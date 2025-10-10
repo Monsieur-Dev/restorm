@@ -1,0 +1,22 @@
+# Gitable Project Rules
+
+## Linear Ticket Management
+
+### Rule 1: Block-quote to Cursor Rule Conversion
+Each block-quote in Linear tickets should trigger the creation of a new cursor rule.
+
+### Rule 2: Branch Creation for Linear Tickets
+When handling a Linear ticket, a new branch should be created each time, using the branch name provided by the Linear ticket.
+
+### Rule 3: Language Convention
+All code and documentation should be written in English.
+
+### Rule 4: Documentation Requirement
+Each time a Linear ticket is handled, documentation should be created in the folder `/docs/{ticket-name}/` where `{ticket-name}` is the name of the ticket.
+
+## Project Conventions
+
+- All file content (code, documentation, comments) must be in English
+- Each Linear ticket requires its own Git branch
+- Documentation must be created for each ticket in the `/docs/` folder
+- Follow the branch naming convention provided by Linear tickets
