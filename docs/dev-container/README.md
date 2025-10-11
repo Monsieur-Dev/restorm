@@ -48,6 +48,7 @@ docs/dev-container/
 ### Services Configuration
 
 #### Development Service
+
 - **Base Image**: `node:24-bullseye`
 - **Electron Dependencies**: Complete build environment
 - **User**: `node` with sudo privileges
@@ -55,6 +56,7 @@ docs/dev-container/
 - **Ports**: 3000 (Application), 22 (SSH)
 
 #### Git Server Service
+
 - **Base Image**: `alpine:latest`
 - **SSH Server**: OpenSSH with Git support
 - **Credentials**: Static user/password authentication
@@ -63,13 +65,13 @@ docs/dev-container/
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `GIT_SERVER_HOST` | `git-server` | Git server hostname |
-| `GIT_SERVER_PORT` | `22` | Git server SSH port |
-| `GIT_USER` | `user` | Git server username |
-| `GIT_PASSWORD` | `password` | Git server password |
-| `NODE_ENV` | `development` | Node.js environment |
+| Variable          | Default       | Description         |
+| ----------------- | ------------- | ------------------- |
+| `GIT_SERVER_HOST` | `git-server`  | Git server hostname |
+| `GIT_SERVER_PORT` | `22`          | Git server SSH port |
+| `GIT_USER`        | `user`        | Git server username |
+| `GIT_PASSWORD`    | `password`    | Git server password |
+| `NODE_ENV`        | `development` | Node.js environment |
 
 ## Environment Configuration
 
@@ -103,17 +105,20 @@ If no `.env` file is provided, the system uses default values defined in `docker
 ### Initial Setup
 
 1. **Clone the repository**:
+
    ```bash
    git clone <repository-url>
    cd gitable
    ```
 
 2. **Checkout the dev container branch**:
+
    ```bash
    git checkout yoanndiguet/oyo-30-dev-container
    ```
 
 3. **Configure environment** (optional):
+
    ```bash
    # Create local environment file in .devcontainer directory
    touch .devcontainer/.env
@@ -174,11 +179,13 @@ The post-create script generates an SSH key pair. To use SSH authentication:
 ### Repository Operations
 
 **Clone a repository**:
+
 ```bash
 git clone user@git-server:repositories/your-repo.git
 ```
 
 **Create a new repository**:
+
 ```bash
 # On Git server
 mkdir -p /home/user/repositories/new-repo.git
@@ -204,6 +211,7 @@ git init --bare
 ### Electron Development
 
 The environment includes all necessary dependencies for Electron development:
+
 - Native build tools
 - Graphics libraries
 - Audio support
@@ -221,11 +229,13 @@ The environment includes all necessary dependencies for Electron development:
 ### Updating Dependencies
 
 To update system packages:
+
 ```bash
 sudo apt-get update && sudo apt-get upgrade
 ```
 
 To update Node.js packages:
+
 ```bash
 npm update -g
 ```
@@ -233,6 +243,7 @@ npm update -g
 ### Container Cleanup
 
 To clean up containers and volumes:
+
 ```bash
 docker-compose -f .devcontainer/docker-compose.yml down -v
 docker system prune -a
@@ -241,6 +252,7 @@ docker system prune -a
 ## Support
 
 For issues related to the dev container setup:
+
 1. Check the troubleshooting section
 2. Validate configuration with test script
 3. Review container logs

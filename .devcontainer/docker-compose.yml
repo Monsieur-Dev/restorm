@@ -24,7 +24,7 @@ services:
       - git-repos:/home/git/repositories
       - git-config:/home/git/.ssh
     ports:
-      - "${GIT_SERVER_PORT:-22}:22"
+      - '${GIT_SERVER_PORT:-22}:22'
     environment:
       - GIT_USER=user
       - GIT_PASSWORD=password

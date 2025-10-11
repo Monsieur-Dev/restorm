@@ -1,63 +1,40 @@
 {
-  "name": "Gitable Dev Container",
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "dev",
-  "workspaceFolder": "/workspace",
-  "shutdownAction": "stopCompose",
-  
+  "name": "Gitable Development Container",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye",
   "features": {
-    "ghcr.io/devcontainers/features/git:1": {},
-    "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers/features/node:1": {
-      "version": "24"
-    },
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+      "version": "20"
+    }
   },
-
   "customizations": {
     "vscode": {
       "extensions": [
-        "ms-vscode.vscode-typescript-next",
+        "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
-        "ms-vscode.vscode-json",
-        "ms-vscode.vscode-yaml",
-        "redhat.vscode-yaml",
-        "ms-vscode-remote.remote-containers",
-        "ms-vscode.vscode-git",
-        "eamodio.gitlens",
-        "ms-vscode.vscode-docker"
+        "ms-vscode.vscode-typescript-next"
       ],
       "settings": {
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "typescript.preferences.importModuleSpecifier": "relative",
-        "git.enableSmartCommit": true,
-        "git.confirmSync": false,
-        "terminal.integrated.defaultProfile.linux": "bash"
+        "eslint.validate": [
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact"
+        ],
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        }
       }
     }
   },
-
-  "postCreateCommand": "bash .devcontainer/post-create.sh",
-  
-  "forwardPorts": [3000, 3001, 22],
-  "portsAttributes": {
-    "3000": {
-      "label": "Application",
-      "onAutoForward": "notify"
-    },
-    "3001": {
-      "label": "Git Server",
-      "onAutoForward": "silent"
-    },
-    "22": {
-      "label": "SSH",
-      "onAutoForward": "silent"
-    }
-  },
-
+  "postCreateCommand": "npm install -g pnpm && cd src && pnpm install",
   "remoteUser": "node",
-  "containerEnv": {
-    "NODE_ENV": "development"
+  "forwardPorts": [5173],
+  "portsAttributes": {
+    "5173": {
+      "label": "Electron Dev Server",
+      "onAutoForward": "notify"
+    }
   }
 }
