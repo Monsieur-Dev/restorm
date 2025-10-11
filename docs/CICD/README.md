@@ -196,6 +196,34 @@ All workflows use pnpm caching to speed up builds:
 
 **Future Solution:** Configure Apple Developer certificates and update the forge configuration.
 
+### Application Shows Blank White Screen
+
+**Problem:** After installing the application from a release, it opens but displays only a blank white screen. DevTools cannot be opened.
+
+**Root Cause:** The renderer output directory was not configured in `electron-vite.config.ts`, causing the renderer to be built to `out/renderer/` instead of `dist/renderer/` where the main process expects it.
+
+**Solution (Applied in v0.1.1):**
+
+1. **Fix renderer output directory:**
+   - Added `outDir: 'dist/renderer'` to the renderer configuration in `src/electron.vite.config.ts`
+   - This ensures the renderer is built to the correct location expected by the main process
+
+2. **Enable DevTools in production:**
+   - Added keyboard shortcuts (F12, Ctrl+Shift+I, or Cmd+Alt+I on macOS) to toggle DevTools
+   - This allows debugging in production builds
+
+**Verification:**
+```bash
+cd src
+pnpm run build
+# Verify that dist/renderer/ exists with index.html and assets
+pnpm run package
+# Test the application
+```
+
+**Prevention:**
+Always test local builds with `pnpm run package` before creating a release to catch packaging issues early.
+
 ## Security Considerations
 
 ### GitHub Token Permissions
