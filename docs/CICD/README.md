@@ -59,7 +59,53 @@ After running this workflow on the `yoanndiguet/oyo-37-cicd-build` branch, you c
 - Verify that the application runs correctly
 - Confirm that all platforms build successfully
 
-### 3. Release Production (`release.yml`)
+### 3. Auto Version Bump (`auto-version.yml`)
+
+**Triggers:**
+- Automatically on every merge to `main` branch
+- Manual trigger via GitHub Actions UI with version type selection
+
+**Purpose:**
+Automatically increments the version number in `package.json`, commits the change, creates a tag, and triggers the release workflow.
+
+**Actions:**
+- Detects the current version from `src/package.json`
+- Determines the version bump type:
+  - **Automatic (on merge)**: Increments `patch` by default
+  - **From commit message**: Use `[minor]` or `[major]` in the commit message to change the bump type
+  - **Manual trigger**: Select `patch`, `minor`, or `major` from the workflow UI
+- Increments the version following semantic versioning
+- Commits the updated `package.json` with message `chore: bump version to X.Y.Z`
+- Creates and pushes a new tag `vX.Y.Z`
+- The new tag automatically triggers the Release Production workflow
+
+**Usage:**
+
+**Automatic (recommended):**
+When you merge a PR to `main`, the workflow runs automatically:
+- Default: increments patch version (0.1.2 → 0.1.3)
+- Include `[minor]` in commit message for minor bump (0.1.3 → 0.2.0)
+- Include `[major]` in commit message for major bump (0.2.0 → 1.0.0)
+
+**Manual trigger:**
+1. Go to the [Actions tab](https://github.com/oYo-fr/gitable/actions)
+2. Select "Auto Version Bump" workflow
+3. Click "Run workflow"
+4. Select the version type (`patch`, `minor`, or `major`)
+5. Click "Run workflow"
+
+**Example:**
+```bash
+# Merge a PR - automatic patch bump
+git merge feature-branch
+# Result: 0.1.2 → 0.1.3, tag v0.1.3 created, release triggered
+
+# Merge with minor bump
+git merge feature-branch -m "feat: add new feature [minor]"
+# Result: 0.1.3 → 0.2.0, tag v0.2.0 created, release triggered
+```
+
+### 4. Release Production (`release.yml`)
 
 **Triggers:**
 - When a tag matching `v*` is pushed (e.g., `v1.0.0`, `v0.2.1`)
@@ -208,9 +254,10 @@ All workflows use pnpm caching to speed up builds:
    - Added `outDir: 'dist/renderer'` to the renderer configuration in `src/electron.vite.config.ts`
    - This ensures the renderer is built to the correct location expected by the main process
 
-2. **Enable DevTools in production:**
-   - Added keyboard shortcuts (F12, Ctrl+Shift+I, or Cmd+Alt+I on macOS) to toggle DevTools
-   - This allows debugging in production builds
+2. **Configure DevTools for production:**
+   - DevTools are disabled by default in production for security
+   - Can be enabled with `--enable-dev-tools` command line flag
+   - Keyboard shortcuts (F12, Ctrl+Shift+I) work only when DevTools are enabled
 
 **Verification:**
 ```bash
@@ -223,6 +270,47 @@ pnpm run package
 
 **Prevention:**
 Always test local builds with `pnpm run package` before creating a release to catch packaging issues early.
+
+### DevTools in Production Builds
+
+**Behavior:**
+
+By default, DevTools are completely disabled in production builds for security reasons:
+- Keyboard shortcuts (F12, Ctrl+Shift+I) are disabled
+- Menu bar is hidden
+- DevTools cannot be accessed through any standard method
+
+**Enabling DevTools for Debugging:**
+
+If you need to debug a production build, you can re-enable DevTools by passing the `--enable-dev-tools` flag:
+
+```bash
+# Linux/macOS
+gitable --enable-dev-tools
+
+# Windows
+Gitable.exe --enable-dev-tools
+
+# From installed location
+/opt/Gitable/gitable --enable-dev-tools
+```
+
+When enabled with the flag:
+- Menu bar becomes visible
+- Keyboard shortcuts work (F12, Ctrl+Shift+I, Cmd+Alt+I)
+- DevTools can be toggled normally
+
+**Development builds:**
+DevTools are always enabled in development mode (`pnpm run dev`).
+
+**Use cases for `--enable-dev-tools`:**
+- Debugging production-specific issues
+- Investigating user-reported bugs
+- Testing the production build locally
+- Inspecting the packaged application behavior
+
+**Security note:**
+Never distribute a build with DevTools permanently enabled, as it could expose sensitive information or allow users to modify the application behavior.
 
 ## Security Considerations
 

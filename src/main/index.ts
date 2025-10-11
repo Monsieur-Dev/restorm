@@ -8,16 +8,23 @@ app.commandLine.appendSwitch('disable-gpu')
 app.commandLine.appendSwitch('disable-software-rasterizer')
 app.commandLine.appendSwitch('disable-gpu-compositing')
 
+// Check if DevTools should be enabled
+// In development: always enabled
+// In production: disabled by default, can be enabled with --enable-dev-tools flag
+const isDevToolsEnabled = !app.isPackaged || process.argv.includes('--enable-dev-tools')
+
 let mainWindow: BrowserWindow | null = null
 
 function createWindow(): void {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    autoHideMenuBar: !isDevToolsEnabled, // Hide menu bar in production unless DevTools enabled
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       nodeIntegration: false,
-      contextIsolation: true
+      contextIsolation: true,
+      devTools: isDevToolsEnabled // Disable DevTools in production unless flag is set
     }
   })
 
@@ -32,25 +39,27 @@ function createWindow(): void {
     })
   }
 
-  // Open DevTools in development mode
+  // Open DevTools automatically in development mode
   if (process.env['NODE_ENV'] === 'development') {
     mainWindow.webContents.openDevTools()
   }
 
-  // Add keyboard shortcuts for DevTools (F12 or Ctrl+Shift+I)
-  mainWindow.webContents.on('before-input-event', (event, input) => {
-    if (input.type === 'keyDown') {
-      const isDevToolsShortcut =
-        input.key === 'F12' ||
-        (input.control && input.shift && input.key === 'I') ||
-        (input.meta && input.alt && input.key === 'I')
-      
-      if (isDevToolsShortcut && mainWindow) {
-        mainWindow.webContents.toggleDevTools()
-        event.preventDefault()
+  // Add keyboard shortcuts for DevTools (F12 or Ctrl+Shift+I) only if enabled
+  if (isDevToolsEnabled) {
+    mainWindow.webContents.on('before-input-event', (event, input) => {
+      if (input.type === 'keyDown') {
+        const isDevToolsShortcut =
+          input.key === 'F12' ||
+          (input.control && input.shift && input.key === 'I') ||
+          (input.meta && input.alt && input.key === 'I')
+        
+        if (isDevToolsShortcut && mainWindow) {
+          mainWindow.webContents.toggleDevTools()
+          event.preventDefault()
+        }
       }
-    }
-  })
+    })
+  }
 
   mainWindow.on('closed', () => {
     mainWindow = null
