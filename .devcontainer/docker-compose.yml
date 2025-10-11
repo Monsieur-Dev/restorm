@@ -1,0 +1,51 @@
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ../:/workspace:cached
+      - /var/run/docker.sock:/var/run/docker.sock
+      - git-repos:/home/node/git-repos
+    working_dir: /workspace
+    command: sleep infinity
+    environment:
+      - NODE_ENV=development
+      - GIT_SERVER_HOST=${GIT_SERVER_HOST:-git-server}
+      - GIT_SERVER_PORT=${GIT_SERVER_PORT:-22}
+    depends_on:
+      - git-server
+    networks:
+      - dev-network
+
+  git-server:
+    image: alpine:latest
+    volumes:
+      - git-repos:/home/git/repositories
+      - git-config:/home/git/.ssh
+    ports:
+      - "${GIT_SERVER_PORT:-22}:22"
+    environment:
+      - GIT_USER=user
+      - GIT_PASSWORD=password
+    command: |
+      sh -c '
+        apk add --no-cache openssh git &&
+        adduser -D -s /usr/bin/git-shell user &&
+        echo "user:password" | chpasswd &&
+        mkdir -p /home/user/.ssh &&
+        mkdir -p /home/user/repositories &&
+        chown -R user:user /home/user &&
+        ssh-keygen -A &&
+        /usr/sbin/sshd -D
+      '
+    networks:
+      - dev-network
+
+volumes:
+  git-repos:
+  git-config:
+
+networks:
+  dev-network:
+    driver: bridge
