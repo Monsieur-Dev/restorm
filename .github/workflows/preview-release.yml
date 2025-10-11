@@ -1,0 +1,81 @@
+name: Preview Release (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version for the preview release (e.g., 0.1.0-preview)'
+        required: false
+        default: '0.1.0-preview'
+
+jobs:
+  build-preview:
+    name: Build Preview on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+          - os: windows-latest
+            platform: windows
+          - os: macos-latest
+            platform: macos
+      fail-fast: false
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+      
+      - name: Install system dependencies (Linux)
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm
+      
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      
+      - name: Install dependencies
+        run: |
+          cd src
+          pnpm install --frozen-lockfile
+      
+      - name: Build with electron-builder
+        run: |
+          cd src
+          pnpm run dist
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: gitable-${{ matrix.platform }}-preview
+          path: |
+            src/dist-electron/**/*.exe
+            src/dist-electron/**/*.zip
+            src/dist-electron/**/*.deb
+            src/dist-electron/**/*.rpm
+            src/dist-electron/**/*.dmg
+          retention-days: 90
+
