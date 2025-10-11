@@ -1,8 +1,12 @@
 import { app, BrowserWindow } from 'electron'
 import { join } from 'path'
 
-// Disable sandbox for development (needed in some Linux environments)
+// Disable sandbox and GPU acceleration for restricted environments (WSL, containers, etc.)
 app.commandLine.appendSwitch('no-sandbox')
+app.commandLine.appendSwitch('disable-dev-shm-usage')
+app.commandLine.appendSwitch('disable-gpu')
+app.commandLine.appendSwitch('disable-software-rasterizer')
+app.commandLine.appendSwitch('disable-gpu-compositing')
 
 let mainWindow: BrowserWindow | null = null
 
