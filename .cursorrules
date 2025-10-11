@@ -20,3 +20,11 @@ Each time a Linear ticket is handled, documentation should be created in the fol
 - Each Linear ticket requires its own Git branch
 - Documentation must be created for each ticket in the `/docs/` folder
 - Follow the branch naming convention provided by Linear tickets
+
+## OYO-31 Specific Rules
+
+### Rule 5: Translation Requirement
+Each time a string displayed to the user is added to the project, its English and French translations should be added to the translation files in `src/renderer/locales/en/translation.json` and `src/renderer/locales/fr/translation.json`.
+
+### Rule 6: Linting Requirement
+Each time code is produced within the project, the linter should be executed to ensure code quality and consistency.

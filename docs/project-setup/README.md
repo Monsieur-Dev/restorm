@@ -16,15 +16,19 @@ This document describes the initial project setup for Gitable, implementing the 
 Based on the Linear ticket requirements, the following rules have been established:
 
 ### 1. Block-quote to Cursor Rule Conversion
+
 Each block-quote in Linear tickets should trigger the creation of a new cursor rule.
 
 ### 2. Branch Creation for Linear Tickets
+
 When handling a Linear ticket, a new branch should be created each time, using the branch name provided by the Linear ticket.
 
 ### 3. Language Convention
+
 All code and documentation should be written in English.
 
 ### 4. Documentation Requirement
+
 Each time a Linear ticket is handled, documentation should be created in the folder `/docs/{ticket-name}/` where `{ticket-name}` is the name of the ticket.
 
 ## Project Structure
@@ -50,6 +54,7 @@ gitable/
 ## Next Steps
 
 Future Linear tickets should follow these established conventions:
+
 1. Create branch using Linear-provided name
 2. Implement ticket requirements
 3. Create documentation in `/docs/{ticket-name}/`

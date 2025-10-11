@@ -1,81 +1,103 @@
 #!/bin/bash
 
-# Post-Create Script for Gitable Dev Container
+# Post-Create Script for Gitable Electron Dev Container
 # This script runs after the dev container is created
 
 set -e
 
-echo "🚀 Starting post-create setup..."
+echo "🚀 Starting Gitable Electron project setup..."
 
 # Update package manager
 echo "📦 Updating package manager..."
 sudo apt-get update
 
-# Set up Git configuration (if not already set)
-echo "⚙️ Configuring Git..."
-if [ -z "$(git config --global user.name)" ]; then
-    git config --global user.name "Dev Container User"
+# Install system dependencies for Electron
+echo "🔧 Installing system dependencies for Electron..."
+sudo apt-get install -y \
+    libnss3-dev \
+    libatk-bridge2.0-dev \
+    libdrm2 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    libgbm1 \
+    libxss1 \
+    libasound2
+
+# Install X11 dependencies for virtual display
+echo "🖥️ Installing X11 dependencies for virtual display..."
+sudo apt-get install -y \
+    xvfb \
+    x11-utils \
+    x11-xserver-utils \
+    dbus-x11
+
+# Install pnpm globally if not present
+echo "📦 Installing pnpm..."
+if ! command -v pnpm &> /dev/null; then
+    npm install -g pnpm
 fi
-if [ -z "$(git config --global user.email)" ]; then
-    git config --global user.email "dev@container.local"
-fi
 
-# Create SSH key for Git server access (if it doesn't exist)
-echo "🔑 Setting up SSH keys..."
-if [ ! -f ~/.ssh/id_rsa ]; then
-    ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa -N "" -C "dev-container-key"
-    echo "SSH key generated at ~/.ssh/id_rsa"
-fi
-
-# Add Git server to known hosts
-echo "🌐 Adding Git server to known hosts..."
-ssh-keyscan -p ${GIT_SERVER_PORT:-22} ${GIT_SERVER_HOST:-git-server} >> ~/.ssh/known_hosts 2>/dev/null || true
-
-# Create workspace directories
-echo "📂 Creating workspace directories..."
-mkdir -p ~/git-repos
-mkdir -p ~/projects
-
-# Install Node.js global packages
+# Install global Node.js packages for Electron development
 echo "📦 Installing global Node.js packages..."
 npm install -g \
     typescript \
     ts-node \
-    nodemon \
-    pm2 \
     eslint \
     prettier \
-    @types/node
+    @types/node \
+    webpack-cli \
+    @electron/rebuild
 
-# Create a sample repository
-echo "📚 Creating sample Git repository..."
-sudo mkdir -p ~/git-repos
-sudo chown -R node:node ~/git-repos
-cd ~/git-repos
-if [ ! -d "sample-repo.git" ]; then
-    git init --bare sample-repo.git
-    echo "Sample repository created at ~/git-repos/sample-repo.git"
-fi
+# Install project dependencies
+echo "📦 Installing project dependencies..."
+cd /workspace
+pnpm install
 
-# Display Git server information
-echo "ℹ️ Git Server Information:"
-echo "  Host: ${GIT_SERVER_HOST:-git-server}"
-echo "  Port: ${GIT_SERVER_PORT:-22}"
-echo "  User: user"
-echo "  Password: password"
+# Install additional dependencies that were missing during debugging
+echo "📦 Installing additional dependencies..."
+pnpm add -D \
+    @electron-forge/plugin-fuses \
+    webpack-cli \
+    css-loader \
+    style-loader
 
-# Display SSH key for Git server access
-echo "🔑 SSH Public Key (add to Git server authorized_keys):"
-cat ~/.ssh/id_rsa.pub
+# Rebuild native dependencies for Electron
+echo "🔨 Rebuilding native dependencies..."
+npx @electron/rebuild
 
-echo "✅ Post-create setup completed successfully!"
+# Run linting to verify setup
+echo "🔍 Running linting check..."
+pnpm lint
+
+# Run type checking to verify setup
+echo "🔍 Running type checking..."
+pnpm type-check
+
+# Run tests to verify setup
+echo "🧪 Running tests..."
+pnpm test
+
+echo "✅ Gitable Electron project setup completed successfully!"
 echo ""
-echo "🎉 Your dev container is ready!"
-echo "   - Git server is running on port ${GIT_SERVER_PORT:-22}"
-echo "   - Sample repository available at ~/git-repos/sample-repo.git"
-echo "   - SSH key generated for Git server access"
+echo "🎉 Your Electron development environment is ready!"
+echo "   - All dependencies installed"
+echo "   - TypeScript configured"
+echo "   - ESLint and Prettier configured"
+echo "   - Jest testing setup"
+echo "   - Electron Forge configured"
+echo "   - X11 virtual display support"
 echo ""
 echo "Next steps:"
-echo "1. Add your SSH public key to the Git server's authorized_keys"
-echo "2. Clone repositories using: git clone user@${GIT_SERVER_HOST:-git-server}:repositories/your-repo.git"
-echo "3. Start developing!"
+echo "1. For Linux desktop: Run 'pnpm start' directly"
+echo "2. For dev container: Run './scripts/start-x11.sh' then 'pnpm start'"
+echo "3. Run 'pnpm lint' to check code quality"
+echo "4. Run 'pnpm test' to run tests"
+echo "5. Run 'pnpm type-check' to verify TypeScript"
+echo ""
+echo "X11 Virtual Display:"
+echo "  - Run './scripts/start-x11.sh' to start virtual display"
+echo "  - Run './scripts/test-electron.sh' to test Electron"
+echo "  - See './scripts/README.md' for detailed instructions"
+echo ""
+echo "Happy coding! 🚀"
