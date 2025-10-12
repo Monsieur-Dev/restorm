@@ -1,7 +1,18 @@
 {
   "app": {
     "title": "Gitable",
-    "welcome": "Hello Gitable"
+    "welcome": "Hello Gitable",
+    "openSettings": "Settings"
+  },
+  "settings": {
+    "title": "Settings",
+    "search": "Search settings...",
+    "loading": "Loading settings...",
+    "loadError": "Failed to load settings",
+    "noResults": "No settings found matching your search",
+    "searchResults": "Search Results",
+    "selectCategory": "Select a category from the sidebar",
+    "reset": "Reset to default"
   }
 }
 

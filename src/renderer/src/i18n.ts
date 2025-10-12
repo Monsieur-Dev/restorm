@@ -12,6 +12,7 @@ const resources = {
   }
 }
 
+// Initialize with default language first
 i18n
   .use(initReactI18next)
   .init({
@@ -21,6 +22,31 @@ i18n
     interpolation: {
       escapeValue: false // React already escapes values
     }
+  })
+  .then(() => {
+    // Load language from settings after initialization
+    window.settingsAPI
+      .getSetting<string>('workbench.appearance.language')
+      .then((language) => {
+        if (language && (language === 'en' || language === 'fr')) {
+          i18n.changeLanguage(language).catch((error) => {
+            console.error('Failed to change language from settings:', error)
+          })
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to load language setting:', error)
+      })
+
+    // Listen for language changes from the main process
+    window.settingsAPI.onLanguageChanged((language: string) => {
+      console.log('Language changed to:', language)
+      if (language === 'en' || language === 'fr') {
+        i18n.changeLanguage(language).catch((error) => {
+          console.error('Failed to change language:', error)
+        })
+      }
+    })
   })
   .catch((error) => {
     console.error('Failed to initialize i18n:', error)

@@ -22,8 +22,11 @@
   },
   "dependencies": {
     "@dtinsight/molecule": "^2.0.0-alpha.10",
+    "@vscode/webview-ui-toolkit": "^1.4.0",
+    "allotment": "^1.20.4",
     "i18next": "^23.7.6",
     "react": "^18.2.0",
+    "react-complex-tree": "^2.6.1",
     "react-dom": "^18.2.0",
     "react-i18next": "^13.5.0",
     "react-icons": "^4.12.0"

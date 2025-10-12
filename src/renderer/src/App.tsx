@@ -1,14 +1,19 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { SettingsView } from './components/settings/SettingsView'
 
 const App: React.FC = () => {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
+  const [showSettings, setShowSettings] = useState(false)
 
-  const toggleLanguage = (): void => {
-    const newLang = i18n.language === 'en' ? 'fr' : 'en'
-    i18n.changeLanguage(newLang).catch((error) => {
-      console.error('Failed to change language:', error)
-    })
+  if (showSettings) {
+    return (
+      <SettingsView
+        onClose={() => {
+          setShowSettings(false)
+        }}
+      />
+    )
   }
 
   return (
@@ -28,7 +33,9 @@ const App: React.FC = () => {
     >
       <h1 style={{ margin: 0 }}>{t('app.welcome')}</h1>
       <button
-        onClick={toggleLanguage}
+        onClick={() => {
+          setShowSettings(true)
+        }}
         style={{
           padding: '10px 20px',
           fontSize: '16px',
@@ -40,7 +47,7 @@ const App: React.FC = () => {
           borderRadius: '2px'
         }}
       >
-        {i18n.language === 'en' ? 'Français' : 'English'}
+        {t('app.openSettings')}
       </button>
     </div>
   )

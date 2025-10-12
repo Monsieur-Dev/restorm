@@ -1,7 +1,18 @@
 {
   "app": {
     "title": "Gitable",
-    "welcome": "Bonjour Gitable"
+    "welcome": "Bonjour Gitable",
+    "openSettings": "Paramètres"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "search": "Rechercher des paramètres...",
+    "loading": "Chargement des paramètres...",
+    "loadError": "Échec du chargement des paramètres",
+    "noResults": "Aucun paramètre trouvé correspondant à votre recherche",
+    "searchResults": "Résultats de recherche",
+    "selectCategory": "Sélectionnez une catégorie dans la barre latérale",
+    "reset": "Réinitialiser par défaut"
   }
 }
 

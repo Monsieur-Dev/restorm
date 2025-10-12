@@ -1,0 +1,629 @@
+/* Settings View */
+.settings-view {
+  width: 100vw;
+  height: 100vh;
+  background-color: #1e1e1e;
+  color: #cccccc;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-view__header {
+  display: flex;
+  align-items: center;
+  padding: 8px 20px;
+  background-color: #252526;
+  border-bottom: 1px solid #454545;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.settings-view__header .settings-search-bar {
+  padding: 0;
+  border-bottom: none;
+  background: transparent;
+  flex: 1;
+}
+
+.settings-view__close {
+  background: transparent;
+  border: none;
+  color: #cccccc;
+  cursor: pointer;
+  font-size: 24px;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.settings-view__close:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.settings-view__body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+}
+
+.settings-view__loading,
+.settings-view__error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 16px;
+}
+
+.settings-view__error {
+  color: #f48771;
+}
+
+/* Allotment Customization (VSCode-like) */
+.settings-view__body .split-view-view {
+  background-color: transparent;
+}
+
+.settings-view__body .split-view-view:first-child {
+  background-color: #252526;
+  border-right: 1px solid #454545;
+}
+
+.settings-view__body .sash {
+  background-color: transparent !important;
+  width: 4px !important;
+}
+
+.settings-view__body .sash:hover {
+  background-color: #007acc !important;
+}
+
+.settings-view__body .sash-container {
+  background-color: transparent;
+}
+
+/* Settings Sidebar */
+.settings-sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #252526;
+}
+
+.settings-sidebar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.settings-sidebar__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #cccccc;
+}
+
+.settings-sidebar__close {
+  display: none;
+}
+
+/* Search Bar */
+.settings-search-bar {
+  position: relative;
+  padding: 4px 20px;
+  background-color: #252526;
+  border-bottom: 1px solid #454545;
+}
+
+.settings-search-bar__container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.settings-search-bar__input {
+  width: 100%;
+  padding: 5px 30px 5px 24px;
+  background-color: #3c3c3c;
+  border: 1px solid #3c3c3c;
+  border-radius: 2px;
+  color: #cccccc;
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+.settings-search-bar__input:focus {
+  border-color: #007acc;
+  background-color: #3c3c3c;
+}
+
+.settings-search-bar__icon {
+  position: absolute;
+  left: 6px;
+  color: #cccccc;
+  pointer-events: none;
+  width: 16px;
+  height: 16px;
+}
+
+.settings-search-bar__clear {
+  position: absolute;
+  right: 4px;
+  background: none;
+  border: none;
+  color: #cccccc;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.settings-search-bar__input:not(:placeholder-shown) + .settings-search-bar__icon + .settings-search-bar__clear {
+  opacity: 1;
+}
+
+.settings-search-bar__clear:hover {
+  background-color: #505050;
+}
+
+/* Tree View */
+.settings-tree-view {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 0;
+}
+
+.settings-tree-node {
+  user-select: none;
+}
+
+.settings-tree-node__item {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: #cccccc;
+  transition: background-color 0.1s;
+}
+
+.settings-tree-node__item:hover {
+  background-color: #2a2d2e;
+}
+
+.settings-tree-node__item--selected {
+  background-color: #37373d;
+  font-weight: 600;
+}
+
+.settings-tree-node__arrow {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 2px;
+  color: #cccccc;
+  transition: opacity 0.1s ease;
+}
+
+.settings-tree-node__arrow svg {
+  width: 16px;
+  height: 16px;
+}
+
+.settings-tree-node__label {
+  flex: 1;
+}
+
+/* Settings Content */
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.settings-content__header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #252526;
+  border-bottom: 1px solid #454545;
+  padding: 0 20px;
+  height: 38px;
+  flex-shrink: 0;
+}
+
+.settings-content__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #cccccc;
+}
+
+.settings-content__close {
+  background: none;
+  border: none;
+  color: #cccccc;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  transition: background-color 0.2s;
+}
+
+.settings-content__close:hover {
+  background-color: #505050;
+}
+
+.settings-content__main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+}
+
+.settings-content__category {
+  padding: 24px 40px 40px;
+  border-bottom: 1px solid #454545;
+}
+
+.settings-content__category:last-child {
+  border-bottom: none;
+}
+
+.settings-content__category-header {
+  margin-bottom: 24px;
+}
+
+.settings-content__category-title {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 300;
+  color: #e7e7e7;
+}
+
+.settings-content__category-description {
+  margin: 0;
+  color: #9d9d9d;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.settings-content__subcategory {
+  margin-top: 32px;
+}
+
+.settings-content__section-title {
+  margin: 0 0 8px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #e7e7e7;
+}
+
+.settings-content__section-description {
+  margin: 0 0 16px 0;
+  color: #9d9d9d;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.settings-content__section {
+  margin-bottom: 24px;
+}
+
+.settings-content__empty {
+  padding: 48px;
+  text-align: center;
+  color: #858585;
+  font-size: 14px;
+}
+
+/* Setting Item */
+.setting-item {
+  padding: 16px 0;
+  border-bottom: 1px solid #2b2b2b;
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+.setting-item__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 16px;
+}
+
+.setting-item__info {
+  flex: 1;
+}
+
+.setting-item__name {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #cccccc;
+}
+
+.setting-item__description {
+  margin: 0;
+  font-size: 13px;
+  color: #858585;
+  line-height: 1.5;
+}
+
+.setting-item__reset {
+  background: none;
+  border: 1px solid #3c3c3c;
+  color: #cccccc;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 2px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.setting-item__reset:hover {
+  background-color: #3c3c3c;
+  border-color: #858585;
+}
+
+.setting-item__control {
+  padding-left: 0;
+}
+
+/* Setting Controls */
+.setting-control {
+  display: flex;
+  align-items: center;
+}
+
+/* Boolean Control (Checkbox) */
+.setting-control--boolean {
+  position: relative;
+}
+
+.setting-control__checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.setting-control__checkbox {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.setting-control__checkbox-custom {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  background-color: #3c3c3c;
+  border: 1px solid #3c3c3c;
+  border-radius: 2px;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.setting-control__checkbox:checked + .setting-control__checkbox-custom {
+  background-color: #0e639c;
+  border-color: #0e639c;
+}
+
+.setting-control__checkbox:checked + .setting-control__checkbox-custom::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.setting-control__checkbox:focus + .setting-control__checkbox-custom {
+  outline: 1px solid #0e639c;
+  outline-offset: 2px;
+}
+
+/* Number and String Controls */
+.setting-control__input {
+  padding: 4px 8px;
+  background-color: #3c3c3c;
+  border: 1px solid #3c3c3c;
+  border-radius: 2px;
+  color: #cccccc;
+  font-family: inherit;
+  font-size: 13px;
+  min-width: 200px;
+  outline: none;
+  transition: border-color 0.1s ease, background-color 0.1s ease;
+}
+
+.setting-control__input:hover {
+  background-color: #404040;
+}
+
+.setting-control__input:focus {
+  border-color: #007acc;
+  background-color: #3c3c3c;
+}
+
+.setting-control--number .setting-control__input {
+  min-width: 100px;
+  padding-right: 2px;
+}
+
+/* Hide default number input arrows and add custom styling */
+.setting-control--number .setting-control__input::-webkit-inner-spin-button,
+.setting-control--number .setting-control__input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Enum Control (Select) */
+.setting-control__select {
+  padding: 4px 24px 4px 8px;
+  background-color: #3c3c3c;
+  background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 11L4 7h8l-4 4z' fill='%23cccccc'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+  background-size: 16px;
+  border: 1px solid #3c3c3c;
+  border-radius: 2px;
+  color: #cccccc;
+  font-family: inherit;
+  font-size: 13px;
+  min-width: 200px;
+  cursor: pointer;
+  outline: none;
+  position: relative;
+  z-index: 10;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  transition: border-color 0.1s ease, background-color 0.1s ease;
+}
+
+.setting-control__select:hover {
+  background-color: #404040;
+}
+
+.setting-control__select:focus {
+  border-color: #007acc;
+  background-color: #3c3c3c;
+  z-index: 100;
+}
+
+.setting-control__select option {
+  background-color: #3c3c3c;
+  color: #cccccc;
+}
+
+.setting-control--enum {
+  position: relative;
+  z-index: 10;
+}
+
+/* Range Control (Slider) */
+.setting-control--range {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.setting-control__range-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.setting-control__slider {
+  flex: 1;
+  height: 4px;
+  background: #3c3c3c;
+  outline: none;
+  border-radius: 2px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.setting-control__slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #0e639c;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.setting-control__slider::-webkit-slider-thumb:hover {
+  background: #1177bb;
+}
+
+.setting-control__slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #0e639c;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s;
+}
+
+.setting-control__slider::-moz-range-thumb:hover {
+  background: #1177bb;
+}
+
+.setting-control__range-value {
+  min-width: 40px;
+  text-align: right;
+  color: #cccccc;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.setting-control__range-labels {
+  display: flex;
+  justify-content: space-between;
+  color: #858585;
+  font-size: 11px;
+  padding: 0 4px;
+}
+
+.setting-control__range-label {
+  user-select: none;
+}
+
+/* Scrollbar styling */
+.settings-content__main::-webkit-scrollbar,
+.settings-tree-view::-webkit-scrollbar {
+  width: 10px;
+}
+
+.settings-content__main::-webkit-scrollbar-track,
+.settings-tree-view::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+
+.settings-content__main::-webkit-scrollbar-thumb,
+.settings-tree-view::-webkit-scrollbar-thumb {
+  background: #424242;
+  border-radius: 5px;
+}
+
+.settings-content__main::-webkit-scrollbar-thumb:hover,
+.settings-tree-view::-webkit-scrollbar-thumb:hover {
+  background: #4e4e4e;
+}
+

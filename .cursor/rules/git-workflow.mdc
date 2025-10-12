@@ -1,0 +1,45 @@
+---
+alwaysApply: true
+---
+
+# Git Workflow Rules
+
+## Branch Protection
+
+**NEVER push code directly to the `main` branch!**
+
+### Required Workflow
+
+1. Always create a feature branch from `main`
+2. Make your changes on the feature branch
+3. Push the feature branch to origin
+4. Create a Pull Request (PR) to merge into `main`
+5. Wait for CI/CD checks to pass
+6. Get code review approval if required
+7. Merge the PR
+
+### Branch Naming Convention
+
+Use the branch name suggested by Linear tickets when available:
+- Format: `username/TICKET-ID-description`
+- Example: `yoanndiguet/oyo-39-project-structure-reorganization`
+
+### Before Pushing
+
+Always check which branch you're on:
+```bash
+git branch --show-current
+```
+
+If you're on `main`, create a new branch:
+```bash
+git checkout -b username/ticket-id-description
+```
+
+### Emergency Hotfixes
+
+Even for hotfixes, create a branch and a PR. This ensures:
+- CI/CD validation
+- Code review
+- Proper documentation
+- Audit trail
