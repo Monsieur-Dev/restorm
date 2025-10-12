@@ -84,22 +84,18 @@ jobs:
             ${{ runner.os }}-pnpm-store-
       
       - name: Install dependencies
-        run: |
-          cd src
-          pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
       
       - name: Build with electron-builder
-        run: |
-          cd src
-          pnpm run dist
+        run: pnpm run dist
       
       - name: Upload Release Assets (Linux)
         if: matrix.platform == 'linux'
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            src/dist-electron/*.deb
-            src/dist-electron/*.rpm
+            dist-electron/*.deb
+            dist-electron/*.rpm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
@@ -108,7 +104,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            src/dist-electron/*.exe
+            dist-electron/*.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
@@ -117,8 +113,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            src/dist-electron/*.dmg
-            src/dist-electron/*.zip
+            dist-electron/*.dmg
+            dist-electron/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   
@@ -155,21 +151,17 @@ jobs:
             ${{ runner.os }}-pnpm-store-
       
       - name: Install dependencies
-        run: |
-          cd src
-          pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
       
       - name: Build with electron-builder
-        run: |
-          cd src
-          pnpm run dist
+        run: pnpm run dist
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: gitable-linux-latest
           path: |
-            src/dist-electron/*.deb
-            src/dist-electron/*.rpm
+            dist-electron/*.deb
+            dist-electron/*.rpm
           retention-days: 30
 

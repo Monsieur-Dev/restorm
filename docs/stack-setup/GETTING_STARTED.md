@@ -24,22 +24,17 @@ If you prefer to install manually:
 # Install pnpm globally
 npm install -g pnpm
 
-# Navigate to the project directory
-cd src
-
 # Install dependencies
 pnpm install
-
-# Manually run Electron install script (required due to pnpm restrictions)
-node node_modules/electron/install.js
 ```
+
+> **Note**: The project includes a `postinstall` script that automatically installs Electron to work around pnpm 10's build script restrictions.
 
 ## Development
 
 ### Start the Development Server
 
 ```bash
-cd src
 pnpm dev
 ```
 
@@ -53,14 +48,14 @@ The application window should open automatically with "Hello Gitable" displayed.
 
 ### Available Scripts
 
-From the `src` directory:
-
 - `pnpm dev` - Start development mode with hot reload
 - `pnpm build` - Build the application for production
 - `pnpm preview` - Preview the production build
 - `pnpm lint` - Run ESLint to check code quality
 - `pnpm lint:fix` - Run ESLint and automatically fix issues
 - `pnpm typecheck` - Run TypeScript type checking
+- `pnpm package` - Package the application (without installer)
+- `pnpm dist` - Build distributable packages (.deb, .rpm, etc.)
 
 ## Code Quality
 
@@ -69,18 +64,16 @@ From the `src` directory:
 The project uses ESLint with strict TypeScript rules. All code must pass linting before committing:
 
 ```bash
-cd src
 pnpm lint
 ```
 
-Configuration: `.eslintrc.json`
+Configuration: `src/.eslintrc.json`
 
 ### Type Checking
 
 TypeScript is configured in strict mode. Run type checking with:
 
 ```bash
-cd src
 pnpm typecheck
 ```
 
@@ -138,27 +131,34 @@ const currentLang = i18n.language
 ## Project Structure
 
 ```
-src/
-├── main/                   # Electron main process
-│   └── index.ts           # Application entry point
-├── preload/               # Electron preload scripts
-│   └── index.ts          # Preload script
-├── renderer/              # React application
-│   ├── index.html        # HTML template
-│   ├── src/
-│   │   ├── App.tsx       # Main React component
-│   │   ├── main.tsx      # React entry point
-│   │   ├── i18n.ts       # i18n configuration
-│   │   └── locales/      # Translation files
-│   │       ├── en/
-│   │       │   └── translation.json
-│   │       └── fr/
-│   │           └── translation.json
-├── electron.vite.config.ts  # Electron-vite configuration
-├── tsconfig.json            # TypeScript config for renderer
-├── tsconfig.node.json       # TypeScript config for main/preload
-├── .eslintrc.json          # ESLint configuration
-└── package.json            # Dependencies and scripts
+gitable/
+├── src/                        # Application source code
+│   ├── main/                  # Electron main process
+│   │   └── index.ts          # Application entry point
+│   ├── preload/              # Electron preload scripts
+│   │   └── index.ts         # Preload script
+│   └── renderer/             # React application
+│       ├── index.html       # HTML template
+│       ├── src/
+│       │   ├── App.tsx      # Main React component
+│       │   ├── main.tsx     # React entry point
+│       │   ├── i18n.ts      # i18n configuration
+│       │   └── locales/     # Translation files
+│       │       ├── en/
+│       │       │   └── translation.json
+│       │       └── fr/
+│       │           └── translation.json
+├── dist/                       # Build output
+│   ├── main/                  # Built main process
+│   ├── preload/               # Built preload scripts
+│   └── renderer/              # Built renderer
+├── dist-electron/              # Distribution packages
+├── build/                      # Build scripts and resources
+├── electron.vite.config.ts     # Electron-vite configuration
+├── tsconfig.json              # TypeScript config for renderer
+├── tsconfig.node.json         # TypeScript config for main/preload
+├── .eslintrc.json             # ESLint configuration (in src/)
+└── package.json               # Dependencies and scripts
 ```
 
 ## Troubleshooting
@@ -182,7 +182,7 @@ GPU process errors in the console are expected in some environments and do not a
 If you encounter module not found errors:
 1. Delete `node_modules` and `pnpm-lock.yaml`
 2. Run `pnpm install` again
-3. Run `node node_modules/electron/install.js` to ensure Electron binary is downloaded
+3. The `postinstall` script will automatically handle Electron installation
 
 ### Hot Reload Not Working
 

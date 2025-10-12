@@ -44,22 +44,14 @@ jobs:
             ${{ runner.os }}-pnpm-store-
       
       - name: Install dependencies
-        run: |
-          cd src
-          pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
       
       - name: Run linter
-        run: |
-          cd src
-          pnpm run lint
+        run: pnpm run lint
       
       - name: Run type check
-        run: |
-          cd src
-          pnpm run typecheck
+        run: pnpm run typecheck
       
       - name: Build application
-        run: |
-          cd src
-          pnpm run build
+        run: pnpm run build
 

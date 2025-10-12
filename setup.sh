@@ -47,9 +47,7 @@ echo ""
 
 # Install project dependencies
 echo "Installing project dependencies..."
-cd src
 pnpm install
-cd ..
 echo -e "${GREEN}✓ Dependencies installed successfully${NC}"
 echo ""
 
@@ -58,9 +56,9 @@ echo -e "${GREEN}Setup completed successfully!${NC}"
 echo "================================================"
 echo ""
 echo "Next steps:"
-echo "  1. cd src"
-echo "  2. pnpm dev      # Start development server"
-echo "  3. pnpm lint     # Run linter"
-echo "  4. pnpm build    # Build for production"
+echo "  1. pnpm dev      # Start development server"
+echo "  2. pnpm lint     # Run linter"
+echo "  3. pnpm build    # Build for production"
+echo "  4. pnpm dist     # Build distributable packages"
 echo ""
 
