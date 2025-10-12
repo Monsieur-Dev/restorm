@@ -8,9 +8,6 @@ A modern Git GUI tool built with Electron, React, TypeScript, and inspired by VS
 # Install dependencies and setup the project
 ./setup.sh
 
-# Navigate to source directory
-cd src
-
 # Start development
 pnpm dev
 ```
@@ -49,14 +46,14 @@ Comprehensive documentation is available in the `/docs` folder:
 
 ### Available Commands
 
-From the `src` directory:
-
 ```bash
 pnpm dev          # Start development server with hot reload
 pnpm build        # Build for production
 pnpm lint         # Check code quality
 pnpm lint:fix     # Fix linting issues automatically
 pnpm typecheck    # Run TypeScript type checking
+pnpm package      # Package application (without installer)
+pnpm dist         # Build distributable packages (.deb, .rpm, etc.)
 ```
 
 ### Code Quality Standards
@@ -82,16 +79,23 @@ The application supports English and French. When adding new user-facing text:
 
 ```
 gitable/
-├── src/                    # Application source code
-│   ├── main/              # Electron main process
-│   ├── preload/           # Electron preload scripts
-│   ├── renderer/          # React application
-│   └── package.json       # Dependencies
-├── docs/                  # Documentation
-│   └── stack-setup/      # Technical documentation
-├── .devcontainer/         # Dev container configuration
-├── setup.sh              # Project setup script
-└── README.md             # This file
+├── src/                        # Application source code
+│   ├── main/                  # Electron main process
+│   ├── preload/               # Electron preload scripts
+│   └── renderer/              # React application
+├── dist/                       # Build output (main, renderer, preload)
+├── dist-electron/              # Distribution packages (.deb, .rpm, etc.)
+├── build/                      # Build scripts and resources
+├── docs/                       # Documentation
+│   └── stack-setup/           # Technical documentation
+├── .devcontainer/              # Dev container configuration
+├── .github/workflows/          # CI/CD workflows
+├── electron.vite.config.ts     # Electron + Vite configuration
+├── tsconfig.json              # TypeScript configuration (renderer)
+├── tsconfig.node.json         # TypeScript configuration (main/preload)
+├── package.json               # Dependencies and scripts
+├── setup.sh                   # Project setup script
+└── README.md                  # This file
 ```
 
 ## 🔧 System Requirements

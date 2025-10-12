@@ -46,7 +46,6 @@ jobs:
       - name: Get current version
         id: current_version
         run: |
-          cd src
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
           echo "Current version: $CURRENT_VERSION"
@@ -73,8 +72,6 @@ jobs:
       - name: Bump version
         id: bump
         run: |
-          cd src
-          
           # Read current version
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           IFS='.' read -r -a VERSION_PARTS <<< "$CURRENT_VERSION"
@@ -109,7 +106,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add src/package.json
+          git add package.json
           git commit -m "chore: bump version to ${{ steps.bump.outputs.new_version }}"
           git push
 

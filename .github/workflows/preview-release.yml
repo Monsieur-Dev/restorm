@@ -58,24 +58,20 @@ jobs:
             ${{ runner.os }}-pnpm-store-
       
       - name: Install dependencies
-        run: |
-          cd src
-          pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
       
       - name: Build with electron-builder
-        run: |
-          cd src
-          pnpm run dist
+        run: pnpm run dist
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: gitable-${{ matrix.platform }}-preview
           path: |
-            src/dist-electron/**/*.exe
-            src/dist-electron/**/*.zip
-            src/dist-electron/**/*.deb
-            src/dist-electron/**/*.rpm
-            src/dist-electron/**/*.dmg
+            dist-electron/**/*.exe
+            dist-electron/**/*.zip
+            dist-electron/**/*.deb
+            dist-electron/**/*.rpm
+            dist-electron/**/*.dmg
           retention-days: 90
 

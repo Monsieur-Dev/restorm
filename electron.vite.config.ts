@@ -9,7 +9,7 @@ export default defineConfig({
       outDir: 'dist/main',
       rollupOptions: {
         input: {
-          index: resolve(__dirname, 'main/index.ts')
+          index: resolve(__dirname, 'src/main/index.ts')
         }
       }
     }
@@ -20,24 +20,24 @@ export default defineConfig({
       outDir: 'dist/preload',
       rollupOptions: {
         input: {
-          index: resolve(__dirname, 'preload/index.ts')
+          index: resolve(__dirname, 'src/preload/index.ts')
         }
       }
     }
   },
   renderer: {
-    root: resolve(__dirname, 'renderer'),
+    root: resolve(__dirname, 'src/renderer'),
     build: {
       outDir: 'dist/renderer',
       rollupOptions: {
         input: {
-          index: resolve(__dirname, 'renderer/index.html')
+          index: resolve(__dirname, 'src/renderer/index.html')
         }
       }
     },
     resolve: {
       alias: {
-        '@renderer': resolve(__dirname, 'renderer/src')
+        '@renderer': resolve(__dirname, 'src/renderer/src')
       }
     },
     plugins: [react()]

@@ -1,6 +1,0 @@
-#!/bin/bash
-# Gitable wrapper script for Kubuntu/Ubuntu environments
-# This script adds required flags to work around shared memory issues
-
-exec /opt/Gitable/gitable-bin --no-sandbox --disable-dev-shm-usage --disable-gpu --disable-software-rasterizer --disable-gpu-compositing "$@"
-
