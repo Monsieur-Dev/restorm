@@ -21,3 +21,8 @@ if command -v update-alternatives &> /dev/null; then
     update-alternatives --install /usr/bin/gitable gitable /usr/bin/gitable 100
 fi
 
+# Fix the .desktop file to use the wrapper instead of the direct binary
+if [ -f "/usr/share/applications/gitable-bin.desktop" ]; then
+    sed -i 's|Exec=/opt/Gitable/gitable-bin|Exec=/usr/bin/gitable|g' /usr/share/applications/gitable-bin.desktop
+    sed -i 's|Icon=gitable-bin|Icon=gitable|g' /usr/share/applications/gitable-bin.desktop
+fi
