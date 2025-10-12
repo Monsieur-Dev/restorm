@@ -6,7 +6,7 @@ node_modules/
 dist/
 out/
 .webpack/
-build/
+# build/ - Commented out: build/ now contains build scripts (postinstall.sh), not build outputs
 
 # Coverage
 coverage/
