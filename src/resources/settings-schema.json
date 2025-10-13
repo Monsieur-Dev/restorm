@@ -79,45 +79,141 @@
       "key": "test",
       "name": "Test Settings",
       "description": "Test settings to demonstrate all available control types",
-      "settings": {
-        "testBoolean": {
-          "key": "testBoolean",
-          "name": "Test Boolean",
-          "description": "A boolean setting example with a checkbox/toggle control",
-          "type": "boolean",
-          "defaultValue": false
+      "categories": {
+        "basicControls": {
+          "key": "basicControls",
+          "name": "Basic Controls",
+          "description": "Basic input controls for simple data types",
+          "settings": {
+            "testBoolean": {
+              "key": "testBoolean",
+              "name": "Test Boolean",
+              "description": "A boolean setting example with a checkbox/toggle control",
+              "type": "boolean",
+              "defaultValue": false
+            },
+            "testBoolean2": {
+              "key": "testBoolean2",
+              "name": "Enable Feature X",
+              "description": "Enable or disable the experimental feature X for testing purposes",
+              "type": "boolean",
+              "defaultValue": true
+            },
+            "testString": {
+              "key": "testString",
+              "name": "Test String",
+              "description": "A string setting example with a text input control",
+              "type": "string",
+              "defaultValue": "Hello World"
+            },
+            "testString2": {
+              "key": "testString2",
+              "name": "User Name",
+              "description": "Enter your display name for the application",
+              "type": "string",
+              "defaultValue": "John Doe"
+            }
+          }
         },
-        "testNumber": {
-          "key": "testNumber",
-          "name": "Test Number",
-          "description": "A number setting example with a numeric input control",
-          "type": "number",
-          "defaultValue": 42
+        "numericControls": {
+          "key": "numericControls",
+          "name": "Numeric Controls",
+          "description": "Number inputs and range sliders",
+          "settings": {
+            "testNumber": {
+              "key": "testNumber",
+              "name": "Test Number",
+              "description": "A number setting example with a numeric input control",
+              "type": "number",
+              "defaultValue": 42
+            },
+            "testNumber2": {
+              "key": "testNumber2",
+              "name": "Max Items",
+              "description": "Maximum number of items to display in the list view",
+              "type": "number",
+              "defaultValue": 100
+            },
+            "testRange": {
+              "key": "testRange",
+              "name": "Test Range",
+              "description": "A range setting example with a slider control (0-100 with step of 5)",
+              "type": "range",
+              "defaultValue": 50,
+              "min": 0,
+              "max": 100,
+              "step": 5
+            },
+            "testRange2": {
+              "key": "testRange2",
+              "name": "Opacity",
+              "description": "Set the opacity level for overlay elements (0-100%)",
+              "type": "range",
+              "defaultValue": 80,
+              "min": 0,
+              "max": 100,
+              "step": 10
+            }
+          }
         },
-        "testString": {
-          "key": "testString",
-          "name": "Test String",
-          "description": "A string setting example with a text input control",
-          "type": "string",
-          "defaultValue": "Hello World"
+        "selectionControls": {
+          "key": "selectionControls",
+          "name": "Selection Controls",
+          "description": "Dropdown and enumeration controls",
+          "settings": {
+            "testEnum": {
+              "key": "testEnum",
+              "name": "Test Enum",
+              "description": "An enumeration setting example with a dropdown select control",
+              "type": "enum",
+              "defaultValue": "option2",
+              "options": ["option1", "option2", "option3", "option4"]
+            },
+            "testEnum2": {
+              "key": "testEnum2",
+              "name": "Log Level",
+              "description": "Set the logging level for application diagnostics",
+              "type": "enum",
+              "defaultValue": "info",
+              "options": ["trace", "debug", "info", "warning", "error"]
+            },
+            "testEnum3": {
+              "key": "testEnum3",
+              "name": "Sort Order",
+              "description": "Choose how items should be sorted in the main view",
+              "type": "enum",
+              "defaultValue": "name",
+              "options": ["name", "date", "size", "type"]
+            }
+          }
         },
-        "testEnum": {
-          "key": "testEnum",
-          "name": "Test Enum",
-          "description": "An enumeration setting example with a dropdown select control",
-          "type": "enum",
-          "defaultValue": "option2",
-          "options": ["option1", "option2", "option3", "option4"]
-        },
-        "testRange": {
-          "key": "testRange",
-          "name": "Test Range",
-          "description": "A range setting example with a slider control (0-100 with step of 5)",
-          "type": "range",
-          "defaultValue": 50,
-          "min": 0,
-          "max": 100,
-          "step": 5
+        "advanced": {
+          "key": "advanced",
+          "name": "Advanced Settings",
+          "description": "Advanced configuration options for power users",
+          "settings": {
+            "debugMode": {
+              "key": "debugMode",
+              "name": "Debug Mode",
+              "description": "Enable debug mode to see detailed logging and diagnostics",
+              "type": "boolean",
+              "defaultValue": false
+            },
+            "cacheSize": {
+              "key": "cacheSize",
+              "name": "Cache Size",
+              "description": "Size of the application cache in megabytes",
+              "type": "number",
+              "defaultValue": 512
+            },
+            "experimentalFeatures": {
+              "key": "experimentalFeatures",
+              "name": "Experimental Features",
+              "description": "Enable experimental features that are still in development",
+              "type": "boolean",
+              "defaultValue": false
+            }
+          }
         }
       }
     }

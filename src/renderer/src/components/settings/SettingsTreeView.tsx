@@ -24,6 +24,7 @@ export const SettingsTreeView: React.FC<SettingsTreeViewProps> = ({
         <CategoryNode
           key={category.key}
           category={category}
+          categoryPath={[category.key]}
           selectedCategory={selectedCategory}
           onSelectCategory={onSelectCategory}
           level={0}
@@ -36,6 +37,7 @@ export const SettingsTreeView: React.FC<SettingsTreeViewProps> = ({
 
 interface CategoryNodeProps {
   category: SettingCategory
+  categoryPath: string[]
   selectedCategory: string | null
   onSelectCategory: (categoryKey: string) => void
   level: number
@@ -44,26 +46,36 @@ interface CategoryNodeProps {
 
 const CategoryNode: React.FC<CategoryNodeProps> = ({
   category,
+  categoryPath,
   selectedCategory,
   onSelectCategory,
   level,
   forceExpand = false
 }) => {
-  const [isExpanded, setIsExpanded] = React.useState(forceExpand || level === 0)
+  // Build full category ID (e.g., "workbench-appearance-language")
+  const fullCategoryId = categoryPath.join('-')
+  
+  // Check if this category or any of its children is selected
+  const isThisSelected = selectedCategory === fullCategoryId
+  const isChildSelected = selectedCategory?.startsWith(fullCategoryId + '-')
+  
+  // Auto-expand if a child is selected
+  const [isExpanded, setIsExpanded] = React.useState(
+    forceExpand || level === 0 || isChildSelected
+  )
 
   React.useEffect(() => {
-    if (forceExpand) {
+    if (forceExpand || isChildSelected) {
       setIsExpanded(true)
     }
-  }, [forceExpand])
+  }, [forceExpand, isChildSelected])
 
   const hasChildren = category.categories && Object.keys(category.categories).length > 0
   const hasSettings = category.settings && Object.keys(category.settings).length > 0
-  const isSelected = selectedCategory === category.key
 
   const handleClick = (): void => {
     if (hasSettings) {
-      onSelectCategory(category.key)
+      onSelectCategory(fullCategoryId)
     }
     if (hasChildren) {
       setIsExpanded(!isExpanded)
@@ -77,7 +89,7 @@ const CategoryNode: React.FC<CategoryNodeProps> = ({
   return (
     <div className="settings-tree-node">
       <div
-        className={`settings-tree-node__item ${isSelected ? 'settings-tree-node__item--selected' : ''}`}
+        className={`settings-tree-node__item ${isThisSelected ? 'settings-tree-node__item--selected' : ''}`}
         style={indentStyle}
         onClick={handleClick}
       >
@@ -95,6 +107,7 @@ const CategoryNode: React.FC<CategoryNodeProps> = ({
             <CategoryNode
               key={subCategory.key}
               category={subCategory}
+              categoryPath={[...categoryPath, subCategory.key]}
               selectedCategory={selectedCategory}
               onSelectCategory={onSelectCategory}
               level={level + 1}

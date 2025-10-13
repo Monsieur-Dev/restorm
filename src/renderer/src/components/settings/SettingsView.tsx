@@ -46,48 +46,62 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onClose }) => {
     loadData().catch(console.error)
   }, [])
 
-  // Intersection Observer to detect which section is visible
+  // Detect which header is currently sticky at the top
   useEffect(() => {
     if (!schema || searchQuery || isScrollingProgrammatically.current) return
 
     const mainContent = document.querySelector('.settings-content__main')
     if (!mainContent) return
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (isScrollingProgrammatically.current) return
+    const handleScroll = (): void => {
+      if (isScrollingProgrammatically.current) return
 
-        // Find the most visible section
-        let maxRatio = 0
-        let mostVisibleCategory: string | null = null
+      // Get all sticky headers
+      const categoryHeaders = mainContent.querySelectorAll('.settings-content__category-header')
+      const subcategoryHeaders = mainContent.querySelectorAll('.settings-content__subcategory-header')
 
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
-            maxRatio = entry.intersectionRatio
-            const categoryId = entry.target.getAttribute('data-category')
-            if (categoryId) {
-              mostVisibleCategory = categoryId.split('-')[0] // Get root category
+      // Check which subcategory header is sticky (closest to top)
+      let activeSectionId: string | null = null
+
+      // First check subcategories (they have higher priority as they're on top when sticky)
+      subcategoryHeaders.forEach((header) => {
+        const rect = header.getBoundingClientRect()
+        const mainRect = mainContent.getBoundingClientRect()
+        // Check if header is sticky at the top (within a small tolerance)
+        if (rect.top - mainRect.top <= 90 && rect.top - mainRect.top >= 80) {
+          const section = header.closest('[data-category]')
+          if (section) {
+            activeSectionId = section.getAttribute('data-category')
+          }
+        }
+      })
+
+      // If no subcategory is sticky, check categories
+      if (!activeSectionId) {
+        categoryHeaders.forEach((header) => {
+          const rect = header.getBoundingClientRect()
+          const mainRect = mainContent.getBoundingClientRect()
+          // Check if header is sticky at the very top
+          if (rect.top - mainRect.top <= 5 && rect.top - mainRect.top >= -5) {
+            const section = header.closest('[data-category]')
+            if (section) {
+              activeSectionId = section.getAttribute('data-category')
             }
           }
         })
-
-        if (mostVisibleCategory && mostVisibleCategory !== activeCategory) {
-          setActiveCategory(mostVisibleCategory)
-        }
-      },
-      {
-        root: mainContent,
-        threshold: [0, 0.25, 0.5, 0.75, 1],
-        rootMargin: '-20% 0px -70% 0px'
       }
-    )
 
-    // Observe all category sections
-    const sections = mainContent.querySelectorAll('[data-category]')
-    sections.forEach((section) => observer.observe(section))
+      if (activeSectionId && activeSectionId !== activeCategory) {
+        setActiveCategory(activeSectionId)
+      }
+    }
+
+    mainContent.addEventListener('scroll', handleScroll)
+    // Initial check
+    handleScroll()
 
     return () => {
-      sections.forEach((section) => observer.unobserve(section))
+      mainContent.removeEventListener('scroll', handleScroll)
     }
   }, [schema, searchQuery, activeCategory])
 
