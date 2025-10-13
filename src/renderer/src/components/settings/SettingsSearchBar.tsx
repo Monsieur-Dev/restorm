@@ -1,5 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { VscClearAll } from 'react-icons/vsc'
+import { Input } from '../common/Input'
 
 interface SettingsSearchBarProps {
   onSearch: (query: string) => void
@@ -49,27 +51,20 @@ export const SettingsSearchBar: React.FC<SettingsSearchBarProps> = ({
   return (
     <div className="settings-search-bar">
       <div className="settings-search-bar__container">
-        <input
-          type="text"
+        <Input
+          variant="search"
           className="settings-search-bar__input"
           placeholder={t('settings.search')}
           value={value}
           onChange={handleChange}
         />
-        <svg
-          className="settings-search-bar__icon"
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="currentColor"
-        >
-          <path d="M11.7 10.3l3.6 3.6-.7.7-3.6-3.6c-.8.6-1.9 1-3 1-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5c0 1.1-.4 2.2-1 3zM8 2C5.8 2 4 3.8 4 6s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4z" />
-        </svg>
         {value && (
-          <button className="settings-search-bar__clear" onClick={handleClear} title="Clear">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-              <path d="M8 8.707l3.646 3.647.708-.707L8.707 8l3.647-3.646-.707-.708L8 7.293 4.354 3.646l-.707.708L7.293 8l-3.646 3.646.707.708L8 8.707z" />
-            </svg>
+          <button
+            className="settings-search-bar__clear"
+            onClick={handleClear}
+            title={t('settings.clearSearchInput')}
+          >
+            <VscClearAll />
           </button>
         )}
       </div>

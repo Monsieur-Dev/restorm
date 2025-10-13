@@ -15,7 +15,8 @@
     "reset": "Reset to default",
     "more": "More actions",
     "resetSetting": "Reset Setting",
-    "copySettingId": "Copy Setting ID"
+    "copySettingId": "Copy Setting ID",
+    "clearSearchInput": "Clear settings search input"
   }
 }
 

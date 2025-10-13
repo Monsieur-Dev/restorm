@@ -15,7 +15,8 @@
     "reset": "Réinitialiser par défaut",
     "more": "Plus d'actions",
     "resetSetting": "Réinitialiser le paramètre",
-    "copySettingId": "Copier l'ID du paramètre"
+    "copySettingId": "Copier l'ID du paramètre",
+    "clearSearchInput": "Effacer la saisie de recherche des paramètres"
   }
 }
 

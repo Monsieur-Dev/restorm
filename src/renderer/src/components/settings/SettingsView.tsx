@@ -15,7 +15,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onClose }) => {
   const [values, setValues] = useState<Record<string, unknown>>({})
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState<string>('')
-  const [searchResults, setSearchResults] = useState<FlattenedSetting[] | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const contentRef = useRef<HTMLDivElement>(null)
   const isScrollingProgrammatically = useRef(false)
@@ -49,7 +48,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onClose }) => {
 
   // Intersection Observer to detect which section is visible
   useEffect(() => {
-    if (!schema || searchResults !== null || isScrollingProgrammatically.current) return
+    if (!schema || searchQuery || isScrollingProgrammatically.current) return
 
     const mainContent = document.querySelector('.settings-content__main')
     if (!mainContent) return
@@ -90,23 +89,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onClose }) => {
     return () => {
       sections.forEach((section) => observer.unobserve(section))
     }
-  }, [schema, searchResults, activeCategory])
+  }, [schema, searchQuery, activeCategory])
 
   // Handle search
-  const handleSearch = useCallback(async (query: string) => {
+  const handleSearch = useCallback((query: string) => {
     setSearchQuery(query)
-
-    if (!query || query.trim() === '') {
-      setSearchResults(null)
-      return
-    }
-
-    try {
-      const results = await window.settingsAPI.searchSettings(query)
-      setSearchResults(results)
-    } catch (error) {
-      console.error('Failed to search settings:', error)
-    }
   }, [])
 
   // Handle category click - scroll to section
@@ -191,7 +178,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onClose }) => {
   const rightPanel = (
     <SettingsContent
       schema={schema}
-      searchResults={searchResults}
+      searchQuery={searchQuery}
       values={values}
       onSettingChange={(key: string, value: unknown) => {
         handleSettingChange(key, value).catch(console.error)
@@ -206,11 +193,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onClose }) => {
   return (
     <div className="settings-view">
       <div className="settings-view__header">
-        <SettingsSearchBar
-          onSearch={(query: string) => {
-            handleSearch(query).catch(console.error)
-          }}
-        />
+        <SettingsSearchBar onSearch={handleSearch} />
         <button className="settings-view__close" onClick={onClose}>
           ×
         </button>

@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next'
 
 interface SettingsContentProps {
   schema: SettingsSchema
-  searchResults: FlattenedSetting[] | null
+  searchQuery: string
   values: Record<string, unknown>
   onSettingChange: (key: string, value: unknown) => void
   onResetSetting: (key: string) => void
@@ -20,7 +20,7 @@ interface SettingsContentProps {
 
 export const SettingsContent: React.FC<SettingsContentProps> = ({
   schema,
-  searchResults,
+  searchQuery,
   values,
   onSettingChange,
   onResetSetting,
@@ -29,47 +29,18 @@ export const SettingsContent: React.FC<SettingsContentProps> = ({
   const { t } = useTranslation()
   const [focusedSettingKey, setFocusedSettingKey] = useState<string | null>(null)
 
-  // Render search results if searching
-  if (searchResults) {
-    if (searchResults.length === 0) {
-      return (
-        <div className="settings-content">
-          <div className="settings-content__main">
-            <div className="settings-content__empty">{t('settings.noResults')}</div>
-          </div>
-        </div>
-      )
-    }
-
+  // Helper function to check if a setting matches the search query
+  const matchesSearch = (setting: FlattenedSetting): boolean => {
+    if (!searchQuery) return true
+    const query = searchQuery.toLowerCase()
     return (
-      <div className="settings-content">
-        <div className="settings-content__main">
-          <div className="settings-content__section">
-            <h2 className="settings-content__section-title">{t('settings.searchResults')}</h2>
-            {searchResults.map((setting) => (
-              <SettingItem
-                key={setting.fullPath}
-                setting={setting}
-                value={values[setting.fullPath]}
-                onChange={(value) => {
-                  onSettingChange(setting.fullPath, value)
-                }}
-                onReset={() => {
-                  onResetSetting(setting.fullPath)
-                }}
-                isFocused={focusedSettingKey === setting.fullPath}
-                onFocus={() => {
-                  setFocusedSettingKey(setting.fullPath)
-                }}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
+      setting.name.toLowerCase().includes(query) ||
+      setting.description.toLowerCase().includes(query) ||
+      setting.fullPath.toLowerCase().includes(query)
     )
   }
 
-  // Render all settings grouped by category
+  // Render all settings grouped by category, filtered by search
   return (
     <div className="settings-content">
       <div className="settings-content__main">
@@ -83,6 +54,8 @@ export const SettingsContent: React.FC<SettingsContentProps> = ({
             onResetSetting={onResetSetting}
             focusedSettingKey={focusedSettingKey}
             setFocusedSettingKey={setFocusedSettingKey}
+            searchQuery={searchQuery}
+            matchesSearch={matchesSearch}
           />
         ))}
       </div>
@@ -98,6 +71,8 @@ interface CategorySectionProps {
   onResetSetting: (key: string) => void
   focusedSettingKey: string | null
   setFocusedSettingKey: (key: string | null) => void
+  searchQuery: string
+  matchesSearch: (setting: FlattenedSetting) => boolean
 }
 
 const CategorySection: React.FC<CategorySectionProps> = ({
@@ -107,9 +82,39 @@ const CategorySection: React.FC<CategorySectionProps> = ({
   onSettingChange,
   onResetSetting,
   focusedSettingKey,
-  setFocusedSettingKey
+  setFocusedSettingKey,
+  searchQuery,
+  matchesSearch
 }) => {
   const sectionId = categoryPath.join('-')
+
+  // Filter settings based on search
+  const filteredSettings =
+    category.settings &&
+    Object.values(category.settings).filter((setting) => {
+      const fullPath = `${categoryPath.join('.')}.${setting.key}`
+      return matchesSearch({ ...setting, fullPath } as FlattenedSetting)
+    })
+
+  // Check if category has any visible content
+  const hasVisibleSettings = filteredSettings && filteredSettings.length > 0
+  const hasVisibleSubcategories =
+    category.categories &&
+    Object.values(category.categories).some((subCat) => {
+      // Check if subcategory has any matching settings
+      return (
+        subCat.settings &&
+        Object.values(subCat.settings).some((setting) => {
+          const fullPath = `${categoryPath.join('.')}.${subCat.key}.${setting.key}`
+          return matchesSearch({ ...setting, fullPath } as FlattenedSetting)
+        })
+      )
+    })
+
+  // Hide category if no visible content
+  if (!hasVisibleSettings && !hasVisibleSubcategories) {
+    return null
+  }
 
   return (
     <div className="settings-content__category" id={sectionId} data-category={sectionId}>
@@ -121,9 +126,9 @@ const CategorySection: React.FC<CategorySectionProps> = ({
       </div>
 
       {/* Render settings directly in this category */}
-      {category.settings && Object.keys(category.settings).length > 0 && (
+      {hasVisibleSettings && (
         <div className="settings-content__section">
-          {Object.values(category.settings).map((setting) => {
+          {filteredSettings.map((setting) => {
             const fullPath = `${categoryPath.join('.')}.${setting.key}`
             return (
               <SettingItem
@@ -158,6 +163,8 @@ const CategorySection: React.FC<CategorySectionProps> = ({
             onResetSetting={onResetSetting}
             focusedSettingKey={focusedSettingKey}
             setFocusedSettingKey={setFocusedSettingKey}
+            searchQuery={searchQuery}
+            matchesSearch={matchesSearch}
           />
         ))}
     </div>
@@ -172,6 +179,8 @@ interface SubCategorySectionProps {
   onResetSetting: (key: string) => void
   focusedSettingKey: string | null
   setFocusedSettingKey: (key: string | null) => void
+  searchQuery: string
+  matchesSearch: (setting: FlattenedSetting) => boolean
 }
 
 const SubCategorySection: React.FC<SubCategorySectionProps> = ({
@@ -181,12 +190,25 @@ const SubCategorySection: React.FC<SubCategorySectionProps> = ({
   onSettingChange,
   onResetSetting,
   focusedSettingKey,
-  setFocusedSettingKey
+  setFocusedSettingKey,
+  searchQuery,
+  matchesSearch
 }) => {
   const categoryPath = [...parentPath, category.key]
   const sectionId = categoryPath.join('-')
 
   if (!category.settings || Object.keys(category.settings).length === 0) {
+    return null
+  }
+
+  // Filter settings based on search
+  const filteredSettings = Object.values(category.settings).filter((setting) => {
+    const fullPath = `${categoryPath.join('.')}.${setting.key}`
+    return matchesSearch({ ...setting, fullPath } as FlattenedSetting)
+  })
+
+  // Hide subcategory if no visible settings
+  if (filteredSettings.length === 0) {
     return null
   }
 
@@ -199,7 +221,7 @@ const SubCategorySection: React.FC<SubCategorySectionProps> = ({
         )}
       </div>
       <div className="settings-content__section">
-        {Object.values(category.settings).map((setting) => {
+        {filteredSettings.map((setting) => {
           const fullPath = `${categoryPath.join('.')}.${setting.key}`
           return (
             <SettingItem
