@@ -12,7 +12,10 @@
     "noResults": "No settings found matching your search",
     "searchResults": "Search Results",
     "selectCategory": "Select a category from the sidebar",
-    "reset": "Reset to default"
+    "reset": "Reset to default",
+    "more": "More actions",
+    "resetSetting": "Reset Setting",
+    "copySettingId": "Copy Setting ID"
   }
 }
 

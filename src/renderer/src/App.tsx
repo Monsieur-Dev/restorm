@@ -3,6 +3,10 @@ import { useTranslation } from 'react-i18next'
 import { SettingsView } from './components/settings/SettingsView'
 
 const App: React.FC = () => {
+  // TEMPORARY: Affichage direct des settings pour le développement avec hot reload
+  return <SettingsView onClose={() => {}} />
+
+  /* VERSION NORMALE (décommenter après développement):
   const { t } = useTranslation()
   const [showSettings, setShowSettings] = useState(false)
 
@@ -51,6 +55,7 @@ const App: React.FC = () => {
       </button>
     </div>
   )
+  */
 }
 
 export default App

@@ -35,6 +35,13 @@
               "min": 50,
               "max": 200,
               "step": 10
+            },
+            "tocWidth": {
+              "key": "tocWidth",
+              "name": "Settings TOC Width",
+              "description": "Width of the Table of Contents panel in the settings view (in pixels)",
+              "type": "number",
+              "defaultValue": 250
             }
           }
         },

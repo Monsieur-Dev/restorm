@@ -1,8 +1,10 @@
-import React from 'react'
+import React, { useState, useRef, useEffect } from 'react'
+import { VscSettingsGear } from 'react-icons/vsc'
 import {
   SettingsSchema,
   SettingCategory,
-  FlattenedSetting
+  FlattenedSetting,
+  SettingType
 } from '../../types/settings.types'
 import { SettingControl } from './SettingControl'
 import { useTranslation } from 'react-i18next'
@@ -25,6 +27,7 @@ export const SettingsContent: React.FC<SettingsContentProps> = ({
   onClose
 }) => {
   const { t } = useTranslation()
+  const [focusedSettingKey, setFocusedSettingKey] = useState<string | null>(null)
 
   // Render search results if searching
   if (searchResults) {
@@ -54,6 +57,10 @@ export const SettingsContent: React.FC<SettingsContentProps> = ({
                 onReset={() => {
                   onResetSetting(setting.fullPath)
                 }}
+                isFocused={focusedSettingKey === setting.fullPath}
+                onFocus={() => {
+                  setFocusedSettingKey(setting.fullPath)
+                }}
               />
             ))}
           </div>
@@ -74,6 +81,8 @@ export const SettingsContent: React.FC<SettingsContentProps> = ({
             values={values}
             onSettingChange={onSettingChange}
             onResetSetting={onResetSetting}
+            focusedSettingKey={focusedSettingKey}
+            setFocusedSettingKey={setFocusedSettingKey}
           />
         ))}
       </div>
@@ -87,6 +96,8 @@ interface CategorySectionProps {
   values: Record<string, unknown>
   onSettingChange: (key: string, value: unknown) => void
   onResetSetting: (key: string) => void
+  focusedSettingKey: string | null
+  setFocusedSettingKey: (key: string | null) => void
 }
 
 const CategorySection: React.FC<CategorySectionProps> = ({
@@ -94,7 +105,9 @@ const CategorySection: React.FC<CategorySectionProps> = ({
   categoryPath,
   values,
   onSettingChange,
-  onResetSetting
+  onResetSetting,
+  focusedSettingKey,
+  setFocusedSettingKey
 }) => {
   const sectionId = categoryPath.join('-')
 
@@ -123,6 +136,10 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                 onReset={() => {
                   onResetSetting(fullPath)
                 }}
+                isFocused={focusedSettingKey === fullPath}
+                onFocus={() => {
+                  setFocusedSettingKey(fullPath)
+                }}
               />
             )
           })}
@@ -139,6 +156,8 @@ const CategorySection: React.FC<CategorySectionProps> = ({
             values={values}
             onSettingChange={onSettingChange}
             onResetSetting={onResetSetting}
+            focusedSettingKey={focusedSettingKey}
+            setFocusedSettingKey={setFocusedSettingKey}
           />
         ))}
     </div>
@@ -151,6 +170,8 @@ interface SubCategorySectionProps {
   values: Record<string, unknown>
   onSettingChange: (key: string, value: unknown) => void
   onResetSetting: (key: string) => void
+  focusedSettingKey: string | null
+  setFocusedSettingKey: (key: string | null) => void
 }
 
 const SubCategorySection: React.FC<SubCategorySectionProps> = ({
@@ -158,7 +179,9 @@ const SubCategorySection: React.FC<SubCategorySectionProps> = ({
   parentPath,
   values,
   onSettingChange,
-  onResetSetting
+  onResetSetting,
+  focusedSettingKey,
+  setFocusedSettingKey
 }) => {
   const categoryPath = [...parentPath, category.key]
   const sectionId = categoryPath.join('-')
@@ -169,10 +192,12 @@ const SubCategorySection: React.FC<SubCategorySectionProps> = ({
 
   return (
     <div className="settings-content__subcategory" id={sectionId} data-category={sectionId}>
-      <h2 className="settings-content__section-title">{category.name}</h2>
-      {category.description && (
-        <p className="settings-content__section-description">{category.description}</p>
-      )}
+      <div className="settings-content__subcategory-header">
+        <h2 className="settings-content__section-title">{category.name}</h2>
+        {category.description && (
+          <p className="settings-content__section-description">{category.description}</p>
+        )}
+      </div>
       <div className="settings-content__section">
         {Object.values(category.settings).map((setting) => {
           const fullPath = `${categoryPath.join('.')}.${setting.key}`
@@ -187,6 +212,10 @@ const SubCategorySection: React.FC<SubCategorySectionProps> = ({
               onReset={() => {
                 onResetSetting(fullPath)
               }}
+              isFocused={focusedSettingKey === fullPath}
+              onFocus={() => {
+                setFocusedSettingKey(fullPath)
+              }}
             />
           )
         })}
@@ -200,24 +229,105 @@ interface SettingItemProps {
   value: unknown
   onChange: (value: unknown) => void
   onReset: () => void
+  isFocused: boolean
+  onFocus: () => void
 }
 
-const SettingItem: React.FC<SettingItemProps> = ({ setting, value, onChange, onReset }) => {
+const SettingItem: React.FC<SettingItemProps> = ({ 
+  setting, 
+  value, 
+  onChange, 
+  onReset, 
+  isFocused, 
+  onFocus 
+}) => {
   const { t } = useTranslation()
+  const [showContextMenu, setShowContextMenu] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const gearButtonRef = useRef<HTMLButtonElement>(null)
+
+  // Handle click outside to close context menu
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent): void => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        gearButtonRef.current &&
+        !gearButtonRef.current.contains(event.target as Node)
+      ) {
+        setShowContextMenu(false)
+      }
+    }
+
+    if (showContextMenu) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside)
+      }
+    }
+  }, [showContextMenu])
+
+  const handleItemClick = (): void => {
+    onFocus()
+  }
+
+  const handleGearClick = (e: React.MouseEvent): void => {
+    e.stopPropagation()
+    setShowContextMenu(!showContextMenu)
+  }
+
+  const handleResetSetting = (): void => {
+    onReset()
+    setShowContextMenu(false)
+  }
+
+  const handleCopySettingId = (): void => {
+    navigator.clipboard.writeText(setting.fullPath).catch((error) => {
+      console.error('Failed to copy setting ID:', error)
+    })
+    setShowContextMenu(false)
+  }
+
+  const isBoolean = setting.type === SettingType.BOOLEAN
 
   return (
-    <div className="setting-item">
+    <div
+      className={`setting-item ${isFocused ? 'setting-item--focused' : ''} ${isBoolean ? 'setting-item--boolean' : ''}`}
+      onClick={handleItemClick}
+    >
       <div className="setting-item__header">
+        <button
+          ref={gearButtonRef}
+          className="setting-item__gear"
+          onClick={handleGearClick}
+          title={t('settings.more')}
+        >
+          <VscSettingsGear />
+        </button>
         <div className="setting-item__info">
           <h3 className="setting-item__name">{setting.name}</h3>
-          <p className="setting-item__description">{setting.description}</p>
+          {!isBoolean && <p className="setting-item__description">{setting.description}</p>}
         </div>
-        <button className="setting-item__reset" onClick={onReset} title={t('settings.reset')}>
-          ↺
-        </button>
+        {showContextMenu && (
+          <div ref={menuRef} className="setting-context-menu">
+            <div className="setting-context-menu__item" onClick={handleResetSetting}>
+              {t('settings.resetSetting')}
+            </div>
+            <div className="setting-context-menu__item" onClick={handleCopySettingId}>
+              {t('settings.copySettingId')}
+            </div>
+          </div>
+        )}
       </div>
       <div className="setting-item__control">
-        <SettingControl setting={setting} value={value} onChange={onChange} />
+        {isBoolean ? (
+          <div className="setting-item__boolean-control">
+            <SettingControl setting={setting} value={value} onChange={onChange} />
+            <p className="setting-item__boolean-description">{setting.description}</p>
+          </div>
+        ) : (
+          <SettingControl setting={setting} value={value} onChange={onChange} />
+        )}
       </div>
     </div>
   )

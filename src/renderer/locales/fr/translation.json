@@ -12,7 +12,10 @@
     "noResults": "Aucun paramètre trouvé correspondant à votre recherche",
     "searchResults": "Résultats de recherche",
     "selectCategory": "Sélectionnez une catégorie dans la barre latérale",
-    "reset": "Réinitialiser par défaut"
+    "reset": "Réinitialiser par défaut",
+    "more": "Plus d'actions",
+    "resetSetting": "Réinitialiser le paramètre",
+    "copySettingId": "Copier l'ID du paramètre"
   }
 }
 

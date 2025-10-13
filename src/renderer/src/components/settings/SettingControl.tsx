@@ -8,6 +8,7 @@ import {
   RangeSettingDefinition,
   SettingType
 } from '../../types/settings.types'
+import { CustomSelect } from './CustomSelect'
 
 interface SettingControlProps {
   setting: SettingDefinition
@@ -134,8 +135,8 @@ interface EnumControlProps {
 
 const EnumControl: React.FC<EnumControlProps> = ({ setting, value, onChange }) => {
   const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      onChange(e.target.value)
+    (newValue: string) => {
+      onChange(newValue)
     },
     [onChange]
   )
@@ -144,17 +145,11 @@ const EnumControl: React.FC<EnumControlProps> = ({ setting, value, onChange }) =
 
   return (
     <div className="setting-control setting-control--enum">
-      <select
-        className="setting-control__select"
+      <CustomSelect
         value={selectedValue}
+        options={setting.options}
         onChange={handleChange}
-      >
-        {setting.options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
+      />
     </div>
   )
 }
