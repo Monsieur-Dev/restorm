@@ -68,3 +68,7 @@ release/
 # Temporary files
 tmp/
 temp/
+
+# Playwright
+playwright-report/
+test-results/
