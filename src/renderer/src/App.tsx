@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ThemeTestPage from './pages/ThemeTestPage'
+import { logger } from './services/logger'
 
 const App: React.FC = () => {
   const { t, i18n } = useTranslation()
@@ -9,7 +10,7 @@ const App: React.FC = () => {
   const toggleLanguage = (): void => {
     const newLang = i18n.language === 'en' ? 'fr' : 'en'
     i18n.changeLanguage(newLang).catch((error) => {
-      console.error('Failed to change language:', error)
+      logger.error('Failed to change language', { error: String(error) })
     })
   }
 

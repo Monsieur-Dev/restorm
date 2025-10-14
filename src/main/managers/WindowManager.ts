@@ -1,6 +1,7 @@
 import { BrowserWindow, screen, app, BrowserWindowConstructorOptions } from 'electron'
 import { join } from 'path'
 import { getStorageService } from '../services/StorageService'
+import { logger } from '../services/LoggerService'
 
 /**
  * Window state interface
@@ -279,11 +280,11 @@ export abstract class BaseWindow {
     // Load URL if provided, otherwise load file
     if (this.configuration.url) {
       window.loadURL(this.configuration.url).catch((error) => {
-        console.error('Failed to load URL:', error)
+        logger.error('Failed to load URL', { error: String(error) })
       })
     } else {
       window.loadFile(this.configuration.file).catch((error) => {
-        console.error('Failed to load file:', error)
+        logger.error('Failed to load file', { error: String(error) })
       })
     }
   }

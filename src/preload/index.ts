@@ -25,6 +25,13 @@ contextBridge.exposeInMainWorld('api', {
       const result: unknown = await ipcRenderer.invoke('theme:set', themeId)
       return result as boolean
     }
+  },
+
+  // Logger API
+  logger: {
+    log: async (level: string, message: string, meta?: Record<string, unknown>): Promise<void> => {
+      await ipcRenderer.invoke('logger:log', { level, message, meta })
+    }
   }
 })
 

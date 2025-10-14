@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron'
 import { MainWindow } from './windows/MainWindow'
 import { getThemeService } from './services/ThemeService'
 import { getStorageService } from './services/StorageService'
+import { logger } from './services/LoggerService'
 import { join } from 'path'
 
 // Disable sandbox and GPU acceleration for restricted environments (WSL, containers, etc.)
@@ -47,12 +48,37 @@ function setupIPC(): void {
     storageService.set('currentTheme', themeId)
     return true
   })
+
+  // Logger IPC handler
+  ipcMain.handle('logger:log', (_event, { level, message, meta }: { level: string; message: string; meta?: Record<string, unknown> }) => {
+    switch (level) {
+      case 'debug':
+        logger.debug(message, meta)
+        break
+      case 'info':
+        logger.info(message, meta)
+        break
+      case 'warn':
+        logger.warn(message, meta)
+        break
+      case 'error':
+        logger.error(message, meta)
+        break
+    }
+  })
 }
 
 // This method will be called when Electron has finished initialization
 app.whenReady().then(() => {
+  logger.info('🚀 Gitable application starting...')
+  logger.info(`Platform: ${process.platform}`)
+  logger.info(`Node version: ${process.versions.node}`)
+  logger.info(`Electron version: ${process.versions.electron}`)
+  
   setupIPC()
   createWindow()
+
+  logger.info('✅ Gitable application started successfully')
 
   app.on('activate', () => {
     // On macOS it's common to re-create a window in the app when the
@@ -62,7 +88,7 @@ app.whenReady().then(() => {
     }
   })
 }).catch((error) => {
-  console.error('App failed to start:', error)
+  logger.error('App failed to start:', { error: String(error) })
 })
 
 // Quit when all windows are closed, except on macOS

@@ -10,6 +10,9 @@ declare global {
         getCurrent: () => Promise<string | undefined>
         set: (themeId: string) => Promise<boolean>
       }
+      logger: {
+        log: (level: string, message: string, meta?: Record<string, unknown>) => Promise<void>
+      }
     }
   }
 }
