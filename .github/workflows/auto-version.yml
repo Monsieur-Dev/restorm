@@ -1,9 +1,11 @@
-name: Auto Version Bump
+name: Auto Version Bump (Deprecated - Use Manual Release instead)
 
 on:
-  push:
-    branches:
-      - main
+  # Disabled automatic version bump on merge
+  # Use the "Manual Release" workflow instead for creating releases
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
     inputs:
       version_type:
@@ -15,16 +17,19 @@ on:
           - patch
           - minor
           - major
+      create_tag:
+        description: 'Create a tag (will NOT trigger release automatically)'
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: write
 
 jobs:
   bump-version:
-    name: Bump Version and Create Tag
+    name: Bump Version Only (No Release)
     runs-on: ubuntu-latest
-    # Skip if commit is already a version bump
-    if: "!contains(github.event.head_commit.message, 'chore: bump version')"
     
     steps:
       - name: Checkout code
@@ -53,19 +58,7 @@ jobs:
       - name: Determine version type
         id: version_type
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            VERSION_TYPE="${{ github.event.inputs.version_type }}"
-          else
-            # Default: increment patch for automatic merges
-            VERSION_TYPE="patch"
-            
-            # If commit contains [minor] or [major], use that type
-            if echo "${{ github.event.head_commit.message }}" | grep -qi "\[minor\]"; then
-              VERSION_TYPE="minor"
-            elif echo "${{ github.event.head_commit.message }}" | grep -qi "\[major\]"; then
-              VERSION_TYPE="major"
-            fi
-          fi
+          VERSION_TYPE="${{ github.event.inputs.version_type }}"
           echo "type=$VERSION_TYPE" >> $GITHUB_OUTPUT
           echo "Version type: $VERSION_TYPE"
 
@@ -111,6 +104,7 @@ jobs:
           git push
 
       - name: Create and push tag
+        if: github.event.inputs.create_tag == 'true'
         run: |
           git tag -a "v${{ steps.bump.outputs.new_version }}" -m "Release v${{ steps.bump.outputs.new_version }}"
           git push origin "v${{ steps.bump.outputs.new_version }}"
@@ -122,7 +116,14 @@ jobs:
           echo "- **Previous version**: ${{ steps.current_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "- **New version**: ${{ steps.bump.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Type**: ${{ steps.version_type.outputs.type }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Tag**: v${{ steps.bump.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "The release workflow will now be triggered automatically." >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.event.inputs.create_tag }}" = "true" ]; then
+            echo "- **Tag**: v${{ steps.bump.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ **Note**: The tag was created but will NOT trigger the release workflow automatically." >> $GITHUB_STEP_SUMMARY
+            echo "Use the 'Manual Release' workflow instead for complete releases." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Tag**: Not created (version bump only)" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "To create a release, use the 'Manual Release' workflow." >> $GITHUB_STEP_SUMMARY
+          fi
 
