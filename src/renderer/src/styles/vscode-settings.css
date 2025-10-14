@@ -1,0 +1,338 @@
+/**
+ * VSCode Settings Structural Styles
+ * 
+ * These styles define the layout, spacing, and typography of the settings page.
+ * They are theme-independent and use CSS variables for colors.
+ */
+
+.settings-editor {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+}
+
+.settings-header {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  background-color: var(--vscode-editor-background);
+}
+
+.settings-search-container {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+  background-color: var(--vscode-editor-background);
+  position: relative;
+  z-index: 100;
+}
+
+.settings-search-input {
+  flex: 1;
+  background-color: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  border: 1px solid var(--vscode-input-border);
+  padding: 6px 8px;
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  outline: none;
+}
+
+.settings-search-input:focus {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: -1px;
+}
+
+.settings-search-input::placeholder {
+  color: var(--vscode-input-placeholderForeground);
+}
+
+.settings-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.settings-toc-container {
+  display: flex;
+  flex-direction: column;
+  width: 220px;
+  flex-shrink: 0;
+  background-color: var(--vscode-sideBar-background);
+  border-right: 1px solid var(--vscode-panel-border);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.settings-toc-tree {
+  padding: 8px 0;
+}
+
+.settings-tree-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px 4px 20px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--vscode-sideBar-foreground);
+  user-select: none;
+  position: relative;
+}
+
+.settings-tree-item:hover {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+.settings-tree-item.active {
+  font-weight: 600;
+}
+
+.settings-tree-item.nested {
+  padding-left: 36px;
+}
+
+.settings-tree-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
+.settings-editor-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 20px 20px 20px;
+  background-color: var(--vscode-editor-background);
+}
+
+.settings-group-container {
+  margin-bottom: 24px;
+}
+
+.settings-group-title-label {
+  position: sticky;
+  top: 0;
+  background-color: var(--vscode-editor-background);
+  z-index: 10;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 24px 0 8px 0;
+  margin: 0;
+  color: var(--vscode-settings-headerForeground);
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.settings-group-title-label.subcategory {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 16px 0 8px 0;
+  margin-top: 12px;
+}
+
+.setting-item {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 0;
+  position: relative;
+}
+
+.setting-item:hover {
+  background-color: var(--vscode-list-hoverBackground);
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-left: -8px;
+  margin-right: -8px;
+  border-radius: 2px;
+}
+
+.setting-item.focused {
+  background-color: var(--vscode-list-focusBackground);
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-left: -8px;
+  margin-right: -8px;
+  border-radius: 2px;
+}
+
+.setting-item-title-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.setting-item-gear-icon {
+  opacity: 0;
+  font-size: 12px;
+  color: var(--vscode-icon-foreground);
+  cursor: pointer;
+  transition: opacity 0.1s;
+  flex-shrink: 0;
+}
+
+.setting-item:hover .setting-item-gear-icon,
+.setting-item.focused .setting-item-gear-icon {
+  opacity: 0.7;
+}
+
+.setting-item-gear-icon:hover {
+  opacity: 1 !important;
+}
+
+.setting-item-title {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--vscode-editor-foreground);
+  margin: 0;
+  line-height: 14px;
+}
+
+.setting-item-description {
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+  margin: 4px 0 8px 18px;
+  line-height: 1.5;
+}
+
+.setting-item-control {
+  margin-left: 18px;
+}
+
+/* Control-specific styles */
+.setting-item-control input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  background-color: var(--vscode-checkbox-background);
+  border: 1px solid var(--vscode-checkbox-border);
+  cursor: pointer;
+  margin: 0;
+}
+
+.setting-item-control input[type="text"],
+.setting-item-control input[type="number"] {
+  background-color: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  border: 1px solid var(--vscode-input-border);
+  padding: 4px 6px;
+  font-size: 13px;
+  font-family: inherit;
+  width: 320px;
+  max-width: 100%;
+}
+
+.setting-item-control input[type="text"]:focus,
+.setting-item-control input[type="number"]:focus {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: -1px;
+}
+
+.setting-item-control select {
+  background-color: var(--vscode-dropdown-background);
+  color: var(--vscode-dropdown-foreground);
+  border: 1px solid var(--vscode-dropdown-border);
+  padding: 4px 20px 4px 6px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 14 14' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l4-5H3z' fill='%23c5c5c5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+  background-size: 12px;
+  width: 320px;
+  max-width: 100%;
+}
+
+.setting-item-control select:focus {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: -1px;
+}
+
+.setting-item-control input[type="range"] {
+  width: 320px;
+  max-width: 100%;
+}
+
+/* Context menu */
+.setting-item-context-menu {
+  position: absolute;
+  background-color: var(--vscode-menu-background);
+  border: 1px solid var(--vscode-menu-border, var(--vscode-panel-border));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  padding: 4px 0;
+  z-index: 1000;
+  min-width: 180px;
+}
+
+.setting-item-context-menu-item {
+  padding: 6px 12px;
+  font-size: 13px;
+  color: var(--vscode-menu-foreground);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.setting-item-context-menu-item:hover {
+  background-color: var(--vscode-menu-selectionBackground);
+  color: var(--vscode-menu-selectionForeground);
+}
+
+/* Clear button for search */
+.settings-search-clear-button {
+  position: absolute;
+  right: 20px;
+  background: none;
+  border: none;
+  color: var(--vscode-icon-foreground);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+}
+
+.settings-search-clear-button:hover {
+  opacity: 1;
+}
+
+/* Scrollbar customization */
+.settings-toc-container::-webkit-scrollbar,
+.settings-editor-content::-webkit-scrollbar {
+  width: 10px;
+}
+
+.settings-toc-container::-webkit-scrollbar-track,
+.settings-editor-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.settings-toc-container::-webkit-scrollbar-thumb,
+.settings-editor-content::-webkit-scrollbar-thumb {
+  background-color: var(--vscode-scrollbarSlider-background);
+  border-radius: 10px;
+  border: 2px solid transparent;
+}
+
+.settings-toc-container::-webkit-scrollbar-thumb:hover,
+.settings-editor-content::-webkit-scrollbar-thumb:hover {
+  background-color: var(--vscode-scrollbarSlider-hoverBackground);
+}
+
+.settings-toc-container::-webkit-scrollbar-thumb:active,
+.settings-editor-content::-webkit-scrollbar-thumb:active {
+  background-color: var(--vscode-scrollbarSlider-activeBackground);
+}
+

@@ -1,0 +1,577 @@
+import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useTheme } from '../hooks/useTheme'
+import CustomDropdown from '../components/CustomDropdown'
+import { CustomTabs, type Tab } from '../components/CustomTabs'
+
+const ThemeTestPage: React.FC = () => {
+  const { t } = useTranslation()
+  const { themes, currentThemeId, setTheme, isLoading } = useTheme()
+  const [textInput, setTextInput] = useState('Sample text')
+  const [numberInput, setNumberInput] = useState(42)
+  const [checkboxChecked, setCheckboxChecked] = useState(true)
+  const [radioValue, setRadioValue] = useState('option1')
+  const [selectValue, setSelectValue] = useState('option1')
+  const [textareaValue, setTextareaValue] = useState('Multi-line\ntext area\nwith multiple lines')
+
+  const handleThemeChange = (value: string): void => {
+    setTheme(value).catch((err: unknown) => {
+      console.error('Failed to change theme:', err)
+    })
+  }
+
+  const themeOptions = themes.map(theme => ({
+    value: theme.id,
+    label: `${theme.name} (${theme.type})`
+  }))
+
+  // Tab content components
+  const inputsContent = (
+    <div style={{ display: 'grid', gap: '15px' }}>
+      <div>
+        <label
+          htmlFor="text-input"
+          style={{
+            display: 'block',
+            marginBottom: '6px',
+            fontSize: '13px'
+          }}
+        >
+          Text Input
+        </label>
+        <input
+          id="text-input"
+          type="text"
+          value={textInput}
+          onChange={(e) => {
+            setTextInput(e.target.value)
+          }}
+          style={{
+            width: '100%',
+            maxWidth: '400px',
+            padding: '6px 8px',
+            backgroundColor: 'var(--vscode-input-background)',
+            color: 'var(--vscode-input-foreground)',
+            border: '1px solid var(--vscode-input-border)',
+            borderRadius: '2px',
+            fontSize: '13px',
+            fontFamily: 'inherit'
+          }}
+        />
+      </div>
+
+      <div>
+        <label
+          htmlFor="number-input"
+          style={{
+            display: 'block',
+            marginBottom: '6px',
+            fontSize: '13px'
+          }}
+        >
+          Number Input
+        </label>
+        <input
+          id="number-input"
+          type="number"
+          value={numberInput}
+          onChange={(e) => {
+            setNumberInput(parseInt(e.target.value) || 0)
+          }}
+          style={{
+            width: '100%',
+            maxWidth: '400px',
+            padding: '6px 8px',
+            backgroundColor: 'var(--vscode-input-background)',
+            color: 'var(--vscode-input-foreground)',
+            border: '1px solid var(--vscode-input-border)',
+            borderRadius: '2px',
+            fontSize: '13px',
+            fontFamily: 'inherit'
+          }}
+        />
+      </div>
+
+      <div>
+        <label
+          htmlFor="disabled-input"
+          style={{
+            display: 'block',
+            marginBottom: '6px',
+            fontSize: '13px',
+            color: 'var(--vscode-descriptionForeground)'
+          }}
+        >
+          Disabled Input
+        </label>
+        <input
+          id="disabled-input"
+          type="text"
+          value="This input is disabled"
+          disabled
+          style={{
+            width: '100%',
+            maxWidth: '400px',
+            padding: '6px 8px',
+            backgroundColor: 'var(--vscode-input-background)',
+            color: 'var(--vscode-input-foreground)',
+            border: '1px solid var(--vscode-input-border)',
+            borderRadius: '2px',
+            fontSize: '13px',
+            fontFamily: 'inherit',
+            opacity: 0.6
+          }}
+        />
+      </div>
+
+      <h3 style={{ fontSize: '16px', marginTop: '20px', marginBottom: '12px' }}>
+        TextArea
+      </h3>
+      <textarea
+        value={textareaValue}
+        onChange={(e) => {
+          setTextareaValue(e.target.value)
+        }}
+        rows={6}
+        style={{
+          width: '100%',
+          maxWidth: '600px',
+          padding: '8px',
+          backgroundColor: 'var(--vscode-input-background)',
+          color: 'var(--vscode-input-foreground)',
+          border: '1px solid var(--vscode-input-border)',
+          borderRadius: '2px',
+          fontSize: '13px',
+          fontFamily: 'inherit',
+          resize: 'vertical'
+        }}
+      />
+    </div>
+  )
+
+  const checkboxesContent = (
+    <div style={{ display: 'grid', gap: '30px' }}>
+      <div>
+        <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>Checkboxes</h3>
+        <div style={{ display: 'grid', gap: '12px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={checkboxChecked}
+              onChange={(e) => {
+                setCheckboxChecked(e.target.checked)
+              }}
+              style={{
+                width: '16px',
+                height: '16px',
+                cursor: 'pointer'
+              }}
+            />
+            <span style={{ fontSize: '13px' }}>Checkbox (checked)</span>
+          </label>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={false}
+              readOnly
+              style={{
+                width: '16px',
+                height: '16px',
+                cursor: 'pointer'
+              }}
+            />
+            <span style={{ fontSize: '13px' }}>Checkbox (unchecked)</span>
+          </label>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={true}
+              disabled
+              readOnly
+              style={{
+                width: '16px',
+                height: '16px',
+                cursor: 'not-allowed',
+                opacity: 0.6
+              }}
+            />
+            <span style={{ fontSize: '13px', color: 'var(--vscode-descriptionForeground)' }}>
+              Checkbox (disabled)
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>Radio Buttons</h3>
+        <div style={{ display: 'grid', gap: '12px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+            <input
+              type="radio"
+              name="radio-group"
+              value="option1"
+              checked={radioValue === 'option1'}
+              onChange={(e) => {
+                setRadioValue(e.target.value)
+              }}
+              style={{
+                width: '16px',
+                height: '16px',
+                cursor: 'pointer'
+              }}
+            />
+            <span style={{ fontSize: '13px' }}>Option 1</span>
+          </label>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+            <input
+              type="radio"
+              name="radio-group"
+              value="option2"
+              checked={radioValue === 'option2'}
+              onChange={(e) => {
+                setRadioValue(e.target.value)
+              }}
+              style={{
+                width: '16px',
+                height: '16px',
+                cursor: 'pointer'
+              }}
+            />
+            <span style={{ fontSize: '13px' }}>Option 2</span>
+          </label>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+            <input
+              type="radio"
+              name="radio-group"
+              value="option3"
+              checked={radioValue === 'option3'}
+              onChange={(e) => {
+                setRadioValue(e.target.value)
+              }}
+              style={{
+                width: '16px',
+                height: '16px',
+                cursor: 'pointer'
+              }}
+            />
+            <span style={{ fontSize: '13px' }}>Option 3</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  )
+
+  const buttonsContent = (
+    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+      <button
+        style={{
+          padding: '8px 14px',
+          fontSize: '13px',
+          backgroundColor: 'var(--vscode-button-background)',
+          color: 'var(--vscode-button-foreground)',
+          border: 'none',
+          borderRadius: '2px',
+          cursor: 'pointer',
+          fontFamily: 'inherit'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)'
+        }}
+      >
+        Primary Button
+      </button>
+
+      <button
+        style={{
+          padding: '8px 14px',
+          fontSize: '13px',
+          backgroundColor: 'var(--vscode-button-secondaryBackground)',
+          color: 'var(--vscode-button-secondaryForeground)',
+          border: 'none',
+          borderRadius: '2px',
+          cursor: 'pointer',
+          fontFamily: 'inherit'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--vscode-button-secondaryHoverBackground)'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--vscode-button-secondaryBackground)'
+        }}
+      >
+        Secondary Button
+      </button>
+
+      <button
+        disabled
+        style={{
+          padding: '8px 14px',
+          fontSize: '13px',
+          backgroundColor: 'var(--vscode-button-background)',
+          color: 'var(--vscode-button-foreground)',
+          border: 'none',
+          borderRadius: '2px',
+          cursor: 'not-allowed',
+          fontFamily: 'inherit',
+          opacity: 0.6
+        }}
+      >
+        Disabled Button
+      </button>
+    </div>
+  )
+
+  const dropdownsContent = (
+    <div style={{ display: 'grid', gap: '15px' }}>
+      <div>
+        <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>Custom Dropdown</h3>
+        <CustomDropdown
+          id="test-dropdown"
+          value={selectValue}
+          options={[
+            { value: 'option1', label: 'Option 1' },
+            { value: 'option2', label: 'Option 2' },
+            { value: 'option3', label: 'Option 3' },
+            { value: 'option4', label: 'Option 4' }
+          ]}
+          onChange={(value) => {
+            setSelectValue(value)
+          }}
+          placeholder="Select an option"
+        />
+      </div>
+
+      <div>
+        <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>Native Select</h3>
+        <select
+          value={selectValue}
+          onChange={(e) => {
+            setSelectValue(e.target.value)
+          }}
+          style={{
+            width: '100%',
+            maxWidth: '400px',
+            padding: '6px 8px',
+            backgroundColor: 'var(--vscode-dropdown-background)',
+            color: 'var(--vscode-dropdown-foreground)',
+            border: '1px solid var(--vscode-dropdown-border)',
+            borderRadius: '2px',
+            fontSize: '13px',
+            fontFamily: 'inherit'
+          }}
+        >
+          <option value="option1">Option 1</option>
+          <option value="option2">Option 2</option>
+          <option value="option3">Option 3</option>
+          <option value="option4">Option 4</option>
+        </select>
+      </div>
+    </div>
+  )
+
+  const panelsContent = (
+    <div style={{ display: 'grid', gap: '20px' }}>
+      <div
+        style={{
+          padding: '16px',
+          backgroundColor: 'var(--vscode-sideBar-background)',
+          border: '1px solid var(--vscode-panel-border)',
+          borderRadius: '4px'
+        }}
+      >
+        <h3 style={{ margin: '0 0 10px 0', fontSize: '14px' }}>Panel with Sidebar Background</h3>
+        <p
+          style={{
+            margin: 0,
+            fontSize: '13px',
+            color: 'var(--vscode-descriptionForeground)'
+          }}
+        >
+          This is a panel with sidebar background color and border.
+        </p>
+      </div>
+
+      <div
+        style={{
+          border: '1px solid var(--vscode-panel-border)',
+          borderRadius: '4px',
+          overflow: 'hidden'
+        }}
+      >
+        <h3 style={{ margin: '0', padding: '12px', fontSize: '14px', backgroundColor: 'var(--vscode-sideBar-background)', borderBottom: '1px solid var(--vscode-panel-border)' }}>List</h3>
+        {['Item 1', 'Item 2 (hover me)', 'Item 3'].map((item, index) => (
+          <div
+            key={index}
+            style={{
+              padding: '10px 12px',
+              fontSize: '13px',
+              backgroundColor: index === 0 
+                ? 'var(--vscode-list-activeSelectionBackground)' 
+                : 'var(--vscode-sideBar-background)',
+              color: index === 0
+                ? 'var(--vscode-list-activeSelectionForeground)'
+                : 'var(--vscode-foreground)',
+              borderBottom: index < 2 ? '1px solid var(--vscode-panel-border)' : 'none',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              if (index !== 0) {
+                e.currentTarget.style.backgroundColor = 'var(--vscode-list-hoverBackground)'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (index !== 0) {
+                e.currentTarget.style.backgroundColor = 'var(--vscode-sideBar-background)'
+              }
+            }}
+          >
+            {item} {index === 0 ? '(selected)' : ''}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+
+  const textContent = (
+    <div style={{ display: 'grid', gap: '10px' }}>
+      <div style={{ 
+        padding: '12px', 
+        backgroundColor: 'var(--vscode-sideBar-background)',
+        border: '1px solid var(--vscode-panel-border)',
+        borderRadius: '4px',
+        marginBottom: '10px'
+      }}>
+        <p style={{ margin: '0 0 5px 0', fontSize: '12px', color: 'var(--vscode-descriptionForeground)' }}>
+          Current font: <code style={{ fontSize: '11px' }}>{window.getComputedStyle(document.body).fontFamily}</code>
+        </p>
+        <p style={{ margin: 0, fontSize: '12px', color: 'var(--vscode-descriptionForeground)' }}>
+          Expected: Inter (bundled with app)
+        </p>
+      </div>
+      
+      <p style={{ margin: 0, fontSize: '13px', color: 'var(--vscode-foreground)' }}>
+        Normal text with foreground color
+      </p>
+      <p style={{ margin: 0, fontSize: '13px', color: 'var(--vscode-descriptionForeground)' }}>
+        Description text with muted color
+      </p>
+      <p style={{ margin: 0, fontSize: '13px', color: 'var(--vscode-errorForeground)' }}>
+        Error text (if available)
+      </p>
+      <p style={{ margin: 0, fontSize: '13px', fontWeight: 'bold' }}>
+        Bold text (weight: 700)
+      </p>
+      <p style={{ margin: 0, fontSize: '13px', fontWeight: '500' }}>
+        Medium text (weight: 500)
+      </p>
+      <p style={{ margin: 0, fontSize: '13px', fontStyle: 'italic' }}>
+        Italic text
+      </p>
+      <code
+        style={{
+          display: 'inline-block',
+          padding: '2px 6px',
+          fontSize: '12px',
+          backgroundColor: 'var(--vscode-textCodeBlock-background)',
+          border: '1px solid var(--vscode-panel-border)',
+          borderRadius: '3px',
+          fontFamily: 'inherit'
+        }}
+      >
+        inline code
+      </code>
+      
+      <div style={{ marginTop: '20px' }}>
+        <h3 style={{ fontSize: '16px', marginBottom: '8px' }}>Font Samples</h3>
+        <p style={{ margin: '5px 0', fontSize: '20px' }}>The quick brown fox jumps</p>
+        <p style={{ margin: '5px 0', fontSize: '16px' }}>The quick brown fox jumps over the lazy dog</p>
+        <p style={{ margin: '5px 0', fontSize: '13px' }}>The quick brown fox jumps over the lazy dog 0123456789</p>
+        <p style={{ margin: '5px 0', fontSize: '11px' }}>The quick brown fox jumps over the lazy dog</p>
+      </div>
+    </div>
+  )
+
+  const tabs: Tab[] = [
+    { id: 'inputs', label: 'Text Inputs', content: inputsContent },
+    { id: 'checkboxes', label: 'Checkboxes & Radio', content: checkboxesContent },
+    { id: 'buttons', label: 'Buttons', content: buttonsContent },
+    { id: 'dropdowns', label: 'Dropdowns', content: dropdownsContent },
+    { id: 'panels', label: 'Panels & Lists', content: panelsContent },
+    { id: 'text', label: 'Text Styles', content: textContent }
+  ]
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        height: '100vh',
+        backgroundColor: 'var(--vscode-editor-background)',
+        color: 'var(--vscode-editor-foreground)',
+        fontFamily: "'Cascadia Code', 'Consolas', 'Monaco', monospace"
+      }}
+    >
+      {/* Header with theme selector */}
+      <div
+        style={{
+          padding: '20px',
+          borderBottom: '1px solid var(--vscode-panel-border)',
+          backgroundColor: 'var(--vscode-sideBar-background)'
+        }}
+      >
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <h1 style={{ margin: '0 0 10px 0', fontSize: '24px' }}>
+            {t('themeTest.title')}
+          </h1>
+          <p
+            style={{
+              margin: '0 0 15px 0',
+              color: 'var(--vscode-descriptionForeground)',
+              fontSize: '14px'
+            }}
+          >
+            {t('themeTest.description')}
+          </p>
+          
+          {/* Theme Selector */}
+          <div style={{ maxWidth: '400px' }}>
+            <label
+              htmlFor="theme-selector"
+              style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontWeight: 'bold',
+                fontSize: '13px'
+              }}
+            >
+              {t('themeTest.selectTheme')}
+            </label>
+            <CustomDropdown
+              id="theme-selector"
+              value={currentThemeId ?? ''}
+              options={themeOptions}
+              onChange={handleThemeChange}
+              disabled={isLoading}
+              placeholder={t('themeTest.selectTheme')}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <CustomTabs tabs={tabs} />
+      </div>
+    </div>
+  )
+}
+
+export default ThemeTestPage

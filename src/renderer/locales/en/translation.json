@@ -2,6 +2,21 @@
   "app": {
     "title": "Gitable",
     "welcome": "Hello Gitable"
+  },
+  "themeTest": {
+    "title": "Theme Test Page",
+    "description": "Test page to visualize all UI components with different VSCode themes",
+    "selectTheme": "Select Theme",
+    "components": {
+      "inputs": "Text Inputs",
+      "checkboxes": "Checkboxes & Radio Buttons",
+      "buttons": "Buttons",
+      "select": "Select / Dropdown",
+      "textarea": "Text Area",
+      "panels": "Panels",
+      "lists": "Lists",
+      "text": "Text Variants"
+    }
   }
 }
 
