@@ -1,17 +1,105 @@
-name: Preview Release (Manual)
+name: Manual Prerelease
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version for the preview release (e.g., 0.1.0-preview)'
-        required: false
-        default: '0.1.0-preview'
+
+permissions:
+  contents: write
 
 jobs:
-  build-preview:
-    name: Build Preview on ${{ matrix.os }}
+  bump-and-prerelease:
+    name: Bump Version and Create Prerelease
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.bump.outputs.new_version }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - name: Get current version
+        id: current_version
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $CURRENT_VERSION"
+
+      - name: Bump version to preview
+        id: bump
+        run: |
+          # Read current version and remove any existing suffixes
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          BASE_VERSION=$(echo "$CURRENT_VERSION" | sed 's/-preview.*//' | sed 's/-.*$//')
+          
+          IFS='.' read -r -a VERSION_PARTS <<< "$BASE_VERSION"
+          MAJOR="${VERSION_PARTS[0]}"
+          MINOR="${VERSION_PARTS[1]}"
+          PATCH="${VERSION_PARTS[2]}"
+          
+          # Increment patch version
+          PATCH=$((PATCH + 1))
+          
+          # Add -preview suffix
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}-preview"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION"
+          
+          # Update package.json
+          node -e "const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8')); pkg.version = '$NEW_VERSION'; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');"
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json
+          git commit -m "chore: bump version to ${{ steps.bump.outputs.new_version }}"
+          git push
+
+      - name: Create and push tag
+        run: |
+          git tag -a "v${{ steps.bump.outputs.new_version }}" -m "Prerelease v${{ steps.bump.outputs.new_version }}"
+          git push origin "v${{ steps.bump.outputs.new_version }}"
+
+      - name: Create GitHub Prerelease
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.bump.outputs.new_version }}
+          name: Prerelease v${{ steps.bump.outputs.new_version }}
+          draft: false
+          prerelease: true
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "## 🚀 Prerelease Started!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Previous version**: ${{ steps.current_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **New version**: ${{ steps.bump.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag**: v${{ steps.bump.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Type**: Prerelease" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The build jobs for all platforms are now running..." >> $GITHUB_STEP_SUMMARY
+
+  build-prerelease:
+    name: Build Prerelease on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    needs: [bump-and-prerelease]
     
     strategy:
       matrix:
@@ -27,6 +115,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: v${{ needs.bump-and-prerelease.outputs.new_version }}
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -65,15 +155,34 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - name: Upload Prerelease Assets (Linux)
+        if: matrix.platform == 'linux'
+        uses: softprops/action-gh-release@v1
         with:
-          name: gitable-${{ matrix.platform }}-preview
-          path: |
-            dist-electron/**/*.exe
-            dist-electron/**/*.zip
-            dist-electron/**/*.deb
-            dist-electron/**/*.rpm
-            dist-electron/**/*.dmg
-          retention-days: 90
-
+          tag_name: v${{ needs.bump-and-prerelease.outputs.new_version }}
+          files: |
+            dist-electron/*.deb
+            dist-electron/*.rpm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Upload Prerelease Assets (Windows)
+        if: matrix.platform == 'windows'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ needs.bump-and-prerelease.outputs.new_version }}
+          files: |
+            dist-electron/*.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Upload Prerelease Assets (macOS)
+        if: matrix.platform == 'macos'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ needs.bump-and-prerelease.outputs.new_version }}
+          files: |
+            dist-electron/*.dmg
+            dist-electron/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
