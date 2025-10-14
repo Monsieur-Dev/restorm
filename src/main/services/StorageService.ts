@@ -1,6 +1,7 @@
 import { app } from 'electron'
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { join, dirname } from 'path'
+import { logger } from './LoggerService'
 
 /**
  * StorageService provides a simple key-value store backed by a JSON file.
@@ -26,7 +27,7 @@ export class StorageService {
         return JSON.parse(content) as Record<string, unknown>
       }
     } catch (error) {
-      console.error('Failed to load storage file:', error)
+      logger.error('Failed to load storage file', { error: String(error) })
     }
     return {}
   }
@@ -42,7 +43,7 @@ export class StorageService {
       }
       writeFileSync(this.filePath, JSON.stringify(this.data, null, 2), 'utf-8')
     } catch (error) {
-      console.error('Failed to save storage file:', error)
+      logger.error('Failed to save storage file', { error: String(error) })
     }
   }
 

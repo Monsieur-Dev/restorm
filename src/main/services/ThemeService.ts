@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync, existsSync } from 'fs'
 import { join, dirname } from 'path'
 import type { ThemeDefinition, ThemeInfo, ThemeVariables } from '../../types/theme'
+import { logger } from './LoggerService'
 
 /**
  * ThemeService manages VSCode themes
@@ -58,7 +59,7 @@ export class ThemeService {
    */
   private discoverThemes(): void {
     if (!existsSync(this.themesPath)) {
-      console.warn(`Themes directory not found: ${this.themesPath}`)
+      logger.warn(`Themes directory not found: ${this.themesPath}`)
       return
     }
 
@@ -98,13 +99,12 @@ export class ThemeService {
             }
           }
         } catch (error) {
-          console.error(`Failed to load theme from ${themeDir}:`, error)
+          logger.error(`Failed to load theme from ${themeDir}`, { error: String(error) })
         }
       }
     }
 
-    // eslint-disable-next-line no-console
-    console.log(`✅ Discovered ${this.themes.size} VSCode themes`)
+    logger.info(`✅ Discovered ${this.themes.size} VSCode themes`)
   }
 
   /**
@@ -184,7 +184,7 @@ export class ThemeService {
 
       return theme
     } catch (error) {
-      console.error(`Failed to load theme file ${themePath}:`, error)
+      logger.error(`Failed to load theme file ${themePath}`, { error: String(error) })
       return null
     }
   }
@@ -208,8 +208,8 @@ export class ThemeService {
 
     const themeInfo = this.themes.get(themeId)
     if (!themeInfo) {
-      console.error(`❌ Theme not found: "${themeId}"`)
-      console.error(`   Available themes: ${Array.from(this.themes.keys()).join(', ')}`)
+      logger.error(`❌ Theme not found: "${themeId}"`)
+      logger.error(`   Available themes: ${Array.from(this.themes.keys()).join(', ')}`)
       return null
     }
 
@@ -217,7 +217,7 @@ export class ThemeService {
     if (theme) {
       this.loadedThemes.set(themeId, theme)
     } else {
-      console.error(`Failed to load theme file for ${themeId}`)
+      logger.error(`Failed to load theme file for ${themeId}`)
     }
 
     return theme

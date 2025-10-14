@@ -28,3 +28,14 @@ Each time a string displayed to the user is added to the project, its English an
 
 ### Rule 6: Linting Requirement
 Each time code is produced within the project, the linter should be executed to ensure code quality and consistency.
+
+## OYO-43 Specific Rules
+
+### Rule 7: Logging Requirement
+> No direct console.logs should be allowed. All logging should go through Winston logger.
+
+All logging in the application must use the Winston logger service:
+- In main process: import `logger` from `./services/LoggerService`
+- In renderer process: import `logger` from `./services/logger`
+- Use `logger.debug()`, `logger.info()`, `logger.warn()`, or `logger.error()` instead of `console.log/warn/error`
+- The only exception is the fallback error handler in the renderer logger service itself

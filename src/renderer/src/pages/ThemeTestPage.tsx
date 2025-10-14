@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useTheme } from '../hooks/useTheme'
 import CustomDropdown from '../components/CustomDropdown'
 import { CustomTabs, type Tab } from '../components/CustomTabs'
+import { logger } from '../services/logger'
 
 const ThemeTestPage: React.FC = () => {
   const { t } = useTranslation()
@@ -16,7 +17,7 @@ const ThemeTestPage: React.FC = () => {
 
   const handleThemeChange = (value: string): void => {
     setTheme(value).catch((err: unknown) => {
-      console.error('Failed to change theme:', err)
+      logger.error('Failed to change theme', { error: String(err) })
     })
   }
 

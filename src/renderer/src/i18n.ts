@@ -2,6 +2,7 @@ import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import enTranslation from '../locales/en/translation.json'
 import frTranslation from '../locales/fr/translation.json'
+import { logger } from './services/logger'
 
 const resources = {
   en: {
@@ -23,7 +24,7 @@ i18n
     }
   })
   .catch((error) => {
-    console.error('Failed to initialize i18n:', error)
+    logger.error('Failed to initialize i18n', { error: String(error) })
   })
 
 export default i18n

@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { useState, useEffect, useCallback } from 'react'
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../../types/theme'
+import { logger } from '../services/logger'
 
 interface UseThemeReturn {
   themes: ThemeInfo[]
@@ -37,7 +38,7 @@ export function useTheme(): UseThemeReturn {
       setThemes(themeList)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load themes')
-      console.error('Failed to load themes:', err)
+      logger.error('Failed to load themes', { error: String(err) })
     } finally {
       setIsLoading(false)
     }
@@ -97,7 +98,7 @@ export function useTheme(): UseThemeReturn {
       setCurrentVariables(themeData.variables)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to set theme')
-      console.error('Failed to set theme:', err)
+      logger.error('Failed to set theme', { error: String(err) })
     } finally {
       setIsLoading(false)
     }
@@ -145,13 +146,15 @@ export function useTheme(): UseThemeReturn {
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to initialize theme')
-        console.error('Failed to initialize theme:', err)
+        logger.error('Failed to initialize theme', { error: String(err) })
       } finally {
         setIsLoading(false)
       }
     }
 
-    initTheme().catch(console.error)
+    initTheme().catch((err) => {
+      logger.error('Failed to initialize theme in useEffect', { error: String(err) })
+    })
   }, [applyCSSVariables])
 
   return {
