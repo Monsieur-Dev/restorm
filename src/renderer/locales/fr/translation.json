@@ -2,6 +2,21 @@
   "app": {
     "title": "Gitable",
     "welcome": "Bonjour Gitable"
+  },
+  "themeTest": {
+    "title": "Page de Test des Thèmes",
+    "description": "Page de test pour visualiser tous les composants d'interface avec différents thèmes VSCode",
+    "selectTheme": "Sélectionner un Thème",
+    "components": {
+      "inputs": "Champs de Texte",
+      "checkboxes": "Cases à Cocher & Boutons Radio",
+      "buttons": "Boutons",
+      "select": "Liste Déroulante",
+      "textarea": "Zone de Texte",
+      "panels": "Panneaux",
+      "lists": "Listes",
+      "text": "Variantes de Texte"
+    }
   }
 }
 

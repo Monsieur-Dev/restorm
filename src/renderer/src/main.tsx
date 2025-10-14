@@ -2,6 +2,8 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import './i18n'
+import '../assets/fonts/fonts.css'
+import './theme-styles.css'
 
 const rootElement = document.getElementById('root')
 

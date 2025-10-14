@@ -1,4 +1,6 @@
 /* Font definitions for Gitable - Local fonts with system fallbacks */
+
+/* Cascadia Code - Monospace font for editor */
 @font-face {
   font-family: 'GitableMono';
   font-style: normal;

@@ -1,0 +1,57 @@
+{
+  "settings-editor": [
+    "settings-editor"
+  ],
+  "settings-header": [
+    "settings-header"
+  ],
+  "settings-search-container": [
+    "settings-search-container"
+  ],
+  "settings-search-input": [
+    "settings-search-input"
+  ],
+  "settings-body": [
+    "settings-body"
+  ],
+  "settings-toc-container": [
+    "settings-toc-container"
+  ],
+  "settings-toc-tree": [
+    "settings-toc-tree"
+  ],
+  "settings-tree-item": [
+    "settings-tree-item"
+  ],
+  "settings-tree-icon": [
+    "settings-tree-icon"
+  ],
+  "settings-editor-content": [
+    "settings-editor-content"
+  ],
+  "settings-group-container": [
+    "settings-group-container"
+  ],
+  "settings-group-title-label": [
+    "settings-group-title-label"
+  ],
+  "setting-item": [
+    "setting-item"
+  ],
+  "setting-item-title-container": [
+    "setting-item-title-container"
+  ],
+  "setting-item-gear-icon": [
+    "setting-item-gear-icon"
+  ],
+  "setting-item-title": [
+    "setting-item-title"
+  ],
+  "setting-item-description": [
+    "setting-item-description"
+  ],
+  "setting-item-control": [
+    "setting-item-control"
+  ]
+}
+
