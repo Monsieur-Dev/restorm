@@ -1,0 +1,94 @@
+{
+  "name": "electron-vscodelike-core-ui",
+  "version": "0.1.0",
+  "description": "A generic Electron + React foundation with VSCode-like UI components and services",
+  "main": "dist/src/main/index.js",
+  "types": "dist/src/main/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/main/index.d.ts",
+      "default": "./dist/src/main/index.js"
+    },
+    "./main": {
+      "types": "./dist/src/main/index.d.ts",
+      "default": "./dist/src/main/index.js"
+    },
+    "./renderer": {
+      "types": "./dist/src/renderer/index.d.ts",
+      "default": "./dist/src/renderer/index.js"
+    },
+    "./preload": {
+      "types": "./dist/src/preload/index.d.ts",
+      "default": "./dist/src/preload/index.js"
+    },
+    "./types/*": "./dist/src/types/*",
+    "./fonts.css": "./fonts.css",
+    "./resources/fonts/*": "./resources/fonts/*"
+  },
+  "files": [
+    "dist",
+    "resources",
+    "fonts.css",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "npm run build:main && npm run build:renderer && npm run merge-dist",
+    "build:main": "tsc --project tsconfig.main.json",
+    "build:renderer": "tsc --project tsconfig.renderer.json",
+    "merge-dist": "rm -rf dist && mkdir -p dist/src && cp -r dist-main/src/main dist/src/ && cp -r dist-main/src/preload dist/src/ && cp -r dist-renderer/src/renderer dist/src/ && cp -r dist-main/src/types dist/src/ 2>/dev/null || cp -r dist-renderer/src/types dist/src/ 2>/dev/null || true",
+    "dev": "tsc --project tsconfig.main.json --watch & tsc --project tsconfig.renderer.json --watch",
+    "lint": "eslint . --ext .ts,.tsx --max-warnings 0",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "electron",
+    "react",
+    "vscode",
+    "ui",
+    "theme",
+    "foundation",
+    "boilerplate"
+  ],
+  "author": {
+    "name": "Yoann Diguet",
+    "email": "contact@oyo-fr.com"
+  },
+  "license": "MIT",
+  "peerDependencies": {
+    "electron": "^28.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "peerDependenciesMeta": {
+    "electron": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "winston": "^3.18.3",
+    "i18next": "^23.7.6",
+    "react-i18next": "^13.5.0",
+    "react-icons": "^4.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.4",
+    "@types/react": "^18.2.42",
+    "@types/react-dom": "^18.2.17",
+    "@typescript-eslint/eslint-plugin": "^6.13.2",
+    "@typescript-eslint/parser": "^6.13.2",
+    "electron": "^28.0.0",
+    "eslint": "^8.55.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "typescript": "^5.3.3"
+  }
+}

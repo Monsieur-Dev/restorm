@@ -43,6 +43,7 @@ jobs:
       - name: Get current version
         id: current_version
         run: |
+          cd gitable
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
           echo "Current version: $CURRENT_VERSION"
@@ -50,6 +51,7 @@ jobs:
       - name: Bump version
         id: bump
         run: |
+          cd gitable
           # Read current version
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           IFS='.' read -r -a VERSION_PARTS <<< "$CURRENT_VERSION"
@@ -84,7 +86,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json
+          git add gitable/package.json
           git commit -m "chore: bump version to ${{ steps.bump.outputs.new_version }}"
           git push
 
@@ -154,6 +156,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y rpm
       
+      - name: Build electron-vscodelike-core-ui
+        run: |
+          cd electron-vscodelike-core-ui
+          npm install
+          npm run build
+      
       - name: Get pnpm store directory
         shell: bash
         run: |
@@ -163,15 +171,19 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/gitable/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
       
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Install gitable dependencies
+        run: |
+          cd gitable
+          pnpm install
       
       - name: Build with electron-builder
-        run: pnpm run dist
+        run: |
+          cd gitable
+          pnpm run dist
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
@@ -181,8 +193,8 @@ jobs:
         with:
           tag_name: v${{ needs.bump-and-release.outputs.new_version }}
           files: |
-            dist-electron/*.deb
-            dist-electron/*.rpm
+            gitable/dist-electron/*.deb
+            gitable/dist-electron/*.rpm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
@@ -192,7 +204,7 @@ jobs:
         with:
           tag_name: v${{ needs.bump-and-release.outputs.new_version }}
           files: |
-            dist-electron/*.exe
+            gitable/dist-electron/*.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
@@ -202,8 +214,8 @@ jobs:
         with:
           tag_name: v${{ needs.bump-and-release.outputs.new_version }}
           files: |
-            dist-electron/*.dmg
-            dist-electron/*.zip
+            gitable/dist-electron/*.dmg
+            gitable/dist-electron/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

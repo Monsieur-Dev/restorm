@@ -1,26 +1,108 @@
-# Gitable
+# Gitable Monorepo
 
-A modern Git GUI tool built with Electron, React, TypeScript, and inspired by VSCode.
+This repository contains two main packages:
+
+1. **electron-vscodelike-core-ui** - A reusable Electron + React foundation library with VSCode-like UI components, theming, logging, window management, and i18n.
+2. **gitable** - A modern Git GUI tool that uses the core-ui library.
+
+## 📦 Package Structure
+
+```
+gitable/
+├── electron-vscodelike-core-ui/    # Generic UI library (will be moved to separate repo later)
+│   ├── src/
+│   │   ├── main/                   # Main process services (logger, storage, theme, window)
+│   │   ├── preload/                # Preload script utilities
+│   │   └── renderer/               # React components and hooks
+│   ├── resources/                  # Themes and fonts
+│   ├── types/                      # TypeScript type definitions
+│   └── package.json                # Library package config
+│
+├── gitable/                        # Gitable application
+│   ├── src/
+│   │   ├── main/                   # Application main process
+│   │   ├── preload/                # Application preload script
+│   │   └── renderer/               # Application UI
+│   ├── docs/                       # Documentation
+│   └── package.json                # Application package config
+│
+├── .cursor/                        # Cursor IDE configuration
+├── .github/workflows/              # GitHub Actions CI/CD workflows
+├── .git/                           # Git repository
+└── dev.sh                          # Development script with hot reload
+```
 
 ## 🚀 Quick Start
 
-```bash
-# Install dependencies and setup the project
-./setup.sh
+### Development Setup
 
-# Start development
-pnpm dev
+The repository uses a custom development workflow for hot reload:
+
+```bash
+# From the repository root, run:
+./dev.sh
 ```
 
-## 📚 Documentation
+This script will:
+1. Start TypeScript compilation in watch mode for `electron-vscodelike-core-ui` (both main and renderer)
+2. Auto-copy changes from core-ui to gitable's node_modules
+3. Start the Gitable application with Electron + Vite dev server
 
-Comprehensive documentation is available in the `/docs` folder:
+**When you modify core-ui files:**
+- TypeScript recompiles automatically (~1-2 seconds)
+- Changes are copied to gitable/node_modules automatically
+- Press **Ctrl+R** in the Electron app to reload and see changes
 
-- **[Stack Setup](./docs/stack-setup/README.md)** - Complete technical stack overview and architecture
-- **[Getting Started](./docs/stack-setup/GETTING_STARTED.md)** - Step-by-step guide for development
-- **[Molecule Integration](./docs/stack-setup/MOLECULE_INTEGRATION.md)** - UI framework integration notes
+### Building Both Packages
 
-## 🛠️ Technology Stack
+To build both packages for production:
+
+```bash
+# Build electron-vscodelike-core-ui
+cd electron-vscodelike-core-ui
+npm install
+npm run build
+
+# Build gitable
+cd ../gitable
+pnpm install
+pnpm run build
+```
+
+## 📦 electron-vscodelike-core-ui
+
+A generic Electron + React foundation library providing:
+
+- **Services**: Logger, Storage, Theme management, Window state persistence
+- **Components**: Custom dropdown, tabs, settings tree view
+- **Hooks**: Theme management hook
+- **Resources**: VSCode themes, fonts
+- **i18n**: Internationalization setup
+- **TypeScript**: Full type definitions
+
+### Usage in Applications
+
+Applications like `gitable` reference the core-ui package locally using the `file:` protocol:
+
+```json
+{
+  "dependencies": {
+    "electron-vscodelike-core-ui": "file:../electron-vscodelike-core-ui"
+  }
+}
+```
+
+This allows local development without needing a pnpm workspace or symlinks.
+
+### Future Plans
+
+The `electron-vscodelike-core-ui` package will be moved to its own repository and published to npm, allowing multiple applications to use it as a dependency.
+
+## 🛠️ Gitable
+
+A modern Git GUI tool built with Electron, React, TypeScript, and inspired by VSCode.
+
+### Technology Stack
 
 - **Electron 28** - Desktop application framework
 - **React 18** - UI library
@@ -28,25 +110,13 @@ Comprehensive documentation is available in the `/docs` folder:
 - **Vite 5** - Fast build tool
 - **electron-vite** - Optimized Electron + Vite integration
 - **i18next** - Internationalization (English + French)
-- **ESLint** - Strict code quality enforcement
 - **pnpm** - Fast, efficient package manager
-
-## ✨ Features
-
-- ✅ Modern Electron + React setup
-- ✅ TypeScript with strict type checking
-- ✅ Hot Module Replacement (HMR) for fast development
-- ✅ Internationalization (i18n) with English and French
-- ✅ VSCode-inspired dark theme
-- ✅ Strict ESLint configuration with zero warnings policy
-- ✅ Dev container support for VS Code
-- ✅ Cross-platform (Linux, macOS, Windows)
-
-## 📝 Development
 
 ### Available Commands
 
 ```bash
+cd gitable
+
 pnpm dev          # Start development server with hot reload
 pnpm build        # Build for production
 pnpm lint         # Check code quality
@@ -56,72 +126,44 @@ pnpm package      # Package application (without installer)
 pnpm dist         # Build distributable packages (.deb, .rpm, etc.)
 ```
 
-### Code Quality Standards
+### Documentation
 
-- **Zero ESLint warnings** - All code must pass strict linting
-- **TypeScript strict mode** - Full type safety required
-- **Bilingual support** - All user-facing strings must have EN + FR translations
+Comprehensive documentation is available in the `gitable/docs` folder:
+
+- **[Stack Setup](./gitable/docs/stack-setup/README.md)** - Complete technical stack overview
+- **[Getting Started](./gitable/docs/stack-setup/GETTING_STARTED.md)** - Step-by-step development guide
+- **[Theming](./gitable/docs/theming/README.md)** - Theme system documentation
+- **[Window Management](./gitable/docs/window-management/README.md)** - Window state persistence
+
+## 🔧 Development Workflow
+
+### Hot Reload for Core-UI Changes
+
+The `dev.sh` script provides a seamless development experience:
+
+1. **Start development**: `./dev.sh` from the repository root
+2. **Modify core-ui files**: Edit any file in `electron-vscodelike-core-ui/src/`
+3. **Wait 2-3 seconds**: TypeScript recompiles and files are copied
+4. **Reload**: Press **Ctrl+R** (or **Cmd+R** on macOS) in the Electron window
+
+### Working on Gitable Only
+
+If you're only modifying Gitable code (not core-ui):
+
+```bash
+cd gitable
+pnpm dev
+```
+
+Changes to Gitable's renderer code will hot-reload automatically via Vite.
 
 ## 🌍 Internationalization
 
 The application supports English and French. When adding new user-facing text:
 
-1. Add English translation to `src/renderer/locales/en/translation.json`
-2. Add French translation to `src/renderer/locales/fr/translation.json`
+1. Add English translation to `gitable/src/renderer/locales/en/translation.json`
+2. Add French translation to `gitable/src/renderer/locales/fr/translation.json`
 3. Use with `const { t } = useTranslation()` and `t('your.key')`
-
-## 🐛 Known Issues
-
-- **GPU Process Errors**: Non-critical GPU errors may appear in console on Linux. The application falls back to software rendering automatically.
-- **Molecule UI**: The alpha version of Molecule is installed but not yet integrated. See [Molecule Integration](./docs/stack-setup/MOLECULE_INTEGRATION.md) for details.
-
-## 📦 Project Structure
-
-```
-gitable/
-├── src/                        # Application source code
-│   ├── main/                  # Electron main process
-│   ├── preload/               # Electron preload scripts
-│   └── renderer/              # React application
-├── dist/                       # Build output (main, renderer, preload)
-├── dist-electron/              # Distribution packages (.deb, .rpm, etc.)
-├── build/                      # Build scripts and resources
-├── docs/                       # Documentation
-│   └── stack-setup/           # Technical documentation
-├── .devcontainer/              # Dev container configuration
-├── .github/workflows/          # CI/CD workflows
-├── electron.vite.config.ts     # Electron + Vite configuration
-├── tsconfig.json              # TypeScript configuration (renderer)
-├── tsconfig.node.json         # TypeScript configuration (main/preload)
-├── package.json               # Dependencies and scripts
-├── setup.sh                   # Project setup script
-└── README.md                  # This file
-```
-
-## 🔧 System Requirements
-
-- **Node.js**: v18 or higher
-- **pnpm**: Latest version (installed by setup.sh)
-- **OS**: Linux, macOS, or Windows with WSL2
-- **RAM**: 4GB minimum, 8GB recommended
-- **Disk**: 500MB for dependencies
-
-## 📖 Learning Resources
-
-- [Electron Documentation](https://www.electronjs.org/docs)
-- [React Documentation](https://react.dev/)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-- [Vite Guide](https://vitejs.dev/guide/)
-- [i18next Documentation](https://www.i18next.com/)
-
-## 👥 Contributing
-
-This project follows strict coding standards:
-
-1. All code must be in English
-2. All commits must pass `pnpm lint` with zero warnings
-3. All user-facing strings must have EN + FR translations
-4. Follow the existing code style and patterns
 
 ## 📄 License
 
@@ -132,3 +174,4 @@ MIT
 - Inspired by [VSCode](https://code.visualstudio.com/)
 - Built with [Molecule UI Framework](https://github.com/DTStack/molecule)
 - Uses [electron-vite](https://github.com/alex8088/electron-vite) for optimal build setup
+

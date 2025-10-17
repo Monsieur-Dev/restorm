@@ -7,13 +7,8 @@ on:
 
 jobs:
   build:
-    name: Build on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-      fail-fast: false
+    name: Build and Test
+    runs-on: ubuntu-latest
     
     steps:
       - name: Checkout code
@@ -24,33 +19,29 @@ jobs:
         with:
           node-version: '18'
       
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 10
-      
-      - name: Get pnpm store directory
-        shell: bash
+      - name: Build electron-vscodelike-core-ui
         run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          cd electron-vscodelike-core-ui
+          npm install
+          npm run build
       
-      - name: Setup pnpm cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-      
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Install gitable dependencies
+        run: |
+          cd gitable
+          npm install
       
       - name: Run linter
-        run: pnpm run lint
+        run: |
+          cd gitable
+          npm run lint
       
       - name: Run type check
-        run: pnpm run typecheck
+        run: |
+          cd gitable
+          npm run typecheck
       
-      - name: Build application
-        run: pnpm run build
+      - name: Build gitable application
+        run: |
+          cd gitable
+          npm run build
 

@@ -1,0 +1,6 @@
+dist
+dist-main
+dist-renderer
+node_modules
+*.config.ts
+
