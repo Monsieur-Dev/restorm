@@ -1,5 +1,47 @@
 # Gitable Project Rules
 
+## Cost Optimization
+
+### Objective
+Minimize token costs (input and output) while remaining effective.
+
+### Instructions for the Assistant
+
+#### Responses
+- **Be concise and direct**: get to the point without sacrificing clarity
+- **Avoid unnecessary repetitions** and reformulations
+- **No multiple examples** unless explicitly requested
+- **Limit explanations**: code + brief comments are sufficient
+- **No excessive prose**: prefer bullet lists
+
+#### Tool Usage
+- **Read only necessary files** for the task
+- **Avoid speculative searches**: ask a question if in doubt
+- **No "just in case" reads**: wait until you need the information
+- **Use grep/codebase_search** rather than reading entire files when possible
+- **Group tool calls** in parallel when relevant
+
+#### Context
+- **Don't explore** code without reason: ask for clarification instead
+- **Don't read** automatically opened files unless relevant to the task
+- **Avoid long confirmations**: act directly if the intent is clear
+
+#### Format
+- Code without unnecessary prose before/after
+- No emojis (unless explicitly requested)
+- Minimal but precise technical explanations
+- Prefer actions over discussions
+
+#### Exceptions
+- If the task is **complex or ambiguous**: ask short questions to clarify
+- If the user requests **detailed explanations**: provide them
+- If you create **critical or complex** code: add necessary comments
+
+## Git Operations
+
+### Rule: Never Push to GitHub Without Authorization
+**NEVER** push code to GitHub (`git push`, `git push --force`, `git push --force-with-lease`, etc.) unless the user **explicitly requests** it. Always ask for permission before pushing.
+
 ## Linear Ticket Management
 
 ### Rule 1: Block-quote to Cursor Rule Conversion

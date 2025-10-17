@@ -1,0 +1,50 @@
+/* VSCode-like Monospace Font - Cascadia Code with system fallbacks */
+
+/* Regular weight */
+@font-face {
+  font-family: 'VSCodeMono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local('Consolas'),
+    local('Monaco'),
+    local('SF Mono'),
+    local('Cascadia Code'),
+    local('JetBrains Mono'),
+    local('Fira Code'),
+    url('./resources/fonts/CascadiaCode-Regular.ttf') format('truetype'),
+    local('Courier New'),
+    monospace;
+}
+
+/* Bold weight */
+@font-face {
+  font-family: 'VSCodeMono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local('Consolas Bold'),
+    local('Monaco Bold'),
+    local('SF Mono Bold'),
+    local('Cascadia Code Bold'),
+    local('JetBrains Mono Bold'),
+    local('Fira Code Bold'),
+    url('./resources/fonts/CascadiaCode-Regular.ttf') format('truetype'),
+    local('Courier New Bold'),
+    monospace;
+}
+
+/* Apply monospace font globally to body and code elements */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+code,
+pre,
+.monaco-editor,
+.vscode-editor {
+  font-family: 'VSCodeMono', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace !important;
+}
+
