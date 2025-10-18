@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useTheme, CustomDropdown, CustomTabs, logger, InputBox, MessageType, Toggle } from 'electron-vscodelike-core-ui/renderer'
+import { useTheme, CustomDropdown, CustomTabs, logger, InputBox, MessageType, Toggle, RadioGroup } from 'electron-vscodelike-core-ui/renderer'
 import type { Tab, IInputValidator } from 'electron-vscodelike-core-ui/renderer'
 
 interface Theme {
@@ -321,61 +321,55 @@ const ThemeTestPage: React.FC = () => {
       </div>
 
       <div>
-        <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>Radio Buttons</h3>
-        <div style={{ display: 'grid', gap: '12px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-            <input
-              type="radio"
-              name="radio-group"
-              value="option1"
-              checked={radioValue === 'option1'}
-              onChange={(e) => {
-                setRadioValue(e.target.value)
+        <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>VSCode Radio Components</h3>
+        <div style={{ display: 'grid', gap: '20px' }}>
+          <div>
+            <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Basic Radio Group</h4>
+            <RadioGroup
+              options={{
+                items: [
+                  { text: 'Option 1', isActive: radioValue === 'option1' },
+                  { text: 'Option 2', isActive: radioValue === 'option2' },
+                  { text: 'Option 3', isActive: radioValue === 'option3' }
+                ]
               }}
-              style={{
-                width: '16px',
-                height: '16px',
-                cursor: 'pointer'
+              onSelect={(index: number) => {
+                setRadioValue(`option${index + 1}`)
               }}
             />
-            <span style={{ fontSize: '13px' }}>Option 1</span>
-          </label>
+          </div>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-            <input
-              type="radio"
-              name="radio-group"
-              value="option2"
-              checked={radioValue === 'option2'}
-              onChange={(e) => {
-                setRadioValue(e.target.value)
+          <div>
+            <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Radio Group with Disabled Options</h4>
+            <RadioGroup
+              options={{
+                items: [
+                  { text: 'Enabled Option', isActive: true },
+                  { text: 'Disabled Option', disabled: true },
+                  { text: 'Another Option' }
+                ]
               }}
-              style={{
-                width: '16px',
-                height: '16px',
-                cursor: 'pointer'
+              onSelect={(_index: number) => {
+                // Handle selection for disabled options example
               }}
             />
-            <span style={{ fontSize: '13px' }}>Option 2</span>
-          </label>
+          </div>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-            <input
-              type="radio"
-              name="radio-group"
-              value="option3"
-              checked={radioValue === 'option3'}
-              onChange={(e) => {
-                setRadioValue(e.target.value)
+          <div>
+            <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Radio Group with Tooltips</h4>
+            <RadioGroup
+              options={{
+                items: [
+                  { text: 'Option A', tooltip: 'This is option A' },
+                  { text: 'Option B', tooltip: 'This is option B', isActive: true },
+                  { text: 'Option C', tooltip: 'This is option C' }
+                ]
               }}
-              style={{
-                width: '16px',
-                height: '16px',
-                cursor: 'pointer'
+              onSelect={(_index: number) => {
+                // Handle selection for tooltips example
               }}
             />
-            <span style={{ fontSize: '13px' }}>Option 3</span>
-          </label>
+          </div>
         </div>
       </div>
     </div>
