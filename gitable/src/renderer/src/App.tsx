@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ThemeTestPage from './pages/ThemeTestPage'
+import SettingsPage from './pages/SettingsPage'
 import { logger, MonacoWorkbench } from 'electron-vscodelike-core-ui/renderer'
 
 const App: React.FC = () => {
   const { t, i18n } = useTranslation()
-  const [currentPage, setCurrentPage] = useState<'home' | 'theme-test'>('theme-test')
+  const [currentPage, setCurrentPage] = useState<'home' | 'theme-test' | 'settings'>('theme-test')
 
   const toggleLanguage = (): void => {
     const newLang = i18n.language === 'en' ? 'fr' : 'en'
@@ -19,6 +20,15 @@ const App: React.FC = () => {
     return (
       <MonacoWorkbench fontAliasing="auto">
         <ThemeTestPage />
+      </MonacoWorkbench>
+    )
+  }
+
+  // Show settings page
+  if (currentPage === 'settings') {
+    return (
+      <MonacoWorkbench fontAliasing="auto">
+        <SettingsPage />
       </MonacoWorkbench>
     )
   }
@@ -73,6 +83,23 @@ const App: React.FC = () => {
           }}
         >
           Theme Test
+        </button>
+        <button
+          onClick={() => {
+            setCurrentPage('settings')
+          }}
+          style={{
+            padding: '10px 20px',
+            fontSize: '16px',
+            cursor: 'pointer',
+            fontFamily: "'Consolas', 'Monaco', 'Courier New', monospace",
+            backgroundColor: 'var(--vscode-button-secondaryBackground, #3a3d41)',
+            color: 'var(--vscode-button-secondaryForeground, #ffffff)',
+            border: 'none',
+            borderRadius: '2px'
+          }}
+        >
+          Settings
         </button>
       </div>
     </div>

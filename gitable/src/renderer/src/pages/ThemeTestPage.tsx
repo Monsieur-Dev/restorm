@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useTheme, CustomDropdown, CustomTabs, logger, InputBox, MessageType, Toggle, RadioGroup, ProgressBar } from 'electron-vscodelike-core-ui/renderer'
+import { useTheme, CustomDropdown, CustomTabs, logger, InputBox, MessageType, Toggle, RadioGroup, ProgressBar, ScrollableElement } from 'electron-vscodelike-core-ui/renderer'
 import type { Tab, IInputValidator } from 'electron-vscodelike-core-ui/renderer'
 
 interface Theme {
@@ -23,6 +23,16 @@ const ThemeTestPage: React.FC = () => {
   const [radioValue, setRadioValue] = useState('option1')
   const [selectValue, setSelectValue] = useState('option1')
   const [textareaValue, setTextareaValue] = useState('Multi-line\ntext area\nwith multiple lines')
+  const [scrollbarUpdateKey, setScrollbarUpdateKey] = useState(0)
+  
+  // Force scrollbar update when content changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setScrollbarUpdateKey(prev => prev + 1)
+    }, 200) // Small delay to ensure content is rendered
+    
+    return () => { clearTimeout(timer) }
+  }, []) // Only run once on mount
   
   // Validators
   const emailValidator: IInputValidator = (value: string) => {
@@ -68,7 +78,12 @@ const ThemeTestPage: React.FC = () => {
 
   // Tab content components
   const inputsContent = (
-    <div style={{ display: 'grid', gap: '20px', maxWidth: '600px' }}>
+    <ScrollableElement
+      key={`inputs-${scrollbarUpdateKey}`}
+      options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
+      style={{ height: '100%', width: '100%' }}
+    >
+      <div style={{ display: 'grid', gap: '20px', maxWidth: '600px', padding: '20px' }}>
       <h3 style={{ fontSize: '16px', marginBottom: '8px' }}>Basic Inputs</h3>
       
       <div>
@@ -263,15 +278,21 @@ const ThemeTestPage: React.FC = () => {
           onChange={setTextareaValue}
         />
       </div>
-    </div>
+      </div>
+    </ScrollableElement>
   )
 
   const checkboxesContent = (
-    <div style={{ display: 'grid', gap: '30px' }}>
-      <div>
-        <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>VSCode Toggle Components</h3>
-        <div style={{ display: 'grid', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+    <ScrollableElement
+      key={`checkboxes-${scrollbarUpdateKey}`}
+      options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
+      style={{ height: '100%', width: '100%' }}
+    >
+      <div style={{ display: 'grid', gap: '30px', padding: '20px' }}>
+        <div>
+          <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>VSCode Toggle Components</h3>
+          <div style={{ display: 'grid', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Toggle
               opts={{
                 title: 'Toggle (checked)',
@@ -284,9 +305,9 @@ const ThemeTestPage: React.FC = () => {
               onChange={(checked: boolean) => { setToggleChecked(checked) }}
             />
             <span style={{ fontSize: '13px' }}>Toggle (checked)</span>
-          </div>
+            </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Toggle
               opts={{
                 title: 'Toggle (unchecked)',
@@ -299,9 +320,9 @@ const ThemeTestPage: React.FC = () => {
               onChange={(checked: boolean) => { setToggleUnchecked(checked) }}
             />
             <span style={{ fontSize: '13px' }}>Toggle (unchecked)</span>
-          </div>
+            </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Toggle
               opts={{
                 title: 'Toggle (disabled)',
@@ -316,6 +337,7 @@ const ThemeTestPage: React.FC = () => {
             <span style={{ fontSize: '13px', color: 'var(--vscode-descriptionForeground)' }}>
               Toggle (disabled)
             </span>
+            </div>
           </div>
         </div>
       </div>
@@ -372,11 +394,16 @@ const ThemeTestPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+    </ScrollableElement>
   )
 
   const buttonsContent = (
-    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+    <ScrollableElement
+      key={`buttons-${scrollbarUpdateKey}`}
+      options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
+      style={{ height: '100%', width: '100%' }}
+    >
+      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', padding: '20px' }}>
       <button
         style={{
           padding: '8px 14px',
@@ -435,11 +462,17 @@ const ThemeTestPage: React.FC = () => {
       >
         Disabled Button
       </button>
-    </div>
+      </div>
+    </ScrollableElement>
   )
 
   const dropdownsContent = (
-    <div style={{ display: 'grid', gap: '15px' }}>
+    <ScrollableElement
+      key={`dropdowns-${scrollbarUpdateKey}`}
+      options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
+      style={{ height: '100%', width: '100%' }}
+    >
+      <div style={{ display: 'grid', gap: '15px', padding: '20px' }}>
       <div>
         <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>Custom Dropdown</h3>
         <CustomDropdown
@@ -483,11 +516,17 @@ const ThemeTestPage: React.FC = () => {
           <option value="option4">Option 4</option>
         </select>
       </div>
-    </div>
+      </div>
+    </ScrollableElement>
   )
 
   const panelsContent = (
-    <div style={{ display: 'grid', gap: '20px' }}>
+    <ScrollableElement
+      key={`panels-${scrollbarUpdateKey}`}
+      options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
+      style={{ height: '100%', width: '100%' }}
+    >
+      <div style={{ display: 'grid', gap: '20px', padding: '20px' }}>
       <div
         style={{
           padding: '16px',
@@ -546,11 +585,17 @@ const ThemeTestPage: React.FC = () => {
           </div>
         ))}
       </div>
-    </div>
+      </div>
+    </ScrollableElement>
   )
 
   const textContent = (
-    <div style={{ display: 'grid', gap: '10px' }}>
+    <ScrollableElement
+      key={`text-${scrollbarUpdateKey}`}
+      options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
+      style={{ height: '100%', width: '100%' }}
+    >
+      <div style={{ display: 'grid', gap: '10px', padding: '20px' }}>
       <div style={{ 
         padding: '12px', 
         backgroundColor: 'var(--vscode-sideBar-background)',
@@ -605,62 +650,190 @@ const ThemeTestPage: React.FC = () => {
         <p style={{ margin: '5px 0', fontSize: '13px' }}>The quick brown fox jumps over the lazy dog 0123456789</p>
         <p style={{ margin: '5px 0', fontSize: '11px' }}>The quick brown fox jumps over the lazy dog</p>
       </div>
-    </div>
+      </div>
+    </ScrollableElement>
+  )
+
+  // ScrollableElement examples content
+  const scrollbarsContent = (
+    <ScrollableElement
+      key={`scrollbars-${scrollbarUpdateKey}`}
+      options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
+      style={{ height: '100%', width: '100%' }}
+    >
+      <div style={{ display: 'grid', gap: '20px', maxWidth: '800px', padding: '20px' }}>
+      <h3 style={{ fontSize: '16px', marginBottom: '8px' }}>VSCode ScrollableElement Components</h3>
+      
+      <div>
+        <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Scrollable Content (Vertical)</h4>
+        <ScrollableElement
+          options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
+          style={{ height: '200px', width: '400px', border: '1px solid var(--vscode-panel-border)' }}
+        >
+          <div style={{ height: '600px', padding: '20px', backgroundColor: 'var(--vscode-editor-background)' }}>
+            <h5 style={{ margin: '0 0 10px 0' }}>Long Content</h5>
+            <p>This is a long content area that demonstrates vertical scrolling.</p>
+            <p>You can scroll up and down to see more content.</p>
+            <p>The scrollbar will appear automatically when needed.</p>
+            <p>It will hide after a few seconds of inactivity.</p>
+            <p>Hover over the content to show the scrollbar again.</p>
+            <p>This content is much taller than the container.</p>
+            <p>Scroll to see all the content below.</p>
+            <p>More content here...</p>
+            <p>Even more content...</p>
+            <p>Keep scrolling...</p>
+            <p>Almost at the end...</p>
+            <p>Final content at the bottom!</p>
+          </div>
+        </ScrollableElement>
+        <p style={{ fontSize: '12px', color: 'var(--vscode-descriptionForeground)', marginTop: '8px' }}>
+          Vertical scrolling with auto-hide scrollbar and shadows
+        </p>
+      </div>
+
+      <div>
+        <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Scrollable Content (Both Axes)</h4>
+        <ScrollableElement
+          options={{
+            vertical: 'auto',
+            horizontal: 'auto',
+            verticalHasArrows: true,
+            horizontalHasArrows: true,
+            useShadows: true
+          }}
+          style={{ height: '200px', width: '400px', border: '1px solid var(--vscode-panel-border)' }}
+        >
+          <div style={{ width: '800px', height: '600px', padding: '20px', backgroundColor: 'var(--vscode-editor-background)' }}>
+            <h5 style={{ margin: '0 0 10px 0' }}>Wide and Tall Content</h5>
+            <p>This content is both wider and taller than the container.</p>
+            <p>You can scroll both horizontally and vertically.</p>
+            <p>The scrollbars have arrow buttons for precise navigation.</p>
+            <p>Hover to see the scrollbars appear.</p>
+            <p>This demonstrates both horizontal and vertical scrolling.</p>
+            <p>Content continues to the right...</p>
+            <p>And also continues downward...</p>
+            <p>You can scroll in all directions.</p>
+            <p>More content in all directions...</p>
+            <p>Keep scrolling to explore...</p>
+            <p>This is a comprehensive scrolling example.</p>
+          </div>
+        </ScrollableElement>
+        <p style={{ fontSize: '12px', color: 'var(--vscode-descriptionForeground)', marginTop: '8px' }}>
+          Both horizontal and vertical scrolling with arrows
+        </p>
+      </div>
+
+      <div>
+        <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Always Visible Scrollbars</h4>
+        <ScrollableElement
+          options={{ vertical: 'visible', horizontal: 'visible' }}
+          style={{ height: '200px', width: '400px', border: '1px solid var(--vscode-panel-border)' }}
+        >
+          <div style={{ height: '400px', padding: '20px', backgroundColor: 'var(--vscode-editor-background)' }}>
+            <h5 style={{ margin: '0 0 10px 0' }}>Always Visible</h5>
+            <p>These scrollbars are always visible.</p>
+            <p>They don&apos;t hide automatically.</p>
+            <p>Perfect for cases where you want constant visibility.</p>
+            <p>No need to hover to see the scrollbars.</p>
+            <p>They remain visible at all times.</p>
+            <p>This is useful for accessibility.</p>
+            <p>Or when you want to show scroll state.</p>
+            <p>Content continues below...</p>
+            <p>More content to scroll through...</p>
+            <p>Scrollbars stay visible!</p>
+          </div>
+        </ScrollableElement>
+        <p style={{ fontSize: '12px', color: 'var(--vscode-descriptionForeground)', marginTop: '8px' }}>
+          Scrollbars are always visible regardless of mouse interaction
+        </p>
+      </div>
+
+      <div>
+        <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Hidden Scrollbars</h4>
+        <ScrollableElement
+          options={{ vertical: 'hidden', horizontal: 'hidden' }}
+          style={{ height: '200px', width: '400px', border: '1px solid var(--vscode-panel-border)' }}
+        >
+          <div style={{ height: '400px', padding: '20px', backgroundColor: 'var(--vscode-editor-background)' }}>
+            <h5 style={{ margin: '0 0 10px 0' }}>No Scrollbars</h5>
+            <p>This content has scrollbars completely hidden.</p>
+            <p>You can still scroll with mouse wheel or touch.</p>
+            <p>But no visual scrollbar indicators.</p>
+            <p>Useful for clean interfaces.</p>
+            <p>Or when you want minimal visual clutter.</p>
+            <p>Content continues below...</p>
+            <p>More content to scroll through...</p>
+            <p>No scrollbars visible!</p>
+          </div>
+        </ScrollableElement>
+        <p style={{ fontSize: '12px', color: 'var(--vscode-descriptionForeground)', marginTop: '8px' }}>
+          Scrollbars are completely hidden but scrolling still works
+        </p>
+      </div>
+      </div>
+    </ScrollableElement>
   )
 
   // ProgressBar examples content
   const progressBarContent = (
-    <div style={{ display: 'grid', gap: '20px', maxWidth: '600px' }}>
-      <h3 style={{ fontSize: '16px', marginBottom: '8px' }}>VSCode ProgressBar Components</h3>
-      
-      <div>
-        <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Infinite Progress Bar</h4>
-        <ProgressBar mode="infinite" />
-        <p style={{ fontSize: '12px', color: 'var(--vscode-descriptionForeground)', marginTop: '8px' }}>
-          Continuous progress indicator with animation
-        </p>
-      </div>
+    <ScrollableElement
+      key={`progress-${scrollbarUpdateKey}`}
+      options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
+      style={{ height: '100%', width: '100%' }}
+    >
+      <div style={{ display: 'grid', gap: '20px', maxWidth: '600px', padding: '20px' }}>
+        <h3 style={{ fontSize: '16px', marginBottom: '8px' }}>VSCode ProgressBar Components</h3>
+        
+        <div>
+          <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Infinite Progress Bar</h4>
+          <ProgressBar mode="infinite" />
+          <p style={{ fontSize: '12px', color: 'var(--vscode-descriptionForeground)', marginTop: '8px' }}>
+            Continuous progress indicator with animation
+          </p>
+        </div>
 
-      <div>
-        <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Discrete Progress Bar (50%)</h4>
-        <ProgressBar mode="discrete" value={50} total={100} />
-        <p style={{ fontSize: '12px', color: 'var(--vscode-descriptionForeground)', marginTop: '8px' }}>
-          Progress bar showing 50% completion
-        </p>
-      </div>
+        <div>
+          <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Discrete Progress Bar (50%)</h4>
+          <ProgressBar mode="discrete" value={50} total={100} />
+          <p style={{ fontSize: '12px', color: 'var(--vscode-descriptionForeground)', marginTop: '8px' }}>
+            Progress bar showing 50% completion
+          </p>
+        </div>
 
-      <div>
-        <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Discrete Progress Bar (75%)</h4>
-        <ProgressBar mode="discrete" value={75} total={100} />
-        <p style={{ fontSize: '12px', color: 'var(--vscode-descriptionForeground)', marginTop: '8px' }}>
-          Progress bar showing 75% completion
-        </p>
-      </div>
+        <div>
+          <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Discrete Progress Bar (75%)</h4>
+          <ProgressBar mode="discrete" value={75} total={100} />
+          <p style={{ fontSize: '12px', color: 'var(--vscode-descriptionForeground)', marginTop: '8px' }}>
+            Progress bar showing 75% completion
+          </p>
+        </div>
 
-      <div>
-        <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Custom Color Progress Bar</h4>
-        <ProgressBar 
-          mode="discrete" 
-          value={30} 
-          total={100}
-          options={{ progressBarBackground: '#ff6b6b' }}
-        />
-        <p style={{ fontSize: '12px', color: 'var(--vscode-descriptionForeground)', marginTop: '8px' }}>
-          Progress bar with custom red color
-        </p>
-      </div>
+        <div>
+          <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Custom Color Progress Bar</h4>
+          <ProgressBar 
+            mode="discrete" 
+            value={30} 
+            total={100}
+            options={{ progressBarBackground: '#ff6b6b' }}
+          />
+          <p style={{ fontSize: '12px', color: 'var(--vscode-descriptionForeground)', marginTop: '8px' }}>
+            Progress bar with custom red color
+          </p>
+        </div>
 
-      <div>
-        <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Completed Progress Bar</h4>
-        <ProgressBar mode="done" />
-        <p style={{ fontSize: '12px', color: 'var(--vscode-descriptionForeground)', marginTop: '8px' }}>
-          Progress bar in completed state
-        </p>
+        <div>
+          <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Completed Progress Bar</h4>
+          <ProgressBar mode="done" />
+          <p style={{ fontSize: '12px', color: 'var(--vscode-descriptionForeground)', marginTop: '8px' }}>
+            Progress bar in completed state
+          </p>
+        </div>
       </div>
-    </div>
+    </ScrollableElement>
   )
 
   const tabs: Tab[] = [
+    { id: 'scrollbars', label: 'Scrollbars', content: scrollbarsContent },
     { id: 'divers', label: 'Divers', content: progressBarContent },
     { id: 'checkboxes', label: 'Checkboxes & Radio', content: checkboxesContent },
     { id: 'inputs', label: 'Text Inputs', content: inputsContent },
@@ -671,68 +844,74 @@ const ThemeTestPage: React.FC = () => {
   ]
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '100vh',
-        height: '100vh',
-        backgroundColor: 'var(--vscode-editor-background)',
-        color: 'var(--vscode-editor-foreground)'
-      }}
+    <ScrollableElement
+      key={`main-${scrollbarUpdateKey}`}
+      options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
+      style={{ height: '100vh', width: '100vw' }}
     >
-      {/* Header with theme selector */}
       <div
         style={{
-          padding: '20px',
-          borderBottom: '1px solid var(--vscode-panel-border)',
-          backgroundColor: 'var(--vscode-sideBar-background)'
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+          height: '100vh',
+          backgroundColor: 'var(--vscode-editor-background)',
+          color: 'var(--vscode-editor-foreground)'
         }}
       >
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <h1 style={{ margin: '0 0 10px 0', fontSize: '24px' }}>
-            {t('themeTest.title')}
-          </h1>
-          <p
-            style={{
-              margin: '0 0 15px 0',
-              color: 'var(--vscode-descriptionForeground)',
-              fontSize: '14px'
-            }}
-          >
-            {t('themeTest.description')}
-          </p>
-          
-          {/* Theme Selector */}
-          <div style={{ maxWidth: '400px' }}>
-            <label
-              htmlFor="theme-selector"
+        {/* Header with theme selector */}
+        <div
+          style={{
+            padding: '20px',
+            borderBottom: '1px solid var(--vscode-panel-border)',
+            backgroundColor: 'var(--vscode-sideBar-background)'
+          }}
+        >
+          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <h1 style={{ margin: '0 0 10px 0', fontSize: '24px' }}>
+              {t('themeTest.title')}
+            </h1>
+            <p
               style={{
-                display: 'block',
-                marginBottom: '8px',
-                fontWeight: 'bold',
-                fontSize: '13px'
+                margin: '0 0 15px 0',
+                color: 'var(--vscode-descriptionForeground)',
+                fontSize: '14px'
               }}
             >
-              {t('themeTest.selectTheme')}
-            </label>
-            <CustomDropdown
-              id="theme-selector"
-              value={currentThemeId ?? ''}
-              options={themeOptions}
-              onChange={handleThemeChange}
-              disabled={isLoading}
-              placeholder={t('themeTest.selectTheme')}
-            />
+              {t('themeTest.description')}
+            </p>
+            
+            {/* Theme Selector */}
+            <div style={{ maxWidth: '400px' }}>
+              <label
+                htmlFor="theme-selector"
+                style={{
+                  display: 'block',
+                  marginBottom: '8px',
+                  fontWeight: 'bold',
+                  fontSize: '13px'
+                }}
+              >
+                {t('themeTest.selectTheme')}
+              </label>
+              <CustomDropdown
+                id="theme-selector"
+                value={currentThemeId ?? ''}
+                options={themeOptions}
+                onChange={handleThemeChange}
+                disabled={isLoading}
+                placeholder={t('themeTest.selectTheme')}
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Tabs */}
-      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <CustomTabs tabs={tabs} />
+        {/* Tabs */}
+        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <CustomTabs tabs={tabs} />
+        </div>
       </div>
-    </div>
+    </ScrollableElement>
   )
 }
 

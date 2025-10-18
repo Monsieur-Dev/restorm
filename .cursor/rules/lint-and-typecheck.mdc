@@ -1,0 +1,66 @@
+---
+description: "Obligatoire après toute production de code : Vérifier le linter et les checks de types"
+---
+
+# Règle Obligatoire : Vérification Linter et TypeCheck
+
+## 🚨 RÈGLE CRITIQUE
+
+**APRÈS TOUTE PRODUCTION DE CODE, VOUS DEVEZ OBLIGATOIREMENT :**
+
+1. **Vérifier le linter** : `npm run lint`
+2. **Vérifier les types** : `npm run typecheck`
+3. **Corriger toutes les erreurs** avant de commiter
+
+## 📋 Checklist Obligatoire
+
+### ✅ Linter (ESLint)
+```bash
+cd gitable
+npm run lint
+```
+- **0 erreurs, 0 warnings** requis
+- Corriger toutes les erreurs ESLint
+- Utiliser `--fix` si possible : `npm run lint:fix`
+
+### ✅ TypeCheck (TypeScript)
+```bash
+cd gitable
+npm run typecheck
+```
+- **0 erreurs TypeScript** requis
+- Corriger tous les problèmes de types
+- Vérifier les interfaces et exports
+
+## 🔧 Erreurs Communes à Corriger
+
+### Linter
+- `@typescript-eslint/no-unused-vars` : Variables non utilisées
+- `@typescript-eslint/no-explicit-any` : Éviter le type `any`
+- `@typescript-eslint/prefer-nullish-coalescing` : Utiliser `??` au lieu de `||`
+- `@typescript-eslint/no-confusing-void-expression` : Ajouter des accolades aux fonctions
+- `@typescript-eslint/no-unsafe-assignment` : Assignations non sécurisées
+
+### TypeCheck
+- Exports manquants dans les modules
+- Interfaces incomplètes
+- Types de retour manquants
+- Propriétés obligatoires manquantes
+
+## ⚠️ INTERDICTION ABSOLUE
+
+**NE JAMAIS COMMITER DU CODE AVEC :**
+- ❌ Erreurs de linter
+- ❌ Erreurs de type
+- ❌ Warnings non résolus
+
+## 🎯 Processus Obligatoire
+
+1. **Développer le code**
+2. **Vérifier le linter** : `npm run lint`
+3. **Vérifier les types** : `npm run typecheck`
+4. **Corriger toutes les erreurs**
+5. **Re-vérifier** : `npm run lint && npm run typecheck`
+6. **Seulement alors** : Commiter
+
+Cette règle est **OBLIGATOIRE** et doit être appliquée à **TOUTE** production de code.
