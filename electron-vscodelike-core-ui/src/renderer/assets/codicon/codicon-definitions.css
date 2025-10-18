@@ -1,0 +1,26 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/* Codicon definitions for Toggle component */
+
+.codicon-check::before {
+	content: "\eab2";
+}
+
+.codicon-star::before {
+	content: "\eab3";
+}
+
+.codicon-heart::before {
+	content: "\eab4";
+}
+
+.codicon-plus::before {
+	content: "\eab5";
+}
+
+.codicon-minus::before {
+	content: "\eab6";
+}
