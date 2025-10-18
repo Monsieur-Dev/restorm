@@ -349,8 +349,8 @@ const ThemeTestPage: React.FC = () => {
                   { text: 'Another Option' }
                 ]
               }}
-              onSelect={(index: number) => {
-                console.log('Selected option:', index)
+              onSelect={(_index: number) => {
+                // Handle selection for disabled options example
               }}
             />
           </div>
@@ -365,8 +365,8 @@ const ThemeTestPage: React.FC = () => {
                   { text: 'Option C', tooltip: 'This is option C' }
                 ]
               }}
-              onSelect={(index: number) => {
-                console.log('Selected option with tooltip:', index)
+              onSelect={(_index: number) => {
+                // Handle selection for tooltips example
               }}
             />
           </div>
