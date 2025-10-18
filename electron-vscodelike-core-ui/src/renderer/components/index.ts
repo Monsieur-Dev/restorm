@@ -15,6 +15,10 @@ export type { IToggleOpts, IToggleStyles, ICheckboxStyles, ToggleProps } from '.
 export { RadioGroup, defaultRadioStyles } from './Radio'
 export type { IRadioStyles, IRadioOptionItem, IRadioOptions, RadioGroupProps } from './Radio'
 
+// ProgressBar exports
+export { ProgressBar, defaultProgressBarStyles } from './ProgressBar'
+export type { IProgressBarStyles, IProgressBarOptions, ProgressBarProps } from './ProgressBar'
+
 // Other exports
 export { CustomDropdown, CustomTabs, SettingsTreeView, MonacoWorkbench }
 export type { Tab } from './CustomTabs'
