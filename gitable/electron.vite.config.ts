@@ -39,8 +39,7 @@ export default defineConfig({
       alias: {
         '@renderer': resolve(__dirname, 'src/renderer/src'),
         // Pointer vers les sources de core-ui pour le HMR
-        'electron-vscodelike-core-ui/renderer': resolve(__dirname, '../electron-vscodelike-core-ui/src/renderer/index.ts'),
-        'electron-vscodelike-core-ui/fonts.css': resolve(__dirname, '../electron-vscodelike-core-ui/fonts.css')
+        'electron-vscodelike-core-ui/renderer': resolve(__dirname, '../electron-vscodelike-core-ui/src/renderer/index.ts')
       }
     },
     plugins: [react()],

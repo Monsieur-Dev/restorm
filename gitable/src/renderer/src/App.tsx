@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ThemeTestPage from './pages/ThemeTestPage'
-import { logger } from 'electron-vscodelike-core-ui/renderer'
+import { logger, MonacoWorkbench } from 'electron-vscodelike-core-ui/renderer'
 
 const App: React.FC = () => {
   const { t, i18n } = useTranslation()
@@ -16,11 +16,16 @@ const App: React.FC = () => {
 
   // Show theme test page
   if (currentPage === 'theme-test') {
-    return <ThemeTestPage />
+    return (
+      <MonacoWorkbench fontAliasing="auto">
+        <ThemeTestPage />
+      </MonacoWorkbench>
+    )
   }
 
   // Home page
   return (
+    <MonacoWorkbench fontAliasing="auto">
     <div
       style={{
         display: 'flex',
@@ -71,6 +76,7 @@ const App: React.FC = () => {
         </button>
       </div>
     </div>
+    </MonacoWorkbench>
   )
 }
 

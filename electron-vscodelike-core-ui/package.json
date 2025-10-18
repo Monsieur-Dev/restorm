@@ -36,7 +36,7 @@
     "build": "npm run build:main && npm run build:renderer && npm run merge-dist",
     "build:main": "tsc --project tsconfig.main.json",
     "build:renderer": "tsc --project tsconfig.renderer.json",
-    "merge-dist": "rm -rf dist && mkdir -p dist/src && cp -r dist-main/src/main dist/src/ && cp -r dist-main/src/preload dist/src/ && cp -r dist-renderer/src/renderer dist/src/ && cp -r dist-main/src/types dist/src/ 2>/dev/null || cp -r dist-renderer/src/types dist/src/ 2>/dev/null || true",
+    "merge-dist": "rm -rf dist && mkdir -p dist/src && cp -r dist-main/src/main dist/src/ && cp -r dist-main/src/preload dist/src/ && cp -r dist-renderer/src/renderer dist/src/ && cp -r dist-main/src/types dist/src/ 2>/dev/null || cp -r dist-renderer/src/types dist/src/ 2>/dev/null || true && cp -r src/renderer/assets dist/src/renderer/ 2>/dev/null || true",
     "dev": "tsc --project tsconfig.main.json --watch & tsc --project tsconfig.renderer.json --watch",
     "lint": "eslint . --ext .ts,.tsx --max-warnings 0",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
