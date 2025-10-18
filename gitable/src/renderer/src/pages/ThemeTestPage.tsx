@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useTheme, CustomDropdown, CustomTabs, logger, InputBox, MessageType } from 'electron-vscodelike-core-ui/renderer'
+import { useTheme, CustomDropdown, CustomTabs, logger, InputBox, MessageType, Toggle } from 'electron-vscodelike-core-ui/renderer'
 import type { Tab, IInputValidator } from 'electron-vscodelike-core-ui/renderer'
 
 interface Theme {
@@ -17,7 +17,9 @@ const ThemeTestPage: React.FC = () => {
   const [emailInput, setEmailInput] = useState('')
   const [passwordInput, setPasswordInput] = useState('')
   const [usernameInput, setUsernameInput] = useState('')
-  const [checkboxChecked, setCheckboxChecked] = useState(true)
+  const [toggleChecked, setToggleChecked] = useState(true)
+  const [toggleUnchecked, setToggleUnchecked] = useState(false)
+  const [toggleDisabled] = useState(false)
   const [radioValue, setRadioValue] = useState('option1')
   const [selectValue, setSelectValue] = useState('option1')
   const [textareaValue, setTextareaValue] = useState('Multi-line\ntext area\nwith multiple lines')
@@ -267,55 +269,54 @@ const ThemeTestPage: React.FC = () => {
   const checkboxesContent = (
     <div style={{ display: 'grid', gap: '30px' }}>
       <div>
-        <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>Checkboxes</h3>
+        <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>VSCode Toggle Components</h3>
         <div style={{ display: 'grid', gap: '12px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={checkboxChecked}
-              onChange={(e) => {
-                setCheckboxChecked(e.target.checked)
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Toggle
+              opts={{
+                title: 'Toggle (checked)',
+                isChecked: toggleChecked,
+                icon: 'check',
+                inputActiveOptionBorder: 'var(--vscode-inputOption-activeBorder)',
+                inputActiveOptionForeground: 'var(--vscode-inputOption-activeForeground)',
+                inputActiveOptionBackground: 'var(--vscode-inputOption-activeBackground)'
               }}
-              style={{
-                width: '16px',
-                height: '16px',
-                cursor: 'pointer'
-              }}
+              onChange={(checked: boolean) => { setToggleChecked(checked) }}
             />
-            <span style={{ fontSize: '13px' }}>Checkbox (checked)</span>
-          </label>
+            <span style={{ fontSize: '13px' }}>Toggle (checked)</span>
+          </div>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={false}
-              readOnly
-              style={{
-                width: '16px',
-                height: '16px',
-                cursor: 'pointer'
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Toggle
+              opts={{
+                title: 'Toggle (unchecked)',
+                isChecked: toggleUnchecked,
+                icon: 'check',
+                inputActiveOptionBorder: 'var(--vscode-inputOption-activeBorder)',
+                inputActiveOptionForeground: 'var(--vscode-inputOption-activeForeground)',
+                inputActiveOptionBackground: 'var(--vscode-inputOption-activeBackground)'
               }}
+              onChange={(checked: boolean) => { setToggleUnchecked(checked) }}
             />
-            <span style={{ fontSize: '13px' }}>Checkbox (unchecked)</span>
-          </label>
+            <span style={{ fontSize: '13px' }}>Toggle (unchecked)</span>
+          </div>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={true}
-              disabled
-              readOnly
-              style={{
-                width: '16px',
-                height: '16px',
-                cursor: 'not-allowed',
-                opacity: 0.6
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Toggle
+              opts={{
+                title: 'Toggle (disabled)',
+                isChecked: toggleDisabled,
+                icon: 'check',
+                inputActiveOptionBorder: 'var(--vscode-inputOption-activeBorder)',
+                inputActiveOptionForeground: 'var(--vscode-inputOption-activeForeground)',
+                inputActiveOptionBackground: 'var(--vscode-inputOption-activeBackground)'
               }}
+              disabled={true}
             />
             <span style={{ fontSize: '13px', color: 'var(--vscode-descriptionForeground)' }}>
-              Checkbox (disabled)
+              Toggle (disabled)
             </span>
-          </label>
+          </div>
         </div>
       </div>
 
@@ -614,8 +615,8 @@ const ThemeTestPage: React.FC = () => {
   )
 
   const tabs: Tab[] = [
-    { id: 'inputs', label: 'Text Inputs', content: inputsContent },
     { id: 'checkboxes', label: 'Checkboxes & Radio', content: checkboxesContent },
+    { id: 'inputs', label: 'Text Inputs', content: inputsContent },
     { id: 'buttons', label: 'Buttons', content: buttonsContent },
     { id: 'dropdowns', label: 'Dropdowns', content: dropdownsContent },
     { id: 'panels', label: 'Panels & Lists', content: panelsContent },
