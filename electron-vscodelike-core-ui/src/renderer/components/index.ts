@@ -11,6 +11,10 @@ export type { IInputOptions, IInputBoxStyles, IMessage, IInputValidator, IInputV
 export { Toggle, defaultToggleStyles } from './Toggle'
 export type { IToggleOpts, IToggleStyles, ICheckboxStyles, ToggleProps } from './Toggle'
 
+// Radio exports
+export { RadioGroup, defaultRadioStyles } from './Radio'
+export type { IRadioStyles, IRadioOptionItem, IRadioOptions, RadioGroupProps } from './Radio'
+
 // Other exports
 export { CustomDropdown, CustomTabs, SettingsTreeView, MonacoWorkbench }
 export type { Tab } from './CustomTabs'
