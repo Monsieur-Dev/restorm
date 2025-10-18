@@ -4,7 +4,6 @@ import App from './App'
 import i18n from 'i18next'
 import type { i18n as I18nType } from 'i18next'
 import { initReactI18next } from 'react-i18next'
-import 'electron-vscodelike-core-ui/fonts.css'
 import { logger } from 'electron-vscodelike-core-ui/renderer'
 
 // Import translations

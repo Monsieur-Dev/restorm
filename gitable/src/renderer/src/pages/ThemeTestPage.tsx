@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useTheme, CustomDropdown, CustomTabs, logger } from 'electron-vscodelike-core-ui/renderer'
-import type { Tab } from 'electron-vscodelike-core-ui/renderer'
+import { useTheme, CustomDropdown, CustomTabs, logger, InputBox, MessageType } from 'electron-vscodelike-core-ui/renderer'
+import type { Tab, IInputValidator } from 'electron-vscodelike-core-ui/renderer'
 
 interface Theme {
   id: string;
@@ -13,11 +13,45 @@ const ThemeTestPage: React.FC = () => {
   const { t } = useTranslation()
   const { themes, currentThemeId, setTheme, isLoading } = useTheme()
   const [textInput, setTextInput] = useState('Sample text')
-  const [numberInput, setNumberInput] = useState(42)
+  const [numberInput, setNumberInput] = useState('42')
+  const [emailInput, setEmailInput] = useState('')
+  const [passwordInput, setPasswordInput] = useState('')
+  const [usernameInput, setUsernameInput] = useState('')
   const [checkboxChecked, setCheckboxChecked] = useState(true)
   const [radioValue, setRadioValue] = useState('option1')
   const [selectValue, setSelectValue] = useState('option1')
   const [textareaValue, setTextareaValue] = useState('Multi-line\ntext area\nwith multiple lines')
+  
+  // Validators
+  const emailValidator: IInputValidator = (value: string) => {
+    if (!value) {
+      return { content: 'Email is required', type: MessageType.ERROR }
+    }
+    if (!value.includes('@')) {
+      return { content: 'Invalid email format', type: MessageType.ERROR }
+    }
+    return null
+  }
+
+  const passwordValidator: IInputValidator = (value: string) => {
+    if (value.length > 0 && value.length < 8) {
+      return {
+        content: 'Password should be at least 8 characters',
+        type: MessageType.WARNING
+      }
+    }
+    return null
+  }
+
+  const usernameValidator: IInputValidator = (value: string) => {
+    if (value.length > 0) {
+      return {
+        content: 'Username will be used for login',
+        type: MessageType.INFO
+      }
+    }
+    return null
+  }
 
   const handleThemeChange = (value: string): void => {
     void setTheme(value).catch((err: unknown) => {
@@ -32,7 +66,9 @@ const ThemeTestPage: React.FC = () => {
 
   // Tab content components
   const inputsContent = (
-    <div style={{ display: 'grid', gap: '15px' }}>
+    <div style={{ display: 'grid', gap: '20px', maxWidth: '600px' }}>
+      <h3 style={{ fontSize: '16px', marginBottom: '8px' }}>Basic Inputs</h3>
+      
       <div>
         <label
           htmlFor="text-input"
@@ -44,25 +80,18 @@ const ThemeTestPage: React.FC = () => {
         >
           Text Input
         </label>
-        <input
-          id="text-input"
-          type="text"
-          value={textInput}
-          onChange={(e) => {
-            setTextInput(e.target.value)
-          }}
-          style={{
-            width: '100%',
-            maxWidth: '400px',
-            padding: '6px 8px',
-            backgroundColor: 'var(--vscode-input-background)',
-            color: 'var(--vscode-input-foreground)',
-            border: '1px solid var(--vscode-input-border)',
-            borderRadius: '2px',
-            fontSize: '13px',
-            fontFamily: 'inherit'
-          }}
-        />
+        <div style={{ maxWidth: '400px' }}>
+          <InputBox
+            id="text-input"
+            options={{
+              placeholder: 'Enter text...',
+              ariaLabel: 'Text input',
+              tooltip: 'Basic text input'
+            }}
+            value={textInput}
+            onChange={setTextInput}
+          />
+        </div>
       </div>
 
       <div>
@@ -76,25 +105,19 @@ const ThemeTestPage: React.FC = () => {
         >
           Number Input
         </label>
-        <input
-          id="number-input"
-          type="number"
-          value={numberInput}
-          onChange={(e) => {
-            setNumberInput(parseInt(e.target.value) || 0)
-          }}
-          style={{
-            width: '100%',
-            maxWidth: '400px',
-            padding: '6px 8px',
-            backgroundColor: 'var(--vscode-input-background)',
-            color: 'var(--vscode-input-foreground)',
-            border: '1px solid var(--vscode-input-border)',
-            borderRadius: '2px',
-            fontSize: '13px',
-            fontFamily: 'inherit'
-          }}
-        />
+        <div style={{ maxWidth: '400px' }}>
+          <InputBox
+            id="number-input"
+            options={{
+              type: 'number',
+              placeholder: 'Enter a number',
+              ariaLabel: 'Number input',
+              tooltip: 'Input for numeric values'
+            }}
+            value={numberInput}
+            onChange={setNumberInput}
+          />
+        </div>
       </div>
 
       <div>
@@ -109,48 +132,135 @@ const ThemeTestPage: React.FC = () => {
         >
           Disabled Input
         </label>
-        <input
-          id="disabled-input"
-          type="text"
-          value="This input is disabled"
-          disabled
-          style={{
-            width: '100%',
-            maxWidth: '400px',
-            padding: '6px 8px',
-            backgroundColor: 'var(--vscode-input-background)',
-            color: 'var(--vscode-input-foreground)',
-            border: '1px solid var(--vscode-input-border)',
-            borderRadius: '2px',
-            fontSize: '13px',
-            fontFamily: 'inherit',
-            opacity: 0.6
-          }}
-        />
+        <div style={{ maxWidth: '400px' }}>
+          <InputBox
+            id="disabled-input"
+            options={{
+              placeholder: 'Cannot edit',
+              ariaLabel: 'Disabled input'
+            }}
+            value="This input is disabled"
+            disabled={true}
+          />
+        </div>
       </div>
 
-      <h3 style={{ fontSize: '16px', marginTop: '20px', marginBottom: '12px' }}>
-        TextArea
+      <h3 style={{ fontSize: '16px', marginTop: '20px', marginBottom: '8px' }}>
+        Inputs with Validation
       </h3>
-      <textarea
-        value={textareaValue}
-        onChange={(e) => {
-          setTextareaValue(e.target.value)
-        }}
-        rows={6}
-        style={{
-          width: '100%',
-          maxWidth: '600px',
-          padding: '8px',
-          backgroundColor: 'var(--vscode-input-background)',
-          color: 'var(--vscode-input-foreground)',
-          border: '1px solid var(--vscode-input-border)',
-          borderRadius: '2px',
-          fontSize: '13px',
-          fontFamily: 'inherit',
-          resize: 'vertical'
-        }}
-      />
+
+      <div>
+        <label
+          htmlFor="email-input"
+          style={{
+            display: 'block',
+            marginBottom: '6px',
+            fontSize: '13px'
+          }}
+        >
+          Email Input (Error Validation)
+        </label>
+        <div style={{ maxWidth: '400px' }}>
+          <InputBox
+            id="email-input"
+            options={{
+              placeholder: 'email@example.com',
+              ariaLabel: 'Email address',
+              tooltip: 'Enter a valid email address',
+              validationOptions: {
+                validation: emailValidator
+              }
+            }}
+            value={emailInput}
+            onChange={setEmailInput}
+          />
+        </div>
+      </div>
+
+      <div>
+        <label
+          htmlFor="password-input"
+          style={{
+            display: 'block',
+            marginBottom: '6px',
+            fontSize: '13px'
+          }}
+        >
+          Password Input (Warning Validation)
+        </label>
+        <div style={{ maxWidth: '400px' }}>
+          <InputBox
+            id="password-input"
+            options={{
+              type: 'password',
+              placeholder: 'Enter password',
+              ariaLabel: 'Password',
+              tooltip: 'Password should be at least 8 characters',
+              validationOptions: {
+                validation: passwordValidator
+              }
+            }}
+            value={passwordInput}
+            onChange={setPasswordInput}
+          />
+        </div>
+      </div>
+
+      <div>
+        <label
+          htmlFor="username-input"
+          style={{
+            display: 'block',
+            marginBottom: '6px',
+            fontSize: '13px'
+          }}
+        >
+          Username Input (Info Validation)
+        </label>
+        <div style={{ maxWidth: '400px' }}>
+          <InputBox
+            id="username-input"
+            options={{
+              placeholder: 'Username',
+              ariaLabel: 'Username',
+              tooltip: 'Enter your username',
+              validationOptions: {
+                validation: usernameValidator
+              }
+            }}
+            value={usernameInput}
+            onChange={setUsernameInput}
+          />
+        </div>
+      </div>
+
+      <h3 style={{ fontSize: '16px', marginTop: '20px', marginBottom: '8px' }}>
+        TextArea (Flexible Height)
+      </h3>
+      
+      <div>
+        <label
+          htmlFor="textarea-input"
+          style={{
+            display: 'block',
+            marginBottom: '6px',
+            fontSize: '13px'
+          }}
+        >
+          Multi-line Text
+        </label>
+        <InputBox
+          id="textarea-input"
+          options={{
+            flexibleHeight: true,
+            placeholder: 'Enter multiple lines...',
+            ariaLabel: 'Multi-line text area',
+            tooltip: 'Flexible height textarea'
+          }}
+          value={textareaValue}
+          onChange={setTextareaValue}
+        />
+      </div>
     </div>
   )
 
@@ -520,8 +630,7 @@ const ThemeTestPage: React.FC = () => {
         minHeight: '100vh',
         height: '100vh',
         backgroundColor: 'var(--vscode-editor-background)',
-        color: 'var(--vscode-editor-foreground)',
-        fontFamily: "'Cascadia Code', 'Consolas', 'Monaco', monospace"
+        color: 'var(--vscode-editor-foreground)'
       }}
     >
       {/* Header with theme selector */}
