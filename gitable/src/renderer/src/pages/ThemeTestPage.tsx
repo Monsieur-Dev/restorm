@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useTheme, CustomDropdown, CustomTabs, logger, InputBox, MessageType, Toggle, RadioGroup, ProgressBar, ScrollableElement } from 'electron-vscodelike-core-ui/renderer'
+import { useTheme, CustomDropdown, CustomTabs, logger, InputBox, MessageType, Toggle, RadioGroup, ProgressBar, ScrollableElement, Button, ButtonWithDescription, ButtonWithDropdown, ButtonWithIcon } from 'electron-vscodelike-core-ui/renderer'
 import type { Tab, IInputValidator } from 'electron-vscodelike-core-ui/renderer'
 
 interface Theme {
@@ -19,10 +19,24 @@ const ThemeTestPage: React.FC = () => {
   const [usernameInput, setUsernameInput] = useState('')
   const [toggleChecked, setToggleChecked] = useState(true)
   const [toggleUnchecked, setToggleUnchecked] = useState(false)
-  const [toggleDisabled] = useState(false)
+  const [toggleDisabled, setToggleDisabled] = useState(false)
   const [radioValue, setRadioValue] = useState('option1')
   const [selectValue, setSelectValue] = useState('option1')
-  const [textareaValue, setTextareaValue] = useState('Multi-line\ntext area\nwith multiple lines')
+  const [textareaValue, setTextareaValue] = useState(`Line 1: Lorem ipsum dolor sit amet
+Line 2: Consectetur adipiscing elit
+Line 3: Sed do eiusmod tempor incididunt
+Line 4: Ut labore et dolore magna aliqua
+Line 5: Ut enim ad minim veniam
+Line 6: Quis nostrud exercitation ullamco
+Line 7: Laboris nisi ut aliquip ex ea
+Line 8: Commodo consequat duis aute
+Line 9: Irure dolor in reprehenderit
+Line 10: In voluptate velit esse cillum
+Line 11: Dolore eu fugiat nulla pariatur
+Line 12: Excepteur sint occaecat cupidatat
+Line 13: Non proident sunt in culpa
+Line 14: Qui officia deserunt mollit
+Line 15: Anim id est laborum sed ut`)
   const [scrollbarUpdateKey, setScrollbarUpdateKey] = useState(0)
   
   // Force scrollbar update when content changes
@@ -99,13 +113,13 @@ const ThemeTestPage: React.FC = () => {
         </label>
         <div style={{ maxWidth: '400px' }}>
           <InputBox
-            id="text-input"
+          id="text-input"
             options={{
               placeholder: 'Enter text...',
               ariaLabel: 'Text input',
               tooltip: 'Basic text input'
             }}
-            value={textInput}
+          value={textInput}
             onChange={setTextInput}
           />
         </div>
@@ -124,14 +138,14 @@ const ThemeTestPage: React.FC = () => {
         </label>
         <div style={{ maxWidth: '400px' }}>
           <InputBox
-            id="number-input"
+          id="number-input"
             options={{
               type: 'number',
               placeholder: 'Enter a number',
               ariaLabel: 'Number input',
               tooltip: 'Input for numeric values'
             }}
-            value={numberInput}
+          value={numberInput}
             onChange={setNumberInput}
           />
         </div>
@@ -151,12 +165,12 @@ const ThemeTestPage: React.FC = () => {
         </label>
         <div style={{ maxWidth: '400px' }}>
           <InputBox
-            id="disabled-input"
+          id="disabled-input"
             options={{
               placeholder: 'Cannot edit',
               ariaLabel: 'Disabled input'
             }}
-            value="This input is disabled"
+          value="This input is disabled"
             disabled={true}
           />
         </div>
@@ -276,8 +290,9 @@ const ThemeTestPage: React.FC = () => {
           }}
           value={textareaValue}
           onChange={setTextareaValue}
-        />
-      </div>
+          style={{ minHeight: '120px' }}
+      />
+    </div>
       </div>
     </ScrollableElement>
   )
@@ -289,10 +304,9 @@ const ThemeTestPage: React.FC = () => {
       style={{ height: '100%', width: '100%' }}
     >
       <div style={{ display: 'grid', gap: '30px', padding: '20px' }}>
-        <div>
+      <div>
           <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>VSCode Toggle Components</h3>
-          <div style={{ display: 'grid', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'grid', gap: '12px' }}>
             <Toggle
               opts={{
                 title: 'Toggle (checked)',
@@ -303,11 +317,9 @@ const ThemeTestPage: React.FC = () => {
                 inputActiveOptionBackground: 'var(--vscode-inputOption-activeBackground)'
               }}
               onChange={(checked: boolean) => { setToggleChecked(checked) }}
+              label="Toggle (checked)"
             />
-            <span style={{ fontSize: '13px' }}>Toggle (checked)</span>
-            </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Toggle
               opts={{
                 title: 'Toggle (unchecked)',
@@ -318,11 +330,9 @@ const ThemeTestPage: React.FC = () => {
                 inputActiveOptionBackground: 'var(--vscode-inputOption-activeBackground)'
               }}
               onChange={(checked: boolean) => { setToggleUnchecked(checked) }}
+              label="Toggle (unchecked)"
             />
-            <span style={{ fontSize: '13px' }}>Toggle (unchecked)</span>
-            </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Toggle
               opts={{
                 title: 'Toggle (disabled)',
@@ -333,11 +343,9 @@ const ThemeTestPage: React.FC = () => {
                 inputActiveOptionBackground: 'var(--vscode-inputOption-activeBackground)'
               }}
               disabled={true}
+              onChange={(checked: boolean) => { setToggleDisabled(checked) }}
+              label="Toggle (disabled)"
             />
-            <span style={{ fontSize: '13px', color: 'var(--vscode-descriptionForeground)' }}>
-              Toggle (disabled)
-            </span>
-            </div>
           </div>
         </div>
       </div>
@@ -397,72 +405,162 @@ const ThemeTestPage: React.FC = () => {
     </ScrollableElement>
   )
 
+  // Button examples content
   const buttonsContent = (
     <ScrollableElement
       key={`buttons-${scrollbarUpdateKey}`}
       options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
       style={{ height: '100%', width: '100%' }}
     >
-      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', padding: '20px' }}>
-      <button
-        style={{
-          padding: '8px 14px',
-          fontSize: '13px',
-          backgroundColor: 'var(--vscode-button-background)',
-          color: 'var(--vscode-button-foreground)',
-          border: 'none',
-          borderRadius: '2px',
-          cursor: 'pointer',
-          fontFamily: 'inherit'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)'
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)'
-        }}
-      >
-        Primary Button
-      </button>
+      <div style={{ display: 'grid', gap: '20px', maxWidth: '800px', padding: '20px' }}>
+        <h3 style={{ fontSize: '16px', marginBottom: '8px' }}>VSCode Button Components</h3>
+        
+        <div>
+          <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Basic Buttons</h4>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <Button
+              options={{ disabled: false }}
+              label="Primary Button"
+              onClick={() => { logger.info('Primary button clicked') }}
+            />
+            <Button
+              options={{ secondary: true }}
+              label="Secondary Button"
+              onClick={() => { logger.info('Secondary button clicked') }}
+            />
+            <Button
+              options={{ disabled: true }}
+              label="Disabled Button"
+            />
+          </div>
+        </div>
 
-      <button
-        style={{
-          padding: '8px 14px',
-          fontSize: '13px',
-          backgroundColor: 'var(--vscode-button-secondaryBackground)',
-          color: 'var(--vscode-button-secondaryForeground)',
-          border: 'none',
-          borderRadius: '2px',
-          cursor: 'pointer',
-          fontFamily: 'inherit'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--vscode-button-secondaryHoverBackground)'
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--vscode-button-secondaryBackground)'
-        }}
-      >
-        Secondary Button
-      </button>
+        <div>
+          <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Buttons with Icons</h4>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <Button
+              options={{ disabled: false }}
+              label="Save"
+              icon="save"
+              onClick={() => { logger.info('Save clicked') }}
+            />
+            <Button
+              options={{ secondary: true }}
+              label="Cancel"
+              icon="close"
+              onClick={() => { logger.info('Cancel clicked') }}
+            />
+            <Button
+              options={{ disabled: false }}
+              label="$(play) Start"
+              onClick={() => { logger.info('Start clicked') }}
+            />
+          </div>
+        </div>
 
-      <button
-        disabled
-        style={{
-          padding: '8px 14px',
-          fontSize: '13px',
-          backgroundColor: 'var(--vscode-button-background)',
-          color: 'var(--vscode-button-foreground)',
-          border: 'none',
-          borderRadius: '2px',
-          cursor: 'not-allowed',
-          fontFamily: 'inherit',
-          opacity: 0.6
-        }}
-      >
-        Disabled Button
-      </button>
-      </div>
+        <div>
+          <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Button with Description</h4>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <ButtonWithDescription
+              options={{ disabled: false }}
+              label="Deploy"
+              description="Deploy to production environment"
+              icon="rocket"
+              onClick={() => { logger.info('Deploy clicked') }}
+            />
+            <ButtonWithDescription
+              options={{ secondary: true }}
+              label="Backup"
+              description="Create system backup"
+              icon="database"
+              onClick={() => { logger.info('Backup clicked') }}
+            />
+          </div>
+        </div>
+
+        <div>
+          <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Button with Dropdown</h4>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <ButtonWithDropdown
+              options={{
+                disabled: false,
+                actions: [
+                  { label: 'New File', onClick: () => { logger.info('New File') } },
+                  { label: 'New Folder', onClick: () => { logger.info('New Folder') } },
+                  { label: 'Import', onClick: () => { logger.info('Import') } }
+                ]
+              }}
+              label="New"
+              icon="add"
+              onClick={() => { logger.info('New clicked') }}
+            />
+            <ButtonWithDropdown
+              options={{
+                secondary: false,
+                actions: [
+                  { label: 'Save', onClick: () => { logger.info('Save') } },
+                  { label: 'Save As...', onClick: () => { logger.info('Save As') } },
+                  { label: 'Export', onClick: () => { logger.info('Export') } }
+                ]
+              }}
+              label="File"
+              onClick={() => { logger.info('File clicked') }}
+            />
+          </div>
+        </div>
+
+        <div>
+          <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Button with Icon Component</h4>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <ButtonWithIcon
+              options={{ disabled: false }}
+              icon="play"
+              label="Start Process"
+              onClick={() => { logger.info('Start Process clicked') }}
+            />
+            <ButtonWithIcon
+              options={{ secondary: true }}
+              icon="stop"
+              label="Stop Process"
+              onClick={() => { logger.info('Stop Process clicked') }}
+            />
+            <Button
+              options={{ disabled: false }}
+              label="$(play) Start with Inline Icon"
+              onClick={() => { logger.info('Inline icon clicked') }}
+            />
+          </div>
+        </div>
+
+        <div>
+          <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Short Label Support with Tooltip</h4>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <Button
+              options={{ 
+                disabled: false,
+                supportShortLabel: true
+              }}
+              label="Very Long Button Label That Should Be Shortened"
+              onClick={() => { logger.info('Short label clicked') }}
+            />
+            <Button
+              options={{ 
+                disabled: false,
+                supportShortLabel: false
+              }}
+              label="Another Very Long Button Label That Will Show Tooltip When Truncated"
+              onClick={() => { logger.info('Long label clicked') }}
+            />
+            <Button
+              options={{ 
+                disabled: false
+              }}
+              label="Short"
+              onClick={() => { logger.info('Short button clicked') }}
+            />
+          </div>
+        </div>
+    </div>
     </ScrollableElement>
   )
 
@@ -516,7 +614,7 @@ const ThemeTestPage: React.FC = () => {
           <option value="option4">Option 4</option>
         </select>
       </div>
-      </div>
+    </div>
     </ScrollableElement>
   )
 
@@ -585,7 +683,7 @@ const ThemeTestPage: React.FC = () => {
           </div>
         ))}
       </div>
-      </div>
+    </div>
     </ScrollableElement>
   )
 
@@ -650,7 +748,7 @@ const ThemeTestPage: React.FC = () => {
         <p style={{ margin: '5px 0', fontSize: '13px' }}>The quick brown fox jumps over the lazy dog 0123456789</p>
         <p style={{ margin: '5px 0', fontSize: '11px' }}>The quick brown fox jumps over the lazy dog</p>
       </div>
-      </div>
+    </div>
     </ScrollableElement>
   )
 
@@ -833,11 +931,11 @@ const ThemeTestPage: React.FC = () => {
   )
 
   const tabs: Tab[] = [
+    { id: 'buttons', label: 'Buttons', content: buttonsContent },
     { id: 'scrollbars', label: 'Scrollbars', content: scrollbarsContent },
     { id: 'divers', label: 'Divers', content: progressBarContent },
     { id: 'checkboxes', label: 'Checkboxes & Radio', content: checkboxesContent },
     { id: 'inputs', label: 'Text Inputs', content: inputsContent },
-    { id: 'buttons', label: 'Buttons', content: buttonsContent },
     { id: 'dropdowns', label: 'Dropdowns', content: dropdownsContent },
     { id: 'panels', label: 'Panels & Lists', content: panelsContent },
     { id: 'text', label: 'Text Styles', content: textContent }
@@ -849,68 +947,68 @@ const ThemeTestPage: React.FC = () => {
       options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
       style={{ height: '100vh', width: '100vw' }}
     >
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        height: '100vh',
+        backgroundColor: 'var(--vscode-editor-background)',
+          color: 'var(--vscode-editor-foreground)'
+      }}
+    >
+      {/* Header with theme selector */}
       <div
         style={{
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh',
-          height: '100vh',
-          backgroundColor: 'var(--vscode-editor-background)',
-          color: 'var(--vscode-editor-foreground)'
+          padding: '20px',
+          borderBottom: '1px solid var(--vscode-panel-border)',
+          backgroundColor: 'var(--vscode-sideBar-background)'
         }}
       >
-        {/* Header with theme selector */}
-        <div
-          style={{
-            padding: '20px',
-            borderBottom: '1px solid var(--vscode-panel-border)',
-            backgroundColor: 'var(--vscode-sideBar-background)'
-          }}
-        >
-          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-            <h1 style={{ margin: '0 0 10px 0', fontSize: '24px' }}>
-              {t('themeTest.title')}
-            </h1>
-            <p
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <h1 style={{ margin: '0 0 10px 0', fontSize: '24px' }}>
+            {t('themeTest.title')}
+          </h1>
+          <p
+            style={{
+              margin: '0 0 15px 0',
+              color: 'var(--vscode-descriptionForeground)',
+              fontSize: '14px'
+            }}
+          >
+            {t('themeTest.description')}
+          </p>
+          
+          {/* Theme Selector */}
+          <div style={{ maxWidth: '400px' }}>
+            <label
+              htmlFor="theme-selector"
               style={{
-                margin: '0 0 15px 0',
-                color: 'var(--vscode-descriptionForeground)',
-                fontSize: '14px'
+                display: 'block',
+                marginBottom: '8px',
+                fontWeight: 'bold',
+                fontSize: '13px'
               }}
             >
-              {t('themeTest.description')}
-            </p>
-            
-            {/* Theme Selector */}
-            <div style={{ maxWidth: '400px' }}>
-              <label
-                htmlFor="theme-selector"
-                style={{
-                  display: 'block',
-                  marginBottom: '8px',
-                  fontWeight: 'bold',
-                  fontSize: '13px'
-                }}
-              >
-                {t('themeTest.selectTheme')}
-              </label>
-              <CustomDropdown
-                id="theme-selector"
-                value={currentThemeId ?? ''}
-                options={themeOptions}
-                onChange={handleThemeChange}
-                disabled={isLoading}
-                placeholder={t('themeTest.selectTheme')}
-              />
-            </div>
+              {t('themeTest.selectTheme')}
+            </label>
+            <CustomDropdown
+              id="theme-selector"
+              value={currentThemeId ?? ''}
+              options={themeOptions}
+              onChange={handleThemeChange}
+              disabled={isLoading}
+              placeholder={t('themeTest.selectTheme')}
+            />
           </div>
         </div>
-
-        {/* Tabs */}
-        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          <CustomTabs tabs={tabs} />
-        </div>
       </div>
+
+      {/* Tabs */}
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <CustomTabs tabs={tabs} />
+      </div>
+    </div>
     </ScrollableElement>
   )
 }

@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@dtinsight/molecule": "^2.0.0-alpha.10",
+    "@vscode/codicons": "^0.0.41",
     "electron-vscodelike-core-ui": "file:../electron-vscodelike-core-ui",
     "i18next": "^23.16.8",
     "react": "^18.2.0",

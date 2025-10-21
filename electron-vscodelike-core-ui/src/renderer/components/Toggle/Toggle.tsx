@@ -1,12 +1,5 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
 import React, { useState, useCallback } from 'react'
 import './toggle.css'
-import '../../assets/codicon/codicon.css'
-import '../../assets/codicon/codicon-definitions.css'
 
 export interface IToggleOpts extends IToggleStyles {
   readonly actionClassName?: string;
@@ -39,6 +32,7 @@ export interface ToggleProps {
   className?: string;
   id?: string;
   styles?: IToggleStyles;
+  label?: string;
 }
 
 // Default styles based on VSCode defaultStyles.ts
@@ -55,7 +49,8 @@ const Toggle: React.FC<ToggleProps> = ({
   disabled = false,
   className = '',
   id,
-  styles
+  styles,
+  label
 }) => {
   const [checked, setChecked] = useState(opts.isChecked);
   const [enabled] = useState(!disabled);
@@ -119,18 +114,37 @@ const Toggle: React.FC<ToggleProps> = ({
   };
 
   return (
-    <div
-      id={id}
-      className={classes}
-      tabIndex={opts.notFocusable ? -1 : 0}
-      role="checkbox"
-      aria-checked={checked}
-      aria-label={opts.title}
-      aria-disabled={!enabled}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      style={inlineStyles}
-    />
+    <div className="toggle-container" style={{ display: 'flex', alignItems: 'center', gap: '8px' }} >
+      <div
+        id={id}
+        className={classes}
+        tabIndex={opts.notFocusable ? -1 : 0}
+        role="checkbox"
+        aria-checked={checked}
+        aria-label={opts.title}
+        aria-disabled={!enabled}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        style={inlineStyles}
+      >
+        {checked && (
+          <span className={`codicon codicon-${opts.icon || 'check'}`} />
+        )}
+      </div>
+      {label && (
+        <span 
+          onClick={handleClick}
+          style={{ 
+            cursor: enabled ? 'pointer' : 'default',
+            color: enabled ? 'var(--vscode-foreground)' : 'var(--vscode-disabledForeground)',
+            fontSize: '13px',
+            userSelect: 'none'
+          }}
+        >
+          {label}
+        </span>
+      )}
+    </div>
   );
 };
 
