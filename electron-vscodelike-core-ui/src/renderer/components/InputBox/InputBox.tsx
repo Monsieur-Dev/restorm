@@ -1,8 +1,3 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
 import React, { useRef, useEffect, useState, useCallback } from 'react'
 import './inputBox.css'
 
@@ -83,6 +78,7 @@ export interface InputBoxProps {
   disabled?: boolean
   className?: string
   id?: string
+  style?: React.CSSProperties
 }
 
 const InputBox: React.FC<InputBoxProps> = ({
@@ -93,7 +89,8 @@ const InputBox: React.FC<InputBoxProps> = ({
   onFocus,
   disabled = false,
   className = '',
-  id
+  id,
+  style
 }) => {
   const [internalValue, setInternalValue] = useState(value)
   const [message, setMessage] = useState<IMessage | null>(null)
@@ -175,9 +172,39 @@ const InputBox: React.FC<InputBoxProps> = ({
         inputRef.current.removeAttribute('aria-invalid')
       }
     }
-
+    
     onChange?.(newValue)
   }
+
+  // Use native event listeners for wheel events
+  useEffect(() => {
+    const textarea = inputRef.current as HTMLTextAreaElement
+    if (!textarea) return
+
+    const handleWheel = (e: WheelEvent) => {
+      e.stopPropagation()
+      e.preventDefault()
+      
+      // Manually handle the scroll
+      const deltaY = e.deltaY
+      const scrollTop = textarea.scrollTop
+      const maxScrollTop = textarea.scrollHeight - textarea.clientHeight
+      
+      if (deltaY > 0 && scrollTop < maxScrollTop) {
+        // Scroll down
+        textarea.scrollTop = Math.min(scrollTop + 30, maxScrollTop)
+      } else if (deltaY < 0 && scrollTop > 0) {
+        // Scroll up
+        textarea.scrollTop = Math.max(scrollTop - 30, 0)
+      }
+    }
+
+    textarea.addEventListener('wheel', handleWheel, { passive: false })
+    
+    return () => {
+      textarea.removeEventListener('wheel', handleWheel)
+    }
+  }, [internalValue]) // Re-attach when content changes
 
   const handleFocus = (): void => {
     setState('focused')
@@ -229,6 +256,24 @@ const InputBox: React.FC<InputBoxProps> = ({
     return containerStyles
   }
 
+  // Calculate styles for textarea
+  const getTextareaStyles = (): React.CSSProperties => {
+    const textareaStyles: React.CSSProperties = {
+      backgroundColor: styles.inputBackground,
+      color: styles.inputForeground,
+      border: 'none',
+      outline: 'none',
+      resize: 'none'
+    }
+
+    // Merge with custom styles if provided
+    if (style) {
+      return { ...textareaStyles, ...style }
+    }
+
+    return textareaStyles
+  }
+
   // Calculate styles for input
   const getInputStyles = (): React.CSSProperties => {
     return {
@@ -271,6 +316,7 @@ const InputBox: React.FC<InputBoxProps> = ({
                 {...baseProps}
                 rows={1}
                 wrap="off"
+                style={getTextareaStyles()}
               />
               {options.flexibleHeight && (
                 <div ref={mirrorRef} className="mirror" aria-hidden="true">

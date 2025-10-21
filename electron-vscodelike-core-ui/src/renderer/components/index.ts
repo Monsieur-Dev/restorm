@@ -23,6 +23,10 @@ export type { IProgressBarStyles, IProgressBarOptions, ProgressBarProps } from '
 export { ScrollableElement, defaultScrollableElementStyles } from './ScrollableElement/index'
 export type { IScrollableElementStyles, IScrollableElementOptions, ScrollableElementProps } from './ScrollableElement/index'
 
+// Button exports
+export { Button, ButtonWithDescription, ButtonWithDropdown, ButtonWithIcon, defaultButtonStyles } from './Button/index'
+export type { IButtonOptions, IButtonStyles, IButtonWithDropdownOptions, ButtonProps, ButtonWithDescriptionProps, ButtonWithDropdownProps, ButtonWithIconProps } from './Button/index'
+
 // Other exports
 export { CustomDropdown, CustomTabs, SettingsTreeView, MonacoWorkbench }
 export type { Tab } from './CustomTabs'
