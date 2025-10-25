@@ -4,7 +4,7 @@ import App from './App'
 import i18n from 'i18next'
 import type { i18n as I18nType } from 'i18next'
 import { initReactI18next } from 'react-i18next'
-import { logger } from 'electron-vscodelike-core-ui/renderer'
+import { logger, MonacoWorkbench } from 'electron-vscodelike-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 
 // Import translations
@@ -47,7 +47,9 @@ void initI18n()
 
     ReactDOM.createRoot(rootElement).render(
       <React.StrictMode>
-        <App />
+        <MonacoWorkbench fontAliasing="auto">
+          <App />
+        </MonacoWorkbench>
       </React.StrictMode>
     )
   })

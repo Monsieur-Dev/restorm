@@ -24,24 +24,26 @@ export interface IButtonWithDropdownOptions extends IButtonOptions {
 }
 
 export interface ButtonProps {
-  options: IButtonOptions;
-  label?: string;
+  options?: IButtonOptions;
   icon?: string | undefined;
+  disabled?: boolean;
+  secondary?: boolean;
   onClick?: ((event: React.MouseEvent<HTMLAnchorElement>) => void) | undefined;
   onMouseEnter?: ((event: React.MouseEvent<HTMLAnchorElement>) => void) | undefined;
   onMouseLeave?: ((event: React.MouseEvent<HTMLAnchorElement>) => void) | undefined;
   className?: string;
   id?: string;
+  children?: React.ReactNode;
 }
 
 export interface ButtonWithDescriptionProps {
-  options: IButtonOptions;
-  label: string;
+  options?: IButtonOptions;
   description: string;
   icon?: string;
   onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
   className?: string;
   id?: string;
+  children?: React.ReactNode;
 }
 
 export interface ButtonWithDropdownProps {

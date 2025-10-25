@@ -3,14 +3,16 @@ import './button.css'
 import { IButtonOptions, IButtonStyles, ButtonProps, defaultButtonStyles } from './types'
 
 const Button: React.FC<ButtonProps> = ({
-  options,
-  label = '',
+  options = {},
   icon,
+  disabled = false,
+  secondary = false,
   onClick,
   onMouseEnter,
   onMouseLeave,
   className = '',
-  id
+  id,
+  children
 }) => {
   const buttonRef = useRef<HTMLAnchorElement>(null)
 
@@ -22,16 +24,16 @@ const Button: React.FC<ButtonProps> = ({
 
   // Handle click events
   const handleClick = useCallback((event: React.MouseEvent<HTMLAnchorElement>) => {
-    if (mergedOptions.disabled) {
+    if (disabled) {
       event.preventDefault()
       return
     }
     onClick?.(event)
-  }, [mergedOptions.disabled, onClick])
+  }, [disabled, onClick])
 
   // Handle keyboard events
   const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLAnchorElement>) => {
-    if (mergedOptions.disabled) return
+    if (disabled) return
 
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
@@ -40,7 +42,7 @@ const Button: React.FC<ButtonProps> = ({
       event.preventDefault()
       buttonRef.current?.blur()
     }
-  }, [mergedOptions.disabled, onClick])
+  }, [disabled, onClick])
 
   // No need for hover/focus state management - CSS handles it
 
@@ -50,31 +52,36 @@ const Button: React.FC<ButtonProps> = ({
     return <span className={`codicon codicon-${icon}`} />
   }
 
-  // Render label with icon support
-  const renderLabel = () => {
-    if (!label) return null
+  // Render children with icon support
+  const renderChildren = () => {
+    if (!children) return null
 
-    // Simple icon parsing - look for $(iconName) pattern
-    const iconRegex = /\$\(([^)]+)\)/g
-    const parts = label.split(iconRegex)
-    
-    return parts.map((part, index) => {
-      if (index % 2 === 1) {
-        // This is an icon name
-        return <span key={index} className={`codicon codicon-${part}`} />
-      } else {
-        // This is text
-        return part
-      }
-    })
+    // If children is a string, parse for $(iconName) pattern
+    if (typeof children === 'string') {
+      const iconRegex = /\$\(([^)]+)\)/g
+      const parts = children.split(iconRegex)
+      
+      return parts.map((part, index) => {
+        if (index % 2 === 1) {
+          // This is an icon name
+          return <span key={index} className={`codicon codicon-${part}`} />
+        } else {
+          // This is text
+          return part
+        }
+      })
+    }
+
+    // If children is not a string, render as-is
+    return children
   }
 
   // Build CSS classes
   const buttonClasses = [
     'monaco-button',
     'monaco-text-button',
-    mergedOptions.secondary ? 'secondary' : '',
-    mergedOptions.disabled ? 'disabled' : '',
+    secondary ? 'secondary' : '',
+    disabled ? 'disabled' : '',
     'default-colors',
     className
   ].filter(Boolean).join(' ')
@@ -96,11 +103,11 @@ const Button: React.FC<ButtonProps> = ({
         title={typeof mergedOptions.title === 'string' ? mergedOptions.title : undefined}
         aria-label={mergedOptions.ariaLabel}
         role="button"
-        tabIndex={mergedOptions.disabled ? -1 : 0}
-        aria-disabled={mergedOptions.disabled}
+        tabIndex={disabled ? -1 : 0}
+        aria-disabled={disabled}
       >
         {renderIcon()}
-        {renderLabel()}
+        {renderChildren()}
       </a>
     </div>
   )

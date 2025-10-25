@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { ScrollableElement } from './ScrollableElement'
 
 export interface Tab {
   id: string
@@ -163,16 +164,18 @@ export const CustomTabs: React.FC<CustomTabsProps> = ({
       </div>
 
       {/* Tab content */}
-      <div
-        role="tabpanel"
-        style={{
-          flex: 1,
-          overflow: 'auto',
-          backgroundColor: 'var(--vscode-editor-background)',
-          padding: '16px'
-        }}
-      >
-        {activeTab?.content}
+      <div role="tabpanel" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <ScrollableElement
+          options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
+          style={{
+            flex: 1,
+            backgroundColor: 'var(--vscode-editor-background)',
+            padding: '16px',
+            minHeight: '400px'
+          }}
+        >
+          {activeTab?.content}
+        </ScrollableElement>
       </div>
     </div>
   )

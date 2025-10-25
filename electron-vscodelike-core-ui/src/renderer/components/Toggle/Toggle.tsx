@@ -1,14 +1,6 @@
 import React, { useState, useCallback } from 'react'
 import './toggle.css'
 
-export interface IToggleOpts extends IToggleStyles {
-  readonly actionClassName?: string;
-  readonly icon?: string; // Codicon icon name (e.g. 'check')
-  readonly title: string;
-  readonly isChecked: boolean;
-  readonly notFocusable?: boolean;
-}
-
 export interface IToggleStyles {
   readonly inputActiveOptionBorder: string | undefined;
   readonly inputActiveOptionForeground: string | undefined;
@@ -25,34 +17,40 @@ export interface ICheckboxStyles {
 }
 
 export interface ToggleProps {
-  opts: IToggleOpts;
+  isChecked: boolean;
   onChange?: (checked: boolean, viaKeyboard: boolean) => void;
   onKeyDown?: (event: React.KeyboardEvent) => void;
   disabled?: boolean;
   className?: string;
   id?: string;
   styles?: IToggleStyles;
-  label?: string;
+  icon?: string; // Codicon icon name (e.g. 'check')
+  actionClassName?: string;
+  notFocusable?: boolean;
+  children?: React.ReactNode;
 }
 
 // Default styles based on VSCode defaultStyles.ts
 export const defaultToggleStyles: IToggleStyles = {
-  inputActiveOptionBorder: 'var(--vscode-inputOption-activeBorder)',
-  inputActiveOptionForeground: 'var(--vscode-inputOption-activeForeground)',
-  inputActiveOptionBackground: 'var(--vscode-inputOption-activeBackground)'
+  inputActiveOptionBorder: 'var(--vscode-inputOption-activeBorder, #007ACC00)',
+  inputActiveOptionForeground: 'var(--vscode-inputOption-activeForeground, #FFFFFF)',
+  inputActiveOptionBackground: 'var(--vscode-inputOption-activeBackground, #0E639C50)'
 };
 
 const Toggle: React.FC<ToggleProps> = ({
-  opts,
+  isChecked,
   onChange,
   onKeyDown,
   disabled = false,
   className = '',
   id,
   styles,
-  label
+  icon,
+  actionClassName,
+  notFocusable,
+  children
 }) => {
-  const [checked, setChecked] = useState(opts.isChecked);
+  const [checked, setChecked] = useState(isChecked);
   const [enabled] = useState(!disabled);
 
   const handleClick = useCallback(() => {
@@ -79,12 +77,9 @@ const Toggle: React.FC<ToggleProps> = ({
   // Build CSS classes
   const classes = [
     'monaco-custom-toggle',
-    checked ? 'codicon' : '',
-    checked && opts.icon ? `codicon-${opts.icon}` : '',
-    checked && !opts.icon ? 'codicon-check' : '',
     checked ? 'checked' : '',
     !enabled ? 'disabled' : '',
-    opts.actionClassName || '',
+    actionClassName || '',
     className
   ].filter(Boolean).join(' ');
 
@@ -118,32 +113,39 @@ const Toggle: React.FC<ToggleProps> = ({
       <div
         id={id}
         className={classes}
-        tabIndex={opts.notFocusable ? -1 : 0}
+        tabIndex={notFocusable ? -1 : 0}
         role="checkbox"
         aria-checked={checked}
-        aria-label={opts.title}
+        aria-label={typeof children === 'string' ? children : 'Toggle'}
         aria-disabled={!enabled}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         style={inlineStyles}
       >
         {checked && (
-          <span className={`codicon codicon-${opts.icon || 'check'}`} />
+          <span 
+            className={`codicon codicon-${icon || 'check'}`}
+            style={{
+              fontSize: '16px',
+              color: 'var(--vscode-checkbox-foreground)',
+              display: 'inline-block',
+              lineHeight: '1'
+            }}
+          />
         )}
       </div>
-      {label && (
-        <span 
-          onClick={handleClick}
-          style={{ 
-            cursor: enabled ? 'pointer' : 'default',
-            color: enabled ? 'var(--vscode-foreground)' : 'var(--vscode-disabledForeground)',
-            fontSize: '13px',
-            userSelect: 'none'
-          }}
-        >
-          {label}
-        </span>
-      )}
+             {children && (
+               <span
+                 onClick={handleClick}
+                 style={{
+                   cursor: enabled ? 'pointer' : 'default',
+                   color: enabled ? 'var(--vscode-foreground)' : 'var(--vscode-disabledForeground)',
+                   userSelect: 'none'
+                 }}
+               >
+                 {children}
+               </span>
+             )}
     </div>
   );
 };

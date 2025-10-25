@@ -1,4 +1,9 @@
-.monaco-custom-toggle {
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+ .monaco-custom-toggle {
 	margin-left: 2px;
 	float: left;
 	cursor: pointer;
@@ -42,30 +47,6 @@
 	padding: 0px;
 	opacity: 1;
 	background-size: 16px !important;
-}
-
-.monaco-custom-toggle.checked {
-	background-color: var(--vscode-checkbox-background) !important;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.monaco-custom-toggle.checked .codicon {
-	font-size: 16px;
-	color: var(--vscode-checkbox-foreground);
-}
-
-.monaco-custom-toggle:not(.checked) {
-	background-color: transparent !important;
-	border-color: var(--vscode-checkbox-border) !important;
-}
-
-.monaco-custom-toggle.disabled {
-	background-color: var(--vscode-checkbox-disabled-background) !important;
-	color: var(--vscode-checkbox-disabled-foreground) !important;
-	border-color: var(--vscode-checkbox-disabled-background) !important;
-	opacity: 0.6;
 }
 
 .monaco-action-bar .checkbox-action-item {

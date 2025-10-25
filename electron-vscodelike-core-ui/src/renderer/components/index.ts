@@ -9,7 +9,7 @@ export type { IInputOptions, IInputBoxStyles, IMessage, IInputValidator, IInputV
 
 // Toggle exports
 export { Toggle, defaultToggleStyles } from './Toggle/index'
-export type { IToggleOpts, IToggleStyles, ICheckboxStyles, ToggleProps } from './Toggle/index'
+export type { IToggleStyles, ICheckboxStyles, ToggleProps } from './Toggle/index'
 
 // Radio exports
 export { RadioGroup, defaultRadioStyles } from './Radio/index'
@@ -26,6 +26,10 @@ export type { IScrollableElementStyles, IScrollableElementOptions, ScrollableEle
 // Button exports
 export { Button, ButtonWithDescription, ButtonWithDropdown, ButtonWithIcon, defaultButtonStyles } from './Button/index'
 export type { IButtonOptions, IButtonStyles, IButtonWithDropdownOptions, ButtonProps, ButtonWithDescriptionProps, ButtonWithDropdownProps, ButtonWithIconProps } from './Button/index'
+
+// SelectBox exports
+export { SelectBox, SelectBoxNative, SelectBoxList, defaultSelectBoxStyles } from './SelectBox/index'
+export type { ISelectBoxDelegate, ISelectBoxOptions, ISelectOptionItem, ISelectBoxStyles, ISelectData, SelectBoxProps, SelectBoxNativeProps, SelectBoxListProps } from './SelectBox/index'
 
 // Other exports
 export { CustomDropdown, CustomTabs, SettingsTreeView, MonacoWorkbench }

@@ -1,0 +1,8 @@
+export { default as InputsTab } from './InputsTab'
+export { default as CheckboxesTab } from './CheckboxesTab'
+export { default as ButtonsTab } from './ButtonsTab'
+export { default as DropdownsTab } from './DropdownsTab'
+export { default as PanelsTab } from './PanelsTab'
+export { default as TextTab } from './TextTab'
+export { default as ScrollbarsTab } from './ScrollbarsTab'
+export { default as ProgressTab } from './ProgressTab'
