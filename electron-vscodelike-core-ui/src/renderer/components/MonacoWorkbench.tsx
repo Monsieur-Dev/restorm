@@ -17,14 +17,16 @@ const MonacoWorkbench: React.FC<MonacoWorkbenchProps> = ({
   fullscreen = false,
   fontAliasing = 'auto'
 }) => {
-  const platform = usePlatform()
+  const { isMacintosh: isMac, isWindows, isLinux } = usePlatform()
 
   const classes = [
     'monaco-workbench',
-    platform,
+    isMac && 'mac',
+    isWindows && 'windows',
+    isLinux && 'linux',
     border && 'border',
     fullscreen && 'fullscreen',
-    platform === 'mac' && fontAliasing && `monaco-font-aliasing-${fontAliasing}`,
+    isMac && fontAliasing && `monaco-font-aliasing-${fontAliasing}`,
     className
   ].filter(Boolean).join(' ')
 

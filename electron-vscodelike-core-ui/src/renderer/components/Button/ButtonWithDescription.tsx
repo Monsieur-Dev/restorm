@@ -3,13 +3,13 @@ import Button from './Button'
 import { ButtonWithDescriptionProps } from './types'
 
 const ButtonWithDescription: React.FC<ButtonWithDescriptionProps> = ({
-  options,
-  label,
+  options = {},
   description,
   icon,
   onClick,
   className = '',
-  id
+  id,
+  children
 }) => {
   // Render icon if provided
   const renderIcon = () => {
@@ -40,11 +40,12 @@ const ButtonWithDescription: React.FC<ButtonWithDescriptionProps> = ({
     <div className={`monaco-description-button ${className}`} id={id}>
       <Button
         options={options}
-        label={label}
         icon={icon}
         onClick={onClick}
         className="monaco-button-label"
-      />
+      >
+        {children}
+      </Button>
       <div className="monaco-button-description">
         {renderIcon()}
         {renderDescription()}

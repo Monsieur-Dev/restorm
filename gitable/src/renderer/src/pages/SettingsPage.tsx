@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { useTheme, CustomDropdown, logger, InputBox, MessageType, Toggle, RadioGroup, ScrollableElement, defaultToggleStyles } from 'electron-vscodelike-core-ui/renderer'
-import type { IInputValidator, IToggleOpts } from 'electron-vscodelike-core-ui/renderer'
+import { useTheme, CustomDropdown, logger, InputBox, MessageType, Toggle, RadioGroup, ScrollableElement } from 'electron-vscodelike-core-ui/renderer'
+import type { IInputValidator } from 'electron-vscodelike-core-ui/renderer'
 
 interface Theme {
   id: string;
@@ -11,12 +11,6 @@ interface Theme {
 const SettingsPage: React.FC = () => {
   const { themes, currentThemeId, setTheme, isLoading } = useTheme()
   
-  // Helper function to create toggle options
-  const createToggleOpts = (title: string, isChecked: boolean): IToggleOpts => ({
-    title,
-    isChecked,
-    ...defaultToggleStyles
-  })
   const [editorSettings, setEditorSettings] = useState({
     fontSize: '14',
     fontFamily: 'Consolas',
@@ -166,7 +160,7 @@ const SettingsPage: React.FC = () => {
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                     <Toggle
-                      opts={createToggleOpts("Word Wrap", editorSettings.wordWrap)}
+                      isChecked={editorSettings.wordWrap}
                       onChange={(checked: boolean) => { setEditorSettings(prev => ({ ...prev, wordWrap: checked })) }}
                     />
                     Word Wrap
@@ -176,7 +170,7 @@ const SettingsPage: React.FC = () => {
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                     <Toggle
-                      opts={createToggleOpts("Show Minimap", editorSettings.minimap)}
+                      isChecked={editorSettings.minimap}
                       onChange={(checked: boolean) => { setEditorSettings(prev => ({ ...prev, minimap: checked })) }}
                     />
                     Show Minimap
@@ -186,7 +180,7 @@ const SettingsPage: React.FC = () => {
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                     <Toggle
-                      opts={createToggleOpts("Line Numbers", editorSettings.lineNumbers)}
+                      isChecked={editorSettings.lineNumbers}
                       onChange={(checked: boolean) => { setEditorSettings(prev => ({ ...prev, lineNumbers: checked })) }}
                     />
                     Line Numbers
@@ -196,7 +190,7 @@ const SettingsPage: React.FC = () => {
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                     <Toggle
-                      opts={createToggleOpts("Auto Save", editorSettings.autoSave)}
+                      isChecked={editorSettings.autoSave}
                       onChange={(checked: boolean) => { setEditorSettings(prev => ({ ...prev, autoSave: checked })) }}
                     />
                     Auto Save
@@ -206,7 +200,7 @@ const SettingsPage: React.FC = () => {
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                     <Toggle
-                      opts={createToggleOpts("Format on Save", editorSettings.formatOnSave)}
+                      isChecked={editorSettings.formatOnSave}
                       onChange={(checked: boolean) => { setEditorSettings(prev => ({ ...prev, formatOnSave: checked })) }}
                     />
                     Format on Save
@@ -274,7 +268,7 @@ const SettingsPage: React.FC = () => {
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                     <Toggle
-                      opts={createToggleOpts("Show Status Bar", appearanceSettings.statusBar)}
+                      isChecked={appearanceSettings.statusBar}
                       onChange={(checked: boolean) => { setAppearanceSettings(prev => ({ ...prev, statusBar: checked })) }}
                     />
                     Show Status Bar
@@ -284,7 +278,7 @@ const SettingsPage: React.FC = () => {
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                     <Toggle
-                      opts={createToggleOpts("Show Activity Bar", appearanceSettings.activityBar)}
+                      isChecked={appearanceSettings.activityBar}
                       onChange={(checked: boolean) => { setAppearanceSettings(prev => ({ ...prev, activityBar: checked })) }}
                     />
                     Show Activity Bar
@@ -303,7 +297,7 @@ const SettingsPage: React.FC = () => {
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                     <Toggle
-                      opts={createToggleOpts("Enable Telemetry", advancedSettings.telemetry)}
+                      isChecked={advancedSettings.telemetry}
                       onChange={(checked: boolean) => { setAdvancedSettings(prev => ({ ...prev, telemetry: checked })) }}
                     />
                     Enable Telemetry
@@ -313,7 +307,7 @@ const SettingsPage: React.FC = () => {
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                     <Toggle
-                      opts={createToggleOpts("Send Crash Reports", advancedSettings.crashReports)}
+                      isChecked={advancedSettings.crashReports}
                       onChange={(checked: boolean) => { setAdvancedSettings(prev => ({ ...prev, crashReports: checked })) }}
                     />
                     Send Crash Reports
@@ -343,7 +337,7 @@ const SettingsPage: React.FC = () => {
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                     <Toggle
-                      opts={createToggleOpts("Enable Experimental Features", advancedSettings.experimentalFeatures)}
+                      isChecked={advancedSettings.experimentalFeatures}
                       onChange={(checked: boolean) => { setAdvancedSettings(prev => ({ ...prev, experimentalFeatures: checked })) }}
                     />
                     Enable Experimental Features

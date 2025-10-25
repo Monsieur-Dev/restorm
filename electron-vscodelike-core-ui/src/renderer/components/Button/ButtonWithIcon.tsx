@@ -16,11 +16,12 @@ const ButtonWithIcon: React.FC<ButtonWithIconProps> = ({
   return (
     <Button
       options={options}
-      label={combinedLabel}
       onClick={onClick}
       className={className}
       {...(id && { id })}
-    />
+    >
+      {combinedLabel}
+    </Button>
   )
 }
 

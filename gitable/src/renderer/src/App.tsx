@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ThemeTestPage from './pages/ThemeTestPage'
 import SettingsPage from './pages/SettingsPage'
-import { logger, MonacoWorkbench } from 'electron-vscodelike-core-ui/renderer'
+import { logger } from 'electron-vscodelike-core-ui/renderer'
 
 const App: React.FC = () => {
   const { t, i18n } = useTranslation()
@@ -17,25 +17,16 @@ const App: React.FC = () => {
 
   // Show theme test page
   if (currentPage === 'theme-test') {
-    return (
-      <MonacoWorkbench fontAliasing="auto">
-        <ThemeTestPage />
-      </MonacoWorkbench>
-    )
+    return <ThemeTestPage />
   }
 
   // Show settings page
   if (currentPage === 'settings') {
-    return (
-      <MonacoWorkbench fontAliasing="auto">
-        <SettingsPage />
-      </MonacoWorkbench>
-    )
+    return <SettingsPage />
   }
 
   // Home page
   return (
-    <MonacoWorkbench fontAliasing="auto">
     <div
       style={{
         display: 'flex',
@@ -43,7 +34,6 @@ const App: React.FC = () => {
         alignItems: 'center',
         justifyContent: 'center',
         height: '100vh',
-        fontFamily: "'Consolas', 'Monaco', 'Courier New', monospace",
         fontSize: '24px',
         gap: '20px',
         backgroundColor: 'var(--vscode-editor-background, #1e1e1e)',
@@ -58,7 +48,6 @@ const App: React.FC = () => {
             padding: '10px 20px',
             fontSize: '16px',
             cursor: 'pointer',
-            fontFamily: "'Consolas', 'Monaco', 'Courier New', monospace",
             backgroundColor: 'var(--vscode-button-background, #0e639c)',
             color: 'var(--vscode-button-foreground, #ffffff)',
             border: 'none',
@@ -75,7 +64,6 @@ const App: React.FC = () => {
             padding: '10px 20px',
             fontSize: '16px',
             cursor: 'pointer',
-            fontFamily: "'Consolas', 'Monaco', 'Courier New', monospace",
             backgroundColor: 'var(--vscode-button-secondaryBackground, #3a3d41)',
             color: 'var(--vscode-button-secondaryForeground, #ffffff)',
             border: 'none',
@@ -92,7 +80,6 @@ const App: React.FC = () => {
             padding: '10px 20px',
             fontSize: '16px',
             cursor: 'pointer',
-            fontFamily: "'Consolas', 'Monaco', 'Courier New', monospace",
             backgroundColor: 'var(--vscode-button-secondaryBackground, #3a3d41)',
             color: 'var(--vscode-button-secondaryForeground, #ffffff)',
             border: 'none',
@@ -103,7 +90,6 @@ const App: React.FC = () => {
         </button>
       </div>
     </div>
-    </MonacoWorkbench>
   )
 }
 
