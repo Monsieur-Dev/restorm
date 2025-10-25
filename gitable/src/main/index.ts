@@ -79,6 +79,20 @@ function setupIPC(): void {
         break
     }
   })
+
+  // Developer Tools IPC handler
+  ipcMain.handle('devtools:toggle', () => {
+    const mainWindow = BrowserWindow.getFocusedWindow()
+    if (mainWindow) {
+      if (mainWindow.webContents.isDevToolsOpened()) {
+        mainWindow.webContents.closeDevTools()
+        logger.info('Developer Tools closed')
+      } else {
+        mainWindow.webContents.openDevTools()
+        logger.info('Developer Tools opened')
+      }
+    }
+  })
   
   logger.info('✅ IPC handlers setup complete')
 }
