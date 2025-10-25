@@ -31,6 +31,11 @@ contextBridge.exposeInMainWorld('api', {
     log: async (level: string, message: string, meta?: Record<string, unknown>): Promise<void> => {
       await ipcRenderer.invoke('logger:log', { level, message, meta })
     }
+  },
+
+  // Developer Tools API
+  toggleDeveloperTools: async (): Promise<void> => {
+    await ipcRenderer.invoke('devtools:toggle')
   }
 })
 

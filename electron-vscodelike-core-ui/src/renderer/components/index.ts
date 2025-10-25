@@ -31,6 +31,10 @@ export type { IButtonOptions, IButtonStyles, IButtonWithDropdownOptions, ButtonP
 export { SelectBox, SelectBoxNative, SelectBoxList, defaultSelectBoxStyles } from './SelectBox/index'
 export type { ISelectBoxDelegate, ISelectBoxOptions, ISelectOptionItem, ISelectBoxStyles, ISelectData, SelectBoxProps, SelectBoxNativeProps, SelectBoxListProps } from './SelectBox/index'
 
+// MenuBar exports
+export { MenuBar, MenuBarItem, MenuItem, MenuItemSeparator } from './MenuBar/index'
+export type { MenuBarProps, MenuItemProps, MenuItemSeparatorProps, MenuBarState, MenuItemState } from './MenuBar/index'
+
 // Other exports
 export { CustomDropdown, CustomTabs, SettingsTreeView, MonacoWorkbench }
 export type { Tab } from './CustomTabs'

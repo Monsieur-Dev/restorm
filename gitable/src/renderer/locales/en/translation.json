@@ -17,6 +17,36 @@
       "lists": "Lists",
       "text": "Text Variants"
     }
+  },
+  "menuBar": {
+    "file": "File",
+    "edit": "Edit",
+    "view": "View",
+    "help": "Help",
+    "new": "New",
+    "open": "Open",
+    "openRecent": "Open Recent",
+    "save": "Save",
+    "autoSave": "Auto-save",
+    "revert": "Revert",
+    "undo": "Undo",
+    "redo": "Redo",
+    "cut": "Cut",
+    "copy": "Copy",
+    "paste": "Paste",
+    "selectAll": "Select All",
+    "find": "Find",
+    "replace": "Replace",
+    "toggleWordWrap": "Toggle Word Wrap",
+    "toggleFullScreen": "Toggle Full Screen",
+    "zoomIn": "Zoom In",
+    "zoomOut": "Zoom Out",
+    "resetZoom": "Reset Zoom",
+    "toggleDeveloperTools": "Toggle Developer Tools",
+    "about": "About",
+    "documentation": "Documentation",
+    "reportIssue": "Report Issue",
+    "keyboardShortcuts": "Keyboard Shortcuts"
   }
 }
 

@@ -1,0 +1,300 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/* Menubar styles */
+
+.menubar {
+	display: flex;
+	flex-shrink: 1;
+	box-sizing: border-box;
+	height: 30px;
+	overflow: hidden;
+	background-color: transparent !important;
+	width: fit-content !important;
+	min-width: auto !important;
+	max-width: none !important;
+}
+
+.menubar.overflow-menu-only {
+	width: 38px;
+}
+
+.fullscreen .menubar:not(.compact) {
+	margin: 0px;
+	padding: 4px 5px;
+}
+
+.menubar > .menubar-menu-button {
+	display: flex;
+	align-items: center;
+	box-sizing: border-box;
+	cursor: default;
+	-webkit-app-region: no-drag;
+	zoom: 1;
+	white-space: nowrap;
+	outline: 0 !important;
+	height: 30px;
+	padding: 0 8px;
+}
+
+.menubar:not(.compact) > .menubar-menu-button:focus .menubar-menu-title {
+	outline-width: 1px;
+	outline-style: solid;
+	outline-offset: -1px;
+	outline-color: var(--vscode-focusBorder);
+}
+
+.menubar.compact {
+	flex-shrink: 0;
+	overflow: visible; /* to avoid the compact menu to be repositioned when clicking */
+}
+
+.menubar.compact > .menubar-menu-button {
+	width: 100%;
+	height: 100%;
+	padding: 0px;
+}
+
+.menubar-menu-title {
+	padding: 4px 8px;
+	border-radius: 5px;
+	font-size: 13px;
+	line-height: 1.2;
+	height: auto !important;
+	max-height: 22px !important;
+	display: flex;
+	align-items: center;
+}
+
+.menubar .menubar-menu-items-holder {
+	position: fixed;
+	left: 0px;
+	opacity: 1;
+	z-index: 2000;
+}
+
+.menubar.compact .menubar-menu-items-holder {
+	position: fixed;
+}
+
+.menubar .menubar-menu-items-holder.monaco-menu-container {
+	outline: 0;
+	border: none;
+}
+
+.menubar .menubar-menu-items-holder.monaco-menu-container :focus {
+	outline: 0;
+}
+
+/* Custom styles for proper menu sizing */
+.menubar {
+	height: 30px !important;
+	max-height: 30px !important;
+	min-height: 30px !important;
+}
+
+.menubar-menu-button {
+	height: 30px !important;
+	max-height: 30px !important;
+	min-height: 30px !important;
+	padding: 0 0px !important;
+}
+
+.menubar-menu-items-holder {
+	width: 300px !important;
+	min-width: 300px !important;
+	max-width: 300px !important;
+	background-color: var(--vscode-menu-background, #252526) !important;
+	box-shadow: 5px 5px 5px  rgba(0,0,0,0.5) !important;
+}
+
+.monaco-menu {
+	background-color: var(--vscode-menu-background, #252526) !important;
+}
+
+.actions-container {
+	background-color: var(--vscode-menu-background, #252526) !important;
+	list-style: none !important;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+.action-item {
+	height: auto !important;
+	min-height: 22px;
+	max-height: none !important;
+	list-style: none !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	display: block !important;
+}
+
+.action-menu-item {
+	height: auto !important;
+	min-height: 22px;
+	max-height: none !important;
+	padding: 4px 8px !important;
+	line-height: 1.4 !important;
+	background-color: transparent !important;
+	color: var(--vscode-menu-foreground, #cccccc) !important;
+	border: none !important;
+	text-decoration: none !important;
+	cursor: pointer !important;
+}
+
+.action-menu-item:hover,
+.action-menu-item.submenu-open {
+	background-color: var(--vscode-list-hoverBackground, #2a2d2e) !important;
+	color: var(--vscode-list-hoverForeground, #ffffff) !important;
+}
+
+.action-menu-item:focus {
+	background-color: var(--vscode-list-activeSelectionBackground, #094771) !important;
+	color: var(--vscode-list-activeSelectionForeground, #ffffff) !important;
+	outline: none !important;
+}
+
+.action-menu-item.disabled {
+	opacity: 0.6 !important;
+	cursor: default !important;
+	color: var(--vscode-disabledForeground, #6a6a6a) !important;
+}
+
+.action-menu-item.disabled:hover {
+	background-color: transparent !important;
+	color: var(--vscode-disabledForeground, #6a6a6a) !important;
+}
+
+/* Separator styles */
+.action-item.separator {
+	height: 1px !important;
+	min-height: 1px !important;
+	margin: 4px 0 !important;
+	padding: 0 !important;
+}
+
+.action-menu-item.separator {
+	height: 1px !important;
+	min-height: 1px !important;
+	background-color: var(--vscode-menu-separatorBackground, #454545) !important;
+	border: none !important;
+	padding: 0 !important;
+	margin: 4px 8px !important;
+}
+
+/* Keybinding styles */
+.keybinding {
+	color: var(--vscode-descriptionForeground, #8c8c8c) !important;
+	font-size: 11px !important;
+	margin-left: 0 !important;
+	padding-left: 0 !important;
+}
+
+/* Icon styles */
+.codicon {
+	color: var(--vscode-menu-foreground, #cccccc) !important;
+	font-size: 16px !important;
+	width: 16px !important;
+	height: 16px !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+}
+
+.codicon-placeholder {
+	width: 16px !important;
+	height: 16px !important;
+	display: inline-block !important;
+}
+
+/* Reset all list styles to prevent bullet points */
+.monaco-menu ul,
+.monaco-menu li,
+.actions-container ul,
+.actions-container li,
+.menubar-menu-items-holder ul,
+.menubar-menu-items-holder li {
+	list-style: none !important;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+/* Ensure proper display for menu items */
+.monaco-menu ul {
+	display: block !important;
+}
+
+.monaco-menu li {
+	display: block !important;
+}
+
+/* Menu item layout improvements */
+.action-menu-item {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: space-between !important;
+	width: 100% !important;
+	max-width: 100% !important;
+	box-sizing: border-box !important;
+}
+
+.action-menu-item .menu-content {
+	display: flex !important;
+	align-items: center !important;
+	flex: 1 !important;
+	gap: 8px !important;
+	min-width: 0 !important;
+	overflow: hidden !important;
+}
+
+.action-menu-item .menu-right {
+	display: flex !important;
+	align-items: center !important;
+	gap: 8px !important;
+	flex-shrink: 0 !important;
+}
+
+.action-menu-item .action-label {
+	flex: 1 !important;
+	min-width: 0 !important;
+	overflow: hidden !important;
+	text-overflow: ellipsis !important;
+	white-space: nowrap !important;
+}
+
+.menubar .toolbar-toggle-more {
+	width: 22px;
+	height: 22px;
+	padding: 0 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	vertical-align: sub;
+}
+
+.menubar.compact .toolbar-toggle-more {
+	position: relative;
+	left: 0px;
+	top: 0px;
+	cursor: pointer;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.menubar:not(.compact) .menubar-menu-button:first-child .toolbar-toggle-more::before,
+.menubar.compact .toolbar-toggle-more::before {
+	content: var(--vscode-icon-menu-content) !important;
+	font-family: var(--vscode-icon-menu-font-family) !important;
+}
+
+/* Match behavior of outline for activity bar icons */
+.menubar.compact > .menubar-menu-button.open .menubar-menu-title,
+.menubar.compact > .menubar-menu-button:focus .menubar-menu-title,
+.menubar.compact > .menubar-menu-button:hover .menubar-menu-title{
+	outline-width: 1px !important;
+	outline-offset: -8px !important;
+}

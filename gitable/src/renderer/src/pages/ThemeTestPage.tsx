@@ -1,6 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useTheme, CustomTabs, logger, SelectBox } from 'electron-vscodelike-core-ui/renderer'
+import { MenuBar, MenuBarItem, MenuItem, MenuItemSeparator } from '../../../../../electron-vscodelike-core-ui/src/renderer/components/MenuBar'
 import type { Tab } from 'electron-vscodelike-core-ui/renderer'
 import { 
   InputsTab, 
@@ -22,6 +23,12 @@ interface Theme {
 const ThemeTestPage: React.FC = () => {
   const { t } = useTranslation()
   const { themes, currentThemeId, setTheme } = useTheme()
+
+  const handleToggleDeveloperTools = async (): Promise<void> => {
+    // Send message to main process to toggle dev tools
+    await window.api.toggleDeveloperTools()
+    logger.info('Toggle Developer Tools')
+  }
 
   const handleThemeChange = (data: { selected: string; index: number }): void => {
     logger.info('handleThemeChange', { data })
@@ -62,6 +69,82 @@ const ThemeTestPage: React.FC = () => {
         color: 'var(--vscode-editor-foreground)'
       }}
     >
+      {/* MenuBar */}
+      <MenuBar>
+        <MenuBarItem title={t('menuBar.file')}>
+          <MenuItem 
+            title={t('menuBar.new')} 
+            shortcut="Ctrl+N" 
+            onClick={() => { logger.info('New file') }} 
+          />
+          <MenuItem 
+            title={t('menuBar.open')} 
+            shortcut="Ctrl+O" 
+            onClick={() => { logger.info('Open file') }} 
+          />
+          <MenuItem title={t('menuBar.openRecent')}>
+            <MenuItem 
+              title="File 1" 
+              onClick={() => { logger.info('Recent file 1') }} 
+            />
+            <MenuItem 
+              title="File 2" 
+              onClick={() => { logger.info('Recent file 2') }} 
+            />
+            <MenuItem 
+              title="File 3" 
+              onClick={() => { logger.info('Recent file 3') }} 
+            />
+          </MenuItem>
+          <MenuItem 
+            title={t('menuBar.save')} 
+            shortcut="Ctrl+S" 
+            onClick={() => { logger.info('Save file') }} 
+          />
+          <MenuItemSeparator />
+          <MenuItem 
+            title={t('menuBar.autoSave')} 
+            checked 
+            onClick={() => { logger.info('Auto-save') }} 
+          />
+          <MenuItemSeparator />
+          <MenuItem 
+            title={t('menuBar.revert')} 
+            disabled 
+            onClick={() => { logger.info('Revert file') }} 
+          />
+        </MenuBarItem>
+        <MenuBarItem title={t('menuBar.edit')}>
+          <MenuItem 
+            title={t('menuBar.undo')} 
+            shortcut="Ctrl+Z" 
+            onClick={() => { logger.info('Undo') }} 
+          />
+          <MenuItem 
+            title={t('menuBar.redo')} 
+            shortcut="Ctrl+Y" 
+            onClick={() => { logger.info('Redo') }} 
+          />
+        </MenuBarItem>
+        <MenuBarItem title={t('menuBar.view')}>
+          <MenuItem 
+            title={t('menuBar.toggleDeveloperTools')} 
+            shortcut="F12" 
+            onClick={() => { void handleToggleDeveloperTools() }} 
+          />
+          <MenuItemSeparator />
+          <MenuItem title="Test Submenu (100 items)">
+            {Array.from({ length: 100 }, (_, index) => (
+              <MenuItem 
+                key={index}
+                title={`Test Item ${index + 1}`} 
+                onClick={() => { logger.info(`Clicked test item ${index + 1}`) }} 
+              />
+            ))}
+          </MenuItem>
+        </MenuBarItem>
+      </MenuBar>
+
       {/* Header with theme selector */}
       <div
         style={{
