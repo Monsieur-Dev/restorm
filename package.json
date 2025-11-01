@@ -13,7 +13,7 @@
     "dev": "cd gitable && cross-env ELECTRON_DISABLE_SANDBOX=1 npx electron-vite dev",
     "build:core-ui": "cd electron-vscodelike-core-ui && npm run build",
     "build:gitable": "cd gitable && npm run build",
-    "build": "npm run build:core-ui && npm run build:gitable",
+    "build": "npm run build:core-ui && cd gitable && npm install ../electron-vscodelike-core-ui && npm run build",
     "lint": "cd gitable && npm run lint"
   },
   "devDependencies": {

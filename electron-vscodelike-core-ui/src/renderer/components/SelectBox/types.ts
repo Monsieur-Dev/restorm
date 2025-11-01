@@ -1,6 +1,6 @@
 // Note: Event and IDisposable are not available in React context
 // These are kept for interface compatibility with VSCode
-type Event<T> = (listener: (e: T) => any) => any
+type Event<T> = (listener: (e: T) => void) => void
 interface IDisposable {
   dispose(): void
 }
@@ -34,7 +34,7 @@ export interface ISelectOptionItem {
   decoratorRight?: string
   description?: string
   descriptionIsMarkdown?: boolean
-  readonly descriptionMarkdownActionHandler?: any // MarkdownActionHandler type
+  readonly descriptionMarkdownActionHandler?: (href: string) => void // MarkdownActionHandler type
   isDisabled?: boolean
 }
 

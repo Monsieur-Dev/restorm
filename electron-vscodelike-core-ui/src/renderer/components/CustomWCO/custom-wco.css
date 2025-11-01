@@ -1,0 +1,49 @@
+/* Custom Window Control Overlay (WCO) styles */
+
+.custom-wco {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  -webkit-app-region: no-drag;
+}
+
+.window-controls-container {
+  display: flex;
+  align-items: center;
+  padding-right: 2px;
+}
+
+/* Window control buttons */
+.window-button {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  color: #c8c8c8;
+  position: relative;
+  border-radius: 50%; /* pour effet circulaire au hover */
+  transition: background-color 0.15s, color 0.15s;
+  -webkit-app-region: no-drag;
+}
+
+/* Minimize button icon positioning */
+.window-button.minimize .codicon {
+  transform: translateY(4px);
+}
+
+/* Hover effects */
+.window-button:hover::before {
+  content: "";
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.1);
+  -webkit-app-region: no-drag;
+}
+
+.window-button:hover {
+  color: #ffffff;
+}

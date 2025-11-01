@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../../types/theme'
 import { logger } from '../services/logger'
 
-interface UseThemeReturn {
+export interface UseThemeReturn {
   themes: ThemeInfo[]
   currentThemeId: string | null
   currentTheme: ThemeDefinition | null
@@ -42,9 +42,60 @@ export function useTheme(): UseThemeReturn {
   }, [])
 
   /**
+   * Convert CSS color to hex format
+   * Handles rgb/rgba formats and returns hex
+   */
+  const cssColorToHex = useCallback((color: string): string => {
+    // If already hex, return as is
+    if (color.startsWith('#')) {
+      return color
+    }
+    
+    // If rgb/rgba, convert to hex
+    const rgbMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/)
+    if (rgbMatch && rgbMatch[1] && rgbMatch[2] && rgbMatch[3]) {
+      const r = parseInt(rgbMatch[1], 10).toString(16).padStart(2, '0')
+      const g = parseInt(rgbMatch[2], 10).toString(16).padStart(2, '0')
+      const b = parseInt(rgbMatch[3], 10).toString(16).padStart(2, '0')
+      return `#${r}${g}${b}`
+    }
+    
+    // Fallback to default
+    return color
+  }, [])
+
+  /**
+   * Update WCO colors based on current theme
+   */
+  const updateWCOColors = useCallback(async () => {
+    // Only update WCO on Windows
+    if (typeof window !== 'undefined' && window.api?.theme?.updateWCO) {
+      const root = document.documentElement
+      const computedStyle = getComputedStyle(root)
+      
+      // Get titleBar colors from CSS variables
+      const backgroundColor = computedStyle.getPropertyValue('--vscode-titleBar-activeBackground').trim() || '#181818'
+      const symbolColor = computedStyle.getPropertyValue('--vscode-titleBar-activeForeground').trim() || '#cccccc'
+      
+      // Convert to hex if needed
+      const bgHex = cssColorToHex(backgroundColor)
+      const symbolHex = cssColorToHex(symbolColor)
+      
+      try {
+        await window.api.theme.updateWCO({
+          backgroundColor: bgHex,
+          symbolColor: symbolHex
+        })
+      } catch (err) {
+        logger.error('Failed to update WCO colors', { error: String(err) })
+      }
+    }
+  }, [cssColorToHex])
+
+  /**
    * Apply CSS variables to the document
    */
-  const applyCSSVariables = useCallback((variables: ThemeVariables) => {
+  const applyCSSVariables = useCallback(async (variables: ThemeVariables) => {
     const root = document.documentElement
     
     // Clear existing VSCode variables
@@ -59,7 +110,14 @@ export function useTheme(): UseThemeReturn {
     Object.entries(variables).forEach(([key, value]) => {
       root.style.setProperty(key, value)
     })
-  }, [])
+    
+    // Update WCO colors after a short delay to ensure CSS is applied
+    setTimeout(() => {
+      updateWCOColors().catch((err) => {
+        logger.error('Failed to update WCO after CSS variables apply', { error: String(err) })
+      })
+    }, 50)
+  }, [updateWCOColors])
 
   /**
    * Set and apply a theme
@@ -78,7 +136,7 @@ export function useTheme(): UseThemeReturn {
       }
 
       // Apply CSS variables
-      applyCSSVariables(themeData.variables)
+      await applyCSSVariables(themeData.variables)
 
       // Update data-theme attribute for compatibility
       const themeInfo = themes.find(t => t.id === themeId)
@@ -129,7 +187,7 @@ export function useTheme(): UseThemeReturn {
             await window.api.theme.load(themeId)
           
           if (themeData) {
-            applyCSSVariables(themeData.variables)
+            await applyCSSVariables(themeData.variables)
             
             const themeInfo = themeList.find(t => t.id === themeId)
             if (themeInfo) {

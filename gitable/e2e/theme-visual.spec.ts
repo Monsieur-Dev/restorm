@@ -1,6 +1,3 @@
-/* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/await-thenable */
-/* eslint-disable @typescript-eslint/prefer-for-of */
 import { test, expect } from '@playwright/test'
 import { _electron as electron, type ElectronApplication, type Page } from 'playwright'
 import { join } from 'path'
@@ -44,18 +41,14 @@ test.describe('VSCode Themes Visual Tests', () => {
     await page.waitForTimeout(1000)
 
     // Get all available themes
-    const themeSelector = await page.locator('#theme-selector')
+    const themeSelector = page.locator('#theme-selector')
     const options = await themeSelector.locator('option').all()
 
-    console.log(`Found ${options.length} themes`)
-
-    for (let i = 0; i < options.length; i++) {
-      const themeValue = await options[i].getAttribute('value')
-      const themeName = await options[i].textContent()
+    for (const option of options) {
+      const themeValue = await option.getAttribute('value')
+      const themeName = await option.textContent()
 
       if (!themeValue || !themeName) continue
-
-      console.log(`Testing theme: ${themeName}`)
 
       // Select the theme
       await themeSelector.selectOption(themeValue)
@@ -67,8 +60,6 @@ test.describe('VSCode Themes Visual Tests', () => {
         path: `test-results/themes/${sanitizedName}.png`,
         fullPage: true
       })
-
-      console.log(`  ✓ Screenshot saved: ${sanitizedName}.png`)
     }
   })
 
@@ -78,7 +69,7 @@ test.describe('VSCode Themes Visual Tests', () => {
     await page.waitForTimeout(1000)
 
     // Select a specific theme (Monokai)
-    const themeSelector = await page.locator('#theme-selector')
+    const themeSelector = page.locator('#theme-selector')
     const options = await themeSelector.locator('option').all()
 
     // Find Monokai theme
@@ -102,7 +93,6 @@ test.describe('VSCode Themes Visual Tests', () => {
       })
 
       expect(backgroundColor).toBeTruthy()
-      console.log(`Monokai background color: ${backgroundColor}`)
     }
   })
 
@@ -124,7 +114,7 @@ test.describe('VSCode Themes Visual Tests', () => {
     ]
 
     for (const section of sections) {
-      const element = await page.locator(`text=${section}`).first()
+      const element = page.locator(`text=${section}`).first()
       await expect(element).toBeVisible()
     }
   })

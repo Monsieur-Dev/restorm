@@ -91,7 +91,7 @@ const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault()
-              handlePrimaryClick(e as any)
+              handlePrimaryClick(e as unknown as React.MouseEvent<HTMLAnchorElement>)
             }
           }}
           aria-disabled={options.disabled}

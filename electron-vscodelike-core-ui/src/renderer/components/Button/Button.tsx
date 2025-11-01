@@ -37,7 +37,7 @@ const Button: React.FC<ButtonProps> = ({
 
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
-      onClick?.(event as any)
+      onClick?.(event as unknown as React.MouseEvent<HTMLAnchorElement>)
     } else if (event.key === 'Escape') {
       event.preventDefault()
       buttonRef.current?.blur()

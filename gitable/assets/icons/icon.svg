@@ -1,0 +1,18 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="#2ECC71"/>
+  
+  <!-- Git branch icon simplified -->
+  <g transform="translate(128, 128)">
+    <!-- Branch line -->
+    <path d="M 128 64 Q 128 32 96 32" stroke="#FFFFFF" stroke-width="32" fill="none" stroke-linecap="round"/>
+    <path d="M 64 96 Q 32 96 32 128" stroke="#FFFFFF" stroke-width="32" fill="none" stroke-linecap="round"/>
+    <path d="M 32 160 L 128 160" stroke="#FFFFFF" stroke-width="32" fill="none" stroke-linecap="round"/>
+    
+    <!-- Circle nodes -->
+    <circle cx="96" cy="64" r="24" fill="#FFFFFF"/>
+    <circle cx="64" cy="128" r="24" fill="#FFFFFF"/>
+    <circle cx="128" cy="160" r="24" fill="#FFFFFF"/>
+  </g>
+</svg>
+

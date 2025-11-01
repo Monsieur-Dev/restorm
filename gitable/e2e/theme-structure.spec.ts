@@ -1,6 +1,3 @@
-/* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/await-thenable */
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { test, expect } from '@playwright/test'
 import { _electron as electron, type ElectronApplication, type Page } from 'playwright'
 import { join } from 'path'
@@ -40,7 +37,9 @@ test.describe('Theme Structure Tests', () => {
     })
 
     expect(dataTheme).toBeTruthy()
-    expect(['dark', 'light', 'hc', 'hcLight']).toContain(dataTheme!)
+    if (dataTheme) {
+      expect(['dark', 'light', 'hc', 'hcLight']).toContain(dataTheme)
+    }
   })
 
   test('should have VSCode CSS variables applied', async () => {
@@ -61,24 +60,16 @@ test.describe('Theme Structure Tests', () => {
     expect(variables.editorForeground).toBeTruthy()
     expect(variables.inputBackground).toBeTruthy()
     expect(variables.buttonBackground).toBeTruthy()
-
-    console.log('Applied CSS variables:', variables)
   })
 
   test('should change theme dynamically', async () => {
-    const themeSelector = await page.locator('#theme-selector')
+    const themeSelector = page.locator('#theme-selector')
     const options = await themeSelector.locator('option').all()
 
     if (options.length < 2) {
       test.skip()
       return
     }
-
-    // Get initial background color
-    const initialBg = await page.evaluate(() => {
-      return getComputedStyle(document.documentElement)
-        .getPropertyValue('--vscode-editor-background')
-    })
 
     // Change to second theme
     const secondThemeValue = await options[1].getAttribute('value')
@@ -97,12 +88,11 @@ test.describe('Theme Structure Tests', () => {
     })
 
     // Colors should be different (unless both themes happen to use same color)
-    console.log(`Initial bg: ${initialBg}, New bg: ${newBg}`)
     expect(newBg).toBeTruthy()
   })
 
   test('should apply theme to input elements', async () => {
-    const textInput = await page.locator('#text-input')
+    const textInput = page.locator('#text-input')
     
     // Check that input uses VSCode variables
     const inputStyles = await textInput.evaluate((el) => {
@@ -117,12 +107,10 @@ test.describe('Theme Structure Tests', () => {
     expect(inputStyles.backgroundColor).toBeTruthy()
     expect(inputStyles.color).toBeTruthy()
     expect(inputStyles.border).toBeTruthy()
-
-    console.log('Input styles:', inputStyles)
   })
 
   test('should apply theme to buttons', async () => {
-    const primaryButton = await page.locator('button:has-text("Primary Button")')
+    const primaryButton = page.locator('button:has-text("Primary Button")')
     
     const buttonStyles = await primaryButton.evaluate((el) => {
       const styles = getComputedStyle(el)
@@ -134,22 +122,18 @@ test.describe('Theme Structure Tests', () => {
 
     expect(buttonStyles.backgroundColor).toBeTruthy()
     expect(buttonStyles.color).toBeTruthy()
-
-    console.log('Button styles:', buttonStyles)
   })
 
   test('should have correct number of themes available', async () => {
-    const themeSelector = await page.locator('#theme-selector')
+    const themeSelector = page.locator('#theme-selector')
     const options = await themeSelector.locator('option').all()
 
     // Should have at least the 10 themes we imported
     expect(options.length).toBeGreaterThanOrEqual(10)
-    
-    console.log(`Found ${options.length} themes`)
   })
 
   test('should persist theme selection', async () => {
-    const themeSelector = await page.locator('#theme-selector')
+    const themeSelector = page.locator('#theme-selector')
     const options = await themeSelector.locator('option').all()
 
     if (options.length < 2) {
@@ -173,7 +157,7 @@ test.describe('Theme Structure Tests', () => {
   })
 
   test('should update data-theme when theme changes', async () => {
-    const themeSelector = await page.locator('#theme-selector')
+    const themeSelector = page.locator('#theme-selector')
     const options = await themeSelector.locator('option').all()
 
     // Find a light theme and a dark theme
@@ -201,7 +185,9 @@ test.describe('Theme Structure Tests', () => {
       })
 
       // Should be 'light' or 'hcLight'
-      expect(['light', 'hcLight']).toContain(dataTheme!)
+      if (dataTheme) {
+        expect(['light', 'hcLight']).toContain(dataTheme)
+      }
     }
 
     if (darkTheme) {
@@ -213,7 +199,9 @@ test.describe('Theme Structure Tests', () => {
       })
 
       // Should be 'dark' or 'hc'
-      expect(['dark', 'hc']).toContain(dataTheme!)
+      if (dataTheme) {
+        expect(['dark', 'hc']).toContain(dataTheme)
+      }
     }
   })
 

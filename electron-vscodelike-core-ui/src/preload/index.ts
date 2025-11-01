@@ -24,6 +24,10 @@ contextBridge.exposeInMainWorld('api', {
     set: async (themeId: string): Promise<boolean> => {
       const result: unknown = await ipcRenderer.invoke('theme:set', themeId)
       return result as boolean
+    },
+    updateWCO: async (colors: { backgroundColor: string; symbolColor: string }): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('theme:update-wco', colors)
+      return result as boolean
     }
   },
 
@@ -32,6 +36,50 @@ contextBridge.exposeInMainWorld('api', {
     log: async (level: string, message: string, meta?: Record<string, unknown>): Promise<void> => {
       await ipcRenderer.invoke('logger:log', { level, message, meta })
     }
+  },
+
+  // Window controls API
+  minimizeWindow: async (): Promise<void> => {
+    await ipcRenderer.invoke('minimize-window')
+  },
+  
+  maximizeWindow: async (): Promise<void> => {
+    await ipcRenderer.invoke('maximize-window')
+  },
+  
+  closeWindow: async (): Promise<void> => {
+    await ipcRenderer.invoke('close-window')
+  },
+
+  // Developer Tools API
+  toggleDeveloperTools: async (): Promise<void> => {
+    await ipcRenderer.invoke('devtools:toggle')
+  },
+
+  // Window title API
+  setWindowTitle: async (title: string): Promise<void> => {
+    ipcRenderer.send('set-window-title', title)
+  },
+
+  // Window icon API
+  getWindowIcon: async (): Promise<string | undefined> => {
+    const result: unknown = await ipcRenderer.invoke('get-window-icon')
+    return result as string | undefined
   }
 })
 
+contextBridge.exposeInMainWorld('electronAPI', {
+  onPlatform: (cb: (platform: string) => void) => {
+    ipcRenderer.on('platform', (_, platform) => {
+      cb(platform);
+    });
+    // Request platform immediately
+    ipcRenderer.send('request-platform');
+  },
+  onWindowState: (cb: (state: string) => void) => {
+    ipcRenderer.on('window-state', (_, state) => cb(state));
+  },
+  sendAction: (action: string) => {
+    ipcRenderer.send('window-action', action);
+  }
+});

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/await-thenable, @typescript-eslint/no-confusing-void-expression */
 import { test, expect } from '@playwright/test'
 
 test.describe('Settings Page - VSCode Theme Integration', () => {
@@ -10,32 +9,33 @@ test.describe('Settings Page - VSCode Theme Integration', () => {
     await page.waitForSelector('.settings-editor', { timeout: 10000 })
     
     // Check that the main structure exists
-    const settingsEditor = await page.locator('.settings-editor')
+    const settingsEditor = page.locator('.settings-editor')
     await expect(settingsEditor).toBeVisible()
     
     // Check header
-    const header = await page.locator('.settings-header')
+    const header = page.locator('.settings-header')
     await expect(header).toBeVisible()
     
     // Check search input
-    const searchInput = await page.locator('.settings-search-input')
+    const searchInput = page.locator('.settings-search-input')
     await expect(searchInput).toBeVisible()
     
     // Check body
-    const body = await page.locator('.settings-body')
+    const body = page.locator('.settings-body')
     await expect(body).toBeVisible()
     
     // Check TOC (tree view)
-    const toc = await page.locator('.settings-toc-container')
+    const toc = page.locator('.settings-toc-container')
     await expect(toc).toBeVisible()
     
     // Check content area
-    const content = await page.locator('.settings-editor-content')
+    const content = page.locator('.settings-editor-content')
     await expect(content).toBeVisible()
     
     // Check that at least one setting item exists
-    const settingItems = await page.locator('.setting-item')
-    await expect(await settingItems.count()).toBeGreaterThan(0)
+    const settingItems = page.locator('.setting-item')
+    const count = await settingItems.count()
+    expect(count).toBeGreaterThan(0)
   })
   
   test('should have VSCode CSS variables applied', async ({ page }) => {
@@ -43,10 +43,12 @@ test.describe('Settings Page - VSCode Theme Integration', () => {
     await page.waitForSelector('.settings-editor')
     
     // Check that the data-theme attribute is set
-    const htmlElement = await page.locator('html')
+    const htmlElement = page.locator('html')
     const theme = await htmlElement.getAttribute('data-theme')
     expect(theme).toBeTruthy()
-    expect(['vscode-dark', 'vscode-light', 'vscode-hc-dark', 'vscode-hc-light']).toContain(theme)
+    if (theme) {
+      expect(['vscode-dark', 'vscode-light', 'vscode-hc-dark', 'vscode-hc-light']).toContain(theme)
+    }
     
     // Check that VSCode CSS variables are defined
     const editorBg = await page.evaluate(() => {
@@ -67,7 +69,7 @@ test.describe('Settings Page - VSCode Theme Integration', () => {
     await page.waitForTimeout(500)
     
     // Check that settings are filtered (some items should be hidden)
-    const settingItems = await page.locator('.setting-item:visible')
+    const settingItems = page.locator('.setting-item:visible')
     const count = await settingItems.count()
     expect(count).toBeGreaterThan(0)
   })
@@ -77,7 +79,7 @@ test.describe('Settings Page - VSCode Theme Integration', () => {
     await page.waitForSelector('.settings-toc-tree')
     
     // Click on a tree item
-    const firstTreeItem = await page.locator('.settings-tree-item').first()
+    const firstTreeItem = page.locator('.settings-tree-item').first()
     await firstTreeItem.click()
     
     // Check that the item is marked as active
@@ -89,15 +91,15 @@ test.describe('Settings Page - VSCode Theme Integration', () => {
     await page.waitForSelector('.settings-editor-content')
     
     // Check for checkbox (boolean control)
-    const checkbox = await page.locator('input[type="checkbox"]').first()
+    const checkbox = page.locator('input[type="checkbox"]').first()
     await expect(checkbox).toBeVisible()
     
     // Check for text input (string control)
-    const textInput = await page.locator('input[type="text"]').first()
+    const textInput = page.locator('input[type="text"]').first()
     await expect(textInput).toBeVisible()
     
     // Check for select (enum control)
-    const select = await page.locator('select').first()
+    const select = page.locator('select').first()
     await expect(select).toBeVisible()
   })
   
@@ -105,13 +107,13 @@ test.describe('Settings Page - VSCode Theme Integration', () => {
     await page.goto('http://localhost:5173')
     await page.waitForSelector('.setting-item')
     
-    const firstSetting = await page.locator('.setting-item').first()
+    const firstSetting = page.locator('.setting-item').first()
     
     // Hover over the setting
     await firstSetting.hover()
     
     // Check that gear icon is visible
-    const gearIcon = await firstSetting.locator('.setting-item-gear-icon')
+    const gearIcon = firstSetting.locator('.setting-item-gear-icon')
     await expect(gearIcon).toBeVisible()
   })
   
@@ -120,7 +122,7 @@ test.describe('Settings Page - VSCode Theme Integration', () => {
     await page.waitForSelector('.settings-group-title-label')
     
     // Check that category header has sticky positioning
-    const categoryHeader = await page.locator('.settings-group-title-label').first()
+    const categoryHeader = page.locator('.settings-group-title-label').first()
     const position = await categoryHeader.evaluate((el) => {
       return window.getComputedStyle(el).position
     })
