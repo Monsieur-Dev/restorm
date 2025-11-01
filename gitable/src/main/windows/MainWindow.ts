@@ -15,7 +15,7 @@ export class MainWindow extends BaseWindow {
       defaultHeight: 800,
       url: process.env['ELECTRON_RENDERER_URL'],
       file: join(__dirname, '../renderer/index.html'),
-      preloadScript: join(__dirname, '../preload/index.js')
+      iconPath: join(__dirname, '../../assets/icons/icon')
     }
     
     logger.info(`📋 Configuration: ${JSON.stringify(configuration, null, 2)}`)

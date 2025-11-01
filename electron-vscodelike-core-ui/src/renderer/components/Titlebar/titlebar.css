@@ -1,0 +1,106 @@
+/* Titlebar styles */
+
+.titlebar {
+	display: flex;
+	align-items: center;
+	width: 100%;
+	height: 30px;
+	box-sizing: border-box;
+	position: relative;
+	-webkit-app-region: drag;
+	background-color: var(--vscode-titleBar-activeBackground, #181818);
+	color: var(--vscode-titleBar-activeForeground, #cccccc);
+	font-size: 13px;
+	overflow: hidden;
+}
+
+/* Icon styles */
+.titlebar-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	padding: 0 8px;
+	-webkit-app-region: drag;
+	flex-shrink: 0;
+}
+.titlebar-icon img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	pointer-events: none;
+}
+
+/* Content area zones */
+.titlebar-left {
+	display: flex;
+	align-items: center;
+	height: 100%;
+	-webkit-app-region: no-drag;
+	flex-shrink: 0;
+}
+.titlebar-left > .titlebar-icon {
+	-webkit-app-region: drag !important;
+}
+
+.titlebar-center {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	-webkit-app-region: drag;
+	overflow: hidden;
+	min-width: 0;
+}
+
+.titlebar-right {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	height: 100%;
+	-webkit-app-region: no-drag;
+	flex-shrink: 0;
+}
+
+/* Title text */
+.titlebar-title {
+	padding: 0 12px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	-webkit-app-region: drag;
+}
+
+/* Window Controls Overlay support */
+.titlebar::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: env(titlebar-area-x, 0);
+	width: env(titlebar-area-width, 0);
+	height: env(titlebar-area-height, 0);
+	-webkit-app-region: no-drag;
+	pointer-events: none;
+}
+
+/* Ensure specific children are non-draggable */
+.titlebar-icon {
+	-webkit-app-region: no-drag;
+}
+
+.titlebar-controls {
+	-webkit-app-region: no-drag;
+}
+
+/* Border support */
+.titlebar {
+	border-bottom: 1px solid var(--vscode-titleBar-border, transparent);
+}
+
+/* Inactive state */
+.window-inactive .titlebar {
+	background-color: var(--vscode-titleBar-inactiveBackground, #1f1f1f);
+	color: var(--vscode-titleBar-inactiveForeground, #9d9d9d);
+}

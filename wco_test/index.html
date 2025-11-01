@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>WCO Cross-Platform Demo</title>
+
+  <!-- Codicons (icônes VS Code) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@vscode/codicons/dist/codicon.css">
+
+  <style>
+body {
+  margin: 0;
+  background: #1e1e1e;
+  color: #fff;
+  font-family: sans-serif;
+  overflow: hidden;
+}
+
+.titlebar {
+  -webkit-app-region: drag;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #2b2b2b;
+  user-select: none;
+}
+
+.window-title {
+  font-size: 13px;
+  color: #ccc;
+  padding-left: 10px;
+}
+
+.window-controls-container {
+  display: flex;
+  -webkit-app-region: no-drag;
+  align-items: center;
+  padding-right: 2px;
+}
+
+/* --- Boutons --- */
+.window-button {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  color: #c8c8c8;
+  position: relative;
+  border-radius: 50%; /* pour effet circulaire au hover */
+  transition: background-color 0.15s, color 0.15s;
+
+}
+.window-button.minimize .codicon {
+  transform: translateY(4px);
+}
+
+.window-button:hover::before {
+  content: "";
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.window-button:hover {
+  color: #ffffff;
+}
+
+
+.content {
+  padding: 16px;
+}
+
+  </style>
+</head>
+<body>
+  <div class="titlebar">
+    <div class="window-title">Mon App Electron</div>
+    <div class="window-controls-container" id="controls" hidden>
+      <div class="window-button minimize" id="minimize" title="Réduire">
+        <span class="codicon codicon-chrome-minimize"></span>
+      </div>
+      <div class="window-button maximize" id="maximize" title="Agrandir">
+        <span class="codicon codicon-chrome-maximize"></span>
+      </div>
+      <div class="window-button close" id="close" title="Fermer">
+        <span class="codicon codicon-chrome-close"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    <h1>Fenêtre Cross-Platform 🎨</h1>
+    <p>Comportement façon VS Code sur Linux, avec vrais boutons natifs ailleurs.</p>
+  </div>
+
+  <script>
+    // --- Thème clair/sombre automatique ---
+    const applyTheme = (dark) => {
+      document.body.classList.toggle('light', !dark);
+    };
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    applyTheme(media.matches);
+    media.addEventListener('change', (e) => applyTheme(e.matches));
+
+    // --- Gestion boutons Linux ---
+    window.electronAPI.onPlatform((platform) => {
+      if (platform === 'linux') {
+        const controls = document.getElementById('controls');
+        controls.hidden = false;
+
+        const minimize = document.getElementById('minimize');
+        const maximize = document.getElementById('maximize');
+        const close = document.getElementById('close');
+        const maximizeIcon = maximize.querySelector('.codicon');
+
+        minimize.onclick = () => window.electronAPI.sendAction('minimize');
+        maximize.onclick = () => window.electronAPI.sendAction('maximize');
+        close.onclick = () => window.electronAPI.sendAction('close');
+
+        // Changement d'icône quand la fenêtre est maximisée/restaurée
+        window.electronAPI.onWindowState((state) => {
+          const icon = maximize.querySelector('.codicon');
+          if (state === 'maximized') {
+            icon.classList.remove('codicon-chrome-maximize');
+            icon.classList.add('codicon-chrome-restore');
+            maximize.title = 'Restaurer';
+          } else {
+            icon.classList.remove('codicon-chrome-restore');
+            icon.classList.add('codicon-chrome-maximize');
+            maximize.title = 'Agrandir';
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

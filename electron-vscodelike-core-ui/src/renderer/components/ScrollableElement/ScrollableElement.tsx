@@ -190,7 +190,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
   }, [scrollTop, scrollLeft]);
 
   // Handle scroll
-  const handleScroll = useCallback((_event: React.UIEvent<HTMLDivElement>) => {
+  const handleScroll = useCallback(() => {
     if (!contentRef.current) return;
 
     const newScrollTop = contentRef.current.scrollTop;

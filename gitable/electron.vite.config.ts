@@ -14,17 +14,6 @@ export default defineConfig({
       }
     }
   },
-  preload: {
-    plugins: [externalizeDepsPlugin()],
-    build: {
-      outDir: 'dist/preload',
-      rollupOptions: {
-        input: {
-          index: resolve(__dirname, 'src/preload/index.ts')
-        }
-      }
-    }
-  },
   renderer: {
     root: resolve(__dirname, 'src/renderer'),
     build: {
@@ -46,7 +35,8 @@ export default defineConfig({
     optimizeDeps: {
       // Ne pas optimiser electron-vscodelike-core-ui
       exclude: ['electron-vscodelike-core-ui']
-    }
+    },
+    publicDir: resolve(__dirname, 'assets')
   }
 })
 

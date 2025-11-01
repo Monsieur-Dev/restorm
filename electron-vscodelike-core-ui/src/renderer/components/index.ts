@@ -35,6 +35,14 @@ export type { ISelectBoxDelegate, ISelectBoxOptions, ISelectOptionItem, ISelectB
 export { MenuBar, MenuBarItem, MenuItem, MenuItemSeparator } from './MenuBar/index'
 export type { MenuBarProps, MenuItemProps, MenuItemSeparatorProps, MenuBarState, MenuItemState } from './MenuBar/index'
 
+// Titlebar exports
+export { Titlebar } from './Titlebar/index'
+export type { TitlebarProps } from './Titlebar/index'
+
+// CustomWCO exports
+export { CustomWCO } from './CustomWCO/index'
+export type { CustomWCOProps } from './CustomWCO/index'
+
 // Other exports
 export { CustomDropdown, CustomTabs, SettingsTreeView, MonacoWorkbench }
 export type { Tab } from './CustomTabs'

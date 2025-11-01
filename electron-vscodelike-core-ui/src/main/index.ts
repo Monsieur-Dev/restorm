@@ -1,6 +1,6 @@
 // Main process exports - with proper TypeScript types
 export { getThemeService, getStorageService, logger } from './services'
-export { BaseWindow } from './managers'
+export { BaseWindow, setupIPC, setupAppLifecycle, initializeApp, configureCommandLineSwitches } from './managers'
 export type { WindowConfiguration, WindowState } from './managers'
 
 // Re-export types for better type inference
