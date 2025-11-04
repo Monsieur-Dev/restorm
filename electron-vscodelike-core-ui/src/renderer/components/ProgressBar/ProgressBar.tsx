@@ -40,8 +40,8 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   const [isLongRunning, setIsLongRunning] = useState(false);
   const [currentValue, setCurrentValue] = useState(0);
   
-  const longRunningTimeoutRef = useRef<NodeJS.Timeout>();
-  const doneTimeoutRef = useRef<NodeJS.Timeout>();
+  const longRunningTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const doneTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Merge default styles with provided styles
   const mergedStyles = {

@@ -179,14 +179,14 @@ const MenuBar: React.FC<MenuBarProps> = ({
 
         return React.cloneElement(child, {
           key: index,
-          ref: (el: HTMLDivElement | null) => {
+          ref: ((el: HTMLDivElement | null) => {
             menuItemsRef.current[index] = el
-          },
+          }) as React.Ref<HTMLDivElement>,
           isFocused,
           isActive,
           onClick: () => handleMenuClick(index),
           onMouseEnter: () => handleMenuMouseEnter(index)
-        })
+        } as any)
       })}
     </div>
   )

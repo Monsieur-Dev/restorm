@@ -41,7 +41,11 @@ function useThemeTyped(): {
   const themesArray: unknown[] = Array.isArray(themesRaw) ? themesRaw : []
   const themes: SafeThemeInfo[] = themesArray as SafeThemeInfo[]
   const currentThemeIdRaw: unknown = result.currentThemeId
-  const currentThemeId: string | null = (currentThemeIdRaw === null || currentThemeIdRaw === undefined) ? null : String(currentThemeIdRaw)
+  const currentThemeId: string | null = (currentThemeIdRaw === null || currentThemeIdRaw === undefined) 
+    ? null 
+    : (typeof currentThemeIdRaw === 'string' || typeof currentThemeIdRaw === 'number')
+      ? String(currentThemeIdRaw)
+      : null
   const setThemeRaw: unknown = result.setTheme
   const setTheme: (themeId: string) => Promise<void> = async (themeId: string): Promise<void> => {
     const setThemeFunc = setThemeRaw as (themeId: string) => Promise<unknown>
@@ -52,7 +56,7 @@ function useThemeTyped(): {
 
 function getThemeByIdHelper(themes: readonly SafeThemeInfo[], themeId: string): SafeThemeInfo | undefined {
   for (const themeItem of themes) {
-    const themeIdValue = String(themeItem.id)
+    const themeIdValue = themeItem.id
     if (themeIdValue === themeId) {
       return themeItem
     }
@@ -75,7 +79,7 @@ const ThemeTestPage: React.FC = () => {
     if (currentThemeId && typeof currentThemeId === 'string') {
       const currentTheme = getThemeById(currentThemeId)
       if (currentTheme) {
-        const themeName = String(currentTheme.name)
+        const themeName = currentTheme.name
         const windowTitle = `${t('app.title')} - ${themeName}`
         void window.api.setWindowTitle(windowTitle)
       }
@@ -95,7 +99,7 @@ const ThemeTestPage: React.FC = () => {
     if (typeof index === 'number' && index >= 0 && index < themes.length) {
       const selectedTheme = themes[index]
       if (selectedTheme) {
-        const themeId = String(selectedTheme.id)
+        const themeId = selectedTheme.id
         void setTheme(themeId).catch((err: unknown) => {
           logger.error('Failed to change theme', { error: String(err) })
         })
@@ -105,9 +109,9 @@ const ThemeTestPage: React.FC = () => {
 
   const themeOptions: ThemeOption[] = []
   for (const themeItem of themes) {
-    const themeName = String(themeItem.name)
-    const themeType = String(themeItem.type)
-    const themeId = String(themeItem.id)
+    const themeName = themeItem.name
+    const themeType = themeItem.type
+    const themeId = themeItem.id
     themeOptions.push({
       text: `${themeName} (${themeType})`,
       description: `Theme ID: ${themeId}`,
@@ -209,8 +213,8 @@ const ThemeTestPage: React.FC = () => {
               {Array.from({ length: 100 }, (_, index) => (
                 <MenuItem 
                   key={index}
-                  title={`Test Item ${index + 1}`} 
-                  onClick={() => { logger.info(`Clicked test item ${index + 1}`) }} 
+                  title={`Test Item ${String(index + 1)}`} 
+                  onClick={() => { logger.info(`Clicked test item ${String(index + 1)}`) }} 
                 />
               ))}
             </MenuItem>

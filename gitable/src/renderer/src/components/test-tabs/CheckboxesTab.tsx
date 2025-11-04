@@ -51,7 +51,7 @@ const CheckboxesTab: React.FC = () => {
                   ]
                 }}
                 onSelect={(index: number) => {
-                  setRadioValue(`option${index + 1}`)
+                  setRadioValue(`option${String(index + 1)}`)
                 }}
               />
             </div>

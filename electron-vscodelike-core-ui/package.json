@@ -38,8 +38,8 @@
     "build:renderer": "tsc --project tsconfig.renderer.json",
     "merge-dist": "node scripts/merge-dist.js",
     "dev": "tsc --project tsconfig.main.json --watch & tsc --project tsconfig.renderer.json --watch",
-    "lint": "eslint . --ext .ts,.tsx --max-warnings 0",
-    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [
@@ -57,9 +57,9 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "electron": "^28.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "electron": "^39.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "peerDependenciesMeta": {
     "electron": {
@@ -74,22 +74,23 @@
   },
   "dependencies": {
     "@vscode/codicons": "^0.0.41",
-    "i18next": "^23.7.6",
-    "react-i18next": "^13.5.0",
-    "react-icons": "^4.12.0",
+    "i18next": "^25.6.0",
+    "react-i18next": "^16.2.4",
+    "react-icons": "^5.5.0",
     "winston": "^3.18.3"
   },
   "devDependencies": {
-    "@types/node": "^20.10.4",
-    "@types/react": "^18.2.42",
-    "@types/react-dom": "^18.2.17",
-    "@typescript-eslint/eslint-plugin": "^6.13.2",
-    "@typescript-eslint/parser": "^6.13.2",
-    "electron": "^28.0.0",
-    "eslint": "^8.55.0",
-    "eslint-plugin-react": "^7.33.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.5",
-    "typescript": "^5.3.3"
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@typescript-eslint/eslint-plugin": "^8.46.3",
+    "@typescript-eslint/parser": "^8.46.3",
+    "electron": "^39.0.0",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3"
   }
 }
