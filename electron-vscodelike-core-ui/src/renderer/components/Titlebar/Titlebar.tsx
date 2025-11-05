@@ -23,7 +23,7 @@ const Titlebar: React.FC<TitlebarProps> = ({
 
   // Fetch app icon if no custom icon is provided
   useEffect(() => {
-    if (!icon && typeof window !== 'undefined' && window.api?.getWindowIcon) {
+    if (!icon) {
       window.api.getWindowIcon().then((path) => {
         setAppIconPath(path)
       }).catch(() => {
@@ -33,8 +33,8 @@ const Titlebar: React.FC<TitlebarProps> = ({
   }, [icon])
 
   // Render icon
-  const renderIcon = () => {
-    const actualIcon = icon || appIconPath
+  const renderIcon = (): JSX.Element | null => {
+    const actualIcon = icon ?? appIconPath
     if (!actualIcon) return null
     
     if (typeof actualIcon === 'string') {
@@ -68,7 +68,7 @@ const Titlebar: React.FC<TitlebarProps> = ({
       
       {/* Center zone */}
       <div className="titlebar-center">
-        {centerContent || <span className="titlebar-title">{title}</span>}
+        {centerContent ?? <span className="titlebar-title">{title}</span>}
       </div>
       
       {/* Right zone */}

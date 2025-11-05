@@ -20,7 +20,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
 
   const hasSubmenu = React.Children.count(children) > 0
 
-  const handleClick = useCallback((event: React.MouseEvent) => {
+  const handleClick = useCallback((event: React.MouseEvent): void => {
     if (disabled) {
       event.preventDefault()
       return
@@ -34,7 +34,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
     onClick?.()
   }, [disabled, hasSubmenu, onClick])
 
-  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((event: React.KeyboardEvent): void => {
     if (disabled) return
 
     if (event.key === 'Enter' || event.key === ' ') {
@@ -54,7 +54,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
     }
   }, [disabled, hasSubmenu, onClick])
 
-  const handleMouseEnter = useCallback(() => {
+  const handleMouseEnter = useCallback((): void => {
     if (!disabled && hasSubmenu) {
       // Clear any existing timeout
       if (submenuTimeoutRef.current) {
@@ -68,7 +68,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
     }
   }, [disabled, hasSubmenu])
 
-  const handleMouseLeave = useCallback(() => {
+  const handleMouseLeave = useCallback((): void => {
     // Clear the timeout for showing submenu
     if (submenuTimeoutRef.current) {
       clearTimeout(submenuTimeoutRef.current)
@@ -78,18 +78,18 @@ const MenuItem: React.FC<MenuItemProps> = ({
     // The submenu will only close when clicking outside or pressing Escape
   }, [])
 
-  const handleSubmenuMouseEnter = useCallback(() => {
+  const handleSubmenuMouseEnter = useCallback((): void => {
     setShowSubmenu(true)
   }, [])
 
-  const handleSubmenuMouseLeave = useCallback(() => {
+  const handleSubmenuMouseLeave = useCallback((): void => {
     // Don't hide submenu when mouse leaves submenu - keep it open
     // The submenu will only close when clicking outside or pressing Escape
   }, [])
 
   // Close submenu when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: MouseEvent): void => {
       if (submenuRef.current && !submenuRef.current.contains(event.target as Node) && 
           itemRef.current && !itemRef.current.contains(event.target as Node)) {
         setShowSubmenu(false)
@@ -98,7 +98,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
 
     if (showSubmenu) {
       document.addEventListener('mousedown', handleClickOutside)
-      return () => document.removeEventListener('mousedown', handleClickOutside)
+      return () => { document.removeEventListener('mousedown', handleClickOutside); }
     }
     return undefined
   }, [showSubmenu])
@@ -134,14 +134,14 @@ const MenuItem: React.FC<MenuItemProps> = ({
     }
   }, [])
 
-  const renderIcon = () => {
+  const renderIcon = (): JSX.Element => {
     if (checked) {
       return <span className="codicon codicon-check" aria-hidden="true" />
     }
     return <span className="codicon-placeholder" aria-hidden="true" />
   }
 
-  const renderShortcut = () => {
+  const renderShortcut = (): React.ReactNode => {
     if (!shortcut) return null
     return (
       <span className="keybinding" aria-label={`Keyboard shortcut: ${shortcut}`}>
@@ -150,7 +150,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
     )
   }
 
-  const renderSubmenuIndicator = () => {
+  const renderSubmenuIndicator = (): JSX.Element => {
     if (!hasSubmenu) return <span className="codicon-placeholder" aria-hidden="true" />
     return <span className="codicon codicon-chevron-right" aria-hidden="true" />
   }
@@ -201,8 +201,8 @@ const MenuItem: React.FC<MenuItemProps> = ({
           style={{
             position: 'fixed',
             zIndex: 2000,
-            left: `${itemRef.current?.getBoundingClientRect()?.right || 0}px`,
-            top: `${itemRef.current?.getBoundingClientRect()?.top || 0}px`
+            left: `${itemRef.current?.getBoundingClientRect().right ?? 0}px`,
+            top: `${itemRef.current?.getBoundingClientRect().top ?? 0}px`
           }}
           onMouseEnter={handleSubmenuMouseEnter}
           onMouseLeave={handleSubmenuMouseLeave}

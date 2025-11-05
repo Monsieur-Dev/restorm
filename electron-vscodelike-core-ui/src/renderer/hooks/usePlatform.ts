@@ -1,9 +1,9 @@
-export const isMacintosh = navigator.platform.toUpperCase().indexOf('MAC') >= 0
+export const isMacintosh = navigator.platform.toUpperCase().includes('MAC')
 
-export const usePlatform = () => {
+export const usePlatform = (): { isMacintosh: boolean; isWindows: boolean; isLinux: boolean } => {
   return {
     isMacintosh,
-    isWindows: navigator.platform.toUpperCase().indexOf('WIN') >= 0,
-    isLinux: navigator.platform.toUpperCase().indexOf('LINUX') >= 0
+    isWindows: navigator.platform.toUpperCase().includes('WIN'),
+    isLinux: navigator.platform.toUpperCase().includes('LINUX')
   }
 }

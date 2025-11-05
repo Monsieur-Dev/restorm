@@ -26,7 +26,7 @@ const MonacoWorkbench: React.FC<MonacoWorkbenchProps> = ({
     isLinux && 'linux',
     border && 'border',
     fullscreen && 'fullscreen',
-    isMac && fontAliasing && `monaco-font-aliasing-${fontAliasing}`,
+    isMac ? `monaco-font-aliasing-${fontAliasing}` : '',
     className
   ].filter(Boolean).join(' ')
 

@@ -22,11 +22,11 @@ const SelectBox: React.FC<SelectBoxProps> = ({
       <SelectBoxNative
         options={options}
         selected={selected}
-        onDidSelect={onDidSelect || (() => {})}
-        selectBoxOptions={selectBoxOptions || {}}
+        onDidSelect={onDidSelect ?? (() => { return; })}
+        selectBoxOptions={selectBoxOptions ?? {}}
         styles={styles}
-        className={className || ''}
-        id={id || ''}
+        className={className}
+        id={id}
       />
     )
   }
@@ -35,8 +35,8 @@ const SelectBox: React.FC<SelectBoxProps> = ({
     <SelectBoxList
       options={options}
       selected={selected}
-      onDidSelect={onDidSelect || (() => {})}
-      selectBoxOptions={selectBoxOptions || {}}
+      onDidSelect={onDidSelect ?? (() => { return; })}
+      selectBoxOptions={selectBoxOptions ?? {}}
       styles={styles}
       className={className}
       id={id}

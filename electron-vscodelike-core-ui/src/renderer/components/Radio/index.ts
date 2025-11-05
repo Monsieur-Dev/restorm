@@ -1,2 +1,3 @@
-export { RadioGroup, defaultRadioStyles } from './Radio'
-export type { IRadioStyles, IRadioOptionItem, IRadioOptions, RadioGroupProps } from './Radio'
+export { RadioGroup } from './Radio'
+export { defaultRadioStyles } from './types'
+export type { IRadioStyles, IRadioOptionItem, IRadioOptions, RadioGroupProps } from './types'

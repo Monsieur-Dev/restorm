@@ -12,10 +12,12 @@ async function log(level: LogLevel, message: string, meta?: Record<string, unkno
   try {
     await window.api.logger.log(level, `[Renderer] ${message}`, meta)
   } catch (error) {
-    // Fallback to console if IPC fails (only in this error handler, unavoidable)
-    // We need console here as the IPC channel failed
-    if (typeof console !== 'undefined' && console.error) {
-      console.error('Failed to send log to main process:', error)
+    // Fallback to stderr if IPC fails, to avoid using console in renderer
+    const messageToWrite = `Failed to send log to main process: ${String(error)}\n`
+    try {
+      process.stderr.write(messageToWrite)
+    } catch {
+      // Swallow as last resort
     }
   }
 }

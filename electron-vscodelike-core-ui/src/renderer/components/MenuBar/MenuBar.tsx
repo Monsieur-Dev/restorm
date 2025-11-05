@@ -84,7 +84,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
             const titleElement = menuElement.querySelector('.menubar-menu-title')
             if (!titleElement) return false
             
-            const title = titleElement.textContent?.toLowerCase() || ''
+            const title = titleElement.textContent.toLowerCase() || ''
             return title.includes(key.toLowerCase())
           })
 
@@ -130,7 +130,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
 
   // Close menu when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: MouseEvent): void => {
       if (menubarRef.current && !menubarRef.current.contains(event.target as Node)) {
         setState({
           focusedMenuIndex: null,
@@ -142,7 +142,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
 
     if (state.isOpen) {
       document.addEventListener('mousedown', handleClickOutside)
-      return () => document.removeEventListener('mousedown', handleClickOutside)
+      return () => { document.removeEventListener('mousedown', handleClickOutside); }
     }
     return undefined
   }, [state.isOpen])
@@ -184,8 +184,8 @@ const MenuBar: React.FC<MenuBarProps> = ({
           },
           isFocused,
           isActive,
-          onClick: () => handleMenuClick(index),
-          onMouseEnter: () => handleMenuMouseEnter(index)
+          onClick: () => { handleMenuClick(index); },
+          onMouseEnter: () => { handleMenuMouseEnter(index); }
         })
       })}
     </div>

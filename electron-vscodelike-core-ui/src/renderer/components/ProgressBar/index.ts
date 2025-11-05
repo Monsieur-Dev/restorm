@@ -1,2 +1,3 @@
-export { ProgressBar, defaultProgressBarStyles } from './ProgressBar'
-export type { IProgressBarStyles, IProgressBarOptions, ProgressBarProps } from './ProgressBar'
+export { ProgressBar } from './ProgressBar'
+export { defaultProgressBarStyles } from './types'
+export type { IProgressBarStyles, IProgressBarOptions, ProgressBarProps } from './types'

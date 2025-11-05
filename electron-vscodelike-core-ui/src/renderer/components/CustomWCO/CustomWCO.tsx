@@ -10,7 +10,7 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
   className = '', 
   platform 
 }) => {
-  const [currentPlatform, setCurrentPlatform] = useState<string>(platform || '')
+  const [currentPlatform, setCurrentPlatform] = useState<string>(platform ?? '')
   const [isMaximized, setIsMaximized] = useState(false)
 
   useEffect(() => {
@@ -33,19 +33,19 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
     }
   }, [])
 
-  const handleMinimize = () => {
+  const handleMinimize = (): void => {
     if (window.electronAPI?.sendAction) {
       window.electronAPI.sendAction('minimize')
     }
   }
 
-  const handleMaximize = () => {
+  const handleMaximize = (): void => {
     if (window.electronAPI?.sendAction) {
       window.electronAPI.sendAction('maximize')
     }
   }
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     if (window.electronAPI?.sendAction) {
       window.electronAPI.sendAction('close')
     }

@@ -16,7 +16,7 @@ const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: MouseEvent): void => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false)
       }
@@ -24,7 +24,7 @@ const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
 
     if (isDropdownOpen) {
       document.addEventListener('mousedown', handleClickOutside)
-      return () => document.removeEventListener('mousedown', handleClickOutside)
+      return () => { document.removeEventListener('mousedown', handleClickOutside); }
     }
     return undefined
   }, [isDropdownOpen])
@@ -95,7 +95,7 @@ const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
             }
           }}
           aria-disabled={options.disabled}
-          aria-label={options.ariaLabel || label}
+          aria-label={options.ariaLabel ?? label}
           style={{
             color: 'var(--vscode-button-foreground)',
             backgroundColor: 'var(--vscode-button-background)'
@@ -134,7 +134,7 @@ const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
                 className="monaco-button-dropdown-action"
                 role="button"
                 tabIndex={0}
-                onClick={() => handleActionClick(action)}
+                onClick={() => { handleActionClick(action); }}
               >
                 {action.label}
               </a>

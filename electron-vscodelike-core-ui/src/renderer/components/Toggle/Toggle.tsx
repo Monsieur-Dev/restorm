@@ -1,41 +1,7 @@
 import React, { useState, useCallback } from 'react'
 import './toggle.css'
-
-export interface IToggleStyles {
-  readonly inputActiveOptionBorder: string | undefined;
-  readonly inputActiveOptionForeground: string | undefined;
-  readonly inputActiveOptionBackground: string | undefined;
-}
-
-export interface ICheckboxStyles {
-  readonly checkboxBackground: string | undefined;
-  readonly checkboxBorder: string | undefined;
-  readonly checkboxForeground: string | undefined;
-  readonly checkboxDisabledBackground: string | undefined;
-  readonly checkboxDisabledForeground: string | undefined;
-  readonly size?: number;
-}
-
-export interface ToggleProps {
-  isChecked: boolean;
-  onChange?: (checked: boolean, viaKeyboard: boolean) => void;
-  onKeyDown?: (event: React.KeyboardEvent) => void;
-  disabled?: boolean;
-  className?: string;
-  id?: string;
-  styles?: IToggleStyles;
-  icon?: string; // Codicon icon name (e.g. 'check')
-  actionClassName?: string;
-  notFocusable?: boolean;
-  children?: React.ReactNode;
-}
-
-// Default styles based on VSCode defaultStyles.ts
-export const defaultToggleStyles: IToggleStyles = {
-  inputActiveOptionBorder: 'var(--vscode-inputOption-activeBorder, #007ACC00)',
-  inputActiveOptionForeground: 'var(--vscode-inputOption-activeForeground, #FFFFFF)',
-  inputActiveOptionBackground: 'var(--vscode-inputOption-activeBackground, #0E639C50)'
-};
+import type { ToggleProps } from './types'
+import { defaultToggleStyles } from './types'
 
 const Toggle: React.FC<ToggleProps> = ({
   isChecked,
@@ -79,7 +45,7 @@ const Toggle: React.FC<ToggleProps> = ({
     'monaco-custom-toggle',
     checked ? 'checked' : '',
     !enabled ? 'disabled' : '',
-    actionClassName || '',
+    actionClassName ?? '',
     className
   ].filter(Boolean).join(' ');
 
@@ -124,7 +90,7 @@ const Toggle: React.FC<ToggleProps> = ({
       >
         {checked && (
           <span 
-            className={`codicon codicon-${icon || 'check'}`}
+            className={`codicon codicon-${icon ?? 'check'}`}
             style={{
               fontSize: '16px',
               color: 'var(--vscode-checkbox-foreground)',

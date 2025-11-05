@@ -26,15 +26,15 @@ const MenuBarItem = forwardRef<HTMLDivElement, MenuBarItemProps>(({
   const [calculatedHeight, setCalculatedHeight] = useState<string>('auto')
   const scrollableRef = useRef<HTMLDivElement>(null)
 
-  const handleClick = () => {
+  const handleClick = (): void => {
     onClick?.()
   }
 
-  const handleMouseEnter = () => {
+  const handleMouseEnter = (): void => {
     onMouseEnter?.()
   }
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = (): void => {
     // Do nothing for top-level menus - they should only open on click
   }
 
@@ -87,8 +87,8 @@ const MenuBarItem = forwardRef<HTMLDivElement, MenuBarItemProps>(({
         <div ref={scrollableRef} className="monaco-menu menubar-menu-items-holder monaco-menu-container" style={{
           position: 'fixed',
           zIndex: 2000,
-          left: `${titleRef.current?.getBoundingClientRect()?.left || 0}px`,
-          top: `${titleRef.current?.getBoundingClientRect()?.bottom || 0}px`
+          left: `${titleRef.current?.getBoundingClientRect().left ?? 0}px`,
+          top: `${titleRef.current?.getBoundingClientRect().bottom ?? 0}px`
         }}>
           <ScrollableElement
             options={{

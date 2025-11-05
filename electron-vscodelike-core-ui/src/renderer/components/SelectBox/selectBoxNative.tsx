@@ -58,7 +58,7 @@ const SelectBoxNative: React.FC<SelectBoxNativeProps> = ({
 
   // Apply styles when component mounts or styles change
   useEffect(() => {
-    if (selectRef.current && styles) {
+    if (selectRef.current) {
       const element = selectRef.current
       element.style.backgroundColor = styles.selectBackground ?? ''
       element.style.color = styles.selectForeground ?? ''
@@ -70,7 +70,7 @@ const SelectBoxNative: React.FC<SelectBoxNativeProps> = ({
   useEffect(() => {
     if (selectRef.current && selected >= 0 && selected < options.length) {
       selectRef.current.selectedIndex = selected
-      selectRef.current.title = options[selected]?.text || ''
+      selectRef.current.title = options[selected]?.text ?? ''
     }
   }, [selected, options])
 
@@ -89,8 +89,8 @@ const SelectBoxNative: React.FC<SelectBoxNativeProps> = ({
         onChange={handleChange}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
-        aria-label={selectBoxOptions?.ariaLabel}
-        aria-description={selectBoxOptions?.ariaDescription}
+        aria-label={selectBoxOptions.ariaLabel}
+        aria-description={selectBoxOptions.ariaDescription}
         disabled={false} // We'll handle disabled state through styling
       >
         {options.map((option, index) => (

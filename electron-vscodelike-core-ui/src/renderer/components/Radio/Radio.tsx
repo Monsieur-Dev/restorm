@@ -1,45 +1,6 @@
 import React, { useState, useCallback } from 'react'
 import './radio.css'
-
-export interface IRadioStyles {
-  readonly activeForeground?: string;
-  readonly activeBackground?: string;
-  readonly activeBorder?: string;
-  readonly inactiveForeground?: string;
-  readonly inactiveBackground?: string;
-  readonly inactiveHoverBackground?: string;
-  readonly inactiveBorder?: string;
-}
-
-export interface IRadioOptionItem {
-  readonly text: string;
-  readonly tooltip?: string;
-  readonly isActive?: boolean;
-  readonly disabled?: boolean;
-}
-
-export interface IRadioOptions {
-  readonly items: ReadonlyArray<IRadioOptionItem>;
-  readonly styles?: IRadioStyles;
-}
-
-export interface RadioGroupProps {
-  options: IRadioOptions;
-  onSelect?: (index: number) => void;
-  className?: string;
-  id?: string;
-}
-
-// Default styles based on VSCode inputColors.ts
-export const defaultRadioStyles: IRadioStyles = {
-  activeForeground: 'var(--vscode-radio-activeForeground)',
-  activeBackground: 'var(--vscode-radio-activeBackground)',
-  activeBorder: 'var(--vscode-radio-activeBorder)',
-  inactiveForeground: 'var(--vscode-radio-inactiveForeground)',
-  inactiveBackground: 'var(--vscode-radio-inactiveBackground)',
-  inactiveHoverBackground: 'var(--vscode-radio-inactiveHoverBackground)',
-  inactiveBorder: 'var(--vscode-radio-inactiveBorder)'
-};
+import type { RadioGroupProps } from './types'
 
 const RadioGroup: React.FC<RadioGroupProps> = ({
   options,
@@ -48,7 +9,8 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
   id
 }) => {
   const [activeIndex, setActiveIndex] = useState(() => {
-    return options.items.findIndex(item => item.isActive) ?? 0;
+    const idx = options.items.findIndex(item => item.isActive);
+    return idx === -1 ? 0 : idx;
   });
 
   const handleSelect = useCallback((index: number) => {
@@ -87,7 +49,7 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
           <button
             key={index}
             className={buttonClasses}
-            onClick={() => handleSelect(index)}
+            onClick={() => { handleSelect(index); }}
             disabled={item.disabled}
             title={item.tooltip}
             type="button"
