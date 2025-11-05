@@ -12,13 +12,13 @@ const ButtonWithDescription: React.FC<ButtonWithDescriptionProps> = ({
   children
 }) => {
   // Render icon if provided
-  const renderIcon = () => {
+  const renderIcon = (): JSX.Element | null => {
     if (!icon) return null
     return <span className={`codicon codicon-${icon}`} />
   }
 
   // Render description with icon support
-  const renderDescription = () => {
+  const renderDescription = (): React.ReactNode => {
     if (!description) return null
 
     // Simple icon parsing - look for $(iconName) pattern

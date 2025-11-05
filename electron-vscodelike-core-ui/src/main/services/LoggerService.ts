@@ -49,7 +49,7 @@ function parseLoggerConfig(): LoggerConfig {
  * Create Winston logger instance with appropriate configuration
  */
 function createLogger(): winston.Logger {
-  const isDev = process.env['NODE_ENV'] === 'development' || !(app?.isPackaged ?? false)
+  const isDev = process.env['NODE_ENV'] === 'development' || !app.isPackaged
   const config = parseLoggerConfig()
 
   // Determine log level

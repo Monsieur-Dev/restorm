@@ -1,42 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './scrollbars.css';
-
-export interface IScrollableElementStyles {
-  readonly scrollbarSliderBackground?: string;
-  readonly scrollbarSliderHoverBackground?: string;
-  readonly scrollbarSliderActiveBackground?: string;
-  readonly scrollbarShadow?: string;
-}
-
-export interface IScrollableElementOptions extends IScrollableElementStyles {
-  readonly useShadows?: boolean; // Show overflow shadows
-  readonly handleMouseWheel?: boolean; // Handle mouse wheel events
-  readonly mouseWheelSmoothScroll?: boolean; // Smooth scrolling
-  readonly horizontal?: 'auto' | 'visible' | 'hidden'; // Horizontal scrollbar visibility
-  readonly vertical?: 'auto' | 'visible' | 'hidden'; // Vertical scrollbar visibility
-  readonly horizontalScrollbarSize?: number; // Height in px (default: 10)
-  readonly verticalScrollbarSize?: number; // Width in px (default: 10)
-  readonly horizontalHasArrows?: boolean; // Show left/right arrows
-  readonly verticalHasArrows?: boolean; // Show up/down arrows
-  readonly arrowSize?: number; // Arrow size in px (default: 11)
-  readonly scrollByPage?: boolean; // Click on track scrolls by page
-}
-
-export interface ScrollableElementProps {
-  children: React.ReactNode;
-  options?: IScrollableElementOptions;
-  className?: string;
-  id?: string;
-  style?: React.CSSProperties;
-  onScroll?: (scrollTop: number, scrollLeft: number) => void;
-}
-
-export const defaultScrollableElementStyles: IScrollableElementStyles = {
-  scrollbarSliderBackground: 'var(--vscode-scrollbarSlider-background)',
-  scrollbarSliderHoverBackground: 'var(--vscode-scrollbarSlider-hoverBackground)',
-  scrollbarSliderActiveBackground: 'var(--vscode-scrollbarSlider-activeBackground)',
-  scrollbarShadow: 'var(--vscode-scrollbar-shadow)'
-};
+import type { ScrollableElementProps } from './types';
+import { defaultScrollableElementStyles } from './types';
 
 const HIDE_TIMEOUT = 500;
 
@@ -103,7 +68,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
     (mergedOptions.horizontal === 'auto' && isHorizontalScrollbarVisible);
 
   // Update dimensions
-  const updateDimensions = useCallback(() => {
+  const updateDimensions = useCallback((): void => {
     if (!containerRef.current || !contentRef.current) return;
 
     const container = containerRef.current;
@@ -121,7 +86,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
   }, []);
 
   // Show scrollbars
-  const showScrollbars = useCallback(() => {
+  const showScrollbars = useCallback((): void => {
     if (mergedOptions.vertical === 'auto') {
       setIsVerticalScrollbarVisible(true);
     }
@@ -137,7 +102,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
   }, [mergedOptions.vertical, mergedOptions.horizontal]);
 
   // Hide scrollbars with delay
-  const hideScrollbars = useCallback(() => {
+  const hideScrollbars = useCallback((): void => {
     // Clear existing timeout
     if (hideTimeoutRef.current) {
       clearTimeout(hideTimeoutRef.current);
@@ -155,7 +120,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
   }, [mergedOptions.vertical, mergedOptions.horizontal]);
 
   // Smooth scroll to position
-  const smoothScrollTo = useCallback((targetScrollTop: number, targetScrollLeft: number) => {
+  const smoothScrollTo = useCallback((targetScrollTop: number, targetScrollLeft: number): void => {
     if (!contentRef.current) return;
 
     const startScrollTop = scrollTop;
@@ -163,7 +128,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
     const startTime = Date.now();
     const duration = 150; // ms
 
-    const animate = () => {
+    const animate = (): void => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
       
@@ -190,7 +155,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
   }, [scrollTop, scrollLeft]);
 
   // Handle scroll
-  const handleScroll = useCallback(() => {
+  const handleScroll = useCallback((): void => {
     if (!contentRef.current) return;
 
     const newScrollTop = contentRef.current.scrollTop;
@@ -206,7 +171,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
   }, [onScroll, showScrollbars, hideScrollbars]);
 
   // Handle mouse wheel
-  const handleWheel = useCallback((event: WheelEvent) => {
+  const handleWheel = useCallback((event: WheelEvent): void => {
     if (!mergedOptions.handleMouseWheel || !contentRef.current) return;
 
     event.preventDefault();
@@ -230,12 +195,12 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
   }, [mergedOptions.handleMouseWheel, mergedOptions.mouseWheelSmoothScroll, scrollTop, scrollLeft, contentHeight, containerHeight, contentWidth, containerWidth, smoothScrollTo, showScrollbars, hideScrollbars]);
 
   // Handle mouse enter
-  const handleMouseEnter = useCallback(() => {
+  const handleMouseEnter = useCallback((): void => {
     showScrollbars();
   }, [showScrollbars]);
 
   // Handle mouse leave
-  const handleMouseLeave = useCallback(() => {
+  const handleMouseLeave = useCallback((): void => {
     hideScrollbars();
   }, [hideScrollbars]);
 
@@ -254,7 +219,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
     (scrollLeft / (contentWidth - containerWidth)) * (containerWidth - horizontalSliderSize - (mergedOptions.horizontalHasArrows ? mergedOptions.arrowSize * 2 : 0)) : 0;
 
   // Arrow click handlers
-  const handleVerticalArrowUp = useCallback(() => {
+  const handleVerticalArrowUp = useCallback((): void => {
     if (!contentRef.current) return;
     const newScrollTop = Math.max(0, scrollTop - 20);
     if (mergedOptions.mouseWheelSmoothScroll) {
@@ -265,7 +230,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
     showScrollbars();
   }, [scrollTop, scrollLeft, mergedOptions.mouseWheelSmoothScroll, smoothScrollTo, showScrollbars]);
 
-  const handleVerticalArrowDown = useCallback(() => {
+  const handleVerticalArrowDown = useCallback((): void => {
     if (!contentRef.current) return;
     const newScrollTop = Math.min(contentHeight - containerHeight, scrollTop + 20);
     if (mergedOptions.mouseWheelSmoothScroll) {
@@ -276,7 +241,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
     showScrollbars();
   }, [scrollTop, scrollLeft, contentHeight, containerHeight, mergedOptions.mouseWheelSmoothScroll, smoothScrollTo, showScrollbars]);
 
-  const handleHorizontalArrowLeft = useCallback(() => {
+  const handleHorizontalArrowLeft = useCallback((): void => {
     if (!contentRef.current) return;
     const newScrollLeft = Math.max(0, scrollLeft - 20);
     if (mergedOptions.mouseWheelSmoothScroll) {
@@ -287,7 +252,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
     showScrollbars();
   }, [scrollTop, scrollLeft, mergedOptions.mouseWheelSmoothScroll, smoothScrollTo, showScrollbars]);
 
-  const handleHorizontalArrowRight = useCallback(() => {
+  const handleHorizontalArrowRight = useCallback((): void => {
     if (!contentRef.current) return;
     const newScrollLeft = Math.min(contentWidth - containerWidth, scrollLeft + 20);
     if (mergedOptions.mouseWheelSmoothScroll) {
@@ -299,7 +264,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
   }, [scrollTop, scrollLeft, contentWidth, containerWidth, mergedOptions.mouseWheelSmoothScroll, smoothScrollTo, showScrollbars]);
 
   // Drag handlers
-  const handleVerticalSliderMouseDown = useCallback((event: React.MouseEvent) => {
+  const handleVerticalSliderMouseDown = useCallback((event: React.MouseEvent): void => {
     event.preventDefault();
     setIsDraggingVertical(true);
     setDragStartY(event.clientY);
@@ -307,7 +272,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
     showScrollbars();
   }, [scrollTop, showScrollbars]);
 
-  const handleHorizontalSliderMouseDown = useCallback((event: React.MouseEvent) => {
+  const handleHorizontalSliderMouseDown = useCallback((event: React.MouseEvent): void => {
     event.preventDefault();
     setIsDraggingHorizontal(true);
     setDragStartX(event.clientX);
@@ -317,7 +282,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
 
   // Global mouse move handler
   useEffect(() => {
-    const handleMouseMove = (event: MouseEvent) => {
+    const handleMouseMove = (event: MouseEvent): void => {
       if (isDraggingVertical && contentRef.current) {
         const deltaY = event.clientY - dragStartY;
         const trackHeight = containerHeight - verticalSliderSize - (mergedOptions.verticalHasArrows ? mergedOptions.arrowSize * 2 : 0);
@@ -341,7 +306,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
       }
     };
 
-    const handleMouseUp = () => {
+    const handleMouseUp = (): void => {
       setIsDraggingVertical(false);
       setIsDraggingHorizontal(false);
     };

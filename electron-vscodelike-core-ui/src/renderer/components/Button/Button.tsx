@@ -47,13 +47,13 @@ const Button: React.FC<ButtonProps> = ({
   // No need for hover/focus state management - CSS handles it
 
   // Render icon if provided
-  const renderIcon = () => {
+  const renderIcon = (): JSX.Element | null => {
     if (!icon) return null
     return <span className={`codicon codicon-${icon}`} />
   }
 
   // Render children with icon support
-  const renderChildren = () => {
+  const renderChildren = (): React.ReactNode => {
     if (!children) return null
 
     // If children is a string, parse for $(iconName) pattern

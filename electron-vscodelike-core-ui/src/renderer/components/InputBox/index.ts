@@ -1,4 +1,5 @@
-export { default as InputBox, MessageType } from './InputBox'
+export { default as InputBox } from './InputBox'
+export { MessageType } from './types'
 export type { 
   IInputOptions, 
   IInputBoxStyles, 
@@ -7,4 +8,4 @@ export type {
   IInputValidationOptions, 
   IRange, 
   InputBoxProps 
-} from './InputBox'
+} from './types'

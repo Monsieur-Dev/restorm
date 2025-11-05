@@ -1,85 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react'
 import './inputBox.css'
-
-export enum MessageType {
-  INFO = 1,
-  WARNING = 2,
-  ERROR = 3
-}
-
-export interface IMessage {
-  readonly content?: string
-  readonly formatContent?: boolean
-  readonly type?: MessageType
-}
-
-export interface IInputValidator {
-  (value: string): IMessage | null
-}
-
-export interface IInputValidationOptions {
-  validation?: IInputValidator
-}
-
-export interface IInputBoxStyles {
-  readonly inputBackground: string | undefined
-  readonly inputForeground: string | undefined
-  readonly inputBorder: string | undefined
-  readonly inputValidationInfoBorder: string | undefined
-  readonly inputValidationInfoBackground: string | undefined
-  readonly inputValidationInfoForeground: string | undefined
-  readonly inputValidationWarningBorder: string | undefined
-  readonly inputValidationWarningBackground: string | undefined
-  readonly inputValidationWarningForeground: string | undefined
-  readonly inputValidationErrorBorder: string | undefined
-  readonly inputValidationErrorBackground: string | undefined
-  readonly inputValidationErrorForeground: string | undefined
-}
-
-export interface IInputOptions {
-  readonly placeholder?: string
-  readonly showPlaceholderOnFocus?: boolean
-  readonly tooltip?: string
-  readonly ariaLabel?: string
-  readonly type?: string
-  readonly validationOptions?: IInputValidationOptions
-  readonly flexibleHeight?: boolean
-  readonly flexibleWidth?: boolean
-  readonly flexibleMaxHeight?: number
-  readonly inputBoxStyles?: IInputBoxStyles
-}
-
-export interface IRange {
-  start: number
-  end: number
-}
-
-export const defaultInputBoxStyles: IInputBoxStyles = {
-  inputBackground: 'var(--vscode-input-background)',
-  inputForeground: 'var(--vscode-input-foreground)',
-  inputBorder: 'var(--vscode-input-border)',
-  inputValidationInfoBorder: 'var(--vscode-inputValidation-infoBorder)',
-  inputValidationInfoBackground: 'var(--vscode-inputValidation-infoBackground)',
-  inputValidationInfoForeground: 'var(--vscode-inputValidation-infoForeground)',
-  inputValidationWarningBorder: 'var(--vscode-inputValidation-warningBorder)',
-  inputValidationWarningBackground: 'var(--vscode-inputValidation-warningBackground)',
-  inputValidationWarningForeground: 'var(--vscode-inputValidation-warningForeground)',
-  inputValidationErrorBorder: 'var(--vscode-inputValidation-errorBorder)',
-  inputValidationErrorBackground: 'var(--vscode-inputValidation-errorBackground)',
-  inputValidationErrorForeground: 'var(--vscode-inputValidation-errorForeground)'
-}
-
-export interface InputBoxProps {
-  options: IInputOptions
-  value?: string
-  onChange?: (value: string) => void
-  onBlur?: () => void
-  onFocus?: () => void
-  disabled?: boolean
-  className?: string
-  id?: string
-  style?: React.CSSProperties
-}
+import { MessageType, defaultInputBoxStyles } from './types'
+import type { IMessage, InputBoxProps } from './types'
 
 const InputBox: React.FC<InputBoxProps> = ({
   options,
@@ -95,13 +17,13 @@ const InputBox: React.FC<InputBoxProps> = ({
   const [internalValue, setInternalValue] = useState(value)
   const [message, setMessage] = useState<IMessage | null>(null)
   const [state, setState] = useState<'idle' | 'focused'>('idle')
-  const [currentPlaceholder, setCurrentPlaceholder] = useState(options.placeholder || '')
+  const [currentPlaceholder, setCurrentPlaceholder] = useState(options.placeholder ?? '')
   
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
   const mirrorRef = useRef<HTMLDivElement>(null)
 
-  const styles = options.inputBoxStyles || defaultInputBoxStyles
+  const styles = options.inputBoxStyles ?? defaultInputBoxStyles
 
   // Sync internal value with prop
   useEffect(() => {
@@ -113,7 +35,7 @@ const InputBox: React.FC<InputBoxProps> = ({
     if (options.showPlaceholderOnFocus && state === 'idle') {
       setCurrentPlaceholder('')
     } else {
-      setCurrentPlaceholder(options.placeholder || '')
+      setCurrentPlaceholder(options.placeholder ?? '')
     }
   }, [options.showPlaceholderOnFocus, options.placeholder, state])
 
@@ -178,10 +100,10 @@ const InputBox: React.FC<InputBoxProps> = ({
 
   // Use native event listeners for wheel events
   useEffect(() => {
-    const textarea = inputRef.current as HTMLTextAreaElement
-    if (!textarea) return
+    const textarea = inputRef.current
+    if (!(textarea instanceof HTMLTextAreaElement)) return
 
-    const handleWheel = (e: WheelEvent) => {
+    const handleWheel = (e: WheelEvent): void => {
       e.stopPropagation()
       e.preventDefault()
       
@@ -248,9 +170,9 @@ const InputBox: React.FC<InputBoxProps> = ({
 
     if (message) {
       const validationStyles = stylesForType(message.type)
-      containerStyles.border = `1px solid ${validationStyles.border || 'transparent'}`
+      containerStyles.border = `1px solid ${validationStyles.border ?? 'transparent'}`
     } else {
-      containerStyles.border = `1px solid ${styles.inputBorder || 'transparent'}`
+      containerStyles.border = `1px solid ${styles.inputBorder ?? 'transparent'}`
     }
 
     return containerStyles
@@ -298,7 +220,7 @@ const InputBox: React.FC<InputBoxProps> = ({
     style: getInputStyles(),
     id,
     'aria-label': options.ariaLabel,
-    title: options.tooltip || options.placeholder || ''
+    title: options.tooltip ?? options.placeholder ?? ''
   }
 
   return (
@@ -318,22 +240,22 @@ const InputBox: React.FC<InputBoxProps> = ({
                 wrap="off"
                 style={getTextareaStyles()}
               />
-              {options.flexibleHeight && (
+              {
                 <div ref={mirrorRef} className="mirror" aria-hidden="true">
                   {internalValue || '\u00a0'}
                 </div>
-              )}
+              }
             </>
           ) : (
             <input
               ref={inputRef as React.RefObject<HTMLInputElement>}
               {...baseProps}
-              type={options.type || 'text'}
+              type={options.type ?? 'text'}
             />
           )}
         </div>
       </div>
-      {message && message.content && state === 'focused' && (
+      {message?.content && state === 'focused' && (
         <div className="monaco-inputbox-container">
           <div
             className={`monaco-inputbox-message ${classForType(message.type)}`}

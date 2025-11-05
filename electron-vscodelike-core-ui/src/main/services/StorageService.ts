@@ -74,9 +74,8 @@ export class StorageService {
    */
   delete(key: string): void {
     if (key in this.data) {
-      const newData = { ...this.data }
-      delete newData[key]
-      this.data = newData
+      const { [key]: _removed, ...rest } = this.data
+      this.data = rest
       this.save()
     }
   }

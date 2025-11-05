@@ -30,25 +30,25 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   // Handle selection change
-  const handleSelectChange = useCallback((index: number) => {
+  const handleSelectChange = useCallback((index: number): void => {
     if (index >= 0 && index < options.length) {
       setCurrentSelection(index)
       onDidSelect({
-        selected: options[index]?.text || '',
+        selected: options[index]?.text ?? '',
         index
       })
     }
   }, [options, onDidSelect])
 
   // Show dropdown
-  const showDropdown = useCallback(() => {
+  const showDropdown = useCallback((): void => {
     if (isVisible) return
     setIsVisible(true)
     setFocusedIndex(currentSelection)
   }, [isVisible, currentSelection])
 
   // Hide dropdown
-  const hideDropdown = useCallback((focusSelect = true) => {
+  const hideDropdown = useCallback((focusSelect = true): void => {
     setIsVisible(false)
     if (focusSelect && selectRef.current) {
       selectRef.current.focus()
@@ -56,7 +56,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   }, [])
 
   // Handle click on select element
-  const handleSelectClick = useCallback((event: React.MouseEvent) => {
+  const handleSelectClick = useCallback((event: React.MouseEvent): void => {
     event.preventDefault()
     event.stopPropagation()
     
@@ -68,13 +68,13 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   }, [isVisible, showDropdown, hideDropdown])
 
   // Handle mouse down on select element
-  const handleSelectMouseDown = useCallback((event: React.MouseEvent) => {
+  const handleSelectMouseDown = useCallback((event: React.MouseEvent): void => {
     event.preventDefault()
     event.stopPropagation()
   }, [])
 
   // Handle keyboard navigation
-  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((event: React.KeyboardEvent): void => {
     let showDropDown = false
 
     if (isMacintosh) {
@@ -98,7 +98,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   }, [showDropdown])
 
   // Handle option click
-  const handleOptionClick = useCallback((index: number) => {
+  const handleOptionClick = useCallback((index: number): void => {
     if (options[index] && !options[index]?.isDisabled) {
       handleSelectChange(index)
       hideDropdown(true)
@@ -106,12 +106,12 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   }, [options, handleSelectChange, hideDropdown])
 
   // Handle option hover
-  const handleOptionHover = useCallback((index: number) => {
+  const handleOptionHover = useCallback((index: number): void => {
     setFocusedIndex(index)
   }, [])
 
   // Handle dropdown keyboard navigation
-  const handleDropdownKeyDown = useCallback((event: React.KeyboardEvent) => {
+  const handleDropdownKeyDown = useCallback((event: React.KeyboardEvent): void => {
     if (!isVisible) return
 
     switch (event.key) {
@@ -170,7 +170,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   }, [isVisible, focusedIndex, options, handleSelectChange, hideDropdown])
 
   // Handle mouse wheel scrolling
-  const handleWheel = useCallback(() => {
+  const handleWheel = useCallback((): void => {
     if (!isVisible) return
     
     // Let ScrollableElement handle the wheel event naturally
@@ -179,7 +179,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
 
   // Handle click outside to close dropdown
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: MouseEvent): void => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) &&
           selectRef.current && !selectRef.current.contains(event.target as Node)) {
         hideDropdown(false)
@@ -205,7 +205,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
 
   // Apply styles when component mounts or styles change
   useEffect(() => {
-    if (selectRef.current && styles) {
+    if (selectRef.current) {
       const element = selectRef.current
       element.style.backgroundColor = styles.selectBackground ?? ''
       element.style.color = styles.selectForeground ?? ''
@@ -217,16 +217,14 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   useEffect(() => {
     if (isVisible && dropdownRef.current) {
       const dropdownElement = dropdownRef.current
-      const triggerElement = dropdownElement.previousElementSibling as HTMLElement
+      const triggerElement = dropdownElement.previousElementSibling as HTMLElement | null
       
-      if (triggerElement) {
-        // Get the width of the trigger element
-        const triggerWidth = triggerElement.offsetWidth
-        
-        // Set the dropdown width to match the trigger width
-        dropdownElement.style.width = `${triggerWidth}px`
-        dropdownElement.style.minWidth = `${triggerWidth}px`
-      }
+      // Get the width of the trigger element, fallback to dropdown width
+      const triggerWidth = triggerElement?.offsetWidth ?? dropdownElement.offsetWidth
+      
+      // Set the dropdown width to match the trigger width
+      dropdownElement.style.width = `${triggerWidth}px`
+      dropdownElement.style.minWidth = `${triggerWidth}px`
     }
   }, [isVisible])
 
@@ -245,7 +243,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   ].filter(Boolean).join(' ')
 
   // Get selected option
-  const selectedOption = options[currentSelection] || options[0]
+  const selectedOption = options[currentSelection] ?? options[0]
 
   return (
     <div className="select-container">
@@ -257,8 +255,8 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
         onClick={handleSelectClick}
         onMouseDown={handleSelectMouseDown}
         onKeyDown={handleKeyDown}
-        aria-label={selectBoxOptions?.ariaLabel}
-        aria-description={selectBoxOptions?.ariaDescription}
+        aria-label={selectBoxOptions.ariaLabel}
+        aria-description={selectBoxOptions.ariaDescription}
         aria-expanded={isVisible}
         tabIndex={0}
       >
@@ -317,9 +315,9 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
                   id={`${id}-option-${index}`}
                   role="option"
                   aria-selected={index === currentSelection}
-                  onClick={() => handleOptionClick(index)}
+                  onClick={() => { handleOptionClick(index); }}
                   className={`select-option ${focusedIndex === index || index === currentSelection ? 'focused' : ''} ${option.isDisabled ? 'disabled' : ''}`}
-                  onMouseEnter={() => handleOptionHover(index)}
+                  onMouseEnter={() => { handleOptionHover(index); }}
                 >
                   <div className="select-option-content">
                     <div className="select-option-header">

@@ -19,7 +19,7 @@ export interface IButtonStyles {
 }
 
 export interface IButtonWithDropdownOptions extends IButtonOptions {
-  readonly actions: Array<{ label: string; onClick: () => void }>;
+  readonly actions: { label: string; onClick: () => void }[];
   readonly addPrimaryActionToDropdown?: boolean;
 }
 

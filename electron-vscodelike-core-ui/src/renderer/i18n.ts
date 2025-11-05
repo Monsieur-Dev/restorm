@@ -1,5 +1,5 @@
 import i18n from 'i18next'
-import type { Resource } from 'i18next'
+import type { Resource, i18n as I18nInstance } from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import { logger } from './services/logger'
 
@@ -7,7 +7,7 @@ import { logger } from './services/logger'
 let isInitialized = false
 
 // Generic i18n setup - applications can provide their own translations
-export function initializeI18n(resources: Resource, defaultLanguage = 'en') {
+export function initializeI18n(resources: Resource, defaultLanguage = 'en'): I18nInstance {
   // Prevent double initialization
   if (isInitialized) {
     logger.warn('i18n already initialized, skipping')

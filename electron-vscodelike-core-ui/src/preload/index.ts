@@ -57,7 +57,7 @@ contextBridge.exposeInMainWorld('api', {
   },
 
   // Window title API
-  setWindowTitle: async (title: string): Promise<void> => {
+  setWindowTitle: (title: string): void => {
     ipcRenderer.send('set-window-title', title)
   },
 
@@ -70,14 +70,14 @@ contextBridge.exposeInMainWorld('api', {
 
 contextBridge.exposeInMainWorld('electronAPI', {
   onPlatform: (cb: (platform: string) => void) => {
-    ipcRenderer.on('platform', (_, platform) => {
+    ipcRenderer.on('platform', (_: Electron.IpcRendererEvent, platform: string) => {
       cb(platform);
     });
     // Request platform immediately
     ipcRenderer.send('request-platform');
   },
   onWindowState: (cb: (state: string) => void) => {
-    ipcRenderer.on('window-state', (_, state) => cb(state));
+    ipcRenderer.on('window-state', (_: Electron.IpcRendererEvent, state: string) => { cb(state); });
   },
   sendAction: (action: string) => {
     ipcRenderer.send('window-action', action);

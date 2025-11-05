@@ -1,2 +1,3 @@
-export { ScrollableElement, defaultScrollableElementStyles } from './ScrollableElement';
-export type { IScrollableElementStyles, IScrollableElementOptions, ScrollableElementProps } from './ScrollableElement';
+export { ScrollableElement } from './ScrollableElement';
+export { defaultScrollableElementStyles } from './types';
+export type { IScrollableElementStyles, IScrollableElementOptions, ScrollableElementProps } from './types';

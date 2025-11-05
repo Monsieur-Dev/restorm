@@ -47,21 +47,25 @@ export abstract class BaseWindow {
      * Minimize the window
      */
     minimizeWindow(): void {
-      if (this.window && !this.window.isDestroyed()) {
-        this.window.minimize()
+      const wnd = this.window
+      if (!wnd || wnd.isDestroyed()) {
+        return
       }
+      wnd.minimize()
     }
   
     /**
      * Maximize/Restore the window
      */
     maximizeWindow(): void {
-      if (this.window && !this.window.isDestroyed()) {
-        if (this.window.isMaximized()) {
-          this.window.unmaximize()
-        } else {
-          this.window.maximize()
-        }
+      const wnd = this.window
+      if (!wnd || wnd.isDestroyed()) {
+        return
+      }
+      if (wnd.isMaximized()) {
+        wnd.unmaximize()
+      } else {
+        wnd.maximize()
       }
     }
   
@@ -69,18 +73,22 @@ export abstract class BaseWindow {
      * Close the window
      */
     closeWindow(): void {
-      if (this.window && !this.window.isDestroyed()) {
-        this.window.close()
+      const wnd = this.window
+      if (!wnd || wnd.isDestroyed()) {
+        return
       }
+      wnd.close()
     }
   
     /**
      * Set window title
      */
     setWindowTitle(title: string): void {
-      if (this.window && !this.window.isDestroyed()) {
-        this.window.setTitle(title)
+      const wnd = this.window
+      if (!wnd || wnd.isDestroyed()) {
+        return
       }
+      wnd.setTitle(title)
     }
   
     /**
@@ -91,45 +99,46 @@ export abstract class BaseWindow {
         return
       }
 
-      // Store reference to this instance for IPC handlers
-      const windowInstance = this.window
-      
       // Remove existing handlers to avoid duplicates
       ipcMain.removeAllListeners('window-action')
       ipcMain.removeAllListeners('set-window-title')
       
       // Handle window actions from renderer
       ipcMain.on('window-action', (_event: Electron.IpcMainEvent, action: string) => {
-        if (windowInstance && !windowInstance.isDestroyed()) {
-          switch (action) {
-            case 'minimize':
-              windowInstance.minimize()
-              break
-            case 'maximize':
-              if (windowInstance.isMaximized()) {
-                windowInstance.unmaximize()
-              } else {
-                windowInstance.maximize()
+        const wnd = this.window
+        if (!wnd || wnd.isDestroyed()) {
+          return
+        }
+        switch (action) {
+          case 'minimize':
+            wnd.minimize()
+            break
+          case 'maximize':
+            if (wnd.isMaximized()) {
+              wnd.unmaximize()
+            } else {
+              wnd.maximize()
+            }
+            // Send window state update after a short delay
+            setTimeout(() => {
+              if (!wnd.isDestroyed()) {
+                wnd.webContents.send('window-state', wnd.isMaximized() ? 'maximized' : 'normal')
               }
-              // Send window state update after a short delay
-              setTimeout(() => {
-                if (windowInstance && !windowInstance.isDestroyed()) {
-                  windowInstance.webContents.send('window-state', windowInstance.isMaximized() ? 'maximized' : 'normal')
-                }
-              }, 100)
-              break
-            case 'close':
-              windowInstance.close()
-              break
-          }
+            }, 100)
+            break
+          case 'close':
+            wnd.close()
+            break
         }
       })
 
       // Handle window title change from renderer
       ipcMain.on('set-window-title', (_event: Electron.IpcMainEvent, title: string) => {
-        if (windowInstance && !windowInstance.isDestroyed()) {
-          windowInstance.setTitle(title)
+        const wnd = this.window
+        if (!wnd || wnd.isDestroyed()) {
+          return
         }
+        wnd.setTitle(title)
       })
 
       // Handle window icon request from renderer
@@ -137,7 +146,7 @@ export abstract class BaseWindow {
         if (!this.iconPath) return null
         try {
           const image = nativeImage.createFromPath(this.iconPath)
-          if (!image || image.isEmpty()) return null
+          if (image.isEmpty()) return null
           return image.toDataURL()
         } catch (error) {
           logger.error('Failed to convert icon to data URL', { error: String(error) })
@@ -333,7 +342,7 @@ export abstract class BaseWindow {
           : false,*/
         //autoHideMenuBar: true,
         webPreferences: {
-          preload: this.configuration.preloadScript || join(__dirname, '../../preload/index.js'),
+          preload: this.configuration.preloadScript ?? join(__dirname, '../../preload/index.js'),
           nodeIntegration: false,
           contextIsolation: true,
           devTools: devToolsEnabled
@@ -392,15 +401,17 @@ export abstract class BaseWindow {
 
       // Listen for window state changes
       window.on('maximize', () => {
-        if (window && !window.isDestroyed()) {
-          window.webContents.send('window-state', 'maximized')
+        if (window.isDestroyed()) {
+          return
         }
+        window.webContents.send('window-state', 'maximized')
       })
 
       window.on('unmaximize', () => {
-        if (window && !window.isDestroyed()) {
-          window.webContents.send('window-state', 'normal')
+        if (window.isDestroyed()) {
+          return
         }
+        window.webContents.send('window-state', 'normal')
       })
   
       // Load content
