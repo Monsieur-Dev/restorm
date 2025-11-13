@@ -5,7 +5,7 @@ import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../types/the
  * Core UI API object for window.api
  * This can be imported and reused in other preload scripts
  */
-export const createCoreUIAPI = () => ({
+export const createCoreUIAPI = (): Record<string, unknown> => ({
   platform: process.platform,
   
   // Theme API
@@ -31,7 +31,7 @@ export const createCoreUIAPI = () => ({
       return result as boolean
     },
     onThemeChanged: (callback: (themeId: string) => void): (() => void) => {
-      const handler = (_event: Electron.IpcRendererEvent, themeId: string) => {
+      const handler = (_event: Electron.IpcRendererEvent, themeId: string): void => {
         callback(themeId)
       }
       ipcRenderer.on('theme:changed', handler)
@@ -92,7 +92,7 @@ export const createCoreUIAPI = () => ({
     return result as boolean
   },
   onWorkbenchTabDropped: (callback: (tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }) => void): (() => void) => {
-    const handler = (_event: Electron.IpcRendererEvent, tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }) => {
+    const handler = (_event: Electron.IpcRendererEvent, tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }): void => {
       callback(tabData)
     }
     ipcRenderer.on('tabs:workbench-tab-dropped', handler)

@@ -234,7 +234,7 @@ export function setupIPC(resourcesPath?: string): void {
         // Use win.id (BrowserWindow ID) instead of webContents.id
         // BrowserWindow.fromId() expects win.id, not webContents.id
         // win.id should always be defined for created windows
-        if (win.id === undefined) {
+        if (!win.id) {
           logger.warn('Window ID is undefined', { webContentsId: win.webContents.id })
           continue
         }

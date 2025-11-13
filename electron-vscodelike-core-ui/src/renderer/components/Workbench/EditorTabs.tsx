@@ -123,7 +123,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({ group, onCloseTab, onMov
 			})
 			
 			// If cursor is outside current window and over another window, send tab to that window
-			if (!insideCurrentWindow && isDifferentWindow && windowUnderCursor) {
+			if (!insideCurrentWindow && isDifferentWindow) {
 				const tab = group.tabs.find((t) => t.id === tabId)
 				if (!tab) {
 					logger.warn('EditorTabs: Tab not found', { draggingTabId: tabId, groupId: group.id })

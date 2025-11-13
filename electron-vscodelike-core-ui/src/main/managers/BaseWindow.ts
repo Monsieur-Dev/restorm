@@ -171,7 +171,7 @@ export abstract class BaseWindow {
             return null
           }
           const instance = BaseWindow.windowInstances.get(wnd)
-          if (!instance || !instance.iconPath) {
+          if (!instance?.iconPath) {
             return null
           }
         try {

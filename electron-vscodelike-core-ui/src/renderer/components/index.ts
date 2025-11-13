@@ -40,6 +40,14 @@ export type { MenuBarProps, MenuItemProps, MenuItemSeparatorProps, MenuBarState,
 export { Titlebar } from './Titlebar/index'
 export type { TitlebarProps } from './Titlebar/index'
 
+// Statusbar exports
+export { Statusbar, StatusbarElement } from './Statusbar/index'
+export type { StatusbarProps, StatusbarElementProps } from './Statusbar/index'
+
+// Tooltip exports
+export { Tooltip } from './Tooltip/index'
+export type { TooltipProps } from './Tooltip/index'
+
 // CustomWCO exports
 export { CustomWCO } from './CustomWCO/index'
 export type { CustomWCOProps } from './CustomWCO/index'

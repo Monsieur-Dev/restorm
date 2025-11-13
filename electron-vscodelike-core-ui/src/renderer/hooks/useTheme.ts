@@ -226,7 +226,8 @@ export function useTheme(): UseThemeReturn {
             
             // Update WCO colors after a short delay to ensure CSS is applied
             // Use updateWCOColors from the closure
-            setTimeout(async () => {
+            setTimeout(() => {
+              void (async () => {
               try {
                 const rootEl = document.documentElement
                 const computedStyle = getComputedStyle(rootEl)
@@ -265,6 +266,7 @@ export function useTheme(): UseThemeReturn {
               } catch (err) {
                 logger.error('🎨 useTheme: Failed to update WCO after theme apply', { error: String(err) })
               }
+              })()
             }, 50)
           } else {
             logger.error('🎨 useTheme: Failed to load theme data', { themeId })
@@ -339,7 +341,8 @@ export function useTheme(): UseThemeReturn {
             logger.info('🎨 useTheme: Theme applied successfully from change event', { themeId })
             
             // Update WCO colors after a short delay
-            setTimeout(async () => {
+            setTimeout(() => {
+              void (async () => {
               try {
                 const rootEl = document.documentElement
                 const computedStyle = getComputedStyle(rootEl)
@@ -371,6 +374,7 @@ export function useTheme(): UseThemeReturn {
               } catch (err) {
                 logger.error('🎨 useTheme: Failed to update WCO after theme change event', { error: String(err) })
               }
+              })()
             }, 50)
           } else {
             logger.error('🎨 useTheme: Failed to load theme data from change event', { themeId })
