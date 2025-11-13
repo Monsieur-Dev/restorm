@@ -1,0 +1,563 @@
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type { ContainerGroupNode, EditorGroup, EditorTab, EditorWorkbenchCallbacks, GroupNode, Orientation, SplitDirection, WorkbenchTree } from './types';
+import { isContainerNode, isTabGroupNode } from './types';
+import { EditorGroupView } from './EditorGroupView';
+import { insertTabAt, normalizeTree, removeTab } from './tree';
+import { computeDropIndex } from './dnd';
+import { getCurrentWindowBounds } from './ipc';
+import { onWorkbenchTabDropped } from './ipc';
+import { logger } from '../../services/logger';
+import './styles/tabs.css';
+
+export interface EditorWorkbenchProps extends EditorWorkbenchCallbacks {
+	tree: WorkbenchTree;
+	onChange?: (tree: WorkbenchTree) => void;
+	style?: React.CSSProperties;
+	className?: string;
+}
+
+// Local splitter hook for any container
+function useSplitSizes(
+	count: number,
+	isVertical: boolean,
+	containerRef: React.RefObject<HTMLDivElement>
+): { sizes: number[]; onStartResize: (index: number, e: React.MouseEvent<HTMLDivElement>) => void } {
+	const [sizes, setSizes] = useState<number[]>([]);
+	const minGroupPx = 120;
+
+	useEffect(() => {
+		if (count <= 0) {
+			setSizes([]);
+			return;
+		}
+		if (sizes.length !== count) {
+			const equal = 1 / count;
+			setSizes(new Array(count).fill(equal));
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [count]);
+
+	const onStartResize = useCallback((index: number, e: React.MouseEvent<HTMLDivElement>) => {
+		if (!containerRef.current || sizes.length !== count) {
+			return;
+		}
+		e.preventDefault();
+		const rect = containerRef.current.getBoundingClientRect();
+		const axisSize = isVertical ? Math.max(1, rect.width) : Math.max(1, rect.height);
+		const minPercent = Math.min(0.5, minGroupPx / axisSize);
+		const startCoord = isVertical ? e.clientX : e.clientY;
+		const startSizes = [...sizes];
+
+		const onMouseMove = (ev: MouseEvent): void => {
+			if (index < 0 || index + 1 >= startSizes.length) return;
+			const deltaPx = (isVertical ? ev.clientX : ev.clientY) - startCoord;
+			const delta = deltaPx / axisSize;
+			let left = (startSizes[index] ?? 0) + delta;
+			let right = (startSizes[index + 1] ?? 0) - delta;
+			if (left < minPercent) {
+				right -= (minPercent - left);
+				left = minPercent;
+			}
+			if (right < minPercent) {
+				left -= (minPercent - right);
+				right = minPercent;
+			}
+			const next = [...startSizes];
+			const li = index;
+			const ri = index + 1;
+			let leftVal = Math.max(minPercent, Math.min(1 - minPercent, left));
+			let rightVal = Math.max(minPercent, Math.min(1 - minPercent, right));
+			next[li] = leftVal;
+			next[ri] = rightVal;
+			// keep others as-is but renormalize the pair to preserve total
+			const sumOthers = startSizes.reduce((acc, s, i) => (i === li || i === ri ? acc : acc + s), 0);
+			const sumNext = leftVal + rightVal + sumOthers;
+			if (sumNext !== 1) {
+				const scale = (1 - sumOthers) / (leftVal + rightVal);
+				leftVal *= scale;
+				rightVal *= scale;
+				next[li] = leftVal;
+				next[ri] = rightVal;
+			}
+			setSizes(next);
+		};
+
+		const onMouseUp = (): void => {
+			window.removeEventListener('mousemove', onMouseMove);
+			window.removeEventListener('mouseup', onMouseUp);
+		};
+		window.addEventListener('mousemove', onMouseMove);
+		window.addEventListener('mouseup', onMouseUp);
+	}, [sizes, count, isVertical, containerRef]);
+
+	return { sizes, onStartResize };
+}
+
+const GroupContainer: React.FC<{
+	node: ContainerGroupNode;
+	callbacks: EditorWorkbenchCallbacks;
+	renderLeaf: (node: EditorGroup) => React.ReactNode;
+}> = ({ node, callbacks, renderLeaf }) => {
+	const isVertical = node.orientation === 'vertical';
+	const ref = useRef<HTMLDivElement | null>(null);
+	const { sizes, onStartResize } = useSplitSizes(node.groups.length, isVertical, ref);
+
+	return (
+		<div ref={ref} style={{ display: 'flex', flex: 1, flexDirection: isVertical ? 'row' : 'column', minWidth: 0, minHeight: 0 }}>
+			{node.groups.map((child, i) => (
+				<React.Fragment key={i}>
+					<div
+						style={{
+							display: 'flex',
+							flexDirection: 'column',
+							...(isVertical
+								? { flex: `0 0 ${(sizes[i] ?? 0) * 100}%`, minWidth: 0 }
+								: { flex: '0 0 auto', height: `${(sizes[i] ?? 0) * 100}%`, minHeight: 0 })
+						}}
+					>
+						{isTabGroupNode(child)
+							? renderLeaf(child)
+							: <GroupContainer node={child} callbacks={callbacks} renderLeaf={renderLeaf} />}
+					</div>
+					{i < node.groups.length - 1 ? (
+						<div
+							role="separator"
+							aria-orientation={isVertical ? 'vertical' : 'horizontal'}
+							onMouseDown={(ev) => { onStartResize(i, ev); }}
+							style={{
+								flex: '0 0 6px',
+								width: isVertical ? 6 : 'auto',
+								height: isVertical ? 'auto' : 6,
+								cursor: isVertical ? 'col-resize' : 'row-resize',
+								alignSelf: 'stretch',
+								userSelect: 'none',
+								touchAction: 'none',
+								background: 'transparent',
+								pointerEvents: 'auto',
+								zIndex: 2
+							}}
+							title=""
+						/>
+					) : null}
+				</React.Fragment>
+			))}
+		</div>
+	);
+};
+
+/**
+ * EditorWorkbench (tree-based): renders nested editor groups and handles split logic.
+ * Consumers own and mutate `tree` (controlled) or pass `onChange` to get updates.
+ */
+export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({ tree, className, style, onChange, ...extCallbacks }) => {
+	// Track which group has focus (only one group should have focus at a time)
+	const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null);
+
+	const change = useCallback((next: WorkbenchTree) => {
+		if (onChange) onChange(normalizeTree(next));
+	}, [onChange]);
+
+	const handleSplitTab = useCallback((tabId: string, fromGroupId: string, targetGroupId: string, direction: 'left' | 'right' | 'top' | 'bottom' | 'full') => {
+		// center/full: if same group -> no-op
+		if (direction === 'full' && fromGroupId === targetGroupId) {
+			return;
+		}
+		const removed = removeTab(tree, fromGroupId, tabId);
+		const tab = removed.tab;
+		if (!tab) return;
+		const next = direction === 'full'
+			? insertTabAt(removed.tree, targetGroupId, 'full', tab)
+			: insertTabAt(removed.tree, targetGroupId, direction, tab);
+		change(next);
+	}, [tree, change]);
+
+	const handleMoveWithinGroup = useCallback((from: { groupId: string; tabId: string }, to: { groupId: string; index: number }) => {
+		// Same-group reordering
+		if (from.groupId === to.groupId) {
+			const next: WorkbenchTree = JSON.parse(JSON.stringify(tree)) as WorkbenchTree;
+			const stack: GroupNode[] = next.groups;
+			const visit = (nodes: GroupNode[]): boolean => {
+				for (const n of nodes) {
+					if (isTabGroupNode(n) && n.id === from.groupId) {
+						const moving = n.tabs.find(t => t.id === from.tabId);
+						if (!moving) return true;
+						const rest = n.tabs.filter(t => t.id !== from.tabId);
+						const idx = Math.max(0, Math.min(to.index, rest.length));
+						n.tabs = [...rest.slice(0, idx), moving, ...rest.slice(idx)];
+						return true;
+					}
+					if (isContainerNode(n)) {
+						if (visit(n.groups)) return true;
+					}
+				}
+				return false;
+			};
+			visit(stack);
+			change(next);
+			return;
+		}
+
+		// Inter-group move: remove from source then insert into target group at specific index
+		const removed = removeTab(tree, from.groupId, from.tabId);
+		const movingTab = removed.tab;
+		if (!movingTab) return;
+		const next: WorkbenchTree = JSON.parse(JSON.stringify(removed.tree)) as WorkbenchTree;
+
+		const insertIntoTarget = (nodes: GroupNode[]): boolean => {
+			for (const n of nodes) {
+				if (isTabGroupNode(n) && n.id === to.groupId) {
+					const idx = Math.max(0, Math.min(to.index, n.tabs.length));
+					n.tabs = [...n.tabs.slice(0, idx), movingTab, ...n.tabs.slice(idx)];
+					n.activeTabId = movingTab.id;
+					return true;
+				}
+				if (isContainerNode(n)) {
+					if (insertIntoTarget(n.groups)) return true;
+				}
+			}
+			return false;
+		};
+		insertIntoTarget(next.groups);
+		change(normalizeTree(next));
+	}, [tree, change]);
+
+	const handleActivate = useCallback((tabId: string, groupId: string) => {
+		const next: WorkbenchTree = JSON.parse(JSON.stringify(tree)) as WorkbenchTree;
+		const rec = (nodes: GroupNode[]): void => {
+			for (const n of nodes) {
+				if (isTabGroupNode(n) && n.id === groupId) {
+					n.activeTabId = tabId;
+				} else if (isContainerNode(n)) {
+					rec(n.groups);
+				}
+			}
+		};
+		rec(next.groups);
+		change(next);
+		// Set focus to the group where the tab was activated
+		setFocusedGroupId(groupId);
+	}, [tree, change]);
+
+	// Handler for focus requests from groups
+	const handleFocusRequested = useCallback((groupId: string) => {
+		setFocusedGroupId(groupId);
+	}, []);
+
+	const handleClose = useCallback((tabId: string, groupId: string) => {
+		const { tree: t } = removeTab(tree, groupId, tabId);
+		change(t);
+	}, [tree, change]);
+
+	// Helper function to find group and drop target at cursor position
+	const findGroupAndDropTargetAtPosition = useCallback(async (screenX: number, screenY: number): Promise<{ groupId: string; type: 'tabs-container'; tabIndex: number } | { groupId: string; type: 'content-placeholder'; direction: SplitDirection | 'full' } | null> => {
+		try {
+			// Get current window bounds
+			const currentWindow = await getCurrentWindowBounds();
+			
+			// Convert screen coordinates to viewport coordinates
+			const viewportX = screenX - currentWindow.x;
+			const viewportY = screenY - currentWindow.y;
+			
+			logger.info('Finding group and drop target at position', { screenX, screenY, viewportX, viewportY, windowBounds: currentWindow });
+			
+			// Use elementFromPoint to find element at cursor position
+			const element = document.elementFromPoint(viewportX, viewportY);
+			
+			if (!element) {
+				logger.warn('No element found at cursor position', { viewportX, viewportY });
+				return null;
+			}
+			
+			// Walk up the DOM tree to find what we're dropping on
+			// Priority 1: Check if we're dropping on the tabs container
+			// Priority 2: Check if we're dropping on the content placeholder
+			let groupId: string | null = null;
+			let tabsContainer: HTMLElement | null = null;
+			let contentElement: Element | null = null;
+			let current: Element | null = element;
+			
+			// First pass: check if we're directly on tabs-container or its children
+			let temp: Element | null = element;
+			while (temp) {
+				if (temp.classList.contains('tabs-container')) {
+					tabsContainer = temp as HTMLElement;
+					logger.info('Found tabs container at cursor position', { element: temp.className });
+					// Find the group ID by walking up from tabs-container
+					let parent: Element | null = temp.parentElement;
+					while (parent) {
+						const parentGroupId = parent.getAttribute('data-group-id');
+						if (parentGroupId) {
+							groupId = parentGroupId;
+							logger.info('Found group ID from tabs container parent', { groupId });
+							break;
+						}
+						parent = parent.parentElement;
+					}
+					break;
+				}
+				temp = temp.parentElement;
+			}
+			
+			// Second pass: if not on tabs-container, check for content placeholder or group container
+			if (!tabsContainer) {
+				current = element;
+				while (current) {
+					const currentGroupId = current.getAttribute('data-group-id');
+					if (currentGroupId) {
+						if (!groupId) {
+							groupId = currentGroupId;
+						}
+						
+						// Check if we're dropping on the content placeholder
+						if (current.classList.contains('editor-group-content-placeholder')) {
+							contentElement = current;
+							logger.info('Found content placeholder at cursor position', { groupId: currentGroupId, element: current.className });
+							break;
+						} else if (current.classList.contains('editor-group-container') && !contentElement) {
+							logger.info('Found group container at cursor position', { groupId: currentGroupId, element: current.className });
+						}
+					}
+					current = current.parentElement;
+				}
+			}
+			
+			if (!groupId) {
+				logger.warn('No group ID found at cursor position', { viewportX, viewportY });
+				return null;
+			}
+			
+			// Priority 1: If dropping on tabs container, calculate index and add to group
+			if (tabsContainer) {
+				const tabIndex = computeDropIndex(tabsContainer, viewportX);
+				logger.info('Drop on tabs container', { groupId, tabIndex });
+				return { groupId, type: 'tabs-container', tabIndex };
+			}
+			
+			// Priority 2: If dropping on content placeholder, calculate direction for split
+			if (!contentElement) {
+				// Try to find content placeholder by group ID
+				const allContentPlaceholders = document.querySelectorAll('.editor-group-content-placeholder[data-group-id="' + groupId + '"]');
+				if (allContentPlaceholders.length > 0 && allContentPlaceholders[0]) {
+					contentElement = allContentPlaceholders[0];
+					logger.info('Found content placeholder by group ID', { groupId, element: contentElement.className });
+				}
+			}
+			
+			if (contentElement) {
+				// Calculate direction based on cursor position relative to content placeholder bounds
+				const rect = contentElement.getBoundingClientRect();
+				const relX = (viewportX - rect.left) / rect.width;
+				const relY = (viewportY - rect.top) / rect.height;
+				const margin = 0.10; // 10% border zones (same as EditorGroupView)
+				
+				let direction: SplitDirection | 'full';
+				// Prioritize horizontal splits (left, right) over vertical splits (top, bottom)
+				if (relX < margin) {
+					direction = 'left';
+				} else if (relX > 1 - margin) {
+					direction = 'right';
+				} else if (relY < margin) {
+					direction = 'top';
+				} else if (relY > 1 - margin) {
+					direction = 'bottom';
+				} else {
+					direction = 'full'; // center: add to same group
+				}
+				
+				logger.info('Drop on content placeholder', { groupId, direction, relX, relY, margin });
+				return { groupId, type: 'content-placeholder', direction };
+			}
+			
+			// Fallback: if we found a group but no specific drop target, use 'full' direction
+			logger.warn('Found group but no specific drop target, using full direction', { groupId, viewportX, viewportY });
+			return { groupId, type: 'content-placeholder', direction: 'full' };
+		} catch (error) {
+			logger.error('Error finding group and drop target at position', { error: String(error), screenX, screenY });
+			return null;
+		}
+	}, []);
+
+	// Handle tab dropped from another window
+	const handleTabDropped = useCallback(async (tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }): Promise<boolean> => {
+		logger.info('Tab dropped from another window', { tabId: tabData.tabId, title: tabData.title, cursorX: tabData.cursorX, cursorY: tabData.cursorY });
+		
+		// Call parent callback if provided (to store content, etc.)
+		if (extCallbacks.onWorkbenchTabDropped) {
+			const result = await extCallbacks.onWorkbenchTabDropped(tabData);
+			if (!result) {
+				logger.warn('Parent onWorkbenchTabDropped callback returned false', { tabId: tabData.tabId });
+				return false;
+			}
+		}
+		
+		// Determine target group and drop target: use cursor position if available
+		let dropTarget: { groupId: string; type: 'tabs-container'; tabIndex: number } | { groupId: string; type: 'content-placeholder'; direction: SplitDirection | 'full' } | null = null;
+		
+		if (tabData.cursorX !== undefined && tabData.cursorY !== undefined) {
+			// Small delay to ensure DOM is ready
+			await new Promise(resolve => setTimeout(resolve, 50));
+			dropTarget = await findGroupAndDropTargetAtPosition(tabData.cursorX, tabData.cursorY);
+			if (dropTarget) {
+				logger.info('Drop target found at cursor position', { dropTarget, cursorX: tabData.cursorX, cursorY: tabData.cursorY });
+			}
+		}
+		
+		// Create new tab with titleString for serialization
+		const newTab: EditorTab = {
+			id: tabData.tabId,
+			title: tabData.title,
+			titleString: tabData.title
+		};
+		
+		// Find target group or first group as fallback
+		let finalTargetGroupId: string | null = null;
+		let finalDropTarget: { type: 'tabs-container'; tabIndex: number } | { type: 'content-placeholder'; direction: SplitDirection | 'full' } | null = null;
+		
+		if (dropTarget) {
+			// Verify target group exists in tree
+			const findGroupNodeById = (nodes: GroupNode[], targetId: string): GroupNode | null => {
+				for (const n of nodes) {
+					if (isTabGroupNode(n) && n.id === targetId) {
+						return n;
+					}
+					if (isContainerNode(n)) {
+						const found = findGroupNodeById(n.groups, targetId);
+						if (found) return found;
+					}
+				}
+				return null;
+			};
+			
+			const targetGroup = findGroupNodeById(tree.groups, dropTarget.groupId);
+			if (targetGroup) {
+				finalTargetGroupId = dropTarget.groupId;
+				if (dropTarget.type === 'tabs-container') {
+					finalDropTarget = { type: 'tabs-container', tabIndex: dropTarget.tabIndex };
+				} else {
+					finalDropTarget = { type: 'content-placeholder', direction: dropTarget.direction };
+				}
+				logger.info('Target group found in tree', { targetGroupId: dropTarget.groupId, found: true, dropTarget: finalDropTarget });
+			} else {
+				logger.warn('Target group not found in tree, using first group', { targetGroupId: dropTarget.groupId });
+			}
+		}
+		
+		// Fallback to first group if target not found
+		if (!finalTargetGroupId) {
+			const findFirstTabGroup = (node: GroupNode): GroupNode | null => {
+				if (isTabGroupNode(node)) {
+					return node;
+				}
+				if (isContainerNode(node)) {
+					for (const group of node.groups) {
+						const found = findFirstTabGroup(group);
+						if (found) return found;
+					}
+				}
+				return null;
+			};
+			
+			const firstNode = tree.groups[0];
+			if (firstNode) {
+				const firstGroup = findFirstTabGroup(firstNode);
+				if (firstGroup && isTabGroupNode(firstGroup)) {
+					finalTargetGroupId = firstGroup.id;
+					finalDropTarget = { type: 'tabs-container', tabIndex: firstGroup.tabs.length }; // Add at end
+					logger.info('Using first group as fallback', { groupId: finalTargetGroupId, dropTarget: finalDropTarget });
+				}
+			}
+		}
+		
+		if (!finalTargetGroupId || !finalDropTarget) {
+			logger.warn('No target group or drop target found, cannot add tab', { tabId: tabData.tabId });
+			return false;
+		}
+		
+		// Use appropriate method based on drop target type
+		if (finalDropTarget.type === 'tabs-container') {
+			// Add tab to group at specific index (same logic as handleMoveWithinGroup)
+			const next: WorkbenchTree = JSON.parse(JSON.stringify(tree)) as WorkbenchTree;
+			const insertIntoTarget = (nodes: GroupNode[]): boolean => {
+				for (const n of nodes) {
+					if (isTabGroupNode(n) && n.id === finalTargetGroupId) {
+						const idx = Math.max(0, Math.min(finalDropTarget.tabIndex, n.tabs.length));
+						n.tabs = [...n.tabs.slice(0, idx), newTab, ...n.tabs.slice(idx)];
+						n.activeTabId = newTab.id;
+						return true;
+					}
+					if (isContainerNode(n)) {
+						if (insertIntoTarget(n.groups)) return true;
+					}
+				}
+				return false;
+			};
+			insertIntoTarget(next.groups);
+			change(normalizeTree(next));
+			logger.info('Tab added to group at index', { tabId: tabData.tabId, targetGroupId: finalTargetGroupId, tabIndex: finalDropTarget.tabIndex });
+		} else {
+			// Use insertTabAt to add tab with proper split handling
+			const next = insertTabAt(tree, finalTargetGroupId, finalDropTarget.direction, newTab);
+			change(normalizeTree(next));
+			logger.info('Tab added using insertTabAt', { tabId: tabData.tabId, targetGroupId: finalTargetGroupId, direction: finalDropTarget.direction });
+		}
+		
+		return true;
+	}, [tree, change, findGroupAndDropTargetAtPosition, extCallbacks]);
+
+	// Listen for tabs dropped from other windows
+	useEffect(() => {
+		const cleanup = onWorkbenchTabDropped(async (tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }) => {
+			await handleTabDropped(tabData);
+		});
+		return cleanup;
+	}, [handleTabDropped]);
+
+	const leafRenderer = useCallback((leaf: EditorGroup) => {
+		const extras: Record<string, unknown> = {};
+		if (extCallbacks.onDetachToNewWindow) {
+			extras['onDetachToNewWindow'] = extCallbacks.onDetachToNewWindow;
+		}
+		if (extCallbacks.renderTabContent) {
+			extras['renderTabContent'] = extCallbacks.renderTabContent;
+		}
+		if (extCallbacks.renderTabTitle) {
+			extras['renderTabTitle'] = extCallbacks.renderTabTitle;
+		}
+		if (extCallbacks.onGetTabContent) {
+			extras['onGetTabContent'] = extCallbacks.onGetTabContent;
+		}
+		// Determine if this group has focus
+		const hasFocus = focusedGroupId === leaf.id;
+		return (
+			<EditorGroupView
+				group={leaf}
+				onMoveTab={handleMoveWithinGroup}
+				onSplitTab={handleSplitTab}
+				onCloseTab={handleClose}
+				onActivateTab={handleActivate}
+				hasFocus={hasFocus}
+				onFocusRequested={handleFocusRequested}
+				{...extras}
+			/>
+		);
+	}, [handleMoveWithinGroup, handleSplitTab, handleClose, handleActivate, handleFocusRequested, focusedGroupId, extCallbacks.onDetachToNewWindow, extCallbacks.renderTabContent, extCallbacks.renderTabTitle, extCallbacks.onGetTabContent]);
+
+	return (
+		<div
+			className={`monaco-workbench part editor ${className ?? ''}`}
+			style={{ display: 'flex', flex: 1, minWidth: 0, minHeight: 0, ...style }}
+		>
+			<div className="content" style={{ display: 'flex', flex: 1, minWidth: 0, minHeight: 0 }}>
+				<GroupContainer
+					node={{ id: 'root', orientation: tree.orientation as Orientation, groups: tree.groups }}
+					callbacks={extCallbacks}
+					renderLeaf={leafRenderer}
+				/>
+			</div>
+		</div>
+	);
+};
+
+export default EditorWorkbench;
+
+

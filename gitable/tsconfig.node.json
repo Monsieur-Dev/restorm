@@ -19,6 +19,10 @@
     "exactOptionalPropertyTypes": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/main", "src/preload"]
+  "include": [
+    "src/main",
+    "src/preload",
+    "../electron-vscodelike-core-ui/src/preload/**/*"
+  ]
 }
 

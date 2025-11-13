@@ -1,5 +1,6 @@
 import React from 'react'
 import { usePlatform } from '../hooks/usePlatform'
+import { useTheme } from '../hooks/useTheme'
 import '../assets/monaco-workbench.css'
 
 export interface MonacoWorkbenchProps {
@@ -18,6 +19,9 @@ const MonacoWorkbench: React.FC<MonacoWorkbenchProps> = ({
   fontAliasing = 'auto'
 }) => {
   const { isMacintosh: isMac, isWindows, isLinux } = usePlatform()
+  
+  // Initialize theme for this window
+  useTheme()
 
   const classes = [
     'monaco-workbench',

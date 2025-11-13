@@ -246,7 +246,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   const selectedOption = options[currentSelection] ?? options[0]
 
   return (
-    <div className="select-container">
+    <div className="select-container custom">
       {/* Hidden select element for accessibility */}
       <select
         ref={selectRef}

@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useTheme, CustomTabs, logger, SelectBox, Titlebar, MenuBar, MenuBarItem, MenuItem, MenuItemSeparator } from 'electron-vscodelike-core-ui/renderer'
+import { useTheme, CustomTabs, logger, SelectBox, Titlebar, MenuBar, MenuBarItem, MenuItem, MenuItemSeparator, Button } from 'electron-vscodelike-core-ui/renderer'
 import type { Tab } from 'electron-vscodelike-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 import { 
@@ -13,6 +13,7 @@ import {
   ScrollbarsTab, 
   ProgressTab 
 } from '../components/test-tabs'
+import { EditorTabsTab } from '../components/test-tabs'
 
 interface ThemeOption {
   text: string
@@ -61,7 +62,7 @@ function getThemeByIdHelper(themes: readonly SafeThemeInfo[], themeId: string): 
 }
 
 const ThemeTestPage: React.FC = () => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { themes, currentThemeId, setTheme } = useThemeTyped()
 
   // Helper function to safely access theme properties
@@ -69,6 +70,14 @@ const ThemeTestPage: React.FC = () => {
     if (themeId === null) return undefined
     return getThemeByIdHelper(themes, themeId)
   }, [themes])
+
+  // Handle language change
+  const handleLanguageChange = (): void => {
+    const newLang = i18n.language === 'en' ? 'fr' : 'en'
+    void i18n.changeLanguage(newLang).catch((error: unknown) => {
+      logger.error('Failed to change language', { error: String(error) })
+    })
+  }
 
   // Update window title when theme changes
   useEffect(() => {
@@ -117,6 +126,7 @@ const ThemeTestPage: React.FC = () => {
   }
 
   const tabs: Tab[] = [
+    { id: 'editor-tabs', label: 'Editor Tabs', content: <EditorTabsTab /> },
     { id: 'checkboxes', label: 'Checkboxes & Radio', content: <CheckboxesTab /> },
     { id: 'dropdowns', label: 'Dropdowns', content: <DropdownsTab /> },
     { id: 'buttons', label: 'Buttons', content: <ButtonsTab /> },
@@ -124,7 +134,7 @@ const ThemeTestPage: React.FC = () => {
     { id: 'progressbars', label: 'Progress bars', content: <ProgressTab /> },
     { id: 'inputs', label: 'Text Inputs', content: <InputsTab /> },
     { id: 'panels', label: 'Panels & Lists', content: <PanelsTab /> },
-    { id: 'text', label: 'Text Styles', content: <TextTab /> }
+    { id: 'text', label: 'Text Styles', content: <TextTab /> },
   ]
 
   return (
@@ -168,6 +178,15 @@ const ThemeTestPage: React.FC = () => {
                 onClick={() => { logger.info('Recent file 3') }} 
               />
             </MenuItem>
+            <MenuItemSeparator />
+            <MenuItem 
+              title={t('menuBar.editor')} 
+              onClick={() => { 
+                logger.info('Opening editor window with notes.txt')
+                void window.gitable.openEditor({ title: 'notes.txt', content: 'test content' })
+              }} 
+            />
+            <MenuItemSeparator />
             <MenuItem 
               title={t('menuBar.save')} 
               shortcut="Ctrl+S" 
@@ -258,30 +277,58 @@ const ThemeTestPage: React.FC = () => {
             {t('themeTest.description')}
           </p>
           
-          {/* Theme Selector */}
-          <div style={{ maxWidth: '400px' }}>
-            <label
-              htmlFor="theme-selector"
-              style={{
-                display: 'block',
-                marginBottom: '8px',
-                fontWeight: 'bold',
-                fontSize: '13px'
-              }}
-            >
-              {t('themeTest.selectTheme')}
-            </label>
-            <SelectBox
-              options={themeOptions}
-              selected={currentThemeId ? themeOptions.findIndex((option: ThemeOption) => option.id === currentThemeId) : -1}
-              onDidSelect={handleThemeChange}
-              selectBoxOptions={{ 
-                useCustomDrawn: true,
-                ariaLabel: t('themeTest.selectTheme')
-              }}
-              id="theme-selector"
-              className=""
-            />
+          {/* Theme Selector and Language Button */}
+          <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+            {/* Theme Selector */}
+            <div style={{ maxWidth: '400px', flex: '1 1 auto' }}>
+              <label
+                htmlFor="theme-selector"
+                style={{
+                  display: 'block',
+                  marginBottom: '8px',
+                  fontWeight: 'bold',
+                  fontSize: '13px'
+                }}
+              >
+                {t('themeTest.selectTheme')}
+              </label>
+              <SelectBox
+                options={themeOptions}
+                selected={currentThemeId ? themeOptions.findIndex((option: ThemeOption) => option.id === currentThemeId) : -1}
+                onDidSelect={handleThemeChange}
+                selectBoxOptions={{ 
+                  useCustomDrawn: true,
+                  ariaLabel: t('themeTest.selectTheme')
+                }}
+                id="theme-selector"
+                className=""
+              />
+            </div>
+            
+            {/* Language Button */}
+            <div style={{ flex: '0 0 auto' }}>
+              <label
+                htmlFor="language-button"
+                style={{
+                  display: 'block',
+                  marginBottom: '8px',
+                  fontWeight: 'bold',
+                  fontSize: '13px'
+                }}
+              >
+                {t('themeTest.language')}
+              </label>
+              <Button
+                onClick={handleLanguageChange}
+                options={{
+                  ariaLabel: i18n.language === 'en' ? 'Switch to French' : 'Passer à l\'anglais',
+                  title: i18n.language === 'en' ? 'Switch to French' : 'Passer à l\'anglais'
+                }}
+                id="language-button"
+              >
+                {i18n.language === 'en' ? 'Français' : 'English'}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

@@ -166,11 +166,12 @@ export const CustomTabs: React.FC<CustomTabsProps> = ({
       {/* Tab content */}
       <div role="tabpanel" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
         <ScrollableElement
+          key={currentActiveTab}
           options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
           style={{
             flex: 1,
             backgroundColor: 'var(--vscode-editor-background)',
-            padding: '16px',
+            padding: '10px',
             minHeight: '400px'
           }}
         >

@@ -1,6 +1,6 @@
 // Renderer process exports
 export * from './components'
-export { MessageType } from './components'
+export { MessageType, onWorkbenchTabDropped } from './components'
 export * from './hooks'
 export type { UseThemeReturn } from './hooks/useTheme'
 export * from './services'
