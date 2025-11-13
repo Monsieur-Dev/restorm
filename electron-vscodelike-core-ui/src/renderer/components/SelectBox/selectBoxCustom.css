@@ -194,6 +194,12 @@
   line-height: 1;
 }
 
+/* When using custom drawn select, remove the global container chevron to avoid double icon */
+.monaco-workbench .select-container.custom:after {
+  content: none !important;
+  display: none !important;
+}
+
 /* Dropdown positioning */
 .monaco-select-box-dropdown-container.positioned {
   position: absolute;

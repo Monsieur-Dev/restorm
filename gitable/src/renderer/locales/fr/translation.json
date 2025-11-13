@@ -1,12 +1,14 @@
 {
   "app": {
     "title": "Gitable",
-    "welcome": "Bonjour Gitable"
+    "welcome": "Bonjour Gitable",
+    "tabsDemo": "Démo des onglets"
   },
   "themeTest": {
     "title": "Page de Test des Thèmes",
     "description": "Page de test pour visualiser tous les composants d'interface avec différents thèmes VSCode",
     "selectTheme": "Sélectionner un Thème",
+    "language": "Langue",
     "components": {
       "inputs": "Champs de Texte",
       "checkboxes": "Cases à Cocher & Boutons Radio",
@@ -26,6 +28,7 @@
     "new": "Nouveau",
     "open": "Ouvrir",
     "openRecent": "Ouvrir récent",
+    "editor": "Éditeur",
     "save": "Enregistrer",
     "autoSave": "Sauvegarde automatique",
     "revert": "Restaurer",

@@ -39,6 +39,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
     useShadows: true,
     handleMouseWheel: true,
     mouseWheelSmoothScroll: true,
+		mouseWheelHorizontal: false,
     horizontal: 'auto' as const,
     vertical: 'auto' as const,
     horizontalScrollbarSize: 10,
@@ -178,8 +179,14 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
     event.stopPropagation();
     showScrollbars();
 
-    const deltaX = event.deltaX;
-    const deltaY = event.deltaY;
+		let deltaX = event.deltaX;
+		let deltaY = event.deltaY;
+
+		// Convert vertical wheel to horizontal scroll if mouseWheelHorizontal is enabled
+		if (mergedOptions.mouseWheelHorizontal) {
+			deltaX = deltaY;
+			deltaY = 0;
+		}
 
     if (mergedOptions.mouseWheelSmoothScroll) {
       const newScrollTop = Math.max(0, Math.min(scrollTop + deltaY, contentHeight - containerHeight));
@@ -192,7 +199,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
     
     // Hide scrollbars after wheel interaction
     hideScrollbars();
-  }, [mergedOptions.handleMouseWheel, mergedOptions.mouseWheelSmoothScroll, scrollTop, scrollLeft, contentHeight, containerHeight, contentWidth, containerWidth, smoothScrollTo, showScrollbars, hideScrollbars]);
+	}, [mergedOptions.handleMouseWheel, mergedOptions.mouseWheelSmoothScroll, mergedOptions.mouseWheelHorizontal, scrollTop, scrollLeft, contentHeight, containerHeight, contentWidth, containerWidth, smoothScrollTo, showScrollbars, hideScrollbars]);
 
   // Handle mouse enter
   const handleMouseEnter = useCallback((): void => {
@@ -370,6 +377,18 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
       }
     };
   }, [updateDimensions]);
+
+  // Update dimensions when children change (e.g., when switching tabs)
+  useEffect(() => {
+    // Use requestAnimationFrame to allow DOM to update before recalculating dimensions
+    const frameId = requestAnimationFrame(() => {
+      updateDimensions();
+    });
+
+    return () => {
+      cancelAnimationFrame(frameId);
+    };
+  }, [children, updateDimensions]);
 
   // Container classes
   const containerClasses = [

@@ -9,6 +9,11 @@ export interface IScrollableElementOptions extends IScrollableElementStyles {
   readonly useShadows?: boolean;
   readonly handleMouseWheel?: boolean;
   readonly mouseWheelSmoothScroll?: boolean;
+	/**
+	 * If true, converts vertical mouse wheel (deltaY) to horizontal scroll (deltaX).
+	 * Useful for horizontal-only scrolling contexts like tab bars.
+	 */
+	readonly mouseWheelHorizontal?: boolean;
   readonly horizontal?: 'auto' | 'visible' | 'hidden';
   readonly vertical?: 'auto' | 'visible' | 'hidden';
   readonly horizontalScrollbarSize?: number;

@@ -2,6 +2,7 @@ import CustomDropdown from './CustomDropdown'
 import CustomTabs from './CustomTabs'
 import { SettingsTreeView } from './SettingsTreeView'
 import MonacoWorkbench from './MonacoWorkbench'
+import { EditorWorkbench } from './Workbench/EditorWorkbench'
 
 // InputBox exports
 export { InputBox, MessageType } from './InputBox'
@@ -44,7 +45,28 @@ export { CustomWCO } from './CustomWCO/index'
 export type { CustomWCOProps } from './CustomWCO/index'
 
 // Other exports
-export { CustomDropdown, CustomTabs, SettingsTreeView, MonacoWorkbench }
+export { CustomDropdown, CustomTabs, SettingsTreeView, MonacoWorkbench, EditorWorkbench }
 export type { Tab } from './CustomTabs'
 export type { MonacoWorkbenchProps } from './MonacoWorkbench'
+export type { EditorWorkbenchProps } from './Workbench/EditorWorkbench'
+export type {
+	WorkbenchState, // legacy flat types (kept for external imports)
+	EditorGroup,
+	EditorTab,
+	EditorWorkbenchCallbacks,
+	SplitDirection,
+	Orientation,
+	WorkbenchTree,
+	GroupNode,
+	TabGroupNode
+} from './Workbench/types'
+
+// Workbench IPC exports
+export { onWorkbenchTabDropped } from './Workbench/ipc'
+
+// Workbench tree functions exports
+export { insertTabAt, normalizeTree, removeTab, findGroup } from './Workbench/tree'
+export type { FindResult } from './Workbench/tree'
+export { isTabGroupNode, isContainerNode } from './Workbench/types'
+export { getTabTitleString, extractTextFromReactNode } from './Workbench/utils'
 

@@ -1,0 +1,107 @@
+.monaco-workbench .part.editor > .content .editor-group-container > .title > .tabs-and-actions-container {
+	display: flex;
+	position: relative;
+	flex: 1;           /* expand within .title */
+	min-width: 0;      /* allow children to shrink horizontally */
+}
+
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container-wrapper {
+	flex: 1; /* expand to take remaining row width so blank area captures DnD */
+	min-width: 0;
+}
+
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container {
+	display: flex;
+	height: 100%;
+	flex-wrap: nowrap; /* prevent tabs from wrapping to next line */
+}
+
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab {
+	position: relative;
+	display: flex;
+	align-items: center;
+	white-space: nowrap;
+	cursor: pointer;
+	height: 100%;
+	min-height: var(--editor-group-tab-height, 35px);
+	box-sizing: border-box;
+	padding: 0 10px;
+	background-color: var(--vscode-tab-inactiveBackground);
+	color: var(--vscode-tab-inactiveForeground);
+	flex-shrink: 0; /* prevent tabs from shrinking below their content size */
+	min-width: fit-content; /* ensure tabs maintain their content width */
+}
+
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.active {
+	background-color: var(--vscode-tab-activeBackground);
+	color: var(--vscode-tab-activeForeground);
+}
+
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab .tab-label {
+	line-height: var(--editor-group-tab-height, 35px);
+}
+
+/* Apply opacity only to label-name content when dimmed */
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container.dimmed > .tab .label-name {
+	opacity: 0.5;
+}
+
+/* Icons inside label-name should always be white and have full opacity even when dimmed */
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container.dimmed > .tab .label-name .codicon-file {
+	opacity: 1 !important;
+	color: #ffffff !important;
+}
+
+/* Icons inside label-name should always be white even when not dimmed */
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab .label-name .codicon-file {
+	color: #ffffff !important;
+}
+
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab .tab-actions {
+	display: flex;
+	align-items: center; /* vertically center actions */
+	height: 100%; /* take full tab height to enable bottom alignment */
+	transform: translateY(1px); /* nudge slightly down */
+	margin-left: 6px; /* extra spacing from label */
+	opacity: 0; /* hidden by default */
+	pointer-events: none;
+	transition: opacity 120ms ease;
+}
+
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab:hover .tab-actions,
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.active .tab-actions {
+	opacity: 1;
+	pointer-events: auto;
+}
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.drop-target-left::after,
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.drop-target-right::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	height: 100%;
+	width: 1px;
+	background-color: var(--vscode-tab-dragAndDropBorder, #4FC3F7);
+	pointer-events: none;
+	z-index: 11;
+}
+
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.drop-target-right::before {
+	right: 0;
+}
+
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.drop-target-left::after {
+	left: 0;
+}
+
+.editor-group-content-placeholder {
+	flex: 1;
+	min-height: 120px;
+	background-color: var(--vscode-editor-background);
+	color: var(--vscode-editor-foreground);
+	display: flex;             /* allow content to grow */
+	align-items: stretch;      /* let children take full height */
+	justify-content: flex-start;
+	border-top: 1px solid var(--tabs-border-bottom-color, transparent);
+}
+
+

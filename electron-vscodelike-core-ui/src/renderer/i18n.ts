@@ -7,11 +7,11 @@ import { logger } from './services/logger'
 let isInitialized = false
 
 // Generic i18n setup - applications can provide their own translations
-export function initializeI18n(resources: Resource, defaultLanguage = 'en'): I18nInstance {
+export function initializeI18n(resources: Resource, defaultLanguage = 'en'): Promise<I18nInstance> {
   // Prevent double initialization
   if (isInitialized) {
     logger.warn('i18n already initialized, skipping')
-    return i18n
+    return Promise.resolve(i18n)
   }
 
   // Initialize i18n
@@ -19,8 +19,8 @@ export function initializeI18n(resources: Resource, defaultLanguage = 'en'): I18
     i18n.use(initReactI18next)
   }
   
-  // Init with resources - use void to handle promise without awaiting
-  void i18n.init({
+  // Init with resources and return the promise
+  return i18n.init({
     resources,
     lng: defaultLanguage,
     fallbackLng: defaultLanguage,
@@ -30,11 +30,11 @@ export function initializeI18n(resources: Resource, defaultLanguage = 'en'): I18
   }).then(() => {
     isInitialized = true
     logger.info('i18n initialized successfully', { language: i18n.language })
+    return i18n
   }).catch((error) => {
     logger.error('Failed to initialize i18n', { error: String(error) })
+    throw error
   })
-
-  return i18n
 }
 
 // Export the i18n instance for direct use

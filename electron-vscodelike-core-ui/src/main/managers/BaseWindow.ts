@@ -11,12 +11,25 @@ import { WindowConfiguration, WindowState, isDevToolsEnabled } from "./WindowMan
 export abstract class BaseWindow {
     private window: BrowserWindow | null = null
     private storageService = getStorageService()
-    private iconPath: string | undefined = undefined
+    protected iconPath: string | undefined = undefined
   
     /**
      * Configuration for this window
      */
     protected readonly configuration: WindowConfiguration
+
+    /**
+     * Static flags to ensure IPC handlers are registered only once
+     */
+    private static iconHandlerRegistered = false
+    private static windowActionHandlerRegistered = false
+    private static windowTitleHandlerRegistered = false
+    private static platformHandlerRegistered = false
+
+    /**
+     * Static Map to associate BrowserWindow instances with BaseWindow instances
+     */
+    private static windowInstances = new Map<BrowserWindow, BaseWindow>()
   
     constructor(configuration: WindowConfiguration) {
       this.configuration = configuration
@@ -38,6 +51,8 @@ export abstract class BaseWindow {
      */
     setWindow(window: BrowserWindow): void {
       this.window = window
+      // Register this instance in the static Map
+      BaseWindow.windowInstances.set(window, this)
       this.attachWindowListeners()
       this.setupDevTools()
       this.setupWindowControls()
@@ -99,16 +114,17 @@ export abstract class BaseWindow {
         return
       }
 
-      // Remove existing handlers to avoid duplicates
-      ipcMain.removeAllListeners('window-action')
-      ipcMain.removeAllListeners('set-window-title')
-      
-      // Handle window actions from renderer
-      ipcMain.on('window-action', (_event: Electron.IpcMainEvent, action: string) => {
-        const wnd = this.window
+      // Register window action handler (only once)
+      if (!BaseWindow.windowActionHandlerRegistered) {
+        ipcMain.on('window-action', (event: Electron.IpcMainEvent, action: string) => {
+          const wnd = BrowserWindow.fromWebContents(event.sender)
         if (!wnd || wnd.isDestroyed()) {
           return
         }
+          const instance = BaseWindow.windowInstances.get(wnd)
+          if (!instance) {
+            return
+          }
         switch (action) {
           case 'minimize':
             wnd.minimize()
@@ -131,21 +147,35 @@ export abstract class BaseWindow {
             break
         }
       })
+        BaseWindow.windowActionHandlerRegistered = true
+      }
 
-      // Handle window title change from renderer
-      ipcMain.on('set-window-title', (_event: Electron.IpcMainEvent, title: string) => {
-        const wnd = this.window
+      // Register window title handler (only once)
+      if (!BaseWindow.windowTitleHandlerRegistered) {
+        ipcMain.on('set-window-title', (event: Electron.IpcMainEvent, title: string) => {
+          const wnd = BrowserWindow.fromWebContents(event.sender)
         if (!wnd || wnd.isDestroyed()) {
           return
         }
         wnd.setTitle(title)
       })
+        BaseWindow.windowTitleHandlerRegistered = true
+      }
 
-      // Handle window icon request from renderer
-      ipcMain.handle('get-window-icon', () => {
-        if (!this.iconPath) return null
+      // Register window icon handler (only once)
+      if (!BaseWindow.iconHandlerRegistered) {
+        logger.info('📋 Registering get-window-icon handler (first time)')
+        ipcMain.handle('get-window-icon', (event: Electron.IpcMainInvokeEvent) => {
+          const wnd = BrowserWindow.fromWebContents(event.sender)
+          if (!wnd || wnd.isDestroyed()) {
+            return null
+          }
+          const instance = BaseWindow.windowInstances.get(wnd)
+          if (!instance || !instance.iconPath) {
+            return null
+          }
         try {
-          const image = nativeImage.createFromPath(this.iconPath)
+            const image = nativeImage.createFromPath(instance.iconPath)
           if (image.isEmpty()) return null
           return image.toDataURL()
         } catch (error) {
@@ -153,6 +183,23 @@ export abstract class BaseWindow {
           return null
         }
       })
+        BaseWindow.iconHandlerRegistered = true
+        logger.info('✅ get-window-icon handler registered successfully')
+      } else {
+        logger.info('⏭️ get-window-icon handler already registered, skipping')
+      }
+
+      // Register platform request handler (only once)
+      if (!BaseWindow.platformHandlerRegistered) {
+        ipcMain.on('request-platform', (event: Electron.IpcMainEvent) => {
+          // Check if WebContents is still valid before sending
+          if (event.sender.isDestroyed()) {
+            return
+          }
+          event.sender.send('platform', process.platform)
+        })
+        BaseWindow.platformHandlerRegistered = true
+      }
     }
   
     /**
@@ -272,10 +319,8 @@ export abstract class BaseWindow {
   
       const devToolsEnabled = isDevToolsEnabled()
   
-      // Open DevTools automatically in development mode
-      if (process.env['NODE_ENV'] === 'development') {
-        this.window.webContents.openDevTools()
-      }
+      // DevTools are not opened automatically - user can open them manually via keyboard shortcuts
+      // if enabled in development mode or with --enable-dev-tools flag in production
   
       // Add keyboard shortcuts for DevTools (F12 or Ctrl+Shift+I) only if enabled
       if (devToolsEnabled) {
@@ -390,14 +435,12 @@ export abstract class BaseWindow {
 
       // Register window with manager (this will setup DevTools and listeners)
       this.setWindow(window)
-      
-      // Handle platform requests from renderer
-      ipcMain.on('request-platform', () => {
-        window.webContents.send('platform', process.platform)
-      })
 
       // Send initial window state
       window.webContents.send('window-state', window.isMaximized() ? 'maximized' : 'normal')
+      
+      // Send platform info immediately
+      window.webContents.send('platform', process.platform)
 
       // Listen for window state changes
       window.on('maximize', () => {
@@ -424,6 +467,8 @@ export abstract class BaseWindow {
   
       // Cleanup on closed
       window.on('closed', () => {
+        // Remove from static Map
+        BaseWindow.windowInstances.delete(window)
         this.destroy()
       })
     }

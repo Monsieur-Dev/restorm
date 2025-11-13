@@ -1,12 +1,14 @@
 {
   "app": {
     "title": "Gitable",
-    "welcome": "Hello Gitable"
+    "welcome": "Hello Gitable",
+    "tabsDemo": "Tabs Demo"
   },
   "themeTest": {
     "title": "Theme Test Page",
     "description": "Test page to visualize all UI components with different VSCode themes",
     "selectTheme": "Select Theme",
+    "language": "Language",
     "components": {
       "inputs": "Text Inputs",
       "checkboxes": "Checkboxes & Radio Buttons",
@@ -26,6 +28,7 @@
     "new": "New",
     "open": "Open",
     "openRecent": "Open Recent",
+    "editor": "Editor",
     "save": "Save",
     "autoSave": "Auto-save",
     "revert": "Revert",
