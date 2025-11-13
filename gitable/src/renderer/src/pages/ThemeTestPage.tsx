@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useTheme, CustomTabs, logger, SelectBox, Titlebar, MenuBar, MenuBarItem, MenuItem, MenuItemSeparator, Button } from 'electron-vscodelike-core-ui/renderer'
+import { useTheme, CustomTabs, logger, SelectBox, Titlebar, MenuBar, MenuBarItem, MenuItem, MenuItemSeparator, Button, Statusbar, StatusbarElement } from 'electron-vscodelike-core-ui/renderer'
 import type { Tab } from 'electron-vscodelike-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 import { 
@@ -246,7 +246,8 @@ const ThemeTestPage: React.FC = () => {
               padding: '4px 8px',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              outline: 'none'
             }}
             onClick={() => { logger.info('Settings button clicked') }}
           >
@@ -337,6 +338,40 @@ const ThemeTestPage: React.FC = () => {
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <CustomTabs tabs={tabs} />
       </div>
+
+      {/* Statusbar */}
+      <Statusbar>
+        <StatusbarElement title="Ready" />
+        <StatusbarElement title={<><i className="codicon codicon-warning"></i>test</>} warning>
+          Contenu de l&apos;infobulle warning
+        </StatusbarElement>
+        <StatusbarElement title={<><i className="codicon codicon-error"></i>test2</>} error>
+          Contenu de l&apos;infobulle error
+        </StatusbarElement>
+        <StatusbarElement 
+          title="test3" 
+          onClick={() => {
+            logger.info('Statusbar element clicked')
+          }}
+        >
+          Contenu de l&apos;infobulle cliquable
+        </StatusbarElement>
+        <StatusbarElement
+          title={<i className="codicon codicon-bell"></i>}
+          className="right-aligned"
+          onClick={() => {
+            logger.info('Notifications clicked')
+          }}
+        >
+          <div>
+            <div style={{ marginBottom: '8px', fontWeight: 'bold' }}>Notifications</div>
+            <div style={{ marginBottom: '4px' }}>• Nouvelle mise à jour disponible</div>
+            <div style={{ marginBottom: '4px' }}>• 3 fichiers modifiés</div>
+            <div style={{ marginBottom: '4px' }}>• Build terminé avec succès</div>
+            <div>• 2 erreurs dans le projet</div>
+          </div>
+        </StatusbarElement>
+      </Statusbar>
     </div>
   )
 }

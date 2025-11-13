@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useTheme, CustomDropdown, logger, InputBox, MessageType, Toggle, RadioGroup, ScrollableElement } from 'electron-vscodelike-core-ui/renderer'
+import { useTheme, CustomDropdown, logger, InputBox, MessageType, Toggle, RadioGroup, ScrollableElement, Statusbar, StatusbarElement } from 'electron-vscodelike-core-ui/renderer'
 import type { IInputValidator } from 'electron-vscodelike-core-ui/renderer'
 
 interface Theme {
@@ -372,6 +372,12 @@ const SettingsPage: React.FC = () => {
           </div>
         </ScrollableElement>
       </div>
+
+      {/* Statusbar */}
+      <Statusbar>
+        <StatusbarElement title="Ready" />
+        <StatusbarElement title="Settings" />
+      </Statusbar>
     </div>
   )
 }

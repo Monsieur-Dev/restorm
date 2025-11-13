@@ -1,0 +1,97 @@
+/* Statusbar styles - VSCode-like */
+
+.statusbar {
+	display: flex;
+	align-items: center;
+	width: 100%;
+	height: 22px;
+	box-sizing: border-box;
+	background-color: var(--vscode-statusBar-background, #007ACC);
+	color: var(--vscode-statusBar-foreground, #FFFFFF);
+	border-top: 1px solid var(--vscode-statusBar-border, transparent);
+	font-size: 12px;
+	line-height: 22px;
+	overflow: hidden;
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+/* Statusbar item */
+.statusbar-item {
+	display: flex;
+	align-items: center;
+	padding: 0 8px;
+	height: 100%;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	cursor: default;
+	position: relative;
+}
+
+/* Separator between items */
+.statusbar-item:not(:last-child)::after {
+	content: '';
+	position: absolute;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	width: 1px;
+	background-color: var(--vscode-statusBar-border, rgba(255, 255, 255, 0.2));
+}
+
+/* Clickable items */
+.statusbar-item.clickable {
+	cursor: pointer;
+}
+
+.statusbar-item.clickable:hover {
+	background-color: var(--vscode-statusBarItem-hoverBackground, rgba(255, 255, 255, 0.1));
+	color: var(--vscode-statusBarItem-hoverForeground, var(--vscode-statusBar-foreground, #FFFFFF));
+}
+
+.statusbar-item.clickable:focus {
+	outline: none;
+}
+
+/* Warning kind */
+.statusbar-item.warning-kind {
+	background-color: var(--vscode-statusBarItem-warningBackground, #FFA500);
+	color: var(--vscode-statusBarItem-warningForeground, #000000);
+}
+
+.statusbar-item.warning-kind.clickable:hover {
+	background-color: var(--vscode-statusBarItem-warningHoverBackground, #FFB733);
+}
+
+/* Error kind */
+.statusbar-item.error-kind {
+	background-color: var(--vscode-statusBarItem-errorBackground, #C72E0F);
+	color: var(--vscode-statusBarItem-errorForeground, #FFFFFF);
+}
+
+.statusbar-item.error-kind.clickable:hover {
+	background-color: var(--vscode-statusBarItem-errorHoverBackground, #E04A1F);
+}
+
+/* Active state for clickable items */
+.statusbar-item.clickable:active {
+	opacity: 0.8;
+}
+
+/* Right-aligned items */
+.statusbar-item.right-aligned {
+	margin-left: auto;
+}
+
+/* Codicon support in statusbar items */
+.statusbar-item .codicon {
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 4px;
+}
+

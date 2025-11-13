@@ -4,7 +4,7 @@ import { ipcRenderer } from 'electron'
  * Electron API object for window.electronAPI
  * This can be imported and reused in other preload scripts
  */
-export const createElectronAPI = () => ({
+export const createElectronAPI = (): Record<string, unknown> => ({
   onPlatform: (cb: (platform: string) => void) => {
     ipcRenderer.on('platform', (_: Electron.IpcRendererEvent, platform: string) => {
       cb(platform);

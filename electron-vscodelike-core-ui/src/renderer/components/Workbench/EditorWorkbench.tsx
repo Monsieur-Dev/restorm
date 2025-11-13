@@ -359,7 +359,7 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({ tree, classNam
 							contentElement = current;
 							logger.info('Found content placeholder at cursor position', { groupId: currentGroupId, element: current.className });
 							break;
-						} else if (current.classList.contains('editor-group-container') && !contentElement) {
+						} else if (current.classList.contains('editor-group-container')) {
 							logger.info('Found group container at cursor position', { groupId: currentGroupId, element: current.className });
 						}
 					}
@@ -552,8 +552,8 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({ tree, classNam
 
 	// Listen for tabs dropped from other windows
 	useEffect(() => {
-		const cleanup = onWorkbenchTabDropped(async (tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }) => {
-			await handleTabDropped(tabData);
+		const cleanup = onWorkbenchTabDropped((tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }) => {
+			void handleTabDropped(tabData);
 		});
 		return cleanup;
 	}, [handleTabDropped]);

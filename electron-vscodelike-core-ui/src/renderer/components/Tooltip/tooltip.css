@@ -1,0 +1,87 @@
+/* Tooltip styles - VSCode-like */
+
+.tooltip {
+	position: fixed;
+	cursor: default;
+	overflow: visible;
+	user-select: text;
+	-webkit-user-select: text;
+	box-sizing: border-box;
+	line-height: 1.5em;
+	white-space: normal;
+	animation: fadein 100ms linear;
+	z-index: 10000;
+}
+
+.tooltip-content {
+	background-color: var(--vscode-editorHoverWidget-background, #252526);
+	color: var(--vscode-editorHoverWidget-foreground, #CCCCCC);
+	border: 1px solid var(--vscode-editorHoverWidget-border, #454545);
+	border-radius: 3px;
+	box-shadow: 4px 2px 7px rgba(0, 0, 0, 1);
+	padding: 4px 8px;
+	max-width: 500px;
+	min-width: 100px;
+	word-wrap: break-word;
+	position: relative;
+}
+
+/* Beak border (outer triangle) */
+.tooltip-content::before {
+	content: '';
+	position: absolute;
+	bottom: -6px;
+	left: var(--beak-left-percent, 50%);
+	margin-left: -6px; /* Center the beak: half of border-left width (6px) */
+	width: 0;
+	height: 0;
+	border-left: 6px solid transparent;
+	border-right: 6px solid transparent;
+	border-top: 6px solid var(--vscode-editorHoverWidget-border, #454545);
+	pointer-events: none;
+}
+
+/* Beak (arrow) pointing down to the statusbar item (inner triangle) */
+.tooltip-content::after {
+	content: '';
+	position: absolute;
+	bottom: -5px;
+	left: var(--beak-left-percent, 50%);
+	margin-left: -5px; /* Center the beak: half of border-left width (5px) */
+	width: 0;
+	height: 0;
+	border-left: 5px solid transparent;
+	border-right: 5px solid transparent;
+	border-top: 5px solid var(--vscode-editorHoverWidget-background, #252526);
+	pointer-events: none;
+}
+
+@keyframes fadein {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+/* Markdown-like content styling */
+.tooltip-content p {
+	margin: 8px 0;
+}
+
+.tooltip-content p:first-child {
+	margin-top: 0;
+}
+
+.tooltip-content p:last-child {
+	margin-bottom: 0;
+}
+
+.tooltip-content code {
+	font-family: var(--monaco-monospace-font, 'Consolas', 'Courier New', monospace);
+	border-radius: 3px;
+	padding: 0 0.4em;
+	background-color: var(--vscode-textCodeBlock-background, rgba(255, 255, 255, 0.1));
+}
+
