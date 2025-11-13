@@ -7,6 +7,8 @@ import { computeDropIndex } from './dnd';
 import { getCurrentWindowBounds } from './ipc';
 import { onWorkbenchTabDropped } from './ipc';
 import { logger } from '../../services/logger';
+import { Sash } from '../Sash';
+import type { SashEvent, IVerticalSashLayoutProvider, IHorizontalSashLayoutProvider } from '../Sash';
 import './styles/tabs.css';
 
 export interface EditorWorkbenchProps extends EditorWorkbenchCallbacks {
@@ -21,9 +23,13 @@ function useSplitSizes(
 	count: number,
 	isVertical: boolean,
 	containerRef: React.RefObject<HTMLDivElement>
-): { sizes: number[]; onStartResize: (index: number, e: React.MouseEvent<HTMLDivElement>) => void } {
+): { sizes: number[]; onSashStart: (index: number) => (event: SashEvent) => void; onSashChange: (index: number) => (event: SashEvent) => void } {
 	const [sizes, setSizes] = useState<number[]>([]);
 	const minGroupPx = 120;
+	const startSizesRef = useRef<number[]>([]);
+	const startCoordRef = useRef<number>(0);
+	const axisSizeRef = useRef<number>(0);
+	const currentIndexRef = useRef<number>(-1);
 
 	useEffect(() => {
 		if (count <= 0) {
@@ -37,23 +43,34 @@ function useSplitSizes(
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [count]);
 
-	const onStartResize = useCallback((index: number, e: React.MouseEvent<HTMLDivElement>) => {
-		if (!containerRef.current || sizes.length !== count) {
-			return;
-		}
-		e.preventDefault();
-		const rect = containerRef.current.getBoundingClientRect();
-		const axisSize = isVertical ? Math.max(1, rect.width) : Math.max(1, rect.height);
-		const minPercent = Math.min(0.5, minGroupPx / axisSize);
-		const startCoord = isVertical ? e.clientX : e.clientY;
-		const startSizes = [...sizes];
+	const onSashStart = useCallback((index: number) => {
+		return (event: SashEvent): void => {
+			if (!containerRef.current || sizes.length !== count) {
+				return;
+			}
+			const rect = containerRef.current.getBoundingClientRect();
+			const axisSize = isVertical ? Math.max(1, rect.width) : Math.max(1, rect.height);
+			const startCoord = isVertical ? event.startX - rect.left : event.startY - rect.top;
+			
+			axisSizeRef.current = axisSize;
+			startCoordRef.current = startCoord;
+			startSizesRef.current = [...sizes];
+			currentIndexRef.current = index;
+		};
+	}, [sizes, count, isVertical, containerRef]);
 
-		const onMouseMove = (ev: MouseEvent): void => {
-			if (index < 0 || index + 1 >= startSizes.length) return;
-			const deltaPx = (isVertical ? ev.clientX : ev.clientY) - startCoord;
-			const delta = deltaPx / axisSize;
-			let left = (startSizes[index] ?? 0) + delta;
-			let right = (startSizes[index + 1] ?? 0) - delta;
+	const onSashChange = useCallback((index: number) => {
+		return (event: SashEvent): void => {
+			if (index < 0 || index + 1 >= startSizesRef.current.length || !containerRef.current) return;
+			
+			const rect = containerRef.current.getBoundingClientRect();
+			const currentCoord = isVertical ? event.currentX - rect.left : event.currentY - rect.top;
+			const deltaPx = currentCoord - startCoordRef.current;
+			const delta = deltaPx / axisSizeRef.current;
+			const minPercent = Math.min(0.5, minGroupPx / axisSizeRef.current);
+			
+			let left = (startSizesRef.current[index] ?? 0) + delta;
+			let right = (startSizesRef.current[index + 1] ?? 0) - delta;
 			if (left < minPercent) {
 				right -= (minPercent - left);
 				left = minPercent;
@@ -62,7 +79,7 @@ function useSplitSizes(
 				left -= (minPercent - right);
 				right = minPercent;
 			}
-			const next = [...startSizes];
+			const next = [...startSizesRef.current];
 			const li = index;
 			const ri = index + 1;
 			let leftVal = Math.max(minPercent, Math.min(1 - minPercent, left));
@@ -70,7 +87,7 @@ function useSplitSizes(
 			next[li] = leftVal;
 			next[ri] = rightVal;
 			// keep others as-is but renormalize the pair to preserve total
-			const sumOthers = startSizes.reduce((acc, s, i) => (i === li || i === ri ? acc : acc + s), 0);
+			const sumOthers = startSizesRef.current.reduce((acc, s, i) => (i === li || i === ri ? acc : acc + s), 0);
 			const sumNext = leftVal + rightVal + sumOthers;
 			if (sumNext !== 1) {
 				const scale = (1 - sumOthers) / (leftVal + rightVal);
@@ -81,16 +98,9 @@ function useSplitSizes(
 			}
 			setSizes(next);
 		};
+	}, [isVertical, containerRef]);
 
-		const onMouseUp = (): void => {
-			window.removeEventListener('mousemove', onMouseMove);
-			window.removeEventListener('mouseup', onMouseUp);
-		};
-		window.addEventListener('mousemove', onMouseMove);
-		window.addEventListener('mouseup', onMouseUp);
-	}, [sizes, count, isVertical, containerRef]);
-
-	return { sizes, onStartResize };
+	return { sizes, onSashStart, onSashChange };
 }
 
 const GroupContainer: React.FC<{
@@ -100,10 +110,57 @@ const GroupContainer: React.FC<{
 }> = ({ node, callbacks, renderLeaf }) => {
 	const isVertical = node.orientation === 'vertical';
 	const ref = useRef<HTMLDivElement | null>(null);
-	const { sizes, onStartResize } = useSplitSizes(node.groups.length, isVertical, ref);
+	const { sizes, onSashStart, onSashChange } = useSplitSizes(node.groups.length, isVertical, ref);
+
+	// Create layout provider for each sash
+	const createLayoutProvider = useCallback((index: number): IVerticalSashLayoutProvider | IHorizontalSashLayoutProvider => {
+		if (isVertical) {
+			return {
+				getVerticalSashLeft: (_sash: { orientation: 'vertical' | 'horizontal' }): number => {
+					if (!ref.current) return 0;
+					const rect = ref.current.getBoundingClientRect();
+					let left = 0;
+					for (let i = 0; i <= index; i++) {
+						left += (sizes[i] ?? 0) * rect.width;
+					}
+					return left;
+				},
+				getVerticalSashTop: (): number => {
+					if (!ref.current) return 0;
+					return 0;
+				},
+				getVerticalSashHeight: (): number => {
+					if (!ref.current) return 0;
+					const rect = ref.current.getBoundingClientRect();
+					return rect.height;
+				}
+			};
+		} else {
+			return {
+				getHorizontalSashTop: (_sash: { orientation: 'vertical' | 'horizontal' }): number => {
+					if (!ref.current) return 0;
+					const rect = ref.current.getBoundingClientRect();
+					let top = 0;
+					for (let i = 0; i <= index; i++) {
+						top += (sizes[i] ?? 0) * rect.height;
+					}
+					return top;
+				},
+				getHorizontalSashLeft: (): number => {
+					if (!ref.current) return 0;
+					return 0;
+				},
+				getHorizontalSashWidth: (): number => {
+					if (!ref.current) return 0;
+					const rect = ref.current.getBoundingClientRect();
+					return rect.width;
+				}
+			};
+		}
+	}, [isVertical, sizes]);
 
 	return (
-		<div ref={ref} style={{ display: 'flex', flex: 1, flexDirection: isVertical ? 'row' : 'column', minWidth: 0, minHeight: 0 }}>
+		<div ref={ref} style={{ display: 'flex', flex: 1, flexDirection: isVertical ? 'row' : 'column', minWidth: 0, minHeight: 0, position: 'relative' }}>
 			{node.groups.map((child, i) => (
 				<React.Fragment key={i}>
 					<div
@@ -120,23 +177,12 @@ const GroupContainer: React.FC<{
 							: <GroupContainer node={child} callbacks={callbacks} renderLeaf={renderLeaf} />}
 					</div>
 					{i < node.groups.length - 1 ? (
-						<div
-							role="separator"
-							aria-orientation={isVertical ? 'vertical' : 'horizontal'}
-							onMouseDown={(ev) => { onStartResize(i, ev); }}
-							style={{
-								flex: '0 0 6px',
-								width: isVertical ? 6 : 'auto',
-								height: isVertical ? 'auto' : 6,
-								cursor: isVertical ? 'col-resize' : 'row-resize',
-								alignSelf: 'stretch',
-								userSelect: 'none',
-								touchAction: 'none',
-								background: 'transparent',
-								pointerEvents: 'auto',
-								zIndex: 2
-							}}
-							title=""
+						<Sash
+							orientation={isVertical ? 'vertical' : 'horizontal'}
+							layoutProvider={createLayoutProvider(i)}
+							onStart={onSashStart(i)}
+							onChange={onSashChange(i)}
+							state="enabled"
 						/>
 					) : null}
 				</React.Fragment>
