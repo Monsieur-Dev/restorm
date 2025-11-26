@@ -1,0 +1,130 @@
+import type React from 'react'
+
+export type ListViewSelectionMode = 'single' | 'multiple'
+
+export type ListViewDropPosition = 'before' | 'after' | 'into'
+
+export interface ListViewItemData {
+  id: string
+  title?: React.ReactNode
+  /**
+   * Icon can be:
+   * - a React node (custom JSX)
+   * - a string (codicon name, without the `codicon-` prefix)
+   */
+  icon?: React.ReactNode | string
+  children?: ListViewItemData[]
+  /**
+   * Optional initial expanded state. If omitted, non-leaf nodes default to expanded.
+   */
+  isExpanded?: boolean
+  /**
+   * When true, the item should display an expander/chevron even if it currently
+   * has no children. Useful for folders that are empty but still expandable.
+   */
+  isExpandable?: boolean
+  /**
+   * Whether the item can be selected. Defaults to true.
+   */
+  isSelectable?: boolean
+  /**
+   * Whether the row should behave as a sticky header when scrolling.
+   */
+  isStickyHeader?: boolean
+  /**
+   * Optional custom payload preserved and passed back in events.
+   */
+  data?: unknown
+}
+
+export interface ListViewItemPath {
+  /**
+   * Array of item ids from root to the current item.
+   */
+  ids: string[]
+  /**
+   * Array of indexes from root to the current item.
+   */
+  indices: number[]
+}
+
+export interface ListViewItemEventPayload {
+  item: ListViewItemData
+  path: ListViewItemPath
+}
+
+export interface ListViewDropEventPayload extends ListViewItemEventPayload {
+  source: ListViewItemData
+  sourcePath: ListViewItemPath
+  position: ListViewDropPosition
+  originalEvent: React.DragEvent<HTMLDivElement>
+}
+
+export interface ListViewProps {
+  /**
+   * Hierarchical data source. If provided, it takes precedence over JSX children.
+   */
+  items?: ListViewItemData[]
+  /**
+   * JSX usage, e.g.:
+   * <ListView>
+   *   <ListViewItem title="Root">
+   *     <ListViewItem title="Child" />
+   *   </ListViewItem>
+   * </ListView>
+   */
+  children?: React.ReactNode
+  className?: string
+  style?: React.CSSProperties
+
+  /**
+   * Optional controlled selection. When provided, the ListView will mirror
+   * these ids as selected rows.
+   */
+  selectedIds?: string[]
+
+  /**
+   * Optional controlled active item id. When provided, the ListView will
+   * treat this item as the keyboard focus anchor.
+   */
+  activeId?: string | null
+
+  /**
+   * Selection behaviour. Defaults to single selection.
+   */
+  selectionMode?: ListViewSelectionMode
+
+  /**
+   * ARIA role for the root container. Defaults to `tree`.
+   */
+  rootRole?: 'list' | 'tree'
+  ariaLabel?: string
+
+  onItemClick?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
+  onItemDoubleClick?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
+  onSelectionChange?: (selectedIds: string[], payload: ListViewItemEventPayload) => void
+  onItemToggle?: (
+    payload: ListViewItemEventPayload,
+    expanded: boolean,
+    event: React.MouseEvent<HTMLDivElement> | React.KeyboardEvent<HTMLDivElement>
+  ) => void
+  onItemDrop?: (payload: ListViewDropEventPayload) => void
+  onItemContextMenu?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
+}
+
+export interface ListViewItemProps {
+  id?: string
+  title?: React.ReactNode
+  icon?: React.ReactNode | string
+  isExpanded?: boolean
+  /**
+   * Force the item to show an expander/chevron even if it has no children.
+   */
+  isExpandable?: boolean
+  isSelectable?: boolean
+  isStickyHeader?: boolean
+  data?: unknown
+  children?: React.ReactNode
+}
+
+

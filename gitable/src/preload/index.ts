@@ -36,6 +36,14 @@ contextBridge.exposeInMainWorld('api', {
   // Developer Tools API
   toggleDeveloperTools: async (): Promise<void> => {
     await ipcRenderer.invoke('devtools:toggle')
+  },
+
+  // Project files API
+  project: {
+    listFiles: async (): Promise<{ path: string; isDirectory: boolean }[]> => {
+      const result: unknown = await ipcRenderer.invoke('project:list-files')
+      return result as { path: string; isDirectory: boolean }[]
+    }
   }
 })
 

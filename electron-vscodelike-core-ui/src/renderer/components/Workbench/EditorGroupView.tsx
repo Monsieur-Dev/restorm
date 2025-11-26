@@ -20,8 +20,6 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 	const [splitTarget, setSplitTarget] = useState<SplitDirection | 'center' | undefined>(undefined);
 	const contentRef = useRef<HTMLDivElement | null>(null);
 
-	const activeTab = group.tabs.find((t) => t.id === group.activeTabId) ?? group.tabs[0];
-
 	// Wrapper around onActivateTab that also requests focus for this group
 	const handleActivateTab = useCallback((tabId: string, groupId: string) => {
 		// Request focus for this group when a tab is activated
@@ -166,11 +164,37 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 					}
 					// Don't prevent default or stop propagation - let Monaco and other editors handle their own clicks
 				}}
-				style={{ position: 'relative', outline: 'none' }}
+				style={{
+					position: 'relative',
+					outline: 'none',
+					overflow: 'hidden',
+					flex: 1,
+					minHeight: 0,
+					display: 'flex',
+					flexDirection: 'column'
+				}}
 			>
-				{activeTab
-					? (activeTab.content ?? renderTabContent?.(activeTab) ?? <span>{activeTab.title}</span>)
-					: <span>No tab</span>}
+				{group.tabs.length === 0
+					? <span>No tab</span>
+					: group.tabs.map((tab) => {
+						const isActive = tab.id === group.activeTabId;
+						const content =
+							(renderTabContent?.(tab) ??
+								tab.content ??
+								<span>{tab.title}</span>);
+						return (
+							<div
+								key={tab.id}
+								style={{
+									display: isActive ? 'flex' : 'none',
+									flex: 1,
+									minHeight: 0
+								}}
+							>
+								{content}
+							</div>
+						);
+					})}
 				<div style={overlayStyle} />
 			</div>
 		</div>

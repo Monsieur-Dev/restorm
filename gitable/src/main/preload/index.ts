@@ -6,8 +6,22 @@ import { contextBridge, ipcRenderer } from 'electron'
 import { createCoreUIAPI } from '../../../../electron-vscodelike-core-ui/src/preload/api'
 import { createElectronAPI } from '../../../../electron-vscodelike-core-ui/src/preload/electronAPI'
 
-// Expose core-ui APIs (imported from core-ui preload modules)
-contextBridge.exposeInMainWorld('api', createCoreUIAPI())
+// Expose core-ui APIs (imported from core-ui preload modules) and extend with Gitable project API
+const coreUIAPI = createCoreUIAPI()
+
+contextBridge.exposeInMainWorld('api', {
+  ...coreUIAPI,
+  project: {
+    listFiles: async (): Promise<{ path: string; isDirectory: boolean }[]> => {
+      const result: unknown = await ipcRenderer.invoke('project:list-files')
+      return result as { path: string; isDirectory: boolean }[]
+    },
+    readFile: async (filePath: string): Promise<string> => {
+      const result: unknown = await ipcRenderer.invoke('project:read-file', filePath)
+      return typeof result === 'string' ? result : ''
+    }
+  }
+})
 contextBridge.exposeInMainWorld('electronAPI', createElectronAPI())
 
 // Expose gitable-specific APIs

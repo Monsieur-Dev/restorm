@@ -29,6 +29,13 @@ export const Tab: React.FC<TabProps> = ({ tab, isActive, onActivate, onClose, dr
 			role="tab"
 			aria-selected={isActive}
 			onClick={() => onActivate?.(tab.id)}
+			onAuxClick={(e) => {
+				if (e.button === 1) {
+					e.preventDefault();
+					e.stopPropagation();
+					onClose?.(tab.id);
+				}
+			}}
 			draggable={draggable}
 			onDragStart={onDragStart}
 			onDragEnd={onDragEnd}

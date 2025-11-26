@@ -17,7 +17,8 @@
       "textarea": "Zone de Texte",
       "panels": "Panneaux",
       "lists": "Listes",
-      "text": "Variantes de Texte"
+      "text": "Variantes de Texte",
+      "stickyHeaders": "En-têtes collants"
     }
   },
   "menuBar": {

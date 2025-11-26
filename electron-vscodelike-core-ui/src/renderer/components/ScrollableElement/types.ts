@@ -24,13 +24,24 @@ export interface IScrollableElementOptions extends IScrollableElementStyles {
   readonly scrollByPage?: boolean;
 }
 
-export interface ScrollableElementProps {
+type ScrollableElementDomProps = Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'onScroll' | 'className' | 'style'
+>;
+
+export interface ScrollableElementProps extends ScrollableElementDomProps {
   children: React.ReactNode;
   options?: IScrollableElementOptions;
+  /** Class applied to the outer scrollable container */
   className?: string;
+  /** Additional class applied to the inner scrollable content element */
+  contentClassName?: string;
   id?: string;
   style?: React.CSSProperties;
+  /** Logical scroll callback with numeric coordinates */
   onScroll?: (scrollTop: number, scrollLeft: number) => void;
+  /** Optional ref to the inner scrollable content element */
+  contentRef?: React.MutableRefObject<HTMLDivElement | null> | ((instance: HTMLDivElement | null) => void);
 }
 
 export const defaultScrollableElementStyles: IScrollableElementStyles = {
