@@ -24,6 +24,31 @@ export type { IProgressBarStyles, IProgressBarOptions, ProgressBarProps } from '
 export { ScrollableElement, defaultScrollableElementStyles } from './ScrollableElement/index'
 export type { IScrollableElementStyles, IScrollableElementOptions, ScrollableElementProps } from './ScrollableElement/index'
 
+// Sash exports
+export { Sash } from './Sash'
+export type {
+  SashOrientation,
+  SashState,
+  SashEvent,
+  IVerticalSashLayoutProvider,
+  IHorizontalSashLayoutProvider,
+  SashLayoutProvider,
+  SashProps
+} from './Sash'
+
+// ListView exports
+export { ListView, ListViewItem } from './ListView'
+export type {
+  ListViewProps,
+  ListViewItemProps,
+  ListViewItemData,
+  ListViewItemEventPayload,
+  ListViewDropEventPayload,
+  ListViewItemPath,
+  ListViewSelectionMode,
+  ListViewDropPosition
+} from './ListView'
+
 // Button exports
 export { Button, ButtonWithDescription, ButtonWithDropdown, ButtonWithIcon, defaultButtonStyles } from './Button/index'
 export type { IButtonOptions, IButtonStyles, IButtonWithDropdownOptions, ButtonProps, ButtonWithDescriptionProps, ButtonWithDropdownProps, ButtonWithIconProps } from './Button/index'

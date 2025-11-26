@@ -257,6 +257,7 @@ export class ThemeService {
       'list.focusBackground': isDark ? '#062f4a' : '#d6ebff',
       'list.hoverForeground': isDark ? '#cccccc' : '#333333',
       'list.focusForeground': isDark ? '#cccccc' : '#333333',
+      'list.foreground': isDark ? '#cccccc' : '#333333',
       
       // Button colors
       'button.background': isDark ? '#0e639c' : '#007acc',

@@ -2,7 +2,8 @@ import { app, ipcMain, BrowserWindow } from 'electron'
 import { MainWindow } from './windows/MainWindow'
 import { EditorWindow } from './windows/EditorWindow'
 import { initializeApp, logger } from 'electron-vscodelike-core-ui'
-import { join } from 'path'
+import { join, relative } from 'path'
+import { promises as fs } from 'fs'
 
 function createWindow(): void {
   logger.info('🪟 Creating main window...')
@@ -110,5 +111,56 @@ ipcMain.handle('tabs:send-workbench-tab-to-window', (_event, targetWindowId: num
   targetWindow.webContents.send('tabs:workbench-tab-dropped', tabData)
   logger.info('Tab data sent to target window', { targetWindowId, tabId: tabData.tabId, cursorX: tabData.cursorX, cursorY: tabData.cursorY })
   return true
+})
+
+// IPC handler to list project files from the Gitable workspace root
+ipcMain.handle('project:list-files', async () => {
+  const projectRoot = join(__dirname, '../..')
+
+  const results: { path: string; isDirectory: boolean }[] = []
+
+  const walk = async (dir: string): Promise<void> => {
+    const entries = await fs.readdir(dir, { withFileTypes: true })
+    for (const entry of entries) {
+      if (entry.name === 'node_modules' || entry.name.startsWith('.')) {
+        continue
+      }
+      const fullPath = join(dir, entry.name)
+      const relPath = relative(projectRoot, fullPath)
+      const isDirectory = entry.isDirectory()
+      results.push({ path: relPath, isDirectory })
+      if (isDirectory) {
+        await walk(fullPath)
+      }
+    }
+  }
+
+  try {
+    await walk(projectRoot)
+    return results
+  } catch (error) {
+    logger.error('Failed to list project files', { error: String(error) })
+    return []
+  }
+})
+
+// IPC handler to read a project file (relative to the Gitable workspace root)
+ipcMain.handle('project:read-file', async (_event, relPath: string) => {
+  const projectRoot = join(__dirname, '../..')
+  const safePath = join(projectRoot, relPath)
+
+  // Basic safety: ensure resolved path stays under project root
+  if (!safePath.startsWith(projectRoot)) {
+    logger.warn('Blocked attempt to read file outside project root', { relPath })
+    return ''
+  }
+
+  try {
+    const content = await fs.readFile(safePath, 'utf8')
+    return content
+  } catch (error) {
+    logger.error('Failed to read project file', { relPath, error: String(error) })
+    return ''
+  }
 })
 

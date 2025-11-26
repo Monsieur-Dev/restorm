@@ -301,6 +301,40 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({ group, onCloseTab, onMov
 		[group.id, group.tabs, onMoveTab]
 	);
 
+	// Ensure the active tab is scrolled into view when it changes
+	useLayoutEffect(() => {
+		if (!containerRef.current || !group.activeTabId) {
+			return;
+		}
+		const container = containerRef.current;
+		const activeEl = tabElementByIdRef.current.get(group.activeTabId);
+		if (!activeEl) {
+			return;
+		}
+
+		// Find the scrollable container created by ScrollableElement (scrollable-content)
+		let scrollable: HTMLElement | null = container.parentElement;
+		while (scrollable && !scrollable.classList.contains('scrollable-content')) {
+			scrollable = scrollable.parentElement;
+		}
+		if (!scrollable) {
+			return;
+		}
+
+		const viewportRect = scrollable.getBoundingClientRect();
+		const activeRect = activeEl.getBoundingClientRect();
+		const padding = 24;
+
+		const leftVisible = viewportRect.left + padding;
+		const rightVisible = viewportRect.right - padding;
+
+		if (activeRect.left < leftVisible) {
+			scrollable.scrollLeft -= leftVisible - activeRect.left;
+		} else if (activeRect.right > rightVisible) {
+			scrollable.scrollLeft += activeRect.right - rightVisible;
+		}
+	}, [group.activeTabId]);
+
 	return (
 		<div className="tabs-and-actions-container">
 			<ScrollableElement

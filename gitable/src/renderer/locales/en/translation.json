@@ -17,7 +17,8 @@
       "textarea": "Text Area",
       "panels": "Panels",
       "lists": "Lists",
-      "text": "Text Variants"
+      "text": "Text Variants",
+      "stickyHeaders": "Sticky Headers"
     }
   },
   "menuBar": {

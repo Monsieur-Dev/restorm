@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback, useEffect } from 'react'
+import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger } from 'electron-vscodelike-core-ui/renderer'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab } from 'electron-vscodelike-core-ui/renderer'
 import type { GitableEditorTab } from '../types/editor'
@@ -25,6 +25,15 @@ export interface WorkbenchProps {
   onTreeChange?: (tree: WorkbenchTree) => void
   className?: string
   style?: React.CSSProperties
+  /**
+   * ID of the group that was focused last in the workbench.
+   * Used to open new files in the correct group.
+   */
+  focusedGroupId?: string | null
+  /**
+   * Callback fired whenever the focused group changes.
+   */
+  onFocusedGroupChange?: (groupId: string | null) => void
 }
 
 const getLanguage = (filename: string): string => {
@@ -38,19 +47,37 @@ const getLanguage = (filename: string): string => {
   return 'plaintext'
 }
 
-const MonacoView: React.FC<{ name: string, text?: string }> = ({ name, text }) => (
+interface MonacoEditorInstance {
+  focus: () => void
+}
+
+const MonacoView: React.FC<{
+  name: string
+  text?: string
+  tabId: string
+  registerEditor?: (tabId: string, editor: MonacoEditorInstance) => void
+}> = ({ name, text, tabId, registerEditor }) => (
   <div style={{ display: 'flex', flex: 1, minHeight: 0, minWidth: 0 }}>
     <Editor
       value={text ?? ''}
       defaultLanguage={getLanguage(name)}
       theme="vs-dark"
+      // Ensure one Monaco model per tab so that scroll and view state are fully independent
+      path={tabId}
       options={{ readOnly: true, minimap: { enabled: false }, lineNumbers: 'on', automaticLayout: true }}
       loading={<div style={{ padding: 12, opacity: 0.7 }}>Loading editor…</div>}
       height="100%"
       width="100%"
+      onMount={(editor) => {
+        if (!registerEditor) return
+        registerEditor(tabId, editor as MonacoEditorInstance)
+      }}
     />
   </div>
 )
+
+// Local alias to bypass strict prop typing issues coming from external package d.ts
+const EditorWorkbenchAny = EditorWorkbench as unknown as React.ComponentType<Record<string, unknown>>
 
 /**
  * Wrapper component for EditorWorkbench that handles Gitable-specific tab rendering
@@ -60,7 +87,9 @@ export const Workbench: React.FC<WorkbenchProps> = ({
   initialTabContentMap = {},
   onTreeChange,
   className,
-  style
+  style,
+  focusedGroupId,
+  onFocusedGroupChange
 }) => {
   // In controlled mode (onTreeChange provided), use initialTree directly
   // In uncontrolled mode, use local state
@@ -68,6 +97,9 @@ export const Workbench: React.FC<WorkbenchProps> = ({
   const [localTree, setLocalTree] = useState<WorkbenchTree>(initialTree)
   const tree = isControlled ? initialTree : localTree
   const [tabContentMap, setTabContentMap] = useState<Record<string, string>>(initialTabContentMap)
+  const editorInstancesRef = useRef<Record<string, MonacoEditorInstance>>({})
+  const lastTabCountRef = useRef<number>(0)
+  const lastRequestedFocusTabIdRef = useRef<string | null>(null)
 
   // In uncontrolled mode, sync local state when initialTree changes
   useEffect(() => {
@@ -83,6 +115,15 @@ export const Workbench: React.FC<WorkbenchProps> = ({
   useEffect(() => {
     setTabContentMap(initialTabContentMap)
   }, [initialTabContentMap])
+
+  const registerEditor = useCallback((tabId: string, editor: MonacoEditorInstance) => {
+    editorInstancesRef.current[tabId] = editor
+    logger.info('Workbench: Monaco editor mounted for tab', {
+      tabId,
+      hasPendingFocusRequest: lastRequestedFocusTabIdRef.current === tabId
+    })
+    // Ne pas forcer le focus ici : on laisse handleTreeChange s'en occuper
+  }, [])
 
   // Handle tab dropped from another window: store content and return true to allow drop
   // EditorWorkbench will handle the insertion logic
@@ -117,8 +158,8 @@ export const Workbench: React.FC<WorkbenchProps> = ({
     const content = tab.content ?? tabContentMap[tab.id] ?? ''
     // Use titleString for filename, fallback to extracting from title
     const filename = tab.titleString ?? (typeof tab.title === 'string' ? tab.title : getTabTitleString(tab, 'untitled'))
-    return <MonacoView name={filename} text={content} />
-  }, [tabContentMap])
+    return <MonacoView name={filename} text={content} tabId={tab.id} registerEditor={registerEditor} />
+  }, [tabContentMap, registerEditor])
 
   // Get tab content
   const onGetTabContent = useCallback((tabId: string): string | undefined => {
@@ -185,6 +226,30 @@ export const Workbench: React.FC<WorkbenchProps> = ({
     }
   }, [renderTabContent, onGetTabContent])
 
+  const handleTabActivated = useCallback((tabId: string): void => {
+    lastRequestedFocusTabIdRef.current = tabId
+    const hasEditor = !!editorInstancesRef.current[tabId]
+    logger.info('Workbench: onTabSelected received from core', {
+      tabId,
+      hasEditorInstance: hasEditor,
+      knownEditors: Object.keys(editorInstancesRef.current)
+    })
+
+    // Defer focus to the end of the event loop to ensure the tab is visible/layouted
+    window.setTimeout(() => {
+      const editor = editorInstancesRef.current[tabId]
+      if (editor) {
+        logger.info('Workbench: Focusing Monaco editor from deferred onTabSelected', { tabId })
+        editor.focus()
+      } else {
+        logger.warn('Workbench: Deferred focus but no editor instance found', {
+          tabId,
+          knownEditors: Object.keys(editorInstancesRef.current)
+        })
+      }
+    }, 0)
+  }, [])
+
   // Merge callbacks
   const callbacks = useMemo<Partial<EditorWorkbenchCallbacks>>(() => {
     return {
@@ -192,9 +257,10 @@ export const Workbench: React.FC<WorkbenchProps> = ({
       onWorkbenchTabDropped: handleTabDropped,
       renderTabContent: workbenchRenderTabContent,
       renderTabTitle,
-      onDetachToNewWindow: handleDetachToNewWindow
+      onDetachToNewWindow: handleDetachToNewWindow,
+      onActivateTab: handleTabActivated
     }
-  }, [onGetTabContent, handleTabDropped, workbenchRenderTabContent, renderTabTitle, handleDetachToNewWindow])
+  }, [onGetTabContent, handleTabDropped, workbenchRenderTabContent, renderTabTitle, handleDetachToNewWindow, handleTabActivated])
 
   // Handle tree change from EditorWorkbench
   const handleTreeChange = useCallback((newTree: WorkbenchTree) => {
@@ -218,7 +284,8 @@ export const Workbench: React.FC<WorkbenchProps> = ({
       }
       return total
     }, 0)
-    
+
+    lastTabCountRef.current = tabCount
     logger.info('Workbench: Tree changed from EditorWorkbench', { 
       groupsCount: newTree.groups.length,
       tabCount,
@@ -241,7 +308,13 @@ export const Workbench: React.FC<WorkbenchProps> = ({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', flex: 1, ...style }} className={className}>
-      <EditorWorkbench tree={tree} onChange={handleTreeChange} {...callbacks} />
+      <EditorWorkbenchAny
+        tree={tree}
+        onChange={handleTreeChange}
+        focusedGroupId={focusedGroupId ?? undefined}
+        onFocusedGroupChange={onFocusedGroupChange}
+        {...callbacks}
+      />
     </div>
   )
 }

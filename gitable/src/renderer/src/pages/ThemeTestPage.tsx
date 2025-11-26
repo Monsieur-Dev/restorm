@@ -11,9 +11,10 @@ import {
   PanelsTab, 
   TextTab, 
   ScrollbarsTab, 
-  ProgressTab 
+  ProgressTab,
+  StickHeadersTab 
 } from '../components/test-tabs'
-import { EditorTabsTab } from '../components/test-tabs'
+import { WorkbenchTab } from '../components/test-tabs'
 
 interface ThemeOption {
   text: string
@@ -126,7 +127,8 @@ const ThemeTestPage: React.FC = () => {
   }
 
   const tabs: Tab[] = [
-    { id: 'editor-tabs', label: 'Editor Tabs', content: <EditorTabsTab /> },
+    { id: 'sticky-headers', label: t('themeTest.components.stickyHeaders'), content: <StickHeadersTab /> },
+    { id: 'workbench', label: 'Workbench', content: <WorkbenchTab /> },
     { id: 'checkboxes', label: 'Checkboxes & Radio', content: <CheckboxesTab /> },
     { id: 'dropdowns', label: 'Dropdowns', content: <DropdownsTab /> },
     { id: 'buttons', label: 'Buttons', content: <ButtonsTab /> },

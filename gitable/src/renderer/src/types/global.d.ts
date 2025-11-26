@@ -29,6 +29,10 @@ declare global {
       getWindowUnderCursor: () => Promise<{ windowId: number; bounds: { x: number; y: number; width: number; height: number } } | null>
       sendWorkbenchTabToWindow: (targetWindowId: number, tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }) => Promise<boolean>
       onWorkbenchTabDropped: (callback: (tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }) => void) => (() => void)
+      project: {
+        listFiles: () => Promise<{ path: string; isDirectory: boolean }[]>
+        readFile: (filePath: string) => Promise<string>
+      }
     }
     gitable: {
       openEditor: (file?: { title: string; content?: string; x?: number; y?: number }) => Promise<void>

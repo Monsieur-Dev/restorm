@@ -16,6 +16,15 @@ export interface EditorWorkbenchProps extends EditorWorkbenchCallbacks {
 	onChange?: (tree: WorkbenchTree) => void;
 	style?: React.CSSProperties;
 	className?: string;
+	/**
+	 * Optional controlled focused group ID. When provided, focus visuals will follow this value.
+	 * When omitted, the workbench manages focus internally.
+	 */
+	focusedGroupId?: string | null | undefined;
+	/**
+	 * Called whenever the focused group changes, either due to tab activation or editor focus.
+	 */
+	onFocusedGroupChange?: ((groupId: string | null) => void) | undefined;
 }
 
 // Local splitter hook for any container
@@ -195,9 +204,32 @@ const GroupContainer: React.FC<{
  * EditorWorkbench (tree-based): renders nested editor groups and handles split logic.
  * Consumers own and mutate `tree` (controlled) or pass `onChange` to get updates.
  */
-export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({ tree, className, style, onChange, ...extCallbacks }) => {
-	// Track which group has focus (only one group should have focus at a time)
-	const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null);
+export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
+	tree,
+	className,
+	style,
+	onChange,
+	focusedGroupId,
+	onFocusedGroupChange,
+	onActivateTab: externalOnActivateTab,
+	...extCallbacks
+}) => {
+	// Internal focus state when component is uncontrolled
+	const [internalFocusedGroupId, setInternalFocusedGroupId] = useState<string | null>(null);
+
+	// Helper to update focus in controlled/uncontrolled modes and notify parent
+	const setFocus = useCallback(
+		(groupId: string | null) => {
+			if (onFocusedGroupChange) {
+				onFocusedGroupChange(groupId);
+			}
+			// Only update local state when not controlled
+			if (focusedGroupId === undefined) {
+				setInternalFocusedGroupId(groupId);
+			}
+		},
+		[focusedGroupId, onFocusedGroupChange]
+	);
 
 	const change = useCallback((next: WorkbenchTree) => {
 		if (onChange) onChange(normalizeTree(next));
@@ -267,7 +299,8 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({ tree, classNam
 		change(normalizeTree(next));
 	}, [tree, change]);
 
-	const handleActivate = useCallback((tabId: string, groupId: string) => {
+	const handleActivate = useCallback(
+		(tabId: string, groupId: string) => {
 		const next: WorkbenchTree = JSON.parse(JSON.stringify(tree)) as WorkbenchTree;
 		const rec = (nodes: GroupNode[]): void => {
 			for (const n of nodes) {
@@ -281,13 +314,22 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({ tree, classNam
 		rec(next.groups);
 		change(next);
 		// Set focus to the group where the tab was activated
-		setFocusedGroupId(groupId);
-	}, [tree, change]);
+			setFocus(groupId);
+			// Notify external listener about tab activation (tab selected event)
+			if (externalOnActivateTab) {
+				externalOnActivateTab(tabId, groupId);
+			}
+		},
+		[tree, change, setFocus, externalOnActivateTab]
+	);
 
 	// Handler for focus requests from groups
-	const handleFocusRequested = useCallback((groupId: string) => {
-		setFocusedGroupId(groupId);
-	}, []);
+	const handleFocusRequested = useCallback(
+		(groupId: string) => {
+			setFocus(groupId);
+		},
+		[setFocus]
+	);
 
 	const handleClose = useCallback((tabId: string, groupId: string) => {
 		const { tree: t } = removeTab(tree, groupId, tabId);
@@ -573,7 +615,8 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({ tree, classNam
 			extras['onGetTabContent'] = extCallbacks.onGetTabContent;
 		}
 		// Determine if this group has focus
-		const hasFocus = focusedGroupId === leaf.id;
+		const effectiveFocusedGroupId = focusedGroupId ?? internalFocusedGroupId;
+		const hasFocus = effectiveFocusedGroupId === leaf.id;
 		return (
 			<EditorGroupView
 				group={leaf}
@@ -586,7 +629,19 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({ tree, classNam
 				{...extras}
 			/>
 		);
-	}, [handleMoveWithinGroup, handleSplitTab, handleClose, handleActivate, handleFocusRequested, focusedGroupId, extCallbacks.onDetachToNewWindow, extCallbacks.renderTabContent, extCallbacks.renderTabTitle, extCallbacks.onGetTabContent]);
+	}, [
+		handleMoveWithinGroup,
+		handleSplitTab,
+		handleClose,
+		handleActivate,
+		handleFocusRequested,
+		focusedGroupId,
+		internalFocusedGroupId,
+		extCallbacks.onDetachToNewWindow,
+		extCallbacks.renderTabContent,
+		extCallbacks.renderTabTitle,
+		extCallbacks.onGetTabContent
+	]);
 
 	return (
 		<div

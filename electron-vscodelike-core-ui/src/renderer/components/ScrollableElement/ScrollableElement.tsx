@@ -9,12 +9,15 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
   children,
   options = {},
   className = '',
+  contentClassName,
   id,
   style,
-  onScroll
+  onScroll,
+  contentRef: externalContentRef,
+  ...domProps
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
@@ -33,13 +36,14 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
   const [dragStartX, setDragStartX] = useState(0);
   const [dragStartScrollTop, setDragStartScrollTop] = useState(0);
   const [dragStartScrollLeft, setDragStartScrollLeft] = useState(0);
+  const [stickyHeaderBackgroundHeight, setStickyHeaderBackgroundHeight] = useState(0);
 
   // Merged options with defaults
   const mergedOptions = {
     useShadows: true,
     handleMouseWheel: true,
     mouseWheelSmoothScroll: true,
-		mouseWheelHorizontal: false,
+    mouseWheelHorizontal: false,
     horizontal: 'auto' as const,
     vertical: 'auto' as const,
     horizontalScrollbarSize: 10,
@@ -63,10 +67,22 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
   const showVerticalScrollbar = needsVerticalScrollbar && mergedOptions.vertical !== 'hidden';
   const showHorizontalScrollbar = needsHorizontalScrollbar && mergedOptions.horizontal !== 'hidden';
 
-  const shouldShowVerticalScrollbar = mergedOptions.vertical === 'visible' || 
+  const shouldShowVerticalScrollbar = mergedOptions.vertical === 'visible' ||
     (mergedOptions.vertical === 'auto' && isVerticalScrollbarVisible);
-  const shouldShowHorizontalScrollbar = mergedOptions.horizontal === 'visible' || 
+  const shouldShowHorizontalScrollbar = mergedOptions.horizontal === 'visible' ||
     (mergedOptions.horizontal === 'auto' && isHorizontalScrollbarVisible);
+
+  const setContentRef = useCallback(
+    (node: HTMLDivElement | null): void => {
+      contentRef.current = node;
+      if (typeof externalContentRef === 'function') {
+        externalContentRef(node);
+      } else if (externalContentRef) {
+        externalContentRef.current = node;
+      }
+    },
+    [externalContentRef]
+  );
 
   // Update dimensions
   const updateDimensions = useCallback((): void => {
@@ -132,18 +148,18 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
     const animate = (): void => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      
+
       // Easing function (ease-out)
       const easeOut = 1 - Math.pow(1 - progress, 3);
-      
+
       const currentScrollTop = startScrollTop + (targetScrollTop - startScrollTop) * easeOut;
       const currentScrollLeft = startScrollLeft + (targetScrollLeft - startScrollLeft) * easeOut;
-      
+
       if (contentRef.current) {
         contentRef.current.scrollTop = currentScrollTop;
         contentRef.current.scrollLeft = currentScrollLeft;
       }
-      
+
       if (progress < 1) {
         animationFrameRef.current = requestAnimationFrame(animate);
       }
@@ -154,6 +170,132 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
     }
     animationFrameRef.current = requestAnimationFrame(animate);
   }, [scrollTop, scrollLeft]);
+
+
+  interface IElementsTopAndHeight {
+    element: HTMLElement,
+    offsetTop: number,
+    height: number,
+    realHeight: number,
+    marginTop: number,
+    marginBottom: number,
+    stickyLevel: number,
+    stickyTop: number,
+    onScreenTop: number,
+    pushTop: number,
+  }
+
+  const elementsTopAndHeightMapRef = useRef<IElementsTopAndHeight[]>([]);
+  const lastElementPerStickyLevelRef = useRef<Map<number, IElementsTopAndHeight>>(new Map());
+
+  const computeElementsTopAndHeight = useCallback((container: HTMLElement): number => {
+    elementsTopAndHeightMapRef.current = [];
+    lastElementPerStickyLevelRef.current = new Map();
+    const nodeList = Array.from(container.children).filter(
+      (node): node is HTMLElement => node instanceof HTMLElement
+    );
+    let maxStickyLevel = 0;
+    nodeList.forEach((el: HTMLElement) => {
+      const stickyLevel = Number(el.getAttribute('data-sticky-level'));
+      if (stickyLevel > 0) {
+        maxStickyLevel = Math.max(maxStickyLevel, stickyLevel);
+        const rect = el.getBoundingClientRect();
+        const computed = window.getComputedStyle(el);
+        const mt = parseFloat(computed.marginTop || '0');
+        const mb = parseFloat(computed.marginBottom || '0');
+        const marginTop = Number.isFinite(mt) ? mt : 0;
+        const marginBottom = Number.isFinite(mb) ? mb : 0;
+        const realHeight = rect.height + marginTop + marginBottom;
+        const currentStickyLevel = stickyLevel;
+
+        let cumulativeSpacing = 0;
+        let currentMarginTop = marginTop;
+        let last = undefined;
+        for (const predecessor of lastElementPerStickyLevelRef.current.values()) {
+          if (predecessor.stickyLevel < currentStickyLevel) {
+            cumulativeSpacing += Math.max(predecessor.marginBottom, currentMarginTop);
+            cumulativeSpacing += predecessor.height;
+            currentMarginTop = predecessor.marginTop;
+          }
+          last = predecessor;
+        }
+        cumulativeSpacing += last?.marginTop ?? marginTop;
+
+        const currentlementTopAndHeight = {
+          element: el,
+          offsetTop: el.offsetTop,
+          stickyTop: cumulativeSpacing,
+          height: rect.height,
+          realHeight,
+          marginTop,
+          marginBottom,
+          stickyLevel: currentStickyLevel,
+          onScreenTop: el.getBoundingClientRect().top - container.getBoundingClientRect().top,
+          pushTop: 0,
+        };
+
+        lastElementPerStickyLevelRef.current.set(currentStickyLevel, currentlementTopAndHeight);
+
+        elementsTopAndHeightMapRef.current.push(currentlementTopAndHeight);
+      } else {
+        el.style.zIndex = '0';
+      }
+
+    });
+    return maxStickyLevel;
+  }, []);
+
+  const updateStickyLayout = useCallback((scrollTop: number, container: HTMLElement): void => {
+
+    const maxStickyLevel = computeElementsTopAndHeight(container);
+
+    let updateStickyHeaderBackgroundHeight = scrollTop > 0;
+    const elementsTopAndHeightMap = elementsTopAndHeightMapRef.current;
+    for (let i = elementsTopAndHeightMap.length - 1; i >= 0; i--) {
+      const el = elementsTopAndHeightMap[i];
+      if (!el) continue;
+      const stickyLevel = el.stickyLevel;
+
+      if (i > 0) {
+        for (let j = i - 1; j >= 0; j--) {
+          const pushed = elementsTopAndHeightMap[j];
+
+          if (pushed && pushed.stickyLevel >= stickyLevel) {
+            const maxMargin = Math.max(pushed.marginBottom, el.marginTop);
+            const pushBy = el.onScreenTop - maxMargin - pushed.stickyTop - pushed.height - pushed.marginTop;
+            if (pushBy < 0) {
+              pushed.pushTop = pushBy;
+            }
+            pushed.pushTop += el.pushTop;
+          }
+        }
+      }
+      el.element.style.zIndex = (maxStickyLevel - stickyLevel + 1).toString();
+      el.element.style.position = 'sticky';
+      el.element.style.top = `${el.stickyTop + el.pushTop}px`;
+      if (updateStickyHeaderBackgroundHeight && el.onScreenTop <= el.stickyTop) {
+        setStickyHeaderBackgroundHeight(el.onScreenTop + el.height + el.marginBottom);
+        updateStickyHeaderBackgroundHeight = false;
+      }
+    }
+    if (updateStickyHeaderBackgroundHeight || !scrollTop) {
+      setStickyHeaderBackgroundHeight(0);
+    }
+    /*console.clear();
+    console.table(elementsTopAndHeightMap?.map(el => ({
+      element: el.element.textContent,
+      stickyLevel: el.stickyLevel,
+      height: Math.round(el.height),
+      marginTop: Math.round(el.marginTop),
+      marginBottom: Math.round(el.marginBottom),
+      stickyTop: Math.round(el.stickyTop),
+      offsetTop: Math.round(el.offsetTop),
+      onScreenTop: Math.round(el.onScreenTop),
+      pushTop: Math.round(el.pushTop),
+    })),
+    ["element", "stickyLevel", "height", "marginTop", "marginBottom", "stickyTop", "offsetTop", "onScreenTop", "pushTop"])*/
+
+  }, [computeElementsTopAndHeight]);
 
   // Handle scroll
   const handleScroll = useCallback((): void => {
@@ -166,10 +308,11 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
     setScrollLeft(newScrollLeft);
     onScroll?.(newScrollTop, newScrollLeft);
     showScrollbars();
-    
+
+    updateStickyLayout(newScrollTop, contentRef.current);
     // Hide scrollbars after scroll ends
     hideScrollbars();
-  }, [onScroll, showScrollbars, hideScrollbars]);
+  }, [onScroll, showScrollbars, hideScrollbars, updateStickyLayout]);
 
   // Handle mouse wheel
   const handleWheel = useCallback((event: WheelEvent): void => {
@@ -179,14 +322,14 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
     event.stopPropagation();
     showScrollbars();
 
-		let deltaX = event.deltaX;
-		let deltaY = event.deltaY;
+    let deltaX = event.deltaX;
+    let deltaY = event.deltaY;
 
-		// Convert vertical wheel to horizontal scroll if mouseWheelHorizontal is enabled
-		if (mergedOptions.mouseWheelHorizontal) {
-			deltaX = deltaY;
-			deltaY = 0;
-		}
+    // Convert vertical wheel to horizontal scroll if mouseWheelHorizontal is enabled
+    if (mergedOptions.mouseWheelHorizontal) {
+      deltaX = deltaY;
+      deltaY = 0;
+    }
 
     if (mergedOptions.mouseWheelSmoothScroll) {
       const newScrollTop = Math.max(0, Math.min(scrollTop + deltaY, contentHeight - containerHeight));
@@ -196,10 +339,10 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
       contentRef.current.scrollTop += deltaY;
       contentRef.current.scrollLeft += deltaX;
     }
-    
+
     // Hide scrollbars after wheel interaction
     hideScrollbars();
-	}, [mergedOptions.handleMouseWheel, mergedOptions.mouseWheelSmoothScroll, mergedOptions.mouseWheelHorizontal, scrollTop, scrollLeft, contentHeight, containerHeight, contentWidth, containerWidth, smoothScrollTo, showScrollbars, hideScrollbars]);
+  }, [mergedOptions.handleMouseWheel, mergedOptions.mouseWheelSmoothScroll, mergedOptions.mouseWheelHorizontal, scrollTop, scrollLeft, contentHeight, containerHeight, contentWidth, containerWidth, smoothScrollTo, showScrollbars, hideScrollbars]);
 
   // Handle mouse enter
   const handleMouseEnter = useCallback((): void => {
@@ -212,17 +355,17 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
   }, [hideScrollbars]);
 
   // Vertical scrollbar calculations
-  const verticalSliderSize = needsVerticalScrollbar ? 
+  const verticalSliderSize = needsVerticalScrollbar ?
     Math.max(20, (containerHeight / contentHeight) * (containerHeight - (mergedOptions.verticalHasArrows ? mergedOptions.arrowSize * 2 : 0))) : 0;
-  
-  const verticalSliderPosition = needsVerticalScrollbar ? 
+
+  const verticalSliderPosition = needsVerticalScrollbar ?
     (scrollTop / (contentHeight - containerHeight)) * (containerHeight - verticalSliderSize - (mergedOptions.verticalHasArrows ? mergedOptions.arrowSize * 2 : 0)) : 0;
 
   // Horizontal scrollbar calculations
-  const horizontalSliderSize = needsHorizontalScrollbar ? 
+  const horizontalSliderSize = needsHorizontalScrollbar ?
     Math.max(20, (containerWidth / contentWidth) * (containerWidth - (mergedOptions.horizontalHasArrows ? mergedOptions.arrowSize * 2 : 0))) : 0;
-  
-  const horizontalSliderPosition = needsHorizontalScrollbar ? 
+
+  const horizontalSliderPosition = needsHorizontalScrollbar ?
     (scrollLeft / (contentWidth - containerWidth)) * (containerWidth - horizontalSliderSize - (mergedOptions.horizontalHasArrows ? mergedOptions.arrowSize * 2 : 0)) : 0;
 
   // Arrow click handlers
@@ -269,6 +412,9 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
     }
     showScrollbars();
   }, [scrollTop, scrollLeft, contentWidth, containerWidth, mergedOptions.mouseWheelSmoothScroll, smoothScrollTo, showScrollbars]);
+
+
+
 
   // Drag handlers
   const handleVerticalSliderMouseDown = useCallback((event: React.MouseEvent): void => {
@@ -358,7 +504,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
   // Update dimensions on mount and resize
   useEffect(() => {
     updateDimensions();
-    
+
     const resizeObserver = new ResizeObserver(updateDimensions);
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
@@ -388,7 +534,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
     return () => {
       cancelAnimationFrame(frameId);
     };
-  }, [children, updateDimensions]);
+  }, [children, updateDimensions, scrollTop]);
 
   // Container classes
   const containerClasses = [
@@ -409,18 +555,15 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Scroll shadows */}
-      {mergedOptions.useShadows && (
-        <>
-          {scrollTop > 0 && <div className="shadow top" />}
-          {scrollLeft > 0 && <div className="shadow left" />}
-        </>
+      {/* Scroll shadows (only horizontal/left shadow kept for now) */}
+      {mergedOptions.useShadows && scrollLeft > 0 && (
+        <div className="shadow left" />
       )}
 
       {/* Content wrapper */}
       <div
-        ref={contentRef}
-        className="scrollable-content"
+        ref={setContentRef}
+        className={`scrollable-content${contentClassName ? ` ${contentClassName}` : ''}`}
         style={{
           width: '100%',
           height: '100%',
@@ -428,7 +571,26 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
           position: 'relative'
         }}
         onScroll={handleScroll}
+        {...domProps}
       >
+        {stickyHeaderBackgroundHeight > 0 && (
+          <div
+            style={{
+              position: 'sticky',
+              top: 0,
+              height: stickyHeaderBackgroundHeight,
+              width: '100%',
+              backgroundColor: 'var(--vscode-editor-background)',
+              // Drop shadow under sticky header background
+              boxShadow: '0 4px 4px rgba(0, 0, 0, 0.4)',
+              zIndex: 1,
+              // Do not push children down: compensate the element's height
+              marginBottom: -stickyHeaderBackgroundHeight,
+              // Ensure it does not intercept mouse events
+              pointerEvents: 'none'
+            }}
+          />
+        )}
         {children}
       </div>
 
