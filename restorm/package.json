@@ -1,0 +1,100 @@
+{
+  "name": "restorm",
+  "version": "0.1.12-preview",
+  "description": "restorm - A Git GUI tool with VSCode-like interface",
+  "main": "dist/main/index.js",
+  "homepage": "https://github.com/oYo-fr/restorm",
+  "author": {
+    "name": "Yoann Diguet",
+    "email": "contact@oyo-fr.com"
+  },
+  "license": "MIT",
+  "scripts": {
+    "dev": "cross-env ELECTRON_DISABLE_SANDBOX=1 electron-vite dev",
+    "dev:web": "vite --config vite.web.config.ts",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "lint": "eslint . --ext .ts,.tsx --max-warnings 0",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "typecheck": "tsc --noEmit",
+    "package": "electron-vite build && electron-builder --dir",
+    "dist": "electron-vite build && electron-builder",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug"
+  },
+  "dependencies": {
+    "@dtinsight/molecule": "^2.0.0-alpha.10",
+    "@monaco-editor/react": "^4.7.0",
+    "@vscode/codicons": "^0.0.41",
+    "electron-core-ui": "file:../electron-core-ui",
+    "i18next": "^23.16.8",
+    "monaco-editor": "^0.54.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-i18next": "^13.5.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0",
+    "@types/node": "^20.10.4",
+    "@types/react": "^18.2.42",
+    "@types/react-dom": "^18.2.17",
+    "@typescript-eslint/eslint-plugin": "^6.13.2",
+    "@typescript-eslint/parser": "^6.13.2",
+    "@vitejs/plugin-react": "^4.2.1",
+    "cross-env": "^10.1.0",
+    "electron": "^28.0.0",
+    "electron-builder": "^26.0.12",
+    "electron-vite": "^2.0.0",
+    "eslint": "^8.55.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "playwright": "^1.56.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.7"
+  },
+  "build": {
+    "appId": "com.oyo-fr.restorm",
+    "productName": "restorm",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "dist/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "**/*.node"
+    ],
+    "extraResources": [],
+    "linux": {
+      "target": [
+        "deb",
+        "rpm"
+      ],
+      "category": "Development",
+      "maintainer": "Yoann Diguet <contact@oyo-fr.com>",
+      "executableName": "restorm-bin"
+    },
+    "deb": {
+      "afterInstall": "build/postinstall.sh"
+    },
+    "rpm": {
+      "afterInstall": "build/postinstall.sh"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.developer-tools"
+    }
+  }
+}

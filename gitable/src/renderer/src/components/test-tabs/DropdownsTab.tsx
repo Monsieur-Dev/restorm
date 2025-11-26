@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { CustomDropdown } from 'electron-vscodelike-core-ui/renderer'
+import { CustomDropdown } from 'electron-core-ui/renderer'
 
 const DropdownsTab: React.FC = () => {
   // Internal state management

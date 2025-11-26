@@ -27,7 +27,7 @@
     "@dtinsight/molecule": "^2.0.0-alpha.10",
     "@monaco-editor/react": "^4.7.0",
     "@vscode/codicons": "^0.0.41",
-    "electron-vscodelike-core-ui": "file:../electron-vscodelike-core-ui",
+    "electron-core-ui": "file:../electron-core-ui",
     "i18next": "^23.16.8",
     "monaco-editor": "^0.54.0",
     "react": "^18.2.0",

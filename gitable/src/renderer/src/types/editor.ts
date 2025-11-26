@@ -1,4 +1,4 @@
-import type { EditorTab } from 'electron-vscodelike-core-ui/renderer'
+import type { EditorTab } from 'electron-core-ui/renderer'
 
 /**
  * Extended EditorTab type for Gitable that includes content

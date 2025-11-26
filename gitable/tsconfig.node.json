@@ -22,7 +22,7 @@
   "include": [
     "src/main",
     "src/preload",
-    "../electron-vscodelike-core-ui/src/preload/**/*"
+    "../electron-core-ui/src/preload/**/*"
   ]
 }
 

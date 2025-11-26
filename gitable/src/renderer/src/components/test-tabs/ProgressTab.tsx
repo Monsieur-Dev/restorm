@@ -1,5 +1,5 @@
 import React from 'react'
-import { ProgressBar } from 'electron-vscodelike-core-ui/renderer'
+import { ProgressBar } from 'electron-core-ui/renderer'
 
 const ProgressTab: React.FC = () => {
   return (

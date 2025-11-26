@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import type { ThemeInfo, ThemeDefinition, ThemeVariables } from 'electron-vscodelike-core-ui/types/theme'
+import type { ThemeInfo, ThemeDefinition, ThemeVariables } from 'electron-core-ui/types/theme'
 
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object

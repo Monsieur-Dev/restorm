@@ -19,9 +19,9 @@ jobs:
         with:
           node-version: '18'
       
-      - name: Build electron-vscodelike-core-ui
+      - name: Build electron-core-ui
         run: |
-          cd electron-vscodelike-core-ui
+          cd electron-core-ui
           npm install
           npm run build
       

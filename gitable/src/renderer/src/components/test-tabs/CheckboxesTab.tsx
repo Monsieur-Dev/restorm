@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Toggle, RadioGroup } from 'electron-vscodelike-core-ui/renderer'
+import { Toggle, RadioGroup } from 'electron-core-ui/renderer'
 
 const CheckboxesTab: React.FC = () => {
   // Internal state management

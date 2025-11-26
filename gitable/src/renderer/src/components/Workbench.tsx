@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react'
-import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger } from 'electron-vscodelike-core-ui/renderer'
-import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab } from 'electron-vscodelike-core-ui/renderer'
+import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger } from 'electron-core-ui/renderer'
+import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
 import type { GitableEditorTab } from '../types/editor'
 import Editor from '@monaco-editor/react'
 

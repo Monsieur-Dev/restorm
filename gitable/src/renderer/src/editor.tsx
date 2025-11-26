@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom/client'
 import { Workbench } from './components/Workbench'
-import type { EditorTab, WorkbenchTree, GroupNode } from 'electron-vscodelike-core-ui/renderer'
-import { isTabGroupNode, isContainerNode, initializeI18n, logger, MonacoWorkbench, Titlebar, i18n } from 'electron-vscodelike-core-ui/renderer'
+import type { EditorTab, WorkbenchTree, GroupNode } from 'electron-core-ui/renderer'
+import { isTabGroupNode, isContainerNode, initializeI18n, logger, MonacoWorkbench, Titlebar, i18n } from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 
 // Import translations

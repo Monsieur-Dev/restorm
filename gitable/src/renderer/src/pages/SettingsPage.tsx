@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { useTheme, CustomDropdown, logger, InputBox, MessageType, Toggle, RadioGroup, ScrollableElement, Statusbar, StatusbarElement } from 'electron-vscodelike-core-ui/renderer'
-import type { IInputValidator } from 'electron-vscodelike-core-ui/renderer'
+import { useTheme, CustomDropdown, logger, InputBox, MessageType, Toggle, RadioGroup, ScrollableElement, Statusbar, StatusbarElement } from 'electron-core-ui/renderer'
+import type { IInputValidator } from 'electron-core-ui/renderer'
 
 interface Theme {
   id: string;

@@ -6,7 +6,7 @@ This document describes the `ListView` component added to the core UI library an
 
 The `ListView` lives in the core UI library and is exported from the renderer entry:
 
-- Module: `electron-vscodelike-core-ui/renderer`
+- Module: `electron-core-ui/renderer`
 - Exports:
   - `ListView`
   - `ListViewItem`
@@ -29,7 +29,7 @@ The `ListView` lives in the core UI library and is exported from the renderer en
 You can declare a hierarchy directly in JSX:
 
 ```tsx
-import { ListView, ListViewItem } from 'electron-vscodelike-core-ui/renderer'
+import { ListView, ListViewItem } from 'electron-core-ui/renderer'
 
 <ListView>
   <ListViewItem title="Parent" icon="root-folder">
@@ -44,8 +44,8 @@ import { ListView, ListViewItem } from 'electron-vscodelike-core-ui/renderer'
 You can also pass a hierarchical data source:
 
 ```tsx
-import { ListView } from 'electron-vscodelike-core-ui/renderer'
-import type { ListViewItemData } from 'electron-vscodelike-core-ui/renderer'
+import { ListView } from 'electron-core-ui/renderer'
+import type { ListViewItemData } from 'electron-core-ui/renderer'
 
 const items: ListViewItemData[] = [
   {

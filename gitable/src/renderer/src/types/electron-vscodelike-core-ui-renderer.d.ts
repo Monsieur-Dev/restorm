@@ -1,9 +1,9 @@
 import type React from 'react'
 
-declare module 'electron-vscodelike-core-ui/renderer' {
+declare module 'electron-core-ui/renderer' {
   /**
    * Extend EditorTab with optional titleString (for serialization) to match
-   * the implementation in electron-vscodelike-core-ui.
+   * the implementation in electron-core-ui.
    */
   interface EditorTab {
     /**

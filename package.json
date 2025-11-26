@@ -2,7 +2,7 @@
   "name": "gitable-monorepo",
   "version": "1.0.0",
   "private": true,
-  "description": "Gitable monorepo with electron-vscodelike-core-ui",
+  "description": "Gitable monorepo with electron-core-ui",
   "homepage": "https://github.com/oYo-fr/gitable",
   "author": {
     "name": "Yoann Diguet",
@@ -10,11 +10,15 @@
   },
   "license": "MIT",
   "scripts": {
-    "dev": "cd gitable && npx cross-env ELECTRON_DISABLE_SANDBOX=1 npx electron-vite dev",
-    "build:core-ui": "cd electron-vscodelike-core-ui && npm run build",
-    "build:gitable": "cd gitable && npm run build",
-    "build": "npm run build:core-ui && cd gitable && npm install ../electron-vscodelike-core-ui && npm run build",
-    "lint": "cd gitable && npm run lint"
+    "dev:gitable": "cd gitable && npx cross-env ELECTRON_DISABLE_SANDBOX=1 npx electron-vite dev",
+    "dev:demo": "cd demo && npx cross-env ELECTRON_DISABLE_SANDBOX=1 npx electron-vite dev",
+    "dev:restorm": "cd restorm && npx cross-env ELECTRON_DISABLE_SANDBOX=1 npx electron-vite dev",
+    "build:core-ui": "cd electron-core-ui && npm run build",
+    "build:gitable": "cd gitable && npm install ../electron-core-ui && npm run build",
+    "build:demo": "cd demo && npm install ../electron-core-ui && npm run build",
+    "build:restorm": "cd restorm && npm install ../electron-core-ui && npm run build",
+    "build": "npm run build:core-ui && npm run build:gitable && npm run build:demo && npm run build:restorm",
+    "lint": "cd gitable && npm run lint && cd ../demo && npm run lint && cd ../restorm && npm run lint"
   },
   "devDependencies": {
     "cross-env": "^7.0.3"

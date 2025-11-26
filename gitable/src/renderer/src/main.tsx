@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import type { i18n as I18nType } from 'i18next'
-import { initializeI18n, logger, MonacoWorkbench, i18n } from 'electron-vscodelike-core-ui/renderer'
+import { initializeI18n, logger, MonacoWorkbench, i18n } from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 
 // Import translations
