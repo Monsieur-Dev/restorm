@@ -1,5 +1,5 @@
 import { join } from 'path'
-import { logger } from 'electron-vscodelike-core-ui'
+import { logger } from 'electron-core-ui'
 import { GitableWindow } from './GitableWindow'
 
 /**

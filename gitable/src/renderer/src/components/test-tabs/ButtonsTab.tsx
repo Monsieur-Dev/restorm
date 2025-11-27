@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, ButtonWithDescription, ButtonWithDropdown, ButtonWithIcon, logger } from 'electron-vscodelike-core-ui/renderer'
+import { Button, ButtonWithDescription, ButtonWithDropdown, ButtonWithIcon, logger } from 'electron-core-ui/renderer'
 
 const ButtonsTab: React.FC = () => {
   return (

@@ -1,5 +1,5 @@
 import React from 'react'
-import { ScrollableElement } from 'electron-vscodelike-core-ui/renderer'
+import { ScrollableElement } from 'electron-core-ui/renderer'
 
 const ScrollbarsTab: React.FC = () => {
   return (

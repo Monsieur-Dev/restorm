@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { InputBox, MessageType } from 'electron-vscodelike-core-ui/renderer'
-import type { IInputValidator } from 'electron-vscodelike-core-ui/renderer'
+import { InputBox, MessageType } from 'electron-core-ui/renderer'
+import type { IInputValidator } from 'electron-core-ui/renderer'
 
 const InputsTab: React.FC = () => {
   // Internal state management

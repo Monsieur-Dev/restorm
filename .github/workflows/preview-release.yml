@@ -136,25 +136,25 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y rpm
       
-      - name: Clean electron-vscodelike-core-ui (Unix)
+      - name: Clean electron-core-ui (Unix)
         if: runner.os != 'Windows'
         run: |
-          cd electron-vscodelike-core-ui
+          cd electron-core-ui
           rm -rf dist dist-main dist-renderer node_modules || true
       
-      - name: Clean electron-vscodelike-core-ui (Windows)
+      - name: Clean electron-core-ui (Windows)
         if: runner.os == 'Windows'
         run: |
-          cd electron-vscodelike-core-ui
+          cd electron-core-ui
           if (Test-Path dist) { Remove-Item -Recurse -Force dist }
           if (Test-Path dist-main) { Remove-Item -Recurse -Force dist-main }
           if (Test-Path dist-renderer) { Remove-Item -Recurse -Force dist-renderer }
           if (Test-Path node_modules) { Remove-Item -Recurse -Force node_modules }
         shell: pwsh
       
-      - name: Build electron-vscodelike-core-ui
+      - name: Build electron-core-ui
         run: |
-          cd electron-vscodelike-core-ui
+          cd electron-core-ui
           npm install
           npm run build
       

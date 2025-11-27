@@ -2,14 +2,14 @@
 
 This repository contains two main packages:
 
-1. **electron-vscodelike-core-ui** - A reusable Electron + React foundation library with VSCode-like UI components, theming, logging, window management, and i18n.
+1. **electron-core-ui** - A reusable Electron + React foundation library with VSCode-like UI components, theming, logging, window management, and i18n.
 2. **gitable** - A modern Git GUI tool that uses the core-ui library.
 
 ## 📦 Package Structure
 
 ```
 gitable/
-├── electron-vscodelike-core-ui/    # Generic UI library (will be moved to separate repo later)
+├── electron-core-ui/    # Generic UI library (will be moved to separate repo later)
 │   ├── src/
 │   │   ├── main/                   # Main process services (logger, storage, theme, window)
 │   │   ├── preload/                # Preload script utilities
@@ -44,7 +44,7 @@ The repository uses a custom development workflow for hot reload:
 ```
 
 This script will:
-1. Start TypeScript compilation in watch mode for `electron-vscodelike-core-ui` (both main and renderer)
+1. Start TypeScript compilation in watch mode for `electron-core-ui` (both main and renderer)
 2. Auto-copy changes from core-ui to gitable's node_modules
 3. Start the Gitable application with Electron + Vite dev server
 
@@ -58,8 +58,8 @@ This script will:
 To build both packages for production:
 
 ```bash
-# Build electron-vscodelike-core-ui
-cd electron-vscodelike-core-ui
+# Build electron-core-ui
+cd electron-core-ui
 npm install
 npm run build
 
@@ -69,7 +69,7 @@ pnpm install
 pnpm run build
 ```
 
-## 📦 electron-vscodelike-core-ui
+## 📦 electron-core-ui
 
 A generic Electron + React foundation library providing:
 
@@ -87,7 +87,7 @@ Applications like `gitable` reference the core-ui package locally using the `fil
 ```json
 {
   "dependencies": {
-    "electron-vscodelike-core-ui": "file:../electron-vscodelike-core-ui"
+    "electron-core-ui": "file:../electron-core-ui"
   }
 }
 ```
@@ -96,7 +96,7 @@ This allows local development without needing a pnpm workspace or symlinks.
 
 ### Future Plans
 
-The `electron-vscodelike-core-ui` package will be moved to its own repository and published to npm, allowing multiple applications to use it as a dependency.
+The `electron-core-ui` package will be moved to its own repository and published to npm, allowing multiple applications to use it as a dependency.
 
 ## 🛠️ Gitable
 
@@ -142,7 +142,7 @@ Comprehensive documentation is available in the `gitable/docs` folder:
 The `dev.sh` script provides a seamless development experience:
 
 1. **Start development**: `./dev.sh` from the repository root
-2. **Modify core-ui files**: Edit any file in `electron-vscodelike-core-ui/src/`
+2. **Modify core-ui files**: Edit any file in `electron-core-ui/src/`
 3. **Wait 2-3 seconds**: TypeScript recompiles and files are copied
 4. **Reload**: Press **Ctrl+R** (or **Cmd+R** on macOS) in the Electron window
 

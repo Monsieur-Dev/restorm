@@ -3,8 +3,8 @@ import { contextBridge, ipcRenderer } from 'electron'
 // This works in both dev and prod because:
 // - In dev: Vite resolves these imports via aliases in electron.vite.config.ts
 // - In prod: These are bundled into the preload script
-import { createCoreUIAPI } from '../../../../electron-vscodelike-core-ui/src/preload/api'
-import { createElectronAPI } from '../../../../electron-vscodelike-core-ui/src/preload/electronAPI'
+import { createCoreUIAPI } from '../../../../electron-core-ui/src/preload/api'
+import { createElectronAPI } from '../../../../electron-core-ui/src/preload/electronAPI'
 
 // Expose core-ui APIs (imported from core-ui preload modules) and extend with Gitable project API
 const coreUIAPI = createCoreUIAPI()

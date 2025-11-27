@@ -1,7 +1,7 @@
 import { app, ipcMain, BrowserWindow } from 'electron'
 import { MainWindow } from './windows/MainWindow'
 import { EditorWindow } from './windows/EditorWindow'
-import { initializeApp, logger } from 'electron-vscodelike-core-ui'
+import { initializeApp, logger } from 'electron-core-ui'
 import { join, relative } from 'path'
 import { promises as fs } from 'fs'
 
@@ -21,7 +21,7 @@ function createWindow(): void {
 function getResourcesPath(): string {
   const isDev = process.env['NODE_ENV'] === 'development' || !app.isPackaged
   return isDev
-    ? join(__dirname, '../../node_modules/electron-vscodelike-core-ui/resources')
+    ? join(__dirname, '../../node_modules/electron-core-ui/resources')
     : join(process.resourcesPath, 'resources')
 }
 
@@ -73,44 +73,6 @@ ipcMain.handle('gitable:get-editor-file', (event) => {
     logger.warn('⚠️ No file parameters found for window', { windowId: window.id })
   }
   return file
-})
-
-// IPC handler to close window (duplicate from IPCManager to ensure it's always available)
-// This handler is also registered in IPCManager.setupIPC, but we register it here
-// as a fallback to ensure it's available even if setupIPC hasn't run yet
-ipcMain.handle('close-window', (event) => {
-  const wnd = BrowserWindow.fromWebContents(event.sender)
-  if (wnd && !wnd.isDestroyed()) {
-    logger.info('Closing window', { windowId: wnd.id })
-    wnd.close()
-  }
-})
-
-// IPC handler to send workbench tab to window (duplicate from IPCManager to ensure it's always available)
-// This handler is also registered in IPCManager.setupIPC, but we register it here
-// as a fallback to ensure it's available even if setupIPC hasn't run yet
-ipcMain.handle('tabs:send-workbench-tab-to-window', (_event, targetWindowId: number, tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }) => {
-  // Get all windows to debug
-  const allWindows = BrowserWindow.getAllWindows()
-  logger.info('Attempting to send tab to window', { 
-    targetWindowId, 
-    allWindowIds: allWindows.map(win => ({ id: win.id, webContentsId: win.webContents.id, destroyed: win.isDestroyed() }))
-  })
-  
-  const targetWindow = BrowserWindow.fromId(targetWindowId)
-  if (!targetWindow || targetWindow.isDestroyed()) {
-    logger.warn('Target window not found for cross-window tab drag', { 
-      targetWindowId,
-      allWindowIds: allWindows.map(win => win.id),
-      allWebContentsIds: allWindows.map(win => win.webContents.id)
-    })
-    return false
-  }
-  
-  // Send tab data to target window
-  targetWindow.webContents.send('tabs:workbench-tab-dropped', tabData)
-  logger.info('Tab data sent to target window', { targetWindowId, tabId: tabData.tabId, cursorX: tabData.cursorX, cursorY: tabData.cursorY })
-  return true
 })
 
 // IPC handler to list project files from the Gitable workspace root

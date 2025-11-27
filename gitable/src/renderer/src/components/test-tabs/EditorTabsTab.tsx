@@ -9,14 +9,14 @@ import type {
   ListViewDropEventPayload,
   IVerticalSashLayoutProvider,
   SashEvent
-} from 'electron-vscodelike-core-ui/renderer'
+} from 'electron-core-ui/renderer'
 import {
   ListView,
   isContainerNode,
   isTabGroupNode,
   logger,
   Sash
-} from 'electron-vscodelike-core-ui/renderer'
+} from 'electron-core-ui/renderer'
 import { Workbench } from '../Workbench'
 
 interface DemoTabGroup { id: string, tabs: EditorTab[], activeTabId?: string }

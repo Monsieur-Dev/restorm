@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { ListView, ListViewItem } from 'electron-vscodelike-core-ui/renderer'
+import { ListView, ListViewItem } from 'electron-core-ui/renderer'
 
 const StickHeadersTab: React.FC = () => {
   const [scrollTop, setScrollTop] = useState(0)

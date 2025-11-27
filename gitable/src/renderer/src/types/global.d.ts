@@ -1,4 +1,4 @@
-import type { ThemeInfo, ThemeDefinition, ThemeVariables } from 'electron-vscodelike-core-ui/types'
+import type { ThemeInfo, ThemeDefinition, ThemeVariables } from 'electron-core-ui/types'
 
 declare global {
   interface Window {

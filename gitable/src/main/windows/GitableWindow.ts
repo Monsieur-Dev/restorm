@@ -1,7 +1,7 @@
 import { join } from 'path'
 import { app } from 'electron'
 import { existsSync } from 'fs'
-import { BaseWindow, WindowConfiguration, logger } from 'electron-vscodelike-core-ui'
+import { BaseWindow, WindowConfiguration, logger } from 'electron-core-ui'
 
 /**
  * GitableWindow - Base class for all Gitable windows
@@ -40,7 +40,7 @@ export class GitableWindow extends BaseWindow {
         logger.info(`📋 Using gitable preload (prod build in dev from appRoot): ${preloadPath}`)
       } else {
         // Fallback to core-ui preload from node_modules
-        const coreUiPreloadPath = join(appRoot, 'node_modules', 'electron-vscodelike-core-ui', 'dist', 'src', 'preload', 'index.js')
+        const coreUiPreloadPath = join(appRoot, 'node_modules', 'electron-core-ui', 'dist', 'src', 'preload', 'index.js')
         if (existsSync(coreUiPreloadPath)) {
           preloadPath = coreUiPreloadPath
           logger.info(`📋 Using core-ui preload from node_modules: ${preloadPath}`)
