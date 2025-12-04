@@ -1,0 +1,623 @@
+# Sunset Beach Day Theme
+# A warm, inviting light theme inspired by a beach sunset
+# Palette: #264653 (deep teal), #2a9d8f (turquoise), #e9c46a (sand gold), #f4a261 (peach), #e76f51 (coral)
+name: Sunset Beach Day
+description: A warm light theme inspired by golden sunsets on tropical beaches
+type: light
+
+colors:
+  # Base colors
+  editor.background: "#FDF8F3"
+  editor.foreground: "#264653"
+  foreground: "#264653"
+  focusBorder: "#2a9d8f"
+  
+  # Selection & highlights
+  selection.background: "#e9c46a80"
+  editor.selectionBackground: "#e9c46a60"
+  editor.selectionHighlightBackground: "#f4a26140"
+  editor.wordHighlightBackground: "#2a9d8f30"
+  editor.wordHighlightStrongBackground: "#2a9d8f50"
+  editor.findMatchBackground: "#f4a261"
+  editor.findMatchHighlightBackground: "#e9c46a80"
+  editor.lineHighlightBackground: "#FBF3E8"
+  minimap.selectionHighlight: "#e9c46a"
+  
+  # Cursor & whitespace
+  editorCursor.foreground: "#e76f51"
+  editorWhitespace.foreground: "#d4c4b0"
+  
+  # Line numbers
+  editorLineNumber.foreground: "#a09080"
+  editorLineNumber.activeForeground: "#e76f51"
+  
+  # Indent guides
+  editorIndentGuide.background: "#e9d5c0"
+  editorIndentGuide.activeBackground: "#c4a080"
+  
+  # Brackets
+  editorBracketHighlight.foreground1: "#2a9d8f"
+  editorBracketHighlight.foreground2: "#e76f51"
+  editorBracketHighlight.foreground3: "#f4a261"
+  editorBracketMatch.background: "#e9c46a50"
+  editorBracketMatch.border: "#e9c46a"
+  
+  # Scrollbar
+  scrollbar.shadow: "#26465320"
+  scrollbarSlider.background: "#2a9d8f40"
+  scrollbarSlider.hoverBackground: "#2a9d8f60"
+  scrollbarSlider.activeBackground: "#2a9d8f80"
+  
+  # Input
+  input.background: "#FFFFFF"
+  input.foreground: "#264653"
+  input.border: "#d4c4b0"
+  input.placeholderForeground: "#8a7a6a"
+  inputOption.activeBorder: "#2a9d8f"
+  inputOption.activeBackground: "#2a9d8f30"
+  inputValidation.infoBorder: "#2a9d8f"
+  inputValidation.infoBackground: "#2a9d8f20"
+  inputValidation.warningBorder: "#f4a261"
+  inputValidation.warningBackground: "#f4a26130"
+  inputValidation.errorBorder: "#e76f51"
+  inputValidation.errorBackground: "#e76f5130"
+  
+  # Dropdown
+  dropdown.background: "#FFFFFF"
+  dropdown.foreground: "#264653"
+  dropdown.border: "#d4c4b0"
+  
+  # Button
+  button.background: "#2a9d8f"
+  button.foreground: "#FFFFFF"
+  button.hoverBackground: "#238b7e"
+  button.secondaryBackground: "#f4a261"
+  button.secondaryForeground: "#264653"
+  
+  # Badge
+  badge.background: "#e76f51"
+  badge.foreground: "#FFFFFF"
+  
+  # Progress bar
+  progressBar.background: "#2a9d8f"
+  
+  # Lists
+  list.activeSelectionBackground: "#2a9d8f"
+  list.activeSelectionForeground: "#FFFFFF"
+  list.activeSelectionIconForeground: "#FFFFFF"
+  list.inactiveSelectionBackground: "#e9c46a50"
+  list.inactiveSelectionForeground: "#264653"
+  list.hoverBackground: "#f4a26130"
+  list.hoverForeground: "#264653"
+  list.dropBackground: "#e9c46a40"
+  list.highlightForeground: "#e76f51"
+  list.focusOutline: "#2a9d8f"
+  quickInputList.focusBackground: "#2a9d8f"
+  quickInputList.focusForeground: "#FFFFFF"
+  
+  # Activity bar
+  activityBar.background: "#264653"
+  activityBar.foreground: "#e9c46a"
+  activityBar.inactiveForeground: "#8aa8a0"
+  activityBarBadge.background: "#e76f51"
+  activityBarBadge.foreground: "#FFFFFF"
+  activityBar.activeBorder: "#e9c46a"
+  
+  # Side bar
+  sideBar.background: "#F5EDE3"
+  sideBar.foreground: "#264653"
+  sideBarTitle.foreground: "#264653"
+  sideBarSectionHeader.background: "#EAE0D5"
+  sideBarSectionHeader.foreground: "#264653"
+  sideBarSectionHeader.border: "#d4c4b0"
+  
+  # Minimap
+  minimap.background: "#F5EDE3"
+  
+  # Editor groups & tabs
+  editorGroup.border: "#d4c4b0"
+  editorGroup.dropBackground: "#2a9d8f40"
+  editorGroupHeader.tabsBackground: "#EAE0D5"
+  editorGroupHeader.tabsBorder: "#d4c4b0"
+  tab.activeBackground: "#FDF8F3"
+  tab.activeForeground: "#264653"
+  tab.activeBorder: "#2a9d8f"
+  tab.inactiveBackground: "#EAE0D5"
+  tab.inactiveForeground: "#5a6a6a"
+  tab.border: "#d4c4b0"
+  tab.hoverBackground: "#FDF8F3"
+  tab.lastPinnedBorder: "#2a9d8f"
+  
+  # Editor widgets
+  editorWidget.background: "#F5EDE3"
+  editorWidget.foreground: "#264653"
+  editorWidget.border: "#d4c4b0"
+  editorHoverWidget.background: "#FFFFFF"
+  editorHoverWidget.border: "#d4c4b0"
+  editorSuggestWidget.background: "#FFFFFF"
+  editorSuggestWidget.border: "#d4c4b0"
+  editorSuggestWidget.foreground: "#264653"
+  editorSuggestWidget.selectedBackground: "#2a9d8f"
+  editorSuggestWidget.selectedForeground: "#FFFFFF"
+  editorSuggestWidget.highlightForeground: "#e76f51"
+  
+  # Peek view
+  peekView.border: "#2a9d8f"
+  peekViewTitle.background: "#264653"
+  peekViewTitleLabel.foreground: "#e9c46a"
+  peekViewTitleDescription.foreground: "#8aa8a0"
+  peekViewResult.background: "#F5EDE3"
+  peekViewResult.selectionBackground: "#2a9d8f"
+  peekViewResult.selectionForeground: "#FFFFFF"
+  peekViewResult.matchHighlightBackground: "#e9c46a80"
+  peekViewEditor.background: "#FDF8F3"
+  peekViewEditor.matchHighlightBackground: "#e9c46a80"
+  
+  # Diff editor
+  diffEditor.insertedTextBackground: "#2a9d8f30"
+  diffEditor.removedTextBackground: "#e76f5130"
+  diffEditor.insertedLineBackground: "#2a9d8f20"
+  diffEditor.removedLineBackground: "#e76f5120"
+  
+  # Panel
+  panel.background: "#F5EDE3"
+  panel.border: "#d4c4b0"
+  panelTitle.activeBorder: "#2a9d8f"
+  panelTitle.activeForeground: "#264653"
+  panelTitle.inactiveForeground: "#7a8a8a"
+  
+  # Status bar
+  statusBar.background: "#264653"
+  statusBar.foreground: "#e9c46a"
+  statusBar.border: "#1a3640"
+  statusBar.noFolderBackground: "#3a5663"
+  statusBar.debuggingBackground: "#e76f51"
+  statusBar.debuggingForeground: "#FFFFFF"
+  statusBarItem.remoteBackground: "#2a9d8f"
+  statusBarItem.remoteForeground: "#FFFFFF"
+  statusBarItem.hoverBackground: "#3a5663"
+  statusBarItem.prominentBackground: "#f4a261"
+  statusBarItem.prominentForeground: "#264653"
+  statusBarItem.prominentHoverBackground: "#e9c46a"
+  statusBarItem.errorBackground: "#e76f51"
+  statusBarItem.errorForeground: "#FFFFFF"
+  ports.iconRunningProcessForeground: "#2a9d8f"
+  
+  # Title bar
+  titleBar.activeBackground: "#264653"
+  titleBar.activeForeground: "#e9c46a"
+  titleBar.inactiveBackground: "#3a5663"
+  titleBar.inactiveForeground: "#8aa8a0"
+  titleBar.border: "#1a3640"
+  
+  # Menu
+  menu.background: "#FFFFFF"
+  menu.foreground: "#264653"
+  menu.selectionBackground: "#2a9d8f"
+  menu.selectionForeground: "#FFFFFF"
+  menu.separatorBackground: "#d4c4b0"
+  menu.border: "#d4c4b0"
+  
+  # Notifications
+  notifications.background: "#FFFFFF"
+  notifications.foreground: "#264653"
+  notifications.border: "#d4c4b0"
+  notificationLink.foreground: "#2a9d8f"
+  notificationsInfoIcon.foreground: "#2a9d8f"
+  notificationsWarningIcon.foreground: "#f4a261"
+  notificationsErrorIcon.foreground: "#e76f51"
+  
+  # Picker
+  pickerGroup.foreground: "#2a9d8f"
+  pickerGroup.border: "#d4c4b0"
+  
+  # Terminal
+  terminal.background: "#FDF8F3"
+  terminal.foreground: "#264653"
+  terminal.ansiBlack: "#264653"
+  terminal.ansiRed: "#e76f51"
+  terminal.ansiGreen: "#2a9d8f"
+  terminal.ansiYellow: "#e9c46a"
+  terminal.ansiBlue: "#3a7ca5"
+  terminal.ansiMagenta: "#b07aa1"
+  terminal.ansiCyan: "#4db6ac"
+  terminal.ansiWhite: "#F5EDE3"
+  terminal.ansiBrightBlack: "#5a6a6a"
+  terminal.ansiBrightRed: "#f4a261"
+  terminal.ansiBrightGreen: "#3ab5a5"
+  terminal.ansiBrightYellow: "#f0d080"
+  terminal.ansiBrightBlue: "#5a9ac5"
+  terminal.ansiBrightMagenta: "#c090b1"
+  terminal.ansiBrightCyan: "#6dc6bc"
+  terminal.ansiBrightWhite: "#FFFFFF"
+  terminal.selectionBackground: "#e9c46a60"
+  terminalCursor.foreground: "#e76f51"
+  
+  # Git decorations
+  gitDecoration.addedResourceForeground: "#2a9d8f"
+  gitDecoration.modifiedResourceForeground: "#f4a261"
+  gitDecoration.deletedResourceForeground: "#e76f51"
+  gitDecoration.untrackedResourceForeground: "#3ab5a5"
+  gitDecoration.ignoredResourceForeground: "#a09080"
+  gitDecoration.conflictingResourceForeground: "#e76f51"
+  
+  # Debug
+  debugToolBar.background: "#F5EDE3"
+  debugIcon.breakpointForeground: "#e76f51"
+  debugIcon.startForeground: "#2a9d8f"
+  
+  # Welcome page
+  welcomePage.tileBackground: "#F5EDE3"
+  welcomePage.tileBorder: "#d4c4b0"
+  welcomePage.progress.foreground: "#2a9d8f"
+  walkThrough.embeddedEditorBackground: "#FDF8F3"
+  
+  # Extension button
+  extensionButton.prominentBackground: "#2a9d8f"
+  extensionButton.prominentForeground: "#FFFFFF"
+  extensionButton.prominentHoverBackground: "#238b7e"
+  
+  # Errors & warnings
+  errorForeground: "#e76f51"
+  editorError.foreground: "#e76f51"
+  editorWarning.foreground: "#f4a261"
+  editorInfo.foreground: "#2a9d8f"
+
+tokenColors:
+  # Default foreground
+  - settings:
+      foreground: "#264653"
+
+  - scope:
+      - meta.embedded
+      - source.groovy.embedded
+      - string meta.image.inline.markdown
+      - variable.legacy.builtin.python
+    settings:
+      foreground: "#264653"
+
+  # Comments - soft coral/salmon for warmth
+  - name: Comment
+    scope: comment
+    settings:
+      fontStyle: italic
+      foreground: "#b08070"
+
+  - name: Comment Documentation
+    scope:
+      - comment.block.documentation
+      - comment.block.javadoc
+    settings:
+      fontStyle: italic
+      foreground: "#2a9d8f"
+
+  # Strings - turquoise like ocean water
+  - name: String
+    scope: string
+    settings:
+      foreground: "#2a9d8f"
+
+  - name: String Escape
+    scope: constant.character.escape
+    settings:
+      foreground: "#e76f51"
+
+  - name: String Regexp
+    scope: string.regexp
+    settings:
+      foreground: "#e76f51"
+
+  # Numbers - sand gold
+  - name: Number
+    scope:
+      - constant.numeric
+      - keyword.other.unit
+    settings:
+      foreground: "#b58900"
+
+  # Constants - coral for emphasis
+  - name: Constant Language
+    scope: constant.language
+    settings:
+      foreground: "#e76f51"
+
+  - name: Constant Other
+    scope:
+      - constant.character
+      - constant.other
+    settings:
+      foreground: "#e76f51"
+
+  # Variables - deep teal
+  - name: Variable
+    scope: variable
+    settings:
+      foreground: "#264653"
+
+  - name: Variable Language
+    scope: variable.language
+    settings:
+      fontStyle: italic
+      foreground: "#e76f51"
+
+  - name: Variable Parameter
+    scope: variable.parameter
+    settings:
+      fontStyle: italic
+      foreground: "#3a7ca5"
+
+  - name: Variable Other
+    scope:
+      - variable.other
+      - variable.other.readwrite
+    settings:
+      foreground: "#264653"
+
+  # Keywords - peach orange for warmth
+  - name: Keyword
+    scope: keyword
+    settings:
+      foreground: "#e76f51"
+
+  - name: Keyword Control
+    scope: keyword.control
+    settings:
+      foreground: "#e76f51"
+
+  - name: Keyword Operator
+    scope: keyword.operator
+    settings:
+      foreground: "#5a6a6a"
+
+  - name: Keyword Operator Expression
+    scope:
+      - keyword.operator.new
+      - keyword.operator.expression
+      - keyword.operator.logical
+    settings:
+      foreground: "#e76f51"
+
+  # Storage - warm orange
+  - name: Storage
+    scope: storage
+    settings:
+      foreground: "#f4a261"
+
+  - name: Storage Type
+    scope: storage.type
+    settings:
+      foreground: "#f4a261"
+
+  - name: Storage Modifier
+    scope: storage.modifier
+    settings:
+      foreground: "#f4a261"
+
+  # Functions - turquoise like sea
+  - name: Function
+    scope:
+      - entity.name.function
+      - support.function
+    settings:
+      foreground: "#2a9d8f"
+
+  - name: Function Call
+    scope: meta.function-call
+    settings:
+      foreground: "#2a9d8f"
+
+  # Classes & Types - sand gold for warmth
+  - name: Class
+    scope:
+      - entity.name.class
+      - entity.name.type
+      - entity.name.namespace
+      - support.class
+      - support.type
+    settings:
+      foreground: "#c08030"
+
+  - name: Inherited Class
+    scope:
+      - entity.other.inherited-class
+      - punctuation.separator.namespace.ruby
+    settings:
+      fontStyle: italic
+      foreground: "#c08030"
+
+  # Tags - coral for HTML/XML
+  - name: Tag
+    scope: entity.name.tag
+    settings:
+      foreground: "#e76f51"
+
+  - name: Tag Bracket
+    scope: punctuation.definition.tag
+    settings:
+      foreground: "#b08070"
+
+  - name: Tag Attribute
+    scope: entity.other.attribute-name
+    settings:
+      fontStyle: italic
+      foreground: "#f4a261"
+
+  # CSS
+  - name: CSS Property Name
+    scope: support.type.property-name
+    settings:
+      foreground: "#264653"
+
+  - name: CSS Property Value
+    scope:
+      - support.constant.property-value
+      - support.constant.color
+    settings:
+      foreground: "#2a9d8f"
+
+  - name: CSS Selector
+    scope:
+      - entity.name.tag.css
+      - entity.name.tag.less
+    settings:
+      foreground: "#e76f51"
+
+  - name: CSS Class
+    scope:
+      - entity.other.attribute-name.class.css
+      - entity.other.attribute-name.id.css
+    settings:
+      foreground: "#c08030"
+
+  # JSON
+  - name: JSON Key
+    scope: support.type.property-name.json
+    settings:
+      foreground: "#e76f51"
+
+  # Punctuation
+  - name: Punctuation
+    scope: punctuation
+    settings:
+      foreground: "#5a6a6a"
+
+  - name: Punctuation Separator
+    scope:
+      - punctuation.separator
+      - punctuation.terminator
+    settings:
+      foreground: "#5a6a6a"
+
+  # Template expressions
+  - name: Template Expression
+    scope:
+      - punctuation.definition.template-expression.begin
+      - punctuation.definition.template-expression.end
+      - punctuation.section.embedded
+    settings:
+      foreground: "#e76f51"
+
+  - name: Template Expression Content
+    scope: meta.template.expression
+    settings:
+      foreground: "#264653"
+
+  # Support
+  - name: Support Variable
+    scope: support.variable
+    settings:
+      foreground: "#3a7ca5"
+
+  - name: Support Constant
+    scope: support.constant
+    settings:
+      foreground: "#e76f51"
+
+  # Invalid
+  - name: Invalid
+    scope: invalid
+    settings:
+      foreground: "#FFFFFF"
+      background: "#e76f51"
+
+  - name: Invalid Deprecated
+    scope: invalid.deprecated
+    settings:
+      foreground: "#FFFFFF"
+      background: "#f4a261"
+
+  # Markup
+  - name: Markup Heading
+    scope: markup.heading
+    settings:
+      fontStyle: bold
+      foreground: "#e76f51"
+
+  - name: Markup Bold
+    scope: markup.bold
+    settings:
+      fontStyle: bold
+      foreground: "#f4a261"
+
+  - name: Markup Italic
+    scope: markup.italic
+    settings:
+      fontStyle: italic
+      foreground: "#c08030"
+
+  - name: Markup Strikethrough
+    scope: markup.strikethrough
+    settings:
+      fontStyle: strikethrough
+
+  - name: Markup Underline
+    scope: markup.underline
+    settings:
+      fontStyle: underline
+
+  - name: Markup Link
+    scope:
+      - markup.underline.link
+      - string.other.link
+    settings:
+      foreground: "#2a9d8f"
+
+  - name: Markup Code
+    scope: markup.inline.raw
+    settings:
+      foreground: "#2a9d8f"
+
+  - name: Markup Quote
+    scope: markup.quote
+    settings:
+      fontStyle: italic
+      foreground: "#b08070"
+
+  - name: Markup List
+    scope: markup.list
+    settings:
+      foreground: "#f4a261"
+
+  - name: Markup Inserted
+    scope: markup.inserted
+    settings:
+      foreground: "#2a9d8f"
+
+  - name: Markup Deleted
+    scope: markup.deleted
+    settings:
+      foreground: "#e76f51"
+
+  - name: Markup Changed
+    scope: markup.changed
+    settings:
+      foreground: "#f4a261"
+
+  # Diff
+  - name: Diff Header
+    scope:
+      - meta.diff
+      - meta.diff.header
+    settings:
+      fontStyle: italic
+      foreground: "#264653"
+
+  # Tokens
+  - scope: token.info-token
+    settings:
+      foreground: "#2a9d8f"
+
+  - scope: token.warn-token
+    settings:
+      foreground: "#f4a261"
+
+  - scope: token.error-token
+    settings:
+      foreground: "#e76f51"
+
+  - scope: token.debug-token
+    settings:
+      foreground: "#b07aa1"
+
+semanticHighlighting: true
+

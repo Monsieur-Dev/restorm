@@ -38,7 +38,7 @@ test.describe('Theme Structure Tests', () => {
 
     expect(dataTheme).toBeTruthy()
     if (dataTheme) {
-      expect(['dark', 'light', 'hc', 'hcLight']).toContain(dataTheme)
+      expect(['dark', 'light', 'hcDark', 'hcLight']).toContain(dataTheme)
     }
   })
 
@@ -200,7 +200,7 @@ test.describe('Theme Structure Tests', () => {
 
       // Should be 'dark' or 'hc'
       if (dataTheme) {
-        expect(['dark', 'hc']).toContain(dataTheme)
+        expect(['dark', 'hcDark']).toContain(dataTheme)
       }
     }
   })

@@ -22,7 +22,7 @@ export type SemanticTokenColors = Record<string, string>
 export interface ThemeDefinition {
   $schema?: string
   name: string
-  type?: 'dark' | 'light' | 'hc' | 'hcLight'
+  type?: 'dark' | 'light' | 'hcDark' | 'hcLight'
   include?: string
   colors?: ThemeColors
   tokenColors?: TokenColor[]
@@ -33,7 +33,7 @@ export interface ThemeDefinition {
 export interface ThemeInfo {
   id: string
   name: string
-  type: 'dark' | 'light' | 'hc' | 'hcLight'
+  type: 'dark' | 'light' | 'hcDark' | 'hcLight'
   path: string
 }
 

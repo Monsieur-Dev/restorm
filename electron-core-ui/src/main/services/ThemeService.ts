@@ -1,61 +1,115 @@
 import { readFileSync, readdirSync, existsSync } from 'fs'
-import { join, dirname } from 'path'
-import type { ThemeDefinition, ThemeInfo, ThemeVariables } from '../../../types/theme'
+import { join, basename, dirname } from 'path'
+import yaml from 'js-yaml'
+import type { ThemeInfo, ThemeVariables, ThemeDefinition } from '../../../types/theme'
 import { logger } from './LoggerService'
 
 /**
- * ThemeService manages VSCode themes
- * - Loads theme definitions from resources
- * - Parses theme JSON files
+ * ThemeService manages YAML-based themes
+ * - Loads theme definitions from resources/themes
+ * - Parses YAML theme files with inheritance
  * - Converts colors to CSS variables
+ * 
+ * Theme loading cascade:
+ * 1. base.yaml (common CSS variables)
+ * 2. {type}/_base.yaml (type-specific defaults: dark, light, hc_dark, hc_light)
+ * 3. {type}/{theme}.yaml (theme-specific overrides)
  */
-interface PackageTheme {
-  label: string
-  id?: string
-  uiTheme: string
-  path: string
+
+interface YamlColorEntry {
+  id: string
+  value: string
+  description?: string
 }
 
-interface PackageJson {
-  contributes?: {
-    themes?: PackageTheme[]
-  }
+interface YamlVariableEntry {
+  id: string
+  value: string
+  description?: string
 }
 
-type PackageNLS = Record<string, string>
+interface YamlBaseFile {
+  variables?: YamlVariableEntry[]
+}
+
+interface YamlTypeBaseFile {
+  colors?: YamlColorEntry[]
+}
+
+interface YamlThemeFile {
+  name: string
+  description?: string
+  colors?: Record<string, string>
+}
+
+type ThemeType = 'dark' | 'light' | 'hc_dark' | 'hc_light'
+
+const THEME_TYPES: ThemeType[] = ['dark', 'light', 'hc_dark', 'hc_light']
 
 export class ThemeService {
   private themesPath: string
   private themes = new Map<string, ThemeInfo>()
-  private loadedThemes = new Map<string, ThemeDefinition>()
+  private baseVariables: Record<string, string> = {}
+  private typeBaseColors: Record<ThemeType, Record<string, string>> = {
+    dark: {},
+    light: {},
+    hc_dark: {},
+    hc_light: {}
+  }
 
   constructor(resourcesPath: string) {
     this.themesPath = join(resourcesPath, 'themes')
+    this.loadBaseFiles()
     this.discoverThemes()
   }
 
   /**
-   * Resolve localized strings from package.nls.json
+   * Load base.yaml and all _base.yaml files
    */
-  private resolveLocalizedString(value: string, nls: PackageNLS | null): string {
-    if (!value.startsWith('%') || !nls) {
-      return value
+  private loadBaseFiles(): void {
+    // Load base.yaml (common variables)
+    const basePath = join(this.themesPath, 'base.yaml')
+    if (existsSync(basePath)) {
+      try {
+        const content = readFileSync(basePath, 'utf-8')
+        const data = yaml.load(content) as YamlBaseFile
+        if (data.variables) {
+          for (const variable of data.variables) {
+            // Convert to CSS variable format
+            const cssVar = `--${variable.id}`
+            this.baseVariables[cssVar] = variable.value
+          }
+        }
+        logger.debug(`Loaded base.yaml with ${Object.keys(this.baseVariables).length} variables`)
+      } catch (error) {
+        logger.error(`Failed to load base.yaml`, { error: String(error) })
+      }
     }
-    // Remove % from start and end (if present)
-    const key = value.startsWith('%') && value.endsWith('%')
-      ? value.slice(1, -1)
-      : value.slice(1)
-    
-    const resolved = nls[key]
-    if (resolved) {
-      return resolved
+
+    // Load type-specific _base.yaml files
+    for (const themeType of THEME_TYPES) {
+      const typeBasePath = join(this.themesPath, themeType, '_base.yaml')
+      if (existsSync(typeBasePath)) {
+        try {
+          const content = readFileSync(typeBasePath, 'utf-8')
+          const data = yaml.load(content) as YamlTypeBaseFile
+          if (data.colors) {
+            for (const color of data.colors) {
+              // Convert to CSS variable format (vscode style)
+              const cssVar = `--vscode-${color.id.replace(/\./g, '-')}`
+              this.typeBaseColors[themeType][cssVar] = color.value
+            }
+          }
+          logger.debug(`Loaded ${themeType}/_base.yaml with ${Object.keys(this.typeBaseColors[themeType]).length} colors`)
+        } catch (error) {
+          logger.error(`Failed to load ${themeType}/_base.yaml`, { error: String(error) })
+        }
+      }
     }
-    
-    return value
   }
 
   /**
-   * Discover all available themes from the themes directory
+   * Discover all available themes from YAML files
    */
   private discoverThemes(): void {
     if (!existsSync(this.themesPath)) {
@@ -63,130 +117,65 @@ export class ThemeService {
       return
     }
 
-    const themeDirs = readdirSync(this.themesPath, { withFileTypes: true })
-      .filter((dirent) => dirent.isDirectory())
-      .map((dirent) => dirent.name)
+    for (const themeType of THEME_TYPES) {
+      const typePath = join(this.themesPath, themeType)
+      if (!existsSync(typePath)) {
+        continue
+      }
 
-    for (const themeDir of themeDirs) {
-      const themePath = join(this.themesPath, themeDir)
-      const packageJsonPath = join(themePath, 'package.json')
+      const files = readdirSync(typePath, { withFileTypes: true })
+        .filter((dirent) => dirent.isFile() && dirent.name.endsWith('.yaml') && dirent.name !== '_base.yaml')
+        .map((dirent) => dirent.name)
 
-      if (existsSync(packageJsonPath)) {
+      for (const file of files) {
+        const themePath = join(typePath, file)
         try {
-          const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8')) as PackageJson
+          const content = readFileSync(themePath, 'utf-8')
+          const data = yaml.load(content) as YamlThemeFile
           
-          // Load localization file if it exists
-          const nlsPath = join(themePath, 'package.nls.json')
-          let nls: PackageNLS | null = null
-          if (existsSync(nlsPath)) {
-            nls = JSON.parse(readFileSync(nlsPath, 'utf-8')) as PackageNLS
+          if (!data.name) {
+            logger.warn(`Theme file ${file} missing 'name' property, skipping`)
+            continue
           }
+
+          const themeId = `${themeType}/${basename(file, '.yaml')}`
           
-          if (packageJson.contributes?.themes) {
-            for (const theme of packageJson.contributes.themes) {
-              // Resolve localized label
-              const resolvedLabel = this.resolveLocalizedString(theme.label, nls)
-              const id = `${themeDir}/${theme.id ?? resolvedLabel}`
-              const themeFilePath = join(this.themesPath, themeDir, theme.path)
-              
-              
-              this.themes.set(id, {
-                id,
-                name: resolvedLabel,
-                type: this.detectThemeType(theme),
-                path: themeFilePath
-              })
-            }
-          }
+          this.themes.set(themeId, {
+            id: themeId,
+            name: data.name,
+            type: this.mapThemeType(themeType),
+            path: themePath
+          })
         } catch (error) {
-          logger.error(`Failed to load theme from ${themeDir}`, { error: String(error) })
+          logger.error(`Failed to parse theme ${file}`, { error: String(error) })
         }
       }
     }
 
-    logger.info(`✅ Discovered ${this.themes.size} VSCode themes`)
+    logger.info(`Discovered ${this.themes.size} YAML themes`)
   }
 
   /**
-   * Detect theme type from theme metadata
+   * Map internal theme type to ThemeInfo type
    */
-  private detectThemeType(theme: PackageTheme): 'dark' | 'light' | 'hc' | 'hcLight' {
-    const uiTheme = theme.uiTheme
-    
-    if (uiTheme.includes('hc-light')) return 'hcLight'
-    if (uiTheme.includes('hc-black') || uiTheme.includes('hc-dark')) return 'hc'
-    if (uiTheme.includes('vs-dark')) return 'dark'
-    if (uiTheme.includes('vs')) return 'light'
-    
-    // Fallback: guess from label
-    const label = theme.label.toLowerCase()
-    if (label.includes('light')) return 'light'
-    return 'dark'
-  }
-
-  /**
-   * Load a theme definition from disk
-   */
-  private loadThemeFile(themePath: string): ThemeDefinition | null {
-    try {
-      const content = readFileSync(themePath, 'utf-8')
-      // Remove comments from JSON (VSCode themes often have comments)
-      // Handle both line comments and inline comments
-      const cleanContent = content
-        .split('\n')
-        .map(line => {
-          // Remove line comments
-          if (line.trim().startsWith('//')) {
-            return ''
-          }
-          // Remove inline comments (but preserve // in strings)
-          const commentIndex = line.indexOf('//')
-          if (commentIndex > 0) {
-            // Simple check: if there's an odd number of quotes before //, it's in a string
-            const beforeComment = line.substring(0, commentIndex)
-            const quoteCount = (beforeComment.match(/"/g) ?? []).length
-            if (quoteCount % 2 === 0) {
-              // Even number of quotes = comment is outside string
-              line = line.substring(0, commentIndex)
-            }
-          }
-          return line
-        })
-        .filter(line => line.trim().length > 0)
-        .join('\n')
-        // Remove trailing commas before closing braces/brackets
-        .replace(/,(\s*[}\]])/g, '$1')
-      
-      const theme = JSON.parse(cleanContent) as ThemeDefinition
-
-      // Handle includes (e.g., dark_plus.json includes dark_vs.json)
-      if (theme.include) {
-        const basePath = join(dirname(themePath), theme.include)
-        const baseTheme = this.loadThemeFile(basePath)
-        
-        if (baseTheme) {
-          // Merge base theme with current theme
-          return {
-            ...baseTheme,
-            ...theme,
-            colors: { ...baseTheme.colors, ...theme.colors },
-            tokenColors: [
-              ...(baseTheme.tokenColors ?? []),
-              ...(theme.tokenColors ?? [])
-            ],
-            semanticTokenColors: {
-              ...baseTheme.semanticTokenColors,
-              ...theme.semanticTokenColors
-            }
-          }
-        }
-      }
-
-      return theme
-    } catch (error) {
-      logger.error(`Failed to load theme file ${themePath}`, { error: String(error) })
-      return null
+  private mapThemeType(type: ThemeType): 'dark' | 'light' | 'hcDark' | 'hcLight' {
+    switch (type) {
+      case 'dark': return 'dark'
+      case 'light': return 'light'
+      case 'hc_dark': return 'hcDark'
+      case 'hc_light': return 'hcLight'
     }
+  }
+
+  /**
+   * Get the internal theme type from a theme path
+   */
+  private getThemeType(themePath: string): ThemeType {
+    const dir = basename(dirname(themePath))
+    if (THEME_TYPES.includes(dir as ThemeType)) {
+      return dir as ThemeType
+    }
+    return 'dark' // Default
   }
 
   /**
@@ -197,139 +186,111 @@ export class ThemeService {
   }
 
   /**
-   * Load a specific theme by ID
+   * Load a specific theme by ID and return CSS variables
+   * Applies inheritance: base.yaml -> type/_base.yaml -> theme.yaml
    */
-  public loadTheme(themeId: string): ThemeDefinition | null {
-    // Check cache
-    const cached = this.loadedThemes.get(themeId)
-    if (cached) {
-      return cached
-    }
-
+  public getThemeWithVariables(themeId: string): {
+    theme: ThemeDefinition
+    variables: ThemeVariables
+  } | null {
     const themeInfo = this.themes.get(themeId)
     if (!themeInfo) {
-      logger.error(`❌ Theme not found: "${themeId}"`)
-      logger.error(`   Available themes: ${Array.from(this.themes.keys()).join(', ')}`)
+      logger.error(`Theme not found: "${themeId}"`)
+      logger.error(`Available themes: ${Array.from(this.themes.keys()).join(', ')}`)
       return null
     }
 
-    const theme = this.loadThemeFile(themeInfo.path)
-    if (theme) {
-      this.loadedThemes.set(themeId, theme)
-    } else {
-      logger.error(`Failed to load theme file for ${themeId}`)
-    }
+    try {
+      // Start with base variables
+      const variables: ThemeVariables = { ...this.baseVariables }
 
-    return theme
+      // Add type-specific base colors
+      const themeType = this.getThemeType(themeInfo.path)
+      Object.assign(variables, this.typeBaseColors[themeType])
+
+      // Build colors object from base + type defaults
+      const colors: Record<string, string> = {}
+      
+      // Add type base colors (convert CSS vars back to color keys)
+      for (const [cssVar, value] of Object.entries(this.typeBaseColors[themeType])) {
+        if (cssVar.startsWith('--vscode-')) {
+          const key = cssVar.slice(9).replace(/-/g, '.')
+          colors[key] = value
+        }
+      }
+
+      // Load and apply theme-specific colors
+      const content = readFileSync(themeInfo.path, 'utf-8')
+      const data = yaml.load(content) as YamlThemeFile
+
+      if (data.colors) {
+        for (const [key, value] of Object.entries(data.colors)) {
+          const cssVar = `--vscode-${key.replace(/\./g, '-')}`
+          variables[cssVar] = value
+          colors[key] = value
+        }
+      }
+
+      const theme: ThemeDefinition = {
+        name: data.name,
+        type: themeInfo.type,
+        colors
+      }
+
+      return { theme, variables }
+    } catch (error) {
+      logger.error(`Failed to load theme ${themeId}`, { error: String(error) })
+      return null
+    }
   }
 
   /**
-   * Get default colors based on theme type
+   * Load a specific theme by ID (legacy compatibility)
    */
-  private getDefaultColors(type: 'dark' | 'light' | 'hc' | 'hcLight'): Record<string, string> {
-    const isDark = type === 'dark' || type === 'hc'
-    const isHC = type === 'hc' || type === 'hcLight'
+  public loadTheme(themeId: string): { name: string; type: 'dark' | 'light' | 'hcDark' | 'hcLight'; colors?: Record<string, string> } | null {
+    const result = this.getThemeWithVariables(themeId)
+    if (!result) {
+      return null
+    }
+    
+    // Convert CSS variables back to colors format for legacy compatibility
+    const colors: Record<string, string> = {}
+    for (const [cssVar, value] of Object.entries(result.variables)) {
+      if (cssVar.startsWith('--vscode-')) {
+        const key = cssVar.slice(9).replace(/-/g, '.')
+        colors[key] = value
+      }
+    }
 
     return {
-      // Editor colors
-      'editor.background': isDark ? '#1e1e1e' : '#ffffff',
-      'editor.foreground': isDark ? '#d4d4d4' : '#000000',
-      
-      // Input colors
-      'input.background': isDark ? '#3c3c3c' : '#ffffff',
-      'input.foreground': isDark ? '#cccccc' : '#000000',
-      'input.border': isHC ? '#6fc3df' : (isDark ? '#3c3c3c' : '#cecece'),
-      
-      // Dropdown colors
-      'dropdown.background': isDark ? '#3c3c3c' : '#ffffff',
-      'dropdown.foreground': isDark ? '#cccccc' : '#333333',
-      'dropdown.border': isHC ? '#6fc3df' : (isDark ? '#3c3c3c' : '#cecece'),
-      'dropdown.listBackground': isDark ? '#252526' : '#ffffff',
-      
-      // QuickInput colors (used by VSCode for dropdown lists)
-      'quickInput.background': isDark ? '#252526' : '#f3f3f3',
-      'quickInput.foreground': isDark ? '#cccccc' : '#333333',
-      
-      // List colors
-      'list.activeSelectionBackground': isDark ? '#04395e' : '#0060c0',
-      'list.activeSelectionForeground': '#ffffff',
-      'list.hoverBackground': isDark ? '#2a2d2e' : '#e8e8e8',
-      'list.focusBackground': isDark ? '#062f4a' : '#d6ebff',
-      'list.hoverForeground': isDark ? '#cccccc' : '#333333',
-      'list.focusForeground': isDark ? '#cccccc' : '#333333',
-      'list.foreground': isDark ? '#cccccc' : '#333333',
-      
-      // Button colors (aligned with VS Code defaults for Dark+ / Light+)
-      'button.background': isDark ? '#0e639c' : '#007acc',
-      'button.foreground': '#ffffff',
-      'button.hoverBackground': isDark ? '#3c3c3c' : '#0062a3',
-      
-      // Checkbox colors
-      'checkbox.background': isDark ? '#3c3c3c' : '#ffffff',
-      'checkbox.foreground': isDark ? '#f0f0f0' : '#000000',
-      'checkbox.border': isHC ? '#6fc3df' : (isDark ? '#3c3c3c' : '#cecece'),
-      
-      // Focus border
-      'focusBorder': isHC ? '#f38518' : (isDark ? '#007fd4' : '#0090f1'),
-      
-      // Scrollbar
-      'scrollbarSlider.background': isDark ? '#79797966' : '#64646466',
-      'scrollbarSlider.hoverBackground': isDark ? '#646464b3' : '#646464b3',
-      'scrollbarSlider.activeBackground': isDark ? '#bfbfbf66' : '#00000099',
-      
-      // Tab colors (VSCode-like: simple underline style)
-      'tab.activeForeground': isDark ? '#ffffff' : '#333333',
-      'tab.activeBorder': isDark ? '#0078d4' : '#0078d4',
-      'tab.inactiveForeground': isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(51, 51, 51, 0.7)',
-      'tab.border': isDark ? 'rgba(128, 128, 128, 0.35)' : 'rgba(97, 97, 97, 0.2)',
-      
-      // Custom: force proper text color for active tab (black on light, white on dark)
-      'tab-active-text-color': isDark ? '#ffffff' : '#000000'
+      name: result.theme.name,
+      type: result.theme.type ?? 'dark',
+      colors
     }
   }
 
   /**
-   * Convert theme colors to CSS variables
+   * Convert theme colors to CSS variables (legacy compatibility)
    */
-  public convertToCSSVariables(theme: ThemeDefinition): ThemeVariables {
-    const variables: ThemeVariables = {}
-
-    // Start with default colors for the theme type
-    const defaults = this.getDefaultColors(theme.type ?? 'dark')
+  public convertToCSSVariables(theme: { colors?: Record<string, string>; type?: 'dark' | 'light' | 'hcDark' | 'hcLight' }): ThemeVariables {
+    const themeType = theme.type ?? 'dark'
+    const internalType: ThemeType = themeType === 'hcDark' ? 'hc_dark' : themeType === 'hcLight' ? 'hc_light' : themeType
     
-    // First apply defaults
-    for (const [key, value] of Object.entries(defaults)) {
-      const cssVar = `--vscode-${key.replace(/\./g, '-')}`
-      variables[cssVar] = value
+    // Start with base variables and type defaults
+    const variables: ThemeVariables = { 
+      ...this.baseVariables,
+      ...this.typeBaseColors[internalType]
     }
 
-    // Then override with theme-specific colors
+    // Apply theme-specific colors
     if (theme.colors) {
       for (const [key, value] of Object.entries(theme.colors)) {
-        // Convert VSCode color key format to CSS variable format
-        // e.g., "editor.background" -> "--vscode-editor-background"
         const cssVar = `--vscode-${key.replace(/\./g, '-')}`
         variables[cssVar] = value
       }
     }
 
     return variables
-  }
-
-  /**
-   * Get theme by ID with CSS variables
-   */
-  public getThemeWithVariables(themeId: string): {
-    theme: ThemeDefinition
-    variables: ThemeVariables
-  } | null {
-    const theme = this.loadTheme(themeId)
-    if (!theme) {
-      return null
-    }
-
-    const variables = this.convertToCSSVariables(theme)
-    return { theme, variables }
   }
 }
 
@@ -348,4 +309,3 @@ export function getThemeService(resourcesPath?: string): ThemeService {
   }
   return themeServiceInstance
 }
-

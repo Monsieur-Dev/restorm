@@ -1,0 +1,10 @@
+# Dark+ Theme
+name: Dark+
+description: Extended dark theme based on Visual Studio Dark
+
+colors:
+  window.border: "#666666"
+  button.hoverBackground: "#3C3C3C"
+  button.secondaryHoverBackground: "#45494E"
+
+

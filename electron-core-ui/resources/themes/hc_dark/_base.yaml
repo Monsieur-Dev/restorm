@@ -1,0 +1,182 @@
+# High Contrast Dark Theme Base
+# Default values for high contrast dark themes
+
+colors:
+  # Editor colors
+  - id: editor.background
+    value: "#000000"
+    description: Editor background color
+
+  - id: editor.foreground
+    value: "#FFFFFF"
+    description: Editor foreground color
+
+  - id: editor.selectionBackground
+    value: "#FFFFFF"
+    description: Editor selection background
+
+  - id: editorIndentGuide.background1
+    value: "#FFFFFF"
+    description: Editor indent guide background
+
+  - id: editorIndentGuide.activeBackground1
+    value: "#FFFFFF"
+    description: Editor active indent guide background
+
+  - id: editorWhitespace.foreground
+    value: "#7c7c7c"
+    description: Editor whitespace foreground
+
+  # Input colors (HC specific - bright borders)
+  - id: input.background
+    value: "#3c3c3c"
+    description: Input background color
+
+  - id: input.foreground
+    value: "#cccccc"
+    description: Input foreground color
+
+  - id: input.border
+    value: "#6fc3df"
+    description: Input border color (high contrast)
+
+  # Dropdown colors
+  - id: dropdown.background
+    value: "#3c3c3c"
+    description: Dropdown background color
+
+  - id: dropdown.foreground
+    value: "#cccccc"
+    description: Dropdown foreground color
+
+  - id: dropdown.border
+    value: "#6fc3df"
+    description: Dropdown border color (high contrast)
+
+  - id: dropdown.listBackground
+    value: "#252526"
+    description: Dropdown list background color
+
+  # QuickInput colors
+  - id: quickInput.background
+    value: "#252526"
+    description: Quick input background color
+
+  - id: quickInput.foreground
+    value: "#cccccc"
+    description: Quick input foreground color
+
+  # List colors
+  - id: list.activeSelectionBackground
+    value: "#04395e"
+    description: List active selection background
+
+  - id: list.activeSelectionForeground
+    value: "#ffffff"
+    description: List active selection foreground
+
+  - id: list.hoverBackground
+    value: "#2a2d2e"
+    description: List hover background
+
+  - id: list.hoverForeground
+    value: "#cccccc"
+    description: List hover foreground
+
+  - id: list.focusBackground
+    value: "#062f4a"
+    description: List focus background
+
+  - id: list.focusForeground
+    value: "#cccccc"
+    description: List focus foreground
+
+  - id: list.foreground
+    value: "#cccccc"
+    description: List foreground
+
+  # Button colors
+  - id: button.background
+    value: "#0e639c"
+    description: Button background color
+
+  - id: button.foreground
+    value: "#ffffff"
+    description: Button foreground color
+
+  - id: button.hoverBackground
+    value: "#3c3c3c"
+    description: Button hover background color
+
+  # Checkbox colors
+  - id: checkbox.background
+    value: "#3c3c3c"
+    description: Checkbox background color
+
+  - id: checkbox.foreground
+    value: "#f0f0f0"
+    description: Checkbox foreground color
+
+  - id: checkbox.border
+    value: "#6fc3df"
+    description: Checkbox border color (high contrast)
+
+  # Focus border (HC specific - orange)
+  - id: focusBorder
+    value: "#f38518"
+    description: Focus border color (high contrast orange)
+
+  # Scrollbar colors
+  - id: scrollbarSlider.background
+    value: "#79797966"
+    description: Scrollbar slider background
+
+  - id: scrollbarSlider.hoverBackground
+    value: "#646464b3"
+    description: Scrollbar slider hover background
+
+  - id: scrollbarSlider.activeBackground
+    value: "#bfbfbf66"
+    description: Scrollbar slider active background
+
+  # Tab colors
+  - id: tab.activeForeground
+    value: "#ffffff"
+    description: Active tab foreground
+
+  - id: tab.activeBorder
+    value: "#0078d4"
+    description: Active tab border
+
+  - id: tab.inactiveForeground
+    value: "rgba(255, 255, 255, 0.5)"
+    description: Inactive tab foreground
+
+  - id: tab.border
+    value: "rgba(128, 128, 128, 0.35)"
+    description: Tab border
+
+  # Selection
+  - id: selection.background
+    value: "#008000"
+    description: Selection background
+
+  # Side bar
+  - id: sideBarTitle.foreground
+    value: "#FFFFFF"
+    description: Side bar title foreground
+
+  # Status bar
+  - id: statusBarItem.remoteBackground
+    value: "#00000000"
+    description: Status bar remote item background
+
+  # Ports
+  - id: ports.iconRunningProcessForeground
+    value: "#FFFFFF"
+    description: Running process icon foreground
+
+  # Action bar
+  - id: actionBar.toggledBackground
+    value: "#383a49"
+    description: Action bar toggled background

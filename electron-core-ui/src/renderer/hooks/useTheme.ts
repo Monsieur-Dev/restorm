@@ -107,7 +107,7 @@ export function useTheme(): UseThemeReturn {
       return
     }
 
-    if (themeType === 'dark' || themeType === 'hc') {
+    if (themeType === 'dark' || themeType === 'hcDark') {
       // Dark / high-contrast themes: dark gray border for subtle framing
       root.style.setProperty('--window-border-color', '#666666')
     } else {

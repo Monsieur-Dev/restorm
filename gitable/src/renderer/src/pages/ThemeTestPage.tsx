@@ -127,8 +127,8 @@ const ThemeTestPage: React.FC = () => {
   }
 
   const tabs: Tab[] = [
-    { id: 'sticky-headers', label: t('themeTest.components.stickyHeaders'), content: <StickHeadersTab /> },
     { id: 'workbench', label: 'Workbench', content: <WorkbenchTab /> },
+    { id: 'sticky-headers', label: t('themeTest.components.stickyHeaders'), content: <StickHeadersTab /> },
     { id: 'checkboxes', label: 'Checkboxes & Radio', content: <CheckboxesTab /> },
     { id: 'dropdowns', label: 'Dropdowns', content: <DropdownsTab /> },
     { id: 'buttons', label: 'Buttons', content: <ButtonsTab /> },
