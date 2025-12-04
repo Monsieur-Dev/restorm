@@ -15,9 +15,13 @@ export interface EditorTabsProps extends EditorWorkbenchCallbacks {
 	 * Used to indicate that the group's content does not have focus.
 	 */
 	dimmed?: boolean;
+	/**
+	 * Called when a tab is double-clicked. Used for fullscreen modal feature.
+	 */
+	onTabDoubleClick?: (tabId: string) => void;
 }
 
-export const EditorTabs: React.FC<EditorTabsProps> = ({ group, onCloseTab, onMoveTab, onActivateTab, onGetTabContent, onDetachToNewWindow, renderTabTitle, dimmed }) => {
+export const EditorTabs: React.FC<EditorTabsProps> = ({ group, onCloseTab, onMoveTab, onActivateTab, onGetTabContent, onDetachToNewWindow, renderTabTitle, dimmed, onTabDoubleClick }) => {
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const [_dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 	const [hoveredTabIndex, setHoveredTabIndex] = useState<number | null>(null);
@@ -402,6 +406,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({ group, onCloseTab, onMov
 							})()}
 							onActivate={() => { onActivateTab?.(tab.id, group.id); }}
 							onClose={(tabId) => onCloseTab?.(tabId, group.id)}
+							onDoubleClick={(tabId) => onTabDoubleClick?.(tabId)}
 						/>
 					))}
 				</div>

@@ -75,7 +75,8 @@ void initI18n().then(() => {
             id, 
             title: title, 
             titleString: title,
-            isDirty: dirty 
+            isDirty: dirty,
+            allowFullscreen: true
           })
           
           const newTree: WorkbenchTree = {

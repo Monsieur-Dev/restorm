@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react'
-import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, Modal } from 'electron-core-ui/renderer'
+import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger } from 'electron-core-ui/renderer'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
 import type { restormEditorTab } from '../types/editor'
 import { HTTPRequestTabView } from './HTTPRequestTabView'
@@ -57,7 +57,6 @@ export const Workbench: React.FC<WorkbenchProps> = ({
   const [localTree, setLocalTree] = useState<WorkbenchTree>(initialTree)
   const tree = isControlled ? initialTree : localTree
   const lastTabCountRef = useRef<number>(0)
-  const [activeModalRequestTitle, setActiveModalRequestTitle] = useState<string | null>(null)
 
   // In uncontrolled mode, sync local state when initialTree changes
   useEffect(() => {
@@ -85,15 +84,8 @@ export const Workbench: React.FC<WorkbenchProps> = ({
     const isHttpMethod = upperMethod !== undefined && httpMethods.includes(upperMethod)
     const pathText = isHttpMethod ? rest.join(' ') : titleString
 
-    const handleDoubleClick = (): void => {
-      setActiveModalRequestTitle(titleString)
-    }
-
     return (
-      <span
-        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-        onDoubleClick={handleDoubleClick}
-      >
+      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
         {isHttpMethod && <HttpMethodBadge method={upperMethod} />}
         <span>{pathText}</span>
       </span>
@@ -220,20 +212,6 @@ export const Workbench: React.FC<WorkbenchProps> = ({
     }
   }, [onTreeChange, isControlled])
 
-  const renderModalTitle = useCallback((requestTitle: string | null): React.ReactNode => {
-    if (!requestTitle) return null
-    const parts = requestTitle.split(' ')
-    const method = parts[0] ?? 'GET'
-    const path = parts.slice(1).join(' ') || requestTitle
-
-    return (
-      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-        <HttpMethodBadge method={method.toUpperCase()} />
-        <span>{path}</span>
-      </span>
-    )
-  }, [])
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', flex: 1, ...style }} className={className}>
       <EditorWorkbenchAny
@@ -243,17 +221,6 @@ export const Workbench: React.FC<WorkbenchProps> = ({
         onFocusedGroupChange={onFocusedGroupChange}
         {...callbacks}
       />
-      <Modal
-        isOpen={activeModalRequestTitle !== null}
-        onClose={() => {
-          setActiveModalRequestTitle(null)
-        }}
-        title={renderModalTitle(activeModalRequestTitle)}
-      >
-        {activeModalRequestTitle ? (
-          <HTTPRequestTabView requestTitle={activeModalRequestTitle} />
-        ) : null}
-      </Modal>
     </div>
   )
 }

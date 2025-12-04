@@ -1,8 +1,7 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react'
-import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger } from 'electron-core-ui/renderer'
+import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, CodeEditor } from 'electron-core-ui/renderer'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
 import type { DemoEditorTab } from '../types/editor'
-import Editor from '@monaco-editor/react'
 
 // Helper function to extract title string from EditorTab
 // This is a local implementation to avoid TypeScript export issues
@@ -58,10 +57,9 @@ const MonacoView: React.FC<{
   registerEditor?: (tabId: string, editor: MonacoEditorInstance) => void
 }> = ({ name, text, tabId, registerEditor }) => (
   <div style={{ display: 'flex', flex: 1, minHeight: 0, minWidth: 0 }}>
-    <Editor
+    <CodeEditor
       value={text ?? ''}
       defaultLanguage={getLanguage(name)}
-      theme="vs-dark"
       // Ensure one Monaco model per tab so that scroll and view state are fully independent
       path={tabId}
       options={{ readOnly: true, minimap: { enabled: false }, lineNumbers: 'on', automaticLayout: true }}

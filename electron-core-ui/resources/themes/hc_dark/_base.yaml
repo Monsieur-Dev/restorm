@@ -144,6 +144,10 @@ colors:
     value: "#ffffff"
     description: Active tab foreground
 
+  - id: tab.activeTextColor
+    value: "#ffffff"
+    description: Active tab text color (selected tab)
+
   - id: tab.activeBorder
     value: "#0078d4"
     description: Active tab border

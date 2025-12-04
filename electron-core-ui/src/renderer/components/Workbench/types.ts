@@ -21,6 +21,15 @@ export interface EditorTab {
 	 * in the group's content area when the tab is active.
 	 */
 	content?: React.ReactNode;
+	/**
+	 * When true, double-clicking on the tab opens a fullscreen modal with the tab content.
+	 * Defaults to false.
+	 */
+	allowFullscreen?: boolean;
+	/**
+	 * Custom title for the fullscreen modal. If not provided, the tab title will be used.
+	 */
+	fullscreenModalTitle?: React.ReactNode;
 }
 
 export interface EditorGroup {

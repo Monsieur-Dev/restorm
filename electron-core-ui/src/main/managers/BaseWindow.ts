@@ -477,12 +477,26 @@ export abstract class BaseWindow {
      * Load content into the window
      */
     private loadWindowContent(window: BrowserWindow): void {
+      const loadStart = performance.now()
+      
+      // Log when DOM is ready
+      window.webContents.once('dom-ready', () => {
+        logger.info(`BaseWindow: dom-ready in ${(performance.now() - loadStart).toFixed(2)}ms`)
+      })
+      
+      // Log when page finishes loading
+      window.webContents.once('did-finish-load', () => {
+        logger.info(`BaseWindow: did-finish-load in ${(performance.now() - loadStart).toFixed(2)}ms`)
+      })
+      
       // Load URL if provided, otherwise load file
       if (this.configuration.url) {
+        logger.info(`BaseWindow: Loading URL ${this.configuration.url}...`)
         window.loadURL(this.configuration.url).catch((error) => {
           logger.error('Failed to load URL', { error: String(error) })
         })
       } else {
+        logger.info(`BaseWindow: Loading file ${this.configuration.file}...`)
         window.loadFile(this.configuration.file).catch((error) => {
           logger.error('Failed to load file', { error: String(error) })
         })

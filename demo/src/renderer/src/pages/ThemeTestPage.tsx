@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useTheme, Tabs, logger, SelectBox, Titlebar, MenuBar, MenuBarItem, MenuItem, MenuItemSeparator, Button, Statusbar, StatusbarElement } from 'electron-core-ui/renderer'
+import { useTheme, Tabs, logger, SelectBox, Titlebar, MenuBar, MenuBarItem, MenuItem, MenuItemSeparator, Button, Statusbar, StatusbarElement, useSettingsModal } from 'electron-core-ui/renderer'
 import type { Tab } from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 import { 
@@ -66,6 +66,7 @@ function getThemeByIdHelper(themes: readonly SafeThemeInfo[], themeId: string): 
 const ThemeTestPage: React.FC = () => {
   const { t, i18n } = useTranslation()
   const { themes, currentThemeId, setTheme } = useThemeTyped()
+  const { showSettingsModal } = useSettingsModal()
 
   // Helper function to safely access theme properties
   const getThemeById = useCallback((themeId: string | null): SafeThemeInfo | undefined => {
@@ -128,17 +129,17 @@ const ThemeTestPage: React.FC = () => {
   }
 
   const tabs: Tab[] = [
-    { id: 'workbench', label: 'Workbench', content: <WorkbenchTab /> },
-    { id: 'sticky-headers', label: t('themeTest.components.stickyHeaders'), content: <StickHeadersTab /> },
-    { id: 'split-view', label: 'SplitView', content: <SplitViewTab /> },
-    { id: 'checkboxes', label: 'Checkboxes & Radio', content: <CheckboxesTab /> },
-    { id: 'dropdowns', label: 'Dropdowns', content: <DropdownsTab /> },
-    { id: 'buttons', label: 'Buttons', content: <ButtonsTab /> },
-    { id: 'scrollbars', label: 'Scrollbars', content: <ScrollbarsTab /> },
-    { id: 'progressbars', label: 'Progress bars', content: <ProgressTab /> },
-    { id: 'inputs', label: 'Text Inputs', content: <InputsTab /> },
-    { id: 'panels', label: 'Panels & Lists', content: <PanelsTab /> },
-    { id: 'text', label: 'Text Styles', content: <TextTab /> },
+    { id: 'workbench', label: 'Workbench', content: <WorkbenchTab />, allowFullscreen: true },
+    { id: 'sticky-headers', label: t('themeTest.components.stickyHeaders'), content: <StickHeadersTab />, allowFullscreen: true },
+    { id: 'split-view', label: 'SplitView', content: <SplitViewTab />, allowFullscreen: true },
+    { id: 'checkboxes', label: 'Checkboxes & Radio', content: <CheckboxesTab />, allowFullscreen: true },
+    { id: 'dropdowns', label: 'Dropdowns', content: <DropdownsTab />, allowFullscreen: true },
+    { id: 'buttons', label: 'Buttons', content: <ButtonsTab />, allowFullscreen: true },
+    { id: 'scrollbars', label: 'Scrollbars', content: <ScrollbarsTab />, allowFullscreen: true },
+    { id: 'progressbars', label: 'Progress bars', content: <ProgressTab />, allowFullscreen: true },
+    { id: 'inputs', label: 'Text Inputs', content: <InputsTab />, allowFullscreen: true },
+    { id: 'panels', label: 'Panels & Lists', content: <PanelsTab />, allowFullscreen: true },
+    { id: 'text', label: 'Text Styles', content: <TextTab />, allowFullscreen: true },
   ]
 
   return (
@@ -243,7 +244,7 @@ const ThemeTestPage: React.FC = () => {
         rightContent={
           <Button
             small secondary
-            onClick={() => { logger.info('Settings button clicked') }}
+            onClick={() => { showSettingsModal() }}
             options={{
               ariaLabel: 'Open settings',
               title: 'Open settings'

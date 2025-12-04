@@ -6,11 +6,12 @@ import { join, relative } from 'path'
 import { promises as fs } from 'fs'
 
 function createWindow(): void {
+  const startTime = performance.now()
   logger.info('🪟 Creating main window...')
   try {
     // Create main window (instance is stored in WindowManager singleton)
     new MainWindow()
-    logger.info('✅ Main window created successfully')
+    logger.info(`✅ Main window created successfully in ${(performance.now() - startTime).toFixed(2)}ms`)
   } catch (error) {
     logger.error('❌ Failed to create main window:', { error: String(error) })
     throw error

@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import Editor from '@monaco-editor/react'
 import {
   Button,
   VariableInputBox,
@@ -12,11 +11,10 @@ import {
   Pane,
   RadioGroup,
   InputBox,
-  Modal
+  CodeEditor
 } from 'electron-core-ui/renderer'
 import type {
   Tab,
-  TabsProps,
   VariableDefinition,
   ISelectOptionItem,
   ISelectData,
@@ -44,41 +42,6 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestT
   const queryParamsRef = useRef<ParamsTabViewHandle | null>(null)
   const splitContainerRef = useRef<HTMLDivElement | null>(null)
   const sashStartLeftRef = useRef<number>(leftPaneWidth)
-  const [isDarkTheme, setIsDarkTheme] = useState<boolean>(() => {
-    if (typeof document === 'undefined') return true
-    const themeAttr = document.documentElement.getAttribute('data-theme') ?? 'dark'
-    return themeAttr === 'dark' || themeAttr === 'hc'
-  })
-
-  useEffect(() => {
-    if (typeof document === 'undefined') return
-
-    const handleThemeChange = (): void => {
-      const themeAttr = document.documentElement.getAttribute('data-theme') ?? 'dark'
-      const dark = themeAttr === 'dark' || themeAttr === 'hc'
-      setIsDarkTheme(dark)
-    }
-
-    const observer = new MutationObserver((mutations) => {
-      for (const m of mutations) {
-        if (m.type === 'attributes' && m.attributeName === 'data-theme') {
-          handleThemeChange()
-        }
-      }
-    })
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['data-theme']
-    })
-
-    // Sync initial value in case theme changed before effect ran
-    handleThemeChange()
-
-    return () => {
-      observer.disconnect()
-    }
-  }, [])
 
   const urlVariables = useMemo<VariableDefinition[]>(
     () => [
@@ -113,9 +76,14 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestT
     []
   )
 
-  const [activeModalTabId, setActiveModalTabId] = useState<string | null>(null)
-
-  const TabsAny = Tabs as React.ComponentType<TabsProps & { onTabDoubleClick?: (tabId: string) => void }>
+  const renderRequestModalTitle = useCallback((tabLabel: string): React.ReactNode => {
+    return (
+      <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <HttpMethodBadge method={requestTitle.split(' ')[0] ?? 'GET'} />
+        <span>{requestTitle}{tabLabel ? ` - ${tabLabel}` : ''}</span>
+      </span>
+    )
+  }, [requestTitle])
 
   const tabs: Tab[] = [
     {
@@ -123,6 +91,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestT
       label: t('requestTab.tabs.docs'),
       // For docs, we let the editor handle its own scrolling, so we disable the Tabs ScrollableElement wrapper.
       useScrollableElement: false,
+      allowFullscreen: true,
+      fullscreenModalTitle: renderRequestModalTitle(t('requestTab.tabs.docs')),
       content: (
         <MarkdownEditor
           initialValue={
@@ -135,6 +105,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestT
       id: 'requestLayout',
       label: t('requestTab.tabs.requestLayout'),
       useScrollableElement: false,
+      allowFullscreen: true,
+      fullscreenModalTitle: renderRequestModalTitle(t('requestTab.tabs.requestLayout')),
       content: (
         <SplitView
           orientation="vertical"
@@ -245,10 +217,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestT
                       boxSizing: 'border-box'
                     }}
                   >
-                    <Editor
+                    <CodeEditor
                       height="100%"
                       language="json"
-                      theme={isDarkTheme ? 'vs-dark' : 'vs'}
                       value={body}
                       onChange={(value) => {
                         setBody(value ?? '')
@@ -309,27 +280,6 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestT
       )
     }
   ]
-
-  const renderRequestModalTitle = (tabId: string | null): React.ReactNode => {
-    if (!tabId) return null
-    let suffix = ''
-    switch (tabId) {
-      case 'docs':
-        suffix = 'Request documentation'
-        break
-      case 'requestLayout':
-        suffix = 'Request'
-        break
-      default:
-        suffix = ''
-    }
-    return (
-      <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <HttpMethodBadge method={requestTitle.split(' ')[0] ?? 'GET'} />
-        <span>{requestTitle}{suffix ? ` - ${suffix}` : ''}</span>
-      </span>
-    )
-  }
 
   // Initialize left pane width to 50% of available space on first layout
   useEffect(() => {
@@ -470,13 +420,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestT
               minHeight: 0
             }}
           >
-            <TabsAny
+            <Tabs
               tabs={tabs}
               activeTabId={activeTabId}
               onTabChange={setActiveTabId}
-              onTabDoubleClick={(tabId: string) => {
-                setActiveModalTabId(tabId)
-              }}
             />
           </div>
 
@@ -502,15 +449,6 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestT
           />
         </div>
       </div>
-      <Modal
-        isOpen={activeModalTabId !== null}
-        onClose={() => {
-          setActiveModalTabId(null)
-        }}
-        title={renderRequestModalTitle(activeModalTabId)}
-      >
-        {tabs.find(tab => tab.id === activeModalTabId)?.content}
-      </Modal>
     </div>
   )
 }

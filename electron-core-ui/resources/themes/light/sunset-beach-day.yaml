@@ -73,6 +73,7 @@ colors:
   button.hoverBackground: "#238b7e"
   button.secondaryBackground: "#f4a261"
   button.secondaryForeground: "#264653"
+  button.secondaryHoverBackground: "#f7bc7a"
   
   # Badge
   badge.background: "#e76f51"

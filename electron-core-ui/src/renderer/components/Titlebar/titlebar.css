@@ -62,6 +62,7 @@
 	height: 100%;
 	-webkit-app-region: no-drag;
 	flex-shrink: 0;
+	padding-right: 5px;
 }
 
 /* Title text */

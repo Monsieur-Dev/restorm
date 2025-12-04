@@ -379,17 +379,38 @@ const App: React.FC = () => {
       {
         id: 'tab-get-pets',
         title: 'GET /pets',
-        titleString: 'GET /pets'
+        titleString: 'GET /pets',
+        allowFullscreen: true,
+        fullscreenModalTitle: (
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <HttpMethodBadge method="GET" />
+            <span>/pets</span>
+          </span>
+        )
       },
       {
         id: 'tab-get-pet-by-id',
         title: 'GET /pets/{id}',
-        titleString: 'GET /pets/{id}'
+        titleString: 'GET /pets/{id}',
+        allowFullscreen: true,
+        fullscreenModalTitle: (
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <HttpMethodBadge method="GET" />
+            <span>/pets/{'{id}'}</span>
+          </span>
+        )
       },
       {
         id: 'tab-create-pet',
         title: 'POST /pets',
-        titleString: 'POST /pets'
+        titleString: 'POST /pets',
+        allowFullscreen: true,
+        fullscreenModalTitle: (
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <HttpMethodBadge method="POST" />
+            <span>/pets</span>
+          </span>
+        )
       }
     ]
 

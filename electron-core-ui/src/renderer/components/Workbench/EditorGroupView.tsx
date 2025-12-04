@@ -1,7 +1,9 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EditorTabs } from './EditorTabs';
+import { Modal } from '../Modal';
 import type { EditorGroup, EditorWorkbenchCallbacks, SplitDirection } from './types';
 import { getEditorDragData, isEditorDragEvent } from './dnd';
+import { getTabTitleString } from './utils';
 
 export interface EditorGroupViewProps extends EditorWorkbenchCallbacks {
 	group: EditorGroup;
@@ -19,7 +21,22 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 	const { group, renderTabContent, onSplitTab, onActivateTab, hasFocus = false, onFocusRequested } = props;
 	const [splitTarget, setSplitTarget] = useState<SplitDirection | 'center' | undefined>(undefined);
 	const [isEditorDrag, setIsEditorDrag] = useState<boolean>(false);
+	const [fullscreenTabId, setFullscreenTabId] = useState<string | null>(null);
 	const contentRef = useRef<HTMLDivElement | null>(null);
+
+	// Handle tab double-click for fullscreen modal
+	const handleTabDoubleClick = useCallback((tabId: string) => {
+		const tab = group.tabs.find((t) => t.id === tabId);
+		if (tab?.allowFullscreen) {
+			setFullscreenTabId(tabId);
+		}
+	}, [group.tabs]);
+
+	// Get the fullscreen tab
+	const fullscreenTab = useMemo(() => {
+		if (!fullscreenTabId) return null;
+		return group.tabs.find((t) => t.id === fullscreenTabId) ?? null;
+	}, [fullscreenTabId, group.tabs]);
 
 	// Wrapper around onActivateTab that also requests focus for this group
 	const handleActivateTab = useCallback((tabId: string, groupId: string) => {
@@ -155,7 +172,7 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 	return (
 		<div className="editor-group-container" data-group-id={group.id} style={{ display: 'flex', flexDirection: 'column', minWidth: 0, position: 'relative', height: '100%' }}>
 			<div className="title" style={{ display: 'flex' }}>
-				<EditorTabs {...props} onActivateTab={handleActivateTab} dimmed={!hasFocus} />
+				<EditorTabs {...props} onActivateTab={handleActivateTab} dimmed={!hasFocus} onTabDoubleClick={handleTabDoubleClick} />
 			</div>
 			<div
 				ref={contentRef}
@@ -222,6 +239,17 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 					})}
 				<div style={overlayStyle} />
 			</div>
+			<Modal
+				isOpen={fullscreenTabId !== null}
+				onClose={() => {
+					setFullscreenTabId(null);
+				}}
+				title={fullscreenTab?.fullscreenModalTitle ?? (fullscreenTab ? getTabTitleString(fullscreenTab, '') : '')}
+			>
+				{fullscreenTab ? (
+					renderTabContent?.(fullscreenTab) ?? fullscreenTab.content ?? <span>{fullscreenTab.title}</span>
+				) : null}
+			</Modal>
 		</div>
 	);
 };

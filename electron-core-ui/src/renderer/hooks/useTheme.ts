@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useContext } from 'react'
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../../types/theme'
 import { logger } from '../services/logger'
+import ThemeContext from '../contexts/ThemeContext'
 
 export interface UseThemeReturn {
   themes: ThemeInfo[]
@@ -15,8 +16,26 @@ export interface UseThemeReturn {
 
 /**
  * Hook to manage VSCode themes
+ * If used within a ThemeProvider, returns the shared context state
+ * Otherwise, creates its own independent state (legacy behavior)
  */
 export function useTheme(): UseThemeReturn {
+  // Try to use context if available
+  const context = useContext(ThemeContext)
+  
+  // Always call legacy hook to respect React hooks rules
+  // This is only used when context is null (no ThemeProvider)
+  const legacyState = useThemeLegacy()
+  
+  // If we have a context, use it directly; otherwise use legacy state
+  return context ?? legacyState
+}
+
+/**
+ * Legacy hook implementation for backwards compatibility
+ * Used when not wrapped in ThemeProvider
+ */
+function useThemeLegacy(): UseThemeReturn {
   const [themes, setThemes] = useState<ThemeInfo[]>([])
   const [currentThemeId, setCurrentThemeId] = useState<string | null>(null)
   const [currentTheme, setCurrentTheme] = useState<ThemeDefinition | null>(null)

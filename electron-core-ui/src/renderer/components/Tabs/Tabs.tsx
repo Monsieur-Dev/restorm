@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { ScrollableElement } from '../ScrollableElement'
+import { Modal } from '../Modal'
 
 export interface Tab {
   id: string
@@ -11,6 +12,15 @@ export interface Tab {
    * Defaults to true.
    */
   useScrollableElement?: boolean
+  /**
+   * When true, double-clicking on the tab opens a fullscreen modal with the tab content.
+   * Defaults to false.
+   */
+  allowFullscreen?: boolean
+  /**
+   * Custom title for the fullscreen modal. If not provided, the tab label will be used.
+   */
+  fullscreenModalTitle?: React.ReactNode
 }
 
 export interface TabsProps {
@@ -18,6 +28,11 @@ export interface TabsProps {
   activeTabId?: string
   onTabChange?: (tabId: string) => void
   onTabClose?: (tabId: string) => void
+  /**
+   * @deprecated Use allowFullscreen property on individual tabs instead.
+   * This callback is still called if provided, but the built-in fullscreen modal
+   * will also be triggered if the tab has allowFullscreen set to true.
+   */
   onTabDoubleClick?: (tabId: string) => void
 }
 
@@ -29,6 +44,7 @@ export const Tabs: React.FC<TabsProps> = ({
   onTabDoubleClick
 }) => {
   const [internalActiveTab, setInternalActiveTab] = useState(tabs[0]?.id ?? '')
+  const [fullscreenTabId, setFullscreenTabId] = useState<string | null>(null)
   const currentActiveTab = activeTabId ?? internalActiveTab
 
   const handleTabClick = (tabId: string): void => {
@@ -41,8 +57,18 @@ export const Tabs: React.FC<TabsProps> = ({
     onTabClose?.(tabId)
   }
 
+  const handleTabDoubleClick = (tabId: string, tab: Tab): void => {
+    // Call legacy callback if provided
+    onTabDoubleClick?.(tabId)
+    // Open fullscreen modal if allowed
+    if (tab.allowFullscreen) {
+      setFullscreenTabId(tabId)
+    }
+  }
+
   const activeTab = tabs.find(tab => tab.id === currentActiveTab)
   const useScrollable = activeTab?.useScrollableElement ?? true
+  const fullscreenTab = fullscreenTabId ? tabs.find(tab => tab.id === fullscreenTabId) : null
 
   return (
     <div
@@ -89,9 +115,7 @@ export const Tabs: React.FC<TabsProps> = ({
                   handleTabClick(tab.id)
                 }}
                 onDoubleClick={() => {
-                  if (onTabDoubleClick) {
-                    onTabDoubleClick(tab.id)
-                  }
+                  handleTabDoubleClick(tab.id, tab)
                 }}
                 style={{
                   position: 'relative',
@@ -216,6 +240,15 @@ export const Tabs: React.FC<TabsProps> = ({
           </div>
         )}
       </div>
+      <Modal
+        isOpen={fullscreenTabId !== null}
+        onClose={() => {
+          setFullscreenTabId(null)
+        }}
+        title={fullscreenTab?.fullscreenModalTitle ?? fullscreenTab?.label ?? ''}
+      >
+        {fullscreenTab?.content}
+      </Modal>
     </div>
   )
 }

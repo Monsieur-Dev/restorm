@@ -1,13 +1,12 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
-import Editor from '@monaco-editor/react'
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { Graph, type GraphRef } from 'jsoncrack-react'
 import {
   Tabs,
   Button,
   ListView,
-  Modal
+  CodeEditor
 } from 'electron-core-ui/renderer'
-import type { Tab, TabsProps, ListViewItemData } from 'electron-core-ui/renderer'
+import type { Tab, ListViewItemData } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
 import './responsesView.css'
 import { HttpMethodBadge } from './HttpMethodBadge'
@@ -44,8 +43,19 @@ export const ResponsesView: React.FC<ResponsesViewProps> = ({ requestTitle }) =>
   })
 
   const graphRef = useRef<GraphRef | null>(null)
-  const [activeModalTabId, setActiveModalTabId] = useState<string | null>(null)
-  const TabsAny = Tabs as React.ComponentType<TabsProps & { onTabDoubleClick?: (tabId: string) => void }>
+
+  const renderModalTitle = useCallback((suffix: string): React.ReactNode => {
+    const parts = requestTitle.split(' ')
+    const method = parts[0] ?? 'GET'
+    const path = parts.slice(1).join(' ') || requestTitle
+
+    return (
+      <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <HttpMethodBadge method={method.toUpperCase()} />
+        <span>{path}{suffix ? ` - ${suffix}` : ''}</span>
+      </span>
+    )
+  }, [requestTitle])
 
   useEffect(() => {
     if (typeof document === 'undefined') return
@@ -444,6 +454,8 @@ export const ResponsesView: React.FC<ResponsesViewProps> = ({ requestTitle }) =>
         id: 'response-summary',
         label: 'Infos',
         useScrollableElement: false,
+        allowFullscreen: true,
+        fullscreenModalTitle: renderModalTitle('Response infos'),
         content: (
           <div
             style={{
@@ -464,6 +476,8 @@ export const ResponsesView: React.FC<ResponsesViewProps> = ({ requestTitle }) =>
         id: 'raw',
         label: 'Response',
         useScrollableElement: false,
+        allowFullscreen: true,
+        fullscreenModalTitle: renderModalTitle('Response'),
         content: (
           <div
             style={{
@@ -481,10 +495,9 @@ export const ResponsesView: React.FC<ResponsesViewProps> = ({ requestTitle }) =>
                 boxSizing: 'border-box'
               }}
             >
-              <Editor
+              <CodeEditor
                 height="100%"
                 language="json"
-                theme={isDarkTheme ? 'vs-dark' : 'vs'}
                 value={rawResponse}
                 onChange={(value) => {
                   setRawResponse(value ?? '')
@@ -504,6 +517,8 @@ export const ResponsesView: React.FC<ResponsesViewProps> = ({ requestTitle }) =>
         id: 'pretty',
         label: t('requestTab.responses.tabs.prettyfied'),
         useScrollableElement: false,
+        allowFullscreen: true,
+        fullscreenModalTitle: renderModalTitle('Response prettified'),
         content: (
           <div
             style={{
@@ -521,10 +536,9 @@ export const ResponsesView: React.FC<ResponsesViewProps> = ({ requestTitle }) =>
                 boxSizing: 'border-box'
               }}
             >
-              <Editor
+              <CodeEditor
                 height="100%"
                 language="json"
-                theme={isDarkTheme ? 'vs-dark' : 'vs'}
                 value={prettyResponse}
                 onChange={(value) => {
                   setPrettyResponse(value ?? '')
@@ -544,6 +558,8 @@ export const ResponsesView: React.FC<ResponsesViewProps> = ({ requestTitle }) =>
         id: 'jsoncrack',
         label: t('requestTab.responses.tabs.jsoncrack'),
         useScrollableElement: false,
+        allowFullscreen: true,
+        fullscreenModalTitle: renderModalTitle('Response JSONCrack'),
         content: (
           <div
             style={{
@@ -649,44 +665,8 @@ export const ResponsesView: React.FC<ResponsesViewProps> = ({ requestTitle }) =>
         )
       }
     ],
-    [t, isDarkTheme, rawResponse, prettyResponse, headersItems]
+    [t, isDarkTheme, rawResponse, prettyResponse, headersItems, renderModalTitle]
   )
-
-  const activeModalTab = useMemo(
-    () => tabs.find(tab => tab.id === activeModalTabId) ?? null,
-    [tabs, activeModalTabId]
-  )
-
-  const renderModalTitle = (tabId: string | null): React.ReactNode => {
-    if (!tabId) return null
-    let suffix = ''
-    switch (tabId) {
-      case 'response-summary':
-        suffix = 'Response infos'
-        break
-      case 'raw':
-        suffix = 'Response'
-        break
-      case 'pretty':
-        suffix = 'Response prettified'
-        break
-      case 'jsoncrack':
-        suffix = 'Response JSONCrack'
-        break
-      default:
-        suffix = ''
-    }
-    const parts = requestTitle.split(' ')
-    const method = parts[0] ?? 'GET'
-    const path = parts.slice(1).join(' ') || requestTitle
-
-    return (
-      <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <HttpMethodBadge method={method.toUpperCase()} />
-        <span>{path}{suffix ? ` - ${suffix}` : ''}</span>
-      </span>
-    )
-  }
 
   return (
     <div
@@ -698,23 +678,11 @@ export const ResponsesView: React.FC<ResponsesViewProps> = ({ requestTitle }) =>
         minHeight: 0
       }}
     >
-      <TabsAny
+      <Tabs
         tabs={tabs}
         activeTabId={activeTabId}
         onTabChange={setActiveTabId}
-        onTabDoubleClick={(tabId: string) => {
-          setActiveModalTabId(tabId)
-        }}
       />
-      <Modal
-        isOpen={activeModalTabId !== null}
-        onClose={() => {
-          setActiveModalTabId(null)
-        }}
-        title={renderModalTitle(activeModalTabId)}
-      >
-        {activeModalTab?.content}
-      </Modal>
     </div>
   )
 }

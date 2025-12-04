@@ -18,7 +18,7 @@
 
 .ecu-modal-container {
 	position: absolute;
-	top: 20px;
+	top: 40px;
 	left: 20px;
 	right: 20px;
 	bottom: 20px;
@@ -51,21 +51,11 @@
 }
 
 .ecu-modal-close {
-	border: none;
-	background: none;
-	color: var(--vscode-titleBar-activeForeground, #ffffff);
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 20px;
-	height: 20px;
-	border-radius: 3px;
-	padding: 0;
+	/* Button component wrapper adjustment */
 }
 
-.ecu-modal-close:hover {
-	background-color: var(--vscode-toolbar-hoverBackground, rgba(255,255,255,0.08));
+.ecu-modal-close .button-container {
+	display: flex;
 }
 
 .ecu-modal-body {

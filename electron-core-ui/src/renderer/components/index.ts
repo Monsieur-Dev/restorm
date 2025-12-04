@@ -22,6 +22,13 @@ export type {
 export { VariableInputBox } from './VariableInputBox'
 export type { VariableInputBoxProps, VariableDefinition } from './VariableInputBox'
 
+// CodeEditor exports
+export { CodeEditor } from './CodeEditor'
+export type { CodeEditorProps, CodeEditorRef } from './CodeEditor'
+
+// Settings exports
+export { SettingsPage, SettingsModalProvider, useSettingsModal } from './Settings'
+
 // Toggle exports
 export { Toggle, defaultToggleStyles } from './Toggle/index'
 export type { IToggleStyles, ICheckboxStyles, ToggleProps } from './Toggle/index'

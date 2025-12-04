@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import MonacoWorkbench from '../MonacoWorkbench'
+import { Button } from '../Button'
 import './modal.css'
 
 export interface ModalProps {
@@ -65,14 +66,14 @@ export const Modal: React.FC<ModalProps> = ({ title, isOpen, onClose, children }
             <div className="ecu-modal-title">
               {title}
             </div>
-            <button
-              type="button"
-              className="ecu-modal-close"
+            <Button
+              small
+              secondary
+              icon="close"
               onClick={onClose}
-              aria-label="Close modal"
-            >
-              <i className="codicon codicon-close" />
-            </button>
+              options={{ ariaLabel: 'Close modal' }}
+              className="ecu-modal-close"
+            />
           </div>
           <div className="ecu-modal-body">
             {children}

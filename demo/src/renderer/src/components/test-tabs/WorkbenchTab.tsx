@@ -348,7 +348,8 @@ const WorkbenchTab: React.FC = () => {
             id: path,
             title,
             titleString: title,
-            content
+            content,
+            allowFullscreen: true
           }
         })
 
@@ -386,7 +387,8 @@ const WorkbenchTab: React.FC = () => {
               id: path,
               title,
               titleString: title,
-              content
+              content,
+              allowFullscreen: true
             }
           })
 
@@ -442,7 +444,8 @@ const WorkbenchTab: React.FC = () => {
             id: filePath,
             title,
             titleString: title,
-            content
+            content,
+            allowFullscreen: true
           }
           setTree(prev => addTabToGroup(prev, newTab, lastFocusedGroupId))
         }

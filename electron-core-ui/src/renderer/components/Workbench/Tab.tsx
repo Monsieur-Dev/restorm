@@ -6,6 +6,7 @@ export interface TabProps extends Pick<EditorWorkbenchCallbacks, 'renderTabTitle
 	isActive: boolean;
 	onActivate?: (tabId: string) => void;
 	onClose?: (tabId: string) => void;
+	onDoubleClick?: (tabId: string) => void;
 	draggable?: boolean;
 	onDragStart?: (e: React.DragEvent) => void;
 	onDragEnd?: (e: React.DragEvent) => void;
@@ -16,7 +17,7 @@ export interface TabProps extends Pick<EditorWorkbenchCallbacks, 'renderTabTitle
 	refCallback?: (el: HTMLDivElement | null) => void;
 }
 
-export const Tab: React.FC<TabProps> = ({ tab, isActive, onActivate, onClose, draggable, onDragStart, onDragEnd, showDropMarker, refCallback, renderTabTitle }) => {
+export const Tab: React.FC<TabProps> = ({ tab, isActive, onActivate, onClose, onDoubleClick, draggable, onDragStart, onDragEnd, showDropMarker, refCallback, renderTabTitle }) => {
 	// Use renderTabTitle if provided, otherwise use tab.title directly
 	const titleContent = renderTabTitle ? renderTabTitle(tab) : tab.title;
 	
@@ -29,6 +30,7 @@ export const Tab: React.FC<TabProps> = ({ tab, isActive, onActivate, onClose, dr
 			role="tab"
 			aria-selected={isActive}
 			onClick={() => onActivate?.(tab.id)}
+			onDoubleClick={() => onDoubleClick?.(tab.id)}
 			onAuxClick={(e) => {
 				if (e.button === 1) {
 					e.preventDefault();

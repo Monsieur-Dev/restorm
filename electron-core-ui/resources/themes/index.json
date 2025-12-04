@@ -1,0 +1,95 @@
+{
+  "themes": [
+    {
+      "id": "dark/abyss",
+      "name": "Abyss",
+      "type": "dark",
+      "description": "A dark theme with deep blue tones",
+      "file": "dark/abyss.yaml"
+    },
+    {
+      "id": "dark/dark-modern",
+      "name": "Default Dark Modern",
+      "type": "dark",
+      "description": "A modern dark theme with refined colors",
+      "file": "dark/dark-modern.yaml"
+    },
+    {
+      "id": "dark/dark-plus",
+      "name": "Dark+",
+      "type": "dark",
+      "description": "Extended dark theme based on Visual Studio Dark",
+      "file": "dark/dark-plus.yaml"
+    },
+    {
+      "id": "dark/kimbie-dark",
+      "name": "Kimbie Dark",
+      "type": "dark",
+      "file": "dark/kimbie-dark.yaml"
+    },
+    {
+      "id": "dark/monokai",
+      "name": "Monokai",
+      "type": "dark",
+      "file": "dark/monokai.yaml"
+    },
+    {
+      "id": "dark/monokai-dimmed",
+      "name": "Monokai Dimmed",
+      "type": "dark",
+      "file": "dark/monokai-dimmed.yaml"
+    },
+    {
+      "id": "dark/red",
+      "name": "Red",
+      "type": "dark",
+      "file": "dark/red.yaml"
+    },
+    {
+      "id": "dark/solarized-dark",
+      "name": "Solarized (dark)",
+      "type": "dark",
+      "file": "dark/solarized-dark.yaml"
+    },
+    {
+      "id": "dark/tomorrow-night-blue",
+      "name": "Tomorrow Night Blue",
+      "type": "dark",
+      "file": "dark/tomorrow-night-blue.yaml"
+    },
+    {
+      "id": "light/light-modern",
+      "name": "Default Light Modern",
+      "type": "light",
+      "description": "A modern light theme with refined colors",
+      "file": "light/light-modern.yaml"
+    },
+    {
+      "id": "light/light-plus",
+      "name": "Light+",
+      "type": "light",
+      "description": "Extended light theme based on Visual Studio Light",
+      "file": "light/light-plus.yaml"
+    },
+    {
+      "id": "light/quiet-light",
+      "name": "Quiet Light",
+      "type": "light",
+      "file": "light/quiet-light.yaml"
+    },
+    {
+      "id": "light/solarized-light",
+      "name": "Solarized (light)",
+      "type": "light",
+      "file": "light/solarized-light.yaml"
+    },
+    {
+      "id": "light/sunset-beach-day",
+      "name": "Sunset Beach Day",
+      "type": "light",
+      "description": "A warm light theme inspired by golden sunsets on tropical beaches",
+      "file": "light/sunset-beach-day.yaml"
+    }
+  ]
+}
+
