@@ -1,0 +1,104 @@
+.ag-theme-restorm-input-table {
+  --ag-background-color: var(--vscode-editor-background);
+  --ag-foreground-color: var(--vscode-editor-foreground);
+  --ag-border-color: var(--vscode-panel-border, #3c3c3c);
+  --ag-row-border-color: var(--vscode-panel-border, #3c3c3c);
+  --ag-header-background-color: var(--vscode-editorGroupHeader-tabsBackground, var(--vscode-editor-background));
+  --ag-header-foreground-color: var(--vscode-foreground);
+  --ag-odd-row-background-color: var(--vscode-editor-background);
+  --ag-selected-row-background-color: var(--vscode-list-activeSelectionBackground);
+  --ag-selected-row-text-color: var(--vscode-list-activeSelectionForeground, #ffffff);
+  --ag-row-hover-color: var(--vscode-list-hoverBackground);
+  --ag-input-border-color: var(--vscode-input-border);
+  --ag-input-focus-border-color: var(--vscode-focusBorder);
+
+  --ag-font-family: var(--vscode-font-family);
+  --ag-font-size: 12px;
+
+  border: 1px solid var(--vscode-panel-border, #3c3c3c);
+  border-radius: 2px;
+}
+
+.ag-theme-restorm-input-table .ag-root-wrapper {
+  border-radius: 2px;
+}
+
+.ag-theme-restorm-input-table .ag-cell,
+.ag-theme-restorm-input-table .ag-header-cell {
+  padding: 2px 6px;
+}
+
+.ag-theme-restorm-input-table .ag-row-drag {
+  opacity: 0.6;
+}
+
+.ag-theme-restorm-input-table .ag-row-hover .ag-row-drag {
+  opacity: 1;
+}
+
+/* New TanStack-based InputTable layout */
+.input-table-root {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 100%;
+}
+
+.input-table-toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.input-table-wrapper {
+  flex: 1;
+  min-height: 120px;
+  overflow: auto;
+  background-color: var(--vscode-editor-background);
+}
+
+.input-table-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--vscode-font-family);
+  font-size: 12px;
+  color: var(--vscode-editor-foreground);
+}
+
+.input-table-table thead {
+  background-color: var(--vscode-editorGroupHeader-tabsBackground, var(--vscode-editor-background));
+}
+
+.input-table-table th,
+.input-table-table td {
+  padding: 2px 6px;
+  border-bottom: 1px solid var(--vscode-panel-border, #3c3c3c);
+}
+
+.input-table-table tbody tr:hover {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+.input-table-drag-header {
+  width: 24px;
+}
+
+.input-table-drag-cell {
+  width: 24px;
+  text-align: center;
+  cursor: grab;
+}
+
+.input-table-drag-handle {
+  opacity: 0.6;
+}
+
+.input-table-text-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+

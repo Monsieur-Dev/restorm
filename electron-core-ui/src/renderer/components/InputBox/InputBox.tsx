@@ -218,6 +218,13 @@ const InputBox: React.FC<InputBoxProps> = ({
     autoCapitalize: 'off' as const,
     spellCheck: false,
     style: getInputStyles(),
+    onDrop: (e: React.DragEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      // Prevent external drag sources (tabs, rows, etc.) from inserting arbitrary text
+      e.preventDefault()
+    },
+    onDragOver: (e: React.DragEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      e.preventDefault()
+    },
     id,
     'aria-label': options.ariaLabel,
     title: options.tooltip ?? options.placeholder ?? ''

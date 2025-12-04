@@ -8,6 +8,7 @@
 	line-height: 1em;
 	padding-left: 0.5em;
 	padding-right: 0.5em;
+	cursor: pointer;
 }
 
 .monaco-custom-radio > .monaco-button:first-child {
@@ -55,10 +56,14 @@
 
 .hc-black .monaco-custom-radio > .monaco-button:not(.active):hover,
 .hc-light .monaco-custom-radio > .monaco-button:not(.active):hover {
-	outline: 1px dashed var(--vscode-toolbar-hoverOutline);
-	outline-offset: -1px
+	outline: none;
 }
 
 .monaco-custom-radio > .monaco-button:hover:not(.active) {
 	background-color: var(--vscode-inputOption-hoverBackground);
+}
+
+.monaco-custom-radio > .monaco-button:focus,
+.monaco-custom-radio > .monaco-button:focus-visible {
+	outline: none;
 }

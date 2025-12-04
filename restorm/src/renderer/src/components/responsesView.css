@@ -1,0 +1,11 @@
+.response-key {
+  width: 250px;
+}
+
+.response-value {
+  flex: 1;
+  opacity: 0.8;
+  overflow: hidden;
+}
+
+

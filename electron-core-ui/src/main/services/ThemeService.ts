@@ -259,10 +259,10 @@ export class ThemeService {
       'list.focusForeground': isDark ? '#cccccc' : '#333333',
       'list.foreground': isDark ? '#cccccc' : '#333333',
       
-      // Button colors
+      // Button colors (aligned with VS Code defaults for Dark+ / Light+)
       'button.background': isDark ? '#0e639c' : '#007acc',
       'button.foreground': '#ffffff',
-      'button.hoverBackground': isDark ? '#1177bb' : '#0062a3',
+      'button.hoverBackground': isDark ? '#3c3c3c' : '#0062a3',
       
       // Checkbox colors
       'checkbox.background': isDark ? '#3c3c3c' : '#ffffff',

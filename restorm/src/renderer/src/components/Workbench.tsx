@@ -1,8 +1,9 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react'
-import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger } from 'electron-core-ui/renderer'
+import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, Modal } from 'electron-core-ui/renderer'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
 import type { restormEditorTab } from '../types/editor'
-import Editor from '@monaco-editor/react'
+import { HTTPRequestTabView } from './HTTPRequestTabView'
+import { HttpMethodBadge } from './HttpMethodBadge'
 
 // Helper function to extract title string from EditorTab
 // This is a local implementation to avoid TypeScript export issues
@@ -36,46 +37,6 @@ export interface WorkbenchProps {
   onFocusedGroupChange?: (groupId: string | null) => void
 }
 
-const getLanguage = (filename: string): string => {
-  const lower = filename.toLowerCase()
-  if (lower.endsWith('.ts') || lower.endsWith('.tsx')) return 'typescript'
-  if (lower.endsWith('.js') || lower.endsWith('.jsx')) return 'javascript'
-  if (lower.endsWith('.md')) return 'markdown'
-  if (lower.endsWith('.css')) return 'css'
-  if (lower.endsWith('.json')) return 'json'
-  if (lower.endsWith('.txt')) return 'plaintext'
-  return 'plaintext'
-}
-
-interface MonacoEditorInstance {
-  focus: () => void
-}
-
-const MonacoView: React.FC<{
-  name: string
-  text?: string
-  tabId: string
-  registerEditor?: (tabId: string, editor: MonacoEditorInstance) => void
-}> = ({ name, text, tabId, registerEditor }) => (
-  <div style={{ display: 'flex', flex: 1, minHeight: 0, minWidth: 0 }}>
-    <Editor
-      value={text ?? ''}
-      defaultLanguage={getLanguage(name)}
-      theme="vs-dark"
-      // Ensure one Monaco model per tab so that scroll and view state are fully independent
-      path={tabId}
-      options={{ readOnly: true, minimap: { enabled: false }, lineNumbers: 'on', automaticLayout: true }}
-      loading={<div style={{ padding: 12, opacity: 0.7 }}>Loading editor…</div>}
-      height="100%"
-      width="100%"
-      onMount={(editor) => {
-        if (!registerEditor) return
-        registerEditor(tabId, editor as MonacoEditorInstance)
-      }}
-    />
-  </div>
-)
-
 // Local alias to bypass strict prop typing issues coming from external package d.ts
 const EditorWorkbenchAny = EditorWorkbench as unknown as React.ComponentType<Record<string, unknown>>
 
@@ -84,7 +45,6 @@ const EditorWorkbenchAny = EditorWorkbench as unknown as React.ComponentType<Rec
  */
 export const Workbench: React.FC<WorkbenchProps> = ({
   tree: initialTree,
-  initialTabContentMap = {},
   onTreeChange,
   className,
   style,
@@ -96,10 +56,8 @@ export const Workbench: React.FC<WorkbenchProps> = ({
   const isControlled = onTreeChange !== undefined
   const [localTree, setLocalTree] = useState<WorkbenchTree>(initialTree)
   const tree = isControlled ? initialTree : localTree
-  const [tabContentMap, setTabContentMap] = useState<Record<string, string>>(initialTabContentMap)
-  const editorInstancesRef = useRef<Record<string, MonacoEditorInstance>>({})
   const lastTabCountRef = useRef<number>(0)
-  const lastRequestedFocusTabIdRef = useRef<string | null>(null)
+  const [activeModalRequestTitle, setActiveModalRequestTitle] = useState<string | null>(null)
 
   // In uncontrolled mode, sync local state when initialTree changes
   useEffect(() => {
@@ -111,60 +69,58 @@ export const Workbench: React.FC<WorkbenchProps> = ({
     }
   }, [initialTree, isControlled])
 
-  // Update tabContentMap when initialTabContentMap changes
-  useEffect(() => {
-    setTabContentMap(initialTabContentMap)
-  }, [initialTabContentMap])
-
-  const registerEditor = useCallback((tabId: string, editor: MonacoEditorInstance) => {
-    editorInstancesRef.current[tabId] = editor
-    logger.info('Workbench: Monaco editor mounted for tab', {
-      tabId,
-      hasPendingFocusRequest: lastRequestedFocusTabIdRef.current === tabId
-    })
-    // Ne pas forcer le focus ici : on laisse handleTreeChange s'en occuper
-  }, [])
-
-  // Handle tab dropped from another window: store content and return true to allow drop
-  // EditorWorkbench will handle the insertion logic
-  const handleTabDropped = useCallback((tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }): boolean | Promise<boolean> => {
-    // Store tab content
-    if (tabData.content !== undefined) {
-      setTabContentMap((prev) => ({
-        ...prev,
-        [tabData.tabId]: tabData.content ?? ''
-      }))
-    }
-    // Return true to allow drop (EditorWorkbench will handle the insertion)
+  // Handle tab dropped from another window: accept the drop and let EditorWorkbench manage tree updates
+  const handleTabDropped = useCallback((_tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }): boolean | Promise<boolean> => {
     return true
   }, [])
 
-  // Render tab title with icon
+  // Render tab title with icon and HTTP method badge (if applicable)
   const renderTabTitle = useCallback((tab: EditorTab): React.ReactNode => {
     // Extract title string for display
     const tabWithTitleString = tab as EditorTab & { titleString?: string }
     const titleString = tabWithTitleString.titleString ?? (typeof tab.title === 'string' ? tab.title : getTabTitleString(tabWithTitleString, ''))
-    // Return icon and text together - icon is part of the title rendering
+    const [maybeMethod, ...rest] = titleString.split(' ')
+    const upperMethod = maybeMethod?.toUpperCase()
+    const httpMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']
+    const isHttpMethod = upperMethod !== undefined && httpMethods.includes(upperMethod)
+    const pathText = isHttpMethod ? rest.join(' ') : titleString
+
+    const handleDoubleClick = (): void => {
+      setActiveModalRequestTitle(titleString)
+    }
+
     return (
-      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-        <i className="codicon codicon-file" style={{ fontSize: '16px' }}></i>
-        <span>{titleString}</span>
+      <span
+        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+        onDoubleClick={handleDoubleClick}
+      >
+        {isHttpMethod && <HttpMethodBadge method={upperMethod} />}
+        <span>{pathText}</span>
       </span>
     )
   }, [])
 
-  // Render tab content
+  // Render tab content (design-only for now, without Monaco editor)
   const renderTabContent = useCallback((tab: restormEditorTab): React.ReactNode => {
-    const content = tab.content ?? tabContentMap[tab.id] ?? ''
-    // Use titleString for filename, fallback to extracting from title
-    const filename = tab.titleString ?? (typeof tab.title === 'string' ? tab.title : getTabTitleString(tab, 'untitled'))
-    return <MonacoView name={filename} text={content} tabId={tab.id} registerEditor={registerEditor} />
-  }, [tabContentMap, registerEditor])
-
-  // Get tab content
-  const onGetTabContent = useCallback((tabId: string): string | undefined => {
-    return tabContentMap[tabId]
-  }, [tabContentMap])
+    const titleString = getTabTitleString(tab as EditorTab & { titleString?: string }, '')
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, minWidth: 0 }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            flex: 1,
+            minHeight: 0,
+            padding: '8px 16px',
+            borderBottom: '1px solid var(--vscode-panel-border)',
+            backgroundColor: 'var(--vscode-editor-background)'
+          }}
+        >
+          <HTTPRequestTabView requestTitle={titleString} />
+        </div>
+      </div>
+    )
+  }, [])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback((tabId: string, groupId: string, cursorX?: number, cursorY?: number): void => {
@@ -183,18 +139,15 @@ export const Workbench: React.FC<WorkbenchProps> = ({
       return
     }
     
-    // Get tab content
-    const content = onGetTabContent(tabId)
-    
     // Get title string for serialization
     const tabWithTitleString = tab as EditorTab & { titleString?: string }
     const titleString = tabWithTitleString.titleString ?? (typeof tab.title === 'string' ? tab.title : getTabTitleString(tabWithTitleString, 'untitled'))
     
     // Open new Editor window with tab parameters and cursor position
-    logger.info('Opening Editor window with detached tab', { title: titleString, hasContent: content !== undefined, cursorX, cursorY })
+    logger.info('Opening Editor window with detached tab', { title: titleString, hasContent: false, cursorX, cursorY })
     const editorParams: { title: string; content?: string; x?: number; y?: number } = {
       title: titleString,
-      content: content ?? ''
+      content: ''
     }
     if (cursorX !== undefined) {
       editorParams.x = cursorX
@@ -203,64 +156,25 @@ export const Workbench: React.FC<WorkbenchProps> = ({
       editorParams.y = cursorY
     }
     void window.restorm.openEditor(editorParams)
-  }, [tree, onGetTabContent])
+  }, [tree])
 
   // Convert renderTabContent to match EditorWorkbench's expected signature
-  // Enrich the tab with content if getTabContent is provided
   const workbenchRenderTabContent = useMemo(() => {
     return (tab: unknown): React.ReactNode => {
       const baseTab = tab as restormEditorTab
-      // Enrich the tab with content
-      if (!baseTab.content) {
-        const content = onGetTabContent(baseTab.id)
-        // Only add content property if it's defined (for exactOptionalPropertyTypes compatibility)
-        const enrichedTab: restormEditorTab = content !== undefined
-          ? {
-              ...baseTab,
-              content
-            }
-          : baseTab
-        return renderTabContent(enrichedTab)
-      }
       return renderTabContent(baseTab)
     }
-  }, [renderTabContent, onGetTabContent])
-
-  const handleTabActivated = useCallback((tabId: string): void => {
-    lastRequestedFocusTabIdRef.current = tabId
-    const hasEditor = !!editorInstancesRef.current[tabId]
-    logger.info('Workbench: onTabSelected received from core', {
-      tabId,
-      hasEditorInstance: hasEditor,
-      knownEditors: Object.keys(editorInstancesRef.current)
-    })
-
-    // Defer focus to the end of the event loop to ensure the tab is visible/layouted
-    window.setTimeout(() => {
-      const editor = editorInstancesRef.current[tabId]
-      if (editor) {
-        logger.info('Workbench: Focusing Monaco editor from deferred onTabSelected', { tabId })
-        editor.focus()
-      } else {
-        logger.warn('Workbench: Deferred focus but no editor instance found', {
-          tabId,
-          knownEditors: Object.keys(editorInstancesRef.current)
-        })
-      }
-    }, 0)
-  }, [])
+  }, [renderTabContent])
 
   // Merge callbacks
   const callbacks = useMemo<Partial<EditorWorkbenchCallbacks>>(() => {
     return {
-      onGetTabContent,
       onWorkbenchTabDropped: handleTabDropped,
       renderTabContent: workbenchRenderTabContent,
       renderTabTitle,
-      onDetachToNewWindow: handleDetachToNewWindow,
-      onActivateTab: handleTabActivated
+      onDetachToNewWindow: handleDetachToNewWindow
     }
-  }, [onGetTabContent, handleTabDropped, workbenchRenderTabContent, renderTabTitle, handleDetachToNewWindow, handleTabActivated])
+  }, [handleTabDropped, workbenchRenderTabContent, renderTabTitle, handleDetachToNewWindow])
 
   // Handle tree change from EditorWorkbench
   const handleTreeChange = useCallback((newTree: WorkbenchTree) => {
@@ -306,6 +220,20 @@ export const Workbench: React.FC<WorkbenchProps> = ({
     }
   }, [onTreeChange, isControlled])
 
+  const renderModalTitle = useCallback((requestTitle: string | null): React.ReactNode => {
+    if (!requestTitle) return null
+    const parts = requestTitle.split(' ')
+    const method = parts[0] ?? 'GET'
+    const path = parts.slice(1).join(' ') || requestTitle
+
+    return (
+      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <HttpMethodBadge method={method.toUpperCase()} />
+        <span>{path}</span>
+      </span>
+    )
+  }, [])
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', flex: 1, ...style }} className={className}>
       <EditorWorkbenchAny
@@ -315,6 +243,17 @@ export const Workbench: React.FC<WorkbenchProps> = ({
         onFocusedGroupChange={onFocusedGroupChange}
         {...callbacks}
       />
+      <Modal
+        isOpen={activeModalRequestTitle !== null}
+        onClose={() => {
+          setActiveModalRequestTitle(null)
+        }}
+        title={renderModalTitle(activeModalRequestTitle)}
+      >
+        {activeModalRequestTitle ? (
+          <HTTPRequestTabView requestTitle={activeModalRequestTitle} />
+        ) : null}
+      </Modal>
     </div>
   )
 }

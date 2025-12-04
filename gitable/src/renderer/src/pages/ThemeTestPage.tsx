@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useTheme, CustomTabs, logger, SelectBox, Titlebar, MenuBar, MenuBarItem, MenuItem, MenuItemSeparator, Button, Statusbar, StatusbarElement } from 'electron-core-ui/renderer'
+import { useTheme, Tabs, logger, SelectBox, Titlebar, MenuBar, MenuBarItem, MenuItem, MenuItemSeparator, Button, Statusbar, StatusbarElement } from 'electron-core-ui/renderer'
 import type { Tab } from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 import { 
@@ -338,7 +338,7 @@ const ThemeTestPage: React.FC = () => {
 
       {/* Tabs */}
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <CustomTabs tabs={tabs} />
+        <Tabs tabs={tabs} />
       </div>
 
       {/* Statusbar */}

@@ -1,6 +1,7 @@
 {
 	"$schema": "vscode://schemas/color-theme",
 	"name": "Dark High Contrast",
+	"type": "hc",
 	"colors": {
 		"editor.background": "#000000",
 		"editor.foreground": "#FFFFFF",

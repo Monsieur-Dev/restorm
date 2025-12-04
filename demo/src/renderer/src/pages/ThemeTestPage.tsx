@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useTheme, CustomTabs, logger, SelectBox, Titlebar, MenuBar, MenuBarItem, MenuItem, MenuItemSeparator, Button, Statusbar, StatusbarElement } from 'electron-core-ui/renderer'
+import { useTheme, Tabs, logger, SelectBox, Titlebar, MenuBar, MenuBarItem, MenuItem, MenuItemSeparator, Button, Statusbar, StatusbarElement } from 'electron-core-ui/renderer'
 import type { Tab } from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 import { 
@@ -12,7 +12,8 @@ import {
   TextTab, 
   ScrollbarsTab, 
   ProgressTab,
-  StickHeadersTab 
+  StickHeadersTab,
+  SplitViewTab
 } from '../components/test-tabs'
 import { WorkbenchTab } from '../components/test-tabs'
 
@@ -127,6 +128,7 @@ const ThemeTestPage: React.FC = () => {
   }
 
   const tabs: Tab[] = [
+    { id: 'split-view', label: 'SplitView', content: <SplitViewTab /> },
     { id: 'sticky-headers', label: t('themeTest.components.stickyHeaders'), content: <StickHeadersTab /> },
     { id: 'workbench', label: 'Workbench', content: <WorkbenchTab /> },
     { id: 'checkboxes', label: 'Checkboxes & Radio', content: <CheckboxesTab /> },
@@ -239,22 +241,16 @@ const ThemeTestPage: React.FC = () => {
           </MenuBar>
         }
         rightContent={
-          <button 
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--vscode-titleBar-activeForeground)',
-              cursor: 'pointer',
-              padding: '4px 8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              outline: 'none'
-            }}
+          <Button
+            small secondary
             onClick={() => { logger.info('Settings button clicked') }}
+            options={{
+              ariaLabel: 'Open settings',
+              title: 'Open settings'
+            }}
           >
             <i className="codicon codicon-gear"></i>
-          </button>
+          </Button>
         }
       />
 
@@ -338,7 +334,7 @@ const ThemeTestPage: React.FC = () => {
 
       {/* Tabs */}
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <CustomTabs tabs={tabs} />
+        <Tabs tabs={tabs} />
       </div>
 
       {/* Statusbar */}

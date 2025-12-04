@@ -13,7 +13,7 @@ A generic Electron + React foundation library with VSCode-like UI components and
 
 - **Renderer Process Components**:
   - `CustomDropdown`: VSCode-styled dropdown component
-  - `CustomTabs`: VSCode-styled tabs component
+  - `Tabs` (formerly `CustomTabs`): VSCode-styled tabs component
   - `useTheme`: React hook for theme management
   - `logger`: Renderer logger that communicates with main process
 
@@ -45,7 +45,7 @@ const theme = getThemeService('/path/to/resources')
 ### Renderer Process
 
 ```typescript
-import { CustomDropdown, CustomTabs, useTheme, logger } from 'electron-core-ui/renderer'
+import { CustomDropdown, Tabs, useTheme, logger } from 'electron-core-ui/renderer'
 
 // Use components and hooks in your React app
 const MyComponent = () => {

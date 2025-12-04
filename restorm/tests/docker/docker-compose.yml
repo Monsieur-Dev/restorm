@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  petstore:
+    image: swaggerapi/petstore
+    container_name: restorm-petstore
+    ports:
+      - "8080:8080"
+

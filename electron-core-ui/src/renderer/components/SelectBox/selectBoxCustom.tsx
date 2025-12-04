@@ -169,14 +169,6 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
     }
   }, [isVisible, focusedIndex, options, handleSelectChange, hideDropdown])
 
-  // Handle mouse wheel scrolling
-  const handleWheel = useCallback((): void => {
-    if (!isVisible) return
-    
-    // Let ScrollableElement handle the wheel event naturally
-    // Don't prevent default to allow normal scrolling behavior
-  }, [isVisible])
-
   // Handle click outside to close dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent): void => {
@@ -284,7 +276,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
         aria-controls={`${id}-listbox`}
       >
         <span className="select-text">
-          {selectedOption ? selectedOption.text : 'Select...'}
+          {selectedOption ? (selectedOption.label ?? selectedOption.text) : 'Select...'}
         </span>
         <span className="codicon codicon-chevron-down select-arrow" />
       </div>
@@ -296,9 +288,9 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
           className={`${dropdownClasses} positioned`}
         >
             <ScrollableElement
-              options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false }}
+              options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false, handleMouseWheel: true }}
               className="select-scrollable-wrapper"
-              style={{ maxHeight: '300px', width: '100%', height: '300px' }}
+              style={{ height: '300px', width: '100%' }}
             >
               <div
                 id={`${id}-listbox`}
@@ -306,7 +298,6 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
                 aria-activedescendant={focusedIndex >= 0 ? `${id}-option-${focusedIndex}` : undefined}
                 className="select-list-container"
                 onKeyDown={handleDropdownKeyDown}
-                onWheel={handleWheel}
                 tabIndex={0}
               >
               {options.map((option, index) => (
@@ -321,7 +312,9 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
                 >
                   <div className="select-option-content">
                     <div className="select-option-header">
-                      <span className="option-text">{option.text}</span>
+                      <span className="option-text">
+                        {option.label ?? option.text}
+                      </span>
                       {option.detail && (
                         <span className="option-detail">
                           {option.detail}

@@ -96,6 +96,27 @@ export function useTheme(): UseThemeReturn {
   }, [cssColorToHex])
 
   /**
+   * Set window border color CSS variable based on theme type.
+   * Dark / high-contrast themes get a very light gray border,
+   * light themes get a dark (black) border.
+   */
+  const setWindowBorderColorForTheme = useCallback((themeType: string | undefined): void => {
+    const root = document.documentElement
+    if (!themeType) {
+      root.style.removeProperty('--window-border-color')
+      return
+    }
+
+    if (themeType === 'dark' || themeType === 'hc') {
+      // Dark / high-contrast themes: dark gray border for subtle framing
+      root.style.setProperty('--window-border-color', '#666666')
+    } else {
+      // Treat all non-dark themes as light variants
+      root.style.setProperty('--window-border-color', '#000000')
+    }
+  }, [])
+
+  /**
    * Apply CSS variables to the document
    */
   const applyCSSVariables = useCallback((variables: ThemeVariables): void => {
@@ -141,10 +162,13 @@ export function useTheme(): UseThemeReturn {
       // Apply CSS variables
       applyCSSVariables(themeData.variables)
 
-      // Update data-theme attribute for compatibility
+      // Update data-theme attribute for compatibility and derive window border color
       const themeInfo = themes.find(t => t.id === themeId)
       if (themeInfo) {
         document.documentElement.setAttribute('data-theme', themeInfo.type)
+        setWindowBorderColorForTheme(themeInfo.type)
+      } else {
+        setWindowBorderColorForTheme(undefined)
       }
 
       // Save current theme
@@ -161,7 +185,7 @@ export function useTheme(): UseThemeReturn {
     } finally {
       setIsLoading(false)
     }
-  }, [themes, applyCSSVariables])
+  }, [themes, applyCSSVariables, setWindowBorderColorForTheme])
 
   /**
    * Load initial theme on mount
@@ -253,6 +277,9 @@ export function useTheme(): UseThemeReturn {
             const themeInfo = themeList.find(t => t.id === themeId)
             if (themeInfo) {
               document.documentElement.setAttribute('data-theme', themeInfo.type)
+              setWindowBorderColorForTheme(themeInfo.type)
+            } else {
+              setWindowBorderColorForTheme(undefined)
             }
 
             setCurrentThemeId(themeId)

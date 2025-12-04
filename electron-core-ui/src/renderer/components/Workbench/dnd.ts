@@ -33,6 +33,16 @@ export function getEditorDragData(e: React.DragEvent): DragEditorPayload | undef
 	}
 }
 
+export function isEditorDragEvent(e: React.DragEvent | DragEvent): boolean {
+	try {
+		const types = e.dataTransfer?.types;
+		if (!types) return currentDragData !== undefined;
+		return Array.from(types).includes(DND_MIME.editor);
+	} catch {
+		return currentDragData !== undefined;
+	}
+}
+
 export function computeDropIndex(container: HTMLElement, clientX: number): number {
 	const children = Array.from(container.children).filter((el): el is HTMLElement => el instanceof HTMLElement && el.classList.contains('tab'));
 	for (let i = 0; i < children.length; i++) {

@@ -645,7 +645,7 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 
 	return (
 		<div
-			className={`monaco-workbench part editor ${className ?? ''}`}
+			className={`part editor ${className ?? ''}`}
 			style={{ display: 'flex', flex: 1, minWidth: 0, minHeight: 0, ...style }}
 		>
 			<div className="content" style={{ display: 'flex', flex: 1, minWidth: 0, minHeight: 0 }}>

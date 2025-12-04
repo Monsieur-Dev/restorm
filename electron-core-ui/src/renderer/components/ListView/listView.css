@@ -66,8 +66,7 @@
   width: 12px;
 }
 
-.list-view:hover .indent-guide,
-.list-view-row.is-active .indent-guide {
+.list-view:hover .indent-guide {
   opacity: 1;
   border-color: var(
     --vscode-tree-indentGuidesStroke,
@@ -78,7 +77,7 @@
 .list-view-expander {
   border: none;
   background: none;
-  padding: 0 4px;
+  padding: 0 0px 0 4px;
   margin: 0;
   cursor: pointer;
   display: flex;

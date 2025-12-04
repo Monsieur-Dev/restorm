@@ -1,5 +1,6 @@
 {
 	"name": "Red",
+	"type": "dark",
 	"colors": {
 		// window
 		"activityBar.background": "#580000",

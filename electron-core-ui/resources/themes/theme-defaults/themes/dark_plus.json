@@ -1,7 +1,13 @@
 {
 	"$schema": "vscode://schemas/color-theme",
 	"name": "Dark+",
+	"type": "dark",
 	"include": "./dark_vs.json",
+	"colors": {
+		"window.border": "#666666",
+		"button.hoverBackground": "#3C3C3C",
+		"button.secondaryHoverBackground": "#45494E"
+	},
 	"tokenColors": [
 		{
 			"name": "Function declarations",

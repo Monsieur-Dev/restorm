@@ -4,10 +4,42 @@ import App from './App'
 import type { i18n as I18nType } from 'i18next'
 import { initializeI18n, logger, MonacoWorkbench, i18n } from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
+import './httpMethods.css'
 
 // Import translations
 import enTranslation from '../locales/en/translation.json'
 import frTranslation from '../locales/fr/translation.json'
+
+// Filter harmless Monaco cancellations so they don't spam the console
+const isMonacoCancellation = (reason: unknown): boolean => {
+  if (!reason) return false
+  const asString = String((reason as { message?: unknown }).message ?? reason)
+  return asString.includes('Canceled')
+}
+
+window.addEventListener('unhandledrejection', (event) => {
+  if (isMonacoCancellation(event.reason)) {
+    event.preventDefault()
+    return
+  }
+})
+
+// Filter noisy React warnings coming from third-party libraries (e.g. jsoncrack-react)
+// about keys being spread into JSX or defaultProps deprecation on function components.
+// These are harmless in our context and clutter the console.
+const originalConsoleError = window.console.error.bind(window.console)
+window.console.error = (...args: unknown[]): void => {
+  const first = args[0]
+  if (typeof first === 'string') {
+    if (first.includes('A props object containing a "key" prop is being spread into JSX')) {
+      return
+    }
+    if (first.includes('Support for defaultProps will be removed from function components in a future major release')) {
+      return
+    }
+  }
+  originalConsoleError(...args)
+}
 
 // Initialize i18n using core-ui's initializeI18n function
 // This prevents double initialization and sets up the plugin

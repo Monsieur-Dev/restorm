@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 
 interface CustomDropdownOption {
   value: string
-  label: string
+  label: React.ReactNode
 }
 
 interface CustomDropdownProps {

@@ -7,6 +7,7 @@ const Button: React.FC<ButtonProps> = ({
   icon,
   disabled = false,
   secondary = false,
+  small = false,
   onClick,
   onMouseEnter,
   onMouseLeave,
@@ -80,6 +81,7 @@ const Button: React.FC<ButtonProps> = ({
   const buttonClasses = [
     'monaco-button',
     'monaco-text-button',
+    small ? 'monaco-small-button' : '',
     secondary ? 'secondary' : '',
     disabled ? 'disabled' : '',
     'default-colors',

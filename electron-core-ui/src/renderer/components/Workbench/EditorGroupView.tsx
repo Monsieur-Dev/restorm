@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EditorTabs } from './EditorTabs';
 import type { EditorGroup, EditorWorkbenchCallbacks, SplitDirection } from './types';
-import { getEditorDragData } from './dnd';
+import { getEditorDragData, isEditorDragEvent } from './dnd';
 
 export interface EditorGroupViewProps extends EditorWorkbenchCallbacks {
 	group: EditorGroup;
@@ -18,6 +18,7 @@ export interface EditorGroupViewProps extends EditorWorkbenchCallbacks {
 export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 	const { group, renderTabContent, onSplitTab, onActivateTab, hasFocus = false, onFocusRequested } = props;
 	const [splitTarget, setSplitTarget] = useState<SplitDirection | 'center' | undefined>(undefined);
+	const [isEditorDrag, setIsEditorDrag] = useState<boolean>(false);
 	const contentRef = useRef<HTMLDivElement | null>(null);
 
 	// Wrapper around onActivateTab that also requests focus for this group
@@ -54,7 +55,8 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 			transition: 'clip-path 150ms ease, opacity 120ms ease',
 			willChange: 'clip-path, opacity',
 			boxSizing: 'border-box',
-			opacity: splitTarget ? 1 : 0
+			// Only show overlay when an editor tab is being dragged
+			opacity: splitTarget && isEditorDrag ? 1 : 0
 		};
 
 		// Default/full area (center or undefined)
@@ -66,13 +68,14 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 		if (splitTarget === 'top') return { ...base, clipPath: 'inset(0 0 50% 0)' };
 		// bottom
 		return { ...base, clipPath: 'inset(50% 0 0 0)' };
-	}, [splitTarget]);
+	}, [splitTarget, isEditorDrag]);
 
 	const isBlockedDrop = useCallback((e: React.DragEvent<HTMLDivElement>): boolean => {
 		const data = getEditorDragData(e);
+		// Only consider drops coming from editor tab drag-and-drop
+		if (!data) return false;
 		// Block when dragging the only tab of this group over its own content
 		return Boolean(
-			data &&
 			data.sourceGroupId === group.id &&
 			group.tabs.length === 1 &&
 			group.tabs[0]?.id === data.editorId
@@ -81,6 +84,13 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 
 	const onDragOverGroup = useCallback(
 		(e: React.DragEvent<HTMLDivElement>) => {
+			// Detect if current drag is coming from editor tabs (using MIME type or fallback flag)
+			const isEditor = isEditorDragEvent(e);
+			setIsEditorDrag(isEditor);
+			if (!isEditor) {
+				setSplitTarget(undefined);
+				return;
+			}
 			e.preventDefault();
 			if (isBlockedDrop(e)) {
 				try { e.dataTransfer.dropEffect = 'none'; } catch { /* noop */ }
@@ -95,6 +105,12 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 
 	const onDragEnterGroup = useCallback(
 		(e: React.DragEvent<HTMLDivElement>) => {
+			const isEditor = isEditorDragEvent(e);
+			setIsEditorDrag(isEditor);
+			if (!isEditor) {
+				setSplitTarget(undefined);
+				return;
+			}
 			e.preventDefault();
 			if (isBlockedDrop(e)) {
 				try { e.dataTransfer.dropEffect = 'none'; } catch { /* noop */ }
@@ -107,12 +123,20 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 		[computeDirection, isBlockedDrop]
 	);
 
-	const onDragLeaveGroup = useCallback(() => { setSplitTarget(undefined); }, []);
+	const onDragLeaveGroup = useCallback(() => {
+		setSplitTarget(undefined);
+		setIsEditorDrag(false);
+	}, []);
 
 	const onDropGroup = useCallback(
 		(e: React.DragEvent<HTMLDivElement>) => {
 			const data = getEditorDragData(e);
-			if (!data) return;
+			// Ignore drops that are not coming from editor tabs (e.g. Milkdown drag & drop)
+			if (!data) {
+				setSplitTarget(undefined);
+				setIsEditorDrag(false);
+				return;
+			}
 			e.preventDefault();
 			// Ignore drop when dragging the only tab of this group into its own content
 			if (data.sourceGroupId === group.id && group.tabs.length === 1 && group.tabs[0]?.id === data.editorId) {
@@ -123,6 +147,7 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 			setSplitTarget(undefined);
 			const direction = dir === 'center' ? 'full' : dir;
 			onSplitTab?.(data.editorId, data.sourceGroupId, group.id, direction);
+			setIsEditorDrag(false);
 		},
 		[computeDirection, onSplitTab, group.id, group.tabs]
 	);

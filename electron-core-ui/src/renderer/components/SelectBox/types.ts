@@ -1,3 +1,5 @@
+import React from 'react'
+
 // Note: Event and IDisposable are not available in React context
 // These are kept for interface compatibility with VSCode
 type Event<T> = (listener: (e: T) => void) => void
@@ -29,10 +31,28 @@ export interface ISelectBoxOptions {
 
 // Select option item interface - matches VSCode implementation
 export interface ISelectOptionItem {
+  /**
+   * Underlying string value of the option.
+   * Used for native selects and serialization.
+   */
   text: string
-  detail?: string
-  decoratorRight?: string
-  description?: string
+  /**
+   * Optional React label rendered in the custom dropdown and trigger.
+   * Falls back to `text` when not provided.
+   */
+  label?: React.ReactNode
+  /**
+   * Optional detail text or React node shown next to the main label.
+   */
+  detail?: React.ReactNode
+  /**
+   * Optional decorator rendered on the right side of the option row.
+   */
+  decoratorRight?: React.ReactNode
+  /**
+   * Optional description rendered in the details pane below the list.
+   */
+  description?: React.ReactNode
   descriptionIsMarkdown?: boolean
   readonly descriptionMarkdownActionHandler?: (href: string) => void // MarkdownActionHandler type
   isDisabled?: boolean

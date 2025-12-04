@@ -1,8 +1,8 @@
-# CustomTabs Component
+# Tabs Component
 
 ## Overview
 
-`CustomTabs` is a lightweight tab strip used in the demo apps to showcase content areas.  
+`Tabs` is a lightweight tab strip used in the demo apps to showcase content areas.  
 It mimics VSCode editor tabs (underline for active tab, hover colors) and uses `ScrollableElement` for the content area.
 
 ## API
@@ -17,7 +17,7 @@ export interface Tab {
   closable?: boolean
 }
 
-interface CustomTabsProps {
+interface TabsProps {
   tabs: Tab[]
   activeTabId?: string
   onTabChange?: (tabId: string) => void
@@ -40,7 +40,7 @@ interface CustomTabsProps {
 
 ```tsx
 import React, { useState } from 'react'
-import { CustomTabs, type Tab } from 'electron-core-ui/renderer'
+import { Tabs, type Tab } from 'electron-core-ui/renderer'
 
 const Example: React.FC = () => {
   const [tabs, setTabs] = useState<Tab[]>([
@@ -50,7 +50,7 @@ const Example: React.FC = () => {
   const [activeId, setActiveId] = useState('welcome')
 
   return (
-    <CustomTabs
+    <Tabs
       tabs={tabs}
       activeTabId={activeId}
       onTabChange={setActiveId}
@@ -73,6 +73,10 @@ const Example: React.FC = () => {
   - Optional close button per tab (`closable`).
 - The content area is wrapped in `ScrollableElement` to provide VSCode-like scrollbars.
 - When `activeTabId` is not provided, the first tab id is used as an internal default.
+
+## Backwards compatibility
+
+- The previous `CustomTabs` name is still exported as an alias to `Tabs` for existing code.
 
 ## Notes for AI Usage
 

@@ -51,6 +51,37 @@
     "documentation": "Documentation",
     "reportIssue": "Signaler un problème",
     "keyboardShortcuts": "Raccourcis clavier"
+  },
+  "sidebar": {
+    "collections": "Collections",
+    "allRequests": "Toutes les requêtes",
+    "sampleCollection": "Collection exemple",
+    "getPets": "GET /pets",
+    "getPetById": "GET /pets/{id}",
+    "createPet": "POST /pets"
+  },
+  "requestTab": {
+    "hello": "Hello world",
+    "send": "Envoyer",
+    "urlPlaceholder": "URL de la requête",
+    "body": {
+      "fileLabel": "Fichier ou URL :"
+    },
+    "tabs": {
+      "docs": "Docs",
+      "requestLayout": "Requête",
+      "authorization": "Autorisation",
+      "headers": "En-têtes",
+      "body": "Corps",
+      "params": "Paramètres"
+    },
+    "responses": {
+      "tabs": {
+        "raw": "Brut",
+        "prettyfied": "Formattée",
+        "jsoncrack": "JSONCrack"
+      }
+    }
   }
 }
 
