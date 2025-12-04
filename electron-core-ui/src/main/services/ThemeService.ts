@@ -69,22 +69,20 @@ export class ThemeService {
     hc_dark: {},
     hc_light: {}
   }
+  /**
+   * Cache for fully resolved themes (parsed YAML + merged variables).
+   * Keyed by themeId to avoid re-reading and re-parsing the same YAML file.
+   */
+  private themeCache = new Map<string, { theme: ThemeDefinition; variables: ThemeVariables }>()
 
   constructor(resourcesPath: string) {
     const constructorStart = performance.now()
-    logger.info(`ThemeService: Starting initialization...`)
-    
+    void constructorStart
+
     this.themesPath = join(resourcesPath, 'themes')
     
-    const loadBaseStart = performance.now()
     this.loadBaseFiles()
-    logger.info(`ThemeService: loadBaseFiles() completed in ${(performance.now() - loadBaseStart).toFixed(2)}ms`)
-    
-    const discoverStart = performance.now()
     this.discoverThemes()
-    logger.info(`ThemeService: discoverThemes() completed in ${(performance.now() - discoverStart).toFixed(2)}ms`)
-    
-    logger.info(`ThemeService: Total initialization completed in ${(performance.now() - constructorStart).toFixed(2)}ms`)
   }
 
   /**
@@ -95,13 +93,8 @@ export class ThemeService {
     const basePath = join(this.themesPath, 'base.yaml')
     if (existsSync(basePath)) {
       try {
-        const baseReadStart = performance.now()
         const content = readFileSync(basePath, 'utf-8')
-        logger.debug(`ThemeService: Read base.yaml in ${(performance.now() - baseReadStart).toFixed(2)}ms`)
-        
-        const baseParseStart = performance.now()
         const data = yaml.load(content) as YamlBaseFile
-        logger.debug(`ThemeService: Parsed base.yaml in ${(performance.now() - baseParseStart).toFixed(2)}ms`)
         
         if (data.variables) {
           for (const variable of data.variables) {
@@ -110,7 +103,6 @@ export class ThemeService {
             this.baseVariables[cssVar] = variable.value
           }
         }
-        logger.debug(`Loaded base.yaml with ${Object.keys(this.baseVariables).length} variables`)
       } catch (error) {
         logger.error(`Failed to load base.yaml`, { error: String(error) })
       }
@@ -121,13 +113,8 @@ export class ThemeService {
       const typeBasePath = join(this.themesPath, themeType, '_base.yaml')
       if (existsSync(typeBasePath)) {
         try {
-          const typeReadStart = performance.now()
           const content = readFileSync(typeBasePath, 'utf-8')
-          logger.debug(`ThemeService: Read ${themeType}/_base.yaml in ${(performance.now() - typeReadStart).toFixed(2)}ms`)
-          
-          const typeParseStart = performance.now()
           const data = yaml.load(content) as YamlTypeBaseFile
-          logger.debug(`ThemeService: Parsed ${themeType}/_base.yaml in ${(performance.now() - typeParseStart).toFixed(2)}ms`)
           
           if (data.colors) {
             for (const color of data.colors) {
@@ -136,7 +123,6 @@ export class ThemeService {
               this.typeBaseColors[themeType][cssVar] = color.value
             }
           }
-          logger.debug(`Loaded ${themeType}/_base.yaml with ${Object.keys(this.typeBaseColors[themeType]).length} colors`)
         } catch (error) {
           logger.error(`Failed to load ${themeType}/_base.yaml`, { error: String(error) })
         }
@@ -157,13 +143,8 @@ export class ThemeService {
     }
 
     try {
-      const readStart = performance.now()
       const content = readFileSync(indexPath, 'utf-8')
-      logger.debug(`ThemeService: Read index.json in ${(performance.now() - readStart).toFixed(2)}ms`)
-      
-      const parseStart = performance.now()
       const index = JSON.parse(content) as ThemeIndex
-      logger.debug(`ThemeService: Parsed index.json in ${(performance.now() - parseStart).toFixed(2)}ms`)
 
       for (const entry of index.themes) {
         const themePath = join(this.themesPath, entry.file)
@@ -175,8 +156,6 @@ export class ThemeService {
           path: themePath
         })
       }
-
-      logger.info(`ThemeService: Loaded ${this.themes.size} themes from index.json`)
     } catch (error) {
       logger.error(`Failed to load theme index`, { error: String(error) })
     }
@@ -221,7 +200,13 @@ export class ThemeService {
     variables: ThemeVariables
   } | null {
     const methodStart = performance.now()
-    logger.debug(`ThemeService: getThemeWithVariables("${themeId}") starting...`)
+    void methodStart
+
+    // Fast path: return cached theme if already resolved
+    const cached = this.themeCache.get(themeId)
+    if (cached) {
+      return cached
+    }
     
     const themeInfo = this.themes.get(themeId)
     if (!themeInfo) {
@@ -250,13 +235,8 @@ export class ThemeService {
       }
 
       // Load and apply theme-specific colors
-      const readStart = performance.now()
       const content = readFileSync(themeInfo.path, 'utf-8')
-      logger.debug(`ThemeService: Read theme file in ${(performance.now() - readStart).toFixed(2)}ms`)
-      
-      const parseStart = performance.now()
       const data = yaml.load(content) as YamlThemeFile
-      logger.debug(`ThemeService: Parsed theme file in ${(performance.now() - parseStart).toFixed(2)}ms`)
 
       if (data.colors) {
         for (const [key, value] of Object.entries(data.colors)) {
@@ -272,7 +252,8 @@ export class ThemeService {
         colors
       }
 
-      logger.info(`ThemeService: getThemeWithVariables("${themeId}") completed in ${(performance.now() - methodStart).toFixed(2)}ms`)
+      // Cache resolved theme for future calls to avoid re-reading the YAML file
+      this.themeCache.set(themeId, { theme, variables })
       return { theme, variables }
     } catch (error) {
       logger.error(`Failed to load theme ${themeId}`, { error: String(error) })

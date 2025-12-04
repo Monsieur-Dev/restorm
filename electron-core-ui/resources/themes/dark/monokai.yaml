@@ -30,6 +30,7 @@ colors:
   editorGroup.dropBackground: "#41433980"
   tab.inactiveBackground: "#34352f"
   tab.border: "#1e1f1c"
+  tab.activeForeground: "#ffffff"
   tab.inactiveForeground: "#ccccc7"
   tab.lastPinnedBorder: "#414339"
   widget.shadow: "#00000098"

@@ -4,7 +4,13 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin()],
+    plugins: [externalizeDepsPlugin({ exclude: ['electron-core-ui'] })],
+    resolve: {
+      alias: {
+        // In dev & build, use core-ui main sources directly
+        'electron-core-ui': resolve(__dirname, '../electron-core-ui/src/main/index.ts')
+      }
+    },
     build: {
       outDir: 'dist/main',
       rollupOptions: {

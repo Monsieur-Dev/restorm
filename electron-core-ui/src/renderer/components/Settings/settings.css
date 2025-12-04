@@ -1,0 +1,38 @@
+.settings-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+  color: var(--vscode-editor-foreground, #d4d4d4);
+  overflow-y: auto;
+}
+
+.settings-title {
+  margin: 0 0 24px 0;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.settings-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--vscode-editor-foreground, #d4d4d4);
+}
+
+.settings-select {
+  max-width: 300px;
+}
+

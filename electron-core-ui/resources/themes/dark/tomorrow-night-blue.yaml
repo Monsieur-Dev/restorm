@@ -29,6 +29,7 @@ colors:
   editorGroup.dropBackground: "#25375daa"
   peekViewResult.background: "#001c40"
   tab.inactiveBackground: "#001c40"
+  tab.activeForeground: "#ffffff"
   tab.lastPinnedBorder: "#007acc80"
   debugToolBar.background: "#001c40"
   titleBar.activeBackground: "#001126"

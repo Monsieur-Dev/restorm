@@ -2,6 +2,7 @@ import CustomDropdown from './CustomDropdown'
 import Tabs from './Tabs'
 import { SettingsTreeView } from './SettingsTreeView'
 import MonacoWorkbench from './MonacoWorkbench'
+import ElectronCoreUiProvider from './ElectronCoreUiProvider'
 import { EditorWorkbench } from './Workbench/EditorWorkbench'
 import { MarkdownEditor } from './MarkdownEditor/MarkdownEditor'
 import { SplitView, Pane } from './SplitView'
@@ -103,12 +104,13 @@ export { CustomWCO } from './CustomWCO/index'
 export type { CustomWCOProps } from './CustomWCO/index'
 
 // Other exports
-export { CustomDropdown, Tabs, SettingsTreeView, MonacoWorkbench, EditorWorkbench, MarkdownEditor, SplitView, Pane }
+export { CustomDropdown, Tabs, SettingsTreeView, MonacoWorkbench, EditorWorkbench, MarkdownEditor, SplitView, Pane, ElectronCoreUiProvider }
 export type { Tab, TabsProps } from './Tabs'
 export { Modal } from './Modal'
 export type { ModalProps } from './Modal'
 export type { MarkdownEditorProps } from './MarkdownEditor/MarkdownEditor'
 export type { MonacoWorkbenchProps } from './MonacoWorkbench'
+export type { ElectronCoreUiProviderProps } from './ElectronCoreUiProvider'
 export type { EditorWorkbenchProps } from './Workbench/EditorWorkbench'
 export type {
 	SplitViewOrientation,

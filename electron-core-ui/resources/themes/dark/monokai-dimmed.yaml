@@ -26,6 +26,7 @@ colors:
   editorGroupHeader.tabsBackground: "#282828"
   tab.inactiveBackground: "#404040"
   tab.border: "#303030"
+  tab.activeForeground: "#ffffff"
   tab.inactiveForeground: "#d8d8d8"
   tab.lastPinnedBorder: "#505050"
   peekView.border: "#3655b5"

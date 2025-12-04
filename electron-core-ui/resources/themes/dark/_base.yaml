@@ -256,3 +256,8 @@ colors:
   - id: window.border
     value: "#666666"
     description: Window border color
+
+  # WCO (Window Controls Overlay)
+  - id: wco.iconForeground
+    value: "#ffffff"
+    description: WCO codicon foreground color

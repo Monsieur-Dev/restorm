@@ -170,8 +170,13 @@ body {
 	-webkit-app-region: no-drag;
 }
 
+/* Default codicon color (used outside and inside the workbench) */
+.codicon {
+	color: var(--vscode-icon-foreground, #000000);
+}
+
 .monaco-workbench .codicon {
-	color: var(--vscode-icon-foreground);
+	color: var(--vscode-icon-foreground, #000000);
 }
 
 .monaco-workbench .codicon[class*='codicon-'] {

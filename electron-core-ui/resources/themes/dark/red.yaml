@@ -6,6 +6,7 @@ colors:
   activityBar.background: "#580000"
   tab.inactiveBackground: "#300a0a"
   tab.activeBackground: "#490000"
+  tab.activeForeground: "#ffffff"
   tab.lastPinnedBorder: "#ff000044"
   sideBar.background: "#330000"
   statusBar.background: "#700000"

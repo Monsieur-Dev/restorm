@@ -157,20 +157,16 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
     const initTheme = async (): Promise<void> => {
       try {
         setIsLoading(true)
-        logger.info('🎨 ThemeProvider: Loading initial theme...')
-
         const themeList: ThemeInfo[] = await window.api.theme.list()
-        logger.info('🎨 ThemeProvider: Themes list loaded', { count: themeList.length })
         setThemes(themeList)
 
         let themeId: string | undefined = await window.api.theme.getCurrent()
-        logger.info('🎨 ThemeProvider: Current theme from storage', { themeId })
 
         const isValidThemeId = (id: string | undefined, list: ThemeInfo[]): id is string => {
           return !!id && list.some(t => t.id === id)
         }
 
-        const originalThemeId = themeId
+        const _originalThemeId = themeId
 
         // Migrate legacy theme IDs
         if (themeId && !isValidThemeId(themeId, themeList)) {
@@ -193,11 +189,10 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
             if (legacyIdRaw in legacyMap) {
               const mappedLabel = legacyMap[legacyIdRaw as LegacyKey]
               const candidateId = `${dir}/${mappedLabel}`
-              if (isValidThemeId(candidateId, themeList)) {
-                logger.info('🎨 ThemeProvider: Migrating legacy theme id', { oldThemeId: legacyThemeId, newThemeId: candidateId })
-                themeId = candidateId
-                await window.api.theme.set(themeId)
-              }
+                if (isValidThemeId(candidateId, themeList)) {
+                  themeId = candidateId
+                  await window.api.theme.set(themeId)
+                }
             }
           }
         }
@@ -207,18 +202,15 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
           const defaultTheme = themeList.find(t => t.type === 'dark') ?? themeList[0]
           if (defaultTheme) {
             themeId = defaultTheme.id
-            logger.info('🎨 ThemeProvider: Using default theme', { themeId, previousThemeId: originalThemeId })
             await window.api.theme.set(themeId)
           }
         }
 
         if (themeId) {
-          logger.info('🎨 ThemeProvider: Loading theme data', { themeId })
           const themeData: { theme: ThemeDefinition; variables: ThemeVariables } | null = 
             await window.api.theme.load(themeId)
           
           if (themeData) {
-            logger.info('🎨 ThemeProvider: Applying theme', { themeId })
             const root = document.documentElement
             const existingVars = Array.from(root.style).filter(prop => prop.startsWith('--vscode-'))
             existingVars.forEach(prop => { root.style.removeProperty(prop) })
@@ -234,7 +226,6 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
             currentThemeIdRef.current = themeId
             setCurrentTheme(themeData.theme)
             setCurrentVariables(themeData.variables)
-            logger.info('🎨 ThemeProvider: Theme applied successfully', { themeId })
             
             setTimeout(() => {
               void updateWCOColors()
@@ -258,7 +249,6 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
     
     // Listen for theme changes from other windows
     const cleanup = window.api.theme.onThemeChanged((themeId: string) => {
-      logger.info('🎨 ThemeProvider: Theme changed from another window', { themeId, currentThemeId: currentThemeIdRef.current })
       if (currentThemeIdRef.current === themeId) return
       
       void (async () => {

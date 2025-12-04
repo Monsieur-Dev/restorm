@@ -1,6 +1,8 @@
 // Renderer process exports
 export * from './components'
 export { MessageType, onWorkbenchTabDropped } from './components'
+export { ElectronCoreUiProvider } from './components/ElectronCoreUiProvider'
+export type { ElectronCoreUiProviderProps } from './components/ElectronCoreUiProvider'
 export * from './hooks'
 export type { UseThemeReturn } from './hooks/useTheme'
 export * from './contexts'

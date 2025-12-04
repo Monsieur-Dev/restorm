@@ -15,6 +15,7 @@ colors:
   # Selection & highlights
   selection.background: "#e9c46a80"
   editor.selectionBackground: "#e9c46a60"
+  icon.foreground: "#000000"
   editor.selectionHighlightBackground: "#f4a26140"
   editor.wordHighlightBackground: "#2a9d8f30"
   editor.wordHighlightStrongBackground: "#2a9d8f50"
@@ -84,8 +85,8 @@ colors:
   
   # Lists
   list.activeSelectionBackground: "#2a9d8f"
-  list.activeSelectionForeground: "#FFFFFF"
-  list.activeSelectionIconForeground: "#FFFFFF"
+  list.activeSelectionForeground: "#000000"
+  list.activeSelectionIconForeground: "#000000"
   list.inactiveSelectionBackground: "#e9c46a50"
   list.inactiveSelectionForeground: "#264653"
   list.hoverBackground: "#f4a26130"
@@ -190,6 +191,8 @@ colors:
   titleBar.inactiveBackground: "#3a5663"
   titleBar.inactiveForeground: "#8aa8a0"
   titleBar.border: "#1a3640"
+  # WCO icons: force white on dark title bar
+  wco.iconForeground: "#ffffff"
   
   # Menu
   menu.background: "#FFFFFF"

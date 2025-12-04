@@ -72,22 +72,18 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({ group, onCloseTab, onMov
 		(e: React.DragEvent, tabId: string) => {
 			setEditorDragData(e, { editorId: tabId, sourceGroupId: group.id });
 			setDraggingTabId(tabId);
-			logger.info('EditorTabs: Drag started', { tabId, groupId: group.id });
 		},
 		[group.id]
 	);
 
 	const onDragEndTab = useCallback(async () => {
 		if (!draggingTabId) {
-			logger.debug('EditorTabs: onDragEndTab called but no draggingTabId', {})
 			return
 		}
 		
 		const tabId = draggingTabId
 		
 		try {
-			logger.info('EditorTabs: onDragEndTab started', { draggingTabId: tabId, groupId: group.id })
-			
 			// Small delay to ensure cursor position is accurate after drag ends
 			await new Promise(resolve => setTimeout(resolve, 50))
 			
@@ -96,13 +92,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({ group, onCloseTab, onMov
 				getCurrentWindowBounds(),
 				getWindowUnderCursor()
 			])
-			
-			logger.info('EditorTabs: Drag end info', {
-				cursor: { x: cursor.x, y: cursor.y },
-				currentWindow: { x: currentWindow.x, y: currentWindow.y, width: currentWindow.width, height: currentWindow.height, windowId: currentWindow.windowId },
-				windowUnderCursor: windowUnderCursor ? { windowId: windowUnderCursor.windowId, bounds: windowUnderCursor.bounds } : null
-			})
-			
+
 			// Check if cursor is inside current window bounds (with small margin for edge cases)
 			const margin = 5
 			const insideCurrentWindow =
@@ -110,22 +100,10 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({ group, onCloseTab, onMov
 				cursor.x <= currentWindow.x + currentWindow.width + margin &&
 				cursor.y >= currentWindow.y - margin &&
 				cursor.y <= currentWindow.y + currentWindow.height + margin
-			
-			logger.info('EditorTabs: Cursor position check', { 
-				insideCurrentWindow, 
-				cursorBounds: { x: cursor.x, y: cursor.y },
-				windowBounds: { x: currentWindow.x, y: currentWindow.y, width: currentWindow.width, height: currentWindow.height }
-			})
-			
+
 			// Check if window under cursor is different from current window
 			const isDifferentWindow = windowUnderCursor && windowUnderCursor.windowId !== currentWindow.windowId
-			
-			logger.info('EditorTabs: Window comparison', {
-				currentWindowId: currentWindow.windowId,
-				windowUnderCursorId: windowUnderCursor?.windowId ?? null,
-				isDifferentWindow
-			})
-			
+
 			// If cursor is outside current window and over another window, send tab to that window
 			if (!insideCurrentWindow && isDifferentWindow) {
 				const tab = group.tabs.find((t) => t.id === tabId)
@@ -135,13 +113,6 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({ group, onCloseTab, onMov
 				}
 				
 				const tabTitleString = getTabTitleString(tab, tabId)
-				logger.info('EditorTabs: Sending tab to another window', {
-					tabId: tabId,
-					title: tabTitleString,
-					targetWindowId: windowUnderCursor.windowId,
-					currentWindowId: currentWindow.windowId
-				})
-				
 				// Send tab to target window
 				const tabContent = onGetTabContent?.(tabId)
 				const tabData: { tabId: string; title: string; groupId: string; content?: string } = {
@@ -151,7 +122,6 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({ group, onCloseTab, onMov
 				}
 				if (tabContent !== undefined) {
 					tabData.content = tabContent
-					logger.info('EditorTabs: Tab content length', { length: tabContent.length })
 				} else {
 					logger.warn('EditorTabs: No tab content available', { tabId: tabId })
 				}
@@ -162,19 +132,15 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({ group, onCloseTab, onMov
 					cursorX: cursor.x,
 					cursorY: cursor.y
 				})
-				
-				logger.info('EditorTabs: Tab send result', { success, tabId: tabId, targetWindowId: windowUnderCursor.windowId })
-				
+
 				if (success) {
 					// Remove tab from current window
-					logger.info('EditorTabs: Removing tab from current window', { tabId: tabId, groupId: group.id })
 					onCloseTab?.(tabId, group.id)
 				} else {
 					logger.warn('EditorTabs: Failed to send tab to target window', { tabId: tabId, targetWindowId: windowUnderCursor.windowId })
 				}
 			} else if (!insideCurrentWindow && !isDifferentWindow) {
 				// Cursor is outside current window but not over another window, create new window
-				logger.info('EditorTabs: Creating new window for detached tab', { draggingTabId: tabId })
 				const tab = group.tabs.find((t) => t.id === tabId)
 				if (!tab) {
 					logger.warn('EditorTabs: Tab not found for new window creation', { draggingTabId: tabId })
@@ -182,9 +148,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({ group, onCloseTab, onMov
 				}
 				
 				// Use onDetachToNewWindow callback if available (preferred method)
-				logger.info('EditorTabs: Checking for onDetachToNewWindow callback', { tabId, groupId: group.id, hasCallback: !!onDetachToNewWindow })
 				if (onDetachToNewWindow) {
-					logger.info('EditorTabs: Using onDetachToNewWindow callback', { tabId, groupId: group.id, cursorX: cursor.x, cursorY: cursor.y })
 					try {
 						onDetachToNewWindow(tabId, group.id, cursor.x, cursor.y)
 						// Note: The callback should handle opening the window and closing/moving the tab
@@ -193,7 +157,6 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({ group, onCloseTab, onMov
 					} catch (error) {
 						logger.error('EditorTabs: Error in onDetachToNewWindow callback', { error: String(error), tabId, groupId: group.id })
 						// Fallback to createAuxWindow on error
-					logger.info('EditorTabs: Falling back to createAuxWindow after error', { tabId })
 					const tabTitleString = getTabTitleString(tab, tabId)
 					await createAuxWindow(
 						{ editorId: tabId, title: tabTitleString },
@@ -204,7 +167,6 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({ group, onCloseTab, onMov
 					}
 				} else {
 					// Fallback to createAuxWindow if callback is not available (for compatibility)
-					logger.info('EditorTabs: Using createAuxWindow fallback (callback not available)', { tabId })
 					const tabTitleString = getTabTitleString(tab, tabId)
 					await createAuxWindow(
 						{ editorId: tabId, title: tabTitleString },
@@ -213,13 +175,6 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({ group, onCloseTab, onMov
 					onMoveTab?.({ groupId: group.id, tabId: tabId }, { groupId: group.id, index: group.tabs.findIndex(t => t.id === tabId) })
 					onCloseTab?.(tabId, group.id)
 				}
-			} else {
-				logger.info('EditorTabs: Drag ended inside current window, no cross-window transfer', { 
-					insideCurrentWindow, 
-					isDifferentWindow,
-					currentWindowId: currentWindow.windowId,
-					windowUnderCursorId: windowUnderCursor?.windowId ?? null
-				})
 			}
 		} catch (error) {
 			logger.error('EditorTabs: Error in onDragEndTab', { error: String(error), draggingTabId: tabId })

@@ -20,9 +20,15 @@ function createWindow(): void {
 // Get resources path from the core-ui package
 function getResourcesPath(): string {
   const isDev = process.env['NODE_ENV'] === 'development' || !app.isPackaged
-  return isDev
-    ? join(__dirname, '../../node_modules/electron-core-ui/resources')
-    : join(process.resourcesPath, 'resources')
+  if (isDev) {
+    // In development, point directly to the monorepo's electron-core-ui resources
+    // so that changes to YAML/JSON themes are picked up without reinstalling.
+    const appPath = app.getAppPath()
+    return join(appPath, '../electron-core-ui/resources')
+  }
+
+  // In production, resources are bundled under process.resourcesPath/resources
+  return join(process.resourcesPath, 'resources')
 }
 
 // Initialize Electron application

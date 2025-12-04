@@ -346,8 +346,6 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 			const viewportX = screenX - currentWindow.x;
 			const viewportY = screenY - currentWindow.y;
 			
-			logger.info('Finding group and drop target at position', { screenX, screenY, viewportX, viewportY, windowBounds: currentWindow });
-			
 			// Use elementFromPoint to find element at cursor position
 			const element = document.elementFromPoint(viewportX, viewportY);
 			
@@ -369,14 +367,12 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 			while (temp) {
 				if (temp.classList.contains('tabs-container')) {
 					tabsContainer = temp as HTMLElement;
-					logger.info('Found tabs container at cursor position', { element: temp.className });
 					// Find the group ID by walking up from tabs-container
 					let parent: Element | null = temp.parentElement;
 					while (parent) {
 						const parentGroupId = parent.getAttribute('data-group-id');
 						if (parentGroupId) {
 							groupId = parentGroupId;
-							logger.info('Found group ID from tabs container parent', { groupId });
 							break;
 						}
 						parent = parent.parentElement;
@@ -391,20 +387,17 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 				current = element;
 				while (current) {
 					const currentGroupId = current.getAttribute('data-group-id');
-					if (currentGroupId) {
-						if (!groupId) {
-							groupId = currentGroupId;
+						if (currentGroupId) {
+							if (!groupId) {
+								groupId = currentGroupId;
+							}
+							
+							// Check if we're dropping on the content placeholder
+							if (current.classList.contains('editor-group-content-placeholder')) {
+								contentElement = current;
+								break;
+							}
 						}
-						
-						// Check if we're dropping on the content placeholder
-						if (current.classList.contains('editor-group-content-placeholder')) {
-							contentElement = current;
-							logger.info('Found content placeholder at cursor position', { groupId: currentGroupId, element: current.className });
-							break;
-						} else if (current.classList.contains('editor-group-container')) {
-							logger.info('Found group container at cursor position', { groupId: currentGroupId, element: current.className });
-						}
-					}
 					current = current.parentElement;
 				}
 			}
@@ -417,7 +410,6 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 			// Priority 1: If dropping on tabs container, calculate index and add to group
 			if (tabsContainer) {
 				const tabIndex = computeDropIndex(tabsContainer, viewportX);
-				logger.info('Drop on tabs container', { groupId, tabIndex });
 				return { groupId, type: 'tabs-container', tabIndex };
 			}
 			
@@ -427,7 +419,6 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 				const allContentPlaceholders = document.querySelectorAll('.editor-group-content-placeholder[data-group-id="' + groupId + '"]');
 				if (allContentPlaceholders.length > 0 && allContentPlaceholders[0]) {
 					contentElement = allContentPlaceholders[0];
-					logger.info('Found content placeholder by group ID', { groupId, element: contentElement.className });
 				}
 			}
 			
@@ -452,7 +443,6 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 					direction = 'full'; // center: add to same group
 				}
 				
-				logger.info('Drop on content placeholder', { groupId, direction, relX, relY, margin });
 				return { groupId, type: 'content-placeholder', direction };
 			}
 			
@@ -467,8 +457,6 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 
 	// Handle tab dropped from another window
 	const handleTabDropped = useCallback(async (tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }): Promise<boolean> => {
-		logger.info('Tab dropped from another window', { tabId: tabData.tabId, title: tabData.title, cursorX: tabData.cursorX, cursorY: tabData.cursorY });
-		
 		// Call parent callback if provided (to store content, etc.)
 		if (extCallbacks.onWorkbenchTabDropped) {
 			const result = await extCallbacks.onWorkbenchTabDropped(tabData);
@@ -485,9 +473,6 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 			// Small delay to ensure DOM is ready
 			await new Promise(resolve => setTimeout(resolve, 50));
 			dropTarget = await findGroupAndDropTargetAtPosition(tabData.cursorX, tabData.cursorY);
-			if (dropTarget) {
-				logger.info('Drop target found at cursor position', { dropTarget, cursorX: tabData.cursorX, cursorY: tabData.cursorY });
-			}
 		}
 		
 		// Create new tab with titleString for serialization
@@ -524,7 +509,6 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 				} else {
 					finalDropTarget = { type: 'content-placeholder', direction: dropTarget.direction };
 				}
-				logger.info('Target group found in tree', { targetGroupId: dropTarget.groupId, found: true, dropTarget: finalDropTarget });
 			} else {
 				logger.warn('Target group not found in tree, using first group', { targetGroupId: dropTarget.groupId });
 			}

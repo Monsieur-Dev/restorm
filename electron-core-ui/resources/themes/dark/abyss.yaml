@@ -61,6 +61,7 @@ colors:
   editorGroupHeader.tabsBackground: "#1c1c2a"
   tab.border: "#2b2b4a"
   tab.inactiveBackground: "#10192c"
+  tab.activeForeground: "#ffffff"
   tab.lastPinnedBorder: "#2b3c5d"
   activityBar.background: "#051336"
   panel.border: "#2b2b4a"

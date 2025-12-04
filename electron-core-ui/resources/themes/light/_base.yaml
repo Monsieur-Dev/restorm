@@ -267,3 +267,8 @@ colors:
   - id: diffEditor.unchangedRegionBackground
     value: "#f8f8f8"
     description: Diff editor unchanged region background
+
+  # WCO (Window Controls Overlay)
+  - id: wco.iconForeground
+    value: "#000000"
+    description: WCO codicon foreground color

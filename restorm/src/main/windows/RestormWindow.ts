@@ -31,19 +31,15 @@ export class RestormWindow extends BaseWindow {
       
       if (existsSync(devPreloadPath)) {
         preloadPath = devPreloadPath
-        logger.info(`📋 Using restorm preload (dev): ${preloadPath}`)
       } else if (existsSync(prodPreloadPath2)) {
         preloadPath = prodPreloadPath2
-        logger.info(`📋 Using restorm preload (prod build in dev): ${preloadPath}`)
       } else if (existsSync(prodPreloadPath1)) {
         preloadPath = prodPreloadPath1
-        logger.info(`📋 Using restorm preload (prod build in dev from appRoot): ${preloadPath}`)
       } else {
         // Fallback to core-ui preload from node_modules
         const coreUiPreloadPath = join(appRoot, 'node_modules', 'electron-core-ui', 'dist', 'src', 'preload', 'index.js')
         if (existsSync(coreUiPreloadPath)) {
           preloadPath = coreUiPreloadPath
-          logger.info(`📋 Using core-ui preload from node_modules: ${preloadPath}`)
           logger.warn('⚠️ window.restorm will not be available (core-ui preload does not expose it)')
         } else {
           // Last resort: let BaseWindow use its default (may not work in dev)
@@ -54,9 +50,7 @@ export class RestormWindow extends BaseWindow {
     } else {
       // In prod, use restorm preload
       preloadPath = join(__dirname, '../preload/index.js')
-      if (existsSync(preloadPath)) {
-        logger.info(`📋 Using restorm preload: ${preloadPath}`)
-      } else {
+      if (!existsSync(preloadPath)) {
         logger.warn(`⚠️ restorm preload not found: ${preloadPath}, using BaseWindow default`)
         preloadPath = undefined
       }

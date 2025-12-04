@@ -29,7 +29,6 @@ export function initializeI18n(resources: Resource, defaultLanguage = 'en'): Pro
     }
   }).then(() => {
     isInitialized = true
-    logger.info('i18n initialized successfully', { language: i18n.language })
     return i18n
   }).catch((error) => {
     logger.error('Failed to initialize i18n', { error: String(error) })

@@ -2,9 +2,18 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import type { i18n as I18nType } from 'i18next'
-import { initializeI18n, logger, MonacoWorkbench, i18n } from 'electron-core-ui/renderer'
+import * as ElectronCoreUi from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 import './httpMethods.css'
+
+const { initializeI18n, logger, i18n } = ElectronCoreUi
+
+type ElectronCoreUiProviderComponent = React.ComponentType<{
+  children: React.ReactNode
+  fontAliasing?: 'auto' | 'antialiased' | 'none'
+}>
+
+const { ElectronCoreUiProvider } = ElectronCoreUi as unknown as { ElectronCoreUiProvider: ElectronCoreUiProviderComponent }
 
 // Import translations
 import enTranslation from '../locales/en/translation.json'
@@ -51,8 +60,6 @@ const initI18n = (): Promise<void> => {
   }, 'en')
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return promise.then(() => {
-    logger.info('i18n initialized successfully with language', { language: i18n.language })
-    
     // Make i18n available globally for debugging
     interface WindowWithI18n extends Window {
       i18n: I18nType;
@@ -73,9 +80,9 @@ void initI18n()
 
     ReactDOM.createRoot(rootElement).render(
       <React.StrictMode>
-        <MonacoWorkbench fontAliasing="auto">
+        <ElectronCoreUiProvider fontAliasing="auto">
           <App />
-        </MonacoWorkbench>
+        </ElectronCoreUiProvider>
       </React.StrictMode>
     )
   })

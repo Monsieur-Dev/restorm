@@ -61,9 +61,6 @@ export const Workbench: React.FC<WorkbenchProps> = ({
   // In uncontrolled mode, sync local state when initialTree changes
   useEffect(() => {
     if (!isControlled) {
-      logger.info('Workbench: Syncing local tree from initialTree (uncontrolled)', { 
-        groupsCount: initialTree.groups.length 
-      })
       setLocalTree(initialTree)
     }
   }, [initialTree, isControlled])
@@ -116,8 +113,6 @@ export const Workbench: React.FC<WorkbenchProps> = ({
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback((tabId: string, groupId: string, cursorX?: number, cursorY?: number): void => {
-    logger.info('Detaching tab to new window', { tabId, groupId, cursorX, cursorY })
-    
     // Find the group and tab in the tree
     const groupResult = findGroup(tree, groupId)
     if (!groupResult.node || !isTabGroupNode(groupResult.node)) {
@@ -136,7 +131,6 @@ export const Workbench: React.FC<WorkbenchProps> = ({
     const titleString = tabWithTitleString.titleString ?? (typeof tab.title === 'string' ? tab.title : getTabTitleString(tabWithTitleString, 'untitled'))
     
     // Open new Editor window with tab parameters and cursor position
-    logger.info('Opening Editor window with detached tab', { title: titleString, hasContent: false, cursorX, cursorY })
     const editorParams: { title: string; content?: string; x?: number; y?: number } = {
       title: titleString,
       content: ''
@@ -192,22 +186,13 @@ export const Workbench: React.FC<WorkbenchProps> = ({
     }, 0)
 
     lastTabCountRef.current = tabCount
-    logger.info('Workbench: Tree changed from EditorWorkbench', { 
-      groupsCount: newTree.groups.length,
-      tabCount,
-      isControlled,
-      isEmpty: tabCount === 0 && newTree.groups.length === 0,
-      treeString: JSON.stringify(newTree).substring(0, 200)
-    })
     
     if (isControlled) {
       // Controlled mode: notify parent immediately
       // onTreeChange is guaranteed to be defined in controlled mode
-      logger.info('Workbench: Notifying parent via onTreeChange (controlled mode)', { tabCount })
       onTreeChange(newTree)
     } else {
       // Uncontrolled mode: update local state
-      logger.info('Workbench: Updating local tree (uncontrolled mode)', { tabCount })
       setLocalTree(newTree)
     }
   }, [onTreeChange, isControlled])

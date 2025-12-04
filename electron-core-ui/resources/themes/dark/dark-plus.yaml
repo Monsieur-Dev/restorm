@@ -6,5 +6,6 @@ colors:
   window.border: "#666666"
   button.hoverBackground: "#3C3C3C"
   button.secondaryHoverBackground: "#45494E"
+  tab.activeForeground: "#ffffff"
 
 

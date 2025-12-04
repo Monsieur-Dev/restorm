@@ -213,22 +213,19 @@ function useThemeLegacy(): UseThemeReturn {
     const initTheme = async (): Promise<void> => {
       try {
         setIsLoading(true)
-        logger.info('🎨 useTheme: Loading initial theme...')
 
         // Load themes list
         const themeList: ThemeInfo[] = await window.api.theme.list()
-        logger.info('🎨 useTheme: Themes list loaded', { count: themeList.length })
         setThemes(themeList)
 
         // Get current theme or use first dark theme as default
         let themeId: string | undefined = await window.api.theme.getCurrent()
-        logger.info('🎨 useTheme: Current theme from storage', { themeId })
 
         const isValidThemeId = (id: string | undefined, list: ThemeInfo[]): id is string => {
           return !!id && list.some(t => t.id === id)
         }
 
-        const originalThemeId = themeId
+        const _originalThemeId = themeId
 
         // Migrate legacy theme IDs (e.g. "theme-defaults/dark_plus") to new IDs (e.g. "theme-defaults/Default Dark+")
         if (themeId && !isValidThemeId(themeId, themeList)) {
@@ -252,7 +249,6 @@ function useThemeLegacy(): UseThemeReturn {
               const mappedLabel = legacyMap[legacyIdRaw as LegacyKey]
               const candidateId = `${dir}/${mappedLabel}`
               if (isValidThemeId(candidateId, themeList)) {
-                logger.info('🎨 useTheme: Migrating legacy theme id', { oldThemeId: legacyThemeId, newThemeId: candidateId })
                 themeId = candidateId
                 await window.api.theme.set(themeId)
               }
@@ -265,18 +261,15 @@ function useThemeLegacy(): UseThemeReturn {
           const defaultTheme = themeList.find(t => t.type === 'dark') ?? themeList[0]
           if (defaultTheme) {
             themeId = defaultTheme.id
-            logger.info('🎨 useTheme: Using default theme', { themeId, previousThemeId: originalThemeId })
             await window.api.theme.set(themeId)
           }
         }
 
         if (themeId) {
-          logger.info('🎨 useTheme: Loading theme data', { themeId })
           const themeData: { theme: ThemeDefinition; variables: ThemeVariables } | null = 
             await window.api.theme.load(themeId)
           
           if (themeData) {
-            logger.info('🎨 useTheme: Applying theme', { themeId })
             // Apply CSS variables directly (don't use applyCSSVariables callback to avoid dependency issues)
             const root = document.documentElement
             
@@ -305,7 +298,6 @@ function useThemeLegacy(): UseThemeReturn {
             currentThemeIdRef.current = themeId
             setCurrentTheme(themeData.theme)
             setCurrentVariables(themeData.variables)
-            logger.info('🎨 useTheme: Theme applied successfully', { themeId })
             
             // Update WCO colors after a short delay to ensure CSS is applied
             // Use updateWCOColors from the closure
@@ -371,11 +363,8 @@ function useThemeLegacy(): UseThemeReturn {
     
     // Listen for theme changes from other windows
     const cleanup = window.api.theme.onThemeChanged((themeId: string) => {
-      logger.info('🎨 useTheme: Theme changed event received from another window', { themeId, currentThemeId: currentThemeIdRef.current })
-      
       // Skip if this is already the current theme (avoid unnecessary re-application)
       if (currentThemeIdRef.current === themeId) {
-        logger.info('🎨 useTheme: Theme is already current, skipping re-application', { themeId })
         return
       }
       
@@ -389,7 +378,6 @@ function useThemeLegacy(): UseThemeReturn {
             await window.api.theme.load(themeId)
           
           if (themeData) {
-            logger.info('🎨 useTheme: Applying theme from change event', { themeId })
             
             // Apply CSS variables directly
             const root = document.documentElement
@@ -420,8 +408,6 @@ function useThemeLegacy(): UseThemeReturn {
             setCurrentTheme(themeData.theme)
             setCurrentVariables(themeData.variables)
             setThemes(themeList)
-            
-            logger.info('🎨 useTheme: Theme applied successfully from change event', { themeId })
             
             // Update WCO colors after a short delay
             setTimeout(() => {

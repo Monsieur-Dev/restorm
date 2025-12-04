@@ -50,7 +50,8 @@
     "about": "About",
     "documentation": "Documentation",
     "reportIssue": "Report Issue",
-    "keyboardShortcuts": "Keyboard Shortcuts"
+    "keyboardShortcuts": "Keyboard Shortcuts",
+    "exit": "Exit"
   },
   "sidebar": {
     "collections": "Collections",

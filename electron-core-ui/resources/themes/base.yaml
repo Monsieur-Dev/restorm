@@ -5,11 +5,11 @@
 variables:
   - id: dropdown-padding-top
     value: "1px"
-    description: Padding top for dropdown items (mac: 3px)
+    description: "Padding top for dropdown items (mac: 3px)"
 
   - id: dropdown-padding-bottom
     value: "1px"
-    description: Padding bottom for dropdown items (mac: 4px)
+    description: "Padding bottom for dropdown items (mac: 4px)"
 
   - id: vscode-sash-size
     value: "4px"

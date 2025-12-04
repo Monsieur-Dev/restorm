@@ -4,16 +4,18 @@ import {
   Titlebar,
   MenuBar,
   MenuBarItem,
+  MenuItem,
+  MenuItemSeparator,
   Statusbar,
   ListView,
   type ListViewItemData,
   Sash,
   type IVerticalSashLayoutProvider,
   type SashEvent,
-  logger,
   SplitView,
   Pane,
-  Button
+  Button,
+  useSettingsModal
 } from 'electron-core-ui/renderer'
 import type { WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
 import { Workbench } from './components/Workbench'
@@ -24,6 +26,30 @@ const RIGHT_MIN_WIDTH = 240
 
 const App: React.FC = () => {
   const { t } = useTranslation()
+  const { showSettingsModal } = useSettingsModal()
+
+  const handleMenuExit = useCallback(() => {
+    void window.api.closeWindow()
+  }, [])
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      const isMac = navigator.platform.toLowerCase().includes('mac')
+      const isCtrlOrCmd = isMac ? event.metaKey : event.ctrlKey
+      const key = event.key.toLowerCase()
+
+      if (isCtrlOrCmd && key === 'q') {
+        event.preventDefault()
+        event.stopPropagation()
+        handleMenuExit()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [handleMenuExit])
 
   const [expandedIds, setExpandedIds] = useState<string[]>([
     'pet-root',
@@ -380,37 +406,19 @@ const App: React.FC = () => {
         id: 'tab-get-pets',
         title: 'GET /pets',
         titleString: 'GET /pets',
-        allowFullscreen: true,
-        fullscreenModalTitle: (
-          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <HttpMethodBadge method="GET" />
-            <span>/pets</span>
-          </span>
-        )
+        allowFullscreen: true
       },
       {
         id: 'tab-get-pet-by-id',
         title: 'GET /pets/{id}',
         titleString: 'GET /pets/{id}',
-        allowFullscreen: true,
-        fullscreenModalTitle: (
-          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <HttpMethodBadge method="GET" />
-            <span>/pets/{'{id}'}</span>
-          </span>
-        )
+        allowFullscreen: true
       },
       {
         id: 'tab-create-pet',
         title: 'POST /pets',
         titleString: 'POST /pets',
-        allowFullscreen: true,
-        fullscreenModalTitle: (
-          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <HttpMethodBadge method="POST" />
-            <span>/pets</span>
-          </span>
-        )
+        allowFullscreen: true
       }
     ]
 
@@ -493,29 +501,25 @@ const App: React.FC = () => {
         title={t('app.title')}
         leftContent={
           <MenuBar>
-            <MenuBarItem title={t('menuBar.file')} />
+            <MenuBarItem title={t('menuBar.file')}>
+              <MenuItem title={t('menuBar.open')} shortcut="Ctrl+O" />
+              <MenuItemSeparator />
+              <MenuItem title={t('menuBar.exit')} shortcut="Ctrl+Q" onClick={handleMenuExit} />
+            </MenuBarItem>
           </MenuBar>
         }
         rightContent={
-          <button
-            type="button"
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--vscode-titleBar-activeForeground)',
-              cursor: 'pointer',
-              padding: '4px 8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              outline: 'none'
-            }}
-            onClick={() => {
-              logger.info('Settings button clicked in restorm titlebar', {})
+          
+          <Button
+            small secondary
+            onClick={() => { showSettingsModal() }}
+            options={{
+              ariaLabel: 'Open settings',
+              title: 'Open settings'
             }}
           >
-            <i className="codicon codicon-gear" aria-hidden="true" />
-          </button>
+            <i className="codicon codicon-gear"></i>
+          </Button>
         }
       />
 

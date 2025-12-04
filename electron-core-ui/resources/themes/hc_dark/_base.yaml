@@ -184,3 +184,8 @@ colors:
   - id: actionBar.toggledBackground
     value: "#383a49"
     description: Action bar toggled background
+
+  # WCO (Window Controls Overlay)
+  - id: wco.iconForeground
+    value: "#ffffff"
+    description: WCO codicon foreground color
