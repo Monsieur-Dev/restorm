@@ -143,7 +143,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
           justifyContent: 'space-between',
           padding: '6px 8px',
           backgroundColor: 'var(--vscode-dropdown-background)',
-          color: 'var(--vscode-tab-active-text-color, #000)',
+          color: 'var(--vscode-tab-active-text-color)',
           border: '1px solid var(--vscode-dropdown-border)',
           borderRadius: '2px',
           fontSize: '13px',
@@ -195,7 +195,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
             marginTop: '4px',
             maxHeight: '300px',
             overflowY: 'auto',
-            backgroundColor: 'var(--vscode-editor-background, #fff)',
+            backgroundColor: 'var(--vscode-editor-background)',
             border: '1px solid var(--vscode-dropdown-border)',
             borderRadius: '2px',
             boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
@@ -226,8 +226,8 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
                     : 'transparent',
                 color:
                   option.value === value
-                    ? 'var(--vscode-list-activeSelectionForeground, #ffffff)'
-                    : 'var(--vscode-tab-active-text-color, #000)',
+                    ? 'var(--vscode-list-activeSelectionForeground)'
+                    : 'var(--vscode-tab-active-text-color)',
                 fontWeight: option.value === value ? '500' : '400',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',

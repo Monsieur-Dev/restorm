@@ -129,8 +129,8 @@ export const Tabs: React.FC<TabsProps> = ({
                   fontFamily: 'var(--vscode-font-family)',
                   backgroundColor: 'transparent',
                   color: isActive
-                    ? 'var(--vscode-tab-active-text-color, #000)'
-                    : 'var(--vscode-tab-inactiveForeground, rgba(128, 128, 128, 0.7))',
+                    ? 'var(--vscode-tab-active-text-color)'
+                    : 'var(--vscode-tab-inactiveForeground)',
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
                   userSelect: 'none',
@@ -138,12 +138,12 @@ export const Tabs: React.FC<TabsProps> = ({
                 }}
                 onMouseEnter={(e) => {
                   if (!isActive) {
-                    e.currentTarget.style.color = 'var(--vscode-tab-active-text-color, #000)'
+                    e.currentTarget.style.color = 'var(--vscode-tab-active-text-color)'
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!isActive) {
-                    e.currentTarget.style.color = 'var(--vscode-tab-inactiveForeground, rgba(128, 128, 128, 0.7))'
+                    e.currentTarget.style.color = 'var(--vscode-tab-inactiveForeground)'
                   }
                 }}
               >
@@ -155,7 +155,7 @@ export const Tabs: React.FC<TabsProps> = ({
                       left: 0,
                       right: 0,
                       height: '2px',
-                      backgroundColor: 'var(--vscode-tab-activeBorder, var(--vscode-tab-active-text-color, #000))',
+                      backgroundColor: 'var(--vscode-tab-activeBorder)',
                       zIndex: 10
                     }}
                   />
@@ -183,7 +183,7 @@ export const Tabs: React.FC<TabsProps> = ({
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.opacity = '1'
-                      e.currentTarget.style.backgroundColor = 'var(--vscode-toolbar-hoverBackground, rgba(255, 255, 255, 0.1))'
+                      e.currentTarget.style.backgroundColor = 'var(--vscode-toolbar-hoverBackground)'
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.opacity = '0.7'

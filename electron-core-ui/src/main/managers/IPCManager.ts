@@ -58,6 +58,14 @@ export function setupIPC(resourcesPath?: string): void {
   })
 
   ipcMain.handle('theme:set', (_event, themeId: string) => {
+    const previousTheme = storageService.get<string>('currentTheme')
+
+    // If the requested theme is already active, avoid rebroadcasting
+    if (previousTheme === themeId) {
+      logger.info('Theme set called with same theme, skipping broadcast', { themeId })
+      return true
+    }
+
     storageService.set('currentTheme', themeId)
     
     // Notify all windows that theme has changed

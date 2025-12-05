@@ -32,8 +32,8 @@ const App: React.FC = () => {
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
-        backgroundColor: 'var(--vscode-editor-background, #1e1e1e)',
-        color: 'var(--vscode-editor-foreground, #d4d4d4)'
+          backgroundColor: 'var(--vscode-editor-background)',
+          color: 'var(--vscode-editor-foreground)'
       }}
     >
       <div
@@ -55,8 +55,8 @@ const App: React.FC = () => {
               padding: '10px 20px',
               fontSize: '16px',
               cursor: 'pointer',
-              backgroundColor: 'var(--vscode-button-background, #0e639c)',
-              color: 'var(--vscode-button-foreground, #ffffff)',
+              backgroundColor: 'var(--vscode-button-background)',
+              color: 'var(--vscode-button-foreground)',
               border: 'none',
               borderRadius: '2px'
             }}
@@ -71,8 +71,8 @@ const App: React.FC = () => {
               padding: '10px 20px',
               fontSize: '16px',
               cursor: 'pointer',
-              backgroundColor: 'var(--vscode-button-secondaryBackground, #3a3d41)',
-              color: 'var(--vscode-button-secondaryForeground, #ffffff)',
+              backgroundColor: 'var(--vscode-button-secondaryBackground)',
+              color: 'var(--vscode-button-secondaryForeground)',
               border: 'none',
               borderRadius: '2px'
             }}
@@ -87,8 +87,8 @@ const App: React.FC = () => {
               padding: '10px 20px',
               fontSize: '16px',
               cursor: 'pointer',
-              backgroundColor: 'var(--vscode-button-secondaryBackground, #3a3d41)',
-              color: 'var(--vscode-button-secondaryForeground, #ffffff)',
+              backgroundColor: 'var(--vscode-button-secondaryBackground)',
+              color: 'var(--vscode-button-secondaryForeground)',
               border: 'none',
               borderRadius: '2px'
             }}

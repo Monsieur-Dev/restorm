@@ -83,6 +83,7 @@ export class ThemeService {
     
     this.loadBaseFiles()
     this.discoverThemes()
+    this.preloadAllThemes()
   }
 
   /**
@@ -182,6 +183,23 @@ export class ThemeService {
       return dir as ThemeType
     }
     return 'dark' // Default
+  }
+
+  /**
+   * Preload and fully resolve all themes at startup.
+   * This ensures every theme YAML is parsed once and
+   * the final derived themes are stored in the cache map.
+   */
+  private preloadAllThemes(): void {
+    const start = performance.now()
+    for (const themeId of this.themes.keys()) {
+      const result = this.getThemeWithVariables(themeId)
+      if (!result) {
+        logger.error(`ThemeService: failed to preload theme "${themeId}"`)
+      }
+    }
+    const duration = performance.now() - start
+    logger.info(`ThemeService: preloaded ${this.themeCache.size} themes in ${duration.toFixed(2)}ms`)
   }
 
   /**

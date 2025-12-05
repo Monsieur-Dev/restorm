@@ -11,6 +11,16 @@ colors:
     value: "#d4d4d4"
     description: Editor foreground color
 
+  # Default widget background (for editors, panels, previews)
+  - id: editorWidget.background
+    value: "#252526"
+    description: Editor widget background color
+
+  # Generic foreground (used by many controls / labels)
+  - id: foreground
+    value: "#d4d4d4"
+    description: Primary foreground color
+
   - id: editor.inactiveSelectionBackground
     value: "#3A3D41"
     description: Editor inactive selection background
@@ -43,6 +53,20 @@ colors:
   - id: input.placeholderForeground
     value: "#A6A6A6"
     description: Input placeholder foreground
+
+  # Toggle / input option active styles (used by checkbox/toggle)
+  - id: inputOption.activeBackground
+    value: "#2489DB82"
+    description: Active option background
+
+  - id: inputOption.activeBorder
+    value: "#2488DB"
+    description: Active option border
+
+  # Generic description text (used by labels, tooltips, etc.)
+  - id: descriptionForeground
+    value: "#9D9D9D"
+    description: Description / secondary foreground
 
   # Dropdown colors
   - id: dropdown.background
@@ -117,8 +141,20 @@ colors:
     description: Button foreground color
 
   - id: button.hoverBackground
-    value: "#3c3c3c"
+    value: "#1177bb"
     description: Button hover background color
+
+  - id: button.secondaryBackground
+    value: "#3c3c3c"
+    description: Secondary button background color
+
+  - id: button.secondaryForeground
+    value: "#cccccc"
+    description: Secondary button foreground color
+
+  - id: button.secondaryHoverBackground
+    value: "#4c4c4c"
+    description: Secondary button hover background color
 
   # Checkbox colors
   - id: checkbox.background
@@ -184,6 +220,10 @@ colors:
     value: "#ccc3"
     description: Last pinned tab border
 
+  - id: tab.dragAndDropBorder
+    value: "#4FC3F7"
+    description: Border color used when dragging tabs
+
   # Menu colors
   - id: menu.background
     value: "#252526"
@@ -246,6 +286,11 @@ colors:
   - id: widget.border
     value: "#303031"
     description: Widget border
+
+  # Panels
+  - id: panel.border
+    value: "#3c3c3c"
+    description: Panel border
 
   # Action bar
   - id: actionBar.toggledBackground

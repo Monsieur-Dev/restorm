@@ -11,6 +11,16 @@ colors:
     value: "#FFFFFF"
     description: Editor foreground color
 
+  # Default widget background (for editors, panels, previews)
+  - id: editorWidget.background
+    value: "#000000"
+    description: Editor widget background color
+
+  # Generic foreground (used by many controls / labels)
+  - id: foreground
+    value: "#FFFFFF"
+    description: Primary foreground color
+
   - id: editor.selectionBackground
     value: "#FFFFFF"
     description: Editor selection background
@@ -39,6 +49,24 @@ colors:
   - id: input.border
     value: "#6fc3df"
     description: Input border color (high contrast)
+
+  # Toggle / input option active styles (used by checkbox/toggle)
+  - id: inputOption.activeBackground
+    value: "#FFFFFF33"
+    description: Active option background
+
+  - id: inputOption.activeBorder
+    value: "#FFFFFF"
+    description: Active option border
+
+  - id: inputOption.activeForeground
+    value: "#000000"
+    description: Active option foreground
+
+  # Generic description text (used by labels, tooltips, etc.)
+  - id: descriptionForeground
+    value: "#FFFFFF"
+    description: Description / secondary foreground
 
   # Dropdown colors
   - id: dropdown.background
@@ -108,6 +136,18 @@ colors:
     value: "#3c3c3c"
     description: Button hover background color
 
+  - id: button.secondaryBackground
+    value: "#000000"
+    description: Secondary button background color
+
+  - id: button.secondaryForeground
+    value: "#ffffff"
+    description: Secondary button foreground color
+
+  - id: button.secondaryHoverBackground
+    value: "#666666"
+    description: Secondary button hover background color
+
   # Checkbox colors
   - id: checkbox.background
     value: "#3c3c3c"
@@ -160,6 +200,10 @@ colors:
     value: "rgba(128, 128, 128, 0.35)"
     description: Tab border
 
+  - id: tab.dragAndDropBorder
+    value: "#FFFFFF"
+    description: Border color used when dragging tabs
+
   # Selection
   - id: selection.background
     value: "#008000"
@@ -189,3 +233,8 @@ colors:
   - id: wco.iconForeground
     value: "#ffffff"
     description: WCO codicon foreground color
+
+  # Panels
+  - id: panel.border
+    value: "#FFFFFF"
+    description: Panel border

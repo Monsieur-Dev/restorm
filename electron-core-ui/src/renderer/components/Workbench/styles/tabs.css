@@ -87,7 +87,7 @@
 	top: 0;
 	height: 100%;
 	width: 1px;
-	background-color: var(--vscode-tab-dragAndDropBorder, #4FC3F7);
+	background-color: var(--vscode-tab-dragAndDropBorder);
 	pointer-events: none;
 	z-index: 11;
 }
@@ -102,13 +102,26 @@
 
 .editor-group-content-placeholder {
 	flex: 1;
-	min-height: 120px;
+	min-height: 0;
 	background-color: var(--vscode-editor-background);
 	color: var(--vscode-editor-foreground);
 	display: flex;             /* allow content to grow */
 	align-items: stretch;      /* let children take full height */
 	justify-content: flex-start;
+	padding: 8px;
+	box-sizing: border-box;
 	border-top: 1px solid var(--tabs-border-bottom-color, transparent);
+}
+
+.editor-group-content-panel {
+	flex: 1;
+	min-height: 0;
+	border-radius: 6px;
+	padding: 6px;
+	background-color: var(--vscode-editorWidget-background);
+	display: flex;
+	flex-direction: column;
+	box-sizing: border-box;
 }
 
 
