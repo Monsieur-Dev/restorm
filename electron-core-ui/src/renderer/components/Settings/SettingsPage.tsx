@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SelectBox } from '../SelectBox'
-import { useThemeContext } from '../../contexts/useThemeContext'
 import type { ISelectData } from '../SelectBox/types'
+import { ThemeCarousel } from './ThemeCarousel'
 import './settings.css'
 
 /**
@@ -19,21 +19,6 @@ const AVAILABLE_LANGUAGES = [
  */
 export const SettingsPage: React.FC = () => {
   const { t, i18n } = useTranslation()
-  const { themes, currentThemeId, setTheme } = useThemeContext()
-
-  // Build theme options for SelectBox
-  const themeOptions = useMemo(() => {
-    return themes.map(theme => ({
-      text: theme.name,
-      detail: theme.type
-    }))
-  }, [themes])
-
-  // Find current theme index
-  const currentThemeIndex = useMemo(() => {
-    const index = themes.findIndex(t => t.id === currentThemeId)
-    return index >= 0 ? index : 0
-  }, [themes, currentThemeId])
 
   // Build language options for SelectBox
   const languageOptions = useMemo(() => {
@@ -49,14 +34,6 @@ export const SettingsPage: React.FC = () => {
     return index >= 0 ? index : 0
   }, [i18n.language])
 
-  // Handle theme change
-  const handleThemeChange = (data: ISelectData): void => {
-    const selectedTheme = themes[data.index]
-    if (selectedTheme) {
-      void setTheme(selectedTheme.id)
-    }
-  }
-
   // Handle language change
   const handleLanguageChange = (data: ISelectData): void => {
     const selectedLanguage = AVAILABLE_LANGUAGES[data.index]
@@ -71,22 +48,16 @@ export const SettingsPage: React.FC = () => {
 
       <div className="settings-section">
         <div className="settings-item">
-          <label className="settings-label" htmlFor="theme-select">
+          <span className="settings-label">
             {t('settings.theme', 'Theme')}
-          </label>
-          <SelectBox
-            id="theme-select"
-            className="settings-select"
-            options={themeOptions}
-            selected={currentThemeIndex}
-            onDidSelect={handleThemeChange}
-          />
+          </span>
+          <ThemeCarousel />
         </div>
 
         <div className="settings-item">
-          <label className="settings-label" htmlFor="language-select">
+          <span className="settings-label">
             {t('settings.language', 'Language')}
-          </label>
+          </span>
           <SelectBox
             id="language-select"
             className="settings-select"
