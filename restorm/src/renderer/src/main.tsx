@@ -50,16 +50,23 @@ window.console.error = (...args: unknown[]): void => {
   originalConsoleError(...args)
 }
 
+type InitializeI18nFn = (
+  resources: Record<string, { translation: unknown }>,
+  defaultLanguage: string
+) => Promise<unknown>
+
 // Initialize i18n using core-ui's initializeI18n function
 // This prevents double initialization and sets up the plugin
 const initI18n = (): Promise<void> => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
-  const promise: Promise<unknown> = initializeI18n({
-    en: { translation: enTranslation },
-    fr: { translation: frTranslation }
-  }, 'en')
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  return promise.then(() => {
+  const safeInitializeI18n = initializeI18n as InitializeI18nFn
+
+  return safeInitializeI18n(
+    {
+      en: { translation: enTranslation },
+      fr: { translation: frTranslation }
+    },
+    'en'
+  ).then(() => {
     // Make i18n available globally for debugging
     interface WindowWithI18n extends Window {
       i18n: I18nType;

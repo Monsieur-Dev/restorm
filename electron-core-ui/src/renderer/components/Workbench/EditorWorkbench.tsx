@@ -45,11 +45,13 @@ function useSplitSizes(
 			setSizes([]);
 			return;
 		}
-		if (sizes.length !== count) {
+		setSizes(prev => {
+			if (prev.length === count) {
+				return prev;
+			}
 			const equal = 1 / count;
-			setSizes(new Array(count).fill(equal));
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
+			return new Array(count).fill(equal);
+		});
 	}, [count]);
 
 	const onSashStart = useCallback((index: number) => {

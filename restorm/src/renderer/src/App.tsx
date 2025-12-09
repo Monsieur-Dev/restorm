@@ -24,7 +24,7 @@ import { HttpMethodBadge } from './components/HttpMethodBadge'
 const MIN_LEFT_WIDTH = 180
 const RIGHT_MIN_WIDTH = 240
 
-type SidebarContextMenuItem = {
+interface SidebarContextMenuItem {
   id: string
   label: string
   icon?: string

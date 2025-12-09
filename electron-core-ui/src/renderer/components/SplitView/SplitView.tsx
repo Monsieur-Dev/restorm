@@ -35,11 +35,13 @@ function useSplitRatios(
 		}
 
 		// Initialize ratios if size changed
-		if (ratios.length !== count) {
+		setRatios(prev => {
+			if (prev.length === count) {
+				return prev;
+			}
 			const equal = 1 / count;
-			setRatios(new Array(count).fill(equal));
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
+			return new Array(count).fill(equal);
+		});
 	}, [count]);
 
 	const onSashStart = useCallback(

@@ -461,7 +461,7 @@ export const ResponsesView: React.FC<ResponsesViewProps> = ({ requestTitle }) =>
             style={{
               height: '100%',
               boxSizing: 'border-box',
-              padding: 8
+              padding: '8px 0px 0px 8px',
             }}
           >
             <ListView
@@ -481,7 +481,7 @@ export const ResponsesView: React.FC<ResponsesViewProps> = ({ requestTitle }) =>
         content: (
           <div
             style={{
-              padding: 8,
+              padding: '8px 0px 0px 8px',
               boxSizing: 'border-box',
               width: '100%',
               height: '100%'
@@ -522,7 +522,7 @@ export const ResponsesView: React.FC<ResponsesViewProps> = ({ requestTitle }) =>
         content: (
           <div
             style={{
-              padding: 8,
+              padding: '8px 0px 0px 8px',
               boxSizing: 'border-box',
               width: '100%',
               height: '100%'
@@ -564,6 +564,7 @@ export const ResponsesView: React.FC<ResponsesViewProps> = ({ requestTitle }) =>
           <div
             style={{
               boxSizing: 'border-box',
+              padding: '8px 0px 0px 8px',
               width: '100%',
               height: '100%',
               overflow: 'hidden'

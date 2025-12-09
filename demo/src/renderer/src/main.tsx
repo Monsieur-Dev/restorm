@@ -15,15 +15,22 @@ logger.info('Renderer script started', { timestamp: scriptStartTime.toFixed(2) }
 
 // Initialize i18n using core-ui's initializeI18n function
 // This prevents double initialization and sets up the plugin
+type InitializeI18nFn = (
+  resources: Record<string, { translation: unknown }>,
+  defaultLanguage: string
+) => Promise<unknown>
+
 const initI18n = (): Promise<void> => {
   logger.info('initI18n starting', { elapsedMs: (performance.now() - scriptStartTime).toFixed(2) })
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
-  const promise: Promise<unknown> = initializeI18n({
-    en: { translation: enTranslation },
-    fr: { translation: frTranslation }
-  }, 'en')
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  return promise.then(() => {
+  const safeInitializeI18n = initializeI18n as InitializeI18nFn
+
+  return safeInitializeI18n(
+    {
+      en: { translation: enTranslation },
+      fr: { translation: frTranslation }
+    },
+    'en'
+  ).then(() => {
     logger.info('i18n initialized successfully with language', { language: i18n.language, elapsedMs: (performance.now() - scriptStartTime).toFixed(2) })
     
     // Make i18n available globally for debugging

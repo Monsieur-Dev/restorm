@@ -11,7 +11,8 @@ import {
   Pane,
   RadioGroup,
   InputBox,
-  CodeEditor
+  CodeEditor,
+  ProgressBar
 } from 'electron-core-ui/renderer'
 import type {
   Tab,
@@ -38,10 +39,12 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestT
   const [bodyFilePath, setBodyFilePath] = useState<string>('')
   const [activeTabId, setActiveTabId] = useState<string>('requestLayout')
   const [leftPaneWidth, setLeftPaneWidth] = useState<number>(0)
+  const [isSending, setIsSending] = useState<boolean>(false)
   const headersParamsRef = useRef<ParamsTabViewHandle | null>(null)
   const queryParamsRef = useRef<ParamsTabViewHandle | null>(null)
   const splitContainerRef = useRef<HTMLDivElement | null>(null)
   const sashStartLeftRef = useRef<number>(leftPaneWidth)
+  const sendTimeoutRef = useRef<number | null>(null)
 
   const urlVariables = useMemo<VariableDefinition[]>(
     () => [
@@ -336,6 +339,15 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestT
     []
   )
 
+  useEffect(() => {
+    return () => {
+      if (sendTimeoutRef.current !== null) {
+        window.clearTimeout(sendTimeoutRef.current)
+        sendTimeoutRef.current = null
+      }
+    }
+  }, [])
+
   return (
     <div
       style={{
@@ -385,7 +397,16 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestT
 
         <Button
           onClick={() => {
-            // Send action will be implemented later
+            // Simulate a send action for 5 seconds
+            if (sendTimeoutRef.current !== null) {
+              window.clearTimeout(sendTimeoutRef.current)
+              sendTimeoutRef.current = null
+            }
+            setIsSending(true)
+            sendTimeoutRef.current = window.setTimeout(() => {
+              setIsSending(false)
+              sendTimeoutRef.current = null
+            }, 5000)
           }}
           options={{
             title: t('requestTab.send'),
@@ -397,6 +418,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestT
             <span>{t('requestTab.send')}</span>
           </span>
         </Button>
+      </div>
+
+      <div style={{ width: '100%', height: 4 }}>
+        {isSending && <ProgressBar mode="infinite" />}
       </div>
 
       <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>

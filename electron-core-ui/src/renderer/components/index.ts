@@ -71,6 +71,10 @@ export type {
   ListViewDropPosition
 } from './ListView'
 
+// Breadcrumb exports
+export { Breadcrumb } from './Breadcrumb'
+export type { BreadcrumbProps, BreadcrumbItem } from './Breadcrumb'
+
 // Button exports
 export { Button, ButtonWithDescription, ButtonWithDropdown, ButtonWithIcon, defaultButtonStyles } from './Button/index'
 export type { IButtonOptions, IButtonStyles, IButtonWithDropdownOptions, ButtonProps, ButtonWithDescriptionProps, ButtonWithDropdownProps, ButtonWithIconProps } from './Button/index'

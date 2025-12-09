@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react'
+import * as CoreUIRenderer from 'electron-core-ui/renderer'
 import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger } from 'electron-core-ui/renderer'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
 import type { restormEditorTab } from '../types/editor'
@@ -36,6 +37,15 @@ export interface WorkbenchProps {
    * Callback fired whenever the focused group changes.
    */
   onFocusedGroupChange?: (groupId: string | null) => void
+}
+
+interface WorkbenchBreadcrumbItem {
+  id: string
+  label: string
+}
+
+const { Breadcrumb } = CoreUIRenderer as unknown as {
+  Breadcrumb: React.ComponentType<{ items: WorkbenchBreadcrumbItem[] }>
 }
 
 // Local alias to bypass strict prop typing issues coming from external package d.ts
@@ -105,6 +115,12 @@ export const Workbench: React.FC<WorkbenchProps> = ({
   const renderTabContent = useCallback((tab: restormEditorTab): React.ReactNode => {
     const titleString = getTabTitleString(tab as EditorTab & { titleString?: string }, '')
 
+    const breadcrumbItems: WorkbenchBreadcrumbItem[] = [
+      { id: 'level-1', label: 'workspace' },
+      { id: 'level-2', label: 'collections' },
+      { id: 'level-3', label: 'current-request' }
+    ]
+
     if (tab.id === 'tab-folder-view-pet') {
       return (
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, minWidth: 0 }}>
@@ -117,7 +133,10 @@ export const Workbench: React.FC<WorkbenchProps> = ({
               backgroundColor: 'var(--vscode-editor-background)'
             }}
           >
-            <FolderView />
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, minWidth: 0 }}>
+              <Breadcrumb items={breadcrumbItems} />
+              <FolderView />
+            </div>
           </div>
         </div>
       )
@@ -136,6 +155,7 @@ export const Workbench: React.FC<WorkbenchProps> = ({
             backgroundColor: 'var(--vscode-editor-background)'
           }}
         >
+          <Breadcrumb items={breadcrumbItems} />
           <HTTPRequestTabView requestTitle={titleString} />
         </div>
       </div>
@@ -240,6 +260,6 @@ export const Workbench: React.FC<WorkbenchProps> = ({
     </div>
   )
 }
-
 export default Workbench
+
 
