@@ -139,7 +139,7 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   const handleMount: OnMount = (editor, monaco) => {
     setEditorInstance(editor)
     setMonacoInstance(monaco)
-    
+
     // Call user-provided callbacks
     onMount?.(editor, monaco)
     onEditorMount?.(editor, monaco)

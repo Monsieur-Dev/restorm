@@ -1,20 +1,17 @@
 import React, { useEffect, useMemo, useRef } from 'react'
-import Editor from '@monaco-editor/react'
 import type { Monaco } from '@monaco-editor/react'
 import type * as monacoEditor from 'monaco-editor'
 import type { VariableInputBoxProps, VariableDefinition } from './types'
 import { defaultInputBoxStyles } from '../InputBox/types'
+import { CodeEditor } from '../CodeEditor/CodeEditor'
 import '../InputBox/inputBox.css'
 import './variableInputBox.css'
 
 const LANGUAGE_ID = 'handlebars'
-const THEME_ID = 'variable-handlebars-theme'
 
 let languageConfigured = false
 let completionProviderDisposable: monacoEditor.IDisposable | null = null
 let hoverProviderDisposable: monacoEditor.IDisposable | null = null
-let lastMonacoInstance: Monaco | null = null
-let themeObserverInitialized = false
 let cancellationHandlerRegistered = false
 
 const isMonacoCancellationError = (reason: unknown): boolean => {
@@ -100,38 +97,13 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = ({
     []
   )
 
-  const applyThemeToEditor = (monacoInstance: Monaco): void => {
-    lastMonacoInstance = monacoInstance
-    const themeAttr = document.documentElement.getAttribute('data-theme') ?? 'dark'
-    const isDark = themeAttr === 'dark' || themeAttr === 'hc'
-    const baseTheme = isDark ? 'vs-dark' : 'vs'
-
-    monacoInstance.editor.defineTheme(THEME_ID, {
-      base: baseTheme,
-      inherit: true,
-      rules: [
-        {
-          token: 'variableToken',
-          foreground: 'c586c0',
-          fontStyle: 'bold'
-        }
-      ],
-      colors: {
-        'editor.background': '#00000000',
-        'editor.lineHighlightBackground': '#00000000',
-        'editorGutter.background': '#00000000'
-      }
-    })
-    monacoInstance.editor.setTheme(THEME_ID)
-  }
-
   const handleMount = (
     editor: monacoEditor.editor.IStandaloneCodeEditor,
     monacoInstance: Monaco
   ): void => {
     editorRef.current = editor
 
-    // Configure language, theme, completion and hover for Handlebars-style variables
+    // Configure language, completion and hover for Handlebars-style variables
     if (!languageConfigured) {
       monacoInstance.languages.setMonarchTokensProvider(LANGUAGE_ID, {
         tokenizer: {
@@ -139,22 +111,6 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = ({
         }
       })
       languageConfigured = true
-    }
-
-    applyThemeToEditor(monacoInstance)
-
-    if (!themeObserverInitialized) {
-      const observer = new MutationObserver((mutations) => {
-        for (const m of mutations) {
-          if (m.type === 'attributes' && m.attributeName === 'data-theme') {
-            if (lastMonacoInstance) {
-              applyThemeToEditor(lastMonacoInstance)
-            }
-          }
-        }
-      })
-      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
-      themeObserverInitialized = true
     }
 
     if (!completionProviderDisposable) {
@@ -233,13 +189,9 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = ({
       }
     })
 
-    // Block external drag & drop and local Ctrl/Cmd+F inside this compact editor only
+    // Block local Ctrl/Cmd+F inside this compact editor only
     const domNode = editor.getDomNode()
     if (domNode) {
-      const preventDrop = (event: DragEvent): void => {
-        event.preventDefault()
-        event.stopPropagation()
-      }
       const preventFind = (event: KeyboardEvent): void => {
         const isMac = navigator.platform.toLowerCase().includes('mac')
         const isCtrlOrCmd = isMac ? event.metaKey : event.ctrlKey
@@ -249,8 +201,6 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = ({
         }
       }
 
-      domNode.addEventListener('drop', preventDrop, true)
-      domNode.addEventListener('dragover', preventDrop, true)
       domNode.addEventListener('keydown', preventFind, true)
     }
 
@@ -295,21 +245,13 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = ({
           <div
             className="input variable-inputbox-editor"
             style={{ padding: '0 6px', width: '100%' }}
-            onDrop={(e) => {
-              // Prevent external drag & drop (e.g. tabs, rows) from inserting text into Monaco
-              e.preventDefault()
-            }}
-            onDragOver={(e) => {
-              e.preventDefault()
-            }}
           >
-            <Editor
+            <CodeEditor
               value={value}
               onChange={(v) => {
                 onChange(v ?? '')
               }}
               language={LANGUAGE_ID}
-              theme={THEME_ID}
               height={20}
               options={editorOptions}
               onMount={handleMount}

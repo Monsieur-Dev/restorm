@@ -66,9 +66,10 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 		const base: React.CSSProperties = {
 			position: 'absolute',
 			inset: 0,
-			pointerEvents: 'none',
-			backgroundColor: 'rgba(0, 0, 0, 0.20)', // 20% black
-			backdropFilter: 'blur(2px)', // slight blur
+			// Only start intercepting events when an editor tab is being dragged
+			pointerEvents: splitTarget && isEditorDrag ? 'auto' : 'none',
+			backgroundColor: 'rgba(0, 0, 0, 0.40)', // 20% black
+			//backdropFilter: 'blur(1px)', // slight blur (removed... too laggy)
 			transition: 'clip-path 150ms ease, opacity 120ms ease',
 			willChange: 'clip-path, opacity',
 			boxSizing: 'border-box',
@@ -239,7 +240,25 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 							);
 						})}
 				</div>
-				<div style={overlayStyle} />
+				<div
+					style={overlayStyle}
+					onDragEnter={(e) => {
+						onDragEnterGroup(e);
+						e.stopPropagation();
+					}}
+					onDragOver={(e) => {
+						onDragOverGroup(e);
+						e.stopPropagation();
+					}}
+					onDragLeave={(e) => {
+						onDragLeaveGroup(e);
+						e.stopPropagation();
+					}}
+					onDrop={(e) => {
+						onDropGroup(e);
+						e.stopPropagation();
+					}}
+				/>
 			</div>
 			<Modal
 				isOpen={fullscreenTabId !== null}
