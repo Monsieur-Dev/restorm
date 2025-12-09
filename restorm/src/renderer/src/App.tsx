@@ -17,12 +17,64 @@ import {
   Button,
   useSettingsModal
 } from 'electron-core-ui/renderer'
-import type { WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
+import type { WorkbenchTree, EditorTab, ContextMenuItem } from 'electron-core-ui/renderer'
 import { Workbench } from './components/Workbench'
 import { HttpMethodBadge } from './components/HttpMethodBadge'
 
 const MIN_LEFT_WIDTH = 180
 const RIGHT_MIN_WIDTH = 240
+
+const buildContextMenuForItem = (item: ListViewItemData): ContextMenuItem[] => {
+  const hasChildren = Array.isArray(item.children) && item.children.length > 0
+  const isFolder = item.isExpandable ?? hasChildren
+
+  if (isFolder) {
+    return [
+      {
+        id: 'create-child-folder',
+        label: 'Créer un sous-dossier',
+        icon: 'new-folder'
+      },
+      {
+        id: 'define-variables',
+        label: 'Définir les variables',
+        icon: 'symbol-variable'
+      },
+      { id: 'sep-folder', isSeparator: true, label: '' },
+      {
+        id: 'delete-folder',
+        label: 'Supprimer',
+        icon: 'trash'
+      }
+    ]
+  }
+
+  return [
+    {
+      id: 'clone-item',
+      label: 'Cloner',
+      icon: 'copy'
+    },
+    { id: 'sep-item', isSeparator: true, label: '' },
+    {
+      id: 'delete-item',
+      label: 'Supprimer',
+      icon: 'trash'
+    }
+  ]
+}
+
+const attachContextMenus = (items: ListViewItemData[]): ListViewItemData[] =>
+  items.map((item) => {
+    const withMenu: ListViewItemData = {
+      ...item,
+      contextMenuItems: buildContextMenuForItem(item)
+    }
+    if (item.children && item.children.length > 0) {
+      withMenu.children = attachContextMenus(item.children)
+    }
+    return withMenu
+  })
 
 const App: React.FC = () => {
   const { t } = useTranslation()
@@ -400,6 +452,11 @@ const App: React.FC = () => {
     [expandedIds]
   )
 
+  const sidebarItemsWithContextMenu: ListViewItemData[] = useMemo(
+    () => attachContextMenus(sidebarItems),
+    [sidebarItems]
+  )
+
   const workbenchTree: WorkbenchTree = useMemo(() => {
     const tabs: EditorTab[] = [
       {
@@ -584,7 +641,7 @@ const App: React.FC = () => {
               }
             >
               <ListView
-                items={sidebarItems}
+                items={sidebarItemsWithContextMenu}
                 rootRole="tree"
                 ariaLabel="Requests"
                 onItemToggle={(payload, expanded) => {

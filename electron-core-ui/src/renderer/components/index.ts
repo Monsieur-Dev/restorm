@@ -95,6 +95,10 @@ export type { StatusbarProps, StatusbarElementProps } from './Statusbar/index'
 export { Tooltip } from './Tooltip/index'
 export type { TooltipProps } from './Tooltip/index'
 
+// ContextMenu exports
+export { ContextMenu } from './ContextMenu/ContextMenu'
+export type { ContextMenuProps, ContextMenuItem } from './ContextMenu/ContextMenu'
+
 // InputTable exports
 export { InputTable } from './InputTable'
 export type { InputTableProps, InputTableColumn, InputTableRow, InputTableColumnType } from './InputTable'

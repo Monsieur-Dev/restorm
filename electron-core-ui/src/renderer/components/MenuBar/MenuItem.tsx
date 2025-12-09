@@ -8,6 +8,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
   onClick,
   checked = false,
   disabled = false,
+  icon,
   children,
   className = '',
   id
@@ -135,6 +136,13 @@ const MenuItem: React.FC<MenuItemProps> = ({
   }, [])
 
   const renderIcon = (): JSX.Element => {
+    if (icon) {
+      return (
+        <span className="codicon-placeholder" aria-hidden="true">
+          {icon}
+        </span>
+      )
+    }
     if (checked) {
       return <span className="codicon codicon-check" aria-hidden="true" />
     }

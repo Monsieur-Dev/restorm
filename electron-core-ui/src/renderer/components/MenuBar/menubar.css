@@ -166,7 +166,7 @@
 .action-item.separator {
 	height: 1px !important;
 	min-height: 1px !important;
-	margin: 4px 0 !important;
+	margin: 4px !important;
 	padding: 0 !important;
 }
 
@@ -177,6 +177,15 @@
 	border: none !important;
 	padding: 0 !important;
 	margin: 4px 8px !important;
+}
+
+/* Context menu specific tuning to avoid visual overflow */
+.ecui-context-menu .action-item.separator {
+	margin: 4px 0 !important;
+}
+
+.ecui-context-menu .action-menu-item.separator {
+	margin: 6px -2px !important;
 }
 
 /* Keybinding styles */

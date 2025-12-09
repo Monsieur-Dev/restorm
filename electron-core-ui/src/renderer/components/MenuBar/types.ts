@@ -12,6 +12,11 @@ export interface MenuItemProps {
   onClick?: () => void
   checked?: boolean
   disabled?: boolean
+  /**
+   * Optional leading icon for the menu item.
+   * When provided, it replaces the default checkmark placeholder.
+   */
+  icon?: React.ReactNode
   children?: React.ReactNode
   className?: string
   id?: string
