@@ -188,16 +188,10 @@ const App: React.FC = () => {
   // Selected item in the sidebar
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
 
-  // Workbench tree state (starts empty)
+  // Workbench tree state (starts with no groups)
   const [workbenchTree, setWorkbenchTree] = useState<WorkbenchTree>({
     orientation: 'vertical',
-    groups: [
-      {
-        id: 'restorm-main-group',
-        tabs: [],
-        activeTabId: ''
-      }
-    ]
+    groups: []
   })
 
   // Open a folder tab in the workbench
@@ -205,19 +199,6 @@ const App: React.FC = () => {
     const tabId = `folder-${folder.id}`
 
     setWorkbenchTree((prev) => {
-      const newTree = { ...prev }
-      const group = newTree.groups[0]
-      if (!group || !isTabGroupNode(group)) return prev
-
-      // Check if tab already exists
-      const existingTab = group.tabs.find((tab) => tab.id === tabId)
-      if (existingTab) {
-        return {
-          ...newTree,
-          groups: [{ ...group, activeTabId: tabId }]
-        }
-      }
-
       // Create new folder tab
       const newTab: FolderTab = {
         id: tabId,
@@ -229,8 +210,34 @@ const App: React.FC = () => {
         allowFullscreen: true
       }
 
+      const group = prev.groups[0]
+
+      // If no group exists, create one with the new tab
+      if (!group || !isTabGroupNode(group)) {
+        return {
+          ...prev,
+          groups: [
+            {
+              id: 'restorm-main-group',
+              tabs: [newTab],
+              activeTabId: tabId
+            }
+          ]
+        }
+      }
+
+      // Check if tab already exists
+      const existingTab = group.tabs.find((tab) => tab.id === tabId)
+      if (existingTab) {
+        return {
+          ...prev,
+          groups: [{ ...group, activeTabId: tabId }]
+        }
+      }
+
+      // Add tab to existing group
       return {
-        ...newTree,
+        ...prev,
         groups: [
           {
             ...group,
@@ -247,19 +254,6 @@ const App: React.FC = () => {
     const tabId = `request-${request.id}`
 
     setWorkbenchTree((prev) => {
-      const newTree = { ...prev }
-      const group = newTree.groups[0]
-      if (!group || !isTabGroupNode(group)) return prev
-
-      // Check if tab already exists
-      const existingTab = group.tabs.find((tab) => tab.id === tabId)
-      if (existingTab) {
-        return {
-          ...newTree,
-          groups: [{ ...group, activeTabId: tabId }]
-        }
-      }
-
       // Create new request tab
       const newTab: HTTPRequestTab = {
         id: tabId,
@@ -271,8 +265,34 @@ const App: React.FC = () => {
         allowFullscreen: true
       }
 
+      const group = prev.groups[0]
+
+      // If no group exists, create one with the new tab
+      if (!group || !isTabGroupNode(group)) {
+        return {
+          ...prev,
+          groups: [
+            {
+              id: 'restorm-main-group',
+              tabs: [newTab],
+              activeTabId: tabId
+            }
+          ]
+        }
+      }
+
+      // Check if tab already exists
+      const existingTab = group.tabs.find((tab) => tab.id === tabId)
+      if (existingTab) {
+        return {
+          ...prev,
+          groups: [{ ...group, activeTabId: tabId }]
+        }
+      }
+
+      // Add tab to existing group
       return {
-        ...newTree,
+        ...prev,
         groups: [
           {
             ...group,
