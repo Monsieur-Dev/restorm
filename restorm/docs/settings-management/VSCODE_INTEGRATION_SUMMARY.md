@@ -22,7 +22,7 @@ Ce document récapitule l'intégration complète du système de thèmes VSCode d
   - `/src/renderer/src/styles/themes/vscode-hc-dark.css` - High Contrast Dark
   - `/src/renderer/src/styles/themes/vscode-hc-light.css` - High Contrast Light
 
-Chaque thème contient ~150+ variables CSS (`--ecui-*`) pour :
+Chaque thème contient ~150+ variables CSS (`--vscode-*`) pour :
 - Couleurs d'éditeur (background, foreground, selection)
 - Couleurs UI (sidebar, panel, titlebar, statusbar)
 - Contrôles (input, dropdown, checkbox, button)
@@ -176,21 +176,21 @@ document.documentElement.setAttribute('data-theme', 'vscode-hc-light')
 ```tsx
 // En JSX
 <div style={{ 
-  color: 'var(--ecui-editor-foreground)',
-  backgroundColor: 'var(--ecui-editor-background)'
+  color: 'var(--vscode-editor-foreground)',
+  backgroundColor: 'var(--vscode-editor-background)'
 }}>
   Texte avec couleurs VSCode
 </div>
 
 // En CSS
 .my-component {
-  color: var(--ecui-foreground);
-  background-color: var(--ecui-input-background);
-  border: 1px solid var(--ecui-input-border);
+  color: var(--vscode-foreground);
+  background-color: var(--vscode-input-background);
+  border: 1px solid var(--vscode-input-border);
 }
 
 .my-component:focus {
-  outline: 1px solid var(--ecui-focusBorder);
+  outline: 1px solid var(--vscode-focusBorder);
 }
 ```
 

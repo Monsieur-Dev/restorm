@@ -98,7 +98,7 @@ export const Tabs: React.FC<TabsProps> = ({
           style={{
             display: 'flex',
             position: 'relative',
-            borderBottom: '1px solid var(--ecui-tab-border)',
+            borderBottom: '1px solid var(--vscode-tab-border)',
             height: '35px',
             minWidth: '100%'
           }}
@@ -126,11 +126,11 @@ export const Tabs: React.FC<TabsProps> = ({
                   padding: '0 12px',
                   height: '35px',
                   fontSize: '13px',
-                  fontFamily: 'var(--ecui-font-family)',
+                  fontFamily: 'var(--vscode-font-family)',
                   backgroundColor: 'transparent',
                   color: isActive
-                    ? 'var(--ecui-tab-active-text-color)'
-                    : 'var(--ecui-tab-inactiveForeground)',
+                    ? 'var(--vscode-tab-active-text-color)'
+                    : 'var(--vscode-tab-inactiveForeground)',
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
                   userSelect: 'none',
@@ -138,12 +138,12 @@ export const Tabs: React.FC<TabsProps> = ({
                 }}
                 onMouseEnter={(e) => {
                   if (!isActive) {
-                    e.currentTarget.style.color = 'var(--ecui-tab-active-text-color)'
+                    e.currentTarget.style.color = 'var(--vscode-tab-active-text-color)'
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!isActive) {
-                    e.currentTarget.style.color = 'var(--ecui-tab-inactiveForeground)'
+                    e.currentTarget.style.color = 'var(--vscode-tab-inactiveForeground)'
                   }
                 }}
               >
@@ -155,7 +155,7 @@ export const Tabs: React.FC<TabsProps> = ({
                       left: 0,
                       right: 0,
                       height: '2px',
-                      backgroundColor: 'var(--ecui-tab-activeBorder)',
+                      backgroundColor: 'var(--vscode-tab-activeBorder)',
                       zIndex: 10
                     }}
                   />
@@ -183,7 +183,7 @@ export const Tabs: React.FC<TabsProps> = ({
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.opacity = '1'
-                      e.currentTarget.style.backgroundColor = 'var(--ecui-toolbar-hoverBackground)'
+                      e.currentTarget.style.backgroundColor = 'var(--vscode-toolbar-hoverBackground)'
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.opacity = '0.7'
@@ -220,7 +220,7 @@ export const Tabs: React.FC<TabsProps> = ({
             options={{ vertical: 'auto', horizontal: 'auto', useShadows: true }}
             style={{
               flex: 1,
-              backgroundColor: 'var(--ecui-editor-background)',
+              backgroundColor: 'var(--vscode-editor-background)',
               minHeight: 0
             }}
           >
@@ -230,7 +230,7 @@ export const Tabs: React.FC<TabsProps> = ({
           <div
             style={{
               flex: 1,
-              backgroundColor: 'var(--ecui-editor-background)',
+              backgroundColor: 'var(--vscode-editor-background)',
               minHeight: 0,
               display: 'flex',
               flexDirection: 'column'

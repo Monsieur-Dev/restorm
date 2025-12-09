@@ -17,14 +17,21 @@ import {
   Button,
   useSettingsModal
 } from 'electron-core-ui/renderer'
-import type { WorkbenchTree, EditorTab, ContextMenuItem } from 'electron-core-ui/renderer'
+import type { WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
 import { Workbench } from './components/Workbench'
 import { HttpMethodBadge } from './components/HttpMethodBadge'
 
 const MIN_LEFT_WIDTH = 180
 const RIGHT_MIN_WIDTH = 240
 
-const buildContextMenuForItem = (item: ListViewItemData): ContextMenuItem[] => {
+type SidebarContextMenuItem = {
+  id: string
+  label: string
+  icon?: string
+  isSeparator?: boolean
+}
+
+const buildContextMenuForItem = (item: ListViewItemData): SidebarContextMenuItem[] => {
   const hasChildren = Array.isArray(item.children) && item.children.length > 0
   const isFolder = item.isExpandable ?? hasChildren
 
@@ -66,10 +73,10 @@ const buildContextMenuForItem = (item: ListViewItemData): ContextMenuItem[] => {
 
 const attachContextMenus = (items: ListViewItemData[]): ListViewItemData[] =>
   items.map((item) => {
-    const withMenu: ListViewItemData = {
+    const withMenu = {
       ...item,
       contextMenuItems: buildContextMenuForItem(item)
-    }
+    } as ListViewItemData
     if (item.children && item.children.length > 0) {
       withMenu.children = attachContextMenus(item.children)
     }
@@ -556,8 +563,8 @@ const App: React.FC = () => {
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
-        backgroundColor: 'var(--ecui-editor-background, #1e1e1e)',
-        color: 'var(--ecui-editor-foreground, #d4d4d4)'
+        backgroundColor: 'var(--vscode-editor-background, #1e1e1e)',
+        color: 'var(--vscode-editor-foreground, #d4d4d4)'
       }}
     >
       <Titlebar
@@ -603,8 +610,8 @@ const App: React.FC = () => {
             display: 'flex',
             flexDirection: 'column',
             minHeight: 0,
-            borderRight: '1px solid var(--ecui-sideBar-border, var(--ecui-panel-border))',
-            backgroundColor: 'var(--ecui-sideBar-background)'
+            borderRight: '1px solid var(--vscode-sideBar-border, var(--vscode-panel-border))',
+            backgroundColor: 'var(--vscode-sideBar-background)'
           }}
         >
           <SplitView

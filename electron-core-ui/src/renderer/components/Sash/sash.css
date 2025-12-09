@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 :root {
-	--ecui-sash-size: 4px;
-	--ecui-sash-hover-size: 8px;
+	--vscode-sash-size: 4px;
+	--vscode-sash-hover-size: 8px;
 }
 
 .monaco-sash {
@@ -50,7 +50,7 @@
 .monaco-sash.vertical {
 	cursor: ew-resize;
 	top: 0;
-	width: var(--ecui-sash-size);
+	width: var(--vscode-sash-size);
 	height: 100%;
 }
 
@@ -58,13 +58,13 @@
 	cursor: ns-resize;
 	left: 0;
 	width: 100%;
-	height: var(--ecui-sash-size);
+	height: var(--vscode-sash-size);
 }
 
 .monaco-sash:not(.disabled) > .orthogonal-drag-handle {
 	content: " ";
-	height: calc(var(--ecui-sash-size) * 2);
-	width: calc(var(--ecui-sash-size) * 2);
+	height: calc(var(--vscode-sash-size) * 2);
+	width: calc(var(--vscode-sash-size) * 2);
 	z-index: 100;
 	display: block;
 	cursor: all-scroll;
@@ -86,20 +86,20 @@
 }
 
 .monaco-sash.vertical > .orthogonal-drag-handle.start {
-	left: calc(var(--ecui-sash-size) * -0.5);
-	top: calc(var(--ecui-sash-size) * -1);
+	left: calc(var(--vscode-sash-size) * -0.5);
+	top: calc(var(--vscode-sash-size) * -1);
 }
 .monaco-sash.vertical > .orthogonal-drag-handle.end {
-	left: calc(var(--ecui-sash-size) * -0.5);
-	bottom: calc(var(--ecui-sash-size) * -1);
+	left: calc(var(--vscode-sash-size) * -0.5);
+	bottom: calc(var(--vscode-sash-size) * -1);
 }
 .monaco-sash.horizontal > .orthogonal-drag-handle.start {
-	top: calc(var(--ecui-sash-size) * -0.5);
-	left: calc(var(--ecui-sash-size) * -1);
+	top: calc(var(--vscode-sash-size) * -0.5);
+	left: calc(var(--vscode-sash-size) * -1);
 }
 .monaco-sash.horizontal > .orthogonal-drag-handle.end {
-	top: calc(var(--ecui-sash-size) * -0.5);
-	right: calc(var(--ecui-sash-size) * -1);
+	top: calc(var(--vscode-sash-size) * -0.5);
+	right: calc(var(--vscode-sash-size) * -1);
 }
 
 .monaco-sash:before {
@@ -115,20 +115,20 @@
 
 .monaco-sash.hover:before,
 .monaco-sash.active:before {
-	background: var(--ecui-sash-hoverBorder, var(--ecui-focusBorder, #007acc)) !important;
+	background: var(--vscode-sash-hoverBorder, var(--vscode-focusBorder, #007acc)) !important;
 	opacity: 1 !important;
 }
 
 .monaco-sash.vertical:before {
-	width: var(--ecui-sash-hover-size);
-	left: calc(50% - (var(--ecui-sash-hover-size) / 2));
+	width: var(--vscode-sash-hover-size);
+	left: calc(50% - (var(--vscode-sash-hover-size) / 2));
 	top: 0;
 	bottom: 0;
 }
 
 .monaco-sash.horizontal:before {
-	height: var(--ecui-sash-hover-size);
-	top: calc(50% - (var(--ecui-sash-hover-size) / 2));
+	height: var(--vscode-sash-hover-size);
+	top: calc(50% - (var(--vscode-sash-hover-size) / 2));
 	left: 0;
 	right: 0;
 }

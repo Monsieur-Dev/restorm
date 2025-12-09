@@ -18,8 +18,8 @@ const SplitViewTab: React.FC = () => {
           width: 260,
           minWidth: 200,
           maxWidth: 400,
-          borderRight: '1px solid var(--ecui-panel-border)',
-          backgroundColor: 'var(--ecui-sideBar-background)',
+          borderRight: '1px solid var(--vscode-panel-border)',
+          backgroundColor: 'var(--vscode-sideBar-background)',
           display: 'flex',
           flexDirection: 'column',
           minHeight: 0,
@@ -86,13 +86,13 @@ const SplitViewTab: React.FC = () => {
         style={{
           flex: 1,
           minWidth: 0,
-          backgroundColor: 'var(--ecui-editor-background)',
-          color: 'var(--ecui-editor-foreground)',
+          backgroundColor: 'var(--vscode-editor-background)',
+          color: 'var(--vscode-editor-foreground)',
           padding: '16px'
         }}
       >
         <h3 style={{ marginTop: 0 }}>Editor area</h3>
-        <p style={{ fontSize: 13, color: 'var(--ecui-descriptionForeground)' }}>
+        <p style={{ fontSize: 13, color: 'var(--vscode-descriptionForeground)' }}>
           This area represents the editor. The SplitView on the left reuses the same layout
           primitives as VS Code to stack multiple panes vertically.
         </p>

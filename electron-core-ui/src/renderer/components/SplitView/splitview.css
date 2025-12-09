@@ -49,8 +49,8 @@
 .monaco-split-view2 .split-view-view-header {
 	flex: 0 0 auto;
 	padding: 2px 8px;
-	color: var(--ecui-foreground);
-	background-color: var(--ecui-sideBarSectionHeader-background);
+	color: var(--vscode-foreground);
+	background-color: var(--vscode-sideBarSectionHeader-background);
 	font-size: 11px;
 	text-transform: uppercase;
 	font-weight: bold;
@@ -100,7 +100,7 @@
 .monaco-split-view2 .split-view-view-header-toggle {
 	border: none;
 	background: transparent;
-	color: var(--ecui-foreground);
+	color: var(--vscode-foreground);
 	cursor: pointer;
 	padding: 0;
 	margin: 0;
@@ -113,7 +113,7 @@
 }
 
 .monaco-split-view2 .split-view-view-header-toggle:hover {
-	color: var(--ecui-focusBorder);
+	color: var(--vscode-focusBorder);
 }
 
 .monaco-split-view2 .split-view-view-header .codicon:first-of-type {

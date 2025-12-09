@@ -114,7 +114,7 @@ export const Workbench: React.FC<WorkbenchProps> = ({
               flex: 1,
               minHeight: 0,
               minWidth: 0,
-              backgroundColor: 'var(--ecui-editor-background)'
+              backgroundColor: 'var(--vscode-editor-background)'
             }}
           >
             <FolderView />
@@ -132,8 +132,8 @@ export const Workbench: React.FC<WorkbenchProps> = ({
             flex: 1,
             minHeight: 0,
             padding: '8px 16px',
-            borderBottom: '1px solid var(--ecui-panel-border)',
-            backgroundColor: 'var(--ecui-editor-background)'
+            borderBottom: '1px solid var(--vscode-panel-border)',
+            backgroundColor: 'var(--vscode-editor-background)'
           }}
         >
           <HTTPRequestTabView requestTitle={titleString} />

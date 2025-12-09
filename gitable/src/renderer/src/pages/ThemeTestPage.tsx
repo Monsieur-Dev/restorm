@@ -146,8 +146,8 @@ const ThemeTestPage: React.FC = () => {
         flexDirection: 'column',
         minHeight: '100vh',
         height: '100vh',
-        backgroundColor: 'var(--ecui-editor-background)',
-        color: 'var(--ecui-editor-foreground)'
+        backgroundColor: 'var(--vscode-editor-background)',
+        color: 'var(--vscode-editor-foreground)'
       }}
     >
       {/* Titlebar with MenuBar */}
@@ -243,7 +243,7 @@ const ThemeTestPage: React.FC = () => {
             style={{
               background: 'none',
               border: 'none',
-              color: 'var(--ecui-titleBar-activeForeground)',
+              color: 'var(--vscode-titleBar-activeForeground)',
               cursor: 'pointer',
               padding: '4px 8px',
               display: 'flex',
@@ -262,8 +262,8 @@ const ThemeTestPage: React.FC = () => {
       <div
         style={{
           padding: '20px',
-          borderBottom: '1px solid var(--ecui-panel-border)',
-          backgroundColor: 'var(--ecui-sideBar-background)'
+          borderBottom: '1px solid var(--vscode-panel-border)',
+          backgroundColor: 'var(--vscode-sideBar-background)'
         }}
       >
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
@@ -273,7 +273,7 @@ const ThemeTestPage: React.FC = () => {
           <p
             style={{
               margin: '0 0 15px 0',
-              color: 'var(--ecui-descriptionForeground)',
+              color: 'var(--vscode-descriptionForeground)',
               fontSize: '14px'
             }}
           >

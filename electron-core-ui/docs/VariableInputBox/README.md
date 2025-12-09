@@ -71,7 +71,7 @@ export interface VariableInputBoxProps {
 - **Theming**:
   - Uses `data-theme` (`dark`, `light`, `hc`, `hcLight`) to select `vs-dark` or `vs`.
   - A `MutationObserver` re-applies the Monaco theme whenever `data-theme` changes.
-  - The Monaco editor background is transparent so the `InputBox` background (`--ecui-input-background`) remains visible.
+  - The Monaco editor background is transparent so the `InputBox` background (`--vscode-input-background`) remains visible.
 
 ## Usage Examples
 

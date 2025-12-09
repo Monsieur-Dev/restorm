@@ -38,8 +38,8 @@ body {
 	font-size: 11px;
 	user-select: none;
 	-webkit-user-select: none;
-	background-color: var(--ecui-editor-background);
-	color: var(--ecui-foreground);
+	background-color: var(--vscode-editor-background);
+	color: var(--vscode-foreground);
 }
 
 .monaco-workbench {
@@ -49,12 +49,12 @@ body {
 	inset: 0;
 	z-index: 1;
 	overflow: hidden;
-	color: var(--ecui-foreground);
-	background-color: var(--ecui-editor-background);
+	color: var(--vscode-foreground);
+	background-color: var(--vscode-editor-background);
 	width: 100%;
 	height: 100%;
 	box-sizing: border-box;
-	border: 1px solid var(--window-border-color, var(--ecui-panel-border)) !important;
+	border: 1px solid var(--window-border-color, var(--vscode-panel-border)) !important;
 	border-radius: 2px;
 }
 
@@ -137,13 +137,13 @@ body {
 	font-size: inherit;
 }
 
-.monaco-workbench input::placeholder { color: var(--ecui-input-placeholderForeground); }
-.monaco-workbench input::-webkit-input-placeholder  { color: var(--ecui-input-placeholderForeground); }
-.monaco-workbench input::-moz-placeholder { color: var(--ecui-input-placeholderForeground); }
+.monaco-workbench input::placeholder { color: var(--vscode-input-placeholderForeground); }
+.monaco-workbench input::-webkit-input-placeholder  { color: var(--vscode-input-placeholderForeground); }
+.monaco-workbench input::-moz-placeholder { color: var(--vscode-input-placeholderForeground); }
 
-.monaco-workbench textarea::placeholder { color: var(--ecui-input-placeholderForeground); }
-.monaco-workbench textarea::-webkit-input-placeholder { color: var(--ecui-input-placeholderForeground); }
-.monaco-workbench textarea::-moz-placeholder { color: var(--ecui-input-placeholderForeground); }
+.monaco-workbench textarea::placeholder { color: var(--vscode-input-placeholderForeground); }
+.monaco-workbench textarea::-webkit-input-placeholder { color: var(--vscode-input-placeholderForeground); }
+.monaco-workbench textarea::-moz-placeholder { color: var(--vscode-input-placeholderForeground); }
 
 .monaco-workbench .pointer {
 	cursor: pointer;
@@ -172,11 +172,11 @@ body {
 
 /* Default codicon color (used outside and inside the workbench) */
 .codicon {
-	color: var(--ecui-icon-foreground, #000000);
+	color: var(--vscode-icon-foreground, #000000);
 }
 
 .monaco-workbench .codicon {
-	color: var(--ecui-icon-foreground, #000000);
+	color: var(--vscode-icon-foreground, #000000);
 }
 
 .monaco-workbench .codicon[class*='codicon-'] {
@@ -217,8 +217,8 @@ body {
 }
 
 .monaco-workbench .select-container:after {
-	content: var(--ecui-icon-chevron-down-content);
-	font-family: var(--ecui-icon-chevron-down-font-family);
+	content: var(--vscode-icon-chevron-down-content);
+	font-family: var(--vscode-icon-chevron-down-font-family);
 	font-size: 16px;
 	width: 16px;
 	height: 16px;
@@ -246,7 +246,7 @@ body {
 	outline-width: 1px;
 	outline-style: solid;
 	outline-offset: -1px;
-	outline-color: var(--ecui-focusBorder);
+	outline-color: var(--vscode-focusBorder);
 	opacity: 1;
 }
 
@@ -284,15 +284,15 @@ body {
 	outline-width: 1px;
 	outline-style: solid;
 	outline-offset: -1px;
-	outline-color: var(--ecui-focusBorder);
+	outline-color: var(--vscode-focusBorder);
 }
 
 .monaco-workbench .monaco-list .monaco-list-row .monaco-highlighted-label .highlight {
-	color: var(--ecui-list-highlightForeground);
+	color: var(--vscode-list-highlightForeground);
 }
 
 .monaco-workbench .monaco-list .monaco-list-row.focused .monaco-highlighted-label .highlight {
-	color: var(--ecui-list-focusHighlightForeground);
+	color: var(--vscode-list-focusHighlightForeground);
 }
 
 .monaco-workbench .synthetic-focus :focus {
@@ -318,16 +318,16 @@ body {
 
 .monaco-workbench .monaco-action-bar:not(.vertical) .action-label:not(.disabled):hover,
 .monaco-workbench .monaco-action-bar:not(.vertical) .monaco-dropdown-with-primary:not(.disabled):hover {
-	background-color: var(--ecui-toolbar-hoverBackground);
+	background-color: var(--vscode-toolbar-hoverBackground);
 }
 
 .monaco-workbench .monaco-action-bar:not(.vertical) .action-item.active .action-label:not(.disabled),
 .monaco-workbench .monaco-action-bar:not(.vertical) .monaco-dropdown.active .action-label:not(.disabled) {
-	background-color: var(--ecui-toolbar-activeBackground);
+	background-color: var(--vscode-toolbar-activeBackground);
 }
 
 .monaco-workbench .monaco-action-bar:not(.vertical) .action-item .action-label:hover:not(.disabled) {
-	outline: 1px dashed var(--ecui-toolbar-hoverOutline);
+	outline: 1px dashed var(--vscode-toolbar-hoverOutline);
 	outline-offset: -1px;
 }
 

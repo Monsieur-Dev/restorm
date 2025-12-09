@@ -763,9 +763,9 @@ const WorkbenchTab: React.FC = () => {
             position: 'fixed',
             top: contextMenu.y,
             left: contextMenu.x,
-            backgroundColor: 'var(--ecui-editor-background)',
-            color: 'var(--ecui-editor-foreground)',
-            border: '1px solid var(--ecui-menu-border, var(--ecui-dropdown-border))',
+            backgroundColor: 'var(--vscode-editor-background)',
+            color: 'var(--vscode-editor-foreground)',
+            border: '1px solid var(--vscode-menu-border, var(--vscode-dropdown-border))',
             boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
             zIndex: 1000,
             minWidth: 140

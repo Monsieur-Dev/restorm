@@ -67,7 +67,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                 <MenuItem
                   key={item.id}
                   title={item.label}
-                  disabled={item.disabled}
+                  disabled={!!item.disabled}
                   icon={
                     item.icon ? (
                       <i

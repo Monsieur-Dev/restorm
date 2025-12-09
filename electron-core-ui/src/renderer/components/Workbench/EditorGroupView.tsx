@@ -251,7 +251,7 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 						e.stopPropagation();
 					}}
 					onDragLeave={(e) => {
-						onDragLeaveGroup(e);
+						onDragLeaveGroup();
 						e.stopPropagation();
 					}}
 					onDrop={(e) => {

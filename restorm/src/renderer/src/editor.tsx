@@ -11,7 +11,7 @@ import frTranslation from '../locales/fr/translation.json'
 
 // Initialize i18n using core-ui's initializeI18n function
 // This prevents double initialization and sets up the plugin
-const initI18n = (): Promise<void> => {
+const initI18n = (): Promise<unknown> => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
   const promise: Promise<unknown> = initializeI18n({
     en: { translation: enTranslation },

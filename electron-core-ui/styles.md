@@ -34,8 +34,8 @@ These are custom CSS variables defined within the project components.
 |------|-------------|---------------|
 | `--dropdown-padding-top` | Padding top for dropdown items | `1px` (mac: `3px`) |
 | `--dropdown-padding-bottom` | Padding bottom for dropdown items | `1px` (mac: `4px`) |
-| `--ecui-sash-size` | Size of sash divider | `4px` |
-| `--ecui-sash-hover-size` | Hover size of sash divider | `8px` |
+| `--vscode-sash-size` | Size of sash divider | `4px` |
+| `--vscode-sash-hover-size` | Hover size of sash divider | `8px` |
 | `--editor-group-tab-height` | Height of editor tabs | `35px` |
 | `--monaco-monospace-font` | Monospace font family | Platform-dependent |
 | `--text-link-decoration` | Text link decoration style | `underline` |
@@ -329,7 +329,7 @@ These are custom CSS variables defined within the project components.
 
 - `-` indicates the variable is not defined in that theme (inherits from base or uses default)
 - Theme numbers correspond to the Theme Legend table above
-- CSS variables are used as `var(--ecui-{property})` in the code
+- CSS variables are used as `var(--vscode-{property})` in the code
 - Some themes extend others (e.g., Dark+ extends dark_vs, Dark Modern extends Dark+)
 - High Contrast themes (16, 17) have special accessibility considerations
 

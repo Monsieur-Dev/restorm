@@ -133,8 +133,8 @@ export const FolderView: React.FC = () => {
           display: 'flex',
           flexDirection: 'column',
           minHeight: 0,
-          borderRight: '1px solid var(--ecui-sideBar-border, var(--ecui-panel-border))',
-          backgroundColor: 'var(--ecui-sideBar-background)'
+          borderRight: '1px solid var(--vscode-sideBar-border, var(--vscode-panel-border))',
+          backgroundColor: 'var(--vscode-sideBar-background)'
         }}
       >
         <SplitView
@@ -196,7 +196,7 @@ export const FolderView: React.FC = () => {
           display: 'flex',
           padding: '8px 16px',
           boxSizing: 'border-box',
-          backgroundColor: 'var(--ecui-editor-background)'
+          backgroundColor: 'var(--vscode-editor-background)'
         }}
       >
         <SplitView

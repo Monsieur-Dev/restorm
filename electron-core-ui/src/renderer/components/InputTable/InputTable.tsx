@@ -142,9 +142,9 @@ export const InputTable: React.FC<InputTableProps> = ({
           type="button"
           onClick={handleAddRow}
           style={{
-            border: '1px solid var(--ecui-button-border)',
-            backgroundColor: 'var(--ecui-button-secondaryBackground)',
-            color: 'var(--ecui-button-secondaryForeground)',
+            border: '1px solid var(--vscode-button-border)',
+            backgroundColor: 'var(--vscode-button-secondaryBackground)',
+            color: 'var(--vscode-button-secondaryForeground)',
             padding: '2px 8px',
             borderRadius: 2,
             fontSize: 12,

@@ -87,7 +87,7 @@ const StickHeadersTab: React.FC = () => {
           style={{
             flex: '0 0 50%',
             height: '50%',
-            border: '1px solid var(--ecui-panel-border)',
+            border: '1px solid var(--vscode-panel-border)',
             boxSizing: 'border-box',
             padding: 8,
             overflow: 'hidden'

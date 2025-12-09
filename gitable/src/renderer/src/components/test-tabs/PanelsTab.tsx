@@ -6,8 +6,8 @@ const PanelsTab: React.FC = () => {
         <div
           style={{
             padding: '16px',
-            backgroundColor: 'var(--ecui-sideBar-background)',
-            border: '1px solid var(--ecui-panel-border)',
+            backgroundColor: 'var(--vscode-sideBar-background)',
+            border: '1px solid var(--vscode-panel-border)',
             borderRadius: '4px'
           }}
         >
@@ -16,7 +16,7 @@ const PanelsTab: React.FC = () => {
             style={{
               margin: 0,
               fontSize: '13px',
-              color: 'var(--ecui-descriptionForeground)'
+              color: 'var(--vscode-descriptionForeground)'
             }}
           >
             This is a panel with sidebar background color and border.
@@ -25,12 +25,12 @@ const PanelsTab: React.FC = () => {
 
         <div
           style={{
-            border: '1px solid var(--ecui-panel-border)',
+            border: '1px solid var(--vscode-panel-border)',
             borderRadius: '4px',
             overflow: 'hidden'
           }}
         >
-          <h3 style={{ margin: '0', padding: '12px', fontSize: '14px', backgroundColor: 'var(--ecui-sideBar-background)', borderBottom: '1px solid var(--ecui-panel-border)' }}>List</h3>
+          <h3 style={{ margin: '0', padding: '12px', fontSize: '14px', backgroundColor: 'var(--vscode-sideBar-background)', borderBottom: '1px solid var(--vscode-panel-border)' }}>List</h3>
           {['Item 1', 'Item 2 (hover me)', 'Item 3'].map((item, index) => (
             <div
               key={index}
@@ -38,22 +38,22 @@ const PanelsTab: React.FC = () => {
                 padding: '10px 12px',
                 fontSize: '13px',
                 backgroundColor: index === 0 
-                  ? 'var(--ecui-list-activeSelectionBackground)' 
-                  : 'var(--ecui-sideBar-background)',
+                  ? 'var(--vscode-list-activeSelectionBackground)' 
+                  : 'var(--vscode-sideBar-background)',
                 color: index === 0
-                  ? 'var(--ecui-list-activeSelectionForeground)'
-                  : 'var(--ecui-foreground)',
-                borderBottom: index < 2 ? '1px solid var(--ecui-panel-border)' : 'none',
+                  ? 'var(--vscode-list-activeSelectionForeground)'
+                  : 'var(--vscode-foreground)',
+                borderBottom: index < 2 ? '1px solid var(--vscode-panel-border)' : 'none',
                 cursor: 'pointer'
               }}
               onMouseEnter={(e) => {
                 if (index !== 0) {
-                  e.currentTarget.style.backgroundColor = 'var(--ecui-list-hoverBackground)'
+                  e.currentTarget.style.backgroundColor = 'var(--vscode-list-hoverBackground)'
                 }
               }}
               onMouseLeave={(e) => {
                 if (index !== 0) {
-                  e.currentTarget.style.backgroundColor = 'var(--ecui-sideBar-background)'
+                  e.currentTarget.style.backgroundColor = 'var(--vscode-sideBar-background)'
                 }
               }}
             >

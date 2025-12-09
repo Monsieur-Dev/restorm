@@ -89,7 +89,7 @@ test.describe('VSCode Themes Visual Tests', () => {
       // Verify theme is applied by checking CSS variables
       const backgroundColor = await page.evaluate(() => {
         return getComputedStyle(document.documentElement)
-          .getPropertyValue('--ecui-editor-background')
+          .getPropertyValue('--vscode-editor-background')
       })
 
       expect(backgroundColor).toBeTruthy()

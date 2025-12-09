@@ -52,7 +52,7 @@ test.describe('Settings Page - VSCode Theme Integration', () => {
     
     // Check that VSCode CSS variables are defined
     const editorBg = await page.evaluate(() => {
-      return getComputedStyle(document.documentElement).getPropertyValue('--ecui-editor-background')
+      return getComputedStyle(document.documentElement).getPropertyValue('--vscode-editor-background')
     })
     expect(editorBg).toBeTruthy()
     expect(editorBg.trim()).not.toBe('')

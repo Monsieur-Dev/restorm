@@ -97,8 +97,8 @@ const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
           aria-disabled={options.disabled}
           aria-label={options.ariaLabel ?? label}
           style={{
-            color: 'var(--ecui-button-foreground)',
-            backgroundColor: 'var(--ecui-button-background)'
+            color: 'var(--vscode-button-foreground)',
+            backgroundColor: 'var(--vscode-button-background)'
           }}
         >
           {icon && <span className={`codicon codicon-${icon}`} />}

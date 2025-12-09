@@ -108,13 +108,13 @@ function MyComponent() {
 
 ### Using CSS Variables
 
-All theme colors are available as CSS variables with the `--ecui-` prefix:
+All theme colors are available as CSS variables with the `--vscode-` prefix:
 
 ```css
 .my-element {
-  background-color: var(--ecui-editor-background);
-  color: var(--ecui-editor-foreground);
-  border: 1px solid var(--ecui-panel-border);
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+  border: 1px solid var(--vscode-panel-border);
 }
 ```
 
@@ -122,21 +122,21 @@ All theme colors are available as CSS variables with the `--ecui-` prefix:
 
 | Variable | Description |
 |----------|-------------|
-| `--ecui-editor-background` | Main editor background |
-| `--ecui-editor-foreground` | Main editor text color |
-| `--ecui-input-background` | Input field background |
-| `--ecui-input-foreground` | Input field text color |
-| `--ecui-input-border` | Input field border |
-| `--ecui-button-background` | Primary button background |
-| `--ecui-button-foreground` | Primary button text |
-| `--ecui-button-hoverBackground` | Button hover state |
-| `--ecui-dropdown-background` | Dropdown/select background |
-| `--ecui-dropdown-border` | Dropdown/select border |
-| `--ecui-list-activeSelectionBackground` | Selected list item |
-| `--ecui-list-hoverBackground` | Hovered list item |
-| `--ecui-panel-border` | Panel/section borders |
-| `--ecui-sideBar-background` | Sidebar background |
-| `--ecui-descriptionForeground` | Muted/description text |
+| `--vscode-editor-background` | Main editor background |
+| `--vscode-editor-foreground` | Main editor text color |
+| `--vscode-input-background` | Input field background |
+| `--vscode-input-foreground` | Input field text color |
+| `--vscode-input-border` | Input field border |
+| `--vscode-button-background` | Primary button background |
+| `--vscode-button-foreground` | Primary button text |
+| `--vscode-button-hoverBackground` | Button hover state |
+| `--vscode-dropdown-background` | Dropdown/select background |
+| `--vscode-dropdown-border` | Dropdown/select border |
+| `--vscode-list-activeSelectionBackground` | Selected list item |
+| `--vscode-list-hoverBackground` | Hovered list item |
+| `--vscode-panel-border` | Panel/section borders |
+| `--vscode-sideBar-background` | Sidebar background |
+| `--vscode-descriptionForeground` | Muted/description text |
 
 ## Testing
 
@@ -207,7 +207,7 @@ You can override specific colors by setting CSS variables after the theme is app
 
 ```typescript
 document.documentElement.style.setProperty(
-  '--ecui-editor-background',
+  '--vscode-editor-background',
   '#000000'
 )
 ```

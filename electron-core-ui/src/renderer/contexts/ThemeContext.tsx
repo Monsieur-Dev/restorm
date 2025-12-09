@@ -57,8 +57,8 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
   const updateWCOColors = useCallback(async (): Promise<void> => {
     const root = document.documentElement
     const computedStyle = getComputedStyle(root)
-    const backgroundColor = computedStyle.getPropertyValue('--ecui-titleBar-activeBackground').trim() || '#181818'
-    const symbolColor = computedStyle.getPropertyValue('--ecui-titleBar-activeForeground').trim() || '#cccccc'
+    const backgroundColor = computedStyle.getPropertyValue('--vscode-titleBar-activeBackground').trim() || '#181818'
+    const symbolColor = computedStyle.getPropertyValue('--vscode-titleBar-activeForeground').trim() || '#cccccc'
     const bgHex = cssColorToHex(backgroundColor)
     const symbolHex = cssColorToHex(symbolColor)
     try {
@@ -83,7 +83,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
 
   const applyCSSVariables = useCallback((variables: ThemeVariables): void => {
     const root = document.documentElement
-    const existingVars = Array.from(root.style).filter(prop => prop.startsWith('--ecui-'))
+    const existingVars = Array.from(root.style).filter(prop => prop.startsWith('--vscode-'))
     existingVars.forEach(prop => { root.style.removeProperty(prop) })
     Object.entries(variables).forEach(([key, value]) => { root.style.setProperty(key, value) })
     setTimeout(() => {
@@ -166,8 +166,6 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
           return !!id && list.some(t => t.id === id)
         }
 
-        const _originalThemeId = themeId
-
         // Migrate legacy theme IDs
         if (themeId && !isValidThemeId(themeId, themeList)) {
           const legacyThemeId = String(themeId)
@@ -212,7 +210,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
           
           if (themeData) {
             const root = document.documentElement
-            const existingVars = Array.from(root.style).filter(prop => prop.startsWith('--ecui-'))
+            const existingVars = Array.from(root.style).filter(prop => prop.startsWith('--vscode-'))
             existingVars.forEach(prop => { root.style.removeProperty(prop) })
             Object.entries(themeData.variables).forEach(([key, value]) => { root.style.setProperty(key, value) })
             
@@ -257,7 +255,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
           const themeData = await window.api.theme.load(themeId)
           if (themeData) {
             const root = document.documentElement
-            const existingVars = Array.from(root.style).filter(prop => prop.startsWith('--ecui-'))
+            const existingVars = Array.from(root.style).filter(prop => prop.startsWith('--vscode-'))
             existingVars.forEach(prop => { root.style.removeProperty(prop) })
             Object.entries(themeData.variables).forEach(([key, value]) => { root.style.setProperty(key, value) })
             
