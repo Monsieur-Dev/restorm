@@ -17,9 +17,10 @@ import {
   Button,
   useSettingsModal,
   isTabGroupNode,
+  isContainerNode,
   navigationService
 } from 'electron-core-ui/renderer'
-import type { WorkbenchTree, NavigationEvent } from 'electron-core-ui/renderer'
+import type { WorkbenchTree, NavigationEvent, GroupNode, TabGroupNode } from 'electron-core-ui/renderer'
 import { Workbench } from './components/Workbench'
 import { Welcome } from './components/Welcome'
 import { HttpMethodBadge } from './components/HttpMethodBadge'
@@ -223,12 +224,78 @@ const App: React.FC = () => {
     groups: []
   })
 
+  // ===========================================================================
+  // Workbench helpers
+  // ===========================================================================
+
+  /** Find the ID of the first tab group in a potentially nested workbench tree */
+  const findFirstTabGroupId = useCallback((nodes: GroupNode[]): string | null => {
+    for (const node of nodes) {
+      if (isTabGroupNode(node)) {
+        return node.id
+      }
+      if (isContainerNode(node)) {
+        const childId = findFirstTabGroupId(node.groups)
+        if (childId) return childId
+      }
+    }
+    return null
+  }, [])
+
+  /** Check if a group with the given ID exists anywhere in the tree */
+  const hasGroupWithId = useCallback((nodes: GroupNode[], groupId: string): boolean => {
+    for (const node of nodes) {
+      if (isTabGroupNode(node)) {
+        if (node.id === groupId) return true
+      } else if (isContainerNode(node)) {
+        if (hasGroupWithId(node.groups, groupId)) return true
+      }
+    }
+    return false
+  }, [])
+
+  /** Find the ID of the group containing a tab with the given ID */
+  const findGroupIdForTab = useCallback((nodes: GroupNode[], tabId: string): string | null => {
+    for (const node of nodes) {
+      if (isTabGroupNode(node)) {
+        if (node.tabs.some((tab) => tab.id === tabId)) {
+          return node.id
+        }
+      } else if (isContainerNode(node)) {
+        const childId = findGroupIdForTab(node.groups, tabId)
+        if (childId) return childId
+      }
+    }
+    return null
+  }, [])
+
+  /** Update a specific tab group by ID anywhere in the tree */
+  const updateGroupById = useCallback(
+    (nodes: GroupNode[], groupId: string, updater: (group: TabGroupNode) => TabGroupNode): GroupNode[] => {
+      return nodes.map((node) => {
+        if (isTabGroupNode(node)) {
+          if (node.id === groupId) {
+            return updater(node)
+          }
+          return node
+        }
+        if (isContainerNode(node)) {
+          return {
+            ...node,
+            groups: updateGroupById(node.groups, groupId, updater)
+          }
+        }
+        return node
+      })
+    },
+    []
+  )
+
   // Open a folder tab in the workbench
   const openFolderTab = useCallback((folder: Folder, breadcrumbs: BreadcrumbItem[]) => {
     const tabId = `folder-${folder.id}`
 
     setWorkbenchTree((prev) => {
-      // Create new folder tab
       const newTab: FolderTab = {
         id: tabId,
         tabType: 'folder',
@@ -239,10 +306,8 @@ const App: React.FC = () => {
         allowFullscreen: true
       }
 
-      const group = prev.groups[0]
-
-      // If no group exists, create one with the new tab
-      if (!group || !isTabGroupNode(group)) {
+      // No groups yet: create the main group with this tab
+      if (prev.groups.length === 0) {
         return {
           ...prev,
           groups: [
@@ -255,28 +320,48 @@ const App: React.FC = () => {
         }
       }
 
-      // Check if tab already exists
-      const existingTab = group.tabs.find((tab) => tab.id === tabId)
-      if (existingTab) {
+      // If tab already exists anywhere, just activate it in its group
+      const existingGroupId = findGroupIdForTab(prev.groups, tabId)
+      if (existingGroupId) {
         return {
           ...prev,
-          groups: [{ ...group, activeTabId: tabId }]
+          groups: updateGroupById(prev.groups, existingGroupId, (group) => ({
+            ...group,
+            activeTabId: tabId
+          }))
         }
       }
 
-      // Add tab to existing group
-      return {
-        ...prev,
-        groups: [
-          {
+      // Otherwise, add the tab to the currently focused group when possible
+      const preferredGroupId =
+        focusedGroupId && hasGroupWithId(prev.groups, focusedGroupId) ? focusedGroupId : null
+
+      const targetGroupId =
+        preferredGroupId && hasGroupWithId(prev.groups, preferredGroupId)
+          ? preferredGroupId
+          : findFirstTabGroupId(prev.groups) ?? 'restorm-main-group'
+
+      const updatedGroups = hasGroupWithId(prev.groups, targetGroupId)
+        ? updateGroupById(prev.groups, targetGroupId, (group) => ({
             ...group,
             tabs: [...group.tabs, newTab],
             activeTabId: tabId
-          }
-        ]
+          }))
+        : [
+            ...prev.groups,
+            {
+              id: targetGroupId,
+              tabs: [newTab],
+              activeTabId: tabId
+            }
+          ]
+
+      return {
+        ...prev,
+        groups: updatedGroups
       }
     })
-  }, [])
+  }, [findFirstTabGroupId, findGroupIdForTab, focusedGroupId, hasGroupWithId, updateGroupById])
 
   // Open an HTTP request tab in the workbench
   const openRequestTab = useCallback(
@@ -284,22 +369,19 @@ const App: React.FC = () => {
     const tabId = `request-${request.id}`
 
     setWorkbenchTree((prev) => {
-      // Create new request tab
       const newTab: HTTPRequestTab = {
         id: tabId,
         tabType: 'http-request',
-          title: `${request.method} ${request.name}`,
-          titleString: `${request.method} ${request.name}`,
-          request,
-          breadcrumbs,
-          environments,
-          allowFullscreen: true
+        title: `${request.method} ${request.name}`,
+        titleString: `${request.method} ${request.name}`,
+        request,
+        breadcrumbs,
+        environments,
+        allowFullscreen: true
       }
 
-      const group = prev.groups[0]
-
-      // If no group exists, create one with the new tab
-      if (!group || !isTabGroupNode(group)) {
+      // No groups yet: create the main group with this tab
+      if (prev.groups.length === 0) {
         return {
           ...prev,
           groups: [
@@ -312,29 +394,49 @@ const App: React.FC = () => {
         }
       }
 
-      // Check if tab already exists
-      const existingTab = group.tabs.find((tab) => tab.id === tabId)
-      if (existingTab) {
+      // If tab already exists anywhere, just activate it in its group
+      const existingGroupId = findGroupIdForTab(prev.groups, tabId)
+      if (existingGroupId) {
         return {
           ...prev,
-          groups: [{ ...group, activeTabId: tabId }]
+          groups: updateGroupById(prev.groups, existingGroupId, (group) => ({
+            ...group,
+            activeTabId: tabId
+          }))
         }
       }
 
-      // Add tab to existing group
-      return {
-        ...prev,
-        groups: [
-          {
+      // Otherwise, add the tab to the currently focused group when possible
+      const preferredGroupId =
+        focusedGroupId && hasGroupWithId(prev.groups, focusedGroupId) ? focusedGroupId : null
+
+      const targetGroupId =
+        preferredGroupId && hasGroupWithId(prev.groups, preferredGroupId)
+          ? preferredGroupId
+          : findFirstTabGroupId(prev.groups) ?? 'restorm-main-group'
+
+      const updatedGroups = hasGroupWithId(prev.groups, targetGroupId)
+        ? updateGroupById(prev.groups, targetGroupId, (group) => ({
             ...group,
             tabs: [...group.tabs, newTab],
             activeTabId: tabId
-          }
-        ]
+          }))
+        : [
+            ...prev.groups,
+            {
+              id: targetGroupId,
+              tabs: [newTab],
+              activeTabId: tabId
+            }
+          ]
+
+      return {
+        ...prev,
+        groups: updatedGroups
       }
     })
   },
-    []
+    [findFirstTabGroupId, findGroupIdForTab, focusedGroupId, hasGroupWithId, updateGroupById]
   )
 
   // Handle navigation events from NavigationService
