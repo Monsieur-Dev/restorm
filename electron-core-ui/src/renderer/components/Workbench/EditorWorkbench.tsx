@@ -635,11 +635,26 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 			style={{ display: 'flex', flex: 1, minWidth: 0, minHeight: 0, ...style }}
 		>
 			<div className="content" style={{ display: 'flex', flex: 1, minWidth: 0, minHeight: 0 }}>
-				<GroupContainer
-					node={{ id: 'root', orientation: tree.orientation as Orientation, groups: tree.groups }}
-					callbacks={extCallbacks}
-					renderLeaf={leafRenderer}
-				/>
+				{tree.groups.length === 0 ? (
+					<div
+						style={{
+							display: 'flex',
+							flex: 1,
+							alignItems: 'center',
+							justifyContent: 'center',
+							color: 'var(--vscode-descriptionForeground)',
+							backgroundColor: 'var(--vscode-editor-background)'
+						}}
+					>
+						<span>No tabs open</span>
+					</div>
+				) : (
+					<GroupContainer
+						node={{ id: 'root', orientation: tree.orientation as Orientation, groups: tree.groups }}
+						callbacks={extCallbacks}
+						renderLeaf={leafRenderer}
+					/>
+				)}
 			</div>
 		</div>
 	);
