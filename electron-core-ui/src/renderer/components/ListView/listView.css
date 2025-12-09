@@ -37,7 +37,8 @@
   color: var(--vscode-list-activeSelectionForeground);
 }
 
-.list-view-row.is-active:not(.is-selected) {
+/* Only show active outline when the list has focus */
+.list-view:focus-within .list-view-row.is-active:not(.is-selected) {
   outline: 1px solid var(--vscode-focusBorder);
   outline-offset: -1px;
 }
