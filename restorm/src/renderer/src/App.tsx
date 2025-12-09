@@ -26,7 +26,7 @@ import { HttpMethodBadge } from './components/HttpMethodBadge'
 import { importSwaggerFromJson } from './services/SwaggerImportService'
 import { folderAsRootListViewItem, collectAllFolderIds } from './services/FolderToListView'
 import swaggerPetstoreJson from './resources/swagger-petstore.json'
-import type { Folder, FolderItem, HTTPRequest } from './types/collections'
+import type { Folder, FolderItem, HTTPRequest, Environment } from './types/collections'
 import { isFolder, isRequest, isHTTPRequest } from './types/collections'
 import type { FolderTab, HTTPRequestTab, BreadcrumbItem } from './types/editor'
 
@@ -153,6 +153,31 @@ function findItemWithBreadcrumbs(
   return { item: null, breadcrumbs: [] }
 }
 
+/** Get environments from the nearest ancestor folder that defines them */
+function getNearestEnvironmentsForBreadcrumbs(
+  rootFolder: Folder,
+  breadcrumbs: BreadcrumbItem[]
+): Environment[] {
+  if (breadcrumbs.length === 0) {
+    return []
+  }
+
+  // The last breadcrumb is the item itself (request or folder),
+  // so we start from its parent and go up
+  for (let i = breadcrumbs.length - 2; i >= 0; i -= 1) {
+    const folderId = breadcrumbs[i]?.id
+    if (!folderId) {
+      continue
+    }
+    const folder = findFolderById(rootFolder, folderId)
+    if (folder && folder.configuration.environments.length > 0) {
+      return folder.configuration.environments
+    }
+  }
+
+  return []
+}
+
 const App: React.FC = () => {
   const { t } = useTranslation()
   const { showSettingsModal } = useSettingsModal()
@@ -254,7 +279,8 @@ const App: React.FC = () => {
   }, [])
 
   // Open an HTTP request tab in the workbench
-  const openRequestTab = useCallback((request: HTTPRequest, breadcrumbs: BreadcrumbItem[]) => {
+  const openRequestTab = useCallback(
+    (request: HTTPRequest, breadcrumbs: BreadcrumbItem[], environments?: Environment[]) => {
     const tabId = `request-${request.id}`
 
     setWorkbenchTree((prev) => {
@@ -262,11 +288,12 @@ const App: React.FC = () => {
       const newTab: HTTPRequestTab = {
         id: tabId,
         tabType: 'http-request',
-        title: `${request.method} ${request.name}`,
-        titleString: `${request.method} ${request.name}`,
-        request,
-        breadcrumbs,
-        allowFullscreen: true
+          title: `${request.method} ${request.name}`,
+          titleString: `${request.method} ${request.name}`,
+          request,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
       }
 
       const group = prev.groups[0]
@@ -306,7 +333,9 @@ const App: React.FC = () => {
         ]
       }
     })
-  }, [])
+  },
+    []
+  )
 
   // Handle navigation events from NavigationService
   useEffect(() => {
@@ -328,7 +357,8 @@ const App: React.FC = () => {
       } else if (params.type === 'http-request') {
         const { item, breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, key)
         if (item && isRequest(item) && isHTTPRequest(item)) {
-          openRequestTab(item, breadcrumbs)
+          const environments = getNearestEnvironmentsForBreadcrumbs(swaggerFolder, breadcrumbs)
+          openRequestTab(item, breadcrumbs, environments)
           // Focus the group containing the tab
           setFocusedGroupId('restorm-main-group')
         }

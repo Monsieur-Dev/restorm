@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
+  ListView,
+  type ListViewItemData,
   VariableInputBox,
   Tabs,
   MarkdownEditor,
@@ -25,11 +27,13 @@ import type {
 import { ParamsTabView, type ParamsTabViewHandle } from './ParamsTabView'
 import { HttpMethodBadge } from './HttpMethodBadge'
 import { ResponsesView } from './ResponsesView'
-import type { HTTPRequest, KeyValue } from '../types/collections'
+import type { HTTPRequest, KeyValue, Environment } from '../types/collections'
 
 export interface HTTPRequestTabViewProps {
   /** The HTTP request to display */
   request: HTTPRequest
+  /** Environments available for this request (from nearest ancestor folder) */
+  environments?: Environment[]
 }
 
 /** Convert KeyValue array to VariableDefinition array */
@@ -72,6 +76,181 @@ function getBodyFilePath(request: HTTPRequest): string {
     return request.body.path
   }
   return ''
+}
+
+/** Convert environments to ListView items */
+function environmentsToListViewItems(
+  environments: Environment[],
+  expandedIds: string[]
+): ListViewItemData[] {
+  return environments.map((env) => ({
+    id: env.id,
+    title: env.name,
+    isExpandable: (env.subEnvironments?.length ?? 0) > 0,
+    isExpanded: expandedIds.includes(env.id),
+    icon: expandedIds.includes(env.id) ? 'folder-opened' : 'folder',
+    children: env.subEnvironments ? environmentsToListViewItems(env.subEnvironments, expandedIds) : []
+  }))
+}
+
+/** Collect all environment IDs recursively */
+function collectEnvironmentIds(environments: Environment[]): string[] {
+  const ids: string[] = []
+  for (const env of environments) {
+    ids.push(env.id)
+    if (env.subEnvironments) {
+      ids.push(...collectEnvironmentIds(env.subEnvironments))
+    }
+  }
+  return ids
+}
+
+/** Find an environment by ID recursively */
+function findEnvironmentById(environments: Environment[], id: string): Environment | null {
+  for (const env of environments) {
+    if (env.id === id) {
+      return env
+    }
+    if (env.subEnvironments) {
+      const found = findEnvironmentById(env.subEnvironments, id)
+      if (found) return found
+    }
+  }
+  return null
+}
+
+export interface EnvironmentDropdownProps {
+  environments?: Environment[] | undefined
+}
+
+export const EnvironmentDropdown: React.FC<EnvironmentDropdownProps> = ({ environments }) => {
+  const { t } = useTranslation()
+  const [isOpen, setIsOpen] = useState(false)
+  const [expandedIds, setExpandedIds] = useState<string[]>(() =>
+    environments && environments.length > 0 ? collectEnvironmentIds(environments) : []
+  )
+  const [selectedEnvId, setSelectedEnvId] = useState<string | null>(() =>
+    environments && environments.length > 0 ? environments[0]?.id ?? null : null
+  )
+  const containerRef = useRef<HTMLDivElement | null>(null)
+
+  // Reset state when environments change
+  useEffect(() => {
+    if (environments && environments.length > 0) {
+      setExpandedIds(collectEnvironmentIds(environments))
+      setSelectedEnvId(environments[0]?.id ?? null)
+    } else {
+      setExpandedIds([])
+      setSelectedEnvId(null)
+    }
+  }, [environments])
+
+  // Close dropdown when clicking outside or pressing Escape
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handlePointerDown = (event: MouseEvent): void => {
+      if (!containerRef.current) return
+      if (!containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') {
+        setIsOpen(false)
+      }
+    }
+
+    window.addEventListener('mousedown', handlePointerDown)
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('mousedown', handlePointerDown)
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isOpen])
+
+  const items = useMemo(
+    () => (environments && environments.length > 0 ? environmentsToListViewItems(environments, expandedIds) : []),
+    [environments, expandedIds]
+  )
+
+  const selectedEnvironmentName = useMemo(() => {
+    if (!environments || environments.length === 0 || !selectedEnvId) {
+      return t('requestTab.environmentSelector.noEnvironment')
+    }
+    const env = findEnvironmentById(environments, selectedEnvId)
+    return env?.name ?? t('requestTab.environmentSelector.noEnvironment')
+  }, [environments, selectedEnvId, t])
+
+  if (!environments || environments.length === 0) {
+    return null
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        position: 'relative',
+        marginLeft: 8
+      }}
+    >
+      <Button
+        secondary
+        options={{
+          ariaLabel: t('requestTab.environmentSelector.ariaLabel'),
+          title: t('requestTab.environmentSelector.ariaLabel')
+        }}
+        onClick={() => {
+          setIsOpen((prev) => !prev)
+        }}
+      >
+        <span style={{ marginRight: 4, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {selectedEnvironmentName}
+        </span>
+        <i className="codicon codicon-chevron-down" />
+      </Button>
+
+      {isOpen && (
+        <div
+          style={{
+            position: 'absolute',
+            right: 0,
+            marginTop: 4,
+            minWidth: 220,
+            maxHeight: 320,
+            overflow: 'hidden',
+            zIndex: 1000,
+            backgroundColor: 'var(--vscode-editor-background)',
+            border: '1px solid var(--vscode-dropdown-border)',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)'
+          }}
+        >
+          <ListView
+            items={items}
+            rootRole="tree"
+            ariaLabel={t('requestTab.environmentSelector.listAriaLabel')}
+            selectedIds={selectedEnvId ? [selectedEnvId] : []}
+            onItemClick={(payload) => {
+              const id = payload.item.id
+              if (id) {
+                setSelectedEnvId(id)
+                setIsOpen(false)
+              }
+            }}
+            onItemToggle={(payload, expanded) => {
+              const id = payload.item.id
+              if (!id) return
+              setExpandedIds((prev) =>
+                expanded ? Array.from(new Set([...prev, id])) : prev.filter((existingId) => existingId !== id)
+              )
+            }}
+          />
+        </div>
+      )}
+    </div>
+  )
 }
 
 export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request }) => {

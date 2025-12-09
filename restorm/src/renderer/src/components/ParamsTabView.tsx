@@ -100,7 +100,7 @@ export const ParamsTabView = React.forwardRef<ParamsTabViewHandle, ParamsTabView
       enabled: true,
       key: kv.key,
       value: kv.value,
-      description: ''
+      description: kv.description ?? ''
     }))
   }, [initialRows])
 

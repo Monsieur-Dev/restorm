@@ -1,5 +1,5 @@
 import type { EditorTab } from 'electron-core-ui/renderer'
-import type { Folder, HTTPRequest } from './collections'
+import type { Folder, HTTPRequest, Environment } from './collections'
 
 /** Breadcrumb item for navigation */
 export interface BreadcrumbItem {
@@ -27,6 +27,8 @@ export interface HTTPRequestTab extends BaseRestormTab {
   tabType: 'http-request'
   /** The HTTP request data to display */
   request: HTTPRequest
+  /** Environments available for this request (from nearest ancestor folder) */
+  environments?: Environment[] | undefined
 }
 
 /** Legacy tab type for backward compatibility */

@@ -34,6 +34,11 @@
     "methodSelect": "Sélectionner la méthode HTTP",
     "addHeader": "Ajouter un header",
     "addParam": "Ajouter un paramètre",
+    "environmentSelector": {
+      "ariaLabel": "Sélectionner un environnement",
+      "listAriaLabel": "Liste des environnements",
+      "noEnvironment": "Aucun environnement"
+    },
     "body": {
       "fileLabel": "Fichier ou URL :",
       "browse": "Parcourir..."

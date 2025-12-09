@@ -4,7 +4,7 @@ import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger } f
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
 import type { RestormEditorTab, BreadcrumbItem } from '../types/editor'
 import { isFolderTab, isHTTPRequestTab } from '../types/editor'
-import { HTTPRequestTabView } from './HTTPRequestTabView'
+import { HTTPRequestTabView, EnvironmentDropdown } from './HTTPRequestTabView'
 import { FolderView } from './FolderView'
 import { HttpMethodBadge } from './HttpMethodBadge'
 
@@ -150,17 +150,55 @@ export const Workbench: React.FC<WorkbenchProps> = ({
     // Folder tab
     if (isFolderTab(tab)) {
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, minWidth: 0 }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            flex: 1,
+            minHeight: 0,
+            minWidth: 0,
+            backgroundColor: 'var(--vscode-editor-background)'
+          }}
+        >
+          <Breadcrumb
+            items={breadcrumbs}
+            onItemClick={(item, index) => {
+              handleBreadcrumbClick(item, index, breadcrumbs)
+            }}
+            onLastItemChange={(item, newValue) => {
+              handleBreadcrumbRename(item, newValue)
+            }}
+          />
+          <FolderView folder={tab.folder} />
+        </div>
+      )
+    }
+
+    // HTTP request tab
+    if (isHTTPRequestTab(tab)) {
+      return (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            flex: 1,
+            minHeight: 0,
+            minWidth: 0,
+            padding: '8px 16px',
+            borderBottom: '1px solid var(--vscode-panel-border)',
+            backgroundColor: 'var(--vscode-editor-background)'
+          }}
+        >
           <div
             style={{
               display: 'flex',
-              flex: 1,
-              minHeight: 0,
-              minWidth: 0,
-              backgroundColor: 'var(--vscode-editor-background)'
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 8,
+              marginBottom: 4
             }}
           >
-            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, minWidth: 0 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <Breadcrumb
                 items={breadcrumbs}
                 onItemClick={(item, index) => {
@@ -170,37 +208,10 @@ export const Workbench: React.FC<WorkbenchProps> = ({
                   handleBreadcrumbRename(item, newValue)
                 }}
               />
-              <FolderView folder={tab.folder} />
             </div>
+            <EnvironmentDropdown environments={tab.environments} />
           </div>
-        </div>
-      )
-    }
-
-    // HTTP request tab
-    if (isHTTPRequestTab(tab)) {
-      return (
-        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, minWidth: 0 }}>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              flex: 1,
-              minHeight: 0,
-              padding: '8px 16px',
-              borderBottom: '1px solid var(--vscode-panel-border)',
-              backgroundColor: 'var(--vscode-editor-background)'
-            }}
-          >
-            <Breadcrumb
-              items={breadcrumbs}
-              onItemClick={(item, index) => {
-                handleBreadcrumbClick(item, index, breadcrumbs)
-              }}
-              onLastItemChange={(item, newValue) => {
-                handleBreadcrumbRename(item, newValue)
-              }}
-            />
+          <div style={{ flex: 1, minHeight: 0, minWidth: 0 }}>
             <HTTPRequestTabView request={tab.request} />
           </div>
         </div>

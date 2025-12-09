@@ -66,6 +66,9 @@ interface SwaggerSchema {
   type?: string
   items?: SwaggerSchema
   additionalProperties?: SwaggerSchema
+  properties?: Record<string, SwaggerSchema>
+  required?: string[]
+  enum?: string[]
 }
 
 interface SwaggerResponseHeader {
@@ -112,6 +115,7 @@ interface SwaggerSpec {
   schemes?: string[]
   tags?: SwaggerTag[]
   paths: Record<string, SwaggerPathItem>
+  definitions?: Record<string, SwaggerSchema>
   externalDocs?: SwaggerExternalDocs
 }
 
@@ -126,6 +130,90 @@ const compiledTagTemplate = Handlebars.compile(tagTemplate)
 // ============================================================================
 // Helper Functions
 // ============================================================================
+
+/** Resolve a JSON pointer reference (e.g. "#/definitions/Pet") into a schema */
+function resolveSchemaRef(ref: string, spec: SwaggerSpec): SwaggerSchema | undefined {
+  if (!ref.startsWith('#/')) return undefined
+
+  const path = ref.slice(2).split('/')
+  let current: unknown = spec as unknown
+
+  for (const segment of path) {
+    if (current && typeof current === 'object' && segment in (current as Record<string, unknown>)) {
+      current = (current as Record<string, unknown>)[segment]
+    } else {
+      return undefined
+    }
+  }
+
+  return current as SwaggerSchema
+}
+
+/** Build a sample JSON value matching the given schema (structure only, simple default values) */
+function schemaToSample(
+  schema: SwaggerSchema,
+  spec: SwaggerSpec,
+  depth = 0,
+  seenRefs: Set<string> = new Set<string>()
+): unknown {
+  // Prevent infinite recursion on circular refs
+  if (depth > 5) return null
+
+  let workingSchema: SwaggerSchema = schema
+
+  if (schema.$ref) {
+    if (seenRefs.has(schema.$ref)) {
+      return null
+    }
+    seenRefs.add(schema.$ref)
+    const resolved = resolveSchemaRef(schema.$ref, spec)
+    if (resolved) {
+      workingSchema = resolved
+    }
+  }
+
+  const inferredType =
+    workingSchema.type ??
+    (workingSchema.properties ? 'object' : workingSchema.items ? 'array' : 'string')
+
+  switch (inferredType) {
+    case 'object': {
+      const result: Record<string, unknown> = {}
+      const props = workingSchema.properties ?? {}
+      for (const [propName, propSchema] of Object.entries(props)) {
+        result[propName] = schemaToSample(propSchema, spec, depth + 1, new Set(seenRefs))
+      }
+
+      // If object has only additionalProperties, add a placeholder key
+      if (!Object.keys(result).length && workingSchema.additionalProperties) {
+        result['exampleKey'] = schemaToSample(
+          workingSchema.additionalProperties,
+          spec,
+          depth + 1,
+          new Set(seenRefs)
+        )
+      }
+
+      return result
+    }
+    case 'array': {
+      const itemSchema = workingSchema.items ?? { type: 'string' }
+      return [schemaToSample(itemSchema, spec, depth + 1, new Set(seenRefs))]
+    }
+    case 'integer':
+    case 'number':
+      return 0
+    case 'boolean':
+      return false
+    case 'string':
+    default: {
+      if (workingSchema.enum && workingSchema.enum.length > 0) {
+        return workingSchema.enum[0]
+      }
+      return ''
+    }
+  }
+}
 
 /** Generate a unique ID */
 function generateId(): string {
@@ -145,16 +233,23 @@ function toHTTPMethod(method: string): HTTPMethod {
 /** Extract body from Swagger parameters */
 function extractBody(
   operation: SwaggerOperation,
-  parameters: SwaggerParameter[]
+  parameters: SwaggerParameter[],
+  spec: SwaggerSpec
 ): HTTPRequestBody | undefined {
   // Check for body parameter (JSON/XML body)
   const bodyParam = parameters.find((p) => p.in === 'body')
   if (bodyParam) {
+    let content = '{}'
+
+    if (bodyParam.schema) {
+      const sampleValue = schemaToSample(bodyParam.schema, spec)
+      const json = JSON.stringify(sampleValue ?? {}, null, 2)
+      content = json
+    }
+
     return {
       type: 'text',
-      content: bodyParam.schema?.$ref
-        ? `// Reference: ${bodyParam.schema.$ref}\n{}`
-        : '{}'
+      content
     }
   }
 
@@ -169,7 +264,8 @@ function extractBody(
         type: 'form-data',
         fields: formDataParams.map((p) => ({
           key: p.name,
-          value: ''
+          value: '',
+          description: p.description
         }))
       }
     }
@@ -179,7 +275,8 @@ function extractBody(
       type: 'x-www-form-urlencoded',
       fields: formDataParams.map((p) => ({
         key: p.name,
-        value: ''
+        value: '',
+        description: p.description
       }))
     }
   }
@@ -193,18 +290,33 @@ function extractHeaders(parameters: SwaggerParameter[]): KeyValue[] {
     .filter((p) => p.in === 'header')
     .map((p) => ({
       key: p.name,
-      value: ''
+      value: '',
+      description: p.description
     }))
 }
 
 /** Extract query params from Swagger parameters */
 function extractParams(parameters: SwaggerParameter[]): KeyValue[] {
-  return parameters
-    .filter((p) => p.in === 'query')
-    .map((p) => ({
-      key: p.name,
-      value: ''
-    }))
+  const result: KeyValue[] = []
+
+  for (const param of parameters) {
+    if (param.in !== 'query' && param.in !== 'path') {
+      continue
+    }
+
+    // Avoid duplicate keys if the same parameter is defined multiple times
+    if (result.some((existing) => existing.key === param.name)) {
+      continue
+    }
+
+    result.push({
+      key: param.name,
+      value: '',
+      description: param.description
+    })
+  }
+
+  return result
 }
 
 /** Build URL with path parameters as placeholders */
@@ -225,7 +337,8 @@ function operationToRequest(
   path: string,
   method: string,
   operation: SwaggerOperation,
-  basePath: string
+  basePath: string,
+  spec: SwaggerSpec
 ): HTTPRequest {
   const parameters = operation.parameters ?? []
 
@@ -254,7 +367,7 @@ function operationToRequest(
     params: extractParams(parameters)
   }
 
-  const body = extractBody(operation, parameters)
+  const body = extractBody(operation, parameters, spec)
   if (body) {
     request.body = body
   }
@@ -333,7 +446,7 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
       const operation = pathItem[method]
       if (!operation) continue
 
-      const request = operationToRequest(path, method, operation, basePath)
+      const request = operationToRequest(path, method, operation, basePath, spec)
       const tags = operation.tags ?? []
 
       if (tags.length === 0) {

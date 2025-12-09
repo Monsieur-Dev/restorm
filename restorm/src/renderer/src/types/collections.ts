@@ -11,6 +11,8 @@
 export interface KeyValue {
   key: string
   value: string
+  /** Optional description, when provided by Swagger or user input */
+  description?: string | undefined
 }
 
 // ============================================================================
