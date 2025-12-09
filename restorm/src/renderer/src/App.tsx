@@ -403,6 +403,12 @@ const App: React.FC = () => {
   const workbenchTree: WorkbenchTree = useMemo(() => {
     const tabs: EditorTab[] = [
       {
+        id: 'tab-folder-view-pet',
+        title: 'pet/{petId}',
+        titleString: 'pet/{petId}',
+        allowFullscreen: true
+      },
+      {
         id: 'tab-get-pets',
         title: 'GET /pets',
         titleString: 'GET /pets',
@@ -553,16 +559,28 @@ const App: React.FC = () => {
               collapsible={false}
               minSize={MIN_LEFT_WIDTH}
               headerActions={
-                <Button
-                  secondary
-                  small
-                  options={{ ariaLabel: 'Add request', title: 'Add request' }}
-                  onClick={() => {
-                    // TODO: hook this to real "add request" behavior
-                  }}
-                >
-                  <i className="codicon codicon-add" />
-                </Button>
+                <>
+                  <Button
+                    secondary
+                    small
+                    options={{ ariaLabel: 'Add request', title: 'Add request' }}
+                    onClick={() => {
+                      // TODO: hook this to real "add request" behavior
+                    }}
+                  >
+                    <i className="codicon codicon-add" />
+                  </Button>
+                  <Button
+                    secondary
+                    small
+                    options={{ ariaLabel: 'Collapse all requests', title: 'Collapse all requests' }}
+                    onClick={() => {
+                      setExpandedIds([])
+                    }}
+                  >
+                    <i className="codicon codicon-collapse-all" />
+                  </Button>
+                </>
               }
             >
               <ListView

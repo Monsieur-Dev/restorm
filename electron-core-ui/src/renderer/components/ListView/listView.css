@@ -14,6 +14,7 @@
   position: relative;
   min-height: 100%;
   box-sizing: border-box;
+  background-color: var(--ecui-editor-background);
 }
 
 .list-view-row {
@@ -47,7 +48,6 @@
   box-sizing: border-box;
   padding-right: 8px;
   height: 100%;
-  background-color: var(--ecui-editor-background);
 }
 
 .list-view-indents {

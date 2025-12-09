@@ -542,6 +542,10 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
     className
   ].filter(Boolean).join(' ');
 
+  // Add padding so children don't sit under custom scrollbars (always reserve space)
+  const contentPaddingRight = mergedOptions.verticalScrollbarSize;
+  const contentPaddingBottom = mergedOptions.horizontalScrollbarSize;
+
   return (
     <div
       ref={containerRef}
@@ -569,7 +573,9 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
           height: '100%',
           minHeight: '100%',
           overflow: 'hidden',
-          position: 'relative'
+          position: 'relative',
+          paddingRight: contentPaddingRight,
+          paddingBottom: contentPaddingBottom
         }}
         onScroll={handleScroll}
         {...domProps}

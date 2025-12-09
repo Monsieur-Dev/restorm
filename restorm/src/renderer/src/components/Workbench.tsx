@@ -3,6 +3,7 @@ import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger } f
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
 import type { restormEditorTab } from '../types/editor'
 import { HTTPRequestTabView } from './HTTPRequestTabView'
+import { FolderView } from './FolderView'
 import { HttpMethodBadge } from './HttpMethodBadge'
 
 // Helper function to extract title string from EditorTab
@@ -73,13 +74,24 @@ export const Workbench: React.FC<WorkbenchProps> = ({
   // Render tab title with icon and HTTP method badge (if applicable)
   const renderTabTitle = useCallback((tab: EditorTab): React.ReactNode => {
     // Extract title string for display
-    const tabWithTitleString = tab as EditorTab & { titleString?: string }
-    const titleString = tabWithTitleString.titleString ?? (typeof tab.title === 'string' ? tab.title : getTabTitleString(tabWithTitleString, ''))
-    const [maybeMethod, ...rest] = titleString.split(' ')
+    const tabWithTitleString = tab as EditorTab & { titleString?: string; id?: string }
+    const rawTitleString = tabWithTitleString.titleString ?? (typeof tab.title === 'string' ? tab.title : getTabTitleString(tabWithTitleString, ''))
+
+    // Special case: folder view tab uses a folder icon
+    if (tabWithTitleString.id === 'tab-folder-view-pet') {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <i className="codicon codicon-folder-opened" aria-hidden="true" />
+          <span>{rawTitleString}</span>
+        </span>
+      )
+    }
+
+    const [maybeMethod, ...rest] = rawTitleString.split(' ')
     const upperMethod = maybeMethod?.toUpperCase()
     const httpMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']
     const isHttpMethod = upperMethod !== undefined && httpMethods.includes(upperMethod)
-    const pathText = isHttpMethod ? rest.join(' ') : titleString
+    const pathText = isHttpMethod ? rest.join(' ') : rawTitleString
 
     return (
       <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -92,6 +104,25 @@ export const Workbench: React.FC<WorkbenchProps> = ({
   // Render tab content (design-only for now, without Monaco editor)
   const renderTabContent = useCallback((tab: restormEditorTab): React.ReactNode => {
     const titleString = getTabTitleString(tab as EditorTab & { titleString?: string }, '')
+
+    if (tab.id === 'tab-folder-view-pet') {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, minWidth: 0 }}>
+          <div
+            style={{
+              display: 'flex',
+              flex: 1,
+              minHeight: 0,
+              minWidth: 0,
+              backgroundColor: 'var(--ecui-editor-background)'
+            }}
+          >
+            <FolderView />
+          </div>
+        </div>
+      )
+    }
+
     return (
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, minWidth: 0 }}>
         <div
