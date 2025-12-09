@@ -62,7 +62,16 @@ export const Modal: React.FC<ModalProps> = ({ title, isOpen, onClose, children }
           aria-modal="true"
           aria-label={typeof title === 'string' ? title : undefined}
         >
-          <div className="ecu-modal-header">
+          <div
+            className="ecu-modal-header"
+            onMouseDown={(event) => {
+              // Middle-click on the modal titlebar closes the modal
+              if (event.button === 1) {
+                event.preventDefault()
+                onClose()
+              }
+            }}
+          >
             <div className="ecu-modal-title">
               {title}
             </div>
