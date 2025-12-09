@@ -189,6 +189,9 @@ const App: React.FC = () => {
   // Selected item in the sidebar
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
 
+  // Focused group ID in the workbench
+  const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null)
+
   // Workbench tree state (starts with no groups)
   const [workbenchTree, setWorkbenchTree] = useState<WorkbenchTree>({
     orientation: 'vertical',
@@ -319,11 +322,15 @@ const App: React.FC = () => {
         if (folder) {
           const { breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, key)
           openFolderTab(folder, breadcrumbs)
+          // Focus the group containing the tab
+          setFocusedGroupId('restorm-main-group')
         }
       } else if (params.type === 'http-request') {
         const { item, breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, key)
         if (item && isRequest(item) && isHTTPRequest(item)) {
           openRequestTab(item, breadcrumbs)
+          // Focus the group containing the tab
+          setFocusedGroupId('restorm-main-group')
         }
       }
     })
@@ -678,6 +685,8 @@ const App: React.FC = () => {
           <Workbench
             tree={workbenchTree}
             onTreeChange={handleTreeChange}
+            focusedGroupId={focusedGroupId}
+            onFocusedGroupChange={setFocusedGroupId}
             onTabActivate={handleTabActivate}
             onBreadcrumbClick={handleBreadcrumbClick}
             onItemRename={handleItemRename}
