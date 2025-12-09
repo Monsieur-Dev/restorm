@@ -25,6 +25,11 @@ export interface EditorWorkbenchProps extends EditorWorkbenchCallbacks {
 	 * Called whenever the focused group changes, either due to tab activation or editor focus.
 	 */
 	onFocusedGroupChange?: ((groupId: string | null) => void) | undefined;
+	/**
+	 * Optional fallback component to display when no tabs are open.
+	 * If not provided, nothing is displayed.
+	 */
+	emptyFallback?: React.ReactNode;
 }
 
 // Local splitter hook for any container
@@ -214,6 +219,7 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 	focusedGroupId,
 	onFocusedGroupChange,
 	onActivateTab: externalOnActivateTab,
+	emptyFallback,
 	...extCallbacks
 }) => {
 	// Internal focus state when component is uncontrolled
@@ -636,18 +642,7 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 		>
 			<div className="content" style={{ display: 'flex', flex: 1, minWidth: 0, minHeight: 0 }}>
 				{tree.groups.length === 0 ? (
-					<div
-						style={{
-							display: 'flex',
-							flex: 1,
-							alignItems: 'center',
-							justifyContent: 'center',
-							color: 'var(--vscode-descriptionForeground)',
-							backgroundColor: 'var(--vscode-editor-background)'
-						}}
-					>
-						<span>No tabs open</span>
-					</div>
+					emptyFallback ?? null
 				) : (
 					<GroupContainer
 						node={{ id: 'root', orientation: tree.orientation as Orientation, groups: tree.groups }}

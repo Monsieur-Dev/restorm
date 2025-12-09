@@ -21,6 +21,7 @@ import {
 } from 'electron-core-ui/renderer'
 import type { WorkbenchTree, NavigationEvent } from 'electron-core-ui/renderer'
 import { Workbench } from './components/Workbench'
+import { Welcome } from './components/Welcome'
 import { HttpMethodBadge } from './components/HttpMethodBadge'
 import { importSwaggerFromJson } from './services/SwaggerImportService'
 import { folderAsRootListViewItem, collectAllFolderIds } from './services/FolderToListView'
@@ -394,16 +395,16 @@ const App: React.FC = () => {
   )
 
   const handleSashChange = useCallback((event: SashEvent): void => {
-    if (!containerRef.current) return
+      if (!containerRef.current) return
 
-    const delta = event.currentX - event.startX
-    const containerWidth = containerRef.current.clientWidth
-    const min = MIN_LEFT_WIDTH
-    const max = Math.max(min, containerWidth - RIGHT_MIN_WIDTH)
-    const start = sashStartLeftRef.current
-    const next = Math.min(max, Math.max(min, start + delta))
+      const delta = event.currentX - event.startX
+      const containerWidth = containerRef.current.clientWidth
+      const min = MIN_LEFT_WIDTH
+      const max = Math.max(min, containerWidth - RIGHT_MIN_WIDTH)
+      const start = sashStartLeftRef.current
+      const next = Math.min(max, Math.max(min, start + delta))
 
-    setLeftWidth(next)
+      setLeftWidth(next)
   }, [])
 
   useEffect(() => {
@@ -680,6 +681,7 @@ const App: React.FC = () => {
             onTabActivate={handleTabActivate}
             onBreadcrumbClick={handleBreadcrumbClick}
             onItemRename={handleItemRename}
+            emptyFallback={<Welcome />}
             style={{ flex: 1 }}
           />
         </div>

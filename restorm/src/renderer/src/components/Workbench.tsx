@@ -38,6 +38,8 @@ export interface WorkbenchProps {
   onBreadcrumbClick?: (item: BreadcrumbItem, index: number, isLast: boolean) => void
   /** Callback fired when the last breadcrumb item is renamed */
   onItemRename?: (item: BreadcrumbItem, newName: string) => void
+  /** Fallback component displayed when no tabs are open */
+  emptyFallback?: React.ReactNode
 }
 
 const { Breadcrumb } = CoreUIRenderer as unknown as {
@@ -60,7 +62,8 @@ export const Workbench: React.FC<WorkbenchProps> = ({
   onFocusedGroupChange,
   onTabActivate,
   onBreadcrumbClick,
-  onItemRename
+  onItemRename,
+  emptyFallback
 }) => {
   const isControlled = onTreeChange !== undefined
   const [localTree, setLocalTree] = useState<WorkbenchTree>(initialTree)
@@ -322,6 +325,7 @@ export const Workbench: React.FC<WorkbenchProps> = ({
         onChange={handleTreeChange}
         focusedGroupId={focusedGroupId ?? undefined}
         onFocusedGroupChange={onFocusedGroupChange}
+        emptyFallback={emptyFallback}
         {...callbacks}
       />
     </div>
