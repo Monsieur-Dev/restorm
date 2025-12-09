@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   ListView,
   type ListViewItemData,
@@ -7,7 +8,10 @@ import {
   type SashEvent,
   SplitView,
   Pane,
-  Button
+  Button,
+  Tabs,
+  type Tab,
+  MarkdownEditor
 } from 'electron-core-ui/renderer'
 import { ParamsTabView } from './ParamsTabView'
 import type { ParamsTabViewHandle } from './ParamsTabView'
@@ -16,6 +20,8 @@ const MIN_LEFT_WIDTH = 160
 const RIGHT_MIN_WIDTH = 240
 
 export const FolderView: React.FC = () => {
+  const { t } = useTranslation()
+  const [activeTabId, setActiveTabId] = useState<string>('configuration')
   const [expandedIds, setExpandedIds] = useState<string[]>([
     'env-local',
     'env-dev',
@@ -63,8 +69,7 @@ export const FolderView: React.FC = () => {
   const [leftWidth, setLeftWidth] = useState<number>(220)
   const [containerHeight, setContainerHeight] = useState<number>(0)
   const sashStartLeftRef = useRef<number>(leftWidth)
-  const headersParamsRef = useRef<ParamsTabViewHandle | null>(null)
-  const paramsParamsRef = useRef<ParamsTabViewHandle | null>(null)
+  const variablesParamsRef = useRef<ParamsTabViewHandle | null>(null)
 
   const layoutProvider: IVerticalSashLayoutProvider = useMemo(
     () => ({
@@ -114,7 +119,7 @@ export const FolderView: React.FC = () => {
     }
   }, [])
 
-  return (
+  const configurationContent = (
     <div
       ref={containerRef}
       style={{
@@ -142,7 +147,7 @@ export const FolderView: React.FC = () => {
           style={{ width: '100%', height: '100%' }}
         >
           <Pane
-            title="Variables"
+            title={t('folderView.environments')}
             collapsible={false}
             minSize={MIN_LEFT_WIDTH}
             headerActions={
@@ -150,7 +155,7 @@ export const FolderView: React.FC = () => {
                 <Button
                   secondary
                   small
-                  options={{ ariaLabel: 'Add request', title: 'Add request' }}
+                  options={{ ariaLabel: t('sidebar.addRequest'), title: t('sidebar.addRequest') }}
                   onClick={() => {
                     // TODO: hook this to real "add request" behavior
                   }}
@@ -160,7 +165,7 @@ export const FolderView: React.FC = () => {
                 <Button
                   secondary
                   small
-                  options={{ ariaLabel: 'Collapse all requests', title: 'Collapse all requests' }}
+                  options={{ ariaLabel: t('sidebar.collapseAll'), title: t('sidebar.collapseAll') }}
                   onClick={() => {
                     setExpandedIds([])
                   }}
@@ -173,7 +178,7 @@ export const FolderView: React.FC = () => {
             <ListView
               items={sidebarItems}
               rootRole="tree"
-              ariaLabel="Folder environments"
+              ariaLabel={t('folderView.environmentsAriaLabel')}
               onItemToggle={(payload, expanded) => {
                 const id = payload.item.id
                 if (!id) return
@@ -194,7 +199,6 @@ export const FolderView: React.FC = () => {
           minWidth: RIGHT_MIN_WIDTH,
           minHeight: 0,
           display: 'flex',
-          padding: '8px 16px',
           boxSizing: 'border-box',
           backgroundColor: 'var(--vscode-editor-background)'
         }}
@@ -204,27 +208,16 @@ export const FolderView: React.FC = () => {
           style={{ width: '100%', height: '100%' }}
         >
           <Pane
-            title="AUTHORIZATION"
-            minSize={80}
-          >
-            <div
-              style={{
-                padding: '8px 8px 4px 8px',
-                boxSizing: 'border-box'
-              }}
-            >
-            </div>
-          </Pane>
-          <Pane
-            title="HEADERS"
+            title={t('folderView.variables')}
+            collapsible={false}
             minSize={80}
             headerActions={
               <Button
                 secondary
                 small
-                options={{ ariaLabel: 'Add header row', title: 'Add header row' }}
+                options={{ ariaLabel: t('folderView.addVariable'), title: t('folderView.addVariable') }}
                 onClick={() => {
-                  headersParamsRef.current?.addRow()
+                  variablesParamsRef.current?.addRow()
                 }}
               >
                 <i className="codicon codicon-add" />
@@ -237,32 +230,7 @@ export const FolderView: React.FC = () => {
                 boxSizing: 'border-box'
               }}
             >
-              <ParamsTabView ref={headersParamsRef} variables={[]} />
-            </div>
-          </Pane>
-          <Pane
-            title="PARAMS"
-            minSize={80}
-            headerActions={
-              <Button
-                secondary
-                small
-                options={{ ariaLabel: 'Add params row', title: 'Add params row' }}
-                onClick={() => {
-                  paramsParamsRef.current?.addRow()
-                }}
-              >
-                <i className="codicon codicon-add" />
-              </Button>
-            }
-          >
-            <div
-              style={{
-                padding: '8px 8px 4px 8px',
-                boxSizing: 'border-box'
-              }}
-            >
-              <ParamsTabView ref={paramsParamsRef} variables={[]} />
+              <ParamsTabView ref={variablesParamsRef} variables={[]} />
             </div>
           </Pane>
         </SplitView>
@@ -274,6 +242,45 @@ export const FolderView: React.FC = () => {
         onStart={handleSashStart}
         onChange={handleSashChange}
         size={4}
+      />
+    </div>
+  )
+
+  const tabs: Tab[] = [
+    {
+      id: 'docs',
+      label: t('folderView.tabs.docs'),
+      useScrollableElement: false,
+      content: (
+        <MarkdownEditor
+          initialValue={
+            '# Folder documentation\n\nThis is some **random** default text for the Docs tab.\n\n- Item 1\n- Item 2\n- Item 3\n'
+          }
+        />
+      )
+    },
+    {
+      id: 'configuration',
+      label: t('folderView.tabs.configuration'),
+      useScrollableElement: false,
+      content: configurationContent
+    }
+  ]
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1,
+        minHeight: 0,
+        minWidth: 0
+      }}
+    >
+      <Tabs
+        tabs={tabs}
+        activeTabId={activeTabId}
+        onTabChange={setActiveTabId}
       />
     </div>
   )
