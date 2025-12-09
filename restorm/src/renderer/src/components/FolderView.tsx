@@ -15,7 +15,8 @@ import {
 } from 'electron-core-ui/renderer'
 import { ParamsTabView } from './ParamsTabView'
 import type { ParamsTabViewHandle } from './ParamsTabView'
-import type { Folder, Environment } from '../types/collections'
+import type { Folder, Environment, KeyValue } from '../types/collections'
+import type { VariableDefinition } from 'electron-core-ui/renderer'
 
 const MIN_LEFT_WIDTH = 160
 const RIGHT_MIN_WIDTH = 240
@@ -54,6 +55,28 @@ function collectEnvironmentIds(environments: Environment[]): string[] {
   return ids
 }
 
+/** Find an environment by ID recursively */
+function findEnvironmentById(environments: Environment[], id: string): Environment | null {
+  for (const env of environments) {
+    if (env.id === id) {
+      return env
+    }
+    if (env.subEnvironments) {
+      const found = findEnvironmentById(env.subEnvironments, id)
+      if (found) return found
+    }
+  }
+  return null
+}
+
+/** Convert KeyValue array to VariableDefinition array for autocomplete */
+function keyValuesToVariableDefinitions(keyValues: KeyValue[]): VariableDefinition[] {
+  return keyValues.map((kv) => ({
+    name: kv.key,
+    value: kv.value
+  }))
+}
+
 export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
   const { t } = useTranslation()
   const [activeTabId, setActiveTabId] = useState<string>('configuration')
@@ -64,6 +87,20 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
     [folder.configuration.environments]
   )
   const [expandedIds, setExpandedIds] = useState<string[]>(allEnvIds)
+
+  // Track selected environment (default to first one)
+  const [selectedEnvId, setSelectedEnvId] = useState<string | null>(
+    () => folder.configuration.environments[0]?.id ?? null
+  )
+
+  // Get the selected environment
+  const selectedEnvironment = useMemo(
+    () =>
+      selectedEnvId
+        ? findEnvironmentById(folder.configuration.environments, selectedEnvId)
+        : null,
+    [folder.configuration.environments, selectedEnvId]
+  )
 
   // Convert environments to ListView items
   const sidebarItems: ListViewItemData[] = useMemo(
@@ -185,6 +222,13 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
               items={sidebarItems}
               rootRole="tree"
               ariaLabel={t('folderView.environmentsAriaLabel')}
+              selectedIds={selectedEnvId ? [selectedEnvId] : []}
+              onItemClick={(payload) => {
+                const id = payload.item.id
+                if (id) {
+                  setSelectedEnvId(id)
+                }
+              }}
               onItemToggle={(payload, expanded) => {
                 const id = payload.item.id
                 if (!id) return
@@ -214,7 +258,11 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
           style={{ width: '100%', height: '100%' }}
         >
           <Pane
-            title={t('folderView.variables')}
+            title={
+              selectedEnvironment
+                ? `${t('folderView.variables')} - ${selectedEnvironment.name}`
+                : t('folderView.variables')
+            }
             collapsible={false}
             minSize={80}
             headerActions={
@@ -236,7 +284,12 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
                 boxSizing: 'border-box'
               }}
             >
-              <ParamsTabView ref={variablesParamsRef} variables={[]} />
+              <ParamsTabView
+                key={selectedEnvId ?? 'no-env'}
+                ref={variablesParamsRef}
+                variables={keyValuesToVariableDefinitions(selectedEnvironment?.variables ?? [])}
+                initialRows={selectedEnvironment?.variables ?? []}
+              />
             </div>
           </Pane>
         </SplitView>
