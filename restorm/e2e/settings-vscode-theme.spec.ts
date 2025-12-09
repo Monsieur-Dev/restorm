@@ -47,7 +47,7 @@ test.describe('Settings Page - VSCode Theme Integration', () => {
     const theme = await htmlElement.getAttribute('data-theme')
     expect(theme).toBeTruthy()
     if (theme) {
-      expect(['vscode-dark', 'vscode-light', 'vscode-hc-dark', 'vscode-hc-light']).toContain(theme)
+      expect(['dark', 'light', 'hcDark', 'hcLight']).toContain(theme)
     }
     
     // Check that VSCode CSS variables are defined
