@@ -6,9 +6,9 @@
 	width: 100%;
 	height: 22px;
 	box-sizing: border-box;
-	background-color: var(--vscode-statusBar-background, #007ACC);
-	color: var(--vscode-statusBar-foreground, #FFFFFF);
-	border-top: 1px solid var(--vscode-statusBar-border, transparent);
+	background-color: var(--ecui-statusBar-background, #007ACC);
+	color: var(--ecui-statusBar-foreground, #FFFFFF);
+	border-top: 1px solid var(--ecui-statusBar-border, transparent);
 	font-size: 12px;
 	line-height: 22px;
 	overflow: hidden;
@@ -37,7 +37,7 @@
 	top: 0;
 	bottom: 0;
 	width: 1px;
-	background-color: var(--vscode-statusBar-border, rgba(255, 255, 255, 0.2));
+	background-color: var(--ecui-statusBar-border, rgba(255, 255, 255, 0.2));
 }
 
 /* Clickable items */
@@ -46,8 +46,8 @@
 }
 
 .statusbar-item.clickable:hover {
-	background-color: var(--vscode-statusBarItem-hoverBackground, rgba(255, 255, 255, 0.1));
-	color: var(--vscode-statusBarItem-hoverForeground, var(--vscode-statusBar-foreground, #FFFFFF));
+	background-color: var(--ecui-statusBarItem-hoverBackground, rgba(255, 255, 255, 0.1));
+	color: var(--ecui-statusBarItem-hoverForeground, var(--ecui-statusBar-foreground, #FFFFFF));
 }
 
 .statusbar-item.clickable:focus {
@@ -56,22 +56,22 @@
 
 /* Warning kind */
 .statusbar-item.warning-kind {
-	background-color: var(--vscode-statusBarItem-warningBackground, #FFA500);
-	color: var(--vscode-statusBarItem-warningForeground, #000000);
+	background-color: var(--ecui-statusBarItem-warningBackground, #FFA500);
+	color: var(--ecui-statusBarItem-warningForeground, #000000);
 }
 
 .statusbar-item.warning-kind.clickable:hover {
-	background-color: var(--vscode-statusBarItem-warningHoverBackground, #FFB733);
+	background-color: var(--ecui-statusBarItem-warningHoverBackground, #FFB733);
 }
 
 /* Error kind */
 .statusbar-item.error-kind {
-	background-color: var(--vscode-statusBarItem-errorBackground, #C72E0F);
-	color: var(--vscode-statusBarItem-errorForeground, #FFFFFF);
+	background-color: var(--ecui-statusBarItem-errorBackground, #C72E0F);
+	color: var(--ecui-statusBarItem-errorForeground, #FFFFFF);
 }
 
 .statusbar-item.error-kind.clickable:hover {
-	background-color: var(--vscode-statusBarItem-errorHoverBackground, #E04A1F);
+	background-color: var(--ecui-statusBarItem-errorHoverBackground, #E04A1F);
 }
 
 /* Active state for clickable items */

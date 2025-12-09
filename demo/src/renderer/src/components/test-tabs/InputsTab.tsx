@@ -117,7 +117,7 @@ Line 15: Anim id est laborum sed ut`)
               display: 'block',
               marginBottom: '6px',
               fontSize: '13px',
-              color: 'var(--vscode-descriptionForeground)'
+              color: 'var(--ecui-descriptionForeground)'
             }}
           >
             Disabled Input

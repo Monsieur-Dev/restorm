@@ -11,8 +11,8 @@
   flex-direction: column;
   flex: 1;
   min-height: 120px;
-  background-color: var(--vscode-editor-background);
-  border: 1px solid var(--vscode-panel-border, #3c3c3c);
+  background-color: var(--ecui-editor-background);
+  border: 1px solid var(--ecui-panel-border, #3c3c3c);
   border-radius: 2px;
 }
 
@@ -22,9 +22,9 @@
 }
 
 .params-table-add-button {
-  border: 1px solid var(--vscode-button-border, transparent);
-  background-color: var(--vscode-button-secondaryBackground, #3c3c3c);
-  color: var(--vscode-button-secondaryForeground, #cccccc);
+  border: 1px solid var(--ecui-button-border, transparent);
+  background-color: var(--ecui-button-secondaryBackground, #3c3c3c);
+  color: var(--ecui-button-secondaryForeground, #cccccc);
   padding: 2px 8px;
   border-radius: 2px;
   font-size: 12px;
@@ -41,15 +41,15 @@
   min-width: 365px; /* 3 * 100px (Key/Value/Description min) + 15px drag + 25px checkbox + 25px trash */
   table-layout: fixed;
   border-collapse: collapse;
-  font-family: var(--vscode-font-family);
+  font-family: var(--ecui-font-family);
   font-size: 12px;
-  color: var(--vscode-editor-foreground);
+  color: var(--ecui-editor-foreground);
 }
 
 .params-table th,
 .params-table td {
   padding: 2px 6px;
-  border-bottom: 1px solid var(--vscode-panel-border, #3c3c3c);
+  border-bottom: 1px solid var(--ecui-panel-border, #3c3c3c);
 }
 
 /* Fixed width for drag handle column */
@@ -94,15 +94,15 @@
 }
 
 .params-table tbody tr:hover {
-  background-color: var(--vscode-list-hoverBackground);
+  background-color: var(--ecui-list-hoverBackground);
 }
 
 .params-table-row-drop-before td {
-  border-top: 2px solid var(--vscode-focusBorder, #007acc);
+  border-top: 2px solid var(--ecui-focusBorder, #007acc);
 }
 
 .params-table-row-drop-after td {
-  border-bottom: 2px solid var(--vscode-focusBorder, #007acc);
+  border-bottom: 2px solid var(--ecui-focusBorder, #007acc);
 }
 
 

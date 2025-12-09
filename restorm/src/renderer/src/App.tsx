@@ -493,8 +493,8 @@ const App: React.FC = () => {
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
-        backgroundColor: 'var(--vscode-editor-background, #1e1e1e)',
-        color: 'var(--vscode-editor-foreground, #d4d4d4)'
+        backgroundColor: 'var(--ecui-editor-background, #1e1e1e)',
+        color: 'var(--ecui-editor-foreground, #d4d4d4)'
       }}
     >
       <Titlebar
@@ -540,8 +540,8 @@ const App: React.FC = () => {
             display: 'flex',
             flexDirection: 'column',
             minHeight: 0,
-            borderRight: '1px solid var(--vscode-sideBar-border, var(--vscode-panel-border))',
-            backgroundColor: 'var(--vscode-sideBar-background)'
+            borderRight: '1px solid var(--ecui-sideBar-border, var(--ecui-panel-border))',
+            backgroundColor: 'var(--ecui-sideBar-background)'
           }}
         >
           <SplitView

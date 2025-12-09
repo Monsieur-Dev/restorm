@@ -282,20 +282,20 @@ import { SelectBox } from 'electron-core-ui/renderer'
 The component uses the following CSS variables:
 
 ### Select Element
-- `--vscode-settings-dropdownBackground` : Background color
-- `--vscode-settings-dropdownForeground` : Text color
-- `--vscode-settings-dropdownBorder` : Border color
-- `--vscode-settings-dropdownHoverBackground` : Hover background
+- `--ecui-settings-dropdownBackground` : Background color
+- `--ecui-settings-dropdownForeground` : Text color
+- `--ecui-settings-dropdownBorder` : Border color
+- `--ecui-settings-dropdownHoverBackground` : Hover background
 
 ### Dropdown List
-- `--vscode-editor-background` : Dropdown background
-- `--vscode-panel-border` : Dropdown border
-- `--vscode-list-activeSelectionBackground` : Selected option background
-- `--vscode-list-activeSelectionForeground` : Selected option text
-- `--vscode-list-hoverBackground` : Hover option background
-- `--vscode-list-hoverForeground` : Hover option text
-- `--vscode-focusBorder` : Focus outline color
-- `--vscode-descriptionForeground` : Description text color
+- `--ecui-editor-background` : Dropdown background
+- `--ecui-panel-border` : Dropdown border
+- `--ecui-list-activeSelectionBackground` : Selected option background
+- `--ecui-list-activeSelectionForeground` : Selected option text
+- `--ecui-list-hoverBackground` : Hover option background
+- `--ecui-list-hoverForeground` : Hover option text
+- `--ecui-focusBorder` : Focus outline color
+- `--ecui-descriptionForeground` : Description text color
 
 ## Platform Behavior
 
@@ -439,7 +439,7 @@ const handleSelection = (data: ISelectData) => {
 />
 
 {error && (
-  <div style={{ color: 'var(--vscode-errorForeground)', fontSize: '12px', marginTop: '4px' }}>
+  <div style={{ color: 'var(--ecui-errorForeground)', fontSize: '12px', marginTop: '4px' }}>
     {error}
   </div>
 )}
@@ -549,11 +549,11 @@ For optimal AI-generated code:
 ```typescript
 // Always use VSCode theme variables
 const defaultSelectBoxStyles: ISelectBoxStyles = {
-  selectBackground: 'var(--vscode-settings-dropdownBackground)',
-  selectForeground: 'var(--vscode-settings-dropdownForeground)',
-  selectBorder: 'var(--vscode-settings-dropdownBorder)',
-  listFocusBackground: 'var(--vscode-list-activeSelectionBackground)',
-  listFocusForeground: 'var(--vscode-list-activeSelectionForeground)'
+  selectBackground: 'var(--ecui-settings-dropdownBackground)',
+  selectForeground: 'var(--ecui-settings-dropdownForeground)',
+  selectBorder: 'var(--ecui-settings-dropdownBorder)',
+  listFocusBackground: 'var(--ecui-list-activeSelectionBackground)',
+  listFocusForeground: 'var(--ecui-list-activeSelectionForeground)'
 }
 ```
 

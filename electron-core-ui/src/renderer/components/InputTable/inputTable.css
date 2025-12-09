@@ -1,21 +1,21 @@
 .ag-theme-restorm-input-table {
-  --ag-background-color: var(--vscode-editor-background);
-  --ag-foreground-color: var(--vscode-editor-foreground);
-  --ag-border-color: var(--vscode-panel-border);
-  --ag-row-border-color: var(--vscode-panel-border);
-  --ag-header-background-color: var(--vscode-editorGroupHeader-tabsBackground, var(--vscode-editor-background));
-  --ag-header-foreground-color: var(--vscode-foreground);
-  --ag-odd-row-background-color: var(--vscode-editor-background);
-  --ag-selected-row-background-color: var(--vscode-list-activeSelectionBackground);
-  --ag-selected-row-text-color: var(--vscode-list-activeSelectionForeground);
-  --ag-row-hover-color: var(--vscode-list-hoverBackground);
-  --ag-input-border-color: var(--vscode-input-border);
-  --ag-input-focus-border-color: var(--vscode-focusBorder);
+  --ag-background-color: var(--ecui-editor-background);
+  --ag-foreground-color: var(--ecui-editor-foreground);
+  --ag-border-color: var(--ecui-panel-border);
+  --ag-row-border-color: var(--ecui-panel-border);
+  --ag-header-background-color: var(--ecui-editorGroupHeader-tabsBackground, var(--ecui-editor-background));
+  --ag-header-foreground-color: var(--ecui-foreground);
+  --ag-odd-row-background-color: var(--ecui-editor-background);
+  --ag-selected-row-background-color: var(--ecui-list-activeSelectionBackground);
+  --ag-selected-row-text-color: var(--ecui-list-activeSelectionForeground);
+  --ag-row-hover-color: var(--ecui-list-hoverBackground);
+  --ag-input-border-color: var(--ecui-input-border);
+  --ag-input-focus-border-color: var(--ecui-focusBorder);
 
-  --ag-font-family: var(--vscode-font-family);
+  --ag-font-family: var(--ecui-font-family);
   --ag-font-size: 12px;
 
-  border: 1px solid var(--vscode-panel-border);
+  border: 1px solid var(--ecui-panel-border);
   border-radius: 2px;
 }
 
@@ -53,29 +53,29 @@
   flex: 1;
   min-height: 120px;
   overflow: auto;
-  background-color: var(--vscode-editor-background);
+  background-color: var(--ecui-editor-background);
 }
 
 .input-table-table {
   width: 100%;
   border-collapse: collapse;
-  font-family: var(--vscode-font-family);
+  font-family: var(--ecui-font-family);
   font-size: 12px;
-  color: var(--vscode-editor-foreground);
+  color: var(--ecui-editor-foreground);
 }
 
 .input-table-table thead {
-  background-color: var(--vscode-editorGroupHeader-tabsBackground, var(--vscode-editor-background));
+  background-color: var(--ecui-editorGroupHeader-tabsBackground, var(--ecui-editor-background));
 }
 
 .input-table-table th,
 .input-table-table td {
   padding: 2px 6px;
-  border-bottom: 1px solid var(--vscode-panel-border);
+  border-bottom: 1px solid var(--ecui-panel-border);
 }
 
 .input-table-table tbody tr:hover {
-  background-color: var(--vscode-list-hoverBackground);
+  background-color: var(--ecui-list-hoverBackground);
 }
 
 .input-table-drag-header {

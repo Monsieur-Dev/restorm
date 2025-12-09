@@ -35,9 +35,9 @@ const DropdownsTab: React.FC = () => {
               width: '100%',
               maxWidth: '400px',
               padding: '6px 8px',
-              backgroundColor: 'var(--vscode-dropdown-background)',
-              color: 'var(--vscode-dropdown-foreground)',
-              border: '1px solid var(--vscode-dropdown-border)',
+              backgroundColor: 'var(--ecui-dropdown-background)',
+              color: 'var(--ecui-dropdown-foreground)',
+              border: '1px solid var(--ecui-dropdown-border)',
               borderRadius: '2px',
               fontSize: '13px',
               fontFamily: 'inherit'

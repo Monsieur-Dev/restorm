@@ -142,9 +142,9 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '6px 8px',
-          backgroundColor: 'var(--vscode-dropdown-background)',
-          color: 'var(--vscode-tab-active-text-color)',
-          border: '1px solid var(--vscode-dropdown-border)',
+          backgroundColor: 'var(--ecui-dropdown-background)',
+          color: 'var(--ecui-tab-active-text-color)',
+          border: '1px solid var(--ecui-dropdown-border)',
           borderRadius: '2px',
           fontSize: '13px',
           fontFamily: 'inherit',
@@ -153,7 +153,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
           outline: 'none'
         }}
         onFocus={(e) => {
-          e.currentTarget.style.outline = '1px solid var(--vscode-focusBorder)'
+          e.currentTarget.style.outline = '1px solid var(--ecui-focusBorder)'
           e.currentTarget.style.outlineOffset = '-1px'
         }}
         onBlur={(e) => {
@@ -195,8 +195,8 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
             marginTop: '4px',
             maxHeight: '300px',
             overflowY: 'auto',
-            backgroundColor: 'var(--vscode-editor-background)',
-            border: '1px solid var(--vscode-dropdown-border)',
+            backgroundColor: 'var(--ecui-editor-background)',
+            border: '1px solid var(--ecui-dropdown-border)',
             borderRadius: '2px',
             boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
             zIndex: 1000
@@ -220,14 +220,14 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
                 cursor: 'pointer',
                 backgroundColor:
                   focusedIndex === index
-                    ? 'var(--vscode-list-hoverBackground)'
+                    ? 'var(--ecui-list-hoverBackground)'
                     : option.value === value
-                    ? 'var(--vscode-list-activeSelectionBackground)'
+                    ? 'var(--ecui-list-activeSelectionBackground)'
                     : 'transparent',
                 color:
                   option.value === value
-                    ? 'var(--vscode-list-activeSelectionForeground)'
-                    : 'var(--vscode-tab-active-text-color)',
+                    ? 'var(--ecui-list-activeSelectionForeground)'
+                    : 'var(--ecui-tab-active-text-color)',
                 fontWeight: option.value === value ? '500' : '400',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',

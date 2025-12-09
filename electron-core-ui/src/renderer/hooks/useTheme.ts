@@ -97,8 +97,8 @@ function useThemeLegacy(): UseThemeReturn {
     const computedStyle = getComputedStyle(root)
     
     // Get titleBar colors from CSS variables
-    const backgroundColor = computedStyle.getPropertyValue('--vscode-titleBar-activeBackground').trim() || '#181818'
-    const symbolColor = computedStyle.getPropertyValue('--vscode-titleBar-activeForeground').trim() || '#cccccc'
+    const backgroundColor = computedStyle.getPropertyValue('--ecui-titleBar-activeBackground').trim() || '#181818'
+    const symbolColor = computedStyle.getPropertyValue('--ecui-titleBar-activeForeground').trim() || '#cccccc'
     
     // Convert to hex if needed
     const bgHex = cssColorToHex(backgroundColor)
@@ -143,7 +143,7 @@ function useThemeLegacy(): UseThemeReturn {
     
     // Clear existing VSCode variables
     const existingVars = Array.from(root.style)
-      .filter(prop => prop.startsWith('--vscode-'))
+      .filter(prop => prop.startsWith('--ecui-'))
     
     existingVars.forEach(prop => {
       root.style.removeProperty(prop)
@@ -275,7 +275,7 @@ function useThemeLegacy(): UseThemeReturn {
             
             // Clear existing VSCode variables
             const existingVars = Array.from(root.style)
-              .filter(prop => prop.startsWith('--vscode-'))
+              .filter(prop => prop.startsWith('--ecui-'))
             
             existingVars.forEach(prop => {
               root.style.removeProperty(prop)
@@ -308,8 +308,8 @@ function useThemeLegacy(): UseThemeReturn {
                 const computedStyle = getComputedStyle(rootEl)
                 
                 // Get titleBar colors from CSS variables
-                const backgroundColor = computedStyle.getPropertyValue('--vscode-titleBar-activeBackground').trim() || '#181818'
-                const symbolColor = computedStyle.getPropertyValue('--vscode-titleBar-activeForeground').trim() || '#cccccc'
+                const backgroundColor = computedStyle.getPropertyValue('--ecui-titleBar-activeBackground').trim() || '#181818'
+                const symbolColor = computedStyle.getPropertyValue('--ecui-titleBar-activeForeground').trim() || '#cccccc'
                 
                 // Convert to hex if needed
                 // Helper function to convert CSS color to hex
@@ -384,7 +384,7 @@ function useThemeLegacy(): UseThemeReturn {
             
             // Clear existing VSCode variables
             const existingVars = Array.from(root.style)
-              .filter(prop => prop.startsWith('--vscode-'))
+              .filter(prop => prop.startsWith('--ecui-'))
             
             existingVars.forEach(prop => {
               root.style.removeProperty(prop)
@@ -416,8 +416,8 @@ function useThemeLegacy(): UseThemeReturn {
                 const rootEl = document.documentElement
                 const computedStyle = getComputedStyle(rootEl)
                 
-                const backgroundColor = computedStyle.getPropertyValue('--vscode-titleBar-activeBackground').trim() || '#181818'
-                const symbolColor = computedStyle.getPropertyValue('--vscode-titleBar-activeForeground').trim() || '#cccccc'
+                const backgroundColor = computedStyle.getPropertyValue('--ecui-titleBar-activeBackground').trim() || '#181818'
+                const symbolColor = computedStyle.getPropertyValue('--ecui-titleBar-activeForeground').trim() || '#cccccc'
                 
                 const cssColorToHexLocal = (color: string): string => {
                   if (color.startsWith('#')) {

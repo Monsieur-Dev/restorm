@@ -67,7 +67,7 @@
 .monaco-inputbox > .ibwrapper > textarea.input[style*="min-height"],
 .monaco-inputbox > .ibwrapper > textarea.input[style*="height"] {
 	scrollbar-width: thin;
-	scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
+	scrollbar-color: var(--ecui-scrollbarSlider-background) transparent;
 	overflow-y: auto;
 	overflow-x: hidden;
 }
@@ -85,18 +85,18 @@
 
 .monaco-inputbox > .ibwrapper > textarea.input[style*="min-height"]::-webkit-scrollbar-thumb,
 .monaco-inputbox > .ibwrapper > textarea.input[style*="height"]::-webkit-scrollbar-thumb {
-	background: var(--vscode-scrollbarSlider-background);
+	background: var(--ecui-scrollbarSlider-background);
 	border-radius: 5px;
 }
 
 .monaco-inputbox > .ibwrapper > textarea.input[style*="min-height"]::-webkit-scrollbar-thumb:hover,
 .monaco-inputbox > .ibwrapper > textarea.input[style*="height"]::-webkit-scrollbar-thumb:hover {
-	background: var(--vscode-scrollbarSlider-hoverBackground);
+	background: var(--ecui-scrollbarSlider-hoverBackground);
 }
 
 .monaco-inputbox > .ibwrapper > textarea.input[style*="min-height"]::-webkit-scrollbar-thumb:active,
 .monaco-inputbox > .ibwrapper > textarea.input[style*="height"]::-webkit-scrollbar-thumb:active {
-	background: var(--vscode-scrollbarSlider-activeBackground);
+	background: var(--ecui-scrollbarSlider-activeBackground);
 }
 
 .monaco-inputbox > .ibwrapper > textarea.input.empty {

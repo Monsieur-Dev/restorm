@@ -58,20 +58,20 @@ const Toggle: React.FC<ToggleProps> = ({
   // Inline styles based on checked and disabled state
   const inlineStyles: React.CSSProperties = {
     color: !enabled 
-      ? 'var(--vscode-checkbox-disabled-foreground)' 
+      ? 'var(--ecui-checkbox-disabled-foreground)' 
       : checked 
         ? mergedStyles.inputActiveOptionForeground 
-        : 'var(--vscode-checkbox-foreground)',
+        : 'var(--ecui-checkbox-foreground)',
     backgroundColor: !enabled 
-      ? 'var(--vscode-checkbox-disabled-background)' 
+      ? 'var(--ecui-checkbox-disabled-background)' 
       : checked 
-        ? 'var(--vscode-checkbox-background)' 
+        ? 'var(--ecui-checkbox-background)' 
         : 'transparent',
     borderColor: !enabled 
-      ? 'var(--vscode-checkbox-disabled-background)' 
+      ? 'var(--ecui-checkbox-disabled-background)' 
       : checked 
         ? mergedStyles.inputActiveOptionBorder 
-        : 'var(--vscode-checkbox-border)'
+        : 'var(--ecui-checkbox-border)'
   };
 
   return (
@@ -93,7 +93,7 @@ const Toggle: React.FC<ToggleProps> = ({
             className={`codicon codicon-${icon ?? 'check'}`}
             style={{
               fontSize: '16px',
-              color: 'var(--vscode-checkbox-foreground)',
+              color: 'var(--ecui-checkbox-foreground)',
               display: 'inline-block',
               lineHeight: '1'
             }}
@@ -105,7 +105,7 @@ const Toggle: React.FC<ToggleProps> = ({
                  onClick={handleClick}
                  style={{
                    cursor: enabled ? 'pointer' : 'default',
-                   color: enabled ? 'var(--vscode-foreground)' : 'var(--vscode-disabledForeground)',
+                   color: enabled ? 'var(--ecui-foreground)' : 'var(--ecui-disabledForeground)',
                    userSelect: 'none'
                  }}
                >

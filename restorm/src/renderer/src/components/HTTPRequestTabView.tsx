@@ -212,7 +212,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestT
                   <div
                     style={{
                       height: '100%',
-                      border: '1px solid var(--vscode-panel-border, #3c3c3c)',
+                      border: '1px solid var(--ecui-panel-border, #3c3c3c)',
                       borderRadius: 3,
                       boxSizing: 'border-box'
                     }}

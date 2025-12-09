@@ -113,18 +113,18 @@ The component comes with default styles using VSCode CSS variables:
 
 ```typescript
 const defaultInputBoxStyles: IInputBoxStyles = {
-  inputBackground: 'var(--vscode-input-background)',
-  inputForeground: 'var(--vscode-input-foreground)',
-  inputBorder: 'var(--vscode-input-border)',
-  inputValidationInfoBorder: 'var(--vscode-inputValidation-infoBorder)',
-  inputValidationInfoBackground: 'var(--vscode-inputValidation-infoBackground)',
-  inputValidationInfoForeground: 'var(--vscode-inputValidation-infoForeground)',
-  inputValidationWarningBorder: 'var(--vscode-inputValidation-warningBorder)',
-  inputValidationWarningBackground: 'var(--vscode-inputValidation-warningBackground)',
-  inputValidationWarningForeground: 'var(--vscode-inputValidation-warningForeground)',
-  inputValidationErrorBorder: 'var(--vscode-inputValidation-errorBorder)',
-  inputValidationErrorBackground: 'var(--vscode-inputValidation-errorBackground)',
-  inputValidationErrorForeground: 'var(--vscode-inputValidation-errorForeground)'
+  inputBackground: 'var(--ecui-input-background)',
+  inputForeground: 'var(--ecui-input-foreground)',
+  inputBorder: 'var(--ecui-input-border)',
+  inputValidationInfoBorder: 'var(--ecui-inputValidation-infoBorder)',
+  inputValidationInfoBackground: 'var(--ecui-inputValidation-infoBackground)',
+  inputValidationInfoForeground: 'var(--ecui-inputValidation-infoForeground)',
+  inputValidationWarningBorder: 'var(--ecui-inputValidation-warningBorder)',
+  inputValidationWarningBackground: 'var(--ecui-inputValidation-warningBackground)',
+  inputValidationWarningForeground: 'var(--ecui-inputValidation-warningForeground)',
+  inputValidationErrorBorder: 'var(--ecui-inputValidation-errorBorder)',
+  inputValidationErrorBackground: 'var(--ecui-inputValidation-errorBackground)',
+  inputValidationErrorForeground: 'var(--ecui-inputValidation-errorForeground)'
 }
 ```
 
@@ -323,24 +323,24 @@ The component uses the following CSS classes from VSCode:
 The component automatically integrates with VSCode themes using these CSS variables:
 
 ### Input Colors
-- `--vscode-input-background` - Input background color
-- `--vscode-input-foreground` - Input text color
-- `--vscode-input-border` - Input border color
+- `--ecui-input-background` - Input background color
+- `--ecui-input-foreground` - Input text color
+- `--ecui-input-border` - Input border color
 
 ### Validation Info Colors
-- `--vscode-inputValidation-infoBorder` - Info border color
-- `--vscode-inputValidation-infoBackground` - Info background color
-- `--vscode-inputValidation-infoForeground` - Info text color
+- `--ecui-inputValidation-infoBorder` - Info border color
+- `--ecui-inputValidation-infoBackground` - Info background color
+- `--ecui-inputValidation-infoForeground` - Info text color
 
 ### Validation Warning Colors
-- `--vscode-inputValidation-warningBorder` - Warning border color
-- `--vscode-inputValidation-warningBackground` - Warning background color
-- `--vscode-inputValidation-warningForeground` - Warning text color
+- `--ecui-inputValidation-warningBorder` - Warning border color
+- `--ecui-inputValidation-warningBackground` - Warning background color
+- `--ecui-inputValidation-warningForeground` - Warning text color
 
 ### Validation Error Colors
-- `--vscode-inputValidation-errorBorder` - Error border color
-- `--vscode-inputValidation-errorBackground` - Error background color
-- `--vscode-inputValidation-errorForeground` - Error text color
+- `--ecui-inputValidation-errorBorder` - Error border color
+- `--ecui-inputValidation-errorBackground` - Error background color
+- `--ecui-inputValidation-errorForeground` - Error text color
 
 ## DOM Structure
 

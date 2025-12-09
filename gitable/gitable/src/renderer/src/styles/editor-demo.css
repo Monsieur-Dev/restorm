@@ -1,12 +1,12 @@
 .editor-group-content-placeholder {
-  border: 1px solid var(--vscode-panel-border, #3c3c3c);
+  border: 1px solid var(--ecui-panel-border, #3c3c3c);
   border-radius: 3px;
   margin: 6px;
   box-sizing: border-box;
 }
 
 .editor-group-content-placeholder {
-  border: 1px solid var(--vscode-panel-border, #3c3c3c);
+  border: 1px solid var(--ecui-panel-border, #3c3c3c);
   border-radius: 3px;
   margin: 6px;
   box-sizing: border-box;

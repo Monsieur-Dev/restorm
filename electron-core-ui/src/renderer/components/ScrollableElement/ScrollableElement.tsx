@@ -581,7 +581,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
               top: 0,
               height: stickyHeaderBackgroundHeight,
               width: '100%',
-              backgroundColor: 'var(--vscode-editor-background)',
+              backgroundColor: 'var(--ecui-editor-background)',
               // Drop shadow under sticky header background
               boxShadow: '0 4px 4px rgba(0, 0, 0, 0.4)',
               zIndex: 1,

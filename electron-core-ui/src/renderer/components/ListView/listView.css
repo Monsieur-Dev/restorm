@@ -21,22 +21,22 @@
   align-items: center;
   box-sizing: border-box;
   cursor: pointer;
-  color: var(--vscode-foreground);
+  color: var(--ecui-foreground);
   background-color: transparent;
   outline: none;
 }
 
 .list-view-row:hover {
-  background-color: var(--vscode-list-hoverBackground);
+  background-color: var(--ecui-list-hoverBackground);
 }
 
 .list-view-row.is-selected {
-  background-color: var(--vscode-list-activeSelectionBackground);
-  color: var(--vscode-list-activeSelectionForeground);
+  background-color: var(--ecui-list-activeSelectionBackground);
+  color: var(--ecui-list-activeSelectionForeground);
 }
 
 .list-view-row.is-active:not(.is-selected) {
-  outline: 1px solid var(--vscode-focusBorder);
+  outline: 1px solid var(--ecui-focusBorder);
   outline-offset: -1px;
 }
 
@@ -47,7 +47,7 @@
   box-sizing: border-box;
   padding-right: 8px;
   height: 100%;
-  background-color: var(--vscode-editor-background);
+  background-color: var(--ecui-editor-background);
 }
 
 .list-view-indents {
@@ -69,8 +69,8 @@
 .list-view:hover .indent-guide {
   opacity: 1;
   border-color: var(
-    --vscode-tree-indentGuidesStroke,
-    var(--vscode-editorIndentGuide-activeBackground, rgba(128, 128, 128, 0.4))
+    --ecui-tree-indentGuidesStroke,
+    var(--ecui-editorIndentGuide-activeBackground, rgba(128, 128, 128, 0.4))
   );
 }
 
@@ -118,15 +118,15 @@
   overflow: hidden;
 }
 .list-view-row.drop-before {
-  box-shadow: inset 0 2px 0 0 var(--vscode-list-activeSelectionBackground);
+  box-shadow: inset 0 2px 0 0 var(--ecui-list-activeSelectionBackground);
 }
 
 .list-view-row.drop-after {
-  box-shadow: inset 0 -2px 0 0 var(--vscode-list-activeSelectionBackground);
+  box-shadow: inset 0 -2px 0 0 var(--ecui-list-activeSelectionBackground);
 }
 
 .list-view-row.drop-into {
-  outline: 1px dashed var(--vscode-list-activeSelectionBackground);
+  outline: 1px dashed var(--ecui-list-activeSelectionBackground);
   outline-offset: -1px;
 }
 

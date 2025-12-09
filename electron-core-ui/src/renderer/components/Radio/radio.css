@@ -32,26 +32,26 @@
 /* default color styles - based on CSS variables */
 
 .monaco-custom-radio > .monaco-button {
-	color: var(--vscode-foreground);
-	background-color: var(--vscode-input-background);
-	border: 1px solid var(--vscode-input-border, transparent);
+	color: var(--ecui-foreground);
+	background-color: var(--ecui-input-background);
+	border: 1px solid var(--ecui-input-border, transparent);
 }
 
 .monaco-custom-radio > .monaco-button.active:hover,
 .monaco-custom-radio > .monaco-button.active {
-	color: var(--vscode-inputOption-activeForeground);
-	background-color: var(--vscode-inputOption-activeBackground);
-	border-color: var(--vscode-inputOption-activeBorder, transparent);
+	color: var(--ecui-inputOption-activeForeground);
+	background-color: var(--ecui-inputOption-activeBackground);
+	border-color: var(--ecui-inputOption-activeBorder, transparent);
 }
 
 .hc-black .monaco-custom-radio > .monaco-button.active,
 .hc-light .monaco-custom-radio > .monaco-button.active {
-	border-color: var(--vscode-radio-activeBorder, transparent);
+	border-color: var(--ecui-radio-activeBorder, transparent);
 }
 
 .hc-black .monaco-custom-radio > .monaco-button:not(.active),
 .hc-light .monaco-custom-radio > .monaco-button:not(.active) {
-	border-color: var(--vscode-radio-inactiveBorder, transparent);
+	border-color: var(--ecui-radio-inactiveBorder, transparent);
 }
 
 .hc-black .monaco-custom-radio > .monaco-button:not(.active):hover,
@@ -60,7 +60,7 @@
 }
 
 .monaco-custom-radio > .monaco-button:hover:not(.active) {
-	background-color: var(--vscode-inputOption-hoverBackground);
+	background-color: var(--ecui-inputOption-hoverBackground);
 }
 
 .monaco-custom-radio > .monaco-button:focus,

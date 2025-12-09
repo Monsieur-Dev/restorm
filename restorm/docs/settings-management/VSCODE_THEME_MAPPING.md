@@ -106,61 +106,61 @@ The theme system uses CSS custom properties (variables) that match VSCode's vari
 
 ```css
 /* Editor colors */
---vscode-editor-background
---vscode-editor-foreground
+--ecui-editor-background
+--ecui-editor-foreground
 
 /* UI colors */
---vscode-sideBar-background
---vscode-sideBar-foreground
---vscode-panel-border
+--ecui-sideBar-background
+--ecui-sideBar-foreground
+--ecui-panel-border
 
 /* Input controls */
---vscode-input-background
---vscode-input-foreground
---vscode-input-border
+--ecui-input-background
+--ecui-input-foreground
+--ecui-input-border
 
 /* Dropdown */
---vscode-dropdown-background
---vscode-dropdown-foreground
---vscode-dropdown-border
+--ecui-dropdown-background
+--ecui-dropdown-foreground
+--ecui-dropdown-border
 
 /* Checkbox */
---vscode-checkbox-background
---vscode-checkbox-foreground
---vscode-checkbox-border
+--ecui-checkbox-background
+--ecui-checkbox-foreground
+--ecui-checkbox-border
 
 /* Buttons */
---vscode-button-background
---vscode-button-foreground
---vscode-button-hoverBackground
+--ecui-button-background
+--ecui-button-foreground
+--ecui-button-hoverBackground
 
 /* List/Tree */
---vscode-list-activeSelectionBackground
---vscode-list-activeSelectionForeground
---vscode-list-hoverBackground
---vscode-list-focusBackground
+--ecui-list-activeSelectionBackground
+--ecui-list-activeSelectionForeground
+--ecui-list-hoverBackground
+--ecui-list-focusBackground
 
 /* Focus */
---vscode-focusBorder
+--ecui-focusBorder
 
 /* Text */
---vscode-foreground
---vscode-descriptionForeground
+--ecui-foreground
+--ecui-descriptionForeground
 ```
 
 ### Settings-Specific Variables
 
 ```css
---vscode-settings-headerForeground
---vscode-settings-checkboxBackground
---vscode-settings-checkboxForeground
---vscode-settings-checkboxBorder
---vscode-settings-textInputBackground
---vscode-settings-textInputForeground
---vscode-settings-textInputBorder
---vscode-settings-dropdownBackground
---vscode-settings-dropdownForeground
---vscode-settings-dropdownBorder
+--ecui-settings-headerForeground
+--ecui-settings-checkboxBackground
+--ecui-settings-checkboxForeground
+--ecui-settings-checkboxBorder
+--ecui-settings-textInputBackground
+--ecui-settings-textInputForeground
+--ecui-settings-textInputBorder
+--ecui-settings-dropdownBackground
+--ecui-settings-dropdownForeground
+--ecui-settings-dropdownBorder
 ```
 
 ## Component Styles
@@ -171,13 +171,13 @@ All input fields (text, number) use VSCode input styling:
 
 ```css
 input[type="text"], input[type="number"] {
-  background-color: var(--vscode-input-background);
-  color: var(--vscode-input-foreground);
-  border: 1px solid var(--vscode-input-border);
+  background-color: var(--ecui-input-background);
+  color: var(--ecui-input-foreground);
+  border: 1px solid var(--ecui-input-border);
 }
 
 input:focus {
-  outline: 1px solid var(--vscode-focusBorder);
+  outline: 1px solid var(--ecui-focusBorder);
   outline-offset: -1px;
 }
 ```
@@ -186,8 +186,8 @@ input:focus {
 
 ```css
 input[type="checkbox"] {
-  background-color: var(--vscode-checkbox-background);
-  border: 1px solid var(--vscode-checkbox-border);
+  background-color: var(--ecui-checkbox-background);
+  border: 1px solid var(--ecui-checkbox-border);
 }
 ```
 
@@ -195,9 +195,9 @@ input[type="checkbox"] {
 
 ```css
 select {
-  background-color: var(--vscode-dropdown-background);
-  color: var(--vscode-dropdown-foreground);
-  border: 1px solid var(--vscode-dropdown-border);
+  background-color: var(--ecui-dropdown-background);
+  color: var(--ecui-dropdown-foreground);
+  border: 1px solid var(--ecui-dropdown-border);
 }
 ```
 
@@ -209,7 +209,7 @@ Category and subcategory titles use `position: sticky` to remain visible when sc
 .settings-group-title-label {
   position: sticky;
   top: 0;
-  background-color: var(--vscode-editor-background);
+  background-color: var(--ecui-editor-background);
   z-index: 10;
 }
 ```
@@ -224,11 +224,11 @@ Custom scrollbar styles matching VSCode:
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: var(--vscode-scrollbarSlider-background);
+  background-color: var(--ecui-scrollbarSlider-background);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: var(--vscode-scrollbarSlider-hoverBackground);
+  background-color: var(--ecui-scrollbarSlider-hoverBackground);
 }
 ```
 
@@ -257,7 +257,7 @@ Custom scrollbar styles matching VSCode:
 
 ```tsx
 // Custom inline styles using variables
-<p style={{ color: 'var(--vscode-descriptionForeground)' }}>
+<p style={{ color: 'var(--ecui-descriptionForeground)' }}>
   This text uses the VSCode description color
 </p>
 ```

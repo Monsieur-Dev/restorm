@@ -14,9 +14,9 @@
 }
 
 .tooltip-content {
-	background-color: var(--vscode-editorHoverWidget-background, #252526);
-	color: var(--vscode-editorHoverWidget-foreground, #CCCCCC);
-	border: 1px solid var(--vscode-editorHoverWidget-border, #454545);
+	background-color: var(--ecui-editorHoverWidget-background, #252526);
+	color: var(--ecui-editorHoverWidget-foreground, #CCCCCC);
+	border: 1px solid var(--ecui-editorHoverWidget-border, #454545);
 	border-radius: 3px;
 	box-shadow: 4px 2px 7px rgba(0, 0, 0, 1);
 	padding: 4px 8px;
@@ -37,7 +37,7 @@
 	height: 0;
 	border-left: 6px solid transparent;
 	border-right: 6px solid transparent;
-	border-top: 6px solid var(--vscode-editorHoverWidget-border, #454545);
+	border-top: 6px solid var(--ecui-editorHoverWidget-border, #454545);
 	pointer-events: none;
 }
 
@@ -52,7 +52,7 @@
 	height: 0;
 	border-left: 5px solid transparent;
 	border-right: 5px solid transparent;
-	border-top: 5px solid var(--vscode-editorHoverWidget-background, #252526);
+	border-top: 5px solid var(--ecui-editorHoverWidget-background, #252526);
 	pointer-events: none;
 }
 
@@ -82,6 +82,6 @@
 	font-family: var(--monaco-monospace-font, 'Consolas', 'Courier New', monospace);
 	border-radius: 3px;
 	padding: 0 0.4em;
-	background-color: var(--vscode-textCodeBlock-background, rgba(255, 255, 255, 0.1));
+	background-color: var(--ecui-textCodeBlock-background, rgba(255, 255, 255, 0.1));
 }
 

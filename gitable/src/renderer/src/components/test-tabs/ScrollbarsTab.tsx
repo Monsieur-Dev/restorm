@@ -10,9 +10,9 @@ const ScrollbarsTab: React.FC = () => {
           <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Scrollable Content (Vertical)</h4>
           <ScrollableElement
             options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
-            style={{ height: '200px', width: '400px', border: '1px solid var(--vscode-panel-border)' }}
+            style={{ height: '200px', width: '400px', border: '1px solid var(--ecui-panel-border)' }}
           >
-            <div style={{ height: '600px', padding: '20px', backgroundColor: 'var(--vscode-editor-background)' }}>
+            <div style={{ height: '600px', padding: '20px', backgroundColor: 'var(--ecui-editor-background)' }}>
               <h5 style={{ margin: '0 0 10px 0' }}>Long Content</h5>
               <p>This is a long content area that demonstrates vertical scrolling.</p>
               <p>You can scroll up and down to see more content.</p>
@@ -28,7 +28,7 @@ const ScrollbarsTab: React.FC = () => {
               <p>Final content at the bottom!</p>
             </div>
           </ScrollableElement>
-          <p style={{ fontSize: '12px', color: 'var(--vscode-descriptionForeground)', marginTop: '8px' }}>
+          <p style={{ fontSize: '12px', color: 'var(--ecui-descriptionForeground)', marginTop: '8px' }}>
             Vertical scrolling with auto-hide scrollbar and shadows
           </p>
         </div>
@@ -43,9 +43,9 @@ const ScrollbarsTab: React.FC = () => {
               horizontalHasArrows: true,
               useShadows: true
             }}
-            style={{ height: '200px', width: '400px', border: '1px solid var(--vscode-panel-border)' }}
+            style={{ height: '200px', width: '400px', border: '1px solid var(--ecui-panel-border)' }}
           >
-            <div style={{ width: '800px', height: '600px', padding: '20px', backgroundColor: 'var(--vscode-editor-background)' }}>
+            <div style={{ width: '800px', height: '600px', padding: '20px', backgroundColor: 'var(--ecui-editor-background)' }}>
               <h5 style={{ margin: '0 0 10px 0' }}>Wide and Tall Content</h5>
               <p>This content is both wider and taller than the container.</p>
               <p>You can scroll both horizontally and vertically.</p>
@@ -60,7 +60,7 @@ const ScrollbarsTab: React.FC = () => {
               <p>This is a comprehensive scrolling example.</p>
             </div>
           </ScrollableElement>
-          <p style={{ fontSize: '12px', color: 'var(--vscode-descriptionForeground)', marginTop: '8px' }}>
+          <p style={{ fontSize: '12px', color: 'var(--ecui-descriptionForeground)', marginTop: '8px' }}>
             Both horizontal and vertical scrolling with arrows
           </p>
         </div>
@@ -69,9 +69,9 @@ const ScrollbarsTab: React.FC = () => {
           <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Always Visible Scrollbars</h4>
           <ScrollableElement
             options={{ vertical: 'visible', horizontal: 'visible' }}
-            style={{ height: '200px', width: '400px', border: '1px solid var(--vscode-panel-border)' }}
+            style={{ height: '200px', width: '400px', border: '1px solid var(--ecui-panel-border)' }}
           >
-            <div style={{ height: '400px', padding: '20px', backgroundColor: 'var(--vscode-editor-background)' }}>
+            <div style={{ height: '400px', padding: '20px', backgroundColor: 'var(--ecui-editor-background)' }}>
               <h5 style={{ margin: '0 0 10px 0' }}>Always Visible</h5>
               <p>These scrollbars are always visible.</p>
               <p>They don&apos;t hide automatically.</p>
@@ -85,7 +85,7 @@ const ScrollbarsTab: React.FC = () => {
               <p>Scrollbars stay visible!</p>
             </div>
           </ScrollableElement>
-          <p style={{ fontSize: '12px', color: 'var(--vscode-descriptionForeground)', marginTop: '8px' }}>
+          <p style={{ fontSize: '12px', color: 'var(--ecui-descriptionForeground)', marginTop: '8px' }}>
             Scrollbars are always visible regardless of mouse interaction
           </p>
         </div>
@@ -94,9 +94,9 @@ const ScrollbarsTab: React.FC = () => {
           <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Hidden Scrollbars</h4>
           <ScrollableElement
             options={{ vertical: 'hidden', horizontal: 'hidden' }}
-            style={{ height: '200px', width: '400px', border: '1px solid var(--vscode-panel-border)' }}
+            style={{ height: '200px', width: '400px', border: '1px solid var(--ecui-panel-border)' }}
           >
-            <div style={{ height: '400px', padding: '20px', backgroundColor: 'var(--vscode-editor-background)' }}>
+            <div style={{ height: '400px', padding: '20px', backgroundColor: 'var(--ecui-editor-background)' }}>
               <h5 style={{ margin: '0 0 10px 0' }}>No Scrollbars</h5>
               <p>This content has scrollbars completely hidden.</p>
               <p>You can still scroll with mouse wheel or touch.</p>
@@ -108,7 +108,7 @@ const ScrollbarsTab: React.FC = () => {
               <p>No scrollbars visible!</p>
             </div>
           </ScrollableElement>
-          <p style={{ fontSize: '12px', color: 'var(--vscode-descriptionForeground)', marginTop: '8px' }}>
+          <p style={{ fontSize: '12px', color: 'var(--ecui-descriptionForeground)', marginTop: '8px' }}>
             Scrollbars are completely hidden but scrolling still works
           </p>
         </div>

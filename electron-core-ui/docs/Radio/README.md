@@ -157,13 +157,13 @@ The component generates the following DOM structure:
 
 The component uses the following CSS variables:
 
-- `--vscode-radio-activeForeground` : Text color of active option
-- `--vscode-radio-activeBackground` : Background color of active option
-- `--vscode-radio-activeBorder` : Border color of active option
-- `--vscode-radio-inactiveForeground` : Text color of inactive options
-- `--vscode-radio-inactiveBackground` : Background color of inactive options
-- `--vscode-radio-inactiveHoverBackground` : Background color on hover for inactive options
-- `--vscode-radio-inactiveBorder` : Border color of inactive options
+- `--ecui-radio-activeForeground` : Text color of active option
+- `--ecui-radio-activeBackground` : Background color of active option
+- `--ecui-radio-activeBorder` : Border color of active option
+- `--ecui-radio-inactiveForeground` : Text color of inactive options
+- `--ecui-radio-inactiveBackground` : Background color of inactive options
+- `--ecui-radio-inactiveHoverBackground` : Background color on hover for inactive options
+- `--ecui-radio-inactiveBorder` : Border color of inactive options
 
 ## Keyboard Navigation
 
@@ -205,13 +205,13 @@ For optimal usage, always use VSCode theme variables:
 
 ```typescript
 const defaultRadioStyles: IRadioStyles = {
-  activeForeground: 'var(--vscode-radio-activeForeground)',
-  activeBackground: 'var(--vscode-radio-activeBackground)',
-  activeBorder: 'var(--vscode-radio-activeBorder)',
-  inactiveForeground: 'var(--vscode-radio-inactiveForeground)',
-  inactiveBackground: 'var(--vscode-radio-inactiveBackground)',
-  inactiveHoverBackground: 'var(--vscode-radio-inactiveHoverBackground)',
-  inactiveBorder: 'var(--vscode-radio-inactiveBorder)'
+  activeForeground: 'var(--ecui-radio-activeForeground)',
+  activeBackground: 'var(--ecui-radio-activeBackground)',
+  activeBorder: 'var(--ecui-radio-activeBorder)',
+  inactiveForeground: 'var(--ecui-radio-inactiveForeground)',
+  inactiveBackground: 'var(--ecui-radio-inactiveBackground)',
+  inactiveHoverBackground: 'var(--ecui-radio-inactiveHoverBackground)',
+  inactiveBorder: 'var(--ecui-radio-inactiveBorder)'
 }
 ```
 

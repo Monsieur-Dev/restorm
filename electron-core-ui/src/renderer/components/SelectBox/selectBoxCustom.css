@@ -134,22 +134,22 @@
 
 /* Focus and hover states */
 .monaco-select-box-dropdown-container > .select-box-dropdown-list-container .monaco-list .monaco-list-row.focused {
-  background-color: var(--vscode-list-activeSelectionBackground) !important;
-  color: var(--vscode-list-activeSelectionForeground) !important;
+  background-color: var(--ecui-list-activeSelectionBackground) !important;
+  color: var(--ecui-list-activeSelectionForeground) !important;
 }
 
 .monaco-select-box-dropdown-container > .select-box-dropdown-list-container .monaco-list .monaco-list-row:not(.focused):hover {
-  background-color: var(--vscode-list-hoverBackground) !important;
-  color: var(--vscode-list-hoverForeground) !important;
+  background-color: var(--ecui-list-hoverBackground) !important;
+  color: var(--ecui-list-hoverForeground) !important;
 }
 
 /* Border styles */
 .monaco-select-box-dropdown-container > .select-box-details-pane.border-top {
-  border-top: 1px solid var(--vscode-dropdown-border);
+  border-top: 1px solid var(--ecui-dropdown-border);
 }
 
 .monaco-select-box-dropdown-container > .select-box-details-pane.border-bottom {
-  border-bottom: 1px solid var(--vscode-dropdown-border);
+  border-bottom: 1px solid var(--ecui-dropdown-border);
 }
 
 /* Select container */
@@ -170,9 +170,9 @@
   justify-content: space-between;
   padding: 4px 8px;
   min-height: 10px;
-  background-color: var(--vscode-dropdown-background);
-  color: var(--vscode-dropdown-foreground);
-  border: 1px solid var(--vscode-dropdown-border);
+  background-color: var(--ecui-dropdown-background);
+  color: var(--ecui-dropdown-foreground);
+  border: 1px solid var(--ecui-dropdown-border);
   border-radius: 2px;
   font-size: 13px;
   font-family: inherit;
@@ -208,8 +208,8 @@
   left: 0;
   right: 0;
   margin-top: 4px;
-  background-color: var(--vscode-dropdown-background);
-  border: 1px solid var(--vscode-dropdown-border);
+  background-color: var(--ecui-dropdown-background);
+  border: 1px solid var(--ecui-dropdown-border);
   border-radius: 2px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   z-index: 1000;
@@ -239,7 +239,7 @@
   font-size: 13px;
   cursor: pointer;
   background-color: transparent;
-  color: var(--vscode-foreground);
+  color: var(--ecui-foreground);
   font-weight: 400;
   white-space: nowrap;
   overflow: hidden;
@@ -251,13 +251,13 @@
 }
 
 .select-option.focused {
-  background-color: var(--vscode-list-activeSelectionBackground);
-  color: var(--vscode-list-activeSelectionForeground);
+  background-color: var(--ecui-list-activeSelectionBackground);
+  color: var(--ecui-list-activeSelectionForeground);
 }
 
 .select-option:hover:not(.disabled) {
-  background-color: var(--vscode-list-hoverBackground);
-  color: var(--vscode-list-hoverForeground);
+  background-color: var(--ecui-list-hoverBackground);
+  color: var(--ecui-list-hoverForeground);
 }
 
 .select-option.disabled {
@@ -290,26 +290,26 @@
 }
 
 .select-option-decorator {
-  color: var(--vscode-descriptionForeground);
+  color: var(--ecui-descriptionForeground);
   font-size: 12px;
 }
 
 /* Details pane */
 .select-box-details-pane {
   padding: 5px;
-  border-top: 1px solid var(--vscode-dropdown-border);
-  background-color: var(--vscode-dropdown-background);
+  border-top: 1px solid var(--ecui-dropdown-border);
+  background-color: var(--ecui-dropdown-background);
   font-size: 12px;
-  color: var(--vscode-descriptionForeground);
+  color: var(--ecui-descriptionForeground);
 }
 
 /* Synthetic focus styling */
 .monaco-select-box.synthetic-focus {
-  outline: 1px solid var(--vscode-focusBorder);
+  outline: 1px solid var(--ecui-focusBorder);
   outline-offset: -1px;
 }
 
 .monaco-select-box-dropdown-container.synthetic-focus {
-  outline: 1px solid var(--vscode-focusBorder);
+  outline: 1px solid var(--ecui-focusBorder);
   outline-offset: -1px;
 }

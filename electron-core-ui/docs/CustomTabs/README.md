@@ -68,7 +68,7 @@ const Example: React.FC = () => {
 ## Behavior
 
 - Implements a horizontal tab bar with:
-  - Active underline using `--vscode-tab-activeBorder`.
+  - Active underline using `--ecui-tab-activeBorder`.
   - Inactive vs active foreground colors using VSCode variables.
   - Optional close button per tab (`closable`).
 - The content area is wrapped in `ScrollableElement` to provide VSCode-like scrollbars.

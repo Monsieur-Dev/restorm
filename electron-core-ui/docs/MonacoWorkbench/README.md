@@ -160,8 +160,8 @@ The component applies the following global styles to all child elements:
 
 ### Form Elements
 - Inherit color and font family
-- Custom placeholder colors via `--vscode-input-placeholderForeground`
-- Focus outline via `--vscode-focusBorder`
+- Custom placeholder colors via `--ecui-input-placeholderForeground`
+- Focus outline via `--ecui-focusBorder`
 - Custom select dropdowns with chevron
 
 ### Links
@@ -179,11 +179,11 @@ The component applies the following global styles to all child elements:
 
 The component expects VSCode theme CSS variables to be defined:
 
-- `--vscode-foreground` - Text color
-- `--vscode-input-placeholderForeground` - Placeholder text
-- `--vscode-focusBorder` - Focus outline color
-- `--vscode-toolbar-hoverBackground` - Hover states
-- `--vscode-toolbar-activeBackground` - Active states
+- `--ecui-foreground` - Text color
+- `--ecui-input-placeholderForeground` - Placeholder text
+- `--ecui-focusBorder` - Focus outline color
+- `--ecui-toolbar-hoverBackground` - Hover states
+- `--ecui-toolbar-activeBackground` - Active states
 - `--window-border-color` - Window border (if enabled)
 - `--monaco-monospace-font` - Set automatically per platform
 

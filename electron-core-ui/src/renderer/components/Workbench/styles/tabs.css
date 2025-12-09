@@ -26,15 +26,15 @@
 	min-height: var(--editor-group-tab-height, 35px);
 	box-sizing: border-box;
 	padding: 0 10px;
-	background-color: var(--vscode-tab-inactiveBackground);
-	color: var(--vscode-tab-inactiveForeground);
+	background-color: var(--ecui-tab-inactiveBackground);
+	color: var(--ecui-tab-inactiveForeground);
 	flex-shrink: 0; /* prevent tabs from shrinking below their content size */
 	min-width: fit-content; /* ensure tabs maintain their content width */
 }
 
 .monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.active {
-	background-color: var(--vscode-tab-activeBackground);
-	color: var(--vscode-tab-activeForeground);
+	background-color: var(--ecui-tab-activeBackground);
+	color: var(--ecui-tab-activeForeground);
 }
 
 .monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab .tab-label {
@@ -87,7 +87,7 @@
 	top: 0;
 	height: 100%;
 	width: 1px;
-	background-color: var(--vscode-tab-dragAndDropBorder);
+	background-color: var(--ecui-tab-dragAndDropBorder);
 	pointer-events: none;
 	z-index: 11;
 }
@@ -103,8 +103,8 @@
 .editor-group-content-placeholder {
 	flex: 1;
 	min-height: 0;
-	background-color: var(--vscode-editor-background);
-	color: var(--vscode-editor-foreground);
+	background-color: var(--ecui-editor-background);
+	color: var(--ecui-editor-foreground);
 	display: flex;             /* allow content to grow */
 	align-items: stretch;      /* let children take full height */
 	justify-content: flex-start;
@@ -118,7 +118,7 @@
 	min-height: 0;
 	border-radius: 6px;
 	padding: 6px;
-	background-color: var(--vscode-editorWidget-background);
+	background-color: var(--ecui-editorWidget-background);
 	display: flex;
 	flex-direction: column;
 	box-sizing: border-box;
