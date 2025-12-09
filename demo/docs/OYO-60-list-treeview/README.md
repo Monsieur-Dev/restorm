@@ -83,7 +83,7 @@ Each payload contains:
 
 The `WorkbenchTab` test tab lives in the Demo renderer:
 
-- File: `src/renderer/src/components/test-tabs/EditorTabsTab.tsx`
+- File: `src/renderer/src/components/test-tabs/WorkbenchTab.tsx`
 - Exported from: `src/renderer/src/components/test-tabs/index.ts` as `WorkbenchTab`
 - Used in `ThemeTestPage` as a demo tab
 

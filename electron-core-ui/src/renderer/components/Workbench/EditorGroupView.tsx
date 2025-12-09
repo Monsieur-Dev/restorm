@@ -1,7 +1,9 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EditorTabs } from './EditorTabs';
+import { Modal } from '../Modal';
 import type { EditorGroup, EditorWorkbenchCallbacks, SplitDirection } from './types';
-import { getEditorDragData } from './dnd';
+import { getEditorDragData, isEditorDragEvent } from './dnd';
+import { getTabTitleString } from './utils';
 
 export interface EditorGroupViewProps extends EditorWorkbenchCallbacks {
 	group: EditorGroup;
@@ -18,7 +20,23 @@ export interface EditorGroupViewProps extends EditorWorkbenchCallbacks {
 export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 	const { group, renderTabContent, onSplitTab, onActivateTab, hasFocus = false, onFocusRequested } = props;
 	const [splitTarget, setSplitTarget] = useState<SplitDirection | 'center' | undefined>(undefined);
+	const [isEditorDrag, setIsEditorDrag] = useState<boolean>(false);
+	const [fullscreenTabId, setFullscreenTabId] = useState<string | null>(null);
 	const contentRef = useRef<HTMLDivElement | null>(null);
+
+	// Handle tab double-click for fullscreen modal
+	const handleTabDoubleClick = useCallback((tabId: string) => {
+		const tab = group.tabs.find((t) => t.id === tabId);
+		if (tab?.allowFullscreen) {
+			setFullscreenTabId(tabId);
+		}
+	}, [group.tabs]);
+
+	// Get the fullscreen tab
+	const fullscreenTab = useMemo(() => {
+		if (!fullscreenTabId) return null;
+		return group.tabs.find((t) => t.id === fullscreenTabId) ?? null;
+	}, [fullscreenTabId, group.tabs]);
 
 	// Wrapper around onActivateTab that also requests focus for this group
 	const handleActivateTab = useCallback((tabId: string, groupId: string) => {
@@ -48,13 +66,15 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 		const base: React.CSSProperties = {
 			position: 'absolute',
 			inset: 0,
-			pointerEvents: 'none',
-			backgroundColor: 'rgba(0, 0, 0, 0.20)', // 20% black
-			backdropFilter: 'blur(2px)', // slight blur
+			// Only start intercepting events when an editor tab is being dragged
+			pointerEvents: splitTarget && isEditorDrag ? 'auto' : 'none',
+			backgroundColor: 'rgba(0, 0, 0, 0.40)', // 20% black
+			//backdropFilter: 'blur(1px)', // slight blur (removed... too laggy)
 			transition: 'clip-path 150ms ease, opacity 120ms ease',
 			willChange: 'clip-path, opacity',
 			boxSizing: 'border-box',
-			opacity: splitTarget ? 1 : 0
+			// Only show overlay when an editor tab is being dragged
+			opacity: splitTarget && isEditorDrag ? 1 : 0
 		};
 
 		// Default/full area (center or undefined)
@@ -66,13 +86,14 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 		if (splitTarget === 'top') return { ...base, clipPath: 'inset(0 0 50% 0)' };
 		// bottom
 		return { ...base, clipPath: 'inset(50% 0 0 0)' };
-	}, [splitTarget]);
+	}, [splitTarget, isEditorDrag]);
 
 	const isBlockedDrop = useCallback((e: React.DragEvent<HTMLDivElement>): boolean => {
 		const data = getEditorDragData(e);
+		// Only consider drops coming from editor tab drag-and-drop
+		if (!data) return false;
 		// Block when dragging the only tab of this group over its own content
 		return Boolean(
-			data &&
 			data.sourceGroupId === group.id &&
 			group.tabs.length === 1 &&
 			group.tabs[0]?.id === data.editorId
@@ -81,6 +102,13 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 
 	const onDragOverGroup = useCallback(
 		(e: React.DragEvent<HTMLDivElement>) => {
+			// Detect if current drag is coming from editor tabs (using MIME type or fallback flag)
+			const isEditor = isEditorDragEvent(e);
+			setIsEditorDrag(isEditor);
+			if (!isEditor) {
+				setSplitTarget(undefined);
+				return;
+			}
 			e.preventDefault();
 			if (isBlockedDrop(e)) {
 				try { e.dataTransfer.dropEffect = 'none'; } catch { /* noop */ }
@@ -95,6 +123,12 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 
 	const onDragEnterGroup = useCallback(
 		(e: React.DragEvent<HTMLDivElement>) => {
+			const isEditor = isEditorDragEvent(e);
+			setIsEditorDrag(isEditor);
+			if (!isEditor) {
+				setSplitTarget(undefined);
+				return;
+			}
 			e.preventDefault();
 			if (isBlockedDrop(e)) {
 				try { e.dataTransfer.dropEffect = 'none'; } catch { /* noop */ }
@@ -107,12 +141,20 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 		[computeDirection, isBlockedDrop]
 	);
 
-	const onDragLeaveGroup = useCallback(() => { setSplitTarget(undefined); }, []);
+	const onDragLeaveGroup = useCallback(() => {
+		setSplitTarget(undefined);
+		setIsEditorDrag(false);
+	}, []);
 
 	const onDropGroup = useCallback(
 		(e: React.DragEvent<HTMLDivElement>) => {
 			const data = getEditorDragData(e);
-			if (!data) return;
+			// Ignore drops that are not coming from editor tabs (e.g. Milkdown drag & drop)
+			if (!data) {
+				setSplitTarget(undefined);
+				setIsEditorDrag(false);
+				return;
+			}
 			e.preventDefault();
 			// Ignore drop when dragging the only tab of this group into its own content
 			if (data.sourceGroupId === group.id && group.tabs.length === 1 && group.tabs[0]?.id === data.editorId) {
@@ -123,6 +165,7 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 			setSplitTarget(undefined);
 			const direction = dir === 'center' ? 'full' : dir;
 			onSplitTab?.(data.editorId, data.sourceGroupId, group.id, direction);
+			setIsEditorDrag(false);
 		},
 		[computeDirection, onSplitTab, group.id, group.tabs]
 	);
@@ -130,7 +173,7 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 	return (
 		<div className="editor-group-container" data-group-id={group.id} style={{ display: 'flex', flexDirection: 'column', minWidth: 0, position: 'relative', height: '100%' }}>
 			<div className="title" style={{ display: 'flex' }}>
-				<EditorTabs {...props} onActivateTab={handleActivateTab} dimmed={!hasFocus} />
+				<EditorTabs {...props} onActivateTab={handleActivateTab} dimmed={!hasFocus} onTabDoubleClick={handleTabDoubleClick} />
 			</div>
 			<div
 				ref={contentRef}
@@ -174,29 +217,60 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 					flexDirection: 'column'
 				}}
 			>
-				{group.tabs.length === 0
-					? <span>No tab</span>
-					: group.tabs.map((tab) => {
-						const isActive = tab.id === group.activeTabId;
-						const content =
-							(renderTabContent?.(tab) ??
-								tab.content ??
-								<span>{tab.title}</span>);
-						return (
-							<div
-								key={tab.id}
-								style={{
-									display: isActive ? 'flex' : 'none',
-									flex: 1,
-									minHeight: 0
-								}}
-							>
-								{content}
-							</div>
-						);
-					})}
-				<div style={overlayStyle} />
+				<div className="editor-group-content-panel">
+					{group.tabs.length === 0
+						? <span>No tab</span>
+						: group.tabs.map((tab) => {
+							const isActive = tab.id === group.activeTabId;
+							const content =
+								(renderTabContent?.(tab) ??
+									tab.content ??
+									<span>{tab.title}</span>);
+							return (
+								<div
+									key={tab.id}
+									style={{
+										display: isActive ? 'flex' : 'none',
+										flex: 1,
+										minHeight: 0
+									}}
+								>
+									{content}
+								</div>
+							);
+						})}
+				</div>
+				<div
+					style={overlayStyle}
+					onDragEnter={(e) => {
+						onDragEnterGroup(e);
+						e.stopPropagation();
+					}}
+					onDragOver={(e) => {
+						onDragOverGroup(e);
+						e.stopPropagation();
+					}}
+					onDragLeave={(e) => {
+						onDragLeaveGroup();
+						e.stopPropagation();
+					}}
+					onDrop={(e) => {
+						onDropGroup(e);
+						e.stopPropagation();
+					}}
+				/>
 			</div>
+			<Modal
+				isOpen={fullscreenTabId !== null}
+				onClose={() => {
+					setFullscreenTabId(null);
+				}}
+				title={fullscreenTab?.fullscreenModalTitle ?? (fullscreenTab ? getTabTitleString(fullscreenTab, '') : '')}
+			>
+				{fullscreenTab ? (
+					renderTabContent?.(fullscreenTab) ?? fullscreenTab.content ?? <span>{fullscreenTab.title}</span>
+				) : null}
+			</Modal>
 		</div>
 	);
 };

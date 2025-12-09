@@ -1,12 +1,34 @@
 import CustomDropdown from './CustomDropdown'
-import CustomTabs from './CustomTabs'
+import Tabs from './Tabs'
 import { SettingsTreeView } from './SettingsTreeView'
 import MonacoWorkbench from './MonacoWorkbench'
+import ElectronCoreUiProvider from './ElectronCoreUiProvider'
 import { EditorWorkbench } from './Workbench/EditorWorkbench'
+import { MarkdownEditor } from './MarkdownEditor/MarkdownEditor'
+import { SplitView, Pane } from './SplitView'
 
 // InputBox exports
 export { InputBox, MessageType } from './InputBox'
-export type { IInputOptions, IInputBoxStyles, IMessage, IInputValidator, IInputValidationOptions, IRange, InputBoxProps } from './InputBox'
+export type {
+  IInputOptions,
+  IInputBoxStyles,
+  IMessage,
+  IInputValidator,
+  IInputValidationOptions,
+  IRange,
+  InputBoxProps
+} from './InputBox'
+
+// VariableInputBox exports
+export { VariableInputBox } from './VariableInputBox'
+export type { VariableInputBoxProps, VariableDefinition } from './VariableInputBox'
+
+// CodeEditor exports
+export { CodeEditor } from './CodeEditor'
+export type { CodeEditorProps, CodeEditorRef } from './CodeEditor'
+
+// Settings exports
+export { SettingsPage, SettingsModalProvider, useSettingsModal } from './Settings'
 
 // Toggle exports
 export { Toggle, defaultToggleStyles } from './Toggle/index'
@@ -49,6 +71,10 @@ export type {
   ListViewDropPosition
 } from './ListView'
 
+// Breadcrumb exports
+export { Breadcrumb } from './Breadcrumb'
+export type { BreadcrumbProps, BreadcrumbItem } from './Breadcrumb'
+
 // Button exports
 export { Button, ButtonWithDescription, ButtonWithDropdown, ButtonWithIcon, defaultButtonStyles } from './Button/index'
 export type { IButtonOptions, IButtonStyles, IButtonWithDropdownOptions, ButtonProps, ButtonWithDescriptionProps, ButtonWithDropdownProps, ButtonWithIconProps } from './Button/index'
@@ -73,15 +99,32 @@ export type { StatusbarProps, StatusbarElementProps } from './Statusbar/index'
 export { Tooltip } from './Tooltip/index'
 export type { TooltipProps } from './Tooltip/index'
 
+// ContextMenu exports
+export { ContextMenu } from './ContextMenu/ContextMenu'
+export type { ContextMenuProps, ContextMenuItem } from './ContextMenu/ContextMenu'
+
+// InputTable exports
+export { InputTable } from './InputTable'
+export type { InputTableProps, InputTableColumn, InputTableRow, InputTableColumnType } from './InputTable'
+
 // CustomWCO exports
 export { CustomWCO } from './CustomWCO/index'
 export type { CustomWCOProps } from './CustomWCO/index'
 
 // Other exports
-export { CustomDropdown, CustomTabs, SettingsTreeView, MonacoWorkbench, EditorWorkbench }
-export type { Tab } from './CustomTabs'
+export { CustomDropdown, Tabs, SettingsTreeView, MonacoWorkbench, EditorWorkbench, MarkdownEditor, SplitView, Pane, ElectronCoreUiProvider }
+export type { Tab, TabsProps } from './Tabs'
+export { Modal } from './Modal'
+export type { ModalProps } from './Modal'
+export type { MarkdownEditorProps } from './MarkdownEditor/MarkdownEditor'
 export type { MonacoWorkbenchProps } from './MonacoWorkbench'
+export type { ElectronCoreUiProviderProps } from './ElectronCoreUiProvider'
 export type { EditorWorkbenchProps } from './Workbench/EditorWorkbench'
+export type {
+	SplitViewOrientation,
+	SplitViewProps,
+	SplitViewPaneProps
+} from './SplitView'
 export type {
 	WorkbenchState, // legacy flat types (kept for external imports)
 	EditorGroup,

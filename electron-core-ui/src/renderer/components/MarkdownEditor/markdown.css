@@ -1,0 +1,56 @@
+.milkdown .editor,
+.milkdown .editor:focus,
+.milkdown .editor:focus-visible {
+  outline: none;
+}
+
+/* Ensure the Milkdown React root fills the available space inside the tab. */
+[data-milkdown-root] {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+[data-milkdown-root] .milkdown {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+[data-milkdown-root] .milkdown .editor {
+  flex: 1;
+  min-height: 0;
+  /* Allow the editor to manage its own scrollbars inside the fixed-height area */
+  overflow: auto;
+}
+
+/* Themed scrollbars for all scrollable content inside the Markdown editor (editor and popups) */
+[data-milkdown-root] * {
+  scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
+  scrollbar-width: thin;
+}
+
+/* WebKit-based browsers scrollbar styling */
+[data-milkdown-root] *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+[data-milkdown-root] *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-milkdown-root] *::-webkit-scrollbar-thumb {
+  background: var(--vscode-scrollbarSlider-background);
+}
+
+[data-milkdown-root] *::-webkit-scrollbar-thumb:hover {
+  background: var(--vscode-scrollbarSlider-hoverBackground);
+}
+
+[data-milkdown-root] *::-webkit-scrollbar-thumb:active {
+  background: var(--vscode-scrollbarSlider-activeBackground);
+}
+
+

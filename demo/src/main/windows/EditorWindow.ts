@@ -3,7 +3,7 @@ import { logger } from 'electron-core-ui'
 import { DemoWindow } from './DemoWindow'
 
 /**
- * EditorWindow - Editor window displaying EditorTabsTab
+ * EditorWindow - Editor window displaying WorkbenchTab
  */
 export class EditorWindow extends DemoWindow {
   private static readonly DEFAULT_WIDTH = 1200

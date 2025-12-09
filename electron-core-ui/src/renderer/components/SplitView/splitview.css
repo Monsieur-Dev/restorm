@@ -1,0 +1,137 @@
+.monaco-split-view2 {
+	position: relative;
+	display: flex;
+	flex: 1 1 auto;
+	min-width: 0;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.monaco-split-view2 .split-view-container {
+	display: flex;
+	flex: 1 1 auto;
+	min-width: 0;
+	min-height: 0;
+	position: relative;
+	flex-direction: column;
+}
+
+.monaco-split-view2 .split-view-view {
+	position: relative;
+	min-width: 0;
+	min-height: 22px;
+	display: flex;
+	flex-direction: column;
+}
+
+/* Animation (similar to VS Code paneview) */
+.monaco-split-view2.animated .split-view-view {
+	transition-duration: 0.15s;
+	transition-timing-function: ease-out;
+}
+
+.monaco-reduce-motion .monaco-split-view2 .split-view-view {
+	transition-duration: 0s !important;
+}
+
+.monaco-split-view2.animated.vertical .split-view-view {
+	transition-property: flex-basis;
+}
+
+.monaco-split-view2.vertical .split-view-view {
+	flex: 0 0 auto;
+}
+
+.monaco-split-view2.horizontal .split-view-view {
+	flex: 0 0 auto;
+}
+
+.monaco-split-view2 .split-view-view-header {
+	flex: 0 0 auto;
+	padding: 2px 8px;
+	color: var(--vscode-foreground);
+	background-color: var(--vscode-sideBarSectionHeader-background);
+	font-size: 11px;
+	text-transform: uppercase;
+	font-weight: bold;
+	letter-spacing: 0.05em;
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 4px;
+	user-select: none;
+	cursor: pointer;
+	box-sizing: border-box;
+}
+
+.monaco-split-view2 .split-view-view-header-main {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.monaco-split-view2 .split-view-view-header-actions {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	margin-left: auto;
+	flex: 0 0 auto;
+	opacity: 0;
+	transform: translateY(-2px);
+	pointer-events: none;
+	transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+}
+
+/* Show header actions when hovering the whole pane (header or body) */
+.monaco-split-view2 .split-view-view:hover .split-view-view-header-actions {
+	opacity: 1;
+	transform: translateY(0);
+	pointer-events: auto;
+}
+
+.monaco-split-view2 .split-view-view-header-title {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.monaco-split-view2 .split-view-view-header-toggle {
+	border: none;
+	background: transparent;
+	color: var(--vscode-foreground);
+	cursor: pointer;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 10px;
+	width: 16px;
+	height: 16px;
+}
+
+.monaco-split-view2 .split-view-view-header-toggle:hover {
+	color: var(--vscode-focusBorder);
+}
+
+.monaco-split-view2 .split-view-view-header .codicon:first-of-type {
+	margin: 0 2px;
+}
+
+.monaco-split-view2 .split-view-view-header.not-collapsible {
+	cursor: default;
+}
+
+.monaco-split-view2 .split-view-view-body {
+	flex: 1 1 auto;
+	min-width: 0;
+	min-height: 0;
+	overflow: hidden;
+	/* Allow children to use flex layouts and fill remaining space (e.g. ScrollableElement) */
+	display: flex;
+	flex-direction: column;
+}
+
+

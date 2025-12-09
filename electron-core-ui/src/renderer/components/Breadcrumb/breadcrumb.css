@@ -1,0 +1,73 @@
+.ecui-breadcrumb {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px 8px;
+  gap: 4px;
+  font-size: 12px;
+  background-color: var(--vscode-breadcrumb-background, transparent);
+  color: var(--vscode-breadcrumb-foreground, var(--vscode-foreground));
+}
+
+.ecui-breadcrumb-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ecui-breadcrumb-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ecui-breadcrumb-link {
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  outline: none;
+}
+
+.ecui-breadcrumb-link:hover {
+  color: var(--vscode-breadcrumb-focusForeground, var(--vscode-textLink-foreground, inherit));
+}
+
+.ecui-breadcrumb-link--current {
+  font-weight: 600;
+}
+
+.ecui-breadcrumb-input {
+  min-width: 80px;
+  max-width: 240px;
+  padding: 2px 4px;
+  border-radius: 2px;
+  border: 1px solid var(--vscode-input-border, var(--vscode-breadcrumb-foreground, #555555));
+  background-color: var(--vscode-input-background, var(--vscode-editor-background));
+  color: var(--vscode-input-foreground, var(--vscode-foreground));
+  font: inherit;
+}
+
+.ecui-breadcrumb-input:focus {
+  outline: 1px solid var(--vscode-focusBorder, var(--vscode-input-border));
+}
+
+.ecui-breadcrumb-separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--vscode-breadcrumb-foreground, var(--vscode-foreground));
+}
+
+.ecui-breadcrumb-separator .codicon {
+  font-size: 12px;
+  opacity: 0.8;
+}

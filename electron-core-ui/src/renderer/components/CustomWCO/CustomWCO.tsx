@@ -6,12 +6,23 @@ export interface CustomWCOProps {
   platform?: string
 }
 
+// Extend Navigator type for windowControlsOverlay API
+interface WindowControlsOverlay {
+  visible: boolean
+  getTitlebarAreaRect: () => DOMRect
+}
+
+interface NavigatorWithWCO extends Navigator {
+  windowControlsOverlay?: WindowControlsOverlay
+}
+
 const CustomWCO: React.FC<CustomWCOProps> = ({ 
   className = '', 
   platform 
 }) => {
   const [currentPlatform, setCurrentPlatform] = useState<string>(platform ?? '')
   const [isMaximized, setIsMaximized] = useState(false)
+  const [wcoWidth, setWcoWidth] = useState<number>(138) // Default Windows WCO width
 
   useEffect(() => {
     // Get platform from electronAPI if not provided as prop
@@ -33,6 +44,29 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
     }
   }, [])
 
+  // Calculate WCO width from native API if available
+  useEffect(() => {
+    const nav = navigator as NavigatorWithWCO
+    if (!nav.windowControlsOverlay?.visible) {
+      return
+    }
+
+    const updateWcoWidth = (): void => {
+      const rect = nav.windowControlsOverlay?.getTitlebarAreaRect()
+      if (rect) {
+        // WCO width = window width - titlebar area width - titlebar area x
+        const controlsWidth = window.innerWidth - rect.width - rect.x
+        if (controlsWidth > 0) {
+          setWcoWidth(controlsWidth)
+        }
+      }
+    }
+    
+    updateWcoWidth()
+    window.addEventListener('resize', updateWcoWidth)
+    return () => { window.removeEventListener('resize', updateWcoWidth) }
+  }, [currentPlatform])
+
   const handleMinimize = (): void => {
     if (window.electronAPI?.sendAction) {
       window.electronAPI.sendAction('minimize')
@@ -51,7 +85,21 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
     }
   }
 
-  // Only show controls on Linux (where native WCO buttons are not available)
+  // On Windows/macOS, return a spacer div to reserve space for native WCO
+  if (currentPlatform === 'win32' || currentPlatform === 'darwin') {
+    return (
+      <div 
+        className={`custom-wco-spacer ${className}`}
+        style={{ 
+          width: wcoWidth, 
+          height: '100%',
+          flexShrink: 0
+        }} 
+      />
+    )
+  }
+
+  // On other platforms (not Linux), return null
   if (currentPlatform !== 'linux') {
     return null
   }

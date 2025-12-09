@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { ScrollableElement } from '../ScrollableElement'
+import { ContextMenu, type ContextMenuItem } from '../ContextMenu/ContextMenu'
 import type {
   ListViewDropEventPayload,
   ListViewDropPosition,
@@ -184,6 +185,17 @@ export const ListView: React.FC<ListViewProps> = ({
   const [dragSource, setDragSource] = useState<ListViewItemEventPayload | null>(null)
   const [dropIndicator, setDropIndicator] = useState<DropIndicatorState | null>(null)
   const listRef = useRef<HTMLDivElement | null>(null)
+  const [contextMenu, setContextMenu] = useState<{
+    visible: boolean
+    x: number
+    y: number
+    item: FlatItem | null
+  }>({
+    visible: false,
+    x: 0,
+    y: 0,
+    item: null
+  })
 
   // Controlled selection support
   React.useEffect(() => {
@@ -430,10 +442,23 @@ export const ListView: React.FC<ListViewProps> = ({
 
   const handleContextMenu = useCallback(
     (flat: FlatItem, event: React.MouseEvent<HTMLDivElement>): void => {
-      if (!onItemContextMenu) return
       event.preventDefault()
-      const payload: ListViewItemEventPayload = { item: flat.item, path: flat.path }
-      onItemContextMenu(payload, event)
+
+      const hasBuiltinMenu = Array.isArray(flat.item.contextMenuItems) && flat.item.contextMenuItems.length > 0
+
+      if (hasBuiltinMenu) {
+        setContextMenu({
+          visible: true,
+          x: event.clientX,
+          y: event.clientY,
+          item: flat
+        })
+      }
+
+      if (onItemContextMenu) {
+        const payload: ListViewItemEventPayload = { item: flat.item, path: flat.path }
+        onItemContextMenu(payload, event)
+      }
     },
     [onItemContextMenu]
   )
@@ -485,6 +510,13 @@ export const ListView: React.FC<ListViewProps> = ({
   )
 
   const rootClasses = ['list-view-root', className].filter(Boolean).join(' ')
+
+  const contextMenuItems: ContextMenuItem[] | null = useMemo(() => {
+    if (!contextMenu.visible || !contextMenu.item) return null
+    const sourceItems = contextMenu.item.item.contextMenuItems
+    if (!sourceItems || sourceItems.length === 0) return null
+    return sourceItems
+  }, [contextMenu])
 
   return (
     <div className={rootClasses} style={style}>
@@ -607,6 +639,17 @@ export const ListView: React.FC<ListViewProps> = ({
             )
           })}
       </ScrollableElement>
+      {contextMenuItems && (
+        <ContextMenu
+          visible={contextMenu.visible}
+          x={contextMenu.x}
+          y={contextMenu.y}
+          items={contextMenuItems}
+          onRequestClose={() => {
+            setContextMenu((prev) => ({ ...prev, visible: false }))
+          }}
+        />
+      )}
     </div>
   )
 }

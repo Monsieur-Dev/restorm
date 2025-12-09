@@ -18,8 +18,8 @@
 	align-items: center;
 	border: 1px solid var(--vscode-button-border, transparent);
 	line-height: 18px;
-	color: var(--vscode-button-foreground, #ffffff);
-	background-color: var(--vscode-button-background, #0e639c);
+	color: var(--vscode-button-foreground);
+	background-color: var(--vscode-button-background);
 }
 
 .monaco-text-button {
@@ -35,22 +35,23 @@
 	max-width: 100%;
 }
 
-.monaco-text-button:focus {
-	outline-offset: 2px !important;
+.monaco-text-button:focus,
+.monaco-text-button:focus-visible {
+	outline: none;
 }
 
 .monaco-text-button:hover {
 	text-decoration: none !important;
-	background-color: var(--vscode-button-hoverBackground, #1177bb);
+	background-color: var(--vscode-button-hoverBackground);
 }
 
 .monaco-text-button.secondary {
-	color: var(--vscode-button-secondaryForeground, #cccccc);
-	background-color: var(--vscode-button-secondaryBackground, #3c3c3c);
+	color: var(--vscode-button-secondaryForeground);
+	background-color: var(--vscode-button-secondaryBackground);
 }
 
 .monaco-text-button.secondary:hover {
-	background-color: var(--vscode-button-secondaryHoverBackground, #4c4c4c);
+	background-color: var(--vscode-button-secondaryHoverBackground);
 }
 
 .monaco-button.disabled:focus,
@@ -103,7 +104,7 @@
 }
 
 .monaco-button-dropdown > .monaco-button:focus {
-	outline-offset: -1px !important;
+	outline: none;
 }
 
 .monaco-button-dropdown.disabled > .monaco-button.disabled,
@@ -133,8 +134,8 @@
 	display: flex;
 	align-items: center;
 	height: auto;
-	min-height: 22px;
-	padding: 5px 2px !important;
+	min-height: 28px; /* increased by 6px */
+	padding: 8px 2px !important;
 	width: auto !important;
 	min-width: 24px;
 }
@@ -214,8 +215,8 @@
 	position: absolute;
 	top: 100%;
 	left: calc(100% - 28px);
-	background-color: var(--vscode-menu-background, #252526);
-	border: 1px solid var(--vscode-menu-border, #454545);
+	background-color: var(--vscode-menu-background);
+	border: 1px solid var(--vscode-menu-border);
 	border-radius: 3px;
 	box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 	z-index: 1000;
@@ -233,7 +234,7 @@
 	padding: 8px 12px;
 	border: none;
 	background-color: transparent;
-	color: var(--vscode-menu-foreground, #cccccc);
+	color: var(--vscode-menu-foreground);
 	text-align: left;
 	cursor: pointer;
 	font-size: 13px;
@@ -245,5 +246,41 @@
 }
 
 .monaco-button-dropdown-action:hover {
-	background-color: var(--vscode-button-background, #0e639c);
+	background-color: var(--vscode-button-background);
+}
+
+/* Small toolbar-style button (20x20) */
+.monaco-text-button.monaco-small-button {
+	width: 20px;
+	min-width: 20px;
+	height: 20px;
+	min-height: 20px;
+	padding: 0;
+	border-radius: 3px;
+	background-color: transparent;
+	color: var(--vscode-titleBar-activeForeground);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: none;
+	outline: none;
+}
+
+.monaco-text-button.monaco-small-button .codicon {
+	margin: 0;
+	line-height: 1;
+	font-size: 14px;
+	padding-top: 1px;
+	padding-left: 1px;
+}
+
+.monaco-text-button.monaco-small-button:focus,
+.monaco-text-button.monaco-small-button:focus-visible {
+	outline: none !important;
+	box-shadow: none !important;
+}
+
+.monaco-text-button.monaco-small-button:hover {
+	background-color: var(--vscode-toolbar-hoverBackground, var(--vscode-button-hoverBackground));
 }

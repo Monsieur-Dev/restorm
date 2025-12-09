@@ -28,9 +28,9 @@ export interface ToggleProps {
 }
 
 export const defaultToggleStyles: IToggleStyles = {
-  inputActiveOptionBorder: 'var(--vscode-inputOption-activeBorder, #007ACC00)',
-  inputActiveOptionForeground: 'var(--vscode-inputOption-activeForeground, #FFFFFF)',
-  inputActiveOptionBackground: 'var(--vscode-inputOption-activeBackground, #0E639C50)'
+  inputActiveOptionBorder: 'var(--vscode-inputOption-activeBorder)',
+  inputActiveOptionForeground: 'var(--vscode-inputOption-activeForeground)',
+  inputActiveOptionBackground: 'var(--vscode-inputOption-activeBackground)'
 };
 
 

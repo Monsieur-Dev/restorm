@@ -35,6 +35,12 @@ export interface ListViewItemData {
    * Optional custom payload preserved and passed back in events.
    */
   data?: unknown
+
+  /**
+   * Optional context menu definition for this item.
+   * When provided, the ListView can render a contextual menu using these items.
+   */
+  contextMenuItems?: import('../ContextMenu/ContextMenu').ContextMenuItem[]
 }
 
 export interface ListViewItemPath {

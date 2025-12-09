@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useTheme, CustomTabs, logger, SelectBox, Titlebar, MenuBar, MenuBarItem, MenuItem, MenuItemSeparator, Button, Statusbar, StatusbarElement } from 'electron-core-ui/renderer'
+import { useTheme, Tabs, logger, SelectBox, Titlebar, MenuBar, MenuBarItem, MenuItem, MenuItemSeparator, Button, Statusbar, StatusbarElement } from 'electron-core-ui/renderer'
 import type { Tab } from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 import { 
@@ -127,8 +127,8 @@ const ThemeTestPage: React.FC = () => {
   }
 
   const tabs: Tab[] = [
-    { id: 'sticky-headers', label: t('themeTest.components.stickyHeaders'), content: <StickHeadersTab /> },
     { id: 'workbench', label: 'Workbench', content: <WorkbenchTab /> },
+    { id: 'sticky-headers', label: t('themeTest.components.stickyHeaders'), content: <StickHeadersTab /> },
     { id: 'checkboxes', label: 'Checkboxes & Radio', content: <CheckboxesTab /> },
     { id: 'dropdowns', label: 'Dropdowns', content: <DropdownsTab /> },
     { id: 'buttons', label: 'Buttons', content: <ButtonsTab /> },
@@ -338,7 +338,7 @@ const ThemeTestPage: React.FC = () => {
 
       {/* Tabs */}
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <CustomTabs tabs={tabs} />
+        <Tabs tabs={tabs} />
       </div>
 
       {/* Statusbar */}

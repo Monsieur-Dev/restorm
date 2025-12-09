@@ -1,0 +1,86 @@
+.ecu-modal-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 10000;
+	display: flex;
+	align-items: stretch;
+	justify-content: stretch;
+	background-color: rgba(0, 0, 0, 0.4);
+	opacity: 0;
+	animation: ecu-modal-fade-in 300ms ease-out forwards;
+}
+
+.ecu-modal-workbench.monaco-workbench {
+	background-color: transparent;
+	border: none !important;
+	box-shadow: none !important;
+}
+
+.ecu-modal-container {
+	position: absolute;
+	top: 40px;
+	left: 20px;
+	right: 20px;
+	bottom: 20px;
+	background-color: var(--vscode-editor-background);
+	border-radius: 4px;
+	border: 1px solid var(--vscode-panel-border);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	min-width: 0;
+}
+
+.ecu-modal-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 8px 12px;
+	border-bottom: 1px solid var(--vscode-panel-border);
+	background-color: var(--vscode-titleBar-activeBackground);
+}
+
+.ecu-modal-title {
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--vscode-titleBar-activeForeground);
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.ecu-modal-close {
+	/* Button component wrapper adjustment */
+}
+
+.ecu-modal-close .button-container {
+	display: flex;
+}
+
+.ecu-modal-body {
+	flex: 1;
+	min-height: 0;
+	min-width: 0;
+	padding: 8px;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+}
+
+@keyframes ecu-modal-fade-in {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+@keyframes ecu-modal-fade-out {
+	from { opacity: 1; }
+	to { opacity: 0; }
+}
+
+.ecu-modal-overlay.ecu-modal-closing {
+	animation: ecu-modal-fade-out 120ms ease-in forwards;
+}
+
+
+

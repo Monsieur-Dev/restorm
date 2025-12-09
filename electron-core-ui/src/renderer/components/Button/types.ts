@@ -28,6 +28,10 @@ export interface ButtonProps {
   icon?: string | undefined;
   disabled?: boolean;
   secondary?: boolean;
+  /**
+   * When true, renders a compact 20x20 toolbar-style button.
+   */
+  small?: boolean;
   onClick?: ((event: React.MouseEvent<HTMLAnchorElement>) => void) | undefined;
   onMouseEnter?: ((event: React.MouseEvent<HTMLAnchorElement>) => void) | undefined;
   onMouseLeave?: ((event: React.MouseEvent<HTMLAnchorElement>) => void) | undefined;

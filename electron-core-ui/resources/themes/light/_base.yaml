@@ -1,0 +1,323 @@
+# Light Theme Base
+# Default values for light themes based on Visual Studio Light
+
+colors:
+  # Editor colors
+  - id: editor.background
+    value: "#ffffff"
+    description: Editor background color
+
+  - id: editor.foreground
+    value: "#000000"
+    description: Editor foreground color
+
+  # Default widget background (for editors, panels, previews)
+  - id: editorWidget.background
+    value: "#F8F8F8"
+    description: Editor widget background color
+
+  # Generic foreground (used by many controls / labels)
+  - id: foreground
+    value: "#3B3B3B"
+    description: Primary foreground color
+
+  - id: editor.inactiveSelectionBackground
+    value: "#E5EBF1"
+    description: Editor inactive selection background
+
+  - id: editor.selectionHighlightBackground
+    value: "#ADD6FF80"
+    description: Editor selection highlight background
+
+  - id: editorIndentGuide.background1
+    value: "#D3D3D3"
+    description: Editor indent guide background
+
+  - id: editorIndentGuide.activeBackground1
+    value: "#939393"
+    description: Editor active indent guide background
+
+  - id: editorSuggestWidget.background
+    value: "#F3F3F3"
+    description: Editor suggest widget background
+
+  # Input colors
+  - id: input.background
+    value: "#ffffff"
+    description: Input background color
+
+  - id: input.foreground
+    value: "#000000"
+    description: Input foreground color
+
+  - id: input.border
+    value: "#cecece"
+    description: Input border color
+
+  - id: input.placeholderForeground
+    value: "#767676"
+    description: Input placeholder foreground
+
+  # Toggle / input option active styles (used by checkbox/toggle)
+  - id: inputOption.activeBackground
+    value: "#BED6ED"
+    description: Active option background
+
+  - id: inputOption.activeBorder
+    value: "#005FB8"
+    description: Active option border
+
+  - id: inputOption.activeForeground
+    value: "#000000"
+    description: Active option foreground
+
+  # Generic description text (used by labels, tooltips, etc.)
+  - id: descriptionForeground
+    value: "#3B3B3B"
+    description: Description / secondary foreground
+
+  # Dropdown colors
+  - id: dropdown.background
+    value: "#ffffff"
+    description: Dropdown background color
+
+  - id: dropdown.foreground
+    value: "#333333"
+    description: Dropdown foreground color
+
+  - id: dropdown.border
+    value: "#cecece"
+    description: Dropdown border color
+
+  - id: dropdown.listBackground
+    value: "#ffffff"
+    description: Dropdown list background color
+
+  # QuickInput colors
+  - id: quickInput.background
+    value: "#f3f3f3"
+    description: Quick input background color
+
+  - id: quickInput.foreground
+    value: "#333333"
+    description: Quick input foreground color
+
+  # List colors
+  - id: list.activeSelectionBackground
+    value: "#0060c0"
+    description: List active selection background
+
+  - id: list.activeSelectionForeground
+    value: "#ffffff"
+    description: List active selection foreground
+
+  - id: list.activeSelectionIconForeground
+    value: "#FFF"
+    description: Active selection icon foreground
+
+  - id: list.hoverBackground
+    value: "#e8e8e8"
+    description: List hover background
+
+  - id: list.hoverForeground
+    value: "#333333"
+    description: List hover foreground
+
+  - id: list.focusBackground
+    value: "#d6ebff"
+    description: List focus background
+
+  - id: list.focusForeground
+    value: "#333333"
+    description: List focus foreground
+
+  - id: list.foreground
+    value: "#333333"
+    description: List foreground
+
+  - id: list.focusAndSelectionOutline
+    value: "#90C2F9"
+    description: List focus and selection outline
+
+  # Button colors
+  - id: button.background
+    value: "#007acc"
+    description: Button background color
+
+  - id: button.foreground
+    value: "#ffffff"
+    description: Button foreground color
+
+  - id: button.hoverBackground
+    value: "#0062a3"
+    description: Button hover background color
+
+  - id: button.secondaryBackground
+    value: "#E5E5E5"
+    description: Secondary button background color
+
+  - id: button.secondaryForeground
+    value: "#3B3B3B"
+    description: Secondary button foreground color
+
+  - id: button.secondaryHoverBackground
+    value: "#CCCCCC"
+    description: Secondary button hover background color
+
+  # Checkbox colors
+  - id: checkbox.background
+    value: "#ffffff"
+    description: Checkbox background color
+
+  - id: checkbox.foreground
+    value: "#000000"
+    description: Checkbox foreground color
+
+  - id: checkbox.border
+    value: "#cecece"
+    description: Checkbox border color
+
+  # Focus border
+  - id: focusBorder
+    value: "#0090f1"
+    description: Focus border color
+
+  # Scrollbar colors
+  - id: scrollbarSlider.background
+    value: "#64646466"
+    description: Scrollbar slider background
+
+  - id: scrollbarSlider.hoverBackground
+    value: "#646464b3"
+    description: Scrollbar slider hover background
+
+  - id: scrollbarSlider.activeBackground
+    value: "#00000099"
+    description: Scrollbar slider active background
+
+  # Tab colors
+  - id: tab.activeForeground
+    value: "#333333"
+    description: Active tab foreground
+
+  - id: tab.activeBorder
+    value: "#0078d4"
+    description: Active tab border
+
+  - id: tab.inactiveForeground
+    value: "rgba(51, 51, 51, 0.7)"
+    description: Inactive tab foreground
+
+  - id: tab.border
+    value: "rgba(97, 97, 97, 0.2)"
+    description: Tab border
+
+  - id: tab.selectedForeground
+    value: "#333333b3"
+    description: Selected tab foreground
+
+  - id: tab.selectedBackground
+    value: "#ffffffa5"
+    description: Selected tab background
+
+  - id: tab.lastPinnedBorder
+    value: "#61616130"
+    description: Last pinned tab border
+
+  - id: tab.dragAndDropBorder
+    value: "#4FC3F7"
+    description: Border color used when dragging tabs
+
+  # Menu colors
+  - id: menu.border
+    value: "#D4D4D4"
+    description: Menu border
+
+  # Search editor
+  - id: searchEditor.textInputBorder
+    value: "#CECECE"
+    description: Search editor text input border
+
+  # Settings
+  - id: settings.textInputBorder
+    value: "#CECECE"
+    description: Settings text input border
+
+  - id: settings.numberInputBorder
+    value: "#CECECE"
+    description: Settings number input border
+
+  # Activity bar
+  - id: activityBarBadge.background
+    value: "#007ACC"
+    description: Activity bar badge background
+
+  # Side bar
+  - id: sideBarTitle.foreground
+    value: "#6F6F6F"
+    description: Side bar title foreground
+
+  - id: sideBarSectionHeader.background
+    value: "#0000"
+    description: Side bar section header background
+
+  - id: sideBarSectionHeader.border
+    value: "#61616130"
+    description: Side bar section header border
+
+  # Status bar
+  - id: statusBarItem.remoteForeground
+    value: "#FFF"
+    description: Status bar remote item foreground
+
+  - id: statusBarItem.remoteBackground
+    value: "#16825D"
+    description: Status bar remote item background
+
+  - id: statusBarItem.errorBackground
+    value: "#c72e0f"
+    description: Status bar error item background
+
+  # Ports
+  - id: ports.iconRunningProcessForeground
+    value: "#369432"
+    description: Running process icon foreground
+
+  # Notebook
+  - id: notebook.cellBorderColor
+    value: "#E8E8E8"
+    description: Notebook cell border color
+
+  - id: notebook.selectedCellBackground
+    value: "#c8ddf150"
+    description: Notebook selected cell background
+
+  # Terminal
+  - id: terminal.inactiveSelectionBackground
+    value: "#E5EBF1"
+    description: Terminal inactive selection background
+
+  # Widget
+  - id: widget.border
+    value: "#d4d4d4"
+    description: Widget border
+
+  # Panels
+  - id: panel.border
+    value: "#E5E5E5"
+    description: Panel border
+
+  # Action bar
+  - id: actionBar.toggledBackground
+    value: "#dddddd"
+    description: Action bar toggled background
+
+  # Diff editor
+  - id: diffEditor.unchangedRegionBackground
+    value: "#f8f8f8"
+    description: Diff editor unchanged region background
+
+  # WCO (Window Controls Overlay)
+  - id: wco.iconForeground
+    value: "#000000"
+    description: WCO codicon foreground color

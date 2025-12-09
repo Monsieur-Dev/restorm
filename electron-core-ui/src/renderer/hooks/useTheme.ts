@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useContext } from 'react'
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../../types/theme'
 import { logger } from '../services/logger'
+import ThemeContext from '../contexts/ThemeContext'
 
 export interface UseThemeReturn {
   themes: ThemeInfo[]
@@ -15,8 +16,26 @@ export interface UseThemeReturn {
 
 /**
  * Hook to manage VSCode themes
+ * If used within a ThemeProvider, returns the shared context state
+ * Otherwise, creates its own independent state (legacy behavior)
  */
 export function useTheme(): UseThemeReturn {
+  // Try to use context if available
+  const context = useContext(ThemeContext)
+  
+  // Always call legacy hook to respect React hooks rules
+  // This is only used when context is null (no ThemeProvider)
+  const legacyState = useThemeLegacy()
+  
+  // If we have a context, use it directly; otherwise use legacy state
+  return context ?? legacyState
+}
+
+/**
+ * Legacy hook implementation for backwards compatibility
+ * Used when not wrapped in ThemeProvider
+ */
+function useThemeLegacy(): UseThemeReturn {
   const [themes, setThemes] = useState<ThemeInfo[]>([])
   const [currentThemeId, setCurrentThemeId] = useState<string | null>(null)
   const [currentTheme, setCurrentTheme] = useState<ThemeDefinition | null>(null)
@@ -96,6 +115,27 @@ export function useTheme(): UseThemeReturn {
   }, [cssColorToHex])
 
   /**
+   * Set window border color CSS variable based on theme type.
+   * Dark / high-contrast themes get a very light gray border,
+   * light themes get a dark (black) border.
+   */
+  const setWindowBorderColorForTheme = useCallback((themeType: string | undefined): void => {
+    const root = document.documentElement
+    if (!themeType) {
+      root.style.removeProperty('--window-border-color')
+      return
+    }
+
+    if (themeType === 'dark' || themeType === 'hcDark') {
+      // Dark / high-contrast themes: dark gray border for subtle framing
+      root.style.setProperty('--window-border-color', '#666666')
+    } else {
+      // Treat all non-dark themes as light variants
+      root.style.setProperty('--window-border-color', '#000000')
+    }
+  }, [])
+
+  /**
    * Apply CSS variables to the document
    */
   const applyCSSVariables = useCallback((variables: ThemeVariables): void => {
@@ -141,10 +181,13 @@ export function useTheme(): UseThemeReturn {
       // Apply CSS variables
       applyCSSVariables(themeData.variables)
 
-      // Update data-theme attribute for compatibility
+      // Update data-theme attribute for compatibility and derive window border color
       const themeInfo = themes.find(t => t.id === themeId)
       if (themeInfo) {
         document.documentElement.setAttribute('data-theme', themeInfo.type)
+        setWindowBorderColorForTheme(themeInfo.type)
+      } else {
+        setWindowBorderColorForTheme(undefined)
       }
 
       // Save current theme
@@ -161,7 +204,7 @@ export function useTheme(): UseThemeReturn {
     } finally {
       setIsLoading(false)
     }
-  }, [themes, applyCSSVariables])
+  }, [themes, applyCSSVariables, setWindowBorderColorForTheme])
 
   /**
    * Load initial theme on mount
@@ -170,22 +213,17 @@ export function useTheme(): UseThemeReturn {
     const initTheme = async (): Promise<void> => {
       try {
         setIsLoading(true)
-        logger.info('🎨 useTheme: Loading initial theme...')
 
         // Load themes list
         const themeList: ThemeInfo[] = await window.api.theme.list()
-        logger.info('🎨 useTheme: Themes list loaded', { count: themeList.length })
         setThemes(themeList)
 
         // Get current theme or use first dark theme as default
         let themeId: string | undefined = await window.api.theme.getCurrent()
-        logger.info('🎨 useTheme: Current theme from storage', { themeId })
 
         const isValidThemeId = (id: string | undefined, list: ThemeInfo[]): id is string => {
           return !!id && list.some(t => t.id === id)
         }
-
-        const originalThemeId = themeId
 
         // Migrate legacy theme IDs (e.g. "theme-defaults/dark_plus") to new IDs (e.g. "theme-defaults/Default Dark+")
         if (themeId && !isValidThemeId(themeId, themeList)) {
@@ -209,7 +247,6 @@ export function useTheme(): UseThemeReturn {
               const mappedLabel = legacyMap[legacyIdRaw as LegacyKey]
               const candidateId = `${dir}/${mappedLabel}`
               if (isValidThemeId(candidateId, themeList)) {
-                logger.info('🎨 useTheme: Migrating legacy theme id', { oldThemeId: legacyThemeId, newThemeId: candidateId })
                 themeId = candidateId
                 await window.api.theme.set(themeId)
               }
@@ -222,18 +259,15 @@ export function useTheme(): UseThemeReturn {
           const defaultTheme = themeList.find(t => t.type === 'dark') ?? themeList[0]
           if (defaultTheme) {
             themeId = defaultTheme.id
-            logger.info('🎨 useTheme: Using default theme', { themeId, previousThemeId: originalThemeId })
             await window.api.theme.set(themeId)
           }
         }
 
         if (themeId) {
-          logger.info('🎨 useTheme: Loading theme data', { themeId })
           const themeData: { theme: ThemeDefinition; variables: ThemeVariables } | null = 
             await window.api.theme.load(themeId)
           
           if (themeData) {
-            logger.info('🎨 useTheme: Applying theme', { themeId })
             // Apply CSS variables directly (don't use applyCSSVariables callback to avoid dependency issues)
             const root = document.documentElement
             
@@ -253,13 +287,15 @@ export function useTheme(): UseThemeReturn {
             const themeInfo = themeList.find(t => t.id === themeId)
             if (themeInfo) {
               document.documentElement.setAttribute('data-theme', themeInfo.type)
+              setWindowBorderColorForTheme(themeInfo.type)
+            } else {
+              setWindowBorderColorForTheme(undefined)
             }
 
             setCurrentThemeId(themeId)
             currentThemeIdRef.current = themeId
             setCurrentTheme(themeData.theme)
             setCurrentVariables(themeData.variables)
-            logger.info('🎨 useTheme: Theme applied successfully', { themeId })
             
             // Update WCO colors after a short delay to ensure CSS is applied
             // Use updateWCOColors from the closure
@@ -325,11 +361,8 @@ export function useTheme(): UseThemeReturn {
     
     // Listen for theme changes from other windows
     const cleanup = window.api.theme.onThemeChanged((themeId: string) => {
-      logger.info('🎨 useTheme: Theme changed event received from another window', { themeId, currentThemeId: currentThemeIdRef.current })
-      
       // Skip if this is already the current theme (avoid unnecessary re-application)
       if (currentThemeIdRef.current === themeId) {
-        logger.info('🎨 useTheme: Theme is already current, skipping re-application', { themeId })
         return
       }
       
@@ -343,7 +376,6 @@ export function useTheme(): UseThemeReturn {
             await window.api.theme.load(themeId)
           
           if (themeData) {
-            logger.info('🎨 useTheme: Applying theme from change event', { themeId })
             
             // Apply CSS variables directly
             const root = document.documentElement
@@ -374,8 +406,6 @@ export function useTheme(): UseThemeReturn {
             setCurrentTheme(themeData.theme)
             setCurrentVariables(themeData.variables)
             setThemes(themeList)
-            
-            logger.info('🎨 useTheme: Theme applied successfully from change event', { themeId })
             
             // Update WCO colors after a short delay
             setTimeout(() => {

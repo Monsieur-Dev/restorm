@@ -1,0 +1,46 @@
+# Base CSS Variables
+# These are custom CSS variables defined within the project components.
+# They are not theme-specific but can be overridden by themes.
+
+variables:
+  - id: dropdown-padding-top
+    value: "1px"
+    description: "Padding top for dropdown items (mac: 3px)"
+
+  - id: dropdown-padding-bottom
+    value: "1px"
+    description: "Padding bottom for dropdown items (mac: 4px)"
+
+  - id: vscode-sash-size
+    value: "4px"
+    description: Size of sash divider
+
+  - id: vscode-sash-hover-size
+    value: "8px"
+    description: Hover size of sash divider
+
+  - id: editor-group-tab-height
+    value: "35px"
+    description: Height of editor tabs
+
+  - id: monaco-monospace-font
+    value: "Consolas, 'Courier New', monospace"
+    description: Monospace font family (platform-dependent)
+
+  - id: text-link-decoration
+    value: "underline"
+    description: Text link decoration style
+
+  - id: beak-left-percent
+    value: "50%"
+    description: Tooltip beak position
+
+  - id: tabs-border-bottom-color
+    value: "transparent"
+    description: Border color for tabs
+
+  - id: ag-font-size
+    value: "12px"
+    description: AG Grid font size
+
+

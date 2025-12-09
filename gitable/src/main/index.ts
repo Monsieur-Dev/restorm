@@ -20,9 +20,15 @@ function createWindow(): void {
 // Get resources path from the core-ui package
 function getResourcesPath(): string {
   const isDev = process.env['NODE_ENV'] === 'development' || !app.isPackaged
-  return isDev
-    ? join(__dirname, '../../node_modules/electron-core-ui/resources')
-    : join(process.resourcesPath, 'resources')
+  if (isDev) {
+    // In development, point directly to the monorepo's electron-core-ui resources
+    // so that changes to YAML/JSON themes are picked up without reinstalling.
+    const appPath = app.getAppPath()
+    return join(appPath, '../electron-core-ui/resources')
+  }
+
+  // In production, resources are bundled under process.resourcesPath/resources
+  return join(process.resourcesPath, 'resources')
 }
 
 // Initialize Electron application
@@ -42,10 +48,9 @@ ipcMain.handle('gitable:open-editor', (_event, file?: { title: string; content?:
       const window = editorWindow.getWindow()
       if (window && file) {
         // Store file parameters with window ID as key (without x, y which are used for positioning)
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { x: _x, y: _y, ...fileParams } = file
+        const { x, y, ...fileParams } = file
         editorWindowFiles.set(window.id, fileParams)
-        logger.info('📦 Stored file parameters for window', { windowId: window.id, file: fileParams })
+        logger.info('📦 Stored file parameters for window', { windowId: window.id, file: fileParams, x, y })
       } else {
         logger.warn('⚠️ Window not available or no file provided', { hasWindow: !!window, hasFile: !!file })
       }

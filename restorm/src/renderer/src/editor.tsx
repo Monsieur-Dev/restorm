@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom/client'
 import { Workbench } from './components/Workbench'
 import type { EditorTab, WorkbenchTree, GroupNode } from 'electron-core-ui/renderer'
-import { isTabGroupNode, isContainerNode, initializeI18n, logger, MonacoWorkbench, Titlebar, i18n } from 'electron-core-ui/renderer'
+import { isTabGroupNode, isContainerNode, initializeI18n, logger, MonacoWorkbench, Titlebar } from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 
 // Import translations
@@ -11,16 +11,20 @@ import frTranslation from '../locales/fr/translation.json'
 
 // Initialize i18n using core-ui's initializeI18n function
 // This prevents double initialization and sets up the plugin
-const initI18n = (): Promise<void> => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
-  const promise: Promise<unknown> = initializeI18n({
-    en: { translation: enTranslation },
-    fr: { translation: frTranslation }
-  }, 'en')
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  return promise.then(() => {
-    logger.info('i18n initialized successfully with language', { language: i18n.language })
-  })
+type InitializeI18nFn = (
+  resources: Record<string, { translation: unknown }>,
+  defaultLanguage: string
+) => Promise<unknown>
+
+const initI18n = (): Promise<unknown> => {
+  const safeInitializeI18n = initializeI18n as InitializeI18nFn
+  return safeInitializeI18n(
+    {
+      en: { translation: enTranslation },
+      fr: { translation: frTranslation }
+    },
+    'en'
+  )
 }
 
 // Wait for i18n to be initialized before rendering
@@ -67,15 +71,14 @@ void initI18n().then(() => {
             return
           }
 
-          logger.info('Received file parameters', { file })
-          
           // Create tab with file parameters
           const tabId = crypto.randomUUID()
           const createTab = (id: string, title: string, dirty = false): EditorTab & { titleString?: string } => ({ 
             id, 
             title: title, 
             titleString: title,
-            isDirty: dirty 
+            isDirty: dirty,
+            allowFullscreen: true
           })
           
           const newTree: WorkbenchTree = {
@@ -105,11 +108,6 @@ void initI18n().then(() => {
 
       // Handle tree changes from Workbench
       const handleTreeChange = React.useCallback((newTree: WorkbenchTree): void => {
-        logger.info('EditorApp: Tree changed from Workbench', { 
-          groupsCount: newTree.groups.length,
-          tree: JSON.stringify(newTree)
-        })
-        
         // Update tree state - the useEffect will check if we should close
         setTree(newTree)
       }, [])
@@ -122,38 +120,22 @@ void initI18n().then(() => {
         }
         
         if (isClosingRef.current) {
-          logger.info('EditorApp: Already closing, skipping check')
           return
         }
 
         const tabCount = countAllTabs(tree)
         const isEmpty = tabCount === 0 && tree.groups.length === 0
-        
-        logger.info('EditorApp: Checking if window should close', { 
-          tabCount, 
-          groupsCount: tree.groups.length,
-          isEmpty,
-          fileLoaded,
-          treeString: JSON.stringify(tree)
-        })
 
         if (isEmpty) {
-          logger.info('EditorApp: Workbench is empty! Closing Editor window now')
           isClosingRef.current = true
           
           // Close immediately without delay
-          logger.info('EditorApp: Calling window.api.closeWindow()')
           window.api.closeWindow()
-            .then(() => {
-              logger.info('EditorApp: Window close request sent successfully')
-            })
             .catch((error: unknown) => {
               logger.error('EditorApp: Error closing window', { error: String(error) })
               // Reset flag so we can try again
               isClosingRef.current = false
             })
-        } else {
-          logger.info('EditorApp: Workbench is not empty, keeping window open', { tabCount, groupsCount: tree.groups.length })
         }
       }, [tree, fileLoaded, countAllTabs])
 

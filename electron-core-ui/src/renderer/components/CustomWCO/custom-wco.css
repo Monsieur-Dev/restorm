@@ -21,11 +21,17 @@
   align-items: center;
   justify-content: center;
   cursor: default;
-  color: #c8c8c8;
+  /* Use dedicated WCO icon color (falls back to generic icon foreground) */
+  color: var(--vscode-wco-iconForeground, var(--vscode-icon-foreground));
   position: relative;
   border-radius: 50%; /* pour effet circulaire au hover */
   transition: background-color 0.15s, color 0.15s;
   -webkit-app-region: no-drag;
+}
+
+/* Ensure codicon glyph uses the button color */
+.window-button .codicon {
+  color: inherit !important;
 }
 
 /* Minimize button icon positioning */
@@ -40,10 +46,11 @@
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.15);
   -webkit-app-region: no-drag;
 }
 
 .window-button:hover {
-  color: #ffffff;
+  /* Keep using the dedicated WCO icon color on hover for maximum contrast */
+  color: var(--vscode-wco-iconForeground, var(--vscode-icon-foreground));
 }
