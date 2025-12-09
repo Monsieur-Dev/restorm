@@ -25,18 +25,64 @@ import type {
 import { ParamsTabView, type ParamsTabViewHandle } from './ParamsTabView'
 import { HttpMethodBadge } from './HttpMethodBadge'
 import { ResponsesView } from './ResponsesView'
+import type { HTTPRequest, KeyValue } from '../types/collections'
 
 export interface HTTPRequestTabViewProps {
-  requestTitle: string
+  /** The HTTP request to display */
+  request: HTTPRequest
 }
 
-export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestTitle }) => {
+/** Convert KeyValue array to VariableDefinition array */
+function keyValuesToVariables(keyValues: KeyValue[]): VariableDefinition[] {
+  return keyValues.map((kv) => ({
+    name: kv.key,
+    value: kv.value,
+    description: ''
+  }))
+}
+
+/** Determine body mode from request body type */
+function getBodyMode(request: HTTPRequest): 'text' | 'form-data' | 'x-www-form-urlencoded' | 'file' {
+  if (!request.body) return 'text'
+  switch (request.body.type) {
+    case 'text':
+      return 'text'
+    case 'file':
+      return 'file'
+    case 'form-data':
+      return 'form-data'
+    case 'x-www-form-urlencoded':
+      return 'x-www-form-urlencoded'
+    default:
+      return 'text'
+  }
+}
+
+/** Get body content for text mode */
+function getBodyContent(request: HTTPRequest): string {
+  if (request.body?.type === 'text') {
+    return request.body.content
+  }
+  return ''
+}
+
+/** Get body file path for file mode */
+function getBodyFilePath(request: HTTPRequest): string {
+  if (request.body?.type === 'file') {
+    return request.body.path
+  }
+  return ''
+}
+
+export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request }) => {
   const { t } = useTranslation()
-  const [method, setMethod] = useState<string>('GET')
-  const [url, setUrl] = useState<string>('')
-  const [body, setBody] = useState<string>('')
-  const [bodyMode, setBodyMode] = useState<'text' | 'form-data' | 'x-www-form-urlencoded' | 'file'>('text')
-  const [bodyFilePath, setBodyFilePath] = useState<string>('')
+  const [method, setMethod] = useState<string>(request.method)
+  const [url, setUrl] = useState<string>(request.url)
+  const [body, setBody] = useState<string>(getBodyContent(request))
+  const [bodyMode, setBodyMode] = useState<'text' | 'form-data' | 'x-www-form-urlencoded' | 'file'>(
+    getBodyMode(request)
+  )
+  const [bodyFilePath, setBodyFilePath] = useState<string>(getBodyFilePath(request))
   const [activeTabId, setActiveTabId] = useState<string>('requestLayout')
   const [leftPaneWidth, setLeftPaneWidth] = useState<number>(0)
   const [isSending, setIsSending] = useState<boolean>(false)
@@ -46,20 +92,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestT
   const sashStartLeftRef = useRef<number>(leftPaneWidth)
   const sendTimeoutRef = useRef<number | null>(null)
 
+  // Convert request params to variables for autocomplete
   const urlVariables = useMemo<VariableDefinition[]>(
-    () => [
-      {
-        name: 'baseUrl',
-        value: 'https://api.example.com',
-        description: 'Base API URL'
-      },
-      {
-        name: 'userId',
-        value: '123456',
-        description: 'Current user identifier'
-      }
-    ],
-    []
+    () => keyValuesToVariables(request.params),
+    [request.params]
   )
 
   const methodOptions = useMemo<ISelectOptionItem[]>(
@@ -82,25 +118,22 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestT
   const renderRequestModalTitle = useCallback((tabLabel: string): React.ReactNode => {
     return (
       <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <HttpMethodBadge method={requestTitle.split(' ')[0] ?? 'GET'} />
-        <span>{requestTitle}{tabLabel ? ` - ${tabLabel}` : ''}</span>
+        <HttpMethodBadge method={method} />
+        <span>{request.name}{tabLabel ? ` - ${tabLabel}` : ''}</span>
       </span>
     )
-  }, [requestTitle])
+  }, [method, request.name])
 
   const tabs: Tab[] = [
     {
       id: 'docs',
       label: t('requestTab.tabs.docs'),
-      // For docs, we let the editor handle its own scrolling, so we disable the Tabs ScrollableElement wrapper.
       useScrollableElement: false,
       allowFullscreen: true,
       fullscreenModalTitle: renderRequestModalTitle(t('requestTab.tabs.docs')),
       content: (
         <MarkdownEditor
-          initialValue={
-            '# Request documentation\n\nThis is some **random** default text for the Docs tab.\n\n- Item 1\n- Item 2\n- Item 3\n'
-          }
+          initialValue={request.documentation || `# ${request.name}\n\nNo documentation available.`}
         />
       )
     },
@@ -134,13 +167,13 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestT
           <Pane
             title={t('requestTab.tabs.headers')}
             initialSize={0.25}
-            collapsed
+            collapsed={request.headers.length === 0}
             minSize={150}
             headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
               <Button
                 secondary
                 small
-                options={{ ariaLabel: 'Add header', title: 'Add header' }}
+                options={{ ariaLabel: t('requestTab.addHeader'), title: t('requestTab.addHeader') }}
                 onClick={() => {
                   if (collapsed) {
                     toggle()
@@ -152,17 +185,22 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestT
               </Button>
             )}
           >
-            <ParamsTabView ref={headersParamsRef} variables={urlVariables} />
+            <ParamsTabView
+              ref={headersParamsRef}
+              variables={urlVariables}
+              initialRows={request.headers}
+            />
           </Pane>
           <Pane
             title={t('requestTab.tabs.params')}
             initialSize={0.25}
+            collapsed={request.params.length === 0}
             minSize={150}
             headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
               <Button
                 small
                 secondary
-                options={{ ariaLabel: 'Add param', title: 'Add param' }}
+                options={{ ariaLabel: t('requestTab.addParam'), title: t('requestTab.addParam') }}
                 onClick={() => {
                   if (collapsed) {
                     toggle()
@@ -174,7 +212,11 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestT
               </Button>
             )}
           >
-            <ParamsTabView ref={queryParamsRef} variables={urlVariables} />
+            <ParamsTabView
+              ref={queryParamsRef}
+              variables={urlVariables}
+              initialRows={request.params}
+            />
           </Pane>
           <Pane
             title={t('requestTab.tabs.body')}
@@ -238,7 +280,14 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestT
                 )}
 
                 {(bodyMode === 'form-data' || bodyMode === 'x-www-form-urlencoded') && (
-                  <ParamsTabView variables={urlVariables} />
+                  <ParamsTabView
+                    variables={urlVariables}
+                    initialRows={
+                      request.body?.type === 'form-data' || request.body?.type === 'x-www-form-urlencoded'
+                        ? request.body.fields
+                        : []
+                    }
+                  />
                 )}
 
                 {bodyMode === 'file' && (
@@ -270,9 +319,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestT
                       />
                     </div>
                     <Button
-                      options={{ ariaLabel: 'Browse file', title: 'Browse file' }}
+                      options={{ ariaLabel: t('requestTab.body.browse'), title: t('requestTab.body.browse') }}
                     >
-                      parcourir...
+                      {t('requestTab.body.browse')}
                     </Button>
                   </div>
                 )}
@@ -462,7 +511,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestT
               marginLeft: 4
             }}
           >
-            <ResponsesView requestTitle={requestTitle} />
+            <ResponsesView requestTitle={`${method} ${request.name}`} />
           </div>
 
           <Sash
@@ -479,5 +528,3 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ requestT
 }
 
 export default HTTPRequestTabView
-
-

@@ -37,6 +37,10 @@
   outline: none;
 }
 
+.ecui-breadcrumb-link:focus {
+  outline: none;
+}
+
 .ecui-breadcrumb-link:hover {
   color: var(--vscode-breadcrumb-focusForeground, var(--vscode-textLink-foreground, inherit));
 }

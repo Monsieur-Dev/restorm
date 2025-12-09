@@ -20,7 +20,11 @@
     "noPropertyAccessFromIndexSignature": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "electron-core-ui/renderer": ["../electron-core-ui/src/renderer/index.ts"]
+    }
   },
   "include": ["src/renderer/src"],
   "references": [{ "path": "./tsconfig.node.json" }]

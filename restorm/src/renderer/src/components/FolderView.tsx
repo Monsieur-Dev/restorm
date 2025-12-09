@@ -15,54 +15,60 @@ import {
 } from 'electron-core-ui/renderer'
 import { ParamsTabView } from './ParamsTabView'
 import type { ParamsTabViewHandle } from './ParamsTabView'
+import type { Folder, Environment } from '../types/collections'
 
 const MIN_LEFT_WIDTH = 160
 const RIGHT_MIN_WIDTH = 240
 
-export const FolderView: React.FC = () => {
+export interface FolderViewProps {
+  /** The folder to display */
+  folder: Folder
+}
+
+/** Convert environments to ListView items */
+function environmentsToListViewItems(
+  environments: Environment[],
+  expandedIds: string[]
+): ListViewItemData[] {
+  return environments.map((env) => ({
+    id: env.id,
+    title: env.name,
+    isExpandable: (env.subEnvironments?.length ?? 0) > 0,
+    isExpanded: expandedIds.includes(env.id),
+    icon: expandedIds.includes(env.id) ? 'folder-opened' : 'folder',
+    children: env.subEnvironments
+      ? environmentsToListViewItems(env.subEnvironments, expandedIds)
+      : []
+  }))
+}
+
+/** Collect all environment IDs recursively */
+function collectEnvironmentIds(environments: Environment[]): string[] {
+  const ids: string[] = []
+  for (const env of environments) {
+    ids.push(env.id)
+    if (env.subEnvironments) {
+      ids.push(...collectEnvironmentIds(env.subEnvironments))
+    }
+  }
+  return ids
+}
+
+export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
   const { t } = useTranslation()
   const [activeTabId, setActiveTabId] = useState<string>('configuration')
-  const [expandedIds, setExpandedIds] = useState<string[]>([
-    'env-local',
-    'env-dev',
-    'env-stage',
-    'env-prod'
-  ])
 
+  // Initialize with all environments expanded
+  const allEnvIds = useMemo(
+    () => collectEnvironmentIds(folder.configuration.environments),
+    [folder.configuration.environments]
+  )
+  const [expandedIds, setExpandedIds] = useState<string[]>(allEnvIds)
+
+  // Convert environments to ListView items
   const sidebarItems: ListViewItemData[] = useMemo(
-    () => [
-      'local',
-      'dev',
-      'stage',
-      'prod'
-    ].map((envName) => {
-      const envId = `env-${envName}`
-      return {
-        id: envId,
-        title: envName,
-        isExpandable: true,
-        isExpanded: expandedIds.includes(envId),
-        icon: expandedIds.includes(envId) ? 'folder-opened' : 'folder',
-        children: [
-          {
-            id: `${envId}-customer-1`,
-            title: 'customer 1',
-            icon: 'blank'
-          },
-          {
-            id: `${envId}-customer-2`,
-            title: 'customer 2',
-            icon: 'blank'
-          },
-          {
-            id: `${envId}-customer-3`,
-            title: 'customer 3',
-            icon: 'blank'
-          }
-        ]
-      } as ListViewItemData
-    }),
-    [expandedIds]
+    () => environmentsToListViewItems(folder.configuration.environments, expandedIds),
+    [folder.configuration.environments, expandedIds]
   )
 
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -157,7 +163,7 @@ export const FolderView: React.FC = () => {
                   small
                   options={{ ariaLabel: t('sidebar.addRequest'), title: t('sidebar.addRequest') }}
                   onClick={() => {
-                    // TODO: hook this to real "add request" behavior
+                    // TODO: hook this to real "add environment" behavior
                   }}
                 >
                   <i className="codicon codicon-add" />
@@ -253,9 +259,7 @@ export const FolderView: React.FC = () => {
       useScrollableElement: false,
       content: (
         <MarkdownEditor
-          initialValue={
-            '# Folder documentation\n\nThis is some **random** default text for the Docs tab.\n\n- Item 1\n- Item 2\n- Item 3\n'
-          }
+          initialValue={folder.documentation || `# ${folder.name}\n\nNo documentation available.`}
         />
       )
     },
@@ -287,4 +291,3 @@ export const FolderView: React.FC = () => {
 }
 
 export default FolderView
-

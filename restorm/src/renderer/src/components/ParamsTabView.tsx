@@ -1,6 +1,7 @@
-import React, { useCallback, useImperativeHandle, useRef, useState } from 'react'
+import React, { useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { VariableInputBox, Toggle, InputBox, ScrollableElement, Button } from 'electron-core-ui/renderer'
 import type { VariableDefinition } from 'electron-core-ui/renderer'
+import type { KeyValue } from '../types/collections'
 import './paramsTabView.css'
 
 interface ParamRow {
@@ -81,16 +82,29 @@ const TextCell: React.FC<TextCellProps> = ({
 
 interface ParamsTabViewProps {
   variables: VariableDefinition[]
+  /** Initial rows to populate the table */
+  initialRows?: KeyValue[]
 }
 
 export interface ParamsTabViewHandle {
   addRow: () => void
 }
 
-export const ParamsTabView = React.forwardRef<ParamsTabViewHandle, ParamsTabViewProps>(({ variables }, ref) => {
-  const [rows, setRows] = useState<ParamRow[]>([
-    { enabled: true, key: '', value: '', description: '' }
-  ])
+export const ParamsTabView = React.forwardRef<ParamsTabViewHandle, ParamsTabViewProps>(({ variables, initialRows }, ref) => {
+  // Convert initialRows to ParamRow format
+  const defaultRows = useMemo<ParamRow[]>(() => {
+    if (!initialRows || initialRows.length === 0) {
+      return [{ enabled: true, key: '', value: '', description: '' }]
+    }
+    return initialRows.map((kv) => ({
+      enabled: true,
+      key: kv.key,
+      value: kv.value,
+      description: ''
+    }))
+  }, [initialRows])
+
+  const [rows, setRows] = useState<ParamRow[]>(defaultRows)
   // dropIndex représente la position d'insertion entre les lignes (0..rows.length)
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const dragGhostRef = useRef<HTMLDivElement | null>(null)

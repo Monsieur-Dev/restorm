@@ -16,7 +16,7 @@
     "preview": "electron-vite preview",
     "lint": "eslint . --ext .ts,.tsx --max-warnings 0",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit --project tsconfig.typecheck.json",
     "package": "electron-vite build && electron-builder --dir",
     "dist": "electron-vite build && electron-builder",
     "test:e2e": "playwright test",

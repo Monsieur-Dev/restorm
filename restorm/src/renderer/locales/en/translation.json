@@ -32,8 +32,11 @@
     "send": "Send",
     "urlPlaceholder": "Request URL",
     "methodSelect": "Select HTTP method",
+    "addHeader": "Add header",
+    "addParam": "Add param",
     "body": {
-      "fileLabel": "File or URL:"
+      "fileLabel": "File or URL:",
+      "browse": "Browse..."
     },
     "tabs": {
       "docs": "Docs",

@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef } from 'react'
+import React, { useCallback, useState, useRef, useEffect } from 'react'
 
 import './breadcrumb.css'
 
@@ -18,10 +18,10 @@ export interface BreadcrumbProps {
    */
   onItemClick?: (item: BreadcrumbItem, index: number, event: React.MouseEvent<HTMLButtonElement>) => void
   /**
-   * Called when the editable last item loses focus or is submitted.
-   * Receives the new value and the index of the last item.
+   * Called when the editable last item is renamed (Enter or blur).
+   * Receives the item, new value, and index.
    */
-  onLastItemChange?: (value: string, index: number) => void
+  onLastItemChange?: (item: BreadcrumbItem, newValue: string, index: number) => void
   className?: string
   style?: React.CSSProperties
   ariaLabel?: string
@@ -37,27 +37,42 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
 }) => {
   const [isEditingLast, setIsEditingLast] = useState(false)
   const [editingValue, setEditingValue] = useState('')
+  const [editingItem, setEditingItem] = useState<BreadcrumbItem | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
+  const shouldSelectOnMount = useRef(false)
 
-  const handleStartEditingLast = useCallback((label: string): void => {
+  const handleStartEditingLast = useCallback((item: BreadcrumbItem): void => {
     setIsEditingLast(true)
-    setEditingValue(label)
-    // Focus is handled via ref callback on the input element
+    setEditingValue(item.label)
+    setEditingItem(item)
+    shouldSelectOnMount.current = true
   }, [])
+
+  // Focus and select on mount when editing starts
+  useEffect(() => {
+    if (isEditingLast && inputRef.current && shouldSelectOnMount.current) {
+      inputRef.current.focus()
+      inputRef.current.select()
+      shouldSelectOnMount.current = false
+    }
+  }, [isEditingLast])
 
   const handleCommitLast = useCallback(
     (index: number): void => {
-      if (!isEditingLast) return
+      if (!isEditingLast || !editingItem) return
       setIsEditingLast(false)
-      if (onLastItemChange) {
-        onLastItemChange(editingValue, index)
+      // Only call callback if value actually changed
+      if (onLastItemChange && editingValue !== editingItem.label) {
+        onLastItemChange(editingItem, editingValue, index)
       }
+      setEditingItem(null)
     },
-    [editingValue, isEditingLast, onLastItemChange]
+    [editingValue, isEditingLast, editingItem, onLastItemChange]
   )
 
   const handleCancelEditingLast = useCallback((): void => {
     setIsEditingLast(false)
+    setEditingItem(null)
   }, [])
 
   const handleInputKeyDown = useCallback(
@@ -117,14 +132,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
             <li key={item.id} className="ecui-breadcrumb-item ecui-breadcrumb-item--last">
               {isEditingLast ? (
                 <input
-                  ref={(node): void => {
-                    inputRef.current = node
-                    if (node) {
-                      // Auto-focus when the input appears
-                      node.focus()
-                      node.select()
-                    }
-                  }}
+                  ref={inputRef}
                   className="ecui-breadcrumb-input"
                   type="text"
                   value={editingValue}
@@ -147,7 +155,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
                     if (onItemClick) {
                       onItemClick(item, index, event)
                     }
-                    handleStartEditingLast(item.label)
+                    handleStartEditingLast(item)
                   }}
                 >
                   {item.label}
