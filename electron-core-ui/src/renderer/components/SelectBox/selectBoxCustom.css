@@ -156,6 +156,8 @@
 .select-container {
   position: relative;
   display: inline-block;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Hidden select element */

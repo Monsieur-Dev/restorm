@@ -704,7 +704,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           />
         </div>
 
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ flex: 1, minWidth: 0, paddingLeft: 15 }}>
           <VariableInputBox
             value={url}
             onChange={(value: string) => {

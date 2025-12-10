@@ -188,15 +188,25 @@ export const Workbench: React.FC<WorkbenchProps> = ({
               }}
             />
           </div>
-          <Breadcrumb
-            items={breadcrumbs}
-            onItemClick={(item, index) => {
-              handleBreadcrumbClick(item, index, breadcrumbs)
+          
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '8px 16px 0 16px'
             }}
-            onLastItemChange={(item, newValue) => {
-              handleBreadcrumbRename(item, newValue)
-            }}
-          />
+          >
+            <Breadcrumb
+              items={breadcrumbs}
+              onItemClick={(item, index) => {
+                handleBreadcrumbClick(item, index, breadcrumbs)
+              }}
+              onLastItemChange={(item, newValue) => {
+                handleBreadcrumbRename(item, newValue)
+              }}
+            />
+          </div>
           <FolderView folder={tab.folder} />
         </div>
       )
