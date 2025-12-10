@@ -317,6 +317,7 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
               ariaLabel={t('folderView.environmentsAriaLabel')}
               selectedIds={selectedEnvId ? [selectedEnvId] : []}
               isRenameable
+              expandOnChevronOnly
               onItemClick={(payload) => {
                 const id = payload.item.id
                 if (id) {

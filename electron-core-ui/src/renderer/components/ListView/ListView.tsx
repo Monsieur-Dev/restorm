@@ -165,6 +165,7 @@ export const ListView: React.FC<ListViewProps> = ({
   ariaLabel,
   isRenameable = false,
   renameShortcut = 'F2',
+  expandOnChevronOnly = false,
   onItemClick,
   onItemDoubleClick,
   onSelectionChange,
@@ -619,6 +620,12 @@ export const ListView: React.FC<ListViewProps> = ({
 
             const handleRowClick = (event: React.MouseEvent<HTMLDivElement>): void => {
               handleSelect(flat, event)
+
+              // If expandOnChevronOnly is true, don't toggle on row click
+              // (expansion is handled only by the chevron button)
+              if (expandOnChevronOnly) {
+                return
+              }
 
               // If the item is expandable (has children or explicitly marked as expandable),
               // also toggle its expanded state when clicking anywhere on the row.

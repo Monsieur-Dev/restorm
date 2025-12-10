@@ -116,6 +116,13 @@ export interface ListViewProps {
    */
   renameShortcut?: string
 
+  /**
+   * When true, clicking on a row only selects it (triggers onItemClick).
+   * Expansion/collapse is only triggered by clicking the chevron.
+   * When false (default), clicking anywhere on an expandable row toggles expansion.
+   */
+  expandOnChevronOnly?: boolean
+
   onItemClick?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
   onItemDoubleClick?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
   onSelectionChange?: (selectedIds: string[], payload: ListViewItemEventPayload) => void

@@ -853,6 +853,8 @@ const App: React.FC = () => {
                 rootRole="tree"
                 ariaLabel="Requests"
                 selectedIds={selectedItemId ? [selectedItemId] : []}
+                isRenameable
+                expandOnChevronOnly
                 onItemToggle={(payload, expanded) => {
                   const id = payload.item.id
                   if (!id) return
