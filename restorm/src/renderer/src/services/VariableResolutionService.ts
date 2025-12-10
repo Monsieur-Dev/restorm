@@ -3,6 +3,30 @@ import type { KeyValue, Environment } from '../types/collections'
 
 export type VariableContext = Record<string, string>
 
+/** Type of source where a variable was defined */
+export type VariableSourceType = 'environment' | 'folder' | 'request'
+
+/** Information about where a variable was defined */
+export interface VariableSource {
+  /** Type of the source (environment, folder, or request) */
+  type: VariableSourceType
+  /** ID of the source entity */
+  id: string
+  /** Human-readable path to the source (e.g., ["Swagger Petstore", "Default"]) */
+  path: string[]
+}
+
+/** A resolved variable with its value and source information */
+export interface ResolvedVariable {
+  /** The resolved value of the variable */
+  value: string
+  /** Where this variable was defined */
+  source: VariableSource
+}
+
+/** Map of variable names to their resolved values and sources */
+export type VariableContextWithSources = Record<string, ResolvedVariable>
+
 export interface ResolvedKeyValue {
   key: string
   value: string
@@ -132,5 +156,61 @@ export function resolveEnvironmentVariables(
   }
 
   return {}
+}
+
+/**
+ * Resolve variables for a selected environment with source tracking.
+ * Returns both values and information about where each variable was defined.
+ */
+export function resolveEnvironmentVariablesWithSources(
+  environments: Environment[] | undefined,
+  selectedEnvId: string | null,
+  folderPath: string[] = []
+): VariableContextWithSources {
+  if (!environments || !selectedEnvId) {
+    return {}
+  }
+
+  const chain = findEnvironmentChain(environments, selectedEnvId)
+  if (!chain) {
+    return {}
+  }
+
+  const result: VariableContextWithSources = {}
+  let context: VariableContext = {}
+
+  for (const env of chain) {
+    const envPath = [...folderPath, env.name]
+    const sequence = resolveKeyValueSequence(env.variables ?? [], context)
+
+    // Track source for each new variable defined in this environment
+    for (const resolved of sequence.resolvedRows) {
+      if (resolved.key) {
+        result[resolved.key] = {
+          value: resolved.value,
+          source: {
+            type: 'environment',
+            id: env.id,
+            path: envPath
+          }
+        }
+      }
+    }
+
+    context = sequence.finalContext
+  }
+
+  return result
+}
+
+/**
+ * Convert VariableContextWithSources to simple VariableContext (values only)
+ */
+export function stripSources(contextWithSources: VariableContextWithSources): VariableContext {
+  const result: VariableContext = {}
+  for (const [key, resolved] of Object.entries(contextWithSources)) {
+    result[key] = resolved.value
+  }
+  return result
 }
 

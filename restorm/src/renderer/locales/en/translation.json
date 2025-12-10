@@ -72,5 +72,8 @@
   },
   "workbench": {
     "tagsLabel": "Tags:"
+  },
+  "codeEditor": {
+    "goToDefinition": "Go to Definition"
   }
 }
