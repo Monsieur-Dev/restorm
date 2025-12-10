@@ -15,8 +15,8 @@ import {
 } from 'electron-core-ui/renderer'
 import { ParamsTabView } from './ParamsTabView'
 import type { ParamsTabViewHandle } from './ParamsTabView'
-import type { Folder, Environment, KeyValue } from '../types/collections'
-import type { VariableDefinition } from 'electron-core-ui/renderer'
+import type { Folder, Environment } from '../types/collections'
+import { useEnvironmentValues } from '../contexts/EnvironmentValuesContext'
 
 const MIN_LEFT_WIDTH = 160
 const RIGHT_MIN_WIDTH = 240
@@ -69,16 +69,9 @@ function findEnvironmentById(environments: Environment[], id: string): Environme
   return null
 }
 
-/** Convert KeyValue array to VariableDefinition array for autocomplete */
-function keyValuesToVariableDefinitions(keyValues: KeyValue[]): VariableDefinition[] {
-  return keyValues.map((kv) => ({
-    name: kv.key,
-    value: kv.value
-  }))
-}
-
 export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
   const { t } = useTranslation()
+  const { setEnvironmentValues } = useEnvironmentValues()
   const [activeTabId, setActiveTabId] = useState<string>('configuration')
 
   // Initialize with all environments expanded
@@ -287,8 +280,16 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
               <ParamsTabView
                 key={selectedEnvId ?? 'no-env'}
                 ref={variablesParamsRef}
-                variables={keyValuesToVariableDefinitions(selectedEnvironment?.variables ?? [])}
+                // At folder level, variables are defined sequentially:
+                // no base variables, each row can only see previous rows.
+                variables={[]}
                 initialRows={selectedEnvironment?.variables ?? []}
+                visibilityMode="accumulated"
+                onResolvedContextChange={(context) => {
+                  if (selectedEnvId) {
+                    setEnvironmentValues(selectedEnvId, context)
+                  }
+                }}
               />
             </div>
           </Pane>

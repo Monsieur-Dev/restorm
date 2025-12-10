@@ -27,22 +27,20 @@ import type {
 import { ParamsTabView, type ParamsTabViewHandle } from './ParamsTabView'
 import { HttpMethodBadge } from './HttpMethodBadge'
 import { ResponsesView } from './ResponsesView'
-import type { HTTPRequest, KeyValue, Environment } from '../types/collections'
+import type { HTTPRequest, Environment } from '../types/collections'
+import { useEnvironmentContext } from '../contexts/EnvironmentContext'
+import { useEnvironmentValues } from '../contexts/EnvironmentValuesContext'
+import {
+  resolveEnvironmentVariables,
+  resolveTemplate,
+  type VariableContext
+} from '../services/VariableResolutionService'
 
 export interface HTTPRequestTabViewProps {
   /** The HTTP request to display */
   request: HTTPRequest
   /** Environments available for this request (from nearest ancestor folder) */
   environments?: Environment[]
-}
-
-/** Convert KeyValue array to VariableDefinition array */
-function keyValuesToVariables(keyValues: KeyValue[]): VariableDefinition[] {
-  return keyValues.map((kv) => ({
-    name: kv.key,
-    value: kv.value,
-    description: ''
-  }))
 }
 
 /** Determine body mode from request body type */
@@ -119,18 +117,12 @@ function findEnvironmentById(environments: Environment[], id: string): Environme
   return null
 }
 
-export interface EnvironmentDropdownProps {
-  environments?: Environment[] | undefined
-}
-
-export const EnvironmentDropdown: React.FC<EnvironmentDropdownProps> = ({ environments }) => {
+export const EnvironmentDropdown: React.FC = () => {
   const { t } = useTranslation()
+  const { environments, selectedEnvId, setSelectedEnvId } = useEnvironmentContext()
   const [isOpen, setIsOpen] = useState(false)
   const [expandedIds, setExpandedIds] = useState<string[]>(() =>
     environments && environments.length > 0 ? collectEnvironmentIds(environments) : []
-  )
-  const [selectedEnvId, setSelectedEnvId] = useState<string | null>(() =>
-    environments && environments.length > 0 ? environments[0]?.id ?? null : null
   )
   const containerRef = useRef<HTMLDivElement | null>(null)
 
@@ -138,12 +130,15 @@ export const EnvironmentDropdown: React.FC<EnvironmentDropdownProps> = ({ enviro
   useEffect(() => {
     if (environments && environments.length > 0) {
       setExpandedIds(collectEnvironmentIds(environments))
-      setSelectedEnvId(environments[0]?.id ?? null)
+      // Keep current selected environment if still present, otherwise default to first
+      if (!selectedEnvId || !environments.some((env) => env.id === selectedEnvId)) {
+        setSelectedEnvId(environments[0]?.id ?? null)
+      }
     } else {
       setExpandedIds([])
       setSelectedEnvId(null)
     }
-  }, [environments])
+  }, [environments, selectedEnvId, setSelectedEnvId])
 
   // Close dropdown when clicking outside or pressing Escape
   useEffect(() => {
@@ -255,6 +250,8 @@ export const EnvironmentDropdown: React.FC<EnvironmentDropdownProps> = ({ enviro
 
 export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request }) => {
   const { t } = useTranslation()
+  const { environments, selectedEnvId } = useEnvironmentContext()
+  const { valuesByEnvId } = useEnvironmentValues()
   const [method, setMethod] = useState<string>(request.method)
   const [url, setUrl] = useState<string>(request.url)
   const [body, setBody] = useState<string>(getBodyContent(request))
@@ -265,16 +262,63 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
   const [activeTabId, setActiveTabId] = useState<string>('requestLayout')
   const [leftPaneWidth, setLeftPaneWidth] = useState<number>(0)
   const [isSending, setIsSending] = useState<boolean>(false)
+  const [resolvedQueryParamsContext, setResolvedQueryParamsContext] = useState<VariableContext>({})
+  const [resolvedPathParamsContext, setResolvedPathParamsContext] = useState<VariableContext>({})
   const headersParamsRef = useRef<ParamsTabViewHandle | null>(null)
   const queryParamsRef = useRef<ParamsTabViewHandle | null>(null)
+  const pathParamsRef = useRef<ParamsTabViewHandle | null>(null)
   const splitContainerRef = useRef<HTMLDivElement | null>(null)
   const sashStartLeftRef = useRef<number>(leftPaneWidth)
   const sendTimeoutRef = useRef<number | null>(null)
 
+  const runtimeEnvironmentContext = useMemo<VariableContext | undefined>(
+    () => (selectedEnvId ? valuesByEnvId[selectedEnvId] : undefined),
+    [valuesByEnvId, selectedEnvId]
+  )
+
+  const environmentContext = useMemo<VariableContext>(
+    () => {
+      if (runtimeEnvironmentContext) {
+        return runtimeEnvironmentContext
+      }
+      return resolveEnvironmentVariables(environments ?? [], selectedEnvId)
+    },
+    [runtimeEnvironmentContext, environments, selectedEnvId]
+  )
+
+  const environmentVariablesForInputs = useMemo<VariableDefinition[]>(
+    () =>
+      Object.entries(environmentContext).map(([name, value]) => ({
+        name,
+        value,
+        description: ''
+      })),
+    [environmentContext]
+  )
+
+  const combinedContextForBodyAndUrl = useMemo<VariableContext>(
+    () => ({
+      ...environmentContext,
+      ...resolvedPathParamsContext,
+      ...resolvedQueryParamsContext
+    }),
+    [environmentContext, resolvedPathParamsContext, resolvedQueryParamsContext]
+  )
+
   // Convert request params to variables for autocomplete
   const urlVariables = useMemo<VariableDefinition[]>(
-    () => keyValuesToVariables(request.params),
-    [request.params]
+    () =>
+      Object.entries(combinedContextForBodyAndUrl).map(([name, value]) => ({
+        name,
+        value,
+        description: ''
+      })),
+    [combinedContextForBodyAndUrl]
+  )
+
+  const resolvedUrl = useMemo(
+    () => resolveTemplate(url, combinedContextForBodyAndUrl),
+    [url, combinedContextForBodyAndUrl]
   )
 
   const methodOptions = useMemo<ISelectOptionItem[]>(
@@ -366,8 +410,41 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           >
             <ParamsTabView
               ref={headersParamsRef}
-              variables={urlVariables}
+              // Headers can only see environment variables inside their fields
+              variables={environmentVariablesForInputs}
               initialRows={request.headers}
+              visibilityMode="base-only"
+            />
+          </Pane>
+          <Pane
+            title={t('requestTab.tabs.pathParams')}
+            initialSize={0.25}
+            collapsed={(request.pathParams?.length ?? 0) === 0}
+            minSize={150}
+            headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
+              <Button
+                small
+                secondary
+                options={{ ariaLabel: t('requestTab.addParam'), title: t('requestTab.addParam') }}
+                onClick={() => {
+                  if (collapsed) {
+                    toggle()
+                  }
+                  pathParamsRef.current?.addRow()
+                }}
+              >
+                <i className="codicon codicon-add" />
+              </Button>
+            )}
+          >
+            <ParamsTabView
+              ref={pathParamsRef}
+              // Path params can only see environment variables, but their resolved
+              // values contribute to the context for body and URL.
+              variables={environmentVariablesForInputs}
+              initialRows={request.pathParams ?? []}
+              visibilityMode="base-only"
+              onResolvedContextChange={setResolvedPathParamsContext}
             />
           </Pane>
           <Pane
@@ -393,8 +470,12 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           >
             <ParamsTabView
               ref={queryParamsRef}
-              variables={urlVariables}
+              // Query params can only see environment variables, but their resolved
+              // values contribute to the context for body and URL.
+              variables={environmentVariablesForInputs}
               initialRows={request.params}
+              visibilityMode="base-only"
+              onResolvedContextChange={setResolvedQueryParamsContext}
             />
           </Pane>
           <Pane
@@ -460,12 +541,14 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
 
                 {(bodyMode === 'form-data' || bodyMode === 'x-www-form-urlencoded') && (
                   <ParamsTabView
+                    // Body fields can see environment + resolved path/params variables
                     variables={urlVariables}
                     initialRows={
                       request.body?.type === 'form-data' || request.body?.type === 'x-www-form-urlencoded'
                         ? request.body.fields
                         : []
                     }
+                    visibilityMode="base-only"
                   />
                 )}
 
@@ -619,6 +702,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
               setUrl(value)
             }}
             variables={urlVariables}
+            resolvedValue={resolvedUrl}
             placeholder={t('requestTab.urlPlaceholder')}
           />
         </div>

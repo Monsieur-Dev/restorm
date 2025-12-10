@@ -300,7 +300,31 @@ function extractParams(parameters: SwaggerParameter[]): KeyValue[] {
   const result: KeyValue[] = []
 
   for (const param of parameters) {
-    if (param.in !== 'query' && param.in !== 'path') {
+    if (param.in !== 'query') {
+      continue
+    }
+
+    // Avoid duplicate keys if the same parameter is defined multiple times
+    if (result.some((existing) => existing.key === param.name)) {
+      continue
+    }
+
+    result.push({
+      key: param.name,
+      value: '',
+      description: param.description
+    })
+  }
+
+  return result
+}
+
+/** Extract path params from Swagger parameters */
+function extractPathParams(parameters: SwaggerParameter[]): KeyValue[] {
+  const result: KeyValue[] = []
+
+  for (const param of parameters) {
+    if (param.in !== 'path') {
       continue
     }
 
@@ -364,7 +388,8 @@ function operationToRequest(
     method: toHTTPMethod(method),
     url: buildUrl(basePath, path, parameters),
     headers: extractHeaders(parameters),
-    params: extractParams(parameters)
+    params: extractParams(parameters),
+    pathParams: extractPathParams(parameters)
   }
 
   const body = extractBody(operation, parameters, spec)

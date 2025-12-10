@@ -14,6 +14,10 @@ let completionProviderDisposable: monacoEditor.IDisposable | null = null
 let hoverProviderDisposable: monacoEditor.IDisposable | null = null
 let cancellationHandlerRegistered = false
 
+// Map Monaco models to the variables that should be visible in their completion list.
+// This avoids sharing a single variablesRef across all VariableInputBox instances.
+const modelVariablesMap = new WeakMap<monacoEditor.editor.ITextModel, VariableDefinition[]>()
+
 const isMonacoCancellationError = (reason: unknown): boolean => {
   if (!reason) return false
 
@@ -28,21 +32,27 @@ const isMonacoCancellationError = (reason: unknown): boolean => {
   return name === 'Canceled' || message === 'Canceled' || message.includes('Canceled: Canceled')
 }
 
-const VariableInputBox: React.FC<VariableInputBoxProps> = ({
-  value,
-  onChange,
-  variables,
-  placeholder,
-  id,
-  className,
-  style,
-  ariaLabel
-}) => {
+const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
+  const {
+    value,
+    onChange,
+    variables,
+    placeholder,
+    resolvedValue,
+    id,
+    className,
+    style,
+    ariaLabel
+  } = props
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
   const variablesRef = useRef<VariableDefinition[]>(variables)
 
   useEffect(() => {
     variablesRef.current = variables
+    const model = editorRef.current?.getModel()
+    if (model) {
+      modelVariablesMap.set(model, variables)
+    }
   }, [variables])
 
   useEffect(() => {
@@ -116,7 +126,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = ({
     if (!completionProviderDisposable) {
       completionProviderDisposable = monacoInstance.languages.registerCompletionItemProvider(LANGUAGE_ID, {
         triggerCharacters: ['{'],
-        provideCompletionItems(_model, position) {
+        provideCompletionItems(model, position) {
           const range = {
             startLineNumber: position.lineNumber,
             endLineNumber: position.lineNumber,
@@ -124,7 +134,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = ({
             endColumn: position.column
           }
 
-          const vars = variablesRef.current
+          const vars = modelVariablesMap.get(model) ?? []
           const suggestions = vars.map((v) => ({
             label: v.name,
             kind: monacoInstance.languages.CompletionItemKind.Variable,
@@ -157,7 +167,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = ({
           }
 
           const name = lineText.substring(openIndex + 2, closeIndex).trim()
-          const vars = variablesRef.current
+          const vars = modelVariablesMap.get(model) ?? []
           const match = vars.find((v) => v.name === name)
 
           if (!match) {
@@ -204,10 +214,20 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = ({
       domNode.addEventListener('keydown', preventFind, true)
     }
 
+    const model = editor.getModel()
+    if (model) {
+      modelVariablesMap.set(model, variablesRef.current)
+    }
+
     if (ariaLabel) {
       editor.updateOptions({ ariaLabel })
     }
   }
+
+  const tooltip =
+    resolvedValue && resolvedValue !== value
+      ? resolvedValue
+      : undefined
 
   return (
     <div>
@@ -221,6 +241,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = ({
           minHeight: 28,
           ...(style ?? {})
         }}
+        title={tooltip}
       >
         <div className="ibwrapper" style={{ display: 'flex', alignItems: 'center' }}>
           {placeholder && !value && (

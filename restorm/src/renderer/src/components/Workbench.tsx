@@ -5,6 +5,7 @@ import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab } from 'electro
 import type { RestormEditorTab, BreadcrumbItem } from '../types/editor'
 import { isFolderTab, isHTTPRequestTab } from '../types/editor'
 import { HTTPRequestTabView, EnvironmentDropdown } from './HTTPRequestTabView'
+import { EnvironmentProvider } from '../contexts/EnvironmentContext'
 import { FolderView } from './FolderView'
 import { HttpMethodBadge } from './HttpMethodBadge'
 
@@ -177,44 +178,46 @@ export const Workbench: React.FC<WorkbenchProps> = ({
     // HTTP request tab
     if (isHTTPRequestTab(tab)) {
       return (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            flex: 1,
-            minHeight: 0,
-            minWidth: 0,
-            padding: '8px 16px',
-            borderBottom: '1px solid var(--vscode-panel-border)',
-            backgroundColor: 'var(--vscode-editor-background)'
-          }}
-        >
+        <EnvironmentProvider environments={tab.environments}>
           <div
             style={{
               display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 8,
-              marginBottom: 4
+              flexDirection: 'column',
+              flex: 1,
+              minHeight: 0,
+              minWidth: 0,
+              padding: '8px 16px',
+              borderBottom: '1px solid var(--vscode-panel-border)',
+              backgroundColor: 'var(--vscode-editor-background)'
             }}
           >
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <Breadcrumb
-                items={breadcrumbs}
-                onItemClick={(item, index) => {
-                  handleBreadcrumbClick(item, index, breadcrumbs)
-                }}
-                onLastItemChange={(item, newValue) => {
-                  handleBreadcrumbRename(item, newValue)
-                }}
-              />
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 8,
+                marginBottom: 4
+              }}
+            >
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <Breadcrumb
+                  items={breadcrumbs}
+                  onItemClick={(item, index) => {
+                    handleBreadcrumbClick(item, index, breadcrumbs)
+                  }}
+                  onLastItemChange={(item, newValue) => {
+                    handleBreadcrumbRename(item, newValue)
+                  }}
+                />
+              </div>
+              <EnvironmentDropdown />
             </div>
-            <EnvironmentDropdown environments={tab.environments} />
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0 }}>
+              <HTTPRequestTabView request={tab.request} />
+            </div>
           </div>
-          <div style={{ flex: 1, minHeight: 0, minWidth: 0 }}>
-            <HTTPRequestTabView request={tab.request} />
-          </div>
-        </div>
+        </EnvironmentProvider>
       )
     }
 

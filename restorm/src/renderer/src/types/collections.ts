@@ -102,8 +102,10 @@ export interface HTTPRequest extends BaseRequest {
   url: string
   /** HTTP headers */
   headers: KeyValue[]
-  /** URL query parameters */
+  /** URL query parameters (e.g. ?page=1) */
   params: KeyValue[]
+  /** URL path parameters (e.g. /users/{id}) */
+  pathParams?: KeyValue[]
   /** Optional request body */
   body?: HTTPRequestBody
 }

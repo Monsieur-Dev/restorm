@@ -24,6 +24,7 @@ import type { WorkbenchTree, NavigationEvent, GroupNode, TabGroupNode } from 'el
 import { Workbench } from './components/Workbench'
 import { Welcome } from './components/Welcome'
 import { HttpMethodBadge } from './components/HttpMethodBadge'
+import { EnvironmentValuesProvider } from './contexts/EnvironmentValuesContext'
 import { importSwaggerFromJson } from './services/SwaggerImportService'
 import { folderAsRootListViewItem, collectAllFolderIds } from './services/FolderToListView'
 import swaggerPetstoreJson from './resources/swagger-petstore.json'
@@ -806,26 +807,28 @@ const App: React.FC = () => {
           </SplitView>
         </div>
 
-        <div
-          style={{
-            flex: 1,
-            minWidth: RIGHT_MIN_WIDTH,
-            minHeight: 0,
-            display: 'flex'
-          }}
-        >
-          <Workbench
-            tree={workbenchTree}
-            onTreeChange={handleTreeChange}
-            focusedGroupId={focusedGroupId}
-            onFocusedGroupChange={setFocusedGroupId}
-            onTabActivate={handleTabActivate}
-            onBreadcrumbClick={handleBreadcrumbClick}
-            onItemRename={handleItemRename}
-            emptyFallback={<Welcome />}
-            style={{ flex: 1 }}
-          />
-        </div>
+        <EnvironmentValuesProvider>
+          <div
+            style={{
+              flex: 1,
+              minWidth: RIGHT_MIN_WIDTH,
+              minHeight: 0,
+              display: 'flex'
+            }}
+          >
+            <Workbench
+              tree={workbenchTree}
+              onTreeChange={handleTreeChange}
+              focusedGroupId={focusedGroupId}
+              onFocusedGroupChange={setFocusedGroupId}
+              onTabActivate={handleTabActivate}
+              onBreadcrumbClick={handleBreadcrumbClick}
+              onItemRename={handleItemRename}
+              emptyFallback={<Welcome />}
+              style={{ flex: 1 }}
+            />
+          </div>
+        </EnvironmentValuesProvider>
 
         <Sash
           orientation="vertical"
