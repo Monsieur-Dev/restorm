@@ -80,6 +80,10 @@ export type { BreadcrumbProps, BreadcrumbItem } from './Breadcrumb'
 export { TagsView } from './TagsView/TagsView'
 export type { TagsViewProps } from './TagsView/TagsView'
 
+// IconSelect exports
+export { IconSelect } from './IconSelect'
+export type { IconSelectProps } from './IconSelect'
+
 // Button exports
 export { Button, ButtonWithDescription, ButtonWithDropdown, ButtonWithIcon, defaultButtonStyles } from './Button/index'
 export type { IButtonOptions, IButtonStyles, IButtonWithDropdownOptions, ButtonProps, ButtonWithDescriptionProps, ButtonWithDropdownProps, ButtonWithIconProps } from './Button/index'

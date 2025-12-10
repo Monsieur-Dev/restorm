@@ -75,3 +75,17 @@
   font-size: 12px;
   opacity: 0.8;
 }
+
+/* Icon in breadcrumb items */
+.ecui-breadcrumb-icon {
+  margin-right: 4px;
+}
+
+.ecui-breadcrumb-icon--emoji {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.ecui-breadcrumb-icon.codicon {
+  font-size: 14px;
+}

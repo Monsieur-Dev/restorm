@@ -3,6 +3,8 @@
  * Defines the structure for organizing HTTP requests in folders with environments
  */
 
+import type { Icon } from 'electron-core-ui/types'
+
 // ============================================================================
 // Base Types
 // ============================================================================
@@ -25,6 +27,8 @@ export interface Environment {
   id: string
   /** Display name of the environment */
   name: string
+  /** Optional icon for the environment */
+  icon?: Icon
   /** Key-value pairs for this environment */
   variables: KeyValue[]
   /** Optional nested sub-environments */
@@ -87,6 +91,8 @@ interface BaseRequest {
   id: string
   /** Display name of the request */
   name: string
+  /** Optional icon for the request */
+  icon?: Icon
   /** Documentation describing the request purpose and usage */
   documentation: string
   /** Optional user notes for the request */
@@ -132,6 +138,8 @@ export interface Folder {
   id: string
   /** Display name of the folder */
   name: string
+  /** Optional icon for the folder */
+  icon?: Icon
   /** Documentation describing the folder contents */
   documentation: string
   /** Optional user notes for the folder */

@@ -1,0 +1,117 @@
+.ecui-icon-select {
+  position: relative;
+  display: inline-block;
+}
+
+.ecui-icon-select-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--vscode-foreground);
+  transition: background-color 0.1s, border-color 0.1s;
+}
+
+.ecui-icon-select-button:hover:not(:disabled) {
+  background-color: var(--vscode-toolbar-hoverBackground);
+  border-color: var(--vscode-toolbar-hoverOutline, transparent);
+}
+
+.ecui-icon-select-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ecui-icon-select-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ecui-icon-select-value .codicon {
+  font-size: 16px;
+}
+
+.ecui-icon-select-picker {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  margin-top: 4px;
+  background: var(--vscode-editorWidget-background);
+  border: 1px solid var(--vscode-editorWidget-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.ecui-icon-select-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px;
+  border-bottom: 1px solid var(--vscode-editorWidget-border);
+}
+
+/* Override emoji-mart styles to match VS Code theme */
+.ecui-icon-select-picker em-emoji-picker {
+  --rgb-background: var(--vscode-editorWidget-background);
+  --rgb-input: var(--vscode-input-background);
+  --rgb-color: var(--vscode-foreground);
+  --shadow: none;
+}
+
+.ecui-icon-select-codicons {
+  max-height: 200px;
+  overflow-y: auto;
+  border-top: 1px solid var(--vscode-editorWidget-border);
+}
+
+.ecui-icon-select-codicons-header {
+  position: sticky;
+  top: 0;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vscode-descriptionForeground);
+  background: var(--vscode-editorWidget-background);
+  border-bottom: 1px solid var(--vscode-editorWidget-border);
+}
+
+.ecui-icon-select-codicons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 32px);
+  gap: 2px;
+  padding: 8px;
+}
+
+.ecui-icon-select-codicon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--vscode-foreground);
+  transition: background-color 0.1s;
+}
+
+.ecui-icon-select-codicon:hover {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+.ecui-icon-select-codicon .codicon {
+  font-size: 16px;
+}
+

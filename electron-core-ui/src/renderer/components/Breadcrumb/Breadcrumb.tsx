@@ -1,10 +1,13 @@
 import React, { useCallback, useState, useRef, useEffect } from 'react'
+import type { Icon } from '../../../../types/icon'
 
 import './breadcrumb.css'
 
 export interface BreadcrumbItem {
   id: string
   label: string
+  /** Optional icon to display before the label */
+  icon?: Icon | null
 }
 
 export interface BreadcrumbProps {
@@ -22,15 +25,33 @@ export interface BreadcrumbProps {
    * Receives the item, new value, and index.
    */
   onLastItemChange?: (item: BreadcrumbItem, newValue: string, index: number) => void
+  /**
+   * Show the root item even when it's the only item (normally hidden).
+   * @default false
+   */
+  showRoot?: boolean
   className?: string
   style?: React.CSSProperties
   ariaLabel?: string
+}
+
+/** Render an icon (emoji or codicon) */
+function renderIcon(icon: Icon | null | undefined): React.ReactNode {
+  if (!icon || icon.type === 'none') return null
+  if (icon.type === 'emoji') {
+    return <span className="ecui-breadcrumb-icon ecui-breadcrumb-icon--emoji">{icon.value}</span>
+  }
+  if (icon.type === 'codicon') {
+    return <i className={`ecui-breadcrumb-icon codicon codicon-${icon.value}`} />
+  }
+  return null
 }
 
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   items,
   onItemClick,
   onLastItemChange,
+  showRoot = false,
   className,
   style,
   ariaLabel
@@ -108,7 +129,8 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
     [handleCommitLast, handleCancelEditingLast]
   )
 
-  if (items.length === 0) {
+  // Hide if empty, or if single item and showRoot is false
+  if (items.length === 0 || (items.length === 1 && !showRoot)) {
     return null
   }
 
@@ -132,6 +154,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
                     }
                   }}
                 >
+                  {renderIcon(item.icon)}
                   {item.label}
                 </button>
                 <span className="ecui-breadcrumb-separator" aria-hidden="true">
@@ -171,6 +194,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
                     handleStartEditingLast(item)
                   }}
                 >
+                  {renderIcon(item.icon)}
                   {committedValue !== null ? committedValue : item.label}
                 </button>
               )}
