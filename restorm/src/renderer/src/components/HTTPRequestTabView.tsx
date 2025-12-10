@@ -7,6 +7,7 @@ import {
   VariableInputBox,
   Tabs,
   MarkdownEditor,
+  MarkdownViewer,
   SelectBox,
   Sash,
   SplitView,
@@ -349,18 +350,6 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
 
   const tabs: Tab[] = [
     {
-      id: 'docs',
-      label: t('requestTab.tabs.docs'),
-      useScrollableElement: false,
-      allowFullscreen: true,
-      fullscreenModalTitle: renderRequestModalTitle(t('requestTab.tabs.docs')),
-      content: (
-        <MarkdownEditor
-          initialValue={request.documentation || `# ${request.name}\n\nNo documentation available.`}
-        />
-      )
-    },
-    {
       id: 'requestLayout',
       label: t('requestTab.tabs.requestLayout'),
       useScrollableElement: false,
@@ -592,6 +581,26 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           </Pane>
         </SplitView>
       )
+    },
+    {
+      id: 'docs',
+      label: t('requestTab.tabs.docs'),
+      useScrollableElement: false,
+      allowFullscreen: true,
+      fullscreenModalTitle: renderRequestModalTitle(t('requestTab.tabs.docs')),
+      content: (
+        <MarkdownViewer
+          value={request.documentation || `# ${request.name}\n\nNo documentation available.`}
+        />
+      )
+    },
+    {
+      id: 'notes',
+      label: t('requestTab.tabs.notes'),
+      useScrollableElement: false,
+      allowFullscreen: true,
+      fullscreenModalTitle: renderRequestModalTitle(t('requestTab.tabs.notes')),
+      content: <MarkdownEditor initialValue={request.notes ?? ''} />
     }
   ]
 

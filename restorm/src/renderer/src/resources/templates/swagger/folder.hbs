@@ -54,3 +54,11 @@
 **Schemes:** {{#each schemes}}`{{this}}`{{#unless @last}}, {{/unless}}{{/each}}
 {{/if}}
 
+{{#if modelsDiagram}}
+## Models
+
+```mermaid
+{{{modelsDiagram}}}
+```
+{{/if}}
+

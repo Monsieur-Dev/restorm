@@ -25,7 +25,8 @@
     "addVariable": "Ajouter une variable",
     "tabs": {
       "docs": "Docs",
-      "configuration": "Configuration"
+      "configuration": "Configuration",
+      "notes": "Notes"
     }
   },
   "requestTab": {
@@ -50,7 +51,8 @@
       "headers": "En-têtes",
       "body": "Corps",
       "params": "Paramètres",
-      "pathParams": "Paramètres de chemin"
+      "pathParams": "Paramètres de chemin",
+      "notes": "Notes"
     },
     "responses": {
       "tabs": {

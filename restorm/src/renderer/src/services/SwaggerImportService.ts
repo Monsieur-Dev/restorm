@@ -169,6 +169,8 @@ interface SchemaDefinitionDocumentation {
   name: string
   description?: string | undefined
   properties: SchemaPropertyDocumentation[]
+  /** Mermaid classDiagram for this schema */
+  mermaidDiagram?: string
 }
 
 /** Build a readable type label for a schema (used in documentation tables) */
@@ -235,12 +237,32 @@ function buildSchemaDefinitionsForOperation(
       })
     }
 
-    definitions.push({
+    const definition: SchemaDefinitionDocumentation = {
       ref,
       name: getRefName(ref),
       description: schema.description,
       properties
-    })
+    }
+
+    // Build a Mermaid UML class diagram for this schema
+    if (properties.length > 0) {
+      const classLines: string[] = []
+      classLines.push('classDiagram')
+      classLines.push(`  class ${definition.name} {`)
+
+      for (const prop of properties) {
+        const typeLabel = prop.type ?? 'any'
+        const visibility = prop.required ? '+' : '-'
+        const optionalSuffix = prop.required ? '' : '?'
+        // Example: "+ id : integer" (required) or "- username? : string" (optional)
+        classLines.push(`    ${visibility} ${prop.name}${optionalSuffix} : ${typeLabel}`)
+      }
+
+      classLines.push('  }')
+      definition.mermaidDiagram = classLines.join('\n')
+    }
+
+    definitions.push(definition)
   }
 
   return definitions
@@ -315,6 +337,61 @@ function schemaToSample(
 /** Generate a unique ID */
 function generateId(): string {
   return crypto.randomUUID()
+}
+
+/**
+ * Build a global Mermaid class diagram for all models defined in the spec.
+ * Shows one class per definition with its properties and relations for properties using $ref.
+ */
+function buildGlobalModelsDiagram(spec: SwaggerSpec): string | undefined {
+  const definitions = spec.definitions ?? {}
+  const entries = Object.entries(definitions)
+
+  if (entries.length === 0) {
+    return undefined
+  }
+
+  const lines: string[] = ['classDiagram']
+  const relationLines = new Set<string>()
+
+  for (const [name, schema] of entries) {
+    const props = schema.properties ?? {}
+    const required = new Set(schema.required ?? [])
+
+    if (Object.keys(props).length > 0) {
+      // Class with properties
+      lines.push(`  class ${name} {`)
+
+      for (const [propName, propSchema] of Object.entries(props)) {
+        const typeLabel = getSchemaTypeLabel(propSchema)
+        const isRequired = required.has(propName)
+        const visibility = isRequired ? '+' : '-'
+        const optionalSuffix = isRequired ? '' : '?'
+        // Example: "+ id : integer" (required) or "- username? : string" (optional)
+        lines.push(`    ${visibility} ${propName}${optionalSuffix} : ${typeLabel}`)
+
+        // Track relations for referenced models
+        if (propSchema.$ref) {
+          const target = getRefName(propSchema.$ref)
+          relationLines.add(`  ${name} --> ${target}`)
+        } else if (propSchema.type === 'array' && propSchema.items?.$ref) {
+          const target = getRefName(propSchema.items.$ref)
+          relationLines.add(`  ${name} --> ${target}`)
+        }
+      }
+
+      lines.push('  }')
+    } else {
+      // Class without explicit properties
+      lines.push(`  class ${name}`)
+    }
+  }
+
+  for (const rel of relationLines) {
+    lines.push(rel)
+  }
+
+  return lines.join('\n')
 }
 
 /** Convert Swagger HTTP method to HTTPMethod type */
@@ -527,7 +604,8 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
     externalDocs: spec.externalDocs,
     host: spec.host,
     basePath: spec.basePath,
-    schemes: spec.schemes
+    schemes: spec.schemes,
+    modelsDiagram: buildGlobalModelsDiagram(spec)
   })
 
   // Create tag folders map

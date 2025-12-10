@@ -89,6 +89,8 @@ interface BaseRequest {
   name: string
   /** Documentation describing the request purpose and usage */
   documentation: string
+  /** Optional user notes for the request */
+  notes?: string
   /** Tags for categorization and filtering */
   tags: string[]
 }
@@ -132,6 +134,8 @@ export interface Folder {
   name: string
   /** Documentation describing the folder contents */
   documentation: string
+  /** Optional user notes for the folder */
+  notes?: string
   /** Tags for categorization and filtering */
   tags: string[]
   /** Folder configuration including environments */

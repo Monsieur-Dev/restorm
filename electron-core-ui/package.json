@@ -93,7 +93,10 @@
     "js-yaml": "^4.1.0",
     "react-i18next": "^13.5.0",
     "react-icons": "^4.12.0",
-    "winston": "^3.18.3"
+    "winston": "^3.18.3",
+    "react-markdown": "^9.0.1",
+    "remark-gfm": "^4.0.0",
+    "mermaid": "^10.9.0"
   },
   "devDependencies": {
     "@monaco-editor/react": "^4.7.0",

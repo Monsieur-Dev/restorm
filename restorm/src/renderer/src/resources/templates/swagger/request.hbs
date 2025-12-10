@@ -56,6 +56,13 @@
 {{/if}}
 **Reference:** `{{ref}}`
 
+{{#if mermaidDiagram}}
+```mermaid
+{{{mermaidDiagram}}}
+```
+{{/if}}
+
+{{!-- Keep the legacy table for detailed property view --}}
 {{#if properties.length}}
 
 | Property | Type | Required | Description |

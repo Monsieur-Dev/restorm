@@ -11,7 +11,8 @@ import {
   Button,
   Tabs,
   type Tab,
-  MarkdownEditor
+  MarkdownEditor,
+  MarkdownViewer
 } from 'electron-core-ui/renderer'
 import { ParamsTabView } from './ParamsTabView'
 import type { ParamsTabViewHandle } from './ParamsTabView'
@@ -313,20 +314,26 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
 
   const tabs: Tab[] = [
     {
-      id: 'docs',
-      label: t('folderView.tabs.docs'),
-      useScrollableElement: false,
-      content: (
-        <MarkdownEditor
-          initialValue={folder.documentation || `# ${folder.name}\n\nNo documentation available.`}
-        />
-      )
-    },
-    {
       id: 'configuration',
       label: t('folderView.tabs.configuration'),
       useScrollableElement: false,
       content: configurationContent
+    },
+    {
+      id: 'docs',
+      label: t('folderView.tabs.docs'),
+      useScrollableElement: false,
+      content: (
+        <MarkdownViewer
+          value={folder.documentation || `# ${folder.name}\n\nNo documentation available.`}
+        />
+      )
+    },
+    {
+      id: 'notes',
+      label: t('folderView.tabs.notes'),
+      useScrollableElement: false,
+      content: <MarkdownEditor initialValue={folder.notes ?? ''} />
     }
   ]
 
