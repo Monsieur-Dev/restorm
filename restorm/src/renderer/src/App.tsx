@@ -87,6 +87,12 @@ const buildContextMenuForItem = (
       label: t('sidebar.contextMenu.clone'),
       icon: 'copy'
     },
+    {
+      id: 'rename-item',
+      label: t('sidebar.contextMenu.rename'),
+      icon: 'edit',
+      shortcut: 'F2'
+    },
     { id: 'sep-item', isSeparator: true, label: '' },
     {
       id: 'delete-item',

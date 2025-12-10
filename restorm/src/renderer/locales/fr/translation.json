@@ -15,14 +15,23 @@
       "createSubfolder": "Créer un sous-dossier",
       "defineVariables": "Définir les variables",
       "delete": "Supprimer",
-      "clone": "Cloner"
+      "clone": "Cloner",
+      "rename": "Renommer"
     }
+  },
+  "environment": {
+    "newName": "Nouvel environnement",
+    "add": "Ajouter un environnement",
+    "rename": "Renommer",
+    "addSub": "Ajouter un sous-environnement",
+    "delete": "Supprimer"
   },
   "folderView": {
     "environments": "Environnements",
     "environmentsAriaLabel": "Environnements du dossier",
     "variables": "Variables",
     "addVariable": "Ajouter une variable",
+    "selectEnvironment": "Sélectionnez un environnement pour voir les variables",
     "tabs": {
       "docs": "Docs",
       "configuration": "Configuration",

@@ -196,7 +196,7 @@ export const ParamsTabView = React.forwardRef<ParamsTabViewHandle, ParamsTabView
 
     lastFinalContextRef.current = nextContext
     onResolvedContextChange(nextContext)
-  }, [sequence.finalContext, onResolvedContextChange])
+  }, [sequence, onResolvedContextChange])
 
   const handleAddRow = useCallback(() => {
     setRows((oldRows) => [

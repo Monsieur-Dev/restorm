@@ -132,4 +132,23 @@
   outline-offset: -1px;
 }
 
+/* Inline rename input */
+.list-view-rename-input {
+  flex: 1;
+  min-width: 0;
+  height: 18px;
+  padding: 0 4px;
+  margin: 0;
+  border: 1px solid var(--vscode-focusBorder);
+  background-color: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.list-view-rename-input:focus {
+  border-color: var(--vscode-focusBorder);
+}
 

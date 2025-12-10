@@ -106,6 +106,16 @@ export interface ListViewProps {
   rootRole?: 'list' | 'tree'
   ariaLabel?: string
 
+  /**
+   * Whether items can be renamed inline. Defaults to false.
+   */
+  isRenameable?: boolean
+
+  /**
+   * Keyboard shortcut to trigger inline rename. Defaults to 'F2'.
+   */
+  renameShortcut?: string
+
   onItemClick?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
   onItemDoubleClick?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
   onSelectionChange?: (selectedIds: string[], payload: ListViewItemEventPayload) => void
@@ -116,6 +126,10 @@ export interface ListViewProps {
   ) => void
   onItemDrop?: (payload: ListViewDropEventPayload) => void
   onItemContextMenu?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
+  /**
+   * Called when an item is renamed via inline editing.
+   */
+  onItemRename?: (payload: ListViewItemEventPayload, newValue: string) => void
 }
 
 export interface ListViewItemProps {

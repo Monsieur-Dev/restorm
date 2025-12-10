@@ -38,8 +38,19 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   const [isEditingLast, setIsEditingLast] = useState(false)
   const [editingValue, setEditingValue] = useState('')
   const [editingItem, setEditingItem] = useState<BreadcrumbItem | null>(null)
+  // Stores the committed value temporarily until parent updates item.label
+  const [committedValue, setCommittedValue] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const shouldSelectOnMount = useRef(false)
+
+  // Clear committedValue when the last item's label changes from parent
+  const lastItem = items[items.length - 1]
+  useEffect(() => {
+    if (committedValue !== null && lastItem && lastItem.label === committedValue) {
+      // Parent has updated the label to match our committed value
+      setCommittedValue(null)
+    }
+  }, [lastItem?.label, committedValue, lastItem])
 
   const handleStartEditingLast = useCallback((item: BreadcrumbItem): void => {
     setIsEditingLast(true)
@@ -63,6 +74,8 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
       setIsEditingLast(false)
       // Only call callback if value actually changed
       if (onLastItemChange && editingValue !== editingItem.label) {
+        // Store the committed value temporarily to show it until parent updates
+        setCommittedValue(editingValue)
         onLastItemChange(editingItem, editingValue, index)
       }
       setEditingItem(null)
@@ -158,7 +171,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
                     handleStartEditingLast(item)
                   }}
                 >
-                  {item.label}
+                  {committedValue !== null ? committedValue : item.label}
                 </button>
               )}
             </li>

@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import {
   ListView,
   type ListViewItemData,
+  type ListViewItemEventPayload,
+  type ContextMenuItem,
   Sash,
   type IVerticalSashLayoutProvider,
   type SashEvent,
@@ -19,6 +21,11 @@ import type { ParamsTabViewHandle } from './ParamsTabView'
 import type { Folder, Environment } from '../types/collections'
 import { useEnvironmentValues } from '../contexts/EnvironmentValuesContext'
 
+/** Generate a unique ID for a new environment */
+function generateEnvironmentId(): string {
+  return `env-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+}
+
 const MIN_LEFT_WIDTH = 160
 const RIGHT_MIN_WIDTH = 240
 
@@ -30,7 +37,8 @@ export interface FolderViewProps {
 /** Convert environments to ListView items */
 function environmentsToListViewItems(
   environments: Environment[],
-  expandedIds: string[]
+  expandedIds: string[],
+  contextMenuItems: ContextMenuItem[]
 ): ListViewItemData[] {
   return environments.map((env) => ({
     id: env.id,
@@ -38,8 +46,9 @@ function environmentsToListViewItems(
     isExpandable: (env.subEnvironments?.length ?? 0) > 0,
     isExpanded: expandedIds.includes(env.id),
     icon: expandedIds.includes(env.id) ? 'folder-opened' : 'folder',
+    contextMenuItems,
     children: env.subEnvironments
-      ? environmentsToListViewItems(env.subEnvironments, expandedIds)
+      ? environmentsToListViewItems(env.subEnvironments, expandedIds, contextMenuItems)
       : []
   }))
 }
@@ -87,6 +96,10 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
     () => folder.configuration.environments[0]?.id ?? null
   )
 
+  // Track item being renamed (used by context menu to trigger rename mode)
+  const [_renamingEnvId, setRenamingEnvId] = useState<string | null>(null)
+  void _renamingEnvId // Will be used when ListView supports external rename trigger
+
   // Get the selected environment
   const selectedEnvironment = useMemo(
     () =>
@@ -96,10 +109,89 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
     [folder.configuration.environments, selectedEnvId]
   )
 
+  // Handler for adding a new environment
+  const handleAddEnvironment = useCallback(() => {
+    const newEnv: Environment = {
+      id: generateEnvironmentId(),
+      name: t('environment.newName'),
+      variables: []
+    }
+    // TODO: This should update the actual folder data through a prop callback
+    // For now, we just log
+    // eslint-disable-next-line no-console
+    console.log('Add environment:', newEnv)
+  }, [t])
+
+  // Handler for adding a sub-environment
+  const handleAddSubEnvironment = useCallback((parentId: string) => {
+    const newEnv: Environment = {
+      id: generateEnvironmentId(),
+      name: t('environment.newName'),
+      variables: []
+    }
+    // TODO: This should update the actual folder data through a prop callback
+    // For now, we just log
+    // eslint-disable-next-line no-console
+    console.log('Add sub-environment to:', parentId, newEnv)
+  }, [t])
+
+  // Handler for deleting an environment
+  const handleDeleteEnvironment = useCallback((envId: string) => {
+    // TODO: This should update the actual folder data through a prop callback
+    // For now, we just log
+    // eslint-disable-next-line no-console
+    console.log('Delete environment:', envId)
+    if (selectedEnvId === envId) {
+      setSelectedEnvId(null)
+    }
+  }, [selectedEnvId])
+
+  // Handler for renaming an environment
+  const handleRenameEnvironment = useCallback((envId: string, newName: string) => {
+    // TODO: This should update the actual folder data through a prop callback
+    // For now, we just log
+    // eslint-disable-next-line no-console
+    console.log('Rename environment:', envId, 'to', newName)
+  }, [])
+
+  // Context menu items for environments
+  const envContextMenuItems = useMemo<ContextMenuItem[]>(() => [
+    {
+      id: 'rename',
+      label: t('environment.rename'),
+      shortcut: 'F2',
+      onClick: () => {
+        if (selectedEnvId) {
+          setRenamingEnvId(selectedEnvId)
+        }
+      }
+    },
+    {
+      id: 'addSubEnvironment',
+      label: t('environment.addSub'),
+      shortcut: 'Ctrl++',
+      onClick: () => {
+        if (selectedEnvId) {
+          handleAddSubEnvironment(selectedEnvId)
+        }
+      }
+    },
+    {
+      id: 'delete',
+      label: t('environment.delete'),
+      shortcut: 'Delete',
+      onClick: () => {
+        if (selectedEnvId) {
+          handleDeleteEnvironment(selectedEnvId)
+        }
+      }
+    }
+  ], [t, selectedEnvId, handleAddSubEnvironment, handleDeleteEnvironment])
+
   // Convert environments to ListView items
   const sidebarItems: ListViewItemData[] = useMemo(
-    () => environmentsToListViewItems(folder.configuration.environments, expandedIds),
-    [folder.configuration.environments, expandedIds]
+    () => environmentsToListViewItems(folder.configuration.environments, expandedIds, envContextMenuItems),
+    [folder.configuration.environments, expandedIds, envContextMenuItems]
   )
 
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -201,10 +293,8 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
                 <Button
                   secondary
                   small
-                  options={{ ariaLabel: t('sidebar.addRequest'), title: t('sidebar.addRequest') }}
-                  onClick={() => {
-                    // TODO: hook this to real "add environment" behavior
-                  }}
+                  options={{ ariaLabel: t('environment.add'), title: t('environment.add') }}
+                  onClick={handleAddEnvironment}
                 >
                   <i className="codicon codicon-add" />
                 </Button>
@@ -226,6 +316,7 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
               rootRole="tree"
               ariaLabel={t('folderView.environmentsAriaLabel')}
               selectedIds={selectedEnvId ? [selectedEnvId] : []}
+              isRenameable
               onItemClick={(payload) => {
                 const id = payload.item.id
                 if (id) {
@@ -240,6 +331,13 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
                     ? Array.from(new Set([...prev, id]))
                     : prev.filter((existingId) => existingId !== id)
                 )
+              }}
+              onItemRename={(payload: ListViewItemEventPayload, newValue: string) => {
+                handleRenameEnvironment(payload.item.id, newValue)
+              }}
+              onItemContextMenu={(payload) => {
+                // Select the item when right-clicking
+                setSelectedEnvId(payload.item.id)
               }}
             />
           </Pane>
@@ -260,45 +358,67 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
           orientation="vertical"
           style={{ width: '100%', height: '100%' }}
         >
-          <Pane
-            title={
-              selectedEnvironment
-                ? `${t('folderView.variables')} - ${selectedEnvironment.name}`
-                : t('folderView.variables')
-            }
-            collapsible={false}
-            minSize={80}
-            headerActions={
-              <Button
-                secondary
-                small
-                options={{ ariaLabel: t('folderView.addVariable'), title: t('folderView.addVariable') }}
-                onClick={() => {
-                  variablesParamsRef.current?.addRow()
+          {selectedEnvId ? (
+            <Pane
+              title={
+                selectedEnvironment
+                  ? `${t('folderView.variables')} - ${selectedEnvironment.name}`
+                  : t('folderView.variables')
+              }
+              collapsible={false}
+              minSize={80}
+              headerActions={
+                <Button
+                  secondary
+                  small
+                  options={{ ariaLabel: t('folderView.addVariable'), title: t('folderView.addVariable') }}
+                  onClick={() => {
+                    variablesParamsRef.current?.addRow()
+                  }}
+                >
+                  <i className="codicon codicon-add" />
+                </Button>
+              }
+            >
+              <div
+                style={{
+                  padding: '8px 8px 4px 8px',
+                  boxSizing: 'border-box'
                 }}
               >
-                <i className="codicon codicon-add" />
-              </Button>
-            }
-          >
-            <div
-              style={{
-                padding: '8px 8px 4px 8px',
-                boxSizing: 'border-box'
-              }}
+                <ParamsTabView
+                  key={selectedEnvId}
+                  ref={variablesParamsRef}
+                  // At folder level, variables are defined sequentially:
+                  // no base variables, each row can only see previous rows.
+                  variables={[]}
+                  initialRows={selectedEnvironment?.variables ?? []}
+                  visibilityMode="accumulated"
+                  onResolvedContextChange={handleEnvironmentVariablesResolved}
+                />
+              </div>
+            </Pane>
+          ) : (
+            <Pane
+              title={t('folderView.variables')}
+              collapsible={false}
+              minSize={80}
             >
-              <ParamsTabView
-                key={selectedEnvId ?? 'no-env'}
-                ref={variablesParamsRef}
-                // At folder level, variables are defined sequentially:
-                // no base variables, each row can only see previous rows.
-                variables={[]}
-                initialRows={selectedEnvironment?.variables ?? []}
-                visibilityMode="accumulated"
-                onResolvedContextChange={handleEnvironmentVariablesResolved}
-              />
-            </div>
-          </Pane>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100%',
+                  color: 'var(--vscode-descriptionForeground)',
+                  fontStyle: 'italic',
+                  padding: 16
+                }}
+              >
+                {t('folderView.selectEnvironment')}
+              </div>
+            </Pane>
+          )}
         </SplitView>
       </div>
 

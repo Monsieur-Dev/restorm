@@ -15,14 +15,23 @@
       "createSubfolder": "Create subfolder",
       "defineVariables": "Define variables",
       "delete": "Delete",
-      "clone": "Clone"
+      "clone": "Clone",
+      "rename": "Rename"
     }
+  },
+  "environment": {
+    "newName": "New environment",
+    "add": "Add environment",
+    "rename": "Rename",
+    "addSub": "Add sub-environment",
+    "delete": "Delete"
   },
   "folderView": {
     "environments": "Environments",
     "environmentsAriaLabel": "Folder environments",
     "variables": "Variables",
     "addVariable": "Add variable row",
+    "selectEnvironment": "Select an environment to view variables",
     "tabs": {
       "docs": "Docs",
       "configuration": "Configuration",
