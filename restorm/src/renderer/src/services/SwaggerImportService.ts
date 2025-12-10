@@ -159,15 +159,15 @@ function getRefName(ref: string): string {
 
 interface SchemaPropertyDocumentation {
   name: string
-  type?: string
-  description?: string
+  type?: string | undefined
+  description?: string | undefined
   required: boolean
 }
 
 interface SchemaDefinitionDocumentation {
   ref: string
   name: string
-  description?: string
+  description?: string | undefined
   properties: SchemaPropertyDocumentation[]
 }
 

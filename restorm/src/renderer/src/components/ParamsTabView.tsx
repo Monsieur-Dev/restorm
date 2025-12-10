@@ -130,6 +130,7 @@ export const ParamsTabView = React.forwardRef<ParamsTabViewHandle, ParamsTabView
   // dropIndex représente la position d'insertion entre les lignes (0..rows.length)
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const dragGhostRef = useRef<HTMLDivElement | null>(null)
+  const lastFinalContextRef = useRef<VariableContext | null>(null)
 
   const updateData = useCallback(
     (rowIndex: number, columnId: keyof ParamRow, value: unknown): void => {
@@ -172,7 +173,29 @@ export const ParamsTabView = React.forwardRef<ParamsTabViewHandle, ParamsTabView
   // Notify parent of final resolved context when it changes
   React.useEffect(() => {
     if (!onResolvedContextChange) return
-    onResolvedContextChange(sequence.finalContext)
+    const nextContext = sequence.finalContext
+
+    // Shallow-compare contexts to avoid infinite update loops
+    const prevContext = lastFinalContextRef.current
+    if (prevContext) {
+      const prevKeys = Object.keys(prevContext)
+      const nextKeys = Object.keys(nextContext)
+      if (prevKeys.length === nextKeys.length) {
+        let changed = false
+        for (const key of nextKeys) {
+          if (prevContext[key] !== nextContext[key]) {
+            changed = true
+            break
+          }
+        }
+        if (!changed) {
+          return
+        }
+      }
+    }
+
+    lastFinalContextRef.current = nextContext
+    onResolvedContextChange(nextContext)
   }, [sequence.finalContext, onResolvedContextChange])
 
   const handleAddRow = useCallback(() => {

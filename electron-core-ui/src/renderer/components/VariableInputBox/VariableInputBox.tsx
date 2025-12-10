@@ -46,6 +46,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
   } = props
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
   const variablesRef = useRef<VariableDefinition[]>(variables)
+  const containerRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     variablesRef.current = variables
@@ -82,6 +83,9 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
       renderLineHighlight: 'none' as const,
       renderIndentGuides: false,
       automaticLayout: true,
+      // Render suggestion / hover widgets in a fixed overlay attached to body,
+      // so they are not clipped by ancestor overflow: hidden (ScrollableElement, tables, etc.).
+      fixedOverflowWidgets: true as const,
       scrollbar: {
         vertical: 'hidden' as const,
         horizontal: 'hidden' as const,
@@ -224,60 +228,54 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
     }
   }
 
-  const tooltip =
-    resolvedValue && resolvedValue !== value
-      ? resolvedValue
-      : undefined
-
   return (
-    <div>
-      <div
-        id={id}
-        className={['monaco-inputbox', 'idle', className].filter(Boolean).join(' ')}
-        style={{
-          backgroundColor: defaultInputBoxStyles.inputBackground,
-          color: defaultInputBoxStyles.inputForeground,
-          border: `1px solid ${defaultInputBoxStyles.inputBorder ?? 'transparent'}`,
-          minHeight: 28,
-          ...(style ?? {})
-        }}
-        title={tooltip}
-      >
-        <div className="ibwrapper" style={{ display: 'flex', alignItems: 'center' }}>
-          {placeholder && !value && (
-            <div
-              style={{
-                position: 'absolute',
-                top: 5,
-                left: 8,
-                right: 8,
-                pointerEvents: 'none',
-                opacity: 0.5,
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                fontSize: 12
-              }}
-            >
-              {placeholder}
-            </div>
-          )}
-
+    <div
+      id={id}
+      className={['monaco-inputbox', 'idle', className].filter(Boolean).join(' ')}
+      style={{
+        backgroundColor: defaultInputBoxStyles.inputBackground,
+        color: defaultInputBoxStyles.inputForeground,
+        border: `1px solid ${defaultInputBoxStyles.inputBorder ?? 'transparent'}`,
+        minHeight: 28,
+        ...(style ?? {})
+      }}
+      ref={containerRef}
+      title={resolvedValue && resolvedValue !== value ? resolvedValue : undefined}
+    >
+      <div className="ibwrapper" style={{ display: 'flex', alignItems: 'center' }}>
+        {placeholder && !value && (
           <div
-            className="input variable-inputbox-editor"
-            style={{ padding: '0 6px', width: '100%' }}
+            style={{
+              position: 'absolute',
+              top: 5,
+              left: 8,
+              right: 8,
+              pointerEvents: 'none',
+              opacity: 0.5,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              fontSize: 12
+            }}
           >
-            <CodeEditor
-              value={value}
-              onChange={(v) => {
-                onChange(v ?? '')
-              }}
-              language={LANGUAGE_ID}
-              height={20}
-              options={editorOptions}
-              onMount={handleMount}
-            />
+            {placeholder}
           </div>
+        )}
+
+        <div
+          className="input variable-inputbox-editor"
+          style={{ padding: '0 6px', width: '100%' }}
+        >
+          <CodeEditor
+            value={value}
+            onChange={(v) => {
+              onChange(v ?? '')
+            }}
+            language={LANGUAGE_ID}
+            height={20}
+            options={editorOptions}
+            onMount={handleMount}
+          />
         </div>
       </div>
     </div>

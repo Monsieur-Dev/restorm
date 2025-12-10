@@ -3,7 +3,3 @@
 .variable-inputbox-editor .monaco-editor .monaco-editor .margin {
 	background-color: transparent !important;
 }
-
-/* Let Monaco overlays (suggestions, hovers) overflow correctly.
-   Scrollbars are already disabled via editor options, so we don't
-   force overflow hidden here to avoid clipping popups. */

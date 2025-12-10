@@ -107,6 +107,15 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
   const sashStartLeftRef = useRef<number>(leftWidth)
   const variablesParamsRef = useRef<ParamsTabViewHandle | null>(null)
 
+  const handleEnvironmentVariablesResolved = useCallback(
+    (context: unknown): void => {
+      if (selectedEnvId) {
+        setEnvironmentValues(selectedEnvId, context as Record<string, string>)
+      }
+    },
+    [selectedEnvId, setEnvironmentValues]
+  )
+
   const layoutProvider: IVerticalSashLayoutProvider = useMemo(
     () => ({
       getVerticalSashLeft: () => leftWidth,
@@ -285,11 +294,7 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
                 variables={[]}
                 initialRows={selectedEnvironment?.variables ?? []}
                 visibilityMode="accumulated"
-                onResolvedContextChange={(context) => {
-                  if (selectedEnvId) {
-                    setEnvironmentValues(selectedEnvId, context)
-                  }
-                }}
+                onResolvedContextChange={handleEnvironmentVariablesResolved}
               />
             </div>
           </Pane>
