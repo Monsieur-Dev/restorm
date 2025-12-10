@@ -237,6 +237,13 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   // Get selected option
   const selectedOption = options[currentSelection] ?? options[0]
 
+  // Compute a dropdown max-height that fits content up to a reasonable max.
+  // Using maxHeight (without forcing height) lets the list shrink to content
+  // when there are only a few items, while still scrolling if there are many.
+  const visibleItemCount = Math.min(options.length, 8)
+  const optionRowHeight = 28 // Approximate row height in px
+  const dropdownHeight = visibleItemCount * optionRowHeight
+
   return (
     <div className="select-container custom">
       {/* Hidden select element for accessibility */}
@@ -290,7 +297,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
             <ScrollableElement
               options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false, handleMouseWheel: true }}
               className="select-scrollable-wrapper"
-              style={{ height: '300px', width: '100%' }}
+              style={{ maxHeight: `${dropdownHeight}px`, width: '100%' }}
             >
               <div
                 id={`${id}-listbox`}
@@ -300,35 +307,38 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
                 onKeyDown={handleDropdownKeyDown}
                 tabIndex={0}
               >
-              {options.map((option, index) => (
-                <div
-                  key={index}
-                  id={`${id}-option-${index}`}
-                  role="option"
-                  aria-selected={index === currentSelection}
-                  onClick={() => { handleOptionClick(index); }}
-                  className={`select-option ${focusedIndex === index || index === currentSelection ? 'focused' : ''} ${option.isDisabled ? 'disabled' : ''}`}
-                  onMouseEnter={() => { handleOptionHover(index); }}
-                >
-                  <div className="select-option-content">
-                    <div className="select-option-header">
-                      <span className="option-text">
-                        {option.label ?? option.text}
-                      </span>
-                      {option.detail && (
-                        <span className="option-detail">
-                          {option.detail}
+              {options.map((option, index) => {
+                const isSelected = index === currentSelection
+                return (
+                  <div
+                    key={index}
+                    id={`${id}-option-${index}`}
+                    role="option"
+                    aria-selected={isSelected}
+                    onClick={() => { handleOptionClick(index); }}
+                    className={`select-option ${isSelected ? 'focused' : ''} ${option.isDisabled ? 'disabled' : ''}`}
+                    onMouseEnter={() => { handleOptionHover(index); }}
+                  >
+                    <div className="select-option-content">
+                      <div className="select-option-header">
+                        <span className="option-text">
+                          {option.label ?? option.text}
                         </span>
-                      )}
+                        {option.detail && (
+                          <span className="option-detail">
+                            {option.detail}
+                          </span>
+                        )}
+                      </div>
                     </div>
+                    {option.decoratorRight && (
+                      <span className="select-option-decorator">
+                        {option.decoratorRight}
+                      </span>
+                    )}
                   </div>
-                  {option.decoratorRight && (
-                    <span className="select-option-decorator">
-                      {option.decoratorRight}
-                    </span>
-                  )}
-                </div>
-                ))}
+                )
+              })}
               </div>
             </ScrollableElement>
 
