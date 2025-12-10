@@ -195,6 +195,14 @@
   line-height: 1;
 }
 
+/* Ensure fixed-width trigger for HTTP method select in restorm.
+   The wrapper div around the SelectBox controls the width; this
+   rule makes the custom trigger fill that width so the chevron
+   always stays aligned to the right edge. */
+#http-method-select + .monaco-select-box.custom-trigger {
+  width: 100%;
+}
+
 /* When using custom drawn select, remove the global container chevron to avoid double icon */
 .monaco-workbench .select-container.custom:after {
   content: none !important;

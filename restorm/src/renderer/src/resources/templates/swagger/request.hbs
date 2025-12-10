@@ -44,6 +44,30 @@
 {{/each}}
 
 {{/if}}
+{{#if schemaDefinitions}}
+## Types
+
+{{#each schemaDefinitions}}
+### {{name}}
+
+{{#if description}}
+{{description}}
+
+{{/if}}
+**Reference:** `{{ref}}`
+
+{{#if properties.length}}
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+{{#each properties}}
+| `{{name}}` | {{type}} | {{#if required}}Yes{{else}}No{{/if}} | {{description}} |
+{{/each}}
+
+{{/if}}
+
+{{/each}}
+{{/if}}
 {{#if responses}}
 ## Responses
 

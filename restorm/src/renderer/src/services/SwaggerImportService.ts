@@ -64,6 +64,8 @@ interface SwaggerParameter {
 interface SwaggerSchema {
   $ref?: string
   type?: string
+  description?: string
+  format?: string
   items?: SwaggerSchema
   additionalProperties?: SwaggerSchema
   properties?: Record<string, SwaggerSchema>
@@ -147,6 +149,101 @@ function resolveSchemaRef(ref: string, spec: SwaggerSpec): SwaggerSchema | undef
   }
 
   return current as SwaggerSchema
+}
+
+/** Extract a human‑readable name from a JSON reference (e.g. "#/definitions/User" -> "User") */
+function getRefName(ref: string): string {
+  const segments = ref.split('/')
+  return segments[segments.length - 1] ?? ref
+}
+
+interface SchemaPropertyDocumentation {
+  name: string
+  type?: string
+  description?: string
+  required: boolean
+}
+
+interface SchemaDefinitionDocumentation {
+  ref: string
+  name: string
+  description?: string
+  properties: SchemaPropertyDocumentation[]
+}
+
+/** Build a readable type label for a schema (used in documentation tables) */
+function getSchemaTypeLabel(schema: SwaggerSchema, depth = 0): string {
+  if (depth > 5) {
+    return '...'
+  }
+
+  if (schema.$ref) {
+    return getRefName(schema.$ref)
+  }
+
+  if (schema.type === 'array' && schema.items) {
+    return `array<${getSchemaTypeLabel(schema.items, depth + 1)}>`
+  }
+
+  if (schema.type) {
+    return schema.type
+  }
+
+  if (schema.properties) {
+    return 'object'
+  }
+
+  return 'any'
+}
+
+/** Build documentation objects for all schemas referenced by an operation */
+function buildSchemaDefinitionsForOperation(
+  operation: SwaggerOperation,
+  spec: SwaggerSpec
+): SchemaDefinitionDocumentation[] {
+  const refs = new Set<string>()
+
+  for (const parameter of operation.parameters ?? []) {
+    const ref = parameter.schema?.$ref
+    if (ref) {
+      refs.add(ref)
+    }
+  }
+
+  for (const response of Object.values(operation.responses ?? {})) {
+    const ref = response.schema?.$ref
+    if (ref) {
+      refs.add(ref)
+    }
+  }
+
+  const definitions: SchemaDefinitionDocumentation[] = []
+
+  for (const ref of refs) {
+    const schema = resolveSchemaRef(ref, spec)
+    if (!schema) continue
+
+    const required = new Set(schema.required ?? [])
+    const properties: SchemaPropertyDocumentation[] = []
+
+    for (const [propName, propSchema] of Object.entries(schema.properties ?? {})) {
+      properties.push({
+        name: propName,
+        type: getSchemaTypeLabel(propSchema),
+        description: propSchema.description,
+        required: required.has(propName)
+      })
+    }
+
+    definitions.push({
+      ref,
+      name: getRefName(ref),
+      description: schema.description,
+      properties
+    })
+  }
+
+  return definitions
 }
 
 /** Build a sample JSON value matching the given schema (structure only, simple default values) */
@@ -376,7 +473,8 @@ function operationToRequest(
     produces: operation.produces,
     parameters: parameters,
     responses: operation.responses,
-    security: operation.security
+    security: operation.security,
+    schemaDefinitions: buildSchemaDefinitionsForOperation(operation, spec)
   })
 
   const request: HTTPRequest = {
