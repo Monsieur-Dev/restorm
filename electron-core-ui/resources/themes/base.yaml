@@ -35,6 +35,23 @@ variables:
     value: "50%"
     description: Tooltip beak position
 
+  # Tooltip / hover widget defaults (can be overridden per theme)
+  - id: vscode-editorHoverWidget-background
+    value: "#252526"
+    description: Fallback hover widget background
+
+  - id: vscode-editorHoverWidget-foreground
+    value: "#CCCCCC"
+    description: Fallback hover widget foreground
+
+  - id: vscode-editorHoverWidget-border
+    value: "#454545"
+    description: Fallback hover widget border
+
+  - id: vscode-textCodeBlock-background
+    value: "rgba(255, 255, 255, 0.1)"
+    description: Fallback text code block background
+
   - id: tabs-border-bottom-color
     value: "transparent"
     description: Border color for tabs

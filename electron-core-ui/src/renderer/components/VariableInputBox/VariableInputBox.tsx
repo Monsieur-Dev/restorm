@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo, useRef } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { Monaco } from '@monaco-editor/react'
 import type * as monacoEditor from 'monaco-editor'
 import type { VariableInputBoxProps, VariableDefinition } from './types'
 import { defaultInputBoxStyles } from '../InputBox/types'
 import { CodeEditor } from '../CodeEditor/CodeEditor'
+import { Tooltip } from '../Tooltip'
 import '../InputBox/inputBox.css'
 import './variableInputBox.css'
 
@@ -47,6 +48,9 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
   const variablesRef = useRef<VariableDefinition[]>(variables)
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const [showResolvedTooltip, setShowResolvedTooltip] = useState(false)
+
+  const hasResolvedTooltip = Boolean(resolvedValue && resolvedValue !== value)
 
   useEffect(() => {
     variablesRef.current = variables
@@ -240,7 +244,14 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
         ...(style ?? {})
       }}
       ref={containerRef}
-      title={resolvedValue && resolvedValue !== value ? resolvedValue : undefined}
+      onMouseEnter={() => {
+        if (hasResolvedTooltip) {
+          setShowResolvedTooltip(true)
+        }
+      }}
+      onMouseLeave={() => {
+        setShowResolvedTooltip(false)
+      }}
     >
       <div className="ibwrapper" style={{ display: 'flex', alignItems: 'center' }}>
         {placeholder && !value && (
@@ -278,6 +289,14 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
           />
         </div>
       </div>
+      {hasResolvedTooltip && (
+        <Tooltip
+          targetRef={containerRef}
+          content={<span>{resolvedValue}</span>}
+          show={showResolvedTooltip}
+          placement="below"
+        />
+      )}
     </div>
   )
 }

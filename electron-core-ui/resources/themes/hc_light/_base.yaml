@@ -16,6 +16,19 @@ colors:
     value: "#FFFFFF"
     description: Editor widget background color
 
+  # Hover widget / tooltip colors
+  - id: editorHoverWidget.background
+    value: "#FFFFFF"
+    description: Hover widget background color
+
+  - id: editorHoverWidget.foreground
+    value: "#000000"
+    description: Hover widget foreground color
+
+  - id: editorHoverWidget.border
+    value: "#6fc3df"
+    description: Hover widget border color (high contrast)
+
   # Generic foreground (used by many controls / labels)
   - id: foreground
     value: "#000000"
@@ -51,6 +64,11 @@ colors:
   - id: descriptionForeground
     value: "#3B3B3B"
     description: Description / secondary foreground
+
+  # Inline code / text code block background (used by tooltips and markdown)
+  - id: textCodeBlock.background
+    value: "rgba(255, 255, 255, 0.1)"
+    description: Text code block background
 
   # Dropdown colors
   - id: dropdown.background

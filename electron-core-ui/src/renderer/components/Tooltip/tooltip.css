@@ -14,11 +14,11 @@
 }
 
 .tooltip-content {
-	background-color: var(--vscode-editorHoverWidget-background, #252526);
-	color: var(--vscode-editorHoverWidget-foreground, #CCCCCC);
-	border: 1px solid var(--vscode-editorHoverWidget-border, #454545);
+	background-color: var(--vscode-editorHoverWidget-background);
+	color: var(--vscode-editorHoverWidget-foreground);
+	border: 1px solid var(--vscode-editorHoverWidget-border);
 	border-radius: 3px;
-	box-shadow: 4px 2px 7px rgba(0, 0, 0, 1);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 	padding: 4px 8px;
 	max-width: 500px;
 	min-width: 100px;
@@ -26,34 +26,57 @@
 	position: relative;
 }
 
-/* Beak border (outer triangle) */
-.tooltip-content::before {
+/* Common beak pseudo-elements */
+.tooltip-content::before,
+.tooltip-content::after {
 	content: '';
 	position: absolute;
+	left: var(--beak-left-percent);
+	pointer-events: none;
+}
+
+/* Beak border (outer triangle) when tooltip is above the target */
+[data-placement="above"] .tooltip-content::before {
 	bottom: -6px;
-	left: var(--beak-left-percent, 50%);
 	margin-left: -6px; /* Center the beak: half of border-left width (6px) */
 	width: 0;
 	height: 0;
 	border-left: 6px solid transparent;
 	border-right: 6px solid transparent;
-	border-top: 6px solid var(--vscode-editorHoverWidget-border, #454545);
-	pointer-events: none;
+	border-top: 6px solid var(--vscode-editorHoverWidget-border);
 }
 
-/* Beak (arrow) pointing down to the statusbar item (inner triangle) */
-.tooltip-content::after {
-	content: '';
-	position: absolute;
+/* Beak (arrow) pointing down to the target when tooltip is above */
+[data-placement="above"] .tooltip-content::after {
 	bottom: -5px;
-	left: var(--beak-left-percent, 50%);
 	margin-left: -5px; /* Center the beak: half of border-left width (5px) */
 	width: 0;
 	height: 0;
 	border-left: 5px solid transparent;
 	border-right: 5px solid transparent;
-	border-top: 5px solid var(--vscode-editorHoverWidget-background, #252526);
-	pointer-events: none;
+	border-top: 5px solid var(--vscode-editorHoverWidget-background);
+}
+
+/* Beak border (outer triangle) when tooltip is below the target */
+[data-placement="below"] .tooltip-content::before {
+	top: -6px;
+	margin-left: -6px; /* Center the beak: half of border-left width (6px) */
+	width: 0;
+	height: 0;
+	border-left: 6px solid transparent;
+	border-right: 6px solid transparent;
+	border-bottom: 6px solid var(--vscode-editorHoverWidget-border);
+}
+
+/* Beak (arrow) pointing up to the target when tooltip is below */
+[data-placement="below"] .tooltip-content::after {
+	top: -5px;
+	margin-left: -5px; /* Center the beak: half of border-left width (5px) */
+	width: 0;
+	height: 0;
+	border-left: 5px solid transparent;
+	border-right: 5px solid transparent;
+	border-bottom: 5px solid var(--vscode-editorHoverWidget-background);
 }
 
 @keyframes fadein {
@@ -79,9 +102,9 @@
 }
 
 .tooltip-content code {
-	font-family: var(--monaco-monospace-font, 'Consolas', 'Courier New', monospace);
+	font-family: var(--monaco-monospace-font);
 	border-radius: 3px;
 	padding: 0 0.4em;
-	background-color: var(--vscode-textCodeBlock-background, rgba(255, 255, 255, 0.1));
+	background-color: var(--vscode-textCodeBlock-background);
 }
 
