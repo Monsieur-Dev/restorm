@@ -9,11 +9,13 @@ export interface TagsViewProps {
   tags: string[]
   /** Called when tags change (add, rename, remove) */
   onChange?: (tags: string[]) => void
+  /** Label for the "Remove tag" menu item. @default "Remove tag" */
+  removeTagLabel?: string
   className?: string
   style?: React.CSSProperties
 }
 
-export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, className, style }) => {
+export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLabel = 'Remove tag', className, style }) => {
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [editingValue, setEditingValue] = useState<string>('')
   const inputRef = useRef<HTMLInputElement | null>(null)
@@ -99,7 +101,7 @@ export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, className, s
     () => [
       {
         id: 'remove',
-        label: 'Remove tag',
+        label: removeTagLabel,
         icon: 'close',
         onClick: () => {
           if (contextMenu.index != null) {
@@ -108,7 +110,7 @@ export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, className, s
         }
       }
     ],
-    [contextMenu.index, handleRemoveAt]
+    [contextMenu.index, handleRemoveAt, removeTagLabel]
   )
 
   const rootClassName = useMemo(

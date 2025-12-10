@@ -71,7 +71,8 @@
     }
   },
   "workbench": {
-    "tagsLabel": "Tags:"
+    "tagsLabel": "Tags:",
+    "removeTag": "Remove tag"
   },
   "codeEditor": {
     "goToDefinition": "Go to Definition"
