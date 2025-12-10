@@ -60,6 +60,11 @@ colors:
   terminal.ansiBrightCyan: "#78ffff"
   terminal.ansiBrightWhite: "#ffffff"
 
+  # Tag colors for Tomorrow Night Blue (use soft sky blue)
+  tag.background: "#80baff"
+  tag.background-hover: "#9cc8ff"
+  tag.foreground: "#001126"
+
 tokenColors:
   - settings:
       background: "#002451"

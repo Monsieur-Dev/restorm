@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import * as CoreUIRenderer from 'electron-core-ui/renderer'
-import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger } from 'electron-core-ui/renderer'
+import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, TagsView } from 'electron-core-ui/renderer'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
 import type { RestormEditorTab, BreadcrumbItem } from '../types/editor'
 import { isFolderTab, isHTTPRequestTab } from '../types/editor'
@@ -8,6 +8,7 @@ import { HTTPRequestTabView, EnvironmentDropdown } from './HTTPRequestTabView'
 import { EnvironmentProvider } from '../contexts/EnvironmentContext'
 import { FolderView } from './FolderView'
 import { HttpMethodBadge } from './HttpMethodBadge'
+import { useTranslation } from 'react-i18next'
 
 /** Extract title string from EditorTab */
 function getTabTitleString(tab: EditorTab & { titleString?: string }, fallback = ''): string {
@@ -39,6 +40,8 @@ export interface WorkbenchProps {
   onBreadcrumbClick?: (item: BreadcrumbItem, index: number, isLast: boolean) => void
   /** Callback fired when the last breadcrumb item is renamed */
   onItemRename?: (item: BreadcrumbItem, newName: string) => void
+  /** Callback fired when tags are changed for a folder or request */
+  onTagsChange?: (targetId: string, tags: string[]) => void
   /** Fallback component displayed when no tabs are open */
   emptyFallback?: React.ReactNode
 }
@@ -64,8 +67,10 @@ export const Workbench: React.FC<WorkbenchProps> = ({
   onTabActivate,
   onBreadcrumbClick,
   onItemRename,
+  onTagsChange,
   emptyFallback
 }) => {
+  const { t } = useTranslation()
   const isControlled = onTreeChange !== undefined
   const [localTree, setLocalTree] = useState<WorkbenchTree>(initialTree)
   const tree = isControlled ? initialTree : localTree
@@ -161,6 +166,28 @@ export const Workbench: React.FC<WorkbenchProps> = ({
             backgroundColor: 'var(--vscode-editor-background)'
           }}
         >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '8px 16px 0 16px'
+            }}
+          >
+            <span
+              style={{
+                color: 'var(--vscode-descriptionForeground)'
+              }}
+            >
+              {t('workbench.tagsLabel')}
+            </span>
+            <TagsView
+              tags={tab.folder.tags}
+              onChange={(nextTags) => {
+                onTagsChange?.(tab.folder.id, nextTags)
+              }}
+            />
+          </div>
           <Breadcrumb
             items={breadcrumbs}
             onItemClick={(item, index) => {
@@ -191,6 +218,28 @@ export const Workbench: React.FC<WorkbenchProps> = ({
               backgroundColor: 'var(--vscode-editor-background)'
             }}
           >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                marginBottom: 4
+              }}
+            >
+              <span
+                style={{
+                  color: 'var(--vscode-descriptionForeground)'
+                }}
+              >
+                {t('workbench.tagsLabel')}
+              </span>
+              <TagsView
+                tags={tab.request.tags}
+                onChange={(nextTags) => {
+                  onTagsChange?.(tab.request.id, nextTags)
+                }}
+              />
+            </div>
             <div
               style={{
                 display: 'flex',

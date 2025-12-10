@@ -8,4 +8,9 @@ colors:
   button.secondaryHoverBackground: "#45494E"
   tab.activeForeground: "#ffffff"
 
+  # Tag colors for Dark+ (accent blue)
+  tag.background: "#094771"
+  tag.background-hover: "#0e639c"
+  tag.foreground: "#ffffff"
+
 

@@ -43,4 +43,17 @@ variables:
     value: "12px"
     description: AG Grid font size
 
+  # Tag component colors (generic defaults, can be overridden per theme type)
+  - id: tag-background
+    value: "#444444"
+    description: Default tag background color
+
+  - id: tag-background-hover
+    value: "#555555"
+    description: Default tag hover background color
+
+  - id: tag-foreground
+    value: "#ffffff"
+    description: Default tag foreground color
+
 

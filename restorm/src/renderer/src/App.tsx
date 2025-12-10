@@ -693,6 +693,66 @@ const App: React.FC = () => {
     []
   )
 
+  // Handle tags changes from Workbench (folders or HTTP requests)
+  const handleTagsChange = useCallback((targetId: string, newTags: string[]) => {
+    // Update folder structure
+    setSwaggerFolder((prevFolder) => {
+      const updateFolderItems = (folder: Folder): Folder => {
+        const updatedItems = folder.items.map((folderItem): FolderItem => {
+          if (isFolder(folderItem)) {
+            if (folderItem.id === targetId) {
+              return { ...folderItem, tags: newTags }
+            }
+            return updateFolderItems(folderItem)
+          } else if (isRequest(folderItem) && isHTTPRequest(folderItem)) {
+            if (folderItem.id === targetId) {
+              return { ...folderItem, tags: newTags }
+            }
+          }
+          return folderItem
+        })
+        return { ...folder, items: updatedItems }
+      }
+
+      if (prevFolder.id === targetId) {
+        return { ...prevFolder, tags: newTags }
+      }
+
+      return updateFolderItems(prevFolder)
+    })
+
+    // Update tags in open workbench tabs
+    setWorkbenchTree((prevTree) => {
+      const group = prevTree.groups[0]
+      if (!group || !isTabGroupNode(group)) return prevTree
+
+      const updatedTabs = group.tabs.map((tab) => {
+        const restormTab = tab as FolderTab | HTTPRequestTab
+
+        if (restormTab.tabType === 'folder' && restormTab.folder.id === targetId) {
+          return {
+            ...restormTab,
+            folder: { ...restormTab.folder, tags: newTags }
+          }
+        }
+
+        if (restormTab.tabType === 'http-request' && restormTab.request.id === targetId) {
+          return {
+            ...restormTab,
+            request: { ...restormTab.request, tags: newTags }
+          }
+        }
+
+        return restormTab
+      })
+
+      return {
+        ...prevTree,
+        groups: [{ ...group, tabs: updatedTabs }]
+      }
+    })
+  }, [])
+
   return (
     <div
       style={{
@@ -824,6 +884,7 @@ const App: React.FC = () => {
               onTabActivate={handleTabActivate}
               onBreadcrumbClick={handleBreadcrumbClick}
               onItemRename={handleItemRename}
+              onTagsChange={handleTagsChange}
               emptyFallback={<Welcome />}
               style={{ flex: 1 }}
             />

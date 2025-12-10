@@ -195,6 +195,19 @@ colors:
     value: "#00000099"
     description: Scrollbar slider active background
 
+  # Tag colors (light base)
+  - id: tag.background
+    value: "#d0e5ff" # soft blue
+    description: Tag background color
+
+  - id: tag.background-hover
+    value: "#bddbff" # slightly stronger blue
+    description: Tag hover background color
+
+  - id: tag.foreground
+    value: "#003355"
+    description: Tag foreground color
+
   # Tab colors
   - id: tab.activeForeground
     value: "#333333"

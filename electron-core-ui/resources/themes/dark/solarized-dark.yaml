@@ -78,6 +78,11 @@ colors:
   debugExceptionWidget.background: "#00212B"
   debugExceptionWidget.border: "#AB395B"
   pickerGroup.foreground: "#2AA19899"
+
+  # Tag colors for Solarized Dark (use accent cyan)
+  tag.background: "#2AA198"
+  tag.background-hover: "#33b3aa"
+  tag.foreground: "#002B36"
   pickerGroup.border: "#2AA19899"
   terminal.ansiBlack: "#073642"
   terminal.ansiRed: "#dc322f"

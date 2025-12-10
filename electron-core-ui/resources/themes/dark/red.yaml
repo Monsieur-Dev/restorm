@@ -60,6 +60,11 @@ colors:
   extensionButton.prominentBackground: "#cc3333"
   extensionButton.prominentHoverBackground: "#cc333388"
 
+  # Tag colors for Red (use softer coral)
+  tag.background: "#cc3333"
+  tag.background-hover: "#e04a4a"
+  tag.foreground: "#fff5f5"
+
 tokenColors:
   - settings:
       foreground: "#F8F8F8"

@@ -65,6 +65,11 @@ colors:
   terminal.ansiBrightWhite: "#f8f8f2"
   terminal.inactiveSelectionBackground: "#676b7140"
 
+  # Tag colors for Monokai Dimmed (use warm gray)
+  tag.background: "#565656"
+  tag.background-hover: "#707070"
+  tag.foreground: "#f8f8f2"
+
 tokenColors:
   - settings:
       foreground: "#C5C8C6"

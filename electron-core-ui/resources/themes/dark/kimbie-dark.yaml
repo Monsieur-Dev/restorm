@@ -54,6 +54,11 @@ colors:
   badge.background: "#7f5d38"
   progressBar.background: "#7f5d38"
 
+  # Tag colors for Kimbie Dark (use warm sand tone)
+  tag.background: "#7f5d38"
+  tag.background-hover: "#a37847"
+  tag.foreground: "#fff7e8"
+
 tokenColors:
   - settings:
       foreground: "#d3af86"

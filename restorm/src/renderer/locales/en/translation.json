@@ -60,5 +60,8 @@
         "jsoncrack": "JSONCrack"
       }
     }
+  },
+  "workbench": {
+    "tagsLabel": "Tags:"
   }
 }
