@@ -110,7 +110,6 @@
 	justify-content: flex-start;
 	padding: 8px;
 	box-sizing: border-box;
-	border-top: 1px solid var(--tabs-border-bottom-color, transparent);
 }
 
 .editor-group-content-panel {

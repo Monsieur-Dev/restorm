@@ -49,7 +49,7 @@
 .params-table th,
 .params-table td {
   padding: 2px 6px;
-  border-bottom: 1px solid var(--vscode-panel-border, #3c3c3c);
+  border-bottom: 1px solid var(--vscode-panel-border);
 }
 
 /* Fixed width for drag handle column */
@@ -98,11 +98,11 @@
 }
 
 .params-table-row-drop-before td {
-  border-top: 2px solid var(--vscode-focusBorder, #007acc);
+  border-top: 2px solid var(--vscode-focusBorder);
 }
 
 .params-table-row-drop-after td {
-  border-bottom: 2px solid var(--vscode-focusBorder, #007acc);
+  border-bottom: 2px solid var(--vscode-focusBorder);
 }
 
 

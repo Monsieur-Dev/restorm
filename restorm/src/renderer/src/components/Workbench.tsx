@@ -237,7 +237,6 @@ export const Workbench: React.FC<WorkbenchProps> = ({
               minHeight: 0,
               minWidth: 0,
               padding: '8px 16px',
-              borderBottom: '1px solid var(--vscode-panel-border)',
               backgroundColor: 'var(--vscode-editor-background)'
             }}
           >

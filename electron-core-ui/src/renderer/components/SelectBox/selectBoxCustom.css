@@ -148,10 +148,6 @@
   border-top: 1px solid var(--vscode-dropdown-border);
 }
 
-.monaco-select-box-dropdown-container > .select-box-details-pane.border-bottom {
-  border-bottom: 1px solid var(--vscode-dropdown-border);
-}
-
 /* Select container */
 .select-container {
   position: relative;
