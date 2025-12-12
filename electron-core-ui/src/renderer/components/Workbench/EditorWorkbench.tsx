@@ -30,13 +30,20 @@ export interface EditorWorkbenchProps extends EditorWorkbenchCallbacks {
 	 * If not provided, nothing is displayed.
 	 */
 	emptyFallback?: React.ReactNode;
+	/**
+	 * Called when group sizes change (due to sash dragging).
+	 * The nodeId is 'root' for top-level groups, or the container node ID for nested groups.
+	 */
+	onSizesChange?: ((nodeId: string, sizes: number[]) => void) | undefined;
 }
 
 // Local splitter hook for any container
 function useSplitSizes(
 	count: number,
 	isVertical: boolean,
-	containerRef: React.RefObject<HTMLDivElement>
+	containerRef: React.RefObject<HTMLDivElement>,
+	initialSizes?: number[],
+	onSizesChange?: (sizes: number[]) => void
 ): { sizes: number[]; onSashStart: (index: number) => (event: SashEvent) => void; onSashChange: (index: number) => (event: SashEvent) => void } {
 	const [sizes, setSizes] = useState<number[]>([]);
 	const minGroupPx = 120;
@@ -44,6 +51,8 @@ function useSplitSizes(
 	const startCoordRef = useRef<number>(0);
 	const axisSizeRef = useRef<number>(0);
 	const currentIndexRef = useRef<number>(-1);
+	const onSizesChangeRef = useRef(onSizesChange);
+	onSizesChangeRef.current = onSizesChange;
 
 	useEffect(() => {
 		if (count <= 0) {
@@ -54,10 +63,14 @@ function useSplitSizes(
 			if (prev.length === count) {
 				return prev;
 			}
+			// Use initial sizes if provided and matching count
+			if (initialSizes && initialSizes.length === count) {
+				return initialSizes;
+			}
 			const equal = 1 / count;
 			return new Array(count).fill(equal);
 		});
-	}, [count]);
+	}, [count, initialSizes]);
 
 	const onSashStart = useCallback((index: number) => {
 		return (event: SashEvent): void => {
@@ -113,6 +126,8 @@ function useSplitSizes(
 				next[ri] = rightVal;
 			}
 			setSizes(next);
+		// Notify parent of size change
+		onSizesChangeRef.current?.(next);
 		};
 	}, [isVertical, containerRef]);
 
@@ -123,10 +138,22 @@ const GroupContainer: React.FC<{
 	node: ContainerGroupNode;
 	callbacks: EditorWorkbenchCallbacks;
 	renderLeaf: (node: EditorGroup) => React.ReactNode;
-}> = ({ node, callbacks, renderLeaf }) => {
+	onNodeSizesChange?: ((nodeId: string, sizes: number[]) => void) | undefined;
+}> = ({ node, callbacks, renderLeaf, onNodeSizesChange }) => {
 	const isVertical = node.orientation === 'vertical';
 	const ref = useRef<HTMLDivElement | null>(null);
-	const { sizes, onSashStart, onSashChange } = useSplitSizes(node.groups.length, isVertical, ref);
+	
+	const handleSizesChange = useCallback((newSizes: number[]) => {
+		onNodeSizesChange?.(node.id, newSizes);
+	}, [node.id, onNodeSizesChange]);
+	
+	const { sizes, onSashStart, onSashChange } = useSplitSizes(
+		node.groups.length,
+		isVertical,
+		ref,
+		node.sizes,
+		handleSizesChange
+	);
 
 	// Create layout provider for each sash
 	const createLayoutProvider = useCallback((index: number): IVerticalSashLayoutProvider | IHorizontalSashLayoutProvider => {
@@ -190,7 +217,7 @@ const GroupContainer: React.FC<{
 					>
 						{isTabGroupNode(child)
 							? renderLeaf(child)
-							: <GroupContainer node={child} callbacks={callbacks} renderLeaf={renderLeaf} />}
+							: <GroupContainer node={child} callbacks={callbacks} renderLeaf={renderLeaf} onNodeSizesChange={onNodeSizesChange} />}
 					</div>
 					{i < node.groups.length - 1 ? (
 						<Sash
@@ -220,6 +247,7 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 	onFocusedGroupChange,
 	onActivateTab: externalOnActivateTab,
 	emptyFallback,
+	onSizesChange,
 	...extCallbacks
 }) => {
 	// Internal focus state when component is uncontrolled
@@ -645,9 +673,10 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 					emptyFallback ?? null
 				) : (
 					<GroupContainer
-						node={{ id: 'root', orientation: tree.orientation as Orientation, groups: tree.groups }}
+						node={{ id: 'root', orientation: tree.orientation as Orientation, groups: tree.groups, sizes: tree.sizes }}
 						callbacks={extCallbacks}
 						renderLeaf={leafRenderer}
+						onNodeSizesChange={onSizesChange}
 					/>
 				)}
 			</div>

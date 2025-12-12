@@ -70,6 +70,10 @@ interface PersistedWorkbenchState {
   }[]
   /** Orientation of the workbench */
   orientation: 'horizontal' | 'vertical'
+  /** Sizes of root-level groups (ratios 0-1) */
+  sizes?: number[] | undefined
+  /** Sizes per container node ID */
+  containerSizes?: Record<string, number[]> | undefined
 }
 
 const WORKBENCH_STORAGE_KEY = 'restorm_workbench_state'
@@ -77,6 +81,7 @@ const WORKBENCH_STORAGE_KEY = 'restorm_workbench_state'
 /** Extract persistable state from WorkbenchTree */
 function extractWorkbenchState(tree: WorkbenchTree): PersistedWorkbenchState {
   const groups: PersistedWorkbenchState['groups'] = []
+  const containerSizes: Record<string, number[]> = {}
   
   const extractGroups = (nodes: GroupNode[]): void => {
     for (const node of nodes) {
@@ -87,6 +92,9 @@ function extractWorkbenchState(tree: WorkbenchTree): PersistedWorkbenchState {
           activeTabId: node.activeTabId
         })
       } else if (isContainerNode(node)) {
+        if (node.sizes) {
+          containerSizes[node.id] = node.sizes
+        }
         extractGroups(node.groups)
       }
     }
@@ -96,7 +104,9 @@ function extractWorkbenchState(tree: WorkbenchTree): PersistedWorkbenchState {
   
   return {
     groups,
-    orientation: tree.orientation
+    orientation: tree.orientation,
+    sizes: tree.sizes,
+    containerSizes: Object.keys(containerSizes).length > 0 ? containerSizes : undefined
   }
 }
 
@@ -607,13 +617,26 @@ const App: React.FC = () => {
         })))
         setWorkbenchTree({
           orientation: savedState.orientation,
-          groups: restoredGroups
+          groups: restoredGroups,
+          sizes: savedState.sizes
         })
       }
     }
 
     restoreWorkbench()
   }, [swaggerFolder])
+
+  // Handle sizes change from workbench sash dragging
+  const handleSizesChange = useCallback((nodeId: string, sizes: number[]) => {
+    setWorkbenchTree(prev => {
+      if (nodeId === 'root') {
+        return { ...prev, sizes }
+      }
+      // For nested containers, we'd need to update the container node
+      // This is more complex, for now just handle root level
+      return prev
+    })
+  }, [])
 
   // Handle navigation events from NavigationService
   useEffect(() => {
@@ -1128,6 +1151,7 @@ const App: React.FC = () => {
               onItemRename={handleItemRename}
               onTagsChange={handleTagsChange}
               onFolderChange={handleFolderChange}
+              onSizesChange={handleSizesChange}
               emptyFallback={<Welcome />}
               style={{ flex: 1 }}
             />

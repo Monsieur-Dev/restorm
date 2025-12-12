@@ -46,6 +46,8 @@ export interface WorkbenchProps {
   onFolderChange?: (folderId: string, folder: import('../types/collections').Folder) => void
   /** Fallback component displayed when no tabs are open */
   emptyFallback?: React.ReactNode
+  /** Callback fired when group sizes change (sash dragging) */
+  onSizesChange?: (nodeId: string, sizes: number[]) => void
 }
 
 const { Breadcrumb } = CoreUIRenderer as unknown as {
@@ -71,7 +73,8 @@ export const Workbench: React.FC<WorkbenchProps> = ({
   onItemRename,
   onTagsChange,
   onFolderChange,
-  emptyFallback
+  emptyFallback,
+  onSizesChange
 }) => {
   const { t } = useTranslation()
   const isControlled = onTreeChange !== undefined
@@ -409,6 +412,7 @@ export const Workbench: React.FC<WorkbenchProps> = ({
         focusedGroupId={focusedGroupId ?? undefined}
         onFocusedGroupChange={onFocusedGroupChange}
         emptyFallback={emptyFallback}
+        onSizesChange={onSizesChange}
         {...callbacks}
       />
     </div>

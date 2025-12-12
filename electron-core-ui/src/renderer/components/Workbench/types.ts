@@ -76,6 +76,8 @@ export interface ContainerGroupNode {
 	id: string;
 	orientation: Orientation;
 	groups: GroupNode[];
+	/** Optional sizes as ratios (0-1) for each child group */
+	sizes?: number[] | undefined;
 }
 
 export type GroupNode = TabGroupNode | ContainerGroupNode;
@@ -83,6 +85,8 @@ export type GroupNode = TabGroupNode | ContainerGroupNode;
 export interface WorkbenchTree {
 	orientation: Orientation;
 	groups: GroupNode[];
+	/** Optional sizes as ratios (0-1) for each root-level group */
+	sizes?: number[] | undefined;
 }
 
 export function isContainerNode(node: GroupNode): node is ContainerGroupNode {
