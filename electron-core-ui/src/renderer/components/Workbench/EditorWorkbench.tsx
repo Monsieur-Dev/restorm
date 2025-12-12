@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useImperativeHandle, useRef, useState, forwardRef } from 'react';
 import type { ContainerGroupNode, EditorGroup, EditorTab, EditorWorkbenchCallbacks, GroupNode, Orientation, SplitDirection, WorkbenchTree } from './types';
 import { isContainerNode, isTabGroupNode } from './types';
 import { EditorGroupView } from './EditorGroupView';
@@ -9,6 +9,8 @@ import { onWorkbenchTabDropped } from './ipc';
 import { logger } from '../../services/logger';
 import { Sash } from '../Sash';
 import type { SashEvent, IVerticalSashLayoutProvider, IHorizontalSashLayoutProvider } from '../Sash';
+import { saveWorkbenchState, loadWorkbenchState, clearWorkbenchState, rebuildWorkbenchTree } from './persistence';
+import type { RebuildTabCallback } from './persistence';
 import './styles/tabs.css';
 
 export interface EditorWorkbenchProps extends EditorWorkbenchCallbacks {
@@ -35,6 +37,50 @@ export interface EditorWorkbenchProps extends EditorWorkbenchCallbacks {
 	 * The nodeId is 'root' for top-level groups, or the container node ID for nested groups.
 	 */
 	onSizesChange?: ((nodeId: string, sizes: number[]) => void) | undefined;
+	/**
+	 * Unique identifier for this workbench instance (used for persistence).
+	 * Required if autosave is enabled.
+	 */
+	workbenchId?: string;
+	/**
+	 * Enable automatic saving/loading of workbench state.
+	 * When enabled, the workbench will automatically save its state on changes
+	 * and attempt to restore it on mount.
+	 * Requires workbenchId to be set.
+	 */
+	autosave?: boolean;
+	/**
+	 * Callback to rebuild a tab from its persisted ID.
+	 * Required if autosave is enabled.
+	 * Should return the EditorTab or null if the tab cannot be rebuilt.
+	 */
+	onRebuildTab?: RebuildTabCallback;
+	/**
+	 * Called when the workbench state has been restored from storage.
+	 * Receives the restored tree or null if restoration failed.
+	 */
+	onStateRestored?: (tree: WorkbenchTree | null) => void;
+}
+
+/**
+ * Imperative handle for EditorWorkbench
+ */
+export interface EditorWorkbenchHandle {
+	/**
+	 * Manually save the current workbench state to storage.
+	 * @returns true if save was successful
+	 */
+	saveState: () => Promise<boolean>;
+	/**
+	 * Manually load and restore workbench state from storage.
+	 * @returns The restored tree or null if restoration failed
+	 */
+	loadState: () => Promise<WorkbenchTree | null>;
+	/**
+	 * Clear the persisted workbench state from storage.
+	 * @returns true if clear was successful
+	 */
+	clearState: () => Promise<boolean>;
 }
 
 // Local splitter hook for any container
@@ -246,8 +292,9 @@ const GroupContainer: React.FC<{
 /**
  * EditorWorkbench (tree-based): renders nested editor groups and handles split logic.
  * Consumers own and mutate `tree` (controlled) or pass `onChange` to get updates.
+ * Supports automatic persistence when autosave and workbenchId are provided.
  */
-export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
+export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbenchProps>(({
 	tree,
 	className,
 	style,
@@ -257,10 +304,93 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 	onActivateTab: externalOnActivateTab,
 	emptyFallback,
 	onSizesChange,
+	workbenchId,
+	autosave,
+	onRebuildTab,
+	onStateRestored,
 	...extCallbacks
-}) => {
+}, ref) => {
 	// Internal focus state when component is uncontrolled
 	const [internalFocusedGroupId, setInternalFocusedGroupId] = useState<string | null>(null);
+	
+	// Track if workbench state has been restored
+	const restoredRef = useRef(false);
+	
+	// Store latest tree for imperative methods
+	const treeRef = useRef(tree);
+	treeRef.current = tree;
+	
+	// Store latest onRebuildTab for imperative methods
+	const onRebuildTabRef = useRef(onRebuildTab);
+	onRebuildTabRef.current = onRebuildTab;
+	
+	// Imperative handle: saveState, loadState, clearState
+	const saveStateImpl = useCallback(async (): Promise<boolean> => {
+		if (!workbenchId) {
+			logger.warn('[EditorWorkbench] Cannot save state: workbenchId is not set');
+			return false;
+		}
+		return saveWorkbenchState(workbenchId, treeRef.current);
+	}, [workbenchId]);
+	
+	const loadStateImpl = useCallback(async (): Promise<WorkbenchTree | null> => {
+		if (!workbenchId) {
+			logger.warn('[EditorWorkbench] Cannot load state: workbenchId is not set');
+			return null;
+		}
+		if (!onRebuildTabRef.current) {
+			logger.warn('[EditorWorkbench] Cannot load state: onRebuildTab is not set');
+			return null;
+		}
+		const savedState = await loadWorkbenchState(workbenchId);
+		if (!savedState) {
+			return null;
+		}
+		return rebuildWorkbenchTree(savedState, onRebuildTabRef.current);
+	}, [workbenchId]);
+	
+	const clearStateImpl = useCallback(async (): Promise<boolean> => {
+		if (!workbenchId) {
+			logger.warn('[EditorWorkbench] Cannot clear state: workbenchId is not set');
+			return false;
+		}
+		return clearWorkbenchState(workbenchId);
+	}, [workbenchId]);
+	
+	useImperativeHandle(ref, () => ({
+		saveState: saveStateImpl,
+		loadState: loadStateImpl,
+		clearState: clearStateImpl
+	}), [saveStateImpl, loadStateImpl, clearStateImpl]);
+	
+	// Autosave: restore state on mount
+	useEffect(() => {
+		if (!autosave || !workbenchId || !onRebuildTab || restoredRef.current) {
+			return;
+		}
+		restoredRef.current = true;
+		
+		const restore = async (): Promise<void> => {
+			const restoredTree = await loadStateImpl();
+			if (restoredTree && onChange) {
+				onChange(restoredTree);
+			}
+			onStateRestored?.(restoredTree);
+		};
+		restore();
+	}, [autosave, workbenchId, onRebuildTab, loadStateImpl, onChange, onStateRestored]);
+	
+	// Autosave: save state on tree changes
+	useEffect(() => {
+		if (!autosave || !workbenchId) {
+			return;
+		}
+		// Skip saving empty trees
+		if (tree.groups.length === 0) {
+			return;
+		}
+		saveWorkbenchState(workbenchId, tree);
+	}, [autosave, workbenchId, tree]);
 
 	// Helper to update focus in controlled/uncontrolled modes and notify parent
 	const setFocus = useCallback(
@@ -691,7 +821,9 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 			</div>
 		</div>
 	);
-};
+});
+
+EditorWorkbench.displayName = 'EditorWorkbench';
 
 export default EditorWorkbench;
 

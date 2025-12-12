@@ -140,7 +140,21 @@ export type { MarkdownEditorProps } from './MarkdownEditor/MarkdownEditor'
 export type { MarkdownViewerProps } from './MarkdownViewer/MarkdownViewer'
 export type { MonacoWorkbenchProps } from './MonacoWorkbench'
 export type { ElectronCoreUiProviderProps } from './ElectronCoreUiProvider'
-export type { EditorWorkbenchProps } from './Workbench/EditorWorkbench'
+export type { EditorWorkbenchProps, EditorWorkbenchHandle } from './Workbench/EditorWorkbench'
+
+// Workbench persistence exports
+export {
+	extractWorkbenchState,
+	rebuildWorkbenchTree,
+	saveWorkbenchState,
+	loadWorkbenchState,
+	clearWorkbenchState
+} from './Workbench/persistence'
+export type {
+	PersistedGroupNode,
+	PersistedWorkbenchState,
+	RebuildTabCallback
+} from './Workbench/persistence'
 export type {
 	SplitViewOrientation,
 	SplitViewProps,

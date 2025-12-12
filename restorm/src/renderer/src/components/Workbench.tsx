@@ -1,7 +1,7 @@
-import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react'
+import React, { useMemo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
 import * as CoreUIRenderer from 'electron-core-ui/renderer'
 import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, TagsView } from 'electron-core-ui/renderer'
-import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
+import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback } from 'electron-core-ui/renderer'
 import type { RestormEditorTab, BreadcrumbItem } from '../types/editor'
 import { isFolderTab, isHTTPRequestTab } from '../types/editor'
 import { HTTPRequestTabView, EnvironmentDropdown } from './HTTPRequestTabView'
@@ -48,6 +48,21 @@ export interface WorkbenchProps {
   emptyFallback?: React.ReactNode
   /** Callback fired when group sizes change (sash dragging) */
   onSizesChange?: (nodeId: string, sizes: number[]) => void
+  /** Unique identifier for workbench persistence (required if autosave is enabled) */
+  workbenchId?: string
+  /** Enable automatic save/load of workbench state */
+  autosave?: boolean
+  /** Callback to rebuild a tab from its ID (required if autosave is enabled) */
+  onRebuildTab?: RebuildTabCallback
+  /** Called when state is restored from storage */
+  onStateRestored?: (tree: WorkbenchTree | null) => void
+}
+
+/** Imperative handle for Workbench component */
+export interface WorkbenchHandle {
+  saveState: () => Promise<boolean>
+  loadState: () => Promise<WorkbenchTree | null>
+  clearState: () => Promise<boolean>
 }
 
 const { Breadcrumb } = CoreUIRenderer as unknown as {
@@ -58,10 +73,10 @@ const { Breadcrumb } = CoreUIRenderer as unknown as {
   }>
 }
 
-const EditorWorkbenchAny = EditorWorkbench as unknown as React.ComponentType<Record<string, unknown>>
+const EditorWorkbenchAny = EditorWorkbench as unknown as React.ForwardRefExoticComponent<Record<string, unknown> & React.RefAttributes<EditorWorkbenchHandle>>
 
 /** Wrapper component for EditorWorkbench that handles restorm-specific tab rendering */
-export const Workbench: React.FC<WorkbenchProps> = ({
+export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
   tree: initialTree,
   onTreeChange,
   className,
@@ -74,14 +89,26 @@ export const Workbench: React.FC<WorkbenchProps> = ({
   onTagsChange,
   onFolderChange,
   emptyFallback,
-  onSizesChange
-}) => {
+  onSizesChange,
+  workbenchId,
+  autosave,
+  onRebuildTab,
+  onStateRestored
+}, ref) => {
   const { t } = useTranslation()
+  const editorWorkbenchRef = useRef<EditorWorkbenchHandle>(null)
   const isControlled = onTreeChange !== undefined
   const [localTree, setLocalTree] = useState<WorkbenchTree>(initialTree)
   const tree = isControlled ? initialTree : localTree
   const lastTabCountRef = useRef<number>(0)
   const lastActiveTabIdRef = useRef<string | null>(null)
+  
+  // Expose imperative handle
+  useImperativeHandle(ref, () => ({
+    saveState: async () => editorWorkbenchRef.current?.saveState() ?? false,
+    loadState: async () => editorWorkbenchRef.current?.loadState() ?? null,
+    clearState: async () => editorWorkbenchRef.current?.clearState() ?? false
+  }), [])
 
   useEffect(() => {
     if (!isControlled) {
@@ -406,16 +433,23 @@ export const Workbench: React.FC<WorkbenchProps> = ({
       className={className}
     >
       <EditorWorkbenchAny
+        ref={editorWorkbenchRef}
         tree={tree}
         onChange={handleTreeChange}
         focusedGroupId={focusedGroupId ?? undefined}
         onFocusedGroupChange={onFocusedGroupChange}
         emptyFallback={emptyFallback}
         onSizesChange={onSizesChange}
+        workbenchId={workbenchId}
+        autosave={autosave}
+        onRebuildTab={onRebuildTab}
+        onStateRestored={onStateRestored}
         {...callbacks}
       />
     </div>
   )
-}
+})
+
+Workbench.displayName = 'Workbench'
 
 export default Workbench

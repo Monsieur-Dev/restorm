@@ -18,11 +18,9 @@ import {
   useSettingsModal,
   isTabGroupNode,
   isContainerNode,
-  navigationService,
-  saveToStorage,
-  loadFromStorage
+  navigationService
 } from 'electron-core-ui/renderer'
-import type { WorkbenchTree, NavigationEvent, GroupNode, TabGroupNode } from 'electron-core-ui/renderer'
+import type { WorkbenchTree, NavigationEvent, GroupNode, TabGroupNode, EditorTab } from 'electron-core-ui/renderer'
 import { Workbench } from './components/Workbench'
 import { Welcome } from './components/Welcome'
 import { HttpMethodBadge } from './components/HttpMethodBadge'
@@ -34,17 +32,11 @@ import type { Folder, FolderItem, HTTPRequest, Environment } from './types/colle
 import { isFolder, isRequest, isHTTPRequest } from './types/collections'
 import type { FolderTab, HTTPRequestTab, BreadcrumbItem } from './types/editor'
 
-// Temporary debug logging
-// eslint-disable-next-line no-console
-const debugLog = (message: string, data?: unknown): void => {
-  console.log('[WorkbenchPersist]', message)
-  if (data) {
-    console.table(data)
-  }
-}
-
 const MIN_LEFT_WIDTH = 180
 const RIGHT_MIN_WIDTH = 240
+
+/** Workbench ID for persistence */
+const WORKBENCH_ID = 'restorm-main-workbench'
 
 interface SidebarContextMenuItem {
   id: string
@@ -59,60 +51,6 @@ type TranslateFunction = (key: string) => string
 
 /** Context menu action handler type */
 type ContextMenuActionHandler = (itemId: string) => void
-
-/** Persisted group node - recursive structure for hierarchical storage */
-interface PersistedGroupNode {
-  type: 'tabs' | 'container'
-  id: string
-  /** For tabs groups */
-  tabIds?: string[]
-  activeTabId?: string | undefined
-  /** For container groups */
-  orientation?: 'horizontal' | 'vertical'
-  children?: PersistedGroupNode[]
-  sizes?: number[] | undefined
-}
-
-/** Persisted workbench state - hierarchical structure for storage */
-interface PersistedWorkbenchState {
-  /** Root orientation */
-  orientation: 'horizontal' | 'vertical'
-  /** Hierarchical groups */
-  groups: PersistedGroupNode[]
-  /** Sizes of root-level groups (ratios 0-1) */
-  sizes?: number[] | undefined
-}
-
-const WORKBENCH_STORAGE_KEY = 'restorm_workbench_state'
-
-/** Extract persistable state from WorkbenchTree (hierarchical) */
-function extractWorkbenchState(tree: WorkbenchTree): PersistedWorkbenchState {
-  const extractNode = (node: GroupNode): PersistedGroupNode => {
-    if (isTabGroupNode(node)) {
-      return {
-        type: 'tabs',
-        id: node.id,
-        tabIds: node.tabs.map(t => t.id),
-        activeTabId: node.activeTabId
-      }
-    } else {
-      // ContainerGroupNode
-      return {
-        type: 'container',
-        id: node.id,
-        orientation: node.orientation,
-        children: node.groups.map(extractNode),
-        sizes: node.sizes
-      }
-    }
-  }
-  
-  return {
-    orientation: tree.orientation,
-    groups: tree.groups.map(extractNode),
-    sizes: tree.sizes
-  }
-}
 
 const buildContextMenuForItem = (
   item: ListViewItemData,
@@ -318,9 +256,6 @@ const App: React.FC = () => {
     orientation: 'vertical',
     groups: []
   })
-
-  // Track if workbench has been restored from storage
-  const workbenchRestoredRef = useRef(false)
 
   // ===========================================================================
   // Workbench helpers
@@ -537,120 +472,49 @@ const App: React.FC = () => {
     [findFirstTabGroupId, findGroupIdForTab, focusedGroupId, hasGroupWithId, updateGroupById]
   )
 
-  // Restore workbench state from storage on initial load
-  useEffect(() => {
-    if (workbenchRestoredRef.current) return
-    workbenchRestoredRef.current = true
-
-    const restoreWorkbench = async (): Promise<void> => {
-      debugLog('Attempting to restore workbench state...')
-      const savedState = await loadFromStorage<PersistedWorkbenchState>(WORKBENCH_STORAGE_KEY)
-      debugLog('Loaded state from storage:', savedState?.groups.map(g => ({
-        type: g.type,
-        groupId: g.id,
-        tabs: g.type === 'tabs' ? (g.tabIds ?? []).join(', ') : `${g.children?.length ?? 0} children`
-      })))
-      if (!savedState || savedState.groups.length === 0) {
-        debugLog('No saved state or empty groups, skipping restore')
-        return
+  // Rebuild tab callback for workbench autosave
+  const handleRebuildTab = useCallback((tabId: string): EditorTab | null => {
+    if (tabId.startsWith('folder-')) {
+      const itemId = tabId.replace('folder-', '')
+      const folder = findFolderById(swaggerFolder, itemId)
+      if (folder) {
+        const { breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, itemId)
+        return {
+          id: tabId,
+          tabType: 'folder',
+          title: folder.name,
+          titleString: folder.name,
+          folder,
+          breadcrumbs,
+          allowFullscreen: true
+        } as FolderTab
       }
-
-      // Build tab from tabId
-      const buildTab = (tabId: string): FolderTab | HTTPRequestTab | null => {
-        if (tabId.startsWith('folder-')) {
-          const itemId = tabId.replace('folder-', '')
-          const folder = findFolderById(swaggerFolder, itemId)
-          if (folder) {
-            const { breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, itemId)
-            return {
-              id: tabId,
-              tabType: 'folder',
-              title: folder.name,
-              titleString: folder.name,
-              folder,
-              breadcrumbs,
-              allowFullscreen: true
-            }
-          }
-        } else if (tabId.startsWith('request-')) {
-          const itemId = tabId.replace('request-', '')
-          const { item, breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, itemId)
-          if (item && isRequest(item) && isHTTPRequest(item)) {
-            const environments = getNearestEnvironmentsForBreadcrumbs(swaggerFolder, breadcrumbs)
-            return {
-              id: tabId,
-              tabType: 'http-request',
-              title: `${item.method} ${item.name}`,
-              titleString: `${item.method} ${item.name}`,
-              request: item,
-              breadcrumbs,
-              environments,
-              allowFullscreen: true
-            }
-          }
-        }
-        return null
-      }
-
-      // Recursively rebuild group nodes from persisted state
-      const rebuildNode = (saved: PersistedGroupNode): GroupNode | null => {
-        if (saved.type === 'tabs') {
-          // TabGroupNode
-          const tabs: (FolderTab | HTTPRequestTab)[] = []
-          for (const tabId of saved.tabIds ?? []) {
-            const tab = buildTab(tabId)
-            if (tab) tabs.push(tab)
-          }
-          if (tabs.length === 0) return null
-          
-          let activeTabId: string
-          if (saved.activeTabId && tabs.some(t => t.id === saved.activeTabId)) {
-            activeTabId = saved.activeTabId
-          } else {
-            activeTabId = tabs[0]!.id
-          }
-          return {
-            id: saved.id,
-            tabs,
-            activeTabId
-          } as TabGroupNode
-        } else {
-          // ContainerGroupNode
-          const children: GroupNode[] = []
-          for (const child of saved.children ?? []) {
-            const rebuilt = rebuildNode(child)
-            if (rebuilt) children.push(rebuilt)
-          }
-          if (children.length === 0) return null
-          
-          return {
-            id: saved.id,
-            orientation: saved.orientation ?? 'vertical',
-            groups: children,
-            sizes: saved.sizes
-          } as GroupNode
-        }
-      }
-
-      // Rebuild the workbench tree with correct hierarchical structure
-      const restoredGroups: GroupNode[] = []
-      for (const savedGroup of savedState.groups) {
-        const rebuilt = rebuildNode(savedGroup)
-        if (rebuilt) restoredGroups.push(rebuilt)
-      }
-
-      if (restoredGroups.length > 0) {
-        debugLog('Restored hierarchical groups:', restoredGroups.length)
-        setWorkbenchTree({
-          orientation: savedState.orientation,
-          groups: restoredGroups,
-          sizes: savedState.sizes
-        })
+    } else if (tabId.startsWith('request-')) {
+      const itemId = tabId.replace('request-', '')
+      const { item, breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, itemId)
+      if (item && isRequest(item) && isHTTPRequest(item)) {
+        const environments = getNearestEnvironmentsForBreadcrumbs(swaggerFolder, breadcrumbs)
+        return {
+          id: tabId,
+          tabType: 'http-request',
+          title: `${item.method} ${item.name}`,
+          titleString: `${item.method} ${item.name}`,
+          request: item,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as HTTPRequestTab
       }
     }
-
-    restoreWorkbench()
+    return null
   }, [swaggerFolder])
+
+  // Handle workbench state restored
+  const handleStateRestored = useCallback((restoredTree: WorkbenchTree | null) => {
+    if (restoredTree) {
+      setWorkbenchTree(restoredTree)
+    }
+  }, [])
 
   // Handle sizes change from workbench sash dragging
   const handleSizesChange = useCallback((nodeId: string, sizes: number[]) => {
@@ -801,23 +665,6 @@ const App: React.FC = () => {
   const handleTreeChange = useCallback((newTree: WorkbenchTree) => {
     setWorkbenchTree(newTree)
   }, [])
-
-  // Persist workbench state whenever it changes
-  useEffect(() => {
-    // Skip saving if workbench is empty (initial state or not yet restored)
-    if (workbenchTree.groups.length === 0) {
-      debugLog('Skipping save - empty workbench')
-      return
-    }
-    
-    const state = extractWorkbenchState(workbenchTree)
-    debugLog('Saving workbench state:', state.groups.map(g => ({
-      type: g.type,
-      groupId: g.id,
-      tabs: g.type === 'tabs' ? (g.tabIds ?? []).join(', ') : `${g.children?.length ?? 0} children`
-    })))
-    saveToStorage(WORKBENCH_STORAGE_KEY, state)
-  }, [workbenchTree])
 
   // Handle tab activation in workbench - navigate to sync sidebar selection
   const handleTabActivate = useCallback((tabId: string) => {
@@ -1193,6 +1040,10 @@ const App: React.FC = () => {
               onSizesChange={handleSizesChange}
               emptyFallback={<Welcome />}
               style={{ flex: 1 }}
+              workbenchId={WORKBENCH_ID}
+              autosave
+              onRebuildTab={handleRebuildTab}
+              onStateRestored={handleStateRestored}
             />
           </div>
         </EnvironmentValuesProvider>
