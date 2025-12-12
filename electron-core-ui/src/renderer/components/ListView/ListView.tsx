@@ -160,6 +160,7 @@ export const ListView: React.FC<ListViewProps> = ({
   style,
   selectedIds: selectedIdsProp,
   activeId: activeIdProp,
+  expandedIds: expandedIdsProp,
   selectionMode = 'single',
   rootRole = 'tree',
   ariaLabel,
@@ -212,6 +213,12 @@ export const ListView: React.FC<ListViewProps> = ({
     const next = new Set(selectedIdsProp)
     setSelectedIds(next)
   }, [selectedIdsProp])
+
+  // Controlled expansion support
+  React.useEffect(() => {
+    if (expandedIdsProp === undefined) return
+    setExpandedIds(new Set(expandedIdsProp))
+  }, [expandedIdsProp])
 
   // Controlled active item support + ensure parents are expanded
   React.useEffect(() => {

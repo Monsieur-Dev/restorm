@@ -141,6 +141,12 @@ export interface ListViewProps {
    */
   expandOnChevronOnly?: boolean
 
+  /**
+   * Controlled expanded IDs. When provided, the component will use these IDs
+   * to determine which items are expanded, instead of internal state.
+   */
+  expandedIds?: string[]
+
   onItemClick?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
   onItemDoubleClick?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
   onSelectionChange?: (selectedIds: string[], payload: ListViewItemEventPayload) => void

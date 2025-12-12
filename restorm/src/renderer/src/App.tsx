@@ -60,53 +60,57 @@ type TranslateFunction = (key: string) => string
 /** Context menu action handler type */
 type ContextMenuActionHandler = (itemId: string) => void
 
-/** Persisted workbench state - simplified structure for storage */
+/** Persisted group node - recursive structure for hierarchical storage */
+interface PersistedGroupNode {
+  type: 'tabs' | 'container'
+  id: string
+  /** For tabs groups */
+  tabIds?: string[]
+  activeTabId?: string | undefined
+  /** For container groups */
+  orientation?: 'horizontal' | 'vertical'
+  children?: PersistedGroupNode[]
+  sizes?: number[] | undefined
+}
+
+/** Persisted workbench state - hierarchical structure for storage */
 interface PersistedWorkbenchState {
-  /** IDs of open tabs in each group */
-  groups: {
-    id: string
-    tabIds: string[]
-    activeTabId?: string | undefined
-  }[]
-  /** Orientation of the workbench */
+  /** Root orientation */
   orientation: 'horizontal' | 'vertical'
+  /** Hierarchical groups */
+  groups: PersistedGroupNode[]
   /** Sizes of root-level groups (ratios 0-1) */
   sizes?: number[] | undefined
-  /** Sizes per container node ID */
-  containerSizes?: Record<string, number[]> | undefined
 }
 
 const WORKBENCH_STORAGE_KEY = 'restorm_workbench_state'
 
-/** Extract persistable state from WorkbenchTree */
+/** Extract persistable state from WorkbenchTree (hierarchical) */
 function extractWorkbenchState(tree: WorkbenchTree): PersistedWorkbenchState {
-  const groups: PersistedWorkbenchState['groups'] = []
-  const containerSizes: Record<string, number[]> = {}
-  
-  const extractGroups = (nodes: GroupNode[]): void => {
-    for (const node of nodes) {
-      if (isTabGroupNode(node)) {
-        groups.push({
-          id: node.id,
-          tabIds: node.tabs.map(t => t.id),
-          activeTabId: node.activeTabId
-        })
-      } else if (isContainerNode(node)) {
-        if (node.sizes) {
-          containerSizes[node.id] = node.sizes
-        }
-        extractGroups(node.groups)
+  const extractNode = (node: GroupNode): PersistedGroupNode => {
+    if (isTabGroupNode(node)) {
+      return {
+        type: 'tabs',
+        id: node.id,
+        tabIds: node.tabs.map(t => t.id),
+        activeTabId: node.activeTabId
+      }
+    } else {
+      // ContainerGroupNode
+      return {
+        type: 'container',
+        id: node.id,
+        orientation: node.orientation,
+        children: node.groups.map(extractNode),
+        sizes: node.sizes
       }
     }
   }
   
-  extractGroups(tree.groups)
-  
   return {
-    groups,
     orientation: tree.orientation,
-    sizes: tree.sizes,
-    containerSizes: Object.keys(containerSizes).length > 0 ? containerSizes : undefined
+    groups: tree.groups.map(extractNode),
+    sizes: tree.sizes
   }
 }
 
@@ -542,9 +546,9 @@ const App: React.FC = () => {
       debugLog('Attempting to restore workbench state...')
       const savedState = await loadFromStorage<PersistedWorkbenchState>(WORKBENCH_STORAGE_KEY)
       debugLog('Loaded state from storage:', savedState?.groups.map(g => ({
+        type: g.type,
         groupId: g.id,
-        activeTab: g.activeTabId,
-        tabs: g.tabIds.join(', ')
+        tabs: g.type === 'tabs' ? (g.tabIds ?? []).join(', ') : `${g.children?.length ?? 0} children`
       })))
       if (!savedState || savedState.groups.length === 0) {
         debugLog('No saved state or empty groups, skipping restore')
@@ -588,36 +592,55 @@ const App: React.FC = () => {
         return null
       }
 
-      // Rebuild the workbench tree with correct group structure
-      const restoredGroups: TabGroupNode[] = []
-      for (const savedGroup of savedState.groups) {
-        const tabs: (FolderTab | HTTPRequestTab)[] = []
-        for (const tabId of savedGroup.tabIds) {
-          const tab = buildTab(tabId)
-          if (tab) tabs.push(tab)
-        }
-        if (tabs.length > 0) {
-          // Determine activeTabId - use saved one if valid, otherwise first tab
+      // Recursively rebuild group nodes from persisted state
+      const rebuildNode = (saved: PersistedGroupNode): GroupNode | null => {
+        if (saved.type === 'tabs') {
+          // TabGroupNode
+          const tabs: (FolderTab | HTTPRequestTab)[] = []
+          for (const tabId of saved.tabIds ?? []) {
+            const tab = buildTab(tabId)
+            if (tab) tabs.push(tab)
+          }
+          if (tabs.length === 0) return null
+          
           let activeTabId: string
-          if (savedGroup.activeTabId && tabs.some(t => t.id === savedGroup.activeTabId)) {
-            activeTabId = savedGroup.activeTabId
+          if (saved.activeTabId && tabs.some(t => t.id === saved.activeTabId)) {
+            activeTabId = saved.activeTabId
           } else {
             activeTabId = tabs[0]!.id
           }
-          restoredGroups.push({
-            id: savedGroup.id,
+          return {
+            id: saved.id,
             tabs,
             activeTabId
-          })
+          } as TabGroupNode
+        } else {
+          // ContainerGroupNode
+          const children: GroupNode[] = []
+          for (const child of saved.children ?? []) {
+            const rebuilt = rebuildNode(child)
+            if (rebuilt) children.push(rebuilt)
+          }
+          if (children.length === 0) return null
+          
+          return {
+            id: saved.id,
+            orientation: saved.orientation ?? 'vertical',
+            groups: children,
+            sizes: saved.sizes
+          } as GroupNode
         }
       }
 
+      // Rebuild the workbench tree with correct hierarchical structure
+      const restoredGroups: GroupNode[] = []
+      for (const savedGroup of savedState.groups) {
+        const rebuilt = rebuildNode(savedGroup)
+        if (rebuilt) restoredGroups.push(rebuilt)
+      }
+
       if (restoredGroups.length > 0) {
-        debugLog('Restored groups:', restoredGroups.map(g => ({
-          groupId: g.id,
-          activeTab: g.activeTabId,
-          tabCount: g.tabs.length
-        })))
+        debugLog('Restored hierarchical groups:', restoredGroups.length)
         setWorkbenchTree({
           orientation: savedState.orientation,
           groups: restoredGroups,
@@ -635,9 +658,21 @@ const App: React.FC = () => {
       if (nodeId === 'root') {
         return { ...prev, sizes }
       }
-      // For nested containers, we'd need to update the container node
-      // This is more complex, for now just handle root level
-      return prev
+      
+      // Recursively update sizes for nested container nodes
+      const updateNodeSizes = (nodes: GroupNode[]): GroupNode[] => {
+        return nodes.map(node => {
+          if (isContainerNode(node)) {
+            if (node.id === nodeId) {
+              return { ...node, sizes }
+            }
+            return { ...node, groups: updateNodeSizes(node.groups) }
+          }
+          return node
+        })
+      }
+      
+      return { ...prev, groups: updateNodeSizes(prev.groups) }
     })
   }, [])
 
@@ -777,9 +812,9 @@ const App: React.FC = () => {
     
     const state = extractWorkbenchState(workbenchTree)
     debugLog('Saving workbench state:', state.groups.map(g => ({
+      type: g.type,
       groupId: g.id,
-      activeTab: g.activeTabId,
-      tabs: g.tabIds.join(', ')
+      tabs: g.type === 'tabs' ? (g.tabIds ?? []).join(', ') : `${g.children?.length ?? 0} children`
     })))
     saveToStorage(WORKBENCH_STORAGE_KEY, state)
   }, [workbenchTree])
@@ -1113,6 +1148,7 @@ const App: React.FC = () => {
                 rootRole="tree"
                 ariaLabel="Requests"
                 selectedIds={selectedItemId ? [selectedItemId] : []}
+                expandedIds={expandedIds}
                 isRenameable
                 expandOnChevronOnly
                 onItemToggle={(payload, expanded) => {

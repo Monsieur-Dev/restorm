@@ -54,18 +54,27 @@ function useSplitSizes(
 	const onSizesChangeRef = useRef(onSizesChange);
 	onSizesChangeRef.current = onSizesChange;
 
+	// Track if initial sizes have been applied
+	const initialSizesAppliedRef = useRef(false);
+	
 	useEffect(() => {
 		if (count <= 0) {
 			setSizes([]);
+			initialSizesAppliedRef.current = false;
 			return;
 		}
+		
+		// Apply initial sizes on first render or when they change
+		if (initialSizes && initialSizes.length === count && !initialSizesAppliedRef.current) {
+			setSizes(initialSizes);
+			initialSizesAppliedRef.current = true;
+			return;
+		}
+		
+		// Only set equal sizes if we don't have the right count yet
 		setSizes(prev => {
 			if (prev.length === count) {
 				return prev;
-			}
-			// Use initial sizes if provided and matching count
-			if (initialSizes && initialSizes.length === count) {
-				return initialSizes;
 			}
 			const equal = 1 / count;
 			return new Array(count).fill(equal);
