@@ -34,6 +34,15 @@ import type { Folder, FolderItem, HTTPRequest, Environment } from './types/colle
 import { isFolder, isRequest, isHTTPRequest } from './types/collections'
 import type { FolderTab, HTTPRequestTab, BreadcrumbItem } from './types/editor'
 
+// Temporary debug logging
+// eslint-disable-next-line no-console
+const debugLog = (message: string, data?: unknown): void => {
+  console.log('[WorkbenchPersist]', message)
+  if (data) {
+    console.table(data)
+  }
+}
+
 const MIN_LEFT_WIDTH = 180
 const RIGHT_MIN_WIDTH = 240
 
@@ -517,46 +526,94 @@ const App: React.FC = () => {
     workbenchRestoredRef.current = true
 
     const restoreWorkbench = async (): Promise<void> => {
+      debugLog('Attempting to restore workbench state...')
       const savedState = await loadFromStorage<PersistedWorkbenchState>(WORKBENCH_STORAGE_KEY)
-      if (!savedState || savedState.groups.length === 0) return
+      debugLog('Loaded state from storage:', savedState?.groups.map(g => ({
+        groupId: g.id,
+        activeTab: g.activeTabId,
+        tabs: g.tabIds.join(', ')
+      })))
+      if (!savedState || savedState.groups.length === 0) {
+        debugLog('No saved state or empty groups, skipping restore')
+        return
+      }
 
-      // Restore tabs from saved state
-      for (const group of savedState.groups) {
-        for (const tabId of group.tabIds) {
-          // Extract item ID from tab ID
-          let itemId: string | null = null
-          let itemType: 'folder' | 'http-request' | null = null
-
-          if (tabId.startsWith('folder-')) {
-            itemId = tabId.replace('folder-', '')
-            itemType = 'folder'
-          } else if (tabId.startsWith('request-')) {
-            itemId = tabId.replace('request-', '')
-            itemType = 'http-request'
-          }
-
-          if (!itemId || !itemType) continue
-
-          // Find item and open tab
-          if (itemType === 'folder') {
-            const folder = findFolderById(swaggerFolder, itemId)
-            if (folder) {
-              const { breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, itemId)
-              openFolderTab(folder, breadcrumbs)
+      // Build tab from tabId
+      const buildTab = (tabId: string): FolderTab | HTTPRequestTab | null => {
+        if (tabId.startsWith('folder-')) {
+          const itemId = tabId.replace('folder-', '')
+          const folder = findFolderById(swaggerFolder, itemId)
+          if (folder) {
+            const { breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, itemId)
+            return {
+              id: tabId,
+              tabType: 'folder',
+              title: folder.name,
+              titleString: folder.name,
+              folder,
+              breadcrumbs,
+              allowFullscreen: true
             }
-          } else if (itemType === 'http-request') {
-            const { item, breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, itemId)
-            if (item && isRequest(item) && isHTTPRequest(item)) {
-              const environments = getNearestEnvironmentsForBreadcrumbs(swaggerFolder, breadcrumbs)
-              openRequestTab(item, breadcrumbs, environments)
+          }
+        } else if (tabId.startsWith('request-')) {
+          const itemId = tabId.replace('request-', '')
+          const { item, breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, itemId)
+          if (item && isRequest(item) && isHTTPRequest(item)) {
+            const environments = getNearestEnvironmentsForBreadcrumbs(swaggerFolder, breadcrumbs)
+            return {
+              id: tabId,
+              tabType: 'http-request',
+              title: `${item.method} ${item.name}`,
+              titleString: `${item.method} ${item.name}`,
+              request: item,
+              breadcrumbs,
+              environments,
+              allowFullscreen: true
             }
           }
         }
+        return null
+      }
+
+      // Rebuild the workbench tree with correct group structure
+      const restoredGroups: TabGroupNode[] = []
+      for (const savedGroup of savedState.groups) {
+        const tabs: (FolderTab | HTTPRequestTab)[] = []
+        for (const tabId of savedGroup.tabIds) {
+          const tab = buildTab(tabId)
+          if (tab) tabs.push(tab)
+        }
+        if (tabs.length > 0) {
+          // Determine activeTabId - use saved one if valid, otherwise first tab
+          let activeTabId: string
+          if (savedGroup.activeTabId && tabs.some(t => t.id === savedGroup.activeTabId)) {
+            activeTabId = savedGroup.activeTabId
+          } else {
+            activeTabId = tabs[0]!.id
+          }
+          restoredGroups.push({
+            id: savedGroup.id,
+            tabs,
+            activeTabId
+          })
+        }
+      }
+
+      if (restoredGroups.length > 0) {
+        debugLog('Restored groups:', restoredGroups.map(g => ({
+          groupId: g.id,
+          activeTab: g.activeTabId,
+          tabCount: g.tabs.length
+        })))
+        setWorkbenchTree({
+          orientation: savedState.orientation,
+          groups: restoredGroups
+        })
       }
     }
 
     restoreWorkbench()
-  }, [swaggerFolder, openFolderTab, openRequestTab])
+  }, [swaggerFolder])
 
   // Handle navigation events from NavigationService
   useEffect(() => {
@@ -679,14 +736,27 @@ const App: React.FC = () => {
     }
   }, [])
 
-  // Handle tree changes from workbench
+  // Handle tree changes from workbench (drag-drop, close tab, etc.)
   const handleTreeChange = useCallback((newTree: WorkbenchTree) => {
     setWorkbenchTree(newTree)
-    
-    // Persist workbench state
-    const state = extractWorkbenchState(newTree)
-    saveToStorage(WORKBENCH_STORAGE_KEY, state)
   }, [])
+
+  // Persist workbench state whenever it changes
+  useEffect(() => {
+    // Skip saving if workbench is empty (initial state or not yet restored)
+    if (workbenchTree.groups.length === 0) {
+      debugLog('Skipping save - empty workbench')
+      return
+    }
+    
+    const state = extractWorkbenchState(workbenchTree)
+    debugLog('Saving workbench state:', state.groups.map(g => ({
+      groupId: g.id,
+      activeTab: g.activeTabId,
+      tabs: g.tabIds.join(', ')
+    })))
+    saveToStorage(WORKBENCH_STORAGE_KEY, state)
+  }, [workbenchTree])
 
   // Handle tab activation in workbench - navigate to sync sidebar selection
   const handleTabActivate = useCallback((tabId: string) => {

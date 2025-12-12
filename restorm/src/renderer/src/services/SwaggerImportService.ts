@@ -334,9 +334,21 @@ function schemaToSample(
   }
 }
 
-/** Generate a unique ID */
-function generateId(): string {
-  return crypto.randomUUID()
+/** Generate a deterministic ID from a seed string using a simple hash */
+function generateId(seed?: string): string {
+  if (!seed) {
+    return crypto.randomUUID()
+  }
+  // Simple hash function to create deterministic ID from seed
+  let hash = 0
+  for (let i = 0; i < seed.length; i++) {
+    const char = seed.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash // Convert to 32bit integer
+  }
+  // Convert to hex and pad to ensure consistent format
+  const hex = Math.abs(hash).toString(16).padStart(8, '0')
+  return `${hex}-${seed.length.toString(16).padStart(4, '0')}-4000-8000-${hex}${hex.slice(0, 4)}`
 }
 
 /**
@@ -556,7 +568,7 @@ function operationToRequest(
 
   const request: HTTPRequest = {
     type: 'http',
-    id: generateId(),
+    id: generateId(`request:${method}:${path}`),
     name: operation.summary ?? operation.operationId ?? `${method.toUpperCase()} ${path}`,
     documentation: documentation.trim(),
     tags: operation.tags ?? [],
@@ -620,7 +632,7 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
     })
 
     tagFolders.set(tag.name, {
-      id: generateId(),
+      id: generateId(`folder:tag:${tag.name}`),
       name: tag.name,
       documentation: tagDocumentation.trim(),
       tags: [tag.name],
@@ -631,7 +643,7 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
 
   // Folder for untagged requests
   const untaggedFolder: Folder = {
-    id: generateId(),
+    id: generateId('folder:untagged:Other'),
     name: 'Other',
     documentation: 'Requests without tags',
     tags: [],
@@ -663,7 +675,7 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
         if (!folder) {
           // Create folder for tag not defined in tags array
           folder = {
-            id: generateId(),
+            id: generateId(`folder:tag:${tagName}`),
             name: tagName,
             documentation: `# ${tagName}`,
             tags: [tagName],
@@ -695,14 +707,14 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
 
   // Create root folder with environment for baseUrl
   const rootFolder: Folder = {
-    id: generateId(),
+    id: generateId(`folder:root:${spec.info.title}`),
     name: spec.info.title,
     documentation: rootDocumentation.trim(),
     tags: [],
     configuration: {
       environments: [
         {
-          id: generateId(),
+          id: generateId(`env:root:Default`),
           name: 'Default',
           variables: [{ key: 'baseUrl', value: defaultBaseUrl }]
         }
