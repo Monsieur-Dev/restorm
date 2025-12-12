@@ -78,7 +78,11 @@
 
 /* Icon in breadcrumb items */
 .ecui-breadcrumb-icon {
+  display: inline-flex;
+  align-items: center;
   margin-right: 4px;
+  vertical-align: middle;
+  padding-bottom: 4px;
 }
 
 .ecui-breadcrumb-icon--emoji {
@@ -87,5 +91,6 @@
 }
 
 .ecui-breadcrumb-icon.codicon {
-  font-size: 14px;
+  font-size: 12px;
+  line-height: 1;
 }

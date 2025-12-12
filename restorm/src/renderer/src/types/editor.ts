@@ -1,10 +1,17 @@
 import type { EditorTab } from 'electron-core-ui/renderer'
 import type { Folder, HTTPRequest, Environment } from './collections'
 
+/** Icon type for breadcrumbs */
+export interface BreadcrumbIcon {
+  type: 'codicon' | 'emoji' | 'none'
+  value: string
+}
+
 /** Breadcrumb item for navigation */
 export interface BreadcrumbItem {
   id: string
   label: string
+  icon?: BreadcrumbIcon | null
 }
 
 /** Base extended EditorTab type for restorm */

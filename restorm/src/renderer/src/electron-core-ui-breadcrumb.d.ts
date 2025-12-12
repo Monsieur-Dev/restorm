@@ -3,9 +3,15 @@ import type * as React from 'react'
 // Local augmentation so restorm can consume the Breadcrumb component
 // before the new types are published in the electron-core-ui package.
 declare module 'electron-core-ui/renderer' {
+  export interface BreadcrumbIcon {
+    type: 'codicon' | 'emoji' | 'none'
+    value: string
+  }
+
   export interface BreadcrumbItem {
     id: string
     label: string
+    icon?: BreadcrumbIcon | null
   }
 
   export interface BreadcrumbProps {

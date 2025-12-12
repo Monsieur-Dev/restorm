@@ -51,7 +51,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   items,
   onItemClick,
   onLastItemChange,
-  showRoot = false,
+  showRoot: _showRoot = false,
   className,
   style,
   ariaLabel
@@ -129,8 +129,8 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
     [handleCommitLast, handleCancelEditingLast]
   )
 
-  // Hide if empty, or if single item and showRoot is false
-  if (items.length === 0 || (items.length === 1 && !showRoot)) {
+  // Hide only if empty
+  if (items.length === 0) {
     return null
   }
 

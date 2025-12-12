@@ -210,6 +210,9 @@ function updateFolderById(folder: Folder, id: string, updatedFolder: Folder): Fo
   }
 }
 
+/** Folder icon for breadcrumbs */
+const FOLDER_ICON = { type: 'codicon' as const, value: 'folder' }
+
 /** Find an item (folder or request) by ID and build breadcrumbs including the item itself */
 function findItemWithBreadcrumbs(
   folder: Folder,
@@ -218,22 +221,22 @@ function findItemWithBreadcrumbs(
 ): { item: FolderItem | null; breadcrumbs: BreadcrumbItem[] } {
   // Check if the root folder itself matches the ID
   if (folder.id === id) {
-    return { item: folder, breadcrumbs: [...path, { id: folder.id, label: folder.name }] }
+    return { item: folder, breadcrumbs: [...path, { id: folder.id, label: folder.name, icon: FOLDER_ICON }] }
   }
 
-  const currentPath = [...path, { id: folder.id, label: folder.name }]
+  const currentPath = [...path, { id: folder.id, label: folder.name, icon: FOLDER_ICON }]
 
   for (const item of folder.items) {
     if (isFolder(item)) {
       if (item.id === id) {
-        // Include the folder itself as the last breadcrumb
-        return { item, breadcrumbs: [...currentPath, { id: item.id, label: item.name }] }
+        // Include the folder itself as the last breadcrumb (with folder icon)
+        return { item, breadcrumbs: [...currentPath, { id: item.id, label: item.name, icon: FOLDER_ICON }] }
       }
       const found = findItemWithBreadcrumbs(item, id, currentPath)
       if (found.item) return found
     } else if (isRequest(item) && isHTTPRequest(item)) {
       if (item.id === id) {
-        // Include the request itself as the last breadcrumb
+        // Include the request itself as the last breadcrumb (no folder icon)
         return { item, breadcrumbs: [...currentPath, { id: item.id, label: item.name }] }
       }
     }
