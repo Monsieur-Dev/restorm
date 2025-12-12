@@ -18,7 +18,9 @@ import {
   useSettingsModal,
   isTabGroupNode,
   isContainerNode,
-  navigationService
+  navigationService,
+  saveToStorage,
+  loadFromStorage
 } from 'electron-core-ui/renderer'
 import type { WorkbenchTree, NavigationEvent, GroupNode, TabGroupNode } from 'electron-core-ui/renderer'
 import { Workbench } from './components/Workbench'
@@ -48,6 +50,46 @@ type TranslateFunction = (key: string) => string
 
 /** Context menu action handler type */
 type ContextMenuActionHandler = (itemId: string) => void
+
+/** Persisted workbench state - simplified structure for storage */
+interface PersistedWorkbenchState {
+  /** IDs of open tabs in each group */
+  groups: {
+    id: string
+    tabIds: string[]
+    activeTabId?: string | undefined
+  }[]
+  /** Orientation of the workbench */
+  orientation: 'horizontal' | 'vertical'
+}
+
+const WORKBENCH_STORAGE_KEY = 'restorm_workbench_state'
+
+/** Extract persistable state from WorkbenchTree */
+function extractWorkbenchState(tree: WorkbenchTree): PersistedWorkbenchState {
+  const groups: PersistedWorkbenchState['groups'] = []
+  
+  const extractGroups = (nodes: GroupNode[]): void => {
+    for (const node of nodes) {
+      if (isTabGroupNode(node)) {
+        groups.push({
+          id: node.id,
+          tabIds: node.tabs.map(t => t.id),
+          activeTabId: node.activeTabId
+        })
+      } else if (isContainerNode(node)) {
+        extractGroups(node.groups)
+      }
+    }
+  }
+  
+  extractGroups(tree.groups)
+  
+  return {
+    groups,
+    orientation: tree.orientation
+  }
+}
 
 const buildContextMenuForItem = (
   item: ListViewItemData,
@@ -250,6 +292,9 @@ const App: React.FC = () => {
     orientation: 'vertical',
     groups: []
   })
+
+  // Track if workbench has been restored from storage
+  const workbenchRestoredRef = useRef(false)
 
   // ===========================================================================
   // Workbench helpers
@@ -466,6 +511,53 @@ const App: React.FC = () => {
     [findFirstTabGroupId, findGroupIdForTab, focusedGroupId, hasGroupWithId, updateGroupById]
   )
 
+  // Restore workbench state from storage on initial load
+  useEffect(() => {
+    if (workbenchRestoredRef.current) return
+    workbenchRestoredRef.current = true
+
+    const restoreWorkbench = async (): Promise<void> => {
+      const savedState = await loadFromStorage<PersistedWorkbenchState>(WORKBENCH_STORAGE_KEY)
+      if (!savedState || savedState.groups.length === 0) return
+
+      // Restore tabs from saved state
+      for (const group of savedState.groups) {
+        for (const tabId of group.tabIds) {
+          // Extract item ID from tab ID
+          let itemId: string | null = null
+          let itemType: 'folder' | 'http-request' | null = null
+
+          if (tabId.startsWith('folder-')) {
+            itemId = tabId.replace('folder-', '')
+            itemType = 'folder'
+          } else if (tabId.startsWith('request-')) {
+            itemId = tabId.replace('request-', '')
+            itemType = 'http-request'
+          }
+
+          if (!itemId || !itemType) continue
+
+          // Find item and open tab
+          if (itemType === 'folder') {
+            const folder = findFolderById(swaggerFolder, itemId)
+            if (folder) {
+              const { breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, itemId)
+              openFolderTab(folder, breadcrumbs)
+            }
+          } else if (itemType === 'http-request') {
+            const { item, breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, itemId)
+            if (item && isRequest(item) && isHTTPRequest(item)) {
+              const environments = getNearestEnvironmentsForBreadcrumbs(swaggerFolder, breadcrumbs)
+              openRequestTab(item, breadcrumbs, environments)
+            }
+          }
+        }
+      }
+    }
+
+    restoreWorkbench()
+  }, [swaggerFolder, openFolderTab, openRequestTab])
+
   // Handle navigation events from NavigationService
   useEffect(() => {
     const unsubscribe = navigationService.onNavigate((event: NavigationEvent) => {
@@ -590,6 +682,10 @@ const App: React.FC = () => {
   // Handle tree changes from workbench
   const handleTreeChange = useCallback((newTree: WorkbenchTree) => {
     setWorkbenchTree(newTree)
+    
+    // Persist workbench state
+    const state = extractWorkbenchState(newTree)
+    saveToStorage(WORKBENCH_STORAGE_KEY, state)
   }, [])
 
   // Handle tab activation in workbench - navigate to sync sidebar selection

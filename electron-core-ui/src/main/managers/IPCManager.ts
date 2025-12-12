@@ -293,6 +293,24 @@ export function setupIPC(resourcesPath?: string): void {
     logger.info('Tab data sent to target window', { targetWindowId, tabId: tabData.tabId, cursorX: tabData.cursorX, cursorY: tabData.cursorY })
     return true
   });
+
+  // Storage API for persisting application data (workbench config, etc.)
+  ipcMain.handle('storage:get', (_event, key: string) => {
+    const storage = getStorageService()
+    return storage.get(key)
+  })
+
+  ipcMain.handle('storage:set', (_event, key: string, value: unknown) => {
+    const storage = getStorageService()
+    storage.set(key, value)
+    return true
+  })
+
+  ipcMain.handle('storage:delete', (_event, key: string) => {
+    const storage = getStorageService()
+    storage.delete(key)
+    return true
+  })
   
   logger.info('✅ IPC handlers setup complete')
 }

@@ -35,12 +35,19 @@ interface WindowApiThemeShim {
   onThemeChanged: (callback: (themeId: string) => void) => () => void
 }
 
+interface WindowApiStorageShim {
+  get: <T>(key: string) => Promise<T | undefined>
+  set: <T>(key: string, value: T) => Promise<boolean>
+  delete: (key: string) => Promise<boolean>
+}
+
 interface WindowApiShim {
   platform: string
   theme: WindowApiThemeShim
   logger: {
     log: (level: string, message: string, meta?: Record<string, unknown>) => Promise<void>
   }
+  storage: WindowApiStorageShim
   minimizeWindow: () => Promise<void>
   maximizeWindow: () => Promise<void>
   closeWindow: () => Promise<void>
@@ -253,7 +260,7 @@ export function ensureCoreUiWebApiShim(): void {
     return
   }
 
-  const w = window as WindowWithOptionalApi
+  const w = window as unknown as WindowWithOptionalApi
 
   // If preload already injected a real API (Electron), do nothing.
   if (w.api) {
@@ -276,6 +283,34 @@ export function ensureCoreUiWebApiShim(): void {
     }
   }
 
+  // Storage shim using localStorage for web builds
+  const storageApi: WindowApiStorageShim = {
+    get: async <T>(key: string): Promise<T | undefined> => {
+      try {
+        const item = localStorage.getItem(`ecui_${key}`)
+        return item ? JSON.parse(item) as T : undefined
+      } catch {
+        return undefined
+      }
+    },
+    set: async <T>(key: string, value: T): Promise<boolean> => {
+      try {
+        localStorage.setItem(`ecui_${key}`, JSON.stringify(value))
+        return true
+      } catch {
+        return false
+      }
+    },
+    delete: async (key: string): Promise<boolean> => {
+      try {
+        localStorage.removeItem(`ecui_${key}`)
+        return true
+      } catch {
+        return false
+      }
+    }
+  }
+
   const api: WindowApiShim = {
     platform: navigator.platform || 'web',
     theme: themeApi,
@@ -284,6 +319,7 @@ export function ensureCoreUiWebApiShim(): void {
       // We intentionally avoid using console here to keep logging centralized.
       log: async () => {}
     },
+    storage: storageApi,
     minimizeWindow: async () => {},
     maximizeWindow: async () => {},
     closeWindow: async () => {},
