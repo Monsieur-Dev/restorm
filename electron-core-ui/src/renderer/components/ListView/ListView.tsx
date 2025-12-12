@@ -681,7 +681,7 @@ export const ListView: React.FC<ListViewProps> = ({
                 aria-level={depth + 1}
                 aria-expanded={!isLeaf ? isExpanded : undefined}
                 aria-selected={isSelected}
-                draggable
+                draggable={!isEditing}
                 onClick={handleRowClick}
                 onDoubleClick={handleRowDoubleClick}
                 onContextMenu={(event): void => {
@@ -703,6 +703,7 @@ export const ListView: React.FC<ListViewProps> = ({
                     {Array.from({ length: depth }).map((_, idx) => (
                       <span key={idx} className="indent-guide" />
                     ))}
+                    {depth > 0 && <span className="indent-spacer" />}
                   </div>
                   {(!isLeaf || item.isExpandable) && (
                     <button
@@ -723,7 +724,23 @@ export const ListView: React.FC<ListViewProps> = ({
                     </button>
                   )}
                   {iconContent && <span className="list-view-icon">{iconContent}</span>}
+                  {item.leftActions && (
+                    <span
+                      className="list-view-left-actions"
+                      onClick={(e): void => { e.stopPropagation() }}
+                    >
+                      {item.leftActions}
+                    </span>
+                  )}
                   <span className="list-view-title">{titleContent}</span>
+                  {item.rightActions && (
+                    <span
+                      className={`list-view-right-actions${item.rightActionsOnHoverOnly ? ' hover-only' : ''}`}
+                      onClick={(e): void => { e.stopPropagation() }}
+                    >
+                      {item.rightActions}
+                    </span>
+                  )}
                 </div>
               </div>
             )

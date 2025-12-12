@@ -76,6 +76,12 @@
   );
 }
 
+.indent-spacer {
+  flex: 0 0 12px;
+  width: 12px;
+  height: 100%;
+}
+
 .list-view-expander {
   border: none;
   background: none;
@@ -150,5 +156,34 @@
 
 .list-view-rename-input:focus {
   border-color: var(--vscode-focusBorder);
+}
+
+/* Left actions (always visible, before title) */
+.list-view-left-actions {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+
+/* Right actions (after title, aligned to the right) */
+.list-view-right-actions {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  padding-left: 8px;
+}
+
+/* Right actions visible only on hover */
+.list-view-right-actions.hover-only {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.list-view-row:hover .list-view-right-actions.hover-only {
+  opacity: 1;
+  pointer-events: auto;
 }
 

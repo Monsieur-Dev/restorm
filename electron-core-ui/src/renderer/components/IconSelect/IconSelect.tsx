@@ -79,6 +79,8 @@ export interface IconSelectProps {
   placeholder?: string
   /** Whether the picker is disabled */
   disabled?: boolean
+  /** Readonly mode: just display the icon without interaction */
+  readonly?: boolean
   className?: string
   style?: React.CSSProperties
 }
@@ -101,15 +103,29 @@ function isDarkTheme(): boolean {
 export const IconSelect: React.FC<IconSelectProps> = ({
   value,
   onChange,
-  placeholder = '🔲',
+  placeholder,
   disabled = false,
+  readonly = false,
   className,
   style
 }) => {
   const [isOpen, setIsOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState<'emoji' | 'codicon'>('emoji')
   const [theme, setTheme] = useState<'light' | 'dark'>(() => isDarkTheme() ? 'dark' : 'light')
+  const [pickerPosition, setPickerPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 })
   const containerRef = useRef<HTMLDivElement | null>(null)
   const pickerRef = useRef<HTMLDivElement | null>(null)
+  const buttonRef = useRef<HTMLButtonElement | null>(null)
+
+  // Calculate picker position when opening
+  const updatePickerPosition = useCallback(() => {
+    if (!buttonRef.current) return
+    const rect = buttonRef.current.getBoundingClientRect()
+    setPickerPosition({
+      top: rect.bottom + 4,
+      left: rect.left
+    })
+  }, [])
 
   // Watch for theme changes
   useEffect(() => {
@@ -180,21 +196,10 @@ export const IconSelect: React.FC<IconSelectProps> = ({
     setIsOpen(false)
   }, [onChange])
 
-  // Build custom category for codicons
-  const customCategory = useMemo(() => [{
-    id: 'codicons',
-    name: 'Codicons',
-    emojis: CODICONS.map(name => ({
-      id: `codicon-${name}`,
-      name: name,
-      keywords: [name, 'codicon', 'icon'],
-      skins: [{ native: name }]
-    }))
-  }], [])
-
   const displayValue = useMemo(() => {
     if (!value || value.type === 'none') {
-      return placeholder
+      // Show placeholder or a subtle icon when empty
+      return placeholder ?? <i className="codicon codicon-symbol-misc" style={{ opacity: 0.4 }} />
     }
     if (value.type === 'emoji') {
       return value.value
@@ -204,17 +209,39 @@ export const IconSelect: React.FC<IconSelectProps> = ({
   }, [value, placeholder])
 
   const rootClassName = useMemo(
-    () => ['ecui-icon-select', className].filter(Boolean).join(' '),
-    [className]
+    () => ['ecui-icon-select', readonly ? 'readonly' : '', className].filter(Boolean).join(' '),
+    [className, readonly]
   )
+
+  const handleButtonClick = useCallback(() => {
+    if (readonly) return
+    if (!isOpen) {
+      updatePickerPosition()
+    }
+    setIsOpen(!isOpen)
+  }, [isOpen, updatePickerPosition, readonly])
+
+  // Readonly mode: just display the icon
+  if (readonly) {
+    // Don't render anything if no value in readonly mode
+    if (!value || value.type === 'none') {
+      return null
+    }
+    return (
+      <span className={rootClassName} style={style}>
+        <span className="ecui-icon-select-value">{displayValue}</span>
+      </span>
+    )
+  }
 
   return (
     <div ref={containerRef} className={rootClassName} style={style}>
       <button
+        ref={buttonRef}
         type="button"
         className="ecui-icon-select-button"
         disabled={disabled}
-        onClick={() => { setIsOpen(!isOpen) }}
+        onClick={handleButtonClick}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
       >
@@ -222,42 +249,67 @@ export const IconSelect: React.FC<IconSelectProps> = ({
       </button>
 
       {isOpen && (
-        <div ref={pickerRef} className="ecui-icon-select-picker">
-          <div className="ecui-icon-select-actions">
+        <div
+          ref={pickerRef}
+          className="ecui-icon-select-picker"
+          style={{
+            position: 'fixed',
+            top: pickerPosition.top,
+            left: pickerPosition.left
+          }}
+        >
+          <div className="ecui-icon-select-header">
+            <div className="ecui-icon-select-tabs">
+              <button
+                type="button"
+                className={`ecui-icon-select-tab ${activeTab === 'emoji' ? 'active' : ''}`}
+                onClick={() => { setActiveTab('emoji') }}
+                title="Emojis"
+              >
+                <span style={{ fontSize: 16 }}>😀</span>
+              </button>
+              <button
+                type="button"
+                className={`ecui-icon-select-tab ${activeTab === 'codicon' ? 'active' : ''}`}
+                onClick={() => { setActiveTab('codicon') }}
+                title="Codicons"
+              >
+                <i className="codicon codicon-vscode-insiders" style={{ fontSize: 16 }} />
+              </button>
+            </div>
             <Button small secondary onClick={handleClear}>
-              <i className="codicon codicon-close" /> Clear
+              <i className="codicon codicon-trash" />
             </Button>
           </div>
           
-          <Picker
-            data={data}
-            onEmojiSelect={handleEmojiSelect}
-            theme={theme}
-            previewPosition="none"
-            skinTonePosition="none"
-            custom={customCategory}
-            categories={['frequent', 'people', 'nature', 'foods', 'activity', 'places', 'objects', 'symbols', 'flags', 'codicons']}
-            onClickOutside={() => { setIsOpen(false) }}
-            emojiButtonColors={[]}
-          />
+          {activeTab === 'emoji' && (
+            <Picker
+              data={data}
+              onEmojiSelect={handleEmojiSelect}
+              theme={theme}
+              previewPosition="none"
+              skinTonePosition="none"
+              emojiButtonColors={[]}
+            />
+          )}
           
-          {/* Custom codicons section */}
-          <div className="ecui-icon-select-codicons">
-            <div className="ecui-icon-select-codicons-header">Codicons</div>
-            <div className="ecui-icon-select-codicons-grid">
-              {CODICONS.map(name => (
-                <button
-                  key={name}
-                  type="button"
-                  className="ecui-icon-select-codicon"
-                  title={name}
-                  onClick={() => { handleCodiconSelect(name) }}
-                >
-                  <i className={`codicon codicon-${name}`} />
-                </button>
-              ))}
+          {activeTab === 'codicon' && (
+            <div className="ecui-icon-select-codicons">
+              <div className="ecui-icon-select-codicons-grid">
+                {CODICONS.map(name => (
+                  <button
+                    key={name}
+                    type="button"
+                    className="ecui-icon-select-codicon"
+                    title={name}
+                    onClick={() => { handleCodiconSelect(name) }}
+                  >
+                    <i className={`codicon codicon-${name}`} />
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </div>

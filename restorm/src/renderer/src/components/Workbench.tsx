@@ -42,6 +42,8 @@ export interface WorkbenchProps {
   onItemRename?: (item: BreadcrumbItem, newName: string) => void
   /** Callback fired when tags are changed for a folder or request */
   onTagsChange?: (targetId: string, tags: string[]) => void
+  /** Callback fired when a folder's data changes (environments, etc.) */
+  onFolderChange?: (folderId: string, folder: import('../types/collections').Folder) => void
   /** Fallback component displayed when no tabs are open */
   emptyFallback?: React.ReactNode
 }
@@ -68,6 +70,7 @@ export const Workbench: React.FC<WorkbenchProps> = ({
   onBreadcrumbClick,
   onItemRename,
   onTagsChange,
+  onFolderChange,
   emptyFallback
 }) => {
   const { t } = useTranslation()
@@ -207,7 +210,14 @@ export const Workbench: React.FC<WorkbenchProps> = ({
               }}
             />
           </div>
-          <FolderView folder={tab.folder} />
+          <FolderView
+            folder={tab.folder}
+            onFolderChange={(updatedFolder) => {
+              if (onFolderChange) {
+                onFolderChange(tab.folder.id, updatedFolder)
+              }
+            }}
+          />
         </div>
       )
     }

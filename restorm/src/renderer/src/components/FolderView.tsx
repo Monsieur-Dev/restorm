@@ -14,11 +14,13 @@ import {
   Tabs,
   type Tab,
   MarkdownEditor,
-  MarkdownViewer
+  MarkdownViewer,
+  IconSelect
 } from 'electron-core-ui/renderer'
+import type { Icon } from 'electron-core-ui/types'
 import { ParamsTabView } from './ParamsTabView'
 import type { ParamsTabViewHandle } from './ParamsTabView'
-import type { Folder, Environment } from '../types/collections'
+import type { Folder, Environment, KeyValue } from '../types/collections'
 import { useEnvironmentValues } from '../contexts/EnvironmentValuesContext'
 
 /** Generate a unique ID for a new environment */
@@ -32,23 +34,27 @@ const RIGHT_MIN_WIDTH = 240
 export interface FolderViewProps {
   /** The folder to display */
   folder: Folder
+  /** Called when folder data changes (environments, etc.) */
+  onFolderChange?: (folder: Folder) => void
 }
 
 /** Convert environments to ListView items */
 function environmentsToListViewItems(
   environments: Environment[],
   expandedIds: string[],
-  contextMenuItems: ContextMenuItem[]
+  contextMenuItems: ContextMenuItem[],
+  renderLeftActions?: (env: Environment) => React.ReactNode
 ): ListViewItemData[] {
   return environments.map((env) => ({
     id: env.id,
     title: env.name,
+    icon: 'blank',
     isExpandable: (env.subEnvironments?.length ?? 0) > 0,
     isExpanded: expandedIds.includes(env.id),
-    icon: expandedIds.includes(env.id) ? 'folder-opened' : 'folder',
     contextMenuItems,
+    leftActions: renderLeftActions?.(env),
     children: env.subEnvironments
-      ? environmentsToListViewItems(env.subEnvironments, expandedIds, contextMenuItems)
+      ? environmentsToListViewItems(env.subEnvironments, expandedIds, contextMenuItems, renderLeftActions)
       : []
   }))
 }
@@ -79,21 +85,100 @@ function findEnvironmentById(environments: Environment[], id: string): Environme
   return null
 }
 
-export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
+/** Add an environment to a list at the root level */
+function addEnvironmentToList(environments: Environment[], newEnv: Environment): Environment[] {
+  return [...environments, newEnv]
+}
+
+/** Add a sub-environment to a parent environment */
+function addSubEnvironment(environments: Environment[], parentId: string, newEnv: Environment): Environment[] {
+  return environments.map(env => {
+    if (env.id === parentId) {
+      return {
+        ...env,
+        subEnvironments: [...(env.subEnvironments ?? []), newEnv]
+      }
+    }
+    if (env.subEnvironments) {
+      return {
+        ...env,
+        subEnvironments: addSubEnvironment(env.subEnvironments, parentId, newEnv)
+      }
+    }
+    return env
+  })
+}
+
+/** Delete an environment by ID */
+function deleteEnvironmentById(environments: Environment[], id: string): Environment[] {
+  return environments
+    .filter(env => env.id !== id)
+    .map(env => {
+      if (env.subEnvironments) {
+        return {
+          ...env,
+          subEnvironments: deleteEnvironmentById(env.subEnvironments, id)
+        }
+      }
+      return env
+    })
+}
+
+/** Rename an environment by ID */
+function renameEnvironmentById(environments: Environment[], id: string, newName: string): Environment[] {
+  return environments.map(env => {
+    if (env.id === id) {
+      return { ...env, name: newName }
+    }
+    if (env.subEnvironments) {
+      return {
+        ...env,
+        subEnvironments: renameEnvironmentById(env.subEnvironments, id, newName)
+      }
+    }
+    return env
+  })
+}
+
+export const FolderView: React.FC<FolderViewProps> = ({ folder, onFolderChange }) => {
   const { t } = useTranslation()
   const { setEnvironmentValues } = useEnvironmentValues()
   const [activeTabId, setActiveTabId] = useState<string>('configuration')
 
+  // Local state for environments (allows modifications without waiting for parent)
+  const [localEnvironments, setLocalEnvironments] = useState<Environment[]>(
+    () => folder.configuration.environments
+  )
+
+  // Sync local state when folder prop changes
+  useEffect(() => {
+    setLocalEnvironments(folder.configuration.environments)
+  }, [folder.configuration.environments])
+
+  // Helper to update environments and notify parent
+  const updateEnvironments = useCallback((newEnvironments: Environment[]) => {
+    setLocalEnvironments(newEnvironments)
+    if (onFolderChange) {
+      onFolderChange({
+        ...folder,
+        configuration: {
+          ...folder.configuration,
+          environments: newEnvironments
+        }
+      })
+    }
+  }, [folder, onFolderChange])
+
   // Initialize with all environments expanded
   const allEnvIds = useMemo(
-    () => collectEnvironmentIds(folder.configuration.environments),
-    [folder.configuration.environments]
+    () => collectEnvironmentIds(localEnvironments),
+    [localEnvironments]
   )
   const [expandedIds, setExpandedIds] = useState<string[]>(allEnvIds)
 
   // Track selected environment (default to first one)
   const [selectedEnvId, setSelectedEnvId] = useState<string | null>(
-    () => folder.configuration.environments[0]?.id ?? null
+    () => localEnvironments[0]?.id ?? null
   )
 
   // Track item being renamed (used by context menu to trigger rename mode)
@@ -104,9 +189,9 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
   const selectedEnvironment = useMemo(
     () =>
       selectedEnvId
-        ? findEnvironmentById(folder.configuration.environments, selectedEnvId)
+        ? findEnvironmentById(localEnvironments, selectedEnvId)
         : null,
-    [folder.configuration.environments, selectedEnvId]
+    [localEnvironments, selectedEnvId]
   )
 
   // Handler for adding a new environment
@@ -116,11 +201,11 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
       name: t('environment.newName'),
       variables: []
     }
-    // TODO: This should update the actual folder data through a prop callback
-    // For now, we just log
-    // eslint-disable-next-line no-console
-    console.log('Add environment:', newEnv)
-  }, [t])
+    const newEnvironments = addEnvironmentToList(localEnvironments, newEnv)
+    updateEnvironments(newEnvironments)
+    // Select the new environment
+    setSelectedEnvId(newEnv.id)
+  }, [t, localEnvironments, updateEnvironments])
 
   // Handler for adding a sub-environment
   const handleAddSubEnvironment = useCallback((parentId: string) => {
@@ -129,30 +214,56 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
       name: t('environment.newName'),
       variables: []
     }
-    // TODO: This should update the actual folder data through a prop callback
-    // For now, we just log
-    // eslint-disable-next-line no-console
-    console.log('Add sub-environment to:', parentId, newEnv)
-  }, [t])
+    const newEnvironments = addSubEnvironment(localEnvironments, parentId, newEnv)
+    updateEnvironments(newEnvironments)
+    // Ensure parent is expanded and select the new environment
+    setExpandedIds(prev => Array.from(new Set([...prev, parentId])))
+    setSelectedEnvId(newEnv.id)
+  }, [t, localEnvironments, updateEnvironments])
 
   // Handler for deleting an environment
   const handleDeleteEnvironment = useCallback((envId: string) => {
-    // TODO: This should update the actual folder data through a prop callback
-    // For now, we just log
-    // eslint-disable-next-line no-console
-    console.log('Delete environment:', envId)
+    const newEnvironments = deleteEnvironmentById(localEnvironments, envId)
+    updateEnvironments(newEnvironments)
     if (selectedEnvId === envId) {
-      setSelectedEnvId(null)
+      setSelectedEnvId(newEnvironments[0]?.id ?? null)
     }
-  }, [selectedEnvId])
+  }, [localEnvironments, selectedEnvId, updateEnvironments])
 
   // Handler for renaming an environment
   const handleRenameEnvironment = useCallback((envId: string, newName: string) => {
-    // TODO: This should update the actual folder data through a prop callback
-    // For now, we just log
-    // eslint-disable-next-line no-console
-    console.log('Rename environment:', envId, 'to', newName)
-  }, [])
+    const newEnvironments = renameEnvironmentById(localEnvironments, envId, newName)
+    updateEnvironments(newEnvironments)
+  }, [localEnvironments, updateEnvironments])
+
+  // Handler for changing an environment's icon
+  const handleIconChange = useCallback((envId: string, icon: Icon | null) => {
+    const updateIcon = (envs: Environment[]): Environment[] =>
+      envs.map(env => {
+        if (env.id === envId) {
+          if (icon) {
+            return { ...env, icon }
+          }
+          // Remove icon property if null
+          const { icon: _removed, ...rest } = env
+          return rest as Environment
+        }
+        if (env.subEnvironments) {
+          return { ...env, subEnvironments: updateIcon(env.subEnvironments) }
+        }
+        return env
+      })
+    updateEnvironments(updateIcon(localEnvironments))
+  }, [localEnvironments, updateEnvironments])
+
+  // Render the icon selector for each environment item
+  const renderEnvLeftActions = useCallback((env: Environment): React.ReactNode => (
+    <IconSelect
+      value={env.icon ?? null}
+      onChange={(icon) => handleIconChange(env.id, icon)}
+      style={{ width: 24, height: 24 }}
+    />
+  ), [handleIconChange])
 
   // Context menu items for environments
   const envContextMenuItems = useMemo<ContextMenuItem[]>(() => [
@@ -190,8 +301,8 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
 
   // Convert environments to ListView items
   const sidebarItems: ListViewItemData[] = useMemo(
-    () => environmentsToListViewItems(folder.configuration.environments, expandedIds, envContextMenuItems),
-    [folder.configuration.environments, expandedIds, envContextMenuItems]
+    () => environmentsToListViewItems(localEnvironments, expandedIds, envContextMenuItems, renderEnvLeftActions),
+    [localEnvironments, expandedIds, envContextMenuItems, renderEnvLeftActions]
   )
 
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -207,6 +318,26 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
       }
     },
     [selectedEnvId, setEnvironmentValues]
+  )
+
+  // Handler for persisting variable changes to the environment
+  const handleEnvironmentVariablesChange = useCallback(
+    (newVariables: KeyValue[]): void => {
+      if (!selectedEnvId) return
+      // Update the selected environment's variables
+      const updateVariables = (envs: Environment[]): Environment[] =>
+        envs.map(env => {
+          if (env.id === selectedEnvId) {
+            return { ...env, variables: newVariables }
+          }
+          if (env.subEnvironments) {
+            return { ...env, subEnvironments: updateVariables(env.subEnvironments) }
+          }
+          return env
+        })
+      updateEnvironments(updateVariables(localEnvironments))
+    },
+    [selectedEnvId, localEnvironments, updateEnvironments]
   )
 
   const layoutProvider: IVerticalSashLayoutProvider = useMemo(
@@ -396,6 +527,7 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder }) => {
                   initialRows={selectedEnvironment?.variables ?? []}
                   visibilityMode="accumulated"
                   onResolvedContextChange={handleEnvironmentVariablesResolved}
+                  onRowsChange={handleEnvironmentVariablesChange}
                 />
               </div>
             </Pane>

@@ -364,3 +364,5 @@ The following files in the project use CSS variables:
 - `src/renderer/components/ScrollableElement/ScrollableElement.tsx`
 
 
+
+

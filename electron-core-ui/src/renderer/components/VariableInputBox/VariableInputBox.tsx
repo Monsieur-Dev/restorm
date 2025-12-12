@@ -10,14 +10,30 @@ import './variableInputBox.css'
 
 const LANGUAGE_ID = 'handlebars'
 
-let languageConfigured = false
-let completionProviderDisposable: monacoEditor.IDisposable | null = null
-let hoverProviderDisposable: monacoEditor.IDisposable | null = null
-let cancellationHandlerRegistered = false
+// Use window to persist state across hot reloads
+const globalKey = '__variableInputBoxProviders__'
+interface ProviderState {
+  languageConfigured: boolean
+  completionProviderDisposable: monacoEditor.IDisposable | null
+  hoverProviderDisposable: monacoEditor.IDisposable | null
+  cancellationHandlerRegistered: boolean
+  modelVariablesMap: WeakMap<monacoEditor.editor.ITextModel, VariableDefinition[]>
+}
 
-// Map Monaco models to the variables that should be visible in their completion list.
-// This avoids sharing a single variablesRef across all VariableInputBox instances.
-const modelVariablesMap = new WeakMap<monacoEditor.editor.ITextModel, VariableDefinition[]>()
+function getProviderState(): ProviderState {
+  const win = window as unknown as Record<string, ProviderState | undefined>
+  if (!win[globalKey]) {
+    win[globalKey] = {
+      languageConfigured: false,
+      completionProviderDisposable: null,
+      hoverProviderDisposable: null,
+      cancellationHandlerRegistered: false,
+      modelVariablesMap: new WeakMap()
+    }
+  }
+  return win[globalKey]
+}
+
 
 const isMonacoCancellationError = (reason: unknown): boolean => {
   if (!reason) return false
@@ -49,19 +65,25 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
   const variablesRef = useRef<VariableDefinition[]>(variables)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [showResolvedTooltip, setShowResolvedTooltip] = useState(false)
+  const [editorMounted, setEditorMounted] = useState(false)
 
   const hasResolvedTooltip = Boolean(resolvedValue && resolvedValue !== value)
 
+  // Keep variablesRef in sync
+  variablesRef.current = variables
+
+  // Update modelVariablesMap when variables change AND editor is mounted
   useEffect(() => {
-    variablesRef.current = variables
+    if (!editorMounted) return
     const model = editorRef.current?.getModel()
     if (model) {
-      modelVariablesMap.set(model, variables)
+      getProviderState().modelVariablesMap.set(model, variables)
     }
-  }, [variables])
+  }, [variables, editorMounted])
 
   useEffect(() => {
-    if (typeof window === 'undefined' || cancellationHandlerRegistered) return
+    const state = getProviderState()
+    if (typeof window === 'undefined' || state.cancellationHandlerRegistered) return
 
     const handler = (event: PromiseRejectionEvent): void => {
       if (isMonacoCancellationError(event.reason)) {
@@ -70,7 +92,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
     }
 
     window.addEventListener('unhandledrejection', handler)
-    cancellationHandlerRegistered = true
+    state.cancellationHandlerRegistered = true
   }, [])
 
   const editorOptions = useMemo(
@@ -121,18 +143,20 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
   ): void => {
     editorRef.current = editor
 
+    const state = getProviderState()
+
     // Configure language, completion and hover for Handlebars-style variables
-    if (!languageConfigured) {
+    if (!state.languageConfigured) {
       monacoInstance.languages.setMonarchTokensProvider(LANGUAGE_ID, {
         tokenizer: {
           root: [[/\{\{[^}]+\}\}/, 'variableToken']]
         }
       })
-      languageConfigured = true
+      state.languageConfigured = true
     }
 
-    if (!completionProviderDisposable) {
-      completionProviderDisposable = monacoInstance.languages.registerCompletionItemProvider(LANGUAGE_ID, {
+    if (!state.completionProviderDisposable) {
+      state.completionProviderDisposable = monacoInstance.languages.registerCompletionItemProvider(LANGUAGE_ID, {
         triggerCharacters: ['{'],
         provideCompletionItems(model, position) {
           const range = {
@@ -142,23 +166,29 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
             endColumn: position.column
           }
 
-          const vars = modelVariablesMap.get(model) ?? []
-          const suggestions = vars.map((v) => ({
-            label: v.name,
-            kind: monacoInstance.languages.CompletionItemKind.Variable,
-            insertText: `{{${v.name}}}`,
-            detail: v.value,
-            documentation: v.description ?? v.value,
-            range
-          }))
-
-          return { suggestions }
+          const vars = getProviderState().modelVariablesMap.get(model) ?? []
+          const suggestions = vars.map((v) => {
+            const labelObj: { label: string; description?: string } = { label: v.name }
+            if (v.value) {
+              labelObj.description = v.value
+            }
+            return {
+              label: labelObj as monacoEditor.languages.CompletionItemLabel,
+              kind: monacoInstance.languages.CompletionItemKind.Variable,
+              insertText: `{{${v.name}}}`,
+              documentation: v.description ?? v.value,
+              range
+            }
+          })
+          // incomplete: true forces Monaco to always recalculate suggestions
+          // instead of using cached results when variables change
+          return { suggestions, incomplete: true }
         }
       })
     }
 
-    if (!hoverProviderDisposable) {
-      hoverProviderDisposable = monacoInstance.languages.registerHoverProvider(LANGUAGE_ID, {
+    if (!state.hoverProviderDisposable) {
+      state.hoverProviderDisposable = monacoInstance.languages.registerHoverProvider(LANGUAGE_ID, {
         provideHover(model, position) {
           const lineText = model.getLineContent(position.lineNumber)
           const col = position.column
@@ -175,7 +205,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
           }
 
           const name = lineText.substring(openIndex + 2, closeIndex).trim()
-          const vars = modelVariablesMap.get(model) ?? []
+          const vars = getProviderState().modelVariablesMap.get(model) ?? []
           const match = vars.find((v) => v.name === name)
 
           if (!match) {
@@ -224,8 +254,11 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
 
     const model = editor.getModel()
     if (model) {
-      modelVariablesMap.set(model, variablesRef.current)
+      state.modelVariablesMap.set(model, variablesRef.current)
     }
+
+    // Signal that editor is mounted so useEffect can update variables
+    setEditorMounted(true)
 
     if (ariaLabel) {
       editor.updateOptions({ ariaLabel })

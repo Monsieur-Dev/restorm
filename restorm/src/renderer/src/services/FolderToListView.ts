@@ -10,8 +10,8 @@ import type { ReactNode } from 'react'
 export interface FolderToListViewOptions {
   /** Set of expanded item IDs */
   expandedIds: Set<string>
-  /** Function to render HTTP method badge */
-  renderMethodBadge: (method: string, name: string) => ReactNode
+  /** Function to render HTTP method badge as leftActions */
+  renderMethodBadge: (method: string) => ReactNode
 }
 
 /**
@@ -23,8 +23,9 @@ function requestToListViewItem(
 ): ListViewItemData {
   return {
     id: request.id,
-    title: options.renderMethodBadge(request.method, request.name),
-    icon: 'blank'
+    title: request.name,
+    icon: undefined,
+    leftActions: options.renderMethodBadge(request.method)
   }
 }
 

@@ -7,22 +7,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   padding: 0;
-  border: 1px solid transparent;
+  border: none;
   border-radius: 4px;
   background: transparent;
   cursor: pointer;
   font-size: 16px;
   line-height: 1;
   color: var(--vscode-foreground);
-  transition: background-color 0.1s, border-color 0.1s;
+  transition: background-color 0.1s;
 }
 
 .ecui-icon-select-button:hover:not(:disabled) {
   background-color: var(--vscode-toolbar-hoverBackground);
-  border-color: var(--vscode-toolbar-hoverOutline, transparent);
 }
 
 .ecui-icon-select-button:disabled {
@@ -41,11 +40,7 @@
 }
 
 .ecui-icon-select-picker {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 1000;
-  margin-top: 4px;
+  z-index: 10000;
   background: var(--vscode-editorWidget-background);
   border: 1px solid var(--vscode-editorWidget-border);
   border-radius: 8px;
@@ -53,11 +48,44 @@
   overflow: hidden;
 }
 
-.ecui-icon-select-actions {
+.ecui-icon-select-header {
   display: flex;
-  justify-content: flex-end;
-  padding: 8px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
   border-bottom: 1px solid var(--vscode-editorWidget-border);
+  background: var(--vscode-editorWidget-background);
+}
+
+.ecui-icon-select-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.ecui-icon-select-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--vscode-foreground);
+  opacity: 0.6;
+  transition: background-color 0.1s, opacity 0.1s;
+}
+
+.ecui-icon-select-tab:hover {
+  background-color: var(--vscode-toolbar-hoverBackground);
+  opacity: 0.8;
+}
+
+.ecui-icon-select-tab.active {
+  background-color: var(--vscode-toolbar-activeBackground, var(--vscode-list-activeSelectionBackground));
+  opacity: 1;
 }
 
 /* Override emoji-mart styles to match VS Code theme */
@@ -66,23 +94,64 @@
   --rgb-input: var(--vscode-input-background);
   --rgb-color: var(--vscode-foreground);
   --shadow: none;
+  --em-color-border: var(--vscode-editorWidget-border);
 }
 
 .ecui-icon-select-codicons {
-  max-height: 200px;
+  width: 352px;
+  max-height: 300px;
   overflow-y: auto;
-  border-top: 1px solid var(--vscode-editorWidget-border);
+  overflow-x: hidden;
 }
 
-.ecui-icon-select-codicons-header {
-  position: sticky;
-  top: 0;
-  padding: 8px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--vscode-descriptionForeground);
-  background: var(--vscode-editorWidget-background);
-  border-bottom: 1px solid var(--vscode-editorWidget-border);
+/* Scrollbar styles for codicons */
+.ecui-icon-select-codicons::-webkit-scrollbar {
+  width: 10px;
+}
+
+.ecui-icon-select-codicons::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ecui-icon-select-codicons::-webkit-scrollbar-thumb {
+  background: var(--vscode-scrollbarSlider-background);
+  border-radius: 5px;
+}
+
+.ecui-icon-select-codicons::-webkit-scrollbar-thumb:hover {
+  background: var(--vscode-scrollbarSlider-hoverBackground);
+}
+
+.ecui-icon-select-codicons::-webkit-scrollbar-thumb:active {
+  background: var(--vscode-scrollbarSlider-activeBackground);
+}
+
+
+/* Ensure emoji-mart scroll container is scrollable */
+.ecui-icon-select-picker em-emoji-picker {
+  display: block;
+}
+
+.ecui-icon-select-picker em-emoji-picker::part(scroll) {
+  overflow-y: auto !important;
+}
+
+/* Target internal emoji-mart elements with webkit scrollbar */
+.ecui-icon-select-picker *::-webkit-scrollbar {
+  width: 10px;
+}
+
+.ecui-icon-select-picker *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ecui-icon-select-picker *::-webkit-scrollbar-thumb {
+  background: var(--vscode-scrollbarSlider-background);
+  border-radius: 5px;
+}
+
+.ecui-icon-select-picker *::-webkit-scrollbar-thumb:hover {
+  background: var(--vscode-scrollbarSlider-hoverBackground);
 }
 
 .ecui-icon-select-codicons-grid {

@@ -15,7 +15,8 @@ import {
   RadioGroup,
   InputBox,
   CodeEditor,
-  ProgressBar
+  ProgressBar,
+  IconSelect
 } from 'electron-core-ui/renderer'
 import type {
   Tab,
@@ -87,7 +88,8 @@ function environmentsToListViewItems(
     title: env.name,
     isExpandable: (env.subEnvironments?.length ?? 0) > 0,
     isExpanded: expandedIds.includes(env.id),
-    icon: expandedIds.includes(env.id) ? 'folder-opened' : 'folder',
+    icon: !env.icon ? (expandedIds.includes(env.id) ? 'folder-opened' : 'folder') : undefined,
+    leftActions: env.icon ? <IconSelect value={env.icon} readonly /> : undefined,
     children: env.subEnvironments ? environmentsToListViewItems(env.subEnvironments, expandedIds) : []
   }))
 }
@@ -172,13 +174,14 @@ export const EnvironmentDropdown: React.FC = () => {
     [environments, expandedIds]
   )
 
-  const selectedEnvironmentName = useMemo(() => {
+  const selectedEnvironment = useMemo(() => {
     if (!environments || environments.length === 0 || !selectedEnvId) {
-      return t('requestTab.environmentSelector.noEnvironment')
+      return null
     }
-    const env = findEnvironmentById(environments, selectedEnvId)
-    return env?.name ?? t('requestTab.environmentSelector.noEnvironment')
-  }, [environments, selectedEnvId, t])
+    return findEnvironmentById(environments, selectedEnvId)
+  }, [environments, selectedEnvId])
+
+  const selectedEnvironmentName = selectedEnvironment?.name ?? t('requestTab.environmentSelector.noEnvironment')
 
   if (!environments || environments.length === 0) {
     return null
@@ -202,6 +205,9 @@ export const EnvironmentDropdown: React.FC = () => {
           setIsOpen((prev) => !prev)
         }}
       >
+        {selectedEnvironment?.icon && (
+          <IconSelect value={selectedEnvironment.icon} readonly style={{ marginRight: 4 }} />
+        )}
         <span style={{ marginRight: 4, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {selectedEnvironmentName}
         </span>

@@ -474,16 +474,11 @@ export const SplitView: React.FC<SplitViewProps> = ({
 										onClick={pane.collapsible === false ? undefined : () => { handleToggleCollapsed(i); }}
 									>
 										<div className="split-view-view-header-main">
-											<i
-												className={[
-													'codicon',
-													pane.collapsible === false
-														? 'codicon-blank'
-														: collapsed[i]
-															? 'codicon-chevron-right'
-															: 'codicon-chevron-down'
-												].join(' ')}
-											/>
+											{pane.collapsible !== false && (
+												<i
+													className={`codicon ${collapsed[i] ? 'codicon-chevron-right' : 'codicon-chevron-down'}`}
+												/>
+											)}
 											<span className="split-view-view-header-title">
 												{pane.title}
 											</span>

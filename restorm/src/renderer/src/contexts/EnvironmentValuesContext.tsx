@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react'
+import { logger } from 'electron-core-ui/renderer'
 import type { VariableContext } from '../services/VariableResolutionService'
 
 export interface EnvironmentValuesContextValue {
@@ -34,10 +35,20 @@ export const EnvironmentValuesProvider: React.FC<EnvironmentValuesProviderProps>
   return <EnvironmentValuesContext.Provider value={value}>{children}</EnvironmentValuesContext.Provider>
 }
 
+// Default context value for when provider is not available (e.g., during hot reload)
+const defaultContextValue: EnvironmentValuesContextValue = {
+  valuesByEnvId: {},
+  setEnvironmentValues: () => {
+    logger.warn('[EnvironmentValuesContext] setEnvironmentValues called outside provider')
+  }
+}
+
 export function useEnvironmentValues(): EnvironmentValuesContextValue {
   const ctx = useContext(EnvironmentValuesContext)
   if (!ctx) {
-    throw new Error('useEnvironmentValues must be used within an EnvironmentValuesProvider')
+    // Return default value instead of throwing during hot reload
+    logger.warn('[EnvironmentValuesContext] useEnvironmentValues called outside provider')
+    return defaultContextValue
   }
   return ctx
 }

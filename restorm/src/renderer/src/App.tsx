@@ -39,6 +39,7 @@ interface SidebarContextMenuItem {
   id: string
   label: string
   icon?: string
+  shortcut?: string
   isSeparator?: boolean
   onClick?: () => void
 }
@@ -134,12 +135,31 @@ function findFolderById(folder: Folder, id: string): Folder | null {
   return null
 }
 
+/** Update a folder by ID in the folder tree (returns new tree) */
+function updateFolderById(folder: Folder, id: string, updatedFolder: Folder): Folder {
+  if (folder.id === id) return updatedFolder
+  return {
+    ...folder,
+    items: folder.items.map((item) => {
+      if (isFolder(item)) {
+        return updateFolderById(item, id, updatedFolder)
+      }
+      return item
+    })
+  }
+}
+
 /** Find an item (folder or request) by ID and build breadcrumbs including the item itself */
 function findItemWithBreadcrumbs(
   folder: Folder,
   id: string,
   path: BreadcrumbItem[] = []
 ): { item: FolderItem | null; breadcrumbs: BreadcrumbItem[] } {
+  // Check if the root folder itself matches the ID
+  if (folder.id === id) {
+    return { item: folder, breadcrumbs: [...path, { id: folder.id, label: folder.name }] }
+  }
+
   const currentPath = [...path, { id: folder.id, label: folder.name }]
 
   for (const item of folder.items) {
@@ -483,7 +503,8 @@ const App: React.FC = () => {
     if (!item) return
 
     if (isFolder(item)) {
-      // Don't navigate on folder click, just toggle expansion
+      // Open folder view (same as "Define variables" context menu)
+      navigationService.navigateTo(itemId, 'sidebar', { type: 'folder' })
       return
     }
 
@@ -504,11 +525,8 @@ const App: React.FC = () => {
     const expandedSet = new Set(expandedIds)
     const rootItem = folderAsRootListViewItem(swaggerFolder, {
       expandedIds: expandedSet,
-      renderMethodBadge: (method: string, name: string) => (
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <HttpMethodBadge method={method} />
-          <span>{name}</span>
-        </span>
+      renderMethodBadge: (method: string) => (
+        <HttpMethodBadge method={method} />
       )
     })
     return [rootItem]
@@ -759,6 +777,56 @@ const App: React.FC = () => {
     })
   }, [])
 
+  // Handle folder changes from FolderView (environments, etc.)
+  const handleFolderChange = useCallback((folderId: string, updatedFolder: Folder) => {
+    // Update folder structure and get updated tree
+    const newSwaggerFolder = updateFolderById(swaggerFolder, folderId, updatedFolder)
+    setSwaggerFolder(newSwaggerFolder)
+
+    // Update folder data in open workbench tabs (all groups)
+    setWorkbenchTree((prevTree) => {
+      const updatedGroups = prevTree.groups.map((group) => {
+        if (!isTabGroupNode(group)) return group
+
+        const updatedTabs = group.tabs.map((tab) => {
+          const restormTab = tab as FolderTab | HTTPRequestTab
+          
+          // Update folder tabs
+          if (restormTab.tabType === 'folder' && restormTab.folder.id === folderId) {
+            return {
+              ...restormTab,
+              folder: updatedFolder,
+              title: updatedFolder.name,
+              titleString: updatedFolder.name
+            }
+          }
+          
+          // Update http-request tabs that belong to this folder (check breadcrumbs)
+          if (restormTab.tabType === 'http-request' && restormTab.breadcrumbs) {
+            const belongsToFolder = restormTab.breadcrumbs.some(bc => bc.id === folderId)
+            if (belongsToFolder) {
+              // Recalculate environments for this request
+              const newEnvironments = getNearestEnvironmentsForBreadcrumbs(newSwaggerFolder, restormTab.breadcrumbs)
+              return {
+                ...restormTab,
+                environments: newEnvironments
+              }
+            }
+          }
+          
+          return restormTab
+        })
+
+        return { ...group, tabs: updatedTabs }
+      })
+
+      return {
+        ...prevTree,
+        groups: updatedGroups
+      }
+    })
+  }, [swaggerFolder])
+
   return (
     <div
       style={{
@@ -893,6 +961,7 @@ const App: React.FC = () => {
               onBreadcrumbClick={handleBreadcrumbClick}
               onItemRename={handleItemRename}
               onTagsChange={handleTagsChange}
+              onFolderChange={handleFolderChange}
               emptyFallback={<Welcome />}
               style={{ flex: 1 }}
             />

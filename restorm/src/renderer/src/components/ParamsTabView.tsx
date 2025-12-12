@@ -1,4 +1,4 @@
-import React, { useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { VariableInputBox, Toggle, InputBox, ScrollableElement, Button } from 'electron-core-ui/renderer'
 import type { VariableDefinition } from 'electron-core-ui/renderer'
 import type { KeyValue } from '../types/collections'
@@ -98,6 +98,10 @@ interface ParamsTabViewProps {
    * Optional callback receiving the final resolved context (for body/url computation).
    */
   onResolvedContextChange?: (context: VariableContext) => void
+  /**
+   * Optional callback when rows change (for persisting edits).
+   */
+  onRowsChange?: (rows: KeyValue[]) => void
 }
 
 export interface ParamsTabViewHandle {
@@ -109,7 +113,8 @@ export const ParamsTabView = React.forwardRef<ParamsTabViewHandle, ParamsTabView
     variables,
     initialRows,
     visibilityMode = 'accumulated',
-    onResolvedContextChange
+    onResolvedContextChange,
+    onRowsChange
   },
   ref
 ) => {
@@ -157,6 +162,18 @@ export const ParamsTabView = React.forwardRef<ParamsTabViewHandle, ParamsTabView
     [rows]
   )
 
+  // Notify parent when rows change (for persistence)
+  const lastRowsRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (!onRowsChange) return
+    // Only notify if rows actually changed (avoid initial call)
+    const rowsJson = JSON.stringify(keyValues)
+    if (lastRowsRef.current !== null && lastRowsRef.current !== rowsJson) {
+      onRowsChange(keyValues)
+    }
+    lastRowsRef.current = rowsJson
+  }, [keyValues, onRowsChange])
+
   const baseContext: VariableContext = useMemo(() => {
     const ctx: VariableContext = {}
     for (const v of variables) {
@@ -170,20 +187,34 @@ export const ParamsTabView = React.forwardRef<ParamsTabViewHandle, ParamsTabView
     [keyValues, baseContext]
   )
 
-  // Notify parent of final resolved context when it changes
+  // Build context from resolved rows only (excluding baseContext)
+  // This prevents stale baseContext values from overwriting updated environment variables
+  const resolvedRowsContext = useMemo<VariableContext>(() => {
+    const ctx: VariableContext = {}
+    for (let i = 0; i < sequence.resolvedRows.length; i++) {
+      const resolvedRow = sequence.resolvedRows[i]
+      const originalRow = rows[i]
+      // Only include enabled rows with non-empty keys
+      if (resolvedRow && originalRow?.enabled && resolvedRow.key) {
+        ctx[resolvedRow.key] = resolvedRow.value
+      }
+    }
+    return ctx
+  }, [sequence.resolvedRows, rows])
+
+  // Notify parent of resolved rows context when it changes
   React.useEffect(() => {
     if (!onResolvedContextChange) return
-    const nextContext = sequence.finalContext
 
     // Shallow-compare contexts to avoid infinite update loops
     const prevContext = lastFinalContextRef.current
     if (prevContext) {
       const prevKeys = Object.keys(prevContext)
-      const nextKeys = Object.keys(nextContext)
+      const nextKeys = Object.keys(resolvedRowsContext)
       if (prevKeys.length === nextKeys.length) {
         let changed = false
         for (const key of nextKeys) {
-          if (prevContext[key] !== nextContext[key]) {
+          if (prevContext[key] !== resolvedRowsContext[key]) {
             changed = true
             break
           }
@@ -194,9 +225,9 @@ export const ParamsTabView = React.forwardRef<ParamsTabViewHandle, ParamsTabView
       }
     }
 
-    lastFinalContextRef.current = nextContext
-    onResolvedContextChange(nextContext)
-  }, [sequence, onResolvedContextChange])
+    lastFinalContextRef.current = resolvedRowsContext
+    onResolvedContextChange(resolvedRowsContext)
+  }, [resolvedRowsContext, onResolvedContextChange])
 
   const handleAddRow = useCallback(() => {
     setRows((oldRows) => [

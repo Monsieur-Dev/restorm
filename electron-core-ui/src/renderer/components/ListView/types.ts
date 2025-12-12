@@ -41,6 +41,24 @@ export interface ListViewItemData {
    * When provided, the ListView can render a contextual menu using these items.
    */
   contextMenuItems?: import('../ContextMenu/ContextMenu').ContextMenuItem[]
+
+  /**
+   * Optional content to display on the left side of the item (before the title).
+   * Always visible.
+   */
+  leftActions?: React.ReactNode
+
+  /**
+   * Optional content to display on the right side of the item (after the title).
+   * Can be configured to show only on hover via `rightActionsOnHoverOnly`.
+   */
+  rightActions?: React.ReactNode
+
+  /**
+   * When true, rightActions are only visible when hovering the row.
+   * Defaults to false (always visible).
+   */
+  rightActionsOnHoverOnly?: boolean
 }
 
 export interface ListViewItemPath {
