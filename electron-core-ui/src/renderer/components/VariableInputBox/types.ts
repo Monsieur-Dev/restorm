@@ -20,6 +20,11 @@ export interface VariableInputBoxProps {
   className?: string
   style?: React.CSSProperties
   ariaLabel?: string
+  /**
+   * Optional callback when user selects "Go to Definition" from context menu.
+   * Called with the variable name under the cursor.
+   */
+  onGoToDefinition?: (variableName: string) => void
 }
 
 

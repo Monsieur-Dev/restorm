@@ -60,11 +60,24 @@ export function resolveKeyValueSequence(rows: KeyValue[], baseContext: VariableC
     const contextSnapshot = { ...currentContext }
     contextsBeforeRow.push(contextSnapshot)
 
-    const compileKey = compileTemplate(row.key)
-    const compileValue = compileTemplate(row.value)
+    let resolvedKey: string
+    let resolvedValue: string
 
-    const resolvedKey = compileKey(contextSnapshot)
-    const resolvedValue = compileValue(contextSnapshot)
+    try {
+      const compileKey = compileTemplate(row.key)
+      resolvedKey = compileKey(contextSnapshot)
+    } catch {
+      // Return original key if Handlebars parsing fails
+      resolvedKey = row.key
+    }
+
+    try {
+      const compileValue = compileTemplate(row.value)
+      resolvedValue = compileValue(contextSnapshot)
+    } catch {
+      // Return original value if Handlebars parsing fails
+      resolvedValue = row.value
+    }
 
     if (resolvedKey) {
       currentContext = {
@@ -100,10 +113,16 @@ export function keyValuesToContext(values: KeyValue[]): VariableContext {
 
 /**
  * Evaluate a single template string with the given context.
+ * Returns the original template if parsing fails (e.g., invalid Handlebars syntax).
  */
 export function resolveTemplate(template: string, context: VariableContext): string {
-  const compile = compileTemplate(template)
-  return compile(context)
+  try {
+    const compile = compileTemplate(template)
+    return compile(context)
+  } catch {
+    // Return original template if Handlebars parsing fails
+    return template
+  }
 }
 
 /**
