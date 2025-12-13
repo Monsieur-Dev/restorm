@@ -1,6 +1,5 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
-import * as CoreUIRenderer from 'electron-core-ui/renderer'
-import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, TagsView } from 'electron-core-ui/renderer'
+import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger } from 'electron-core-ui/renderer'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback } from 'electron-core-ui/renderer'
 import type { RestormEditorTab, BreadcrumbItem } from '../types/editor'
 import { isFolderTab, isHTTPRequestTab } from '../types/editor'
@@ -9,6 +8,7 @@ import { EnvironmentProvider } from '../contexts/EnvironmentContext'
 import { FolderView } from './FolderView'
 import { HttpMethodBadge } from './HttpMethodBadge'
 import { useTranslation } from 'react-i18next'
+import { WorkbenchTab } from './WorkbenchTab'
 
 /** Extract title string from EditorTab */
 function getTabTitleString(tab: EditorTab & { titleString?: string }, fallback = ''): string {
@@ -63,14 +63,6 @@ export interface WorkbenchHandle {
   saveState: () => Promise<boolean>
   loadState: () => Promise<WorkbenchTree | null>
   clearState: () => Promise<boolean>
-}
-
-const { Breadcrumb } = CoreUIRenderer as unknown as {
-  Breadcrumb: React.ComponentType<{
-    items: BreadcrumbItem[]
-    onItemClick?: (item: BreadcrumbItem, index: number, event: React.MouseEvent<HTMLButtonElement>) => void
-    onLastItemChange?: (item: BreadcrumbItem, newValue: string, index: number) => void
-  }>
 }
 
 const EditorWorkbenchAny = EditorWorkbench as unknown as React.ForwardRefExoticComponent<Record<string, unknown> & React.RefAttributes<EditorWorkbenchHandle>>
@@ -148,37 +140,8 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
       )
     }
 
-    // Legacy tab: parse title for method
-    const [maybeMethod, ...rest] = titleString.split(' ')
-    const upperMethod = maybeMethod?.toUpperCase()
-    const httpMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']
-    const isHttpMethod = upperMethod !== undefined && httpMethods.includes(upperMethod)
-    const pathText = isHttpMethod ? rest.join(' ') : titleString
-
-    return (
-      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-        {isHttpMethod && <HttpMethodBadge method={upperMethod} />}
-        <span>{pathText}</span>
-      </span>
-    )
+    return null
   }, [])
-
-  // Handle breadcrumb item click
-  const handleBreadcrumbClick = useCallback(
-    (item: BreadcrumbItem, index: number, breadcrumbs: BreadcrumbItem[]) => {
-      const isLast = index === breadcrumbs.length - 1
-      onBreadcrumbClick?.(item, index, isLast)
-    },
-    [onBreadcrumbClick]
-  )
-
-  // Handle breadcrumb last item rename
-  const handleBreadcrumbRename = useCallback(
-    (item: BreadcrumbItem, newValue: string) => {
-      onItemRename?.(item, newValue)
-    },
-    [onItemRename]
-  )
 
   // Render tab content based on tab type
   const renderTabContent = useCallback((tab: RestormEditorTab): React.ReactNode => {
@@ -189,57 +152,16 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
     // Folder tab
     if (isFolderTab(tab)) {
       return (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            flex: 1,
-            minHeight: 0,
-            minWidth: 0,
-            backgroundColor: 'var(--vscode-editor-background)'
+        <WorkbenchTab
+          breadcrumbs={breadcrumbs}
+          onBreadcrumbClick={onBreadcrumbClick}
+          onBreadcrumbRename={onItemRename}
+          tags={tab.folder.tags}
+          onTagsChange={(nextTags) => {
+            onTagsChange?.(tab.folder.id, nextTags)
           }}
+          label={t('workbench.tagsLabel')}
         >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '8px 16px 0 16px'
-            }}
-          >
-            <span
-              style={{
-                color: 'var(--vscode-descriptionForeground)'
-              }}
-            >
-              {t('workbench.tagsLabel')}
-            </span>
-            <TagsView
-              tags={tab.folder.tags}
-              onChange={(nextTags) => {
-                onTagsChange?.(tab.folder.id, nextTags)
-              }}
-            />
-          </div>
-          
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '8px 16px 0 16px'
-            }}
-          >
-            <Breadcrumb
-              items={breadcrumbs}
-              onItemClick={(item, index) => {
-                handleBreadcrumbClick(item, index, breadcrumbs)
-              }}
-              onLastItemChange={(item, newValue) => {
-                handleBreadcrumbRename(item, newValue)
-              }}
-            />
-          </div>
           <FolderView
             folder={tab.folder}
             onFolderChange={(updatedFolder) => {
@@ -248,7 +170,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
               }
             }}
           />
-        </div>
+        </WorkbenchTab>
       )
     }
 
@@ -256,86 +178,28 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
     if (isHTTPRequestTab(tab)) {
       return (
         <EnvironmentProvider environments={tab.environments}>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              flex: 1,
-              minHeight: 0,
-              minWidth: 0,
-              padding: '8px 16px',
-              backgroundColor: 'var(--vscode-editor-background)'
+          <WorkbenchTab
+            breadcrumbs={breadcrumbs}
+            onBreadcrumbClick={onBreadcrumbClick}
+            onBreadcrumbRename={onItemRename}
+            tags={tab.request.tags}
+            onTagsChange={(nextTags) => {
+              onTagsChange?.(tab.request.id, nextTags)
             }}
+            label={t('workbench.tagsLabel')}
+            headerRight={<EnvironmentDropdown />}
           >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                marginBottom: 4
-              }}
-            >
-              <span
-                style={{
-                  color: 'var(--vscode-descriptionForeground)'
-                }}
-              >
-                {t('workbench.tagsLabel')}
-              </span>
-              <TagsView
-                tags={tab.request.tags}
-                onChange={(nextTags) => {
-                  onTagsChange?.(tab.request.id, nextTags)
-                }}
-              />
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 8,
-                marginBottom: 4
-              }}
-            >
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <Breadcrumb
-                  items={breadcrumbs}
-                  onItemClick={(item, index) => {
-                    handleBreadcrumbClick(item, index, breadcrumbs)
-                  }}
-                  onLastItemChange={(item, newValue) => {
-                    handleBreadcrumbRename(item, newValue)
-                  }}
-                />
-              </div>
-              <EnvironmentDropdown />
-            </div>
-            <div style={{ flex: 1, minHeight: 0, minWidth: 0 }}>
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
               <HTTPRequestTabView request={tab.request} />
             </div>
-          </div>
+          </WorkbenchTab>
         </EnvironmentProvider>
       )
     }
 
-    // Legacy/empty tab
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, minWidth: 0 }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flex: 1,
-            color: 'var(--vscode-descriptionForeground)'
-          }}
-        >
-          No content
-        </div>
-      </div>
-    )
-  }, [handleBreadcrumbClick, handleBreadcrumbRename])
+    // Legacy/empty tab fallback (should not happen with typed tabs)
+    return null
+  }, [onBreadcrumbClick, onItemRename, onTagsChange, onFolderChange, t])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(
