@@ -72,7 +72,11 @@
   },
   "workbench": {
     "tagsLabel": "Tags:",
-    "removeTag": "Remove tag"
+    "removeTag": "Remove tag",
+    "tabContextMenu": {
+      "close": "Close",
+      "closeOthers": "Close others"
+    }
   },
   "codeEditor": {
     "goToDefinition": "Go to Definition"

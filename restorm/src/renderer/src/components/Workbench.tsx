@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
-import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger } from 'electron-core-ui/renderer'
+import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, type ContextMenuItem } from 'electron-core-ui/renderer'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback } from 'electron-core-ui/renderer'
 import type { RestormEditorTab, BreadcrumbItem } from '../types/editor'
 import { isFolderTab, isHTTPRequestTab } from '../types/editor'
@@ -247,6 +247,28 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
     [tree]
   )
 
+  const getTabContextMenuItems = useCallback(
+    (_tab: EditorTab, _groupId: string, actions: { close: () => void; closeOthersInGroup: () => void }): ContextMenuItem[] => {
+      const items: ContextMenuItem[] = [
+        {
+          id: 'close',
+          label: t('workbench.tabContextMenu.close'),
+          icon: 'close',
+          onClick: actions.close
+        },
+        {
+          id: 'close-others',
+          label: t('workbench.tabContextMenu.closeOthers'),
+          icon: 'close-all',
+          onClick: actions.closeOthersInGroup
+        }
+      ]
+
+      return items
+    },
+    [t]
+  )
+
   const workbenchRenderTabContent = useMemo(() => {
     return (tab: unknown): React.ReactNode => {
       const baseTab = tab as RestormEditorTab
@@ -259,9 +281,10 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
       onWorkbenchTabDropped: handleTabDropped,
       renderTabContent: workbenchRenderTabContent,
       renderTabTitle,
-      onDetachToNewWindow: handleDetachToNewWindow
+      onDetachToNewWindow: handleDetachToNewWindow,
+      getTabContextMenuItems
     }
-  }, [handleTabDropped, workbenchRenderTabContent, renderTabTitle, handleDetachToNewWindow])
+  }, [handleTabDropped, workbenchRenderTabContent, renderTabTitle, handleDetachToNewWindow, getTabContextMenuItems])
 
   const handleTreeChange = useCallback(
     (newTree: WorkbenchTree) => {

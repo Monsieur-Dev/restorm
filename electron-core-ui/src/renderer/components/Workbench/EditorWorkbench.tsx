@@ -511,6 +511,24 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		change(t);
 	}, [tree, change]);
 
+	const handleCloseOthersInGroup = useCallback((tabId: string, groupId: string) => {
+		const next: WorkbenchTree = JSON.parse(JSON.stringify(tree)) as WorkbenchTree;
+
+		const rec = (nodes: GroupNode[]): void => {
+			for (const n of nodes) {
+				if (isTabGroupNode(n) && n.id === groupId) {
+					n.tabs = n.tabs.filter(t => t.id === tabId);
+					n.activeTabId = tabId;
+				} else if (isContainerNode(n)) {
+					rec(n.groups);
+				}
+			}
+		};
+
+		rec(next.groups);
+		change(next);
+	}, [tree, change]);
+
 	// Helper function to find group and drop target at cursor position
 	const findGroupAndDropTargetAtPosition = useCallback(async (screenX: number, screenY: number): Promise<{ groupId: string; type: 'tabs-container'; tabIndex: number } | { groupId: string; type: 'content-placeholder'; direction: SplitDirection | 'full' } | null> => {
 		try {
@@ -773,6 +791,9 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		if (extCallbacks.onGetTabContent) {
 			extras['onGetTabContent'] = extCallbacks.onGetTabContent;
 		}
+		if (extCallbacks.getTabContextMenuItems) {
+			extras['getTabContextMenuItems'] = extCallbacks.getTabContextMenuItems;
+		}
 		// Determine if this group has focus
 		const effectiveFocusedGroupId = focusedGroupId ?? internalFocusedGroupId;
 		const hasFocus = effectiveFocusedGroupId === leaf.id;
@@ -783,6 +804,7 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 				onSplitTab={handleSplitTab}
 				onCloseTab={handleClose}
 				onActivateTab={handleActivate}
+				onCloseOthersInGroup={handleCloseOthersInGroup}
 				hasFocus={hasFocus}
 				onFocusRequested={handleFocusRequested}
 				{...extras}
@@ -792,6 +814,7 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		handleMoveWithinGroup,
 		handleSplitTab,
 		handleClose,
+		handleCloseOthersInGroup,
 		handleActivate,
 		handleFocusRequested,
 		focusedGroupId,

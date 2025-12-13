@@ -1,6 +1,6 @@
 import React from 'react'
 import * as CoreUIRenderer from 'electron-core-ui/renderer'
-import { TagsView, ScrollableElement } from 'electron-core-ui/renderer'
+import { TagsView } from 'electron-core-ui/renderer'
 import type { BreadcrumbItem } from '../types/editor'
 
 const { Breadcrumb } = CoreUIRenderer as unknown as {
@@ -88,7 +88,7 @@ export const WorkbenchTab: React.FC<WorkbenchTabProps> = ({
         </div>
         {headerRight}
       </div>
-      {children}
+        {children}
     </div>
   )
 }

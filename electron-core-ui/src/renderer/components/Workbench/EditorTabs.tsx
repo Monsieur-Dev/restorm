@@ -1,12 +1,14 @@
 import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import './styles/tabs.css';
 import Tab from './Tab';
-import type { EditorGroup, EditorWorkbenchCallbacks } from './types';
+import type { EditorGroup, EditorTab, EditorWorkbenchCallbacks } from './types';
 import { clearEditorDragData, computeDropIndex, getEditorDragData, setEditorDragData } from './dnd';
 import { createAuxWindow, getCurrentWindowBounds, getCursorScreenPoint, getWindowUnderCursor, sendWorkbenchTabToWindow } from './ipc';
 import { logger } from '../../services/logger';
 import { getTabTitleString } from './utils';
 import { ScrollableElement } from '../ScrollableElement';
+import { ContextMenu } from '../ContextMenu/ContextMenu';
+import type { ContextMenuItem } from '../ContextMenu/ContextMenu';
 
 export interface EditorTabsProps extends EditorWorkbenchCallbacks {
 	group: EditorGroup;
@@ -21,13 +23,37 @@ export interface EditorTabsProps extends EditorWorkbenchCallbacks {
 	onTabDoubleClick?: (tabId: string) => void;
 }
 
-export const EditorTabs: React.FC<EditorTabsProps> = ({ group, onCloseTab, onMoveTab, onActivateTab, onGetTabContent, onDetachToNewWindow, renderTabTitle, dimmed, onTabDoubleClick }) => {
+export const EditorTabs: React.FC<EditorTabsProps> = ({
+	group,
+	onCloseTab,
+	onCloseOthersInGroup,
+	onMoveTab,
+	onActivateTab,
+	onGetTabContent,
+	onDetachToNewWindow,
+	renderTabTitle,
+	getTabContextMenuItems,
+	dimmed,
+	onTabDoubleClick
+}) => {
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const [_dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 	const [hoveredTabIndex, setHoveredTabIndex] = useState<number | null>(null);
 	const [hoveredSide, setHoveredSide] = useState<'left' | 'right' | null>(null);
 
 	const [draggingTabId, setDraggingTabId] = useState<string | undefined>(undefined);
+
+	const [contextMenuState, setContextMenuState] = useState<{
+		visible: boolean;
+		x: number;
+		y: number;
+		items: ContextMenuItem[];
+	}>({
+		visible: false,
+		x: 0,
+		y: 0,
+		items: []
+	});
 
 	// FLIP animation: store previous rects per tab id and refs to elements
 	const tabElementByIdRef = useRef<Map<string, HTMLElement>>(new Map());
@@ -260,6 +286,36 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({ group, onCloseTab, onMov
 		[group.id, group.tabs, onMoveTab]
 	);
 
+	const handleTabContextMenu = useCallback(
+		(event: React.MouseEvent, tab: EditorTab) => {
+			if (!getTabContextMenuItems) {
+				return;
+			}
+			event.preventDefault();
+
+			const close = () => {
+				onCloseTab?.(tab.id, group.id);
+			};
+
+			const closeOthersInGroup = () => {
+				onCloseOthersInGroup?.(tab.id, group.id);
+			};
+
+			const items = getTabContextMenuItems(tab, group.id, { close, closeOthersInGroup }) ?? [];
+			if (!items.length) {
+				return;
+			}
+
+			setContextMenuState({
+				visible: true,
+				x: event.clientX,
+				y: event.clientY,
+				items
+			});
+		},
+		[getTabContextMenuItems, group.id, onCloseTab, onCloseOthersInGroup]
+	);
+
 	// Ensure the active tab is scrolled into view when it changes
 	useLayoutEffect(() => {
 		if (!containerRef.current || !group.activeTabId) {
@@ -361,11 +417,21 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({ group, onCloseTab, onMov
 							})()}
 							onActivate={() => { onActivateTab?.(tab.id, group.id); }}
 							onClose={(tabId) => onCloseTab?.(tabId, group.id)}
+							onContextMenu={(e) => { handleTabContextMenu(e, tab); }}
 							onDoubleClick={(tabId) => onTabDoubleClick?.(tabId)}
 						/>
 					))}
 				</div>
 			</ScrollableElement>
+			<ContextMenu
+				visible={contextMenuState.visible}
+				x={contextMenuState.x}
+				y={contextMenuState.y}
+				items={contextMenuState.items}
+				onRequestClose={() => {
+					setContextMenuState((prev) => ({ ...prev, visible: false }));
+				}}
+			/>
 		</div>
 	);
 };
