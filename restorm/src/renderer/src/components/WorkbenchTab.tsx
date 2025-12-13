@@ -88,13 +88,7 @@ export const WorkbenchTab: React.FC<WorkbenchTabProps> = ({
         </div>
         {headerRight}
       </div>
-
-      <ScrollableElement
-        options={{ vertical: 'auto', horizontal: 'auto', handleMouseWheel: true, mouseWheelSmoothScroll: true }}
-        style={{ flex: 1, minHeight: 0, minWidth: 0 }}
-      >
-        {children}
-      </ScrollableElement>
+      {children}
     </div>
   )
 }

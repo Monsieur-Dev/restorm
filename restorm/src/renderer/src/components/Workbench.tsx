@@ -118,7 +118,6 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
   // Render tab title with icon and HTTP method badge (if applicable)
   const renderTabTitle = useCallback((tab: EditorTab): React.ReactNode => {
     const restormTab = tab as RestormEditorTab
-    const titleString = getTabTitleString(restormTab, '')
 
     // Folder tab: show folder icon
     if (isFolderTab(restormTab)) {
@@ -216,11 +215,26 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
         return
       }
 
-      const titleString = getTabTitleString(tab as RestormEditorTab, 'untitled')
+      const restormTab = tab as RestormEditorTab
+
+      // Encode minimal metadata so the editor window can rebuild the tab
+      type DetachedTabMetadata =
+        | { kind: 'folder'; itemId: string }
+        | { kind: 'http-request'; itemId: string }
+
+      let metadata: DetachedTabMetadata | null = null
+
+      if (isFolderTab(restormTab)) {
+        metadata = { kind: 'folder', itemId: restormTab.folder.id }
+      } else if (isHTTPRequestTab(restormTab)) {
+        metadata = { kind: 'http-request', itemId: restormTab.request.id }
+      }
 
       const editorParams: { title: string; content?: string; x?: number; y?: number } = {
-        title: titleString,
-        content: ''
+        title: getTabTitleString(restormTab, 'untitled')
+      }
+      if (metadata) {
+        editorParams.content = JSON.stringify(metadata)
       }
       if (cursorX !== undefined) {
         editorParams.x = cursorX
