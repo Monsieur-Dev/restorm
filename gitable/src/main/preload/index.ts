@@ -34,4 +34,3 @@ contextBridge.exposeInMainWorld('gitable', {
     return result as { title: string; content?: string } | undefined
   }
 })
-

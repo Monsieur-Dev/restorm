@@ -205,4 +205,3 @@ Potential improvements for future iterations:
 - [Electron BrowserWindow Documentation](https://www.electronjs.org/docs/latest/api/browser-window)
 - [Electron Screen API](https://www.electronjs.org/docs/latest/api/screen)
 - [Electron App User Data Path](https://www.electronjs.org/docs/latest/api/app#appgetpathname)
-

@@ -5,5 +5,3 @@ declare module 'electron-core-ui/renderer' {
     small?: boolean;
   }
 }
-
-

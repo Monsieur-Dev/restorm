@@ -34,4 +34,3 @@ contextBridge.exposeInMainWorld('restorm', {
     return result as { title: string; content?: string } | undefined
   }
 })
-

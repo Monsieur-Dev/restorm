@@ -50,4 +50,3 @@ export default defineConfig({
     publicDir: resolve(__dirname, 'assets')
   }
 })
-

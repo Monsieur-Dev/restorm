@@ -148,14 +148,12 @@
   border-top: 1px solid var(--vscode-dropdown-border);
 }
 
-.monaco-select-box-dropdown-container > .select-box-details-pane.border-bottom {
-  border-bottom: 1px solid var(--vscode-dropdown-border);
-}
-
 /* Select container */
 .select-container {
   position: relative;
   display: inline-block;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Hidden select element */
@@ -193,6 +191,14 @@
   opacity: 0.8;
   font-size: 16px;
   line-height: 1;
+}
+
+/* Ensure fixed-width trigger for HTTP method select in restorm.
+   The wrapper div around the SelectBox controls the width; this
+   rule makes the custom trigger fill that width so the chevron
+   always stays aligned to the right edge. */
+#http-method-select + .monaco-select-box.custom-trigger {
+  width: 100%;
 }
 
 /* When using custom drawn select, remove the global container chevron to avoid double icon */

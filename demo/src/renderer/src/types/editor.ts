@@ -14,4 +14,3 @@ export interface DemoEditorTab extends EditorTab {
    */
   titleString?: string
 }
-

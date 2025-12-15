@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useImperativeHandle, useRef, useState, forwardRef } from 'react';
 import type { ContainerGroupNode, EditorGroup, EditorTab, EditorWorkbenchCallbacks, GroupNode, Orientation, SplitDirection, WorkbenchTree } from './types';
 import { isContainerNode, isTabGroupNode } from './types';
 import { EditorGroupView } from './EditorGroupView';
@@ -9,6 +9,8 @@ import { onWorkbenchTabDropped } from './ipc';
 import { logger } from '../../services/logger';
 import { Sash } from '../Sash';
 import type { SashEvent, IVerticalSashLayoutProvider, IHorizontalSashLayoutProvider } from '../Sash';
+import { saveWorkbenchState, loadWorkbenchState, clearWorkbenchState, rebuildWorkbenchTree } from './persistence';
+import type { RebuildTabCallback } from './persistence';
 import './styles/tabs.css';
 
 export interface EditorWorkbenchProps extends EditorWorkbenchCallbacks {
@@ -25,13 +27,69 @@ export interface EditorWorkbenchProps extends EditorWorkbenchCallbacks {
 	 * Called whenever the focused group changes, either due to tab activation or editor focus.
 	 */
 	onFocusedGroupChange?: ((groupId: string | null) => void) | undefined;
+	/**
+	 * Optional fallback component to display when no tabs are open.
+	 * If not provided, nothing is displayed.
+	 */
+	emptyFallback?: React.ReactNode;
+	/**
+	 * Called when group sizes change (due to sash dragging).
+	 * The nodeId is 'root' for top-level groups, or the container node ID for nested groups.
+	 */
+	onSizesChange?: ((nodeId: string, sizes: number[]) => void) | undefined;
+	/**
+	 * Unique identifier for this workbench instance (used for persistence).
+	 * Required if autosave is enabled.
+	 */
+	workbenchId?: string;
+	/**
+	 * Enable automatic saving/loading of workbench state.
+	 * When enabled, the workbench will automatically save its state on changes
+	 * and attempt to restore it on mount.
+	 * Requires workbenchId to be set.
+	 */
+	autosave?: boolean;
+	/**
+	 * Callback to rebuild a tab from its persisted ID.
+	 * Required if autosave is enabled.
+	 * Should return the EditorTab or null if the tab cannot be rebuilt.
+	 */
+	onRebuildTab?: RebuildTabCallback;
+	/**
+	 * Called when the workbench state has been restored from storage.
+	 * Receives the restored tree or null if restoration failed.
+	 */
+	onStateRestored?: (tree: WorkbenchTree | null) => void;
+}
+
+/**
+ * Imperative handle for EditorWorkbench
+ */
+export interface EditorWorkbenchHandle {
+	/**
+	 * Manually save the current workbench state to storage.
+	 * @returns true if save was successful
+	 */
+	saveState: () => Promise<boolean>;
+	/**
+	 * Manually load and restore workbench state from storage.
+	 * @returns The restored tree or null if restoration failed
+	 */
+	loadState: () => Promise<WorkbenchTree | null>;
+	/**
+	 * Clear the persisted workbench state from storage.
+	 * @returns true if clear was successful
+	 */
+	clearState: () => Promise<boolean>;
 }
 
 // Local splitter hook for any container
 function useSplitSizes(
 	count: number,
 	isVertical: boolean,
-	containerRef: React.RefObject<HTMLDivElement>
+	containerRef: React.RefObject<HTMLDivElement>,
+	initialSizes?: number[],
+	onSizesChange?: (sizes: number[]) => void
 ): { sizes: number[]; onSashStart: (index: number) => (event: SashEvent) => void; onSashChange: (index: number) => (event: SashEvent) => void } {
 	const [sizes, setSizes] = useState<number[]>([]);
 	const minGroupPx = 120;
@@ -39,12 +97,27 @@ function useSplitSizes(
 	const startCoordRef = useRef<number>(0);
 	const axisSizeRef = useRef<number>(0);
 	const currentIndexRef = useRef<number>(-1);
+	const onSizesChangeRef = useRef(onSizesChange);
+	onSizesChangeRef.current = onSizesChange;
 
+	// Track if initial sizes have been applied
+	const initialSizesAppliedRef = useRef(false);
+	
 	useEffect(() => {
 		if (count <= 0) {
 			setSizes([]);
+			initialSizesAppliedRef.current = false;
 			return;
 		}
+		
+		// Apply initial sizes on first render or when they change
+		if (initialSizes && initialSizes.length === count && !initialSizesAppliedRef.current) {
+			setSizes(initialSizes);
+			initialSizesAppliedRef.current = true;
+			return;
+		}
+		
+		// Only set equal sizes if we don't have the right count yet
 		setSizes(prev => {
 			if (prev.length === count) {
 				return prev;
@@ -52,7 +125,7 @@ function useSplitSizes(
 			const equal = 1 / count;
 			return new Array(count).fill(equal);
 		});
-	}, [count]);
+	}, [count, initialSizes]);
 
 	const onSashStart = useCallback((index: number) => {
 		return (event: SashEvent): void => {
@@ -108,6 +181,8 @@ function useSplitSizes(
 				next[ri] = rightVal;
 			}
 			setSizes(next);
+		// Notify parent of size change
+		onSizesChangeRef.current?.(next);
 		};
 	}, [isVertical, containerRef]);
 
@@ -118,10 +193,22 @@ const GroupContainer: React.FC<{
 	node: ContainerGroupNode;
 	callbacks: EditorWorkbenchCallbacks;
 	renderLeaf: (node: EditorGroup) => React.ReactNode;
-}> = ({ node, callbacks, renderLeaf }) => {
+	onNodeSizesChange?: ((nodeId: string, sizes: number[]) => void) | undefined;
+}> = ({ node, callbacks, renderLeaf, onNodeSizesChange }) => {
 	const isVertical = node.orientation === 'vertical';
 	const ref = useRef<HTMLDivElement | null>(null);
-	const { sizes, onSashStart, onSashChange } = useSplitSizes(node.groups.length, isVertical, ref);
+	
+	const handleSizesChange = useCallback((newSizes: number[]) => {
+		onNodeSizesChange?.(node.id, newSizes);
+	}, [node.id, onNodeSizesChange]);
+	
+	const { sizes, onSashStart, onSashChange } = useSplitSizes(
+		node.groups.length,
+		isVertical,
+		ref,
+		node.sizes,
+		handleSizesChange
+	);
 
 	// Create layout provider for each sash
 	const createLayoutProvider = useCallback((index: number): IVerticalSashLayoutProvider | IHorizontalSashLayoutProvider => {
@@ -185,7 +272,7 @@ const GroupContainer: React.FC<{
 					>
 						{isTabGroupNode(child)
 							? renderLeaf(child)
-							: <GroupContainer node={child} callbacks={callbacks} renderLeaf={renderLeaf} />}
+							: <GroupContainer node={child} callbacks={callbacks} renderLeaf={renderLeaf} onNodeSizesChange={onNodeSizesChange} />}
 					</div>
 					{i < node.groups.length - 1 ? (
 						<Sash
@@ -205,8 +292,9 @@ const GroupContainer: React.FC<{
 /**
  * EditorWorkbench (tree-based): renders nested editor groups and handles split logic.
  * Consumers own and mutate `tree` (controlled) or pass `onChange` to get updates.
+ * Supports automatic persistence when autosave and workbenchId are provided.
  */
-export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
+export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbenchProps>(({
 	tree,
 	className,
 	style,
@@ -214,10 +302,95 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 	focusedGroupId,
 	onFocusedGroupChange,
 	onActivateTab: externalOnActivateTab,
+	emptyFallback,
+	onSizesChange,
+	workbenchId,
+	autosave,
+	onRebuildTab,
+	onStateRestored,
 	...extCallbacks
-}) => {
+}, ref) => {
 	// Internal focus state when component is uncontrolled
 	const [internalFocusedGroupId, setInternalFocusedGroupId] = useState<string | null>(null);
+	
+	// Track if workbench state has been restored
+	const restoredRef = useRef(false);
+	
+	// Store latest tree for imperative methods
+	const treeRef = useRef(tree);
+	treeRef.current = tree;
+	
+	// Store latest onRebuildTab for imperative methods
+	const onRebuildTabRef = useRef(onRebuildTab);
+	onRebuildTabRef.current = onRebuildTab;
+	
+	// Imperative handle: saveState, loadState, clearState
+	const saveStateImpl = useCallback(async (): Promise<boolean> => {
+		if (!workbenchId) {
+			logger.warn('[EditorWorkbench] Cannot save state: workbenchId is not set');
+			return false;
+		}
+		return saveWorkbenchState(workbenchId, treeRef.current);
+	}, [workbenchId]);
+	
+	const loadStateImpl = useCallback(async (): Promise<WorkbenchTree | null> => {
+		if (!workbenchId) {
+			logger.warn('[EditorWorkbench] Cannot load state: workbenchId is not set');
+			return null;
+		}
+		if (!onRebuildTabRef.current) {
+			logger.warn('[EditorWorkbench] Cannot load state: onRebuildTab is not set');
+			return null;
+		}
+		const savedState = await loadWorkbenchState(workbenchId);
+		if (!savedState) {
+			return null;
+		}
+		return rebuildWorkbenchTree(savedState, onRebuildTabRef.current);
+	}, [workbenchId]);
+	
+	const clearStateImpl = useCallback(async (): Promise<boolean> => {
+		if (!workbenchId) {
+			logger.warn('[EditorWorkbench] Cannot clear state: workbenchId is not set');
+			return false;
+		}
+		return clearWorkbenchState(workbenchId);
+	}, [workbenchId]);
+	
+	useImperativeHandle(ref, () => ({
+		saveState: saveStateImpl,
+		loadState: loadStateImpl,
+		clearState: clearStateImpl
+	}), [saveStateImpl, loadStateImpl, clearStateImpl]);
+	
+	// Autosave: restore state on mount
+	useEffect(() => {
+		if (!autosave || !workbenchId || !onRebuildTab || restoredRef.current) {
+			return;
+		}
+		restoredRef.current = true;
+		
+		const restore = async (): Promise<void> => {
+			const restoredTree = await loadStateImpl();
+			if (restoredTree && onChange) {
+				onChange(restoredTree);
+			}
+			onStateRestored?.(restoredTree);
+		};
+		restore();
+	}, [autosave, workbenchId, onRebuildTab, loadStateImpl, onChange, onStateRestored]);
+	
+	// Autosave: save state on tree changes
+	useEffect(() => {
+		if (!autosave || !workbenchId) {
+			return;
+		}
+		// Skip saving empty trees
+		if (tree.groups.length === 0) {
+			return;
+		}
+		saveWorkbenchState(workbenchId, tree);
+	}, [autosave, workbenchId, tree]);
 
 	// Helper to update focus in controlled/uncontrolled modes and notify parent
 	const setFocus = useCallback(
@@ -336,6 +509,24 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 	const handleClose = useCallback((tabId: string, groupId: string) => {
 		const { tree: t } = removeTab(tree, groupId, tabId);
 		change(t);
+	}, [tree, change]);
+
+	const handleCloseOthersInGroup = useCallback((tabId: string, groupId: string) => {
+		const next: WorkbenchTree = JSON.parse(JSON.stringify(tree)) as WorkbenchTree;
+
+		const rec = (nodes: GroupNode[]): void => {
+			for (const n of nodes) {
+				if (isTabGroupNode(n) && n.id === groupId) {
+					n.tabs = n.tabs.filter(t => t.id === tabId);
+					n.activeTabId = tabId;
+				} else if (isContainerNode(n)) {
+					rec(n.groups);
+				}
+			}
+		};
+
+		rec(next.groups);
+		change(next);
 	}, [tree, change]);
 
 	// Helper function to find group and drop target at cursor position
@@ -600,6 +791,9 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 		if (extCallbacks.onGetTabContent) {
 			extras['onGetTabContent'] = extCallbacks.onGetTabContent;
 		}
+		if (extCallbacks.getTabContextMenuItems) {
+			extras['getTabContextMenuItems'] = extCallbacks.getTabContextMenuItems;
+		}
 		// Determine if this group has focus
 		const effectiveFocusedGroupId = focusedGroupId ?? internalFocusedGroupId;
 		const hasFocus = effectiveFocusedGroupId === leaf.id;
@@ -610,6 +804,7 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 				onSplitTab={handleSplitTab}
 				onCloseTab={handleClose}
 				onActivateTab={handleActivate}
+				onCloseOthersInGroup={handleCloseOthersInGroup}
 				hasFocus={hasFocus}
 				onFocusRequested={handleFocusRequested}
 				{...extras}
@@ -619,6 +814,7 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 		handleMoveWithinGroup,
 		handleSplitTab,
 		handleClose,
+		handleCloseOthersInGroup,
 		handleActivate,
 		handleFocusRequested,
 		focusedGroupId,
@@ -635,16 +831,21 @@ export const EditorWorkbench: React.FC<EditorWorkbenchProps> = ({
 			style={{ display: 'flex', flex: 1, minWidth: 0, minHeight: 0, ...style }}
 		>
 			<div className="content" style={{ display: 'flex', flex: 1, minWidth: 0, minHeight: 0 }}>
-				<GroupContainer
-					node={{ id: 'root', orientation: tree.orientation as Orientation, groups: tree.groups }}
-					callbacks={extCallbacks}
-					renderLeaf={leafRenderer}
-				/>
+				{tree.groups.length === 0 ? (
+					emptyFallback ?? null
+				) : (
+					<GroupContainer
+						node={{ id: 'root', orientation: tree.orientation as Orientation, groups: tree.groups, sizes: tree.sizes }}
+						callbacks={extCallbacks}
+						renderLeaf={leafRenderer}
+						onNodeSizesChange={onSizesChange}
+					/>
+				)}
 			</div>
 		</div>
 	);
-};
+});
+
+EditorWorkbench.displayName = 'EditorWorkbench';
 
 export default EditorWorkbench;
-
-

@@ -1,0 +1,120 @@
+.markdown-viewer {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  overflow: auto;
+  font-family: var(--vscode-font-family, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+  font-size: var(--vscode-editor-font-size, 13px);
+  line-height: 1.5;
+}
+
+.markdown-viewer-light {
+  background-color: var(--vscode-editor-background, #ffffff);
+  color: var(--vscode-editor-foreground, #000000);
+}
+
+.markdown-viewer-dark {
+  background-color: var(--vscode-editor-background, #1e1e1e);
+  color: var(--vscode-editor-foreground, #d4d4d4);
+}
+
+.markdown-viewer h1,
+.markdown-viewer h2,
+.markdown-viewer h3,
+.markdown-viewer h4,
+.markdown-viewer h5,
+.markdown-viewer h6 {
+  font-weight: 600;
+  margin-top: 1.2em;
+  margin-bottom: 0.6em;
+}
+
+.markdown-viewer p {
+  margin: 0.4em 0;
+}
+
+.markdown-viewer code {
+  font-family: var(--vscode-editor-font-family, 'Consolas', 'Courier New', monospace);
+  font-size: 0.95em;
+}
+
+.markdown-viewer pre {
+  background-color: var(--vscode-editor-background, #1e1e1e);
+  border-radius: 4px;
+  padding: 8px;
+  overflow: auto;
+}
+
+.markdown-viewer a {
+  color: var(--vscode-textLink-foreground, #3794ff);
+  text-decoration: none;
+}
+
+.markdown-viewer a:hover {
+  text-decoration: underline;
+}
+
+.markdown-viewer ul,
+.markdown-viewer ol {
+  padding-left: 1.5em;
+}
+
+.markdown-viewer blockquote {
+  border-left: 3px solid var(--vscode-textBlockQuote-border, #cccccc);
+  margin: 0.6em 0;
+  padding-left: 0.8em;
+  color: var(--vscode-textBlockQuote-foreground, #808080);
+}
+
+.markdown-viewer table {
+  border-collapse: collapse;
+}
+
+.markdown-viewer th,
+.markdown-viewer td {
+  border: 1px solid var(--vscode-editorWidget-border, #3c3c3c);
+  padding: 4px 8px;
+}
+
+.markdown-viewer-mermaid {
+  margin: 8px 0;
+}
+
+.markdown-viewer-mermaid {
+  overflow: auto;
+  padding-bottom: 6px;
+}
+
+.markdown-viewer-mermaid svg {
+  max-width: 100%;
+  height: auto;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.markdown-viewer-mermaid .nodeLabel {
+  font-size: 11px;
+  line-height: 1;
+}
+
+.markdown-viewer::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.markdown-viewer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.markdown-viewer::-webkit-scrollbar-thumb {
+  background: var(--vscode-scrollbarSlider-background, #797979);
+}
+
+.markdown-viewer::-webkit-scrollbar-thumb:hover {
+  background: var(--vscode-scrollbarSlider-hoverBackground, #858585);
+}
+
+.markdown-viewer::-webkit-scrollbar-thumb:active {
+  background: var(--vscode-scrollbarSlider-activeBackground, #9f9f9f);
+}

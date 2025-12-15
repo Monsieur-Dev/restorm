@@ -83,6 +83,3 @@ Declarative VS Code-like Tabs with reorder, fixed tabs, detachable tabs, slim mo
 - Slim: inspired by actionbar.css.
 
 Keep visual parity with VS Code variables (tab height, colors).
-
-
-

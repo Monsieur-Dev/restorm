@@ -168,4 +168,3 @@ La page Settings de Gitable utilise maintenant les thèmes officiels de VSCode a
 ---
 
 *Dernière mise à jour : 14 octobre 2025*
-

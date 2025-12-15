@@ -1,0 +1,185 @@
+.ecui-icon-select {
+  position: relative;
+  display: inline-block;
+}
+
+.ecui-icon-select-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--vscode-foreground);
+  transition: background-color 0.1s;
+}
+
+.ecui-icon-select-button:hover:not(:disabled) {
+  background-color: var(--vscode-toolbar-hoverBackground);
+}
+
+.ecui-icon-select-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ecui-icon-select-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ecui-icon-select-value .codicon {
+  font-size: 16px;
+}
+
+.ecui-icon-select-picker {
+  z-index: 10000;
+  background: var(--vscode-editorWidget-background);
+  border: 1px solid var(--vscode-editorWidget-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.ecui-icon-select-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--vscode-editorWidget-border);
+  background: var(--vscode-editorWidget-background);
+}
+
+.ecui-icon-select-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.ecui-icon-select-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--vscode-foreground);
+  opacity: 0.6;
+  transition: background-color 0.1s, opacity 0.1s;
+}
+
+.ecui-icon-select-tab:hover {
+  background-color: var(--vscode-toolbar-hoverBackground);
+  opacity: 0.8;
+}
+
+.ecui-icon-select-tab.active {
+  background-color: var(--vscode-toolbar-activeBackground, var(--vscode-list-activeSelectionBackground));
+  opacity: 1;
+}
+
+/* Override emoji-mart styles to match VS Code theme */
+.ecui-icon-select-picker em-emoji-picker {
+  --rgb-background: var(--vscode-editorWidget-background);
+  --rgb-input: var(--vscode-input-background);
+  --rgb-color: var(--vscode-foreground);
+  --shadow: none;
+  --em-color-border: var(--vscode-editorWidget-border);
+}
+
+.ecui-icon-select-codicons {
+  width: 352px;
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Scrollbar styles for codicons */
+.ecui-icon-select-codicons::-webkit-scrollbar {
+  width: 10px;
+}
+
+.ecui-icon-select-codicons::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ecui-icon-select-codicons::-webkit-scrollbar-thumb {
+  background: var(--vscode-scrollbarSlider-background);
+  border-radius: 5px;
+}
+
+.ecui-icon-select-codicons::-webkit-scrollbar-thumb:hover {
+  background: var(--vscode-scrollbarSlider-hoverBackground);
+}
+
+.ecui-icon-select-codicons::-webkit-scrollbar-thumb:active {
+  background: var(--vscode-scrollbarSlider-activeBackground);
+}
+
+
+/* Ensure emoji-mart scroll container is scrollable */
+.ecui-icon-select-picker em-emoji-picker {
+  display: block;
+}
+
+.ecui-icon-select-picker em-emoji-picker::part(scroll) {
+  overflow-y: auto !important;
+}
+
+/* Target internal emoji-mart elements with webkit scrollbar */
+.ecui-icon-select-picker *::-webkit-scrollbar {
+  width: 10px;
+}
+
+.ecui-icon-select-picker *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ecui-icon-select-picker *::-webkit-scrollbar-thumb {
+  background: var(--vscode-scrollbarSlider-background);
+  border-radius: 5px;
+}
+
+.ecui-icon-select-picker *::-webkit-scrollbar-thumb:hover {
+  background: var(--vscode-scrollbarSlider-hoverBackground);
+}
+
+.ecui-icon-select-codicons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 32px);
+  gap: 2px;
+  padding: 8px;
+}
+
+.ecui-icon-select-codicon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--vscode-foreground);
+  transition: background-color 0.1s;
+}
+
+.ecui-icon-select-codicon:hover {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+.ecui-icon-select-codicon .codicon {
+  font-size: 16px;
+}

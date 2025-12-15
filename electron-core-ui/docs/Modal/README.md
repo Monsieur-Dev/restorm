@@ -84,5 +84,3 @@ const Example: React.FC = () => {
   - `var(--vscode-titleBar-activeForeground)` for text and close icon.
 - Fonts, codicon sizes and focus outlines come from `MonacoWorkbench` / `monaco-workbench.css`, so the modal feels
   visually integrated with the rest of the VS Code‑like UI.
-
-

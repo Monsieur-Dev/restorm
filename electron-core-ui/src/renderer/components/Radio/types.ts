@@ -37,5 +37,3 @@ export const defaultRadioStyles: IRadioStyles = {
   inactiveHoverBackground: 'var(--vscode-radio-inactiveHoverBackground)',
   inactiveBorder: 'var(--vscode-radio-inactiveBorder)'
 };
-
-

@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "electron-core-ui/renderer": ["../electron-core-ui/dist-renderer/src/renderer/index.d.ts"]
+    }
+  }
+}

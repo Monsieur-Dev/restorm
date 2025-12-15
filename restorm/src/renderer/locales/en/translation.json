@@ -1,72 +1,58 @@
 {
   "app": {
     "title": "restorm",
-    "welcome": "Hello restorm",
-    "tabsDemo": "Tabs Demo"
-  },
-  "themeTest": {
-    "title": "Theme Test Page",
-    "description": "Test page to visualize all UI components with different VSCode themes",
-    "selectTheme": "Select Theme",
-    "language": "Language",
-    "components": {
-      "inputs": "Text Inputs",
-      "checkboxes": "Checkboxes & Radio Buttons",
-      "buttons": "Buttons",
-      "select": "Select / Dropdown",
-      "textarea": "Text Area",
-      "panels": "Panels",
-      "lists": "Lists",
-      "text": "Text Variants",
-      "stickyHeaders": "Sticky Headers"
-    }
+    "openSettings": "Open settings"
   },
   "menuBar": {
     "file": "File",
-    "edit": "Edit",
-    "view": "View",
-    "help": "Help",
-    "new": "New",
     "open": "Open",
-    "openRecent": "Open Recent",
-    "editor": "Editor",
-    "save": "Save",
-    "autoSave": "Auto-save",
-    "revert": "Revert",
-    "undo": "Undo",
-    "redo": "Redo",
-    "cut": "Cut",
-    "copy": "Copy",
-    "paste": "Paste",
-    "selectAll": "Select All",
-    "find": "Find",
-    "replace": "Replace",
-    "toggleWordWrap": "Toggle Word Wrap",
-    "toggleFullScreen": "Toggle Full Screen",
-    "zoomIn": "Zoom In",
-    "zoomOut": "Zoom Out",
-    "resetZoom": "Reset Zoom",
-    "toggleDeveloperTools": "Toggle Developer Tools",
-    "about": "About",
-    "documentation": "Documentation",
-    "reportIssue": "Report Issue",
-    "keyboardShortcuts": "Keyboard Shortcuts",
     "exit": "Exit"
   },
   "sidebar": {
-    "collections": "Collections",
-    "allRequests": "All requests",
-    "sampleCollection": "Sample collection",
-    "getPets": "GET /pets",
-    "getPetById": "GET /pets/{id}",
-    "createPet": "POST /pets"
+    "addRequest": "Add request",
+    "collapseAll": "Collapse all requests",
+    "workspace": "Workspace",
+    "contextMenu": {
+      "createSubfolder": "Create subfolder",
+      "defineVariables": "Define variables",
+      "delete": "Delete",
+      "clone": "Clone",
+      "rename": "Rename"
+    }
+  },
+  "environment": {
+    "newName": "New environment",
+    "add": "Add environment",
+    "rename": "Rename",
+    "addSub": "Add sub-environment",
+    "delete": "Delete"
+  },
+  "folderView": {
+    "environments": "Environments",
+    "environmentsAriaLabel": "Folder environments",
+    "variables": "Variables",
+    "addVariable": "Add variable row",
+    "selectEnvironment": "Select an environment to view variables",
+    "tabs": {
+      "docs": "Docs",
+      "configuration": "Configuration",
+      "notes": "Notes"
+    }
   },
   "requestTab": {
-    "hello": "Hello world",
     "send": "Send",
     "urlPlaceholder": "Request URL",
+    "methodSelect": "Select HTTP method",
+    "addHeader": "Add header",
+    "addParam": "Add param",
+    "environmentSelector": {
+      "ariaLabel": "Select environment",
+      "listAriaLabel": "Available environments",
+      "noEnvironment": "No environment"
+    },
     "body": {
-      "fileLabel": "File or URL:"
+      "fileLabel": "File or URL:",
+      "browse": "Browse..."
     },
     "tabs": {
       "docs": "Docs",
@@ -74,15 +60,26 @@
       "authorization": "Authorization",
       "headers": "Headers",
       "body": "Body",
-      "params": "Params"
+      "params": "Params",
+      "pathParams": "Path params",
+      "notes": "Notes"
     },
     "responses": {
       "tabs": {
-        "raw": "Raw",
         "prettyfied": "Prettyfied",
         "jsoncrack": "JSONCrack"
       }
     }
+  },
+  "workbench": {
+    "tagsLabel": "Tags:",
+    "removeTag": "Remove tag",
+    "tabContextMenu": {
+      "close": "Close",
+      "closeOthers": "Close others"
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Go to Definition"
   }
 }
-

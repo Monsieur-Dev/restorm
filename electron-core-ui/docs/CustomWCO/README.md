@@ -55,5 +55,3 @@ const AppShell: React.FC = ({ children }) => {
 - Do not use `CustomWCO` on macOS or Windows unless you explicitly want to **replace** native window buttons; by default it hides itself on non-Linux platforms.
 - When integrating with a custom preload, ensure that `window.electronAPI.onPlatform`, `onWindowState` and `sendAction` are exposed with the same signatures as in the demo project.
 - Keep all user-facing strings (tooltips like `"Minimize"`, `"Restore"`, `"Close"`) consistent and, if needed, route them through the host app’s i18n system instead of inlining translations in this component.
-
-

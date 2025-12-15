@@ -78,6 +78,11 @@ colors:
   debugExceptionWidget.border: "#AB395B"
   pickerGroup.border: "#596F99"
   pickerGroup.foreground: "#596F99"
+
+  # Tag colors for Abyss (use badge blue)
+  tag.background: "#0063a5"
+  tag.background-hover: "#0a74bf"
+  tag.foreground: "#ffffff"
   extensionButton.prominentBackground: "#5f8b3b"
   extensionButton.prominentHoverBackground: "#5f8b3bbb"
   terminal.ansiBlack: "#111111"

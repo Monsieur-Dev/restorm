@@ -1,10 +1,13 @@
-import React, { useCallback, useState, useRef } from 'react'
+import React, { useCallback, useState, useRef, useEffect } from 'react'
+import type { Icon } from '../../../../types/icon'
 
 import './breadcrumb.css'
 
 export interface BreadcrumbItem {
   id: string
   label: string
+  /** Optional icon to display before the label */
+  icon?: Icon | null
 }
 
 export interface BreadcrumbProps {
@@ -18,46 +21,92 @@ export interface BreadcrumbProps {
    */
   onItemClick?: (item: BreadcrumbItem, index: number, event: React.MouseEvent<HTMLButtonElement>) => void
   /**
-   * Called when the editable last item loses focus or is submitted.
-   * Receives the new value and the index of the last item.
+   * Called when the editable last item is renamed (Enter or blur).
+   * Receives the item, new value, and index.
    */
-  onLastItemChange?: (value: string, index: number) => void
+  onLastItemChange?: (item: BreadcrumbItem, newValue: string, index: number) => void
+  /**
+   * Show the root item even when it's the only item (normally hidden).
+   * @default false
+   */
+  showRoot?: boolean
   className?: string
   style?: React.CSSProperties
   ariaLabel?: string
+}
+
+/** Render an icon (emoji or codicon) */
+function renderIcon(icon: Icon | null | undefined): React.ReactNode {
+  if (!icon || icon.type === 'none') return null
+  if (icon.type === 'emoji') {
+    return <span className="ecui-breadcrumb-icon ecui-breadcrumb-icon--emoji">{icon.value}</span>
+  }
+  if (icon.type === 'codicon') {
+    return <i className={`ecui-breadcrumb-icon codicon codicon-${icon.value}`} />
+  }
+  return null
 }
 
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   items,
   onItemClick,
   onLastItemChange,
+  showRoot: _showRoot = false,
   className,
   style,
   ariaLabel
 }) => {
   const [isEditingLast, setIsEditingLast] = useState(false)
   const [editingValue, setEditingValue] = useState('')
+  const [editingItem, setEditingItem] = useState<BreadcrumbItem | null>(null)
+  // Stores the committed value temporarily until parent updates item.label
+  const [committedValue, setCommittedValue] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
+  const shouldSelectOnMount = useRef(false)
 
-  const handleStartEditingLast = useCallback((label: string): void => {
+  // Clear committedValue when the last item's label changes from parent
+  const lastItem = items[items.length - 1]
+  useEffect(() => {
+    if (committedValue !== null && lastItem && lastItem.label === committedValue) {
+      // Parent has updated the label to match our committed value
+      setCommittedValue(null)
+    }
+  }, [lastItem?.label, committedValue, lastItem])
+
+  const handleStartEditingLast = useCallback((item: BreadcrumbItem): void => {
     setIsEditingLast(true)
-    setEditingValue(label)
-    // Focus is handled via ref callback on the input element
+    setEditingValue(item.label)
+    setEditingItem(item)
+    shouldSelectOnMount.current = true
   }, [])
+
+  // Focus and select on mount when editing starts
+  useEffect(() => {
+    if (isEditingLast && inputRef.current && shouldSelectOnMount.current) {
+      inputRef.current.focus()
+      inputRef.current.select()
+      shouldSelectOnMount.current = false
+    }
+  }, [isEditingLast])
 
   const handleCommitLast = useCallback(
     (index: number): void => {
-      if (!isEditingLast) return
+      if (!isEditingLast || !editingItem) return
       setIsEditingLast(false)
-      if (onLastItemChange) {
-        onLastItemChange(editingValue, index)
+      // Only call callback if value actually changed
+      if (onLastItemChange && editingValue !== editingItem.label) {
+        // Store the committed value temporarily to show it until parent updates
+        setCommittedValue(editingValue)
+        onLastItemChange(editingItem, editingValue, index)
       }
+      setEditingItem(null)
     },
-    [editingValue, isEditingLast, onLastItemChange]
+    [editingValue, isEditingLast, editingItem, onLastItemChange]
   )
 
   const handleCancelEditingLast = useCallback((): void => {
     setIsEditingLast(false)
+    setEditingItem(null)
   }, [])
 
   const handleInputKeyDown = useCallback(
@@ -80,6 +129,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
     [handleCommitLast, handleCancelEditingLast]
   )
 
+  // Hide only if empty
   if (items.length === 0) {
     return null
   }
@@ -104,6 +154,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
                     }
                   }}
                 >
+                  {renderIcon(item.icon)}
                   {item.label}
                 </button>
                 <span className="ecui-breadcrumb-separator" aria-hidden="true">
@@ -117,14 +168,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
             <li key={item.id} className="ecui-breadcrumb-item ecui-breadcrumb-item--last">
               {isEditingLast ? (
                 <input
-                  ref={(node): void => {
-                    inputRef.current = node
-                    if (node) {
-                      // Auto-focus when the input appears
-                      node.focus()
-                      node.select()
-                    }
-                  }}
+                  ref={inputRef}
                   className="ecui-breadcrumb-input"
                   type="text"
                   value={editingValue}
@@ -147,10 +191,11 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
                     if (onItemClick) {
                       onItemClick(item, index, event)
                     }
-                    handleStartEditingLast(item.label)
+                    handleStartEditingLast(item)
                   }}
                 >
-                  {item.label}
+                  {renderIcon(item.icon)}
+                  {committedValue !== null ? committedValue : item.label}
                 </button>
               )}
             </li>

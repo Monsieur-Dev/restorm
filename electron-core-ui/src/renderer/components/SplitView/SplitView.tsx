@@ -298,52 +298,6 @@ export const SplitView: React.FC<SplitViewProps> = ({
 		[panes.length, updateRatios, computeRatiosForState]
 	);
 
-	// Initialize ratios from initialSize when first computed
-	useEffect(() => {
-		if (!containerRef.current || panes.length === 0) {
-			return;
-		}
-		const hasInitial = panes.some(p => typeof p.initialSize === 'number');
-		if (!hasInitial) {
-			return;
-		}
-		const totalInitial = panes.reduce(
-			(sum, p) => sum + (typeof p.initialSize === 'number' ? p.initialSize : 0),
-			0
-		);
-		if (totalInitial <= 0) {
-			return;
-		}
-		const next: number[] = [];
-		for (const p of panes) {
-			if (typeof p.initialSize === 'number') {
-				next.push(p.initialSize / totalInitial);
-			} else {
-				// distribute remaining space equally
-				next.push(1 / panes.length);
-			}
-		}
-		const sum = next.reduce((a, b) => a + b, 0) || 1;
-		for (let i = 0; i < next.length; i++) {
-			const value = next[i] ?? 0;
-			next[i] = value / sum;
-		}
-		if (next.length === ratios.length) {
-			// only override once on mount/children change
-			if (ratios.every(r => r === 0)) {
-				// Guard, though ratios are initialized to equal
-				// eslint-disable-next-line no-void
-				void 0;
-			}
-		}
-		// We intentionally do not call setRatios here directly to avoid
-		// conflicting with hook internal state; hook already initializes
-		// equally and users can control further via onSizesChange.
-		// A more advanced version could make ratios fully controlled.
-		// For now we keep implementation minimal.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [panes.length]);
-
 	// Notify external listener when ratios change
 	useEffect(() => {
 		if (onSizesChange && ratios.length === panes.length && panes.length > 0) {
@@ -474,16 +428,11 @@ export const SplitView: React.FC<SplitViewProps> = ({
 										onClick={pane.collapsible === false ? undefined : () => { handleToggleCollapsed(i); }}
 									>
 										<div className="split-view-view-header-main">
-											<i
-												className={[
-													'codicon',
-													pane.collapsible === false
-														? 'codicon-blank'
-														: collapsed[i]
-															? 'codicon-chevron-right'
-															: 'codicon-chevron-down'
-												].join(' ')}
-											/>
+											{pane.collapsible !== false && (
+												<i
+													className={`codicon ${collapsed[i] ? 'codicon-chevron-right' : 'codicon-chevron-down'}`}
+												/>
+											)}
 											<span className="split-view-view-header-title">
 												{pane.title}
 											</span>
@@ -533,5 +482,3 @@ export const SplitView: React.FC<SplitViewProps> = ({
 };
 
 SplitView.displayName = 'SplitView';
-
-

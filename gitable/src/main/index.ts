@@ -130,4 +130,3 @@ ipcMain.handle('project:read-file', async (_event, relPath: string) => {
     return ''
   }
 })
-

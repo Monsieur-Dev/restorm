@@ -136,5 +136,3 @@ const FileTree: React.FC = () => {
 - Prefer **pure data trees** (`ListViewItemData[]`) over JSX when integrating with backends or IPC, since they are easy to serialize and diff.
 - Use the `data` field to attach stable metadata (like `filePath`, ids, etc.) instead of encoding those values in `id` or `title`.
 - When implementing complex drag/drop logic, handle all structural updates in a **pure helper** (e.g. `updateListAfterDrop`) and call it from `onItemDrop`; avoid mutating the `items` array in place.
-
-

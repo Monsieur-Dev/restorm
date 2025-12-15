@@ -425,4 +425,3 @@ Themes are validated during loading:
 - [TextMate Scopes](https://macromates.com/manual/en/language_grammars#naming_conventions)
 - [VSCode Theme Guide](https://code.visualstudio.com/api/extension-guides/color-theme)
 - [Theme Extension Samples](https://github.com/microsoft/vscode-extension-samples/tree/main/theme-sample)
-

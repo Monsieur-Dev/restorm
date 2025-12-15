@@ -76,4 +76,3 @@ export class GitableWindow extends BaseWindow {
     }
   }
 }
-

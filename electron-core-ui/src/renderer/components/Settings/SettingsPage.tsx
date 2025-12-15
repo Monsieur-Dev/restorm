@@ -44,20 +44,18 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <div className="settings-page">
-      <h2 className="settings-title">{t('settings.title', 'Settings')}</h2>
-
       <div className="settings-section">
         <div className="settings-item">
-          <span className="settings-label">
+          <h1 className="settings-label">
             {t('settings.theme', 'Theme')}
-          </span>
+          </h1>
           <ThemeCarousel />
         </div>
 
         <div className="settings-item">
-          <span className="settings-label">
+          <h1 className="settings-label">
             {t('settings.language', 'Language')}
-          </span>
+          </h1>
           <SelectBox
             id="language-select"
             className="settings-select"
@@ -72,4 +70,3 @@ export const SettingsPage: React.FC = () => {
 }
 
 export default SettingsPage
-

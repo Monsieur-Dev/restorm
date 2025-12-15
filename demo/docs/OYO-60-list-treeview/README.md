@@ -134,5 +134,3 @@ The demo tab reuses the existing `menuBar.new` translation key:
 - French: `"Nouveau"`
 
 No additional translation keys are required for this feature.
-
-

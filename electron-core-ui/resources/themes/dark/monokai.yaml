@@ -78,6 +78,11 @@ colors:
   peekViewEditor.background: "#272822"
   peekViewResult.background: "#1e1f1c"
   peekViewTitle.background: "#1e1f1c"
+
+  # Tag colors for Monokai (use badge olive)
+  tag.background: "#75715E"
+  tag.background-hover: "#928f72"
+  tag.foreground: "#f8f8f2"
   peekViewResult.selectionBackground: "#414339"
   peekViewResult.matchHighlightBackground: "#75715E"
   peekViewEditor.matchHighlightBackground: "#75715E"

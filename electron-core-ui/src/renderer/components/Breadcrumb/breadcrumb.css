@@ -3,7 +3,7 @@
   align-items: center;
   width: 100%;
   box-sizing: border-box;
-  padding: 4px 8px;
+  padding: 4px 0px;
   gap: 4px;
   font-size: 12px;
   background-color: var(--vscode-breadcrumb-background, transparent);
@@ -34,6 +34,10 @@
   cursor: pointer;
   color: inherit;
   font: inherit;
+  outline: none;
+}
+
+.ecui-breadcrumb-link:focus {
   outline: none;
 }
 
@@ -70,4 +74,23 @@
 .ecui-breadcrumb-separator .codicon {
   font-size: 12px;
   opacity: 0.8;
+}
+
+/* Icon in breadcrumb items */
+.ecui-breadcrumb-icon {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 4px;
+  vertical-align: middle;
+  padding-bottom: 4px;
+}
+
+.ecui-breadcrumb-icon--emoji {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.ecui-breadcrumb-icon.codicon {
+  font-size: 12px;
+  line-height: 1;
 }

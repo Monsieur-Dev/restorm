@@ -584,4 +584,3 @@ const [selectedIndex, setSelectedIndex] = useState(0)
   onDidSelect={(data) => store.setSelectedIndex(data.index)}
 />
 ```
-

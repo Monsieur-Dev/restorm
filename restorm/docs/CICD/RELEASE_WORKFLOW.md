@@ -147,4 +147,3 @@ Vérifie que tu as les permissions nécessaires sur le repo (write access).
 ### Les artifacts ne sont pas uploadés
 
 Vérifie les logs du job de build pour voir si `electron-builder` a bien créé les packages dans `dist-electron/`.
-

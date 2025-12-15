@@ -25,11 +25,11 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   items,
   onRequestClose
 }) => {
-  if (!visible) return null
-
   const containerRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
+    if (!visible) return
+
     const handleMouseDown = (event: MouseEvent): void => {
       if (!containerRef.current) return
       if (!containerRef.current.contains(event.target as Node)) {
@@ -41,7 +41,9 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleMouseDown)
     }
-  }, [onRequestClose])
+  }, [visible, onRequestClose])
+
+  if (!visible) return null
 
   return (
     <div
@@ -92,4 +94,3 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
 }
 
 export default ContextMenu
-

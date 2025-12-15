@@ -7,4 +7,3 @@ export type { WindowConfiguration, WindowState } from './managers'
 export type { ThemeService } from './services/ThemeService'
 export type { StorageService } from './services/StorageService'
 export type { LoggerInterface } from './services/LoggerService'
-

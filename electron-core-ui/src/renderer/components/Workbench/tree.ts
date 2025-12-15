@@ -155,5 +155,3 @@ export function normalizeTree(tree: WorkbenchTree): WorkbenchTree {
 	// we still keep the root orientation as-is; it only affects top-level splitters.
 	return result;
 }
-
-

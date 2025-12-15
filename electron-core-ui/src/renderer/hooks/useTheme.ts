@@ -460,8 +460,7 @@ function useThemeLegacy(): UseThemeReturn {
     return () => {
       cleanup()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Only run once on mount
+  }, [setIsLoading, setError, setThemes, setCurrentThemeId, setCurrentTheme, setCurrentVariables])
 
   return {
     themes,
@@ -476,4 +475,3 @@ function useThemeLegacy(): UseThemeReturn {
 }
 
 export default useTheme
-

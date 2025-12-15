@@ -97,7 +97,7 @@
 
 /* Border support */
 .titlebar {
-	border-bottom: 1px solid var(--vscode-titleBar-border, transparent);
+	border-bottom: 1px solid var(--vscode-titleBar-border);
 }
 
 /* Inactive state */

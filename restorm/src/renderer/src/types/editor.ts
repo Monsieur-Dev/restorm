@@ -1,17 +1,61 @@
 import type { EditorTab } from 'electron-core-ui/renderer'
+import type { Folder, HTTPRequest, Environment } from './collections'
 
-/**
- * Extended EditorTab type for restorm that includes content
- */
-export interface restormEditorTab extends EditorTab {
-  /**
-   * Content of the tab as a string (used for Monaco editor)
-   */
-  content?: string
-  /**
-   * String representation of the title for serialization purposes (IPC, logs, etc.).
-   * Inherited from EditorTab, but explicitly declared here for TypeScript recognition.
-   */
-  titleString?: string
+/** Icon type for breadcrumbs */
+export interface BreadcrumbIcon {
+  type: 'codicon' | 'emoji' | 'none'
+  value: string
 }
 
+/** Breadcrumb item for navigation */
+export interface BreadcrumbItem {
+  id: string
+  label: string
+  icon?: BreadcrumbIcon | null
+}
+
+/** Base extended EditorTab type for restorm */
+interface BaseRestormTab extends EditorTab {
+  /** String representation of the title for serialization purposes */
+  titleString?: string
+  /** Breadcrumb path for navigation */
+  breadcrumbs?: BreadcrumbItem[]
+}
+
+/** Tab displaying a folder's configuration */
+export interface FolderTab extends BaseRestormTab {
+  tabType: 'folder'
+  /** The folder data to display */
+  folder: Folder
+}
+
+/** Tab displaying an HTTP request */
+export interface HTTPRequestTab extends BaseRestormTab {
+  tabType: 'http-request'
+  /** The HTTP request data to display */
+  request: HTTPRequest
+  /** Environments available for this request (from nearest ancestor folder) */
+  environments?: Environment[] | undefined
+}
+
+/** Legacy tab type for backward compatibility */
+export interface LegacyTab extends BaseRestormTab {
+  tabType?: undefined
+  content?: string
+}
+
+/** Union of all restorm tab types */
+export type RestormEditorTab = FolderTab | HTTPRequestTab | LegacyTab
+
+/** @deprecated Use RestormEditorTab instead */
+export type restormEditorTab = RestormEditorTab
+
+/** Type guard for FolderTab */
+export function isFolderTab(tab: RestormEditorTab): tab is FolderTab {
+  return tab.tabType === 'folder'
+}
+
+/** Type guard for HTTPRequestTab */
+export function isHTTPRequestTab(tab: RestormEditorTab): tab is HTTPRequestTab {
+  return tab.tabType === 'http-request'
+}

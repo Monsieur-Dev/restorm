@@ -41,6 +41,24 @@ export interface ListViewItemData {
    * When provided, the ListView can render a contextual menu using these items.
    */
   contextMenuItems?: import('../ContextMenu/ContextMenu').ContextMenuItem[]
+
+  /**
+   * Optional content to display on the left side of the item (before the title).
+   * Always visible.
+   */
+  leftActions?: React.ReactNode
+
+  /**
+   * Optional content to display on the right side of the item (after the title).
+   * Can be configured to show only on hover via `rightActionsOnHoverOnly`.
+   */
+  rightActions?: React.ReactNode
+
+  /**
+   * When true, rightActions are only visible when hovering the row.
+   * Defaults to false (always visible).
+   */
+  rightActionsOnHoverOnly?: boolean
 }
 
 export interface ListViewItemPath {
@@ -106,6 +124,29 @@ export interface ListViewProps {
   rootRole?: 'list' | 'tree'
   ariaLabel?: string
 
+  /**
+   * Whether items can be renamed inline. Defaults to false.
+   */
+  isRenameable?: boolean
+
+  /**
+   * Keyboard shortcut to trigger inline rename. Defaults to 'F2'.
+   */
+  renameShortcut?: string
+
+  /**
+   * When true, clicking on a row only selects it (triggers onItemClick).
+   * Expansion/collapse is only triggered by clicking the chevron.
+   * When false (default), clicking anywhere on an expandable row toggles expansion.
+   */
+  expandOnChevronOnly?: boolean
+
+  /**
+   * Controlled expanded IDs. When provided, the component will use these IDs
+   * to determine which items are expanded, instead of internal state.
+   */
+  expandedIds?: string[]
+
   onItemClick?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
   onItemDoubleClick?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
   onSelectionChange?: (selectedIds: string[], payload: ListViewItemEventPayload) => void
@@ -116,6 +157,10 @@ export interface ListViewProps {
   ) => void
   onItemDrop?: (payload: ListViewDropEventPayload) => void
   onItemContextMenu?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
+  /**
+   * Called when an item is renamed via inline editing.
+   */
+  onItemRename?: (payload: ListViewItemEventPayload, newValue: string) => void
 }
 
 export interface ListViewItemProps {
@@ -132,5 +177,3 @@ export interface ListViewItemProps {
   data?: unknown
   children?: React.ReactNode
 }
-
-

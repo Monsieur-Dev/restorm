@@ -19,5 +19,3 @@ export const createElectronAPI = (): Record<string, unknown> => ({
     ipcRenderer.send('window-action', action);
   }
 })
-
-

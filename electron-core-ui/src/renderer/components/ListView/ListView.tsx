@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ScrollableElement } from '../ScrollableElement'
 import { ContextMenu, type ContextMenuItem } from '../ContextMenu/ContextMenu'
 import type {
@@ -160,15 +160,20 @@ export const ListView: React.FC<ListViewProps> = ({
   style,
   selectedIds: selectedIdsProp,
   activeId: activeIdProp,
+  expandedIds: expandedIdsProp,
   selectionMode = 'single',
   rootRole = 'tree',
   ariaLabel,
+  isRenameable = false,
+  renameShortcut = 'F2',
+  expandOnChevronOnly = false,
   onItemClick,
   onItemDoubleClick,
   onSelectionChange,
   onItemToggle,
   onItemDrop,
-  onItemContextMenu
+  onItemContextMenu,
+  onItemRename
 }) => {
   const initialItems = useMemo<ListViewItemData[]>(() => {
     if (items && items.length > 0) {
@@ -197,12 +202,23 @@ export const ListView: React.FC<ListViewProps> = ({
     item: null
   })
 
+  // Inline rename state
+  const [editingItemId, setEditingItemId] = useState<string | null>(null)
+  const [editingValue, setEditingValue] = useState<string>('')
+  const renameInputRef = useRef<HTMLInputElement | null>(null)
+
   // Controlled selection support
   React.useEffect(() => {
     if (!selectedIdsProp) return
     const next = new Set(selectedIdsProp)
     setSelectedIds(next)
   }, [selectedIdsProp])
+
+  // Controlled expansion support
+  React.useEffect(() => {
+    if (expandedIdsProp === undefined) return
+    setExpandedIds(new Set(expandedIdsProp))
+  }, [expandedIdsProp])
 
   // Controlled active item support + ensure parents are expanded
   React.useEffect(() => {
@@ -377,12 +393,65 @@ export const ListView: React.FC<ListViewProps> = ({
     [onItemDoubleClick, handleToggle]
   )
 
+  // Start inline rename for an item
+  const startRename = useCallback(
+    (flat: FlatItem): void => {
+      if (!isRenameable) return
+      const titleStr = typeof flat.item.title === 'string' ? flat.item.title : ''
+      setEditingItemId(flat.item.id)
+      setEditingValue(titleStr)
+    },
+    [isRenameable]
+  )
+
+  // Commit the rename and notify parent
+  const commitRename = useCallback(
+    (flat: FlatItem): void => {
+      if (!editingItemId) return
+      const trimmed = editingValue.trim()
+      const originalTitle = typeof flat.item.title === 'string' ? flat.item.title : ''
+      setEditingItemId(null)
+      if (trimmed && trimmed !== originalTitle && onItemRename) {
+        const payload: ListViewItemEventPayload = { item: flat.item, path: flat.path }
+        onItemRename(payload, trimmed)
+      }
+    },
+    [editingItemId, editingValue, onItemRename]
+  )
+
+  // Cancel rename without saving
+  const cancelRename = useCallback((): void => {
+    setEditingItemId(null)
+    setEditingValue('')
+  }, [])
+
+  // Focus the rename input when editing starts
+  useEffect(() => {
+    if (editingItemId && renameInputRef.current) {
+      renameInputRef.current.focus()
+      renameInputRef.current.select()
+    }
+  }, [editingItemId])
+
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>): void => {
+      // Ignore keyboard navigation when editing
+      if (editingItemId) return
+
       if (flatItems.length === 0) return
 
       const currentIndex = findFlatIndexById(activeId ?? (flatItems[0]?.item.id ?? null))
       let nextIndex = currentIndex
+
+      // Check for rename shortcut
+      if (isRenameable && event.key === renameShortcut) {
+        const flat = flatItems[currentIndex]
+        if (flat) {
+          event.preventDefault()
+          startRename(flat)
+        }
+        return
+      }
 
       switch (event.key) {
         case 'ArrowDown':
@@ -437,7 +506,7 @@ export const ListView: React.FC<ListViewProps> = ({
         })
       }
     },
-    [flatItems, activeId, selectionMode, emitSelectionChange, findFlatIndexById, handleToggle]
+    [flatItems, activeId, selectionMode, emitSelectionChange, findFlatIndexById, handleToggle, isRenameable, renameShortcut, startRename, editingItemId]
   )
 
   const handleContextMenu = useCallback(
@@ -559,6 +628,12 @@ export const ListView: React.FC<ListViewProps> = ({
             const handleRowClick = (event: React.MouseEvent<HTMLDivElement>): void => {
               handleSelect(flat, event)
 
+              // If expandOnChevronOnly is true, don't toggle on row click
+              // (expansion is handled only by the chevron button)
+              if (expandOnChevronOnly) {
+                return
+              }
+
               // If the item is expandable (has children or explicitly marked as expandable),
               // also toggle its expanded state when clicking anywhere on the row.
               const isExpandable = !isLeaf || item.isExpandable
@@ -571,7 +646,29 @@ export const ListView: React.FC<ListViewProps> = ({
               handleDoubleClick(flat, event)
             }
 
-            const titleContent = item.title
+            const isEditing = editingItemId === item.id
+            const titleContent = isEditing ? (
+              <input
+                ref={renameInputRef}
+                type="text"
+                className="list-view-rename-input"
+                value={editingValue}
+                onChange={(e): void => { setEditingValue(e.target.value) }}
+                onBlur={(): void => { commitRename(flat) }}
+                onKeyDown={(e): void => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    commitRename(flat)
+                  } else if (e.key === 'Escape') {
+                    e.preventDefault()
+                    cancelRename()
+                  }
+                }}
+                onClick={(e): void => { e.stopPropagation() }}
+              />
+            ) : (
+              item.title
+            )
             const iconContent =
               typeof item.icon === 'string' ? (
                 <i className={`codicon codicon-${item.icon}`} aria-hidden="true" />
@@ -591,7 +688,7 @@ export const ListView: React.FC<ListViewProps> = ({
                 aria-level={depth + 1}
                 aria-expanded={!isLeaf ? isExpanded : undefined}
                 aria-selected={isSelected}
-                draggable
+                draggable={!isEditing}
                 onClick={handleRowClick}
                 onDoubleClick={handleRowDoubleClick}
                 onContextMenu={(event): void => {
@@ -609,10 +706,13 @@ export const ListView: React.FC<ListViewProps> = ({
                 }}
               >
                 <div className="list-view-row-inner">
+                  
                   <div className="list-view-indents" aria-hidden="true">
                     {Array.from({ length: depth }).map((_, idx) => (
                       <span key={idx} className="indent-guide" />
                     ))}
+                    
+                    {depth > 0 && isLeaf && <span className="indent-spacer" />}
                   </div>
                   {(!isLeaf || item.isExpandable) && (
                     <button
@@ -633,7 +733,23 @@ export const ListView: React.FC<ListViewProps> = ({
                     </button>
                   )}
                   {iconContent && <span className="list-view-icon">{iconContent}</span>}
+                  {item.leftActions && (
+                    <span
+                      className="list-view-left-actions"
+                      onClick={(e): void => { e.stopPropagation() }}
+                    >
+                      {item.leftActions}
+                    </span>
+                  )}
                   <span className="list-view-title">{titleContent}</span>
+                  {item.rightActions && (
+                    <span
+                      className={`list-view-right-actions${item.rightActionsOnHoverOnly ? ' hover-only' : ''}`}
+                      onClick={(e): void => { e.stopPropagation() }}
+                    >
+                      {item.rightActions}
+                    </span>
+                  )}
                 </div>
               </div>
             )
@@ -655,5 +771,3 @@ export const ListView: React.FC<ListViewProps> = ({
 }
 
 export default ListView
-
-

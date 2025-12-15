@@ -1,7 +1,27 @@
-import React, { useCallback, useImperativeHandle, useRef, useState } from 'react'
-import { VariableInputBox, Toggle, InputBox, ScrollableElement, Button } from 'electron-core-ui/renderer'
-import type { VariableDefinition } from 'electron-core-ui/renderer'
-import './paramsTabView.css'
+import React, {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
+import Handlebars from 'handlebars'
+import { VariableInputBox } from '../VariableInputBox'
+import type { VariableDefinition } from '../VariableInputBox'
+import { Toggle } from '../Toggle'
+import { InputBox } from '../InputBox'
+import { ScrollableElement } from '../ScrollableElement'
+import { Button } from '../Button'
+import './keyValueTable.css'
+
+export interface KeyValueTableRow {
+  key: string
+  value: string
+  description?: string | undefined
+}
+
+export type VariableContext = Record<string, string>
 
 interface ParamRow {
   enabled: boolean
@@ -19,11 +39,13 @@ interface EditableCellBaseProps {
 interface VariableCellProps extends EditableCellBaseProps {
   value: string
   variables: VariableDefinition[]
+  resolvedValue?: string | undefined
 }
 
 const VariableCell: React.FC<VariableCellProps> = ({
   value,
   variables,
+  resolvedValue,
   rowIndex,
   columnId,
   updateData
@@ -42,6 +64,7 @@ const VariableCell: React.FC<VariableCellProps> = ({
         updateData(rowIndex, columnId, v)
       }}
       variables={variables}
+      resolvedValue={resolvedValue}
     />
   )
 }
@@ -79,21 +102,132 @@ const TextCell: React.FC<TextCellProps> = ({
   )
 }
 
-interface ParamsTabViewProps {
+export interface KeyValueTableProps {
+  /** Base variables visible to all rows (environment, folder, etc.) */
   variables: VariableDefinition[]
+  /** Initial rows to populate the table */
+  initialRows?: KeyValueTableRow[]
+  /**
+   * Visibility mode for variables inside this table:
+   * - 'accumulated': each row sees base variables plus previous rows
+   * - 'base-only': each row only sees base variables (no variables from previous rows)
+   */
+  visibilityMode?: 'accumulated' | 'base-only'
+  /**
+   * Optional callback receiving the final resolved context (for body/url computation).
+   */
+  onResolvedContextChange?: (context: VariableContext) => void
+  /**
+   * Optional callback when rows change (for persisting edits).
+   */
+  onRowsChange?: (rows: KeyValueTableRow[]) => void
 }
 
-export interface ParamsTabViewHandle {
+export interface KeyValueTableHandle {
   addRow: () => void
 }
 
-export const ParamsTabView = React.forwardRef<ParamsTabViewHandle, ParamsTabViewProps>(({ variables }, ref) => {
-  const [rows, setRows] = useState<ParamRow[]>([
-    { enabled: true, key: '', value: '', description: '' }
-  ])
-  // dropIndex représente la position d'insertion entre les lignes (0..rows.length)
+interface ResolvedKeyValue {
+  key: string
+  value: string
+  description?: string | undefined
+}
+
+interface ResolvedSequence {
+  /** Context available before each row (same length as rows) */
+  contextsBeforeRow: VariableContext[]
+  /** Rows after Handlebars resolution */
+  resolvedRows: ResolvedKeyValue[]
+  /** Final context after processing all rows */
+  finalContext: VariableContext
+}
+
+function compileTemplate(template: string): Handlebars.TemplateDelegate {
+  // Precompile with no escaping (we want raw strings)
+  return Handlebars.compile(template, { noEscape: true })
+}
+
+/**
+ * Evaluate a sequence of KeyValue rows using Handlebars.
+ * Each row sees the context built from baseContext plus all previous resolved rows.
+ */
+function resolveKeyValueSequence(rows: KeyValueTableRow[], baseContext: VariableContext): ResolvedSequence {
+  let currentContext: VariableContext = { ...baseContext }
+  const contextsBeforeRow: VariableContext[] = []
+  const resolvedRows: ResolvedKeyValue[] = []
+
+  for (const row of rows) {
+    const contextSnapshot = { ...currentContext }
+    contextsBeforeRow.push(contextSnapshot)
+
+    let resolvedKey: string
+    let resolvedValue: string
+
+    try {
+      const compileKey = compileTemplate(row.key)
+      resolvedKey = compileKey(contextSnapshot)
+    } catch {
+      // Return original key if Handlebars parsing fails
+      resolvedKey = row.key
+    }
+
+    try {
+      const compileValue = compileTemplate(row.value)
+      resolvedValue = compileValue(contextSnapshot)
+    } catch {
+      // Return original value if Handlebars parsing fails
+      resolvedValue = row.value
+    }
+
+    if (resolvedKey) {
+      currentContext = {
+        ...currentContext,
+        [resolvedKey]: resolvedValue
+      }
+    }
+
+    resolvedRows.push({
+      key: resolvedKey,
+      value: resolvedValue,
+      description: row.description
+    })
+  }
+
+  return {
+    contextsBeforeRow,
+    resolvedRows,
+    finalContext: currentContext
+  }
+}
+
+export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTableProps>((
+  {
+    variables,
+    initialRows,
+    visibilityMode = 'accumulated',
+    onResolvedContextChange,
+    onRowsChange
+  },
+  ref
+) => {
+  // Convert initialRows to ParamRow format
+  const defaultRows = useMemo<ParamRow[]>(() => {
+    if (!initialRows || initialRows.length === 0) {
+      return [{ enabled: true, key: '', value: '', description: '' }]
+    }
+    return initialRows.map((kv) => ({
+      enabled: true,
+      key: kv.key,
+      value: kv.value,
+      description: kv.description ?? ''
+    }))
+  }, [initialRows])
+
+  const [rows, setRows] = useState<ParamRow[]>(defaultRows)
+  // dropIndex represents the insertion position between rows (0..rows.length)
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const dragGhostRef = useRef<HTMLDivElement | null>(null)
+  const lastFinalContextRef = useRef<VariableContext | null>(null)
 
   const updateData = useCallback(
     (rowIndex: number, columnId: keyof ParamRow, value: unknown): void => {
@@ -109,6 +243,83 @@ export const ParamsTabView = React.forwardRef<ParamsTabViewHandle, ParamsTabView
     },
     []
   )
+
+  const keyValues: KeyValueTableRow[] = useMemo(
+    () =>
+      rows.map((row) => ({
+        key: row.key,
+        value: row.value,
+        description: row.description
+      })),
+    [rows]
+  )
+
+  // Notify parent when rows change (for persistence)
+  const lastRowsRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (!onRowsChange) return
+    // Only notify if rows actually changed (avoid initial call)
+    const rowsJson = JSON.stringify(keyValues)
+    if (lastRowsRef.current !== null && lastRowsRef.current !== rowsJson) {
+      onRowsChange(keyValues)
+    }
+    lastRowsRef.current = rowsJson
+  }, [keyValues, onRowsChange])
+
+  const baseContext: VariableContext = useMemo(() => {
+    const ctx: VariableContext = {}
+    for (const v of variables) {
+      ctx[v.name] = v.value
+    }
+    return ctx
+  }, [variables])
+
+  const sequence = useMemo(
+    () => resolveKeyValueSequence(keyValues, baseContext),
+    [keyValues, baseContext]
+  )
+
+  // Build context from resolved rows only (excluding baseContext)
+  // This prevents stale baseContext values from overwriting updated environment variables
+  const resolvedRowsContext = useMemo<VariableContext>(() => {
+    const ctx: VariableContext = {}
+    for (let i = 0; i < sequence.resolvedRows.length; i++) {
+      const resolvedRow = sequence.resolvedRows[i]
+      const originalRow = rows[i]
+      // Only include enabled rows with non-empty keys
+      if (resolvedRow && originalRow?.enabled && resolvedRow.key) {
+        ctx[resolvedRow.key] = resolvedRow.value
+      }
+    }
+    return ctx
+  }, [sequence.resolvedRows, rows])
+
+  // Notify parent of resolved rows context when it changes
+  useEffect(() => {
+    if (!onResolvedContextChange) return
+
+    // Shallow-compare contexts to avoid infinite update loops
+    const prevContext = lastFinalContextRef.current
+    if (prevContext) {
+      const prevKeys = Object.keys(prevContext)
+      const nextKeys = Object.keys(resolvedRowsContext)
+      if (prevKeys.length === nextKeys.length) {
+        let changed = false
+        for (const key of nextKeys) {
+          if (prevContext[key] !== resolvedRowsContext[key]) {
+            changed = true
+            break
+          }
+        }
+        if (!changed) {
+          return
+        }
+      }
+    }
+
+    lastFinalContextRef.current = resolvedRowsContext
+    onResolvedContextChange(resolvedRowsContext)
+  }, [resolvedRowsContext, onResolvedContextChange])
 
   const handleAddRow = useCallback(() => {
     setRows((oldRows) => [
@@ -126,13 +337,13 @@ export const ParamsTabView = React.forwardRef<ParamsTabViewHandle, ParamsTabView
       event.dataTransfer.effectAllowed = 'move'
       event.dataTransfer.setData('text/plain', String(index))
 
-      // Nettoyer un éventuel ghost précédent
+      // Clean up any previous ghost
       if (dragGhostRef.current) {
         document.body.removeChild(dragGhostRef.current)
         dragGhostRef.current = null
       }
 
-      // Créer un mini tableau contenant uniquement la ligne clonée
+      // Create a mini table containing only the cloned row
       const maybeRow = event.currentTarget.closest('tr')
       const rowElement = (maybeRow ?? event.currentTarget) as HTMLElement
       const rect = rowElement.getBoundingClientRect()
@@ -156,12 +367,12 @@ export const ParamsTabView = React.forwardRef<ParamsTabViewHandle, ParamsTabView
       document.body.appendChild(container)
       dragGhostRef.current = container
 
-      // Garder la même position relative entre la souris et la ligne
+      // Keep same relative position between mouse and row
       const offsetX = event.clientX - rect.left
       const offsetY = event.clientY - rect.top
       event.dataTransfer.setDragImage(container, offsetX, offsetY)
     },
-    [dragGhostRef]
+    []
   )
 
   const handleDrop = useCallback(
@@ -231,10 +442,24 @@ export const ParamsTabView = React.forwardRef<ParamsTabViewHandle, ParamsTabView
                   ]
                     .filter(Boolean)
                     .join(' ') || undefined
+                  const contextForRow: VariableContext =
+                    visibilityMode === 'accumulated'
+                      ? sequence.contextsBeforeRow[index] ?? baseContext
+                      : baseContext
+
+                  const availableVariables: VariableDefinition[] = Object.entries(contextForRow).map(
+                    ([name, value]) => ({
+                      name,
+                      value
+                    })
+                  )
+
+                  const resolvedRow = sequence.resolvedRows[index]
+
                   return (
-                  <tr
-                    key={index}
-                    className={rowClassName}
+                    <tr
+                      key={index}
+                      className={rowClassName}
                       onDragOver={(e) => {
                         e.preventDefault()
                         const rect = e.currentTarget.getBoundingClientRect()
@@ -264,16 +489,16 @@ export const ParamsTabView = React.forwardRef<ParamsTabViewHandle, ParamsTabView
                       }}
                     >
                       <td>
-                    <span
-                      className="params-table-drag-handle"
-                      draggable
-                      onDragStart={(e) => {
-                        e.stopPropagation()
-                        handleDragStart(e, index)
-                      }}
-                    >
-                      ⋮⋮
-                    </span>
+                        <span
+                          className="params-table-drag-handle"
+                          draggable
+                          onDragStart={(e) => {
+                            e.stopPropagation()
+                            handleDragStart(e, index)
+                          }}
+                        >
+                          ⋮⋮
+                        </span>
                       </td>
                       <td>
                         <Toggle
@@ -286,19 +511,21 @@ export const ParamsTabView = React.forwardRef<ParamsTabViewHandle, ParamsTabView
                       </td>
                       <td>
                         <VariableCell
-                          value={row.key}
-                          variables={variables}
                           rowIndex={index}
                           columnId="key"
+                          value={row.key}
+                          variables={availableVariables}
+                          resolvedValue={resolvedRow?.key}
                           updateData={updateData}
                         />
                       </td>
                       <td>
                         <VariableCell
-                          value={row.value}
-                          variables={variables}
                           rowIndex={index}
                           columnId="value"
+                          value={row.value}
+                          variables={availableVariables}
+                          resolvedValue={resolvedRow?.value}
                           updateData={updateData}
                         />
                       </td>
@@ -334,5 +561,4 @@ export const ParamsTabView = React.forwardRef<ParamsTabViewHandle, ParamsTabView
   )
 })
 
-ParamsTabView.displayName = 'ParamsTabView'
-
+KeyValueTable.displayName = 'KeyValueTable'

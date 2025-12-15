@@ -14,6 +14,8 @@ A generic Electron + React foundation library with VSCode-like UI components and
 - **Renderer Process Components**:
   - `CustomDropdown`: VSCode-styled dropdown component
   - `Tabs` (formerly `CustomTabs`): VSCode-styled tabs component
+  - `ListView` & `ListViewDropdown`: hierarchical lists and dropdown tree selector
+  - `InputTable` & `KeyValueTable`: editable tables for parameter/key-value style data
   - `useTheme`: React hook for theme management
   - `logger`: Renderer logger that communicates with main process
 
@@ -74,4 +76,3 @@ pnpm lint
 ## License
 
 MIT
-

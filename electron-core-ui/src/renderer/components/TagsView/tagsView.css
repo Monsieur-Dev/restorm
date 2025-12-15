@@ -1,0 +1,48 @@
+.ecui-tags-view {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ecui-tags-view-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ecui-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 3px;
+  border: none;
+  background-color: var(--vscode-tag-background);
+  color: var(--vscode-tag-foreground);
+  font-weight: bold;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.ecui-tag:hover {
+  background-color: var(--vscode-tag-background-hover);
+}
+
+.ecui-tag-label {
+  white-space: nowrap;
+}
+
+.ecui-tag--editing {
+  padding: 0;
+}
+
+.ecui-tag-input {
+  border: 1px solid var(--vscode-input-border);
+  background-color: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: var(--vscode-editor-font-size, 13px);
+  outline: none;
+  min-width: 60px;
+}

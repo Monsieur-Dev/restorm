@@ -304,4 +304,3 @@ These features are supported in:
 - Edge 88+
 - Safari 13.1+
 - Firefox 72+ (except custom scrollbar)
-

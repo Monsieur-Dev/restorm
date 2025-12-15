@@ -79,6 +79,11 @@ colors:
   # Badge
   badge.background: "#e76f51"
   badge.foreground: "#FFFFFF"
+
+  # Tag colors for Sunset Beach Day (use peach accent)
+  tag.background: "#f4a261"
+  tag.background-hover: "#f7b37a"
+  tag.foreground: "#264653"
   
   # Progress bar
   progressBar.background: "#2a9d8f"
@@ -624,4 +629,3 @@ tokenColors:
       foreground: "#b07aa1"
 
 semanticHighlighting: true
-

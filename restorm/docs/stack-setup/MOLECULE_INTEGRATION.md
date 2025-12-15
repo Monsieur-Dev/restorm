@@ -54,4 +54,3 @@ import { Button, Input, Select } from '@dtinsight/molecule'
 - [Molecule GitHub](https://github.com/DTStack/molecule)
 - [Molecule Documentation](https://dtstack.github.io/molecule/)
 - [Molecule Examples](https://github.com/DTStack/molecule-examples)
-

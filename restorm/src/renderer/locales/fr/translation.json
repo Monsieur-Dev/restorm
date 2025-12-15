@@ -1,72 +1,58 @@
 {
   "app": {
     "title": "restorm",
-    "welcome": "Bonjour restorm",
-    "tabsDemo": "Démo des onglets"
-  },
-  "themeTest": {
-    "title": "Page de Test des Thèmes",
-    "description": "Page de test pour visualiser tous les composants d'interface avec différents thèmes VSCode",
-    "selectTheme": "Sélectionner un Thème",
-    "language": "Langue",
-    "components": {
-      "inputs": "Champs de Texte",
-      "checkboxes": "Cases à Cocher & Boutons Radio",
-      "buttons": "Boutons",
-      "select": "Liste Déroulante",
-      "textarea": "Zone de Texte",
-      "panels": "Panneaux",
-      "lists": "Listes",
-      "text": "Variantes de Texte",
-      "stickyHeaders": "En-têtes collants"
-    }
+    "openSettings": "Ouvrir les paramètres"
   },
   "menuBar": {
     "file": "Fichier",
-    "edit": "Édition",
-    "view": "Affichage",
-    "help": "Aide",
-    "new": "Nouveau",
     "open": "Ouvrir",
-    "openRecent": "Ouvrir récent",
-    "editor": "Éditeur",
-    "save": "Enregistrer",
-    "autoSave": "Sauvegarde automatique",
-    "revert": "Restaurer",
-    "undo": "Annuler",
-    "redo": "Rétablir",
-    "cut": "Couper",
-    "copy": "Copier",
-    "paste": "Coller",
-    "selectAll": "Tout sélectionner",
-    "find": "Rechercher",
-    "replace": "Remplacer",
-    "toggleWordWrap": "Basculer le retour à la ligne",
-    "toggleFullScreen": "Basculer le plein écran",
-    "zoomIn": "Zoom avant",
-    "zoomOut": "Zoom arrière",
-    "resetZoom": "Réinitialiser le zoom",
-    "toggleDeveloperTools": "Basculer les outils de développement",
-    "about": "À propos",
-    "documentation": "Documentation",
-    "reportIssue": "Signaler un problème",
-    "keyboardShortcuts": "Raccourcis clavier",
     "exit": "Quitter"
   },
   "sidebar": {
-    "collections": "Collections",
-    "allRequests": "Toutes les requêtes",
-    "sampleCollection": "Collection exemple",
-    "getPets": "GET /pets",
-    "getPetById": "GET /pets/{id}",
-    "createPet": "POST /pets"
+    "addRequest": "Ajouter une requête",
+    "collapseAll": "Tout réduire",
+    "workspace": "Espace de travail",
+    "contextMenu": {
+      "createSubfolder": "Créer un sous-dossier",
+      "defineVariables": "Définir les variables",
+      "delete": "Supprimer",
+      "clone": "Cloner",
+      "rename": "Renommer"
+    }
+  },
+  "environment": {
+    "newName": "Nouvel environnement",
+    "add": "Ajouter un environnement",
+    "rename": "Renommer",
+    "addSub": "Ajouter un sous-environnement",
+    "delete": "Supprimer"
+  },
+  "folderView": {
+    "environments": "Environnements",
+    "environmentsAriaLabel": "Environnements du dossier",
+    "variables": "Variables",
+    "addVariable": "Ajouter une variable",
+    "selectEnvironment": "Sélectionnez un environnement pour voir les variables",
+    "tabs": {
+      "docs": "Docs",
+      "configuration": "Configuration",
+      "notes": "Notes"
+    }
   },
   "requestTab": {
-    "hello": "Hello world",
     "send": "Envoyer",
     "urlPlaceholder": "URL de la requête",
+    "methodSelect": "Sélectionner la méthode HTTP",
+    "addHeader": "Ajouter un header",
+    "addParam": "Ajouter un paramètre",
+    "environmentSelector": {
+      "ariaLabel": "Sélectionner un environnement",
+      "listAriaLabel": "Liste des environnements",
+      "noEnvironment": "Aucun environnement"
+    },
     "body": {
-      "fileLabel": "Fichier ou URL :"
+      "fileLabel": "Fichier ou URL :",
+      "browse": "Parcourir..."
     },
     "tabs": {
       "docs": "Docs",
@@ -74,15 +60,26 @@
       "authorization": "Autorisation",
       "headers": "En-têtes",
       "body": "Corps",
-      "params": "Paramètres"
+      "params": "Paramètres",
+      "pathParams": "Paramètres de chemin",
+      "notes": "Notes"
     },
     "responses": {
       "tabs": {
-        "raw": "Brut",
         "prettyfied": "Formattée",
         "jsoncrack": "JSONCrack"
       }
     }
+  },
+  "workbench": {
+    "tagsLabel": "Tags :",
+    "removeTag": "Supprimer le tag",
+    "tabContextMenu": {
+      "close": "Fermer",
+      "closeOthers": "Fermer les autres"
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Aller à la définition"
   }
 }
-

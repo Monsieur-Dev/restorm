@@ -29,6 +29,3 @@ export const ElectronCoreUiProvider: React.FC<ElectronCoreUiProviderProps> = ({
 }
 
 export default ElectronCoreUiProvider
-
-
-

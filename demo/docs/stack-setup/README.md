@@ -156,4 +156,3 @@ The project uses electron-vite for optimized builds:
 - Optimized production builds
 - TypeScript support out of the box
 - Separate configurations for main, preload, and renderer processes
-

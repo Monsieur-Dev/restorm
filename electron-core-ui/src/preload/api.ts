@@ -111,7 +111,21 @@ export const createCoreUIAPI = (): Record<string, unknown> => ({
   getWindowIcon: async (): Promise<string | undefined> => {
     const result: unknown = await ipcRenderer.invoke('get-window-icon')
     return result as string | undefined
+  },
+
+  // Storage API for persisting application data
+  storage: {
+    get: async <T>(key: string): Promise<T | undefined> => {
+      const result: unknown = await ipcRenderer.invoke('storage:get', key)
+      return result as T | undefined
+    },
+    set: async <T>(key: string, value: T): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('storage:set', key, value)
+      return result as boolean
+    },
+    delete: async (key: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('storage:delete', key)
+      return result as boolean
+    }
   }
 })
-
-

@@ -177,7 +177,7 @@ The project's ESLint configuration strictly forbids direct `console.*` usage:
 }
 ```
 
-This ensures all logging goes through Winston. The only exception is the error handler in the renderer logger service itself, which uses `// eslint-disable-next-line no-console`.
+This ensures all logging goes through Winston. The only exception is the error handler in the renderer logger service itself, which internally bypasses the `no-console` rule for its own fallback error handling.
 
 ## Migration from console.log
 
@@ -369,4 +369,3 @@ Console output active (info/warn/error levels).
 - [Winston Documentation](https://github.com/winstonjs/winston)
 - [Winston Transports](https://github.com/winstonjs/winston/blob/master/docs/transports.md)
 - [Winston Formats](https://github.com/winstonjs/winston/blob/master/docs/formats.md)
-

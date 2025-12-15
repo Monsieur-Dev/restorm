@@ -60,6 +60,11 @@ colors:
   editorIndentGuide.background: "#aaaaaa60"
   editorIndentGuide.activeBackground: "#777777b0"
 
+  # Tag colors for Quiet Light (use lavender accent)
+  tag.background: "#c4b7d7"
+  tag.background-hover: "#b5a7ce"
+  tag.foreground: "#3b3063"
+
 tokenColors:
   - settings:
       foreground: "#333333"

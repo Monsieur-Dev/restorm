@@ -23,13 +23,23 @@ const Titlebar: React.FC<TitlebarProps> = ({
 
   // Fetch app icon if no custom icon is provided
   useEffect(() => {
-    if (!icon) {
-      window.api.getWindowIcon().then((path) => {
-        setAppIconPath(path)
-      }).catch(() => {
-        // Ignore errors when fetching app icon
-      })
+    if (icon) return
+    if (typeof window === 'undefined') return
+
+    const anyWindow = window as unknown as { api?: { getWindowIcon?: () => Promise<string | undefined> } }
+    const api = anyWindow.api
+    if (!api?.getWindowIcon) {
+      return
     }
+
+    api
+      .getWindowIcon()
+      .then((path) => {
+        setAppIconPath(path)
+      })
+      .catch(() => {
+        // Ignore errors when fetching app icon in non-Electron/web environments
+      })
   }, [icon])
 
   // Render icon

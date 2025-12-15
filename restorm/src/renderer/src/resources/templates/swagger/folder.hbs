@@ -1,0 +1,63 @@
+# {{title}}
+
+{{#if description}}
+{{description}}
+
+{{/if}}
+{{#if version}}
+**Version:** {{version}}
+
+{{/if}}
+{{#if termsOfService}}
+**Terms of Service:** [{{termsOfService}}]({{termsOfService}})
+
+{{/if}}
+{{#if contact}}
+## Contact
+
+{{#if contact.name}}
+- **Name:** {{contact.name}}
+{{/if}}
+{{#if contact.email}}
+- **Email:** [{{contact.email}}](mailto:{{contact.email}})
+{{/if}}
+{{#if contact.url}}
+- **URL:** [{{contact.url}}]({{contact.url}})
+{{/if}}
+
+{{/if}}
+{{#if license}}
+## License
+
+{{#if license.url}}
+[{{license.name}}]({{license.url}})
+{{else}}
+{{license.name}}
+{{/if}}
+
+{{/if}}
+{{#if externalDocs}}
+## External Documentation
+
+[{{externalDocs.description}}]({{externalDocs.url}})
+
+{{/if}}
+{{#if host}}
+**Host:** `{{host}}`
+
+{{/if}}
+{{#if basePath}}
+**Base Path:** `{{basePath}}`
+
+{{/if}}
+{{#if schemes}}
+**Schemes:** {{#each schemes}}`{{this}}`{{#unless @last}}, {{/unless}}{{/each}}
+{{/if}}
+
+{{#if modelsDiagram}}
+## Models
+
+```mermaid
+{{{modelsDiagram}}}
+```
+{{/if}}

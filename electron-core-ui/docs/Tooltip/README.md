@@ -17,6 +17,13 @@ export interface TooltipProps {
   onMouseEnter?: () => void
   onMouseLeave?: () => void
   className?: string
+  /**
+   * Vertical placement strategy:
+   * - 'auto' (default): prefer above the target, but fall back below if there is not enough space.
+   * - 'above': always position above the target (clamped to viewport).
+   * - 'below': prefer below the target, falling back above only when there is no space below.
+   */
+  placement?: 'auto' | 'above' | 'below'
 }
 ```
 
@@ -28,6 +35,7 @@ export interface TooltipProps {
 - **onMouseEnter** (`() => void`, optional): Called when the user hovers the tooltip itself.
 - **onMouseLeave** (`() => void`, optional): Called when the user leaves the tooltip.
 - **className** (`string`, optional): Additional CSS classes merged with the base `.tooltip` class.
+- **placement** (`'auto' | 'above' | 'below'`, optional): Controls vertical placement relative to the target; defaults to `'auto'`.
 
 ## Usage
 
@@ -63,6 +71,10 @@ const Example: React.FC = () => {
 ## Behavior
 
 - Computes the position from `targetRef.getBoundingClientRect()` and keeps the tooltip centered over the target by default.
+- Supports vertical placement:
+  - `'auto'`: prefers above the target (status bar–style) and falls back below if there is not enough space.
+  - `'above'`: forces the tooltip above the target (clamped inside the viewport).
+  - `'below'`: prefers below the target and falls back above only when there is no room below.
 - Repositions automatically when:
   - `show` changes.
   - The window is scrolled (capturing scroll events).
@@ -75,5 +87,3 @@ const Example: React.FC = () => {
 - Manage `show` state in the **parent** component; `Tooltip` itself is intentionally stateless regarding visibility.
 - Always reuse a single `Tooltip` per target rather than creating a new component instance on every render, to avoid layout thrashing.
 - When integrating into more complex layouts (status bar, lists), ensure `targetRef` always points to a stable DOM element (not conditionally rendered), otherwise positioning may fail or flicker.
-
-

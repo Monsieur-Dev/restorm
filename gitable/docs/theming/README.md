@@ -269,4 +269,3 @@ Potential improvements for the theme system:
 5. **Auto Dark Mode**: Switch based on system preferences
 6. **Per-Window Themes**: Different themes for different windows
 7. **Theme Variants**: Light/dark variants of the same theme
-

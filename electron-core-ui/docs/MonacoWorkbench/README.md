@@ -240,4 +240,3 @@ When using this component:
 4. The component applies global styles to ensure consistency
 5. All child elements inherit VSCode-like styling
 6. Use CSS variables for colors to maintain theme compatibility
-

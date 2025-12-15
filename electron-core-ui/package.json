@@ -29,12 +29,17 @@
       "types": "./dist/src/preload/electronAPI.d.ts",
       "default": "./dist/src/preload/electronAPI.js"
     },
-    "./types/*": "./dist/src/types/*",
+    "./types": {
+      "types": "./types/index.d.ts",
+      "default": "./types/index.d.ts"
+    },
+    "./types/*": "./types/*",
     "./fonts.css": "./fonts.css",
     "./resources/fonts/*": "./resources/fonts/*"
   },
   "files": [
     "dist",
+    "types",
     "resources",
     "fonts.css",
     "README.md",
@@ -86,17 +91,24 @@
     }
   },
   "dependencies": {
+    "@emoji-mart/data": "^1.2.1",
+    "@emoji-mart/react": "^1.1.1",
     "@vscode/codicons": "^0.0.41",
     "ag-grid-community": "^34.3.1",
     "ag-grid-react": "^34.3.1",
+    "handlebars": "^4.7.7",
     "i18next": "^23.7.6",
     "js-yaml": "^4.1.0",
+    "mermaid": "^10.9.0",
     "react-i18next": "^13.5.0",
     "react-icons": "^4.12.0",
+    "react-markdown": "^9.0.1",
+    "remark-gfm": "^4.0.0",
     "winston": "^3.18.3"
   },
   "devDependencies": {
     "@monaco-editor/react": "^4.7.0",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.10.4",
     "@types/react": "^18.2.42",
     "@types/react-dom": "^18.2.17",
@@ -107,8 +119,8 @@
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
-    "@types/js-yaml": "^4.0.9",
     "monaco-editor": "^0.54.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vite": "^7.3.0"
   }
 }

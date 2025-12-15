@@ -110,5 +110,3 @@ const urlVariables: VariableDefinition[] = [
   ariaLabel="Request URL"
 />
 ```
-
-

@@ -57,4 +57,3 @@
 .monaco-select-box:hover:not(:disabled) {
   background-color: var(--vscode-settings-dropdownHoverBackground, var(--vscode-settings-dropdownBackground));
 }
-

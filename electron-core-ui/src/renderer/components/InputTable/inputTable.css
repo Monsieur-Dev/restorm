@@ -71,7 +71,6 @@
 .input-table-table th,
 .input-table-table td {
   padding: 2px 6px;
-  border-bottom: 1px solid var(--vscode-panel-border);
 }
 
 .input-table-table tbody tr:hover {
@@ -100,5 +99,3 @@
   color: inherit;
   font: inherit;
 }
-
-

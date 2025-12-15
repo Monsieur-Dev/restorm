@@ -99,5 +99,3 @@ const SettingsShell: React.FC = () => {
 - Always keep the `schema` **pure and serializable** (no functions inside), since it may be generated or persisted from external sources.
 - When constructing `selectedCategory`, reuse the same `'-'`-joined path logic as in the component (root to leaf keys) to avoid mismatches.
 - For search UX, use `searchQuery` only to control expansion; apply actual text filtering on the right-hand settings panel instead of mutating the schema.
-
-

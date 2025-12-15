@@ -1,18 +1,41 @@
-import React, { useEffect, useMemo, useRef } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Monaco } from '@monaco-editor/react'
 import type * as monacoEditor from 'monaco-editor'
 import type { VariableInputBoxProps, VariableDefinition } from './types'
 import { defaultInputBoxStyles } from '../InputBox/types'
 import { CodeEditor } from '../CodeEditor/CodeEditor'
+import { Tooltip } from '../Tooltip'
+import { ContextMenu, type ContextMenuItem } from '../ContextMenu/ContextMenu'
 import '../InputBox/inputBox.css'
 import './variableInputBox.css'
 
 const LANGUAGE_ID = 'handlebars'
 
-let languageConfigured = false
-let completionProviderDisposable: monacoEditor.IDisposable | null = null
-let hoverProviderDisposable: monacoEditor.IDisposable | null = null
-let cancellationHandlerRegistered = false
+// Use window to persist state across hot reloads
+const globalKey = '__variableInputBoxProviders__'
+interface ProviderState {
+  languageConfigured: boolean
+  completionProviderDisposable: monacoEditor.IDisposable | null
+  hoverProviderDisposable: monacoEditor.IDisposable | null
+  cancellationHandlerRegistered: boolean
+  modelVariablesMap: WeakMap<monacoEditor.editor.ITextModel, VariableDefinition[]>
+}
+
+function getProviderState(): ProviderState {
+  const win = window as unknown as Record<string, ProviderState | undefined>
+  if (!win[globalKey]) {
+    win[globalKey] = {
+      languageConfigured: false,
+      completionProviderDisposable: null,
+      hoverProviderDisposable: null,
+      cancellationHandlerRegistered: false,
+      modelVariablesMap: new WeakMap()
+    }
+  }
+  return win[globalKey]
+}
+
 
 const isMonacoCancellationError = (reason: unknown): boolean => {
   if (!reason) return false
@@ -28,25 +51,121 @@ const isMonacoCancellationError = (reason: unknown): boolean => {
   return name === 'Canceled' || message === 'Canceled' || message.includes('Canceled: Canceled')
 }
 
-const VariableInputBox: React.FC<VariableInputBoxProps> = ({
-  value,
-  onChange,
-  variables,
-  placeholder,
-  id,
-  className,
-  style,
-  ariaLabel
-}) => {
+const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
+  const { t } = useTranslation()
+  const {
+    value,
+    onChange,
+    variables,
+    placeholder,
+    resolvedValue,
+    id,
+    className,
+    style,
+    ariaLabel
+  } = props
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
   const variablesRef = useRef<VariableDefinition[]>(variables)
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const [showResolvedTooltip, setShowResolvedTooltip] = useState(false)
+  const [editorMounted, setEditorMounted] = useState(false)
+  const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number }>({
+    visible: false,
+    x: 0,
+    y: 0
+  })
+
+  const hasResolvedTooltip = Boolean(resolvedValue && resolvedValue !== value)
+
+  // Context menu handlers
+  const handleCut = useCallback(() => {
+    editorRef.current?.focus()
+    editorRef.current?.trigger('keyboard', 'editor.action.clipboardCutAction', null)
+  }, [])
+
+  const handleCopy = useCallback(() => {
+    editorRef.current?.focus()
+    editorRef.current?.trigger('keyboard', 'editor.action.clipboardCopyAction', null)
+  }, [])
+
+  const handlePaste = useCallback(async () => {
+    editorRef.current?.focus()
+    try {
+      const text = await navigator.clipboard.readText()
+      editorRef.current?.trigger('keyboard', 'paste', { text })
+    } catch {
+      // Fallback: use execCommand
+      document.execCommand('paste')
+    }
+  }, [])
+
+  const handleGoToDefinition = useCallback(() => {
+    const editor = editorRef.current
+    if (!editor) return
+    
+    const position = editor.getPosition()
+    if (!position) return
+    
+    const model = editor.getModel()
+    if (!model) return
+    
+    const lineText = model.getLineContent(position.lineNumber)
+    const col = position.column
+    
+    // Find variable under cursor: {{variableName}}
+    const openIndex = lineText.lastIndexOf('{{', col - 1)
+    const closeIndex = lineText.indexOf('}}', openIndex + 2)
+    
+    if (openIndex !== -1 && closeIndex !== -1 && col >= openIndex + 1 && col <= closeIndex + 3) {
+      const variableName = lineText.substring(openIndex + 2, closeIndex).trim()
+      // Trigger the onGoToDefinition callback if it exists
+      if (props.onGoToDefinition) {
+        props.onGoToDefinition(variableName)
+      }
+    }
+  }, [props])
+
+  const contextMenuItems = useMemo<ContextMenuItem[]>(() => {
+    const items: ContextMenuItem[] = [
+      { id: 'cut', label: t('contextMenu.cut'), onClick: handleCut },
+      { id: 'copy', label: t('contextMenu.copy'), onClick: handleCopy },
+      { id: 'paste', label: t('contextMenu.paste'), onClick: handlePaste }
+    ]
+    
+    if (props.onGoToDefinition) {
+      items.push(
+        { id: 'sep1', label: '', isSeparator: true },
+        { id: 'goToDefinition', label: t('contextMenu.goToDefinition'), onClick: handleGoToDefinition }
+      )
+    }
+    
+    return items
+  }, [t, handleCut, handleCopy, handlePaste, handleGoToDefinition, props.onGoToDefinition])
+
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    setContextMenu({ visible: true, x: e.clientX, y: e.clientY })
+  }, [])
+
+  const closeContextMenu = useCallback(() => {
+    setContextMenu(prev => ({ ...prev, visible: false }))
+  }, [])
+
+  // Keep variablesRef in sync
+  variablesRef.current = variables
+
+  // Update modelVariablesMap when variables change AND editor is mounted
+  useEffect(() => {
+    if (!editorMounted) return
+    const model = editorRef.current?.getModel()
+    if (model) {
+      getProviderState().modelVariablesMap.set(model, variables)
+    }
+  }, [variables, editorMounted])
 
   useEffect(() => {
-    variablesRef.current = variables
-  }, [variables])
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || cancellationHandlerRegistered) return
+    const state = getProviderState()
+    if (typeof window === 'undefined' || state.cancellationHandlerRegistered) return
 
     const handler = (event: PromiseRejectionEvent): void => {
       if (isMonacoCancellationError(event.reason)) {
@@ -55,7 +174,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = ({
     }
 
     window.addEventListener('unhandledrejection', handler)
-    cancellationHandlerRegistered = true
+    state.cancellationHandlerRegistered = true
   }, [])
 
   const editorOptions = useMemo(
@@ -72,6 +191,9 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = ({
       renderLineHighlight: 'none' as const,
       renderIndentGuides: false,
       automaticLayout: true,
+      // Render suggestion / hover widgets in a fixed overlay attached to body,
+      // so they are not clipped by ancestor overflow: hidden (ScrollableElement, tables, etc.).
+      fixedOverflowWidgets: true as const,
       scrollbar: {
         vertical: 'hidden' as const,
         horizontal: 'hidden' as const,
@@ -83,6 +205,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = ({
       },
       quickSuggestions: false,
       suggestOnTriggerCharacters: true,
+      contextmenu: false,
       fontSize: 13,
       lineHeight: 16,
       padding: {
@@ -103,20 +226,22 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = ({
   ): void => {
     editorRef.current = editor
 
+    const state = getProviderState()
+
     // Configure language, completion and hover for Handlebars-style variables
-    if (!languageConfigured) {
+    if (!state.languageConfigured) {
       monacoInstance.languages.setMonarchTokensProvider(LANGUAGE_ID, {
         tokenizer: {
           root: [[/\{\{[^}]+\}\}/, 'variableToken']]
         }
       })
-      languageConfigured = true
+      state.languageConfigured = true
     }
 
-    if (!completionProviderDisposable) {
-      completionProviderDisposable = monacoInstance.languages.registerCompletionItemProvider(LANGUAGE_ID, {
+    if (!state.completionProviderDisposable) {
+      state.completionProviderDisposable = monacoInstance.languages.registerCompletionItemProvider(LANGUAGE_ID, {
         triggerCharacters: ['{'],
-        provideCompletionItems(_model, position) {
+        provideCompletionItems(model, position) {
           const range = {
             startLineNumber: position.lineNumber,
             endLineNumber: position.lineNumber,
@@ -124,23 +249,29 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = ({
             endColumn: position.column
           }
 
-          const vars = variablesRef.current
-          const suggestions = vars.map((v) => ({
-            label: v.name,
-            kind: monacoInstance.languages.CompletionItemKind.Variable,
-            insertText: `{{${v.name}}}`,
-            detail: v.value,
-            documentation: v.description ?? v.value,
-            range
-          }))
-
-          return { suggestions }
+          const vars = getProviderState().modelVariablesMap.get(model) ?? []
+          const suggestions = vars.map((v) => {
+            const labelObj: { label: string; description?: string } = { label: v.name }
+            if (v.value) {
+              labelObj.description = v.value
+            }
+            return {
+              label: labelObj as monacoEditor.languages.CompletionItemLabel,
+              kind: monacoInstance.languages.CompletionItemKind.Variable,
+              insertText: `{{${v.name}}}`,
+              documentation: v.description ?? v.value,
+              range
+            }
+          })
+          // incomplete: true forces Monaco to always recalculate suggestions
+          // instead of using cached results when variables change
+          return { suggestions, incomplete: true }
         }
       })
     }
 
-    if (!hoverProviderDisposable) {
-      hoverProviderDisposable = monacoInstance.languages.registerHoverProvider(LANGUAGE_ID, {
+    if (!state.hoverProviderDisposable) {
+      state.hoverProviderDisposable = monacoInstance.languages.registerHoverProvider(LANGUAGE_ID, {
         provideHover(model, position) {
           const lineText = model.getLineContent(position.lineNumber)
           const col = position.column
@@ -157,7 +288,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = ({
           }
 
           const name = lineText.substring(openIndex + 2, closeIndex).trim()
-          const vars = variablesRef.current
+          const vars = getProviderState().modelVariablesMap.get(model) ?? []
           const match = vars.find((v) => v.name === name)
 
           if (!match) {
@@ -204,13 +335,22 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = ({
       domNode.addEventListener('keydown', preventFind, true)
     }
 
+    const model = editor.getModel()
+    if (model) {
+      state.modelVariablesMap.set(model, variablesRef.current)
+    }
+
+
+    // Signal that editor is mounted so useEffect can update variables
+    setEditorMounted(true)
+
     if (ariaLabel) {
       editor.updateOptions({ ariaLabel })
     }
   }
 
   return (
-    <div>
+    <>
       <div
         id={id}
         className={['monaco-inputbox', 'idle', className].filter(Boolean).join(' ')}
@@ -221,6 +361,16 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = ({
           minHeight: 28,
           ...(style ?? {})
         }}
+        ref={containerRef}
+        onMouseEnter={() => {
+          if (hasResolvedTooltip) {
+            setShowResolvedTooltip(true)
+          }
+        }}
+        onMouseLeave={() => {
+          setShowResolvedTooltip(false)
+        }}
+        onContextMenu={handleContextMenu}
       >
         <div className="ibwrapper" style={{ display: 'flex', alignItems: 'center' }}>
           {placeholder && !value && (
@@ -258,11 +408,24 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = ({
             />
           </div>
         </div>
+        {hasResolvedTooltip && (
+          <Tooltip
+            targetRef={containerRef}
+            content={<span>{resolvedValue}</span>}
+            show={showResolvedTooltip}
+            placement="below"
+          />
+        )}
       </div>
-    </div>
+      <ContextMenu
+        visible={contextMenu.visible}
+        x={contextMenu.x}
+        y={contextMenu.y}
+        items={contextMenuItems}
+        onRequestClose={closeContextMenu}
+      />
+    </>
   )
 }
 
 export { VariableInputBox }
-
-

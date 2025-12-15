@@ -1,0 +1,108 @@
+# {{summary}}
+
+{{#if description}}
+{{description}}
+
+{{/if}}
+{{#if operationId}}
+**Operation ID:** `{{operationId}}`
+
+{{/if}}
+{{#if deprecated}}
+> ⚠️ **Deprecated:** This endpoint is deprecated and may be removed in future versions.
+
+{{/if}}
+{{#if externalDocs}}
+## External Documentation
+
+[{{externalDocs.description}}]({{externalDocs.url}})
+
+{{/if}}
+{{#if consumes}}
+## Consumes
+
+{{#each consumes}}
+- `{{this}}`
+{{/each}}
+
+{{/if}}
+{{#if produces}}
+## Produces
+
+{{#each produces}}
+- `{{this}}`
+{{/each}}
+
+{{/if}}
+{{#if parameters}}
+## Parameters
+
+| Name | Location | Type | Required | Description |
+|------|----------|------|----------|-------------|
+{{#each parameters}}
+| `{{name}}` | {{in}} | {{#if schema}}{{schema.$ref}}{{else}}{{type}}{{#if format}} ({{format}}){{/if}}{{/if}} | {{#if required}}Yes{{else}}No{{/if}} | {{description}} |
+{{/each}}
+
+{{/if}}
+{{#if schemaDefinitions}}
+## Types
+
+{{#each schemaDefinitions}}
+### {{name}}
+
+{{#if description}}
+{{description}}
+
+{{/if}}
+**Reference:** `{{ref}}`
+
+{{#if mermaidDiagram}}
+```mermaid
+{{{mermaidDiagram}}}
+```
+{{/if}}
+
+{{!-- Keep the legacy table for detailed property view --}}
+{{#if properties.length}}
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+{{#each properties}}
+| `{{name}}` | {{type}} | {{#if required}}Yes{{else}}No{{/if}} | {{description}} |
+{{/each}}
+
+{{/if}}
+
+{{/each}}
+{{/if}}
+{{#if responses}}
+## Responses
+
+{{#each responses}}
+### {{@key}}
+{{#if this.description}}
+{{this.description}}
+{{/if}}
+
+{{#if this.schema}}
+**Schema:** {{#if this.schema.$ref}}`{{this.schema.$ref}}`{{else}}`{{this.schema.type}}`{{/if}}
+{{/if}}
+
+{{#if this.headers}}
+**Headers:**
+{{#each this.headers}}
+- `{{@key}}`: {{this.description}} ({{this.type}}{{#if this.format}}, {{this.format}}{{/if}})
+{{/each}}
+{{/if}}
+
+{{/each}}
+{{/if}}
+{{#if security}}
+## Security
+
+{{#each security}}
+{{#each this}}
+- **{{@key}}**{{#if this.length}}: {{#each this}}`{{this}}`{{#unless @last}}, {{/unless}}{{/each}}{{/if}}
+{{/each}}
+{{/each}}
+{{/if}}

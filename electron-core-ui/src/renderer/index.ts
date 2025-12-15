@@ -1,3 +1,8 @@
+// Ensure a safe window.api shim exists when running in a non-Electron (pure web) environment
+import { ensureCoreUiWebApiShim } from './webShim'
+
+ensureCoreUiWebApiShim()
+
 // Renderer process exports
 export * from './components'
 export { MessageType, onWorkbenchTabDropped } from './components'
@@ -10,4 +15,3 @@ export type { ThemeContextValue } from './contexts'
 export * from './services'
 export { initializeI18n, default as i18n } from './i18n'
 export type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../types/theme'
-

@@ -129,4 +129,3 @@ test.describe('Settings Page - VSCode Theme Integration', () => {
     expect(position).toBe('sticky')
   })
 })
-

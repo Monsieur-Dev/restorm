@@ -90,5 +90,3 @@ export interface SplitViewPaneProps {
     - `--vscode-sideBar-background`
 
 The main container uses the `monaco-split-view2` class name to stay close to VS Code’s DOM structure.
-
-

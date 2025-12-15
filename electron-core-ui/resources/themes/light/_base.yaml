@@ -16,6 +16,19 @@ colors:
     value: "#F8F8F8"
     description: Editor widget background color
 
+  # Hover widget / tooltip colors
+  - id: editorHoverWidget.background
+    value: "#F3F3F3"
+    description: Hover widget background color
+
+  - id: editorHoverWidget.foreground
+    value: "#333333"
+    description: Hover widget foreground color
+
+  - id: editorHoverWidget.border
+    value: "#CECECE"
+    description: Hover widget border color
+
   # Generic foreground (used by many controls / labels)
   - id: foreground
     value: "#3B3B3B"
@@ -75,6 +88,11 @@ colors:
   - id: descriptionForeground
     value: "#3B3B3B"
     description: Description / secondary foreground
+
+  # Inline code / text code block background (used by tooltips and markdown)
+  - id: textCodeBlock.background
+    value: "rgba(255, 255, 255, 0.1)"
+    description: Text code block background
 
   # Dropdown colors
   - id: dropdown.background
@@ -194,6 +212,19 @@ colors:
   - id: scrollbarSlider.activeBackground
     value: "#00000099"
     description: Scrollbar slider active background
+
+  # Tag colors (light base)
+  - id: tag.background
+    value: "#d0e5ff" # soft blue
+    description: Tag background color
+
+  - id: tag.background-hover
+    value: "#bddbff" # slightly stronger blue
+    description: Tag hover background color
+
+  - id: tag.foreground
+    value: "#003355"
+    description: Tag foreground color
 
   # Tab colors
   - id: tab.activeForeground

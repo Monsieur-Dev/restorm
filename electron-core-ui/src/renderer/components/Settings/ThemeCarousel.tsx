@@ -220,4 +220,3 @@ export const ThemeCarousel: React.FC<ThemeCarouselProps> = ({ className }) => {
 }
 
 export default ThemeCarousel
-

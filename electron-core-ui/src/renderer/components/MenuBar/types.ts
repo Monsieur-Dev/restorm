@@ -37,4 +37,3 @@ export interface MenuItemState {
   isHovered: boolean
   isFocused: boolean
 }
-

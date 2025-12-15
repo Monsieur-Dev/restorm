@@ -38,4 +38,3 @@ export interface ThemeInfo {
 }
 
 export type ThemeVariables = Record<string, string>
-

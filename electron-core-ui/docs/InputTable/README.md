@@ -146,5 +146,3 @@ const createEmptyRow = (): InputTableRow => ({
   getVariablesForColumn={getVariablesForColumn}
 />
 ```
-
-

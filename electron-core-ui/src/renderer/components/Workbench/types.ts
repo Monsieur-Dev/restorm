@@ -1,3 +1,5 @@
+import type { ContextMenuItem } from '../ContextMenu/ContextMenu'
+
 export type SplitDirection = 'left' | 'right' | 'top' | 'bottom' | 'full';
 export type Orientation = 'vertical' | 'horizontal';
 
@@ -47,6 +49,10 @@ export interface EditorWorkbenchCallbacks {
 	onMoveTab?: (from: { groupId: string; tabId: string }, to: { groupId: string; index: number }) => void;
 	onSplitTab?: (tabId: string, fromGroupId: string, targetGroupId: string, direction: SplitDirection) => void;
 	onCloseTab?: (tabId: string, groupId: string) => void;
+	/**
+	 * Close all other tabs in the same group as the given tab.
+	 */
+	onCloseOthersInGroup?: (tabId: string, groupId: string) => void;
 	onDetachToNewWindow?: (tabId: string, groupId: string, cursorX?: number, cursorY?: number) => void;
 	onActivateTab?: (tabId: string, groupId: string) => void;
 	renderTabContent?: (tab: EditorTab) => React.ReactNode;
@@ -61,6 +67,15 @@ export interface EditorWorkbenchCallbacks {
 	 * Should return true if the tab was successfully handled, false otherwise.
 	 */
 	onWorkbenchTabDropped?: (tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }) => boolean | Promise<boolean>;
+	/**
+	 * Optional callback to build a context menu for a tab.
+	 * The actions helpers will perform the default close behaviours for this workbench.
+	 */
+	getTabContextMenuItems?: (
+		tab: EditorTab,
+		groupId: string,
+		actions: { close: () => void; closeOthersInGroup: () => void }
+	) => ContextMenuItem[] | undefined;
 }
 
 /**
@@ -76,6 +91,8 @@ export interface ContainerGroupNode {
 	id: string;
 	orientation: Orientation;
 	groups: GroupNode[];
+	/** Optional sizes as ratios (0-1) for each child group */
+	sizes?: number[] | undefined;
 }
 
 export type GroupNode = TabGroupNode | ContainerGroupNode;
@@ -83,6 +100,8 @@ export type GroupNode = TabGroupNode | ContainerGroupNode;
 export interface WorkbenchTree {
 	orientation: Orientation;
 	groups: GroupNode[];
+	/** Optional sizes as ratios (0-1) for each root-level group */
+	sizes?: number[] | undefined;
 }
 
 export function isContainerNode(node: GroupNode): node is ContainerGroupNode {
@@ -92,5 +111,3 @@ export function isContainerNode(node: GroupNode): node is ContainerGroupNode {
 export function isTabGroupNode(node: GroupNode): node is TabGroupNode {
 	return 'tabs' in (node as TabGroupNode);
 }
-
-

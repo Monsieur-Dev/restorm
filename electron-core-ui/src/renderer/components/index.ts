@@ -5,6 +5,7 @@ import MonacoWorkbench from './MonacoWorkbench'
 import ElectronCoreUiProvider from './ElectronCoreUiProvider'
 import { EditorWorkbench } from './Workbench/EditorWorkbench'
 import { MarkdownEditor } from './MarkdownEditor/MarkdownEditor'
+import { MarkdownViewer } from './MarkdownViewer/MarkdownViewer'
 import { SplitView, Pane } from './SplitView'
 
 // InputBox exports
@@ -71,9 +72,21 @@ export type {
   ListViewDropPosition
 } from './ListView'
 
+// ListViewDropdown exports
+export { ListViewDropdown } from './ListViewDropdown/ListViewDropdown'
+export type { ListViewDropdownProps } from './ListViewDropdown/ListViewDropdown'
+
 // Breadcrumb exports
 export { Breadcrumb } from './Breadcrumb'
 export type { BreadcrumbProps, BreadcrumbItem } from './Breadcrumb'
+
+// TagsView exports
+export { TagsView } from './TagsView/TagsView'
+export type { TagsViewProps } from './TagsView/TagsView'
+
+// IconSelect exports
+export { IconSelect } from './IconSelect'
+export type { IconSelectProps } from './IconSelect'
 
 // Button exports
 export { Button, ButtonWithDescription, ButtonWithDropdown, ButtonWithIcon, defaultButtonStyles } from './Button/index'
@@ -107,19 +120,54 @@ export type { ContextMenuProps, ContextMenuItem } from './ContextMenu/ContextMen
 export { InputTable } from './InputTable'
 export type { InputTableProps, InputTableColumn, InputTableRow, InputTableColumnType } from './InputTable'
 
+// KeyValueTable exports
+export { KeyValueTable } from './KeyValueTable/KeyValueTable'
+export type {
+  KeyValueTableProps,
+  KeyValueTableHandle,
+  KeyValueTableRow,
+  VariableContext as KeyValueTableVariableContext
+} from './KeyValueTable/KeyValueTable'
+
 // CustomWCO exports
 export { CustomWCO } from './CustomWCO/index'
 export type { CustomWCOProps } from './CustomWCO/index'
 
 // Other exports
-export { CustomDropdown, Tabs, SettingsTreeView, MonacoWorkbench, EditorWorkbench, MarkdownEditor, SplitView, Pane, ElectronCoreUiProvider }
+export {
+  CustomDropdown,
+  Tabs,
+  SettingsTreeView,
+  MonacoWorkbench,
+  EditorWorkbench,
+  MarkdownEditor,
+  MarkdownViewer,
+  SplitView,
+  Pane,
+  ElectronCoreUiProvider
+}
 export type { Tab, TabsProps } from './Tabs'
 export { Modal } from './Modal'
 export type { ModalProps } from './Modal'
 export type { MarkdownEditorProps } from './MarkdownEditor/MarkdownEditor'
+export type { MarkdownViewerProps } from './MarkdownViewer/MarkdownViewer'
 export type { MonacoWorkbenchProps } from './MonacoWorkbench'
 export type { ElectronCoreUiProviderProps } from './ElectronCoreUiProvider'
-export type { EditorWorkbenchProps } from './Workbench/EditorWorkbench'
+export type { EditorWorkbenchProps, EditorWorkbenchHandle } from './Workbench/EditorWorkbench'
+
+// Workbench persistence exports
+export {
+	extractWorkbenchState,
+	rebuildWorkbenchTree,
+	saveWorkbenchState,
+	loadWorkbenchState,
+	clearWorkbenchState
+} from './Workbench/persistence'
+export type {
+	PersistedGroupNode,
+	PersistedWorkbenchState,
+	RebuildTabCallback
+} from './Workbench/persistence'
 export type {
 	SplitViewOrientation,
 	SplitViewProps,
@@ -145,4 +193,3 @@ export { insertTabAt, normalizeTree, removeTab, findGroup } from './Workbench/tr
 export type { FindResult } from './Workbench/tree'
 export { isTabGroupNode, isContainerNode } from './Workbench/types'
 export { getTabTitleString, extractTextFromReactNode } from './Workbench/utils'
-

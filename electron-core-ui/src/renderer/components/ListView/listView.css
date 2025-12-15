@@ -37,7 +37,8 @@
   color: var(--vscode-list-activeSelectionForeground);
 }
 
-.list-view-row.is-active:not(.is-selected) {
+/* Only show active outline when the list has focus */
+.list-view:focus-within .list-view-row.is-active:not(.is-selected) {
   outline: 1px solid var(--vscode-focusBorder);
   outline-offset: -1px;
 }
@@ -73,6 +74,12 @@
     --vscode-tree-indentGuidesStroke,
     var(--vscode-editorIndentGuide-activeBackground, rgba(128, 128, 128, 0.4))
   );
+}
+
+.indent-spacer {
+  flex: 0 0 12px;
+  width: 12px;
+  height: 100%;
 }
 
 .list-view-expander {
@@ -131,4 +138,51 @@
   outline-offset: -1px;
 }
 
+/* Inline rename input */
+.list-view-rename-input {
+  flex: 1;
+  min-width: 0;
+  height: 18px;
+  padding: 0 4px;
+  margin: 0;
+  border: 1px solid var(--vscode-focusBorder);
+  background-color: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+  box-sizing: border-box;
+}
 
+.list-view-rename-input:focus {
+  border-color: var(--vscode-focusBorder);
+}
+
+/* Left actions (always visible, before title) */
+.list-view-left-actions {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+
+/* Right actions (after title, aligned to the right) */
+.list-view-right-actions {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  padding-left: 8px;
+}
+
+/* Right actions visible only on hover */
+.list-view-right-actions.hover-only {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.list-view-row:hover .list-view-right-actions.hover-only {
+  opacity: 1;
+  pointer-events: auto;
+}

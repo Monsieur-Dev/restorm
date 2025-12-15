@@ -88,6 +88,11 @@ colors:
   terminal.background: "#FDF6E3"
   walkThrough.embeddedEditorBackground: "#00000014"
 
+  # Tag colors for Solarized Light (use golden accent)
+  tag.background: "#b58900"
+  tag.background-hover: "#c49b12"
+  tag.foreground: "#fdf6e3"
+
 tokenColors:
   - settings:
       foreground: "#657B83"

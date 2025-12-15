@@ -149,4 +149,7 @@ colors:
   welcomePage.tileBackground: "#F3F3F3"
   widget.border: "#E5E5E5"
 
-
+  # Tag colors for Default Light Modern (use neutral teal)
+  tag.background: "#cbe8f5"
+  tag.background-hover: "#b3ddf0"
+  tag.foreground: "#103a4a"

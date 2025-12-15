@@ -206,4 +206,3 @@ To use it:
 - Read the [main README](./README.md) for architecture details
 - Check [MOLECULE_INTEGRATION.md](./MOLECULE_INTEGRATION.md) for UI framework notes
 - Explore the codebase and start building features!
-

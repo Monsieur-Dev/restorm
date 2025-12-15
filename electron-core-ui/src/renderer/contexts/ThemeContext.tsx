@@ -15,6 +15,27 @@ export interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
+type ThemeApi = {
+  list: () => Promise<ThemeInfo[]>
+  load: (themeId: string) => Promise<{ theme: ThemeDefinition; variables: ThemeVariables } | null>
+  getCurrent: () => Promise<string | undefined>
+  set: (themeId: string) => Promise<boolean>
+  updateWCO: (colors: { backgroundColor: string; symbolColor: string }) => Promise<boolean>
+  onThemeChanged: (callback: (themeId: string) => void) => () => void
+}
+
+type WindowWithThemeApi = typeof window & {
+  api?: {
+    theme?: ThemeApi
+  }
+}
+
+function getThemeApi(): ThemeApi | null {
+  if (typeof window === 'undefined') return null
+  const anyWindow = window as WindowWithThemeApi
+  return anyWindow.api?.theme ?? null
+}
+
 // Global initialization flag to prevent multiple inits across StrictMode
 let globalInitStarted = false
 let globalInitPromise: Promise<void> | null = null
@@ -55,6 +76,10 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
   }, [])
 
   const updateWCOColors = useCallback(async (): Promise<void> => {
+    const themeApi = getThemeApi()
+    if (!themeApi?.updateWCO) {
+      return
+    }
     const root = document.documentElement
     const computedStyle = getComputedStyle(root)
     const backgroundColor = computedStyle.getPropertyValue('--vscode-titleBar-activeBackground').trim() || '#181818'
@@ -62,7 +87,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
     const bgHex = cssColorToHex(backgroundColor)
     const symbolHex = cssColorToHex(symbolColor)
     try {
-      await window.api.theme.updateWCO({ backgroundColor: bgHex, symbolColor: symbolHex })
+      await themeApi.updateWCO({ backgroundColor: bgHex, symbolColor: symbolHex })
     } catch (err) {
       logger.error('Failed to update WCO colors', { error: String(err) })
     }
@@ -94,10 +119,15 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
   }, [updateWCOColors])
 
   const refreshThemes = useCallback(async (): Promise<void> => {
+    const themeApi = getThemeApi()
+    if (!themeApi?.list) {
+      setIsLoading(false)
+      return
+    }
     try {
       setIsLoading(true)
       setError(null)
-      const themeList: ThemeInfo[] = await window.api.theme.list()
+      const themeList: ThemeInfo[] = await themeApi.list()
       setThemes(themeList)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load themes')
@@ -108,11 +138,17 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
   }, [])
 
   const setTheme = useCallback(async (themeId: string): Promise<void> => {
+    const themeApi = getThemeApi()
+    if (!themeApi?.load || !themeApi.set) {
+      setError('Theme API is not available')
+      setIsLoading(false)
+      return
+    }
     try {
       setIsLoading(true)
       setError(null)
-      const themeData: { theme: ThemeDefinition; variables: ThemeVariables } | null = 
-        await window.api.theme.load(themeId)
+      const themeData: { theme: ThemeDefinition; variables: ThemeVariables } | null =
+        await themeApi.load(themeId)
       if (!themeData) throw new Error(`Theme not found: ${themeId}`)
       applyCSSVariables(themeData.variables)
       const themeInfo = themes.find(t => t.id === themeId)
@@ -122,7 +158,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
       } else {
         setWindowBorderColorForTheme(undefined)
       }
-      await window.api.theme.set(themeId)
+      await themeApi.set(themeId)
       setCurrentThemeId(themeId)
       currentThemeIdRef.current = themeId
       setCurrentTheme(themeData.theme)
@@ -154,13 +190,19 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
     globalInitStarted = true
     initDoneRef.current = true
 
+    const themeApi = getThemeApi()
+    if (!themeApi) {
+      setIsLoading(false)
+      return
+    }
+
     const initTheme = async (): Promise<void> => {
       try {
         setIsLoading(true)
-        const themeList: ThemeInfo[] = await window.api.theme.list()
+        const themeList: ThemeInfo[] = await themeApi.list()
         setThemes(themeList)
 
-        let themeId: string | undefined = await window.api.theme.getCurrent()
+        let themeId: string | undefined = await themeApi.getCurrent()
 
         const isValidThemeId = (id: string | undefined, list: ThemeInfo[]): id is string => {
           return !!id && list.some(t => t.id === id)
@@ -189,7 +231,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
               const candidateId = `${dir}/${mappedLabel}`
                 if (isValidThemeId(candidateId, themeList)) {
                   themeId = candidateId
-                  await window.api.theme.set(themeId)
+                  await themeApi.set(themeId)
                 }
             }
           }
@@ -200,13 +242,13 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
           const defaultTheme = themeList.find(t => t.type === 'dark') ?? themeList[0]
           if (defaultTheme) {
             themeId = defaultTheme.id
-            await window.api.theme.set(themeId)
+            await themeApi.set(themeId)
           }
         }
 
         if (themeId) {
-          const themeData: { theme: ThemeDefinition; variables: ThemeVariables } | null = 
-            await window.api.theme.load(themeId)
+          const themeData: { theme: ThemeDefinition; variables: ThemeVariables } | null =
+            await themeApi.load(themeId)
           
           if (themeData) {
             const root = document.documentElement
@@ -246,7 +288,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
     })
     
     // Listen for theme changes from other windows
-    const cleanup = window.api.theme.onThemeChanged((themeId: string) => {
+    const cleanup = getThemeApi()?.onThemeChanged?.((themeId: string) => {
       if (currentThemeIdRef.current === themeId) return
       
       void (async () => {
@@ -282,7 +324,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
       })()
     })
     
-    return () => { cleanup() }
+    return () => { cleanup?.() }
   }, [setWindowBorderColorForTheme, updateWCOColors])
 
   const value = useMemo<ThemeContextValue>(() => ({
@@ -304,4 +346,3 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
 }
 
 export default ThemeContext
-

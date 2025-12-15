@@ -19,4 +19,3 @@ test.describe('Application Loading', () => {
     expect(title).toBeTruthy();
   });
 });
-

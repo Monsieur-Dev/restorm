@@ -120,5 +120,3 @@ declare module 'electron-core-ui/renderer' {
 
   export const Sash: React.FC<SashProps>
 }
-
-

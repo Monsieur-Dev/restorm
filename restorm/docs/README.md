@@ -38,5 +38,3 @@ A local Swagger Petstore instance is provided via Docker for future testing:
 - At the monorepo root:
   - `npm run restorm:docker:up` – runs `docker:up` inside the `restorm` folder.
   - `npm run restorm:docker:down` – runs `docker:down` inside the `restorm` folder.
-
-

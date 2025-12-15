@@ -218,27 +218,25 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 				}}
 			>
 				<div className="editor-group-content-panel">
-					{group.tabs.length === 0
-						? <span>No tab</span>
-						: group.tabs.map((tab) => {
-							const isActive = tab.id === group.activeTabId;
-							const content =
-								(renderTabContent?.(tab) ??
-									tab.content ??
-									<span>{tab.title}</span>);
-							return (
-								<div
-									key={tab.id}
-									style={{
-										display: isActive ? 'flex' : 'none',
-										flex: 1,
-										minHeight: 0
-									}}
-								>
-									{content}
-								</div>
-							);
-						})}
+				{group.tabs.map((tab) => {
+					const isActive = tab.id === group.activeTabId;
+					const content =
+						(renderTabContent?.(tab) ??
+							tab.content ??
+							<span>{tab.title}</span>);
+					return (
+						<div
+							key={tab.id}
+							style={{
+								display: isActive ? 'flex' : 'none',
+								flex: 1,
+								minHeight: 0
+							}}
+						>
+							{content}
+						</div>
+					);
+				})}
 				</div>
 				<div
 					style={overlayStyle}
@@ -276,5 +274,3 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 };
 
 export default EditorGroupView;
-
-

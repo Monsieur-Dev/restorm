@@ -218,4 +218,3 @@ const StickHeadersTab: React.FC = () => {
 }
 
 export default StickHeadersTab
-

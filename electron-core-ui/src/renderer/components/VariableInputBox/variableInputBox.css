@@ -3,10 +3,3 @@
 .variable-inputbox-editor .monaco-editor .monaco-editor .margin {
 	background-color: transparent !important;
 }
-
-/* Completely hide Monaco scrollbars for VariableInputBox */
-.variable-inputbox-editor .monaco-scrollable-element {
-	overflow: hidden !important;
-}
-
-

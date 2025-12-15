@@ -293,4 +293,3 @@ L'intégration des thèmes VSCode est complète et fonctionnelle ! La page Setti
 - Des contrôles natifs stylisés comme dans VSCode
 
 L'application est prête à être testée et utilisée avec un look & feel VSCode authentique ! 🎉
-

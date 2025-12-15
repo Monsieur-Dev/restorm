@@ -1,13 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom/client'
 import { Workbench } from './components/Workbench'
-import type { EditorTab, WorkbenchTree, GroupNode } from 'electron-core-ui/renderer'
+import type { WorkbenchTree, GroupNode } from 'electron-core-ui/renderer'
 import { isTabGroupNode, isContainerNode, initializeI18n, logger, MonacoWorkbench, Titlebar } from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
+import './httpMethods.css'
 
 // Import translations
 import enTranslation from '../locales/en/translation.json'
 import frTranslation from '../locales/fr/translation.json'
+
+import { importSwaggerFromJson } from './services/SwaggerImportService'
+import swaggerPetstoreJson from './resources/swagger-petstore.json'
+import type { Folder, FolderItem, Environment } from './types/collections'
+import { isFolder, isRequest, isHTTPRequest } from './types/collections'
+import type { FolderTab, HTTPRequestTab, BreadcrumbItem } from './types/editor'
 
 // Initialize i18n using core-ui's initializeI18n function
 // This prevents double initialization and sets up the plugin
@@ -26,6 +33,85 @@ const initI18n = (): Promise<unknown> => {
     'en'
   )
 }
+
+// Import and convert swagger to Folder structure (initial data)
+const initialSwaggerFolder = importSwaggerFromJson(JSON.stringify(swaggerPetstoreJson))
+
+/** Folder icon for breadcrumbs */
+const FOLDER_ICON = { type: 'codicon' as const, value: 'folder' }
+
+/** Find a folder by ID in the folder tree */
+function findFolderById(folder: Folder, id: string): Folder | null {
+  if (folder.id === id) return folder
+  for (const item of folder.items) {
+    if (isFolder(item)) {
+      const found = findFolderById(item, id)
+      if (found) return found
+    }
+  }
+  return null
+}
+
+/** Find an item (folder or request) by ID and build breadcrumbs including the item itself */
+function findItemWithBreadcrumbs(
+  folder: Folder,
+  id: string,
+  path: BreadcrumbItem[] = []
+): { item: FolderItem | null; breadcrumbs: BreadcrumbItem[] } {
+  // Check if the root folder itself matches the ID
+  if (folder.id === id) {
+    return { item: folder, breadcrumbs: [...path, { id: folder.id, label: folder.name, icon: FOLDER_ICON }] }
+  }
+
+  const currentPath = [...path, { id: folder.id, label: folder.name, icon: FOLDER_ICON }]
+
+  for (const item of folder.items) {
+    if (isFolder(item)) {
+      if (item.id === id) {
+        // Include the folder itself as the last breadcrumb (with folder icon)
+        return { item, breadcrumbs: [...currentPath, { id: item.id, label: item.name, icon: FOLDER_ICON }] }
+      }
+      const found = findItemWithBreadcrumbs(item, id, currentPath)
+      if (found.item) return found
+    } else if (isRequest(item) && isHTTPRequest(item)) {
+      if (item.id === id) {
+        // Include the request itself as the last breadcrumb (no folder icon)
+        return { item, breadcrumbs: [...currentPath, { id: item.id, label: item.name }] }
+      }
+    }
+  }
+
+  return { item: null, breadcrumbs: [] }
+}
+
+/** Get environments from the nearest ancestor folder that defines them */
+function getNearestEnvironmentsForBreadcrumbs(
+  rootFolder: Folder,
+  breadcrumbs: BreadcrumbItem[]
+): Environment[] {
+  if (breadcrumbs.length === 0) {
+    return []
+  }
+
+  // The last breadcrumb is the item itself (request or folder),
+  // so we start from its parent and go up
+  for (let i = breadcrumbs.length - 2; i >= 0; i -= 1) {
+    const folderId = breadcrumbs[i]?.id
+    if (!folderId) {
+      continue
+    }
+    const folder = findFolderById(rootFolder, folderId)
+    if (folder && folder.configuration.environments.length > 0) {
+      return folder.configuration.environments
+    }
+  }
+
+  return []
+}
+
+type DetachedTabMetadata =
+  | { kind: 'folder'; itemId: string }
+  | { kind: 'http-request'; itemId: string }
 
 // Wait for i18n to be initialized before rendering
 void initI18n().then(() => {
@@ -46,6 +132,9 @@ void initI18n().then(() => {
       const [tabContentMap, setTabContentMap] = useState<Record<string, string>>({})
       const [fileLoaded, setFileLoaded] = useState(false)
       const isClosingRef = useRef(false)
+
+      // Local, read-only swagger folder used to rebuild detached tabs
+      const swaggerFolderRef = useRef<Folder>(initialSwaggerFolder)
 
       // Helper function to count all tabs in a WorkbenchTree
       const countAllTabs = React.useCallback((tree: WorkbenchTree): number => {
@@ -71,36 +160,100 @@ void initI18n().then(() => {
             return
           }
 
-          // Create tab with file parameters
-          const tabId = crypto.randomUUID()
-          const createTab = (id: string, title: string, dirty = false): EditorTab & { titleString?: string } => ({ 
-            id, 
-            title: title, 
-            titleString: title,
-            isDirty: dirty,
-            allowFullscreen: true
-          })
-          
-          const newTree: WorkbenchTree = {
-            orientation: 'vertical',
-            groups: [
-              {
-                id: 'group-1',
-                tabs: [
-                  createTab(tabId, file.title, false)
-                ],
-                activeTabId: tabId
-              }
-            ]
+          let metadata: DetachedTabMetadata | null = null
+          if (file.content) {
+            try {
+              metadata = JSON.parse(file.content) as DetachedTabMetadata
+            } catch (error) {
+              logger.warn('Failed to parse detached tab metadata from content', {
+                content: file.content,
+                error: String(error)
+              })
+            }
           }
 
-          const newTabContentMap: Record<string, string> = {
-            [tabId]: file.content ?? ''
+          if (!metadata) {
+            logger.warn('No detached tab metadata received, skipping editor initialization')
+            return
           }
 
-          setTree(newTree)
-          setTabContentMap(newTabContentMap)
-          setFileLoaded(true)
+          const rootFolder = swaggerFolderRef.current
+
+          if (metadata.kind === 'folder') {
+            const folder = findFolderById(rootFolder, metadata.itemId)
+            if (!folder) {
+              logger.warn('Folder not found for detached tab', { itemId: metadata.itemId })
+              return
+            }
+
+            const { breadcrumbs } = findItemWithBreadcrumbs(rootFolder, metadata.itemId)
+            const tabId = `folder-${folder.id}`
+
+            const newTab: FolderTab = {
+              id: tabId,
+              tabType: 'folder',
+              title: folder.name,
+              titleString: folder.name,
+              folder,
+              breadcrumbs,
+              allowFullscreen: true
+            }
+
+            const newTree: WorkbenchTree = {
+              orientation: 'vertical',
+              groups: [
+                {
+                  id: 'restorm-editor-group',
+                  tabs: [newTab],
+                  activeTabId: tabId
+                }
+              ]
+            }
+
+            setTree(newTree)
+            setTabContentMap({})
+            setFileLoaded(true)
+            return
+          }
+
+          // The only other supported metadata kind is the HTTP request case
+          else {
+            const { item, breadcrumbs } = findItemWithBreadcrumbs(rootFolder, metadata.itemId)
+            if (!item || !isRequest(item) || !isHTTPRequest(item)) {
+              logger.warn('Request not found for detached tab', { itemId: metadata.itemId })
+              return
+            }
+
+            const environments = getNearestEnvironmentsForBreadcrumbs(rootFolder, breadcrumbs)
+            const tabId = `request-${item.id}`
+
+            const newTab: HTTPRequestTab = {
+              id: tabId,
+              tabType: 'http-request',
+              title: `${item.method} ${item.name}`,
+              titleString: `${item.method} ${item.name}`,
+              request: item,
+              breadcrumbs,
+              environments,
+              allowFullscreen: true
+            }
+
+            const newTree: WorkbenchTree = {
+              orientation: 'vertical',
+              groups: [
+                {
+                  id: 'restorm-editor-group',
+                  tabs: [newTab],
+                  activeTabId: tabId
+                }
+              ]
+            }
+
+            setTree(newTree)
+            setTabContentMap({})
+            setFileLoaded(true)
+            return
+          }
         }).catch((error) => {
           logger.error('Failed to get file parameters', { error: String(error) })
         })
@@ -139,26 +292,47 @@ void initI18n().then(() => {
         }
       }, [tree, fileLoaded, countAllTabs])
 
-      // Render empty workbench if no file is loaded yet (before file is received)
-      if (!fileLoaded && tree.groups.length === 0) {
-        return (
-          <MonacoWorkbench fontAliasing="auto">
-            <Titlebar title="restorm" />
+      const renderBody = (): React.ReactNode => {
+        if (!fileLoaded && tree.groups.length === 0) {
+          return (
             <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
               <span style={{ opacity: 0.5 }}>Waiting for file...</span>
             </div>
-          </MonacoWorkbench>
+          )
+        }
+
+        return (
+          <div
+            style={{
+              flex: 1,
+              minHeight: 0,
+              display: 'flex'
+            }}
+          >
+            <Workbench
+              tree={tree}
+              initialTabContentMap={tabContentMap}
+              onTreeChange={handleTreeChange}
+              style={{ flex: 1 }}
+            />
+          </div>
         )
       }
 
       return (
         <MonacoWorkbench fontAliasing="auto">
-          <Titlebar title="restorm" />
-          <Workbench
-            tree={tree}
-            initialTabContentMap={tabContentMap}
-            onTreeChange={handleTreeChange}
-          />
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100vh',
+              backgroundColor: 'var(--vscode-editor-background)',
+              color: 'var(--vscode-editor-foreground)'
+            }}
+          >
+            <Titlebar title="restorm" />
+            {renderBody()}
+          </div>
         </MonacoWorkbench>
       )
     }
@@ -172,4 +346,3 @@ void initI18n().then(() => {
   .catch((error: unknown) => {
     logger.error('Failed to initialize i18n', { error: String(error) })
   })
-

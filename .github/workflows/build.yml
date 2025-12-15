@@ -44,4 +44,3 @@ jobs:
         run: |
           cd gitable
           npm run build
-

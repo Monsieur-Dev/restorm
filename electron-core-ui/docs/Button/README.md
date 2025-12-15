@@ -185,6 +185,12 @@ interface IButtonStyles {
 }
 ```
 
+## Notes for AI Usage
+
+- Prefer **controlled callbacks** (`onClick`) that delegate to small, pure functions; avoid embedding side effects or navigation logic inline in JSX so agents can more easily reuse or reorder actions.
+- Keep `options` objects stable (memoized) when toggling only a few flags (like `disabled`), to minimize unnecessary re-renders and make button state derivation easier to reason about.
+- When generating buttons programmatically, separate **semantic meaning** (e.g. `actionId`, `intent`) from visual labels and icons so that agents can choose or replace actions without breaking the layout.
+
 ## Styling
 
 ### CSS Variables

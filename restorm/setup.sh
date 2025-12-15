@@ -61,4 +61,3 @@ echo "  2. pnpm lint     # Run linter"
 echo "  3. pnpm build    # Build for production"
 echo "  4. pnpm dist     # Build distributable packages"
 echo ""
-

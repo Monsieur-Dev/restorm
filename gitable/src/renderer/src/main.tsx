@@ -57,4 +57,3 @@ void initI18n()
   .catch((error: unknown) => {
     logger.error('Failed to initialize i18n', { error: String(error) })
   })
-

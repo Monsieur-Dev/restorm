@@ -28,5 +28,3 @@ declare module '@milkdown/crepe' {
 
   export const Crepe: CrepeConstructor
 }
-
-
