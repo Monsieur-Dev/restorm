@@ -4,7 +4,8 @@ import {
   Tabs,
   Button,
   ListView,
-  CodeEditor
+  CodeEditor,
+  Tooltip
 } from 'electron-core-ui/renderer'
 import type { Tab, ListViewItemData } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
@@ -64,6 +65,57 @@ function getStatusColor(statusCode: number): string {
   return 'var(--vscode-foreground)'
 }
 
+/** Status code badge with tooltip showing description */
+const StatusCodeBadge: React.FC<{ statusCode: number; statusText: string }> = ({
+  statusCode,
+  statusText
+}) => {
+  const { t } = useTranslation()
+  const containerRef = useRef<HTMLSpanElement>(null)
+  const [showTooltip, setShowTooltip] = useState(false)
+
+  const statusKey = `httpStatus.${statusCode}`
+  const statusName = t(`${statusKey}.name`, { defaultValue: '' })
+  const statusDescription = t(`${statusKey}.description`, {
+    defaultValue: t('httpStatus.unknown.description')
+  })
+
+  const tooltipContent = (
+    <div style={{ maxWidth: 300 }}>
+      <div style={{ fontWeight: 'bold', marginBottom: 4 }}>
+        {statusCode} {statusName || statusText}
+      </div>
+      <div style={{ fontSize: 12, opacity: 0.9 }}>{statusDescription}</div>
+    </div>
+  )
+
+  return (
+    <>
+      <span
+        ref={containerRef}
+        className="response-value"
+        style={{
+          color: getStatusColor(statusCode),
+          cursor: 'help',
+          textDecoration: 'underline',
+          textDecorationStyle: 'dotted',
+          textUnderlineOffset: 2
+        }}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        {statusCode} {statusText}
+      </span>
+      <Tooltip
+        targetRef={containerRef}
+        content={tooltipContent}
+        show={showTooltip}
+        placement="below"
+      />
+    </>
+  )
+}
+
 /** Convert KeyValue array to ListView items */
 function keyValuesToListItems(keyValues: KeyValue[], prefix: string): ListViewItemData[] {
   return keyValues.map((kv, index) => ({
@@ -84,7 +136,7 @@ export const HTTPResponseView: React.FC<HTTPResponseViewProps> = ({
   isLoading = false
 }) => {
   const { t } = useTranslation()
-  const [activeTabId, setActiveTabId] = useState<string>('raw')
+  const [activeTabId, setActiveTabId] = useState<string>('response-summary')
   const [isDarkTheme, setIsDarkTheme] = useState<boolean>(() => {
     if (typeof document === 'undefined') return true
     const themeAttr = document.documentElement.getAttribute('data-theme') ?? 'dark'
@@ -92,6 +144,20 @@ export const HTTPResponseView: React.FC<HTTPResponseViewProps> = ({
   })
 
   const graphRef = useRef<GraphRef | null>(null)
+
+  // Auto-select tab based on response status
+  useEffect(() => {
+    if (!response) return
+
+    const isSuccess = response.statusCode >= 200 && response.statusCode < 300
+    const hasBody = response.responseBody && response.responseBody.trim().length > 0
+
+    if (isSuccess && hasBody) {
+      setActiveTabId('raw')
+    } else {
+      setActiveTabId('response-summary')
+    }
+  }, [response])
 
   const renderModalTitle = useCallback(
     (suffix: string): React.ReactNode => {
@@ -172,9 +238,7 @@ export const HTTPResponseView: React.FC<HTTPResponseViewProps> = ({
         title: (
           <span style={{ display: 'flex', gap: 8 }}>
             <span className="response-key">Status Code</span>
-            <span className="response-value" style={{ color: getStatusColor(response.statusCode) }}>
-              {response.statusCode} {response.statusText}
-            </span>
+            <StatusCodeBadge statusCode={response.statusCode} statusText={response.statusText} />
           </span>
         )
       },

@@ -84,5 +84,111 @@
   },
   "codeEditor": {
     "goToDefinition": "Aller à la définition"
+  },
+  "httpStatus": {
+    "100": {
+      "name": "Continue",
+      "description": "Le serveur a reçu les en-têtes de la requête et le client doit procéder à l'envoi du corps de la requête."
+    },
+    "101": {
+      "name": "Changement de protocole",
+      "description": "Le demandeur a demandé au serveur de changer de protocole et le serveur a accepté."
+    },
+    "200": {
+      "name": "OK",
+      "description": "Réponse standard pour les requêtes HTTP réussies. La réponse réelle dépend de la méthode de requête utilisée."
+    },
+    "201": {
+      "name": "Créé",
+      "description": "La requête a été satisfaite, entraînant la création d'une nouvelle ressource."
+    },
+    "202": {
+      "name": "Accepté",
+      "description": "La requête a été acceptée pour traitement, mais le traitement n'est pas terminé."
+    },
+    "204": {
+      "name": "Pas de contenu",
+      "description": "Le serveur a traité la requête avec succès et ne renvoie aucun contenu."
+    },
+    "301": {
+      "name": "Déplacé définitivement",
+      "description": "Cette requête et toutes les requêtes futures doivent être dirigées vers l'URI donnée."
+    },
+    "302": {
+      "name": "Trouvé",
+      "description": "Indique au client de consulter une autre URL. La spécification HTTP/1.0 exigeait une redirection temporaire."
+    },
+    "304": {
+      "name": "Non modifié",
+      "description": "Indique que la ressource n'a pas été modifiée depuis la version spécifiée par les en-têtes de la requête."
+    },
+    "400": {
+      "name": "Mauvaise requête",
+      "description": "Le serveur ne peut pas traiter la requête en raison d'une erreur client apparente (syntaxe de requête malformée, etc.)."
+    },
+    "401": {
+      "name": "Non autorisé",
+      "description": "Une authentification est requise et a échoué ou n'a pas encore été fournie."
+    },
+    "403": {
+      "name": "Interdit",
+      "description": "La requête contenait des données valides et a été comprise par le serveur, mais le serveur refuse l'action."
+    },
+    "404": {
+      "name": "Non trouvé",
+      "description": "La ressource demandée n'a pas pu être trouvée mais pourrait être disponible à l'avenir."
+    },
+    "405": {
+      "name": "Méthode non autorisée",
+      "description": "Une méthode de requête n'est pas prise en charge pour la ressource demandée."
+    },
+    "408": {
+      "name": "Délai d'attente dépassé",
+      "description": "Le serveur a expiré en attendant la requête."
+    },
+    "409": {
+      "name": "Conflit",
+      "description": "Indique que la requête n'a pas pu être traitée en raison d'un conflit dans l'état actuel de la ressource."
+    },
+    "410": {
+      "name": "Disparu",
+      "description": "Indique que la ressource demandée était auparavant utilisée mais n'est plus disponible et ne le sera plus."
+    },
+    "415": {
+      "name": "Type de média non supporté",
+      "description": "L'entité de la requête a un type de média que le serveur ou la ressource ne prend pas en charge."
+    },
+    "422": {
+      "name": "Entité non traitable",
+      "description": "La requête était bien formée mais n'a pas pu être suivie en raison d'erreurs sémantiques."
+    },
+    "429": {
+      "name": "Trop de requêtes",
+      "description": "L'utilisateur a envoyé trop de requêtes dans un laps de temps donné (limitation du débit)."
+    },
+    "500": {
+      "name": "Erreur interne du serveur",
+      "description": "Message d'erreur générique, donné lorsqu'une condition inattendue a été rencontrée."
+    },
+    "501": {
+      "name": "Non implémenté",
+      "description": "Le serveur ne reconnaît pas la méthode de requête ou n'a pas la capacité de répondre à la requête."
+    },
+    "502": {
+      "name": "Mauvaise passerelle",
+      "description": "Le serveur agissait en tant que passerelle ou proxy et a reçu une réponse invalide du serveur en amont."
+    },
+    "503": {
+      "name": "Service indisponible",
+      "description": "Le serveur ne peut pas traiter la requête (car il est surchargé ou en maintenance)."
+    },
+    "504": {
+      "name": "Délai de passerelle dépassé",
+      "description": "Le serveur agissait en tant que passerelle ou proxy et n'a pas reçu de réponse en temps voulu du serveur en amont."
+    },
+    "unknown": {
+      "name": "Statut inconnu",
+      "description": "Ce code de statut n'est pas reconnu."
+    }
   }
 }
