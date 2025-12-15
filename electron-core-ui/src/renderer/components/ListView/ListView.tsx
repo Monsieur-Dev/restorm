@@ -706,11 +706,13 @@ export const ListView: React.FC<ListViewProps> = ({
                 }}
               >
                 <div className="list-view-row-inner">
+                  
                   <div className="list-view-indents" aria-hidden="true">
                     {Array.from({ length: depth }).map((_, idx) => (
                       <span key={idx} className="indent-guide" />
                     ))}
-                    {depth > 0 && <span className="indent-spacer" />}
+                    
+                    {depth > 0 && isLeaf && <span className="indent-spacer" />}
                   </div>
                   {(!isLeaf || item.isExpandable) && (
                     <button

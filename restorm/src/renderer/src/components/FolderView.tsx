@@ -48,7 +48,6 @@ function environmentsToListViewItems(
   return environments.map((env) => ({
     id: env.id,
     title: env.name,
-    icon: 'blank',
     isExpandable: (env.subEnvironments?.length ?? 0) > 0,
     isExpanded: expandedIds.includes(env.id),
     contextMenuItems,
