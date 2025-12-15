@@ -1,4 +1,5 @@
 import React, { useState, useCallback, createContext, useContext, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Modal } from '../Modal'
 import { SettingsPage } from './SettingsPage'
 
@@ -37,6 +38,7 @@ interface SettingsModalProviderProps {
  * Wrap your app with this to use useSettingsModal()
  */
 export function SettingsModalProvider({ children }: SettingsModalProviderProps): React.ReactElement {
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
 
   const showSettingsModal = useCallback(() => {
@@ -58,7 +60,7 @@ export function SettingsModalProvider({ children }: SettingsModalProviderProps):
       {children}
       <Modal
         isOpen={isOpen}
-        title="Settings"
+        title={t('settings.title', 'Settings')}
         onClose={hideSettingsModal}
       >
         <SettingsPage />
