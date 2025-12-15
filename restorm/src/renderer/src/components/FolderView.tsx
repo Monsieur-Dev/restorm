@@ -15,12 +15,11 @@ import {
   type Tab,
   MarkdownEditor,
   MarkdownViewer,
-  IconSelect
+  IconSelect,
+  KeyValueTable
 } from 'electron-core-ui/renderer'
-import type { Icon } from 'electron-core-ui/types'
-import { ParamsTabView } from './ParamsTabView'
-import type { ParamsTabViewHandle } from './ParamsTabView'
-import type { Folder, Environment, KeyValue } from '../types/collections'
+import type { KeyValueTableHandle } from 'electron-core-ui/renderer'
+import type { Folder, Environment, KeyValue, Icon } from '../types/collections'
 import { useEnvironmentValues } from '../contexts/EnvironmentValuesContext'
 
 /** Generate a unique ID for a new environment */
@@ -259,7 +258,9 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder, onFolderChange }
   const renderEnvLeftActions = useCallback((env: Environment): React.ReactNode => (
     <IconSelect
       value={env.icon ?? null}
-      onChange={(icon) => handleIconChange(env.id, icon)}
+      onChange={(icon) => {
+        handleIconChange(env.id, icon)
+      }}
       style={{ width: 24, height: 24 }}
     />
   ), [handleIconChange])
@@ -308,7 +309,7 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder, onFolderChange }
   const [leftWidth, setLeftWidth] = useState<number>(220)
   const [containerHeight, setContainerHeight] = useState<number>(0)
   const sashStartLeftRef = useRef<number>(leftWidth)
-  const variablesParamsRef = useRef<ParamsTabViewHandle | null>(null)
+  const variablesParamsRef = useRef<KeyValueTableHandle | null>(null)
 
   const handleEnvironmentVariablesResolved = useCallback(
     (context: unknown): void => {
@@ -517,7 +518,7 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder, onFolderChange }
                   boxSizing: 'border-box'
                 }}
               >
-                <ParamsTabView
+                <KeyValueTable
                   key={selectedEnvId}
                   ref={variablesParamsRef}
                   // At folder level, variables are defined sequentially:

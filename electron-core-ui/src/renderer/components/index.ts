@@ -72,6 +72,10 @@ export type {
   ListViewDropPosition
 } from './ListView'
 
+// ListViewDropdown exports
+export { ListViewDropdown } from './ListViewDropdown/ListViewDropdown'
+export type { ListViewDropdownProps } from './ListViewDropdown/ListViewDropdown'
+
 // Breadcrumb exports
 export { Breadcrumb } from './Breadcrumb'
 export type { BreadcrumbProps, BreadcrumbItem } from './Breadcrumb'
@@ -115,6 +119,15 @@ export type { ContextMenuProps, ContextMenuItem } from './ContextMenu/ContextMen
 // InputTable exports
 export { InputTable } from './InputTable'
 export type { InputTableProps, InputTableColumn, InputTableRow, InputTableColumnType } from './InputTable'
+
+// KeyValueTable exports
+export { KeyValueTable } from './KeyValueTable/KeyValueTable'
+export type {
+  KeyValueTableProps,
+  KeyValueTableHandle,
+  KeyValueTableRow,
+  VariableContext as KeyValueTableVariableContext
+} from './KeyValueTable/KeyValueTable'
 
 // CustomWCO exports
 export { CustomWCO } from './CustomWCO/index'

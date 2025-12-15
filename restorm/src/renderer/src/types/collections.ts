@@ -3,11 +3,25 @@
  * Defines the structure for organizing HTTP requests in folders with environments
  */
 
-import type { Icon } from 'electron-core-ui/types'
-
 // ============================================================================
 // Base Types
 // ============================================================================
+
+/**
+ * Type of icon (emoji character, codicon name, or no icon).
+ * Duplicated from electron-core-ui to avoid direct type dependency.
+ */
+export type IconType = 'emoji' | 'codicon' | 'none'
+
+/**
+ * Represents an icon that can be either an emoji or a codicon.
+ */
+export interface Icon {
+  /** The type of icon */
+  type: IconType
+  /** The icon value - emoji character for 'emoji', codicon name for 'codicon', empty for 'none' */
+  value: string
+}
 
 /** Key-value pair used for headers, params, environment variables, etc. */
 export interface KeyValue {

@@ -103,3 +103,9 @@ The component uses standard VSCode CSS variables for theming:
 - `.ecui-breadcrumb-link--current`: applied to the last item in label mode (rendered in bold)
 - `.ecui-breadcrumb-input`: input used when editing the last item
 - `.ecui-breadcrumb-separator`: wrapper for the chevron separator icon
+
+## Notes for AI Usage
+
+- Treat `items` as a **pure, ordered path** in your domain model (e.g. workspace → folder → resource) and rebuild it from state rather than mutating labels in-place, except when handling `onLastItemChange`.
+- Use stable `id` values that map directly to domain entities; this makes it easier for AI agents to translate breadcrumb clicks into navigation actions.
+- Keep rename logic confined to a small handler (e.g. `onLastItemChange`) so that agents can safely update the last segment’s label without touching the rest of the path.

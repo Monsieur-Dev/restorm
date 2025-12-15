@@ -39,6 +39,7 @@
   },
   "files": [
     "dist",
+    "types",
     "resources",
     "fonts.css",
     "README.md",
@@ -95,6 +96,7 @@
     "@vscode/codicons": "^0.0.41",
     "ag-grid-community": "^34.3.1",
     "ag-grid-react": "^34.3.1",
+    "handlebars": "^4.7.7",
     "i18next": "^23.7.6",
     "js-yaml": "^4.1.0",
     "mermaid": "^10.9.0",

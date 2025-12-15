@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
-  ListView,
+  ListViewDropdown,
   type ListViewItemData,
   VariableInputBox,
   Tabs,
@@ -16,7 +16,8 @@ import {
   InputBox,
   CodeEditor,
   ProgressBar,
-  IconSelect
+  IconSelect,
+  KeyValueTable
 } from 'electron-core-ui/renderer'
 import type {
   Tab,
@@ -24,9 +25,9 @@ import type {
   ISelectOptionItem,
   ISelectData,
   IVerticalSashLayoutProvider,
-  SashEvent
+  SashEvent,
+  KeyValueTableHandle
 } from 'electron-core-ui/renderer'
-import { ParamsTabView, type ParamsTabViewHandle } from './ParamsTabView'
 import { HttpMethodBadge } from './HttpMethodBadge'
 import { ResponsesView } from './ResponsesView'
 import type { HTTPRequest, Environment } from '../types/collections'
@@ -123,11 +124,9 @@ function findEnvironmentById(environments: Environment[], id: string): Environme
 export const EnvironmentDropdown: React.FC = () => {
   const { t } = useTranslation()
   const { environments, selectedEnvId, setSelectedEnvId } = useEnvironmentContext()
-  const [isOpen, setIsOpen] = useState(false)
   const [expandedIds, setExpandedIds] = useState<string[]>(() =>
     environments && environments.length > 0 ? collectEnvironmentIds(environments) : []
   )
-  const containerRef = useRef<HTMLDivElement | null>(null)
 
   // Reset state when environments change
   useEffect(() => {
@@ -142,32 +141,6 @@ export const EnvironmentDropdown: React.FC = () => {
       setSelectedEnvId(null)
     }
   }, [environments, selectedEnvId, setSelectedEnvId])
-
-  // Close dropdown when clicking outside or pressing Escape
-  useEffect(() => {
-    if (!isOpen) return
-
-    const handlePointerDown = (event: MouseEvent): void => {
-      if (!containerRef.current) return
-      if (!containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-
-    const handleKeyDown = (event: KeyboardEvent): void => {
-      if (event.key === 'Escape') {
-        setIsOpen(false)
-      }
-    }
-
-    window.addEventListener('mousedown', handlePointerDown)
-    window.addEventListener('keydown', handleKeyDown)
-
-    return () => {
-      window.removeEventListener('mousedown', handlePointerDown)
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [isOpen])
 
   const items = useMemo(
     () => (environments && environments.length > 0 ? environmentsToListViewItems(environments, expandedIds) : []),
@@ -189,68 +162,48 @@ export const EnvironmentDropdown: React.FC = () => {
 
   return (
     <div
-      ref={containerRef}
       style={{
-        position: 'relative',
         marginLeft: 8
       }}
     >
-      <Button
-        secondary
-        options={{
-          ariaLabel: t('requestTab.environmentSelector.ariaLabel'),
-          title: t('requestTab.environmentSelector.ariaLabel')
+      <ListViewDropdown
+        items={items}
+        rootRole="tree"
+        menuAriaLabel={t('requestTab.environmentSelector.listAriaLabel')}
+        selectedIds={selectedEnvId ? [selectedEnvId] : []}
+        expandedIds={expandedIds}
+        buttonProps={{
+          secondary: true,
+          options: {
+            ariaLabel: t('requestTab.environmentSelector.ariaLabel'),
+            title: t('requestTab.environmentSelector.ariaLabel')
+          }
         }}
-        onClick={() => {
-          setIsOpen((prev) => !prev)
+        buttonContent={
+          <>
+            {selectedEnvironment?.icon && (
+              <IconSelect value={selectedEnvironment.icon} readonly style={{ marginRight: 4 }} />
+            )}
+            <span style={{ marginRight: 4, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {selectedEnvironmentName}
+            </span>
+            <i className="codicon codicon-chevron-down" />
+          </>
+        }
+        onItemClick={(payload) => {
+          const id = payload.item.id
+          if (id) {
+            setSelectedEnvId(id)
+          }
         }}
-      >
-        {selectedEnvironment?.icon && (
-          <IconSelect value={selectedEnvironment.icon} readonly style={{ marginRight: 4 }} />
-        )}
-        <span style={{ marginRight: 4, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {selectedEnvironmentName}
-        </span>
-        <i className="codicon codicon-chevron-down" />
-      </Button>
-
-      {isOpen && (
-        <div
-          style={{
-            position: 'absolute',
-            right: 0,
-            marginTop: 4,
-            minWidth: 220,
-            maxHeight: 320,
-            overflow: 'hidden',
-            zIndex: 1000,
-            backgroundColor: 'var(--vscode-editor-background)',
-            border: '1px solid var(--vscode-dropdown-border)',
-            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)'
-          }}
-        >
-          <ListView
-            items={items}
-            rootRole="tree"
-            ariaLabel={t('requestTab.environmentSelector.listAriaLabel')}
-            selectedIds={selectedEnvId ? [selectedEnvId] : []}
-            onItemClick={(payload) => {
-              const id = payload.item.id
-              if (id) {
-                setSelectedEnvId(id)
-                setIsOpen(false)
-              }
-            }}
-            onItemToggle={(payload, expanded) => {
-              const id = payload.item.id
-              if (!id) return
-              setExpandedIds((prev) =>
-                expanded ? Array.from(new Set([...prev, id])) : prev.filter((existingId) => existingId !== id)
-              )
-            }}
-          />
-        </div>
-      )}
+        onItemToggle={(payload, expanded) => {
+          const id = payload.item.id
+          if (!id) return
+          setExpandedIds((prev) =>
+            expanded ? Array.from(new Set([...prev, id])) : prev.filter((existingId) => existingId !== id)
+          )
+        }}
+      />
     </div>
   )
 }
@@ -271,9 +224,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
   const [isSending, setIsSending] = useState<boolean>(false)
   const [resolvedQueryParamsContext, setResolvedQueryParamsContext] = useState<VariableContext>({})
   const [resolvedPathParamsContext, setResolvedPathParamsContext] = useState<VariableContext>({})
-  const headersParamsRef = useRef<ParamsTabViewHandle | null>(null)
-  const queryParamsRef = useRef<ParamsTabViewHandle | null>(null)
-  const pathParamsRef = useRef<ParamsTabViewHandle | null>(null)
+  const headersParamsRef = useRef<KeyValueTableHandle | null>(null)
+  const queryParamsRef = useRef<KeyValueTableHandle | null>(null)
+  const pathParamsRef = useRef<KeyValueTableHandle | null>(null)
   const splitContainerRef = useRef<HTMLDivElement | null>(null)
   const sashStartLeftRef = useRef<number>(leftPaneWidth)
   const sendTimeoutRef = useRef<number | null>(null)
@@ -403,7 +356,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
               </Button>
             )}
           >
-            <ParamsTabView
+            <KeyValueTable
               ref={headersParamsRef}
               // Headers can only see environment variables inside their fields
               variables={environmentVariablesForInputs}
@@ -432,7 +385,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
               </Button>
             )}
           >
-            <ParamsTabView
+            <KeyValueTable
               ref={pathParamsRef}
               // Path params can only see environment variables, but their resolved
               // values contribute to the context for body and URL.
@@ -463,7 +416,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
               </Button>
             )}
           >
-            <ParamsTabView
+            <KeyValueTable
               ref={queryParamsRef}
               // Query params can only see environment variables, but their resolved
               // values contribute to the context for body and URL.
@@ -535,7 +488,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
                 )}
 
                 {(bodyMode === 'form-data' || bodyMode === 'x-www-form-urlencoded') && (
-                  <ParamsTabView
+                  <KeyValueTable
                     // Body fields can see environment + resolved path/params variables
                     variables={urlVariables}
                     initialRows={

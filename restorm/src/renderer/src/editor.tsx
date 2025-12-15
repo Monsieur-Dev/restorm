@@ -12,7 +12,7 @@ import frTranslation from '../locales/fr/translation.json'
 
 import { importSwaggerFromJson } from './services/SwaggerImportService'
 import swaggerPetstoreJson from './resources/swagger-petstore.json'
-import type { Folder, FolderItem, HTTPRequest, Environment } from './types/collections'
+import type { Folder, FolderItem, Environment } from './types/collections'
 import { isFolder, isRequest, isHTTPRequest } from './types/collections'
 import type { FolderTab, HTTPRequestTab, BreadcrumbItem } from './types/editor'
 
