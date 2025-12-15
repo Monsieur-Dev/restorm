@@ -29,15 +29,16 @@ import type {
   KeyValueTableHandle
 } from 'electron-core-ui/renderer'
 import { HttpMethodBadge } from './HttpMethodBadge'
-import { ResponsesView } from './ResponsesView'
-import type { HTTPRequest, Environment } from '../types/collections'
+import { HTTPResponseView } from './HTTPResponseView'
+import type { HTTPRequest, Environment, HTTPResponse, HTTPMethod } from '../types/collections'
 import { useEnvironmentContext } from '../contexts/EnvironmentContext'
 import { useEnvironmentValues } from '../contexts/EnvironmentValuesContext'
 import {
   resolveEnvironmentVariables,
-  resolveTemplate,
   type VariableContext
 } from '../services/VariableResolutionService'
+import { executeHTTPRequest, resolveRequestURL, type HTTPRequestInput } from '../services/HTTPRequestService'
+import { logger } from 'electron-core-ui/renderer'
 
 export interface HTTPRequestTabViewProps {
   /** The HTTP request to display */
@@ -222,6 +223,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
   const [activeTabId, setActiveTabId] = useState<string>('requestLayout')
   const [leftPaneWidth, setLeftPaneWidth] = useState<number>(0)
   const [isSending, setIsSending] = useState<boolean>(false)
+  const [httpResponse, setHttpResponse] = useState<HTTPResponse | null>(null)
   const [resolvedQueryParamsContext, setResolvedQueryParamsContext] = useState<VariableContext>({})
   const [resolvedPathParamsContext, setResolvedPathParamsContext] = useState<VariableContext>({})
   const headersParamsRef = useRef<KeyValueTableHandle | null>(null)
@@ -276,10 +278,31 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     [combinedContextForBodyAndUrl]
   )
 
-  const resolvedUrl = useMemo(
-    () => resolveTemplate(url, combinedContextForBodyAndUrl),
-    [url, combinedContextForBodyAndUrl]
+  // Build path params KeyValue[] from resolved context
+  const pathParamsForUrl = useMemo(
+    () => Object.entries(resolvedPathParamsContext).map(([key, value]) => ({ key, value })),
+    [resolvedPathParamsContext]
   )
+
+  // Build query params KeyValue[] from resolved context
+  const queryParamsForUrl = useMemo(
+    () => Object.entries(resolvedQueryParamsContext).map(([key, value]) => ({ key, value })),
+    [resolvedQueryParamsContext]
+  )
+
+  // Use the service to resolve the URL (centralized logic)
+  const resolvedUrlResult = useMemo(
+    () =>
+      resolveRequestURL({
+        urlTemplate: url,
+        pathParams: pathParamsForUrl,
+        queryParams: queryParamsForUrl,
+        environmentContext: environmentContext
+      }),
+    [url, pathParamsForUrl, queryParamsForUrl, environmentContext]
+  )
+
+  const resolvedUrl = resolvedUrlResult.url
 
   const methodOptions = useMemo<ISelectOptionItem[]>(
     () =>
@@ -677,16 +700,47 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
 
         <Button
           onClick={() => {
-            // Simulate a send action for 5 seconds
-            if (sendTimeoutRef.current !== null) {
-              window.clearTimeout(sendTimeoutRef.current)
-              sendTimeoutRef.current = null
-            }
+            if (isSending) return
+
             setIsSending(true)
-            sendTimeoutRef.current = window.setTimeout(() => {
-              setIsSending(false)
-              sendTimeoutRef.current = null
-            }, 5000)
+            setHttpResponse(null)
+
+            // Build request input from current UI state
+            // Use resolved values from KeyValueTable contexts
+            const requestInput: HTTPRequestInput = {
+              request,
+              method: method as HTTPMethod,
+              url,
+              headers: request.headers,
+              params: queryParamsForUrl,
+              pathParams: pathParamsForUrl,
+              bodyContent: body,
+              bodyMode,
+              formFields:
+                bodyMode === 'form-data' || bodyMode === 'x-www-form-urlencoded'
+                  ? (request.body?.type === 'form-data' || request.body?.type === 'x-www-form-urlencoded'
+                      ? request.body.fields
+                      : [])
+                  : [],
+              filePath: bodyFilePath,
+              variableContext: environmentContext
+            }
+
+            executeHTTPRequest(requestInput)
+              .then((response) => {
+                setHttpResponse(response)
+                logger.info('HTTP request completed', {
+                  url: response.requestUrl,
+                  status: response.statusCode,
+                  duration: response.timings.durationMs
+                })
+              })
+              .catch((err: unknown) => {
+                logger.error('HTTP request failed', { error: String(err) })
+              })
+              .finally(() => {
+                setIsSending(false)
+              })
           }}
           options={{
             title: t('requestTab.send'),
@@ -742,7 +796,11 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
               marginLeft: 4
             }}
           >
-            <ResponsesView requestTitle={`${method} ${request.name}`} />
+            <HTTPResponseView
+              response={httpResponse}
+              requestTitle={`${method} ${request.name}`}
+              isLoading={isSending}
+            />
           </div>
 
           <Sash
