@@ -6,3 +6,11 @@ export type {
   NavigationListener,
   HistoryStateListener
 } from './NavigationService'
+
+export { searchService } from './SearchService'
+export type {
+  SearchDocument,
+  SearchResult,
+  SearchNavigation,
+  GroupedResults
+} from './SearchService'

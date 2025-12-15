@@ -3,6 +3,7 @@
  */
 
 import Handlebars from 'handlebars'
+import { searchService, type SearchDocument } from 'electron-core-ui/renderer'
 import type {
   Folder,
   HTTPRequest,
@@ -758,4 +759,92 @@ export async function importSwaggerFromUrl(
 export function importSwaggerFromJson(json: string, options: SwaggerImportOptions = {}): Folder {
   const spec = JSON.parse(json) as SwaggerSpec
   return importSwagger(spec, options)
+}
+
+// ============================================================================
+// Search Indexing
+// ============================================================================
+
+/** Check if an item is a Folder */
+function isSearchFolder(item: Folder | HTTPRequest): item is Folder {
+  return 'items' in item
+}
+
+/** Check if an item is an HTTPRequest */
+function isSearchHTTPRequest(item: Folder | HTTPRequest): item is HTTPRequest {
+  return 'type' in item
+}
+
+/**
+ * Index a folder and all its contents recursively for search
+ */
+export function indexFolderForSearch(folder: Folder, parentPath: string[] = []): void {
+  const currentPath = [...parentPath, folder.id]
+  const documents: SearchDocument[] = []
+
+  // Index the folder itself
+  documents.push({
+    id: folder.id,
+    title: folder.name,
+    description: folder.documentation.slice(0, 200),
+    category: 'folder',
+    icon: 'folder',
+    keywords: folder.tags.join(' '),
+    navigation: {
+      type: 'folder',
+      folderId: folder.id,
+      path: currentPath
+    }
+  })
+
+  // Index all items in the folder
+  for (const item of folder.items) {
+    if (isSearchFolder(item)) {
+      // Recursively index subfolders
+      indexFolderForSearch(item, currentPath)
+    } else if (isSearchHTTPRequest(item)) {
+      // Index HTTP request
+      const keywords = [
+        ...item.tags,
+        ...item.headers.map((h) => h.key),
+        ...item.params.map((p) => p.key),
+        ...(item.pathParams?.map((p) => p.key) ?? [])
+      ].join(' ')
+
+      documents.push({
+        id: item.id,
+        title: item.name,
+        description: item.documentation.slice(0, 200),
+        category: 'request',
+        icon: item.method.toLowerCase(),
+        keywords,
+        navigation: {
+          type: 'request',
+          folderId: folder.id,
+          requestId: item.id,
+          path: [...currentPath, item.id]
+        }
+      })
+    }
+  }
+
+  // Index all documents
+  searchService.indexDocuments(documents)
+}
+
+/**
+ * Remove a folder and all its contents from the search index
+ */
+export function removeFolderFromSearch(folder: Folder): void {
+  // Remove the folder itself
+  searchService.removeDocument(folder.id)
+
+  // Remove all items in the folder
+  for (const item of folder.items) {
+    if (isSearchFolder(item)) {
+      removeFolderFromSearch(item)
+    } else {
+      searchService.removeDocument(item.id)
+    }
+  }
 }

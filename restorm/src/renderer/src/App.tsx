@@ -20,12 +20,12 @@ import {
   isContainerNode,
   navigationService
 } from 'electron-core-ui/renderer'
-import type { WorkbenchTree, NavigationEvent, GroupNode, TabGroupNode, EditorTab } from 'electron-core-ui/renderer'
+import type { WorkbenchTree, NavigationEvent, GroupNode, TabGroupNode, EditorTab, SearchResult } from 'electron-core-ui/renderer'
 import { Workbench } from './components/Workbench'
 import { Welcome } from './components/Welcome'
 import { HttpMethodBadge } from './components/HttpMethodBadge'
 import { EnvironmentValuesProvider } from './contexts/EnvironmentValuesContext'
-import { importSwaggerFromJson } from './services/SwaggerImportService'
+import { importSwaggerFromJson, indexFolderForSearch } from './services/SwaggerImportService'
 import { folderAsRootListViewItem, collectAllFolderIds } from './services/FolderToListView'
 import swaggerPetstoreJson from './resources/swagger-petstore.json'
 import type { Folder, FolderItem, HTTPRequest, Environment } from './types/collections'
@@ -241,6 +241,11 @@ const App: React.FC = () => {
 
   // Swagger folder data (mutable for renaming)
   const [swaggerFolder, setSwaggerFolder] = useState<Folder>(initialSwaggerFolder)
+
+  // Index folder for search on initial load and when folder changes
+  useEffect(() => {
+    indexFolderForSearch(swaggerFolder)
+  }, [swaggerFolder])
 
   // Initialize with all folders expanded
   const [expandedIds, setExpandedIds] = useState<string[]>(allFolderIds)
@@ -594,6 +599,15 @@ const App: React.FC = () => {
     navigationService.navigateTo(itemId, 'context-menu', { type: 'folder' })
   }, [])
 
+  // Handle search result click - navigate to the selected item
+  const handleSearchResultClick = useCallback((result: SearchResult) => {
+    if (result.navigation?.type === 'request' && result.navigation.requestId) {
+      handleItemClick(result.navigation.requestId)
+    } else if (result.navigation?.type === 'folder' && result.navigation.folderId) {
+      handleItemClick(result.navigation.folderId)
+    }
+  }, [handleItemClick])
+
   // Convert swagger folder to ListView items
   const sidebarItems: ListViewItemData[] = useMemo(() => {
     const expandedSet = new Set(expandedIds)
@@ -913,6 +927,8 @@ const App: React.FC = () => {
     >
       <Titlebar
         title={t('app.title')}
+        showSearchBar
+        onSearchResultClick={handleSearchResultClick}
         leftContent={
           <MenuBar>
             <MenuBarItem title={t('menuBar.file')}>

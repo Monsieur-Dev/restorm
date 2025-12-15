@@ -104,6 +104,10 @@ export type { MenuBarProps, MenuItemProps, MenuItemSeparatorProps, MenuBarState,
 export { Titlebar } from './Titlebar/index'
 export type { TitlebarProps } from './Titlebar/index'
 
+// SearchBar exports
+export { SearchBar } from './SearchBar/index'
+export type { SearchBarProps } from './SearchBar/index'
+
 // Statusbar exports
 export { Statusbar, StatusbarElement } from './Statusbar/index'
 export type { StatusbarProps, StatusbarElementProps } from './Statusbar/index'

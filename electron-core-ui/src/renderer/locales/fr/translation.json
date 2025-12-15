@@ -15,5 +15,16 @@
     "copy": "Copier",
     "paste": "Coller",
     "goToDefinition": "Aller à la définition"
+  },
+  "search": {
+    "placeholder": "Rechercher...",
+    "noResults": "Aucun résultat trouvé",
+    "categories": {
+      "request": "Requêtes HTTP",
+      "folder": "Dossiers",
+      "environment": "Environnements",
+      "settings": "Paramètres",
+      "tag": "Tags"
+    }
   }
 }
