@@ -771,9 +771,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
         >
           <div
             style={{
-              width: leftPaneWidth || '50%',
+              width: httpResponse || isSending ? leftPaneWidth || '50%' : '100%',
               minWidth: 320,
-              maxWidth: '80%',
+              maxWidth: httpResponse || isSending ? '80%' : '100%',
               display: 'flex',
               flexDirection: 'column',
               minHeight: 0
@@ -786,30 +786,34 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
             />
           </div>
 
-          <div
-            style={{
-              flex: 1,
-              minWidth: 260,
-              display: 'flex',
-              flexDirection: 'column',
-              minHeight: 0,
-              marginLeft: 4
-            }}
-          >
-            <HTTPResponseView
-              response={httpResponse}
-              requestTitle={`${method} ${request.name}`}
-              isLoading={isSending}
-            />
-          </div>
+          {(httpResponse || isSending) && (
+            <>
+              <div
+                style={{
+                  flex: 1,
+                  minWidth: 260,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  minHeight: 0,
+                  marginLeft: 4
+                }}
+              >
+                <HTTPResponseView
+                  response={httpResponse}
+                  requestTitle={`${method} ${request.name}`}
+                  isLoading={isSending}
+                />
+              </div>
 
-          <Sash
-            orientation="vertical"
-            layoutProvider={splitLayoutProvider}
-            onStart={handleSashStart}
-            onChange={handleSashChange}
-            size={4}
-          />
+              <Sash
+                orientation="vertical"
+                layoutProvider={splitLayoutProvider}
+                onStart={handleSashStart}
+                onChange={handleSashChange}
+                size={4}
+              />
+            </>
+          )}
         </div>
       </div>
     </div>
