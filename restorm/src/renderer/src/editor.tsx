@@ -326,8 +326,8 @@ void initI18n().then(() => {
               display: 'flex',
               flexDirection: 'column',
               height: '100vh',
-              backgroundColor: 'var(--vscode-editor-background, #1e1e1e)',
-              color: 'var(--vscode-editor-foreground, #d4d4d4)'
+              backgroundColor: 'var(--vscode-editor-background)',
+              color: 'var(--vscode-editor-foreground)'
             }}
           >
             <Titlebar title="restorm" />

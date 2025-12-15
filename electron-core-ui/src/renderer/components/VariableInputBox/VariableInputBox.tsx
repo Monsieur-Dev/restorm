@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Monaco } from '@monaco-editor/react'
 import type * as monacoEditor from 'monaco-editor'
 import type { VariableInputBoxProps, VariableDefinition } from './types'
@@ -51,6 +52,7 @@ const isMonacoCancellationError = (reason: unknown): boolean => {
 }
 
 const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
+  const { t } = useTranslation()
   const {
     value,
     onChange,
@@ -125,20 +127,20 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
 
   const contextMenuItems = useMemo<ContextMenuItem[]>(() => {
     const items: ContextMenuItem[] = [
-      { id: 'cut', label: 'Cut', onClick: handleCut },
-      { id: 'copy', label: 'Copy', onClick: handleCopy },
-      { id: 'paste', label: 'Paste', onClick: handlePaste }
+      { id: 'cut', label: t('contextMenu.cut'), onClick: handleCut },
+      { id: 'copy', label: t('contextMenu.copy'), onClick: handleCopy },
+      { id: 'paste', label: t('contextMenu.paste'), onClick: handlePaste }
     ]
     
     if (props.onGoToDefinition) {
       items.push(
         { id: 'sep1', label: '', isSeparator: true },
-        { id: 'goToDefinition', label: 'Go to Definition', onClick: handleGoToDefinition }
+        { id: 'goToDefinition', label: t('contextMenu.goToDefinition'), onClick: handleGoToDefinition }
       )
     }
     
     return items
-  }, [handleCut, handleCopy, handlePaste, handleGoToDefinition, props.onGoToDefinition])
+  }, [t, handleCut, handleCopy, handlePaste, handleGoToDefinition, props.onGoToDefinition])
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault()

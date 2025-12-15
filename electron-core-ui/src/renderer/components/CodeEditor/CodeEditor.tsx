@@ -1,4 +1,5 @@
 import React, { useState, useEffect, forwardRef, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import Editor, { type EditorProps, type Monaco, type OnMount } from '@monaco-editor/react'
 import type * as monacoEditor from 'monaco-editor'
 
@@ -54,7 +55,7 @@ export interface CodeEditorProps extends Omit<EditorProps, 'theme'> {
 
   /**
    * Label for the "Go to definition" action in the context menu.
-   * @default "Go to Definition"
+   * @default Uses i18n translation key 'codeEditor.goToDefinition'
    */
   goToDefinitionLabel?: string
 }
@@ -75,7 +76,7 @@ export interface CodeEditorRef {
 function isDarkTheme(): boolean {
   if (typeof document === 'undefined') return true
   const themeAttr = document.documentElement.getAttribute('data-theme') ?? 'dark'
-  return themeAttr === 'dark' || themeAttr === 'hcDark' || themeAttr === 'hc'
+  return themeAttr === 'dark' || themeAttr === 'hcDark'
 }
 
 /**
@@ -125,6 +126,8 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   { theme, onMount, onEditorMount, onGoToDefinition, goToDefinitionLabel = 'Go to Definition', ...props },
   ref
 ) {
+  const { t } = useTranslation()
+  const resolvedLabel = goToDefinitionLabel ?? t('codeEditor.goToDefinition')
   const [currentTheme, setCurrentTheme] = useState<string>(() => theme ?? getMonacoTheme())
   const [editorInstance, setEditorInstance] = useState<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
   const [monacoInstance, setMonacoInstance] = useState<Monaco | null>(null)
@@ -187,7 +190,7 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
     // Register "Go to Definition" action for Handlebars variables
     editor.addAction({
       id: 'editor.action.goToVariableDefinition',
-      label: goToDefinitionLabel,
+      label: resolvedLabel,
       contextMenuGroupId: 'navigation',
       contextMenuOrder: 1,
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.F12],

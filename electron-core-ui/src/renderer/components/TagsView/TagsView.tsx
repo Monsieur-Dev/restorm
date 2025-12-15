@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../Button'
 import { ContextMenu, type ContextMenuItem } from '../ContextMenu/ContextMenu'
 
@@ -9,13 +10,15 @@ export interface TagsViewProps {
   tags: string[]
   /** Called when tags change (add, rename, remove) */
   onChange?: (tags: string[]) => void
-  /** Label for the "Remove tag" menu item. @default "Remove tag" */
+  /** Label for the "Remove tag" menu item. @default Uses i18n translation key 'tagsView.removeTag' */
   removeTagLabel?: string
   className?: string
   style?: React.CSSProperties
 }
 
-export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLabel = 'Remove tag', className, style }) => {
+export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLabel, className, style }) => {
+  const { t } = useTranslation()
+  const resolvedRemoveTagLabel = removeTagLabel ?? t('tagsView.removeTag')
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [editingValue, setEditingValue] = useState<string>('')
   const inputRef = useRef<HTMLInputElement | null>(null)
@@ -101,7 +104,7 @@ export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLab
     () => [
       {
         id: 'remove',
-        label: removeTagLabel,
+        label: resolvedRemoveTagLabel,
         icon: 'close',
         onClick: () => {
           if (contextMenu.index != null) {
@@ -110,7 +113,7 @@ export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLab
         }
       }
     ],
-    [contextMenu.index, handleRemoveAt, removeTagLabel]
+    [contextMenu.index, handleRemoveAt, resolvedRemoveTagLabel]
   )
 
   const rootClassName = useMemo(

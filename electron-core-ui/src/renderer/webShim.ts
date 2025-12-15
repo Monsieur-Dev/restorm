@@ -6,25 +6,27 @@
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../types/theme'
 import yaml from 'js-yaml'
 import themeIndexJson from '../../resources/themes/index.json'
-import baseYaml from '../../resources/themes/base.yaml?raw'
-import darkBaseYaml from '../../resources/themes/dark/_base.yaml?raw'
-import lightBaseYaml from '../../resources/themes/light/_base.yaml?raw'
-import hcDarkBaseYaml from '../../resources/themes/hc_dark/_base.yaml?raw'
-import hcLightBaseYaml from '../../resources/themes/hc_light/_base.yaml?raw'
-import abyssYaml from '../../resources/themes/dark/abyss.yaml?raw'
-import darkModernYaml from '../../resources/themes/dark/dark-modern.yaml?raw'
-import darkPlusYaml from '../../resources/themes/dark/dark-plus.yaml?raw'
-import kimbieDarkYaml from '../../resources/themes/dark/kimbie-dark.yaml?raw'
-import monokaiYaml from '../../resources/themes/dark/monokai.yaml?raw'
-import monokaiDimmedYaml from '../../resources/themes/dark/monokai-dimmed.yaml?raw'
-import redYaml from '../../resources/themes/dark/red.yaml?raw'
-import solarizedDarkYaml from '../../resources/themes/dark/solarized-dark.yaml?raw'
-import tomorrowNightBlueYaml from '../../resources/themes/dark/tomorrow-night-blue.yaml?raw'
-import lightModernYaml from '../../resources/themes/light/light-modern.yaml?raw'
-import lightPlusYaml from '../../resources/themes/light/light-plus.yaml?raw'
-import quietLightYaml from '../../resources/themes/light/quiet-light.yaml?raw'
-import solarizedLightYaml from '../../resources/themes/light/solarized-light.yaml?raw'
-import sunsetBeachDayYaml from '../../resources/themes/light/sunset-beach-day.yaml?raw'
+
+// Dynamically import all theme YAML files using Vite's glob import
+const themeYamlModules = import.meta.glob('../../resources/themes/**/*.yaml', {
+  query: '?raw',
+  import: 'default',
+  eager: true
+}) as Record<string, string>
+
+// Helper to extract theme ID from file path
+function getThemeIdFromPath(path: string): string {
+  // Path format: ../../resources/themes/dark/abyss.yaml -> dark/abyss
+  const match = path.match(/themes\/(.+)\.yaml$/)
+  return match?.[1] ?? ''
+}
+
+// Build mappings from glob imports
+const baseYaml = themeYamlModules['../../resources/themes/base.yaml'] ?? ''
+const darkBaseYaml = themeYamlModules['../../resources/themes/dark/_base.yaml'] ?? ''
+const lightBaseYaml = themeYamlModules['../../resources/themes/light/_base.yaml'] ?? ''
+const hcDarkBaseYaml = themeYamlModules['../../resources/themes/hc_dark/_base.yaml'] ?? ''
+const hcLightBaseYaml = themeYamlModules['../../resources/themes/hc_light/_base.yaml'] ?? ''
 
 interface WindowApiThemeShim {
   list: () => Promise<ThemeInfo[]>
@@ -112,21 +114,14 @@ type ThemeCacheValue = { theme: ThemeDefinition; variables: ThemeVariables }
 
 const themeIndex = themeIndexJson as ThemeIndex
 
-const THEME_YAML_BY_ID: Record<string, string> = {
-  'dark/abyss': abyssYaml,
-  'dark/dark-modern': darkModernYaml,
-  'dark/dark-plus': darkPlusYaml,
-  'dark/kimbie-dark': kimbieDarkYaml,
-  'dark/monokai': monokaiYaml,
-  'dark/monokai-dimmed': monokaiDimmedYaml,
-  'dark/red': redYaml,
-  'dark/solarized-dark': solarizedDarkYaml,
-  'dark/tomorrow-night-blue': tomorrowNightBlueYaml,
-  'light/light-modern': lightModernYaml,
-  'light/light-plus': lightPlusYaml,
-  'light/quiet-light': quietLightYaml,
-  'light/solarized-light': solarizedLightYaml,
-  'light/sunset-beach-day': sunsetBeachDayYaml
+// Build theme YAML mapping dynamically from glob imports
+const THEME_YAML_BY_ID: Record<string, string> = {}
+for (const [path, content] of Object.entries(themeYamlModules)) {
+  const themeId = getThemeIdFromPath(path)
+  // Skip base files and root base.yaml
+  if (themeId && !themeId.endsWith('/_base') && themeId !== 'base') {
+    THEME_YAML_BY_ID[themeId] = content
+  }
 }
 
 let webBaseVariables: ThemeVariables | null = null

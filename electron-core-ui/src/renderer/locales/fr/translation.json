@@ -3,5 +3,17 @@
     "title": "Paramètres",
     "theme": "Thème",
     "language": "Langue"
+  },
+  "codeEditor": {
+    "goToDefinition": "Aller à la définition"
+  },
+  "tagsView": {
+    "removeTag": "Supprimer le tag"
+  },
+  "contextMenu": {
+    "cut": "Couper",
+    "copy": "Copier",
+    "paste": "Coller",
+    "goToDefinition": "Aller à la définition"
   }
 }

@@ -1,74 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Picker from '@emoji-mart/react'
 import data from '@emoji-mart/data'
+import codiconsMapping from '@vscode/codicons/src/template/mapping.json'
 import type { Icon } from '../../../../types/icon'
 import { Button } from '../Button'
 
 import './iconSelect.css'
 
-// List of commonly used codicons for the custom category
-const CODICONS = [
-  'account', 'activate-breakpoints', 'add', 'archive', 'arrow-both', 'arrow-down',
-  'arrow-left', 'arrow-right', 'arrow-small-down', 'arrow-small-left', 'arrow-small-right',
-  'arrow-small-up', 'arrow-up', 'beaker', 'bell', 'bell-dot', 'bold', 'book', 'bookmark',
-  'briefcase', 'broadcast', 'browser', 'bug', 'calendar', 'call-incoming', 'call-outgoing',
-  'case-sensitive', 'check', 'check-all', 'checklist', 'chevron-down', 'chevron-left',
-  'chevron-right', 'chevron-up', 'chrome-close', 'chrome-maximize', 'chrome-minimize',
-  'chrome-restore', 'circle-filled', 'circle-outline', 'circle-slash', 'circuit-board',
-  'clear-all', 'clippy', 'clock', 'clone', 'close', 'close-all', 'cloud', 'cloud-download',
-  'cloud-upload', 'code', 'collapse-all', 'color-mode', 'combine', 'comment',
-  'comment-discussion', 'compass', 'console', 'copy', 'credit-card', 'dash', 'dashboard',
-  'database', 'debug', 'debug-alt', 'debug-breakpoint', 'debug-console', 'debug-continue',
-  'debug-disconnect', 'debug-pause', 'debug-restart', 'debug-start', 'debug-step-into',
-  'debug-step-out', 'debug-step-over', 'debug-stop', 'desktop-download', 'device-camera',
-  'device-camera-video', 'device-mobile', 'diff', 'diff-added', 'diff-ignored',
-  'diff-modified', 'diff-removed', 'diff-renamed', 'discard', 'edit', 'editor-layout',
-  'ellipsis', 'empty-window', 'error', 'exclude', 'expand-all', 'export', 'extensions',
-  'eye', 'eye-closed', 'feedback', 'file', 'file-add', 'file-binary', 'file-code',
-  'file-media', 'file-pdf', 'file-submodule', 'file-symlink-directory', 'file-symlink-file',
-  'file-zip', 'files', 'filter', 'flame', 'fold', 'fold-down', 'fold-up', 'folder',
-  'folder-active', 'folder-library', 'folder-opened', 'gear', 'gift', 'gist', 'gist-secret',
-  'git-branch', 'git-commit', 'git-compare', 'git-merge', 'git-pull-request', 'github',
-  'github-action', 'github-alt', 'github-inverted', 'globe', 'go-to-file', 'grabber',
-  'graph', 'graph-left', 'gripper', 'group-by-ref-type', 'heart', 'history', 'home',
-  'horizontal-rule', 'hubot', 'inbox', 'info', 'inspect', 'issue-closed', 'issue-opened',
-  'issue-reopened', 'issues', 'italic', 'jersey', 'json', 'kebab-vertical', 'key',
-  'keyboard', 'law', 'layers', 'layers-active', 'layers-dot', 'layout', 'library',
-  'lightbulb', 'lightbulb-autofix', 'link', 'link-external', 'list-filter', 'list-flat',
-  'list-ordered', 'list-selection', 'list-tree', 'list-unordered', 'live-share',
-  'loading', 'location', 'lock', 'mail', 'mail-read', 'map', 'markdown', 'megaphone',
-  'mention', 'menu', 'merge', 'milestone', 'mirror', 'mortar-board', 'move', 'multiple-windows',
-  'mute', 'new-file', 'new-folder', 'newline', 'no-newline', 'note', 'notebook',
-  'notebook-template', 'octoface', 'open-preview', 'organization', 'outline', 'output',
-  'package', 'paintcan', 'pass', 'pass-filled', 'person', 'person-add', 'pie-chart',
-  'pin', 'pinned', 'pinned-dirty', 'play', 'play-circle', 'plug', 'preserve-case',
-  'preview', 'primitive-square', 'project', 'pulse', 'question', 'quote', 'radio-tower',
-  'reactions', 'record', 'record-keys', 'redo', 'references', 'refresh', 'regex',
-  'remote', 'remote-explorer', 'remove', 'remove-close', 'repl', 'replace', 'replace-all',
-  'reply', 'repo', 'repo-clone', 'repo-forked', 'repo-pull', 'repo-push', 'report',
-  'request-changes', 'robot', 'rocket', 'root-folder', 'root-folder-opened', 'rss',
-  'ruby', 'run', 'run-above', 'run-all', 'run-below', 'run-errors', 'save', 'save-all',
-  'save-as', 'screen-full', 'screen-normal', 'search', 'search-save', 'search-stop',
-  'selection', 'send', 'server', 'server-environment', 'server-process', 'settings',
-  'settings-gear', 'shield', 'sign-in', 'sign-out', 'smiley', 'snake', 'sort-precedence',
-  'source-control', 'split-horizontal', 'split-vertical', 'squirrel', 'star', 'star-add',
-  'star-delete', 'star-empty', 'star-full', 'star-half', 'stop', 'stop-circle',
-  'symbol-array', 'symbol-boolean', 'symbol-class', 'symbol-color', 'symbol-constant',
-  'symbol-enum', 'symbol-enum-member', 'symbol-event', 'symbol-field', 'symbol-file',
-  'symbol-interface', 'symbol-key', 'symbol-keyword', 'symbol-method', 'symbol-misc',
-  'symbol-namespace', 'symbol-numeric', 'symbol-operator', 'symbol-parameter',
-  'symbol-property', 'symbol-ruler', 'symbol-snippet', 'symbol-string', 'symbol-structure',
-  'symbol-variable', 'sync', 'sync-ignored', 'tab', 'tag', 'target', 'tasklist',
-  'telescope', 'terminal', 'terminal-bash', 'terminal-cmd', 'terminal-debian',
-  'terminal-linux', 'terminal-powershell', 'terminal-tmux', 'terminal-ubuntu', 'text-size',
-  'three-bars', 'thumbsdown', 'thumbsup', 'tools', 'trash', 'trashcan', 'triangle-down',
-  'triangle-left', 'triangle-right', 'triangle-up', 'twitter', 'type-hierarchy',
-  'type-hierarchy-sub', 'type-hierarchy-super', 'unfold', 'ungroup-by-ref-type', 'unlock',
-  'unmute', 'unverified', 'variable', 'variable-group', 'verified', 'verified-filled',
-  'versions', 'vm', 'vm-active', 'vm-connect', 'vm-outline', 'vm-running', 'wand',
-  'warning', 'watch', 'whitespace', 'whole-word', 'window', 'word-wrap', 'workspace-trusted',
-  'workspace-unknown', 'workspace-untrusted', 'zoom-in', 'zoom-out'
-]
+// Get all codicon names from the official @vscode/codicons package
+const CODICONS = Object.keys(codiconsMapping).sort()
 
 export interface IconSelectProps {
   /** Currently selected icon */
@@ -97,7 +37,7 @@ interface EmojiData {
 function isDarkTheme(): boolean {
   if (typeof document === 'undefined') return true
   const themeAttr = document.documentElement.getAttribute('data-theme') ?? 'dark'
-  return themeAttr === 'dark' || themeAttr === 'hcDark' || themeAttr === 'hc'
+  return themeAttr === 'dark' || themeAttr === 'hcDark'
 }
 
 export const IconSelect: React.FC<IconSelectProps> = ({

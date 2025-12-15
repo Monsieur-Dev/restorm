@@ -39,7 +39,7 @@ export const ResponsesView: React.FC<ResponsesViewProps> = ({ requestTitle }) =>
   const [isDarkTheme, setIsDarkTheme] = useState<boolean>(() => {
     if (typeof document === 'undefined') return true
     const themeAttr = document.documentElement.getAttribute('data-theme') ?? 'dark'
-    return themeAttr === 'dark' || themeAttr === 'hc'
+    return themeAttr === 'dark' || themeAttr === 'hcDark'
   })
 
   const graphRef = useRef<GraphRef | null>(null)
@@ -62,7 +62,7 @@ export const ResponsesView: React.FC<ResponsesViewProps> = ({ requestTitle }) =>
 
     const handleThemeChange = (): void => {
       const themeAttr = document.documentElement.getAttribute('data-theme') ?? 'dark'
-      const dark = themeAttr === 'dark' || themeAttr === 'hc'
+      const dark = themeAttr === 'dark' || themeAttr === 'hcDark'
       setIsDarkTheme(dark)
     }
 
