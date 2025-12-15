@@ -1,22 +1,19 @@
 .ag-theme-restorm-input-table {
   --ag-background-color: var(--vscode-editor-background);
   --ag-foreground-color: var(--vscode-editor-foreground);
-  --ag-border-color: var(--vscode-panel-border);
-  --ag-row-border-color: var(--vscode-panel-border);
+  --ag-border-color: transparent;
+  --ag-row-border-color: transparent;
   --ag-header-background-color: var(--vscode-editorGroupHeader-tabsBackground, var(--vscode-editor-background));
   --ag-header-foreground-color: var(--vscode-foreground);
   --ag-odd-row-background-color: var(--vscode-editor-background);
   --ag-selected-row-background-color: var(--vscode-list-activeSelectionBackground);
   --ag-selected-row-text-color: var(--vscode-list-activeSelectionForeground);
   --ag-row-hover-color: var(--vscode-list-hoverBackground);
-  --ag-input-border-color: var(--vscode-input-border);
+  --ag-input-border-color: transparent;
   --ag-input-focus-border-color: var(--vscode-focusBorder);
 
   --ag-font-family: var(--vscode-font-family);
   --ag-font-size: 12px;
-
-  border: 1px solid var(--vscode-panel-border);
-  border-radius: 2px;
 }
 
 .ag-theme-restorm-input-table .ag-root-wrapper {

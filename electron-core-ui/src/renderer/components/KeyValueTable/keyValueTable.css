@@ -12,8 +12,6 @@
   flex: 1;
   min-height: 120px;
   background-color: var(--vscode-editor-background);
-  border: 1px solid var(--vscode-panel-border, #3c3c3c);
-  border-radius: 2px;
 }
 
 .params-table-toolbar {
@@ -49,7 +47,6 @@
 .params-table th,
 .params-table td {
   padding: 2px 6px;
-  border-bottom: 1px solid var(--vscode-panel-border);
 }
 
 /* Fixed width for drag handle column */
