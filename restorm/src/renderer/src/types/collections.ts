@@ -208,3 +208,97 @@ export function isBodyFormData(body: HTTPRequestBody): body is HTTPRequestBodyFo
 export function isBodyUrlEncoded(body: HTTPRequestBody): body is HTTPRequestBodyXWwwFormUrlEncoded {
   return body.type === 'x-www-form-urlencoded'
 }
+
+// ============================================================================
+// Response Types
+// ============================================================================
+
+/** Timing information for HTTP requests */
+export interface HTTPTimings {
+  /** When the request was initiated (ISO 8601) */
+  startedAt: string
+  /** Total duration in milliseconds */
+  durationMs: number
+  /** DNS lookup time in ms (if available) */
+  dnsLookupMs?: number
+  /** TCP connection time in ms (if available) */
+  tcpConnectionMs?: number
+  /** TLS handshake time in ms (if available) */
+  tlsHandshakeMs?: number
+  /** Time to first byte in ms (if available) */
+  ttfbMs?: number
+  /** Content download time in ms (if available) */
+  downloadMs?: number
+}
+
+/** Network information for the request */
+export interface HTTPNetworkInfo {
+  /** Remote server IP address and port */
+  remoteAddress?: string
+  /** Local IP address and port */
+  localAddress?: string
+  /** HTTP protocol version (e.g., "HTTP/1.1", "HTTP/2") */
+  protocol?: string
+}
+
+/** Base response interface for all request types */
+interface BaseResponse {
+  /** Unique identifier for the response */
+  id: string
+  /** ID of the request that generated this response */
+  requestId: string
+  /** Error message if the request failed */
+  error?: string
+}
+
+/** Complete HTTP response with all details */
+export interface HTTPResponse extends BaseResponse {
+  type: 'http'
+
+  // === Request details (what was sent) ===
+  /** The final resolved URL that was called */
+  requestUrl: string
+  /** HTTP method used */
+  requestMethod: HTTPMethod
+  /** Headers sent with the request */
+  requestHeaders: KeyValue[]
+  /** Query parameters sent */
+  requestParams: KeyValue[]
+  /** Path parameters used */
+  requestPathParams?: KeyValue[]
+  /** Body sent (if any) */
+  requestBody?: HTTPRequestBody
+
+  // === Response details ===
+  /** HTTP status code */
+  statusCode: number
+  /** HTTP status text (e.g., "OK", "Not Found") */
+  statusText: string
+  /** Response headers received */
+  responseHeaders: KeyValue[]
+  /** Response body as string */
+  responseBody: string
+  /** Content-Type of the response */
+  contentType?: string
+  /** Size of the response body in bytes */
+  contentLength?: number
+
+  // === Timing and network ===
+  /** Timing information */
+  timings: HTTPTimings
+  /** Network information */
+  network?: HTTPNetworkInfo
+
+  // === Security ===
+  /** Referrer policy used */
+  referrerPolicy?: string
+}
+
+/** Union of all response types */
+export type Response = HTTPResponse // | GraphQLResponse | WebSocketResponse
+
+/** Check if a response is an HTTPResponse */
+export function isHTTPResponse(response: Response): response is HTTPResponse {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  return response.type === 'http'
+}

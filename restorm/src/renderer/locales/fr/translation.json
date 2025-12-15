@@ -66,9 +66,12 @@
     },
     "responses": {
       "tabs": {
+        "response": "Réponse",
         "prettyfied": "Formattée",
         "jsoncrack": "JSONCrack"
-      }
+      },
+      "loading": "Envoi de la requête...",
+      "noResponse": "Cliquez sur Envoyer pour exécuter la requête"
     }
   },
   "workbench": {

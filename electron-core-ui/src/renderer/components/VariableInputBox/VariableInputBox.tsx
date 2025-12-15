@@ -314,10 +314,20 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
     }
 
     // Prevent multiline input to behave like a multi-line editor
+    // Block Enter with any modifier (Ctrl+Enter, Shift+Enter, etc.)
     editor.onKeyDown((e) => {
       if (e.keyCode === monacoInstance.KeyCode.Enter) {
         e.preventDefault()
+        e.stopPropagation()
       }
+    })
+
+    // Also remove default keybindings for inserting lines
+    editor.addCommand(monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.Enter, () => {
+      // Do nothing - prevent Ctrl+Enter from inserting a line
+    })
+    editor.addCommand(monacoInstance.KeyMod.Shift | monacoInstance.KeyCode.Enter, () => {
+      // Do nothing - prevent Shift+Enter from inserting a line
     })
 
     // Block local Ctrl/Cmd+F inside this compact editor only
