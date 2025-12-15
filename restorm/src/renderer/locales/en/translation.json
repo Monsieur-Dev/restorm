@@ -84,5 +84,111 @@
   },
   "codeEditor": {
     "goToDefinition": "Go to Definition"
+  },
+  "httpStatus": {
+    "100": {
+      "name": "Continue",
+      "description": "The server has received the request headers and the client should proceed to send the request body."
+    },
+    "101": {
+      "name": "Switching Protocols",
+      "description": "The requester has asked the server to switch protocols and the server has agreed to do so."
+    },
+    "200": {
+      "name": "OK",
+      "description": "Standard response for successful HTTP requests. The actual response depends on the request method used."
+    },
+    "201": {
+      "name": "Created",
+      "description": "The request has been fulfilled, resulting in the creation of a new resource."
+    },
+    "202": {
+      "name": "Accepted",
+      "description": "The request has been accepted for processing, but the processing has not been completed."
+    },
+    "204": {
+      "name": "No Content",
+      "description": "The server successfully processed the request and is not returning any content."
+    },
+    "301": {
+      "name": "Moved Permanently",
+      "description": "This and all future requests should be directed to the given URI."
+    },
+    "302": {
+      "name": "Found",
+      "description": "Tells the client to look at another URL. The HTTP/1.0 specification required the client to perform a temporary redirect."
+    },
+    "304": {
+      "name": "Not Modified",
+      "description": "Indicates that the resource has not been modified since the version specified by the request headers."
+    },
+    "400": {
+      "name": "Bad Request",
+      "description": "The server cannot or will not process the request due to an apparent client error (e.g., malformed request syntax)."
+    },
+    "401": {
+      "name": "Unauthorized",
+      "description": "Authentication is required and has failed or has not yet been provided."
+    },
+    "403": {
+      "name": "Forbidden",
+      "description": "The request contained valid data and was understood by the server, but the server is refusing action."
+    },
+    "404": {
+      "name": "Not Found",
+      "description": "The requested resource could not be found but may be available in the future."
+    },
+    "405": {
+      "name": "Method Not Allowed",
+      "description": "A request method is not supported for the requested resource."
+    },
+    "408": {
+      "name": "Request Timeout",
+      "description": "The server timed out waiting for the request."
+    },
+    "409": {
+      "name": "Conflict",
+      "description": "Indicates that the request could not be processed because of conflict in the current state of the resource."
+    },
+    "410": {
+      "name": "Gone",
+      "description": "Indicates that the resource requested was previously in use but is no longer available and will not be available again."
+    },
+    "415": {
+      "name": "Unsupported Media Type",
+      "description": "The request entity has a media type which the server or resource does not support."
+    },
+    "422": {
+      "name": "Unprocessable Entity",
+      "description": "The request was well-formed but was unable to be followed due to semantic errors."
+    },
+    "429": {
+      "name": "Too Many Requests",
+      "description": "The user has sent too many requests in a given amount of time (rate limiting)."
+    },
+    "500": {
+      "name": "Internal Server Error",
+      "description": "A generic error message, given when an unexpected condition was encountered and no more specific message is suitable."
+    },
+    "501": {
+      "name": "Not Implemented",
+      "description": "The server either does not recognize the request method, or it lacks the ability to fulfil the request."
+    },
+    "502": {
+      "name": "Bad Gateway",
+      "description": "The server was acting as a gateway or proxy and received an invalid response from the upstream server."
+    },
+    "503": {
+      "name": "Service Unavailable",
+      "description": "The server cannot handle the request (because it is overloaded or down for maintenance)."
+    },
+    "504": {
+      "name": "Gateway Timeout",
+      "description": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server."
+    },
+    "unknown": {
+      "name": "Unknown Status",
+      "description": "This status code is not recognized."
+    }
   }
 }
