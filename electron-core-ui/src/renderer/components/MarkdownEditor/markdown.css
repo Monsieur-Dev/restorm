@@ -100,5 +100,3 @@
 [data-milkdown-root] *::-webkit-scrollbar-thumb:active {
   background: var(--vscode-scrollbarSlider-activeBackground);
 }
-
-

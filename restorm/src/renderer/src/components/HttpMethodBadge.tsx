@@ -12,5 +12,3 @@ export const HttpMethodBadge: React.FC<HttpMethodBadgeProps> = ({ method }) => {
 
   return <span className={className}>{method.toUpperCase()}</span>
 }
-
-

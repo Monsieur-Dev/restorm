@@ -87,5 +87,3 @@ const Example: React.FC = () => {
 - Manage `show` state in the **parent** component; `Tooltip` itself is intentionally stateless regarding visibility.
 - Always reuse a single `Tooltip` per target rather than creating a new component instance on every render, to avoid layout thrashing.
 - When integrating into more complex layouts (status bar, lists), ensure `targetRef` always points to a stable DOM element (not conditionally rendered), otherwise positioning may fail or flicker.
-
-

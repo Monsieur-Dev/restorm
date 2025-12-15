@@ -66,5 +66,3 @@ export interface SplitViewProps {
 	onSizesChange?: (sizes: number[]) => void;
 	children?: React.ReactNode;
 }
-
-

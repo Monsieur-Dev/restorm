@@ -70,4 +70,3 @@ export class RestormWindow extends BaseWindow {
     }
   }
 }
-

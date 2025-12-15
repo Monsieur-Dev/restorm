@@ -382,4 +382,3 @@ export function initializeApp(
     logger.error('App failed to start:', { error: String(error) })
   })
 }
-

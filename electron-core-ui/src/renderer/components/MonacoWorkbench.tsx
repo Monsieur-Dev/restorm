@@ -42,4 +42,3 @@ const MonacoWorkbench: React.FC<MonacoWorkbenchProps> = ({
 }
 
 export default MonacoWorkbench
-

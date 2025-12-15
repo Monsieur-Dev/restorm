@@ -437,5 +437,3 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 };
 
 export default EditorTabs;
-
-

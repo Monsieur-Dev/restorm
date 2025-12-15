@@ -81,5 +81,3 @@ const AppStatusbar: React.FC = () => {
 - Keep `title` compact and user-facing; move any long explanations or lists into `children` so they appear in the tooltip instead of the bar itself.
 - Use `warning` and `error` flags only for **semantic** warnings/errors, not generic clicks, to avoid confusing color semantics.
 - When wiring click handlers, call logging APIs (`logger.info`, etc.) rather than `console.log`, so logs remain centralized and consistent with the core UI’s logging rules.
-
-

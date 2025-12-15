@@ -362,8 +362,3 @@ The following files in the project use CSS variables:
 - `src/renderer/components/SelectBox/types.ts`
 - `src/renderer/components/ScrollableElement/types.ts`
 - `src/renderer/components/ScrollableElement/ScrollableElement.tsx`
-
-
-
-
-

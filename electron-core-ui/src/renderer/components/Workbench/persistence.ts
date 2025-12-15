@@ -177,4 +177,3 @@ export async function clearWorkbenchState(workbenchId: string): Promise<boolean>
     return false;
   }
 }
-

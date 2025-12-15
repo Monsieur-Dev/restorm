@@ -9,5 +9,3 @@ export type {
   ListViewSelectionMode,
   ListViewDropPosition
 } from './types'
-
-

@@ -214,4 +214,3 @@ test.describe('Theme Structure Tests', () => {
     expect(fontFamily.toLowerCase()).toMatch(/cascadia|consolas|monaco|monospace/)
   })
 })
-

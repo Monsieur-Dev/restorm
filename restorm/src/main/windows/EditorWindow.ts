@@ -70,4 +70,3 @@ export class EditorWindow extends RestormWindow {
     }
   }
 }
-

@@ -208,4 +208,3 @@ export function isBodyFormData(body: HTTPRequestBody): body is HTTPRequestBodyFo
 export function isBodyUrlEncoded(body: HTTPRequestBody): body is HTTPRequestBodyXWwwFormUrlEncoded {
   return body.type === 'x-www-form-urlencoded'
 }
-

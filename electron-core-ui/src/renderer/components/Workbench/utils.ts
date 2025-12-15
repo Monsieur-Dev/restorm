@@ -40,4 +40,3 @@ export function getTabTitleString(tab: EditorTab, fallback = ''): string {
 	}
 	return extractTextFromReactNode(tab.title, fallback);
 }
-

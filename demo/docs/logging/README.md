@@ -369,4 +369,3 @@ Console output active (info/warn/error levels).
 - [Winston Documentation](https://github.com/winstonjs/winston)
 - [Winston Transports](https://github.com/winstonjs/winston/blob/master/docs/transports.md)
 - [Winston Formats](https://github.com/winstonjs/winston/blob/master/docs/formats.md)
-

@@ -199,4 +199,3 @@ export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLab
 }
 
 export default TagsView
-

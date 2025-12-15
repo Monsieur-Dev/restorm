@@ -34,4 +34,3 @@ contextBridge.exposeInMainWorld('demo', {
     return result as { title: string; content?: string } | undefined
   }
 })
-

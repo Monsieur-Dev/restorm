@@ -687,5 +687,3 @@ export const ResponsesView: React.FC<ResponsesViewProps> = ({ requestTitle }) =>
     </div>
   )
 }
-
-

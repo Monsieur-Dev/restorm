@@ -21,5 +21,3 @@ export interface InputTableProps {
   className?: string
   style?: React.CSSProperties
 }
-
-

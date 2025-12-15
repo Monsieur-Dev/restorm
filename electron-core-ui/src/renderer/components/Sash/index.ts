@@ -10,4 +10,3 @@ export type {
 	Sash as SashType,
 	SashProps
 } from './types';
-

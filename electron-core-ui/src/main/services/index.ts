@@ -5,4 +5,3 @@ export type { LoggerInterface } from './LoggerService'
 export { getStorageService, StorageService } from './StorageService'
 
 export { getThemeService, ThemeService } from './ThemeService'
-

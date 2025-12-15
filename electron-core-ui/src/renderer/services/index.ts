@@ -6,4 +6,3 @@ export type {
   NavigationListener,
   HistoryStateListener
 } from './NavigationService'
-

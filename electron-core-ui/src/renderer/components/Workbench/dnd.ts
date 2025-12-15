@@ -58,5 +58,3 @@ export function computeDropIndex(container: HTMLElement, clientX: number): numbe
 export function clearEditorDragData(): void {
 	currentDragData = undefined;
 }
-
-

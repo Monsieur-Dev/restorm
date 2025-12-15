@@ -32,6 +32,3 @@ export interface WindowConfiguration {
 export function isDevToolsEnabled(): boolean {
   return !app.isPackaged || process.argv.includes('--enable-dev-tools')
 }
-
-
-

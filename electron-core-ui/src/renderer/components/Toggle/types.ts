@@ -32,5 +32,3 @@ export const defaultToggleStyles: IToggleStyles = {
   inputActiveOptionForeground: 'var(--vscode-inputOption-activeForeground)',
   inputActiveOptionBackground: 'var(--vscode-inputOption-activeBackground)'
 };
-
-

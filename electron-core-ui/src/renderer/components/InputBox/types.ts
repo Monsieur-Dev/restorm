@@ -75,5 +75,3 @@ export const defaultInputBoxStyles: IInputBoxStyles = {
   inputValidationErrorBackground: 'var(--vscode-inputValidation-errorBackground)',
   inputValidationErrorForeground: 'var(--vscode-inputValidation-errorForeground)'
 }
-
-

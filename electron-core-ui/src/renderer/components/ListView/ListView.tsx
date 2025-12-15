@@ -771,5 +771,3 @@ export const ListView: React.FC<ListViewProps> = ({
 }
 
 export default ListView
-
-

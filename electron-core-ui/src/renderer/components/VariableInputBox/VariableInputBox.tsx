@@ -427,5 +427,3 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
 }
 
 export { VariableInputBox }
-
-

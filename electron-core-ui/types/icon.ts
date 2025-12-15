@@ -33,4 +33,3 @@ export function codiconIcon(name: string): Icon {
 export function noIcon(): Icon {
   return { type: 'none', value: '' }
 }
-

@@ -12,4 +12,3 @@ export type {
   SelectBoxListProps
 } from './types'
 export { defaultSelectBoxStyles } from './types'
-

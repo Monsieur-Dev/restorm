@@ -70,4 +70,3 @@ export function SettingsModalProvider({ children }: SettingsModalProviderProps):
 }
 
 export default SettingsModalProvider
-

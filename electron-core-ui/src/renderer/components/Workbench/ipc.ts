@@ -36,5 +36,3 @@ export function onWorkbenchTabDropped(
 ): () => void {
   return window.api.onWorkbenchTabDropped(callback)
 }
-
-

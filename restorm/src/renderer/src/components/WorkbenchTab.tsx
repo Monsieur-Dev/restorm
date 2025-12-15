@@ -94,4 +94,3 @@ export const WorkbenchTab: React.FC<WorkbenchTabProps> = ({
 }
 
 export default WorkbenchTab
-

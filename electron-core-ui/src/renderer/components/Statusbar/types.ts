@@ -15,4 +15,3 @@ export interface StatusbarElementProps {
   id?: string
   children?: React.ReactNode
 }
-

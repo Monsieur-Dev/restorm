@@ -128,4 +128,3 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "To create a release, use the 'Manual Release' workflow." >> $GITHUB_STEP_SUMMARY
           fi
-

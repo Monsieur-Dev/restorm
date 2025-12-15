@@ -759,4 +759,3 @@ export function importSwaggerFromJson(json: string, options: SwaggerImportOption
   const spec = JSON.parse(json) as SwaggerSpec
   return importSwagger(spec, options)
 }
-

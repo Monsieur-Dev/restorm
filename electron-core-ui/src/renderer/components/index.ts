@@ -193,4 +193,3 @@ export { insertTabAt, normalizeTree, removeTab, findGroup } from './Workbench/tr
 export type { FindResult } from './Workbench/tree'
 export { isTabGroupNode, isContainerNode } from './Workbench/types'
 export { getTabTitleString, extractTextFromReactNode } from './Workbench/utils'
-

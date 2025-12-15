@@ -111,5 +111,3 @@ export function isContainerNode(node: GroupNode): node is ContainerGroupNode {
 export function isTabGroupNode(node: GroupNode): node is TabGroupNode {
 	return 'tabs' in (node as TabGroupNode);
 }
-
-

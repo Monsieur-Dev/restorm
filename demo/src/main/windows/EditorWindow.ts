@@ -66,4 +66,3 @@ export class EditorWindow extends DemoWindow {
     }
   }
 }
-

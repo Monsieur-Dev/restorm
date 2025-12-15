@@ -267,4 +267,3 @@ class NavigationService {
 export const navigationService = new NavigationService()
 
 export default navigationService
-

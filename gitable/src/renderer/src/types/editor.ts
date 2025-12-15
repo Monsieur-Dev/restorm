@@ -14,4 +14,3 @@ export interface GitableEditorTab extends EditorTab {
    */
   titleString?: string
 }
-

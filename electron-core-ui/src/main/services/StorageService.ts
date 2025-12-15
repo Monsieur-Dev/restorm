@@ -100,4 +100,3 @@ export function getStorageService(): StorageService {
   }
   return storageInstance
 }
-

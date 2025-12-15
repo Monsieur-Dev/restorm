@@ -218,4 +218,3 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
 })
 
 export default CodeEditor
-

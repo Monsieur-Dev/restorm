@@ -75,5 +75,3 @@ const ThemeSelector: React.FC = () => {
 - Use **controlled state** for `value` + `onChange`; do not store mutable option state inside the component.
 - When integrating with i18n, put translations on `label` only; keep `value` stable and non-localized.
 - For accessibility, always provide a semantic label via an external `<label htmlFor="id">` element instead of using placeholder text only.
-
-

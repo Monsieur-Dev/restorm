@@ -232,4 +232,3 @@ export function stripSources(contextWithSources: VariableContextWithSources): Va
   }
   return result
 }
-

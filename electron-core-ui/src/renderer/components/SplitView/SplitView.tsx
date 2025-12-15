@@ -482,5 +482,3 @@ export const SplitView: React.FC<SplitViewProps> = ({
 };
 
 SplitView.displayName = 'SplitView';
-
-

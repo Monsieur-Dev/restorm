@@ -23,4 +23,3 @@ const Statusbar: React.FC<StatusbarProps> = ({
 }
 
 export default Statusbar
-

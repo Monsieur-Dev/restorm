@@ -29,4 +29,3 @@
   "include": ["src/renderer/src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
-

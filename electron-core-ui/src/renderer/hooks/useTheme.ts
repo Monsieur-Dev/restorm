@@ -475,4 +475,3 @@ function useThemeLegacy(): UseThemeReturn {
 }
 
 export default useTheme
-

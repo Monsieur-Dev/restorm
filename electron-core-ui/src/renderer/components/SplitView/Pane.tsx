@@ -8,5 +8,3 @@ export const Pane: React.FC<SplitViewPaneProps> = (_props) => {
 };
 
 export default Pane;
-
-

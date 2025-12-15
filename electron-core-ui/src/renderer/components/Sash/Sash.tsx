@@ -267,4 +267,3 @@ export const Sash: React.FC<SashProps> = ({
 };
 
 export default Sash;
-

@@ -106,4 +106,3 @@ export function collectAllFolderIds(folder: Folder): string[] {
 
   return ids
 }
-

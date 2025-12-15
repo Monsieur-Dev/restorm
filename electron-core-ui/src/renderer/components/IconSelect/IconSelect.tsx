@@ -317,4 +317,3 @@ export const IconSelect: React.FC<IconSelectProps> = ({
 }
 
 export default IconSelect
-

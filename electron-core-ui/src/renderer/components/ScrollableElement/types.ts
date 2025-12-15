@@ -50,5 +50,3 @@ export const defaultScrollableElementStyles: IScrollableElementStyles = {
   scrollbarSliderActiveBackground: 'var(--vscode-scrollbarSlider-activeBackground)',
   scrollbarShadow: 'var(--vscode-scrollbar-shadow)'
 };
-
-

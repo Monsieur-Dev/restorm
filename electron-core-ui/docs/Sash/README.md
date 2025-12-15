@@ -120,5 +120,3 @@ const SplitPane: React.FC = () => {
 - Always let the **layout provider** compute sash coordinates; do not hard-code positions inside the Sash component.
 - Use a `ResizeObserver` (as in the example) to keep heights/widths up to date when the container resizes.
 - Keep drag logic **pure** and bounded (clamp values with `min`/`max`) to avoid invalid layouts or negative sizes when the user drags aggressively or resizes the window quickly.
-
-

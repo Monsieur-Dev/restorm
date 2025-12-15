@@ -168,4 +168,3 @@ La page Settings de Demo utilise maintenant les thèmes officiels de VSCode avec
 ---
 
 *Dernière mise à jour : 14 octobre 2025*
-

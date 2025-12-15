@@ -76,4 +76,3 @@ export class DemoWindow extends BaseWindow {
     }
   }
 }
-

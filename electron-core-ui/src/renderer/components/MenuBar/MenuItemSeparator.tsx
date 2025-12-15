@@ -17,4 +17,3 @@ const MenuItemSeparator: React.FC<MenuItemSeparatorProps> = ({
 }
 
 export default MenuItemSeparator
-

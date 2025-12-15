@@ -26,5 +26,3 @@ export interface VariableInputBoxProps {
    */
   onGoToDefinition?: (variableName: string) => void
 }
-
-

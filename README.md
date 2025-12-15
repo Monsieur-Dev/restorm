@@ -174,4 +174,3 @@ MIT
 - Inspired by [VSCode](https://code.visualstudio.com/)
 - Built with [Molecule UI Framework](https://github.com/DTStack/molecule)
 - Uses [electron-vite](https://github.com/alex8088/electron-vite) for optimal build setup
-

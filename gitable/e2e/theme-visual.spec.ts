@@ -119,4 +119,3 @@ test.describe('VSCode Themes Visual Tests', () => {
     }
   })
 })
-

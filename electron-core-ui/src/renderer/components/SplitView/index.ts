@@ -5,5 +5,3 @@ export type {
 	SplitViewProps,
 	SplitViewPaneProps
 } from './types';
-
-

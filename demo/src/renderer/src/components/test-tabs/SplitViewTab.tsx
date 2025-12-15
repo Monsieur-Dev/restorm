@@ -102,5 +102,3 @@ const SplitViewTab: React.FC = () => {
 }
 
 export default SplitViewTab
-
-

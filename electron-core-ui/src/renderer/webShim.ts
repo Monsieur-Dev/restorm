@@ -350,5 +350,3 @@ export function ensureCoreUiWebApiShim(): void {
 
   w.api = api
 }
-
-

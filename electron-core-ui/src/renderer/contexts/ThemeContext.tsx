@@ -346,4 +346,3 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
 }
 
 export default ThemeContext
-

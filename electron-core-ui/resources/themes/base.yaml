@@ -72,5 +72,3 @@ variables:
   - id: tag-foreground
     value: "#ffffff"
     description: Default tag foreground color
-
-

@@ -274,5 +274,3 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 };
 
 export default EditorGroupView;
-
-
