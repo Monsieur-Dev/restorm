@@ -962,7 +962,7 @@ const App: React.FC = () => {
         >
           <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }}>
             <Pane
-              title="Requests"
+              title={t('sidebar.workspace')}
               collapsible={false}
               minSize={MIN_LEFT_WIDTH}
               headerActions={
@@ -993,7 +993,7 @@ const App: React.FC = () => {
               <ListView
                 items={sidebarItemsWithContextMenu}
                 rootRole="tree"
-                ariaLabel="Requests"
+                ariaLabel={t('sidebar.workspace')}
                 selectedIds={selectedItemId ? [selectedItemId] : []}
                 expandedIds={expandedIds}
                 isRenameable

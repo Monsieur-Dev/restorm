@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import type { Environment } from '../types/collections'
+import { findEnvironmentChain } from '../services/VariableResolutionService'
 
 export interface EnvironmentContextValue {
   environments?: Environment[] | undefined
@@ -23,9 +24,14 @@ export const EnvironmentProvider: React.FC<EnvironmentProviderProps> = ({ enviro
       setSelectedEnvId(null)
       return
     }
-    // Keep current selection if still present, otherwise default to first env
-    const exists = environments.some((env) => env.id === selectedEnvId)
-    if (!exists) {
+    // Keep current selection if still present (including sub-environments), otherwise default to first env
+    if (!selectedEnvId) {
+      setSelectedEnvId(environments[0]?.id ?? null)
+      return
+    }
+
+    const chain = findEnvironmentChain(environments, selectedEnvId)
+    if (!chain) {
       setSelectedEnvId(environments[0]?.id ?? null)
     }
   }, [environments, selectedEnvId])

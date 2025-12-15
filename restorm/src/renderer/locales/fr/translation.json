@@ -11,6 +11,7 @@
   "sidebar": {
     "addRequest": "Ajouter une requête",
     "collapseAll": "Tout réduire",
+    "workspace": "Espace de travail",
     "contextMenu": {
       "createSubfolder": "Créer un sous-dossier",
       "defineVariables": "Définir les variables",

@@ -133,8 +133,8 @@ export const EnvironmentDropdown: React.FC = () => {
   useEffect(() => {
     if (environments && environments.length > 0) {
       setExpandedIds(collectEnvironmentIds(environments))
-      // Keep current selected environment if still present, otherwise default to first
-      if (!selectedEnvId || !environments.some((env) => env.id === selectedEnvId)) {
+      // Keep current selected environment if still present (including sub-environments), otherwise default to first
+      if (!selectedEnvId || !findEnvironmentById(environments, selectedEnvId)) {
         setSelectedEnvId(environments[0]?.id ?? null)
       }
     } else {

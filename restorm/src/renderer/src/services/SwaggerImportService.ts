@@ -716,7 +716,17 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
         {
           id: generateId(`env:root:Default`),
           name: 'Default',
-          variables: [{ key: 'baseUrl', value: defaultBaseUrl }]
+          variables: [{ key: 'baseUrl', value: defaultBaseUrl }],
+          subEnvironments:
+            spec.info.title === 'Swagger Petstore'
+              ? [
+                  {
+                    id: generateId('env:root:Default:Production'),
+                    name: 'Production',
+                    variables: [{ key: 'baseUrl', value: 'https://petstore.com' }]
+                  }
+                ]
+              : []
         }
       ]
     },

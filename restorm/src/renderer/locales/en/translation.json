@@ -11,6 +11,7 @@
   "sidebar": {
     "addRequest": "Add request",
     "collapseAll": "Collapse all requests",
+    "workspace": "Workspace",
     "contextMenu": {
       "createSubfolder": "Create subfolder",
       "defineVariables": "Define variables",
