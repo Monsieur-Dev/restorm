@@ -216,7 +216,8 @@ void initI18n().then(() => {
             return
           }
 
-          if (metadata.kind === 'http-request') {
+          // The only other supported metadata kind is the HTTP request case
+          else {
             const { item, breadcrumbs } = findItemWithBreadcrumbs(rootFolder, metadata.itemId)
             if (!item || !isRequest(item) || !isHTTPRequest(item)) {
               logger.warn('Request not found for detached tab', { itemId: metadata.itemId })
@@ -291,7 +292,7 @@ void initI18n().then(() => {
         }
       }, [tree, fileLoaded, countAllTabs])
 
-      const renderBody = () => {
+      const renderBody = (): React.ReactNode => {
         if (!fileLoaded && tree.groups.length === 0) {
           return (
             <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center' }}>

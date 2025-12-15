@@ -168,7 +168,7 @@ export function resolveEnvironmentVariables(
   if (chain) {
     let context: VariableContext = {}
     for (const env of chain) {
-      const sequence = resolveKeyValueSequence(env.variables ?? [], context)
+      const sequence = resolveKeyValueSequence(env.variables, context)
       context = sequence.finalContext
     }
     return context
@@ -200,7 +200,7 @@ export function resolveEnvironmentVariablesWithSources(
 
   for (const env of chain) {
     const envPath = [...folderPath, env.name]
-    const sequence = resolveKeyValueSequence(env.variables ?? [], context)
+    const sequence = resolveKeyValueSequence(env.variables, context)
 
     // Track source for each new variable defined in this environment
     for (const resolved of sequence.resolvedRows) {

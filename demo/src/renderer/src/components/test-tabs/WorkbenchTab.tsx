@@ -359,11 +359,15 @@ const WorkbenchTab: React.FC = () => {
         }
 
         if (jsonTabs.length > 0) {
+          const firstJsonTab = jsonTabs[0]
+          if (!firstJsonTab) {
+            // Should not happen because jsonTabs.length > 0, but keeps types and runtime safe
+            return
+          }
           const jsonGroup: TabGroupNode = {
             id: 'group-json',
             tabs: jsonTabs,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            activeTabId: jsonTabs[0]!.id
+            activeTabId: firstJsonTab.id
           }
           nextTree.groups = [jsonGroup]
         }
@@ -392,11 +396,15 @@ const WorkbenchTab: React.FC = () => {
             }
           })
 
+          const firstTsTab = tsTabs[0]
+          if (!firstTsTab) {
+            // Should not happen because tsEntries.length > 0, but keeps types and runtime safe
+            return
+          }
           const tsGroup: TabGroupNode = {
             id: 'group-ts',
             tabs: tsTabs,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            activeTabId: tsTabs[0]!.id
+            activeTabId: firstTsTab.id
           }
           nextTree.groups = [...nextTree.groups, tsGroup]
         }

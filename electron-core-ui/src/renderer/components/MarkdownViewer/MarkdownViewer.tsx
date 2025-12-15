@@ -102,18 +102,13 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ value, allowMerm
         remarkPlugins={[remarkGfm]}
         components={{
           // Use a custom renderer for code blocks so we can support Mermaid
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          code(codeProps: any) {
+          code(codeProps: JSX.IntrinsicElements['code']) {
             const {
               inline,
               className: codeClassName,
               children,
               ...props
-            } = codeProps as {
-              inline?: boolean
-              className?: string
-              children: React.ReactNode
-            }
+            } = codeProps as JSX.IntrinsicElements['code'] & { inline?: boolean }
             const match = /language-(\w+)/.exec(codeClassName ?? '')
             const codeContent = String(children).replace(/\n$/, '')
 
@@ -128,12 +123,8 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ value, allowMerm
             )
           },
           // Custom link renderer: open HTTP(S) links directly in a new browser window/tab
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          a(anchorProps: any) {
-            const { href, children, ...rest } = anchorProps as {
-              href?: string
-              children: React.ReactNode
-            }
+          a(anchorProps: JSX.IntrinsicElements['a']) {
+            const { href, children, ...rest } = anchorProps
 
             const handleClick = (event: React.MouseEvent<HTMLAnchorElement>): void => {
               if (!href) return

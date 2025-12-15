@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { logger } from '../services/logger'
 
 interface StorageAPI {
   get: <T>(key: string) => Promise<T | undefined>
@@ -11,9 +12,8 @@ interface StorageAPI {
  * Returns undefined if not available (e.g., in web-only mode)
  */
 export function getStorageAPI(): StorageAPI | undefined {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const api = (window as any).api as { storage?: StorageAPI } | undefined
-  return api?.storage
+  const host = window as unknown as { api?: { storage?: StorageAPI } }
+  return host.api?.storage
 }
 
 /**
@@ -40,8 +40,7 @@ export function useStorage<T>(
             setValueState(stored)
           }
         } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error(`[useStorage] Failed to load ${key}:`, error)
+          logger.error('[useStorage] Failed to load value', { key, error: String(error) })
         }
       }
       setIsLoading(false)
@@ -56,8 +55,7 @@ export function useStorage<T>(
       const api = getStorageAPI()
       if (api) {
         api.set(key, newValue).catch((error) => {
-          // eslint-disable-next-line no-console
-          console.error(`[useStorage] Failed to save ${key}:`, error)
+          logger.error('[useStorage] Failed to save value', { key, error: String(error) })
         })
       }
     },

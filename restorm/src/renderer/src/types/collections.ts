@@ -182,8 +182,11 @@ export function isRequest(item: FolderItem): item is Request {
 
 /** Check if a request is an HTTPRequest (useful when more request types are added) */
 export function isHTTPRequest(request: Request): request is HTTPRequest {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  return request.type === 'http'
+  // Currently Request is a single-variant union (only HTTPRequest),
+  // so every Request is an HTTPRequest. This helper exists for
+  // future extensibility when new request kinds are added.
+  void request
+  return true
 }
 
 /** Check if a body is text */

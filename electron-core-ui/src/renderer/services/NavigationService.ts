@@ -39,6 +39,8 @@
  * - Back/forward buttons to work across all navigation sources
  */
 
+import { logger } from './logger'
+
 /** Parameters associated with a navigation target */
 export interface NavigationParams {
   /** Type of the navigation target (e.g., 'folder', 'http-request') */
@@ -242,8 +244,7 @@ class NavigationService {
       try {
         listener(event)
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error in navigation listener:', error)
+        logger.error('Error in navigation listener', { error: String(error) })
       }
     }
   }
@@ -256,8 +257,7 @@ class NavigationService {
       try {
         listener(canGoBack, canGoForward)
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error in history state listener:', error)
+        logger.error('Error in history state listener', { error: String(error) })
       }
     }
   }
