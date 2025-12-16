@@ -353,40 +353,35 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           )}
 
           {hasResults && (
-            <ScrollableElement
+            <ListView
               className="search-results-wrapper"
-              options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false }}
+              items={listViewItems}
+              rootRole="tree"
+              ariaLabel={t('search.resultsAriaLabel', 'Search results')}
+              selectionMode="single"
               style={{ maxHeight: MAX_RESULTS_HEIGHT }}
-            >
-              <ListView
-                items={listViewItems}
-                rootRole="tree"
-                ariaLabel={t('search.resultsAriaLabel', 'Search results')}
-                selectionMode="single"
-                style={{ height: 'auto' }}
-                onItemClick={(payload) => {
-                  const result = payload.item.data as SearchResult | undefined
-                  if (result) {
-                    handleResultClick(result)
-                  }
-                }}
-                onItemMouseEnter={(payload, event) => {
-                  // If hovering another result, close previous tooltip immediately
-                  if (hoveredResultId && hoveredResultId !== payload.item.id) {
-                    setHoveredResultId(null)
-                    tooltipTargetRef.current = null
-                  }
+              onItemClick={(payload) => {
+                const result = payload.item.data as SearchResult | undefined
+                if (result) {
+                  handleResultClick(result)
+                }
+              }}
+              onItemMouseEnter={(payload, event) => {
+                // If hovering another result, close previous tooltip immediately
+                if (hoveredResultId && hoveredResultId !== payload.item.id) {
+                  setHoveredResultId(null)
+                  tooltipTargetRef.current = null
+                }
 
-                  clearHideTooltipTimeout()
-                  setHoveredResultId(payload.item.id)
-                  tooltipTargetRef.current = event.currentTarget
-                }}
-                onItemMouseLeave={() => {
-                  // Schedule hide after 300ms (can be cancelled if mouse enters tooltip)
-                  scheduleHideTooltip()
-                }}
-              />
-            </ScrollableElement>
+                clearHideTooltipTimeout()
+                setHoveredResultId(payload.item.id)
+                tooltipTargetRef.current = event.currentTarget
+              }}
+              onItemMouseLeave={() => {
+                // Schedule hide after 300ms (can be cancelled if mouse enters tooltip)
+                scheduleHideTooltip()
+              }}
+            />
           )}
 
           <Tooltip
