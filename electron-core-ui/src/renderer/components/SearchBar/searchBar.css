@@ -110,10 +110,20 @@
   color: var(--vscode-input-placeholderForeground);
 }
 
-/* Results wrapper with height animation */
-.search-results-wrapper {
-  overflow: hidden;
-  transition: height 200ms ease-out;
+/* Results wrapper - override ListView default height: 100% */
+.search-results-wrapper.list-view-root {
+  height: auto;
+  max-height: 300px;
+}
+
+.search-results-wrapper .list-view-scrollable {
+  height: auto;
+  max-height: 300px;
+}
+
+.search-results-wrapper .scrollable-content.list-view {
+  height: auto !important;
+  min-height: auto !important;
 }
 
 /* Results content */
