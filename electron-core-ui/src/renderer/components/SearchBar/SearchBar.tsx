@@ -362,6 +362,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                 rootRole="tree"
                 ariaLabel={t('search.resultsAriaLabel', 'Search results')}
                 selectionMode="single"
+                style={{ maxHeight: MAX_RESULTS_HEIGHT }}
                 onItemClick={(payload) => {
                   const result = payload.item.data as SearchResult | undefined
                   if (result) {
