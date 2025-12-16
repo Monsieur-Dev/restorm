@@ -110,20 +110,9 @@
   color: var(--vscode-input-placeholderForeground);
 }
 
-/* Results wrapper - override ListView default height: 100% */
-.search-results-wrapper.list-view-root {
-  height: auto;
+/* Results wrapper */
+.search-results-wrapper {
   max-height: 300px;
-}
-
-.search-results-wrapper .list-view-scrollable {
-  height: auto;
-  max-height: 300px;
-}
-
-.search-results-wrapper .scrollable-content.list-view {
-  height: auto !important;
-  min-height: auto !important;
 }
 
 /* Results content */

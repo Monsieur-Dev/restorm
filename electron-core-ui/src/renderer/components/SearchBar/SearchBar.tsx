@@ -4,7 +4,6 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ListView, type ListViewItemData } from '../ListView'
 import Tooltip from '../Tooltip/Tooltip'
 import { MarkdownViewer } from '../MarkdownViewer/MarkdownViewer'
 import { ScrollableElement } from '../ScrollableElement'
@@ -23,14 +22,6 @@ export interface SearchBarProps {
 
 /** Debounce delay in milliseconds */
 const DEBOUNCE_MS = 150
-
-/** Get category label translation key */
-function getCategoryLabel(label: string, t: (key: string, fallback: string) => string): string {
-  if (label.startsWith('search.')) {
-    return t(label, label)
-  }
-  return label
-}
 
 export const SearchBar: React.FC<SearchBarProps> = ({
   title = '',
@@ -120,7 +111,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
   // Handle close
   const handleClose = useCallback(() => {
-    return;
     setIsOpen(false)
     setQuery('')
     setResults([])
@@ -186,68 +176,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   // Determine state
   const hasResults = results.length > 0
   const hasQuery = query.trim().length > 0
-
-  // Transform results to ListView items
-  const listViewItems: ListViewItemData[] = useMemo(
-    () =>
-      results.map((group) => {
-        const children: ListViewItemData[] = group.items.map((result) => {
-          const { category, icon, title: resultTitle, description } = result
-          const MAX_DESCRIPTION_LENGTH = 100
-          const shortDescription =
-            description && description.length > MAX_DESCRIPTION_LENGTH
-              ? description.slice(0, MAX_DESCRIPTION_LENGTH) + '...'
-              : description
-
-          // HTTP request: method badge + route on first line, description on second line
-          if (category === 'request' && icon) {
-            const method = icon.toUpperCase()
-            const content = (
-              <div className="result-content">
-                <div className="result-title result-http-title">
-                  <span className={`http-method-badge method-${method.toLowerCase()}`}>{method}</span>
-                  <span className="http-route">{resultTitle}</span>
-                </div>
-                {shortDescription && <div className="result-description">{shortDescription}</div>}
-              </div>
-            )
-
-            return {
-              id: result.id,
-              title: content,
-              data: result
-            }
-          }
-
-          // Default rendering for other categories (folders, etc.)
-          const content = (
-            <div className="result-content">
-              <div className="result-title">{resultTitle}</div>
-              {shortDescription && <div className="result-description">{shortDescription}</div>}
-            </div>
-          )
-
-          return {
-            id: result.id,
-            title: content,
-            icon: <i className={`codicon codicon-${icon ?? 'symbol-misc'} result-icon`} />,
-            data: result
-          }
-        })
-
-        return {
-          id: `category-${group.category}`,
-          title: getCategoryLabel(group.label, t),
-          icon: <i className={`codicon codicon-${group.icon} category-icon`} />,
-          isExpanded: true,
-          isExpandable: true,
-          isSelectable: false,
-          isStickyHeader: true,
-          children
-        }
-      }),
-    [results, t]
-  )
 
   // Get currently hovered result for tooltip
   const hoveredResult = useMemo(() => {
@@ -350,34 +278,71 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           )}
 
           {hasResults && (
-            <ListView
+            <ScrollableElement
               className="search-results-wrapper"
-              items={listViewItems}
-              rootRole="tree"
-              ariaLabel={t('search.resultsAriaLabel', 'Search results')}
-              selectionMode="single"
-              onItemClick={(payload) => {
-                const result = payload.item.data as SearchResult | undefined
-                if (result) {
-                  handleResultClick(result)
-                }
-              }}
-              onItemMouseEnter={(payload, event) => {
-                // If hovering another result, close previous tooltip immediately
-                if (hoveredResultId && hoveredResultId !== payload.item.id) {
-                  setHoveredResultId(null)
-                  tooltipTargetRef.current = null
-                }
+              options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false, fitContent: true }}
+              style={{ maxHeight: 350 }}
+            >
+              <div className="search-results-content" role="tree" aria-label={t('search.resultsAriaLabel', 'Search results')} style={{ maxHeight: '350px' }}>
+                {results.map((group) => (
+                  <div key={group.category} className="search-results-group">
+                    <div className="search-results-category">
+                      <i className={`codicon codicon-${group.icon} category-icon`} />
+                      <span>{group.label.startsWith('search.') ? t(group.label, group.label) : group.label}</span>
+                    </div>
+                    {group.items.map((result) => {
+                      const { category, icon, title: resultTitle, description } = result
+                      const shortDescription = description && description.length > 100
+                        ? description.slice(0, 100) + '...'
+                        : description
 
-                clearHideTooltipTimeout()
-                setHoveredResultId(payload.item.id)
-                tooltipTargetRef.current = event.currentTarget
-              }}
-              onItemMouseLeave={() => {
-                // Schedule hide after 300ms (can be cancelled if mouse enters tooltip)
-                scheduleHideTooltip()
-              }}
-            />
+                      return (
+                        <div
+                          key={result.id}
+                          className="search-result-item"
+                          role="treeitem"
+                          tabIndex={0}
+                          onClick={() => handleResultClick(result)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleResultClick(result)
+                          }}
+                          onMouseEnter={(event) => {
+                            if (hoveredResultId && hoveredResultId !== result.id) {
+                              setHoveredResultId(null)
+                              tooltipTargetRef.current = null
+                            }
+                            clearHideTooltipTimeout()
+                            setHoveredResultId(result.id)
+                            tooltipTargetRef.current = event.currentTarget
+                          }}
+                          onMouseLeave={() => {
+                            scheduleHideTooltip()
+                          }}
+                        >
+                          {category === 'request' && icon ? (
+                            <div className="result-content">
+                              <div className="result-title result-http-title">
+                                <span className={`http-method-badge method-${icon.toLowerCase()}`}>{icon.toUpperCase()}</span>
+                                <span className="http-route">{resultTitle}</span>
+                              </div>
+                              {shortDescription && <div className="result-description">{shortDescription}</div>}
+                            </div>
+                          ) : (
+                            <>
+                              <i className={`codicon codicon-${icon ?? 'symbol-misc'} result-icon`} />
+                              <div className="result-content">
+                                <div className="result-title">{resultTitle}</div>
+                                {shortDescription && <div className="result-description">{shortDescription}</div>}
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                ))}
+              </div>
+            </ScrollableElement>
           )}
 
           <Tooltip
