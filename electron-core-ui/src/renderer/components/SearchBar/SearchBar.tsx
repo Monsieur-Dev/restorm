@@ -192,20 +192,19 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     if (!hoveredResult) return null
 
     const { category, icon, title: resultTitle, description } = hoveredResult
-    const maxTooltipHeight = 'calc(100vh - 50px)'
 
     if (category === 'request' && icon) {
       const method = icon.toUpperCase()
       return (
-        <div style={{ maxHeight: maxTooltipHeight, width: 400, overflow: 'hidden' }}>
+        <div style={{ width: 400 }}>
           <div style={{ marginBottom: 8 }}>
             <span className={`http-method-badge method-${method.toLowerCase()}`}>{method}</span>{' '}
             <strong>{resultTitle}</strong>
           </div>
           {description && (
             <ScrollableElement
-              options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false }}
-              style={{ maxHeight: 'calc(100vh - 120px)' }}
+              options={{ vertical: 'auto', horizontal: 'auto', useShadows: false, fitContent: true }}
+              style={{ maxHeight: 'calc(100vh - 90px)' }}
             >
               <MarkdownViewer value={description} />
             </ScrollableElement>
@@ -216,14 +215,14 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
     // Folder or other category
     return (
-      <div style={{ maxHeight: maxTooltipHeight, width: 400, overflow: 'hidden' }}>
+      <div style={{ width: 400 }}>
         <div style={{ marginBottom: 8 }}>
           <strong>{resultTitle}</strong>
         </div>
         {description && (
           <ScrollableElement
-            options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false }}
-            style={{ maxHeight: 'calc(100vh - 120px)' }}
+            options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false, fitContent: true }}
+            style={{ maxHeight: 'calc(100vh - 90px)' }}
           >
             <MarkdownViewer value={description} />
           </ScrollableElement>
@@ -278,11 +277,12 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           )}
 
           {hasResults && (
-            <ScrollableElement
-              className="search-results-wrapper"
-              options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false, fitContent: true }}
-              style={{ maxHeight: 350 }}
-            >
+            <div onMouseDown={(e) => e.preventDefault()}>
+              <ScrollableElement
+                className="search-results-wrapper"
+                options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false, fitContent: true }}
+                style={{ maxHeight: 350 }}
+              >
               <div className="search-results-content" role="tree" aria-label={t('search.resultsAriaLabel', 'Search results')} style={{ maxHeight: '350px' }}>
                 {results.map((group) => (
                   <div key={group.category} className="search-results-group">
@@ -342,7 +342,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                   </div>
                 ))}
               </div>
-            </ScrollableElement>
+              </ScrollableElement>
+            </div>
           )}
 
           <Tooltip
@@ -360,6 +361,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               setIsTooltipHovered(false)
               scheduleHideTooltip()
             }}
+            onMouseDown={(e) => e.preventDefault()}
           />
         </div>
       )}

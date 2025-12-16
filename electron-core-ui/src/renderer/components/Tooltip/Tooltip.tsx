@@ -7,6 +7,7 @@ export interface TooltipProps {
   show: boolean
   onMouseEnter?: () => void
   onMouseLeave?: () => void
+  onMouseDown?: (e: React.MouseEvent) => void
   className?: string
   /**
    * Vertical placement strategy:
@@ -38,6 +39,7 @@ const Tooltip: React.FC<TooltipProps> = ({
   show,
   onMouseEnter,
   onMouseLeave,
+  onMouseDown,
   className = '',
   placement = 'auto',
   side = 'auto',
@@ -252,6 +254,7 @@ const Tooltip: React.FC<TooltipProps> = ({
       } as React.CSSProperties}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
+      onMouseDown={onMouseDown}
     >
       <div className="tooltip-content">
         {content}
