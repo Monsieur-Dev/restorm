@@ -393,6 +393,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             content={tooltipContent}
             side="right"
             fixedTop={25}
+            repositionKey={hoveredResultId}
             onMouseEnter={() => {
               clearHideTooltipTimeout()
               setIsTooltipHovered(true)

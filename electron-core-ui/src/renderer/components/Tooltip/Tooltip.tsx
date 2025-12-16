@@ -25,6 +25,11 @@ export interface TooltipProps {
    * Fixed top position in pixels. When set, overrides vertical placement calculation.
    */
   fixedTop?: number
+  /**
+   * Key to force repositioning when target changes. Pass a unique value (e.g., item ID)
+   * to trigger position recalculation when hovering different elements.
+   */
+  repositionKey?: string | number | null
 }
 
 const Tooltip: React.FC<TooltipProps> = ({
@@ -36,7 +41,8 @@ const Tooltip: React.FC<TooltipProps> = ({
   className = '',
   placement = 'auto',
   side = 'auto',
-  fixedTop
+  fixedTop,
+  repositionKey
 }) => {
   const tooltipRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState<{ top: number; left: number; beakLeftPercent: number; beakTopPercent: number | undefined }>({ top: -9999, left: -9999, beakLeftPercent: 50, beakTopPercent: undefined })
@@ -199,7 +205,7 @@ const Tooltip: React.FC<TooltipProps> = ({
       setIsPositioned(false)
       setPosition({ top: -9999, left: -9999, beakLeftPercent: 50, beakTopPercent: undefined })
     }
-  }, [show, updatePosition])
+  }, [show, updatePosition, repositionKey])
 
   useEffect(() => {
     if (!show) {
