@@ -2,8 +2,11 @@
  * SearchBar component - Search input with results dropdown
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ListView, type ListViewItemData } from '../ListView'
+import Tooltip from '../Tooltip/Tooltip'
+import { MarkdownViewer } from '../MarkdownViewer/MarkdownViewer'
 import { ScrollableElement } from '../ScrollableElement'
 import { searchService, type SearchResult, type GroupedResults } from '../../services/SearchService'
 import { logger } from '../../services/logger'
@@ -21,67 +24,15 @@ export interface SearchBarProps {
 /** Debounce delay in milliseconds */
 const DEBOUNCE_MS = 150
 
-/** Get codicon class for an icon name */
-function getCodiconClass(icon: string | undefined, fallback: string): string {
-  if (!icon) return `codicon codicon-${fallback}`
+/** Maximum height for the results list */
+const MAX_RESULTS_HEIGHT = 300
 
-  // HTTP methods use text instead of icon
-  const method = icon.toLowerCase()
-  if (['get', 'post', 'put', 'patch', 'delete', 'head', 'options'].includes(method)) {
-    return ''
+/** Get category label translation key */
+function getCategoryLabel(label: string, t: (key: string, fallback: string) => string): string {
+  if (label.startsWith('search.')) {
+    return t(label, label)
   }
-
-  return `codicon codicon-${icon}`
-}
-
-/** Render HTTP method badge or codicon */
-function renderIcon(result: SearchResult): React.ReactNode {
-  const { category, icon } = result
-
-  // HTTP requests don't use icon in the same way
-  if (category === 'request') {
-    return null
-  }
-
-  const codiconClass = getCodiconClass(icon, 'symbol-misc')
-  return <i className={`${codiconClass} result-icon`} />
-}
-
-/** Render result content based on category */
-function renderResultContent(result: SearchResult): React.ReactNode {
-  const { category, icon, title, description } = result
-
-  // HTTP request: display method badge + route on first line, description below
-  if (category === 'request' && icon) {
-    const method = icon.toUpperCase()
-    return (
-      <div className="result-content">
-        <div className="result-title result-http-title">
-          <span className={`http-method-badge method-${method.toLowerCase()}`}>{method}</span>
-          <span className="http-route">{title}</span>
-        </div>
-        {description && (
-          <div className="result-description">
-            {description.slice(0, 100)}
-            {description.length > 100 ? '...' : ''}
-          </div>
-        )}
-      </div>
-    )
-  }
-
-  // Default rendering for other categories
-  return (
-    <div className="result-content">
-      <div className="result-title">{title}</div>
-      {description && (
-        <div className="result-description">
-          {description.slice(0, 100)}
-          {description.length > 100 ? '...' : ''}
-        </div>
-      )}
-    </div>
-  )
+  return label
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({
@@ -100,8 +51,32 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [openBoxPosition, setOpenBoxPosition] = useState({ top: 0, left: 0, width: 0 })
 
+  // Tooltip state
+  const [hoveredResultId, setHoveredResultId] = useState<string | null>(null)
+  const [isTooltipHovered, setIsTooltipHovered] = useState(false)
+  const tooltipTargetRef = useRef<HTMLElement | null>(null)
+  const hideTooltipTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const resultsWrapperRef = useRef<HTMLDivElement>(null)
+
   const placeholderText = placeholder ?? t('search.placeholder', 'Search...')
   const noResultsText = t('search.noResults', 'No results found')
+
+  // Clear tooltip hide timeout
+  const clearHideTooltipTimeout = useCallback(() => {
+    if (hideTooltipTimeoutRef.current) {
+      clearTimeout(hideTooltipTimeoutRef.current)
+      hideTooltipTimeoutRef.current = null
+    }
+  }, [])
+
+  // Schedule tooltip hide after 300ms
+  const scheduleHideTooltip = useCallback(() => {
+    clearHideTooltipTimeout()
+    hideTooltipTimeoutRef.current = setTimeout(() => {
+      setHoveredResultId(null)
+      setIsTooltipHovered(false)
+    }, 300)
+  }, [clearHideTooltipTimeout])
 
   // Perform search with debounce
   const performSearch = useCallback((searchQuery: string) => {
@@ -152,7 +127,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     setIsOpen(false)
     setQuery('')
     setResults([])
-  }, [])
+    setHoveredResultId(null)
+    setIsTooltipHovered(false)
+    clearHideTooltipTimeout()
+  }, [clearHideTooltipTimeout])
 
   // Handle result click
   const handleResultClick = useCallback(
@@ -197,26 +175,136 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     }
   }, [isOpen])
 
-  // Cleanup debounce on unmount
+  // Cleanup debounce and tooltip timeout on unmount
   useEffect(() => {
     return () => {
       if (debounceRef.current) {
         clearTimeout(debounceRef.current)
       }
+      clearHideTooltipTimeout()
     }
-  }, [])
-
-  // Get category label (translate if it's a translation key)
-  const getCategoryLabel = (label: string): string => {
-    if (label.startsWith('search.')) {
-      return t(label, label)
-    }
-    return label
-  }
+  }, [clearHideTooltipTimeout])
 
   // Determine state
   const hasResults = results.length > 0
   const hasQuery = query.trim().length > 0
+
+  // Transform results to ListView items
+  const listViewItems: ListViewItemData[] = useMemo(
+    () =>
+      results.map((group) => {
+        const children: ListViewItemData[] = group.items.map((result) => {
+          const { category, icon, title: resultTitle, description } = result
+          const MAX_DESCRIPTION_LENGTH = 100
+          const shortDescription =
+            description && description.length > MAX_DESCRIPTION_LENGTH
+              ? description.slice(0, MAX_DESCRIPTION_LENGTH) + '...'
+              : description
+
+          // HTTP request: method badge + route on first line, description on second line
+          if (category === 'request' && icon) {
+            const method = icon.toUpperCase()
+            const content = (
+              <div className="result-content">
+                <div className="result-title result-http-title">
+                  <span className={`http-method-badge method-${method.toLowerCase()}`}>{method}</span>
+                  <span className="http-route">{resultTitle}</span>
+                </div>
+                {shortDescription && <div className="result-description">{shortDescription}</div>}
+              </div>
+            )
+
+            return {
+              id: result.id,
+              title: content,
+              data: result
+            }
+          }
+
+          // Default rendering for other categories (folders, etc.)
+          const content = (
+            <div className="result-content">
+              <div className="result-title">{resultTitle}</div>
+              {shortDescription && <div className="result-description">{shortDescription}</div>}
+            </div>
+          )
+
+          return {
+            id: result.id,
+            title: content,
+            icon: <i className={`codicon codicon-${icon ?? 'symbol-misc'} result-icon`} />,
+            data: result
+          }
+        })
+
+        return {
+          id: `category-${group.category}`,
+          title: getCategoryLabel(group.label, t),
+          icon: <i className={`codicon codicon-${group.icon} category-icon`} />,
+          isExpanded: true,
+          isExpandable: true,
+          isSelectable: false,
+          isStickyHeader: true,
+          children
+        }
+      }),
+    [results, t]
+  )
+
+  // Get currently hovered result for tooltip
+  const hoveredResult = useMemo(() => {
+    if (!hoveredResultId) return null
+    for (const group of results) {
+      const found = group.items.find((item) => item.id === hoveredResultId)
+      if (found) return found
+    }
+    return null
+  }, [hoveredResultId, results])
+
+  // Tooltip content
+  const tooltipContent = useMemo(() => {
+    if (!hoveredResult) return null
+
+    const { category, icon, title: resultTitle, description } = hoveredResult
+    const maxTooltipHeight = 'calc(100vh - 50px)'
+
+    if (category === 'request' && icon) {
+      const method = icon.toUpperCase()
+      return (
+        <div style={{ maxHeight: maxTooltipHeight, width: 400, overflow: 'hidden' }}>
+          <div style={{ marginBottom: 8 }}>
+            <span className={`http-method-badge method-${method.toLowerCase()}`}>{method}</span>{' '}
+            <strong>{resultTitle}</strong>
+          </div>
+          {description && (
+            <ScrollableElement
+              options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false }}
+              style={{ maxHeight: 'calc(100vh - 120px)' }}
+            >
+              <MarkdownViewer value={description} />
+            </ScrollableElement>
+          )}
+        </div>
+      )
+    }
+
+    // Folder or other category
+    return (
+      <div style={{ maxHeight: maxTooltipHeight, width: 400, overflow: 'hidden' }}>
+        <div style={{ marginBottom: 8 }}>
+          <strong>{resultTitle}</strong>
+        </div>
+        {description && (
+          <ScrollableElement
+            options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false }}
+            style={{ maxHeight: 'calc(100vh - 120px)' }}
+          >
+            <MarkdownViewer value={description} />
+          </ScrollableElement>
+        )}
+      </div>
+    )
+  }, [hoveredResult])
 
   return (
     <div className="search-bar-container" ref={containerRef}>
@@ -263,42 +351,57 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             <div className="search-results-empty">{noResultsText}</div>
           )}
 
-          {hasResults && (
-            <ScrollableElement
-              options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
-              style={{ maxHeight: 320 }}
-            >
-              <div className="search-results-content">
-                {results.map((group) => (
-                  <div key={group.category}>
-                    <div className="search-results-category">
-                      <i className={`codicon codicon-${group.icon} category-icon`} />
-                      <span>{getCategoryLabel(group.label)}</span>
-                    </div>
-                    {group.items.map((result) => (
-                      <div
-                        key={result.id}
-                        className="search-result-item"
-                        onClick={() => {
-                          handleResultClick(result)
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            handleResultClick(result)
-                          }
-                        }}
-                        role="button"
-                        tabIndex={0}
-                      >
-                        {renderIcon(result)}
-                        {renderResultContent(result)}
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </ScrollableElement>
-          )}
+          <div
+            ref={resultsWrapperRef}
+            className="search-results-wrapper"
+            style={{ maxHeight: hasResults ? MAX_RESULTS_HEIGHT : 0 }}
+          >
+            {hasResults && (
+              <ListView
+                items={listViewItems}
+                rootRole="tree"
+                ariaLabel={t('search.resultsAriaLabel', 'Search results')}
+                selectionMode="single"
+                onItemClick={(payload) => {
+                  const result = payload.item.data as SearchResult | undefined
+                  if (result) {
+                    handleResultClick(result)
+                  }
+                }}
+                onItemMouseEnter={(payload, event) => {
+                  // If hovering another result, close previous tooltip immediately
+                  if (hoveredResultId && hoveredResultId !== payload.item.id) {
+                    setHoveredResultId(null)
+                    tooltipTargetRef.current = null
+                  }
+
+                  clearHideTooltipTimeout()
+                  setHoveredResultId(payload.item.id)
+                  tooltipTargetRef.current = event.currentTarget
+                }}
+                onItemMouseLeave={() => {
+                  // Schedule hide after 300ms (can be cancelled if mouse enters tooltip)
+                  scheduleHideTooltip()
+                }}
+              />
+            )}
+          </div>
+
+          <Tooltip
+            targetRef={tooltipTargetRef}
+            show={hoveredResultId !== null || isTooltipHovered}
+            content={tooltipContent}
+            side="right"
+            fixedTop={25}
+            onMouseEnter={() => {
+              clearHideTooltipTimeout()
+              setIsTooltipHovered(true)
+            }}
+            onMouseLeave={() => {
+              setIsTooltipHovered(false)
+              scheduleHideTooltip()
+            }}
+          />
         </div>
       )}
     </div>
@@ -306,4 +409,3 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 }
 
 export default SearchBar
-
