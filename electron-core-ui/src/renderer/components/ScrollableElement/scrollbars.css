@@ -1,3 +1,12 @@
+/* Hide native scrollbars on scrollable content */
+.monaco-scrollable-element > .scrollable-content {
+	scrollbar-width: none; /* Firefox */
+	-ms-overflow-style: none; /* IE/Edge */
+}
+.monaco-scrollable-element > .scrollable-content::-webkit-scrollbar {
+	display: none; /* Chrome/Safari/Webkit */
+}
+
 /* Arrows */
 .monaco-scrollable-element > .scrollbar > .scra {
 	cursor: pointer;

@@ -568,7 +568,8 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
           width: '100%',
           height: mergedOptions.fitContent ? 'auto' : '100%',
           minHeight: mergedOptions.fitContent ? 'auto' : '100%',
-          overflow: 'hidden',
+          maxHeight: mergedOptions.fitContent ? style?.maxHeight : undefined,
+          overflow: 'auto',
           position: 'relative',
         }}
         onScroll={handleScroll}
