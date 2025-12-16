@@ -814,7 +814,9 @@ export function indexFolderForSearch(folder: Folder, parentPath: string[] = []):
       documents.push({
         id: item.id,
         title: item.name,
-        description: item.documentation.slice(0, 200),
+        // Use full documentation so tooltips and previews can render
+        // the complete markdown content without truncation.
+        description: item.documentation,
         category: 'request',
         icon: item.method.toLowerCase(),
         keywords,

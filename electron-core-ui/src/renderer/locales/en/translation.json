@@ -19,6 +19,7 @@
   "search": {
     "placeholder": "Search...",
     "noResults": "No results found",
+    "resultsAriaLabel": "Search results",
     "categories": {
       "request": "HTTP Requests",
       "folder": "Folders",

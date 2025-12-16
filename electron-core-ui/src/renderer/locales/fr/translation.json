@@ -19,6 +19,7 @@
   "search": {
     "placeholder": "Rechercher...",
     "noResults": "Aucun résultat trouvé",
+    "resultsAriaLabel": "Résultats de recherche",
     "categories": {
       "request": "Requêtes HTTP",
       "folder": "Dossiers",
