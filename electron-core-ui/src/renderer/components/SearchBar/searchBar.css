@@ -113,7 +113,7 @@
 /* Results wrapper with height animation */
 .search-results-wrapper {
   overflow: hidden;
-  transition: max-height 200ms ease-out;
+  transition: height 200ms ease-out;
 }
 
 /* Results content */
