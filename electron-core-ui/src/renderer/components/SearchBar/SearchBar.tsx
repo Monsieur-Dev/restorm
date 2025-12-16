@@ -56,8 +56,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   const [isTooltipHovered, setIsTooltipHovered] = useState(false)
   const tooltipTargetRef = useRef<HTMLElement | null>(null)
   const hideTooltipTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const resultsWrapperRef = useRef<HTMLDivElement>(null)
-  const [resultsHeight, setResultsHeight] = useState(0)
 
   const placeholderText = placeholder ?? t('search.placeholder', 'Search...')
   const noResultsText = t('search.noResults', 'No results found')
@@ -125,12 +123,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
   // Handle close
   const handleClose = useCallback(() => {
-    //setIsOpen(false)
-    //setQuery('')
-    //setResults([])
-    //setHoveredResultId(null)
-    //setIsTooltipHovered(false)
-    //clearHideTooltipTimeout()
+    return;
+    setIsOpen(false)
+    setQuery('')
+    setResults([])
+    setHoveredResultId(null)
+    setIsTooltipHovered(false)
+    clearHideTooltipTimeout()
   }, [clearHideTooltipTimeout])
 
   // Handle result click
@@ -186,21 +185,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     }
   }, [clearHideTooltipTimeout])
 
-  // Measure results height when results change
-  useEffect(() => {
-    if (!resultsWrapperRef.current) {
-      setResultsHeight(0)
-      return
-    }
-
-    // Wait for render to complete
-    requestAnimationFrame(() => {
-      if (resultsWrapperRef.current) {
-        const scrollHeight = resultsWrapperRef.current.scrollHeight
-        setResultsHeight(Math.min(scrollHeight, MAX_RESULTS_HEIGHT))
-      }
-    })
-  }, [results])
 
   // Determine state
   const hasResults = results.length > 0
@@ -368,17 +352,18 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             <div className="search-results-empty">{noResultsText}</div>
           )}
 
-          <div
-            ref={resultsWrapperRef}
-            className="search-results-wrapper"
-            style={{ height: hasResults ? resultsHeight : 0 }}
-          >
-            {hasResults && (
+          {hasResults && (
+            <ScrollableElement
+              className="search-results-wrapper"
+              options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false }}
+              style={{ maxHeight: MAX_RESULTS_HEIGHT }}
+            >
               <ListView
                 items={listViewItems}
                 rootRole="tree"
                 ariaLabel={t('search.resultsAriaLabel', 'Search results')}
                 selectionMode="single"
+                style={{ height: 'auto' }}
                 onItemClick={(payload) => {
                   const result = payload.item.data as SearchResult | undefined
                   if (result) {
@@ -401,8 +386,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                   scheduleHideTooltip()
                 }}
               />
-            )}
-          </div>
+            </ScrollableElement>
+          )}
 
           <Tooltip
             targetRef={tooltipTargetRef}
