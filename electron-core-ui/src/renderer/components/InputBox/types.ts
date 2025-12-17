@@ -53,12 +53,14 @@ export interface InputBoxProps {
   options: IInputOptions
   value?: string
   onChange?: (value: string) => void
-  onBlur?: () => void
+  onBlur?: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void
   onFocus?: () => void
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void
   disabled?: boolean
   className?: string
   id?: string
   style?: React.CSSProperties
+  inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement>
 }
 
 export const defaultInputBoxStyles: IInputBoxStyles = {

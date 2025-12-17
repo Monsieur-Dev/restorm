@@ -93,21 +93,28 @@
   align-items: center;
   gap: 8px;
   padding: 6px 10px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .search-bar-input {
   flex: 1;
-  border: none;
-  background: transparent;
-  color: var(--vscode-input-foreground);
-  font-size: 13px;
-  font-family: var(--vscode-font-family);
-  outline: none;
   min-width: 0;
+  width: 100%;
 }
 
-.search-bar-input::placeholder {
-  color: var(--vscode-input-placeholderForeground);
+.search-bar-input > div {
+  width: 100%;
+}
+
+.search-bar-input .monaco-inputbox {
+  background: transparent;
+  border: none;
+  width: 100%;
+}
+
+.search-bar-input .monaco-inputbox > .ibwrapper > .input {
+  background: transparent;
 }
 
 /* Results wrapper */

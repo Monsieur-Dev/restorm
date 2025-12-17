@@ -9,10 +9,12 @@ const InputBox: React.FC<InputBoxProps> = ({
   onChange,
   onBlur,
   onFocus,
+  onKeyDown,
   disabled = false,
   className = '',
   id,
-  style
+  style,
+  inputRef: externalInputRef
 }) => {
   const [internalValue, setInternalValue] = useState(value)
   const [message, setMessage] = useState<IMessage | null>(null)
@@ -20,7 +22,8 @@ const InputBox: React.FC<InputBoxProps> = ({
   const [currentPlaceholder, setCurrentPlaceholder] = useState(options.placeholder ?? '')
   
   const containerRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
+  const internalInputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
+  const inputRef = externalInputRef ?? internalInputRef
   const mirrorRef = useRef<HTMLDivElement>(null)
 
   const styles = options.inputBoxStyles ?? defaultInputBoxStyles
@@ -136,12 +139,12 @@ const InputBox: React.FC<InputBoxProps> = ({
     onFocus?.()
   }
 
-  const handleBlur = (): void => {
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     setState('idle')
     if (containerRef.current) {
       containerRef.current.classList.remove('synthetic-focus')
     }
-    onBlur?.()
+    onBlur?.(e)
   }
 
   // Calculate classes for container
@@ -212,6 +215,7 @@ const InputBox: React.FC<InputBoxProps> = ({
     onChange: handleChange,
     onFocus: handleFocus,
     onBlur: handleBlur,
+    onKeyDown,
     disabled,
     placeholder: currentPlaceholder,
     autoCorrect: 'off' as const,
@@ -231,7 +235,7 @@ const InputBox: React.FC<InputBoxProps> = ({
   }
 
   return (
-    <div>
+    <div className={className} style={style}>
       <div
         ref={containerRef}
         className={getContainerClasses()}

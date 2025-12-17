@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import Tooltip from '../Tooltip/Tooltip'
 import { MarkdownViewer } from '../MarkdownViewer/MarkdownViewer'
 import { ScrollableElement } from '../ScrollableElement'
+import InputBox from '../InputBox/InputBox'
 import { searchService, type SearchResult, type GroupedResults } from '../../services/SearchService'
 import { logger } from '../../services/logger'
 import './searchBar.css'
@@ -34,7 +35,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   const [results, setResults] = useState<GroupedResults[]>([])
 
   const containerRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
   const closedRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [openBoxPosition, setOpenBoxPosition] = useState({ top: 0, left: 0, width: 0 })
@@ -82,8 +83,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
   // Handle query change
   const handleQueryChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newQuery = e.target.value
+    (newQuery: string) => {
       logger.debug('[SearchBar] Query changed', { newQuery })
       setQuery(newQuery)
 
@@ -140,7 +140,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
   // Handle blur with delay to allow click on results
   const handleBlur = useCallback(
-    (e: React.FocusEvent) => {
+    (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       // Check if the related target is within the container
       const relatedTarget = e.relatedTarget as Node | null
       if (containerRef.current?.contains(relatedTarget)) {
@@ -269,16 +269,17 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           }}
         >
           <div className="search-bar-input-row">
-            <input
-              ref={inputRef}
-              type="text"
+            <InputBox
+              inputRef={inputRef}
               className="search-bar-input"
               value={query}
               onChange={handleQueryChange}
               onKeyDown={handleKeyDown}
               onBlur={handleBlur}
-              placeholder={placeholderText}
-              aria-label={placeholderText}
+              options={{
+                placeholder: placeholderText,
+                ariaLabel: placeholderText
+              }}
             />
           </div>
 
