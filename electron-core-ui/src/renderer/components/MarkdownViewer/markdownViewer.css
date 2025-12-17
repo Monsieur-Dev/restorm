@@ -4,6 +4,11 @@
   box-sizing: border-box;
   padding: 8px 12px;
   overflow: auto;
+}
+
+/* When inside a ScrollableElement, let the parent handle scrolling */
+.scrollable-content .markdown-viewer {
+  overflow: visible;
   font-family: var(--vscode-font-family, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
   font-size: var(--vscode-editor-font-size, 13px);
   line-height: 1.5;
@@ -112,9 +117,9 @@
 }
 
 .markdown-viewer::-webkit-scrollbar-thumb:hover {
-  background: var(--vscode-scrollbarSlider-hoverBackground, #858585);
+  background: var(--vscode-scrollbarSlider-hoverBackground);
 }
 
 .markdown-viewer::-webkit-scrollbar-thumb:active {
-  background: var(--vscode-scrollbarSlider-activeBackground, #9f9f9f);
+  background: var(--vscode-scrollbarSlider-activeBackground);
 }
