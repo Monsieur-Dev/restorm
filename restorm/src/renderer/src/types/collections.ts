@@ -8,18 +8,18 @@
 // ============================================================================
 
 /**
- * Type of icon (emoji character, codicon name, or no icon).
+ * Type of icon (emoji character, codicon name, library icons, or no icon).
  * Duplicated from electron-core-ui to avoid direct type dependency.
  */
-export type IconType = 'emoji' | 'codicon' | 'none'
+export type IconType = 'emoji' | 'codicon' | 'iconoir' | 'phosphor' | 'material' | 'simpleicons' | 'feather' | 'fontawesome' | 'none'
 
 /**
- * Represents an icon that can be either an emoji or a codicon.
+ * Represents an icon that can be an emoji, codicon, or an icon from supported libraries.
  */
 export interface Icon {
   /** The type of icon */
   type: IconType
-  /** The icon value - emoji character for 'emoji', codicon name for 'codicon', empty for 'none' */
+  /** The icon value - emoji character for 'emoji', icon name for library icons, empty for 'none' */
   value: string
 }
 

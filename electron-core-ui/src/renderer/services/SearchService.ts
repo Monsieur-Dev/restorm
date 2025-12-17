@@ -58,7 +58,7 @@ interface CategoryMeta {
 const CATEGORY_META: Record<string, CategoryMeta> = {
   request: { label: 'search.categories.request', icon: 'cloud', order: 1 },
   folder: { label: 'search.categories.folder', icon: 'folder', order: 2 },
-  environment: { label: 'search.categories.environment', icon: 'server-environment', order: 3 },
+  environment: { label: 'search.categories.environment', icon: 'folder-library', order: 3 },
   settings: { label: 'search.categories.settings', icon: 'settings-gear', order: 4 },
   tag: { label: 'search.categories.tag', icon: 'tag', order: 5 }
 }
