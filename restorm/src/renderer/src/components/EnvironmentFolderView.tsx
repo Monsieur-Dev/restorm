@@ -11,16 +11,14 @@ import {
   SplitView,
   Pane,
   Button,
-  Tabs,
   type Tab,
-  MarkdownEditor,
-  MarkdownViewer,
   IconSelect,
   KeyValueTable
 } from 'electron-core-ui/renderer'
 import type { KeyValueTableHandle } from 'electron-core-ui/renderer'
 import type { EnvironmentFolder, Environment, KeyValue, Icon } from '../types/collections'
 import { useEnvironmentValues } from '../contexts/useEnvironmentValues'
+import { BaseFolderView } from './BaseFolderView'
 
 /** Generate a unique ID for a new environment */
 function generateEnvironmentId(): string {
@@ -138,10 +136,18 @@ function renameEnvironmentById(environments: Environment[], id: string, newName:
   })
 }
 
-export const EnvironmentFolderView: React.FC<EnvironmentFolderViewProps> = ({ folder, onFolderChange }) => {
+/**
+ * Internal component for the environment configuration panel.
+ * Separated to keep the main component cleaner.
+ */
+interface EnvironmentConfigPanelProps {
+  folder: EnvironmentFolder
+  onFolderChange?: ((folder: EnvironmentFolder) => void) | undefined
+}
+
+const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder, onFolderChange }) => {
   const { t } = useTranslation()
   const { setEnvironmentValues } = useEnvironmentValues()
-  const [activeTabId, setActiveTabId] = useState<string>('configuration')
 
   // Local state for environments (allows modifications without waiting for parent)
   const [localEnvironments, setLocalEnvironments] = useState<Environment[]>(
@@ -387,7 +393,7 @@ export const EnvironmentFolderView: React.FC<EnvironmentFolderViewProps> = ({ fo
     }
   }, [])
 
-  const configurationContent = (
+  return (
     <div
       ref={containerRef}
       style={{
@@ -563,55 +569,25 @@ export const EnvironmentFolderView: React.FC<EnvironmentFolderViewProps> = ({ fo
       />
     </div>
   )
+}
 
-  const tabs: Tab[] = [
-    {
-      id: 'configuration',
-      label: t('folderView.tabs.configuration'),
-      useScrollableElement: false,
-      content: configurationContent
-    },
-    {
-      id: 'docs',
-      label: t('folderView.tabs.docs'),
-      useScrollableElement: false,
-      content: (
-        <MarkdownViewer
-          value={folder.documentation || `# ${folder.name}\n\nNo documentation available.`}
-        />
-      )
-    },
-    {
-      id: 'notes',
-      label: t('folderView.tabs.notes'),
-      useScrollableElement: false,
-      content: (
-        <MarkdownEditor
-          initialValue={folder.notes ?? ''}
-          onChange={(markdown) => {
-            folder.notes = markdown
-          }}
-        />
-      )
-    }
-  ]
+export const EnvironmentFolderView: React.FC<EnvironmentFolderViewProps> = ({ folder, onFolderChange }) => {
+  const { t } = useTranslation()
+
+  // Configuration tab with environment management
+  const configurationTab: Tab = {
+    id: 'configuration',
+    label: t('folderView.tabs.configuration'),
+    useScrollableElement: false,
+    content: <EnvironmentConfigPanel folder={folder} onFolderChange={onFolderChange} />
+  }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        flex: 1,
-        minHeight: 0,
-        minWidth: 0
-      }}
-    >
-      <Tabs
-        tabs={tabs}
-        activeTabId={activeTabId}
-        onTabChange={setActiveTabId}
-      />
-    </div>
+    <BaseFolderView
+      folder={folder}
+      additionalTabs={[configurationTab]}
+      defaultActiveTabId="configuration"
+    />
   )
 }
 
