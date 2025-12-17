@@ -21,7 +21,7 @@
 	border-bottom-right-radius: 3px;
 }
 
-.monaco-custom-radio > .monaco-button:not(.active):not(:last-child) {
+.monaco-custom-radio > .monaco-button:not(.active, :last-child) {
 	border-right: none;
 }
 

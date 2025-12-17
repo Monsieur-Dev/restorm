@@ -129,6 +129,7 @@
 	min-width: 0;
 	min-height: 0;
 	overflow: hidden;
+
 	/* Allow children to use flex layouts and fill remaining space (e.g. ScrollableElement) */
 	display: flex;
 	flex-direction: column;

@@ -1,7 +1,7 @@
-/*---------------------------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------------------------- */
 
 :root {
 	--sash-size: 4px;
@@ -89,20 +89,23 @@
 	left: calc(var(--sash-size) * -0.5);
 	top: calc(var(--sash-size) * -1);
 }
+
 .monaco-sash.vertical > .orthogonal-drag-handle.end {
 	left: calc(var(--sash-size) * -0.5);
 	bottom: calc(var(--sash-size) * -1);
 }
+
 .monaco-sash.horizontal > .orthogonal-drag-handle.start {
 	top: calc(var(--sash-size) * -0.5);
 	left: calc(var(--sash-size) * -1);
 }
+
 .monaco-sash.horizontal > .orthogonal-drag-handle.end {
 	top: calc(var(--sash-size) * -0.5);
 	right: calc(var(--sash-size) * -1);
 }
 
-.monaco-sash:before {
+.monaco-sash::before {
 	content: '';
 	pointer-events: none;
 	position: absolute;
@@ -113,20 +116,20 @@
 	z-index: 1;
 }
 
-.monaco-sash.hover:before,
-.monaco-sash.active:before {
+.monaco-sash.hover::before,
+.monaco-sash.active::before {
 	background: var(--sash-hoverBorder) !important;
 	opacity: 1 !important;
 }
 
-.monaco-sash.vertical:before {
+.monaco-sash.vertical::before {
 	width: var(--sash-hover-size);
 	left: calc(50% - (var(--sash-hover-size) / 2));
 	top: 0;
 	bottom: 0;
 }
 
-.monaco-sash.horizontal:before {
+.monaco-sash.horizontal::before {
 	height: var(--sash-hover-size);
 	top: calc(50% - (var(--sash-hover-size) / 2));
 	left: 0;
@@ -144,7 +147,7 @@
 }
 
 .monaco-sash.debug.disabled {
-	background: rgba(0, 255, 255, 0.2);
+	background: rgb(0, 255, 255, 0.2);
 }
 
 .monaco-sash.debug:not(.disabled) > .orthogonal-drag-handle {

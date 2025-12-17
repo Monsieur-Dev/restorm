@@ -218,7 +218,7 @@
 	background-color: var(--menu-background);
 	border: 1px solid var(--menu-border);
 	border-radius: 3px;
-	box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+	box-shadow: 0 2px 8px rgb(0,0,0,0.2);
 	z-index: 1000;
 	min-width: 120px;
 	max-width: 300px;

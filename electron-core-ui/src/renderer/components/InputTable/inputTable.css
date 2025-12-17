@@ -11,7 +11,6 @@
   --ag-row-hover-color: var(--list-hoverBackground);
   --ag-input-border-color: transparent;
   --ag-input-focus-border-color: var(--focusBorder);
-
   --ag-font-family: var(--font-family);
   --ag-font-size: 12px;
 }

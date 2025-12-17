@@ -44,7 +44,7 @@
   background: var(--editorWidget-background);
   border: 1px solid var(--editorWidget-border);
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 16px rgb(0, 0, 0, 0.3);
   overflow: hidden;
 }
 

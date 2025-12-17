@@ -3,6 +3,7 @@
 	scrollbar-width: none; /* Firefox */
 	-ms-overflow-style: none; /* IE/Edge */
 }
+
 .monaco-scrollable-element > .scrollable-content::-webkit-scrollbar {
 	display: none; /* Chrome/Safari/Webkit */
 }
@@ -29,18 +30,21 @@
 	opacity: 1;
 
 	/* Background rule added for IE9 - to allow clicks on dom node */
-	background:rgba(0,0,0,0);
-
+	background:rgb(0,0,0,0);
 	transition: opacity 100ms linear;
+
 	/* In front of peek view */
 	z-index: 11;
 }
+
 .monaco-scrollable-element > .invisible {
 	opacity: 0;
 	pointer-events: none;
+
 	/* Keep the same stacking order as visible scrollbars during fade-out */
 	z-index: 1000;
 }
+
 .monaco-scrollable-element > .invisible.fade {
 	transition: opacity 800ms linear;
 }
@@ -50,6 +54,7 @@
 	position: absolute;
 	display: none;
 }
+
 .monaco-scrollable-element > .shadow.top {
 	display: block;
 	top: 0;
@@ -58,6 +63,7 @@
 	width: 100%;
 	box-shadow: var(--scrollbar-shadow) 0 6px 6px -6px inset;
 }
+
 .monaco-scrollable-element > .shadow.left {
 	display: block;
 	top: 3px;
@@ -66,6 +72,7 @@
 	width: 3px;
 	box-shadow: var(--scrollbar-shadow) 6px 0 6px -6px inset;
 }
+
 .monaco-scrollable-element > .shadow.top-left-corner {
 	display: block;
 	top: 0;
@@ -73,6 +80,7 @@
 	height: 3px;
 	width: 3px;
 }
+
 .monaco-scrollable-element > .shadow.top.left {
 	box-shadow: var(--scrollbar-shadow) 6px 0 6px -6px inset;
 }
