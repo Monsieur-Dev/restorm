@@ -8,8 +8,8 @@
 	box-sizing: border-box;
 	position: relative;
 	-webkit-app-region: drag;
-	background-color: var(--vscode-titleBar-activeBackground);
-	color: var(--vscode-titleBar-activeForeground);
+	background-color: var(--titleBar-activeBackground);
+	color: var(--titleBar-activeForeground);
 	font-size: 13px;
 	overflow: hidden;
 }
@@ -97,11 +97,11 @@
 
 /* Border support */
 .titlebar {
-	border-bottom: 1px solid var(--vscode-titleBar-border);
+	border-bottom: 1px solid var(--titleBar-border);
 }
 
 /* Inactive state */
 .window-inactive .titlebar {
-	background-color: var(--vscode-titleBar-inactiveBackground);
-	color: var(--vscode-titleBar-inactiveForeground);
+	background-color: var(--titleBar-inactiveBackground);
+	color: var(--titleBar-inactiveForeground);
 }

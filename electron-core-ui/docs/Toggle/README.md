@@ -66,9 +66,9 @@ const [checked, setChecked] = useState(false)
     title: 'Enable notifications',
     isChecked: checked,
     icon: 'check',
-    inputActiveOptionBorder: 'var(--vscode-inputOption-activeBorder)',
-    inputActiveOptionForeground: 'var(--vscode-inputOption-activeForeground)',
-    inputActiveOptionBackground: 'var(--vscode-inputOption-activeBackground)'
+    inputActiveOptionBorder: 'var(--inputOption-activeBorder)',
+    inputActiveOptionForeground: 'var(--inputOption-activeForeground)',
+    inputActiveOptionBackground: 'var(--inputOption-activeBackground)'
   }}
   onChange={(checked) => setChecked(checked)}
 />
@@ -82,9 +82,9 @@ const [checked, setChecked] = useState(false)
     title: 'Disabled option',
     isChecked: false,
     icon: 'check',
-    inputActiveOptionBorder: 'var(--vscode-inputOption-activeBorder)',
-    inputActiveOptionForeground: 'var(--vscode-inputOption-activeForeground)',
-    inputActiveOptionBackground: 'var(--vscode-inputOption-activeBackground)'
+    inputActiveOptionBorder: 'var(--inputOption-activeBorder)',
+    inputActiveOptionForeground: 'var(--inputOption-activeForeground)',
+    inputActiveOptionBackground: 'var(--inputOption-activeBackground)'
   }}
   disabled={true}
 />
@@ -98,9 +98,9 @@ const [checked, setChecked] = useState(false)
     title: 'Custom icon toggle',
     isChecked: false,
     icon: 'star', // Utilise l'icône star au lieu de check
-    inputActiveOptionBorder: 'var(--vscode-inputOption-activeBorder)',
-    inputActiveOptionForeground: 'var(--vscode-inputOption-activeForeground)',
-    inputActiveOptionBackground: 'var(--vscode-inputOption-activeBackground)'
+    inputActiveOptionBorder: 'var(--inputOption-activeBorder)',
+    inputActiveOptionForeground: 'var(--inputOption-activeForeground)',
+    inputActiveOptionBackground: 'var(--inputOption-activeBackground)'
   }}
   onChange={(checked) => console.log('Star toggled:', checked)}
 />
@@ -138,7 +138,7 @@ The component generates the following DOM structure:
   aria-checked="true"
   aria-label="Toggle title"
   aria-disabled="false"
-  style="color: var(--vscode-inputOption-activeForeground); background-color: var(--vscode-inputOption-activeBackground); border-color: var(--vscode-inputOption-activeBorder);"
+  style="color: var(--inputOption-activeForeground); background-color: var(--inputOption-activeBackground); border-color: var(--inputOption-activeBorder);"
 >
 </div>
 ```
@@ -155,11 +155,11 @@ The component generates the following DOM structure:
 
 The component uses the following CSS variables:
 
-- `--vscode-inputOption-activeBorder` : Active toggle border
-- `--vscode-inputOption-activeForeground` : Active icon color
-- `--vscode-inputOption-activeBackground` : Active toggle background
-- `--vscode-inputOption-hoverBackground` : Hover background
-- `--vscode-focusBorder` : Focus border (high contrast mode)
+- `--inputOption-activeBorder` : Active toggle border
+- `--inputOption-activeForeground` : Active icon color
+- `--inputOption-activeBackground` : Active toggle background
+- `--inputOption-hoverBackground` : Hover background
+- `--focusBorder` : Focus border (high contrast mode)
 
 ## Codicon Support
 
@@ -195,9 +195,9 @@ For optimal usage, always use VSCode theme variables:
 
 ```typescript
 const defaultToggleStyles: IToggleStyles = {
-  inputActiveOptionBorder: 'var(--vscode-inputOption-activeBorder)',
-  inputActiveOptionForeground: 'var(--vscode-inputOption-activeForeground)',
-  inputActiveOptionBackground: 'var(--vscode-inputOption-activeBackground)'
+  inputActiveOptionBorder: 'var(--inputOption-activeBorder)',
+  inputActiveOptionForeground: 'var(--inputOption-activeForeground)',
+  inputActiveOptionBackground: 'var(--inputOption-activeBackground)'
 }
 ```
 

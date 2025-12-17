@@ -27,7 +27,7 @@ This component is a generic, reusable version of the environment/headers/params 
   - Enable/disable rows per-line via `Toggle`.
   - Drag & drop reordering with a custom drag ghost and visual drop indicators (before/after).
 - **Theming**:
-  - Uses VSCode CSS variables (`--vscode-*`) for borders, background and text.
+  - Uses VSCode CSS variables (`--*`) for borders, background and text.
   - Fits naturally into VSCode-like layouts and dark/light themes.
 
 ## TypeScript Interfaces

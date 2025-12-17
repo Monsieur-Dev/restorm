@@ -54,10 +54,10 @@ interface ScrollableElementProps {
 
 ```typescript
 const defaultScrollableElementStyles: IScrollableElementStyles = {
-  scrollbarSliderBackground: 'var(--vscode-scrollbarSlider-background)',
-  scrollbarSliderHoverBackground: 'var(--vscode-scrollbarSlider-hoverBackground)',
-  scrollbarSliderActiveBackground: 'var(--vscode-scrollbarSlider-activeBackground)',
-  scrollbarShadow: 'var(--vscode-scrollbar-shadow)'
+  scrollbarSliderBackground: 'var(--scrollbarSlider-background)',
+  scrollbarSliderHoverBackground: 'var(--scrollbarSlider-hoverBackground)',
+  scrollbarSliderActiveBackground: 'var(--scrollbarSlider-activeBackground)',
+  scrollbarShadow: 'var(--scrollbar-shadow)'
 };
 ```
 
@@ -203,10 +203,10 @@ const defaultScrollableElementStyles: IScrollableElementStyles = {
 
 The component uses the following VSCode CSS variables for theming:
 
-- `--vscode-scrollbarSlider-background`: Default slider background
-- `--vscode-scrollbarSlider-hoverBackground`: Slider background on hover
-- `--vscode-scrollbarSlider-activeBackground`: Slider background when active
-- `--vscode-scrollbar-shadow`: Shadow color for overflow indication
+- `--scrollbarSlider-background`: Default slider background
+- `--scrollbarSlider-hoverBackground`: Slider background on hover
+- `--scrollbarSlider-activeBackground`: Slider background when active
+- `--scrollbar-shadow`: Shadow color for overflow indication
 
 ## Behavior
 

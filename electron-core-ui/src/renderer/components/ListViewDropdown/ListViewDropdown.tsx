@@ -105,8 +105,8 @@ export const ListViewDropdown: React.FC<ListViewDropdownProps> = ({
             maxHeight,
             overflow: 'hidden',
             zIndex: 1000,
-            backgroundColor: 'var(--vscode-editor-background)',
-            border: '1px solid var(--vscode-dropdown-border)',
+            backgroundColor: 'var(--editor-background)',
+            border: '1px solid var(--dropdown-border)',
             boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)'
           }}
         >

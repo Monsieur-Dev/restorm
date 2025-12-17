@@ -26,15 +26,15 @@
   height: 24px;
   width: 100%;
   max-width: 600px;
-  background-color: var(--vscode-input-background);
-  border: 1px solid var(--vscode-widget-border);
+  background-color: var(--input-background);
+  border: 1px solid var(--widget-border);
   box-sizing: border-box;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
 .search-bar-closed:hover {
-  background-color: var(--vscode-input-background);
-  border-color: var(--vscode-focusBorder);
+  background-color: var(--input-background);
+  border-color: var(--focusBorder);
 }
 
 .search-bar-closed .search-icon {
@@ -46,7 +46,7 @@
 
 .search-bar-closed .search-title {
   font-size: 11px;
-  color: var(--vscode-input-placeholderForeground);
+  color: var(--input-placeholderForeground);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -67,8 +67,8 @@
 /* Open state - unified search box with results */
 .search-bar-open {
   position: fixed;
-  background-color: var(--vscode-input-background);
-  border: 1px solid var(--vscode-widget-border);
+  background-color: var(--input-background);
+  border: 1px solid var(--widget-border);
   border-radius: 4px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
   z-index: 10000;
@@ -130,7 +130,7 @@
 .search-results-empty {
   padding: 12px 16px;
   text-align: center;
-  color: var(--vscode-descriptionForeground);
+  color: var(--descriptionForeground);
   font-size: 12px;
 }
 
@@ -139,13 +139,13 @@
   padding: 6px 12px 6px 8px;
   font-size: 11px;
   font-weight: 600;
-  color: var(--vscode-descriptionForeground);
+  color: var(--descriptionForeground);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   display: flex;
   align-items: center;
   gap: 4px;
-  background-color: var(--vscode-dropdown-background);
+  background-color: var(--dropdown-background);
   position: sticky;
   top: 0;
   cursor: pointer;
@@ -153,7 +153,7 @@
 }
 
 .search-results-category:hover {
-  background-color: var(--vscode-list-hoverBackground);
+  background-color: var(--list-hoverBackground);
 }
 
 .search-results-category .category-chevron {
@@ -184,11 +184,11 @@
 }
 
 .search-result-item:hover {
-  background-color: var(--vscode-list-hoverBackground);
+  background-color: var(--list-hoverBackground);
 }
 
 .search-result-item:focus {
-  background-color: var(--vscode-list-focusBackground);
+  background-color: var(--list-focusBackground);
   outline: none;
 }
 
@@ -207,7 +207,7 @@
 
 .search-result-item .result-title {
   font-size: 12px;
-  color: var(--vscode-foreground);
+  color: var(--foreground);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -215,7 +215,7 @@
 
 .search-result-item .result-description {
   font-size: 11px;
-  color: var(--vscode-descriptionForeground);
+  color: var(--descriptionForeground);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -271,7 +271,7 @@
 }
 
 .http-route {
-  color: var(--vscode-foreground);
+  color: var(--foreground);
   font-size: 12px;
   white-space: nowrap;
   overflow: hidden;
@@ -291,7 +291,7 @@
 
 .search-results-wrapper .list-view-row .result-title {
   font-size: 12px;
-  color: var(--vscode-foreground);
+  color: var(--foreground);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -299,7 +299,7 @@
 
 .search-results-wrapper .list-view-row .result-description {
   font-size: 11px;
-  color: var(--vscode-descriptionForeground);
+  color: var(--descriptionForeground);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

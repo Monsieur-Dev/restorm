@@ -135,7 +135,7 @@ The component generates the following DOM structure:
 
 The component uses the following CSS variables:
 
-- `--vscode-progressBar-background` : Background color of the progress bar
+- `--progressBar-background` : Background color of the progress bar
 - Default fallback: `#0E70C0` (VSCode blue)
 
 ## Animation Details
@@ -192,7 +192,7 @@ For optimal usage, always use VSCode theme variables:
 
 ```typescript
 const defaultProgressBarStyles: IProgressBarStyles = {
-  progressBarBackground: 'var(--vscode-progressBar-background)'
+  progressBarBackground: 'var(--progressBar-background)'
 }
 ```
 

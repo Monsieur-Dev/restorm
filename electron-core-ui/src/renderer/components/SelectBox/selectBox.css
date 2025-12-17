@@ -43,7 +43,7 @@
 
 /* Focus styles */
 .monaco-select-box:focus {
-  outline: 1px solid var(--vscode-focusBorder);
+  outline: 1px solid var(--focusBorder);
   outline-offset: -1px;
 }
 
@@ -55,5 +55,5 @@
 
 /* Hover state */
 .monaco-select-box:hover:not(:disabled) {
-  background-color: var(--vscode-settings-dropdownHoverBackground);
+  background-color: var(--settings-dropdownHoverBackground);
 }

@@ -360,7 +360,7 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
       container.style.top = '-1000px'
       container.style.left = '-1000px'
       container.style.pointerEvents = 'none'
-      container.style.backgroundColor = 'var(--vscode-editor-background)'
+      container.style.backgroundColor = 'var(--editor-background)'
       container.style.borderRadius = '2px'
       container.appendChild(table)
 

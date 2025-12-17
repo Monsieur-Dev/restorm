@@ -165,11 +165,11 @@ const win = new BrowserWindow({
 
 The component uses the following CSS variables:
 
-- `--vscode-titleBar-activeBackground` : Background color when window is active
-- `--vscode-titleBar-activeForeground` : Text color when window is active
-- `--vscode-titleBar-inactiveBackground` : Background color when window is inactive
-- `--vscode-titleBar-inactiveForeground` : Text color when window is inactive
-- `--vscode-titleBar-border` : Border color of the title bar
+- `--titleBar-activeBackground` : Background color when window is active
+- `--titleBar-activeForeground` : Text color when window is active
+- `--titleBar-inactiveBackground` : Background color when window is inactive
+- `--titleBar-inactiveForeground` : Text color when window is inactive
+- `--titleBar-border` : Border color of the title bar
 
 ### Theme Integration
 
@@ -179,8 +179,8 @@ The inactive state is triggered by adding the `.window-inactive` class to a pare
 
 ```css
 .window-inactive .titlebar {
-  background-color: var(--vscode-titleBar-inactiveBackground);
-  color: var(--vscode-titleBar-inactiveForeground);
+  background-color: var(--titleBar-inactiveBackground);
+  color: var(--titleBar-inactiveForeground);
 }
 ```
 

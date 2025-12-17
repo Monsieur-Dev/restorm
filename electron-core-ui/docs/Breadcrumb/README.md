@@ -85,13 +85,13 @@ const Example: React.FC = () => {
 
 The component uses standard VSCode CSS variables for theming:
 
-- `--vscode-breadcrumb-background`
-- `--vscode-breadcrumb-foreground`
-- `--vscode-breadcrumb-focusForeground`
-- `--vscode-input-background`
-- `--vscode-input-foreground`
-- `--vscode-input-border`
-- `--vscode-focusBorder`
+- `--breadcrumb-background`
+- `--breadcrumb-foreground`
+- `--breadcrumb-focusForeground`
+- `--input-background`
+- `--input-foreground`
+- `--input-border`
+- `--focusBorder`
 
 ### Classes
 

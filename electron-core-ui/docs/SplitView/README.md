@@ -82,11 +82,11 @@ export interface SplitViewPaneProps {
   - The `onSizesChange` callback receives updated ratios so parents can react (e.g. persist layout).
 - **Theming**
   - Uses the existing `Sash` component and VS Code theme variables, including:
-    - `--vscode-sash-size`
-    - `--vscode-sash-hover-size`
-    - `--vscode-sash-hoverBorder`
-    - `--vscode-panel-border`
-    - `--vscode-editorGroup-border`
-    - `--vscode-sideBar-background`
+    - `--sash-size`
+    - `--sash-hover-size`
+    - `--sash-hoverBorder`
+    - `--panel-border`
+    - `--editorGroup-border`
+    - `--sideBar-background`
 
 The main container uses the `monaco-split-view2` class name to stay close to VS Code’s DOM structure.

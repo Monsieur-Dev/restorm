@@ -1,18 +1,18 @@
 .ag-theme-restorm-input-table {
-  --ag-background-color: var(--vscode-editor-background);
-  --ag-foreground-color: var(--vscode-editor-foreground);
+  --ag-background-color: var(--editor-background);
+  --ag-foreground-color: var(--editor-foreground);
   --ag-border-color: transparent;
   --ag-row-border-color: transparent;
-  --ag-header-background-color: var(--vscode-editorGroupHeader-tabsBackground);
-  --ag-header-foreground-color: var(--vscode-foreground);
-  --ag-odd-row-background-color: var(--vscode-editor-background);
-  --ag-selected-row-background-color: var(--vscode-list-activeSelectionBackground);
-  --ag-selected-row-text-color: var(--vscode-list-activeSelectionForeground);
-  --ag-row-hover-color: var(--vscode-list-hoverBackground);
+  --ag-header-background-color: var(--editorGroupHeader-tabsBackground);
+  --ag-header-foreground-color: var(--foreground);
+  --ag-odd-row-background-color: var(--editor-background);
+  --ag-selected-row-background-color: var(--list-activeSelectionBackground);
+  --ag-selected-row-text-color: var(--list-activeSelectionForeground);
+  --ag-row-hover-color: var(--list-hoverBackground);
   --ag-input-border-color: transparent;
-  --ag-input-focus-border-color: var(--vscode-focusBorder);
+  --ag-input-focus-border-color: var(--focusBorder);
 
-  --ag-font-family: var(--vscode-font-family);
+  --ag-font-family: var(--font-family);
   --ag-font-size: 12px;
 }
 
@@ -50,19 +50,19 @@
   flex: 1;
   min-height: 120px;
   overflow: auto;
-  background-color: var(--vscode-editor-background);
+  background-color: var(--editor-background);
 }
 
 .input-table-table {
   width: 100%;
   border-collapse: collapse;
-  font-family: var(--vscode-font-family);
+  font-family: var(--font-family);
   font-size: 12px;
-  color: var(--vscode-editor-foreground);
+  color: var(--editor-foreground);
 }
 
 .input-table-table thead {
-  background-color: var(--vscode-editorGroupHeader-tabsBackground);
+  background-color: var(--editorGroupHeader-tabsBackground);
 }
 
 .input-table-table th,
@@ -71,7 +71,7 @@
 }
 
 .input-table-table tbody tr:hover {
-  background-color: var(--vscode-list-hoverBackground);
+  background-color: var(--list-hoverBackground);
 }
 
 .input-table-drag-header {

@@ -16,12 +16,12 @@
   cursor: pointer;
   font-size: 16px;
   line-height: 1;
-  color: var(--vscode-foreground);
+  color: var(--foreground);
   transition: background-color 0.1s;
 }
 
 .ecui-icon-select-button:hover:not(:disabled) {
-  background-color: var(--vscode-toolbar-hoverBackground);
+  background-color: var(--toolbar-hoverBackground);
 }
 
 .ecui-icon-select-button:disabled {
@@ -41,8 +41,8 @@
 
 .ecui-icon-select-picker {
   z-index: 10000;
-  background: var(--vscode-editorWidget-background);
-  border: 1px solid var(--vscode-editorWidget-border);
+  background: var(--editorWidget-background);
+  border: 1px solid var(--editorWidget-border);
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   overflow: hidden;
@@ -53,8 +53,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 6px 8px;
-  border-bottom: 1px solid var(--vscode-editorWidget-border);
-  background: var(--vscode-editorWidget-background);
+  border-bottom: 1px solid var(--editorWidget-border);
+  background: var(--editorWidget-background);
 }
 
 .ecui-icon-select-tabs {
@@ -73,28 +73,28 @@
   border-radius: 4px;
   background: transparent;
   cursor: pointer;
-  color: var(--vscode-foreground);
+  color: var(--foreground);
   opacity: 0.6;
   transition: background-color 0.1s, opacity 0.1s;
 }
 
 .ecui-icon-select-tab:hover {
-  background-color: var(--vscode-toolbar-hoverBackground);
+  background-color: var(--toolbar-hoverBackground);
   opacity: 0.8;
 }
 
 .ecui-icon-select-tab.active {
-  background-color: var(--vscode-toolbar-activeBackground);
+  background-color: var(--toolbar-activeBackground);
   opacity: 1;
 }
 
 /* Override emoji-mart styles to match VS Code theme */
 .ecui-icon-select-picker em-emoji-picker {
-  --rgb-background: var(--vscode-editorWidget-background);
-  --rgb-input: var(--vscode-input-background);
-  --rgb-color: var(--vscode-foreground);
+  --rgb-background: var(--editorWidget-background);
+  --rgb-input: var(--input-background);
+  --rgb-color: var(--foreground);
   --shadow: none;
-  --em-color-border: var(--vscode-editorWidget-border);
+  --em-color-border: var(--editorWidget-border);
 }
 
 .ecui-icon-select-codicons {
@@ -114,16 +114,16 @@
 }
 
 .ecui-icon-select-codicons::-webkit-scrollbar-thumb {
-  background: var(--vscode-scrollbarSlider-background);
+  background: var(--scrollbarSlider-background);
   border-radius: 5px;
 }
 
 .ecui-icon-select-codicons::-webkit-scrollbar-thumb:hover {
-  background: var(--vscode-scrollbarSlider-hoverBackground);
+  background: var(--scrollbarSlider-hoverBackground);
 }
 
 .ecui-icon-select-codicons::-webkit-scrollbar-thumb:active {
-  background: var(--vscode-scrollbarSlider-activeBackground);
+  background: var(--scrollbarSlider-activeBackground);
 }
 
 
@@ -146,12 +146,12 @@
 }
 
 .ecui-icon-select-picker *::-webkit-scrollbar-thumb {
-  background: var(--vscode-scrollbarSlider-background);
+  background: var(--scrollbarSlider-background);
   border-radius: 5px;
 }
 
 .ecui-icon-select-picker *::-webkit-scrollbar-thumb:hover {
-  background: var(--vscode-scrollbarSlider-hoverBackground);
+  background: var(--scrollbarSlider-hoverBackground);
 }
 
 .ecui-icon-select-codicons-grid {
@@ -172,12 +172,12 @@
   border-radius: 4px;
   background: transparent;
   cursor: pointer;
-  color: var(--vscode-foreground);
+  color: var(--foreground);
   transition: background-color 0.1s;
 }
 
 .ecui-icon-select-codicon:hover {
-  background-color: var(--vscode-list-hoverBackground);
+  background-color: var(--list-hoverBackground);
 }
 
 .ecui-icon-select-codicon .codicon {

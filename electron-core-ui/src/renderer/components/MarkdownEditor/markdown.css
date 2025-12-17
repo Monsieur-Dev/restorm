@@ -75,7 +75,7 @@
 
 /* Themed scrollbars for all scrollable content inside the Markdown editor (editor and popups) */
 [data-milkdown-root] * {
-  scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
+  scrollbar-color: var(--scrollbarSlider-background) transparent;
   scrollbar-width: thin;
 }
 
@@ -90,13 +90,13 @@
 }
 
 [data-milkdown-root] *::-webkit-scrollbar-thumb {
-  background: var(--vscode-scrollbarSlider-background);
+  background: var(--scrollbarSlider-background);
 }
 
 [data-milkdown-root] *::-webkit-scrollbar-thumb:hover {
-  background: var(--vscode-scrollbarSlider-hoverBackground);
+  background: var(--scrollbarSlider-hoverBackground);
 }
 
 [data-milkdown-root] *::-webkit-scrollbar-thumb:active {
-  background: var(--vscode-scrollbarSlider-activeBackground);
+  background: var(--scrollbarSlider-activeBackground);
 }

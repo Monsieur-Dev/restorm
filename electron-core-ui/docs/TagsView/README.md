@@ -16,7 +16,7 @@
 - Clic droit sur un tag : ouvre un menu contextuel permettant de supprimer le tag.
 - Bouton `+` (small / secondary) en fin de ligne pour ajouter un nouveau tag.
 - Styles basés sur les variables de thème :
-  - `--tag-background`, `--tag-background-hover`, `--tag-foreground` (avec fallback vers `--vscode-*`).
+  - `--tag-background`, `--tag-background-hover`, `--tag-foreground` (avec fallback vers `--*`).
 
 ## Exemple d’utilisation
 

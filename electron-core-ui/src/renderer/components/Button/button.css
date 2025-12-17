@@ -16,10 +16,10 @@
 	cursor: pointer;
 	justify-content: center;
 	align-items: center;
-	border: 1px solid var(--vscode-button-border);
+	border: 1px solid var(--button-border);
 	line-height: 18px;
-	color: var(--vscode-button-foreground);
-	background-color: var(--vscode-button-background);
+	color: var(--button-foreground);
+	background-color: var(--button-background);
 }
 
 .monaco-text-button {
@@ -42,16 +42,16 @@
 
 .monaco-text-button:hover {
 	text-decoration: none !important;
-	background-color: var(--vscode-button-hoverBackground);
+	background-color: var(--button-hoverBackground);
 }
 
 .monaco-text-button.secondary {
-	color: var(--vscode-button-secondaryForeground);
-	background-color: var(--vscode-button-secondaryBackground);
+	color: var(--button-secondaryForeground);
+	background-color: var(--button-secondaryBackground);
 }
 
 .monaco-text-button.secondary:hover {
-	background-color: var(--vscode-button-secondaryHoverBackground);
+	background-color: var(--button-secondaryHoverBackground);
 }
 
 .monaco-button.disabled:focus,
@@ -128,7 +128,7 @@
 }
 
 .monaco-dropdown-button {
-	border: 1px solid var(--vscode-button-border);
+	border: 1px solid var(--button-border);
 	border-left-width: 0 !important;
 	border-radius: 0 2px 2px 0 !important;
 	display: flex;
@@ -176,38 +176,38 @@
 
 .monaco-button.default-colors,
 .monaco-button-dropdown.default-colors > .monaco-button{
-	color: var(--vscode-button-foreground);
-	background-color: var(--vscode-button-background);
+	color: var(--button-foreground);
+	background-color: var(--button-background);
 }
 
 .monaco-button.default-colors:hover,
 .monaco-button-dropdown.default-colors > .monaco-button:hover {
-	background-color: var(--vscode-button-hoverBackground);
+	background-color: var(--button-hoverBackground);
 }
 
 .monaco-button.default-colors.secondary,
 .monaco-button-dropdown.default-colors > .monaco-button.secondary {
-	color: var(--vscode-button-secondaryForeground);
-	background-color: var(--vscode-button-secondaryBackground);
+	color: var(--button-secondaryForeground);
+	background-color: var(--button-secondaryBackground);
 }
 
 .monaco-button.default-colors.secondary:hover,
 .monaco-button-dropdown.default-colors > .monaco-button.secondary:hover {
-	background-color: var(--vscode-button-secondaryHoverBackground);
+	background-color: var(--button-secondaryHoverBackground);
 }
 
 .monaco-button-dropdown.default-colors .monaco-button-dropdown-separator {
-	background-color: var(--vscode-button-background);
-	border-top: 1px solid var(--vscode-button-border);
-	border-bottom: 1px solid var(--vscode-button-border);
+	background-color: var(--button-background);
+	border-top: 1px solid var(--button-border);
+	border-bottom: 1px solid var(--button-border);
 }
 
 .monaco-button-dropdown.default-colors .monaco-button.secondary + .monaco-button-dropdown-separator {
-	background-color: var(--vscode-button-secondaryBackground);
+	background-color: var(--button-secondaryBackground);
 }
 
 .monaco-button-dropdown.default-colors .monaco-button-dropdown-separator > div {
-	background-color: var(--vscode-button-separator);
+	background-color: var(--button-separator);
 }
 
 /* Dropdown menu styles */
@@ -215,8 +215,8 @@
 	position: absolute;
 	top: 100%;
 	left: calc(100% - 28px);
-	background-color: var(--vscode-menu-background);
-	border: 1px solid var(--vscode-menu-border);
+	background-color: var(--menu-background);
+	border: 1px solid var(--menu-border);
 	border-radius: 3px;
 	box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 	z-index: 1000;
@@ -234,7 +234,7 @@
 	padding: 8px 12px;
 	border: none;
 	background-color: transparent;
-	color: var(--vscode-menu-foreground);
+	color: var(--menu-foreground);
 	text-align: left;
 	cursor: pointer;
 	font-size: 13px;
@@ -246,7 +246,7 @@
 }
 
 .monaco-button-dropdown-action:hover {
-	background-color: var(--vscode-button-background);
+	background-color: var(--button-background);
 }
 
 /* Small toolbar-style button (20x20) */
@@ -258,7 +258,7 @@
 	padding: 0;
 	border-radius: 3px;
 	background-color: transparent;
-	color: var(--vscode-titleBar-activeForeground);
+	color: var(--titleBar-activeForeground);
 	cursor: pointer;
 	display: flex;
 	align-items: center;
@@ -282,5 +282,5 @@
 }
 
 .monaco-text-button.monaco-small-button:hover {
-	background-color: var(--vscode-toolbar-hoverBackground);
+	background-color: var(--toolbar-hoverBackground);
 }
