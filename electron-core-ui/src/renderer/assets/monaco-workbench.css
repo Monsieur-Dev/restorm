@@ -54,7 +54,7 @@ body {
 	width: 100%;
 	height: 100%;
 	box-sizing: border-box;
-	border: 1px solid var(--window-border-color, var(--vscode-panel-border)) !important;
+	border: 1px solid var(--window-border-color) !important;
 	border-radius: 2px;
 }
 
@@ -172,11 +172,11 @@ body {
 
 /* Default codicon color (used outside and inside the workbench) */
 .codicon {
-	color: var(--vscode-icon-foreground, #000000);
+	color: var(--vscode-icon-foreground);
 }
 
 .monaco-workbench .codicon {
-	color: var(--vscode-icon-foreground, #000000);
+	color: var(--vscode-icon-foreground);
 }
 
 .monaco-workbench .codicon[class*='codicon-'] {

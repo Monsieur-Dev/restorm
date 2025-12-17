@@ -3,7 +3,7 @@
   --ag-foreground-color: var(--vscode-editor-foreground);
   --ag-border-color: transparent;
   --ag-row-border-color: transparent;
-  --ag-header-background-color: var(--vscode-editorGroupHeader-tabsBackground, var(--vscode-editor-background));
+  --ag-header-background-color: var(--vscode-editorGroupHeader-tabsBackground);
   --ag-header-foreground-color: var(--vscode-foreground);
   --ag-odd-row-background-color: var(--vscode-editor-background);
   --ag-selected-row-background-color: var(--vscode-list-activeSelectionBackground);
@@ -62,7 +62,7 @@
 }
 
 .input-table-table thead {
-  background-color: var(--vscode-editorGroupHeader-tabsBackground, var(--vscode-editor-background));
+  background-color: var(--vscode-editorGroupHeader-tabsBackground);
 }
 
 .input-table-table th,

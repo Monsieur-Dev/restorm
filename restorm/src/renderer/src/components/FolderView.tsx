@@ -407,7 +407,7 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder, onFolderChange }
           display: 'flex',
           flexDirection: 'column',
           minHeight: 0,
-          borderRight: '1px solid var(--vscode-sideBar-border, var(--vscode-panel-border))',
+          borderRight: '1px solid var(--vscode-sideBar-border)',
           backgroundColor: 'var(--vscode-sideBar-background)'
         }}
       >

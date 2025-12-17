@@ -22,7 +22,7 @@
   justify-content: center;
   cursor: default;
   /* Use dedicated WCO icon color (falls back to generic icon foreground) */
-  color: var(--vscode-wco-iconForeground, var(--vscode-icon-foreground));
+  color: var(--vscode-wco-iconForeground);
   position: relative;
   border-radius: 50%; /* pour effet circulaire au hover */
   transition: background-color 0.15s, color 0.15s;
@@ -52,5 +52,5 @@
 
 .window-button:hover {
   /* Keep using the dedicated WCO icon color on hover for maximum contrast */
-  color: var(--vscode-wco-iconForeground, var(--vscode-icon-foreground));
+  color: var(--vscode-wco-iconForeground);
 }

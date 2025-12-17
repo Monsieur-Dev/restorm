@@ -365,7 +365,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 				className={`tabs-container-wrapper${dimmed ? ' dimmed' : ''}`}
 				style={{
 					flex: 1,
-					height: 'var(--editor-group-tab-height, 35px)',
+					height: 'var(--editor-group-tab-height)',
 					minWidth: 0
 				}}
 			>

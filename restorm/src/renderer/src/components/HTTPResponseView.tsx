@@ -54,13 +54,13 @@ function formatDate(isoString: string): string {
 /** Get status color based on status code */
 function getStatusColor(statusCode: number): string {
   if (statusCode >= 200 && statusCode < 300) {
-    return 'var(--vscode-testing-iconPassed, #73c991)'
+    return 'var(--vscode-testing-iconPassed)'
   }
   if (statusCode >= 300 && statusCode < 400) {
-    return 'var(--vscode-editorWarning-foreground, #cca700)'
+    return 'var(--vscode-editorWarning-foreground)'
   }
   if (statusCode >= 400) {
-    return 'var(--vscode-testing-iconFailed, #f14c4c)'
+    return 'var(--vscode-testing-iconFailed)'
   }
   return 'var(--vscode-foreground)'
 }
@@ -475,7 +475,7 @@ export const HTTPResponseView: React.FC<HTTPResponseViewProps> = ({
             <div
               style={{
                 height: '100%',
-                border: '1px solid var(--vscode-panel-border, #3c3c3c)',
+                border: '1px solid var(--vscode-panel-border)',
                 borderRadius: 3,
                 boxSizing: 'border-box'
               }}
@@ -537,7 +537,7 @@ export const HTTPResponseView: React.FC<HTTPResponseViewProps> = ({
                 style={{
                   flex: 1,
                   minHeight: 0,
-                  border: '1px solid var(--vscode-panel-border, #3c3c3c)',
+                  border: '1px solid var(--vscode-panel-border)',
                   borderRadius: 3,
                   boxSizing: 'border-box',
                   position: 'relative',

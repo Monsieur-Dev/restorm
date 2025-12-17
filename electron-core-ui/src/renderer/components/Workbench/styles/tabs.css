@@ -23,7 +23,7 @@
 	white-space: nowrap;
 	cursor: pointer;
 	height: 100%;
-	min-height: var(--editor-group-tab-height, 35px);
+	min-height: var(--editor-group-tab-height);
 	box-sizing: border-box;
 	padding: 0 10px;
 	background-color: var(--vscode-tab-inactiveBackground);
@@ -38,7 +38,7 @@
 }
 
 .monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab .tab-label {
-	line-height: var(--editor-group-tab-height, 35px);
+	line-height: var(--editor-group-tab-height);
 }
 
 /* Apply opacity only to label-name content when dimmed */

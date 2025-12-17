@@ -84,7 +84,7 @@
 }
 
 .ecui-icon-select-tab.active {
-  background-color: var(--vscode-toolbar-activeBackground, var(--vscode-list-activeSelectionBackground));
+  background-color: var(--vscode-toolbar-activeBackground);
   opacity: 1;
 }
 

@@ -32,7 +32,7 @@
 }
 
 .markdown-viewer code {
-  font-family: var(--vscode-editor-font-family, 'Consolas', 'Courier New', monospace);
+  font-family: var(--vscode-editor-font-family);
   font-size: 0.95em;
 }
 

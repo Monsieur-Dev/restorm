@@ -101,16 +101,16 @@
 	width: 300px !important;
 	min-width: 300px !important;
 	max-width: 300px !important;
-	background-color: var(--vscode-menu-background, #252526) !important;
+	background-color: var(--vscode-menu-background) !important;
 	box-shadow: 5px 5px 5px  rgba(0,0,0,0.5) !important;
 }
 
 .monaco-menu {
-	background-color: var(--vscode-menu-background, #252526) !important;
+	background-color: var(--vscode-menu-background) !important;
 }
 
 .actions-container {
-	background-color: var(--vscode-menu-background, #252526) !important;
+	background-color: var(--vscode-menu-background) !important;
 	list-style: none !important;
 	margin: 0 !important;
 	padding: 0 !important;
@@ -133,7 +133,7 @@
 	padding: 4px 8px !important;
 	line-height: 1.4 !important;
 	background-color: transparent !important;
-	color: var(--vscode-menu-foreground, #cccccc) !important;
+	color: var(--vscode-menu-foreground) !important;
 	border: none !important;
 	text-decoration: none !important;
 	cursor: pointer !important;
@@ -141,25 +141,25 @@
 
 .action-menu-item:hover,
 .action-menu-item.submenu-open {
-	background-color: var(--vscode-list-hoverBackground, #2a2d2e) !important;
-	color: var(--vscode-list-hoverForeground, #ffffff) !important;
+	background-color: var(--vscode-list-hoverBackground) !important;
+	color: var(--vscode-list-hoverForeground) !important;
 }
 
 .action-menu-item:focus {
-	background-color: var(--vscode-list-activeSelectionBackground, #094771) !important;
-	color: var(--vscode-list-activeSelectionForeground, #ffffff) !important;
+	background-color: var(--vscode-list-activeSelectionBackground) !important;
+	color: var(--vscode-list-activeSelectionForeground) !important;
 	outline: none !important;
 }
 
 .action-menu-item.disabled {
 	opacity: 0.6 !important;
 	cursor: default !important;
-	color: var(--vscode-disabledForeground, #6a6a6a) !important;
+	color: var(--vscode-disabledForeground) !important;
 }
 
 .action-menu-item.disabled:hover {
 	background-color: transparent !important;
-	color: var(--vscode-disabledForeground, #6a6a6a) !important;
+	color: var(--vscode-disabledForeground) !important;
 }
 
 /* Separator styles */
@@ -173,7 +173,7 @@
 .action-menu-item.separator {
 	height: 1px !important;
 	min-height: 1px !important;
-	background-color: var(--vscode-menu-separatorBackground, #454545) !important;
+	background-color: var(--vscode-menu-separatorBackground) !important;
 	border: none !important;
 	padding: 0 !important;
 	margin: 4px 8px !important;
@@ -190,7 +190,7 @@
 
 /* Keybinding styles */
 .keybinding {
-	color: var(--vscode-descriptionForeground, #8c8c8c) !important;
+	color: var(--vscode-descriptionForeground) !important;
 	font-size: 11px !important;
 	margin-left: 0 !important;
 	padding-left: 0 !important;
@@ -198,7 +198,7 @@
 
 /* Icon styles */
 .codicon {
-	color: var(--vscode-menu-foreground, #cccccc) !important;
+	color: var(--vscode-menu-foreground) !important;
 	font-size: 16px !important;
 	width: 16px !important;
 	height: 16px !important;

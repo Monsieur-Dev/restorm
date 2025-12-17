@@ -16,7 +16,7 @@
 	cursor: pointer;
 	justify-content: center;
 	align-items: center;
-	border: 1px solid var(--vscode-button-border, transparent);
+	border: 1px solid var(--vscode-button-border);
 	line-height: 18px;
 	color: var(--vscode-button-foreground);
 	background-color: var(--vscode-button-background);
@@ -128,7 +128,7 @@
 }
 
 .monaco-dropdown-button {
-	border: 1px solid var(--vscode-button-border, transparent);
+	border: 1px solid var(--vscode-button-border);
 	border-left-width: 0 !important;
 	border-radius: 0 2px 2px 0 !important;
 	display: flex;
@@ -282,5 +282,5 @@
 }
 
 .monaco-text-button.monaco-small-button:hover {
-	background-color: var(--vscode-toolbar-hoverBackground, var(--vscode-button-hoverBackground));
+	background-color: var(--vscode-toolbar-hoverBackground);
 }
