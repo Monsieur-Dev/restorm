@@ -16,6 +16,29 @@ import {
 } from 'electron-core-ui/renderer'
 import type { Folder, HTTPRequest } from '../types/collections'
 
+/** Metadata structure for search documents in restorm */
+export interface RestormSearchMetadata {
+  /** URL of the request */
+  url?: string
+  /** HTTP headers */
+  headers?: { key: string; value: string }[]
+  /** URL query parameters */
+  params?: { key: string; value: string }[]
+  /** URL path parameters */
+  pathParams?: { key: string; value: string }[]
+  /** Request body */
+  body?: {
+    type: 'text' | 'file' | 'form-data' | 'x-www-form-urlencoded'
+    content?: string
+    path?: string
+    fields?: { key: string; value: string }[]
+  }
+  /** Tags */
+  tags?: string[]
+  /** Notes */
+  notes?: string
+}
+
 /** Check if an item is a Folder */
 function isFolder(item: unknown): item is Folder {
   return typeof item === 'object' && item !== null && 'items' in item && 'configuration' in item
@@ -33,7 +56,7 @@ function folderToSearchDocument(folder: Folder, parentPath: string[] = []): Sear
   return {
     id: folder.id,
     title: folder.name,
-    description: [folder.documentation, folder.notes].filter(Boolean).join('\n\n'),
+    ...(folder.documentation ? { description: folder.documentation } : {}),
     category: 'folder',
     icon: 'folder',
     keywords: folder.tags.join(' '),
@@ -41,6 +64,10 @@ function folderToSearchDocument(folder: Folder, parentPath: string[] = []): Sear
       type: 'folder',
       folderId: folder.id,
       path: [...parentPath, folder.id]
+    },
+    metadata: {
+      tags: folder.tags,
+      ...(folder.notes ? { notes: folder.notes } : {})
     }
   }
 }
@@ -78,10 +105,39 @@ function requestToSearchDocument(
     getBodyContent(request.body)
   ].join(' ')
 
+  // Build body metadata
+  let bodyMetadata: RestormSearchMetadata['body'] = undefined
+  if (request.body) {
+    switch (request.body.type) {
+      case 'text':
+        bodyMetadata = {
+          type: 'text',
+          content: request.body.content
+        }
+        break
+      case 'file':
+        bodyMetadata = {
+          type: 'file',
+          path: request.body.path
+        }
+        break
+      case 'form-data':
+      case 'x-www-form-urlencoded':
+        bodyMetadata = {
+          type: request.body.type,
+          fields: request.body.fields.map((f) => ({
+            key: f.key,
+            value: f.value
+          }))
+        }
+        break
+    }
+  }
+
   return {
     id: request.id,
     title: request.name,
-    description: [request.documentation, request.notes].filter(Boolean).join('\n\n'),
+    ...(request.documentation ? { description: request.documentation } : {}),
     category: 'request',
     icon: request.method.toLowerCase(),
     keywords,
@@ -90,6 +146,15 @@ function requestToSearchDocument(
       folderId: parentFolderId,
       requestId: request.id,
       path: [...parentPath, request.id]
+    },
+    metadata: {
+      url: request.url,
+      headers: request.headers.map((h) => ({ key: h.key, value: h.value })),
+      params: request.params.map((p) => ({ key: p.key, value: p.value })),
+      ...(request.pathParams ? { pathParams: request.pathParams.map((p) => ({ key: p.key, value: p.value })) } : {}),
+      ...(bodyMetadata ? { body: bodyMetadata } : {}),
+      tags: request.tags,
+      ...(request.notes ? { notes: request.notes } : {})
     }
   }
 }

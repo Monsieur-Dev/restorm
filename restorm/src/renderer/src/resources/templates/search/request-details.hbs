@@ -1,0 +1,59 @@
+{{#if url}}
+### URL
+```
+{{url}}
+```
+{{/if}}
+
+{{#if headers.length}}
+### Headers
+| Key | Value |
+|-----|-------|
+{{#each headers}}
+| {{key}} | {{value}} |
+{{/each}}
+{{/if}}
+
+{{#if pathParams.length}}
+### Path Parameters
+| Key | Value |
+|-----|-------|
+{{#each pathParams}}
+| {{key}} | {{value}} |
+{{/each}}
+{{/if}}
+
+{{#if params.length}}
+### Query Parameters
+| Key | Value |
+|-----|-------|
+{{#each params}}
+| {{key}} | {{value}} |
+{{/each}}
+{{/if}}
+
+{{#if body}}
+### Body
+{{#ifEquals body.type "text"}}
+```
+{{{body.content}}}
+```
+{{/ifEquals}}
+{{#ifEquals body.type "file"}}
+**File:** {{body.path}}
+{{/ifEquals}}
+{{#ifEquals body.type "form-data"}}
+| Key | Value |
+|-----|-------|
+{{#each body.fields}}
+| {{key}} | {{value}} |
+{{/each}}
+{{/ifEquals}}
+{{#ifEquals body.type "x-www-form-urlencoded"}}
+| Key | Value |
+|-----|-------|
+{{#each body.fields}}
+| {{key}} | {{value}} |
+{{/each}}
+{{/ifEquals}}
+{{/if}}

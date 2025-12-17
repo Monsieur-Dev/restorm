@@ -19,6 +19,8 @@ export interface SearchBarProps {
   onResultClick?: ((result: SearchResult) => void) | undefined
   /** Placeholder text for the search input */
   placeholder?: string
+  /** Custom renderer for tooltip content. If not provided, uses default rendering with description. */
+  renderTooltipContent?: (result: SearchResult) => React.ReactNode
 }
 
 /** Debounce delay in milliseconds */
@@ -27,14 +29,17 @@ const DEBOUNCE_MS = 150
 export const SearchBar: React.FC<SearchBarProps> = ({
   title = '',
   onResultClick,
-  placeholder
+  placeholder,
+  renderTooltipContent
 }) => {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<GroupedResults[]>([])
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set())
 
   const containerRef = useRef<HTMLDivElement>(null)
+  const openBoxRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
   const closedRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -83,7 +88,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   // Handle query change
   const handleQueryChange = useCallback(
     (newQuery: string) => {
-      logger.debug('[SearchBar] Query changed', { newQuery })
       setQuery(newQuery)
 
       if (newQuery.trim()) {
@@ -118,6 +122,19 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     clearHideTooltipTimeout()
   }, [clearHideTooltipTimeout])
 
+  // Toggle category collapse
+  const toggleCategory = useCallback((category: string) => {
+    setCollapsedCategories((prev) => {
+      const next = new Set(prev)
+      if (next.has(category)) {
+        next.delete(category)
+      } else {
+        next.add(category)
+      }
+      return next
+    })
+  }, [])
+
   // Handle result click
   const handleResultClick = useCallback(
     (result: SearchResult) => {
@@ -137,22 +154,53 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     [handleClose]
   )
 
-  // Handle blur with delay to allow click on results
+  // Handle blur - only close if focus goes outside search area
   const handleBlur = useCallback(
     (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      // Check if the related target is within the container
+      // Check if the related target is within the open box (includes tooltip)
       const relatedTarget = e.relatedTarget as Node | null
-      if (containerRef.current?.contains(relatedTarget)) {
+      if (relatedTarget) {
+        // Focus went to another element - check if it's within our search area
+        if (openBoxRef.current?.contains(relatedTarget)) {
+          return
+        }
+        // Check if it's within the tooltip (which may be positioned outside container)
+        const tooltip = document.querySelector('.search-result-tooltip')
+        if (tooltip?.contains(relatedTarget)) {
+          return
+        }
+      }
+      // Focus went nowhere specific (clicked on non-focusable element)
+      // Let the global click handler deal with it
+    },
+    []
+  )
+
+  // Global click handler to close search when clicking outside
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleGlobalMouseDown = (e: MouseEvent): void => {
+      const target = e.target as Node
+      // Check if click is within the open search box
+      if (openBoxRef.current?.contains(target)) {
         return
       }
+      // Check if click is within the tooltip
+      const tooltip = document.querySelector('.search-result-tooltip')
+      if (tooltip?.contains(target)) {
+        return
+      }
+      // Click was outside - close the search
+      handleClose()
+    }
 
-      // Delay close to allow click events on results to fire
-      setTimeout(() => {
-        handleClose()
-      }, 150)
-    },
-    [handleClose]
-  )
+    // Use mousedown to catch clicks before they trigger other events
+    document.addEventListener('mousedown', handleGlobalMouseDown)
+    return () => {
+      document.removeEventListener('mousedown', handleGlobalMouseDown)
+    }
+  }, [isOpen, handleClose])
 
   // Focus input when opened
   useEffect(() => {
@@ -209,6 +257,12 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   const tooltipContent = useMemo(() => {
     if (!hoveredResult) return null
 
+    // Use custom renderer if provided
+    if (renderTooltipContent) {
+      return renderTooltipContent(hoveredResult)
+    }
+
+    // Default rendering: show title and description
     const { category, icon, title: resultTitle, description } = hoveredResult
 
     if (category === 'request' && icon) {
@@ -237,7 +291,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         )}
       </div>
     )
-  }, [hoveredResult])
+  }, [hoveredResult, renderTooltipContent])
 
   return (
     <div className="search-bar-container" ref={containerRef}>
@@ -260,6 +314,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       </div>
       {isOpen && (
         <div
+          ref={openBoxRef}
           className={`search-bar-open ${hasResults ? 'has-results' : ''} ${hasQuery && !hasResults ? 'no-results' : ''}`}
           style={{
             top: openBoxPosition.top,
@@ -294,59 +349,71 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                 style={{ maxHeight: 350 }}
               >
               <div className="search-results-content" role="tree" aria-label={t('search.resultsAriaLabel', 'Search results')} style={{ maxHeight: '350px' }}>
-                {results.map((group) => (
-                  <div key={group.category} className="search-results-group">
-                    <div className="search-results-category">
-                      <i className={`codicon codicon-${group.icon} category-icon`} />
-                      <span>{group.label.startsWith('search.') ? t(group.label, group.label) : group.label}</span>
-                    </div>
-                    {group.items.map((result) => {
-                      const { category, icon, title: resultTitle } = result
+                {results.map((group) => {
+                  const isCollapsed = collapsedCategories.has(group.category)
+                  return (
+                    <div key={group.category} className="search-results-group">
+                      <div
+                        className="search-results-category"
+                        data-sticky-level={1}
+                        role="treeitem"
+                        aria-expanded={!isCollapsed}
+                        onClick={() => { toggleCategory(group.category) }}
+                      >
+                        <i className={`codicon codicon-chevron-${isCollapsed ? 'right' : 'down'} category-chevron`} />
+                        <i className={`codicon codicon-${group.icon} category-icon`} />
+                        <span>{group.label.startsWith('search.') ? t(group.label, group.label) : group.label}</span>
+                        <span className="category-count">({group.items.length})</span>
+                      </div>
+                      {!isCollapsed && group.items.map((result) => {
+                        const { category, icon, title: resultTitle } = result
 
-                      return (
-                        <div
-                          key={result.id}
-                          data-result-id={result.id}
-                          className="search-result-item"
-                          role="treeitem"
-                          tabIndex={0}
-                          onClick={() => { handleResultClick(result) }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleResultClick(result)
-                          }}
-                          onMouseEnter={(event) => {
-                            if (hoveredResultId && hoveredResultId !== result.id) {
-                              setHoveredResultId(null)
-                              tooltipTargetRef.current = null
-                            }
-                            clearHideTooltipTimeout()
-                            setHoveredResultId(result.id)
-                            tooltipTargetRef.current = event.currentTarget
-                          }}
-                          onMouseLeave={() => {
-                            scheduleHideTooltip()
-                          }}
-                        >
-                          {category === 'request' && icon ? (
-                            <div className="result-content">
-                              <div className="result-title result-http-title">
-                                <span className={`http-method-badge method-${icon.toLowerCase()}`}>{icon.toUpperCase()}</span>
-                                <span className="http-route">{resultTitle}</span>
-                              </div>
-                            </div>
-                          ) : (
-                            <>
-                              <i className={`codicon codicon-${icon ?? 'symbol-misc'} result-icon`} />
+                        return (
+                          <div
+                            key={result.id}
+                            data-result-id={result.id}
+                            data-sticky-level={0}
+                            className="search-result-item"
+                            role="treeitem"
+                            tabIndex={0}
+                            onClick={() => { handleResultClick(result) }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleResultClick(result)
+                            }}
+                            onMouseEnter={(event) => {
+                              if (hoveredResultId && hoveredResultId !== result.id) {
+                                setHoveredResultId(null)
+                                tooltipTargetRef.current = null
+                              }
+                              clearHideTooltipTimeout()
+                              setHoveredResultId(result.id)
+                              tooltipTargetRef.current = event.currentTarget
+                            }}
+                            onMouseLeave={() => {
+                              scheduleHideTooltip()
+                            }}
+                          >
+                            {category === 'request' && icon ? (
                               <div className="result-content">
-                                <div className="result-title">{resultTitle}</div>
+                                <div className="result-title result-http-title">
+                                  <span className={`http-method-badge method-${icon.toLowerCase()}`}>{icon.toUpperCase()}</span>
+                                  <span className="http-route">{resultTitle}</span>
+                                </div>
                               </div>
-                            </>
-                          )}
-                        </div>
-                      )
-                    })}
-                  </div>
-                ))}
+                            ) : (
+                              <>
+                                <i className={`codicon codicon-${icon ?? 'symbol-misc'} result-icon`} />
+                                <div className="result-content">
+                                  <div className="result-title">{resultTitle}</div>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )
+                })}
               </div>
               </ScrollableElement>
             </div>
@@ -368,7 +435,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               setIsTooltipHovered(false)
               scheduleHideTooltip()
             }}
-            onMouseDown={(e) => { e.preventDefault() }}
           />
         </div>
       )}

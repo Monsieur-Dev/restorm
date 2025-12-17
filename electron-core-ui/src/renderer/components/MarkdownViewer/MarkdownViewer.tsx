@@ -1,9 +1,58 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import mermaid from 'mermaid'
 
 import './markdownViewer.css'
+
+interface CodeBlockProps {
+  className?: string
+  children: React.ReactNode
+}
+
+const CodeBlock: React.FC<CodeBlockProps> = ({ className, children }) => {
+  const [copied, setCopied] = useState(false)
+  const codeContent = String(children).replace(/\n$/, '')
+
+  const handleCopy = useCallback(() => {
+    const copyToClipboard = async (): Promise<void> => {
+      try {
+        await navigator.clipboard.writeText(codeContent)
+        setCopied(true)
+        setTimeout(() => { setCopied(false) }, 2000)
+      } catch {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea')
+        textArea.value = codeContent
+        document.body.appendChild(textArea)
+        textArea.select()
+        document.execCommand('copy')
+        document.body.removeChild(textArea)
+        setCopied(true)
+        setTimeout(() => { setCopied(false) }, 2000)
+      }
+    }
+    void copyToClipboard()
+  }, [codeContent])
+
+  return (
+    <div className="markdown-code-block">
+      <button
+        type="button"
+        className={`markdown-code-copy-btn ${copied ? 'copied' : ''}`}
+        onClick={handleCopy}
+        title={copied ? 'Copied!' : 'Copy code'}
+      >
+        <i className={`codicon codicon-${copied ? 'check' : 'copy'}`} />
+      </button>
+      <pre>
+        <code className={className}>
+          {children}
+        </code>
+      </pre>
+    </div>
+  )
+}
 
 export interface MarkdownViewerProps {
   /** Markdown content to render (read-only) */
@@ -103,21 +152,28 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ value, allowMerm
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          // Use a custom renderer for code blocks so we can support Mermaid
+          // Custom renderer for pre blocks to add copy button
+          pre(preProps: JSX.IntrinsicElements['pre']) {
+            const { children } = preProps
+            // Check if this is a mermaid block
+            const codeChild = React.Children.toArray(children)[0]
+            if (React.isValidElement(codeChild)) {
+              const codeClassName = (codeChild.props as { className?: string }).className ?? ''
+              const match = /language-(\w+)/.exec(codeClassName)
+              if (match && match[1] === 'mermaid' && allowMermaid) {
+                const codeContent = String((codeChild.props as { children?: React.ReactNode }).children).replace(/\n$/, '')
+                return <MermaidBlock code={codeContent} isDark={isDark} />
+              }
+            }
+            return <CodeBlock>{children}</CodeBlock>
+          },
+          // Use a custom renderer for inline code
           code(codeProps: JSX.IntrinsicElements['code']) {
             const {
-              inline,
               className: codeClassName,
               children,
               ...props
-            } = codeProps as JSX.IntrinsicElements['code'] & { inline?: boolean }
-            const match = /language-(\w+)/.exec(codeClassName ?? '')
-            const codeContent = String(children).replace(/\n$/, '')
-
-            if (!inline && match && match[1] === 'mermaid' && allowMermaid) {
-              return <MermaidBlock code={codeContent} isDark={isDark} />
-            }
-
+            } = codeProps
             return (
               <code className={codeClassName} {...props}>
                 {children}

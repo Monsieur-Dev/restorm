@@ -85,6 +85,12 @@
   "codeEditor": {
     "goToDefinition": "Aller à la définition"
   },
+  "search": {
+    "tooltip": {
+      "noDetails": "Aucun détail disponible",
+      "noContent": "Aucune documentation ni notes"
+    }
+  },
   "httpStatus": {
     "100": {
       "name": "Continue",

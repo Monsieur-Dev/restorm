@@ -24,6 +24,7 @@ import type { WorkbenchTree, NavigationEvent, GroupNode, TabGroupNode, EditorTab
 import { Workbench } from './components/Workbench'
 import { Welcome } from './components/Welcome'
 import { HttpMethodBadge } from './components/HttpMethodBadge'
+import { renderSearchTooltipContent } from './components/renderSearchTooltipContent'
 import { EnvironmentValuesProvider } from './contexts/EnvironmentValuesContext'
 import { importSwaggerFromJson } from './services/SwaggerImportService'
 import { searchIndexService } from './services/SearchIndexService'
@@ -934,6 +935,7 @@ const App: React.FC = () => {
         title={t('app.title')}
         showSearchBar
         onSearchResultClick={handleSearchResultClick}
+        renderSearchTooltipContent={renderSearchTooltipContent}
         leftContent={
           <MenuBar>
             <MenuBarItem title={t('menuBar.file')}>

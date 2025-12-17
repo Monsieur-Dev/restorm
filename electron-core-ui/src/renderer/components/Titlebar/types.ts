@@ -13,4 +13,6 @@ export interface TitlebarProps {
   showSearchBar?: boolean
   /** Callback when a search result is clicked */
   onSearchResultClick?: (result: SearchResult) => void
+  /** Custom renderer for search tooltip content */
+  renderSearchTooltipContent?: (result: SearchResult) => React.ReactNode
 }

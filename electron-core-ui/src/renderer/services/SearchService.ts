@@ -30,6 +30,8 @@ export interface SearchDocument {
   keywords?: string
   /** Navigation data for clicking on the result */
   navigation?: SearchNavigation
+  /** Additional metadata for the document (application-specific data) */
+  metadata?: Record<string, unknown>
 }
 
 /** Search result with relevance score */
@@ -79,7 +81,7 @@ class SearchService {
     this.documents = new Map()
     this.miniSearch = new MiniSearch<SearchDocument>({
       fields: ['title', 'description', 'keywords'],
-      storeFields: ['id', 'title', 'description', 'category', 'icon', 'keywords', 'navigation'],
+      storeFields: ['id', 'title', 'description', 'category', 'icon', 'keywords', 'navigation', 'metadata'],
       searchOptions: {
         boost: { title: 2 },
         fuzzy: 0.2,
@@ -129,7 +131,7 @@ class SearchService {
     this.documents.clear()
     this.miniSearch = new MiniSearch<SearchDocument>({
       fields: ['title', 'description', 'keywords'],
-      storeFields: ['id', 'title', 'description', 'category', 'icon', 'keywords', 'navigation'],
+      storeFields: ['id', 'title', 'description', 'category', 'icon', 'keywords', 'navigation', 'metadata'],
       searchOptions: {
         boost: { title: 2 },
         fuzzy: 0.2,
@@ -161,6 +163,7 @@ class SearchService {
       if (doc?.icon) searchResult.icon = doc.icon
       if (doc?.keywords) searchResult.keywords = doc.keywords
       if (doc?.navigation) searchResult.navigation = doc.navigation
+      if (doc?.metadata) searchResult.metadata = doc.metadata
       return searchResult
     })
 

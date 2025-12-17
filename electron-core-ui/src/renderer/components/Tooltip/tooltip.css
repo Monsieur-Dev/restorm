@@ -4,8 +4,6 @@
 	position: fixed;
 	cursor: default;
 	overflow: visible;
-	user-select: text;
-	-webkit-user-select: text;
 	box-sizing: border-box;
 	line-height: 1.5em;
 	white-space: normal;
