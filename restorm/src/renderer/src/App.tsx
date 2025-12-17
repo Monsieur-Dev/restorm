@@ -31,9 +31,9 @@ import { searchIndexService } from './services/SearchIndexService'
 import { makeReactiveFolder } from './types/reactive'
 import { folderAsRootListViewItem, collectAllFolderIds } from './services/FolderToListView'
 import swaggerPetstoreJson from './resources/swagger-petstore.json'
-import type { Folder, FolderItem, HTTPRequest, Environment } from './types/collections'
-import { isFolder, isRequest, isHTTPRequest } from './types/collections'
-import type { FolderTab, HTTPRequestTab, BreadcrumbItem } from './types/editor'
+import type { Folder, FolderItem, HTTPRequest, Environment, EnvironmentFolder } from './types/collections'
+import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder } from './types/collections'
+import type { FolderTab, EnvironmentFolderTab, HTTPRequestTab, BreadcrumbItem } from './types/editor'
 
 const MIN_LEFT_WIDTH = 180
 const RIGHT_MIN_WIDTH = 240
@@ -125,16 +125,16 @@ const attachContextMenus = (
     return withMenu
   })
 
-// Import and convert swagger to Folder structure (initial data)
+// Import and convert swagger to EnvironmentFolder structure (initial data)
 const rawSwaggerFolder = importSwaggerFromJson(JSON.stringify(swaggerPetstoreJson))
-const initialSwaggerFolder = makeReactiveFolder(rawSwaggerFolder)
+const initialSwaggerFolder = makeReactiveFolder(rawSwaggerFolder) as EnvironmentFolder
 const allFolderIds = collectAllFolderIds(initialSwaggerFolder)
 
-/** Find a folder by ID in the folder tree */
-function findFolderById(folder: Folder, id: string): Folder | undefined {
+/** Find a folder by ID in the folder tree (returns Folder or EnvironmentFolder) */
+function findFolderById(folder: Folder | EnvironmentFolder, id: string): Folder | EnvironmentFolder | undefined {
   if (folder.id === id) return folder
   for (const item of folder.items) {
-    if (isFolder(item)) {
+    if (isAnyFolder(item)) {
       const found = findFolderById(item, id)
       if (found) return found
     }
@@ -142,11 +142,27 @@ function findFolderById(folder: Folder, id: string): Folder | undefined {
   return undefined
 }
 
-/** Find an HTTP request by ID in the folder tree */
-function findRequestById(folder: Folder, id: string): HTTPRequest | undefined {
+/** Find an environment folder by ID in the folder tree */
+function findEnvironmentFolderById(folder: Folder | EnvironmentFolder, id: string): EnvironmentFolder | undefined {
+  if (isEnvironmentFolder(folder as FolderItem) && folder.id === id) return folder as EnvironmentFolder
   for (const item of folder.items) {
-    if (!isFolder(item) && item.id === id) return item
-    if (isFolder(item)) {
+    if (isEnvironmentFolder(item)) {
+      if (item.id === id) return item
+      const found = findEnvironmentFolderById(item, id)
+      if (found) return found
+    } else if (isAnyFolder(item)) {
+      const found = findEnvironmentFolderById(item, id)
+      if (found) return found
+    }
+  }
+  return undefined
+}
+
+/** Find an HTTP request by ID in the folder tree */
+function findRequestById(folder: Folder | EnvironmentFolder, id: string): HTTPRequest | undefined {
+  for (const item of folder.items) {
+    if (!isAnyFolder(item) && item.id === id) return item
+    if (isAnyFolder(item)) {
       const found = findRequestById(item, id)
       if (found) return found
     }
@@ -155,11 +171,11 @@ function findRequestById(folder: Folder, id: string): HTTPRequest | undefined {
 }
 
 /** Find any item (folder or request) by ID in the folder tree */
-function findItemById(folder: Folder, id: string): FolderItem | null {
+function findItemById(folder: Folder | EnvironmentFolder, id: string): FolderItem | null {
   if (folder.id === id) return folder
   for (const item of folder.items) {
     if (item.id === id) return item
-    if (isFolder(item)) {
+    if (isAnyFolder(item)) {
       const found = findItemById(item, id)
       if (found) return found
     }
@@ -169,25 +185,32 @@ function findItemById(folder: Folder, id: string): FolderItem | null {
 
 /** Folder icon for breadcrumbs */
 const FOLDER_ICON = { type: 'codicon' as const, value: 'folder' }
+/** Environment folder icon for breadcrumbs */
+const ENV_FOLDER_ICON = { type: 'codicon' as const, value: 'folder-library' }
+
+/** Get the appropriate icon for a folder */
+function getFolderIcon(item: Folder | EnvironmentFolder): { type: 'codicon'; value: string } {
+  return isEnvironmentFolder(item as FolderItem) ? ENV_FOLDER_ICON : FOLDER_ICON
+}
 
 /** Find an item (folder or request) by ID and build breadcrumbs including the item itself */
 function findItemWithBreadcrumbs(
-  folder: Folder,
+  folder: Folder | EnvironmentFolder,
   id: string,
   path: BreadcrumbItem[] = []
 ): { item: FolderItem | null; breadcrumbs: BreadcrumbItem[] } {
   // Check if the root folder itself matches the ID
   if (folder.id === id) {
-    return { item: folder, breadcrumbs: [...path, { id: folder.id, label: folder.name, icon: FOLDER_ICON }] }
+    return { item: folder, breadcrumbs: [...path, { id: folder.id, label: folder.name, icon: getFolderIcon(folder) }] }
   }
 
-  const currentPath = [...path, { id: folder.id, label: folder.name, icon: FOLDER_ICON }]
+  const currentPath = [...path, { id: folder.id, label: folder.name, icon: getFolderIcon(folder) }]
 
   for (const item of folder.items) {
-    if (isFolder(item)) {
+    if (isAnyFolder(item)) {
       if (item.id === id) {
-        // Include the folder itself as the last breadcrumb (with folder icon)
-        return { item, breadcrumbs: [...currentPath, { id: item.id, label: item.name, icon: FOLDER_ICON }] }
+        // Include the folder itself as the last breadcrumb (with appropriate icon)
+        return { item, breadcrumbs: [...currentPath, { id: item.id, label: item.name, icon: getFolderIcon(item) }] }
       }
       const found = findItemWithBreadcrumbs(item, id, currentPath)
       if (found.item) return found
@@ -202,9 +225,9 @@ function findItemWithBreadcrumbs(
   return { item: null, breadcrumbs: [] }
 }
 
-/** Get environments from the nearest ancestor folder that defines them */
+/** Get environments from the nearest ancestor EnvironmentFolder */
 function getNearestEnvironmentsForBreadcrumbs(
-  rootFolder: Folder,
+  rootFolder: Folder | EnvironmentFolder,
   breadcrumbs: BreadcrumbItem[]
 ): Environment[] {
   if (breadcrumbs.length === 0) {
@@ -219,8 +242,11 @@ function getNearestEnvironmentsForBreadcrumbs(
       continue
     }
     const folder = findFolderById(rootFolder, folderId)
-    if (folder && folder.configuration.environments.length > 0) {
-      return folder.configuration.environments
+    if (folder && isEnvironmentFolder(folder as FolderItem)) {
+      const envFolder = folder as EnvironmentFolder
+      if (envFolder.environments.length > 0) {
+        return envFolder.environments
+      }
     }
   }
 
@@ -255,7 +281,7 @@ const App: React.FC = () => {
   }, [handleMenuExit])
 
   // Swagger folder data (mutable for renaming)
-  const [swaggerFolder, setSwaggerFolder] = useState<Folder>(initialSwaggerFolder)
+  const [swaggerFolder, setSwaggerFolder] = useState<EnvironmentFolder>(initialSwaggerFolder)
 
   // Counter to force re-render without breaking reactive proxies
   const [, forceUpdate] = useState(0)
@@ -430,6 +456,78 @@ const App: React.FC = () => {
     })
   }, [findFirstTabGroupId, findGroupIdForTab, focusedGroupId, hasGroupWithId, updateGroupById])
 
+  // Open an environment folder tab in the workbench
+  const openEnvironmentFolderTab = useCallback((folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[]) => {
+    const tabId = `env-folder-${folder.id}`
+
+    setWorkbenchTree((prev) => {
+      const newTab: EnvironmentFolderTab = {
+        id: tabId,
+        tabType: 'environment-folder',
+        title: folder.name,
+        titleString: folder.name,
+        folder,
+        breadcrumbs,
+        allowFullscreen: true
+      }
+
+      // No groups yet: create the main group with this tab
+      if (prev.groups.length === 0) {
+        return {
+          ...prev,
+          groups: [
+            {
+              id: 'restorm-main-group',
+              tabs: [newTab],
+              activeTabId: tabId
+            }
+          ]
+        }
+      }
+
+      // If tab already exists anywhere, just activate it in its group
+      const existingGroupId = findGroupIdForTab(prev.groups, tabId)
+      if (existingGroupId) {
+        return {
+          ...prev,
+          groups: updateGroupById(prev.groups, existingGroupId, (group) => ({
+            ...group,
+            activeTabId: tabId
+          }))
+        }
+      }
+
+      // Otherwise, add the tab to the currently focused group when possible
+      const preferredGroupId =
+        focusedGroupId && hasGroupWithId(prev.groups, focusedGroupId) ? focusedGroupId : null
+
+      const targetGroupId =
+        preferredGroupId && hasGroupWithId(prev.groups, preferredGroupId)
+          ? preferredGroupId
+          : findFirstTabGroupId(prev.groups) ?? 'restorm-main-group'
+
+      const updatedGroups = hasGroupWithId(prev.groups, targetGroupId)
+        ? updateGroupById(prev.groups, targetGroupId, (group) => ({
+            ...group,
+            tabs: [...group.tabs, newTab],
+            activeTabId: tabId
+          }))
+        : [
+            ...prev.groups,
+            {
+              id: targetGroupId,
+              tabs: [newTab],
+              activeTabId: tabId
+            }
+          ]
+
+      return {
+        ...prev,
+        groups: updatedGroups
+      }
+    })
+  }, [findFirstTabGroupId, findGroupIdForTab, focusedGroupId, hasGroupWithId, updateGroupById])
+
   // Open an HTTP request tab in the workbench
   const openRequestTab = useCallback(
     (request: HTTPRequest, breadcrumbs: BreadcrumbItem[], environments?: Environment[]) => {
@@ -508,10 +606,25 @@ const App: React.FC = () => {
 
   // Rebuild tab callback for workbench autosave
   const handleRebuildTab = useCallback((tabId: string): EditorTab | null => {
-    if (tabId.startsWith('folder-')) {
+    if (tabId.startsWith('env-folder-')) {
+      const itemId = tabId.replace('env-folder-', '')
+      const folder = findEnvironmentFolderById(swaggerFolder, itemId)
+      if (folder) {
+        const { breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, itemId)
+        return {
+          id: tabId,
+          tabType: 'environment-folder',
+          title: folder.name,
+          titleString: folder.name,
+          folder,
+          breadcrumbs,
+          allowFullscreen: true
+        } as EnvironmentFolderTab
+      }
+    } else if (tabId.startsWith('folder-')) {
       const itemId = tabId.replace('folder-', '')
       const folder = findFolderById(swaggerFolder, itemId)
-      if (folder) {
+      if (folder && !isEnvironmentFolder(folder as FolderItem)) {
         const { breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, itemId)
         return {
           id: tabId,
@@ -583,11 +696,15 @@ const App: React.FC = () => {
       setSelectedItemId(key)
 
       // Open appropriate tab based on navigation type
-      if (params.type === 'folder') {
+      if (params.type === 'folder' || params.type === 'environment-folder') {
         const folder = findFolderById(swaggerFolder, key)
         if (folder) {
           const { breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, key)
-          openFolderTab(folder, breadcrumbs)
+          if (isEnvironmentFolder(folder as FolderItem)) {
+            openEnvironmentFolderTab(folder as EnvironmentFolder, breadcrumbs)
+          } else {
+            openFolderTab(folder, breadcrumbs)
+          }
           // Focus the group containing the tab
           setFocusedGroupId('restorm-main-group')
         }
@@ -603,12 +720,18 @@ const App: React.FC = () => {
     })
 
     return unsubscribe
-  }, [openFolderTab, openRequestTab, swaggerFolder])
+  }, [openFolderTab, openEnvironmentFolderTab, openRequestTab, swaggerFolder])
 
   // Handle item click in the sidebar - use navigation service
   const handleItemClick = useCallback((itemId: string) => {
     const { item } = findItemWithBreadcrumbs(swaggerFolder, itemId)
     if (!item) return
+
+    if (isEnvironmentFolder(item)) {
+      // Open environment folder view
+      navigationService.navigateTo(itemId, 'sidebar', { type: 'environment-folder' })
+      return
+    }
 
     if (isFolder(item)) {
       // Open folder view (same as "Define variables" context menu)
@@ -715,7 +838,10 @@ const App: React.FC = () => {
     let itemId: string | null = null
     let itemType: string | null = null
 
-    if (tabId.startsWith('folder-')) {
+    if (tabId.startsWith('env-folder-')) {
+      itemId = tabId.replace('env-folder-', '')
+      itemType = 'environment-folder'
+    } else if (tabId.startsWith('folder-')) {
       itemId = tabId.replace('folder-', '')
       itemType = 'folder'
     } else if (tabId.startsWith('request-')) {
@@ -738,7 +864,11 @@ const App: React.FC = () => {
       // Determine item type by looking up in the swagger folder
       const foundItem = findFolderById(swaggerFolder, item.id)
       if (foundItem) {
-        navigationService.navigateTo(item.id, 'breadcrumb', { type: 'folder' })
+        if (isEnvironmentFolder(foundItem as FolderItem)) {
+          navigationService.navigateTo(item.id, 'breadcrumb', { type: 'environment-folder' })
+        } else {
+          navigationService.navigateTo(item.id, 'breadcrumb', { type: 'folder' })
+        }
       } else {
         // It might be a request
         const { item: requestItem } = findItemWithBreadcrumbs(swaggerFolder, item.id)
@@ -768,10 +898,22 @@ const App: React.FC = () => {
         if (!group || !isTabGroupNode(group)) return prevTree
 
         const updatedTabs = group.tabs.map((tab) => {
-          const restormTab = tab as FolderTab | HTTPRequestTab
+          const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
 
           // Update tab title if it's the renamed item
           if (restormTab.tabType === 'folder' && restormTab.folder.id === item.id) {
+            return {
+              ...restormTab,
+              title: newName,
+              titleString: newName,
+              folder: { ...restormTab.folder, name: newName },
+              breadcrumbs: restormTab.breadcrumbs?.map((bc) =>
+                bc.id === item.id ? { ...bc, label: newName } : bc
+              )
+            }
+          }
+
+          if (restormTab.tabType === 'environment-folder' && restormTab.folder.id === item.id) {
             return {
               ...restormTab,
               title: newName,
@@ -833,9 +975,16 @@ const App: React.FC = () => {
       if (!group || !isTabGroupNode(group)) return prevTree
 
       const updatedTabs = group.tabs.map((tab) => {
-        const restormTab = tab as FolderTab | HTTPRequestTab
+        const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
 
         if (restormTab.tabType === 'folder' && restormTab.folder.id === targetId) {
+          return {
+            ...restormTab,
+            folder: { ...restormTab.folder, tags: newTags }
+          }
+        }
+
+        if (restormTab.tabType === 'environment-folder' && restormTab.folder.id === targetId) {
           return {
             ...restormTab,
             folder: { ...restormTab.folder, tags: newTags }
@@ -859,11 +1008,11 @@ const App: React.FC = () => {
     })
   }, [swaggerFolder])
 
-  // Handle folder changes from FolderView (environments, etc.)
+  // Handle folder changes from FolderView
   const handleFolderChange = useCallback((folderId: string, updatedFolder: Folder) => {
     // Find and update the reactive folder directly to preserve proxies
     const reactiveFolder = findFolderById(swaggerFolder, folderId)
-    if (reactiveFolder) {
+    if (reactiveFolder && !isEnvironmentFolder(reactiveFolder as FolderItem)) {
       // Update properties on the reactive object (triggers re-indexing)
       reactiveFolder.configuration = updatedFolder.configuration
       if (updatedFolder.notes !== undefined) {
@@ -883,10 +1032,59 @@ const App: React.FC = () => {
         if (!isTabGroupNode(group)) return group
 
         const updatedTabs = group.tabs.map((tab) => {
-          const restormTab = tab as FolderTab | HTTPRequestTab
+          const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
           
           // Update folder tabs
           if (restormTab.tabType === 'folder' && restormTab.folder.id === folderId) {
+            return {
+              ...restormTab,
+              folder: updatedFolder,
+              title: updatedFolder.name,
+              titleString: updatedFolder.name
+            }
+          }
+          
+          return restormTab
+        })
+
+        return { ...group, tabs: updatedTabs }
+      })
+
+      return {
+        ...prevTree,
+        groups: updatedGroups
+      }
+    })
+  }, [swaggerFolder])
+
+  // Handle environment folder changes from EnvironmentFolderView
+  const handleEnvironmentFolderChange = useCallback((folderId: string, updatedFolder: EnvironmentFolder) => {
+    // Find and update the reactive folder directly to preserve proxies
+    const reactiveFolder = findEnvironmentFolderById(swaggerFolder, folderId)
+    if (reactiveFolder) {
+      // Update properties on the reactive object (triggers re-indexing)
+      reactiveFolder.environments = updatedFolder.environments
+      if (updatedFolder.notes !== undefined) {
+        reactiveFolder.notes = updatedFolder.notes
+      }
+      reactiveFolder.documentation = updatedFolder.documentation
+      reactiveFolder.tags = updatedFolder.tags
+      reactiveFolder.name = updatedFolder.name
+    }
+    
+    // Force React re-render without breaking reactive proxies
+    forceUpdate((n) => n + 1)
+
+    // Update folder data in open workbench tabs (all groups)
+    setWorkbenchTree((prevTree) => {
+      const updatedGroups = prevTree.groups.map((group) => {
+        if (!isTabGroupNode(group)) return group
+
+        const updatedTabs = group.tabs.map((tab) => {
+          const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
+          
+          // Update environment folder tabs
+          if (restormTab.tabType === 'environment-folder' && restormTab.folder.id === folderId) {
             return {
               ...restormTab,
               folder: updatedFolder,
@@ -1060,6 +1258,7 @@ const App: React.FC = () => {
               onItemRename={handleItemRename}
               onTagsChange={handleTagsChange}
               onFolderChange={handleFolderChange}
+              onEnvironmentFolderChange={handleEnvironmentFolderChange}
               onSizesChange={handleSizesChange}
               emptyFallback={<Welcome />}
               style={{ flex: 1 }}
@@ -1069,6 +1268,7 @@ const App: React.FC = () => {
               onStateRestored={handleStateRestored}
               getRequestById={(id) => findRequestById(swaggerFolder, id)}
               getFolderById={(id) => findFolderById(swaggerFolder, id)}
+              getEnvironmentFolderById={(id) => findEnvironmentFolderById(swaggerFolder, id)}
             />
           </div>
         </EnvironmentValuesProvider>

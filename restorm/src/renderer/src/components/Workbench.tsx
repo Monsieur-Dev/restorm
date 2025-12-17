@@ -2,10 +2,12 @@ import React, { useMemo, useState, useCallback, useEffect, useRef, forwardRef, u
 import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, type ContextMenuItem } from 'electron-core-ui/renderer'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback } from 'electron-core-ui/renderer'
 import type { RestormEditorTab, BreadcrumbItem } from '../types/editor'
-import { isFolderTab, isHTTPRequestTab } from '../types/editor'
+import { isFolderTab, isEnvironmentFolderTab, isHTTPRequestTab } from '../types/editor'
 import { HTTPRequestTabView, EnvironmentDropdown } from './HTTPRequestTabView'
 import { EnvironmentProvider } from '../contexts/EnvironmentContext'
 import { FolderView } from './FolderView'
+import { EnvironmentFolderView } from './EnvironmentFolderView'
+import type { EnvironmentFolder } from '../types/collections'
 import { HttpMethodBadge } from './HttpMethodBadge'
 import { useTranslation } from 'react-i18next'
 import { WorkbenchTab } from './WorkbenchTab'
@@ -60,6 +62,10 @@ export interface WorkbenchProps {
   getRequestById?: (id: string) => import('../types/collections').HTTPRequest | undefined
   /** Get a reactive Folder by ID (for reactivity support) */
   getFolderById?: (id: string) => import('../types/collections').Folder | undefined
+  /** Get a reactive EnvironmentFolder by ID (for reactivity support) */
+  getEnvironmentFolderById?: (id: string) => EnvironmentFolder | undefined
+  /** Callback fired when an environment folder's data changes */
+  onEnvironmentFolderChange?: (folderId: string, folder: EnvironmentFolder) => void
 }
 
 /** Imperative handle for Workbench component */
@@ -84,6 +90,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
   onItemRename,
   onTagsChange,
   onFolderChange,
+  onEnvironmentFolderChange,
   emptyFallback,
   onSizesChange,
   workbenchId,
@@ -91,7 +98,8 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
   onRebuildTab,
   onStateRestored,
   getRequestById,
-  getFolderById
+  getFolderById,
+  getEnvironmentFolderById
 }, ref) => {
   const { t } = useTranslation()
   const editorWorkbenchRef = useRef<EditorWorkbenchHandle>(null)
@@ -130,6 +138,16 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <i className="codicon codicon-folder-opened" aria-hidden="true" />
+          <span>{restormTab.folder.name}</span>
+        </span>
+      )
+    }
+
+    // Environment folder tab: show folder-library icon
+    if (isEnvironmentFolderTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <i className="codicon codicon-folder-library" aria-hidden="true" />
           <span>{restormTab.folder.name}</span>
         </span>
       )
@@ -181,6 +199,33 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
       )
     }
 
+    // Environment folder tab
+    if (isEnvironmentFolderTab(tab)) {
+      // Get reactive environment folder if available, otherwise use tab's copy
+      const folder = getEnvironmentFolderById?.(tab.folder.id) ?? tab.folder
+      return (
+        <WorkbenchTab
+          breadcrumbs={breadcrumbs}
+          onBreadcrumbClick={onBreadcrumbClick}
+          onBreadcrumbRename={onItemRename}
+          tags={folder.tags}
+          onTagsChange={(nextTags) => {
+            onTagsChange?.(folder.id, nextTags)
+          }}
+          label={t('workbench.tagsLabel')}
+        >
+          <EnvironmentFolderView
+            folder={folder}
+            onFolderChange={(updatedFolder) => {
+              if (onEnvironmentFolderChange) {
+                onEnvironmentFolderChange(folder.id, updatedFolder)
+              }
+            }}
+          />
+        </WorkbenchTab>
+      )
+    }
+
     // HTTP request tab
     if (isHTTPRequestTab(tab)) {
       // Get reactive request if available, otherwise use tab's copy
@@ -208,7 +253,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [onBreadcrumbClick, onItemRename, onTagsChange, onFolderChange, t, getRequestById, getFolderById])
+  }, [onBreadcrumbClick, onItemRename, onTagsChange, onFolderChange, onEnvironmentFolderChange, t, getRequestById, getFolderById, getEnvironmentFolderById])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(
@@ -230,12 +275,15 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
       // Encode minimal metadata so the editor window can rebuild the tab
       type DetachedTabMetadata =
         | { kind: 'folder'; itemId: string }
+        | { kind: 'environment-folder'; itemId: string }
         | { kind: 'http-request'; itemId: string }
 
       let metadata: DetachedTabMetadata | null = null
 
       if (isFolderTab(restormTab)) {
         metadata = { kind: 'folder', itemId: restormTab.folder.id }
+      } else if (isEnvironmentFolderTab(restormTab)) {
+        metadata = { kind: 'environment-folder', itemId: restormTab.folder.id }
       } else if (isHTTPRequestTab(restormTab)) {
         metadata = { kind: 'http-request', itemId: restormTab.request.id }
       }
