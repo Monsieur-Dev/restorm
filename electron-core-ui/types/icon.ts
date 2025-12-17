@@ -1,15 +1,15 @@
 /**
- * Type of icon (emoji character, codicon name, or no icon)
+ * Type of icon (emoji character, codicon name, library icons, or no icon)
  */
-export type IconType = 'emoji' | 'codicon' | 'none'
+export type IconType = 'emoji' | 'codicon' | 'iconoir' | 'phosphor' | 'material' | 'simpleicons' | 'feather' | 'fontawesome' | 'none'
 
 /**
- * Represents an icon that can be either an emoji or a codicon
+ * Represents an icon that can be an emoji, codicon, or an icon from supported libraries
  */
 export interface Icon {
   /** The type of icon */
   type: IconType
-  /** The icon value - emoji character for 'emoji', codicon name for 'codicon', empty for 'none' */
+  /** The icon value - emoji character for 'emoji', icon name for library icons, empty for 'none' */
   value: string
 }
 
@@ -25,6 +25,48 @@ export function emojiIcon(emoji: string): Icon {
  */
 export function codiconIcon(name: string): Icon {
   return { type: 'codicon', value: name }
+}
+
+/**
+ * Create an Iconoir icon
+ */
+export function iconoirIcon(name: string): Icon {
+  return { type: 'iconoir', value: name }
+}
+
+/**
+ * Create a Phosphor icon
+ */
+export function phosphorIcon(name: string): Icon {
+  return { type: 'phosphor', value: name }
+}
+
+/**
+ * Create a Material icon
+ */
+export function materialIcon(name: string): Icon {
+  return { type: 'material', value: name }
+}
+
+/**
+ * Create a Simple Icons icon
+ */
+export function simpleIcon(name: string): Icon {
+  return { type: 'simpleicons', value: name }
+}
+
+/**
+ * Create a Feather icon
+ */
+export function featherIcon(name: string): Icon {
+  return { type: 'feather', value: name }
+}
+
+/**
+ * Create a Font Awesome icon
+ */
+export function fontAwesomeIcon(name: string): Icon {
+  return { type: 'fontawesome', value: name }
 }
 
 /**

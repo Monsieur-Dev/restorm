@@ -85,8 +85,8 @@ export { TagsView } from './TagsView/TagsView'
 export type { TagsViewProps } from './TagsView/TagsView'
 
 // IconSelect exports
-export { IconSelect } from './IconSelect'
-export type { IconSelectProps } from './IconSelect'
+export { IconSelect, renderLibraryIcon, IconoirIcon, PhosphorIcon, MdiIcon, SimpleIcon, ICON_LIBRARIES } from './IconSelect'
+export type { IconSelectProps, IconLibrary } from './IconSelect'
 
 // Button exports
 export { Button, ButtonWithDescription, ButtonWithDropdown, ButtonWithIcon, defaultButtonStyles } from './Button/index'
