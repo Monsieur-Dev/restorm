@@ -12,6 +12,8 @@ export interface MarkdownViewerProps {
   allowMermaid?: boolean
   /** Optional additional CSS class name */
   className?: string
+  /** Optional inline styles */
+  style?: React.CSSProperties
 }
 
 /**
@@ -86,7 +88,7 @@ const MermaidBlock: React.FC<MermaidBlockProps> = ({ code, isDark }) => {
   return <div ref={containerRef} className="markdown-viewer-mermaid" />
 }
 
-export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ value, allowMermaid = true, className }) => {
+export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ value, allowMermaid = true, className, style }) => {
   const isDark = useIsDarkTheme()
   const rootClassName = [
     'markdown-viewer',
@@ -97,7 +99,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ value, allowMerm
     .join(' ')
 
   return (
-    <div className={rootClassName}>
+    <div className={rootClassName} style={style}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{

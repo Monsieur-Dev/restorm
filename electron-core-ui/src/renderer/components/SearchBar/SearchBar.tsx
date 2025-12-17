@@ -58,8 +58,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
   // Schedule tooltip hide after 300ms
   const scheduleHideTooltip = useCallback(() => {
-    // DEBUG: Disabled for testing
-    return
     clearHideTooltipTimeout()
     hideTooltipTimeoutRef.current = setTimeout(() => {
       setHoveredResultId(null)
@@ -113,8 +111,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
   // Handle close
   const handleClose = useCallback(() => {
-    // DEBUG: Disabled for testing
-    return
     setIsOpen(false)
     setQuery('')
     setResults([])
@@ -158,27 +154,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     },
     [handleClose]
   )
-
-  // DEBUG: Force tooltip display for testing
-  useEffect(() => {
-    setIsOpen(true)
-    setQuery('pet')
-    const searchResults = searchService.search('pet')
-    setResults(searchResults)
-    setTimeout(() => {
-      for (const group of searchResults) {
-        const firstRequest = group.items.find(item => item.category === 'request')
-        if (firstRequest) {
-          setHoveredResultId(firstRequest.id)
-          const el = document.querySelector(`[data-result-id="${firstRequest.id}"]`) as HTMLElement
-          if (el) {
-            tooltipTargetRef.current = el
-          }
-          break
-        }
-      }
-    }, 100)
-  }, [])
 
   // Focus input when opened
   useEffect(() => {
@@ -227,12 +202,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             <strong>{resultTitle}</strong>
           </div>
           {description && (
-            <ScrollableElement
-              options={{ vertical: 'auto', horizontal: 'auto', useShadows: false, fitContent: true }}
-              style={{ flex: 1, minHeight: 0, maxHeight: 'calc(100vh - 130px)' }}
-            >
-              <MarkdownViewer value={description} />
-            </ScrollableElement>
+            <MarkdownViewer value={description} style={{ flex: 1, minHeight: 0, maxHeight: 'calc(100vh - 130px)' }} />
           )}
         </div>
       )
@@ -245,12 +215,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           <strong>{resultTitle}</strong>
         </div>
         {description && (
-          <ScrollableElement
-            options={{ vertical: 'auto', horizontal: 'auto', useShadows: false, fitContent: true }}
-            style={{ flex: 1, minHeight: 0, maxHeight: 'calc(100vh - 130px)' }}
-          >
-            <MarkdownViewer value={description} />
-          </ScrollableElement>
+          <MarkdownViewer value={description} style={{ flex: 1, minHeight: 0, maxHeight: 'calc(100vh - 130px)' }} />
         )}
       </div>
     )
