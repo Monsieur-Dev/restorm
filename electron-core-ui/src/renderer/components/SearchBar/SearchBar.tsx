@@ -162,6 +162,25 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     }
   }, [isOpen])
 
+  // Update position on window resize when open
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleResize = () => {
+      if (closedRef.current) {
+        const rect = closedRef.current.getBoundingClientRect()
+        setOpenBoxPosition({
+          top: rect.top,
+          left: rect.left,
+          width: rect.width
+        })
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [isOpen])
+
   // Cleanup debounce and tooltip timeout on unmount
   useEffect(() => {
     return () => {
@@ -223,23 +242,24 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
   return (
     <div className="search-bar-container" ref={containerRef}>
-      {!isOpen ? (
-        <div
-          className="search-bar-closed"
-          ref={closedRef}
-          onClick={handleOpenClick}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              handleOpenClick()
-            }
-          }}
-        >
-          <i className="codicon codicon-search search-icon" />
-          <span className="search-title">{title}</span>
-        </div>
-      ) : (
+      {/* Hidden element kept for position reference */}
+      <div
+        className="search-bar-closed"
+        ref={closedRef}
+        onClick={!isOpen ? handleOpenClick : undefined}
+        role="button"
+        tabIndex={isOpen ? -1 : 0}
+        onKeyDown={(e) => {
+          if (!isOpen && (e.key === 'Enter' || e.key === ' ')) {
+            handleOpenClick()
+          }
+        }}
+        style={isOpen ? { visibility: 'hidden', pointerEvents: 'none' } : undefined}
+      >
+        <i className="codicon codicon-search search-icon" />
+        <span className="search-title">{title}</span>
+      </div>
+      {isOpen && (
         <div
           className={`search-bar-open ${hasResults ? 'has-results' : ''} ${hasQuery && !hasResults ? 'no-results' : ''}`}
           style={{
