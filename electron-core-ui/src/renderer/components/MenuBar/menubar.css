@@ -17,7 +17,7 @@
 }
 
 .fullscreen .menubar:not(.compact) {
-	margin: 0px;
+	margin: 0;
 	padding: 4px 5px;
 }
 
@@ -38,7 +38,7 @@
 	outline-width: 1px;
 	outline-style: solid;
 	outline-offset: -1px;
-	outline-color: var(--vscode-focusBorder);
+	outline-color: var(--focusBorder);
 }
 
 .menubar.compact {
@@ -49,7 +49,7 @@
 .menubar.compact > .menubar-menu-button {
 	width: 100%;
 	height: 100%;
-	padding: 0px;
+	padding: 0;
 }
 
 .menubar-menu-title {
@@ -65,7 +65,7 @@
 
 .menubar .menubar-menu-items-holder {
 	position: fixed;
-	left: 0px;
+	left: 0;
 	opacity: 1;
 	z-index: 2000;
 }
@@ -94,23 +94,23 @@
 	height: 30px !important;
 	max-height: 30px !important;
 	min-height: 30px !important;
-	padding: 0 0px !important;
+	padding: 0 !important;
 }
 
 .menubar-menu-items-holder {
 	width: 300px !important;
 	min-width: 300px !important;
 	max-width: 300px !important;
-	background-color: var(--vscode-menu-background) !important;
-	box-shadow: 5px 5px 5px  rgba(0,0,0,0.5) !important;
+	background-color: var(--menu-background) !important;
+	box-shadow: 5px 5px 5px  rgb(0,0,0,0.5) !important;
 }
 
 .monaco-menu {
-	background-color: var(--vscode-menu-background) !important;
+	background-color: var(--menu-background) !important;
 }
 
 .actions-container {
-	background-color: var(--vscode-menu-background) !important;
+	background-color: var(--menu-background) !important;
 	list-style: none !important;
 	margin: 0 !important;
 	padding: 0 !important;
@@ -133,7 +133,7 @@
 	padding: 4px 8px !important;
 	line-height: 1.4 !important;
 	background-color: transparent !important;
-	color: var(--vscode-menu-foreground) !important;
+	color: var(--menu-foreground) !important;
 	border: none !important;
 	text-decoration: none !important;
 	cursor: pointer !important;
@@ -141,25 +141,25 @@
 
 .action-menu-item:hover,
 .action-menu-item.submenu-open {
-	background-color: var(--vscode-list-hoverBackground) !important;
-	color: var(--vscode-list-hoverForeground) !important;
+	background-color: var(--list-hoverBackground) !important;
+	color: var(--list-hoverForeground) !important;
 }
 
 .action-menu-item:focus {
-	background-color: var(--vscode-list-activeSelectionBackground) !important;
-	color: var(--vscode-list-activeSelectionForeground) !important;
+	background-color: var(--list-activeSelectionBackground) !important;
+	color: var(--list-activeSelectionForeground) !important;
 	outline: none !important;
 }
 
 .action-menu-item.disabled {
 	opacity: 0.6 !important;
 	cursor: default !important;
-	color: var(--vscode-disabledForeground) !important;
+	color: var(--disabledForeground) !important;
 }
 
 .action-menu-item.disabled:hover {
 	background-color: transparent !important;
-	color: var(--vscode-disabledForeground) !important;
+	color: var(--disabledForeground) !important;
 }
 
 /* Separator styles */
@@ -173,7 +173,7 @@
 .action-menu-item.separator {
 	height: 1px !important;
 	min-height: 1px !important;
-	background-color: var(--vscode-menu-separatorBackground) !important;
+	background-color: var(--menu-separatorBackground) !important;
 	border: none !important;
 	padding: 0 !important;
 	margin: 4px 8px !important;
@@ -190,7 +190,7 @@
 
 /* Keybinding styles */
 .keybinding {
-	color: var(--vscode-descriptionForeground) !important;
+	color: var(--descriptionForeground) !important;
 	font-size: 11px !important;
 	margin-left: 0 !important;
 	padding-left: 0 !important;
@@ -198,7 +198,7 @@
 
 /* Icon styles */
 .codicon {
-	color: var(--vscode-menu-foreground) !important;
+	color: var(--menu-foreground) !important;
 	font-size: 16px !important;
 	width: 16px !important;
 	height: 16px !important;
@@ -280,8 +280,8 @@
 
 .menubar.compact .toolbar-toggle-more {
 	position: relative;
-	left: 0px;
-	top: 0px;
+	left: 0;
+	top: 0;
 	cursor: pointer;
 	width: 100%;
 	display: flex;
@@ -291,8 +291,8 @@
 
 .menubar:not(.compact) .menubar-menu-button:first-child .toolbar-toggle-more::before,
 .menubar.compact .toolbar-toggle-more::before {
-	content: var(--vscode-icon-menu-content) !important;
-	font-family: var(--vscode-icon-menu-font-family) !important;
+	content: var(--icon-menu-content) !important;
+	font-family: var(--icon-menu-font-family) !important;
 }
 
 /* Match behavior of outline for activity bar icons */

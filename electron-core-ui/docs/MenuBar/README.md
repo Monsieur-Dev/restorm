@@ -339,20 +339,20 @@ All `<ul>` and `<li>` elements are styled to remove default browser styling:
 
 The component uses the following CSS variables:
 
-- `--vscode-menubar-background` : Background color of the menu bar
-- `--vscode-menubar-foreground` : Text color of menu items
-- `--vscode-menu-background` : Background color of dropdown menus (opaque, not transparent)
-- `--vscode-menu-foreground` : Text color of menu items
-- `--vscode-menu-border` : Border color of dropdown menus
-- `--vscode-list-hoverBackground` : Background color of hovered menu items
-- `--vscode-list-hoverForeground` : Text color of hovered menu items
-- `--vscode-list-activeSelectionBackground` : Background color of focused menu items
-- `--vscode-list-activeSelectionForeground` : Text color of focused menu items
-- `--vscode-menu-separatorBackground` : Color of menu separators
-- `--vscode-descriptionForeground` : Color of keyboard shortcuts
-- `--vscode-disabledForeground` : Color of disabled menu items
-- `--vscode-focusBorder` : Focus border color
-- `--vscode-widget-shadow` : Dropdown menu shadow
+- `--menubar-background` : Background color of the menu bar
+- `--menubar-foreground` : Text color of menu items
+- `--menu-background` : Background color of dropdown menus (opaque, not transparent)
+- `--menu-foreground` : Text color of menu items
+- `--menu-border` : Border color of dropdown menus
+- `--list-hoverBackground` : Background color of hovered menu items
+- `--list-hoverForeground` : Text color of hovered menu items
+- `--list-activeSelectionBackground` : Background color of focused menu items
+- `--list-activeSelectionForeground` : Text color of focused menu items
+- `--menu-separatorBackground` : Color of menu separators
+- `--descriptionForeground` : Color of keyboard shortcuts
+- `--disabledForeground` : Color of disabled menu items
+- `--focusBorder` : Focus border color
+- `--widget-shadow` : Dropdown menu shadow
 
 ## Keyboard Navigation
 
@@ -425,9 +425,9 @@ This ensures a clean, professional menu system that behaves like native desktop 
 ## Visual Styling
 
 ### Background Colors
-- **Menu containers**: Use `var(--vscode-menu-background)` for opaque, solid backgrounds
+- **Menu containers**: Use `var(--menu-background)` for opaque, solid backgrounds
 - **Menu items**: Transparent background with hover/focus states
-- **Borders**: `var(--vscode-menu-border)` for consistent theming
+- **Borders**: `var(--menu-border)` for consistent theming
 - **Shadows**: Subtle drop shadows for depth
 
 ### Color Consistency

@@ -83,19 +83,19 @@ export interface ISelectData {
 
 // Default SelectBox styles
 export const defaultSelectBoxStyles: ISelectBoxStyles = {
-  selectBackground: 'var(--vscode-settings-dropdownBackground)',
-  selectListBackground: 'var(--vscode-editor-background)',
-  selectForeground: 'var(--vscode-settings-dropdownForeground)',
-  decoratorRightForeground: 'var(--vscode-descriptionForeground)',
-  selectBorder: 'var(--vscode-settings-dropdownBorder)',
-  selectListBorder: 'var(--vscode-panel-border)',
-  focusBorder: 'var(--vscode-focusBorder)',
-  listFocusBackground: 'var(--vscode-list-activeSelectionBackground)',
-  listFocusForeground: 'var(--vscode-list-activeSelectionForeground)',
-  listHoverBackground: 'var(--vscode-list-hoverBackground)',
-  listHoverForeground: 'var(--vscode-list-hoverForeground)',
-  listFocusOutline: 'var(--vscode-focusBorder)',
-  listHoverOutline: 'var(--vscode-list-hoverBackground)'
+  selectBackground: 'var(--settings-dropdownBackground)',
+  selectListBackground: 'var(--editor-background)',
+  selectForeground: 'var(--settings-dropdownForeground)',
+  decoratorRightForeground: 'var(--descriptionForeground)',
+  selectBorder: 'var(--settings-dropdownBorder)',
+  selectListBorder: 'var(--panel-border)',
+  focusBorder: 'var(--focusBorder)',
+  listFocusBackground: 'var(--list-activeSelectionBackground)',
+  listFocusForeground: 'var(--list-activeSelectionForeground)',
+  listHoverBackground: 'var(--list-hoverBackground)',
+  listHoverForeground: 'var(--list-hoverForeground)',
+  listFocusOutline: 'var(--focusBorder)',
+  listHoverOutline: 'var(--list-hoverBackground)'
 }
 
 // React props interface for SelectBox component

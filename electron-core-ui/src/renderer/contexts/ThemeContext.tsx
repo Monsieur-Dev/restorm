@@ -79,8 +79,8 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
     }
     const root = document.documentElement
     const computedStyle = getComputedStyle(root)
-    const backgroundColor = computedStyle.getPropertyValue('--vscode-titleBar-activeBackground').trim() || '#181818'
-    const symbolColor = computedStyle.getPropertyValue('--vscode-titleBar-activeForeground').trim() || '#cccccc'
+    const backgroundColor = computedStyle.getPropertyValue('--titleBar-activeBackground').trim() || '#181818'
+    const symbolColor = computedStyle.getPropertyValue('--titleBar-activeForeground').trim() || '#cccccc'
     const bgHex = cssColorToHex(backgroundColor)
     const symbolHex = cssColorToHex(symbolColor)
     try {
@@ -105,7 +105,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
 
   const applyCSSVariables = useCallback((variables: ThemeVariables): void => {
     const root = document.documentElement
-    const existingVars = Array.from(root.style).filter(prop => prop.startsWith('--vscode-'))
+    const existingVars = Array.from(root.style).filter(prop => prop.startsWith('--') && prop !== '--window-border-color')
     existingVars.forEach(prop => { root.style.removeProperty(prop) })
     Object.entries(variables).forEach(([key, value]) => { root.style.setProperty(key, value) })
     setTimeout(() => {
@@ -249,7 +249,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
           
           if (themeData) {
             const root = document.documentElement
-            const existingVars = Array.from(root.style).filter(prop => prop.startsWith('--vscode-'))
+            const existingVars = Array.from(root.style).filter(prop => prop.startsWith('--') && prop !== '--window-border-color')
             existingVars.forEach(prop => { root.style.removeProperty(prop) })
             Object.entries(themeData.variables).forEach(([key, value]) => { root.style.setProperty(key, value) })
             
@@ -294,7 +294,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
           const themeData = await window.api.theme.load(themeId)
           if (themeData) {
             const root = document.documentElement
-            const existingVars = Array.from(root.style).filter(prop => prop.startsWith('--vscode-'))
+            const existingVars = Array.from(root.style).filter(prop => prop.startsWith('--') && prop !== '--window-border-color')
             existingVars.forEach(prop => { root.style.removeProperty(prop) })
             Object.entries(themeData.variables).forEach(([key, value]) => { root.style.setProperty(key, value) })
             

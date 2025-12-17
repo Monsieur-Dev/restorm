@@ -51,9 +51,12 @@
     "build:renderer": "tsc --project tsconfig.renderer.json",
     "merge-dist": "node scripts/merge-dist.js",
     "dev": "tsc --project tsconfig.main.json --watch & tsc --project tsconfig.renderer.json --watch",
-    "lint": "eslint . --ext .ts,.tsx --max-warnings 0",
-    "lint:fix": "eslint . --ext .ts,.tsx --fix",
-    "typecheck": "tsc --noEmit"
+    "lint": "eslint . --ext .ts,.tsx --max-warnings 0 && stylelint \"src/**/*.css\"",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix && stylelint \"src/**/*.css\" --fix",
+    "lint:css": "stylelint \"src/**/*.css\"",
+    "lint:css:fix": "stylelint \"src/**/*.css\" --fix",
+    "typecheck": "tsc --noEmit",
+    "validate:contrast": "node scripts/validate-contrast.js"
   },
   "keywords": [
     "electron",
@@ -125,6 +128,8 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
     "monaco-editor": "^0.54.0",
+    "stylelint": "^16.26.1",
+    "stylelint-config-standard": "^39.0.1",
     "typescript": "^5.3.3",
     "vite": "^7.3.0"
   }

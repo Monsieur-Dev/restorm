@@ -80,7 +80,7 @@ const Example: React.FC = () => {
 - The container (`.ecu-modal-container`) is positioned with `top/left/right/bottom: 20px`,
   which ensures a **20px margin** around the dialog on all edges.
 - The header uses:
-  - `var(--vscode-titleBar-activeBackground)` for background.
-  - `var(--vscode-titleBar-activeForeground)` for text and close icon.
+  - `var(--titleBar-activeBackground)` for background.
+  - `var(--titleBar-activeForeground)` for text and close icon.
 - Fonts, codicon sizes and focus outlines come from `MonacoWorkbench` / `monaco-workbench.css`, so the modal feels
   visually integrated with the rest of the VS Code‑like UI.

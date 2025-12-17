@@ -17,15 +17,15 @@
   padding: 3px 8px;
   border-radius: 3px;
   border: none;
-  background-color: var(--vscode-tag-background);
-  color: var(--vscode-tag-foreground);
+  background-color: var(--tag-background);
+  color: var(--tag-foreground);
   font-weight: bold;
   font-size: 12px;
   cursor: pointer;
 }
 
 .ecui-tag:hover {
-  background-color: var(--vscode-tag-background-hover);
+  background-color: var(--tag-background-hover);
 }
 
 .ecui-tag-label {
@@ -37,12 +37,12 @@
 }
 
 .ecui-tag-input {
-  border: 1px solid var(--vscode-input-border);
-  background-color: var(--vscode-input-background);
-  color: var(--vscode-input-foreground);
+  border: 1px solid var(--input-border);
+  background-color: var(--input-background);
+  color: var(--input-foreground);
   border-radius: 10px;
   padding: 2px 6px;
-  font-size: var(--vscode-editor-font-size);
+  font-size: var(--editor-font-size);
   outline: none;
   min-width: 60px;
 }

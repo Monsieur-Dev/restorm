@@ -12,15 +12,15 @@
 }
 
 .tooltip-content {
-	background-color: var(--vscode-editorHoverWidget-background);
-	color: var(--vscode-editorHoverWidget-foreground);
-	border: 1px solid var(--vscode-editorHoverWidget-border);
+	background-color: var(--editorHoverWidget-background);
+	color: var(--editorHoverWidget-foreground);
+	border: 1px solid var(--editorHoverWidget-border);
 	border-radius: 3px;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+	box-shadow: 0 4px 12px rgb(0, 0, 0, 0.5);
 	padding: 4px 8px;
 	max-width: 500px;
 	min-width: 100px;
-	word-wrap: break-word;
+	overflow-wrap: break-word;
 	position: relative;
 }
 
@@ -41,7 +41,7 @@
 	height: 0;
 	border-left: 6px solid transparent;
 	border-right: 6px solid transparent;
-	border-top: 6px solid var(--vscode-editorHoverWidget-border);
+	border-top: 6px solid var(--editorHoverWidget-border);
 }
 
 /* Beak (arrow) pointing down to the target when tooltip is above */
@@ -52,7 +52,7 @@
 	height: 0;
 	border-left: 5px solid transparent;
 	border-right: 5px solid transparent;
-	border-top: 5px solid var(--vscode-editorHoverWidget-background);
+	border-top: 5px solid var(--editorHoverWidget-background);
 }
 
 /* Beak border (outer triangle) when tooltip is below the target */
@@ -63,7 +63,7 @@
 	height: 0;
 	border-left: 6px solid transparent;
 	border-right: 6px solid transparent;
-	border-bottom: 6px solid var(--vscode-editorHoverWidget-border);
+	border-bottom: 6px solid var(--editorHoverWidget-border);
 }
 
 /* Beak (arrow) pointing up to the target when tooltip is below */
@@ -74,7 +74,7 @@
 	height: 0;
 	border-left: 5px solid transparent;
 	border-right: 5px solid transparent;
-	border-bottom: 5px solid var(--vscode-editorHoverWidget-background);
+	border-bottom: 5px solid var(--editorHoverWidget-background);
 }
 
 /* Side positioning - tooltip to the right with beak on the left */
@@ -93,7 +93,7 @@
 	height: 0;
 	border-top: 6px solid transparent;
 	border-bottom: 6px solid transparent;
-	border-right: 6px solid var(--vscode-editorHoverWidget-border);
+	border-right: 6px solid var(--editorHoverWidget-border);
 	border-left: none;
 }
 
@@ -105,7 +105,7 @@
 	height: 0;
 	border-top: 5px solid transparent;
 	border-bottom: 5px solid transparent;
-	border-right: 5px solid var(--vscode-editorHoverWidget-background);
+	border-right: 5px solid var(--editorHoverWidget-background);
 	border-left: none;
 }
 
@@ -113,6 +113,7 @@
 	from {
 		opacity: 0;
 	}
+
 	to {
 		opacity: 1;
 	}
@@ -135,5 +136,5 @@
 	font-family: var(--monaco-monospace-font);
 	border-radius: 3px;
 	padding: 0 0.4em;
-	background-color: var(--vscode-textCodeBlock-background);
+	background-color: var(--textCodeBlock-background);
 }

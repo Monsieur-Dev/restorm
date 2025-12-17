@@ -50,8 +50,8 @@ export interface ScrollableElementProps extends ScrollableElementDomProps {
 }
 
 export const defaultScrollableElementStyles: IScrollableElementStyles = {
-  scrollbarSliderBackground: 'var(--vscode-scrollbarSlider-background)',
-  scrollbarSliderHoverBackground: 'var(--vscode-scrollbarSlider-hoverBackground)',
-  scrollbarSliderActiveBackground: 'var(--vscode-scrollbarSlider-activeBackground)',
-  scrollbarShadow: 'var(--vscode-scrollbar-shadow)'
+  scrollbarSliderBackground: 'var(--scrollbarSlider-background)',
+  scrollbarSliderHoverBackground: 'var(--scrollbarSlider-hoverBackground)',
+  scrollbarSliderActiveBackground: 'var(--scrollbarSlider-activeBackground)',
+  scrollbarShadow: 'var(--scrollbar-shadow)'
 };

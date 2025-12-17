@@ -176,7 +176,7 @@ function ensureWebBaseLoaded(): void {
       const parsed = yaml.load(typeBaseSources[type]) as YamlTypeBaseFile
       if (parsed.colors) {
         for (const c of parsed.colors) {
-          const cssVar = `--vscode-${c.id.replace(/\./g, '-')}`
+          const cssVar = `--${c.id.replace(/\./g, '-')}`
           webTypeBaseColors[type][cssVar] = c.value
         }
       }
@@ -223,7 +223,7 @@ function webLoadTheme(themeId: string): ThemeCacheValue | null {
   const colors: Record<string, string> = {}
 
   for (const [cssVar, val] of Object.entries(webTypeBaseColors[entry.type])) {
-    if (cssVar.startsWith('--vscode-')) {
+    if (cssVar.startsWith('--')) {
       const key = cssVar.slice(9).replace(/-/g, '.')
       colors[key] = val
     }
@@ -231,7 +231,7 @@ function webLoadTheme(themeId: string): ThemeCacheValue | null {
 
   if (parsed.colors) {
     for (const [key, value] of Object.entries(parsed.colors)) {
-      const cssVar = `--vscode-${key.replace(/\./g, '-')}`
+      const cssVar = `--${key.replace(/\./g, '-')}`
       variables[cssVar] = value
       colors[key] = value
     }

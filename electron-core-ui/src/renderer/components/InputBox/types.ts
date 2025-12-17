@@ -64,16 +64,16 @@ export interface InputBoxProps {
 }
 
 export const defaultInputBoxStyles: IInputBoxStyles = {
-  inputBackground: 'var(--vscode-input-background)',
-  inputForeground: 'var(--vscode-input-foreground)',
-  inputBorder: 'var(--vscode-input-border)',
-  inputValidationInfoBorder: 'var(--vscode-inputValidation-infoBorder)',
-  inputValidationInfoBackground: 'var(--vscode-inputValidation-infoBackground)',
-  inputValidationInfoForeground: 'var(--vscode-inputValidation-infoForeground)',
-  inputValidationWarningBorder: 'var(--vscode-inputValidation-warningBorder)',
-  inputValidationWarningBackground: 'var(--vscode-inputValidation-warningBackground)',
-  inputValidationWarningForeground: 'var(--vscode-inputValidation-warningForeground)',
-  inputValidationErrorBorder: 'var(--vscode-inputValidation-errorBorder)',
-  inputValidationErrorBackground: 'var(--vscode-inputValidation-errorBackground)',
-  inputValidationErrorForeground: 'var(--vscode-inputValidation-errorForeground)'
+  inputBackground: 'var(--input-background)',
+  inputForeground: 'var(--input-foreground)',
+  inputBorder: 'var(--input-border)',
+  inputValidationInfoBorder: 'var(--inputValidation-infoBorder)',
+  inputValidationInfoBackground: 'var(--inputValidation-infoBackground)',
+  inputValidationInfoForeground: 'var(--inputValidation-infoForeground)',
+  inputValidationWarningBorder: 'var(--inputValidation-warningBorder)',
+  inputValidationWarningBackground: 'var(--inputValidation-warningBackground)',
+  inputValidationWarningForeground: 'var(--inputValidation-warningForeground)',
+  inputValidationErrorBorder: 'var(--inputValidation-errorBorder)',
+  inputValidationErrorBackground: 'var(--inputValidation-errorBackground)',
+  inputValidationErrorForeground: 'var(--inputValidation-errorForeground)'
 }

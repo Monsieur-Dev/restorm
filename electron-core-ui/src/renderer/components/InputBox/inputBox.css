@@ -11,7 +11,6 @@
 
 .monaco-inputbox > .ibwrapper > .input,
 .monaco-inputbox > .ibwrapper > .mirror {
-
 	/* Customizable */
 	padding: 4px 6px;
 }
@@ -55,11 +54,11 @@
 }
 
 /* Hide scrollbars only when using flexible height (no fixed height) */
-.monaco-inputbox > .ibwrapper > textarea.input:not([style*="min-height"]):not([style*="height"]) {
+.monaco-inputbox > .ibwrapper > textarea.input:not([style*="min-height"], [style*="height"]) {
 	scrollbar-width: none; /* Firefox: hide scrollbars */
 }
 
-.monaco-inputbox > .ibwrapper > textarea.input:not([style*="min-height"]):not([style*="height"])::-webkit-scrollbar {
+.monaco-inputbox > .ibwrapper > textarea.input:not([style*="min-height"], [style*="height"])::-webkit-scrollbar {
 	display: none; /* Chrome + Safari: hide scrollbar */
 }
 
@@ -67,7 +66,7 @@
 .monaco-inputbox > .ibwrapper > textarea.input[style*="min-height"],
 .monaco-inputbox > .ibwrapper > textarea.input[style*="height"] {
 	scrollbar-width: thin;
-	scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
+	scrollbar-color: var(--scrollbarSlider-background) transparent;
 	overflow-y: auto;
 	overflow-x: hidden;
 }
@@ -85,18 +84,18 @@
 
 .monaco-inputbox > .ibwrapper > textarea.input[style*="min-height"]::-webkit-scrollbar-thumb,
 .monaco-inputbox > .ibwrapper > textarea.input[style*="height"]::-webkit-scrollbar-thumb {
-	background: var(--vscode-scrollbarSlider-background);
+	background: var(--scrollbarSlider-background);
 	border-radius: 5px;
 }
 
 .monaco-inputbox > .ibwrapper > textarea.input[style*="min-height"]::-webkit-scrollbar-thumb:hover,
 .monaco-inputbox > .ibwrapper > textarea.input[style*="height"]::-webkit-scrollbar-thumb:hover {
-	background: var(--vscode-scrollbarSlider-hoverBackground);
+	background: var(--scrollbarSlider-hoverBackground);
 }
 
 .monaco-inputbox > .ibwrapper > textarea.input[style*="min-height"]::-webkit-scrollbar-thumb:active,
 .monaco-inputbox > .ibwrapper > textarea.input[style*="height"]::-webkit-scrollbar-thumb:active {
-	background: var(--vscode-scrollbarSlider-activeBackground);
+	background: var(--scrollbarSlider-activeBackground);
 }
 
 .monaco-inputbox > .ibwrapper > textarea.input.empty {
@@ -112,7 +111,7 @@
 	box-sizing: border-box;
 	white-space: pre-wrap;
 	visibility: hidden;
-	word-wrap: break-word;
+	overflow-wrap: break-word;
 }
 
 /* Context view */
@@ -131,7 +130,7 @@
 	font-size: 12px;
 	line-height: 17px;
 	margin-top: -1px;
-	word-wrap: break-word;
+	overflow-wrap: break-word;
 }
 
 /* Action bar support */

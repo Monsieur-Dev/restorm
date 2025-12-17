@@ -68,7 +68,7 @@ const ThemeSelector: React.FC = () => {
   - **Escape**: close list.
   - **ArrowUp/ArrowDown/Home/End**: move focused option.
 - Clicking outside closes the list.
-- Options are rendered using VSCode theme variables (`--vscode-dropdown-*`, `--vscode-list-*`, `--vscode-tab-active-text-color`).
+- Options are rendered using VSCode theme variables (`--dropdown-*`, `--list-*`, `--tab-active-text-color`).
 
 ## Notes for AI Usage
 

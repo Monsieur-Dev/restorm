@@ -17,5 +17,5 @@ export interface ProgressBarProps {
 }
 
 export const defaultProgressBarStyles: IProgressBarStyles = {
-  progressBarBackground: 'var(--vscode-progressBar-background)'
+  progressBarBackground: 'var(--progressBar-background)'
 };

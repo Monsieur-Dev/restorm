@@ -197,14 +197,14 @@ interface IButtonStyles {
 
 The components use VSCode CSS variables for theming:
 
-- `--vscode-button-foreground`
-- `--vscode-button-background`
-- `--vscode-button-hoverBackground`
-- `--vscode-button-secondaryForeground`
-- `--vscode-button-secondaryBackground`
-- `--vscode-button-secondaryHoverBackground`
-- `--vscode-button-border`
-- `--vscode-button-separator`
+- `--button-foreground`
+- `--button-background`
+- `--button-hoverBackground`
+- `--button-secondaryForeground`
+- `--button-secondaryBackground`
+- `--button-secondaryHoverBackground`
+- `--button-border`
+- `--button-separator`
 
 ### CSS Classes
 

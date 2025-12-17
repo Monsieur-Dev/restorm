@@ -1,7 +1,7 @@
-/*---------------------------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------------------------
  * SelectBox Base Styles
  * Based on VSCode's selectBox.css
- *--------------------------------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------------------------- */
 
 .monaco-select-box {
   width: 100%;
@@ -25,7 +25,7 @@
   cursor: pointer;
   min-width: 100px;
   min-height: 14px;
-  padding: 0px 23px 0px 8px;
+  padding: 0 23px 0 8px;
 }
 
 .mac .monaco-action-bar .action-item .monaco-select-box {
@@ -43,7 +43,7 @@
 
 /* Focus styles */
 .monaco-select-box:focus {
-  outline: 1px solid var(--vscode-focusBorder);
+  outline: 1px solid var(--focusBorder);
   outline-offset: -1px;
 }
 
@@ -55,5 +55,5 @@
 
 /* Hover state */
 .monaco-select-box:hover:not(:disabled) {
-  background-color: var(--vscode-settings-dropdownHoverBackground);
+  background-color: var(--settings-dropdownHoverBackground);
 }

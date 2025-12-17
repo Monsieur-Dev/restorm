@@ -29,11 +29,11 @@ export interface RadioGroupProps {
 
 // Default styles based on VSCode inputColors.ts
 export const defaultRadioStyles: IRadioStyles = {
-  activeForeground: 'var(--vscode-radio-activeForeground)',
-  activeBackground: 'var(--vscode-radio-activeBackground)',
-  activeBorder: 'var(--vscode-radio-activeBorder)',
-  inactiveForeground: 'var(--vscode-radio-inactiveForeground)',
-  inactiveBackground: 'var(--vscode-radio-inactiveBackground)',
-  inactiveHoverBackground: 'var(--vscode-radio-inactiveHoverBackground)',
-  inactiveBorder: 'var(--vscode-radio-inactiveBorder)'
+  activeForeground: 'var(--radio-activeForeground)',
+  activeBackground: 'var(--radio-activeBackground)',
+  activeBorder: 'var(--radio-activeBorder)',
+  inactiveForeground: 'var(--radio-inactiveForeground)',
+  inactiveBackground: 'var(--radio-inactiveBackground)',
+  inactiveHoverBackground: 'var(--radio-inactiveHoverBackground)',
+  inactiveBorder: 'var(--radio-inactiveBorder)'
 };

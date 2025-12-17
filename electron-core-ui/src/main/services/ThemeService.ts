@@ -119,8 +119,8 @@ export class ThemeService {
           
           if (data.colors) {
             for (const color of data.colors) {
-              // Convert to CSS variable format (vscode style)
-              const cssVar = `--vscode-${color.id.replace(/\./g, '-')}`
+              // Convert to CSS variable format
+              const cssVar = `--${color.id.replace(/\./g, '-')}`
               this.typeBaseColors[themeType][cssVar] = color.value
             }
           }
@@ -246,8 +246,12 @@ export class ThemeService {
       
       // Add type base colors (convert CSS vars back to color keys)
       for (const [cssVar, value] of Object.entries(this.typeBaseColors[themeType])) {
-        if (cssVar.startsWith('--vscode-')) {
-          const key = cssVar.slice(9).replace(/-/g, '.')
+        // Skip base variables (non-color variables from base.yaml)
+        if (Object.keys(this.baseVariables).includes(cssVar)) {
+          continue
+        }
+        if (cssVar.startsWith('--')) {
+          const key = cssVar.slice(2).replace(/-/g, '.')
           colors[key] = value
         }
       }
@@ -258,7 +262,7 @@ export class ThemeService {
 
       if (data.colors) {
         for (const [key, value] of Object.entries(data.colors)) {
-          const cssVar = `--vscode-${key.replace(/\./g, '-')}`
+          const cssVar = `--${key.replace(/\./g, '-')}`
           variables[cssVar] = value
           colors[key] = value
         }
@@ -291,8 +295,12 @@ export class ThemeService {
     // Convert CSS variables back to colors format for legacy compatibility
     const colors: Record<string, string> = {}
     for (const [cssVar, value] of Object.entries(result.variables)) {
-      if (cssVar.startsWith('--vscode-')) {
-        const key = cssVar.slice(9).replace(/-/g, '.')
+      // Skip base variables (non-color variables from base.yaml)
+      if (Object.keys(this.baseVariables).includes(cssVar)) {
+        continue
+      }
+      if (cssVar.startsWith('--')) {
+        const key = cssVar.slice(2).replace(/-/g, '.')
         colors[key] = value
       }
     }
@@ -320,7 +328,7 @@ export class ThemeService {
     // Apply theme-specific colors
     if (theme.colors) {
       for (const [key, value] of Object.entries(theme.colors)) {
-        const cssVar = `--vscode-${key.replace(/\./g, '-')}`
+        const cssVar = `--${key.replace(/\./g, '-')}`
         variables[cssVar] = value
       }
     }

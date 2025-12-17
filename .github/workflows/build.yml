@@ -19,10 +19,29 @@ jobs:
         with:
           node-version: '18'
       
-      - name: Build electron-core-ui
+      - name: Install electron-core-ui dependencies
         run: |
           cd electron-core-ui
           npm install
+      
+      - name: Run electron-core-ui linter (ESLint + Stylelint)
+        run: |
+          cd electron-core-ui
+          npm run lint
+      
+      - name: Run electron-core-ui type check
+        run: |
+          cd electron-core-ui
+          npm run typecheck
+      
+      - name: Validate theme contrast ratios
+        run: |
+          cd electron-core-ui
+          npm run validate:contrast
+      
+      - name: Build electron-core-ui
+        run: |
+          cd electron-core-ui
           npm run build
       
       - name: Install gitable dependencies

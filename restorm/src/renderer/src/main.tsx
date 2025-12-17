@@ -1,10 +1,12 @@
-import React from 'react'
+import React, { Suspense, lazy } from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App'
 import type { i18n as I18nType } from 'i18next'
 import * as ElectronCoreUi from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 import './httpMethods.css'
+import LoadingScreen from './components/LoadingScreen'
+
+const App = lazy(() => import('./App'))
 
 const { initializeI18n, logger, i18n } = ElectronCoreUi
 
@@ -88,7 +90,9 @@ void initI18n()
     ReactDOM.createRoot(rootElement).render(
       <React.StrictMode>
         <ElectronCoreUiProvider fontAliasing="auto">
-          <App />
+          <Suspense fallback={<LoadingScreen />}>
+            <App />
+          </Suspense>
         </ElectronCoreUiProvider>
       </React.StrictMode>
     )

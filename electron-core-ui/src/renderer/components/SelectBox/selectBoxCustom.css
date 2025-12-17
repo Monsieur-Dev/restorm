@@ -1,7 +1,7 @@
-/*---------------------------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------------------------
  * SelectBox Custom Dropdown Styles
  * Based on VSCode's selectBoxCustom.css
- *--------------------------------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------------------------- */
 
 /* Use custom CSS vars to expose padding into parent select for padding calculation */
 .monaco-select-box-dropdown-padding {
@@ -93,6 +93,7 @@
 }
 
 /* Accepted CSS hiding technique for accessibility reader text  */
+
 /* https://webaim.org/techniques/css/invisiblecontent/ */
 
 .monaco-select-box-dropdown-container > .select-box-dropdown-list-container .monaco-list .monaco-list-row > .visually-hidden {
@@ -112,7 +113,7 @@
 
 .monaco-select-box-dropdown-container > .select-box-dropdown-container-width-control > .width-control-div {
   overflow: hidden;
-  max-height: 0px;
+  max-height: 0;
 }
 
 .monaco-select-box-dropdown-container > .select-box-dropdown-container-width-control > .width-control-div > .option-text-width-control {
@@ -134,18 +135,18 @@
 
 /* Focus and hover states */
 .monaco-select-box-dropdown-container > .select-box-dropdown-list-container .monaco-list .monaco-list-row.focused {
-  background-color: var(--vscode-list-activeSelectionBackground) !important;
-  color: var(--vscode-list-activeSelectionForeground) !important;
+  background-color: var(--list-activeSelectionBackground) !important;
+  color: var(--list-activeSelectionForeground) !important;
 }
 
 .monaco-select-box-dropdown-container > .select-box-dropdown-list-container .monaco-list .monaco-list-row:not(.focused):hover {
-  background-color: var(--vscode-list-hoverBackground) !important;
-  color: var(--vscode-list-hoverForeground) !important;
+  background-color: var(--list-hoverBackground) !important;
+  color: var(--list-hoverForeground) !important;
 }
 
 /* Border styles */
 .monaco-select-box-dropdown-container > .select-box-details-pane.border-top {
-  border-top: 1px solid var(--vscode-dropdown-border);
+  border-top: 1px solid var(--dropdown-border);
 }
 
 /* Select container */
@@ -168,9 +169,9 @@
   justify-content: space-between;
   padding: 4px 8px;
   min-height: 10px;
-  background-color: var(--vscode-dropdown-background);
-  color: var(--vscode-dropdown-foreground);
-  border: 1px solid var(--vscode-dropdown-border);
+  background-color: var(--dropdown-background);
+  color: var(--dropdown-foreground);
+  border: 1px solid var(--dropdown-border);
   border-radius: 2px;
   font-size: 13px;
   font-family: inherit;
@@ -202,7 +203,7 @@
 }
 
 /* When using custom drawn select, remove the global container chevron to avoid double icon */
-.monaco-workbench .select-container.custom:after {
+.monaco-workbench .select-container.custom::after {
   content: none !important;
   display: none !important;
 }
@@ -214,10 +215,10 @@
   left: 0;
   right: 0;
   margin-top: 4px;
-  background-color: var(--vscode-dropdown-background);
-  border: 1px solid var(--vscode-dropdown-border);
+  background-color: var(--dropdown-background);
+  border: 1px solid var(--dropdown-border);
   border-radius: 2px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 8px rgb(0, 0, 0, 0.3);
   z-index: 1000;
   max-height: 300px;
   overflow: hidden;
@@ -245,7 +246,7 @@
   font-size: 13px;
   cursor: pointer;
   background-color: transparent;
-  color: var(--vscode-foreground);
+  color: var(--foreground);
   font-weight: 400;
   white-space: nowrap;
   overflow: hidden;
@@ -257,13 +258,13 @@
 }
 
 .select-option.focused {
-  background-color: var(--vscode-list-activeSelectionBackground);
-  color: var(--vscode-list-activeSelectionForeground);
+  background-color: var(--list-activeSelectionBackground);
+  color: var(--list-activeSelectionForeground);
 }
 
 .select-option:hover:not(.disabled) {
-  background-color: var(--vscode-list-hoverBackground);
-  color: var(--vscode-list-hoverForeground);
+  background-color: var(--list-hoverBackground);
+  color: var(--list-hoverForeground);
 }
 
 .select-option.disabled {
@@ -296,26 +297,26 @@
 }
 
 .select-option-decorator {
-  color: var(--vscode-descriptionForeground);
+  color: var(--descriptionForeground);
   font-size: 12px;
 }
 
 /* Details pane */
 .select-box-details-pane {
   padding: 5px;
-  border-top: 1px solid var(--vscode-dropdown-border);
-  background-color: var(--vscode-dropdown-background);
+  border-top: 1px solid var(--dropdown-border);
+  background-color: var(--dropdown-background);
   font-size: 12px;
-  color: var(--vscode-descriptionForeground);
+  color: var(--descriptionForeground);
 }
 
 /* Synthetic focus styling */
 .monaco-select-box.synthetic-focus {
-  outline: 1px solid var(--vscode-focusBorder);
+  outline: 1px solid var(--focusBorder);
   outline-offset: -1px;
 }
 
 .monaco-select-box-dropdown-container.synthetic-focus {
-  outline: 1px solid var(--vscode-focusBorder);
+  outline: 1px solid var(--focusBorder);
   outline-offset: -1px;
 }

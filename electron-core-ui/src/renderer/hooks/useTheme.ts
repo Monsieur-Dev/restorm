@@ -97,8 +97,8 @@ function useThemeLegacy(): UseThemeReturn {
     const computedStyle = getComputedStyle(root)
     
     // Get titleBar colors from CSS variables
-    const backgroundColor = computedStyle.getPropertyValue('--vscode-titleBar-activeBackground').trim() || '#181818'
-    const symbolColor = computedStyle.getPropertyValue('--vscode-titleBar-activeForeground').trim() || '#cccccc'
+    const backgroundColor = computedStyle.getPropertyValue('--titleBar-activeBackground').trim() || '#181818'
+    const symbolColor = computedStyle.getPropertyValue('--titleBar-activeForeground').trim() || '#cccccc'
     
     // Convert to hex if needed
     const bgHex = cssColorToHex(backgroundColor)
@@ -141,9 +141,9 @@ function useThemeLegacy(): UseThemeReturn {
   const applyCSSVariables = useCallback((variables: ThemeVariables): void => {
     const root = document.documentElement
     
-    // Clear existing VSCode variables
+    // Clear existing theme variables (color variables start with -- and contain a dash after the prefix)
     const existingVars = Array.from(root.style)
-      .filter(prop => prop.startsWith('--vscode-'))
+      .filter(prop => prop.startsWith('--') && prop !== '--window-border-color')
     
     existingVars.forEach(prop => {
       root.style.removeProperty(prop)
@@ -271,9 +271,9 @@ function useThemeLegacy(): UseThemeReturn {
             // Apply CSS variables directly (don't use applyCSSVariables callback to avoid dependency issues)
             const root = document.documentElement
             
-            // Clear existing VSCode variables
+            // Clear existing theme variables
             const existingVars = Array.from(root.style)
-              .filter(prop => prop.startsWith('--vscode-'))
+              .filter(prop => prop.startsWith('--') && prop !== '--window-border-color')
             
             existingVars.forEach(prop => {
               root.style.removeProperty(prop)
@@ -306,8 +306,8 @@ function useThemeLegacy(): UseThemeReturn {
                 const computedStyle = getComputedStyle(rootEl)
                 
                 // Get titleBar colors from CSS variables
-                const backgroundColor = computedStyle.getPropertyValue('--vscode-titleBar-activeBackground').trim() || '#181818'
-                const symbolColor = computedStyle.getPropertyValue('--vscode-titleBar-activeForeground').trim() || '#cccccc'
+                const backgroundColor = computedStyle.getPropertyValue('--titleBar-activeBackground').trim() || '#181818'
+                const symbolColor = computedStyle.getPropertyValue('--titleBar-activeForeground').trim() || '#cccccc'
                 
                 // Convert to hex if needed
                 // Helper function to convert CSS color to hex
@@ -380,9 +380,9 @@ function useThemeLegacy(): UseThemeReturn {
             // Apply CSS variables directly
             const root = document.documentElement
             
-            // Clear existing VSCode variables
+            // Clear existing theme variables
             const existingVars = Array.from(root.style)
-              .filter(prop => prop.startsWith('--vscode-'))
+              .filter(prop => prop.startsWith('--') && prop !== '--window-border-color')
             
             existingVars.forEach(prop => {
               root.style.removeProperty(prop)
@@ -414,8 +414,8 @@ function useThemeLegacy(): UseThemeReturn {
                 const rootEl = document.documentElement
                 const computedStyle = getComputedStyle(rootEl)
                 
-                const backgroundColor = computedStyle.getPropertyValue('--vscode-titleBar-activeBackground').trim() || '#181818'
-                const symbolColor = computedStyle.getPropertyValue('--vscode-titleBar-activeForeground').trim() || '#cccccc'
+                const backgroundColor = computedStyle.getPropertyValue('--titleBar-activeBackground').trim() || '#181818'
+                const symbolColor = computedStyle.getPropertyValue('--titleBar-activeForeground').trim() || '#cccccc'
                 
                 const cssColorToHexLocal = (color: string): string => {
                   if (color.startsWith('#')) {

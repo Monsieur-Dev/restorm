@@ -9,7 +9,7 @@
         margin: 0;
         padding: 0;
         overflow: hidden;
-        background-color: var(--vscode-editor-background);
+        background-color: var(--vscode-editor-background, #1a1a2e);
         color: var(--vscode-foreground);
       }
       #root {
@@ -19,10 +19,40 @@
         color: inherit;
       }
 
+      /* Initial loading screen styles */
+      .initial-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        width: 100vw;
+        background-color: #1a1a2e;
+      }
+      .initial-loading img {
+        width: 200px;
+        height: auto;
+        animation: pulse 2s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%, 100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.8;
+          transform: scale(0.98);
+        }
+      }
     </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Initial loading screen shown before React mounts -->
+      <div class="initial-loading">
+        <img src="/imgs/icon_with_text.png" alt="Restorm" />
+      </div>
+    </div>
     <script type="module" src="./src/main.tsx"></script>
   </body>
 </html>
