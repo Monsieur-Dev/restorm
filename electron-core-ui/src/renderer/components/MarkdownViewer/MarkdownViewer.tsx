@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import rehypeRaw from 'rehype-raw'
 import mermaid from 'mermaid'
 
 import './markdownViewer.css'
@@ -151,6 +152,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ value, allowMerm
     <div className={rootClassName} style={style}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeRaw]}
         components={{
           // Custom renderer for pre blocks to add copy button
           pre(preProps: JSX.IntrinsicElements['pre']) {

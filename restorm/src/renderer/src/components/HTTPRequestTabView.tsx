@@ -385,29 +385,48 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
   const codeSnippetsMarkdown = useMemo(() => {
     // Parse URL to extract host and path
     let host = ''
-    let path = ''
+    let pathOnly = ''
     let baseUrl = ''
     try {
       const urlObj = new URL(resolvedUrl.startsWith('http') ? resolvedUrl : `https://${resolvedUrl}`)
       host = urlObj.host
-      path = urlObj.pathname + urlObj.search
+      pathOnly = urlObj.pathname
       baseUrl = `${urlObj.protocol}//${urlObj.host}`
     } catch {
       // If URL parsing fails, use the raw URL
       host = resolvedUrl
-      path = '/'
+      pathOnly = '/'
       baseUrl = resolvedUrl
     }
 
-    // Prepare headers array
-    const headers = request.headers
+    // Prepare headers array (from current state)
+    const headersData = request.headers
       .filter(h => h.key)
       .map(h => ({ key: h.key, value: h.value }))
 
-    // Prepare body content
-    let bodyContent = ''
-    if (request.body?.type === 'text' && request.body.content) {
-      bodyContent = request.body.content
+    // Prepare query params
+    const paramsData = request.params
+      .filter(p => p.key)
+      .map(p => ({ key: p.key, value: p.value }))
+
+    // Prepare path params
+    const pathParamsData = (request.pathParams ?? [])
+      .filter(p => p.key)
+      .map(p => ({ key: p.key, value: p.value }))
+
+    // Prepare body content based on mode
+    let bodyContent: string | null = null
+    if (bodyMode === 'text' && body) {
+      bodyContent = body
+    } else if ((bodyMode === 'form-data' || bodyMode === 'x-www-form-urlencoded') && request.body?.type === bodyMode) {
+      const fields = request.body.fields.filter(f => f.key)
+      if (fields.length > 0) {
+        if (bodyMode === 'form-data') {
+          bodyContent = fields.map(f => `${f.key}=${f.value}`).join('&')
+        } else {
+          bodyContent = fields.map(f => `${encodeURIComponent(f.key)}=${encodeURIComponent(f.value)}`).join('&')
+        }
+      }
     }
 
     // Capitalize method for C#/Ruby
@@ -419,12 +438,19 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
       capitalMethod,
       url: resolvedUrl,
       host,
-      path,
+      path: pathOnly,
       baseUrl,
-      headers,
-      body: bodyContent || null
+      headers: headersData.length > 0 ? headersData : null,
+      params: paramsData.length > 0 ? paramsData : null,
+      pathParams: pathParamsData.length > 0 ? pathParamsData : null,
+      body: bodyContent,
+      bodyMode,
+      hasHeaders: headersData.length > 0,
+      hasParams: paramsData.length > 0,
+      hasPathParams: pathParamsData.length > 0,
+      hasBody: !!bodyContent
     })
-  }, [method, resolvedUrl, request.headers, request.body])
+  }, [method, resolvedUrl, request.headers, request.params, request.pathParams, request.body, body, bodyMode])
 
   const tabs: Tab[] = [
     {
