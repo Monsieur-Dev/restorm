@@ -5,6 +5,8 @@
 import Handlebars from 'handlebars'
 import type {
   Folder,
+  EnvironmentFolder,
+  Environment,
   HTTPRequest,
   HTTPMethod,
   HTTPRequestBody,
@@ -594,32 +596,45 @@ function operationToRequest(
 export interface SwaggerImportOptions {
   /** Base URL to use for requests (defaults to scheme + host from spec) */
   baseUrl?: string
+  /** 
+   * Existing EnvironmentFolder to add the environment to.
+   * If not provided, a new EnvironmentFolder will be created as root.
+   */
+  environmentFolder?: EnvironmentFolder
+  /**
+   * Parent folder where requests will be imported.
+   * If provided with environmentFolder, requests will be imported here instead of environmentFolder.
+   * If provided without environmentFolder, requests will be imported here and a new environment
+   * will be added to the nearest EnvironmentFolder ancestor (which must exist).
+   */
+  parentFolder?: Folder
 }
 
 /**
- * Import a Swagger/OpenAPI 2.0 specification and convert it to a Folder structure
+ * Create a new environment for the imported Swagger spec
  */
-export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions = {}): Folder {
-  const basePath = spec.basePath ?? ''
-  const defaultScheme = spec.schemes?.[0] ?? 'https'
-  const defaultHost = spec.host ?? 'localhost'
-  const defaultBaseUrl = options.baseUrl ?? `${defaultScheme}://${defaultHost}`
+function createSwaggerEnvironment(spec: SwaggerSpec, defaultBaseUrl: string): Environment {
+  return {
+    id: generateId(`env:root:Default`),
+    name: 'Default',
+    variables: [{ key: 'baseUrl', value: defaultBaseUrl }],
+    subEnvironments:
+      spec.info.title === 'Swagger Petstore'
+        ? [
+            {
+              id: generateId('env:root:Default:Production'),
+              name: 'Production',
+              variables: [{ key: 'baseUrl', value: 'https://petstore.com' }]
+            }
+          ]
+        : []
+  }
+}
 
-  // Build documentation for root folder
-  const rootDocumentation = compiledFolderTemplate({
-    title: spec.info.title,
-    description: spec.info.description,
-    version: spec.info.version,
-    termsOfService: spec.info.termsOfService,
-    contact: spec.info.contact,
-    license: spec.info.license,
-    externalDocs: spec.externalDocs,
-    host: spec.host,
-    basePath: spec.basePath,
-    schemes: spec.schemes,
-    modelsDiagram: buildGlobalModelsDiagram(spec)
-  })
-
+/**
+ * Build the imported folder items from a Swagger spec (tag folders and requests)
+ */
+function buildSwaggerFolderItems(spec: SwaggerSpec, basePath: string): Folder['items'] {
   // Create tag folders map
   const tagFolders = new Map<string, Folder>()
 
@@ -636,7 +651,7 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
       name: tag.name,
       documentation: tagDocumentation.trim(),
       tags: [tag.name],
-      configuration: { environments: [] },
+      configuration: {},
       items: []
     })
   }
@@ -647,7 +662,7 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
     name: 'Other',
     documentation: 'Requests without tags',
     tags: [],
-    configuration: { environments: [] },
+    configuration: {},
     items: []
   }
 
@@ -679,7 +694,7 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
             name: tagName,
             documentation: `# ${tagName}`,
             tags: [tagName],
-            configuration: { environments: [] },
+            configuration: {},
             items: []
           }
           tagFolders.set(tagName, folder)
@@ -690,7 +705,7 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
     }
   }
 
-  // Build root folder items
+  // Build items array
   const items: Folder['items'] = []
 
   // Add tag folders with requests
@@ -705,32 +720,88 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
     items.push(untaggedFolder)
   }
 
-  // Create root folder with environment for baseUrl
-  const rootFolder: Folder = {
+  return items
+}
+
+/**
+ * Import result type - can be either an EnvironmentFolder (new root) or modified folders
+ */
+export interface SwaggerImportResult {
+  /** The root EnvironmentFolder if created, or the existing environmentFolder if provided */
+  environmentFolder: EnvironmentFolder
+  /** The folder where requests were imported (same as environmentFolder if no parentFolder was provided) */
+  targetFolder: Folder | EnvironmentFolder
+  /** The newly created environment */
+  environment: Environment
+}
+
+/**
+ * Import a Swagger/OpenAPI 2.0 specification and convert it to a Folder structure
+ * 
+ * Behavior based on options:
+ * - No options: Creates a new EnvironmentFolder as root with requests inside
+ * - environmentFolder only: Adds environment to it, imports requests into it
+ * - environmentFolder + parentFolder: Adds environment to environmentFolder, imports requests to parentFolder
+ * - parentFolder only: Throws error (needs an EnvironmentFolder for the environment)
+ */
+export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions = {}): EnvironmentFolder {
+  const basePath = spec.basePath ?? ''
+  const defaultScheme = spec.schemes?.[0] ?? 'https'
+  const defaultHost = spec.host ?? 'localhost'
+  const defaultBaseUrl = options.baseUrl ?? `${defaultScheme}://${defaultHost}`
+
+  // Create the environment for this import
+  const newEnvironment = createSwaggerEnvironment(spec, defaultBaseUrl)
+
+  // Build the imported items (tag folders and requests)
+  const importedItems = buildSwaggerFolderItems(spec, basePath)
+
+  // Case: parentFolder provided without environmentFolder - error
+  if (options.parentFolder && !options.environmentFolder) {
+    throw new Error('parentFolder requires an environmentFolder to store the environment configuration')
+  }
+
+  // Case: environmentFolder provided (with or without parentFolder)
+  if (options.environmentFolder) {
+    // Add the new environment to the existing environmentFolder
+    options.environmentFolder.environments = [
+      ...options.environmentFolder.environments,
+      newEnvironment
+    ]
+
+    // Determine target folder for requests
+    const targetFolder = options.parentFolder ?? options.environmentFolder
+    
+    // Add imported items to target folder
+    targetFolder.items = [...targetFolder.items, ...importedItems]
+
+    return options.environmentFolder
+  }
+
+  // Case: No options - create new EnvironmentFolder as root
+  const rootDocumentation = compiledFolderTemplate({
+    title: spec.info.title,
+    description: spec.info.description,
+    version: spec.info.version,
+    termsOfService: spec.info.termsOfService,
+    contact: spec.info.contact,
+    license: spec.info.license,
+    externalDocs: spec.externalDocs,
+    host: spec.host,
+    basePath: spec.basePath,
+    schemes: spec.schemes,
+    modelsDiagram: buildGlobalModelsDiagram(spec)
+  })
+
+  const rootFolder: EnvironmentFolder = {
+    folderType: 'environment',
     id: generateId(`folder:root:${spec.info.title}`),
     name: spec.info.title,
     documentation: rootDocumentation.trim(),
     tags: [],
-    configuration: {
-      environments: [
-        {
-          id: generateId(`env:root:Default`),
-          name: 'Default',
-          variables: [{ key: 'baseUrl', value: defaultBaseUrl }],
-          subEnvironments:
-            spec.info.title === 'Swagger Petstore'
-              ? [
-                  {
-                    id: generateId('env:root:Default:Production'),
-                    name: 'Production',
-                    variables: [{ key: 'baseUrl', value: 'https://petstore.com' }]
-                  }
-                ]
-              : []
-        }
-      ]
-    },
-    items
+    configuration: {},
+    environments: [newEnvironment],
+    items: importedItems
   }
 
   return rootFolder
@@ -742,7 +813,7 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
 export async function importSwaggerFromUrl(
   url: string,
   options: SwaggerImportOptions = {}
-): Promise<Folder> {
+): Promise<EnvironmentFolder> {
   const response = await fetch(url)
   if (!response.ok) {
     throw new Error(`Failed to fetch Swagger spec: ${response.status} ${response.statusText}`)
@@ -755,7 +826,7 @@ export async function importSwaggerFromUrl(
 /**
  * Import a Swagger specification from a JSON string
  */
-export function importSwaggerFromJson(json: string, options: SwaggerImportOptions = {}): Folder {
+export function importSwaggerFromJson(json: string, options: SwaggerImportOptions = {}): EnvironmentFolder {
   const spec = JSON.parse(json) as SwaggerSpec
   return importSwagger(spec, options)
 }

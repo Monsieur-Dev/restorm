@@ -12,9 +12,9 @@ import frTranslation from '../locales/fr/translation.json'
 
 import { importSwaggerFromJson } from './services/SwaggerImportService'
 import swaggerPetstoreJson from './resources/swagger-petstore.json'
-import type { Folder, FolderItem, Environment } from './types/collections'
-import { isFolder, isRequest, isHTTPRequest } from './types/collections'
-import type { FolderTab, HTTPRequestTab, BreadcrumbItem } from './types/editor'
+import type { Folder, FolderItem, Environment, EnvironmentFolder } from './types/collections'
+import { isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder } from './types/collections'
+import type { FolderTab, EnvironmentFolderTab, HTTPRequestTab, BreadcrumbItem } from './types/editor'
 
 // Initialize i18n using core-ui's initializeI18n function
 // This prevents double initialization and sets up the plugin
@@ -39,12 +39,19 @@ const initialSwaggerFolder = importSwaggerFromJson(JSON.stringify(swaggerPetstor
 
 /** Folder icon for breadcrumbs */
 const FOLDER_ICON = { type: 'codicon' as const, value: 'folder' }
+/** Environment folder icon for breadcrumbs */
+const ENV_FOLDER_ICON = { type: 'codicon' as const, value: 'folder-library' }
+
+/** Get the appropriate icon for a folder */
+function getFolderIcon(item: Folder | EnvironmentFolder): { type: 'codicon'; value: string } {
+  return isEnvironmentFolder(item as FolderItem) ? ENV_FOLDER_ICON : FOLDER_ICON
+}
 
 /** Find a folder by ID in the folder tree */
-function findFolderById(folder: Folder, id: string): Folder | null {
+function findFolderById(folder: Folder | EnvironmentFolder, id: string): Folder | EnvironmentFolder | null {
   if (folder.id === id) return folder
   for (const item of folder.items) {
-    if (isFolder(item)) {
+    if (isAnyFolder(item)) {
       const found = findFolderById(item, id)
       if (found) return found
     }
@@ -54,22 +61,22 @@ function findFolderById(folder: Folder, id: string): Folder | null {
 
 /** Find an item (folder or request) by ID and build breadcrumbs including the item itself */
 function findItemWithBreadcrumbs(
-  folder: Folder,
+  folder: Folder | EnvironmentFolder,
   id: string,
   path: BreadcrumbItem[] = []
 ): { item: FolderItem | null; breadcrumbs: BreadcrumbItem[] } {
   // Check if the root folder itself matches the ID
   if (folder.id === id) {
-    return { item: folder, breadcrumbs: [...path, { id: folder.id, label: folder.name, icon: FOLDER_ICON }] }
+    return { item: folder, breadcrumbs: [...path, { id: folder.id, label: folder.name, icon: getFolderIcon(folder) }] }
   }
 
-  const currentPath = [...path, { id: folder.id, label: folder.name, icon: FOLDER_ICON }]
+  const currentPath = [...path, { id: folder.id, label: folder.name, icon: getFolderIcon(folder) }]
 
   for (const item of folder.items) {
-    if (isFolder(item)) {
+    if (isAnyFolder(item)) {
       if (item.id === id) {
-        // Include the folder itself as the last breadcrumb (with folder icon)
-        return { item, breadcrumbs: [...currentPath, { id: item.id, label: item.name, icon: FOLDER_ICON }] }
+        // Include the folder itself as the last breadcrumb (with appropriate icon)
+        return { item, breadcrumbs: [...currentPath, { id: item.id, label: item.name, icon: getFolderIcon(item) }] }
       }
       const found = findItemWithBreadcrumbs(item, id, currentPath)
       if (found.item) return found
@@ -84,9 +91,9 @@ function findItemWithBreadcrumbs(
   return { item: null, breadcrumbs: [] }
 }
 
-/** Get environments from the nearest ancestor folder that defines them */
+/** Get environments from the nearest ancestor EnvironmentFolder */
 function getNearestEnvironmentsForBreadcrumbs(
-  rootFolder: Folder,
+  rootFolder: Folder | EnvironmentFolder,
   breadcrumbs: BreadcrumbItem[]
 ): Environment[] {
   if (breadcrumbs.length === 0) {
@@ -101,8 +108,11 @@ function getNearestEnvironmentsForBreadcrumbs(
       continue
     }
     const folder = findFolderById(rootFolder, folderId)
-    if (folder && folder.configuration.environments.length > 0) {
-      return folder.configuration.environments
+    if (folder && isEnvironmentFolder(folder as FolderItem)) {
+      const envFolder = folder as EnvironmentFolder
+      if (envFolder.environments.length > 0) {
+        return envFolder.environments
+      }
     }
   }
 
@@ -111,6 +121,7 @@ function getNearestEnvironmentsForBreadcrumbs(
 
 type DetachedTabMetadata =
   | { kind: 'folder'; itemId: string }
+  | { kind: 'environment-folder'; itemId: string }
   | { kind: 'http-request'; itemId: string }
 
 // Wait for i18n to be initialized before rendering
@@ -134,7 +145,7 @@ void initI18n().then(() => {
       const isClosingRef = useRef(false)
 
       // Local, read-only swagger folder used to rebuild detached tabs
-      const swaggerFolderRef = useRef<Folder>(initialSwaggerFolder)
+      const swaggerFolderRef = useRef<EnvironmentFolder>(initialSwaggerFolder)
 
       // Helper function to count all tabs in a WorkbenchTree
       const countAllTabs = React.useCallback((tree: WorkbenchTree): number => {
@@ -179,9 +190,46 @@ void initI18n().then(() => {
 
           const rootFolder = swaggerFolderRef.current
 
+          if (metadata.kind === 'environment-folder') {
+            const folder = findFolderById(rootFolder, metadata.itemId)
+            if (!folder || !isEnvironmentFolder(folder as FolderItem)) {
+              logger.warn('Environment folder not found for detached tab', { itemId: metadata.itemId })
+              return
+            }
+
+            const { breadcrumbs } = findItemWithBreadcrumbs(rootFolder, metadata.itemId)
+            const tabId = `env-folder-${folder.id}`
+
+            const newTab: EnvironmentFolderTab = {
+              id: tabId,
+              tabType: 'environment-folder',
+              title: folder.name,
+              titleString: folder.name,
+              folder: folder as EnvironmentFolder,
+              breadcrumbs,
+              allowFullscreen: true
+            }
+
+            const newTree: WorkbenchTree = {
+              orientation: 'vertical',
+              groups: [
+                {
+                  id: 'restorm-editor-group',
+                  tabs: [newTab],
+                  activeTabId: tabId
+                }
+              ]
+            }
+
+            setTree(newTree)
+            setTabContentMap({})
+            setFileLoaded(true)
+            return
+          }
+
           if (metadata.kind === 'folder') {
             const folder = findFolderById(rootFolder, metadata.itemId)
-            if (!folder) {
+            if (!folder || isEnvironmentFolder(folder as FolderItem)) {
               logger.warn('Folder not found for detached tab', { itemId: metadata.itemId })
               return
             }
@@ -217,7 +265,7 @@ void initI18n().then(() => {
           }
 
           // The only other supported metadata kind is the HTTP request case
-          else {
+          {
             const { item, breadcrumbs } = findItemWithBreadcrumbs(rootFolder, metadata.itemId)
             if (!item || !isRequest(item) || !isHTTPRequest(item)) {
               logger.warn('Request not found for detached tab', { itemId: metadata.itemId })

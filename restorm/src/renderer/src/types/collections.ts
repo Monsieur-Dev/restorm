@@ -49,9 +49,10 @@ export interface Environment {
   subEnvironments?: Environment[]
 }
 
-/** Folder configuration containing environments */
+/** Folder configuration (currently empty, environments moved to EnvironmentFolder) */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FolderConfiguration {
-  environments: Environment[]
+  // Reserved for future folder-specific settings
 }
 
 // ============================================================================
@@ -143,8 +144,16 @@ export type Request = HTTPRequest // | GraphQLRequest | WebSocketRequest
 // Folder Type
 // ============================================================================
 
-/** Folder item can be either a nested folder or a request */
-export type FolderItem = Folder | Request
+/** Environment folder containing environments configuration */
+export interface EnvironmentFolder extends Folder {
+  /** Discriminator to identify environment folders */
+  folderType: 'environment'
+  /** Environment configurations for this folder */
+  environments: Environment[]
+}
+
+/** Folder item can be either a nested folder, an environment folder, or a request */
+export type FolderItem = Folder | EnvironmentFolder | Request
 
 /** Folder containing requests and sub-folders with configuration */
 export interface Folder {
@@ -170,8 +179,21 @@ export interface Folder {
 // Type Guards
 // ============================================================================
 
-/** Check if an item is a Folder */
+/** Check if an item is an EnvironmentFolder */
+export function isEnvironmentFolder(item: FolderItem): item is EnvironmentFolder {
+  if (!('items' in item) || !('configuration' in item) || !('folderType' in item)) {
+    return false
+  }
+  return (item as { folderType: string }).folderType === 'environment'
+}
+
+/** Check if an item is a Folder (but not an EnvironmentFolder) */
 export function isFolder(item: FolderItem): item is Folder {
+  return 'items' in item && 'configuration' in item && !isEnvironmentFolder(item)
+}
+
+/** Check if an item is any kind of folder (Folder or EnvironmentFolder) */
+export function isAnyFolder(item: FolderItem): item is Folder | EnvironmentFolder {
   return 'items' in item && 'configuration' in item
 }
 
