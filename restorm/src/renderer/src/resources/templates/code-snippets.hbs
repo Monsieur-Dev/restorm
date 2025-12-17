@@ -521,7 +521,7 @@ content(response, "text")
 ```powershell
 $headers = @{
 {{#each headers}}    "{{key}}" = "{{value}}"
-{{/each}}}
+{{/each}} }
 {{#if body}}
 $body = @'
 {{body}}
@@ -565,7 +565,7 @@ HTTPoison.{{lowerMethod}}!(
 
 (client/{{lowerMethod}} "{{url}}"
   {:headers {
-{{#each headers}}             "{{key}}" "{{value}}"{{/each}}}{{#if body}}
+{{#each headers}}             "{{key}}" "{{value}}"{{/each}} }{{#if body}}
    :body "{{body}}"
    :content-type :json{{/if}}})
 ```
