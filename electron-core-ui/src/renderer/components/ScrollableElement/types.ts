@@ -22,6 +22,11 @@ export interface IScrollableElementOptions extends IScrollableElementStyles {
   readonly verticalHasArrows?: boolean;
   readonly arrowSize?: number;
   readonly scrollByPage?: boolean;
+  /**
+   * If true, the content will use height: auto instead of height: 100%.
+   * Use this when the ScrollableElement has a max-height and should fit its content.
+   */
+  readonly fitContent?: boolean;
 }
 
 type ScrollableElementDomProps = Omit<

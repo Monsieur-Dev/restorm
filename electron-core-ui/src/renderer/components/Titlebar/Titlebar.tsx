@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import './titlebar.css'
 import { TitlebarProps } from './types'
 import { CustomWCO } from '../CustomWCO'
+import { SearchBar } from '../SearchBar'
 
 const Titlebar: React.FC<TitlebarProps> = ({
   icon,
@@ -11,7 +12,10 @@ const Titlebar: React.FC<TitlebarProps> = ({
   centerContent,
   children,  // Deprecated: use leftContent instead
   className = '',
-  id
+  id,
+  showSearchBar = false,
+  onSearchResultClick,
+  renderSearchTooltipContent
 }) => {
   const titlebarClasses = [
     'titlebar',
@@ -64,7 +68,7 @@ const Titlebar: React.FC<TitlebarProps> = ({
       className={titlebarClasses}
       style={{
         width: '100%',
-        height: '30px',
+        height: '32px',
         display: 'flex',
         alignItems: 'center',
         boxSizing: 'border-box'
@@ -78,7 +82,15 @@ const Titlebar: React.FC<TitlebarProps> = ({
       
       {/* Center zone */}
       <div className="titlebar-center">
-        {centerContent ?? <span className="titlebar-title">{title}</span>}
+        {showSearchBar ? (
+          <SearchBar
+            title={title}
+            onResultClick={onSearchResultClick}
+            {...(renderSearchTooltipContent ? { renderTooltipContent: renderSearchTooltipContent } : {})}
+          />
+        ) : (
+          centerContent ?? <span className="titlebar-title">{title}</span>
+        )}
       </div>
       
       {/* Right zone */}

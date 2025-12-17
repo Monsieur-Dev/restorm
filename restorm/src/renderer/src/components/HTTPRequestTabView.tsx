@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import Handlebars from 'handlebars'
 import {
   Button,
   ListViewDropdown,
@@ -17,8 +18,13 @@ import {
   CodeEditor,
   ProgressBar,
   IconSelect,
-  KeyValueTable
+  KeyValueTable,
+  logger
 } from 'electron-core-ui/renderer'
+import codeSnippetsTemplate from '../resources/templates/code-snippets.hbs?raw'
+
+// Compile the code snippets Handlebars template
+const compiledCodeSnippetsTemplate = Handlebars.compile(codeSnippetsTemplate)
 import type {
   Tab,
   VariableDefinition,
@@ -31,14 +37,13 @@ import type {
 import { HttpMethodBadge } from './HttpMethodBadge'
 import { HTTPResponseView } from './HTTPResponseView'
 import type { HTTPRequest, Environment, HTTPResponse, HTTPMethod } from '../types/collections'
-import { useEnvironmentContext } from '../contexts/EnvironmentContext'
-import { useEnvironmentValues } from '../contexts/EnvironmentValuesContext'
+import { useEnvironmentContext } from '../contexts/useEnvironmentContext'
+import { useEnvironmentValues } from '../contexts/useEnvironmentValues'
 import {
   resolveEnvironmentVariables,
   type VariableContext
 } from '../services/VariableResolutionService'
 import { executeHTTPRequest, resolveRequestURL, type HTTPRequestInput } from '../services/HTTPRequestService'
-import { logger } from 'electron-core-ui/renderer'
 
 export interface HTTPRequestTabViewProps {
   /** The HTTP request to display */
@@ -233,6 +238,52 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
   const sashStartLeftRef = useRef<number>(leftPaneWidth)
   const sendTimeoutRef = useRef<number | null>(null)
 
+  // Track request.id to detect when switching to a different request
+  const requestIdRef = useRef<string>(request.id)
+
+  // Reset local state when switching to a different request
+  useEffect(() => {
+    if (requestIdRef.current !== request.id) {
+      requestIdRef.current = request.id
+      setMethod(request.method)
+      setUrl(request.url)
+      setBody(getBodyContent(request))
+      setBodyMode(getBodyMode(request))
+      setBodyFilePath(getBodyFilePath(request))
+    }
+  }, [request])
+
+  // Sync method changes to reactive object
+  useEffect(() => {
+    if (method !== request.method && requestIdRef.current === request.id) {
+      request.method = method as HTTPMethod
+    }
+  }, [method, request])
+
+  // Sync url changes to reactive object
+  useEffect(() => {
+    if (url !== request.url && requestIdRef.current === request.id) {
+      request.url = url
+    }
+  }, [url, request])
+
+  // Sync body changes to reactive object
+  useEffect(() => {
+    if (requestIdRef.current !== request.id) return
+    if (bodyMode === 'text') {
+      const currentContent = request.body?.type === 'text' ? request.body.content : ''
+      if (body !== currentContent) {
+        request.body = { type: 'text', content: body }
+      }
+    } else if (bodyMode === 'file') {
+      const currentPath = request.body?.type === 'file' ? request.body.path : ''
+      if (bodyFilePath !== currentPath) {
+        request.body = { type: 'file', path: bodyFilePath }
+      }
+    }
+    // form-data and x-www-form-urlencoded are handled by KeyValueTable onRowsChange
+  }, [body, bodyMode, bodyFilePath, request])
+
   const runtimeEnvironmentContext = useMemo<VariableContext | undefined>(
     () => (selectedEnvId ? valuesByEnvId[selectedEnvId] : undefined),
     [valuesByEnvId, selectedEnvId]
@@ -330,6 +381,77 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     )
   }, [method, request.name])
 
+  // Generate code snippets markdown
+  const codeSnippetsMarkdown = useMemo(() => {
+    // Parse URL to extract host and path
+    let host = ''
+    let pathOnly = ''
+    let baseUrl = ''
+    try {
+      const urlObj = new URL(resolvedUrl.startsWith('http') ? resolvedUrl : `https://${resolvedUrl}`)
+      host = urlObj.host
+      pathOnly = urlObj.pathname
+      baseUrl = `${urlObj.protocol}//${urlObj.host}`
+    } catch {
+      // If URL parsing fails, use the raw URL
+      host = resolvedUrl
+      pathOnly = '/'
+      baseUrl = resolvedUrl
+    }
+
+    // Prepare headers array (from current state)
+    const headersData = request.headers
+      .filter(h => h.key)
+      .map(h => ({ key: h.key, value: h.value }))
+
+    // Prepare query params
+    const paramsData = request.params
+      .filter(p => p.key)
+      .map(p => ({ key: p.key, value: p.value }))
+
+    // Prepare path params
+    const pathParamsData = (request.pathParams ?? [])
+      .filter(p => p.key)
+      .map(p => ({ key: p.key, value: p.value }))
+
+    // Prepare body content based on mode
+    let bodyContent: string | null = null
+    if (bodyMode === 'text' && body) {
+      bodyContent = body
+    } else if ((bodyMode === 'form-data' || bodyMode === 'x-www-form-urlencoded') && request.body?.type === bodyMode) {
+      const fields = request.body.fields.filter(f => f.key)
+      if (fields.length > 0) {
+        if (bodyMode === 'form-data') {
+          bodyContent = fields.map(f => `${f.key}=${f.value}`).join('&')
+        } else {
+          bodyContent = fields.map(f => `${encodeURIComponent(f.key)}=${encodeURIComponent(f.value)}`).join('&')
+        }
+      }
+    }
+
+    // Capitalize method for C#/Ruby
+    const capitalMethod = method.charAt(0).toUpperCase() + method.slice(1).toLowerCase()
+
+    return compiledCodeSnippetsTemplate({
+      method,
+      lowerMethod: method.toLowerCase(),
+      capitalMethod,
+      url: resolvedUrl,
+      host,
+      path: pathOnly,
+      baseUrl,
+      headers: headersData.length > 0 ? headersData : null,
+      params: paramsData.length > 0 ? paramsData : null,
+      pathParams: pathParamsData.length > 0 ? pathParamsData : null,
+      body: bodyContent,
+      bodyMode,
+      hasHeaders: headersData.length > 0,
+      hasParams: paramsData.length > 0,
+      hasPathParams: pathParamsData.length > 0,
+      hasBody: !!bodyContent
+    })
+  }, [method, resolvedUrl, request.headers, request.params, request.pathParams, request.body, body, bodyMode])
+
   const tabs: Tab[] = [
     {
       id: 'requestLayout',
@@ -385,6 +507,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
               variables={environmentVariablesForInputs}
               initialRows={request.headers}
               visibilityMode="base-only"
+              onRowsChange={(rows) => {
+                request.headers = rows
+              }}
             />
           </Pane>
           <Pane
@@ -416,6 +541,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
               initialRows={request.pathParams ?? []}
               visibilityMode="base-only"
               onResolvedContextChange={setResolvedPathParamsContext}
+              onRowsChange={(rows) => {
+                request.pathParams = rows
+              }}
             />
           </Pane>
           <Pane
@@ -447,6 +575,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
               initialRows={request.params}
               visibilityMode="base-only"
               onResolvedContextChange={setResolvedQueryParamsContext}
+              onRowsChange={(rows) => {
+                request.params = rows
+              }}
             />
           </Pane>
           <Pane
@@ -488,7 +619,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
                   <div
                     style={{
                       height: '100%',
-                      border: '1px solid var(--vscode-panel-border, #3c3c3c)',
+                      border: '1px solid var(--vscode-panel-border)',
                       borderRadius: 3,
                       boxSizing: 'border-box'
                     }}
@@ -520,6 +651,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
                         : []
                     }
                     visibilityMode="base-only"
+                    onRowsChange={(rows) => {
+                      request.body = { type: bodyMode as 'form-data' | 'x-www-form-urlencoded', fields: rows }
+                    }}
                   />
                 )}
 
@@ -582,7 +716,24 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
       useScrollableElement: false,
       allowFullscreen: true,
       fullscreenModalTitle: renderRequestModalTitle(t('requestTab.tabs.notes')),
-      content: <MarkdownEditor initialValue={request.notes ?? ''} />
+      content: (
+        <MarkdownEditor
+          initialValue={request.notes ?? ''}
+          onChange={(markdown) => {
+            request.notes = markdown
+          }}
+        />
+      )
+    },
+    {
+      id: 'codeSnippets',
+      label: t('requestTab.tabs.codeSnippets'),
+      useScrollableElement: false,
+      allowFullscreen: true,
+      fullscreenModalTitle: renderRequestModalTitle(t('requestTab.tabs.codeSnippets')),
+      content: (
+        <MarkdownViewer value={codeSnippetsMarkdown} />
+      )
     }
   ]
 
@@ -771,9 +922,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
         >
           <div
             style={{
-              width: httpResponse || isSending ? leftPaneWidth || '50%' : '100%',
+              width: httpResponse ?? isSending ? leftPaneWidth || '50%' : '100%',
               minWidth: 320,
-              maxWidth: httpResponse || isSending ? '80%' : '100%',
+              maxWidth: httpResponse ?? isSending ? '80%' : '100%',
               display: 'flex',
               flexDirection: 'column',
               minHeight: 0
@@ -786,7 +937,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
             />
           </div>
 
-          {(httpResponse || isSending) && (
+          {(httpResponse ?? isSending) && (
             <>
               <div
                 style={{

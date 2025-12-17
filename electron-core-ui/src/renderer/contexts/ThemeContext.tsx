@@ -15,7 +15,7 @@ export interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
-type ThemeApi = {
+interface ThemeApi {
   list: () => Promise<ThemeInfo[]>
   load: (themeId: string) => Promise<{ theme: ThemeDefinition; variables: ThemeVariables } | null>
   getCurrent: () => Promise<string | undefined>
@@ -24,16 +24,13 @@ type ThemeApi = {
   onThemeChanged: (callback: (themeId: string) => void) => () => void
 }
 
-type WindowWithThemeApi = typeof window & {
-  api?: {
-    theme?: ThemeApi
-  }
-}
-
 function getThemeApi(): ThemeApi | null {
   if (typeof window === 'undefined') return null
-  const anyWindow = window as WindowWithThemeApi
-  return anyWindow.api?.theme ?? null
+  const anyWindow: Record<string, unknown> = window as unknown as Record<string, unknown>
+  if (!('api' in anyWindow) || !anyWindow['api']) return null
+  const api = anyWindow['api'] as Record<string, unknown>
+  if (!('theme' in api) || !api['theme']) return null
+  return api['theme'] as ThemeApi
 }
 
 // Global initialization flag to prevent multiple inits across StrictMode
@@ -139,7 +136,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
 
   const setTheme = useCallback(async (themeId: string): Promise<void> => {
     const themeApi = getThemeApi()
-    if (!themeApi?.load || !themeApi.set) {
+    if (!themeApi) {
       setError('Theme API is not available')
       setIsLoading(false)
       return
@@ -288,7 +285,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
     })
     
     // Listen for theme changes from other windows
-    const cleanup = getThemeApi()?.onThemeChanged?.((themeId: string) => {
+    const cleanup = getThemeApi()?.onThemeChanged((themeId: string) => {
       if (currentThemeIdRef.current === themeId) return
       
       void (async () => {

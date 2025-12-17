@@ -12,8 +12,6 @@ import type {
 } from './types'
 import './listView.css'
 
-const ROW_HEIGHT = 22
-
 interface FlatItem {
   item: ListViewItemData
   depth: number
@@ -173,7 +171,9 @@ export const ListView: React.FC<ListViewProps> = ({
   onItemToggle,
   onItemDrop,
   onItemContextMenu,
-  onItemRename
+  onItemRename,
+  onItemMouseEnter,
+  onItemMouseLeave
 }) => {
   const initialItems = useMemo<ListViewItemData[]>(() => {
     if (items && items.length > 0) {
@@ -646,6 +646,18 @@ export const ListView: React.FC<ListViewProps> = ({
               handleDoubleClick(flat, event)
             }
 
+            const handleRowMouseEnter = (event: React.MouseEvent<HTMLDivElement>): void => {
+              if (!onItemMouseEnter) return
+              const payload: ListViewItemEventPayload = { item: item, path: flat.path }
+              onItemMouseEnter(payload, event)
+            }
+
+            const handleRowMouseLeave = (event: React.MouseEvent<HTMLDivElement>): void => {
+              if (!onItemMouseLeave) return
+              const payload: ListViewItemEventPayload = { item: item, path: flat.path }
+              onItemMouseLeave(payload, event)
+            }
+
             const isEditing = editingItemId === item.id
             const titleContent = isEditing ? (
               <input
@@ -676,7 +688,7 @@ export const ListView: React.FC<ListViewProps> = ({
                 item.icon
               )
 
-            const rowStyle: React.CSSProperties = { height: ROW_HEIGHT }
+            const rowStyle: React.CSSProperties = {}
 
             return (
               <div
@@ -691,6 +703,8 @@ export const ListView: React.FC<ListViewProps> = ({
                 draggable={!isEditing}
                 onClick={handleRowClick}
                 onDoubleClick={handleRowDoubleClick}
+                onMouseEnter={handleRowMouseEnter}
+                onMouseLeave={handleRowMouseLeave}
                 onContextMenu={(event): void => {
                   handleContextMenu(flat, event)
                 }}

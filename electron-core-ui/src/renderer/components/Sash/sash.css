@@ -115,7 +115,7 @@
 
 .monaco-sash.hover:before,
 .monaco-sash.active:before {
-	background: var(--vscode-sash-hoverBorder, var(--vscode-focusBorder, #007acc)) !important;
+	background: var(--vscode-sash-hoverBorder) !important;
 	opacity: 1 !important;
 }
 

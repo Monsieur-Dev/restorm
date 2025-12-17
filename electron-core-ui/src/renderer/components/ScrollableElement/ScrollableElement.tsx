@@ -566,9 +566,10 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
         className={`scrollable-content${contentClassName ? ` ${contentClassName}` : ''}`}
         style={{
           width: '100%',
-          height: '100%',
-          minHeight: '100%',
-          overflow: 'hidden',
+          height: mergedOptions.fitContent ? 'auto' : '100%',
+          minHeight: mergedOptions.fitContent ? 'auto' : '100%',
+          maxHeight: mergedOptions.fitContent ? style?.maxHeight : undefined,
+          overflow: 'auto',
           position: 'relative',
         }}
         onScroll={handleScroll}

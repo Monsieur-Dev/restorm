@@ -20,12 +20,15 @@ import {
   isContainerNode,
   navigationService
 } from 'electron-core-ui/renderer'
-import type { WorkbenchTree, NavigationEvent, GroupNode, TabGroupNode, EditorTab } from 'electron-core-ui/renderer'
+import type { WorkbenchTree, NavigationEvent, GroupNode, TabGroupNode, EditorTab, SearchResult } from 'electron-core-ui/renderer'
 import { Workbench } from './components/Workbench'
 import { Welcome } from './components/Welcome'
 import { HttpMethodBadge } from './components/HttpMethodBadge'
+import { renderSearchTooltipContent } from './components/renderSearchTooltipContent'
 import { EnvironmentValuesProvider } from './contexts/EnvironmentValuesContext'
 import { importSwaggerFromJson } from './services/SwaggerImportService'
+import { searchIndexService } from './services/SearchIndexService'
+import { makeReactiveFolder } from './types/reactive'
 import { folderAsRootListViewItem, collectAllFolderIds } from './services/FolderToListView'
 import swaggerPetstoreJson from './resources/swagger-petstore.json'
 import type { Folder, FolderItem, HTTPRequest, Environment } from './types/collections'
@@ -123,11 +126,12 @@ const attachContextMenus = (
   })
 
 // Import and convert swagger to Folder structure (initial data)
-const initialSwaggerFolder = importSwaggerFromJson(JSON.stringify(swaggerPetstoreJson))
+const rawSwaggerFolder = importSwaggerFromJson(JSON.stringify(swaggerPetstoreJson))
+const initialSwaggerFolder = makeReactiveFolder(rawSwaggerFolder)
 const allFolderIds = collectAllFolderIds(initialSwaggerFolder)
 
 /** Find a folder by ID in the folder tree */
-function findFolderById(folder: Folder, id: string): Folder | null {
+function findFolderById(folder: Folder, id: string): Folder | undefined {
   if (folder.id === id) return folder
   for (const item of folder.items) {
     if (isFolder(item)) {
@@ -135,21 +139,32 @@ function findFolderById(folder: Folder, id: string): Folder | null {
       if (found) return found
     }
   }
-  return null
+  return undefined
 }
 
-/** Update a folder by ID in the folder tree (returns new tree) */
-function updateFolderById(folder: Folder, id: string, updatedFolder: Folder): Folder {
-  if (folder.id === id) return updatedFolder
-  return {
-    ...folder,
-    items: folder.items.map((item) => {
-      if (isFolder(item)) {
-        return updateFolderById(item, id, updatedFolder)
-      }
-      return item
-    })
+/** Find an HTTP request by ID in the folder tree */
+function findRequestById(folder: Folder, id: string): HTTPRequest | undefined {
+  for (const item of folder.items) {
+    if (!isFolder(item) && item.id === id) return item
+    if (isFolder(item)) {
+      const found = findRequestById(item, id)
+      if (found) return found
+    }
   }
+  return undefined
+}
+
+/** Find any item (folder or request) by ID in the folder tree */
+function findItemById(folder: Folder, id: string): FolderItem | null {
+  if (folder.id === id) return folder
+  for (const item of folder.items) {
+    if (item.id === id) return item
+    if (isFolder(item)) {
+      const found = findItemById(item, id)
+      if (found) return found
+    }
+  }
+  return null
 }
 
 /** Folder icon for breadcrumbs */
@@ -241,6 +256,25 @@ const App: React.FC = () => {
 
   // Swagger folder data (mutable for renaming)
   const [swaggerFolder, setSwaggerFolder] = useState<Folder>(initialSwaggerFolder)
+
+  // Counter to force re-render without breaking reactive proxies
+  const [, forceUpdate] = useState(0)
+
+  // Ref to track if search index has been initialized
+  const searchIndexInitializedRef = useRef(false)
+
+  // Initialize search index service and index folder on initial load
+  useEffect(() => {
+    if (searchIndexInitializedRef.current) return
+    searchIndexInitializedRef.current = true
+    
+    searchIndexService.initialize()
+    searchIndexService.indexFolderTree(swaggerFolder)
+    
+    // Note: No cleanup needed - the service is a singleton that should persist
+    // for the lifetime of the application. StrictMode would otherwise destroy
+    // subscriptions before re-rendering.
+  }, [swaggerFolder])
 
   // Initialize with all folders expanded
   const [expandedIds, setExpandedIds] = useState<string[]>(allFolderIds)
@@ -594,6 +628,15 @@ const App: React.FC = () => {
     navigationService.navigateTo(itemId, 'context-menu', { type: 'folder' })
   }, [])
 
+  // Handle search result click - navigate to the selected item
+  const handleSearchResultClick = useCallback((result: SearchResult) => {
+    if (result.navigation?.type === 'request' && result.navigation.requestId) {
+      handleItemClick(result.navigation.requestId)
+    } else if (result.navigation?.type === 'folder' && result.navigation.folderId) {
+      handleItemClick(result.navigation.folderId)
+    }
+  }, [handleItemClick])
+
   // Convert swagger folder to ListView items
   const sidebarItems: ListViewItemData[] = useMemo(() => {
     const expandedSet = new Set(expandedIds)
@@ -710,32 +753,14 @@ const App: React.FC = () => {
   // Handle item rename from breadcrumb
   const handleItemRename = useCallback(
     (item: BreadcrumbItem, newName: string) => {
-      setSwaggerFolder((prevFolder) => {
-        // Deep clone and update the folder structure
-        const updateFolderItems = (folder: Folder): Folder => {
-          const updatedItems = folder.items.map((folderItem): FolderItem => {
-            if (isFolder(folderItem)) {
-              if (folderItem.id === item.id) {
-                return { ...folderItem, name: newName }
-              }
-              return updateFolderItems(folderItem)
-            } else if (isRequest(folderItem) && isHTTPRequest(folderItem)) {
-              if (folderItem.id === item.id) {
-                return { ...folderItem, name: newName }
-              }
-            }
-            return folderItem
-          })
-          return { ...folder, items: updatedItems }
-        }
+      // Find and update the reactive object directly (triggers search re-indexing)
+      const foundItem = findItemById(swaggerFolder, item.id)
+      if (foundItem) {
+        foundItem.name = newName
+      }
 
-        // Check if root folder is being renamed
-        if (prevFolder.id === item.id) {
-          return { ...prevFolder, name: newName }
-        }
-
-        return updateFolderItems(prevFolder)
-      })
+      // Force React re-render by creating new reference
+      setSwaggerFolder((prevFolder) => ({ ...prevFolder }))
 
       // Also update the workbench tab title and breadcrumbs
       setWorkbenchTree((prevTree) => {
@@ -788,36 +813,19 @@ const App: React.FC = () => {
         }
       })
     },
-    []
+    [swaggerFolder]
   )
 
   // Handle tags changes from Workbench (folders or HTTP requests)
   const handleTagsChange = useCallback((targetId: string, newTags: string[]) => {
-    // Update folder structure
-    setSwaggerFolder((prevFolder) => {
-      const updateFolderItems = (folder: Folder): Folder => {
-        const updatedItems = folder.items.map((folderItem): FolderItem => {
-          if (isFolder(folderItem)) {
-            if (folderItem.id === targetId) {
-              return { ...folderItem, tags: newTags }
-            }
-            return updateFolderItems(folderItem)
-          } else if (isRequest(folderItem) && isHTTPRequest(folderItem)) {
-            if (folderItem.id === targetId) {
-              return { ...folderItem, tags: newTags }
-            }
-          }
-          return folderItem
-        })
-        return { ...folder, items: updatedItems }
-      }
+    // Find and update the reactive object directly (triggers search re-indexing)
+    const item = findItemById(swaggerFolder, targetId)
+    if (item) {
+      item.tags = newTags
+    }
 
-      if (prevFolder.id === targetId) {
-        return { ...prevFolder, tags: newTags }
-      }
-
-      return updateFolderItems(prevFolder)
-    })
+    // Force React re-render without breaking reactive proxies
+    forceUpdate((n) => n + 1)
 
     // Update tags in open workbench tabs
     setWorkbenchTree((prevTree) => {
@@ -849,13 +857,25 @@ const App: React.FC = () => {
         groups: [{ ...group, tabs: updatedTabs }]
       }
     })
-  }, [])
+  }, [swaggerFolder])
 
   // Handle folder changes from FolderView (environments, etc.)
   const handleFolderChange = useCallback((folderId: string, updatedFolder: Folder) => {
-    // Update folder structure and get updated tree
-    const newSwaggerFolder = updateFolderById(swaggerFolder, folderId, updatedFolder)
-    setSwaggerFolder(newSwaggerFolder)
+    // Find and update the reactive folder directly to preserve proxies
+    const reactiveFolder = findFolderById(swaggerFolder, folderId)
+    if (reactiveFolder) {
+      // Update properties on the reactive object (triggers re-indexing)
+      reactiveFolder.configuration = updatedFolder.configuration
+      if (updatedFolder.notes !== undefined) {
+        reactiveFolder.notes = updatedFolder.notes
+      }
+      reactiveFolder.documentation = updatedFolder.documentation
+      reactiveFolder.tags = updatedFolder.tags
+      reactiveFolder.name = updatedFolder.name
+    }
+    
+    // Force React re-render without breaking reactive proxies
+    forceUpdate((n) => n + 1)
 
     // Update folder data in open workbench tabs (all groups)
     setWorkbenchTree((prevTree) => {
@@ -880,7 +900,7 @@ const App: React.FC = () => {
             const belongsToFolder = restormTab.breadcrumbs.some(bc => bc.id === folderId)
             if (belongsToFolder) {
               // Recalculate environments for this request
-              const newEnvironments = getNearestEnvironmentsForBreadcrumbs(newSwaggerFolder, restormTab.breadcrumbs)
+              const newEnvironments = getNearestEnvironmentsForBreadcrumbs(swaggerFolder, restormTab.breadcrumbs)
               return {
                 ...restormTab,
                 environments: newEnvironments
@@ -913,6 +933,9 @@ const App: React.FC = () => {
     >
       <Titlebar
         title={t('app.title')}
+        showSearchBar
+        onSearchResultClick={handleSearchResultClick}
+        renderSearchTooltipContent={renderSearchTooltipContent}
         leftContent={
           <MenuBar>
             <MenuBarItem title={t('menuBar.file')}>
@@ -1044,6 +1067,8 @@ const App: React.FC = () => {
               autosave
               onRebuildTab={handleRebuildTab}
               onStateRestored={handleStateRestored}
+              getRequestById={(id) => findRequestById(swaggerFolder, id)}
+              getFolderById={(id) => findFolderById(swaggerFolder, id)}
             />
           </div>
         </EnvironmentValuesProvider>

@@ -2,11 +2,12 @@ import React, { useEffect, useRef, useState, useCallback } from 'react'
 import './tooltip.css'
 
 export interface TooltipProps {
-  targetRef: React.RefObject<HTMLElement>
+  targetRef: React.RefObject<HTMLElement | null>
   content: React.ReactNode
   show: boolean
   onMouseEnter?: () => void
   onMouseLeave?: () => void
+  onMouseDown?: (e: React.MouseEvent) => void
   className?: string
   /**
    * Vertical placement strategy:
@@ -15,6 +16,21 @@ export interface TooltipProps {
    * - 'below': prefer below the target, falling back above only when there is no space below.
    */
   placement?: 'auto' | 'above' | 'below'
+  /**
+   * Horizontal side positioning:
+   * - 'auto' (default): use standard above/below placement
+   * - 'right': position tooltip to the right of the target, beak on the left
+   */
+  side?: 'auto' | 'right'
+  /**
+   * Fixed top position in pixels. When set, overrides vertical placement calculation.
+   */
+  fixedTop?: number
+  /**
+   * Key to force repositioning when target changes. Pass a unique value (e.g., item ID)
+   * to trigger position recalculation when hovering different elements.
+   */
+  repositionKey?: string | number | null
 }
 
 const Tooltip: React.FC<TooltipProps> = ({
@@ -23,11 +39,15 @@ const Tooltip: React.FC<TooltipProps> = ({
   show,
   onMouseEnter,
   onMouseLeave,
+  onMouseDown,
   className = '',
-  placement = 'auto'
+  placement = 'auto',
+  side = 'auto',
+  fixedTop,
+  repositionKey
 }) => {
   const tooltipRef = useRef<HTMLDivElement>(null)
-  const [position, setPosition] = useState<{ top: number; left: number; beakLeftPercent: number }>({ top: -9999, left: -9999, beakLeftPercent: 50 })
+  const [position, setPosition] = useState<{ top: number; left: number; beakLeftPercent: number; beakTopPercent: number | undefined }>({ top: -9999, left: -9999, beakLeftPercent: 50, beakTopPercent: undefined })
   const [isPositioned, setIsPositioned] = useState(false)
   const [resolvedPlacement, setResolvedPlacement] = useState<'above' | 'below'>('above')
 
@@ -40,31 +60,66 @@ const Tooltip: React.FC<TooltipProps> = ({
     const viewportHeight = window.innerHeight
     const gap = 3 // Reduced gap between tooltip and target
     const beakHeight = 5
-
-    // Calculate target center (middle point between left and right edges of StatusbarElement)
-    // This is the exact center of the button/element where the beak should point
-    const targetCenterX = targetRect.left + (targetRect.width / 2)
+    const beakWidth = 6
     
-    // Get tooltip width - if tooltip is at -9999, width might be 0, so we need to measure it differently
+    // Get tooltip dimensions - if tooltip is at -9999, dimensions might be 0
     const tooltipWidth = tooltipRect.width > 0 ? tooltipRect.width : tooltipRef.current.offsetWidth || tooltipRef.current.scrollWidth
-    
-    // Position tooltip centered on target (we'll adjust the beak position separately)
-    let left = targetCenterX - (tooltipWidth / 2)
-    
-    // Measure tooltip height (may be 0 on first pass, so fall back to DOM metrics)
     const tooltipHeight = tooltipRect.height > 0 ? tooltipRect.height : tooltipRef.current.offsetHeight || tooltipRef.current.scrollHeight
+
     let top: number
-    let nextPlacement: 'above' | 'below'
+    let left: number
+    let beakLeftPercent = 50
+    let beakTopPercent: number | undefined
+    let nextPlacement: 'above' | 'below' = 'above'
+
+    // Side positioning (tooltip to the right of target)
+    if (side === 'right') {
+      // Position tooltip to the right of the target
+      left = targetRect.right + gap + beakWidth
+
+      // Use fixedTop if provided, otherwise align with target center
+      if (fixedTop !== undefined) {
+        top = fixedTop
+      } else {
+        const targetCenterY = targetRect.top + targetRect.height / 2
+        top = targetCenterY - tooltipHeight / 2
+      }
+
+      // Clamp to viewport
+      if (left + tooltipWidth + gap > viewportWidth) {
+        left = viewportWidth - tooltipWidth - gap
+      }
+      if (top < gap) {
+        top = gap
+      }
+      if (top + tooltipHeight + gap > viewportHeight) {
+        top = viewportHeight - tooltipHeight - gap
+      }
+
+      // Calculate beak vertical position as percentage
+      // The beak should point to the vertical center of the target
+      const targetCenterY = targetRect.top + targetRect.height / 2
+      beakTopPercent = ((targetCenterY - top) / tooltipHeight) * 100
+      // Clamp beak position between 10% and 90%
+      beakTopPercent = Math.max(10, Math.min(90, beakTopPercent))
+
+      setPosition({ top, left, beakLeftPercent: 0, beakTopPercent })
+      setResolvedPlacement('below') // Not really used for side positioning
+      setIsPositioned(true)
+      return
+    }
+
+    // Standard above/below positioning
+    const targetCenterX = targetRect.left + targetRect.width / 2
+    left = targetCenterX - tooltipWidth / 2
 
     if (placement === 'above') {
-      // Explicitly above the target (used for statusbar-style tooltips)
       top = targetRect.top - tooltipHeight - gap - beakHeight + 5
       if (top < gap) {
         top = gap
       }
       nextPlacement = 'above'
     } else if (placement === 'below') {
-      // Prefer below the target; if there is no room, fall back above
       top = targetRect.bottom + gap + beakHeight
       if (top + tooltipHeight + gap > viewportHeight) {
         const aboveTop = targetRect.top - tooltipHeight - gap - beakHeight + 5
@@ -79,14 +134,12 @@ const Tooltip: React.FC<TooltipProps> = ({
         nextPlacement = 'below'
       }
     } else {
-      // 'auto': prefer above (original behavior), but fall back below if not enough space
       const aboveTop = targetRect.top - tooltipHeight - gap - beakHeight + 5
       if (aboveTop >= gap) {
         top = aboveTop
         nextPlacement = 'above'
       } else {
         top = targetRect.bottom + gap + beakHeight
-        // If still out of bounds at the bottom, clamp inside viewport
         if (top + tooltipHeight + gap > viewportHeight) {
           top = Math.max(gap, viewportHeight - tooltipHeight - gap)
         }
@@ -97,8 +150,6 @@ const Tooltip: React.FC<TooltipProps> = ({
     // Adjust if tooltip goes off screen horizontally
     const minLeft = gap
     const maxLeft = viewportWidth - tooltipWidth - gap
-    
-    // Check if tooltip would go off screen
     if (left < minLeft) {
       left = minLeft
     } else if (left > maxLeft) {
@@ -106,26 +157,22 @@ const Tooltip: React.FC<TooltipProps> = ({
     }
 
     // Calculate beak position as percentage
-    // beakLeftPercent = ((targetCenterX - tooltipLeft) / tooltipWidth) * 100
-    // This ensures the beak points to the center of the target button
-    const beakLeftPercent = ((targetCenterX - left) / tooltipWidth) * 100
+    beakLeftPercent = ((targetCenterX - left) / tooltipWidth) * 100
 
-    setPosition({ top, left, beakLeftPercent })
+    setPosition({ top, left, beakLeftPercent, beakTopPercent: undefined })
     setResolvedPlacement(nextPlacement)
     setIsPositioned(true)
     
     // Recalculate after positioning to ensure accurate beak position
-    // This handles cases where tooltip width changes after initial render
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         if (tooltipRef.current && targetRef.current) {
           const finalTooltipRect = tooltipRef.current.getBoundingClientRect()
           const finalTargetRect = targetRef.current.getBoundingClientRect()
-          const finalTargetCenterX = finalTargetRect.left + (finalTargetRect.width / 2)
+          const finalTargetCenterX = finalTargetRect.left + finalTargetRect.width / 2
           const finalTooltipLeft = finalTooltipRect.left
           const finalTooltipWidth = finalTooltipRect.width
           
-          // Recalculate beak position
           const finalBeakLeftPercent = ((finalTargetCenterX - finalTooltipLeft) / finalTooltipWidth) * 100
           
           setPosition(prev => ({
@@ -135,13 +182,13 @@ const Tooltip: React.FC<TooltipProps> = ({
         }
       })
     })
-  }, [targetRef, placement])
+  }, [targetRef, placement, side, fixedTop])
 
   useEffect(() => {
     if (show) {
       // Reset positioning state
       setIsPositioned(false)
-      setPosition({ top: -9999, left: -9999, beakLeftPercent: 50 })
+      setPosition({ top: -9999, left: -9999, beakLeftPercent: 50, beakTopPercent: undefined })
       // Wait for next frame to ensure tooltip is rendered and has dimensions
       requestAnimationFrame(() => {
         // Double RAF to ensure layout is complete
@@ -158,9 +205,9 @@ const Tooltip: React.FC<TooltipProps> = ({
       })
     } else {
       setIsPositioned(false)
-      setPosition({ top: -9999, left: -9999, beakLeftPercent: 50 })
+      setPosition({ top: -9999, left: -9999, beakLeftPercent: 50, beakTopPercent: undefined })
     }
-  }, [show, updatePosition])
+  }, [show, updatePosition, repositionKey])
 
   useEffect(() => {
     if (!show) {
@@ -194,6 +241,7 @@ const Tooltip: React.FC<TooltipProps> = ({
       ref={tooltipRef}
       className={tooltipClasses}
       data-placement={resolvedPlacement}
+      data-side={side}
       style={{
         position: 'fixed',
         top: `${position.top}px`,
@@ -201,10 +249,12 @@ const Tooltip: React.FC<TooltipProps> = ({
         zIndex: 10000,
         opacity: isPositioned ? 1 : 0,
         transition: isPositioned ? 'opacity 100ms linear' : 'none',
-        '--beak-left-percent': `${position.beakLeftPercent}%`
+        '--beak-left-percent': `${position.beakLeftPercent}%`,
+        '--beak-top-percent': position.beakTopPercent !== undefined ? `${position.beakTopPercent}%` : '50%'
       } as React.CSSProperties}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
+      onMouseDown={onMouseDown}
     >
       <div className="tooltip-content">
         {content}

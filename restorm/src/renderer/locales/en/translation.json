@@ -62,7 +62,8 @@
       "body": "Body",
       "params": "Params",
       "pathParams": "Path params",
-      "notes": "Notes"
+      "notes": "Notes",
+      "codeSnippets": "Code snippets"
     },
     "responses": {
       "tabs": {
@@ -84,6 +85,12 @@
   },
   "codeEditor": {
     "goToDefinition": "Go to Definition"
+  },
+  "search": {
+    "tooltip": {
+      "noDetails": "No details available",
+      "noContent": "No documentation or notes"
+    }
   },
   "httpStatus": {
     "100": {

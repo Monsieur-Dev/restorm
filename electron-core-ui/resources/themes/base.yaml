@@ -60,15 +60,37 @@ variables:
     value: "12px"
     description: AG Grid font size
 
+  - id: vscode-editor-font-size
+    value: "13px"
+    description: Default editor font size
+
+  - id: vscode-editor-font-family
+    value: "Consolas, 'Courier New', monospace"
+    description: Default editor font family
+
+  # Radio component defaults (for high contrast themes)
+  - id: vscode-radio-activeBorder
+    value: "transparent"
+    description: Radio button active border color
+
+  - id: vscode-radio-inactiveBorder
+    value: "transparent"
+    description: Radio button inactive border color
+
+  # Window controls overlay
+  - id: vscode-wco-iconForeground
+    value: "#cccccc"
+    description: Window controls overlay icon color
+
   # Tag component colors (generic defaults, can be overridden per theme type)
-  - id: tag-background
+  - id: vscode-tag-background
     value: "#444444"
     description: Default tag background color
 
-  - id: tag-background-hover
+  - id: vscode-tag-background-hover
     value: "#555555"
     description: Default tag hover background color
 
-  - id: tag-foreground
+  - id: vscode-tag-foreground
     value: "#ffffff"
     description: Default tag foreground color

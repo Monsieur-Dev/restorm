@@ -1,0 +1,323 @@
+.search-bar-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 600px;
+  height: 100%;
+  -webkit-app-region: no-drag;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+/* Closed state - VSCode style search trigger */
+.search-bar-closed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 2px 10px;
+  margin-top: 0px;
+  border-radius: 4px;
+  transition: background-color 150ms ease, border-color 150ms ease, height 150ms ease, box-shadow 150ms ease;
+  user-select: none;
+  height: 24px;
+  width: 100%;
+  max-width: 600px;
+  background-color: var(--vscode-input-background);
+  border: 1px solid var(--vscode-widget-border);
+  box-sizing: border-box;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.search-bar-closed:hover {
+  background-color: var(--vscode-input-background);
+  border-color: var(--vscode-focusBorder);
+}
+
+.search-bar-closed .search-icon {
+  font-size: 13px;
+  opacity: 0.6;
+  flex-shrink: 0;
+  animation: fadeSlideIn 150ms ease-out;
+}
+
+.search-bar-closed .search-title {
+  font-size: 11px;
+  color: var(--vscode-input-placeholderForeground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: fadeSlideIn 150ms ease-out;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Open state - unified search box with results */
+.search-bar-open {
+  position: fixed;
+  background-color: var(--vscode-input-background);
+  border: 1px solid var(--vscode-widget-border);
+  border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  z-index: 10000;
+  box-sizing: border-box;
+  animation: searchBoxAppear 150ms ease-out;
+  -webkit-app-region: no-drag;
+}
+
+@keyframes searchBoxAppear {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-bar-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.search-bar-input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+}
+
+.search-bar-input > div {
+  width: 100%;
+}
+
+.search-bar-input .monaco-inputbox {
+  background: transparent;
+  border: none;
+  width: 100%;
+}
+
+.search-bar-input .monaco-inputbox > .ibwrapper > .input {
+  background: transparent;
+}
+
+/* Results wrapper */
+.search-results-wrapper {
+  max-height: 300px;
+}
+
+/* Results content */
+.search-results-content {
+  padding: 4px 0;
+}
+
+.search-results-empty {
+  padding: 12px 16px;
+  text-align: center;
+  color: var(--vscode-descriptionForeground);
+  font-size: 12px;
+}
+
+/* Category header */
+.search-results-category {
+  padding: 6px 12px 6px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--vscode-descriptionForeground);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--vscode-dropdown-background);
+  position: sticky;
+  top: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.search-results-category:hover {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+.search-results-category .category-chevron {
+  font-size: 14px;
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.search-results-category .category-icon {
+  font-size: 12px;
+}
+
+.search-results-category .category-count {
+  margin-left: auto;
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+/* Result item */
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 28px;
+  cursor: pointer;
+  transition: background-color 100ms ease;
+}
+
+.search-result-item:hover {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+.search-result-item:focus {
+  background-color: var(--vscode-list-focusBackground);
+  outline: none;
+}
+
+.search-result-item .result-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  width: 16px;
+  text-align: center;
+}
+
+.search-result-item .result-content {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.search-result-item .result-title {
+  font-size: 12px;
+  color: var(--vscode-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-result-item .result-description {
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+/* HTTP request result with method badge */
+.result-http-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.http-method-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #ffffff;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+
+.http-method-badge.method-get {
+  background-color: #007acc;
+}
+
+.http-method-badge.method-post {
+  background-color: #1b8a3d;
+}
+
+.http-method-badge.method-put {
+  background-color: #d18616;
+}
+
+.http-method-badge.method-patch {
+  background-color: #9370db;
+}
+
+.http-method-badge.method-delete {
+  background-color: #c74632;
+}
+
+.http-method-badge.method-head {
+  background-color: #ff69b4;
+}
+
+.http-method-badge.method-options {
+  background-color: #6a5acd;
+}
+
+.http-route {
+  color: var(--vscode-foreground);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ListView result items */
+.search-results-wrapper .list-view-row {
+  padding: 4px 8px;
+}
+
+.search-results-wrapper .list-view-row .result-content {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.search-results-wrapper .list-view-row .result-title {
+  font-size: 12px;
+  color: var(--vscode-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-results-wrapper .list-view-row .result-description {
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.search-results-wrapper .list-view-row .result-http-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-results-wrapper .list-view-row .result-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* Search result tooltip - fixed width */
+.search-result-tooltip {
+  width: 500px;
+}

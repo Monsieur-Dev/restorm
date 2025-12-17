@@ -1,3 +1,4 @@
 export { SettingsPage } from './SettingsPage'
-export { SettingsModalProvider, useSettingsModal } from './SettingsModal'
+export { SettingsModalProvider } from './SettingsModal'
+export { useSettingsModal } from './useSettingsModal'
 export { ThemeCarousel } from './ThemeCarousel'

@@ -72,7 +72,7 @@
   opacity: 1;
   border-color: var(
     --vscode-tree-indentGuidesStroke,
-    var(--vscode-editorIndentGuide-activeBackground, rgba(128, 128, 128, 0.4))
+    var(--vscode-editorIndentGuide-activeBackground)
   );
 }
 

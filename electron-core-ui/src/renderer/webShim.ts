@@ -8,11 +8,11 @@ import yaml from 'js-yaml'
 import themeIndexJson from '../../resources/themes/index.json'
 
 // Dynamically import all theme YAML files using Vite's glob import
-const themeYamlModules = import.meta.glob('../../resources/themes/**/*.yaml', {
+const themeYamlModules = import.meta.glob<string>('../../resources/themes/**/*.yaml', {
   query: '?raw',
   import: 'default',
   eager: true
-}) as Record<string, string>
+})
 
 // Helper to extract theme ID from file path
 function getThemeIdFromPath(path: string): string {
@@ -70,8 +70,6 @@ interface WindowApiShim {
   ) => () => void
 }
 
-type WindowWithOptionalApi = Window & { api?: WindowApiShim }
-
 type ThemeTypeInternal = 'dark' | 'light' | 'hc_dark' | 'hc_light'
 
 interface ThemeIndexEntry {
@@ -110,7 +108,7 @@ interface YamlThemeFile {
   colors?: Record<string, string>
 }
 
-type ThemeCacheValue = { theme: ThemeDefinition; variables: ThemeVariables }
+interface ThemeCacheValue { theme: ThemeDefinition; variables: ThemeVariables }
 
 const themeIndex = themeIndexJson as ThemeIndex
 
@@ -156,7 +154,7 @@ function ensureWebBaseLoaded(): void {
   // base.yaml
   try {
     const parsed = yaml.load(baseYaml) as YamlBaseFile
-    if (parsed?.variables) {
+    if (parsed.variables) {
       for (const v of parsed.variables) {
         const cssVar = `--${v.id}`
         webBaseVariables[cssVar] = v.value
@@ -176,7 +174,7 @@ function ensureWebBaseLoaded(): void {
   for (const type of Object.keys(typeBaseSources) as ThemeTypeInternal[]) {
     try {
       const parsed = yaml.load(typeBaseSources[type]) as YamlTypeBaseFile
-      if (parsed?.colors) {
+      if (parsed.colors) {
         for (const c of parsed.colors) {
           const cssVar = `--vscode-${c.id.replace(/\./g, '-')}`
           webTypeBaseColors[type][cssVar] = c.value
@@ -188,7 +186,7 @@ function ensureWebBaseLoaded(): void {
   }
 }
 
-async function webListThemes(): Promise<ThemeInfo[]> {
+function webListThemes(): ThemeInfo[] {
   ensureWebBaseLoaded()
   return themeIndex.themes.map((entry) => ({
     id: entry.id,
@@ -198,7 +196,7 @@ async function webListThemes(): Promise<ThemeInfo[]> {
   }))
 }
 
-async function webLoadTheme(themeId: string): Promise<ThemeCacheValue | null> {
+function webLoadTheme(themeId: string): ThemeCacheValue | null {
   ensureWebBaseLoaded()
 
   const cached = webThemeCache.get(themeId)
@@ -255,24 +253,26 @@ export function ensureCoreUiWebApiShim(): void {
     return
   }
 
-  const w = window as unknown as WindowWithOptionalApi
+  const w: Record<string, unknown> = window as unknown as Record<string, unknown>
 
   // If preload already injected a real API (Electron), do nothing.
-  if (w.api) {
+  if ('api' in w && w['api']) {
     return
   }
 
   const themeApi: WindowApiThemeShim = {
-    list: async () => webListThemes(),
-    load: async (themeId: string) => webLoadTheme(themeId),
-    getCurrent: async () => {
+    list: () => Promise.resolve(webListThemes()),
+    load: (themeId: string) => Promise.resolve(webLoadTheme(themeId)),
+    getCurrent: () => {
       // Default to first dark theme if available
-      const themes = await webListThemes()
-      const darkTheme = themes.find((t) => t.type === 'dark')
-      return (darkTheme ?? themes[0])?.id
+      const themes: ThemeInfo[] = webListThemes()
+      const darkTheme: ThemeInfo | undefined = themes.find((t) => t.type === 'dark')
+      const firstTheme: ThemeInfo | undefined = themes[0]
+      const selectedTheme = darkTheme ?? firstTheme
+      return Promise.resolve(selectedTheme?.id)
     },
-    set: async () => true,
-    updateWCO: async () => true,
+    set: () => Promise.resolve(true),
+    updateWCO: () => Promise.resolve(true),
     onThemeChanged: (_callback: (themeId: string) => void) => () => {
       // no-op in web shim
     }
@@ -280,28 +280,28 @@ export function ensureCoreUiWebApiShim(): void {
 
   // Storage shim using localStorage for web builds
   const storageApi: WindowApiStorageShim = {
-    get: async <T>(key: string): Promise<T | undefined> => {
+    get: <T>(key: string): Promise<T | undefined> => {
       try {
         const item = localStorage.getItem(`ecui_${key}`)
-        return item ? JSON.parse(item) as T : undefined
+        return Promise.resolve(item ? JSON.parse(item) as T : undefined)
       } catch {
-        return undefined
+        return Promise.resolve(undefined)
       }
     },
-    set: async <T>(key: string, value: T): Promise<boolean> => {
+    set: <T>(key: string, value: T): Promise<boolean> => {
       try {
         localStorage.setItem(`ecui_${key}`, JSON.stringify(value))
-        return true
+        return Promise.resolve(true)
       } catch {
-        return false
+        return Promise.resolve(false)
       }
     },
-    delete: async (key: string): Promise<boolean> => {
+    delete: (key: string): Promise<boolean> => {
       try {
         localStorage.removeItem(`ecui_${key}`)
-        return true
+        return Promise.resolve(true)
       } catch {
-        return false
+        return Promise.resolve(false)
       }
     }
   }
@@ -312,36 +312,36 @@ export function ensureCoreUiWebApiShim(): void {
     logger: {
       // In web builds, swallow log messages; the app can add its own logging if desired.
       // We intentionally avoid using console here to keep logging centralized.
-      log: async () => {}
+      log: () => Promise.resolve()
     },
     storage: storageApi,
-    minimizeWindow: async () => {},
-    maximizeWindow: async () => {},
-    closeWindow: async () => {},
-    toggleDeveloperTools: async () => {},
-    setWindowTitle: async () => {},
-    getWindowIcon: async () => undefined,
-    getCursorScreenPoint: async () => ({ x: 0, y: 0 }),
-    getActiveWindowBounds: async () => ({
+    minimizeWindow: () => Promise.resolve(),
+    maximizeWindow: () => Promise.resolve(),
+    closeWindow: () => Promise.resolve(),
+    toggleDeveloperTools: () => Promise.resolve(),
+    setWindowTitle: () => Promise.resolve(),
+    getWindowIcon: () => Promise.resolve(undefined),
+    getCursorScreenPoint: () => Promise.resolve({ x: 0, y: 0 }),
+    getActiveWindowBounds: () => Promise.resolve({
       x: 0,
       y: 0,
       width: window.innerWidth || 0,
       height: window.innerHeight || 0
     }),
-    getCurrentWindowBounds: async () => ({
+    getCurrentWindowBounds: () => Promise.resolve({
       x: 0,
       y: 0,
       width: window.innerWidth || 0,
       height: window.innerHeight || 0,
       windowId: 0
     }),
-    createAuxWindow: async () => {},
-    getWindowUnderCursor: async () => null,
-    sendWorkbenchTabToWindow: async () => false,
+    createAuxWindow: () => Promise.resolve(),
+    getWindowUnderCursor: () => Promise.resolve(null),
+    sendWorkbenchTabToWindow: () => Promise.resolve(false),
     onWorkbenchTabDropped: () => () => {
       // no-op
     }
   }
 
-  w.api = api
+  w['api'] = api
 }

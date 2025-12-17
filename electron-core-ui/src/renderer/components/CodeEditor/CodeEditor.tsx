@@ -127,7 +127,7 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   ref
 ) {
   const { t } = useTranslation()
-  const resolvedLabel = goToDefinitionLabel ?? t('codeEditor.goToDefinition')
+  const resolvedLabel = goToDefinitionLabel === 'Go to Definition' ? t('codeEditor.goToDefinition') : goToDefinitionLabel
   const [currentTheme, setCurrentTheme] = useState<string>(() => theme ?? getMonacoTheme())
   const [editorInstance, setEditorInstance] = useState<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
   const [monacoInstance, setMonacoInstance] = useState<Monaco | null>(null)

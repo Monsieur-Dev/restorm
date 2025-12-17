@@ -4,8 +4,6 @@
 	position: fixed;
 	cursor: default;
 	overflow: visible;
-	user-select: text;
-	-webkit-user-select: text;
 	box-sizing: border-box;
 	line-height: 1.5em;
 	white-space: normal;
@@ -77,6 +75,38 @@
 	border-left: 5px solid transparent;
 	border-right: 5px solid transparent;
 	border-bottom: 5px solid var(--vscode-editorHoverWidget-background);
+}
+
+/* Side positioning - tooltip to the right with beak on the left */
+[data-side="right"] .tooltip-content::before,
+[data-side="right"] .tooltip-content::after {
+	left: auto;
+	top: var(--beak-top-percent);
+	margin-left: 0;
+	margin-top: -6px;
+}
+
+/* Beak border (outer triangle) pointing left */
+[data-side="right"] .tooltip-content::before {
+	left: -6px;
+	width: 0;
+	height: 0;
+	border-top: 6px solid transparent;
+	border-bottom: 6px solid transparent;
+	border-right: 6px solid var(--vscode-editorHoverWidget-border);
+	border-left: none;
+}
+
+/* Beak (arrow) pointing left */
+[data-side="right"] .tooltip-content::after {
+	left: -5px;
+	margin-top: -5px;
+	width: 0;
+	height: 0;
+	border-top: 5px solid transparent;
+	border-bottom: 5px solid transparent;
+	border-right: 5px solid var(--vscode-editorHoverWidget-background);
+	border-left: none;
 }
 
 @keyframes fadein {

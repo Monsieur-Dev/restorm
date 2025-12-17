@@ -1,14 +1,7 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import type { Environment } from '../types/collections'
 import { findEnvironmentChain } from '../services/VariableResolutionService'
-
-export interface EnvironmentContextValue {
-  environments?: Environment[] | undefined
-  selectedEnvId: string | null
-  setSelectedEnvId: (id: string | null) => void
-}
-
-const EnvironmentContext = createContext<EnvironmentContextValue | undefined>(undefined)
+import { EnvironmentContext, type EnvironmentContextValue } from './useEnvironmentContext'
 
 export interface EnvironmentProviderProps {
   environments: Environment[] | undefined
@@ -46,12 +39,4 @@ export const EnvironmentProvider: React.FC<EnvironmentProviderProps> = ({ enviro
   )
 
   return <EnvironmentContext.Provider value={value}>{children}</EnvironmentContext.Provider>
-}
-
-export function useEnvironmentContext(): EnvironmentContextValue {
-  const ctx = useContext(EnvironmentContext)
-  if (!ctx) {
-    throw new Error('useEnvironmentContext must be used within an EnvironmentProvider')
-  }
-  return ctx
 }

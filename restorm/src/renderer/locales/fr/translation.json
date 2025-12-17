@@ -62,7 +62,8 @@
       "body": "Corps",
       "params": "Paramètres",
       "pathParams": "Paramètres de chemin",
-      "notes": "Notes"
+      "notes": "Notes",
+      "codeSnippets": "Exemples de code"
     },
     "responses": {
       "tabs": {
@@ -84,6 +85,12 @@
   },
   "codeEditor": {
     "goToDefinition": "Aller à la définition"
+  },
+  "search": {
+    "tooltip": {
+      "noDetails": "Aucun détail disponible",
+      "noContent": "Aucune documentation ni notes"
+    }
   },
   "httpStatus": {
     "100": {

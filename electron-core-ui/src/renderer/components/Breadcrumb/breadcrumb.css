@@ -6,8 +6,8 @@
   padding: 4px 0px;
   gap: 4px;
   font-size: 12px;
-  background-color: var(--vscode-breadcrumb-background, transparent);
-  color: var(--vscode-breadcrumb-foreground, var(--vscode-foreground));
+  background-color: var(--vscode-breadcrumb-background);
+  color: var(--vscode-breadcrumb-foreground);
 }
 
 .ecui-breadcrumb-list {
@@ -42,7 +42,7 @@
 }
 
 .ecui-breadcrumb-link:hover {
-  color: var(--vscode-breadcrumb-focusForeground, var(--vscode-textLink-foreground, inherit));
+  color: var(--vscode-breadcrumb-focusForeground);
 }
 
 .ecui-breadcrumb-link--current {
@@ -54,21 +54,21 @@
   max-width: 240px;
   padding: 2px 4px;
   border-radius: 2px;
-  border: 1px solid var(--vscode-input-border, var(--vscode-breadcrumb-foreground, #555555));
-  background-color: var(--vscode-input-background, var(--vscode-editor-background));
-  color: var(--vscode-input-foreground, var(--vscode-foreground));
+  border: 1px solid var(--vscode-input-border);
+  background-color: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
   font: inherit;
 }
 
 .ecui-breadcrumb-input:focus {
-  outline: 1px solid var(--vscode-focusBorder, var(--vscode-input-border));
+  outline: 1px solid var(--vscode-focusBorder);
 }
 
 .ecui-breadcrumb-separator {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--vscode-breadcrumb-foreground, var(--vscode-foreground));
+  color: var(--vscode-breadcrumb-foreground);
 }
 
 .ecui-breadcrumb-separator .codicon {

@@ -161,6 +161,16 @@ export interface ListViewProps {
    * Called when an item is renamed via inline editing.
    */
   onItemRename?: (payload: ListViewItemEventPayload, newValue: string) => void
+
+  /**
+   * Optional mouse enter handler for a row.
+   */
+  onItemMouseEnter?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
+
+  /**
+   * Optional mouse leave handler for a row.
+   */
+  onItemMouseLeave?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
 }
 
 export interface ListViewItemProps {

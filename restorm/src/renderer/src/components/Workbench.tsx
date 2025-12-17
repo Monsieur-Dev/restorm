@@ -56,6 +56,10 @@ export interface WorkbenchProps {
   onRebuildTab?: RebuildTabCallback
   /** Called when state is restored from storage */
   onStateRestored?: (tree: WorkbenchTree | null) => void
+  /** Get a reactive HTTPRequest by ID (for reactivity support) */
+  getRequestById?: (id: string) => import('../types/collections').HTTPRequest | undefined
+  /** Get a reactive Folder by ID (for reactivity support) */
+  getFolderById?: (id: string) => import('../types/collections').Folder | undefined
 }
 
 /** Imperative handle for Workbench component */
@@ -85,7 +89,9 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
   workbenchId,
   autosave,
   onRebuildTab,
-  onStateRestored
+  onStateRestored,
+  getRequestById,
+  getFolderById
 }, ref) => {
   const { t } = useTranslation()
   const editorWorkbenchRef = useRef<EditorWorkbenchHandle>(null)
@@ -150,22 +156,24 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
 
     // Folder tab
     if (isFolderTab(tab)) {
+      // Get reactive folder if available, otherwise use tab's copy
+      const folder = getFolderById?.(tab.folder.id) ?? tab.folder
       return (
         <WorkbenchTab
           breadcrumbs={breadcrumbs}
           onBreadcrumbClick={onBreadcrumbClick}
           onBreadcrumbRename={onItemRename}
-          tags={tab.folder.tags}
+          tags={folder.tags}
           onTagsChange={(nextTags) => {
-            onTagsChange?.(tab.folder.id, nextTags)
+            onTagsChange?.(folder.id, nextTags)
           }}
           label={t('workbench.tagsLabel')}
         >
           <FolderView
-            folder={tab.folder}
+            folder={folder}
             onFolderChange={(updatedFolder) => {
               if (onFolderChange) {
-                onFolderChange(tab.folder.id, updatedFolder)
+                onFolderChange(folder.id, updatedFolder)
               }
             }}
           />
@@ -175,21 +183,23 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
 
     // HTTP request tab
     if (isHTTPRequestTab(tab)) {
+      // Get reactive request if available, otherwise use tab's copy
+      const request = getRequestById?.(tab.request.id) ?? tab.request
       return (
         <EnvironmentProvider environments={tab.environments}>
           <WorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
             onBreadcrumbRename={onItemRename}
-            tags={tab.request.tags}
+            tags={request.tags}
             onTagsChange={(nextTags) => {
-              onTagsChange?.(tab.request.id, nextTags)
+              onTagsChange?.(request.id, nextTags)
             }}
             label={t('workbench.tagsLabel')}
             headerRight={<EnvironmentDropdown />}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
-              <HTTPRequestTabView request={tab.request} />
+              <HTTPRequestTabView request={request} />
             </div>
           </WorkbenchTab>
         </EnvironmentProvider>
@@ -198,7 +208,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [onBreadcrumbClick, onItemRename, onTagsChange, onFolderChange, t])
+  }, [onBreadcrumbClick, onItemRename, onTagsChange, onFolderChange, t, getRequestById, getFolderById])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(

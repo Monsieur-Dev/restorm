@@ -295,9 +295,9 @@ export function setupIPC(resourcesPath?: string): void {
   });
 
   // Storage API for persisting application data (workbench config, etc.)
-  ipcMain.handle('storage:get', (_event, key: string) => {
+  ipcMain.handle('storage:get', (_event, key: string): unknown => {
     const storage = getStorageService()
-    return storage.get(key)
+    return storage.get<unknown>(key)
   })
 
   ipcMain.handle('storage:set', (_event, key: string, value: unknown) => {

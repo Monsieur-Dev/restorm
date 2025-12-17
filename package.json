@@ -10,6 +10,7 @@
   },
   "license": "MIT",
   "scripts": {
+    "install:all": "cd electron-core-ui && npm install && cd ../gitable && npm install && cd ../demo && npm install && cd ../restorm && npm install",
     "dev:gitable": "cd gitable && npx cross-env ELECTRON_DISABLE_SANDBOX=1 npx electron-vite dev",
     "dev:demo": "cd demo && npx cross-env ELECTRON_DISABLE_SANDBOX=1 npx electron-vite dev",
     "dev:restorm": "cd restorm && npx cross-env ELECTRON_DISABLE_SANDBOX=1 npx electron-vite dev",
@@ -18,7 +19,10 @@
     "build:demo": "cd demo && npm install ../electron-core-ui && npm run build",
     "build:restorm": "cd restorm && npm install ../electron-core-ui && npm run build",
     "build": "npm run build:core-ui && npm run build:gitable && npm run build:demo && npm run build:restorm",
-    "lint": "cd gitable && npm run lint && cd ../demo && npm run lint && cd ../restorm && npm run lint",
+    "lint": "cd gitable && npm run lint && cd ../demo && npm run lint && cd ../restorm && npm run lint && cd ../electron-core-ui && npm run lint",
+    "lint:fix": "cd gitable && npm run lint:fix && cd ../demo && npm run lint:fix && cd ../restorm && npm run lint:fix && cd ../electron-core-ui && npm run lint:fix",
+    "typecheck": "cd electron-core-ui && npm run typecheck && cd ../gitable && npm run typecheck && cd ../demo && npm run typecheck && cd ../restorm && npm run typecheck",
+    "test": "cd restorm && npm run test",
     "backup": "tar --exclude='node_modules' --exclude='*/node_modules/*' --exclude='bin' --exclude='*/bin/*' --exclude='out' --exclude='*/out/*' --exclude='dist' --exclude='*/dist/*' -czf ../gitable-backup-$(date +%Y%m%d-%H%M%S).tar.gz .",
     "restorm:docker:up": "cd restorm && npm run docker:up",
     "restorm:docker:down": "cd restorm && npm run docker:down"

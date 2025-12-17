@@ -45,7 +45,7 @@ export function useStorage<T>(
       }
       setIsLoading(false)
     }
-    load()
+    void load()
   }, [key])
 
   // Save value

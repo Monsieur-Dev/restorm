@@ -460,7 +460,7 @@ function useThemeLegacy(): UseThemeReturn {
     return () => {
       cleanup()
     }
-  }, [setIsLoading, setError, setThemes, setCurrentThemeId, setCurrentTheme, setCurrentVariables])
+  }, [setIsLoading, setError, setThemes, setCurrentThemeId, setCurrentTheme, setCurrentVariables, setWindowBorderColorForTheme])
 
   return {
     themes,
