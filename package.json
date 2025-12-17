@@ -21,6 +21,7 @@
     "build": "npm run build:core-ui && npm run build:gitable && npm run build:demo && npm run build:restorm",
     "lint": "cd gitable && npm run lint && cd ../demo && npm run lint && cd ../restorm && npm run lint && cd ../electron-core-ui && npm run lint",
     "lint:fix": "cd gitable && npm run lint:fix && cd ../demo && npm run lint:fix && cd ../restorm && npm run lint:fix && cd ../electron-core-ui && npm run lint:fix",
+    "typecheck": "cd electron-core-ui && npm run typecheck && cd ../gitable && npm run typecheck && cd ../demo && npm run typecheck && cd ../restorm && npm run typecheck",
     "test": "cd restorm && npm run test",
     "backup": "tar --exclude='node_modules' --exclude='*/node_modules/*' --exclude='bin' --exclude='*/bin/*' --exclude='out' --exclude='*/out/*' --exclude='dist' --exclude='*/dist/*' -czf ../gitable-backup-$(date +%Y%m%d-%H%M%S).tar.gz .",
     "restorm:docker:up": "cd restorm && npm run docker:up",
