@@ -101,8 +101,8 @@ const StatusCodeBadge: React.FC<{ statusCode: number; statusText: string }> = ({
           textDecorationStyle: 'dotted',
           textUnderlineOffset: 2
         }}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
+        onMouseEnter={() => { setShowTooltip(true) }}
+        onMouseLeave={() => { setShowTooltip(false) }}
       >
         {statusCode} {statusText}
       </span>

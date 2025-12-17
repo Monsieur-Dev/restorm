@@ -41,10 +41,8 @@ function renderIcon(icon: Icon | null | undefined): React.ReactNode {
   if (icon.type === 'emoji') {
     return <span className="ecui-breadcrumb-icon ecui-breadcrumb-icon--emoji">{icon.value}</span>
   }
-  if (icon.type === 'codicon') {
-    return <i className={`ecui-breadcrumb-icon codicon codicon-${icon.value}`} />
-  }
-  return null
+  // icon.type === 'codicon'
+  return <i className={`ecui-breadcrumb-icon codicon codicon-${icon.value}`} />
 }
 
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({
@@ -195,7 +193,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
                   }}
                 >
                   {renderIcon(item.icon)}
-                  {committedValue !== null ? committedValue : item.label}
+                  {committedValue ?? item.label}
                 </button>
               )}
             </li>

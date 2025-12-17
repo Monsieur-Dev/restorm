@@ -297,3 +297,8 @@
   font-size: 14px;
   flex-shrink: 0;
 }
+
+/* Search result tooltip - fixed width */
+.search-result-tooltip {
+  width: 500px;
+}

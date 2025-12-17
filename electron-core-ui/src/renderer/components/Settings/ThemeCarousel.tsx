@@ -40,8 +40,8 @@ export const ThemeCarousel: React.FC<ThemeCarouselProps> = ({ className }) => {
 
   const sortedThemes: ThemeInfo[] = useMemo(() => {
     return [...themes].sort((a, b) => {
-      const orderA = THEME_TYPE_ORDER[a.type as ThemeTypeOrder] ?? 99
-      const orderB = THEME_TYPE_ORDER[b.type as ThemeTypeOrder] ?? 99
+      const orderA = (a.type in THEME_TYPE_ORDER) ? THEME_TYPE_ORDER[a.type as ThemeTypeOrder] : 99
+      const orderB = (b.type in THEME_TYPE_ORDER) ? THEME_TYPE_ORDER[b.type as ThemeTypeOrder] : 99
       if (orderA !== orderB) return orderA - orderB
       return a.name.localeCompare(b.name)
     })
@@ -205,7 +205,7 @@ export const ThemeCarousel: React.FC<ThemeCarouselProps> = ({ className }) => {
                     <CustomDropdown
                       id={`theme-beatles-${theme.id}`}
                       value={selectedBeatle}
-                      options={BEATLES_OPTIONS as unknown as Array<{ value: string; label: React.ReactNode }>}
+                      options={BEATLES_OPTIONS as unknown as { value: string; label: React.ReactNode }[]}
                       onChange={setSelectedBeatle}
                     />
                   </div>

@@ -40,7 +40,7 @@ function useSplitRatios(
 				return prev;
 			}
 			const equal = 1 / count;
-			return new Array(count).fill(equal);
+			return new Array<number>(count).fill(equal);
 		});
 	}, [count]);
 

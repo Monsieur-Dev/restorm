@@ -93,7 +93,8 @@ class SearchService {
    */
   indexDocument(doc: SearchDocument): void {
     // Remove existing document with same id if exists
-    if (this.documents.has(doc.id)) {
+    const isReindex = this.documents.has(doc.id)
+    if (isReindex) {
       this.removeDocument(doc.id)
     }
 

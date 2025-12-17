@@ -296,9 +296,3 @@ export interface HTTPResponse extends BaseResponse {
 
 /** Union of all response types */
 export type Response = HTTPResponse // | GraphQLResponse | WebSocketResponse
-
-/** Check if a response is an HTTPResponse */
-export function isHTTPResponse(response: Response): response is HTTPResponse {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  return response.type === 'http'
-}

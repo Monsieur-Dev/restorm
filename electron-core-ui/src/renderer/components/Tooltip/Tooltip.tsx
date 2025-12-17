@@ -61,7 +61,7 @@ const Tooltip: React.FC<TooltipProps> = ({
     const gap = 3 // Reduced gap between tooltip and target
     const beakHeight = 5
     const beakWidth = 6
-
+    
     // Get tooltip dimensions - if tooltip is at -9999, dimensions might be 0
     const tooltipWidth = tooltipRect.width > 0 ? tooltipRect.width : tooltipRef.current.offsetWidth || tooltipRef.current.scrollWidth
     const tooltipHeight = tooltipRect.height > 0 ? tooltipRect.height : tooltipRef.current.offsetHeight || tooltipRef.current.scrollHeight
@@ -162,7 +162,7 @@ const Tooltip: React.FC<TooltipProps> = ({
     setPosition({ top, left, beakLeftPercent, beakTopPercent: undefined })
     setResolvedPlacement(nextPlacement)
     setIsPositioned(true)
-
+    
     // Recalculate after positioning to ensure accurate beak position
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -172,9 +172,9 @@ const Tooltip: React.FC<TooltipProps> = ({
           const finalTargetCenterX = finalTargetRect.left + finalTargetRect.width / 2
           const finalTooltipLeft = finalTooltipRect.left
           const finalTooltipWidth = finalTooltipRect.width
-
+          
           const finalBeakLeftPercent = ((finalTargetCenterX - finalTooltipLeft) / finalTooltipWidth) * 100
-
+          
           setPosition(prev => ({
             ...prev,
             beakLeftPercent: finalBeakLeftPercent

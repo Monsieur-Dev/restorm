@@ -123,7 +123,7 @@ function useSplitSizes(
 				return prev;
 			}
 			const equal = 1 / count;
-			return new Array(count).fill(equal);
+			return new Array<number>(count).fill(equal);
 		});
 	}, [count, initialSizes]);
 
@@ -377,7 +377,7 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 			}
 			onStateRestored?.(restoredTree);
 		};
-		restore();
+		void restore();
 	}, [autosave, workbenchId, onRebuildTab, loadStateImpl, onChange, onStateRestored]);
 	
 	// Autosave: save state on tree changes
@@ -389,7 +389,7 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		if (tree.groups.length === 0) {
 			return;
 		}
-		saveWorkbenchState(workbenchId, tree);
+		void saveWorkbenchState(workbenchId, tree);
 	}, [autosave, workbenchId, tree]);
 
 	// Helper to update focus in controlled/uncontrolled modes and notify parent
@@ -822,7 +822,8 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		extCallbacks.onDetachToNewWindow,
 		extCallbacks.renderTabContent,
 		extCallbacks.renderTabTitle,
-		extCallbacks.onGetTabContent
+		extCallbacks.onGetTabContent,
+		extCallbacks.getTabContextMenuItems
 	]);
 
 	return (

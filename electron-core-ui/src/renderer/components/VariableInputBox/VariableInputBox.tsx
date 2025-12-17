@@ -129,7 +129,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
     const items: ContextMenuItem[] = [
       { id: 'cut', label: t('contextMenu.cut'), onClick: handleCut },
       { id: 'copy', label: t('contextMenu.copy'), onClick: handleCopy },
-      { id: 'paste', label: t('contextMenu.paste'), onClick: handlePaste }
+      { id: 'paste', label: t('contextMenu.paste'), onClick: () => { void handlePaste() } }
     ]
     
     if (props.onGoToDefinition) {

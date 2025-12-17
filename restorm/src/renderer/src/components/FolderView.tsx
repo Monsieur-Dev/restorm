@@ -20,7 +20,7 @@ import {
 } from 'electron-core-ui/renderer'
 import type { KeyValueTableHandle } from 'electron-core-ui/renderer'
 import type { Folder, Environment, KeyValue, Icon } from '../types/collections'
-import { useEnvironmentValues } from '../contexts/EnvironmentValuesContext'
+import { useEnvironmentValues } from '../contexts/useEnvironmentValues'
 
 /** Generate a unique ID for a new environment */
 function generateEnvironmentId(): string {
@@ -156,6 +156,11 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder, onFolderChange }
   // Helper to update environments and notify parent
   const updateEnvironments = useCallback((newEnvironments: Environment[]) => {
     setLocalEnvironments(newEnvironments)
+    // Update reactive object directly for search indexing
+    folder.configuration = {
+      ...folder.configuration,
+      environments: newEnvironments
+    }
     if (onFolderChange) {
       onFolderChange({
         ...folder,
@@ -586,7 +591,14 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder, onFolderChange }
       id: 'notes',
       label: t('folderView.tabs.notes'),
       useScrollableElement: false,
-      content: <MarkdownEditor initialValue={folder.notes ?? ''} />
+      content: (
+        <MarkdownEditor
+          initialValue={folder.notes ?? ''}
+          onChange={(markdown) => {
+            folder.notes = markdown
+          }}
+        />
+      )
     }
   ]
 

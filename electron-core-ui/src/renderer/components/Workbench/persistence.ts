@@ -79,7 +79,7 @@ export function rebuildWorkbenchTree(
   savedState: PersistedWorkbenchState,
   rebuildTab: RebuildTabCallback
 ): WorkbenchTree | null {
-  if (!savedState || savedState.groups.length === 0) {
+  if (savedState.groups.length === 0) {
     return null;
   }
 
@@ -93,11 +93,14 @@ export function rebuildWorkbenchTree(
       }
       if (tabs.length === 0) return null;
       
+      const firstTab = tabs[0];
       let activeTabId: string;
       if (saved.activeTabId && tabs.some(t => t.id === saved.activeTabId)) {
         activeTabId = saved.activeTabId;
+      } else if (firstTab) {
+        activeTabId = firstTab.id;
       } else {
-        activeTabId = tabs[0]!.id;
+        return null;
       }
       return {
         id: saved.id,

@@ -76,7 +76,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     debounceRef.current = setTimeout(() => {
       logger.debug('[SearchBar] Executing search', { searchQuery })
       const searchResults = searchService.search(searchQuery)
-      logger.debug('[SearchBar] Search results', { count: searchResults.length, results: searchResults })
       setResults(searchResults)
     }, DEBOUNCE_MS)
   }, [])
@@ -166,7 +165,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   useEffect(() => {
     if (!isOpen) return
 
-    const handleResize = () => {
+    const handleResize = (): void => {
       if (closedRef.current) {
         const rect = closedRef.current.getBoundingClientRect()
         setOpenBoxPosition({
@@ -178,7 +177,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     }
 
     window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    return (): void => { window.removeEventListener('resize', handleResize) }
   }, [isOpen])
 
   // Cleanup debounce and tooltip timeout on unmount
@@ -215,7 +214,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     if (category === 'request' && icon) {
       const method = icon.toUpperCase()
       return (
-        <div style={{ width: 400, maxHeight: 'calc(100vh - 90px)', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ maxHeight: 'calc(100vh - 90px)', display: 'flex', flexDirection: 'column' }}>
           <div style={{ marginBottom: 8, flexShrink: 0 }}>
             <span className={`http-method-badge method-${method.toLowerCase()}`}>{method}</span>{' '}
             <strong>{resultTitle}</strong>
@@ -229,7 +228,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
     // Folder or other category
     return (
-      <div style={{ width: 400, maxHeight: 'calc(100vh - 90px)', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ maxHeight: 'calc(100vh - 90px)', display: 'flex', flexDirection: 'column' }}>
         <div style={{ marginBottom: 8, flexShrink: 0 }}>
           <strong>{resultTitle}</strong>
         </div>
@@ -288,7 +287,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           )}
 
           {hasResults && (
-            <div onMouseDown={(e) => e.preventDefault()}>
+            <div onMouseDown={(e) => { e.preventDefault() }}>
               <ScrollableElement
                 className="search-results-wrapper"
                 options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false, fitContent: true }}
@@ -302,10 +301,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                       <span>{group.label.startsWith('search.') ? t(group.label, group.label) : group.label}</span>
                     </div>
                     {group.items.map((result) => {
-                      const { category, icon, title: resultTitle, description } = result
-                      const shortDescription = description && description.length > 100
-                        ? description.slice(0, 100) + '...'
-                        : description
+                      const { category, icon, title: resultTitle } = result
 
                       return (
                         <div
@@ -314,7 +310,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                           className="search-result-item"
                           role="treeitem"
                           tabIndex={0}
-                          onClick={() => handleResultClick(result)}
+                          onClick={() => { handleResultClick(result) }}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') handleResultClick(result)
                           }}
@@ -337,14 +333,12 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                                 <span className={`http-method-badge method-${icon.toLowerCase()}`}>{icon.toUpperCase()}</span>
                                 <span className="http-route">{resultTitle}</span>
                               </div>
-                              {shortDescription && <div className="result-description">{shortDescription}</div>}
                             </div>
                           ) : (
                             <>
                               <i className={`codicon codicon-${icon ?? 'symbol-misc'} result-icon`} />
                               <div className="result-content">
                                 <div className="result-title">{resultTitle}</div>
-                                {shortDescription && <div className="result-description">{shortDescription}</div>}
                               </div>
                             </>
                           )}
@@ -365,6 +359,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             side="right"
             fixedTop={25}
             repositionKey={hoveredResultId}
+            className="search-result-tooltip"
             onMouseEnter={() => {
               clearHideTooltipTimeout()
               setIsTooltipHovered(true)
@@ -373,7 +368,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               setIsTooltipHovered(false)
               scheduleHideTooltip()
             }}
-            onMouseDown={(e) => e.preventDefault()}
+            onMouseDown={(e) => { e.preventDefault() }}
           />
         </div>
       )}

@@ -129,7 +129,7 @@ const InputBox: React.FC<InputBoxProps> = ({
     return () => {
       textarea.removeEventListener('wheel', handleWheel)
     }
-  }, [internalValue]) // Re-attach when content changes
+  }, [internalValue, inputRef]) // Re-attach when content changes
 
   const handleFocus = (): void => {
     setState('focused')

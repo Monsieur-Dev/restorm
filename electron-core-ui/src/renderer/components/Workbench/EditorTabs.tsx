@@ -293,11 +293,11 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 			}
 			event.preventDefault();
 
-			const close = () => {
+			const close = (): void => {
 				onCloseTab?.(tab.id, group.id);
 			};
 
-			const closeOthersInGroup = () => {
+			const closeOthersInGroup = (): void => {
 				onCloseOthersInGroup?.(tab.id, group.id);
 			};
 
