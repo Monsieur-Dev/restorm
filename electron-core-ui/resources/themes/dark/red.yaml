@@ -55,6 +55,7 @@ colors:
   pickerGroup.foreground: "#cc9999"
   pickerGroup.border: "#ff000033"
   badge.background: "#cc3333"
+  badge.foreground: "#ffffff"
   progressBar.background: "#cc3333"
   errorForeground: "#ffeaea"
   extensionButton.prominentBackground: "#cc3333"

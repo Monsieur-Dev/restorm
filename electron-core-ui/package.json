@@ -55,7 +55,8 @@
     "lint:fix": "eslint . --ext .ts,.tsx --fix && stylelint \"src/**/*.css\" --fix",
     "lint:css": "stylelint \"src/**/*.css\"",
     "lint:css:fix": "stylelint \"src/**/*.css\" --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "validate:contrast": "node scripts/validate-contrast.js"
   },
   "keywords": [
     "electron",
