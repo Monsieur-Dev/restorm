@@ -1,0 +1,573 @@
+{{!-- Code snippets template for HTTP requests --}}
+{{!-- Generates markdown with code examples in multiple languages --}}
+
+<details open>
+<summary><strong>cURL</strong></summary>
+
+```bash
+curl -X {{method}} '{{url}}'{{#if headers}} \
+{{#each headers}}  -H '{{key}}: {{value}}'{{#unless @last}} \
+{{/unless}}{{/each}}{{/if}}{{#if body}} \
+  -d '{{body}}'{{/if}}
+```
+
+</details>
+
+<details>
+<summary><strong>JavaScript - Fetch</strong></summary>
+
+```javascript
+fetch('{{url}}', {
+  method: '{{method}}'{{#if headers}},
+  headers: {
+{{#each headers}}    '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}  }{{/if}}{{#if body}},
+  body: JSON.stringify({{body}}){{/if}}
+})
+  .then(response => response.json())
+  .then(data => console.log(data))
+  .catch(error => console.error('Error:', error));
+```
+
+</details>
+
+<details>
+<summary><strong>JavaScript - Axios</strong></summary>
+
+```javascript
+import axios from 'axios';
+
+axios({
+  method: '{{lowerMethod}}',
+  url: '{{url}}'{{#if headers}},
+  headers: {
+{{#each headers}}    '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}  }{{/if}}{{#if body}},
+  data: {{body}}{{/if}}
+})
+  .then(response => console.log(response.data))
+  .catch(error => console.error(error));
+```
+
+</details>
+
+<details>
+<summary><strong>TypeScript - Fetch</strong></summary>
+
+```typescript
+interface ResponseData {
+  // Define your response type here
+}
+
+async function makeRequest(): Promise<ResponseData> {
+  const response = await fetch('{{url}}', {
+    method: '{{method}}'{{#if headers}},
+    headers: {
+{{#each headers}}      '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}    }{{/if}}{{#if body}},
+    body: JSON.stringify({{body}}){{/if}}
+  });
+  
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  
+  return response.json();
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Python - Requests</strong></summary>
+
+```python
+import requests
+
+response = requests.{{lowerMethod}}(
+    '{{url}}'{{#if headers}},
+    headers={
+{{#each headers}}        '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}    }{{/if}}{{#if body}},
+    json={{body}}{{/if}}
+)
+
+print(response.json())
+```
+
+</details>
+
+<details>
+<summary><strong>Python - http.client</strong></summary>
+
+```python
+import http.client
+import json
+
+conn = http.client.HTTPSConnection("{{host}}")
+{{#if body}}
+payload = json.dumps({{body}})
+{{/if}}
+headers = {
+{{#each headers}}    '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}
+}
+
+conn.request("{{method}}", "{{path}}"{{#if body}}, payload{{/if}}, headers)
+response = conn.getresponse()
+data = response.read()
+print(data.decode("utf-8"))
+```
+
+</details>
+
+<details>
+<summary><strong>Python - aiohttp (async)</strong></summary>
+
+```python
+import aiohttp
+import asyncio
+
+async def make_request():
+    async with aiohttp.ClientSession() as session:
+        async with session.{{lowerMethod}}(
+            '{{url}}'{{#if headers}},
+            headers={
+{{#each headers}}                '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}            }{{/if}}{{#if body}},
+            json={{body}}{{/if}}
+        ) as response:
+            return await response.json()
+
+result = asyncio.run(make_request())
+print(result)
+```
+
+</details>
+
+<details>
+<summary><strong>Node.js - Native (https)</strong></summary>
+
+```javascript
+const https = require('https');
+
+const options = {
+  hostname: '{{host}}',
+  port: 443,
+  path: '{{path}}',
+  method: '{{method}}'{{#if headers}},
+  headers: {
+{{#each headers}}    '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}  }{{/if}}
+};
+
+const req = https.request(options, (res) => {
+  let data = '';
+  res.on('data', (chunk) => data += chunk);
+  res.on('end', () => console.log(JSON.parse(data)));
+});
+
+req.on('error', (error) => console.error(error));
+{{#if body}}
+req.write(JSON.stringify({{body}}));
+{{/if}}
+req.end();
+```
+
+</details>
+
+<details>
+<summary><strong>Go</strong></summary>
+
+```go
+package main
+
+import (
+    "fmt"
+    "io"
+    "net/http"{{#if body}}
+    "strings"{{/if}}
+)
+
+func main() {
+    {{#if body}}body := strings.NewReader(`{{body}}`)
+    req, err := http.NewRequest("{{method}}", "{{url}}", body){{else}}req, err := http.NewRequest("{{method}}", "{{url}}", nil){{/if}}
+    if err != nil {
+        panic(err)
+    }
+
+{{#each headers}}    req.Header.Set("{{key}}", "{{value}}")
+{{/each}}
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        panic(err)
+    }
+    defer resp.Body.Close()
+
+    respBody, _ := io.ReadAll(resp.Body)
+    fmt.Println(string(respBody))
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Rust - reqwest</strong></summary>
+
+```rust
+use reqwest::header::{HeaderMap, HeaderValue};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let client = reqwest::Client::new();
+    
+    let mut headers = HeaderMap::new();
+{{#each headers}}    headers.insert("{{key}}", HeaderValue::from_static("{{value}}"));
+{{/each}}
+
+    let response = client
+        .{{lowerMethod}}("{{url}}")
+        .headers(headers){{#if body}}
+        .body(r#"{{body}}"#){{/if}}
+        .send()
+        .await?;
+
+    println!("{}", response.text().await?);
+    Ok(())
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Java - HttpClient (Java 11+)</strong></summary>
+
+```java
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        HttpClient client = HttpClient.newHttpClient();
+        
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create("{{url}}"))
+            .method("{{method}}", {{#if body}}HttpRequest.BodyPublishers.ofString("{{body}}"){{else}}HttpRequest.BodyPublishers.noBody(){{/if}})
+{{#each headers}}            .header("{{key}}", "{{value}}")
+{{/each}}            .build();
+
+        HttpResponse<String> response = client.send(request, 
+            HttpResponse.BodyHandlers.ofString());
+        
+        System.out.println(response.body());
+    }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Java - OkHttp</strong></summary>
+
+```java
+import okhttp3.*;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        OkHttpClient client = new OkHttpClient();
+        {{#if body}}
+        MediaType mediaType = MediaType.parse("application/json");
+        RequestBody body = RequestBody.create(mediaType, "{{body}}");
+        {{/if}}
+        Request request = new Request.Builder()
+            .url("{{url}}")
+{{#each headers}}            .addHeader("{{key}}", "{{value}}")
+{{/each}}            .method("{{method}}", {{#if body}}body{{else}}null{{/if}})
+            .build();
+
+        Response response = client.newCall(request).execute();
+        System.out.println(response.body().string());
+    }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>C# - HttpClient</strong></summary>
+
+```csharp
+using System.Net.Http;
+using System.Text;
+
+var client = new HttpClient();
+{{#if body}}
+var content = new StringContent("{{body}}", Encoding.UTF8, "application/json");
+{{/if}}
+var request = new HttpRequestMessage(HttpMethod.{{capitalMethod}}, "{{url}}");
+{{#each headers}}
+request.Headers.Add("{{key}}", "{{value}}");
+{{/each}}
+{{#if body}}
+request.Content = content;
+{{/if}}
+
+var response = await client.SendAsync(request);
+var responseBody = await response.Content.ReadAsStringAsync();
+Console.WriteLine(responseBody);
+```
+
+</details>
+
+<details>
+<summary><strong>PHP - cURL</strong></summary>
+
+```php
+<?php
+$curl = curl_init();
+
+curl_setopt_array($curl, [
+    CURLOPT_URL => "{{url}}",
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_CUSTOMREQUEST => "{{method}}",
+{{#if headers}}    CURLOPT_HTTPHEADER => [
+{{#each headers}}        "{{key}}: {{value}}"{{#unless @last}},{{/unless}}
+{{/each}}
+    ],
+{{/if}}{{#if body}}    CURLOPT_POSTFIELDS => '{{body}}',
+{{/if}}]);
+
+$response = curl_exec($curl);
+curl_close($curl);
+
+echo $response;
+```
+
+</details>
+
+<details>
+<summary><strong>PHP - Guzzle</strong></summary>
+
+```php
+<?php
+require 'vendor/autoload.php';
+
+use GuzzleHttp\Client;
+
+$client = new Client();
+
+$response = $client->request('{{method}}', '{{url}}', [
+{{#if headers}}    'headers' => [
+{{#each headers}}        '{{key}}' => '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}
+    ]{{#if body}},{{/if}}
+{{/if}}{{#if body}}    'json' => {{body}}
+{{/if}}]);
+
+echo $response->getBody();
+```
+
+</details>
+
+<details>
+<summary><strong>Ruby - Net::HTTP</strong></summary>
+
+```ruby
+require 'net/http'
+require 'uri'
+require 'json'
+
+uri = URI.parse("{{url}}")
+http = Net::HTTP.new(uri.host, uri.port)
+http.use_ssl = uri.scheme == 'https'
+
+request = Net::HTTP::{{capitalMethod}}.new(uri.request_uri)
+{{#each headers}}
+request["{{key}}"] = "{{value}}"
+{{/each}}
+{{#if body}}
+request.body = '{{body}}'
+{{/if}}
+
+response = http.request(request)
+puts response.body
+```
+
+</details>
+
+<details>
+<summary><strong>Ruby - Faraday</strong></summary>
+
+```ruby
+require 'faraday'
+
+conn = Faraday.new(url: '{{baseUrl}}') do |f|
+  f.request :json
+  f.response :json
+end
+
+response = conn.{{lowerMethod}}('{{path}}') do |req|
+{{#each headers}}  req.headers['{{key}}'] = '{{value}}'
+{{/each}}{{#if body}}  req.body = {{body}}
+{{/if}}end
+
+puts response.body
+```
+
+</details>
+
+<details>
+<summary><strong>Swift - URLSession</strong></summary>
+
+```swift
+import Foundation
+
+let url = URL(string: "{{url}}")!
+var request = URLRequest(url: url)
+request.httpMethod = "{{method}}"
+{{#each headers}}
+request.setValue("{{value}}", forHTTPHeaderField: "{{key}}")
+{{/each}}
+{{#if body}}
+request.httpBody = """
+{{body}}
+""".data(using: .utf8)
+{{/if}}
+
+let task = URLSession.shared.dataTask(with: request) { data, response, error in
+    guard let data = data else { return }
+    print(String(data: data, encoding: .utf8)!)
+}
+task.resume()
+```
+
+</details>
+
+<details>
+<summary><strong>Kotlin - OkHttp</strong></summary>
+
+```kotlin
+import okhttp3.OkHttpClient
+import okhttp3.Request
+{{#if body}}import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.MediaType.Companion.toMediaType{{/if}}
+
+val client = OkHttpClient()
+{{#if body}}
+val mediaType = "application/json".toMediaType()
+val body = """{{body}}""".toRequestBody(mediaType)
+{{/if}}
+val request = Request.Builder()
+    .url("{{url}}")
+    .method("{{method}}", {{#if body}}body{{else}}null{{/if}})
+{{#each headers}}    .addHeader("{{key}}", "{{value}}")
+{{/each}}    .build()
+
+val response = client.newCall(request).execute()
+println(response.body?.string())
+```
+
+</details>
+
+<details>
+<summary><strong>Dart - http</strong></summary>
+
+```dart
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+void main() async {
+  final response = await http.{{lowerMethod}}(
+    Uri.parse('{{url}}'),
+    headers: {
+{{#each headers}}      '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}    }{{#if body}},
+    body: jsonEncode({{body}}){{/if}},
+  );
+
+  print(response.body);
+}
+```
+
+</details>
+
+<details>
+<summary><strong>R - httr</strong></summary>
+
+```r
+library(httr)
+library(jsonlite)
+
+response <- {{method}}(
+  "{{url}}"{{#if headers}},
+  add_headers(
+{{#each headers}}    `{{key}}` = "{{value}}"{{#unless @last}},{{/unless}}
+{{/each}}  ){{/if}}{{#if body}},
+  body = '{{body}}',
+  encode = "json"{{/if}}
+)
+
+content(response, "text")
+```
+
+</details>
+
+<details>
+<summary><strong>PowerShell</strong></summary>
+
+```powershell
+$headers = @{
+{{#each headers}}    "{{key}}" = "{{value}}"
+{{/each}}}
+{{#if body}}
+$body = @'
+{{body}}
+'@
+{{/if}}
+
+$response = Invoke-RestMethod -Uri "{{url}}" `
+    -Method {{method}} `
+    -Headers $headers{{#if body}} `
+    -Body $body `
+    -ContentType "application/json"{{/if}}
+
+$response | ConvertTo-Json
+```
+
+</details>
+
+<details>
+<summary><strong>Elixir - HTTPoison</strong></summary>
+
+```elixir
+HTTPoison.{{lowerMethod}}!(
+  "{{url}}",
+  {{#if body}}"{{body}}"{{else}}""{{/if}},
+  [
+{{#each headers}}    {"{{key}}", "{{value}}"}{{#unless @last}},{{/unless}}
+{{/each}}
+  ]
+)
+|> Map.get(:body)
+|> IO.inspect()
+```
+
+</details>
+
+<details>
+<summary><strong>Clojure - clj-http</strong></summary>
+
+```clojure
+(require '[clj-http.client :as client])
+
+(client/{{lowerMethod}} "{{url}}"
+  {:headers {
+{{#each headers}}             "{{key}}" "{{value}}"{{/each}}}{{#if body}}
+   :body "{{body}}"
+   :content-type :json{{/if}}})
+```
+
+</details>

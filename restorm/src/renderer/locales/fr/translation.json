@@ -62,7 +62,8 @@
       "body": "Corps",
       "params": "Paramètres",
       "pathParams": "Paramètres de chemin",
-      "notes": "Notes"
+      "notes": "Notes",
+      "codeSnippets": "Exemples de code"
     },
     "responses": {
       "tabs": {

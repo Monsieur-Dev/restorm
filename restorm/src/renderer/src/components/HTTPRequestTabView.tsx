@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import Handlebars from 'handlebars'
 import {
   Button,
   ListViewDropdown,
@@ -20,6 +21,10 @@ import {
   KeyValueTable,
   logger
 } from 'electron-core-ui/renderer'
+import codeSnippetsTemplate from '../resources/templates/code-snippets.hbs?raw'
+
+// Compile the code snippets Handlebars template
+const compiledCodeSnippetsTemplate = Handlebars.compile(codeSnippetsTemplate)
 import type {
   Tab,
   VariableDefinition,
@@ -376,6 +381,51 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     )
   }, [method, request.name])
 
+  // Generate code snippets markdown
+  const codeSnippetsMarkdown = useMemo(() => {
+    // Parse URL to extract host and path
+    let host = ''
+    let path = ''
+    let baseUrl = ''
+    try {
+      const urlObj = new URL(resolvedUrl.startsWith('http') ? resolvedUrl : `https://${resolvedUrl}`)
+      host = urlObj.host
+      path = urlObj.pathname + urlObj.search
+      baseUrl = `${urlObj.protocol}//${urlObj.host}`
+    } catch {
+      // If URL parsing fails, use the raw URL
+      host = resolvedUrl
+      path = '/'
+      baseUrl = resolvedUrl
+    }
+
+    // Prepare headers array
+    const headers = request.headers
+      .filter(h => h.key)
+      .map(h => ({ key: h.key, value: h.value }))
+
+    // Prepare body content
+    let bodyContent = ''
+    if (request.body?.type === 'text' && request.body.content) {
+      bodyContent = request.body.content
+    }
+
+    // Capitalize method for C#/Ruby
+    const capitalMethod = method.charAt(0).toUpperCase() + method.slice(1).toLowerCase()
+
+    return compiledCodeSnippetsTemplate({
+      method,
+      lowerMethod: method.toLowerCase(),
+      capitalMethod,
+      url: resolvedUrl,
+      host,
+      path,
+      baseUrl,
+      headers,
+      body: bodyContent || null
+    })
+  }, [method, resolvedUrl, request.headers, request.body])
+
   const tabs: Tab[] = [
     {
       id: 'requestLayout',
@@ -647,6 +697,16 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
             request.notes = markdown
           }}
         />
+      )
+    },
+    {
+      id: 'codeSnippets',
+      label: t('requestTab.tabs.codeSnippets'),
+      useScrollableElement: false,
+      allowFullscreen: true,
+      fullscreenModalTitle: renderRequestModalTitle(t('requestTab.tabs.codeSnippets')),
+      content: (
+        <MarkdownViewer value={codeSnippetsMarkdown} />
       )
     }
   ]

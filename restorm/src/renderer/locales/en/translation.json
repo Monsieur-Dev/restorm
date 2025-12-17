@@ -62,7 +62,8 @@
       "body": "Body",
       "params": "Params",
       "pathParams": "Path params",
-      "notes": "Notes"
+      "notes": "Notes",
+      "codeSnippets": "Code snippets"
     },
     "responses": {
       "tabs": {
