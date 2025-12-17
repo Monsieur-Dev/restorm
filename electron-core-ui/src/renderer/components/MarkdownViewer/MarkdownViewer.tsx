@@ -2,9 +2,11 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
+import rehypeHighlight from 'rehype-highlight'
 import mermaid from 'mermaid'
 
 import './markdownViewer.css'
+import 'highlight.js/styles/vs2015.css'
 
 interface CodeBlockProps {
   className?: string
@@ -152,7 +154,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ value, allowMerm
     <div className={rootClassName} style={style}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw]}
+        rehypePlugins={[rehypeRaw, rehypeHighlight]}
         components={{
           // Custom renderer for pre blocks to add copy button
           pre(preProps: JSX.IntrinsicElements['pre']) {

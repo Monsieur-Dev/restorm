@@ -98,6 +98,7 @@
     "ag-grid-community": "^34.3.1",
     "ag-grid-react": "^34.3.1",
     "handlebars": "^4.7.7",
+    "highlight.js": "^11.11.1",
     "i18next": "^23.7.6",
     "js-yaml": "^4.1.0",
     "mermaid": "^10.9.0",
@@ -105,6 +106,7 @@
     "react-i18next": "^13.5.0",
     "react-icons": "^4.12.0",
     "react-markdown": "^9.0.1",
+    "rehype-highlight": "^7.0.2",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.0",
     "winston": "^3.18.3"
