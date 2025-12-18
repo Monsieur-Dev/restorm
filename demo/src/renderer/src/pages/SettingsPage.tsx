@@ -71,16 +71,16 @@ const SettingsPage: React.FC = () => {
         flexDirection: 'column',
         minHeight: '100vh',
         height: '100vh',
-        backgroundColor: 'var(--vscode-editor-background)',
-        color: 'var(--vscode-editor-foreground)'
+        backgroundColor: 'var(--editor-background)',
+        color: 'var(--editor-foreground)'
       }}
     >
       {/* Header */}
       <div
         style={{
           padding: '20px',
-          borderBottom: '1px solid var(--vscode-panel-border)',
-          backgroundColor: 'var(--vscode-sideBar-background)'
+          borderBottom: '1px solid var(--panel-border)',
+          backgroundColor: 'var(--sideBar-background)'
         }}
       >
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
@@ -90,7 +90,7 @@ const SettingsPage: React.FC = () => {
           <p
             style={{
               margin: '0 0 15px 0',
-              color: 'var(--vscode-descriptionForeground)',
+              color: 'var(--descriptionForeground)',
               fontSize: '14px'
             }}
           >
@@ -109,7 +109,7 @@ const SettingsPage: React.FC = () => {
             
             {/* Editor Settings */}
             <div style={{ marginBottom: '40px' }}>
-              <h2 style={{ fontSize: '18px', marginBottom: '20px', color: 'var(--vscode-foreground)' }}>
+              <h2 style={{ fontSize: '18px', marginBottom: '20px', color: 'var(--foreground)' }}>
                 Editor Settings
               </h2>
               
@@ -211,7 +211,7 @@ const SettingsPage: React.FC = () => {
 
             {/* Appearance Settings */}
             <div style={{ marginBottom: '40px' }}>
-              <h2 style={{ fontSize: '18px', marginBottom: '20px', color: 'var(--vscode-foreground)' }}>
+              <h2 style={{ fontSize: '18px', marginBottom: '20px', color: 'var(--foreground)' }}>
                 Appearance
               </h2>
               
@@ -289,7 +289,7 @@ const SettingsPage: React.FC = () => {
 
             {/* Advanced Settings */}
             <div style={{ marginBottom: '40px' }}>
-              <h2 style={{ fontSize: '18px', marginBottom: '20px', color: 'var(--vscode-foreground)' }}>
+              <h2 style={{ fontSize: '18px', marginBottom: '20px', color: 'var(--foreground)' }}>
                 Advanced
               </h2>
               
@@ -348,20 +348,20 @@ const SettingsPage: React.FC = () => {
 
             {/* Additional content to demonstrate scrolling */}
             <div style={{ marginBottom: '40px' }}>
-              <h2 style={{ fontSize: '18px', marginBottom: '20px', color: 'var(--vscode-foreground)' }}>
+              <h2 style={{ fontSize: '18px', marginBottom: '20px', color: 'var(--foreground)' }}>
                 Additional Settings
               </h2>
               
               <div style={{ display: 'grid', gap: '20px', maxWidth: '600px' }}>
-                <p style={{ color: 'var(--vscode-descriptionForeground)', fontSize: '14px' }}>
+                <p style={{ color: 'var(--descriptionForeground)', fontSize: '14px' }}>
                   This section demonstrates the ScrollableElement component in a real settings page.
                   The content scrolls smoothly with VSCode-style scrollbars that auto-hide.
                 </p>
                 
                 {Array.from({ length: 20 }, (_, i) => (
-                  <div key={i} style={{ padding: '10px', border: '1px solid var(--vscode-panel-border)', borderRadius: '4px' }}>
+                  <div key={i} style={{ padding: '10px', border: '1px solid var(--panel-border)', borderRadius: '4px' }}>
                     <h4 style={{ margin: '0 0 8px 0', fontSize: '14px' }}>Setting {i + 1}</h4>
-                    <p style={{ margin: '0', fontSize: '12px', color: 'var(--vscode-descriptionForeground)' }}>
+                    <p style={{ margin: '0', fontSize: '12px', color: 'var(--descriptionForeground)' }}>
                       This is a sample setting item to demonstrate scrolling behavior.
                     </p>
                   </div>

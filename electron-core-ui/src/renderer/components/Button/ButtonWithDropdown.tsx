@@ -62,7 +62,7 @@ const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
 
   // Build CSS classes
   const containerClasses = [
-    'monaco-button-dropdown',
+    'button-dropdown',
     'default-colors',
     options.disabled ? 'disabled' : '',
     className
@@ -84,7 +84,7 @@ const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
       <div ref={containerRef} className={containerClasses}>
         {/* Primary Button */}
         <a
-          className="monaco-button monaco-text-button"
+          className="button text-button"
           role="button"
           tabIndex={0}
           onClick={handlePrimaryClick}
@@ -106,7 +106,7 @@ const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
         </a>
         
         {/* Separator */}
-        <div className="monaco-button-dropdown-separator" style={separatorStyles}>
+        <div className="button-dropdown-separator" style={separatorStyles}>
           <div style={separatorDivStyles} />
         </div>
         
@@ -119,19 +119,19 @@ const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
           }}
           icon="chevron-down"
           onClick={handleDropdownClick}
-          className="monaco-dropdown-button"
+          className="dropdown-button"
         />
         
         {/* Dropdown Menu */}
         {isDropdownOpen && (
           <div
             ref={dropdownRef}
-            className="monaco-button-dropdown-menu"
+            className="button-dropdown-menu"
           >
             {options.actions.map((action, index) => (
               <a
                 key={index}
-                className="monaco-button-dropdown-action"
+                className="button-dropdown-action"
                 role="button"
                 tabIndex={0}
                 onClick={() => { handleActionClick(action); }}

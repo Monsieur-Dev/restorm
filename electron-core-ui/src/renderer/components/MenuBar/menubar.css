@@ -74,12 +74,12 @@
 	position: fixed;
 }
 
-.menubar .menubar-menu-items-holder.monaco-menu-container {
+.menubar .menubar-menu-items-holder.menu-container {
 	outline: 0;
 	border: none;
 }
 
-.menubar .menubar-menu-items-holder.monaco-menu-container :focus {
+.menubar .menubar-menu-items-holder.menu-container :focus {
 	outline: 0;
 }
 
@@ -105,7 +105,7 @@
 	box-shadow: 5px 5px 5px  rgb(0,0,0,0.5) !important;
 }
 
-.monaco-menu {
+.menu {
 	background-color: var(--menu-background) !important;
 }
 
@@ -214,8 +214,8 @@
 }
 
 /* Reset all list styles to prevent bullet points */
-.monaco-menu ul,
-.monaco-menu li,
+.menu ul,
+.menu li,
 .actions-container ul,
 .actions-container li,
 .menubar-menu-items-holder ul,
@@ -226,11 +226,11 @@
 }
 
 /* Ensure proper display for menu items */
-.monaco-menu ul {
+.menu ul {
 	display: block !important;
 }
 
-.monaco-menu li {
+.menu li {
 	display: block !important;
 }
 

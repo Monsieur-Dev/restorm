@@ -24,7 +24,7 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
 
   // Build CSS classes for container
   const containerClasses = [
-    'monaco-custom-radio',
+    'custom-radio',
     className
   ].filter(Boolean).join(' ');
 
@@ -40,7 +40,7 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
         
         // Build CSS classes for button
         const buttonClasses = [
-          'monaco-button',
+          'button',
           isActive ? 'active' : '',
           isPreviousActive ? 'previous-active' : ''
         ].filter(Boolean).join(' ');

@@ -11,8 +11,8 @@ export const Welcome: React.FC = () => {
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        color: 'var(--vscode-descriptionForeground)',
-        backgroundColor: 'var(--vscode-editor-background)'
+        color: 'var(--descriptionForeground)',
+        backgroundColor: 'var(--editor-background)'
       }}
     >
       <span>Hello restorm</span>

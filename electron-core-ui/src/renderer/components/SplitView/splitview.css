@@ -1,4 +1,4 @@
-.monaco-split-view2 {
+.split-view2 {
 	position: relative;
 	display: flex;
 	flex: 1 1 auto;
@@ -7,7 +7,7 @@
 	overflow: hidden;
 }
 
-.monaco-split-view2 .split-view-container {
+.split-view2 .split-view-container {
 	display: flex;
 	flex: 1 1 auto;
 	min-width: 0;
@@ -16,7 +16,7 @@
 	flex-direction: column;
 }
 
-.monaco-split-view2 .split-view-view {
+.split-view2 .split-view-view {
 	position: relative;
 	min-width: 0;
 	min-height: 22px;
@@ -25,28 +25,28 @@
 }
 
 /* Animation (similar to VS Code paneview) */
-.monaco-split-view2.animated .split-view-view {
+.split-view2.animated .split-view-view {
 	transition-duration: 0.15s;
 	transition-timing-function: ease-out;
 }
 
-.monaco-reduce-motion .monaco-split-view2 .split-view-view {
+.reduce-motion .split-view2 .split-view-view {
 	transition-duration: 0s !important;
 }
 
-.monaco-split-view2.animated.vertical .split-view-view {
+.split-view2.animated.vertical .split-view-view {
 	transition-property: flex-basis;
 }
 
-.monaco-split-view2.vertical .split-view-view {
+.split-view2.vertical .split-view-view {
 	flex: 0 0 auto;
 }
 
-.monaco-split-view2.horizontal .split-view-view {
+.split-view2.horizontal .split-view-view {
 	flex: 0 0 auto;
 }
 
-.monaco-split-view2 .split-view-view-header {
+.split-view2 .split-view-view-header {
 	flex: 0 0 auto;
 	padding: 2px 8px;
 	color: var(--foreground);
@@ -64,7 +64,7 @@
 	box-sizing: border-box;
 }
 
-.monaco-split-view2 .split-view-view-header-main {
+.split-view2 .split-view-view-header-main {
 	display: flex;
 	align-items: center;
 	gap: 4px;
@@ -72,7 +72,7 @@
 	min-width: 0;
 }
 
-.monaco-split-view2 .split-view-view-header-actions {
+.split-view2 .split-view-view-header-actions {
 	display: flex;
 	align-items: center;
 	gap: 4px;
@@ -85,19 +85,19 @@
 }
 
 /* Show header actions when hovering the whole pane (header or body) */
-.monaco-split-view2 .split-view-view:hover .split-view-view-header-actions {
+.split-view2 .split-view-view:hover .split-view-view-header-actions {
 	opacity: 1;
 	transform: translateY(0);
 	pointer-events: auto;
 }
 
-.monaco-split-view2 .split-view-view-header-title {
+.split-view2 .split-view-view-header-title {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
-.monaco-split-view2 .split-view-view-header-toggle {
+.split-view2 .split-view-view-header-toggle {
 	border: none;
 	background: transparent;
 	color: var(--foreground);
@@ -112,19 +112,19 @@
 	height: 16px;
 }
 
-.monaco-split-view2 .split-view-view-header-toggle:hover {
+.split-view2 .split-view-view-header-toggle:hover {
 	color: var(--focusBorder);
 }
 
-.monaco-split-view2 .split-view-view-header .codicon:first-of-type {
+.split-view2 .split-view-view-header .codicon:first-of-type {
 	margin: 0 2px;
 }
 
-.monaco-split-view2 .split-view-view-header.not-collapsible {
+.split-view2 .split-view-view-header.not-collapsible {
 	cursor: default;
 }
 
-.monaco-split-view2 .split-view-view-body {
+.split-view2 .split-view-view-body {
 	flex: 1 1 auto;
 	min-width: 0;
 	min-height: 0;

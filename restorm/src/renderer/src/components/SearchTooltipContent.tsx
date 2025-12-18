@@ -137,7 +137,7 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
       {folderTabs.length > 0 ? (
         <Tabs tabs={folderTabs} />
       ) : (
-        <div style={{ color: 'var(--vscode-descriptionForeground)', fontStyle: 'italic' }}>
+        <div style={{ color: 'var(--descriptionForeground)', fontStyle: 'italic' }}>
           {t('search.tooltip.noContent', 'No documentation or notes')}
         </div>
       )}

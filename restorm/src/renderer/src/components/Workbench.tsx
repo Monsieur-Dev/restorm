@@ -182,7 +182,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
     if (isGraphQLRequestTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ color: 'var(--vscode-charts-purple)', fontWeight: 600, fontSize: 10 }}>GQL</span>
+          <span style={{ color: 'var(--charts-purple)', fontWeight: 600, fontSize: 10 }}>GQL</span>
           <span>{restormTab.request.name}</span>
         </span>
       )
@@ -192,7 +192,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
     if (isGrpcRequestTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ color: 'var(--vscode-charts-blue)', fontWeight: 600, fontSize: 10 }}>gRPC</span>
+          <span style={{ color: 'var(--charts-blue)', fontWeight: 600, fontSize: 10 }}>gRPC</span>
           <span>{restormTab.request.name}</span>
         </span>
       )
@@ -202,7 +202,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
     if (isSoapRequestTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ color: 'var(--vscode-charts-yellow)', fontWeight: 600, fontSize: 10 }}>SOAP</span>
+          <span style={{ color: 'var(--charts-yellow)', fontWeight: 600, fontSize: 10 }}>SOAP</span>
           <span>{restormTab.request.name}</span>
         </span>
       )
@@ -212,7 +212,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
     if (isWebSocketRequestTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ color: 'var(--vscode-charts-green)', fontWeight: 600, fontSize: 10 }}>WS</span>
+          <span style={{ color: 'var(--charts-green)', fontWeight: 600, fontSize: 10 }}>WS</span>
           <span>{restormTab.request.name}</span>
         </span>
       )

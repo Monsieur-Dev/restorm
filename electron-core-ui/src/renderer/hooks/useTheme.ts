@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useContext } from 'react'
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../../types/theme'
 import { logger } from '../services/logger'
-import ThemeContext from '../contexts/ThemeContext'
+import ThemeContext, { themeProviderActive } from '../contexts/ThemeContext'
 
 export interface UseThemeReturn {
   themes: ThemeInfo[]
@@ -208,8 +208,17 @@ function useThemeLegacy(): UseThemeReturn {
 
   /**
    * Load initial theme on mount
+   * NOTE: This effect is skipped when ThemeProvider is active to avoid race conditions
    */
   useEffect(() => {
+    // Skip all initialization and listeners if ThemeProvider is managing themes
+    // This prevents race conditions where both ThemeProvider and useThemeLegacy
+    // try to clear and re-apply CSS variables
+    if (themeProviderActive) {
+      setIsLoading(false)
+      return () => { /* no cleanup needed */ }
+    }
+
     const initTheme = async (): Promise<void> => {
       try {
         setIsLoading(true)

@@ -37,6 +37,13 @@ function getThemeApi(): ThemeApi | null {
 let globalInitStarted = false
 let globalInitPromise: Promise<void> | null = null
 
+/**
+ * Flag indicating that ThemeProvider is managing themes.
+ * When true, useThemeLegacy should not run its own initialization
+ * to avoid race conditions and CSS variable conflicts.
+ */
+export let themeProviderActive = false
+
 interface ThemeProviderProps {
   children: React.ReactNode
 }
@@ -46,6 +53,10 @@ interface ThemeProviderProps {
  * Only ONE instance should be used at the app root
  */
 export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElement {
+  // Mark ThemeProvider as active IMMEDIATELY (not in useEffect)
+  // This prevents useThemeLegacy from running its initialization
+  themeProviderActive = true
+  
   const [themes, setThemes] = useState<ThemeInfo[]>([])
   const [currentThemeId, setCurrentThemeId] = useState<string | null>(null)
   const [currentTheme, setCurrentTheme] = useState<ThemeDefinition | null>(null)

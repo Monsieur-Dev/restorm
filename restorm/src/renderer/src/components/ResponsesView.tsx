@@ -490,7 +490,7 @@ export const ResponsesView: React.FC<ResponsesViewProps> = ({ requestTitle }) =>
             <div
               style={{
                 height: '100%',
-                border: '1px solid var(--vscode-panel-border)',
+                border: '1px solid var(--panel-border)',
                 borderRadius: 3,
                 boxSizing: 'border-box'
               }}
@@ -531,7 +531,7 @@ export const ResponsesView: React.FC<ResponsesViewProps> = ({ requestTitle }) =>
             <div
               style={{
                 height: '100%',
-                border: '1px solid var(--vscode-panel-border)',
+                border: '1px solid var(--panel-border)',
                 borderRadius: 3,
                 boxSizing: 'border-box'
               }}
@@ -599,7 +599,7 @@ export const ResponsesView: React.FC<ResponsesViewProps> = ({ requestTitle }) =>
                 style={{
                   flex: 1,
                   minHeight: 0,
-                  border: '1px solid var(--vscode-panel-border)',
+                  border: '1px solid var(--panel-border)',
                   borderRadius: 3,
                   boxSizing: 'border-box',
                   position: 'relative',

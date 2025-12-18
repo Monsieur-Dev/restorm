@@ -3,13 +3,13 @@
  * Based on VSCode's selectBox.css
  *-------------------------------------------------------------------------------------------- */
 
-.monaco-select-box {
+.select-box {
   width: 100%;
   cursor: pointer;
   border-radius: 2px;
 }
 
-.monaco-select-box-dropdown-container {
+.select-box-dropdown-container {
   font-size: 13px;
   font-weight: normal;
   text-transform: none;
@@ -17,18 +17,18 @@
 
 /** Actions */
 
-.monaco-action-bar .action-item.select-container {
+.action-bar .action-item.select-container {
   cursor: default;
 }
 
-.monaco-action-bar .action-item .monaco-select-box {
+.action-bar .action-item .select-box {
   cursor: pointer;
   min-width: 100px;
   min-height: 14px;
   padding: 0 23px 0 8px;
 }
 
-.mac .monaco-action-bar .action-item .monaco-select-box {
+.mac .action-bar .action-item .select-box {
   font-size: 11px;
   border-radius: 3px;
   min-height: 20px;
@@ -42,18 +42,18 @@
 }
 
 /* Focus styles */
-.monaco-select-box:focus {
+.select-box:focus {
   outline: 1px solid var(--focusBorder);
   outline-offset: -1px;
 }
 
 /* Disabled state */
-.monaco-select-box:disabled {
+.select-box:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
 /* Hover state */
-.monaco-select-box:hover:not(:disabled) {
+.select-box:hover:not(:disabled) {
   background-color: var(--settings-dropdownHoverBackground);
 }

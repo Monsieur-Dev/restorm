@@ -1,9 +1,9 @@
-/* Button container styles */
+/* Button container styles - cache bust */
 .button-container {
 	display: inline-block;
 }
 
-.monaco-text-button {
+.text-button {
 	box-sizing: border-box;
 	display: flex;
 	width: 100%;
@@ -22,50 +22,50 @@
 	background-color: var(--button-background);
 }
 
-.monaco-text-button {
+.text-button {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
-.monaco-text-button > * {
+.text-button > * {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	max-width: 100%;
 }
 
-.monaco-text-button:focus,
-.monaco-text-button:focus-visible {
+.text-button:focus,
+.text-button:focus-visible {
 	outline: none;
 }
 
-.monaco-text-button:hover {
+.text-button:hover {
 	text-decoration: none !important;
 	background-color: var(--button-hoverBackground);
 }
 
-.monaco-text-button.secondary {
+.text-button.secondary {
 	color: var(--button-secondaryForeground);
 	background-color: var(--button-secondaryBackground);
 }
 
-.monaco-text-button.secondary:hover {
+.text-button.secondary:hover {
 	background-color: var(--button-secondaryHoverBackground);
 }
 
-.monaco-button.disabled:focus,
-.monaco-button.disabled {
+.button.disabled:focus,
+.button.disabled {
 	opacity: 0.4 !important;
 	cursor: default;
 }
 
-.monaco-text-button .codicon {
+.text-button .codicon {
 	margin: 0 0.2em;
 	color: inherit !important;
 }
 
-.monaco-text-button.monaco-text-button-with-short-label {
+.text-button.text-button-with-short-label {
 	flex-direction: row;
 	flex-wrap: wrap;
 	padding: 0 4px;
@@ -73,18 +73,18 @@
 	height: 28px;
 }
 
-.monaco-text-button.monaco-text-button-with-short-label > .monaco-button-label {
+.text-button.text-button-with-short-label > .button-label {
 	flex-basis: 100%;
 }
 
-.monaco-text-button.monaco-text-button-with-short-label > .monaco-button-label-short {
+.text-button.text-button-with-short-label > .button-label-short {
 	flex-grow: 1;
 	width: 0;
 	overflow: hidden;
 }
 
-.monaco-text-button.monaco-text-button-with-short-label > .monaco-button-label,
-.monaco-text-button.monaco-text-button-with-short-label > .monaco-button-label-short {
+.text-button.text-button-with-short-label > .button-label,
+.text-button.text-button-with-short-label > .button-label-short {
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -93,41 +93,41 @@
 	padding: 4px 0;
 }
 
-.monaco-button-dropdown {
+.button-dropdown {
 	display: flex;
 	cursor: pointer;
 	position: relative;
 }
 
-.monaco-button-dropdown.disabled {
+.button-dropdown.disabled {
 	cursor: default;
 }
 
-.monaco-button-dropdown > .monaco-button:focus {
+.button-dropdown > .button:focus {
 	outline: none;
 }
 
-.monaco-button-dropdown.disabled > .monaco-button.disabled,
-.monaco-button-dropdown.disabled > .monaco-button.disabled:focus,
-.monaco-button-dropdown.disabled > .monaco-button-dropdown-separator {
+.button-dropdown.disabled > .button.disabled,
+.button-dropdown.disabled > .button.disabled:focus,
+.button-dropdown.disabled > .button-dropdown-separator {
 	opacity: 0.4 !important;
 }
 
-.monaco-button-dropdown > .monaco-button.monaco-text-button {
+.button-dropdown > .button.text-button {
 	border-right-width: 0 !important;
 }
 
-.monaco-button-dropdown .monaco-button-dropdown-separator {
+.button-dropdown .button-dropdown-separator {
 	padding: 4px 0;
 	cursor: default;
 }
 
-.monaco-button-dropdown .monaco-button-dropdown-separator > div {
+.button-dropdown .button-dropdown-separator > div {
 	height: 100%;
 	width: 1px;
 }
 
-.monaco-dropdown-button {
+.dropdown-button {
 	border: 1px solid var(--button-border);
 	border-left-width: 0 !important;
 	border-radius: 0 2px 2px 0 !important;
@@ -140,78 +140,78 @@
 	min-width: 24px;
 }
 
-.monaco-button-dropdown .monaco-text-button {
+.button-dropdown .text-button {
 	border-radius: 2px 0 0 2px;
 	width: auto;
 	flex: 1;
 }
 
-.monaco-description-button {
+.description-button {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	margin: 4px 5px; /* allows button focus outline to be visible */
 }
 
-.monaco-description-button .monaco-button-description {
+.description-button .button-description {
 	font-style: italic;
 	font-size: 11px;
 	padding: 4px 20px;
 }
 
-.monaco-description-button .monaco-button-label,
-.monaco-description-button .monaco-button-description {
+.description-button .button-label,
+.description-button .button-description {
 	display: flex;
 	justify-content: center;
 	align-items: center;
 }
 
-.monaco-description-button .monaco-button-label > .codicon,
-.monaco-description-button .monaco-button-description > .codicon {
+.description-button .button-label > .codicon,
+.description-button .button-description > .codicon {
 	margin: 0 0.2em;
 	color: inherit !important;
 }
 
 /* default color styles - based on CSS variables */
 
-.monaco-button.default-colors,
-.monaco-button-dropdown.default-colors > .monaco-button{
+.button.default-colors,
+.button-dropdown.default-colors > .button{
 	color: var(--button-foreground);
 	background-color: var(--button-background);
 }
 
-.monaco-button.default-colors:hover,
-.monaco-button-dropdown.default-colors > .monaco-button:hover {
+.button.default-colors:hover,
+.button-dropdown.default-colors > .button:hover {
 	background-color: var(--button-hoverBackground);
 }
 
-.monaco-button.default-colors.secondary,
-.monaco-button-dropdown.default-colors > .monaco-button.secondary {
+.button.default-colors.secondary,
+.button-dropdown.default-colors > .button.secondary {
 	color: var(--button-secondaryForeground);
 	background-color: var(--button-secondaryBackground);
 }
 
-.monaco-button.default-colors.secondary:hover,
-.monaco-button-dropdown.default-colors > .monaco-button.secondary:hover {
+.button.default-colors.secondary:hover,
+.button-dropdown.default-colors > .button.secondary:hover {
 	background-color: var(--button-secondaryHoverBackground);
 }
 
-.monaco-button-dropdown.default-colors .monaco-button-dropdown-separator {
+.button-dropdown.default-colors .button-dropdown-separator {
 	background-color: var(--button-background);
 	border-top: 1px solid var(--button-border);
 	border-bottom: 1px solid var(--button-border);
 }
 
-.monaco-button-dropdown.default-colors .monaco-button.secondary + .monaco-button-dropdown-separator {
+.button-dropdown.default-colors .button.secondary + .button-dropdown-separator {
 	background-color: var(--button-secondaryBackground);
 }
 
-.monaco-button-dropdown.default-colors .monaco-button-dropdown-separator > div {
+.button-dropdown.default-colors .button-dropdown-separator > div {
 	background-color: var(--button-separator);
 }
 
 /* Dropdown menu styles */
-.monaco-button-dropdown-menu {
+.button-dropdown-menu {
 	position: absolute;
 	top: 100%;
 	left: calc(100% - 28px);
@@ -228,7 +228,7 @@
 	flex-direction: column;
 }
 
-.monaco-button-dropdown-action {
+.button-dropdown-action {
 	display: block;
 	width: 100%;
 	padding: 8px 12px;
@@ -245,12 +245,12 @@
 	box-sizing: border-box;
 }
 
-.monaco-button-dropdown-action:hover {
+.button-dropdown-action:hover {
 	background-color: var(--button-background);
 }
 
 /* Small toolbar-style button (20x20) */
-.monaco-text-button.monaco-small-button {
+.text-button.small-button {
 	width: 20px;
 	min-width: 20px;
 	height: 20px;
@@ -267,7 +267,7 @@
 	outline: none;
 }
 
-.monaco-text-button.monaco-small-button .codicon {
+.text-button.small-button .codicon {
 	margin: 0;
 	line-height: 1;
 	font-size: 14px;
@@ -275,12 +275,12 @@
 	padding-left: 1px;
 }
 
-.monaco-text-button.monaco-small-button:focus,
-.monaco-text-button.monaco-small-button:focus-visible {
+.text-button.small-button:focus,
+.text-button.small-button:focus-visible {
 	outline: none !important;
 	box-shadow: none !important;
 }
 
-.monaco-text-button.monaco-small-button:hover {
+.text-button.small-button:hover {
 	background-color: var(--toolbar-hoverBackground);
 }

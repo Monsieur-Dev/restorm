@@ -42,7 +42,7 @@ const Toggle: React.FC<ToggleProps> = ({
 
   // Build CSS classes
   const classes = [
-    'monaco-custom-toggle',
+    'custom-toggle',
     checked ? 'checked' : '',
     !enabled ? 'disabled' : '',
     actionClassName ?? '',

@@ -1,8 +1,8 @@
-.monaco-custom-radio {
+.custom-radio {
 	display: flex;
 }
 
-.monaco-custom-radio > .monaco-button {
+.custom-radio > .button {
 	border-radius: 0;
 	font-size: 0.9em;
 	line-height: 1em;
@@ -11,59 +11,59 @@
 	cursor: pointer;
 }
 
-.monaco-custom-radio > .monaco-button:first-child {
+.custom-radio > .button:first-child {
 	border-top-left-radius: 3px;
 	border-bottom-left-radius: 3px;
 }
 
-.monaco-custom-radio > .monaco-button:last-child {
+.custom-radio > .button:last-child {
 	border-top-right-radius: 3px;
 	border-bottom-right-radius: 3px;
 }
 
-.monaco-custom-radio > .monaco-button:not(.active, :last-child) {
+.custom-radio > .button:not(.active, :last-child) {
 	border-right: none;
 }
 
-.monaco-custom-radio > .monaco-button.previous-active {
+.custom-radio > .button.previous-active {
 	border-left: none;
 }
 
 /* default color styles - based on CSS variables */
 
-.monaco-custom-radio > .monaco-button {
+.custom-radio > .button {
 	color: var(--foreground);
 	background-color: var(--input-background);
 	border: 1px solid var(--input-border);
 }
 
-.monaco-custom-radio > .monaco-button.active:hover,
-.monaco-custom-radio > .monaco-button.active {
+.custom-radio > .button.active:hover,
+.custom-radio > .button.active {
 	color: var(--inputOption-activeForeground);
 	background-color: var(--inputOption-activeBackground);
 	border-color: var(--inputOption-activeBorder);
 }
 
-.hc-black .monaco-custom-radio > .monaco-button.active,
-.hc-light .monaco-custom-radio > .monaco-button.active {
+.hc-black .custom-radio > .button.active,
+.hc-light .custom-radio > .button.active {
 	border-color: var(--radio-activeBorder);
 }
 
-.hc-black .monaco-custom-radio > .monaco-button:not(.active),
-.hc-light .monaco-custom-radio > .monaco-button:not(.active) {
+.hc-black .custom-radio > .button:not(.active),
+.hc-light .custom-radio > .button:not(.active) {
 	border-color: var(--radio-inactiveBorder);
 }
 
-.hc-black .monaco-custom-radio > .monaco-button:not(.active):hover,
-.hc-light .monaco-custom-radio > .monaco-button:not(.active):hover {
+.hc-black .custom-radio > .button:not(.active):hover,
+.hc-light .custom-radio > .button:not(.active):hover {
 	outline: none;
 }
 
-.monaco-custom-radio > .monaco-button:hover:not(.active) {
+.custom-radio > .button:hover:not(.active) {
 	background-color: var(--inputOption-hoverBackground);
 }
 
-.monaco-custom-radio > .monaco-button:focus,
-.monaco-custom-radio > .monaco-button:focus-visible {
+.custom-radio > .button:focus,
+.custom-radio > .button:focus-visible {
 	outline: none;
 }

@@ -106,61 +106,61 @@ The theme system uses CSS custom properties (variables) that match VSCode's vari
 
 ```css
 /* Editor colors */
---vscode-editor-background
---vscode-editor-foreground
+--editor-background
+--editor-foreground
 
 /* UI colors */
---vscode-sideBar-background
---vscode-sideBar-foreground
---vscode-panel-border
+--sideBar-background
+--sideBar-foreground
+--panel-border
 
 /* Input controls */
---vscode-input-background
---vscode-input-foreground
---vscode-input-border
+--input-background
+--input-foreground
+--input-border
 
 /* Dropdown */
---vscode-dropdown-background
---vscode-dropdown-foreground
---vscode-dropdown-border
+--dropdown-background
+--dropdown-foreground
+--dropdown-border
 
 /* Checkbox */
---vscode-checkbox-background
---vscode-checkbox-foreground
---vscode-checkbox-border
+--checkbox-background
+--checkbox-foreground
+--checkbox-border
 
 /* Buttons */
---vscode-button-background
---vscode-button-foreground
---vscode-button-hoverBackground
+--button-background
+--button-foreground
+--button-hoverBackground
 
 /* List/Tree */
---vscode-list-activeSelectionBackground
---vscode-list-activeSelectionForeground
---vscode-list-hoverBackground
---vscode-list-focusBackground
+--list-activeSelectionBackground
+--list-activeSelectionForeground
+--list-hoverBackground
+--list-focusBackground
 
 /* Focus */
---vscode-focusBorder
+--focusBorder
 
 /* Text */
---vscode-foreground
---vscode-descriptionForeground
+--foreground
+--descriptionForeground
 ```
 
 ### Settings-Specific Variables
 
 ```css
---vscode-settings-headerForeground
---vscode-settings-checkboxBackground
---vscode-settings-checkboxForeground
---vscode-settings-checkboxBorder
---vscode-settings-textInputBackground
---vscode-settings-textInputForeground
---vscode-settings-textInputBorder
---vscode-settings-dropdownBackground
---vscode-settings-dropdownForeground
---vscode-settings-dropdownBorder
+--settings-headerForeground
+--settings-checkboxBackground
+--settings-checkboxForeground
+--settings-checkboxBorder
+--settings-textInputBackground
+--settings-textInputForeground
+--settings-textInputBorder
+--settings-dropdownBackground
+--settings-dropdownForeground
+--settings-dropdownBorder
 ```
 
 ## Component Styles
@@ -171,13 +171,13 @@ All input fields (text, number) use VSCode input styling:
 
 ```css
 input[type="text"], input[type="number"] {
-  background-color: var(--vscode-input-background);
-  color: var(--vscode-input-foreground);
-  border: 1px solid var(--vscode-input-border);
+  background-color: var(--input-background);
+  color: var(--input-foreground);
+  border: 1px solid var(--input-border);
 }
 
 input:focus {
-  outline: 1px solid var(--vscode-focusBorder);
+  outline: 1px solid var(--focusBorder);
   outline-offset: -1px;
 }
 ```
@@ -186,8 +186,8 @@ input:focus {
 
 ```css
 input[type="checkbox"] {
-  background-color: var(--vscode-checkbox-background);
-  border: 1px solid var(--vscode-checkbox-border);
+  background-color: var(--checkbox-background);
+  border: 1px solid var(--checkbox-border);
 }
 ```
 
@@ -195,9 +195,9 @@ input[type="checkbox"] {
 
 ```css
 select {
-  background-color: var(--vscode-dropdown-background);
-  color: var(--vscode-dropdown-foreground);
-  border: 1px solid var(--vscode-dropdown-border);
+  background-color: var(--dropdown-background);
+  color: var(--dropdown-foreground);
+  border: 1px solid var(--dropdown-border);
 }
 ```
 
@@ -209,7 +209,7 @@ Category and subcategory titles use `position: sticky` to remain visible when sc
 .settings-group-title-label {
   position: sticky;
   top: 0;
-  background-color: var(--vscode-editor-background);
+  background-color: var(--editor-background);
   z-index: 10;
 }
 ```
@@ -224,11 +224,11 @@ Custom scrollbar styles matching VSCode:
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: var(--vscode-scrollbarSlider-background);
+  background-color: var(--scrollbarSlider-background);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: var(--vscode-scrollbarSlider-hoverBackground);
+  background-color: var(--scrollbarSlider-hoverBackground);
 }
 ```
 
@@ -257,7 +257,7 @@ Custom scrollbar styles matching VSCode:
 
 ```tsx
 // Custom inline styles using variables
-<p style={{ color: 'var(--vscode-descriptionForeground)' }}>
+<p style={{ color: 'var(--descriptionForeground)' }}>
   This text uses the VSCode description color
 </p>
 ```

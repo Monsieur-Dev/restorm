@@ -222,7 +222,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
             alignItems: 'center', 
             justifyContent: 'center', 
             height: '100%', 
-            color: 'var(--vscode-descriptionForeground)' 
+            color: 'var(--descriptionForeground)' 
           }}>
             {t('requestTab.responses.noResponse')}
           </div>
@@ -259,7 +259,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
               alignItems: 'center', 
               justifyContent: 'center', 
               height: '100%', 
-              color: 'var(--vscode-descriptionForeground)' 
+              color: 'var(--descriptionForeground)' 
             }}>
               {isLoading ? t('requestTab.responses.loading') : t('requestTab.responses.noResponse')}
             </div>
@@ -299,7 +299,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
               <div style={{
                 flex: 1,
                 minHeight: 0,
-                border: '1px solid var(--vscode-panel-border)',
+                border: '1px solid var(--panel-border)',
                 borderRadius: 3,
                 boxSizing: 'border-box',
                 position: 'relative',

@@ -1,22 +1,22 @@
-.monaco-workbench .part.editor > .content .editor-group-container > .title > .tabs-and-actions-container {
+.workbench .part.editor > .content .editor-group-container > .title > .tabs-and-actions-container {
 	display: flex;
 	position: relative;
 	flex: 1;           /* expand within .title */
 	min-width: 0;      /* allow children to shrink horizontally */
 }
 
-.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container-wrapper {
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container-wrapper {
 	flex: 1; /* expand to take remaining row width so blank area captures DnD */
 	min-width: 0;
 }
 
-.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container {
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container {
 	display: flex;
 	height: 100%;
 	flex-wrap: nowrap; /* prevent tabs from wrapping to next line */
 }
 
-.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab {
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab {
 	position: relative;
 	display: flex;
 	align-items: center;
@@ -32,32 +32,32 @@
 	min-width: fit-content; /* ensure tabs maintain their content width */
 }
 
-.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.active {
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.active {
 	background-color: var(--tab-activeBackground);
 	color: var(--tab-activeForeground);
 }
 
-.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab .tab-label {
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab .tab-label {
 	line-height: var(--editor-group-tab-height);
 }
 
 /* Apply opacity only to label-name content when dimmed */
-.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container.dimmed > .tab .label-name {
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container.dimmed > .tab .label-name {
 	opacity: 0.5;
 }
 
 /* Icons inside label-name should always be white and have full opacity even when dimmed */
-.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container.dimmed > .tab .label-name .codicon-file {
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container.dimmed > .tab .label-name .codicon-file {
 	opacity: 1 !important;
 	color: #fff !important;
 }
 
 /* Icons inside label-name should always be white even when not dimmed */
-.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab .label-name .codicon-file {
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab .label-name .codicon-file {
 	color: #fff !important;
 }
 
-.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab .tab-actions {
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab .tab-actions {
 	display: flex;
 	align-items: center; /* vertically center actions */
 	height: 100%; /* take full tab height to enable bottom alignment */
@@ -68,21 +68,21 @@
 	transition: opacity 120ms ease;
 }
 
-.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab .tab-actions .action-label {
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab .tab-actions .action-label {
 	border: none;
 	outline: none;
 	box-shadow: none;
 	padding: 0;
 }
 
-.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab:hover .tab-actions,
-.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.active .tab-actions {
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab:hover .tab-actions,
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.active .tab-actions {
 	opacity: 1;
 	pointer-events: auto;
 }
 
-.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.drop-target-left::after,
-.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.drop-target-right::before {
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.drop-target-left::after,
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.drop-target-right::before {
 	content: "";
 	position: absolute;
 	top: 0;
@@ -93,11 +93,11 @@
 	z-index: 11;
 }
 
-.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.drop-target-right::before {
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.drop-target-right::before {
 	right: 0;
 }
 
-.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.drop-target-left::after {
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.drop-target-left::after {
 	left: 0;
 }
 

@@ -114,7 +114,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
   const requestContent = (
     <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }}>
       <Pane title={t('graphql.tabs.query')} initialSize={0.5} minSize={150}>
-        <div style={{ height: '100%', border: '1px solid var(--vscode-panel-border)', borderRadius: 3 }}>
+        <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
           <CodeEditor
             height="100%"
             language="graphql"
@@ -125,7 +125,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
         </div>
       </Pane>
       <Pane title={t('graphql.tabs.variables')} initialSize={0.25} minSize={100}>
-        <div style={{ height: '100%', border: '1px solid var(--vscode-panel-border)', borderRadius: 3 }}>
+        <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
           <CodeEditor
             height="100%"
             language="json"
@@ -186,7 +186,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>
       <div style={{ display: 'flex', gap: 8 }}>
         <span style={{ fontWeight: 600, minWidth: 100 }}>Status:</span>
-        <span style={{ color: response.statusCode >= 200 && response.statusCode < 300 ? 'var(--vscode-testing-iconPassed)' : 'var(--vscode-testing-iconFailed)' }}>
+        <span style={{ color: response.statusCode >= 200 && response.statusCode < 300 ? 'var(--testing-iconPassed)' : 'var(--testing-iconFailed)' }}>
           {response.statusCode}
         </span>
       </div>
@@ -200,9 +200,9 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
       </div>
       {response.errors && response.errors.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
-          <span style={{ fontWeight: 600, color: 'var(--vscode-testing-iconFailed)' }}>Errors:</span>
+          <span style={{ fontWeight: 600, color: 'var(--testing-iconFailed)' }}>Errors:</span>
           {response.errors.map((err, i) => (
-            <div key={i} style={{ padding: 4, background: 'var(--vscode-inputValidation-errorBackground)', borderRadius: 3 }}>
+            <div key={i} style={{ padding: 4, background: 'var(--inputValidation-errorBackground)', borderRadius: 3 }}>
               {err.message}
             </div>
           ))}
@@ -213,7 +213,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
   
   // Response content (raw JSON)
   const responseContent = response && (response.data ?? response.errors) ? (
-    <div style={{ height: '100%', border: '1px solid var(--vscode-panel-border)', borderRadius: 3 }}>
+    <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
       <CodeEditor
         height="100%"
         language="json"
@@ -226,7 +226,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
   // URL section
   const urlSection = (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <span style={{ fontWeight: 600, color: 'var(--vscode-charts-purple)' }}>GraphQL</span>
+      <span style={{ fontWeight: 600, color: 'var(--charts-purple)' }}>GraphQL</span>
       <div style={{ flex: 1, minWidth: 0, paddingLeft: 15 }}>
         <VariableInputBox
           value={url}

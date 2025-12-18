@@ -122,7 +122,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
   const requestContent = (
     <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }}>
       <Pane title={t('grpc.tabs.message')} initialSize={0.7} minSize={150}>
-        <div style={{ height: '100%', border: '1px solid var(--vscode-panel-border)', borderRadius: 3 }}>
+        <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
           <CodeEditor
             height="100%"
             language="json"
@@ -199,7 +199,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>
       <div style={{ display: 'flex', gap: 8 }}>
         <span style={{ fontWeight: 600, minWidth: 100 }}>Status:</span>
-        <span style={{ color: response.statusCode === 0 ? 'var(--vscode-testing-iconPassed)' : 'var(--vscode-editorWarning-foreground)' }}>
+        <span style={{ color: response.statusCode === 0 ? 'var(--testing-iconPassed)' : 'var(--editorWarning-foreground)' }}>
           {response.statusCode} ({response.statusCode === 0 ? 'OK' : 'Error'})
         </span>
       </div>
@@ -221,8 +221,8 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
       </div>
       {response.error && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
-          <span style={{ fontWeight: 600, color: 'var(--vscode-testing-iconFailed)' }}>Error:</span>
-          <div style={{ padding: 4, background: 'var(--vscode-inputValidation-errorBackground)', borderRadius: 3 }}>
+          <span style={{ fontWeight: 600, color: 'var(--testing-iconFailed)' }}>Error:</span>
+          <div style={{ padding: 4, background: 'var(--inputValidation-errorBackground)', borderRadius: 3 }}>
             {response.error}
           </div>
         </div>
@@ -232,7 +232,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
   
   // Response content (raw JSON)
   const responseContent = response?.responseMessage ? (
-    <div style={{ height: '100%', border: '1px solid var(--vscode-panel-border)', borderRadius: 3 }}>
+    <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
       <CodeEditor
         height="100%"
         language="json"
@@ -256,8 +256,8 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
   const urlSection = (
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontWeight: 600, color: 'var(--vscode-charts-blue)' }}>gRPC</span>
-        <span style={{ padding: '2px 6px', borderRadius: 3, background: 'var(--vscode-badge-background)', fontSize: 11 }}>
+        <span style={{ fontWeight: 600, color: 'var(--charts-blue)' }}>gRPC</span>
+        <span style={{ padding: '2px 6px', borderRadius: 3, background: 'var(--badge-background)', fontSize: 11 }}>
           {request.callType}
         </span>
         <div style={{ flex: 1, minWidth: 0, paddingLeft: 15 }}>
@@ -275,7 +275,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
           </span>
         </Button>
       </div>
-      <div style={{ fontSize: 12, color: 'var(--vscode-descriptionForeground)' }}>
+      <div style={{ fontSize: 12, color: 'var(--descriptionForeground)' }}>
         {request.service}/{request.method}
       </div>
     </>

@@ -86,9 +86,9 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   
   const protocolColor = useMemo(() => {
     switch (request.protocol) {
-      case 'mqtt': return 'var(--vscode-charts-orange)'
-      case 'socketio': return 'var(--vscode-charts-green)'
-      default: return 'var(--vscode-charts-blue)'
+      case 'mqtt': return 'var(--charts-orange)'
+      case 'socketio': return 'var(--charts-green)'
+      default: return 'var(--charts-blue)'
     }
   }, [request.protocol])
   
@@ -164,7 +164,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
               </div>
             </div>
           )}
-          <div style={{ flex: 1, border: '1px solid var(--vscode-panel-border)', borderRadius: 3 }}>
+          <div style={{ flex: 1, border: '1px solid var(--panel-border)', borderRadius: 3 }}>
             <CodeEditor
               height="100%"
               language="json"
@@ -231,7 +231,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>
       <div style={{ display: 'flex', gap: 8 }}>
         <span style={{ fontWeight: 600, minWidth: 100 }}>Status:</span>
-        <span style={{ color: response.connected ? 'var(--vscode-testing-iconPassed)' : 'var(--vscode-testing-iconFailed)' }}>
+        <span style={{ color: response.connected ? 'var(--testing-iconPassed)' : 'var(--testing-iconFailed)' }}>
           {response.connected ? t('websocket.connected') : t('websocket.disconnected')}
         </span>
       </div>
@@ -255,8 +255,8 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       </div>
       {response.error && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
-          <span style={{ fontWeight: 600, color: 'var(--vscode-testing-iconFailed)' }}>Error:</span>
-          <div style={{ padding: 4, background: 'var(--vscode-inputValidation-errorBackground)', borderRadius: 3 }}>
+          <span style={{ fontWeight: 600, color: 'var(--testing-iconFailed)' }}>Error:</span>
+          <div style={{ padding: 4, background: 'var(--inputValidation-errorBackground)', borderRadius: 3 }}>
             {response.error}
           </div>
         </div>
@@ -266,7 +266,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   
   // Response content - messages list
   const responseContent = response && response.messages.length > 0 ? (
-    <div style={{ height: '100%', overflow: 'auto', fontFamily: 'var(--vscode-editor-font-family)', fontSize: 12 }}>
+    <div style={{ height: '100%', overflow: 'auto', fontFamily: 'var(--editor-font-family)', fontSize: 12 }}>
       {response.messages.map((msg, i) => (
         <div
           key={i}
@@ -274,7 +274,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
             padding: '4px 8px',
             marginBottom: 4,
             borderRadius: 3,
-            background: msg.direction === 'sent' ? 'var(--vscode-editor-selectionBackground)' : 'var(--vscode-editor-inactiveSelectionBackground)',
+            background: msg.direction === 'sent' ? 'var(--editor-selectionBackground)' : 'var(--editor-inactiveSelectionBackground)',
             whiteSpace: 'pre-wrap',
             wordBreak: 'break-all'
           }}
@@ -283,7 +283,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         </div>
       ))}
       {response.messages.length === 0 && (
-        <div style={{ color: 'var(--vscode-descriptionForeground)' }}>
+        <div style={{ color: 'var(--descriptionForeground)' }}>
           {t('websocket.noMessages')}
         </div>
       )}

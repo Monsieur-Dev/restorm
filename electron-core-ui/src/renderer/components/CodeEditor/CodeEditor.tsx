@@ -89,7 +89,7 @@ function getMonacoTheme(): string {
 /**
  * CodeEditor component that wraps Monaco Editor with automatic theme synchronization
  * 
- * This component provides the same API as Monaco Editor from @monaco-editor/react,
+ * This component provides the same API as Monaco Editor from @editor/react,
  * but automatically switches between vs-dark and vs themes based on the application's
  * current theme (detected via data-theme attribute on document.documentElement).
  * 

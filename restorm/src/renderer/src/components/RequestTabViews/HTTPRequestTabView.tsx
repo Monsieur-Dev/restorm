@@ -93,8 +93,8 @@ function keyValuesToListItems(keyValues: KeyValue[], prefix: string): ListViewIt
     icon: 'blank',
     title: (
       <span style={{ display: 'flex', gap: 8 }}>
-        <span style={{ fontWeight: 600, color: 'var(--vscode-symbolIcon-propertyForeground)' }}>{kv.key}</span>
-        <span style={{ color: 'var(--vscode-descriptionForeground)' }}>{kv.value}</span>
+        <span style={{ fontWeight: 600, color: 'var(--symbolIcon-propertyForeground)' }}>{kv.key}</span>
+        <span style={{ color: 'var(--descriptionForeground)' }}>{kv.value}</span>
       </span>
     )
   }))
@@ -370,7 +370,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           />
           <div style={{ flex: 1, minHeight: 0 }}>
             {bodyMode === 'text' && (
-              <div style={{ height: '100%', border: '1px solid var(--vscode-panel-border)', borderRadius: 3, boxSizing: 'border-box' }}>
+              <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3, boxSizing: 'border-box' }}>
                 <CodeEditor
                   height="100%"
                   language="json"
@@ -463,7 +463,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     const items: ListViewItemData[] = [
       { id: 'general-request-url', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Request URL</span><span>{httpResponse.requestUrl}</span></span> },
       { id: 'general-request-method', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Request Method</span><span>{httpResponse.requestMethod}</span></span> },
-      { id: 'general-status-code', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Status Code</span><span style={{ color: getStatusColor(httpResponse.statusCode) === 'green' ? 'var(--vscode-testing-iconPassed)' : getStatusColor(httpResponse.statusCode) === 'orange' ? 'var(--vscode-editorWarning-foreground)' : 'var(--vscode-testing-iconFailed)' }}>{httpResponse.statusCode} {httpResponse.statusText}</span></span> },
+      { id: 'general-status-code', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Status Code</span><span style={{ color: getStatusColor(httpResponse.statusCode) === 'green' ? 'var(--testing-iconPassed)' : getStatusColor(httpResponse.statusCode) === 'orange' ? 'var(--editorWarning-foreground)' : 'var(--testing-iconFailed)' }}>{httpResponse.statusCode} {httpResponse.statusText}</span></span> },
       { id: 'general-duration', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Duration</span><span>{formatDuration(httpResponse.timings.durationMs)}</span></span> }
     ]
     if (httpResponse.contentType) {
@@ -473,7 +473,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
       items.push({ id: 'general-content-length', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Content-Length</span><span>{formatBytes(httpResponse.contentLength)}</span></span> })
     }
     if (httpResponse.error) {
-      items.push({ id: 'general-error', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Error</span><span style={{ color: 'var(--vscode-testing-iconFailed)' }}>{httpResponse.error}</span></span> })
+      items.push({ id: 'general-error', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Error</span><span style={{ color: 'var(--testing-iconFailed)' }}>{httpResponse.error}</span></span> })
     }
     return items
   }, [httpResponse])
@@ -510,7 +510,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
   }, [httpResponse])
 
   const responseContent = httpResponse && formattedResponseBody ? (
-    <div style={{ height: '100%', border: '1px solid var(--vscode-panel-border)', borderRadius: 3, boxSizing: 'border-box' }}>
+    <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3, boxSizing: 'border-box' }}>
       <CodeEditor
         height="100%"
         language="json"

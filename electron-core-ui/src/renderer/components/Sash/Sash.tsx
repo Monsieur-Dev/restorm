@@ -234,7 +234,7 @@ export const Sash: React.FC<SashProps> = ({
 
 	// Build CSS classes
 	const classes = [
-		'monaco-sash',
+		'sash',
 		orientation,
 		state === 'disabled' && 'disabled',
 		state === 'atMinimum' && 'minimum',

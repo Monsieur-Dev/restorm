@@ -222,15 +222,15 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
 
   // Build CSS classes
   const selectClasses = [
-    'monaco-select-box',
-    'monaco-select-box-dropdown-padding',
+    'select-box',
+    'select-box-dropdown-padding',
     'setting-control-focus-target',
     isVisible ? 'synthetic-focus' : '',
     className
   ].filter(Boolean).join(' ')
 
   const dropdownClasses = [
-    'monaco-select-box-dropdown-container',
+    'select-box-dropdown-container',
     isVisible ? 'visible' : ''
   ].filter(Boolean).join(' ')
 

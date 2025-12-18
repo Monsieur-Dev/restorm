@@ -52,7 +52,7 @@ export const WorkbenchTab: React.FC<WorkbenchTabProps> = ({
         flex: 1,
         minHeight: 0,
         minWidth: 0,
-        backgroundColor: 'var(--vscode-editor-background)'
+        backgroundColor: 'var(--editor-background)'
       }}
     >
       {callout && (
@@ -74,7 +74,7 @@ export const WorkbenchTab: React.FC<WorkbenchTabProps> = ({
       >
         <span
           style={{
-            color: 'var(--vscode-descriptionForeground)'
+            color: 'var(--descriptionForeground)'
           }}
         >
           {label}

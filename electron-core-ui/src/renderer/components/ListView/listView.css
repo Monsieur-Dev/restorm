@@ -93,13 +93,13 @@
   color: inherit;
 }
 
-/* Override global monaco-workbench focus outlines for this control */
-.monaco-workbench .list-view-expander:focus,
-.monaco-workbench .list-view-expander:focus-visible {
+/* Override global workbench focus outlines for this control */
+.workbench .list-view-expander:focus,
+.workbench .list-view-expander:focus-visible {
   outline: 0 !important;
 }
 
-.monaco-workbench .list-view:focus {
+.workbench .list-view:focus {
   outline: 0 !important;
 }
 

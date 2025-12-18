@@ -108,13 +108,13 @@ function MyComponent() {
 
 ### Using CSS Variables
 
-All theme colors are available as CSS variables with the `--vscode-` prefix:
+All theme colors are available as CSS variables with the `--` prefix:
 
 ```css
 .my-element {
-  background-color: var(--vscode-editor-background);
-  color: var(--vscode-editor-foreground);
-  border: 1px solid var(--vscode-panel-border);
+  background-color: var(--editor-background);
+  color: var(--editor-foreground);
+  border: 1px solid var(--panel-border);
 }
 ```
 
@@ -122,21 +122,21 @@ All theme colors are available as CSS variables with the `--vscode-` prefix:
 
 | Variable | Description |
 |----------|-------------|
-| `--vscode-editor-background` | Main editor background |
-| `--vscode-editor-foreground` | Main editor text color |
-| `--vscode-input-background` | Input field background |
-| `--vscode-input-foreground` | Input field text color |
-| `--vscode-input-border` | Input field border |
-| `--vscode-button-background` | Primary button background |
-| `--vscode-button-foreground` | Primary button text |
-| `--vscode-button-hoverBackground` | Button hover state |
-| `--vscode-dropdown-background` | Dropdown/select background |
-| `--vscode-dropdown-border` | Dropdown/select border |
-| `--vscode-list-activeSelectionBackground` | Selected list item |
-| `--vscode-list-hoverBackground` | Hovered list item |
-| `--vscode-panel-border` | Panel/section borders |
-| `--vscode-sideBar-background` | Sidebar background |
-| `--vscode-descriptionForeground` | Muted/description text |
+| `--editor-background` | Main editor background |
+| `--editor-foreground` | Main editor text color |
+| `--input-background` | Input field background |
+| `--input-foreground` | Input field text color |
+| `--input-border` | Input field border |
+| `--button-background` | Primary button background |
+| `--button-foreground` | Primary button text |
+| `--button-hoverBackground` | Button hover state |
+| `--dropdown-background` | Dropdown/select background |
+| `--dropdown-border` | Dropdown/select border |
+| `--list-activeSelectionBackground` | Selected list item |
+| `--list-hoverBackground` | Hovered list item |
+| `--panel-border` | Panel/section borders |
+| `--sideBar-background` | Sidebar background |
+| `--descriptionForeground` | Muted/description text |
 
 ## Testing
 
@@ -207,7 +207,7 @@ You can override specific colors by setting CSS variables after the theme is app
 
 ```typescript
 document.documentElement.style.setProperty(
-  '--vscode-editor-background',
+  '--editor-background',
   '#000000'
 )
 ```

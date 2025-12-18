@@ -60,8 +60,8 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         e.preventDefault()
       }}
     >
-      <div className="monaco-menu menubar-menu-items-holder monaco-menu-container">
-        <div className="monaco-menu">
+      <div className="menu menubar-menu-items-holder menu-container">
+        <div className="menu">
           <ul className="actions-container" role="menu">
             {items.map((item) =>
               item.isSeparator ? (

@@ -149,7 +149,7 @@ const InputBox: React.FC<InputBoxProps> = ({
 
   // Calculate classes for container
   const getContainerClasses = (): string => {
-    const classes = ['monaco-inputbox']
+    const classes = ['inputbox']
     
     if (message) {
       classes.push(classForType(message.type))
@@ -267,9 +267,9 @@ const InputBox: React.FC<InputBoxProps> = ({
         </div>
       </div>
       {message?.content && state === 'focused' && (
-        <div className="monaco-inputbox-container">
+        <div className="inputbox-container">
           <div
-            className={`monaco-inputbox-message ${classForType(message.type)}`}
+            className={`inputbox-message ${classForType(message.type)}`}
             style={{
               backgroundColor: stylesForType(message.type).background,
               color: stylesForType(message.type).foreground,

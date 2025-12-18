@@ -37,16 +37,16 @@ const ButtonWithDescription: React.FC<ButtonWithDescriptionProps> = ({
   }
 
   return (
-    <div className={`monaco-description-button ${className}`} id={id}>
+    <div className={`description-button ${className}`} id={id}>
       <Button
         options={options}
         icon={icon}
         onClick={onClick}
-        className="monaco-button-label"
+        className="button-label"
       >
         {children}
       </Button>
-      <div className="monaco-button-description">
+      <div className="button-description">
         {renderIcon()}
         {renderDescription()}
       </div>

@@ -359,12 +359,12 @@ The ThemeService automatically converts theme colors to CSS variables:
 
 | Theme Key | CSS Variable |
 |-----------|--------------|
-| `editor.background` | `--vscode-editor-background` |
-| `editor.foreground` | `--vscode-editor-foreground` |
-| `input.background` | `--vscode-input-background` |
-| `button.background` | `--vscode-button-background` |
+| `editor.background` | `--editor-background` |
+| `editor.foreground` | `--editor-foreground` |
+| `input.background` | `--input-background` |
+| `button.background` | `--button-background` |
 
-The conversion rule: Replace dots with dashes and prefix with `--vscode-`.
+The conversion rule: Replace dots with dashes and prefix with `--`.
 
 ## Example: Complete Minimal Theme
 

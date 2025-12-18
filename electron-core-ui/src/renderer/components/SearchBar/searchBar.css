@@ -109,13 +109,13 @@
   width: 100%;
 }
 
-.search-bar-input .monaco-inputbox {
+.search-bar-input .inputbox {
   background: transparent;
   border: none;
   width: 100%;
 }
 
-.search-bar-input .monaco-inputbox > .ibwrapper > .input {
+.search-bar-input .inputbox > .ibwrapper > .input {
   background: transparent;
 }
 

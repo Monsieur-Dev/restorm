@@ -84,7 +84,7 @@ const MenuBarItem = forwardRef<HTMLDivElement, MenuBarItemProps>(({
         {title}
       </div>
       {children && isActive && (
-        <div ref={scrollableRef} className="monaco-menu menubar-menu-items-holder monaco-menu-container" style={{
+        <div ref={scrollableRef} className="menu menubar-menu-items-holder menu-container" style={{
           position: 'fixed',
           zIndex: 2000,
           left: `${titleRef.current?.getBoundingClientRect().left ?? 0}px`,

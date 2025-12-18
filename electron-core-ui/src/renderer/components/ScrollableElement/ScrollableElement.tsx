@@ -538,7 +538,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
 
   // Container classes
   const containerClasses = [
-    'monaco-scrollable-element',
+    'scrollable-element',
     className
   ].filter(Boolean).join(' ');
 

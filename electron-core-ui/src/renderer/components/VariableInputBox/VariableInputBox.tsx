@@ -363,7 +363,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
     <>
       <div
         id={id}
-        className={['monaco-inputbox', 'idle', className].filter(Boolean).join(' ')}
+        className={['inputbox', 'idle', className].filter(Boolean).join(' ')}
         style={{
           backgroundColor: defaultInputBoxStyles.inputBackground,
           color: defaultInputBoxStyles.inputForeground,

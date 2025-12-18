@@ -1,4 +1,4 @@
-.monaco-inputbox {
+.inputbox {
 	position: relative;
 	display: block;
 	padding: 0;
@@ -9,18 +9,18 @@
 	font-size: inherit;
 }
 
-.monaco-inputbox > .ibwrapper > .input,
-.monaco-inputbox > .ibwrapper > .mirror {
+.inputbox > .ibwrapper > .input,
+.inputbox > .ibwrapper > .mirror {
 	/* Customizable */
 	padding: 4px 6px;
 }
 
-.monaco-inputbox > .ibwrapper {
+.inputbox > .ibwrapper {
 	position: relative;
 	width: 100%;
 }
 
-.monaco-inputbox > .ibwrapper > .input {
+.inputbox > .ibwrapper > .input {
 	display: inline-block;
 	box-sizing:	border-box;
 	width: 100%;
@@ -33,76 +33,76 @@
 	color: inherit;
 }
 
-.monaco-inputbox > .ibwrapper > input {
+.inputbox > .ibwrapper > input {
 	text-overflow: ellipsis;
 }
 
 /* Hide number input spinners */
-.monaco-inputbox > .ibwrapper > input[type="number"]::-webkit-inner-spin-button,
-.monaco-inputbox > .ibwrapper > input[type="number"]::-webkit-outer-spin-button {
+.inputbox > .ibwrapper > input[type="number"]::-webkit-inner-spin-button,
+.inputbox > .ibwrapper > input[type="number"]::-webkit-outer-spin-button {
 	-webkit-appearance: none !important;
 	margin: 0;
 }
 
-.monaco-inputbox > .ibwrapper > input[type="number"] {
+.inputbox > .ibwrapper > input[type="number"] {
 	-moz-appearance: textfield;
 }
 
-.monaco-inputbox > .ibwrapper > textarea.input {
+.inputbox > .ibwrapper > textarea.input {
 	display: block;
 	outline: none;
 }
 
 /* Hide scrollbars only when using flexible height (no fixed height) */
-.monaco-inputbox > .ibwrapper > textarea.input:not([style*="min-height"], [style*="height"]) {
+.inputbox > .ibwrapper > textarea.input:not([style*="min-height"], [style*="height"]) {
 	scrollbar-width: none; /* Firefox: hide scrollbars */
 }
 
-.monaco-inputbox > .ibwrapper > textarea.input:not([style*="min-height"], [style*="height"])::-webkit-scrollbar {
+.inputbox > .ibwrapper > textarea.input:not([style*="min-height"], [style*="height"])::-webkit-scrollbar {
 	display: none; /* Chrome + Safari: hide scrollbar */
 }
 
 /* VSCode-style scrollbar for textarea with fixed height */
-.monaco-inputbox > .ibwrapper > textarea.input[style*="min-height"],
-.monaco-inputbox > .ibwrapper > textarea.input[style*="height"] {
+.inputbox > .ibwrapper > textarea.input[style*="min-height"],
+.inputbox > .ibwrapper > textarea.input[style*="height"] {
 	scrollbar-width: thin;
 	scrollbar-color: var(--scrollbarSlider-background) transparent;
 	overflow-y: auto;
 	overflow-x: hidden;
 }
 
-.monaco-inputbox > .ibwrapper > textarea.input[style*="min-height"]::-webkit-scrollbar,
-.monaco-inputbox > .ibwrapper > textarea.input[style*="height"]::-webkit-scrollbar {
+.inputbox > .ibwrapper > textarea.input[style*="min-height"]::-webkit-scrollbar,
+.inputbox > .ibwrapper > textarea.input[style*="height"]::-webkit-scrollbar {
 	width: 10px;
 	height: 10px;
 }
 
-.monaco-inputbox > .ibwrapper > textarea.input[style*="min-height"]::-webkit-scrollbar-track,
-.monaco-inputbox > .ibwrapper > textarea.input[style*="height"]::-webkit-scrollbar-track {
+.inputbox > .ibwrapper > textarea.input[style*="min-height"]::-webkit-scrollbar-track,
+.inputbox > .ibwrapper > textarea.input[style*="height"]::-webkit-scrollbar-track {
 	background: transparent;
 }
 
-.monaco-inputbox > .ibwrapper > textarea.input[style*="min-height"]::-webkit-scrollbar-thumb,
-.monaco-inputbox > .ibwrapper > textarea.input[style*="height"]::-webkit-scrollbar-thumb {
+.inputbox > .ibwrapper > textarea.input[style*="min-height"]::-webkit-scrollbar-thumb,
+.inputbox > .ibwrapper > textarea.input[style*="height"]::-webkit-scrollbar-thumb {
 	background: var(--scrollbarSlider-background);
 	border-radius: 5px;
 }
 
-.monaco-inputbox > .ibwrapper > textarea.input[style*="min-height"]::-webkit-scrollbar-thumb:hover,
-.monaco-inputbox > .ibwrapper > textarea.input[style*="height"]::-webkit-scrollbar-thumb:hover {
+.inputbox > .ibwrapper > textarea.input[style*="min-height"]::-webkit-scrollbar-thumb:hover,
+.inputbox > .ibwrapper > textarea.input[style*="height"]::-webkit-scrollbar-thumb:hover {
 	background: var(--scrollbarSlider-hoverBackground);
 }
 
-.monaco-inputbox > .ibwrapper > textarea.input[style*="min-height"]::-webkit-scrollbar-thumb:active,
-.monaco-inputbox > .ibwrapper > textarea.input[style*="height"]::-webkit-scrollbar-thumb:active {
+.inputbox > .ibwrapper > textarea.input[style*="min-height"]::-webkit-scrollbar-thumb:active,
+.inputbox > .ibwrapper > textarea.input[style*="height"]::-webkit-scrollbar-thumb:active {
 	background: var(--scrollbarSlider-activeBackground);
 }
 
-.monaco-inputbox > .ibwrapper > textarea.input.empty {
+.inputbox > .ibwrapper > textarea.input.empty {
 	white-space: nowrap;
 }
 
-.monaco-inputbox > .ibwrapper > .mirror {
+.inputbox > .ibwrapper > .mirror {
 	position: absolute;
 	display: inline-block;
 	width: 100%;
@@ -116,11 +116,11 @@
 
 /* Context view */
 
-.monaco-inputbox-container {
+.inputbox-container {
 	text-align: right;
 }
 
-.monaco-inputbox-container .monaco-inputbox-message {
+.inputbox-container .inputbox-message {
 	display: inline-block;
 	overflow: hidden;
 	text-align: left;
@@ -134,17 +134,17 @@
 }
 
 /* Action bar support */
-.monaco-inputbox .monaco-action-bar {
+.inputbox .action-bar {
 	position: absolute;
 	right: 2px;
 	top: 4px;
 }
 
-.monaco-inputbox .monaco-action-bar .action-item {
+.inputbox .action-bar .action-item {
 	margin-left: 2px;
 }
 
-.monaco-inputbox .monaco-action-bar .action-item .codicon {
+.inputbox .action-bar .action-item .codicon {
 	background-repeat: no-repeat;
 	width: 16px;
 	height: 16px;

@@ -108,7 +108,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
   const requestContent = (
     <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }}>
       <Pane title={t('soap.tabs.body')} initialSize={0.7} minSize={150}>
-        <div style={{ height: '100%', border: '1px solid var(--vscode-panel-border)', borderRadius: 3 }}>
+        <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
           <CodeEditor
             height="100%"
             language="xml"
@@ -173,7 +173,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>
       <div style={{ display: 'flex', gap: 8 }}>
         <span style={{ fontWeight: 600, minWidth: 100 }}>Status:</span>
-        <span style={{ color: response.statusCode >= 200 && response.statusCode < 300 ? 'var(--vscode-testing-iconPassed)' : 'var(--vscode-testing-iconFailed)' }}>
+        <span style={{ color: response.statusCode >= 200 && response.statusCode < 300 ? 'var(--testing-iconPassed)' : 'var(--testing-iconFailed)' }}>
           {response.statusCode}
         </span>
       </div>
@@ -195,8 +195,8 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
       </div>
       {response.fault && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
-          <span style={{ fontWeight: 600, color: 'var(--vscode-testing-iconFailed)' }}>SOAP Fault:</span>
-          <div style={{ padding: 4, background: 'var(--vscode-inputValidation-errorBackground)', borderRadius: 3 }}>
+          <span style={{ fontWeight: 600, color: 'var(--testing-iconFailed)' }}>SOAP Fault:</span>
+          <div style={{ padding: 4, background: 'var(--inputValidation-errorBackground)', borderRadius: 3 }}>
             <div><strong>Code:</strong> {response.fault.code}</div>
             <div><strong>Message:</strong> {response.fault.message}</div>
           </div>
@@ -207,7 +207,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
   
   // Response content (raw XML)
   const responseContent = response?.responseBody ? (
-    <div style={{ height: '100%', border: '1px solid var(--vscode-panel-border)', borderRadius: 3 }}>
+    <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
       <CodeEditor
         height="100%"
         language="xml"
@@ -221,7 +221,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
   const urlSection = (
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontWeight: 600, color: 'var(--vscode-charts-yellow)' }}>SOAP</span>
+        <span style={{ fontWeight: 600, color: 'var(--charts-yellow)' }}>SOAP</span>
         <div style={{ flex: 1, minWidth: 0, paddingLeft: 15 }}>
           <VariableInputBox
             value={url}
@@ -237,7 +237,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
           </span>
         </Button>
       </div>
-      <div style={{ fontSize: 12, color: 'var(--vscode-descriptionForeground)' }}>
+      <div style={{ fontSize: 12, color: 'var(--descriptionForeground)' }}>
         {request.service}/{request.operation} • SOAPAction: {request.soapAction}
       </div>
     </>

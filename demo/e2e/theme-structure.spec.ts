@@ -48,10 +48,10 @@ test.describe('Theme Structure Tests', () => {
       const styles = getComputedStyle(root)
       
       return {
-        editorBackground: styles.getPropertyValue('--vscode-editor-background'),
-        editorForeground: styles.getPropertyValue('--vscode-editor-foreground'),
-        inputBackground: styles.getPropertyValue('--vscode-input-background'),
-        buttonBackground: styles.getPropertyValue('--vscode-button-background')
+        editorBackground: styles.getPropertyValue('--editor-background'),
+        editorForeground: styles.getPropertyValue('--editor-foreground'),
+        inputBackground: styles.getPropertyValue('--input-background'),
+        buttonBackground: styles.getPropertyValue('--button-background')
       }
     })
 
@@ -84,7 +84,7 @@ test.describe('Theme Structure Tests', () => {
     // Get new background color
     const newBg = await page.evaluate(() => {
       return getComputedStyle(document.documentElement)
-        .getPropertyValue('--vscode-editor-background')
+        .getPropertyValue('--editor-background')
     })
 
     // Colors should be different (unless both themes happen to use same color)
