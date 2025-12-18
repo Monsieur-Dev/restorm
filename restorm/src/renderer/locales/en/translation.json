@@ -18,6 +18,13 @@
       "delete": "Delete",
       "clone": "Clone",
       "rename": "Rename"
+    },
+    "deleteConfirm": {
+      "title": "Confirm deletion",
+      "folderMessage": "Are you sure you want to delete the folder \"{{name}}\" and all its contents?",
+      "itemMessage": "Are you sure you want to delete \"{{name}}\"?",
+      "confirm": "Delete",
+      "cancel": "Cancel"
     }
   },
   "environment": {
@@ -40,6 +47,7 @@
     }
   },
   "requestTab": {
+    "deprecated": "This endpoint is deprecated and may be removed in a future version.",
     "send": "Send",
     "urlPlaceholder": "Request URL",
     "methodSelect": "Select HTTP method",

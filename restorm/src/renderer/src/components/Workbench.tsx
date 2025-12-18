@@ -242,6 +242,10 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
             }}
             label={t('workbench.tagsLabel')}
             headerRight={<EnvironmentDropdown />}
+            callout={request.deprecated ? {
+              variant: 'warning',
+              message: t('requestTab.deprecated')
+            } : undefined}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
               <HTTPRequestTabView request={request} />

@@ -131,6 +131,8 @@ export interface HTTPRequest extends BaseRequest {
   pathParams?: KeyValue[]
   /** Optional request body */
   body?: HTTPRequestBody
+  /** Whether this endpoint is deprecated */
+  deprecated?: boolean
 }
 
 // Future request types can be added here:

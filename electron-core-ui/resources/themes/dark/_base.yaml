@@ -337,3 +337,55 @@ colors:
   - id: wco.iconForeground
     value: "#ffffff"
     description: WCO codicon foreground color
+
+  # Alert colors (info)
+  - id: alert.info.background
+    value: "#063b49"
+    description: Alert info background color
+
+  - id: alert.info.foreground
+    value: "#75bfcf"
+    description: Alert info foreground color
+
+  - id: alert.info.border
+    value: "#0d5868"
+    description: Alert info border color
+
+  # Alert colors (warning)
+  - id: alert.warning.background
+    value: "#4d3800"
+    description: Alert warning background color
+
+  - id: alert.warning.foreground
+    value: "#cca700"
+    description: Alert warning foreground color
+
+  - id: alert.warning.border
+    value: "#665200"
+    description: Alert warning border color
+
+  # Alert colors (error)
+  - id: alert.error.background
+    value: "#5a1d1d"
+    description: Alert error background color
+
+  - id: alert.error.foreground
+    value: "#f48771"
+    description: Alert error foreground color
+
+  - id: alert.error.border
+    value: "#6e2323"
+    description: Alert error border color
+
+  # Alert colors (debug)
+  - id: alert.debug.background
+    value: "#3d3d3d"
+    description: Alert debug background color
+
+  - id: alert.debug.foreground
+    value: "#b0b0b0"
+    description: Alert debug foreground color
+
+  - id: alert.debug.border
+    value: "#4d4d4d"
+    description: Alert debug border color

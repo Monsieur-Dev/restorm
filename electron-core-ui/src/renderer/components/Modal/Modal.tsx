@@ -4,14 +4,18 @@ import MonacoWorkbench from '../MonacoWorkbench'
 import { Button } from '../Button'
 import './modal.css'
 
+export type ModalSize = 'full' | 'dialog'
+
 export interface ModalProps {
   title: React.ReactNode
   isOpen: boolean
   onClose: () => void
   children: React.ReactNode
+  /** Modal size: 'full' for fullscreen-like, 'dialog' for compact dialog box */
+  size?: ModalSize
 }
 
-export const Modal: React.FC<ModalProps> = ({ title, isOpen, onClose, children }) => {
+export const Modal: React.FC<ModalProps> = ({ title, isOpen, onClose, children, size = 'full' }) => {
   const [visible, setVisible] = useState(isOpen)
 
   useEffect(() => {
@@ -53,11 +57,16 @@ export const Modal: React.FC<ModalProps> = ({ title, isOpen, onClose, children }
     !isOpen ? 'ecu-modal-closing' : ''
   ].filter(Boolean).join(' ')
 
+  const containerClassName = [
+    'ecu-modal-container',
+    size === 'dialog' ? 'ecu-modal-dialog' : ''
+  ].filter(Boolean).join(' ')
+
   const content = (
     <div className={overlayClassName}>
       <MonacoWorkbench className="ecu-modal-workbench" border={false} fullscreen>
         <div
-          className="ecu-modal-container"
+          className={containerClassName}
           role="dialog"
           aria-modal="true"
           aria-label={typeof title === 'string' ? title : undefined}

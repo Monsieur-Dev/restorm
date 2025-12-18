@@ -25,6 +25,7 @@
   color: var(--foreground);
   outline: none;
   background-color: var(--editor-background);
+  min-height: 26px;
 }
 
 .list-view-row:hover {

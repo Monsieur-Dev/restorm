@@ -8,6 +8,10 @@ import { MarkdownEditor } from './MarkdownEditor/MarkdownEditor'
 import { MarkdownViewer } from './MarkdownViewer/MarkdownViewer'
 import { SplitView, Pane } from './SplitView'
 
+// Callout exports
+export { Callout } from './Callout'
+export type { CalloutProps, CalloutVariant } from './Callout'
+
 // InputBox exports
 export { InputBox, MessageType } from './InputBox'
 export type {

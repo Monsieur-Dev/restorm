@@ -1,0 +1,48 @@
+.ecu-callout {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  line-height: 1.4;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ecu-callout .codicon {
+  font-size: 22px !important;
+  flex-shrink: 0;
+}
+
+.ecu-callout-message {
+  flex: 1;
+}
+
+/* Info variant */
+.ecu-callout-info {
+  background-color: var(--alert-info-background);
+  color: var(--alert-info-foreground);
+  border: 1px solid var(--alert-info-border, transparent);
+}
+
+/* Warning variant */
+.ecu-callout-warning {
+  background-color: var(--alert-warning-background);
+  color: var(--alert-warning-foreground);
+  border: 1px solid var(--alert-warning-border, transparent);
+}
+
+/* Error variant */
+.ecu-callout-error {
+  background-color: var(--alert-error-background);
+  color: var(--alert-error-foreground);
+  border: 1px solid var(--alert-error-border, transparent);
+}
+
+/* Debug variant */
+.ecu-callout-debug {
+  background-color: var(--alert-debug-background);
+  color: var(--alert-debug-foreground);
+  border: 1px solid var(--alert-debug-border, transparent);
+}

@@ -581,6 +581,10 @@ function operationToRequest(
     pathParams: extractPathParams(parameters)
   }
 
+  if (operation.deprecated) {
+    request.deprecated = true
+  }
+
   const body = extractBody(operation, parameters, spec)
   if (body) {
     request.body = body

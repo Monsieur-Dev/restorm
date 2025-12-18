@@ -147,6 +147,18 @@ export interface ListViewProps {
    */
   expandedIds?: string[]
 
+  /**
+   * Controlled editing item ID. When provided, the item with this ID will be
+   * in rename/edit mode. Set to null to exit edit mode.
+   */
+  editingItemId?: string | null
+
+  /**
+   * Called when editing mode ends (either by commit or cancel).
+   * Useful for controlled editingItemId to sync state.
+   */
+  onEditingEnd?: () => void
+
   onItemClick?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
   onItemDoubleClick?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
   onSelectionChange?: (selectedIds: string[], payload: ListViewItemEventPayload) => void
@@ -171,6 +183,11 @@ export interface ListViewProps {
    * Optional mouse leave handler for a row.
    */
   onItemMouseLeave?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
+
+  /**
+   * Called when the Delete key is pressed on the active item.
+   */
+  onDeleteRequest?: (payload: ListViewItemEventPayload) => void
 }
 
 export interface ListViewItemProps {

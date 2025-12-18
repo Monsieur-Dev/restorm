@@ -1,6 +1,6 @@
 import React from 'react'
 import * as CoreUIRenderer from 'electron-core-ui/renderer'
-import { TagsView } from 'electron-core-ui/renderer'
+import { TagsView, Callout, type CalloutVariant } from 'electron-core-ui/renderer'
 import type { BreadcrumbItem } from '../types/editor'
 
 const { Breadcrumb } = CoreUIRenderer as unknown as {
@@ -11,6 +11,15 @@ const { Breadcrumb } = CoreUIRenderer as unknown as {
   }>
 }
 
+export interface WorkbenchTabCallout {
+  /** The variant/style of the callout */
+  variant: CalloutVariant
+  /** The message to display */
+  message: string
+  /** Optional custom icon (codicon name without 'codicon-' prefix) */
+  icon?: string
+}
+
 export interface WorkbenchTabProps {
   breadcrumbs: BreadcrumbItem[]
   onBreadcrumbClick?: ((item: BreadcrumbItem, index: number, isLast: boolean) => void) | undefined
@@ -19,6 +28,8 @@ export interface WorkbenchTabProps {
   onTagsChange?: (nextTags: string[]) => void
   label: string
   headerRight?: React.ReactNode
+  /** Optional callout to display at the top of the tab */
+  callout?: WorkbenchTabCallout | undefined
   children: React.ReactNode
 }
 
@@ -30,6 +41,7 @@ export const WorkbenchTab: React.FC<WorkbenchTabProps> = ({
   onTagsChange,
   label,
   headerRight,
+  callout,
   children
 }) => {
   return (
@@ -43,6 +55,15 @@ export const WorkbenchTab: React.FC<WorkbenchTabProps> = ({
         backgroundColor: 'var(--vscode-editor-background)'
       }}
     >
+      {callout && (
+        <div style={{ padding: '8px 16px 0 16px' }}>
+          <Callout
+            variant={callout.variant}
+            message={callout.message}
+            {...(callout.icon ? { icon: callout.icon } : {})}
+          />
+        </div>
+      )}
       <div
         style={{
           display: 'flex',

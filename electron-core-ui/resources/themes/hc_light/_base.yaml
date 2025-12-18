@@ -225,3 +225,55 @@ colors:
   - id: panel.border
     value: "#000000"
     description: Panel border
+
+  # Alert colors (info) - High contrast light
+  - id: alert.info.background
+    value: "#ffffff"
+    description: Alert info background color
+
+  - id: alert.info.foreground
+    value: "#0277bd"
+    description: Alert info foreground color
+
+  - id: alert.info.border
+    value: "#0277bd"
+    description: Alert info border color
+
+  # Alert colors (warning) - High contrast light
+  - id: alert.warning.background
+    value: "#ffffff"
+    description: Alert warning background color
+
+  - id: alert.warning.foreground
+    value: "#a35e00"
+    description: Alert warning foreground color
+
+  - id: alert.warning.border
+    value: "#a35e00"
+    description: Alert warning border color
+
+  # Alert colors (error) - High contrast light
+  - id: alert.error.background
+    value: "#ffffff"
+    description: Alert error background color
+
+  - id: alert.error.foreground
+    value: "#b71c1c"
+    description: Alert error foreground color
+
+  - id: alert.error.border
+    value: "#b71c1c"
+    description: Alert error border color
+
+  # Alert colors (debug) - High contrast light
+  - id: alert.debug.background
+    value: "#ffffff"
+    description: Alert debug background color
+
+  - id: alert.debug.foreground
+    value: "#000000"
+    description: Alert debug foreground color
+
+  - id: alert.debug.border
+    value: "#000000"
+    description: Alert debug border color

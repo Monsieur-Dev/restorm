@@ -7,7 +7,7 @@
 
 import { eventBus, DocumentEvents, type DocumentChangedPayload, logger } from 'electron-core-ui/renderer'
 import type { Folder, HTTPRequest, FolderItem } from './collections'
-import { isFolder, isHTTPRequest, isRequest } from './collections'
+import { isAnyFolder, isHTTPRequest, isRequest } from './collections'
 
 // ============================================================================
 // Indexable Properties Configuration
@@ -238,7 +238,7 @@ export function makeReactiveRequest(request: HTTPRequest, parentFolderId: string
  * Make a FolderItem (Folder or Request) reactive
  */
 export function makeReactiveFolderItem(item: FolderItem, parentFolderId: string): FolderItem {
-  if (isFolder(item)) {
+  if (isAnyFolder(item)) {
     return makeReactiveFolder(item)
   } else if (isRequest(item) && isHTTPRequest(item)) {
     return makeReactiveRequest(item, parentFolderId)
