@@ -44,7 +44,7 @@ vi.mock('electron-core-ui/renderer', async () => {
     }
   }
 
-  let miniSearch = new MiniSearchClass<MockSearchDocument>({
+  let miniSearch = new MiniSearchClass({
     fields: ['title', 'description', 'keywords'],
     storeFields: ['title', 'description', 'category', 'icon', 'navigation'],
     searchOptions: {
@@ -78,7 +78,7 @@ vi.mock('electron-core-ui/renderer', async () => {
       return miniSearch.search(query) as unknown as MockSearchDocument[]
     },
     clearIndex(): void {
-      miniSearch = new MiniSearchClass<MockSearchDocument>({
+      miniSearch = new MiniSearchClass({
         fields: ['title', 'description', 'keywords'],
         storeFields: ['title', 'description', 'category', 'icon', 'navigation'],
         searchOptions: {

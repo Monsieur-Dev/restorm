@@ -50,10 +50,7 @@ export interface Environment {
 }
 
 /** Folder configuration (currently empty, environments moved to EnvironmentFolder) */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface FolderConfiguration {
-  // Reserved for future folder-specific settings
-}
+export type FolderConfiguration = Record<string, never>
 
 // ============================================================================
 // HTTP Request Body Types (Discriminated Union)

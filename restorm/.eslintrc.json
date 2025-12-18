@@ -56,6 +56,17 @@
     "no-console": ["error"],
     "react/prop-types": "off"
   },
+  "overrides": [
+    {
+      "files": ["tests/**/*.ts", "tests/**/*.tsx"],
+      "rules": {
+        "no-console": "off",
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-unsafe-member-access": "off",
+        "@typescript-eslint/no-unsafe-call": "off"
+      }
+    }
+  ],
   "settings": {
     "react": {
       "version": "detect"

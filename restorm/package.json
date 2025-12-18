@@ -1,7 +1,7 @@
 {
   "name": "restorm",
   "version": "0.1.12-preview",
-  "description": "restorm - A Git GUI tool with VSCode-like interface",
+  "description": "restorm - A REST API client",
   "main": "dist/main/index.js",
   "homepage": "https://github.com/oYo-fr/restorm",
   "author": {
@@ -21,11 +21,17 @@
     "dist": "electron-vite build && electron-builder",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:unit": "vitest run --config vitest.config.ts",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:integration:coverage": "vitest run --config vitest.integration.config.ts --coverage",
+    "test:all": "npm run test:unit && npm run test:integration",
+    "test:ci": "npm run docker:up && npm run docker:wait && npm run test:all && npm run docker:down",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
     "docker:up": "docker compose -f tests/docker/docker-compose.yml up -d",
-    "docker:down": "docker compose -f tests/docker/docker-compose.yml down"
+    "docker:down": "docker compose -f tests/docker/docker-compose.yml down",
+    "docker:wait": "node tests/integration/wait-for-services.js"
   },
   "dependencies": {
     "@dtinsight/molecule": "^2.0.0-alpha.10",
@@ -58,6 +64,7 @@
     "@typescript-eslint/eslint-plugin": "^6.13.2",
     "@typescript-eslint/parser": "^6.13.2",
     "@vitejs/plugin-react": "^4.2.1",
+    "@vitest/coverage-v8": "^4.0.16",
     "cross-env": "^10.1.0",
     "electron": "^28.0.0",
     "electron-builder": "^26.0.12",
@@ -67,6 +74,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
     "jsdom": "^27.3.0",
+    "minisearch": "^7.2.0",
     "playwright": "^1.56.0",
     "typescript": "^5.3.3",
     "vite": "^5.0.7",
