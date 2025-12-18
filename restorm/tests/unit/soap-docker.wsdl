@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SOAP WSDL - Castle Mock Docker Server (port 8090)
+  
+  Castle Mock is a mock server - you configure mocks via the web UI.
+  This WSDL can be imported into Castle Mock to create mock services.
+  
+  Web UI: http://localhost:8090/castlemock
+  Default credentials: admin/admin
+-->
+<definitions 
+  name="CastleMockTestService"
+  targetNamespace="http://restorm.test/castlemock"
+  xmlns="http://schemas.xmlsoap.org/wsdl/"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns:tns="http://restorm.test/castlemock"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <!-- Types -->
+  <types>
+    <xsd:schema targetNamespace="http://restorm.test/castlemock">
+      
+      <!-- Echo Service Types -->
+      <xsd:element name="EchoRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="message" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="EchoResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="message" type="xsd:string"/>
+            <xsd:element name="timestamp" type="xsd:dateTime"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <!-- Calculator Service Types -->
+      <xsd:element name="AddRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="a" type="xsd:int"/>
+            <xsd:element name="b" type="xsd:int"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="AddResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="result" type="xsd:int"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="SubtractRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="a" type="xsd:int"/>
+            <xsd:element name="b" type="xsd:int"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="SubtractResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="result" type="xsd:int"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="MultiplyRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="a" type="xsd:int"/>
+            <xsd:element name="b" type="xsd:int"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="MultiplyResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="result" type="xsd:int"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="DivideRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="a" type="xsd:int"/>
+            <xsd:element name="b" type="xsd:int"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="DivideResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="result" type="xsd:double"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <!-- User Service Types -->
+      <xsd:complexType name="User">
+        <xsd:sequence>
+          <xsd:element name="id" type="xsd:int"/>
+          <xsd:element name="username" type="xsd:string"/>
+          <xsd:element name="email" type="xsd:string"/>
+          <xsd:element name="createdAt" type="xsd:dateTime" minOccurs="0"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:element name="GetUserRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="userId" type="xsd:int"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="GetUserResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="user" type="tns:User"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="CreateUserRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="username" type="xsd:string"/>
+            <xsd:element name="email" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="CreateUserResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="user" type="tns:User"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="ListUsersRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="limit" type="xsd:int" minOccurs="0"/>
+            <xsd:element name="offset" type="xsd:int" minOccurs="0"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="ListUsersResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="users" type="tns:User" maxOccurs="unbounded"/>
+            <xsd:element name="total" type="xsd:int"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <!-- Fault Types -->
+      <xsd:element name="ServiceFault">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="errorCode" type="xsd:string"/>
+            <xsd:element name="errorMessage" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+    </xsd:schema>
+  </types>
+
+  <!-- Messages -->
+  <!-- Echo Messages -->
+  <message name="EchoInput">
+    <part name="parameters" element="tns:EchoRequest"/>
+  </message>
+  <message name="EchoOutput">
+    <part name="parameters" element="tns:EchoResponse"/>
+  </message>
+
+  <!-- Calculator Messages -->
+  <message name="AddInput">
+    <part name="parameters" element="tns:AddRequest"/>
+  </message>
+  <message name="AddOutput">
+    <part name="parameters" element="tns:AddResponse"/>
+  </message>
+  <message name="SubtractInput">
+    <part name="parameters" element="tns:SubtractRequest"/>
+  </message>
+  <message name="SubtractOutput">
+    <part name="parameters" element="tns:SubtractResponse"/>
+  </message>
+  <message name="MultiplyInput">
+    <part name="parameters" element="tns:MultiplyRequest"/>
+  </message>
+  <message name="MultiplyOutput">
+    <part name="parameters" element="tns:MultiplyResponse"/>
+  </message>
+  <message name="DivideInput">
+    <part name="parameters" element="tns:DivideRequest"/>
+  </message>
+  <message name="DivideOutput">
+    <part name="parameters" element="tns:DivideResponse"/>
+  </message>
+
+  <!-- User Messages -->
+  <message name="GetUserInput">
+    <part name="parameters" element="tns:GetUserRequest"/>
+  </message>
+  <message name="GetUserOutput">
+    <part name="parameters" element="tns:GetUserResponse"/>
+  </message>
+  <message name="CreateUserInput">
+    <part name="parameters" element="tns:CreateUserRequest"/>
+  </message>
+  <message name="CreateUserOutput">
+    <part name="parameters" element="tns:CreateUserResponse"/>
+  </message>
+  <message name="ListUsersInput">
+    <part name="parameters" element="tns:ListUsersRequest"/>
+  </message>
+  <message name="ListUsersOutput">
+    <part name="parameters" element="tns:ListUsersResponse"/>
+  </message>
+
+  <!-- Fault Message -->
+  <message name="ServiceFaultMessage">
+    <part name="fault" element="tns:ServiceFault"/>
+  </message>
+
+  <!-- Port Types -->
+  <portType name="EchoPortType">
+    <operation name="Echo">
+      <documentation>Echo a message back</documentation>
+      <input message="tns:EchoInput"/>
+      <output message="tns:EchoOutput"/>
+    </operation>
+  </portType>
+
+  <portType name="CalculatorPortType">
+    <operation name="Add">
+      <documentation>Add two numbers</documentation>
+      <input message="tns:AddInput"/>
+      <output message="tns:AddOutput"/>
+    </operation>
+    <operation name="Subtract">
+      <documentation>Subtract two numbers</documentation>
+      <input message="tns:SubtractInput"/>
+      <output message="tns:SubtractOutput"/>
+    </operation>
+    <operation name="Multiply">
+      <documentation>Multiply two numbers</documentation>
+      <input message="tns:MultiplyInput"/>
+      <output message="tns:MultiplyOutput"/>
+    </operation>
+    <operation name="Divide">
+      <documentation>Divide two numbers</documentation>
+      <input message="tns:DivideInput"/>
+      <output message="tns:DivideOutput"/>
+      <fault name="DivisionFault" message="tns:ServiceFaultMessage"/>
+    </operation>
+  </portType>
+
+  <portType name="UserPortType">
+    <operation name="GetUser">
+      <documentation>Get a user by ID</documentation>
+      <input message="tns:GetUserInput"/>
+      <output message="tns:GetUserOutput"/>
+      <fault name="UserNotFoundFault" message="tns:ServiceFaultMessage"/>
+    </operation>
+    <operation name="CreateUser">
+      <documentation>Create a new user</documentation>
+      <input message="tns:CreateUserInput"/>
+      <output message="tns:CreateUserOutput"/>
+      <fault name="ValidationFault" message="tns:ServiceFaultMessage"/>
+    </operation>
+    <operation name="ListUsers">
+      <documentation>List all users</documentation>
+      <input message="tns:ListUsersInput"/>
+      <output message="tns:ListUsersOutput"/>
+    </operation>
+  </portType>
+
+  <!-- Bindings -->
+  <binding name="EchoSoapBinding" type="tns:EchoPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="Echo">
+      <soap:operation soapAction="http://restorm.test/castlemock/Echo"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+  </binding>
+
+  <binding name="CalculatorSoapBinding" type="tns:CalculatorPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="Add">
+      <soap:operation soapAction="http://restorm.test/castlemock/Add"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+    <operation name="Subtract">
+      <soap:operation soapAction="http://restorm.test/castlemock/Subtract"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+    <operation name="Multiply">
+      <soap:operation soapAction="http://restorm.test/castlemock/Multiply"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+    <operation name="Divide">
+      <soap:operation soapAction="http://restorm.test/castlemock/Divide"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+      <fault name="DivisionFault"><soap:fault name="DivisionFault" use="literal"/></fault>
+    </operation>
+  </binding>
+
+  <binding name="UserSoapBinding" type="tns:UserPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="GetUser">
+      <soap:operation soapAction="http://restorm.test/castlemock/GetUser"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+      <fault name="UserNotFoundFault"><soap:fault name="UserNotFoundFault" use="literal"/></fault>
+    </operation>
+    <operation name="CreateUser">
+      <soap:operation soapAction="http://restorm.test/castlemock/CreateUser"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+      <fault name="ValidationFault"><soap:fault name="ValidationFault" use="literal"/></fault>
+    </operation>
+    <operation name="ListUsers">
+      <soap:operation soapAction="http://restorm.test/castlemock/ListUsers"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+  </binding>
+
+  <!-- Services -->
+  <service name="TestService">
+    <documentation>
+      Castle Mock Test Services.
+      Import this WSDL into Castle Mock (http://localhost:8090/castlemock)
+      to create mock endpoints.
+    </documentation>
+    <port name="EchoPort" binding="tns:EchoSoapBinding">
+      <soap:address location="http://localhost:8090/castlemock/mock/soap/echo"/>
+    </port>
+    <port name="CalculatorPort" binding="tns:CalculatorSoapBinding">
+      <soap:address location="http://localhost:8090/castlemock/mock/soap/calculator"/>
+    </port>
+    <port name="UserPort" binding="tns:UserSoapBinding">
+      <soap:address location="http://localhost:8090/castlemock/mock/soap/user"/>
+    </port>
+  </service>
+
+</definitions>

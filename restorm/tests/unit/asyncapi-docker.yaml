@@ -1,0 +1,369 @@
+asyncapi: 2.6.0
+info:
+  title: Docker Test Services - AsyncAPI
+  version: 1.0.0
+  description: |
+    AsyncAPI specification for Docker test services.
+    Covers Socket.IO and MQTT endpoints.
+
+servers:
+  mqtt:
+    url: localhost:1883
+    protocol: mqtt
+    description: Eclipse Mosquitto MQTT broker
+  mqtt-websocket:
+    url: localhost:9001
+    protocol: mqtt
+    description: Mosquitto MQTT over WebSocket
+  socketio:
+    url: localhost:3001
+    protocol: socketio
+    description: Custom Socket.IO test server
+
+defaultContentType: application/json
+
+channels:
+  #
+  # Socket.IO Channels (port 3001)
+  # Matches: restorm/tests/docker/socketio-server/server.js
+  #
+  
+  echo:
+    description: Echo channel - returns the same data back
+    servers:
+      - socketio
+    publish:
+      operationId: sendEcho
+      summary: Send data to be echoed
+      message:
+        $ref: '#/components/messages/EchoMessage'
+    subscribe:
+      operationId: receiveEcho
+      summary: Receive echoed data
+      message:
+        $ref: '#/components/messages/EchoMessage'
+
+  ping:
+    description: Ping channel - send ping request
+    servers:
+      - socketio
+    publish:
+      operationId: sendPing
+      summary: Send ping
+      message:
+        $ref: '#/components/messages/EmptyMessage'
+
+  pong:
+    description: Pong channel - receive pong response
+    servers:
+      - socketio
+    subscribe:
+      operationId: receivePong
+      summary: Receive pong with timestamp
+      message:
+        $ref: '#/components/messages/PongMessage'
+
+  broadcast:
+    description: Broadcast to all connected clients
+    servers:
+      - socketio
+    publish:
+      operationId: sendBroadcast
+      summary: Send broadcast message
+      message:
+        $ref: '#/components/messages/BroadcastInput'
+    subscribe:
+      operationId: receiveBroadcast
+      summary: Receive broadcast from any client
+      message:
+        $ref: '#/components/messages/BroadcastMessage'
+
+  join-room:
+    description: Join a room
+    servers:
+      - socketio
+    publish:
+      operationId: joinRoom
+      summary: Join a room by name
+      message:
+        $ref: '#/components/messages/RoomName'
+
+  joined:
+    description: Room joined confirmation
+    servers:
+      - socketio
+    subscribe:
+      operationId: onJoined
+      summary: Confirmation of room join
+      message:
+        $ref: '#/components/messages/RoomConfirmation'
+
+  leave-room:
+    description: Leave a room
+    servers:
+      - socketio
+    publish:
+      operationId: leaveRoom
+      summary: Leave a room by name
+      message:
+        $ref: '#/components/messages/RoomName'
+
+  left:
+    description: Room left confirmation
+    servers:
+      - socketio
+    subscribe:
+      operationId: onLeft
+      summary: Confirmation of room leave
+      message:
+        $ref: '#/components/messages/RoomConfirmation'
+
+  room-message:
+    description: Send/receive messages in a room
+    servers:
+      - socketio
+    publish:
+      operationId: sendRoomMessage
+      summary: Send message to a room
+      message:
+        $ref: '#/components/messages/RoomMessageInput'
+    subscribe:
+      operationId: receiveRoomMessage
+      summary: Receive message from a room
+      message:
+        $ref: '#/components/messages/RoomMessageOutput'
+
+  #
+  # MQTT Channels (ports 1883, 9001)
+  # Eclipse Mosquitto - generic pub/sub broker
+  #
+  
+  test/echo:
+    description: MQTT echo topic for testing
+    servers:
+      - mqtt
+      - mqtt-websocket
+    publish:
+      operationId: mqttPublishEcho
+      summary: Publish test message
+      message:
+        $ref: '#/components/messages/MqttTestMessage'
+    subscribe:
+      operationId: mqttSubscribeEcho
+      summary: Subscribe to test messages
+      message:
+        $ref: '#/components/messages/MqttTestMessage'
+
+  test/json:
+    description: MQTT JSON topic for testing
+    servers:
+      - mqtt
+      - mqtt-websocket
+    publish:
+      operationId: mqttPublishJson
+      summary: Publish JSON message
+      message:
+        $ref: '#/components/messages/MqttJsonMessage'
+    subscribe:
+      operationId: mqttSubscribeJson
+      summary: Subscribe to JSON messages
+      message:
+        $ref: '#/components/messages/MqttJsonMessage'
+
+  sensors/{sensorId}/data:
+    description: Sensor data topic pattern
+    parameters:
+      sensorId:
+        description: Unique sensor identifier
+        schema:
+          type: string
+    servers:
+      - mqtt
+      - mqtt-websocket
+    publish:
+      operationId: mqttPublishSensorData
+      summary: Publish sensor data
+      message:
+        $ref: '#/components/messages/SensorData'
+    subscribe:
+      operationId: mqttSubscribeSensorData
+      summary: Subscribe to sensor data
+      message:
+        $ref: '#/components/messages/SensorData'
+
+  devices/{deviceId}/status:
+    description: Device status topic pattern
+    parameters:
+      deviceId:
+        description: Unique device identifier
+        schema:
+          type: string
+    servers:
+      - mqtt
+      - mqtt-websocket
+    subscribe:
+      operationId: mqttSubscribeDeviceStatus
+      summary: Subscribe to device status updates
+      message:
+        $ref: '#/components/messages/DeviceStatus'
+
+components:
+  messages:
+    # Socket.IO Messages
+    EmptyMessage:
+      name: EmptyMessage
+      title: Empty Message
+      payload:
+        type: object
+
+    EchoMessage:
+      name: EchoMessage
+      title: Echo Message
+      summary: Any data to be echoed back
+      payload:
+        type: object
+        additionalProperties: true
+
+    PongMessage:
+      name: PongMessage
+      title: Pong Response
+      payload:
+        type: object
+        required:
+          - timestamp
+        properties:
+          timestamp:
+            type: integer
+            format: int64
+            description: Server timestamp in milliseconds
+
+    BroadcastInput:
+      name: BroadcastInput
+      title: Broadcast Input
+      payload:
+        type: object
+        additionalProperties: true
+
+    BroadcastMessage:
+      name: BroadcastMessage
+      title: Broadcast Message
+      payload:
+        type: object
+        required:
+          - from
+          - data
+          - timestamp
+        properties:
+          from:
+            type: string
+            description: Socket ID of the sender
+          data:
+            type: object
+            additionalProperties: true
+          timestamp:
+            type: integer
+            format: int64
+
+    RoomName:
+      name: RoomName
+      title: Room Name
+      payload:
+        type: string
+        description: Name of the room
+
+    RoomConfirmation:
+      name: RoomConfirmation
+      title: Room Confirmation
+      payload:
+        type: object
+        required:
+          - room
+        properties:
+          room:
+            type: string
+
+    RoomMessageInput:
+      name: RoomMessageInput
+      title: Room Message Input
+      payload:
+        type: object
+        required:
+          - room
+          - message
+        properties:
+          room:
+            type: string
+          message:
+            type: string
+
+    RoomMessageOutput:
+      name: RoomMessageOutput
+      title: Room Message Output
+      payload:
+        type: object
+        required:
+          - from
+          - room
+          - message
+          - timestamp
+        properties:
+          from:
+            type: string
+            description: Socket ID of the sender
+          room:
+            type: string
+          message:
+            type: string
+          timestamp:
+            type: integer
+            format: int64
+
+    # MQTT Messages
+    MqttTestMessage:
+      name: MqttTestMessage
+      title: MQTT Test Message
+      contentType: text/plain
+      payload:
+        type: string
+
+    MqttJsonMessage:
+      name: MqttJsonMessage
+      title: MQTT JSON Message
+      contentType: application/json
+      payload:
+        type: object
+        additionalProperties: true
+
+    SensorData:
+      name: SensorData
+      title: Sensor Data
+      payload:
+        type: object
+        properties:
+          sensorId:
+            type: string
+          value:
+            type: number
+          unit:
+            type: string
+          timestamp:
+            type: string
+            format: date-time
+
+    DeviceStatus:
+      name: DeviceStatus
+      title: Device Status
+      payload:
+        type: object
+        properties:
+          deviceId:
+            type: string
+          online:
+            type: boolean
+          lastSeen:
+            type: string
+            format: date-time
+          battery:
+            type: integer
+            minimum: 0
+            maximum: 100
