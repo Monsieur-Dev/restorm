@@ -6,8 +6,8 @@
  * This implementation uses HTTP/2 fetch for basic unary calls.
  */
 
-import type { GrpcRequest, GrpcResponse, KeyValue } from '../types/collections'
-import { resolveTemplate, type VariableContext } from './VariableResolutionService'
+import type { GrpcRequest, GrpcResponse, KeyValue } from '../../types/collections'
+import { resolveTemplate, type VariableContext } from '../VariableResolutionService'
 
 /** Input for executing a gRPC request */
 export interface GrpcRequestInput {

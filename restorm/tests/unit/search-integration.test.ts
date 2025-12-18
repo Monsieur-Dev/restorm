@@ -135,7 +135,7 @@ vi.mock('electron-core-ui/renderer', async () => {
 })
 
 import { searchService } from 'electron-core-ui/renderer'
-import { importSwaggerFromJson } from '../../src/renderer/src/services/SwaggerImportService'
+import { importSwaggerFromJson } from '../../src/renderer/src/services/import/SwaggerImportService'
 import { searchIndexService } from '../../src/renderer/src/services/SearchIndexService'
 import { makeReactiveFolder } from '../../src/renderer/src/types/reactive'
 import type { Folder, HTTPRequest } from '../../src/renderer/src/types/collections'

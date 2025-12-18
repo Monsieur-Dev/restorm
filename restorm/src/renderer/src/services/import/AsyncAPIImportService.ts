@@ -9,7 +9,7 @@ import type {
   Environment,
   WebSocketRequest,
   WebSocketProtocol
-} from '../types/collections'
+} from '../../types/collections'
 import * as yaml from 'yaml'
 
 // ============================================================================

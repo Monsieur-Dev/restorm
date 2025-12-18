@@ -19,7 +19,7 @@ import {
   resolveEnvironmentVariables,
   type VariableContext
 } from '../../services/VariableResolutionService'
-import { executeGraphQLRequest, type GraphQLRequestInput } from '../../services/GraphQLRequestService'
+import { executeGraphQLRequest, type GraphQLRequestInput } from '../../services/request/GraphQLRequestService'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { Badge } from '../Badge'
 import codeSnippetsTemplate from '../../resources/templates/code-snippets-graphql.hbs?raw'

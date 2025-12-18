@@ -10,8 +10,8 @@ import type {
   HTTPRequestBody,
   KeyValue,
   HTTPMethod
-} from '../types/collections'
-import { resolveTemplate, type VariableContext } from './VariableResolutionService'
+} from '../../types/collections'
+import { resolveTemplate, type VariableContext } from '../VariableResolutionService'
 
 /** Input for URL resolution */
 export interface URLResolutionInput {

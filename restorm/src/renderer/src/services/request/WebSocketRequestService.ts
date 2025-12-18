@@ -3,8 +3,8 @@
  * Handles real-time messaging connections
  */
 
-import type { WebSocketRequest, WebSocketResponse, WebSocketMessage, KeyValue } from '../types/collections'
-import { resolveTemplate, type VariableContext } from './VariableResolutionService'
+import type { WebSocketRequest, WebSocketResponse, WebSocketMessage, KeyValue } from '../../types/collections'
+import { resolveTemplate, type VariableContext } from '../VariableResolutionService'
 
 /** Input for executing a WebSocket request */
 export interface WebSocketRequestInput {

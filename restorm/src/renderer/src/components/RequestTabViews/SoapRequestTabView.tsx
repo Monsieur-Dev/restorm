@@ -19,7 +19,7 @@ import {
   resolveEnvironmentVariables,
   type VariableContext
 } from '../../services/VariableResolutionService'
-import { executeSoapRequest, type SoapRequestInput } from '../../services/SoapRequestService'
+import { executeSoapRequest, type SoapRequestInput } from '../../services/request/SoapRequestService'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { Badge } from '../Badge'
 import codeSnippetsTemplate from '../../resources/templates/code-snippets-soap.hbs?raw'

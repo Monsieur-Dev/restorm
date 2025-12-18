@@ -6,11 +6,11 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 
-import { importSwaggerFromJson } from '../../src/renderer/src/services/SwaggerImportService'
-import { importGraphQLFromString } from '../../src/renderer/src/services/GraphQLImportService'
-import { importGrpcFromString } from '../../src/renderer/src/services/GrpcImportService'
-import { importSoapFromString } from '../../src/renderer/src/services/SoapImportService'
-import { importAsyncAPIFromString } from '../../src/renderer/src/services/AsyncAPIImportService'
+import { importSwaggerFromJson } from '../../src/renderer/src/services/import/SwaggerImportService'
+import { importGraphQLFromString } from '../../src/renderer/src/services/import/GraphQLImportService'
+import { importGrpcFromString } from '../../src/renderer/src/services/import/GrpcImportService'
+import { importSoapFromString } from '../../src/renderer/src/services/import/SoapImportService'
+import { importAsyncAPIFromString } from '../../src/renderer/src/services/import/AsyncAPIImportService'
 import type { Folder, EnvironmentFolder, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest } from '../../src/renderer/src/types/collections'
 
 // Helper to load test files

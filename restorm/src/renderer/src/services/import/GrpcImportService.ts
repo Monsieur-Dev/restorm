@@ -8,7 +8,7 @@ import type {
   Environment,
   GrpcRequest,
   GrpcCallType
-} from '../types/collections'
+} from '../../types/collections'
 
 // ============================================================================
 // Proto Types

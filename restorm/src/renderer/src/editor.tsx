@@ -12,7 +12,7 @@ import './components/Badge.css'
 import enTranslation from '../locales/en/translation.json'
 import frTranslation from '../locales/fr/translation.json'
 
-import { importSwaggerFromJson } from './services/SwaggerImportService'
+import { importSwaggerFromJson } from './services/import/SwaggerImportService'
 import swaggerPetstoreJson from './resources/swagger-petstore.json'
 import type { Folder, FolderItem, Environment, EnvironmentFolder } from './types/collections'
 import { isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder } from './types/collections'

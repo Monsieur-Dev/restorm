@@ -19,7 +19,7 @@ import {
   resolveEnvironmentVariables,
   type VariableContext
 } from '../../services/VariableResolutionService'
-import { executeGrpcRequest, type GrpcRequestInput } from '../../services/GrpcRequestService'
+import { executeGrpcRequest, type GrpcRequestInput } from '../../services/request/GrpcRequestService'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { Badge } from '../Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'

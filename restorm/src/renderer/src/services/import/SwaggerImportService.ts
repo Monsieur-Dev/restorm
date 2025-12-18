@@ -11,12 +11,12 @@ import type {
   HTTPMethod,
   HTTPRequestBody,
   KeyValue
-} from '../types/collections'
+} from '../../types/collections'
 
 // Import templates as raw strings
-import folderTemplate from '../resources/templates/swagger/folder.hbs?raw'
-import requestTemplate from '../resources/templates/swagger/request.hbs?raw'
-import tagTemplate from '../resources/templates/swagger/tag.hbs?raw'
+import folderTemplate from '../../resources/templates/swagger/folder.hbs?raw'
+import requestTemplate from '../../resources/templates/swagger/request.hbs?raw'
+import tagTemplate from '../../resources/templates/swagger/tag.hbs?raw'
 
 // ============================================================================
 // Swagger Types

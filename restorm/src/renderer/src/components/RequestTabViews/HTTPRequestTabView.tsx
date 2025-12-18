@@ -27,7 +27,7 @@ import {
   resolveEnvironmentVariables,
   type VariableContext
 } from '../../services/VariableResolutionService'
-import { executeHTTPRequest, resolveRequestURL, type HTTPRequestInput } from '../../services/HTTPRequestService'
+import { executeHTTPRequest, resolveRequestURL, type HTTPRequestInput } from '../../services/request/HTTPRequestService'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { Badge } from '../Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'

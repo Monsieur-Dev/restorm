@@ -7,7 +7,7 @@ import type {
   EnvironmentFolder,
   Environment,
   SoapRequest
-} from '../types/collections'
+} from '../../types/collections'
 
 // ============================================================================
 // WSDL Types

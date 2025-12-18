@@ -8,7 +8,7 @@ import type {
   Environment,
   GraphQLRequest,
   GraphQLOperationType
-} from '../types/collections'
+} from '../../types/collections'
 
 // ============================================================================
 // GraphQL Schema Types

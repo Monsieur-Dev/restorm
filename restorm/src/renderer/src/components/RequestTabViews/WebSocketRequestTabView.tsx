@@ -20,7 +20,7 @@ import {
   resolveEnvironmentVariables,
   type VariableContext
 } from '../../services/VariableResolutionService'
-import { executeWebSocketRequest, type WebSocketRequestInput } from '../../services/WebSocketRequestService'
+import { executeWebSocketRequest, type WebSocketRequestInput } from '../../services/request/WebSocketRequestService'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { Badge } from '../Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'

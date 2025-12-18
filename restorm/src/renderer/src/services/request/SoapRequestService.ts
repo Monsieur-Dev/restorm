@@ -1,22 +1,22 @@
 /**
- * GraphQL Request Service
- * Handles executing GraphQL requests
+ * SOAP Request Service
+ * Handles executing SOAP requests
  */
 
 import axios from 'axios'
-import type { GraphQLRequest, GraphQLResponse, KeyValue } from '../types/collections'
-import { resolveTemplate, type VariableContext } from './VariableResolutionService'
+import type { SoapRequest, SoapResponse, KeyValue } from '../../types/collections'
+import { resolveTemplate, type VariableContext } from '../VariableResolutionService'
 
-/** Input for executing a GraphQL request */
-export interface GraphQLRequestInput {
-  /** The GraphQL request definition */
-  request: GraphQLRequest
-  /** Current URL (may differ from request.url if user changed it) */
+/** Input for executing a SOAP request */
+export interface SoapRequestInput {
+  /** The SOAP request definition */
+  request: SoapRequest
+  /** Current URL */
   url: string
-  /** Current query */
-  query: string
-  /** Current variables (JSON string) */
-  variables?: string
+  /** Current SOAP action */
+  soapAction: string
+  /** Current body (XML) */
+  body: string
   /** Current headers */
   headers: KeyValue[]
   /** Variable context from environments */
@@ -56,74 +56,74 @@ function objectToKeyValues(obj: Record<string, unknown>): KeyValue[] {
   }))
 }
 
+/** Parse SOAP fault from response */
+function parseSoapFault(xml: string): { code: string; message: string } | undefined {
+  const faultMatch = xml.match(/<(?:\w+:)?Fault[^>]*>([\s\S]*?)<\/(?:\w+:)?Fault>/i)
+  if (!faultMatch?.[1]) return undefined
+  
+  const faultContent = faultMatch[1]
+  
+  const codeMatch = faultContent.match(/<(?:\w+:)?faultcode[^>]*>([\s\S]*?)<\/(?:\w+:)?faultcode>/i)
+  const messageMatch = faultContent.match(/<(?:\w+:)?faultstring[^>]*>([\s\S]*?)<\/(?:\w+:)?faultstring>/i)
+  
+  return {
+    code: codeMatch?.[1]?.trim() ?? 'Unknown',
+    message: messageMatch?.[1]?.trim() ?? 'Unknown error'
+  }
+}
+
 /**
- * Execute a GraphQL request and return the response
+ * Execute a SOAP request and return the response
  */
-export async function executeGraphQLRequest(input: GraphQLRequestInput): Promise<GraphQLResponse> {
+export async function executeSoapRequest(input: SoapRequestInput): Promise<SoapResponse> {
   const startTime = Date.now()
   const startedAt = new Date().toISOString()
   
   const context = input.variableContext
   
-  // Resolve URL
+  // Resolve URL and body
   const resolvedUrl = resolveTemplate(input.url, context)
+  const resolvedBody = resolveTemplate(input.body, context)
+  const resolvedSoapAction = resolveTemplate(input.soapAction, context)
   
   // Resolve headers
   const resolvedHeaders = resolveKeyValues(input.headers, context)
   const headersObj = headersToObject(resolvedHeaders)
   
-  // Ensure Content-Type is set
+  // Ensure Content-Type and SOAPAction are set
   if (!headersObj['Content-Type']) {
-    headersObj['Content-Type'] = 'application/json'
+    headersObj['Content-Type'] = 'text/xml; charset=utf-8'
   }
-  
-  // Parse variables
-  let variables: Record<string, unknown> = {}
-  if (input.variables) {
-    try {
-      const resolvedVariables = resolveTemplate(input.variables, context)
-      const parsed = JSON.parse(resolvedVariables) as unknown
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-        variables = parsed as Record<string, unknown>
-      }
-    } catch {
-      // Invalid JSON, use empty object
-    }
-  }
-  
-  // Build GraphQL payload
-  const payload = {
-    query: input.query,
-    variables: Object.keys(variables).length > 0 ? variables : undefined
+  if (resolvedSoapAction && !headersObj['SOAPAction']) {
+    headersObj['SOAPAction'] = resolvedSoapAction
   }
   
   try {
-    const response = await axios.post(resolvedUrl, payload, {
+    const response = await axios.post(resolvedUrl, resolvedBody, {
       headers: headersObj,
       validateStatus: () => true,
+      responseType: 'text',
       timeout: 30000
     })
     
     const durationMs = Date.now() - startTime
+    const responseBody = typeof response.data === 'string' ? response.data : String(response.data)
     
-    // Parse GraphQL response
-    const responseData = response.data as {
-      data?: unknown
-      errors?: { message: string; locations?: { line: number; column: number }[]; path?: string[] }[]
-    }
+    // Check for SOAP fault
+    const fault = parseSoapFault(responseBody)
     
     return {
       id: generateResponseId(),
-      type: 'graphql',
+      type: 'soap',
       requestId: input.request.id,
       requestUrl: resolvedUrl,
-      requestQuery: input.query,
-      requestVariables: input.variables,
+      requestSoapAction: resolvedSoapAction,
+      requestBody: resolvedBody,
       requestHeaders: resolvedHeaders,
       statusCode: response.status,
-      data: responseData.data,
-      errors: responseData.errors,
+      responseBody,
       responseHeaders: objectToKeyValues(response.headers as Record<string, unknown>),
+      fault,
       timings: {
         startedAt,
         durationMs
@@ -135,13 +135,14 @@ export async function executeGraphQLRequest(input: GraphQLRequestInput): Promise
     
     return {
       id: generateResponseId(),
-      type: 'graphql',
+      type: 'soap',
       requestId: input.request.id,
       requestUrl: resolvedUrl,
-      requestQuery: input.query,
-      requestVariables: input.variables,
+      requestSoapAction: resolvedSoapAction,
+      requestBody: resolvedBody,
       requestHeaders: resolvedHeaders,
       statusCode: 0,
+      responseBody: '',
       responseHeaders: [],
       error: error.message || 'Request failed',
       timings: {
