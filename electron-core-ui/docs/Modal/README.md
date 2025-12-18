@@ -10,13 +10,13 @@ variables and the same base styles as the workbench.
 - Pressing the **Escape** key or clicking the close button closes the modal.
 
 Base fonts, codicons and focus styles are inherited from `MonacoWorkbench`, which wraps the modal
-contents and pulls in `monaco-workbench.css` for you.
+contents and pulls in `workbench.css` for you.
 
 ## Component Location
 
 - Source: `electron-core-ui/src/renderer/components/Modal/Modal.tsx`
 - Styles:
-  - `electron-core-ui/src/renderer/assets/monaco-workbench.css` (global workbench styles, applied via `MonacoWorkbench`)
+  - `electron-core-ui/src/renderer/assets/workbench.css` (global workbench styles, applied via `MonacoWorkbench`)
   - `electron-core-ui/src/renderer/components/Modal/modal.css` (modal‑specific styles)
 
 ## API
@@ -82,5 +82,5 @@ const Example: React.FC = () => {
 - The header uses:
   - `var(--titleBar-activeBackground)` for background.
   - `var(--titleBar-activeForeground)` for text and close icon.
-- Fonts, codicon sizes and focus outlines come from `MonacoWorkbench` / `monaco-workbench.css`, so the modal feels
+- Fonts, codicon sizes and focus outlines come from `MonacoWorkbench` / `workbench.css`, so the modal feels
   visually integrated with the rest of the VS Code‑like UI.

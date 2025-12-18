@@ -22,6 +22,8 @@ import {
 } from '../../services/VariableResolutionService'
 import { executeWebSocketRequest, type WebSocketRequestInput } from '../../services/WebSocketRequestService'
 import { BaseRequestTabView } from './BaseRequestTabView'
+import { Badge } from '../Badge'
+import { mapToBadgeType } from '../../utils/badgeUtils'
 import codeSnippetsTemplate from '../../resources/templates/code-snippets-websocket.hbs?raw'
 
 // Compile the Handlebars template
@@ -84,21 +86,6 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     [environmentContext]
   )
   
-  const protocolColor = useMemo(() => {
-    switch (request.protocol) {
-      case 'mqtt': return 'var(--charts-orange)'
-      case 'socketio': return 'var(--charts-green)'
-      default: return 'var(--charts-blue)'
-    }
-  }, [request.protocol])
-  
-  const protocolLabel = useMemo(() => {
-    switch (request.protocol) {
-      case 'mqtt': return 'MQTT'
-      case 'socketio': return 'Socket.IO'
-      default: return 'WebSocket'
-    }
-  }, [request.protocol])
   
   const handleSend = (): void => {
     if (isSending) return
@@ -293,8 +280,8 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   // URL section
   const urlSection = (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <span style={{ fontWeight: 600, color: protocolColor }}>{protocolLabel}</span>
-      <div style={{ flex: 1, minWidth: 0, paddingLeft: 15 }}>
+      <Badge type={mapToBadgeType(request.protocol)} />
+      <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }}>
         <VariableInputBox
           value={url}
           onChange={setUrl}

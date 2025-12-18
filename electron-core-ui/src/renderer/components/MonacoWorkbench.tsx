@@ -1,6 +1,6 @@
 import React from 'react'
 import { usePlatform } from '../hooks/usePlatform'
-import '../assets/monaco-workbench.css'
+import '../assets/workbench.css'
 
 export interface MonacoWorkbenchProps {
   children: React.ReactNode
@@ -23,13 +23,13 @@ const MonacoWorkbench: React.FC<MonacoWorkbenchProps> = ({
   // No need to call useTheme() here
 
   const classes = [
-    'monaco-workbench',
+    'workbench',
     isMac && 'mac',
     isWindows && 'windows',
     isLinux && 'linux',
     border && 'border',
     fullscreen && 'fullscreen',
-    isMac ? `monaco-font-aliasing-${fontAliasing}` : '',
+    isMac ? `font-aliasing-${fontAliasing}` : '',
     className
   ].filter(Boolean).join(' ')
 

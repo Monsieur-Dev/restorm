@@ -262,12 +262,12 @@ import { SelectBox } from 'electron-core-ui/renderer'
 ### Base Classes
 
 - **`.select-container`** : Container for the select element
-- **`.monaco-select-box`** : Base select element class
-- **`.monaco-select-box-dropdown-padding`** : Custom padding for dropdown calculations
+- **`.select-box`** : Base select element class
+- **`.select-box-dropdown-padding`** : Custom padding for dropdown calculations
 
 ### Custom Dropdown Classes
 
-- **`.monaco-select-box-dropdown-container`** : Custom dropdown container
+- **`.select-box-dropdown-container`** : Custom dropdown container
 - **`.select-box-dropdown-list-container`** : Container for option list
 - **`.select-box-details-pane`** : Details pane at bottom of dropdown
 - **`.option-text`** : Main option text

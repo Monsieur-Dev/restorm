@@ -21,6 +21,8 @@ import {
 } from '../../services/VariableResolutionService'
 import { executeGrpcRequest, type GrpcRequestInput } from '../../services/GrpcRequestService'
 import { BaseRequestTabView } from './BaseRequestTabView'
+import { Badge } from '../Badge'
+import { mapToBadgeType } from '../../utils/badgeUtils'
 import codeSnippetsTemplate from '../../resources/templates/code-snippets-grpc.hbs?raw'
 
 // Compile the Handlebars template
@@ -256,11 +258,8 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
   const urlSection = (
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontWeight: 600, color: 'var(--charts-blue)' }}>gRPC</span>
-        <span style={{ padding: '2px 6px', borderRadius: 3, background: 'var(--badge-background)', fontSize: 11 }}>
-          {request.callType}
-        </span>
-        <div style={{ flex: 1, minWidth: 0, paddingLeft: 15 }}>
+        <Badge type={mapToBadgeType(request.callType)} />
+        <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }}>
           <VariableInputBox
             value={url}
             onChange={setUrl}

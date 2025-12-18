@@ -9,7 +9,8 @@ import {
 import type { Tab, ListViewItemData } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
 import './responsesView.css'
-import { HttpMethodBadge } from './HttpMethodBadge'
+import { Badge } from './Badge'
+import { mapToBadgeType } from '../utils/badgeUtils'
 
 export interface ResponsesViewProps {
   requestTitle: string
@@ -51,7 +52,7 @@ export const ResponsesView: React.FC<ResponsesViewProps> = ({ requestTitle }) =>
 
     return (
       <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <HttpMethodBadge method={method.toUpperCase()} />
+        <Badge type={mapToBadgeType(method.toUpperCase())} />
         <span>{path}{suffix ? ` - ${suffix}` : ''}</span>
       </span>
     )

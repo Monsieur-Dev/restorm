@@ -186,7 +186,7 @@ const defaultScrollableElementStyles: IScrollableElementStyles = {
 
 ## CSS Classes
 
-- `.monaco-scrollable-element`: Main container
+- `.scrollable-element`: Main container
 - `.scrollable-content`: Content wrapper
 - `.scrollbar`: Scrollbar container
 - `.scrollbar.vertical`: Vertical scrollbar

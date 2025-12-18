@@ -23,7 +23,8 @@ import { EnvironmentProvider } from '../contexts/EnvironmentContext'
 import { FolderView } from './FolderView'
 import { EnvironmentFolderView } from './EnvironmentFolderView'
 import type { EnvironmentFolder } from '../types/collections'
-import { HttpMethodBadge } from './HttpMethodBadge'
+import { Badge } from './Badge'
+import { mapToBadgeType } from '../utils/badgeUtils'
 import { useTranslation } from 'react-i18next'
 import { WorkbenchTab } from './WorkbenchTab'
 
@@ -172,7 +173,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
     if (isHTTPRequestTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <HttpMethodBadge method={restormTab.request.method} />
+          <Badge type={mapToBadgeType(restormTab.request.method)} />
           <span>{restormTab.request.name}</span>
         </span>
       )
@@ -182,7 +183,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
     if (isGraphQLRequestTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ color: 'var(--charts-purple)', fontWeight: 600, fontSize: 10 }}>GQL</span>
+          <Badge type="GQL" />
           <span>{restormTab.request.name}</span>
         </span>
       )
@@ -192,7 +193,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
     if (isGrpcRequestTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ color: 'var(--charts-blue)', fontWeight: 600, fontSize: 10 }}>gRPC</span>
+          <Badge type={mapToBadgeType(restormTab.request.callType)} />
           <span>{restormTab.request.name}</span>
         </span>
       )
@@ -202,7 +203,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
     if (isSoapRequestTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ color: 'var(--charts-yellow)', fontWeight: 600, fontSize: 10 }}>SOAP</span>
+          <Badge type="SOAP" />
           <span>{restormTab.request.name}</span>
         </span>
       )
@@ -212,7 +213,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
     if (isWebSocketRequestTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ color: 'var(--charts-green)', fontWeight: 600, fontSize: 10 }}>WS</span>
+          <Badge type={mapToBadgeType(restormTab.request.protocol)} />
           <span>{restormTab.request.name}</span>
         </span>
       )

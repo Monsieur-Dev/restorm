@@ -29,7 +29,8 @@ import {
 } from '../../services/VariableResolutionService'
 import { executeHTTPRequest, resolveRequestURL, type HTTPRequestInput } from '../../services/HTTPRequestService'
 import { BaseRequestTabView } from './BaseRequestTabView'
-import { HttpMethodBadge } from '../HttpMethodBadge'
+import { Badge } from '../Badge'
+import { mapToBadgeType } from '../../utils/badgeUtils'
 
 // Compile the code snippets Handlebars template
 const compiledTemplate = Handlebars.compile(codeSnippetsTemplate)
@@ -213,7 +214,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
   const methodOptions = useMemo<ISelectOptionItem[]>(
     () => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'].map((verb) => ({
       text: verb,
-      label: <HttpMethodBadge method={verb} />
+      label: <Badge type={mapToBadgeType(verb)} />
     })),
     []
   )

@@ -26,8 +26,8 @@ import {
 import type { WorkbenchTree, NavigationEvent, GroupNode, TabGroupNode, EditorTab, SearchResult } from 'electron-core-ui/renderer'
 import { Workbench } from './components/Workbench'
 import { Welcome } from './components/Welcome'
-import { HttpMethodBadge } from './components/HttpMethodBadge'
-import { ProtocolBadge } from './components/ProtocolBadge'
+import { Badge } from './components/Badge'
+import { mapToBadgeType } from './utils/badgeUtils'
 import { renderSearchTooltipContent } from './components/renderSearchTooltipContent'
 import { EnvironmentValuesProvider } from './contexts/EnvironmentValuesContext'
 import { importSwaggerFromJson } from './services/SwaggerImportService'
@@ -1405,10 +1405,10 @@ const App: React.FC = () => {
     const options = {
       expandedIds: expandedSet,
       renderMethodBadge: (method: string) => (
-        <HttpMethodBadge method={method} />
+        <Badge type={mapToBadgeType(method)} />
       ),
       renderProtocolBadge: (protocol: string, label?: string) => (
-        <ProtocolBadge protocol={protocol} label={label} />
+        <Badge type={mapToBadgeType(protocol)} label={label} />
       ),
       renderDeprecatedTitle: (name: string) => (
         <span style={{ textDecoration: 'line-through', opacity: 0.7 }}>{name}</span>

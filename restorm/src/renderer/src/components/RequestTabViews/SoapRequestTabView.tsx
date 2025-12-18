@@ -21,6 +21,7 @@ import {
 } from '../../services/VariableResolutionService'
 import { executeSoapRequest, type SoapRequestInput } from '../../services/SoapRequestService'
 import { BaseRequestTabView } from './BaseRequestTabView'
+import { Badge } from '../Badge'
 import codeSnippetsTemplate from '../../resources/templates/code-snippets-soap.hbs?raw'
 
 // Compile the Handlebars template
@@ -221,8 +222,8 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
   const urlSection = (
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontWeight: 600, color: 'var(--charts-yellow)' }}>SOAP</span>
-        <div style={{ flex: 1, minWidth: 0, paddingLeft: 15 }}>
+        <Badge type="SOAP" />
+        <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }}>
           <VariableInputBox
             value={url}
             onChange={setUrl}

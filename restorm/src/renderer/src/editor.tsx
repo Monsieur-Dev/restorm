@@ -5,7 +5,8 @@ import type { WorkbenchTree, GroupNode } from 'electron-core-ui/renderer'
 import { isTabGroupNode, isContainerNode, initializeI18n, logger, MonacoWorkbench, Titlebar } from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 import './httpMethods.css'
-import './protocolBadges.css'
+import './app.css'
+import './components/Badge.css'
 
 // Import translations
 import enTranslation from '../locales/en/translation.json'

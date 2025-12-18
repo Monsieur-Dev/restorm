@@ -208,11 +208,11 @@ The components use VSCode CSS variables for theming:
 
 ### CSS Classes
 
-- `.monaco-button` - Base button class
-- `.monaco-text-button` - Text button variant
-- `.monaco-button-dropdown` - Dropdown container
-- `.monaco-description-button` - Button with description
-- `.monaco-button.disabled` - Disabled state
+- `.button` - Base button class
+- `.text-button` - Text button variant
+- `.button-dropdown` - Dropdown container
+- `.description-button` - Button with description
+- `.button.disabled` - Disabled state
 - `.default-colors` - CSS variable-based theming
 
 ## Features

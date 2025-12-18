@@ -21,6 +21,7 @@ import {
 } from '../../services/VariableResolutionService'
 import { executeGraphQLRequest, type GraphQLRequestInput } from '../../services/GraphQLRequestService'
 import { BaseRequestTabView } from './BaseRequestTabView'
+import { Badge } from '../Badge'
 import codeSnippetsTemplate from '../../resources/templates/code-snippets-graphql.hbs?raw'
 
 // Compile the Handlebars template
@@ -226,8 +227,8 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
   // URL section
   const urlSection = (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <span style={{ fontWeight: 600, color: 'var(--charts-purple)' }}>GraphQL</span>
-      <div style={{ flex: 1, minWidth: 0, paddingLeft: 15 }}>
+      <Badge type="GQL" />
+      <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }}>
         <VariableInputBox
           value={url}
           onChange={setUrl}
