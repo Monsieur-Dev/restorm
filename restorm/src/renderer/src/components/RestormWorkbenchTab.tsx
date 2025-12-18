@@ -11,7 +11,7 @@ const { Breadcrumb } = CoreUIRenderer as unknown as {
   }>
 }
 
-export interface WorkbenchTabCallout {
+export interface RestormWorkbenchTabCallout {
   /** The variant/style of the callout */
   variant: CalloutVariant
   /** The message to display */
@@ -20,7 +20,7 @@ export interface WorkbenchTabCallout {
   icon?: string
 }
 
-export interface WorkbenchTabProps {
+export interface RestormWorkbenchTabProps {
   breadcrumbs: BreadcrumbItem[]
   onBreadcrumbClick?: ((item: BreadcrumbItem, index: number, isLast: boolean) => void) | undefined
   onBreadcrumbRename?: ((item: BreadcrumbItem, newValue: string) => void) | undefined
@@ -29,11 +29,11 @@ export interface WorkbenchTabProps {
   label: string
   headerRight?: React.ReactNode
   /** Optional callout to display at the top of the tab */
-  callout?: WorkbenchTabCallout | undefined
+  callout?: RestormWorkbenchTabCallout | undefined
   children: React.ReactNode
 }
 
-export const WorkbenchTab: React.FC<WorkbenchTabProps> = ({
+export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
   breadcrumbs,
   onBreadcrumbClick,
   onBreadcrumbRename,
@@ -114,4 +114,4 @@ export const WorkbenchTab: React.FC<WorkbenchTabProps> = ({
   )
 }
 
-export default WorkbenchTab
+export default RestormWorkbenchTab

@@ -3,7 +3,7 @@
 ## Overview
 
 `Tabs` is a lightweight tab strip used in the demo apps to showcase content areas.  
-It mimics VSCode editor tabs (underline for active tab, hover colors) and uses `ScrollableElement` for the content area.
+It mimics editor tabs (underline for active tab, hover colors) and uses `ScrollableElement` for the content area.
 
 ## API
 
@@ -69,9 +69,9 @@ const Example: React.FC = () => {
 
 - Implements a horizontal tab bar with:
   - Active underline using `--tab-activeBorder`.
-  - Inactive vs active foreground colors using VSCode variables.
+  - Inactive vs active foreground colors using theme variables.
   - Optional close button per tab (`closable`).
-- The content area is wrapped in `ScrollableElement` to provide VSCode-like scrollbars.
+- The content area is wrapped in `ScrollableElement` to provide styled scrollbars.
 - When `activeTabId` is not provided, the first tab id is used as an internal default.
 
 ## Backwards compatibility

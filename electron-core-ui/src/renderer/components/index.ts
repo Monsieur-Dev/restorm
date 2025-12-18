@@ -1,7 +1,7 @@
 import CustomDropdown from './CustomDropdown'
 import Tabs from './Tabs'
 import { SettingsTreeView } from './SettingsTreeView'
-import MonacoWorkbench from './MonacoWorkbench'
+import Workbench from './Workbench/Workbench'
 import ElectronCoreUiProvider from './ElectronCoreUiProvider'
 import { EditorWorkbench } from './Workbench/EditorWorkbench'
 import { MarkdownEditor } from './MarkdownEditor/MarkdownEditor'
@@ -146,7 +146,7 @@ export {
   CustomDropdown,
   Tabs,
   SettingsTreeView,
-  MonacoWorkbench,
+  Workbench,
   EditorWorkbench,
   MarkdownEditor,
   MarkdownViewer,
@@ -159,7 +159,7 @@ export { Modal } from './Modal'
 export type { ModalProps } from './Modal'
 export type { MarkdownEditorProps } from './MarkdownEditor/MarkdownEditor'
 export type { MarkdownViewerProps } from './MarkdownViewer/MarkdownViewer'
-export type { MonacoWorkbenchProps } from './MonacoWorkbench'
+export type { WorkbenchProps } from './Workbench/Workbench'
 export type { ElectronCoreUiProviderProps } from './ElectronCoreUiProvider'
 export type { EditorWorkbenchProps, EditorWorkbenchHandle } from './Workbench/EditorWorkbench'
 

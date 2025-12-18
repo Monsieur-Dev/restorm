@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `ProgressBar` component is a React implementation of VSCode's ProgressBar widget. It provides both infinite and discrete progress indicators with VSCode styling, theme integration, and full accessibility support.
+The `ProgressBar` component is a React implementation of the ProgressBar widget. It provides both infinite and discrete progress indicators with theme styling, theme integration, and full accessibility support.
 
 ## API
 
@@ -131,12 +131,12 @@ The component generates the following DOM structure:
 - **infinite-long-running** : Applied after 10 seconds in infinite mode
 - **progress-bit** : The actual progress indicator
 
-## VSCode Theme Variables
+## Theme Variables
 
 The component uses the following CSS variables:
 
 - `--progressBar-background` : Background color of the progress bar
-- Default fallback: `#0E70C0` (VSCode blue)
+- Default fallback: `#0E70C0` (blue)
 
 ## Animation Details
 
@@ -174,7 +174,7 @@ The component automatically handles:
 
 ## Theme Integration
 
-The component automatically adapts to VSCode themes through CSS variables. No additional configuration is required.
+The component automatically adapts to themes through CSS variables. No additional configuration is required.
 
 ## Performance
 
@@ -188,7 +188,7 @@ The component uses:
 
 ### Recommended Configuration
 
-For optimal usage, always use VSCode theme variables:
+For optimal usage, always use theme variables:
 
 ```typescript
 const defaultProgressBarStyles: IProgressBarStyles = {

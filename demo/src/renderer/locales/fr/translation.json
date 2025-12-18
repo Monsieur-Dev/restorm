@@ -6,7 +6,7 @@
   },
   "themeTest": {
     "title": "Page de Test des Thèmes",
-    "description": "Page de test pour visualiser tous les composants d'interface avec différents thèmes VSCode",
+    "description": "Page de test pour visualiser tous les composants d'interface avec différents thèmes",
     "selectTheme": "Sélectionner un Thème",
     "language": "Langue",
     "components": {

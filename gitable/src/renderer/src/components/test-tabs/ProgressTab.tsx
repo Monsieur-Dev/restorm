@@ -4,7 +4,7 @@ import { ProgressBar } from 'electron-core-ui/renderer'
 const ProgressTab: React.FC = () => {
   return (
     <div style={{ display: 'grid', gap: '20px', maxWidth: '600px', padding: '20px' }}>
-        <h3 style={{ fontSize: '16px', marginBottom: '8px' }}>VSCode ProgressBar Components</h3>
+        <h3 style={{ fontSize: '16px', marginBottom: '8px' }}>ProgressBar Components</h3>
         
         <div>
           <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Infinite Progress Bar</h4>

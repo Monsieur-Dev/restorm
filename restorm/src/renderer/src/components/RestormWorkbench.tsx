@@ -26,7 +26,7 @@ import type { EnvironmentFolder } from '../types/collections'
 import { Badge } from './Badge'
 import { mapToBadgeType } from '../utils/badgeUtils'
 import { useTranslation } from 'react-i18next'
-import { WorkbenchTab } from './WorkbenchTab'
+import { RestormWorkbenchTab } from './RestormWorkbenchTab'
 
 /** Extract title string from EditorTab */
 function getTabTitleString(tab: EditorTab & { titleString?: string }, fallback = ''): string {
@@ -42,7 +42,7 @@ function getTabTitleString(tab: EditorTab & { titleString?: string }, fallback =
   return fallback
 }
 
-export interface WorkbenchProps {
+export interface RestormWorkbenchProps {
   tree: WorkbenchTree
   initialTabContentMap?: Record<string, string>
   onTreeChange?: (tree: WorkbenchTree) => void
@@ -85,7 +85,7 @@ export interface WorkbenchProps {
 }
 
 /** Imperative handle for Workbench component */
-export interface WorkbenchHandle {
+export interface RestormWorkbenchHandle {
   saveState: () => Promise<boolean>
   loadState: () => Promise<WorkbenchTree | null>
   clearState: () => Promise<boolean>
@@ -94,7 +94,7 @@ export interface WorkbenchHandle {
 const EditorWorkbenchAny = EditorWorkbench as unknown as React.ForwardRefExoticComponent<Record<string, unknown> & React.RefAttributes<EditorWorkbenchHandle>>
 
 /** Wrapper component for EditorWorkbench that handles restorm-specific tab rendering */
-export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
+export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbenchProps>(({
   tree: initialTree,
   onTreeChange,
   className,
@@ -233,7 +233,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
       // Get reactive folder if available, otherwise use tab's copy
       const folder = getFolderById?.(tab.folder.id) ?? tab.folder
       return (
-        <WorkbenchTab
+        <RestormWorkbenchTab
           breadcrumbs={breadcrumbs}
           onBreadcrumbClick={onBreadcrumbClick}
           onBreadcrumbRename={onItemRename}
@@ -251,7 +251,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
               }
             }}
           />
-        </WorkbenchTab>
+        </RestormWorkbenchTab>
       )
     }
 
@@ -260,7 +260,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
       // Get reactive environment folder if available, otherwise use tab's copy
       const folder = getEnvironmentFolderById?.(tab.folder.id) ?? tab.folder
       return (
-        <WorkbenchTab
+        <RestormWorkbenchTab
           breadcrumbs={breadcrumbs}
           onBreadcrumbClick={onBreadcrumbClick}
           onBreadcrumbRename={onItemRename}
@@ -278,7 +278,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
               }
             }}
           />
-        </WorkbenchTab>
+        </RestormWorkbenchTab>
       )
     }
 
@@ -289,7 +289,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
       const request = (reactiveRequest && reactiveRequest.type === 'http') ? reactiveRequest : tab.request
       return (
         <EnvironmentProvider environments={tab.environments}>
-          <WorkbenchTab
+          <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
             onBreadcrumbRename={onItemRename}
@@ -307,7 +307,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
               <HTTPRequestTabView request={request} />
             </div>
-          </WorkbenchTab>
+          </RestormWorkbenchTab>
         </EnvironmentProvider>
       )
     }
@@ -317,7 +317,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
       const request = tab.request
       return (
         <EnvironmentProvider environments={tab.environments}>
-          <WorkbenchTab
+          <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
             onBreadcrumbRename={onItemRename}
@@ -331,7 +331,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
               <GraphQLRequestTabView request={request} />
             </div>
-          </WorkbenchTab>
+          </RestormWorkbenchTab>
         </EnvironmentProvider>
       )
     }
@@ -341,7 +341,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
       const request = tab.request
       return (
         <EnvironmentProvider environments={tab.environments}>
-          <WorkbenchTab
+          <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
             onBreadcrumbRename={onItemRename}
@@ -355,7 +355,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
               <GrpcRequestTabView request={request} />
             </div>
-          </WorkbenchTab>
+          </RestormWorkbenchTab>
         </EnvironmentProvider>
       )
     }
@@ -365,7 +365,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
       const request = tab.request
       return (
         <EnvironmentProvider environments={tab.environments}>
-          <WorkbenchTab
+          <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
             onBreadcrumbRename={onItemRename}
@@ -379,7 +379,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
               <SoapRequestTabView request={request} />
             </div>
-          </WorkbenchTab>
+          </RestormWorkbenchTab>
         </EnvironmentProvider>
       )
     }
@@ -389,7 +389,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
       const request = tab.request
       return (
         <EnvironmentProvider environments={tab.environments}>
-          <WorkbenchTab
+          <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
             onBreadcrumbRename={onItemRename}
@@ -403,7 +403,7 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
               <WebSocketRequestTabView request={request} />
             </div>
-          </WorkbenchTab>
+          </RestormWorkbenchTab>
         </EnvironmentProvider>
       )
     }
@@ -566,6 +566,6 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
   )
 })
 
-Workbench.displayName = 'Workbench'
+RestormWorkbench.displayName = 'RestormWorkbench'
 
-export default Workbench
+export default RestormWorkbench

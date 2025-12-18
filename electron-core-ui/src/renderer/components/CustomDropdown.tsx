@@ -163,7 +163,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
         <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {selectedOption ? selectedOption.label : placeholder}
         </span>
-        {/* Chevron icon like VSCode */}
+        {/* Chevron icon */}
         <svg
           width="16"
           height="16"

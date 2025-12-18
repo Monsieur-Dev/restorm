@@ -62,7 +62,7 @@
 	display: none; /* Chrome + Safari: hide scrollbar */
 }
 
-/* VSCode-style scrollbar for textarea with fixed height */
+/* editor-style scrollbar for textarea with fixed height */
 .inputbox > .ibwrapper > textarea.input[style*="min-height"],
 .inputbox > .ibwrapper > textarea.input[style*="height"] {
 	scrollbar-width: thin;

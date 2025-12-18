@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `RadioGroup` component is a React implementation of VSCode's Radio widget. It provides a horizontal group of radio button options with VSCode styling, theme integration, and full accessibility support.
+The `RadioGroup` component is a React implementation of the Radio widget. It provides a horizontal group of radio button options with theme styling, theme integration, and full accessibility support.
 
 ## API
 
@@ -43,7 +43,7 @@ export interface RadioGroupProps {
 
 - **options** (`IRadioOptions`) : Radio group configuration
   - `items` : Array of radio option items
-  - `styles` : Custom styles (optional, uses VSCode default styles if not provided)
+  - `styles` : Custom styles (optional, uses default styles if not provided)
 
 - **onSelect** (`(index: number) => void`) : Callback called when an option is selected
 - **className** (`string`) : Additional CSS classes
@@ -153,7 +153,7 @@ The component generates the following DOM structure:
 - **active** : Applied to the currently selected button
 - **previous-active** : Applied to the previously selected button (for styling transitions)
 
-## VSCode Theme Variables
+## Theme Variables
 
 The component uses the following CSS variables:
 
@@ -191,7 +191,7 @@ The component automatically handles:
 
 ## Theme Integration
 
-The component automatically adapts to VSCode themes through CSS variables. No additional configuration is required.
+The component automatically adapts to themes through CSS variables. No additional configuration is required.
 
 ## Performance
 
@@ -201,7 +201,7 @@ The component uses `useCallback` to optimize performance and avoid unnecessary r
 
 ### Recommended Configuration
 
-For optimal usage, always use VSCode theme variables:
+For optimal usage, always use theme variables:
 
 ```typescript
 const defaultRadioStyles: IRadioStyles = {

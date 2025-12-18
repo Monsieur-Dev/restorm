@@ -6,7 +6,7 @@
   },
   "themeTest": {
     "title": "Theme Test Page",
-    "description": "Test page to visualize all UI components with different VSCode themes",
+    "description": "Test page to visualize all UI components with different themes",
     "selectTheme": "Select Theme",
     "language": "Language",
     "components": {

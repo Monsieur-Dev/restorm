@@ -11,7 +11,7 @@ const CheckboxesTab: React.FC = () => {
   return (
     <div style={{ display: 'grid', gap: '30px', padding: '20px' }}>
         <div>
-          <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>VSCode Toggle Components</h3>
+          <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>Toggle Components</h3>
           <div style={{ display: 'grid', gap: '12px' }}>
         <Toggle
           isChecked={toggleChecked}
@@ -38,7 +38,7 @@ const CheckboxesTab: React.FC = () => {
         </div>
 
         <div>
-          <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>VSCode Radio Components</h3>
+          <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>Radio Components</h3>
           <div style={{ display: 'grid', gap: '20px' }}>
             <div>
               <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Basic Radio Group</h4>

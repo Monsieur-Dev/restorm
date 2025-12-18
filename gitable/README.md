@@ -1,6 +1,6 @@
 # Gitable
 
-A modern Git GUI tool built with Electron, React, TypeScript, and inspired by VSCode.
+A modern Git GUI tool built with Electron, React, TypeScript, and built with modern UI.
 
 ## 🚀 Quick Start
 
@@ -37,9 +37,9 @@ Comprehensive documentation is available in the `/docs` folder:
 - ✅ TypeScript with strict type checking
 - ✅ Hot Module Replacement (HMR) for fast development
 - ✅ Internationalization (i18n) with English and French
-- ✅ VSCode-inspired dark theme
+- ✅ Dark theme
 - ✅ Strict ESLint configuration with zero warnings policy
-- ✅ Dev container support for VS Code
+- ✅ Dev container support
 - ✅ Cross-platform (Linux, macOS, Windows)
 
 ## 📝 Development
@@ -129,6 +129,6 @@ MIT
 
 ## 🙏 Acknowledgments
 
-- Inspired by [VSCode](https://code.visualstudio.com/)
+
 - Built with [Molecule UI Framework](https://github.com/DTStack/molecule)
 - Uses [electron-vite](https://github.com/alex8088/electron-vite) for optimal build setup

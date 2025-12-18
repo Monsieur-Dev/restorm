@@ -1,13 +1,13 @@
 import React from 'react'
 
 // Note: Event and IDisposable are not available in React context
-// These are kept for interface compatibility with VSCode
+// These are kept for interface compatibility
 type Event<T> = (listener: (e: T) => void) => void
 interface IDisposable {
   dispose(): void
 }
 
-// SelectBox delegate interface - matches VSCode implementation
+// SelectBox delegate interface
 export interface ISelectBoxDelegate extends IDisposable {
   readonly onDidSelect: Event<ISelectData>
   setOptions(options: ISelectOptionItem[], selected?: number): void
@@ -29,7 +29,7 @@ export interface ISelectBoxOptions {
   optionsAsChildren?: boolean
 }
 
-// Select option item interface - matches VSCode implementation
+// Select option item interface
 export interface ISelectOptionItem {
   /**
    * Underlying string value of the option.

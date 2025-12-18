@@ -24,7 +24,7 @@ test.afterAll(async () => {
   await electronApp.close()
 })
 
-test.describe('VSCode Themes Visual Tests', () => {
+test.describe('Themes Visual Tests', () => {
   test('should navigate to theme test page', async () => {
     // Click the Theme Test button
     await page.click('text=Theme Test')

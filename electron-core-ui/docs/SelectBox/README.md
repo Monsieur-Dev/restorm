@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `SelectBox` component is a React implementation of VSCode's SelectBox widget. It provides both native and custom dropdown implementations with full VSCode styling, theme integration, accessibility support, and advanced features like descriptions, decorators, and scrolling for long lists.
+The `SelectBox` component is a React implementation of the SelectBox widget. It provides both native and custom dropdown implementations with full theme styling, theme integration, accessibility support, and advanced features like descriptions, decorators, and scrolling for long lists.
 
 ## API
 
@@ -277,7 +277,7 @@ import { SelectBox } from 'electron-core-ui/renderer'
 - **`.visible`** : Applied when dropdown is visible
 - **`.synthetic-focus`** : Applied when element has synthetic focus
 
-## VSCode Theme Variables
+## Theme Variables
 
 The component uses the following CSS variables:
 
@@ -547,7 +547,7 @@ For lists with 100+ options, consider:
 For optimal AI-generated code:
 
 ```typescript
-// Always use VSCode theme variables
+// Always use theme variables
 const defaultSelectBoxStyles: ISelectBoxStyles = {
   selectBackground: 'var(--settings-dropdownBackground)',
   selectForeground: 'var(--settings-dropdownForeground)',

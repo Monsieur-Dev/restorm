@@ -2,7 +2,7 @@
 
 ## Overview
 
-`KeyValueTable` is a VSCode-themed, variable-aware key/value table built on top of `VariableInputBox`, `InputBox`, `Toggle` and `ScrollableElement`.
+`KeyValueTable` is a themed, variable-aware key/value table built on top of `VariableInputBox`, `InputBox`, `Toggle` and `ScrollableElement`.
 It is designed for editing ordered lists of key/value pairs (with an optional description), with support for Handlebars-style `{{variables}}`, per-row enable/disable, and drag & drop reordering.
 
 This component is a generic, reusable version of the environment/headers/params editor used in the `restorm` project.
@@ -27,8 +27,8 @@ This component is a generic, reusable version of the environment/headers/params 
   - Enable/disable rows per-line via `Toggle`.
   - Drag & drop reordering with a custom drag ghost and visual drop indicators (before/after).
 - **Theming**:
-  - Uses VSCode CSS variables (`--*`) for borders, background and text.
-  - Fits naturally into VSCode-like layouts and dark/light themes.
+  - Uses theme CSS variables (`--*`) for borders, background and text.
+  - Fits naturally into styled layouts and dark/light themes.
 
 ## TypeScript Interfaces
 

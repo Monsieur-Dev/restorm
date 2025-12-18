@@ -1,6 +1,6 @@
 # Breadcrumb
 
-VSCode-style breadcrumb navigation component for React applications.
+Breadcrumb navigation component for React applications.
 
 ## Overview
 
@@ -83,7 +83,7 @@ const Example: React.FC = () => {
 
 ### CSS Variables
 
-The component uses standard VSCode CSS variables for theming:
+The component uses standard theme CSS variables for theming:
 
 - `--breadcrumb-background`
 - `--breadcrumb-foreground`

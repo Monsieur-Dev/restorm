@@ -2,7 +2,7 @@
 
 ## Overview
 
-`SettingsTreeView` renders a VSCode-like settings navigation tree (left sidebar) from a declarative `SettingsSchema`.  
+`SettingsTreeView` renders a styled settings navigation tree (left sidebar) from a declarative `SettingsSchema`.  
 It supports nested categories, auto-expansion when searching, and highlights the selected category.
 
 ## API

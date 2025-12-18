@@ -15,7 +15,7 @@ export interface UseThemeReturn {
 }
 
 /**
- * Hook to manage VSCode themes
+ * Hook to manage themes
  * If used within a ThemeProvider, returns the shared context state
  * Otherwise, creates its own independent state (legacy behavior)
  */

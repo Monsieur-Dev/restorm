@@ -1,10 +1,10 @@
 # ScrollableElement Component
 
-A React component that provides VSCode-style custom scrollbars with auto-hide functionality, smooth scrolling, and full keyboard accessibility.
+A React component that provides custom scrollbars with auto-hide functionality, smooth scrolling, and full keyboard accessibility.
 
 ## Overview
 
-The `ScrollableElement` component wraps content and provides custom scrollbars that match VSCode's behavior. It supports both vertical and horizontal scrolling, with optional arrow buttons, scroll shadows, and configurable visibility modes.
+The `ScrollableElement` component wraps content and provides custom scrollbars that match the behavior. It supports both vertical and horizontal scrolling, with optional arrow buttons, scroll shadows, and configurable visibility modes.
 
 ## API Reference
 
@@ -199,9 +199,9 @@ const defaultScrollableElementStyles: IScrollableElementStyles = {
 - `.shadow.top`: Top shadow
 - `.shadow.left`: Left shadow
 
-## VSCode Theme Variables
+## Theme Variables
 
-The component uses the following VSCode CSS variables for theming:
+The component uses the following theme CSS variables for theming:
 
 - `--scrollbarSlider-background`: Default slider background
 - `--scrollbarSlider-hoverBackground`: Slider background on hover
@@ -261,7 +261,7 @@ The component uses the following VSCode CSS variables for theming:
 
 1. **Auto-hide scrollbars**: Perfect for clean interfaces that show scrollbars only when needed
 2. **Smooth scrolling**: Enhanced user experience with fluid animations
-3. **Custom styling**: Easy theming with VSCode color variables
+3. **Custom styling**: Easy theming with theme color variables
 4. **Flexible configuration**: Support for various scrollbar modes and behaviors
 5. **Performance optimized**: Uses ResizeObserver for efficient dimension tracking
 
@@ -279,7 +279,7 @@ The component uses the following VSCode CSS variables for theming:
 - Set appropriate `scrollbarSize` for your design system
 - Enable arrows for precise navigation in data-heavy interfaces
 - Use `onScroll` callback for scroll position tracking
-- Combine with VSCode themes for consistent styling
+- Combine with themes for consistent styling
 
 ### Performance Considerations
 

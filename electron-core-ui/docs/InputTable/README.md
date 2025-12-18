@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `InputTable` component is a VSCode-themed, editable table built on top of AG Grid Community.
+The `InputTable` component is a themed, editable table built on top of AG Grid Community.
 It is designed for parameter-style data entry where each row represents an item and each column defines the input type (text, checkbox, or `VariableInputBox`).
 
 ## Component Location
@@ -24,7 +24,7 @@ It is designed for parameter-style data entry where each row represents an item 
   - `rows` is fully controlled by the parent
   - `onChange` is called whenever a cell changes, rows are reordered, or a row is added
 - Theming:
-  - Uses VSCode CSS variables (`--*`) to theme the grid via AG Grid CSS variables
+  - Uses theme CSS variables (`--*`) to theme the grid via AG Grid CSS variables
   - Works seamlessly with `useTheme` in the host application
 
 ## TypeScript Interfaces

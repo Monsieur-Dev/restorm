@@ -412,8 +412,8 @@ export abstract class BaseWindow {
       // Note: titleBarOverlay colors must be hex values, not CSS variables
       if (process.platform === 'win32') {
         mergedOptions.titleBarOverlay = {
-          color: '#181818', // Default VSCode titleBar background
-          symbolColor: '#cccccc', // Default VSCode titleBar foreground
+          color: '#181818', // Default titleBar background
+          symbolColor: '#cccccc', // Default titleBar foreground
           height: 30
         }
       }

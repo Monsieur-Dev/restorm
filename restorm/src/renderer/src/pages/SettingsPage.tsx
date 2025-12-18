@@ -355,7 +355,7 @@ const SettingsPage: React.FC = () => {
               <div style={{ display: 'grid', gap: '20px', maxWidth: '600px' }}>
                 <p style={{ color: 'var(--descriptionForeground)', fontSize: '14px' }}>
                   This section demonstrates the ScrollableElement component in a real settings page.
-                  The content scrolls smoothly with VSCode-style scrollbars that auto-hide.
+                  The content scrolls smoothly with styled scrollbars that auto-hide.
                 </p>
                 
                 {Array.from({ length: 20 }, (_, i) => (

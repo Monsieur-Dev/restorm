@@ -24,7 +24,7 @@ import {
   navigationService
 } from 'electron-core-ui/renderer'
 import type { WorkbenchTree, NavigationEvent, GroupNode, TabGroupNode, EditorTab, SearchResult } from 'electron-core-ui/renderer'
-import { Workbench } from './components/Workbench'
+import { RestormWorkbench } from './components/RestormWorkbench'
 import { Welcome } from './components/Welcome'
 import { Badge } from './components/Badge'
 import { mapToBadgeType } from './utils/badgeUtils'
@@ -1899,7 +1899,7 @@ const App: React.FC = () => {
               display: 'flex'
             }}
           >
-            <Workbench
+            <RestormWorkbench
               tree={workbenchTree}
               onTreeChange={handleTreeChange}
               focusedGroupId={focusedGroupId}

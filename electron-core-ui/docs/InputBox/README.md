@@ -2,7 +2,7 @@
 
 ## Overview
 
-`InputBox` is a React implementation of VSCode's input box. It provides a themed single-line or multi-line text/number input with validation, placeholder handling, and accessibility options.
+`InputBox` is a React implementation of the input box. It provides a themed single-line or multi-line text/number input with validation, placeholder handling, and accessibility options.
 
 It is used internally by several higher-level components (such as `VariableInputBox`) and can be used directly in your own forms and toolbars.
 

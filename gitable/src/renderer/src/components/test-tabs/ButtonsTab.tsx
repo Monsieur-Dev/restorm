@@ -4,7 +4,7 @@ import { Button, ButtonWithDescription, ButtonWithDropdown, ButtonWithIcon, logg
 const ButtonsTab: React.FC = () => {
   return (
     <div style={{ display: 'grid', gap: '20px', maxWidth: '800px', padding: '20px' }}>
-        <h3 style={{ fontSize: '16px', marginBottom: '8px' }}>VSCode Button Components</h3>
+        <h3 style={{ fontSize: '16px', marginBottom: '8px' }}>Button Components</h3>
         
         <div>
           <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Basic Buttons (New API with children)</h4>

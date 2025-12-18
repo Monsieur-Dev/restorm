@@ -1,8 +1,8 @@
 import React from 'react'
-import { usePlatform } from '../hooks/usePlatform'
-import '../assets/workbench.css'
+import { usePlatform } from '../../hooks/usePlatform'
+import '../../assets/workbench.css'
 
-export interface MonacoWorkbenchProps {
+export interface WorkbenchProps {
   children: React.ReactNode
   className?: string
   border?: boolean
@@ -10,7 +10,7 @@ export interface MonacoWorkbenchProps {
   fontAliasing?: 'auto' | 'antialiased' | 'none'
 }
 
-const MonacoWorkbench: React.FC<MonacoWorkbenchProps> = ({
+const Workbench: React.FC<WorkbenchProps> = ({
   children,
   className = '',
   border = false,
@@ -20,7 +20,6 @@ const MonacoWorkbench: React.FC<MonacoWorkbenchProps> = ({
   const { isMacintosh: isMac, isWindows, isLinux } = usePlatform()
   
   // Theme is managed by ThemeProvider (parent component)
-  // No need to call useTheme() here
 
   const classes = [
     'workbench',
@@ -40,4 +39,4 @@ const MonacoWorkbench: React.FC<MonacoWorkbenchProps> = ({
   )
 }
 
-export default MonacoWorkbench
+export default Workbench

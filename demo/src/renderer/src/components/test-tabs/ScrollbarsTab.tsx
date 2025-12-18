@@ -4,7 +4,7 @@ import { ScrollableElement } from 'electron-core-ui/renderer'
 const ScrollbarsTab: React.FC = () => {
   return (
     <div style={{ display: 'grid', gap: '20px', maxWidth: '800px', padding: '20px' }}>
-        <h3 style={{ fontSize: '16px', marginBottom: '8px' }}>VSCode ScrollableElement Components</h3>
+        <h3 style={{ fontSize: '16px', marginBottom: '8px' }}>ScrollableElement Components</h3>
         
         <div>
           <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Scrollable Content (Vertical)</h4>

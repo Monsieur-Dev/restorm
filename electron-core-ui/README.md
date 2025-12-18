@@ -1,19 +1,19 @@
-# Electron VSCode-like Core UI
+# Electron Core UI
 
-A generic Electron + React foundation library with VSCode-like UI components and services.
+A generic Electron + React foundation library with UI components and services.
 
 ## Features
 
 - **Main Process Services**:
   - `LoggerService`: Winston-based logging with file and console support
   - `StorageService`: Simple key-value store backed by JSON files
-  - `ThemeService`: VSCode theme management and loading
+  - `ThemeService`: Theme management and loading
   - `WindowManager`: Window state persistence and restoration
   - `BaseWindow`: Abstract base class for window management
 
 - **Renderer Process Components**:
-  - `CustomDropdown`: VSCode-styled dropdown component
-  - `Tabs` (formerly `CustomTabs`): VSCode-styled tabs component
+  - `CustomDropdown`: Styled dropdown component
+  - `Tabs` (formerly `CustomTabs`): Styled tabs component
   - `ListView` & `ListViewDropdown`: hierarchical lists and dropdown tree selector
   - `InputTable` & `KeyValueTable`: editable tables for parameter/key-value style data
   - `useTheme`: React hook for theme management

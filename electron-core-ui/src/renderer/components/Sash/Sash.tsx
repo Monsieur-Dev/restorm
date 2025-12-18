@@ -5,7 +5,7 @@ import './sash.css';
 
 /**
  * Sash component for resizing panels
- * Based on VS Code's sash implementation
+ * Sash implementation for resizable panes
  */
 export const Sash: React.FC<SashProps> = ({
 	orientation,

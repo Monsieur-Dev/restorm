@@ -1,6 +1,6 @@
 # ContextMenu Component
 
-VSCode-style context (right-click) menu component for React applications, sharing the same look and feel as the main menu bar.
+Context (right-click) menu component for React applications, sharing the same look and feel as the main menu bar.
 
 ## Overview
 

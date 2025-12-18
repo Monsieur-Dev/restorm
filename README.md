@@ -2,7 +2,7 @@
 
 This repository contains two main packages:
 
-1. **electron-core-ui** - A reusable Electron + React foundation library with VSCode-like UI components, theming, logging, window management, and i18n.
+1. **electron-core-ui** - A reusable Electron + React foundation library with UI components, theming, logging, window management, and i18n.
 2. **gitable** - A modern Git GUI tool that uses the core-ui library.
 
 ## 📦 Package Structure
@@ -76,7 +76,7 @@ A generic Electron + React foundation library providing:
 - **Services**: Logger, Storage, Theme management, Window state persistence
 - **Components**: Custom dropdown, tabs, settings tree view
 - **Hooks**: Theme management hook
-- **Resources**: VSCode themes, fonts
+- **Resources**: Themes, fonts
 - **i18n**: Internationalization setup
 - **TypeScript**: Full type definitions
 
@@ -100,7 +100,7 @@ The `electron-core-ui` package will be moved to its own repository and published
 
 ## 🛠️ Gitable
 
-A modern Git GUI tool built with Electron, React, TypeScript, and inspired by VSCode.
+A modern Git GUI tool built with Electron, React, and TypeScript.
 
 ### Technology Stack
 
@@ -171,6 +171,5 @@ MIT
 
 ## 🙏 Acknowledgments
 
-- Inspired by [VSCode](https://code.visualstudio.com/)
 - Built with [Molecule UI Framework](https://github.com/DTStack/molecule)
 - Uses [electron-vite](https://github.com/alex8088/electron-vite) for optimal build setup

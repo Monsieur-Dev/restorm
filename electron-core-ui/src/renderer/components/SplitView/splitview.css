@@ -24,7 +24,7 @@
 	flex-direction: column;
 }
 
-/* Animation (similar to VS Code paneview) */
+/* Animation for paneview */
 .split-view2.animated .split-view-view {
 	transition-duration: 0.15s;
 	transition-timing-function: ease-out;

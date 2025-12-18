@@ -11,7 +11,7 @@
   box-sizing: border-box;
 }
 
-/* Closed state - VSCode style search trigger */
+/* Closed state - editor style search trigger */
 .search-bar-closed {
   display: flex;
   align-items: center;

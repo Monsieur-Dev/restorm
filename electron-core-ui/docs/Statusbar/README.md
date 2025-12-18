@@ -2,7 +2,7 @@
 
 ## Overview
 
-`Statusbar` and `StatusbarElement` render a VSCode-like status bar at the bottom of the window.  
+`Statusbar` and `StatusbarElement` render a styled status bar at the bottom of the window.  
 They are used to display small pieces of state (ready, warnings, errors, notifications) with optional tooltips and click handlers.
 
 ## API
@@ -73,7 +73,7 @@ const AppStatusbar: React.FC = () => {
 - `StatusbarElement`:
   - Uses `title` as the visible label in the bar.
   - Uses `children` as the tooltip content shown by the `Tooltip` component in the demo.
-  - Applies VSCode theme colors for normal / warning / error states.
+  - Applies theme colors for normal / warning / error states.
   - Accepts `onClick` for interactive elements (e.g. open problems view, toggle panel).
 
 ## Notes for AI Usage

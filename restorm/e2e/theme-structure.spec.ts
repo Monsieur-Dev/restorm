@@ -42,7 +42,7 @@ test.describe('Theme Structure Tests', () => {
     }
   })
 
-  test('should have VSCode CSS variables applied', async () => {
+  test('should have CSS variables applied', async () => {
     const variables = await page.evaluate(() => {
       const root = document.documentElement
       const styles = getComputedStyle(root)
@@ -94,7 +94,7 @@ test.describe('Theme Structure Tests', () => {
   test('should apply theme to input elements', async () => {
     const textInput = page.locator('#text-input')
     
-    // Check that input uses VSCode variables
+    // Check that input uses theme variables
     const inputStyles = await textInput.evaluate((el) => {
       const styles = getComputedStyle(el)
       return {

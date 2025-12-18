@@ -94,7 +94,7 @@ const SplitViewTab: React.FC = () => {
         <h3 style={{ marginTop: 0 }}>Editor area</h3>
         <p style={{ fontSize: 13, color: 'var(--descriptionForeground)' }}>
           This area represents the editor. The SplitView on the left reuses the same layout
-          primitives as VS Code to stack multiple panes vertically.
+          primitives to stack multiple panes vertically.
         </p>
       </div>
     </div>

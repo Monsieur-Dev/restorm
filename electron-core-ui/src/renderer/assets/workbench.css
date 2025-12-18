@@ -180,7 +180,7 @@ body {
 }
 
 .workbench .codicon[class*='codicon-'] {
-	font-size: 16px; /* sets font-size for codicons in workbench (https://github.com/microsoft/vscode/issues/98495) */
+	font-size: 16px;
 }
 
 .workbench .predefined-file-icon[class*='codicon-']::before {
@@ -189,7 +189,7 @@ body {
 	padding-right: 3px;
 }
 
-.predefined-file-icon::before { /* do add additional specificity to this selector, so it can be overridden by product themes */
+.predefined-file-icon::before {
 	font-family: codicon;
 }
 
@@ -198,7 +198,7 @@ body {
 }
 
 .workbench.modal-dialog-visible .progress-container.infinite .progress-bit {
-	display: none; /* stop progress animations when dialogs are visible (https://github.com/microsoft/vscode/issues/138396) */
+	display: none;
 }
 
 /* Custom Dropdown (select) Arrows */
@@ -269,7 +269,7 @@ body {
 }
 
 .workbench.mac select:focus {
-	border-color: transparent; /* outline is a square, but border has a radius, so we avoid this glitch when focused (https://github.com/microsoft/vscode/issues/26045) */
+	border-color: transparent;
 }
 
 .workbench .list:not(.element-focused):focus::before {
