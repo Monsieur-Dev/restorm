@@ -102,7 +102,8 @@ function requestToSearchDocument(
     ...request.headers.map((h) => `${h.key} ${h.value}`),
     ...request.params.map((p) => `${p.key} ${p.value}`),
     ...(request.pathParams?.map((p) => `${p.key} ${p.value}`) ?? []),
-    getBodyContent(request.body)
+    getBodyContent(request.body),
+    request.notes ?? ''
   ].join(' ')
 
   // Build body metadata

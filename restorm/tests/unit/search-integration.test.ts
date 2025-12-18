@@ -139,7 +139,7 @@ import { importSwaggerFromJson } from '../../src/renderer/src/services/SwaggerIm
 import { searchIndexService } from '../../src/renderer/src/services/SearchIndexService'
 import { makeReactiveFolder } from '../../src/renderer/src/types/reactive'
 import type { Folder, HTTPRequest } from '../../src/renderer/src/types/collections'
-import { isFolder, isRequest, isHTTPRequest } from '../../src/renderer/src/types/collections'
+import { isAnyFolder, isRequest, isHTTPRequest } from '../../src/renderer/src/types/collections'
 import swaggerPetstore from './swagger-petstore.json'
 
 // Type the mocked search service
@@ -169,7 +169,7 @@ describe('Search Integration', () => {
    */
   function findRequestByName(folder: Folder, name: string): HTTPRequest | undefined {
     for (const item of folder.items) {
-      if (isFolder(item)) {
+      if (isAnyFolder(item)) {
         const found = findRequestByName(item, name)
         if (found) return found
       } else if (isRequest(item) && isHTTPRequest(item) && item.name.includes(name)) {

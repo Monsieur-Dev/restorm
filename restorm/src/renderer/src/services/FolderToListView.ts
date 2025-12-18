@@ -12,6 +12,8 @@ export interface FolderToListViewOptions {
   expandedIds: Set<string>
   /** Function to render HTTP method badge as leftActions */
   renderMethodBadge: (method: string) => ReactNode
+  /** Function to render deprecated request title (with strikethrough) */
+  renderDeprecatedTitle?: (name: string) => ReactNode
 }
 
 /**
@@ -21,9 +23,14 @@ function requestToListViewItem(
   request: HTTPRequest,
   options: FolderToListViewOptions
 ): ListViewItemData {
+  // Render title with strikethrough if deprecated
+  const title = request.deprecated && options.renderDeprecatedTitle
+    ? options.renderDeprecatedTitle(request.name)
+    : request.name
+
   return {
     id: request.id,
-    title: request.name,
+    title,
     icon: undefined,
     leftActions: options.renderMethodBadge(request.method)
   }

@@ -18,6 +18,13 @@
       "delete": "Supprimer",
       "clone": "Cloner",
       "rename": "Renommer"
+    },
+    "deleteConfirm": {
+      "title": "Confirmer la suppression",
+      "folderMessage": "Êtes-vous sûr de vouloir supprimer le dossier \"{{name}}\" et tout son contenu ?",
+      "itemMessage": "Êtes-vous sûr de vouloir supprimer \"{{name}}\" ?",
+      "confirm": "Supprimer",
+      "cancel": "Annuler"
     }
   },
   "environment": {
@@ -40,6 +47,7 @@
     }
   },
   "requestTab": {
+    "deprecated": "Ce endpoint est déprécié et pourrait être supprimé dans une version future.",
     "send": "Envoyer",
     "urlPlaceholder": "URL de la requête",
     "methodSelect": "Sélectionner la méthode HTTP",

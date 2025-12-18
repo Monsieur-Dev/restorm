@@ -9,12 +9,15 @@ import {
   Statusbar,
   ListView,
   type ListViewItemData,
+  type ListViewDropEventPayload,
+  type ListViewItemEventPayload,
   Sash,
   type IVerticalSashLayoutProvider,
   type SashEvent,
   SplitView,
   Pane,
   Button,
+  Modal,
   useSettingsModal,
   isTabGroupNode,
   isContainerNode,
@@ -58,7 +61,9 @@ type ContextMenuActionHandler = (itemId: string) => void
 const buildContextMenuForItem = (
   item: ListViewItemData,
   t: TranslateFunction,
-  onDefineVariables: ContextMenuActionHandler
+  onCloneItem: ContextMenuActionHandler,
+  onCreateSubfolder: ContextMenuActionHandler,
+  onDeleteItem: ContextMenuActionHandler
 ): SidebarContextMenuItem[] => {
   const hasChildren = Array.isArray(item.children) && item.children.length > 0
   const isItemFolder = item.isExpandable ?? hasChildren
@@ -69,21 +74,26 @@ const buildContextMenuForItem = (
       {
         id: 'create-child-folder',
         label: t('sidebar.contextMenu.createSubfolder'),
-        icon: 'new-folder'
+        icon: 'new-folder',
+        onClick: () => {
+          onCreateSubfolder(itemId)
+        }
       },
       {
-        id: 'define-variables',
-        label: t('sidebar.contextMenu.defineVariables'),
-        icon: 'symbol-variable',
-        onClick: () => {
-          onDefineVariables(itemId)
-        }
+        id: 'rename-item',
+        label: t('sidebar.contextMenu.rename'),
+        icon: 'edit',
+        shortcut: 'F2'
       },
       { id: 'sep-folder', isSeparator: true, label: '' },
       {
         id: 'delete-folder',
         label: t('sidebar.contextMenu.delete'),
-        icon: 'trash'
+        icon: 'trash',
+        shortcut: 'Suppr',
+        onClick: () => {
+          onDeleteItem(itemId)
+        }
       }
     ]
   }
@@ -92,7 +102,11 @@ const buildContextMenuForItem = (
     {
       id: 'clone-item',
       label: t('sidebar.contextMenu.clone'),
-      icon: 'copy'
+      icon: 'copy',
+      shortcut: 'Ctrl+D',
+      onClick: () => {
+        onCloneItem(itemId)
+      }
     },
     {
       id: 'rename-item',
@@ -104,7 +118,11 @@ const buildContextMenuForItem = (
     {
       id: 'delete-item',
       label: t('sidebar.contextMenu.delete'),
-      icon: 'trash'
+      icon: 'trash',
+      shortcut: 'Suppr',
+      onClick: () => {
+        onDeleteItem(itemId)
+      }
     }
   ]
 }
@@ -112,15 +130,17 @@ const buildContextMenuForItem = (
 const attachContextMenus = (
   items: ListViewItemData[],
   t: TranslateFunction,
-  onDefineVariables: ContextMenuActionHandler
+  onCloneItem: ContextMenuActionHandler,
+  onCreateSubfolder: ContextMenuActionHandler,
+  onDeleteItem: ContextMenuActionHandler
 ): ListViewItemData[] =>
   items.map((item) => {
     const withMenu = {
       ...item,
-      contextMenuItems: buildContextMenuForItem(item, t, onDefineVariables)
+      contextMenuItems: buildContextMenuForItem(item, t, onCloneItem, onCreateSubfolder, onDeleteItem)
     } as ListViewItemData
     if (item.children && item.children.length > 0) {
-      withMenu.children = attachContextMenus(item.children, t, onDefineVariables)
+      withMenu.children = attachContextMenus(item.children, t, onCloneItem, onCreateSubfolder, onDeleteItem)
     }
     return withMenu
   })
@@ -251,6 +271,121 @@ function getNearestEnvironmentsForBreadcrumbs(
   }
 
   return []
+}
+
+/** Find an item and its parent folder in the tree */
+function findItemWithParent(
+  folder: Folder | EnvironmentFolder,
+  targetId: string,
+  parent: Folder | EnvironmentFolder | null = null
+): { item: FolderItem | null; parent: Folder | EnvironmentFolder | null; index: number } {
+  // Check if the folder itself is the target (but it can't be moved if it's the root)
+  if (folder.id === targetId) {
+    return { item: folder, parent, index: -1 }
+  }
+
+  for (let i = 0; i < folder.items.length; i++) {
+    const item = folder.items[i]
+    if (item === undefined) continue
+    if (item.id === targetId) {
+      return { item, parent: folder, index: i }
+    }
+    if (isAnyFolder(item)) {
+      const found = findItemWithParent(item, targetId, item)
+      if (found.item) return found
+    }
+  }
+
+  return { item: null, parent: null, index: -1 }
+}
+
+/** Remove an item from its parent folder and return a copy of the item */
+function removeItemFromTree(
+  folder: Folder | EnvironmentFolder,
+  itemId: string
+): FolderItem | null {
+  const { item, parent, index } = findItemWithParent(folder, itemId)
+  if (!item || !parent || index < 0) return null
+
+  // Remove from parent
+  parent.items.splice(index, 1)
+  return item
+}
+
+/** Insert an item into the tree at the specified position */
+function insertItemIntoTree(
+  folder: Folder | EnvironmentFolder,
+  item: FolderItem,
+  targetId: string,
+  position: 'before' | 'after' | 'into'
+): boolean {
+  const { item: target, parent, index } = findItemWithParent(folder, targetId)
+  if (!target) return false
+
+  if (position === 'into') {
+    // Insert into the target (which must be a folder)
+    if (isAnyFolder(target)) {
+      target.items.push(item)
+      return true
+    }
+    // If target is not a folder, insert after it instead
+    if (parent) {
+      parent.items.splice(index + 1, 0, item)
+      return true
+    }
+    return false
+  }
+
+  // Insert before or after the target
+  if (!parent) return false
+
+  const insertIndex = position === 'before' ? index : index + 1
+  parent.items.splice(insertIndex, 0, item)
+  return true
+}
+
+/** Generate a unique ID */
+function generateUniqueId(): string {
+  return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+}
+
+/** Deep clone an item with new IDs */
+function deepCloneItem(item: FolderItem): FolderItem {
+  const newId = generateUniqueId()
+
+  if (isAnyFolder(item)) {
+    const clonedFolder = {
+      ...item,
+      id: newId,
+      name: `${item.name} (copy)`,
+      items: item.items.map((child) => deepCloneItem(child))
+    }
+    return clonedFolder
+  }
+
+  // It's a request
+  return {
+    ...item,
+    id: newId,
+    name: `${item.name} (copy)`
+  }
+}
+
+/** Clone an item and insert the clone after it */
+function cloneItemInTree(
+  folder: Folder | EnvironmentFolder,
+  itemId: string
+): FolderItem | null {
+  const { item, parent, index } = findItemWithParent(folder, itemId)
+  if (!item || !parent || index < 0) return null
+
+  // Deep clone the item
+  const clonedItem = deepCloneItem(item)
+
+  // Insert after the original
+  parent.items.splice(index + 1, 0, clonedItem)
+
+  return clonedItem
 }
 
 const App: React.FC = () => {
@@ -745,11 +880,303 @@ const App: React.FC = () => {
     }
   }, [swaggerFolder])
 
-  // Handle "Define variables" context menu action
-  const handleDefineVariables = useCallback((itemId: string) => {
-    // Navigate to folder - this will trigger the onNavigate listener
-    navigationService.navigateTo(itemId, 'context-menu', { type: 'folder' })
+  // Handle drag & drop in the sidebar to reorder items
+  const handleItemDrop = useCallback((payload: ListViewDropEventPayload) => {
+    const sourceId = payload.source.id
+    const targetId = payload.item.id
+    const position = payload.position
+
+    // Don't allow dropping an item onto itself
+    if (sourceId === targetId) return
+
+    // Don't allow dropping the root folder
+    if (sourceId === swaggerFolder.id) return
+
+    // Don't allow dropping onto the root folder with 'before' or 'after'
+    if (targetId === swaggerFolder.id && position !== 'into') return
+
+    // Don't allow dropping a folder into one of its descendants
+    const isDescendant = (parentId: string, childId: string): boolean => {
+      const parent = findItemById(swaggerFolder, parentId)
+      if (!parent || !isAnyFolder(parent)) return false
+      for (const item of parent.items) {
+        if (item.id === childId) return true
+        if (isAnyFolder(item) && isDescendant(item.id, childId)) return true
+      }
+      return false
+    }
+    if (isDescendant(sourceId, targetId)) return
+
+    // Remove the item from its current position
+    const removedItem = removeItemFromTree(swaggerFolder, sourceId)
+    if (!removedItem) return
+
+    // Insert at the new position
+    const inserted = insertItemIntoTree(swaggerFolder, removedItem, targetId, position)
+    if (!inserted) {
+      // If insertion failed, try to restore the item (this shouldn't happen)
+      return
+    }
+
+    // Force React re-render by creating new reference
+    setSwaggerFolder((prevFolder) => ({ ...prevFolder }))
+
+    // Update breadcrumbs in open workbench tabs
+    setWorkbenchTree((prevTree) => {
+      const group = prevTree.groups[0]
+      if (!group || !isTabGroupNode(group)) return prevTree
+
+      const updatedTabs = group.tabs.map((tab) => {
+        const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
+
+        // Get the item ID from the tab
+        let itemId: string
+        if (restormTab.tabType === 'folder') {
+          itemId = restormTab.folder.id
+        } else if (restormTab.tabType === 'environment-folder') {
+          itemId = restormTab.folder.id
+        } else {
+          itemId = restormTab.request.id
+        }
+
+        // Recalculate breadcrumbs for this tab
+        const { breadcrumbs: newBreadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, itemId)
+        if (newBreadcrumbs.length === 0) return tab
+
+        // For HTTP request tabs, also recalculate environments
+        if (restormTab.tabType === 'http-request') {
+          const newEnvironments = getNearestEnvironmentsForBreadcrumbs(swaggerFolder, newBreadcrumbs)
+          return {
+            ...restormTab,
+            breadcrumbs: newBreadcrumbs,
+            environments: newEnvironments
+          }
+        }
+
+        return {
+          ...restormTab,
+          breadcrumbs: newBreadcrumbs
+        }
+      })
+
+      return {
+        ...prevTree,
+        groups: [{ ...group, tabs: updatedTabs }]
+      }
+    })
+  }, [swaggerFolder])
+
+  // Handle "Clone" context menu action
+  const handleCloneItem = useCallback((itemId: string) => {
+    // Don't allow cloning the root folder
+    if (itemId === swaggerFolder.id) return
+
+    // Clone the item
+    const clonedItem = cloneItemInTree(swaggerFolder, itemId)
+    if (!clonedItem) return
+
+    // Force React re-render by creating new reference
+    setSwaggerFolder((prevFolder) => ({ ...prevFolder }))
+  }, [swaggerFolder])
+
+  // State for sidebar editing (controlled rename mode)
+  const [sidebarEditingItemId, setSidebarEditingItemId] = useState<string | null>(null)
+
+  // Handle "Create subfolder" context menu action
+  const handleCreateSubfolder = useCallback((parentFolderId: string) => {
+    // Find the parent folder
+    const parentFolder = findFolderById(swaggerFolder, parentFolderId)
+    if (!parentFolder) return
+
+    // Create a new folder
+    const newFolder: Folder = {
+      id: generateUniqueId(),
+      name: 'New Folder',
+      documentation: '',
+      tags: [],
+      configuration: {},
+      items: []
+    }
+
+    // Add to parent folder
+    parentFolder.items.push(newFolder)
+
+    // Expand the parent folder to show the new subfolder
+    setExpandedIds((prev) => Array.from(new Set([...prev, parentFolderId])))
+
+    // Select the new folder
+    setSelectedItemId(newFolder.id)
+
+    // Force React re-render by creating new reference
+    setSwaggerFolder((prevFolder) => ({ ...prevFolder }))
+
+    // Put the new folder in edit mode (after render)
+    setTimeout(() => {
+      setSidebarEditingItemId(newFolder.id)
+    }, 0)
+  }, [swaggerFolder])
+
+  // State for delete confirmation modal
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    isOpen: boolean
+    itemId: string
+    itemName: string
+    isFolder: boolean
+  }>({ isOpen: false, itemId: '', itemName: '', isFolder: false })
+
+  // Handle "Delete" context menu action - show confirmation
+  const handleDeleteItem = useCallback((itemId: string) => {
+    // Don't allow deleting the root folder
+    if (itemId === swaggerFolder.id) return
+
+    // Find the item to get its name and type
+    const item = findItemById(swaggerFolder, itemId)
+    if (!item) return
+
+    const isFolder = isAnyFolder(item)
+    setDeleteConfirmation({
+      isOpen: true,
+      itemId,
+      itemName: item.name,
+      isFolder
+    })
+  }, [swaggerFolder])
+
+  // Confirm deletion
+  const confirmDelete = useCallback(() => {
+    const { itemId } = deleteConfirmation
+
+    // Remove the item from the tree
+    removeItemFromTree(swaggerFolder, itemId)
+
+    // Close any tabs that reference the deleted item
+    setWorkbenchTree((prevTree) => {
+      const group = prevTree.groups[0]
+      if (!group || !isTabGroupNode(group)) return prevTree
+
+      const filteredTabs = group.tabs.filter((tab) => {
+        const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
+
+        // Check if the tab is the deleted item
+        if (restormTab.tabType === 'folder' && restormTab.folder.id === itemId) return false
+        if (restormTab.tabType === 'environment-folder' && restormTab.folder.id === itemId) return false
+        if (restormTab.tabType === 'http-request' && restormTab.request.id === itemId) return false
+
+        // Check if the tab's breadcrumbs contain the deleted item (item is inside deleted folder)
+        if (restormTab.breadcrumbs?.some((bc) => bc.id === itemId)) return false
+
+        return true
+      })
+
+      // If no tabs left, remove the group entirely to show emptyFallback
+      if (filteredTabs.length === 0) {
+        return {
+          ...prevTree,
+          groups: []
+        }
+      }
+
+      // Update activeTabId if current tab was closed
+      let newActiveTabId: string = group.activeTabId ?? ''
+      if (!filteredTabs.some((t) => t.id === group.activeTabId)) {
+        const firstTabId = filteredTabs[0]?.id
+        newActiveTabId = firstTabId ?? ''
+      }
+
+      return {
+        ...prevTree,
+        groups: [{ ...group, tabs: filteredTabs, activeTabId: newActiveTabId }]
+      }
+    })
+
+    // Force React re-render
+    setSwaggerFolder((prevFolder) => ({ ...prevFolder }))
+
+    // Close the confirmation modal
+    setDeleteConfirmation((prev) => ({ ...prev, isOpen: false }))
+  }, [deleteConfirmation, swaggerFolder])
+
+  // Cancel deletion
+  const cancelDelete = useCallback(() => {
+    setDeleteConfirmation((prev) => ({ ...prev, isOpen: false }))
   }, [])
+
+  // Handle item rename from sidebar ListView
+  const handleSidebarItemRename = useCallback((payload: ListViewItemEventPayload, newName: string) => {
+    const itemId = payload.item.id
+
+    // Find and update the reactive object directly (triggers search re-indexing)
+    const foundItem = findItemById(swaggerFolder, itemId)
+    if (foundItem) {
+      foundItem.name = newName
+    }
+
+    // Force React re-render by creating new reference
+    setSwaggerFolder((prevFolder) => ({ ...prevFolder }))
+
+    // Also update the workbench tab title and breadcrumbs
+    setWorkbenchTree((prevTree) => {
+      const group = prevTree.groups[0]
+      if (!group || !isTabGroupNode(group)) return prevTree
+
+      const updatedTabs = group.tabs.map((tab) => {
+        const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
+
+        // Update tab title if it's the renamed item
+        if (restormTab.tabType === 'folder' && restormTab.folder.id === itemId) {
+          return {
+            ...restormTab,
+            title: newName,
+            titleString: newName,
+            folder: { ...restormTab.folder, name: newName },
+            breadcrumbs: restormTab.breadcrumbs?.map((bc) =>
+              bc.id === itemId ? { ...bc, label: newName } : bc
+            )
+          }
+        }
+
+        if (restormTab.tabType === 'environment-folder' && restormTab.folder.id === itemId) {
+          return {
+            ...restormTab,
+            title: newName,
+            titleString: newName,
+            folder: { ...restormTab.folder, name: newName },
+            breadcrumbs: restormTab.breadcrumbs?.map((bc) =>
+              bc.id === itemId ? { ...bc, label: newName } : bc
+            )
+          }
+        }
+
+        if (restormTab.tabType === 'http-request' && restormTab.request.id === itemId) {
+          const newTitle = `${restormTab.request.method} ${newName}`
+          return {
+            ...restormTab,
+            title: newTitle,
+            titleString: newTitle,
+            request: { ...restormTab.request, name: newName },
+            breadcrumbs: restormTab.breadcrumbs?.map((bc) =>
+              bc.id === itemId ? { ...bc, label: newName } : bc
+            )
+          }
+        }
+
+        // Update breadcrumbs for other tabs that might reference this item
+        if (restormTab.breadcrumbs) {
+          const updatedBreadcrumbs = restormTab.breadcrumbs.map((bc) =>
+            bc.id === itemId ? { ...bc, label: newName } : bc
+          )
+          return { ...restormTab, breadcrumbs: updatedBreadcrumbs }
+        }
+
+        return tab
+      })
+
+      return {
+        ...prevTree,
+        groups: [{ ...group, tabs: updatedTabs }]
+      }
+    })
+  }, [swaggerFolder])
 
   // Handle search result click - navigate to the selected item
   const handleSearchResultClick = useCallback((result: SearchResult) => {
@@ -767,14 +1194,17 @@ const App: React.FC = () => {
       expandedIds: expandedSet,
       renderMethodBadge: (method: string) => (
         <HttpMethodBadge method={method} />
+      ),
+      renderDeprecatedTitle: (name: string) => (
+        <span style={{ textDecoration: 'line-through', opacity: 0.7 }}>{name}</span>
       )
     })
     return [rootItem]
   }, [expandedIds, swaggerFolder])
 
   const sidebarItemsWithContextMenu: ListViewItemData[] = useMemo(
-    () => attachContextMenus(sidebarItems, t, handleDefineVariables),
-    [sidebarItems, t, handleDefineVariables]
+    () => attachContextMenus(sidebarItems, t, handleCloneItem, handleCreateSubfolder, handleDeleteItem),
+    [sidebarItems, t, handleCloneItem, handleCreateSubfolder, handleDeleteItem]
   )
 
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -1234,6 +1664,11 @@ const App: React.FC = () => {
                     handleItemClick(id)
                   }
                 }}
+                onItemDrop={handleItemDrop}
+                onItemRename={handleSidebarItemRename}
+                editingItemId={sidebarEditingItemId}
+                onEditingEnd={() => { setSidebarEditingItemId(null) }}
+                onDeleteRequest={(payload) => { handleDeleteItem(payload.item.id) }}
               />
             </Pane>
           </SplitView>
@@ -1283,6 +1718,30 @@ const App: React.FC = () => {
       </div>
 
       <Statusbar />
+
+      {/* Delete confirmation modal */}
+      <Modal
+        title={t('sidebar.deleteConfirm.title')}
+        isOpen={deleteConfirmation.isOpen}
+        onClose={cancelDelete}
+        size="dialog"
+      >
+        <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <p style={{ margin: 0 }}>
+            {deleteConfirmation.isFolder
+              ? t('sidebar.deleteConfirm.folderMessage', { name: deleteConfirmation.itemName })
+              : t('sidebar.deleteConfirm.itemMessage', { name: deleteConfirmation.itemName })}
+          </p>
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+            <Button secondary onClick={cancelDelete}>
+              {t('sidebar.deleteConfirm.cancel')}
+            </Button>
+            <Button onClick={confirmDelete}>
+              {t('sidebar.deleteConfirm.confirm')}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }

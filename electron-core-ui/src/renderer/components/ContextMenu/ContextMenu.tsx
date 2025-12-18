@@ -5,6 +5,7 @@ export interface ContextMenuItem {
   id: string
   label: string
   icon?: string
+  shortcut?: string
   isSeparator?: boolean
   disabled?: boolean
   onClick?: () => void
@@ -69,6 +70,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                 <MenuItem
                   key={item.id}
                   title={item.label}
+                  {...(item.shortcut ? { shortcut: item.shortcut } : {})}
                   disabled={!!item.disabled}
                   icon={
                     item.icon ? (

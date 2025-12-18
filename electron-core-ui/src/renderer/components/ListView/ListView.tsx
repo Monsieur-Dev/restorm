@@ -159,6 +159,8 @@ export const ListView: React.FC<ListViewProps> = ({
   selectedIds: selectedIdsProp,
   activeId: activeIdProp,
   expandedIds: expandedIdsProp,
+  editingItemId: editingItemIdProp,
+  onEditingEnd,
   selectionMode = 'single',
   rootRole = 'tree',
   ariaLabel,
@@ -173,7 +175,8 @@ export const ListView: React.FC<ListViewProps> = ({
   onItemContextMenu,
   onItemRename,
   onItemMouseEnter,
-  onItemMouseLeave
+  onItemMouseLeave,
+  onDeleteRequest
 }) => {
   const initialItems = useMemo<ListViewItemData[]>(() => {
     if (items && items.length > 0) {
@@ -202,10 +205,23 @@ export const ListView: React.FC<ListViewProps> = ({
     item: null
   })
 
-  // Inline rename state
-  const [editingItemId, setEditingItemId] = useState<string | null>(null)
+  // Inline rename state (supports controlled mode via editingItemIdProp)
+  const [internalEditingItemId, setInternalEditingItemId] = useState<string | null>(null)
   const [editingValue, setEditingValue] = useState<string>('')
   const renameInputRef = useRef<HTMLInputElement | null>(null)
+  
+  // Use controlled editingItemId if provided, otherwise use internal state
+  const isEditingControlled = editingItemIdProp !== undefined
+  const editingItemId = isEditingControlled ? editingItemIdProp : internalEditingItemId
+  
+  const setEditingItemId = useCallback((id: string | null) => {
+    if (!isEditingControlled) {
+      setInternalEditingItemId(id)
+    }
+    if (id === null && onEditingEnd) {
+      onEditingEnd()
+    }
+  }, [isEditingControlled, onEditingEnd])
 
   // Controlled selection support
   React.useEffect(() => {
@@ -401,7 +417,7 @@ export const ListView: React.FC<ListViewProps> = ({
       setEditingItemId(flat.item.id)
       setEditingValue(titleStr)
     },
-    [isRenameable]
+    [isRenameable, setEditingItemId]
   )
 
   // Commit the rename and notify parent
@@ -416,14 +432,14 @@ export const ListView: React.FC<ListViewProps> = ({
         onItemRename(payload, trimmed)
       }
     },
-    [editingItemId, editingValue, onItemRename]
+    [editingItemId, editingValue, onItemRename, setEditingItemId]
   )
 
   // Cancel rename without saving
   const cancelRename = useCallback((): void => {
     setEditingItemId(null)
     setEditingValue('')
-  }, [])
+  }, [setEditingItemId])
 
   // Focus the rename input when editing starts
   useEffect(() => {
@@ -432,6 +448,17 @@ export const ListView: React.FC<ListViewProps> = ({
       renameInputRef.current.select()
     }
   }, [editingItemId])
+
+  // Initialize editingValue when controlled editingItemId changes
+  useEffect(() => {
+    if (editingItemIdProp && isEditingControlled) {
+      const flat = flatItems.find((f) => f.item.id === editingItemIdProp)
+      if (flat) {
+        const titleStr = typeof flat.item.title === 'string' ? flat.item.title : ''
+        setEditingValue(titleStr)
+      }
+    }
+  }, [editingItemIdProp, isEditingControlled, flatItems])
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>): void => {
@@ -486,6 +513,15 @@ export const ListView: React.FC<ListViewProps> = ({
           event.preventDefault()
           return
         }
+        case 'Delete': {
+          const flat = flatItems[currentIndex]
+          if (flat && onDeleteRequest) {
+            event.preventDefault()
+            const payload: ListViewItemEventPayload = { item: flat.item, path: flat.path }
+            onDeleteRequest(payload)
+          }
+          return
+        }
         default:
           return
       }
@@ -506,7 +542,7 @@ export const ListView: React.FC<ListViewProps> = ({
         })
       }
     },
-    [flatItems, activeId, selectionMode, emitSelectionChange, findFlatIndexById, handleToggle, isRenameable, renameShortcut, startRename, editingItemId]
+    [flatItems, activeId, selectionMode, emitSelectionChange, findFlatIndexById, handleToggle, isRenameable, renameShortcut, startRename, editingItemId, onDeleteRequest]
   )
 
   const handleContextMenu = useCallback(
@@ -584,8 +620,18 @@ export const ListView: React.FC<ListViewProps> = ({
     if (!contextMenu.visible || !contextMenu.item) return null
     const sourceItems = contextMenu.item.item.contextMenuItems
     if (!sourceItems || sourceItems.length === 0) return null
-    return sourceItems
-  }, [contextMenu])
+    const flat = contextMenu.item
+    // Wrap onClick handlers to intercept 'rename-item' action
+    return sourceItems.map((menuItem) => ({
+      ...menuItem,
+      onClick: () => {
+        if (menuItem.id === 'rename-item' && isRenameable) {
+          startRename(flat)
+        }
+        menuItem.onClick?.()
+      }
+    }))
+  }, [contextMenu, isRenameable, startRename])
 
   return (
     <div className={rootClasses} style={style}>
