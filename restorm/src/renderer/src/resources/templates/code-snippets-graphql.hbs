@@ -1,0 +1,429 @@
+{{!-- Code snippets template for GraphQL requests --}}
+{{!-- Generates markdown with code examples in multiple languages --}}
+
+<details open>
+<summary><strong>cURL</strong></summary>
+
+```bash
+curl -X POST '{{url}}' \
+  -H 'Content-Type: application/json'{{#if headers}}{{#each headers}} \
+  -H '{{key}}: {{value}}'{{/each}}{{/if}} \
+  -d '{"query": "{{escapedQuery}}"{{#if variables}}, "variables": {{variables}}{{/if}} }'
+```
+
+</details>
+
+<details>
+<summary><strong>JavaScript - Fetch</strong></summary>
+
+```javascript
+const query = `{{query}}`;
+
+fetch('{{url}}', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'{{#if headers}},
+{{#each headers}}    '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}{{/if}}
+  },
+  body: JSON.stringify({
+    query,
+    variables: {{variables}}
+  })
+})
+  .then(response => response.json())
+  .then(data => console.log(data))
+  .catch(error => console.error('Error:', error));
+```
+
+</details>
+
+<details>
+<summary><strong>JavaScript - Apollo Client</strong></summary>
+
+```javascript
+import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
+
+const client = new ApolloClient({
+  uri: '{{url}}',
+  cache: new InMemoryCache(){{#if headers}},
+  headers: {
+{{#each headers}}    '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}  }{{/if}}
+});
+
+const {{#if (eq operationType "mutation")}}MUTATION{{else}}QUERY{{/if}} = gql`
+{{query}}
+`;
+
+client.{{apolloMethod}}({
+  {{#if (eq operationType "mutation")}}mutation{{else}}query{{/if}}: {{#if (eq operationType "mutation")}}MUTATION{{else}}QUERY{{/if}},
+  variables: {{variables}}
+})
+  .then(result => console.log(result.data))
+  .catch(error => console.error(error));
+```
+
+</details>
+
+<details>
+<summary><strong>TypeScript - Fetch</strong></summary>
+
+```typescript
+interface GraphQLResponse<T> {
+  data?: T;
+  errors?: Array<{ message: string }>;
+}
+
+const query = `{{query}}`;
+
+async function executeGraphQL<T>(): Promise<GraphQLResponse<T>> {
+  const response = await fetch('{{url}}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'{{#if headers}},
+{{#each headers}}      '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}{{/if}}
+    },
+    body: JSON.stringify({
+      query,
+      variables: {{variables}}
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+executeGraphQL().then(console.log).catch(console.error);
+```
+
+</details>
+
+<details>
+<summary><strong>Python - Requests</strong></summary>
+
+```python
+import requests
+
+query = """
+{{query}}
+"""
+
+response = requests.post(
+    '{{url}}',
+    headers={
+        'Content-Type': 'application/json'{{#if headers}},
+{{#each headers}}        '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}{{/if}}
+    },
+    json={
+        'query': query,
+        'variables': {{variables}}
+    }
+)
+
+print(response.json())
+```
+
+</details>
+
+<details>
+<summary><strong>Python - gql</strong></summary>
+
+```python
+from gql import gql, Client
+from gql.transport.requests import RequestsHTTPTransport
+
+transport = RequestsHTTPTransport(
+    url='{{url}}',
+    headers={
+        'Content-Type': 'application/json'{{#if headers}},
+{{#each headers}}        '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}{{/if}}
+    }
+)
+
+client = Client(transport=transport, fetch_schema_from_transport=True)
+
+query = gql("""
+{{query}}
+""")
+
+result = client.execute(query, variable_values={{variables}})
+print(result)
+```
+
+</details>
+
+<details>
+<summary><strong>Go - graphql-go</strong></summary>
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "github.com/machinebox/graphql"
+)
+
+func main() {
+    client := graphql.NewClient("{{url}}")
+
+    req := graphql.NewRequest(`
+{{query}}
+    `)
+{{#if variables}}
+    // Set variables
+    // req.Var("key", "value")
+{{/if}}
+{{#if headers}}
+{{#each headers}}
+    req.Header.Set("{{key}}", "{{value}}")
+{{/each}}
+{{/if}}
+
+    var response interface{}
+    if err := client.Run(context.Background(), req, &response); err != nil {
+        panic(err)
+    }
+
+    fmt.Printf("%+v\n", response)
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Ruby - graphql-client</strong></summary>
+
+```ruby
+require 'graphql/client'
+require 'graphql/client/http'
+
+HTTP = GraphQL::Client::HTTP.new("{{url}}") do
+  def headers(context)
+    {
+      "Content-Type" => "application/json"{{#if headers}},
+{{#each headers}}      "{{key}}" => "{{value}}"{{#unless @last}},{{/unless}}
+{{/each}}{{/if}}
+    }
+  end
+end
+
+Schema = GraphQL::Client.load_schema(HTTP)
+Client = GraphQL::Client.new(schema: Schema, execute: HTTP)
+
+Query = Client.parse <<-'GRAPHQL'
+{{query}}
+GRAPHQL
+
+result = Client.query(Query, variables: {{variables}})
+puts result.data.to_h
+```
+
+</details>
+
+<details>
+<summary><strong>PHP - guzzle</strong></summary>
+
+```php
+<?php
+require 'vendor/autoload.php';
+
+use GuzzleHttp\Client;
+
+$client = new Client();
+
+$query = <<<'GRAPHQL'
+{{query}}
+GRAPHQL;
+
+$response = $client->post('{{url}}', [
+    'headers' => [
+        'Content-Type' => 'application/json'{{#if headers}},
+{{#each headers}}        '{{key}}' => '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}{{/if}}
+    ],
+    'json' => [
+        'query' => $query,
+        'variables' => json_decode('{{variables}}', true)
+    ]
+]);
+
+$data = json_decode($response->getBody(), true);
+print_r($data);
+```
+
+</details>
+
+<details>
+<summary><strong>C# - GraphQL.Client</strong></summary>
+
+```csharp
+using GraphQL;
+using GraphQL.Client.Http;
+using GraphQL.Client.Serializer.Newtonsoft;
+
+var client = new GraphQLHttpClient("{{url}}", new NewtonsoftJsonSerializer());
+{{#if headers}}
+{{#each headers}}
+client.HttpClient.DefaultRequestHeaders.Add("{{key}}", "{{value}}");
+{{/each}}
+{{/if}}
+
+var request = new GraphQLRequest
+{
+    Query = @"
+{{query}}
+    ",
+    Variables = new {{variables}}
+};
+
+var response = await client.SendQueryAsync<dynamic>(request);
+Console.WriteLine(response.Data);
+```
+
+</details>
+
+<details>
+<summary><strong>Java - graphql-java</strong></summary>
+
+```java
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
+public class GraphQLExample {
+    public static void main(String[] args) throws Exception {
+        String query = """
+            {{query}}
+            """;
+        
+        String body = String.format(
+            "{\"query\": \"%s\", \"variables\": %s}",
+            query.replace("\"", "\\\"").replace("\n", "\\n"),
+            "{{variables}}"
+        );
+
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create("{{url}}"))
+            .header("Content-Type", "application/json")
+{{#if headers}}{{#each headers}}            .header("{{key}}", "{{value}}")
+{{/each}}{{/if}}            .POST(HttpRequest.BodyPublishers.ofString(body))
+            .build();
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpResponse<String> response = client.send(request, 
+            HttpResponse.BodyHandlers.ofString());
+        
+        System.out.println(response.body());
+    }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Swift - Apollo iOS</strong></summary>
+
+```swift
+import Apollo
+
+let apollo = ApolloClient(url: URL(string: "{{url}}")!)
+
+// Note: You'll need to generate Swift types from your schema
+// using the Apollo CLI: apollo-ios-cli generate
+
+// Example usage with generated types:
+// apollo.fetch(query: YourGeneratedQuery()) { result in
+//     switch result {
+//     case .success(let graphQLResult):
+//         print(graphQLResult.data)
+//     case .failure(let error):
+//         print("Error: \(error)")
+//     }
+// }
+
+// For raw queries, use URLSession:
+var request = URLRequest(url: URL(string: "{{url}}")!)
+request.httpMethod = "POST"
+request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+{{#if headers}}
+{{#each headers}}
+request.setValue("{{value}}", forHTTPHeaderField: "{{key}}")
+{{/each}}
+{{/if}}
+
+let query = """
+{{query}}
+"""
+
+let body: [String: Any] = [
+    "query": query,
+    "variables": {{variables}}
+]
+request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+
+URLSession.shared.dataTask(with: request) { data, response, error in
+    if let data = data {
+        print(String(data: data, encoding: .utf8) ?? "")
+    }
+}.resume()
+```
+
+</details>
+
+<details>
+<summary><strong>Kotlin - Apollo Kotlin</strong></summary>
+
+```kotlin
+import com.apollographql.apollo3.ApolloClient
+import kotlinx.coroutines.runBlocking
+
+// Note: Generate types with Apollo Kotlin Gradle plugin
+// apollo {
+//     service("service") {
+//         packageName.set("com.example")
+//     }
+// }
+
+fun main() = runBlocking {
+    val apolloClient = ApolloClient.Builder()
+        .serverUrl("{{url}}")
+{{#if headers}}        .addHttpHeader("Authorization", "Bearer token")
+{{/if}}        .build()
+
+    // Use generated query types
+    // val response = apolloClient.query(YourQuery()).execute()
+    // println(response.data)
+    
+    // For raw HTTP, use OkHttp:
+    val client = okhttp3.OkHttpClient()
+    
+    val query = """
+        {{query}}
+    """.trimIndent()
+    
+    val body = """
+        {"query": "${query.replace("\"", "\\\"").replace("\n", "\\n")}", "variables": {{variables}} }
+    """.trimIndent()
+    
+    val request = okhttp3.Request.Builder()
+        .url("{{url}}")
+        .post(body.toRequestBody("application/json".toMediaType()))
+{{#if headers}}{{#each headers}}        .addHeader("{{key}}", "{{value}}")
+{{/each}}{{/if}}        .build()
+    
+    client.newCall(request).execute().use { response ->
+        println(response.body?.string())
+    }
+}
+```
+
+</details>

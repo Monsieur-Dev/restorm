@@ -1,3 +1,8 @@
+{{!-- HTTP Request --}}
+{{#ifEquals requestType "http"}}
+{{#if method}}
+**Method:** `{{method}}`
+{{/if}}
 {{#if url}}
 ### URL
 ```
@@ -57,3 +62,205 @@
 {{/each}}
 {{/ifEquals}}
 {{/if}}
+{{/ifEquals}}
+
+{{!-- GraphQL Request --}}
+{{#ifEquals requestType "graphql"}}
+{{#if operationType}}
+**Type:** `{{operationType}}`
+{{/if}}
+{{#if url}}
+### Endpoint
+```
+{{url}}
+```
+{{/if}}
+
+{{#if query}}
+### Query
+```graphql
+{{{query}}}
+```
+{{/if}}
+
+{{#if variables}}
+### Variables
+```json
+{{{variables}}}
+```
+{{/if}}
+
+{{#if headers.length}}
+### Headers
+| Key | Value |
+|-----|-------|
+{{#each headers}}
+| {{key}} | {{value}} |
+{{/each}}
+{{/if}}
+{{/ifEquals}}
+
+{{!-- gRPC Request --}}
+{{#ifEquals requestType "grpc"}}
+{{#if service}}
+**Service:** `{{service}}`
+{{/if}}
+{{#if method}}
+**Method:** `{{method}}`
+{{/if}}
+{{#if callType}}
+**Call Type:** `{{callType}}`
+{{/if}}
+{{#if url}}
+### Server
+```
+{{url}}
+```
+{{/if}}
+
+{{#if requestMessage}}
+### Message
+```json
+{{{requestMessage}}}
+```
+{{/if}}
+
+{{#if grpcMetadata.length}}
+### Metadata
+| Key | Value |
+|-----|-------|
+{{#each grpcMetadata}}
+| {{key}} | {{value}} |
+{{/each}}
+{{/if}}
+{{/ifEquals}}
+
+{{!-- SOAP Request --}}
+{{#ifEquals requestType "soap"}}
+{{#if service}}
+**Service:** `{{service}}`
+{{/if}}
+{{#if operation}}
+**Operation:** `{{operation}}`
+{{/if}}
+{{#if soapAction}}
+**SOAPAction:** `{{soapAction}}`
+{{/if}}
+{{#if url}}
+### Endpoint
+```
+{{url}}
+```
+{{/if}}
+
+{{#if soapBody}}
+### Body
+```xml
+{{{soapBody}}}
+```
+{{/if}}
+
+{{#if headers.length}}
+### Headers
+| Key | Value |
+|-----|-------|
+{{#each headers}}
+| {{key}} | {{value}} |
+{{/each}}
+{{/if}}
+{{/ifEquals}}
+
+{{!-- WebSocket Request --}}
+{{#ifEquals requestType "websocket"}}
+{{#if protocol}}
+**Protocol:** `{{protocol}}`
+{{/if}}
+{{#if event}}
+**Event:** `{{event}}`
+{{/if}}
+{{#if url}}
+### URL
+```
+{{url}}
+```
+{{/if}}
+
+{{#if message}}
+### Message
+```json
+{{{message}}}
+```
+{{/if}}
+
+{{#if headers.length}}
+### Headers
+| Key | Value |
+|-----|-------|
+{{#each headers}}
+| {{key}} | {{value}} |
+{{/each}}
+{{/if}}
+{{/ifEquals}}
+
+{{!-- Fallback for unknown/old requests without requestType --}}
+{{#unless requestType}}
+{{#if url}}
+### URL
+```
+{{url}}
+```
+{{/if}}
+
+{{#if headers.length}}
+### Headers
+| Key | Value |
+|-----|-------|
+{{#each headers}}
+| {{key}} | {{value}} |
+{{/each}}
+{{/if}}
+
+{{#if pathParams.length}}
+### Path Parameters
+| Key | Value |
+|-----|-------|
+{{#each pathParams}}
+| {{key}} | {{value}} |
+{{/each}}
+{{/if}}
+
+{{#if params.length}}
+### Query Parameters
+| Key | Value |
+|-----|-------|
+{{#each params}}
+| {{key}} | {{value}} |
+{{/each}}
+{{/if}}
+
+{{#if body}}
+### Body
+{{#ifEquals body.type "text"}}
+```
+{{{body.content}}}
+```
+{{/ifEquals}}
+{{#ifEquals body.type "file"}}
+**File:** {{body.path}}
+{{/ifEquals}}
+{{#ifEquals body.type "form-data"}}
+| Key | Value |
+|-----|-------|
+{{#each body.fields}}
+| {{key}} | {{value}} |
+{{/each}}
+{{/ifEquals}}
+{{#ifEquals body.type "x-www-form-urlencoded"}}
+| Key | Value |
+|-----|-------|
+{{#each body.fields}}
+| {{key}} | {{value}} |
+{{/each}}
+{{/ifEquals}}
+{{/if}}
+{{/unless}}

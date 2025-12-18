@@ -135,12 +135,97 @@ export interface HTTPRequest extends BaseRequest {
   deprecated?: boolean
 }
 
-// Future request types can be added here:
-// export interface GraphQLRequest extends BaseRequest { type: 'graphql'; ... }
-// export interface WebSocketRequest extends BaseRequest { type: 'websocket'; ... }
+// ============================================================================
+// GraphQL Request Types
+// ============================================================================
+
+/** GraphQL operation type */
+export type GraphQLOperationType = 'query' | 'mutation' | 'subscription'
+
+/** GraphQL request definition */
+export interface GraphQLRequest extends BaseRequest {
+  type: 'graphql'
+  /** GraphQL endpoint URL */
+  url: string
+  /** GraphQL operation type */
+  operationType: GraphQLOperationType
+  /** GraphQL query/mutation/subscription string */
+  query: string
+  /** GraphQL variables as JSON string */
+  variables?: string
+  /** HTTP headers */
+  headers: KeyValue[]
+}
+
+// ============================================================================
+// gRPC Request Types
+// ============================================================================
+
+/** gRPC call type */
+export type GrpcCallType = 'unary' | 'server-stream' | 'client-stream' | 'bidirectional-stream'
+
+/** gRPC request definition */
+export interface GrpcRequest extends BaseRequest {
+  type: 'grpc'
+  /** gRPC server URL (host:port) */
+  url: string
+  /** Service name (e.g., "grpcbin.HelloService") */
+  service: string
+  /** Method name (e.g., "SayHello") */
+  method: string
+  /** gRPC call type */
+  callType: GrpcCallType
+  /** Request message as JSON string */
+  requestMessage: string
+  /** Metadata (headers) */
+  metadata: KeyValue[]
+}
+
+// ============================================================================
+// SOAP Request Types
+// ============================================================================
+
+/** SOAP request definition */
+export interface SoapRequest extends BaseRequest {
+  type: 'soap'
+  /** SOAP endpoint URL */
+  url: string
+  /** SOAP action */
+  soapAction: string
+  /** Service name */
+  service: string
+  /** Operation name */
+  operation: string
+  /** SOAP envelope body as XML string */
+  body: string
+  /** HTTP headers */
+  headers: KeyValue[]
+}
+
+// ============================================================================
+// WebSocket/Socket.IO Request Types
+// ============================================================================
+
+/** WebSocket protocol type */
+export type WebSocketProtocol = 'websocket' | 'socketio' | 'mqtt'
+
+/** WebSocket/Socket.IO request definition */
+export interface WebSocketRequest extends BaseRequest {
+  type: 'websocket'
+  /** WebSocket URL (ws:// or wss://) */
+  url: string
+  /** Protocol type */
+  protocol: WebSocketProtocol
+  /** Event/channel name (for Socket.IO/MQTT) */
+  event?: string | undefined
+  /** Message payload as JSON string */
+  message: string
+  /** Connection headers/options */
+  headers: KeyValue[]
+}
 
 /** Union of all request types */
-export type Request = HTTPRequest // | GraphQLRequest | WebSocketRequest
+export type Request = HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest
 
 // ============================================================================
 // Folder Type
@@ -204,13 +289,29 @@ export function isRequest(item: FolderItem): item is Request {
   return 'type' in item && !('items' in item)
 }
 
-/** Check if a request is an HTTPRequest (useful when more request types are added) */
+/** Check if a request is an HTTPRequest */
 export function isHTTPRequest(request: Request): request is HTTPRequest {
-  // Currently Request is a single-variant union (only HTTPRequest),
-  // so every Request is an HTTPRequest. This helper exists for
-  // future extensibility when new request kinds are added.
-  void request
-  return true
+  return request.type === 'http'
+}
+
+/** Check if a request is a GraphQLRequest */
+export function isGraphQLRequest(request: Request): request is GraphQLRequest {
+  return request.type === 'graphql'
+}
+
+/** Check if a request is a GrpcRequest */
+export function isGrpcRequest(request: Request): request is GrpcRequest {
+  return request.type === 'grpc'
+}
+
+/** Check if a request is a SoapRequest */
+export function isSoapRequest(request: Request): request is SoapRequest {
+  return request.type === 'soap'
+}
+
+/** Check if a request is a WebSocketRequest */
+export function isWebSocketRequest(request: Request): request is WebSocketRequest {
+  return request.type === 'websocket'
 }
 
 /** Check if a body is text */
@@ -272,7 +373,7 @@ interface BaseResponse {
   /** ID of the request that generated this response */
   requestId: string
   /** Error message if the request failed */
-  error?: string
+  error?: string | undefined
 }
 
 /** Complete HTTP response with all details */
@@ -318,5 +419,117 @@ export interface HTTPResponse extends BaseResponse {
   referrerPolicy?: string
 }
 
+// ============================================================================
+// GraphQL Response Types
+// ============================================================================
+
+/** GraphQL response */
+export interface GraphQLResponse extends BaseResponse {
+  type: 'graphql'
+  /** The final resolved URL that was called */
+  requestUrl: string
+  /** Query sent */
+  requestQuery: string
+  /** Variables sent */
+  requestVariables?: string | undefined
+  /** Headers sent */
+  requestHeaders: KeyValue[]
+  /** HTTP status code */
+  statusCode: number
+  /** Response data (JSON) */
+  data?: unknown
+  /** GraphQL errors */
+  errors?: { message: string; locations?: { line: number; column: number }[]; path?: string[] }[] | undefined
+  /** Response headers */
+  responseHeaders: KeyValue[]
+  /** Timing information */
+  timings: HTTPTimings
+}
+
+// ============================================================================
+// gRPC Response Types
+// ============================================================================
+
+/** gRPC response */
+export interface GrpcResponse extends BaseResponse {
+  type: 'grpc'
+  /** Server URL */
+  requestUrl: string
+  /** Service/method called */
+  requestMethod: string
+  /** Request message sent */
+  requestMessage: string
+  /** Metadata sent */
+  requestMetadata: KeyValue[]
+  /** gRPC status code */
+  statusCode: number
+  /** gRPC status message */
+  statusMessage: string
+  /** Response message (JSON) */
+  responseMessage: string
+  /** Response metadata */
+  responseMetadata: KeyValue[]
+  /** Timing information */
+  timings: HTTPTimings
+}
+
+// ============================================================================
+// SOAP Response Types
+// ============================================================================
+
+/** SOAP response */
+export interface SoapResponse extends BaseResponse {
+  type: 'soap'
+  /** Endpoint URL */
+  requestUrl: string
+  /** SOAP action */
+  requestSoapAction: string
+  /** Request body sent */
+  requestBody: string
+  /** Headers sent */
+  requestHeaders: KeyValue[]
+  /** HTTP status code */
+  statusCode: number
+  /** Response body (XML) */
+  responseBody: string
+  /** Response headers */
+  responseHeaders: KeyValue[]
+  /** Parsed fault if present */
+  fault?: { code: string; message: string } | undefined
+  /** Timing information */
+  timings: HTTPTimings
+}
+
+// ============================================================================
+// WebSocket Response Types
+// ============================================================================
+
+/** WebSocket message */
+export interface WebSocketMessage {
+  /** Message direction */
+  direction: 'sent' | 'received'
+  /** Event name (for Socket.IO) */
+  event?: string | undefined
+  /** Message data */
+  data: string
+  /** Timestamp */
+  timestamp: string
+}
+
+/** WebSocket response */
+export interface WebSocketResponse extends BaseResponse {
+  type: 'websocket'
+  /** WebSocket URL */
+  requestUrl: string
+  /** Protocol used */
+  protocol: WebSocketProtocol
+  /** Connection status */
+  connected: boolean
+  /** Messages exchanged */
+  messages: WebSocketMessage[]
+  /** Timing information */
+  timings: HTTPTimings
+}
+
 /** Union of all response types */
-export type Response = HTTPResponse // | GraphQLResponse | WebSocketResponse
+export type Response = HTTPResponse | GraphQLResponse | GrpcResponse | SoapResponse | WebSocketResponse

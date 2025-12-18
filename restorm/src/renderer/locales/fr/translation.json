@@ -94,7 +94,67 @@
   "codeEditor": {
     "goToDefinition": "Aller à la définition"
   },
+  "graphql": {
+    "send": "Envoyer",
+    "response": "Réponse",
+    "urlPlaceholder": "URL du endpoint GraphQL",
+    "tabs": {
+      "query": "Requête",
+      "variables": "Variables",
+      "headers": "En-têtes",
+      "docs": "Docs",
+      "notes": "Notes"
+    }
+  },
+  "grpc": {
+    "send": "Appeler",
+    "response": "Réponse",
+    "urlPlaceholder": "Serveur gRPC (hôte:port)",
+    "tabs": {
+      "message": "Message",
+      "metadata": "Métadonnées",
+      "docs": "Docs",
+      "notes": "Notes"
+    }
+  },
+  "soap": {
+    "send": "Envoyer",
+    "response": "Réponse",
+    "urlPlaceholder": "URL du endpoint SOAP",
+    "tabs": {
+      "body": "Corps",
+      "headers": "En-têtes",
+      "docs": "Docs",
+      "notes": "Notes"
+    }
+  },
+  "websocket": {
+    "connect": "Connecter",
+    "messages": "Messages",
+    "connected": "Connecté",
+    "disconnected": "Déconnecté",
+    "noMessages": "Aucun message pour l'instant",
+    "urlPlaceholder": "URL WebSocket",
+    "event": "Événement",
+    "topic": "Topic",
+    "tabs": {
+      "message": "Message",
+      "headers": "En-têtes",
+      "docs": "Docs",
+      "notes": "Notes"
+    }
+  },
   "search": {
+    "placeholder": "Rechercher...",
+    "noResults": "Aucun résultat trouvé",
+    "resultsAriaLabel": "Résultats de recherche",
+    "categories": {
+      "request": "Requêtes",
+      "folder": "Dossiers",
+      "environment": "Environnements",
+      "settings": "Paramètres",
+      "tag": "Tags"
+    },
     "tooltip": {
       "noDetails": "Aucun détail disponible",
       "noContent": "Aucune documentation ni notes"

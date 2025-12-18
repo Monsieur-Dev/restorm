@@ -4,6 +4,7 @@ import type { i18n as I18nType } from 'i18next'
 import * as ElectronCoreUi from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 import './httpMethods.css'
+import './protocolBadges.css'
 import LoadingScreen from './components/LoadingScreen'
 
 const App = lazy(() => import('./App'))

@@ -27,16 +27,55 @@ import type { WorkbenchTree, NavigationEvent, GroupNode, TabGroupNode, EditorTab
 import { Workbench } from './components/Workbench'
 import { Welcome } from './components/Welcome'
 import { HttpMethodBadge } from './components/HttpMethodBadge'
+import { ProtocolBadge } from './components/ProtocolBadge'
 import { renderSearchTooltipContent } from './components/renderSearchTooltipContent'
 import { EnvironmentValuesProvider } from './contexts/EnvironmentValuesContext'
 import { importSwaggerFromJson } from './services/SwaggerImportService'
+import { importGraphQLFromString } from './services/GraphQLImportService'
+import { importGrpcFromString } from './services/GrpcImportService'
+import { importSoapFromString } from './services/SoapImportService'
+import { importAsyncAPIFromString } from './services/AsyncAPIImportService'
 import { searchIndexService } from './services/SearchIndexService'
 import { makeReactiveFolder } from './types/reactive'
-import { folderAsRootListViewItem, collectAllFolderIds } from './services/FolderToListView'
+import { folderToListViewItems, collectAllFolderIds } from './services/FolderToListView'
 import swaggerPetstoreJson from './resources/swagger-petstore.json'
-import type { Folder, FolderItem, HTTPRequest, Environment, EnvironmentFolder } from './types/collections'
-import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder } from './types/collections'
-import type { FolderTab, EnvironmentFolderTab, HTTPRequestTab, BreadcrumbItem } from './types/editor'
+// Import test spec files
+import graphqlDocker from '../../../tests/unit/graphql-docker.graphql?raw'
+import graphqlPetstore from '../../../tests/unit/graphql-petstore.graphql?raw'
+import grpcDocker from '../../../tests/unit/grpc-docker.proto?raw'
+import grpcPetstore from '../../../tests/unit/grpc-petstore.proto?raw'
+import soapDocker from '../../../tests/unit/soap-docker.wsdl?raw'
+import soapPetstore from '../../../tests/unit/soap-petstore.wsdl?raw'
+import asyncapiDocker from '../../../tests/unit/asyncapi-docker.yaml?raw'
+import asyncapiPetstore from '../../../tests/unit/asyncapi-petstore.yaml?raw'
+import type {
+  Folder,
+  FolderItem,
+  Environment,
+  EnvironmentFolder,
+  Request
+} from './types/collections'
+import {
+  isFolder,
+  isRequest,
+  isHTTPRequest,
+  isGraphQLRequest,
+  isGrpcRequest,
+  isSoapRequest,
+  isWebSocketRequest,
+  isEnvironmentFolder,
+  isAnyFolder
+} from './types/collections'
+import type {
+  FolderTab,
+  EnvironmentFolderTab,
+  HTTPRequestTab,
+  GraphQLRequestTab,
+  GrpcRequestTab,
+  SoapRequestTab,
+  WebSocketRequestTab,
+  BreadcrumbItem
+} from './types/editor'
 
 const MIN_LEFT_WIDTH = 180
 const RIGHT_MIN_WIDTH = 240
@@ -145,9 +184,40 @@ const attachContextMenus = (
     return withMenu
   })
 
-// Import and convert swagger to EnvironmentFolder structure (initial data)
+// Import and convert all API specs to folder structures (initial data)
 const rawSwaggerFolder = importSwaggerFromJson(JSON.stringify(swaggerPetstoreJson))
-const initialSwaggerFolder = makeReactiveFolder(rawSwaggerFolder) as EnvironmentFolder
+const rawGraphqlDocker = importGraphQLFromString(graphqlDocker, { name: 'GraphQL Docker', baseUrl: 'http://localhost:4000' })
+const rawGraphqlPetstore = importGraphQLFromString(graphqlPetstore, { name: 'GraphQL Petstore' })
+const rawGrpcDocker = importGrpcFromString(grpcDocker, { name: 'gRPC Docker', baseUrl: 'localhost:9000' })
+const rawGrpcPetstore = importGrpcFromString(grpcPetstore, { name: 'gRPC Petstore' })
+const rawSoapDocker = importSoapFromString(soapDocker, { name: 'SOAP Docker' })
+const rawSoapPetstore = importSoapFromString(soapPetstore, { name: 'SOAP Petstore' })
+const rawAsyncapiDocker = importAsyncAPIFromString(asyncapiDocker, { name: 'AsyncAPI Docker' })
+const rawAsyncapiPetstore = importAsyncAPIFromString(asyncapiPetstore, { name: 'AsyncAPI Petstore' })
+
+// Create root folder containing all imported APIs
+const rootFolder: EnvironmentFolder = {
+  folderType: 'environment',
+  id: 'root-restorm-collections',
+  name: 'Restorm Collections',
+  documentation: '# Restorm Collections\n\nAll imported API collections.',
+  tags: [],
+  configuration: {},
+  environments: rawSwaggerFolder.environments,
+  items: [
+    rawSwaggerFolder,
+    rawGraphqlDocker,
+    rawGraphqlPetstore,
+    rawGrpcDocker,
+    rawGrpcPetstore,
+    rawSoapDocker,
+    rawSoapPetstore,
+    rawAsyncapiDocker,
+    rawAsyncapiPetstore
+  ]
+}
+
+const initialSwaggerFolder = makeReactiveFolder(rootFolder) as EnvironmentFolder
 const allFolderIds = collectAllFolderIds(initialSwaggerFolder)
 
 /** Find a folder by ID in the folder tree (returns Folder or EnvironmentFolder) */
@@ -178,10 +248,10 @@ function findEnvironmentFolderById(folder: Folder | EnvironmentFolder, id: strin
   return undefined
 }
 
-/** Find an HTTP request by ID in the folder tree */
-function findRequestById(folder: Folder | EnvironmentFolder, id: string): HTTPRequest | undefined {
+/** Find any request by ID in the folder tree */
+function findRequestById(folder: Folder | EnvironmentFolder, id: string): Request | undefined {
   for (const item of folder.items) {
-    if (!isAnyFolder(item) && item.id === id) return item
+    if (isRequest(item) && item.id === id) return item
     if (isAnyFolder(item)) {
       const found = findRequestById(item, id)
       if (found) return found
@@ -234,7 +304,7 @@ function findItemWithBreadcrumbs(
       }
       const found = findItemWithBreadcrumbs(item, id, currentPath)
       if (found.item) return found
-    } else if (isRequest(item) && isHTTPRequest(item)) {
+    } else if (isRequest(item)) {
       if (item.id === id) {
         // Include the request itself as the last breadcrumb (no folder icon)
         return { item, breadcrumbs: [...currentPath, { id: item.id, label: item.name }] }
@@ -664,16 +734,40 @@ const App: React.FC = () => {
   }, [findFirstTabGroupId, findGroupIdForTab, focusedGroupId, hasGroupWithId, updateGroupById])
 
   // Open an HTTP request tab in the workbench
-  const openRequestTab = useCallback(
-    (request: HTTPRequest, breadcrumbs: BreadcrumbItem[], environments?: Environment[]) => {
+  // Generic function to open any request type tab
+  const openAnyRequestTab = useCallback(
+    (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[]) => {
     const tabId = `request-${request.id}`
+    
+    // Determine tab type and title based on request type
+    let tabType: string
+    let title: string
+    
+    if (isHTTPRequest(request)) {
+      tabType = 'http-request'
+      title = `${request.method} ${request.name}`
+    } else if (isGraphQLRequest(request)) {
+      tabType = 'graphql-request'
+      title = `GraphQL ${request.name}`
+    } else if (isGrpcRequest(request)) {
+      tabType = 'grpc-request'
+      title = `gRPC ${request.name}`
+    } else if (isSoapRequest(request)) {
+      tabType = 'soap-request'
+      title = `SOAP ${request.name}`
+    } else if (isWebSocketRequest(request)) {
+      tabType = 'websocket-request'
+      title = `WS ${request.name}`
+    } else {
+      return // Unknown request type
+    }
 
     setWorkbenchTree((prev) => {
-      const newTab: HTTPRequestTab = {
+      const newTab = {
         id: tabId,
-        tabType: 'http-request',
-        title: `${request.method} ${request.name}`,
-        titleString: `${request.method} ${request.name}`,
+        tabType,
+        title,
+        titleString: title,
         request,
         breadcrumbs,
         environments,
@@ -774,18 +868,65 @@ const App: React.FC = () => {
     } else if (tabId.startsWith('request-')) {
       const itemId = tabId.replace('request-', '')
       const { item, breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, itemId)
-      if (item && isRequest(item) && isHTTPRequest(item)) {
+      if (item && isRequest(item)) {
         const environments = getNearestEnvironmentsForBreadcrumbs(swaggerFolder, breadcrumbs)
-        return {
-          id: tabId,
-          tabType: 'http-request',
-          title: `${item.method} ${item.name}`,
-          titleString: `${item.method} ${item.name}`,
-          request: item,
-          breadcrumbs,
-          environments,
-          allowFullscreen: true
-        } as HTTPRequestTab
+        
+        if (isHTTPRequest(item)) {
+          return {
+            id: tabId,
+            tabType: 'http-request',
+            title: `${item.method} ${item.name}`,
+            titleString: `${item.method} ${item.name}`,
+            request: item,
+            breadcrumbs,
+            environments,
+            allowFullscreen: true
+          } as HTTPRequestTab
+        } else if (isGraphQLRequest(item)) {
+          return {
+            id: tabId,
+            tabType: 'graphql-request',
+            title: `GraphQL ${item.name}`,
+            titleString: `GraphQL ${item.name}`,
+            request: item,
+            breadcrumbs,
+            environments,
+            allowFullscreen: true
+          } as GraphQLRequestTab
+        } else if (isGrpcRequest(item)) {
+          return {
+            id: tabId,
+            tabType: 'grpc-request',
+            title: `gRPC ${item.name}`,
+            titleString: `gRPC ${item.name}`,
+            request: item,
+            breadcrumbs,
+            environments,
+            allowFullscreen: true
+          } as GrpcRequestTab
+        } else if (isSoapRequest(item)) {
+          return {
+            id: tabId,
+            tabType: 'soap-request',
+            title: `SOAP ${item.name}`,
+            titleString: `SOAP ${item.name}`,
+            request: item,
+            breadcrumbs,
+            environments,
+            allowFullscreen: true
+          } as SoapRequestTab
+        } else if (isWebSocketRequest(item)) {
+          return {
+            id: tabId,
+            tabType: 'websocket-request',
+            title: `WS ${item.name}`,
+            titleString: `WS ${item.name}`,
+            request: item,
+            breadcrumbs,
+            environments,
+            allowFullscreen: true
+          } as WebSocketRequestTab
+        }
       }
     }
     return null
@@ -843,11 +984,13 @@ const App: React.FC = () => {
           // Focus the group containing the tab
           setFocusedGroupId('restorm-main-group')
         }
-      } else if (params.type === 'http-request') {
+      } else if (params.type === 'http-request' || params.type === 'graphql-request' || 
+                 params.type === 'grpc-request' || params.type === 'soap-request' || 
+                 params.type === 'websocket-request') {
         const { item, breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, key)
-        if (item && isRequest(item) && isHTTPRequest(item)) {
+        if (item && isRequest(item)) {
           const environments = getNearestEnvironmentsForBreadcrumbs(swaggerFolder, breadcrumbs)
-          openRequestTab(item, breadcrumbs, environments)
+          openAnyRequestTab(item, breadcrumbs, environments)
           // Focus the group containing the tab
           setFocusedGroupId('restorm-main-group')
         }
@@ -855,7 +998,7 @@ const App: React.FC = () => {
     })
 
     return unsubscribe
-  }, [openFolderTab, openEnvironmentFolderTab, openRequestTab, swaggerFolder])
+  }, [openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, swaggerFolder])
 
   // Handle item click in the sidebar - use navigation service
   const handleItemClick = useCallback((itemId: string) => {
@@ -874,9 +1017,19 @@ const App: React.FC = () => {
       return
     }
 
-    if (isRequest(item) && isHTTPRequest(item)) {
-      // Navigate to request - this will trigger the onNavigate listener
-      navigationService.navigateTo(itemId, 'sidebar', { type: 'http-request' })
+    if (isRequest(item)) {
+      // Navigate to request - determine type from request
+      if (isHTTPRequest(item)) {
+        navigationService.navigateTo(itemId, 'sidebar', { type: 'http-request' })
+      } else if (isGraphQLRequest(item)) {
+        navigationService.navigateTo(itemId, 'sidebar', { type: 'graphql-request' })
+      } else if (isGrpcRequest(item)) {
+        navigationService.navigateTo(itemId, 'sidebar', { type: 'grpc-request' })
+      } else if (isSoapRequest(item)) {
+        navigationService.navigateTo(itemId, 'sidebar', { type: 'soap-request' })
+      } else if (isWebSocketRequest(item)) {
+        navigationService.navigateTo(itemId, 'sidebar', { type: 'websocket-request' })
+      }
     }
   }, [swaggerFolder])
 
@@ -1187,19 +1340,21 @@ const App: React.FC = () => {
     }
   }, [handleItemClick])
 
-  // Convert swagger folder to ListView items
+  // Convert swagger folder to ListView items (show children at root level)
   const sidebarItems: ListViewItemData[] = useMemo(() => {
     const expandedSet = new Set(expandedIds)
-    const rootItem = folderAsRootListViewItem(swaggerFolder, {
+    return folderToListViewItems(swaggerFolder, {
       expandedIds: expandedSet,
       renderMethodBadge: (method: string) => (
         <HttpMethodBadge method={method} />
+      ),
+      renderProtocolBadge: (protocol: string, label?: string) => (
+        <ProtocolBadge protocol={protocol} label={label} />
       ),
       renderDeprecatedTitle: (name: string) => (
         <span style={{ textDecoration: 'line-through', opacity: 0.7 }}>{name}</span>
       )
     })
-    return [rootItem]
   }, [expandedIds, swaggerFolder])
 
   const sidebarItemsWithContextMenu: ListViewItemData[] = useMemo(

@@ -1,5 +1,5 @@
 // gRPC Schema - Docker Test Server (moul/grpcbin)
-// Ports: 9000 (gRPC), 9001 (gRPC-Web)
+// Ports: 9000 (gRPC), 9002 (gRPC-Web)
 // Documentation: https://github.com/moul/grpcbin
 
 syntax = "proto3";

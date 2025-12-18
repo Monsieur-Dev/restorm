@@ -6,8 +6,8 @@
  */
 
 import { eventBus, DocumentEvents, type DocumentChangedPayload, logger } from 'electron-core-ui/renderer'
-import type { Folder, HTTPRequest, FolderItem } from './collections'
-import { isAnyFolder, isHTTPRequest, isRequest } from './collections'
+import type { Folder, HTTPRequest, FolderItem, Request, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest } from './collections'
+import { isAnyFolder, isHTTPRequest, isRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest } from './collections'
 
 // ============================================================================
 // Indexable Properties Configuration
@@ -21,8 +21,8 @@ const FOLDER_INDEXABLE_KEYS = new Set([
   'tags'
 ])
 
-/** Properties that trigger re-indexing when modified */
-const REQUEST_INDEXABLE_KEYS = new Set([
+/** Properties that trigger re-indexing when modified (HTTP requests) */
+const HTTP_REQUEST_INDEXABLE_KEYS = new Set([
   'name',
   'documentation',
   'notes',
@@ -33,6 +33,60 @@ const REQUEST_INDEXABLE_KEYS = new Set([
   'params',
   'pathParams',
   'body'
+])
+
+/** Properties that trigger re-indexing when modified (GraphQL requests) */
+const GRAPHQL_REQUEST_INDEXABLE_KEYS = new Set([
+  'name',
+  'documentation',
+  'notes',
+  'tags',
+  'url',
+  'headers',
+  'operationType',
+  'query',
+  'variables'
+])
+
+/** Properties that trigger re-indexing when modified (gRPC requests) */
+const GRPC_REQUEST_INDEXABLE_KEYS = new Set([
+  'name',
+  'documentation',
+  'notes',
+  'tags',
+  'url',
+  'metadata',
+  'service',
+  'method',
+  'callType',
+  'requestMessage'
+])
+
+/** Properties that trigger re-indexing when modified (SOAP requests) */
+const SOAP_REQUEST_INDEXABLE_KEYS = new Set([
+  'name',
+  'documentation',
+  'notes',
+  'tags',
+  'url',
+  'headers',
+  'service',
+  'operation',
+  'soapAction',
+  'body'
+])
+
+/** Properties that trigger re-indexing when modified (WebSocket requests) */
+const WEBSOCKET_REQUEST_INDEXABLE_KEYS = new Set([
+  'name',
+  'documentation',
+  'notes',
+  'tags',
+  'url',
+  'headers',
+  'protocol',
+  'event',
+  'message'
 ])
 
 // ============================================================================
@@ -72,7 +126,7 @@ const DEBOUNCE_MS = 50
 function emitUpdate(
   docType: 'folder' | 'request',
   docId: string,
-  document: Folder | HTTPRequest,
+  document: Folder | Request,
   parentFolderId?: string
 ): void {
   // Clear any pending emission for this document
@@ -116,7 +170,7 @@ function emitUpdate(
 function createArrayProxyHandler(
   docType: 'folder' | 'request',
   docId: string,
-  rootDocument: () => Folder | HTTPRequest,
+  rootDocument: () => Folder | Request,
   parentFolderId?: string
 ): ProxyHandler<unknown[]> {
   return {
@@ -158,13 +212,13 @@ function createArrayProxyHandler(
 }
 
 /**
- * Create a proxy handler for documents (Folder or HTTPRequest)
+ * Create a proxy handler for documents (Folder or Request)
  */
 function createDocumentProxyHandler(
   docType: 'folder' | 'request',
   indexableKeys: Set<string>,
   parentFolderId?: string
-): ProxyHandler<Folder | HTTPRequest> {
+): ProxyHandler<Folder | Request> {
   return {
     get(target, prop, receiver): unknown {
       // Return symbols
@@ -225,13 +279,76 @@ export function makeReactiveFolder(folder: Folder): Folder {
 /**
  * Make an HTTPRequest reactive - it will emit events when indexable properties change
  */
-export function makeReactiveRequest(request: HTTPRequest, parentFolderId: string): HTTPRequest {
+export function makeReactiveHTTPRequest(request: HTTPRequest, parentFolderId: string): HTTPRequest {
   if (isReactive(request)) {
     return request
   }
+  return new Proxy(request, createDocumentProxyHandler('request', HTTP_REQUEST_INDEXABLE_KEYS, parentFolderId) as ProxyHandler<HTTPRequest>)
+}
 
-  // Cast is safe: Proxy preserves the original object type
-  return new Proxy(request, createDocumentProxyHandler('request', REQUEST_INDEXABLE_KEYS, parentFolderId) as ProxyHandler<HTTPRequest>)
+/**
+ * Make a GraphQLRequest reactive - it will emit events when indexable properties change
+ */
+export function makeReactiveGraphQLRequest(request: GraphQLRequest, parentFolderId: string): GraphQLRequest {
+  if (isReactive(request)) {
+    return request
+  }
+  return new Proxy(request, createDocumentProxyHandler('request', GRAPHQL_REQUEST_INDEXABLE_KEYS, parentFolderId) as ProxyHandler<GraphQLRequest>)
+}
+
+/**
+ * Make a GrpcRequest reactive - it will emit events when indexable properties change
+ */
+export function makeReactiveGrpcRequest(request: GrpcRequest, parentFolderId: string): GrpcRequest {
+  if (isReactive(request)) {
+    return request
+  }
+  return new Proxy(request, createDocumentProxyHandler('request', GRPC_REQUEST_INDEXABLE_KEYS, parentFolderId) as ProxyHandler<GrpcRequest>)
+}
+
+/**
+ * Make a SoapRequest reactive - it will emit events when indexable properties change
+ */
+export function makeReactiveSoapRequest(request: SoapRequest, parentFolderId: string): SoapRequest {
+  if (isReactive(request)) {
+    return request
+  }
+  return new Proxy(request, createDocumentProxyHandler('request', SOAP_REQUEST_INDEXABLE_KEYS, parentFolderId) as ProxyHandler<SoapRequest>)
+}
+
+/**
+ * Make a WebSocketRequest reactive - it will emit events when indexable properties change
+ */
+export function makeReactiveWebSocketRequest(request: WebSocketRequest, parentFolderId: string): WebSocketRequest {
+  if (isReactive(request)) {
+    return request
+  }
+  return new Proxy(request, createDocumentProxyHandler('request', WEBSOCKET_REQUEST_INDEXABLE_KEYS, parentFolderId) as ProxyHandler<WebSocketRequest>)
+}
+
+/**
+ * Make any Request type reactive - it will emit events when indexable properties change
+ */
+export function makeReactiveRequest(request: Request, parentFolderId: string): Request {
+  if (isReactive(request)) {
+    return request
+  }
+  if (isHTTPRequest(request)) {
+    return makeReactiveHTTPRequest(request, parentFolderId)
+  }
+  if (isGraphQLRequest(request)) {
+    return makeReactiveGraphQLRequest(request, parentFolderId)
+  }
+  if (isGrpcRequest(request)) {
+    return makeReactiveGrpcRequest(request, parentFolderId)
+  }
+  if (isSoapRequest(request)) {
+    return makeReactiveSoapRequest(request, parentFolderId)
+  }
+  if (isWebSocketRequest(request)) {
+    return makeReactiveWebSocketRequest(request, parentFolderId)
+  }
+  return request
 }
 
 /**
@@ -240,7 +357,7 @@ export function makeReactiveRequest(request: HTTPRequest, parentFolderId: string
 export function makeReactiveFolderItem(item: FolderItem, parentFolderId: string): FolderItem {
   if (isAnyFolder(item)) {
     return makeReactiveFolder(item)
-  } else if (isRequest(item) && isHTTPRequest(item)) {
+  } else if (isRequest(item)) {
     return makeReactiveRequest(item, parentFolderId)
   }
   return item
@@ -270,7 +387,7 @@ export function emitFolderDeleted(folderId: string): void {
 /**
  * Emit a request created event
  */
-export function emitRequestCreated(request: HTTPRequest, parentFolderId: string): void {
+export function emitRequestCreated(request: Request, parentFolderId: string): void {
   eventBus.emitSync<DocumentChangedPayload>(DocumentEvents.REQUEST_CREATED, {
     id: request.id,
     type: 'request',

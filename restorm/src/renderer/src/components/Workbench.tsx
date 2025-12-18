@@ -2,8 +2,23 @@ import React, { useMemo, useState, useCallback, useEffect, useRef, forwardRef, u
 import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, type ContextMenuItem } from 'electron-core-ui/renderer'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback } from 'electron-core-ui/renderer'
 import type { RestormEditorTab, BreadcrumbItem } from '../types/editor'
-import { isFolderTab, isEnvironmentFolderTab, isHTTPRequestTab } from '../types/editor'
-import { HTTPRequestTabView, EnvironmentDropdown } from './HTTPRequestTabView'
+import {
+  isFolderTab,
+  isEnvironmentFolderTab,
+  isHTTPRequestTab,
+  isGraphQLRequestTab,
+  isGrpcRequestTab,
+  isSoapRequestTab,
+  isWebSocketRequestTab
+} from '../types/editor'
+import { EnvironmentDropdown } from './EnvironmentDropdown'
+import {
+  HTTPRequestTabView,
+  GraphQLRequestTabView,
+  GrpcRequestTabView,
+  SoapRequestTabView,
+  WebSocketRequestTabView 
+} from './RequestTabViews'
 import { EnvironmentProvider } from '../contexts/EnvironmentContext'
 import { FolderView } from './FolderView'
 import { EnvironmentFolderView } from './EnvironmentFolderView'
@@ -58,8 +73,8 @@ export interface WorkbenchProps {
   onRebuildTab?: RebuildTabCallback
   /** Called when state is restored from storage */
   onStateRestored?: (tree: WorkbenchTree | null) => void
-  /** Get a reactive HTTPRequest by ID (for reactivity support) */
-  getRequestById?: (id: string) => import('../types/collections').HTTPRequest | undefined
+  /** Get a reactive Request by ID (for reactivity support) */
+  getRequestById?: (id: string) => import('../types/collections').Request | undefined
   /** Get a reactive Folder by ID (for reactivity support) */
   getFolderById?: (id: string) => import('../types/collections').Folder | undefined
   /** Get a reactive EnvironmentFolder by ID (for reactivity support) */
@@ -163,6 +178,46 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
       )
     }
 
+    // GraphQL request tab
+    if (isGraphQLRequestTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ color: 'var(--vscode-charts-purple)', fontWeight: 600, fontSize: 10 }}>GQL</span>
+          <span>{restormTab.request.name}</span>
+        </span>
+      )
+    }
+
+    // gRPC request tab
+    if (isGrpcRequestTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ color: 'var(--vscode-charts-blue)', fontWeight: 600, fontSize: 10 }}>gRPC</span>
+          <span>{restormTab.request.name}</span>
+        </span>
+      )
+    }
+
+    // SOAP request tab
+    if (isSoapRequestTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ color: 'var(--vscode-charts-yellow)', fontWeight: 600, fontSize: 10 }}>SOAP</span>
+          <span>{restormTab.request.name}</span>
+        </span>
+      )
+    }
+
+    // WebSocket request tab
+    if (isWebSocketRequestTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ color: 'var(--vscode-charts-green)', fontWeight: 600, fontSize: 10 }}>WS</span>
+          <span>{restormTab.request.name}</span>
+        </span>
+      )
+    }
+
     return null
   }, [])
 
@@ -229,7 +284,8 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
     // HTTP request tab
     if (isHTTPRequestTab(tab)) {
       // Get reactive request if available, otherwise use tab's copy
-      const request = getRequestById?.(tab.request.id) ?? tab.request
+      const reactiveRequest = getRequestById?.(tab.request.id)
+      const request = (reactiveRequest && reactiveRequest.type === 'http') ? reactiveRequest : tab.request
       return (
         <EnvironmentProvider environments={tab.environments}>
           <WorkbenchTab
@@ -249,6 +305,102 @@ export const Workbench = forwardRef<WorkbenchHandle, WorkbenchProps>(({
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
               <HTTPRequestTabView request={request} />
+            </div>
+          </WorkbenchTab>
+        </EnvironmentProvider>
+      )
+    }
+
+    // GraphQL request tab
+    if (isGraphQLRequestTab(tab)) {
+      const request = tab.request
+      return (
+        <EnvironmentProvider environments={tab.environments}>
+          <WorkbenchTab
+            breadcrumbs={breadcrumbs}
+            onBreadcrumbClick={onBreadcrumbClick}
+            onBreadcrumbRename={onItemRename}
+            tags={request.tags}
+            onTagsChange={(nextTags) => {
+              onTagsChange?.(request.id, nextTags)
+            }}
+            label={t('workbench.tagsLabel')}
+            headerRight={<EnvironmentDropdown />}
+          >
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
+              <GraphQLRequestTabView request={request} />
+            </div>
+          </WorkbenchTab>
+        </EnvironmentProvider>
+      )
+    }
+
+    // gRPC request tab
+    if (isGrpcRequestTab(tab)) {
+      const request = tab.request
+      return (
+        <EnvironmentProvider environments={tab.environments}>
+          <WorkbenchTab
+            breadcrumbs={breadcrumbs}
+            onBreadcrumbClick={onBreadcrumbClick}
+            onBreadcrumbRename={onItemRename}
+            tags={request.tags}
+            onTagsChange={(nextTags) => {
+              onTagsChange?.(request.id, nextTags)
+            }}
+            label={t('workbench.tagsLabel')}
+            headerRight={<EnvironmentDropdown />}
+          >
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
+              <GrpcRequestTabView request={request} />
+            </div>
+          </WorkbenchTab>
+        </EnvironmentProvider>
+      )
+    }
+
+    // SOAP request tab
+    if (isSoapRequestTab(tab)) {
+      const request = tab.request
+      return (
+        <EnvironmentProvider environments={tab.environments}>
+          <WorkbenchTab
+            breadcrumbs={breadcrumbs}
+            onBreadcrumbClick={onBreadcrumbClick}
+            onBreadcrumbRename={onItemRename}
+            tags={request.tags}
+            onTagsChange={(nextTags) => {
+              onTagsChange?.(request.id, nextTags)
+            }}
+            label={t('workbench.tagsLabel')}
+            headerRight={<EnvironmentDropdown />}
+          >
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
+              <SoapRequestTabView request={request} />
+            </div>
+          </WorkbenchTab>
+        </EnvironmentProvider>
+      )
+    }
+
+    // WebSocket request tab
+    if (isWebSocketRequestTab(tab)) {
+      const request = tab.request
+      return (
+        <EnvironmentProvider environments={tab.environments}>
+          <WorkbenchTab
+            breadcrumbs={breadcrumbs}
+            onBreadcrumbClick={onBreadcrumbClick}
+            onBreadcrumbRename={onItemRename}
+            tags={request.tags}
+            onTagsChange={(nextTags) => {
+              onTagsChange?.(request.id, nextTags)
+            }}
+            label={t('workbench.tagsLabel')}
+            headerRight={<EnvironmentDropdown />}
+          >
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
+              <WebSocketRequestTabView request={request} />
             </div>
           </WorkbenchTab>
         </EnvironmentProvider>
