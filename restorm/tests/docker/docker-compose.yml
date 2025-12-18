@@ -1,8 +1,54 @@
-version: "3.8"
-
 services:
+  # REST/HTTP - OpenAPI Petstore
   petstore:
     image: swaggerapi/petstore
     container_name: restorm-petstore
     ports:
       - "8080:8080"
+
+  # GraphQL - Custom test server
+  graphql:
+    image: node:20-alpine
+    container_name: restorm-graphql
+    working_dir: /app
+    volumes:
+      - ./graphql-server:/app
+    command: sh -c "npm install && node server.js"
+    ports:
+      - "4000:4000"
+
+  # MQTT - Eclipse Mosquitto broker
+  mqtt:
+    image: eclipse-mosquitto:2
+    container_name: restorm-mqtt
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+  # SOAP - Castle Mock server
+  soap:
+    image: castlemock/castlemock
+    container_name: restorm-soap
+    ports:
+      - "8090:8080"
+
+  # gRPC - gRPCbin echo server
+  grpc:
+    image: moul/grpcbin
+    container_name: restorm-grpc
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+  # Socket.IO - Custom test server
+  socketio:
+    image: node:20-alpine
+    container_name: restorm-socketio
+    working_dir: /app
+    volumes:
+      - ./socketio-server:/app
+    command: sh -c "npm install && node server.js"
+    ports:
+      - "3001:3001"

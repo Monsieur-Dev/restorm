@@ -1,0 +1,438 @@
+asyncapi: 2.6.0
+info:
+  title: Petstore AsyncAPI
+  version: 1.0.0
+  description: |
+    AsyncAPI specification for the Petstore.
+    Covers MQTT and Socket.IO event-driven operations.
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
+servers:
+  mqtt:
+    url: localhost:1883
+    protocol: mqtt
+    description: MQTT broker for pet store events
+  mqtt-ws:
+    url: localhost:9001
+    protocol: mqtt
+    description: MQTT over WebSocket
+  socketio:
+    url: localhost:3001
+    protocol: socketio
+    description: Socket.IO server for real-time updates
+
+defaultContentType: application/json
+
+channels:
+  # MQTT Channels
+  pet/created:
+    description: Channel for new pet creation events
+    subscribe:
+      operationId: onPetCreated
+      summary: Receive notifications when a new pet is created
+      message:
+        $ref: '#/components/messages/PetCreated'
+
+  pet/updated:
+    description: Channel for pet update events
+    subscribe:
+      operationId: onPetUpdated
+      summary: Receive notifications when a pet is updated
+      message:
+        $ref: '#/components/messages/PetUpdated'
+
+  pet/deleted:
+    description: Channel for pet deletion events
+    subscribe:
+      operationId: onPetDeleted
+      summary: Receive notifications when a pet is deleted
+      message:
+        $ref: '#/components/messages/PetDeleted'
+
+  pet/status/{status}:
+    description: Channel for pets filtered by status
+    parameters:
+      status:
+        description: Pet status filter
+        schema:
+          type: string
+          enum:
+            - available
+            - pending
+            - sold
+    subscribe:
+      operationId: onPetStatusChange
+      summary: Receive notifications for pets with specific status
+      message:
+        $ref: '#/components/messages/PetStatusChanged'
+
+  order/placed:
+    description: Channel for new order events
+    subscribe:
+      operationId: onOrderPlaced
+      summary: Receive notifications when a new order is placed
+      message:
+        $ref: '#/components/messages/OrderPlaced'
+
+  order/status/{orderId}:
+    description: Channel for order status updates
+    parameters:
+      orderId:
+        description: Order ID to track
+        schema:
+          type: string
+    subscribe:
+      operationId: onOrderStatusUpdate
+      summary: Receive status updates for a specific order
+      message:
+        $ref: '#/components/messages/OrderStatusUpdated'
+
+  inventory/updated:
+    description: Channel for inventory updates
+    subscribe:
+      operationId: onInventoryUpdated
+      summary: Receive notifications when inventory changes
+      message:
+        $ref: '#/components/messages/InventoryUpdated'
+
+  # Socket.IO specific channels
+  echo:
+    description: Echo channel for testing
+    publish:
+      operationId: sendEcho
+      summary: Send a message to be echoed back
+      message:
+        $ref: '#/components/messages/EchoRequest'
+    subscribe:
+      operationId: receiveEcho
+      summary: Receive echoed message
+      message:
+        $ref: '#/components/messages/EchoResponse'
+
+  ping:
+    description: Ping/pong channel for connection testing
+    publish:
+      operationId: sendPing
+      summary: Send ping request
+      message:
+        $ref: '#/components/messages/PingRequest'
+
+  pong:
+    description: Pong response channel
+    subscribe:
+      operationId: receivePong
+      summary: Receive pong response
+      message:
+        $ref: '#/components/messages/PongResponse'
+
+  broadcast:
+    description: Broadcast channel for all connected clients
+    publish:
+      operationId: sendBroadcast
+      summary: Send message to all connected clients
+      message:
+        $ref: '#/components/messages/BroadcastRequest'
+    subscribe:
+      operationId: receiveBroadcast
+      summary: Receive broadcast messages
+      message:
+        $ref: '#/components/messages/BroadcastMessage'
+
+  room/{roomName}:
+    description: Room-based messaging
+    parameters:
+      roomName:
+        description: Name of the room
+        schema:
+          type: string
+    publish:
+      operationId: sendRoomMessage
+      summary: Send message to a specific room
+      message:
+        $ref: '#/components/messages/RoomMessage'
+    subscribe:
+      operationId: receiveRoomMessage
+      summary: Receive messages from a room
+      message:
+        $ref: '#/components/messages/RoomMessage'
+
+components:
+  messages:
+    PetCreated:
+      name: PetCreated
+      title: Pet Created Event
+      summary: Notification when a new pet is added
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/PetEvent'
+
+    PetUpdated:
+      name: PetUpdated
+      title: Pet Updated Event
+      summary: Notification when a pet is modified
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/PetEvent'
+
+    PetDeleted:
+      name: PetDeleted
+      title: Pet Deleted Event
+      summary: Notification when a pet is removed
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          petId:
+            type: integer
+            format: int64
+          timestamp:
+            type: string
+            format: date-time
+
+    PetStatusChanged:
+      name: PetStatusChanged
+      title: Pet Status Changed Event
+      summary: Notification when a pet's status changes
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/PetEvent'
+
+    OrderPlaced:
+      name: OrderPlaced
+      title: Order Placed Event
+      summary: Notification when a new order is created
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/OrderEvent'
+
+    OrderStatusUpdated:
+      name: OrderStatusUpdated
+      title: Order Status Updated Event
+      summary: Notification when an order status changes
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/OrderEvent'
+
+    InventoryUpdated:
+      name: InventoryUpdated
+      title: Inventory Updated Event
+      summary: Notification when inventory levels change
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/InventoryEvent'
+
+    EchoRequest:
+      name: EchoRequest
+      title: Echo Request
+      summary: Message to be echoed back
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          message:
+            type: string
+          data:
+            type: object
+
+    EchoResponse:
+      name: EchoResponse
+      title: Echo Response
+      summary: Echoed message response
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          message:
+            type: string
+          data:
+            type: object
+
+    PingRequest:
+      name: PingRequest
+      title: Ping Request
+      summary: Ping request for connection testing
+      contentType: application/json
+      payload:
+        type: object
+
+    PongResponse:
+      name: PongResponse
+      title: Pong Response
+      summary: Pong response with timestamp
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          timestamp:
+            type: integer
+            format: int64
+
+    BroadcastRequest:
+      name: BroadcastRequest
+      title: Broadcast Request
+      summary: Message to broadcast to all clients
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          message:
+            type: string
+          data:
+            type: object
+
+    BroadcastMessage:
+      name: BroadcastMessage
+      title: Broadcast Message
+      summary: Received broadcast message
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          from:
+            type: string
+            description: Socket ID of sender
+          data:
+            type: object
+          timestamp:
+            type: integer
+            format: int64
+
+    RoomMessage:
+      name: RoomMessage
+      title: Room Message
+      summary: Message sent to/from a room
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          from:
+            type: string
+            description: Socket ID of sender
+          room:
+            type: string
+          message:
+            type: string
+          timestamp:
+            type: integer
+            format: int64
+
+  schemas:
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+
+    Tag:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+
+    Pet:
+      type: object
+      required:
+        - name
+        - photoUrls
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        category:
+          $ref: '#/components/schemas/Category'
+        photoUrls:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        status:
+          type: string
+          enum:
+            - available
+            - pending
+            - sold
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        petId:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+          format: int32
+        shipDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum:
+            - placed
+            - approved
+            - delivered
+        complete:
+          type: boolean
+
+    PetEvent:
+      type: object
+      properties:
+        eventType:
+          type: string
+          enum:
+            - created
+            - updated
+            - deleted
+            - statusChanged
+        pet:
+          $ref: '#/components/schemas/Pet'
+        timestamp:
+          type: string
+          format: date-time
+
+    OrderEvent:
+      type: object
+      properties:
+        eventType:
+          type: string
+          enum:
+            - placed
+            - statusUpdated
+            - completed
+            - cancelled
+        order:
+          $ref: '#/components/schemas/Order'
+        timestamp:
+          type: string
+          format: date-time
+
+    InventoryEvent:
+      type: object
+      properties:
+        available:
+          type: integer
+          format: int32
+        pending:
+          type: integer
+          format: int32
+        sold:
+          type: integer
+          format: int32
+        timestamp:
+          type: string
+          format: date-time

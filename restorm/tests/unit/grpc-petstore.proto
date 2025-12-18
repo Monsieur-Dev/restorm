@@ -1,0 +1,243 @@
+syntax = "proto3";
+
+package petstore;
+
+option go_package = "petstore/v1";
+
+// Pet service for managing pets in the store
+service PetService {
+  // Get a single pet by ID
+  rpc GetPet(GetPetRequest) returns (Pet);
+  
+  // List all pets with optional filtering
+  rpc ListPets(ListPetsRequest) returns (ListPetsResponse);
+  
+  // Create a new pet
+  rpc CreatePet(CreatePetRequest) returns (Pet);
+  
+  // Update an existing pet
+  rpc UpdatePet(UpdatePetRequest) returns (Pet);
+  
+  // Delete a pet
+  rpc DeletePet(DeletePetRequest) returns (DeletePetResponse);
+  
+  // Stream pet updates in real-time
+  rpc StreamPetUpdates(StreamPetUpdatesRequest) returns (stream PetUpdate);
+}
+
+// Store service for managing orders
+service StoreService {
+  // Get store inventory
+  rpc GetInventory(GetInventoryRequest) returns (GetInventoryResponse);
+  
+  // Place an order
+  rpc PlaceOrder(PlaceOrderRequest) returns (Order);
+  
+  // Get an order by ID
+  rpc GetOrder(GetOrderRequest) returns (Order);
+  
+  // Delete an order
+  rpc DeleteOrder(DeleteOrderRequest) returns (DeleteOrderResponse);
+}
+
+// User service for managing users
+service UserService {
+  // Create a new user
+  rpc CreateUser(CreateUserRequest) returns (User);
+  
+  // Get user by username
+  rpc GetUser(GetUserRequest) returns (User);
+  
+  // Update user
+  rpc UpdateUser(UpdateUserRequest) returns (User);
+  
+  // Delete user
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+  
+  // Login user
+  rpc Login(LoginRequest) returns (LoginResponse);
+  
+  // Logout user
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+}
+
+// Enums
+enum PetStatus {
+  PET_STATUS_UNSPECIFIED = 0;
+  PET_STATUS_AVAILABLE = 1;
+  PET_STATUS_PENDING = 2;
+  PET_STATUS_SOLD = 3;
+}
+
+enum OrderStatus {
+  ORDER_STATUS_UNSPECIFIED = 0;
+  ORDER_STATUS_PLACED = 1;
+  ORDER_STATUS_APPROVED = 2;
+  ORDER_STATUS_DELIVERED = 3;
+}
+
+// Messages
+message Category {
+  int64 id = 1;
+  string name = 2;
+}
+
+message Tag {
+  int64 id = 1;
+  string name = 2;
+}
+
+message Pet {
+  int64 id = 1;
+  string name = 2;
+  Category category = 3;
+  repeated string photo_urls = 4;
+  repeated Tag tags = 5;
+  PetStatus status = 6;
+}
+
+message Order {
+  int64 id = 1;
+  int64 pet_id = 2;
+  int32 quantity = 3;
+  string ship_date = 4;
+  OrderStatus status = 5;
+  bool complete = 6;
+}
+
+message User {
+  int64 id = 1;
+  string username = 2;
+  string first_name = 3;
+  string last_name = 4;
+  string email = 5;
+  string password = 6;
+  string phone = 7;
+  int32 user_status = 8;
+}
+
+// Pet Service Requests/Responses
+message GetPetRequest {
+  int64 id = 1;
+}
+
+message ListPetsRequest {
+  repeated PetStatus status = 1;
+  repeated string tags = 2;
+  int32 limit = 3;
+  int32 offset = 4;
+}
+
+message ListPetsResponse {
+  repeated Pet pets = 1;
+  int32 total = 2;
+}
+
+message CreatePetRequest {
+  string name = 1;
+  Category category = 2;
+  repeated string photo_urls = 3;
+  repeated Tag tags = 4;
+  PetStatus status = 5;
+}
+
+message UpdatePetRequest {
+  int64 id = 1;
+  string name = 2;
+  Category category = 3;
+  repeated string photo_urls = 4;
+  repeated Tag tags = 5;
+  PetStatus status = 6;
+}
+
+message DeletePetRequest {
+  int64 id = 1;
+}
+
+message DeletePetResponse {
+  bool success = 1;
+}
+
+message StreamPetUpdatesRequest {
+  repeated PetStatus status_filter = 1;
+}
+
+message PetUpdate {
+  string event_type = 1; // "created", "updated", "deleted"
+  Pet pet = 2;
+  string timestamp = 3;
+}
+
+// Store Service Requests/Responses
+message GetInventoryRequest {}
+
+message GetInventoryResponse {
+  map<string, int32> inventory = 1;
+}
+
+message PlaceOrderRequest {
+  int64 pet_id = 1;
+  int32 quantity = 2;
+  string ship_date = 3;
+}
+
+message GetOrderRequest {
+  int64 id = 1;
+}
+
+message DeleteOrderRequest {
+  int64 id = 1;
+}
+
+message DeleteOrderResponse {
+  bool success = 1;
+}
+
+// User Service Requests/Responses
+message CreateUserRequest {
+  string username = 1;
+  string first_name = 2;
+  string last_name = 3;
+  string email = 4;
+  string password = 5;
+  string phone = 6;
+}
+
+message GetUserRequest {
+  string username = 1;
+}
+
+message UpdateUserRequest {
+  string username = 1;
+  string first_name = 2;
+  string last_name = 3;
+  string email = 4;
+  string password = 5;
+  string phone = 6;
+}
+
+message DeleteUserRequest {
+  string username = 1;
+}
+
+message DeleteUserResponse {
+  bool success = 1;
+}
+
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string token = 1;
+  string expires_at = 2;
+}
+
+message LogoutRequest {
+  string token = 1;
+}
+
+message LogoutResponse {
+  bool success = 1;
+}

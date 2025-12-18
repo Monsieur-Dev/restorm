@@ -1,0 +1,9 @@
+{
+  "name": "restorm-socketio-test-server",
+  "version": "1.0.0",
+  "description": "Socket.IO test server for Restorm",
+  "main": "server.js",
+  "dependencies": {
+    "socket.io": "^4.7.2"
+  }
+}

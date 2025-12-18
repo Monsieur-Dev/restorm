@@ -1,0 +1,10 @@
+{
+  "name": "restorm-graphql-test-server",
+  "version": "1.0.0",
+  "description": "GraphQL test server for Restorm",
+  "main": "server.js",
+  "dependencies": {
+    "@apollo/server": "^4.10.0",
+    "graphql": "^16.8.1"
+  }
+}

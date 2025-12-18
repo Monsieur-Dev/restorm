@@ -1,0 +1,209 @@
+# Petstore GraphQL Schema
+# Equivalent to the Swagger Petstore API
+
+# Enums
+enum PetStatus {
+  AVAILABLE
+  PENDING
+  SOLD
+}
+
+enum OrderStatus {
+  PLACED
+  APPROVED
+  DELIVERED
+}
+
+# Types
+type Category {
+  id: ID!
+  name: String!
+}
+
+type Tag {
+  id: ID!
+  name: String!
+}
+
+type Pet {
+  id: ID!
+  name: String!
+  category: Category
+  photoUrls: [String!]!
+  tags: [Tag!]
+  status: PetStatus
+}
+
+type Order {
+  id: ID!
+  petId: ID!
+  pet: Pet
+  quantity: Int!
+  shipDate: String
+  status: OrderStatus
+  complete: Boolean!
+}
+
+type User {
+  id: ID!
+  username: String!
+  firstName: String
+  lastName: String
+  email: String!
+  phone: String
+  userStatus: Int
+}
+
+type Inventory {
+  available: Int!
+  pending: Int!
+  sold: Int!
+}
+
+type LoginResponse {
+  token: String!
+  expiresAt: String!
+  user: User!
+}
+
+type ApiResponse {
+  code: Int!
+  type: String!
+  message: String!
+}
+
+# Input types for mutations
+input CategoryInput {
+  id: ID
+  name: String!
+}
+
+input TagInput {
+  id: ID
+  name: String!
+}
+
+input CreatePetInput {
+  name: String!
+  category: CategoryInput
+  photoUrls: [String!]!
+  tags: [TagInput!]
+  status: PetStatus
+}
+
+input UpdatePetInput {
+  id: ID!
+  name: String
+  category: CategoryInput
+  photoUrls: [String!]
+  tags: [TagInput!]
+  status: PetStatus
+}
+
+input CreateOrderInput {
+  petId: ID!
+  quantity: Int!
+  shipDate: String
+}
+
+input CreateUserInput {
+  username: String!
+  firstName: String
+  lastName: String
+  email: String!
+  password: String!
+  phone: String
+}
+
+input UpdateUserInput {
+  username: String!
+  firstName: String
+  lastName: String
+  email: String
+  password: String
+  phone: String
+}
+
+# Queries
+type Query {
+  # Pet queries
+  """Get a pet by ID"""
+  pet(id: ID!): Pet
+  
+  """Find pets by status"""
+  petsByStatus(status: [PetStatus!]!): [Pet!]!
+  
+  """Find pets by tags"""
+  petsByTags(tags: [String!]!): [Pet!]!
+  
+  """List all pets with pagination"""
+  pets(limit: Int = 20, offset: Int = 0): [Pet!]!
+
+  # Store queries
+  """Get store inventory"""
+  inventory: Inventory!
+  
+  """Get an order by ID"""
+  order(id: ID!): Order
+
+  # User queries
+  """Get user by username"""
+  user(username: String!): User
+  
+  """Login user"""
+  login(username: String!, password: String!): LoginResponse
+}
+
+# Mutations
+type Mutation {
+  # Pet mutations
+  """Add a new pet to the store"""
+  createPet(input: CreatePetInput!): Pet!
+  
+  """Update an existing pet"""
+  updatePet(input: UpdatePetInput!): Pet!
+  
+  """Update pet with form data"""
+  updatePetForm(id: ID!, name: String, status: PetStatus): Pet!
+  
+  """Delete a pet"""
+  deletePet(id: ID!): Boolean!
+  
+  """Upload pet image"""
+  uploadPetImage(petId: ID!, file: String!, additionalMetadata: String): ApiResponse!
+
+  # Store mutations
+  """Place a new order"""
+  placeOrder(input: CreateOrderInput!): Order!
+  
+  """Delete an order"""
+  deleteOrder(id: ID!): Boolean!
+
+  # User mutations
+  """Create a new user"""
+  createUser(input: CreateUserInput!): User!
+  
+  """Create multiple users"""
+  createUsers(inputs: [CreateUserInput!]!): [User!]!
+  
+  """Update user"""
+  updateUser(input: UpdateUserInput!): User!
+  
+  """Delete user"""
+  deleteUser(username: String!): Boolean!
+  
+  """Logout user"""
+  logout: Boolean!
+}
+
+# Subscriptions
+type Subscription {
+  """Subscribe to pet status changes"""
+  petStatusChanged(status: PetStatus): Pet!
+  
+  """Subscribe to new orders"""
+  orderPlaced: Order!
+  
+  """Subscribe to pet creations"""
+  petCreated: Pet!
+}

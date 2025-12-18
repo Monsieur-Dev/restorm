@@ -1,0 +1,505 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions 
+  name="PetStoreService"
+  targetNamespace="http://petstore.example.com/wsdl"
+  xmlns="http://schemas.xmlsoap.org/wsdl/"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns:tns="http://petstore.example.com/wsdl"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <!-- Types -->
+  <types>
+    <xsd:schema targetNamespace="http://petstore.example.com/wsdl">
+      
+      <!-- Simple Types -->
+      <xsd:simpleType name="PetStatus">
+        <xsd:restriction base="xsd:string">
+          <xsd:enumeration value="available"/>
+          <xsd:enumeration value="pending"/>
+          <xsd:enumeration value="sold"/>
+        </xsd:restriction>
+      </xsd:simpleType>
+
+      <xsd:simpleType name="OrderStatus">
+        <xsd:restriction base="xsd:string">
+          <xsd:enumeration value="placed"/>
+          <xsd:enumeration value="approved"/>
+          <xsd:enumeration value="delivered"/>
+        </xsd:restriction>
+      </xsd:simpleType>
+
+      <!-- Complex Types -->
+      <xsd:complexType name="Category">
+        <xsd:sequence>
+          <xsd:element name="id" type="xsd:long"/>
+          <xsd:element name="name" type="xsd:string"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="Tag">
+        <xsd:sequence>
+          <xsd:element name="id" type="xsd:long"/>
+          <xsd:element name="name" type="xsd:string"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="Pet">
+        <xsd:sequence>
+          <xsd:element name="id" type="xsd:long"/>
+          <xsd:element name="name" type="xsd:string"/>
+          <xsd:element name="category" type="tns:Category" minOccurs="0"/>
+          <xsd:element name="photoUrls" type="xsd:string" maxOccurs="unbounded"/>
+          <xsd:element name="tags" type="tns:Tag" minOccurs="0" maxOccurs="unbounded"/>
+          <xsd:element name="status" type="tns:PetStatus" minOccurs="0"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="Order">
+        <xsd:sequence>
+          <xsd:element name="id" type="xsd:long"/>
+          <xsd:element name="petId" type="xsd:long"/>
+          <xsd:element name="quantity" type="xsd:int"/>
+          <xsd:element name="shipDate" type="xsd:dateTime" minOccurs="0"/>
+          <xsd:element name="status" type="tns:OrderStatus" minOccurs="0"/>
+          <xsd:element name="complete" type="xsd:boolean"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="User">
+        <xsd:sequence>
+          <xsd:element name="id" type="xsd:long"/>
+          <xsd:element name="username" type="xsd:string"/>
+          <xsd:element name="firstName" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="lastName" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="email" type="xsd:string"/>
+          <xsd:element name="password" type="xsd:string"/>
+          <xsd:element name="phone" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="userStatus" type="xsd:int" minOccurs="0"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="Inventory">
+        <xsd:sequence>
+          <xsd:element name="available" type="xsd:int"/>
+          <xsd:element name="pending" type="xsd:int"/>
+          <xsd:element name="sold" type="xsd:int"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="ApiResponse">
+        <xsd:sequence>
+          <xsd:element name="code" type="xsd:int"/>
+          <xsd:element name="type" type="xsd:string"/>
+          <xsd:element name="message" type="xsd:string"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <!-- Pet Elements -->
+      <xsd:element name="GetPetRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="petId" type="xsd:long"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="GetPetResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="pet" type="tns:Pet"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="FindPetsByStatusRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="status" type="tns:PetStatus" maxOccurs="unbounded"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="FindPetsByStatusResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="pets" type="tns:Pet" maxOccurs="unbounded"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="CreatePetRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="pet" type="tns:Pet"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="CreatePetResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="pet" type="tns:Pet"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="UpdatePetRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="pet" type="tns:Pet"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="UpdatePetResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="pet" type="tns:Pet"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="DeletePetRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="petId" type="xsd:long"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="DeletePetResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="success" type="xsd:boolean"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <!-- Store Elements -->
+      <xsd:element name="GetInventoryRequest">
+        <xsd:complexType/>
+      </xsd:element>
+
+      <xsd:element name="GetInventoryResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="inventory" type="tns:Inventory"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="PlaceOrderRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="order" type="tns:Order"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="PlaceOrderResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="order" type="tns:Order"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="GetOrderRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="orderId" type="xsd:long"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="GetOrderResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="order" type="tns:Order"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <!-- User Elements -->
+      <xsd:element name="CreateUserRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="user" type="tns:User"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="CreateUserResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="user" type="tns:User"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="GetUserRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="username" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="GetUserResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="user" type="tns:User"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="LoginRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="username" type="xsd:string"/>
+            <xsd:element name="password" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="LoginResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="token" type="xsd:string"/>
+            <xsd:element name="expiresAt" type="xsd:dateTime"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+    </xsd:schema>
+  </types>
+
+  <!-- Messages -->
+  <!-- Pet Messages -->
+  <message name="GetPetInput">
+    <part name="parameters" element="tns:GetPetRequest"/>
+  </message>
+  <message name="GetPetOutput">
+    <part name="parameters" element="tns:GetPetResponse"/>
+  </message>
+
+  <message name="FindPetsByStatusInput">
+    <part name="parameters" element="tns:FindPetsByStatusRequest"/>
+  </message>
+  <message name="FindPetsByStatusOutput">
+    <part name="parameters" element="tns:FindPetsByStatusResponse"/>
+  </message>
+
+  <message name="CreatePetInput">
+    <part name="parameters" element="tns:CreatePetRequest"/>
+  </message>
+  <message name="CreatePetOutput">
+    <part name="parameters" element="tns:CreatePetResponse"/>
+  </message>
+
+  <message name="UpdatePetInput">
+    <part name="parameters" element="tns:UpdatePetRequest"/>
+  </message>
+  <message name="UpdatePetOutput">
+    <part name="parameters" element="tns:UpdatePetResponse"/>
+  </message>
+
+  <message name="DeletePetInput">
+    <part name="parameters" element="tns:DeletePetRequest"/>
+  </message>
+  <message name="DeletePetOutput">
+    <part name="parameters" element="tns:DeletePetResponse"/>
+  </message>
+
+  <!-- Store Messages -->
+  <message name="GetInventoryInput">
+    <part name="parameters" element="tns:GetInventoryRequest"/>
+  </message>
+  <message name="GetInventoryOutput">
+    <part name="parameters" element="tns:GetInventoryResponse"/>
+  </message>
+
+  <message name="PlaceOrderInput">
+    <part name="parameters" element="tns:PlaceOrderRequest"/>
+  </message>
+  <message name="PlaceOrderOutput">
+    <part name="parameters" element="tns:PlaceOrderResponse"/>
+  </message>
+
+  <message name="GetOrderInput">
+    <part name="parameters" element="tns:GetOrderRequest"/>
+  </message>
+  <message name="GetOrderOutput">
+    <part name="parameters" element="tns:GetOrderResponse"/>
+  </message>
+
+  <!-- User Messages -->
+  <message name="CreateUserInput">
+    <part name="parameters" element="tns:CreateUserRequest"/>
+  </message>
+  <message name="CreateUserOutput">
+    <part name="parameters" element="tns:CreateUserResponse"/>
+  </message>
+
+  <message name="GetUserInput">
+    <part name="parameters" element="tns:GetUserRequest"/>
+  </message>
+  <message name="GetUserOutput">
+    <part name="parameters" element="tns:GetUserResponse"/>
+  </message>
+
+  <message name="LoginInput">
+    <part name="parameters" element="tns:LoginRequest"/>
+  </message>
+  <message name="LoginOutput">
+    <part name="parameters" element="tns:LoginResponse"/>
+  </message>
+
+  <!-- Port Types -->
+  <portType name="PetPortType">
+    <operation name="GetPet">
+      <documentation>Find pet by ID</documentation>
+      <input message="tns:GetPetInput"/>
+      <output message="tns:GetPetOutput"/>
+    </operation>
+    <operation name="FindPetsByStatus">
+      <documentation>Find pets by status</documentation>
+      <input message="tns:FindPetsByStatusInput"/>
+      <output message="tns:FindPetsByStatusOutput"/>
+    </operation>
+    <operation name="CreatePet">
+      <documentation>Add a new pet to the store</documentation>
+      <input message="tns:CreatePetInput"/>
+      <output message="tns:CreatePetOutput"/>
+    </operation>
+    <operation name="UpdatePet">
+      <documentation>Update an existing pet</documentation>
+      <input message="tns:UpdatePetInput"/>
+      <output message="tns:UpdatePetOutput"/>
+    </operation>
+    <operation name="DeletePet">
+      <documentation>Delete a pet</documentation>
+      <input message="tns:DeletePetInput"/>
+      <output message="tns:DeletePetOutput"/>
+    </operation>
+  </portType>
+
+  <portType name="StorePortType">
+    <operation name="GetInventory">
+      <documentation>Returns pet inventories by status</documentation>
+      <input message="tns:GetInventoryInput"/>
+      <output message="tns:GetInventoryOutput"/>
+    </operation>
+    <operation name="PlaceOrder">
+      <documentation>Place an order for a pet</documentation>
+      <input message="tns:PlaceOrderInput"/>
+      <output message="tns:PlaceOrderOutput"/>
+    </operation>
+    <operation name="GetOrder">
+      <documentation>Find purchase order by ID</documentation>
+      <input message="tns:GetOrderInput"/>
+      <output message="tns:GetOrderOutput"/>
+    </operation>
+  </portType>
+
+  <portType name="UserPortType">
+    <operation name="CreateUser">
+      <documentation>Create user</documentation>
+      <input message="tns:CreateUserInput"/>
+      <output message="tns:CreateUserOutput"/>
+    </operation>
+    <operation name="GetUser">
+      <documentation>Get user by username</documentation>
+      <input message="tns:GetUserInput"/>
+      <output message="tns:GetUserOutput"/>
+    </operation>
+    <operation name="Login">
+      <documentation>Logs user into the system</documentation>
+      <input message="tns:LoginInput"/>
+      <output message="tns:LoginOutput"/>
+    </operation>
+  </portType>
+
+  <!-- Bindings -->
+  <binding name="PetSoapBinding" type="tns:PetPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="GetPet">
+      <soap:operation soapAction="http://petstore.example.com/GetPet"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+    <operation name="FindPetsByStatus">
+      <soap:operation soapAction="http://petstore.example.com/FindPetsByStatus"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+    <operation name="CreatePet">
+      <soap:operation soapAction="http://petstore.example.com/CreatePet"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+    <operation name="UpdatePet">
+      <soap:operation soapAction="http://petstore.example.com/UpdatePet"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+    <operation name="DeletePet">
+      <soap:operation soapAction="http://petstore.example.com/DeletePet"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+  </binding>
+
+  <binding name="StoreSoapBinding" type="tns:StorePortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="GetInventory">
+      <soap:operation soapAction="http://petstore.example.com/GetInventory"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+    <operation name="PlaceOrder">
+      <soap:operation soapAction="http://petstore.example.com/PlaceOrder"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+    <operation name="GetOrder">
+      <soap:operation soapAction="http://petstore.example.com/GetOrder"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+  </binding>
+
+  <binding name="UserSoapBinding" type="tns:UserPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="CreateUser">
+      <soap:operation soapAction="http://petstore.example.com/CreateUser"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+    <operation name="GetUser">
+      <soap:operation soapAction="http://petstore.example.com/GetUser"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+    <operation name="Login">
+      <soap:operation soapAction="http://petstore.example.com/Login"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+  </binding>
+
+  <!-- Services -->
+  <service name="PetStoreService">
+    <documentation>Petstore SOAP Web Service</documentation>
+    <port name="PetPort" binding="tns:PetSoapBinding">
+      <soap:address location="http://localhost:8090/petstore/pet"/>
+    </port>
+    <port name="StorePort" binding="tns:StoreSoapBinding">
+      <soap:address location="http://localhost:8090/petstore/store"/>
+    </port>
+    <port name="UserPort" binding="tns:UserSoapBinding">
+      <soap:address location="http://localhost:8090/petstore/user"/>
+    </port>
+  </service>
+
+</definitions>
