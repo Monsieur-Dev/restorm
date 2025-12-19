@@ -79,9 +79,9 @@ const Button: React.FC<ButtonProps> = ({
 
   // Build CSS classes
   const buttonClasses = [
-    'monaco-button',
-    'monaco-text-button',
-    small ? 'monaco-small-button' : '',
+    'button',
+    'text-button',
+    small ? 'small-button' : '',
     secondary ? 'secondary' : '',
     disabled ? 'disabled' : '',
     'default-colors',

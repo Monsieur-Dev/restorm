@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom/client'
 import { Workbench } from './components/Workbench'
 import type { EditorTab, WorkbenchTree, GroupNode } from 'electron-core-ui/renderer'
-import { isTabGroupNode, isContainerNode, initializeI18n, logger, MonacoWorkbench, Titlebar, i18n } from 'electron-core-ui/renderer'
+import { isTabGroupNode, isContainerNode, initializeI18n, logger, Workbench as CoreWorkbench, Titlebar, i18n } from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 
 // Import translations
@@ -166,24 +166,24 @@ void initI18n().then(() => {
       // Render empty workbench if no file is loaded yet (before file is received)
       if (!fileLoaded && tree.groups.length === 0) {
         return (
-          <MonacoWorkbench fontAliasing="auto">
+          <CoreWorkbench fontAliasing="auto">
             <Titlebar title="Demo" />
             <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
               <span style={{ opacity: 0.5 }}>Waiting for file...</span>
             </div>
-          </MonacoWorkbench>
+          </CoreWorkbench>
         )
       }
 
       return (
-        <MonacoWorkbench fontAliasing="auto">
+        <CoreWorkbench fontAliasing="auto">
           <Titlebar title="Demo" />
           <Workbench
             tree={tree}
             initialTabContentMap={tabContentMap}
             onTreeChange={handleTreeChange}
           />
-        </MonacoWorkbench>
+        </CoreWorkbench>
       )
     }
 

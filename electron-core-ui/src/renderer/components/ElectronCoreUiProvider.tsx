@@ -1,28 +1,28 @@
 import React from 'react'
 import { ThemeProvider } from '../contexts'
 import { SettingsModalProvider } from './Settings'
-import MonacoWorkbench, { type MonacoWorkbenchProps } from './MonacoWorkbench'
+import Workbench, { type WorkbenchProps } from './Workbench/Workbench'
 
-export interface ElectronCoreUiProviderProps extends Omit<MonacoWorkbenchProps, 'children'> {
+export interface ElectronCoreUiProviderProps extends Omit<WorkbenchProps, 'children'> {
   children: React.ReactNode
 }
 
 /**
  * High-level provider that wires core Electron UI context providers
- * and the Monaco workbench layout in a single component.
+ * and the workbench layout in a single component.
  *
  * It should be used once at the root of the renderer tree.
  */
 export const ElectronCoreUiProvider: React.FC<ElectronCoreUiProviderProps> = ({
   children,
-  ...monacoProps
+  ...workbenchProps
 }) => {
   return (
     <ThemeProvider>
       <SettingsModalProvider>
-        <MonacoWorkbench {...monacoProps}>
+        <Workbench {...workbenchProps}>
           {children}
-        </MonacoWorkbench>
+        </Workbench>
       </SettingsModalProvider>
     </ThemeProvider>
   )

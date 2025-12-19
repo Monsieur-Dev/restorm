@@ -11,11 +11,11 @@ variables:
     value: "1px"
     description: "Padding bottom for dropdown items (mac: 4px)"
 
-  - id: vscode-sash-size
+  - id: sash-size
     value: "4px"
     description: Size of sash divider
 
-  - id: vscode-sash-hover-size
+  - id: sash-hover-size
     value: "8px"
     description: Hover size of sash divider
 
@@ -36,19 +36,19 @@ variables:
     description: Tooltip beak position
 
   # Tooltip / hover widget defaults (can be overridden per theme)
-  - id: vscode-editorHoverWidget-background
+  - id: editorHoverWidget-background
     value: "#252526"
     description: Fallback hover widget background
 
-  - id: vscode-editorHoverWidget-foreground
+  - id: editorHoverWidget-foreground
     value: "#CCCCCC"
     description: Fallback hover widget foreground
 
-  - id: vscode-editorHoverWidget-border
+  - id: editorHoverWidget-border
     value: "#454545"
     description: Fallback hover widget border
 
-  - id: vscode-textCodeBlock-background
+  - id: textCodeBlock-background
     value: "rgba(255, 255, 255, 0.1)"
     description: Fallback text code block background
 
@@ -60,37 +60,37 @@ variables:
     value: "12px"
     description: AG Grid font size
 
-  - id: vscode-editor-font-size
+  - id: editor-font-size
     value: "13px"
     description: Default editor font size
 
-  - id: vscode-editor-font-family
+  - id: editor-font-family
     value: "Consolas, 'Courier New', monospace"
     description: Default editor font family
 
   # Radio component defaults (for high contrast themes)
-  - id: vscode-radio-activeBorder
+  - id: radio-activeBorder
     value: "transparent"
     description: Radio button active border color
 
-  - id: vscode-radio-inactiveBorder
+  - id: radio-inactiveBorder
     value: "transparent"
     description: Radio button inactive border color
 
   # Window controls overlay
-  - id: vscode-wco-iconForeground
+  - id: wco-iconForeground
     value: "#cccccc"
     description: Window controls overlay icon color
 
   # Tag component colors (generic defaults, can be overridden per theme type)
-  - id: vscode-tag-background
+  - id: tag-background
     value: "#444444"
     description: Default tag background color
 
-  - id: vscode-tag-background-hover
+  - id: tag-background-hover
     value: "#555555"
     description: Default tag hover background color
 
-  - id: vscode-tag-foreground
+  - id: tag-foreground
     value: "#ffffff"
     description: Default tag foreground color

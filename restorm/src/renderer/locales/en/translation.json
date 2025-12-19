@@ -94,7 +94,67 @@
   "codeEditor": {
     "goToDefinition": "Go to Definition"
   },
+  "graphql": {
+    "send": "Send",
+    "response": "Response",
+    "urlPlaceholder": "GraphQL endpoint URL",
+    "tabs": {
+      "query": "Query",
+      "variables": "Variables",
+      "headers": "Headers",
+      "docs": "Docs",
+      "notes": "Notes"
+    }
+  },
+  "grpc": {
+    "send": "Invoke",
+    "response": "Response",
+    "urlPlaceholder": "gRPC server (host:port)",
+    "tabs": {
+      "message": "Message",
+      "metadata": "Metadata",
+      "docs": "Docs",
+      "notes": "Notes"
+    }
+  },
+  "soap": {
+    "send": "Send",
+    "response": "Response",
+    "urlPlaceholder": "SOAP endpoint URL",
+    "tabs": {
+      "body": "Body",
+      "headers": "Headers",
+      "docs": "Docs",
+      "notes": "Notes"
+    }
+  },
+  "websocket": {
+    "connect": "Connect",
+    "messages": "Messages",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "noMessages": "No messages yet",
+    "urlPlaceholder": "WebSocket URL",
+    "event": "Event",
+    "topic": "Topic",
+    "tabs": {
+      "message": "Message",
+      "headers": "Headers",
+      "docs": "Docs",
+      "notes": "Notes"
+    }
+  },
   "search": {
+    "placeholder": "Search...",
+    "noResults": "No results found",
+    "resultsAriaLabel": "Search results",
+    "categories": {
+      "request": "Requests",
+      "folder": "Folders",
+      "environment": "Environments",
+      "settings": "Settings",
+      "tag": "Tags"
+    },
     "tooltip": {
       "noDetails": "No details available",
       "noContent": "No documentation or notes"

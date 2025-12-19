@@ -18,5 +18,3 @@ export class MainWindow extends RestormWindow {
     super(configuration)
   }
 }
-
-  

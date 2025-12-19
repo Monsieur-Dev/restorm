@@ -76,7 +76,7 @@ const SelectBoxNative: React.FC<SelectBoxNativeProps> = ({
 
   // Build CSS classes
   const selectClasses = [
-    'monaco-select-box',
+    'select-box',
     className
   ].filter(Boolean).join(' ')
 

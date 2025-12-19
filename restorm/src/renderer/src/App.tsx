@@ -24,19 +24,58 @@ import {
   navigationService
 } from 'electron-core-ui/renderer'
 import type { WorkbenchTree, NavigationEvent, GroupNode, TabGroupNode, EditorTab, SearchResult } from 'electron-core-ui/renderer'
-import { Workbench } from './components/Workbench'
+import { RestormWorkbench } from './components/RestormWorkbench'
 import { Welcome } from './components/Welcome'
-import { HttpMethodBadge } from './components/HttpMethodBadge'
+import { Badge } from './components/Badge'
+import { mapToBadgeType } from './utils/badgeUtils'
 import { renderSearchTooltipContent } from './components/renderSearchTooltipContent'
 import { EnvironmentValuesProvider } from './contexts/EnvironmentValuesContext'
-import { importSwaggerFromJson } from './services/SwaggerImportService'
+import { importSwaggerFromJson } from './services/import/SwaggerImportService'
+import { importGraphQLFromString } from './services/import/GraphQLImportService'
+import { importGrpcFromString } from './services/import/GrpcImportService'
+import { importSoapFromString } from './services/import/SoapImportService'
+import { importAsyncAPIFromString } from './services/import/AsyncAPIImportService'
 import { searchIndexService } from './services/SearchIndexService'
 import { makeReactiveFolder } from './types/reactive'
 import { folderAsRootListViewItem, collectAllFolderIds } from './services/FolderToListView'
 import swaggerPetstoreJson from './resources/swagger-petstore.json'
-import type { Folder, FolderItem, HTTPRequest, Environment, EnvironmentFolder } from './types/collections'
-import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder } from './types/collections'
-import type { FolderTab, EnvironmentFolderTab, HTTPRequestTab, BreadcrumbItem } from './types/editor'
+// Import test spec files
+import graphqlDocker from '../../../tests/unit/graphql-docker.graphql?raw'
+import graphqlPetstore from '../../../tests/unit/graphql-petstore.graphql?raw'
+import grpcDocker from '../../../tests/unit/grpc-docker.proto?raw'
+import grpcPetstore from '../../../tests/unit/grpc-petstore.proto?raw'
+import soapDocker from '../../../tests/unit/soap-docker.wsdl?raw'
+import soapPetstore from '../../../tests/unit/soap-petstore.wsdl?raw'
+import asyncapiDocker from '../../../tests/unit/asyncapi-docker.yaml?raw'
+import asyncapiPetstore from '../../../tests/unit/asyncapi-petstore.yaml?raw'
+import type {
+  Folder,
+  FolderItem,
+  Environment,
+  EnvironmentFolder,
+  Request
+} from './types/collections'
+import {
+  isFolder,
+  isRequest,
+  isHTTPRequest,
+  isGraphQLRequest,
+  isGrpcRequest,
+  isSoapRequest,
+  isWebSocketRequest,
+  isEnvironmentFolder,
+  isAnyFolder
+} from './types/collections'
+import type {
+  FolderTab,
+  EnvironmentFolderTab,
+  HTTPRequestTab,
+  GraphQLRequestTab,
+  GrpcRequestTab,
+  SoapRequestTab,
+  WebSocketRequestTab,
+  BreadcrumbItem
+} from './types/editor'
 
 const MIN_LEFT_WIDTH = 180
 const RIGHT_MIN_WIDTH = 240
@@ -145,60 +184,118 @@ const attachContextMenus = (
     return withMenu
   })
 
-// Import and convert swagger to EnvironmentFolder structure (initial data)
+// Import and convert all API specs to folder structures (initial data)
+// Each import creates its own independent EnvironmentFolder as a root node
 const rawSwaggerFolder = importSwaggerFromJson(JSON.stringify(swaggerPetstoreJson))
-const initialSwaggerFolder = makeReactiveFolder(rawSwaggerFolder) as EnvironmentFolder
-const allFolderIds = collectAllFolderIds(initialSwaggerFolder)
+const rawGraphqlDocker = importGraphQLFromString(graphqlDocker, { name: 'GraphQL Docker', baseUrl: 'http://localhost:4000' })
+const rawGraphqlPetstore = importGraphQLFromString(graphqlPetstore, { name: 'GraphQL Petstore' })
+const rawGrpcDocker = importGrpcFromString(grpcDocker, { name: 'gRPC Docker', baseUrl: 'localhost:9000' })
+const rawGrpcPetstore = importGrpcFromString(grpcPetstore, { name: 'gRPC Petstore' })
+const rawSoapDocker = importSoapFromString(soapDocker, { name: 'SOAP Docker' })
+const rawSoapPetstore = importSoapFromString(soapPetstore, { name: 'SOAP Petstore' })
+const rawAsyncapiDocker = importAsyncAPIFromString(asyncapiDocker, { name: 'AsyncAPI Docker' })
+const rawAsyncapiPetstore = importAsyncAPIFromString(asyncapiPetstore, { name: 'AsyncAPI Petstore' })
 
-/** Find a folder by ID in the folder tree (returns Folder or EnvironmentFolder) */
-function findFolderById(folder: Folder | EnvironmentFolder, id: string): Folder | EnvironmentFolder | undefined {
+// All root folders as independent workspace nodes
+const initialRootFolders: EnvironmentFolder[] = [
+  rawSwaggerFolder,
+  rawGraphqlDocker,
+  rawGraphqlPetstore,
+  rawGrpcDocker,
+  rawGrpcPetstore,
+  rawSoapDocker,
+  rawSoapPetstore,
+  rawAsyncapiDocker,
+  rawAsyncapiPetstore
+].map((folder) => makeReactiveFolder(folder) as EnvironmentFolder)
+
+const allFolderIds = initialRootFolders.flatMap((folder) => collectAllFolderIds(folder))
+
+/** Find a folder by ID in a single folder tree (returns Folder or EnvironmentFolder) */
+function findFolderByIdInTree(folder: Folder | EnvironmentFolder, id: string): Folder | EnvironmentFolder | undefined {
   if (folder.id === id) return folder
   for (const item of folder.items) {
     if (isAnyFolder(item)) {
-      const found = findFolderById(item, id)
+      const found = findFolderByIdInTree(item, id)
       if (found) return found
     }
   }
   return undefined
 }
 
-/** Find an environment folder by ID in the folder tree */
-function findEnvironmentFolderById(folder: Folder | EnvironmentFolder, id: string): EnvironmentFolder | undefined {
+/** Find a folder by ID across multiple root folders */
+function findFolderById(rootFolders: EnvironmentFolder[], id: string): Folder | EnvironmentFolder | undefined {
+  for (const root of rootFolders) {
+    const found = findFolderByIdInTree(root, id)
+    if (found) return found
+  }
+  return undefined
+}
+
+/** Find an environment folder by ID in a single folder tree */
+function findEnvironmentFolderByIdInTree(folder: Folder | EnvironmentFolder, id: string): EnvironmentFolder | undefined {
   if (isEnvironmentFolder(folder as FolderItem) && folder.id === id) return folder as EnvironmentFolder
   for (const item of folder.items) {
     if (isEnvironmentFolder(item)) {
       if (item.id === id) return item
-      const found = findEnvironmentFolderById(item, id)
+      const found = findEnvironmentFolderByIdInTree(item, id)
       if (found) return found
     } else if (isAnyFolder(item)) {
-      const found = findEnvironmentFolderById(item, id)
+      const found = findEnvironmentFolderByIdInTree(item, id)
       if (found) return found
     }
   }
   return undefined
 }
 
-/** Find an HTTP request by ID in the folder tree */
-function findRequestById(folder: Folder | EnvironmentFolder, id: string): HTTPRequest | undefined {
+/** Find an environment folder by ID across multiple root folders */
+function findEnvironmentFolderById(rootFolders: EnvironmentFolder[], id: string): EnvironmentFolder | undefined {
+  for (const root of rootFolders) {
+    const found = findEnvironmentFolderByIdInTree(root, id)
+    if (found) return found
+  }
+  return undefined
+}
+
+/** Find any request by ID in a single folder tree */
+function findRequestByIdInTree(folder: Folder | EnvironmentFolder, id: string): Request | undefined {
   for (const item of folder.items) {
-    if (!isAnyFolder(item) && item.id === id) return item
+    if (isRequest(item) && item.id === id) return item
     if (isAnyFolder(item)) {
-      const found = findRequestById(item, id)
+      const found = findRequestByIdInTree(item, id)
       if (found) return found
     }
   }
   return undefined
 }
 
-/** Find any item (folder or request) by ID in the folder tree */
-function findItemById(folder: Folder | EnvironmentFolder, id: string): FolderItem | null {
+/** Find any request by ID across multiple root folders */
+function findRequestById(rootFolders: EnvironmentFolder[], id: string): Request | undefined {
+  for (const root of rootFolders) {
+    const found = findRequestByIdInTree(root, id)
+    if (found) return found
+  }
+  return undefined
+}
+
+/** Find any item (folder or request) by ID in a single folder tree */
+function findItemByIdInTree(folder: Folder | EnvironmentFolder, id: string): FolderItem | null {
   if (folder.id === id) return folder
   for (const item of folder.items) {
     if (item.id === id) return item
     if (isAnyFolder(item)) {
-      const found = findItemById(item, id)
+      const found = findItemByIdInTree(item, id)
       if (found) return found
     }
+  }
+  return null
+}
+
+/** Find any item (folder or request) by ID across multiple root folders */
+function findItemById(rootFolders: EnvironmentFolder[], id: string): FolderItem | null {
+  for (const root of rootFolders) {
+    const found = findItemByIdInTree(root, id)
+    if (found) return found
   }
   return null
 }
@@ -213,8 +310,8 @@ function getFolderIcon(item: Folder | EnvironmentFolder): { type: 'codicon'; val
   return isEnvironmentFolder(item as FolderItem) ? ENV_FOLDER_ICON : FOLDER_ICON
 }
 
-/** Find an item (folder or request) by ID and build breadcrumbs including the item itself */
-function findItemWithBreadcrumbs(
+/** Find an item (folder or request) by ID and build breadcrumbs including the item itself - in a single tree */
+function findItemWithBreadcrumbsInTree(
   folder: Folder | EnvironmentFolder,
   id: string,
   path: BreadcrumbItem[] = []
@@ -232,9 +329,9 @@ function findItemWithBreadcrumbs(
         // Include the folder itself as the last breadcrumb (with appropriate icon)
         return { item, breadcrumbs: [...currentPath, { id: item.id, label: item.name, icon: getFolderIcon(item) }] }
       }
-      const found = findItemWithBreadcrumbs(item, id, currentPath)
+      const found = findItemWithBreadcrumbsInTree(item, id, currentPath)
       if (found.item) return found
-    } else if (isRequest(item) && isHTTPRequest(item)) {
+    } else if (isRequest(item)) {
       if (item.id === id) {
         // Include the request itself as the last breadcrumb (no folder icon)
         return { item, breadcrumbs: [...currentPath, { id: item.id, label: item.name }] }
@@ -245,9 +342,21 @@ function findItemWithBreadcrumbs(
   return { item: null, breadcrumbs: [] }
 }
 
+/** Find an item (folder or request) by ID and build breadcrumbs including the item itself - across multiple root folders */
+function findItemWithBreadcrumbs(
+  rootFolders: EnvironmentFolder[],
+  id: string
+): { item: FolderItem | null; breadcrumbs: BreadcrumbItem[] } {
+  for (const root of rootFolders) {
+    const found = findItemWithBreadcrumbsInTree(root, id)
+    if (found.item) return found
+  }
+  return { item: null, breadcrumbs: [] }
+}
+
 /** Get environments from the nearest ancestor EnvironmentFolder */
 function getNearestEnvironmentsForBreadcrumbs(
-  rootFolder: Folder | EnvironmentFolder,
+  rootFolders: EnvironmentFolder[],
   breadcrumbs: BreadcrumbItem[]
 ): Environment[] {
   if (breadcrumbs.length === 0) {
@@ -261,7 +370,7 @@ function getNearestEnvironmentsForBreadcrumbs(
     if (!folderId) {
       continue
     }
-    const folder = findFolderById(rootFolder, folderId)
+    const folder = findFolderById(rootFolders, folderId)
     if (folder && isEnvironmentFolder(folder as FolderItem)) {
       const envFolder = folder as EnvironmentFolder
       if (envFolder.environments.length > 0) {
@@ -273,8 +382,8 @@ function getNearestEnvironmentsForBreadcrumbs(
   return []
 }
 
-/** Find an item and its parent folder in the tree */
-function findItemWithParent(
+/** Find an item and its parent folder in a single tree */
+function findItemWithParentInTree(
   folder: Folder | EnvironmentFolder,
   targetId: string,
   parent: Folder | EnvironmentFolder | null = null
@@ -291,7 +400,7 @@ function findItemWithParent(
       return { item, parent: folder, index: i }
     }
     if (isAnyFolder(item)) {
-      const found = findItemWithParent(item, targetId, item)
+      const found = findItemWithParentInTree(item, targetId, item)
       if (found.item) return found
     }
   }
@@ -299,12 +408,24 @@ function findItemWithParent(
   return { item: null, parent: null, index: -1 }
 }
 
+/** Find an item and its parent folder across multiple root folders */
+function findItemWithParent(
+  rootFolders: EnvironmentFolder[],
+  targetId: string
+): { item: FolderItem | null; parent: Folder | EnvironmentFolder | null; index: number; rootFolder: EnvironmentFolder | null } {
+  for (const root of rootFolders) {
+    const found = findItemWithParentInTree(root, targetId)
+    if (found.item) return { ...found, rootFolder: root }
+  }
+  return { item: null, parent: null, index: -1, rootFolder: null }
+}
+
 /** Remove an item from its parent folder and return a copy of the item */
 function removeItemFromTree(
-  folder: Folder | EnvironmentFolder,
+  rootFolders: EnvironmentFolder[],
   itemId: string
 ): FolderItem | null {
-  const { item, parent, index } = findItemWithParent(folder, itemId)
+  const { item, parent, index } = findItemWithParent(rootFolders, itemId)
   if (!item || !parent || index < 0) return null
 
   // Remove from parent
@@ -314,12 +435,12 @@ function removeItemFromTree(
 
 /** Insert an item into the tree at the specified position */
 function insertItemIntoTree(
-  folder: Folder | EnvironmentFolder,
+  rootFolders: EnvironmentFolder[],
   item: FolderItem,
   targetId: string,
   position: 'before' | 'after' | 'into'
 ): boolean {
-  const { item: target, parent, index } = findItemWithParent(folder, targetId)
+  const { item: target, parent, index } = findItemWithParent(rootFolders, targetId)
   if (!target) return false
 
   if (position === 'into') {
@@ -373,10 +494,10 @@ function deepCloneItem(item: FolderItem): FolderItem {
 
 /** Clone an item and insert the clone after it */
 function cloneItemInTree(
-  folder: Folder | EnvironmentFolder,
+  rootFolders: EnvironmentFolder[],
   itemId: string
 ): FolderItem | null {
-  const { item, parent, index } = findItemWithParent(folder, itemId)
+  const { item, parent, index } = findItemWithParent(rootFolders, itemId)
   if (!item || !parent || index < 0) return null
 
   // Deep clone the item
@@ -415,8 +536,9 @@ const App: React.FC = () => {
     }
   }, [handleMenuExit])
 
-  // Swagger folder data (mutable for renaming)
-  const [swaggerFolder, setSwaggerFolder] = useState<EnvironmentFolder>(initialSwaggerFolder)
+  // Root folders data (mutable for renaming)
+  // Each root folder is an independent EnvironmentFolder
+  const [rootFolders, setRootFolders] = useState<EnvironmentFolder[]>(initialRootFolders)
 
   // Counter to force re-render without breaking reactive proxies
   const [, forceUpdate] = useState(0)
@@ -430,12 +552,15 @@ const App: React.FC = () => {
     searchIndexInitializedRef.current = true
     
     searchIndexService.initialize()
-    searchIndexService.indexFolderTree(swaggerFolder)
+    // Index all root folders
+    for (const folder of rootFolders) {
+      searchIndexService.indexFolderTree(folder)
+    }
     
     // Note: No cleanup needed - the service is a singleton that should persist
     // for the lifetime of the application. StrictMode would otherwise destroy
     // subscriptions before re-rendering.
-  }, [swaggerFolder])
+  }, [rootFolders])
 
   // Initialize with all folders expanded
   const [expandedIds, setExpandedIds] = useState<string[]>(allFolderIds)
@@ -664,16 +789,40 @@ const App: React.FC = () => {
   }, [findFirstTabGroupId, findGroupIdForTab, focusedGroupId, hasGroupWithId, updateGroupById])
 
   // Open an HTTP request tab in the workbench
-  const openRequestTab = useCallback(
-    (request: HTTPRequest, breadcrumbs: BreadcrumbItem[], environments?: Environment[]) => {
+  // Generic function to open any request type tab
+  const openAnyRequestTab = useCallback(
+    (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[]) => {
     const tabId = `request-${request.id}`
+    
+    // Determine tab type and title based on request type
+    let tabType: string
+    let title: string
+    
+    if (isHTTPRequest(request)) {
+      tabType = 'http-request'
+      title = `${request.method} ${request.name}`
+    } else if (isGraphQLRequest(request)) {
+      tabType = 'graphql-request'
+      title = `GraphQL ${request.name}`
+    } else if (isGrpcRequest(request)) {
+      tabType = 'grpc-request'
+      title = `gRPC ${request.name}`
+    } else if (isSoapRequest(request)) {
+      tabType = 'soap-request'
+      title = `SOAP ${request.name}`
+    } else if (isWebSocketRequest(request)) {
+      tabType = 'websocket-request'
+      title = `WS ${request.name}`
+    } else {
+      return // Unknown request type
+    }
 
     setWorkbenchTree((prev) => {
-      const newTab: HTTPRequestTab = {
+      const newTab = {
         id: tabId,
-        tabType: 'http-request',
-        title: `${request.method} ${request.name}`,
-        titleString: `${request.method} ${request.name}`,
+        tabType,
+        title,
+        titleString: title,
         request,
         breadcrumbs,
         environments,
@@ -743,9 +892,9 @@ const App: React.FC = () => {
   const handleRebuildTab = useCallback((tabId: string): EditorTab | null => {
     if (tabId.startsWith('env-folder-')) {
       const itemId = tabId.replace('env-folder-', '')
-      const folder = findEnvironmentFolderById(swaggerFolder, itemId)
+      const folder = findEnvironmentFolderById(rootFolders, itemId)
       if (folder) {
-        const { breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, itemId)
+        const { breadcrumbs } = findItemWithBreadcrumbs(rootFolders, itemId)
         return {
           id: tabId,
           tabType: 'environment-folder',
@@ -758,9 +907,9 @@ const App: React.FC = () => {
       }
     } else if (tabId.startsWith('folder-')) {
       const itemId = tabId.replace('folder-', '')
-      const folder = findFolderById(swaggerFolder, itemId)
+      const folder = findFolderById(rootFolders, itemId)
       if (folder && !isEnvironmentFolder(folder as FolderItem)) {
-        const { breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, itemId)
+        const { breadcrumbs } = findItemWithBreadcrumbs(rootFolders, itemId)
         return {
           id: tabId,
           tabType: 'folder',
@@ -773,23 +922,70 @@ const App: React.FC = () => {
       }
     } else if (tabId.startsWith('request-')) {
       const itemId = tabId.replace('request-', '')
-      const { item, breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, itemId)
-      if (item && isRequest(item) && isHTTPRequest(item)) {
-        const environments = getNearestEnvironmentsForBreadcrumbs(swaggerFolder, breadcrumbs)
-        return {
-          id: tabId,
-          tabType: 'http-request',
-          title: `${item.method} ${item.name}`,
-          titleString: `${item.method} ${item.name}`,
-          request: item,
-          breadcrumbs,
-          environments,
-          allowFullscreen: true
-        } as HTTPRequestTab
+      const { item, breadcrumbs } = findItemWithBreadcrumbs(rootFolders, itemId)
+      if (item && isRequest(item)) {
+        const environments = getNearestEnvironmentsForBreadcrumbs(rootFolders, breadcrumbs)
+        
+        if (isHTTPRequest(item)) {
+          return {
+            id: tabId,
+            tabType: 'http-request',
+            title: `${item.method} ${item.name}`,
+            titleString: `${item.method} ${item.name}`,
+            request: item,
+            breadcrumbs,
+            environments,
+            allowFullscreen: true
+          } as HTTPRequestTab
+        } else if (isGraphQLRequest(item)) {
+          return {
+            id: tabId,
+            tabType: 'graphql-request',
+            title: `GraphQL ${item.name}`,
+            titleString: `GraphQL ${item.name}`,
+            request: item,
+            breadcrumbs,
+            environments,
+            allowFullscreen: true
+          } as GraphQLRequestTab
+        } else if (isGrpcRequest(item)) {
+          return {
+            id: tabId,
+            tabType: 'grpc-request',
+            title: `gRPC ${item.name}`,
+            titleString: `gRPC ${item.name}`,
+            request: item,
+            breadcrumbs,
+            environments,
+            allowFullscreen: true
+          } as GrpcRequestTab
+        } else if (isSoapRequest(item)) {
+          return {
+            id: tabId,
+            tabType: 'soap-request',
+            title: `SOAP ${item.name}`,
+            titleString: `SOAP ${item.name}`,
+            request: item,
+            breadcrumbs,
+            environments,
+            allowFullscreen: true
+          } as SoapRequestTab
+        } else if (isWebSocketRequest(item)) {
+          return {
+            id: tabId,
+            tabType: 'websocket-request',
+            title: `WS ${item.name}`,
+            titleString: `WS ${item.name}`,
+            request: item,
+            breadcrumbs,
+            environments,
+            allowFullscreen: true
+          } as WebSocketRequestTab
+        }
       }
     }
     return null
-  }, [swaggerFolder])
+  }, [rootFolders])
 
   // Handle workbench state restored
   const handleStateRestored = useCallback((restoredTree: WorkbenchTree | null) => {
@@ -832,9 +1028,9 @@ const App: React.FC = () => {
 
       // Open appropriate tab based on navigation type
       if (params.type === 'folder' || params.type === 'environment-folder') {
-        const folder = findFolderById(swaggerFolder, key)
+        const folder = findFolderById(rootFolders, key)
         if (folder) {
-          const { breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, key)
+          const { breadcrumbs } = findItemWithBreadcrumbs(rootFolders, key)
           if (isEnvironmentFolder(folder as FolderItem)) {
             openEnvironmentFolderTab(folder as EnvironmentFolder, breadcrumbs)
           } else {
@@ -843,11 +1039,13 @@ const App: React.FC = () => {
           // Focus the group containing the tab
           setFocusedGroupId('restorm-main-group')
         }
-      } else if (params.type === 'http-request') {
-        const { item, breadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, key)
-        if (item && isRequest(item) && isHTTPRequest(item)) {
-          const environments = getNearestEnvironmentsForBreadcrumbs(swaggerFolder, breadcrumbs)
-          openRequestTab(item, breadcrumbs, environments)
+      } else if (params.type === 'http-request' || params.type === 'graphql-request' || 
+                 params.type === 'grpc-request' || params.type === 'soap-request' || 
+                 params.type === 'websocket-request') {
+        const { item, breadcrumbs } = findItemWithBreadcrumbs(rootFolders, key)
+        if (item && isRequest(item)) {
+          const environments = getNearestEnvironmentsForBreadcrumbs(rootFolders, breadcrumbs)
+          openAnyRequestTab(item, breadcrumbs, environments)
           // Focus the group containing the tab
           setFocusedGroupId('restorm-main-group')
         }
@@ -855,11 +1053,11 @@ const App: React.FC = () => {
     })
 
     return unsubscribe
-  }, [openFolderTab, openEnvironmentFolderTab, openRequestTab, swaggerFolder])
+  }, [openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, rootFolders])
 
   // Handle item click in the sidebar - use navigation service
   const handleItemClick = useCallback((itemId: string) => {
-    const { item } = findItemWithBreadcrumbs(swaggerFolder, itemId)
+    const { item } = findItemWithBreadcrumbs(rootFolders, itemId)
     if (!item) return
 
     if (isEnvironmentFolder(item)) {
@@ -874,11 +1072,21 @@ const App: React.FC = () => {
       return
     }
 
-    if (isRequest(item) && isHTTPRequest(item)) {
-      // Navigate to request - this will trigger the onNavigate listener
-      navigationService.navigateTo(itemId, 'sidebar', { type: 'http-request' })
+    if (isRequest(item)) {
+      // Navigate to request - determine type from request
+      if (isHTTPRequest(item)) {
+        navigationService.navigateTo(itemId, 'sidebar', { type: 'http-request' })
+      } else if (isGraphQLRequest(item)) {
+        navigationService.navigateTo(itemId, 'sidebar', { type: 'graphql-request' })
+      } else if (isGrpcRequest(item)) {
+        navigationService.navigateTo(itemId, 'sidebar', { type: 'grpc-request' })
+      } else if (isSoapRequest(item)) {
+        navigationService.navigateTo(itemId, 'sidebar', { type: 'soap-request' })
+      } else if (isWebSocketRequest(item)) {
+        navigationService.navigateTo(itemId, 'sidebar', { type: 'websocket-request' })
+      }
     }
-  }, [swaggerFolder])
+  }, [rootFolders])
 
   // Handle drag & drop in the sidebar to reorder items
   const handleItemDrop = useCallback((payload: ListViewDropEventPayload) => {
@@ -889,15 +1097,17 @@ const App: React.FC = () => {
     // Don't allow dropping an item onto itself
     if (sourceId === targetId) return
 
-    // Don't allow dropping the root folder
-    if (sourceId === swaggerFolder.id) return
+    // Don't allow dropping a root folder (they are top-level)
+    const isRootFolder = rootFolders.some((f) => f.id === sourceId)
+    if (isRootFolder) return
 
-    // Don't allow dropping onto the root folder with 'before' or 'after'
-    if (targetId === swaggerFolder.id && position !== 'into') return
+    // Don't allow dropping onto a root folder with 'before' or 'after' (only 'into')
+    const isTargetRootFolder = rootFolders.some((f) => f.id === targetId)
+    if (isTargetRootFolder && position !== 'into') return
 
     // Don't allow dropping a folder into one of its descendants
     const isDescendant = (parentId: string, childId: string): boolean => {
-      const parent = findItemById(swaggerFolder, parentId)
+      const parent = findItemById(rootFolders, parentId)
       if (!parent || !isAnyFolder(parent)) return false
       for (const item of parent.items) {
         if (item.id === childId) return true
@@ -908,18 +1118,18 @@ const App: React.FC = () => {
     if (isDescendant(sourceId, targetId)) return
 
     // Remove the item from its current position
-    const removedItem = removeItemFromTree(swaggerFolder, sourceId)
+    const removedItem = removeItemFromTree(rootFolders, sourceId)
     if (!removedItem) return
 
     // Insert at the new position
-    const inserted = insertItemIntoTree(swaggerFolder, removedItem, targetId, position)
+    const inserted = insertItemIntoTree(rootFolders, removedItem, targetId, position)
     if (!inserted) {
       // If insertion failed, try to restore the item (this shouldn't happen)
       return
     }
 
     // Force React re-render by creating new reference
-    setSwaggerFolder((prevFolder) => ({ ...prevFolder }))
+    setRootFolders((prevFolders) => [...prevFolders])
 
     // Update breadcrumbs in open workbench tabs
     setWorkbenchTree((prevTree) => {
@@ -940,12 +1150,12 @@ const App: React.FC = () => {
         }
 
         // Recalculate breadcrumbs for this tab
-        const { breadcrumbs: newBreadcrumbs } = findItemWithBreadcrumbs(swaggerFolder, itemId)
+        const { breadcrumbs: newBreadcrumbs } = findItemWithBreadcrumbs(rootFolders, itemId)
         if (newBreadcrumbs.length === 0) return tab
 
         // For HTTP request tabs, also recalculate environments
         if (restormTab.tabType === 'http-request') {
-          const newEnvironments = getNearestEnvironmentsForBreadcrumbs(swaggerFolder, newBreadcrumbs)
+          const newEnvironments = getNearestEnvironmentsForBreadcrumbs(rootFolders, newBreadcrumbs)
           return {
             ...restormTab,
             breadcrumbs: newBreadcrumbs,
@@ -964,20 +1174,21 @@ const App: React.FC = () => {
         groups: [{ ...group, tabs: updatedTabs }]
       }
     })
-  }, [swaggerFolder])
+  }, [rootFolders])
 
   // Handle "Clone" context menu action
   const handleCloneItem = useCallback((itemId: string) => {
-    // Don't allow cloning the root folder
-    if (itemId === swaggerFolder.id) return
+    // Don't allow cloning root folders
+    const isRootFolder = rootFolders.some((f) => f.id === itemId)
+    if (isRootFolder) return
 
     // Clone the item
-    const clonedItem = cloneItemInTree(swaggerFolder, itemId)
+    const clonedItem = cloneItemInTree(rootFolders, itemId)
     if (!clonedItem) return
 
     // Force React re-render by creating new reference
-    setSwaggerFolder((prevFolder) => ({ ...prevFolder }))
-  }, [swaggerFolder])
+    setRootFolders((prevFolders) => [...prevFolders])
+  }, [rootFolders])
 
   // State for sidebar editing (controlled rename mode)
   const [sidebarEditingItemId, setSidebarEditingItemId] = useState<string | null>(null)
@@ -985,7 +1196,7 @@ const App: React.FC = () => {
   // Handle "Create subfolder" context menu action
   const handleCreateSubfolder = useCallback((parentFolderId: string) => {
     // Find the parent folder
-    const parentFolder = findFolderById(swaggerFolder, parentFolderId)
+    const parentFolder = findFolderById(rootFolders, parentFolderId)
     if (!parentFolder) return
 
     // Create a new folder
@@ -1008,13 +1219,13 @@ const App: React.FC = () => {
     setSelectedItemId(newFolder.id)
 
     // Force React re-render by creating new reference
-    setSwaggerFolder((prevFolder) => ({ ...prevFolder }))
+    setRootFolders((prevFolders) => [...prevFolders])
 
     // Put the new folder in edit mode (after render)
     setTimeout(() => {
       setSidebarEditingItemId(newFolder.id)
     }, 0)
-  }, [swaggerFolder])
+  }, [rootFolders])
 
   // State for delete confirmation modal
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
@@ -1026,28 +1237,29 @@ const App: React.FC = () => {
 
   // Handle "Delete" context menu action - show confirmation
   const handleDeleteItem = useCallback((itemId: string) => {
-    // Don't allow deleting the root folder
-    if (itemId === swaggerFolder.id) return
+    // Don't allow deleting root folders
+    const isRootFolder = rootFolders.some((f) => f.id === itemId)
+    if (isRootFolder) return
 
     // Find the item to get its name and type
-    const item = findItemById(swaggerFolder, itemId)
+    const item = findItemById(rootFolders, itemId)
     if (!item) return
 
-    const isFolder = isAnyFolder(item)
+    const isFolderItem = isAnyFolder(item)
     setDeleteConfirmation({
       isOpen: true,
       itemId,
       itemName: item.name,
-      isFolder
+      isFolder: isFolderItem
     })
-  }, [swaggerFolder])
+  }, [rootFolders])
 
   // Confirm deletion
   const confirmDelete = useCallback(() => {
     const { itemId } = deleteConfirmation
 
     // Remove the item from the tree
-    removeItemFromTree(swaggerFolder, itemId)
+    removeItemFromTree(rootFolders, itemId)
 
     // Close any tabs that reference the deleted item
     setWorkbenchTree((prevTree) => {
@@ -1090,11 +1302,11 @@ const App: React.FC = () => {
     })
 
     // Force React re-render
-    setSwaggerFolder((prevFolder) => ({ ...prevFolder }))
+    setRootFolders((prevFolders) => [...prevFolders])
 
     // Close the confirmation modal
     setDeleteConfirmation((prev) => ({ ...prev, isOpen: false }))
-  }, [deleteConfirmation, swaggerFolder])
+  }, [deleteConfirmation, rootFolders])
 
   // Cancel deletion
   const cancelDelete = useCallback(() => {
@@ -1106,13 +1318,13 @@ const App: React.FC = () => {
     const itemId = payload.item.id
 
     // Find and update the reactive object directly (triggers search re-indexing)
-    const foundItem = findItemById(swaggerFolder, itemId)
+    const foundItem = findItemById(rootFolders, itemId)
     if (foundItem) {
       foundItem.name = newName
     }
 
     // Force React re-render by creating new reference
-    setSwaggerFolder((prevFolder) => ({ ...prevFolder }))
+    setRootFolders((prevFolders) => [...prevFolders])
 
     // Also update the workbench tab title and breadcrumbs
     setWorkbenchTree((prevTree) => {
@@ -1176,7 +1388,7 @@ const App: React.FC = () => {
         groups: [{ ...group, tabs: updatedTabs }]
       }
     })
-  }, [swaggerFolder])
+  }, [rootFolders])
 
   // Handle search result click - navigate to the selected item
   const handleSearchResultClick = useCallback((result: SearchResult) => {
@@ -1187,20 +1399,24 @@ const App: React.FC = () => {
     }
   }, [handleItemClick])
 
-  // Convert swagger folder to ListView items
+  // Convert root folders to ListView items (each root folder is a top-level node)
   const sidebarItems: ListViewItemData[] = useMemo(() => {
     const expandedSet = new Set(expandedIds)
-    const rootItem = folderAsRootListViewItem(swaggerFolder, {
+    const options = {
       expandedIds: expandedSet,
       renderMethodBadge: (method: string) => (
-        <HttpMethodBadge method={method} />
+        <Badge type={mapToBadgeType(method)} />
+      ),
+      renderProtocolBadge: (protocol: string, label?: string) => (
+        <Badge type={mapToBadgeType(protocol)} label={label} />
       ),
       renderDeprecatedTitle: (name: string) => (
         <span style={{ textDecoration: 'line-through', opacity: 0.7 }}>{name}</span>
       )
-    })
-    return [rootItem]
-  }, [expandedIds, swaggerFolder])
+    }
+    // Each root folder becomes a top-level item in the sidebar
+    return rootFolders.map((folder) => folderAsRootListViewItem(folder, options))
+  }, [expandedIds, rootFolders])
 
   const sidebarItemsWithContextMenu: ListViewItemData[] = useMemo(
     () => attachContextMenus(sidebarItems, t, handleCloneItem, handleCreateSubfolder, handleDeleteItem),
@@ -1291,8 +1507,8 @@ const App: React.FC = () => {
       // Skip navigation for last item (current page)
       if (isLast) return
 
-      // Determine item type by looking up in the swagger folder
-      const foundItem = findFolderById(swaggerFolder, item.id)
+      // Determine item type by looking up in the root folders
+      const foundItem = findFolderById(rootFolders, item.id)
       if (foundItem) {
         if (isEnvironmentFolder(foundItem as FolderItem)) {
           navigationService.navigateTo(item.id, 'breadcrumb', { type: 'environment-folder' })
@@ -1301,26 +1517,26 @@ const App: React.FC = () => {
         }
       } else {
         // It might be a request
-        const { item: requestItem } = findItemWithBreadcrumbs(swaggerFolder, item.id)
+        const { item: requestItem } = findItemWithBreadcrumbs(rootFolders, item.id)
         if (requestItem && isRequest(requestItem) && isHTTPRequest(requestItem)) {
           navigationService.navigateTo(item.id, 'breadcrumb', { type: 'http-request' })
         }
       }
     },
-    [swaggerFolder]
+    [rootFolders]
   )
 
   // Handle item rename from breadcrumb
   const handleItemRename = useCallback(
     (item: BreadcrumbItem, newName: string) => {
       // Find and update the reactive object directly (triggers search re-indexing)
-      const foundItem = findItemById(swaggerFolder, item.id)
+      const foundItem = findItemById(rootFolders, item.id)
       if (foundItem) {
         foundItem.name = newName
       }
 
       // Force React re-render by creating new reference
-      setSwaggerFolder((prevFolder) => ({ ...prevFolder }))
+      setRootFolders((prevFolders) => [...prevFolders])
 
       // Also update the workbench tab title and breadcrumbs
       setWorkbenchTree((prevTree) => {
@@ -1376,22 +1592,22 @@ const App: React.FC = () => {
             return { ...restormTab, breadcrumbs: updatedBreadcrumbs }
           }
 
-          return tab
-        })
-
-        return {
-          ...prevTree,
-          groups: [{ ...group, tabs: updatedTabs }]
-        }
+        return tab
       })
-    },
-    [swaggerFolder]
+
+      return {
+        ...prevTree,
+        groups: [{ ...group, tabs: updatedTabs }]
+      }
+    })
+  },
+    [rootFolders]
   )
 
   // Handle tags changes from Workbench (folders or HTTP requests)
   const handleTagsChange = useCallback((targetId: string, newTags: string[]) => {
     // Find and update the reactive object directly (triggers search re-indexing)
-    const item = findItemById(swaggerFolder, targetId)
+    const item = findItemById(rootFolders, targetId)
     if (item) {
       item.tags = newTags
     }
@@ -1436,12 +1652,12 @@ const App: React.FC = () => {
         groups: [{ ...group, tabs: updatedTabs }]
       }
     })
-  }, [swaggerFolder])
+  }, [rootFolders])
 
   // Handle folder changes from FolderView
   const handleFolderChange = useCallback((folderId: string, updatedFolder: Folder) => {
     // Find and update the reactive folder directly to preserve proxies
-    const reactiveFolder = findFolderById(swaggerFolder, folderId)
+    const reactiveFolder = findFolderById(rootFolders, folderId)
     if (reactiveFolder && !isEnvironmentFolder(reactiveFolder as FolderItem)) {
       // Update properties on the reactive object (triggers re-indexing)
       reactiveFolder.configuration = updatedFolder.configuration
@@ -1485,12 +1701,12 @@ const App: React.FC = () => {
         groups: updatedGroups
       }
     })
-  }, [swaggerFolder])
+  }, [rootFolders])
 
   // Handle environment folder changes from EnvironmentFolderView
   const handleEnvironmentFolderChange = useCallback((folderId: string, updatedFolder: EnvironmentFolder) => {
     // Find and update the reactive folder directly to preserve proxies
-    const reactiveFolder = findEnvironmentFolderById(swaggerFolder, folderId)
+    const reactiveFolder = findEnvironmentFolderById(rootFolders, folderId)
     if (reactiveFolder) {
       // Update properties on the reactive object (triggers re-indexing)
       reactiveFolder.environments = updatedFolder.environments
@@ -1528,7 +1744,7 @@ const App: React.FC = () => {
             const belongsToFolder = restormTab.breadcrumbs.some(bc => bc.id === folderId)
             if (belongsToFolder) {
               // Recalculate environments for this request
-              const newEnvironments = getNearestEnvironmentsForBreadcrumbs(swaggerFolder, restormTab.breadcrumbs)
+              const newEnvironments = getNearestEnvironmentsForBreadcrumbs(rootFolders, restormTab.breadcrumbs)
               return {
                 ...restormTab,
                 environments: newEnvironments
@@ -1547,7 +1763,7 @@ const App: React.FC = () => {
         groups: updatedGroups
       }
     })
-  }, [swaggerFolder])
+  }, [rootFolders])
 
   return (
     <div
@@ -1555,8 +1771,8 @@ const App: React.FC = () => {
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
-        backgroundColor: 'var(--vscode-editor-background)',
-        color: 'var(--vscode-editor-foreground)'
+        backgroundColor: 'var(--editor-background)',
+        color: 'var(--editor-foreground)'
       }}
     >
       <Titlebar
@@ -1607,8 +1823,8 @@ const App: React.FC = () => {
             display: 'flex',
             flexDirection: 'column',
             minHeight: 0,
-            borderRight: '1px solid var(--vscode-sideBar-border)',
-            backgroundColor: 'var(--vscode-sideBar-background)'
+            borderRight: '1px solid var(--sideBar-border)',
+            backgroundColor: 'var(--sideBar-background)'
           }}
         >
           <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }}>
@@ -1683,7 +1899,7 @@ const App: React.FC = () => {
               display: 'flex'
             }}
           >
-            <Workbench
+            <RestormWorkbench
               tree={workbenchTree}
               onTreeChange={handleTreeChange}
               focusedGroupId={focusedGroupId}
@@ -1701,9 +1917,9 @@ const App: React.FC = () => {
               autosave
               onRebuildTab={handleRebuildTab}
               onStateRestored={handleStateRestored}
-              getRequestById={(id) => findRequestById(swaggerFolder, id)}
-              getFolderById={(id) => findFolderById(swaggerFolder, id)}
-              getEnvironmentFolderById={(id) => findEnvironmentFolderById(swaggerFolder, id)}
+              getRequestById={(id) => findRequestById(rootFolders, id)}
+              getFolderById={(id) => findFolderById(rootFolders, id)}
+              getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootFolders, id)}
             />
           </div>
         </EnvironmentValuesProvider>

@@ -2,8 +2,8 @@
 
 ## Overview
 
-`SplitView` is a declarative wrapper around VS Code–style split layouts with draggable `Sash` separators.  
-It lets you arrange multiple panes either horizontally or vertically while keeping the look & feel driven by VS Code theme variables.
+`SplitView` is a declarative wrapper around split layouts with draggable `Sash` separators.  
+It lets you arrange multiple panes either horizontally or vertically while keeping the look & feel driven by theme variables.
 
 ## Basic usage
 
@@ -81,7 +81,7 @@ export interface SplitViewPaneProps {
   - Dragging a `Sash` updates neighboring pane ratios while respecting `minSize` / `maxSize` when provided.
   - The `onSizesChange` callback receives updated ratios so parents can react (e.g. persist layout).
 - **Theming**
-  - Uses the existing `Sash` component and VS Code theme variables, including:
+  - Uses the existing `Sash` component and theme variables, including:
     - `--sash-size`
     - `--sash-hover-size`
     - `--sash-hoverBorder`
@@ -89,4 +89,4 @@ export interface SplitViewPaneProps {
     - `--editorGroup-border`
     - `--sideBar-background`
 
-The main container uses the `monaco-split-view2` class name to stay close to VS Code’s DOM structure.
+The main container uses the `monaco-split-view2` class name to stay close to theme’s DOM structure.

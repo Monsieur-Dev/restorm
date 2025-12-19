@@ -205,7 +205,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
       {hasSubmenu && showSubmenu && (
         <div
           ref={submenuRef}
-          className="monaco-menu menubar-menu-items-holder monaco-menu-container"
+          className="menu menubar-menu-items-holder menu-container"
           style={{
             position: 'fixed',
             zIndex: 2000,

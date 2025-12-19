@@ -109,7 +109,7 @@ const MermaidBlock: React.FC<MermaidBlockProps> = ({ code, isDark }) => {
 
     const render = async (): Promise<void> => {
       try {
-        // Initialize Mermaid with a theme matching the current VSCode-like theme.
+        // Initialize Mermaid with a theme matching the current theme.
         // We re-apply the config on each render to react to theme changes.
         mermaid.initialize({
           startOnLoad: false,

@@ -1,0 +1,334 @@
+/**
+ * Service for importing GraphQL schemas into Restorm collections
+ */
+
+import type {
+  Folder,
+  EnvironmentFolder,
+  Environment,
+  GraphQLRequest,
+  GraphQLOperationType
+} from '../../types/collections'
+
+// ============================================================================
+// GraphQL Schema Types
+// ============================================================================
+
+interface GraphQLField {
+  name: string
+  description?: string | undefined
+  args: GraphQLArgument[]
+  type: string
+}
+
+interface GraphQLArgument {
+  name: string
+  type: string
+  description?: string | undefined
+  defaultValue?: string | undefined
+}
+
+interface GraphQLType {
+  name: string
+  description?: string | undefined
+  fields: GraphQLField[]
+}
+
+interface ParsedGraphQLSchema {
+  types: GraphQLType[]
+  queries: GraphQLField[]
+  mutations: GraphQLField[]
+  subscriptions: GraphQLField[]
+}
+
+// ============================================================================
+// Parser Functions
+// ============================================================================
+
+/** Parse a GraphQL type string from schema */
+function parseTypeString(typeStr: string): string {
+  return typeStr.trim()
+}
+
+/** Parse arguments from a field definition */
+function parseArguments(argsStr: string): GraphQLArgument[] {
+  if (!argsStr || argsStr.trim() === '') return []
+  
+  const args: GraphQLArgument[] = []
+  // Simple parsing: split by comma, handle basic cases
+  const argParts = argsStr.split(',')
+  
+  for (const part of argParts) {
+    const match = part.trim().match(/^(\w+)\s*:\s*(.+?)(?:\s*=\s*(.+))?$/)
+    if (match?.[1] && match[2]) {
+      args.push({
+        name: match[1],
+        type: parseTypeString(match[2]),
+        defaultValue: match[3]?.trim()
+      })
+    }
+  }
+  
+  return args
+}
+
+/** Parse a GraphQL SDL schema string */
+function parseGraphQLSchema(schemaString: string): ParsedGraphQLSchema {
+  const result: ParsedGraphQLSchema = {
+    types: [],
+    queries: [],
+    mutations: [],
+    subscriptions: []
+  }
+  
+  // Remove comments
+  const cleanedSchema = schemaString
+    .replace(/#[^\n]*/g, '') // Remove single-line comments
+    .replace(/"""[\s\S]*?"""/g, (match) => {
+      // Keep triple-quoted descriptions but mark them
+      return `__DESC__${match}__DESC__`
+    })
+  
+  // Parse type definitions
+  const typeRegex = /type\s+(\w+)\s*\{([^}]+)\}/g
+  let typeMatch
+  
+  while ((typeMatch = typeRegex.exec(cleanedSchema)) !== null) {
+    const typeName = typeMatch[1]
+    const fieldsBlock = typeMatch[2]
+    
+    if (!typeName || !fieldsBlock) continue
+    
+    const fields = parseFieldsBlock(fieldsBlock)
+    
+    if (typeName === 'Query') {
+      result.queries = fields
+    } else if (typeName === 'Mutation') {
+      result.mutations = fields
+    } else if (typeName === 'Subscription') {
+      result.subscriptions = fields
+    } else {
+      result.types.push({
+        name: typeName,
+        fields
+      })
+    }
+  }
+  
+  return result
+}
+
+/** Parse fields from a type block */
+function parseFieldsBlock(block: string): GraphQLField[] {
+  const fields: GraphQLField[] = []
+  const lines = block.split('\n')
+  
+  let currentDescription = ''
+  
+  for (const line of lines) {
+    const trimmed = line.trim()
+    
+    // Check for description (triple quotes)
+    if (trimmed.startsWith('"""')) {
+      const descMatch = trimmed.match(/"""(.+?)"""/)
+      if (descMatch?.[1]) {
+        currentDescription = descMatch[1].trim()
+      }
+      continue
+    }
+    
+    // Skip empty lines
+    if (!trimmed) continue
+    
+    // Parse field: name(args): Type
+    const fieldMatch = trimmed.match(/^(\w+)(?:\(([^)]*)\))?\s*:\s*(.+)$/)
+    if (fieldMatch?.[1] && fieldMatch[3]) {
+      fields.push({
+        name: fieldMatch[1],
+        description: currentDescription || undefined,
+        args: parseArguments(fieldMatch[2] ?? ''),
+        type: parseTypeString(fieldMatch[3])
+      })
+      currentDescription = ''
+    }
+  }
+  
+  return fields
+}
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+/** Generate a deterministic ID from a seed string */
+function generateId(seed?: string): string {
+  if (!seed) {
+    return crypto.randomUUID()
+  }
+  let hash = 0
+  for (let i = 0; i < seed.length; i++) {
+    const char = seed.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash
+  }
+  const hex = Math.abs(hash).toString(16).padStart(8, '0')
+  return `${hex}-${seed.length.toString(16).padStart(4, '0')}-4000-8000-${hex}${hex.slice(0, 4)}`
+}
+
+/** Build a sample GraphQL query for a field */
+function buildSampleQuery(field: GraphQLField, operationType: GraphQLOperationType): string {
+  const argsStr = field.args.length > 0
+    ? `(${field.args.map(a => `${a.name}: ${getSampleValue(a.type)}`).join(', ')})`
+    : ''
+  
+  const operationName = operationType === 'query' ? 'query' : operationType
+  
+  return `${operationName} {
+  ${field.name}${argsStr} {
+    # Add fields here
+  }
+}`
+}
+
+/** Get a sample value for a GraphQL type */
+function getSampleValue(type: string): string {
+  const baseType = type.replace(/[![\]]/g, '').trim()
+  
+  switch (baseType) {
+    case 'ID':
+    case 'String':
+      return '"example"'
+    case 'Int':
+      return '1'
+    case 'Float':
+      return '1.0'
+    case 'Boolean':
+      return 'true'
+    default:
+      return '""'
+  }
+}
+
+/** Convert a GraphQL field to a GraphQLRequest */
+function fieldToRequest(
+  field: GraphQLField,
+  operationType: GraphQLOperationType,
+  baseUrl: string,
+  collectionName: string
+): GraphQLRequest {
+  const query = buildSampleQuery(field, operationType)
+  
+  const request: GraphQLRequest = {
+    type: 'graphql',
+    id: generateId(`${collectionName}:graphql:${operationType}:${field.name}`),
+    name: field.name,
+    documentation: field.description ?? `GraphQL ${operationType}: ${field.name}`,
+    tags: [operationType],
+    url: baseUrl,
+    operationType,
+    query,
+    headers: [
+      { key: 'Content-Type', value: 'application/json' }
+    ]
+  }
+  
+  if (field.args.length > 0) {
+    request.variables = JSON.stringify({}, null, 2)
+  }
+  
+  return request
+}
+
+// ============================================================================
+// Main Service
+// ============================================================================
+
+export interface GraphQLImportOptions {
+  /** Base URL for GraphQL endpoint */
+  baseUrl?: string
+  /** Name for the imported collection */
+  name?: string
+}
+
+/**
+ * Import a GraphQL SDL schema and convert it to a Folder structure
+ */
+export function importGraphQL(schemaString: string, options: GraphQLImportOptions = {}): EnvironmentFolder {
+  const baseUrl = options.baseUrl ?? '{{baseUrl}}'
+  const name = options.name ?? (options.baseUrl ? 'GraphQL API' : 'GraphQL API')
+  
+  const schema = parseGraphQLSchema(schemaString)
+  
+  // Create folders for queries, mutations, subscriptions
+  const items: Folder['items'] = []
+  
+  if (schema.queries.length > 0) {
+    const queriesFolder: Folder = {
+      id: generateId(`${name}:folder:graphql:queries`),
+      name: 'Queries',
+      documentation: '# GraphQL Queries\n\nRead operations',
+      tags: ['query'],
+      configuration: {},
+      items: schema.queries.map(field => fieldToRequest(field, 'query', baseUrl, name))
+    }
+    items.push(queriesFolder)
+  }
+  
+  if (schema.mutations.length > 0) {
+    const mutationsFolder: Folder = {
+      id: generateId(`${name}:folder:graphql:mutations`),
+      name: 'Mutations',
+      documentation: '# GraphQL Mutations\n\nWrite operations',
+      tags: ['mutation'],
+      configuration: {},
+      items: schema.mutations.map(field => fieldToRequest(field, 'mutation', baseUrl, name))
+    }
+    items.push(mutationsFolder)
+  }
+  
+  if (schema.subscriptions.length > 0) {
+    const subscriptionsFolder: Folder = {
+      id: generateId(`${name}:folder:graphql:subscriptions`),
+      name: 'Subscriptions',
+      documentation: '# GraphQL Subscriptions\n\nReal-time operations',
+      tags: ['subscription'],
+      configuration: {},
+      items: schema.subscriptions.map(field => fieldToRequest(field, 'subscription', baseUrl, name))
+    }
+    items.push(subscriptionsFolder)
+  }
+  
+  // Build types documentation
+  const typesDoc = schema.types.map(t => {
+    const fieldsDoc = t.fields.map(f => `  - ${f.name}: ${f.type}`).join('\n')
+    return `### ${t.name}\n${fieldsDoc}`
+  }).join('\n\n')
+  
+  const environment: Environment = {
+    id: generateId(`${name}:env:graphql:Default`),
+    name: 'Default',
+    variables: [
+      { key: 'baseUrl', value: options.baseUrl ?? 'http://localhost:4000' }
+    ]
+  }
+  
+  const rootFolder: EnvironmentFolder = {
+    folderType: 'environment',
+    id: generateId(`${name}:folder:graphql:root`),
+    name,
+    documentation: `# ${name}\n\nGraphQL API\n\n## Types\n\n${typesDoc}`,
+    tags: [],
+    configuration: {},
+    environments: [environment],
+    items
+  }
+  
+  return rootFolder
+}
+
+/**
+ * Import a GraphQL schema from a file content string
+ */
+export function importGraphQLFromString(content: string, options: GraphQLImportOptions = {}): EnvironmentFolder {
+  return importGraphQL(content, options)
+}

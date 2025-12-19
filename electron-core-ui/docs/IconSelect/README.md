@@ -1,6 +1,6 @@
 # IconSelect Component
 
-A component for selecting icons – either emojis or VS Code codicons – with VSCode-themed styling.
+A component for selecting icons – either emojis or codicons – with themed styling.
 
 ## Component Location
 

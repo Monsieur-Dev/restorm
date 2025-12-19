@@ -1,0 +1,663 @@
+{{!-- Code snippets template for WebSocket requests --}}
+{{!-- Generates markdown with code examples in multiple languages --}}
+
+{{#if isNativeWebSocket}}
+<details open>
+<summary><strong>JavaScript - Browser WebSocket</strong></summary>
+
+```javascript
+const ws = new WebSocket('{{url}}');
+
+ws.onopen = () => {
+  console.log('Connected');
+{{#if message}}
+  ws.send(JSON.stringify({{message}}));
+{{/if}}
+};
+
+ws.onmessage = (event) => {
+  console.log('Received:', event.data);
+};
+
+ws.onerror = (error) => {
+  console.error('Error:', error);
+};
+
+ws.onclose = (event) => {
+  console.log('Disconnected:', event.code, event.reason);
+};
+
+// To send a message:
+// ws.send(JSON.stringify({ type: 'message', data: 'Hello' }));
+
+// To close:
+// ws.close();
+```
+
+</details>
+
+<details>
+<summary><strong>JavaScript - ws (Node.js)</strong></summary>
+
+```javascript
+const WebSocket = require('ws');
+
+const ws = new WebSocket('{{url}}'{{#if headers}}, {
+  headers: {
+{{#each headers}}    '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}  }
+}{{/if}});
+
+ws.on('open', () => {
+  console.log('Connected');
+{{#if message}}
+  ws.send(JSON.stringify({{message}}));
+{{/if}}
+});
+
+ws.on('message', (data) => {
+  console.log('Received:', data.toString());
+});
+
+ws.on('error', (error) => {
+  console.error('Error:', error);
+});
+
+ws.on('close', (code, reason) => {
+  console.log('Disconnected:', code, reason.toString());
+});
+```
+
+</details>
+
+<details>
+<summary><strong>TypeScript - ws</strong></summary>
+
+```typescript
+import WebSocket from 'ws';
+
+const ws = new WebSocket('{{url}}'{{#if headers}}, {
+  headers: {
+{{#each headers}}    '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}  }
+}{{/if}});
+
+ws.on('open', (): void => {
+  console.log('Connected');
+{{#if message}}
+  ws.send(JSON.stringify({{message}}));
+{{/if}}
+});
+
+ws.on('message', (data: WebSocket.RawData): void => {
+  console.log('Received:', data.toString());
+});
+
+ws.on('error', (error: Error): void => {
+  console.error('Error:', error);
+});
+
+ws.on('close', (code: number, reason: Buffer): void => {
+  console.log('Disconnected:', code, reason.toString());
+});
+```
+
+</details>
+{{/if}}
+
+{{#if isSocketIO}}
+<details open>
+<summary><strong>JavaScript - Socket.IO Client</strong></summary>
+
+```javascript
+import { io } from 'socket.io-client';
+
+const socket = io('{{url}}'{{#if headers}}, {
+  extraHeaders: {
+{{#each headers}}    '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}  }
+}{{/if}});
+
+socket.on('connect', () => {
+  console.log('Connected:', socket.id);
+{{#if event}}
+  socket.emit('{{event}}', {{message}});
+{{/if}}
+});
+
+socket.on('disconnect', (reason) => {
+  console.log('Disconnected:', reason);
+});
+
+socket.on('error', (error) => {
+  console.error('Error:', error);
+});
+
+// Listen for events
+{{#if event}}
+socket.on('{{event}}', (data) => {
+  console.log('Received {{event}}:', data);
+});
+{{/if}}
+
+// Emit events:
+// socket.emit('eventName', { data: 'value' });
+
+// Disconnect:
+// socket.disconnect();
+```
+
+</details>
+
+<details>
+<summary><strong>TypeScript - Socket.IO Client</strong></summary>
+
+```typescript
+import { io, Socket } from 'socket.io-client';
+
+interface ServerToClientEvents {
+{{#if event}}
+  {{event}}: (data: unknown) => void;
+{{/if}}
+  // Add your event types here
+}
+
+interface ClientToServerEvents {
+{{#if event}}
+  {{event}}: (data: unknown) => void;
+{{/if}}
+  // Add your event types here
+}
+
+const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io('{{url}}'{{#if headers}}, {
+  extraHeaders: {
+{{#each headers}}    '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}  }
+}{{/if}});
+
+socket.on('connect', () => {
+  console.log('Connected:', socket.id);
+{{#if event}}
+  socket.emit('{{event}}', {{message}});
+{{/if}}
+});
+
+socket.on('disconnect', (reason) => {
+  console.log('Disconnected:', reason);
+});
+
+{{#if event}}
+socket.on('{{event}}', (data) => {
+  console.log('Received {{event}}:', data);
+});
+{{/if}}
+```
+
+</details>
+{{/if}}
+
+{{#if isMQTT}}
+<details open>
+<summary><strong>JavaScript - MQTT.js (Browser/Node.js)</strong></summary>
+
+```javascript
+import mqtt from 'mqtt';
+
+const client = mqtt.connect('{{url}}'{{#if headers}}, {
+{{#each headers}}  {{key}}: '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}} }{{/if}});
+
+client.on('connect', () => {
+  console.log('Connected');
+{{#if topic}}
+{{#if isSubscribe}}
+  client.subscribe('{{topic}}', (err) => {
+    if (err) {
+      console.error('Subscribe error:', err);
+    } else {
+      console.log('Subscribed to {{topic}}');
+    }
+  });
+{{/if}}
+{{#if isPublish}}
+  client.publish('{{topic}}', JSON.stringify({{message}}));
+{{/if}}
+{{/if}}
+});
+
+client.on('message', (topic, message) => {
+  console.log('Received:', topic, message.toString());
+});
+
+client.on('error', (error) => {
+  console.error('Error:', error);
+});
+
+client.on('close', () => {
+  console.log('Disconnected');
+});
+
+// Publish:
+// client.publish('topic', 'message');
+
+// Subscribe:
+// client.subscribe('topic');
+
+// Disconnect:
+// client.end();
+```
+
+</details>
+
+<details>
+<summary><strong>Python - paho-mqtt</strong></summary>
+
+```python
+import paho.mqtt.client as mqtt
+import json
+
+def on_connect(client, userdata, flags, rc):
+    print(f"Connected with result code {rc}")
+{{#if topic}}
+{{#if isSubscribe}}
+    client.subscribe("{{topic}}")
+{{/if}}
+{{#if isPublish}}
+    client.publish("{{topic}}", json.dumps({{message}}))
+{{/if}}
+{{/if}}
+
+def on_message(client, userdata, msg):
+    print(f"Received: {msg.topic} {msg.payload.decode()}")
+
+def on_disconnect(client, userdata, rc):
+    print(f"Disconnected with result code {rc}")
+
+client = mqtt.Client()
+client.on_connect = on_connect
+client.on_message = on_message
+client.on_disconnect = on_disconnect
+
+{{#if username}}
+client.username_pw_set("{{username}}", "{{password}}")
+{{/if}}
+
+client.connect("{{host}}", {{port}}, 60)
+client.loop_forever()
+```
+
+</details>
+{{/if}}
+
+<details>
+<summary><strong>Python - websockets</strong></summary>
+
+```python
+import asyncio
+import websockets
+import json
+
+async def connect():
+    {{#if headers}}
+    headers = {
+{{#each headers}}        '{{key}}': '{{value}}',
+{{/each}}    }
+    async with websockets.connect('{{url}}', extra_headers=headers) as ws:
+    {{else}}
+    async with websockets.connect('{{url}}') as ws:
+    {{/if}}
+        print('Connected')
+{{#if message}}
+        await ws.send(json.dumps({{message}}))
+{{/if}}
+        
+        async for message in ws:
+            print('Received:', message)
+
+asyncio.run(connect())
+```
+
+</details>
+
+<details>
+<summary><strong>Go - gorilla/websocket</strong></summary>
+
+```go
+package main
+
+import (
+    "encoding/json"
+    "fmt"
+    "log"
+    "net/http"
+    "github.com/gorilla/websocket"
+)
+
+func main() {
+{{#if headers}}
+    header := http.Header{}
+{{#each headers}}
+    header.Set("{{key}}", "{{value}}")
+{{/each}}
+    
+    conn, _, err := websocket.DefaultDialer.Dial("{{url}}", header)
+{{else}}
+    conn, _, err := websocket.DefaultDialer.Dial("{{url}}", nil)
+{{/if}}
+    if err != nil {
+        log.Fatal("Dial error:", err)
+    }
+    defer conn.Close()
+
+    fmt.Println("Connected")
+
+{{#if message}}
+    message := {{message}}
+    if err := conn.WriteJSON(message); err != nil {
+        log.Println("Write error:", err)
+    }
+{{/if}}
+
+    for {
+        _, message, err := conn.ReadMessage()
+        if err != nil {
+            log.Println("Read error:", err)
+            break
+        }
+        fmt.Printf("Received: %s\n", message)
+    }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>C# - ClientWebSocket</strong></summary>
+
+```csharp
+using System;
+using System.Net.WebSockets;
+using System.Text;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task Main()
+    {
+        using var ws = new ClientWebSocket();
+{{#if headers}}
+{{#each headers}}
+        ws.Options.SetRequestHeader("{{key}}", "{{value}}");
+{{/each}}
+{{/if}}
+
+        await ws.ConnectAsync(new Uri("{{url}}"), CancellationToken.None);
+        Console.WriteLine("Connected");
+
+{{#if message}}
+        var message = JsonSerializer.Serialize({{message}});
+        var bytes = Encoding.UTF8.GetBytes(message);
+        await ws.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
+{{/if}}
+
+        var buffer = new byte[4096];
+        while (ws.State == WebSocketState.Open)
+        {
+            var result = await ws.ReceiveAsync(buffer, CancellationToken.None);
+            if (result.MessageType == WebSocketMessageType.Close)
+            {
+                await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+            }
+            else
+            {
+                var text = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                Console.WriteLine($"Received: {text}");
+            }
+        }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Java - java-websocket</strong></summary>
+
+```java
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.handshake.ServerHandshake;
+import java.net.URI;
+{{#if headers}}import java.util.HashMap;
+import java.util.Map;{{/if}}
+
+public class WebSocketExample {
+    public static void main(String[] args) throws Exception {
+{{#if headers}}
+        Map<String, String> headers = new HashMap<>();
+{{#each headers}}
+        headers.put("{{key}}", "{{value}}");
+{{/each}}
+        
+        WebSocketClient client = new WebSocketClient(new URI("{{url}}"), headers) {
+{{else}}
+        WebSocketClient client = new WebSocketClient(new URI("{{url}}")) {
+{{/if}}
+            @Override
+            public void onOpen(ServerHandshake handshake) {
+                System.out.println("Connected");
+{{#if message}}
+                send("{{message}}");
+{{/if}}
+            }
+
+            @Override
+            public void onMessage(String message) {
+                System.out.println("Received: " + message);
+            }
+
+            @Override
+            public void onClose(int code, String reason, boolean remote) {
+                System.out.println("Disconnected: " + code + " " + reason);
+            }
+
+            @Override
+            public void onError(Exception ex) {
+                System.err.println("Error: " + ex.getMessage());
+            }
+        };
+        
+        client.connect();
+    }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Ruby - websocket-client-simple</strong></summary>
+
+```ruby
+require 'websocket-client-simple'
+require 'json'
+
+ws = WebSocket::Client::Simple.connect('{{url}}'{{#if headers}}, headers: {
+{{#each headers}}  '{{key}}' => '{{value}}',
+{{/each}} }{{/if}})
+
+ws.on :open do
+  puts 'Connected'
+{{#if message}}
+  ws.send({{message}}.to_json)
+{{/if}}
+end
+
+ws.on :message do |msg|
+  puts "Received: #{msg.data}"
+end
+
+ws.on :error do |e|
+  puts "Error: #{e.message}"
+end
+
+ws.on :close do |e|
+  puts "Disconnected: #{e.code} #{e.reason}"
+end
+
+loop do
+  sleep 1
+end
+```
+
+</details>
+
+<details>
+<summary><strong>Rust - tokio-tungstenite</strong></summary>
+
+```rust
+use futures_util::{SinkExt, StreamExt};
+use tokio_tungstenite::{connect_async, tungstenite::Message};
+
+#[tokio::main]
+async fn main() {
+    let url = "{{url}}";
+    
+    let (ws_stream, _) = connect_async(url)
+        .await
+        .expect("Failed to connect");
+    
+    println!("Connected");
+    
+    let (mut write, mut read) = ws_stream.split();
+
+{{#if message}}
+    let message = serde_json::json!({{message}});
+    write.send(Message::Text(message.to_string())).await.unwrap();
+{{/if}}
+
+    while let Some(msg) = read.next().await {
+        match msg {
+            Ok(Message::Text(text)) => {
+                println!("Received: {}", text);
+            }
+            Ok(Message::Close(_)) => {
+                println!("Connection closed");
+                break;
+            }
+            Err(e) => {
+                eprintln!("Error: {}", e);
+                break;
+            }
+            _ => {}
+        }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Swift - URLSessionWebSocketTask</strong></summary>
+
+```swift
+import Foundation
+
+let url = URL(string: "{{url}}")!
+var request = URLRequest(url: url)
+{{#if headers}}
+{{#each headers}}
+request.setValue("{{value}}", forHTTPHeaderField: "{{key}}")
+{{/each}}
+{{/if}}
+
+let webSocketTask = URLSession.shared.webSocketTask(with: request)
+
+func receive() {
+    webSocketTask.receive { result in
+        switch result {
+        case .success(let message):
+            switch message {
+            case .string(let text):
+                print("Received: \(text)")
+            case .data(let data):
+                print("Received data: \(data.count) bytes")
+            @unknown default:
+                break
+            }
+            receive() // Continue receiving
+        case .failure(let error):
+            print("Error: \(error)")
+        }
+    }
+}
+
+webSocketTask.resume()
+print("Connected")
+
+{{#if message}}
+let message = URLSessionWebSocketTask.Message.string("""
+{{message}}
+""")
+webSocketTask.send(message) { error in
+    if let error = error {
+        print("Send error: \(error)")
+    }
+}
+{{/if}}
+
+receive()
+
+RunLoop.main.run()
+```
+
+</details>
+
+<details>
+<summary><strong>Kotlin - OkHttp</strong></summary>
+
+```kotlin
+import okhttp3.*
+
+fun main() {
+    val client = OkHttpClient()
+    
+    val request = Request.Builder()
+        .url("{{url}}")
+{{#if headers}}
+{{#each headers}}
+        .addHeader("{{key}}", "{{value}}")
+{{/each}}
+{{/if}}
+        .build()
+    
+    val listener = object : WebSocketListener() {
+        override fun onOpen(webSocket: WebSocket, response: Response) {
+            println("Connected")
+{{#if message}}
+            webSocket.send("""{{message}}""")
+{{/if}}
+        }
+        
+        override fun onMessage(webSocket: WebSocket, text: String) {
+            println("Received: $text")
+        }
+        
+        override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+            webSocket.close(1000, null)
+            println("Closing: $code $reason")
+        }
+        
+        override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+            println("Error: ${t.message}")
+        }
+    }
+    
+    client.newWebSocket(request, listener)
+    
+    // Keep the program running
+    Thread.sleep(Long.MAX_VALUE)
+}
+```
+
+</details>

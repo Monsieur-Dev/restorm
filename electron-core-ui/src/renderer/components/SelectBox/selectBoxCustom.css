@@ -1,40 +1,40 @@
 /* ---------------------------------------------------------------------------------------------
  * SelectBox Custom Dropdown Styles
- * Based on VSCode's selectBoxCustom.css
+ * Based on editor's selectBoxCustom.css
  *-------------------------------------------------------------------------------------------- */
 
 /* Use custom CSS vars to expose padding into parent select for padding calculation */
-.monaco-select-box-dropdown-padding {
+.select-box-dropdown-padding {
   --dropdown-padding-top: 1px;
   --dropdown-padding-bottom: 1px;
 }
 
-.hc-black .monaco-select-box-dropdown-padding,
-.hc-light .monaco-select-box-dropdown-padding {
+.hc-black .select-box-dropdown-padding,
+.hc-light .select-box-dropdown-padding {
   --dropdown-padding-top: 3px;
   --dropdown-padding-bottom: 4px;
 }
 
-.monaco-select-box-dropdown-container {
+.select-box-dropdown-container {
   display: none;
   box-sizing: border-box;
 }
 
-.monaco-select-box-dropdown-container > .select-box-details-pane > .select-box-description-markdown * {
+.select-box-dropdown-container > .select-box-details-pane > .select-box-description-markdown * {
   margin: 0;
 }
 
-.monaco-select-box-dropdown-container > .select-box-details-pane > .select-box-description-markdown a:focus {
+.select-box-dropdown-container > .select-box-details-pane > .select-box-description-markdown a:focus {
   outline: 1px solid -webkit-focus-ring-color;
   outline-offset: -1px;
 }
 
-.monaco-select-box-dropdown-container > .select-box-details-pane > .select-box-description-markdown code {
+.select-box-dropdown-container > .select-box-details-pane > .select-box-description-markdown code {
   line-height: 15px; /** For some reason, this is needed, otherwise <code> will take up 20px height */
-  font-family: var(--monaco-monospace-font);
+  font-family: var(--monospace-font);
 }
 
-.monaco-select-box-dropdown-container.visible {
+.select-box-dropdown-container.visible {
   display: flex;
   flex-direction: column;
   text-align: left;
@@ -54,20 +54,20 @@
   box-sizing: border-box;
 }
 
-.monaco-select-box-dropdown-container > .select-box-details-pane {
+.select-box-dropdown-container > .select-box-details-pane {
   padding: 5px;
 }
 
-.hc-black .monaco-select-box-dropdown-container > .select-box-dropdown-list-container {
+.hc-black .select-box-dropdown-container > .select-box-dropdown-list-container {
   padding-top: var(--dropdown-padding-top);
   padding-bottom: var(--dropdown-padding-bottom);
 }
 
-.monaco-select-box-dropdown-container > .select-box-dropdown-list-container .monaco-list .monaco-list-row {
+.select-box-dropdown-container > .select-box-dropdown-list-container .list .list-row {
   cursor: pointer;
 }
 
-.monaco-select-box-dropdown-container > .select-box-dropdown-list-container .monaco-list .monaco-list-row > .option-text {
+.select-box-dropdown-container > .select-box-dropdown-list-container .list .list-row > .option-text {
   text-overflow: ellipsis;
   overflow: hidden;
   padding-left: 3.5px;
@@ -75,7 +75,7 @@
   float: left;
 }
 
-.monaco-select-box-dropdown-container > .select-box-dropdown-list-container .monaco-list .monaco-list-row > .option-detail {
+.select-box-dropdown-container > .select-box-dropdown-list-container .list .list-row > .option-detail {
   text-overflow: ellipsis;
   overflow: hidden;
   padding-left: 3.5px;
@@ -84,7 +84,7 @@
   opacity: 0.7;
 }
 
-.monaco-select-box-dropdown-container > .select-box-dropdown-list-container .monaco-list .monaco-list-row > .option-decorator-right {
+.select-box-dropdown-container > .select-box-dropdown-list-container .list .list-row > .option-decorator-right {
   text-overflow: ellipsis;
   overflow: hidden;
   padding-right: 10px;
@@ -96,7 +96,7 @@
 
 /* https://webaim.org/techniques/css/invisiblecontent/ */
 
-.monaco-select-box-dropdown-container > .select-box-dropdown-list-container .monaco-list .monaco-list-row > .visually-hidden {
+.select-box-dropdown-container > .select-box-dropdown-list-container .list .list-row > .visually-hidden {
   position: absolute;
   left: -10000px;
   top: auto;
@@ -105,47 +105,47 @@
   overflow: hidden;
 }
 
-.monaco-select-box-dropdown-container > .select-box-dropdown-container-width-control {
+.select-box-dropdown-container > .select-box-dropdown-container-width-control {
   flex: 1 1 auto;
   align-self: flex-start;
   opacity: 0;
 }
 
-.monaco-select-box-dropdown-container > .select-box-dropdown-container-width-control > .width-control-div {
+.select-box-dropdown-container > .select-box-dropdown-container-width-control > .width-control-div {
   overflow: hidden;
   max-height: 0;
 }
 
-.monaco-select-box-dropdown-container > .select-box-dropdown-container-width-control > .width-control-div > .option-text-width-control {
+.select-box-dropdown-container > .select-box-dropdown-container-width-control > .width-control-div > .option-text-width-control {
   padding-left: 4px;
   padding-right: 8px;
   white-space: nowrap;
 }
 
 /* Disabled option styling */
-.monaco-select-box-dropdown-container > .select-box-dropdown-list-container .monaco-list .monaco-list-row.option-disabled {
+.select-box-dropdown-container > .select-box-dropdown-list-container .list .list-row.option-disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.monaco-select-box-dropdown-container > .select-box-dropdown-list-container .monaco-list .monaco-list-row.option-disabled:hover {
+.select-box-dropdown-container > .select-box-dropdown-list-container .list .list-row.option-disabled:hover {
   background-color: transparent !important;
   color: inherit !important;
 }
 
 /* Focus and hover states */
-.monaco-select-box-dropdown-container > .select-box-dropdown-list-container .monaco-list .monaco-list-row.focused {
+.select-box-dropdown-container > .select-box-dropdown-list-container .list .list-row.focused {
   background-color: var(--list-activeSelectionBackground) !important;
   color: var(--list-activeSelectionForeground) !important;
 }
 
-.monaco-select-box-dropdown-container > .select-box-dropdown-list-container .monaco-list .monaco-list-row:not(.focused):hover {
+.select-box-dropdown-container > .select-box-dropdown-list-container .list .list-row:not(.focused):hover {
   background-color: var(--list-hoverBackground) !important;
   color: var(--list-hoverForeground) !important;
 }
 
 /* Border styles */
-.monaco-select-box-dropdown-container > .select-box-details-pane.border-top {
+.select-box-dropdown-container > .select-box-details-pane.border-top {
   border-top: 1px solid var(--dropdown-border);
 }
 
@@ -158,12 +158,12 @@
 }
 
 /* Hidden select element */
-.monaco-select-box.hidden-select {
+.select-box.hidden-select {
   display: none;
 }
 
 /* Custom dropdown trigger */
-.monaco-select-box.custom-trigger {
+.select-box.custom-trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -179,14 +179,14 @@
   outline: none;
 }
 
-.monaco-select-box.custom-trigger .select-text {
+.select-box.custom-trigger .select-text {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.monaco-select-box.custom-trigger .select-arrow {
+.select-box.custom-trigger .select-arrow {
   margin-left: 8px;
   flex-shrink: 0;
   opacity: 0.8;
@@ -198,18 +198,18 @@
    The wrapper div around the SelectBox controls the width; this
    rule makes the custom trigger fill that width so the chevron
    always stays aligned to the right edge. */
-#http-method-select + .monaco-select-box.custom-trigger {
+#http-method-select + .select-box.custom-trigger {
   width: 100%;
 }
 
 /* When using custom drawn select, remove the global container chevron to avoid double icon */
-.monaco-workbench .select-container.custom::after {
+.workbench .select-container.custom::after {
   content: none !important;
   display: none !important;
 }
 
 /* Dropdown positioning */
-.monaco-select-box-dropdown-container.positioned {
+.select-box-dropdown-container.positioned {
   position: absolute;
   top: 100%;
   left: 0;
@@ -311,12 +311,12 @@
 }
 
 /* Synthetic focus styling */
-.monaco-select-box.synthetic-focus {
+.select-box.synthetic-focus {
   outline: 1px solid var(--focusBorder);
   outline-offset: -1px;
 }
 
-.monaco-select-box-dropdown-container.synthetic-focus {
+.select-box-dropdown-container.synthetic-focus {
   outline: 1px solid var(--focusBorder);
   outline-offset: -1px;
 }

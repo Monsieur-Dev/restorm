@@ -11,8 +11,8 @@ const App: React.FC = () => {
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
-        backgroundColor: 'var(--vscode-editor-background)',
-        color: 'var(--vscode-editor-foreground)'
+        backgroundColor: 'var(--editor-background)',
+        color: 'var(--editor-foreground)'
       }}
     >
       <Titlebar

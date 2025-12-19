@@ -25,5 +25,3 @@ export class MainWindow extends DemoWindow {
     logger.info('✅ MainWindow constructor completed')
   }
 }
-
-  

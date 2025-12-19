@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import MonacoWorkbench from '../MonacoWorkbench'
+import Workbench from '../Workbench/Workbench'
 import { Button } from '../Button'
 import './modal.css'
 
@@ -64,7 +64,7 @@ export const Modal: React.FC<ModalProps> = ({ title, isOpen, onClose, children, 
 
   const content = (
     <div className={overlayClassName}>
-      <MonacoWorkbench className="ecu-modal-workbench" border={false} fullscreen>
+      <Workbench className="ecu-modal-workbench" border={false} fullscreen>
         <div
           className={containerClassName}
           role="dialog"
@@ -97,7 +97,7 @@ export const Modal: React.FC<ModalProps> = ({ title, isOpen, onClose, children, 
             {children}
           </div>
         </div>
-      </MonacoWorkbench>
+      </Workbench>
     </div>
   )
 

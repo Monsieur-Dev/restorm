@@ -27,7 +27,7 @@ export interface RadioGroupProps {
   id?: string;
 }
 
-// Default styles based on VSCode inputColors.ts
+// Default styles for radio buttons
 export const defaultRadioStyles: IRadioStyles = {
   activeForeground: 'var(--radio-activeForeground)',
   activeBackground: 'var(--radio-activeBackground)',

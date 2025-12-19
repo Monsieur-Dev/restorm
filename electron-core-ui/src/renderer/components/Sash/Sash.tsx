@@ -5,7 +5,7 @@ import './sash.css';
 
 /**
  * Sash component for resizing panels
- * Based on VS Code's sash implementation
+ * Sash implementation for resizable panes
  */
 export const Sash: React.FC<SashProps> = ({
 	orientation,
@@ -234,7 +234,7 @@ export const Sash: React.FC<SashProps> = ({
 
 	// Build CSS classes
 	const classes = [
-		'monaco-sash',
+		'sash',
 		orientation,
 		state === 'disabled' && 'disabled',
 		state === 'atMinimum' && 'minimum',

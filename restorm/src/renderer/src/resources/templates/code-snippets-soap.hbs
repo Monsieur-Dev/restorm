@@ -1,0 +1,463 @@
+{{!-- Code snippets template for SOAP requests --}}
+{{!-- Generates markdown with code examples in multiple languages --}}
+
+<details open>
+<summary><strong>cURL</strong></summary>
+
+```bash
+curl -X POST '{{url}}' \
+  -H 'Content-Type: text/xml; charset=utf-8' \
+  -H 'SOAPAction: {{soapAction}}'{{#if headers}}{{#each headers}} \
+  -H '{{key}}: {{value}}'{{/each}}{{/if}} \
+  -d '{{body}}'
+```
+
+</details>
+
+<details>
+<summary><strong>JavaScript - Fetch</strong></summary>
+
+```javascript
+const soapBody = `{{body}}`;
+
+fetch('{{url}}', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'text/xml; charset=utf-8',
+    'SOAPAction': '{{soapAction}}'{{#if headers}},
+{{#each headers}}    '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}{{/if}}
+  },
+  body: soapBody
+})
+  .then(response => response.text())
+  .then(xml => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xml, 'text/xml');
+    console.log(doc);
+  })
+  .catch(error => console.error('Error:', error));
+```
+
+</details>
+
+<details>
+<summary><strong>JavaScript - soap (npm)</strong></summary>
+
+```javascript
+const soap = require('soap');
+
+const url = '{{wsdlUrl}}';
+
+soap.createClient(url, (err, client) => {
+  if (err) {
+    console.error('Error creating client:', err);
+    return;
+  }
+
+{{#if headers}}
+  client.addHttpHeader('SOAPAction', '{{soapAction}}');
+{{#each headers}}
+  client.addHttpHeader('{{key}}', '{{value}}');
+{{/each}}
+{{/if}}
+
+  const args = {
+    // Define your request parameters here
+  };
+
+  client.{{operation}}(args, (err, result) => {
+    if (err) {
+      console.error('Error:', err);
+      return;
+    }
+    console.log('Result:', result);
+  });
+});
+```
+
+</details>
+
+<details>
+<summary><strong>TypeScript - Fetch</strong></summary>
+
+```typescript
+const soapBody = `{{body}}`;
+
+async function callSoapService(): Promise<Document> {
+  const response = await fetch('{{url}}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'text/xml; charset=utf-8',
+      'SOAPAction': '{{soapAction}}'{{#if headers}},
+{{#each headers}}      '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}{{/if}}
+    },
+    body: soapBody
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const xml = await response.text();
+  const parser = new DOMParser();
+  return parser.parseFromString(xml, 'text/xml');
+}
+
+callSoapService()
+  .then(doc => console.log(doc))
+  .catch(error => console.error('Error:', error));
+```
+
+</details>
+
+<details>
+<summary><strong>Python - zeep</strong></summary>
+
+```python
+from zeep import Client
+from zeep.transports import Transport
+from requests import Session
+
+session = Session()
+{{#if headers}}
+session.headers.update({
+{{#each headers}}    '{{key}}': '{{value}}',
+{{/each}} })
+{{/if}}
+
+transport = Transport(session=session)
+client = Client('{{wsdlUrl}}', transport=transport)
+
+# Call the service operation
+result = client.service.{{operation}}(
+    # Add your parameters here
+)
+
+print(result)
+```
+
+</details>
+
+<details>
+<summary><strong>Python - Requests (raw)</strong></summary>
+
+```python
+import requests
+
+soap_body = '''{{body}}'''
+
+headers = {
+    'Content-Type': 'text/xml; charset=utf-8',
+    'SOAPAction': '{{soapAction}}'{{#if headers}},
+{{#each headers}}    '{{key}}': '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}{{/if}}
+}
+
+response = requests.post('{{url}}', data=soap_body, headers=headers)
+
+print(response.status_code)
+print(response.text)
+```
+
+</details>
+
+<details>
+<summary><strong>C# - WCF</strong></summary>
+
+```csharp
+using System.ServiceModel;
+
+// Generate client from WSDL:
+// svcutil.exe {{wsdlUrl}}
+
+var binding = new BasicHttpBinding();
+var endpoint = new EndpointAddress("{{url}}");
+
+var client = new {{service}}Client(binding, endpoint);
+
+try
+{
+    var result = await client.{{operation}}Async(/* parameters */);
+    Console.WriteLine($"Result: {result}");
+}
+finally
+{
+    await client.CloseAsync();
+}
+```
+
+</details>
+
+<details>
+<summary><strong>C# - HttpClient (raw)</strong></summary>
+
+```csharp
+using System.Net.Http;
+using System.Text;
+
+var soapBody = @"{{body}}";
+
+using var client = new HttpClient();
+
+var content = new StringContent(soapBody, Encoding.UTF8, "text/xml");
+content.Headers.Add("SOAPAction", "{{soapAction}}");
+{{#if headers}}
+{{#each headers}}
+content.Headers.Add("{{key}}", "{{value}}");
+{{/each}}
+{{/if}}
+
+var response = await client.PostAsync("{{url}}", content);
+var result = await response.Content.ReadAsStringAsync();
+
+Console.WriteLine(result);
+```
+
+</details>
+
+<details>
+<summary><strong>Java - JAX-WS</strong></summary>
+
+```java
+import javax.xml.namespace.QName;
+import javax.xml.ws.Service;
+import java.net.URL;
+
+public class SoapExample {
+    public static void main(String[] args) throws Exception {
+        URL wsdlUrl = new URL("{{wsdlUrl}}");
+        QName serviceName = new QName("{{namespace}}", "{{service}}");
+        
+        Service service = Service.create(wsdlUrl, serviceName);
+        
+        // Get the port (interface)
+        // {{service}}PortType port = service.getPort({{service}}PortType.class);
+        
+        // Call the operation
+        // var result = port.{{operation}}(/* parameters */);
+        // System.out.println(result);
+    }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Java - HttpURLConnection (raw)</strong></summary>
+
+```java
+import java.io.*;
+import java.net.*;
+
+public class SoapRawExample {
+    public static void main(String[] args) throws Exception {
+        String soapBody = """
+            {{body}}
+            """;
+
+        URL url = new URL("{{url}}");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "text/xml; charset=utf-8");
+        conn.setRequestProperty("SOAPAction", "{{soapAction}}");
+{{#if headers}}
+{{#each headers}}
+        conn.setRequestProperty("{{key}}", "{{value}}");
+{{/each}}
+{{/if}}
+        conn.setDoOutput(true);
+
+        try (OutputStream os = conn.getOutputStream()) {
+            os.write(soapBody.getBytes("UTF-8"));
+        }
+
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(conn.getInputStream()))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                System.out.println(line);
+            }
+        }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>PHP - SoapClient</strong></summary>
+
+```php
+<?php
+$options = [
+    'trace' => true,
+    'exceptions' => true,
+{{#if headers}}
+    'stream_context' => stream_context_create([
+        'http' => [
+            'header' => implode("\r\n", [
+{{#each headers}}                '{{key}}: {{value}}',
+{{/each}}            ])
+        ]
+    ])
+{{/if}}
+];
+
+try {
+    $client = new SoapClient('{{wsdlUrl}}', $options);
+    
+    $params = [
+        // Add your parameters here
+    ];
+    
+    $result = $client->{{operation}}($params);
+    print_r($result);
+} catch (SoapFault $e) {
+    echo "Error: " . $e->getMessage();
+}
+```
+
+</details>
+
+<details>
+<summary><strong>PHP - cURL (raw)</strong></summary>
+
+```php
+<?php
+$soapBody = '{{body}}';
+
+$ch = curl_init();
+
+curl_setopt_array($ch, [
+    CURLOPT_URL => '{{url}}',
+    CURLOPT_POST => true,
+    CURLOPT_POSTFIELDS => $soapBody,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_HTTPHEADER => [
+        'Content-Type: text/xml; charset=utf-8',
+        'SOAPAction: {{soapAction}}'{{#if headers}},
+{{#each headers}}        '{{key}}: {{value}}'{{#unless @last}},{{/unless}}
+{{/each}}{{/if}}
+    ]
+]);
+
+$response = curl_exec($ch);
+
+if (curl_errno($ch)) {
+    echo 'Error: ' . curl_error($ch);
+} else {
+    echo $response;
+}
+
+curl_close($ch);
+```
+
+</details>
+
+<details>
+<summary><strong>Ruby - savon</strong></summary>
+
+```ruby
+require 'savon'
+
+client = Savon.client(
+  wsdl: '{{wsdlUrl}}',
+  headers: {
+    'SOAPAction' => '{{soapAction}}'{{#if headers}},
+{{#each headers}}    '{{key}}' => '{{value}}'{{#unless @last}},{{/unless}}
+{{/each}}{{/if}}
+  }
+)
+
+# List available operations
+# puts client.operations
+
+response = client.call(:{{operation_snake}}, message: {
+  # Add your parameters here
+})
+
+puts response.body
+```
+
+</details>
+
+<details>
+<summary><strong>Go - net/http (raw)</strong></summary>
+
+```go
+package main
+
+import (
+    "bytes"
+    "fmt"
+    "io"
+    "net/http"
+)
+
+func main() {
+    soapBody := `{{body}}`
+
+    req, err := http.NewRequest("POST", "{{url}}", bytes.NewBufferString(soapBody))
+    if err != nil {
+        panic(err)
+    }
+
+    req.Header.Set("Content-Type", "text/xml; charset=utf-8")
+    req.Header.Set("SOAPAction", "{{soapAction}}")
+{{#if headers}}
+{{#each headers}}
+    req.Header.Set("{{key}}", "{{value}}")
+{{/each}}
+{{/if}}
+
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        panic(err)
+    }
+    defer resp.Body.Close()
+
+    body, err := io.ReadAll(resp.Body)
+    if err != nil {
+        panic(err)
+    }
+
+    fmt.Println(string(body))
+}
+```
+
+</details>
+
+<details>
+<summary><strong>PowerShell</strong></summary>
+
+```powershell
+$soapBody = @"
+{{body}}
+"@
+
+$headers = @{
+    'Content-Type' = 'text/xml; charset=utf-8'
+    'SOAPAction' = '{{soapAction}}'
+{{#if headers}}
+{{#each headers}}    '{{key}}' = '{{value}}'
+{{/each}}
+{{/if}} }
+
+try {
+    $response = Invoke-WebRequest -Uri '{{url}}' `
+        -Method POST `
+        -Headers $headers `
+        -Body $soapBody `
+        -ContentType 'text/xml; charset=utf-8'
+    
+    [xml]$xml = $response.Content
+    $xml.OuterXml | Format-XML
+} catch {
+    Write-Error $_.Exception.Message
+}
+```
+
+</details>

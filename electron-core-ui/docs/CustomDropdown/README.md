@@ -2,8 +2,8 @@
 
 ## Overview
 
-`CustomDropdown` is a small, VSCode-themed dropdown component used in the demo apps.  
-It provides keyboard-navigation, full-width styling, and integrates with the VSCode color variables exposed by the theme service.
+`CustomDropdown` is a small, themed dropdown component used in the demo apps.  
+It provides keyboard-navigation, full-width styling, and integrates with the theme color variables exposed by the theme service.
 
 ## API
 
@@ -68,7 +68,7 @@ const ThemeSelector: React.FC = () => {
   - **Escape**: close list.
   - **ArrowUp/ArrowDown/Home/End**: move focused option.
 - Clicking outside closes the list.
-- Options are rendered using VSCode theme variables (`--dropdown-*`, `--list-*`, `--tab-active-text-color`).
+- Options are rendered using theme variables (`--dropdown-*`, `--list-*`, `--tab-active-text-color`).
 
 ## Notes for AI Usage
 

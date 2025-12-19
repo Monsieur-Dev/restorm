@@ -1,6 +1,6 @@
 export const DND_MIME = {
-	editor: 'application/x-vscodelike-editor',
-	group: 'application/x-vscodelike-editor-group'
+	editor: 'application/x-workbench-editor',
+	group: 'application/x-workbench-editor-group'
 } as const;
 
 export interface DragEditorPayload {

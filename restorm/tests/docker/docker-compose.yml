@@ -40,7 +40,7 @@ services:
     container_name: restorm-grpc
     ports:
       - "9000:9000"
-      - "9001:9001"
+      - "9002:9001"
 
   # Socket.IO - Custom test server
   socketio:

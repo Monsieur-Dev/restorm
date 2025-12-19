@@ -1,6 +1,6 @@
 /**
- * VSCode Theme Types
- * Based on the official VSCode theme format
+ * Theme Types
+ * Theme format definitions
  */
 export interface TokenColorSettings {
     foreground?: string;

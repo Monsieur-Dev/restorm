@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom/client'
-import { Workbench } from './components/Workbench'
+import { RestormWorkbench } from './components/RestormWorkbench'
 import type { WorkbenchTree, GroupNode } from 'electron-core-ui/renderer'
-import { isTabGroupNode, isContainerNode, initializeI18n, logger, MonacoWorkbench, Titlebar } from 'electron-core-ui/renderer'
+import { isTabGroupNode, isContainerNode, initializeI18n, logger, Workbench as CoreWorkbench, Titlebar } from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 import './httpMethods.css'
+import './app.css'
+import './components/Badge.css'
 
 // Import translations
 import enTranslation from '../locales/en/translation.json'
 import frTranslation from '../locales/fr/translation.json'
 
-import { importSwaggerFromJson } from './services/SwaggerImportService'
+import { importSwaggerFromJson } from './services/import/SwaggerImportService'
 import swaggerPetstoreJson from './resources/swagger-petstore.json'
 import type { Folder, FolderItem, Environment, EnvironmentFolder } from './types/collections'
 import { isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder } from './types/collections'
@@ -357,7 +359,7 @@ void initI18n().then(() => {
               display: 'flex'
             }}
           >
-            <Workbench
+            <RestormWorkbench
               tree={tree}
               initialTabContentMap={tabContentMap}
               onTreeChange={handleTreeChange}
@@ -368,20 +370,20 @@ void initI18n().then(() => {
       }
 
       return (
-        <MonacoWorkbench fontAliasing="auto">
+        <CoreWorkbench fontAliasing="auto">
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
               height: '100vh',
-              backgroundColor: 'var(--vscode-editor-background)',
-              color: 'var(--vscode-editor-foreground)'
+              backgroundColor: 'var(--editor-background)',
+              color: 'var(--editor-foreground)'
             }}
           >
             <Titlebar title="restorm" />
             {renderBody()}
           </div>
-        </MonacoWorkbench>
+        </CoreWorkbench>
       )
     }
 

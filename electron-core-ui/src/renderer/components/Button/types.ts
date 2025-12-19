@@ -68,7 +68,7 @@ export interface ButtonWithIconProps {
   id?: string;
 }
 
-// Default styles based on VSCode's unthemedButtonStyles
+// Default styles for buttons
 export const defaultButtonStyles: IButtonStyles = {
   buttonBackground: '#0E639C',
   buttonHoverBackground: '#006BB3',

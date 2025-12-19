@@ -24,6 +24,21 @@ interface DemoContainer { id: string, orientation: 'vertical' | 'horizontal', gr
 type DemoNode = DemoTabGroup | DemoContainer
 interface DemoTree extends WorkbenchTree { groups: DemoNode[] }
 
+/** File entry from project API */
+interface FileEntry {
+  path: string
+  isDirectory: boolean
+}
+
+/** Project API type */
+interface ProjectApi {
+  listFiles: () => Promise<FileEntry[]>
+  readFile: (filePath: string) => Promise<string>
+}
+
+/** Typed project API accessor */
+const getProjectApi = (): ProjectApi => (window.api as unknown as { project: ProjectApi }).project
+
 const initialTree: DemoTree = {
   orientation: 'vertical',
   groups: []
@@ -315,10 +330,10 @@ const WorkbenchTab: React.FC = () => {
 
   // Load file tree from project root on mount
   useEffect(() => {
-    const projectApi = window.api.project
+    const projectApi = getProjectApi()
     void (async () => {
       try {
-        const entries = await projectApi.listFiles()
+        const entries: FileEntry[] = await projectApi.listFiles()
 
         // Build ListView items from full project tree
         const treeNodes = buildFileTree(entries)
@@ -326,7 +341,7 @@ const WorkbenchTab: React.FC = () => {
         setItems(listItems)
 
         // Open all root-level JSON files in a first workbench group
-        const rootJsonEntries = entries.filter((entry) => {
+        const rootJsonEntries = entries.filter((entry: FileEntry) => {
           return !entry.isDirectory && !entry.path.includes('/') && entry.path.endsWith('.json')
         })
 
@@ -334,18 +349,18 @@ const WorkbenchTab: React.FC = () => {
           return
         }
 
-        const jsonContents = await Promise.all(
-          rootJsonEntries.map((entry) => projectApi.readFile(entry.path))
+        const jsonContents: string[] = await Promise.all(
+          rootJsonEntries.map((entry: FileEntry) => projectApi.readFile(entry.path))
         )
 
         // Build first group with all root-level JSON files, first tab active
-        const jsonTabs: EditorTab[] = rootJsonEntries.map((entry, index) => {
-          const path = entry.path
-          const segments = path.split(/[/\\]/)
-          const title = segments[segments.length - 1] ?? path
-          const content = jsonContents[index]
+        const jsonTabs: EditorTab[] = rootJsonEntries.map((entry: FileEntry, index: number) => {
+          const filePath = entry.path
+          const segments = filePath.split(/[/\\]/)
+          const title = segments[segments.length - 1] ?? filePath
+          const content = jsonContents[index] ?? ''
           return {
-            id: path,
+            id: filePath,
             title,
             titleString: title,
             content,
@@ -373,22 +388,22 @@ const WorkbenchTab: React.FC = () => {
         }
 
         // Open all root-level *.ts files in a second group
-        const tsEntries = entries.filter((entry) => {
+        const tsEntries = entries.filter((entry: FileEntry) => {
           return !entry.isDirectory && !entry.path.includes('/') && entry.path.endsWith('.ts')
         })
 
         if (tsEntries.length > 0) {
-          const tsContents = await Promise.all(
-            tsEntries.map((entry) => projectApi.readFile(entry.path))
+          const tsContents: string[] = await Promise.all(
+            tsEntries.map((entry: FileEntry) => projectApi.readFile(entry.path))
           )
 
-          const tsTabs: EditorTab[] = tsEntries.map((entry, index) => {
-            const path = entry.path
-            const segments = path.split(/[/\\]/)
-            const title = segments[segments.length - 1] ?? path
-            const content = tsContents[index]
+          const tsTabs: EditorTab[] = tsEntries.map((entry: FileEntry, index: number) => {
+            const filePath = entry.path
+            const segments = filePath.split(/[/\\]/)
+            const title = segments[segments.length - 1] ?? filePath
+            const content = tsContents[index] ?? ''
             return {
-              id: path,
+              id: filePath,
               title,
               titleString: title,
               content,
@@ -410,7 +425,7 @@ const WorkbenchTab: React.FC = () => {
         }
 
         setTree(nextTree)
-        setSelectedIds(rootJsonEntries.map((entry) => entry.path))
+        setSelectedIds(rootJsonEntries.map((entry: FileEntry) => entry.path))
       } catch (error: unknown) {
         logger.error('Failed to load project files for WorkbenchTab', { error: String(error) })
       }
@@ -428,7 +443,7 @@ const WorkbenchTab: React.FC = () => {
     }
 
     const filePath = pendingFilePath
-    const projectApi = window.api.project
+    const projectApi = getProjectApi()
     logger.info('WorkbenchTab: opening file from tree', { filePath })
 
     void projectApi.readFile(filePath)
@@ -771,9 +786,9 @@ const WorkbenchTab: React.FC = () => {
             position: 'fixed',
             top: contextMenu.y,
             left: contextMenu.x,
-            backgroundColor: 'var(--vscode-editor-background)',
-            color: 'var(--vscode-editor-foreground)',
-            border: '1px solid var(--vscode-menu-border)',
+            backgroundColor: 'var(--editor-background)',
+            color: 'var(--editor-foreground)',
+            border: '1px solid var(--menu-border)',
             boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
             zIndex: 1000,
             minWidth: 140

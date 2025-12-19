@@ -10,6 +10,8 @@
   },
   "license": "MIT",
   "scripts": {
+    "clean": "npx rimraf node_modules electron-core-ui/node_modules electron-core-ui/dist gitable/node_modules gitable/dist gitable/out gitable/.vite demo/node_modules demo/dist demo/out demo/.vite restorm/node_modules restorm/dist restorm/out restorm/.vite",
+    "rebuild:all": "npm run clean && npm install && npm run install:all && npm run build",
     "install:all": "cd electron-core-ui && npm install && cd ../gitable && npm install && cd ../demo && npm install && cd ../restorm && npm install",
     "dev:gitable": "cd gitable && npx cross-env ELECTRON_DISABLE_SANDBOX=1 npx electron-vite dev",
     "dev:demo": "cd demo && npx cross-env ELECTRON_DISABLE_SANDBOX=1 npx electron-vite dev",
@@ -28,6 +30,7 @@
     "restorm:docker:down": "cd restorm && npm run docker:down"
   },
   "devDependencies": {
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "rimraf": "^6.0.1"
   }
 }

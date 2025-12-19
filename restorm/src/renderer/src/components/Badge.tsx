@@ -1,0 +1,42 @@
+import React from 'react'
+import './Badge.css'
+
+/**
+ * Badge types supported by the application
+ */
+export type BadgeType =
+  // HTTP Methods
+  | 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS'
+  // gRPC call types
+  | 'UNARY' | 'S-STR' | 'C-STR' | 'BIDI'
+  // GraphQL
+  | 'GQL' | 'QUERY' | 'MUTATION' | 'SUBSCRIPTION'
+  // SOAP
+  | 'SOAP'
+  // WebSocket protocols
+  | 'WS' | 'MQTT' | 'SIO'
+
+export interface BadgeProps {
+  /** The type of badge - determines styling */
+  type: BadgeType
+  /** Optional custom label - if not provided, uses the type as label */
+  label?: string | undefined
+  /** Optional additional CSS class */
+  className?: string | undefined
+}
+
+/**
+ * A unified badge component for displaying protocol/method indicators
+ */
+export const Badge: React.FC<BadgeProps> = ({ type, label, className }) => {
+  const displayText = label ?? type
+  const typeClass = `badge-${type.toLowerCase().replace('-', '')}`
+  
+  return (
+    <span className={`badge ${typeClass} ${className ?? ''}`}>
+      {displayText}
+    </span>
+  )
+}
+
+export default Badge

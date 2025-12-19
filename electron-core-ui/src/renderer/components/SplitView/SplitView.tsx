@@ -370,7 +370,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
 	);
 
 	const rootClassName = [
-		'monaco-split-view2',
+		'split-view2',
 		orientation,
 		isAnimatingCollapse ? 'animated' : '',
 		className

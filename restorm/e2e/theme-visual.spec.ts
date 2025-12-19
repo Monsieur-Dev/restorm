@@ -24,7 +24,7 @@ test.afterAll(async () => {
   await electronApp.close()
 })
 
-test.describe('VSCode Themes Visual Tests', () => {
+test.describe('Themes Visual Tests', () => {
   test('should navigate to theme test page', async () => {
     // Click the Theme Test button
     await page.click('text=Theme Test')
@@ -89,7 +89,7 @@ test.describe('VSCode Themes Visual Tests', () => {
       // Verify theme is applied by checking CSS variables
       const backgroundColor = await page.evaluate(() => {
         return getComputedStyle(document.documentElement)
-          .getPropertyValue('--vscode-editor-background')
+          .getPropertyValue('--editor-background')
       })
 
       expect(backgroundColor).toBeTruthy()

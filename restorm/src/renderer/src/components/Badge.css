@@ -1,0 +1,133 @@
+/* ============================================================================
+ * Badge Component Styles
+ * ============================================================================ */
+
+/* Base badge styles */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+  font-family: var(--font-family);
+}
+
+/* ============================================================================
+ * HTTP Methods
+ * ============================================================================ */
+
+.badge-get {
+  background-color: #2e7d32;
+  color: #ffffff;
+}
+
+.badge-post {
+  background-color: #1565c0;
+  color: #ffffff;
+}
+
+.badge-put {
+  background-color: #ef6c00;
+  color: #ffffff;
+}
+
+.badge-delete {
+  background-color: #c62828;
+  color: #ffffff;
+}
+
+.badge-patch {
+  background-color: #6a1b9a;
+  color: #ffffff;
+}
+
+.badge-head {
+  background-color: #00838f;
+  color: #ffffff;
+}
+
+.badge-options {
+  background-color: #4527a0;
+  color: #ffffff;
+}
+
+/* ============================================================================
+ * gRPC Call Types
+ * ============================================================================ */
+
+.badge-unary {
+  background-color: #0277bd;
+  color: #ffffff;
+}
+
+.badge-sstr {
+  background-color: #00695c;
+  color: #ffffff;
+}
+
+.badge-cstr {
+  background-color: #558b2f;
+  color: #ffffff;
+}
+
+.badge-bidi {
+  background-color: #5d4037;
+  color: #ffffff;
+}
+
+/* ============================================================================
+ * GraphQL
+ * ============================================================================ */
+
+.badge-gql {
+  background-color: #e535ab;
+  color: #ffffff;
+}
+
+.badge-query {
+  background-color: #e535ab;
+  color: #ffffff;
+}
+
+.badge-mutation {
+  background-color: #b71c1c;
+  color: #ffffff;
+}
+
+.badge-subscription {
+  background-color: #7b1fa2;
+  color: #ffffff;
+}
+
+/* ============================================================================
+ * SOAP
+ * ============================================================================ */
+
+.badge-soap {
+  background-color: #f9a825;
+  color: #000000;
+}
+
+/* ============================================================================
+ * WebSocket / Real-time protocols
+ * ============================================================================ */
+
+.badge-ws {
+  background-color: #43a047;
+  color: #ffffff;
+}
+
+.badge-mqtt {
+  background-color: #ff6f00;
+  color: #000000;
+}
+
+.badge-sio {
+  background-color: #00897b;
+  color: #ffffff;
+}

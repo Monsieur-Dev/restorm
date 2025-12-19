@@ -3,8 +3,8 @@
  */
 
 import type { ListViewItemData } from 'electron-core-ui/renderer'
-import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder } from '../types/collections'
-import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder } from '../types/collections'
+import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest } from '../types/collections'
+import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest } from '../types/collections'
 import type { ReactNode } from 'react'
 
 export interface FolderToListViewOptions {
@@ -12,6 +12,8 @@ export interface FolderToListViewOptions {
   expandedIds: Set<string>
   /** Function to render HTTP method badge as leftActions */
   renderMethodBadge: (method: string) => ReactNode
+  /** Function to render protocol badge as leftActions */
+  renderProtocolBadge?: (protocol: string, label?: string) => ReactNode
   /** Function to render deprecated request title (with strikethrough) */
   renderDeprecatedTitle?: (name: string) => ReactNode
 }
@@ -19,7 +21,7 @@ export interface FolderToListViewOptions {
 /**
  * Convert an HTTPRequest to a ListViewItemData
  */
-function requestToListViewItem(
+function httpRequestToListViewItem(
   request: HTTPRequest,
   options: FolderToListViewOptions
 ): ListViewItemData {
@@ -37,14 +39,88 @@ function requestToListViewItem(
 }
 
 /**
+ * Convert a GraphQLRequest to a ListViewItemData
+ */
+function graphqlRequestToListViewItem(
+  request: GraphQLRequest,
+  options: FolderToListViewOptions
+): ListViewItemData {
+  return {
+    id: request.id,
+    title: request.name,
+    icon: undefined,
+    leftActions: options.renderProtocolBadge?.(request.operationType)
+  }
+}
+
+/**
+ * Convert a GrpcRequest to a ListViewItemData
+ */
+function grpcRequestToListViewItem(
+  request: GrpcRequest,
+  options: FolderToListViewOptions
+): ListViewItemData {
+  return {
+    id: request.id,
+    title: request.name,
+    icon: undefined,
+    leftActions: options.renderProtocolBadge?.(request.callType)
+  }
+}
+
+/**
+ * Convert a SoapRequest to a ListViewItemData
+ */
+function soapRequestToListViewItem(
+  request: SoapRequest,
+  options: FolderToListViewOptions
+): ListViewItemData {
+  return {
+    id: request.id,
+    title: request.name,
+    icon: undefined,
+    leftActions: options.renderProtocolBadge?.('soap')
+  }
+}
+
+/**
+ * Convert a WebSocketRequest to a ListViewItemData
+ */
+function websocketRequestToListViewItem(
+  request: WebSocketRequest,
+  options: FolderToListViewOptions
+): ListViewItemData {
+  return {
+    id: request.id,
+    title: request.name,
+    icon: undefined,
+    leftActions: options.renderProtocolBadge?.(request.protocol)
+  }
+}
+
+/**
  * Convert a FolderItem (Folder, EnvironmentFolder, or Request) to ListViewItemData
  */
 function folderItemToListViewItem(
   item: FolderItem,
   options: FolderToListViewOptions
 ): ListViewItemData {
-  if (isRequest(item) && isHTTPRequest(item)) {
-    return requestToListViewItem(item, options)
+  if (isRequest(item)) {
+    if (isHTTPRequest(item)) {
+      return httpRequestToListViewItem(item, options)
+    }
+    if (isGraphQLRequest(item)) {
+      return graphqlRequestToListViewItem(item, options)
+    }
+    if (isGrpcRequest(item)) {
+      return grpcRequestToListViewItem(item, options)
+    }
+    if (isSoapRequest(item)) {
+      return soapRequestToListViewItem(item, options)
+    }
+    if (isWebSocketRequest(item)) {
+      return websocketRequestToListViewItem(item, options)
+    }
   }
 
   if (isEnvironmentFolder(item)) {

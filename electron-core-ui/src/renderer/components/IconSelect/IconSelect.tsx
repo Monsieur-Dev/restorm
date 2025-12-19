@@ -22,7 +22,7 @@ import {
 
 import './iconSelect.css'
 
-// Get all codicon names from the official @vscode/codicons package
+// Get all codicon names from the codicons package
 const CODICONS = Object.keys(codiconsMapping).sort()
 
 // Tab types

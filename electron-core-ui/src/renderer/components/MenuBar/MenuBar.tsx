@@ -102,7 +102,6 @@ const MenuBar: React.FC<MenuBarProps> = ({
     }
   }, [menuItems, state.focusedMenuIndex])
 
-
   const handleMenuClick = useCallback((index: number) => {
     setState(prev => ({
       ...prev,

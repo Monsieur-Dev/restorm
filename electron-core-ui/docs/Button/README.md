@@ -1,6 +1,6 @@
 # Button Components
 
-VSCode-style button components for React applications, providing consistent UI patterns and theming support.
+Button components for React applications, providing consistent UI patterns and theming support.
 
 ## Overview
 
@@ -26,7 +26,7 @@ import {
 
 ### Button
 
-Basic button component with full VSCode styling and behavior.
+Basic button component with full theme styling and behavior.
 
 #### Props
 
@@ -195,7 +195,7 @@ interface IButtonStyles {
 
 ### CSS Variables
 
-The components use VSCode CSS variables for theming:
+The components use theme CSS variables for theming:
 
 - `--button-foreground`
 - `--button-background`
@@ -208,11 +208,11 @@ The components use VSCode CSS variables for theming:
 
 ### CSS Classes
 
-- `.monaco-button` - Base button class
-- `.monaco-text-button` - Text button variant
-- `.monaco-button-dropdown` - Dropdown container
-- `.monaco-description-button` - Button with description
-- `.monaco-button.disabled` - Disabled state
+- `.button` - Base button class
+- `.text-button` - Text button variant
+- `.button-dropdown` - Dropdown container
+- `.description-button` - Button with description
+- `.button.disabled` - Disabled state
 - `.default-colors` - CSS variable-based theming
 
 ## Features
@@ -297,7 +297,7 @@ Icons are supported via Codicons. Use the `icon` prop or include icons in labels
 
 1. **Use appropriate button types**: Primary for main actions, secondary for alternatives
 2. **Provide clear labels**: Use descriptive text that explains the action
-3. **Use icons consistently**: Follow VSCode's icon patterns
+3. **Use icons consistently**: Follow the icon patterns
 4. **Handle disabled states**: Provide visual feedback for unavailable actions
 5. **Test keyboard navigation**: Ensure all buttons are accessible via keyboard
 6. **Use dropdowns sparingly**: Only when you have multiple related actions

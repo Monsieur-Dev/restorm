@@ -412,8 +412,8 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
           display: 'flex',
           flexDirection: 'column',
           minHeight: 0,
-          borderRight: '1px solid var(--vscode-sideBar-border)',
-          backgroundColor: 'var(--vscode-sideBar-background)'
+          borderRight: '1px solid var(--sideBar-border)',
+          backgroundColor: 'var(--sideBar-background)'
         }}
       >
         <SplitView
@@ -488,7 +488,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
           minHeight: 0,
           display: 'flex',
           boxSizing: 'border-box',
-          backgroundColor: 'var(--vscode-editor-background)'
+          backgroundColor: 'var(--editor-background)'
         }}
       >
         <SplitView
@@ -548,7 +548,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                   alignItems: 'center',
                   justifyContent: 'center',
                   height: '100%',
-                  color: 'var(--vscode-descriptionForeground)',
+                  color: 'var(--descriptionForeground)',
                   fontStyle: 'italic',
                   padding: 16
                 }}

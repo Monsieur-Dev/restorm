@@ -1,0 +1,589 @@
+{{!-- Code snippets template for gRPC requests --}}
+{{!-- Generates markdown with code examples in multiple languages --}}
+
+<details open>
+<summary><strong>grpcurl</strong></summary>
+
+```bash
+grpcurl{{#if plaintext}} -plaintext{{/if}}{{#if metadata}}{{#each metadata}} \
+  -H '{{key}}: {{value}}'{{/each}}{{/if}} \
+  -d '{{requestMessage}}' \
+  {{host}} {{service}}/{{method}}
+```
+
+</details>
+
+<details>
+<summary><strong>grpc_cli</strong></summary>
+
+```bash
+grpc_cli call {{host}} {{service}}.{{method}} '{{requestMessage}}'{{#if metadata}} \
+  --metadata="{{#each metadata}}{{key}}:{{value}}{{#unless @last}},{{/unless}}{{/each}}"{{/if}}
+```
+
+</details>
+
+<details>
+<summary><strong>JavaScript - @grpc/grpc-js</strong></summary>
+
+```javascript
+const grpc = require('@grpc/grpc-js');
+const protoLoader = require('@grpc/proto-loader');
+
+const packageDefinition = protoLoader.loadSync('{{protoFile}}', {
+  keepCase: true,
+  longs: String,
+  enums: String,
+  defaults: true,
+  oneofs: true
+});
+
+const proto = grpc.loadPackageDefinition(packageDefinition).{{package}};
+const client = new proto.{{serviceName}}(
+  '{{host}}',
+  {{#if plaintext}}grpc.credentials.createInsecure(){{else}}grpc.credentials.createSsl(){{/if}}
+);
+
+{{#if metadata}}
+const metadata = new grpc.Metadata();
+{{#each metadata}}
+metadata.add('{{key}}', '{{value}}');
+{{/each}}
+
+{{/if}}
+const request = {{requestMessage}};
+
+{{#if isUnary}}
+client.{{methodName}}(request{{#if metadata}}, metadata{{/if}}, (error, response) => {
+  if (error) {
+    console.error('Error:', error);
+    return;
+  }
+  console.log('Response:', response);
+});
+{{/if}}
+{{#if isServerStream}}
+const call = client.{{methodName}}(request{{#if metadata}}, metadata{{/if}});
+call.on('data', (response) => {
+  console.log('Response:', response);
+});
+call.on('error', (error) => {
+  console.error('Error:', error);
+});
+call.on('end', () => {
+  console.log('Stream ended');
+});
+{{/if}}
+{{#if isClientStream}}
+const call = client.{{methodName}}({{#if metadata}}metadata, {{/if}}(error, response) => {
+  if (error) {
+    console.error('Error:', error);
+    return;
+  }
+  console.log('Response:', response);
+});
+call.write(request);
+call.end();
+{{/if}}
+{{#if isBidirectional}}
+const call = client.{{methodName}}({{#if metadata}}metadata{{/if}});
+call.on('data', (response) => {
+  console.log('Response:', response);
+});
+call.on('error', (error) => {
+  console.error('Error:', error);
+});
+call.on('end', () => {
+  console.log('Stream ended');
+});
+call.write(request);
+call.end();
+{{/if}}
+```
+
+</details>
+
+<details>
+<summary><strong>TypeScript - @grpc/grpc-js</strong></summary>
+
+```typescript
+import * as grpc from '@grpc/grpc-js';
+import * as protoLoader from '@grpc/proto-loader';
+
+const packageDefinition = protoLoader.loadSync('{{protoFile}}', {
+  keepCase: true,
+  longs: String,
+  enums: String,
+  defaults: true,
+  oneofs: true
+});
+
+const proto = grpc.loadPackageDefinition(packageDefinition) as any;
+const client = new proto.{{package}}.{{serviceName}}(
+  '{{host}}',
+  {{#if plaintext}}grpc.credentials.createInsecure(){{else}}grpc.credentials.createSsl(){{/if}}
+);
+
+{{#if metadata}}
+const metadata = new grpc.Metadata();
+{{#each metadata}}
+metadata.add('{{key}}', '{{value}}');
+{{/each}}
+
+{{/if}}
+interface Request {
+  // Define your request type
+}
+
+interface Response {
+  // Define your response type
+}
+
+const request: Request = {{requestMessage}};
+
+{{#if isUnary}}
+client.{{methodName}}(request{{#if metadata}}, metadata{{/if}}, (error: grpc.ServiceError | null, response: Response) => {
+  if (error) {
+    console.error('Error:', error);
+    return;
+  }
+  console.log('Response:', response);
+});
+{{/if}}
+{{#if isServerStream}}
+const call = client.{{methodName}}(request{{#if metadata}}, metadata{{/if}}) as grpc.ClientReadableStream<Response>;
+call.on('data', (response: Response) => {
+  console.log('Response:', response);
+});
+call.on('error', (error: grpc.ServiceError) => {
+  console.error('Error:', error);
+});
+call.on('end', () => {
+  console.log('Stream ended');
+});
+{{/if}}
+```
+
+</details>
+
+<details>
+<summary><strong>Python - grpcio</strong></summary>
+
+```python
+import grpc
+import {{package}}_pb2
+import {{package}}_pb2_grpc
+
+{{#if plaintext}}
+channel = grpc.insecure_channel('{{host}}')
+{{else}}
+credentials = grpc.ssl_channel_credentials()
+channel = grpc.secure_channel('{{host}}', credentials)
+{{/if}}
+
+stub = {{package}}_pb2_grpc.{{serviceName}}Stub(channel)
+
+{{#if metadata}}
+metadata = [
+{{#each metadata}}    ('{{key}}', '{{value}}'),
+{{/each}}]
+{{/if}}
+
+request = {{package}}_pb2.{{requestType}}(**{{requestMessage}})
+
+{{#if isUnary}}
+response = stub.{{method}}(request{{#if metadata}}, metadata=metadata{{/if}})
+print(response)
+{{/if}}
+{{#if isServerStream}}
+responses = stub.{{method}}(request{{#if metadata}}, metadata=metadata{{/if}})
+for response in responses:
+    print(response)
+{{/if}}
+{{#if isClientStream}}
+def request_iterator():
+    yield request
+
+response = stub.{{method}}(request_iterator(){{#if metadata}}, metadata=metadata{{/if}})
+print(response)
+{{/if}}
+{{#if isBidirectional}}
+def request_iterator():
+    yield request
+
+responses = stub.{{method}}(request_iterator(){{#if metadata}}, metadata=metadata{{/if}})
+for response in responses:
+    print(response)
+{{/if}}
+```
+
+</details>
+
+<details>
+<summary><strong>Go - google.golang.org/grpc</strong></summary>
+
+```go
+package main
+
+import (
+    "context"
+    "log"
+{{#unless plaintext}}    "google.golang.org/grpc/credentials"{{/unless}}
+    "google.golang.org/grpc"
+{{#if metadata}}    "google.golang.org/grpc/metadata"{{/if}}
+    pb "your/package/path/{{package}}"
+)
+
+func main() {
+{{#if plaintext}}
+    conn, err := grpc.Dial("{{host}}", grpc.WithInsecure())
+{{else}}
+    creds, err := credentials.NewClientTLSFromFile("cert.pem", "")
+    if err != nil {
+        log.Fatalf("Failed to load credentials: %v", err)
+    }
+    conn, err := grpc.Dial("{{host}}", grpc.WithTransportCredentials(creds))
+{{/if}}
+    if err != nil {
+        log.Fatalf("Failed to connect: %v", err)
+    }
+    defer conn.Close()
+
+    client := pb.New{{serviceName}}Client(conn)
+
+    ctx := context.Background()
+{{#if metadata}}
+    md := metadata.Pairs(
+{{#each metadata}}        "{{key}}", "{{value}}",
+{{/each}}    )
+    ctx = metadata.NewOutgoingContext(ctx, md)
+{{/if}}
+
+    request := &pb.{{requestType}}{{requestMessage}}
+
+{{#if isUnary}}
+    response, err := client.{{method}}(ctx, request)
+    if err != nil {
+        log.Fatalf("Error: %v", err)
+    }
+    log.Printf("Response: %v", response)
+{{/if}}
+{{#if isServerStream}}
+    stream, err := client.{{method}}(ctx, request)
+    if err != nil {
+        log.Fatalf("Error: %v", err)
+    }
+    for {
+        response, err := stream.Recv()
+        if err != nil {
+            break
+        }
+        log.Printf("Response: %v", response)
+    }
+{{/if}}
+{{#if isClientStream}}
+    stream, err := client.{{method}}(ctx)
+    if err != nil {
+        log.Fatalf("Error: %v", err)
+    }
+    stream.Send(request)
+    response, err := stream.CloseAndRecv()
+    if err != nil {
+        log.Fatalf("Error: %v", err)
+    }
+    log.Printf("Response: %v", response)
+{{/if}}
+{{#if isBidirectional}}
+    stream, err := client.{{method}}(ctx)
+    if err != nil {
+        log.Fatalf("Error: %v", err)
+    }
+    
+    go func() {
+        stream.Send(request)
+        stream.CloseSend()
+    }()
+    
+    for {
+        response, err := stream.Recv()
+        if err != nil {
+            break
+        }
+        log.Printf("Response: %v", response)
+    }
+{{/if}}
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Java - grpc-java</strong></summary>
+
+```java
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+{{#if metadata}}import io.grpc.Metadata;
+import io.grpc.stub.MetadataUtils;{{/if}}
+import {{package}}.{{serviceName}}Grpc;
+import {{package}}.{{requestType}};
+
+public class GrpcExample {
+    public static void main(String[] args) {
+        ManagedChannel channel = ManagedChannelBuilder
+            .forTarget("{{host}}")
+{{#if plaintext}}            .usePlaintext(){{/if}}
+            .build();
+
+{{#if metadata}}
+        Metadata metadata = new Metadata();
+{{#each metadata}}
+        metadata.put(Metadata.Key.of("{{key}}", Metadata.ASCII_STRING_MARSHALLER), "{{value}}");
+{{/each}}
+{{/if}}
+
+        {{serviceName}}Grpc.{{serviceName}}BlockingStub stub = {{serviceName}}Grpc.newBlockingStub(channel){{#if metadata}}
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)){{/if}};
+
+        {{requestType}} request = {{requestType}}.newBuilder()
+            // .setField(value)
+            .build();
+
+{{#if isUnary}}
+        var response = stub.{{methodName}}(request);
+        System.out.println("Response: " + response);
+{{/if}}
+{{#if isServerStream}}
+        var responses = stub.{{methodName}}(request);
+        responses.forEachRemaining(response -> {
+            System.out.println("Response: " + response);
+        });
+{{/if}}
+
+        channel.shutdown();
+    }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>C# - Grpc.Net.Client</strong></summary>
+
+```csharp
+using Grpc.Net.Client;
+{{#if metadata}}using Grpc.Core;{{/if}}
+using {{Package}};
+
+{{#if plaintext}}
+AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+{{/if}}
+
+using var channel = GrpcChannel.ForAddress("{{#if plaintext}}http{{else}}https{{/if}}://{{host}}");
+var client = new {{serviceName}}.{{serviceName}}Client(channel);
+
+{{#if metadata}}
+var headers = new Metadata
+{
+{{#each metadata}}    { "{{key}}", "{{value}}" },
+{{/each}} };
+{{/if}}
+
+var request = new {{requestType}}
+{
+    // Set properties here
+};
+
+{{#if isUnary}}
+var response = await client.{{method}}Async(request{{#if metadata}}, headers{{/if}});
+Console.WriteLine($"Response: {response}");
+{{/if}}
+{{#if isServerStream}}
+using var call = client.{{method}}(request{{#if metadata}}, headers{{/if}});
+await foreach (var response in call.ResponseStream.ReadAllAsync())
+{
+    Console.WriteLine($"Response: {response}");
+}
+{{/if}}
+```
+
+</details>
+
+<details>
+<summary><strong>Ruby - grpc</strong></summary>
+
+```ruby
+require 'grpc'
+require '{{package}}_services_pb'
+
+{{#if plaintext}}
+stub = {{Package}}::{{serviceName}}::Stub.new('{{host}}', :this_channel_is_insecure)
+{{else}}
+credentials = GRPC::Core::ChannelCredentials.new
+stub = {{Package}}::{{serviceName}}::Stub.new('{{host}}', credentials)
+{{/if}}
+
+{{#if metadata}}
+metadata = {
+{{#each metadata}}  '{{key}}' => '{{value}}',
+{{/each}} }
+{{/if}}
+
+request = {{Package}}::{{requestType}}.new({{requestMessage}})
+
+{{#if isUnary}}
+response = stub.{{method_snake}}(request{{#if metadata}}, metadata: metadata{{/if}})
+puts response
+{{/if}}
+{{#if isServerStream}}
+stub.{{method_snake}}(request{{#if metadata}}, metadata: metadata{{/if}}).each do |response|
+  puts response
+end
+{{/if}}
+```
+
+</details>
+
+<details>
+<summary><strong>Rust - tonic</strong></summary>
+
+```rust
+use tonic::transport::Channel;
+{{#if metadata}}use tonic::Request;{{/if}}
+
+pub mod {{package}} {
+    tonic::include_proto!("{{package}}");
+}
+
+use {{package}}::{{lowercase serviceName}}_client::{{serviceName}}Client;
+use {{package}}::{{requestType}};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let channel = Channel::from_static("{{#if plaintext}}http{{else}}https{{/if}}://{{host}}")
+        .connect()
+        .await?;
+
+    let mut client = {{serviceName}}Client::new(channel);
+
+    let request = {{requestType}} {
+        // Set fields here
+    };
+
+{{#if metadata}}
+    let mut request = Request::new(request);
+{{#each metadata}}
+    request.metadata_mut().insert("{{key}}", "{{value}}".parse()?);
+{{/each}}
+{{else}}
+    let request = tonic::Request::new(request);
+{{/if}}
+
+{{#if isUnary}}
+    let response = client.{{method_snake}}(request).await?;
+    println!("Response: {:?}", response.into_inner());
+{{/if}}
+{{#if isServerStream}}
+    let mut stream = client.{{method_snake}}(request).await?.into_inner();
+    while let Some(response) = stream.message().await? {
+        println!("Response: {:?}", response);
+    }
+{{/if}}
+
+    Ok(())
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Kotlin - grpc-kotlin</strong></summary>
+
+```kotlin
+import io.grpc.ManagedChannelBuilder
+{{#if metadata}}import io.grpc.Metadata
+import io.grpc.stub.MetadataUtils{{/if}}
+import {{package}}.{{serviceName}}GrpcKt
+import {{package}}.{{requestType}}
+import kotlinx.coroutines.runBlocking
+
+fun main() = runBlocking {
+    val channel = ManagedChannelBuilder
+        .forTarget("{{host}}")
+{{#if plaintext}}        .usePlaintext(){{/if}}
+        .build()
+
+{{#if metadata}}
+    val metadata = Metadata().apply {
+{{#each metadata}}
+        put(Metadata.Key.of("{{key}}", Metadata.ASCII_STRING_MARSHALLER), "{{value}}")
+{{/each}}
+    }
+{{/if}}
+
+    val stub = {{serviceName}}GrpcKt.{{serviceName}}CoroutineStub(channel){{#if metadata}}
+        .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)){{/if}}
+
+    val request = {{requestType}} {
+        // Set fields here
+    }
+
+{{#if isUnary}}
+    val response = stub.{{methodName}}(request)
+    println("Response: $response")
+{{/if}}
+{{#if isServerStream}}
+    stub.{{methodName}}(request).collect { response ->
+        println("Response: $response")
+    }
+{{/if}}
+
+    channel.shutdown()
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Swift - grpc-swift</strong></summary>
+
+```swift
+import GRPC
+import NIO
+import {{Package}}
+
+let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+defer { try? group.syncShutdownGracefully() }
+
+let channel = try GRPCChannelPool.with(
+    target: .host("{{host}}", port: {{port}}),
+    transportSecurity: {{#if plaintext}}.plaintext{{else}}.tls(.makeClientConfigurationBackedByNIOSSL()){{/if}},
+    eventLoopGroup: group
+)
+defer { try? channel.close().wait() }
+
+let client = {{Package}}_{{serviceName}}NIOClient(channel: channel)
+
+{{#if metadata}}
+var callOptions = CallOptions()
+{{#each metadata}}
+callOptions.customMetadata.add(name: "{{key}}", value: "{{value}}")
+{{/each}}
+{{/if}}
+
+var request = {{Package}}_{{requestType}}()
+// Set request fields
+
+{{#if isUnary}}
+let response = try client.{{methodName}}(request{{#if metadata}}, callOptions: callOptions{{/if}}).response.wait()
+print("Response: \(response)")
+{{/if}}
+{{#if isServerStream}}
+let call = client.{{methodName}}(request{{#if metadata}}, callOptions: callOptions{{/if}}) { response in
+    print("Response: \(response)")
+}
+_ = try call.status.wait()
+{{/if}}
+```
+
+</details>

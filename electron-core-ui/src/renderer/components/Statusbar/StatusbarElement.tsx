@@ -33,10 +33,10 @@ const StatusbarElement: React.FC<StatusbarElementProps> = ({
         clearTimeout(hideTimeoutRef.current)
         hideTimeoutRef.current = null
       }
-      // Delay showing tooltip (similar to VSCode)
+      // Delay showing tooltip
       const timeout = setTimeout(() => {
         setShowTooltip(true)
-      }, 300) // 300ms delay like VSCode
+      }, 300) // 300ms delay
       tooltipTimeoutRef.current = timeout
     }
   }

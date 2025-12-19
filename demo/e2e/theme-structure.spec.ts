@@ -42,16 +42,16 @@ test.describe('Theme Structure Tests', () => {
     }
   })
 
-  test('should have VSCode CSS variables applied', async () => {
+  test('should have CSS variables applied', async () => {
     const variables = await page.evaluate(() => {
       const root = document.documentElement
       const styles = getComputedStyle(root)
       
       return {
-        editorBackground: styles.getPropertyValue('--vscode-editor-background'),
-        editorForeground: styles.getPropertyValue('--vscode-editor-foreground'),
-        inputBackground: styles.getPropertyValue('--vscode-input-background'),
-        buttonBackground: styles.getPropertyValue('--vscode-button-background')
+        editorBackground: styles.getPropertyValue('--editor-background'),
+        editorForeground: styles.getPropertyValue('--editor-foreground'),
+        inputBackground: styles.getPropertyValue('--input-background'),
+        buttonBackground: styles.getPropertyValue('--button-background')
       }
     })
 
@@ -84,7 +84,7 @@ test.describe('Theme Structure Tests', () => {
     // Get new background color
     const newBg = await page.evaluate(() => {
       return getComputedStyle(document.documentElement)
-        .getPropertyValue('--vscode-editor-background')
+        .getPropertyValue('--editor-background')
     })
 
     // Colors should be different (unless both themes happen to use same color)
@@ -94,7 +94,7 @@ test.describe('Theme Structure Tests', () => {
   test('should apply theme to input elements', async () => {
     const textInput = page.locator('#text-input')
     
-    // Check that input uses VSCode variables
+    // Check that input uses theme variables
     const inputStyles = await textInput.evaluate((el) => {
       const styles = getComputedStyle(el)
       return {

@@ -10,7 +10,7 @@
 	animation: ecu-modal-fade-in 300ms ease-out forwards;
 }
 
-.ecu-modal-workbench.monaco-workbench {
+.ecu-modal-workbench.workbench {
 	background-color: transparent;
 	border: none !important;
 	box-shadow: none !important;

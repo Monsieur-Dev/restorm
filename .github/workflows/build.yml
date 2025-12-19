@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
       
       - name: Install electron-core-ui dependencies
         run: |
@@ -63,3 +63,92 @@ jobs:
         run: |
           cd gitable
           npm run build
+
+      - name: Install restorm dependencies
+        run: |
+          cd restorm
+          npm install
+
+      - name: Run restorm linter
+        run: |
+          cd restorm
+          npm run lint
+
+      - name: Run restorm type check
+        run: |
+          cd restorm
+          npm run typecheck
+
+      - name: Run restorm unit tests
+        run: |
+          cd restorm
+          npm run test:unit
+
+      - name: Build restorm application
+        run: |
+          cd restorm
+          NODE_OPTIONS="--max-old-space-size=4096" npm run build
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: build
+    
+    services:
+      petstore:
+        image: swaggerapi/petstore
+        ports:
+          - 8080:8080
+      graphql:
+        image: node:20-alpine
+        ports:
+          - 4000:4000
+      soap:
+        image: castlemock/castlemock
+        ports:
+          - 8090:8080
+      grpc:
+        image: moul/grpcbin
+        ports:
+          - 9000:9000
+          - 9002:9001
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install electron-core-ui dependencies
+        run: |
+          cd electron-core-ui
+          npm install
+
+      - name: Build electron-core-ui
+        run: |
+          cd electron-core-ui
+          npm run build
+
+      - name: Install restorm dependencies
+        run: |
+          cd restorm
+          npm install
+
+      - name: Start GraphQL and Socket.IO servers
+        run: |
+          cd restorm/tests/docker/graphql-server && npm install && node server.js &
+          cd restorm/tests/docker/socketio-server && npm install && node server.js &
+          sleep 10
+
+      - name: Wait for services
+        run: |
+          cd restorm
+          node tests/integration/wait-for-services.js
+
+      - name: Run integration tests
+        run: |
+          cd restorm
+          npm run test:integration:coverage

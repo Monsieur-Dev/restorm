@@ -77,7 +77,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
 
   // Build CSS classes
   const containerClasses = [
-    'monaco-progress-container',
+    'progress-container',
     isActive ? 'active' : '',
     isInfinite ? 'infinite' : '',
     isDiscrete ? 'discrete' : '',

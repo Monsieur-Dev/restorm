@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `MenuBar` component is a React implementation of VSCode's MenuBar widget. It provides a complete menu bar system with top-level menu items, dropdown menus, submenus, separators, and full keyboard navigation support. The component features VSCode styling, theme integration, accessibility support, and internationalization.
+The `MenuBar` component is a React implementation of the MenuBar widget. It provides a complete menu bar system with top-level menu items, dropdown menus, submenus, separators, and full keyboard navigation support. The component features theme styling, theme integration, accessibility support, and internationalization.
 
 ## API
 
@@ -310,7 +310,7 @@ const MyComponent = () => {
 - **menubar-menu-button** : Individual menu button container
 - **menubar-menu-title** : Text content of menu buttons
 - **menubar-menu-items-holder** : Container for dropdown menus
-- **monaco-menu-container** : VSCode menu container styling
+- **monaco-menu-container** : Menu container styling
 
 ### Menu Classes
 - **monaco-menu** : Main menu container
@@ -330,12 +330,12 @@ All `<ul>` and `<li>` elements are styled to remove default browser styling:
 - **Proper display** : Block display for proper layout
 
 ### Icon Classes
-- **codicon** : VSCode icon font
+- **codicon** : icon font
 - **codicon-check** : Check mark icon
 - **codicon-chevron-right** : Right arrow for submenus
 - **codicon-placeholder** : Placeholder for alignment
 
-## VSCode Theme Variables
+## Theme Variables
 
 The component uses the following CSS variables:
 
@@ -405,7 +405,7 @@ All dropdown menus and submenus are positioned using `position: fixed` with high
 ### ScrollableElement Integration
 - **Custom scrollbars**: Consistent with the rest of the application
 - **Smooth scrolling**: Enhanced user experience
-- **Theme integration**: Scrollbars match VSCode theme variables
+- **Theme integration**: Scrollbars match theme variables
 - **Mouse wheel support**: Native mouse wheel scrolling
 - **Shadow effects**: Visual feedback for scrollable content
 
@@ -431,7 +431,7 @@ This ensures a clean, professional menu system that behaves like native desktop 
 - **Shadows**: Subtle drop shadows for depth
 
 ### Color Consistency
-The MenuBar component uses the same color scheme as other VSCode components:
+The MenuBar component uses the same color scheme as other components:
 - **DropdownButton**: Same background colors as dropdown components
 - **SelectBox**: Consistent with select box styling
 - **Button**: Matching button component colors
@@ -454,7 +454,7 @@ This ensures visual consistency across the entire application.
 
 ## Theme Integration
 
-The component automatically adapts to VSCode themes through CSS variables. No additional configuration is required.
+The component automatically adapts to themes through CSS variables. No additional configuration is required.
 
 ## Performance
 
@@ -468,7 +468,7 @@ The component uses:
 
 ### Recommended Configuration
 
-For optimal usage, always use VSCode theme variables and proper internationalization:
+For optimal usage, always use theme variables and proper internationalization:
 
 ```typescript
 // Use i18n for all user-facing strings

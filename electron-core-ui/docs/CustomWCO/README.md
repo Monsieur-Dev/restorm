@@ -2,7 +2,7 @@
 
 ## Overview
 
-`CustomWCO` (Window Controls Overlay) renders custom window control buttons (minimize / maximize / close) that mimic VSCode on platforms where native controls are not available (notably Linux with WCO).  
+`CustomWCO` (Window Controls Overlay) renders custom window control buttons (minimize / maximize / close) that mimic the native controls on platforms where native controls are not available (notably Linux with WCO).  
 It listens to `window.electronAPI` events to adapt to platform and window state.
 
 ## API

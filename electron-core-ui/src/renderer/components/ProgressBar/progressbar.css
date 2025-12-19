@@ -1,10 +1,10 @@
-.monaco-progress-container {
+.progress-container {
 	width: 100%;
 	height: 2px;
 	overflow: hidden; /* keep progress bit in bounds */
 }
 
-.monaco-progress-container .progress-bit {
+.progress-container .progress-bit {
 	width: 2%;
 	height: 2px;
 	position: absolute;
@@ -12,20 +12,20 @@
 	display: none;
 }
 
-.monaco-progress-container.active .progress-bit {
+.progress-container.active .progress-bit {
 	display: inherit;
 }
 
-.monaco-progress-container.discrete .progress-bit {
+.progress-container.discrete .progress-bit {
 	left: 0;
 	transition: width 100ms linear;
 }
 
-.monaco-progress-container.discrete.done .progress-bit {
+.progress-container.discrete.done .progress-bit {
 	width: 100%;
 }
 
-.monaco-progress-container.infinite .progress-bit {
+.progress-container.infinite .progress-bit {
 	animation-name: progress;
 	animation-duration: 4s;
 	animation-iteration-count: infinite;
@@ -33,12 +33,12 @@
 	animation-timing-function: linear;
 }
 
-.monaco-progress-container.infinite.infinite-long-running .progress-bit {
+.progress-container.infinite.infinite-long-running .progress-bit {
 	/*
 		The more smooth `linear` timing function can cause
 		higher GPU consumption as indicated in
-		https://github.com/microsoft/vscode/issues/97900 &
-		https://github.com/microsoft/vscode/issues/138396
+		https://github.com/microsoft/editor/issues/97900 &
+		https://github.com/microsoft/editor/issues/138396
 	*/
 	animation-timing-function: steps(100);
 }

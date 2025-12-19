@@ -4,7 +4,7 @@ import { Button, ButtonWithDescription, ButtonWithDropdown, ButtonWithIcon, logg
 const ButtonsTab: React.FC = () => {
   return (
     <div style={{ display: 'grid', gap: '20px', maxWidth: '800px', padding: '20px' }}>
-        <h3 style={{ fontSize: '16px', marginBottom: '8px' }}>VSCode Button Components</h3>
+        <h3 style={{ fontSize: '16px', marginBottom: '8px' }}>Button Components</h3>
         
         <div>
           <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Basic Buttons (New API with children)</h4>
@@ -27,7 +27,6 @@ const ButtonsTab: React.FC = () => {
           </div>
         </div>
 
-
         <div>
           <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Buttons with Icons (New API)</h4>
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -49,7 +48,6 @@ const ButtonsTab: React.FC = () => {
             </Button>
           </div>
         </div>
-
 
         <div>
           <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Button with Description (New API)</h4>

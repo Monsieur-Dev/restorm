@@ -159,4 +159,3 @@ export const DocumentEvents = {
 } as const
 
 export type DocumentEventName = (typeof DocumentEvents)[keyof typeof DocumentEvents]
-

@@ -1,4 +1,4 @@
-/* Tooltip styles - VSCode-like */
+/* Tooltip styles - editor-like */
 
 .tooltip {
 	position: fixed;
@@ -133,7 +133,7 @@
 }
 
 .tooltip-content code {
-	font-family: var(--monaco-monospace-font);
+	font-family: var(--monospace-font);
 	border-radius: 3px;
 	padding: 0 0.4em;
 	background-color: var(--textCodeBlock-background);

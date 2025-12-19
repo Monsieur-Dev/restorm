@@ -1,5 +1,5 @@
-.variable-inputbox-editor .monaco-editor,
-.variable-inputbox-editor .monaco-editor .monaco-editor-background,
-.variable-inputbox-editor .monaco-editor .monaco-editor .margin {
+.variable-inputbox-editor .editor,
+.variable-inputbox-editor .editor .editor-background,
+.variable-inputbox-editor .editor .editor .margin {
 	background-color: transparent !important;
 }

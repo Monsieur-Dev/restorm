@@ -20,7 +20,6 @@ interface SearchDocument {
   }
 }
 
-
 // Mock electron-core-ui/renderer with real search service
 vi.mock('electron-core-ui/renderer', async () => {
   const handlers = new Map<string, Set<(payload: unknown) => void>>()
@@ -44,7 +43,7 @@ vi.mock('electron-core-ui/renderer', async () => {
     }
   }
 
-  let miniSearch = new MiniSearchClass<MockSearchDocument>({
+  let miniSearch = new MiniSearchClass({
     fields: ['title', 'description', 'keywords'],
     storeFields: ['title', 'description', 'category', 'icon', 'navigation'],
     searchOptions: {
@@ -78,7 +77,7 @@ vi.mock('electron-core-ui/renderer', async () => {
       return miniSearch.search(query) as unknown as MockSearchDocument[]
     },
     clearIndex(): void {
-      miniSearch = new MiniSearchClass<MockSearchDocument>({
+      miniSearch = new MiniSearchClass({
         fields: ['title', 'description', 'keywords'],
         storeFields: ['title', 'description', 'category', 'icon', 'navigation'],
         searchOptions: {
@@ -135,7 +134,7 @@ vi.mock('electron-core-ui/renderer', async () => {
 })
 
 import { searchService } from 'electron-core-ui/renderer'
-import { importSwaggerFromJson } from '../../src/renderer/src/services/SwaggerImportService'
+import { importSwaggerFromJson } from '../../src/renderer/src/services/import/SwaggerImportService'
 import { searchIndexService } from '../../src/renderer/src/services/SearchIndexService'
 import { makeReactiveFolder } from '../../src/renderer/src/types/reactive'
 import type { Folder, HTTPRequest } from '../../src/renderer/src/types/collections'
@@ -254,4 +253,3 @@ describe('Search Integration', () => {
     expect(hasStoreResult).toBe(true)
   })
 })
-

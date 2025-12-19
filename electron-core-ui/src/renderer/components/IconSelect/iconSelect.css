@@ -88,7 +88,7 @@
   opacity: 1;
 }
 
-/* Override emoji-mart styles to match VS Code theme */
+/* Override emoji-mart styles to match theme */
 .ecui-icon-select-picker em-emoji-picker {
   --rgb-background: var(--editorWidget-background);
   --rgb-input: var(--input-background);

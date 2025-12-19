@@ -5,26 +5,26 @@ const TextTab: React.FC = () => {
     <div style={{ display: 'grid', gap: '10px', padding: '20px' }}>
         <div style={{ 
           padding: '12px', 
-          backgroundColor: 'var(--vscode-sideBar-background)',
-          border: '1px solid var(--vscode-panel-border)',
+          backgroundColor: 'var(--sideBar-background)',
+          border: '1px solid var(--panel-border)',
           borderRadius: '4px',
           marginBottom: '10px'
         }}>
-          <p style={{ margin: '0 0 5px 0', fontSize: '12px', color: 'var(--vscode-descriptionForeground)' }}>
+          <p style={{ margin: '0 0 5px 0', fontSize: '12px', color: 'var(--descriptionForeground)' }}>
             Current font: <code style={{ fontSize: '11px' }}>{window.getComputedStyle(document.body).fontFamily}</code>
           </p>
-          <p style={{ margin: 0, fontSize: '12px', color: 'var(--vscode-descriptionForeground)' }}>
+          <p style={{ margin: 0, fontSize: '12px', color: 'var(--descriptionForeground)' }}>
             Expected: Inter (bundled with app)
           </p>
         </div>
         
-        <p style={{ margin: 0, fontSize: '13px', color: 'var(--vscode-foreground)' }}>
+        <p style={{ margin: 0, fontSize: '13px', color: 'var(--foreground)' }}>
           Normal text with foreground color
         </p>
-        <p style={{ margin: 0, fontSize: '13px', color: 'var(--vscode-descriptionForeground)' }}>
+        <p style={{ margin: 0, fontSize: '13px', color: 'var(--descriptionForeground)' }}>
           Description text with muted color
         </p>
-        <p style={{ margin: 0, fontSize: '13px', color: 'var(--vscode-errorForeground)' }}>
+        <p style={{ margin: 0, fontSize: '13px', color: 'var(--errorForeground)' }}>
           Error text (if available)
         </p>
         <p style={{ margin: 0, fontSize: '13px', fontWeight: 'bold' }}>
@@ -41,8 +41,8 @@ const TextTab: React.FC = () => {
             display: 'inline-block',
             padding: '2px 6px',
             fontSize: '12px',
-            backgroundColor: 'var(--vscode-textCodeBlock-background)',
-            border: '1px solid var(--vscode-panel-border)',
+            backgroundColor: 'var(--textCodeBlock-background)',
+            border: '1px solid var(--panel-border)',
             borderRadius: '3px',
             fontFamily: 'inherit'
           }}

@@ -1,7 +1,7 @@
 /**
  * NavigationService
  *
- * Provides navigation management with history support (back/forward) similar to VSCode.
+ * Provides navigation management with history support (back/forward).
  * This service allows different parts of the UI to coordinate navigation state.
  *
  * ## Usage

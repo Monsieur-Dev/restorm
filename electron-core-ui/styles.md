@@ -37,7 +37,7 @@ These are custom CSS variables defined within the project components.
 | `--sash-size` | Size of sash divider | `4px` |
 | `--sash-hover-size` | Hover size of sash divider | `8px` |
 | `--editor-group-tab-height` | Height of editor tabs | `35px` |
-| `--monaco-monospace-font` | Monospace font family | Platform-dependent |
+| `--monospace-font` | Monospace font family | Platform-dependent |
 | `--text-link-decoration` | Text link decoration style | `underline` |
 | `--beak-left-percent` | Tooltip beak position | `50%` |
 | `--tabs-border-bottom-color` | Border color for tabs | `transparent` |
@@ -343,7 +343,7 @@ The following files in the project use CSS variables:
 - `src/renderer/components/SelectBox/selectBoxCustom.css`
 - `src/renderer/components/Sash/sash.css`
 - `src/renderer/components/InputTable/inputTable.css`
-- `src/renderer/assets/monaco-workbench.css`
+- `src/renderer/assets/workbench.css`
 - `src/renderer/components/Workbench/styles/tabs.css`
 - `src/renderer/components/Tooltip/tooltip.css`
 - `src/renderer/components/Toggle/toggle.css`

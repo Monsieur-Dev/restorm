@@ -14,7 +14,8 @@ import {
   type Subscription,
   logger
 } from 'electron-core-ui/renderer'
-import type { Folder, HTTPRequest } from '../types/collections'
+import type { Folder, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, Request } from '../types/collections'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isRequest } from '../types/collections'
 
 /** Metadata structure for search documents in restorm */
 export interface RestormSearchMetadata {
@@ -42,11 +43,6 @@ export interface RestormSearchMetadata {
 /** Check if an item is a Folder */
 function isFolder(item: unknown): item is Folder {
   return typeof item === 'object' && item !== null && 'items' in item && 'configuration' in item
-}
-
-/** Check if an item is an HTTPRequest */
-function isHTTPRequest(item: unknown): item is HTTPRequest {
-  return typeof item === 'object' && item !== null && 'method' in item && 'url' in item
 }
 
 /**
@@ -90,7 +86,7 @@ function getBodyContent(body: HTTPRequest['body']): string {
   }
 }
 
-function requestToSearchDocument(
+function httpRequestToSearchDocument(
   request: HTTPRequest,
   parentFolderId: string,
   parentPath: string[] = []
@@ -149,6 +145,8 @@ function requestToSearchDocument(
       path: [...parentPath, request.id]
     },
     metadata: {
+      requestType: 'http',
+      method: request.method,
       url: request.url,
       headers: request.headers.map((h) => ({ key: h.key, value: h.value })),
       params: request.params.map((p) => ({ key: p.key, value: p.value })),
@@ -157,6 +155,212 @@ function requestToSearchDocument(
       tags: request.tags,
       ...(request.notes ? { notes: request.notes } : {})
     }
+  }
+}
+
+function graphqlRequestToSearchDocument(
+  request: GraphQLRequest,
+  parentFolderId: string,
+  parentPath: string[] = []
+): SearchDocument {
+  const keywords = [
+    'graphql',
+    request.operationType,
+    request.url,
+    request.query,
+    ...request.tags,
+    ...request.headers.map((h) => `${h.key} ${h.value}`),
+    request.variables ?? '',
+    request.notes ?? ''
+  ].join(' ')
+
+  return {
+    id: request.id,
+    title: request.name,
+    ...(request.documentation ? { description: request.documentation } : {}),
+    category: 'request',
+    icon: 'graphql',
+    keywords,
+    navigation: {
+      type: 'request',
+      folderId: parentFolderId,
+      requestId: request.id,
+      path: [...parentPath, request.id]
+    },
+    metadata: {
+      requestType: 'graphql',
+      url: request.url,
+      operationType: request.operationType,
+      query: request.query,
+      ...(request.variables ? { variables: request.variables } : {}),
+      headers: request.headers.map((h) => ({ key: h.key, value: h.value })),
+      tags: request.tags,
+      ...(request.notes ? { notes: request.notes } : {})
+    }
+  }
+}
+
+function grpcRequestToSearchDocument(
+  request: GrpcRequest,
+  parentFolderId: string,
+  parentPath: string[] = []
+): SearchDocument {
+  const keywords = [
+    'grpc',
+    request.service,
+    request.method,
+    request.callType,
+    request.url,
+    request.requestMessage,
+    ...request.tags,
+    ...request.metadata.map((m) => `${m.key} ${m.value}`),
+    request.notes ?? ''
+  ].join(' ')
+
+  return {
+    id: request.id,
+    title: request.name,
+    ...(request.documentation ? { description: request.documentation } : {}),
+    category: 'request',
+    icon: 'grpc',
+    keywords,
+    navigation: {
+      type: 'request',
+      folderId: parentFolderId,
+      requestId: request.id,
+      path: [...parentPath, request.id]
+    },
+    metadata: {
+      requestType: 'grpc',
+      url: request.url,
+      service: request.service,
+      method: request.method,
+      callType: request.callType,
+      requestMessage: request.requestMessage,
+      grpcMetadata: request.metadata.map((m) => ({ key: m.key, value: m.value })),
+      tags: request.tags,
+      ...(request.notes ? { notes: request.notes } : {})
+    }
+  }
+}
+
+function soapRequestToSearchDocument(
+  request: SoapRequest,
+  parentFolderId: string,
+  parentPath: string[] = []
+): SearchDocument {
+  const keywords = [
+    'soap',
+    request.service,
+    request.operation,
+    request.soapAction,
+    request.url,
+    request.body,
+    ...request.tags,
+    ...request.headers.map((h) => `${h.key} ${h.value}`),
+    request.notes ?? ''
+  ].join(' ')
+
+  return {
+    id: request.id,
+    title: request.name,
+    ...(request.documentation ? { description: request.documentation } : {}),
+    category: 'request',
+    icon: 'soap',
+    keywords,
+    navigation: {
+      type: 'request',
+      folderId: parentFolderId,
+      requestId: request.id,
+      path: [...parentPath, request.id]
+    },
+    metadata: {
+      requestType: 'soap',
+      url: request.url,
+      service: request.service,
+      operation: request.operation,
+      soapAction: request.soapAction,
+      soapBody: request.body,
+      headers: request.headers.map((h) => ({ key: h.key, value: h.value })),
+      tags: request.tags,
+      ...(request.notes ? { notes: request.notes } : {})
+    }
+  }
+}
+
+function websocketRequestToSearchDocument(
+  request: WebSocketRequest,
+  parentFolderId: string,
+  parentPath: string[] = []
+): SearchDocument {
+  const keywords = [
+    'websocket',
+    request.protocol,
+    request.url,
+    request.event ?? '',
+    request.message,
+    ...request.tags,
+    ...request.headers.map((h) => `${h.key} ${h.value}`),
+    request.notes ?? ''
+  ].join(' ')
+
+  return {
+    id: request.id,
+    title: request.name,
+    ...(request.documentation ? { description: request.documentation } : {}),
+    category: 'request',
+    icon: 'websocket',
+    keywords,
+    navigation: {
+      type: 'request',
+      folderId: parentFolderId,
+      requestId: request.id,
+      path: [...parentPath, request.id]
+    },
+    metadata: {
+      requestType: 'websocket',
+      url: request.url,
+      protocol: request.protocol,
+      ...(request.event ? { event: request.event } : {}),
+      message: request.message,
+      headers: request.headers.map((h) => ({ key: h.key, value: h.value })),
+      tags: request.tags,
+      ...(request.notes ? { notes: request.notes } : {})
+    }
+  }
+}
+
+function requestToSearchDocument(
+  request: Request,
+  parentFolderId: string,
+  parentPath: string[] = []
+): SearchDocument {
+  if (isHTTPRequest(request)) {
+    return httpRequestToSearchDocument(request, parentFolderId, parentPath)
+  } else if (isGraphQLRequest(request)) {
+    return graphqlRequestToSearchDocument(request, parentFolderId, parentPath)
+  } else if (isGrpcRequest(request)) {
+    return grpcRequestToSearchDocument(request, parentFolderId, parentPath)
+  } else if (isSoapRequest(request)) {
+    return soapRequestToSearchDocument(request, parentFolderId, parentPath)
+  } else if (isWebSocketRequest(request)) {
+    return websocketRequestToSearchDocument(request, parentFolderId, parentPath)
+  }
+  // Fallback for unknown types - should never happen but satisfies exhaustiveness
+  const unknownRequest = request as { id: string; name: string; tags: string[] }
+  return {
+    id: unknownRequest.id,
+    title: unknownRequest.name,
+    category: 'request',
+    icon: 'file',
+    keywords: unknownRequest.name,
+    navigation: {
+      type: 'request',
+      folderId: parentFolderId,
+      requestId: unknownRequest.id,
+      path: [...parentPath, unknownRequest.id]
+    },
+    metadata: { tags: unknownRequest.tags }
   }
 }
 
@@ -173,7 +377,7 @@ function indexFolderRecursively(folder: Folder, parentPath: string[] = []): void
   for (const item of folder.items) {
     if (isFolder(item)) {
       indexFolderRecursively(item, currentPath)
-    } else if (isHTTPRequest(item)) {
+    } else if (isRequest(item)) {
       searchService.indexDocument(requestToSearchDocument(item, folder.id, currentPath))
     }
   }
@@ -237,9 +441,10 @@ class SearchIndexService {
     // Subscribe to request events
     this.subscriptions.push(
       eventBus.subscribe<DocumentChangedPayload>(DocumentEvents.REQUEST_CREATED, (payload) => {
-        if (isHTTPRequest(payload.document) && payload.parentFolderId) {
+        const doc = payload.document as Request
+        if (isRequest(doc) && payload.parentFolderId) {
           searchService.indexDocument(
-            requestToSearchDocument(payload.document, payload.parentFolderId)
+            requestToSearchDocument(doc, payload.parentFolderId)
           )
         }
       })
@@ -248,9 +453,10 @@ class SearchIndexService {
     this.subscriptions.push(
       eventBus.subscribe<DocumentChangedPayload>(DocumentEvents.REQUEST_UPDATED, (payload) => {
         logger.debug('[SearchIndexService] REQUEST_UPDATED received', { id: payload.id, parentFolderId: payload.parentFolderId })
-        if (isHTTPRequest(payload.document) && payload.parentFolderId) {
+        const doc = payload.document as Request
+        if (isRequest(doc) && payload.parentFolderId) {
           searchService.indexDocument(
-            requestToSearchDocument(payload.document, payload.parentFolderId)
+            requestToSearchDocument(doc, payload.parentFolderId)
           )
         }
       })
@@ -301,4 +507,3 @@ class SearchIndexService {
 
 /** Singleton instance */
 export const searchIndexService = new SearchIndexService()
-

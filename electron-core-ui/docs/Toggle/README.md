@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `Toggle` component is a React implementation of VSCode's Toggle component. It provides a custom checkbox interface with codicon support, keyboard navigation, and full accessibility.
+The `Toggle` component is a React implementation of the Toggle component. It provides a custom checkbox interface with codicon support, keyboard navigation, and full accessibility.
 
 ## API
 
@@ -50,7 +50,7 @@ export interface ToggleProps {
 - **disabled** (`boolean`) : Disables the toggle
 - **className** (`string`) : Additional CSS classes
 - **id** (`string`) : HTML ID of the toggle
-- **styles** (`IToggleStyles`) : Custom styles (optional, uses VSCode default styles if not provided)
+- **styles** (`IToggleStyles`) : Custom styles (optional, uses default styles if not provided)
 
 ## Usage Examples
 
@@ -151,7 +151,7 @@ The component generates the following DOM structure:
 - **checked** : Applied when toggle is checked
 - **disabled** : Applied when toggle is disabled
 
-## VSCode Theme Variables
+## Theme Variables
 
 The component uses the following CSS variables:
 
@@ -163,7 +163,7 @@ The component uses the following CSS variables:
 
 ## Codicon Support
 
-The component uses VSCode's codicon font to display icons. Available icons include:
+The component uses the codicon font to display icons. Available icons include:
 
 - `check` : Check mark (default)
 - `star` : Star
@@ -191,7 +191,7 @@ The component implements the following ARIA attributes:
 
 ### Recommended Configuration
 
-For optimal usage, always use VSCode theme variables:
+For optimal usage, always use theme variables:
 
 ```typescript
 const defaultToggleStyles: IToggleStyles = {
@@ -211,7 +211,7 @@ The component automatically handles:
 
 ### Theme Integration
 
-The component automatically adapts to VSCode themes through CSS variables. No additional configuration is required.
+The component automatically adapts to themes through CSS variables. No additional configuration is required.
 
 ### Performance
 

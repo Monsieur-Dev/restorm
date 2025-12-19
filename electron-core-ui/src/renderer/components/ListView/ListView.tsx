@@ -236,9 +236,20 @@ export const ListView: React.FC<ListViewProps> = ({
     setExpandedIds(new Set(expandedIdsProp))
   }, [expandedIdsProp])
 
+  // Track previous activeIdProp to detect real changes
+  const prevActiveIdPropRef = useRef<string | null | undefined>(undefined)
+
   // Controlled active item support + ensure parents are expanded
   React.useEffect(() => {
     if (activeIdProp === undefined || activeIdProp === null) return
+    
+    // Only update if activeIdProp actually changed (not just when initialItems changed)
+    const activeIdPropChanged = prevActiveIdPropRef.current !== activeIdProp
+    prevActiveIdPropRef.current = activeIdProp
+    
+    if (!activeIdPropChanged) return
+    
+    shouldScrollRef.current = true // Enable scroll when controlled activeId changes
     setActiveId(activeIdProp)
 
     // Expand all ancestors of the active item when activeId is controlled
@@ -273,9 +284,11 @@ export const ListView: React.FC<ListViewProps> = ({
     return flattenItems(initialItems, expandedIds)
   }, [initialItems, expandedIds])
 
-  // Scroll the active item into view when activeId changes
-  React.useEffect(() => {
-    if (!activeId) return
+  // Track if scroll should happen (only on user interaction, not on expand/collapse)
+  const shouldScrollRef = useRef(false)
+
+  // Function to scroll active item into view (called explicitly when needed)
+  const scrollActiveIntoView = useCallback(() => {
     const container = listRef.current
     if (!container) return
 
@@ -283,7 +296,16 @@ export const ListView: React.FC<ListViewProps> = ({
     if (!row) return
 
     row.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-  }, [activeId, flatItems.length])
+  }, [])
+
+  // Scroll to active item only when explicitly requested
+  React.useEffect(() => {
+    if (!activeId) return
+    if (!shouldScrollRef.current) return
+    shouldScrollRef.current = false
+
+    scrollActiveIntoView()
+  }, [activeId, scrollActiveIntoView])
 
   const findFlatIndexById = useCallback(
     (id: string | null): number => {
@@ -528,6 +550,7 @@ export const ListView: React.FC<ListViewProps> = ({
 
       const flat = nextIndex !== currentIndex ? flatItems[nextIndex] : undefined
       if (flat) {
+        shouldScrollRef.current = true // Enable scroll for keyboard navigation
         setActiveId(flat.item.id)
         const payload: ListViewItemEventPayload = { item: flat.item, path: flat.path }
 
@@ -765,15 +788,17 @@ export const ListView: React.FC<ListViewProps> = ({
                   handleDrop(flat, event)
                 }}
               >
-                <div className="list-view-row-inner">
-                  
-                  <div className="list-view-indents" aria-hidden="true">
-                    {Array.from({ length: depth }).map((_, idx) => (
-                      <span key={idx} className="indent-guide" />
-                    ))}
-                    
-                    {depth > 0 && isLeaf && <span className="indent-spacer" />}
-                  </div>
+                {/* Indents positioned absolutely to span full row height */}
+                <div className="list-view-indents" aria-hidden="true">
+                  {Array.from({ length: depth }).map((_, idx) => (
+                    <span key={idx} className="indent-guide" />
+                  ))}
+                  {depth > 0 && isLeaf && <span className="indent-spacer" />}
+                </div>
+                <div 
+                  className="list-view-row-inner"
+                  style={{ paddingLeft: depth * 12 + (depth > 0 && isLeaf ? 12 : 0) }}
+                >
                   {(!isLeaf || item.isExpandable) && (
                     <button
                       type="button"

@@ -22,7 +22,7 @@ It reuses the visual look & feel of the standard `InputBox` while providing Hand
   - Triggered by typing `{`
   - Inserts `{{variableName}}`
 - Hover tooltip displaying the variable value (and optional description)
-- VSCode theme integration:
+- Theme integration:
   - Uses `document.documentElement.dataset.theme` (`data-theme` attribute) to detect dark/light/hc
   - Applies a derived Monaco theme (`vs-dark` or `vs`) with transparent background
   - Reacts to theme changes via a `MutationObserver`

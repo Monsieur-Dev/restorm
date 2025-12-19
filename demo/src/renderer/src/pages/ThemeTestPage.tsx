@@ -149,8 +149,8 @@ const ThemeTestPage: React.FC = () => {
         flexDirection: 'column',
         minHeight: '100vh',
         height: '100vh',
-        backgroundColor: 'var(--vscode-editor-background)',
-        color: 'var(--vscode-editor-foreground)'
+        backgroundColor: 'var(--editor-background)',
+        color: 'var(--editor-foreground)'
       }}
     >
       {/* Titlebar with MenuBar */}
@@ -259,8 +259,8 @@ const ThemeTestPage: React.FC = () => {
       <div
         style={{
           padding: '20px',
-          borderBottom: '1px solid var(--vscode-panel-border)',
-          backgroundColor: 'var(--vscode-sideBar-background)'
+          borderBottom: '1px solid var(--panel-border)',
+          backgroundColor: 'var(--sideBar-background)'
         }}
       >
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
@@ -270,7 +270,7 @@ const ThemeTestPage: React.FC = () => {
           <p
             style={{
               margin: '0 0 15px 0',
-              color: 'var(--vscode-descriptionForeground)',
+              color: 'var(--descriptionForeground)',
               fontSize: '14px'
             }}
           >

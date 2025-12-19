@@ -1,8 +1,7 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react'
-import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger } from 'electron-core-ui/renderer'
+import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, CodeEditor } from 'electron-core-ui/renderer'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
 import type { GitableEditorTab } from '../types/editor'
-import Editor from '@monaco-editor/react'
 
 // Helper function to extract title string from EditorTab
 // This is a local implementation to avoid TypeScript export issues
@@ -47,22 +46,21 @@ const getLanguage = (filename: string): string => {
   return 'plaintext'
 }
 
-interface MonacoEditorInstance {
+interface EditorInstance {
   focus: () => void
 }
 
-const MonacoView: React.FC<{
+const EditorView: React.FC<{
   name: string
   text?: string
   tabId: string
-  registerEditor?: (tabId: string, editor: MonacoEditorInstance) => void
+  registerEditor?: (tabId: string, editor: EditorInstance) => void
 }> = ({ name, text, tabId, registerEditor }) => (
   <div style={{ display: 'flex', flex: 1, minHeight: 0, minWidth: 0 }}>
-    <Editor
+    <CodeEditor
       value={text ?? ''}
-      defaultLanguage={getLanguage(name)}
-      theme="vs-dark"
-      // Ensure one Monaco model per tab so that scroll and view state are fully independent
+      language={getLanguage(name)}
+      // Ensure one model per tab so that scroll and view state are fully independent
       path={tabId}
       options={{ readOnly: true, minimap: { enabled: false }, lineNumbers: 'on', automaticLayout: true }}
       loading={<div style={{ padding: 12, opacity: 0.7 }}>Loading editor…</div>}
@@ -70,7 +68,7 @@ const MonacoView: React.FC<{
       width="100%"
       onMount={(editor) => {
         if (!registerEditor) return
-        registerEditor(tabId, editor as MonacoEditorInstance)
+        registerEditor(tabId, editor as EditorInstance)
       }}
     />
   </div>
@@ -97,7 +95,7 @@ export const Workbench: React.FC<WorkbenchProps> = ({
   const [localTree, setLocalTree] = useState<WorkbenchTree>(initialTree)
   const tree = isControlled ? initialTree : localTree
   const [tabContentMap, setTabContentMap] = useState<Record<string, string>>(initialTabContentMap)
-  const editorInstancesRef = useRef<Record<string, MonacoEditorInstance>>({})
+  const editorInstancesRef = useRef<Record<string, EditorInstance>>({})
   const lastTabCountRef = useRef<number>(0)
   const lastRequestedFocusTabIdRef = useRef<string | null>(null)
 
@@ -116,9 +114,9 @@ export const Workbench: React.FC<WorkbenchProps> = ({
     setTabContentMap(initialTabContentMap)
   }, [initialTabContentMap])
 
-  const registerEditor = useCallback((tabId: string, editor: MonacoEditorInstance) => {
+  const registerEditor = useCallback((tabId: string, editor: EditorInstance) => {
     editorInstancesRef.current[tabId] = editor
-    logger.info('Workbench: Monaco editor mounted for tab', {
+    logger.info('Workbench: Editor mounted for tab', {
       tabId,
       hasPendingFocusRequest: lastRequestedFocusTabIdRef.current === tabId
     })
@@ -158,7 +156,7 @@ export const Workbench: React.FC<WorkbenchProps> = ({
     const content = tab.content ?? tabContentMap[tab.id] ?? ''
     // Use titleString for filename, fallback to extracting from title
     const filename = tab.titleString ?? (typeof tab.title === 'string' ? tab.title : getTabTitleString(tab, 'untitled'))
-    return <MonacoView name={filename} text={content} tabId={tab.id} registerEditor={registerEditor} />
+    return <EditorView name={filename} text={content} tabId={tab.id} registerEditor={registerEditor} />
   }, [tabContentMap, registerEditor])
 
   // Get tab content
@@ -187,7 +185,7 @@ export const Workbench: React.FC<WorkbenchProps> = ({
     const content = onGetTabContent(tabId)
     
     // Get title string for serialization
-    const tabWithTitleString = tab as EditorTab & { titleString?: string }
+    const tabWithTitleString = tab
     const titleString = tabWithTitleString.titleString ?? (typeof tab.title === 'string' ? tab.title : getTabTitleString(tabWithTitleString, 'untitled'))
     
     // Open new Editor window with tab parameters and cursor position
@@ -239,7 +237,7 @@ export const Workbench: React.FC<WorkbenchProps> = ({
     window.setTimeout(() => {
       const editor = editorInstancesRef.current[tabId]
       if (editor) {
-        logger.info('Workbench: Focusing Monaco editor from deferred onTabSelected', { tabId })
+        logger.info('Workbench: Focusing editor from deferred onTabSelected', { tabId })
         editor.focus()
       } else {
         logger.warn('Workbench: Deferred focus but no editor instance found', {

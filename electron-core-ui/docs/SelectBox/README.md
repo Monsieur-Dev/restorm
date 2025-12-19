@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `SelectBox` component is a React implementation of VSCode's SelectBox widget. It provides both native and custom dropdown implementations with full VSCode styling, theme integration, accessibility support, and advanced features like descriptions, decorators, and scrolling for long lists.
+The `SelectBox` component is a React implementation of the SelectBox widget. It provides both native and custom dropdown implementations with full theme styling, theme integration, accessibility support, and advanced features like descriptions, decorators, and scrolling for long lists.
 
 ## API
 
@@ -262,12 +262,12 @@ import { SelectBox } from 'electron-core-ui/renderer'
 ### Base Classes
 
 - **`.select-container`** : Container for the select element
-- **`.monaco-select-box`** : Base select element class
-- **`.monaco-select-box-dropdown-padding`** : Custom padding for dropdown calculations
+- **`.select-box`** : Base select element class
+- **`.select-box-dropdown-padding`** : Custom padding for dropdown calculations
 
 ### Custom Dropdown Classes
 
-- **`.monaco-select-box-dropdown-container`** : Custom dropdown container
+- **`.select-box-dropdown-container`** : Custom dropdown container
 - **`.select-box-dropdown-list-container`** : Container for option list
 - **`.select-box-details-pane`** : Details pane at bottom of dropdown
 - **`.option-text`** : Main option text
@@ -277,7 +277,7 @@ import { SelectBox } from 'electron-core-ui/renderer'
 - **`.visible`** : Applied when dropdown is visible
 - **`.synthetic-focus`** : Applied when element has synthetic focus
 
-## VSCode Theme Variables
+## Theme Variables
 
 The component uses the following CSS variables:
 
@@ -547,7 +547,7 @@ For lists with 100+ options, consider:
 For optimal AI-generated code:
 
 ```typescript
-// Always use VSCode theme variables
+// Always use theme variables
 const defaultSelectBoxStyles: ISelectBoxStyles = {
   selectBackground: 'var(--settings-dropdownBackground)',
   selectForeground: 'var(--settings-dropdownForeground)',

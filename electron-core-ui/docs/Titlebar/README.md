@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `Titlebar` component is a React implementation of a window title bar for Electron applications with Window Controls Overlay support. It provides a draggable title bar with optional icon, title display, and child content (like a MenuBar). The component features VSCode styling, theme integration, and automatic detection of window controls position based on the desktop environment.
+The `Titlebar` component is a React implementation of a window title bar for Electron applications with Window Controls Overlay support. It provides a draggable title bar with optional icon, title display, and child content (like a MenuBar). The component features theme styling, theme integration, and automatic detection of window controls position based on the desktop environment.
 
 ## API
 
@@ -161,7 +161,7 @@ const win = new BrowserWindow({
 })
 ```
 
-## VSCode Theme Variables
+## Theme Variables
 
 The component uses the following CSS variables:
 
@@ -173,7 +173,7 @@ The component uses the following CSS variables:
 
 ### Theme Integration
 
-The component automatically adapts to VSCode themes through CSS variables. No additional configuration is required.
+The component automatically adapts to themes through CSS variables. No additional configuration is required.
 
 The inactive state is triggered by adding the `.window-inactive` class to a parent element:
 
@@ -204,12 +204,12 @@ The entire titlebar allows dragging the window, except for interactive elements:
 ## Visual Styling
 
 ### Dimensions
-- **Height**: Fixed at 30px (standard VSCode titlebar height)
+- **Height**: Fixed at 30px (standard titlebar height)
 - **Icon size**: 16x16px within a 32px wide container
-- **Font size**: 13px (VSCode standard)
+- **Font size**: 13px (standard)
 
 ### Color Scheme
-The component automatically matches VSCode color schemes through CSS variables.
+The component automatically matches theme color schemes through CSS variables.
 
 ## Integration with MenuBar
 
@@ -247,7 +247,7 @@ The component uses:
 
 ### Recommended Configuration
 
-For optimal usage, always use VSCode theme variables and proper component nesting:
+For optimal usage, always use theme variables and proper component nesting:
 
 ```tsx
 import { Titlebar, MenuBar, MenuBarItem, MenuItem } from 'electron-core-ui/renderer'
