@@ -1,0 +1,18 @@
+# Restorm Feature Flags Configuration
+# This file defines the feature flags available in the application
+# 
+# Each feature can have multiple strategies that must ALL return true
+# for the feature to be enabled (AND logic).
+
+Features:
+  # Test feature - always enabled
+  - Name: "test"
+    Strategies:
+      - Type: Basic
+        Enabled: true
+
+  # Desktop indicator feature - only visible on desktop platform
+  - Name: "desktop-indicator"
+    Strategies:
+      - Type: Platform
+        AvailableOn: [desktop]

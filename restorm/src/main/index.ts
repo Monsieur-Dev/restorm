@@ -1,6 +1,6 @@
 import { app, ipcMain, BrowserWindow } from 'electron'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger } from 'electron-core-ui'
+import { initializeApp, logger, initFeatureService } from 'electron-core-ui'
 import { join, relative } from 'path'
 import { promises as fs } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
@@ -30,6 +30,21 @@ function getResourcesPath(): string {
   // In production, resources are bundled under process.resourcesPath/resources
   return join(process.resourcesPath, 'resources')
 }
+
+// Get features configuration path for restorm
+function getFeaturesConfigPath(): string {
+  const isDev = process.env['NODE_ENV'] === 'development' || !app.isPackaged
+  if (isDev) {
+    const appPath = app.getAppPath()
+    return join(appPath, 'resources/features.yaml')
+  }
+  return join(process.resourcesPath, 'restorm-resources/features.yaml')
+}
+
+// Initialize Feature Flipping Service
+const featuresConfigPath = getFeaturesConfigPath()
+initFeatureService(featuresConfigPath, 'desktop')
+logger.info('✅ Feature Flipping Service initialized', { configPath: featuresConfigPath })
 
 // Initialize Electron application
 const resourcesPath = getResourcesPath()

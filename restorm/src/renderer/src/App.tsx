@@ -7,6 +7,7 @@ import {
   MenuItem,
   MenuItemSeparator,
   Statusbar,
+  StatusbarElement,
   ListView,
   type ListViewItemData,
   type ListViewDropEventPayload,
@@ -21,7 +22,8 @@ import {
   useSettingsModal,
   isTabGroupNode,
   isContainerNode,
-  navigationService
+  navigationService,
+  useFeature
 } from 'electron-core-ui/renderer'
 import type { WorkbenchTree, NavigationEvent, GroupNode, TabGroupNode, EditorTab, SearchResult } from 'electron-core-ui/renderer'
 import { RestormWorkbench } from './components/RestormWorkbench'
@@ -507,6 +509,20 @@ function cloneItemInTree(
   parent.items.splice(index + 1, 0, clonedItem)
 
   return clonedItem
+}
+
+/**
+ * Desktop indicator component for statusbar
+ * Shows "Desktop" text when desktop-indicator feature is enabled
+ */
+const DesktopIndicator: React.FC = () => {
+  const { isEnabled, isLoading } = useFeature('desktop-indicator')
+
+  if (isLoading || !isEnabled) {
+    return null
+  }
+
+  return <StatusbarElement title="Desktop" />
 }
 
 const App: React.FC = () => {
@@ -1933,7 +1949,9 @@ const App: React.FC = () => {
         />
       </div>
 
-      <Statusbar />
+      <Statusbar>
+        <DesktopIndicator />
+      </Statusbar>
 
       {/* Delete confirmation modal */}
       <Modal

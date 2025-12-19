@@ -1,6 +1,6 @@
 import { BrowserWindow, ipcMain, app, screen } from 'electron'
 import { join } from 'path'
-import { getThemeService, getStorageService, logger } from '../services'
+import { getThemeService, getStorageService, logger, isFeatureServiceInitialized, getFeatureService } from '../services'
 
 /**
  * Configure Electron command line switches
@@ -309,6 +309,24 @@ export function setupIPC(resourcesPath?: string): void {
     const storage = getStorageService()
     storage.delete(key)
     return true
+  })
+
+  // Feature Flipping IPC handlers
+  // Note: The feature service must be initialized by the consuming app before these handlers can work
+  ipcMain.handle('feature:is-enabled', (_event, featureName: string) => {
+    if (!isFeatureServiceInitialized()) {
+      logger.warn('Feature service not initialized, returning false for feature check', { featureName })
+      return false
+    }
+    return getFeatureService().isEnabled(featureName)
+  })
+
+  ipcMain.handle('feature:get-platform', () => {
+    if (!isFeatureServiceInitialized()) {
+      logger.warn('Feature service not initialized, returning "desktop" as default platform')
+      return 'desktop'
+    }
+    return getFeatureService().getPlatform()
   })
   
   logger.info('✅ IPC handlers setup complete')
