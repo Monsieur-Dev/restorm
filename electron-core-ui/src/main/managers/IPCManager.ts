@@ -2,7 +2,6 @@ import { BrowserWindow, ipcMain, app, screen } from 'electron'
 import { join } from 'path'
 import { getThemeService, getStorageService, logger } from '../services'
 
-
 /**
  * Configure Electron command line switches
  * Disables sandbox and GPU acceleration for restricted environments (WSL, containers, etc.)

@@ -3,7 +3,6 @@ import { join } from "path"
 import { getStorageService, logger } from "../services"
 import { WindowConfiguration, WindowState, isDevToolsEnabled } from "./WindowManager"
 
-
 /**
  * BaseWindow handles window state persistence and restoration
  * with safety checks to ensure windows remain visible and accessible

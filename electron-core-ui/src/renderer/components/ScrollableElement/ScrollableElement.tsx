@@ -171,7 +171,6 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
     animationFrameRef.current = requestAnimationFrame(animate);
   }, [scrollTop, scrollLeft]);
 
-
   interface IElementsTopAndHeight {
     element: HTMLElement,
     offsetTop: number,
@@ -412,9 +411,6 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
     }
     showScrollbars();
   }, [scrollTop, scrollLeft, contentWidth, containerWidth, mergedOptions.mouseWheelSmoothScroll, smoothScrollTo, showScrollbars]);
-
-
-
 
   // Drag handlers
   const handleVerticalSliderMouseDown = useCallback((event: React.MouseEvent): void => {

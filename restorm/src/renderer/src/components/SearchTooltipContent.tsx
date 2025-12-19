@@ -144,4 +144,3 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
     </div>
   )
 }
-

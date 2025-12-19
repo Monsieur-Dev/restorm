@@ -238,7 +238,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     }
   }, [clearHideTooltipTimeout])
 
-
   // Determine state
   const hasResults = results.length > 0
   const hasQuery = query.trim().length > 0

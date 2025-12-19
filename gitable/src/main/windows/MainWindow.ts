@@ -25,5 +25,3 @@ export class MainWindow extends GitableWindow {
     logger.info('✅ MainWindow constructor completed')
   }
 }
-
-  

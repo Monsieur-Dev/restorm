@@ -185,7 +185,7 @@ export const Workbench: React.FC<WorkbenchProps> = ({
     const content = onGetTabContent(tabId)
     
     // Get title string for serialization
-    const tabWithTitleString = tab as EditorTab & { titleString?: string }
+    const tabWithTitleString = tab
     const titleString = tabWithTitleString.titleString ?? (typeof tab.title === 'string' ? tab.title : getTabTitleString(tabWithTitleString, 'untitled'))
     
     // Open new Editor window with tab parameters and cursor position

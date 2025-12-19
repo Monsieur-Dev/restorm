@@ -37,7 +37,7 @@ interface TabConfig {
 
 const TABS: TabConfig[] = [
   { id: 'emoji', title: 'Emojis', icon: <span style={{ fontSize: 16 }}>😀</span>, hasSearch: false },
-  { id: 'codicon', title: 'Codicons', icon: <i className="codicon codicon-symbol-misc" style={{ fontSize: 16 }} />, hasSearch: true },
+  { id: 'codicon', title: 'Codicons', icon: <i className="codicon codicon-vscode-insiders" style={{ fontSize: 16 }} />, hasSearch: true },
   { id: 'iconoir', title: 'Iconoir', icon: <IconoirIcon name="Iconoir" size={16} />, hasSearch: true },
   { id: 'phosphor', title: 'Phosphor', icon: <PhosphorIcon name="PhosphorLogo" size={16} />, hasSearch: true },
   { id: 'material', title: 'Material', icon: <MdiIcon name="mdiMaterialDesign" size={16} />, hasSearch: true },

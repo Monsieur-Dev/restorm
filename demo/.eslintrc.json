@@ -54,7 +54,9 @@
     "@typescript-eslint/await-thenable": "error",
     "@typescript-eslint/no-misused-promises": "error",
     "no-console": ["error"],
-    "react/prop-types": "off"
+    "react/prop-types": "off",
+    "eol-last": ["error", "always"],
+    "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 0 }]
   },
   "settings": {
     "react": {

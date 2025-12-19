@@ -507,4 +507,3 @@ class SearchIndexService {
 
 /** Singleton instance */
 export const searchIndexService = new SearchIndexService()
-

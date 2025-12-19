@@ -213,4 +213,3 @@ class SearchService {
 
 /** Singleton instance of the search service */
 export const searchService = new SearchService()
-

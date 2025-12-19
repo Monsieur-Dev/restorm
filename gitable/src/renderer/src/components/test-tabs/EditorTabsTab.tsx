@@ -153,7 +153,7 @@ const updateTabContentInTree = (tree: DemoTree, tabId: string, content: string):
       if (isTabGroupNode(node)) {
         const tab = node.tabs.find(t => t.id === tabId)
         if (tab) {
-          (tab as EditorTab & { content?: string }).content = content
+          (tab).content = content
           node.activeTabId = tabId
         }
       } else if (isContainerNode(node)) {

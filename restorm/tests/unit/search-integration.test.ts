@@ -20,7 +20,6 @@ interface SearchDocument {
   }
 }
 
-
 // Mock electron-core-ui/renderer with real search service
 vi.mock('electron-core-ui/renderer', async () => {
   const handlers = new Map<string, Set<(payload: unknown) => void>>()
@@ -254,4 +253,3 @@ describe('Search Integration', () => {
     expect(hasStoreResult).toBe(true)
   })
 })
-

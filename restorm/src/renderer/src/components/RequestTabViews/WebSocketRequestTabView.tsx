@@ -86,7 +86,6 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     [environmentContext]
   )
   
-  
   const handleSend = (): void => {
     if (isSending) return
     setIsSending(true)

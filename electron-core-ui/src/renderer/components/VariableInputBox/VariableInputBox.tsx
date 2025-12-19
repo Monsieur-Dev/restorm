@@ -36,7 +36,6 @@ function getProviderState(): ProviderState {
   return win[globalKey]
 }
 
-
 const isMonacoCancellationError = (reason: unknown): boolean => {
   if (!reason) return false
 
@@ -349,7 +348,6 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
     if (model) {
       state.modelVariablesMap.set(model, variablesRef.current)
     }
-
 
     // Signal that editor is mounted so useEffect can update variables
     setEditorMounted(true)

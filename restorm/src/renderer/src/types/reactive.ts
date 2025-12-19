@@ -406,4 +406,3 @@ export function emitRequestDeleted(requestId: string, parentFolderId: string): v
     parentFolderId
   })
 }
-

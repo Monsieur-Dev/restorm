@@ -14,4 +14,3 @@ export function useThemeContext(): ThemeContextValue {
 }
 
 export default useThemeContext
-

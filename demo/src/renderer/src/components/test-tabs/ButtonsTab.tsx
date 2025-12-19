@@ -27,7 +27,6 @@ const ButtonsTab: React.FC = () => {
           </div>
         </div>
 
-
         <div>
           <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Buttons with Icons (New API)</h4>
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -49,7 +48,6 @@ const ButtonsTab: React.FC = () => {
             </Button>
           </div>
         </div>
-
 
         <div>
           <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Button with Description (New API)</h4>
