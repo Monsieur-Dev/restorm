@@ -5,7 +5,7 @@ interface LoadingScreenProps {
 }
 
 const LoadingScreen: React.FC<LoadingScreenProps> = ({ 
-  logoSrc = '/imgs/icon_with_text.png' 
+  logoSrc = '/imgs/logo_400.png' 
 }) => {
   return (
     <div

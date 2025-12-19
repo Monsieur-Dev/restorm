@@ -1,5 +1,6 @@
 import { ipcRenderer } from 'electron'
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../types/theme'
+import type { FeaturePlatform } from '../../types/feature'
 
 /**
  * Core UI API object for window.api
@@ -126,6 +127,18 @@ export const createCoreUIAPI = (): Record<string, unknown> => ({
     delete: async (key: string): Promise<boolean> => {
       const result: unknown = await ipcRenderer.invoke('storage:delete', key)
       return result as boolean
+    }
+  },
+
+  // Feature Flipping API
+  feature: {
+    isEnabled: async (featureName: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('feature:is-enabled', featureName)
+      return result as boolean
+    },
+    getPlatform: async (): Promise<FeaturePlatform> => {
+      const result: unknown = await ipcRenderer.invoke('feature:get-platform')
+      return result as FeaturePlatform
     }
   }
 })

@@ -4,6 +4,7 @@
 // effectively a no-op.
 
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../types/theme'
+import type { FeaturePlatform } from '../../types/feature'
 import yaml from 'js-yaml'
 import themeIndexJson from '../../resources/themes/index.json'
 
@@ -43,6 +44,11 @@ interface WindowApiStorageShim {
   delete: (key: string) => Promise<boolean>
 }
 
+interface WindowApiFeatureShim {
+  isEnabled: (featureName: string) => Promise<boolean>
+  getPlatform: () => Promise<FeaturePlatform>
+}
+
 interface WindowApiShim {
   platform: string
   theme: WindowApiThemeShim
@@ -50,6 +56,7 @@ interface WindowApiShim {
     log: (level: string, message: string, meta?: Record<string, unknown>) => Promise<void>
   }
   storage: WindowApiStorageShim
+  feature: WindowApiFeatureShim
   minimizeWindow: () => Promise<void>
   maximizeWindow: () => Promise<void>
   closeWindow: () => Promise<void>
@@ -306,6 +313,18 @@ export function ensureCoreUiWebApiShim(): void {
     }
   }
 
+  // Feature API shim for web builds
+  // In web builds, features always return false (platform is 'web')
+  const featureApi: WindowApiFeatureShim = {
+    isEnabled: (_featureName: string): Promise<boolean> => {
+      // In web platform, features are disabled by default unless configured otherwise
+      return Promise.resolve(false)
+    },
+    getPlatform: (): Promise<FeaturePlatform> => {
+      return Promise.resolve('web')
+    }
+  }
+
   const api: WindowApiShim = {
     platform: navigator.platform || 'web',
     theme: themeApi,
@@ -315,6 +334,7 @@ export function ensureCoreUiWebApiShim(): void {
       log: () => Promise.resolve()
     },
     storage: storageApi,
+    feature: featureApi,
     minimizeWindow: () => Promise.resolve(),
     maximizeWindow: () => Promise.resolve(),
     closeWindow: () => Promise.resolve(),

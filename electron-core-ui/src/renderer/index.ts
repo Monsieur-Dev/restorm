@@ -15,3 +15,13 @@ export type { ThemeContextValue } from './contexts'
 export * from './services'
 export { initializeI18n, default as i18n } from './i18n'
 export type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../types/theme'
+export type {
+  FeatureStrategyType,
+  FeaturePlatform,
+  FeatureStrategy,
+  BasicStrategy,
+  PlatformStrategy,
+  FeatureConfig,
+  FeaturesYamlConfig,
+  FeatureApi
+} from '../../types/feature'
