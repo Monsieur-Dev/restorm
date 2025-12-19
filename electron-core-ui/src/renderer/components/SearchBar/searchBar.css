@@ -21,7 +21,7 @@
   padding: 2px 10px;
   margin-top: 0;
   border-radius: 4px;
-  transition: background-color 150ms ease, border-color 150ms ease, height 150ms ease, box-shadow 150ms ease;
+  transition: background-color 250ms ease, border-color 250ms ease, height 250ms ease, box-shadow 250ms ease;
   user-select: none;
   height: 24px;
   width: 100%;
@@ -29,6 +29,11 @@
   background-color: var(--input-background);
   border: 1px solid var(--widget-border);
   box-sizing: border-box;
+  box-shadow: none;
+}
+
+.search-bar-closed:focus,
+.search-bar-closed:focus-within {
   box-shadow: 0 4px 16px rgb(0, 0, 0, 0.35);
 }
 
@@ -41,7 +46,7 @@
   font-size: 13px;
   opacity: 0.6;
   flex-shrink: 0;
-  animation: fadeSlideIn 150ms ease-out;
+  animation: fadeSlideIn 250ms ease-out;
 }
 
 .search-bar-closed .search-title {
@@ -50,7 +55,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  animation: fadeSlideIn 150ms ease-out;
+  animation: fadeSlideIn 250ms ease-out;
 }
 
 @keyframes fadeSlideIn {
@@ -74,7 +79,7 @@
   box-shadow: 0 4px 16px rgb(0, 0, 0, 0.35);
   z-index: 10000;
   box-sizing: border-box;
-  animation: searchBoxAppear 150ms ease-out;
+  animation: searchBoxAppear 250ms ease-out;
   -webkit-app-region: no-drag;
 }
 
@@ -88,6 +93,22 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes searchBoxDisappear {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.search-bar-open.closing {
+  animation: searchBoxDisappear 250ms ease-in forwards;
 }
 
 .search-bar-input-row {
@@ -270,6 +291,63 @@
 
 .http-method-badge.method-options {
   background-color: #6a5acd;
+}
+
+/* GraphQL */
+.http-method-badge.method-graphql,
+.http-method-badge.method-gql,
+.http-method-badge.method-query {
+  background-color: #e535ab;
+}
+
+.http-method-badge.method-mutation {
+  background-color: #b71c1c;
+}
+
+.http-method-badge.method-subscription {
+  background-color: #7b1fa2;
+}
+
+/* gRPC */
+.http-method-badge.method-grpc,
+.http-method-badge.method-unary {
+  background-color: #0277bd;
+}
+
+.http-method-badge.method-s-str,
+.http-method-badge.method-sstr {
+  background-color: #00695c;
+}
+
+.http-method-badge.method-c-str,
+.http-method-badge.method-cstr {
+  background-color: #558b2f;
+}
+
+.http-method-badge.method-bidi {
+  background-color: #5d4037;
+}
+
+/* SOAP */
+.http-method-badge.method-soap {
+  background-color: #f9a825;
+  color: #000;
+}
+
+/* WebSocket / Real-time */
+.http-method-badge.method-ws,
+.http-method-badge.method-websocket {
+  background-color: #43a047;
+}
+
+.http-method-badge.method-mqtt {
+  background-color: #ff6f00;
+  color: #000;
+}
+
+.http-method-badge.method-sio,
+.http-method-badge.method-socketio {
+  background-color: #00897b;
 }
 
 .http-route {

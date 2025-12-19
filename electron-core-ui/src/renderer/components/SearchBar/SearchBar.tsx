@@ -34,6 +34,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 }) => {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
+  const [isClosing, setIsClosing] = useState(false)
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<GroupedResults[]>([])
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set())
@@ -112,14 +113,21 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     setIsOpen(true)
   }, [])
 
-  // Handle close
+  // Handle close with animation
   const handleClose = useCallback(() => {
-    setIsOpen(false)
-    setQuery('')
-    setResults([])
+    // Start closing animation
+    setIsClosing(true)
     setHoveredResultId(null)
     setIsTooltipHovered(false)
     clearHideTooltipTimeout()
+    
+    // After animation completes, actually close
+    setTimeout(() => {
+      setIsOpen(false)
+      setIsClosing(false)
+      setQuery('')
+      setResults([])
+    }, 150)
   }, [clearHideTooltipTimeout])
 
   // Toggle category collapse
@@ -314,7 +322,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       {isOpen && (
         <div
           ref={openBoxRef}
-          className={`search-bar-open ${hasResults ? 'has-results' : ''} ${hasQuery && !hasResults ? 'no-results' : ''}`}
+          className={`search-bar-open ${hasResults ? 'has-results' : ''} ${hasQuery && !hasResults ? 'no-results' : ''} ${isClosing ? 'closing' : ''}`}
           style={{
             top: openBoxPosition.top,
             left: openBoxPosition.left,

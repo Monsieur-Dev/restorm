@@ -1,0 +1,23 @@
+/* CodeEditor - Monaco background synchronization */
+
+/* Make Monaco editor background transparent to inherit from container */
+.ecui-code-editor .editor,
+.ecui-code-editor .monaco-editor,
+.ecui-code-editor .monaco-editor .overflow-guard,
+.ecui-code-editor .monaco-editor-background,
+.ecui-code-editor .monaco-editor .margin {
+  background-color: var(--input-background) !important;
+}
+
+/* Ensure scrollbar background matches */
+.ecui-code-editor .monaco-editor .monaco-scrollable-element > .scrollbar > .slider {
+  background: var(--scrollbarSlider-background);
+}
+
+.ecui-code-editor .monaco-editor .monaco-scrollable-element > .scrollbar > .slider:hover {
+  background: var(--scrollbarSlider-hoverBackground);
+}
+
+.ecui-code-editor .monaco-editor .monaco-scrollable-element > .scrollbar > .slider.active {
+  background: var(--scrollbarSlider-activeBackground);
+}

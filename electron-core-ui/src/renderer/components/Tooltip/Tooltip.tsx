@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import './tooltip.css'
 
 export interface TooltipProps {
@@ -236,7 +237,7 @@ const Tooltip: React.FC<TooltipProps> = ({
 
   const tooltipClasses = ['tooltip', className].filter(Boolean).join(' ')
 
-  return (
+  return createPortal(
     <div
       ref={tooltipRef}
       className={tooltipClasses}
@@ -259,7 +260,8 @@ const Tooltip: React.FC<TooltipProps> = ({
       <div className="tooltip-content">
         {content}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 
