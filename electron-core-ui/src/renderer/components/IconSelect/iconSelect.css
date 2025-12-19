@@ -45,7 +45,29 @@
   border: 1px solid var(--editorWidget-border);
   border-radius: 8px;
   box-shadow: 0 4px 16px rgb(0, 0, 0, 0.3);
+  overflow: visible;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", system-ui, Ubuntu, "Droid Sans", sans-serif;
+  font-size: 13px;
+}
+
+/* Arrow/notch pointing to the button */
+.ecui-icon-select-picker::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 16px;
+  width: 14px;
+  height: 14px;
+  background: var(--editorWidget-background);
+  border-left: 1px solid var(--editorWidget-border);
+  border-top: 1px solid var(--editorWidget-border);
+  transform: rotate(45deg);
+  z-index: 1;
+}
+
+.ecui-icon-select-picker-content {
   overflow: hidden;
+  border-radius: 8px;
 }
 
 .ecui-icon-select-header {
@@ -88,22 +110,169 @@
   opacity: 1;
 }
 
-/* Override emoji-mart styles to match theme */
-.ecui-icon-select-picker em-emoji-picker {
-  --rgb-background: var(--editorWidget-background);
-  --rgb-input: var(--input-background);
-  --rgb-color: var(--foreground);
-  --shadow: none;
-  --em-color-border: var(--editorWidget-border);
+/* Custom emoji picker styles */
+.ecui-emoji-picker {
+  width: 352px;
+  height: 350px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ecui-emoji-picker-categories {
+  display: flex;
+  gap: 2px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--editorWidget-border);
+  background: var(--editorWidget-background);
+  flex-shrink: 0;
+}
+
+.ecui-emoji-picker-category {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  opacity: 0.6;
+  transition: background-color 0.1s, opacity 0.1s;
+}
+
+.ecui-emoji-picker-category:hover {
+  background-color: var(--toolbar-hoverBackground);
+  opacity: 0.8;
+}
+
+.ecui-emoji-picker-category.active {
+  background-color: var(--toolbar-activeBackground);
+  opacity: 1;
+}
+
+.ecui-emoji-picker-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  border-bottom: 1px solid var(--editorWidget-border);
+  background: var(--editorWidget-background);
+  flex-shrink: 0;
+}
+
+.ecui-emoji-picker-search .codicon {
+  font-size: 14px;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.ecui-emoji-picker-search-input {
+  flex: 1;
+  border: none;
+  background: var(--input-background);
+  color: var(--input-foreground);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  outline: none;
+}
+
+.ecui-emoji-picker-search-input:focus {
+  outline: 1px solid var(--focusBorder);
+}
+
+.ecui-emoji-picker-search-input::placeholder {
+  color: var(--input-placeholderForeground);
+}
+
+.ecui-emoji-picker-search-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--foreground);
+  opacity: 0.6;
+}
+
+.ecui-emoji-picker-search-clear:hover {
+  opacity: 1;
+  background: var(--toolbar-hoverBackground);
+}
+
+.ecui-emoji-picker-scroll {
+  flex: 1;
+  min-height: 0;
+}
+
+.ecui-emoji-picker-content {
+  padding: 4px;
+}
+
+.ecui-emoji-picker-section {
+  margin-bottom: 8px;
+}
+
+.ecui-emoji-picker-section-title {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--descriptionForeground);
+  padding: 4px 4px 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ecui-emoji-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 32px);
+  gap: 2px;
+}
+
+.ecui-emoji-picker-emoji {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  transition: background-color 0.1s;
+}
+
+.ecui-emoji-picker-emoji:hover {
+  background-color: var(--list-hoverBackground);
+}
+
+.ecui-emoji-picker-empty {
+  padding: 20px;
+  text-align: center;
+  color: var(--descriptionForeground);
+  font-size: 12px;
 }
 
 .ecui-icon-select-codicons {
   width: 352px;
-  max-height: 350px;
-  overflow-y: auto;
-  overflow-x: hidden;
+  height: 350px;
   display: flex;
   flex-direction: column;
+}
+
+.ecui-icon-select-scroll {
+  flex: 1;
+  min-height: 0;
 }
 
 /* Search input */
@@ -166,8 +335,7 @@
 
 /* Library container */
 .ecui-icon-select-library {
-  flex: 1;
-  overflow-y: auto;
+  padding: 4px;
 }
 
 /* More icons hint */
@@ -179,55 +347,6 @@
   border-top: 1px solid var(--editorWidget-border);
 }
 
-/* Scrollbar styles for codicons */
-.ecui-icon-select-codicons::-webkit-scrollbar {
-  width: 10px;
-}
-
-.ecui-icon-select-codicons::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.ecui-icon-select-codicons::-webkit-scrollbar-thumb {
-  background: var(--scrollbarSlider-background);
-  border-radius: 5px;
-}
-
-.ecui-icon-select-codicons::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbarSlider-hoverBackground);
-}
-
-.ecui-icon-select-codicons::-webkit-scrollbar-thumb:active {
-  background: var(--scrollbarSlider-activeBackground);
-}
-
-
-/* Ensure emoji-mart scroll container is scrollable */
-.ecui-icon-select-picker em-emoji-picker {
-  display: block;
-}
-
-.ecui-icon-select-picker em-emoji-picker::part(scroll) {
-  overflow-y: auto !important;
-}
-
-/* Target internal emoji-mart elements with webkit scrollbar */
-.ecui-icon-select-picker *::-webkit-scrollbar {
-  width: 10px;
-}
-
-.ecui-icon-select-picker *::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.ecui-icon-select-picker *::-webkit-scrollbar-thumb {
-  background: var(--scrollbarSlider-background);
-  border-radius: 5px;
-}
-
-.ecui-icon-select-picker *::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbarSlider-hoverBackground);
-}
 
 .ecui-icon-select-codicons-grid {
   display: grid;
@@ -257,4 +376,92 @@
 
 .ecui-icon-select-codicon .codicon {
   font-size: 16px;
+}
+
+/* Grouped Icon Picker */
+.ecui-grouped-icon-picker {
+  width: 352px;
+  height: 350px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ecui-grouped-icon-categories {
+  display: flex;
+  gap: 2px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--editorWidget-border);
+  background: var(--editorWidget-background);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  max-height: 72px;
+  overflow: hidden;
+}
+
+.ecui-grouped-icon-category {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--foreground);
+  opacity: 0.6;
+  transition: background-color 0.1s, opacity 0.1s;
+}
+
+.ecui-grouped-icon-category:hover {
+  background-color: var(--toolbar-hoverBackground);
+  opacity: 0.8;
+}
+
+.ecui-grouped-icon-category.active {
+  background-color: var(--toolbar-activeBackground);
+  opacity: 1;
+}
+
+.ecui-grouped-icon-scroll {
+  flex: 1;
+  min-height: 0;
+}
+
+.ecui-grouped-icon-sections {
+  padding: 4px;
+}
+
+.ecui-grouped-icon-section {
+  margin-bottom: 12px;
+}
+
+.ecui-grouped-icon-section-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--descriptionForeground);
+  padding: 4px 4px 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ecui-grouped-icon-section-header .codicon {
+  font-size: 12px;
+}
+
+.ecui-grouped-icon-count {
+  opacity: 0.6;
+  font-weight: 400;
+}
+
+.ecui-grouped-icon-empty {
+  padding: 20px;
+  text-align: center;
+  color: var(--descriptionForeground);
+  font-size: 12px;
 }

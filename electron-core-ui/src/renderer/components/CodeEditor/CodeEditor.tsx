@@ -2,6 +2,7 @@ import React, { useState, useEffect, forwardRef, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import Editor, { type EditorProps, type Monaco, type OnMount } from '@monaco-editor/react'
 import type * as monacoEditor from 'monaco-editor'
+import './codeEditor.css'
 
 /**
  * Extract a Handlebars variable name at the given position in text.
@@ -212,11 +213,13 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   }
 
   return (
-    <Editor
-      {...props}
-      theme={currentTheme}
-      onMount={handleMount}
-    />
+    <div className="ecui-code-editor" style={{ height: props.height, width: props.width }}>
+      <Editor
+        {...props}
+        theme={currentTheme}
+        onMount={handleMount}
+      />
+    </div>
   )
 })
 

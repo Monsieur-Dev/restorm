@@ -1,7 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import Picker from '@emoji-mart/react'
-import data from '@emoji-mart/data'
+import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 import codiconsMapping from '@vscode/codicons/src/template/mapping.json'
+import { EmojiPicker } from './EmojiPicker'
+import { GroupedIconPicker } from './GroupedIconPicker'
+import { ScrollableElement } from '../ScrollableElement'
 import type { Icon, IconType } from '../../../../types/icon'
 import { Button } from '../Button'
 import {
@@ -19,6 +22,12 @@ import {
   FaIcon,
   renderLibraryIcon
 } from './iconLibraries'
+import {
+  CODICON_CATEGORIES,
+  FONTAWESOME_CATEGORIES,
+  ICONOIR_CATEGORIES,
+  PHOSPHOR_CATEGORIES
+} from './iconCategories'
 
 import './iconSelect.css'
 
@@ -61,12 +70,6 @@ export interface IconSelectProps {
   style?: React.CSSProperties
 }
 
-interface EmojiData {
-  native: string
-  id: string
-  shortcodes?: string
-}
-
 /**
  * Detect if the current theme is dark based on data-theme attribute
  */
@@ -82,8 +85,8 @@ function isDarkTheme(): boolean {
 const SearchInput: React.FC<{
   value: string
   onChange: (value: string) => void
-  placeholder?: string
-}> = ({ value, onChange, placeholder = 'Search...' }) => (
+  placeholder: string
+}> = ({ value, onChange, placeholder }) => (
   <div className="ecui-icon-select-search">
     <i className="codicon codicon-search" />
     <input
@@ -114,7 +117,8 @@ const IconGrid: React.FC<{
   renderIcon: (name: string) => React.ReactNode
   onSelect: (name: string) => void
   maxDisplay?: number
-}> = ({ icons, renderIcon, onSelect, maxDisplay = 500 }) => {
+  moreHintText?: string
+}> = ({ icons, renderIcon, onSelect, maxDisplay = 500, moreHintText }) => {
   const displayedIcons = icons.slice(0, maxDisplay)
   const hasMore = icons.length > maxDisplay
   
@@ -133,9 +137,9 @@ const IconGrid: React.FC<{
           </button>
         ))}
       </div>
-      {hasMore && (
+      {hasMore && moreHintText && (
         <div className="ecui-icon-select-more-hint">
-          +{icons.length - maxDisplay} more icons. Use search to find specific icons.
+          {moreHintText}
         </div>
       )}
     </div>
@@ -151,6 +155,7 @@ export const IconSelect: React.FC<IconSelectProps> = ({
   className,
   style
 }) => {
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<TabId>('emoji')
   const [theme, setTheme] = useState<'light' | 'dark'>(() => isDarkTheme() ? 'dark' : 'light')
@@ -159,14 +164,10 @@ export const IconSelect: React.FC<IconSelectProps> = ({
   const pickerRef = useRef<HTMLDivElement | null>(null)
   const buttonRef = useRef<HTMLButtonElement | null>(null)
 
-  // Search states for each tab
-  const [codiconSearch, setCodiconSearch] = useState('')
-  const [iconoirSearch, setIconoirSearch] = useState('')
-  const [phosphorSearch, setPhosphorSearch] = useState('')
+  // Search states for tabs without grouping
   const [materialSearch, setMaterialSearch] = useState('')
   const [simpleIconsSearch, setSimpleIconsSearch] = useState('')
   const [featherSearch, setFeatherSearch] = useState('')
-  const [fontAwesomeSearch, setFontAwesomeSearch] = useState('')
 
   // Memoized icon lists
   const iconoirNames = useMemo(() => getIconoirNames(), [])
@@ -176,25 +177,7 @@ export const IconSelect: React.FC<IconSelectProps> = ({
   const featherNames = useMemo(() => getFeatherNames(), [])
   const fontAwesomeNames = useMemo(() => getFontAwesomeNames(), [])
 
-  // Filtered icon lists
-  const filteredCodicons = useMemo(() => {
-    if (!codiconSearch) return CODICONS
-    const search = codiconSearch.toLowerCase()
-    return CODICONS.filter(name => name.toLowerCase().includes(search))
-  }, [codiconSearch])
-
-  const filteredIconoir = useMemo(() => {
-    if (!iconoirSearch) return iconoirNames
-    const search = iconoirSearch.toLowerCase()
-    return iconoirNames.filter(name => name.toLowerCase().includes(search))
-  }, [iconoirSearch, iconoirNames])
-
-  const filteredPhosphor = useMemo(() => {
-    if (!phosphorSearch) return phosphorNames
-    const search = phosphorSearch.toLowerCase()
-    return phosphorNames.filter(name => name.toLowerCase().includes(search))
-  }, [phosphorSearch, phosphorNames])
-
+  // Filtered icon lists (for tabs without grouping)
   const filteredMaterial = useMemo(() => {
     if (!materialSearch) return mdiNames
     const search = materialSearch.toLowerCase()
@@ -213,19 +196,14 @@ export const IconSelect: React.FC<IconSelectProps> = ({
     return featherNames.filter(name => name.toLowerCase().includes(search))
   }, [featherSearch, featherNames])
 
-  const filteredFontAwesome = useMemo(() => {
-    if (!fontAwesomeSearch) return fontAwesomeNames
-    const search = fontAwesomeSearch.toLowerCase()
-    return fontAwesomeNames.filter(name => name.toLowerCase().includes(search))
-  }, [fontAwesomeSearch, fontAwesomeNames])
-
   // Calculate picker position when opening
   const updatePickerPosition = useCallback(() => {
     if (!buttonRef.current) return
     const rect = buttonRef.current.getBoundingClientRect()
+    // Position so the arrow (at 23px from left) points to button center (12px)
     setPickerPosition({
-      top: rect.bottom + 4,
-      left: rect.left
+      top: rect.bottom + 12,
+      left: rect.left - 11
     })
   }, [])
 
@@ -277,23 +255,19 @@ export const IconSelect: React.FC<IconSelectProps> = ({
     }
   }, [isOpen])
 
-  // Reset search when tab changes or picker closes
+  // Reset search when picker closes
   useEffect(() => {
     if (!isOpen) {
-      setCodiconSearch('')
-      setIconoirSearch('')
-      setPhosphorSearch('')
       setMaterialSearch('')
       setSimpleIconsSearch('')
       setFeatherSearch('')
-      setFontAwesomeSearch('')
     }
   }, [isOpen])
 
-  const handleEmojiSelect = useCallback((emojiData: EmojiData) => {
+  const handleEmojiSelect = useCallback((emoji: string) => {
     onChange?.({
       type: 'emoji',
-      value: emojiData.native
+      value: emoji
     })
     setIsOpen(false)
   }, [onChange])
@@ -364,7 +338,7 @@ export const IconSelect: React.FC<IconSelectProps> = ({
         <span className="ecui-icon-select-value">{displayValue}</span>
       </button>
 
-      {isOpen && (
+      {isOpen && createPortal(
         <div
           ref={pickerRef}
           className="ecui-icon-select-picker"
@@ -394,59 +368,43 @@ export const IconSelect: React.FC<IconSelectProps> = ({
           </div>
           
           {activeTab === 'emoji' && (
-            <Picker
-              data={data}
+            <EmojiPicker
               onEmojiSelect={handleEmojiSelect}
               theme={theme}
-              previewPosition="none"
-              skinTonePosition="none"
-              emojiButtonColors={[]}
             />
           )}
           
           {activeTab === 'codicon' && (
-            <div className="ecui-icon-select-codicons">
-              <SearchInput
-                value={codiconSearch}
-                onChange={setCodiconSearch}
-                placeholder="Search codicons..."
-              />
-              <IconGrid
-                icons={filteredCodicons}
-                renderIcon={(name) => <i className={`codicon codicon-${name}`} />}
-                onSelect={(name) => { handleIconSelect('codicon', name) }}
-              />
-            </div>
+            <GroupedIconPicker
+              iconNames={CODICONS}
+              categories={CODICON_CATEGORIES}
+              renderIcon={(name) => <i className={`codicon codicon-${name}`} />}
+              onSelect={(name) => { handleIconSelect('codicon', name) }}
+              searchPlaceholder={t('iconSelect.searchCodicons')}
+              idPrefix="codicon"
+            />
           )}
 
           {activeTab === 'iconoir' && (
-            <div className="ecui-icon-select-codicons">
-              <SearchInput
-                value={iconoirSearch}
-                onChange={setIconoirSearch}
-                placeholder="Search Iconoir..."
-              />
-              <IconGrid
-                icons={filteredIconoir}
-                renderIcon={(name) => <IconoirIcon name={name} size={16} />}
-                onSelect={(name) => { handleIconSelect('iconoir', name) }}
-              />
-            </div>
+            <GroupedIconPicker
+              iconNames={iconoirNames}
+              categories={ICONOIR_CATEGORIES}
+              renderIcon={(name) => <IconoirIcon name={name} size={16} />}
+              onSelect={(name) => { handleIconSelect('iconoir', name) }}
+              searchPlaceholder={t('iconSelect.searchIconoir')}
+              idPrefix="iconoir"
+            />
           )}
 
           {activeTab === 'phosphor' && (
-            <div className="ecui-icon-select-codicons">
-              <SearchInput
-                value={phosphorSearch}
-                onChange={setPhosphorSearch}
-                placeholder="Search Phosphor..."
-              />
-              <IconGrid
-                icons={filteredPhosphor}
-                renderIcon={(name) => <PhosphorIcon name={name} size={16} />}
-                onSelect={(name) => { handleIconSelect('phosphor', name) }}
-              />
-            </div>
+            <GroupedIconPicker
+              iconNames={phosphorNames}
+              categories={PHOSPHOR_CATEGORIES}
+              renderIcon={(name) => <PhosphorIcon name={name} size={16} />}
+              onSelect={(name) => { handleIconSelect('phosphor', name) }}
+              searchPlaceholder={t('iconSelect.searchPhosphor')}
+              idPrefix="phosphor"
+            />
           )}
 
           {activeTab === 'material' && (
@@ -454,13 +412,19 @@ export const IconSelect: React.FC<IconSelectProps> = ({
               <SearchInput
                 value={materialSearch}
                 onChange={setMaterialSearch}
-                placeholder="Search Material..."
+                placeholder={t('iconSelect.searchMaterial')}
               />
-              <IconGrid
-                icons={filteredMaterial}
-                renderIcon={(name) => <MdiIcon name={name} size={16} />}
-                onSelect={(name) => { handleIconSelect('material', name) }}
-              />
+              <ScrollableElement
+                options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false }}
+                className="ecui-icon-select-scroll"
+              >
+                <IconGrid
+                  icons={filteredMaterial}
+                  renderIcon={(name) => <MdiIcon name={name} size={16} />}
+                  onSelect={(name) => { handleIconSelect('material', name) }}
+                  moreHintText={t('iconSelect.moreIcons', { count: filteredMaterial.length - 500 })}
+                />
+              </ScrollableElement>
             </div>
           )}
 
@@ -469,13 +433,19 @@ export const IconSelect: React.FC<IconSelectProps> = ({
               <SearchInput
                 value={simpleIconsSearch}
                 onChange={setSimpleIconsSearch}
-                placeholder="Search Simple Icons..."
+                placeholder={t('iconSelect.searchSimpleIcons')}
               />
-              <IconGrid
-                icons={filteredSimpleIcons}
-                renderIcon={(name) => <SimpleIcon name={name} size={16} />}
-                onSelect={(name) => { handleIconSelect('simpleicons', name) }}
-              />
+              <ScrollableElement
+                options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false }}
+                className="ecui-icon-select-scroll"
+              >
+                <IconGrid
+                  icons={filteredSimpleIcons}
+                  renderIcon={(name) => <SimpleIcon name={name} size={16} />}
+                  onSelect={(name) => { handleIconSelect('simpleicons', name) }}
+                  moreHintText={t('iconSelect.moreIcons', { count: filteredSimpleIcons.length - 500 })}
+                />
+              </ScrollableElement>
             </div>
           )}
 
@@ -484,31 +454,34 @@ export const IconSelect: React.FC<IconSelectProps> = ({
               <SearchInput
                 value={featherSearch}
                 onChange={setFeatherSearch}
-                placeholder="Search Feather..."
+                placeholder={t('iconSelect.searchFeather')}
               />
-              <IconGrid
-                icons={filteredFeather}
-                renderIcon={(name) => <FeatherIcon name={name} size={16} />}
-                onSelect={(name) => { handleIconSelect('feather', name) }}
-              />
+              <ScrollableElement
+                options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false }}
+                className="ecui-icon-select-scroll"
+              >
+                <IconGrid
+                  icons={filteredFeather}
+                  renderIcon={(name) => <FeatherIcon name={name} size={16} />}
+                  onSelect={(name) => { handleIconSelect('feather', name) }}
+                  moreHintText={t('iconSelect.moreIcons', { count: filteredFeather.length - 500 })}
+                />
+              </ScrollableElement>
             </div>
           )}
 
           {activeTab === 'fontawesome' && (
-            <div className="ecui-icon-select-codicons">
-              <SearchInput
-                value={fontAwesomeSearch}
-                onChange={setFontAwesomeSearch}
-                placeholder="Search Font Awesome..."
-              />
-              <IconGrid
-                icons={filteredFontAwesome}
-                renderIcon={(name) => <FaIcon name={name} size={16} />}
-                onSelect={(name) => { handleIconSelect('fontawesome', name) }}
-              />
-            </div>
+            <GroupedIconPicker
+              iconNames={fontAwesomeNames}
+              categories={FONTAWESOME_CATEGORIES}
+              renderIcon={(name) => <FaIcon name={name} size={16} />}
+              onSelect={(name) => { handleIconSelect('fontawesome', name) }}
+              searchPlaceholder={t('iconSelect.searchFontAwesome')}
+              idPrefix="fontawesome"
+            />
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

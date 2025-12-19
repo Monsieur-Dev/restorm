@@ -5,6 +5,8 @@
 	cursor: default;
 	overflow: visible;
 	box-sizing: border-box;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", system-ui, Ubuntu, "Droid Sans", sans-serif;
+	font-size: 13px;
 	line-height: 1.5em;
 	white-space: normal;
 	animation: fadein 100ms linear;
