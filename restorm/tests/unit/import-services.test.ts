@@ -82,10 +82,11 @@ describe('SwaggerImportService', () => {
 
     it('should create environment with baseUrl variable', () => {
       const result = importSwaggerFromJson(swaggerJson)
-      const defaultEnv = result.environments.find((e) => e.name === 'Default')
+      // Environment name is extracted from the host (localhost:8080 -> localhost)
+      const env = result.environments.find((e) => e.name === 'localhost')
 
-      expect(defaultEnv).toBeDefined()
-      expect(defaultEnv?.variables.some((v) => v.key === 'baseUrl')).toBe(true)
+      expect(env).toBeDefined()
+      expect(env?.variables.some((v) => v.key === 'baseUrl')).toBe(true)
     })
 
     it('should create folders for each tag', () => {
@@ -128,8 +129,9 @@ describe('SwaggerImportService', () => {
         baseUrl: 'http://custom.url'
       })
 
-      const defaultEnv = result.environments.find((e) => e.name === 'Default')
-      const baseUrlVar = defaultEnv?.variables.find((v) => v.key === 'baseUrl')
+      // Environment name is extracted from the host (localhost:8080 -> localhost)
+      const env = result.environments.find((e) => e.name === 'localhost')
+      const baseUrlVar = env?.variables.find((v) => v.key === 'baseUrl')
       expect(baseUrlVar?.value).toBe('http://custom.url')
     })
 

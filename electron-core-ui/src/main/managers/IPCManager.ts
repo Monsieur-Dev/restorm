@@ -1,6 +1,6 @@
 import { BrowserWindow, ipcMain, app, screen } from 'electron'
 import { join } from 'path'
-import { getThemeService, getStorageService, logger, isFeatureServiceInitialized, getFeatureService } from '../services'
+import { getThemeService, getStorageService, logger, isFeatureServiceInitialized, getFeatureService, isFileServiceInitialized, getFileService } from '../services'
 
 /**
  * Configure Electron command line switches
@@ -91,7 +91,6 @@ export function setupIPC(resourcesPath?: string): void {
             symbolColor: colors.symbolColor,
             height: 30
           })
-          logger.info('WCO colors updated', { backgroundColor: colors.backgroundColor, symbolColor: colors.symbolColor })
         }
       }
     }
@@ -328,7 +327,155 @@ export function setupIPC(resourcesPath?: string): void {
     }
     return getFeatureService().getPlatform()
   })
-  
+
+  // File Service IPC handlers
+  // Note: The file service must be initialized by the consuming app before these handlers can work
+  ipcMain.handle('file:new', async () => {
+    if (!isFileServiceInitialized()) {
+      logger.warn('File service not initialized')
+      return false
+    }
+    return getFileService().newFile()
+  })
+
+  ipcMain.handle('file:open', async (_event, path?: string) => {
+    if (!isFileServiceInitialized()) {
+      logger.warn('File service not initialized')
+      return { success: false }
+    }
+    return getFileService().open(path)
+  })
+
+  ipcMain.handle('file:save', async (_event, content: unknown) => {
+    if (!isFileServiceInitialized()) {
+      logger.warn('File service not initialized')
+      return false
+    }
+    return getFileService().save(content)
+  })
+
+  ipcMain.handle('file:save-as', async (_event, content: unknown, filename?: string, format?: string) => {
+    if (!isFileServiceInitialized()) {
+      logger.warn('File service not initialized')
+      return false
+    }
+    return getFileService().saveAs(content, filename, format as 'json' | 'yaml' | undefined)
+  })
+
+  ipcMain.handle('file:close', () => {
+    if (!isFileServiceInitialized()) {
+      logger.warn('File service not initialized')
+      return false
+    }
+    return getFileService().close()
+  })
+
+  ipcMain.handle('file:get-state', () => {
+    if (!isFileServiceInitialized()) {
+      logger.warn('File service not initialized')
+      return null
+    }
+    return getFileService().getState()
+  })
+
+  ipcMain.handle('file:get-name', () => {
+    if (!isFileServiceInitialized()) {
+      return null
+    }
+    return getFileService().getFileName()
+  })
+
+  ipcMain.handle('file:get-path', () => {
+    if (!isFileServiceInitialized()) {
+      return null
+    }
+    return getFileService().getFilePath()
+  })
+
+  ipcMain.handle('file:is-dirty', () => {
+    if (!isFileServiceInitialized()) {
+      return false
+    }
+    return getFileService().isDirty()
+  })
+
+  ipcMain.handle('file:mark-dirty', () => {
+    if (!isFileServiceInitialized()) {
+      return
+    }
+    getFileService().markDirty()
+  })
+
+  ipcMain.handle('file:clear-dirty', () => {
+    if (!isFileServiceInitialized()) {
+      return
+    }
+    getFileService().clearDirty()
+  })
+
+  ipcMain.handle('file:show-unsaved-dialog', async (_event, labels?: {
+    title?: string
+    message?: string
+    detail?: string
+    save?: string
+    dontSave?: string
+    cancel?: string
+  }) => {
+    if (!isFileServiceInitialized()) {
+      return 'cancel'
+    }
+    return getFileService().showUnsavedChangesDialog(labels)
+  })
+
+  ipcMain.handle('file:get-recent', () => {
+    if (!isFileServiceInitialized()) {
+      return []
+    }
+    return getFileService().getRecentFiles()
+  })
+
+  ipcMain.handle('file:get-favorites', () => {
+    if (!isFileServiceInitialized()) {
+      return []
+    }
+    return getFileService().getFavorites()
+  })
+
+  ipcMain.handle('file:toggle-favorite', (_event, path: string) => {
+    if (!isFileServiceInitialized()) {
+      return false
+    }
+    return getFileService().toggleFavorite(path)
+  })
+
+  ipcMain.handle('file:remove-from-recent', (_event, path: string) => {
+    if (!isFileServiceInitialized()) {
+      return
+    }
+    getFileService().removeFromRecent(path)
+  })
+
+  ipcMain.handle('file:get-content-checksum', () => {
+    if (!isFileServiceInitialized()) {
+      return null
+    }
+    return getFileService().getContentChecksum()
+  })
+
+  ipcMain.handle('file:set-content-checksum', (_event, checksum: string) => {
+    if (!isFileServiceInitialized()) {
+      return
+    }
+    getFileService().setContentChecksum(checksum)
+  })
+
+  ipcMain.handle('file:has-content-changed', (_event, currentChecksum: string) => {
+    if (!isFileServiceInitialized()) {
+      return false
+    }
+    return getFileService().hasContentChanged(currentChecksum)
+  })
+
   logger.info('✅ IPC handlers setup complete')
 }
 

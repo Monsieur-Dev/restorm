@@ -1,19 +1,77 @@
 import { app, ipcMain, BrowserWindow } from 'electron'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFeatureService } from 'electron-core-ui'
+import { initializeApp, logger, initFeatureService, initFileService, getFileService, isFileServiceInitialized } from 'electron-core-ui'
 import { join, relative } from 'path'
 import { promises as fs } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
+
+// Keep track of main window and editor windows
+let mainWindow: BrowserWindow | null = null
+const editorWindows = new Set<BrowserWindow>()
 
 function createWindow(): void {
   logger.info('🪟 Creating main window...')
   try {
     // Create main window (instance is stored in WindowManager singleton)
-    new MainWindow()
+    const mainWin = new MainWindow()
+    mainWindow = mainWin.getWindow()
+    
+    if (mainWindow) {
+      // Handle main window close event - check for unsaved changes
+      mainWindow.on('close', (event) => {
+        // Check if file is dirty and ask for confirmation
+        if (isFileServiceInitialized() && getFileService().isDirty()) {
+          event.preventDefault()
+          
+          // Show confirmation dialog
+          void getFileService().showUnsavedChangesDialog().then((result) => {
+            if (result === 'cancel') {
+              // User cancelled - don't close
+              return
+            }
+            
+            if (result === 'save') {
+              // User wants to save - send message to renderer to save
+              // The renderer will handle saving and then close
+              mainWindow?.webContents.send('app:save-and-close')
+            } else {
+              // User chose to discard - close all windows
+              closeAllWindows()
+            }
+          })
+        } else {
+          // No unsaved changes - close all windows
+          closeAllWindows()
+        }
+      })
+      
+      mainWindow.on('closed', () => {
+        mainWindow = null
+      })
+    }
+    
     logger.info('✅ Main window created successfully')
   } catch (error) {
     logger.error('❌ Failed to create main window:', { error: String(error) })
     throw error
+  }
+}
+
+// Close all editor windows and then the main window
+function closeAllWindows(): void {
+  logger.info('🚪 Closing all windows...', { editorWindowCount: editorWindows.size })
+  
+  // Close all editor windows first
+  for (const editorWin of editorWindows) {
+    if (!editorWin.isDestroyed()) {
+      editorWin.destroy() // Use destroy() to force close without triggering close event
+    }
+  }
+  editorWindows.clear()
+  
+  // Then close main window
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.destroy() // Use destroy() to force close
   }
 }
 
@@ -46,6 +104,15 @@ const featuresConfigPath = getFeaturesConfigPath()
 initFeatureService(featuresConfigPath, 'desktop')
 logger.info('✅ Feature Flipping Service initialized', { configPath: featuresConfigPath })
 
+// Initialize File Service for .restorm files with YAML serialization
+initFileService({
+  extension: '.restorm',
+  defaultFormat: 'yaml',
+  maxRecentFiles: 10,
+  storagePrefix: 'restorm_'
+})
+logger.info('✅ File Service initialized')
+
 // Initialize Electron application
 const resourcesPath = getResourcesPath()
 initializeApp('restorm', createWindow, resourcesPath)
@@ -61,13 +128,23 @@ ipcMain.handle('restorm:open-editor', (_event, file?: { title: string; content?:
     // Wait a bit for window to be fully created, then store file parameters
     setTimeout(() => {
       const window = editorWindow.getWindow()
-      if (window && file) {
-        // Store file parameters with window ID as key (without x, y which are used for positioning)
-        const { x, y, ...fileParams } = file
-        editorWindowFiles.set(window.id, fileParams)
-        logger.info('📦 Stored file parameters for window', { windowId: window.id, file: fileParams, x, y })
+      if (window) {
+        // Add to editor windows set
+        editorWindows.add(window)
+        
+        // Remove from set when closed
+        window.on('closed', () => {
+          editorWindows.delete(window)
+        })
+        
+        if (file) {
+          // Store file parameters with window ID as key (without x, y which are used for positioning)
+          const { x, y, ...fileParams } = file
+          editorWindowFiles.set(window.id, fileParams)
+          logger.info('📦 Stored file parameters for window', { windowId: window.id, file: fileParams, x, y })
+        }
       } else {
-        logger.warn('⚠️ Window not available or no file provided', { hasWindow: !!window, hasFile: !!file })
+        logger.warn('⚠️ Window not available', { hasFile: !!file })
       }
     }, 100)
     logger.info('✅ Restorm editor window created successfully')
@@ -75,6 +152,12 @@ ipcMain.handle('restorm:open-editor', (_event, file?: { title: string; content?:
     logger.error('❌ Failed to create Restorm editor window:', { error: String(error) })
     throw error
   }
+})
+
+// IPC handler to force close all windows (called after save or discard)
+ipcMain.handle('restorm:force-close', () => {
+  logger.info('🚪 Force closing all windows...')
+  closeAllWindows()
 })
 
 // IPC handler to get file parameters for Editor window

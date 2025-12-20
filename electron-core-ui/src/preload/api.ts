@@ -1,6 +1,7 @@
 import { ipcRenderer } from 'electron'
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../types/theme'
 import type { FeaturePlatform } from '../../types/feature'
+import type { FileServiceState, FileMetadata, SerializationFormat } from '../../types/file'
 
 /**
  * Core UI API object for window.api
@@ -139,6 +140,125 @@ export const createCoreUIAPI = (): Record<string, unknown> => ({
     getPlatform: async (): Promise<FeaturePlatform> => {
       const result: unknown = await ipcRenderer.invoke('feature:get-platform')
       return result as FeaturePlatform
+    }
+  },
+
+  // File Service API
+  file: {
+    newFile: async (): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('file:new')
+      return result as boolean
+    },
+    open: async (path?: string): Promise<{ success: boolean; content?: unknown }> => {
+      const result: unknown = await ipcRenderer.invoke('file:open', path)
+      return result as { success: boolean; content?: unknown }
+    },
+    save: async (content: unknown): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('file:save', content)
+      return result as boolean
+    },
+    saveAs: async (content: unknown, filename?: string, format?: SerializationFormat): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('file:save-as', content, filename, format)
+      return result as boolean
+    },
+    close: async (): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('file:close')
+      return result as boolean
+    },
+    getState: async (): Promise<FileServiceState | null> => {
+      const result: unknown = await ipcRenderer.invoke('file:get-state')
+      return result as FileServiceState | null
+    },
+    getFileName: async (): Promise<string | null> => {
+      const result: unknown = await ipcRenderer.invoke('file:get-name')
+      return result as string | null
+    },
+    getFilePath: async (): Promise<string | null> => {
+      const result: unknown = await ipcRenderer.invoke('file:get-path')
+      return result as string | null
+    },
+    isDirty: async (): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('file:is-dirty')
+      return result as boolean
+    },
+    markDirty: async (): Promise<void> => {
+      await ipcRenderer.invoke('file:mark-dirty')
+    },
+    clearDirty: async (): Promise<void> => {
+      await ipcRenderer.invoke('file:clear-dirty')
+    },
+    showUnsavedChangesDialog: async (labels?: {
+      title?: string
+      message?: string
+      detail?: string
+      save?: string
+      dontSave?: string
+      cancel?: string
+    }): Promise<'save' | 'discard' | 'cancel'> => {
+      const result: unknown = await ipcRenderer.invoke('file:show-unsaved-dialog', labels)
+      return result as 'save' | 'discard' | 'cancel'
+    },
+    getRecentFiles: async (): Promise<FileMetadata[]> => {
+      const result: unknown = await ipcRenderer.invoke('file:get-recent')
+      return result as FileMetadata[]
+    },
+    getFavorites: async (): Promise<FileMetadata[]> => {
+      const result: unknown = await ipcRenderer.invoke('file:get-favorites')
+      return result as FileMetadata[]
+    },
+    toggleFavorite: async (path: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('file:toggle-favorite', path)
+      return result as boolean
+    },
+    removeFromRecent: async (path: string): Promise<void> => {
+      await ipcRenderer.invoke('file:remove-from-recent', path)
+    },
+    getContentChecksum: async (): Promise<string | null> => {
+      const result: unknown = await ipcRenderer.invoke('file:get-content-checksum')
+      return result as string | null
+    },
+    setContentChecksum: async (checksum: string): Promise<void> => {
+      await ipcRenderer.invoke('file:set-content-checksum', checksum)
+    },
+    hasContentChanged: async (currentChecksum: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('file:has-content-changed', currentChecksum)
+      return result as boolean
+    },
+    onStateChanged: (callback: (state: FileServiceState) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, state: FileServiceState): void => {
+        callback(state)
+      }
+      ipcRenderer.on('file:state-changed', handler)
+      return () => {
+        ipcRenderer.removeListener('file:state-changed', handler)
+      }
+    },
+    onDirtyChanged: (callback: (isDirty: boolean) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, isDirty: boolean): void => {
+        callback(isDirty)
+      }
+      ipcRenderer.on('file:dirty-changed', handler)
+      return () => {
+        ipcRenderer.removeListener('file:dirty-changed', handler)
+      }
+    },
+    onFileOpened: (callback: (state: FileServiceState) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, state: FileServiceState): void => {
+        callback(state)
+      }
+      ipcRenderer.on('file:opened', handler)
+      return () => {
+        ipcRenderer.removeListener('file:opened', handler)
+      }
+    },
+    onFileClosed: (callback: () => void): (() => void) => {
+      const handler = (): void => {
+        callback()
+      }
+      ipcRenderer.on('file:closed', handler)
+      return () => {
+        ipcRenderer.removeListener('file:closed', handler)
+      }
     }
   }
 })

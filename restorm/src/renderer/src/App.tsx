@@ -23,33 +23,25 @@ import {
   isTabGroupNode,
   isContainerNode,
   navigationService,
-  useFeature
+  useFeature,
+  useFileService,
+  useFileEvents,
+  hasContentChanged,
+  setContentChecksum,
+  eventBus,
+  DocumentEvents
 } from 'electron-core-ui/renderer'
 import type { WorkbenchTree, NavigationEvent, GroupNode, TabGroupNode, EditorTab, SearchResult } from 'electron-core-ui/renderer'
 import { RestormWorkbench } from './components/RestormWorkbench'
 import { Welcome } from './components/Welcome'
+import { EmptyBench } from './components/EmptyBench'
 import { Badge } from './components/Badge'
 import { mapToBadgeType } from './utils/badgeUtils'
 import { renderSearchTooltipContent } from './components/renderSearchTooltipContent'
 import { EnvironmentValuesProvider } from './contexts/EnvironmentValuesContext'
-import { importSwaggerFromJson } from './services/import/SwaggerImportService'
-import { importGraphQLFromString } from './services/import/GraphQLImportService'
-import { importGrpcFromString } from './services/import/GrpcImportService'
-import { importSoapFromString } from './services/import/SoapImportService'
-import { importAsyncAPIFromString } from './services/import/AsyncAPIImportService'
 import { searchIndexService } from './services/SearchIndexService'
 import { makeReactiveFolder } from './types/reactive'
 import { folderAsRootListViewItem, collectAllFolderIds } from './services/FolderToListView'
-import swaggerPetstoreJson from './resources/swagger-petstore.json'
-// Import test spec files
-import graphqlDocker from '../../../tests/unit/graphql-docker.graphql?raw'
-import graphqlPetstore from '../../../tests/unit/graphql-petstore.graphql?raw'
-import grpcDocker from '../../../tests/unit/grpc-docker.proto?raw'
-import grpcPetstore from '../../../tests/unit/grpc-petstore.proto?raw'
-import soapDocker from '../../../tests/unit/soap-docker.wsdl?raw'
-import soapPetstore from '../../../tests/unit/soap-petstore.wsdl?raw'
-import asyncapiDocker from '../../../tests/unit/asyncapi-docker.yaml?raw'
-import asyncapiPetstore from '../../../tests/unit/asyncapi-petstore.yaml?raw'
 import type {
   Folder,
   FolderItem,
@@ -186,30 +178,8 @@ const attachContextMenus = (
     return withMenu
   })
 
-// Import and convert all API specs to folder structures (initial data)
-// Each import creates its own independent EnvironmentFolder as a root node
-const rawSwaggerFolder = importSwaggerFromJson(JSON.stringify(swaggerPetstoreJson))
-const rawGraphqlDocker = importGraphQLFromString(graphqlDocker, { name: 'GraphQL Docker', baseUrl: 'http://localhost:4000' })
-const rawGraphqlPetstore = importGraphQLFromString(graphqlPetstore, { name: 'GraphQL Petstore' })
-const rawGrpcDocker = importGrpcFromString(grpcDocker, { name: 'gRPC Docker', baseUrl: 'localhost:9000' })
-const rawGrpcPetstore = importGrpcFromString(grpcPetstore, { name: 'gRPC Petstore' })
-const rawSoapDocker = importSoapFromString(soapDocker, { name: 'SOAP Docker' })
-const rawSoapPetstore = importSoapFromString(soapPetstore, { name: 'SOAP Petstore' })
-const rawAsyncapiDocker = importAsyncAPIFromString(asyncapiDocker, { name: 'AsyncAPI Docker' })
-const rawAsyncapiPetstore = importAsyncAPIFromString(asyncapiPetstore, { name: 'AsyncAPI Petstore' })
-
-// All root folders as independent workspace nodes
-const initialRootFolders: EnvironmentFolder[] = [
-  rawSwaggerFolder,
-  rawGraphqlDocker,
-  rawGraphqlPetstore,
-  rawGrpcDocker,
-  rawGrpcPetstore,
-  rawSoapDocker,
-  rawSoapPetstore,
-  rawAsyncapiDocker,
-  rawAsyncapiPetstore
-].map((folder) => makeReactiveFolder(folder) as EnvironmentFolder)
+// Initial root folders - empty at startup, populated when opening a file
+const initialRootFolders: EnvironmentFolder[] = []
 
 const allFolderIds = initialRootFolders.flatMap((folder) => collectAllFolderIds(folder))
 
@@ -528,6 +498,28 @@ const DesktopIndicator: React.FC = () => {
 const App: React.FC = () => {
   const { t } = useTranslation()
   const { showSettingsModal } = useSettingsModal()
+  const {
+    state: fileState,
+    fileName,
+    filePath,
+    isDirty,
+    recentFiles,
+    favorites,
+    newFile,
+    open: openFile,
+    save: saveFile,
+    saveAs: saveFileAs,
+    close: closeFile,
+    markDirty,
+    clearDirty,
+    showUnsavedChangesDialog
+  } = useFileService()
+
+  // Sync document.title with window title for taskbar
+  useEffect(() => {
+    const title = fileName ? `Restorm - ${fileName}${isDirty ? ' *' : ''}` : 'Restorm'
+    document.title = title
+  }, [fileName, isDirty])
 
   const handleMenuExit = useCallback(() => {
     void window.api.closeWindow()
@@ -556,8 +548,198 @@ const App: React.FC = () => {
   // Each root folder is an independent EnvironmentFolder
   const [rootFolders, setRootFolders] = useState<EnvironmentFolder[]>(initialRootFolders)
 
+  // File save handlers (after rootFolders is defined)
+  // Deep clone to remove Proxy wrappers before IPC serialization
+  const handleMenuSave = useCallback(() => {
+    const plainData = JSON.parse(JSON.stringify({ collections: rootFolders })) as unknown
+    void saveFile(plainData)
+  }, [saveFile, rootFolders])
+
+  const handleMenuSaveAs = useCallback(() => {
+    const plainData = JSON.parse(JSON.stringify({ collections: rootFolders })) as unknown
+    void saveFileAs(plainData)
+  }, [saveFileAs, rootFolders])
+
+  // Listen for save-and-close event from main process (when closing window with unsaved changes)
+  useEffect(() => {
+    const handleSaveAndClose = async (): Promise<void> => {
+      const plainData = JSON.parse(JSON.stringify({ collections: rootFolders })) as unknown
+      const saved = await saveFile(plainData)
+      if (saved) {
+        // Force close all windows after save
+        await window.restorm.forceClose()
+      }
+    }
+    
+    const cleanup = window.restorm.onSaveAndClose(() => {
+      void handleSaveAndClose()
+    })
+    
+    return cleanup
+  }, [rootFolders, saveFile])
+
+  // Helper to check for unsaved changes before proceeding
+  const checkUnsavedChanges = useCallback(async (): Promise<boolean> => {
+    // Compare current state with saved state checksum via FileService
+    // Use the same structure as the file content for consistent comparison
+    const currentChecksum = JSON.stringify({ collections: rootFolders })
+    const hasRealChanges = await hasContentChanged(currentChecksum)
+    
+    if (!hasRealChanges) return true // No actual changes, proceed
+
+    const result = await showUnsavedChangesDialog({
+      title: t('file.unsavedChanges.title'),
+      message: t('file.unsavedChanges.message', { fileName: fileName ?? t('file.untitled') }),
+      detail: t('file.unsavedChanges.detail'),
+      save: t('file.unsavedChanges.save'),
+      dontSave: t('file.unsavedChanges.dontSave'),
+      cancel: t('file.unsavedChanges.cancel')
+    })
+    if (result === 'cancel') return false // User cancelled
+    if (result === 'save') {
+      // Save first, then proceed
+      const plainData = JSON.parse(JSON.stringify({ collections: rootFolders })) as unknown
+      const saved = await saveFile(plainData)
+      return saved // Only proceed if save was successful
+    }
+    return true // User chose to discard changes
+  }, [showUnsavedChangesDialog, rootFolders, saveFile, t, fileName])
+
+  // File menu handlers
+  const handleMenuNew = useCallback(async () => {
+    const canProceed = await checkUnsavedChanges()
+    if (canProceed) {
+      await newFile()
+    }
+  }, [checkUnsavedChanges, newFile])
+
+  const handleMenuOpen = useCallback(async () => {
+    const canProceed = await checkUnsavedChanges()
+    if (canProceed) {
+      await openFile()
+    }
+  }, [checkUnsavedChanges, openFile])
+
+  const handleMenuClose = useCallback(async () => {
+    const canProceed = await checkUnsavedChanges()
+    if (canProceed) {
+      await closeFile()
+    }
+  }, [checkUnsavedChanges, closeFile])
+
+  const handleOpenRecentFile = useCallback(async (path: string) => {
+    const canProceed = await checkUnsavedChanges()
+    if (canProceed) {
+      await openFile(path)
+    }
+  }, [checkUnsavedChanges, openFile])
+
+  // Handler for file opened event - loads collections into workbench
+  const handleFileOpened = useCallback((state: { currentFile: { content: unknown } }) => {
+    const content = state.currentFile.content as { collections?: EnvironmentFolder[] } | null
+    const collections = content?.collections && Array.isArray(content.collections) ? content.collections : []
+    
+    // Make folders reactive and update state
+    const reactiveFolders = collections.map(
+      (folder) => makeReactiveFolder(folder) as EnvironmentFolder
+    )
+    setRootFolders(reactiveFolders)
+    
+    // Update the content checksum in FileService with the transformed data
+    // This ensures consistent comparison when checking for unsaved changes
+    void setContentChecksum(JSON.stringify({ collections: reactiveFolders }))
+    
+    // Re-index for search
+    searchIndexService.initialize()
+    for (const folder of reactiveFolders) {
+      searchIndexService.indexFolderTree(folder)
+    }
+  }, [])
+
+  // Handler for file closed event - clears the workbench
+  const handleFileClosed = useCallback(() => {
+    // Clear the workbench tree
+    setWorkbenchTree({
+      orientation: 'vertical',
+      groups: []
+    })
+    // Clear root folders
+    setRootFolders([])
+  }, [])
+
+  // Listen to file events
+  useFileEvents(handleFileOpened, handleFileClosed)
+
+  // Load file content on mount if a file is already open (e.g., after page refresh)
+  const initialLoadDoneRef = useRef(false)
+  useEffect(() => {
+    // Only run once and only if file is open but rootFolders is empty
+    if (initialLoadDoneRef.current) return
+    if (!fileState?.currentFile.path) return
+    if (rootFolders.length > 0) return
+    
+    // A file is open but content not loaded yet - load it
+    initialLoadDoneRef.current = true
+    handleFileOpened(fileState)
+  }, [fileState, rootFolders.length, handleFileOpened])
+
   // Counter to force re-render without breaking reactive proxies
-  const [, forceUpdate] = useState(0)
+  const [updateCount, forceUpdate] = useState(0)
+
+  // Listen to document change events from eventBus to trigger dirty state detection
+  useEffect(() => {
+    // Only subscribe if a file is open
+    if (!fileName) return
+
+    const handleDocumentChange = (): void => {
+      forceUpdate((n) => n + 1)
+    }
+
+    // Subscribe to all document change events
+    const subscriptions = [
+      eventBus.subscribe(DocumentEvents.REQUEST_CREATED, handleDocumentChange),
+      eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, handleDocumentChange),
+      eventBus.subscribe(DocumentEvents.REQUEST_DELETED, handleDocumentChange),
+      eventBus.subscribe(DocumentEvents.FOLDER_CREATED, handleDocumentChange),
+      eventBus.subscribe(DocumentEvents.FOLDER_UPDATED, handleDocumentChange),
+      eventBus.subscribe(DocumentEvents.FOLDER_DELETED, handleDocumentChange)
+    ]
+
+    return () => {
+      for (const sub of subscriptions) {
+        sub.unsubscribe()
+      }
+    }
+  }, [fileName])
+
+  // Update content checksum in FileService when file is saved (isDirty becomes false)
+  useEffect(() => {
+    if (!isDirty && fileName) {
+      // File was just saved - update the checksum with current state
+      void setContentChecksum(JSON.stringify({ collections: rootFolders }))
+    }
+  }, [isDirty, fileName, rootFolders])
+
+  // Track user modifications and mark/clear file as dirty
+  useEffect(() => {
+    // Skip if no file is open
+    if (!fileName) return
+    
+    // Compare current state with saved state checksum via FileService
+    const checkChanges = async (): Promise<void> => {
+      const currentChecksum = JSON.stringify({ collections: rootFolders })
+      const hasChanges = await hasContentChanged(currentChecksum)
+      if (hasChanges && !isDirty) {
+        // Content changed - mark as dirty
+        void markDirty()
+      } else if (!hasChanges && isDirty) {
+        // Content returned to saved state - clear dirty
+        void clearDirty()
+      }
+    }
+    void checkChanges()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rootFolders, updateCount, fileName, isDirty, markDirty, clearDirty])
 
   // Ref to track if search index has been initialized
   const searchIndexInitializedRef = useRef(false)
@@ -1792,14 +1974,51 @@ const App: React.FC = () => {
       }}
     >
       <Titlebar
-        title={t('app.title')}
+        title={fileName ? `Restorm - ${fileName}${isDirty ? ' *' : ''}` : t('app.title')}
         showSearchBar
         onSearchResultClick={handleSearchResultClick}
         renderSearchTooltipContent={renderSearchTooltipContent}
         leftContent={
           <MenuBar>
             <MenuBarItem title={t('menuBar.file')}>
-              <MenuItem title={t('menuBar.open')} shortcut="Ctrl+O" />
+              <MenuItem title={t('menuBar.new')} shortcut="Ctrl+N" onClick={() => { void handleMenuNew() }} />
+              <MenuItemSeparator />
+              <MenuItem title={t('menuBar.open')} shortcut="Ctrl+O" onClick={() => { void handleMenuOpen() }} />
+              {fileName && (
+                <>
+                  <MenuItemSeparator />
+                  <MenuItem title={t('menuBar.save')} shortcut="Ctrl+S" onClick={handleMenuSave} />
+                  <MenuItem title={t('menuBar.saveAs')} shortcut="Ctrl+Shift+S" onClick={handleMenuSaveAs} />
+                </>
+              )}
+              {recentFiles.length > 0 && (
+                <MenuItem title={t('menuBar.recentFiles')}>
+                  {recentFiles.slice(0, 10).map((file) => (
+                    <MenuItem
+                      key={file.path}
+                      title={file.name}
+                      onClick={() => { void handleOpenRecentFile(file.path) }}
+                    />
+                  ))}
+                </MenuItem>
+              )}
+              {favorites.length > 0 && (
+                <MenuItem title={t('menuBar.favorites')}>
+                  {favorites.map((file) => (
+                    <MenuItem
+                      key={file.path}
+                      title={file.name}
+                      onClick={() => { void handleOpenRecentFile(file.path) }}
+                    />
+                  ))}
+                </MenuItem>
+              )}
+              {fileName && (
+                <>
+                  <MenuItemSeparator />
+                  <MenuItem title={t('menuBar.close')} onClick={() => { void handleMenuClose() }} />
+                </>
+              )}
               <MenuItemSeparator />
               <MenuItem title={t('menuBar.exit')} shortcut="Ctrl+Q" onClick={handleMenuExit} />
             </MenuBarItem>
@@ -1831,21 +2050,22 @@ const App: React.FC = () => {
           minHeight: 0
         }}
       >
-        <div
-          style={{
-            width: leftWidth,
-            minWidth: MIN_LEFT_WIDTH,
-            maxWidth: '70%',
-            display: 'flex',
-            flexDirection: 'column',
-            minHeight: 0,
-            borderRight: '1px solid var(--sideBar-border)',
-            backgroundColor: 'var(--sideBar-background)'
-          }}
-        >
-          <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }}>
-            <Pane
-              title={t('sidebar.workspace')}
+        {fileName && (
+          <div
+            style={{
+              width: leftWidth,
+              minWidth: MIN_LEFT_WIDTH,
+              maxWidth: '70%',
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: 0,
+              borderRight: '1px solid var(--sideBar-border)',
+              backgroundColor: 'var(--sideBar-background)'
+            }}
+          >
+            <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }}>
+              <Pane
+                title={t('sidebar.workspace')}
               collapsible={false}
               minSize={MIN_LEFT_WIDTH}
               headerActions={
@@ -1902,9 +2122,10 @@ const App: React.FC = () => {
                 onEditingEnd={() => { setSidebarEditingItemId(null) }}
                 onDeleteRequest={(payload) => { handleDeleteItem(payload.item.id) }}
               />
-            </Pane>
-          </SplitView>
-        </div>
+              </Pane>
+            </SplitView>
+          </div>
+        )}
 
         <EnvironmentValuesProvider>
           <div
@@ -1927,7 +2148,7 @@ const App: React.FC = () => {
               onFolderChange={handleFolderChange}
               onEnvironmentFolderChange={handleEnvironmentFolderChange}
               onSizesChange={handleSizesChange}
-              emptyFallback={<Welcome />}
+              emptyFallback={fileName ? <EmptyBench /> : <Welcome />}
               style={{ flex: 1 }}
               workbenchId={WORKBENCH_ID}
               autosave
@@ -1940,16 +2161,19 @@ const App: React.FC = () => {
           </div>
         </EnvironmentValuesProvider>
 
-        <Sash
-          orientation="vertical"
-          layoutProvider={layoutProvider}
-          onStart={handleSashStart}
-          onChange={handleSashChange}
-          size={4}
-        />
+        {fileName && (
+          <Sash
+            orientation="vertical"
+            layoutProvider={layoutProvider}
+            onStart={handleSashStart}
+            onChange={handleSashChange}
+            size={4}
+          />
+        )}
       </div>
 
       <Statusbar>
+        {filePath && <StatusbarElement title={filePath} />}
         <DesktopIndicator />
       </Statusbar>
 

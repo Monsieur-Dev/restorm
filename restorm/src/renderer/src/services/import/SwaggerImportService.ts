@@ -615,23 +615,56 @@ export interface SwaggerImportOptions {
 }
 
 /**
+ * Extract domain name from a URL or host string
+ */
+function extractDomainName(urlOrHost: string): string {
+  try {
+    // If it's a full URL, parse it
+    if (urlOrHost.startsWith('http://') || urlOrHost.startsWith('https://')) {
+      const url = new URL(urlOrHost)
+      return url.hostname
+    }
+    // If it's just a host (possibly with port), extract the hostname
+    const hostWithoutPort = urlOrHost.split(':')[0]
+    return hostWithoutPort && hostWithoutPort !== '' ? hostWithoutPort : 'Default'
+  } catch {
+    return 'Default'
+  }
+}
+
+/**
  * Create a new environment for the imported Swagger spec
+ * The environment name is the domain from the host URL
+ * If multiple schemes are defined, sub-environments are created for each
  */
 function createSwaggerEnvironment(spec: SwaggerSpec, defaultBaseUrl: string): Environment {
+  const host = spec.host ?? ''
+  const basePath = spec.basePath ?? ''
+  const schemes = spec.schemes ?? []
+  
+  // Extract domain name for the environment name
+  const domainName = extractDomainName(host !== '' ? host : defaultBaseUrl)
+  
+  // Build sub-environments for each scheme if multiple schemes exist
+  const subEnvironments: Environment['subEnvironments'] = []
+  
+  if (schemes.length > 1) {
+    // Multiple schemes - create a sub-environment for each
+    for (const scheme of schemes) {
+      const schemeBaseUrl = `${scheme}://${host}${basePath}`
+      subEnvironments.push({
+        id: generateId(`env:root:${domainName}:${scheme}`),
+        name: scheme,
+        variables: [{ key: 'baseUrl', value: schemeBaseUrl }]
+      })
+    }
+  }
+  
   return {
-    id: generateId(`env:root:Default`),
-    name: 'Default',
+    id: generateId(`env:root:${domainName}`),
+    name: domainName,
     variables: [{ key: 'baseUrl', value: defaultBaseUrl }],
-    subEnvironments:
-      spec.info.title === 'Swagger Petstore'
-        ? [
-            {
-              id: generateId('env:root:Default:Production'),
-              name: 'Production',
-              variables: [{ key: 'baseUrl', value: 'https://petstore.com' }]
-            }
-          ]
-        : []
+    subEnvironments
   }
 }
 

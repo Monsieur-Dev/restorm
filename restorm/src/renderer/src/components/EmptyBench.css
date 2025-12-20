@@ -1,0 +1,13 @@
+.empty-bench-container {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--editor-background);
+}
+
+.empty-bench-logo {
+  width: 120px;
+  height: auto;
+  opacity: 0.5;
+}

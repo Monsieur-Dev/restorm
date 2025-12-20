@@ -1,4 +1,15 @@
 {
+  "file": {
+    "untitled": "Sans titre",
+    "unsavedChanges": {
+      "title": "Modifications non enregistrées",
+      "message": "Voulez-vous enregistrer les modifications apportées à \"{{fileName}}\" ?",
+      "detail": "Vos modifications seront perdues si vous ne les enregistrez pas.",
+      "save": "Enregistrer",
+      "dontSave": "Ne pas enregistrer",
+      "cancel": "Annuler"
+    }
+  },
   "settings": {
     "title": "Paramètres",
     "theme": "Thème",

@@ -25,3 +25,13 @@ export type {
   FeaturesYamlConfig,
   FeatureApi
 } from '../../types/feature'
+export type {
+  SerializationFormat,
+  FilePlatform,
+  FileMetadata,
+  CurrentFileState,
+  FileServiceConfig,
+  FileServiceState,
+  FileServiceApi,
+  WebFileEntry
+} from '../../types/file'
