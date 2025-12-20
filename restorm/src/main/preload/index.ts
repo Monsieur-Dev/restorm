@@ -32,5 +32,17 @@ contextBridge.exposeInMainWorld('restorm', {
   getEditorFile: async (): Promise<{ title: string; content?: string } | undefined> => {
     const result: unknown = await ipcRenderer.invoke('restorm:get-editor-file')
     return result as { title: string; content?: string } | undefined
+  },
+  forceClose: async (): Promise<void> => {
+    await ipcRenderer.invoke('restorm:force-close')
+  },
+  onSaveAndClose: (callback: () => void): (() => void) => {
+    const handler = (): void => {
+      callback()
+    }
+    ipcRenderer.on('app:save-and-close', handler)
+    return () => {
+      ipcRenderer.removeListener('app:save-and-close', handler)
+    }
   }
 })

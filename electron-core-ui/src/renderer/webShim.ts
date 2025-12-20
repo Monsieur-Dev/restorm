@@ -5,6 +5,7 @@
 
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../types/theme'
 import type { FeaturePlatform } from '../../types/feature'
+import type { FileServiceState, FileMetadata, SerializationFormat } from '../../types/file'
 import yaml from 'js-yaml'
 import themeIndexJson from '../../resources/themes/index.json'
 
@@ -49,6 +50,39 @@ interface WindowApiFeatureShim {
   getPlatform: () => Promise<FeaturePlatform>
 }
 
+interface WindowApiFileShim {
+  newFile: () => Promise<boolean>
+  open: (path?: string) => Promise<{ success: boolean; content?: unknown }>
+  save: (content: unknown) => Promise<boolean>
+  saveAs: (content: unknown, filename?: string, format?: SerializationFormat) => Promise<boolean>
+  close: () => Promise<boolean>
+  getState: () => Promise<FileServiceState | null>
+  getFileName: () => Promise<string | null>
+  getFilePath: () => Promise<string | null>
+  isDirty: () => Promise<boolean>
+  markDirty: () => Promise<void>
+  clearDirty: () => Promise<void>
+  showUnsavedChangesDialog: (labels?: {
+    title?: string
+    message?: string
+    detail?: string
+    save?: string
+    dontSave?: string
+    cancel?: string
+  }) => Promise<'save' | 'discard' | 'cancel'>
+  getRecentFiles: () => Promise<FileMetadata[]>
+  getFavorites: () => Promise<FileMetadata[]>
+  toggleFavorite: (path: string) => Promise<boolean>
+  removeFromRecent: (path: string) => Promise<void>
+  getContentChecksum: () => Promise<string | null>
+  setContentChecksum: (checksum: string) => Promise<void>
+  hasContentChanged: (currentChecksum: string) => Promise<boolean>
+  onStateChanged: (callback: (state: FileServiceState) => void) => () => void
+  onDirtyChanged: (callback: (isDirty: boolean) => void) => () => void
+  onFileOpened: (callback: (state: FileServiceState) => void) => () => void
+  onFileClosed: (callback: () => void) => () => void
+}
+
 interface WindowApiShim {
   platform: string
   theme: WindowApiThemeShim
@@ -57,6 +91,7 @@ interface WindowApiShim {
   }
   storage: WindowApiStorageShim
   feature: WindowApiFeatureShim
+  file: WindowApiFileShim
   minimizeWindow: () => Promise<void>
   maximizeWindow: () => Promise<void>
   closeWindow: () => Promise<void>
@@ -325,6 +360,241 @@ export function ensureCoreUiWebApiShim(): void {
     }
   }
 
+  // File API shim for web builds
+  // Uses localStorage for file storage
+  const WEB_FILE_PREFIX = 'webfile_'
+  const WEB_RECENT_KEY = 'webfile_recent'
+  const WEB_FAVORITES_KEY = 'webfile_favorites'
+
+  let webCurrentFile: { path: string | null; name: string | null; isDirty: boolean; content: unknown; contentChecksum: string | null } = {
+    path: null,
+    name: null,
+    isDirty: false,
+    content: null,
+    contentChecksum: null
+  }
+
+  const webStateChangeCallbacks = new Set<(state: FileServiceState) => void>()
+  const webDirtyChangeCallbacks = new Set<(isDirty: boolean) => void>()
+  const webFileOpenedCallbacks = new Set<(state: FileServiceState) => void>()
+  const webFileClosedCallbacks = new Set<() => void>()
+
+  const getWebState = (): FileServiceState => {
+    const recentJson = localStorage.getItem(WEB_RECENT_KEY)
+    const favoritesJson = localStorage.getItem(WEB_FAVORITES_KEY)
+    const recent: FileMetadata[] = recentJson ? JSON.parse(recentJson) as FileMetadata[] : []
+    const favorites = favoritesJson ? JSON.parse(favoritesJson) as string[] : []
+
+    return {
+      currentFile: {
+        path: webCurrentFile.path,
+        name: webCurrentFile.name,
+        isDirty: webCurrentFile.isDirty,
+        content: webCurrentFile.content,
+        format: 'json',
+        contentChecksum: webCurrentFile.contentChecksum
+      },
+      recentFiles: recent,
+      favorites: recent.filter(f => favorites.includes(f.path)),
+      platform: 'web'
+    }
+  }
+
+  const notifyWebStateChange = (): void => {
+    const state = getWebState()
+    for (const cb of webStateChangeCallbacks) {
+      try { cb(state) } catch { /* ignore */ }
+    }
+  }
+
+  const notifyWebDirtyChange = (): void => {
+    for (const cb of webDirtyChangeCallbacks) {
+      try { cb(webCurrentFile.isDirty) } catch { /* ignore */ }
+    }
+  }
+
+  const notifyWebFileOpened = (): void => {
+    const state = getWebState()
+    for (const cb of webFileOpenedCallbacks) {
+      try { cb(state) } catch { /* ignore */ }
+    }
+  }
+
+  const notifyWebFileClosed = (): void => {
+    for (const cb of webFileClosedCallbacks) {
+      try { cb() } catch { /* ignore */ }
+    }
+  }
+
+  const fileApi: WindowApiFileShim = {
+    newFile: (): Promise<boolean> => {
+      // Web behavior: For web, we'll ask for a name via prompt
+      const name = window.prompt('Enter file name:')
+      if (!name) {
+        return Promise.resolve(false)
+      }
+      const emptyContent = {}
+      webCurrentFile = { path: name, name, isDirty: false, content: emptyContent, contentChecksum: JSON.stringify(emptyContent) }
+      // Save empty content to localStorage
+      localStorage.setItem(WEB_FILE_PREFIX + name, JSON.stringify(emptyContent))
+      notifyWebStateChange()
+      notifyWebDirtyChange()
+      notifyWebFileOpened()
+      return Promise.resolve(true)
+    },
+    open: (path?: string): Promise<{ success: boolean; content?: unknown }> => {
+      if (!path) {
+        // For web, we need the app to handle showing a file picker
+        return Promise.resolve({ success: false })
+      }
+      try {
+        const data = localStorage.getItem(WEB_FILE_PREFIX + path)
+        if (!data) return Promise.resolve({ success: false })
+        const content = JSON.parse(data) as unknown
+        webCurrentFile = { path, name: path, isDirty: false, content, contentChecksum: JSON.stringify(content) }
+        notifyWebStateChange()
+        notifyWebDirtyChange()
+        notifyWebFileOpened()
+        return Promise.resolve({ success: true, content })
+      } catch {
+        return Promise.resolve({ success: false })
+      }
+    },
+    save: (content: unknown): Promise<boolean> => {
+      if (!webCurrentFile.path) return Promise.resolve(false)
+      try {
+        localStorage.setItem(WEB_FILE_PREFIX + webCurrentFile.path, JSON.stringify(content))
+        webCurrentFile.content = content
+        webCurrentFile.isDirty = false
+        webCurrentFile.contentChecksum = JSON.stringify(content)
+        notifyWebStateChange()
+        notifyWebDirtyChange()
+        return Promise.resolve(true)
+      } catch {
+        return Promise.resolve(false)
+      }
+    },
+    saveAs: (content: unknown, filename?: string): Promise<boolean> => {
+      const name = filename ?? `file_${Date.now()}`
+      try {
+        localStorage.setItem(WEB_FILE_PREFIX + name, JSON.stringify(content))
+        webCurrentFile = { path: name, name, isDirty: false, content, contentChecksum: JSON.stringify(content) }
+        // Add to recent
+        const recentJson = localStorage.getItem(WEB_RECENT_KEY)
+        const recent: FileMetadata[] = recentJson ? JSON.parse(recentJson) as FileMetadata[] : []
+        const filtered = recent.filter(f => f.path !== name)
+        filtered.unshift({ path: name, name, lastOpened: Date.now(), isFavorite: false })
+        localStorage.setItem(WEB_RECENT_KEY, JSON.stringify(filtered.slice(0, 10)))
+        notifyWebStateChange()
+        notifyWebDirtyChange()
+        return Promise.resolve(true)
+      } catch {
+        return Promise.resolve(false)
+      }
+    },
+    close: (): Promise<boolean> => {
+      webCurrentFile = { path: null, name: null, isDirty: false, content: null, contentChecksum: null }
+      notifyWebStateChange()
+      notifyWebDirtyChange()
+      notifyWebFileClosed()
+      return Promise.resolve(true)
+    },
+    getState: (): Promise<FileServiceState | null> => Promise.resolve(getWebState()),
+    getFileName: (): Promise<string | null> => Promise.resolve(webCurrentFile.name),
+    getFilePath: (): Promise<string | null> => Promise.resolve(webCurrentFile.path),
+    isDirty: (): Promise<boolean> => Promise.resolve(webCurrentFile.isDirty),
+    markDirty: (): Promise<void> => {
+      if (!webCurrentFile.isDirty) {
+        webCurrentFile.isDirty = true
+        notifyWebStateChange()
+        notifyWebDirtyChange()
+      }
+      return Promise.resolve()
+    },
+    clearDirty: (): Promise<void> => {
+      if (webCurrentFile.isDirty) {
+        webCurrentFile.isDirty = false
+        notifyWebStateChange()
+        notifyWebDirtyChange()
+      }
+      return Promise.resolve()
+    },
+    showUnsavedChangesDialog: (labels?: {
+      title?: string
+      message?: string
+      detail?: string
+      save?: string
+      dontSave?: string
+      cancel?: string
+    }): Promise<'save' | 'discard' | 'cancel'> => {
+      // Simple web implementation using confirm
+      const message = labels?.message ?? 'You have unsaved changes. Do you want to save them?'
+      const result = window.confirm(message)
+      return Promise.resolve(result ? 'save' : 'discard')
+    },
+    getRecentFiles: (): Promise<FileMetadata[]> => {
+      const recentJson = localStorage.getItem(WEB_RECENT_KEY)
+      return Promise.resolve(recentJson ? JSON.parse(recentJson) as FileMetadata[] : [])
+    },
+    getFavorites: (): Promise<FileMetadata[]> => {
+      const recentJson = localStorage.getItem(WEB_RECENT_KEY)
+      const favoritesJson = localStorage.getItem(WEB_FAVORITES_KEY)
+      const recent: FileMetadata[] = recentJson ? JSON.parse(recentJson) as FileMetadata[] : []
+      const favorites = favoritesJson ? JSON.parse(favoritesJson) as string[] : []
+      return Promise.resolve(recent.filter(f => favorites.includes(f.path)))
+    },
+    toggleFavorite: (path: string): Promise<boolean> => {
+      const favoritesJson = localStorage.getItem(WEB_FAVORITES_KEY)
+      const favorites = favoritesJson ? JSON.parse(favoritesJson) as string[] : []
+      const idx = favorites.indexOf(path)
+      if (idx >= 0) {
+        favorites.splice(idx, 1)
+      } else {
+        favorites.push(path)
+      }
+      localStorage.setItem(WEB_FAVORITES_KEY, JSON.stringify(favorites))
+      notifyWebStateChange()
+      return Promise.resolve(idx < 0)
+    },
+    removeFromRecent: (path: string): Promise<void> => {
+      const recentJson = localStorage.getItem(WEB_RECENT_KEY)
+      const recent: FileMetadata[] = recentJson ? JSON.parse(recentJson) as FileMetadata[] : []
+      const filtered = recent.filter(f => f.path !== path)
+      localStorage.setItem(WEB_RECENT_KEY, JSON.stringify(filtered))
+      notifyWebStateChange()
+      return Promise.resolve()
+    },
+    getContentChecksum: (): Promise<string | null> => {
+      return Promise.resolve(webCurrentFile.contentChecksum)
+    },
+    setContentChecksum: (checksum: string): Promise<void> => {
+      webCurrentFile.contentChecksum = checksum
+      return Promise.resolve()
+    },
+    hasContentChanged: (currentChecksum: string): Promise<boolean> => {
+      if (webCurrentFile.contentChecksum === null) {
+        return Promise.resolve(false)
+      }
+      return Promise.resolve(webCurrentFile.contentChecksum !== currentChecksum)
+    },
+    onStateChanged: (callback: (state: FileServiceState) => void): (() => void) => {
+      webStateChangeCallbacks.add(callback)
+      return () => { webStateChangeCallbacks.delete(callback) }
+    },
+    onDirtyChanged: (callback: (isDirty: boolean) => void): (() => void) => {
+      webDirtyChangeCallbacks.add(callback)
+      return () => { webDirtyChangeCallbacks.delete(callback) }
+    },
+    onFileOpened: (callback: (state: FileServiceState) => void): (() => void) => {
+      webFileOpenedCallbacks.add(callback)
+      return () => { webFileOpenedCallbacks.delete(callback) }
+    },
+    onFileClosed: (callback: () => void): (() => void) => {
+      webFileClosedCallbacks.add(callback)
+      return () => { webFileClosedCallbacks.delete(callback) }
+    }
+  }
+
   const api: WindowApiShim = {
     platform: navigator.platform || 'web',
     theme: themeApi,
@@ -335,6 +605,7 @@ export function ensureCoreUiWebApiShim(): void {
     },
     storage: storageApi,
     feature: featureApi,
+    file: fileApi,
     minimizeWindow: () => Promise.resolve(),
     maximizeWindow: () => Promise.resolve(),
     closeWindow: () => Promise.resolve(),

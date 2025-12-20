@@ -5,8 +5,16 @@
   },
   "menuBar": {
     "file": "Fichier",
-    "open": "Ouvrir",
-    "exit": "Quitter"
+    "new": "Nouveau...",
+    "open": "Ouvrir...",
+    "recentFiles": "Fichiers récents",
+    "favorites": "Favoris",
+    "close": "Fermer",
+    "save": "Enregistrer",
+    "saveAs": "Enregistrer sous...",
+    "exit": "Quitter",
+    "noRecentFiles": "Aucun fichier récent",
+    "noFavorites": "Aucun favori"
   },
   "sidebar": {
     "addRequest": "Ajouter une requête",
@@ -265,5 +273,13 @@
       "name": "Statut inconnu",
       "description": "Ce code de statut n'est pas reconnu."
     }
+  },
+  "welcome": {
+    "favorites": "Favoris",
+    "recentFiles": "Fichiers récents",
+    "addToFavorites": "Ajouter aux favoris",
+    "removeFromFavorites": "Retirer des favoris",
+    "confirmRemoveFavorite": "Voulez-vous vraiment retirer \"{{fileName}}\" des favoris ?",
+    "noFilesHint": "Ouvrez un fichier ou créez-en un nouveau pour commencer"
   }
 }

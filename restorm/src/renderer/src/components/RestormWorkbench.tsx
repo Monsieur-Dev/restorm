@@ -125,6 +125,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   const lastTabCountRef = useRef<number>(0)
   const lastActiveTabIdRef = useRef<string | null>(null)
   
+  // Cache for tabs dropped from other windows (stores the full RestormEditorTab data)
+  const droppedTabsCacheRef = useRef<Map<string, RestormEditorTab>>(new Map())
+  
   // Expose imperative handle
   useImperativeHandle(ref, () => ({
     saveState: async () => editorWorkbenchRef.current?.saveState() ?? false,
@@ -139,7 +142,17 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   }, [initialTree, isControlled])
 
   const handleTabDropped = useCallback(
-    (_tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }): boolean | Promise<boolean> => {
+    (tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }): boolean | Promise<boolean> => {
+      // Parse the content JSON to get the full RestormEditorTab and cache it
+      if (tabData.content) {
+        try {
+          const restoredTab = JSON.parse(tabData.content) as RestormEditorTab
+          droppedTabsCacheRef.current.set(tabData.tabId, restoredTab)
+        } catch (error) {
+          logger.error('Failed to parse dropped tab content', { tabId: tabData.tabId, error: String(error) })
+          return false
+        }
+      }
       return true
     },
     []
@@ -147,7 +160,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
   // Render tab title with icon and HTTP method badge (if applicable)
   const renderTabTitle = useCallback((tab: EditorTab): React.ReactNode => {
-    const restormTab = tab as RestormEditorTab
+    // Check if this is a dropped tab with cached data
+    const cachedTab = droppedTabsCacheRef.current.get(tab.id)
+    const restormTab = cachedTab ?? (tab as RestormEditorTab)
 
     // Folder tab: show folder icon
     if (isFolderTab(restormTab)) {
@@ -224,14 +239,18 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
   // Render tab content based on tab type
   const renderTabContent = useCallback((tab: RestormEditorTab): React.ReactNode => {
-    const breadcrumbs = tab.breadcrumbs ?? [
-      { id: 'root', label: 'Swagger Petstore' }
+    // Check if this is a dropped tab with cached data
+    const cachedTab = droppedTabsCacheRef.current.get(tab.id)
+    const effectiveTab = cachedTab ?? tab
+    
+    const breadcrumbs = effectiveTab.breadcrumbs ?? [
+      { id: 'root', label: 'Root' }
     ]
 
     // Folder tab
-    if (isFolderTab(tab)) {
+    if (isFolderTab(effectiveTab)) {
       // Get reactive folder if available, otherwise use tab's copy
-      const folder = getFolderById?.(tab.folder.id) ?? tab.folder
+      const folder = getFolderById?.(effectiveTab.folder.id) ?? effectiveTab.folder
       return (
         <RestormWorkbenchTab
           breadcrumbs={breadcrumbs}
@@ -256,9 +275,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     }
 
     // Environment folder tab
-    if (isEnvironmentFolderTab(tab)) {
+    if (isEnvironmentFolderTab(effectiveTab)) {
       // Get reactive environment folder if available, otherwise use tab's copy
-      const folder = getEnvironmentFolderById?.(tab.folder.id) ?? tab.folder
+      const folder = getEnvironmentFolderById?.(effectiveTab.folder.id) ?? effectiveTab.folder
       return (
         <RestormWorkbenchTab
           breadcrumbs={breadcrumbs}
@@ -283,12 +302,12 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     }
 
     // HTTP request tab
-    if (isHTTPRequestTab(tab)) {
+    if (isHTTPRequestTab(effectiveTab)) {
       // Get reactive request if available, otherwise use tab's copy
-      const reactiveRequest = getRequestById?.(tab.request.id)
-      const request = (reactiveRequest && reactiveRequest.type === 'http') ? reactiveRequest : tab.request
+      const reactiveRequest = getRequestById?.(effectiveTab.request.id)
+      const request = (reactiveRequest && reactiveRequest.type === 'http') ? reactiveRequest : effectiveTab.request
       return (
-        <EnvironmentProvider environments={tab.environments}>
+        <EnvironmentProvider environments={effectiveTab.environments}>
           <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -313,10 +332,10 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     }
 
     // GraphQL request tab
-    if (isGraphQLRequestTab(tab)) {
-      const request = tab.request
+    if (isGraphQLRequestTab(effectiveTab)) {
+      const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={tab.environments}>
+        <EnvironmentProvider environments={effectiveTab.environments}>
           <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -337,10 +356,10 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     }
 
     // gRPC request tab
-    if (isGrpcRequestTab(tab)) {
-      const request = tab.request
+    if (isGrpcRequestTab(effectiveTab)) {
+      const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={tab.environments}>
+        <EnvironmentProvider environments={effectiveTab.environments}>
           <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -361,10 +380,10 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     }
 
     // SOAP request tab
-    if (isSoapRequestTab(tab)) {
-      const request = tab.request
+    if (isSoapRequestTab(effectiveTab)) {
+      const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={tab.environments}>
+        <EnvironmentProvider environments={effectiveTab.environments}>
           <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -385,10 +404,10 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     }
 
     // WebSocket request tab
-    if (isWebSocketRequestTab(tab)) {
-      const request = tab.request
+    if (isWebSocketRequestTab(effectiveTab)) {
+      const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={tab.environments}>
+        <EnvironmentProvider environments={effectiveTab.environments}>
           <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -427,29 +446,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         return
       }
 
-      const restormTab = tab as RestormEditorTab
+      // Check if this tab was dropped from another window and use cached data
+      const cachedTab = droppedTabsCacheRef.current.get(tabId)
+      const restormTab = cachedTab ?? (tab as RestormEditorTab)
 
-      // Encode minimal metadata so the editor window can rebuild the tab
-      type DetachedTabMetadata =
-        | { kind: 'folder'; itemId: string }
-        | { kind: 'environment-folder'; itemId: string }
-        | { kind: 'http-request'; itemId: string }
-
-      let metadata: DetachedTabMetadata | null = null
-
-      if (isFolderTab(restormTab)) {
-        metadata = { kind: 'folder', itemId: restormTab.folder.id }
-      } else if (isEnvironmentFolderTab(restormTab)) {
-        metadata = { kind: 'environment-folder', itemId: restormTab.folder.id }
-      } else if (isHTTPRequestTab(restormTab)) {
-        metadata = { kind: 'http-request', itemId: restormTab.request.id }
-      }
-
+      // Serialize the complete tab data so the editor window can display it directly
       const editorParams: { title: string; content?: string; x?: number; y?: number } = {
-        title: getTabTitleString(restormTab, 'untitled')
-      }
-      if (metadata) {
-        editorParams.content = JSON.stringify(metadata)
+        title: getTabTitleString(restormTab, 'untitled'),
+        // Pass the complete tab as JSON - the editor window will deserialize and display it
+        content: JSON.stringify(restormTab)
       }
       if (cursorX !== undefined) {
         editorParams.x = cursorX
@@ -491,15 +496,49 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     }
   }, [renderTabContent])
 
+  // Get tab content for serialization (used when detaching tabs to other windows)
+  const getTabContent = useCallback((tabId: string): string | undefined => {
+    // First check in dropped tabs cache
+    const cachedTab = droppedTabsCacheRef.current.get(tabId)
+    if (cachedTab) {
+      return JSON.stringify(cachedTab)
+    }
+
+    // Search for the tab in the tree
+    const findTabInTree = (nodes: typeof tree.groups): RestormEditorTab | undefined => {
+      for (const node of nodes) {
+        if (isTabGroupNode(node)) {
+          const tab = node.tabs.find(t => t.id === tabId)
+          if (tab) {
+            return tab as RestormEditorTab
+          }
+        } else if (isContainerNode(node)) {
+          const found = findTabInTree(node.groups)
+          if (found) return found
+        }
+      }
+      return undefined
+    }
+
+    const tab = findTabInTree(tree.groups)
+    if (tab) {
+      return JSON.stringify(tab)
+    }
+
+    logger.warn('getTabContent: Tab not found', { tabId })
+    return undefined
+  }, [tree])
+
   const callbacks = useMemo<Partial<EditorWorkbenchCallbacks>>(() => {
     return {
       onWorkbenchTabDropped: handleTabDropped,
       renderTabContent: workbenchRenderTabContent,
       renderTabTitle,
       onDetachToNewWindow: handleDetachToNewWindow,
-      getTabContextMenuItems
+      getTabContextMenuItems,
+      onGetTabContent: getTabContent
     }
-  }, [handleTabDropped, workbenchRenderTabContent, renderTabTitle, handleDetachToNewWindow, getTabContextMenuItems])
+  }, [handleTabDropped, workbenchRenderTabContent, renderTabTitle, handleDetachToNewWindow, getTabContextMenuItems, getTabContent])
 
   const handleTreeChange = useCallback(
     (newTree: WorkbenchTree) => {

@@ -12,3 +12,10 @@ export {
   isFeatureServiceInitialized,
   FeatureFlippingService
 } from './FeatureFlippingService'
+
+export {
+  initFileService,
+  getFileService,
+  isFileServiceInitialized,
+  FileService
+} from './FileService'

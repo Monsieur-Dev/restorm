@@ -1,4 +1,15 @@
 {
+  "file": {
+    "untitled": "Untitled",
+    "unsavedChanges": {
+      "title": "Unsaved Changes",
+      "message": "Do you want to save the changes to \"{{fileName}}\"?",
+      "detail": "Your changes will be lost if you don't save them.",
+      "save": "Save",
+      "dontSave": "Don't Save",
+      "cancel": "Cancel"
+    }
+  },
   "settings": {
     "title": "Settings",
     "theme": "Theme",

@@ -37,6 +37,8 @@ declare global {
     restorm: {
       openEditor: (file?: { title: string; content?: string; x?: number; y?: number }) => Promise<void>
       getEditorFile: () => Promise<{ title: string; content?: string } | undefined>
+      forceClose: () => Promise<void>
+      onSaveAndClose: (callback: () => void) => (() => void)
     }
   }
 }
