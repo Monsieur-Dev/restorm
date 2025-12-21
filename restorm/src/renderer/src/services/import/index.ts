@@ -1,6 +1,7 @@
 export * from './AsyncAPIImportService'
 export * from './GraphQLImportService'
 export * from './GrpcImportService'
+export * from './InsomniaImportService'
 export * from './PostmanImportService'
 export * from './SoapImportService'
 export * from './SwaggerImportService'
