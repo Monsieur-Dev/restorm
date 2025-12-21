@@ -1,4 +1,5 @@
 export * from './AsyncAPIImportService'
+export * from './BrunoImportService'
 export * from './GraphQLImportService'
 export * from './GrpcImportService'
 export * from './InsomniaImportService'

@@ -13,6 +13,7 @@ import { importSoapFromString } from '../../src/renderer/src/services/import/Soa
 import { importAsyncAPIFromString } from '../../src/renderer/src/services/import/AsyncAPIImportService'
 import { importPostmanFromJson } from '../../src/renderer/src/services/import/PostmanImportService'
 import { importInsomniaFromJson } from '../../src/renderer/src/services/import/InsomniaImportService'
+import { importBrunoFromJson } from '../../src/renderer/src/services/import/BrunoImportService'
 import type { Folder, EnvironmentFolder, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest } from '../../src/renderer/src/types/collections'
 
 // Helper to load test files
@@ -924,6 +925,170 @@ describe('InsomniaImportService', () => {
 })
 
 // =============================================================================
+// BrunoImportService Tests
+// =============================================================================
+
+describe('BrunoImportService', () => {
+  const brunoJson = loadTestFile('bruno-petstore.json')
+
+  describe('importBrunoFromJson', () => {
+    it('should import Bruno collection and return an EnvironmentFolder', () => {
+      const result = importBrunoFromJson(brunoJson)
+
+      expect(result).toBeDefined()
+      expect(result.folderType).toBe('environment')
+      expect(result.name).toBe('Petstore API')
+      expect(result.environments).toBeDefined()
+      expect(result.environments.length).toBeGreaterThan(0)
+    })
+
+    it('should create environment', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const env = result.environments[0]
+
+      expect(env).toBeDefined()
+      expect(env?.name).toBe('Default')
+    })
+
+    it('should create nested folders', () => {
+      const result = importBrunoFromJson(brunoJson)
+
+      const folderNames = result.items.filter(isFolder).map(f => f.name)
+      expect(folderNames).toContain('Pets')
+      expect(folderNames).toContain('Store')
+      expect(folderNames).toContain('Users')
+    })
+
+    it('should create HTTP requests', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      expect(requests.length).toBeGreaterThan(0)
+      requests.forEach(req => {
+        expect(req.type).toBe('http')
+        expect(req.method).toBeDefined()
+        expect(req.url).toBeDefined()
+      })
+    })
+
+    it('should correctly parse HTTP methods', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const methods = new Set(requests.map(r => r.method))
+      expect(methods.has('GET')).toBe(true)
+      expect(methods.has('POST')).toBe(true)
+      expect(methods.has('PUT')).toBe(true)
+      expect(methods.has('DELETE')).toBe(true)
+      expect(methods.has('PATCH')).toBe(true)
+    })
+
+    it('should parse headers from requests', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const requestsWithHeaders = requests.filter(r => r.headers.length > 0)
+      expect(requestsWithHeaders.length).toBeGreaterThan(0)
+    })
+
+    it('should parse query parameters', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const requestsWithParams = requests.filter(r => r.params.length > 0)
+      expect(requestsWithParams.length).toBeGreaterThan(0)
+    })
+
+    it('should parse path parameters', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const requestsWithPathParams = requests.filter(r => r.pathParams && r.pathParams.length > 0)
+      expect(requestsWithPathParams.length).toBeGreaterThan(0)
+    })
+
+    it('should parse JSON request bodies', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const requestsWithTextBody = requests.filter(r => r.body?.type === 'text')
+      expect(requestsWithTextBody.length).toBeGreaterThan(0)
+    })
+
+    it('should handle form-data bodies', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const formDataRequests = requests.filter(r => r.body?.type === 'form-data')
+      expect(formDataRequests.length).toBeGreaterThan(0)
+    })
+
+    it('should handle urlencoded bodies', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const urlencodedRequests = requests.filter(r => r.body?.type === 'x-www-form-urlencoded')
+      expect(urlencodedRequests.length).toBeGreaterThan(0)
+    })
+
+    it('should detect and convert GraphQL requests', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const requests = findAllRequests(result, isGraphQLRequest)
+
+      expect(requests.length).toBeGreaterThan(0)
+      requests.forEach(req => {
+        expect(req.type).toBe('graphql')
+        expect(req.query).toBeDefined()
+      })
+    })
+
+    it('should use custom baseUrl option', () => {
+      const result = importBrunoFromJson(brunoJson, {
+        baseUrl: 'http://custom.url'
+      })
+
+      const env = result.environments[0]
+      const baseUrlVar = env?.variables.find(v => v.key === 'baseUrl')
+      expect(baseUrlVar?.value).toBe('http://custom.url')
+    })
+
+    it('should generate unique IDs for all items', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+      const ids = requests.map(r => r.id)
+
+      expect(new Set(ids).size).toBe(ids.length)
+    })
+
+    it('should generate deterministic IDs', () => {
+      const result1 = importBrunoFromJson(brunoJson)
+      const result2 = importBrunoFromJson(brunoJson)
+
+      const requests1 = findAllRequests(result1, isHTTPRequest)
+      const requests2 = findAllRequests(result2, isHTTPRequest)
+
+      expect(requests1.length).toBe(requests2.length)
+      for (let i = 0; i < requests1.length; i++) {
+        expect(requests1[i].id).toBe(requests2[i].id)
+      }
+    })
+
+    it('should include documentation from docs field', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      // At least some requests should have documentation
+      const requestsWithDocs = requests.filter(r => r.documentation.length > 0)
+      expect(requestsWithDocs.length).toBeGreaterThan(0)
+    })
+
+    it('should throw on invalid JSON', () => {
+      expect(() => importBrunoFromJson('not valid json')).toThrow()
+    })
+  })
+})
+
+// =============================================================================
 // Cross-service Tests
 // =============================================================================
 
@@ -936,8 +1101,9 @@ describe('Import Services - Cross-validation', () => {
     const asyncapi = importAsyncAPIFromString(loadTestFile('asyncapi-docker.yaml'), { name: 'AsyncAPI' })
     const postman = importPostmanFromJson(loadTestFile('postman-petstore.json'))
     const insomnia = importInsomniaFromJson(loadTestFile('insomnia-petstore.json'))
+    const bruno = importBrunoFromJson(loadTestFile('bruno-petstore.json'))
 
-    const results = [swagger, graphql, grpc, soap, asyncapi, postman, insomnia]
+    const results = [swagger, graphql, grpc, soap, asyncapi, postman, insomnia, bruno]
 
     results.forEach((result) => {
       expect(result.folderType).toBe('environment')
@@ -958,8 +1124,9 @@ describe('Import Services - Cross-validation', () => {
     const asyncapi = importAsyncAPIFromString(loadTestFile('asyncapi-docker.yaml'), { name: 'AsyncAPI' })
     const postman = importPostmanFromJson(loadTestFile('postman-petstore.json'))
     const insomnia = importInsomniaFromJson(loadTestFile('insomnia-petstore.json'))
+    const bruno = importBrunoFromJson(loadTestFile('bruno-petstore.json'))
 
-    const results = [swagger, graphql, grpc, soap, asyncapi, postman, insomnia]
+    const results = [swagger, graphql, grpc, soap, asyncapi, postman, insomnia, bruno]
 
     results.forEach((result) => {
       expect(result.environments.length).toBeGreaterThan(0)
