@@ -1,0 +1,24 @@
+{
+  "ignores": [
+    "@types/*",
+    "typescript",
+    "typescript-eslint",
+    "@typescript-eslint/*",
+    "eslint",
+    "eslint-*",
+    "globals",
+    "cross-env",
+    "electron",
+    "electron-builder",
+    "electron-vite",
+    "@vitejs/*",
+    "vite",
+    "playwright",
+    "@playwright/*",
+    "vitest",
+    "@vitest/*",
+    "@testing-library/*",
+    "jsdom",
+    "@milkdown/*"
+  ]
+}

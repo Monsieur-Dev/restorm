@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState, type JSX } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
@@ -15,7 +15,7 @@ interface CodeBlockProps {
 
 const CodeBlock: React.FC<CodeBlockProps> = ({ className, children }) => {
   const [copied, setCopied] = useState(false)
-  const codeContent = String(children).replace(/\n$/, '')
+  const codeContent = (typeof children === 'string' ? children : '').replace(/\n$/, '')
 
   const handleCopy = useCallback(() => {
     const copyToClipboard = async (): Promise<void> => {
@@ -25,12 +25,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ className, children }) => {
         setTimeout(() => { setCopied(false) }, 2000)
       } catch {
         // Fallback for older browsers
-        const textArea = document.createElement('textarea')
-        textArea.value = codeContent
-        document.body.appendChild(textArea)
-        textArea.select()
-        document.execCommand('copy')
-        document.body.removeChild(textArea)
+        await navigator.clipboard.writeText(codeContent)
         setCopied(true)
         setTimeout(() => { setCopied(false) }, 2000)
       }
@@ -157,15 +152,16 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ value, allowMerm
         rehypePlugins={[rehypeRaw, rehypeHighlight]}
         components={{
           // Custom renderer for pre blocks to add copy button
-          pre(preProps: JSX.IntrinsicElements['pre']) {
+          pre(preProps: React.JSX.IntrinsicElements['pre']) {
             const { children } = preProps
             // Check if this is a mermaid block
             const codeChild = React.Children.toArray(children)[0]
             if (React.isValidElement(codeChild)) {
               const codeClassName = (codeChild.props as { className?: string }).className ?? ''
               const match = /language-(\w+)/.exec(codeClassName)
-              if (match && match[1] === 'mermaid' && allowMermaid) {
-                const codeContent = String((codeChild.props as { children?: React.ReactNode }).children).replace(/\n$/, '')
+              if (match?.[1] === 'mermaid' && allowMermaid) {
+                const rawChildren = (codeChild.props as { children?: React.ReactNode }).children
+                const codeContent = (typeof rawChildren === 'string' ? rawChildren : '').replace(/\n$/, '')
                 return <MermaidBlock code={codeContent} isDark={isDark} />
               }
             }
@@ -185,7 +181,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ value, allowMerm
             )
           },
           // Custom link renderer: open HTTP(S) links directly in a new browser window/tab
-          a(anchorProps: JSX.IntrinsicElements['a']) {
+          a(anchorProps: React.JSX.IntrinsicElements['a']) {
             const { href, children, ...rest } = anchorProps
 
             const handleClick = (event: React.MouseEvent<HTMLAnchorElement>): void => {

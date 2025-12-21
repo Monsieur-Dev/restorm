@@ -204,6 +204,74 @@ function findFolderById(rootFolders: EnvironmentFolder[], id: string): Folder | 
   return undefined
 }
 
+// ===========================================================================
+// Workbench tree helpers (pure functions, defined outside component)
+// ===========================================================================
+
+/** Find the ID of the first tab group in a potentially nested workbench tree */
+function findFirstTabGroupId(nodes: GroupNode[]): string | null {
+  for (const node of nodes) {
+    if (isTabGroupNode(node)) {
+      return node.id
+    }
+    if (isContainerNode(node)) {
+      const childId = findFirstTabGroupId(node.groups)
+      if (childId) return childId
+    }
+  }
+  return null
+}
+
+/** Check if a group with the given ID exists anywhere in the tree */
+function hasGroupWithId(nodes: GroupNode[], groupId: string): boolean {
+  for (const node of nodes) {
+    if (isTabGroupNode(node)) {
+      if (node.id === groupId) return true
+    } else if (isContainerNode(node)) {
+      if (hasGroupWithId(node.groups, groupId)) return true
+    }
+  }
+  return false
+}
+
+/** Find the ID of the group containing a tab with the given ID */
+function findGroupIdForTab(nodes: GroupNode[], tabId: string): string | null {
+  for (const node of nodes) {
+    if (isTabGroupNode(node)) {
+      if (node.tabs.some((tab) => tab.id === tabId)) {
+        return node.id
+      }
+    } else if (isContainerNode(node)) {
+      const childId = findGroupIdForTab(node.groups, tabId)
+      if (childId) return childId
+    }
+  }
+  return null
+}
+
+/** Update a specific tab group by ID anywhere in the tree */
+function updateGroupById(
+  nodes: GroupNode[],
+  groupId: string,
+  updater: (group: TabGroupNode) => TabGroupNode
+): GroupNode[] {
+  return nodes.map((node) => {
+    if (isTabGroupNode(node)) {
+      if (node.id === groupId) {
+        return updater(node)
+      }
+      return node
+    }
+    if (isContainerNode(node)) {
+      return {
+        ...node,
+        groups: updateGroupById(node.groups, groupId, updater)
+      }
+    }
+    return node
+  })
+}
+
 /** Find an environment folder by ID in a single folder tree */
 function findEnvironmentFolderByIdInTree(folder: Folder | EnvironmentFolder, id: string): EnvironmentFolder | undefined {
   if (isEnvironmentFolder(folder as FolderItem) && folder.id === id) return folder as EnvironmentFolder
@@ -527,7 +595,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
-      const isMac = navigator.platform.toLowerCase().includes('mac')
+      const isMac = navigator.userAgent.toLowerCase().includes('mac')
       const isCtrlOrCmd = isMac ? event.metaKey : event.ctrlKey
       const key = event.key.toLowerCase()
 
@@ -547,6 +615,21 @@ const App: React.FC = () => {
   // Root folders data (mutable for renaming)
   // Each root folder is an independent EnvironmentFolder
   const [rootFolders, setRootFolders] = useState<EnvironmentFolder[]>(initialRootFolders)
+
+  // Initialize with all folders expanded
+  const [expandedIds, setExpandedIds] = useState<string[]>(allFolderIds)
+
+  // Selected item in the sidebar
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
+
+  // Focused group ID in the workbench
+  const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null)
+
+  // Workbench tree state (starts with no groups)
+  const [workbenchTree, setWorkbenchTree] = useState<WorkbenchTree>({
+    orientation: 'vertical',
+    groups: []
+  })
 
   // File save handlers (after rootFolders is defined)
   // Deep clone to remove Proxy wrappers before IPC serialization
@@ -680,7 +763,10 @@ const App: React.FC = () => {
     
     // A file is open but content not loaded yet - load it
     initialLoadDoneRef.current = true
-    handleFileOpened(fileState)
+    const rafId = requestAnimationFrame(() => {
+      handleFileOpened(fileState)
+    })
+    return (): void => { cancelAnimationFrame(rafId) }
   }, [fileState, rootFolders.length, handleFileOpened])
 
   // Counter to force re-render without breaking reactive proxies
@@ -738,7 +824,7 @@ const App: React.FC = () => {
       }
     }
     void checkChanges()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [rootFolders, updateCount, fileName, isDirty, markDirty, clearDirty])
 
   // Ref to track if search index has been initialized
@@ -759,88 +845,6 @@ const App: React.FC = () => {
     // for the lifetime of the application. StrictMode would otherwise destroy
     // subscriptions before re-rendering.
   }, [rootFolders])
-
-  // Initialize with all folders expanded
-  const [expandedIds, setExpandedIds] = useState<string[]>(allFolderIds)
-
-  // Selected item in the sidebar
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
-
-  // Focused group ID in the workbench
-  const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null)
-
-  // Workbench tree state (starts with no groups)
-  const [workbenchTree, setWorkbenchTree] = useState<WorkbenchTree>({
-    orientation: 'vertical',
-    groups: []
-  })
-
-  // ===========================================================================
-  // Workbench helpers
-  // ===========================================================================
-
-  /** Find the ID of the first tab group in a potentially nested workbench tree */
-  const findFirstTabGroupId = useCallback((nodes: GroupNode[]): string | null => {
-    for (const node of nodes) {
-      if (isTabGroupNode(node)) {
-        return node.id
-      }
-      if (isContainerNode(node)) {
-        const childId = findFirstTabGroupId(node.groups)
-        if (childId) return childId
-      }
-    }
-    return null
-  }, [])
-
-  /** Check if a group with the given ID exists anywhere in the tree */
-  const hasGroupWithId = useCallback((nodes: GroupNode[], groupId: string): boolean => {
-    for (const node of nodes) {
-      if (isTabGroupNode(node)) {
-        if (node.id === groupId) return true
-      } else if (isContainerNode(node)) {
-        if (hasGroupWithId(node.groups, groupId)) return true
-      }
-    }
-    return false
-  }, [])
-
-  /** Find the ID of the group containing a tab with the given ID */
-  const findGroupIdForTab = useCallback((nodes: GroupNode[], tabId: string): string | null => {
-    for (const node of nodes) {
-      if (isTabGroupNode(node)) {
-        if (node.tabs.some((tab) => tab.id === tabId)) {
-          return node.id
-        }
-      } else if (isContainerNode(node)) {
-        const childId = findGroupIdForTab(node.groups, tabId)
-        if (childId) return childId
-      }
-    }
-    return null
-  }, [])
-
-  /** Update a specific tab group by ID anywhere in the tree */
-  const updateGroupById = useCallback(
-    (nodes: GroupNode[], groupId: string, updater: (group: TabGroupNode) => TabGroupNode): GroupNode[] => {
-      return nodes.map((node) => {
-        if (isTabGroupNode(node)) {
-          if (node.id === groupId) {
-            return updater(node)
-          }
-          return node
-        }
-        if (isContainerNode(node)) {
-          return {
-            ...node,
-            groups: updateGroupById(node.groups, groupId, updater)
-          }
-        }
-        return node
-      })
-    },
-    []
-  )
 
   // Open a folder tab in the workbench
   const openFolderTab = useCallback((folder: Folder, breadcrumbs: BreadcrumbItem[]) => {
@@ -912,7 +916,7 @@ const App: React.FC = () => {
         groups: updatedGroups
       }
     })
-  }, [findFirstTabGroupId, findGroupIdForTab, focusedGroupId, hasGroupWithId, updateGroupById])
+  }, [focusedGroupId])
 
   // Open an environment folder tab in the workbench
   const openEnvironmentFolderTab = useCallback((folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[]) => {
@@ -984,7 +988,7 @@ const App: React.FC = () => {
         groups: updatedGroups
       }
     })
-  }, [findFirstTabGroupId, findGroupIdForTab, focusedGroupId, hasGroupWithId, updateGroupById])
+  }, [focusedGroupId])
 
   // Open an HTTP request tab in the workbench
   // Generic function to open any request type tab
@@ -1083,7 +1087,7 @@ const App: React.FC = () => {
       }
     })
   },
-    [findFirstTabGroupId, findGroupIdForTab, focusedGroupId, hasGroupWithId, updateGroupById]
+    [focusedGroupId]
   )
 
   // Rebuild tab callback for workbench autosave

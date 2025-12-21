@@ -77,7 +77,7 @@ function useThemeLegacy(): UseThemeReturn {
     }
     
     // If rgb/rgba, convert to hex
-    const rgbMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/)
+    const rgbMatch = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/.exec(color)
     if (rgbMatch?.[1] && rgbMatch[2] && rgbMatch[3]) {
       const r = parseInt(rgbMatch[1], 10).toString(16).padStart(2, '0')
       const g = parseInt(rgbMatch[2], 10).toString(16).padStart(2, '0')
@@ -156,7 +156,7 @@ function useThemeLegacy(): UseThemeReturn {
     
     // Update WCO colors after a short delay to ensure CSS is applied
     setTimeout(() => {
-      updateWCOColors().catch((err) => {
+      updateWCOColors().catch((err: unknown) => {
         logger.error('Failed to update WCO after CSS variables apply', { error: String(err) })
       })
     }, 50)
@@ -327,7 +327,7 @@ function useThemeLegacy(): UseThemeReturn {
                   }
                   
                   // If rgb/rgba, convert to hex
-                  const rgbMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/)
+                  const rgbMatch = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/.exec(color)
                   if (rgbMatch?.[1] && rgbMatch[2] && rgbMatch[3]) {
                     const r = parseInt(rgbMatch[1], 10).toString(16).padStart(2, '0')
                     const g = parseInt(rgbMatch[2], 10).toString(16).padStart(2, '0')
@@ -364,7 +364,7 @@ function useThemeLegacy(): UseThemeReturn {
       }
     }
 
-    initTheme().catch((err) => {
+    initTheme().catch((err: unknown) => {
       logger.error('🎨 useTheme: Failed to initialize theme in useEffect', { error: String(err) })
     })
     
@@ -430,7 +430,7 @@ function useThemeLegacy(): UseThemeReturn {
                   if (color.startsWith('#')) {
                     return color
                   }
-                  const rgbMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/)
+                  const rgbMatch = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/.exec(color)
                   if (rgbMatch?.[1] && rgbMatch[2] && rgbMatch[3]) {
                     const r = parseInt(rgbMatch[1], 10).toString(16).padStart(2, '0')
                     const g = parseInt(rgbMatch[2], 10).toString(16).padStart(2, '0')

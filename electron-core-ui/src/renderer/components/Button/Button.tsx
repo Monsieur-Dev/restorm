@@ -48,7 +48,7 @@ const Button: React.FC<ButtonProps> = ({
   // No need for hover/focus state management - CSS handles it
 
   // Render icon if provided
-  const renderIcon = (): JSX.Element | null => {
+  const renderIcon = (): React.JSX.Element | null => {
     if (!icon) return null
     return <span className={`codicon codicon-${icon}`} />
   }

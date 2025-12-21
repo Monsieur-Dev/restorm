@@ -57,7 +57,9 @@ interface MarkdownEditorInnerProps {
 const MarkdownEditorInner: React.FC<MarkdownEditorInnerProps> = ({ initialValue, onChange }) => {
   // Use ref to avoid stale closure in listener callback
   const onChangeRef = useRef(onChange)
-  onChangeRef.current = onChange
+  useEffect(() => {
+    onChangeRef.current = onChange
+  }, [onChange])
 
   useEditor((root) => {
     const crepe = new Crepe({

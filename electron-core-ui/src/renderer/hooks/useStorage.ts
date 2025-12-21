@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { logger } from '../services/logger'
 
 interface StorageAPI {
-  get: <T>(key: string) => Promise<T | undefined>
-  set: <T>(key: string, value: T) => Promise<boolean>
+  get: (key: string) => Promise<unknown>
+  set: (key: string, value: unknown) => Promise<boolean>
   delete: (key: string) => Promise<boolean>
 }
 
@@ -35,7 +35,7 @@ export function useStorage<T>(
       const api = getStorageAPI()
       if (api) {
         try {
-          const stored = await api.get<T>(key)
+          const stored = await api.get(key) as T | undefined
           if (stored !== undefined) {
             setValueState(stored)
           }
@@ -54,7 +54,7 @@ export function useStorage<T>(
       setValueState(newValue)
       const api = getStorageAPI()
       if (api) {
-        api.set(key, newValue).catch((error) => {
+        api.set(key, newValue).catch((error: unknown) => {
           logger.error('[useStorage] Failed to save value', { key, error: String(error) })
         })
       }
@@ -68,7 +68,7 @@ export function useStorage<T>(
 /**
  * Save a value to persistent storage (fire and forget)
  */
-export async function saveToStorage<T>(key: string, value: T): Promise<boolean> {
+export async function saveToStorage(key: string, value: unknown): Promise<boolean> {
   const api = getStorageAPI()
   if (!api) return false
   try {
@@ -81,11 +81,11 @@ export async function saveToStorage<T>(key: string, value: T): Promise<boolean> 
 /**
  * Load a value from persistent storage
  */
-export async function loadFromStorage<T>(key: string): Promise<T | undefined> {
+export async function loadFromStorage(key: string): Promise<unknown> {
   const api = getStorageAPI()
   if (!api) return undefined
   try {
-    return await api.get<T>(key)
+    return await api.get(key)
   } catch {
     return undefined
   }

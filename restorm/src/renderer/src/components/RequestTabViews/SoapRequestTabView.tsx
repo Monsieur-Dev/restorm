@@ -27,6 +27,11 @@ import codeSnippetsTemplate from '../../resources/templates/code-snippets-soap.h
 // Compile the Handlebars template
 const compiledTemplate = Handlebars.compile(codeSnippetsTemplate)
 
+// Helper to update reactive proxy properties (intentional mutation for reactive objects)
+function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
+  Object.assign(obj, { [key]: value })
+}
+
 export interface SoapRequestTabViewProps {
   request: SoapRequest
 }
@@ -47,20 +52,24 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
   useEffect(() => {
     if (requestIdRef.current !== request.id) {
       requestIdRef.current = request.id
-      setUrlState(request.url)
-      setBodyState(request.body)
-      setResponse(null)
+      const rafId = requestAnimationFrame(() => {
+        setUrlState(request.url)
+        setBodyState(request.body)
+        setResponse(null)
+      })
+      return (): void => { cancelAnimationFrame(rafId) }
     }
+    return undefined
   }, [request])
 
   // Sync state changes to reactive request object
   const setUrl = useCallback((value: string): void => {
     setUrlState(value)
-    request.url = value
+    updateReactiveProperty(request, 'url', value)
   }, [request])
   const setBody = useCallback((value: string): void => {
     setBodyState(value)
-    request.body = value
+    updateReactiveProperty(request, 'body', value)
   }, [request])
   
   const runtimeContext = useMemo<VariableContext | undefined>(
@@ -143,7 +152,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
           variables={envVariables}
           initialRows={request.headers}
           visibilityMode="base-only"
-          onRowsChange={(rows) => { request.headers = rows }}
+          onRowsChange={(rows): void => { updateReactiveProperty(request, 'headers', rows) }}
         />
       </Pane>
     </SplitView>
@@ -251,7 +260,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
       codeSnippetsContent={codeSnippetsContent}
       documentation={request.documentation}
       notes={request.notes}
-      onNotesChange={(md) => { request.notes = md }}
+      onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
       isLoading={isSending}
       showResponse={response !== null}
       infosContent={infosContent}

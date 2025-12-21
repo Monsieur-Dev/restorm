@@ -89,7 +89,7 @@ export { TagsView } from './TagsView/TagsView'
 export type { TagsViewProps } from './TagsView/TagsView'
 
 // IconSelect exports
-export { IconSelect, renderLibraryIcon, IconoirIcon, PhosphorIcon, MdiIcon, SimpleIcon, ICON_LIBRARIES } from './IconSelect'
+export { IconSelect, RenderLibraryIcon, IconoirIcon, PhosphorIcon, MdiIcon, SimpleIcon, ICON_LIBRARIES } from './IconSelect'
 export type { IconSelectProps, IconLibrary } from './IconSelect'
 
 // Button exports

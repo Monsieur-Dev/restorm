@@ -32,6 +32,11 @@ import { BaseRequestTabView } from './BaseRequestTabView'
 import { Badge } from '../Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
 
+// Helper to update reactive proxy properties (intentional mutation for reactive objects)
+function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
+  Object.assign(obj, { [key]: value })
+}
+
 // Compile the code snippets Handlebars template
 const compiledTemplate = Handlebars.compile(codeSnippetsTemplate)
 
@@ -125,26 +130,30 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
   useEffect(() => {
     if (requestIdRef.current !== request.id) {
       requestIdRef.current = request.id
-      setMethod(request.method)
-      setUrl(request.url)
-      setBody(getBodyContent(request))
-      setBodyMode(getBodyMode(request))
-      setBodyFilePath(getBodyFilePath(request))
-      setHttpResponse(null)
+      const rafId = requestAnimationFrame(() => {
+        setMethod(request.method)
+        setUrl(request.url)
+        setBody(getBodyContent(request))
+        setBodyMode(getBodyMode(request))
+        setBodyFilePath(getBodyFilePath(request))
+        setHttpResponse(null)
+      })
+      return (): void => { cancelAnimationFrame(rafId) }
     }
+    return undefined
   }, [request])
 
   // Sync method changes to reactive object
   useEffect(() => {
     if (method !== request.method && requestIdRef.current === request.id) {
-      request.method = method as HTTPMethod
+      updateReactiveProperty(request, 'method', method as HTTPMethod)
     }
   }, [method, request])
 
   // Sync url changes to reactive object
   useEffect(() => {
     if (url !== request.url && requestIdRef.current === request.id) {
-      request.url = url
+      updateReactiveProperty(request, 'url', url)
     }
   }, [url, request])
 
@@ -154,12 +163,12 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     if (bodyMode === 'text') {
       const currentContent = request.body?.type === 'text' ? request.body.content : ''
       if (body !== currentContent) {
-        request.body = { type: 'text', content: body }
+        updateReactiveProperty(request, 'body', { type: 'text', content: body })
       }
     } else if (bodyMode === 'file') {
       const currentPath = request.body?.type === 'file' ? request.body.path : ''
       if (bodyFilePath !== currentPath) {
-        request.body = { type: 'file', path: bodyFilePath }
+        updateReactiveProperty(request, 'body', { type: 'file', path: bodyFilePath })
       }
     }
   }, [body, bodyMode, bodyFilePath, request])
@@ -294,7 +303,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           variables={envVariables}
           initialRows={request.headers}
           visibilityMode="base-only"
-          onRowsChange={(rows) => { request.headers = rows }}
+          onRowsChange={(rows): void => { updateReactiveProperty(request, 'headers', rows) }}
         />
       </Pane>
       <Pane
@@ -322,7 +331,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           initialRows={request.pathParams ?? []}
           visibilityMode="base-only"
           onResolvedContextChange={setResolvedPathParamsContext}
-          onRowsChange={(rows) => { request.pathParams = rows }}
+          onRowsChange={(rows): void => { updateReactiveProperty(request, 'pathParams', rows) }}
         />
       </Pane>
       <Pane
@@ -350,7 +359,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           initialRows={request.params}
           visibilityMode="base-only"
           onResolvedContextChange={setResolvedQueryParamsContext}
-          onRowsChange={(rows) => { request.params = rows }}
+          onRowsChange={(rows): void => { updateReactiveProperty(request, 'params', rows) }}
         />
       </Pane>
       <Pane title={t('requestTab.tabs.body')} initialSize={0.4}>
@@ -386,7 +395,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
                 variables={urlVariables}
                 initialRows={request.body?.type === 'form-data' || request.body?.type === 'x-www-form-urlencoded' ? request.body.fields : []}
                 visibilityMode="base-only"
-                onRowsChange={(rows) => { request.body = { type: bodyMode as 'form-data' | 'x-www-form-urlencoded', fields: rows } }}
+                onRowsChange={(rows): void => { updateReactiveProperty(request, 'body', { type: bodyMode, fields: rows }) }}
               />
             )}
             {bodyMode === 'file' && (
@@ -570,7 +579,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
       codeSnippetsContent={codeSnippetsContent}
       documentation={request.documentation}
       notes={request.notes}
-      onNotesChange={(md) => { request.notes = md }}
+      onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
       isLoading={isSending}
       showResponse={httpResponse !== null}
       infosContent={infosContent}

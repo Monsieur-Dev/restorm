@@ -117,11 +117,10 @@ export const createCoreUIAPI = (): Record<string, unknown> => ({
 
   // Storage API for persisting application data
   storage: {
-    get: async <T>(key: string): Promise<T | undefined> => {
-      const result: unknown = await ipcRenderer.invoke('storage:get', key)
-      return result as T | undefined
+    get: async (key: string): Promise<unknown> => {
+      return await ipcRenderer.invoke('storage:get', key)
     },
-    set: async <T>(key: string, value: T): Promise<boolean> => {
+    set: async (key: string, value: unknown): Promise<boolean> => {
       const result: unknown = await ipcRenderer.invoke('storage:set', key, value)
       return result as boolean
     },

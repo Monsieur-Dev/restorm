@@ -60,7 +60,7 @@ function parseProto(content: string): ParsedProto {
   }
   
   // Extract package
-  const packageMatch = content.match(/package\s+([\w.]+)\s*;/)
+  const packageMatch = /package\s+([\w.]+)\s*;/.exec(content)
   if (packageMatch?.[1]) {
     result.package = packageMatch[1]
   }
@@ -123,7 +123,7 @@ function parseServiceMethods(body: string): ProtoMethod[] {
     }
     
     // Parse rpc method
-    const rpcMatch = trimmed.match(/rpc\s+(\w+)\s*\(\s*(stream\s+)?(\w+)\s*\)\s*returns\s*\(\s*(stream\s+)?(\w+)\s*\)/)
+    const rpcMatch = /rpc\s+(\w+)\s*\(\s*(stream\s+)?(\w+)\s*\)\s*returns\s*\(\s*(stream\s+)?(\w+)\s*\)/.exec(trimmed)
     if (rpcMatch?.[1] && rpcMatch[3] && rpcMatch[5]) {
       methods.push({
         name: rpcMatch[1],
@@ -150,7 +150,7 @@ function parseMessageFields(body: string): ProtoField[] {
     if (!trimmed || trimmed.startsWith('//')) continue
     
     // Parse field: (repeated)? type name = number;
-    const fieldMatch = trimmed.match(/(repeated\s+)?(\w+)\s+(\w+)\s*=\s*(\d+)/)
+    const fieldMatch = /(repeated\s+)?(\w+)\s+(\w+)\s*=\s*(\d+)/.exec(trimmed)
     if (fieldMatch?.[2] && fieldMatch[3] && fieldMatch[4]) {
       fields.push({
         name: fieldMatch[3],

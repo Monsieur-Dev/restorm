@@ -59,16 +59,19 @@ export const EnvironmentDropdown: React.FC = () => {
 
   // Reset state when environments change
   useEffect(() => {
-    if (environments && environments.length > 0) {
-      setExpandedIds(collectEnvironmentIds(environments))
-      // Keep current selected environment if still present (including sub-environments), otherwise default to first
-      if (!selectedEnvId || !findEnvironmentById(environments, selectedEnvId)) {
-        setSelectedEnvId(environments[0]?.id ?? null)
+    const rafId = requestAnimationFrame(() => {
+      if (environments && environments.length > 0) {
+        setExpandedIds(collectEnvironmentIds(environments))
+        // Keep current selected environment if still present (including sub-environments), otherwise default to first
+        if (!selectedEnvId || !findEnvironmentById(environments, selectedEnvId)) {
+          setSelectedEnvId(environments[0]?.id ?? null)
+        }
+      } else {
+        setExpandedIds([])
+        setSelectedEnvId(null)
       }
-    } else {
-      setExpandedIds([])
-      setSelectedEnvId(null)
-    }
+    })
+    return (): void => { cancelAnimationFrame(rafId) }
   }, [environments, selectedEnvId, setSelectedEnvId])
 
   const items = useMemo(

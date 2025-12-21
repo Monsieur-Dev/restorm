@@ -207,7 +207,8 @@ export const ListView: React.FC<ListViewProps> = ({
 
   // Inline rename state (supports controlled mode via editingItemIdProp)
   const [internalEditingItemId, setInternalEditingItemId] = useState<string | null>(null)
-  const [editingValue, setEditingValue] = useState<string>('')
+  // Store both the itemId and value to avoid effect-based sync
+  const [editingState, setEditingState] = useState<{ itemId: string | null; value: string }>({ itemId: null, value: '' })
   const renameInputRef = useRef<HTMLInputElement | null>(null)
   
   // Use controlled editingItemId if provided, otherwise use internal state
@@ -284,6 +285,20 @@ export const ListView: React.FC<ListViewProps> = ({
     return flattenItems(initialItems, expandedIds)
   }, [initialItems, expandedIds])
 
+  // Derive editingValue: if editingState was set for a different item, compute initial value
+  const editingValue = useMemo(() => {
+    if (!editingItemId) return ''
+    if (editingState.itemId === editingItemId) return editingState.value
+    // Compute initial value for the current editing item
+    const flat = flatItems.find((f) => f.item.id === editingItemId)
+    return flat && typeof flat.item.title === 'string' ? flat.item.title : ''
+  }, [editingItemId, editingState, flatItems])
+
+  // Wrapper to update editing value while keeping track of itemId
+  const setEditingValue = useCallback((value: string) => {
+    setEditingState({ itemId: editingItemId, value })
+  }, [editingItemId])
+
   // Track if scroll should happen (only on user interaction, not on expand/collapse)
   const shouldScrollRef = useRef(false)
 
@@ -302,9 +317,12 @@ export const ListView: React.FC<ListViewProps> = ({
   React.useEffect(() => {
     if (!activeId) return
     if (!shouldScrollRef.current) return
-    shouldScrollRef.current = false
 
-    scrollActiveIntoView()
+    // Clear flag and scroll in RAF to avoid sync mutation
+    requestAnimationFrame(() => {
+      shouldScrollRef.current = false
+      scrollActiveIntoView()
+    })
   }, [activeId, scrollActiveIntoView])
 
   const findFlatIndexById = useCallback(
@@ -439,7 +457,7 @@ export const ListView: React.FC<ListViewProps> = ({
       setEditingItemId(flat.item.id)
       setEditingValue(titleStr)
     },
-    [isRenameable, setEditingItemId]
+    [isRenameable, setEditingItemId, setEditingValue]
   )
 
   // Commit the rename and notify parent
@@ -461,7 +479,7 @@ export const ListView: React.FC<ListViewProps> = ({
   const cancelRename = useCallback((): void => {
     setEditingItemId(null)
     setEditingValue('')
-  }, [setEditingItemId])
+  }, [setEditingItemId, setEditingValue])
 
   // Focus the rename input when editing starts
   useEffect(() => {
@@ -470,17 +488,6 @@ export const ListView: React.FC<ListViewProps> = ({
       renameInputRef.current.select()
     }
   }, [editingItemId])
-
-  // Initialize editingValue when controlled editingItemId changes
-  useEffect(() => {
-    if (editingItemIdProp && isEditingControlled) {
-      const flat = flatItems.find((f) => f.item.id === editingItemIdProp)
-      if (flat) {
-        const titleStr = typeof flat.item.title === 'string' ? flat.item.title : ''
-        setEditingValue(titleStr)
-      }
-    }
-  }, [editingItemIdProp, isEditingControlled, flatItems])
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>): void => {
@@ -550,7 +557,9 @@ export const ListView: React.FC<ListViewProps> = ({
 
       const flat = nextIndex !== currentIndex ? flatItems[nextIndex] : undefined
       if (flat) {
-        shouldScrollRef.current = true // Enable scroll for keyboard navigation
+        requestAnimationFrame(() => {
+          shouldScrollRef.current = true // Enable scroll for keyboard navigation
+        })
         setActiveId(flat.item.id)
         const payload: ListViewItemEventPayload = { item: flat.item, path: flat.path }
 

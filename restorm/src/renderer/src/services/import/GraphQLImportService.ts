@@ -59,7 +59,7 @@ function parseArguments(argsStr: string): GraphQLArgument[] {
   const argParts = argsStr.split(',')
   
   for (const part of argParts) {
-    const match = part.trim().match(/^(\w+)\s*:\s*(.+?)(?:\s*=\s*(.+))?$/)
+    const match = /^(\w+)\s*:\s*(.+?)(?:\s*=\s*(.+))?$/.exec(part.trim())
     if (match?.[1] && match[2]) {
       args.push({
         name: match[1],
@@ -130,7 +130,7 @@ function parseFieldsBlock(block: string): GraphQLField[] {
     
     // Check for description (triple quotes)
     if (trimmed.startsWith('"""')) {
-      const descMatch = trimmed.match(/"""(.+?)"""/)
+      const descMatch = /"""(.+?)"""/.exec(trimmed)
       if (descMatch?.[1]) {
         currentDescription = descMatch[1].trim()
       }
@@ -141,7 +141,7 @@ function parseFieldsBlock(block: string): GraphQLField[] {
     if (!trimmed) continue
     
     // Parse field: name(args): Type
-    const fieldMatch = trimmed.match(/^(\w+)(?:\(([^)]*)\))?\s*:\s*(.+)$/)
+    const fieldMatch = /^(\w+)(?:\(([^)]*)\))?\s*:\s*(.+)$/.exec(trimmed)
     if (fieldMatch?.[1] && fieldMatch[3]) {
       fields.push({
         name: fieldMatch[1],

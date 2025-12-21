@@ -165,7 +165,7 @@ export async function saveWorkbenchState(workbenchId: string, tree: WorkbenchTre
  * Load workbench state from storage
  */
 export async function loadWorkbenchState(workbenchId: string): Promise<PersistedWorkbenchState | undefined> {
-  return loadFromStorage<PersistedWorkbenchState>(getStorageKey(workbenchId));
+  return await loadFromStorage(getStorageKey(workbenchId)) as PersistedWorkbenchState | undefined;
 }
 
 /**

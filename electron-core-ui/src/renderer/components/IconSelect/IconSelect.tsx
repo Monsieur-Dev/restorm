@@ -14,13 +14,15 @@ import {
   getSimpleIconsNames,
   getFeatherNames,
   getFontAwesomeNames,
+} from './iconLibraryUtils'
+import {
   IconoirIcon,
   PhosphorIcon,
   MdiIcon,
   SimpleIcon,
   FeatherIcon,
   FaIcon,
-  renderLibraryIcon
+  RenderLibraryIcon,
 } from './iconLibraries'
 import {
   CODICON_CATEGORIES,
@@ -32,7 +34,11 @@ import {
 import './iconSelect.css'
 
 // Get all codicon names from the codicons package
-const CODICONS = Object.keys(codiconsMapping).sort()
+// In v0.0.44+, mapping.json changed format from { "iconName": codePoint } to { codePoint: ["iconNames"] }
+const CODICONS = Object.values(codiconsMapping as Record<string, string[]>)
+  .flat()
+  .filter((name, index, arr) => arr.indexOf(name) === index) // dedupe
+  .sort()
 
 // Tab types
 type TabId = 'emoji' | 'codicon' | 'iconoir' | 'phosphor' | 'material' | 'simpleicons' | 'feather' | 'fontawesome'
@@ -169,6 +175,14 @@ export const IconSelect: React.FC<IconSelectProps> = ({
   const [simpleIconsSearch, setSimpleIconsSearch] = useState('')
   const [featherSearch, setFeatherSearch] = useState('')
 
+  // Close picker and reset search states
+  const closeAndReset = useCallback(() => {
+    setIsOpen(false)
+    setMaterialSearch('')
+    setSimpleIconsSearch('')
+    setFeatherSearch('')
+  }, [])
+
   // Memoized icon lists
   const iconoirNames = useMemo(() => getIconoirNames(), [])
   const phosphorNames = useMemo(() => getPhosphorNames(), [])
@@ -245,7 +259,7 @@ export const IconSelect: React.FC<IconSelectProps> = ({
         pickerRef.current &&
         !pickerRef.current.contains(target)
       ) {
-        setIsOpen(false)
+        closeAndReset()
       }
     }
 
@@ -253,37 +267,28 @@ export const IconSelect: React.FC<IconSelectProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [isOpen])
-
-  // Reset search when picker closes
-  useEffect(() => {
-    if (!isOpen) {
-      setMaterialSearch('')
-      setSimpleIconsSearch('')
-      setFeatherSearch('')
-    }
-  }, [isOpen])
+  }, [isOpen, closeAndReset])
 
   const handleEmojiSelect = useCallback((emoji: string) => {
     onChange?.({
       type: 'emoji',
       value: emoji
     })
-    setIsOpen(false)
-  }, [onChange])
+    closeAndReset()
+  }, [onChange, closeAndReset])
 
   const handleIconSelect = useCallback((type: IconType, name: string) => {
     onChange?.({
       type,
       value: name
     })
-    setIsOpen(false)
-  }, [onChange])
+    closeAndReset()
+  }, [onChange, closeAndReset])
 
   const handleClear = useCallback(() => {
     onChange?.(null)
-    setIsOpen(false)
-  }, [onChange])
+    closeAndReset()
+  }, [onChange, closeAndReset])
 
   const displayValue = useMemo(() => {
     if (!value || value.type === 'none') {
@@ -296,7 +301,7 @@ export const IconSelect: React.FC<IconSelectProps> = ({
       return <i className={`codicon codicon-${value.value}`} />
     }
     // Library icons
-    return renderLibraryIcon(value.type, value.value, 16)
+    return <RenderLibraryIcon type={value.type} name={value.value} size={16} />
   }, [value, placeholder])
 
   const rootClassName = useMemo(

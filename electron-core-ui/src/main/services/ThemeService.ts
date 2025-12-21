@@ -199,7 +199,7 @@ export class ThemeService {
       }
     }
     const duration = performance.now() - start
-    logger.info(`ThemeService: preloaded ${this.themeCache.size} themes in ${duration.toFixed(2)}ms`)
+    logger.info(`ThemeService: preloaded ${String(this.themeCache.size)} themes in ${duration.toFixed(2)}ms`)
   }
 
   /**

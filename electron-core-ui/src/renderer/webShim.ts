@@ -19,7 +19,7 @@ const themeYamlModules = import.meta.glob<string>('../../resources/themes/**/*.y
 // Helper to extract theme ID from file path
 function getThemeIdFromPath(path: string): string {
   // Path format: ../../resources/themes/dark/abyss.yaml -> dark/abyss
-  const match = path.match(/themes\/(.+)\.yaml$/)
+  const match = /themes\/(.+)\.yaml$/.exec(path)
   return match?.[1] ?? ''
 }
 
@@ -40,8 +40,8 @@ interface WindowApiThemeShim {
 }
 
 interface WindowApiStorageShim {
-  get: <T>(key: string) => Promise<T | undefined>
-  set: <T>(key: string, value: T) => Promise<boolean>
+  get: (key: string) => Promise<unknown>
+  set: (key: string, value: unknown) => Promise<boolean>
   delete: (key: string) => Promise<boolean>
 }
 
@@ -322,15 +322,15 @@ export function ensureCoreUiWebApiShim(): void {
 
   // Storage shim using localStorage for web builds
   const storageApi: WindowApiStorageShim = {
-    get: <T>(key: string): Promise<T | undefined> => {
+    get: (key: string): Promise<unknown> => {
       try {
         const item = localStorage.getItem(`ecui_${key}`)
-        return Promise.resolve(item ? JSON.parse(item) as T : undefined)
+        return Promise.resolve(item ? JSON.parse(item) as unknown : undefined)
       } catch {
         return Promise.resolve(undefined)
       }
     },
-    set: <T>(key: string, value: T): Promise<boolean> => {
+    set: (key: string, value: unknown): Promise<boolean> => {
       try {
         localStorage.setItem(`ecui_${key}`, JSON.stringify(value))
         return Promise.resolve(true)
@@ -475,7 +475,7 @@ export function ensureCoreUiWebApiShim(): void {
       }
     },
     saveAs: (content: unknown, filename?: string): Promise<boolean> => {
-      const name = filename ?? `file_${Date.now()}`
+      const name = filename ?? `file_${String(Date.now())}`
       try {
         localStorage.setItem(WEB_FILE_PREFIX + name, JSON.stringify(content))
         webCurrentFile = { path: name, name, isDirty: false, content, contentChecksum: JSON.stringify(content) }
@@ -596,7 +596,7 @@ export function ensureCoreUiWebApiShim(): void {
   }
 
   const api: WindowApiShim = {
-    platform: navigator.platform || 'web',
+    platform: (navigator as { userAgentData?: { platform?: string } }).userAgentData?.platform ?? 'web',
     theme: themeApi,
     logger: {
       // In web builds, swallow log messages; the app can add its own logging if desired.

@@ -137,8 +137,12 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
   useEffect(() => {
     if (!isControlled) {
-      setLocalTree(initialTree)
+      const rafId = requestAnimationFrame(() => {
+        setLocalTree(initialTree)
+      })
+      return (): void => { cancelAnimationFrame(rafId) }
     }
+    return undefined
   }, [initialTree, isControlled])
 
   const handleTabDropped = useCallback(
@@ -305,7 +309,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isHTTPRequestTab(effectiveTab)) {
       // Get reactive request if available, otherwise use tab's copy
       const reactiveRequest = getRequestById?.(effectiveTab.request.id)
-      const request = (reactiveRequest && reactiveRequest.type === 'http') ? reactiveRequest : effectiveTab.request
+      const request = (reactiveRequest?.type === 'http') ? reactiveRequest : effectiveTab.request
       return (
         <EnvironmentProvider environments={effectiveTab.environments}>
           <RestormWorkbenchTab

@@ -19,9 +19,14 @@ export interface TagsViewProps {
 export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLabel, className, style }) => {
   const { t } = useTranslation()
   const resolvedRemoveTagLabel = removeTagLabel ?? t('tagsView.removeTag')
-  const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [rawEditingIndex, setEditingIndex] = useState<number | null>(null)
   const [editingValue, setEditingValue] = useState<string>('')
   const inputRef = useRef<HTMLInputElement | null>(null)
+
+  // Derive effective editing index - automatically null if out of bounds
+  const editingIndex = rawEditingIndex !== null && rawEditingIndex >= 0 && rawEditingIndex < tags.length
+    ? rawEditingIndex
+    : null
 
   const [contextMenu, setContextMenu] = useState<{
     visible: boolean
@@ -34,14 +39,6 @@ export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLab
     y: 0,
     index: null
   })
-
-  // Ensure editing index stays in bounds when tags array changes
-  useEffect(() => {
-    if (editingIndex != null && (editingIndex < 0 || editingIndex >= tags.length)) {
-      setEditingIndex(null)
-      setEditingValue('')
-    }
-  }, [editingIndex, tags.length])
 
   // Focus input when entering editing mode
   useEffect(() => {

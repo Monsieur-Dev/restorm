@@ -50,14 +50,14 @@ export class StorageService {
   /**
    * Get a value by key
    */
-  get<T>(key: string): T | undefined {
-    return this.data[key] as T | undefined
+  get(key: string): unknown {
+    return this.data[key]
   }
 
   /**
    * Set a value by key
    */
-  set<T>(key: string, value: T): void {
+  set(key: string, value: unknown): void {
     this.data[key] = value
     this.save()
   }
@@ -95,8 +95,6 @@ let storageInstance: StorageService | null = null
  * Get the singleton instance of StorageService
  */
 export function getStorageService(): StorageService {
-  if (!storageInstance) {
-    storageInstance = new StorageService()
-  }
+  storageInstance ??= new StorageService()
   return storageInstance
 }

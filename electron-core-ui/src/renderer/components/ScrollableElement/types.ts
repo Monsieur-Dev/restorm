@@ -46,7 +46,7 @@ export interface ScrollableElementProps extends ScrollableElementDomProps {
   /** Logical scroll callback with numeric coordinates */
   onScroll?: (scrollTop: number, scrollLeft: number) => void;
   /** Optional ref to the inner scrollable content element */
-  contentRef?: React.MutableRefObject<HTMLDivElement | null> | ((instance: HTMLDivElement | null) => void);
+  contentRef?: React.RefObject<HTMLDivElement | null> | ((instance: HTMLDivElement | null) => void);
 }
 
 export const defaultScrollableElementStyles: IScrollableElementStyles = {

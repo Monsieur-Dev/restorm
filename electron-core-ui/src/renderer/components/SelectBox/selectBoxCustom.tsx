@@ -23,8 +23,31 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   id
 }) => {
   const [isVisible, setIsVisible] = useState(false)
-  const [focusedIndex, setFocusedIndex] = useState(selected)
-  const [currentSelection, setCurrentSelection] = useState(selected)
+  // Track internal selection override with the 'selected' value it was set for
+  const [internalState, setInternalState] = useState<{
+    forSelected: number
+    selection: number | null
+    focus: number | null
+  }>({ forSelected: selected, selection: null, focus: null })
+  
+  // Derive current values: use internal state only if it was set for the current 'selected' prop
+  const internalIsValid = internalState.forSelected === selected
+  const currentSelection = internalIsValid && internalState.selection !== null 
+    ? internalState.selection 
+    : selected
+  const focusedIndex = internalIsValid && internalState.focus !== null 
+    ? internalState.focus 
+    : selected
+
+  // Helper to update internal selection
+  const setInternalSelection = useCallback((value: number | null) => {
+    setInternalState(prev => ({ ...prev, forSelected: selected, selection: value }))
+  }, [selected])
+
+  // Helper to update internal focus  
+  const setInternalFocus = useCallback((value: number | null) => {
+    setInternalState(prev => ({ ...prev, forSelected: selected, focus: value }))
+  }, [selected])
   
   const selectRef = useRef<HTMLSelectElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -32,23 +55,23 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   // Handle selection change
   const handleSelectChange = useCallback((index: number): void => {
     if (index >= 0 && index < options.length) {
-      setCurrentSelection(index)
+      setInternalSelection(index)
       onDidSelect({
         selected: options[index]?.text ?? '',
         index
       })
     }
-  }, [options, onDidSelect])
+  }, [options, onDidSelect, setInternalSelection])
 
   // Show dropdown
   const showDropdown = useCallback((): void => {
     if (isVisible) return
     setIsVisible(true)
-    setFocusedIndex(currentSelection)
-  }, [isVisible, currentSelection])
+    setInternalFocus(currentSelection)
+  }, [isVisible, currentSelection, setInternalFocus])
 
   // Hide dropdown
-  const hideDropdown = useCallback((focusSelect = true): void => {
+  const hideDropdown = useCallback((focusSelect: boolean): void => {
     setIsVisible(false)
     if (focusSelect && selectRef.current) {
       selectRef.current.focus()
@@ -99,7 +122,8 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
 
   // Handle option click
   const handleOptionClick = useCallback((index: number): void => {
-    if (options[index] && !options[index]?.isDisabled) {
+    const option = options[index]
+    if (option && !option.isDisabled) {
       handleSelectChange(index)
       hideDropdown(true)
     }
@@ -107,8 +131,8 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
 
   // Handle option hover
   const handleOptionHover = useCallback((index: number): void => {
-    setFocusedIndex(index)
-  }, [])
+    setInternalFocus(index)
+  }, [setInternalFocus])
 
   // Handle dropdown keyboard navigation
   const handleDropdownKeyDown = useCallback((event: React.KeyboardEvent): void => {
@@ -138,7 +162,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
             nextIndex++
           }
           if (nextIndex < options.length) {
-            setFocusedIndex(nextIndex)
+            setInternalFocus(nextIndex)
           }
         }
         break
@@ -152,22 +176,22 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
             prevIndex--
           }
           if (prevIndex >= 0) {
-            setFocusedIndex(prevIndex)
+            setInternalFocus(prevIndex)
           }
         }
         break
 
       case 'Home':
         event.preventDefault()
-        setFocusedIndex(0)
+        setInternalFocus(0)
         break
 
       case 'End':
         event.preventDefault()
-        setFocusedIndex(options.length - 1)
+        setInternalFocus(options.length - 1)
         break
     }
-  }, [isVisible, focusedIndex, options, handleSelectChange, hideDropdown])
+  }, [isVisible, focusedIndex, options, handleSelectChange, hideDropdown, setInternalFocus])
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -186,14 +210,6 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [isVisible, hideDropdown])
-
-  // Update selected value when selected prop changes
-  useEffect(() => {
-    if (selected >= 0 && selected < options.length) {
-      setCurrentSelection(selected)
-      setFocusedIndex(selected)
-    }
-  }, [selected, options])
 
   // Apply styles when component mounts or styles change
   useEffect(() => {
@@ -343,7 +359,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
             </ScrollableElement>
 
           {/* Details pane for descriptions */}
-          {options.some(option => option.description) && (
+          {options.some(option => option.description !== undefined) && (
             <div className="select-box-details-pane border-top">
               {selectedOption?.description}
             </div>

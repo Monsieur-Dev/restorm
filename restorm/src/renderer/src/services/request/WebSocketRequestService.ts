@@ -111,7 +111,7 @@ export function connectWebSocket(
       socket.onerror = () => {
         connection.connected = false
       }
-    } catch (err) {
+    } catch {
       connection.connected = false
     }
   }
@@ -138,7 +138,7 @@ export function sendWebSocketMessage(
   event?: string
 ): WebSocketMessage | null {
   const connection = connections.get(connectionId)
-  if (!connection || !connection.connected) {
+  if (!connection?.connected) {
     return null
   }
   

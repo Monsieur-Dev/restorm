@@ -143,7 +143,7 @@ function headersToKeyValues(headers: Record<string, unknown>): KeyValue[] {
     if (value !== undefined && value !== null) {
       result.push({
         key,
-        value: String(value)
+        value: typeof value === 'string' ? value : JSON.stringify(value)
       })
     }
   }

@@ -10,27 +10,35 @@
   },
   "license": "MIT",
   "scripts": {
+    "postinstall": "bash -c 'node node_modules/.pnpm/electron@*/node_modules/electron/install.js' || true",
     "clean": "npx rimraf node_modules electron-core-ui/node_modules electron-core-ui/dist gitable/node_modules gitable/dist gitable/out gitable/.vite demo/node_modules demo/dist demo/out demo/.vite restorm/node_modules restorm/dist restorm/out restorm/.vite",
-    "rebuild:all": "npm run clean && npm install && npm run install:all && npm run build",
-    "install:all": "cd electron-core-ui && npm install && cd ../gitable && npm install && cd ../demo && npm install && cd ../restorm && npm install",
-    "dev:gitable": "cd gitable && npx cross-env ELECTRON_DISABLE_SANDBOX=1 npx electron-vite dev",
-    "dev:demo": "cd demo && npx cross-env ELECTRON_DISABLE_SANDBOX=1 npx electron-vite dev",
-    "dev:restorm": "cd restorm && npx cross-env ELECTRON_DISABLE_SANDBOX=1 npx electron-vite dev",
-    "build:core-ui": "cd electron-core-ui && npm run build",
-    "build:gitable": "cd gitable && npm install ../electron-core-ui && npm run build",
-    "build:demo": "cd demo && npm install ../electron-core-ui && npm run build",
-    "build:restorm": "cd restorm && npm install ../electron-core-ui && npm run build",
-    "build": "npm run build:core-ui && npm run build:gitable && npm run build:demo && npm run build:restorm",
-    "lint": "cd gitable && npm run lint && cd ../demo && npm run lint && cd ../restorm && npm run lint && cd ../electron-core-ui && npm run lint",
-    "lint:fix": "cd gitable && npm run lint:fix && cd ../demo && npm run lint:fix && cd ../restorm && npm run lint:fix && cd ../electron-core-ui && npm run lint:fix",
-    "typecheck": "cd electron-core-ui && npm run typecheck && cd ../gitable && npm run typecheck && cd ../demo && npm run typecheck && cd ../restorm && npm run typecheck",
-    "test": "cd restorm && npm run test",
+    "rebuild:all": "pnpm run clean && pnpm install && pnpm run build",
+    "dev:gitable": "pnpm --filter gitable run dev",
+    "dev:demo": "pnpm --filter demo run dev",
+    "dev:restorm": "pnpm --filter restorm run dev",
+    "build:core-ui": "pnpm --filter electron-core-ui run build",
+    "build:gitable": "pnpm --filter gitable run build",
+    "build:demo": "pnpm --filter demo run build",
+    "build:restorm": "pnpm --filter restorm run build",
+    "build": "pnpm run build:core-ui && pnpm run build:gitable && pnpm run build:demo && pnpm run build:restorm",
+    "lint": "pnpm -r run lint",
+    "lint:fix": "pnpm -r run lint:fix",
+    "typecheck": "pnpm -r run typecheck",
+    "depcheck": "pnpm -r run depcheck",
+    "test": "pnpm --filter restorm run test",
     "backup": "tar --exclude='node_modules' --exclude='*/node_modules/*' --exclude='bin' --exclude='*/bin/*' --exclude='out' --exclude='*/out/*' --exclude='dist' --exclude='*/dist/*' -czf ../gitable-backup-$(date +%Y%m%d-%H%M%S).tar.gz .",
-    "restorm:docker:up": "cd restorm && npm run docker:up",
-    "restorm:docker:down": "cd restorm && npm run docker:down"
+    "restorm:docker:up": "pnpm --filter restorm run docker:up",
+    "restorm:docker:down": "pnpm --filter restorm run docker:down"
   },
   "devDependencies": {
-    "cross-env": "^7.0.3",
+    "cross-env": "^10.1.0",
+    "depcheck": "^1.4.7",
     "rimraf": "^6.0.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "^19.2.3",
+      "react-dom": "^19.2.3"
+    }
   }
 }

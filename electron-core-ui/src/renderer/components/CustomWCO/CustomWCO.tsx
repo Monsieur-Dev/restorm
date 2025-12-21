@@ -20,18 +20,20 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
   className = '', 
   platform 
 }) => {
-  const [currentPlatform, setCurrentPlatform] = useState<string>(platform ?? '')
+  // Track async platform detection separately
+  const [asyncPlatform, setAsyncPlatform] = useState<string>('')
   const [isMaximized, setIsMaximized] = useState(false)
   const [wcoWidth, setWcoWidth] = useState<number>(138) // Default Windows WCO width
+
+  // Effective platform: use prop if provided, otherwise async-detected
+  const currentPlatform = platform ?? asyncPlatform
 
   useEffect(() => {
     // Get platform from electronAPI if not provided as prop
     if (!platform && window.electronAPI?.onPlatform) {
-      window.electronAPI.onPlatform((platform: string) => {
-        setCurrentPlatform(platform)
+      window.electronAPI.onPlatform((detectedPlatform: string) => {
+        setAsyncPlatform(detectedPlatform)
       })
-    } else if (platform) {
-      setCurrentPlatform(platform)
     }
   }, [platform])
 

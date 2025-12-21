@@ -106,7 +106,7 @@ class NavigationService {
   navigateTo(key: string, source: string, params: NavigationParams = {}): void {
     // Check if this is the same as current location
     const current = this.history[this.currentIndex]
-    if (current && current.key === key) {
+    if (current?.key === key) {
       // Still emit event for components to react (e.g., tab focus)
       this.emitNavigationEvent(key, source, params, false)
       return

@@ -2,6 +2,30 @@ import React, { useState, useCallback, useRef, useEffect } from 'react'
 import './menubar.css'
 import { MenuBarProps, MenuBarState } from './types'
 
+// Wrapper component to avoid ref mutation in render
+const MenuItemWrapper: React.FC<{
+  child: React.ReactElement
+  index: number
+  setRef: (index: number, el: HTMLDivElement | null) => void
+  isFocused: boolean
+  isActive: boolean
+  onClick: () => void
+  onMouseEnter: () => void
+}> = ({ child, index, setRef, isFocused, isActive, onClick, onMouseEnter }) => {
+  const refCallback = useCallback((el: HTMLDivElement | null) => {
+    setRef(index, el)
+  }, [index, setRef])
+
+  return React.cloneElement(child as React.ReactElement<Record<string, unknown>>, {
+    key: index,
+    ref: refCallback,
+    isFocused,
+    isActive,
+    onClick,
+    onMouseEnter
+  })
+}
+
 const MenuBar: React.FC<MenuBarProps> = ({
   children,
   className = '',
@@ -15,6 +39,11 @@ const MenuBar: React.FC<MenuBarProps> = ({
 
   const menubarRef = useRef<HTMLDivElement>(null)
   const menuItemsRef = useRef<(HTMLDivElement | null)[]>([])
+
+  // Stable callback for setting menu item refs
+  const setMenuItemRef = useCallback((index: number, el: HTMLDivElement | null) => {
+    menuItemsRef.current[index] = el
+  }, [])
 
   const menuItems = React.Children.toArray(children)
 
@@ -176,16 +205,18 @@ const MenuBar: React.FC<MenuBarProps> = ({
         const isFocused = state.focusedMenuIndex === index
         const isActive = state.activeMenuIndex === index
 
-        return React.cloneElement(child, {
-          key: index,
-          ref: (el: HTMLDivElement | null) => {
-            menuItemsRef.current[index] = el
-          },
-          isFocused,
-          isActive,
-          onClick: () => { handleMenuClick(index); },
-          onMouseEnter: () => { handleMenuMouseEnter(index); }
-        })
+        return (
+          <MenuItemWrapper
+            key={index}
+            child={child}
+            index={index}
+            setRef={setMenuItemRef}
+            isFocused={isFocused}
+            isActive={isActive}
+            onClick={(): void => { handleMenuClick(index) }}
+            onMouseEnter={(): void => { handleMenuMouseEnter(index) }}
+          />
+        )
       })}
     </div>
   )

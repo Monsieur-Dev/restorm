@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react'
+import React, { useState, useCallback, useRef, useEffect, useLayoutEffect } from 'react'
 import { MenuItemProps } from './types'
 import { ScrollableElement } from '../ScrollableElement'
 
@@ -17,7 +17,20 @@ const MenuItem: React.FC<MenuItemProps> = ({
   const itemRef = useRef<HTMLAnchorElement>(null)
   const submenuRef = useRef<HTMLDivElement>(null)
   const submenuTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const [calculatedHeight, setCalculatedHeight] = useState<string>('auto')
+  // Store the calculated height only when submenu is shown (null means use 'auto')
+  const [activeHeight, setActiveHeight] = useState<string | null>(null)
+  const [submenuPosition, setSubmenuPosition] = useState({ left: 0, top: 0 })
+
+  // Derive effective height: 'auto' when not shown, calculated value when shown
+  const calculatedHeight = showSubmenu && activeHeight !== null ? activeHeight : 'auto'
+
+  // Calculate submenu position when showing
+  useLayoutEffect(() => {
+    if (showSubmenu && itemRef.current) {
+      const rect = itemRef.current.getBoundingClientRect()
+      setSubmenuPosition({ left: rect.right, top: rect.top })
+    }
+  }, [showSubmenu])
 
   const hasSubmenu = React.Children.count(children) > 0
 
@@ -104,26 +117,26 @@ const MenuItem: React.FC<MenuItemProps> = ({
     return undefined
   }, [showSubmenu])
 
-  // Calculate dynamic height for scroll fix
+  // Calculate dynamic height for scroll fix when submenu is shown
   useEffect(() => {
-    if (showSubmenu && submenuRef.current) {
-      setTimeout(() => {
-        if (submenuRef.current) {
-          const rect = submenuRef.current.getBoundingClientRect()
-          const windowHeight = window.innerHeight
-          const availableHeight = windowHeight - rect.top -10
-          const currentHeight = submenuRef.current.scrollHeight
-          
-          if (availableHeight < currentHeight) {
-            setCalculatedHeight(`${availableHeight}px`)
-          } else {
-            setCalculatedHeight(`${currentHeight}px`)
-          }
-        }
-      }, 0)
-    } else {
-      setCalculatedHeight('auto')
+    if (!showSubmenu || !submenuRef.current) {
+      return
     }
+    const timeoutId = setTimeout(() => {
+      if (submenuRef.current) {
+        const rect = submenuRef.current.getBoundingClientRect()
+        const windowHeight = window.innerHeight
+        const availableHeight = windowHeight - rect.top - 10
+        const currentHeight = submenuRef.current.scrollHeight
+        
+        if (availableHeight < currentHeight) {
+          setActiveHeight(`${availableHeight}px`)
+        } else {
+          setActiveHeight(`${currentHeight}px`)
+        }
+      }
+    }, 0)
+    return () => { clearTimeout(timeoutId) }
   }, [showSubmenu])
 
   // Cleanup timeouts on unmount
@@ -135,7 +148,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
     }
   }, [])
 
-  const renderIcon = (): JSX.Element => {
+  const renderIcon = (): React.JSX.Element => {
     if (icon) {
       return (
         <span className="codicon-placeholder" aria-hidden="true">
@@ -158,7 +171,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
     )
   }
 
-  const renderSubmenuIndicator = (): JSX.Element => {
+  const renderSubmenuIndicator = (): React.JSX.Element => {
     if (!hasSubmenu) return <span className="codicon-placeholder" aria-hidden="true" />
     return <span className="codicon codicon-chevron-right" aria-hidden="true" />
   }
@@ -209,8 +222,8 @@ const MenuItem: React.FC<MenuItemProps> = ({
           style={{
             position: 'fixed',
             zIndex: 2000,
-            left: `${itemRef.current?.getBoundingClientRect().right ?? 0}px`,
-            top: `${itemRef.current?.getBoundingClientRect().top ?? 0}px`
+            left: `${submenuPosition.left}px`,
+            top: `${submenuPosition.top}px`
           }}
           onMouseEnter={handleSubmenuMouseEnter}
           onMouseLeave={handleSubmenuMouseLeave}

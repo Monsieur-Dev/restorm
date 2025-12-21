@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import Workbench from '../Workbench/Workbench'
 import { Button } from '../Button'
@@ -16,21 +16,31 @@ export interface ModalProps {
 }
 
 export const Modal: React.FC<ModalProps> = ({ title, isOpen, onClose, children, size = 'full' }) => {
-  const [visible, setVisible] = useState(isOpen)
+  // Track if we're in the closing animation phase
+  const [isClosing, setIsClosing] = useState(false)
+  const wasOpenRef = useRef(isOpen)
+  
+  // Derive visible: shown when open OR during closing animation
+  const visible = isOpen || isClosing
 
+  // Handle closing animation - using setTimeout to make setState async
   useEffect(() => {
-    if (isOpen) {
-      setVisible(true)
-      return
+    // Only trigger closing animation when transitioning from open to closed
+    if (wasOpenRef.current && !isOpen) {
+      // Use requestAnimationFrame to defer the setState to the next frame
+      const rafId = requestAnimationFrame(() => {
+        setIsClosing(true)
+      })
+      const timeout = window.setTimeout(() => {
+        setIsClosing(false)
+      }, 150)
+      return () => { 
+        cancelAnimationFrame(rafId)
+        window.clearTimeout(timeout) 
+      }
     }
-
-    const timeout = window.setTimeout(() => {
-      setVisible(false)
-    }, 150)
-
-    return () => {
-      window.clearTimeout(timeout)
-    }
+    wasOpenRef.current = isOpen
+    return undefined
   }, [isOpen])
 
   useEffect(() => {

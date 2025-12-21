@@ -93,11 +93,9 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 		// Only consider drops coming from editor tab drag-and-drop
 		if (!data) return false;
 		// Block when dragging the only tab of this group over its own content
-		return Boolean(
-			data.sourceGroupId === group.id &&
+		return data.sourceGroupId === group.id &&
 			group.tabs.length === 1 &&
-			group.tabs[0]?.id === data.editorId
-		);
+			group.tabs[0]?.id === data.editorId;
 	}, [group.id, group.tabs]);
 
 	const onDragOverGroup = useCallback(

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, forwardRef, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import Editor, { type EditorProps, type Monaco, type OnMount } from '@monaco-editor/react'
+import Editor, { type EditorProps, type OnMount } from '@monaco-editor/react'
 import type * as monacoEditor from 'monaco-editor'
 import './codeEditor.css'
 
@@ -68,7 +68,7 @@ export interface CodeEditorRef {
   /** The Monaco editor instance */
   editor: monacoEditor.editor.IStandaloneCodeEditor | null
   /** The Monaco namespace */
-  monaco: Monaco | null
+  monaco: typeof monacoEditor | null
 }
 
 /**
@@ -129,32 +129,28 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
 ) {
   const { t } = useTranslation()
   const resolvedLabel = goToDefinitionLabel === 'Go to Definition' ? t('codeEditor.goToDefinition') : goToDefinitionLabel
-  const [currentTheme, setCurrentTheme] = useState<string>(() => theme ?? getMonacoTheme())
+  // Auto-detected theme (only used when theme prop is undefined)
+  const [autoDetectedTheme, setAutoDetectedTheme] = useState<string>(getMonacoTheme)
   const [editorInstance, setEditorInstance] = useState<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
-  const [monacoInstance, setMonacoInstance] = useState<Monaco | null>(null)
+  const [monacoInstance, setMonacoInstance] = useState<typeof monacoEditor | null>(null)
   const goToDefinitionRef = useRef(onGoToDefinition)
+
+  // Effective theme: use prop if provided, otherwise auto-detected
+  const currentTheme = theme ?? autoDetectedTheme
 
   // Keep ref updated
   useEffect(() => {
     goToDefinitionRef.current = onGoToDefinition
   }, [onGoToDefinition])
 
-  // Sync theme when prop changes
+  // Watch for theme changes in the document (only when theme prop is not set)
   useEffect(() => {
-    if (theme !== undefined) {
-      setCurrentTheme(theme)
-    }
-  }, [theme])
-
-  // Watch for theme changes in the document
-  useEffect(() => {
-    // If theme is manually specified, don't auto-detect
     if (theme !== undefined) return
     if (typeof document === 'undefined') return
 
     const handleThemeChange = (): void => {
       const newTheme = getMonacoTheme()
-      setCurrentTheme(newTheme)
+      setAutoDetectedTheme(newTheme)
     }
 
     const observer = new MutationObserver((mutations) => {
@@ -185,8 +181,9 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   }), [editorInstance, monacoInstance])
 
   const handleMount: OnMount = (editor, monaco) => {
+    const monacoTyped = monaco as typeof monacoEditor
     setEditorInstance(editor)
-    setMonacoInstance(monaco)
+    setMonacoInstance(monacoTyped)
 
     // Register "Go to Definition" action for Handlebars variables
     editor.addAction({
@@ -194,7 +191,7 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
       label: resolvedLabel,
       contextMenuGroupId: 'navigation',
       contextMenuOrder: 1,
-      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.F12],
+      keybindings: [monacoTyped.KeyMod.CtrlCmd | monacoTyped.KeyCode.F12],
       run: (ed) => {
         const model = ed.getModel()
         const position = ed.getPosition()

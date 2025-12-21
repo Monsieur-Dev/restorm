@@ -60,9 +60,9 @@ function createLogger(): winston.Logger {
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     winston.format.colorize(),
     winston.format.printf((info): string => {
-      const { timestamp, level, message, ...meta } = info
+      const { timestamp, level, message, ...meta } = info as { timestamp: string; level: string; message: string; [key: string]: unknown }
       const metaStr = Object.keys(meta).length > 0 ? ` ${JSON.stringify(meta)}` : ''
-      return `${String(timestamp)} [${String(level)}]: ${String(message)}${metaStr}`
+      return `${timestamp} [${level}]: ${message}${metaStr}`
     })
   )
 
@@ -75,9 +75,9 @@ function createLogger(): winston.Logger {
     : winston.format.combine(
         winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
         winston.format.printf((info): string => {
-          const { timestamp, level, message, ...meta } = info
+          const { timestamp, level, message, ...meta } = info as { timestamp: string; level: string; message: string; [key: string]: unknown }
           const metaStr = Object.keys(meta).length > 0 ? ` ${JSON.stringify(meta)}` : ''
-          return `${String(timestamp)} [${String(level)}]: ${String(message)}${metaStr}`
+          return `${timestamp} [${level}]: ${message}${metaStr}`
         })
       )
 
@@ -118,9 +118,7 @@ let loggerInstance: winston.Logger | null = null
  * Get or create the logger instance
  */
 function getLogger(): winston.Logger {
-  if (!loggerInstance) {
-    loggerInstance = createLogger()
-  }
+  loggerInstance ??= createLogger()
   return loggerInstance
 }
 

@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useImperativeHandle, useRef, useState, forwardRef } from 'react';
-import type { ContainerGroupNode, EditorGroup, EditorTab, EditorWorkbenchCallbacks, GroupNode, Orientation, SplitDirection, WorkbenchTree } from './types';
+import React, { useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, forwardRef } from 'react';
+import type { ContainerGroupNode, EditorGroup, EditorTab, EditorWorkbenchCallbacks, GroupNode, SplitDirection, WorkbenchTree } from './types';
 import { isContainerNode, isTabGroupNode } from './types';
 import { EditorGroupView } from './EditorGroupView';
 import { insertTabAt, normalizeTree, removeTab } from './tree';
@@ -87,45 +87,59 @@ export interface EditorWorkbenchHandle {
 function useSplitSizes(
 	count: number,
 	isVertical: boolean,
-	containerRef: React.RefObject<HTMLDivElement>,
+	containerRef: React.RefObject<HTMLDivElement | null>,
 	initialSizes?: number[],
 	onSizesChange?: (sizes: number[]) => void
 ): { sizes: number[]; onSashStart: (index: number) => (event: SashEvent) => void; onSashChange: (index: number) => (event: SashEvent) => void } {
-	const [sizes, setSizes] = useState<number[]>([]);
+	// Track user-set sizes with the count they were computed for, and the initialSizes that were applied
+	const [sizeState, setSizeState] = useState<{ forCount: number; values: number[]; appliedInitial: string | null }>({ forCount: 0, values: [], appliedInitial: null });
 	const minGroupPx = 120;
 	const startSizesRef = useRef<number[]>([]);
 	const startCoordRef = useRef<number>(0);
 	const axisSizeRef = useRef<number>(0);
 	const currentIndexRef = useRef<number>(-1);
 	const onSizesChangeRef = useRef(onSizesChange);
-	onSizesChangeRef.current = onSizesChange;
+	useLayoutEffect(() => {
+		onSizesChangeRef.current = onSizesChange;
+	}, [onSizesChange]);
 
-	// Track if initial sizes have been applied
-	const initialSizesAppliedRef = useRef(false);
-	
+	// Create a stable key for initialSizes to track if they've been applied
+	const initialSizesKey = initialSizes ? initialSizes.join(',') : null;
+
+	// Derive sizes from state, initialSizes, or compute equal distribution
+	const sizes = useMemo(() => {
+		if (count <= 0) return [];
+		// If user has set sizes for current count, use them
+		if (sizeState.forCount === count && sizeState.values.length === count) {
+			return sizeState.values;
+		}
+		// If initial sizes match count and haven't been applied yet, use them
+		if (initialSizes?.length === count && initialSizesKey !== sizeState.appliedInitial) {
+			return initialSizes;
+		}
+		// Otherwise compute equal distribution
+		const equal = 1 / count;
+		return new Array<number>(count).fill(equal);
+	}, [count, sizeState, initialSizes, initialSizesKey]);
+
+	// Apply initialSizes using requestAnimationFrame to avoid synchronous setState in effect
 	useEffect(() => {
-		if (count <= 0) {
-			setSizes([]);
-			initialSizesAppliedRef.current = false;
-			return;
+		if (initialSizes?.length === count && initialSizesKey !== sizeState.appliedInitial) {
+			const rafId = requestAnimationFrame(() => {
+				setSizeState({ forCount: count, values: initialSizes, appliedInitial: initialSizesKey });
+			});
+			return (): void => { cancelAnimationFrame(rafId); };
 		}
-		
-		// Apply initial sizes on first render or when they change
-		if (initialSizes && initialSizes.length === count && !initialSizesAppliedRef.current) {
-			setSizes(initialSizes);
-			initialSizesAppliedRef.current = true;
-			return;
-		}
-		
-		// Only set equal sizes if we don't have the right count yet
-		setSizes(prev => {
-			if (prev.length === count) {
-				return prev;
-			}
-			const equal = 1 / count;
-			return new Array<number>(count).fill(equal);
+		return undefined;
+	}, [count, initialSizes, initialSizesKey, sizeState.appliedInitial]);
+
+	// Wrapper to set sizes while tracking count
+	const setSizes = useCallback((updater: number[] | ((prev: number[]) => number[])) => {
+		setSizeState(prev => {
+			const newValues = typeof updater === 'function' ? updater(prev.values) : updater;
+			return { forCount: count, values: newValues, appliedInitial: prev.appliedInitial };
 		});
-	}, [count, initialSizes]);
+	}, [count]);
 
 	const onSashStart = useCallback((index: number) => {
 		return (event: SashEvent): void => {
@@ -184,7 +198,7 @@ function useSplitSizes(
 		// Notify parent of size change
 		onSizesChangeRef.current?.(next);
 		};
-	}, [isVertical, containerRef]);
+	}, [isVertical, containerRef, setSizes]);
 
 	return { sizes, onSashStart, onSashChange };
 }
@@ -581,9 +595,7 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 				while (current) {
 					const currentGroupId = current.getAttribute('data-group-id');
 						if (currentGroupId) {
-							if (!groupId) {
-								groupId = currentGroupId;
-							}
+							groupId ??= currentGroupId;
 							
 							// Check if we're dropping on the content placeholder
 							if (current.classList.contains('editor-group-content-placeholder')) {
@@ -836,7 +848,7 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 					emptyFallback ?? null
 				) : (
 					<GroupContainer
-						node={{ id: 'root', orientation: tree.orientation as Orientation, groups: tree.groups, sizes: tree.sizes }}
+						node={{ id: 'root', orientation: tree.orientation, groups: tree.groups, sizes: tree.sizes }}
 						callbacks={extCallbacks}
 						renderLeaf={leafRenderer}
 						onNodeSizesChange={onSizesChange}

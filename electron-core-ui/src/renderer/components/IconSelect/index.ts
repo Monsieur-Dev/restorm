@@ -7,7 +7,9 @@ export {
   SimpleIcon,
   FeatherIcon,
   FaIcon,
-  renderLibraryIcon,
+  RenderLibraryIcon,
+} from './iconLibraries'
+export {
   getIconoirNames,
   getPhosphorNames,
   getMdiNames,
@@ -16,4 +18,4 @@ export {
   getFontAwesomeNames,
   ICON_LIBRARIES,
   type IconLibrary
-} from './iconLibraries'
+} from './iconLibraryUtils'

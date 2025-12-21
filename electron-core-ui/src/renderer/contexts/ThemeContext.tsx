@@ -73,7 +73,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
 
   const cssColorToHex = useCallback((color: string): string => {
     if (color.startsWith('#')) return color
-    const rgbMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/)
+    const rgbMatch = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/.exec(color)
     if (rgbMatch?.[1] && rgbMatch[2] && rgbMatch[3]) {
       const r = parseInt(rgbMatch[1], 10).toString(16).padStart(2, '0')
       const g = parseInt(rgbMatch[2], 10).toString(16).padStart(2, '0')
@@ -120,7 +120,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
     existingVars.forEach(prop => { root.style.removeProperty(prop) })
     Object.entries(variables).forEach(([key, value]) => { root.style.setProperty(key, value) })
     setTimeout(() => {
-      updateWCOColors().catch((err) => {
+      updateWCOColors().catch((err: unknown) => {
         logger.error('Failed to update WCO after CSS variables apply', { error: String(err) })
       })
     }, 50)
@@ -291,7 +291,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
     }
 
     globalInitPromise = initTheme()
-    globalInitPromise.catch((err) => {
+    globalInitPromise.catch((err: unknown) => {
       logger.error('🎨 ThemeProvider: Init promise rejected', { error: String(err) })
     })
     

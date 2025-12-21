@@ -17,6 +17,11 @@ import {
 } from 'electron-core-ui/renderer'
 import type { KeyValueTableHandle } from 'electron-core-ui/renderer'
 import type { EnvironmentFolder, Environment, KeyValue, Icon } from '../types/collections'
+
+// Helper to update reactive proxy properties (intentional mutation for reactive objects)
+function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
+  Object.assign(obj, { [key]: value })
+}
 import { useEnvironmentValues } from '../contexts/useEnvironmentValues'
 import { BaseFolderView } from './BaseFolderView'
 
@@ -156,14 +161,17 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
 
   // Sync local state when folder prop changes
   useEffect(() => {
-    setLocalEnvironments(folder.environments)
+    const rafId = requestAnimationFrame(() => {
+      setLocalEnvironments(folder.environments)
+    })
+    return (): void => { cancelAnimationFrame(rafId) }
   }, [folder.environments])
 
   // Helper to update environments and notify parent
   const updateEnvironments = useCallback((newEnvironments: Environment[]) => {
     setLocalEnvironments(newEnvironments)
     // Update reactive object directly for search indexing
-    folder.environments = newEnvironments
+    updateReactiveProperty(folder, 'environments', newEnvironments)
     if (onFolderChange) {
       onFolderChange({
         ...folder,

@@ -13,20 +13,30 @@ export const EnvironmentProvider: React.FC<EnvironmentProviderProps> = ({ enviro
 
   // Reset selection when environments list changes
   useEffect(() => {
+    let rafId: number | undefined
+    
     if (!environments || environments.length === 0) {
-      setSelectedEnvId(null)
-      return
+      rafId = requestAnimationFrame(() => {
+        setSelectedEnvId(null)
+      })
+      return (): void => { if (rafId !== undefined) cancelAnimationFrame(rafId) }
     }
     // Keep current selection if still present (including sub-environments), otherwise default to first env
     if (!selectedEnvId) {
-      setSelectedEnvId(environments[0]?.id ?? null)
-      return
+      rafId = requestAnimationFrame(() => {
+        setSelectedEnvId(environments[0]?.id ?? null)
+      })
+      return (): void => { if (rafId !== undefined) cancelAnimationFrame(rafId) }
     }
 
     const chain = findEnvironmentChain(environments, selectedEnvId)
     if (!chain) {
-      setSelectedEnvId(environments[0]?.id ?? null)
+      rafId = requestAnimationFrame(() => {
+        setSelectedEnvId(environments[0]?.id ?? null)
+      })
+      return (): void => { if (rafId !== undefined) cancelAnimationFrame(rafId) }
     }
+    return undefined
   }, [environments, selectedEnvId])
 
   const value = useMemo<EnvironmentContextValue>(

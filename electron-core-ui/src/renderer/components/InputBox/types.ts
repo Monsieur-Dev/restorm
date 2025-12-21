@@ -60,7 +60,7 @@ export interface InputBoxProps {
   className?: string
   id?: string
   style?: React.CSSProperties
-  inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement>
+  inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>
 }
 
 export const defaultInputBoxStyles: IInputBoxStyles = {
