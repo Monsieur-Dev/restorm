@@ -28,6 +28,11 @@ import codeSnippetsTemplate from '../../resources/templates/code-snippets-grpc.h
 // Compile the Handlebars template
 const compiledTemplate = Handlebars.compile(codeSnippetsTemplate)
 
+// Helper to update reactive proxy properties (intentional mutation for reactive objects)
+function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
+  Object.assign(obj, { [key]: value })
+}
+
 export interface GrpcRequestTabViewProps {
   request: GrpcRequest
 }
@@ -48,20 +53,24 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
   useEffect(() => {
     if (requestIdRef.current !== request.id) {
       requestIdRef.current = request.id
-      setUrlState(request.url)
-      setRequestMessageState(request.requestMessage)
-      setResponse(null)
+      const rafId = requestAnimationFrame(() => {
+        setUrlState(request.url)
+        setRequestMessageState(request.requestMessage)
+        setResponse(null)
+      })
+      return (): void => { cancelAnimationFrame(rafId) }
     }
+    return undefined
   }, [request])
 
   // Sync state changes to reactive request object
   const setUrl = useCallback((value: string): void => {
     setUrlState(value)
-    request.url = value
+    updateReactiveProperty(request, 'url', value)
   }, [request])
   const setRequestMessage = useCallback((value: string): void => {
     setRequestMessageState(value)
-    request.requestMessage = value
+    updateReactiveProperty(request, 'requestMessage', value)
   }, [request])
   
   const runtimeContext = useMemo<VariableContext | undefined>(
@@ -158,7 +167,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
           variables={envVariables}
           initialRows={request.metadata}
           visibilityMode="base-only"
-          onRowsChange={(rows) => { request.metadata = rows }}
+          onRowsChange={(rows): void => { updateReactiveProperty(request, 'metadata', rows) }}
         />
       </Pane>
     </SplitView>
@@ -287,7 +296,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
       codeSnippetsContent={codeSnippetsContent}
       documentation={request.documentation}
       notes={request.notes}
-      onNotesChange={(md) => { request.notes = md }}
+      onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
       isLoading={isSending}
       showResponse={response !== null}
       infosContent={infosContent}

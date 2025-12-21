@@ -83,9 +83,7 @@ const buildFileTree = (entries: { path: string; isDirectory: boolean }[]): FileT
       const isLast = index === segments.length - 1
       const isDir = isLast ? entry.isDirectory : true
 
-      if (!current.children) {
-        current.children = []
-      }
+      current.children ??= []
 
       let child = current.children.find(c => c.name === segment)
       if (!child) {
@@ -612,9 +610,7 @@ const WorkbenchTab: React.FC = () => {
       if (lastFocusedGroupId) {
         activeTabId = getActiveTabInGroup(newTree.groups, lastFocusedGroupId)
       }
-      if (!activeTabId) {
-        activeTabId = collectFirstActiveTabId(newTree.groups)
-      }
+      activeTabId ??= collectFirstActiveTabId(newTree.groups)
 
       if (activeTabId) {
         setSelectedIds([activeTabId])
@@ -644,8 +640,12 @@ const WorkbenchTab: React.FC = () => {
 
     const activeTabId = getActiveTabInGroup(tree.groups, lastFocusedGroupId)
     if (activeTabId) {
-      setSelectedIds([activeTabId])
+      const rafId = requestAnimationFrame(() => {
+        setSelectedIds([activeTabId])
+      })
+      return (): void => { cancelAnimationFrame(rafId) }
     }
+    return undefined
   }, [lastFocusedGroupId, tree])
 
   const handleItemDrop = useCallback(
@@ -656,17 +656,14 @@ const WorkbenchTab: React.FC = () => {
   )
 
   const handleContextMenu = useCallback(
-    (payload: { item: ListViewItemData }): void => {
+    (payload: { item: ListViewItemData }, event: React.MouseEvent): void => {
       logger.info('WorkbenchTab: context menu on item', { id: payload.item.id })
       setContextMenu(prev => {
-        const event = window.event
-        const x = event instanceof MouseEvent ? event.clientX : 0
-        const y = event instanceof MouseEvent ? event.clientY : 0
         return {
           ...prev,
           visible: true,
-          x,
-          y,
+          x: event.clientX,
+          y: event.clientY,
           target: payload.item
         }
       })
@@ -749,7 +746,7 @@ const WorkbenchTab: React.FC = () => {
           }}
           onItemContextMenu={(payload, event) => {
             event.preventDefault()
-            handleContextMenu(payload)
+            handleContextMenu(payload, event)
           }}
         />
       </div>

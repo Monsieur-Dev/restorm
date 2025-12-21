@@ -33,10 +33,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
           version: 10
 
@@ -143,10 +143,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
       
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
           version: 10
       
@@ -159,8 +159,8 @@ jobs:
       - name: Build electron-core-ui
         run: |
           cd electron-core-ui
-          npm install
-          npm run build
+          pnpm install --frozen-lockfile
+          pnpm run build
       
       - name: Get pnpm store directory
         shell: bash
@@ -178,7 +178,7 @@ jobs:
       - name: Install gitable dependencies
         run: |
           cd gitable
-          pnpm install
+          pnpm install --frozen-lockfile
       
       - name: Build with electron-builder
         run: |

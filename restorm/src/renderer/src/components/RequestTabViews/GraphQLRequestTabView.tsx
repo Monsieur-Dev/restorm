@@ -27,6 +27,11 @@ import codeSnippetsTemplate from '../../resources/templates/code-snippets-graphq
 // Compile the Handlebars template
 const compiledTemplate = Handlebars.compile(codeSnippetsTemplate)
 
+// Helper to update reactive proxy properties (intentional mutation for reactive objects)
+function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
+  Object.assign(obj, { [key]: value })
+}
+
 export interface GraphQLRequestTabViewProps {
   request: GraphQLRequest
 }
@@ -48,25 +53,29 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
   useEffect(() => {
     if (requestIdRef.current !== request.id) {
       requestIdRef.current = request.id
-      setUrlState(request.url)
-      setQueryState(request.query)
-      setVariablesState(request.variables ?? '{}')
-      setResponse(null)
+      const rafId = requestAnimationFrame(() => {
+        setUrlState(request.url)
+        setQueryState(request.query)
+        setVariablesState(request.variables ?? '{}')
+        setResponse(null)
+      })
+      return (): void => { cancelAnimationFrame(rafId) }
     }
+    return undefined
   }, [request])
 
   // Sync state changes to reactive request object
   const setUrl = useCallback((value: string): void => {
     setUrlState(value)
-    request.url = value
+    updateReactiveProperty(request, 'url', value)
   }, [request])
   const setQuery = useCallback((value: string): void => {
     setQueryState(value)
-    request.query = value
+    updateReactiveProperty(request, 'query', value)
   }, [request])
   const setVariables = useCallback((value: string): void => {
     setVariablesState(value)
-    request.variables = value
+    updateReactiveProperty(request, 'variables', value)
   }, [request])
   
   const runtimeContext = useMemo<VariableContext | undefined>(
@@ -160,7 +169,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
           variables={envVariables}
           initialRows={request.headers}
           visibilityMode="base-only"
-          onRowsChange={(rows) => { request.headers = rows }}
+          onRowsChange={(rows): void => { updateReactiveProperty(request, 'headers', rows) }}
         />
       </Pane>
     </SplitView>
@@ -252,7 +261,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
       codeSnippetsContent={codeSnippetsContent}
       documentation={request.documentation}
       notes={request.notes}
-      onNotesChange={(md) => { request.notes = md }}
+      onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
       isLoading={isSending}
       showResponse={response !== null}
       infosContent={infosContent}

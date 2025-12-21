@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Sash } from '../Sash';
 import type { SashEvent, IHorizontalSashLayoutProvider } from '../Sash';
 import { Pane } from './Pane';
@@ -6,138 +6,249 @@ import type { InternalPaneConfig, SplitViewProps } from './types';
 import './splitview.css';
 
 function isPaneElement(child: React.ReactNode): child is React.ReactElement<React.ComponentProps<typeof Pane>> {
-	return Boolean(
-		React.isValidElement(child) &&
-		(child.type === Pane || (typeof child.type === 'function' && (child.type as { displayName?: string }).displayName === 'Pane'))
-	);
+	return React.isValidElement(child) &&
+		(child.type === Pane || (typeof child.type === 'function' && (child.type as { displayName?: string }).displayName === 'Pane'));
 }
+
+// Separate component for pane items to avoid ref access during render
+interface SplitViewPaneItemProps {
+	pane: InternalPaneConfig;
+	index: number;
+	ratio: number;
+	isCollapsed: boolean;
+	isFirstCollapsedAfterExpanded: boolean;
+	layoutProvider: IHorizontalSashLayoutProvider;
+	onSashStart: (event: SashEvent) => void;
+	onSashChange: (event: SashEvent) => void;
+	onToggleCollapsed: () => void;
+	showSash: boolean;
+	nextIsCollapsed: boolean;
+}
+
+const SplitViewPaneItem: React.FC<SplitViewPaneItemProps> = ({
+	pane,
+	index,
+	ratio,
+	isCollapsed,
+	isFirstCollapsedAfterExpanded,
+	layoutProvider,
+	onSashStart,
+	onSashChange,
+	onToggleCollapsed,
+	showSash,
+	nextIsCollapsed
+}) => {
+	const paneStyle: React.CSSProperties = isCollapsed
+		? {
+			flexGrow: 0,
+			flexShrink: 0,
+			flexBasis: `${0 * 100}%`,
+			minWidth: 0,
+			...(isFirstCollapsedAfterExpanded ? { marginTop: 'auto' } : {})
+		}
+		: {
+			flexGrow: 0,
+			flexShrink: 0,
+			flexBasis: `${ratio * 100}%`,
+			minHeight: 0,
+			minWidth: 0
+		};
+
+	return (
+		<React.Fragment key={pane.id ?? index}>
+			<div className="split-view-view" style={paneStyle}>
+				{pane.title ? (
+					<div
+						className={[
+							'split-view-view-header',
+							pane.collapsible === false ? 'not-collapsible' : ''
+						].filter(Boolean).join(' ')}
+						onClick={pane.collapsible === false ? undefined : onToggleCollapsed}
+					>
+						<div className="split-view-view-header-main">
+							{pane.collapsible !== false && (
+								<i
+									className={`codicon ${isCollapsed ? 'codicon-chevron-right' : 'codicon-chevron-down'}`}
+								/>
+							)}
+							<span className="split-view-view-header-title">
+								{pane.title}
+							</span>
+						</div>
+						{pane.headerActions ? (
+							<div
+								className="split-view-view-header-actions"
+								onClick={(event): void => {
+									event.stopPropagation();
+								}}
+							>
+								{typeof pane.headerActions === 'function'
+									? pane.headerActions({
+										collapsed: isCollapsed,
+										toggle: onToggleCollapsed
+									})
+									: pane.headerActions}
+							</div>
+						) : null}
+					</div>
+				) : null}
+				{!isCollapsed ? (
+					<div className="split-view-view-body">
+						{pane.children}
+					</div>
+				) : null}
+			</div>
+			{showSash ? (
+				<Sash
+					orientation="horizontal"
+					layoutProvider={layoutProvider}
+					onStart={onSashStart}
+					onChange={onSashChange}
+					state={!isCollapsed && !nextIsCollapsed ? 'enabled' : 'disabled'}
+				/>
+			) : null}
+		</React.Fragment>
+	);
+};
+SplitViewPaneItem.displayName = 'SplitViewPaneItem';
 
 function useSplitRatios(
 	count: number,
-	containerRef: React.RefObject<HTMLDivElement>,
+	containerRef: React.RefObject<HTMLDivElement | null>,
 	minSizes: number[],
 	maxSizes: (number | undefined)[]
 ): {
 	ratios: number[];
-	onSashStart: (index: number) => (event: SashEvent) => void;
-	onSashChange: (index: number) => (event: SashEvent) => void;
+	onSashStart: (index: number, event: SashEvent) => void;
+	onSashChange: (index: number, event: SashEvent) => void;
 	updateRatios: (updater: (current: number[]) => number[]) => void;
 } {
-	const [ratios, setRatios] = useState<number[]>([]);
+	// Store ratios with the count they were calculated for
+	const [ratioState, setRatioState] = useState<{ forCount: number; values: number[] }>({ forCount: 0, values: [] });
 	const startRatiosRef = useRef<number[]>([]);
 	const startCoordRef = useRef<number>(0);
 	const axisSizeRef = useRef<number>(0);
 
-	useEffect(() => {
-		if (count <= 0) {
-			setRatios([]);
-			return;
+	// Derive effective ratios based on current count
+	const ratios = useMemo(() => {
+		if (count <= 0) return [];
+		// If ratios were set for current count, use them
+		if (ratioState.forCount === count && ratioState.values.length === count) {
+			return ratioState.values;
 		}
+		// Otherwise compute equal distribution
+		const equal = 1 / count;
+		return new Array<number>(count).fill(equal);
+	}, [count, ratioState]);
 
-		// Initialize ratios if size changed
-		setRatios(prev => {
-			if (prev.length === count) {
-				return prev;
-			}
-			const equal = 1 / count;
-			return new Array<number>(count).fill(equal);
+	// Keep a ref to ratios for use in callbacks without re-creating them
+	const ratiosRef = useRef(ratios);
+	useLayoutEffect(() => {
+		ratiosRef.current = ratios;
+	}, [ratios]);
+
+	// Wrapper to update ratios while tracking count
+	const setRatios = useCallback((updater: number[] | ((prev: number[]) => number[])) => {
+		setRatioState(prev => {
+			const newValues = typeof updater === 'function' ? updater(prev.values) : updater;
+			return { forCount: count, values: newValues };
 		});
 	}, [count]);
 
+	// Single handler for sash start - takes index as parameter
 	const onSashStart = useCallback(
-		(index: number) => {
-			return (event: SashEvent): void => {
-				// Mark index as used to satisfy TypeScript; we don't need per-sash state on start.
-				void index;
-				if (!containerRef.current || ratios.length !== count) {
-					return;
-				}
-				const rect = containerRef.current.getBoundingClientRect();
-				const axisSize = Math.max(1, rect.height);
-				const startCoord = event.startY - rect.top;
+		(index: number, event: SashEvent): void => {
+			void index; // Index not needed for start, but kept for API consistency
+			const container = containerRef.current;
+			const currentRatios = ratiosRef.current;
+			if (!container || currentRatios.length !== count) {
+				return;
+			}
+			const rect = container.getBoundingClientRect();
+			const axisSize = Math.max(1, rect.height);
+			const startCoord = event.startY - rect.top;
 
-				axisSizeRef.current = axisSize;
-				startCoordRef.current = startCoord;
-				startRatiosRef.current = [...ratios];
-			};
+			axisSizeRef.current = axisSize;
+			startCoordRef.current = startCoord;
+			startRatiosRef.current = [...currentRatios];
 		},
-		[ratios, count, containerRef]
+		[containerRef, count]
 	);
 
+	// Single handler for sash change - takes index as parameter
 	const onSashChange = useCallback(
-		(index: number) => {
-			return (event: SashEvent): void => {
-				if (index < 0 || index + 1 >= startRatiosRef.current.length || !containerRef.current) return;
+		(index: number, event: SashEvent): void => {
+			const container = containerRef.current;
+			if (index < 0 || index + 1 >= startRatiosRef.current.length || !container) return;
 
-				const rect = containerRef.current.getBoundingClientRect();
-				const currentCoord = event.currentY - rect.top;
-				const deltaPx = currentCoord - startCoordRef.current;
-				const axisSize = axisSizeRef.current || rect.height || 1;
-				const delta = deltaPx / axisSize;
+			const rect = container.getBoundingClientRect();
+			const currentCoord = event.currentY - rect.top;
+			const deltaPx = currentCoord - startCoordRef.current;
+			const axisSize = axisSizeRef.current || rect.height || 1;
+			const delta = deltaPx / axisSize;
 
-				const leftStart = startRatiosRef.current[index] ?? 0;
-				const rightStart = startRatiosRef.current[index + 1] ?? 0;
+			const leftStart = startRatiosRef.current[index] ?? 0;
+			const rightStart = startRatiosRef.current[index + 1] ?? 0;
 
-				let left = leftStart + delta;
-				let right = rightStart - delta;
+			let left = leftStart + delta;
+			let right = rightStart - delta;
 
-				// Convert pane min/max to ratios
-				const leftMin = Math.min(
-					0.5,
-					(minSizes[index] ?? 0) / axisSize
-				);
-				const rightMin = Math.min(
-					0.5,
-					(minSizes[index + 1] ?? 0) / axisSize
-				);
+			// Convert pane min/max to ratios
+			const leftMin = Math.min(
+				0.5,
+				(minSizes[index] ?? 0) / axisSize
+			);
+			const rightMin = Math.min(
+				0.5,
+				(minSizes[index + 1] ?? 0) / axisSize
+			);
 
-				const leftMaxRaw = maxSizes[index];
-				const rightMaxRaw = maxSizes[index + 1];
-				const leftMax = leftMaxRaw != null ? leftMaxRaw / axisSize : 1;
-				const rightMax = rightMaxRaw != null ? rightMaxRaw / axisSize : 1;
+			const leftMaxRaw = maxSizes[index];
+			const rightMaxRaw = maxSizes[index + 1];
+			const leftMax = leftMaxRaw != null ? leftMaxRaw / axisSize : 1;
+			const rightMax = rightMaxRaw != null ? rightMaxRaw / axisSize : 1;
 
-				// Apply min constraints
-				if (left < leftMin) {
-					right -= (leftMin - left);
-					left = leftMin;
-				}
-				if (right < rightMin) {
-					left -= (rightMin - right);
-					right = rightMin;
-				}
+			// Apply min constraints
+			if (left < leftMin) {
+				right -= (leftMin - left);
+				left = leftMin;
+			}
+			if (right < rightMin) {
+				left -= (rightMin - right);
+				right = rightMin;
+			}
 
-				// Apply max constraints
-				left = Math.min(leftMax, left);
-				right = Math.min(rightMax, right);
+			// Apply max constraints
+			left = Math.min(leftMax, left);
+			right = Math.min(rightMax, right);
 
-				const next = [...startRatiosRef.current];
-				const li = index;
-				const ri = index + 1;
+			const next = [...startRatiosRef.current];
+			const li = index;
+			const ri = index + 1;
 
-				let leftVal = Math.max(leftMin, Math.min(1 - rightMin, left));
-				let rightVal = Math.max(rightMin, Math.min(1 - leftMin, right));
+			let leftVal = Math.max(leftMin, Math.min(1 - rightMin, left));
+			let rightVal = Math.max(rightMin, Math.min(1 - leftMin, right));
 
+			next[li] = leftVal;
+			next[ri] = rightVal;
+
+			// Normalize total to 1 preserving others
+			const sumOthers = startRatiosRef.current.reduce(
+				(acc, s, i) => (i === li || i === ri ? acc : acc + s),
+				0
+			);
+			const sumNext = leftVal + rightVal + sumOthers;
+			if (sumNext !== 1) {
+				const scale = (1 - sumOthers) / (leftVal + rightVal);
+				leftVal *= scale;
+				rightVal *= scale;
 				next[li] = leftVal;
 				next[ri] = rightVal;
+			}
 
-				// Normalize total to 1 preserving others
-				const sumOthers = startRatiosRef.current.reduce(
-					(acc, s, i) => (i === li || i === ri ? acc : acc + s),
-					0
-				);
-				const sumNext = leftVal + rightVal + sumOthers;
-				if (sumNext !== 1) {
-					const scale = (1 - sumOthers) / (leftVal + rightVal);
-					leftVal *= scale;
-					rightVal *= scale;
-					next[li] = leftVal;
-					next[ri] = rightVal;
-				}
-
-				setRatios(next);
-			};
+			setRatios(next);
 		},
-		[containerRef, minSizes, maxSizes]
+		[containerRef, minSizes, maxSizes, setRatios]
 	);
 
 	const updateRatios = useCallback(
@@ -151,7 +262,7 @@ function useSplitRatios(
 				return next.map(value => value / sum);
 			});
 		},
-		[]
+		[setRatios]
 	);
 
 	return { ratios, onSashStart, onSashChange, updateRatios };
@@ -198,27 +309,34 @@ export const SplitView: React.FC<SplitViewProps> = ({
 		maxSizes
 	);
 
-	// Collapsed state per pane
-	const [collapsed, setCollapsed] = useState<boolean[]>([]);
+	// Collapsed state per pane - track with count for proper derivation
+	const [collapsedState, setCollapsedState] = useState<{ forCount: number; values: boolean[] }>({ forCount: 0, values: [] });
 	const collapseAnimationTimeoutRef = useRef<number | null>(null);
 	const [isAnimatingCollapse, setIsAnimatingCollapse] = useState(false);
 
-	useEffect(() => {
-		setCollapsed(prev => {
-			if (prev.length === panes.length) {
-				return prev;
+	// Derive collapsed array from state or compute from pane defaults
+	const collapsed = useMemo(() => {
+		if (collapsedState.forCount === panes.length && collapsedState.values.length === panes.length) {
+			return collapsedState.values;
+		}
+		return panes.map((pane, index) => {
+			if (typeof collapsedState.values[index] === 'boolean' && collapsedState.forCount >= index + 1) {
+				return collapsedState.values[index];
 			}
-			return panes.map((pane, index) => {
-				if (typeof prev[index] === 'boolean') {
-					return prev[index] as boolean;
-				}
-				if (typeof pane.collapsed === 'boolean') {
-					return pane.collapsed;
-				}
-				return Boolean(pane.defaultCollapsed);
-			});
+			if (typeof pane.collapsed === 'boolean') {
+				return pane.collapsed;
+			}
+			return Boolean(pane.defaultCollapsed);
 		});
-	}, [panes]);
+	}, [panes, collapsedState]);
+
+	// Wrapper to update collapsed state
+	const setCollapsed = useCallback((updater: boolean[] | ((prev: boolean[]) => boolean[])) => {
+		setCollapsedState(prev => {
+			const newValues = typeof updater === 'function' ? updater(prev.values) : updater;
+			return { forCount: panes.length, values: newValues };
+		});
+	}, [panes.length]);
 
 	// Helper to compute target ratios for a given collapsed mask and container height.
 	const computeRatiosForState = useCallback((collapsedMask: boolean[], containerHeight: number | undefined): number[] => {
@@ -295,7 +413,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
 				return nextCollapsed;
 			});
 		},
-		[panes.length, updateRatios, computeRatiosForState]
+		[panes.length, updateRatios, computeRatiosForState, setCollapsed]
 	);
 
 	// Notify external listener when ratios change
@@ -344,30 +462,28 @@ export const SplitView: React.FC<SplitViewProps> = ({
 		};
 	}, [collapsed, panes.length, updateRatios, computeRatiosForState]);
 
-	const createLayoutProvider = useCallback(
-		(index: number): IHorizontalSashLayoutProvider => {
-			return {
-				getHorizontalSashTop: (): number => {
-					if (!containerRef.current) return 0;
-					const rect = containerRef.current.getBoundingClientRect();
-					let top = 0;
-					for (let i = 0; i <= index; i++) {
-						top += (ratios[i] ?? 0) * rect.height;
-					}
-					return top;
-				},
-				getHorizontalSashLeft: (): number => {
-					return 0;
-				},
-				getHorizontalSashWidth: (): number => {
-					if (!containerRef.current) return 0;
-					const rect = containerRef.current.getBoundingClientRect();
-					return rect.width;
+	// Memoize layout providers to avoid ref access warning during render
+	const layoutProviders = useMemo(() => {
+		return ratios.map((_, index): IHorizontalSashLayoutProvider => ({
+			getHorizontalSashTop: (): number => {
+				if (!containerRef.current) return 0;
+				const rect = containerRef.current.getBoundingClientRect();
+				let top = 0;
+				for (let i = 0; i <= index; i++) {
+					top += (ratios[i] ?? 0) * rect.height;
 				}
-			};
-		},
-		[ratios]
-	);
+				return top;
+			},
+			getHorizontalSashLeft: (): number => {
+				return 0;
+			},
+			getHorizontalSashWidth: (): number => {
+				if (!containerRef.current) return 0;
+				const rect = containerRef.current.getBoundingClientRect();
+				return rect.width;
+			}
+		}));
+	}, [ratios]);
 
 	const rootClassName = [
 		'split-view2',
@@ -389,93 +505,34 @@ export const SplitView: React.FC<SplitViewProps> = ({
 		}
 	}
 
+	// Create stable callbacks for each pane to avoid inline functions in render
+	const paneCallbacks = useMemo(() => {
+		return panes.map((_, i) => ({
+			onSashStart: (event: SashEvent): void => { onSashStart(i, event); },
+			onSashChange: (event: SashEvent): void => { onSashChange(i, event); },
+			onToggleCollapsed: (): void => { handleToggleCollapsed(i); }
+		}));
+	}, [panes, onSashStart, onSashChange, handleToggleCollapsed]);
+
 	return (
 		<div className={rootClassName} style={style}>
 			<div ref={containerRef} className="split-view-container">
-				{panes.map((pane, i) => {
-					const ratio = ratios[i] ?? (1 / Math.max(1, panes.length));
-					const paneStyle: React.CSSProperties = collapsed[i]
-						? {
-							// Collapsed panes only show their header.
-							// Use a percentage flex-basis so transitions animate when
-							// expanding/collapsing; the visual height is clamped by CSS.
-							flexGrow: 0,
-							flexShrink: 0,
-							flexBasis: `${0 * 100}%`,
-							minWidth: 0,
-							// When there is at least one expanded pane above, pin the first
-							// collapsed pane block to the bottom by consuming remaining space.
-							...(i === firstCollapsedAfterExpanded ? { marginTop: 'auto' } : {})
-						}
-						: {
-							// Expanded panes take proportional remaining height.
-							flexGrow: 0,
-							flexShrink: 0,
-							flexBasis: `${ratio * 100}%`,
-							minHeight: 0,
-							minWidth: 0
-						};
-
-					return (
-						<React.Fragment key={pane.id ?? i}>
-							<div className="split-view-view" style={paneStyle}>
-								{pane.title ? (
-									<div
-										className={[
-											'split-view-view-header',
-											pane.collapsible === false ? 'not-collapsible' : ''
-										].filter(Boolean).join(' ')}
-										onClick={pane.collapsible === false ? undefined : () => { handleToggleCollapsed(i); }}
-									>
-										<div className="split-view-view-header-main">
-											{pane.collapsible !== false && (
-												<i
-													className={`codicon ${collapsed[i] ? 'codicon-chevron-right' : 'codicon-chevron-down'}`}
-												/>
-											)}
-											<span className="split-view-view-header-title">
-												{pane.title}
-											</span>
-										</div>
-										{pane.headerActions ? (
-											<div
-												className="split-view-view-header-actions"
-												onClick={(event): void => {
-													// Prevent header click from toggling when clicking actions.
-													event.stopPropagation();
-												}}
-											>
-												{typeof pane.headerActions === 'function'
-													? pane.headerActions({
-														collapsed: Boolean(collapsed[i]),
-														toggle: () => {
-															handleToggleCollapsed(i);
-														}
-													})
-													: pane.headerActions}
-											</div>
-										) : null}
-									</div>
-								) : null}
-								{!collapsed[i] ? (
-									<div className="split-view-view-body">
-										{pane.children}
-									</div>
-								) : null}
-							</div>
-							{i < panes.length - 1 ? (
-								<Sash
-									orientation="horizontal"
-									layoutProvider={createLayoutProvider(i)}
-									onStart={onSashStart(i)}
-									onChange={onSashChange(i)}
-									// Only make the sash usable when both adjacent panes are expanded.
-									state={!collapsed[i] && !collapsed[i + 1] ? 'enabled' : 'disabled'}
-								/>
-							) : null}
-						</React.Fragment>
-					);
-				})}
+				{panes.map((pane, i) => (
+					<SplitViewPaneItem
+						key={pane.id ?? i}
+						pane={pane}
+						index={i}
+						ratio={ratios[i] ?? (1 / Math.max(1, panes.length))}
+						isCollapsed={Boolean(collapsed[i])}
+						isFirstCollapsedAfterExpanded={i === firstCollapsedAfterExpanded}
+						layoutProvider={layoutProviders[i] ?? { getHorizontalSashTop: () => 0, getHorizontalSashLeft: () => 0, getHorizontalSashWidth: () => 0 }}
+						onSashStart={paneCallbacks[i]?.onSashStart ?? ((): void => { /* noop */ })}
+						onSashChange={paneCallbacks[i]?.onSashChange ?? ((): void => { /* noop */ })}
+						onToggleCollapsed={paneCallbacks[i]?.onToggleCollapsed ?? ((): void => { /* noop */ })}
+						showSash={i < panes.length - 1}
+						nextIsCollapsed={Boolean(collapsed[i + 1])}
+					/>
+				))}
 			</div>
 		</div>
 	);

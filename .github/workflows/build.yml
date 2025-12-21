@@ -19,75 +19,95 @@ jobs:
         with:
           node-version: '20'
       
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      
       - name: Install electron-core-ui dependencies
         run: |
           cd electron-core-ui
-          npm install
+          pnpm install --frozen-lockfile
+      
+      - name: Check electron-core-ui unused dependencies
+        run: |
+          cd electron-core-ui
+          npx depcheck
       
       - name: Run electron-core-ui linter (ESLint + Stylelint)
         run: |
           cd electron-core-ui
-          npm run lint
+          pnpm run lint
       
       - name: Run electron-core-ui type check
         run: |
           cd electron-core-ui
-          npm run typecheck
+          pnpm run typecheck
       
       - name: Validate theme contrast ratios
         run: |
           cd electron-core-ui
-          npm run validate:contrast
+          pnpm run validate:contrast
       
       - name: Build electron-core-ui
         run: |
           cd electron-core-ui
-          npm run build
+          pnpm run build
       
       - name: Install gitable dependencies
         run: |
           cd gitable
-          npm install
+          pnpm install --frozen-lockfile
+      
+      - name: Check gitable unused dependencies
+        run: |
+          cd gitable
+          npx depcheck
       
       - name: Run linter
         run: |
           cd gitable
-          npm run lint
+          pnpm run lint
       
       - name: Run type check
         run: |
           cd gitable
-          npm run typecheck
+          pnpm run typecheck
       
       - name: Build gitable application
         run: |
           cd gitable
-          npm run build
+          pnpm run build
 
       - name: Install restorm dependencies
         run: |
           cd restorm
-          npm install
+          pnpm install --frozen-lockfile
+
+      - name: Check restorm unused dependencies
+        run: |
+          cd restorm
+          npx depcheck
 
       - name: Run restorm linter
         run: |
           cd restorm
-          npm run lint
+          pnpm run lint
 
       - name: Run restorm type check
         run: |
           cd restorm
-          npm run typecheck
+          pnpm run typecheck
 
       - name: Run restorm unit tests
         run: |
           cd restorm
-          npm run test:unit
+          pnpm run test:unit
 
       - name: Build restorm application
         run: |
           cd restorm
-          NODE_OPTIONS="--max-old-space-size=4096" npm run build
+          NODE_OPTIONS="--max-old-space-size=4096" pnpm run build
 
   integration-tests:
     name: Integration Tests
@@ -122,20 +142,25 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - name: Install electron-core-ui dependencies
         run: |
           cd electron-core-ui
-          npm install
+          pnpm install --frozen-lockfile
 
       - name: Build electron-core-ui
         run: |
           cd electron-core-ui
-          npm run build
+          pnpm run build
 
       - name: Install restorm dependencies
         run: |
           cd restorm
-          npm install
+          pnpm install --frozen-lockfile
 
       - name: Start GraphQL and Socket.IO servers
         run: |
@@ -151,4 +176,4 @@ jobs:
       - name: Run integration tests
         run: |
           cd restorm
-          npm run test:integration:coverage
+          pnpm run test:integration:coverage

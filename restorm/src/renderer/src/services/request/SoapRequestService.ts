@@ -58,13 +58,13 @@ function objectToKeyValues(obj: Record<string, unknown>): KeyValue[] {
 
 /** Parse SOAP fault from response */
 function parseSoapFault(xml: string): { code: string; message: string } | undefined {
-  const faultMatch = xml.match(/<(?:\w+:)?Fault[^>]*>([\s\S]*?)<\/(?:\w+:)?Fault>/i)
+  const faultMatch = /<(?:\w+:)?Fault[^>]*>([\s\S]*?)<\/(?:\w+:)?Fault>/i.exec(xml)
   if (!faultMatch?.[1]) return undefined
   
   const faultContent = faultMatch[1]
   
-  const codeMatch = faultContent.match(/<(?:\w+:)?faultcode[^>]*>([\s\S]*?)<\/(?:\w+:)?faultcode>/i)
-  const messageMatch = faultContent.match(/<(?:\w+:)?faultstring[^>]*>([\s\S]*?)<\/(?:\w+:)?faultstring>/i)
+  const codeMatch = /<(?:\w+:)?faultcode[^>]*>([\s\S]*?)<\/(?:\w+:)?faultcode>/i.exec(faultContent)
+  const messageMatch = /<(?:\w+:)?faultstring[^>]*>([\s\S]*?)<\/(?:\w+:)?faultstring>/i.exec(faultContent)
   
   return {
     code: codeMatch?.[1]?.trim() ?? 'Unknown',
@@ -91,9 +91,7 @@ export async function executeSoapRequest(input: SoapRequestInput): Promise<SoapR
   const headersObj = headersToObject(resolvedHeaders)
   
   // Ensure Content-Type and SOAPAction are set
-  if (!headersObj['Content-Type']) {
-    headersObj['Content-Type'] = 'text/xml; charset=utf-8'
-  }
+  headersObj['Content-Type'] ??= 'text/xml; charset=utf-8'
   if (resolvedSoapAction && !headersObj['SOAPAction']) {
     headersObj['SOAPAction'] = resolvedSoapAction
   }

@@ -29,8 +29,9 @@ export interface TabsProps {
   onTabChange?: (tabId: string) => void
   onTabClose?: (tabId: string) => void
   /**
-   * @deprecated Use allowFullscreen property on individual tabs instead.
-   * This callback is still called if provided, but the built-in fullscreen modal
+   * Legacy callback for tab double-click events.
+   * Consider using allowFullscreen property on individual tabs instead for fullscreen behavior.
+   * This callback is still called if provided, and the built-in fullscreen modal
    * will also be triggered if the tab has allowFullscreen set to true.
    */
   onTabDoubleClick?: (tabId: string) => void
@@ -41,7 +42,7 @@ export const Tabs: React.FC<TabsProps> = ({
   activeTabId,
   onTabChange,
   onTabClose,
-  onTabDoubleClick
+  onTabDoubleClick: legacyDoubleClickCallback
 }) => {
   const [internalActiveTab, setInternalActiveTab] = useState(tabs[0]?.id ?? '')
   const [fullscreenTabId, setFullscreenTabId] = useState<string | null>(null)
@@ -59,7 +60,7 @@ export const Tabs: React.FC<TabsProps> = ({
 
   const handleTabDoubleClick = (tabId: string, tab: Tab): void => {
     // Call legacy callback if provided
-    onTabDoubleClick?.(tabId)
+    legacyDoubleClickCallback?.(tabId)
     // Open fullscreen modal if allowed
     if (tab.allowFullscreen) {
       setFullscreenTabId(tabId)

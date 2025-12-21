@@ -122,7 +122,7 @@ void initI18n().then(() => {
           setTree(newTree)
           setTabContentMap({})
           setFileLoaded(true)
-        }).catch((error) => {
+        }).catch((error: unknown) => {
           logger.error('Failed to get file parameters', { error: String(error) })
         })
       }, [])

@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { Monaco } from '@monaco-editor/react'
 import type * as monacoEditor from 'monaco-editor'
 import type { VariableInputBoxProps, VariableDefinition } from './types'
 import { defaultInputBoxStyles } from '../InputBox/types'
@@ -24,14 +23,12 @@ interface ProviderState {
 
 function getProviderState(): ProviderState {
   const win = window as unknown as Record<string, ProviderState | undefined>
-  if (!win[globalKey]) {
-    win[globalKey] = {
-      languageConfigured: false,
-      completionProviderDisposable: null,
-      hoverProviderDisposable: null,
-      cancellationHandlerRegistered: false,
-      modelVariablesMap: new WeakMap()
-    }
+  win[globalKey] ??= {
+    languageConfigured: false,
+    completionProviderDisposable: null,
+    hoverProviderDisposable: null,
+    cancellationHandlerRegistered: false,
+    modelVariablesMap: new WeakMap()
   }
   return win[globalKey]
 }
@@ -89,13 +86,8 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
 
   const handlePaste = useCallback(async () => {
     editorRef.current?.focus()
-    try {
-      const text = await navigator.clipboard.readText()
-      editorRef.current?.trigger('keyboard', 'paste', { text })
-    } catch {
-      // Fallback: use execCommand
-      document.execCommand('paste')
-    }
+    const text = await navigator.clipboard.readText()
+    editorRef.current?.trigger('keyboard', 'paste', { text })
   }, [])
 
   const handleGoToDefinition = useCallback(() => {
@@ -221,7 +213,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
 
   const handleMount = (
     editor: monacoEditor.editor.IStandaloneCodeEditor,
-    monacoInstance: Monaco
+    monacoInstance: typeof monacoEditor
   ): void => {
     editorRef.current = editor
 
@@ -237,10 +229,9 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
       state.languageConfigured = true
     }
 
-    if (!state.completionProviderDisposable) {
-      state.completionProviderDisposable = monacoInstance.languages.registerCompletionItemProvider(LANGUAGE_ID, {
+    state.completionProviderDisposable ??= monacoInstance.languages.registerCompletionItemProvider(LANGUAGE_ID, {
         triggerCharacters: ['{'],
-        provideCompletionItems(model, position) {
+        provideCompletionItems(model: monacoEditor.editor.ITextModel, position: monacoEditor.Position) {
           const range = {
             startLineNumber: position.lineNumber,
             endLineNumber: position.lineNumber,
@@ -267,11 +258,9 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
           return { suggestions, incomplete: true }
         }
       })
-    }
 
-    if (!state.hoverProviderDisposable) {
-      state.hoverProviderDisposable = monacoInstance.languages.registerHoverProvider(LANGUAGE_ID, {
-        provideHover(model, position) {
+    state.hoverProviderDisposable ??= monacoInstance.languages.registerHoverProvider(LANGUAGE_ID, {
+        provideHover(model: monacoEditor.editor.ITextModel, position: monacoEditor.Position) {
           const lineText = model.getLineContent(position.lineNumber)
           const col = position.column
 
@@ -310,7 +299,6 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
           }
         }
       })
-    }
 
     // Prevent multiline input to behave like a multi-line editor
     // Block Enter with any modifier (Ctrl+Enter, Shift+Enter, etc.)
@@ -333,7 +321,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
     const domNode = editor.getDomNode()
     if (domNode) {
       const preventFind = (event: KeyboardEvent): void => {
-        const isMac = navigator.platform.toLowerCase().includes('mac')
+        const isMac = navigator.userAgent.toLowerCase().includes('mac')
         const isCtrlOrCmd = isMac ? event.metaKey : event.ctrlKey
         if (isCtrlOrCmd && (event.key === 'f' || event.key === 'F')) {
           event.preventDefault()

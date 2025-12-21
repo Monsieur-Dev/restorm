@@ -60,7 +60,7 @@ class EventBusService {
    * @param event Event name to emit
    * @param payload Data to pass to handlers
    */
-  async emit<T = unknown>(event: string, payload: T): Promise<void> {
+  async emit(event: string, payload: unknown): Promise<void> {
     const handlers = this.handlers.get(event)
     if (!handlers || handlers.size === 0) {
       return
@@ -85,10 +85,10 @@ class EventBusService {
    * @param event Event name to emit
    * @param payload Data to pass to handlers
    */
-  emitSync<T = unknown>(event: string, payload: T): void {
+  emitSync(event: string, payload: unknown): void {
     // Use queueMicrotask for true async execution
     queueMicrotask(() => {
-      this.emit(event, payload).catch((error) => {
+      this.emit(event, payload).catch((error: unknown) => {
         logger.error(`[EventBus] Unhandled error in emit for "${event}":`, { error: String(error) })
       })
     })

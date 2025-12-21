@@ -77,8 +77,9 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
       contentRef.current = node;
       if (typeof externalContentRef === 'function') {
         externalContentRef(node);
-      } else if (externalContentRef) {
-        externalContentRef.current = node;
+      } else if (externalContentRef && typeof externalContentRef === 'object') {
+        // Use Object.assign to update ref without direct mutation
+        Object.assign(externalContentRef, { current: node });
       }
     },
     [externalContentRef]
@@ -471,19 +472,8 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
     };
   }, [isDraggingVertical, isDraggingHorizontal, dragStartY, dragStartX, dragStartScrollTop, dragStartScrollLeft, containerHeight, containerWidth, verticalSliderSize, horizontalSliderSize, contentHeight, contentWidth, mergedOptions.verticalHasArrows, mergedOptions.horizontalHasArrows, mergedOptions.arrowSize]);
 
-  // Initialize scrollbar visibility based on options
-  useEffect(() => {
-    if (mergedOptions.vertical === 'visible') {
-      setIsVerticalScrollbarVisible(true);
-    } else if (mergedOptions.vertical === 'hidden') {
-      setIsVerticalScrollbarVisible(false);
-    }
-    if (mergedOptions.horizontal === 'visible') {
-      setIsHorizontalScrollbarVisible(true);
-    } else if (mergedOptions.horizontal === 'hidden') {
-      setIsHorizontalScrollbarVisible(false);
-    }
-  }, [mergedOptions.vertical, mergedOptions.horizontal]);
+  // Note: scrollbar visibility state is only used for 'auto' mode.
+  // For 'visible' and 'hidden' modes, the shouldShow* variables handle it directly.
 
   // Add wheel event listener with passive: false
   useEffect(() => {

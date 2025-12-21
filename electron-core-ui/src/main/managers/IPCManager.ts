@@ -51,13 +51,13 @@ export function setupIPC(resourcesPath?: string): void {
   })
 
   ipcMain.handle('theme:get-current', () => {
-    const currentTheme = storageService.get<string>('currentTheme')
+    const currentTheme = storageService.get('currentTheme') as string | undefined
     // If no theme is selected, use 'theme-defaults/dark_plus' as default
     return currentTheme ?? 'theme-defaults/dark_plus'
   })
 
   ipcMain.handle('theme:set', (_event, themeId: string) => {
-    const previousTheme = storageService.get<string>('currentTheme')
+    const previousTheme = storageService.get('currentTheme') as string | undefined
 
     // If the requested theme is already active, avoid rebroadcasting
     if (previousTheme === themeId) {
@@ -208,7 +208,7 @@ export function setupIPC(resourcesPath?: string): void {
     const first = BrowserWindow.getAllWindows()[0];
     const urlToLoad = first?.webContents.getURL();
     if (urlToLoad && urlToLoad.length > 0) {
-      win.loadURL(urlToLoad).catch((err) => { logger.error('Failed to load URL in aux window', { error: String(err) }); });
+      win.loadURL(urlToLoad).catch((err: unknown) => { logger.error('Failed to load URL in aux window', { error: String(err) }); });
     }
   });
 
@@ -295,7 +295,7 @@ export function setupIPC(resourcesPath?: string): void {
   // Storage API for persisting application data (workbench config, etc.)
   ipcMain.handle('storage:get', (_event, key: string): unknown => {
     const storage = getStorageService()
-    return storage.get<unknown>(key)
+    return storage.get(key)
   })
 
   ipcMain.handle('storage:set', (_event, key: string, value: unknown) => {
@@ -542,7 +542,7 @@ export function initializeApp(
         }
       }
     })
-  }).catch((error) => {
+  }).catch((error: unknown) => {
     logger.error('App failed to start:', { error: String(error) })
   })
 }

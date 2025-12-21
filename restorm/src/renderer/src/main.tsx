@@ -26,7 +26,8 @@ import frTranslation from '../locales/fr/translation.json'
 // Filter harmless Monaco cancellations so they don't spam the console
 const isMonacoCancellation = (reason: unknown): boolean => {
   if (!reason) return false
-  const asString = String((reason as { message?: unknown }).message ?? reason)
+  const message = (reason as { message?: unknown }).message ?? reason
+  const asString = typeof message === 'string' ? message : ''
   return asString.includes('Canceled')
 }
 

@@ -12,7 +12,7 @@ const ButtonWithDescription: React.FC<ButtonWithDescriptionProps> = ({
   children
 }) => {
   // Render icon if provided
-  const renderIcon = (): JSX.Element | null => {
+  const renderIcon = (): React.JSX.Element | null => {
     if (!icon) return null
     return <span className={`codicon codicon-${icon}`} />
   }

@@ -81,7 +81,7 @@ function parseWsdl(wsdlContent: string): ParsedWsdl {
   }
   
   // Extract target namespace
-  const nsMatch = wsdlContent.match(/targetNamespace\s*=\s*["']([^"']+)["']/)
+  const nsMatch = /targetNamespace\s*=\s*["']([^"']+)["']/.exec(wsdlContent)
   if (nsMatch?.[1]) {
     result.targetNamespace = nsMatch[1]
   }
@@ -104,14 +104,14 @@ function parseWsdl(wsdlContent: string): ParsedWsdl {
       const bindingAttr = getAttr(portMatch[0], 'binding')
       const binding = bindingAttr?.split(':').pop() ?? ''
       
-      const addressMatch = portContent.match(/location\s*=\s*["']([^"']+)["']/)
+      const addressMatch = /location\s*=\s*["']([^"']+)["']/.exec(portContent)
       const address = addressMatch?.[1] ?? ''
       
       ports.push({ name: portName, binding, address })
     }
     
     // Extract documentation
-    const docMatch = serviceBlock.match(/<(?:\w+:)?documentation[^>]*>([\s\S]*?)<\/(?:\w+:)?documentation>/i)
+    const docMatch = /<(?:\w+:)?documentation[^>]*>([\s\S]*?)<\/(?:\w+:)?documentation>/i.exec(serviceBlock)
     
     result.services.push({
       name: serviceName,
@@ -136,7 +136,7 @@ function parseWsdl(wsdlContent: string): ParsedWsdl {
       
       if (!opName || !opContent) continue
       
-      const soapActionMatch = opContent.match(/soapAction\s*=\s*["']([^"']+)["']/)
+      const soapActionMatch = /soapAction\s*=\s*["']([^"']+)["']/.exec(opContent)
       
       operations.push({
         name: opName,
@@ -166,7 +166,7 @@ function parseWsdl(wsdlContent: string): ParsedWsdl {
       
       if (!opName || !opContent) continue
       
-      const docMatch = opContent.match(/<(?:\w+:)?documentation[^>]*>([\s\S]*?)<\/(?:\w+:)?documentation>/i)
+      const docMatch = /<(?:\w+:)?documentation[^>]*>([\s\S]*?)<\/(?:\w+:)?documentation>/i.exec(opContent)
       
       operations.push({
         name: opName,

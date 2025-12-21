@@ -73,9 +73,7 @@ export async function executeGraphQLRequest(input: GraphQLRequestInput): Promise
   const headersObj = headersToObject(resolvedHeaders)
   
   // Ensure Content-Type is set
-  if (!headersObj['Content-Type']) {
-    headersObj['Content-Type'] = 'application/json'
-  }
+  headersObj['Content-Type'] ??= 'application/json'
   
   // Parse variables
   let variables: Record<string, unknown> = {}

@@ -29,6 +29,11 @@ import codeSnippetsTemplate from '../../resources/templates/code-snippets-websoc
 // Compile the Handlebars template
 const compiledTemplate = Handlebars.compile(codeSnippetsTemplate)
 
+// Helper to update reactive proxy properties (intentional mutation for reactive objects)
+function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
+  Object.assign(obj, { [key]: value })
+}
+
 export interface WebSocketRequestTabViewProps {
   request: WebSocketRequest
 }
@@ -50,25 +55,29 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   useEffect(() => {
     if (requestIdRef.current !== request.id) {
       requestIdRef.current = request.id
-      setUrlState(request.url)
-      setEventState(request.event ?? '')
-      setMessageState(request.message)
-      setResponse(null)
+      const rafId = requestAnimationFrame(() => {
+        setUrlState(request.url)
+        setEventState(request.event ?? '')
+        setMessageState(request.message)
+        setResponse(null)
+      })
+      return (): void => { cancelAnimationFrame(rafId) }
     }
+    return undefined
   }, [request])
 
   // Sync state changes to reactive request object
   const setUrl = useCallback((value: string): void => {
     setUrlState(value)
-    request.url = value
+    updateReactiveProperty(request, 'url', value)
   }, [request])
   const setEvent = useCallback((value: string): void => {
     setEventState(value)
-    request.event = value ? value : undefined
+    updateReactiveProperty(request, 'event', value ? value : undefined)
   }, [request])
   const setMessage = useCallback((value: string): void => {
     setMessageState(value)
-    request.message = value
+    updateReactiveProperty(request, 'message', value)
   }, [request])
   
   const runtimeContext = useMemo<VariableContext | undefined>(
@@ -185,7 +194,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           variables={envVariables}
           initialRows={request.headers}
           visibilityMode="base-only"
-          onRowsChange={(rows) => { request.headers = rows }}
+          onRowsChange={(rows): void => { updateReactiveProperty(request, 'headers', rows) }}
         />
       </Pane>
     </SplitView>
@@ -304,7 +313,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       codeSnippetsContent={codeSnippetsContent}
       documentation={request.documentation}
       notes={request.notes}
-      onNotesChange={(md) => { request.notes = md }}
+      onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
       isLoading={isSending}
       showResponse={response !== null}
       infosContent={infosContent}

@@ -12,15 +12,30 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   id,
   onComplete
 }) => {
-  const [isActive, setIsActive] = useState(false);
-  const [isDone, setIsDone] = useState(false);
-  const [isInfinite, setIsInfinite] = useState(false);
-  const [isDiscrete, setIsDiscrete] = useState(false);
+  // Track async states (timers)
   const [isLongRunning, setIsLongRunning] = useState(false);
-  const [currentValue, setCurrentValue] = useState(0);
+  const [hasCompletedAnimation, setHasCompletedAnimation] = useState(false);
+  // Track previous mode to know if we came from discrete mode when completing
+  const [wasDiscreteBeforeDone, setWasDiscreteBeforeDone] = useState(false);
   
-  const longRunningTimeoutRef = useRef<NodeJS.Timeout>();
-  const doneTimeoutRef = useRef<NodeJS.Timeout>();
+  const longRunningTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const doneTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const prevModeRef = useRef(mode);
+
+  // Derive states from mode
+  const isInfinite = mode === 'infinite';
+  const isDiscrete = mode === 'discrete';
+  const isDone = mode === 'done';
+  const isActive = mode !== 'done' || !hasCompletedAnimation;
+  
+  // Calculate current value based on mode
+  const currentValue = (() => {
+    if (mode === 'infinite') return 2; // 2% width for infinite mode
+    if (mode === 'discrete') return Math.min(100, Math.max(0, value));
+    // mode === 'done' at this point
+    if (wasDiscreteBeforeDone) return 100;
+    return 0;
+  })();
 
   // Merge default styles with provided styles
   const mergedStyles = {
@@ -28,41 +43,34 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     ...options
   };
 
-  // Handle mode changes
+  // Handle mode changes - only for async operations
   useEffect(() => {
-    switch (mode) {
-      case 'infinite':
-        setIsActive(true);
-        setIsInfinite(true);
-        setIsDiscrete(false);
-        setIsDone(false);
-        setCurrentValue(2); // 2% width for infinite mode
-        
-        // Long running mode after 10 seconds
-        longRunningTimeoutRef.current = setTimeout(() => {
-          setIsLongRunning(true);
-        }, 10000);
-        break;
-        
-      case 'discrete':
-        setIsActive(true);
-        setIsInfinite(false);
-        setIsDiscrete(true);
-        setIsDone(false);
-        setCurrentValue(Math.min(100, Math.max(0, value)));
-        break;
-        
-      case 'done':
-        setIsDone(true);
-        if (isDiscrete) {
-          setCurrentValue(100);
-        }
-        // Auto-hide after 200ms
-        doneTimeoutRef.current = setTimeout(() => {
-          setIsActive(false);
-          onComplete?.();
-        }, 200);
-        break;
+    // Reset states on mode change and track if we came from discrete
+    if (mode !== prevModeRef.current) {
+      const wasDiscrete = prevModeRef.current === 'discrete';
+      prevModeRef.current = mode;
+      // Use requestAnimationFrame to defer the setState
+      const rafId = requestAnimationFrame(() => {
+        setIsLongRunning(false);
+        setHasCompletedAnimation(false);
+        // Track if we're transitioning to done from discrete
+        setWasDiscreteBeforeDone(mode === 'done' && wasDiscrete);
+      });
+      return () => { cancelAnimationFrame(rafId); };
+    }
+    prevModeRef.current = mode;
+
+    if (mode === 'infinite') {
+      // Long running mode after 10 seconds
+      longRunningTimeoutRef.current = setTimeout(() => {
+        setIsLongRunning(true);
+      }, 10000);
+    } else if (mode === 'done') {
+      // Auto-hide after 200ms
+      doneTimeoutRef.current = setTimeout(() => {
+        setHasCompletedAnimation(true);
+        onComplete?.();
+      }, 200);
     }
 
     return () => {

@@ -64,10 +64,10 @@ export class FileService {
     const storage = getStorageService()
 
     // Load recent files
-    const savedRecent = storage.get<FileMetadata[]>(this.RECENT_FILES_KEY)
+    const savedRecent = storage.get(this.RECENT_FILES_KEY) as FileMetadata[] | undefined
     if (savedRecent && Array.isArray(savedRecent)) {
       // Filter out files that no longer exist
-      this.recentFiles = savedRecent.filter((file) => this.fileExists(file.path))
+      this.recentFiles = savedRecent.filter((file: FileMetadata) => this.fileExists(file.path))
       // Update storage if some files were removed
       if (this.recentFiles.length !== savedRecent.length) {
         this.saveRecentFiles()
@@ -75,7 +75,7 @@ export class FileService {
     }
 
     // Load favorites from recent files
-    const savedFavorites = storage.get<string[]>(this.FAVORITES_KEY)
+    const savedFavorites = storage.get(this.FAVORITES_KEY) as string[] | undefined
     if (savedFavorites && Array.isArray(savedFavorites)) {
       // Update favorite flags in recent files
       for (const file of this.recentFiles) {
@@ -126,7 +126,7 @@ export class FileService {
 
     // Check if it was a favorite
     const storage = getStorageService()
-    const favorites = storage.get<string[]>(this.FAVORITES_KEY) ?? []
+    const favorites = (storage.get(this.FAVORITES_KEY) ?? []) as string[]
     const isFavorite = favorites.includes(path)
 
     // Add to beginning

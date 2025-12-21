@@ -8,6 +8,11 @@ import {
 } from 'electron-core-ui/renderer'
 import type { Folder, EnvironmentFolder } from '../types/collections'
 
+// Helper to update reactive proxy properties (intentional mutation for reactive objects)
+function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
+  Object.assign(obj, { [key]: value })
+}
+
 export interface BaseFolderViewProps {
   /** The folder to display (Folder or EnvironmentFolder) */
   folder: Folder | EnvironmentFolder
@@ -49,8 +54,8 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
       content: (
         <MarkdownEditor
           initialValue={folder.notes ?? ''}
-          onChange={(markdown) => {
-            folder.notes = markdown
+          onChange={(markdown): void => {
+            updateReactiveProperty(folder, 'notes', markdown)
           }}
         />
       )

@@ -205,7 +205,7 @@ export abstract class BaseWindow {
      * Load window state from storage with safety checks
      */
     private loadWindowState(): WindowState {
-      const windows = this.storageService.get<Record<string, WindowState>>('windows') ?? {}
+      const windows = (this.storageService.get('windows') ?? {}) as Record<string, WindowState>
       const savedState = windows[this.configuration.name]
   
       // Default state
@@ -276,7 +276,7 @@ export abstract class BaseWindow {
       }
   
       // Get existing windows data
-      const windows = this.storageService.get<Record<string, WindowState>>('windows') ?? {}
+      const windows = (this.storageService.get('windows') ?? {}) as Record<string, WindowState>
       windows[this.configuration.name] = state
   
       // Save to storage
@@ -491,12 +491,12 @@ export abstract class BaseWindow {
       // Load URL if provided, otherwise load file
       if (this.configuration.url) {
         logger.info(`BaseWindow: Loading URL ${this.configuration.url}...`)
-        window.loadURL(this.configuration.url).catch((error) => {
+        window.loadURL(this.configuration.url).catch((error: unknown) => {
           logger.error('Failed to load URL', { error: String(error) })
         })
       } else {
         logger.info(`BaseWindow: Loading file ${this.configuration.file}...`)
-        window.loadFile(this.configuration.file).catch((error) => {
+        window.loadFile(this.configuration.file).catch((error: unknown) => {
           logger.error('Failed to load file', { error: String(error) })
         })
       }

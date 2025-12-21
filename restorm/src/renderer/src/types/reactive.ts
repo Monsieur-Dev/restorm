@@ -367,7 +367,7 @@ export function makeReactiveFolderItem(item: FolderItem, parentFolderId: string)
  * Emit a folder created event
  */
 export function emitFolderCreated(folder: Folder): void {
-  eventBus.emitSync<DocumentChangedPayload>(DocumentEvents.FOLDER_CREATED, {
+  eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
     id: folder.id,
     type: 'folder',
     document: folder
@@ -388,7 +388,7 @@ export function emitFolderDeleted(folderId: string): void {
  * Emit a request created event
  */
 export function emitRequestCreated(request: Request, parentFolderId: string): void {
-  eventBus.emitSync<DocumentChangedPayload>(DocumentEvents.REQUEST_CREATED, {
+  eventBus.emitSync(DocumentEvents.REQUEST_CREATED, {
     id: request.id,
     type: 'request',
     document: request,

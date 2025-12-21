@@ -52,7 +52,7 @@ export class FeatureFlippingService {
         this.features.set(feature.Name, feature)
       }
 
-      logger.info(`FeatureFlippingService: Loaded ${this.features.size} features`)
+      logger.info(`FeatureFlippingService: Loaded ${String(this.features.size)} features`)
     } catch (error) {
       logger.error('Failed to load features configuration', { error: String(error) })
     }

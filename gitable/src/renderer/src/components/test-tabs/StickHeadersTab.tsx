@@ -21,8 +21,11 @@ const StickHeadersTab: React.FC = () => {
     }
 
     const max = Math.max(0, el.scrollHeight - el.clientHeight)
-    setScrollTop(el.scrollTop)
-    setMaxScroll(max)
+    const initialScrollTop = el.scrollTop
+    const rafId = requestAnimationFrame(() => {
+      setScrollTop(initialScrollTop)
+      setMaxScroll(max)
+    })
 
     const handleResize = (): void => {
       const target = getScrollableContent()
@@ -35,7 +38,8 @@ const StickHeadersTab: React.FC = () => {
     }
 
     window.addEventListener('resize', handleResize)
-    return () => {
+    return (): void => {
+      cancelAnimationFrame(rafId)
       window.removeEventListener('resize', handleResize)
     }
   }, [])

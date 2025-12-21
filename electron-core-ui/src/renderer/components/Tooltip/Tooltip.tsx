@@ -185,11 +185,21 @@ const Tooltip: React.FC<TooltipProps> = ({
     })
   }, [targetRef, placement, side, fixedTop])
 
+  const prevShowRef = useRef(show)
+  const prevRepositionKeyRef = useRef(repositionKey)
   useEffect(() => {
-    if (show) {
-      // Reset positioning state
-      setIsPositioned(false)
-      setPosition({ top: -9999, left: -9999, beakLeftPercent: 50, beakTopPercent: undefined })
+    const showChanged = prevShowRef.current !== show
+    const keyChanged = prevRepositionKeyRef.current !== repositionKey
+    prevShowRef.current = show
+    prevRepositionKeyRef.current = repositionKey
+
+    if (show && (showChanged || keyChanged)) {
+      // Reset positioning state when becoming visible or reposition key changes
+      // Use requestAnimationFrame to defer setState
+      const rafId = requestAnimationFrame(() => {
+        setIsPositioned(false)
+        setPosition({ top: -9999, left: -9999, beakLeftPercent: 50, beakTopPercent: undefined })
+      })
       // Wait for next frame to ensure tooltip is rendered and has dimensions
       requestAnimationFrame(() => {
         // Double RAF to ensure layout is complete
@@ -204,10 +214,15 @@ const Tooltip: React.FC<TooltipProps> = ({
           }, 10)
         })
       })
-    } else {
-      setIsPositioned(false)
-      setPosition({ top: -9999, left: -9999, beakLeftPercent: 50, beakTopPercent: undefined })
+      return () => { cancelAnimationFrame(rafId) }
+    } else if (!show && showChanged) {
+      const rafId = requestAnimationFrame(() => {
+        setIsPositioned(false)
+        setPosition({ top: -9999, left: -9999, beakLeftPercent: 50, beakTopPercent: undefined })
+      })
+      return () => { cancelAnimationFrame(rafId) }
     }
+    return undefined
   }, [show, updatePosition, repositionKey])
 
   useEffect(() => {

@@ -47,7 +47,7 @@ const Titlebar: React.FC<TitlebarProps> = ({
   }, [icon])
 
   // Render icon
-  const renderIcon = (): JSX.Element | null => {
+  const renderIcon = (): React.JSX.Element | null => {
     const actualIcon = icon ?? appIconPath
     if (!actualIcon) return null
     
