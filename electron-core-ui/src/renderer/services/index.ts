@@ -24,3 +24,9 @@ export type {
   DocumentDeletedPayload,
   DocumentEventName
 } from './EventBus'
+
+export { keyboardShortcutService } from './KeyboardShortcutService'
+export type {
+  ParsedShortcut,
+  ShortcutHandler
+} from './KeyboardShortcutService'

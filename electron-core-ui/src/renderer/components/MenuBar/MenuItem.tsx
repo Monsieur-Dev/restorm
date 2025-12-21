@@ -13,6 +13,8 @@ const MenuItem: React.FC<MenuItemProps> = ({
   className = '',
   id
 }) => {
+  // Note: Keyboard shortcuts are registered by MenuBarItem parent component
+  // to keep them active even when the menu is closed
   const [showSubmenu, setShowSubmenu] = useState(false)
   const itemRef = useRef<HTMLAnchorElement>(null)
   const submenuRef = useRef<HTMLDivElement>(null)

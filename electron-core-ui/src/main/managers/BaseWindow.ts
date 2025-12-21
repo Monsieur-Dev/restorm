@@ -1,4 +1,4 @@
-import { BrowserWindow, screen, BrowserWindowConstructorOptions, ipcMain, nativeImage } from "electron"
+import { BrowserWindow, screen, BrowserWindowConstructorOptions, ipcMain, nativeImage, Menu } from "electron"
 import { join } from "path"
 import { getStorageService, logger } from "../services"
 import { WindowConfiguration, WindowState, isDevToolsEnabled } from "./WindowManager"
@@ -318,13 +318,12 @@ export abstract class BaseWindow {
   
       const devToolsEnabled = isDevToolsEnabled()
   
-      // DevTools are not opened automatically - user can open them manually via keyboard shortcuts
-      // if enabled in development mode or with --enable-dev-tools flag in production
-  
-      // Add keyboard shortcuts for DevTools (F12 or Ctrl+Shift+I) only if enabled
-      if (devToolsEnabled) {
-        this.window.webContents.on('before-input-event', (event, input) => {
-          if (input.type === 'keyDown') {
+      // Intercept keyboard shortcuts before Chromium handles them
+      // This allows shortcuts like Ctrl+N, Ctrl+O to reach the renderer
+      this.window.webContents.on('before-input-event', (event, input) => {
+        if (input.type === 'keyDown') {
+          // Handle DevTools shortcuts if enabled
+          if (devToolsEnabled) {
             const isDevToolsShortcut =
               input.key === 'F12' ||
               (input.control && input.shift && input.key === 'I') ||
@@ -333,10 +332,29 @@ export abstract class BaseWindow {
             if (isDevToolsShortcut && this.window) {
               this.window.webContents.toggleDevTools()
               event.preventDefault()
+              return
             }
           }
-        })
-      }
+
+          // Intercept Ctrl/Cmd shortcuts and send them to the renderer via IPC
+          // This prevents Chromium from handling them (new window, open file, etc.)
+          const isModifiedKey = input.control || input.meta
+          
+          if (isModifiedKey && input.key.length === 1 && this.window) {
+            // Build shortcut string
+            const parts: string[] = []
+            if (input.control || input.meta) parts.push('Ctrl')
+            if (input.shift) parts.push('Shift')
+            if (input.alt) parts.push('Alt')
+            parts.push(input.key.toUpperCase())
+            const shortcut = parts.join('+')
+            
+            // Send to renderer and prevent default Chromium behavior
+            this.window.webContents.send('keyboard-shortcut', shortcut)
+            event.preventDefault()
+          }
+        }
+      })
     }
   
     /**
@@ -426,6 +444,15 @@ export abstract class BaseWindow {
   
       // Create the browser window
       const window = new BrowserWindow(mergedOptions)
+
+      // Disable default Electron menu to prevent it from capturing keyboard shortcuts
+      // This allows shortcuts like Ctrl+N, Ctrl+O to be handled by the renderer process
+      Menu.setApplicationMenu(null)
+      
+      // Tell Electron to ignore menu shortcuts and let them through to the renderer
+      window.webContents.on('did-finish-load', () => {
+        window.webContents.setIgnoreMenuShortcuts(true)
+      })
 
       // Set fullscreen state if saved
       if (state.fullscreen) {
