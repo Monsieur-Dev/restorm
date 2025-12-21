@@ -1,0 +1,11 @@
+---
+description: "Do not create documentation automatically"
+---
+
+# Rule: No automatic documentation
+
+## Instruction
+
+**DO NOT create documentation** (files in `/docs/`, README, etc.) unless the user explicitly requests it.
+
+The project rule regarding documentation creation for each Linear ticket should only be applied upon explicit request.

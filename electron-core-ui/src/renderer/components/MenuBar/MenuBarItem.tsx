@@ -1,5 +1,6 @@
-import React, { forwardRef, useRef, useState, useEffect, useLayoutEffect } from 'react'
+import React, { forwardRef, useRef, useState, useEffect, useLayoutEffect, useMemo } from 'react'
 import { ScrollableElement } from '../ScrollableElement'
+import { keyboardShortcutService } from '../../services/KeyboardShortcutService'
 
 interface MenuBarItemProps {
   title: string
@@ -10,6 +11,43 @@ interface MenuBarItemProps {
   onMouseEnter?: () => void
   className?: string
   id?: string
+}
+
+/** Extract shortcut info from MenuItem children recursively */
+interface ShortcutInfo {
+  shortcut: string
+  onClick: () => void
+  disabled: boolean
+}
+
+function extractShortcuts(children: React.ReactNode): ShortcutInfo[] {
+  const shortcuts: ShortcutInfo[] = []
+  
+  React.Children.forEach(children, (child) => {
+    if (!React.isValidElement(child)) return
+    
+    const props = child.props as Record<string, unknown>
+    const shortcut = props['shortcut']
+    const onClick = props['onClick']
+    const disabled = props['disabled']
+    const childChildren = props['children']
+    
+    // Check if this is a MenuItem with a shortcut
+    if (shortcut && typeof shortcut === 'string' && typeof onClick === 'function') {
+      shortcuts.push({
+        shortcut,
+        onClick: onClick as () => void,
+        disabled: disabled === true
+      })
+    }
+    
+    // Recurse into children (for nested menus)
+    if (childChildren) {
+      shortcuts.push(...extractShortcuts(childChildren as React.ReactNode))
+    }
+  })
+  
+  return shortcuts
 }
 
 const MenuBarItem = forwardRef<HTMLDivElement, MenuBarItemProps>(({
@@ -27,6 +65,55 @@ const MenuBarItem = forwardRef<HTMLDivElement, MenuBarItemProps>(({
   const [activeHeight, setActiveHeight] = useState<string | null>(null)
   const [menuPosition, setMenuPosition] = useState({ left: 0, top: 0 })
   const scrollableRef = useRef<HTMLDivElement>(null)
+
+  // Extract shortcuts from children and register them globally
+  const shortcuts = useMemo(() => extractShortcuts(children), [children])
+  
+  // Create a stable key for shortcuts to avoid unnecessary re-registrations
+  const shortcutsKey = useMemo(() => {
+    return shortcuts
+      .filter(s => !s.disabled)
+      .map(s => s.shortcut)
+      .sort()
+      .join('|')
+  }, [shortcuts])
+  
+  // Store handlers in a ref to avoid re-registration when only handlers change
+  const handlersRef = useRef<Map<string, () => void>>(new Map())
+  useEffect(() => {
+    handlersRef.current.clear()
+    for (const info of shortcuts) {
+      if (!info.disabled) {
+        handlersRef.current.set(info.shortcut.toLowerCase(), info.onClick)
+      }
+    }
+  }, [shortcuts])
+  
+  // Register keyboard shortcuts - these stay active even when menu is closed
+  useEffect(() => {
+    const unregisters: (() => void)[] = []
+    
+    for (const info of shortcuts) {
+      if (!info.disabled) {
+        // Use a wrapper that calls the current handler from ref
+        const handler = (): void => {
+          const currentHandler = handlersRef.current.get(info.shortcut.toLowerCase())
+          if (currentHandler) {
+            currentHandler()
+          }
+        }
+        const unregister = keyboardShortcutService.register(info.shortcut, handler)
+        unregisters.push(unregister)
+      }
+    }
+    
+    return () => {
+      for (const unregister of unregisters) {
+        unregister()
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shortcutsKey])
 
   // Derive effective height: 'auto' when not active, calculated value when active
   const calculatedHeight = isActive && activeHeight !== null ? activeHeight : 'auto'

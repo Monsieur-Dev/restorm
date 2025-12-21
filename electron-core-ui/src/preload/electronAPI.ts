@@ -17,5 +17,10 @@ export const createElectronAPI = (): Record<string, unknown> => ({
   },
   sendAction: (action: string) => {
     ipcRenderer.send('window-action', action);
+  },
+  onKeyboardShortcut: (cb: (shortcut: string) => void) => {
+    ipcRenderer.on('keyboard-shortcut', (_: Electron.IpcRendererEvent, shortcut: string) => {
+      cb(shortcut);
+    });
   }
 })
