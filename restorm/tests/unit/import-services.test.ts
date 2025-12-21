@@ -11,6 +11,7 @@ import { importGraphQLFromString } from '../../src/renderer/src/services/import/
 import { importGrpcFromString } from '../../src/renderer/src/services/import/GrpcImportService'
 import { importSoapFromString } from '../../src/renderer/src/services/import/SoapImportService'
 import { importAsyncAPIFromString } from '../../src/renderer/src/services/import/AsyncAPIImportService'
+import { importPostmanFromJson } from '../../src/renderer/src/services/import/PostmanImportService'
 import type { Folder, EnvironmentFolder, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest } from '../../src/renderer/src/types/collections'
 
 // Helper to load test files
@@ -529,6 +530,209 @@ describe('AsyncAPIImportService', () => {
 })
 
 // =============================================================================
+// PostmanImportService Tests
+// =============================================================================
+
+describe('PostmanImportService', () => {
+  const postmanJson = loadTestFile('postman-petstore.json')
+
+  describe('importPostmanFromJson', () => {
+    it('should import Postman collection and return an EnvironmentFolder', () => {
+      const result = importPostmanFromJson(postmanJson)
+
+      expect(result).toBeDefined()
+      expect(result.folderType).toBe('environment')
+      expect(result.name).toBe('Swagger Petstore')
+      expect(result.environments).toBeDefined()
+      expect(result.environments.length).toBeGreaterThan(0)
+    })
+
+    it('should create environment with baseUrl variable', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const env = result.environments[0]
+
+      expect(env).toBeDefined()
+      expect(env?.variables.some((v) => v.key === 'baseUrl')).toBe(true)
+    })
+
+    it('should create nested folders for Postman folder structure', () => {
+      const result = importPostmanFromJson(postmanJson)
+
+      // Postman collection has pet, store, user folders
+      const folderNames = result.items.filter(isFolder).map((f) => f.name)
+      expect(folderNames).toContain('pet')
+      expect(folderNames).toContain('store')
+      expect(folderNames).toContain('user')
+    })
+
+    it('should create HTTP requests for each endpoint', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      expect(requests.length).toBeGreaterThan(0)
+      requests.forEach((req) => {
+        expect(req.type).toBe('http')
+        expect(req.method).toBeDefined()
+        expect(req.url).toBeDefined()
+      })
+    })
+
+    it('should correctly parse HTTP methods', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const methods = new Set(requests.map((r) => r.method))
+      // Petstore uses GET, POST, PUT, DELETE
+      expect(methods.has('GET')).toBe(true)
+      expect(methods.has('POST')).toBe(true)
+      expect(methods.has('PUT')).toBe(true)
+      expect(methods.has('DELETE')).toBe(true)
+    })
+
+    it('should parse headers from requests', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      // At least some requests should have headers
+      const requestsWithHeaders = requests.filter((r) => r.headers.length > 0)
+      expect(requestsWithHeaders.length).toBeGreaterThan(0)
+    })
+
+    it('should parse query parameters', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      // Find requests with query params (e.g., findByStatus)
+      const requestsWithParams = requests.filter((r) => r.params.length > 0)
+      expect(requestsWithParams.length).toBeGreaterThan(0)
+    })
+
+    it('should parse path parameters', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      // Find requests with path params (e.g., GET /pet/{petId})
+      const requestsWithPathParams = requests.filter((r) => r.pathParams && r.pathParams.length > 0)
+      expect(requestsWithPathParams.length).toBeGreaterThan(0)
+    })
+
+    it('should convert path variables from :var to {{var}} format', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      // URLs should use {{var}} format, not :var
+      const requestsWithTemplateVars = requests.filter((r) => r.url.includes('{{'))
+      expect(requestsWithTemplateVars.length).toBeGreaterThan(0)
+      
+      // No URLs should have :var format after conversion
+      requests.forEach((req) => {
+        // Only check if URL doesn't start with http (path variables are in path, not protocol)
+        const pathPart = req.url.replace(/^https?:\/\/[^/]+/, '')
+        expect(pathPart).not.toMatch(/:[a-zA-Z_][a-zA-Z0-9_]*/)
+      })
+    })
+
+    it('should parse request bodies', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      // POST/PUT requests should have bodies
+      const requestsWithBody = requests.filter((r) => r.body !== undefined)
+      expect(requestsWithBody.length).toBeGreaterThan(0)
+    })
+
+    it('should handle form-data bodies', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      // Find requests with formdata body
+      const formDataRequests = requests.filter(
+        (r) => r.body?.type === 'form-data'
+      )
+      expect(formDataRequests.length).toBeGreaterThan(0)
+    })
+
+    it('should handle urlencoded bodies', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      // Find requests with urlencoded body
+      const urlencodedRequests = requests.filter(
+        (r) => r.body?.type === 'x-www-form-urlencoded'
+      )
+      expect(urlencodedRequests.length).toBeGreaterThan(0)
+    })
+
+    it('should handle raw JSON bodies', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      // Find requests with raw text body (JSON)
+      const rawBodyRequests = requests.filter(
+        (r) => r.body?.type === 'text'
+      )
+      expect(rawBodyRequests.length).toBeGreaterThan(0)
+    })
+
+    it('should use custom baseUrl option', () => {
+      const result = importPostmanFromJson(postmanJson, {
+        baseUrl: 'http://custom.url'
+      })
+
+      const env = result.environments[0]
+      const baseUrlVar = env?.variables.find((v) => v.key === 'baseUrl')
+      expect(baseUrlVar?.value).toBe('http://custom.url')
+    })
+
+    it('should generate unique IDs for all items', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+      const ids = requests.map((r) => r.id)
+
+      // All IDs should be unique
+      expect(new Set(ids).size).toBe(ids.length)
+    })
+
+    it('should generate deterministic IDs', () => {
+      const result1 = importPostmanFromJson(postmanJson)
+      const result2 = importPostmanFromJson(postmanJson)
+
+      const requests1 = findAllRequests(result1, isHTTPRequest)
+      const requests2 = findAllRequests(result2, isHTTPRequest)
+
+      // Same content should produce same IDs
+      expect(requests1.length).toBe(requests2.length)
+      for (let i = 0; i < requests1.length; i++) {
+        expect(requests1[i].id).toBe(requests2[i].id)
+      }
+    })
+
+    it('should include documentation from descriptions', () => {
+      const result = importPostmanFromJson(postmanJson)
+      
+      // Collection should have documentation from info.description
+      expect(result.documentation).toBeDefined()
+      expect(result.documentation.length).toBeGreaterThan(0)
+    })
+
+    it('should throw on invalid JSON', () => {
+      expect(() => importPostmanFromJson('not valid json')).toThrow()
+    })
+
+    it('should throw on unsupported schema version', () => {
+      const invalidCollection = JSON.stringify({
+        info: {
+          name: 'Test',
+          schema: 'https://schema.getpostman.com/json/collection/v1.0.0/collection.json'
+        },
+        item: []
+      })
+      expect(() => importPostmanFromJson(invalidCollection)).toThrow(/Unsupported Postman collection schema/)
+    })
+  })
+})
+
+// =============================================================================
 // Cross-service Tests
 // =============================================================================
 
@@ -539,8 +743,9 @@ describe('Import Services - Cross-validation', () => {
     const grpc = importGrpcFromString(loadTestFile('grpc-docker.proto'), { name: 'gRPC' })
     const soap = importSoapFromString(loadTestFile('soap-docker.wsdl'), { name: 'SOAP' })
     const asyncapi = importAsyncAPIFromString(loadTestFile('asyncapi-docker.yaml'), { name: 'AsyncAPI' })
+    const postman = importPostmanFromJson(loadTestFile('postman-petstore.json'))
 
-    const results = [swagger, graphql, grpc, soap, asyncapi]
+    const results = [swagger, graphql, grpc, soap, asyncapi, postman]
 
     results.forEach((result) => {
       expect(result.folderType).toBe('environment')
@@ -559,8 +764,9 @@ describe('Import Services - Cross-validation', () => {
     const grpc = importGrpcFromString(loadTestFile('grpc-docker.proto'), { name: 'gRPC' })
     const soap = importSoapFromString(loadTestFile('soap-docker.wsdl'), { name: 'SOAP' })
     const asyncapi = importAsyncAPIFromString(loadTestFile('asyncapi-docker.yaml'), { name: 'AsyncAPI' })
+    const postman = importPostmanFromJson(loadTestFile('postman-petstore.json'))
 
-    const results = [swagger, graphql, grpc, soap, asyncapi]
+    const results = [swagger, graphql, grpc, soap, asyncapi, postman]
 
     results.forEach((result) => {
       expect(result.environments.length).toBeGreaterThan(0)
