@@ -1,0 +1,246 @@
+{
+  "name": "Petstore API",
+  "version": "1",
+  "items": [
+    {
+      "name": "Pets",
+      "type": "folder",
+      "items": [
+        {
+          "name": "List Pets",
+          "type": "http",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/pets",
+            "headers": [
+              { "name": "Accept", "value": "application/json", "enabled": true },
+              { "name": "X-API-Key", "value": "{{apiKey}}", "enabled": true }
+            ],
+            "params": [
+              { "name": "status", "value": "available", "type": "query", "enabled": true },
+              { "name": "limit", "value": "10", "type": "query", "enabled": true }
+            ],
+            "body": { "mode": "none" },
+            "auth": {
+              "mode": "apikey",
+              "apikey": { "key": "X-API-Key", "value": "{{apiKey}}", "placement": "header" }
+            },
+            "docs": "Get a list of all pets with optional filtering"
+          }
+        },
+        {
+          "name": "Get Pet by ID",
+          "type": "http",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/pets/:petId",
+            "headers": [
+              { "name": "Accept", "value": "application/json", "enabled": true }
+            ],
+            "params": [
+              { "name": "petId", "value": "123", "type": "path", "enabled": true }
+            ],
+            "body": { "mode": "none" },
+            "auth": {
+              "mode": "bearer",
+              "bearer": { "token": "{{apiKey}}" }
+            },
+            "docs": "Retrieve a specific pet by its ID"
+          }
+        },
+        {
+          "name": "Create Pet",
+          "type": "http",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/pets",
+            "headers": [
+              { "name": "Content-Type", "value": "application/json", "enabled": true },
+              { "name": "Accept", "value": "application/json", "enabled": true }
+            ],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"name\": \"Fluffy\",\n  \"species\": \"cat\",\n  \"age\": 3,\n  \"status\": \"available\"\n}"
+            },
+            "auth": {
+              "mode": "basic",
+              "basic": { "username": "admin", "password": "secret123" }
+            },
+            "docs": "Add a new pet to the store",
+            "script": {
+              "req": "// Pre-request script\nconsole.log('Creating pet...');",
+              "res": "// Post-response script\nconsole.log('Pet created!');"
+            }
+          }
+        },
+        {
+          "name": "Update Pet",
+          "type": "http",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/pets/:petId",
+            "headers": [
+              { "name": "Content-Type", "value": "application/json", "enabled": true }
+            ],
+            "params": [
+              { "name": "petId", "value": "123", "type": "path", "enabled": true }
+            ],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"name\": \"Fluffy Updated\",\n  \"status\": \"sold\"\n}"
+            },
+            "auth": { "mode": "none" },
+            "docs": "Update an existing pet"
+          }
+        },
+        {
+          "name": "Delete Pet",
+          "type": "http",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/pets/:petId",
+            "headers": [
+              { "name": "X-API-Key", "value": "{{apiKey}}", "enabled": true }
+            ],
+            "params": [
+              { "name": "petId", "value": "123", "type": "path", "enabled": true }
+            ],
+            "body": { "mode": "none" },
+            "auth": { "mode": "none" },
+            "docs": "Remove a pet from the store"
+          }
+        },
+        {
+          "name": "Update Pet Form",
+          "type": "http",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/pets/:petId",
+            "headers": [],
+            "params": [
+              { "name": "petId", "value": "123", "type": "path", "enabled": true }
+            ],
+            "body": {
+              "mode": "formUrlEncoded",
+              "formUrlEncoded": [
+                { "name": "name", "value": "New Name", "enabled": true },
+                { "name": "status", "value": "pending", "enabled": true }
+              ]
+            },
+            "auth": { "mode": "none" },
+            "docs": "Update pet using form data"
+          }
+        },
+        {
+          "name": "Upload Pet Image",
+          "type": "http",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/pets/:petId/image",
+            "headers": [
+              { "name": "Accept", "value": "application/json", "enabled": true }
+            ],
+            "params": [
+              { "name": "petId", "value": "123", "type": "path", "enabled": true }
+            ],
+            "body": {
+              "mode": "multipartForm",
+              "multipartForm": [
+                { "name": "file", "value": "", "enabled": true },
+                { "name": "description", "value": "Pet photo", "enabled": true }
+              ]
+            },
+            "auth": { "mode": "none" },
+            "docs": "Upload an image for a pet"
+          }
+        },
+        {
+          "name": "GraphQL Get Pets",
+          "type": "graphql",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/graphql",
+            "headers": [
+              { "name": "Content-Type", "value": "application/json", "enabled": true }
+            ],
+            "params": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetPets($status: String) {\n  pets(status: $status) {\n    id\n    name\n    species\n    status\n  }\n}",
+                "variables": "{ \"status\": \"available\" }"
+              }
+            },
+            "auth": { "mode": "none" },
+            "docs": "Query pets using GraphQL"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Store",
+      "type": "folder",
+      "items": [
+        {
+          "name": "Get Inventory",
+          "type": "http",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/store/inventory",
+            "headers": [
+              { "name": "Accept", "value": "application/json", "enabled": true }
+            ],
+            "params": [],
+            "body": { "mode": "none" },
+            "auth": { "mode": "none" },
+            "docs": "Returns pet inventories by status"
+          }
+        },
+        {
+          "name": "Place Order",
+          "type": "http",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/store/order",
+            "headers": [
+              { "name": "Content-Type", "value": "application/json", "enabled": true }
+            ],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"petId\": 123,\n  \"quantity\": 1,\n  \"status\": \"placed\"\n}"
+            },
+            "auth": { "mode": "none" },
+            "docs": "Place an order for a pet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "type": "folder",
+      "items": [
+        {
+          "name": "Create User",
+          "type": "http",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/users",
+            "headers": [
+              { "name": "Content-Type", "value": "application/json", "enabled": true }
+            ],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"username\": \"john_doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"securepass\"\n}"
+            },
+            "auth": { "mode": "none" },
+            "docs": "Create a new user account",
+            "tests": "// Test script\nexpect(response.status).toBe(201);"
+          }
+        }
+      ]
+    }
+  ]
+}

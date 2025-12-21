@@ -1,0 +1,387 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2024-01-15T10:00:00.000Z",
+  "__export_source": "insomnia.desktop.app:v8.0.0",
+  "resources": [
+    {
+      "_id": "wrk_petstore",
+      "parentId": null,
+      "modified": 1705312800000,
+      "created": 1705312800000,
+      "name": "Petstore API",
+      "description": "A sample API for managing pets in a store",
+      "_type": "workspace",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_base",
+      "parentId": "wrk_petstore",
+      "modified": 1705312800000,
+      "created": 1705312800000,
+      "name": "Production",
+      "description": "Production environment",
+      "_type": "environment",
+      "data": {
+        "baseUrl": "https://api.petstore.com/v1",
+        "apiKey": "prod-api-key-123"
+      },
+      "dataPropertyOrder": null,
+      "color": null,
+      "isPrivate": false
+    },
+    {
+      "_id": "env_dev",
+      "parentId": "wrk_petstore",
+      "modified": 1705312800000,
+      "created": 1705312800000,
+      "name": "Development",
+      "description": "Development environment",
+      "_type": "environment",
+      "data": {
+        "baseUrl": "http://localhost:3000/v1",
+        "apiKey": "dev-api-key-456"
+      },
+      "dataPropertyOrder": null,
+      "color": "#00ff00",
+      "isPrivate": false
+    },
+    {
+      "_id": "fld_pets",
+      "parentId": "wrk_petstore",
+      "modified": 1705312800000,
+      "created": 1705312800000,
+      "name": "Pets",
+      "description": "Pet management endpoints",
+      "_type": "request_group",
+      "metaSortKey": 1
+    },
+    {
+      "_id": "fld_store",
+      "parentId": "wrk_petstore",
+      "modified": 1705312800000,
+      "created": 1705312800000,
+      "name": "Store",
+      "description": "Store operations",
+      "_type": "request_group",
+      "metaSortKey": 2
+    },
+    {
+      "_id": "fld_users",
+      "parentId": "wrk_petstore",
+      "modified": 1705312800000,
+      "created": 1705312800000,
+      "name": "Users",
+      "description": "User management",
+      "_type": "request_group",
+      "metaSortKey": 3
+    },
+    {
+      "_id": "req_list_pets",
+      "parentId": "fld_pets",
+      "modified": 1705312800000,
+      "created": 1705312800000,
+      "name": "List Pets",
+      "description": "Get a list of all pets with optional filtering",
+      "_type": "request",
+      "method": "GET",
+      "url": "{{baseUrl}}/pets",
+      "parameters": [
+        {
+          "name": "status",
+          "value": "available",
+          "description": "Filter by pet status"
+        },
+        {
+          "name": "limit",
+          "value": "10",
+          "description": "Maximum number of results"
+        }
+      ],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "X-API-Key",
+          "value": "{{apiKey}}"
+        }
+      ],
+      "authentication": {
+        "type": "apikey",
+        "key": "X-API-Key",
+        "value": "{{apiKey}}",
+        "addTo": "header"
+      },
+      "metaSortKey": 1
+    },
+    {
+      "_id": "req_get_pet",
+      "parentId": "fld_pets",
+      "modified": 1705312800000,
+      "created": 1705312800000,
+      "name": "Get Pet by ID",
+      "description": "Retrieve a specific pet by its ID",
+      "_type": "request",
+      "method": "GET",
+      "url": "{{baseUrl}}/pets/{{petId}}",
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{apiKey}}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": 2
+    },
+    {
+      "_id": "req_create_pet",
+      "parentId": "fld_pets",
+      "modified": 1705312800000,
+      "created": 1705312800000,
+      "name": "Create Pet",
+      "description": "Add a new pet to the store",
+      "_type": "request",
+      "method": "POST",
+      "url": "{{baseUrl}}/pets",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Fluffy\",\n  \"species\": \"cat\",\n  \"age\": 3,\n  \"status\": \"available\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "basic",
+        "username": "admin",
+        "password": "secret123"
+      },
+      "metaSortKey": 3
+    },
+    {
+      "_id": "req_update_pet",
+      "parentId": "fld_pets",
+      "modified": 1705312800000,
+      "created": 1705312800000,
+      "name": "Update Pet",
+      "description": "Update an existing pet",
+      "_type": "request",
+      "method": "PUT",
+      "url": "{{baseUrl}}/pets/{{petId}}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Fluffy Updated\",\n  \"status\": \"sold\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "metaSortKey": 4
+    },
+    {
+      "_id": "req_delete_pet",
+      "parentId": "fld_pets",
+      "modified": 1705312800000,
+      "created": 1705312800000,
+      "name": "Delete Pet",
+      "description": "Remove a pet from the store",
+      "_type": "request",
+      "method": "DELETE",
+      "url": "{{baseUrl}}/pets/{{petId}}",
+      "headers": [
+        {
+          "name": "X-API-Key",
+          "value": "{{apiKey}}"
+        }
+      ],
+      "metaSortKey": 5
+    },
+    {
+      "_id": "req_upload_image",
+      "parentId": "fld_pets",
+      "modified": 1705312800000,
+      "created": 1705312800000,
+      "name": "Upload Pet Image",
+      "description": "Upload an image for a pet",
+      "_type": "request",
+      "method": "POST",
+      "url": "{{baseUrl}}/pets/{{petId}}/image",
+      "body": {
+        "mimeType": "multipart/form-data",
+        "params": [
+          {
+            "name": "file",
+            "value": "",
+            "type": "file",
+            "fileName": "/path/to/image.jpg"
+          },
+          {
+            "name": "description",
+            "value": "Pet photo",
+            "type": "text"
+          }
+        ]
+      },
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "metaSortKey": 6
+    },
+    {
+      "_id": "req_update_pet_form",
+      "parentId": "fld_pets",
+      "modified": 1705312800000,
+      "created": 1705312800000,
+      "name": "Update Pet (Form)",
+      "description": "Update pet using form data",
+      "_type": "request",
+      "method": "PATCH",
+      "url": "{{baseUrl}}/pets/{{petId}}",
+      "body": {
+        "mimeType": "application/x-www-form-urlencoded",
+        "params": [
+          {
+            "name": "name",
+            "value": "New Name"
+          },
+          {
+            "name": "status",
+            "value": "pending"
+          }
+        ]
+      },
+      "metaSortKey": 7
+    },
+    {
+      "_id": "req_inventory",
+      "parentId": "fld_store",
+      "modified": 1705312800000,
+      "created": 1705312800000,
+      "name": "Get Inventory",
+      "description": "Returns pet inventories by status",
+      "_type": "request",
+      "method": "GET",
+      "url": "{{baseUrl}}/store/inventory",
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "metaSortKey": 1
+    },
+    {
+      "_id": "req_place_order",
+      "parentId": "fld_store",
+      "modified": 1705312800000,
+      "created": 1705312800000,
+      "name": "Place Order",
+      "description": "Place an order for a pet",
+      "_type": "request",
+      "method": "POST",
+      "url": "{{baseUrl}}/store/order",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"petId\": 123,\n  \"quantity\": 1,\n  \"status\": \"placed\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "metaSortKey": 2
+    },
+    {
+      "_id": "req_create_user",
+      "parentId": "fld_users",
+      "modified": 1705312800000,
+      "created": 1705312800000,
+      "name": "Create User",
+      "description": "Create a new user account",
+      "_type": "request",
+      "method": "POST",
+      "url": "{{baseUrl}}/users",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"john_doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"securepass\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "metaSortKey": 1
+    },
+    {
+      "_id": "req_login",
+      "parentId": "fld_users",
+      "modified": 1705312800000,
+      "created": 1705312800000,
+      "name": "User Login",
+      "description": "Authenticate a user",
+      "_type": "request",
+      "method": "POST",
+      "url": "{{baseUrl}}/users/login",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"john_doe\",\n  \"password\": \"securepass\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "oauth2",
+        "grantType": "password",
+        "accessTokenUrl": "{{baseUrl}}/oauth/token",
+        "clientId": "my-client",
+        "clientSecret": "my-secret",
+        "scope": "read write"
+      },
+      "metaSortKey": 2
+    },
+    {
+      "_id": "req_graphql_pets",
+      "parentId": "fld_pets",
+      "modified": 1705312800000,
+      "created": 1705312800000,
+      "name": "GraphQL - Get Pets",
+      "description": "Query pets using GraphQL",
+      "_type": "request",
+      "method": "POST",
+      "url": "{{baseUrl}}/graphql",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"query\": \"query GetPets($status: String) { pets(status: $status) { id name species status } }\",\n  \"variables\": { \"status\": \"available\" }\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "metaSortKey": 8
+    }
+  ]
+}

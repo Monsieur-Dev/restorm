@@ -11,6 +11,9 @@ import { importGraphQLFromString } from '../../src/renderer/src/services/import/
 import { importGrpcFromString } from '../../src/renderer/src/services/import/GrpcImportService'
 import { importSoapFromString } from '../../src/renderer/src/services/import/SoapImportService'
 import { importAsyncAPIFromString } from '../../src/renderer/src/services/import/AsyncAPIImportService'
+import { importPostmanFromJson } from '../../src/renderer/src/services/import/PostmanImportService'
+import { importInsomniaFromJson } from '../../src/renderer/src/services/import/InsomniaImportService'
+import { importBrunoFromJson } from '../../src/renderer/src/services/import/BrunoImportService'
 import type { Folder, EnvironmentFolder, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest } from '../../src/renderer/src/types/collections'
 
 // Helper to load test files
@@ -529,6 +532,563 @@ describe('AsyncAPIImportService', () => {
 })
 
 // =============================================================================
+// PostmanImportService Tests
+// =============================================================================
+
+describe('PostmanImportService', () => {
+  const postmanJson = loadTestFile('postman-petstore.json')
+
+  describe('importPostmanFromJson', () => {
+    it('should import Postman collection and return an EnvironmentFolder', () => {
+      const result = importPostmanFromJson(postmanJson)
+
+      expect(result).toBeDefined()
+      expect(result.folderType).toBe('environment')
+      expect(result.name).toBe('Swagger Petstore')
+      expect(result.environments).toBeDefined()
+      expect(result.environments.length).toBeGreaterThan(0)
+    })
+
+    it('should create environment with baseUrl variable', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const env = result.environments[0]
+
+      expect(env).toBeDefined()
+      expect(env?.variables.some((v) => v.key === 'baseUrl')).toBe(true)
+    })
+
+    it('should create nested folders for Postman folder structure', () => {
+      const result = importPostmanFromJson(postmanJson)
+
+      // Postman collection has pet, store, user folders
+      const folderNames = result.items.filter(isFolder).map((f) => f.name)
+      expect(folderNames).toContain('pet')
+      expect(folderNames).toContain('store')
+      expect(folderNames).toContain('user')
+    })
+
+    it('should create HTTP requests for each endpoint', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      expect(requests.length).toBeGreaterThan(0)
+      requests.forEach((req) => {
+        expect(req.type).toBe('http')
+        expect(req.method).toBeDefined()
+        expect(req.url).toBeDefined()
+      })
+    })
+
+    it('should correctly parse HTTP methods', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const methods = new Set(requests.map((r) => r.method))
+      // Petstore uses GET, POST, PUT, DELETE
+      expect(methods.has('GET')).toBe(true)
+      expect(methods.has('POST')).toBe(true)
+      expect(methods.has('PUT')).toBe(true)
+      expect(methods.has('DELETE')).toBe(true)
+    })
+
+    it('should parse headers from requests', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      // At least some requests should have headers
+      const requestsWithHeaders = requests.filter((r) => r.headers.length > 0)
+      expect(requestsWithHeaders.length).toBeGreaterThan(0)
+    })
+
+    it('should parse query parameters', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      // Find requests with query params (e.g., findByStatus)
+      const requestsWithParams = requests.filter((r) => r.params.length > 0)
+      expect(requestsWithParams.length).toBeGreaterThan(0)
+    })
+
+    it('should parse path parameters', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      // Find requests with path params (e.g., GET /pet/{petId})
+      const requestsWithPathParams = requests.filter((r) => r.pathParams && r.pathParams.length > 0)
+      expect(requestsWithPathParams.length).toBeGreaterThan(0)
+    })
+
+    it('should convert path variables from :var to {{var}} format', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      // URLs should use {{var}} format, not :var
+      const requestsWithTemplateVars = requests.filter((r) => r.url.includes('{{'))
+      expect(requestsWithTemplateVars.length).toBeGreaterThan(0)
+      
+      // No URLs should have :var format after conversion
+      requests.forEach((req) => {
+        // Only check if URL doesn't start with http (path variables are in path, not protocol)
+        const pathPart = req.url.replace(/^https?:\/\/[^/]+/, '')
+        expect(pathPart).not.toMatch(/:[a-zA-Z_][a-zA-Z0-9_]*/)
+      })
+    })
+
+    it('should parse request bodies', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      // POST/PUT requests should have bodies
+      const requestsWithBody = requests.filter((r) => r.body !== undefined)
+      expect(requestsWithBody.length).toBeGreaterThan(0)
+    })
+
+    it('should handle form-data bodies', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      // Find requests with formdata body
+      const formDataRequests = requests.filter(
+        (r) => r.body?.type === 'form-data'
+      )
+      expect(formDataRequests.length).toBeGreaterThan(0)
+    })
+
+    it('should handle urlencoded bodies', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      // Find requests with urlencoded body
+      const urlencodedRequests = requests.filter(
+        (r) => r.body?.type === 'x-www-form-urlencoded'
+      )
+      expect(urlencodedRequests.length).toBeGreaterThan(0)
+    })
+
+    it('should handle raw JSON bodies', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      // Find requests with raw text body (JSON)
+      const rawBodyRequests = requests.filter(
+        (r) => r.body?.type === 'text'
+      )
+      expect(rawBodyRequests.length).toBeGreaterThan(0)
+    })
+
+    it('should use custom baseUrl option', () => {
+      const result = importPostmanFromJson(postmanJson, {
+        baseUrl: 'http://custom.url'
+      })
+
+      const env = result.environments[0]
+      const baseUrlVar = env?.variables.find((v) => v.key === 'baseUrl')
+      expect(baseUrlVar?.value).toBe('http://custom.url')
+    })
+
+    it('should generate unique IDs for all items', () => {
+      const result = importPostmanFromJson(postmanJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+      const ids = requests.map((r) => r.id)
+
+      // All IDs should be unique
+      expect(new Set(ids).size).toBe(ids.length)
+    })
+
+    it('should generate deterministic IDs', () => {
+      const result1 = importPostmanFromJson(postmanJson)
+      const result2 = importPostmanFromJson(postmanJson)
+
+      const requests1 = findAllRequests(result1, isHTTPRequest)
+      const requests2 = findAllRequests(result2, isHTTPRequest)
+
+      // Same content should produce same IDs
+      expect(requests1.length).toBe(requests2.length)
+      for (let i = 0; i < requests1.length; i++) {
+        expect(requests1[i].id).toBe(requests2[i].id)
+      }
+    })
+
+    it('should include documentation from descriptions', () => {
+      const result = importPostmanFromJson(postmanJson)
+      
+      // Collection should have documentation from info.description
+      expect(result.documentation).toBeDefined()
+      expect(result.documentation.length).toBeGreaterThan(0)
+    })
+
+    it('should throw on invalid JSON', () => {
+      expect(() => importPostmanFromJson('not valid json')).toThrow()
+    })
+
+    it('should throw on unsupported schema version', () => {
+      const invalidCollection = JSON.stringify({
+        info: {
+          name: 'Test',
+          schema: 'https://schema.getpostman.com/json/collection/v1.0.0/collection.json'
+        },
+        item: []
+      })
+      expect(() => importPostmanFromJson(invalidCollection)).toThrow(/Unsupported Postman collection schema/)
+    })
+  })
+})
+
+// =============================================================================
+// InsomniaImportService Tests
+// =============================================================================
+
+describe('InsomniaImportService', () => {
+  const insomniaJson = loadTestFile('insomnia-petstore.json')
+
+  describe('importInsomniaFromJson', () => {
+    it('should import Insomnia export and return an EnvironmentFolder', () => {
+      const result = importInsomniaFromJson(insomniaJson)
+
+      expect(result).toBeDefined()
+      expect(result.folderType).toBe('environment')
+      expect(result.name).toBe('Petstore API')
+      expect(result.environments).toBeDefined()
+      expect(result.environments.length).toBeGreaterThan(0)
+    })
+
+    it('should create environments from Insomnia environments', () => {
+      const result = importInsomniaFromJson(insomniaJson)
+
+      // Should have Production and Development environments
+      const envNames = result.environments.map(e => e.name)
+      expect(envNames).toContain('Production')
+      expect(envNames).toContain('Development')
+    })
+
+    it('should extract environment variables', () => {
+      const result = importInsomniaFromJson(insomniaJson)
+      const prodEnv = result.environments.find(e => e.name === 'Production')
+
+      expect(prodEnv).toBeDefined()
+      expect(prodEnv?.variables.some(v => v.key === 'baseUrl')).toBe(true)
+      expect(prodEnv?.variables.some(v => v.key === 'apiKey')).toBe(true)
+    })
+
+    it('should create nested folders from request groups', () => {
+      const result = importInsomniaFromJson(insomniaJson)
+
+      const folderNames = result.items.filter(isFolder).map(f => f.name)
+      expect(folderNames).toContain('Pets')
+      expect(folderNames).toContain('Store')
+      expect(folderNames).toContain('Users')
+    })
+
+    it('should create HTTP requests', () => {
+      const result = importInsomniaFromJson(insomniaJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      expect(requests.length).toBeGreaterThan(0)
+      requests.forEach(req => {
+        expect(req.type).toBe('http')
+        expect(req.method).toBeDefined()
+        expect(req.url).toBeDefined()
+      })
+    })
+
+    it('should correctly parse HTTP methods', () => {
+      const result = importInsomniaFromJson(insomniaJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const methods = new Set(requests.map(r => r.method))
+      expect(methods.has('GET')).toBe(true)
+      expect(methods.has('POST')).toBe(true)
+      expect(methods.has('PUT')).toBe(true)
+      expect(methods.has('DELETE')).toBe(true)
+      expect(methods.has('PATCH')).toBe(true)
+    })
+
+    it('should parse headers from requests', () => {
+      const result = importInsomniaFromJson(insomniaJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const requestsWithHeaders = requests.filter(r => r.headers.length > 0)
+      expect(requestsWithHeaders.length).toBeGreaterThan(0)
+    })
+
+    it('should parse query parameters', () => {
+      const result = importInsomniaFromJson(insomniaJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const requestsWithParams = requests.filter(r => r.params.length > 0)
+      expect(requestsWithParams.length).toBeGreaterThan(0)
+    })
+
+    it('should extract path parameters from URL', () => {
+      const result = importInsomniaFromJson(insomniaJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const requestsWithPathParams = requests.filter(r => r.pathParams && r.pathParams.length > 0)
+      expect(requestsWithPathParams.length).toBeGreaterThan(0)
+    })
+
+    it('should parse JSON request bodies', () => {
+      const result = importInsomniaFromJson(insomniaJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const requestsWithTextBody = requests.filter(r => r.body?.type === 'text')
+      expect(requestsWithTextBody.length).toBeGreaterThan(0)
+    })
+
+    it('should handle form-data bodies', () => {
+      const result = importInsomniaFromJson(insomniaJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const formDataRequests = requests.filter(r => r.body?.type === 'form-data')
+      expect(formDataRequests.length).toBeGreaterThan(0)
+    })
+
+    it('should handle urlencoded bodies', () => {
+      const result = importInsomniaFromJson(insomniaJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const urlencodedRequests = requests.filter(r => r.body?.type === 'x-www-form-urlencoded')
+      expect(urlencodedRequests.length).toBeGreaterThan(0)
+    })
+
+    it('should detect and convert GraphQL requests', () => {
+      const result = importInsomniaFromJson(insomniaJson)
+      const requests = findAllRequests(result, isGraphQLRequest)
+
+      expect(requests.length).toBeGreaterThan(0)
+      requests.forEach(req => {
+        expect(req.type).toBe('graphql')
+        expect(req.query).toBeDefined()
+      })
+    })
+
+    it('should use custom baseUrl option', () => {
+      const result = importInsomniaFromJson(insomniaJson, {
+        baseUrl: 'http://custom.url'
+      })
+
+      const env = result.environments[0]
+      const baseUrlVar = env?.variables.find(v => v.key === 'baseUrl')
+      expect(baseUrlVar?.value).toBe('http://custom.url')
+    })
+
+    it('should generate unique IDs for all items', () => {
+      const result = importInsomniaFromJson(insomniaJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+      const ids = requests.map(r => r.id)
+
+      expect(new Set(ids).size).toBe(ids.length)
+    })
+
+    it('should generate deterministic IDs', () => {
+      const result1 = importInsomniaFromJson(insomniaJson)
+      const result2 = importInsomniaFromJson(insomniaJson)
+
+      const requests1 = findAllRequests(result1, isHTTPRequest)
+      const requests2 = findAllRequests(result2, isHTTPRequest)
+
+      expect(requests1.length).toBe(requests2.length)
+      for (let i = 0; i < requests1.length; i++) {
+        expect(requests1[i].id).toBe(requests2[i].id)
+      }
+    })
+
+    it('should include documentation from descriptions', () => {
+      const result = importInsomniaFromJson(insomniaJson)
+
+      expect(result.documentation).toBeDefined()
+      expect(result.documentation.length).toBeGreaterThan(0)
+    })
+
+    it('should throw on invalid JSON', () => {
+      expect(() => importInsomniaFromJson('not valid json')).toThrow()
+    })
+
+    it('should throw on unsupported export format', () => {
+      const invalidExport = JSON.stringify({
+        _type: 'export',
+        __export_format: 3,
+        resources: []
+      })
+      expect(() => importInsomniaFromJson(invalidExport)).toThrow(/Unsupported Insomnia export format/)
+    })
+
+    it('should throw on invalid export type', () => {
+      const invalidExport = JSON.stringify({
+        _type: 'invalid',
+        __export_format: 4,
+        resources: []
+      })
+      expect(() => importInsomniaFromJson(invalidExport)).toThrow(/Invalid Insomnia export/)
+    })
+  })
+})
+
+// =============================================================================
+// BrunoImportService Tests
+// =============================================================================
+
+describe('BrunoImportService', () => {
+  const brunoJson = loadTestFile('bruno-petstore.json')
+
+  describe('importBrunoFromJson', () => {
+    it('should import Bruno collection and return an EnvironmentFolder', () => {
+      const result = importBrunoFromJson(brunoJson)
+
+      expect(result).toBeDefined()
+      expect(result.folderType).toBe('environment')
+      expect(result.name).toBe('Petstore API')
+      expect(result.environments).toBeDefined()
+      expect(result.environments.length).toBeGreaterThan(0)
+    })
+
+    it('should create environment', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const env = result.environments[0]
+
+      expect(env).toBeDefined()
+      expect(env?.name).toBe('Default')
+    })
+
+    it('should create nested folders', () => {
+      const result = importBrunoFromJson(brunoJson)
+
+      const folderNames = result.items.filter(isFolder).map(f => f.name)
+      expect(folderNames).toContain('Pets')
+      expect(folderNames).toContain('Store')
+      expect(folderNames).toContain('Users')
+    })
+
+    it('should create HTTP requests', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      expect(requests.length).toBeGreaterThan(0)
+      requests.forEach(req => {
+        expect(req.type).toBe('http')
+        expect(req.method).toBeDefined()
+        expect(req.url).toBeDefined()
+      })
+    })
+
+    it('should correctly parse HTTP methods', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const methods = new Set(requests.map(r => r.method))
+      expect(methods.has('GET')).toBe(true)
+      expect(methods.has('POST')).toBe(true)
+      expect(methods.has('PUT')).toBe(true)
+      expect(methods.has('DELETE')).toBe(true)
+      expect(methods.has('PATCH')).toBe(true)
+    })
+
+    it('should parse headers from requests', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const requestsWithHeaders = requests.filter(r => r.headers.length > 0)
+      expect(requestsWithHeaders.length).toBeGreaterThan(0)
+    })
+
+    it('should parse query parameters', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const requestsWithParams = requests.filter(r => r.params.length > 0)
+      expect(requestsWithParams.length).toBeGreaterThan(0)
+    })
+
+    it('should parse path parameters', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const requestsWithPathParams = requests.filter(r => r.pathParams && r.pathParams.length > 0)
+      expect(requestsWithPathParams.length).toBeGreaterThan(0)
+    })
+
+    it('should parse JSON request bodies', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const requestsWithTextBody = requests.filter(r => r.body?.type === 'text')
+      expect(requestsWithTextBody.length).toBeGreaterThan(0)
+    })
+
+    it('should handle form-data bodies', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const formDataRequests = requests.filter(r => r.body?.type === 'form-data')
+      expect(formDataRequests.length).toBeGreaterThan(0)
+    })
+
+    it('should handle urlencoded bodies', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      const urlencodedRequests = requests.filter(r => r.body?.type === 'x-www-form-urlencoded')
+      expect(urlencodedRequests.length).toBeGreaterThan(0)
+    })
+
+    it('should detect and convert GraphQL requests', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const requests = findAllRequests(result, isGraphQLRequest)
+
+      expect(requests.length).toBeGreaterThan(0)
+      requests.forEach(req => {
+        expect(req.type).toBe('graphql')
+        expect(req.query).toBeDefined()
+      })
+    })
+
+    it('should use custom baseUrl option', () => {
+      const result = importBrunoFromJson(brunoJson, {
+        baseUrl: 'http://custom.url'
+      })
+
+      const env = result.environments[0]
+      const baseUrlVar = env?.variables.find(v => v.key === 'baseUrl')
+      expect(baseUrlVar?.value).toBe('http://custom.url')
+    })
+
+    it('should generate unique IDs for all items', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+      const ids = requests.map(r => r.id)
+
+      expect(new Set(ids).size).toBe(ids.length)
+    })
+
+    it('should generate deterministic IDs', () => {
+      const result1 = importBrunoFromJson(brunoJson)
+      const result2 = importBrunoFromJson(brunoJson)
+
+      const requests1 = findAllRequests(result1, isHTTPRequest)
+      const requests2 = findAllRequests(result2, isHTTPRequest)
+
+      expect(requests1.length).toBe(requests2.length)
+      for (let i = 0; i < requests1.length; i++) {
+        expect(requests1[i].id).toBe(requests2[i].id)
+      }
+    })
+
+    it('should include documentation from docs field', () => {
+      const result = importBrunoFromJson(brunoJson)
+      const requests = findAllRequests(result, isHTTPRequest)
+
+      // At least some requests should have documentation
+      const requestsWithDocs = requests.filter(r => r.documentation.length > 0)
+      expect(requestsWithDocs.length).toBeGreaterThan(0)
+    })
+
+    it('should throw on invalid JSON', () => {
+      expect(() => importBrunoFromJson('not valid json')).toThrow()
+    })
+  })
+})
+
+// =============================================================================
 // Cross-service Tests
 // =============================================================================
 
@@ -539,8 +1099,11 @@ describe('Import Services - Cross-validation', () => {
     const grpc = importGrpcFromString(loadTestFile('grpc-docker.proto'), { name: 'gRPC' })
     const soap = importSoapFromString(loadTestFile('soap-docker.wsdl'), { name: 'SOAP' })
     const asyncapi = importAsyncAPIFromString(loadTestFile('asyncapi-docker.yaml'), { name: 'AsyncAPI' })
+    const postman = importPostmanFromJson(loadTestFile('postman-petstore.json'))
+    const insomnia = importInsomniaFromJson(loadTestFile('insomnia-petstore.json'))
+    const bruno = importBrunoFromJson(loadTestFile('bruno-petstore.json'))
 
-    const results = [swagger, graphql, grpc, soap, asyncapi]
+    const results = [swagger, graphql, grpc, soap, asyncapi, postman, insomnia, bruno]
 
     results.forEach((result) => {
       expect(result.folderType).toBe('environment')
@@ -559,8 +1122,11 @@ describe('Import Services - Cross-validation', () => {
     const grpc = importGrpcFromString(loadTestFile('grpc-docker.proto'), { name: 'gRPC' })
     const soap = importSoapFromString(loadTestFile('soap-docker.wsdl'), { name: 'SOAP' })
     const asyncapi = importAsyncAPIFromString(loadTestFile('asyncapi-docker.yaml'), { name: 'AsyncAPI' })
+    const postman = importPostmanFromJson(loadTestFile('postman-petstore.json'))
+    const insomnia = importInsomniaFromJson(loadTestFile('insomnia-petstore.json'))
+    const bruno = importBrunoFromJson(loadTestFile('bruno-petstore.json'))
 
-    const results = [swagger, graphql, grpc, soap, asyncapi]
+    const results = [swagger, graphql, grpc, soap, asyncapi, postman, insomnia, bruno]
 
     results.forEach((result) => {
       expect(result.environments.length).toBeGreaterThan(0)
