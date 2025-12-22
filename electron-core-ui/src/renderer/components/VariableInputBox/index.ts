@@ -1,2 +1,2 @@
 export { VariableInputBox } from './VariableInputBox'
-export type { VariableInputBoxProps, VariableDefinition } from './types'
+export type { VariableInputBoxProps, VariableDefinition, HelperDefinition } from './types'

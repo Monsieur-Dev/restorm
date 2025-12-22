@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Handlebars } from '../../utils/handlebarsHelpers'
+import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
   Button,
   VariableInputBox,
@@ -40,6 +41,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
   const { t } = useTranslation()
   const { environments, selectedEnvId } = useEnvironmentContext()
   const { valuesByEnvId } = useEnvironmentValues()
+  const handlebarsHelpers = useHandlebarsHelpers()
   
   const [url, setUrlState] = useState(request.url)
   const [body, setBodyState] = useState(request.body)
@@ -237,6 +239,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
             value={url}
             onChange={setUrl}
             variables={envVariables}
+            helpers={handlebarsHelpers}
             placeholder={t('soap.urlPlaceholder')}
           />
         </div>

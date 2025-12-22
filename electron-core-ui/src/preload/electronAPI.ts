@@ -22,5 +22,18 @@ export const createElectronAPI = (): Record<string, unknown> => ({
     ipcRenderer.on('keyboard-shortcut', (_: Electron.IpcRendererEvent, shortcut: string) => {
       cb(shortcut);
     });
+  },
+  /**
+   * Register shortcuts that should be intercepted by the main process
+   * These are shortcuts that Chromium would handle by default (Ctrl+N, Ctrl+O, etc.)
+   */
+  registerInterceptedShortcuts: (shortcuts: string[]) => {
+    ipcRenderer.send('register-intercepted-shortcuts', shortcuts);
+  },
+  /**
+   * Check if we're in dev mode (for enabling dev-specific shortcuts like Ctrl+Shift+R)
+   */
+  isDevMode: (): Promise<boolean> => {
+    return ipcRenderer.invoke('is-dev-mode');
   }
 })

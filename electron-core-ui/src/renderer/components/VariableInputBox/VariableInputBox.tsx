@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type * as monacoEditor from 'monaco-editor'
-import type { VariableInputBoxProps, VariableDefinition } from './types'
+import type { VariableInputBoxProps, VariableDefinition, HelperDefinition } from './types'
 import { defaultInputBoxStyles } from '../InputBox/types'
 import { CodeEditor } from '../CodeEditor/CodeEditor'
 import { Tooltip } from '../Tooltip'
@@ -11,6 +11,35 @@ import './variableInputBox.css'
 
 const LANGUAGE_ID = 'handlebars'
 
+interface ModelData {
+  variables: VariableDefinition[]
+  helpers: HelperDefinition[]
+}
+
+// Category prefixes for filtering (e.g., typing "arr:" shows only array helpers)
+const CATEGORY_PREFIXES: Record<string, string> = {
+  comparison: 'comp',
+  string: 'str',
+  math: 'math',
+  array: 'arr',
+  object: 'obj',
+  url: 'url',
+  date: 'date',
+  regex: 'regex',
+  misc: 'misc'
+}
+
+// Pre-computed helper suggestion data (without range which varies per position)
+interface CachedHelperSuggestion {
+  label: { label: string; description: string }
+  kind: number // CompletionItemKind.Function
+  insertText: string
+  filterText: string
+  documentation: { value: string }
+  detail: string
+  sortText: string
+}
+
 // Use window to persist state across hot reloads
 const globalKey = '__variableInputBoxProviders__'
 interface ProviderState {
@@ -18,7 +47,9 @@ interface ProviderState {
   completionProviderDisposable: monacoEditor.IDisposable | null
   hoverProviderDisposable: monacoEditor.IDisposable | null
   cancellationHandlerRegistered: boolean
-  modelVariablesMap: WeakMap<monacoEditor.editor.ITextModel, VariableDefinition[]>
+  modelDataMap: WeakMap<monacoEditor.editor.ITextModel, ModelData>
+  // Cache for helper suggestions (keyed by stringified helpers array)
+  helperSuggestionsCache: Map<string, CachedHelperSuggestion[]>
 }
 
 function getProviderState(): ProviderState {
@@ -28,9 +59,48 @@ function getProviderState(): ProviderState {
     completionProviderDisposable: null,
     hoverProviderDisposable: null,
     cancellationHandlerRegistered: false,
-    modelVariablesMap: new WeakMap()
+    modelDataMap: new WeakMap(),
+    helperSuggestionsCache: new Map()
   }
   return win[globalKey]
+}
+
+// Build cached helper suggestions (computed once per unique helpers array)
+function getCachedHelperSuggestions(
+  helpers: HelperDefinition[],
+  functionKind: number
+): CachedHelperSuggestion[] {
+  const state = getProviderState()
+  // Use helper names as cache key (assumes helpers don't change content, only list)
+  const cacheKey = helpers.map((h) => h.name).join(',')
+
+  let cached = state.helperSuggestionsCache.get(cacheKey)
+  if (!cached) {
+    cached = helpers.map((h) => {
+      const docParts = [h.description, '', `**Syntax:** \`${h.syntax}\``]
+      if (h.example) {
+        docParts.push('', `**Example:** ${h.example}`)
+      }
+
+      const categoryKey =
+        Object.keys(CATEGORY_PREFIXES).find(
+          (key) => h.category.toLowerCase().includes(key) || key.includes(h.category.toLowerCase())
+        ) ?? 'misc'
+      const prefix = CATEGORY_PREFIXES[categoryKey] ?? 'misc'
+
+      return {
+        label: { label: h.name, description: h.category },
+        kind: functionKind,
+        insertText: `{{${h.name} }}`,
+        filterText: `${prefix}:${h.name} ${h.name}`,
+        documentation: { value: docParts.join('\n') },
+        detail: `${h.category} helper`,
+        sortText: `1_${categoryKey}_${h.name}`
+      }
+    })
+    state.helperSuggestionsCache.set(cacheKey, cached)
+  }
+  return cached
 }
 
 const isMonacoCancellationError = (reason: unknown): boolean => {
@@ -53,6 +123,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
     value,
     onChange,
     variables,
+    helpers = [],
     placeholder,
     resolvedValue,
     id,
@@ -62,6 +133,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
   } = props
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
   const variablesRef = useRef<VariableDefinition[]>(variables)
+  const helpersRef = useRef<HelperDefinition[]>(helpers)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [showResolvedTooltip, setShowResolvedTooltip] = useState(false)
   const [editorMounted, setEditorMounted] = useState(false)
@@ -142,17 +214,18 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
     setContextMenu(prev => ({ ...prev, visible: false }))
   }, [])
 
-  // Keep variablesRef in sync
+  // Keep refs in sync
   variablesRef.current = variables
+  helpersRef.current = helpers
 
-  // Update modelVariablesMap when variables change AND editor is mounted
+  // Update modelDataMap when variables or helpers change AND editor is mounted
   useEffect(() => {
     if (!editorMounted) return
     const model = editorRef.current?.getModel()
     if (model) {
-      getProviderState().modelVariablesMap.set(model, variables)
+      getProviderState().modelDataMap.set(model, { variables, helpers })
     }
-  }, [variables, editorMounted])
+  }, [variables, helpers, editorMounted])
 
   useEffect(() => {
     const state = getProviderState()
@@ -206,7 +279,18 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
       mouseWheelScrollSensitivity: 0,
       fastScrollSensitivity: 0,
       tabSize: 2,
-      insertSpaces: true
+      insertSpaces: true,
+      // Suggestion widget options
+      suggest: {
+        showIcons: true,
+        showStatusBar: true,
+        // Show documentation panel expanded by default
+        showInlineDetails: true,
+        // Show the details panel on the side when navigating suggestions
+        detailsVisible: true,
+        // Preview the suggestion in the editor
+        preview: true
+      }
     }),
     []
   )
@@ -239,20 +323,39 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
             endColumn: position.column
           }
 
-          const vars = getProviderState().modelVariablesMap.get(model) ?? []
-          const suggestions = vars.map((v) => {
+          const data = getProviderState().modelDataMap.get(model) ?? { variables: [], helpers: [] }
+          const suggestions: monacoEditor.languages.CompletionItem[] = []
+
+          // Add variable suggestions
+          for (const v of data.variables) {
             const labelObj: { label: string; description?: string } = { label: v.name }
             if (v.value) {
               labelObj.description = v.value
             }
-            return {
+            suggestions.push({
               label: labelObj as monacoEditor.languages.CompletionItemLabel,
               kind: monacoInstance.languages.CompletionItemKind.Variable,
               insertText: `{{${v.name}}}`,
               documentation: v.description ?? v.value,
+              detail: 'variable',
+              sortText: `0_${v.name}`, // Variables first
               range
-            }
-          })
+            })
+          }
+
+          // Add cached helper suggestions (only range needs to be added per call)
+          const cachedHelpers = getCachedHelperSuggestions(
+            data.helpers,
+            monacoInstance.languages.CompletionItemKind.Function
+          )
+          for (const cached of cachedHelpers) {
+            suggestions.push({
+              ...cached,
+              label: cached.label as monacoEditor.languages.CompletionItemLabel,
+              range
+            })
+          }
+
           // incomplete: true forces Monaco to always recalculate suggestions
           // instead of using cached results when variables change
           return { suggestions, incomplete: true }
@@ -275,28 +378,57 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
             return { contents: [] }
           }
 
-          const name = lineText.substring(openIndex + 2, closeIndex).trim()
-          const vars = getProviderState().modelVariablesMap.get(model) ?? []
-          const match = vars.find((v) => v.name === name)
+          // Extract the content between {{ and }}, get first word (helper/variable name)
+          const innerContent = lineText.substring(openIndex + 2, closeIndex).trim()
+          const name = innerContent.split(/\s+/)[0] ?? ''
 
-          if (!match) {
-            return { contents: [] }
+          const data = getProviderState().modelDataMap.get(model) ?? { variables: [], helpers: [] }
+
+          // Check if it's a variable
+          const varMatch = data.variables.find((v) => v.name === name)
+          if (varMatch) {
+            const range = new monacoInstance.Range(
+              position.lineNumber,
+              openIndex + 1,
+              position.lineNumber,
+              closeIndex + 3
+            )
+            return {
+              range,
+              contents: [
+                { value: `**${varMatch.name}** *(variable)*` },
+                { value: '```text\n' + (varMatch.value || '(empty)') + '\n```' }
+              ]
+            }
           }
 
-          const range = new monacoInstance.Range(
-            position.lineNumber,
-            openIndex + 1,
-            position.lineNumber,
-            closeIndex + 3
-          )
-
-          return {
-            range,
-            contents: [
-              { value: `**${match.name}**` },
-              { value: '```text\n' + (match.value || '(empty)') + '\n```' }
+          // Check if it's a helper (also check with # prefix for block helpers)
+          const helperName = name.startsWith('#') ? name.slice(1) : name
+          const helperMatch = data.helpers.find((h) => h.name === helperName)
+          if (helperMatch) {
+            const range = new monacoInstance.Range(
+              position.lineNumber,
+              openIndex + 1,
+              position.lineNumber,
+              closeIndex + 3
+            )
+            const docParts = [
+              `**${helperMatch.name}** *(${helperMatch.category} helper)*`,
+              '',
+              helperMatch.description,
+              '',
+              `**Syntax:** \`${helperMatch.syntax}\``
             ]
+            if (helperMatch.example) {
+              docParts.push('', `**Example:** ${helperMatch.example}`)
+            }
+            return {
+              range,
+              contents: [{ value: docParts.join('\n') }]
+            }
           }
+
+          return { contents: [] }
         }
       })
 
@@ -334,7 +466,10 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
 
     const model = editor.getModel()
     if (model) {
-      state.modelVariablesMap.set(model, variablesRef.current)
+      state.modelDataMap.set(model, {
+        variables: variablesRef.current,
+        helpers: helpersRef.current
+      })
     }
 
     // Signal that editor is mounted so useEffect can update variables

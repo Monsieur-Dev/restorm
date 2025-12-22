@@ -16,3 +16,9 @@ Features:
     Strategies:
       - Type: Platform
         AvailableOn: [desktop]
+
+  # Handlebars helpers - extended helpers for variable transformation
+  - Name: "handlebars-helpers"
+    Strategies:
+      - Type: Basic
+        Enabled: true

@@ -24,11 +24,18 @@ export abstract class BaseWindow {
     private static windowActionHandlerRegistered = false
     private static windowTitleHandlerRegistered = false
     private static platformHandlerRegistered = false
+    private static interceptedShortcutsHandlerRegistered = false
+    private static isDevModeHandlerRegistered = false
 
     /**
      * Static Map to associate BrowserWindow instances with BaseWindow instances
      */
     private static windowInstances = new Map<BrowserWindow, BaseWindow>()
+    
+    /**
+     * Map to store intercepted shortcuts per window (webContentsId -> Set of shortcuts)
+     */
+    private static interceptedShortcutsPerWindow = new Map<number, Set<string>>()
   
     constructor(configuration: WindowConfiguration) {
       this.configuration = configuration
@@ -199,6 +206,44 @@ export abstract class BaseWindow {
         })
         BaseWindow.platformHandlerRegistered = true
       }
+
+      // Register intercepted shortcuts handler (only once)
+      if (!BaseWindow.interceptedShortcutsHandlerRegistered) {
+        ipcMain.on('register-intercepted-shortcuts', (event: Electron.IpcMainEvent, shortcuts: string[]) => {
+          if (event.sender.isDestroyed()) {
+            return
+          }
+          const webContentsId = event.sender.id
+          // Parse shortcuts to extract keys that need interception (Ctrl+X pattern)
+          const keysToIntercept = new Set<string>()
+          for (const shortcut of shortcuts) {
+            const parts = shortcut.toLowerCase().split('+')
+            if (parts.length === 0) continue
+            const hasCtrl = parts.includes('ctrl') || parts.includes('control')
+            const hasShift = parts.includes('shift')
+            const hasAlt = parts.includes('alt')
+            // Only intercept simple Ctrl+X shortcuts (not Ctrl+Shift+X, etc.)
+            // These are the ones Chromium would handle by default
+            if (hasCtrl && !hasShift && !hasAlt) {
+              const key = parts[parts.length - 1]
+              if (key?.length === 1) {
+                keysToIntercept.add(key)
+              }
+            }
+          }
+          BaseWindow.interceptedShortcutsPerWindow.set(webContentsId, keysToIntercept)
+          logger.debug(`[BaseWindow] Registered intercepted shortcuts for window ${webContentsId}:`, { keys: Array.from(keysToIntercept) })
+        })
+        BaseWindow.interceptedShortcutsHandlerRegistered = true
+      }
+
+      // Register isDevMode handler (only once)
+      if (!BaseWindow.isDevModeHandlerRegistered) {
+        ipcMain.handle('is-dev-mode', () => {
+          return isDevToolsEnabled()
+        })
+        BaseWindow.isDevModeHandlerRegistered = true
+      }
     }
   
     /**
@@ -336,22 +381,31 @@ export abstract class BaseWindow {
             }
           }
 
-          // Intercept Ctrl/Cmd shortcuts and send them to the renderer via IPC
-          // This prevents Chromium from handling them (new window, open file, etc.)
+          // Only intercept specific shortcuts that the renderer has registered
+          // These are shortcuts that Chromium would handle by default (Ctrl+N, Ctrl+O, etc.)
           const isModifiedKey = input.control || input.meta
           
           if (isModifiedKey && input.key.length === 1 && this.window) {
-            // Build shortcut string
-            const parts: string[] = []
-            if (input.control || input.meta) parts.push('Ctrl')
-            if (input.shift) parts.push('Shift')
-            if (input.alt) parts.push('Alt')
-            parts.push(input.key.toUpperCase())
-            const shortcut = parts.join('+')
+            const webContentsId = this.window.webContents.id
+            const shortcutsToIntercept = BaseWindow.interceptedShortcutsPerWindow.get(webContentsId) ?? new Set<string>()
             
-            // Send to renderer and prevent default Chromium behavior
-            this.window.webContents.send('keyboard-shortcut', shortcut)
-            event.preventDefault()
+            const keyLower = input.key.toLowerCase()
+            
+            // Only intercept if this is a shortcut registered by the renderer
+            if (shortcutsToIntercept.has(keyLower)) {
+              // Build shortcut string
+              const parts: string[] = []
+              if (input.control || input.meta) parts.push('Ctrl')
+              if (input.shift) parts.push('Shift')
+              if (input.alt) parts.push('Alt')
+              parts.push(input.key.toUpperCase())
+              const shortcut = parts.join('+')
+              
+              // Send to renderer and prevent default Chromium behavior
+              this.window.webContents.send('keyboard-shortcut', shortcut)
+              event.preventDefault()
+            }
+            // Other shortcuts (Ctrl+Space, Ctrl+F, etc.) pass through to renderer naturally
           }
         }
       })
