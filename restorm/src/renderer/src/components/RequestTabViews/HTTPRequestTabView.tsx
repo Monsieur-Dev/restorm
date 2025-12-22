@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Handlebars } from '../../utils/handlebarsHelpers'
+import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
   Button,
   VariableInputBox,
@@ -110,6 +111,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
   const { t } = useTranslation()
   const { environments, selectedEnvId } = useEnvironmentContext()
   const { valuesByEnvId } = useEnvironmentValues()
+  const handlebarsHelpers = useHandlebarsHelpers()
   
   const [method, setMethod] = useState<string>(request.method)
   const [url, setUrl] = useState<string>(request.url)
@@ -559,6 +561,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           value={url}
           onChange={(value: string) => { setUrl(value) }}
           variables={urlVariables}
+          helpers={handlebarsHelpers}
           resolvedValue={resolvedUrl}
           placeholder={t('requestTab.urlPlaceholder')}
         />
