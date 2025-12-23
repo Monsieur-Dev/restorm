@@ -4,15 +4,14 @@ import { Handlebars } from '../../utils/handlebarsHelpers'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
   Button,
-  VariableInputBox,
   CodeEditor,
-  KeyValueTable,
   SplitView,
   Pane,
   logger,
-  type VariableDefinition,
-  type KeyValueTableHandle
+  type VariableDefinition
 } from 'electron-core-ui/renderer'
+import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { GrpcRequest, GrpcResponse } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import { useEnvironmentValues } from '../../contexts/useEnvironmentValues'
@@ -164,9 +163,10 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
           </Button>
         )}
       >
-        <KeyValueTable
+        <RestormKeyValueTable
           ref={metadataRef}
           variables={envVariables}
+          helpers={handlebarsHelpers}
           initialRows={request.metadata}
           visibilityMode="base-only"
           onRowsChange={(rows): void => { updateReactiveProperty(request, 'metadata', rows) }}
@@ -271,7 +271,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <Badge type={mapToBadgeType(request.callType)} />
         <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }}>
-          <VariableInputBox
+          <RestormVariableInputBox
             value={url}
             onChange={setUrl}
             variables={envVariables}

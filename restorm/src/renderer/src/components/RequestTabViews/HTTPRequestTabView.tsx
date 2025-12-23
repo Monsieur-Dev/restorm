@@ -4,22 +4,21 @@ import { Handlebars } from '../../utils/handlebarsHelpers'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
   Button,
-  VariableInputBox,
   SelectBox,
   SplitView,
   Pane,
   RadioGroup,
   InputBox,
   CodeEditor,
-  KeyValueTable,
   ListView,
   logger,
   type VariableDefinition,
   type ISelectOptionItem,
   type ISelectData,
-  type KeyValueTableHandle,
   type ListViewItemData
 } from 'electron-core-ui/renderer'
+import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import codeSnippetsTemplate from '../../resources/templates/code-snippets-httprequests.hbs?raw'
 import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
@@ -300,9 +299,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           </Button>
         )}
       >
-        <KeyValueTable
+        <RestormKeyValueTable
           ref={headersParamsRef}
           variables={envVariables}
+          helpers={handlebarsHelpers}
           initialRows={request.headers}
           visibilityMode="base-only"
           onRowsChange={(rows): void => { updateReactiveProperty(request, 'headers', rows) }}
@@ -327,9 +327,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           </Button>
         )}
       >
-        <KeyValueTable
+        <RestormKeyValueTable
           ref={pathParamsRef}
           variables={envVariables}
+          helpers={handlebarsHelpers}
           initialRows={request.pathParams ?? []}
           visibilityMode="base-only"
           onResolvedContextChange={setResolvedPathParamsContext}
@@ -355,9 +356,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           </Button>
         )}
       >
-        <KeyValueTable
+        <RestormKeyValueTable
           ref={queryParamsRef}
           variables={envVariables}
+          helpers={handlebarsHelpers}
           initialRows={request.params}
           visibilityMode="base-only"
           onResolvedContextChange={setResolvedQueryParamsContext}
@@ -393,8 +395,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
               </div>
             )}
             {(bodyMode === 'form-data' || bodyMode === 'x-www-form-urlencoded') && (
-              <KeyValueTable
+              <RestormKeyValueTable
                 variables={urlVariables}
+                helpers={handlebarsHelpers}
                 initialRows={request.body?.type === 'form-data' || request.body?.type === 'x-www-form-urlencoded' ? request.body.fields : []}
                 visibilityMode="base-only"
                 onRowsChange={(rows): void => { updateReactiveProperty(request, 'body', { type: bodyMode, fields: rows }) }}
@@ -557,7 +560,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
         />
       </div>
       <div style={{ flex: 1, minWidth: 0, paddingLeft: 15 }}>
-        <VariableInputBox
+        <RestormVariableInputBox
           value={url}
           onChange={(value: string) => { setUrl(value) }}
           variables={urlVariables}

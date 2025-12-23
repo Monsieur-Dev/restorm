@@ -6,9 +6,6 @@ import React, {
   useRef,
   useState
 } from 'react'
-import Handlebars from 'handlebars'
-import { VariableInputBox } from '../VariableInputBox'
-import type { VariableDefinition } from '../VariableInputBox'
 import { Toggle } from '../Toggle'
 import { InputBox } from '../InputBox'
 import { ScrollableElement } from '../ScrollableElement'
@@ -21,8 +18,6 @@ export interface KeyValueTableRow {
   description?: string | undefined
 }
 
-export type VariableContext = Record<string, string>
-
 interface ParamRow {
   enabled: boolean
   key: string
@@ -30,57 +25,19 @@ interface ParamRow {
   description: string
 }
 
-interface EditableCellBaseProps {
-  rowIndex: number
-  columnId: keyof ParamRow
-  updateData: (rowIndex: number, columnId: keyof ParamRow, value: unknown) => void
-}
-
-interface VariableCellProps extends EditableCellBaseProps {
+/**
+ * Props passed to custom cell renderers
+ */
+export interface CellRendererProps {
   value: string
-  variables: VariableDefinition[]
-  resolvedValue?: string | undefined
+  onChange: (value: string) => void
+  placeholder?: string
 }
 
-const VariableCell: React.FC<VariableCellProps> = ({
-  value,
-  variables,
-  resolvedValue,
-  rowIndex,
-  columnId,
-  updateData
-}) => {
-  const [localValue, setLocalValue] = useState<string>(value)
-
-  React.useEffect(() => {
-    setLocalValue(value)
-  }, [value])
-
-  return (
-    <VariableInputBox
-      value={localValue}
-      onChange={(v) => {
-        setLocalValue(v)
-        updateData(rowIndex, columnId, v)
-      }}
-      variables={variables}
-      resolvedValue={resolvedValue}
-    />
-  )
-}
-
-interface TextCellProps extends EditableCellBaseProps {
-  value: string
-  placeholder?: string | undefined
-}
-
-const TextCell: React.FC<TextCellProps> = ({
-  value,
-  placeholder,
-  rowIndex,
-  columnId,
-  updateData
-}) => {
+/**
+ * Default cell renderer using InputBox
+ */
+const DefaultCellRenderer: React.FC<CellRendererProps> = ({ value, onChange, placeholder }) => {
   const [localValue, setLocalValue] = useState<string>(value)
 
   React.useEffect(() => {
@@ -96,117 +53,44 @@ const TextCell: React.FC<TextCellProps> = ({
       value={localValue}
       onChange={(newValue: string) => {
         setLocalValue(newValue)
-        updateData(rowIndex, columnId, newValue)
+        onChange(newValue)
       }}
     />
   )
 }
 
 export interface KeyValueTableProps {
-  /** Base variables visible to all rows (environment, folder, etc.) */
-  variables: VariableDefinition[]
   /** Initial rows to populate the table */
   initialRows?: KeyValueTableRow[]
-  /**
-   * Visibility mode for variables inside this table:
-   * - 'accumulated': each row sees base variables plus previous rows
-   * - 'base-only': each row only sees base variables (no variables from previous rows)
-   */
-  visibilityMode?: 'accumulated' | 'base-only'
-  /**
-   * Optional callback receiving the final resolved context (for body/url computation).
-   */
-  onResolvedContextChange?: (context: VariableContext) => void
   /**
    * Optional callback when rows change (for persisting edits).
    */
   onRowsChange?: (rows: KeyValueTableRow[]) => void
+  /**
+   * Custom renderer for key cells. Defaults to InputBox.
+   */
+  renderKeyCell?: React.ComponentType<CellRendererProps>
+  /**
+   * Custom renderer for value cells. Defaults to InputBox.
+   */
+  renderValueCell?: React.ComponentType<CellRendererProps>
+  /**
+   * Custom renderer for description cells. Defaults to InputBox.
+   */
+  renderDescriptionCell?: React.ComponentType<CellRendererProps>
 }
 
 export interface KeyValueTableHandle {
   addRow: () => void
 }
 
-interface ResolvedKeyValue {
-  key: string
-  value: string
-  description?: string | undefined
-}
-
-interface ResolvedSequence {
-  /** Context available before each row (same length as rows) */
-  contextsBeforeRow: VariableContext[]
-  /** Rows after Handlebars resolution */
-  resolvedRows: ResolvedKeyValue[]
-  /** Final context after processing all rows */
-  finalContext: VariableContext
-}
-
-function compileTemplate(template: string): Handlebars.TemplateDelegate {
-  // Precompile with no escaping (we want raw strings)
-  return Handlebars.compile(template, { noEscape: true })
-}
-
-/**
- * Evaluate a sequence of KeyValue rows using Handlebars.
- * Each row sees the context built from baseContext plus all previous resolved rows.
- */
-function resolveKeyValueSequence(rows: KeyValueTableRow[], baseContext: VariableContext): ResolvedSequence {
-  let currentContext: VariableContext = { ...baseContext }
-  const contextsBeforeRow: VariableContext[] = []
-  const resolvedRows: ResolvedKeyValue[] = []
-
-  for (const row of rows) {
-    const contextSnapshot = { ...currentContext }
-    contextsBeforeRow.push(contextSnapshot)
-
-    let resolvedKey: string
-    let resolvedValue: string
-
-    try {
-      const compileKey = compileTemplate(row.key)
-      resolvedKey = compileKey(contextSnapshot)
-    } catch {
-      // Return original key if Handlebars parsing fails
-      resolvedKey = row.key
-    }
-
-    try {
-      const compileValue = compileTemplate(row.value)
-      resolvedValue = compileValue(contextSnapshot)
-    } catch {
-      // Return original value if Handlebars parsing fails
-      resolvedValue = row.value
-    }
-
-    if (resolvedKey) {
-      currentContext = {
-        ...currentContext,
-        [resolvedKey]: resolvedValue
-      }
-    }
-
-    resolvedRows.push({
-      key: resolvedKey,
-      value: resolvedValue,
-      description: row.description
-    })
-  }
-
-  return {
-    contextsBeforeRow,
-    resolvedRows,
-    finalContext: currentContext
-  }
-}
-
 export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTableProps>((
   {
-    variables,
     initialRows,
-    visibilityMode = 'accumulated',
-    onResolvedContextChange,
-    onRowsChange
+    onRowsChange,
+    renderKeyCell: KeyCellRenderer = DefaultCellRenderer,
+    renderValueCell: ValueCellRenderer = DefaultCellRenderer,
+    renderDescriptionCell: DescriptionCellRenderer = DefaultCellRenderer
   },
   ref
 ) => {
@@ -227,7 +111,6 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
   // dropIndex represents the insertion position between rows (0..rows.length)
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const dragGhostRef = useRef<HTMLDivElement | null>(null)
-  const lastFinalContextRef = useRef<VariableContext | null>(null)
 
   const updateData = useCallback(
     (rowIndex: number, columnId: keyof ParamRow, value: unknown): void => {
@@ -265,61 +148,6 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
     }
     lastRowsRef.current = rowsJson
   }, [keyValues, onRowsChange])
-
-  const baseContext: VariableContext = useMemo(() => {
-    const ctx: VariableContext = {}
-    for (const v of variables) {
-      ctx[v.name] = v.value
-    }
-    return ctx
-  }, [variables])
-
-  const sequence = useMemo(
-    () => resolveKeyValueSequence(keyValues, baseContext),
-    [keyValues, baseContext]
-  )
-
-  // Build context from resolved rows only (excluding baseContext)
-  // This prevents stale baseContext values from overwriting updated environment variables
-  const resolvedRowsContext = useMemo<VariableContext>(() => {
-    const ctx: VariableContext = {}
-    for (let i = 0; i < sequence.resolvedRows.length; i++) {
-      const resolvedRow = sequence.resolvedRows[i]
-      const originalRow = rows[i]
-      // Only include enabled rows with non-empty keys
-      if (resolvedRow && originalRow?.enabled && resolvedRow.key) {
-        ctx[resolvedRow.key] = resolvedRow.value
-      }
-    }
-    return ctx
-  }, [sequence.resolvedRows, rows])
-
-  // Notify parent of resolved rows context when it changes
-  useEffect(() => {
-    if (!onResolvedContextChange) return
-
-    // Shallow-compare contexts to avoid infinite update loops
-    const prevContext = lastFinalContextRef.current
-    if (prevContext) {
-      const prevKeys = Object.keys(prevContext)
-      const nextKeys = Object.keys(resolvedRowsContext)
-      if (prevKeys.length === nextKeys.length) {
-        let changed = false
-        for (const key of nextKeys) {
-          if (prevContext[key] !== resolvedRowsContext[key]) {
-            changed = true
-            break
-          }
-        }
-        if (!changed) {
-          return
-        }
-      }
-    }
-
-    lastFinalContextRef.current = resolvedRowsContext
-    onResolvedContextChange(resolvedRowsContext)
-  }, [resolvedRowsContext, onResolvedContextChange])
 
   const handleAddRow = useCallback(() => {
     setRows((oldRows) => [
@@ -442,19 +270,6 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
                   ]
                     .filter(Boolean)
                     .join(' ') || undefined
-                  const contextForRow: VariableContext =
-                    visibilityMode === 'accumulated'
-                      ? sequence.contextsBeforeRow[index] ?? baseContext
-                      : baseContext
-
-                  const availableVariables: VariableDefinition[] = Object.entries(contextForRow).map(
-                    ([name, value]) => ({
-                      name,
-                      value
-                    })
-                  )
-
-                  const resolvedRow = sequence.resolvedRows[index]
 
                   return (
                     <tr
@@ -510,32 +325,22 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
                         />
                       </td>
                       <td>
-                        <VariableCell
-                          rowIndex={index}
-                          columnId="key"
+                        <KeyCellRenderer
                           value={row.key}
-                          variables={availableVariables}
-                          resolvedValue={resolvedRow?.key}
-                          updateData={updateData}
+                          onChange={(v) => { updateData(index, 'key', v) }}
                         />
                       </td>
                       <td>
-                        <VariableCell
-                          rowIndex={index}
-                          columnId="value"
+                        <ValueCellRenderer
                           value={row.value}
-                          variables={availableVariables}
-                          resolvedValue={resolvedRow?.value}
-                          updateData={updateData}
+                          onChange={(v) => { updateData(index, 'value', v) }}
                         />
                       </td>
                       <td>
-                        <TextCell
+                        <DescriptionCellRenderer
                           value={row.description}
+                          onChange={(v) => { updateData(index, 'description', v) }}
                           placeholder="Description"
-                          rowIndex={index}
-                          columnId="description"
-                          updateData={updateData}
                         />
                       </td>
                       <td>

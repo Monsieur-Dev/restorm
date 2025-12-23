@@ -4,15 +4,14 @@ import { Handlebars } from '../../utils/handlebarsHelpers'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
   Button,
-  VariableInputBox,
   CodeEditor,
-  KeyValueTable,
   SplitView,
   Pane,
   logger,
-  type VariableDefinition,
-  type KeyValueTableHandle
+  type VariableDefinition
 } from 'electron-core-ui/renderer'
+import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { SoapRequest, SoapResponse } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import { useEnvironmentValues } from '../../contexts/useEnvironmentValues'
@@ -149,9 +148,10 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
           </Button>
         )}
       >
-        <KeyValueTable
+        <RestormKeyValueTable
           ref={headersRef}
           variables={envVariables}
+          helpers={handlebarsHelpers}
           initialRows={request.headers}
           visibilityMode="base-only"
           onRowsChange={(rows): void => { updateReactiveProperty(request, 'headers', rows) }}
@@ -235,7 +235,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <Badge type="SOAP" />
         <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }}>
-          <VariableInputBox
+          <RestormVariableInputBox
             value={url}
             onChange={setUrl}
             variables={envVariables}

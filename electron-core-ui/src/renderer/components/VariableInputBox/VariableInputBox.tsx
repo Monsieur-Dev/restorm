@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type * as monacoEditor from 'monaco-editor'
-import type { VariableInputBoxProps, VariableDefinition, HelperDefinition } from './types'
+import type { VariableInputBoxProps, VariableDefinition } from './types'
 import { defaultInputBoxStyles } from '../InputBox/types'
 import { CodeEditor } from '../CodeEditor/CodeEditor'
-import { Tooltip } from '../Tooltip'
 import { ContextMenu, type ContextMenuItem } from '../ContextMenu/ContextMenu'
 import '../InputBox/inputBox.css'
 import './variableInputBox.css'
@@ -13,31 +12,6 @@ const LANGUAGE_ID = 'handlebars'
 
 interface ModelData {
   variables: VariableDefinition[]
-  helpers: HelperDefinition[]
-}
-
-// Category prefixes for filtering (e.g., typing "arr:" shows only array helpers)
-const CATEGORY_PREFIXES: Record<string, string> = {
-  comparison: 'comp',
-  string: 'str',
-  math: 'math',
-  array: 'arr',
-  object: 'obj',
-  url: 'url',
-  date: 'date',
-  regex: 'regex',
-  misc: 'misc'
-}
-
-// Pre-computed helper suggestion data (without range which varies per position)
-interface CachedHelperSuggestion {
-  label: { label: string; description: string }
-  kind: number // CompletionItemKind.Function
-  insertText: string
-  filterText: string
-  documentation: { value: string }
-  detail: string
-  sortText: string
 }
 
 // Use window to persist state across hot reloads
@@ -48,8 +22,6 @@ interface ProviderState {
   hoverProviderDisposable: monacoEditor.IDisposable | null
   cancellationHandlerRegistered: boolean
   modelDataMap: WeakMap<monacoEditor.editor.ITextModel, ModelData>
-  // Cache for helper suggestions (keyed by stringified helpers array)
-  helperSuggestionsCache: Map<string, CachedHelperSuggestion[]>
 }
 
 function getProviderState(): ProviderState {
@@ -59,48 +31,9 @@ function getProviderState(): ProviderState {
     completionProviderDisposable: null,
     hoverProviderDisposable: null,
     cancellationHandlerRegistered: false,
-    modelDataMap: new WeakMap(),
-    helperSuggestionsCache: new Map()
+    modelDataMap: new WeakMap()
   }
   return win[globalKey]
-}
-
-// Build cached helper suggestions (computed once per unique helpers array)
-function getCachedHelperSuggestions(
-  helpers: HelperDefinition[],
-  functionKind: number
-): CachedHelperSuggestion[] {
-  const state = getProviderState()
-  // Use helper names as cache key (assumes helpers don't change content, only list)
-  const cacheKey = helpers.map((h) => h.name).join(',')
-
-  let cached = state.helperSuggestionsCache.get(cacheKey)
-  if (!cached) {
-    cached = helpers.map((h) => {
-      const docParts = [h.description, '', `**Syntax:** \`${h.syntax}\``]
-      if (h.example) {
-        docParts.push('', `**Example:** ${h.example}`)
-      }
-
-      const categoryKey =
-        Object.keys(CATEGORY_PREFIXES).find(
-          (key) => h.category.toLowerCase().includes(key) || key.includes(h.category.toLowerCase())
-        ) ?? 'misc'
-      const prefix = CATEGORY_PREFIXES[categoryKey] ?? 'misc'
-
-      return {
-        label: { label: h.name, description: h.category },
-        kind: functionKind,
-        insertText: `{{${h.name} }}`,
-        filterText: `${prefix}:${h.name} ${h.name}`,
-        documentation: { value: docParts.join('\n') },
-        detail: `${h.category} helper`,
-        sortText: `1_${categoryKey}_${h.name}`
-      }
-    })
-    state.helperSuggestionsCache.set(cacheKey, cached)
-  }
-  return cached
 }
 
 const isMonacoCancellationError = (reason: unknown): boolean => {
@@ -123,27 +56,22 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
     value,
     onChange,
     variables,
-    helpers = [],
     placeholder,
-    resolvedValue,
     id,
     className,
     style,
-    ariaLabel
+    ariaLabel,
+    onMount: onMountProp
   } = props
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
   const variablesRef = useRef<VariableDefinition[]>(variables)
-  const helpersRef = useRef<HelperDefinition[]>(helpers)
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const [showResolvedTooltip, setShowResolvedTooltip] = useState(false)
   const [editorMounted, setEditorMounted] = useState(false)
   const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number }>({
     visible: false,
     x: 0,
     y: 0
   })
-
-  const hasResolvedTooltip = Boolean(resolvedValue && resolvedValue !== value)
 
   // Context menu handlers
   const handleCut = useCallback(() => {
@@ -162,48 +90,14 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
     editorRef.current?.trigger('keyboard', 'paste', { text })
   }, [])
 
-  const handleGoToDefinition = useCallback(() => {
-    const editor = editorRef.current
-    if (!editor) return
-    
-    const position = editor.getPosition()
-    if (!position) return
-    
-    const model = editor.getModel()
-    if (!model) return
-    
-    const lineText = model.getLineContent(position.lineNumber)
-    const col = position.column
-    
-    // Find variable under cursor: {{variableName}}
-    const openIndex = lineText.lastIndexOf('{{', col - 1)
-    const closeIndex = lineText.indexOf('}}', openIndex + 2)
-    
-    if (openIndex !== -1 && closeIndex !== -1 && col >= openIndex + 1 && col <= closeIndex + 3) {
-      const variableName = lineText.substring(openIndex + 2, closeIndex).trim()
-      // Trigger the onGoToDefinition callback if it exists
-      if (props.onGoToDefinition) {
-        props.onGoToDefinition(variableName)
-      }
-    }
-  }, [props])
-
-  const contextMenuItems = useMemo<ContextMenuItem[]>(() => {
-    const items: ContextMenuItem[] = [
+  const contextMenuItems = useMemo<ContextMenuItem[]>(
+    () => [
       { id: 'cut', label: t('contextMenu.cut'), onClick: handleCut },
       { id: 'copy', label: t('contextMenu.copy'), onClick: handleCopy },
       { id: 'paste', label: t('contextMenu.paste'), onClick: () => { void handlePaste() } }
-    ]
-    
-    if (props.onGoToDefinition) {
-      items.push(
-        { id: 'sep1', label: '', isSeparator: true },
-        { id: 'goToDefinition', label: t('contextMenu.goToDefinition'), onClick: handleGoToDefinition }
-      )
-    }
-    
-    return items
-  }, [t, handleCut, handleCopy, handlePaste, handleGoToDefinition, props.onGoToDefinition])
+    ],
+    [t, handleCut, handleCopy, handlePaste]
+  )
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
@@ -216,16 +110,15 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
 
   // Keep refs in sync
   variablesRef.current = variables
-  helpersRef.current = helpers
 
-  // Update modelDataMap when variables or helpers change AND editor is mounted
+  // Update modelDataMap when variables change AND editor is mounted
   useEffect(() => {
     if (!editorMounted) return
     const model = editorRef.current?.getModel()
     if (model) {
-      getProviderState().modelDataMap.set(model, { variables, helpers })
+      getProviderState().modelDataMap.set(model, { variables })
     }
-  }, [variables, helpers, editorMounted])
+  }, [variables, editorMounted])
 
   useEffect(() => {
     const state = getProviderState()
@@ -284,11 +177,8 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
       suggest: {
         showIcons: true,
         showStatusBar: true,
-        // Show documentation panel expanded by default
         showInlineDetails: true,
-        // Show the details panel on the side when navigating suggestions
         detailsVisible: true,
-        // Preview the suggestion in the editor
         preview: true
       }
     }),
@@ -323,7 +213,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
             endColumn: position.column
           }
 
-          const data = getProviderState().modelDataMap.get(model) ?? { variables: [], helpers: [] }
+          const data = getProviderState().modelDataMap.get(model) ?? { variables: [] }
           const suggestions: monacoEditor.languages.CompletionItem[] = []
 
           // Add variable suggestions
@@ -338,20 +228,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
               insertText: `{{${v.name}}}`,
               documentation: v.description ?? v.value,
               detail: 'variable',
-              sortText: `0_${v.name}`, // Variables first
-              range
-            })
-          }
-
-          // Add cached helper suggestions (only range needs to be added per call)
-          const cachedHelpers = getCachedHelperSuggestions(
-            data.helpers,
-            monacoInstance.languages.CompletionItemKind.Function
-          )
-          for (const cached of cachedHelpers) {
-            suggestions.push({
-              ...cached,
-              label: cached.label as monacoEditor.languages.CompletionItemLabel,
+              sortText: `0_${v.name}`,
               range
             })
           }
@@ -378,11 +255,11 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
             return { contents: [] }
           }
 
-          // Extract the content between {{ and }}, get first word (helper/variable name)
+          // Extract the content between {{ and }}, get first word (variable name)
           const innerContent = lineText.substring(openIndex + 2, closeIndex).trim()
           const name = innerContent.split(/\s+/)[0] ?? ''
 
-          const data = getProviderState().modelDataMap.get(model) ?? { variables: [], helpers: [] }
+          const data = getProviderState().modelDataMap.get(model) ?? { variables: [] }
 
           // Check if it's a variable
           const varMatch = data.variables.find((v) => v.name === name)
@@ -399,32 +276,6 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
                 { value: `**${varMatch.name}** *(variable)*` },
                 { value: '```text\n' + (varMatch.value || '(empty)') + '\n```' }
               ]
-            }
-          }
-
-          // Check if it's a helper (also check with # prefix for block helpers)
-          const helperName = name.startsWith('#') ? name.slice(1) : name
-          const helperMatch = data.helpers.find((h) => h.name === helperName)
-          if (helperMatch) {
-            const range = new monacoInstance.Range(
-              position.lineNumber,
-              openIndex + 1,
-              position.lineNumber,
-              closeIndex + 3
-            )
-            const docParts = [
-              `**${helperMatch.name}** *(${helperMatch.category} helper)*`,
-              '',
-              helperMatch.description,
-              '',
-              `**Syntax:** \`${helperMatch.syntax}\``
-            ]
-            if (helperMatch.example) {
-              docParts.push('', `**Example:** ${helperMatch.example}`)
-            }
-            return {
-              range,
-              contents: [{ value: docParts.join('\n') }]
             }
           }
 
@@ -467,8 +318,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
     const model = editor.getModel()
     if (model) {
       state.modelDataMap.set(model, {
-        variables: variablesRef.current,
-        helpers: helpersRef.current
+        variables: variablesRef.current
       })
     }
 
@@ -478,6 +328,9 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
     if (ariaLabel) {
       editor.updateOptions({ ariaLabel })
     }
+
+    // Call the onMount callback if provided
+    onMountProp?.(editor, monacoInstance)
   }
 
   return (
@@ -493,14 +346,6 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
           ...(style ?? {})
         }}
         ref={containerRef}
-        onMouseEnter={() => {
-          if (hasResolvedTooltip) {
-            setShowResolvedTooltip(true)
-          }
-        }}
-        onMouseLeave={() => {
-          setShowResolvedTooltip(false)
-        }}
         onContextMenu={handleContextMenu}
       >
         <div className="ibwrapper" style={{ display: 'flex', alignItems: 'center' }}>
@@ -539,14 +384,6 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
             />
           </div>
         </div>
-        {hasResolvedTooltip && (
-          <Tooltip
-            targetRef={containerRef}
-            content={<span>{resolvedValue}</span>}
-            show={showResolvedTooltip}
-            placement="below"
-          />
-        )}
       </div>
       <ContextMenu
         visible={contextMenu.visible}

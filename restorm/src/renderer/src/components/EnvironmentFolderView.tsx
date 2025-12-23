@@ -13,9 +13,10 @@ import {
   Button,
   type Tab,
   IconSelect,
-  KeyValueTable
+  type KeyValueTableHandle
 } from 'electron-core-ui/renderer'
-import type { KeyValueTableHandle } from 'electron-core-ui/renderer'
+import { RestormKeyValueTable, type VariableContext } from './RestormKeyValueTable'
+import { useHandlebarsHelpers } from '../hooks/useHandlebarsHelpers'
 import type { EnvironmentFolder, Environment, KeyValue, Icon } from '../types/collections'
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
@@ -153,6 +154,7 @@ interface EnvironmentConfigPanelProps {
 const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder, onFolderChange }) => {
   const { t } = useTranslation()
   const { setEnvironmentValues } = useEnvironmentValues()
+  const handlebarsHelpers = useHandlebarsHelpers()
 
   // Local state for environments (allows modifications without waiting for parent)
   const [localEnvironments, setLocalEnvironments] = useState<Environment[]>(
@@ -325,9 +327,9 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
   const variablesParamsRef = useRef<KeyValueTableHandle | null>(null)
 
   const handleEnvironmentVariablesResolved = useCallback(
-    (context: unknown): void => {
+    (context: VariableContext): void => {
       if (selectedEnvId) {
-        setEnvironmentValues(selectedEnvId, context as Record<string, string>)
+        setEnvironmentValues(selectedEnvId, context)
       }
     },
     [selectedEnvId, setEnvironmentValues]
@@ -531,12 +533,13 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                   boxSizing: 'border-box'
                 }}
               >
-                <KeyValueTable
+                <RestormKeyValueTable
                   key={selectedEnvId}
                   ref={variablesParamsRef}
                   // At folder level, variables are defined sequentially:
                   // no base variables, each row can only see previous rows.
                   variables={[]}
+                  helpers={handlebarsHelpers}
                   initialRows={selectedEnvironment?.variables ?? []}
                   visibilityMode="accumulated"
                   onResolvedContextChange={handleEnvironmentVariablesResolved}
