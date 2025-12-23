@@ -23,8 +23,17 @@ export interface Icon {
   value: string
 }
 
+/**
+ * Runtime-only property marker.
+ * Properties of this type are generated at runtime and excluded from serialization.
+ * They are regenerated during deserialization.
+ */
+export type RuntimeId = string
+
 /** Key-value pair used for headers, params, environment variables, etc. */
 export interface KeyValue {
+  /** Runtime-only identifier, excluded from serialization. Generated at runtime. */
+  id?: RuntimeId
   key: string
   value: string
   /** Optional description, when provided by Swagger or user input */
@@ -37,8 +46,8 @@ export interface KeyValue {
 
 /** Environment configuration with variables and optional sub-environments */
 export interface Environment {
-  /** Unique identifier for the environment */
-  id: string
+  /** Runtime-only identifier, excluded from serialization. Generated at runtime. */
+  id?: RuntimeId
   /** Display name of the environment */
   name: string
   /** Optional icon for the environment */
@@ -99,8 +108,8 @@ export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 
 
 /** Base request interface with common properties */
 interface BaseRequest {
-  /** Unique identifier for the request */
-  id: string
+  /** Runtime-only identifier, excluded from serialization. Generated at runtime. */
+  id?: RuntimeId
   /** Display name of the request */
   name: string
   /** Optional icon for the request */
@@ -241,8 +250,8 @@ export type FolderItem = Folder | EnvironmentFolder | Request
 
 /** Folder containing requests and sub-folders with configuration */
 export interface Folder {
-  /** Unique identifier for the folder */
-  id: string
+  /** Runtime-only identifier, excluded from serialization. Generated at runtime. */
+  id?: RuntimeId
   /** Display name of the folder */
   name: string
   /** Optional icon for the folder */
@@ -365,8 +374,8 @@ export interface HTTPNetworkInfo {
 
 /** Base response interface for all request types */
 interface BaseResponse {
-  /** Unique identifier for the response */
-  id: string
+  /** Runtime-only identifier, excluded from serialization. Generated at runtime. */
+  id?: RuntimeId
   /** ID of the request that generated this response */
   requestId: string
   /** Error message if the request failed */

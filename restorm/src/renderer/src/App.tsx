@@ -42,6 +42,7 @@ import { EnvironmentValuesProvider } from './contexts/EnvironmentValuesContext'
 import { searchIndexService } from './services/SearchIndexService'
 import { makeReactiveFolder } from './types/reactive'
 import { folderAsRootListViewItem, collectAllFolderIds } from './services/FolderToListView'
+import { prepareForSerialization, processAfterDeserialization } from './utils/serialization'
 import type {
   Folder,
   FolderItem,
@@ -632,22 +633,25 @@ const App: React.FC = () => {
   })
 
   // File save handlers (after rootFolders is defined)
-  // Deep clone to remove Proxy wrappers before IPC serialization
+  // Deep clone to remove Proxy wrappers before IPC serialization, then strip runtime-only ids
   const handleMenuSave = useCallback(() => {
     const plainData = JSON.parse(JSON.stringify({ collections: rootFolders })) as unknown
-    void saveFile(plainData)
+    const dataForSave = prepareForSerialization(plainData)
+    void saveFile(dataForSave)
   }, [saveFile, rootFolders])
 
   const handleMenuSaveAs = useCallback(() => {
     const plainData = JSON.parse(JSON.stringify({ collections: rootFolders })) as unknown
-    void saveFileAs(plainData)
+    const dataForSave = prepareForSerialization(plainData)
+    void saveFileAs(dataForSave)
   }, [saveFileAs, rootFolders])
 
   // Listen for save-and-close event from main process (when closing window with unsaved changes)
   useEffect(() => {
     const handleSaveAndClose = async (): Promise<void> => {
       const plainData = JSON.parse(JSON.stringify({ collections: rootFolders })) as unknown
-      const saved = await saveFile(plainData)
+      const dataForSave = prepareForSerialization(plainData)
+      const saved = await saveFile(dataForSave)
       if (saved) {
         // Force close all windows after save
         await window.restorm.forceClose()
@@ -664,8 +668,9 @@ const App: React.FC = () => {
   // Helper to check for unsaved changes before proceeding
   const checkUnsavedChanges = useCallback(async (): Promise<boolean> => {
     // Compare current state with saved state checksum via FileService
-    // Use the same structure as the file content for consistent comparison
-    const currentChecksum = JSON.stringify({ collections: rootFolders })
+    // Use the same structure as the file content for consistent comparison (without runtime ids)
+    const dataForChecksum = prepareForSerialization({ collections: rootFolders })
+    const currentChecksum = JSON.stringify(dataForChecksum)
     const hasRealChanges = await hasContentChanged(currentChecksum)
     
     if (!hasRealChanges) return true // No actual changes, proceed
@@ -682,7 +687,8 @@ const App: React.FC = () => {
     if (result === 'save') {
       // Save first, then proceed
       const plainData = JSON.parse(JSON.stringify({ collections: rootFolders })) as unknown
-      const saved = await saveFile(plainData)
+      const dataForSave = prepareForSerialization(plainData)
+      const saved = await saveFile(dataForSave)
       return saved // Only proceed if save was successful
     }
     return true // User chose to discard changes
@@ -722,15 +728,19 @@ const App: React.FC = () => {
     const content = state.currentFile.content as { collections?: EnvironmentFolder[] } | null
     const collections = content?.collections && Array.isArray(content.collections) ? content.collections : []
     
+    // Generate runtime ids for all objects after deserialization
+    const collectionsWithIds = processAfterDeserialization(collections)
+    
     // Make folders reactive and update state
-    const reactiveFolders = collections.map(
+    const reactiveFolders = collectionsWithIds.map(
       (folder) => makeReactiveFolder(folder) as EnvironmentFolder
     )
     setRootFolders(reactiveFolders)
     
-    // Update the content checksum in FileService with the transformed data
+    // Update the content checksum in FileService with data WITHOUT ids
     // This ensures consistent comparison when checking for unsaved changes
-    void setContentChecksum(JSON.stringify({ collections: reactiveFolders }))
+    const dataForChecksum = prepareForSerialization({ collections: reactiveFolders })
+    void setContentChecksum(JSON.stringify(dataForChecksum))
     
     // Re-index for search
     searchIndexService.initialize()
@@ -801,8 +811,9 @@ const App: React.FC = () => {
   // Update content checksum in FileService when file is saved (isDirty becomes false)
   useEffect(() => {
     if (!isDirty && fileName) {
-      // File was just saved - update the checksum with current state
-      void setContentChecksum(JSON.stringify({ collections: rootFolders }))
+      // File was just saved - update the checksum with current state (without runtime ids)
+      const dataForChecksum = prepareForSerialization({ collections: rootFolders })
+      void setContentChecksum(JSON.stringify(dataForChecksum))
     }
   }, [isDirty, fileName, rootFolders])
 
@@ -813,7 +824,8 @@ const App: React.FC = () => {
     
     // Compare current state with saved state checksum via FileService
     const checkChanges = async (): Promise<void> => {
-      const currentChecksum = JSON.stringify({ collections: rootFolders })
+      const dataForChecksum = prepareForSerialization({ collections: rootFolders })
+      const currentChecksum = JSON.stringify(dataForChecksum)
       const hasChanges = await hasContentChanged(currentChecksum)
       if (hasChanges && !isDirty) {
         // Content changed - mark as dirty

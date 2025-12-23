@@ -1,6 +1,5 @@
 collections:
   - folderType: environment
-    id: 766dd6c4-001c-4000-8000-766dd6c4766d
     name: Swagger Petstore
     documentation: |-
       # Swagger Petstore
@@ -78,28 +77,24 @@ collections:
     tags: []
     configuration: {}
     environments:
-      - id: 202eb0f6-0010-4000-8000-202eb0f6202e
-        name: Default
+      - name: Default
         variables:
           - key: baseUrl
             value: http://localhost:8080
             description: ''
         subEnvironments:
-          - id: 47687a23-001b-4000-8000-47687a234768
-            name: Production
+          - name: Production
             variables:
               - key: baseUrl
                 value: https://petstore.com
     items:
-      - id: 658d6a33-000e-4000-8000-658d6a33658d
-        name: pet
+      - name: pet
         documentation: "# pet\r\n\r\nEverything about your Pets\r\n\r\n## External Documentation\r\n\r\n[Find out more](http://swagger.io)"
         tags:
           - pet
         configuration: {}
         items:
           - type: http
-            id: 48e1f7f2-0018-4000-8000-48e1f7f248e1
             name: Find pet by ID
             documentation: |-
               # Find pet by ID
@@ -180,7 +175,6 @@ collections:
                 value: ''
                 description: ID of pet to return
           - type: http
-            id: 7d41454e-0019-4000-8000-7d41454e7d41
             name: Updates a pet in the store with form data
             documentation: |-
               # Updates a pet in the store with form data
@@ -234,7 +228,6 @@ collections:
                   value: ''
                   description: Updated status of the pet
           - type: http
-            id: 2e127f1d-001b-4000-8000-2e127f1d2e12
             name: Deletes a pet
             documentation: |-
               # Deletes a pet
@@ -281,7 +274,6 @@ collections:
                 value: ''
                 description: Pet id to delete
           - type: http
-            id: 484c6099-0025-4000-8000-484c6099484c
             name: uploads an image
             documentation: |-
               # uploads an image
@@ -358,7 +350,6 @@ collections:
                   value: ''
                   description: file to upload
           - type: http
-            id: 5d99e601-0011-4000-8000-5d99e6015d99
             name: Add a new pet to the store
             documentation: |-
               # Add a new pet to the store
@@ -449,7 +440,6 @@ collections:
                   "status": "available"
                 }
           - type: http
-            id: 38dfe4a6-0010-4000-8000-38dfe4a638df
             name: Update an existing pet
             documentation: |-
               # Update an existing pet
@@ -550,7 +540,6 @@ collections:
                   "status": "available"
                 }
           - type: http
-            id: 589b00ae-001d-4000-8000-589b00ae589b
             name: Finds Pets by status
             documentation: |-
               # Finds Pets by status
@@ -597,7 +586,6 @@ collections:
                 description: Status values that need to be considered for filter
             pathParams: []
           - type: http
-            id: 3a6e4487-001b-4000-8000-3a6e44873a6e
             name: Finds Pets by tags
             documentation: |-
               # Finds Pets by tags
@@ -646,15 +634,13 @@ collections:
                 description: Tags to filter by
             pathParams: []
             deprecated: true
-      - id: 380cbcf5-0010-4000-8000-380cbcf5380c
-        name: store
+      - name: store
         documentation: "# store\r\n\r\nAccess to Petstore orders"
         tags:
           - store
         configuration: {}
         items:
           - type: http
-            id: 6b2d6d4e-001c-4000-8000-6b2d6d4e6b2d
             name: Returns pet inventories by status
             documentation: |-
               # Returns pet inventories by status
@@ -686,7 +672,6 @@ collections:
             params: []
             pathParams: []
           - type: http
-            id: 0da91b00-0022-4000-8000-0da91b000da9
             name: Find purchase order by ID
             documentation: |-
               # Find purchase order by ID
@@ -761,7 +746,6 @@ collections:
                 value: ''
                 description: ID of pet that needs to be fetched
           - type: http
-            id: 47cb4d95-0025-4000-8000-47cb4d9547cb
             name: Delete purchase order by ID
             documentation: |-
               # Delete purchase order by ID
@@ -801,7 +785,6 @@ collections:
                 value: ''
                 description: ID of the order that needs to be deleted
           - type: http
-            id: 23521e80-0019-4000-8000-23521e802352
             name: Place an order for a pet
             documentation: |-
               # Place an order for a pet
@@ -880,15 +863,13 @@ collections:
                   "status": "placed",
                   "complete": false
                 }
-      - id: 4c225537-000f-4000-8000-4c2255374c22
-        name: user
+      - name: user
         documentation: "# user\r\n\r\nOperations about user\r\n\r\n## External Documentation\r\n\r\n[Find out more about our store](http://swagger.io)"
         tags:
           - user
         configuration: {}
         items:
           - type: http
-            id: 01c71b44-0021-4000-8000-01c71b4401c7
             name: Creates list of users with given input array
             documentation: |-
               # Creates list of users with given input array
@@ -937,7 +918,6 @@ collections:
                   }
                 ]
           - type: http
-            id: 69106f50-001c-4000-8000-69106f506910
             name: Get user by user name
             documentation: |-
               # Get user by user name
@@ -1014,7 +994,6 @@ collections:
                 value: ''
                 description: 'The name that needs to be fetched. Use user1 for testing. '
           - type: http
-            id: 69b9c9e9-001c-4000-8000-69b9c9e969b9
             name: Updated user
             documentation: |-
               # Updated user
@@ -1105,7 +1084,6 @@ collections:
                   "userStatus": 0
                 }
           - type: http
-            id: 58fc9705-001f-4000-8000-58fc970558fc
             name: Delete user
             documentation: |-
               # Delete user
@@ -1145,7 +1123,6 @@ collections:
                 value: ''
                 description: The name that needs to be deleted
           - type: http
-            id: 55a06115-0012-4000-8000-55a0611555a0
             name: Create user
             documentation: |-
               # Create user
@@ -1227,7 +1204,6 @@ collections:
                   "userStatus": 0
                 }
           - type: http
-            id: 36855c73-0022-4000-8000-36855c733685
             name: Creates list of users with given input array
             documentation: |-
               # Creates list of users with given input array
@@ -1276,7 +1252,6 @@ collections:
                   }
                 ]
           - type: http
-            id: 2f831c85-0017-4000-8000-2f831c852f83
             name: Logs user into the system
             documentation: |-
               # Logs user into the system
@@ -1322,7 +1297,6 @@ collections:
                 description: The password for login in clear text
             pathParams: []
           - type: http
-            id: 3f1f7412-0018-4000-8000-3f1f74123f1f
             name: Logs out current logged in user session
             documentation: |-
               # Logs out current logged in user session
@@ -1346,7 +1320,6 @@ collections:
             params: []
             pathParams: []
   - folderType: environment
-    id: 5127d024-0022-4000-8000-5127d0245127
     name: GraphQL Docker
     documentation: |-
       # GraphQL Docker
@@ -1369,14 +1342,12 @@ collections:
     tags: []
     configuration: {}
     environments:
-      - id: 4da9d280-0022-4000-8000-4da9d2804da9
-        name: Default
+      - name: Default
         variables:
           - key: baseUrl
             value: http://localhost:4000
     items:
-      - id: 534bf1d4-0025-4000-8000-534bf1d4534b
-        name: Queries
+      - name: Queries
         documentation: |-
           # GraphQL Queries
 
@@ -1386,7 +1357,6 @@ collections:
         configuration: {}
         items:
           - type: graphql
-            id: 2d59debe-0022-4000-8000-2d59debe2d59
             name: users
             documentation: 'GraphQL query: users'
             tags:
@@ -1403,7 +1373,6 @@ collections:
               - key: Content-Type
                 value: application/json
           - type: graphql
-            id: 3b44f6af-0021-4000-8000-3b44f6af3b44
             name: user
             documentation: 'GraphQL query: user'
             tags:
@@ -1421,7 +1390,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 2da1f0f3-0022-4000-8000-2da1f0f32da1
             name: posts
             documentation: 'GraphQL query: posts'
             tags:
@@ -1438,7 +1406,6 @@ collections:
               - key: Content-Type
                 value: application/json
           - type: graphql
-            id: 3b4749da-0021-4000-8000-3b4749da3b47
             name: post
             documentation: 'GraphQL query: post'
             tags:
@@ -1456,7 +1423,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 3b4c7855-0021-4000-8000-3b4c78553b4c
             name: echo
             documentation: 'GraphQL query: echo'
             tags:
@@ -1473,8 +1439,7 @@ collections:
               - key: Content-Type
                 value: application/json
             variables: '{}'
-      - id: 04109fd0-0027-4000-8000-04109fd00410
-        name: Mutations
+      - name: Mutations
         documentation: |-
           # GraphQL Mutations
 
@@ -1484,7 +1449,6 @@ collections:
         configuration: {}
         items:
           - type: graphql
-            id: 45d9ecc4-002a-4000-8000-45d9ecc445d9
             name: createUser
             documentation: 'GraphQL mutation: createUser'
             tags:
@@ -1502,7 +1466,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 45d79999-002a-4000-8000-45d7999945d7
             name: createPost
             documentation: 'GraphQL mutation: createPost'
             tags:
@@ -1520,7 +1483,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 5d6ae1f3-002a-4000-8000-5d6ae1f35d6a
             name: deleteUser
             documentation: 'GraphQL mutation: deleteUser'
             tags:
@@ -1538,7 +1500,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 5d688ec8-002a-4000-8000-5d688ec85d68
             name: deletePost
             documentation: 'GraphQL mutation: deletePost'
             tags:
@@ -1555,8 +1516,7 @@ collections:
               - key: Content-Type
                 value: application/json
             variables: '{}'
-      - id: 6751aac4-002b-4000-8000-6751aac46751
-        name: Subscriptions
+      - name: Subscriptions
         documentation: |-
           # GraphQL Subscriptions
 
@@ -1566,7 +1526,6 @@ collections:
         configuration: {}
         items:
           - type: graphql
-            id: 79f70a5f-002f-4000-8000-79f70a5f79f7
             name: postCreated
             documentation: 'GraphQL subscription: postCreated'
             tags:
@@ -1583,7 +1542,6 @@ collections:
               - key: Content-Type
                 value: application/json
   - folderType: environment
-    id: 221609e2-0024-4000-8000-221609e22216
     name: GraphQL Petstore
     documentation: |-
       # GraphQL Petstore
@@ -1643,14 +1601,12 @@ collections:
     tags: []
     configuration: {}
     environments:
-      - id: 1e980c3e-0024-4000-8000-1e980c3e1e98
-        name: Default
+      - name: Default
         variables:
           - key: baseUrl
             value: http://localhost:4000
     items:
-      - id: 322288aa-0027-4000-8000-322288aa3222
-        name: Queries
+      - name: Queries
         documentation: |-
           # GraphQL Queries
 
@@ -1660,7 +1616,6 @@ collections:
         configuration: {}
         items:
           - type: graphql
-            id: 0953399b-0022-4000-8000-0953399b0953
             name: pet
             documentation: 'GraphQL query: pet'
             tags:
@@ -1678,7 +1633,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 017b6e7f-002b-4000-8000-017b6e7f017b
             name: petsByStatus
             documentation: 'GraphQL query: petsByStatus'
             tags:
@@ -1696,7 +1650,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 5981f298-0029-4000-8000-5981f2985981
             name: petsByTags
             documentation: 'GraphQL query: petsByTags'
             tags:
@@ -1714,7 +1667,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 2113fa38-0023-4000-8000-2113fa382113
             name: pets
             documentation: 'GraphQL query: pets'
             tags:
@@ -1732,7 +1684,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 7f2054d8-0028-4000-8000-7f2054d87f20
             name: inventory
             documentation: 'GraphQL query: inventory'
             tags:
@@ -1749,7 +1700,6 @@ collections:
               - key: Content-Type
                 value: application/json
           - type: graphql
-            id: 0162e0ca-0024-4000-8000-0162e0ca0162
             name: order
             documentation: 'GraphQL query: order'
             tags:
@@ -1767,7 +1717,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 211672cf-0023-4000-8000-211672cf2116
             name: user
             documentation: 'GraphQL query: user'
             tags:
@@ -1785,7 +1734,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 013748e5-0024-4000-8000-013748e50137
             name: login
             documentation: 'GraphQL query: login'
             tags:
@@ -1802,8 +1750,7 @@ collections:
               - key: Content-Type
                 value: application/json
             variables: '{}'
-      - id: 2056ccd2-0029-4000-8000-2056ccd22056
-        name: Mutations
+      - name: Mutations
         documentation: |-
           # GraphQL Mutations
 
@@ -1813,7 +1760,6 @@ collections:
         configuration: {}
         items:
           - type: graphql
-            id: 6b80c77c-002b-4000-8000-6b80c77c6b80
             name: createPet
             documentation: 'GraphQL mutation: createPet'
             tags:
@@ -1831,7 +1777,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 03598e69-002b-4000-8000-03598e690359
             name: updatePet
             documentation: 'GraphQL mutation: updatePet'
             tags:
@@ -1849,7 +1794,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 7a774efb-002f-4000-8000-7a774efb7a77
             name: updatePetForm
             documentation: 'GraphQL mutation: updatePetForm'
             tags:
@@ -1867,7 +1811,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 5b736175-002b-4000-8000-5b7361755b73
             name: deletePet
             documentation: 'GraphQL mutation: deletePet'
             tags:
@@ -1885,7 +1828,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 7f0d34c4-0030-4000-8000-7f0d34c47f0d
             name: uploadPetImage
             documentation: 'GraphQL mutation: uploadPetImage'
             tags:
@@ -1903,7 +1845,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 66ef875a-002c-4000-8000-66ef875a66ef
             name: placeOrder
             documentation: 'GraphQL mutation: placeOrder'
             tags:
@@ -1921,7 +1862,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 4c187a24-002d-4000-8000-4c187a244c18
             name: deleteOrder
             documentation: 'GraphQL mutation: deleteOrder'
             tags:
@@ -1939,7 +1879,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 0495aefa-002c-4000-8000-0495aefa0495
             name: createUser
             documentation: 'GraphQL mutation: createUser'
             tags:
@@ -1957,7 +1896,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 71dfd02d-002d-4000-8000-71dfd02d71df
             name: createUsers
             documentation: 'GraphQL mutation: createUsers'
             tags:
@@ -1975,7 +1913,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 67d5c5ad-002c-4000-8000-67d5c5ad67d5
             name: updateUser
             documentation: 'GraphQL mutation: updateUser'
             tags:
@@ -1993,7 +1930,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 12fb4635-002c-4000-8000-12fb463512fb
             name: deleteUser
             documentation: 'GraphQL mutation: deleteUser'
             tags:
@@ -2011,7 +1947,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 60c8d4d7-0028-4000-8000-60c8d4d760c8
             name: logout
             documentation: 'GraphQL mutation: logout'
             tags:
@@ -2027,8 +1962,7 @@ collections:
             headers:
               - key: Content-Type
                 value: application/json
-      - id: 6ad586c6-002d-4000-8000-6ad586c66ad5
-        name: Subscriptions
+      - name: Subscriptions
         documentation: |-
           # GraphQL Subscriptions
 
@@ -2038,7 +1972,6 @@ collections:
         configuration: {}
         items:
           - type: graphql
-            id: 4f1cc36e-0036-4000-8000-4f1cc36e4f1c
             name: petStatusChanged
             documentation: 'GraphQL subscription: petStatusChanged'
             tags:
@@ -2056,7 +1989,6 @@ collections:
                 value: application/json
             variables: '{}'
           - type: graphql
-            id: 2df501a0-0031-4000-8000-2df501a02df5
             name: orderPlaced
             documentation: 'GraphQL subscription: orderPlaced'
             tags:
@@ -2073,7 +2005,6 @@ collections:
               - key: Content-Type
                 value: application/json
           - type: graphql
-            id: 4f5144f4-0030-4000-8000-4f5144f44f51
             name: petCreated
             documentation: 'GraphQL subscription: petCreated'
             tags:
@@ -2090,7 +2021,6 @@ collections:
               - key: Content-Type
                 value: application/json
   - folderType: environment
-    id: 4ee2c28a-001c-4000-8000-4ee2c28a4ee2
     name: gRPC Docker
     documentation: |-
       # gRPC Docker
@@ -2128,21 +2058,18 @@ collections:
     tags: []
     configuration: {}
     environments:
-      - id: 3f69cc0a-001c-4000-8000-3f69cc0a3f69
-        name: Default
+      - name: Default
         variables:
           - key: baseUrl
             value: localhost:9000
     items:
-      - id: 66ef834b-0024-4000-8000-66ef834b66ef
-        name: HelloService
+      - name: HelloService
         documentation: Hello service - simple greeting
         tags:
           - service
         configuration: {}
         items:
           - type: grpc
-            id: 6d144335-002e-4000-8000-6d1443356d14
             name: SayHello
             documentation: Say hello
             tags:
@@ -2156,15 +2083,13 @@ collections:
                 "greeting": ""
               }
             metadata: []
-      - id: 00b3a817-0026-4000-8000-00b3a81700b3
-        name: HeadersService
+      - name: HeadersService
         documentation: Headers service - echo headers
         tags:
           - service
         configuration: {}
         items:
           - type: grpc
-            id: 6af65cae-0032-4000-8000-6af65cae6af6
             name: GetHeaders
             documentation: Returns request headers
             tags:
@@ -2175,15 +2100,13 @@ collections:
             callType: unary
             requestMessage: '{}'
             metadata: []
-      - id: 5e948cb5-0024-4000-8000-5e948cb55e94
-        name: IndexService
+      - name: IndexService
         documentation: Index service - list available services
         tags:
           - service
         configuration: {}
         items:
           - type: grpc
-            id: 6c650556-002e-4000-8000-6c6505566c65
             name: GetIndex
             documentation: Get server index
             tags:
@@ -2194,15 +2117,13 @@ collections:
             callType: unary
             requestMessage: '{}'
             metadata: []
-      - id: 2dcdbab5-0024-4000-8000-2dcdbab52dcd
-        name: DummyService
+      - name: DummyService
         documentation: DummyMessage service - generate dummy messages
         tags:
           - service
         configuration: {}
         items:
           - type: grpc
-            id: 1dd6c035-0030-4000-8000-1dd6c0351dd6
             name: DummyUnary
             documentation: Unary call
             tags:
@@ -2224,7 +2145,6 @@ collections:
               }
             metadata: []
           - type: grpc
-            id: 1afe3e87-0037-4000-8000-1afe3e871afe
             name: DummyServerStream
             documentation: Server streaming
             tags:
@@ -2246,7 +2166,6 @@ collections:
               }
             metadata: []
           - type: grpc
-            id: 53bb7d0f-0037-4000-8000-53bb7d0f53bb
             name: DummyClientStream
             documentation: Client streaming
             tags:
@@ -2268,7 +2187,6 @@ collections:
               }
             metadata: []
           - type: grpc
-            id: 1ab03bc1-003e-4000-8000-1ab03bc11ab0
             name: DummyBidirectionalStream
             documentation: Bidirectional streaming
             tags:
@@ -2289,15 +2207,13 @@ collections:
                 ]
               }
             metadata: []
-      - id: 05792459-002c-4000-8000-057924590579
-        name: SpecificErrorService
+      - name: SpecificErrorService
         documentation: SpecificError service - return specific error codes
         tags:
           - service
         configuration: {}
         items:
           - type: grpc
-            id: 6a4b747c-003b-4000-8000-6a4b747c6a4b
             name: SpecificError
             documentation: Return a specific gRPC error code
             tags:
@@ -2311,15 +2227,13 @@ collections:
                 "code": 0
               }
             metadata: []
-      - id: 21e3a544-0023-4000-8000-21e3a54421e3
-        name: AddrService
+      - name: AddrService
         documentation: AddrService - return client address
         tags:
           - service
         configuration: {}
         items:
           - type: grpc
-            id: 4850f96d-0032-4000-8000-4850f96d4850
             name: GetClientAddr
             documentation: Get client IP address
             tags:
@@ -2331,7 +2245,6 @@ collections:
             requestMessage: '{}'
             metadata: []
   - folderType: environment
-    id: 09dcfa48-001e-4000-8000-09dcfa4809dc
     name: gRPC Petstore
     documentation: |-
       # gRPC Petstore
@@ -2474,21 +2387,18 @@ collections:
     tags: []
     configuration: {}
     environments:
-      - id: 059bfc38-001e-4000-8000-059bfc38059b
-        name: Default
+      - name: Default
         variables:
           - key: baseUrl
             value: localhost:9000
     items:
-      - id: 6863d264-0024-4000-8000-6863d2646863
-        name: PetService
+      - name: PetService
         documentation: Pet service for managing pets in the store
         tags:
           - service
         configuration: {}
         items:
           - type: grpc
-            id: 08503bf9-002d-4000-8000-08503bf90850
             name: GetPet
             documentation: Get a single pet by ID
             tags:
@@ -2503,7 +2413,6 @@ collections:
               }
             metadata: []
           - type: grpc
-            id: 59f59470-002f-4000-8000-59f5947059f5
             name: ListPets
             documentation: List all pets with optional filtering
             tags:
@@ -2525,7 +2434,6 @@ collections:
               }
             metadata: []
           - type: grpc
-            id: 7742d85b-0030-4000-8000-7742d85b7742
             name: CreatePet
             documentation: Create a new pet
             tags:
@@ -2548,7 +2456,6 @@ collections:
               }
             metadata: []
           - type: grpc
-            id: 0f1b9f48-0030-4000-8000-0f1b9f480f1b
             name: UpdatePet
             documentation: Update an existing pet
             tags:
@@ -2572,7 +2479,6 @@ collections:
               }
             metadata: []
           - type: grpc
-            id: 4fb15096-0030-4000-8000-4fb150964fb1
             name: DeletePet
             documentation: Delete a pet
             tags:
@@ -2587,7 +2493,6 @@ collections:
               }
             metadata: []
           - type: grpc
-            id: 43f4b6e9-0037-4000-8000-43f4b6e943f4
             name: StreamPetUpdates
             documentation: Stream pet updates in real-time
             tags:
@@ -2603,15 +2508,13 @@ collections:
                 ]
               }
             metadata: []
-      - id: 63bf21e6-0026-4000-8000-63bf21e663bf
-        name: StoreService
+      - name: StoreService
         documentation: Store service for managing orders
         tags:
           - service
         configuration: {}
         items:
           - type: grpc
-            id: 0c832d7a-0035-4000-8000-0c832d7a0c83
             name: GetInventory
             documentation: Get store inventory
             tags:
@@ -2623,7 +2526,6 @@ collections:
             requestMessage: '{}'
             metadata: []
           - type: grpc
-            id: 074cf599-0033-4000-8000-074cf599074c
             name: PlaceOrder
             documentation: Place an order
             tags:
@@ -2640,7 +2542,6 @@ collections:
               }
             metadata: []
           - type: grpc
-            id: 0d0d6578-0031-4000-8000-0d0d65780d0d
             name: GetOrder
             documentation: Get an order by ID
             tags:
@@ -2655,7 +2556,6 @@ collections:
               }
             metadata: []
           - type: grpc
-            id: 1f37df7d-0034-4000-8000-1f37df7d1f37
             name: DeleteOrder
             documentation: Delete an order
             tags:
@@ -2669,15 +2569,13 @@ collections:
                 "id": 0
               }
             metadata: []
-      - id: 49ea67dc-0025-4000-8000-49ea67dc49ea
-        name: UserService
+      - name: UserService
         documentation: User service for managing users
         tags:
           - service
         configuration: {}
         items:
           - type: grpc
-            id: 0b4ba5bd-0032-4000-8000-0b4ba5bd0b4b
             name: CreateUser
             documentation: Create a new user
             tags:
@@ -2697,7 +2595,6 @@ collections:
               }
             metadata: []
           - type: grpc
-            id: 0eab4ed5-002f-4000-8000-0eab4ed50eab
             name: GetUser
             documentation: Get user by username
             tags:
@@ -2712,7 +2609,6 @@ collections:
               }
             metadata: []
           - type: grpc
-            id: 57f470f6-0032-4000-8000-57f470f657f4
             name: UpdateUser
             documentation: Update user
             tags:
@@ -2732,7 +2628,6 @@ collections:
               }
             metadata: []
           - type: grpc
-            id: 22dc9aec-0032-4000-8000-22dc9aec22dc
             name: DeleteUser
             documentation: Delete user
             tags:
@@ -2747,7 +2642,6 @@ collections:
               }
             metadata: []
           - type: grpc
-            id: 56da7ed3-002d-4000-8000-56da7ed356da
             name: Login
             documentation: Login user
             tags:
@@ -2763,7 +2657,6 @@ collections:
               }
             metadata: []
           - type: grpc
-            id: 7b8a8ca0-002e-4000-8000-7b8a8ca07b8a
             name: Logout
             documentation: Logout user
             tags:
@@ -2778,7 +2671,6 @@ collections:
               }
             metadata: []
   - folderType: environment
-    id: 25963bca-001c-4000-8000-25963bca2596
     name: SOAP Docker
     documentation: |-
       # SOAP Docker
@@ -2789,14 +2681,12 @@ collections:
     tags: []
     configuration: {}
     environments:
-      - id: 32abbb04-001c-4000-8000-32abbb0432ab
-        name: Default
+      - name: Default
         variables:
           - key: baseUrl
             value: http://localhost:8090/castlemock/mock/soap/echo
     items:
-      - id: 706e7645-0023-4000-8000-706e7645706e
-        name: TestService
+      - name: TestService
         documentation: |-
           Castle Mock Test Services.
                 Import this WSDL into Castle Mock (http://localhost:8090/castlemock)
@@ -2806,7 +2696,6 @@ collections:
         configuration: {}
         items:
           - type: soap
-            id: 58e4737a-0021-4000-8000-58e4737a58e4
             name: Echo
             documentation: Echo a message back
             tags:
@@ -2833,7 +2722,6 @@ collections:
               - key: SOAPAction
                 value: http://restorm.test/castlemock/Echo
   - folderType: environment
-    id: 05918448-001e-4000-8000-059184480591
     name: SOAP Petstore
     documentation: |-
       # SOAP Petstore
@@ -2844,21 +2732,18 @@ collections:
     tags: []
     configuration: {}
     environments:
-      - id: 12a70382-001e-4000-8000-12a7038212a7
-        name: Default
+      - name: Default
         variables:
           - key: baseUrl
             value: http://localhost:8090/petstore/pet
     items:
-      - id: 712ade0d-0029-4000-8000-712ade0d712a
-        name: PetStoreService
+      - name: PetStoreService
         documentation: Petstore SOAP Web Service
         tags:
           - service
         configuration: {}
         items:
           - type: soap
-            id: 20d9323c-0029-4000-8000-20d9323c20d9
             name: GetPet
             documentation: Find pet by ID
             tags:
@@ -2885,7 +2770,6 @@ collections:
               - key: SOAPAction
                 value: http://petstore.example.com/GetPet
           - type: soap
-            id: 61208f69-0033-4000-8000-61208f696120
             name: FindPetsByStatus
             documentation: Find pets by status
             tags:
@@ -2912,7 +2796,6 @@ collections:
               - key: SOAPAction
                 value: http://petstore.example.com/FindPetsByStatus
           - type: soap
-            id: 6af2eeb0-002c-4000-8000-6af2eeb06af2
             name: CreatePet
             documentation: Add a new pet to the store
             tags:
@@ -2939,7 +2822,6 @@ collections:
               - key: SOAPAction
                 value: http://petstore.example.com/CreatePet
           - type: soap
-            id: 02cbb59d-002c-4000-8000-02cbb59d02cb
             name: UpdatePet
             documentation: Update an existing pet
             tags:
@@ -2966,7 +2848,6 @@ collections:
               - key: SOAPAction
                 value: http://petstore.example.com/UpdatePet
           - type: soap
-            id: 5c013a41-002c-4000-8000-5c013a415c01
             name: DeletePet
             documentation: Delete a pet
             tags:
@@ -2993,7 +2874,6 @@ collections:
               - key: SOAPAction
                 value: http://petstore.example.com/DeletePet
   - folderType: environment
-    id: 119630aa-0024-4000-8000-119630aa1196
     name: AsyncAPI Docker
     documentation: |-
       # AsyncAPI Docker
@@ -3006,14 +2886,12 @@ collections:
     tags: []
     configuration: {}
     environments:
-      - id: 5641a9aa-0024-4000-8000-5641a9aa5641
-        name: Default
+      - name: Default
         variables:
           - key: baseUrl
             value: localhost:1883
     items:
-      - id: 1193f2ec-0024-4000-8000-1193f2ec1193
-        name: MQTT
+      - name: MQTT
         documentation: |-
           # MQTT Channels
 
@@ -3023,7 +2901,6 @@ collections:
         configuration: {}
         items:
           - type: websocket
-            id: 3eebde4f-0024-4000-8000-3eebde4f3eeb
             name: mqttPublishEcho
             documentation: Publish test message
             tags:
@@ -3035,7 +2912,6 @@ collections:
             message: '{}'
             headers: []
           - type: websocket
-            id: 6609c5ac-0026-4000-8000-6609c5ac6609
             name: mqttSubscribeEcho
             documentation: Subscribe to test messages
             tags:
@@ -3047,7 +2923,6 @@ collections:
             message: '{}'
             headers: []
           - type: websocket
-            id: 3ee95b8c-0024-4000-8000-3ee95b8c3ee9
             name: mqttPublishJson
             documentation: Publish JSON message
             tags:
@@ -3059,7 +2934,6 @@ collections:
             message: '{}'
             headers: []
           - type: websocket
-            id: 660c486f-0026-4000-8000-660c486f660c
             name: mqttSubscribeJson
             documentation: Subscribe to JSON messages
             tags:
@@ -3071,7 +2945,6 @@ collections:
             message: '{}'
             headers: []
           - type: websocket
-            id: 76fa123b-0032-4000-8000-76fa123b76fa
             name: mqttPublishSensorData
             documentation: Publish sensor data
             tags:
@@ -3089,7 +2962,6 @@ collections:
               }
             headers: []
           - type: websocket
-            id: 53fc8180-0034-4000-8000-53fc818053fc
             name: mqttSubscribeSensorData
             documentation: Subscribe to sensor data
             tags:
@@ -3107,7 +2979,6 @@ collections:
               }
             headers: []
           - type: websocket
-            id: 6528d0c8-0036-4000-8000-6528d0c86528
             name: mqttSubscribeDeviceStatus
             documentation: Subscribe to device status updates
             tags:
@@ -3124,8 +2995,7 @@ collections:
                 "battery": 0
               }
             headers: []
-      - id: 5771a7a1-0028-4000-8000-5771a7a15771
-        name: Socket.IO
+      - name: Socket.IO
         documentation: |-
           # Socket.IO Events
 
@@ -3135,7 +3005,6 @@ collections:
         configuration: {}
         items:
           - type: websocket
-            id: 2a6cd76a-001f-4000-8000-2a6cd76a2a6c
             name: sendEcho
             documentation: Send data to be echoed
             tags:
@@ -3147,7 +3016,6 @@ collections:
             message: '{}'
             headers: []
           - type: websocket
-            id: 2f204c45-0021-4000-8000-2f204c452f20
             name: receiveEcho
             documentation: Receive echoed data
             tags:
@@ -3159,7 +3027,6 @@ collections:
             message: '{}'
             headers: []
           - type: websocket
-            id: 2a67c01d-001f-4000-8000-2a67c01d2a67
             name: sendPing
             documentation: Send ping
             tags:
@@ -3171,7 +3038,6 @@ collections:
             message: '{}'
             headers: []
           - type: websocket
-            id: 2f1b1e72-0021-4000-8000-2f1b1e722f1b
             name: receivePong
             documentation: Receive pong with timestamp
             tags:
@@ -3186,7 +3052,6 @@ collections:
               }
             headers: []
           - type: websocket
-            id: 56677710-0024-4000-8000-566777105667
             name: sendBroadcast
             documentation: Send broadcast message
             tags:
@@ -3198,7 +3063,6 @@ collections:
             message: '{}'
             headers: []
           - type: websocket
-            id: 4e8e2ceb-0026-4000-8000-4e8e2ceb4e8e
             name: receiveBroadcast
             documentation: Receive broadcast from any client
             tags:
@@ -3215,7 +3079,6 @@ collections:
               }
             headers: []
           - type: websocket
-            id: 161df033-0024-4000-8000-161df033161d
             name: joinRoom
             documentation: Join a room by name
             tags:
@@ -3227,7 +3090,6 @@ collections:
             message: '{}'
             headers: []
           - type: websocket
-            id: 20f3835f-0023-4000-8000-20f3835f20f3
             name: onJoined
             documentation: Confirmation of room join
             tags:
@@ -3242,7 +3104,6 @@ collections:
               }
             headers: []
           - type: websocket
-            id: 343353e2-0025-4000-8000-343353e23433
             name: leaveRoom
             documentation: Leave a room by name
             tags:
@@ -3254,7 +3115,6 @@ collections:
             message: '{}'
             headers: []
           - type: websocket
-            id: 2f1d1663-0021-4000-8000-2f1d16632f1d
             name: onLeft
             documentation: Confirmation of room leave
             tags:
@@ -3269,7 +3129,6 @@ collections:
               }
             headers: []
           - type: websocket
-            id: 7c44e97a-0027-4000-8000-7c44e97a7c44
             name: sendRoomMessage
             documentation: Send message to a room
             tags:
@@ -3285,7 +3144,6 @@ collections:
               }
             headers: []
           - type: websocket
-            id: 0930acab-0029-4000-8000-0930acab0930
             name: receiveRoomMessage
             documentation: Receive message from a room
             tags:
@@ -3303,7 +3161,6 @@ collections:
               }
             headers: []
   - folderType: environment
-    id: 75b4ae98-0026-4000-8000-75b4ae9875b4
     name: AsyncAPI Petstore
     documentation: |-
       # AsyncAPI Petstore
@@ -3316,14 +3173,12 @@ collections:
     tags: []
     configuration: {}
     environments:
-      - id: 31093598-0026-4000-8000-310935983109
-        name: Default
+      - name: Default
         variables:
           - key: baseUrl
             value: localhost:1883
     items:
-      - id: 75b6ec56-0026-4000-8000-75b6ec5675b6
-        name: MQTT
+      - name: MQTT
         documentation: |-
           # MQTT Channels
 
@@ -3333,7 +3188,6 @@ collections:
         configuration: {}
         items:
           - type: websocket
-            id: 04565160-002a-4000-8000-045651600456
             name: onPetCreated
             documentation: Receive notifications when a new pet is created
             tags:
@@ -3345,7 +3199,6 @@ collections:
             message: '{}'
             headers: []
           - type: websocket
-            id: 46f14ccd-002a-4000-8000-46f14ccd46f1
             name: onPetUpdated
             documentation: Receive notifications when a pet is updated
             tags:
@@ -3357,7 +3210,6 @@ collections:
             message: '{}'
             headers: []
           - type: websocket
-            id: 23720291-002a-4000-8000-237202912372
             name: onPetDeleted
             documentation: Receive notifications when a pet is deleted
             tags:
@@ -3373,7 +3225,6 @@ collections:
               }
             headers: []
           - type: websocket
-            id: 7f8ef9e5-0032-4000-8000-7f8ef9e57f8e
             name: onPetStatusChange
             documentation: Receive notifications for pets with specific status
             tags:
@@ -3385,7 +3236,6 @@ collections:
             message: '{}'
             headers: []
           - type: websocket
-            id: 617f67b6-002b-4000-8000-617f67b6617f
             name: onOrderPlaced
             documentation: Receive notifications when a new order is placed
             tags:
@@ -3397,7 +3247,6 @@ collections:
             message: '{}'
             headers: []
           - type: websocket
-            id: 740a5395-0035-4000-8000-740a5395740a
             name: onOrderStatusUpdate
             documentation: Receive status updates for a specific order
             tags:
@@ -3409,7 +3258,6 @@ collections:
             message: '{}'
             headers: []
           - type: websocket
-            id: 49a96070-0030-4000-8000-49a9607049a9
             name: onInventoryUpdated
             documentation: Receive notifications when inventory changes
             tags:
@@ -3421,7 +3269,6 @@ collections:
             message: '{}'
             headers: []
           - type: websocket
-            id: 73c00918-0021-4000-8000-73c0091873c0
             name: sendEcho
             documentation: Send a message to be echoed back
             tags:
@@ -3437,7 +3284,6 @@ collections:
               }
             headers: []
           - type: websocket
-            id: 68a98443-0023-4000-8000-68a9844368a9
             name: receiveEcho
             documentation: Receive echoed message
             tags:
@@ -3453,7 +3299,6 @@ collections:
               }
             headers: []
           - type: websocket
-            id: 73c52065-0021-4000-8000-73c5206573c5
             name: sendPing
             documentation: Send ping request
             tags:
@@ -3465,7 +3310,6 @@ collections:
             message: '{}'
             headers: []
           - type: websocket
-            id: 68a45670-0023-4000-8000-68a4567068a4
             name: receivePong
             documentation: Receive pong response
             tags:
@@ -3480,7 +3324,6 @@ collections:
               }
             headers: []
           - type: websocket
-            id: 224da9ae-0026-4000-8000-224da9ae224d
             name: sendBroadcast
             documentation: Send message to all connected clients
             tags:
@@ -3496,7 +3339,6 @@ collections:
               }
             headers: []
           - type: websocket
-            id: 6e7e1629-0028-4000-8000-6e7e16296e7e
             name: receiveBroadcast
             documentation: Receive broadcast messages
             tags:
@@ -3513,7 +3355,6 @@ collections:
               }
             headers: []
           - type: websocket
-            id: 42dd8a03-002c-4000-8000-42dd8a0342dd
             name: sendRoomMessage
             documentation: Send message to a specific room
             tags:
@@ -3531,7 +3372,6 @@ collections:
               }
             headers: []
           - type: websocket
-            id: 4f0fa5c8-002e-4000-8000-4f0fa5c84f0f
             name: receiveRoomMessage
             documentation: Receive messages from a room
             tags:

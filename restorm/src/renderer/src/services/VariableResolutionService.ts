@@ -1,4 +1,5 @@
 import Handlebars from 'handlebars'
+import { logger } from 'electron-core-ui/renderer'
 import type { KeyValue, Environment } from '../types/collections'
 
 export type VariableContext = Record<string, string>
@@ -44,6 +45,7 @@ export interface ResolvedSequence {
 
 function compileTemplate(template: string): HandlebarsTemplateDelegate {
   // Precompile with no escaping (we want raw strings)
+  logger.debug('Handlebars: Compiling template', { template })
   return Handlebars.compile(template, { noEscape: true })
 }
 
@@ -66,6 +68,7 @@ export function resolveKeyValueSequence(rows: KeyValue[], baseContext: VariableC
     try {
       const compileKey = compileTemplate(row.key)
       resolvedKey = compileKey(contextSnapshot)
+      logger.debug('Handlebars: Resolved key', { originalKey: row.key, resolvedKey, context: contextSnapshot })
     } catch {
       // Return original key if Handlebars parsing fails
       resolvedKey = row.key
@@ -74,6 +77,7 @@ export function resolveKeyValueSequence(rows: KeyValue[], baseContext: VariableC
     try {
       const compileValue = compileTemplate(row.value)
       resolvedValue = compileValue(contextSnapshot)
+      logger.debug('Handlebars: Resolved value', { originalValue: row.value, resolvedValue, context: contextSnapshot })
     } catch {
       // Return original value if Handlebars parsing fails
       resolvedValue = row.value
@@ -118,7 +122,9 @@ export function keyValuesToContext(values: KeyValue[]): VariableContext {
 export function resolveTemplate(template: string, context: VariableContext): string {
   try {
     const compile = compileTemplate(template)
-    return compile(context)
+    const result = compile(context)
+    logger.debug('Handlebars: Resolved template', { template, result, context })
+    return result
   } catch {
     // Return original template if Handlebars parsing fails
     return template
