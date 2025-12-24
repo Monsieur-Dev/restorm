@@ -62,6 +62,23 @@ interface VariableTransformResult {
   key: string
 }
 
+/** Request context tracking */
+interface RequestContext {
+  /** Selected environment ID (null if no environment) */
+  environmentId: string | null
+  /** Request KeyValues to transform (headers, params, pathParams, etc.) */
+  keyValueGroups: Map<string, KeyValue[]>
+}
+
+/** Request structure (minimal for context service) */
+interface RequestData {
+  id: string
+  headers?: KeyValue[]
+  params?: KeyValue[]
+  pathParams?: KeyValue[]
+  // Add other fields as needed (body fields, etc.)
+}
+
 /**
  * ContextService class - manages Handlebars context (Main Process)
  */
@@ -77,6 +94,9 @@ class ContextService {
 
   /** Map of variableId (runtime id) -> transformation result */
   private variableTransformResults = new Map<string, VariableTransformResult>()
+
+  /** Map of requestId -> request context (selected env + keyvalue groups) */
+  private requestContexts = new Map<string, RequestContext>()
 
   /**
    * Initialize the service and start listening to events
@@ -228,6 +248,9 @@ class ContextService {
         this.recalculateContextCascade(childId)
       }
     }
+
+    // Also recalculate requests using this environment or its descendants
+    this.recalculateRequestsUsingEnvironment(envId)
   }
 
   /**
@@ -381,6 +404,179 @@ class ContextService {
     return result
   }
 
+  // =========================================================================
+  // Request Context Management
+  // =========================================================================
+
+  /**
+   * Register a request for context tracking.
+   * Called when a request tab is opened.
+   */
+  registerRequest(requestId: string, environmentId: string | null, requestData: RequestData): void {
+    logger.info('[ContextService] Registering request', { requestId, environmentId })
+
+    const keyValueGroups = new Map<string, KeyValue[]>()
+    if (requestData.headers) keyValueGroups.set('headers', requestData.headers)
+    if (requestData.params) keyValueGroups.set('params', requestData.params)
+    if (requestData.pathParams) keyValueGroups.set('pathParams', requestData.pathParams)
+
+    this.requestContexts.set(requestId, {
+      environmentId,
+      keyValueGroups
+    })
+
+    // Calculate transformations for all KeyValue groups
+    this.recalculateRequestContext(requestId)
+  }
+
+  /**
+   * Unregister a request from context tracking.
+   * Called when a request tab is closed.
+   */
+  unregisterRequest(requestId: string): void {
+    logger.info('[ContextService] Unregistering request', { requestId })
+
+    const ctx = this.requestContexts.get(requestId)
+    if (ctx) {
+      // Remove all variable transform results for this request's KeyValues
+      for (const keyValues of ctx.keyValueGroups.values()) {
+        for (const kv of keyValues) {
+          if (kv.id) {
+            this.variableTransformResults.delete(kv.id)
+          }
+        }
+      }
+    }
+
+    this.requestContexts.delete(requestId)
+  }
+
+  /**
+   * Update the selected environment for a request.
+   * Called when the environment dropdown changes.
+   */
+  setRequestEnvironment(requestId: string, environmentId: string | null): void {
+    const ctx = this.requestContexts.get(requestId)
+    if (!ctx) {
+      logger.warn('[ContextService] setRequestEnvironment: request not registered', { requestId })
+      return
+    }
+
+    logger.info('[ContextService] Setting request environment', { requestId, environmentId })
+    ctx.environmentId = environmentId
+    this.recalculateRequestContext(requestId)
+  }
+
+  /**
+   * Update a KeyValue group for a request (e.g., headers, params).
+   * Called when the user modifies headers/params/etc in the UI.
+   */
+  updateRequestKeyValues(requestId: string, groupName: string, keyValues: KeyValue[]): void {
+    const ctx = this.requestContexts.get(requestId)
+    if (!ctx) {
+      logger.warn('[ContextService] updateRequestKeyValues: request not registered', { requestId })
+      return
+    }
+
+    // Remove old transform results for the group
+    const oldKeyValues = ctx.keyValueGroups.get(groupName)
+    if (oldKeyValues) {
+      for (const kv of oldKeyValues) {
+        if (kv.id) {
+          this.variableTransformResults.delete(kv.id)
+        }
+      }
+    }
+
+    ctx.keyValueGroups.set(groupName, keyValues)
+    this.recalculateRequestContext(requestId)
+  }
+
+  /**
+   * Recalculate all KeyValue transformations for a request
+   */
+  private recalculateRequestContext(requestId: string): void {
+    const ctx = this.requestContexts.get(requestId)
+    if (!ctx) return
+
+    // Get the base context from the selected environment
+    let baseContext: TransformedContext = {}
+    if (ctx.environmentId) {
+      const envContext = this.transformedContexts.get(ctx.environmentId)
+      if (envContext) {
+        baseContext = { ...envContext }
+      }
+    }
+
+    logger.debug('[ContextService] Recalculating request context', {
+      requestId,
+      environmentId: ctx.environmentId,
+      baseContextKeys: Object.keys(baseContext),
+      groups: Array.from(ctx.keyValueGroups.keys())
+    })
+
+    // Process each KeyValue group
+    for (const [groupName, keyValues] of ctx.keyValueGroups) {
+      // For each group, accumulate context as we process variables
+      const groupContext = { ...baseContext }
+
+      for (const kv of keyValues) {
+        if (kv.key) {
+          const contextUsed = { ...groupContext }
+          const transformedValue = this.transformValue(kv.value, groupContext)
+          groupContext[kv.key] = transformedValue
+
+          if (kv.id) {
+            this.storeAndBroadcastTransformResult(kv.id, {
+              contextUsed,
+              transformedValue,
+              rawValue: kv.value,
+              key: kv.key
+            })
+          }
+        }
+      }
+
+      logger.debug('[ContextService] Processed request group', {
+        requestId,
+        groupName,
+        variableCount: keyValues.filter(kv => kv.id).length
+      })
+    }
+  }
+
+  /**
+   * Recalculate all requests that use a specific environment
+   * Called when an environment is updated
+   */
+  private recalculateRequestsUsingEnvironment(environmentId: string): void {
+    // Also check if any request uses a descendant environment
+    const affectedEnvIds = new Set<string>([environmentId])
+
+    // Collect all descendant environment IDs
+    const collectDescendants = (envId: string): void => {
+      const meta = this.environmentMeta.get(envId)
+      if (meta) {
+        for (const childId of meta.childIds) {
+          affectedEnvIds.add(childId)
+          collectDescendants(childId)
+        }
+      }
+    }
+    collectDescendants(environmentId)
+
+    // Recalculate all requests using affected environments
+    for (const [requestId, ctx] of this.requestContexts) {
+      if (ctx.environmentId && affectedEnvIds.has(ctx.environmentId)) {
+        logger.debug('[ContextService] Recalculating request due to environment change', {
+          requestId,
+          environmentId: ctx.environmentId
+        })
+        this.recalculateRequestContext(requestId)
+      }
+    }
+  }
+
   /**
    * Destroy the service and unsubscribe from events
    */
@@ -393,6 +589,7 @@ class ContextService {
     this.environmentMeta.clear()
     this.transformedContexts.clear()
     this.variableTransformResults.clear()
+    this.requestContexts.clear()
     this.initialized = false
   }
 }

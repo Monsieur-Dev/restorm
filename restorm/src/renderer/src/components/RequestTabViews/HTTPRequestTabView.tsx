@@ -21,6 +21,7 @@ import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import codeSnippetsTemplate from '../../resources/templates/code-snippets-httprequests.hbs?raw'
 import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue } from '../../types/collections'
+import type { KeyValueTableRow } from 'electron-core-ui/renderer'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { VariableContext } from '../RestormKeyValueTable'
 import { executeHTTPRequest, resolveRequestURL, type HTTPRequestInput } from '../../services/request/HTTPRequestService'
@@ -104,10 +105,9 @@ function keyValuesToListItems(keyValues: KeyValue[], prefix: string): ListViewIt
 
 export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request }) => {
   const { t } = useTranslation()
-  const { environments: _environments, selectedEnvId: _selectedEnvId } = useEnvironmentContext()
-  void _environments // TODO: will be used when variable resolution is implemented in backend
-  void _selectedEnvId
+  const { selectedEnvId } = useEnvironmentContext()
   const handlebarsHelpers = useHandlebarsHelpers()
+  const previousEnvIdRef = useRef<string | null>(null)
   
   const [method, setMethod] = useState<string>(request.method)
   const [url, setUrl] = useState<string>(request.url)
@@ -138,6 +138,44 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     }
     return undefined
   }, [request])
+
+  // Register request with ContextService on mount, unregister on unmount
+  useEffect(() => {
+    const requestId = request.id
+    logger.debug('[HTTPRequestTabView] Registering request with ContextService', { requestId, selectedEnvId })
+
+    // Convert KeyValue arrays to plain objects for IPC
+    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string }[] =>
+      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value }))
+
+    void window.restorm.context.registerRequest(requestId, selectedEnvId ?? null, {
+      headers: toKeyValueData(request.headers),
+      params: toKeyValueData(request.params),
+      pathParams: request.pathParams ? toKeyValueData(request.pathParams) : []
+    })
+
+    previousEnvIdRef.current = selectedEnvId ?? null
+
+    return () => {
+      logger.debug('[HTTPRequestTabView] Unregistering request from ContextService', { requestId })
+      void window.restorm.context.unregisterRequest(requestId)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Intentionally only run on mount/unmount and when request.id changes
+  }, [request.id])
+
+  // Notify ContextService when selected environment changes
+  useEffect(() => {
+    const currentEnvId = selectedEnvId ?? null
+    if (previousEnvIdRef.current !== currentEnvId) {
+      logger.debug('[HTTPRequestTabView] Environment changed, notifying ContextService', {
+        requestId: request.id,
+        previousEnvId: previousEnvIdRef.current,
+        newEnvId: currentEnvId
+      })
+      void window.restorm.context.setRequestEnvironment(request.id, currentEnvId)
+      previousEnvIdRef.current = currentEnvId
+    }
+  }, [selectedEnvId, request.id])
 
   // Sync method changes to reactive object
   useEffect(() => {
@@ -172,6 +210,34 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
   // TODO: Variable resolution will be implemented in backend
   const environmentContext = useMemo<VariableContext>(() => ({}), [])
   const envVariables = useMemo<VariableDefinition[]>(() => [], [])
+
+  // Callbacks for KeyValue changes - notify both reactive object and ContextService
+  const handleHeadersChange = useCallback((rows: KeyValueTableRow[]): void => {
+    updateReactiveProperty(request, 'headers', rows)
+    void window.restorm.context.updateRequestKeyValues(
+      request.id,
+      'headers',
+      rows.map(r => ({ id: r.id, key: r.key, value: r.value }))
+    )
+  }, [request])
+
+  const handleParamsChange = useCallback((rows: KeyValueTableRow[]): void => {
+    updateReactiveProperty(request, 'params', rows)
+    void window.restorm.context.updateRequestKeyValues(
+      request.id,
+      'params',
+      rows.map(r => ({ id: r.id, key: r.key, value: r.value }))
+    )
+  }, [request])
+
+  const handlePathParamsChange = useCallback((rows: KeyValueTableRow[]): void => {
+    updateReactiveProperty(request, 'pathParams', rows)
+    void window.restorm.context.updateRequestKeyValues(
+      request.id,
+      'pathParams',
+      rows.map(r => ({ id: r.id, key: r.key, value: r.value }))
+    )
+  }, [request])
 
   const resolvedUrlResult = useMemo(
     () => resolveRequestURL({
@@ -268,7 +334,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           variables={envVariables}
           helpers={handlebarsHelpers}
           initialRows={request.headers}
-          onRowsChange={(rows): void => { updateReactiveProperty(request, 'headers', rows) }}
+          onRowsChange={handleHeadersChange}
         />
       </Pane>
       <Pane
@@ -295,7 +361,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           variables={envVariables}
           helpers={handlebarsHelpers}
           initialRows={request.pathParams ?? []}
-          onRowsChange={(rows): void => { updateReactiveProperty(request, 'pathParams', rows) }}
+          onRowsChange={handlePathParamsChange}
         />
       </Pane>
       <Pane
@@ -322,7 +388,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           variables={envVariables}
           helpers={handlebarsHelpers}
           initialRows={request.params}
-          onRowsChange={(rows): void => { updateReactiveProperty(request, 'params', rows) }}
+          onRowsChange={handleParamsChange}
         />
       </Pane>
       <Pane title={t('requestTab.tabs.body')} initialSize={0.4}>

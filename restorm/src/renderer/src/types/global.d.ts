@@ -42,9 +42,28 @@ declare global {
       context: {
         getAllTransformResults: () => Promise<Record<string, VariableTransformResult>>
         onVariableTransformed: (callback: (result: VariableTransformResult) => void) => (() => void)
+        registerRequest: (
+          requestId: string,
+          environmentId: string | null,
+          requestData: {
+            headers?: KeyValueData[]
+            params?: KeyValueData[]
+            pathParams?: KeyValueData[]
+          }
+        ) => Promise<void>
+        unregisterRequest: (requestId: string) => Promise<void>
+        setRequestEnvironment: (requestId: string, environmentId: string | null) => Promise<void>
+        updateRequestKeyValues: (requestId: string, groupName: string, keyValues: KeyValueData[]) => Promise<void>
       }
     }
   }
+}
+
+/** KeyValue data for context service */
+export interface KeyValueData {
+  id?: string
+  key: string
+  value: string
 }
 
 /** Variable transformation result from context service */

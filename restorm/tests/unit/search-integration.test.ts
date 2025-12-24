@@ -61,13 +61,14 @@ vi.mock('electron-core-ui/renderer', async () => {
       }
       miniSearch.add(doc)
     },
-    async indexDocuments(docs: MockSearchDocument[]): Promise<void> {
+    indexDocuments(docs: MockSearchDocument[]): Promise<void> {
       for (const doc of docs) {
         if (miniSearch.has(doc.id)) {
           miniSearch.discard(doc.id)
         }
         miniSearch.add(doc)
       }
+      return Promise.resolve()
     },
     removeDocument(id: string): void {
       if (miniSearch.has(id)) {
@@ -216,7 +217,9 @@ describe('Search Integration', () => {
     }
 
     // Clear previous emitSync calls
-    vi.mocked(eventBus.emitSync).mockClear()
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- vitest mock pattern
+    const emitSyncMock = vi.mocked(eventBus.emitSync)
+    emitSyncMock.mockClear()
 
     // Modify the notes to include "restorm"
     request.notes = 'This is a test note with restorm keyword'
@@ -225,7 +228,7 @@ describe('Search Integration', () => {
     vi.advanceTimersByTime(100)
 
     // Verify that REQUEST_UPDATED event was emitted (reindexing happens in main process)
-    expect(eventBus.emitSync).toHaveBeenCalledWith(
+    expect(emitSyncMock).toHaveBeenCalledWith(
       'document:request:updated',
       expect.objectContaining({
         id: request.id,

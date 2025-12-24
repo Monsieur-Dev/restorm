@@ -69,6 +69,34 @@ contextBridge.exposeInMainWorld('restorm', {
       return () => {
         ipcRenderer.removeListener('context:variable-transformed', handler)
       }
+    },
+    /** Register a request for context tracking (when tab opens) */
+    registerRequest: async (
+      requestId: string,
+      environmentId: string | null,
+      requestData: {
+        headers?: { id?: string; key: string; value: string }[]
+        params?: { id?: string; key: string; value: string }[]
+        pathParams?: { id?: string; key: string; value: string }[]
+      }
+    ): Promise<void> => {
+      await ipcRenderer.invoke('context:register-request', requestId, environmentId, requestData)
+    },
+    /** Unregister a request from context tracking (when tab closes) */
+    unregisterRequest: async (requestId: string): Promise<void> => {
+      await ipcRenderer.invoke('context:unregister-request', requestId)
+    },
+    /** Set the selected environment for a request */
+    setRequestEnvironment: async (requestId: string, environmentId: string | null): Promise<void> => {
+      await ipcRenderer.invoke('context:set-request-environment', requestId, environmentId)
+    },
+    /** Update KeyValues for a request (headers, params, etc.) */
+    updateRequestKeyValues: async (
+      requestId: string,
+      groupName: string,
+      keyValues: { id?: string; key: string; value: string }[]
+    ): Promise<void> => {
+      await ipcRenderer.invoke('context:update-request-keyvalues', requestId, groupName, keyValues)
     }
   }
 })

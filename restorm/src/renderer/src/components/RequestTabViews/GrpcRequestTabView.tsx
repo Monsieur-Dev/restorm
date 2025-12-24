@@ -8,11 +8,12 @@ import {
   SplitView,
   Pane,
   logger,
-  type VariableDefinition
+  type VariableDefinition,
+  type KeyValueTableRow
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
-import type { GrpcRequest, GrpcResponse } from '../../types/collections'
+import type { GrpcRequest, GrpcResponse, KeyValue } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { VariableContext } from '../RestormKeyValueTable'
 import { executeGrpcRequest, type GrpcRequestInput } from '../../services/request/GrpcRequestService'
@@ -35,10 +36,9 @@ export interface GrpcRequestTabViewProps {
 
 export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request }) => {
   const { t } = useTranslation()
-  const { environments: _environments, selectedEnvId: _selectedEnvId } = useEnvironmentContext()
-  void _environments // TODO: will be used when variable resolution is implemented in backend
-  void _selectedEnvId
+  const { selectedEnvId } = useEnvironmentContext()
   const handlebarsHelpers = useHandlebarsHelpers()
+  const previousEnvIdRef = useRef<string | null>(null)
   
   const [url, setUrlState] = useState(request.url)
   const [requestMessage, setRequestMessageState] = useState(request.requestMessage)
@@ -61,6 +61,41 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
     return undefined
   }, [request])
 
+  // Register request with ContextService on mount, unregister on unmount
+  useEffect(() => {
+    const requestId = request.id
+    logger.debug('[GrpcRequestTabView] Registering request with ContextService', { requestId, selectedEnvId })
+
+    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string }[] =>
+      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value }))
+
+    void window.restorm.context.registerRequest(requestId, selectedEnvId ?? null, {
+      headers: toKeyValueData(request.metadata)
+    })
+
+    previousEnvIdRef.current = selectedEnvId ?? null
+
+    return () => {
+      logger.debug('[GrpcRequestTabView] Unregistering request from ContextService', { requestId })
+      void window.restorm.context.unregisterRequest(requestId)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Intentionally only run on mount/unmount and when request.id changes
+  }, [request.id])
+
+  // Notify ContextService when selected environment changes
+  useEffect(() => {
+    const currentEnvId = selectedEnvId ?? null
+    if (previousEnvIdRef.current !== currentEnvId) {
+      logger.debug('[GrpcRequestTabView] Environment changed, notifying ContextService', {
+        requestId: request.id,
+        previousEnvId: previousEnvIdRef.current,
+        newEnvId: currentEnvId
+      })
+      void window.restorm.context.setRequestEnvironment(request.id, currentEnvId)
+      previousEnvIdRef.current = currentEnvId
+    }
+  }, [selectedEnvId, request.id])
+
   // Sync state changes to reactive request object
   const setUrl = useCallback((value: string): void => {
     setUrlState(value)
@@ -74,7 +109,17 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
   // TODO: Variable resolution will be implemented in backend
   const environmentContext: VariableContext = {}
   const envVariables: VariableDefinition[] = []
-  
+
+  // Callback for metadata changes - notify both reactive object and ContextService
+  const handleMetadataChange = useCallback((rows: KeyValueTableRow[]): void => {
+    updateReactiveProperty(request, 'metadata', rows)
+    void window.restorm.context.updateRequestKeyValues(
+      request.id,
+      'headers', // Use 'headers' as the group name for consistency
+      rows.map(r => ({ id: r.id, key: r.key, value: r.value }))
+    )
+  }, [request])
+
   const handleSend = (): void => {
     if (isSending) return
     setIsSending(true)
@@ -154,7 +199,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
           variables={envVariables}
           helpers={handlebarsHelpers}
           initialRows={request.metadata}
-          onRowsChange={(rows): void => { updateReactiveProperty(request, 'metadata', rows) }}
+          onRowsChange={handleMetadataChange}
         />
       </Pane>
     </SplitView>

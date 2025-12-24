@@ -242,3 +242,28 @@ ipcMain.handle('project:read-file', async (_event, relPath: string) => {
 ipcMain.handle('context:get-all-transform-results', () => {
   return contextService.getAllVariableTransformResults()
 })
+
+// IPC handler to register a request for context tracking
+ipcMain.handle('context:register-request', (_event, requestId: string, environmentId: string | null, requestData: { headers?: { id?: string; key: string; value: string }[]; params?: { id?: string; key: string; value: string }[]; pathParams?: { id?: string; key: string; value: string }[] }) => {
+  contextService.registerRequest(requestId, environmentId, {
+    id: requestId,
+    headers: requestData.headers,
+    params: requestData.params,
+    pathParams: requestData.pathParams
+  })
+})
+
+// IPC handler to unregister a request from context tracking
+ipcMain.handle('context:unregister-request', (_event, requestId: string) => {
+  contextService.unregisterRequest(requestId)
+})
+
+// IPC handler to set the environment for a request
+ipcMain.handle('context:set-request-environment', (_event, requestId: string, environmentId: string | null) => {
+  contextService.setRequestEnvironment(requestId, environmentId)
+})
+
+// IPC handler to update KeyValues for a request
+ipcMain.handle('context:update-request-keyvalues', (_event, requestId: string, groupName: string, keyValues: { id?: string; key: string; value: string }[]) => {
+  contextService.updateRequestKeyValues(requestId, groupName, keyValues)
+})
