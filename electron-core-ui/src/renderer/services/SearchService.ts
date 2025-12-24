@@ -6,13 +6,8 @@
 
 import MiniSearch from 'minisearch'
 
-/** Navigation data for navigating to a search result */
-export interface SearchNavigation {
-  type: 'folder' | 'request' | 'environment' | 'settings'
-  folderId?: string
-  requestId?: string
-  path?: string[]
-}
+/** Navigation data for navigating to a search result (application-specific) */
+export type SearchNavigation = Record<string, unknown>
 
 /** Document to be indexed for search */
 export interface SearchDocument {

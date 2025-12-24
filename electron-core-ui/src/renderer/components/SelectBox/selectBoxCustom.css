@@ -194,7 +194,7 @@
   line-height: 1;
 }
 
-/* Ensure fixed-width trigger for HTTP method select in restorm.
+/* Ensure fixed-width trigger for method selects.
    The wrapper div around the SelectBox controls the width; this
    rule makes the custom trigger fill that width so the chevron
    always stays aligned to the right edge. */

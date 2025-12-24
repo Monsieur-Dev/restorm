@@ -293,7 +293,7 @@
   background-color: #6a5acd;
 }
 
-/* GraphQL */
+/* Query languages */
 .http-method-badge.method-graphql,
 .http-method-badge.method-gql,
 .http-method-badge.method-query {
@@ -334,7 +334,7 @@
   color: #000;
 }
 
-/* WebSocket / Real-time */
+/* Real-time protocols */
 .http-method-badge.method-ws,
 .http-method-badge.method-websocket {
   background-color: #43a047;
