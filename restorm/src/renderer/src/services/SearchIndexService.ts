@@ -12,8 +12,18 @@ import {
   type DocumentDeletedPayload,
   type SearchDocument,
   type Subscription,
+  type CategoryMeta,
   logger
 } from 'electron-core-ui/renderer'
+
+/** Search categories configuration for Restorm */
+const RESTORM_SEARCH_CATEGORIES: Record<string, CategoryMeta> = {
+  request: { label: 'search.categories.request', icon: 'cloud', order: 1 },
+  folder: { label: 'search.categories.folder', icon: 'folder', order: 2 },
+  environment: { label: 'search.categories.environment', icon: 'folder-library', order: 3 },
+  settings: { label: 'search.categories.settings', icon: 'settings-gear', order: 4 },
+  tag: { label: 'search.categories.tag', icon: 'tag', order: 5 }
+}
 import type { Folder, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, Request } from '../types/collections'
 import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isRequest } from '../types/collections'
 
@@ -414,6 +424,9 @@ class SearchIndexService {
     if (this.initialized) {
       return
     }
+
+    // Register search categories
+    searchService.registerCategories(RESTORM_SEARCH_CATEGORIES)
 
     // Subscribe to folder events
     this.subscriptions.push(

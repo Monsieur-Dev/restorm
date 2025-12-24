@@ -48,19 +48,10 @@ export interface GroupedResults {
 }
 
 /** Category metadata for display */
-interface CategoryMeta {
+export interface CategoryMeta {
   label: string
   icon: string
   order: number
-}
-
-/** Default category metadata */
-const CATEGORY_META: Record<string, CategoryMeta> = {
-  request: { label: 'search.categories.request', icon: 'cloud', order: 1 },
-  folder: { label: 'search.categories.folder', icon: 'folder', order: 2 },
-  environment: { label: 'search.categories.environment', icon: 'folder-library', order: 3 },
-  settings: { label: 'search.categories.settings', icon: 'settings-gear', order: 4 },
-  tag: { label: 'search.categories.tag', icon: 'tag', order: 5 }
 }
 
 /** Default category for unknown categories */
@@ -76,6 +67,7 @@ const DEFAULT_CATEGORY_META: CategoryMeta = {
 class SearchService {
   private miniSearch: MiniSearch<SearchDocument>
   private documents: Map<string, SearchDocument>
+  private categoryMeta: Record<string, CategoryMeta> = {}
 
   constructor() {
     this.documents = new Map()
@@ -88,6 +80,22 @@ class SearchService {
         prefix: true
       }
     })
+  }
+
+  /**
+   * Register a category with its metadata
+   */
+  registerCategory(category: string, meta: CategoryMeta): void {
+    this.categoryMeta[category] = meta
+  }
+
+  /**
+   * Register multiple categories at once
+   */
+  registerCategories(categories: Record<string, CategoryMeta>): void {
+    for (const [category, meta] of Object.entries(categories)) {
+      this.categoryMeta[category] = meta
+    }
   }
 
   /**
@@ -184,7 +192,7 @@ class SearchService {
     const groupedResults: GroupedResults[] = []
 
     for (const [category, items] of grouped) {
-      const meta = CATEGORY_META[category] ?? DEFAULT_CATEGORY_META
+      const meta = this.categoryMeta[category] ?? DEFAULT_CATEGORY_META
       groupedResults.push({
         category,
         label: meta.label,
@@ -195,8 +203,8 @@ class SearchService {
 
     // Sort groups by order
     groupedResults.sort((a, b) => {
-      const orderA = CATEGORY_META[a.category]?.order ?? DEFAULT_CATEGORY_META.order
-      const orderB = CATEGORY_META[b.category]?.order ?? DEFAULT_CATEGORY_META.order
+      const orderA = this.categoryMeta[a.category]?.order ?? DEFAULT_CATEGORY_META.order
+      const orderB = this.categoryMeta[b.category]?.order ?? DEFAULT_CATEGORY_META.order
       return orderA - orderB
     })
 

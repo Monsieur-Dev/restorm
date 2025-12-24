@@ -12,7 +12,8 @@ export type {
   SearchDocument,
   SearchResult,
   SearchNavigation,
-  GroupedResults
+  GroupedResults,
+  CategoryMeta
 } from './SearchService'
 
 export { eventBus, DocumentEvents } from './EventBus'
