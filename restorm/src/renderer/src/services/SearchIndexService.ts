@@ -522,6 +522,13 @@ class SearchIndexService {
   async clearIndex(): Promise<void> {
     await searchService.clearIndex()
   }
+
+  /**
+   * Destroy the service (for testing)
+   */
+  destroy(): void {
+    this.initialized = false
+  }
 }
 
 /** Singleton instance */
