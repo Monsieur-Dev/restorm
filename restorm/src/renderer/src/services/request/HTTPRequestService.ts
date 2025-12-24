@@ -11,7 +11,13 @@ import type {
   KeyValue,
   HTTPMethod
 } from '../../types/collections'
-import { resolveTemplate, type VariableContext } from '../VariableResolutionService'
+// TODO: Variable resolution will be implemented in backend
+export type VariableContext = Record<string, string>
+
+/** Placeholder for variable resolution - returns template as-is (to be implemented in backend) */
+function resolveTemplate(template: string, _context: VariableContext): string {
+  return template
+}
 
 /** Input for URL resolution */
 export interface URLResolutionInput {

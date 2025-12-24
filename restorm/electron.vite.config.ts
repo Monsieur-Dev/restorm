@@ -8,6 +8,7 @@ export default defineConfig({
     resolve: {
       alias: {
         // In dev & build, use core-ui main sources directly
+        'electron-core-ui/main': resolve(__dirname, '../electron-core-ui/src/main/index.ts'),
         'electron-core-ui': resolve(__dirname, '../electron-core-ui/src/main/index.ts')
       }
     },

@@ -24,6 +24,15 @@ contextBridge.exposeInMainWorld('api', {
 })
 contextBridge.exposeInMainWorld('electronAPI', createElectronAPI())
 
+/** Variable transformation result from context service */
+interface VariableTransformResult {
+  variableId: string
+  contextUsed: Record<string, string>
+  transformedValue: string
+  rawValue: string
+  key: string
+}
+
 // Expose restorm-specific APIs
 contextBridge.exposeInMainWorld('restorm', {
   openEditor: async (file?: { title: string; content?: string; x?: number; y?: number }): Promise<void> => {
@@ -43,6 +52,23 @@ contextBridge.exposeInMainWorld('restorm', {
     ipcRenderer.on('app:save-and-close', handler)
     return () => {
       ipcRenderer.removeListener('app:save-and-close', handler)
+    }
+  },
+  context: {
+    /** Get all variable transformation results */
+    getAllTransformResults: async (): Promise<Record<string, VariableTransformResult>> => {
+      const result: unknown = await ipcRenderer.invoke('context:get-all-transform-results')
+      return result as Record<string, VariableTransformResult>
+    },
+    /** Listen for variable transformation updates */
+    onVariableTransformed: (callback: (result: VariableTransformResult) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, result: VariableTransformResult): void => {
+        callback(result)
+      }
+      ipcRenderer.on('context:variable-transformed', handler)
+      return () => {
+        ipcRenderer.removeListener('context:variable-transformed', handler)
+      }
     }
   }
 })

@@ -7,8 +7,8 @@
 
 import { eventBus, logger } from 'electron-core-ui/renderer'
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
-import type { Folder, HTTPRequest, FolderItem, Request, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest } from './collections'
-import { isAnyFolder, isHTTPRequest, isRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest } from './collections'
+import type { Folder, HTTPRequest, FolderItem, Request, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, Environment } from './collections'
+import { isAnyFolder, isHTTPRequest, isRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isEnvironmentFolder } from './collections'
 
 // ============================================================================
 // Indexable Properties Configuration
@@ -90,6 +90,13 @@ const WEBSOCKET_REQUEST_INDEXABLE_KEYS = new Set([
   'message'
 ])
 
+/** Properties that trigger re-indexing when modified (Environments) */
+const ENVIRONMENT_INDEXABLE_KEYS = new Set([
+  'name',
+  'variables',
+  'subEnvironments'
+])
+
 // ============================================================================
 // Internal Tracking
 // ============================================================================
@@ -125,10 +132,11 @@ const DEBOUNCE_MS = 50
  * Emit an update event with debouncing to batch rapid changes
  */
 function emitUpdate(
-  docType: 'folder' | 'request',
+  docType: 'folder' | 'request' | 'environment',
   docId: string,
-  document: Folder | Request,
-  parentFolderId?: string
+  document: Folder | Request | Environment,
+  parentFolderId?: string,
+  parentEnvironmentId?: string
 ): void {
   // Clear any pending emission for this document
   const pending = pendingEmissions.get(docId)
@@ -140,18 +148,27 @@ function emitUpdate(
   const timeoutId = setTimeout(() => {
     pendingEmissions.delete(docId)
 
-    const event = docType === 'folder'
-      ? DocumentEvents.FOLDER_UPDATED
-      : DocumentEvents.REQUEST_UPDATED
+    let event: string
+    if (docType === 'folder') {
+      event = DocumentEvents.FOLDER_UPDATED
+    } else if (docType === 'request') {
+      event = DocumentEvents.REQUEST_UPDATED
+    } else {
+      event = DocumentEvents.ENVIRONMENT_UPDATED
+    }
 
     const payload: DocumentChangedPayload = {
       id: docId,
       type: docType,
-      document
+      document: JSON.parse(JSON.stringify(document)) // Deep clone to remove Proxy
     }
 
     if (parentFolderId !== undefined) {
       payload.parentFolderId = parentFolderId
+    }
+
+    if (parentEnvironmentId !== undefined) {
+      payload.parentEnvironmentId = parentEnvironmentId
     }
 
     logger.debug(`[Reactive] Emitting ${event} for ${docType} ${docId}`)
@@ -169,10 +186,11 @@ function emitUpdate(
  * Create a proxy handler for arrays that emits events on modification
  */
 function createArrayProxyHandler(
-  docType: 'folder' | 'request',
+  docType: 'folder' | 'request' | 'environment',
   docId: string,
-  rootDocument: () => Folder | Request,
-  parentFolderId?: string
+  rootDocument: () => Folder | Request | Environment,
+  parentFolderId?: string,
+  parentEnvironmentId?: string
 ): ProxyHandler<unknown[]> {
   return {
     get(target, prop, receiver): unknown {
@@ -187,7 +205,7 @@ function createArrayProxyHandler(
         if (mutatingMethods.includes(prop as string)) {
           return (...args: unknown[]): unknown => {
             const result: unknown = (value as (...a: unknown[]) => unknown).apply(target, args)
-            emitUpdate(docType, docId, rootDocument(), parentFolderId)
+            emitUpdate(docType, docId, rootDocument(), parentFolderId, parentEnvironmentId)
             return result
           }
         }
@@ -199,14 +217,14 @@ function createArrayProxyHandler(
     set(target, prop, value, receiver) {
       const result = Reflect.set(target, prop, value, receiver)
       if (typeof prop !== 'symbol' && prop !== 'length') {
-        emitUpdate(docType, docId, rootDocument(), parentFolderId)
+        emitUpdate(docType, docId, rootDocument(), parentFolderId, parentEnvironmentId)
       }
       return result
     },
 
     deleteProperty(target, prop) {
       const result = Reflect.deleteProperty(target, prop)
-      emitUpdate(docType, docId, rootDocument(), parentFolderId)
+      emitUpdate(docType, docId, rootDocument(), parentFolderId, parentEnvironmentId)
       return result
     }
   }
@@ -257,9 +275,75 @@ function createDocumentProxyHandler(
   }
 }
 
+/**
+ * Create a proxy handler for Environment documents
+ */
+function createEnvironmentProxyHandler(
+  parentFolderId: string,
+  parentEnvironmentId?: string
+): ProxyHandler<Environment> {
+  return {
+    get(target, prop, receiver): unknown {
+      // Return symbols
+      if (prop === REACTIVE_SYMBOL) return true
+      if (prop === DOC_TYPE_SYMBOL) return 'environment'
+      if (prop === DOC_ID_SYMBOL) return target.id
+      if (prop === PARENT_ID_SYMBOL) return parentEnvironmentId ?? parentFolderId
+
+      const value: unknown = Reflect.get(target, prop, receiver)
+
+      // Wrap variables array in proxy to track mutations
+      if (prop === 'variables' && Array.isArray(value) && !isReactive(value)) {
+        const arrayProxy = new Proxy(
+          value as unknown[],
+          createArrayProxyHandler('environment', target.id ?? '', () => target, parentFolderId, parentEnvironmentId)
+        )
+        // Replace with proxy for future access
+        Reflect.set(target, prop, arrayProxy)
+        return arrayProxy
+      }
+
+      return value
+    },
+
+    set(target, prop, value, receiver) {
+      const result = Reflect.set(target, prop, value, receiver)
+
+      // Emit event if an indexable property changed
+      if (ENVIRONMENT_INDEXABLE_KEYS.has(prop as string)) {
+        emitUpdate('environment', target.id ?? '', target, parentFolderId, parentEnvironmentId)
+      }
+
+      return result
+    }
+  }
+}
+
 // ============================================================================
 // Public API
 // ============================================================================
+
+/**
+ * Make an Environment reactive - it will emit events when indexable properties change
+ */
+export function makeReactiveEnvironment(
+  env: Environment,
+  parentFolderId: string,
+  parentEnvironmentId?: string
+): Environment {
+  if (isReactive(env)) {
+    return env
+  }
+
+  // Make sub-environments reactive recursively
+  if (env.subEnvironments) {
+    env.subEnvironments = env.subEnvironments.map((subEnv) =>
+      makeReactiveEnvironment(subEnv, parentFolderId, env.id)
+    )
+  }
+
+  return new Proxy(env, createEnvironmentProxyHandler(parentFolderId, parentEnvironmentId))
+}
 
 /**
  * Make a Folder reactive - it will emit events when indexable properties change
@@ -272,6 +356,13 @@ export function makeReactiveFolder(folder: Folder): Folder {
   // Make child items reactive
   const reactiveItems = folder.items.map((item) => makeReactiveFolderItem(item, folder.id))
   folder.items = reactiveItems
+
+  // If this is an EnvironmentFolder, make environments reactive
+  if (isEnvironmentFolder(folder)) {
+    folder.environments = folder.environments.map((env) =>
+      makeReactiveEnvironment(env, folder.id ?? '')
+    )
+  }
 
   // Cast is safe: Proxy preserves the original object type
   return new Proxy(folder, createDocumentProxyHandler('folder', FOLDER_INDEXABLE_KEYS) as ProxyHandler<Folder>)
@@ -405,5 +496,55 @@ export function emitRequestDeleted(requestId: string, parentFolderId: string): v
     id: requestId,
     type: 'request',
     parentFolderId
+  })
+}
+
+/**
+ * Emit an environment created event
+ */
+export function emitEnvironmentCreated(
+  env: Environment,
+  parentFolderId: string,
+  parentEnvironmentId?: string
+): void {
+  eventBus.emitSync(DocumentEvents.ENVIRONMENT_CREATED, {
+    id: env.id,
+    type: 'environment',
+    document: JSON.parse(JSON.stringify(env)) as Environment,
+    parentFolderId,
+    parentEnvironmentId
+  })
+}
+
+/**
+ * Emit an environment updated event
+ */
+export function emitEnvironmentUpdated(
+  env: Environment,
+  parentFolderId: string,
+  parentEnvironmentId?: string
+): void {
+  eventBus.emitSync(DocumentEvents.ENVIRONMENT_UPDATED, {
+    id: env.id,
+    type: 'environment',
+    document: JSON.parse(JSON.stringify(env)) as Environment,
+    parentFolderId,
+    parentEnvironmentId
+  })
+}
+
+/**
+ * Emit an environment deleted event
+ */
+export function emitEnvironmentDeleted(
+  envId: string,
+  parentFolderId: string,
+  parentEnvironmentId?: string
+): void {
+  eventBus.emitSync(DocumentEvents.ENVIRONMENT_DELETED, {
+    id: envId,
+    type: 'environment',
+    parentFolderId,
+    parentEnvironmentId
   })
 }

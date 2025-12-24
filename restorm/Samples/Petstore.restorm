@@ -79,14 +79,30 @@ collections:
     environments:
       - name: Default
         variables:
+          - key: port
+            value: '8080'
+            description: ''
+          - key: scheme
+            value: http
+            description: ''
+          - key: domain
+            value: localhost
+            description: ''
           - key: baseUrl
-            value: http://localhost:8080
+            value: '{{scheme}}://{{domain}}:{{port}}'
             description: ''
         subEnvironments:
           - name: Production
             variables:
+              - key: scheme
+                value: https
+                description: ''
+              - key: domain
+                value: petstore.com
+                description: ''
               - key: baseUrl
-                value: https://petstore.com
+                value: '{{scheme}}://{{domain}}:{{port}}'
+                description: ''
     items:
       - name: pet
         documentation: "# pet\r\n\r\nEverything about your Pets\r\n\r\n## External Documentation\r\n\r\n[Find out more](http://swagger.io)"

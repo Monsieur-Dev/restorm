@@ -22,11 +22,7 @@ import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyVal
 import codeSnippetsTemplate from '../../resources/templates/code-snippets-httprequests.hbs?raw'
 import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
-import { useEnvironmentValues } from '../../contexts/useEnvironmentValues'
-import {
-  resolveEnvironmentVariables,
-  type VariableContext
-} from '../../services/VariableResolutionService'
+import type { VariableContext } from '../RestormKeyValueTable'
 import { executeHTTPRequest, resolveRequestURL, type HTTPRequestInput } from '../../services/request/HTTPRequestService'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { Badge } from '../Badge'
@@ -108,8 +104,9 @@ function keyValuesToListItems(keyValues: KeyValue[], prefix: string): ListViewIt
 
 export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request }) => {
   const { t } = useTranslation()
-  const { environments, selectedEnvId } = useEnvironmentContext()
-  const { valuesByEnvId } = useEnvironmentValues()
+  const { environments: _environments, selectedEnvId: _selectedEnvId } = useEnvironmentContext()
+  void _environments // TODO: will be used when variable resolution is implemented in backend
+  void _selectedEnvId
   const handlebarsHelpers = useHandlebarsHelpers()
   
   const [method, setMethod] = useState<string>(request.method)
@@ -119,8 +116,6 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
   const [bodyFilePath, setBodyFilePath] = useState<string>(getBodyFilePath(request))
   const [isSending, setIsSending] = useState<boolean>(false)
   const [httpResponse, setHttpResponse] = useState<HTTPResponse | null>(null)
-  const [resolvedQueryParamsContext, setResolvedQueryParamsContext] = useState<VariableContext>({})
-  const [resolvedPathParamsContext, setResolvedPathParamsContext] = useState<VariableContext>({})
   
   const headersParamsRef = useRef<KeyValueTableHandle | null>(null)
   const queryParamsRef = useRef<KeyValueTableHandle | null>(null)
@@ -174,49 +169,18 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     }
   }, [body, bodyMode, bodyFilePath, request])
 
-  const runtimeContext = useMemo<VariableContext | undefined>(
-    () => (selectedEnvId ? valuesByEnvId[selectedEnvId] : undefined),
-    [valuesByEnvId, selectedEnvId]
-  )
-
-  const environmentContext = useMemo<VariableContext>(
-    () => runtimeContext ?? resolveEnvironmentVariables(environments ?? [], selectedEnvId),
-    [runtimeContext, environments, selectedEnvId]
-  )
-
-  const envVariables = useMemo<VariableDefinition[]>(
-    () => Object.entries(environmentContext).map(([name, value]) => ({ name, value, description: '' })),
-    [environmentContext]
-  )
-
-  const combinedContext = useMemo<VariableContext>(
-    () => ({ ...environmentContext, ...resolvedPathParamsContext, ...resolvedQueryParamsContext }),
-    [environmentContext, resolvedPathParamsContext, resolvedQueryParamsContext]
-  )
-
-  const urlVariables = useMemo<VariableDefinition[]>(
-    () => Object.entries(combinedContext).map(([name, value]) => ({ name, value, description: '' })),
-    [combinedContext]
-  )
-
-  const pathParamsForUrl = useMemo(
-    () => Object.entries(resolvedPathParamsContext).map(([key, value]) => ({ key, value })),
-    [resolvedPathParamsContext]
-  )
-
-  const queryParamsForUrl = useMemo(
-    () => Object.entries(resolvedQueryParamsContext).map(([key, value]) => ({ key, value })),
-    [resolvedQueryParamsContext]
-  )
+  // TODO: Variable resolution will be implemented in backend
+  const environmentContext = useMemo<VariableContext>(() => ({}), [])
+  const envVariables = useMemo<VariableDefinition[]>(() => [], [])
 
   const resolvedUrlResult = useMemo(
     () => resolveRequestURL({
       urlTemplate: url,
-      pathParams: pathParamsForUrl,
-      queryParams: queryParamsForUrl,
+      pathParams: request.pathParams ?? [],
+      queryParams: request.params,
       environmentContext
     }),
-    [url, pathParamsForUrl, queryParamsForUrl, environmentContext]
+    [url, request.pathParams, request.params, environmentContext]
   )
 
   const resolvedUrl = resolvedUrlResult.url
@@ -239,8 +203,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
       method: method as HTTPMethod,
       url,
       headers: request.headers,
-      params: queryParamsForUrl,
-      pathParams: pathParamsForUrl,
+      params: request.params,
+      pathParams: request.pathParams ?? [],
       bodyContent: body,
       bodyMode,
       formFields: (bodyMode === 'form-data' || bodyMode === 'x-www-form-urlencoded')
@@ -265,7 +229,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
       .finally(() => {
         setIsSending(false)
       })
-  }, [isSending, request, method, url, body, bodyMode, bodyFilePath, queryParamsForUrl, pathParamsForUrl, environmentContext])
+  }, [isSending, request, method, url, body, bodyMode, bodyFilePath, environmentContext])
 
   // Request content (SplitView with Panes)
   const requestContent = (
@@ -304,7 +268,6 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           variables={envVariables}
           helpers={handlebarsHelpers}
           initialRows={request.headers}
-          visibilityMode="base-only"
           onRowsChange={(rows): void => { updateReactiveProperty(request, 'headers', rows) }}
         />
       </Pane>
@@ -332,8 +295,6 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           variables={envVariables}
           helpers={handlebarsHelpers}
           initialRows={request.pathParams ?? []}
-          visibilityMode="base-only"
-          onResolvedContextChange={setResolvedPathParamsContext}
           onRowsChange={(rows): void => { updateReactiveProperty(request, 'pathParams', rows) }}
         />
       </Pane>
@@ -361,8 +322,6 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           variables={envVariables}
           helpers={handlebarsHelpers}
           initialRows={request.params}
-          visibilityMode="base-only"
-          onResolvedContextChange={setResolvedQueryParamsContext}
           onRowsChange={(rows): void => { updateReactiveProperty(request, 'params', rows) }}
         />
       </Pane>
@@ -396,10 +355,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
             )}
             {(bodyMode === 'form-data' || bodyMode === 'x-www-form-urlencoded') && (
               <RestormKeyValueTable
-                variables={urlVariables}
+                variables={envVariables}
                 helpers={handlebarsHelpers}
                 initialRows={request.body?.type === 'form-data' || request.body?.type === 'x-www-form-urlencoded' ? request.body.fields : []}
-                visibilityMode="base-only"
                 onRowsChange={(rows): void => { updateReactiveProperty(request, 'body', { type: bodyMode, fields: rows }) }}
               />
             )}
@@ -563,7 +521,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
         <RestormVariableInputBox
           value={url}
           onChange={(value: string) => { setUrl(value) }}
-          variables={urlVariables}
+          variables={envVariables}
           helpers={handlebarsHelpers}
           resolvedValue={resolvedUrl}
           placeholder={t('requestTab.urlPlaceholder')}

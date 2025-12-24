@@ -13,12 +13,15 @@ import { Button } from '../Button'
 import './keyValueTable.css'
 
 export interface KeyValueTableRow {
+  /** Runtime ID for the row (optional) */
+  id?: string | undefined
   key: string
   value: string
   description?: string | undefined
 }
 
 interface ParamRow {
+  id: string | undefined
   enabled: boolean
   key: string
   value: string
@@ -32,6 +35,8 @@ export interface CellRendererProps {
   value: string
   onChange: (value: string) => void
   placeholder?: string
+  /** Runtime ID of the row (if provided in KeyValueTableRow) */
+  rowId?: string | undefined
 }
 
 /**
@@ -97,9 +102,10 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
   // Convert initialRows to ParamRow format
   const defaultRows = useMemo<ParamRow[]>(() => {
     if (!initialRows || initialRows.length === 0) {
-      return [{ enabled: true, key: '', value: '', description: '' }]
+      return [{ id: undefined, enabled: true, key: '', value: '', description: '' } as ParamRow]
     }
-    return initialRows.map((kv) => ({
+    return initialRows.map((kv): ParamRow => ({
+      id: kv.id,
       enabled: true,
       key: kv.key,
       value: kv.value,
@@ -129,7 +135,8 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
 
   const keyValues: KeyValueTableRow[] = useMemo(
     () =>
-      rows.map((row) => ({
+      rows.map((row): KeyValueTableRow => ({
+        id: row.id,
         key: row.key,
         value: row.value,
         description: row.description
@@ -152,7 +159,7 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
   const handleAddRow = useCallback(() => {
     setRows((oldRows) => [
       ...oldRows,
-      { enabled: true, key: '', value: '', description: '' }
+      { id: undefined, enabled: true, key: '', value: '', description: '' }
     ])
   }, [])
 
@@ -328,12 +335,14 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
                         <KeyCellRenderer
                           value={row.key}
                           onChange={(v) => { updateData(index, 'key', v) }}
+                          rowId={row.id}
                         />
                       </td>
                       <td>
                         <ValueCellRenderer
                           value={row.value}
                           onChange={(v) => { updateData(index, 'value', v) }}
+                          rowId={row.id}
                         />
                       </td>
                       <td>
@@ -341,10 +350,12 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
                           value={row.description}
                           onChange={(v) => { updateData(index, 'description', v) }}
                           placeholder="Description"
+                          rowId={row.id}
                         />
                       </td>
                       <td>
                         <Button
+                          small
                           secondary
                           options={{ ariaLabel: 'Delete row', title: 'Delete row' }}
                           onClick={() => {

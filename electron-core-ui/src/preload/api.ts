@@ -259,5 +259,97 @@ export const createCoreUIAPI = (): Record<string, unknown> => ({
         ipcRenderer.removeListener('file:closed', handler)
       }
     }
+  },
+
+  // EventBus API (main process)
+  eventBus: {
+    emit: async (event: string, payload: unknown): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('eventbus:emit', event, payload)
+      return result as boolean
+    },
+    emitSync: async (event: string, payload: unknown): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('eventbus:emit-sync', event, payload)
+      return result as boolean
+    }
+  },
+
+  // Search Service API (main process)
+  search: {
+    registerCategories: async (categories: Record<string, { label: string; icon: string; order: number }>): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('search:register-categories', categories)
+      return result as boolean
+    },
+    indexDocument: async (doc: {
+      id: string
+      title: string
+      description?: string
+      category: string
+      icon?: string
+      keywords?: string
+      navigation?: Record<string, unknown>
+      metadata?: Record<string, unknown>
+    }): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('search:index-document', doc)
+      return result as boolean
+    },
+    indexDocuments: async (docs: {
+      id: string
+      title: string
+      description?: string
+      category: string
+      icon?: string
+      keywords?: string
+      navigation?: Record<string, unknown>
+      metadata?: Record<string, unknown>
+    }[]): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('search:index-documents', docs)
+      return result as boolean
+    },
+    removeDocument: async (id: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('search:remove-document', id)
+      return result as boolean
+    },
+    clearIndex: async (): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('search:clear-index')
+      return result as boolean
+    },
+    search: async (query: string): Promise<{
+      category: string
+      label: string
+      icon: string
+      items: {
+        id: string
+        title: string
+        description?: string
+        category: string
+        icon?: string
+        keywords?: string
+        navigation?: Record<string, unknown>
+        metadata?: Record<string, unknown>
+        score: number
+      }[]
+    }[]> => {
+      const result: unknown = await ipcRenderer.invoke('search:search', query)
+      return result as {
+        category: string
+        label: string
+        icon: string
+        items: {
+          id: string
+          title: string
+          description?: string
+          category: string
+          icon?: string
+          keywords?: string
+          navigation?: Record<string, unknown>
+          metadata?: Record<string, unknown>
+          score: number
+        }[]
+      }[]
+    },
+    getDocumentCount: async (): Promise<number> => {
+      const result: unknown = await ipcRenderer.invoke('search:get-document-count')
+      return result as number
+    }
   }
 })

@@ -1,6 +1,6 @@
 import { BrowserWindow, ipcMain, app, screen } from 'electron'
 import { join } from 'path'
-import { getThemeService, getStorageService, logger, isFeatureServiceInitialized, getFeatureService, isFileServiceInitialized, getFileService } from '../services'
+import { getThemeService, getStorageService, logger, isFeatureServiceInitialized, getFeatureService, isFileServiceInitialized, getFileService, eventBusService, searchService, type SearchDocument, type CategoryMeta } from '../services'
 
 /**
  * Configure Electron command line switches
@@ -474,6 +474,51 @@ export function setupIPC(resourcesPath?: string): void {
       return false
     }
     return getFileService().hasContentChanged(currentChecksum)
+  })
+
+  // EventBus IPC handlers
+  ipcMain.handle('eventbus:emit', async (_event, eventName: string, payload: unknown) => {
+    await eventBusService.emit(eventName, payload)
+    return true
+  })
+
+  ipcMain.handle('eventbus:emit-sync', (_event, eventName: string, payload: unknown) => {
+    eventBusService.emitSync(eventName, payload)
+    return true
+  })
+
+  // Search Service IPC handlers
+  ipcMain.handle('search:register-categories', (_event, categories: Record<string, CategoryMeta>) => {
+    searchService.registerCategories(categories)
+    return true
+  })
+
+  ipcMain.handle('search:index-document', (_event, doc: SearchDocument) => {
+    searchService.indexDocument(doc)
+    return true
+  })
+
+  ipcMain.handle('search:index-documents', (_event, docs: SearchDocument[]) => {
+    searchService.indexDocuments(docs)
+    return true
+  })
+
+  ipcMain.handle('search:remove-document', (_event, id: string) => {
+    searchService.removeDocument(id)
+    return true
+  })
+
+  ipcMain.handle('search:clear-index', () => {
+    searchService.clearIndex()
+    return true
+  })
+
+  ipcMain.handle('search:search', (_event, query: string) => {
+    return searchService.search(query)
+  })
+
+  ipcMain.handle('search:get-document-count', () => {
+    return searchService.getDocumentCount()
   })
 
   logger.info('✅ IPC handlers setup complete')

@@ -9,7 +9,7 @@ export interface DocumentEventPayload {
   /** Document ID */
   id: string
   /** Document type */
-  type: 'folder' | 'request'
+  type: 'folder' | 'request' | 'environment'
 }
 
 /** Payload for document created/updated events */
@@ -18,6 +18,8 @@ export interface DocumentChangedPayload extends DocumentEventPayload {
   document: unknown
   /** Parent folder ID (for requests) */
   parentFolderId?: string
+  /** Parent environment ID (for sub-environments) */
+  parentEnvironmentId?: string
 }
 
 /** Payload for document deleted events */
@@ -33,7 +35,10 @@ export const DocumentEvents = {
   FOLDER_DELETED: 'document:folder:deleted',
   REQUEST_CREATED: 'document:request:created',
   REQUEST_UPDATED: 'document:request:updated',
-  REQUEST_DELETED: 'document:request:deleted'
+  REQUEST_DELETED: 'document:request:deleted',
+  ENVIRONMENT_CREATED: 'document:environment:created',
+  ENVIRONMENT_UPDATED: 'document:environment:updated',
+  ENVIRONMENT_DELETED: 'document:environment:deleted'
 } as const
 
 export type DocumentEventName = (typeof DocumentEvents)[keyof typeof DocumentEvents]

@@ -14,11 +14,7 @@ import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { GrpcRequest, GrpcResponse } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
-import { useEnvironmentValues } from '../../contexts/useEnvironmentValues'
-import {
-  resolveEnvironmentVariables,
-  type VariableContext
-} from '../../services/VariableResolutionService'
+import type { VariableContext } from '../RestormKeyValueTable'
 import { executeGrpcRequest, type GrpcRequestInput } from '../../services/request/GrpcRequestService'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { Badge } from '../Badge'
@@ -39,8 +35,9 @@ export interface GrpcRequestTabViewProps {
 
 export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request }) => {
   const { t } = useTranslation()
-  const { environments, selectedEnvId } = useEnvironmentContext()
-  const { valuesByEnvId } = useEnvironmentValues()
+  const { environments: _environments, selectedEnvId: _selectedEnvId } = useEnvironmentContext()
+  void _environments // TODO: will be used when variable resolution is implemented in backend
+  void _selectedEnvId
   const handlebarsHelpers = useHandlebarsHelpers()
   
   const [url, setUrlState] = useState(request.url)
@@ -74,20 +71,9 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
     updateReactiveProperty(request, 'requestMessage', value)
   }, [request])
   
-  const runtimeContext = useMemo<VariableContext | undefined>(
-    () => (selectedEnvId ? valuesByEnvId[selectedEnvId] : undefined),
-    [valuesByEnvId, selectedEnvId]
-  )
-  
-  const environmentContext = useMemo<VariableContext>(
-    () => runtimeContext ?? resolveEnvironmentVariables(environments ?? [], selectedEnvId),
-    [runtimeContext, environments, selectedEnvId]
-  )
-  
-  const envVariables = useMemo<VariableDefinition[]>(
-    () => Object.entries(environmentContext).map(([name, value]) => ({ name, value, description: '' })),
-    [environmentContext]
-  )
+  // TODO: Variable resolution will be implemented in backend
+  const environmentContext: VariableContext = {}
+  const envVariables: VariableDefinition[] = []
   
   const handleSend = (): void => {
     if (isSending) return
@@ -168,7 +154,6 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
           variables={envVariables}
           helpers={handlebarsHelpers}
           initialRows={request.metadata}
-          visibilityMode="base-only"
           onRowsChange={(rows): void => { updateReactiveProperty(request, 'metadata', rows) }}
         />
       </Pane>

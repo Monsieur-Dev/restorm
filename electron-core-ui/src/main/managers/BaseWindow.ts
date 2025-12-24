@@ -232,7 +232,6 @@ export abstract class BaseWindow {
             }
           }
           BaseWindow.interceptedShortcutsPerWindow.set(webContentsId, keysToIntercept)
-          logger.debug(`[BaseWindow] Registered intercepted shortcuts for window ${webContentsId}:`, { keys: Array.from(keysToIntercept) })
         })
         BaseWindow.interceptedShortcutsHandlerRegistered = true
       }

@@ -4,6 +4,7 @@ import { initializeApp, logger, initFeatureService, initFileService, getFileServ
 import { join, relative } from 'path'
 import { promises as fs } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
+import { searchIndexService, contextService } from './services'
 
 // Keep track of main window and editor windows
 let mainWindow: BrowserWindow | null = null
@@ -112,6 +113,14 @@ initFileService({
   storagePrefix: 'restorm_'
 })
 logger.info('✅ File Service initialized')
+
+// Initialize Search Index Service (listens to document events from renderer)
+searchIndexService.initialize()
+logger.info('✅ Search Index Service initialized')
+
+// Initialize Context Service (manages Handlebars context and resolved values)
+contextService.initialize()
+logger.info('✅ Context Service initialized')
 
 // Initialize Electron application
 const resourcesPath = getResourcesPath()
@@ -227,4 +236,9 @@ ipcMain.handle('project:read-file', async (_event, relPath: string) => {
     logger.error('Failed to read project file', { relPath, error: String(error) })
     return ''
   }
+})
+
+// IPC handler to get all variable transform results from ContextService
+ipcMain.handle('context:get-all-transform-results', () => {
+  return contextService.getAllVariableTransformResults()
 })

@@ -39,8 +39,21 @@ declare global {
       getEditorFile: () => Promise<{ title: string; content?: string } | undefined>
       forceClose: () => Promise<void>
       onSaveAndClose: (callback: () => void) => (() => void)
+      context: {
+        getAllTransformResults: () => Promise<Record<string, VariableTransformResult>>
+        onVariableTransformed: (callback: (result: VariableTransformResult) => void) => (() => void)
+      }
     }
   }
+}
+
+/** Variable transformation result from context service */
+export interface VariableTransformResult {
+  variableId: string
+  contextUsed: Record<string, string>
+  transformedValue: string
+  rawValue: string
+  key: string
 }
 
 export {}

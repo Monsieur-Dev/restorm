@@ -9,6 +9,7 @@ import {
   type VariableDefinition
 } from 'electron-core-ui/renderer'
 import type { TranslatedHelperDefinition } from '../../utils/handlebarsHelpersDefinitions'
+import type { VariableTransformResult } from '../../types/global.d'
 
 const LANGUAGE_ID = 'handlebars'
 
@@ -81,7 +82,8 @@ export interface RestormVariableInputBoxProps {
   variables: VariableDefinition[]
   helpers?: TranslatedHelperDefinition[]
   placeholder?: string
-  resolvedValue?: string
+  /** Runtime ID of the variable (KeyValue.id) - used to receive resolved values from backend */
+  variableId?: string
   id?: string
   className?: string
   style?: React.CSSProperties
@@ -97,7 +99,7 @@ export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (
     variables,
     helpers = [],
     placeholder,
-    resolvedValue,
+    variableId,
     id,
     className,
     style,
@@ -109,6 +111,8 @@ export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (
   const containerRef = useRef<HTMLDivElement | null>(null)
   const helpersRef = useRef<TranslatedHelperDefinition[]>(helpers)
   const [showResolvedTooltip, setShowResolvedTooltip] = useState(false)
+  const [resolvedValue, setResolvedValue] = useState<string | undefined>(undefined)
+  const [availableVariables, setAvailableVariables] = useState<VariableDefinition[]>([])
   const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number }>({
     visible: false,
     x: 0,
@@ -119,6 +123,59 @@ export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (
   useEffect(() => {
     helpersRef.current = helpers
   }, [helpers])
+
+  // Load initial resolved value and subscribe to updates from backend
+  useEffect(() => {
+    if (!variableId) return
+
+    // Load initial value
+    void (async () => {
+      try {
+        const results = await window.restorm.context.getAllTransformResults()
+        const result = results[variableId]
+        if (result) {
+          setResolvedValue(result.transformedValue)
+          // Convert contextUsed to VariableDefinition[]
+          const varsFromContext: VariableDefinition[] = Object.entries(result.contextUsed).map(
+            ([name, value]) => ({ name, value })
+          )
+          setAvailableVariables(varsFromContext)
+        }
+      } catch {
+        // Ignore errors during initial load
+      }
+    })()
+
+    // Subscribe to updates
+    const unsubscribe = window.restorm.context.onVariableTransformed((result: VariableTransformResult) => {
+      if (result.variableId === variableId) {
+        setResolvedValue(result.transformedValue)
+        // Update available variables from contextUsed
+        const varsFromContext: VariableDefinition[] = Object.entries(result.contextUsed).map(
+          ([name, value]) => ({ name, value })
+        )
+        setAvailableVariables(varsFromContext)
+      }
+    })
+
+    return unsubscribe
+  }, [variableId])
+
+  // Merge prop variables with backend variables (backend takes precedence for resolved values)
+  const mergedVariables = React.useMemo(() => {
+    // Start with backend variables (they have resolved values)
+    const varMap = new Map<string, VariableDefinition>()
+    for (const v of availableVariables) {
+      varMap.set(v.name, v)
+    }
+    // Add prop variables that aren't already in the map
+    for (const v of variables) {
+      if (!varMap.has(v.name)) {
+        varMap.set(v.name, v)
+      }
+    }
+    return Array.from(varMap.values())
+  }, [variables, availableVariables])
 
   const hasResolvedTooltip = Boolean(resolvedValue && resolvedValue !== value)
 
@@ -286,12 +343,12 @@ export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (
         }}
         onMouseLeave={() => { setShowResolvedTooltip(false) }}
         onContextMenu={handleContextMenu}
-        style={{ display: 'contents' }}
+        style={{ position: 'relative', width: '100%' }}
       >
         <VariableInputBox
           value={value}
           onChange={onChange}
-          variables={variables}
+          variables={mergedVariables}
           placeholder={placeholder}
           id={id}
           className={className}

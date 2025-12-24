@@ -155,7 +155,7 @@ describe('Search Integration', () => {
     vi.clearAllMocks()
     vi.useFakeTimers()
     mockedSearchService.clearIndex()
-    searchIndexService.initialize()
+    void searchIndexService.initialize()
   })
 
   afterEach(() => {
@@ -186,7 +186,7 @@ describe('Search Integration', () => {
     const reactiveFolder = makeReactiveFolder(folder)
 
     // Index it
-    searchIndexService.indexFolderTree(reactiveFolder)
+    void searchIndexService.indexFolderTree(reactiveFolder)
 
     // Search for "store"
     const results = mockedSearchService.search('store')
@@ -203,7 +203,7 @@ describe('Search Integration', () => {
     const reactiveFolder = makeReactiveFolder(folder)
 
     // Index it
-    searchIndexService.indexFolderTree(reactiveFolder)
+    void searchIndexService.indexFolderTree(reactiveFolder)
 
     // Search for "restorm" - should NOT find anything
     let results = mockedSearchService.search('restorm')
@@ -235,7 +235,7 @@ describe('Search Integration', () => {
     const reactiveFolder = makeReactiveFolder(folder)
 
     // Index it
-    searchIndexService.indexFolderTree(reactiveFolder)
+    void searchIndexService.indexFolderTree(reactiveFolder)
 
     // Search for "store"
     const results = mockedSearchService.search('store')

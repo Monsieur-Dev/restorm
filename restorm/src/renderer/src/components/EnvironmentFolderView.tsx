@@ -15,7 +15,7 @@ import {
   IconSelect,
   type KeyValueTableHandle
 } from 'electron-core-ui/renderer'
-import { RestormKeyValueTable, type VariableContext } from './RestormKeyValueTable'
+import { RestormKeyValueTable } from './RestormKeyValueTable'
 import { useHandlebarsHelpers } from '../hooks/useHandlebarsHelpers'
 import type { EnvironmentFolder, Environment, KeyValue, Icon } from '../types/collections'
 
@@ -23,7 +23,6 @@ import type { EnvironmentFolder, Environment, KeyValue, Icon } from '../types/co
 function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
   Object.assign(obj, { [key]: value })
 }
-import { useEnvironmentValues } from '../contexts/useEnvironmentValues'
 import { BaseFolderView } from './BaseFolderView'
 
 /** Generate a unique ID for a new environment */
@@ -153,7 +152,6 @@ interface EnvironmentConfigPanelProps {
 
 const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder, onFolderChange }) => {
   const { t } = useTranslation()
-  const { setEnvironmentValues } = useEnvironmentValues()
   const handlebarsHelpers = useHandlebarsHelpers()
 
   // Local state for environments (allows modifications without waiting for parent)
@@ -198,13 +196,23 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
   const [_renamingEnvId, setRenamingEnvId] = useState<string | null>(null)
   void _renamingEnvId // Will be used when ListView supports external rename trigger
 
-  // Get the selected environment
+  // Get the selected environment from local state (for display)
   const selectedEnvironment = useMemo(
     () =>
       selectedEnvId
         ? findEnvironmentById(localEnvironments, selectedEnvId)
         : null,
     [localEnvironments, selectedEnvId]
+  )
+
+  // Get the reactive environment object directly from folder.environments
+  // This is used for mutations to avoid triggering React re-renders
+  const reactiveSelectedEnvironment = useMemo(
+    () =>
+      selectedEnvId
+        ? findEnvironmentById(folder.environments, selectedEnvId)
+        : null,
+    [folder.environments, selectedEnvId]
   )
 
   // Handler for adding a new environment
@@ -326,33 +334,16 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
   const sashStartLeftRef = useRef<number>(leftWidth)
   const variablesParamsRef = useRef<KeyValueTableHandle | null>(null)
 
-  const handleEnvironmentVariablesResolved = useCallback(
-    (context: VariableContext): void => {
-      if (selectedEnvId) {
-        setEnvironmentValues(selectedEnvId, context)
-      }
-    },
-    [selectedEnvId, setEnvironmentValues]
-  )
-
   // Handler for persisting variable changes to the environment
+  // Updates the reactive object directly without triggering React re-renders
   const handleEnvironmentVariablesChange = useCallback(
     (newVariables: KeyValue[]): void => {
-      if (!selectedEnvId) return
-      // Update the selected environment's variables
-      const updateVariables = (envs: Environment[]): Environment[] =>
-        envs.map(env => {
-          if (env.id === selectedEnvId) {
-            return { ...env, variables: newVariables }
-          }
-          if (env.subEnvironments) {
-            return { ...env, subEnvironments: updateVariables(env.subEnvironments) }
-          }
-          return env
-        })
-      updateEnvironments(updateVariables(localEnvironments))
+      if (!reactiveSelectedEnvironment) return
+      // Directly mutate the reactive environment object from folder.environments
+      // This will trigger the eventBus event via reactive.ts without re-rendering
+      updateReactiveProperty(reactiveSelectedEnvironment, 'variables', newVariables)
     },
-    [selectedEnvId, localEnvironments, updateEnvironments]
+    [reactiveSelectedEnvironment]
   )
 
   const layoutProvider: IVerticalSashLayoutProvider = useMemo(
@@ -540,9 +531,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                   // no base variables, each row can only see previous rows.
                   variables={[]}
                   helpers={handlebarsHelpers}
-                  initialRows={selectedEnvironment?.variables ?? []}
-                  visibilityMode="accumulated"
-                  onResolvedContextChange={handleEnvironmentVariablesResolved}
+                  initialRows={reactiveSelectedEnvironment?.variables ?? []}
                   onRowsChange={handleEnvironmentVariablesChange}
                 />
               </div>

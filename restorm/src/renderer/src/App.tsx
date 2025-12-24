@@ -30,7 +30,7 @@ import {
   setContentChecksum,
   eventBus
 } from 'electron-core-ui/renderer'
-import { DocumentEvents } from './services/DocumentEvents'
+import { DocumentEvents, type DocumentChangedPayload } from './services/DocumentEvents'
 import type { WorkbenchTree, NavigationEvent, GroupNode, TabGroupNode, EditorTab, SearchResult } from 'electron-core-ui/renderer'
 import { RestormWorkbench } from './components/RestormWorkbench'
 import { Welcome } from './components/Welcome'
@@ -743,9 +743,38 @@ const App: React.FC = () => {
     void setContentChecksum(JSON.stringify(dataForChecksum))
     
     // Re-index for search
-    searchIndexService.initialize()
+    void (async () => {
+      await searchIndexService.initialize()
+      for (const folder of reactiveFolders) {
+        await searchIndexService.indexFolderTree(folder)
+      }
+    })()
+
+    // Emit ENVIRONMENT_CREATED events for all environments in EnvironmentFolders (recursively)
+    const emitEnvironmentCreated = (env: Environment, parentFolderId: string, parentEnvironmentId?: string): void => {
+      const payload: DocumentChangedPayload = {
+        id: env.id ?? '',
+        type: 'environment',
+        document: JSON.parse(JSON.stringify(env)),
+        parentFolderId,
+        parentEnvironmentId
+      }
+      eventBus.emitSync(DocumentEvents.ENVIRONMENT_CREATED, payload)
+      // Recursively emit for sub-environments
+      if (env.subEnvironments) {
+        for (const subEnv of env.subEnvironments) {
+          emitEnvironmentCreated(subEnv, parentFolderId, env.id ?? '')
+        }
+      }
+    }
+
     for (const folder of reactiveFolders) {
-      searchIndexService.indexFolderTree(folder)
+      if (isEnvironmentFolder(folder as FolderItem)) {
+        const envFolder = folder
+        for (const env of envFolder.environments) {
+          emitEnvironmentCreated(env, envFolder.id ?? '')
+        }
+      }
     }
   }, [])
 
@@ -847,15 +876,16 @@ const App: React.FC = () => {
     if (searchIndexInitializedRef.current) return
     searchIndexInitializedRef.current = true
     
-    searchIndexService.initialize()
-    // Index all root folders
-    for (const folder of rootFolders) {
-      searchIndexService.indexFolderTree(folder)
-    }
+    void (async () => {
+      await searchIndexService.initialize()
+      // Index all root folders
+      for (const folder of rootFolders) {
+        await searchIndexService.indexFolderTree(folder)
+      }
+    })()
     
-    // Note: No cleanup needed - the service is a singleton that should persist
-    // for the lifetime of the application. StrictMode would otherwise destroy
-    // subscriptions before re-rendering.
+    // Note: No cleanup needed - the service sends data to main process
+    // which handles the actual indexing and event subscriptions.
   }, [rootFolders])
 
   // Open a folder tab in the workbench

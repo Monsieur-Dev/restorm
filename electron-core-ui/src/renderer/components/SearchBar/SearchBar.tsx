@@ -81,8 +81,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
     debounceRef.current = setTimeout(() => {
       logger.debug('[SearchBar] Executing search', { searchQuery })
-      const searchResults = searchService.search(searchQuery)
-      setResults(searchResults)
+      searchService.search(searchQuery).then((searchResults) => {
+        setResults(searchResults)
+      }).catch((error: unknown) => {
+        logger.error('[SearchBar] Search error', { error: String(error) })
+      })
     }, DEBOUNCE_MS)
   }, [])
 

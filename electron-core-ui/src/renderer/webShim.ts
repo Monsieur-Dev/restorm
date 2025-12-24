@@ -83,6 +83,54 @@ interface WindowApiFileShim {
   onFileClosed: (callback: () => void) => () => void
 }
 
+interface WindowApiEventBusShim {
+  emit: (event: string, payload: unknown) => Promise<boolean>
+  emitSync: (event: string, payload: unknown) => Promise<boolean>
+}
+
+interface WindowApiSearchShim {
+  registerCategories: (categories: Record<string, { label: string; icon: string; order: number }>) => Promise<boolean>
+  indexDocument: (doc: {
+    id: string
+    title: string
+    description?: string
+    category: string
+    icon?: string
+    keywords?: string
+    navigation?: Record<string, unknown>
+    metadata?: Record<string, unknown>
+  }) => Promise<boolean>
+  indexDocuments: (docs: {
+    id: string
+    title: string
+    description?: string
+    category: string
+    icon?: string
+    keywords?: string
+    navigation?: Record<string, unknown>
+    metadata?: Record<string, unknown>
+  }[]) => Promise<boolean>
+  removeDocument: (id: string) => Promise<boolean>
+  clearIndex: () => Promise<boolean>
+  search: (query: string) => Promise<{
+    category: string
+    label: string
+    icon: string
+    items: {
+      id: string
+      title: string
+      description?: string
+      category: string
+      icon?: string
+      keywords?: string
+      navigation?: Record<string, unknown>
+      metadata?: Record<string, unknown>
+      score: number
+    }[]
+  }[]>
+  getDocumentCount: () => Promise<number>
+}
+
 interface WindowApiShim {
   platform: string
   theme: WindowApiThemeShim
@@ -92,6 +140,8 @@ interface WindowApiShim {
   storage: WindowApiStorageShim
   feature: WindowApiFeatureShim
   file: WindowApiFileShim
+  eventBus: WindowApiEventBusShim
+  search: WindowApiSearchShim
   minimizeWindow: () => Promise<void>
   maximizeWindow: () => Promise<void>
   closeWindow: () => Promise<void>
@@ -595,6 +645,139 @@ export function ensureCoreUiWebApiShim(): void {
     }
   }
 
+  // EventBus shim for web builds (in-memory, same process)
+  const webEventHandlers = new Map<string, Set<(payload: unknown) => void>>()
+  const eventBusApi: WindowApiEventBusShim = {
+    emit: (event: string, payload: unknown): Promise<boolean> => {
+      const handlers = webEventHandlers.get(event)
+      if (handlers) {
+        for (const handler of handlers) {
+          try { handler(payload) } catch { /* ignore */ }
+        }
+      }
+      return Promise.resolve(true)
+    },
+    emitSync: (event: string, payload: unknown): Promise<boolean> => {
+      setTimeout(() => {
+        const handlers = webEventHandlers.get(event)
+        if (handlers) {
+          for (const handler of handlers) {
+            try { handler(payload) } catch { /* ignore */ }
+          }
+        }
+      }, 0)
+      return Promise.resolve(true)
+    }
+  }
+
+  // Search shim for web builds (in-memory index)
+  const webSearchDocuments = new Map<string, {
+    id: string
+    title: string
+    description?: string
+    category: string
+    icon?: string
+    keywords?: string
+    navigation?: Record<string, unknown>
+    metadata?: Record<string, unknown>
+  }>()
+  const webSearchCategories: Record<string, { label: string; icon: string; order: number }> = {}
+
+  const searchApi: WindowApiSearchShim = {
+    registerCategories: (categories): Promise<boolean> => {
+      Object.assign(webSearchCategories, categories)
+      return Promise.resolve(true)
+    },
+    indexDocument: (doc): Promise<boolean> => {
+      webSearchDocuments.set(doc.id, doc)
+      return Promise.resolve(true)
+    },
+    indexDocuments: (docs): Promise<boolean> => {
+      for (const doc of docs) {
+        webSearchDocuments.set(doc.id, doc)
+      }
+      return Promise.resolve(true)
+    },
+    removeDocument: (id): Promise<boolean> => {
+      webSearchDocuments.delete(id)
+      return Promise.resolve(true)
+    },
+    clearIndex: (): Promise<boolean> => {
+      webSearchDocuments.clear()
+      return Promise.resolve(true)
+    },
+    search: (query): Promise<{
+      category: string
+      label: string
+      icon: string
+      items: {
+        id: string
+        title: string
+        description?: string
+        category: string
+        icon?: string
+        keywords?: string
+        navigation?: Record<string, unknown>
+        metadata?: Record<string, unknown>
+        score: number
+      }[]
+    }[]> => {
+      // Simple case-insensitive substring search for web builds
+      const lowerQuery = query.toLowerCase()
+      const results: {
+        id: string
+        title: string
+        description?: string
+        category: string
+        icon?: string
+        keywords?: string
+        navigation?: Record<string, unknown>
+        metadata?: Record<string, unknown>
+        score: number
+      }[] = []
+
+      for (const doc of webSearchDocuments.values()) {
+        const titleMatch = doc.title.toLowerCase().includes(lowerQuery)
+        const descMatch = doc.description?.toLowerCase().includes(lowerQuery)
+        const keywordsMatch = doc.keywords?.toLowerCase().includes(lowerQuery)
+        if (titleMatch || descMatch || keywordsMatch) {
+          results.push({ ...doc, score: titleMatch ? 2 : 1 })
+        }
+      }
+
+      // Group by category
+      const grouped = new Map<string, typeof results>()
+      for (const result of results) {
+        const cat = result.category
+        if (!grouped.has(cat)) grouped.set(cat, [])
+        grouped.get(cat)?.push(result)
+      }
+
+      const output: {
+        category: string
+        label: string
+        icon: string
+        items: typeof results
+      }[] = []
+
+      for (const [category, items] of grouped) {
+        const meta = webSearchCategories[category] ?? { label: category, icon: 'symbol-misc', order: 99 }
+        output.push({ category, label: meta.label, icon: meta.icon, items })
+      }
+
+      output.sort((a, b) => {
+        const orderA = webSearchCategories[a.category]?.order ?? 99
+        const orderB = webSearchCategories[b.category]?.order ?? 99
+        return orderA - orderB
+      })
+
+      return Promise.resolve(output)
+    },
+    getDocumentCount: (): Promise<number> => {
+      return Promise.resolve(webSearchDocuments.size)
+    }
+  }
+
   const api: WindowApiShim = {
     platform: (navigator as { userAgentData?: { platform?: string } }).userAgentData?.platform ?? 'web',
     theme: themeApi,
@@ -606,6 +789,8 @@ export function ensureCoreUiWebApiShim(): void {
     storage: storageApi,
     feature: featureApi,
     file: fileApi,
+    eventBus: eventBusApi,
+    search: searchApi,
     minimizeWindow: () => Promise.resolve(),
     maximizeWindow: () => Promise.resolve(),
     closeWindow: () => Promise.resolve(),
