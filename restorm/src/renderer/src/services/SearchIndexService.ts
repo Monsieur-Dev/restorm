@@ -7,14 +7,16 @@
 import {
   eventBus,
   searchService,
-  DocumentEvents,
-  type DocumentChangedPayload,
-  type DocumentDeletedPayload,
   type SearchDocument,
   type Subscription,
   type CategoryMeta,
   logger
 } from 'electron-core-ui/renderer'
+import {
+  DocumentEvents,
+  type DocumentChangedPayload,
+  type DocumentDeletedPayload
+} from './DocumentEvents'
 
 /** Search categories configuration for Restorm */
 const RESTORM_SEARCH_CATEGORIES: Record<string, CategoryMeta> = {

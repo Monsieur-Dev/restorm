@@ -5,7 +5,8 @@
  * emit events when indexable properties are modified.
  */
 
-import { eventBus, DocumentEvents, type DocumentChangedPayload, logger } from 'electron-core-ui/renderer'
+import { eventBus, logger } from 'electron-core-ui/renderer'
+import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
 import type { Folder, HTTPRequest, FolderItem, Request, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest } from './collections'
 import { isAnyFolder, isHTTPRequest, isRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest } from './collections'
 

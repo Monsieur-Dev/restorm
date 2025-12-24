@@ -28,9 +28,9 @@ import {
   useFileEvents,
   hasContentChanged,
   setContentChecksum,
-  eventBus,
-  DocumentEvents
+  eventBus
 } from 'electron-core-ui/renderer'
+import { DocumentEvents } from './services/DocumentEvents'
 import type { WorkbenchTree, NavigationEvent, GroupNode, TabGroupNode, EditorTab, SearchResult } from 'electron-core-ui/renderer'
 import { RestormWorkbench } from './components/RestormWorkbench'
 import { Welcome } from './components/Welcome'
