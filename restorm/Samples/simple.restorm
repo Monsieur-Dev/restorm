@@ -1,0 +1,282 @@
+collections:
+  - folderType: environment
+    name: Swagger Petstore
+    documentation: |-
+      # Swagger Petstore
+
+      This is a sample server Petstore server.  You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For this sample, you can use the api key &#x60;special-key&#x60; to test the authorization filters.
+
+      **Version:** 1.0.7
+
+      **Terms of Service:** [http://swagger.io/terms/](http://swagger.io/terms/)
+
+      ## Contact
+
+      - **Email:** [apiteam@swagger.io](mailto:apiteam@swagger.io)
+
+      ## License
+
+      [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
+
+      ## External Documentation
+
+      [Find out more about Swagger](http://swagger.io)
+
+      **Host:** `localhost:8080`
+
+      **Base Path:** `/api`
+
+      **Schemes:** `https`, `http`
+
+      ## Models
+
+      ```mermaid
+      classDiagram
+        class Category {
+          - id? : integer
+          - name? : string
+        }
+        class Pet {
+          - id? : integer
+          - category? : Category
+          + name : string
+          + photoUrls : array<string>
+          - tags? : array<Tag>
+          - status? : string
+        }
+        class Tag {
+          - id? : integer
+          - name? : string
+        }
+        class ApiResponse {
+          - code? : integer
+          - type? : string
+          - message? : string
+        }
+        class Order {
+          - id? : integer
+          - petId? : integer
+          - quantity? : integer
+          - shipDate? : string
+          - status? : string
+          - complete? : boolean
+        }
+        class User {
+          - id? : integer
+          - username? : string
+          - firstName? : string
+          - lastName? : string
+          - email? : string
+          - password? : string
+          - phone? : string
+          - userStatus? : integer
+        }
+        Pet --> Category
+        Pet --> Tag
+      ```
+    tags: []
+    configuration: {}
+    environments:
+      - name: Default
+        variables:
+          - key: port
+            value: '8080'
+            description: ''
+          - key: scheme
+            value: http
+            description: ''
+          - key: domain
+            value: localhost
+            description: ''
+          - key: baseUrl
+            value: '{{scheme}}://{{domain}}:{{port}}'
+            description: ''
+        subEnvironments:
+          - name: Production
+            variables:
+              - key: scheme
+                value: https
+                description: ''
+              - key: domain
+                value: petstore.com
+                description: ''
+              - key: baseUrl
+                value: '{{scheme}}://{{domain}}:{{port}}'
+                description: ''
+    items:
+      - name: pet
+        documentation: "# pet\r\n\r\nEverything about your Pets\r\n\r\n## External Documentation\r\n\r\n[Find out more](http://swagger.io)"
+        tags:
+          - pet
+        configuration: {}
+        items:
+          - type: http
+            name: Find pet by ID
+            documentation: |-
+              # Find pet by ID
+
+              Returns a single pet
+
+              **Operation ID:** `getPetById`
+
+              ## Produces
+
+              - `application/json`
+              - `application/xml`
+
+              ## Parameters
+
+              | Name | Location | Type | Required | Description |
+              |------|----------|------|----------|-------------|
+              | `petId` | path | integer (int64) | Yes | ID of pet to return |
+
+              ## Types
+
+              ### Pet
+
+              **Reference:** `#/definitions/Pet`
+
+              ```mermaid
+              classDiagram
+                class Pet {
+                  - id? : integer
+                  - category? : Category
+                  + name : string
+                  + photoUrls : array<string>
+                  - tags? : array<Tag>
+                  - status? : string
+                }
+              ```
+
+
+              | Property | Type | Required | Description |
+              |----------|------|----------|-------------|
+              | `id` | integer | No |  |
+              | `category` | Category | No |  |
+              | `name` | string | Yes |  |
+              | `photoUrls` | array&lt;string&gt; | Yes |  |
+              | `tags` | array&lt;Tag&gt; | No |  |
+              | `status` | string | No | pet status in the store |
+
+
+              ## Responses
+
+              ### 200
+              successful operation
+
+              **Schema:** `#/definitions/Pet`
+
+
+              ### 400
+              Invalid ID supplied
+
+
+
+              ### 404
+              Pet not found
+
+
+
+              ## Security
+
+              - **api_key**
+            tags:
+              - pet
+            method: GET
+            url: '{{baseUrl}}/api/pet/{{petId}}'
+            headers: []
+            params: []
+            pathParams:
+              - key: petId
+                value: ''
+                description: ID of pet to return
+          - type: http
+            name: Add a new pet to the store
+            documentation: |-
+              # Add a new pet to the store
+
+              **Operation ID:** `addPet`
+
+              ## Consumes
+
+              - `application/json`
+              - `application/xml`
+
+              ## Produces
+
+              - `application/json`
+              - `application/xml`
+
+              ## Parameters
+
+              | Name | Location | Type | Required | Description |
+              |------|----------|------|----------|-------------|
+              | `body` | body | #/definitions/Pet | Yes | Pet object that needs to be added to the store |
+
+              ## Types
+
+              ### Pet
+
+              **Reference:** `#/definitions/Pet`
+
+              ```mermaid
+              classDiagram
+                class Pet {
+                  - id? : integer
+                  - category? : Category
+                  + name : string
+                  + photoUrls : array<string>
+                  - tags? : array<Tag>
+                  - status? : string
+                }
+              ```
+
+
+              | Property | Type | Required | Description |
+              |----------|------|----------|-------------|
+              | `id` | integer | No |  |
+              | `category` | Category | No |  |
+              | `name` | string | Yes |  |
+              | `photoUrls` | array&lt;string&gt; | Yes |  |
+              | `tags` | array&lt;Tag&gt; | No |  |
+              | `status` | string | No | pet status in the store |
+
+
+              ## Responses
+
+              ### 405
+              Invalid input
+
+
+
+              ## Security
+
+              - **petstore_auth**: `write:pets`, `read:pets`
+            tags:
+              - pet
+            method: POST
+            url: '{{baseUrl}}/api/pet'
+            headers: []
+            params: []
+            pathParams: []
+            body:
+              type: text
+              content: |-
+                {
+                  "id": 0,
+                  "category": {
+                    "id": 0,
+                    "name": ""
+                  },
+                  "name": "",
+                  "photoUrls": [
+                    ""
+                  ],
+                  "tags": [
+                    {
+                      "id": 0,
+                      "name": ""
+                    }
+                  ],
+                  "status": "available"
+                }

@@ -54,6 +54,7 @@ declare global {
         unregisterRequest: (requestId: string) => Promise<void>
         setRequestEnvironment: (requestId: string, environmentId: string | null) => Promise<void>
         updateRequestKeyValues: (requestId: string, groupName: string, keyValues: KeyValueData[]) => Promise<void>
+        clearAll: () => Promise<void>
       }
     }
   }

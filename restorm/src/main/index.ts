@@ -267,3 +267,8 @@ ipcMain.handle('context:set-request-environment', (_event, requestId: string, en
 ipcMain.handle('context:update-request-keyvalues', (_event, requestId: string, groupName: string, keyValues: { id?: string; key: string; value: string }[]) => {
   contextService.updateRequestKeyValues(requestId, groupName, keyValues)
 })
+
+// IPC handler to clear all context data
+ipcMain.handle('context:clear-all', () => {
+  contextService.clearAll()
+})

@@ -97,6 +97,10 @@ contextBridge.exposeInMainWorld('restorm', {
       keyValues: { id?: string; key: string; value: string }[]
     ): Promise<void> => {
       await ipcRenderer.invoke('context:update-request-keyvalues', requestId, groupName, keyValues)
+    },
+    /** Clear all context data (when file is closed) */
+    clearAll: async (): Promise<void> => {
+      await ipcRenderer.invoke('context:clear-all')
     }
   }
 })

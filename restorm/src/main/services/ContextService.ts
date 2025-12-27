@@ -578,6 +578,18 @@ class ContextService {
   }
 
   /**
+   * Clear all data without unsubscribing from events
+   * Used when a file is closed
+   */
+  clearAll(): void {
+    logger.info('[ContextService] Clearing all data...')
+    this.environmentMeta.clear()
+    this.transformedContexts.clear()
+    this.variableTransformResults.clear()
+    this.requestContexts.clear()
+  }
+
+  /**
    * Destroy the service and unsubscribe from events
    */
   destroy(): void {
@@ -586,10 +598,7 @@ class ContextService {
       subscription.unsubscribe()
     }
     this.subscriptions = []
-    this.environmentMeta.clear()
-    this.transformedContexts.clear()
-    this.variableTransformResults.clear()
-    this.requestContexts.clear()
+    this.clearAll()
     this.initialized = false
   }
 }

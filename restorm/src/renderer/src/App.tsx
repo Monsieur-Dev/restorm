@@ -723,8 +723,15 @@ const App: React.FC = () => {
     }
   }, [checkUnsavedChanges, openFile])
 
+  // Flag to prevent double loading
+  const fileLoadingRef = useRef(false)
+
   // Handler for file opened event - loads collections into workbench
   const handleFileOpened = useCallback((state: { currentFile: { content: unknown } }) => {
+    // Prevent double loading
+    if (fileLoadingRef.current) return
+    fileLoadingRef.current = true
+
     const content = state.currentFile.content as { collections?: EnvironmentFolder[] } | null
     const collections = content?.collections && Array.isArray(content.collections) ? content.collections : []
     
@@ -742,44 +749,55 @@ const App: React.FC = () => {
     const dataForChecksum = prepareForSerialization({ collections: reactiveFolders })
     void setContentChecksum(JSON.stringify(dataForChecksum))
     
-    // Re-index for search
+    // Clear previous data, emit events, then re-index for search
+    // This must be done in correct order: clear first, then emit, then index
     void (async () => {
+      // 1. Clear previous data first
+      await searchIndexService.clearIndex()
+      await window.restorm.context.clearAll()
+      
+      // 2. Emit ENVIRONMENT_CREATED events for all environments
+      const emitEnvironmentCreated = (env: Environment, parentFolderId: string, parentEnvironmentId?: string): void => {
+        const payload: DocumentChangedPayload = {
+          id: env.id ?? '',
+          type: 'environment',
+          document: JSON.parse(JSON.stringify(env)),
+          parentFolderId,
+          parentEnvironmentId
+        }
+        eventBus.emitSync(DocumentEvents.ENVIRONMENT_CREATED, payload)
+        // Recursively emit for sub-environments
+        if (env.subEnvironments) {
+          for (const subEnv of env.subEnvironments) {
+            emitEnvironmentCreated(subEnv, parentFolderId, env.id ?? '')
+          }
+        }
+      }
+
+      for (const folder of reactiveFolders) {
+        if (isEnvironmentFolder(folder as FolderItem)) {
+          const envFolder = folder
+          for (const env of envFolder.environments) {
+            emitEnvironmentCreated(env, envFolder.id ?? '')
+          }
+        }
+      }
+
+      // 3. Initialize and index for search
       await searchIndexService.initialize()
       for (const folder of reactiveFolders) {
         await searchIndexService.indexFolderTree(folder)
       }
+
+      // Allow loading again (e.g., if user closes and reopens a file)
+      fileLoadingRef.current = false
     })()
-
-    // Emit ENVIRONMENT_CREATED events for all environments in EnvironmentFolders (recursively)
-    const emitEnvironmentCreated = (env: Environment, parentFolderId: string, parentEnvironmentId?: string): void => {
-      const payload: DocumentChangedPayload = {
-        id: env.id ?? '',
-        type: 'environment',
-        document: JSON.parse(JSON.stringify(env)),
-        parentFolderId,
-        parentEnvironmentId
-      }
-      eventBus.emitSync(DocumentEvents.ENVIRONMENT_CREATED, payload)
-      // Recursively emit for sub-environments
-      if (env.subEnvironments) {
-        for (const subEnv of env.subEnvironments) {
-          emitEnvironmentCreated(subEnv, parentFolderId, env.id ?? '')
-        }
-      }
-    }
-
-    for (const folder of reactiveFolders) {
-      if (isEnvironmentFolder(folder as FolderItem)) {
-        const envFolder = folder
-        for (const env of envFolder.environments) {
-          emitEnvironmentCreated(env, envFolder.id ?? '')
-        }
-      }
-    }
   }, [])
 
   // Handler for file closed event - clears the workbench
   const handleFileClosed = useCallback(() => {
+    // Reset loading flag to allow loading a new file
+    fileLoadingRef.current = false
     // Clear the workbench tree
     setWorkbenchTree({
       orientation: 'vertical',
@@ -787,6 +805,10 @@ const App: React.FC = () => {
     })
     // Clear root folders
     setRootFolders([])
+    // Clear search index
+    searchIndexService.clearIndex()
+    // Clear context service data
+    window.restorm.context.clearAll()
   }, [])
 
   // Listen to file events
