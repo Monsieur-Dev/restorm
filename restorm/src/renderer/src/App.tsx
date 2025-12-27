@@ -719,9 +719,11 @@ const App: React.FC = () => {
   const handleOpenRecentFile = useCallback(async (path: string) => {
     const canProceed = await checkUnsavedChanges()
     if (canProceed) {
+      // Close current file first to trigger cleanup (clear index, clear context)
+      await closeFile()
       await openFile(path)
     }
-  }, [checkUnsavedChanges, openFile])
+  }, [checkUnsavedChanges, closeFile, openFile])
 
   // Flag to prevent double loading
   const fileLoadingRef = useRef(false)
