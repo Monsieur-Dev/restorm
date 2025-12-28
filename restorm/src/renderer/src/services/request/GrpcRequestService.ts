@@ -8,7 +8,7 @@
 
 import type { GrpcRequest, GrpcResponse, KeyValue } from '../../types/collections'
 // TODO: Variable resolution will be implemented in backend
-export type VariableContext = Record<string, string>
+import type { VariableContext } from './types'
 
 /** Placeholder for variable resolution - returns template as-is (to be implemented in backend) */
 function resolveTemplate(template: string, _context: VariableContext): string {
