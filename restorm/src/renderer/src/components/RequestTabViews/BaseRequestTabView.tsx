@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useRef, useCallback, type ReactNode } from 'react'
+import React, { useState, useMemo, useRef, useCallback, Suspense, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Graph, type GraphRef } from 'jsoncrack-react'
+import type { GraphRef } from 'jsoncrack-react'
 import {
   Tabs,
   Button,
@@ -12,6 +12,9 @@ import {
   type IVerticalSashLayoutProvider,
   type SashEvent
 } from 'electron-core-ui/renderer'
+
+// Lazy load Graph to avoid Monaco initialization conflicts at app startup
+const Graph = React.lazy(() => import('jsoncrack-react').then(mod => ({ default: mod.Graph })))
 
 // ============================================================================
 // Types
@@ -349,13 +352,15 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
                     <i className="codicon codicon-screen-full" />
                   </Button>
                 </div>
-                <Graph
-                  key={graphKey}
-                  ref={graphRef}
-                  json={formattedJson || '{}'}
-                  layout={{ theme: isDarkTheme ? 'dark' : 'light' }}
-                  style={{ width: '100%', height: '100%' }}
-                />
+                <Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}><i className="codicon codicon-loading codicon-modifier-spin" /></div>}>
+                  <Graph
+                    key={graphKey}
+                    ref={graphRef}
+                    json={formattedJson || '{}'}
+                    layout={{ theme: isDarkTheme ? 'dark' : 'light' }}
+                    style={{ width: '100%', height: '100%' }}
+                  />
+                </Suspense>
               </div>
             </div>
           </div>
