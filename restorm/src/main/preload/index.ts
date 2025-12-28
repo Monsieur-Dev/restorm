@@ -240,5 +240,206 @@ contextBridge.exposeInMainWorld('restorm', {
         ipcRenderer.removeListener('http:request-progress', handler)
       }
     }
+  },
+  graphql: {
+    /** Execute a GraphQL request */
+    execute: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      statusCode?: number
+      data?: unknown
+      errors?: { message: string; locations?: { line: number; column: number }[]; path?: string[] }[]
+      headers?: Record<string, string | string[]>
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+      requestUrl?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('graphql:execute', input)
+      return result as {
+        requestId: string
+        success: boolean
+        statusCode?: number
+        data?: unknown
+        errors?: { message: string; locations?: { line: number; column: number }[]; path?: string[] }[]
+        headers?: Record<string, string | string[]>
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+        requestUrl?: string
+      }
+    },
+    /** Cancel a GraphQL request */
+    cancel: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('graphql:cancel', requestId)
+      return result as boolean
+    },
+    /** Check if a request is currently active */
+    isActive: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('graphql:is-active', requestId)
+      return result as boolean
+    },
+    /** Listen for request progress updates */
+    onProgress: (callback: (data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('graphql:request-progress', handler)
+      return () => {
+        ipcRenderer.removeListener('graphql:request-progress', handler)
+      }
+    }
+  },
+  soap: {
+    /** Execute a SOAP request */
+    execute: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      statusCode?: number
+      responseBody?: string
+      headers?: Record<string, string | string[]>
+      fault?: { code: string; message: string }
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+      requestUrl?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('soap:execute', input)
+      return result as {
+        requestId: string
+        success: boolean
+        statusCode?: number
+        responseBody?: string
+        headers?: Record<string, string | string[]>
+        fault?: { code: string; message: string }
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+        requestUrl?: string
+      }
+    },
+    /** Cancel a SOAP request */
+    cancel: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('soap:cancel', requestId)
+      return result as boolean
+    },
+    /** Check if a request is currently active */
+    isActive: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('soap:is-active', requestId)
+      return result as boolean
+    },
+    /** Listen for request progress updates */
+    onProgress: (callback: (data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('soap:request-progress', handler)
+      return () => {
+        ipcRenderer.removeListener('soap:request-progress', handler)
+      }
+    }
+  },
+  grpc: {
+    /** Execute a gRPC request */
+    execute: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      statusCode?: number
+      statusMessage?: string
+      responseMessage?: string
+      metadata?: Record<string, string>
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+      requestUrl?: string
+      requestMethod?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('grpc:execute', input)
+      return result as {
+        requestId: string
+        success: boolean
+        statusCode?: number
+        statusMessage?: string
+        responseMessage?: string
+        metadata?: Record<string, string>
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+        requestUrl?: string
+        requestMethod?: string
+      }
+    },
+    /** Cancel a gRPC request */
+    cancel: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('grpc:cancel', requestId)
+      return result as boolean
+    },
+    /** Check if a request is currently active */
+    isActive: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('grpc:is-active', requestId)
+      return result as boolean
+    },
+    /** Listen for request progress updates */
+    onProgress: (callback: (data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('grpc:request-progress', handler)
+      return () => {
+        ipcRenderer.removeListener('grpc:request-progress', handler)
+      }
+    }
+  },
+  websocket: {
+    /** Connect to a WebSocket endpoint */
+    connect: async (input: { requestId: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      connected: boolean
+      messages: { direction: 'sent' | 'received'; data: string; event?: string; timestamp: string }[]
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+      requestUrl?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('websocket:connect', input)
+      return result as {
+        requestId: string
+        success: boolean
+        connected: boolean
+        messages: { direction: 'sent' | 'received'; data: string; event?: string; timestamp: string }[]
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+        requestUrl?: string
+      }
+    },
+    /** Disconnect from WebSocket */
+    disconnect: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('websocket:disconnect', requestId)
+      return result as boolean
+    },
+    /** Send a message on an active WebSocket connection */
+    send: async (requestId: string, message: string, event?: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('websocket:send', requestId, message, event)
+      return result as boolean
+    },
+    /** Check if a connection is currently active */
+    isActive: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('websocket:is-active', requestId)
+      return result as boolean
+    },
+    /** Listen for connection progress updates */
+    onProgress: (callback: (data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('websocket:connection-progress', handler)
+      return () => {
+        ipcRenderer.removeListener('websocket:connection-progress', handler)
+      }
+    },
+    /** Listen for incoming messages */
+    onMessage: (callback: (data: { requestId: string; message: { direction: 'sent' | 'received'; data: string; event?: string; timestamp: string } }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; message: { direction: 'sent' | 'received'; data: string; event?: string; timestamp: string } }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('websocket:message', handler)
+      return () => {
+        ipcRenderer.removeListener('websocket:message', handler)
+      }
+    }
   }
 })

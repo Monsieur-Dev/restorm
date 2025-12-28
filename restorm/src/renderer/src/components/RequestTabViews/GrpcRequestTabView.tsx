@@ -15,7 +15,7 @@ import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyVal
 import type { GrpcRequest, GrpcResponse, KeyValue } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { VariableContext } from '../RestormKeyValueTable'
-import { executeGrpcRequest, type GrpcRequestInput } from '../../services/request/GrpcRequestService'
+import type { GRPCExecutionResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { Badge } from '../Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
@@ -172,19 +172,25 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
     setIsSending(true)
     setResponse(null)
     
-    const input: GrpcRequestInput = {
-      request,
-      url,
-      service: request.service,
-      method: request.method,
-      requestMessage,
-      metadata: request.metadata,
-      variableContext: environmentContext
-    }
-    
-    executeGrpcRequest(input)
-      .then((res) => {
-        setResponse(res)
+    window.restorm.grpc.execute({ requestId: request.id })
+      .then((res: GRPCExecutionResult) => {
+        // Convert backend result to GrpcResponse format
+        const grpcResponse: GrpcResponse = {
+          id: `resp_${Date.now()}`,
+          type: 'grpc',
+          requestId: request.id,
+          requestUrl: res.requestUrl ?? '',
+          requestMethod: res.requestMethod ?? `${request.service}/${request.method}`,
+          requestMessage,
+          requestMetadata: request.metadata,
+          statusCode: res.statusCode ?? 12,
+          statusMessage: res.statusMessage ?? '',
+          responseMessage: res.responseMessage ?? '',
+          responseMetadata: [],
+          error: res.error,
+          timings: res.timings
+        }
+        setResponse(grpcResponse)
         logger.info('gRPC request completed', { method: res.requestMethod, status: res.statusCode })
       })
       .catch((err: unknown) => {
@@ -193,6 +199,10 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
       .finally(() => {
         setIsSending(false)
       })
+  }
+  
+  const handleCancel = (): void => {
+    void window.restorm.grpc.cancel(request.id)
   }
   
   // Parse host and port from URL
@@ -327,10 +337,16 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
             placeholder={t('grpc.urlPlaceholder')}
           />
         </div>
-        <Button onClick={handleSend} options={{ title: t('grpc.send'), ariaLabel: t('grpc.send') }}>
+        <Button 
+          onClick={isSending ? handleCancel : handleSend} 
+          options={{ 
+            title: isSending ? t('cancel') : t('grpc.send'), 
+            ariaLabel: isSending ? t('cancel') : t('grpc.send') 
+          }}
+        >
           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <i className="codicon codicon-send" />
-            <span>{t('grpc.send')}</span>
+            <i className={isSending ? 'codicon codicon-close' : 'codicon codicon-send'} />
+            <span>{isSending ? t('cancel') : t('grpc.send')}</span>
           </span>
         </Button>
       </div>

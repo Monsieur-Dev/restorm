@@ -308,3 +308,92 @@ ipcMain.handle('http:cancel', (_event, requestId: string) => {
 ipcMain.handle('http:is-active', (_event, requestId: string) => {
   return httpExecutionService.isActive(requestId)
 })
+
+// ========================
+// GraphQL Execution IPC handlers
+// ========================
+
+import { graphqlExecutionService, type GraphQLExecutionInput } from './services/GraphQLExecutionService'
+
+// IPC handler to execute GraphQL request
+ipcMain.handle('graphql:execute', async (_event, input: GraphQLExecutionInput) => {
+  return graphqlExecutionService.execute(input)
+})
+
+// IPC handler to cancel GraphQL request
+ipcMain.handle('graphql:cancel', (_event, requestId: string) => {
+  return graphqlExecutionService.cancel(requestId)
+})
+
+// IPC handler to check if request is active
+ipcMain.handle('graphql:is-active', (_event, requestId: string) => {
+  return graphqlExecutionService.isActive(requestId)
+})
+
+// ========================
+// SOAP Execution IPC handlers
+// ========================
+
+import { soapExecutionService, type SOAPExecutionInput } from './services/SOAPExecutionService'
+
+// IPC handler to execute SOAP request
+ipcMain.handle('soap:execute', async (_event, input: SOAPExecutionInput) => {
+  return soapExecutionService.execute(input)
+})
+
+// IPC handler to cancel SOAP request
+ipcMain.handle('soap:cancel', (_event, requestId: string) => {
+  return soapExecutionService.cancel(requestId)
+})
+
+// IPC handler to check if request is active
+ipcMain.handle('soap:is-active', (_event, requestId: string) => {
+  return soapExecutionService.isActive(requestId)
+})
+
+// ========================
+// gRPC Execution IPC handlers
+// ========================
+
+import { grpcExecutionService, type GRPCExecutionInput } from './services/GRPCExecutionService'
+
+// IPC handler to execute gRPC request
+ipcMain.handle('grpc:execute', async (_event, input: GRPCExecutionInput) => {
+  return grpcExecutionService.execute(input)
+})
+
+// IPC handler to cancel gRPC request
+ipcMain.handle('grpc:cancel', (_event, requestId: string) => {
+  return grpcExecutionService.cancel(requestId)
+})
+
+// IPC handler to check if request is active
+ipcMain.handle('grpc:is-active', (_event, requestId: string) => {
+  return grpcExecutionService.isActive(requestId)
+})
+
+// ========================
+// WebSocket Execution IPC handlers
+// ========================
+
+import { websocketExecutionService, type WebSocketExecutionInput } from './services/WebSocketExecutionService'
+
+// IPC handler to connect WebSocket
+ipcMain.handle('websocket:connect', async (_event, input: WebSocketExecutionInput) => {
+  return websocketExecutionService.execute(input)
+})
+
+// IPC handler to disconnect WebSocket
+ipcMain.handle('websocket:disconnect', (_event, requestId: string) => {
+  return websocketExecutionService.disconnect(requestId)
+})
+
+// IPC handler to send WebSocket message
+ipcMain.handle('websocket:send', (_event, requestId: string, message: string, event?: string) => {
+  return websocketExecutionService.send(requestId, message, event)
+})
+
+// IPC handler to check if connection is active
+ipcMain.handle('websocket:is-active', (_event, requestId: string) => {
+  return websocketExecutionService.isActive(requestId)
+})

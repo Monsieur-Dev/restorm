@@ -15,7 +15,7 @@ import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyVal
 import type { GraphQLRequest, GraphQLResponse, KeyValue } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { VariableContext } from '../RestormKeyValueTable'
-import { executeGraphQLRequest, type GraphQLRequestInput } from '../../services/request/GraphQLRequestService'
+import type { GraphQLExecutionResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { Badge } from '../Badge'
 
@@ -177,18 +177,24 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
     setIsSending(true)
     setResponse(null)
     
-    const input: GraphQLRequestInput = {
-      request,
-      url,
-      query,
-      variables,
-      headers: request.headers,
-      variableContext: environmentContext
-    }
-    
-    executeGraphQLRequest(input)
-      .then((res) => {
-        setResponse(res)
+    window.restorm.graphql.execute({ requestId: request.id })
+      .then((res: GraphQLExecutionResult) => {
+        // Convert backend result to GraphQLResponse format
+        const graphqlResponse: GraphQLResponse = {
+          id: `resp_${Date.now()}`,
+          type: 'graphql',
+          requestId: request.id,
+          requestUrl: res.requestUrl ?? '',
+          requestQuery: query,
+          requestVariables: variables,
+          requestHeaders: request.headers,
+          statusCode: res.statusCode ?? 0,
+          data: res.data,
+          errors: res.errors,
+          responseHeaders: [],
+          timings: res.timings
+        }
+        setResponse(graphqlResponse)
         logger.info('GraphQL request completed', { url: res.requestUrl, status: res.statusCode })
       })
       .catch((err: unknown) => {
@@ -197,6 +203,10 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
       .finally(() => {
         setIsSending(false)
       })
+  }
+  
+  const handleCancel = (): void => {
+    void window.restorm.graphql.cancel(request.id)
   }
   
   // Request content (SplitView with Query, Variables, Headers)
@@ -312,10 +322,16 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
           placeholder={t('graphql.urlPlaceholder')}
         />
       </div>
-      <Button onClick={handleSend} options={{ title: t('graphql.send'), ariaLabel: t('graphql.send') }}>
+      <Button 
+        onClick={isSending ? handleCancel : handleSend} 
+        options={{ 
+          title: isSending ? t('cancel') : t('graphql.send'), 
+          ariaLabel: isSending ? t('cancel') : t('graphql.send') 
+        }}
+      >
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <i className="codicon codicon-send" />
-          <span>{t('graphql.send')}</span>
+          <i className={isSending ? 'codicon codicon-close' : 'codicon codicon-send'} />
+          <span>{isSending ? t('cancel') : t('graphql.send')}</span>
         </span>
       </Button>
     </div>

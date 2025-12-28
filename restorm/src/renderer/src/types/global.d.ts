@@ -68,6 +68,32 @@ declare global {
         isActive: (requestId: string) => Promise<boolean>
         onProgress: (callback: (data: HTTPProgressData) => void) => (() => void)
       }
+      graphql: {
+        execute: (input: GraphQLExecutionInput) => Promise<GraphQLExecutionResult>
+        cancel: (requestId: string) => Promise<boolean>
+        isActive: (requestId: string) => Promise<boolean>
+        onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
+      }
+      soap: {
+        execute: (input: SOAPExecutionInput) => Promise<SOAPExecutionResult>
+        cancel: (requestId: string) => Promise<boolean>
+        isActive: (requestId: string) => Promise<boolean>
+        onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
+      }
+      grpc: {
+        execute: (input: GRPCExecutionInput) => Promise<GRPCExecutionResult>
+        cancel: (requestId: string) => Promise<boolean>
+        isActive: (requestId: string) => Promise<boolean>
+        onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
+      }
+      websocket: {
+        connect: (input: WebSocketExecutionInput) => Promise<WebSocketExecutionResult>
+        disconnect: (requestId: string) => Promise<boolean>
+        send: (requestId: string, message: string, event?: string) => Promise<boolean>
+        isActive: (requestId: string) => Promise<boolean>
+        onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
+        onMessage: (callback: (data: WebSocketMessageData) => void) => (() => void)
+      }
     }
   }
 }
@@ -135,6 +161,113 @@ export interface HTTPExecutionResult {
 export interface HTTPProgressData {
   requestId: string
   status: 'started' | 'completed' | 'cancelled' | 'error'
+}
+
+/** Generic request progress data */
+export interface RequestProgressData {
+  requestId: string
+  status: 'started' | 'completed' | 'cancelled' | 'error'
+}
+
+/** GraphQL execution input */
+export interface GraphQLExecutionInput {
+  requestId: string
+  timeout?: number
+}
+
+/** GraphQL execution result */
+export interface GraphQLExecutionResult {
+  requestId: string
+  success: boolean
+  statusCode?: number
+  data?: unknown
+  errors?: { message: string; locations?: { line: number; column: number }[]; path?: string[] }[]
+  headers?: Record<string, string | string[]>
+  error?: string
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  requestUrl?: string
+}
+
+/** SOAP execution input */
+export interface SOAPExecutionInput {
+  requestId: string
+  timeout?: number
+}
+
+/** SOAP execution result */
+export interface SOAPExecutionResult {
+  requestId: string
+  success: boolean
+  statusCode?: number
+  responseBody?: string
+  headers?: Record<string, string | string[]>
+  fault?: { code: string; message: string }
+  error?: string
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  requestUrl?: string
+}
+
+/** gRPC execution input */
+export interface GRPCExecutionInput {
+  requestId: string
+  timeout?: number
+}
+
+/** gRPC execution result */
+export interface GRPCExecutionResult {
+  requestId: string
+  success: boolean
+  statusCode?: number
+  statusMessage?: string
+  responseMessage?: string
+  metadata?: Record<string, string>
+  error?: string
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  requestUrl?: string
+  requestMethod?: string
+}
+
+/** WebSocket execution input */
+export interface WebSocketExecutionInput {
+  requestId: string
+  timeout?: number
+}
+
+/** WebSocket message */
+export interface WebSocketMessageItem {
+  direction: 'sent' | 'received'
+  data: string
+  event?: string
+  timestamp: string
+}
+
+/** WebSocket execution result */
+export interface WebSocketExecutionResult {
+  requestId: string
+  success: boolean
+  connected: boolean
+  messages: WebSocketMessageItem[]
+  error?: string
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  requestUrl?: string
+}
+
+/** WebSocket message data for streaming */
+export interface WebSocketMessageData {
+  requestId: string
+  message: WebSocketMessageItem
 }
 
 /** Full request data for backend processing */

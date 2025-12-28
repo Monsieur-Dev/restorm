@@ -15,7 +15,7 @@ import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyVal
 import type { SoapRequest, SoapResponse, KeyValue } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { VariableContext } from '../RestormKeyValueTable'
-import { executeSoapRequest, type SoapRequestInput } from '../../services/request/SoapRequestService'
+import type { SOAPExecutionResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { Badge } from '../Badge'
 
@@ -171,18 +171,24 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
     setIsSending(true)
     setResponse(null)
     
-    const input: SoapRequestInput = {
-      request,
-      url,
-      soapAction: request.soapAction,
-      body,
-      headers: request.headers,
-      variableContext: environmentContext
-    }
-    
-    executeSoapRequest(input)
-      .then((res) => {
-        setResponse(res)
+    window.restorm.soap.execute({ requestId: request.id })
+      .then((res: SOAPExecutionResult) => {
+        // Convert backend result to SoapResponse format
+        const soapResponse: SoapResponse = {
+          id: `resp_${Date.now()}`,
+          type: 'soap',
+          requestId: request.id,
+          requestUrl: res.requestUrl ?? '',
+          requestSoapAction: request.soapAction,
+          requestBody: body,
+          requestHeaders: request.headers,
+          statusCode: res.statusCode ?? 0,
+          responseBody: res.responseBody ?? '',
+          responseHeaders: [],
+          fault: res.fault,
+          timings: res.timings
+        }
+        setResponse(soapResponse)
         logger.info('SOAP request completed', { url: res.requestUrl, status: res.statusCode })
       })
       .catch((err: unknown) => {
@@ -191,6 +197,10 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
       .finally(() => {
         setIsSending(false)
       })
+  }
+  
+  const handleCancel = (): void => {
+    void window.restorm.soap.cancel(request.id)
   }
   
   // Request content (SplitView with Body, Headers)
@@ -303,10 +313,16 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
             placeholder={t('soap.urlPlaceholder')}
           />
         </div>
-        <Button onClick={handleSend} options={{ title: t('soap.send'), ariaLabel: t('soap.send') }}>
+        <Button 
+          onClick={isSending ? handleCancel : handleSend} 
+          options={{ 
+            title: isSending ? t('cancel') : t('soap.send'), 
+            ariaLabel: isSending ? t('cancel') : t('soap.send') 
+          }}
+        >
           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <i className="codicon codicon-send" />
-            <span>{t('soap.send')}</span>
+            <i className={isSending ? 'codicon codicon-close' : 'codicon codicon-send'} />
+            <span>{isSending ? t('cancel') : t('soap.send')}</span>
           </span>
         </Button>
       </div>

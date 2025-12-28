@@ -16,7 +16,7 @@ import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyVal
 import type { WebSocketRequest, WebSocketResponse, WebSocketMessage, KeyValue } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { VariableContext } from '../RestormKeyValueTable'
-import { executeWebSocketRequest, type WebSocketRequestInput } from '../../services/request/WebSocketRequestService'
+import type { WebSocketExecutionResult, WebSocketMessageItem } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { Badge } from '../Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
@@ -179,19 +179,29 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     setIsSending(true)
     setResponse(null)
     
-    const input: WebSocketRequestInput = {
-      request,
-      url,
-      protocol: request.protocol,
-      event: event ? event : undefined,
-      message,
-      headers: request.headers,
-      variableContext: environmentContext
-    }
-    
-    executeWebSocketRequest(input, 5000)
-      .then((res) => {
-        setResponse(res)
+    window.restorm.websocket.connect({ requestId: request.id, timeout: 5000 })
+      .then((res: WebSocketExecutionResult) => {
+        // Convert backend result to WebSocketResponse format
+        const wsResponse: WebSocketResponse = {
+          id: `resp_${Date.now()}`,
+          type: 'websocket',
+          requestId: request.id,
+          requestUrl: res.requestUrl ?? '',
+          requestProtocol: request.protocol,
+          requestEvent: event,
+          requestMessage: message,
+          requestHeaders: request.headers,
+          connected: res.connected,
+          messages: res.messages.map((m: WebSocketMessageItem) => ({
+            direction: m.direction,
+            data: m.data,
+            event: m.event,
+            timestamp: m.timestamp
+          })),
+          error: res.error,
+          timings: res.timings
+        }
+        setResponse(wsResponse)
         logger.info('WebSocket request completed', { url: res.requestUrl, connected: res.connected })
       })
       .catch((err: unknown) => {
@@ -200,6 +210,10 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       .finally(() => {
         setIsSending(false)
       })
+  }
+  
+  const handleDisconnect = (): void => {
+    void window.restorm.websocket.disconnect(request.id)
   }
   
   const formatMessage = (msg: WebSocketMessage): string => {
@@ -359,10 +373,16 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           placeholder={t('websocket.urlPlaceholder')}
         />
       </div>
-      <Button onClick={handleSend} options={{ title: t('websocket.connect'), ariaLabel: t('websocket.connect') }}>
+      <Button 
+        onClick={isSending ? handleDisconnect : handleSend} 
+        options={{ 
+          title: isSending ? t('websocket.disconnect') : t('websocket.connect'), 
+          ariaLabel: isSending ? t('websocket.disconnect') : t('websocket.connect') 
+        }}
+      >
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <i className="codicon codicon-plug" />
-          <span>{t('websocket.connect')}</span>
+          <i className={isSending ? 'codicon codicon-debug-disconnect' : 'codicon codicon-plug'} />
+          <span>{isSending ? t('websocket.disconnect') : t('websocket.connect')}</span>
         </span>
       </Button>
     </div>
