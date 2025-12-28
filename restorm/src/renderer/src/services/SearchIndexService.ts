@@ -47,6 +47,8 @@ export interface RestormSearchMetadata {
   tags?: string[]
   /** Notes */
   notes?: string
+  /** Breadcrumb path (parent folder names) */
+  breadcrumb?: string[]
 }
 
 /** Check if an item is a Folder */
@@ -57,7 +59,7 @@ function isFolder(item: unknown): item is Folder {
 /**
  * Convert a Folder to a SearchDocument
  */
-function folderToSearchDocument(folder: Folder, parentPath: string[] = []): {
+function folderToSearchDocument(folder: Folder, parentPath: string[] = [], parentNames: string[] = []): {
   id: string
   title: string
   description?: string
@@ -81,7 +83,8 @@ function folderToSearchDocument(folder: Folder, parentPath: string[] = []): {
     },
     metadata: {
       tags: folder.tags,
-      ...(folder.notes ? { notes: folder.notes } : {})
+      ...(folder.notes ? { notes: folder.notes } : {}),
+      ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
     }
   }
 }
@@ -107,7 +110,8 @@ function getBodyContent(body: HTTPRequest['body']): string {
 function httpRequestToSearchDocument(
   request: HTTPRequest,
   parentFolderId: string,
-  parentPath: string[] = []
+  parentPath: string[] = [],
+  parentNames: string[] = []
 ): {
   id: string
   title: string
@@ -180,7 +184,8 @@ function httpRequestToSearchDocument(
       ...(request.pathParams ? { pathParams: request.pathParams.map((p) => ({ key: p.key, value: p.value })) } : {}),
       ...(bodyMetadata ? { body: bodyMetadata } : {}),
       tags: request.tags,
-      ...(request.notes ? { notes: request.notes } : {})
+      ...(request.notes ? { notes: request.notes } : {}),
+      ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
     }
   }
 }
@@ -188,7 +193,8 @@ function httpRequestToSearchDocument(
 function graphqlRequestToSearchDocument(
   request: GraphQLRequest,
   parentFolderId: string,
-  parentPath: string[] = []
+  parentPath: string[] = [],
+  parentNames: string[] = []
 ): {
   id: string
   title: string
@@ -215,7 +221,7 @@ function graphqlRequestToSearchDocument(
     title: request.name,
     ...(request.documentation ? { description: request.documentation } : {}),
     category: 'request',
-    icon: 'graphql',
+    icon: request.operationType,
     keywords,
     navigation: {
       type: 'request',
@@ -231,7 +237,8 @@ function graphqlRequestToSearchDocument(
       ...(request.variables ? { variables: request.variables } : {}),
       headers: request.headers.map((h) => ({ key: h.key, value: h.value })),
       tags: request.tags,
-      ...(request.notes ? { notes: request.notes } : {})
+      ...(request.notes ? { notes: request.notes } : {}),
+      ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
     }
   }
 }
@@ -239,7 +246,8 @@ function graphqlRequestToSearchDocument(
 function grpcRequestToSearchDocument(
   request: GrpcRequest,
   parentFolderId: string,
-  parentPath: string[] = []
+  parentPath: string[] = [],
+  parentNames: string[] = []
 ): {
   id: string
   title: string
@@ -267,7 +275,7 @@ function grpcRequestToSearchDocument(
     title: request.name,
     ...(request.documentation ? { description: request.documentation } : {}),
     category: 'request',
-    icon: 'grpc',
+    icon: request.callType,
     keywords,
     navigation: {
       type: 'request',
@@ -284,7 +292,8 @@ function grpcRequestToSearchDocument(
       requestMessage: request.requestMessage,
       grpcMetadata: request.metadata.map((m) => ({ key: m.key, value: m.value })),
       tags: request.tags,
-      ...(request.notes ? { notes: request.notes } : {})
+      ...(request.notes ? { notes: request.notes } : {}),
+      ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
     }
   }
 }
@@ -292,7 +301,8 @@ function grpcRequestToSearchDocument(
 function soapRequestToSearchDocument(
   request: SoapRequest,
   parentFolderId: string,
-  parentPath: string[] = []
+  parentPath: string[] = [],
+  parentNames: string[] = []
 ): {
   id: string
   title: string
@@ -337,7 +347,8 @@ function soapRequestToSearchDocument(
       soapBody: request.body,
       headers: request.headers.map((h) => ({ key: h.key, value: h.value })),
       tags: request.tags,
-      ...(request.notes ? { notes: request.notes } : {})
+      ...(request.notes ? { notes: request.notes } : {}),
+      ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
     }
   }
 }
@@ -345,7 +356,8 @@ function soapRequestToSearchDocument(
 function websocketRequestToSearchDocument(
   request: WebSocketRequest,
   parentFolderId: string,
-  parentPath: string[] = []
+  parentPath: string[] = [],
+  parentNames: string[] = []
 ): {
   id: string
   title: string
@@ -372,7 +384,7 @@ function websocketRequestToSearchDocument(
     title: request.name,
     ...(request.documentation ? { description: request.documentation } : {}),
     category: 'request',
-    icon: 'websocket',
+    icon: request.protocol,
     keywords,
     navigation: {
       type: 'request',
@@ -388,7 +400,8 @@ function websocketRequestToSearchDocument(
       message: request.message,
       headers: request.headers.map((h) => ({ key: h.key, value: h.value })),
       tags: request.tags,
-      ...(request.notes ? { notes: request.notes } : {})
+      ...(request.notes ? { notes: request.notes } : {}),
+      ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
     }
   }
 }
@@ -396,7 +409,8 @@ function websocketRequestToSearchDocument(
 function requestToSearchDocument(
   request: Request,
   parentFolderId: string,
-  parentPath: string[] = []
+  parentPath: string[] = [],
+  parentNames: string[] = []
 ): {
   id: string
   title: string
@@ -408,15 +422,15 @@ function requestToSearchDocument(
   metadata: Record<string, unknown>
 } {
   if (isHTTPRequest(request)) {
-    return httpRequestToSearchDocument(request, parentFolderId, parentPath)
+    return httpRequestToSearchDocument(request, parentFolderId, parentPath, parentNames)
   } else if (isGraphQLRequest(request)) {
-    return graphqlRequestToSearchDocument(request, parentFolderId, parentPath)
+    return graphqlRequestToSearchDocument(request, parentFolderId, parentPath, parentNames)
   } else if (isGrpcRequest(request)) {
-    return grpcRequestToSearchDocument(request, parentFolderId, parentPath)
+    return grpcRequestToSearchDocument(request, parentFolderId, parentPath, parentNames)
   } else if (isSoapRequest(request)) {
-    return soapRequestToSearchDocument(request, parentFolderId, parentPath)
+    return soapRequestToSearchDocument(request, parentFolderId, parentPath, parentNames)
   } else if (isWebSocketRequest(request)) {
-    return websocketRequestToSearchDocument(request, parentFolderId, parentPath)
+    return websocketRequestToSearchDocument(request, parentFolderId, parentPath, parentNames)
   }
   // Fallback for unknown types
   const unknownRequest = request as { id: string; name: string; tags: string[] }
@@ -432,7 +446,10 @@ function requestToSearchDocument(
       requestId: unknownRequest.id,
       path: [...parentPath, unknownRequest.id]
     },
-    metadata: { tags: unknownRequest.tags }
+    metadata: {
+      tags: unknownRequest.tags,
+      ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
+    }
   }
 }
 
@@ -441,7 +458,8 @@ function requestToSearchDocument(
  */
 function collectFolderDocuments(
   folder: Folder,
-  parentPath: string[] = []
+  parentPath: string[] = [],
+  parentNames: string[] = []
 ): {
   id: string
   title: string
@@ -453,6 +471,7 @@ function collectFolderDocuments(
   metadata: Record<string, unknown>
 }[] {
   const currentPath = [...parentPath, folder.id]
+  const currentNames = [...parentNames, folder.name]
   const documents: {
     id: string
     title: string
@@ -465,14 +484,14 @@ function collectFolderDocuments(
   }[] = []
 
   // Add the folder itself
-  documents.push(folderToSearchDocument(folder, parentPath))
+  documents.push(folderToSearchDocument(folder, parentPath, parentNames))
 
   // Add all items
   for (const item of folder.items) {
     if (isFolder(item)) {
-      documents.push(...collectFolderDocuments(item, currentPath))
+      documents.push(...collectFolderDocuments(item, currentPath, currentNames))
     } else if (isRequest(item)) {
-      documents.push(requestToSearchDocument(item, folder.id, currentPath))
+      documents.push(requestToSearchDocument(item, folder.id, currentPath, currentNames))
     }
   }
 

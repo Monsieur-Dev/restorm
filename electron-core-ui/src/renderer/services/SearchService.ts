@@ -57,9 +57,9 @@ class SearchServiceClient {
    */
   async registerCategory(category: string, meta: CategoryMeta): Promise<void> {
     await window.api.search.registerCategories({ [category]: meta })
-  }
+}
 
-  /**
+/**
    * Register multiple categories at once
    */
   async registerCategories(categories: Record<string, CategoryMeta>): Promise<void> {

@@ -2048,6 +2048,7 @@ const App: React.FC = () => {
         showSearchBar
         onSearchResultClick={handleSearchResultClick}
         renderSearchTooltipContent={renderSearchTooltipContent}
+        renderSearchBadge={(method) => <Badge type={mapToBadgeType(method)} />}
         leftContent={
           <MenuBar>
             <MenuBarItem title={t('menuBar.file')}>

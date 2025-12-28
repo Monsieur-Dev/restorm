@@ -21,6 +21,8 @@ export interface SearchBarProps {
   placeholder?: string
   /** Custom renderer for tooltip content. If not provided, uses default rendering with description. */
   renderTooltipContent?: (result: SearchResult) => React.ReactNode
+  /** Custom renderer for method/type badge. If not provided, uses default http-method-badge styling. */
+  renderBadge?: (method: string) => React.ReactNode
 }
 
 /** Debounce delay in milliseconds */
@@ -30,7 +32,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   title = '',
   onResultClick,
   placeholder,
-  renderTooltipContent
+  renderTooltipContent,
+  renderBadge
 }) => {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
@@ -280,7 +283,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       return (
         <div style={{ maxHeight: 'calc(100vh - 90px)', display: 'flex', flexDirection: 'column' }}>
           <div style={{ marginBottom: 8, flexShrink: 0 }}>
-            <span className={`http-method-badge method-${method.toLowerCase()}`}>{method}</span>{' '}
+            {renderBadge ? renderBadge(method) : (
+              <span className={`http-method-badge method-${method.toLowerCase()}`}>{method}</span>
+            )}{' '}
             <strong>{resultTitle}</strong>
           </div>
           {description && (
@@ -403,21 +408,53 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                               scheduleHideTooltip()
                             }}
                           >
-                            {category === 'request' && icon ? (
-                              <div className="result-content">
-                                <div className="result-title result-http-title">
-                                  <span className={`http-method-badge method-${icon.toLowerCase()}`}>{icon.toUpperCase()}</span>
-                                  <span className="http-route">{resultTitle}</span>
-                                </div>
-                              </div>
-                            ) : (
-                              <>
-                                <i className={`codicon codicon-${icon ?? 'symbol-misc'} result-icon`} />
-                                <div className="result-content">
-                                  <div className="result-title">{resultTitle}</div>
-                                </div>
-                              </>
-                            )}
+                            {(() => {
+                              const breadcrumb = result.metadata?.['breadcrumb']
+                              const breadcrumbArray = Array.isArray(breadcrumb) ? (breadcrumb as string[]) : null
+                              
+                              if (category === 'request' && icon) {
+                                return (
+                                  <div className="result-content">
+                                    <div className="result-title result-http-title">
+                                      {renderBadge ? renderBadge(icon.toUpperCase()) : (
+                                        <span className={`http-method-badge method-${icon.toLowerCase()}`}>{icon.toUpperCase()}</span>
+                                      )}
+                                      <span className="http-route">{resultTitle}</span>
+                                      {breadcrumbArray && breadcrumbArray.length > 0 && (
+                                        <span className="result-breadcrumb">
+                                          {breadcrumbArray.map((item, index) => (
+                                            <React.Fragment key={index}>
+                                              {index > 0 && <span className="breadcrumb-separator">/</span>}
+                                              <span className="breadcrumb-item">{item}</span>
+                                            </React.Fragment>
+                                          ))}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                )
+                              }
+                              return (
+                                <>
+                                  <i className={`codicon codicon-${icon ?? 'symbol-misc'} result-icon`} />
+                                  <div className="result-content">
+                                    <div className="result-title">
+                                      {resultTitle}
+                                      {breadcrumbArray && breadcrumbArray.length > 0 && (
+                                        <span className="result-breadcrumb">
+                                          {breadcrumbArray.map((item, index) => (
+                                            <React.Fragment key={index}>
+                                              {index > 0 && <span className="breadcrumb-separator">/</span>}
+                                              <span className="breadcrumb-item">{item}</span>
+                                            </React.Fragment>
+                                          ))}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </>
+                              )
+                            })()}
                           </div>
                         )
                       })}
