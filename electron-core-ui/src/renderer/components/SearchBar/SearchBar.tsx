@@ -306,7 +306,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         )}
       </div>
     )
-  }, [hoveredResult, renderTooltipContent])
+  }, [hoveredResult, renderTooltipContent, renderBadge])
 
   return (
     <div className="search-bar-container" ref={containerRef}>
