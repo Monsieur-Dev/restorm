@@ -1,15 +1,19 @@
 /**
- * ContextService - Manages Handlebars context and resolved values (Main Process)
+ * ContextService - Manages Handlebars context, URL resolution and code snippets (Main Process)
  *
  * Listens to document events from the EventBus and maintains:
  * - Data objects needed for Handlebars resolution
  * - Resolved variable values per environment
+ * - Resolved URLs for each request
+ * - Generated code snippets for each request
  *
  * Runs in the main process to avoid blocking the UI.
  */
 
-import { BrowserWindow } from 'electron'
+import { BrowserWindow, app } from 'electron'
 import Handlebars from 'handlebars'
+import * as fs from 'fs'
+import * as path from 'path'
 import {
   eventBusService,
   type Subscription,
@@ -20,6 +24,11 @@ import {
   type DocumentChangedPayload,
   type DocumentDeletedPayload
 } from './DocumentEvents'
+import { registerHandlebarsHelpers } from '../utils/handlebarsHelpers'
+
+// ============================================================================
+// Types and Interfaces
+// ============================================================================
 
 /** KeyValue structure from environment */
 interface KeyValue {
@@ -62,25 +71,123 @@ interface VariableTransformResult {
   key: string
 }
 
-/** Request context tracking */
+/** HTTP request body types */
+type HTTPRequestBody =
+  | { type: 'text'; content: string }
+  | { type: 'file'; path: string }
+  | { type: 'form-data'; fields: KeyValue[] }
+  | { type: 'x-www-form-urlencoded'; fields: KeyValue[] }
+
+/** Full request data for URL resolution and code snippet generation */
+export interface FullRequestData {
+  id: string
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket'
+  
+  // Common fields
+  url: string
+  headers: KeyValue[]
+  
+  // HTTP specific
+  method?: string
+  params?: KeyValue[]
+  pathParams?: KeyValue[]
+  body?: HTTPRequestBody
+  
+  // GraphQL specific
+  operationType?: string
+  query?: string
+  variables?: string
+  
+  // gRPC specific
+  service?: string
+  grpcMethod?: string
+  callType?: string
+  requestMessage?: string
+  metadata?: KeyValue[]
+  
+  // SOAP specific
+  soapAction?: string
+  soapService?: string
+  operation?: string
+  soapBody?: string
+  
+  // WebSocket specific
+  protocol?: string
+  event?: string
+  message?: string
+}
+
+/** Request context tracking with full data */
 interface RequestContext {
   /** Selected environment ID (null if no environment) */
   environmentId: string | null
   /** Request KeyValues to transform (headers, params, pathParams, etc.) */
   keyValueGroups: Map<string, KeyValue[]>
+  /** Full request data for URL and code snippet generation */
+  fullData: FullRequestData | null
 }
 
-/** Request structure (minimal for context service) */
+/** Resolved URL result */
+export interface ResolvedUrlResult {
+  /** The final resolved URL */
+  resolvedUrl: string
+  /** Base URL without query string */
+  baseUrl: string
+  /** Query string (without leading ?) */
+  queryString: string
+}
+
+/** Code snippets result */
+export interface CodeSnippetsResult {
+  /** Generated markdown content with code snippets */
+  markdown: string
+}
+
+/** Request structure (minimal for context service - legacy) */
 interface RequestData {
   id: string
   headers?: KeyValue[]
   params?: KeyValue[]
   pathParams?: KeyValue[]
-  // Add other fields as needed (body fields, etc.)
+}
+
+// ============================================================================
+// Code Snippet Templates loading
+// ============================================================================
+
+/**
+ * Get the path to template files.
+ * In development, templates are copied to dist/main/resources/templates/
+ * In production, they're bundled with the app.
+ */
+function getTemplatesPath(): string {
+  // Check if running in development or production
+  if (app.isPackaged) {
+    // In production, templates are in resources/app.asar/dist/main/resources/templates
+    return path.join(process.resourcesPath, 'app.asar', 'dist', 'main', 'resources', 'templates')
+  }
+  // In development, __dirname is dist/main/, templates are in dist/main/resources/templates/
+  return path.join(__dirname, 'resources', 'templates')
 }
 
 /**
- * ContextService class - manages Handlebars context (Main Process)
+ * Load a template file and return its contents
+ */
+function loadTemplate(templateName: string): string {
+  const templatesPath = getTemplatesPath()
+  const templatePath = path.join(templatesPath, templateName)
+  
+  try {
+    return fs.readFileSync(templatePath, 'utf-8')
+  } catch (error) {
+    logger.error('[ContextService] Failed to load template', { templateName, templatePath, error: String(error) })
+    return ''
+  }
+}
+
+
+/**
+ * ContextService class - manages Handlebars context, URLs and code snippets (Main Process)
  */
 class ContextService {
   private subscriptions: Subscription[] = []
@@ -95,8 +202,21 @@ class ContextService {
   /** Map of variableId (runtime id) -> transformation result */
   private variableTransformResults = new Map<string, VariableTransformResult>()
 
-  /** Map of requestId -> request context (selected env + keyvalue groups) */
+  /** Map of requestId -> request context (selected env + keyvalue groups + full data) */
   private requestContexts = new Map<string, RequestContext>()
+
+  /** Map of requestId -> resolved URL result */
+  private resolvedUrls = new Map<string, ResolvedUrlResult>()
+
+  /** Map of requestId -> generated code snippets */
+  private codeSnippets = new Map<string, CodeSnippetsResult>()
+
+  /** Compiled Handlebars templates for code snippets */
+  private httpSnippetTemplate: Handlebars.TemplateDelegate | null = null
+  private graphqlSnippetTemplate: Handlebars.TemplateDelegate | null = null
+  private websocketSnippetTemplate: Handlebars.TemplateDelegate | null = null
+  private grpcSnippetTemplate: Handlebars.TemplateDelegate | null = null
+  private soapSnippetTemplate: Handlebars.TemplateDelegate | null = null
 
   /**
    * Initialize the service and start listening to events
@@ -107,6 +227,28 @@ class ContextService {
     }
 
     logger.info('[ContextService] Initializing...')
+
+    // Register Handlebars helpers before compiling templates
+    registerHandlebarsHelpers()
+
+    // Load and compile code snippet templates from files
+    try {
+      const httpTemplate = loadTemplate('code-snippets-httprequests.hbs')
+      const graphqlTemplate = loadTemplate('code-snippets-graphql.hbs')
+      const websocketTemplate = loadTemplate('code-snippets-websocket.hbs')
+      const grpcTemplate = loadTemplate('code-snippets-grpc.hbs')
+      const soapTemplate = loadTemplate('code-snippets-soap.hbs')
+      
+      if (httpTemplate) this.httpSnippetTemplate = Handlebars.compile(httpTemplate, { noEscape: true })
+      if (graphqlTemplate) this.graphqlSnippetTemplate = Handlebars.compile(graphqlTemplate, { noEscape: true })
+      if (websocketTemplate) this.websocketSnippetTemplate = Handlebars.compile(websocketTemplate, { noEscape: true })
+      if (grpcTemplate) this.grpcSnippetTemplate = Handlebars.compile(grpcTemplate, { noEscape: true })
+      if (soapTemplate) this.soapSnippetTemplate = Handlebars.compile(soapTemplate, { noEscape: true })
+      
+      logger.info('[ContextService] Code snippet templates loaded and compiled')
+    } catch (error) {
+      logger.error('[ContextService] Failed to compile code snippet templates', { error: String(error) })
+    }
 
     // Subscribe to environment events
     this.subscriptions.push(
@@ -422,7 +564,8 @@ class ContextService {
 
     this.requestContexts.set(requestId, {
       environmentId,
-      keyValueGroups
+      keyValueGroups,
+      fullData: null
     })
 
     // Calculate transformations for all KeyValue groups
@@ -449,6 +592,31 @@ class ContextService {
     }
 
     this.requestContexts.delete(requestId)
+    this.resolvedUrls.delete(requestId)
+    this.codeSnippets.delete(requestId)
+  }
+
+  /**
+   * Update full request data for URL resolution and code snippet generation.
+   * Called when request properties change (url, body, headers, etc.)
+   */
+  updateFullRequestData(requestId: string, data: FullRequestData): void {
+    const ctx = this.requestContexts.get(requestId)
+    if (!ctx) {
+      logger.warn('[ContextService] updateFullRequestData: request not registered', { requestId })
+      return
+    }
+
+    ctx.fullData = data
+
+    // Also update keyValueGroups from full data
+    if (data.headers) ctx.keyValueGroups.set('headers', data.headers)
+    if (data.params) ctx.keyValueGroups.set('params', data.params)
+    if (data.pathParams) ctx.keyValueGroups.set('pathParams', data.pathParams)
+    if (data.metadata) ctx.keyValueGroups.set('metadata', data.metadata)
+
+    // Recalculate everything
+    this.recalculateRequestContext(requestId)
   }
 
   /**
@@ -543,6 +711,427 @@ class ContextService {
         variableCount: keyValues.filter(kv => kv.id).length
       })
     }
+
+    // Calculate resolved URL and code snippets if we have full data
+    if (ctx.fullData) {
+      // Sync fullData with keyValueGroups to ensure we use the latest values
+      const headersFromGroup = ctx.keyValueGroups.get('headers')
+      const paramsFromGroup = ctx.keyValueGroups.get('params')
+      const pathParamsFromGroup = ctx.keyValueGroups.get('pathParams')
+      
+      const updatedData: FullRequestData = {
+        ...ctx.fullData,
+        headers: headersFromGroup ?? ctx.fullData.headers,
+        ...(paramsFromGroup !== undefined ? { params: paramsFromGroup } : ctx.fullData.params !== undefined ? { params: ctx.fullData.params } : {}),
+        ...(pathParamsFromGroup !== undefined ? { pathParams: pathParamsFromGroup } : ctx.fullData.pathParams !== undefined ? { pathParams: ctx.fullData.pathParams } : {})
+      }
+      this.calculateResolvedUrl(requestId, updatedData, baseContext)
+      this.calculateCodeSnippets(requestId, updatedData, baseContext)
+      this.calculateAvailableVariables(requestId, updatedData, baseContext)
+    }
+  }
+
+  // =========================================================================
+  // Available Variables for Autocompletion
+  // =========================================================================
+
+  /** Store for available variables per variableId (each field has its own context) */
+  private availableVariablesPerField = new Map<string, Array<{ name: string; value: string }>>()
+
+  /**
+   * Calculate available variables for autocompletion
+   * - URL field: env + all path params
+   * - Each path param value field: env + previous path params only
+   * - Each header value field: env + previous headers only
+   * - Each param value field: env + previous params only
+   */
+  private calculateAvailableVariables(
+    requestId: string,
+    data: FullRequestData,
+    envContext: TransformedContext
+  ): void {
+    // Base environment variables
+    const envVars: Array<{ name: string; value: string }> = []
+    for (const [name, value] of Object.entries(envContext)) {
+      envVars.push({ name, value: String(value) })
+    }
+
+    // Helper to add or replace a variable in cumulative array
+    const addOrReplace = (
+      arr: Array<{ name: string; value: string }>,
+      name: string,
+      value: string
+    ): void => {
+      const existingIndex = arr.findIndex(v => v.name === name)
+      if (existingIndex >= 0) {
+        arr[existingIndex] = { name, value }
+      } else {
+        arr.push({ name, value })
+      }
+    }
+
+    // Calculate for path params
+    const pathParams = data.pathParams ?? []
+    const cumulativePathParams: Array<{ name: string; value: string }> = []
+    
+    for (const pp of pathParams) {
+      if (!pp) continue
+      
+      if (pp.id) {
+        const varsForThisField = [...envVars, ...cumulativePathParams]
+        this.broadcastFieldVariables(pp.id, varsForThisField)
+      }
+      
+      if (pp.key && pp.key.trim() !== '') {
+        const contextForResolve: TransformedContext = { ...envContext }
+        for (const prev of cumulativePathParams) {
+          contextForResolve[prev.name] = prev.value
+        }
+        const resolvedValue = this.transformValue(pp.value, contextForResolve)
+        addOrReplace(cumulativePathParams, pp.key, resolvedValue)
+      }
+    }
+
+    // Calculate for headers
+    const headers = data.headers ?? []
+    const cumulativeHeaders: Array<{ name: string; value: string }> = []
+    
+    for (const h of headers) {
+      if (!h) continue
+      
+      if (h.id) {
+        const varsForThisField = [...envVars, ...cumulativeHeaders]
+        this.broadcastFieldVariables(h.id, varsForThisField)
+      }
+      
+      if (h.key && h.key.trim() !== '') {
+        const contextForResolve: TransformedContext = { ...envContext }
+        for (const prev of cumulativeHeaders) {
+          contextForResolve[prev.name] = prev.value
+        }
+        const resolvedValue = this.transformValue(h.value, contextForResolve)
+        addOrReplace(cumulativeHeaders, h.key, resolvedValue)
+      }
+    }
+
+    // Calculate for params (query params)
+    const params = data.params ?? []
+    const cumulativeParams: Array<{ name: string; value: string }> = []
+    
+    for (const p of params) {
+      if (!p) continue
+      
+      if (p.id) {
+        const varsForThisField = [...envVars, ...cumulativeParams]
+        this.broadcastFieldVariables(p.id, varsForThisField)
+      }
+      
+      if (p.key && p.key.trim() !== '') {
+        const contextForResolve: TransformedContext = { ...envContext }
+        for (const prev of cumulativeParams) {
+          contextForResolve[prev.name] = prev.value
+        }
+        const resolvedValue = this.transformValue(p.value, contextForResolve)
+        addOrReplace(cumulativeParams, p.key, resolvedValue)
+      }
+    }
+
+    // URL field gets env + ALL path params
+    const urlVariableId = `${requestId}:url`
+    const urlVars = [...envVars, ...cumulativePathParams]
+    this.broadcastFieldVariables(urlVariableId, urlVars)
+  }
+
+  /**
+   * Broadcast available variables for a specific field
+   */
+  private broadcastFieldVariables(
+    variableId: string,
+    variables: Array<{ name: string; value: string }>
+  ): void {
+    const previous = this.availableVariablesPerField.get(variableId)
+    const hasChanged = !previous ||
+      previous.length !== variables.length ||
+      variables.some((v, i) => previous[i]?.name !== v.name || previous[i]?.value !== v.value)
+
+    if (hasChanged) {
+      this.availableVariablesPerField.set(variableId, variables)
+      this.broadcastToRenderer('context:available-variables', { variableId, variables })
+    }
+  }
+
+  // =========================================================================
+  // URL Resolution
+  // =========================================================================
+
+  /**
+   * Calculate the resolved URL for a request
+   */
+  private calculateResolvedUrl(requestId: string, data: FullRequestData, envContext: TransformedContext): void {
+    // Build cumulative context with path params (non-encoded for resolution)
+    const cumulativeContext = { ...envContext }
+    const pathParams = data.pathParams ?? []
+    
+    for (const pp of pathParams) {
+      if (pp.key) {
+        // Resolve using cumulative context (env + previous path params)
+        const resolvedKey = this.transformValue(pp.key, cumulativeContext)
+        const resolvedValue = this.transformValue(pp.value, cumulativeContext)
+        // Store non-encoded value for next iterations (last value wins for same key)
+        cumulativeContext[resolvedKey] = resolvedValue
+      }
+    }
+    
+    // Build URL context with URL-encoded values
+    const fullContext = { ...envContext }
+    for (const [key, value] of Object.entries(cumulativeContext)) {
+      if (!(key in envContext)) {
+        // Only encode path param values, not env values
+        fullContext[key] = encodeURIComponent(String(value))
+      }
+    }
+
+    // Transform the URL template
+    const baseUrl = this.transformValue(data.url, fullContext)
+
+    // Build query string from params with cumulative resolution
+    const params = data.params ?? []
+    const cumulativeParamsContext = { ...envContext }
+    const resolvedParams = new Map<string, string>() // key -> resolved value (last wins)
+    
+    for (const param of params) {
+      if (param.key) {
+        // Resolve using cumulative context
+        const resolvedKey = this.transformValue(param.key, cumulativeParamsContext)
+        const resolvedValue = this.transformValue(param.value, cumulativeParamsContext)
+        // Store for URL (last value wins for same key)
+        resolvedParams.set(resolvedKey, resolvedValue)
+        // Add to cumulative context for next params
+        cumulativeParamsContext[resolvedKey] = resolvedValue
+      }
+    }
+    
+    const queryParts: string[] = []
+    for (const [key, value] of resolvedParams) {
+      queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    }
+    const queryString = queryParts.join('&')
+
+    // Combine base URL and query string
+    let resolvedUrl = baseUrl
+    if (queryString) {
+      // Determine separator: ?, &, or nothing
+      if (baseUrl.endsWith('?') || baseUrl.endsWith('&')) {
+        resolvedUrl = baseUrl + queryString
+      } else if (baseUrl.includes('?')) {
+        resolvedUrl = baseUrl + '&' + queryString
+      } else {
+        resolvedUrl = baseUrl + '?' + queryString
+      }
+    }
+
+    const result: ResolvedUrlResult = {
+      resolvedUrl,
+      baseUrl,
+      queryString
+    }
+
+    // Store and broadcast
+    const previousResult = this.resolvedUrls.get(requestId)
+    if (!previousResult || previousResult.resolvedUrl !== result.resolvedUrl) {
+      this.resolvedUrls.set(requestId, result)
+      this.broadcastToRenderer('context:url-resolved', { requestId, ...result })
+      logger.debug('[ContextService] URL resolved', { requestId, resolvedUrl })
+    }
+  }
+
+  // =========================================================================
+  // Code Snippets Generation
+  // =========================================================================
+
+  /**
+   * Calculate code snippets for a request
+   */
+  private calculateCodeSnippets(requestId: string, data: FullRequestData, envContext: TransformedContext): void {
+    let markdown = ''
+
+    // Get resolved URL
+    const urlResult = this.resolvedUrls.get(requestId)
+    const resolvedUrl = urlResult?.resolvedUrl ?? this.transformValue(data.url, envContext)
+
+    // Parse URL components
+    let host = ''
+    let path = '/'
+    try {
+      const urlObj = new URL(resolvedUrl.startsWith('http') ? resolvedUrl : `https://${resolvedUrl}`)
+      host = urlObj.host
+      path = urlObj.pathname + urlObj.search
+    } catch {
+      host = resolvedUrl
+    }
+
+    // Resolve headers
+    const headers = (data.headers ?? [])
+      .filter(h => h.key)
+      .map(h => ({
+        key: this.transformValue(h.key, envContext),
+        value: this.transformValue(h.value, envContext)
+      }))
+
+    switch (data.requestType) {
+      case 'http': {
+        const method = data.method ?? 'GET'
+        let body: string | null = null
+
+        // Resolve body
+        if (data.body) {
+          switch (data.body.type) {
+            case 'text':
+              body = this.transformValue(data.body.content, envContext)
+              break
+            case 'form-data':
+            case 'x-www-form-urlencoded':
+              body = data.body.fields
+                .filter(f => f.key)
+                .map(f => `${encodeURIComponent(f.key)}=${encodeURIComponent(this.transformValue(f.value, envContext))}`)
+                .join('&')
+              break
+          }
+        }
+
+        if (this.httpSnippetTemplate) {
+          markdown = this.httpSnippetTemplate({
+            method,
+            lowerMethod: method.toLowerCase(),
+            url: resolvedUrl,
+            host,
+            path,
+            headers: headers.length > 0 ? headers : null,
+            body
+          })
+        }
+        break
+      }
+
+      case 'graphql': {
+        const query = data.query ?? ''
+        const variables = data.variables ?? ''
+        const escapedQuery = query.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')
+
+        if (this.graphqlSnippetTemplate) {
+          markdown = this.graphqlSnippetTemplate({
+            url: resolvedUrl,
+            query,
+            escapedQuery,
+            variables: variables || null,
+            headers: headers.length > 0 ? headers : null
+          })
+        }
+        break
+      }
+
+      case 'websocket': {
+        const message = data.message ? this.transformValue(data.message, envContext) : ''
+
+        if (this.websocketSnippetTemplate) {
+          markdown = this.websocketSnippetTemplate({
+            url: resolvedUrl,
+            protocol: data.protocol ?? 'websocket',
+            event: data.event ?? '',
+            message: message || null
+          })
+        }
+        break
+      }
+
+      case 'grpc': {
+        const requestMessage = data.requestMessage ? this.transformValue(data.requestMessage, envContext) : '{}'
+        const metadata = (data.metadata ?? [])
+          .filter(m => m.key)
+          .map(m => ({
+            key: this.transformValue(m.key, envContext),
+            value: this.transformValue(m.value, envContext)
+          }))
+
+        if (this.grpcSnippetTemplate) {
+          markdown = this.grpcSnippetTemplate({
+            host,
+            service: data.service ?? '',
+            method: data.grpcMethod ?? '',
+            callType: data.callType ?? 'unary',
+            requestMessage,
+            metadata: metadata.length > 0 ? metadata : null
+          })
+        }
+        break
+      }
+
+      case 'soap': {
+        const soapBody = data.soapBody ? this.transformValue(data.soapBody, envContext) : ''
+
+        if (this.soapSnippetTemplate) {
+          markdown = this.soapSnippetTemplate({
+            url: resolvedUrl,
+            soapAction: data.soapAction ?? '',
+            service: data.soapService ?? '',
+            operation: data.operation ?? '',
+            body: soapBody,
+            headers: headers.length > 0 ? headers : null
+          })
+        }
+        break
+      }
+    }
+
+    const result: CodeSnippetsResult = { markdown }
+
+    // Store and broadcast
+    const previousResult = this.codeSnippets.get(requestId)
+    if (!previousResult || previousResult.markdown !== result.markdown) {
+      this.codeSnippets.set(requestId, result)
+      this.broadcastToRenderer('context:code-snippets-updated', { requestId, ...result })
+      logger.debug('[ContextService] Code snippets generated', { requestId, length: markdown.length })
+    }
+  }
+
+  // =========================================================================
+  // Getters for URL and Code Snippets
+  // =========================================================================
+
+  /**
+   * Get the resolved URL for a request
+   */
+  getResolvedUrl(requestId: string): ResolvedUrlResult | undefined {
+    return this.resolvedUrls.get(requestId)
+  }
+
+  /**
+   * Get the code snippets for a request
+   */
+  getCodeSnippets(requestId: string): CodeSnippetsResult | undefined {
+    return this.codeSnippets.get(requestId)
+  }
+
+  /**
+   * Get all resolved URLs as a plain object (for IPC)
+   */
+  getAllResolvedUrls(): Record<string, ResolvedUrlResult> {
+    const result: Record<string, ResolvedUrlResult> = {}
+    for (const [key, value] of this.resolvedUrls) {
+      result[key] = value
+    }
+    return result
+  }
+
+  /**
+   * Get all code snippets as a plain object (for IPC)
+   */
+  getAllCodeSnippets(): Record<string, CodeSnippetsResult> {
+    const result: Record<string, CodeSnippetsResult> = {}
+    for (const [key, value] of this.codeSnippets) {
+      result[key] = value
+    }
+    return result
   }
 
   /**
@@ -587,6 +1176,9 @@ class ContextService {
     this.transformedContexts.clear()
     this.variableTransformResults.clear()
     this.requestContexts.clear()
+    this.resolvedUrls.clear()
+    this.codeSnippets.clear()
+    this.availableVariablesPerField.clear()
   }
 
   /**

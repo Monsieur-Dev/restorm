@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Handlebars } from '../../utils/handlebarsHelpers'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
   Button,
@@ -20,10 +19,6 @@ import { executeGrpcRequest, type GrpcRequestInput } from '../../services/reques
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { Badge } from '../Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
-import codeSnippetsTemplate from '../../resources/templates/code-snippets-grpc.hbs?raw'
-
-// Compile the Handlebars template
-const compiledTemplate = Handlebars.compile(codeSnippetsTemplate)
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
 function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
@@ -44,6 +39,10 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
   const [requestMessage, setRequestMessageState] = useState(request.requestMessage)
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<GrpcResponse | null>(null)
+  
+  // Backend-provided resolved URL and code snippets
+  const [resolvedUrl, setResolvedUrl] = useState<string>('')
+  const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
   
   const metadataRef = useRef<KeyValueTableHandle | null>(null)
   const requestIdRef = useRef(request.id)
@@ -73,10 +72,42 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
       headers: toKeyValueData(request.metadata)
     })
 
+    // Send full request data for URL and code snippet calculation
+    void window.restorm.context.updateFullRequestData(requestId, {
+      url: request.url,
+      method: request.callType,
+      requestType: 'grpc',
+      headers: toKeyValueData(request.metadata),
+      body: request.requestMessage
+    })
+
+    // Subscribe to backend events
+    const unsubUrl = window.restorm.context.onUrlResolved((result) => {
+      if (result.requestId === requestId) {
+        setResolvedUrl(result.resolvedUrl)
+      }
+    })
+
+    const unsubSnippets = window.restorm.context.onCodeSnippetsUpdated((result) => {
+      if (result.requestId === requestId) {
+        setBackendCodeSnippets(result.markdown)
+      }
+    })
+
+    // Get initial values if they exist
+    void window.restorm.context.getResolvedUrl(requestId).then((result) => {
+      if (result) setResolvedUrl(result.resolvedUrl)
+    })
+    void window.restorm.context.getCodeSnippets(requestId).then((result) => {
+      if (result) setBackendCodeSnippets(result.markdown)
+    })
+
     previousEnvIdRef.current = selectedEnvId ?? null
 
     return () => {
       logger.debug('[GrpcRequestTabView] Unregistering request from ContextService', { requestId })
+      unsubUrl()
+      unsubSnippets()
       void window.restorm.context.unregisterRequest(requestId)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- Intentionally only run on mount/unmount and when request.id changes
@@ -96,6 +127,20 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
     }
   }, [selectedEnvId, request.id])
 
+  // Notify ContextService when URL or request message changes
+  useEffect(() => {
+    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string }[] =>
+      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value }))
+
+    void window.restorm.context.updateFullRequestData(request.id, {
+      url,
+      method: request.callType,
+      requestType: 'grpc',
+      headers: toKeyValueData(request.metadata),
+      body: requestMessage
+    })
+  }, [request.id, request.callType, request.metadata, url, requestMessage])
+
   // Sync state changes to reactive request object
   const setUrl = useCallback((value: string): void => {
     setUrlState(value)
@@ -106,9 +151,11 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
     updateReactiveProperty(request, 'requestMessage', value)
   }, [request])
   
-  // TODO: Variable resolution will be implemented in backend
+  // Variable resolution done in backend
   const environmentContext: VariableContext = {}
-  const envVariables: VariableDefinition[] = []
+  
+  // Stable empty array for components that get variables via their own variableId
+  const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
 
   // Callback for metadata changes - notify both reactive object and ContextService
   const handleMetadataChange = useCallback((rows: KeyValueTableRow[]): void => {
@@ -196,7 +243,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
       >
         <RestormKeyValueTable
           ref={metadataRef}
-          variables={envVariables}
+          variables={emptyVariables}
           helpers={handlebarsHelpers}
           initialRows={request.metadata}
           onRowsChange={handleMetadataChange}
@@ -205,37 +252,8 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
     </SplitView>
   )
   
-  // Generate code snippets
-  const codeSnippetsContent = useMemo(() => {
-    const metadataData = request.metadata.filter(m => m.key).map(m => ({ key: m.key, value: m.value }))
-    const serviceParts = request.service.split('.')
-    const serviceName = serviceParts[serviceParts.length - 1] ?? request.service
-    const packageName = serviceParts.slice(0, -1).join('.') || 'package'
-    
-    return compiledTemplate({
-      url,
-      host: hostInfo.host,
-      port: hostInfo.port,
-      service: request.service,
-      serviceName,
-      method: request.method,
-      methodName: request.method.charAt(0).toLowerCase() + request.method.slice(1),
-      method_snake: request.method.replace(/([A-Z])/g, '_$1').toLowerCase().replace(/^_/, ''),
-      callType: request.callType,
-      requestMessage: requestMessage || '{}',
-      requestType: 'Request',
-      metadata: metadataData.length > 0 ? metadataData : null,
-      package: packageName,
-      Package: packageName.charAt(0).toUpperCase() + packageName.slice(1),
-      Namespace: packageName.replace(/\./g, '::'),
-      protoFile: 'service.proto',
-      plaintext: !url.startsWith('https'),
-      isUnary: request.callType === 'unary',
-      isServerStream: request.callType === 'server-stream',
-      isClientStream: request.callType === 'client-stream',
-      isBidirectional: request.callType === 'bidirectional-stream'
-    })
-  }, [url, hostInfo, request.service, request.method, request.callType, request.metadata, requestMessage])
+  // Use backend-provided code snippets
+  const codeSnippetsContent = backendCodeSnippets || t('requestTab.codeSnippets.loading', 'Loading code snippets...')
   
   // Infos content (detailed info panel)
   const infosContent = response ? (
@@ -300,11 +318,11 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <Badge type={mapToBadgeType(request.callType)} />
-        <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }}>
+        <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }} title={resolvedUrl || url}>
           <RestormVariableInputBox
             value={url}
             onChange={setUrl}
-            variables={envVariables}
+            variables={emptyVariables}
             helpers={handlebarsHelpers}
             placeholder={t('grpc.urlPlaceholder')}
           />

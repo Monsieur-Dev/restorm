@@ -40,6 +40,12 @@ interface CachedHelperSuggestion {
 // Cache for helper suggestions
 const helperSuggestionsCache = new Map<string, CachedHelperSuggestion[]>()
 
+// Global flag to track if Monaco providers have been registered
+let monacoProvidersRegistered = false
+
+// Global reference to helpers for the Monaco providers
+let globalHelpersRef: { current: TranslatedHelperDefinition[] } = { current: [] }
+
 // Build cached helper suggestions (computed once per unique helpers array)
 function getCachedHelperSuggestions(
   helpers: TranslatedHelperDefinition[],
@@ -119,6 +125,21 @@ export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (
     y: 0
   })
 
+  // Suppress Monaco "Canceled" errors (normal when editor operations are interrupted)
+  useEffect(() => {
+    const handler = (event: PromiseRejectionEvent): void => {
+      const reason = event.reason
+      if (reason && (
+        reason === 'Canceled' ||
+        (typeof reason === 'object' && 'message' in reason && reason.message === 'Canceled')
+      )) {
+        event.preventDefault()
+      }
+    }
+    window.addEventListener('unhandledrejection', handler)
+    return () => window.removeEventListener('unhandledrejection', handler)
+  }, [])
+
   // Keep helpers ref in sync via useEffect
   useEffect(() => {
     helpersRef.current = helpers
@@ -146,19 +167,31 @@ export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (
       }
     })()
 
-    // Subscribe to updates
-    const unsubscribe = window.restorm.context.onVariableTransformed((result: VariableTransformResult) => {
+    // Subscribe to transformation updates (for resolved value tooltip)
+    const unsubscribeTransform = window.restorm.context.onVariableTransformed((result: VariableTransformResult) => {
       if (result.variableId === variableId) {
         setResolvedValue(result.transformedValue)
-        // Update available variables from contextUsed
-        const varsFromContext: VariableDefinition[] = Object.entries(result.contextUsed).map(
-          ([name, value]) => ({ name, value })
-        )
-        setAvailableVariables(varsFromContext)
       }
     })
 
-    return unsubscribe
+    // Subscribe to available variables updates (for autocompletion)
+    const unsubscribeVars = window.restorm.context.onAvailableVariables((result) => {
+      if (result.variableId === variableId) {
+        setAvailableVariables(prev => {
+          const newVars = result.variables
+          if (prev.length !== newVars.length) return newVars
+          const hasChanges = newVars.some((v, i) => 
+            prev[i]?.name !== v.name || prev[i]?.value !== v.value
+          )
+          return hasChanges ? newVars : prev
+        })
+      }
+    })
+
+    return () => {
+      unsubscribeTransform()
+      unsubscribeVars()
+    }
   }, [variableId])
 
   // Merge prop variables with backend variables (backend takes precedence for resolved values)
@@ -254,74 +287,78 @@ export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (
     (editor: monacoEditor.editor.IStandaloneCodeEditor, monaco: typeof monacoEditor) => {
       editorRef.current = editor
 
-      // Register helper completion provider (additional to base variable completion)
-      monaco.languages.registerCompletionItemProvider(LANGUAGE_ID, {
-        triggerCharacters: ['{'],
-        provideCompletionItems(_model, position) {
-          const range = {
-            startLineNumber: position.lineNumber,
-            endLineNumber: position.lineNumber,
-            startColumn: position.column,
-            endColumn: position.column
-          }
+      // Register providers only once globally (not per component instance)
+      if (!monacoProvidersRegistered) {
+        monacoProvidersRegistered = true
 
-          const cachedHelpers = getCachedHelperSuggestions(
-            helpersRef.current,
-            monaco.languages.CompletionItemKind.Function
-          )
-
-          const suggestions = cachedHelpers.map((cached) => ({
-            ...cached,
-            label: cached.label as monacoEditor.languages.CompletionItemLabel,
-            range
-          }))
-
-          return { suggestions, incomplete: true }
-        }
-      })
-
-      // Register helper hover provider
-      monaco.languages.registerHoverProvider(LANGUAGE_ID, {
-        provideHover(model, position) {
-          const lineText = model.getLineContent(position.lineNumber)
-          const col = position.column
-
-          const openIndex = lineText.lastIndexOf('{{', col - 1)
-          const closeIndex = lineText.indexOf('}}', openIndex + 2)
-
-          if (openIndex === -1 || closeIndex === -1) {
-            return { contents: [] }
-          }
-
-          if (col < openIndex + 1 || col > closeIndex + 3) {
-            return { contents: [] }
-          }
-
-          const innerContent = lineText.substring(openIndex + 2, closeIndex).trim()
-          const name = innerContent.split(/\s+/)[0] ?? ''
-
-          // Check if it's a helper (also check with # prefix for block helpers)
-          const helperName = name.startsWith('#') ? name.slice(1) : name
-          const helperMatch = helpersRef.current.find((h) => h.name === helperName)
-
-          if (helperMatch) {
-            const range = new monaco.Range(
-              position.lineNumber,
-              openIndex + 1,
-              position.lineNumber,
-              closeIndex + 3
-            )
-            const docParts = [
-              `**${helperMatch.name}** *(${helperMatch.category} helper)*`,
-              '',
-              helperMatch.description,
-              '',
-              `**Syntax:** \`${helperMatch.syntax}\``
-            ]
-            if (helperMatch.example) {
-              docParts.push('', `**Example:** ${helperMatch.example}`)
+        // Register helper completion provider (additional to base variable completion)
+        monaco.languages.registerCompletionItemProvider(LANGUAGE_ID, {
+          triggerCharacters: ['{'],
+          provideCompletionItems(_model, position) {
+            const range = {
+              startLineNumber: position.lineNumber,
+              endLineNumber: position.lineNumber,
+              startColumn: position.column,
+              endColumn: position.column
             }
-            return {
+
+            const cachedHelpers = getCachedHelperSuggestions(
+              globalHelpersRef.current,
+              monaco.languages.CompletionItemKind.Function
+            )
+
+            const suggestions = cachedHelpers.map((cached) => ({
+              ...cached,
+              label: cached.label as monacoEditor.languages.CompletionItemLabel,
+              range
+            }))
+
+            return { suggestions, incomplete: true }
+          }
+        })
+
+        // Register helper hover provider
+        monaco.languages.registerHoverProvider(LANGUAGE_ID, {
+          provideHover(model, position) {
+            const lineText = model.getLineContent(position.lineNumber)
+            const col = position.column
+
+            const openIndex = lineText.lastIndexOf('{{', col - 1)
+            const closeIndex = lineText.indexOf('}}', openIndex + 2)
+
+            if (openIndex === -1 || closeIndex === -1) {
+              return { contents: [] }
+            }
+
+            if (col < openIndex + 1 || col > closeIndex + 3) {
+              return { contents: [] }
+            }
+
+            const innerContent = lineText.substring(openIndex + 2, closeIndex).trim()
+            const name = innerContent.split(/\s+/)[0] ?? ''
+
+            // Check if it's a helper (also check with # prefix for block helpers)
+            const helperName = name.startsWith('#') ? name.slice(1) : name
+            const helperMatch = globalHelpersRef.current.find((h) => h.name === helperName)
+
+            if (helperMatch) {
+              const range = new monaco.Range(
+                position.lineNumber,
+                openIndex + 1,
+                position.lineNumber,
+                closeIndex + 3
+              )
+              const docParts = [
+                `**${helperMatch.name}** *(${helperMatch.category} helper)*`,
+                '',
+                helperMatch.description,
+                '',
+                `**Syntax:** \`${helperMatch.syntax}\``
+              ]
+              if (helperMatch.example) {
+                docParts.push('', `**Example:** ${helperMatch.example}`)
+              }
+              return {
               range,
               contents: [{ value: docParts.join('\n') }]
             }
@@ -330,9 +367,15 @@ export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (
           return { contents: [] }
         }
       })
+      }
     },
     []
   )
+
+  // Update global helpers reference when helpers change
+  useEffect(() => {
+    globalHelpersRef.current = helpers
+  }, [helpers])
 
   return (
     <>

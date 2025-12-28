@@ -268,6 +268,21 @@ ipcMain.handle('context:update-request-keyvalues', (_event, requestId: string, g
   contextService.updateRequestKeyValues(requestId, groupName, keyValues)
 })
 
+// IPC handler to update full request data for URL resolution and code snippets
+ipcMain.handle('context:update-full-request-data', (_event, requestId: string, data: unknown) => {
+  contextService.updateFullRequestData(requestId, data as Parameters<typeof contextService.updateFullRequestData>[1])
+})
+
+// IPC handler to get resolved URL for a request
+ipcMain.handle('context:get-resolved-url', (_event, requestId: string) => {
+  return contextService.getResolvedUrl(requestId)
+})
+
+// IPC handler to get code snippets for a request
+ipcMain.handle('context:get-code-snippets', (_event, requestId: string) => {
+  return contextService.getCodeSnippets(requestId)
+})
+
 // IPC handler to clear all context data
 ipcMain.handle('context:clear-all', () => {
   contextService.clearAll()

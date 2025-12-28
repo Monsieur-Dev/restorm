@@ -1,27 +1,21 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useFeature } from 'electron-core-ui/renderer'
 import {
   handlebarsHelpersDefinitions,
   type TranslatedHelperDefinition
 } from '../utils/handlebarsHelpersDefinitions'
-import { registerHandlebarsHelpers } from '../utils/handlebarsHelpers'
 
 /**
  * Hook that returns Handlebars helper definitions with translated descriptions
  * Helpers are sorted by category for better organization in autocomplete
  * Returns empty array if handlebars-helpers feature flag is disabled
+ * 
+ * Note: Actual helper registration is done in the main process (ContextService)
  */
 export function useHandlebarsHelpers(): TranslatedHelperDefinition[] {
   const { t } = useTranslation()
   const { isEnabled, isLoading } = useFeature('handlebars-helpers')
-
-  // Register helpers when feature is enabled
-  useEffect(() => {
-    if (isEnabled && !isLoading) {
-      registerHandlebarsHelpers()
-    }
-  }, [isEnabled, isLoading])
 
   return useMemo(() => {
     // Return empty array if feature is disabled or loading

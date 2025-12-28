@@ -21,11 +21,16 @@ export interface KeyValueTableRow {
 }
 
 interface ParamRow {
-  id: string | undefined
+  id: string
   enabled: boolean
   key: string
   value: string
   description: string
+}
+
+/** Generate a unique ID for new rows */
+function generateRowId(): string {
+  return crypto.randomUUID()
 }
 
 /**
@@ -102,10 +107,10 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
   // Convert initialRows to ParamRow format
   const defaultRows = useMemo<ParamRow[]>(() => {
     if (!initialRows || initialRows.length === 0) {
-      return [{ id: undefined, enabled: true, key: '', value: '', description: '' } as ParamRow]
+      return [{ id: generateRowId(), enabled: true, key: '', value: '', description: '' }]
     }
     return initialRows.map((kv): ParamRow => ({
-      id: kv.id,
+      id: kv.id ?? generateRowId(),
       enabled: true,
       key: kv.key,
       value: kv.value,
@@ -159,7 +164,7 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
   const handleAddRow = useCallback(() => {
     setRows((oldRows) => [
       ...oldRows,
-      { id: undefined, enabled: true, key: '', value: '', description: '' }
+      { id: generateRowId(), enabled: true, key: '', value: '', description: '' }
     ])
   }, [])
 

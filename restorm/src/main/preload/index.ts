@@ -33,6 +33,53 @@ interface VariableTransformResult {
   key: string
 }
 
+/** Resolved URL result from context service */
+interface ResolvedUrlResult {
+  requestId: string
+  resolvedUrl: string
+  baseUrl: string
+  queryString: string
+}
+
+/** Code snippets result from context service */
+interface CodeSnippetsResult {
+  requestId: string
+  markdown: string
+}
+
+/** Available variables for autocompletion (per field) */
+interface AvailableVariablesResult {
+  variableId: string
+  variables: Array<{ name: string; value: string }>
+}
+
+/** Full request data for backend processing */
+interface FullRequestData {
+  id: string
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket'
+  url: string
+  headers: { id?: string; key: string; value: string }[]
+  method?: string
+  params?: { id?: string; key: string; value: string }[]
+  pathParams?: { id?: string; key: string; value: string }[]
+  body?: { type: string; content?: string; path?: string; fields?: { id?: string; key: string; value: string }[] }
+  operationType?: string
+  query?: string
+  variables?: string
+  service?: string
+  grpcMethod?: string
+  callType?: string
+  requestMessage?: string
+  metadata?: { id?: string; key: string; value: string }[]
+  soapAction?: string
+  soapService?: string
+  operation?: string
+  soapBody?: string
+  protocol?: string
+  event?: string
+  message?: string
+}
+
 // Expose restorm-specific APIs
 contextBridge.exposeInMainWorld('restorm', {
   openEditor: async (file?: { title: string; content?: string; x?: number; y?: number }): Promise<void> => {
@@ -97,6 +144,50 @@ contextBridge.exposeInMainWorld('restorm', {
       keyValues: { id?: string; key: string; value: string }[]
     ): Promise<void> => {
       await ipcRenderer.invoke('context:update-request-keyvalues', requestId, groupName, keyValues)
+    },
+    /** Update full request data for URL resolution and code snippet generation */
+    updateFullRequestData: async (requestId: string, data: FullRequestData): Promise<void> => {
+      await ipcRenderer.invoke('context:update-full-request-data', requestId, data)
+    },
+    /** Get resolved URL for a request */
+    getResolvedUrl: async (requestId: string): Promise<ResolvedUrlResult | undefined> => {
+      const result: unknown = await ipcRenderer.invoke('context:get-resolved-url', requestId)
+      return result as ResolvedUrlResult | undefined
+    },
+    /** Get code snippets for a request */
+    getCodeSnippets: async (requestId: string): Promise<CodeSnippetsResult | undefined> => {
+      const result: unknown = await ipcRenderer.invoke('context:get-code-snippets', requestId)
+      return result as CodeSnippetsResult | undefined
+    },
+    /** Listen for URL resolution updates */
+    onUrlResolved: (callback: (result: ResolvedUrlResult) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, result: ResolvedUrlResult): void => {
+        callback(result)
+      }
+      ipcRenderer.on('context:url-resolved', handler)
+      return () => {
+        ipcRenderer.removeListener('context:url-resolved', handler)
+      }
+    },
+    /** Listen for code snippets updates */
+    onCodeSnippetsUpdated: (callback: (result: CodeSnippetsResult) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, result: CodeSnippetsResult): void => {
+        callback(result)
+      }
+      ipcRenderer.on('context:code-snippets-updated', handler)
+      return () => {
+        ipcRenderer.removeListener('context:code-snippets-updated', handler)
+      }
+    },
+    /** Listen for available variables updates (for autocompletion) */
+    onAvailableVariables: (callback: (result: AvailableVariablesResult) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, result: AvailableVariablesResult): void => {
+        callback(result)
+      }
+      ipcRenderer.on('context:available-variables', handler)
+      return () => {
+        ipcRenderer.removeListener('context:available-variables', handler)
+      }
     },
     /** Clear all context data (when file is closed) */
     clearAll: async (): Promise<void> => {

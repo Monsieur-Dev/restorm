@@ -1,6 +1,5 @@
-import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Handlebars } from '../../utils/handlebarsHelpers'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
   Button,
@@ -19,10 +18,6 @@ import type { VariableContext } from '../RestormKeyValueTable'
 import { executeSoapRequest, type SoapRequestInput } from '../../services/request/SoapRequestService'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { Badge } from '../Badge'
-import codeSnippetsTemplate from '../../resources/templates/code-snippets-soap.hbs?raw'
-
-// Compile the Handlebars template
-const compiledTemplate = Handlebars.compile(codeSnippetsTemplate)
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
 function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
@@ -43,6 +38,10 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
   const [body, setBodyState] = useState(request.body)
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<SoapResponse | null>(null)
+  
+  // Backend-provided resolved URL and code snippets
+  const [resolvedUrl, setResolvedUrl] = useState<string>('')
+  const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
   
   const headersRef = useRef<KeyValueTableHandle | null>(null)
   const requestIdRef = useRef(request.id)
@@ -72,10 +71,42 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
       headers: toKeyValueData(request.headers)
     })
 
+    // Send full request data for URL and code snippet calculation
+    void window.restorm.context.updateFullRequestData(requestId, {
+      url: request.url,
+      method: 'POST',
+      requestType: 'soap',
+      headers: toKeyValueData(request.headers),
+      body: request.body
+    })
+
+    // Subscribe to backend events
+    const unsubUrl = window.restorm.context.onUrlResolved((result) => {
+      if (result.requestId === requestId) {
+        setResolvedUrl(result.resolvedUrl)
+      }
+    })
+
+    const unsubSnippets = window.restorm.context.onCodeSnippetsUpdated((result) => {
+      if (result.requestId === requestId) {
+        setBackendCodeSnippets(result.markdown)
+      }
+    })
+
+    // Get initial values if they exist
+    void window.restorm.context.getResolvedUrl(requestId).then((result) => {
+      if (result) setResolvedUrl(result.resolvedUrl)
+    })
+    void window.restorm.context.getCodeSnippets(requestId).then((result) => {
+      if (result) setBackendCodeSnippets(result.markdown)
+    })
+
     previousEnvIdRef.current = selectedEnvId ?? null
 
     return () => {
       logger.debug('[SoapRequestTabView] Unregistering request from ContextService', { requestId })
+      unsubUrl()
+      unsubSnippets()
       void window.restorm.context.unregisterRequest(requestId)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- Intentionally only run on mount/unmount and when request.id changes
@@ -95,6 +126,20 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
     }
   }, [selectedEnvId, request.id])
 
+  // Notify ContextService when URL or body changes
+  useEffect(() => {
+    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string }[] =>
+      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value }))
+
+    void window.restorm.context.updateFullRequestData(request.id, {
+      url,
+      method: 'POST',
+      requestType: 'soap',
+      headers: toKeyValueData(request.headers),
+      body
+    })
+  }, [request.id, request.headers, url, body])
+
   // Sync state changes to reactive request object
   const setUrl = useCallback((value: string): void => {
     setUrlState(value)
@@ -105,9 +150,11 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
     updateReactiveProperty(request, 'body', value)
   }, [request])
   
-  // TODO: Variable resolution will be implemented in backend
+  // Variable resolution done in backend
   const environmentContext: VariableContext = {}
-  const envVariables: VariableDefinition[] = []
+  
+  // Stable empty array for components that get variables via their own variableId
+  const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
 
   // Callback for headers changes - notify both reactive object and ContextService
   const handleHeadersChange = useCallback((rows: KeyValueTableRow[]): void => {
@@ -181,7 +228,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
       >
         <RestormKeyValueTable
           ref={headersRef}
-          variables={envVariables}
+          variables={emptyVariables}
           helpers={handlebarsHelpers}
           initialRows={request.headers}
           onRowsChange={handleHeadersChange}
@@ -190,25 +237,8 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
     </SplitView>
   )
   
-  // Generate code snippets
-  const codeSnippetsContent = useMemo(() => {
-    const headersData = request.headers.filter(h => h.key).map(h => ({ key: h.key, value: h.value }))
-    const escapedBody = body.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
-    const operationSnake = request.operation.replace(/([A-Z])/g, '_$1').toLowerCase().replace(/^_/, '')
-    
-    return compiledTemplate({
-      url,
-      wsdlUrl: url.endsWith('?wsdl') ? url : `${url}?wsdl`,
-      service: request.service,
-      operation: request.operation,
-      operation_snake: operationSnake,
-      soapAction: request.soapAction,
-      namespace: 'http://tempuri.org/',
-      body,
-      escapedBody,
-      headers: headersData.length > 0 ? headersData : null
-    })
-  }, [url, request.service, request.operation, request.soapAction, request.headers, body])
+  // Use backend-provided code snippets
+  const codeSnippetsContent = backendCodeSnippets || t('requestTab.codeSnippets.loading', 'Loading code snippets...')
   
   // Infos content (detailed info panel)
   const infosContent = response ? (
@@ -264,11 +294,11 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <Badge type="SOAP" />
-        <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }}>
+        <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }} title={resolvedUrl || url}>
           <RestormVariableInputBox
             value={url}
             onChange={setUrl}
-            variables={envVariables}
+            variables={emptyVariables}
             helpers={handlebarsHelpers}
             placeholder={t('soap.urlPlaceholder')}
           />

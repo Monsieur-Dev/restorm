@@ -54,6 +54,12 @@ declare global {
         unregisterRequest: (requestId: string) => Promise<void>
         setRequestEnvironment: (requestId: string, environmentId: string | null) => Promise<void>
         updateRequestKeyValues: (requestId: string, groupName: string, keyValues: KeyValueData[]) => Promise<void>
+        updateFullRequestData: (requestId: string, data: FullRequestData) => Promise<void>
+        getResolvedUrl: (requestId: string) => Promise<ResolvedUrlResult | undefined>
+        getCodeSnippets: (requestId: string) => Promise<CodeSnippetsResult | undefined>
+        onUrlResolved: (callback: (result: ResolvedUrlResult) => void) => (() => void)
+        onCodeSnippetsUpdated: (callback: (result: CodeSnippetsResult) => void) => (() => void)
+        onAvailableVariables: (callback: (result: AvailableVariablesResult) => void) => (() => void)
         clearAll: () => Promise<void>
       }
     }
@@ -62,7 +68,7 @@ declare global {
 
 /** KeyValue data for context service */
 export interface KeyValueData {
-  id?: string
+  id?: string | undefined
   key: string
   value: string
 }
@@ -74,6 +80,53 @@ export interface VariableTransformResult {
   transformedValue: string
   rawValue: string
   key: string
+}
+
+/** Resolved URL result from context service */
+export interface ResolvedUrlResult {
+  requestId: string
+  resolvedUrl: string
+  baseUrl: string
+  queryString: string
+}
+
+/** Code snippets result from context service */
+export interface CodeSnippetsResult {
+  requestId: string
+  markdown: string
+}
+
+/** Available variables result for autocompletion (per field) */
+export interface AvailableVariablesResult {
+  variableId: string
+  variables: Array<{ name: string; value: string }>
+}
+
+/** Full request data for backend processing */
+export interface FullRequestData {
+  id: string
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket'
+  url: string
+  headers: KeyValueData[]
+  method?: string | undefined
+  params?: KeyValueData[] | undefined
+  pathParams?: KeyValueData[] | undefined
+  body?: { type: string; content?: string | undefined; path?: string | undefined; fields?: KeyValueData[] | undefined } | undefined
+  operationType?: string | undefined
+  query?: string | undefined
+  variables?: string | undefined
+  service?: string | undefined
+  grpcMethod?: string | undefined
+  callType?: string | undefined
+  requestMessage?: string | undefined
+  metadata?: KeyValueData[] | undefined
+  soapAction?: string | undefined
+  soapService?: string | undefined
+  operation?: string | undefined
+  soapBody?: string | undefined
+  protocol?: string | undefined
+  event?: string | undefined
+  message?: string | undefined
 }
 
 export {}
