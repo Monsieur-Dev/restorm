@@ -111,9 +111,9 @@ class HTTPExecutionService {
       let body: string | undefined
       if (requestContext?.fullData?.body) {
         const bodyData = requestContext.fullData.body
-        if (bodyData.type === 'text' && bodyData.content) {
+        if (bodyData.type === 'text') {
           body = contextService.resolveValue(bodyData.content, requestId)
-        } else if (bodyData.type === 'x-www-form-urlencoded' && bodyData.fields) {
+        } else if (bodyData.type === 'x-www-form-urlencoded') {
           const params = new URLSearchParams()
           for (const field of bodyData.fields) {
             if (field.key) {
@@ -123,9 +123,7 @@ class HTTPExecutionService {
             }
           }
           body = params.toString()
-          if (!headers['Content-Type']) {
-            headers['Content-Type'] = 'application/x-www-form-urlencoded'
-          }
+          headers['Content-Type'] ??= 'application/x-www-form-urlencoded'
         }
         // Note: form-data and file modes require special handling
       }
@@ -304,4 +302,3 @@ class HTTPExecutionService {
 
 /** Singleton instance */
 export const httpExecutionService = new HTTPExecutionService()
-

@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react'
+import React, { useCallback, useRef, useEffect } from 'react'
 import {
   KeyValueTable,
   InputBox,
@@ -37,8 +37,15 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
   // Keep refs to avoid recreating cell renderers
   const variablesRef = useRef(variables)
   const helpersRef = useRef(helpers)
-  variablesRef.current = variables
-  helpersRef.current = helpers
+  
+  // Update refs via useEffect to avoid accessing during render
+  useEffect(() => {
+    variablesRef.current = variables
+  }, [variables])
+  
+  useEffect(() => {
+    helpersRef.current = helpers
+  }, [helpers])
 
   // Simple InputBox renderer for keys (no variable resolution needed for keys)
   const KeyCellRenderer = useCallback<React.FC<CellRendererProps>>(

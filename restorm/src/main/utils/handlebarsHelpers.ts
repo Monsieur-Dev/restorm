@@ -759,4 +759,3 @@ export function registerHandlebarsHelpers(): void {
     return result
   })
 }
-

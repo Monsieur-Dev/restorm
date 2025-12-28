@@ -157,7 +157,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
   }, [request])
   
   // Variable resolution done in backend
-  const environmentContext: VariableContext = {}
+  const _environmentContext: VariableContext = {}
   
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])

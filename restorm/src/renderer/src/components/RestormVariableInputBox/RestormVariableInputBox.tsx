@@ -44,7 +44,7 @@ const helperSuggestionsCache = new Map<string, CachedHelperSuggestion[]>()
 let monacoProvidersRegistered = false
 
 // Global reference to helpers for the Monaco providers
-let globalHelpersRef: { current: TranslatedHelperDefinition[] } = { current: [] }
+const globalHelpersRef: { current: TranslatedHelperDefinition[] } = { current: [] }
 
 // Build cached helper suggestions (computed once per unique helpers array)
 function getCachedHelperSuggestions(
@@ -128,16 +128,16 @@ export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (
   // Suppress Monaco "Canceled" errors (normal when editor operations are interrupted)
   useEffect(() => {
     const handler = (event: PromiseRejectionEvent): void => {
-      const reason = event.reason
-      if (reason && (
+      const reason = event.reason as unknown
+      if (
         reason === 'Canceled' ||
-        (typeof reason === 'object' && 'message' in reason && reason.message === 'Canceled')
-      )) {
+        (reason !== null && typeof reason === 'object' && 'message' in reason && reason.message === 'Canceled')
+      ) {
         event.preventDefault()
       }
     }
     window.addEventListener('unhandledrejection', handler)
-    return () => window.removeEventListener('unhandledrejection', handler)
+    return () => { window.removeEventListener('unhandledrejection', handler) }
   }, [])
 
   // Keep helpers ref in sync via useEffect
@@ -180,9 +180,10 @@ export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (
         setAvailableVariables(prev => {
           const newVars = result.variables
           if (prev.length !== newVars.length) return newVars
-          const hasChanges = newVars.some((v, i) => 
-            prev[i]?.name !== v.name || prev[i]?.value !== v.value
-          )
+          const hasChanges = newVars.some((v, i) => {
+            const prevItem = prev[i]
+            return prevItem && (prevItem.name !== v.name || prevItem.value !== v.value)
+          })
           return hasChanges ? newVars : prev
         })
       }

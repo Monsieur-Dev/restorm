@@ -47,7 +47,7 @@ class GRPCExecutionService {
   /**
    * Execute a gRPC request
    */
-  async execute(input: GRPCExecutionInput): Promise<GRPCExecutionResult> {
+  execute(input: GRPCExecutionInput): GRPCExecutionResult {
     const { requestId } = input
     const startTime = Date.now()
     const startedAt = new Date().toISOString()
@@ -180,4 +180,3 @@ class GRPCExecutionService {
 
 /** Singleton instance */
 export const grpcExecutionService = new GRPCExecutionService()
-

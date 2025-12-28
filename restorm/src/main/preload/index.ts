@@ -50,7 +50,7 @@ interface CodeSnippetsResult {
 /** Available variables for autocompletion (per field) */
 interface AvailableVariablesResult {
   variableId: string
-  variables: Array<{ name: string; value: string }>
+  variables: { name: string; value: string }[]
 }
 
 /** Full request data for backend processing */

@@ -146,7 +146,7 @@ class SOAPExecutionService {
         if (typeof requestContext.fullData.body === 'string') {
           body = contextService.resolveValue(requestContext.fullData.body, requestId)
         } else if (requestContext.fullData.body.content) {
-          body = contextService.resolveValue(requestContext.fullData.body.content, requestId)
+          body = contextService.resolveValue(requestContext.fullData.body.content as string, requestId)
         }
       }
 
@@ -319,4 +319,3 @@ class SOAPExecutionService {
 
 /** Singleton instance */
 export const soapExecutionService = new SOAPExecutionService()
-

@@ -185,7 +185,6 @@ function loadTemplate(templateName: string): string {
   }
 }
 
-
 /**
  * ContextService class - manages Handlebars context, URLs and code snippets (Main Process)
  */
@@ -610,10 +609,10 @@ class ContextService {
     ctx.fullData = data
 
     // Also update keyValueGroups from full data
-    if (data.headers) ctx.keyValueGroups.set('headers', data.headers)
-    if (data.params) ctx.keyValueGroups.set('params', data.params)
-    if (data.pathParams) ctx.keyValueGroups.set('pathParams', data.pathParams)
-    if (data.metadata) ctx.keyValueGroups.set('metadata', data.metadata)
+    if (data.headers.length > 0) ctx.keyValueGroups.set('headers', data.headers)
+    if (data.params && data.params.length > 0) ctx.keyValueGroups.set('params', data.params)
+    if (data.pathParams && data.pathParams.length > 0) ctx.keyValueGroups.set('pathParams', data.pathParams)
+    if (data.metadata && data.metadata.length > 0) ctx.keyValueGroups.set('metadata', data.metadata)
 
     // Recalculate everything
     this.recalculateRequestContext(requestId)
@@ -736,7 +735,7 @@ class ContextService {
   // =========================================================================
 
   /** Store for available variables per variableId (each field has its own context) */
-  private availableVariablesPerField = new Map<string, Array<{ name: string; value: string }>>()
+  private availableVariablesPerField = new Map<string, { name: string; value: string }[]>()
 
   /**
    * Calculate available variables for autocompletion
@@ -751,14 +750,14 @@ class ContextService {
     envContext: TransformedContext
   ): void {
     // Base environment variables
-    const envVars: Array<{ name: string; value: string }> = []
+    const envVars: { name: string; value: string }[] = []
     for (const [name, value] of Object.entries(envContext)) {
-      envVars.push({ name, value: String(value) })
+      envVars.push({ name, value })
     }
 
     // Helper to add or replace a variable in cumulative array
     const addOrReplace = (
-      arr: Array<{ name: string; value: string }>,
+      arr: { name: string; value: string }[],
       name: string,
       value: string
     ): void => {
@@ -772,10 +771,9 @@ class ContextService {
 
     // Calculate for path params
     const pathParams = data.pathParams ?? []
-    const cumulativePathParams: Array<{ name: string; value: string }> = []
+    const cumulativePathParams: { name: string; value: string }[] = []
     
     for (const pp of pathParams) {
-      if (!pp) continue
       
       if (pp.id) {
         const varsForThisField = [...envVars, ...cumulativePathParams]
@@ -793,11 +791,10 @@ class ContextService {
     }
 
     // Calculate for headers
-    const headers = data.headers ?? []
-    const cumulativeHeaders: Array<{ name: string; value: string }> = []
+    const headers = data.headers
+    const cumulativeHeaders: { name: string; value: string }[] = []
     
     for (const h of headers) {
-      if (!h) continue
       
       if (h.id) {
         const varsForThisField = [...envVars, ...cumulativeHeaders]
@@ -816,10 +813,9 @@ class ContextService {
 
     // Calculate for params (query params)
     const params = data.params ?? []
-    const cumulativeParams: Array<{ name: string; value: string }> = []
+    const cumulativeParams: { name: string; value: string }[] = []
     
     for (const p of params) {
-      if (!p) continue
       
       if (p.id) {
         const varsForThisField = [...envVars, ...cumulativeParams]
@@ -847,12 +843,15 @@ class ContextService {
    */
   private broadcastFieldVariables(
     variableId: string,
-    variables: Array<{ name: string; value: string }>
+    variables: { name: string; value: string }[]
   ): void {
     const previous = this.availableVariablesPerField.get(variableId)
     const hasChanged = !previous ||
       previous.length !== variables.length ||
-      variables.some((v, i) => previous[i]?.name !== v.name || previous[i]?.value !== v.value)
+      variables.some((v, i) => {
+        const prevItem = previous[i]
+        return prevItem && (prevItem.name !== v.name || prevItem.value !== v.value)
+      })
 
     if (hasChanged) {
       this.availableVariablesPerField.set(variableId, variables)
@@ -887,7 +886,7 @@ class ContextService {
     for (const [key, value] of Object.entries(cumulativeContext)) {
       if (!(key in envContext)) {
         // Only encode path param values, not env values
-        fullContext[key] = encodeURIComponent(String(value))
+        fullContext[key] = encodeURIComponent(value)
       }
     }
 
@@ -971,7 +970,7 @@ class ContextService {
     }
 
     // Resolve headers
-    const headers = (data.headers ?? [])
+    const headers = data.headers
       .filter(h => h.key)
       .map(h => ({
         key: this.transformValue(h.key, envContext),
@@ -1125,7 +1124,7 @@ class ContextService {
    */
   resolveValue(value: string, requestId: string): string {
     const ctx = this.requestContexts.get(requestId)
-    if (!ctx || !ctx.environmentId) {
+    if (!ctx?.environmentId) {
       return value
     }
 

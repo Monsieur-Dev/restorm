@@ -808,9 +808,9 @@ const App: React.FC = () => {
     // Clear root folders
     setRootFolders([])
     // Clear search index
-    searchIndexService.clearIndex()
+    void searchIndexService.clearIndex()
     // Clear context service data
-    window.restorm.context.clearAll()
+    void window.restorm.context.clearAll()
   }, [])
 
   // Listen to file events

@@ -358,7 +358,7 @@ ipcMain.handle('soap:is-active', (_event, requestId: string) => {
 import { grpcExecutionService, type GRPCExecutionInput } from './services/GRPCExecutionService'
 
 // IPC handler to execute gRPC request
-ipcMain.handle('grpc:execute', async (_event, input: GRPCExecutionInput) => {
+ipcMain.handle('grpc:execute', (_event, input: GRPCExecutionInput) => {
   return grpcExecutionService.execute(input)
 })
 

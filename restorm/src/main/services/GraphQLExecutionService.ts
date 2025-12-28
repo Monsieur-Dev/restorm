@@ -309,4 +309,3 @@ class GraphQLExecutionService {
 
 /** Singleton instance */
 export const graphqlExecutionService = new GraphQLExecutionService()
-

@@ -131,7 +131,7 @@ export interface CodeSnippetsResult {
 /** Available variables result for autocompletion (per field) */
 export interface AvailableVariablesResult {
   variableId: string
-  variables: Array<{ name: string; value: string }>
+  variables: { name: string; value: string }[]
 }
 
 /** HTTP execution input for backend */

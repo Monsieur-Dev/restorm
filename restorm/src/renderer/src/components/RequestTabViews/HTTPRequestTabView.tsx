@@ -270,7 +270,6 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
       body: bodyData
     })
   }, [request.id, url, method, request.headers, request.params, request.pathParams, body, bodyMode, bodyFilePath, request.body, toKeyValueData])
-
   
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
@@ -291,9 +290,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
         setUrlVariables(prev => {
           const newVars = result.variables
           if (prev.length !== newVars.length) return newVars
-          const hasChanges = newVars.some((v, i) => 
-            prev[i]?.name !== v.name || prev[i]?.value !== v.value
-          )
+          const hasChanges = newVars.some((v, i) => {
+            const prevItem = prev[i]
+            return prevItem && (prevItem.name !== v.name || prevItem.value !== v.value)
+          })
           return hasChanges ? newVars : prev
         })
       }
@@ -389,8 +389,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
             requestUrl: result.requestUrl ?? '',
             requestMethod: method as HTTPMethod,
             requestHeaders: request.headers,
-            requestParams: request.params ?? [],
-            requestPathParams: request.pathParams ?? [],
+            requestParams: request.params,
+            requestPathParams: request.pathParams,
             statusCode: result.statusCode ?? 0,
             statusText: result.statusText ?? '',
             responseHeaders,
@@ -415,8 +415,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
             requestUrl: result.requestUrl ?? url,
             requestMethod: method as HTTPMethod,
             requestHeaders: request.headers,
-            requestParams: request.params ?? [],
-            requestPathParams: request.pathParams ?? [],
+            requestParams: request.params,
+            requestPathParams: request.pathParams,
             statusCode: 0,
             statusText: 'Error',
             responseHeaders: [],

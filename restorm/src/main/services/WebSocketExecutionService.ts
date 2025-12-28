@@ -136,7 +136,7 @@ class WebSocketExecutionService {
         })
 
         ws.on('message', (data: WebSocket.Data) => {
-          const msgStr = data.toString()
+          const msgStr = typeof data === 'string' ? data : Buffer.isBuffer(data) ? data.toString('utf8') : JSON.stringify(data)
           const msg: WebSocketMessage = {
             direction: 'received',
             data: msgStr,
@@ -267,4 +267,3 @@ class WebSocketExecutionService {
 
 /** Singleton instance */
 export const websocketExecutionService = new WebSocketExecutionService()
-

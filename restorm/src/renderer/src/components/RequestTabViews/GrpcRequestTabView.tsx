@@ -152,7 +152,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
   }, [request])
   
   // Variable resolution done in backend
-  const environmentContext: VariableContext = {}
+  const _environmentContext: VariableContext = {}
   
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
@@ -205,8 +205,8 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
     void window.restorm.grpc.cancel(request.id)
   }
   
-  // Parse host and port from URL
-  const hostInfo = useMemo(() => {
+  // Parse host and port from URL (kept for potential future use)
+  const _hostInfo = useMemo(() => {
     try {
       const urlObj = new URL(url.startsWith('http') ? url : `http://${url}`)
       return {
