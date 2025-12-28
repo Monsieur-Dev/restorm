@@ -193,5 +193,52 @@ contextBridge.exposeInMainWorld('restorm', {
     clearAll: async (): Promise<void> => {
       await ipcRenderer.invoke('context:clear-all')
     }
+  },
+  http: {
+    /** Execute an HTTP request */
+    execute: async (input: { requestId: string; method: string; timeout?: number }): Promise<{
+      requestId: string
+      success: boolean
+      statusCode?: number
+      statusText?: string
+      headers?: Record<string, string | string[]>
+      body?: string
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+      requestUrl?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('http:execute', input)
+      return result as {
+        requestId: string
+        success: boolean
+        statusCode?: number
+        statusText?: string
+        headers?: Record<string, string | string[]>
+        body?: string
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+        requestUrl?: string
+      }
+    },
+    /** Cancel an HTTP request */
+    cancel: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('http:cancel', requestId)
+      return result as boolean
+    },
+    /** Check if a request is currently active */
+    isActive: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('http:is-active', requestId)
+      return result as boolean
+    },
+    /** Listen for request progress updates */
+    onProgress: (callback: (data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; status: 'started' | 'completed' | 'cancelled' | 'error' }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('http:request-progress', handler)
+      return () => {
+        ipcRenderer.removeListener('http:request-progress', handler)
+      }
+    }
   }
 })

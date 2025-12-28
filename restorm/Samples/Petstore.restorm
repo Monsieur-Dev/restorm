@@ -188,7 +188,7 @@ collections:
             params: []
             pathParams:
               - key: petId
-                value: ''
+                value: '1'
                 description: ID of pet to return
           - type: http
             name: Updates a pet in the store with form data

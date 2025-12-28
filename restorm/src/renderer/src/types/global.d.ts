@@ -62,6 +62,12 @@ declare global {
         onAvailableVariables: (callback: (result: AvailableVariablesResult) => void) => (() => void)
         clearAll: () => Promise<void>
       }
+      http: {
+        execute: (input: HTTPExecutionInput) => Promise<HTTPExecutionResult>
+        cancel: (requestId: string) => Promise<boolean>
+        isActive: (requestId: string) => Promise<boolean>
+        onProgress: (callback: (data: HTTPProgressData) => void) => (() => void)
+      }
     }
   }
 }
@@ -100,6 +106,35 @@ export interface CodeSnippetsResult {
 export interface AvailableVariablesResult {
   variableId: string
   variables: Array<{ name: string; value: string }>
+}
+
+/** HTTP execution input for backend */
+export interface HTTPExecutionInput {
+  requestId: string
+  method: string
+  timeout?: number
+}
+
+/** HTTP execution result from backend */
+export interface HTTPExecutionResult {
+  requestId: string
+  success: boolean
+  statusCode?: number
+  statusText?: string
+  headers?: Record<string, string | string[]>
+  body?: string
+  error?: string
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  requestUrl?: string
+}
+
+/** HTTP progress data */
+export interface HTTPProgressData {
+  requestId: string
+  status: 'started' | 'completed' | 'cancelled' | 'error'
 }
 
 /** Full request data for backend processing */

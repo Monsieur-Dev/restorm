@@ -63,6 +63,8 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
   const [activeTabId, setActiveTabId] = useState('request')
   const [responseTabId, setResponseTabId] = useState(responseContent ? 'response' : 'infos')
   const [leftPaneWidth, setLeftPaneWidth] = useState(0)
+  // Key counter to force Graph remount when switching to jsoncrack tab (Monaco disposal issue)
+  const [graphKey, setGraphKey] = useState(0)
   const [isDarkTheme, setIsDarkTheme] = useState<boolean>(() => {
     if (typeof document === 'undefined') return true
     const themeAttr = document.documentElement.getAttribute('data-theme') ?? 'dark'
@@ -159,6 +161,14 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
     },
     []
   )
+  
+  // Handle response tab change - increment graphKey when switching to jsoncrack
+  const handleResponseTabChange = useCallback((tabId: string) => {
+    if (tabId === 'jsoncrack' && responseTabId !== 'jsoncrack') {
+      setGraphKey(prev => prev + 1)
+    }
+    setResponseTabId(tabId)
+  }, [responseTabId])
   
   // Build request tabs (Request, Docs, Notes, Code Snippets)
   const requestTabs: Tab[] = useMemo(() => [
@@ -340,6 +350,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
                   </Button>
                 </div>
                 <Graph
+                  key={graphKey}
                   ref={graphRef}
                   json={formattedJson || '{}'}
                   layout={{ theme: isDarkTheme ? 'dark' : 'light' }}
@@ -353,7 +364,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
     }
     
     return tabs
-  }, [showResponse, isLoading, infosContent, responseContent, formattedJson, isDarkTheme, t])
+  }, [showResponse, isLoading, infosContent, responseContent, formattedJson, isDarkTheme, graphKey, t])
   
   const showResponsePanel = showResponse || isLoading
   
@@ -426,7 +437,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
                 <Tabs 
                   tabs={responseTabs} 
                   activeTabId={responseTabId} 
-                  onTabChange={setResponseTabId} 
+                  onTabChange={handleResponseTabChange} 
                 />
               </div>
               

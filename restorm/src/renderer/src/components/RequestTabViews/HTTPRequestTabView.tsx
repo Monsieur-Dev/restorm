@@ -21,7 +21,6 @@ import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyVal
 import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue } from '../../types/collections'
 import type { KeyValueTableRow } from 'electron-core-ui/renderer'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
-import { executeHTTPRequest, type HTTPRequestInput, type VariableContext } from '../../services/request/HTTPRequestService'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { Badge } from '../Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
@@ -272,8 +271,6 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     })
   }, [request.id, url, method, request.headers, request.params, request.pathParams, body, bodyMode, bodyFilePath, request.body, toKeyValueData])
 
-  // Variable resolution done in backend - variables will be received via IPC
-  const environmentContext = useMemo<VariableContext>(() => ({}), [])
   
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
@@ -352,41 +349,107 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
 
   const handleSend = useCallback((): void => {
     if (isSending) return
+    const requestId = request.id
+    if (!requestId) {
+      logger.error('Cannot send request without ID')
+      return
+    }
     setIsSending(true)
     setHttpResponse(null)
 
-    const requestInput: HTTPRequestInput = {
-      request,
-      method: method as HTTPMethod,
-      url,
-      headers: request.headers,
-      params: request.params,
-      pathParams: request.pathParams ?? [],
-      bodyContent: body,
-      bodyMode,
-      formFields: (bodyMode === 'form-data' || bodyMode === 'x-www-form-urlencoded')
-        ? (request.body?.type === 'form-data' || request.body?.type === 'x-www-form-urlencoded' ? request.body.fields : [])
-        : [],
-      filePath: bodyFilePath,
-      variableContext: environmentContext
-    }
+    // Execute via backend
+    window.restorm.http.execute({
+      requestId,
+      method,
+      timeout: 30000
+    })
+      .then((result) => {
+        if (result.success) {
+          // Convert backend result to HTTPResponse format
+          const responseHeaders: KeyValue[] = []
+          if (result.headers) {
+            for (const [key, value] of Object.entries(result.headers)) {
+              responseHeaders.push({
+                key,
+                value: Array.isArray(value) ? value.join(', ') : value
+              })
+            }
+          }
 
-    executeHTTPRequest(requestInput)
-      .then((response) => {
-        setHttpResponse(response)
-        logger.info('HTTP request completed', {
-          url: response.requestUrl,
-          status: response.statusCode,
-          duration: response.timings.durationMs
-        })
+          const contentTypeHeader = result.headers?.['content-type']
+          const contentType = Array.isArray(contentTypeHeader) ? contentTypeHeader[0] : contentTypeHeader
+          const contentLengthHeader = result.headers?.['content-length']
+          const contentLengthStr = Array.isArray(contentLengthHeader) ? contentLengthHeader[0] : contentLengthHeader
+          const contentLength = contentLengthStr ? parseInt(contentLengthStr, 10) : undefined
+
+          const response: HTTPResponse = {
+            id: `resp_${Date.now()}`,
+            type: 'http',
+            requestId,
+            requestUrl: result.requestUrl ?? '',
+            requestMethod: method as HTTPMethod,
+            requestHeaders: request.headers,
+            requestParams: request.params ?? [],
+            requestPathParams: request.pathParams ?? [],
+            statusCode: result.statusCode ?? 0,
+            statusText: result.statusText ?? '',
+            responseHeaders,
+            responseBody: result.body ?? '',
+            timings: result.timings,
+            ...(request.body && { requestBody: request.body }),
+            ...(contentType && { contentType }),
+            ...(contentLength !== undefined && !isNaN(contentLength) && { contentLength })
+          }
+          setHttpResponse(response)
+          logger.info('HTTP request completed', {
+            url: result.requestUrl,
+            status: result.statusCode,
+            duration: result.timings.durationMs
+          })
+        } else {
+          // Handle error
+          const errorResponse: HTTPResponse = {
+            id: `resp_${Date.now()}`,
+            type: 'http',
+            requestId,
+            requestUrl: result.requestUrl ?? url,
+            requestMethod: method as HTTPMethod,
+            requestHeaders: request.headers,
+            requestParams: request.params ?? [],
+            requestPathParams: request.pathParams ?? [],
+            statusCode: 0,
+            statusText: 'Error',
+            responseHeaders: [],
+            responseBody: '',
+            error: result.error,
+            timings: result.timings,
+            ...(request.body && { requestBody: request.body })
+          }
+          setHttpResponse(errorResponse)
+          logger.error('HTTP request failed', { error: result.error })
+        }
       })
       .catch((err: unknown) => {
-        logger.error('HTTP request failed', { error: String(err) })
+        logger.error('HTTP request execution error', { error: String(err) })
       })
       .finally(() => {
         setIsSending(false)
       })
-  }, [isSending, request, method, url, body, bodyMode, bodyFilePath, environmentContext])
+  }, [isSending, request, method, url])
+
+  const handleCancel = useCallback((): void => {
+    const requestId = request.id
+    if (!requestId) return
+    window.restorm.http.cancel(requestId)
+      .then((cancelled) => {
+        if (cancelled) {
+          logger.info('HTTP request cancelled', { requestId })
+        }
+      })
+      .catch((err: unknown) => {
+        logger.error('Failed to cancel HTTP request', { error: String(err) })
+      })
+  }, [request.id])
 
   // Request content (SplitView with Panes)
   const requestContent = (
@@ -634,12 +697,21 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           placeholder={t('requestTab.urlPlaceholder')}
         />
       </div>
-      <Button onClick={handleSend} options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <i className="codicon codicon-send" aria-hidden="true" />
-          <span>{t('requestTab.send')}</span>
-        </span>
-      </Button>
+      {isSending ? (
+        <Button onClick={handleCancel} options={{ title: t('requestTab.cancel'), ariaLabel: t('requestTab.cancel') }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <i className="codicon codicon-close" aria-hidden="true" />
+            <span>{t('requestTab.cancel')}</span>
+          </span>
+        </Button>
+      ) : (
+        <Button onClick={handleSend} options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <i className="codicon codicon-send" aria-hidden="true" />
+            <span>{t('requestTab.send')}</span>
+          </span>
+        </Button>
+      )}
     </div>
   )
 

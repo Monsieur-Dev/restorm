@@ -57,6 +57,7 @@
   "requestTab": {
     "deprecated": "This endpoint is deprecated and may be removed in a future version.",
     "send": "Send",
+    "cancel": "Cancel",
     "urlPlaceholder": "Request URL",
     "methodSelect": "Select HTTP method",
     "addHeader": "Add header",

@@ -57,6 +57,7 @@
   "requestTab": {
     "deprecated": "Ce endpoint est déprécié et pourrait être supprimé dans une version future.",
     "send": "Envoyer",
+    "cancel": "Annuler",
     "urlPlaceholder": "URL de la requête",
     "methodSelect": "Sélectionner la méthode HTTP",
     "addHeader": "Ajouter un header",

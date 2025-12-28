@@ -1113,6 +1113,31 @@ class ContextService {
   }
 
   /**
+   * Get the request context for a request (used by HTTPExecutionService)
+   */
+  getRequestContext(requestId: string): RequestContext | undefined {
+    return this.requestContexts.get(requestId)
+  }
+
+  /**
+   * Resolve a single value using the request's environment context
+   * Used by HTTPExecutionService to resolve headers, body, etc.
+   */
+  resolveValue(value: string, requestId: string): string {
+    const ctx = this.requestContexts.get(requestId)
+    if (!ctx || !ctx.environmentId) {
+      return value
+    }
+
+    const envContext = this.transformedContexts.get(ctx.environmentId)
+    if (!envContext) {
+      return value
+    }
+
+    return this.transformValue(value, envContext)
+  }
+
+  /**
    * Get all resolved URLs as a plain object (for IPC)
    */
   getAllResolvedUrls(): Record<string, ResolvedUrlResult> {

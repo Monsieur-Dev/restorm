@@ -287,3 +287,24 @@ ipcMain.handle('context:get-code-snippets', (_event, requestId: string) => {
 ipcMain.handle('context:clear-all', () => {
   contextService.clearAll()
 })
+
+// ========================
+// HTTP Execution IPC handlers
+// ========================
+
+import { httpExecutionService, type HTTPExecutionInput } from './services/HTTPExecutionService'
+
+// IPC handler to execute HTTP request
+ipcMain.handle('http:execute', async (_event, input: HTTPExecutionInput) => {
+  return httpExecutionService.execute(input)
+})
+
+// IPC handler to cancel HTTP request
+ipcMain.handle('http:cancel', (_event, requestId: string) => {
+  return httpExecutionService.cancel(requestId)
+})
+
+// IPC handler to check if request is active
+ipcMain.handle('http:is-active', (_event, requestId: string) => {
+  return httpExecutionService.isActive(requestId)
+})
