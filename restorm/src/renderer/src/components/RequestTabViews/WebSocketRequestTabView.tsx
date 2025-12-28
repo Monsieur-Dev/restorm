@@ -81,7 +81,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       method: request.protocol,
       requestType: 'websocket',
       headers: toKeyValueData(request.headers),
-      body: request.message
+      body: { type: 'text', content: request.message }
     })
 
     // Subscribe to backend events
@@ -140,7 +140,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       method: request.protocol,
       requestType: 'websocket',
       headers: toKeyValueData(request.headers),
-      body: message
+      body: { type: 'text', content: message }
     })
   }, [request.id, request.protocol, request.headers, url, message])
 
@@ -187,10 +187,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           type: 'websocket',
           requestId: request.id,
           requestUrl: res.requestUrl ?? '',
-          requestProtocol: request.protocol,
-          requestEvent: event,
-          requestMessage: message,
-          requestHeaders: request.headers,
+          protocol: request.protocol,
           connected: res.connected,
           messages: res.messages.map((m: WebSocketMessageItem) => ({
             direction: m.direction,

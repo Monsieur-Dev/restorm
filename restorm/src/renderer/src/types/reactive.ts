@@ -296,7 +296,7 @@ function createEnvironmentProxyHandler(
       if (prop === 'variables' && Array.isArray(value) && !isReactive(value)) {
         const arrayProxy = new Proxy(
           value as unknown[],
-          createArrayProxyHandler('environment', target.id ?? '', () => target, parentFolderId, parentEnvironmentId)
+          createArrayProxyHandler('environment', target.id, () => target, parentFolderId, parentEnvironmentId)
         )
         // Replace with proxy for future access
         Reflect.set(target, prop, arrayProxy)
@@ -311,7 +311,7 @@ function createEnvironmentProxyHandler(
 
       // Emit event if an indexable property changed
       if (ENVIRONMENT_INDEXABLE_KEYS.has(prop as string)) {
-        emitUpdate('environment', target.id ?? '', target, parentFolderId, parentEnvironmentId)
+        emitUpdate('environment', target.id, target, parentFolderId, parentEnvironmentId)
       }
 
       return result
@@ -360,7 +360,7 @@ export function makeReactiveFolder(folder: Folder): Folder {
   // If this is an EnvironmentFolder, make environments reactive
   if (isEnvironmentFolder(folder)) {
     folder.environments = folder.environments.map((env) =>
-      makeReactiveEnvironment(env, folder.id ?? '')
+      makeReactiveEnvironment(env, folder.id)
     )
   }
 

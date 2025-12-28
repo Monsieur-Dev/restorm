@@ -77,7 +77,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
       method: 'POST',
       requestType: 'soap',
       headers: toKeyValueData(request.headers),
-      body: request.body
+      body: { type: 'text', content: request.body }
     })
 
     // Subscribe to backend events
@@ -136,7 +136,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
       method: 'POST',
       requestType: 'soap',
       headers: toKeyValueData(request.headers),
-      body
+      body: { type: 'text', content: body }
     })
   }, [request.id, request.headers, url, body])
 

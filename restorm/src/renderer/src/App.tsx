@@ -761,7 +761,7 @@ const App: React.FC = () => {
       // 2. Emit ENVIRONMENT_CREATED events for all environments
       const emitEnvironmentCreated = (env: Environment, parentFolderId: string, parentEnvironmentId?: string): void => {
         const payload: DocumentChangedPayload = {
-          id: env.id ?? '',
+          id: env.id,
           type: 'environment',
           document: JSON.parse(JSON.stringify(env)),
           parentFolderId,
@@ -771,7 +771,7 @@ const App: React.FC = () => {
         // Recursively emit for sub-environments
         if (env.subEnvironments) {
           for (const subEnv of env.subEnvironments) {
-            emitEnvironmentCreated(subEnv, parentFolderId, env.id ?? '')
+            emitEnvironmentCreated(subEnv, parentFolderId, env.id)
           }
         }
       }
@@ -780,7 +780,7 @@ const App: React.FC = () => {
         if (isEnvironmentFolder(folder as FolderItem)) {
           const envFolder = folder
           for (const env of envFolder.environments) {
-            emitEnvironmentCreated(env, envFolder.id ?? '')
+            emitEnvironmentCreated(env, envFolder.id)
           }
         }
       }
@@ -1661,9 +1661,9 @@ const App: React.FC = () => {
   // Handle search result click - navigate to the selected item
   const handleSearchResultClick = useCallback((result: SearchResult) => {
     if (result.navigation?.type === 'request' && result.navigation.requestId) {
-      handleItemClick(result.navigation.requestId)
+      handleItemClick(result.navigation.requestId as string)
     } else if (result.navigation?.type === 'folder' && result.navigation.folderId) {
-      handleItemClick(result.navigation.folderId)
+      handleItemClick(result.navigation.folderId as string)
     }
   }, [handleItemClick])
 

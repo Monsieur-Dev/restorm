@@ -78,7 +78,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
       method: request.callType,
       requestType: 'grpc',
       headers: toKeyValueData(request.metadata),
-      body: request.requestMessage
+      body: { type: 'text', content: request.requestMessage }
     })
 
     // Subscribe to backend events
@@ -137,7 +137,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
       method: request.callType,
       requestType: 'grpc',
       headers: toKeyValueData(request.metadata),
-      body: requestMessage
+      body: { type: 'text', content: requestMessage }
     })
   }, [request.id, request.callType, request.metadata, url, requestMessage])
 

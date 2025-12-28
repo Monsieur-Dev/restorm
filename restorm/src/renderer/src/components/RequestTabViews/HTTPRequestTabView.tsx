@@ -146,7 +146,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
 
   // Subscribe to backend URL and code snippets updates
   useEffect(() => {
-    const requestId = request.id ?? ''
+    const requestId = request.id
     if (!requestId) return
 
     const unsubUrl = window.restorm.context.onUrlResolved((result) => {
@@ -177,7 +177,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
 
   // Register request with ContextService on mount, unregister on unmount
   useEffect(() => {
-    const requestId = request.id ?? ''
+    const requestId = request.id
     if (!requestId) return
 
     logger.debug('[HTTPRequestTabView] Registering request with ContextService', { requestId, selectedEnvId })
@@ -199,7 +199,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
 
   // Notify ContextService when selected environment changes
   useEffect(() => {
-    const requestId = request.id ?? ''
+    const requestId = request.id
     if (!requestId) return
 
     const currentEnvId = selectedEnvId ?? null
@@ -246,7 +246,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
 
   // Send full request data to backend for URL resolution and code snippets
   useEffect(() => {
-    const requestId = request.id ?? ''
+    const requestId = request.id
     if (!requestId || requestIdRef.current !== request.id) return
 
     // Build body data
@@ -305,7 +305,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
   // Callbacks for KeyValue changes - notify both reactive object and ContextService
   const handleHeadersChange = useCallback((rows: KeyValueTableRow[]): void => {
     updateReactiveProperty(request, 'headers', rows as KeyValue[])
-    const requestId = request.id ?? ''
+    const requestId = request.id
     if (requestId) {
       void window.restorm.context.updateRequestKeyValues(
         requestId,
@@ -317,7 +317,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
 
   const handleParamsChange = useCallback((rows: KeyValueTableRow[]): void => {
     updateReactiveProperty(request, 'params', rows as KeyValue[])
-    const requestId = request.id ?? ''
+    const requestId = request.id
     if (requestId) {
       void window.restorm.context.updateRequestKeyValues(
         requestId,
@@ -329,7 +329,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
 
   const handlePathParamsChange = useCallback((rows: KeyValueTableRow[]): void => {
     updateReactiveProperty(request, 'pathParams', rows as KeyValue[])
-    const requestId = request.id ?? ''
+    const requestId = request.id
     if (requestId) {
       void window.restorm.context.updateRequestKeyValues(
         requestId,

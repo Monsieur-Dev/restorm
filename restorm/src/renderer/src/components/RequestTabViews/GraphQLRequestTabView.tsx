@@ -79,7 +79,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
       method: 'POST',
       requestType: 'graphql',
       headers: toKeyValueData(request.headers),
-      body: JSON.stringify({ query: request.query, variables: request.variables })
+      body: { type: 'text', content: JSON.stringify({ query: request.query, variables: request.variables }) }
     })
 
     // Subscribe to backend events
@@ -138,7 +138,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
       method: 'POST',
       requestType: 'graphql',
       headers: toKeyValueData(request.headers),
-      body: JSON.stringify({ query, variables })
+      body: { type: 'text', content: JSON.stringify({ query, variables }) }
     })
   }, [request.id, request.headers, url, query, variables])
 
