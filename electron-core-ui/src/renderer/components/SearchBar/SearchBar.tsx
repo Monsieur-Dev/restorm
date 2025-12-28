@@ -21,7 +21,7 @@ export interface SearchBarProps {
   placeholder?: string
   /** Custom renderer for tooltip content. If not provided, uses default rendering with description. */
   renderTooltipContent?: (result: SearchResult) => React.ReactNode
-  /** Custom renderer for method/type badge. If not provided, uses default http-method-badge styling. */
+  /** Custom renderer for method/type badge. If not provided, uses default request-type-badge styling. */
   renderBadge?: (method: string) => React.ReactNode
 }
 
@@ -284,7 +284,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         <div style={{ maxHeight: 'calc(100vh - 90px)', display: 'flex', flexDirection: 'column' }}>
           <div style={{ marginBottom: 8, flexShrink: 0 }}>
             {renderBadge ? renderBadge(method) : (
-              <span className={`http-method-badge method-${method.toLowerCase()}`}>{method}</span>
+              <span className={`request-type-badge method-${method.toLowerCase()}`}>{method}</span>
             )}{' '}
             <strong>{resultTitle}</strong>
           </div>
@@ -415,11 +415,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                               if (category === 'request' && icon) {
                                 return (
                                   <div className="result-content">
-                                    <div className="result-title result-http-title">
+                                    <div className="result-title result-badge-title">
                                       {renderBadge ? renderBadge(icon.toUpperCase()) : (
-                                        <span className={`http-method-badge method-${icon.toLowerCase()}`}>{icon.toUpperCase()}</span>
+                                        <span className={`request-type-badge method-${icon.toLowerCase()}`}>{icon.toUpperCase()}</span>
                                       )}
-                                      <span className="http-route">{resultTitle}</span>
+                                      <span className="result-title-text">{resultTitle}</span>
                                       {breadcrumbArray && breadcrumbArray.length > 0 && (
                                         <span className="result-breadcrumb">
                                           {breadcrumbArray.map((item, index) => (

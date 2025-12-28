@@ -246,13 +246,13 @@
 }
 
 /* HTTP request result with method badge */
-.result-http-title {
+.result-badge-title {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.http-method-badge {
+.request-type-badge {
   display: inline-flex;
   align-items: center;
   padding: 0 6px;
@@ -265,92 +265,92 @@
   flex-shrink: 0;
 }
 
-.http-method-badge.method-get {
+.request-type-badge.method-get {
   background-color: #007acc;
 }
 
-.http-method-badge.method-post {
+.request-type-badge.method-post {
   background-color: #1b8a3d;
 }
 
-.http-method-badge.method-put {
+.request-type-badge.method-put {
   background-color: #d18616;
 }
 
-.http-method-badge.method-patch {
+.request-type-badge.method-patch {
   background-color: #9370db;
 }
 
-.http-method-badge.method-delete {
+.request-type-badge.method-delete {
   background-color: #c74632;
 }
 
-.http-method-badge.method-head {
+.request-type-badge.method-head {
   background-color: #ff69b4;
 }
 
-.http-method-badge.method-options {
+.request-type-badge.method-options {
   background-color: #6a5acd;
 }
 
 /* Query languages */
-.http-method-badge.method-graphql,
-.http-method-badge.method-gql,
-.http-method-badge.method-query {
+.request-type-badge.method-graphql,
+.request-type-badge.method-gql,
+.request-type-badge.method-query {
   background-color: #e535ab;
 }
 
-.http-method-badge.method-mutation {
+.request-type-badge.method-mutation {
   background-color: #b71c1c;
 }
 
-.http-method-badge.method-subscription {
+.request-type-badge.method-subscription {
   background-color: #7b1fa2;
 }
 
 /* gRPC */
-.http-method-badge.method-grpc,
-.http-method-badge.method-unary {
+.request-type-badge.method-grpc,
+.request-type-badge.method-unary {
   background-color: #0277bd;
 }
 
-.http-method-badge.method-s-str,
-.http-method-badge.method-sstr {
+.request-type-badge.method-s-str,
+.request-type-badge.method-sstr {
   background-color: #00695c;
 }
 
-.http-method-badge.method-c-str,
-.http-method-badge.method-cstr {
+.request-type-badge.method-c-str,
+.request-type-badge.method-cstr {
   background-color: #558b2f;
 }
 
-.http-method-badge.method-bidi {
+.request-type-badge.method-bidi {
   background-color: #5d4037;
 }
 
 /* SOAP */
-.http-method-badge.method-soap {
+.request-type-badge.method-soap {
   background-color: #f9a825;
   color: #000;
 }
 
 /* Real-time protocols */
-.http-method-badge.method-ws,
-.http-method-badge.method-websocket {
+.request-type-badge.method-ws,
+.request-type-badge.method-websocket {
   background-color: #43a047;
 }
 
-.http-method-badge.method-mqtt {
+.request-type-badge.method-mqtt {
   background-color: #ff6f00;
   color: #000;
 }
 
-.http-method-badge.method-sio,
-.http-method-badge.method-socketio {
+.request-type-badge.method-sio,
+.request-type-badge.method-socketio {
   background-color: #00897b;
 }
 
-.http-route {
+.result-title-text {
   color: var(--foreground);
   font-size: 12px;
   white-space: nowrap;
@@ -386,7 +386,7 @@
   margin-top: 2px;
 }
 
-.search-results-wrapper .list-view-row .result-http-title {
+.search-results-wrapper .list-view-row .result-badge-title {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -398,7 +398,7 @@
 }
 
 .search-result-item .result-title .result-breadcrumb,
-.search-result-item .result-http-title .result-breadcrumb {
+.search-result-item .result-badge-title .result-breadcrumb {
   display: flex;
   align-items: center;
   font-size: 10px;
