@@ -108,7 +108,9 @@ function ensureRestormWebShim(): void {
     }
   })
 
-  ;(window as unknown as { restorm?: typeof window.restorm }).restorm = {
+  // Type assertion needed because window.restorm is optional in types but we're creating it here
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+  ;(window as any).restorm = {
     openEditor: async () => {
       // No-op in web mode
     },
@@ -217,6 +219,42 @@ function ensureRestormWebShim(): void {
 
 // Ensure web shim is set up before rendering
 ensureRestormWebShim()
+
+// Expose test helpers on window for E2E tests
+if (typeof window !== 'undefined') {
+  // Always expose in dev mode or when explicitly enabled (for E2E tests)
+  // In production, this will be tree-shaken out
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  const isDev = (import.meta as { env?: { DEV?: boolean; MODE?: string; VITE_ENABLE_TEST_HELPERS?: string } }).env?.DEV ?? false
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  const mode = (import.meta as { env?: { MODE?: string } }).env?.MODE
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  const enableTestHelpers = (import.meta as { env?: { VITE_ENABLE_TEST_HELPERS?: string } }).env?.VITE_ENABLE_TEST_HELPERS === 'true'
+  const shouldExpose = isDev || mode === 'test' || enableTestHelpers
+  
+  if (shouldExpose) {
+    // Load test helpers asynchronously to avoid blocking app initialization
+    void Promise.all([
+      import('./services/import/SwaggerImportService'),
+      import('./types/reactive'),
+      import('./services/SearchIndexService')
+    ]).then(([swaggerModule, reactiveModule, searchModule]) => {
+      ;(window as unknown as {
+        __testHelpers?: {
+          importSwagger: (swaggerJson: string) => Promise<void>
+        }
+      }).__testHelpers = {
+        importSwagger: async (swaggerJson: string) => {
+          const folder = swaggerModule.importSwaggerFromJson(swaggerJson)
+          const reactiveFolder = reactiveModule.makeReactiveFolder(folder)
+          await searchModule.searchIndexService.indexFolderTree(reactiveFolder)
+        }
+      }
+    }).catch((error) => {
+      console.error('Failed to load test helpers:', error)
+    })
+  }
+}
 
 void initI18n()
   .then(() => {
