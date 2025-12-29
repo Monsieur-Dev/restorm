@@ -34,7 +34,7 @@ declare global {
         readFile: (filePath: string) => Promise<string>
       }
     }
-    restorm: {
+    restorm?: {
       openEditor: (file?: { title: string; content?: string; x?: number; y?: number }) => Promise<void>
       getEditorFile: () => Promise<{ title: string; content?: string } | undefined>
       forceClose: () => Promise<void>

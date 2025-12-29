@@ -18,6 +18,11 @@ export function VariableTransformProvider({ children }: VariableTransformProvide
 
   // Set up single IPC subscription
   useEffect(() => {
+    // Check if Electron APIs are available (not in web mode)
+    if (!window.restorm || !window.restorm.context?.onVariableTransformed) {
+      return
+    }
+
     const unsubscribe = window.restorm.context.onVariableTransformed((result: VariableTransformResult) => {
       const { variableId, transformedValue } = result
       

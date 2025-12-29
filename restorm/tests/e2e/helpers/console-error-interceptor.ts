@@ -7,7 +7,7 @@ export interface ConsoleInterceptor {
   assertNoWarnings: () => void;
 }
 
-// Known errors to ignore (Vite build errors and expected web mode errors)
+// Known errors to ignore (Vite build errors that don't affect runtime)
 const IGNORED_ERROR_PATTERNS = [
   /Failed to resolve import.*electron-core-ui/,
   /Pre-transform error/,
@@ -16,15 +16,6 @@ const IGNORED_ERROR_PATTERNS = [
   /Failed to resolve import.*\.json/,
   /Failed to load resource: the server responded with a status of 500/,
   /the server responded with a status of 500/,
-  // Expected errors in web mode (Electron APIs not available)
-  /Cannot read properties of undefined \(reading 'context'\)/,
-  /Cannot read properties of undefined \(reading 'onSaveAndClose'\)/,
-  /Cannot read property 'context' of undefined/,
-  /Cannot read property 'onSaveAndClose' of undefined/,
-  // React errors from components using Electron APIs in web mode
-  /The above error occurred in the <VariableTransformProvider> component/,
-  /The above error occurred in the <AvailableVariablesProvider> component/,
-  /Consider adding an error boundary/,
 ];
 
 function shouldIgnoreError(errorText: string): boolean {

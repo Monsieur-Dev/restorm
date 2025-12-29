@@ -713,6 +713,11 @@ const App: React.FC = () => {
       }
     }
     
+    // Check if Electron APIs are available (not in web mode)
+    if (!window.restorm?.onSaveAndClose) {
+      return
+    }
+
     const cleanup = window.restorm.onSaveAndClose(() => {
       void handleSaveAndClose()
     })
