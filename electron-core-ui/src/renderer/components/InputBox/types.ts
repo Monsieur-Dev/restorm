@@ -53,6 +53,8 @@ export interface InputBoxProps {
   options: IInputOptions
   value?: string
   onChange?: (value: string) => void
+  /** Debounce delay (ms) before emitting onChange to parent. Default: 200ms. */
+  changeDebounceMs?: number
   onBlur?: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void
   onFocus?: () => void
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void

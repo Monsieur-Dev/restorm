@@ -7,6 +7,7 @@ const InputBox: React.FC<InputBoxProps> = ({
   options,
   value = '',
   onChange,
+  changeDebounceMs = 200,
   onBlur,
   onFocus,
   onKeyDown,
@@ -25,13 +26,25 @@ const InputBox: React.FC<InputBoxProps> = ({
   const internalInputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
   const inputRef = externalInputRef ?? internalInputRef
   const mirrorRef = useRef<HTMLDivElement>(null)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const lastEmittedValueRef = useRef<string>(value)
 
   const styles = options.inputBoxStyles ?? defaultInputBoxStyles
 
   // Sync internal value with prop
   useEffect(() => {
     setInternalValue(value)
+    lastEmittedValueRef.current = value
   }, [value])
+
+  // Clear pending debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+      }
+    }
+  }, [])
 
   // Apply placeholder logic
   useEffect(() => {
@@ -80,6 +93,23 @@ const InputBox: React.FC<InputBoxProps> = ({
     return options.validationOptions.validation(val)
   }, [options.validationOptions])
 
+  const emitChange = useCallback((nextValue: string): void => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+    }
+
+    lastEmittedValueRef.current = nextValue
+
+    if (changeDebounceMs <= 0) {
+      onChange?.(nextValue)
+      return
+    }
+
+    debounceRef.current = setTimeout(() => {
+      onChange?.(lastEmittedValueRef.current)
+    }, changeDebounceMs)
+  }, [changeDebounceMs, onChange])
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     const newValue = e.target.value
     setInternalValue(newValue)
@@ -98,7 +128,7 @@ const InputBox: React.FC<InputBoxProps> = ({
       }
     }
     
-    onChange?.(newValue)
+    emitChange(newValue)
   }
 
   // Use native event listeners for wheel events
