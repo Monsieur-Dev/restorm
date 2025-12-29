@@ -427,7 +427,8 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
           <Tabs 
             tabs={requestTabs} 
             activeTabId={activeTabId} 
-            onTabChange={setActiveTabId} 
+            onTabChange={setActiveTabId}
+            keepMounted
           />
         </div>
         

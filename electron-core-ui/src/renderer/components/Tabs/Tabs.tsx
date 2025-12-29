@@ -29,6 +29,13 @@ export interface TabsProps {
   onTabChange?: (tabId: string) => void
   onTabClose?: (tabId: string) => void
   /**
+   * When true, all tab contents stay mounted (hidden with CSS) instead of being unmounted.
+   * This preserves component state when switching tabs (useful for editors like Milkdown).
+   * Requires the parent container to have a defined height.
+   * Defaults to false.
+   */
+  keepMounted?: boolean
+  /**
    * Legacy callback for tab double-click events.
    * Consider using allowFullscreen property on individual tabs instead for fullscreen behavior.
    * This callback is still called if provided, and the built-in fullscreen modal
@@ -42,6 +49,7 @@ export const Tabs: React.FC<TabsProps> = ({
   activeTabId,
   onTabChange,
   onTabClose,
+  keepMounted = false,
   onTabDoubleClick: legacyDoubleClickCallback
 }) => {
   const [internalActiveTab, setInternalActiveTab] = useState(tabs[0]?.id ?? '')
@@ -211,48 +219,83 @@ export const Tabs: React.FC<TabsProps> = ({
         </div>
       </ScrollableElement>
 
-      {/* Tab content - all tabs stay mounted, inactive ones are hidden with CSS */}
-      <div role="tabpanel" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, position: 'relative' }}>
-        {tabs.map(tab => {
-          const isActive = tab.id === currentActiveTab
-          const useScrollable = tab.useScrollableElement ?? true
-          return useScrollable ? (
-            <ScrollableElement
-              key={tab.id}
-              options={{ vertical: 'auto', horizontal: 'auto', useShadows: true }}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: 'var(--editor-background)',
-                visibility: isActive ? 'visible' : 'hidden',
-                pointerEvents: isActive ? 'auto' : 'none'
-              }}
-            >
-              {tab.content}
-            </ScrollableElement>
-          ) : (
-            <div
-              key={tab.id}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: 'var(--editor-background)',
-                display: 'flex',
-                flexDirection: 'column',
-                visibility: isActive ? 'visible' : 'hidden',
-                pointerEvents: isActive ? 'auto' : 'none'
-              }}
-            >
-              {tab.content}
-            </div>
-          )
-        })}
+      {/* Tab content */}
+      <div role="tabpanel" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, ...(keepMounted ? { position: 'relative' } : {}) }}>
+        {keepMounted ? (
+          // Keep all tabs mounted, hide inactive ones with CSS (preserves component state)
+          tabs.map(tab => {
+            const isActive = tab.id === currentActiveTab
+            const useScrollable = tab.useScrollableElement ?? true
+            return useScrollable ? (
+              <ScrollableElement
+                key={tab.id}
+                options={{ vertical: 'auto', horizontal: 'auto', useShadows: true }}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: 'var(--editor-background)',
+                  visibility: isActive ? 'visible' : 'hidden',
+                  pointerEvents: isActive ? 'auto' : 'none'
+                }}
+              >
+                {tab.content}
+              </ScrollableElement>
+            ) : (
+              <div
+                key={tab.id}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: 'var(--editor-background)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  visibility: isActive ? 'visible' : 'hidden',
+                  pointerEvents: isActive ? 'auto' : 'none'
+                }}
+              >
+                {tab.content}
+              </div>
+            )
+          })
+        ) : (
+          // Default: only render active tab (unmount inactive ones)
+          (() => {
+            const activeTab = tabs.find(tab => tab.id === currentActiveTab)
+            if (!activeTab) return null
+            const useScrollable = activeTab.useScrollableElement ?? true
+            return useScrollable ? (
+              <ScrollableElement
+                key={currentActiveTab}
+                options={{ vertical: 'auto', horizontal: 'auto', useShadows: true }}
+                style={{
+                  flex: 1,
+                  backgroundColor: 'var(--editor-background)',
+                  minHeight: 0
+                }}
+              >
+                {activeTab.content}
+              </ScrollableElement>
+            ) : (
+              <div
+                style={{
+                  flex: 1,
+                  backgroundColor: 'var(--editor-background)',
+                  minHeight: 0,
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}
+              >
+                {activeTab.content}
+              </div>
+            )
+          })()
+        )}
       </div>
       <Modal
         isOpen={fullscreenTabId !== null}
