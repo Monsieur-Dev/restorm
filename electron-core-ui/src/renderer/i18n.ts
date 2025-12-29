@@ -66,6 +66,15 @@ export function initializeI18n(resources: Resource, defaultLanguage = 'en'): Pro
     }
   }).then(() => {
     isInitialized = true
+    
+    // Synchronize initial language with main process
+    void window.api.i18n.setLanguage(defaultLanguage)
+    
+    // Listen for language changes and sync with main process
+    i18n.on('languageChanged', (lng: string) => {
+      void window.api.i18n.setLanguage(lng)
+    })
+    
     return i18n
   }).catch((error: unknown) => {
     logger.error('Failed to initialize i18n', { error: String(error) })

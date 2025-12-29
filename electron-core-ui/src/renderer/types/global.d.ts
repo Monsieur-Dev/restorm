@@ -13,6 +13,11 @@ interface WindowApiTheme {
   onThemeChanged: (callback: (themeId: string) => void) => () => void
 }
 
+interface WindowApiI18n {
+  setLanguage: (language: string) => Promise<boolean>
+  getLanguage: () => Promise<string>
+}
+
 interface WindowApiStorage {
   get: (key: string) => Promise<unknown>
   set: (key: string, value: unknown) => Promise<boolean>
@@ -36,6 +41,8 @@ interface WindowApiFile {
   isDirty: () => Promise<boolean>
   markDirty: () => Promise<void>
   clearDirty: () => Promise<void>
+  checkAndUpdateDirty: (currentChecksum: string) => Promise<void>
+  finishLoading: () => Promise<void>
   showUnsavedChangesDialog: (labels?: {
     title?: string
     message?: string
@@ -51,6 +58,17 @@ interface WindowApiFile {
   getContentChecksum: () => Promise<string | null>
   setContentChecksum: (checksum: string) => Promise<void>
   hasContentChanged: (currentChecksum: string) => Promise<boolean>
+  // Object checksum tracking
+  registerInitialChecksums: (objects: Map<string, unknown>) => Promise<void>
+  updateObjectChecksum: (runtimeId: string, data: unknown) => Promise<void>
+  removeObjectChecksum: (runtimeId: string) => Promise<void>
+  commitChecksums: () => Promise<void>
+  getDirtyStateDetails: () => Promise<{
+    isDirty: boolean
+    changedIds: string[]
+    newIds: string[]
+    deletedIds: string[]
+  }>
   onStateChanged: (callback: (state: FileServiceState) => void) => () => void
   onDirtyChanged: (callback: (isDirty: boolean) => void) => () => void
   onFileOpened: (callback: (state: FileServiceState) => void) => () => void
@@ -97,6 +115,7 @@ interface WindowApiSearch {
 interface WindowApi {
   platform: string
   theme: WindowApiTheme
+  i18n: WindowApiI18n
   logger: {
     log: (level: string, message: string, meta?: Record<string, unknown>) => Promise<void>
   }

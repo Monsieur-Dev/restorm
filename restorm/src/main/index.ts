@@ -1,10 +1,11 @@
 import { app, ipcMain, BrowserWindow } from 'electron'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFeatureService, initFileService, getFileService, isFileServiceInitialized } from 'electron-core-ui'
+import { initializeApp, logger, initFeatureService, initFileService, getFileService, isFileServiceInitialized, eventBusService, i18nService } from 'electron-core-ui'
 import { join, relative } from 'path'
 import { promises as fs } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
 import { searchIndexService, contextService } from './services'
+import { DocumentEvents } from './services/DocumentEvents'
 
 // Keep track of main window and editor windows
 let mainWindow: BrowserWindow | null = null
@@ -105,6 +106,14 @@ const featuresConfigPath = getFeaturesConfigPath()
 initFeatureService(featuresConfigPath, 'desktop')
 logger.info('✅ Feature Flipping Service initialized', { configPath: featuresConfigPath })
 
+// Initialize I18n Service for main process translations
+// Default to system locale or 'en', will be synchronized with renderer via IPC
+const systemLocale = app.getLocale().split('-')[0] ?? 'en'
+const supportedLocales = ['en', 'fr']
+const defaultLocale = supportedLocales.includes(systemLocale) ? systemLocale : 'en'
+i18nService.initialize('', defaultLocale)
+logger.info('✅ I18n Service initialized', { locale: defaultLocale })
+
 // Initialize File Service for .restorm files with YAML serialization
 initFileService({
   extension: '.restorm',
@@ -113,6 +122,28 @@ initFileService({
   storagePrefix: 'restorm_'
 })
 logger.info('✅ File Service initialized')
+
+// Subscribe to document events to mark file as dirty
+const dirtyEvents = [
+  DocumentEvents.REQUEST_CREATED,
+  DocumentEvents.REQUEST_UPDATED,
+  DocumentEvents.REQUEST_DELETED,
+  DocumentEvents.FOLDER_CREATED,
+  DocumentEvents.FOLDER_UPDATED,
+  DocumentEvents.FOLDER_DELETED,
+  DocumentEvents.ENVIRONMENT_CREATED,
+  DocumentEvents.ENVIRONMENT_UPDATED,
+  DocumentEvents.ENVIRONMENT_DELETED
+]
+for (const event of dirtyEvents) {
+  eventBusService.subscribe(event, () => {
+    if (isFileServiceInitialized() && getFileService().getFilePath() && !getFileService().isLoading()) {
+      logger.debug(`[DirtyState] Document change detected (${event}), marking file as dirty`)
+      getFileService().markDirty()
+    }
+  })
+}
+logger.info('✅ Dirty state subscriptions registered')
 
 // Initialize Search Index Service (listens to document events from renderer)
 searchIndexService.initialize()

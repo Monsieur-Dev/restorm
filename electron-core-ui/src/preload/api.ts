@@ -44,6 +44,18 @@ export const createCoreUIAPI = (): Record<string, unknown> => ({
     }
   },
 
+  // I18n API (main process language synchronization)
+  i18n: {
+    setLanguage: async (language: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('i18n:set-language', language)
+      return result as boolean
+    },
+    getLanguage: async (): Promise<string> => {
+      const result: unknown = await ipcRenderer.invoke('i18n:get-language')
+      return result as string
+    }
+  },
+
   // Logger API
   logger: {
     log: async (level: string, message: string, meta?: Record<string, unknown>): Promise<void> => {
@@ -186,6 +198,12 @@ export const createCoreUIAPI = (): Record<string, unknown> => ({
     clearDirty: async (): Promise<void> => {
       await ipcRenderer.invoke('file:clear-dirty')
     },
+    checkAndUpdateDirty: async (currentChecksum: string): Promise<void> => {
+      await ipcRenderer.invoke('file:check-and-update-dirty', currentChecksum)
+    },
+    finishLoading: async (): Promise<void> => {
+      await ipcRenderer.invoke('file:finish-loading')
+    },
     showUnsavedChangesDialog: async (labels?: {
       title?: string
       message?: string
@@ -222,6 +240,28 @@ export const createCoreUIAPI = (): Record<string, unknown> => ({
     hasContentChanged: async (currentChecksum: string): Promise<boolean> => {
       const result: unknown = await ipcRenderer.invoke('file:has-content-changed', currentChecksum)
       return result as boolean
+    },
+    // Object checksum tracking
+    registerInitialChecksums: async (objects: Map<string, unknown>): Promise<void> => {
+      await ipcRenderer.invoke('file:register-initial-checksums', Array.from(objects.entries()))
+    },
+    updateObjectChecksum: async (runtimeId: string, data: unknown): Promise<void> => {
+      await ipcRenderer.invoke('file:update-object-checksum', runtimeId, data)
+    },
+    removeObjectChecksum: async (runtimeId: string): Promise<void> => {
+      await ipcRenderer.invoke('file:remove-object-checksum', runtimeId)
+    },
+    commitChecksums: async (): Promise<void> => {
+      await ipcRenderer.invoke('file:commit-checksums')
+    },
+    getDirtyStateDetails: async (): Promise<{
+      isDirty: boolean
+      changedIds: string[]
+      newIds: string[]
+      deletedIds: string[]
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('file:get-dirty-state-details')
+      return result as { isDirty: boolean; changedIds: string[]; newIds: string[]; deletedIds: string[] }
     },
     onStateChanged: (callback: (state: FileServiceState) => void): (() => void) => {
       const handler = (_event: Electron.IpcRendererEvent, state: FileServiceState): void => {

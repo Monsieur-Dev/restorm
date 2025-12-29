@@ -82,15 +82,19 @@ collections:
           - key: port
             value: '8080'
             description: ''
+            enabled: true
           - key: scheme
             value: http
             description: ''
+            enabled: true
           - key: domain
             value: localhost
             description: ''
+            enabled: true
           - key: baseUrl
             value: '{{scheme}}://{{domain}}:{{port}}'
             description: ''
+            enabled: true
         subEnvironments:
           - name: Production
             variables:
@@ -190,6 +194,7 @@ collections:
               - key: petId
                 value: '1'
                 description: ID of pet to return
+                enabled: true
           - type: http
             name: Updates a pet in the store with form data
             documentation: |-

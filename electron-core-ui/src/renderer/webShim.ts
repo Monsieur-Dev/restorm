@@ -62,6 +62,8 @@ interface WindowApiFileShim {
   isDirty: () => Promise<boolean>
   markDirty: () => Promise<void>
   clearDirty: () => Promise<void>
+  checkAndUpdateDirty: (currentChecksum: string) => Promise<void>
+  finishLoading: () => Promise<void>
   showUnsavedChangesDialog: (labels?: {
     title?: string
     message?: string
@@ -77,6 +79,17 @@ interface WindowApiFileShim {
   getContentChecksum: () => Promise<string | null>
   setContentChecksum: (checksum: string) => Promise<void>
   hasContentChanged: (currentChecksum: string) => Promise<boolean>
+  // Object checksum tracking
+  registerInitialChecksums: (objects: Map<string, unknown>) => Promise<void>
+  updateObjectChecksum: (runtimeId: string, data: unknown) => Promise<void>
+  removeObjectChecksum: (runtimeId: string) => Promise<void>
+  commitChecksums: () => Promise<void>
+  getDirtyStateDetails: () => Promise<{
+    isDirty: boolean
+    changedIds: string[]
+    newIds: string[]
+    deletedIds: string[]
+  }>
   onStateChanged: (callback: (state: FileServiceState) => void) => () => void
   onDirtyChanged: (callback: (isDirty: boolean) => void) => () => void
   onFileOpened: (callback: (state: FileServiceState) => void) => () => void
@@ -86,6 +99,11 @@ interface WindowApiFileShim {
 interface WindowApiEventBusShim {
   emit: (event: string, payload: unknown) => Promise<boolean>
   emitSync: (event: string, payload: unknown) => Promise<boolean>
+}
+
+interface WindowApiI18nShim {
+  setLanguage: (language: string) => Promise<boolean>
+  getLanguage: () => Promise<string>
 }
 
 interface WindowApiSearchShim {
@@ -134,6 +152,7 @@ interface WindowApiSearchShim {
 interface WindowApiShim {
   platform: string
   theme: WindowApiThemeShim
+  i18n: WindowApiI18nShim
   logger: {
     log: (level: string, message: string, meta?: Record<string, unknown>) => Promise<void>
   }
@@ -370,6 +389,18 @@ export function ensureCoreUiWebApiShim(): void {
     }
   }
 
+  // I18n shim for web builds (no-op, language is handled by i18next directly)
+  let webCurrentLanguage = 'en'
+  const i18nApi: WindowApiI18nShim = {
+    setLanguage: (language: string): Promise<boolean> => {
+      webCurrentLanguage = language
+      return Promise.resolve(true)
+    },
+    getLanguage: (): Promise<string> => {
+      return Promise.resolve(webCurrentLanguage)
+    }
+  }
+
   // Storage shim using localStorage for web builds
   const storageApi: WindowApiStorageShim = {
     get: (key: string): Promise<unknown> => {
@@ -569,6 +600,23 @@ export function ensureCoreUiWebApiShim(): void {
       }
       return Promise.resolve()
     },
+    checkAndUpdateDirty: (currentChecksum: string): Promise<void> => {
+      const hasChanges = webCurrentFile.contentChecksum !== null && webCurrentFile.contentChecksum !== currentChecksum
+      if (hasChanges && !webCurrentFile.isDirty) {
+        webCurrentFile.isDirty = true
+        notifyWebStateChange()
+        notifyWebDirtyChange()
+      } else if (!hasChanges && webCurrentFile.isDirty) {
+        webCurrentFile.isDirty = false
+        notifyWebStateChange()
+        notifyWebDirtyChange()
+      }
+      return Promise.resolve()
+    },
+    finishLoading: (): Promise<void> => {
+      // No-op for web builds
+      return Promise.resolve()
+    },
     showUnsavedChangesDialog: (labels?: {
       title?: string
       message?: string
@@ -626,6 +674,36 @@ export function ensureCoreUiWebApiShim(): void {
         return Promise.resolve(false)
       }
       return Promise.resolve(webCurrentFile.contentChecksum !== currentChecksum)
+    },
+    // Object checksum tracking (simplified for web - uses in-memory maps)
+    registerInitialChecksums: (_objects: Map<string, unknown>): Promise<void> => {
+      // Web shim: no-op, dirty state handled by content checksum
+      return Promise.resolve()
+    },
+    updateObjectChecksum: (_runtimeId: string, _data: unknown): Promise<void> => {
+      // Web shim: no-op
+      return Promise.resolve()
+    },
+    removeObjectChecksum: (_runtimeId: string): Promise<void> => {
+      // Web shim: no-op
+      return Promise.resolve()
+    },
+    commitChecksums: (): Promise<void> => {
+      // Web shim: no-op
+      return Promise.resolve()
+    },
+    getDirtyStateDetails: (): Promise<{
+      isDirty: boolean
+      changedIds: string[]
+      newIds: string[]
+      deletedIds: string[]
+    }> => {
+      return Promise.resolve({
+        isDirty: webCurrentFile.isDirty,
+        changedIds: [],
+        newIds: [],
+        deletedIds: []
+      })
     },
     onStateChanged: (callback: (state: FileServiceState) => void): (() => void) => {
       webStateChangeCallbacks.add(callback)
@@ -781,6 +859,7 @@ export function ensureCoreUiWebApiShim(): void {
   const api: WindowApiShim = {
     platform: (navigator as { userAgentData?: { platform?: string } }).userAgentData?.platform ?? 'web',
     theme: themeApi,
+    i18n: i18nApi,
     logger: {
       // In web builds, swallow log messages; the app can add its own logging if desired.
       // We intentionally avoid using console here to keep logging centralized.

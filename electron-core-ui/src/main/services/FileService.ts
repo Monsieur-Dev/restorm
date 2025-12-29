@@ -1,5 +1,6 @@
 import { dialog, BrowserWindow } from 'electron'
 import { readFileSync, writeFileSync, existsSync } from 'fs'
+import { createHash } from 'crypto'
 import { basename, extname } from 'path'
 import yaml from 'js-yaml'
 import type {
@@ -11,8 +12,11 @@ import type {
   OpenDialogResult,
   FileServiceState
 } from '../../../types/file'
+import type { RuntimeId, ChecksumMap, DirtyStateResult } from '../../../types/runtime'
 import { logger } from './LoggerService'
 import { getStorageService } from './StorageService'
+import { i18nService } from './I18nService'
+import { eventBusService } from './EventBusService'
 
 /**
  * FileService manages file operations with serialization support
@@ -30,9 +34,16 @@ export class FileService {
   private recentFiles: FileMetadata[] = []
   private stateChangeCallbacks = new Set<(state: FileServiceState) => void>()
   private dirtyChangeCallbacks = new Set<(isDirty: boolean) => void>()
+  private _isLoading = false
 
   private readonly RECENT_FILES_KEY: string
   private readonly FAVORITES_KEY: string
+
+  // Checksum tracking for granular dirty state management
+  /** Checksums of objects at the time of last save */
+  private savedChecksums: ChecksumMap = new Map()
+  /** Current checksums of objects (updated on each modification) */
+  private currentChecksums: ChecksumMap = new Map()
 
   constructor(config: Partial<FileServiceConfig> = {}) {
     this.config = {
@@ -55,7 +66,150 @@ export class FileService {
     }
 
     this.loadPersistedData()
+    this.subscribeToObjectChanges()
   }
+
+  // ==========================================================================
+  // Checksum-based Dirty State Management
+  // ==========================================================================
+
+  /**
+   * Subscribe to object change events from the event bus.
+   * When an object is modified, we update its checksum and recalculate dirty state.
+   */
+  private subscribeToObjectChanges(): void {
+    // Subscribe to object change events (emitted by the renderer via IPC)
+    // Note: subscription is kept alive for the lifetime of the service
+    eventBusService.subscribe<{
+      runtimeId: RuntimeId
+      data: unknown
+    }>('object:changed', ({ runtimeId, data }) => {
+      this.updateObjectChecksum(runtimeId, data)
+    })
+  }
+
+  /**
+   * Calculate SHA-256 checksum of an object
+   */
+  private calculateChecksum(data: unknown): string {
+    const json = JSON.stringify(data, null, 0) // Deterministic JSON
+    return createHash('sha256').update(json).digest('hex')
+  }
+
+  /**
+   * Update the checksum for a specific object and recalculate dirty state
+   */
+  public updateObjectChecksum(runtimeId: RuntimeId, data: unknown): void {
+    const checksum = this.calculateChecksum(data)
+    const previousChecksum = this.currentChecksums.get(runtimeId)
+
+    // Only update if checksum actually changed
+    if (previousChecksum !== checksum) {
+      this.currentChecksums.set(runtimeId, checksum)
+      logger.debug('[FileService] Object checksum updated', { runtimeId, checksum: checksum.slice(0, 8) })
+      this.recalculateDirtyState()
+    }
+  }
+
+  /**
+   * Register initial checksums for all objects when a file is loaded.
+   * This establishes the "clean" state baseline.
+   * @param objects Map of runtimeId → object data
+   */
+  public registerInitialChecksums(objects: Map<RuntimeId, unknown>): void {
+    this.savedChecksums.clear()
+    this.currentChecksums.clear()
+
+    for (const [runtimeId, data] of objects) {
+      const checksum = this.calculateChecksum(data)
+      this.savedChecksums.set(runtimeId, checksum)
+      this.currentChecksums.set(runtimeId, checksum)
+    }
+
+    logger.info('[FileService] Registered initial checksums', { count: objects.size })
+    this.recalculateDirtyState()
+  }
+
+  /**
+   * Commit current checksums as the new "saved" state.
+   * Called after a successful save operation.
+   */
+  public commitChecksums(): void {
+    this.savedChecksums.clear()
+    for (const [runtimeId, checksum] of this.currentChecksums) {
+      this.savedChecksums.set(runtimeId, checksum)
+    }
+    logger.debug('[FileService] Checksums committed')
+    this.recalculateDirtyState()
+  }
+
+  /**
+   * Clear all checksum tracking (called when closing a file)
+   */
+  public clearChecksums(): void {
+    this.savedChecksums.clear()
+    this.currentChecksums.clear()
+    logger.debug('[FileService] Checksums cleared')
+  }
+
+  /**
+   * Recalculate dirty state by comparing current checksums with saved checksums.
+   * Dirty if any object has changed, been added, or been removed.
+   */
+  private recalculateDirtyState(): void {
+    const result = this.getDirtyStateDetails()
+    const newIsDirty = result.isDirty
+
+    if (this.currentFile.isDirty !== newIsDirty) {
+      this.currentFile.isDirty = newIsDirty
+      logger.debug('[FileService] Dirty state changed', { isDirty: newIsDirty })
+      this.notifyDirtyChange()
+      this.notifyStateChange()
+    }
+  }
+
+  /**
+   * Get detailed dirty state information including which objects changed
+   */
+  public getDirtyStateDetails(): DirtyStateResult {
+    const changedIds: RuntimeId[] = []
+    const newIds: RuntimeId[] = []
+    const deletedIds: RuntimeId[] = []
+
+    // Check for changed and new objects
+    for (const [runtimeId, currentChecksum] of this.currentChecksums) {
+      const savedChecksum = this.savedChecksums.get(runtimeId)
+      if (savedChecksum === undefined) {
+        newIds.push(runtimeId)
+      } else if (savedChecksum !== currentChecksum) {
+        changedIds.push(runtimeId)
+      }
+    }
+
+    // Check for deleted objects
+    for (const runtimeId of this.savedChecksums.keys()) {
+      if (!this.currentChecksums.has(runtimeId)) {
+        deletedIds.push(runtimeId)
+      }
+    }
+
+    const isDirty = changedIds.length > 0 || newIds.length > 0 || deletedIds.length > 0
+
+    return { isDirty, changedIds, newIds, deletedIds }
+  }
+
+  /**
+   * Remove an object from checksum tracking (when object is deleted)
+   */
+  public removeObjectChecksum(runtimeId: RuntimeId): void {
+    this.currentChecksums.delete(runtimeId)
+    logger.debug('[FileService] Object checksum removed', { runtimeId })
+    this.recalculateDirtyState()
+  }
+
+  // ==========================================================================
+  // Persistence
+  // ==========================================================================
 
   /**
    * Load persisted recent files and favorites from storage
@@ -218,6 +372,7 @@ export class FileService {
    * Notify dirty change listeners (local and via IPC)
    */
   private notifyDirtyChange(): void {
+    logger.debug('FileService: notifyDirtyChange called', { isDirty: this.currentFile.isDirty })
     // Notify local callbacks
     for (const callback of this.dirtyChangeCallbacks) {
       try {
@@ -228,6 +383,7 @@ export class FileService {
     }
     // Broadcast to all renderer windows via IPC
     this.broadcastEvent('file:dirty-changed', this.currentFile.isDirty)
+    logger.debug('FileService: Broadcasted file:dirty-changed', { isDirty: this.currentFile.isDirty })
   }
 
   /**
@@ -297,6 +453,9 @@ export class FileService {
   public async open(path?: string): Promise<{ success: boolean; content?: unknown }> {
     let filePath: string
 
+    // Mark as loading to prevent dirty state during initialization
+    this._isLoading = true
+
     // Show dialog if no path provided
     if (path) {
       filePath = path
@@ -304,6 +463,7 @@ export class FileService {
       const result = await this.showOpenDialog()
       const selectedPath = result.filePaths[0]
       if (result.canceled || !selectedPath) {
+        this._isLoading = false
         return { success: false }
       }
       filePath = selectedPath
@@ -422,6 +582,9 @@ export class FileService {
    * Close current file
    */
   public close(): boolean {
+    // Clear checksum tracking
+    this.clearChecksums()
+
     this.currentFile = {
       path: null,
       name: null,
@@ -497,20 +660,20 @@ export class FileService {
     cancel?: string
   }): Promise<'save' | 'discard' | 'cancel'> {
     const focusedWindow = BrowserWindow.getFocusedWindow()
-    const fileName = this.currentFile.name ?? 'Untitled'
+    const fileName = this.currentFile.name ?? i18nService.t('file.untitled')
     
     const options = {
       type: 'warning' as const,
       buttons: [
-        labels?.save ?? 'Save',
-        labels?.dontSave ?? "Don't Save",
-        labels?.cancel ?? 'Cancel'
+        labels?.save ?? i18nService.t('file.unsavedChanges.save'),
+        labels?.dontSave ?? i18nService.t('file.unsavedChanges.dontSave'),
+        labels?.cancel ?? i18nService.t('file.unsavedChanges.cancel')
       ],
       defaultId: 0,
       cancelId: 2,
-      title: labels?.title ?? 'Unsaved Changes',
-      message: labels?.message ?? `Do you want to save the changes to "${fileName}"?`,
-      detail: labels?.detail ?? 'Your changes will be lost if you don\'t save them.'
+      title: labels?.title ?? i18nService.t('file.unsavedChanges.title'),
+      message: labels?.message ?? i18nService.t('file.unsavedChanges.message', { fileName }),
+      detail: labels?.detail ?? i18nService.t('file.unsavedChanges.detail')
     }
 
     const result = focusedWindow
@@ -524,6 +687,45 @@ export class FileService {
         return 'discard'
       default:
         return 'cancel'
+    }
+  }
+
+  /**
+   * Check for unsaved changes before performing an action.
+   * This is a reusable pattern for window close, file operations, etc.
+   * 
+   * @param onSaveRequired Callback when user chooses to save - should trigger save and return true if save was successful
+   * @param onDiscard Callback when user chooses to discard changes
+   * @returns true if the action can proceed, false if cancelled
+   */
+  public async checkUnsavedBeforeAction(
+    onSaveRequired?: () => Promise<boolean> | boolean | undefined,
+    onDiscard?: () => void
+  ): Promise<boolean> {
+    // If not dirty, action can proceed
+    if (!this.currentFile.isDirty) {
+      return true
+    }
+
+    const result = await this.showUnsavedChangesDialog()
+
+    switch (result) {
+      case 'save':
+        if (onSaveRequired) {
+          const saved = await onSaveRequired()
+          return saved === true
+        }
+        return false // No save handler, can't proceed
+
+      case 'discard':
+        if (onDiscard) {
+          onDiscard()
+        }
+        return true
+
+      case 'cancel':
+      default:
+        return false
     }
   }
 
@@ -558,6 +760,21 @@ export class FileService {
    */
   public isDirty(): boolean {
     return this.currentFile.isDirty
+  }
+
+  /**
+   * Check if file is currently being loaded (initialization phase)
+   */
+  public isLoading(): boolean {
+    return this._isLoading
+  }
+
+  /**
+   * Mark loading as finished (call after renderer initialization is complete)
+   */
+  public finishLoading(): void {
+    this._isLoading = false
+    logger.debug('FileService: Loading finished')
   }
 
   /**

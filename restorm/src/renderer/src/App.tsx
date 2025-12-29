@@ -26,8 +26,9 @@ import {
   useFeature,
   useFileService,
   useFileEvents,
-  hasContentChanged,
   setContentChecksum,
+  finishLoading,
+  hasContentChanged,
   eventBus
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type DocumentChangedPayload } from './services/DocumentEvents'
@@ -746,8 +747,7 @@ const App: React.FC = () => {
     )
     setRootFolders(reactiveFolders)
     
-    // Update the content checksum in FileService with data WITHOUT ids
-    // This ensures consistent comparison when checking for unsaved changes
+    // Update the content checksum for dirty state detection
     const dataForChecksum = prepareForSerialization({ collections: reactiveFolders })
     void setContentChecksum(JSON.stringify(dataForChecksum))
     
@@ -791,6 +791,9 @@ const App: React.FC = () => {
         await searchIndexService.indexFolderTree(folder)
       }
 
+      // 4. Signal that loading is complete - dirty state events can now be processed
+      await finishLoading()
+
       // Allow loading again (e.g., if user closes and reopens a file)
       fileLoadingRef.current = false
     })()
@@ -833,64 +836,70 @@ const App: React.FC = () => {
   }, [fileState, rootFolders.length, handleFileOpened])
 
   // Counter to force re-render without breaking reactive proxies
-  const [updateCount, forceUpdate] = useState(0)
-
-  // Listen to document change events from eventBus to trigger dirty state detection
-  useEffect(() => {
-    // Only subscribe if a file is open
-    if (!fileName) return
-
-    const handleDocumentChange = (): void => {
-      forceUpdate((n) => n + 1)
-    }
-
-    // Subscribe to all document change events
-    const subscriptions = [
-      eventBus.subscribe(DocumentEvents.REQUEST_CREATED, handleDocumentChange),
-      eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, handleDocumentChange),
-      eventBus.subscribe(DocumentEvents.REQUEST_DELETED, handleDocumentChange),
-      eventBus.subscribe(DocumentEvents.FOLDER_CREATED, handleDocumentChange),
-      eventBus.subscribe(DocumentEvents.FOLDER_UPDATED, handleDocumentChange),
-      eventBus.subscribe(DocumentEvents.FOLDER_DELETED, handleDocumentChange)
-    ]
-
-    return () => {
-      for (const sub of subscriptions) {
-        sub.unsubscribe()
-      }
-    }
-  }, [fileName])
+  const [_updateCount, forceUpdate] = useState(0)
+  void _updateCount // Suppress unused variable warning
 
   // Update content checksum in FileService when file is saved (isDirty becomes false)
+  const wasDirtyRef = useRef(isDirty)
   useEffect(() => {
-    if (!isDirty && fileName) {
-      // File was just saved - update the checksum with current state (without runtime ids)
+    // Detect save: was dirty, now not dirty
+    if (wasDirtyRef.current && !isDirty && fileName) {
+      // File was just saved - update the checksum with current state
       const dataForChecksum = prepareForSerialization({ collections: rootFolders })
       void setContentChecksum(JSON.stringify(dataForChecksum))
     }
+    wasDirtyRef.current = isDirty
   }, [isDirty, fileName, rootFolders])
 
-  // Track user modifications and mark/clear file as dirty
+  // Subscribe to DocumentEvents and check dirty state on each change
+  // Uses content checksum comparison to detect if current state matches saved state
   useEffect(() => {
-    // Skip if no file is open
-    if (!fileName) return
-    
-    // Compare current state with saved state checksum via FileService
-    const checkChanges = async (): Promise<void> => {
+    const checkDirtyState = (): void => {
+      // Compute current checksum and compare with saved
       const dataForChecksum = prepareForSerialization({ collections: rootFolders })
       const currentChecksum = JSON.stringify(dataForChecksum)
-      const hasChanges = await hasContentChanged(currentChecksum)
-      if (hasChanges && !isDirty) {
-        // Content changed - mark as dirty
-        void markDirty()
-      } else if (!hasChanges && isDirty) {
-        // Content returned to saved state - clear dirty
-        void clearDirty()
-      }
+      void hasContentChanged(currentChecksum).then(changed => {
+        if (changed && !isDirty) {
+          void markDirty()
+        } else if (!changed && isDirty) {
+          void clearDirty()
+        }
+      })
     }
-    void checkChanges()
-   
-  }, [rootFolders, updateCount, fileName, isDirty, markDirty, clearDirty])
+
+    // Handle any document change
+    const handleDocumentChanged = (): void => {
+      // Debounce the check
+      setTimeout(checkDirtyState, 100)
+    }
+
+    // Subscribe to all update events
+    const unsubFolderUpdated = eventBus.subscribe(DocumentEvents.FOLDER_UPDATED, handleDocumentChanged)
+    const unsubRequestUpdated = eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, handleDocumentChanged)
+    const unsubEnvironmentUpdated = eventBus.subscribe(DocumentEvents.ENVIRONMENT_UPDATED, handleDocumentChanged)
+
+    // Subscribe to all delete events
+    const unsubFolderDeleted = eventBus.subscribe(DocumentEvents.FOLDER_DELETED, handleDocumentChanged)
+    const unsubRequestDeleted = eventBus.subscribe(DocumentEvents.REQUEST_DELETED, handleDocumentChanged)
+    const unsubEnvironmentDeleted = eventBus.subscribe(DocumentEvents.ENVIRONMENT_DELETED, handleDocumentChanged)
+
+    // Subscribe to all create events
+    const unsubFolderCreated = eventBus.subscribe(DocumentEvents.FOLDER_CREATED, handleDocumentChanged)
+    const unsubRequestCreated = eventBus.subscribe(DocumentEvents.REQUEST_CREATED, handleDocumentChanged)
+    const unsubEnvironmentCreated = eventBus.subscribe(DocumentEvents.ENVIRONMENT_CREATED, handleDocumentChanged)
+
+    return () => {
+      unsubFolderUpdated.unsubscribe()
+      unsubRequestUpdated.unsubscribe()
+      unsubEnvironmentUpdated.unsubscribe()
+      unsubFolderDeleted.unsubscribe()
+      unsubRequestDeleted.unsubscribe()
+      unsubEnvironmentDeleted.unsubscribe()
+      unsubFolderCreated.unsubscribe()
+      unsubRequestCreated.unsubscribe()
+      unsubEnvironmentCreated.unsubscribe()
+    }
+  }, [rootFolders, isDirty, markDirty, clearDirty])
 
   // Ref to track if search index has been initialized
   const searchIndexInitializedRef = useRef(false)

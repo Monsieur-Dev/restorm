@@ -39,6 +39,8 @@ export const SettingsPage: React.FC = () => {
     const selectedLanguage = AVAILABLE_LANGUAGES[data.index]
     if (selectedLanguage) {
       void i18n.changeLanguage(selectedLanguage.code)
+      // Synchronize language with main process for dialogs
+      void window.api.i18n.setLanguage(selectedLanguage.code)
     }
   }
 
