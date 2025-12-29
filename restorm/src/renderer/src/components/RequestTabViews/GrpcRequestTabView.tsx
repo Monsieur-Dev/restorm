@@ -114,8 +114,8 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
 
     return () => {
       logger.debug('[GrpcRequestTabView] Unregistering request from ContextService', { requestId })
-      unsubUrl()
-      unsubSnippets()
+      unsubUrl?.()
+      unsubSnippets?.()
       void window.restorm?.context?.unregisterRequest(requestId)
     }
   }, [request.id])

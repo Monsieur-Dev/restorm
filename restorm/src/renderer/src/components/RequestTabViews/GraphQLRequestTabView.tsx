@@ -115,8 +115,8 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
 
     return () => {
       logger.debug('[GraphQLRequestTabView] Unregistering request from ContextService', { requestId })
-      unsubUrl()
-      unsubSnippets()
+      unsubUrl?.()
+      unsubSnippets?.()
       void window.restorm?.context?.unregisterRequest(requestId)
     }
   }, [request.id])

@@ -113,8 +113,8 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
 
     return () => {
       logger.debug('[SoapRequestTabView] Unregistering request from ContextService', { requestId })
-      unsubUrl()
-      unsubSnippets()
+      unsubUrl?.()
+      unsubSnippets?.()
       void window.restorm?.context?.unregisterRequest(requestId)
     }
   }, [request.id])

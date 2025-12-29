@@ -171,8 +171,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     })
 
     return () => {
-      unsubUrl()
-      unsubSnippets()
+      unsubUrl?.()
+      unsubSnippets?.()
     }
   }, [request.id])
 
