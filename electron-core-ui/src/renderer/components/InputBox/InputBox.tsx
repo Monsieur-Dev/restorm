@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react'
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react'
 import './inputBox.css'
 import { MessageType, defaultInputBoxStyles } from './types'
 import type { IMessage, InputBoxProps } from './types'
@@ -7,7 +7,7 @@ const InputBox: React.FC<InputBoxProps> = ({
   options,
   value = '',
   onChange,
-  changeDebounceMs = 200,
+  changeDebounceMs = 0,
   onBlur,
   onFocus,
   onKeyDown,
@@ -17,10 +17,16 @@ const InputBox: React.FC<InputBoxProps> = ({
   style,
   inputRef: externalInputRef
 }) => {
-  const [internalValue, setInternalValue] = useState(value)
   const [message, setMessage] = useState<IMessage | null>(null)
   const [state, setState] = useState<'idle' | 'focused'>('idle')
-  const [currentPlaceholder, setCurrentPlaceholder] = useState(options.placeholder ?? '')
+  
+  // Compute placeholder based on state and options (no useEffect needed)
+  const currentPlaceholder = useMemo(() => {
+    if (options.showPlaceholderOnFocus && state === 'idle') {
+      return ''
+    }
+    return options.placeholder ?? ''
+  }, [options.showPlaceholderOnFocus, options.placeholder, state])
   
   const containerRef = useRef<HTMLDivElement>(null)
   const internalInputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
@@ -31,12 +37,6 @@ const InputBox: React.FC<InputBoxProps> = ({
 
   const styles = options.inputBoxStyles ?? defaultInputBoxStyles
 
-  // Sync internal value with prop
-  useEffect(() => {
-    setInternalValue(value)
-    lastEmittedValueRef.current = value
-  }, [value])
-
   // Clear pending debounce on unmount
   useEffect(() => {
     return () => {
@@ -45,15 +45,6 @@ const InputBox: React.FC<InputBoxProps> = ({
       }
     }
   }, [])
-
-  // Apply placeholder logic
-  useEffect(() => {
-    if (options.showPlaceholderOnFocus && state === 'idle') {
-      setCurrentPlaceholder('')
-    } else {
-      setCurrentPlaceholder(options.placeholder ?? '')
-    }
-  }, [options.showPlaceholderOnFocus, options.placeholder, state])
 
   const stylesForType = useCallback((type: MessageType | undefined): { border: string | undefined; background: string | undefined; foreground: string | undefined } => {
     switch (type) {
@@ -112,7 +103,6 @@ const InputBox: React.FC<InputBoxProps> = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     const newValue = e.target.value
-    setInternalValue(newValue)
     
     // Validate
     const validationMessage = validate(newValue)
@@ -159,7 +149,7 @@ const InputBox: React.FC<InputBoxProps> = ({
     return () => {
       textarea.removeEventListener('wheel', handleWheel)
     }
-  }, [internalValue, inputRef]) // Re-attach when content changes
+  }, [value, inputRef]) // Re-attach when content changes
 
   const handleFocus = (): void => {
     setState('focused')
@@ -237,11 +227,11 @@ const InputBox: React.FC<InputBoxProps> = ({
     }
   }
 
-  const inputClasses = ['input', internalValue ? '' : 'empty'].filter(Boolean).join(' ')
+  const inputClasses = ['input', value ? '' : 'empty'].filter(Boolean).join(' ')
 
   const baseProps = {
     className: inputClasses,
-    value: internalValue,
+    value: value,
     onChange: handleChange,
     onFocus: handleFocus,
     onBlur: handleBlur,
@@ -283,7 +273,7 @@ const InputBox: React.FC<InputBoxProps> = ({
               />
               {
                 <div ref={mirrorRef} className="mirror" aria-hidden="true">
-                  {internalValue || '\u00a0'}
+                  {value || '\u00a0'}
                 </div>
               }
             </>

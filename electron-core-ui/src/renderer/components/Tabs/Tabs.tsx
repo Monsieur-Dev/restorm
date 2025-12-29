@@ -67,8 +67,6 @@ export const Tabs: React.FC<TabsProps> = ({
     }
   }
 
-  const activeTab = tabs.find(tab => tab.id === currentActiveTab)
-  const useScrollable = activeTab?.useScrollableElement ?? true
   const fullscreenTab = fullscreenTabId ? tabs.find(tab => tab.id === fullscreenTabId) : null
 
   return (
@@ -213,33 +211,48 @@ export const Tabs: React.FC<TabsProps> = ({
         </div>
       </ScrollableElement>
 
-      {/* Tab content */}
-      <div role="tabpanel" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-        {useScrollable ? (
-          <ScrollableElement
-            key={currentActiveTab}
-            options={{ vertical: 'auto', horizontal: 'auto', useShadows: true }}
-            style={{
-              flex: 1,
-              backgroundColor: 'var(--editor-background)',
-              minHeight: 0
-            }}
-          >
-            {activeTab?.content}
-          </ScrollableElement>
-        ) : (
-          <div
-            style={{
-              flex: 1,
-              backgroundColor: 'var(--editor-background)',
-              minHeight: 0,
-              display: 'flex',
-              flexDirection: 'column'
-            }}
-          >
-            {activeTab?.content}
-          </div>
-        )}
+      {/* Tab content - all tabs stay mounted, inactive ones are hidden with CSS */}
+      <div role="tabpanel" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, position: 'relative' }}>
+        {tabs.map(tab => {
+          const isActive = tab.id === currentActiveTab
+          const useScrollable = tab.useScrollableElement ?? true
+          return useScrollable ? (
+            <ScrollableElement
+              key={tab.id}
+              options={{ vertical: 'auto', horizontal: 'auto', useShadows: true }}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'var(--editor-background)',
+                visibility: isActive ? 'visible' : 'hidden',
+                pointerEvents: isActive ? 'auto' : 'none'
+              }}
+            >
+              {tab.content}
+            </ScrollableElement>
+          ) : (
+            <div
+              key={tab.id}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'var(--editor-background)',
+                display: 'flex',
+                flexDirection: 'column',
+                visibility: isActive ? 'visible' : 'hidden',
+                pointerEvents: isActive ? 'auto' : 'none'
+              }}
+            >
+              {tab.content}
+            </div>
+          )
+        })}
       </div>
       <Modal
         isOpen={fullscreenTabId !== null}

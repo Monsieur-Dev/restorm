@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useCallback, Suspense, type ReactNode } from 'react'
+import React, { useState, useMemo, useRef, useCallback, Suspense, useEffect, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { GraphRef } from 'jsoncrack-react'
 import {
@@ -21,6 +21,8 @@ const Graph = React.lazy(() => import('jsoncrack-react').then(mod => ({ default:
 // ============================================================================
 
 export interface BaseRequestTabViewProps {
+  /** Unique ID of the request (used to reset notes editor when switching requests) */
+  requestId: string
   /** URL input section (rendered above tabs) */
   urlSection: ReactNode
   /** Content for the "Request" tab */
@@ -50,6 +52,7 @@ export interface BaseRequestTabViewProps {
 // ============================================================================
 
 export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
+  requestId,
   urlSection,
   requestContent,
   codeSnippetsContent,
@@ -78,6 +81,15 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
   const sashStartLeftRef = useRef(0)
   const graphRef = useRef<GraphRef | null>(null)
   const prevResponseContentRef = useRef<typeof responseContent>(null)
+  
+  // Ref for onChange to avoid recreating tabs callback
+  const onNotesChangeRef = useRef(onNotesChange)
+  useEffect(() => { onNotesChangeRef.current = onNotesChange }, [onNotesChange])
+  
+  // Stable notes change handler that uses ref
+  const handleNotesChange = useCallback((md: string) => {
+    onNotesChangeRef.current?.(md)
+  }, [])
 
   // Switch to response tab only when content becomes available (new response), or to infos if it disappears
   React.useEffect(() => {
@@ -193,8 +205,9 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
       useScrollableElement: false,
       content: (
         <MarkdownEditor
+          key={requestId}
           initialValue={notes ?? ''}
-          onChange={(md) => onNotesChange?.(md)}
+          onChange={handleNotesChange}
         />
       )
     },
@@ -204,7 +217,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
       useScrollableElement: false,
       content: <MarkdownViewer value={codeSnippetsContent} />
     }
-  ], [requestContent, documentation, notes, onNotesChange, codeSnippetsContent, t])
+  ], [requestId, notes, requestContent, documentation, handleNotesChange, codeSnippetsContent, t])
 
   // Format JSON for display
   const formattedJson = useMemo(() => {

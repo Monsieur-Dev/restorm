@@ -195,6 +195,10 @@ collections:
                 value: '1'
                 description: ID of pet to return
                 enabled: true
+            notes: ''
+            body:
+              type: text
+              content: ''
           - type: http
             name: Updates a pet in the store with form data
             documentation: |-
@@ -239,15 +243,18 @@ collections:
               - key: petId
                 value: ''
                 description: ID of pet that needs to be updated
+                enabled: true
             body:
               type: x-www-form-urlencoded
               fields:
                 - key: name
                   value: ''
                   description: Updated name of the pet
+                  enabled: true
                 - key: status
                   value: ''
                   description: Updated status of the pet
+                  enabled: true
           - type: http
             name: Deletes a pet
             documentation: |-
@@ -289,11 +296,17 @@ collections:
             headers:
               - key: api_key
                 value: ''
+                description: ''
+                enabled: true
             params: []
             pathParams:
               - key: petId
                 value: ''
                 description: Pet id to delete
+                enabled: true
+            body:
+              type: text
+              content: ''
           - type: http
             name: uploads an image
             documentation: |-
@@ -367,9 +380,11 @@ collections:
                 - key: additionalMetadata
                   value: ''
                   description: Additional data to pass to server
+                  enabled: true
                 - key: file
                   value: ''
                   description: file to upload
+                  enabled: true
           - type: http
             name: Add a new pet to the store
             documentation: |-
@@ -437,7 +452,11 @@ collections:
             method: POST
             url: '{{baseUrl}}/api/pet'
             headers: []
-            params: []
+            params:
+              - key: ''
+                value: ''
+                description: ''
+                enabled: true
             pathParams: []
             body:
               type: text
@@ -605,7 +624,9 @@ collections:
               - key: status
                 value: ''
                 description: Status values that need to be considered for filter
+                enabled: true
             pathParams: []
+            notes: ''
           - type: http
             name: Finds Pets by tags
             documentation: |-
@@ -1340,6 +1361,7 @@ collections:
             headers: []
             params: []
             pathParams: []
+    notes: ''
   - folderType: environment
     name: GraphQL Docker
     documentation: |-
@@ -1393,6 +1415,9 @@ collections:
             headers:
               - key: Content-Type
                 value: application/json
+                description: ''
+                enabled: true
+            variables: '{}'
           - type: graphql
             name: user
             documentation: 'GraphQL query: user'
@@ -1409,6 +1434,8 @@ collections:
             headers:
               - key: Content-Type
                 value: application/json
+                description: ''
+                enabled: true
             variables: '{}'
           - type: graphql
             name: posts
@@ -1703,6 +1730,8 @@ collections:
             headers:
               - key: Content-Type
                 value: application/json
+                description: ''
+                enabled: true
             variables: '{}'
           - type: graphql
             name: inventory
@@ -2740,8 +2769,12 @@ collections:
             headers:
               - key: Content-Type
                 value: text/xml; charset=utf-8
+                description: ''
+                enabled: true
               - key: SOAPAction
                 value: http://restorm.test/castlemock/Echo
+                description: ''
+                enabled: true
   - folderType: environment
     name: SOAP Petstore
     documentation: |-
@@ -2788,8 +2821,12 @@ collections:
             headers:
               - key: Content-Type
                 value: text/xml; charset=utf-8
+                description: ''
+                enabled: true
               - key: SOAPAction
                 value: http://petstore.example.com/GetPet
+                description: ''
+                enabled: true
           - type: soap
             name: FindPetsByStatus
             documentation: Find pets by status
@@ -2931,7 +2968,13 @@ collections:
             protocol: mqtt
             event: test/echo
             message: '{}'
-            headers: []
+            headers:
+              - key: s
+                value: s
+                description: ''
+                enabled: true
+            notes: |
+              ugg
           - type: websocket
             name: mqttSubscribeEcho
             documentation: Subscribe to test messages
@@ -3036,6 +3079,7 @@ collections:
             event: echo
             message: '{}'
             headers: []
+            notes: ''
           - type: websocket
             name: receiveEcho
             documentation: Receive echoed data

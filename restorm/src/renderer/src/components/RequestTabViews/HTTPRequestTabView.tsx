@@ -176,27 +176,34 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     }
   }, [request.id])
 
+  // Refs to capture initial values for registration (avoid re-running effect when these change)
+  const selectedEnvIdRef = useRef(selectedEnvId)
+  const requestRef = useRef(request)
+  useEffect(() => { selectedEnvIdRef.current = selectedEnvId }, [selectedEnvId])
+  useEffect(() => { requestRef.current = request }, [request])
+
   // Register request with ContextService on mount, unregister on unmount
   useEffect(() => {
     const requestId = request.id
     if (!requestId) return
 
-    logger.debug('[HTTPRequestTabView] Registering request with ContextService', { requestId, selectedEnvId })
+    const currentEnvId = selectedEnvIdRef.current
+    const currentRequest = requestRef.current
+    logger.debug('[HTTPRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
-    void window.restorm.context.registerRequest(requestId, selectedEnvId ?? null, {
-      headers: toKeyValueData(request.headers),
-      params: toKeyValueData(request.params),
-      pathParams: request.pathParams ? toKeyValueData(request.pathParams) : []
+    void window.restorm.context.registerRequest(requestId, currentEnvId ?? null, {
+      headers: toKeyValueData(currentRequest.headers),
+      params: toKeyValueData(currentRequest.params),
+      pathParams: currentRequest.pathParams ? toKeyValueData(currentRequest.pathParams) : []
     })
 
-    previousEnvIdRef.current = selectedEnvId ?? null
+    previousEnvIdRef.current = currentEnvId ?? null
 
     return () => {
       logger.debug('[HTTPRequestTabView] Unregistering request from ContextService', { requestId })
       void window.restorm.context.unregisterRequest(requestId)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Intentionally only run on mount/unmount and when request.id changes
-  }, [request.id])
+  }, [request.id, toKeyValueData])
 
   // Notify ContextService when selected environment changes
   useEffect(() => {
@@ -718,6 +725,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
 
   return (
     <BaseRequestTabView
+      requestId={request.id}
       urlSection={urlSection}
       requestContent={requestContent}
       codeSnippetsContent={codeSnippetsContent}

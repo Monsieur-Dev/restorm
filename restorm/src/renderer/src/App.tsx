@@ -43,6 +43,8 @@ import { Badge } from './components/Badge'
 import { mapToBadgeType } from './utils/badgeUtils'
 import { renderSearchTooltipContent } from './components/renderSearchTooltipContent'
 import { EnvironmentValuesProvider } from './contexts/EnvironmentValuesContext'
+import { AvailableVariablesProvider } from './contexts/AvailableVariablesContext'
+import { VariableTransformProvider } from './contexts/VariableTransformContext'
 import { searchIndexService } from './services/SearchIndexService'
 import { makeReactiveFolder } from './types/reactive'
 import { folderAsRootListViewItem, collectAllFolderIds } from './services/FolderToListView'
@@ -2067,16 +2069,18 @@ const App: React.FC = () => {
   }, [rootFolders])
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100vh',
-        backgroundColor: 'var(--editor-background)',
-        color: 'var(--editor-foreground)'
-      }}
-    >
-      <Titlebar
+    <AvailableVariablesProvider>
+      <VariableTransformProvider>
+        <div
+          style={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100vh',
+          backgroundColor: 'var(--editor-background)',
+          color: 'var(--editor-foreground)'
+        }}
+      >
+        <Titlebar
         title={fileName ? `Restorm - ${fileName}${isDirty ? ' *' : ''}` : t('app.title')}
         showSearchBar
         onSearchResultClick={handleSearchResultClick}
@@ -2303,8 +2307,10 @@ const App: React.FC = () => {
             </Button>
           </div>
         </div>
-      </Modal>
-    </div>
+          </Modal>
+        </div>
+      </VariableTransformProvider>
+    </AvailableVariablesProvider>
   )
 }
 

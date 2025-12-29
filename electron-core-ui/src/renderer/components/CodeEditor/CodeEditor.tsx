@@ -244,7 +244,9 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
     }
 
     debounceRef.current = setTimeout(() => {
-      props.onChange?.(lastValueRef.current, lastEventRef.current)
+      if (lastEventRef.current) {
+        props.onChange?.(lastValueRef.current, lastEventRef.current)
+      }
     }, changeDebounceMs)
   }
 

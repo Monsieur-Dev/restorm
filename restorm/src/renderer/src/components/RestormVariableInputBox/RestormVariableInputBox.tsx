@@ -9,7 +9,8 @@ import {
   type VariableDefinition
 } from 'electron-core-ui/renderer'
 import type { TranslatedHelperDefinition } from '../../utils/handlebarsHelpersDefinitions'
-import type { VariableTransformResult } from '../../types/global.d'
+import { useAvailableVariables } from '../../hooks/useAvailableVariables'
+import { useVariableTransform } from '../../hooks/useVariableTransform'
 
 const LANGUAGE_ID = 'handlebars'
 
@@ -117,8 +118,9 @@ export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (
   const containerRef = useRef<HTMLDivElement | null>(null)
   const helpersRef = useRef<TranslatedHelperDefinition[]>(helpers)
   const [showResolvedTooltip, setShowResolvedTooltip] = useState(false)
-  const [resolvedValue, setResolvedValue] = useState<string | undefined>(undefined)
-  const [availableVariables, setAvailableVariables] = useState<VariableDefinition[]>([])
+  // Use centralized contexts for single IPC subscriptions
+  const availableVariables = useAvailableVariables(variableId)
+  const resolvedValue = useVariableTransform(variableId)
   const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number }>({
     visible: false,
     x: 0,
@@ -145,55 +147,7 @@ export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (
     helpersRef.current = helpers
   }, [helpers])
 
-  // Load initial resolved value and subscribe to updates from backend
-  useEffect(() => {
-    if (!variableId) return
-
-    // Load initial value
-    void (async () => {
-      try {
-        const results = await window.restorm.context.getAllTransformResults()
-        const result = results[variableId]
-        if (result) {
-          setResolvedValue(result.transformedValue)
-          // Convert contextUsed to VariableDefinition[]
-          const varsFromContext: VariableDefinition[] = Object.entries(result.contextUsed).map(
-            ([name, value]) => ({ name, value })
-          )
-          setAvailableVariables(varsFromContext)
-        }
-      } catch {
-        // Ignore errors during initial load
-      }
-    })()
-
-    // Subscribe to transformation updates (for resolved value tooltip)
-    const unsubscribeTransform = window.restorm.context.onVariableTransformed((result: VariableTransformResult) => {
-      if (result.variableId === variableId) {
-        setResolvedValue(result.transformedValue)
-      }
-    })
-
-    // Subscribe to available variables updates (for autocompletion)
-    const unsubscribeVars = window.restorm.context.onAvailableVariables((result) => {
-      if (result.variableId === variableId) {
-        setAvailableVariables(prev => {
-          const newVars = result.variables
-          if (prev.length !== newVars.length) return newVars
-          const hasChanges = newVars.some((v, i) => {
-            const prevItem = prev[i]
-            return prevItem && (prevItem.name !== v.name || prevItem.value !== v.value)
-          })
-          return hasChanges ? newVars : prev
-        })
-      }
-    })
-
-    return () => {
-      unsubscribeTransform()
-      unsubscribeVars()
-    }
-  }, [variableId])
+  // Variable transformation and available variables are now handled by centralized contexts
 
   // Merge prop variables with backend variables (backend takes precedence for resolved values)
   const mergedVariables = React.useMemo(() => {

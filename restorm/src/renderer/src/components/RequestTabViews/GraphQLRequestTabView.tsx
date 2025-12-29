@@ -61,25 +61,33 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
     return undefined
   }, [request])
 
+  // Refs to capture initial values for registration (avoid re-running effect when these change)
+  const selectedEnvIdRef = useRef(selectedEnvId)
+  const requestRef = useRef(request)
+  useEffect(() => { selectedEnvIdRef.current = selectedEnvId }, [selectedEnvId])
+  useEffect(() => { requestRef.current = request }, [request])
+
   // Register request with ContextService on mount, unregister on unmount
   useEffect(() => {
     const requestId = request.id
-    logger.debug('[GraphQLRequestTabView] Registering request with ContextService', { requestId, selectedEnvId })
+    const currentEnvId = selectedEnvIdRef.current
+    const currentRequest = requestRef.current
+    logger.debug('[GraphQLRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
     const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
       kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
 
-    void window.restorm.context.registerRequest(requestId, selectedEnvId ?? null, {
-      headers: toKeyValueData(request.headers)
+    void window.restorm.context.registerRequest(requestId, currentEnvId ?? null, {
+      headers: toKeyValueData(currentRequest.headers)
     })
 
     // Send full request data for URL and code snippet calculation
     void window.restorm.context.updateFullRequestData(requestId, {
-      url: request.url,
+      url: currentRequest.url,
       method: 'POST',
       requestType: 'graphql',
-      headers: toKeyValueData(request.headers),
-      body: { type: 'text', content: JSON.stringify({ query: request.query, variables: request.variables }) }
+      headers: toKeyValueData(currentRequest.headers),
+      body: { type: 'text', content: JSON.stringify({ query: currentRequest.query, variables: currentRequest.variables }) }
     })
 
     // Subscribe to backend events
@@ -103,7 +111,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
       if (result) setBackendCodeSnippets(result.markdown)
     })
 
-    previousEnvIdRef.current = selectedEnvId ?? null
+    previousEnvIdRef.current = currentEnvId ?? null
 
     return () => {
       logger.debug('[GraphQLRequestTabView] Unregistering request from ContextService', { requestId })
@@ -111,7 +119,6 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
       unsubSnippets()
       void window.restorm.context.unregisterRequest(requestId)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Intentionally only run on mount/unmount and when request.id changes
   }, [request.id])
 
   // Notify ContextService when selected environment changes
@@ -339,6 +346,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
   
   return (
     <BaseRequestTabView
+      requestId={request.id}
       urlSection={urlSection}
       requestContent={requestContent}
       codeSnippetsContent={codeSnippetsContent}

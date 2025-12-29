@@ -55,27 +55,42 @@ interface MarkdownEditorInnerProps {
 }
 
 const MarkdownEditorInner: React.FC<MarkdownEditorInnerProps> = ({ initialValue, onChange }) => {
-  // Use ref to avoid stale closure in listener callback
+  // Use refs to avoid stale closures and track mounted state
   const onChangeRef = useRef(onChange)
+  const isMountedRef = useRef(true)
+  // Store initial value in ref to use only once at mount (avoid recreating editor on each change)
+  const initialValueRef = useRef(initialValue)
+  
   useEffect(() => {
     onChangeRef.current = onChange
   }, [onChange])
 
+  // Track mounted state to prevent updates after unmount
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
+
   useEditor((root) => {
     const crepe = new Crepe({
       root,
-      defaultValue: initialValue
+      defaultValue: initialValueRef.current
     })
 
     // Add listener for change detection using Crepe's built-in API
     ;(crepe as unknown as CrepeWithListener).on((listener: ListenerManager) => {
       listener.markdownUpdated((_ctx, markdown: string) => {
-        onChangeRef.current?.(markdown)
+        // Only call onChange if component is still mounted
+        if (isMountedRef.current) {
+          onChangeRef.current?.(markdown)
+        }
       })
     })
 
     return crepe
-  }, [initialValue])
+  }, []) // Empty deps - editor is created once at mount
 
   return <Milkdown />
 }
