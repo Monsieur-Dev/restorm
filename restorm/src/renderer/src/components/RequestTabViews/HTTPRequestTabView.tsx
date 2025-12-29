@@ -307,7 +307,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
       }
     })
     
-    return () => { unsubscribe() }
+    return () => { unsubscribe?.() }
   }, [urlVariableId])
 
   // Callbacks for KeyValue changes - notify both reactive object and ContextService
