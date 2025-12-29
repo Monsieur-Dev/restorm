@@ -117,8 +117,8 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
 
     return () => {
       logger.debug('[WebSocketRequestTabView] Unregistering request from ContextService', { requestId })
-      unsubUrl()
-      unsubSnippets()
+      unsubUrl?.()
+      unsubSnippets?.()
       void window.restorm?.context?.unregisterRequest(requestId)
     }
   }, [request.id])
