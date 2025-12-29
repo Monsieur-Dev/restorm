@@ -108,7 +108,7 @@ function ensureRestormWebShim(): void {
     }
   })
 
-  ;(window as unknown as { restorm: typeof window.restorm }).restorm = {
+  ;(window as unknown as { restorm?: typeof window.restorm }).restorm = {
     openEditor: async () => {
       // No-op in web mode
     },
