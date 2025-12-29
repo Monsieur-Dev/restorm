@@ -126,32 +126,41 @@ function ensureRestormWebShim(): void {
     context: {
       getAllTransformResults: async () => ({}),
       onVariableTransformed: () => () => {
+        // TODO: Implement client-side variable transformation in web mode
+        // This would require porting ContextService logic to renderer
         // No-op unsubscribe
       },
       registerRequest: async () => {
+        // TODO: Implement client-side request registration in web mode
         // No-op in web mode
       },
       unregisterRequest: async () => {
         // No-op in web mode
       },
       setRequestEnvironment: async () => {
+        // TODO: Implement client-side environment switching in web mode
         // No-op in web mode
       },
       updateRequestKeyValues: async () => {
+        // TODO: Implement client-side key-value updates in web mode
         // No-op in web mode
       },
       updateFullRequestData: async () => {
+        // TODO: Implement client-side request data updates in web mode
         // No-op in web mode
       },
       getResolvedUrl: async () => undefined,
       getCodeSnippets: async () => undefined,
       onUrlResolved: () => () => {
+        // TODO: Implement client-side URL resolution in web mode
         // No-op unsubscribe
       },
       onCodeSnippetsUpdated: () => () => {
+        // TODO: Implement client-side code snippet generation in web mode
         // No-op unsubscribe
       },
       onAvailableVariables: () => () => {
+        // TODO: Implement client-side available variables in web mode
         // No-op unsubscribe
       },
       clearAll: async () => {
