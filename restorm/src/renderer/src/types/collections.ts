@@ -34,6 +34,8 @@ export interface KeyValue {
   value: string
   /** Optional description, when provided by Swagger or user input */
   description?: string | undefined
+  /** Whether this key-value is enabled (default: true) */
+  enabled?: boolean
 }
 
 // ============================================================================

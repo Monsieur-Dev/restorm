@@ -36,6 +36,8 @@ interface KeyValue {
   key: string
   value: string
   description?: string
+  /** Whether this key-value is enabled (default: true) */
+  enabled?: boolean
 }
 
 /** Environment structure */
@@ -422,6 +424,20 @@ class ContextService {
     const finalContext = { ...accumulatedContext }
 
     for (const kv of meta.rawVariables) {
+      // Broadcast available variables for autocompletion (for ALL fields, including disabled)
+      // Each field sees: parent env variables + previous ENABLED variables in this env
+      if (kv.id) {
+        const varsForThisField = Object.entries(finalContext).map(([name, value]) => ({
+          name,
+          value
+        }))
+        this.broadcastFieldVariables(kv.id, varsForThisField)
+      }
+
+      // Skip disabled variables for context accumulation (enabled defaults to true if undefined)
+      if (kv.enabled === false) {
+        continue
+      }
       if (kv.key) {
         // Copy context before transformation for this variable
         const contextUsed = { ...finalContext }
@@ -688,6 +704,10 @@ class ContextService {
       const groupContext = { ...baseContext }
 
       for (const kv of keyValues) {
+        // Skip disabled variables (enabled defaults to true if undefined)
+        if (kv.enabled === false) {
+          continue
+        }
         if (kv.key) {
           const contextUsed = { ...groupContext }
           const transformedValue = this.transformValue(kv.value, groupContext)
@@ -707,7 +727,7 @@ class ContextService {
       logger.debug('[ContextService] Processed request group', {
         requestId,
         groupName,
-        variableCount: keyValues.filter(kv => kv.id).length
+        variableCount: keyValues.filter(kv => kv.id && kv.enabled !== false).length
       })
     }
 
@@ -774,6 +794,10 @@ class ContextService {
     const cumulativePathParams: { name: string; value: string }[] = []
     
     for (const pp of pathParams) {
+      // Skip disabled path params (enabled defaults to true if undefined)
+      if (pp.enabled === false) {
+        continue
+      }
       
       if (pp.id) {
         const varsForThisField = [...envVars, ...cumulativePathParams]
@@ -795,6 +819,10 @@ class ContextService {
     const cumulativeHeaders: { name: string; value: string }[] = []
     
     for (const h of headers) {
+      // Skip disabled headers (enabled defaults to true if undefined)
+      if (h.enabled === false) {
+        continue
+      }
       
       if (h.id) {
         const varsForThisField = [...envVars, ...cumulativeHeaders]
@@ -816,6 +844,10 @@ class ContextService {
     const cumulativeParams: { name: string; value: string }[] = []
     
     for (const p of params) {
+      // Skip disabled params (enabled defaults to true if undefined)
+      if (p.enabled === false) {
+        continue
+      }
       
       if (p.id) {
         const varsForThisField = [...envVars, ...cumulativeParams]
@@ -872,6 +904,10 @@ class ContextService {
     const pathParams = data.pathParams ?? []
     
     for (const pp of pathParams) {
+      // Skip disabled path params (enabled defaults to true if undefined)
+      if (pp.enabled === false) {
+        continue
+      }
       if (pp.key) {
         // Resolve using cumulative context (env + previous path params)
         const resolvedKey = this.transformValue(pp.key, cumulativeContext)
@@ -899,6 +935,10 @@ class ContextService {
     const resolvedParams = new Map<string, string>() // key -> resolved value (last wins)
     
     for (const param of params) {
+      // Skip disabled params (enabled defaults to true if undefined)
+      if (param.enabled === false) {
+        continue
+      }
       if (param.key) {
         // Resolve using cumulative context
         const resolvedKey = this.transformValue(param.key, cumulativeParamsContext)
@@ -969,9 +1009,9 @@ class ContextService {
       host = resolvedUrl
     }
 
-    // Resolve headers
+    // Resolve headers (skip disabled ones)
     const headers = data.headers
-      .filter(h => h.key)
+      .filter(h => h.key && h.enabled !== false)
       .map(h => ({
         key: this.transformValue(h.key, envContext),
         value: this.transformValue(h.value, envContext)

@@ -18,6 +18,8 @@ export interface KeyValueTableRow {
   key: string
   value: string
   description?: string | undefined
+  /** Whether this row is enabled (default: true) */
+  enabled?: boolean
 }
 
 interface ParamRow {
@@ -111,7 +113,7 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
     }
     return initialRows.map((kv): ParamRow => ({
       id: kv.id ?? generateRowId(),
-      enabled: true,
+      enabled: kv.enabled !== false, // Default to true if undefined
       key: kv.key,
       value: kv.value,
       description: kv.description ?? ''
@@ -144,7 +146,8 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
         id: row.id,
         key: row.key,
         value: row.value,
-        description: row.description
+        description: row.description,
+        enabled: row.enabled
       })),
     [rows]
   )

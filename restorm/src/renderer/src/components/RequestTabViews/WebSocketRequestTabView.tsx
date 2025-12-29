@@ -68,8 +68,8 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     const requestId = request.id
     logger.debug('[WebSocketRequestTabView] Registering request with ContextService', { requestId, selectedEnvId })
 
-    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string }[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value }))
+    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
 
     void window.restorm.context.registerRequest(requestId, selectedEnvId ?? null, {
       headers: toKeyValueData(request.headers)
@@ -132,8 +132,8 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
 
   // Notify ContextService when URL, event or message changes
   useEffect(() => {
-    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string }[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value }))
+    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
 
     void window.restorm.context.updateFullRequestData(request.id, {
       url,
@@ -170,7 +170,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     void window.restorm.context.updateRequestKeyValues(
       request.id,
       'headers',
-      rows.map(r => ({ id: r.id, key: r.key, value: r.value }))
+      rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
     )
   }, [request])
 

@@ -137,10 +137,11 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
   }, [request])
 
   // Convert KeyValue arrays to plain objects for IPC
-  const toKeyValueData = useCallback((kvs: KeyValue[]): { id?: string; key: string; value: string }[] =>
+  const toKeyValueData = useCallback((kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
     kvs.map(kv => {
-      const result: { id?: string; key: string; value: string } = { key: kv.key, value: kv.value }
+      const result: { id?: string; key: string; value: string; enabled?: boolean } = { key: kv.key, value: kv.value }
       if (kv.id !== undefined) result.id = kv.id
+      if (kv.enabled !== undefined) result.enabled = kv.enabled
       return result
     }), [])
 
@@ -310,7 +311,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
       void window.restorm.context.updateRequestKeyValues(
         requestId,
         'headers',
-        rows.map(r => ({ id: r.id, key: r.key, value: r.value }))
+        rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
       )
     }
   }, [request])
@@ -322,7 +323,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
       void window.restorm.context.updateRequestKeyValues(
         requestId,
         'params',
-        rows.map(r => ({ id: r.id, key: r.key, value: r.value }))
+        rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
       )
     }
   }, [request])
@@ -334,7 +335,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
       void window.restorm.context.updateRequestKeyValues(
         requestId,
         'pathParams',
-        rows.map(r => ({ id: r.id, key: r.key, value: r.value }))
+        rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
       )
     }
   }, [request])

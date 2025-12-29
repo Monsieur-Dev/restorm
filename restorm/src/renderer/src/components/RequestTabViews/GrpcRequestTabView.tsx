@@ -65,8 +65,8 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
     const requestId = request.id
     logger.debug('[GrpcRequestTabView] Registering request with ContextService', { requestId, selectedEnvId })
 
-    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string }[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value }))
+    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
 
     void window.restorm.context.registerRequest(requestId, selectedEnvId ?? null, {
       headers: toKeyValueData(request.metadata)
@@ -129,8 +129,8 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
 
   // Notify ContextService when URL or request message changes
   useEffect(() => {
-    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string }[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value }))
+    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
 
     void window.restorm.context.updateFullRequestData(request.id, {
       url,
@@ -163,7 +163,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
     void window.restorm.context.updateRequestKeyValues(
       request.id,
       'headers', // Use 'headers' as the group name for consistency
-      rows.map(r => ({ id: r.id, key: r.key, value: r.value }))
+      rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
     )
   }, [request])
 

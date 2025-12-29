@@ -103,6 +103,8 @@ export interface KeyValueData {
   id?: string | undefined
   key: string
   value: string
+  /** Whether this key-value is enabled (default: true) */
+  enabled?: boolean
 }
 
 /** Variable transformation result from context service */

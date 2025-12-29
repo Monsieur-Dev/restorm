@@ -84,12 +84,16 @@ class WebSocketExecutionService {
       const messages: WebSocketMessage[] = []
       let connected = false
 
-      // Build headers from context
+      // Build headers from context (skip disabled ones)
       const headers: Record<string, string> = {}
       if (requestContext?.keyValueGroups) {
         const headersGroup = requestContext.keyValueGroups.get('headers')
         if (headersGroup) {
           for (const h of headersGroup) {
+            // Skip disabled headers (enabled defaults to true if undefined)
+            if (h.enabled === false) {
+              continue
+            }
             if (h.key) {
               const resolvedValue = contextService.resolveValue(h.value, requestId)
               headers[h.key] = resolvedValue
