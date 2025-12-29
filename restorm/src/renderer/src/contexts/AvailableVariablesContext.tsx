@@ -18,11 +18,12 @@ export function AvailableVariablesProvider({ children }: AvailableVariablesProvi
   // Set up single IPC subscription
   useEffect(() => {
     // Check if Electron APIs are available (not in web mode)
-    if (!window.restorm || !window.restorm.context?.onAvailableVariables) {
+    const restormContext = window.restorm?.context
+    if (!restormContext?.onAvailableVariables) {
       return
     }
 
-    const unsubscribe = window.restorm.context.onAvailableVariables((result) => {
+    const unsubscribe = restormContext.onAvailableVariables((result) => {
       const { variableId, variables } = result
       
       // Update stored variables
