@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react'
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react'
 import './inputBox.css'
 import { MessageType, defaultInputBoxStyles } from './types'
 import type { IMessage, InputBoxProps } from './types'
@@ -7,6 +7,7 @@ const InputBox: React.FC<InputBoxProps> = ({
   options,
   value = '',
   onChange,
+  changeDebounceMs = 0,
   onBlur,
   onFocus,
   onKeyDown,
@@ -16,31 +17,34 @@ const InputBox: React.FC<InputBoxProps> = ({
   style,
   inputRef: externalInputRef
 }) => {
-  const [internalValue, setInternalValue] = useState(value)
   const [message, setMessage] = useState<IMessage | null>(null)
   const [state, setState] = useState<'idle' | 'focused'>('idle')
-  const [currentPlaceholder, setCurrentPlaceholder] = useState(options.placeholder ?? '')
+  
+  // Compute placeholder based on state and options (no useEffect needed)
+  const currentPlaceholder = useMemo(() => {
+    if (options.showPlaceholderOnFocus && state === 'idle') {
+      return ''
+    }
+    return options.placeholder ?? ''
+  }, [options.showPlaceholderOnFocus, options.placeholder, state])
   
   const containerRef = useRef<HTMLDivElement>(null)
   const internalInputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
   const inputRef = externalInputRef ?? internalInputRef
   const mirrorRef = useRef<HTMLDivElement>(null)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const lastEmittedValueRef = useRef<string>(value)
 
   const styles = options.inputBoxStyles ?? defaultInputBoxStyles
 
-  // Sync internal value with prop
+  // Clear pending debounce on unmount
   useEffect(() => {
-    setInternalValue(value)
-  }, [value])
-
-  // Apply placeholder logic
-  useEffect(() => {
-    if (options.showPlaceholderOnFocus && state === 'idle') {
-      setCurrentPlaceholder('')
-    } else {
-      setCurrentPlaceholder(options.placeholder ?? '')
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+      }
     }
-  }, [options.showPlaceholderOnFocus, options.placeholder, state])
+  }, [])
 
   const stylesForType = useCallback((type: MessageType | undefined): { border: string | undefined; background: string | undefined; foreground: string | undefined } => {
     switch (type) {
@@ -80,9 +84,25 @@ const InputBox: React.FC<InputBoxProps> = ({
     return options.validationOptions.validation(val)
   }, [options.validationOptions])
 
+  const emitChange = useCallback((nextValue: string): void => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+    }
+
+    lastEmittedValueRef.current = nextValue
+
+    if (changeDebounceMs <= 0) {
+      onChange?.(nextValue)
+      return
+    }
+
+    debounceRef.current = setTimeout(() => {
+      onChange?.(lastEmittedValueRef.current)
+    }, changeDebounceMs)
+  }, [changeDebounceMs, onChange])
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     const newValue = e.target.value
-    setInternalValue(newValue)
     
     // Validate
     const validationMessage = validate(newValue)
@@ -98,7 +118,7 @@ const InputBox: React.FC<InputBoxProps> = ({
       }
     }
     
-    onChange?.(newValue)
+    emitChange(newValue)
   }
 
   // Use native event listeners for wheel events
@@ -129,7 +149,7 @@ const InputBox: React.FC<InputBoxProps> = ({
     return () => {
       textarea.removeEventListener('wheel', handleWheel)
     }
-  }, [internalValue, inputRef]) // Re-attach when content changes
+  }, [value, inputRef]) // Re-attach when content changes
 
   const handleFocus = (): void => {
     setState('focused')
@@ -207,11 +227,11 @@ const InputBox: React.FC<InputBoxProps> = ({
     }
   }
 
-  const inputClasses = ['input', internalValue ? '' : 'empty'].filter(Boolean).join(' ')
+  const inputClasses = ['input', value ? '' : 'empty'].filter(Boolean).join(' ')
 
   const baseProps = {
     className: inputClasses,
-    value: internalValue,
+    value: value,
     onChange: handleChange,
     onFocus: handleFocus,
     onBlur: handleBlur,
@@ -253,7 +273,7 @@ const InputBox: React.FC<InputBoxProps> = ({
               />
               {
                 <div ref={mirrorRef} className="mirror" aria-hidden="true">
-                  {internalValue || '\u00a0'}
+                  {value || '\u00a0'}
                 </div>
               }
             </>

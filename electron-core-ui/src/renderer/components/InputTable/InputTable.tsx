@@ -154,7 +154,7 @@ export const InputTable: React.FC<InputTableProps> = ({
           +
         </button>
       </div>
-      <div className="ag-theme-restorm-input-table input-table-wrapper">
+      <div className="theme-core-ui-input-table input-table-wrapper">
         <table className="input-table-table">
           <thead>
             <tr>

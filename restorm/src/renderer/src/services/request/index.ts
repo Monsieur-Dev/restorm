@@ -1,3 +1,4 @@
+export * from './types'
 export * from './GraphQLRequestService'
 export * from './GrpcRequestService'
 export * from './HTTPRequestService'

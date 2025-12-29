@@ -1,4 +1,4 @@
-.ag-theme-restorm-input-table {
+.theme-core-ui-input-table {
   --ag-background-color: var(--editor-background);
   --ag-foreground-color: var(--editor-foreground);
   --ag-border-color: transparent;
@@ -15,20 +15,20 @@
   --ag-font-size: 12px;
 }
 
-.ag-theme-restorm-input-table .ag-root-wrapper {
+.theme-core-ui-input-table .ag-root-wrapper {
   border-radius: 2px;
 }
 
-.ag-theme-restorm-input-table .ag-cell,
-.ag-theme-restorm-input-table .ag-header-cell {
+.theme-core-ui-input-table .ag-cell,
+.theme-core-ui-input-table .ag-header-cell {
   padding: 2px 6px;
 }
 
-.ag-theme-restorm-input-table .ag-row-drag {
+.theme-core-ui-input-table .ag-row-drag {
   opacity: 0.6;
 }
 
-.ag-theme-restorm-input-table .ag-row-hover .ag-row-drag {
+.theme-core-ui-input-table .ag-row-hover .ag-row-drag {
   opacity: 1;
 }
 

@@ -307,7 +307,7 @@ function schemaToSample(
 
       // If object has only additionalProperties, add a placeholder key
       if (!Object.keys(result).length && workingSchema.additionalProperties) {
-        result['exampleKey'] = schemaToSample(
+        result.exampleKey = schemaToSample(
           workingSchema.additionalProperties,
           spec,
           depth + 1,

@@ -5,6 +5,7 @@ import type {
   SerializationFormat,
   UnsavedChangesDialogLabels
 } from '../../../types/file'
+import { logger } from '../services/logger'
 
 interface WindowFileApi {
   file: {
@@ -19,6 +20,8 @@ interface WindowFileApi {
     isDirty: () => Promise<boolean>
     markDirty: () => Promise<void>
     clearDirty: () => Promise<void>
+    checkAndUpdateDirty: (currentChecksum: string) => Promise<void>
+    finishLoading: () => Promise<void>
     showUnsavedChangesDialog: (labels?: UnsavedChangesDialogLabels) => Promise<'save' | 'discard' | 'cancel'>
     getRecentFiles: () => Promise<FileMetadata[]>
     getFavorites: () => Promise<FileMetadata[]>
@@ -27,6 +30,17 @@ interface WindowFileApi {
     getContentChecksum: () => Promise<string | null>
     setContentChecksum: (checksum: string) => Promise<void>
     hasContentChanged: (currentChecksum: string) => Promise<boolean>
+    // Object checksum tracking
+    registerInitialChecksums: (objects: Map<string, unknown>) => Promise<void>
+    updateObjectChecksum: (runtimeId: string, data: unknown) => Promise<void>
+    removeObjectChecksum: (runtimeId: string) => Promise<void>
+    commitChecksums: () => Promise<void>
+    getDirtyStateDetails: () => Promise<{
+      isDirty: boolean
+      changedIds: string[]
+      newIds: string[]
+      deletedIds: string[]
+    }>
     onStateChanged: (callback: (state: FileServiceState) => void) => () => void
     onDirtyChanged: (callback: (isDirty: boolean) => void) => () => void
     onFileOpened: (callback: (state: FileServiceState) => void) => () => void
@@ -346,4 +360,89 @@ export const hasContentChanged = async (currentChecksum: string): Promise<boolea
   const api = getApi()
   if (!api) return false
   return api.hasContentChanged(currentChecksum)
+}
+
+/**
+ * Signal that file loading/initialization is complete
+ * Call this after the renderer has finished initializing the file content
+ */
+export const finishLoading = async (): Promise<void> => {
+  const api = getApi()
+  if (!api) return
+  await api.finishLoading()
+}
+
+// ==========================================================================
+// Object Checksum Tracking
+// ==========================================================================
+
+/**
+ * Register initial checksums for all objects when a file is loaded.
+ * This establishes the "clean" state baseline.
+ * @param objects Map of runtimeId → object data
+ */
+export const registerInitialChecksums = async (objects: Map<string, unknown>): Promise<void> => {
+  logger.debug('[useFileService] registerInitialChecksums called', { count: objects.size })
+  const api = getApi()
+  if (!api) {
+    logger.warn('[useFileService] No API available for registerInitialChecksums')
+    return
+  }
+  await api.registerInitialChecksums(objects)
+}
+
+/**
+ * Update the checksum for a specific object
+ * @param runtimeId Runtime ID of the object
+ * @param data Current state of the object
+ */
+export const updateObjectChecksum = async (runtimeId: string, data: unknown): Promise<void> => {
+  const api = getApi()
+  if (!api) return
+  await api.updateObjectChecksum(runtimeId, data)
+}
+
+/**
+ * Remove an object from checksum tracking (when object is deleted)
+ * @param runtimeId Runtime ID of the object
+ */
+export const removeObjectChecksum = async (runtimeId: string): Promise<void> => {
+  const api = getApi()
+  if (!api) return
+  await api.removeObjectChecksum(runtimeId)
+}
+
+/**
+ * Commit current checksums as the new "saved" state.
+ * Call this after a successful save operation.
+ */
+export const commitChecksums = async (): Promise<void> => {
+  const api = getApi()
+  if (!api) return
+  await api.commitChecksums()
+}
+
+/**
+ * Get detailed dirty state information including which objects changed
+ */
+export const getDirtyStateDetails = async (): Promise<{
+  isDirty: boolean
+  changedIds: string[]
+  newIds: string[]
+  deletedIds: string[]
+}> => {
+  const api = getApi()
+  if (!api) return { isDirty: false, changedIds: [], newIds: [], deletedIds: [] }
+  return api.getDirtyStateDetails()
+}
+
+/**
+ * Check and update dirty state based on content checksum
+ * Compares the provided checksum with the saved checksum and updates dirty state accordingly
+ * @param currentChecksum JSON stringified current content
+ */
+export const checkAndUpdateDirty = async (currentChecksum: string): Promise<void> => {
+  const api = getApi()
+  if (!api) return
+  await api.checkAndUpdateDirty(currentChecksum)
 }

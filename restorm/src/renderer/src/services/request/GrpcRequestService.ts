@@ -7,7 +7,13 @@
  */
 
 import type { GrpcRequest, GrpcResponse, KeyValue } from '../../types/collections'
-import { resolveTemplate, type VariableContext } from '../VariableResolutionService'
+// TODO: Variable resolution will be implemented in backend
+import type { VariableContext } from './types'
+
+/** Placeholder for variable resolution - returns template as-is (to be implemented in backend) */
+function resolveTemplate(template: string, _context: VariableContext): string {
+  return template
+}
 
 /** Input for executing a gRPC request */
 export interface GrpcRequestInput {

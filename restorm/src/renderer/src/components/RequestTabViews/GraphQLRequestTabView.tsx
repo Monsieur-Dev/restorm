@@ -1,32 +1,23 @@
-import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Handlebars } from '../../utils/handlebarsHelpers'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
   Button,
-  VariableInputBox,
   CodeEditor,
-  KeyValueTable,
   SplitView,
   Pane,
   logger,
   type VariableDefinition,
-  type KeyValueTableHandle
+  type KeyValueTableRow
 } from 'electron-core-ui/renderer'
-import type { GraphQLRequest, GraphQLResponse } from '../../types/collections'
+import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
+import type { GraphQLRequest, GraphQLResponse, KeyValue } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
-import { useEnvironmentValues } from '../../contexts/useEnvironmentValues'
-import {
-  resolveEnvironmentVariables,
-  type VariableContext
-} from '../../services/VariableResolutionService'
-import { executeGraphQLRequest, type GraphQLRequestInput } from '../../services/request/GraphQLRequestService'
+import type { VariableContext } from '../RestormKeyValueTable'
+import type { GraphQLExecutionResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { Badge } from '../Badge'
-import codeSnippetsTemplate from '../../resources/templates/code-snippets-graphql.hbs?raw'
-
-// Compile the Handlebars template
-const compiledTemplate = Handlebars.compile(codeSnippetsTemplate)
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
 function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
@@ -39,15 +30,19 @@ export interface GraphQLRequestTabViewProps {
 
 export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ request }) => {
   const { t } = useTranslation()
-  const { environments, selectedEnvId } = useEnvironmentContext()
-  const { valuesByEnvId } = useEnvironmentValues()
+  const { selectedEnvId } = useEnvironmentContext()
   const handlebarsHelpers = useHandlebarsHelpers()
+  const previousEnvIdRef = useRef<string | null>(null)
   
   const [url, setUrlState] = useState(request.url)
   const [query, setQueryState] = useState(request.query)
   const [variables, setVariablesState] = useState(request.variables ?? '{}')
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<GraphQLResponse | null>(null)
+  
+  // Backend-provided resolved URL and code snippets
+  const [resolvedUrl, setResolvedUrl] = useState<string>('')
+  const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
   
   const headersRef = useRef<KeyValueTableHandle | null>(null)
   const requestIdRef = useRef(request.id)
@@ -66,6 +61,94 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
     return undefined
   }, [request])
 
+  // Refs to capture initial values for registration (avoid re-running effect when these change)
+  const selectedEnvIdRef = useRef(selectedEnvId)
+  const requestRef = useRef(request)
+  useEffect(() => { selectedEnvIdRef.current = selectedEnvId }, [selectedEnvId])
+  useEffect(() => { requestRef.current = request }, [request])
+
+  // Register request with ContextService on mount, unregister on unmount
+  useEffect(() => {
+    const requestId = request.id
+    const currentEnvId = selectedEnvIdRef.current
+    const currentRequest = requestRef.current
+    logger.debug('[GraphQLRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
+
+    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
+
+    void window.restorm.context.registerRequest(requestId, currentEnvId ?? null, {
+      headers: toKeyValueData(currentRequest.headers)
+    })
+
+    // Send full request data for URL and code snippet calculation
+    void window.restorm.context.updateFullRequestData(requestId, {
+      url: currentRequest.url,
+      method: 'POST',
+      requestType: 'graphql',
+      headers: toKeyValueData(currentRequest.headers),
+      body: { type: 'text', content: JSON.stringify({ query: currentRequest.query, variables: currentRequest.variables }) }
+    })
+
+    // Subscribe to backend events
+    const unsubUrl = window.restorm.context.onUrlResolved((result) => {
+      if (result.requestId === requestId) {
+        setResolvedUrl(result.resolvedUrl)
+      }
+    })
+
+    const unsubSnippets = window.restorm.context.onCodeSnippetsUpdated((result) => {
+      if (result.requestId === requestId) {
+        setBackendCodeSnippets(result.markdown)
+      }
+    })
+
+    // Get initial values if they exist
+    void window.restorm.context.getResolvedUrl(requestId).then((result) => {
+      if (result) setResolvedUrl(result.resolvedUrl)
+    })
+    void window.restorm.context.getCodeSnippets(requestId).then((result) => {
+      if (result) setBackendCodeSnippets(result.markdown)
+    })
+
+    previousEnvIdRef.current = currentEnvId ?? null
+
+    return () => {
+      logger.debug('[GraphQLRequestTabView] Unregistering request from ContextService', { requestId })
+      unsubUrl()
+      unsubSnippets()
+      void window.restorm.context.unregisterRequest(requestId)
+    }
+  }, [request.id])
+
+  // Notify ContextService when selected environment changes
+  useEffect(() => {
+    const currentEnvId = selectedEnvId ?? null
+    if (previousEnvIdRef.current !== currentEnvId) {
+      logger.debug('[GraphQLRequestTabView] Environment changed, notifying ContextService', {
+        requestId: request.id,
+        previousEnvId: previousEnvIdRef.current,
+        newEnvId: currentEnvId
+      })
+      void window.restorm.context.setRequestEnvironment(request.id, currentEnvId)
+      previousEnvIdRef.current = currentEnvId
+    }
+  }, [selectedEnvId, request.id])
+
+  // Notify ContextService when URL, query or variables change
+  useEffect(() => {
+    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
+
+    void window.restorm.context.updateFullRequestData(request.id, {
+      url,
+      method: 'POST',
+      requestType: 'graphql',
+      headers: toKeyValueData(request.headers),
+      body: { type: 'text', content: JSON.stringify({ query, variables }) }
+    })
+  }, [request.id, request.headers, url, query, variables])
+
   // Sync state changes to reactive request object
   const setUrl = useCallback((value: string): void => {
     setUrlState(value)
@@ -80,38 +163,45 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
     updateReactiveProperty(request, 'variables', value)
   }, [request])
   
-  const runtimeContext = useMemo<VariableContext | undefined>(
-    () => (selectedEnvId ? valuesByEnvId[selectedEnvId] : undefined),
-    [valuesByEnvId, selectedEnvId]
-  )
+  // Variable resolution done in backend
+  const _environmentContext: VariableContext = {}
   
-  const environmentContext = useMemo<VariableContext>(
-    () => runtimeContext ?? resolveEnvironmentVariables(environments ?? [], selectedEnvId),
-    [runtimeContext, environments, selectedEnvId]
-  )
-  
-  const envVariables = useMemo<VariableDefinition[]>(
-    () => Object.entries(environmentContext).map(([name, value]) => ({ name, value, description: '' })),
-    [environmentContext]
-  )
+  // Stable empty array for components that get variables via their own variableId
+  const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
+
+  // Callback for headers changes - notify both reactive object and ContextService
+  const handleHeadersChange = useCallback((rows: KeyValueTableRow[]): void => {
+    updateReactiveProperty(request, 'headers', rows)
+    void window.restorm.context.updateRequestKeyValues(
+      request.id,
+      'headers',
+      rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
+    )
+  }, [request])
   
   const handleSend = (): void => {
     if (isSending) return
     setIsSending(true)
     setResponse(null)
     
-    const input: GraphQLRequestInput = {
-      request,
-      url,
-      query,
-      variables,
-      headers: request.headers,
-      variableContext: environmentContext
-    }
-    
-    executeGraphQLRequest(input)
-      .then((res) => {
-        setResponse(res)
+    window.restorm.graphql.execute({ requestId: request.id })
+      .then((res: GraphQLExecutionResult) => {
+        // Convert backend result to GraphQLResponse format
+        const graphqlResponse: GraphQLResponse = {
+          id: `resp_${Date.now()}`,
+          type: 'graphql',
+          requestId: request.id,
+          requestUrl: res.requestUrl ?? '',
+          requestQuery: query,
+          requestVariables: variables,
+          requestHeaders: request.headers,
+          statusCode: res.statusCode ?? 0,
+          data: res.data,
+          errors: res.errors,
+          responseHeaders: [],
+          timings: res.timings
+        }
+        setResponse(graphqlResponse)
         logger.info('GraphQL request completed', { url: res.requestUrl, status: res.statusCode })
       })
       .catch((err: unknown) => {
@@ -120,6 +210,10 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
       .finally(() => {
         setIsSending(false)
       })
+  }
+  
+  const handleCancel = (): void => {
+    void window.restorm.graphql.cancel(request.id)
   }
   
   // Request content (SplitView with Query, Variables, Headers)
@@ -166,32 +260,19 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
           </Button>
         )}
       >
-        <KeyValueTable
+        <RestormKeyValueTable
           ref={headersRef}
-          variables={envVariables}
+          variables={emptyVariables}
+          helpers={handlebarsHelpers}
           initialRows={request.headers}
-          visibilityMode="base-only"
-          onRowsChange={(rows): void => { updateReactiveProperty(request, 'headers', rows) }}
+          onRowsChange={handleHeadersChange}
         />
       </Pane>
     </SplitView>
   )
   
-  // Generate code snippets
-  const codeSnippetsContent = useMemo(() => {
-    const escapedQuery = query.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')
-    const headersData = request.headers.filter(h => h.key).map(h => ({ key: h.key, value: h.value }))
-    
-    return compiledTemplate({
-      url,
-      query,
-      escapedQuery,
-      variables: variables || '{}',
-      headers: headersData.length > 0 ? headersData : null,
-      operationType: request.operationType,
-      apolloMethod: request.operationType === 'mutation' ? 'mutate' : 'query'
-    })
-  }, [url, query, variables, request.headers, request.operationType])
+  // Use backend-provided code snippets
+  const codeSnippetsContent = backendCodeSnippets || t('requestTab.codeSnippets.loading', 'Loading code snippets...')
   
   // Infos content (detailed info panel)
   const infosContent = response ? (
@@ -239,19 +320,25 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
   const urlSection = (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
       <Badge type="GQL" />
-      <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }}>
-        <VariableInputBox
+      <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }} title={resolvedUrl || url}>
+        <RestormVariableInputBox
           value={url}
           onChange={setUrl}
-          variables={envVariables}
+          variables={emptyVariables}
           helpers={handlebarsHelpers}
           placeholder={t('graphql.urlPlaceholder')}
         />
       </div>
-      <Button onClick={handleSend} options={{ title: t('graphql.send'), ariaLabel: t('graphql.send') }}>
+      <Button 
+        onClick={isSending ? handleCancel : handleSend} 
+        options={{ 
+          title: isSending ? t('cancel') : t('graphql.send'), 
+          ariaLabel: isSending ? t('cancel') : t('graphql.send') 
+        }}
+      >
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <i className="codicon codicon-send" />
-          <span>{t('graphql.send')}</span>
+          <i className={isSending ? 'codicon codicon-close' : 'codicon codicon-send'} />
+          <span>{isSending ? t('cancel') : t('graphql.send')}</span>
         </span>
       </Button>
     </div>
@@ -259,6 +346,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
   
   return (
     <BaseRequestTabView
+      requestId={request.id}
       urlSection={urlSection}
       requestContent={requestContent}
       codeSnippetsContent={codeSnippetsContent}

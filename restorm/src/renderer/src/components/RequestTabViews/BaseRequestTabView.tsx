@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useRef, useCallback, type ReactNode } from 'react'
+import React, { useState, useMemo, useRef, useCallback, Suspense, useEffect, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Graph, type GraphRef } from 'jsoncrack-react'
+import type { GraphRef } from 'jsoncrack-react'
 import {
   Tabs,
   Button,
@@ -13,11 +13,16 @@ import {
   type SashEvent
 } from 'electron-core-ui/renderer'
 
+// Lazy load Graph to avoid Monaco initialization conflicts at app startup
+const Graph = React.lazy(() => import('jsoncrack-react').then(mod => ({ default: mod.Graph })))
+
 // ============================================================================
 // Types
 // ============================================================================
 
 export interface BaseRequestTabViewProps {
+  /** Unique ID of the request (used to reset notes editor when switching requests) */
+  requestId: string
   /** URL input section (rendered above tabs) */
   urlSection: ReactNode
   /** Content for the "Request" tab */
@@ -47,6 +52,7 @@ export interface BaseRequestTabViewProps {
 // ============================================================================
 
 export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
+  requestId,
   urlSection,
   requestContent,
   codeSnippetsContent,
@@ -63,6 +69,8 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
   const [activeTabId, setActiveTabId] = useState('request')
   const [responseTabId, setResponseTabId] = useState(responseContent ? 'response' : 'infos')
   const [leftPaneWidth, setLeftPaneWidth] = useState(0)
+  // Key counter to force Graph remount when switching to jsoncrack tab (Monaco disposal issue)
+  const [graphKey, setGraphKey] = useState(0)
   const [isDarkTheme, setIsDarkTheme] = useState<boolean>(() => {
     if (typeof document === 'undefined') return true
     const themeAttr = document.documentElement.getAttribute('data-theme') ?? 'dark'
@@ -73,6 +81,15 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
   const sashStartLeftRef = useRef(0)
   const graphRef = useRef<GraphRef | null>(null)
   const prevResponseContentRef = useRef<typeof responseContent>(null)
+  
+  // Ref for onChange to avoid recreating tabs callback
+  const onNotesChangeRef = useRef(onNotesChange)
+  useEffect(() => { onNotesChangeRef.current = onNotesChange }, [onNotesChange])
+  
+  // Stable notes change handler that uses ref
+  const handleNotesChange = useCallback((md: string) => {
+    onNotesChangeRef.current?.(md)
+  }, [])
 
   // Switch to response tab only when content becomes available (new response), or to infos if it disappears
   React.useEffect(() => {
@@ -160,6 +177,14 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
     []
   )
   
+  // Handle response tab change - increment graphKey when switching to jsoncrack
+  const handleResponseTabChange = useCallback((tabId: string) => {
+    if (tabId === 'jsoncrack' && responseTabId !== 'jsoncrack') {
+      setGraphKey(prev => prev + 1)
+    }
+    setResponseTabId(tabId)
+  }, [responseTabId])
+  
   // Build request tabs (Request, Docs, Notes, Code Snippets)
   const requestTabs: Tab[] = useMemo(() => [
     {
@@ -180,8 +205,9 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
       useScrollableElement: false,
       content: (
         <MarkdownEditor
+          key={requestId}
           initialValue={notes ?? ''}
-          onChange={(md) => onNotesChange?.(md)}
+          onChange={handleNotesChange}
         />
       )
     },
@@ -191,7 +217,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
       useScrollableElement: false,
       content: <MarkdownViewer value={codeSnippetsContent} />
     }
-  ], [requestContent, documentation, notes, onNotesChange, codeSnippetsContent, t])
+  ], [requestId, notes, requestContent, documentation, handleNotesChange, codeSnippetsContent, t])
 
   // Format JSON for display
   const formattedJson = useMemo(() => {
@@ -339,12 +365,15 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
                     <i className="codicon codicon-screen-full" />
                   </Button>
                 </div>
-                <Graph
-                  ref={graphRef}
-                  json={formattedJson || '{}'}
-                  layout={{ theme: isDarkTheme ? 'dark' : 'light' }}
-                  style={{ width: '100%', height: '100%' }}
-                />
+                <Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}><i className="codicon codicon-loading codicon-modifier-spin" /></div>}>
+                  <Graph
+                    key={graphKey}
+                    ref={graphRef}
+                    json={formattedJson || '{}'}
+                    layout={{ theme: isDarkTheme ? 'dark' : 'light' }}
+                    style={{ width: '100%', height: '100%' }}
+                  />
+                </Suspense>
               </div>
             </div>
           </div>
@@ -353,7 +382,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
     }
     
     return tabs
-  }, [showResponse, isLoading, infosContent, responseContent, formattedJson, isDarkTheme, t])
+  }, [showResponse, isLoading, infosContent, responseContent, formattedJson, isDarkTheme, graphKey, t])
   
   const showResponsePanel = showResponse || isLoading
   
@@ -398,7 +427,8 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
           <Tabs 
             tabs={requestTabs} 
             activeTabId={activeTabId} 
-            onTabChange={setActiveTabId} 
+            onTabChange={setActiveTabId}
+            keepMounted
           />
         </div>
         
@@ -426,7 +456,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
                 <Tabs 
                   tabs={responseTabs} 
                   activeTabId={responseTabId} 
-                  onTabChange={setResponseTabId} 
+                  onTabChange={handleResponseTabChange} 
                 />
               </div>
               

@@ -43,6 +43,11 @@ export interface CodeEditorProps extends Omit<EditorProps, 'theme'> {
   theme?: string
   
   /**
+   * Debounce delay (ms) before emitting onChange to parent. Default: 200ms.
+   */
+  changeDebounceMs?: number
+  
+  /**
    * Callback fired when the editor is mounted
    * This is an alias for onMount to maintain consistency
    */
@@ -124,7 +129,7 @@ function getMonacoTheme(): string {
  * ```
  */
 export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function CodeEditor(
-  { theme, onMount, onEditorMount, onGoToDefinition, goToDefinitionLabel = 'Go to Definition', ...props },
+  { theme, changeDebounceMs = 200, onMount, onEditorMount, onGoToDefinition, goToDefinitionLabel = 'Go to Definition', ...props },
   ref
 ) {
   const { t } = useTranslation()
@@ -134,6 +139,9 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   const [editorInstance, setEditorInstance] = useState<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
   const [monacoInstance, setMonacoInstance] = useState<typeof monacoEditor | null>(null)
   const goToDefinitionRef = useRef(onGoToDefinition)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const lastValueRef = useRef<string | undefined>(props.value)
+  const lastEventRef = useRef<monacoEditor.editor.IModelContentChangedEvent | undefined>(undefined)
 
   // Effective theme: use prop if provided, otherwise auto-detected
   const currentTheme = theme ?? autoDetectedTheme
@@ -142,6 +150,19 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   useEffect(() => {
     goToDefinitionRef.current = onGoToDefinition
   }, [onGoToDefinition])
+
+  useEffect(() => {
+    lastValueRef.current = props.value
+  }, [props.value])
+
+  // Clear pending debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+      }
+    }
+  }, [])
 
   // Watch for theme changes in the document (only when theme prop is not set)
   useEffect(() => {
@@ -209,11 +230,32 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
     onEditorMount?.(editor, monaco)
   }
 
+  const handleChange: EditorProps['onChange'] = (nextValue, ev) => {
+    lastValueRef.current = nextValue
+    lastEventRef.current = ev as monacoEditor.editor.IModelContentChangedEvent | undefined
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+    }
+
+    if (changeDebounceMs <= 0) {
+      props.onChange?.(nextValue, ev)
+      return
+    }
+
+    debounceRef.current = setTimeout(() => {
+      if (lastEventRef.current) {
+        props.onChange?.(lastValueRef.current, lastEventRef.current)
+      }
+    }, changeDebounceMs)
+  }
+
   return (
     <div className="ecui-code-editor" style={{ height: props.height, width: props.width }}>
       <Editor
         {...props}
         theme={currentTheme}
+        onChange={handleChange}
         onMount={handleMount}
       />
     </div>

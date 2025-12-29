@@ -1,34 +1,26 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Handlebars } from '../../utils/handlebarsHelpers'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
   Button,
-  VariableInputBox,
   SelectBox,
   SplitView,
   Pane,
   RadioGroup,
   InputBox,
   CodeEditor,
-  KeyValueTable,
   ListView,
   logger,
   type VariableDefinition,
   type ISelectOptionItem,
   type ISelectData,
-  type KeyValueTableHandle,
   type ListViewItemData
 } from 'electron-core-ui/renderer'
-import codeSnippetsTemplate from '../../resources/templates/code-snippets-httprequests.hbs?raw'
+import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue } from '../../types/collections'
+import type { KeyValueTableRow } from 'electron-core-ui/renderer'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
-import { useEnvironmentValues } from '../../contexts/useEnvironmentValues'
-import {
-  resolveEnvironmentVariables,
-  type VariableContext
-} from '../../services/VariableResolutionService'
-import { executeHTTPRequest, resolveRequestURL, type HTTPRequestInput } from '../../services/request/HTTPRequestService'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { Badge } from '../Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
@@ -37,9 +29,6 @@ import { mapToBadgeType } from '../../utils/badgeUtils'
 function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
   Object.assign(obj, { [key]: value })
 }
-
-// Compile the code snippets Handlebars template
-const compiledTemplate = Handlebars.compile(codeSnippetsTemplate)
 
 export interface HTTPRequestTabViewProps {
   request: HTTPRequest
@@ -109,9 +98,9 @@ function keyValuesToListItems(keyValues: KeyValue[], prefix: string): ListViewIt
 
 export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request }) => {
   const { t } = useTranslation()
-  const { environments, selectedEnvId } = useEnvironmentContext()
-  const { valuesByEnvId } = useEnvironmentValues()
+  const { selectedEnvId } = useEnvironmentContext()
   const handlebarsHelpers = useHandlebarsHelpers()
+  const previousEnvIdRef = useRef<string | null>(null)
   
   const [method, setMethod] = useState<string>(request.method)
   const [url, setUrl] = useState<string>(request.url)
@@ -120,8 +109,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
   const [bodyFilePath, setBodyFilePath] = useState<string>(getBodyFilePath(request))
   const [isSending, setIsSending] = useState<boolean>(false)
   const [httpResponse, setHttpResponse] = useState<HTTPResponse | null>(null)
-  const [resolvedQueryParamsContext, setResolvedQueryParamsContext] = useState<VariableContext>({})
-  const [resolvedPathParamsContext, setResolvedPathParamsContext] = useState<VariableContext>({})
+  
+  // Backend-provided resolved URL and code snippets
+  const [resolvedUrl, setResolvedUrl] = useState<string>('')
+  const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
   
   const headersParamsRef = useRef<KeyValueTableHandle | null>(null)
   const queryParamsRef = useRef<KeyValueTableHandle | null>(null)
@@ -144,6 +135,92 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     }
     return undefined
   }, [request])
+
+  // Convert KeyValue arrays to plain objects for IPC
+  const toKeyValueData = useCallback((kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+    kvs.map(kv => {
+      const result: { id?: string; key: string; value: string; enabled?: boolean } = { key: kv.key, value: kv.value }
+      if (kv.id !== undefined) result.id = kv.id
+      if (kv.enabled !== undefined) result.enabled = kv.enabled
+      return result
+    }), [])
+
+  // Subscribe to backend URL and code snippets updates
+  useEffect(() => {
+    const requestId = request.id
+    if (!requestId) return
+
+    const unsubUrl = window.restorm.context.onUrlResolved((result) => {
+      if (result.requestId === requestId) {
+        setResolvedUrl(result.resolvedUrl)
+      }
+    })
+
+    const unsubSnippets = window.restorm.context.onCodeSnippetsUpdated((result) => {
+      if (result.requestId === requestId) {
+        setBackendCodeSnippets(result.markdown)
+      }
+    })
+
+    // Get initial values if they exist
+    void window.restorm.context.getResolvedUrl(requestId).then((result) => {
+      if (result) setResolvedUrl(result.resolvedUrl)
+    })
+    void window.restorm.context.getCodeSnippets(requestId).then((result) => {
+      if (result) setBackendCodeSnippets(result.markdown)
+    })
+
+    return () => {
+      unsubUrl()
+      unsubSnippets()
+    }
+  }, [request.id])
+
+  // Refs to capture initial values for registration (avoid re-running effect when these change)
+  const selectedEnvIdRef = useRef(selectedEnvId)
+  const requestRef = useRef(request)
+  useEffect(() => { selectedEnvIdRef.current = selectedEnvId }, [selectedEnvId])
+  useEffect(() => { requestRef.current = request }, [request])
+
+  // Register request with ContextService on mount, unregister on unmount
+  useEffect(() => {
+    const requestId = request.id
+    if (!requestId) return
+
+    const currentEnvId = selectedEnvIdRef.current
+    const currentRequest = requestRef.current
+    logger.debug('[HTTPRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
+
+    void window.restorm.context.registerRequest(requestId, currentEnvId ?? null, {
+      headers: toKeyValueData(currentRequest.headers),
+      params: toKeyValueData(currentRequest.params),
+      pathParams: currentRequest.pathParams ? toKeyValueData(currentRequest.pathParams) : []
+    })
+
+    previousEnvIdRef.current = currentEnvId ?? null
+
+    return () => {
+      logger.debug('[HTTPRequestTabView] Unregistering request from ContextService', { requestId })
+      void window.restorm.context.unregisterRequest(requestId)
+    }
+  }, [request.id, toKeyValueData])
+
+  // Notify ContextService when selected environment changes
+  useEffect(() => {
+    const requestId = request.id
+    if (!requestId) return
+
+    const currentEnvId = selectedEnvId ?? null
+    if (previousEnvIdRef.current !== currentEnvId) {
+      logger.debug('[HTTPRequestTabView] Environment changed, notifying ContextService', {
+        requestId,
+        previousEnvId: previousEnvIdRef.current,
+        newEnvId: currentEnvId
+      })
+      void window.restorm.context.setRequestEnvironment(requestId, currentEnvId)
+      previousEnvIdRef.current = currentEnvId
+    }
+  }, [selectedEnvId, request.id])
 
   // Sync method changes to reactive object
   useEffect(() => {
@@ -175,52 +252,100 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     }
   }, [body, bodyMode, bodyFilePath, request])
 
-  const runtimeContext = useMemo<VariableContext | undefined>(
-    () => (selectedEnvId ? valuesByEnvId[selectedEnvId] : undefined),
-    [valuesByEnvId, selectedEnvId]
-  )
+  // Send full request data to backend for URL resolution and code snippets
+  useEffect(() => {
+    const requestId = request.id
+    if (!requestId || requestIdRef.current !== request.id) return
 
-  const environmentContext = useMemo<VariableContext>(
-    () => runtimeContext ?? resolveEnvironmentVariables(environments ?? [], selectedEnvId),
-    [runtimeContext, environments, selectedEnvId]
-  )
+    // Build body data
+    let bodyData: { type: string; content?: string; path?: string; fields?: { id?: string; key: string; value: string }[] } | undefined
+    if (bodyMode === 'text' && body) {
+      bodyData = { type: 'text', content: body }
+    } else if (bodyMode === 'file' && bodyFilePath) {
+      bodyData = { type: 'file', path: bodyFilePath }
+    } else if ((bodyMode === 'form-data' || bodyMode === 'x-www-form-urlencoded') && request.body?.type === bodyMode) {
+      bodyData = { type: bodyMode, fields: toKeyValueData(request.body.fields) }
+    }
 
-  const envVariables = useMemo<VariableDefinition[]>(
-    () => Object.entries(environmentContext).map(([name, value]) => ({ name, value, description: '' })),
-    [environmentContext]
-  )
+    void window.restorm.context.updateFullRequestData(requestId, {
+      id: requestId,
+      requestType: 'http',
+      url,
+      method,
+      headers: toKeyValueData(request.headers),
+      params: toKeyValueData(request.params),
+      pathParams: request.pathParams ? toKeyValueData(request.pathParams) : [],
+      body: bodyData
+    })
+  }, [request.id, url, method, request.headers, request.params, request.pathParams, body, bodyMode, bodyFilePath, request.body, toKeyValueData])
+  
+  // Stable empty array for components that get variables via their own variableId
+  const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
+  
+  // URL field variableId (for receiving its specific available variables)
+  const urlVariableId = useMemo(() => `${request.id}:url`, [request.id])
+  
+  // Available variables for URL field autocompletion (env + all path params)
+  const [urlVariables, setUrlVariables] = useState<VariableDefinition[]>([])
+  
+  // Listen for URL field available variables from backend
+  useEffect(() => {
+    const varId = urlVariableId
+    if (!varId || varId === 'undefined:url') return
+    
+    const unsubscribe = window.restorm.context.onAvailableVariables((result) => {
+      if (result.variableId === varId) {
+        setUrlVariables(prev => {
+          const newVars = result.variables
+          if (prev.length !== newVars.length) return newVars
+          const hasChanges = newVars.some((v, i) => {
+            const prevItem = prev[i]
+            return prevItem && (prevItem.name !== v.name || prevItem.value !== v.value)
+          })
+          return hasChanges ? newVars : prev
+        })
+      }
+    })
+    
+    return () => { unsubscribe() }
+  }, [urlVariableId])
 
-  const combinedContext = useMemo<VariableContext>(
-    () => ({ ...environmentContext, ...resolvedPathParamsContext, ...resolvedQueryParamsContext }),
-    [environmentContext, resolvedPathParamsContext, resolvedQueryParamsContext]
-  )
+  // Callbacks for KeyValue changes - notify both reactive object and ContextService
+  const handleHeadersChange = useCallback((rows: KeyValueTableRow[]): void => {
+    updateReactiveProperty(request, 'headers', rows as KeyValue[])
+    const requestId = request.id
+    if (requestId) {
+      void window.restorm.context.updateRequestKeyValues(
+        requestId,
+        'headers',
+        rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
+      )
+    }
+  }, [request])
 
-  const urlVariables = useMemo<VariableDefinition[]>(
-    () => Object.entries(combinedContext).map(([name, value]) => ({ name, value, description: '' })),
-    [combinedContext]
-  )
+  const handleParamsChange = useCallback((rows: KeyValueTableRow[]): void => {
+    updateReactiveProperty(request, 'params', rows as KeyValue[])
+    const requestId = request.id
+    if (requestId) {
+      void window.restorm.context.updateRequestKeyValues(
+        requestId,
+        'params',
+        rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
+      )
+    }
+  }, [request])
 
-  const pathParamsForUrl = useMemo(
-    () => Object.entries(resolvedPathParamsContext).map(([key, value]) => ({ key, value })),
-    [resolvedPathParamsContext]
-  )
-
-  const queryParamsForUrl = useMemo(
-    () => Object.entries(resolvedQueryParamsContext).map(([key, value]) => ({ key, value })),
-    [resolvedQueryParamsContext]
-  )
-
-  const resolvedUrlResult = useMemo(
-    () => resolveRequestURL({
-      urlTemplate: url,
-      pathParams: pathParamsForUrl,
-      queryParams: queryParamsForUrl,
-      environmentContext
-    }),
-    [url, pathParamsForUrl, queryParamsForUrl, environmentContext]
-  )
-
-  const resolvedUrl = resolvedUrlResult.url
+  const handlePathParamsChange = useCallback((rows: KeyValueTableRow[]): void => {
+    updateReactiveProperty(request, 'pathParams', rows as KeyValue[])
+    const requestId = request.id
+    if (requestId) {
+      void window.restorm.context.updateRequestKeyValues(
+        requestId,
+        'pathParams',
+        rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
+      )
+    }
+  }, [request])
 
   const methodOptions = useMemo<ISelectOptionItem[]>(
     () => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'].map((verb) => ({
@@ -232,41 +357,107 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
 
   const handleSend = useCallback((): void => {
     if (isSending) return
+    const requestId = request.id
+    if (!requestId) {
+      logger.error('Cannot send request without ID')
+      return
+    }
     setIsSending(true)
     setHttpResponse(null)
 
-    const requestInput: HTTPRequestInput = {
-      request,
-      method: method as HTTPMethod,
-      url,
-      headers: request.headers,
-      params: queryParamsForUrl,
-      pathParams: pathParamsForUrl,
-      bodyContent: body,
-      bodyMode,
-      formFields: (bodyMode === 'form-data' || bodyMode === 'x-www-form-urlencoded')
-        ? (request.body?.type === 'form-data' || request.body?.type === 'x-www-form-urlencoded' ? request.body.fields : [])
-        : [],
-      filePath: bodyFilePath,
-      variableContext: environmentContext
-    }
+    // Execute via backend
+    window.restorm.http.execute({
+      requestId,
+      method,
+      timeout: 30000
+    })
+      .then((result) => {
+        if (result.success) {
+          // Convert backend result to HTTPResponse format
+          const responseHeaders: KeyValue[] = []
+          if (result.headers) {
+            for (const [key, value] of Object.entries(result.headers)) {
+              responseHeaders.push({
+                key,
+                value: Array.isArray(value) ? value.join(', ') : value
+              })
+            }
+          }
 
-    executeHTTPRequest(requestInput)
-      .then((response) => {
-        setHttpResponse(response)
-        logger.info('HTTP request completed', {
-          url: response.requestUrl,
-          status: response.statusCode,
-          duration: response.timings.durationMs
-        })
+          const contentTypeHeader = result.headers?.['content-type']
+          const contentType = Array.isArray(contentTypeHeader) ? contentTypeHeader[0] : contentTypeHeader
+          const contentLengthHeader = result.headers?.['content-length']
+          const contentLengthStr = Array.isArray(contentLengthHeader) ? contentLengthHeader[0] : contentLengthHeader
+          const contentLength = contentLengthStr ? parseInt(contentLengthStr, 10) : undefined
+
+          const response: HTTPResponse = {
+            id: `resp_${Date.now()}`,
+            type: 'http',
+            requestId,
+            requestUrl: result.requestUrl ?? '',
+            requestMethod: method as HTTPMethod,
+            requestHeaders: request.headers,
+            requestParams: request.params,
+            requestPathParams: request.pathParams,
+            statusCode: result.statusCode ?? 0,
+            statusText: result.statusText ?? '',
+            responseHeaders,
+            responseBody: result.body ?? '',
+            timings: result.timings,
+            ...(request.body && { requestBody: request.body }),
+            ...(contentType && { contentType }),
+            ...(contentLength !== undefined && !isNaN(contentLength) && { contentLength })
+          }
+          setHttpResponse(response)
+          logger.info('HTTP request completed', {
+            url: result.requestUrl,
+            status: result.statusCode,
+            duration: result.timings.durationMs
+          })
+        } else {
+          // Handle error
+          const errorResponse: HTTPResponse = {
+            id: `resp_${Date.now()}`,
+            type: 'http',
+            requestId,
+            requestUrl: result.requestUrl ?? url,
+            requestMethod: method as HTTPMethod,
+            requestHeaders: request.headers,
+            requestParams: request.params,
+            requestPathParams: request.pathParams,
+            statusCode: 0,
+            statusText: 'Error',
+            responseHeaders: [],
+            responseBody: '',
+            error: result.error,
+            timings: result.timings,
+            ...(request.body && { requestBody: request.body })
+          }
+          setHttpResponse(errorResponse)
+          logger.error('HTTP request failed', { error: result.error })
+        }
       })
       .catch((err: unknown) => {
-        logger.error('HTTP request failed', { error: String(err) })
+        logger.error('HTTP request execution error', { error: String(err) })
       })
       .finally(() => {
         setIsSending(false)
       })
-  }, [isSending, request, method, url, body, bodyMode, bodyFilePath, queryParamsForUrl, pathParamsForUrl, environmentContext])
+  }, [isSending, request, method, url])
+
+  const handleCancel = useCallback((): void => {
+    const requestId = request.id
+    if (!requestId) return
+    window.restorm.http.cancel(requestId)
+      .then((cancelled) => {
+        if (cancelled) {
+          logger.info('HTTP request cancelled', { requestId })
+        }
+      })
+      .catch((err: unknown) => {
+        logger.error('Failed to cancel HTTP request', { error: String(err) })
+      })
+  }, [request.id])
 
   // Request content (SplitView with Panes)
   const requestContent = (
@@ -300,12 +491,12 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           </Button>
         )}
       >
-        <KeyValueTable
+        <RestormKeyValueTable
           ref={headersParamsRef}
-          variables={envVariables}
+          variables={emptyVariables}
+          helpers={handlebarsHelpers}
           initialRows={request.headers}
-          visibilityMode="base-only"
-          onRowsChange={(rows): void => { updateReactiveProperty(request, 'headers', rows) }}
+          onRowsChange={handleHeadersChange}
         />
       </Pane>
       <Pane
@@ -327,13 +518,12 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           </Button>
         )}
       >
-        <KeyValueTable
+        <RestormKeyValueTable
           ref={pathParamsRef}
-          variables={envVariables}
+          variables={emptyVariables}
+          helpers={handlebarsHelpers}
           initialRows={request.pathParams ?? []}
-          visibilityMode="base-only"
-          onResolvedContextChange={setResolvedPathParamsContext}
-          onRowsChange={(rows): void => { updateReactiveProperty(request, 'pathParams', rows) }}
+          onRowsChange={handlePathParamsChange}
         />
       </Pane>
       <Pane
@@ -355,13 +545,12 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           </Button>
         )}
       >
-        <KeyValueTable
+        <RestormKeyValueTable
           ref={queryParamsRef}
-          variables={envVariables}
+          variables={emptyVariables}
+          helpers={handlebarsHelpers}
           initialRows={request.params}
-          visibilityMode="base-only"
-          onResolvedContextChange={setResolvedQueryParamsContext}
-          onRowsChange={(rows): void => { updateReactiveProperty(request, 'params', rows) }}
+          onRowsChange={handleParamsChange}
         />
       </Pane>
       <Pane title={t('requestTab.tabs.body')} initialSize={0.4}>
@@ -393,11 +582,11 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
               </div>
             )}
             {(bodyMode === 'form-data' || bodyMode === 'x-www-form-urlencoded') && (
-              <KeyValueTable
-                variables={urlVariables}
+              <RestormKeyValueTable
+                variables={emptyVariables}
+                helpers={handlebarsHelpers}
                 initialRows={request.body?.type === 'form-data' || request.body?.type === 'x-www-form-urlencoded' ? request.body.fields : []}
-                visibilityMode="base-only"
-                onRowsChange={(rows): void => { updateReactiveProperty(request, 'body', { type: bodyMode, fields: rows }) }}
+                onRowsChange={(rows): void => { updateReactiveProperty(request, 'body', { type: bodyMode, fields: rows as KeyValue[] }) }}
               />
             )}
             {bodyMode === 'file' && (
@@ -417,57 +606,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     </SplitView>
   )
 
-  // Generate code snippets
-  const codeSnippetsContent = useMemo(() => {
-    let host = '', pathOnly = '', baseUrl = ''
-    try {
-      const urlObj = new URL(resolvedUrl.startsWith('http') ? resolvedUrl : `https://${resolvedUrl}`)
-      host = urlObj.host
-      pathOnly = urlObj.pathname
-      baseUrl = `${urlObj.protocol}//${urlObj.host}`
-    } catch {
-      host = resolvedUrl
-      pathOnly = '/'
-      baseUrl = resolvedUrl
-    }
-
-    const headersData = request.headers.filter(h => h.key).map(h => ({ key: h.key, value: h.value }))
-    const paramsData = request.params.filter(p => p.key).map(p => ({ key: p.key, value: p.value }))
-    const pathParamsData = (request.pathParams ?? []).filter(p => p.key).map(p => ({ key: p.key, value: p.value }))
-
-    let bodyContent: string | null = null
-    if (bodyMode === 'text' && body) {
-      bodyContent = body
-    } else if ((bodyMode === 'form-data' || bodyMode === 'x-www-form-urlencoded') && request.body?.type === bodyMode) {
-      const fields = request.body.fields.filter(f => f.key)
-      if (fields.length > 0) {
-        bodyContent = bodyMode === 'form-data'
-          ? fields.map(f => `${f.key}=${f.value}`).join('&')
-          : fields.map(f => `${encodeURIComponent(f.key)}=${encodeURIComponent(f.value)}`).join('&')
-      }
-    }
-
-    const capitalMethod = method.charAt(0).toUpperCase() + method.slice(1).toLowerCase()
-
-    return compiledTemplate({
-      method,
-      lowerMethod: method.toLowerCase(),
-      capitalMethod,
-      url: resolvedUrl,
-      host,
-      path: pathOnly,
-      baseUrl,
-      headers: headersData.length > 0 ? headersData : null,
-      params: paramsData.length > 0 ? paramsData : null,
-      pathParams: pathParamsData.length > 0 ? pathParamsData : null,
-      body: bodyContent,
-      bodyMode,
-      hasHeaders: headersData.length > 0,
-      hasParams: paramsData.length > 0,
-      hasPathParams: pathParamsData.length > 0,
-      hasBody: !!bodyContent
-    })
-  }, [method, resolvedUrl, request.headers, request.params, request.pathParams, request.body, body, bodyMode])
+  // Use backend-provided code snippets
+  const codeSnippetsContent = backendCodeSnippets || t('requestTab.codeSnippets.loading', 'Loading code snippets...')
 
   // Build general info items for response
   const generalItems: ListViewItemData[] = useMemo(() => {
@@ -556,27 +696,36 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           selectBoxOptions={{ ariaLabel: t('requestTab.methodSelect'), useCustomDrawn: true }}
         />
       </div>
-      <div style={{ flex: 1, minWidth: 0, paddingLeft: 15 }}>
-        <VariableInputBox
+      <div style={{ flex: 1, minWidth: 0, paddingLeft: 15 }} title={resolvedUrl || url}>
+        <RestormVariableInputBox
           value={url}
           onChange={(value: string) => { setUrl(value) }}
           variables={urlVariables}
           helpers={handlebarsHelpers}
-          resolvedValue={resolvedUrl}
           placeholder={t('requestTab.urlPlaceholder')}
         />
       </div>
-      <Button onClick={handleSend} options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <i className="codicon codicon-send" aria-hidden="true" />
-          <span>{t('requestTab.send')}</span>
-        </span>
-      </Button>
+      {isSending ? (
+        <Button onClick={handleCancel} options={{ title: t('requestTab.cancel'), ariaLabel: t('requestTab.cancel') }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <i className="codicon codicon-close" aria-hidden="true" />
+            <span>{t('requestTab.cancel')}</span>
+          </span>
+        </Button>
+      ) : (
+        <Button onClick={handleSend} options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <i className="codicon codicon-send" aria-hidden="true" />
+            <span>{t('requestTab.send')}</span>
+          </span>
+        </Button>
+      )}
     </div>
   )
 
   return (
     <BaseRequestTabView
+      requestId={request.id}
       urlSection={urlSection}
       requestContent={requestContent}
       codeSnippetsContent={codeSnippetsContent}

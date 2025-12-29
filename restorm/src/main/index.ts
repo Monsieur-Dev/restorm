@@ -1,9 +1,11 @@
 import { app, ipcMain, BrowserWindow } from 'electron'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFeatureService, initFileService, getFileService, isFileServiceInitialized } from 'electron-core-ui'
+import { initializeApp, logger, initFeatureService, initFileService, getFileService, isFileServiceInitialized, i18nService } from 'electron-core-ui'
 import { join, relative } from 'path'
 import { promises as fs } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
+import { searchIndexService, contextService } from './services'
+// DocumentEvents are handled by FileService internally for dirty state tracking
 
 // Keep track of main window and editor windows
 let mainWindow: BrowserWindow | null = null
@@ -104,6 +106,14 @@ const featuresConfigPath = getFeaturesConfigPath()
 initFeatureService(featuresConfigPath, 'desktop')
 logger.info('✅ Feature Flipping Service initialized', { configPath: featuresConfigPath })
 
+// Initialize I18n Service for main process translations
+// Default to system locale or 'en', will be synchronized with renderer via IPC
+const systemLocale = app.getLocale().split('-')[0] ?? 'en'
+const supportedLocales = ['en', 'fr']
+const defaultLocale = supportedLocales.includes(systemLocale) ? systemLocale : 'en'
+i18nService.initialize('', defaultLocale)
+logger.info('✅ I18n Service initialized', { locale: defaultLocale })
+
 // Initialize File Service for .restorm files with YAML serialization
 initFileService({
   extension: '.restorm',
@@ -112,6 +122,18 @@ initFileService({
   storagePrefix: 'restorm_'
 })
 logger.info('✅ File Service initialized')
+
+// Dirty state is now handled by FileService via checksum comparison
+// FileService subscribes to DocumentEvents internally and tracks per-object checksums
+logger.info('✅ Dirty state managed by FileService checksum system')
+
+// Initialize Search Index Service (listens to document events from renderer)
+searchIndexService.initialize()
+logger.info('✅ Search Index Service initialized')
+
+// Initialize Context Service (manages Handlebars context and resolved values)
+contextService.initialize()
+logger.info('✅ Context Service initialized')
 
 // Initialize Electron application
 const resourcesPath = getResourcesPath()
@@ -227,4 +249,164 @@ ipcMain.handle('project:read-file', async (_event, relPath: string) => {
     logger.error('Failed to read project file', { relPath, error: String(error) })
     return ''
   }
+})
+
+// IPC handler to get all variable transform results from ContextService
+ipcMain.handle('context:get-all-transform-results', () => {
+  return contextService.getAllVariableTransformResults()
+})
+
+// IPC handler to register a request for context tracking
+ipcMain.handle('context:register-request', (_event, requestId: string, environmentId: string | null, requestData: { headers?: { id?: string; key: string; value: string }[]; params?: { id?: string; key: string; value: string }[]; pathParams?: { id?: string; key: string; value: string }[] }) => {
+  contextService.registerRequest(requestId, environmentId, {
+    id: requestId,
+    headers: requestData.headers,
+    params: requestData.params,
+    pathParams: requestData.pathParams
+  })
+})
+
+// IPC handler to unregister a request from context tracking
+ipcMain.handle('context:unregister-request', (_event, requestId: string) => {
+  contextService.unregisterRequest(requestId)
+})
+
+// IPC handler to set the environment for a request
+ipcMain.handle('context:set-request-environment', (_event, requestId: string, environmentId: string | null) => {
+  contextService.setRequestEnvironment(requestId, environmentId)
+})
+
+// IPC handler to update KeyValues for a request
+ipcMain.handle('context:update-request-keyvalues', (_event, requestId: string, groupName: string, keyValues: { id?: string; key: string; value: string }[]) => {
+  contextService.updateRequestKeyValues(requestId, groupName, keyValues)
+})
+
+// IPC handler to update full request data for URL resolution and code snippets
+ipcMain.handle('context:update-full-request-data', (_event, requestId: string, data: unknown) => {
+  contextService.updateFullRequestData(requestId, data as Parameters<typeof contextService.updateFullRequestData>[1])
+})
+
+// IPC handler to get resolved URL for a request
+ipcMain.handle('context:get-resolved-url', (_event, requestId: string) => {
+  return contextService.getResolvedUrl(requestId)
+})
+
+// IPC handler to get code snippets for a request
+ipcMain.handle('context:get-code-snippets', (_event, requestId: string) => {
+  return contextService.getCodeSnippets(requestId)
+})
+
+// IPC handler to clear all context data
+ipcMain.handle('context:clear-all', () => {
+  contextService.clearAll()
+})
+
+// ========================
+// HTTP Execution IPC handlers
+// ========================
+
+import { httpExecutionService, type HTTPExecutionInput } from './services/HTTPExecutionService'
+
+// IPC handler to execute HTTP request
+ipcMain.handle('http:execute', async (_event, input: HTTPExecutionInput) => {
+  return httpExecutionService.execute(input)
+})
+
+// IPC handler to cancel HTTP request
+ipcMain.handle('http:cancel', (_event, requestId: string) => {
+  return httpExecutionService.cancel(requestId)
+})
+
+// IPC handler to check if request is active
+ipcMain.handle('http:is-active', (_event, requestId: string) => {
+  return httpExecutionService.isActive(requestId)
+})
+
+// ========================
+// GraphQL Execution IPC handlers
+// ========================
+
+import { graphqlExecutionService, type GraphQLExecutionInput } from './services/GraphQLExecutionService'
+
+// IPC handler to execute GraphQL request
+ipcMain.handle('graphql:execute', async (_event, input: GraphQLExecutionInput) => {
+  return graphqlExecutionService.execute(input)
+})
+
+// IPC handler to cancel GraphQL request
+ipcMain.handle('graphql:cancel', (_event, requestId: string) => {
+  return graphqlExecutionService.cancel(requestId)
+})
+
+// IPC handler to check if request is active
+ipcMain.handle('graphql:is-active', (_event, requestId: string) => {
+  return graphqlExecutionService.isActive(requestId)
+})
+
+// ========================
+// SOAP Execution IPC handlers
+// ========================
+
+import { soapExecutionService, type SOAPExecutionInput } from './services/SOAPExecutionService'
+
+// IPC handler to execute SOAP request
+ipcMain.handle('soap:execute', async (_event, input: SOAPExecutionInput) => {
+  return soapExecutionService.execute(input)
+})
+
+// IPC handler to cancel SOAP request
+ipcMain.handle('soap:cancel', (_event, requestId: string) => {
+  return soapExecutionService.cancel(requestId)
+})
+
+// IPC handler to check if request is active
+ipcMain.handle('soap:is-active', (_event, requestId: string) => {
+  return soapExecutionService.isActive(requestId)
+})
+
+// ========================
+// gRPC Execution IPC handlers
+// ========================
+
+import { grpcExecutionService, type GRPCExecutionInput } from './services/GRPCExecutionService'
+
+// IPC handler to execute gRPC request
+ipcMain.handle('grpc:execute', (_event, input: GRPCExecutionInput) => {
+  return grpcExecutionService.execute(input)
+})
+
+// IPC handler to cancel gRPC request
+ipcMain.handle('grpc:cancel', (_event, requestId: string) => {
+  return grpcExecutionService.cancel(requestId)
+})
+
+// IPC handler to check if request is active
+ipcMain.handle('grpc:is-active', (_event, requestId: string) => {
+  return grpcExecutionService.isActive(requestId)
+})
+
+// ========================
+// WebSocket Execution IPC handlers
+// ========================
+
+import { websocketExecutionService, type WebSocketExecutionInput } from './services/WebSocketExecutionService'
+
+// IPC handler to connect WebSocket
+ipcMain.handle('websocket:connect', async (_event, input: WebSocketExecutionInput) => {
+  return websocketExecutionService.execute(input)
+})
+
+// IPC handler to disconnect WebSocket
+ipcMain.handle('websocket:disconnect', (_event, requestId: string) => {
+  return websocketExecutionService.disconnect(requestId)
+})
+
+// IPC handler to send WebSocket message
+ipcMain.handle('websocket:send', (_event, requestId: string, message: string, event?: string) => {
+  return websocketExecutionService.send(requestId, message, event)
+})
+
+// IPC handler to check if connection is active
+ipcMain.handle('websocket:is-active', (_event, requestId: string) => {
+  return websocketExecutionService.isActive(requestId)
 })

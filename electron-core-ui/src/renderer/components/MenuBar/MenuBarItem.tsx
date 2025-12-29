@@ -78,6 +78,12 @@ const MenuBarItem = forwardRef<HTMLDivElement, MenuBarItemProps>(({
       .join('|')
   }, [shortcuts])
   
+  // Store shortcuts in ref for access in registration effect without re-triggering it
+  const shortcutsRef = useRef(shortcuts)
+  useEffect(() => {
+    shortcutsRef.current = shortcuts
+  }, [shortcuts])
+  
   // Store handlers in a ref to avoid re-registration when only handlers change
   const handlersRef = useRef<Map<string, () => void>>(new Map())
   useEffect(() => {
@@ -92,8 +98,9 @@ const MenuBarItem = forwardRef<HTMLDivElement, MenuBarItemProps>(({
   // Register keyboard shortcuts - these stay active even when menu is closed
   useEffect(() => {
     const unregisters: (() => void)[] = []
+    const currentShortcuts = shortcutsRef.current
     
-    for (const info of shortcuts) {
+    for (const info of currentShortcuts) {
       if (!info.disabled) {
         // Use a wrapper that calls the current handler from ref
         const handler = (): void => {
@@ -112,7 +119,6 @@ const MenuBarItem = forwardRef<HTMLDivElement, MenuBarItemProps>(({
         unregister()
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shortcutsKey])
 
   // Derive effective height: 'auto' when not active, calculated value when active

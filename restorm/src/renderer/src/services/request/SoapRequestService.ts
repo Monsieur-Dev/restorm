@@ -5,7 +5,13 @@
 
 import axios from 'axios'
 import type { SoapRequest, SoapResponse, KeyValue } from '../../types/collections'
-import { resolveTemplate, type VariableContext } from '../VariableResolutionService'
+// TODO: Variable resolution will be implemented in backend
+import type { VariableContext } from './types'
+
+/** Placeholder for variable resolution - returns template as-is (to be implemented in backend) */
+function resolveTemplate(template: string, _context: VariableContext): string {
+  return template
+}
 
 /** Input for executing a SOAP request */
 export interface SoapRequestInput {
@@ -92,8 +98,8 @@ export async function executeSoapRequest(input: SoapRequestInput): Promise<SoapR
   
   // Ensure Content-Type and SOAPAction are set
   headersObj['Content-Type'] ??= 'text/xml; charset=utf-8'
-  if (resolvedSoapAction && !headersObj['SOAPAction']) {
-    headersObj['SOAPAction'] = resolvedSoapAction
+  if (resolvedSoapAction && !headersObj.SOAPAction) {
+    headersObj.SOAPAction = resolvedSoapAction
   }
   
   try {

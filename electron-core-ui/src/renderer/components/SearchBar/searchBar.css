@@ -246,13 +246,14 @@
 }
 
 /* HTTP request result with method badge */
-.result-http-title {
+.result-badge-title {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.http-method-badge {
+/* Base badge style - consumers should provide specific colors via renderBadge prop or custom CSS */
+.request-type-badge {
   display: inline-flex;
   align-items: center;
   padding: 0 6px;
@@ -263,94 +264,10 @@
   color: #fff;
   line-height: 1.4;
   flex-shrink: 0;
+  background-color: #6b7280; /* Default gray fallback */
 }
 
-.http-method-badge.method-get {
-  background-color: #007acc;
-}
-
-.http-method-badge.method-post {
-  background-color: #1b8a3d;
-}
-
-.http-method-badge.method-put {
-  background-color: #d18616;
-}
-
-.http-method-badge.method-patch {
-  background-color: #9370db;
-}
-
-.http-method-badge.method-delete {
-  background-color: #c74632;
-}
-
-.http-method-badge.method-head {
-  background-color: #ff69b4;
-}
-
-.http-method-badge.method-options {
-  background-color: #6a5acd;
-}
-
-/* GraphQL */
-.http-method-badge.method-graphql,
-.http-method-badge.method-gql,
-.http-method-badge.method-query {
-  background-color: #e535ab;
-}
-
-.http-method-badge.method-mutation {
-  background-color: #b71c1c;
-}
-
-.http-method-badge.method-subscription {
-  background-color: #7b1fa2;
-}
-
-/* gRPC */
-.http-method-badge.method-grpc,
-.http-method-badge.method-unary {
-  background-color: #0277bd;
-}
-
-.http-method-badge.method-s-str,
-.http-method-badge.method-sstr {
-  background-color: #00695c;
-}
-
-.http-method-badge.method-c-str,
-.http-method-badge.method-cstr {
-  background-color: #558b2f;
-}
-
-.http-method-badge.method-bidi {
-  background-color: #5d4037;
-}
-
-/* SOAP */
-.http-method-badge.method-soap {
-  background-color: #f9a825;
-  color: #000;
-}
-
-/* WebSocket / Real-time */
-.http-method-badge.method-ws,
-.http-method-badge.method-websocket {
-  background-color: #43a047;
-}
-
-.http-method-badge.method-mqtt {
-  background-color: #ff6f00;
-  color: #000;
-}
-
-.http-method-badge.method-sio,
-.http-method-badge.method-socketio {
-  background-color: #00897b;
-}
-
-.http-route {
+.result-title-text {
   color: var(--foreground);
   font-size: 12px;
   white-space: nowrap;
@@ -386,7 +303,7 @@
   margin-top: 2px;
 }
 
-.search-results-wrapper .list-view-row .result-http-title {
+.search-results-wrapper .list-view-row .result-badge-title {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -395,6 +312,30 @@
 .search-results-wrapper .list-view-row .result-icon {
   font-size: 14px;
   flex-shrink: 0;
+}
+
+.search-result-item .result-title .result-breadcrumb,
+.search-result-item .result-badge-title .result-breadcrumb {
+  display: flex;
+  align-items: center;
+  font-size: 10px;
+  color: var(--descriptionForeground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-left: auto;
+  flex-shrink: 1;
+  min-width: 0;
+  opacity: 0.7;
+}
+
+.search-result-item .result-breadcrumb .breadcrumb-separator {
+  margin: 0 3px;
+  opacity: 0.6;
+}
+
+.search-result-item .result-breadcrumb .breadcrumb-item {
+  opacity: 0.9;
 }
 
 /* Search result tooltip - fixed width */

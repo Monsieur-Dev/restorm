@@ -19,3 +19,17 @@ export {
   isFileServiceInitialized,
   FileService
 } from './FileService'
+
+export { eventBusService } from './EventBusService'
+export type { EventHandler, Subscription } from './EventBusService'
+
+export { i18nService } from './I18nService'
+
+export { searchService } from './SearchService'
+export type {
+  SearchDocument,
+  SearchResult,
+  SearchNavigation,
+  GroupedResults,
+  CategoryMeta
+} from './SearchService'

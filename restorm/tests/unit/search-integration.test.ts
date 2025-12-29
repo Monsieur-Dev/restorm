@@ -54,19 +54,21 @@ vi.mock('electron-core-ui/renderer', async () => {
   })
 
   const searchService = {
+    registerCategories: vi.fn().mockResolvedValue(undefined),
     indexDocument(doc: MockSearchDocument): void {
       if (miniSearch.has(doc.id)) {
         miniSearch.discard(doc.id)
       }
       miniSearch.add(doc)
     },
-    indexDocuments(docs: MockSearchDocument[]): void {
+    indexDocuments(docs: MockSearchDocument[]): Promise<void> {
       for (const doc of docs) {
         if (miniSearch.has(doc.id)) {
           miniSearch.discard(doc.id)
         }
         miniSearch.add(doc)
       }
+      return Promise.resolve()
     },
     removeDocument(id: string): void {
       if (miniSearch.has(id)) {
@@ -143,8 +145,9 @@ import swaggerPetstore from './swagger-petstore.json'
 
 // Type the mocked search service
 const mockedSearchService = searchService as {
+  registerCategories: (categories: Record<string, unknown>) => Promise<void>
   indexDocument: (doc: SearchDocument) => void
-  indexDocuments: (docs: SearchDocument[]) => void
+  indexDocuments: (docs: SearchDocument[]) => Promise<void>
   removeDocument: (id: string) => void
   search: (query: string) => SearchDocument[]
   clearIndex: () => void
@@ -155,7 +158,7 @@ describe('Search Integration', () => {
     vi.clearAllMocks()
     vi.useFakeTimers()
     mockedSearchService.clearIndex()
-    searchIndexService.initialize()
+    void searchIndexService.initialize()
   })
 
   afterEach(() => {
@@ -186,7 +189,7 @@ describe('Search Integration', () => {
     const reactiveFolder = makeReactiveFolder(folder)
 
     // Index it
-    searchIndexService.indexFolderTree(reactiveFolder)
+    void searchIndexService.indexFolderTree(reactiveFolder)
 
     // Search for "store"
     const results = mockedSearchService.search('store')
@@ -195,7 +198,9 @@ describe('Search Integration', () => {
     expect(results.length).toBeGreaterThan(0)
   })
 
-  it('should reindex when notes are modified and find new content', () => {
+  it('should emit update event when notes are modified', async () => {
+    const { eventBus } = await import('electron-core-ui/renderer')
+
     // Import swagger
     const folder = importSwaggerFromJson(JSON.stringify(swaggerPetstore))
 
@@ -203,11 +208,7 @@ describe('Search Integration', () => {
     const reactiveFolder = makeReactiveFolder(folder)
 
     // Index it
-    searchIndexService.indexFolderTree(reactiveFolder)
-
-    // Search for "restorm" - should NOT find anything
-    let results = mockedSearchService.search('restorm')
-    expect(results.length).toBe(0)
+    await searchIndexService.indexFolderTree(reactiveFolder)
 
     // Find a request to modify (e.g., one with "pet" in the name)
     const request = findRequestByName(reactiveFolder, 'pet')
@@ -215,16 +216,25 @@ describe('Search Integration', () => {
       throw new Error('Expected to find a request with "pet" in the name')
     }
 
+    // Clear previous emitSync calls
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- vitest mock pattern
+    const emitSyncMock = vi.mocked(eventBus.emitSync)
+    emitSyncMock.mockClear()
+
     // Modify the notes to include "restorm"
     request.notes = 'This is a test note with restorm keyword'
 
-    // Wait for debounce to trigger the reindex event
+    // Wait for debounce to trigger the update event
     vi.advanceTimersByTime(100)
 
-    // Search for "restorm" - should find the modified request
-    results = mockedSearchService.search('restorm')
-    expect(results.length).toBe(1)
-    expect(results[0].id).toBe(request.id)
+    // Verify that REQUEST_UPDATED event was emitted (reindexing happens in main process)
+    expect(emitSyncMock).toHaveBeenCalledWith(
+      'document:request:updated',
+      expect.objectContaining({
+        id: request.id,
+        type: 'request'
+      })
+    )
   })
 
   it('should find multiple store-related items in petstore', () => {
@@ -235,7 +245,7 @@ describe('Search Integration', () => {
     const reactiveFolder = makeReactiveFolder(folder)
 
     // Index it
-    searchIndexService.indexFolderTree(reactiveFolder)
+    void searchIndexService.indexFolderTree(reactiveFolder)
 
     // Search for "store"
     const results = mockedSearchService.search('store')

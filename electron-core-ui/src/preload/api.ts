@@ -44,6 +44,18 @@ export const createCoreUIAPI = (): Record<string, unknown> => ({
     }
   },
 
+  // I18n API (main process language synchronization)
+  i18n: {
+    setLanguage: async (language: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('i18n:set-language', language)
+      return result as boolean
+    },
+    getLanguage: async (): Promise<string> => {
+      const result: unknown = await ipcRenderer.invoke('i18n:get-language')
+      return result as string
+    }
+  },
+
   // Logger API
   logger: {
     log: async (level: string, message: string, meta?: Record<string, unknown>): Promise<void> => {
@@ -186,6 +198,12 @@ export const createCoreUIAPI = (): Record<string, unknown> => ({
     clearDirty: async (): Promise<void> => {
       await ipcRenderer.invoke('file:clear-dirty')
     },
+    checkAndUpdateDirty: async (currentChecksum: string): Promise<void> => {
+      await ipcRenderer.invoke('file:check-and-update-dirty', currentChecksum)
+    },
+    finishLoading: async (): Promise<void> => {
+      await ipcRenderer.invoke('file:finish-loading')
+    },
     showUnsavedChangesDialog: async (labels?: {
       title?: string
       message?: string
@@ -223,6 +241,28 @@ export const createCoreUIAPI = (): Record<string, unknown> => ({
       const result: unknown = await ipcRenderer.invoke('file:has-content-changed', currentChecksum)
       return result as boolean
     },
+    // Object checksum tracking
+    registerInitialChecksums: async (objects: Map<string, unknown>): Promise<void> => {
+      await ipcRenderer.invoke('file:register-initial-checksums', Array.from(objects.entries()))
+    },
+    updateObjectChecksum: async (runtimeId: string, data: unknown): Promise<void> => {
+      await ipcRenderer.invoke('file:update-object-checksum', runtimeId, data)
+    },
+    removeObjectChecksum: async (runtimeId: string): Promise<void> => {
+      await ipcRenderer.invoke('file:remove-object-checksum', runtimeId)
+    },
+    commitChecksums: async (): Promise<void> => {
+      await ipcRenderer.invoke('file:commit-checksums')
+    },
+    getDirtyStateDetails: async (): Promise<{
+      isDirty: boolean
+      changedIds: string[]
+      newIds: string[]
+      deletedIds: string[]
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('file:get-dirty-state-details')
+      return result as { isDirty: boolean; changedIds: string[]; newIds: string[]; deletedIds: string[] }
+    },
     onStateChanged: (callback: (state: FileServiceState) => void): (() => void) => {
       const handler = (_event: Electron.IpcRendererEvent, state: FileServiceState): void => {
         callback(state)
@@ -258,6 +298,98 @@ export const createCoreUIAPI = (): Record<string, unknown> => ({
       return () => {
         ipcRenderer.removeListener('file:closed', handler)
       }
+    }
+  },
+
+  // EventBus API (main process)
+  eventBus: {
+    emit: async (event: string, payload: unknown): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('eventbus:emit', event, payload)
+      return result as boolean
+    },
+    emitSync: async (event: string, payload: unknown): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('eventbus:emit-sync', event, payload)
+      return result as boolean
+    }
+  },
+
+  // Search Service API (main process)
+  search: {
+    registerCategories: async (categories: Record<string, { label: string; icon: string; order: number }>): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('search:register-categories', categories)
+      return result as boolean
+    },
+    indexDocument: async (doc: {
+      id: string
+      title: string
+      description?: string
+      category: string
+      icon?: string
+      keywords?: string
+      navigation?: Record<string, unknown>
+      metadata?: Record<string, unknown>
+    }): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('search:index-document', doc)
+      return result as boolean
+    },
+    indexDocuments: async (docs: {
+      id: string
+      title: string
+      description?: string
+      category: string
+      icon?: string
+      keywords?: string
+      navigation?: Record<string, unknown>
+      metadata?: Record<string, unknown>
+    }[]): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('search:index-documents', docs)
+      return result as boolean
+    },
+    removeDocument: async (id: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('search:remove-document', id)
+      return result as boolean
+    },
+    clearIndex: async (): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('search:clear-index')
+      return result as boolean
+    },
+    search: async (query: string): Promise<{
+      category: string
+      label: string
+      icon: string
+      items: {
+        id: string
+        title: string
+        description?: string
+        category: string
+        icon?: string
+        keywords?: string
+        navigation?: Record<string, unknown>
+        metadata?: Record<string, unknown>
+        score: number
+      }[]
+    }[]> => {
+      const result: unknown = await ipcRenderer.invoke('search:search', query)
+      return result as {
+        category: string
+        label: string
+        icon: string
+        items: {
+          id: string
+          title: string
+          description?: string
+          category: string
+          icon?: string
+          keywords?: string
+          navigation?: Record<string, unknown>
+          metadata?: Record<string, unknown>
+          score: number
+        }[]
+      }[]
+    },
+    getDocumentCount: async (): Promise<number> => {
+      const result: unknown = await ipcRenderer.invoke('search:get-document-count')
+      return result as number
     }
   }
 })

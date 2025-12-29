@@ -12,17 +12,14 @@ export type {
   SearchDocument,
   SearchResult,
   SearchNavigation,
-  GroupedResults
+  GroupedResults,
+  CategoryMeta
 } from './SearchService'
 
-export { eventBus, DocumentEvents } from './EventBus'
+export { eventBus } from './EventBus'
 export type {
   EventHandler,
-  Subscription,
-  DocumentEventPayload,
-  DocumentChangedPayload,
-  DocumentDeletedPayload,
-  DocumentEventName
+  Subscription
 } from './EventBus'
 
 export { keyboardShortcutService } from './KeyboardShortcutService'

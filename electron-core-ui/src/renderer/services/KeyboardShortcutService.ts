@@ -146,7 +146,6 @@ class KeyboardShortcutService {
     if (electronAPI?.registerInterceptedShortcuts) {
       const shortcuts = this.getRegisteredShortcuts()
       electronAPI.registerInterceptedShortcuts(shortcuts)
-      logger.debug('[KeyboardShortcutService] Synced intercepted shortcuts with main process:', { shortcuts })
     }
   }
 
@@ -164,10 +163,8 @@ class KeyboardShortcutService {
         if (isDevMode) {
           // Register Ctrl+Shift+R for page refresh in dev mode
           this.register('Ctrl+Shift+R', () => {
-            logger.info('[KeyboardShortcutService] Dev refresh triggered')
             window.location.reload()
           })
-          logger.info('[KeyboardShortcutService] Dev mode shortcuts registered (Ctrl+Shift+R)')
         }
       } catch (error) {
         logger.warn('[KeyboardShortcutService] Failed to check dev mode:', { error: String(error) })
@@ -187,7 +184,6 @@ class KeyboardShortcutService {
     this.setupIPCListener()
     
     this.isListening = true
-    logger.debug('[KeyboardShortcutService] Started listening for shortcuts')
   }
 
   /**
@@ -199,11 +195,9 @@ class KeyboardShortcutService {
     const electronAPI = getElectronAPI()
     if (electronAPI?.onKeyboardShortcut) {
       electronAPI.onKeyboardShortcut((shortcut: string) => {
-        logger.debug(`[KeyboardShortcutService] Received IPC shortcut: ${shortcut}`)
         this.triggerShortcut(shortcut)
       })
       this.ipcListenerRegistered = true
-      logger.debug('[KeyboardShortcutService] IPC listener registered')
     }
   }
 
@@ -215,7 +209,6 @@ class KeyboardShortcutService {
     
     document.removeEventListener('keydown', this.boundHandler, { capture: true })
     this.isListening = false
-    logger.debug('[KeyboardShortcutService] Stopped listening for shortcuts')
   }
 
   /**
@@ -238,8 +231,6 @@ class KeyboardShortcutService {
       enabled: true
     })
     
-    logger.debug(`[KeyboardShortcutService] Registered shortcut: ${shortcut}`)
-    
     // Auto-start listening when first shortcut is registered
     if (!this.isListening) {
       this.startListening()
@@ -253,7 +244,6 @@ class KeyboardShortcutService {
     
     return () => {
       this.shortcuts.delete(key)
-      logger.debug(`[KeyboardShortcutService] Unregistered shortcut: ${shortcut}`)
       
       // Sync with main process after unregistering
       this.syncInterceptedShortcutsWithMain()
@@ -277,28 +267,9 @@ class KeyboardShortcutService {
       target.isContentEditable
     )
     
-    // DEBUG: Log all keyboard events with modifiers
-    if (event.ctrlKey || event.metaKey || event.key === ' ') {
-      const registeredShortcuts = Array.from(this.shortcuts.values()).map(e => e.shortcut)
-      logger.info(`[KeyboardShortcutService] KeyDown event:`, {
-        key: event.key,
-        code: event.code,
-        ctrlKey: event.ctrlKey,
-        metaKey: event.metaKey,
-        shiftKey: event.shiftKey,
-        altKey: event.altKey,
-        target: target.tagName,
-        targetClasses: target.className.substring(0, 100),
-        isInputElement,
-        registeredShortcuts,
-        defaultPrevented: event.defaultPrevented
-      })
-    }
-    
     // For input elements, only allow shortcuts with Ctrl/Meta modifier
     // This prevents shortcuts from interfering with typing
     if (isInputElement && !event.ctrlKey && !event.metaKey) {
-      logger.info(`[KeyboardShortcutService] Skipping - input element without Ctrl/Meta`)
       return
     }
     
@@ -311,8 +282,6 @@ class KeyboardShortcutService {
         // This allows other components (like Monaco editor) to handle their own shortcuts
         event.preventDefault()
         event.stopPropagation()
-        
-        logger.info(`[KeyboardShortcutService] Triggered shortcut: ${entry.shortcut}`)
         
         try {
           const result = entry.handler()
@@ -330,9 +299,6 @@ class KeyboardShortcutService {
       }
     }
     
-    // No matching handler found - let the event propagate to allow
-    // other components (Monaco editor, etc.) to handle their own shortcuts
-    logger.info(`[KeyboardShortcutService] No matching handler - letting event propagate`)
   }
 
   /**
@@ -345,8 +311,6 @@ class KeyboardShortcutService {
       if (!entry.enabled) continue
       
       if (entry.shortcut === normalizedShortcut) {
-        logger.debug(`[KeyboardShortcutService] Triggered IPC shortcut: ${entry.shortcut}`)
-        
         try {
           const result = entry.handler()
           if (result instanceof Promise) {
@@ -394,7 +358,6 @@ class KeyboardShortcutService {
   clearAll(): void {
     this.shortcuts.clear()
     this.stopListening()
-    logger.debug('[KeyboardShortcutService] Cleared all shortcuts')
   }
 }
 

@@ -1,34 +1,25 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Handlebars } from '../../utils/handlebarsHelpers'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
   Button,
-  VariableInputBox,
   InputBox,
   CodeEditor,
-  KeyValueTable,
   SplitView,
   Pane,
   logger,
   type VariableDefinition,
-  type KeyValueTableHandle
+  type KeyValueTableRow
 } from 'electron-core-ui/renderer'
-import type { WebSocketRequest, WebSocketResponse, WebSocketMessage } from '../../types/collections'
+import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
+import type { WebSocketRequest, WebSocketResponse, WebSocketMessage, KeyValue } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
-import { useEnvironmentValues } from '../../contexts/useEnvironmentValues'
-import {
-  resolveEnvironmentVariables,
-  type VariableContext
-} from '../../services/VariableResolutionService'
-import { executeWebSocketRequest, type WebSocketRequestInput } from '../../services/request/WebSocketRequestService'
+import type { VariableContext } from '../RestormKeyValueTable'
+import type { WebSocketExecutionResult, WebSocketMessageItem } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { Badge } from '../Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
-import codeSnippetsTemplate from '../../resources/templates/code-snippets-websocket.hbs?raw'
-
-// Compile the Handlebars template
-const compiledTemplate = Handlebars.compile(codeSnippetsTemplate)
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
 function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
@@ -41,15 +32,19 @@ export interface WebSocketRequestTabViewProps {
 
 export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = ({ request }) => {
   const { t } = useTranslation()
-  const { environments, selectedEnvId } = useEnvironmentContext()
-  const { valuesByEnvId } = useEnvironmentValues()
+  const { selectedEnvId } = useEnvironmentContext()
   const handlebarsHelpers = useHandlebarsHelpers()
+  const previousEnvIdRef = useRef<string | null>(null)
   
   const [url, setUrlState] = useState(request.url)
   const [event, setEventState] = useState(request.event ?? '')
   const [message, setMessageState] = useState(request.message)
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<WebSocketResponse | null>(null)
+  
+  // Backend-provided resolved URL and code snippets
+  const [resolvedUrl, setResolvedUrl] = useState<string>('')
+  const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
   
   const headersRef = useRef<KeyValueTableHandle | null>(null)
   const requestIdRef = useRef(request.id)
@@ -68,6 +63,94 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     return undefined
   }, [request])
 
+  // Refs to capture initial values for registration (avoid re-running effect when these change)
+  const selectedEnvIdRef = useRef(selectedEnvId)
+  const requestRef = useRef(request)
+  useEffect(() => { selectedEnvIdRef.current = selectedEnvId }, [selectedEnvId])
+  useEffect(() => { requestRef.current = request }, [request])
+
+  // Register request with ContextService on mount, unregister on unmount
+  useEffect(() => {
+    const requestId = request.id
+    const currentEnvId = selectedEnvIdRef.current
+    const currentRequest = requestRef.current
+    logger.debug('[WebSocketRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
+
+    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
+
+    void window.restorm.context.registerRequest(requestId, currentEnvId ?? null, {
+      headers: toKeyValueData(currentRequest.headers)
+    })
+
+    // Send full request data for URL and code snippet calculation
+    void window.restorm.context.updateFullRequestData(requestId, {
+      url: currentRequest.url,
+      method: currentRequest.protocol,
+      requestType: 'websocket',
+      headers: toKeyValueData(currentRequest.headers),
+      body: { type: 'text', content: currentRequest.message }
+    })
+
+    // Subscribe to backend events
+    const unsubUrl = window.restorm.context.onUrlResolved((result) => {
+      if (result.requestId === requestId) {
+        setResolvedUrl(result.resolvedUrl)
+      }
+    })
+
+    const unsubSnippets = window.restorm.context.onCodeSnippetsUpdated((result) => {
+      if (result.requestId === requestId) {
+        setBackendCodeSnippets(result.markdown)
+      }
+    })
+
+    // Get initial values if they exist
+    void window.restorm.context.getResolvedUrl(requestId).then((result) => {
+      if (result) setResolvedUrl(result.resolvedUrl)
+    })
+    void window.restorm.context.getCodeSnippets(requestId).then((result) => {
+      if (result) setBackendCodeSnippets(result.markdown)
+    })
+
+    previousEnvIdRef.current = currentEnvId ?? null
+
+    return () => {
+      logger.debug('[WebSocketRequestTabView] Unregistering request from ContextService', { requestId })
+      unsubUrl()
+      unsubSnippets()
+      void window.restorm.context.unregisterRequest(requestId)
+    }
+  }, [request.id])
+
+  // Notify ContextService when selected environment changes
+  useEffect(() => {
+    const currentEnvId = selectedEnvId ?? null
+    if (previousEnvIdRef.current !== currentEnvId) {
+      logger.debug('[WebSocketRequestTabView] Environment changed, notifying ContextService', {
+        requestId: request.id,
+        previousEnvId: previousEnvIdRef.current,
+        newEnvId: currentEnvId
+      })
+      void window.restorm.context.setRequestEnvironment(request.id, currentEnvId)
+      previousEnvIdRef.current = currentEnvId
+    }
+  }, [selectedEnvId, request.id])
+
+  // Notify ContextService when URL, event or message changes
+  useEffect(() => {
+    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
+
+    void window.restorm.context.updateFullRequestData(request.id, {
+      url,
+      method: request.protocol,
+      requestType: 'websocket',
+      headers: toKeyValueData(request.headers),
+      body: { type: 'text', content: message }
+    })
+  }, [request.id, request.protocol, request.headers, url, message])
+
   // Sync state changes to reactive request object
   const setUrl = useCallback((value: string): void => {
     setUrlState(value)
@@ -82,39 +165,47 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     updateReactiveProperty(request, 'message', value)
   }, [request])
   
-  const runtimeContext = useMemo<VariableContext | undefined>(
-    () => (selectedEnvId ? valuesByEnvId[selectedEnvId] : undefined),
-    [valuesByEnvId, selectedEnvId]
-  )
+  // Variable resolution done in backend
+  const _environmentContext: VariableContext = {}
   
-  const environmentContext = useMemo<VariableContext>(
-    () => runtimeContext ?? resolveEnvironmentVariables(environments ?? [], selectedEnvId),
-    [runtimeContext, environments, selectedEnvId]
-  )
-  
-  const envVariables = useMemo<VariableDefinition[]>(
-    () => Object.entries(environmentContext).map(([name, value]) => ({ name, value, description: '' })),
-    [environmentContext]
-  )
-  
+  // Stable empty array for components that get variables via their own variableId
+  const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
+
+  // Callback for headers changes - notify both reactive object and ContextService
+  const handleHeadersChange = useCallback((rows: KeyValueTableRow[]): void => {
+    updateReactiveProperty(request, 'headers', rows)
+    void window.restorm.context.updateRequestKeyValues(
+      request.id,
+      'headers',
+      rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
+    )
+  }, [request])
+
   const handleSend = (): void => {
     if (isSending) return
     setIsSending(true)
     setResponse(null)
     
-    const input: WebSocketRequestInput = {
-      request,
-      url,
-      protocol: request.protocol,
-      event: event ? event : undefined,
-      message,
-      headers: request.headers,
-      variableContext: environmentContext
-    }
-    
-    executeWebSocketRequest(input, 5000)
-      .then((res) => {
-        setResponse(res)
+    window.restorm.websocket.connect({ requestId: request.id, timeout: 5000 })
+      .then((res: WebSocketExecutionResult) => {
+        // Convert backend result to WebSocketResponse format
+        const wsResponse: WebSocketResponse = {
+          id: `resp_${Date.now()}`,
+          type: 'websocket',
+          requestId: request.id,
+          requestUrl: res.requestUrl ?? '',
+          protocol: request.protocol,
+          connected: res.connected,
+          messages: res.messages.map((m: WebSocketMessageItem) => ({
+            direction: m.direction,
+            data: m.data,
+            event: m.event,
+            timestamp: m.timestamp
+          })),
+          error: res.error,
+          timings: res.timings
+        }
+        setResponse(wsResponse)
         logger.info('WebSocket request completed', { url: res.requestUrl, connected: res.connected })
       })
       .catch((err: unknown) => {
@@ -125,14 +216,18 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       })
   }
   
+  const handleDisconnect = (): void => {
+    void window.restorm.websocket.disconnect(request.id)
+  }
+  
   const formatMessage = (msg: WebSocketMessage): string => {
     const prefix = msg.direction === 'sent' ? '→' : '←'
     const eventStr = msg.event ? `[${msg.event}] ` : ''
     return `${prefix} ${eventStr}${msg.data}`
   }
   
-  // Parse host and port from URL
-  const hostInfo = useMemo(() => {
+  // Parse host and port from URL (kept for potential future use)
+  const _hostInfo = useMemo(() => {
     try {
       const urlObj = new URL(url.replace(/^ws/, 'http'))
       return {
@@ -191,37 +286,19 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           </Button>
         )}
       >
-        <KeyValueTable
+        <RestormKeyValueTable
           ref={headersRef}
-          variables={envVariables}
+          variables={emptyVariables}
+          helpers={handlebarsHelpers}
           initialRows={request.headers}
-          visibilityMode="base-only"
-          onRowsChange={(rows): void => { updateReactiveProperty(request, 'headers', rows) }}
+          onRowsChange={handleHeadersChange}
         />
       </Pane>
     </SplitView>
   )
   
-  // Generate code snippets
-  const codeSnippetsContent = useMemo(() => {
-    const headersData = request.headers.filter(h => h.key).map(h => ({ key: h.key, value: h.value }))
-    
-    return compiledTemplate({
-      url,
-      host: hostInfo.host,
-      port: hostInfo.port,
-      protocol: request.protocol,
-      event: event || null,
-      topic: event || null,
-      message: message || '{}',
-      headers: headersData.length > 0 ? headersData : null,
-      isNativeWebSocket: request.protocol === 'websocket',
-      isSocketIO: request.protocol === 'socketio',
-      isMQTT: request.protocol === 'mqtt',
-      isPublish: true,
-      isSubscribe: true
-    })
-  }, [url, hostInfo, request.protocol, request.headers, event, message])
+  // Use backend-provided code snippets
+  const codeSnippetsContent = backendCodeSnippets || t('requestTab.codeSnippets.loading', 'Loading code snippets...')
   
   // Infos content (detailed info panel)
   const infosContent = response ? (
@@ -291,19 +368,25 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   const urlSection = (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
       <Badge type={mapToBadgeType(request.protocol)} />
-      <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }}>
-        <VariableInputBox
+      <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }} title={resolvedUrl || url}>
+        <RestormVariableInputBox
           value={url}
           onChange={setUrl}
-          variables={envVariables}
+          variables={emptyVariables}
           helpers={handlebarsHelpers}
           placeholder={t('websocket.urlPlaceholder')}
         />
       </div>
-      <Button onClick={handleSend} options={{ title: t('websocket.connect'), ariaLabel: t('websocket.connect') }}>
+      <Button 
+        onClick={isSending ? handleDisconnect : handleSend} 
+        options={{ 
+          title: isSending ? t('websocket.disconnect') : t('websocket.connect'), 
+          ariaLabel: isSending ? t('websocket.disconnect') : t('websocket.connect') 
+        }}
+      >
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <i className="codicon codicon-plug" />
-          <span>{t('websocket.connect')}</span>
+          <i className={isSending ? 'codicon codicon-debug-disconnect' : 'codicon codicon-plug'} />
+          <span>{isSending ? t('websocket.disconnect') : t('websocket.connect')}</span>
         </span>
       </Button>
     </div>
@@ -311,6 +394,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   
   return (
     <BaseRequestTabView
+      requestId={request.id}
       urlSection={urlSection}
       requestContent={requestContent}
       codeSnippetsContent={codeSnippetsContent}

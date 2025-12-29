@@ -15,7 +15,8 @@ const Titlebar: React.FC<TitlebarProps> = ({
   id,
   showSearchBar = false,
   onSearchResultClick,
-  renderSearchTooltipContent
+  renderSearchTooltipContent,
+  renderSearchBadge
 }) => {
   const titlebarClasses = [
     'titlebar',
@@ -87,6 +88,7 @@ const Titlebar: React.FC<TitlebarProps> = ({
             title={title}
             onResultClick={onSearchResultClick}
             {...(renderSearchTooltipContent ? { renderTooltipContent: renderSearchTooltipContent } : {})}
+            {...(renderSearchBadge ? { renderBadge: renderSearchBadge } : {})}
           />
         ) : (
           centerContent ?? <span className="titlebar-title">{title}</span>

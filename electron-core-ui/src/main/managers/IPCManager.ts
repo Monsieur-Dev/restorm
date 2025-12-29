@@ -1,6 +1,6 @@
 import { BrowserWindow, ipcMain, app, screen } from 'electron'
 import { join } from 'path'
-import { getThemeService, getStorageService, logger, isFeatureServiceInitialized, getFeatureService, isFileServiceInitialized, getFileService } from '../services'
+import { getThemeService, getStorageService, logger, isFeatureServiceInitialized, getFeatureService, isFileServiceInitialized, getFileService, eventBusService, searchService, i18nService, type SearchDocument, type CategoryMeta } from '../services'
 
 /**
  * Configure Electron command line switches
@@ -95,6 +95,17 @@ export function setupIPC(resourcesPath?: string): void {
       }
     }
     return true
+  })
+
+  // I18n IPC handlers
+  ipcMain.handle('i18n:set-language', (_event, language: string) => {
+    i18nService.setLanguage(language)
+    logger.debug('Language changed via IPC', { language })
+    return true
+  })
+
+  ipcMain.handle('i18n:get-language', () => {
+    return i18nService.getLanguage()
   })
 
   // Logger IPC handler
@@ -413,6 +424,30 @@ export function setupIPC(resourcesPath?: string): void {
     getFileService().clearDirty()
   })
 
+  ipcMain.handle('file:finish-loading', () => {
+    if (!isFileServiceInitialized()) {
+      return
+    }
+    getFileService().finishLoading()
+  })
+
+  ipcMain.handle('file:check-and-update-dirty', (_event, currentChecksum: string) => {
+    if (!isFileServiceInitialized()) {
+      return
+    }
+    const fileService = getFileService()
+    const hasChanges = fileService.hasContentChanged(currentChecksum)
+    const isDirty = fileService.isDirty()
+    
+    if (hasChanges && !isDirty) {
+      logger.debug('[FileService] Content changed, marking dirty')
+      fileService.markDirty()
+    } else if (!hasChanges && isDirty) {
+      logger.debug('[FileService] Content returned to saved state, clearing dirty')
+      fileService.clearDirty()
+    }
+  })
+
   ipcMain.handle('file:show-unsaved-dialog', async (_event, labels?: {
     title?: string
     message?: string
@@ -474,6 +509,89 @@ export function setupIPC(resourcesPath?: string): void {
       return false
     }
     return getFileService().hasContentChanged(currentChecksum)
+  })
+
+  // Object checksum tracking handlers
+  ipcMain.handle('file:register-initial-checksums', (_event, objects: [string, unknown][]) => {
+    logger.debug('[IPCManager] file:register-initial-checksums called', { count: objects.length })
+    if (!isFileServiceInitialized()) {
+      logger.warn('[IPCManager] FileService not initialized')
+      return
+    }
+    getFileService().registerInitialChecksums(new Map(objects))
+  })
+
+  ipcMain.handle('file:update-object-checksum', (_event, runtimeId: string, data: unknown) => {
+    if (!isFileServiceInitialized()) {
+      return
+    }
+    getFileService().updateObjectChecksum(runtimeId, data)
+  })
+
+  ipcMain.handle('file:remove-object-checksum', (_event, runtimeId: string) => {
+    if (!isFileServiceInitialized()) {
+      return
+    }
+    getFileService().removeObjectChecksum(runtimeId)
+  })
+
+  ipcMain.handle('file:commit-checksums', () => {
+    if (!isFileServiceInitialized()) {
+      return
+    }
+    getFileService().commitChecksums()
+  })
+
+  ipcMain.handle('file:get-dirty-state-details', () => {
+    if (!isFileServiceInitialized()) {
+      return { isDirty: false, changedIds: [], newIds: [], deletedIds: [] }
+    }
+    return getFileService().getDirtyStateDetails()
+  })
+
+  // EventBus IPC handlers
+  ipcMain.handle('eventbus:emit', async (_event, eventName: string, payload: unknown) => {
+    await eventBusService.emit(eventName, payload)
+    return true
+  })
+
+  ipcMain.handle('eventbus:emit-sync', (_event, eventName: string, payload: unknown) => {
+    eventBusService.emitSync(eventName, payload)
+    return true
+  })
+
+  // Search Service IPC handlers
+  ipcMain.handle('search:register-categories', (_event, categories: Record<string, CategoryMeta>) => {
+    searchService.registerCategories(categories)
+    return true
+  })
+
+  ipcMain.handle('search:index-document', (_event, doc: SearchDocument) => {
+    searchService.indexDocument(doc)
+    return true
+  })
+
+  ipcMain.handle('search:index-documents', (_event, docs: SearchDocument[]) => {
+    searchService.indexDocuments(docs)
+    return true
+  })
+
+  ipcMain.handle('search:remove-document', (_event, id: string) => {
+    searchService.removeDocument(id)
+    return true
+  })
+
+  ipcMain.handle('search:clear-index', () => {
+    searchService.clearIndex()
+    return true
+  })
+
+  ipcMain.handle('search:search', (_event, query: string) => {
+    return searchService.search(query)
+  })
+
+  ipcMain.handle('search:get-document-count', () => {
+    return searchService.getDocumentCount()
   })
 
   logger.info('✅ IPC handlers setup complete')

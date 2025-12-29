@@ -8,6 +8,8 @@ import Handlebars from 'handlebars'
 import { MarkdownViewer, Tabs, type Tab, type SearchResult } from 'electron-core-ui/renderer'
 import type { RestormSearchMetadata } from '../services/SearchIndexService'
 import requestDetailsTemplate from '../resources/templates/search/request-details.hbs?raw'
+import { Badge } from './Badge'
+import { mapToBadgeType } from '../utils/badgeUtils'
 import './SearchTooltipContent.css'
 
 // Compile the Handlebars template
@@ -42,6 +44,7 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
     const method = icon.toUpperCase()
     const tags = restormMetadata?.tags ?? []
     const notes = restormMetadata?.notes
+    const breadcrumb = restormMetadata?.breadcrumb ?? []
 
     // Build tabs for request tooltip - order matters (first tab is default)
     const tabs: Tab[] = []
@@ -76,9 +79,20 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
 
     return (
       <div style={{ maxHeight: 'calc(100vh - 90px)', display: 'flex', flexDirection: 'column' }}>
+        {/* Breadcrumb */}
+        {breadcrumb.length > 0 && (
+          <div className="search-tooltip-breadcrumb">
+            {breadcrumb.map((item, index) => (
+              <React.Fragment key={index}>
+                {index > 0 && <span className="breadcrumb-separator">/</span>}
+                <span className="breadcrumb-item">{item}</span>
+              </React.Fragment>
+            ))}
+          </div>
+        )}
         {/* Method, title and tags on same line */}
         <div style={{ marginBottom: 8, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span className={`http-method-badge method-${method.toLowerCase()}`}>{method}</span>
+          <Badge type={mapToBadgeType(method)} />
           <strong style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{resultTitle}</strong>
           {tags.length > 0 && (
             <div className="search-tooltip-tags">
@@ -97,6 +111,7 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
   // Folder or other category
   const folderTags = restormMetadata?.tags ?? []
   const folderNotes = restormMetadata?.notes
+  const folderBreadcrumb = restormMetadata?.breadcrumb ?? []
   
   // Build tabs for folder tooltip - order matters (first tab is default)
   const folderTabs: Tab[] = []
@@ -122,6 +137,17 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
 
   return (
     <div style={{ maxHeight: 'calc(100vh - 90px)', display: 'flex', flexDirection: 'column' }}>
+      {/* Breadcrumb */}
+      {folderBreadcrumb.length > 0 && (
+        <div className="search-tooltip-breadcrumb">
+          {folderBreadcrumb.map((item, index) => (
+            <React.Fragment key={index}>
+              {index > 0 && <span className="breadcrumb-separator">/</span>}
+              <span className="breadcrumb-item">{item}</span>
+            </React.Fragment>
+          ))}
+        </div>
+      )}
       {/* Title and tags on same line */}
       <div style={{ marginBottom: 8, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
         <strong style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{resultTitle}</strong>

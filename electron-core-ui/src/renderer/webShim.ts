@@ -62,6 +62,8 @@ interface WindowApiFileShim {
   isDirty: () => Promise<boolean>
   markDirty: () => Promise<void>
   clearDirty: () => Promise<void>
+  checkAndUpdateDirty: (currentChecksum: string) => Promise<void>
+  finishLoading: () => Promise<void>
   showUnsavedChangesDialog: (labels?: {
     title?: string
     message?: string
@@ -77,21 +79,88 @@ interface WindowApiFileShim {
   getContentChecksum: () => Promise<string | null>
   setContentChecksum: (checksum: string) => Promise<void>
   hasContentChanged: (currentChecksum: string) => Promise<boolean>
+  // Object checksum tracking
+  registerInitialChecksums: (objects: Map<string, unknown>) => Promise<void>
+  updateObjectChecksum: (runtimeId: string, data: unknown) => Promise<void>
+  removeObjectChecksum: (runtimeId: string) => Promise<void>
+  commitChecksums: () => Promise<void>
+  getDirtyStateDetails: () => Promise<{
+    isDirty: boolean
+    changedIds: string[]
+    newIds: string[]
+    deletedIds: string[]
+  }>
   onStateChanged: (callback: (state: FileServiceState) => void) => () => void
   onDirtyChanged: (callback: (isDirty: boolean) => void) => () => void
   onFileOpened: (callback: (state: FileServiceState) => void) => () => void
   onFileClosed: (callback: () => void) => () => void
 }
 
+interface WindowApiEventBusShim {
+  emit: (event: string, payload: unknown) => Promise<boolean>
+  emitSync: (event: string, payload: unknown) => Promise<boolean>
+}
+
+interface WindowApiI18nShim {
+  setLanguage: (language: string) => Promise<boolean>
+  getLanguage: () => Promise<string>
+}
+
+interface WindowApiSearchShim {
+  registerCategories: (categories: Record<string, { label: string; icon: string; order: number }>) => Promise<boolean>
+  indexDocument: (doc: {
+    id: string
+    title: string
+    description?: string
+    category: string
+    icon?: string
+    keywords?: string
+    navigation?: Record<string, unknown>
+    metadata?: Record<string, unknown>
+  }) => Promise<boolean>
+  indexDocuments: (docs: {
+    id: string
+    title: string
+    description?: string
+    category: string
+    icon?: string
+    keywords?: string
+    navigation?: Record<string, unknown>
+    metadata?: Record<string, unknown>
+  }[]) => Promise<boolean>
+  removeDocument: (id: string) => Promise<boolean>
+  clearIndex: () => Promise<boolean>
+  search: (query: string) => Promise<{
+    category: string
+    label: string
+    icon: string
+    items: {
+      id: string
+      title: string
+      description?: string
+      category: string
+      icon?: string
+      keywords?: string
+      navigation?: Record<string, unknown>
+      metadata?: Record<string, unknown>
+      score: number
+    }[]
+  }[]>
+  getDocumentCount: () => Promise<number>
+}
+
 interface WindowApiShim {
   platform: string
   theme: WindowApiThemeShim
+  i18n: WindowApiI18nShim
   logger: {
     log: (level: string, message: string, meta?: Record<string, unknown>) => Promise<void>
   }
   storage: WindowApiStorageShim
   feature: WindowApiFeatureShim
   file: WindowApiFileShim
+  eventBus: WindowApiEventBusShim
+  search: WindowApiSearchShim
   minimizeWindow: () => Promise<void>
   maximizeWindow: () => Promise<void>
   closeWindow: () => Promise<void>
@@ -320,6 +389,18 @@ export function ensureCoreUiWebApiShim(): void {
     }
   }
 
+  // I18n shim for web builds (no-op, language is handled by i18next directly)
+  let webCurrentLanguage = 'en'
+  const i18nApi: WindowApiI18nShim = {
+    setLanguage: (language: string): Promise<boolean> => {
+      webCurrentLanguage = language
+      return Promise.resolve(true)
+    },
+    getLanguage: (): Promise<string> => {
+      return Promise.resolve(webCurrentLanguage)
+    }
+  }
+
   // Storage shim using localStorage for web builds
   const storageApi: WindowApiStorageShim = {
     get: (key: string): Promise<unknown> => {
@@ -519,6 +600,23 @@ export function ensureCoreUiWebApiShim(): void {
       }
       return Promise.resolve()
     },
+    checkAndUpdateDirty: (currentChecksum: string): Promise<void> => {
+      const hasChanges = webCurrentFile.contentChecksum !== null && webCurrentFile.contentChecksum !== currentChecksum
+      if (hasChanges && !webCurrentFile.isDirty) {
+        webCurrentFile.isDirty = true
+        notifyWebStateChange()
+        notifyWebDirtyChange()
+      } else if (!hasChanges && webCurrentFile.isDirty) {
+        webCurrentFile.isDirty = false
+        notifyWebStateChange()
+        notifyWebDirtyChange()
+      }
+      return Promise.resolve()
+    },
+    finishLoading: (): Promise<void> => {
+      // No-op for web builds
+      return Promise.resolve()
+    },
     showUnsavedChangesDialog: (labels?: {
       title?: string
       message?: string
@@ -577,6 +675,36 @@ export function ensureCoreUiWebApiShim(): void {
       }
       return Promise.resolve(webCurrentFile.contentChecksum !== currentChecksum)
     },
+    // Object checksum tracking (simplified for web - uses in-memory maps)
+    registerInitialChecksums: (_objects: Map<string, unknown>): Promise<void> => {
+      // Web shim: no-op, dirty state handled by content checksum
+      return Promise.resolve()
+    },
+    updateObjectChecksum: (_runtimeId: string, _data: unknown): Promise<void> => {
+      // Web shim: no-op
+      return Promise.resolve()
+    },
+    removeObjectChecksum: (_runtimeId: string): Promise<void> => {
+      // Web shim: no-op
+      return Promise.resolve()
+    },
+    commitChecksums: (): Promise<void> => {
+      // Web shim: no-op
+      return Promise.resolve()
+    },
+    getDirtyStateDetails: (): Promise<{
+      isDirty: boolean
+      changedIds: string[]
+      newIds: string[]
+      deletedIds: string[]
+    }> => {
+      return Promise.resolve({
+        isDirty: webCurrentFile.isDirty,
+        changedIds: [],
+        newIds: [],
+        deletedIds: []
+      })
+    },
     onStateChanged: (callback: (state: FileServiceState) => void): (() => void) => {
       webStateChangeCallbacks.add(callback)
       return () => { webStateChangeCallbacks.delete(callback) }
@@ -595,9 +723,143 @@ export function ensureCoreUiWebApiShim(): void {
     }
   }
 
+  // EventBus shim for web builds (in-memory, same process)
+  const webEventHandlers = new Map<string, Set<(payload: unknown) => void>>()
+  const eventBusApi: WindowApiEventBusShim = {
+    emit: (event: string, payload: unknown): Promise<boolean> => {
+      const handlers = webEventHandlers.get(event)
+      if (handlers) {
+        for (const handler of handlers) {
+          try { handler(payload) } catch { /* ignore */ }
+        }
+      }
+      return Promise.resolve(true)
+    },
+    emitSync: (event: string, payload: unknown): Promise<boolean> => {
+      setTimeout(() => {
+        const handlers = webEventHandlers.get(event)
+        if (handlers) {
+          for (const handler of handlers) {
+            try { handler(payload) } catch { /* ignore */ }
+          }
+        }
+      }, 0)
+      return Promise.resolve(true)
+    }
+  }
+
+  // Search shim for web builds (in-memory index)
+  const webSearchDocuments = new Map<string, {
+    id: string
+    title: string
+    description?: string
+    category: string
+    icon?: string
+    keywords?: string
+    navigation?: Record<string, unknown>
+    metadata?: Record<string, unknown>
+  }>()
+  const webSearchCategories: Record<string, { label: string; icon: string; order: number }> = {}
+
+  const searchApi: WindowApiSearchShim = {
+    registerCategories: (categories): Promise<boolean> => {
+      Object.assign(webSearchCategories, categories)
+      return Promise.resolve(true)
+    },
+    indexDocument: (doc): Promise<boolean> => {
+      webSearchDocuments.set(doc.id, doc)
+      return Promise.resolve(true)
+    },
+    indexDocuments: (docs): Promise<boolean> => {
+      for (const doc of docs) {
+        webSearchDocuments.set(doc.id, doc)
+      }
+      return Promise.resolve(true)
+    },
+    removeDocument: (id): Promise<boolean> => {
+      webSearchDocuments.delete(id)
+      return Promise.resolve(true)
+    },
+    clearIndex: (): Promise<boolean> => {
+      webSearchDocuments.clear()
+      return Promise.resolve(true)
+    },
+    search: (query): Promise<{
+      category: string
+      label: string
+      icon: string
+      items: {
+        id: string
+        title: string
+        description?: string
+        category: string
+        icon?: string
+        keywords?: string
+        navigation?: Record<string, unknown>
+        metadata?: Record<string, unknown>
+        score: number
+      }[]
+    }[]> => {
+      // Simple case-insensitive substring search for web builds
+      const lowerQuery = query.toLowerCase()
+      const results: {
+        id: string
+        title: string
+        description?: string
+        category: string
+        icon?: string
+        keywords?: string
+        navigation?: Record<string, unknown>
+        metadata?: Record<string, unknown>
+        score: number
+      }[] = []
+
+      for (const doc of webSearchDocuments.values()) {
+        const titleMatch = doc.title.toLowerCase().includes(lowerQuery)
+        const descMatch = doc.description?.toLowerCase().includes(lowerQuery)
+        const keywordsMatch = doc.keywords?.toLowerCase().includes(lowerQuery)
+        if (titleMatch || descMatch || keywordsMatch) {
+          results.push({ ...doc, score: titleMatch ? 2 : 1 })
+        }
+      }
+
+      // Group by category
+      const grouped = new Map<string, typeof results>()
+      for (const result of results) {
+        const cat = result.category
+        if (!grouped.has(cat)) grouped.set(cat, [])
+        grouped.get(cat)?.push(result)
+      }
+
+      const output: {
+        category: string
+        label: string
+        icon: string
+        items: typeof results
+      }[] = []
+
+      for (const [category, items] of grouped) {
+        const meta = webSearchCategories[category] ?? { label: category, icon: 'symbol-misc', order: 99 }
+        output.push({ category, label: meta.label, icon: meta.icon, items })
+      }
+
+      output.sort((a, b) => {
+        const orderA = webSearchCategories[a.category]?.order ?? 99
+        const orderB = webSearchCategories[b.category]?.order ?? 99
+        return orderA - orderB
+      })
+
+      return Promise.resolve(output)
+    },
+    getDocumentCount: (): Promise<number> => {
+      return Promise.resolve(webSearchDocuments.size)
+    }
+  }
+
   const api: WindowApiShim = {
     platform: (navigator as { userAgentData?: { platform?: string } }).userAgentData?.platform ?? 'web',
     theme: themeApi,
+    i18n: i18nApi,
     logger: {
       // In web builds, swallow log messages; the app can add its own logging if desired.
       // We intentionally avoid using console here to keep logging centralized.
@@ -606,6 +868,8 @@ export function ensureCoreUiWebApiShim(): void {
     storage: storageApi,
     feature: featureApi,
     file: fileApi,
+    eventBus: eventBusApi,
+    search: searchApi,
     minimizeWindow: () => Promise.resolve(),
     maximizeWindow: () => Promise.resolve(),
     closeWindow: () => Promise.resolve(),

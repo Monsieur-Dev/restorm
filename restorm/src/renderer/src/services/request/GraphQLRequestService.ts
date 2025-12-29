@@ -5,7 +5,15 @@
 
 import axios from 'axios'
 import type { GraphQLRequest, GraphQLResponse, KeyValue } from '../../types/collections'
-import { resolveTemplate, type VariableContext } from '../VariableResolutionService'
+import type { VariableContext } from './types'
+
+// Re-export for consumers
+export type { VariableContext } from './types'
+
+/** Placeholder for variable resolution - returns template as-is (to be implemented in backend) */
+function resolveTemplate(template: string, _context: VariableContext): string {
+  return template
+}
 
 /** Input for executing a GraphQL request */
 export interface GraphQLRequestInput {

@@ -1,7 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import type { Environment } from '../types/collections'
-import { findEnvironmentChain } from '../services/VariableResolutionService'
 import { EnvironmentContext, type EnvironmentContextValue } from './useEnvironmentContext'
+
+/** Find an environment by ID in a list (including sub-environments) */
+function findEnvironmentById(environments: Environment[], id: string): Environment | null {
+  for (const env of environments) {
+    if (env.id === id) return env
+    if (env.subEnvironments) {
+      const found = findEnvironmentById(env.subEnvironments, id)
+      if (found) return found
+    }
+  }
+  return null
+}
 
 export interface EnvironmentProviderProps {
   environments: Environment[] | undefined
@@ -29,8 +40,8 @@ export const EnvironmentProvider: React.FC<EnvironmentProviderProps> = ({ enviro
       return (): void => { if (rafId !== undefined) cancelAnimationFrame(rafId) }
     }
 
-    const chain = findEnvironmentChain(environments, selectedEnvId)
-    if (!chain) {
+    const found = findEnvironmentById(environments, selectedEnvId)
+    if (!found) {
       rafId = requestAnimationFrame(() => {
         setSelectedEnvId(environments[0]?.id ?? null)
       })

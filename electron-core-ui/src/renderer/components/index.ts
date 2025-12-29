@@ -134,7 +134,7 @@ export type {
   KeyValueTableProps,
   KeyValueTableHandle,
   KeyValueTableRow,
-  VariableContext as KeyValueTableVariableContext
+  CellRendererProps
 } from './KeyValueTable/KeyValueTable'
 
 // CustomWCO exports

@@ -1,33 +1,24 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Handlebars } from '../../utils/handlebarsHelpers'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
   Button,
-  VariableInputBox,
   CodeEditor,
-  KeyValueTable,
   SplitView,
   Pane,
   logger,
   type VariableDefinition,
-  type KeyValueTableHandle
+  type KeyValueTableRow
 } from 'electron-core-ui/renderer'
-import type { GrpcRequest, GrpcResponse } from '../../types/collections'
+import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
+import type { GrpcRequest, GrpcResponse, KeyValue } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
-import { useEnvironmentValues } from '../../contexts/useEnvironmentValues'
-import {
-  resolveEnvironmentVariables,
-  type VariableContext
-} from '../../services/VariableResolutionService'
-import { executeGrpcRequest, type GrpcRequestInput } from '../../services/request/GrpcRequestService'
+import type { VariableContext } from '../RestormKeyValueTable'
+import type { GRPCExecutionResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { Badge } from '../Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
-import codeSnippetsTemplate from '../../resources/templates/code-snippets-grpc.hbs?raw'
-
-// Compile the Handlebars template
-const compiledTemplate = Handlebars.compile(codeSnippetsTemplate)
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
 function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
@@ -40,14 +31,18 @@ export interface GrpcRequestTabViewProps {
 
 export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request }) => {
   const { t } = useTranslation()
-  const { environments, selectedEnvId } = useEnvironmentContext()
-  const { valuesByEnvId } = useEnvironmentValues()
+  const { selectedEnvId } = useEnvironmentContext()
   const handlebarsHelpers = useHandlebarsHelpers()
+  const previousEnvIdRef = useRef<string | null>(null)
   
   const [url, setUrlState] = useState(request.url)
   const [requestMessage, setRequestMessageState] = useState(request.requestMessage)
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<GrpcResponse | null>(null)
+  
+  // Backend-provided resolved URL and code snippets
+  const [resolvedUrl, setResolvedUrl] = useState<string>('')
+  const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
   
   const metadataRef = useRef<KeyValueTableHandle | null>(null)
   const requestIdRef = useRef(request.id)
@@ -65,6 +60,94 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
     return undefined
   }, [request])
 
+  // Refs to capture initial values for registration (avoid re-running effect when these change)
+  const selectedEnvIdRef = useRef(selectedEnvId)
+  const requestRef = useRef(request)
+  useEffect(() => { selectedEnvIdRef.current = selectedEnvId }, [selectedEnvId])
+  useEffect(() => { requestRef.current = request }, [request])
+
+  // Register request with ContextService on mount, unregister on unmount
+  useEffect(() => {
+    const requestId = request.id
+    const currentEnvId = selectedEnvIdRef.current
+    const currentRequest = requestRef.current
+    logger.debug('[GrpcRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
+
+    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
+
+    void window.restorm.context.registerRequest(requestId, currentEnvId ?? null, {
+      headers: toKeyValueData(currentRequest.metadata)
+    })
+
+    // Send full request data for URL and code snippet calculation
+    void window.restorm.context.updateFullRequestData(requestId, {
+      url: currentRequest.url,
+      method: currentRequest.callType,
+      requestType: 'grpc',
+      headers: toKeyValueData(currentRequest.metadata),
+      body: { type: 'text', content: currentRequest.requestMessage }
+    })
+
+    // Subscribe to backend events
+    const unsubUrl = window.restorm.context.onUrlResolved((result) => {
+      if (result.requestId === requestId) {
+        setResolvedUrl(result.resolvedUrl)
+      }
+    })
+
+    const unsubSnippets = window.restorm.context.onCodeSnippetsUpdated((result) => {
+      if (result.requestId === requestId) {
+        setBackendCodeSnippets(result.markdown)
+      }
+    })
+
+    // Get initial values if they exist
+    void window.restorm.context.getResolvedUrl(requestId).then((result) => {
+      if (result) setResolvedUrl(result.resolvedUrl)
+    })
+    void window.restorm.context.getCodeSnippets(requestId).then((result) => {
+      if (result) setBackendCodeSnippets(result.markdown)
+    })
+
+    previousEnvIdRef.current = currentEnvId ?? null
+
+    return () => {
+      logger.debug('[GrpcRequestTabView] Unregistering request from ContextService', { requestId })
+      unsubUrl()
+      unsubSnippets()
+      void window.restorm.context.unregisterRequest(requestId)
+    }
+  }, [request.id])
+
+  // Notify ContextService when selected environment changes
+  useEffect(() => {
+    const currentEnvId = selectedEnvId ?? null
+    if (previousEnvIdRef.current !== currentEnvId) {
+      logger.debug('[GrpcRequestTabView] Environment changed, notifying ContextService', {
+        requestId: request.id,
+        previousEnvId: previousEnvIdRef.current,
+        newEnvId: currentEnvId
+      })
+      void window.restorm.context.setRequestEnvironment(request.id, currentEnvId)
+      previousEnvIdRef.current = currentEnvId
+    }
+  }, [selectedEnvId, request.id])
+
+  // Notify ContextService when URL or request message changes
+  useEffect(() => {
+    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
+
+    void window.restorm.context.updateFullRequestData(request.id, {
+      url,
+      method: request.callType,
+      requestType: 'grpc',
+      headers: toKeyValueData(request.metadata),
+      body: { type: 'text', content: requestMessage }
+    })
+  }, [request.id, request.callType, request.metadata, url, requestMessage])
+
   // Sync state changes to reactive request object
   const setUrl = useCallback((value: string): void => {
     setUrlState(value)
@@ -75,39 +158,46 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
     updateReactiveProperty(request, 'requestMessage', value)
   }, [request])
   
-  const runtimeContext = useMemo<VariableContext | undefined>(
-    () => (selectedEnvId ? valuesByEnvId[selectedEnvId] : undefined),
-    [valuesByEnvId, selectedEnvId]
-  )
+  // Variable resolution done in backend
+  const _environmentContext: VariableContext = {}
   
-  const environmentContext = useMemo<VariableContext>(
-    () => runtimeContext ?? resolveEnvironmentVariables(environments ?? [], selectedEnvId),
-    [runtimeContext, environments, selectedEnvId]
-  )
-  
-  const envVariables = useMemo<VariableDefinition[]>(
-    () => Object.entries(environmentContext).map(([name, value]) => ({ name, value, description: '' })),
-    [environmentContext]
-  )
-  
+  // Stable empty array for components that get variables via their own variableId
+  const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
+
+  // Callback for metadata changes - notify both reactive object and ContextService
+  const handleMetadataChange = useCallback((rows: KeyValueTableRow[]): void => {
+    updateReactiveProperty(request, 'metadata', rows)
+    void window.restorm.context.updateRequestKeyValues(
+      request.id,
+      'headers', // Use 'headers' as the group name for consistency
+      rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
+    )
+  }, [request])
+
   const handleSend = (): void => {
     if (isSending) return
     setIsSending(true)
     setResponse(null)
     
-    const input: GrpcRequestInput = {
-      request,
-      url,
-      service: request.service,
-      method: request.method,
-      requestMessage,
-      metadata: request.metadata,
-      variableContext: environmentContext
-    }
-    
-    executeGrpcRequest(input)
-      .then((res) => {
-        setResponse(res)
+    window.restorm.grpc.execute({ requestId: request.id })
+      .then((res: GRPCExecutionResult) => {
+        // Convert backend result to GrpcResponse format
+        const grpcResponse: GrpcResponse = {
+          id: `resp_${Date.now()}`,
+          type: 'grpc',
+          requestId: request.id,
+          requestUrl: res.requestUrl ?? '',
+          requestMethod: res.requestMethod ?? `${request.service}/${request.method}`,
+          requestMessage,
+          requestMetadata: request.metadata,
+          statusCode: res.statusCode ?? 12,
+          statusMessage: res.statusMessage ?? '',
+          responseMessage: res.responseMessage ?? '',
+          responseMetadata: [],
+          error: res.error,
+          timings: res.timings
+        }
+        setResponse(grpcResponse)
         logger.info('gRPC request completed', { method: res.requestMethod, status: res.statusCode })
       })
       .catch((err: unknown) => {
@@ -118,8 +208,12 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
       })
   }
   
-  // Parse host and port from URL
-  const hostInfo = useMemo(() => {
+  const handleCancel = (): void => {
+    void window.restorm.grpc.cancel(request.id)
+  }
+  
+  // Parse host and port from URL (kept for potential future use)
+  const _hostInfo = useMemo(() => {
     try {
       const urlObj = new URL(url.startsWith('http') ? url : `http://${url}`)
       return {
@@ -164,48 +258,19 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
           </Button>
         )}
       >
-        <KeyValueTable
+        <RestormKeyValueTable
           ref={metadataRef}
-          variables={envVariables}
+          variables={emptyVariables}
+          helpers={handlebarsHelpers}
           initialRows={request.metadata}
-          visibilityMode="base-only"
-          onRowsChange={(rows): void => { updateReactiveProperty(request, 'metadata', rows) }}
+          onRowsChange={handleMetadataChange}
         />
       </Pane>
     </SplitView>
   )
   
-  // Generate code snippets
-  const codeSnippetsContent = useMemo(() => {
-    const metadataData = request.metadata.filter(m => m.key).map(m => ({ key: m.key, value: m.value }))
-    const serviceParts = request.service.split('.')
-    const serviceName = serviceParts[serviceParts.length - 1] ?? request.service
-    const packageName = serviceParts.slice(0, -1).join('.') || 'package'
-    
-    return compiledTemplate({
-      url,
-      host: hostInfo.host,
-      port: hostInfo.port,
-      service: request.service,
-      serviceName,
-      method: request.method,
-      methodName: request.method.charAt(0).toLowerCase() + request.method.slice(1),
-      method_snake: request.method.replace(/([A-Z])/g, '_$1').toLowerCase().replace(/^_/, ''),
-      callType: request.callType,
-      requestMessage: requestMessage || '{}',
-      requestType: 'Request',
-      metadata: metadataData.length > 0 ? metadataData : null,
-      package: packageName,
-      Package: packageName.charAt(0).toUpperCase() + packageName.slice(1),
-      Namespace: packageName.replace(/\./g, '::'),
-      protoFile: 'service.proto',
-      plaintext: !url.startsWith('https'),
-      isUnary: request.callType === 'unary',
-      isServerStream: request.callType === 'server-stream',
-      isClientStream: request.callType === 'client-stream',
-      isBidirectional: request.callType === 'bidirectional-stream'
-    })
-  }, [url, hostInfo, request.service, request.method, request.callType, request.metadata, requestMessage])
+  // Use backend-provided code snippets
+  const codeSnippetsContent = backendCodeSnippets || t('requestTab.codeSnippets.loading', 'Loading code snippets...')
   
   // Infos content (detailed info panel)
   const infosContent = response ? (
@@ -270,19 +335,25 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <Badge type={mapToBadgeType(request.callType)} />
-        <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }}>
-          <VariableInputBox
+        <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }} title={resolvedUrl || url}>
+          <RestormVariableInputBox
             value={url}
             onChange={setUrl}
-            variables={envVariables}
+            variables={emptyVariables}
             helpers={handlebarsHelpers}
             placeholder={t('grpc.urlPlaceholder')}
           />
         </div>
-        <Button onClick={handleSend} options={{ title: t('grpc.send'), ariaLabel: t('grpc.send') }}>
+        <Button 
+          onClick={isSending ? handleCancel : handleSend} 
+          options={{ 
+            title: isSending ? t('cancel') : t('grpc.send'), 
+            ariaLabel: isSending ? t('cancel') : t('grpc.send') 
+          }}
+        >
           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <i className="codicon codicon-send" />
-            <span>{t('grpc.send')}</span>
+            <i className={isSending ? 'codicon codicon-close' : 'codicon codicon-send'} />
+            <span>{isSending ? t('cancel') : t('grpc.send')}</span>
           </span>
         </Button>
       </div>
@@ -294,6 +365,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
   
   return (
     <BaseRequestTabView
+      requestId={request.id}
       urlSection={urlSection}
       requestContent={requestContent}
       codeSnippetsContent={codeSnippetsContent}

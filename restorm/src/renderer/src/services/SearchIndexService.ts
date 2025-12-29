@@ -1,21 +1,30 @@
 /**
- * SearchIndexService - Handles search indexing for Folder and HTTPRequest documents
+ * SearchIndexService - Client wrapper for search indexing (Renderer Process)
  *
- * Listens to document events from the EventBus and updates the search index accordingly.
+ * The actual indexing is done in the main process. This service provides:
+ * 1. Initial categories registration
+ * 2. Bulk folder tree indexing at startup
+ *
+ * Document events (create/update/delete) are handled by the main process
+ * via EventBus events sent from reactive.ts
  */
 
 import {
-  eventBus,
   searchService,
-  DocumentEvents,
-  type DocumentChangedPayload,
-  type DocumentDeletedPayload,
-  type SearchDocument,
-  type Subscription,
+  type CategoryMeta,
   logger
 } from 'electron-core-ui/renderer'
 import type { Folder, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, Request } from '../types/collections'
 import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isRequest } from '../types/collections'
+
+/** Search categories configuration for Restorm */
+const RESTORM_SEARCH_CATEGORIES: Record<string, CategoryMeta> = {
+  request: { label: 'search.categories.request', icon: 'cloud', order: 1 },
+  folder: { label: 'search.categories.folder', icon: 'folder', order: 2 },
+  environment: { label: 'search.categories.environment', icon: 'folder-library', order: 3 },
+  settings: { label: 'search.categories.settings', icon: 'settings-gear', order: 4 },
+  tag: { label: 'search.categories.tag', icon: 'tag', order: 5 }
+}
 
 /** Metadata structure for search documents in restorm */
 export interface RestormSearchMetadata {
@@ -38,6 +47,8 @@ export interface RestormSearchMetadata {
   tags?: string[]
   /** Notes */
   notes?: string
+  /** Breadcrumb path (parent folder names) */
+  breadcrumb?: string[]
 }
 
 /** Check if an item is a Folder */
@@ -48,7 +59,16 @@ function isFolder(item: unknown): item is Folder {
 /**
  * Convert a Folder to a SearchDocument
  */
-function folderToSearchDocument(folder: Folder, parentPath: string[] = []): SearchDocument {
+function folderToSearchDocument(folder: Folder, parentPath: string[] = [], parentNames: string[] = []): {
+  id: string
+  title: string
+  description?: string
+  category: string
+  icon: string
+  keywords: string
+  navigation: Record<string, unknown>
+  metadata: Record<string, unknown>
+} {
   return {
     id: folder.id,
     title: folder.name,
@@ -63,13 +83,14 @@ function folderToSearchDocument(folder: Folder, parentPath: string[] = []): Sear
     },
     metadata: {
       tags: folder.tags,
-      ...(folder.notes ? { notes: folder.notes } : {})
+      ...(folder.notes ? { notes: folder.notes } : {}),
+      ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
     }
   }
 }
 
 /**
- * Convert an HTTPRequest to a SearchDocument
+ * Get body content for keywords
  */
 function getBodyContent(body: HTTPRequest['body']): string {
   if (!body) return ''
@@ -89,8 +110,18 @@ function getBodyContent(body: HTTPRequest['body']): string {
 function httpRequestToSearchDocument(
   request: HTTPRequest,
   parentFolderId: string,
-  parentPath: string[] = []
-): SearchDocument {
+  parentPath: string[] = [],
+  parentNames: string[] = []
+): {
+  id: string
+  title: string
+  description?: string
+  category: string
+  icon: string
+  keywords: string
+  navigation: Record<string, unknown>
+  metadata: Record<string, unknown>
+} {
   const keywords = [
     request.method,
     request.url,
@@ -153,7 +184,8 @@ function httpRequestToSearchDocument(
       ...(request.pathParams ? { pathParams: request.pathParams.map((p) => ({ key: p.key, value: p.value })) } : {}),
       ...(bodyMetadata ? { body: bodyMetadata } : {}),
       tags: request.tags,
-      ...(request.notes ? { notes: request.notes } : {})
+      ...(request.notes ? { notes: request.notes } : {}),
+      ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
     }
   }
 }
@@ -161,8 +193,18 @@ function httpRequestToSearchDocument(
 function graphqlRequestToSearchDocument(
   request: GraphQLRequest,
   parentFolderId: string,
-  parentPath: string[] = []
-): SearchDocument {
+  parentPath: string[] = [],
+  parentNames: string[] = []
+): {
+  id: string
+  title: string
+  description?: string
+  category: string
+  icon: string
+  keywords: string
+  navigation: Record<string, unknown>
+  metadata: Record<string, unknown>
+} {
   const keywords = [
     'graphql',
     request.operationType,
@@ -179,7 +221,7 @@ function graphqlRequestToSearchDocument(
     title: request.name,
     ...(request.documentation ? { description: request.documentation } : {}),
     category: 'request',
-    icon: 'graphql',
+    icon: request.operationType,
     keywords,
     navigation: {
       type: 'request',
@@ -195,7 +237,8 @@ function graphqlRequestToSearchDocument(
       ...(request.variables ? { variables: request.variables } : {}),
       headers: request.headers.map((h) => ({ key: h.key, value: h.value })),
       tags: request.tags,
-      ...(request.notes ? { notes: request.notes } : {})
+      ...(request.notes ? { notes: request.notes } : {}),
+      ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
     }
   }
 }
@@ -203,8 +246,18 @@ function graphqlRequestToSearchDocument(
 function grpcRequestToSearchDocument(
   request: GrpcRequest,
   parentFolderId: string,
-  parentPath: string[] = []
-): SearchDocument {
+  parentPath: string[] = [],
+  parentNames: string[] = []
+): {
+  id: string
+  title: string
+  description?: string
+  category: string
+  icon: string
+  keywords: string
+  navigation: Record<string, unknown>
+  metadata: Record<string, unknown>
+} {
   const keywords = [
     'grpc',
     request.service,
@@ -222,7 +275,7 @@ function grpcRequestToSearchDocument(
     title: request.name,
     ...(request.documentation ? { description: request.documentation } : {}),
     category: 'request',
-    icon: 'grpc',
+    icon: request.callType,
     keywords,
     navigation: {
       type: 'request',
@@ -239,7 +292,8 @@ function grpcRequestToSearchDocument(
       requestMessage: request.requestMessage,
       grpcMetadata: request.metadata.map((m) => ({ key: m.key, value: m.value })),
       tags: request.tags,
-      ...(request.notes ? { notes: request.notes } : {})
+      ...(request.notes ? { notes: request.notes } : {}),
+      ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
     }
   }
 }
@@ -247,8 +301,18 @@ function grpcRequestToSearchDocument(
 function soapRequestToSearchDocument(
   request: SoapRequest,
   parentFolderId: string,
-  parentPath: string[] = []
-): SearchDocument {
+  parentPath: string[] = [],
+  parentNames: string[] = []
+): {
+  id: string
+  title: string
+  description?: string
+  category: string
+  icon: string
+  keywords: string
+  navigation: Record<string, unknown>
+  metadata: Record<string, unknown>
+} {
   const keywords = [
     'soap',
     request.service,
@@ -283,7 +347,8 @@ function soapRequestToSearchDocument(
       soapBody: request.body,
       headers: request.headers.map((h) => ({ key: h.key, value: h.value })),
       tags: request.tags,
-      ...(request.notes ? { notes: request.notes } : {})
+      ...(request.notes ? { notes: request.notes } : {}),
+      ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
     }
   }
 }
@@ -291,8 +356,18 @@ function soapRequestToSearchDocument(
 function websocketRequestToSearchDocument(
   request: WebSocketRequest,
   parentFolderId: string,
-  parentPath: string[] = []
-): SearchDocument {
+  parentPath: string[] = [],
+  parentNames: string[] = []
+): {
+  id: string
+  title: string
+  description?: string
+  category: string
+  icon: string
+  keywords: string
+  navigation: Record<string, unknown>
+  metadata: Record<string, unknown>
+} {
   const keywords = [
     'websocket',
     request.protocol,
@@ -309,7 +384,7 @@ function websocketRequestToSearchDocument(
     title: request.name,
     ...(request.documentation ? { description: request.documentation } : {}),
     category: 'request',
-    icon: 'websocket',
+    icon: request.protocol,
     keywords,
     navigation: {
       type: 'request',
@@ -325,7 +400,8 @@ function websocketRequestToSearchDocument(
       message: request.message,
       headers: request.headers.map((h) => ({ key: h.key, value: h.value })),
       tags: request.tags,
-      ...(request.notes ? { notes: request.notes } : {})
+      ...(request.notes ? { notes: request.notes } : {}),
+      ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
     }
   }
 }
@@ -333,20 +409,30 @@ function websocketRequestToSearchDocument(
 function requestToSearchDocument(
   request: Request,
   parentFolderId: string,
-  parentPath: string[] = []
-): SearchDocument {
+  parentPath: string[] = [],
+  parentNames: string[] = []
+): {
+  id: string
+  title: string
+  description?: string
+  category: string
+  icon: string
+  keywords: string
+  navigation: Record<string, unknown>
+  metadata: Record<string, unknown>
+} {
   if (isHTTPRequest(request)) {
-    return httpRequestToSearchDocument(request, parentFolderId, parentPath)
+    return httpRequestToSearchDocument(request, parentFolderId, parentPath, parentNames)
   } else if (isGraphQLRequest(request)) {
-    return graphqlRequestToSearchDocument(request, parentFolderId, parentPath)
+    return graphqlRequestToSearchDocument(request, parentFolderId, parentPath, parentNames)
   } else if (isGrpcRequest(request)) {
-    return grpcRequestToSearchDocument(request, parentFolderId, parentPath)
+    return grpcRequestToSearchDocument(request, parentFolderId, parentPath, parentNames)
   } else if (isSoapRequest(request)) {
-    return soapRequestToSearchDocument(request, parentFolderId, parentPath)
+    return soapRequestToSearchDocument(request, parentFolderId, parentPath, parentNames)
   } else if (isWebSocketRequest(request)) {
-    return websocketRequestToSearchDocument(request, parentFolderId, parentPath)
+    return websocketRequestToSearchDocument(request, parentFolderId, parentPath, parentNames)
   }
-  // Fallback for unknown types - should never happen but satisfies exhaustiveness
+  // Fallback for unknown types
   const unknownRequest = request as { id: string; name: string; tags: string[] }
   return {
     id: unknownRequest.id,
@@ -360,148 +446,107 @@ function requestToSearchDocument(
       requestId: unknownRequest.id,
       path: [...parentPath, unknownRequest.id]
     },
-    metadata: { tags: unknownRequest.tags }
+    metadata: {
+      tags: unknownRequest.tags,
+      ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
+    }
   }
 }
 
 /**
- * Recursively index a folder and all its contents
+ * Recursively collect all documents from a folder tree
  */
-function indexFolderRecursively(folder: Folder, parentPath: string[] = []): void {
+function collectFolderDocuments(
+  folder: Folder,
+  parentPath: string[] = [],
+  parentNames: string[] = []
+): {
+  id: string
+  title: string
+  description?: string
+  category: string
+  icon: string
+  keywords: string
+  navigation: Record<string, unknown>
+  metadata: Record<string, unknown>
+}[] {
   const currentPath = [...parentPath, folder.id]
+  const currentNames = [...parentNames, folder.name]
+  const documents: {
+    id: string
+    title: string
+    description?: string
+    category: string
+    icon: string
+    keywords: string
+    navigation: Record<string, unknown>
+    metadata: Record<string, unknown>
+  }[] = []
 
-  // Index the folder
-  searchService.indexDocument(folderToSearchDocument(folder, parentPath))
+  // Add the folder itself
+  documents.push(folderToSearchDocument(folder, parentPath, parentNames))
 
-  // Index all items
+  // Add all items
   for (const item of folder.items) {
     if (isFolder(item)) {
-      indexFolderRecursively(item, currentPath)
+      documents.push(...collectFolderDocuments(item, currentPath, currentNames))
     } else if (isRequest(item)) {
-      searchService.indexDocument(requestToSearchDocument(item, folder.id, currentPath))
+      documents.push(requestToSearchDocument(item, folder.id, currentPath, currentNames))
     }
   }
+
+  return documents
 }
 
 /**
- * Recursively remove a folder and all its contents from the index
- */
-function removeFolderRecursively(folder: Folder): void {
-  // Remove the folder
-  searchService.removeDocument(folder.id)
-
-  // Remove all items
-  for (const item of folder.items) {
-    if (isFolder(item)) {
-      removeFolderRecursively(item)
-    } else {
-      searchService.removeDocument(item.id)
-    }
-  }
-}
-
-/**
- * SearchIndexService class - manages search index subscriptions
+ * SearchIndexService class - client wrapper for search operations
  */
 class SearchIndexService {
-  private subscriptions: Subscription[] = []
   private initialized = false
 
   /**
-   * Initialize the service and start listening to events
+   * Initialize the service (registers categories in main process)
    */
-  initialize(): void {
+  async initialize(): Promise<void> {
     if (this.initialized) {
       return
     }
 
-    // Subscribe to folder events
-    this.subscriptions.push(
-      eventBus.subscribe<DocumentChangedPayload>(DocumentEvents.FOLDER_CREATED, (payload) => {
-        if (isFolder(payload.document)) {
-          indexFolderRecursively(payload.document)
-        }
-      })
-    )
-
-    this.subscriptions.push(
-      eventBus.subscribe<DocumentChangedPayload>(DocumentEvents.FOLDER_UPDATED, (payload) => {
-        if (isFolder(payload.document)) {
-          searchService.indexDocument(folderToSearchDocument(payload.document))
-        }
-      })
-    )
-
-    this.subscriptions.push(
-      eventBus.subscribe<DocumentDeletedPayload>(DocumentEvents.FOLDER_DELETED, (payload) => {
-        searchService.removeDocument(payload.id)
-      })
-    )
-
-    // Subscribe to request events
-    this.subscriptions.push(
-      eventBus.subscribe<DocumentChangedPayload>(DocumentEvents.REQUEST_CREATED, (payload) => {
-        const doc = payload.document as Request
-        if (isRequest(doc) && payload.parentFolderId) {
-          searchService.indexDocument(
-            requestToSearchDocument(doc, payload.parentFolderId)
-          )
-        }
-      })
-    )
-
-    this.subscriptions.push(
-      eventBus.subscribe<DocumentChangedPayload>(DocumentEvents.REQUEST_UPDATED, (payload) => {
-        logger.debug('[SearchIndexService] REQUEST_UPDATED received', { id: payload.id, parentFolderId: payload.parentFolderId })
-        const doc = payload.document as Request
-        if (isRequest(doc) && payload.parentFolderId) {
-          searchService.indexDocument(
-            requestToSearchDocument(doc, payload.parentFolderId)
-          )
-        }
-      })
-    )
-
-    this.subscriptions.push(
-      eventBus.subscribe<DocumentDeletedPayload>(DocumentEvents.REQUEST_DELETED, (payload) => {
-        searchService.removeDocument(payload.id)
-      })
-    )
-
+    logger.debug('[SearchIndexService] Initializing (registering categories)...')
+    await searchService.registerCategories(RESTORM_SEARCH_CATEGORIES)
     this.initialized = true
-  }
-
-  /**
-   * Cleanup subscriptions
-   */
-  destroy(): void {
-    logger.debug('[SearchIndexService] destroy() called', { subscriptionsCount: this.subscriptions.length })
-    for (const subscription of this.subscriptions) {
-      subscription.unsubscribe()
-    }
-    this.subscriptions = []
-    this.initialized = false
+    logger.debug('[SearchIndexService] Initialized')
   }
 
   /**
    * Index a folder tree (for initial load)
+   * Sends all documents to main process in batch
    */
-  indexFolderTree(folder: Folder): void {
-    indexFolderRecursively(folder)
-  }
-
-  /**
-   * Remove a folder tree from the index
-   */
-  removeFolderTree(folder: Folder): void {
-    removeFolderRecursively(folder)
+  async indexFolderTree(folder: Folder): Promise<void> {
+    logger.debug('[SearchIndexService] Indexing folder tree', { folderId: folder.id, folderName: folder.name })
+    try {
+      const documents = collectFolderDocuments(folder)
+      // Convert to plain objects to avoid IPC serialization issues with Proxies
+      const plainDocuments = JSON.parse(JSON.stringify(documents)) as typeof documents
+      await searchService.indexDocuments(plainDocuments)
+      logger.debug('[SearchIndexService] Indexed folder tree', { documentCount: documents.length })
+    } catch (error) {
+      logger.error('[SearchIndexService] Error indexing folder tree', { error: String(error), folderId: folder.id })
+    }
   }
 
   /**
    * Clear the entire search index
    */
-  clearIndex(): void {
-    searchService.clearIndex()
+  async clearIndex(): Promise<void> {
+    await searchService.clearIndex()
+  }
+
+  /**
+   * Destroy the service (for testing)
+   */
+  destroy(): void {
+    this.initialized = false
   }
 }
 
