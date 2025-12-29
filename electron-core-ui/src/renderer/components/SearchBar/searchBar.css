@@ -252,6 +252,7 @@
   gap: 8px;
 }
 
+/* Base badge style - consumers should provide specific colors via renderBadge prop or custom CSS */
 .request-type-badge {
   display: inline-flex;
   align-items: center;
@@ -263,91 +264,7 @@
   color: #fff;
   line-height: 1.4;
   flex-shrink: 0;
-}
-
-.request-type-badge.method-get {
-  background-color: #007acc;
-}
-
-.request-type-badge.method-post {
-  background-color: #1b8a3d;
-}
-
-.request-type-badge.method-put {
-  background-color: #d18616;
-}
-
-.request-type-badge.method-patch {
-  background-color: #9370db;
-}
-
-.request-type-badge.method-delete {
-  background-color: #c74632;
-}
-
-.request-type-badge.method-head {
-  background-color: #ff69b4;
-}
-
-.request-type-badge.method-options {
-  background-color: #6a5acd;
-}
-
-/* Query languages */
-.request-type-badge.method-graphql,
-.request-type-badge.method-gql,
-.request-type-badge.method-query {
-  background-color: #e535ab;
-}
-
-.request-type-badge.method-mutation {
-  background-color: #b71c1c;
-}
-
-.request-type-badge.method-subscription {
-  background-color: #7b1fa2;
-}
-
-/* gRPC */
-.request-type-badge.method-grpc,
-.request-type-badge.method-unary {
-  background-color: #0277bd;
-}
-
-.request-type-badge.method-s-str,
-.request-type-badge.method-sstr {
-  background-color: #00695c;
-}
-
-.request-type-badge.method-c-str,
-.request-type-badge.method-cstr {
-  background-color: #558b2f;
-}
-
-.request-type-badge.method-bidi {
-  background-color: #5d4037;
-}
-
-/* SOAP */
-.request-type-badge.method-soap {
-  background-color: #f9a825;
-  color: #000;
-}
-
-/* Real-time protocols */
-.request-type-badge.method-ws,
-.request-type-badge.method-websocket {
-  background-color: #43a047;
-}
-
-.request-type-badge.method-mqtt {
-  background-color: #ff6f00;
-  color: #000;
-}
-
-.request-type-badge.method-sio,
-.request-type-badge.method-socketio {
-  background-color: #00897b;
+  background-color: #6b7280; /* Default gray fallback */
 }
 
 .result-title-text {
