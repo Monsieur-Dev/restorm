@@ -76,12 +76,12 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
     const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
       kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
 
-    void window.restorm.context.registerRequest(requestId, currentEnvId ?? null, {
+    void window.restorm?.context?.registerRequest(requestId, currentEnvId ?? null, {
       headers: toKeyValueData(currentRequest.metadata)
     })
 
     // Send full request data for URL and code snippet calculation
-    void window.restorm.context.updateFullRequestData(requestId, {
+    void window.restorm?.context?.updateFullRequestData(requestId, {
       url: currentRequest.url,
       method: currentRequest.callType,
       requestType: 'grpc',
@@ -90,23 +90,23 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
     })
 
     // Subscribe to backend events
-    const unsubUrl = window.restorm.context.onUrlResolved((result) => {
+    const unsubUrl = window.restorm?.context?.onUrlResolved((result) => {
       if (result.requestId === requestId) {
         setResolvedUrl(result.resolvedUrl)
       }
     })
 
-    const unsubSnippets = window.restorm.context.onCodeSnippetsUpdated((result) => {
+    const unsubSnippets = window.restorm?.context?.onCodeSnippetsUpdated((result) => {
       if (result.requestId === requestId) {
         setBackendCodeSnippets(result.markdown)
       }
     })
 
     // Get initial values if they exist
-    void window.restorm.context.getResolvedUrl(requestId).then((result) => {
+    void window.restorm?.context?.getResolvedUrl(requestId).then((result) => {
       if (result) setResolvedUrl(result.resolvedUrl)
     })
-    void window.restorm.context.getCodeSnippets(requestId).then((result) => {
+    void window.restorm?.context?.getCodeSnippets(requestId).then((result) => {
       if (result) setBackendCodeSnippets(result.markdown)
     })
 
@@ -116,7 +116,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
       logger.debug('[GrpcRequestTabView] Unregistering request from ContextService', { requestId })
       unsubUrl()
       unsubSnippets()
-      void window.restorm.context.unregisterRequest(requestId)
+      void window.restorm?.context?.unregisterRequest(requestId)
     }
   }, [request.id])
 
@@ -129,7 +129,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
         previousEnvId: previousEnvIdRef.current,
         newEnvId: currentEnvId
       })
-      void window.restorm.context.setRequestEnvironment(request.id, currentEnvId)
+      void window.restorm?.context?.setRequestEnvironment(request.id, currentEnvId)
       previousEnvIdRef.current = currentEnvId
     }
   }, [selectedEnvId, request.id])
@@ -139,7 +139,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
     const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
       kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
 
-    void window.restorm.context.updateFullRequestData(request.id, {
+    void window.restorm?.context?.updateFullRequestData(request.id, {
       url,
       method: request.callType,
       requestType: 'grpc',
@@ -167,7 +167,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
   // Callback for metadata changes - notify both reactive object and ContextService
   const handleMetadataChange = useCallback((rows: KeyValueTableRow[]): void => {
     updateReactiveProperty(request, 'metadata', rows)
-    void window.restorm.context.updateRequestKeyValues(
+    void window.restorm?.context?.updateRequestKeyValues(
       request.id,
       'headers', // Use 'headers' as the group name for consistency
       rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
@@ -179,7 +179,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
     setIsSending(true)
     setResponse(null)
     
-    window.restorm.grpc.execute({ requestId: request.id })
+    window.restorm?.grpc?.execute({ requestId: request.id })
       .then((res: GRPCExecutionResult) => {
         // Convert backend result to GrpcResponse format
         const grpcResponse: GrpcResponse = {
@@ -209,7 +209,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
   }
   
   const handleCancel = (): void => {
-    void window.restorm.grpc.cancel(request.id)
+    void window.restorm?.grpc?.cancel(request.id)
   }
   
   // Parse host and port from URL (kept for potential future use)

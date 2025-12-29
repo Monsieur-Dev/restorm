@@ -150,23 +150,23 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     const requestId = request.id
     if (!requestId) return
 
-    const unsubUrl = window.restorm.context.onUrlResolved((result) => {
+    const unsubUrl = window.restorm?.context?.onUrlResolved((result) => {
       if (result.requestId === requestId) {
         setResolvedUrl(result.resolvedUrl)
       }
     })
 
-    const unsubSnippets = window.restorm.context.onCodeSnippetsUpdated((result) => {
+    const unsubSnippets = window.restorm?.context?.onCodeSnippetsUpdated((result) => {
       if (result.requestId === requestId) {
         setBackendCodeSnippets(result.markdown)
       }
     })
 
     // Get initial values if they exist
-    void window.restorm.context.getResolvedUrl(requestId).then((result) => {
+    void window.restorm?.context?.getResolvedUrl(requestId).then((result) => {
       if (result) setResolvedUrl(result.resolvedUrl)
     })
-    void window.restorm.context.getCodeSnippets(requestId).then((result) => {
+    void window.restorm?.context?.getCodeSnippets(requestId).then((result) => {
       if (result) setBackendCodeSnippets(result.markdown)
     })
 
@@ -191,7 +191,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     const currentRequest = requestRef.current
     logger.debug('[HTTPRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
-    void window.restorm.context.registerRequest(requestId, currentEnvId ?? null, {
+    void window.restorm?.context?.registerRequest(requestId, currentEnvId ?? null, {
       headers: toKeyValueData(currentRequest.headers),
       params: toKeyValueData(currentRequest.params),
       pathParams: currentRequest.pathParams ? toKeyValueData(currentRequest.pathParams) : []
@@ -201,7 +201,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
 
     return () => {
       logger.debug('[HTTPRequestTabView] Unregistering request from ContextService', { requestId })
-      void window.restorm.context.unregisterRequest(requestId)
+      void window.restorm?.context?.unregisterRequest(requestId)
     }
   }, [request.id, toKeyValueData])
 
@@ -217,7 +217,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
         previousEnvId: previousEnvIdRef.current,
         newEnvId: currentEnvId
       })
-      void window.restorm.context.setRequestEnvironment(requestId, currentEnvId)
+      void window.restorm?.context?.setRequestEnvironment(requestId, currentEnvId)
       previousEnvIdRef.current = currentEnvId
     }
   }, [selectedEnvId, request.id])
@@ -267,7 +267,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
       bodyData = { type: bodyMode, fields: toKeyValueData(request.body.fields) }
     }
 
-    void window.restorm.context.updateFullRequestData(requestId, {
+    void window.restorm?.context?.updateFullRequestData(requestId, {
       id: requestId,
       requestType: 'http',
       url,
@@ -293,7 +293,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     const varId = urlVariableId
     if (!varId || varId === 'undefined:url') return
     
-    const unsubscribe = window.restorm.context.onAvailableVariables((result) => {
+    const unsubscribe = window.restorm?.context?.onAvailableVariables((result) => {
       if (result.variableId === varId) {
         setUrlVariables(prev => {
           const newVars = result.variables
@@ -315,7 +315,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     updateReactiveProperty(request, 'headers', rows as KeyValue[])
     const requestId = request.id
     if (requestId) {
-      void window.restorm.context.updateRequestKeyValues(
+      void window.restorm?.context?.updateRequestKeyValues(
         requestId,
         'headers',
         rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
@@ -327,7 +327,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     updateReactiveProperty(request, 'params', rows as KeyValue[])
     const requestId = request.id
     if (requestId) {
-      void window.restorm.context.updateRequestKeyValues(
+      void window.restorm?.context?.updateRequestKeyValues(
         requestId,
         'params',
         rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
@@ -339,7 +339,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     updateReactiveProperty(request, 'pathParams', rows as KeyValue[])
     const requestId = request.id
     if (requestId) {
-      void window.restorm.context.updateRequestKeyValues(
+      void window.restorm?.context?.updateRequestKeyValues(
         requestId,
         'pathParams',
         rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
@@ -366,7 +366,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     setHttpResponse(null)
 
     // Execute via backend
-    window.restorm.http.execute({
+    window.restorm?.http?.execute({
       requestId,
       method,
       timeout: 30000
@@ -448,7 +448,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
   const handleCancel = useCallback((): void => {
     const requestId = request.id
     if (!requestId) return
-    window.restorm.http.cancel(requestId)
+    window.restorm?.http?.cancel(requestId)
       .then((cancelled) => {
         if (cancelled) {
           logger.info('HTTP request cancelled', { requestId })

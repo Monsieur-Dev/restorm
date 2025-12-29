@@ -466,7 +466,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       if (cursorY !== undefined) {
         editorParams.y = cursorY
       }
-      void window.restorm.openEditor(editorParams)
+      void window.restorm?.openEditor(editorParams)
     },
     [tree]
   )
