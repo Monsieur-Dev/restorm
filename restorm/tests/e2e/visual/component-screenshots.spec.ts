@@ -15,7 +15,7 @@ test.describe('Component Screenshots', () => {
     // Take screenshot of the main application
     // First run will create reference screenshot, subsequent runs will compare
     // Using higher threshold for visual tests to account for rendering differences
-    await compareVisual(page, 'main-application', { threshold: 0.5 });
+    await compareVisual(page, 'main-application', { threshold: 0.1 });
   });
 
   test('should capture ListView screenshot', async ({ page }) => {

@@ -15,6 +15,6 @@ test.describe('Theme Regression', () => {
     // Take screenshot of main view
     // First run will create reference screenshot, subsequent runs will compare
     // Using higher threshold for visual tests to account for rendering differences
-    await compareVisual(page, 'theme-default', { threshold: 0.5 });
+    await compareVisual(page, 'theme-default', { threshold: 0.1 });
   });
 });
