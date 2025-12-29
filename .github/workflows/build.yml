@@ -113,7 +113,6 @@ jobs:
         run: |
           cd restorm
           pnpm run test:e2e
-        continue-on-error: true
 
       - name: Build restorm application
         run: |

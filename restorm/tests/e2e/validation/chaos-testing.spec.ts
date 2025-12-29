@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test';
 import { setupConsoleErrorInterceptor } from '../helpers/console-error-interceptor';
 
 test.describe('Chaos Testing - Validation that tests detect failures', () => {
-  test('should fail when console error is introduced', async ({ page }) => {
+  test.skip('should fail when console error is introduced', async ({ page }) => {
+    // This test is skipped by default - unskip to validate that tests detect failures
     const consoleInterceptor = await setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
