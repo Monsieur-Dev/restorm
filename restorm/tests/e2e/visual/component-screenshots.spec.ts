@@ -39,4 +39,3 @@ test.describe('Component Screenshots', () => {
     }
   });
 });
-

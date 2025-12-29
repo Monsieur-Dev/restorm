@@ -1,10 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { setupConsoleErrorInterceptor } from '../helpers/console-error-interceptor';
-import { join } from 'path';
 
 test.describe('File Loading', () => {
   test('should load a JSON file without errors', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -19,7 +18,7 @@ test.describe('File Loading', () => {
   });
 
   test('should load a YAML file without errors', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -33,7 +32,7 @@ test.describe('File Loading', () => {
   });
 
   test('should display error for corrupted file', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -47,4 +46,3 @@ test.describe('File Loading', () => {
     consoleInterceptor.assertNoErrors();
   });
 });
-

@@ -148,7 +148,7 @@ export async function executeGraphQLRequest(input: GraphQLRequestInput): Promise
       errorMessage = `${errorMessage} (code: ${error.code})`
     }
     if (error.response) {
-      errorMessage = `${errorMessage} (HTTP ${error.response.status}: ${error.response.statusText || 'Unknown'})`
+      errorMessage = `${errorMessage} (HTTP ${error.response.status}: ${error.response.statusText ?? 'Unknown'})`
     }
     
     return {

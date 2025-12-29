@@ -3,7 +3,7 @@ import { setupConsoleErrorInterceptor } from '../helpers/console-error-intercept
 
 test.describe('Error Handling', () => {
   test('should handle errors gracefully', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -19,4 +19,3 @@ test.describe('Error Handling', () => {
     expect(criticalErrors.length).toBe(0);
   });
 });
-

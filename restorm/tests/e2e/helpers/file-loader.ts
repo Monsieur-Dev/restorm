@@ -1,10 +1,9 @@
 import type { Page } from '@playwright/test';
-import { join } from 'path';
 
 export async function loadRestormFile(
   page: Page,
   filePath: string,
-  format: 'json' | 'yaml' | 'json5'
+  _format: 'json' | 'yaml' | 'json5'
 ): Promise<void> {
   // Wait for file menu to be available
   await page.waitForSelector('[role="menubar"]', { timeout: 5000 });
@@ -31,11 +30,11 @@ export async function loadRestormFile(
   
   // Verify no errors
   const consoleErrors = await page.evaluate(() => {
-    return (window as any).__consoleErrors || [];
+    const windowWithErrors = window as typeof window & { __consoleErrors?: string[] };
+    return windowWithErrors.__consoleErrors ?? [];
   });
   
   if (consoleErrors.length > 0) {
     throw new Error(`Errors during file load: ${consoleErrors.join(', ')}`);
   }
 }
-

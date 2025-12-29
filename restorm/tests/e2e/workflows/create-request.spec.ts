@@ -1,9 +1,9 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 import { setupConsoleErrorInterceptor } from '../helpers/console-error-interceptor';
 
 test.describe('Create Request Workflow', () => {
   test('should be able to create a new request', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -19,4 +19,3 @@ test.describe('Create Request Workflow', () => {
     consoleInterceptor.assertNoErrors();
   });
 });
-

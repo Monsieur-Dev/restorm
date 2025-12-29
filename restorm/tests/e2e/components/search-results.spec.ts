@@ -1,16 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { setupConsoleErrorInterceptor } from '../helpers/console-error-interceptor';
-import { join } from 'path';
 
 test.describe('Search Results', () => {
   test('should find request in search results, show tooltip on hover, and navigate on click', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    
-    // Load a file with requests
-    const sampleFile = join(__dirname, '../../Samples/simple.restorm');
     
     // Try to load file via menu (if available)
     try {
@@ -26,7 +22,7 @@ test.describe('Search Results', () => {
           // For now, we'll assume the file is already loaded or use a different approach
         }
       }
-    } catch (error) {
+    } catch {
       // File loading might not be available in test environment
       // Continue with the test assuming data exists
     }
@@ -96,16 +92,11 @@ test.describe('Search Results', () => {
         }
       }
       
-      // Count tabs before clicking
-      const tabsBefore = page.locator('[role="tab"], [class*="Tab"], [data-testid*="tab"]');
-      const tabCountBefore = await tabsBefore.count();
-      
       // Click on the result to navigate
       await firstResult.click();
       await page.waitForTimeout(500);
       
       // Verify a new tab was opened (or existing tab was activated)
-      // The tab count might stay the same if the tab already existed
       const tabsAfter = page.locator('[role="tab"], [class*="Tab"], [data-testid*="tab"]');
       const tabCountAfter = await tabsAfter.count();
       
@@ -119,7 +110,7 @@ test.describe('Search Results', () => {
       const methodSelector = page.locator('select, [role="combobox"]').first();
       
       // At least one of these should be visible if the request tab is open
-      const hasRequestContent = await Promise.race([
+      await Promise.race([
         urlInput.isVisible().catch(() => false),
         methodSelector.isVisible().catch(() => false)
       ]);
@@ -136,7 +127,7 @@ test.describe('Search Results', () => {
   });
   
   test('should show complete tooltip content on search result hover', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -178,15 +169,12 @@ test.describe('Search Results', () => {
         '.tooltip-content'
       ];
       
-      let tooltipFound = false;
       for (const selector of tooltipSelectors) {
         const tooltip = page.locator(selector);
         const count = await tooltip.count();
         if (count > 0) {
           const isVisible = await tooltip.first().isVisible().catch(() => false);
           if (isVisible) {
-            tooltipFound = true;
-            
             // Verify tooltip has substantial content (not just empty)
             const tooltipText = await tooltip.first().textContent();
             expect(tooltipText?.trim().length).toBeGreaterThan(0);
@@ -212,7 +200,7 @@ test.describe('Search Results', () => {
   });
   
   test('should navigate to request tab when clicking search result', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -238,7 +226,6 @@ test.describe('Search Results', () => {
     
     if (resultCount > 0) {
       const firstResult = searchResults.first();
-      const resultText = await firstResult.textContent();
       
       // Click the result
       await firstResult.click();
@@ -256,13 +243,11 @@ test.describe('Search Results', () => {
         'button:has-text("Invoke")'
       ];
       
-      let foundRequestContent = false;
       for (const selector of requestIndicators) {
         const element = page.locator(selector).first();
         if (await element.count() > 0) {
           const isVisible = await element.isVisible().catch(() => false);
           if (isVisible) {
-            foundRequestContent = true;
             break;
           }
         }
@@ -276,4 +261,3 @@ test.describe('Search Results', () => {
     consoleInterceptor.assertNoErrors();
   });
 });
-

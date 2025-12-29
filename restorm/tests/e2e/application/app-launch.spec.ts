@@ -3,7 +3,7 @@ import { setupConsoleErrorInterceptor } from '../helpers/console-error-intercept
 
 test.describe('Application Launch', () => {
   test('should load the application successfully', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -21,7 +21,7 @@ test.describe('Application Launch', () => {
   });
 
   test('should not have console errors on launch', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -30,4 +30,3 @@ test.describe('Application Launch', () => {
     consoleInterceptor.assertNoWarnings();
   });
 });
-

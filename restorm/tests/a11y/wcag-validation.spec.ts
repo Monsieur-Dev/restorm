@@ -36,4 +36,3 @@ test.describe('WCAG Validation', () => {
     expect(accessibleButtons).toBeGreaterThan(buttonCount * 0.7);
   });
 });
-

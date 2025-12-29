@@ -22,7 +22,7 @@ function shouldIgnoreError(errorText: string): boolean {
   return IGNORED_ERROR_PATTERNS.some(pattern => pattern.test(errorText));
 }
 
-export async function setupConsoleErrorInterceptor(page: Page): Promise<ConsoleInterceptor> {
+export function setupConsoleErrorInterceptor(page: Page): ConsoleInterceptor {
   const errors: string[] = [];
   const warnings: string[] = [];
   
@@ -61,4 +61,3 @@ export async function setupConsoleErrorInterceptor(page: Page): Promise<ConsoleI
     },
   };
 }
-

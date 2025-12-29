@@ -346,7 +346,7 @@ describe('Integration Tests with Docker Services', () => {
       
       // If statusCode is 0, there was a network error - skip test if server is not accessible
       if (response.statusCode === 0) {
-        console.warn(`GraphQL server at ${SERVICES.graphql.baseUrl} is not accessible: ${response.error || 'Unknown error'}. Skipping test.`)
+        console.warn(`GraphQL server at ${SERVICES.graphql.baseUrl} is not accessible: ${response.error ?? 'Unknown error'}. Skipping test.`)
         return
       }
       
@@ -400,7 +400,7 @@ describe('Integration Tests with Docker Services', () => {
       
       // If statusCode is 0, there was a network error - skip test if server is not accessible
       if (response.statusCode === 0) {
-        console.warn(`GraphQL server at ${SERVICES.graphql.baseUrl} is not accessible: ${response.error || 'Unknown error'}. Skipping test.`)
+        console.warn(`GraphQL server at ${SERVICES.graphql.baseUrl} is not accessible: ${response.error ?? 'Unknown error'}. Skipping test.`)
         return
       }
       
@@ -474,7 +474,7 @@ describe('Integration Tests with Docker Services', () => {
       
       // If statusCode is 0, there was a network error - skip test if server is not accessible
       if (response.statusCode === 0) {
-        console.warn(`GraphQL server at ${SERVICES.graphql.baseUrl} is not accessible: ${response.error || 'Unknown error'}. Skipping test.`)
+        console.warn(`GraphQL server at ${SERVICES.graphql.baseUrl} is not accessible: ${response.error ?? 'Unknown error'}. Skipping test.`)
         return
       }
       
@@ -528,7 +528,7 @@ describe('Integration Tests with Docker Services', () => {
       
       // If statusCode is 0, there was a network error - skip test if server is not accessible
       if (response.statusCode === 0) {
-        console.warn(`GraphQL server at ${SERVICES.graphql.baseUrl} is not accessible: ${response.error || 'Unknown error'}. Skipping test.`)
+        console.warn(`GraphQL server at ${SERVICES.graphql.baseUrl} is not accessible: ${response.error ?? 'Unknown error'}. Skipping test.`)
         return
       }
       

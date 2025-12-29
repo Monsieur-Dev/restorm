@@ -7,8 +7,7 @@ export async function compareVisual(
   options?: { threshold?: number }
 ): Promise<void> {
   await expect(page).toHaveScreenshot(`${componentName}.png`, {
-    threshold: options?.threshold || 0.2,
+    threshold: options?.threshold ?? 0.2,
     animations: 'disabled',
   });
 }
-

@@ -3,7 +3,7 @@ import { setupConsoleErrorInterceptor } from '../helpers/console-error-intercept
 
 test.describe('ListView Component', () => {
   test('should display ListView correctly', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -28,7 +28,7 @@ test.describe('ListView Component', () => {
   });
 
   test('should update when items change', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -41,4 +41,3 @@ test.describe('ListView Component', () => {
     consoleInterceptor.assertNoErrors();
   });
 });
-

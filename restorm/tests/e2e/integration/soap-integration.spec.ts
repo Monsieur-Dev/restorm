@@ -3,7 +3,7 @@ import { setupConsoleErrorInterceptor } from '../helpers/console-error-intercept
 
 test.describe('SOAP Integration', () => {
   test('should handle SOAP requests', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -16,7 +16,7 @@ test.describe('SOAP Integration', () => {
   });
 
   test('should have SOAP request UI elements available', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -30,4 +30,3 @@ test.describe('SOAP Integration', () => {
     consoleInterceptor.assertNoErrors();
   });
 });
-

@@ -3,7 +3,7 @@ import { setupConsoleErrorInterceptor } from '../helpers/console-error-intercept
 
 test.describe('gRPC Integration', () => {
   test('should handle gRPC requests', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -16,7 +16,7 @@ test.describe('gRPC Integration', () => {
   });
 
   test('should have gRPC request UI elements available', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -30,4 +30,3 @@ test.describe('gRPC Integration', () => {
     consoleInterceptor.assertNoErrors();
   });
 });
-

@@ -3,7 +3,7 @@ import { setupConsoleErrorInterceptor } from '../helpers/console-error-intercept
 
 test.describe('WebSocket Integration', () => {
   test('should handle WebSocket connections', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -16,7 +16,7 @@ test.describe('WebSocket Integration', () => {
   });
 
   test('should have WebSocket request UI elements available', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -30,4 +30,3 @@ test.describe('WebSocket Integration', () => {
     consoleInterceptor.assertNoErrors();
   });
 });
-

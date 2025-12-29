@@ -1,9 +1,9 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 import { setupConsoleErrorInterceptor } from '../helpers/console-error-interceptor';
 
 test.describe('Events Integration', () => {
   test('should handle events without errors', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -15,4 +15,3 @@ test.describe('Events Integration', () => {
     consoleInterceptor.assertNoErrors();
   });
 });
-

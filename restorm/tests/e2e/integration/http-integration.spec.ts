@@ -3,7 +3,7 @@ import { setupConsoleErrorInterceptor } from '../helpers/console-error-intercept
 
 test.describe('HTTP Integration', () => {
   test('should handle HTTP requests', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -16,7 +16,7 @@ test.describe('HTTP Integration', () => {
   });
 
   test('should have HTTP request UI elements available', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -30,4 +30,3 @@ test.describe('HTTP Integration', () => {
     consoleInterceptor.assertNoErrors();
   });
 });
-

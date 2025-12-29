@@ -3,7 +3,7 @@ import { setupConsoleErrorInterceptor } from '../helpers/console-error-intercept
 
 test.describe('GraphQL Integration', () => {
   test('should handle GraphQL requests', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -18,7 +18,7 @@ test.describe('GraphQL Integration', () => {
   });
 
   test('should have GraphQL request UI elements available', async ({ page }) => {
-    const consoleInterceptor = await setupConsoleErrorInterceptor(page);
+    const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -32,4 +32,3 @@ test.describe('GraphQL Integration', () => {
     consoleInterceptor.assertNoErrors();
   });
 });
-

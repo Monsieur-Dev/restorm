@@ -18,4 +18,3 @@ test.describe('Theme Regression', () => {
     await compareVisual(page, 'theme-default', { threshold: 0.5 });
   });
 });
-
