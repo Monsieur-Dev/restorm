@@ -73,7 +73,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
     const currentEnvId = selectedEnvIdRef.current
     const currentRequest = requestRef.current
     
-    // Check if Electron APIs are available (not in web mode)
+    // Get restorm context (available in both Electron and web mode via shim)
     const restormContext = window.restorm?.context
     if (!restormContext) {
       return

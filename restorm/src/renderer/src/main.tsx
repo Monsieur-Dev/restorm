@@ -80,6 +80,144 @@ const initI18n = (): Promise<void> => {
   })
 }
 
+// Web shim for window.restorm APIs (when not in Electron)
+function ensureRestormWebShim(): void {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  // If Electron preload already injected window.restorm, do nothing
+  if (window.restorm) {
+    return
+  }
+
+  // Create web shim for window.restorm
+  const saveAndCloseCallbacks = new Set<() => void>()
+  
+  // Listen to beforeunload to trigger save-and-close callbacks
+  window.addEventListener('beforeunload', (event) => {
+    if (saveAndCloseCallbacks.size > 0) {
+      // Trigger all registered callbacks
+      for (const callback of saveAndCloseCallbacks) {
+        try {
+          callback()
+        } catch (error) {
+          console.error('Error in save-and-close callback:', error)
+        }
+      }
+    }
+  })
+
+  ;(window as unknown as { restorm: typeof window.restorm }).restorm = {
+    openEditor: async () => {
+      // No-op in web mode
+    },
+    getEditorFile: async () => undefined,
+    forceClose: async () => {
+      // In web mode, we can't force close the window, but we can try
+      window.close()
+    },
+    onSaveAndClose: (callback: () => void) => {
+      saveAndCloseCallbacks.add(callback)
+      return () => {
+        saveAndCloseCallbacks.delete(callback)
+      }
+    },
+    context: {
+      getAllTransformResults: async () => ({}),
+      onVariableTransformed: () => () => {
+        // No-op unsubscribe
+      },
+      registerRequest: async () => {
+        // No-op in web mode
+      },
+      unregisterRequest: async () => {
+        // No-op in web mode
+      },
+      setRequestEnvironment: async () => {
+        // No-op in web mode
+      },
+      updateRequestKeyValues: async () => {
+        // No-op in web mode
+      },
+      updateFullRequestData: async () => {
+        // No-op in web mode
+      },
+      getResolvedUrl: async () => undefined,
+      getCodeSnippets: async () => undefined,
+      onUrlResolved: () => () => {
+        // No-op unsubscribe
+      },
+      onCodeSnippetsUpdated: () => () => {
+        // No-op unsubscribe
+      },
+      onAvailableVariables: () => () => {
+        // No-op unsubscribe
+      },
+      clearAll: async () => {
+        // No-op in web mode
+      }
+    },
+    http: {
+      execute: async () => {
+        throw new Error('HTTP execution not available in web mode')
+      },
+      cancel: async () => false,
+      isActive: async () => false,
+      onProgress: () => () => {
+        // No-op unsubscribe
+      }
+    },
+    graphql: {
+      execute: async () => {
+        throw new Error('GraphQL execution not available in web mode')
+      },
+      cancel: async () => false,
+      isActive: async () => false,
+      onProgress: () => () => {
+        // No-op unsubscribe
+      }
+    },
+    soap: {
+      execute: async () => {
+        throw new Error('SOAP execution not available in web mode')
+      },
+      cancel: async () => false,
+      isActive: async () => false,
+      onProgress: () => () => {
+        // No-op unsubscribe
+      }
+    },
+    grpc: {
+      execute: async () => {
+        throw new Error('gRPC execution not available in web mode')
+      },
+      cancel: async () => false,
+      isActive: async () => false,
+      onProgress: () => () => {
+        // No-op unsubscribe
+      }
+    },
+    websocket: {
+      connect: async () => {
+        throw new Error('WebSocket execution not available in web mode')
+      },
+      disconnect: async () => false,
+      send: async () => false,
+      isActive: async () => false,
+      onProgress: () => () => {
+        // No-op unsubscribe
+      },
+      onMessage: () => () => {
+        // No-op unsubscribe
+      }
+    }
+  }
+}
+
+// Ensure web shim is set up before rendering
+ensureRestormWebShim()
+
 void initI18n()
   .then(() => {
     
