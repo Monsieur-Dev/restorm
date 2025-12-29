@@ -432,9 +432,11 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		const removed = removeTab(tree, fromGroupId, tabId);
 		const tab = removed.tab;
 		if (!tab) return;
+		// Increment _renderVersion on the tab to force React to recreate the component
+		const updatedTab = { ...tab, _renderVersion: (tab._renderVersion ?? 0) + 1 };
 		const next = direction === 'full'
-			? insertTabAt(removed.tree, targetGroupId, 'full', tab)
-			: insertTabAt(removed.tree, targetGroupId, direction, tab);
+			? insertTabAt(removed.tree, targetGroupId, 'full', updatedTab)
+			: insertTabAt(removed.tree, targetGroupId, direction, updatedTab);
 		change(next);
 	}, [tree, change]);
 
@@ -450,7 +452,13 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 						if (!moving) return true;
 						const rest = n.tabs.filter(t => t.id !== from.tabId);
 						const idx = Math.max(0, Math.min(to.index, rest.length));
-						n.tabs = [...rest.slice(0, idx), moving, ...rest.slice(idx)];
+						// Increment _renderVersion on all tabs to force React to recreate components
+						// This fixes Monaco disposal issues when tabs are reordered
+						const updatedTabs = [...rest.slice(0, idx), moving, ...rest.slice(idx)].map(tab => ({
+							...tab,
+							_renderVersion: (tab._renderVersion ?? 0) + 1
+						}));
+						n.tabs = updatedTabs;
 						return true;
 					}
 					if (isContainerNode(n)) {
@@ -468,14 +476,16 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		const removed = removeTab(tree, from.groupId, from.tabId);
 		const movingTab = removed.tab;
 		if (!movingTab) return;
+		// Increment _renderVersion on the moving tab to force React to recreate the component
+		const updatedMovingTab = { ...movingTab, _renderVersion: (movingTab._renderVersion ?? 0) + 1 };
 		const next: WorkbenchTree = JSON.parse(JSON.stringify(removed.tree)) as WorkbenchTree;
 
 		const insertIntoTarget = (nodes: GroupNode[]): boolean => {
 			for (const n of nodes) {
 				if (isTabGroupNode(n) && n.id === to.groupId) {
 					const idx = Math.max(0, Math.min(to.index, n.tabs.length));
-					n.tabs = [...n.tabs.slice(0, idx), movingTab, ...n.tabs.slice(idx)];
-					n.activeTabId = movingTab.id;
+					n.tabs = [...n.tabs.slice(0, idx), updatedMovingTab, ...n.tabs.slice(idx)];
+					n.activeTabId = updatedMovingTab.id;
 					return true;
 				}
 				if (isContainerNode(n)) {

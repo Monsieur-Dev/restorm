@@ -224,7 +224,9 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 							<span>{tab.title}</span>);
 					return (
 						<div
-							key={tab.id}
+							// Include _renderVersion in key so React recreates the component
+							// when a tab is moved (fixes Monaco disposal issues)
+							key={`${tab.id}-${tab._renderVersion ?? 0}`}
 							style={{
 								display: isActive ? 'flex' : 'none',
 								flex: 1,

@@ -32,6 +32,12 @@ export interface EditorTab {
 	 * Custom title for the fullscreen modal. If not provided, the tab title will be used.
 	 */
 	fullscreenModalTitle?: React.ReactNode;
+	/**
+	 * Internal version number that changes when a tab is moved.
+	 * Used to force React to recreate the component (fixes Monaco disposal issues).
+	 * @internal
+	 */
+	_renderVersion?: number;
 }
 
 export interface EditorGroup {
