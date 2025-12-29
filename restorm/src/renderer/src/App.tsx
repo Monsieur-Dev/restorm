@@ -29,7 +29,10 @@ import {
   setContentChecksum,
   finishLoading,
   hasContentChanged,
-  eventBus
+  registerInitialChecksums,
+  commitChecksums,
+  eventBus,
+  logger
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type DocumentChangedPayload } from './services/DocumentEvents'
 import type { WorkbenchTree, NavigationEvent, GroupNode, TabGroupNode, EditorTab, SearchResult } from 'electron-core-ui/renderer'
@@ -552,6 +555,57 @@ function cloneItemInTree(
 }
 
 /**
+ * Collect all objects (folders, requests, environments) with their runtimeIds for checksum tracking.
+ * This creates a Map that can be passed to registerInitialChecksums.
+ */
+function collectAllObjectsForChecksums(folders: EnvironmentFolder[]): Map<string, unknown> {
+  const objects = new Map<string, unknown>()
+
+  function collectEnvironments(env: Environment): void {
+    // Store the environment object directly - serialization happens later
+    // This matches the format used in reactive.ts events: JSON.parse(JSON.stringify(env))
+    objects.set(env.id, env)
+
+    // Recursively collect sub-environments
+    if (env.subEnvironments) {
+      for (const subEnv of env.subEnvironments) {
+        collectEnvironments(subEnv)
+      }
+    }
+  }
+
+  function collectFromFolder(folder: Folder | EnvironmentFolder): void {
+    // Store the folder object directly - serialization happens later
+    // This matches the format used in reactive.ts events: JSON.parse(JSON.stringify(folder))
+    objects.set(folder.id, folder)
+
+    // If it's an environment folder, collect its environments
+    if (isEnvironmentFolder(folder as FolderItem)) {
+      const envFolder = folder as EnvironmentFolder
+      for (const env of envFolder.environments) {
+        collectEnvironments(env)
+      }
+    }
+
+    // Collect items (requests and sub-folders)
+    for (const item of folder.items) {
+      if (isAnyFolder(item)) {
+        collectFromFolder(item)
+      } else {
+        // Store the request object directly - serialization happens later
+        objects.set(item.id, item)
+      }
+    }
+  }
+
+  for (const folder of folders) {
+    collectFromFolder(folder)
+  }
+
+  return objects
+}
+
+/**
  * Desktop indicator component for statusbar
  * Shows "Desktop" text when desktop-indicator feature is enabled
  */
@@ -580,8 +634,6 @@ const App: React.FC = () => {
     save: saveFile,
     saveAs: saveFileAs,
     close: closeFile,
-    markDirty,
-    clearDirty,
     showUnsavedChangesDialog
   } = useFileService()
 
@@ -747,7 +799,23 @@ const App: React.FC = () => {
     )
     setRootFolders(reactiveFolders)
     
-    // Update the content checksum for dirty state detection
+    // Register initial checksums for all objects (granular dirty state tracking)
+    // Use JSON.parse(JSON.stringify()) to strip Proxy wrappers and ensure serializable data
+    const objectsForChecksums = collectAllObjectsForChecksums(reactiveFolders)
+    const serializableObjects = new Map<string, unknown>()
+    for (const [id, data] of objectsForChecksums) {
+      try {
+        serializableObjects.set(id, JSON.parse(JSON.stringify(data)))
+      } catch (e) {
+        logger.warn('[App] Failed to serialize object for checksum', { id, error: e })
+      }
+    }
+    logger.info('[App] About to register initial checksums', { count: serializableObjects.size })
+    registerInitialChecksums(serializableObjects)
+      .then(() => { logger.info('[App] Initial checksums registered successfully') })
+      .catch((err: unknown) => { logger.error('[App] Failed to register initial checksums', { error: String(err) }) })
+    
+    // Also set legacy content checksum for backward compatibility
     const dataForChecksum = prepareForSerialization({ collections: reactiveFolders })
     void setContentChecksum(JSON.stringify(dataForChecksum))
     
@@ -839,67 +907,23 @@ const App: React.FC = () => {
   const [_updateCount, forceUpdate] = useState(0)
   void _updateCount // Suppress unused variable warning
 
-  // Update content checksum in FileService when file is saved (isDirty becomes false)
+  // Commit checksums when file is saved (isDirty becomes false)
   const wasDirtyRef = useRef(isDirty)
   useEffect(() => {
     // Detect save: was dirty, now not dirty
     if (wasDirtyRef.current && !isDirty && fileName) {
-      // File was just saved - update the checksum with current state
+      // File was just saved - commit checksums (current becomes new baseline)
+      void commitChecksums()
+      logger.debug('[App] Checksums committed after save')
+      // Also update legacy content checksum for backward compatibility
       const dataForChecksum = prepareForSerialization({ collections: rootFolders })
       void setContentChecksum(JSON.stringify(dataForChecksum))
     }
     wasDirtyRef.current = isDirty
   }, [isDirty, fileName, rootFolders])
 
-  // Subscribe to DocumentEvents and check dirty state on each change
-  // Uses content checksum comparison to detect if current state matches saved state
-  useEffect(() => {
-    const checkDirtyState = (): void => {
-      // Compute current checksum and compare with saved
-      const dataForChecksum = prepareForSerialization({ collections: rootFolders })
-      const currentChecksum = JSON.stringify(dataForChecksum)
-      void hasContentChanged(currentChecksum).then(changed => {
-        if (changed && !isDirty) {
-          void markDirty()
-        } else if (!changed && isDirty) {
-          void clearDirty()
-        }
-      })
-    }
-
-    // Handle any document change
-    const handleDocumentChanged = (): void => {
-      // Debounce the check
-      setTimeout(checkDirtyState, 100)
-    }
-
-    // Subscribe to all update events
-    const unsubFolderUpdated = eventBus.subscribe(DocumentEvents.FOLDER_UPDATED, handleDocumentChanged)
-    const unsubRequestUpdated = eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, handleDocumentChanged)
-    const unsubEnvironmentUpdated = eventBus.subscribe(DocumentEvents.ENVIRONMENT_UPDATED, handleDocumentChanged)
-
-    // Subscribe to all delete events
-    const unsubFolderDeleted = eventBus.subscribe(DocumentEvents.FOLDER_DELETED, handleDocumentChanged)
-    const unsubRequestDeleted = eventBus.subscribe(DocumentEvents.REQUEST_DELETED, handleDocumentChanged)
-    const unsubEnvironmentDeleted = eventBus.subscribe(DocumentEvents.ENVIRONMENT_DELETED, handleDocumentChanged)
-
-    // Subscribe to all create events
-    const unsubFolderCreated = eventBus.subscribe(DocumentEvents.FOLDER_CREATED, handleDocumentChanged)
-    const unsubRequestCreated = eventBus.subscribe(DocumentEvents.REQUEST_CREATED, handleDocumentChanged)
-    const unsubEnvironmentCreated = eventBus.subscribe(DocumentEvents.ENVIRONMENT_CREATED, handleDocumentChanged)
-
-    return () => {
-      unsubFolderUpdated.unsubscribe()
-      unsubRequestUpdated.unsubscribe()
-      unsubEnvironmentUpdated.unsubscribe()
-      unsubFolderDeleted.unsubscribe()
-      unsubRequestDeleted.unsubscribe()
-      unsubEnvironmentDeleted.unsubscribe()
-      unsubFolderCreated.unsubscribe()
-      unsubRequestCreated.unsubscribe()
-      unsubEnvironmentCreated.unsubscribe()
-    }
-  }, [rootFolders, isDirty, markDirty, clearDirty])
+  // Dirty state is now handled by FileService in the main process
+  // It subscribes to DocumentEvents and compares checksums automatically
 
   // Ref to track if search index has been initialized
   const searchIndexInitializedRef = useRef(false)

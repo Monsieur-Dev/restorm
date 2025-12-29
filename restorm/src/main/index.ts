@@ -1,11 +1,11 @@
 import { app, ipcMain, BrowserWindow } from 'electron'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFeatureService, initFileService, getFileService, isFileServiceInitialized, eventBusService, i18nService } from 'electron-core-ui'
+import { initializeApp, logger, initFeatureService, initFileService, getFileService, isFileServiceInitialized, i18nService } from 'electron-core-ui'
 import { join, relative } from 'path'
 import { promises as fs } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
 import { searchIndexService, contextService } from './services'
-import { DocumentEvents } from './services/DocumentEvents'
+// DocumentEvents are handled by FileService internally for dirty state tracking
 
 // Keep track of main window and editor windows
 let mainWindow: BrowserWindow | null = null
@@ -123,27 +123,9 @@ initFileService({
 })
 logger.info('✅ File Service initialized')
 
-// Subscribe to document events to mark file as dirty
-const dirtyEvents = [
-  DocumentEvents.REQUEST_CREATED,
-  DocumentEvents.REQUEST_UPDATED,
-  DocumentEvents.REQUEST_DELETED,
-  DocumentEvents.FOLDER_CREATED,
-  DocumentEvents.FOLDER_UPDATED,
-  DocumentEvents.FOLDER_DELETED,
-  DocumentEvents.ENVIRONMENT_CREATED,
-  DocumentEvents.ENVIRONMENT_UPDATED,
-  DocumentEvents.ENVIRONMENT_DELETED
-]
-for (const event of dirtyEvents) {
-  eventBusService.subscribe(event, () => {
-    if (isFileServiceInitialized() && getFileService().getFilePath() && !getFileService().isLoading()) {
-      logger.debug(`[DirtyState] Document change detected (${event}), marking file as dirty`)
-      getFileService().markDirty()
-    }
-  })
-}
-logger.info('✅ Dirty state subscriptions registered')
+// Dirty state is now handled by FileService via checksum comparison
+// FileService subscribes to DocumentEvents internally and tracks per-object checksums
+logger.info('✅ Dirty state managed by FileService checksum system')
 
 // Initialize Search Index Service (listens to document events from renderer)
 searchIndexService.initialize()

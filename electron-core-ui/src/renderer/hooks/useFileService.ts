@@ -5,6 +5,7 @@ import type {
   SerializationFormat,
   UnsavedChangesDialogLabels
 } from '../../../types/file'
+import { logger } from '../services/logger'
 
 interface WindowFileApi {
   file: {
@@ -381,8 +382,12 @@ export const finishLoading = async (): Promise<void> => {
  * @param objects Map of runtimeId → object data
  */
 export const registerInitialChecksums = async (objects: Map<string, unknown>): Promise<void> => {
+  logger.debug('[useFileService] registerInitialChecksums called', { count: objects.size })
   const api = getApi()
-  if (!api) return
+  if (!api) {
+    logger.warn('[useFileService] No API available for registerInitialChecksums')
+    return
+  }
   await api.registerInitialChecksums(objects)
 }
 

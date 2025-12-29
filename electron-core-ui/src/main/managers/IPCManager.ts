@@ -513,7 +513,9 @@ export function setupIPC(resourcesPath?: string): void {
 
   // Object checksum tracking handlers
   ipcMain.handle('file:register-initial-checksums', (_event, objects: [string, unknown][]) => {
+    logger.debug('[IPCManager] file:register-initial-checksums called', { count: objects.length })
     if (!isFileServiceInitialized()) {
+      logger.warn('[IPCManager] FileService not initialized')
       return
     }
     getFileService().registerInitialChecksums(new Map(objects))

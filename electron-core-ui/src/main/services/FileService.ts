@@ -74,26 +74,92 @@ export class FileService {
   // ==========================================================================
 
   /**
-   * Subscribe to object change events from the event bus.
+   * Subscribe to DocumentEvents from the event bus.
    * When an object is modified, we update its checksum and recalculate dirty state.
+   * Events are emitted by the renderer via IPC and relayed through EventBusService.
    */
   private subscribeToObjectChanges(): void {
-    // Subscribe to object change events (emitted by the renderer via IPC)
-    // Note: subscription is kept alive for the lifetime of the service
-    eventBusService.subscribe<{
-      runtimeId: RuntimeId
-      data: unknown
-    }>('object:changed', ({ runtimeId, data }) => {
-      this.updateObjectChecksum(runtimeId, data)
-    })
+    // Document event types
+    const DOCUMENT_EVENTS = {
+      FOLDER_CREATED: 'document:folder:created',
+      FOLDER_UPDATED: 'document:folder:updated',
+      FOLDER_DELETED: 'document:folder:deleted',
+      REQUEST_CREATED: 'document:request:created',
+      REQUEST_UPDATED: 'document:request:updated',
+      REQUEST_DELETED: 'document:request:deleted',
+      ENVIRONMENT_CREATED: 'document:environment:created',
+      ENVIRONMENT_UPDATED: 'document:environment:updated',
+      ENVIRONMENT_DELETED: 'document:environment:deleted'
+    }
+
+    // Handler for create/update events
+    const handleDocumentChanged = (payload: { id: string; type: string; document: unknown }): void => {
+      if (!payload.id || !payload.document) return
+      const checksum = this.calculateChecksum(payload.document)
+      const previousChecksum = this.currentChecksums.get(payload.id)
+      
+      logger.debug('[FileService] Document changed', { 
+        id: payload.id, 
+        type: payload.type,
+        newChecksum: checksum.slice(0, 8),
+        prevChecksum: previousChecksum?.slice(0, 8) ?? 'none',
+        savedChecksum: this.savedChecksums.get(payload.id)?.slice(0, 8) ?? 'none'
+      })
+
+      if (previousChecksum !== checksum) {
+        this.currentChecksums.set(payload.id, checksum)
+        this.recalculateDirtyState()
+      }
+    }
+
+    // Handler for delete events
+    const handleDocumentDeleted = (payload: { id: string }): void => {
+      if (!payload.id) return
+      logger.debug('[FileService] Document deleted', { id: payload.id })
+      this.currentChecksums.delete(payload.id)
+      this.recalculateDirtyState()
+    }
+
+    // Subscribe to UPDATE events only - CREATED events are handled by registerInitialChecksums
+    // to avoid race conditions during file loading
+    eventBusService.subscribe(DOCUMENT_EVENTS.FOLDER_UPDATED, handleDocumentChanged)
+    eventBusService.subscribe(DOCUMENT_EVENTS.REQUEST_UPDATED, handleDocumentChanged)
+    eventBusService.subscribe(DOCUMENT_EVENTS.ENVIRONMENT_UPDATED, handleDocumentChanged)
+
+    // Subscribe to DELETE events
+    eventBusService.subscribe(DOCUMENT_EVENTS.FOLDER_DELETED, handleDocumentDeleted)
+    eventBusService.subscribe(DOCUMENT_EVENTS.REQUEST_DELETED, handleDocumentDeleted)
+    eventBusService.subscribe(DOCUMENT_EVENTS.ENVIRONMENT_DELETED, handleDocumentDeleted)
+
+    logger.info('[FileService] Subscribed to DocumentEvents (UPDATE/DELETE only) for dirty state tracking')
   }
 
   /**
-   * Calculate SHA-256 checksum of an object
+   * Calculate SHA-256 checksum of an object with deterministic serialization
+   * Keys are sorted to ensure consistent checksums regardless of property order
    */
   private calculateChecksum(data: unknown): string {
-    const json = JSON.stringify(data, null, 0) // Deterministic JSON
+    const json = JSON.stringify(this.sortObjectKeys(data))
     return createHash('sha256').update(json).digest('hex')
+  }
+
+  /**
+   * Recursively sort object keys to ensure deterministic JSON serialization
+   */
+  private sortObjectKeys(obj: unknown): unknown {
+    if (obj === null || obj === undefined) return obj
+    if (Array.isArray(obj)) {
+      return obj.map(item => this.sortObjectKeys(item))
+    }
+    if (typeof obj === 'object') {
+      const sorted: Record<string, unknown> = {}
+      const keys = Object.keys(obj as Record<string, unknown>).sort()
+      for (const key of keys) {
+        sorted[key] = this.sortObjectKeys((obj as Record<string, unknown>)[key])
+      }
+      return sorted
+    }
+    return obj
   }
 
   /**
@@ -124,9 +190,17 @@ export class FileService {
       const checksum = this.calculateChecksum(data)
       this.savedChecksums.set(runtimeId, checksum)
       this.currentChecksums.set(runtimeId, checksum)
+      logger.debug('[FileService] Registered checksum', { 
+        runtimeId, 
+        checksum: checksum.slice(0, 8),
+        dataPreview: JSON.stringify(data).slice(0, 100)
+      })
     }
 
-    logger.info('[FileService] Registered initial checksums', { count: objects.size })
+    logger.info('[FileService] Registered initial checksums', { 
+      count: objects.size,
+      ids: Array.from(objects.keys())
+    })
     this.recalculateDirtyState()
   }
 
@@ -159,6 +233,15 @@ export class FileService {
   private recalculateDirtyState(): void {
     const result = this.getDirtyStateDetails()
     const newIsDirty = result.isDirty
+
+    logger.debug('[FileService] recalculateDirtyState', {
+      savedCount: this.savedChecksums.size,
+      currentCount: this.currentChecksums.size,
+      changedIds: result.changedIds,
+      newIds: result.newIds,
+      deletedIds: result.deletedIds,
+      isDirty: newIsDirty
+    })
 
     if (this.currentFile.isDirty !== newIsDirty) {
       this.currentFile.isDirty = newIsDirty
@@ -811,6 +894,10 @@ export class FileService {
    * Called by renderer when content is modified to track the initial state
    */
   public setContentChecksum(checksum: string): void {
+    const preview = checksum.length > 100 
+      ? `${checksum.slice(0, 50)}...${checksum.slice(-50)} (len=${checksum.length})`
+      : checksum
+    logger.debug('[FileService] setContentChecksum', { preview, len: checksum.length })
     this.currentFile.contentChecksum = checksum
   }
 
@@ -822,9 +909,25 @@ export class FileService {
   public hasContentChanged(currentChecksum: string): boolean {
     // If no checksum stored, consider no changes (file not yet opened)
     if (this.currentFile.contentChecksum === null) {
+      logger.debug('[FileService] hasContentChanged: no stored checksum')
       return false
     }
-    return this.currentFile.contentChecksum !== currentChecksum
+    const stored = this.currentFile.contentChecksum
+    const storedPreview = stored.length > 100 
+      ? `${stored.slice(0, 50)}...${stored.slice(-50)} (len=${stored.length})`
+      : stored
+    const currentPreview = currentChecksum.length > 100 
+      ? `${currentChecksum.slice(0, 50)}...${currentChecksum.slice(-50)} (len=${currentChecksum.length})`
+      : currentChecksum
+    const changed = stored !== currentChecksum
+    logger.debug('[FileService] hasContentChanged', { 
+      changed, 
+      storedPreview, 
+      currentPreview,
+      storedLen: stored.length,
+      currentLen: currentChecksum.length
+    })
+    return changed
   }
 
   /**

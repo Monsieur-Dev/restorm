@@ -376,7 +376,7 @@ class ContextService {
     this.environmentMeta.delete(envId)
     this.transformedContexts.delete(envId)
 
-    logger.debug('[ContextService] Deleted environment from context', { id: envId })
+    // logger.debug('[ContextService] Deleted environment from context', { id: envId })
   }
 
   /**
@@ -459,11 +459,11 @@ class ContextService {
     // Store the result
     this.transformedContexts.set(envId, finalContext)
 
-    logger.debug('[ContextService] Calculated context', {
-      id: envId,
-      contextKeys: Object.keys(finalContext),
-      variableResultsCount: meta.rawVariables.filter(kv => kv.id).length
-    })
+    // logger.debug('[ContextService] Calculated context', {
+    //   id: envId,
+    //   contextKeys: Object.keys(finalContext),
+    //   variableResultsCount: meta.rawVariables.filter(kv => kv.id).length
+    // })
   }
 
   /**
@@ -691,15 +691,15 @@ class ContextService {
       }
     }
 
-    logger.debug('[ContextService] Recalculating request context', {
-      requestId,
-      environmentId: ctx.environmentId,
-      baseContextKeys: Object.keys(baseContext),
-      groups: Array.from(ctx.keyValueGroups.keys())
-    })
+    // logger.debug('[ContextService] Recalculating request context', {
+    //   requestId,
+    //   environmentId: ctx.environmentId,
+    //   baseContextKeys: Object.keys(baseContext),
+    //   groups: Array.from(ctx.keyValueGroups.keys())
+    // })
 
     // Process each KeyValue group
-    for (const [groupName, keyValues] of ctx.keyValueGroups) {
+    for (const [_groupName, keyValues] of ctx.keyValueGroups) {
       // For each group, accumulate context as we process variables
       const groupContext = { ...baseContext }
 
@@ -724,11 +724,11 @@ class ContextService {
         }
       }
 
-      logger.debug('[ContextService] Processed request group', {
-        requestId,
-        groupName,
-        variableCount: keyValues.filter(kv => kv.id && kv.enabled !== false).length
-      })
+      // logger.debug('[ContextService] Processed request group', {
+      //   requestId,
+      //   groupName,
+      //   variableCount: keyValues.filter(kv => kv.id && kv.enabled !== false).length
+      // })
     }
 
     // Calculate resolved URL and code snippets if we have full data
@@ -980,7 +980,7 @@ class ContextService {
     if (!previousResult || previousResult.resolvedUrl !== result.resolvedUrl) {
       this.resolvedUrls.set(requestId, result)
       this.broadcastToRenderer('context:url-resolved', { requestId, ...result })
-      logger.debug('[ContextService] URL resolved', { requestId, resolvedUrl })
+      // logger.debug('[ContextService] URL resolved', { requestId, resolvedUrl })
     }
   }
 
@@ -1129,7 +1129,7 @@ class ContextService {
     if (!previousResult || previousResult.markdown !== result.markdown) {
       this.codeSnippets.set(requestId, result)
       this.broadcastToRenderer('context:code-snippets-updated', { requestId, ...result })
-      logger.debug('[ContextService] Code snippets generated', { requestId, length: markdown.length })
+      // logger.debug('[ContextService] Code snippets generated', { requestId, length: markdown.length })
     }
   }
 
@@ -1221,10 +1221,10 @@ class ContextService {
     // Recalculate all requests using affected environments
     for (const [requestId, ctx] of this.requestContexts) {
       if (ctx.environmentId && affectedEnvIds.has(ctx.environmentId)) {
-        logger.debug('[ContextService] Recalculating request due to environment change', {
-          requestId,
-          environmentId: ctx.environmentId
-        })
+        // logger.debug('[ContextService] Recalculating request due to environment change', {
+        //   requestId,
+        //   environmentId: ctx.environmentId
+        // })
         this.recalculateRequestContext(requestId)
       }
     }
