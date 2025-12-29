@@ -104,6 +104,17 @@ jobs:
           cd restorm
           pnpm run test:unit
 
+      - name: Install Playwright browsers
+        run: |
+          cd restorm
+          pnpm exec playwright install --with-deps chromium
+
+      - name: Run restorm E2E tests
+        run: |
+          cd restorm
+          pnpm run test:e2e
+        continue-on-error: true
+
       - name: Build restorm application
         run: |
           cd restorm
