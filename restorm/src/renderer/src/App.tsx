@@ -831,7 +831,7 @@ const App: React.FC = () => {
     void (async () => {
       // 1. Clear previous data first
       await searchIndexService.clearIndex()
-      await window.restorm?.context?.clearAll()
+      await window.restorm?.context.clearAll()
       
       // 2. Emit ENVIRONMENT_CREATED events for all environments
       const emitEnvironmentCreated = (env: Environment, parentFolderId: string, parentEnvironmentId?: string): void => {
@@ -888,7 +888,7 @@ const App: React.FC = () => {
     // Clear search index
     void searchIndexService.clearIndex()
     // Clear context service data
-    void window.restorm?.context?.clearAll()
+    void window.restorm?.context.clearAll()
   }, [])
 
   // Listen to file events
