@@ -99,17 +99,17 @@ jobs:
           cd restorm
           pnpm run typecheck
 
-      - name: Run restorm unit tests
+      - name: Run restorm unit and integration tests
         run: |
           cd restorm
-          pnpm run test:unit
+          pnpm run test:all
 
       - name: Install Playwright browsers
         run: |
           cd restorm
           pnpm exec playwright install --with-deps chromium
 
-      - name: Run restorm E2E tests
+      - name: Run restorm E2E tests (Playwright)
         run: |
           cd restorm
           pnpm run test:e2e
