@@ -1,5 +1,41 @@
 // Main process exports - with proper TypeScript types
 export { getThemeService, getStorageService, logger, initFeatureService, getFeatureService, isFeatureServiceInitialized, initFileService, getFileService, isFileServiceInitialized, eventBusService, searchService, i18nService, graphQLService, createSchema, createPubSub } from './services'
+
+// Decorators
+export {
+  trackable,
+  searchable,
+  NonSerialised,
+  separateFiles,
+  separateFolders,
+  fileNaming,
+  isTrackable,
+  getTrackableConfig,
+  getTrackableProperties,
+  isSearchable,
+  getSearchableConfig,
+  getSearchableProperties,
+  isNonSerialised,
+  getNonSerialisedProperties,
+  hasSeparateFiles,
+  getSeparateFilesConfig,
+  getSeparateFilesProperties,
+  hasSeparateFolders,
+  getSeparateFoldersConfig,
+  getSeparateFoldersProperties,
+  getFileNamingConfig,
+  generateFileName,
+  getAllMetadata,
+  serializeWithDecorators
+} from './decorators'
+export type {
+  TrackableConfig,
+  SearchableConfig,
+  SeparateFilesConfig,
+  SeparateFoldersConfig,
+  FileNamingConfig,
+  AllMetadata
+} from './decorators'
 export { BaseWindow, setupIPC, setupAppLifecycle, initializeApp, configureCommandLineSwitches, setupAppProtocol } from './managers'
 export type { WindowConfiguration, WindowState } from './managers'
 
