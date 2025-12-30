@@ -1,0 +1,53 @@
+#!/bin/sh
+
+echo "🔍 Running pre-commit checks..."
+
+# electron-core-ui
+echo "📦 electron-core-ui: depcheck"
+cd electron-core-ui && npx depcheck || exit 1
+echo "📦 electron-core-ui: lint"
+pnpm run lint || exit 1
+echo "📦 electron-core-ui: typecheck"
+pnpm run typecheck || exit 1
+echo "📦 electron-core-ui: build"
+pnpm run build || exit 1
+cd ..
+
+# gitable
+echo "📦 gitable: depcheck"
+cd gitable && npx depcheck || exit 1
+echo "📦 gitable: lint"
+pnpm run lint || exit 1
+echo "📦 gitable: typecheck"
+pnpm run typecheck || exit 1
+echo "📦 gitable: build"
+pnpm run build || exit 1
+cd ..
+
+# demo
+echo "📦 demo: depcheck"
+cd demo && npx depcheck || exit 1
+echo "📦 demo: lint"
+pnpm run lint || exit 1
+echo "📦 demo: typecheck"
+pnpm run typecheck || exit 1
+echo "📦 demo: build"
+pnpm run build || exit 1
+cd ..
+
+# restorm
+echo "📦 restorm: depcheck"
+cd restorm && npx depcheck || exit 1
+echo "📦 restorm: lint"
+pnpm run lint || exit 1
+echo "📦 restorm: typecheck"
+pnpm run typecheck || exit 1
+echo "📦 restorm: unit tests"
+pnpm run test:all || exit 1
+echo "📦 restorm: build"
+NODE_OPTIONS="--max-old-space-size=4096" pnpm run build || exit 1
+echo "📦 restorm: e2e tests"
+pnpm run test:e2e || exit 1
+cd ..
+
+echo "✅ All pre-commit checks passed!"

@@ -79,12 +79,12 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
       kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
 
-    void window.restorm.context.registerRequest(requestId, currentEnvId ?? null, {
+    void window.restorm?.context.registerRequest(requestId, currentEnvId ?? null, {
       headers: toKeyValueData(currentRequest.headers)
     })
 
     // Send full request data for URL and code snippet calculation
-    void window.restorm.context.updateFullRequestData(requestId, {
+    void window.restorm?.context.updateFullRequestData(requestId, {
       url: currentRequest.url,
       method: currentRequest.protocol,
       requestType: 'websocket',
@@ -93,23 +93,23 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     })
 
     // Subscribe to backend events
-    const unsubUrl = window.restorm.context.onUrlResolved((result) => {
+    const unsubUrl = window.restorm?.context.onUrlResolved((result) => {
       if (result.requestId === requestId) {
         setResolvedUrl(result.resolvedUrl)
       }
     })
 
-    const unsubSnippets = window.restorm.context.onCodeSnippetsUpdated((result) => {
+    const unsubSnippets = window.restorm?.context.onCodeSnippetsUpdated((result) => {
       if (result.requestId === requestId) {
         setBackendCodeSnippets(result.markdown)
       }
     })
 
     // Get initial values if they exist
-    void window.restorm.context.getResolvedUrl(requestId).then((result) => {
+    void window.restorm?.context.getResolvedUrl(requestId).then((result) => {
       if (result) setResolvedUrl(result.resolvedUrl)
     })
-    void window.restorm.context.getCodeSnippets(requestId).then((result) => {
+    void window.restorm?.context.getCodeSnippets(requestId).then((result) => {
       if (result) setBackendCodeSnippets(result.markdown)
     })
 
@@ -117,9 +117,9 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
 
     return () => {
       logger.debug('[WebSocketRequestTabView] Unregistering request from ContextService', { requestId })
-      unsubUrl()
-      unsubSnippets()
-      void window.restorm.context.unregisterRequest(requestId)
+      unsubUrl?.()
+      unsubSnippets?.()
+      void window.restorm?.context.unregisterRequest(requestId)
     }
   }, [request.id])
 
@@ -132,7 +132,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         previousEnvId: previousEnvIdRef.current,
         newEnvId: currentEnvId
       })
-      void window.restorm.context.setRequestEnvironment(request.id, currentEnvId)
+      void window.restorm?.context.setRequestEnvironment(request.id, currentEnvId)
       previousEnvIdRef.current = currentEnvId
     }
   }, [selectedEnvId, request.id])
@@ -142,7 +142,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
       kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
 
-    void window.restorm.context.updateFullRequestData(request.id, {
+    void window.restorm?.context.updateFullRequestData(request.id, {
       url,
       method: request.protocol,
       requestType: 'websocket',
@@ -174,7 +174,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   // Callback for headers changes - notify both reactive object and ContextService
   const handleHeadersChange = useCallback((rows: KeyValueTableRow[]): void => {
     updateReactiveProperty(request, 'headers', rows)
-    void window.restorm.context.updateRequestKeyValues(
+    void window.restorm?.context.updateRequestKeyValues(
       request.id,
       'headers',
       rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
@@ -186,7 +186,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     setIsSending(true)
     setResponse(null)
     
-    window.restorm.websocket.connect({ requestId: request.id, timeout: 5000 })
+    window.restorm?.websocket.connect({ requestId: request.id, timeout: 5000 })
       .then((res: WebSocketExecutionResult) => {
         // Convert backend result to WebSocketResponse format
         const wsResponse: WebSocketResponse = {
@@ -217,7 +217,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   }
   
   const handleDisconnect = (): void => {
-    void window.restorm.websocket.disconnect(request.id)
+    void window.restorm?.websocket.disconnect(request.id)
   }
   
   const formatMessage = (msg: WebSocketMessage): string => {

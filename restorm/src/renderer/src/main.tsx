@@ -80,6 +80,240 @@ const initI18n = (): Promise<void> => {
   })
 }
 
+// Web shim for window.restorm APIs (when not in Electron)
+function ensureRestormWebShim(): void {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  // If Electron preload already injected window.restorm, do nothing
+  if (window.restorm) {
+    return
+  }
+
+  // Create web shim for window.restorm
+  const saveAndCloseCallbacks = new Set<() => void>()
+  
+  // Listen to beforeunload to trigger save-and-close callbacks
+  window.addEventListener('beforeunload', () => {
+    if (saveAndCloseCallbacks.size > 0) {
+      // Trigger all registered callbacks
+      for (const callback of saveAndCloseCallbacks) {
+        try {
+          callback()
+        } catch {
+          // Ignore errors in callbacks
+        }
+      }
+    }
+  })
+
+  // Type assertion needed because window.restorm is optional in types but we're creating it here
+  // Define the restorm shim object
+  const restormShim = {
+    openEditor: () => Promise.resolve(),
+    getEditorFile: () => Promise.resolve(undefined),
+    forceClose: () => {
+      window.close()
+      return Promise.resolve()
+    },
+    onSaveAndClose: (callback: () => void) => {
+      saveAndCloseCallbacks.add(callback)
+      return () => {
+        saveAndCloseCallbacks.delete(callback)
+      }
+    },
+    context: {
+      getAllTransformResults: () => Promise.resolve({}),
+      onVariableTransformed: () => () => { /* No-op unsubscribe */ },
+      registerRequest: () => Promise.resolve(),
+      unregisterRequest: () => Promise.resolve(),
+      setRequestEnvironment: () => Promise.resolve(),
+      updateRequestKeyValues: () => Promise.resolve(),
+      updateFullRequestData: () => Promise.resolve(),
+      getResolvedUrl: () => Promise.resolve(undefined),
+      getCodeSnippets: () => Promise.resolve(undefined),
+      onUrlResolved: () => () => { /* No-op unsubscribe */ },
+      onCodeSnippetsUpdated: () => () => { /* No-op unsubscribe */ },
+      onAvailableVariables: () => () => { /* No-op unsubscribe */ },
+      clearAll: () => Promise.resolve()
+    },
+    http: {
+      execute: () => Promise.reject(new Error('HTTP execution not available in web mode')),
+      cancel: () => Promise.resolve(false),
+      isActive: () => Promise.resolve(false),
+      onProgress: () => () => { /* No-op unsubscribe */ }
+    },
+    graphql: {
+      execute: () => Promise.reject(new Error('GraphQL execution not available in web mode')),
+      cancel: () => Promise.resolve(false),
+      isActive: () => Promise.resolve(false),
+      onProgress: () => () => { /* No-op unsubscribe */ }
+    },
+    soap: {
+      execute: () => Promise.reject(new Error('SOAP execution not available in web mode')),
+      cancel: () => Promise.resolve(false),
+      isActive: () => Promise.resolve(false),
+      onProgress: () => () => { /* No-op unsubscribe */ }
+    },
+    grpc: {
+      execute: () => Promise.reject(new Error('gRPC execution not available in web mode')),
+      cancel: () => Promise.resolve(false),
+      isActive: () => Promise.resolve(false),
+      onProgress: () => () => { /* No-op unsubscribe */ }
+    },
+    websocket: {
+      connect: () => Promise.reject(new Error('WebSocket execution not available in web mode')),
+      disconnect: () => Promise.resolve(false),
+      send: () => Promise.resolve(false),
+      isActive: () => Promise.resolve(false),
+      onProgress: () => () => { /* No-op unsubscribe */ },
+      onMessage: () => () => { /* No-op unsubscribe */ }
+    }
+  }
+  
+  // Assign the shim to window.restorm
+  Object.defineProperty(window, 'restorm', {
+    value: restormShim,
+    writable: true,
+    configurable: true
+  })
+}
+
+// Ensure web shim is set up before rendering
+ensureRestormWebShim()
+
+// Expose test helpers on window for E2E tests
+if (typeof window !== 'undefined') {
+  // Always expose in dev mode or when explicitly enabled (for E2E tests)
+  // In production, this will be tree-shaken out
+   
+  const isDev = (import.meta as { env?: { DEV?: boolean; MODE?: string; VITE_ENABLE_TEST_HELPERS?: string } }).env?.DEV ?? false
+   
+  const mode = (import.meta as { env?: { MODE?: string } }).env?.MODE
+   
+  const enableTestHelpers = (import.meta as { env?: { VITE_ENABLE_TEST_HELPERS?: string } }).env?.VITE_ENABLE_TEST_HELPERS === 'true'
+  const shouldExpose = isDev || mode === 'test' || enableTestHelpers
+  
+  if (shouldExpose) {
+    // Load test helpers asynchronously to avoid blocking app initialization
+    void Promise.all([
+      import('./services/import/SwaggerImportService'),
+      import('./types/reactive'),
+      import('./services/SearchIndexService'),
+      import('./utils/serialization'),
+      import('electron-core-ui/renderer')
+    ]).then(([swaggerModule, reactiveModule, searchModule, serializationModule, electronCoreUiModule]) => {
+      ;(window as unknown as {
+        __testHelpers?: {
+          importSwagger: (swaggerJson: string) => Promise<void>
+          loadRestormData: (data: { collections: unknown[] }) => Promise<void>
+        }
+      }).__testHelpers = {
+        importSwagger: async (swaggerJson: string) => {
+          const folder = swaggerModule.importSwaggerFromJson(swaggerJson)
+          const reactiveFolder = reactiveModule.makeReactiveFolder(folder)
+          await searchModule.searchIndexService.indexFolderTree(reactiveFolder)
+          
+          // Also add to rootFolders so it appears in ListView
+          const windowWithRestormHelpers = window as unknown as {
+            __restormTestHelpers?: { 
+              setRootFolders: (folders: unknown[]) => void
+            }
+          }
+          if (windowWithRestormHelpers.__restormTestHelpers?.setRootFolders) {
+            windowWithRestormHelpers.__restormTestHelpers.setRootFolders([reactiveFolder])
+          }
+        },
+        loadRestormData: async (data: { collections: unknown[] }) => {
+          // Process collections to generate runtime IDs
+          const collectionsWithIds = serializationModule.processAfterDeserialization(data.collections)
+          
+          // Make folders reactive
+          const reactiveFolders = collectionsWithIds.map(
+            (folder) => reactiveModule.makeReactiveFolder(folder as import('./types/collections').Folder)
+          )
+          
+          // Create file state to simulate file opened event
+          const fileState = {
+            currentFile: {
+              path: 'test-data.restorm',
+              name: 'test-data.restorm',
+              content: { collections: reactiveFolders },
+              format: 'json' as const,
+              isDirty: false
+            },
+            recentFiles: [],
+            favorites: []
+          }
+          
+          // Wait for App to register its callback and expose test helpers
+          // Try multiple times with increasing delays
+          let helpersFound = false
+          for (let attempt = 0; attempt < 10; attempt++) {
+            await new Promise(resolve => setTimeout(resolve, 500))
+            
+            // Try Approach 1: Use App's setRootFolders helper (most direct)
+            const windowWithRestormHelpers = window as unknown as {
+              __restormTestHelpers?: { 
+                loadFile: (state: typeof fileState) => void
+                setRootFolders: (folders: typeof reactiveFolders) => void
+              }
+            }
+            
+            if (windowWithRestormHelpers.__restormTestHelpers?.setRootFolders) {
+              windowWithRestormHelpers.__restormTestHelpers.setRootFolders(reactiveFolders)
+              helpersFound = true
+              break
+            }
+            
+            // Try Approach 2: Use App's loadFile helper
+            if (windowWithRestormHelpers.__restormTestHelpers?.loadFile) {
+              windowWithRestormHelpers.__restormTestHelpers.loadFile(fileState)
+              helpersFound = true
+              break
+            }
+            
+            // Try Approach 3: Use web shim test helper
+            const windowWithTestHelpers = window as unknown as {
+              __webFileTestHelpers?: { triggerFileOpened: (state: typeof fileState) => void }
+            }
+            
+            if (windowWithTestHelpers.__webFileTestHelpers) {
+              windowWithTestHelpers.__webFileTestHelpers.triggerFileOpened(fileState)
+              helpersFound = true
+              break
+            }
+            
+            // Try Approach 4: Use eventBus emitLocal
+            try {
+              await electronCoreUiModule.eventBus.emitLocal('restorm:test:file-opened', fileState)
+              helpersFound = true
+              break
+            } catch {
+              // Continue trying
+            }
+          }
+          
+          if (!helpersFound) {
+            // Test helpers not found after 5 seconds - file loading may fail
+          }
+          
+          // Index folders for search (will be done again by App, but do it here too for safety)
+          for (const folder of reactiveFolders) {
+            await searchModule.searchIndexService.indexFolderTree(folder)
+          }
+          
+          // Wait longer for App to process the event and render
+          await new Promise(resolve => setTimeout(resolve, 3000))
+        }
+      }
+    }).catch(() => {
+      // Failed to load test helpers - this is expected in production
+    })
+  }
+}
+
 void initI18n()
   .then(() => {
     

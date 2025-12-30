@@ -19,23 +19,30 @@ export class RestormWindow extends BaseWindow {
     let preloadPath: string | undefined
     
     if (isDev) {
-      // In dev, try to use restorm preload from out/ (build prod) first
+      // In dev, try to use restorm preload from out/ or dist/ (build) first
       // This ensures window.restorm is always available
-      // Try multiple paths: dev build, prod build, or node_modules
       const appRoot = app.getAppPath()
-      const projectRoot = join(__dirname, '../../..') // Go up from dist/main/windows to project root
+      // __dirname is dist/main, so go up 2 levels to get restorm project root
+      const projectRoot = join(__dirname, '../..')
       
-      const devPreloadPath = join(appRoot, '.electron-vite', 'dev', 'preload', 'index.mjs')
-      const prodPreloadPath1 = join(appRoot, 'out', 'preload', 'index.js')
-      const prodPreloadPath2 = join(projectRoot, 'out', 'preload', 'index.js')
+      // Priority order: out/ (electron-vite default), then dist/, then dev
+      const paths = [
+        join(projectRoot, 'out', 'preload', 'index.js'),
+        join(__dirname, '../preload/index.js'),
+        join(projectRoot, 'dist', 'preload', 'index.js'),
+        join(appRoot, 'out', 'preload', 'index.js'),
+        join(appRoot, 'dist', 'preload', 'index.js'),
+        join(appRoot, '.electron-vite', 'dev', 'preload', 'index.mjs')
+      ]
       
-      if (existsSync(devPreloadPath)) {
-        preloadPath = devPreloadPath
-      } else if (existsSync(prodPreloadPath2)) {
-        preloadPath = prodPreloadPath2
-      } else if (existsSync(prodPreloadPath1)) {
-        preloadPath = prodPreloadPath1
-      } else {
+      for (const p of paths) {
+        if (existsSync(p)) {
+          preloadPath = p
+          break
+        }
+      }
+      
+      if (!preloadPath) {
         // Fallback to core-ui preload from node_modules
         const coreUiPreloadPath = join(appRoot, 'node_modules', 'electron-core-ui', 'dist', 'src', 'preload', 'index.js')
         if (existsSync(coreUiPreloadPath)) {

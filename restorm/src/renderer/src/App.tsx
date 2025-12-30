@@ -709,11 +709,11 @@ const App: React.FC = () => {
       const saved = await saveFile(dataForSave)
       if (saved) {
         // Force close all windows after save
-        await window.restorm.forceClose()
+        await window.restorm?.forceClose()
       }
     }
     
-    const cleanup = window.restorm.onSaveAndClose(() => {
+    const cleanup = window.restorm?.onSaveAndClose(() => {
       void handleSaveAndClose()
     })
     
@@ -786,7 +786,9 @@ const App: React.FC = () => {
   // Handler for file opened event - loads collections into workbench
   const handleFileOpened = useCallback((state: { currentFile: { content: unknown } }) => {
     // Prevent double loading
-    if (fileLoadingRef.current) return
+    if (fileLoadingRef.current) {
+      return
+    }
     fileLoadingRef.current = true
 
     const content = state.currentFile.content as { collections?: EnvironmentFolder[] } | null
@@ -826,7 +828,7 @@ const App: React.FC = () => {
     void (async () => {
       // 1. Clear previous data first
       await searchIndexService.clearIndex()
-      await window.restorm.context.clearAll()
+      await window.restorm?.context.clearAll()
       
       // 2. Emit ENVIRONMENT_CREATED events for all environments
       const emitEnvironmentCreated = (env: Environment, parentFolderId: string, parentEnvironmentId?: string): void => {
@@ -883,11 +885,70 @@ const App: React.FC = () => {
     // Clear search index
     void searchIndexService.clearIndex()
     // Clear context service data
-    void window.restorm.context.clearAll()
+    void window.restorm?.context.clearAll()
   }, [])
 
-  // Listen to file events
+  // Listen to file events (including from command line --open argument)
   useFileEvents(handleFileOpened, handleFileClosed)
+  
+  // Listen to test events for E2E tests (only in dev/test mode)
+  // Expose handleFileOpened directly on window for E2E tests
+  // This must be done outside useEffect to ensure it's available immediately
+  const handleFileOpenedRef = useRef(handleFileOpened)
+  useEffect(() => {
+    handleFileOpenedRef.current = handleFileOpened
+  }, [handleFileOpened])
+  
+  useEffect(() => {
+    // Always expose test helpers in dev mode (Vite sets DEV=true)
+    // In web mode via Playwright, mode is undefined, so we check both
+    const isDev = (import.meta as { env?: { DEV?: boolean; MODE?: string } }).env?.DEV ?? false
+    const mode = (import.meta as { env?: { MODE?: string } }).env?.MODE
+    // Always expose if not in production build
+    const shouldListen = isDev || mode === 'test' || mode === 'development' || mode === undefined
+    
+    if (!shouldListen) return
+    
+    // Expose immediately (don't wait for handleFileOpened to be ready)
+    ;(window as unknown as { 
+      __restormTestHelpers?: { 
+        loadFile: (fileState: { currentFile: { content: unknown } }) => void
+        setRootFolders: (folders: EnvironmentFolder[]) => void
+      } 
+    }).__restormTestHelpers = {
+      loadFile: (fileState: { currentFile: { content: unknown } }) => {
+        // Reset loading flag to allow loading
+        fileLoadingRef.current = false
+        // Use ref to ensure we call the latest version
+        handleFileOpenedRef.current(fileState)
+      },
+      setRootFolders: (folders: EnvironmentFolder[]) => {
+        fileLoadingRef.current = false
+        // Make folders reactive before setting
+        const reactiveFolders = folders.map(folder => makeReactiveFolder(folder) as EnvironmentFolder)
+        setRootFolders(reactiveFolders)
+        // Also trigger indexing
+        void (async () => {
+          await searchIndexService.clearIndex()
+          await searchIndexService.initialize()
+          for (const folder of reactiveFolders) {
+            await searchIndexService.indexFolderTree(folder)
+          }
+        })()
+      }
+    }
+    
+    // Also listen to eventBus for backward compatibility
+    const subscription = eventBus.subscribe('restorm:test:file-opened', (fileState: { currentFile: { content: unknown } }) => {
+      fileLoadingRef.current = false
+      handleFileOpenedRef.current(fileState)
+    })
+    
+    return () => {
+      subscription.unsubscribe()
+      delete (window as unknown as { __restormTestHelpers?: unknown }).__restormTestHelpers
+    }
+  }, []) // Empty deps - set up once on mount
 
   // Load file content on mount if a file is already open (e.g., after page refresh)
   const initialLoadDoneRef = useRef(false)

@@ -86,31 +86,41 @@ copyIfExists(
   path.join(distSrcDir, 'renderer', 'assets')
 )
 
-// Copy CSS files from components
-const componentsDir = path.join(__dirname, '..', 'src', 'renderer', 'components')
-if (fs.existsSync(componentsDir)) {
-  const componentDirs = fs.readdirSync(componentsDir, { withFileTypes: true })
-    .filter(dirent => dirent.isDirectory())
-    .map(dirent => dirent.name)
+// Copy CSS files from components (recursively)
+function copyCssFilesRecursive(srcDir, destDir) {
+  if (!fs.existsSync(srcDir)) return
   
-  for (const componentDir of componentDirs) {
-    const srcComponentDir = path.join(componentsDir, componentDir)
-    const cssFiles = fs.readdirSync(srcComponentDir)
-      .filter(file => file.endsWith('.css'))
+  const entries = fs.readdirSync(srcDir, { withFileTypes: true })
+  
+  for (const entry of entries) {
+    const srcPath = path.join(srcDir, entry.name)
+    const destPath = path.join(destDir, entry.name)
     
-    if (cssFiles.length > 0) {
-      const destComponentDir = path.join(distSrcDir, 'renderer', 'components', componentDir)
-      if (!fs.existsSync(destComponentDir)) {
-        fs.mkdirSync(destComponentDir, { recursive: true })
+    if (entry.isDirectory()) {
+      if (!fs.existsSync(destPath)) {
+        fs.mkdirSync(destPath, { recursive: true })
       }
-      for (const cssFile of cssFiles) {
-        fs.copyFileSync(
-          path.join(srcComponentDir, cssFile),
-          path.join(destComponentDir, cssFile)
-        )
+      copyCssFilesRecursive(srcPath, destPath)
+    } else if (entry.name.endsWith('.css')) {
+      const destDirPath = path.dirname(destPath)
+      if (!fs.existsSync(destDirPath)) {
+        fs.mkdirSync(destDirPath, { recursive: true })
       }
+      fs.copyFileSync(srcPath, destPath)
     }
   }
 }
+
+const componentsDir = path.join(__dirname, '..', 'src', 'renderer', 'components')
+const destComponentsDir = path.join(distSrcDir, 'renderer', 'components')
+if (fs.existsSync(componentsDir)) {
+  copyCssFilesRecursive(componentsDir, destComponentsDir)
+}
+
+// Copy resources directory (themes, etc.)
+copyIfExists(
+  path.join(__dirname, '..', 'resources'),
+  path.join(distDir, 'resources')
+)
 
 console.log('✅ Dist merge completed successfully')

@@ -72,17 +72,24 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
     const requestId = request.id
     const currentEnvId = selectedEnvIdRef.current
     const currentRequest = requestRef.current
+    
+    // Get restorm context (available in both Electron and web mode via shim)
+    const restormContext = window.restorm?.context
+    if (!restormContext) {
+      return
+    }
+    
     logger.debug('[GraphQLRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
     const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
       kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
 
-    void window.restorm.context.registerRequest(requestId, currentEnvId ?? null, {
+    void restormContext.registerRequest(requestId, currentEnvId ?? null, {
       headers: toKeyValueData(currentRequest.headers)
     })
 
     // Send full request data for URL and code snippet calculation
-    void window.restorm.context.updateFullRequestData(requestId, {
+    void restormContext.updateFullRequestData(requestId, {
       url: currentRequest.url,
       method: 'POST',
       requestType: 'graphql',
@@ -91,23 +98,23 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
     })
 
     // Subscribe to backend events
-    const unsubUrl = window.restorm.context.onUrlResolved((result) => {
+    const unsubUrl = restormContext.onUrlResolved((result) => {
       if (result.requestId === requestId) {
         setResolvedUrl(result.resolvedUrl)
       }
     })
 
-    const unsubSnippets = window.restorm.context.onCodeSnippetsUpdated((result) => {
+    const unsubSnippets = restormContext.onCodeSnippetsUpdated((result) => {
       if (result.requestId === requestId) {
         setBackendCodeSnippets(result.markdown)
       }
     })
 
     // Get initial values if they exist
-    void window.restorm.context.getResolvedUrl(requestId).then((result) => {
+    void restormContext.getResolvedUrl(requestId).then((result) => {
       if (result) setResolvedUrl(result.resolvedUrl)
     })
-    void window.restorm.context.getCodeSnippets(requestId).then((result) => {
+    void restormContext.getCodeSnippets(requestId).then((result) => {
       if (result) setBackendCodeSnippets(result.markdown)
     })
 
@@ -117,7 +124,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
       logger.debug('[GraphQLRequestTabView] Unregistering request from ContextService', { requestId })
       unsubUrl()
       unsubSnippets()
-      void window.restorm.context.unregisterRequest(requestId)
+      void restormContext.unregisterRequest(requestId)
     }
   }, [request.id])
 
@@ -130,7 +137,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
         previousEnvId: previousEnvIdRef.current,
         newEnvId: currentEnvId
       })
-      void window.restorm.context.setRequestEnvironment(request.id, currentEnvId)
+      void window.restorm?.context.setRequestEnvironment(request.id, currentEnvId)
       previousEnvIdRef.current = currentEnvId
     }
   }, [selectedEnvId, request.id])
@@ -140,7 +147,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
     const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
       kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
 
-    void window.restorm.context.updateFullRequestData(request.id, {
+    void window.restorm?.context.updateFullRequestData(request.id, {
       url,
       method: 'POST',
       requestType: 'graphql',
@@ -172,7 +179,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
   // Callback for headers changes - notify both reactive object and ContextService
   const handleHeadersChange = useCallback((rows: KeyValueTableRow[]): void => {
     updateReactiveProperty(request, 'headers', rows)
-    void window.restorm.context.updateRequestKeyValues(
+    void window.restorm?.context.updateRequestKeyValues(
       request.id,
       'headers',
       rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
@@ -184,7 +191,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
     setIsSending(true)
     setResponse(null)
     
-    window.restorm.graphql.execute({ requestId: request.id })
+    window.restorm?.graphql.execute({ requestId: request.id })
       .then((res: GraphQLExecutionResult) => {
         // Convert backend result to GraphQLResponse format
         const graphqlResponse: GraphQLResponse = {
@@ -213,7 +220,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
   }
   
   const handleCancel = (): void => {
-    void window.restorm.graphql.cancel(request.id)
+    void window.restorm?.graphql.cancel(request.id)
   }
   
   // Request content (SplitView with Query, Variables, Headers)

@@ -9,7 +9,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@renderer': resolve(__dirname, 'src/renderer/src')
+      '@renderer': resolve(__dirname, 'src/renderer/src'),
+      // Point to electron-core-ui sources for web mode (tests E2E)
+      'electron-core-ui/renderer': resolve(__dirname, '../electron-core-ui/src/renderer/index.ts')
     }
   },
   plugins: [react()],

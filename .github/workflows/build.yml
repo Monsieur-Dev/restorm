@@ -99,10 +99,10 @@ jobs:
           cd restorm
           pnpm run typecheck
 
-      - name: Run restorm unit tests
+      - name: Run restorm unit and integration tests
         run: |
           cd restorm
-          pnpm run test:unit
+          pnpm run test:all
 
       - name: Build restorm application
         run: |

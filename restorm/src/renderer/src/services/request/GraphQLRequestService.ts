@@ -137,7 +137,19 @@ export async function executeGraphQLRequest(input: GraphQLRequestInput): Promise
     }
   } catch (err) {
     const durationMs = Date.now() - startTime
-    const error = err as Error
+    const error = err as Error & { code?: string; response?: { status?: number; statusText?: string } }
+    
+    // Build detailed error message
+    let errorMessage = 'Request failed'
+    if (error.message) {
+      errorMessage = error.message
+    }
+    if (error.code) {
+      errorMessage = `${errorMessage} (code: ${error.code})`
+    }
+    if (error.response) {
+      errorMessage = `${errorMessage} (HTTP ${error.response.status}: ${error.response.statusText ?? 'Unknown'})`
+    }
     
     return {
       id: generateResponseId(),
@@ -149,7 +161,7 @@ export async function executeGraphQLRequest(input: GraphQLRequestInput): Promise
       requestHeaders: resolvedHeaders,
       statusCode: 0,
       responseHeaders: [],
-      error: error.message || 'Request failed',
+      error: errorMessage,
       timings: {
         startedAt,
         durationMs

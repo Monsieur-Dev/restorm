@@ -568,16 +568,25 @@ export abstract class BaseWindow {
         logger.info(`BaseWindow: did-finish-load in ${(performance.now() - loadStart).toFixed(2)}ms`)
       })
       
-      // Load URL if provided, otherwise load file
+      // Load URL if provided, otherwise load file via app:// protocol
       if (this.configuration.url) {
         logger.info(`BaseWindow: Loading URL ${this.configuration.url}...`)
         window.loadURL(this.configuration.url).catch((error: unknown) => {
           logger.error('Failed to load URL', { error: String(error) })
         })
       } else {
-        logger.info(`BaseWindow: Loading file ${this.configuration.file}...`)
-        window.loadFile(this.configuration.file).catch((error: unknown) => {
-          logger.error('Failed to load file', { error: String(error) })
+        // Use app:// protocol to serve files - this allows absolute paths like /imgs/logo.png to work
+        // The protocol handler resolves paths relative to the renderer directory
+        const fileName = this.configuration.file.split('/').pop() ?? 'index.html'
+        const appUrl = `app://./${fileName}`
+        logger.info(`BaseWindow: Loading via app:// protocol: ${appUrl} (file: ${this.configuration.file})...`)
+        window.loadURL(appUrl).catch((error: unknown) => {
+          logger.error('Failed to load app:// URL', { error: String(error) })
+          // Fallback to file:// if app:// fails
+          logger.info(`BaseWindow: Falling back to loadFile: ${this.configuration.file}`)
+          window.loadFile(this.configuration.file).catch((err: unknown) => {
+            logger.error('Failed to load file', { error: String(err) })
+          })
         })
       }
     }

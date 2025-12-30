@@ -75,12 +75,12 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
     const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
       kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
 
-    void window.restorm.context.registerRequest(requestId, currentEnvId ?? null, {
+    void window.restorm?.context.registerRequest(requestId, currentEnvId ?? null, {
       headers: toKeyValueData(currentRequest.headers)
     })
 
     // Send full request data for URL and code snippet calculation
-    void window.restorm.context.updateFullRequestData(requestId, {
+    void window.restorm?.context.updateFullRequestData(requestId, {
       url: currentRequest.url,
       method: 'POST',
       requestType: 'soap',
@@ -89,23 +89,23 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
     })
 
     // Subscribe to backend events
-    const unsubUrl = window.restorm.context.onUrlResolved((result) => {
+    const unsubUrl = window.restorm?.context.onUrlResolved((result) => {
       if (result.requestId === requestId) {
         setResolvedUrl(result.resolvedUrl)
       }
     })
 
-    const unsubSnippets = window.restorm.context.onCodeSnippetsUpdated((result) => {
+    const unsubSnippets = window.restorm?.context.onCodeSnippetsUpdated((result) => {
       if (result.requestId === requestId) {
         setBackendCodeSnippets(result.markdown)
       }
     })
 
     // Get initial values if they exist
-    void window.restorm.context.getResolvedUrl(requestId).then((result) => {
+    void window.restorm?.context.getResolvedUrl(requestId).then((result) => {
       if (result) setResolvedUrl(result.resolvedUrl)
     })
-    void window.restorm.context.getCodeSnippets(requestId).then((result) => {
+    void window.restorm?.context.getCodeSnippets(requestId).then((result) => {
       if (result) setBackendCodeSnippets(result.markdown)
     })
 
@@ -113,9 +113,9 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
 
     return () => {
       logger.debug('[SoapRequestTabView] Unregistering request from ContextService', { requestId })
-      unsubUrl()
-      unsubSnippets()
-      void window.restorm.context.unregisterRequest(requestId)
+      unsubUrl?.()
+      unsubSnippets?.()
+      void window.restorm?.context.unregisterRequest(requestId)
     }
   }, [request.id])
 
@@ -128,7 +128,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
         previousEnvId: previousEnvIdRef.current,
         newEnvId: currentEnvId
       })
-      void window.restorm.context.setRequestEnvironment(request.id, currentEnvId)
+      void window.restorm?.context.setRequestEnvironment(request.id, currentEnvId)
       previousEnvIdRef.current = currentEnvId
     }
   }, [selectedEnvId, request.id])
@@ -138,7 +138,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
     const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
       kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
 
-    void window.restorm.context.updateFullRequestData(request.id, {
+    void window.restorm?.context.updateFullRequestData(request.id, {
       url,
       method: 'POST',
       requestType: 'soap',
@@ -166,7 +166,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
   // Callback for headers changes - notify both reactive object and ContextService
   const handleHeadersChange = useCallback((rows: KeyValueTableRow[]): void => {
     updateReactiveProperty(request, 'headers', rows)
-    void window.restorm.context.updateRequestKeyValues(
+    void window.restorm?.context.updateRequestKeyValues(
       request.id,
       'headers',
       rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
@@ -178,7 +178,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
     setIsSending(true)
     setResponse(null)
     
-    window.restorm.soap.execute({ requestId: request.id })
+    window.restorm?.soap.execute({ requestId: request.id })
       .then((res: SOAPExecutionResult) => {
         // Convert backend result to SoapResponse format
         const soapResponse: SoapResponse = {
@@ -207,7 +207,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
   }
   
   const handleCancel = (): void => {
-    void window.restorm.soap.cancel(request.id)
+    void window.restorm?.soap.cancel(request.id)
   }
   
   // Request content (SplitView with Body, Headers)

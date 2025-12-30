@@ -79,7 +79,7 @@ void initI18n().then(() => {
       // Get file parameters from main process when component mounts
       useEffect(() => {
         // Request file parameters from main process
-        void window.restorm.getEditorFile().then((file) => {
+        void window.restorm?.getEditorFile().then((file) => {
           if (!file) {
             logger.warn('No file parameters received from main process')
             return

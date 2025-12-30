@@ -1,10 +1,17 @@
 import { defineConfig, devices } from '@playwright/test';
+import { _electron as electron } from 'playwright';
 
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
   testDir: './tests/e2e',
+  
+  /* Timeouts */
+  timeout: 120 * 1000,
+  expect: {
+    timeout: 5000,
+  },
   
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -19,7 +26,11 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: [
+    ['html'],
+    ['json', { outputFile: 'test-results/results.json' }],
+    ['junit', { outputFile: 'test-results/junit.xml' }],
+  ],
   
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
@@ -31,6 +42,12 @@ export default defineConfig({
     
     /* Screenshot on failure */
     screenshot: 'only-on-failure',
+    
+    /* Video on failure */
+    video: 'retain-on-failure',
+    
+    /* Action timeout */
+    actionTimeout: 10000,
   },
 
   /* Configure projects for major browsers */
@@ -38,6 +55,12 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'electron',
+      use: {
+        // Electron configuration will be handled in individual tests
+      },
     },
   ],
 
