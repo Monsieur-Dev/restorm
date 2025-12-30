@@ -27,3 +27,6 @@ export type {
   ParsedShortcut,
   ShortcutHandler
 } from './KeyboardShortcutService'
+
+export { graphQLClient } from './GraphQLClient'
+export type { GraphQLResult, GraphQLClientConfig } from './GraphQLClient'

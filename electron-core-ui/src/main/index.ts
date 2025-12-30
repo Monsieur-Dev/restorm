@@ -1,5 +1,5 @@
 // Main process exports - with proper TypeScript types
-export { getThemeService, getStorageService, logger, initFeatureService, getFeatureService, isFeatureServiceInitialized, initFileService, getFileService, isFileServiceInitialized, eventBusService, searchService, i18nService } from './services'
+export { getThemeService, getStorageService, logger, initFeatureService, getFeatureService, isFeatureServiceInitialized, initFileService, getFileService, isFileServiceInitialized, eventBusService, searchService, i18nService, graphQLService, createSchema, createPubSub } from './services'
 export { BaseWindow, setupIPC, setupAppLifecycle, initializeApp, configureCommandLineSwitches, setupAppProtocol } from './managers'
 export type { WindowConfiguration, WindowState } from './managers'
 
@@ -11,6 +11,7 @@ export type { FeatureFlippingService } from './services/FeatureFlippingService'
 export type { FileService } from './services/FileService'
 export type { EventHandler, Subscription } from './services/EventBusService'
 export type { SearchDocument, SearchResult, SearchNavigation, GroupedResults, CategoryMeta } from './services/SearchService'
+export type { GraphQLServiceConfig, PubSub } from './services/GraphQLService'
 
 // Re-export feature types
 export type {

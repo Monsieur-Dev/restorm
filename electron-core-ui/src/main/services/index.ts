@@ -33,3 +33,6 @@ export type {
   GroupedResults,
   CategoryMeta
 } from './SearchService'
+
+export { graphQLService, createSchema, createPubSub } from './GraphQLService'
+export type { GraphQLServiceConfig, PubSub } from './GraphQLService'

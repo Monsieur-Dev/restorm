@@ -1,15 +1,9 @@
 {
   "ignores": [
-    "@types/*",
-    "typescript",
-    "typescript-eslint",
-    "@typescript-eslint/*",
-    "eslint",
-    "eslint-*",
-    "globals",
-    "stylelint",
-    "stylelint-*",
-    "vite",
-    "@milkdown/*"
+    "graphql",
+    "@typescript-eslint/eslint-plugin",
+    "@typescript-eslint/parser",
+    "stylelint-config-standard",
+    "vite"
   ]
 }

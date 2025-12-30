@@ -5,6 +5,8 @@ import { join, relative } from 'path'
 import { promises as fs } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
 import { searchIndexService, contextService } from './services'
+import { graphQLService } from 'electron-core-ui/main'
+import { typeDefs, resolvers, pubsub, initializeGraphQLEventBridge } from './graphql'
 // DocumentEvents are handled by FileService internally for dirty state tracking
 
 // Parse command line arguments for --open / -o
@@ -193,6 +195,23 @@ logger.info('✅ Search Index Service initialized')
 // Initialize Context Service (manages Handlebars context and resolved values)
 contextService.initialize()
 logger.info('✅ Context Service initialized')
+
+// Initialize GraphQL Service
+graphQLService.initialize({
+  typeDefs,
+  resolvers,
+  pubsub,
+  port: 4123, // Use non-standard port to avoid conflicts
+  context: () => ({
+    pubsub
+  })
+})
+initializeGraphQLEventBridge()
+void graphQLService.start().then(() => {
+  logger.info('✅ GraphQL Service started', { endpoint: graphQLService.getEndpoint() })
+}).catch((error: unknown) => {
+  logger.error('❌ Failed to start GraphQL Service', { error: String(error) })
+})
 
 // Initialize Electron application
 const resourcesPath = getResourcesPath()
