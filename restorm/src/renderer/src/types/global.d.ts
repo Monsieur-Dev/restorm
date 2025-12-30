@@ -39,6 +39,12 @@ declare global {
       getEditorFile: () => Promise<{ title: string; content?: string } | undefined>
       forceClose: () => Promise<void>
       onSaveAndClose: (callback: () => void) => (() => void)
+      file: {
+        saveAsFile: (data: unknown, format: 'json' | 'yaml' | 'json5') => Promise<SaveResult>
+        saveAsFolder: (data: unknown, format: 'json' | 'yaml' | 'json5') => Promise<SaveResult>
+        openFolder: () => Promise<{ success: boolean; content?: unknown; path?: string }>
+        showFolderDialog: () => Promise<{ canceled: boolean; filePath?: string }>
+      }
       context: {
         getAllTransformResults: () => Promise<Record<string, VariableTransformResult>>
         onVariableTransformed: (callback: (result: VariableTransformResult) => void) => (() => void)
@@ -96,6 +102,13 @@ declare global {
       }
     }
   }
+}
+
+/** Save result from file operations */
+export interface SaveResult {
+  success: boolean
+  path?: string
+  error?: string
 }
 
 /** KeyValue data for context service */

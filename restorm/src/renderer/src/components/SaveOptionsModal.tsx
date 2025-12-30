@@ -23,7 +23,7 @@ export interface SaveOptions {
 interface SaveOptionsModalProps {
   isOpen: boolean
   onClose: () => void
-  onSave: (options: SaveOptions) => void
+  onSave: (options: SaveOptions) => void | Promise<void>
   defaultOptions?: Partial<SaveOptions>
   rootFolder?: FolderItem
   title?: string
@@ -76,7 +76,7 @@ export function SaveOptionsModal({
   }, [])
 
   const handleSave = useCallback(() => {
-    onSave({ mode, format })
+    void onSave({ mode, format })
     onClose()
   }, [mode, format, onSave, onClose])
 

@@ -80,10 +80,41 @@ interface FullRequestData {
   message?: string
 }
 
+/** Save result type */
+interface SaveResult {
+  success: boolean
+  path?: string
+  error?: string
+}
+
 // Expose restorm-specific APIs
 contextBridge.exposeInMainWorld('restorm', {
   openEditor: async (file?: { title: string; content?: string; x?: number; y?: number }): Promise<void> => {
     await ipcRenderer.invoke('restorm:open-editor', file)
+  },
+  
+  // File operations with mode support
+  file: {
+    /** Save as single file */
+    saveAsFile: async (data: unknown, format: 'json' | 'yaml' | 'json5'): Promise<SaveResult> => {
+      const result: unknown = await ipcRenderer.invoke('restorm:save-as-file', data, format)
+      return result as SaveResult
+    },
+    /** Save as folder structure */
+    saveAsFolder: async (data: unknown, format: 'json' | 'yaml' | 'json5'): Promise<SaveResult> => {
+      const result: unknown = await ipcRenderer.invoke('restorm:save-as-folder', data, format)
+      return result as SaveResult
+    },
+    /** Open folder */
+    openFolder: async (): Promise<{ success: boolean; content?: unknown; path?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('restorm:open-folder')
+      return result as { success: boolean; content?: unknown; path?: string }
+    },
+    /** Show save dialog for folder selection */
+    showFolderDialog: async (): Promise<{ canceled: boolean; filePath?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('restorm:show-folder-dialog')
+      return result as { canceled: boolean; filePath?: string }
+    }
   },
   getEditorFile: async (): Promise<{ title: string; content?: string } | undefined> => {
     const result: unknown = await ipcRenderer.invoke('restorm:get-editor-file')

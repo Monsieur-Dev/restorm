@@ -635,9 +635,9 @@ const App: React.FC = () => {
     newFile,
     open: openFile,
     save: saveFile,
-    saveAs: saveFileAs,
     close: closeFile,
-    showUnsavedChangesDialog
+    showUnsavedChangesDialog,
+    clearDirty
   } = useFileService()
 
   // Sync document.title with window title for taskbar
@@ -703,13 +703,36 @@ const App: React.FC = () => {
     setShowSaveOptionsModal(true)
   }, [])
 
-  const handleSaveWithOptions = useCallback((options: SaveOptions) => {
+  const handleSaveWithOptions = useCallback(async (options: SaveOptions) => {
     const plainData = JSON.parse(JSON.stringify({ collections: rootFolders })) as unknown
-    const dataForSave = prepareForSerialization(plainData)
-    // TODO: Use options.mode and options.format for persistence
+    const dataForSave = prepareForSerialization(plainData) as Record<string, unknown>
+    
     logger.info('[App] Saving with options', { mode: options.mode, format: options.format })
-    void saveFileAs(dataForSave)
-  }, [saveFileAs, rootFolders])
+    
+    try {
+      if (options.mode === 'folder') {
+        // Save as folder structure
+        const result = await window.restorm?.file.saveAsFolder(dataForSave, options.format)
+        if (result?.success) {
+          logger.info('[App] Folder saved successfully', { path: result.path })
+          await clearDirty()
+        } else {
+          logger.error('[App] Failed to save folder', { error: result?.error ?? 'Unknown error' })
+        }
+      } else {
+        // Save as single file
+        const result = await window.restorm?.file.saveAsFile(dataForSave, options.format)
+        if (result?.success) {
+          logger.info('[App] File saved successfully', { path: result.path })
+          await clearDirty()
+        } else {
+          logger.error('[App] Failed to save file', { error: result?.error ?? 'Unknown error' })
+        }
+      }
+    } catch (error) {
+      logger.error('[App] Save error', { error: String(error) })
+    }
+  }, [rootFolders, clearDirty])
 
   // Listen for save-and-close event from main process (when closing window with unsaved changes)
   useEffect(() => {

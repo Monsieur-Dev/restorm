@@ -1,12 +1,13 @@
-import { app, ipcMain, BrowserWindow } from 'electron'
+import { app, ipcMain, BrowserWindow, dialog } from 'electron'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFeatureService, initFileService, getFileService, isFileServiceInitialized, i18nService } from 'electron-core-ui'
-import { join, relative } from 'path'
-import { promises as fs } from 'fs'
+import { initializeApp, logger, initFeatureService, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, getPersistenceService, isPersistenceServiceInitialized } from 'electron-core-ui'
+import { join, relative, basename } from 'path'
+import { promises as fs, existsSync, mkdirSync } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
 import { searchIndexService, contextService } from './services'
 import { graphQLService } from 'electron-core-ui/main'
 import { typeDefs, resolvers, pubsub } from './graphql'
+import type { PersistenceFormat } from 'electron-core-ui'
 // DocumentEvents are handled by FileService internally for dirty state tracking
 
 // Parse command line arguments for --open / -o
@@ -184,6 +185,15 @@ initFileService({
 })
 logger.info('✅ File Service initialized')
 
+// Initialize Persistence Service for folder mode support
+initPersistenceService({
+  extension: 'restorm',
+  format: 'yaml',
+  mode: 'single-file',
+  indexFileName: 'index'
+})
+logger.info('✅ Persistence Service initialized')
+
 // Dirty state is now handled by FileService via checksum comparison
 // FileService subscribes to DocumentEvents internally and tracks per-object checksums
 logger.info('✅ Dirty state managed by FileService checksum system')
@@ -277,6 +287,530 @@ ipcMain.handle('restorm:get-editor-file', (event) => {
   }
   return file
 })
+
+// ==========================================================================
+// File Save Mode IPC Handlers
+// ==========================================================================
+
+// IPC handler to save as single file with format choice
+ipcMain.handle('restorm:save-as-file', async (_event, data: unknown, format: PersistenceFormat) => {
+  logger.info('📄 Save as single file requested', { format })
+  
+  try {
+    const window = BrowserWindow.fromWebContents(_event.sender)
+    if (!window) {
+      return { success: false, error: 'No window found' }
+    }
+
+    // Show save dialog
+    const result = await dialog.showSaveDialog(window, {
+      title: 'Save Collection',
+      defaultPath: 'collection.restorm',
+      filters: [
+        { name: 'Restorm Collection', extensions: ['restorm'] }
+      ]
+    })
+
+    if (result.canceled || !result.filePath) {
+      return { success: false, error: 'Cancelled' }
+    }
+
+    // Use PersistenceService for single file save
+    if (!isPersistenceServiceInitialized()) {
+      return { success: false, error: 'PersistenceService not initialized' }
+    }
+
+    const persistenceService = getPersistenceService()
+    const saveResult = await persistenceService.saveSingleFile(
+      result.filePath,
+      data as Record<string, unknown>,
+      { format }
+    )
+
+    if (saveResult.success) {
+      logger.info('✅ File saved successfully', { path: saveResult.path })
+    }
+
+    return saveResult
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    logger.error('❌ Failed to save file', { error: errorMsg })
+    return { success: false, error: errorMsg }
+  }
+})
+
+// IPC handler to save as folder structure
+ipcMain.handle('restorm:save-as-folder', async (_event, data: unknown, format: PersistenceFormat) => {
+  logger.info('📁 Save as folder requested', { format })
+  
+  try {
+    const window = BrowserWindow.fromWebContents(_event.sender)
+    if (!window) {
+      return { success: false, error: 'No window found' }
+    }
+
+    // Show folder selection dialog
+    const result = await dialog.showOpenDialog(window, {
+      title: 'Select Folder for Collection',
+      properties: ['openDirectory', 'createDirectory']
+    })
+
+    if (result.canceled || !result.filePaths[0]) {
+      return { success: false, error: 'Cancelled' }
+    }
+
+    const folderPath = result.filePaths[0]
+    
+    // Use PersistenceService for folder mode save
+    if (!isPersistenceServiceInitialized()) {
+      return { success: false, error: 'PersistenceService not initialized' }
+    }
+    
+    // Save the data using folder mode
+    // The PersistenceService will use decorators to determine file/folder structure
+    const dataObj = data as Record<string, unknown>
+    const saveResult = await saveFolderStructure(folderPath, dataObj, format)
+
+    if (saveResult.success) {
+      logger.info('✅ Folder saved successfully', { path: saveResult.path })
+    }
+
+    return saveResult
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    logger.error('❌ Failed to save folder', { error: errorMsg })
+    return { success: false, error: errorMsg }
+  }
+})
+
+// IPC handler to open folder
+ipcMain.handle('restorm:open-folder', async (_event) => {
+  logger.info('📁 Open folder requested')
+  
+  try {
+    const window = BrowserWindow.fromWebContents(_event.sender)
+    if (!window) {
+      return { success: false, error: 'No window found' }
+    }
+
+    // Show folder selection dialog
+    const result = await dialog.showOpenDialog(window, {
+      title: 'Open Collection Folder',
+      properties: ['openDirectory']
+    })
+
+    if (result.canceled || !result.filePaths[0]) {
+      return { success: false }
+    }
+
+    const folderPath = result.filePaths[0]
+    
+    // Load the folder structure
+    const content = await loadFolderStructure(folderPath)
+    
+    if (content) {
+      logger.info('✅ Folder loaded successfully', { path: folderPath })
+      return { success: true, content, path: folderPath }
+    }
+
+    return { success: false, error: 'Failed to load folder' }
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    logger.error('❌ Failed to open folder', { error: errorMsg })
+    return { success: false, error: errorMsg }
+  }
+})
+
+// IPC handler to show folder selection dialog
+ipcMain.handle('restorm:show-folder-dialog', async (_event) => {
+  const window = BrowserWindow.fromWebContents(_event.sender)
+  if (!window) {
+    return { canceled: true }
+  }
+
+  const result = await dialog.showOpenDialog(window, {
+    title: 'Select Folder',
+    properties: ['openDirectory', 'createDirectory']
+  })
+
+  return {
+    canceled: result.canceled,
+    filePath: result.filePaths[0]
+  }
+})
+
+// ==========================================================================
+// Folder Structure Save/Load Helpers
+// ==========================================================================
+
+/**
+ * Save a collection as folder structure with separate files for each item
+ */
+async function saveFolderStructure(
+  folderPath: string,
+  data: Record<string, unknown>,
+  format: PersistenceFormat
+): Promise<{ success: boolean; path?: string; error?: string }> {
+  const ext = format === 'json5' ? 'json5' : format
+  
+  try {
+    // Ensure folder exists
+    if (!existsSync(folderPath)) {
+      mkdirSync(folderPath, { recursive: true })
+    }
+
+    const collections = data['collections'] as unknown[] | undefined
+    if (!collections || !Array.isArray(collections)) {
+      // No collections, save as single index file
+      const persistenceService = getPersistenceService()
+      return await persistenceService.saveSingleFile(
+        join(folderPath, `index.${ext}`),
+        data,
+        { format }
+      )
+    }
+
+    // Save each collection (EnvironmentFolder) as a subfolder
+    for (let collIdx = 0; collIdx < collections.length; collIdx++) {
+      const collection = collections[collIdx] as Record<string, unknown>
+      const collectionName = (collection['name'] as string) || `Collection_${collIdx + 1}`
+      const safeName = sanitizeName(collectionName)
+      const collectionPath = join(folderPath, `${String(collIdx + 1).padStart(2, '0')} - ${safeName}`)
+      
+      if (!existsSync(collectionPath)) {
+        mkdirSync(collectionPath, { recursive: true })
+      }
+
+      // Save collection index (without items and environments)
+      const { items: collItems, environments, ...collectionIndex } = collection
+      await saveFile(join(collectionPath, `index.${ext}`), collectionIndex, format)
+
+      // Save environments in environments/ subfolder
+      if (environments && Array.isArray(environments)) {
+        const envsPath = join(collectionPath, 'environments')
+        if (!existsSync(envsPath)) {
+          mkdirSync(envsPath, { recursive: true })
+        }
+        for (let envIdx = 0; envIdx < environments.length; envIdx++) {
+          const env = environments[envIdx] as Record<string, unknown>
+          const envName = (env['name'] as string) || `Environment_${envIdx + 1}`
+          const safeEnvName = sanitizeName(envName)
+          await saveFile(
+            join(envsPath, `${String(envIdx + 1).padStart(2, '0')} - ${safeEnvName}.${ext}`),
+            env,
+            format
+          )
+        }
+      }
+
+      // Save items (folders and requests)
+      if (collItems && Array.isArray(collItems)) {
+        await saveFolderItems(collectionPath, collItems as Record<string, unknown>[], format, ext)
+      }
+    }
+
+    return { success: true, path: folderPath }
+  } catch (error) {
+    return { success: false, error: String(error) }
+  }
+}
+
+/**
+ * Recursively save folder items
+ */
+async function saveFolderItems(
+  parentPath: string,
+  items: Record<string, unknown>[],
+  format: PersistenceFormat,
+  ext: string
+): Promise<void> {
+  for (let idx = 0; idx < items.length; idx++) {
+    const item = items[idx]
+    if (!item) continue
+    
+    const rawName = item['name']
+    const itemName = typeof rawName === 'string' ? rawName : `Item_${idx + 1}`
+    const safeName = sanitizeName(itemName)
+    const itemType = item['type'] as string | undefined
+
+    if (itemType === 'folder' || item['items'] !== undefined) {
+      // It's a folder - create subfolder
+      const folderPath = join(parentPath, `${String(idx + 1).padStart(2, '0')} - ${safeName}`)
+      if (!existsSync(folderPath)) {
+        mkdirSync(folderPath, { recursive: true })
+      }
+
+      // Save folder index (without items)
+      const { items: subItems, ...folderIndex } = item
+      await saveFile(join(folderPath, `index.${ext}`), folderIndex, format)
+
+      // Recursively save sub-items
+      if (subItems && Array.isArray(subItems)) {
+        await saveFolderItems(folderPath, subItems as Record<string, unknown>[], format, ext)
+      }
+    } else {
+      // It's a request - save as file
+      const rawMethod = item['method']
+      const method = typeof rawMethod === 'string' ? rawMethod : (itemType?.toUpperCase() ?? 'REQ')
+      await saveFile(
+        join(parentPath, `${String(idx + 1).padStart(2, '0')} - ${method} - ${safeName}.${ext}`),
+        item,
+        format
+      )
+    }
+  }
+}
+
+/**
+ * Save a single file with the given format
+ */
+async function saveFile(
+  filePath: string,
+  data: Record<string, unknown>,
+  format: PersistenceFormat
+): Promise<void> {
+  const persistenceService = getPersistenceService()
+  await persistenceService.saveSingleFile(filePath, data, { format })
+}
+
+/**
+ * Sanitize a name for use as a file/folder name
+ */
+function sanitizeName(name: string): string {
+  return name
+    .replace(/[<>:"/\\|?*]/g, '_') // Replace invalid characters
+    .replace(/\s+/g, ' ')          // Normalize whitespace
+    .trim()
+    .slice(0, 100)                 // Limit length
+}
+
+/**
+ * Load a collection from folder structure
+ */
+async function loadFolderStructure(
+  folderPath: string
+): Promise<Record<string, unknown> | null> {
+  try {
+    // Look for index file
+    const indexFiles = ['index.yaml', 'index.yml', 'index.json', 'index.json5']
+    let indexPath: string | null = null
+    
+    for (const indexFile of indexFiles) {
+      const testPath = join(folderPath, indexFile)
+      if (existsSync(testPath)) {
+        indexPath = testPath
+        break
+      }
+    }
+
+    // If no index file, try to reconstruct from folder structure
+    if (!indexPath) {
+      return await reconstructFromFolders(folderPath)
+    }
+
+    // Load the index file
+    const persistenceService = getPersistenceService()
+    const result = await persistenceService.loadSingleFile(indexPath)
+    
+    if (!result.success || !result.data) {
+      return null
+    }
+
+    // If it's a collection folder (has subfolders), reconstruct the full structure
+    const entries = await fs.readdir(folderPath, { withFileTypes: true })
+    const hasSubfolders = entries.some(e => e.isDirectory())
+    
+    if (hasSubfolders) {
+      return await reconstructFromFolders(folderPath)
+    }
+
+    return result.data as Record<string, unknown>
+  } catch (error) {
+    logger.error('Failed to load folder structure', { error: String(error) })
+    return null
+  }
+}
+
+/**
+ * Reconstruct collection data from folder structure
+ */
+async function reconstructFromFolders(
+  folderPath: string
+): Promise<Record<string, unknown>> {
+  const collections: Record<string, unknown>[] = []
+  const persistenceService = getPersistenceService()
+
+  const entries = await fs.readdir(folderPath, { withFileTypes: true })
+  
+  // Sort entries by name (to maintain order from numbered prefixes)
+  const sortedEntries = entries.sort((a, b) => a.name.localeCompare(b.name))
+
+  for (const entry of sortedEntries) {
+    if (entry.isDirectory()) {
+      const collectionPath = join(folderPath, entry.name)
+      const collection = await loadCollectionFolder(collectionPath, persistenceService)
+      if (collection) {
+        collections.push(collection)
+      }
+    }
+  }
+
+  // If no subfolders found, this might be a single collection root
+  if (collections.length === 0) {
+    const singleCollection = await loadCollectionFolder(folderPath, persistenceService)
+    if (singleCollection) {
+      collections.push(singleCollection)
+    }
+  }
+
+  return { collections }
+}
+
+/**
+ * Load a single collection folder
+ */
+async function loadCollectionFolder(
+  collectionPath: string,
+  persistenceService: ReturnType<typeof getPersistenceService>
+): Promise<Record<string, unknown> | null> {
+  try {
+    // Try to load index file
+    let collection: Record<string, unknown> = {}
+    const indexFiles = ['index.yaml', 'index.yml', 'index.json', 'index.json5']
+    
+    for (const indexFile of indexFiles) {
+      const indexPath = join(collectionPath, indexFile)
+      if (existsSync(indexPath)) {
+        const result = await persistenceService.loadSingleFile(indexPath)
+        if (result.success && result.data) {
+          collection = result.data as Record<string, unknown>
+          break
+        }
+      }
+    }
+
+    // If no index found, create basic collection from folder name
+    if (Object.keys(collection).length === 0) {
+      const folderName = basename(collectionPath)
+      const cleanName = folderName.replace(/^\d+\s*-\s*/, '') // Remove numbering prefix
+      collection = { name: cleanName }
+    }
+
+    // Load environments from environments/ subfolder
+    const envsPath = join(collectionPath, 'environments')
+    if (existsSync(envsPath)) {
+      const environments: Record<string, unknown>[] = []
+      const envEntries = await fs.readdir(envsPath, { withFileTypes: true })
+      const sortedEnvEntries = envEntries.sort((a, b) => a.name.localeCompare(b.name))
+      
+      for (const envEntry of sortedEnvEntries) {
+        if (envEntry.isFile() && /\.(yaml|yml|json|json5)$/.test(envEntry.name)) {
+          const envPath = join(envsPath, envEntry.name)
+          const result = await persistenceService.loadSingleFile(envPath)
+          if (result.success && result.data) {
+            environments.push(result.data as Record<string, unknown>)
+          }
+        }
+      }
+      
+      if (environments.length > 0) {
+        collection['environments'] = environments
+      }
+    }
+
+    // Load items from other subfolders and files
+    const items = await loadFolderItemsRecursive(collectionPath, persistenceService)
+    if (items.length > 0) {
+      collection['items'] = items
+    }
+
+    return collection
+  } catch (error) {
+    logger.error('Failed to load collection folder', { path: collectionPath, error: String(error) })
+    return null
+  }
+}
+
+/**
+ * Recursively load folder items (folders and requests)
+ */
+async function loadFolderItemsRecursive(
+  parentPath: string,
+  persistenceService: ReturnType<typeof getPersistenceService>
+): Promise<Record<string, unknown>[]> {
+  const items: Record<string, unknown>[] = []
+
+  const entries = await fs.readdir(parentPath, { withFileTypes: true })
+  const sortedEntries = entries.sort((a, b) => a.name.localeCompare(b.name))
+
+  for (const entry of sortedEntries) {
+    // Skip index files and environments folder
+    if (entry.name.startsWith('index.') || entry.name === 'environments') {
+      continue
+    }
+
+    if (entry.isDirectory()) {
+      // It's a folder
+      const folderPath = join(parentPath, entry.name)
+      const folder = await loadSubFolder(folderPath, persistenceService)
+      if (folder) {
+        items.push(folder)
+      }
+    } else if (/\.(yaml|yml|json|json5)$/.test(entry.name)) {
+      // It's a request file
+      const filePath = join(parentPath, entry.name)
+      const result = await persistenceService.loadSingleFile(filePath)
+      if (result.success && result.data) {
+        items.push(result.data as Record<string, unknown>)
+      }
+    }
+  }
+
+  return items
+}
+
+/**
+ * Load a subfolder (which is a Folder item)
+ */
+async function loadSubFolder(
+  folderPath: string,
+  persistenceService: ReturnType<typeof getPersistenceService>
+): Promise<Record<string, unknown> | null> {
+  try {
+    let folder: Record<string, unknown> = {}
+    
+    // Try to load index file
+    const indexFiles = ['index.yaml', 'index.yml', 'index.json', 'index.json5']
+    for (const indexFile of indexFiles) {
+      const indexPath = join(folderPath, indexFile)
+      if (existsSync(indexPath)) {
+        const result = await persistenceService.loadSingleFile(indexPath)
+        if (result.success && result.data) {
+          folder = result.data as Record<string, unknown>
+          break
+        }
+      }
+    }
+
+    // If no index found, create basic folder from name
+    if (Object.keys(folder).length === 0) {
+      const folderName = basename(folderPath)
+      const cleanName = folderName.replace(/^\d+\s*-\s*/, '') // Remove numbering prefix
+      folder = { name: cleanName, type: 'folder' }
+    }
+
+    // Recursively load sub-items
+    const subItems = await loadFolderItemsRecursive(folderPath, persistenceService)
+    if (subItems.length > 0) {
+      folder['items'] = subItems
+    }
+
+    return folder
+  } catch (error) {
+    logger.error('Failed to load subfolder', { path: folderPath, error: String(error) })
+    return null
+  }
+}
 
 // IPC handler to list project files from the Restorm workspace root
 ipcMain.handle('project:list-files', async () => {
