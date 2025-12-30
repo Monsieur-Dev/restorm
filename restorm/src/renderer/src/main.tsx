@@ -109,8 +109,8 @@ function ensureRestormWebShim(): void {
   })
 
   // Type assertion needed because window.restorm is optional in types but we're creating it here
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-  ;(window as any).restorm = {
+  const windowWithRestorm = window as Window & { restorm: NonNullable<typeof window.restorm> }
+  windowWithRestorm.restorm = {
     openEditor: () => Promise.resolve(),
     getEditorFile: () => Promise.resolve(undefined),
     forceClose: () => {
