@@ -4,12 +4,17 @@
  * Used by SearchIndexService and other services to react to document changes.
  */
 
+/** Event source - indicates where the change originated */
+export type EventSource = 'user' | 'remote' | 'file-load' | 'graphql'
+
 /** Base payload for document events */
 export interface DocumentEventPayload {
   /** Document ID */
   id: string
   /** Document type */
   type: 'folder' | 'request' | 'environment'
+  /** Event source - where the change originated (default: 'user') */
+  source?: EventSource
 }
 
 /** Payload for document created/updated events */
