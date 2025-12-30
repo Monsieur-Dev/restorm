@@ -93,26 +93,22 @@ test.describe('Handlebars Transformations (Electron)', () => {
 
   test.afterAll(async () => {
     // Save file to avoid "unsaved changes" dialog blocking close
-    if (page) {
-      try {
-        await page.keyboard.press('Control+s');
-        await page.waitForTimeout(500);
-      } catch {
-        // Ignore save errors
-      }
+    try {
+      await page.keyboard.press('Control+s');
+      await page.waitForTimeout(500);
+    } catch {
+      // Ignore save errors (page may not be initialized if beforeAll failed)
     }
     
     // Close Electron app properly
-    if (electronApp) {
+    try {
+      await electronApp.close();
+    } catch {
+      // If close fails, force kill the process
       try {
-        await electronApp.close();
+        electronApp.process().kill('SIGKILL');
       } catch {
-        // If close fails, force kill the process
-        try {
-          electronApp.process()?.kill('SIGKILL');
-        } catch {
-          // Ignore kill errors
-        }
+        // Ignore kill errors
       }
     }
     
