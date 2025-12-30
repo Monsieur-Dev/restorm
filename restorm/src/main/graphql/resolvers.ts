@@ -5,7 +5,7 @@
  * Connects to the event system and store for data management.
  */
 
-import { createPubSub, type PubSub } from 'electron-core-ui/main'
+import { createPubSub, type PubSub, searchService } from 'electron-core-ui/main'
 import { eventBusService, logger } from 'electron-core-ui/main'
 import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from '../services/DocumentEvents'
 import { contextService } from '../services'
@@ -221,9 +221,14 @@ export const resolvers = {
     },
 
     search: (_: unknown, { query, limit }: { query: string; limit?: number }): unknown[] => {
-      // Will be implemented in task 5 (Search)
       logger.debug('[GraphQL] search query', { query, limit })
-      return []
+      const results = searchService.search(query, { limit }) as { id: string }[]
+      // Transform search results to match GraphQL Request type
+      return results.map(result => {
+        // Find the actual item in collections to return full data
+        const item = findById(collectionsStore, result.id)
+        return item
+      }).filter(Boolean)
     }
   },
 
