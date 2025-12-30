@@ -10,6 +10,7 @@
   },
   "license": "MIT",
   "scripts": {
+    "prepare": "husky",
     "clean": "npx rimraf node_modules electron-core-ui/node_modules electron-core-ui/dist gitable/node_modules gitable/dist gitable/out gitable/.vite demo/node_modules demo/dist demo/out demo/.vite restorm/node_modules restorm/dist restorm/out restorm/.vite",
     "rebuild:all": "pnpm run clean && pnpm install && pnpm run build",
     "dev:gitable": "pnpm --filter gitable run dev",
@@ -32,6 +33,7 @@
   "devDependencies": {
     "cross-env": "^10.1.0",
     "depcheck": "^1.4.7",
+    "husky": "^9.1.7",
     "rimraf": "^6.0.1"
   },
   "pnpm": {
@@ -39,6 +41,8 @@
       "react": "^18.3.1",
       "react-dom": "^18.3.1"
     },
-    "onlyBuiltDependencies": ["electron"]
+    "onlyBuiltDependencies": [
+      "electron"
+    ]
   }
 }

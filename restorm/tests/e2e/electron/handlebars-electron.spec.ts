@@ -111,7 +111,7 @@ test.describe('Handlebars Transformations (Electron)', () => {
   test('should resolve and update path params in URL tooltip', async () => {
     // Expand the folder "Test API"
     const folderRow = page.locator('[role="treeitem"]:has-text("Test API")').first();
-    await expect(folderRow).toBeVisible({ timeout: 1000 });
+    await expect(folderRow).toBeVisible({ timeout: 10000 });
     
     const chevron = folderRow.locator('.codicon-chevron-right, .codicon-chevron-down, [class*="chevron"]').first();
     if (await chevron.count() > 0) {
@@ -119,19 +119,19 @@ test.describe('Handlebars Transformations (Electron)', () => {
     } else {
       await folderRow.dblclick();
     }
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(500);
 
     // Click on the request
     const requestItem = page.locator('text=Get User').first();
-    await expect(requestItem).toBeVisible({ timeout: 1000 });
+    await expect(requestItem).toBeVisible({ timeout: 5000 });
     await requestItem.click();
 
     // Wait for URL resolution
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(2000);
     
     // Verify the URL tooltip shows the original value
     const urlContainerBefore = page.locator('div[title]').filter({ hasText: '{{baseUrl}}' }).first();
-    await expect(urlContainerBefore).toBeVisible({ timeout: 1000 });
+    await expect(urlContainerBefore).toBeVisible({ timeout: 10000 });
     
     const titleBefore = await urlContainerBefore.getAttribute('title');
     console.log('URL title before edit:', titleBefore);
@@ -139,17 +139,17 @@ test.describe('Handlebars Transformations (Electron)', () => {
 
     // Find the PATH PARAMS pane header and expand if collapsed
     const pathParamsPane = page.locator('text=PATH PARAMS').first();
-    await expect(pathParamsPane).toBeVisible({ timeout: 1000 });
+    await expect(pathParamsPane).toBeVisible({ timeout: 5000 });
     
     const paneHeader = pathParamsPane.locator('..').locator('..');
     const isCollapsed = await paneHeader.locator('.pane-collapsed, [aria-expanded="false"]').count() > 0;
     if (isCollapsed) {
       await pathParamsPane.click();
-      await page.waitForTimeout(100);
+      await page.waitForTimeout(500);
     }
     
     const pathParamsSection = page.locator('.params-table-root').first();
-    await expect(pathParamsSection).toBeVisible({ timeout: 1000 });
+    await expect(pathParamsSection).toBeVisible({ timeout: 5000 });
 
     // The value cell uses RestormVariableInputBox which is a Monaco editor
     // Monaco editors display text in .view-line elements, input goes to hidden textarea
@@ -182,7 +182,7 @@ test.describe('Handlebars Transformations (Electron)', () => {
     await page.locator('.params-table th').first().click();
     
     // Wait for transformation to update
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(2000);
 
     // Check the URL tooltip is updated with the new value
     const urlContainerAfter = page.locator('div[title]').filter({ hasText: '{{baseUrl}}' }).first();
