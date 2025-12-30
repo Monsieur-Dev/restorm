@@ -785,13 +785,8 @@ const App: React.FC = () => {
 
   // Handler for file opened event - loads collections into workbench
   const handleFileOpened = useCallback((state: { currentFile: { content: unknown } }) => {
-    console.log('[App] handleFileOpened called', { 
-      fileLoadingRef: fileLoadingRef.current,
-      hasContent: !!state.currentFile.content 
-    })
     // Prevent double loading
     if (fileLoadingRef.current) {
-      console.log('[App] handleFileOpened: skipping, already loading')
       return
     }
     fileLoadingRef.current = true
@@ -922,10 +917,6 @@ const App: React.FC = () => {
       } 
     }).__restormTestHelpers = {
       loadFile: (fileState: { currentFile: { content: unknown } }) => {
-        console.log('[App] __restormTestHelpers.loadFile called', { 
-          hasContent: !!fileState.currentFile.content,
-          fileLoadingRef: fileLoadingRef.current 
-        })
         // Reset loading flag to allow loading
         fileLoadingRef.current = false
         // Use ref to ensure we call the latest version
@@ -949,7 +940,6 @@ const App: React.FC = () => {
     
     // Also listen to eventBus for backward compatibility
     const subscription = eventBus.subscribe('restorm:test:file-opened', (fileState: { currentFile: { content: unknown } }) => {
-      console.log('[App] Received restorm:test:file-opened event', { hasContent: !!fileState.currentFile.content })
       fileLoadingRef.current = false
       handleFileOpenedRef.current(fileState)
     })

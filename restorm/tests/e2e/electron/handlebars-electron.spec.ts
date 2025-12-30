@@ -2,6 +2,7 @@ import { test, expect, _electron as electron, ElectronApplication, Page } from '
 import { join, resolve } from 'path';
 import { writeFileSync, mkdirSync, existsSync, rmSync } from 'fs';
 import * as yaml from 'yaml';
+import electronPath from 'electron';
 
 // Test data with path params and variables in URL
 const testData = {
@@ -55,8 +56,8 @@ test.describe('Handlebars Transformations (Electron)', () => {
     writeFileSync(testFilePath, yaml.stringify(testData));
     console.log('Test file created:', testFilePath);
     
-    // Use require.resolve to find electron
-    const electronExePath = require('electron') as unknown as string;
+    // Use the electron module path
+    const electronExePath = electronPath as unknown as string;
     const mainJsPath = join(restormRoot, 'dist/main/index.js');
 
     console.log('Electron path:', electronExePath);
@@ -90,14 +91,9 @@ test.describe('Handlebars Transformations (Electron)', () => {
     await page.screenshot({ path: 'test-results/debug-electron-after-open-arg.png' });
   });
 
-  test.afterAll(async () => {
+  test.afterAll(() => {
     // Force kill Electron process to avoid unsaved changes dialog blocking
-    if (electronApp) {
-      const proc = electronApp.process();
-      if (proc) {
-        proc.kill('SIGKILL');
-      }
-    }
+    electronApp.process().kill('SIGKILL');
     
     // Clean up test file
     try {
@@ -227,7 +223,7 @@ test.describe('Handlebars Transformations (Electron)', () => {
     console.log('Found target Monaco editor with 12345');
     
     // Click on the editor to focus it
-    await targetEditor!.click();
+    await targetEditor.click();
     await page.waitForTimeout(300);
     
     // Select all (Ctrl+A) and type the new value

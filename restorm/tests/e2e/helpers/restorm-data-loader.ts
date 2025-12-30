@@ -7,30 +7,30 @@ import type { Page } from '@playwright/test';
 export async function loadRestormData(
   page: Page,
   restormData: {
-    collections: Array<{
+    collections: {
       id: string
       name: string
       type: 'environmentFolder' | 'folder'
-      environments?: Array<{
+      environments?: {
         id: string
         name: string
-        variables?: Array<{
+        variables?: {
           id?: string
           key: string
           value: string
           description?: string
           enabled?: boolean
-        }>
-      }>
-      items?: Array<{
+        }[]
+      }[]
+      items?: {
         id: string
         name: string
         type: 'httpRequest' | 'graphqlRequest' | 'grpcRequest' | 'soapRequest' | 'websocketRequest'
         httpMethod?: string
         url?: string
         [key: string]: unknown
-      }>
-    }>
+      }[]
+    }[]
   }
 ): Promise<void> {
   await page.evaluate(async (data) => {
@@ -52,4 +52,3 @@ export async function loadRestormData(
   // Wait for data to be processed
   await page.waitForTimeout(1000)
 }
-

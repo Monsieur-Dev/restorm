@@ -116,7 +116,7 @@ test.describe('Search Results', () => {
     // Note: In test mode, the actual tab opening might not work if data isn't fully loaded in UI
     // But clicking should at least close the search bar and not cause errors
     const searchBarOpen = page.locator('.search-bar-open');
-    const isSearchBarStillOpen = await searchBarOpen.isVisible().catch(() => false);
+    const _isSearchBarStillOpen = await searchBarOpen.isVisible().catch(() => false);
     
     // The search bar should close after clicking a result (navigation should occur)
     // We verify that clicking didn't cause errors by checking console

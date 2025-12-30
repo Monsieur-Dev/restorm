@@ -95,29 +95,27 @@ function ensureRestormWebShim(): void {
   const saveAndCloseCallbacks = new Set<() => void>()
   
   // Listen to beforeunload to trigger save-and-close callbacks
-  window.addEventListener('beforeunload', (event) => {
+  window.addEventListener('beforeunload', () => {
     if (saveAndCloseCallbacks.size > 0) {
       // Trigger all registered callbacks
       for (const callback of saveAndCloseCallbacks) {
         try {
           callback()
-        } catch (error) {
-          console.error('Error in save-and-close callback:', error)
+        } catch {
+          // Ignore errors in callbacks
         }
       }
     }
   })
 
   // Type assertion needed because window.restorm is optional in types but we're creating it here
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
   ;(window as any).restorm = {
-    openEditor: async () => {
-      // No-op in web mode
-    },
-    getEditorFile: async () => undefined,
-    forceClose: async () => {
-      // In web mode, we can't force close the window, but we can try
+    openEditor: () => Promise.resolve(),
+    getEditorFile: () => Promise.resolve(undefined),
+    forceClose: () => {
       window.close()
+      return Promise.resolve()
     },
     onSaveAndClose: (callback: () => void) => {
       saveAndCloseCallbacks.add(callback)
@@ -126,93 +124,51 @@ function ensureRestormWebShim(): void {
       }
     },
     context: {
-      getAllTransformResults: async () => ({}),
-      onVariableTransformed: () => () => {
-        // No-op unsubscribe
-      },
-      registerRequest: async () => {
-        // No-op in web mode
-      },
-      unregisterRequest: async () => {
-        // No-op in web mode
-      },
-      setRequestEnvironment: async () => {
-        // No-op in web mode
-      },
-      updateRequestKeyValues: async () => {
-        // No-op in web mode
-      },
-      updateFullRequestData: async () => {
-        // No-op in web mode
-      },
-      getResolvedUrl: async () => undefined,
-      getCodeSnippets: async () => undefined,
-      onUrlResolved: () => () => {
-        // No-op unsubscribe
-      },
-      onCodeSnippetsUpdated: () => () => {
-        // No-op unsubscribe
-      },
-      onAvailableVariables: () => () => {
-        // No-op unsubscribe
-      },
-      clearAll: async () => {
-        // No-op in web mode
-      }
+      getAllTransformResults: () => Promise.resolve({}),
+      onVariableTransformed: () => () => { /* No-op unsubscribe */ },
+      registerRequest: () => Promise.resolve(),
+      unregisterRequest: () => Promise.resolve(),
+      setRequestEnvironment: () => Promise.resolve(),
+      updateRequestKeyValues: () => Promise.resolve(),
+      updateFullRequestData: () => Promise.resolve(),
+      getResolvedUrl: () => Promise.resolve(undefined),
+      getCodeSnippets: () => Promise.resolve(undefined),
+      onUrlResolved: () => () => { /* No-op unsubscribe */ },
+      onCodeSnippetsUpdated: () => () => { /* No-op unsubscribe */ },
+      onAvailableVariables: () => () => { /* No-op unsubscribe */ },
+      clearAll: () => Promise.resolve()
     },
     http: {
-      execute: async () => {
-        throw new Error('HTTP execution not available in web mode')
-      },
-      cancel: async () => false,
-      isActive: async () => false,
-      onProgress: () => () => {
-        // No-op unsubscribe
-      }
+      execute: () => Promise.reject(new Error('HTTP execution not available in web mode')),
+      cancel: () => Promise.resolve(false),
+      isActive: () => Promise.resolve(false),
+      onProgress: () => () => { /* No-op unsubscribe */ }
     },
     graphql: {
-      execute: async () => {
-        throw new Error('GraphQL execution not available in web mode')
-      },
-      cancel: async () => false,
-      isActive: async () => false,
-      onProgress: () => () => {
-        // No-op unsubscribe
-      }
+      execute: () => Promise.reject(new Error('GraphQL execution not available in web mode')),
+      cancel: () => Promise.resolve(false),
+      isActive: () => Promise.resolve(false),
+      onProgress: () => () => { /* No-op unsubscribe */ }
     },
     soap: {
-      execute: async () => {
-        throw new Error('SOAP execution not available in web mode')
-      },
-      cancel: async () => false,
-      isActive: async () => false,
-      onProgress: () => () => {
-        // No-op unsubscribe
-      }
+      execute: () => Promise.reject(new Error('SOAP execution not available in web mode')),
+      cancel: () => Promise.resolve(false),
+      isActive: () => Promise.resolve(false),
+      onProgress: () => () => { /* No-op unsubscribe */ }
     },
     grpc: {
-      execute: async () => {
-        throw new Error('gRPC execution not available in web mode')
-      },
-      cancel: async () => false,
-      isActive: async () => false,
-      onProgress: () => () => {
-        // No-op unsubscribe
-      }
+      execute: () => Promise.reject(new Error('gRPC execution not available in web mode')),
+      cancel: () => Promise.resolve(false),
+      isActive: () => Promise.resolve(false),
+      onProgress: () => () => { /* No-op unsubscribe */ }
     },
     websocket: {
-      connect: async () => {
-        throw new Error('WebSocket execution not available in web mode')
-      },
-      disconnect: async () => false,
-      send: async () => false,
-      isActive: async () => false,
-      onProgress: () => () => {
-        // No-op unsubscribe
-      },
-      onMessage: () => () => {
-        // No-op unsubscribe
-      }
+      connect: () => Promise.reject(new Error('WebSocket execution not available in web mode')),
+      disconnect: () => Promise.resolve(false),
+      send: () => Promise.resolve(false),
+      isActive: () => Promise.resolve(false),
+      onProgress: () => () => { /* No-op unsubscribe */ },
+      onMessage: () => () => { /* No-op unsubscribe */ }
     }
   }
 }
@@ -224,11 +180,11 @@ ensureRestormWebShim()
 if (typeof window !== 'undefined') {
   // Always expose in dev mode or when explicitly enabled (for E2E tests)
   // In production, this will be tree-shaken out
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+   
   const isDev = (import.meta as { env?: { DEV?: boolean; MODE?: string; VITE_ENABLE_TEST_HELPERS?: string } }).env?.DEV ?? false
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+   
   const mode = (import.meta as { env?: { MODE?: string } }).env?.MODE
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+   
   const enableTestHelpers = (import.meta as { env?: { VITE_ENABLE_TEST_HELPERS?: string } }).env?.VITE_ENABLE_TEST_HELPERS === 'true'
   const shouldExpose = isDev || mode === 'test' || enableTestHelpers
   
@@ -299,7 +255,6 @@ if (typeof window !== 'undefined') {
             }
             
             if (windowWithRestormHelpers.__restormTestHelpers?.setRootFolders) {
-              console.log('[Test Helper] Found __restormTestHelpers.setRootFolders, calling it')
               windowWithRestormHelpers.__restormTestHelpers.setRootFolders(reactiveFolders)
               helpersFound = true
               break
@@ -307,7 +262,6 @@ if (typeof window !== 'undefined') {
             
             // Try Approach 2: Use App's loadFile helper
             if (windowWithRestormHelpers.__restormTestHelpers?.loadFile) {
-              console.log('[Test Helper] Found __restormTestHelpers.loadFile, calling it')
               windowWithRestormHelpers.__restormTestHelpers.loadFile(fileState)
               helpersFound = true
               break
@@ -319,7 +273,6 @@ if (typeof window !== 'undefined') {
             }
             
             if (windowWithTestHelpers.__webFileTestHelpers) {
-              console.log('[Test Helper] Found __webFileTestHelpers, calling triggerFileOpened')
               windowWithTestHelpers.__webFileTestHelpers.triggerFileOpened(fileState)
               helpersFound = true
               break
@@ -328,16 +281,15 @@ if (typeof window !== 'undefined') {
             // Try Approach 4: Use eventBus emitLocal
             try {
               await electronCoreUiModule.eventBus.emitLocal('restorm:test:file-opened', fileState)
-              console.log('[Test Helper] Emitted restorm:test:file-opened event')
               helpersFound = true
               break
-            } catch (e) {
+            } catch {
               // Continue trying
             }
           }
           
           if (!helpersFound) {
-            console.warn('[Test Helper] Could not trigger file opened event after 5 seconds')
+            // Test helpers not found after 5 seconds - file loading may fail
           }
           
           // Index folders for search (will be done again by App, but do it here too for safety)
@@ -349,8 +301,8 @@ if (typeof window !== 'undefined') {
           await new Promise(resolve => setTimeout(resolve, 3000))
         }
       }
-    }).catch((error) => {
-      console.error('Failed to load test helpers:', error)
+    }).catch(() => {
+      // Failed to load test helpers - this is expected in production
     })
   }
 }

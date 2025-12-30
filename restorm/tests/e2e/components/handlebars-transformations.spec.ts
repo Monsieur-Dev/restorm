@@ -31,7 +31,7 @@ test.describe('Handlebars Transformations', () => {
     });
     
     // Use setRootFolders directly to add data with variables
-    const result = await page.evaluate(async () => {
+    const result = await page.evaluate(() => {
       const restormHelpers = (window as unknown as { __restormTestHelpers?: { setRootFolders: (folders: unknown[]) => void } }).__restormTestHelpers
       if (!restormHelpers?.setRootFolders) {
         return { success: false, error: 'setRootFolders not available' }
