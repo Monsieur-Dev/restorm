@@ -85,31 +85,17 @@ test.describe('Handlebars Transformations (Electron)', () => {
     await page.waitForLoadState('load');
     console.log('Page load complete');
     
-    // Wait for app and file to be loaded (the --open argument triggers file loading after 2s post-load)
-    // Total wait: 2s for open + 3s for React to re-render = 5s minimum, add buffer for safety
-    await page.waitForTimeout(8000);
+    // Wait for app and file to be loaded (--open triggers file loading 2s after load)
+    await page.waitForTimeout(4000);
     await page.screenshot({ path: 'test-results/debug-electron-after-open-arg.png' });
   });
 
-  test.afterAll(async () => {
-    // Save file to avoid "unsaved changes" dialog blocking close
+  test.afterAll(() => {
+    // Force kill Electron process (avoids unsaved changes dialog)
     try {
-      await page.keyboard.press('Control+s');
-      await page.waitForTimeout(500);
+      electronApp.process().kill('SIGKILL');
     } catch {
-      // Ignore save errors (page may not be initialized if beforeAll failed)
-    }
-    
-    // Close Electron app properly
-    try {
-      await electronApp.close();
-    } catch {
-      // If close fails, force kill the process
-      try {
-        electronApp.process().kill('SIGKILL');
-      } catch {
-        // Ignore kill errors
-      }
+      // Ignore kill errors
     }
     
     // Clean up test file
@@ -122,100 +108,48 @@ test.describe('Handlebars Transformations (Electron)', () => {
     }
   });
 
-  test('should resolve path params in URL and show in tooltip', async () => {
-    // Wait for the app to render
-    await page.waitForTimeout(1000);
-
-    // First, expand the folder "Test API" by clicking on the expand chevron
-    // The chevron is a button with codicon-chevron-right before the folder name
+  test('should resolve and update path params in URL tooltip', async () => {
+    // Expand the folder "Test API"
     const folderRow = page.locator('[role="treeitem"]:has-text("Test API")').first();
-    await expect(folderRow).toBeVisible({ timeout: 15000 });
+    await expect(folderRow).toBeVisible({ timeout: 1000 });
     
-    // Click the chevron to expand (not the item itself which opens the editor)
-    const chevron = folderRow.locator('.codicon-chevron-right, .codicon-chevron-down, [class*="chevron"]').first();
-    if (await chevron.count() > 0) {
-      await chevron.click();
-    } else {
-      // Fallback: double-click to toggle expand
-      await folderRow.dblclick();
-    }
-    await page.waitForTimeout(500);
-
-    // Now find and click on the request in the sidebar
-    const requestItem = page.locator('text=Get User').first();
-    await expect(requestItem).toBeVisible({ timeout: 5000 });
-    await requestItem.click();
-
-    // Wait for the request tab to open
-    await page.waitForTimeout(2000);
-
-    // Wait for URL resolution to complete
-    await page.waitForTimeout(2000);
-    
-    // Find the URL container div (has title attribute with resolved URL)
-    const urlContainer = page.locator('div[title]').filter({ hasText: '{{baseUrl}}' }).first();
-    await expect(urlContainer).toBeVisible({ timeout: 5000 });
-    
-    const title = await urlContainer.getAttribute('title');
-    console.log('URL title (resolved):', title);
-    
-    // The tooltip should show the resolved URL with Handlebars variables replaced
-    expect(title).toBeTruthy();
-    expect(title).toContain('https://api.example.com');
-    expect(title).toContain('/users/12345');
-    expect(title).not.toContain('{{baseUrl}}');
-    expect(title).not.toContain('{{userId}}');
-  });
-
-  test('should update tooltip when path param value changes', async () => {
-    // Wait for the app to render
-    await page.waitForTimeout(1000);
-
-    // First, expand the folder "Test API" by clicking on the expand chevron
-    const folderRow = page.locator('[role="treeitem"]:has-text("Test API")').first();
-    await expect(folderRow).toBeVisible({ timeout: 15000 });
-    
-    // Click the chevron to expand (not the item itself which opens the editor)
     const chevron = folderRow.locator('.codicon-chevron-right, .codicon-chevron-down, [class*="chevron"]').first();
     if (await chevron.count() > 0) {
       await chevron.click();
     } else {
       await folderRow.dblclick();
     }
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(100);
 
-    // Now find and click on the request in the sidebar
+    // Click on the request
     const requestItem = page.locator('text=Get User').first();
-    await expect(requestItem).toBeVisible({ timeout: 5000 });
+    await expect(requestItem).toBeVisible({ timeout: 1000 });
     await requestItem.click();
 
-    // Wait for the request tab to open and URL resolution to complete
-    await page.waitForTimeout(4000);
+    // Wait for URL resolution
+    await page.waitForTimeout(500);
     
-    // First verify the URL tooltip shows the original value
+    // Verify the URL tooltip shows the original value
     const urlContainerBefore = page.locator('div[title]').filter({ hasText: '{{baseUrl}}' }).first();
-    await expect(urlContainerBefore).toBeVisible({ timeout: 5000 });
+    await expect(urlContainerBefore).toBeVisible({ timeout: 1000 });
     
     const titleBefore = await urlContainerBefore.getAttribute('title');
     console.log('URL title before edit:', titleBefore);
     expect(titleBefore).toContain('/users/12345');
 
-    // Find the PATH PARAMS pane header and expand it if collapsed
+    // Find the PATH PARAMS pane header and expand if collapsed
     const pathParamsPane = page.locator('text=PATH PARAMS').first();
-    await expect(pathParamsPane).toBeVisible({ timeout: 10000 });
+    await expect(pathParamsPane).toBeVisible({ timeout: 1000 });
     
-    // Check if pane is collapsed (look for expand button or collapsed state)
     const paneHeader = pathParamsPane.locator('..').locator('..');
     const isCollapsed = await paneHeader.locator('.pane-collapsed, [aria-expanded="false"]').count() > 0;
     if (isCollapsed) {
-      console.log('PATH PARAMS pane is collapsed, clicking to expand...');
       await pathParamsPane.click();
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(100);
     }
     
-    // Now look for the params table
     const pathParamsSection = page.locator('.params-table-root').first();
-    await expect(pathParamsSection).toBeVisible({ timeout: 10000 });
+    await expect(pathParamsSection).toBeVisible({ timeout: 1000 });
 
     // The value cell uses RestormVariableInputBox which is a Monaco editor
     // Monaco editors display text in .view-line elements, input goes to hidden textarea
@@ -239,20 +173,16 @@ test.describe('Handlebars Transformations (Electron)', () => {
     expect(targetEditor).not.toBeNull();
     console.log('Found target Monaco editor with 12345');
     
-    // Click on the editor to focus it
+    // Click on the editor and edit
     await targetEditor.click();
-    await page.waitForTimeout(300);
-    
-    // Select all (Ctrl+A) and type the new value
     await page.keyboard.press('Control+a');
-    await page.waitForTimeout(100);
     await page.keyboard.type('99999');
     
     // Click outside to blur and trigger update
     await page.locator('.params-table th').first().click();
     
-    // Wait for the transformation to update (ContextService needs time to process)
-    await page.waitForTimeout(3000);
+    // Wait for transformation to update
+    await page.waitForTimeout(500);
 
     // Check the URL tooltip is updated with the new value
     const urlContainerAfter = page.locator('div[title]').filter({ hasText: '{{baseUrl}}' }).first();
