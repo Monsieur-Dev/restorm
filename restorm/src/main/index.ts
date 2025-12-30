@@ -7,6 +7,30 @@ import { EditorWindow } from './windows/EditorWindow'
 import { searchIndexService, contextService } from './services'
 // DocumentEvents are handled by FileService internally for dirty state tracking
 
+// Parse command line arguments for --open / -o
+function parseOpenFileArg(): string | undefined {
+  const args = process.argv.slice(app.isPackaged ? 1 : 2) // Skip electron executable and script in dev
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i]
+    if (!arg) continue
+    if (arg === '-o' || arg === '--open') {
+      return args[i + 1]
+    }
+    if (arg.startsWith('--open=')) {
+      return arg.substring('--open='.length)
+    }
+    if (arg.startsWith('-o=')) {
+      return arg.substring('-o='.length)
+    }
+  }
+  return undefined
+}
+
+const fileToOpenOnStart = parseOpenFileArg()
+if (fileToOpenOnStart) {
+  logger.info('📂 File to open on start:', { path: fileToOpenOnStart })
+}
+
 // Keep track of main window and editor windows
 let mainWindow: BrowserWindow | null = null
 const editorWindows = new Set<BrowserWindow>()
@@ -50,6 +74,30 @@ function createWindow(): void {
       mainWindow.on('closed', () => {
         mainWindow = null
       })
+      
+      // Open file from command line argument if specified
+      if (fileToOpenOnStart) {
+        // Use dom-ready which fires reliably with app:// protocol
+        mainWindow.webContents.on('dom-ready', () => {
+          logger.info('📂 DOM ready, will open file from command line:', { path: fileToOpenOnStart })
+          // Wait for the renderer React app to be fully initialized and hooks mounted
+          // 3 seconds should be enough for React to mount and subscribe to events
+          setTimeout(() => {
+            if (isFileServiceInitialized()) {
+              logger.info('📂 Opening file now...', { path: fileToOpenOnStart })
+              void getFileService().open(fileToOpenOnStart).then((result) => {
+                if (result.success) {
+                  logger.info('✅ File opened successfully from command line')
+                } else {
+                  logger.error('❌ Failed to open file from command line:', { path: fileToOpenOnStart })
+                }
+              })
+            } else {
+              logger.warn('⚠️ FileService not initialized, cannot open file')
+            }
+          }, 3000)
+        })
+      }
     }
     
     logger.info('✅ Main window created successfully')
@@ -89,6 +137,17 @@ function getResourcesPath(): string {
 
   // In production, resources are bundled under process.resourcesPath/resources
   return join(process.resourcesPath, 'resources')
+}
+
+// Get renderer path for static assets (images, etc.)
+function getRendererPath(): string {
+  // Only use app:// protocol in packaged production builds
+  // In development/test, use loadFile which works without the protocol
+  if (!app.isPackaged) {
+    return ''
+  }
+  // In production, renderer files are in the app resources
+  return join(__dirname, '../renderer')
 }
 
 // Get features configuration path for restorm
@@ -137,7 +196,8 @@ logger.info('✅ Context Service initialized')
 
 // Initialize Electron application
 const resourcesPath = getResourcesPath()
-initializeApp('restorm', createWindow, resourcesPath)
+const rendererPath = getRendererPath()
+initializeApp('restorm', createWindow, resourcesPath, undefined, rendererPath || undefined)
 
 // Store file parameters for Editor window (keyed by window ID)
 const editorWindowFiles = new Map<number, { title: string; content?: string }>()

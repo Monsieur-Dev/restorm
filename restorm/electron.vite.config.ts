@@ -79,6 +79,10 @@ export default defineConfig({
       // Ne pas optimiser electron-core-ui
       exclude: ['electron-core-ui']
     },
-    publicDir: resolve(__dirname, 'assets')
+    publicDir: resolve(__dirname, 'assets'),
+    // Define env variables for test helpers
+    define: {
+      'import.meta.env.VITE_ENABLE_TEST_HELPERS': JSON.stringify(process.env.VITE_ENABLE_TEST_HELPERS ?? 'false')
+    }
   }
 })

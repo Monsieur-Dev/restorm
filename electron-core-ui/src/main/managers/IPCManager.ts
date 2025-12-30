@@ -1,5 +1,6 @@
-import { BrowserWindow, ipcMain, app, screen } from 'electron'
+import { BrowserWindow, ipcMain, app, screen, protocol, net } from 'electron'
 import { join } from 'path'
+import { pathToFileURL } from 'url'
 import { getThemeService, getStorageService, logger, isFeatureServiceInitialized, getFeatureService, isFileServiceInitialized, getFileService, eventBusService, searchService, i18nService, type SearchDocument, type CategoryMeta } from '../services'
 
 /**
@@ -613,17 +614,36 @@ export function setupAppLifecycle(): void {
 }
 
 /**
+ * Setup custom protocol to serve static files in production mode
+ * This allows absolute paths like /imgs/logo.png to work with file:// URLs
+ * @param rendererPath - Path to the renderer directory containing static assets
+ */
+export function setupAppProtocol(rendererPath: string): void {
+  // Register the app:// protocol to serve files from the renderer directory
+  protocol.handle('app', (request) => {
+    // Convert app://path to file://rendererPath/path
+    const url = new URL(request.url)
+    const filePath = join(rendererPath, url.pathname)
+    return net.fetch(pathToFileURL(filePath).toString())
+  })
+  
+  logger.info(`✅ App protocol registered with renderer path: ${rendererPath}`)
+}
+
+/**
  * Initialize Electron application
  * @param appName - Name of the application (for logging)
  * @param createWindow - Function to create the main window
  * @param devResourcesPath - Optional path to resources directory in development mode
  * @param onActivate - Optional function to handle macOS activate event
+ * @param rendererPath - Optional path to renderer directory for static assets (used for app:// protocol)
  */
 export function initializeApp(
   appName: string,
   createWindow: () => void,
   devResourcesPath?: string,
-  onActivate?: () => void
+  onActivate?: () => void,
+  rendererPath?: string
 ): void {
   // Configure command line switches first (before app is ready)
   configureCommandLineSwitches()
@@ -633,6 +653,11 @@ export function initializeApp(
     logger.info(`Platform: ${process.platform}`)
     logger.info(`Node version: ${process.versions.node}`)
     logger.info(`Electron version: ${process.versions.electron}`)
+    
+    // Setup app:// protocol for serving static files if rendererPath provided
+    if (rendererPath) {
+      setupAppProtocol(rendererPath)
+    }
     
     logger.info('🔧 Starting setupIPC...')
     setupIPC(devResourcesPath)

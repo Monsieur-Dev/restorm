@@ -893,7 +893,7 @@ const App: React.FC = () => {
     void window.restorm?.context.clearAll()
   }, [])
 
-  // Listen to file events
+  // Listen to file events (including from command line --open argument)
   useFileEvents(handleFileOpened, handleFileClosed)
   
   // Listen to test events for E2E tests (only in dev/test mode)
@@ -2229,7 +2229,7 @@ const App: React.FC = () => {
           minHeight: 0
         }}
       >
-        {(fileName || rootFolders.length > 0) && (
+        {fileName && (
           <div
             style={{
               width: leftWidth,
