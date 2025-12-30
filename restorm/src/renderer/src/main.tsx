@@ -109,8 +109,8 @@ function ensureRestormWebShim(): void {
   })
 
   // Type assertion needed because window.restorm is optional in types but we're creating it here
-  const windowWithRestorm = window as Window & { restorm: NonNullable<typeof window.restorm> }
-  windowWithRestorm.restorm = {
+  // Define the restorm shim object
+  const restormShim = {
     openEditor: () => Promise.resolve(),
     getEditorFile: () => Promise.resolve(undefined),
     forceClose: () => {
@@ -171,6 +171,13 @@ function ensureRestormWebShim(): void {
       onMessage: () => () => { /* No-op unsubscribe */ }
     }
   }
+  
+  // Assign the shim to window.restorm
+  Object.defineProperty(window, 'restorm', {
+    value: restormShim,
+    writable: true,
+    configurable: true
+  })
 }
 
 // Ensure web shim is set up before rendering
