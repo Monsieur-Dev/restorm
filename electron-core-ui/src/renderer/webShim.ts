@@ -459,6 +459,17 @@ export function ensureCoreUiWebApiShim(): void {
   const webDirtyChangeCallbacks = new Set<(isDirty: boolean) => void>()
   const webFileOpenedCallbacks = new Set<(state: FileServiceState) => void>()
   const webFileClosedCallbacks = new Set<() => void>()
+  
+  // Expose test helper to trigger file opened event (for E2E tests)
+  if (typeof window !== 'undefined') {
+    (window as unknown as { __webFileTestHelpers?: { triggerFileOpened: (state: FileServiceState) => void } }).__webFileTestHelpers = {
+      triggerFileOpened: (state: FileServiceState) => {
+        for (const cb of webFileOpenedCallbacks) {
+          try { cb(state) } catch { /* ignore */ }
+        }
+      }
+    }
+  }
 
   const getWebState = (): FileServiceState => {
     const recentJson = localStorage.getItem(WEB_RECENT_KEY)

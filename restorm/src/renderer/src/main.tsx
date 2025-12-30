@@ -237,17 +237,116 @@ if (typeof window !== 'undefined') {
     void Promise.all([
       import('./services/import/SwaggerImportService'),
       import('./types/reactive'),
-      import('./services/SearchIndexService')
-    ]).then(([swaggerModule, reactiveModule, searchModule]) => {
+      import('./services/SearchIndexService'),
+      import('./utils/serialization'),
+      import('electron-core-ui/renderer')
+    ]).then(([swaggerModule, reactiveModule, searchModule, serializationModule, electronCoreUiModule]) => {
       ;(window as unknown as {
         __testHelpers?: {
           importSwagger: (swaggerJson: string) => Promise<void>
+          loadRestormData: (data: { collections: unknown[] }) => Promise<void>
         }
       }).__testHelpers = {
         importSwagger: async (swaggerJson: string) => {
           const folder = swaggerModule.importSwaggerFromJson(swaggerJson)
           const reactiveFolder = reactiveModule.makeReactiveFolder(folder)
           await searchModule.searchIndexService.indexFolderTree(reactiveFolder)
+          
+          // Also add to rootFolders so it appears in ListView
+          const windowWithRestormHelpers = window as unknown as {
+            __restormTestHelpers?: { 
+              setRootFolders: (folders: unknown[]) => void
+            }
+          }
+          if (windowWithRestormHelpers.__restormTestHelpers?.setRootFolders) {
+            windowWithRestormHelpers.__restormTestHelpers.setRootFolders([reactiveFolder])
+          }
+        },
+        loadRestormData: async (data: { collections: unknown[] }) => {
+          // Process collections to generate runtime IDs
+          const collectionsWithIds = serializationModule.processAfterDeserialization(data.collections)
+          
+          // Make folders reactive
+          const reactiveFolders = collectionsWithIds.map(
+            (folder) => reactiveModule.makeReactiveFolder(folder as import('./types/collections').Folder)
+          )
+          
+          // Create file state to simulate file opened event
+          const fileState = {
+            currentFile: {
+              path: 'test-data.restorm',
+              name: 'test-data.restorm',
+              content: { collections: reactiveFolders },
+              format: 'json' as const,
+              isDirty: false
+            },
+            recentFiles: [],
+            favorites: []
+          }
+          
+          // Wait for App to register its callback and expose test helpers
+          // Try multiple times with increasing delays
+          let helpersFound = false
+          for (let attempt = 0; attempt < 10; attempt++) {
+            await new Promise(resolve => setTimeout(resolve, 500))
+            
+            // Try Approach 1: Use App's setRootFolders helper (most direct)
+            const windowWithRestormHelpers = window as unknown as {
+              __restormTestHelpers?: { 
+                loadFile: (state: typeof fileState) => void
+                setRootFolders: (folders: typeof reactiveFolders) => void
+              }
+            }
+            
+            if (windowWithRestormHelpers.__restormTestHelpers?.setRootFolders) {
+              console.log('[Test Helper] Found __restormTestHelpers.setRootFolders, calling it')
+              windowWithRestormHelpers.__restormTestHelpers.setRootFolders(reactiveFolders)
+              helpersFound = true
+              break
+            }
+            
+            // Try Approach 2: Use App's loadFile helper
+            if (windowWithRestormHelpers.__restormTestHelpers?.loadFile) {
+              console.log('[Test Helper] Found __restormTestHelpers.loadFile, calling it')
+              windowWithRestormHelpers.__restormTestHelpers.loadFile(fileState)
+              helpersFound = true
+              break
+            }
+            
+            // Try Approach 3: Use web shim test helper
+            const windowWithTestHelpers = window as unknown as {
+              __webFileTestHelpers?: { triggerFileOpened: (state: typeof fileState) => void }
+            }
+            
+            if (windowWithTestHelpers.__webFileTestHelpers) {
+              console.log('[Test Helper] Found __webFileTestHelpers, calling triggerFileOpened')
+              windowWithTestHelpers.__webFileTestHelpers.triggerFileOpened(fileState)
+              helpersFound = true
+              break
+            }
+            
+            // Try Approach 4: Use eventBus emitLocal
+            try {
+              await electronCoreUiModule.eventBus.emitLocal('restorm:test:file-opened', fileState)
+              console.log('[Test Helper] Emitted restorm:test:file-opened event')
+              helpersFound = true
+              break
+            } catch (e) {
+              // Continue trying
+            }
+          }
+          
+          if (!helpersFound) {
+            console.warn('[Test Helper] Could not trigger file opened event after 5 seconds')
+          }
+          
+          // Index folders for search (will be done again by App, but do it here too for safety)
+          for (const folder of reactiveFolders) {
+            await searchModule.searchIndexService.indexFolderTree(folder)
+          }
+          
+          // Wait longer for App to process the event and render
+          await new Promise(resolve => setTimeout(resolve, 3000))
         }
       }
     }).catch((error) => {

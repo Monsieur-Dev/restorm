@@ -785,8 +785,15 @@ const App: React.FC = () => {
 
   // Handler for file opened event - loads collections into workbench
   const handleFileOpened = useCallback((state: { currentFile: { content: unknown } }) => {
+    console.log('[App] handleFileOpened called', { 
+      fileLoadingRef: fileLoadingRef.current,
+      hasContent: !!state.currentFile.content 
+    })
     // Prevent double loading
-    if (fileLoadingRef.current) return
+    if (fileLoadingRef.current) {
+      console.log('[App] handleFileOpened: skipping, already loading')
+      return
+    }
     fileLoadingRef.current = true
 
     const content = state.currentFile.content as { collections?: EnvironmentFolder[] } | null
@@ -888,6 +895,70 @@ const App: React.FC = () => {
 
   // Listen to file events
   useFileEvents(handleFileOpened, handleFileClosed)
+  
+  // Listen to test events for E2E tests (only in dev/test mode)
+  // Expose handleFileOpened directly on window for E2E tests
+  // This must be done outside useEffect to ensure it's available immediately
+  const handleFileOpenedRef = useRef(handleFileOpened)
+  useEffect(() => {
+    handleFileOpenedRef.current = handleFileOpened
+  }, [handleFileOpened])
+  
+  useEffect(() => {
+    // Always expose test helpers in dev mode (Vite sets DEV=true)
+    // In web mode via Playwright, mode is undefined, so we check both
+    const isDev = (import.meta as { env?: { DEV?: boolean; MODE?: string } }).env?.DEV ?? false
+    const mode = (import.meta as { env?: { MODE?: string } }).env?.MODE
+    // Always expose if not in production build
+    const shouldListen = isDev || mode === 'test' || mode === 'development' || mode === undefined
+    
+    if (!shouldListen) return
+    
+    // Expose immediately (don't wait for handleFileOpened to be ready)
+    ;(window as unknown as { 
+      __restormTestHelpers?: { 
+        loadFile: (fileState: { currentFile: { content: unknown } }) => void
+        setRootFolders: (folders: EnvironmentFolder[]) => void
+      } 
+    }).__restormTestHelpers = {
+      loadFile: (fileState: { currentFile: { content: unknown } }) => {
+        console.log('[App] __restormTestHelpers.loadFile called', { 
+          hasContent: !!fileState.currentFile.content,
+          fileLoadingRef: fileLoadingRef.current 
+        })
+        // Reset loading flag to allow loading
+        fileLoadingRef.current = false
+        // Use ref to ensure we call the latest version
+        handleFileOpenedRef.current(fileState)
+      },
+      setRootFolders: (folders: EnvironmentFolder[]) => {
+        fileLoadingRef.current = false
+        // Make folders reactive before setting
+        const reactiveFolders = folders.map(folder => makeReactiveFolder(folder) as EnvironmentFolder)
+        setRootFolders(reactiveFolders)
+        // Also trigger indexing
+        void (async () => {
+          await searchIndexService.clearIndex()
+          await searchIndexService.initialize()
+          for (const folder of reactiveFolders) {
+            await searchIndexService.indexFolderTree(folder)
+          }
+        })()
+      }
+    }
+    
+    // Also listen to eventBus for backward compatibility
+    const subscription = eventBus.subscribe('restorm:test:file-opened', (fileState: { currentFile: { content: unknown } }) => {
+      console.log('[App] Received restorm:test:file-opened event', { hasContent: !!fileState.currentFile.content })
+      fileLoadingRef.current = false
+      handleFileOpenedRef.current(fileState)
+    })
+    
+    return () => {
+      subscription.unsubscribe()
+      delete (window as unknown as { __restormTestHelpers?: unknown }).__restormTestHelpers
+    }
+  }, []) // Empty deps - set up once on mount
 
   // Load file content on mount if a file is already open (e.g., after page refresh)
   const initialLoadDoneRef = useRef(false)
@@ -2158,7 +2229,7 @@ const App: React.FC = () => {
           minHeight: 0
         }}
       >
-        {fileName && (
+        {(fileName || rootFolders.length > 0) && (
           <div
             style={{
               width: leftWidth,
