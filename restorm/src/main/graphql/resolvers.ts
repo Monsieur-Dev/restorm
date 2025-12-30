@@ -2,13 +2,14 @@
  * GraphQL Resolvers for Restorm
  * 
  * Implements the GraphQL resolvers for Restorm objects.
- * Connects to the event system and store for data management.
+ * Connects to the CollectionStore for data management.
  */
 
 import { createPubSub, type PubSub, searchService } from 'electron-core-ui/main'
 import { eventBusService, logger } from 'electron-core-ui/main'
 import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from '../services/DocumentEvents'
 import { contextService } from '../services'
+import { collectionStore } from '../services/CollectionStore'
 
 // PubSub events for subscriptions
 const PUBSUB_EVENTS = {
@@ -26,9 +27,6 @@ const PUBSUB_EVENTS = {
 
 // Create PubSub instance for subscriptions
 export const pubsub: PubSub<Record<string, unknown>> = createPubSub()
-
-// In-memory store for collections (will be replaced by proper store in task 7)
-let collectionsStore: unknown[] = []
 
 /**
  * Initialize event subscriptions to forward to GraphQL subscriptions
@@ -78,7 +76,7 @@ export function initializeGraphQLEventBridge(): void {
  * Set the collections store (called when file is loaded)
  */
 export function setCollectionsStore(collections: unknown[]): void {
-  collectionsStore = collections
+  collectionStore.setCollections(collections as { id: string; name: string; items: unknown[] }[])
   logger.debug('[GraphQL Resolvers] Collections store updated', { count: collections.length })
 }
 
@@ -86,30 +84,7 @@ export function setCollectionsStore(collections: unknown[]): void {
  * Get the collections store
  */
 export function getCollectionsStore(): unknown[] {
-  return collectionsStore
-}
-
-// Helper to find item by ID recursively
-function findById(items: unknown[], id: string): unknown {
-  for (const item of items) {
-    const obj = item as Record<string, unknown>
-    if (obj.id === id) {
-      return item
-    }
-    if (Array.isArray(obj.items)) {
-      const found = findById(obj.items as unknown[], id)
-      if (found) return found
-    }
-    if (Array.isArray(obj.environments)) {
-      const found = findById(obj.environments as unknown[], id)
-      if (found) return found
-    }
-    if (Array.isArray(obj.subEnvironments)) {
-      const found = findById(obj.subEnvironments as unknown[], id)
-      if (found) return found
-    }
-  }
-  return null
+  return collectionStore.getCollections()
 }
 
 // Type resolver for union types
@@ -150,15 +125,15 @@ export const resolvers = {
 
   Query: {
     collections: (): unknown[] => {
-      return collectionsStore
+      return collectionStore.getCollections()
     },
 
     folder: (_: unknown, { id }: { id: string }): unknown => {
-      return findById(collectionsStore, id)
+      return collectionStore.findById(id)
     },
 
     environmentFolder: (_: unknown, { id }: { id: string }): unknown => {
-      const item = findById(collectionsStore, id)
+      const item = collectionStore.findById(id)
       const obj = item as Record<string, unknown> | null
       if (obj?.folderType === 'environment') {
         return item
@@ -167,7 +142,7 @@ export const resolvers = {
     },
 
     request: (_: unknown, { id }: { id: string }): unknown => {
-      const item = findById(collectionsStore, id)
+      const item = collectionStore.findById(id)
       const obj = item as Record<string, unknown> | null
       if (obj?.type && ['http', 'graphql', 'grpc', 'soap', 'websocket'].includes(obj.type as string)) {
         return item
@@ -176,12 +151,8 @@ export const resolvers = {
     },
 
     environment: (_: unknown, { id }: { id: string }): unknown => {
-      const item = findById(collectionsStore, id)
-      const obj = item as Record<string, unknown> | null
-      if (obj?.variables !== undefined) {
-        return item
-      }
-      return null
+      const env = collectionStore.findEnvironmentById(id)
+      return env
     },
 
     resolvedContext: (_: unknown, { environmentId }: { environmentId: string }): unknown => {
@@ -209,7 +180,7 @@ export const resolvers = {
         return null
       }
       // Find the original URL from the request
-      const request = findById(collectionsStore, requestId) as Record<string, unknown> | null
+      const request = collectionStore.findById(requestId) as Record<string, unknown> | null
       const url = request?.url
       const originalUrl = typeof url === 'string' ? url : ''
       return {
@@ -226,77 +197,81 @@ export const resolvers = {
       // Transform search results to match GraphQL Request type
       return results.map(result => {
         // Find the actual item in collections to return full data
-        const item = findById(collectionsStore, result.id)
+        const item = collectionStore.findById(result.id)
         return item
       }).filter(Boolean)
     }
   },
 
   Mutation: {
-    createFolder: (_: unknown, { parentId, input }: { parentId: string; input: unknown }): unknown => {
+    createFolder: (_: unknown, { parentId, input }: { parentId: string | null; input: unknown }): unknown => {
       logger.debug('[GraphQL] createFolder mutation', { parentId, input })
-      // TODO: Implement in task 7 (Store)
-      return input
+      const folder = input as { id?: string; name: string; items?: unknown[] }
+      return collectionStore.createFolder(parentId, {
+        id: folder.id ?? '',
+        name: folder.name,
+        items: (folder.items ?? []) as { id: string; name: string; items: unknown[]; type?: string }[]
+      })
     },
 
     updateFolder: (_: unknown, { id, input }: { id: string; input: unknown }): unknown => {
       logger.debug('[GraphQL] updateFolder mutation', { id, input })
-      // TODO: Implement in task 7 (Store)
-      return input
+      return collectionStore.updateFolder(id, input as { name?: string })
     },
 
     deleteFolder: (_: unknown, { id }: { id: string }): boolean => {
       logger.debug('[GraphQL] deleteFolder mutation', { id })
-      // TODO: Implement in task 7 (Store)
-      return true
+      return collectionStore.deleteFolder(id)
     },
 
     moveFolder: (_: unknown, { id, newParentId, index }: { id: string; newParentId: string; index: number }): unknown => {
       logger.debug('[GraphQL] moveFolder mutation', { id, newParentId, index })
-      // TODO: Implement in task 7 (Store)
-      return findById(collectionsStore, id)
+      return collectionStore.moveFolder(id, newParentId, index)
     },
 
     createRequest: (_: unknown, { parentId, input }: { parentId: string; input: unknown }): unknown => {
       logger.debug('[GraphQL] createRequest mutation', { parentId, input })
-      // TODO: Implement in task 7 (Store)
-      return input
+      const request = input as { id?: string; name: string; type: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' }
+      return collectionStore.createRequest(parentId, {
+        id: request.id ?? '',
+        name: request.name,
+        type: request.type
+      })
     },
 
     updateRequest: (_: unknown, { id, input }: { id: string; input: unknown }): unknown => {
       logger.debug('[GraphQL] updateRequest mutation', { id, input })
-      // TODO: Implement in task 7 (Store)
-      return input
+      return collectionStore.updateRequest(id, input as { name?: string })
     },
 
     deleteRequest: (_: unknown, { id }: { id: string }): boolean => {
       logger.debug('[GraphQL] deleteRequest mutation', { id })
-      // TODO: Implement in task 7 (Store)
-      return true
+      return collectionStore.deleteRequest(id)
     },
 
     moveRequest: (_: unknown, { id, newParentId, index }: { id: string; newParentId: string; index: number }): unknown => {
       logger.debug('[GraphQL] moveRequest mutation', { id, newParentId, index })
-      // TODO: Implement in task 7 (Store)
-      return findById(collectionsStore, id)
+      return collectionStore.moveRequest(id, newParentId, index)
     },
 
-    createEnvironment: (_: unknown, { parentId, input }: { parentId: string; input: unknown }): unknown => {
-      logger.debug('[GraphQL] createEnvironment mutation', { parentId, input })
-      // TODO: Implement in task 7 (Store)
-      return input
+    createEnvironment: (_: unknown, { parentId, input, parentEnvironmentId }: { parentId: string; input: unknown; parentEnvironmentId?: string }): unknown => {
+      logger.debug('[GraphQL] createEnvironment mutation', { parentId, input, parentEnvironmentId })
+      const env = input as { id?: string; name: string; variables?: { key: string; value: string }[] }
+      return collectionStore.createEnvironment(parentId, {
+        id: env.id ?? '',
+        name: env.name,
+        variables: env.variables ?? []
+      }, parentEnvironmentId)
     },
 
     updateEnvironment: (_: unknown, { id, input }: { id: string; input: unknown }): unknown => {
       logger.debug('[GraphQL] updateEnvironment mutation', { id, input })
-      // TODO: Implement in task 7 (Store)
-      return input
+      return collectionStore.updateEnvironment(id, input as { name?: string })
     },
 
     deleteEnvironment: (_: unknown, { id }: { id: string }): boolean => {
       logger.debug('[GraphQL] deleteEnvironment mutation', { id })
-      // TODO: Implement in task 7 (Store)
-      return true
+      return collectionStore.deleteEnvironment(id)
     }
   },
 
