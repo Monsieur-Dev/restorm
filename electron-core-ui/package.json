@@ -108,6 +108,7 @@
     "i18next": "^25.7.3",
     "iconoir-react": "^7.11.0",
     "js-yaml": "^4.1.1",
+    "json5": "^2.2.3",
     "mermaid": "^11.12.2",
     "minisearch": "^7.2.0",
     "react-feather": "^2.0.10",

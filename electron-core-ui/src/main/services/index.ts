@@ -36,3 +36,25 @@ export type {
 
 export { graphQLService, createSchema, createPubSub } from './GraphQLService'
 export type { GraphQLServiceConfig, PubSub } from './GraphQLService'
+
+export {
+  initPersistenceService,
+  getPersistenceService,
+  isPersistenceServiceInitialized,
+  PersistenceService,
+  serialize,
+  deserialize,
+  detectFormat,
+  filterNonSerialised,
+  generateIndexedFileName,
+  sanitizeFileName,
+  calculateIndexPadding
+} from './PersistenceService'
+export type {
+  PersistenceFormat,
+  PersistenceMode,
+  PersistenceConfig,
+  FileNamingContext,
+  SaveResult,
+  LoadResult
+} from './PersistenceService'
