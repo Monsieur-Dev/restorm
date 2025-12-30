@@ -8,6 +8,7 @@
 import { createPubSub, type PubSub } from 'electron-core-ui/main'
 import { eventBusService, logger } from 'electron-core-ui/main'
 import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from '../services/DocumentEvents'
+import { contextService } from '../services'
 
 // PubSub events for subscriptions
 const PUBSUB_EVENTS = {
@@ -184,15 +185,39 @@ export const resolvers = {
     },
 
     resolvedContext: (_: unknown, { environmentId }: { environmentId: string }): unknown => {
-      // Will be implemented in task 4 (Context Service)
       logger.debug('[GraphQL] resolvedContext query', { environmentId })
-      return null
+      const context = contextService.getContext(environmentId)
+      if (!context) {
+        return null
+      }
+      // Transform the context to GraphQL format
+      const variables = Object.entries(context).map(([key, value]) => ({
+        key,
+        value,
+        resolved: value
+      }))
+      return {
+        environmentId,
+        variables
+      }
     },
 
     resolvedURL: (_: unknown, { requestId, environmentId }: { requestId: string; environmentId: string }): unknown => {
-      // Will be implemented in task 4 (Context Service)
       logger.debug('[GraphQL] resolvedURL query', { requestId, environmentId })
-      return null
+      const urlResult = contextService.getResolvedUrl(requestId)
+      if (!urlResult) {
+        return null
+      }
+      // Find the original URL from the request
+      const request = findById(collectionsStore, requestId) as Record<string, unknown> | null
+      const url = request?.url
+      const originalUrl = typeof url === 'string' ? url : ''
+      return {
+        requestId,
+        environmentId,
+        original: originalUrl,
+        resolved: urlResult.resolvedUrl
+      }
     },
 
     search: (_: unknown, { query, limit }: { query: string; limit?: number }): unknown[] => {
