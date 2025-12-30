@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 // Mock electron modules
 vi.mock('electron', () => ({
@@ -19,21 +19,16 @@ vi.mock('../../../src/main/services/LoggerService', () => ({
 }));
 
 // Import after mocking
-import { ContextService } from '../../../src/main/services/ContextService';
+import { contextService } from '../../../src/main/services/ContextService';
 
 describe('ContextService', () => {
-  let contextService: ContextService;
-
-  beforeEach(() => {
-    contextService = new ContextService();
-  });
+  // Access the private method via any cast for testing
+  const service = contextService as unknown as { 
+    transformValue: (value: string, context: Record<string, string>) => string 
+  };
 
   describe('Handlebars transformations', () => {
     it('should transform variables in URL using environment variables', () => {
-      // Access the private method via any cast for testing
-      const service = contextService as unknown as { 
-        transformValue: (value: string, context: Record<string, string>) => string 
-      };
 
       const context = {
         baseUrl: 'https://api.example.com',
@@ -46,10 +41,6 @@ describe('ContextService', () => {
     });
 
     it('should transform path params in URL', () => {
-      const service = contextService as unknown as { 
-        transformValue: (value: string, context: Record<string, string>) => string 
-      };
-
       const context = {
         baseUrl: 'https://api.example.com',
         userId: '12345'
@@ -61,10 +52,6 @@ describe('ContextService', () => {
     });
 
     it('should return original value when no variables present', () => {
-      const service = contextService as unknown as { 
-        transformValue: (value: string, context: Record<string, string>) => string 
-      };
-
       const context = { baseUrl: 'https://api.example.com' };
 
       const result = service.transformValue('https://static-url.com/path', context);
@@ -73,10 +60,6 @@ describe('ContextService', () => {
     });
 
     it('should return original value when variable not found in context', () => {
-      const service = contextService as unknown as { 
-        transformValue: (value: string, context: Record<string, string>) => string 
-      };
-
       const context = { baseUrl: 'https://api.example.com' };
 
       // {{unknown}} should remain empty since it's not in context
@@ -86,10 +69,6 @@ describe('ContextService', () => {
     });
 
     it('should handle nested template syntax', () => {
-      const service = contextService as unknown as { 
-        transformValue: (value: string, context: Record<string, string>) => string 
-      };
-
       const context = {
         protocol: 'https',
         host: 'api.example.com',
@@ -103,10 +82,6 @@ describe('ContextService', () => {
 
     it('should NOT return empty string for valid templates (regression test)', () => {
       // This test will fail if someone adds `return '';` at the beginning of transformValue
-      const service = contextService as unknown as { 
-        transformValue: (value: string, context: Record<string, string>) => string 
-      };
-
       const context = {
         baseUrl: 'https://api.example.com'
       };
@@ -119,10 +94,6 @@ describe('ContextService', () => {
     });
 
     it('should transform multiple occurrences of same variable', () => {
-      const service = contextService as unknown as { 
-        transformValue: (value: string, context: Record<string, string>) => string 
-      };
-
       const context = { id: '42' };
 
       const result = service.transformValue('/items/{{id}}/details/{{id}}', context);
