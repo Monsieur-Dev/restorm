@@ -2,7 +2,9 @@ import { test, expect } from '@playwright/test';
 import { setupConsoleErrorInterceptor } from '../helpers/console-error-interceptor';
 
 test.describe('Handlebars Transformations', () => {
-  test('should display request with variables in ListView and show in workbench', async ({ page }) => {
+  // Skip this test in web mode - data injection via setRootFolders is unreliable
+  // Use the Electron tests in tests/e2e/electron/handlebars-electron.spec.ts instead
+  test.skip('should display request with variables in ListView and show in workbench', async ({ page }) => {
     const consoleInterceptor = setupConsoleErrorInterceptor(page);
     
     // Capture console logs for debugging
