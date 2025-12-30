@@ -91,9 +91,30 @@ test.describe('Handlebars Transformations (Electron)', () => {
     await page.screenshot({ path: 'test-results/debug-electron-after-open-arg.png' });
   });
 
-  test.afterAll(() => {
-    // Force kill Electron process to avoid unsaved changes dialog blocking
-    electronApp.process().kill('SIGKILL');
+  test.afterAll(async () => {
+    // Save file to avoid "unsaved changes" dialog blocking close
+    if (page) {
+      try {
+        await page.keyboard.press('Control+s');
+        await page.waitForTimeout(500);
+      } catch {
+        // Ignore save errors
+      }
+    }
+    
+    // Close Electron app properly
+    if (electronApp) {
+      try {
+        await electronApp.close();
+      } catch {
+        // If close fails, force kill the process
+        try {
+          electronApp.process()?.kill('SIGKILL');
+        } catch {
+          // Ignore kill errors
+        }
+      }
+    }
     
     // Clean up test file
     try {
