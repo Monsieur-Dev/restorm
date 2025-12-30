@@ -109,15 +109,17 @@ jobs:
           cd restorm
           NODE_OPTIONS="--max-old-space-size=4096" pnpm run build
 
-      - name: Install Playwright browsers
+      - name: Install Playwright browsers and dependencies
         run: |
           cd restorm
           pnpm exec playwright install --with-deps chromium
+          sudo apt-get update
+          sudo apt-get install -y xvfb
 
       - name: Run restorm E2E tests (Playwright)
         run: |
           cd restorm
-          pnpm run test:e2e
+          xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" pnpm run test:e2e
 
   integration-tests:
     name: Integration Tests
