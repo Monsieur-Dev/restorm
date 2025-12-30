@@ -1,5 +1,5 @@
 // Main process exports - with proper TypeScript types
-export { getThemeService, getStorageService, logger, initFeatureService, getFeatureService, isFeatureServiceInitialized, initFileService, getFileService, isFileServiceInitialized, eventBusService, searchService, i18nService, graphQLService, createSchema, createPubSub, initPersistenceService, getPersistenceService, isPersistenceServiceInitialized, PersistenceService, serialize, deserialize, detectFormat, filterNonSerialised, generateIndexedFileName, sanitizeFileName, calculateIndexPadding } from './services'
+export { getThemeService, getStorageService, logger, initFeatureService, getFeatureService, isFeatureServiceInitialized, initFileService, getFileService, isFileServiceInitialized, eventBusService, searchService, i18nService, graphQLService, createSchema, createPubSub, initPersistenceService, getPersistenceService, isPersistenceServiceInitialized, PersistenceService, serialize, deserialize, detectFormat, filterNonSerialised, generateIndexedFileName, sanitizeFileName, calculateIndexPadding, graphQLSchemaGenerator, inferGraphQLType, createFieldDefinitions } from './services'
 
 // Decorators
 export {
@@ -49,6 +49,7 @@ export type { EventHandler, Subscription } from './services/EventBusService'
 export type { SearchDocument, SearchResult, SearchNavigation, GroupedResults, CategoryMeta } from './services/SearchService'
 export type { GraphQLServiceConfig, PubSub } from './services/GraphQLService'
 export type { PersistenceFormat, PersistenceMode, PersistenceConfig, FileNamingContext, SaveResult, LoadResult } from './services/PersistenceService'
+export type { SchemaGeneratorConfig } from './services/GraphQLSchemaGenerator'
 
 // Re-export feature types
 export type {

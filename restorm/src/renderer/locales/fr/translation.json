@@ -283,6 +283,28 @@
     "confirmRemoveFavorite": "Voulez-vous vraiment retirer \"{{fileName}}\" des favoris ?",
     "noFilesHint": "Ouvrez un fichier ou créez-en un nouveau pour commencer"
   },
+  "save": {
+    "title": "Options d'enregistrement",
+    "mode": {
+      "label": "Mode d'enregistrement",
+      "file": "Fichier unique",
+      "folder": "Structure de dossiers",
+      "fileDescription": "Enregistrer tout dans un seul fichier",
+      "folderDescription": "Enregistrer dans une structure de dossiers avec des fichiers séparés"
+    },
+    "format": {
+      "label": "Format"
+    },
+    "preview": {
+      "label": "Aperçu de la structure"
+    }
+  },
+  "common": {
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "ok": "OK",
+    "close": "Fermer"
+  },
   "helpers": {
     "categories": {
       "comparison": "Comparaison",

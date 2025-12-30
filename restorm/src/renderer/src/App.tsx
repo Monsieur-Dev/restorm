@@ -40,6 +40,7 @@ import { RestormWorkbench } from './components/RestormWorkbench'
 import { Welcome } from './components/Welcome'
 import { EmptyBench } from './components/EmptyBench'
 import { Badge } from './components/Badge'
+import { SaveOptionsModal, type SaveOptions } from './components/SaveOptionsModal'
 import { mapToBadgeType } from './utils/badgeUtils'
 import { renderSearchTooltipContent } from './components/renderSearchTooltipContent'
 import { EnvironmentValuesProvider } from './contexts/EnvironmentValuesContext'
@@ -695,9 +696,18 @@ const App: React.FC = () => {
     void saveFile(dataForSave)
   }, [saveFile, rootFolders])
 
+  // Save options modal state - declared early for use in handlers
+  const [showSaveOptionsModal, setShowSaveOptionsModal] = useState(false)
+
   const handleMenuSaveAs = useCallback(() => {
+    setShowSaveOptionsModal(true)
+  }, [])
+
+  const handleSaveWithOptions = useCallback((options: SaveOptions) => {
     const plainData = JSON.parse(JSON.stringify({ collections: rootFolders })) as unknown
     const dataForSave = prepareForSerialization(plainData)
+    // TODO: Use options.mode and options.format for persistence
+    logger.info('[App] Saving with options', { mode: options.mode, format: options.format })
     void saveFileAs(dataForSave)
   }, [saveFileAs, rootFolders])
 
@@ -2369,6 +2379,14 @@ const App: React.FC = () => {
           </div>
         </div>
           </Modal>
+
+          {/* Save Options Modal */}
+          <SaveOptionsModal
+            isOpen={showSaveOptionsModal}
+            onClose={() => { setShowSaveOptionsModal(false) }}
+            onSave={handleSaveWithOptions}
+            rootFolder={rootFolders[0]}
+          />
         </div>
       </VariableTransformProvider>
     </AvailableVariablesProvider>

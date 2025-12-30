@@ -6,7 +6,7 @@ import { promises as fs } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
 import { searchIndexService, contextService } from './services'
 import { graphQLService } from 'electron-core-ui/main'
-import { typeDefs, resolvers, pubsub, initializeGraphQLEventBridge } from './graphql'
+import { typeDefs, resolvers, pubsub } from './graphql'
 // DocumentEvents are handled by FileService internally for dirty state tracking
 
 // Parse command line arguments for --open / -o
@@ -206,7 +206,6 @@ graphQLService.initialize({
     pubsub
   })
 })
-initializeGraphQLEventBridge()
 void graphQLService.start().then(() => {
   logger.info('✅ GraphQL Service started', { endpoint: graphQLService.getEndpoint() })
 }).catch((error: unknown) => {

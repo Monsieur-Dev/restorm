@@ -7,10 +7,19 @@ import './httpMethods.css'
 import './app.css'
 import './components/Badge.css'
 import LoadingScreen from './components/LoadingScreen'
+import { initializeGraphQL } from './services/GraphQLIntegration'
 
 const App = lazy(() => import('./App'))
 
 const { initializeI18n, logger, i18n } = ElectronCoreUi
+
+// Initialize GraphQL client (connects to main process GraphQL server)
+// This must happen before React renders to ensure subscriptions are ready
+try {
+  initializeGraphQL()
+} catch (error) {
+  logger.warn('[main] Failed to initialize GraphQL client - will retry when server is ready', { error: String(error) })
+}
 
 type ElectronCoreUiProviderComponent = React.ComponentType<{
   children: React.ReactNode

@@ -1,82 +1,19 @@
 /**
  * GraphQL Resolvers for Restorm
- * 
+ *
  * Implements the GraphQL resolvers for Restorm objects.
  * Connects to the CollectionStore for data management.
  */
 
-import { createPubSub, type PubSub, searchService } from 'electron-core-ui/main'
-import { eventBusService, logger } from 'electron-core-ui/main'
-import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from '../services/DocumentEvents'
+import { searchService, logger } from 'electron-core-ui/main'
 import { contextService } from '../services'
-import { collectionStore } from '../services/CollectionStore'
-
-// PubSub events for subscriptions
-const PUBSUB_EVENTS = {
-  FOLDER_CREATED: 'FOLDER_CREATED',
-  FOLDER_UPDATED: 'FOLDER_UPDATED',
-  FOLDER_DELETED: 'FOLDER_DELETED',
-  REQUEST_CREATED: 'REQUEST_CREATED',
-  REQUEST_UPDATED: 'REQUEST_UPDATED',
-  REQUEST_DELETED: 'REQUEST_DELETED',
-  ENVIRONMENT_CREATED: 'ENVIRONMENT_CREATED',
-  ENVIRONMENT_UPDATED: 'ENVIRONMENT_UPDATED',
-  ENVIRONMENT_DELETED: 'ENVIRONMENT_DELETED',
-  CONTEXT_CHANGED: 'CONTEXT_CHANGED'
-} as const
-
-// Create PubSub instance for subscriptions
-export const pubsub: PubSub<Record<string, unknown>> = createPubSub()
-
-/**
- * Initialize event subscriptions to forward to GraphQL subscriptions
- */
-export function initializeGraphQLEventBridge(): void {
-  // Forward document events to GraphQL subscriptions
-  eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.FOLDER_CREATED, (payload) => {
-    pubsub.publish(PUBSUB_EVENTS.FOLDER_CREATED, { folderCreated: payload.document })
-  })
-
-  eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.FOLDER_UPDATED, (payload) => {
-    pubsub.publish(PUBSUB_EVENTS.FOLDER_UPDATED, { folderUpdated: payload.document })
-  })
-
-  eventBusService.subscribe<DocumentDeletedPayload>(DocumentEvents.FOLDER_DELETED, (payload) => {
-    pubsub.publish(PUBSUB_EVENTS.FOLDER_DELETED, { folderDeleted: payload.id })
-  })
-
-  eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.REQUEST_CREATED, (payload) => {
-    pubsub.publish(PUBSUB_EVENTS.REQUEST_CREATED, { requestCreated: payload.document })
-  })
-
-  eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.REQUEST_UPDATED, (payload) => {
-    pubsub.publish(PUBSUB_EVENTS.REQUEST_UPDATED, { requestUpdated: payload.document })
-  })
-
-  eventBusService.subscribe<DocumentDeletedPayload>(DocumentEvents.REQUEST_DELETED, (payload) => {
-    pubsub.publish(PUBSUB_EVENTS.REQUEST_DELETED, { requestDeleted: payload.id })
-  })
-
-  eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.ENVIRONMENT_CREATED, (payload) => {
-    pubsub.publish(PUBSUB_EVENTS.ENVIRONMENT_CREATED, { environmentCreated: payload.document })
-  })
-
-  eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.ENVIRONMENT_UPDATED, (payload) => {
-    pubsub.publish(PUBSUB_EVENTS.ENVIRONMENT_UPDATED, { environmentUpdated: payload.document })
-  })
-
-  eventBusService.subscribe<DocumentDeletedPayload>(DocumentEvents.ENVIRONMENT_DELETED, (payload) => {
-    pubsub.publish(PUBSUB_EVENTS.ENVIRONMENT_DELETED, { environmentDeleted: payload.id })
-  })
-
-  logger.info('[GraphQL Resolvers] Event bridge initialized')
-}
+import { collectionStore, pubsub, PUBSUB_TOPICS } from '../services/CollectionStore'
 
 /**
  * Set the collections store (called when file is loaded)
  */
 export function setCollectionsStore(collections: unknown[]): void {
-  collectionStore.setCollections(collections as { id: string; name: string; items: unknown[] }[])
+  collectionStore.setCollections(collections as Parameters<typeof collectionStore.setCollections>[0])
   logger.debug('[GraphQL Resolvers] Collections store updated', { count: collections.length })
 }
 
@@ -209,8 +146,7 @@ export const resolvers = {
       const folder = input as { id?: string; name: string; items?: unknown[] }
       return collectionStore.createFolder(parentId, {
         id: folder.id ?? '',
-        name: folder.name,
-        items: (folder.items ?? []) as { id: string; name: string; items: unknown[]; type?: string }[]
+        name: folder.name
       })
     },
 
@@ -277,37 +213,47 @@ export const resolvers = {
 
   Subscription: {
     folderCreated: {
-      subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_EVENTS.FOLDER_CREATED)
+      subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_TOPICS.FOLDER_CREATED),
+      resolve: (payload: unknown): unknown => ({ folderCreated: payload })
     },
     folderUpdated: {
-      subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_EVENTS.FOLDER_UPDATED)
+      subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_TOPICS.FOLDER_UPDATED),
+      resolve: (payload: unknown): unknown => ({ folderUpdated: payload })
     },
     folderDeleted: {
-      subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_EVENTS.FOLDER_DELETED)
+      subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_TOPICS.FOLDER_DELETED),
+      resolve: (payload: unknown): unknown => ({ folderDeleted: payload })
     },
     requestCreated: {
-      subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_EVENTS.REQUEST_CREATED)
+      subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_TOPICS.REQUEST_CREATED),
+      resolve: (payload: unknown): unknown => ({ requestCreated: payload })
     },
     requestUpdated: {
-      subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_EVENTS.REQUEST_UPDATED)
+      subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_TOPICS.REQUEST_UPDATED),
+      resolve: (payload: unknown): unknown => ({ requestUpdated: payload })
     },
     requestDeleted: {
-      subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_EVENTS.REQUEST_DELETED)
+      subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_TOPICS.REQUEST_DELETED),
+      resolve: (payload: unknown): unknown => ({ requestDeleted: payload })
     },
     environmentCreated: {
-      subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_EVENTS.ENVIRONMENT_CREATED)
+      subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_TOPICS.ENVIRONMENT_CREATED),
+      resolve: (payload: unknown): unknown => ({ environmentCreated: payload })
     },
     environmentUpdated: {
-      subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_EVENTS.ENVIRONMENT_UPDATED)
+      subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_TOPICS.ENVIRONMENT_UPDATED),
+      resolve: (payload: unknown): unknown => ({ environmentUpdated: payload })
     },
     environmentDeleted: {
-      subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_EVENTS.ENVIRONMENT_DELETED)
+      subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_TOPICS.ENVIRONMENT_DELETED),
+      resolve: (payload: unknown): unknown => ({ environmentDeleted: payload })
     },
     contextChanged: {
       subscribe: (_: unknown, { environmentId }: { environmentId: string }): AsyncIterable<unknown> => {
         logger.debug('[GraphQL] contextChanged subscription', { environmentId })
-        return pubsub.subscribe(PUBSUB_EVENTS.CONTEXT_CHANGED)
-      }
+        return pubsub.subscribe(PUBSUB_TOPICS.CONTEXT_CHANGED)
+      },
+      resolve: (payload: unknown): unknown => ({ contextChanged: payload })
     }
   }
 }

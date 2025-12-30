@@ -6,6 +6,7 @@
  * In web mode, it can connect to any GraphQL endpoint.
  */
 
+import { createClient, type Client } from 'graphql-sse'
 import { logger } from './logger'
 
 /**
@@ -37,6 +38,7 @@ class GraphQLClient {
   private endpoint = ''
   private headers: Record<string, string> = {}
   private isInitialized = false
+  private sseClient: Client | null = null
 
   /**
    * Initialize the GraphQL client
@@ -45,6 +47,13 @@ class GraphQLClient {
     this.endpoint = config.endpoint
     this.headers = config.headers ?? {}
     this.isInitialized = true
+    
+    // Create SSE client for subscriptions
+    this.sseClient = createClient({
+      url: this.endpoint,
+      headers: this.headers
+    })
+    
     logger.info(`[GraphQLClient] Initialized with endpoint: ${this.endpoint}`)
   }
 
@@ -110,7 +119,7 @@ class GraphQLClient {
   }
 
   /**
-   * Subscribe to a GraphQL subscription using Server-Sent Events
+   * Subscribe to a GraphQL subscription using graphql-sse
    */
   subscribe(
     subscription: string,
@@ -118,48 +127,54 @@ class GraphQLClient {
     onData?: (data: unknown) => void,
     onError?: (error: Error) => void
   ): () => void {
-    if (!this.isInitialized) {
+    if (!this.isInitialized || !this.sseClient) {
       throw new Error('[GraphQLClient] Not initialized. Call initialize() first.')
     }
 
-    const url = new URL(this.endpoint)
-    url.searchParams.set('query', subscription)
-    if (variables) {
-      url.searchParams.set('variables', JSON.stringify(variables))
-    }
+    let unsubscribe: (() => void) | null = null
 
-    const eventSource = new EventSource(url.toString())
-
-    eventSource.onmessage = (event) => {
-      try {
-        const result = JSON.parse(event.data as string) as GraphQLResult
-        if (result.data && onData) {
-          onData(result.data)
-        }
-        if (result.errors) {
-          logger.warn('[GraphQLClient] Subscription errors', { errors: result.errors })
-          if (onError) {
-            onError(new Error(result.errors[0]?.message ?? 'Unknown GraphQL error'))
+    // Use graphql-sse client for subscriptions
+    try {
+      unsubscribe = this.sseClient.subscribe(
+        {
+          query: subscription,
+          ...(variables && { variables })
+        },
+        {
+          next: (result) => {
+            if (result.data && onData) {
+              onData(result.data)
+            }
+            if (result.errors) {
+              logger.warn('[GraphQLClient] Subscription errors', { errors: result.errors })
+              if (onError) {
+                onError(new Error(result.errors[0]?.message ?? 'Unknown GraphQL error'))
+              }
+            }
+          },
+          error: (error) => {
+            logger.error('[GraphQLClient] Subscription error', { error: String(error) })
+            if (onError) {
+              onError(error instanceof Error ? error : new Error(String(error)))
+            }
+          },
+          complete: () => {
+            logger.debug('[GraphQLClient] Subscription completed')
           }
         }
-      } catch (error) {
-        logger.error('[GraphQLClient] Failed to parse subscription data', { error: String(error) })
-        if (onError) {
-          onError(error as Error)
-        }
-      }
-    }
-
-    eventSource.onerror = () => {
-      logger.error('[GraphQLClient] Subscription error')
+      )
+    } catch (error) {
+      logger.error('[GraphQLClient] Failed to start subscription', { error: String(error) })
       if (onError) {
-        onError(new Error('Subscription connection error'))
+        onError(error instanceof Error ? error : new Error(String(error)))
       }
     }
 
     // Return unsubscribe function
     return () => {
-      eventSource.close()
+      if (unsubscribe) {
+        unsubscribe()
+      }
       logger.debug('[GraphQLClient] Subscription closed')
     }
   }

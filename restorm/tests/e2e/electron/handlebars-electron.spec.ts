@@ -93,7 +93,7 @@ test.describe('Handlebars Transformations (Electron)', () => {
   test.afterAll(() => {
     // Force kill Electron process (avoids unsaved changes dialog)
     try {
-      electronApp.process().kill('SIGKILL');
+    electronApp.process().kill('SIGKILL');
     } catch {
       // Ignore kill errors
     }

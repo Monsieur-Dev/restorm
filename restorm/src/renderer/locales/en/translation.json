@@ -283,6 +283,28 @@
     "confirmRemoveFavorite": "Are you sure you want to remove \"{{fileName}}\" from favorites?",
     "noFilesHint": "Open a file or create a new one to get started"
   },
+  "save": {
+    "title": "Save Options",
+    "mode": {
+      "label": "Save Mode",
+      "file": "Single File",
+      "folder": "Folder Structure",
+      "fileDescription": "Save everything in a single file",
+      "folderDescription": "Save as a folder structure with separate files"
+    },
+    "format": {
+      "label": "Format"
+    },
+    "preview": {
+      "label": "Structure Preview"
+    }
+  },
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "ok": "OK",
+    "close": "Close"
+  },
   "helpers": {
     "categories": {
       "comparison": "Comparison",

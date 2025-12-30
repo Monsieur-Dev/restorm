@@ -58,3 +58,10 @@ export type {
   SaveResult,
   LoadResult
 } from './PersistenceService'
+
+export {
+  graphQLSchemaGenerator,
+  inferGraphQLType,
+  createFieldDefinitions
+} from './GraphQLSchemaGenerator'
+export type { SchemaGeneratorConfig } from './GraphQLSchemaGenerator'

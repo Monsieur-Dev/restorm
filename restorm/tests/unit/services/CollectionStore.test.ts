@@ -5,17 +5,26 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 // Mock electron-core-ui/main to avoid Electron dependencies in tests
-vi.mock('electron-core-ui/main', () => ({
-  eventBusService: {
-    emit: vi.fn().mockResolvedValue(undefined)
-  },
-  logger: {
-    info: vi.fn(),
-    debug: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn()
+vi.mock('electron-core-ui/main', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>()
+  return {
+    ...actual,
+    eventBusService: {
+      emit: vi.fn().mockResolvedValue(undefined)
+    },
+    logger: {
+      info: vi.fn(),
+      debug: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn()
+    },
+    createPubSub: () => ({
+      publish: vi.fn(),
+      subscribe: vi.fn().mockReturnValue({ [Symbol.asyncIterator]: vi.fn() })
+    }),
+    serializeWithDecorators: vi.fn((_: unknown, data: unknown) => data)
   }
-}))
+})
 
 import { collectionStore } from '../../../src/main/services/CollectionStore'
 

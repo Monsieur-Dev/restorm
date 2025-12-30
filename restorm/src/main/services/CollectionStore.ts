@@ -2,50 +2,63 @@
  * Collection Store - Main process store for Restorm collections
  *
  * Manages the in-memory representation of collections, folders, requests, and environments.
- * Emits events when data changes for synchronization with the renderer process.
+ * Uses decorated model classes and publishes events via GraphQL PubSub.
  */
 
-import { eventBusService, logger } from 'electron-core-ui/main'
+import { eventBusService, logger, createPubSub, serializeWithDecorators } from 'electron-core-ui/main'
 import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from './DocumentEvents'
+import {
+  Folder,
+  EnvironmentFolder,
+  Environment,
+  KeyValue,
+  HTTPRequest,
+  GraphQLRequest,
+  GrpcRequest,
+  SoapRequest,
+  WebSocketRequest,
+  isEnvironmentFolder,
+  isAnyFolder,
+  type FolderItem,
+  type Request
+} from '../../shared/models'
 
 // ============================================================================
-// Types
+// PubSub Topics
 // ============================================================================
 
-/** Base document type */
-interface BaseDocument {
-  id: string
-  name: string
-  type?: string
-}
+export const PUBSUB_TOPICS = {
+  FOLDER_CREATED: 'FOLDER_CREATED',
+  FOLDER_UPDATED: 'FOLDER_UPDATED',
+  FOLDER_DELETED: 'FOLDER_DELETED',
+  REQUEST_CREATED: 'REQUEST_CREATED',
+  REQUEST_UPDATED: 'REQUEST_UPDATED',
+  REQUEST_DELETED: 'REQUEST_DELETED',
+  ENVIRONMENT_CREATED: 'ENVIRONMENT_CREATED',
+  ENVIRONMENT_UPDATED: 'ENVIRONMENT_UPDATED',
+  ENVIRONMENT_DELETED: 'ENVIRONMENT_DELETED',
+  CONTEXT_CHANGED: 'CONTEXT_CHANGED'
+} as const
 
-/** Environment type */
-interface Environment extends BaseDocument {
-  variables: { key: string; value: string; enabled?: boolean }[]
-  subEnvironments?: Environment[]
-}
+// Create PubSub instance for GraphQL subscriptions
+export const pubsub = createPubSub<{
+  [PUBSUB_TOPICS.FOLDER_CREATED]: [Folder | EnvironmentFolder]
+  [PUBSUB_TOPICS.FOLDER_UPDATED]: [Folder | EnvironmentFolder]
+  [PUBSUB_TOPICS.FOLDER_DELETED]: [string]
+  [PUBSUB_TOPICS.REQUEST_CREATED]: [Request]
+  [PUBSUB_TOPICS.REQUEST_UPDATED]: [Request]
+  [PUBSUB_TOPICS.REQUEST_DELETED]: [string]
+  [PUBSUB_TOPICS.ENVIRONMENT_CREATED]: [Environment]
+  [PUBSUB_TOPICS.ENVIRONMENT_UPDATED]: [Environment]
+  [PUBSUB_TOPICS.ENVIRONMENT_DELETED]: [string]
+  [PUBSUB_TOPICS.CONTEXT_CHANGED]: [string, { environmentId: string; variables: { key: string; value: string; resolved: string }[] }]
+}>()
 
-/** Folder type */
-interface Folder extends BaseDocument {
-  items: FolderItem[]
-  folderType?: 'standard' | 'environment'
-  environments?: Environment[]
-}
+// ============================================================================
+// Type for collection (root folder)
+// ============================================================================
 
-/** Request type */
-interface Request extends BaseDocument {
-  type: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket'
-  url?: string
-  method?: string
-  headers?: { key: string; value: string }[]
-  // ... other request properties
-}
-
-/** Folder item can be a folder or request */
-type FolderItem = Folder | Request
-
-/** Collection is the root folder */
-type Collection = Folder
+type Collection = EnvironmentFolder
 
 // ============================================================================
 // Store Class
@@ -89,7 +102,7 @@ class CollectionStore {
   /**
    * Find parent folder of an item
    */
-  findParentFolder(itemId: string): Folder | null {
+  findParentFolder(itemId: string): Folder | EnvironmentFolder | null {
     for (const collection of this.collections) {
       const parent = this.findParentInFolder(collection, itemId)
       if (parent) return parent
@@ -105,7 +118,8 @@ class CollectionStore {
    * Set all collections (used when loading from file)
    */
   setCollections(collections: Collection[], source: 'file-load' | 'user' = 'file-load'): void {
-    this.collections = collections
+    // Convert plain objects to class instances if needed
+    this.collections = collections.map(c => this.ensureEnvironmentFolderInstance(c))
     logger.info('[CollectionStore] Collections set', { count: collections.length, source })
   }
 
@@ -124,26 +138,37 @@ class CollectionStore {
   /**
    * Create a new folder
    */
-  createFolder(parentId: string | null, folder: Partial<Folder> & { name: string }): Folder {
-    const newFolder: Folder = {
-      ...folder,
-      id: folder.id ?? this.generateId(),
-      name: folder.name,
-      items: folder.items ?? []
-    } as Folder
+  createFolder(parentId: string | null, folderData: Partial<Folder> & { name: string }): Folder {
+    const newFolder = new Folder({
+      ...folderData,
+      id: folderData.id ?? this.generateId(),
+      name: folderData.name,
+      items: folderData.items ?? []
+    })
 
     if (parentId === null) {
-      // Add as root collection
-      this.collections.push(newFolder)
-    } else {
-      // Add to parent folder
-      const parent = this.findById(parentId) as Folder | null
-      if (parent && 'items' in parent) {
-        parent.items.push(newFolder)
-      }
+      // Create as EnvironmentFolder at root
+      const envFolder = new EnvironmentFolder({
+        id: newFolder.id,
+        name: newFolder.name,
+        documentation: newFolder.documentation,
+        notes: newFolder.notes,
+        tags: newFolder.tags,
+        items: [],
+        environments: []
+      })
+      this.collections.push(envFolder)
+      this.emitFolderCreated(envFolder, parentId)
+      return envFolder
     }
 
-    // Emit event
+    // Add to parent folder
+    const parent = this.findById(parentId)
+    if (parent && isAnyFolder(parent)) {
+      parent.items.push(newFolder)
+    }
+
+    // Emit events
     this.emitFolderCreated(newFolder, parentId)
     return newFolder
   }
@@ -151,9 +176,9 @@ class CollectionStore {
   /**
    * Update a folder
    */
-  updateFolder(id: string, updates: Partial<Folder>): Folder | null {
-    const folder = this.findById(id) as Folder | null
-    if (!folder || !('items' in folder)) return null
+  updateFolder(id: string, updates: Partial<Folder>): Folder | EnvironmentFolder | null {
+    const folder = this.findById(id)
+    if (!folder || !isAnyFolder(folder)) return null
 
     // Apply updates
     Object.assign(folder, updates)
@@ -191,9 +216,9 @@ class CollectionStore {
   /**
    * Move a folder to a new parent
    */
-  moveFolder(id: string, newParentId: string, index: number): Folder | null {
-    const folder = this.findById(id) as Folder | null
-    if (!folder || !('items' in folder)) return null
+  moveFolder(id: string, newParentId: string, index: number): Folder | EnvironmentFolder | null {
+    const folder = this.findById(id)
+    if (!folder || !isAnyFolder(folder)) return null
 
     // Remove from current parent
     const currentParent = this.findParentFolder(id)
@@ -211,8 +236,8 @@ class CollectionStore {
     }
 
     // Add to new parent
-    const newParent = this.findById(newParentId) as Folder | null
-    if (newParent && 'items' in newParent) {
+    const newParent = this.findById(newParentId)
+    if (newParent && isAnyFolder(newParent)) {
       newParent.items.splice(index, 0, folder)
     }
 
@@ -228,14 +253,12 @@ class CollectionStore {
   /**
    * Create a new request
    */
-  createRequest(parentId: string, request: Request): Request {
-    const newRequest: Request = {
-      ...request,
-      id: request.id || this.generateId()
-    }
+  createRequest(parentId: string, requestData: Partial<Request> & { type: Request['type']; name: string }): Request {
+    const newRequest = this.createRequestInstance(requestData)
+    newRequest.id = requestData.id ?? this.generateId()
 
-    const parent = this.findById(parentId) as Folder | null
-    if (parent && 'items' in parent) {
+    const parent = this.findById(parentId)
+    if (parent && isAnyFolder(parent)) {
       parent.items.push(newRequest)
     }
 
@@ -249,7 +272,7 @@ class CollectionStore {
    */
   updateRequest(id: string, updates: Partial<Request>): Request | null {
     const request = this.findById(id) as Request | null
-    if (!request?.type) return null
+    if (!request || !('type' in request) || isAnyFolder(request)) return null
 
     // Apply updates
     Object.assign(request, updates)
@@ -280,7 +303,7 @@ class CollectionStore {
    */
   moveRequest(id: string, newParentId: string, index: number): Request | null {
     const request = this.findById(id) as Request | null
-    if (!request?.type) return null
+    if (!request || !('type' in request) || isAnyFolder(request)) return null
 
     // Remove from current parent
     const currentParent = this.findParentFolder(id)
@@ -292,8 +315,8 @@ class CollectionStore {
     }
 
     // Add to new parent
-    const newParent = this.findById(newParentId) as Folder | null
-    if (newParent && 'items' in newParent) {
+    const newParent = this.findById(newParentId)
+    if (newParent && isAnyFolder(newParent)) {
       newParent.items.splice(index, 0, request)
     }
 
@@ -309,13 +332,13 @@ class CollectionStore {
   /**
    * Create a new environment
    */
-  createEnvironment(parentId: string, environment: Partial<Environment> & { name: string }, parentEnvironmentId?: string): Environment {
-    const newEnv: Environment = {
-      ...environment,
-      id: environment.id ?? this.generateId(),
-      name: environment.name,
-      variables: environment.variables ?? []
-    } as Environment
+  createEnvironment(parentId: string, environmentData: Partial<Environment> & { name: string }, parentEnvironmentId?: string): Environment {
+    const newEnv = new Environment({
+      ...environmentData,
+      id: environmentData.id ?? this.generateId(),
+      name: environmentData.name,
+      variables: environmentData.variables?.map(v => v instanceof KeyValue ? v : KeyValue.fromPlain(v)) ?? []
+    })
 
     if (parentEnvironmentId) {
       // Add as sub-environment
@@ -326,9 +349,8 @@ class CollectionStore {
       }
     } else {
       // Add to folder
-      const folder = this.findById(parentId) as Folder | null
-      if (folder?.folderType === 'environment') {
-        folder.environments ??= []
+      const folder = this.findById(parentId)
+      if (folder && isEnvironmentFolder(folder)) {
         folder.environments.push(newEnv)
       }
     }
@@ -367,13 +389,40 @@ class CollectionStore {
   }
 
   // ==========================================================================
+  // Serialization
+  // ==========================================================================
+
+  /**
+   * Serialize a folder for persistence (respecting @NonSerialised decorators)
+   */
+  serializeFolder(folder: Folder | EnvironmentFolder): Record<string, unknown> {
+    const constructor = isEnvironmentFolder(folder) ? EnvironmentFolder : Folder
+    return serializeWithDecorators(constructor, folder.toPlainObject())
+  }
+
+  /**
+   * Serialize a request for persistence
+   */
+  serializeRequest(request: Request): Record<string, unknown> {
+    const constructor = this.getRequestConstructor(request.type)
+    return serializeWithDecorators(constructor, request.toPlainObject())
+  }
+
+  /**
+   * Serialize an environment for persistence
+   */
+  serializeEnvironment(environment: Environment): Record<string, unknown> {
+    return serializeWithDecorators(Environment, environment.toPlainObject())
+  }
+
+  // ==========================================================================
   // Private Helpers
   // ==========================================================================
 
   private findInItems(items: FolderItem[], id: string): FolderItem | null {
     for (const item of items) {
       if (item.id === id) return item
-      if ('items' in item) {
+      if (isAnyFolder(item)) {
         const found = this.findInItems(item.items, id)
         if (found) return found
       }
@@ -381,8 +430,8 @@ class CollectionStore {
     return null
   }
 
-  private findEnvironmentInFolder(folder: Folder, id: string): Environment | null {
-    if (folder.environments) {
+  private findEnvironmentInFolder(folder: Folder | EnvironmentFolder, id: string): Environment | null {
+    if (isEnvironmentFolder(folder)) {
       for (const env of folder.environments) {
         if (env.id === id) return env
         const found = this.findInSubEnvironments(env.subEnvironments, id)
@@ -390,7 +439,7 @@ class CollectionStore {
       }
     }
     for (const item of folder.items) {
-      if ('items' in item) {
+      if (isAnyFolder(item)) {
         const found = this.findEnvironmentInFolder(item, id)
         if (found) return found
       }
@@ -408,10 +457,10 @@ class CollectionStore {
     return null
   }
 
-  private findParentInFolder(folder: Folder, itemId: string): Folder | null {
+  private findParentInFolder(folder: Folder | EnvironmentFolder, itemId: string): Folder | EnvironmentFolder | null {
     for (const item of folder.items) {
       if (item.id === itemId) return folder
-      if ('items' in item) {
+      if (isAnyFolder(item)) {
         const found = this.findParentInFolder(item, itemId)
         if (found) return found
       }
@@ -419,8 +468,8 @@ class CollectionStore {
     return null
   }
 
-  private deleteEnvironmentFromFolder(folder: Folder, id: string): boolean {
-    if (folder.environments) {
+  private deleteEnvironmentFromFolder(folder: Folder | EnvironmentFolder, id: string): boolean {
+    if (isEnvironmentFolder(folder)) {
       const index = folder.environments.findIndex(env => env.id === id)
       if (index !== -1) {
         folder.environments.splice(index, 1)
@@ -431,7 +480,7 @@ class CollectionStore {
       }
     }
     for (const item of folder.items) {
-      if ('items' in item) {
+      if (isAnyFolder(item)) {
         if (this.deleteEnvironmentFromFolder(item, id)) return true
       }
     }
@@ -455,28 +504,64 @@ class CollectionStore {
     return crypto.randomUUID()
   }
 
+  private ensureEnvironmentFolderInstance(obj: unknown): EnvironmentFolder {
+    if (obj instanceof EnvironmentFolder) return obj
+    return EnvironmentFolder.fromPlain(obj as Parameters<typeof EnvironmentFolder.fromPlain>[0])
+  }
+
+  private createRequestInstance(data: Partial<Request> & { type: Request['type'] }): Request {
+    switch (data.type) {
+      case 'http':
+        return HTTPRequest.fromPlain(data as Parameters<typeof HTTPRequest.fromPlain>[0])
+      case 'graphql':
+        return GraphQLRequest.fromPlain(data as Parameters<typeof GraphQLRequest.fromPlain>[0])
+      case 'grpc':
+        return GrpcRequest.fromPlain(data as Parameters<typeof GrpcRequest.fromPlain>[0])
+      case 'soap':
+        return SoapRequest.fromPlain(data as Parameters<typeof SoapRequest.fromPlain>[0])
+      case 'websocket':
+        return WebSocketRequest.fromPlain(data as Parameters<typeof WebSocketRequest.fromPlain>[0])
+      default:
+        // Default to HTTPRequest
+        return HTTPRequest.fromPlain(data as Parameters<typeof HTTPRequest.fromPlain>[0])
+    }
+  }
+
+  private getRequestConstructor(type: Request['type']): new (...args: unknown[]) => Request {
+    switch (type) {
+      case 'http': return HTTPRequest as new (...args: unknown[]) => Request
+      case 'graphql': return GraphQLRequest as new (...args: unknown[]) => Request
+      case 'grpc': return GrpcRequest as new (...args: unknown[]) => Request
+      case 'soap': return SoapRequest as new (...args: unknown[]) => Request
+      case 'websocket': return WebSocketRequest as new (...args: unknown[]) => Request
+      default: return HTTPRequest as new (...args: unknown[]) => Request
+    }
+  }
+
   // ==========================================================================
-  // Event Emission
+  // Event Emission (EventBus + PubSub)
   // ==========================================================================
 
-  private emitFolderCreated(folder: Folder, parentId: string | null): void {
+  private emitFolderCreated(folder: Folder | EnvironmentFolder, parentId: string | null): void {
     const payload: DocumentChangedPayload = {
       id: folder.id,
       type: 'folder',
-      document: folder,
+      document: folder.toPlainObject(),
       parentFolderId: parentId ?? undefined
     }
     void eventBusService.emit(DocumentEvents.FOLDER_CREATED, payload)
+    pubsub.publish(PUBSUB_TOPICS.FOLDER_CREATED, folder)
     logger.debug('[CollectionStore] Folder created', { id: folder.id, name: folder.name })
   }
 
-  private emitFolderUpdated(folder: Folder): void {
+  private emitFolderUpdated(folder: Folder | EnvironmentFolder): void {
     const payload: DocumentChangedPayload = {
       id: folder.id,
       type: 'folder',
-      document: folder
+      document: folder.toPlainObject()
     }
     void eventBusService.emit(DocumentEvents.FOLDER_UPDATED, payload)
+    pubsub.publish(PUBSUB_TOPICS.FOLDER_UPDATED, folder)
     logger.debug('[CollectionStore] Folder updated', { id: folder.id, name: folder.name })
   }
 
@@ -486,6 +571,7 @@ class CollectionStore {
       type: 'folder'
     }
     void eventBusService.emit(DocumentEvents.FOLDER_DELETED, payload)
+    pubsub.publish(PUBSUB_TOPICS.FOLDER_DELETED, id)
     logger.debug('[CollectionStore] Folder deleted', { id })
   }
 
@@ -493,10 +579,11 @@ class CollectionStore {
     const payload: DocumentChangedPayload = {
       id: request.id,
       type: 'request',
-      document: request,
+      document: request.toPlainObject(),
       parentFolderId: parentId
     }
     void eventBusService.emit(DocumentEvents.REQUEST_CREATED, payload)
+    pubsub.publish(PUBSUB_TOPICS.REQUEST_CREATED, request)
     logger.debug('[CollectionStore] Request created', { id: request.id, name: request.name })
   }
 
@@ -504,9 +591,10 @@ class CollectionStore {
     const payload: DocumentChangedPayload = {
       id: request.id,
       type: 'request',
-      document: request
+      document: request.toPlainObject()
     }
     void eventBusService.emit(DocumentEvents.REQUEST_UPDATED, payload)
+    pubsub.publish(PUBSUB_TOPICS.REQUEST_UPDATED, request)
     logger.debug('[CollectionStore] Request updated', { id: request.id, name: request.name })
   }
 
@@ -516,6 +604,7 @@ class CollectionStore {
       type: 'request'
     }
     void eventBusService.emit(DocumentEvents.REQUEST_DELETED, payload)
+    pubsub.publish(PUBSUB_TOPICS.REQUEST_DELETED, id)
     logger.debug('[CollectionStore] Request deleted', { id })
   }
 
@@ -523,11 +612,12 @@ class CollectionStore {
     const payload: DocumentChangedPayload = {
       id: env.id,
       type: 'environment',
-      document: env,
+      document: env.toPlainObject(),
       parentFolderId: parentId,
       parentEnvironmentId
     }
     void eventBusService.emit(DocumentEvents.ENVIRONMENT_CREATED, payload)
+    pubsub.publish(PUBSUB_TOPICS.ENVIRONMENT_CREATED, env)
     logger.debug('[CollectionStore] Environment created', { id: env.id, name: env.name })
   }
 
@@ -535,9 +625,10 @@ class CollectionStore {
     const payload: DocumentChangedPayload = {
       id: env.id,
       type: 'environment',
-      document: env
+      document: env.toPlainObject()
     }
     void eventBusService.emit(DocumentEvents.ENVIRONMENT_UPDATED, payload)
+    pubsub.publish(PUBSUB_TOPICS.ENVIRONMENT_UPDATED, env)
     logger.debug('[CollectionStore] Environment updated', { id: env.id, name: env.name })
   }
 
@@ -547,6 +638,7 @@ class CollectionStore {
       type: 'environment'
     }
     void eventBusService.emit(DocumentEvents.ENVIRONMENT_DELETED, payload)
+    pubsub.publish(PUBSUB_TOPICS.ENVIRONMENT_DELETED, id)
     logger.debug('[CollectionStore] Environment deleted', { id })
   }
 }
