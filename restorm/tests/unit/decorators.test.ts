@@ -38,7 +38,9 @@ describe('Decorator utilities', () => {
 
   describe('getNonSerialisedProperties', () => {
     it('should return empty set for class without decorators', () => {
-      class PlainClass {}
+      class PlainClass {
+        name = ''
+      }
       const props = getNonSerialisedProperties(PlainClass)
       expect(props.size).toBe(0)
     })
@@ -46,7 +48,9 @@ describe('Decorator utilities', () => {
 
   describe('serializeWithDecorators', () => {
     it('should keep all properties for class without NonSerialised', () => {
-      class PlainClass {}
+      class PlainClass {
+        name = ''
+      }
       const obj = { prop1: 'value', prop2: 42, prop3: true }
       const serialized = serializeWithDecorators(PlainClass, obj)
       
@@ -54,4 +58,3 @@ describe('Decorator utilities', () => {
     })
   })
 })
-

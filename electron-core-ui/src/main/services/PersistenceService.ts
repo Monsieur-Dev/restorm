@@ -252,7 +252,7 @@ export class PersistenceService {
 
   constructor(config?: Partial<PersistenceConfig>) {
     this.config = {
-      extension: config?.extension ?? 'restorm',
+      extension: config?.extension ?? 'json',
       format: config?.format ?? 'json5',
       mode: config?.mode ?? 'single-file',
       indexFileName: config?.indexFileName ?? '_index'
