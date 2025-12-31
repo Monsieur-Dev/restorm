@@ -18,6 +18,7 @@ import {
   type DocumentChangedPayload,
   type DocumentDeletedPayload
 } from './DocumentEvents'
+import { pubsub, PUBSUB_TOPICS } from './CollectionStore'
 
 /** Search categories configuration for Restorm */
 const RESTORM_SEARCH_CATEGORIES: Record<string, CategoryMeta> = {
@@ -200,6 +201,17 @@ function requestToSearchDocument(
 }
 
 /**
+ * Publish search index update to GraphQL subscribers
+ */
+function publishIndexUpdate(action: 'indexed' | 'removed', documentId: string, documentType: string): void {
+  pubsub.publish(PUBSUB_TOPICS.SEARCH_INDEX_UPDATED, {
+    action,
+    documentId,
+    documentType
+  })
+}
+
+/**
  * Recursively index a folder and all its contents
  */
 function indexFolderRecursively(folder: FolderData, parentPath: string[] = []): void {
@@ -207,6 +219,7 @@ function indexFolderRecursively(folder: FolderData, parentPath: string[] = []): 
 
   // Index the folder
   searchService.indexDocument(folderToSearchDocument(folder, parentPath))
+  publishIndexUpdate('indexed', folder.id, 'folder')
 
   // Index all items
   for (const item of folder.items) {
@@ -214,6 +227,7 @@ function indexFolderRecursively(folder: FolderData, parentPath: string[] = []): 
       indexFolderRecursively(item, currentPath)
     } else if (isRequest(item)) {
       searchService.indexDocument(requestToSearchDocument(item, folder.id, currentPath))
+      publishIndexUpdate('indexed', item.id, 'request')
     }
   }
 }
@@ -224,6 +238,7 @@ function indexFolderRecursively(folder: FolderData, parentPath: string[] = []): 
 function removeFolderRecursively(folder: FolderData): void {
   // Remove the folder
   searchService.removeDocument(folder.id)
+  publishIndexUpdate('removed', folder.id, 'folder')
 
   // Remove all items
   for (const item of folder.items) {
@@ -231,6 +246,7 @@ function removeFolderRecursively(folder: FolderData): void {
       removeFolderRecursively(item)
     } else {
       searchService.removeDocument(item.id)
+      publishIndexUpdate('removed', item.id, 'request')
     }
   }
 }
@@ -270,6 +286,7 @@ class SearchIndexService {
         logger.debug('[SearchIndexService] FOLDER_UPDATED', { id: payload.id })
         if (isFolder(payload.document)) {
           searchService.indexDocument(folderToSearchDocument(payload.document))
+          publishIndexUpdate('indexed', payload.id, 'folder')
         }
       })
     )
@@ -278,6 +295,7 @@ class SearchIndexService {
       eventBusService.subscribe<DocumentDeletedPayload>(DocumentEvents.FOLDER_DELETED, (payload) => {
         logger.debug('[SearchIndexService] FOLDER_DELETED', { id: payload.id })
         searchService.removeDocument(payload.id)
+        publishIndexUpdate('removed', payload.id, 'folder')
       })
     )
 
@@ -289,6 +307,7 @@ class SearchIndexService {
           searchService.indexDocument(
             requestToSearchDocument(payload.document, payload.parentFolderId)
           )
+          publishIndexUpdate('indexed', payload.id, 'request')
         }
       })
     )
@@ -300,6 +319,7 @@ class SearchIndexService {
           searchService.indexDocument(
             requestToSearchDocument(payload.document, payload.parentFolderId)
           )
+          publishIndexUpdate('indexed', payload.id, 'request')
         }
       })
     )
@@ -308,6 +328,7 @@ class SearchIndexService {
       eventBusService.subscribe<DocumentDeletedPayload>(DocumentEvents.REQUEST_DELETED, (payload) => {
         logger.debug('[SearchIndexService] REQUEST_DELETED', { id: payload.id })
         searchService.removeDocument(payload.id)
+        publishIndexUpdate('removed', payload.id, 'request')
       })
     )
 

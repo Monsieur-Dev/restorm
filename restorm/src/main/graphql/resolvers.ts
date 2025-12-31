@@ -254,6 +254,10 @@ export const resolvers = {
         return pubsub.subscribe(PUBSUB_TOPICS.CONTEXT_CHANGED)
       },
       resolve: (payload: unknown): unknown => ({ contextChanged: payload })
+    },
+    searchIndexUpdated: {
+      subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_TOPICS.SEARCH_INDEX_UPDATED),
+      resolve: (payload: unknown): unknown => ({ searchIndexUpdated: payload })
     }
   }
 }

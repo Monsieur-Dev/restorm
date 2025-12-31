@@ -37,7 +37,8 @@ export const PUBSUB_TOPICS = {
   ENVIRONMENT_CREATED: 'ENVIRONMENT_CREATED',
   ENVIRONMENT_UPDATED: 'ENVIRONMENT_UPDATED',
   ENVIRONMENT_DELETED: 'ENVIRONMENT_DELETED',
-  CONTEXT_CHANGED: 'CONTEXT_CHANGED'
+  CONTEXT_CHANGED: 'CONTEXT_CHANGED',
+  SEARCH_INDEX_UPDATED: 'SEARCH_INDEX_UPDATED'
 } as const
 
 // Create PubSub instance for GraphQL subscriptions
@@ -52,6 +53,7 @@ export const pubsub = createPubSub<{
   [PUBSUB_TOPICS.ENVIRONMENT_UPDATED]: [Environment]
   [PUBSUB_TOPICS.ENVIRONMENT_DELETED]: [string]
   [PUBSUB_TOPICS.CONTEXT_CHANGED]: [string, { environmentId: string; variables: { key: string; value: string; resolved: string }[] }]
+  [PUBSUB_TOPICS.SEARCH_INDEX_UPDATED]: [string, { action: 'indexed' | 'removed'; documentId: string; documentType: string }]
 }>()
 
 // ============================================================================

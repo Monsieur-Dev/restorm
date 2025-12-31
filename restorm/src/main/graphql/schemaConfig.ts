@@ -275,6 +275,12 @@ type Mutation {
 
   // Subscription type (matches resolvers.ts)
   const subscriptionType = `
+type SearchIndexUpdate {
+  action: String!
+  documentId: String!
+  documentType: String!
+}
+
 type Subscription {
   folderCreated: Folder!
   folderUpdated: Folder!
@@ -286,6 +292,7 @@ type Subscription {
   environmentUpdated: Environment!
   environmentDeleted: String!
   contextChanged(environmentId: String!): ResolvedContext!
+  searchIndexUpdated: SearchIndexUpdate!
 }`
   parts.push(subscriptionType)
 
