@@ -1,251 +1,227 @@
 /**
  * Schema Configuration for Restorm
  *
- * Registers all Restorm model classes with the GraphQL schema generator.
- * The schema is then auto-generated based on decorator metadata.
+ * Defines the GraphQL schema for Restorm.
  */
-
-import {
-  graphQLSchemaGenerator,
-  createFieldDefinitions
-} from 'electron-core-ui/main'
-
-import {
-  KeyValue,
-  Environment,
-  Folder,
-  EnvironmentFolder,
-  HTTPRequest,
-  GraphQLRequest,
-  GrpcRequest,
-  SoapRequest,
-  WebSocketRequest
-} from '../../shared/models'
-
-/**
- * Register all enums used in the schema
- */
-function registerEnums(): void {
-  graphQLSchemaGenerator.registerEnum('HTTPMethod', [
-    'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'
-  ])
-
-  graphQLSchemaGenerator.registerEnum('RequestType', [
-    'http', 'graphql', 'grpc', 'soap', 'websocket'
-  ])
-
-  graphQLSchemaGenerator.registerEnum('GraphQLOperationType', [
-    'query', 'mutation', 'subscription'
-  ])
-
-  graphQLSchemaGenerator.registerEnum('GrpcCallType', [
-    'unary', 'serverStreaming', 'clientStreaming', 'bidirectional'
-  ])
-
-  graphQLSchemaGenerator.registerEnum('WebSocketProtocol', [
-    'websocket', 'socketio', 'mqtt'
-  ])
-
-  graphQLSchemaGenerator.registerEnum('HTTPBodyType', [
-    'text', 'file', 'formData', 'xWwwFormUrlEncoded'
-  ])
-}
-
-/**
- * Register all model classes with field definitions
- */
-function registerClasses(): void {
-  // KeyValue
-  graphQLSchemaGenerator.registerClass(
-    KeyValue,
-    'KeyValue',
-    createFieldDefinitions(KeyValue.prototype, {
-      id: { type: 'String', nullable: true },
-      key: { type: 'String' },
-      value: { type: 'String' },
-      description: { type: 'String', nullable: true },
-      enabled: { type: 'Boolean', nullable: true }
-    })
-  )
-
-  // Environment
-  graphQLSchemaGenerator.registerClass(
-    Environment,
-    'Environment',
-    createFieldDefinitions(Environment.prototype, {
-      id: { type: 'String' },
-      name: { type: 'String' },
-      variables: { type: 'KeyValue', isArray: true },
-      subEnvironments: { type: 'Environment', isArray: true, nullable: true }
-    })
-  )
-
-  // Folder
-  graphQLSchemaGenerator.registerClass(
-    Folder,
-    'Folder',
-    createFieldDefinitions(Folder.prototype, {
-      id: { type: 'String' },
-      name: { type: 'String' },
-      documentation: { type: 'String', nullable: true },
-      notes: { type: 'String', nullable: true },
-      tags: { type: 'String', isArray: true },
-      items: { type: 'FolderItem', isArray: true }
-    })
-  )
-
-  // EnvironmentFolder
-  graphQLSchemaGenerator.registerClass(
-    EnvironmentFolder,
-    'EnvironmentFolder',
-    createFieldDefinitions(EnvironmentFolder.prototype, {
-      id: { type: 'String' },
-      name: { type: 'String' },
-      folderType: { type: 'String' },
-      documentation: { type: 'String', nullable: true },
-      notes: { type: 'String', nullable: true },
-      tags: { type: 'String', isArray: true },
-      environments: { type: 'Environment', isArray: true },
-      items: { type: 'FolderItem', isArray: true }
-    })
-  )
-
-  // HTTPRequest
-  graphQLSchemaGenerator.registerClass(
-    HTTPRequest,
-    'HTTPRequest',
-    createFieldDefinitions(HTTPRequest.prototype, {
-      id: { type: 'String' },
-      name: { type: 'String' },
-      type: { type: 'RequestType' },
-      method: { type: 'HTTPMethod' },
-      url: { type: 'String' },
-      headers: { type: 'KeyValue', isArray: true },
-      params: { type: 'KeyValue', isArray: true },
-      pathParams: { type: 'KeyValue', isArray: true, nullable: true },
-      body: { type: 'JSON', nullable: true },
-      documentation: { type: 'String', nullable: true },
-      notes: { type: 'String', nullable: true },
-      tags: { type: 'String', isArray: true },
-      deprecated: { type: 'Boolean', nullable: true }
-    })
-  )
-
-  // GraphQLRequest
-  graphQLSchemaGenerator.registerClass(
-    GraphQLRequest,
-    'GraphQLRequest',
-    createFieldDefinitions(GraphQLRequest.prototype, {
-      id: { type: 'String' },
-      name: { type: 'String' },
-      type: { type: 'RequestType' },
-      url: { type: 'String' },
-      operationType: { type: 'GraphQLOperationType' },
-      query: { type: 'String' },
-      variables: { type: 'String', nullable: true },
-      headers: { type: 'KeyValue', isArray: true },
-      documentation: { type: 'String', nullable: true },
-      notes: { type: 'String', nullable: true },
-      tags: { type: 'String', isArray: true }
-    })
-  )
-
-  // GrpcRequest
-  graphQLSchemaGenerator.registerClass(
-    GrpcRequest,
-    'GrpcRequest',
-    createFieldDefinitions(GrpcRequest.prototype, {
-      id: { type: 'String' },
-      name: { type: 'String' },
-      type: { type: 'RequestType' },
-      url: { type: 'String' },
-      service: { type: 'String' },
-      method: { type: 'String' },
-      callType: { type: 'GrpcCallType' },
-      requestMessage: { type: 'String', nullable: true },
-      metadata: { type: 'KeyValue', isArray: true },
-      documentation: { type: 'String', nullable: true },
-      notes: { type: 'String', nullable: true },
-      tags: { type: 'String', isArray: true }
-    })
-  )
-
-  // SoapRequest
-  graphQLSchemaGenerator.registerClass(
-    SoapRequest,
-    'SoapRequest',
-    createFieldDefinitions(SoapRequest.prototype, {
-      id: { type: 'String' },
-      name: { type: 'String' },
-      type: { type: 'RequestType' },
-      url: { type: 'String' },
-      soapAction: { type: 'String', nullable: true },
-      service: { type: 'String', nullable: true },
-      operation: { type: 'String', nullable: true },
-      body: { type: 'String', nullable: true },
-      headers: { type: 'KeyValue', isArray: true },
-      documentation: { type: 'String', nullable: true },
-      notes: { type: 'String', nullable: true },
-      tags: { type: 'String', isArray: true }
-    })
-  )
-
-  // WebSocketRequest
-  graphQLSchemaGenerator.registerClass(
-    WebSocketRequest,
-    'WebSocketRequest',
-    createFieldDefinitions(WebSocketRequest.prototype, {
-      id: { type: 'String' },
-      name: { type: 'String' },
-      type: { type: 'RequestType' },
-      url: { type: 'String' },
-      protocol: { type: 'WebSocketProtocol' },
-      event: { type: 'String', nullable: true },
-      message: { type: 'String', nullable: true },
-      headers: { type: 'KeyValue', isArray: true },
-      documentation: { type: 'String', nullable: true },
-      notes: { type: 'String', nullable: true },
-      tags: { type: 'String', isArray: true }
-    })
-  )
-}
-
-/**
- * Register union types
- */
-function registerUnions(): void {
-  graphQLSchemaGenerator.registerUnion('Request', [
-    'HTTPRequest', 'GraphQLRequest', 'GrpcRequest', 'SoapRequest', 'WebSocketRequest'
-  ])
-
-  graphQLSchemaGenerator.registerUnion('FolderItem', [
-    'Folder', 'EnvironmentFolder', 'HTTPRequest', 'GraphQLRequest', 'GrpcRequest', 'SoapRequest', 'WebSocketRequest'
-  ])
-}
-
-/**
- * Initialize the schema configuration
- */
-export function initializeSchemaConfig(): void {
-  graphQLSchemaGenerator.clear()
-  registerEnums()
-  registerClasses()
-  registerUnions()
-}
 
 /**
  * Generate the GraphQL schema string
  */
 export function generateRestormSchema(): string {
-  initializeSchemaConfig()
 
-  // Generate base schema
-  const baseSchema = graphQLSchemaGenerator.generateSchema()
+  // Generate base types (scalars, enums, objects, unions, inputs)
+  // but NOT Query/Mutation/Subscription (we define those manually)
+  const parts: string[] = []
 
-  // Add SearchResult type
-  const searchResultType = graphQLSchemaGenerator.generateSearchResultType()
+  // Scalars
+  parts.push('scalar JSON')
 
-  // Add context types (specific to Restorm)
+  // Enums
+  const enums = `
+enum HTTPMethod {
+  GET
+  POST
+  PUT
+  PATCH
+  DELETE
+  HEAD
+  OPTIONS
+}
+
+enum RequestType {
+  http
+  graphql
+  grpc
+  soap
+  websocket
+}
+
+enum GraphQLOperationType {
+  query
+  mutation
+  subscription
+}
+
+enum GrpcCallType {
+  unary
+  serverStreaming
+  clientStreaming
+  bidirectional
+}
+
+enum WebSocketProtocol {
+  websocket
+  socketio
+  mqtt
+}
+
+enum HTTPBodyType {
+  text
+  file
+  formData
+  xWwwFormUrlEncoded
+}`
+  parts.push(enums)
+
+  // Object types
+  const objectTypes = `
+type KeyValue {
+  id: String
+  key: String!
+  value: String!
+  description: String
+  enabled: Boolean
+}
+
+type Environment {
+  id: String!
+  name: String!
+  variables: [KeyValue!]!
+  subEnvironments: [Environment!]
+}
+
+type EnvironmentFolder {
+  id: String!
+  name: String!
+  folderType: String!
+  documentation: String
+  notes: String
+  tags: [String!]!
+  environments: [Environment!]!
+  items: [FolderItem!]!
+}
+
+type Folder {
+  id: String!
+  name: String!
+  documentation: String
+  notes: String
+  tags: [String!]!
+  configuration: JSON
+  items: [FolderItem!]!
+}
+
+type HTTPRequest {
+  id: String!
+  name: String!
+  type: RequestType!
+  method: HTTPMethod!
+  url: String!
+  headers: [KeyValue!]!
+  params: [KeyValue!]!
+  pathParams: [KeyValue!]
+  body: JSON
+  documentation: String
+  notes: String
+  tags: [String!]!
+  deprecated: Boolean
+}
+
+type GraphQLRequest {
+  id: String!
+  name: String!
+  type: RequestType!
+  url: String!
+  operationType: GraphQLOperationType!
+  query: String!
+  variables: String
+  headers: [KeyValue!]!
+  documentation: String
+  notes: String
+  tags: [String!]!
+}
+
+type GrpcRequest {
+  id: String!
+  name: String!
+  type: RequestType!
+  url: String!
+  service: String!
+  method: String!
+  callType: GrpcCallType!
+  requestMessage: String
+  metadata: [KeyValue!]!
+  documentation: String
+  notes: String
+  tags: [String!]!
+}
+
+type SoapRequest {
+  id: String!
+  name: String!
+  type: RequestType!
+  url: String!
+  soapAction: String
+  service: String
+  operation: String
+  body: String
+  headers: [KeyValue!]!
+  documentation: String
+  notes: String
+  tags: [String!]!
+}
+
+type WebSocketRequest {
+  id: String!
+  name: String!
+  type: RequestType!
+  url: String!
+  protocol: WebSocketProtocol!
+  event: String
+  message: String
+  headers: [KeyValue!]!
+  documentation: String
+  notes: String
+  tags: [String!]!
+}`
+  parts.push(objectTypes)
+
+  // Union types
+  parts.push('union Request = HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest')
+  parts.push('union FolderItem = Folder | EnvironmentFolder | HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest')
+
+  // Input types
+  const inputTypes = `
+input KeyValueInput {
+  id: String
+  key: String!
+  value: String!
+  description: String
+  enabled: Boolean
+}
+
+input EnvironmentInput {
+  id: String
+  name: String!
+  variables: [KeyValueInput!]!
+  subEnvironments: [EnvironmentInput!]
+}
+
+input FolderInput {
+  id: String
+  name: String!
+  documentation: String
+  notes: String
+  tags: [String!]
+}
+
+input HTTPRequestInput {
+  id: String
+  name: String!
+  type: RequestType!
+  method: HTTPMethod!
+  url: String!
+  headers: [KeyValueInput!]
+  params: [KeyValueInput!]
+  pathParams: [KeyValueInput!]
+  body: JSON
+  documentation: String
+  notes: String
+  tags: [String!]
+}`
+  parts.push(inputTypes)
+
+  // Context types
   const contextTypes = `
 type ResolvedVariable {
   key: String!
@@ -264,6 +240,54 @@ type ResolvedURL {
   original: String!
   resolved: String!
 }`
+  parts.push(contextTypes)
 
-  return `${baseSchema}\n\n${searchResultType}\n${contextTypes}`
+  // Query type (matches resolvers.ts)
+  const queryType = `
+type Query {
+  collections: [EnvironmentFolder!]!
+  folder(id: String!): Folder
+  environmentFolder(id: String!): EnvironmentFolder
+  request(id: String!): Request
+  environment(id: String!): Environment
+  resolvedContext(environmentId: String!): ResolvedContext
+  resolvedURL(requestId: String!, environmentId: String!): ResolvedURL
+  search(query: String!, limit: Int): [Request!]!
+}`
+  parts.push(queryType)
+
+  // Mutation type (matches resolvers.ts)
+  const mutationType = `
+type Mutation {
+  createFolder(parentId: String!, input: FolderInput!): Folder!
+  updateFolder(id: String!, input: FolderInput!): Folder!
+  deleteFolder(id: String!): Boolean!
+  moveFolder(id: String!, newParentId: String!, index: Int!): Folder!
+  createRequest(parentId: String!, input: HTTPRequestInput!): HTTPRequest!
+  updateRequest(id: String!, input: HTTPRequestInput!): HTTPRequest!
+  deleteRequest(id: String!): Boolean!
+  moveRequest(id: String!, newParentId: String!, index: Int!): HTTPRequest!
+  createEnvironment(parentId: String!, input: EnvironmentInput!): Environment!
+  updateEnvironment(id: String!, input: EnvironmentInput!): Environment!
+  deleteEnvironment(id: String!): Boolean!
+}`
+  parts.push(mutationType)
+
+  // Subscription type (matches resolvers.ts)
+  const subscriptionType = `
+type Subscription {
+  folderCreated: Folder!
+  folderUpdated: Folder!
+  folderDeleted: String!
+  requestCreated: Request!
+  requestUpdated: Request!
+  requestDeleted: String!
+  environmentCreated: Environment!
+  environmentUpdated: Environment!
+  environmentDeleted: String!
+  contextChanged(environmentId: String!): ResolvedContext!
+}`
+  parts.push(subscriptionType)
+
+  return parts.join('\n\n')
 }
