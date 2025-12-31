@@ -25,6 +25,7 @@ import {
   type DocumentDeletedPayload
 } from './DocumentEvents'
 import { registerHandlebarsHelpers } from '../utils/handlebarsHelpers'
+import { pubsub, PUBSUB_TOPICS } from './CollectionStore'
 
 // ============================================================================
 // Types and Interfaces
@@ -459,11 +460,24 @@ class ContextService {
     // Store the result
     this.transformedContexts.set(envId, finalContext)
 
-    // logger.debug('[ContextService] Calculated context', {
-    //   id: envId,
-    //   contextKeys: Object.keys(finalContext),
-    //   variableResultsCount: meta.rawVariables.filter(kv => kv.id).length
-    // })
+    // Publish context change to GraphQL subscribers
+    this.publishContextChanged(envId, finalContext)
+  }
+
+  /**
+   * Publish context change to GraphQL subscribers
+   */
+  private publishContextChanged(environmentId: string, context: TransformedContext): void {
+    const variables = Object.entries(context).map(([key, value]) => ({
+      key,
+      value,
+      resolved: value
+    }))
+
+    pubsub.publish(PUBSUB_TOPICS.CONTEXT_CHANGED, {
+      environmentId,
+      variables
+    })
   }
 
   /**
