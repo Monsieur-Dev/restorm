@@ -6,7 +6,7 @@ test.describe('Open Folder from Command Line', () => {
   let electronApp: ElectronApplication;
   let page: Page;
   const restormRoot = resolve(__dirname, '../../..');
-  const petstoreFolderPath = join(restormRoot, 'Samples/Petstore');
+  const petstoreFolderPath = join(restormRoot, 'tests/e2e/samples/Petstore');
 
   test.beforeEach(async () => {
     const electronExePath = electronPath as unknown as string;

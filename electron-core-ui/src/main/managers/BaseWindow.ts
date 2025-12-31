@@ -1,4 +1,4 @@
-import { BrowserWindow, screen, BrowserWindowConstructorOptions, ipcMain, nativeImage, Menu } from "electron"
+import { app, BrowserWindow, screen, BrowserWindowConstructorOptions, ipcMain, nativeImage, Menu } from "electron"
 import { join } from "path"
 import { getStorageService, logger } from "../services"
 import { WindowConfiguration, WindowState, isDevToolsEnabled } from "./WindowManager"
@@ -568,25 +568,28 @@ export abstract class BaseWindow {
         logger.info(`BaseWindow: did-finish-load in ${(performance.now() - loadStart).toFixed(2)}ms`)
       })
       
-      // Load URL if provided, otherwise load file via app:// protocol
+      // Load URL if provided, otherwise load file
       if (this.configuration.url) {
         logger.info(`BaseWindow: Loading URL ${this.configuration.url}...`)
         window.loadURL(this.configuration.url).catch((error: unknown) => {
           logger.error('Failed to load URL', { error: String(error) })
         })
-      } else {
-        // Use app:// protocol to serve files - this allows absolute paths like /imgs/logo.png to work
-        // The protocol handler resolves paths relative to the renderer directory
+      } else if (app.isPackaged) {
+        // In production, use app:// protocol for absolute paths to work
         const fileName = this.configuration.file.split('/').pop() ?? 'index.html'
         const appUrl = `app://./${fileName}`
-        logger.info(`BaseWindow: Loading via app:// protocol: ${appUrl} (file: ${this.configuration.file})...`)
+        logger.info(`BaseWindow: Loading via app:// protocol: ${appUrl}...`)
         window.loadURL(appUrl).catch((error: unknown) => {
           logger.error('Failed to load app:// URL', { error: String(error) })
-          // Fallback to file:// if app:// fails
-          logger.info(`BaseWindow: Falling back to loadFile: ${this.configuration.file}`)
           window.loadFile(this.configuration.file).catch((err: unknown) => {
             logger.error('Failed to load file', { error: String(err) })
           })
+        })
+      } else {
+        // In development/test, use loadFile directly to avoid protocol issues
+        logger.info(`BaseWindow: Loading file: ${this.configuration.file}...`)
+        window.loadFile(this.configuration.file).catch((error: unknown) => {
+          logger.error('Failed to load file', { error: String(error) })
         })
       }
     }
