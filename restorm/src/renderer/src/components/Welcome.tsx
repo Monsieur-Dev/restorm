@@ -12,13 +12,13 @@ export const Welcome: React.FC = () => {
   const {
     recentFiles,
     favorites,
-    open: openFile,
     toggleFavorite
   } = useFileService()
 
   const handleOpenFile = useCallback((path: string) => {
-    void openFile(path)
-  }, [openFile])
+    // Use restorm:open-path which handles both files and folders
+    void window.restorm?.file.openPath(path)
+  }, [])
 
   const handleToggleFavorite = useCallback((path: string, fileName: string, isCurrentlyFavorite: boolean, event: React.MouseEvent) => {
     event.stopPropagation() // Prevent opening the file

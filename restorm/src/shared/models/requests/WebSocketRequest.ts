@@ -13,7 +13,7 @@ import type { WebSocketProtocol, RequestType, RuntimeId, Icon } from '../types'
 /**
  * WebSocket request definition with protocol, event, and message.
  */
-@fileNaming({ pattern: '{index} - WS - {name}', nameProperty: 'name' })
+@fileNaming({ pattern: '{index} - WS - {name}', nameProperty: 'name', idProperty: 'id' })
 export class WebSocketRequest extends BaseRequest {
   /** Request type discriminator */
   readonly type: RequestType = 'websocket'

@@ -1,0 +1,17 @@
+type: websocket
+name: receiveRoomMessage
+documentation: Receive message from a room
+tags:
+  - subscribe
+  - socketio
+url: ws://localhost:3001
+protocol: socketio
+event: room-message
+message: |-
+  {
+    "from": "",
+    "room": "",
+    "message": "",
+    "timestamp": 0
+  }
+headers: []

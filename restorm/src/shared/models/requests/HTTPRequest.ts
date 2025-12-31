@@ -21,7 +21,7 @@ export interface HTTPRequestBody {
 /**
  * HTTP request definition with method, URL, headers, params, and body.
  */
-@fileNaming({ pattern: '{index} - {type} - {name}', typeProperty: 'method', nameProperty: 'name' })
+@fileNaming({ pattern: '{index} - {type} - {name}', typeProperty: 'method', nameProperty: 'name', idProperty: 'id' })
 export class HTTPRequest extends BaseRequest {
   /** Request type discriminator */
   readonly type: RequestType = 'http'

@@ -1,0 +1,14 @@
+type: grpc
+name: Logout
+documentation: Logout user
+tags:
+  - unary
+url: '{{baseUrl}}'
+service: petstore.UserService
+method: Logout
+callType: unary
+requestMessage: |-
+  {
+    "token": ""
+  }
+metadata: []

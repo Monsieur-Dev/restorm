@@ -1,0 +1,17 @@
+type: graphql
+name: updateUser
+documentation: 'GraphQL mutation: updateUser'
+tags:
+  - mutation
+url: '{{baseUrl}}'
+operationType: mutation
+query: |-
+  mutation {
+    updateUser(input: "") {
+      # Add fields here
+    }
+  }
+headers:
+  - key: Content-Type
+    value: application/json
+variables: '{}'

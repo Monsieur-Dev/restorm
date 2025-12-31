@@ -1,0 +1,17 @@
+type: graphql
+name: petsByStatus
+documentation: 'GraphQL query: petsByStatus'
+tags:
+  - query
+url: '{{baseUrl}}'
+operationType: query
+query: |-
+  query {
+    petsByStatus(status: "") {
+      # Add fields here
+    }
+  }
+headers:
+  - key: Content-Type
+    value: application/json
+variables: '{}'

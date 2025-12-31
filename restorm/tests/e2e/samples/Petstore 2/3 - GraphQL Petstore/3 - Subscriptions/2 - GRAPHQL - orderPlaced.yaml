@@ -1,0 +1,16 @@
+type: graphql
+name: orderPlaced
+documentation: 'GraphQL subscription: orderPlaced'
+tags:
+  - subscription
+url: '{{baseUrl}}'
+operationType: subscription
+query: |-
+  subscription {
+    orderPlaced {
+      # Add fields here
+    }
+  }
+headers:
+  - key: Content-Type
+    value: application/json

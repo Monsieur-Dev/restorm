@@ -41,9 +41,10 @@ declare global {
       onSaveAndClose: (callback: () => void) => (() => void)
       file: {
         saveAsFile: (data: unknown, format: 'json' | 'yaml' | 'json5') => Promise<SaveResult>
-        saveAsFolder: (data: unknown, format: 'json' | 'yaml' | 'json5') => Promise<SaveResult>
-        openFolder: () => Promise<{ success: boolean; content?: unknown; path?: string }>
+        saveAsFolder: (data: unknown, format: 'json' | 'yaml' | 'json5', targetPath?: string) => Promise<SaveResult>
+        openFolder: () => Promise<{ success: boolean; content?: unknown; path?: string; format?: 'json' | 'yaml' | 'json5' }>
         showFolderDialog: () => Promise<{ canceled: boolean; filePath?: string }>
+        openPath: (path: string) => Promise<{ success: boolean; isDirectory?: boolean; content?: unknown; path?: string; format?: 'json' | 'yaml' | 'json5' }>
       }
       context: {
         getAllTransformResults: () => Promise<Record<string, VariableTransformResult>>

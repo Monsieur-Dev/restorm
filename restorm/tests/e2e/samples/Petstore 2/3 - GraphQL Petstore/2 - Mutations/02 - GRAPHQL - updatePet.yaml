@@ -1,0 +1,17 @@
+type: graphql
+name: updatePet
+documentation: 'GraphQL mutation: updatePet'
+tags:
+  - mutation
+url: '{{baseUrl}}'
+operationType: mutation
+query: |-
+  mutation {
+    updatePet(input: "") {
+      # Add fields here
+    }
+  }
+headers:
+  - key: Content-Type
+    value: application/json
+variables: '{}'

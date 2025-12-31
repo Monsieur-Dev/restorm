@@ -1,0 +1,56 @@
+type: http
+name: Updates a pet in the store with form data
+documentation: |-
+  # Updates a pet in the store with form data
+
+  **Operation ID:** `updatePetWithForm`
+
+  ## Consumes
+
+  - `application/x-www-form-urlencoded`
+
+  ## Produces
+
+  - `application/json`
+  - `application/xml`
+
+  ## Parameters
+
+  | Name | Location | Type | Required | Description |
+  |------|----------|------|----------|-------------|
+  | `petId` | path | integer (int64) | Yes | ID of pet that needs to be updated |
+  | `name` | formData | string | No | Updated name of the pet |
+  | `status` | formData | string | No | Updated status of the pet |
+
+  ## Responses
+
+  ### 405
+  Invalid input
+
+
+
+  ## Security
+
+  - **petstore_auth**: `write:pets`, `read:pets`
+tags:
+  - pet
+method: POST
+url: '{{baseUrl}}/api/pet/{{petId}}'
+headers: []
+params: []
+pathParams:
+  - key: petId
+    value: ''
+    description: ID of pet that needs to be updated
+    enabled: true
+body:
+  type: x-www-form-urlencoded
+  fields:
+    - key: name
+      value: ''
+      description: Updated name of the pet
+      enabled: true
+    - key: status
+      value: ''
+      description: Updated status of the pet
+      enabled: true

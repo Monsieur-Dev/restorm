@@ -13,7 +13,7 @@ import type { RequestType, RuntimeId, Icon } from '../types'
 /**
  * SOAP request definition with service, operation, and body.
  */
-@fileNaming({ pattern: '{index} - SOAP - {name}', nameProperty: 'name' })
+@fileNaming({ pattern: '{index} - SOAP - {name}', nameProperty: 'name', idProperty: 'id' })
 export class SoapRequest extends BaseRequest {
   /** Request type discriminator */
   readonly type: RequestType = 'soap'

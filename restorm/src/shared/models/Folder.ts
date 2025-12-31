@@ -17,7 +17,7 @@ import type { RuntimeId, Icon, FolderConfiguration, BaseFolderItem } from './typ
  */
 @trackable()
 @searchable()
-@fileNaming({ pattern: '{index} - {name}', nameProperty: 'name' })
+@fileNaming({ pattern: '{index} - {name}', nameProperty: 'name', idProperty: 'id' })
 export class Folder {
   /** Runtime identifier (generated at runtime, not persisted) */
   @NonSerialised()

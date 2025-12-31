@@ -1,0 +1,5 @@
+name: user
+documentation: "# user\r\n\r\nOperations about user\r\n\r\n## External Documentation\r\n\r\n[Find out more about our store](http://swagger.io)"
+tags:
+  - user
+configuration: {}

@@ -1,0 +1,52 @@
+type: http
+name: Deletes a pet
+documentation: |-
+  # Deletes a pet
+
+  **Operation ID:** `deletePet`
+
+  ## Produces
+
+  - `application/json`
+  - `application/xml`
+
+  ## Parameters
+
+  | Name | Location | Type | Required | Description |
+  |------|----------|------|----------|-------------|
+  | `api_key` | header | string | No |  |
+  | `petId` | path | integer (int64) | Yes | Pet id to delete |
+
+  ## Responses
+
+  ### 400
+  Invalid ID supplied
+
+
+
+  ### 404
+  Pet not found
+
+
+
+  ## Security
+
+  - **petstore_auth**: `write:pets`, `read:pets`
+tags:
+  - pet
+method: DELETE
+url: '{{baseUrl}}/api/pet/{{petId}}'
+headers:
+  - key: api_key
+    value: ''
+    description: ''
+    enabled: true
+params: []
+pathParams:
+  - key: petId
+    value: ''
+    description: Pet id to delete
+    enabled: true
+body:
+  type: text
+  content: ''

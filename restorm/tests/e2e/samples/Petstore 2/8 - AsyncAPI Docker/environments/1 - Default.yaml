@@ -1,0 +1,4 @@
+name: Default
+variables:
+  - key: baseUrl
+    value: localhost:1883

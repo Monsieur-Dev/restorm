@@ -372,6 +372,8 @@ export interface FileNamingConfig {
   typeProperty?: string
   /** Property to use for the 'name' placeholder */
   nameProperty?: string
+  /** Property to use as unique identifier for file/folder tracking (default: 'id') */
+  idProperty?: string
 }
 
 /**

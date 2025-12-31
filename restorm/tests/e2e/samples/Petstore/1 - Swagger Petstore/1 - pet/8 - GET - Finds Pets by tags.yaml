@@ -1,0 +1,49 @@
+type: http
+name: Finds Pets by tags
+documentation: |-
+  # Finds Pets by tags
+
+  Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
+
+  **Operation ID:** `findPetsByTags`
+
+  > ⚠️ **Deprecated:** This endpoint is deprecated and may be removed in future versions.
+
+  ## Produces
+
+  - `application/json`
+  - `application/xml`
+
+  ## Parameters
+
+  | Name | Location | Type | Required | Description |
+  |------|----------|------|----------|-------------|
+  | `tags` | query | array | Yes | Tags to filter by |
+
+  ## Responses
+
+  ### 200
+  successful operation
+
+  **Schema:** `array`
+
+
+  ### 400
+  Invalid tag value
+
+
+
+  ## Security
+
+  - **petstore_auth**: `write:pets`, `read:pets`
+tags:
+  - pet
+method: GET
+url: '{{baseUrl}}/api/pet/findByTags'
+headers: []
+params:
+  - key: tags
+    value: ''
+    description: Tags to filter by
+pathParams: []
+deprecated: true

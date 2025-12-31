@@ -2,12 +2,14 @@ import { app, ipcMain, BrowserWindow, dialog } from 'electron'
 import { MainWindow } from './windows/MainWindow'
 import { initializeApp, logger, initFeatureService, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, getPersistenceService, isPersistenceServiceInitialized } from 'electron-core-ui'
 import { join, relative, basename } from 'path'
-import { promises as fs, existsSync, mkdirSync } from 'fs'
+import { promises as fs, existsSync, mkdirSync, statSync, readFileSync, writeFileSync, renameSync, rmSync } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
 import { searchIndexService, contextService } from './services'
 import { graphQLService } from 'electron-core-ui/main'
 import { typeDefs, resolvers, pubsub } from './graphql'
 import type { PersistenceFormat } from 'electron-core-ui'
+import { randomUUID } from 'crypto'
+import { folderMappingService } from './services/FolderMappingService'
 // DocumentEvents are handled by FileService internally for dirty state tracking
 
 // Parse command line arguments for --open / -o
@@ -32,6 +34,14 @@ function parseOpenFileArg(): string | undefined {
 const fileToOpenOnStart = parseOpenFileArg()
 if (fileToOpenOnStart) {
   logger.info('📂 File to open on start:', { path: fileToOpenOnStart })
+}
+
+/**
+ * Get mocked folder path for E2E tests, if E2E_MOCK_SAVE_FOLDER env var is set.
+ * Returns null if not in E2E mode.
+ */
+function getE2EMockedFolderPath(): string | null {
+  return process.env['E2E_MOCK_SAVE_FOLDER'] ?? null
 }
 
 // Keep track of main window and editor windows
@@ -78,16 +88,39 @@ function createWindow(): void {
         mainWindow = null
       })
       
-      // Open file from command line argument if specified
+      // Open file or folder from command line argument if specified
       if (fileToOpenOnStart) {
         // Use dom-ready which fires reliably with app:// protocol
         mainWindow.webContents.on('dom-ready', () => {
-          logger.info('📂 DOM ready, will open file from command line:', { path: fileToOpenOnStart })
+          logger.info('📂 DOM ready, will open from command line:', { path: fileToOpenOnStart })
           // Wait for the renderer React app to be fully initialized and hooks mounted
-          // 3 seconds should be enough for React to mount and subscribe to events
           setTimeout(() => {
-            if (isFileServiceInitialized()) {
-              logger.info('📂 Opening file now...', { path: fileToOpenOnStart })
+            // Check if it's a file or directory
+            const isDirectory = existsSync(fileToOpenOnStart) && statSync(fileToOpenOnStart).isDirectory()
+            
+            if (isDirectory) {
+              // Open as folder
+              logger.info('📂 Opening folder...', { path: fileToOpenOnStart })
+              if (!isPersistenceServiceInitialized()) {
+                logger.warn('⚠️ PersistenceService not initialized, cannot load folder')
+                return
+              }
+              void loadFolderStructure(fileToOpenOnStart).then((result) => {
+                if (result && mainWindow && isFileServiceInitialized()) {
+                  logger.info('✅ Folder loaded, sending to renderer', { 
+                    collectionsCount: (result.data as { collections?: unknown[] }).collections?.length,
+                    format: result.format
+                  })
+                  // Set the file state in FileService so the UI knows a file is open
+                  const fileService = getFileService() as { setOpenedFolder: (path: string, content: unknown, format?: string) => void }
+                  fileService.setOpenedFolder(fileToOpenOnStart, result.data, result.format)
+                } else {
+                  logger.error('❌ Failed to load folder from command line', { result })
+                }
+              })
+            } else if (isFileServiceInitialized()) {
+              // Open as file
+              logger.info('📂 Opening file...', { path: fileToOpenOnStart })
               void getFileService().open(fileToOpenOnStart).then((result) => {
                 if (result.success) {
                   logger.info('✅ File opened successfully from command line')
@@ -340,26 +373,40 @@ ipcMain.handle('restorm:save-as-file', async (_event, data: unknown, format: Per
 })
 
 // IPC handler to save as folder structure
-ipcMain.handle('restorm:save-as-folder', async (_event, data: unknown, format: PersistenceFormat) => {
-  logger.info('📁 Save as folder requested', { format })
+ipcMain.handle('restorm:save-as-folder', async (_event, data: unknown, format: PersistenceFormat, targetPath?: string) => {
+  logger.info('📁 Save as folder requested', { format, targetPath })
   
   try {
-    const window = BrowserWindow.fromWebContents(_event.sender)
-    if (!window) {
-      return { success: false, error: 'No window found' }
+    let folderPath: string
+    
+    if (targetPath) {
+      // Use provided path directly (for Ctrl+S on already opened folder)
+      folderPath = targetPath
+    } else {
+      // Check for E2E mock path first
+      const mockedPath = getE2EMockedFolderPath()
+      if (mockedPath) {
+        folderPath = mockedPath
+        logger.info('E2E: Using mocked folder path', { path: mockedPath })
+      } else {
+        // Show folder selection dialog (for Save As)
+        const window = BrowserWindow.fromWebContents(_event.sender)
+        if (!window) {
+          return { success: false, error: 'No window found' }
+        }
+
+        const result = await dialog.showOpenDialog(window, {
+          title: 'Select Folder for Collection',
+          properties: ['openDirectory', 'createDirectory']
+        })
+
+        if (result.canceled || !result.filePaths[0]) {
+          return { success: false, error: 'Cancelled' }
+        }
+
+        folderPath = result.filePaths[0]
+      }
     }
-
-    // Show folder selection dialog
-    const result = await dialog.showOpenDialog(window, {
-      title: 'Select Folder for Collection',
-      properties: ['openDirectory', 'createDirectory']
-    })
-
-    if (result.canceled || !result.filePaths[0]) {
-      return { success: false, error: 'Cancelled' }
-    }
-
-    const folderPath = result.filePaths[0]
     
     // Use PersistenceService for folder mode save
     if (!isPersistenceServiceInitialized()) {
@@ -371,8 +418,9 @@ ipcMain.handle('restorm:save-as-folder', async (_event, data: unknown, format: P
     const dataObj = data as Record<string, unknown>
     const saveResult = await saveFolderStructure(folderPath, dataObj, format)
 
-    if (saveResult.success) {
+    if (saveResult.success && saveResult.path) {
       logger.info('✅ Folder saved successfully', { path: saveResult.path })
+      // Update FileService to track the new folder path - state will be broadcast via file:opened event
     }
 
     return saveResult
@@ -406,11 +454,14 @@ ipcMain.handle('restorm:open-folder', async (_event) => {
     const folderPath = result.filePaths[0]
     
     // Load the folder structure
-    const content = await loadFolderStructure(folderPath)
+    const loadResult = await loadFolderStructure(folderPath)
     
-    if (content) {
-      logger.info('✅ Folder loaded successfully', { path: folderPath })
-      return { success: true, content, path: folderPath }
+    if (loadResult && isFileServiceInitialized()) {
+      logger.info('✅ Folder loaded successfully', { path: folderPath, format: loadResult.format })
+      // Update FileService so the UI knows a file is open
+      const fileService = getFileService() as { setOpenedFolder: (path: string, content: unknown, format?: string) => void }
+      fileService.setOpenedFolder(folderPath, loadResult.data, loadResult.format)
+      return { success: true, content: loadResult.data, path: folderPath, format: loadResult.format }
     }
 
     return { success: false, error: 'Failed to load folder' }
@@ -439,6 +490,40 @@ ipcMain.handle('restorm:show-folder-dialog', async (_event) => {
   }
 })
 
+// IPC handler to open a file or folder (smart detection)
+ipcMain.handle('restorm:open-path', async (_event, path: string) => {
+  logger.info('📂 Open path requested', { path })
+  
+  try {
+    const stats = statSync(path)
+    
+    if (stats.isDirectory()) {
+      // It's a directory - load as folder
+      if (!isPersistenceServiceInitialized()) {
+        return { success: false, error: 'PersistenceService not initialized' }
+      }
+      
+      const loadResult = await loadFolderStructure(path)
+      if (loadResult && isFileServiceInitialized()) {
+        const fileService = getFileService() as { setOpenedFolder: (path: string, content: unknown, format?: string) => void }
+        fileService.setOpenedFolder(path, loadResult.data, loadResult.format)
+        return { success: true, isDirectory: true, content: loadResult.data, path, format: loadResult.format }
+      }
+      return { success: false, error: 'Failed to load folder' }
+    } else {
+      // It's a file - use normal file open
+      if (!isFileServiceInitialized()) {
+        return { success: false, error: 'FileService not initialized' }
+      }
+      return await getFileService().open(path)
+    }
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    logger.error('❌ Failed to open path', { path, error: errorMsg })
+    return { success: false, error: errorMsg }
+  }
+})
+
 // ==========================================================================
 // Folder Structure Save/Load Helpers
 // ==========================================================================
@@ -446,6 +531,76 @@ ipcMain.handle('restorm:show-folder-dialog', async (_event) => {
 /**
  * Save a collection as folder structure with separate files for each item
  */
+/** Configuration file name for folder-mode projects */
+const RESTORM_CONF_FILE = 'restorm.conf'
+
+/** Configuration stored in restorm.conf */
+interface RestormConfig {
+  format: PersistenceFormat
+}
+
+/**
+ * Read restorm.conf from a folder, returns default config if not found
+ * The config file is stored as YAML for readability
+ */
+function readRestormConfig(folderPath: string): RestormConfig {
+  const confPath = join(folderPath, RESTORM_CONF_FILE)
+  if (existsSync(confPath)) {
+    try {
+      const content = readFileSync(confPath, 'utf-8')
+      // Simple YAML parsing for format: value
+      const match = /^format:\s*(\w+)/m.exec(content)
+      if (match?.[1]) {
+        const format = match[1] as PersistenceFormat
+        if (['json', 'yaml', 'json5'].includes(format)) {
+          return { format }
+        }
+      }
+    } catch (error) {
+      logger.warn('Failed to read restorm.conf, using defaults', { error: String(error) })
+    }
+  }
+  // Default to yaml
+  return { format: 'yaml' }
+}
+
+/**
+ * Write restorm.conf to a folder
+ * The config file is stored as simple YAML for readability
+ */
+function writeRestormConfig(folderPath: string, config: RestormConfig): void {
+  const confPath = join(folderPath, RESTORM_CONF_FILE)
+  const content = `format: ${config.format}\n`
+  writeFileSync(confPath, content, 'utf-8')
+}
+
+/**
+ * Handle rename if the path has changed for an item.
+ * Returns the actual path to use (new path after rename, or new path for new items).
+ */
+function handleRenameIfNeeded(id: string | undefined, newPath: string, _isDirectory: boolean): string {
+  if (!id) return newPath
+  
+  const oldPath = folderMappingService.getPath(id)
+  
+  if (oldPath && oldPath !== newPath && existsSync(oldPath)) {
+    try {
+      // Ensure parent directory exists
+      const parentDir = join(newPath, '..')
+      if (!existsSync(parentDir)) {
+        mkdirSync(parentDir, { recursive: true })
+      }
+      
+      renameSync(oldPath, newPath)
+      logger.debug('Renamed item', { from: oldPath, to: newPath })
+    } catch (error) {
+      logger.warn('Failed to rename, will create new', { oldPath, newPath, error: String(error) })
+    }
+  }
+  
+  return newPath
+}
+
 async function saveFolderStructure(
   folderPath: string,
   data: Record<string, unknown>,
@@ -454,15 +609,22 @@ async function saveFolderStructure(
   const ext = format === 'json5' ? 'json5' : format
   
   try {
+    // Start save session to track what's being saved
+    folderMappingService.startSaveSession()
+    
     // Ensure folder exists
     if (!existsSync(folderPath)) {
       mkdirSync(folderPath, { recursive: true })
     }
 
+    // Write restorm.conf with the format
+    writeRestormConfig(folderPath, { format })
+
     const collections = data['collections'] as unknown[] | undefined
     if (!collections || !Array.isArray(collections)) {
       // No collections, save as single index file
       const persistenceService = getPersistenceService()
+      folderMappingService.commitSaveSession()
       return await persistenceService.saveSingleFile(
         join(folderPath, `index.${ext}`),
         data,
@@ -471,14 +633,24 @@ async function saveFolderStructure(
     }
 
     // Save each collection (EnvironmentFolder) as a subfolder
-    for (let collIdx = 0; collIdx < collections.length; collIdx++) {
+    const collectionCount = collections.length
+    for (let collIdx = 0; collIdx < collectionCount; collIdx++) {
       const collection = collections[collIdx] as Record<string, unknown>
+      const collectionId = collection['id'] as string | undefined
       const collectionName = (collection['name'] as string) || `Collection_${collIdx + 1}`
       const safeName = sanitizeName(collectionName)
-      const collectionPath = join(folderPath, `${String(collIdx + 1).padStart(2, '0')} - ${safeName}`)
+      const newCollectionPath = join(folderPath, `${formatIndex(collIdx, collectionCount)} - ${safeName}`)
+      
+      // Handle rename if path changed
+      const collectionPath = handleRenameIfNeeded(collectionId, newCollectionPath, true)
       
       if (!existsSync(collectionPath)) {
         mkdirSync(collectionPath, { recursive: true })
+      }
+      
+      // Mark as seen
+      if (collectionId) {
+        folderMappingService.markAsSeen(collectionId, collectionPath)
       }
 
       // Save collection index (without items and environments)
@@ -491,15 +663,23 @@ async function saveFolderStructure(
         if (!existsSync(envsPath)) {
           mkdirSync(envsPath, { recursive: true })
         }
-        for (let envIdx = 0; envIdx < environments.length; envIdx++) {
+        const envCount = environments.length
+        for (let envIdx = 0; envIdx < envCount; envIdx++) {
           const env = environments[envIdx] as Record<string, unknown>
+          const envId = env['id'] as string | undefined
           const envName = (env['name'] as string) || `Environment_${envIdx + 1}`
           const safeEnvName = sanitizeName(envName)
-          await saveFile(
-            join(envsPath, `${String(envIdx + 1).padStart(2, '0')} - ${safeEnvName}.${ext}`),
-            env,
-            format
-          )
+          const newEnvPath = join(envsPath, `${formatIndex(envIdx, envCount)} - ${safeEnvName}.${ext}`)
+          
+          // Handle rename if path changed
+          const envPath = handleRenameIfNeeded(envId, newEnvPath, false)
+          
+          await saveFile(envPath, env, format)
+          
+          // Mark as seen
+          if (envId) {
+            folderMappingService.markAsSeen(envId, envPath)
+          }
         }
       }
 
@@ -508,6 +688,22 @@ async function saveFolderStructure(
         await saveFolderItems(collectionPath, collItems as Record<string, unknown>[], format, ext)
       }
     }
+
+    // Delete orphaned files/folders (items that were removed)
+    const orphanedPaths = folderMappingService.getOrphanedPaths()
+    for (const orphanPath of orphanedPaths) {
+      try {
+        if (existsSync(orphanPath)) {
+          rmSync(orphanPath, { recursive: true, force: true })
+          logger.info('Deleted orphaned path', { path: orphanPath })
+        }
+      } catch (error) {
+        logger.warn('Failed to delete orphaned path', { path: orphanPath, error: String(error) })
+      }
+    }
+
+    // Commit the save session
+    folderMappingService.commitSaveSession()
 
     return { success: true, path: folderPath }
   } catch (error) {
@@ -524,20 +720,32 @@ async function saveFolderItems(
   format: PersistenceFormat,
   ext: string
 ): Promise<void> {
-  for (let idx = 0; idx < items.length; idx++) {
+  const itemCount = items.length
+  for (let idx = 0; idx < itemCount; idx++) {
     const item = items[idx]
     if (!item) continue
     
+    const itemId = item['id'] as string | undefined
     const rawName = item['name']
     const itemName = typeof rawName === 'string' ? rawName : `Item_${idx + 1}`
     const safeName = sanitizeName(itemName)
     const itemType = item['type'] as string | undefined
+    const prefix = formatIndex(idx, itemCount)
 
     if (itemType === 'folder' || item['items'] !== undefined) {
       // It's a folder - create subfolder
-      const folderPath = join(parentPath, `${String(idx + 1).padStart(2, '0')} - ${safeName}`)
+      const newFolderPath = join(parentPath, `${prefix} - ${safeName}`)
+      
+      // Handle rename if path changed
+      const folderPath = handleRenameIfNeeded(itemId, newFolderPath, true)
+      
       if (!existsSync(folderPath)) {
         mkdirSync(folderPath, { recursive: true })
+      }
+      
+      // Mark as seen
+      if (itemId) {
+        folderMappingService.markAsSeen(itemId, folderPath)
       }
 
       // Save folder index (without items)
@@ -552,17 +760,42 @@ async function saveFolderItems(
       // It's a request - save as file
       const rawMethod = item['method']
       const method = typeof rawMethod === 'string' ? rawMethod : (itemType?.toUpperCase() ?? 'REQ')
-      await saveFile(
-        join(parentPath, `${String(idx + 1).padStart(2, '0')} - ${method} - ${safeName}.${ext}`),
-        item,
-        format
-      )
+      const newFilePath = join(parentPath, `${prefix} - ${method} - ${safeName}.${ext}`)
+      
+      // Handle rename if path changed
+      const filePath = handleRenameIfNeeded(itemId, newFilePath, false)
+      
+      await saveFile(filePath, item, format)
+      
+      // Mark as seen
+      if (itemId) {
+        folderMappingService.markAsSeen(itemId, filePath)
+      }
     }
   }
 }
 
 /**
- * Save a single file with the given format
+ * Recursively strip 'id' properties from an object for serialization
+ */
+function stripIds<T>(obj: T): T {
+  if (obj === null || obj === undefined) return obj
+  if (Array.isArray(obj)) {
+    return obj.map((item: unknown) => stripIds(item)) as T
+  }
+  if (typeof obj === 'object') {
+    const result: Record<string, unknown> = {}
+    for (const [key, value] of Object.entries(obj)) {
+      if (key === 'id') continue // Skip id properties
+      result[key] = stripIds(value)
+    }
+    return result as T
+  }
+  return obj
+}
+
+/**
+ * Save a single file with the given format, stripping IDs before serialization
  */
 async function saveFile(
   filePath: string,
@@ -570,7 +803,29 @@ async function saveFile(
   format: PersistenceFormat
 ): Promise<void> {
   const persistenceService = getPersistenceService()
-  await persistenceService.saveSingleFile(filePath, data, { format })
+  const cleanData = stripIds(data)
+  await persistenceService.saveSingleFile(filePath, cleanData, { format })
+}
+
+/**
+ * Calculate the padding width needed for numbering items
+ * @param count Total number of items
+ * @returns Number of digits needed (e.g., 9→1, 99→2, 999→3)
+ */
+function getPaddingWidth(count: number): number {
+  if (count <= 0) return 1
+  return String(count).length
+}
+
+/**
+ * Format an index number with dynamic padding based on total count
+ * @param index 0-based index
+ * @param count Total number of items
+ * @returns Formatted string (e.g., "1", "01", "001")
+ */
+function formatIndex(index: number, count: number): string {
+  const width = getPaddingWidth(count)
+  return String(index + 1).padStart(width, '0')
 }
 
 /**
@@ -585,12 +840,140 @@ function sanitizeName(name: string): string {
 }
 
 /**
+ * Generate runtime IDs for all objects in the data structure.
+ * Called after loading to assign IDs that will be used for tracking.
+ * 
+ * @param data - The loaded data structure
+ * @param idProperty - Property name to use for IDs (default: 'id')
+ */
+function generateRuntimeIds(data: unknown, idProperty = 'id'): void {
+  if (!data || typeof data !== 'object') return
+  
+  const obj = data as Record<string, unknown>
+  
+  // Assign ID if not already present
+  obj[idProperty] ??= randomUUID()
+  
+  // Recurse into collections
+  if (obj['collections'] && Array.isArray(obj['collections'])) {
+    for (const collection of obj['collections']) {
+      generateRuntimeIds(collection, idProperty)
+    }
+  }
+  
+  // Recurse into items (folders and requests)
+  if (obj['items'] && Array.isArray(obj['items'])) {
+    for (const item of obj['items']) {
+      generateRuntimeIds(item, idProperty)
+    }
+  }
+  
+  // Recurse into environments
+  if (obj['environments'] && Array.isArray(obj['environments'])) {
+    for (const env of obj['environments']) {
+      generateRuntimeIds(env, idProperty)
+    }
+  }
+  
+  // Recurse into sub-environments
+  if (obj['subEnvironments'] && Array.isArray(obj['subEnvironments'])) {
+    for (const subEnv of obj['subEnvironments']) {
+      generateRuntimeIds(subEnv, idProperty)
+    }
+  }
+}
+
+/**
+ * Build mapping from loaded data structure with actual file paths.
+ * Called during folder loading to associate IDs with their paths.
+ */
+function buildMappingFromStructure(
+  basePath: string,
+  data: unknown,
+  currentPath: string,
+  idProperty = 'id'
+): void {
+  if (!data || typeof data !== 'object') return
+  
+  const obj = data as Record<string, unknown>
+  const id = obj[idProperty]
+  
+  // Register this object's path
+  if (typeof id === 'string' && id) {
+    folderMappingService.registerPath(id, currentPath)
+  }
+  
+  // Recurse into collections (they are subfolders)
+  if (obj['collections'] && Array.isArray(obj['collections'])) {
+    const collections = obj['collections'] as Record<string, unknown>[]
+    for (let i = 0; i < collections.length; i++) {
+      const collection = collections[i]
+      if (!collection) continue
+      const collName = (collection['name'] as string) || `Collection_${i + 1}`
+      const collPath = join(currentPath, `${formatIndex(i, collections.length)} - ${sanitizeName(collName)}`)
+      buildMappingFromStructure(basePath, collection, collPath, idProperty)
+    }
+  }
+  
+  // Recurse into items
+  if (obj['items'] && Array.isArray(obj['items'])) {
+    const items = obj['items'] as Record<string, unknown>[]
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i]
+      if (!item) continue
+      const itemName = (item['name'] as string) || `Item_${i + 1}`
+      const isFolder = item['items'] !== undefined
+      
+      if (isFolder) {
+        const folderPath = join(currentPath, `${formatIndex(i, items.length)} - ${sanitizeName(itemName)}`)
+        buildMappingFromStructure(basePath, item, folderPath, idProperty)
+      } else {
+        // It's a request - file path includes method/type
+        const methodVal = item['method']
+        const typeVal = item['type']
+        const method = (typeof methodVal === 'string' ? methodVal : null) 
+          ?? (typeof typeVal === 'string' ? typeVal : null) 
+          ?? 'REQ'
+        const ext = 'yaml' // Default, actual ext determined by format
+        const filePath = join(currentPath, `${formatIndex(i, items.length)} - ${method} - ${sanitizeName(itemName)}.${ext}`)
+        const itemIdVal = item[idProperty]
+        if (typeof itemIdVal === 'string') {
+          folderMappingService.registerPath(itemIdVal, filePath)
+        }
+      }
+    }
+  }
+  
+  // Recurse into environments
+  if (obj['environments'] && Array.isArray(obj['environments'])) {
+    const envs = obj['environments'] as Record<string, unknown>[]
+    const envsPath = join(currentPath, 'environments')
+    for (let i = 0; i < envs.length; i++) {
+      const env = envs[i]
+      if (!env) continue
+      const envName = (env['name'] as string) || `Environment_${i + 1}`
+      const envPath = join(envsPath, `${formatIndex(i, envs.length)} - ${sanitizeName(envName)}.yaml`)
+      const envIdVal = env[idProperty]
+      if (typeof envIdVal === 'string') {
+        folderMappingService.registerPath(envIdVal, envPath)
+      }
+      // Recurse for sub-environments
+      buildMappingFromStructure(basePath, env, envPath, idProperty)
+    }
+  }
+}
+
+/**
  * Load a collection from folder structure
  */
 async function loadFolderStructure(
   folderPath: string
-): Promise<Record<string, unknown> | null> {
+): Promise<{ data: Record<string, unknown>; format: PersistenceFormat } | null> {
   try {
+    // Read configuration to get format
+    const config = readRestormConfig(folderPath)
+    const format = config.format
+    
     // Look for index file
     const indexFiles = ['index.yaml', 'index.yml', 'index.json', 'index.json5']
     let indexPath: string | null = null
@@ -603,28 +986,44 @@ async function loadFolderStructure(
       }
     }
 
+    let data: Record<string, unknown>
+
     // If no index file, try to reconstruct from folder structure
     if (!indexPath) {
-      return await reconstructFromFolders(folderPath)
+      data = await reconstructFromFolders(folderPath)
+    } else {
+      // Load the index file
+      const persistenceService = getPersistenceService()
+      const result = await persistenceService.loadSingleFile(indexPath)
+      
+      if (!result.success || !result.data) {
+        return null
+      }
+
+      // If it's a collection folder (has subfolders), reconstruct the full structure
+      const entries = await fs.readdir(folderPath, { withFileTypes: true })
+      const hasSubfolders = entries.some(e => e.isDirectory())
+      
+      if (hasSubfolders) {
+        data = await reconstructFromFolders(folderPath)
+      } else {
+        data = result.data as Record<string, unknown>
+      }
     }
 
-    // Load the index file
-    const persistenceService = getPersistenceService()
-    const result = await persistenceService.loadSingleFile(indexPath)
+    // Generate runtime IDs for all objects
+    generateRuntimeIds(data, 'id')
     
-    if (!result.success || !result.data) {
-      return null
-    }
-
-    // If it's a collection folder (has subfolders), reconstruct the full structure
-    const entries = await fs.readdir(folderPath, { withFileTypes: true })
-    const hasSubfolders = entries.some(e => e.isDirectory())
+    // Build the mapping from IDs to file paths for tracking
+    folderMappingService.clear()
+    buildMappingFromStructure(folderPath, data, folderPath, 'id')
     
-    if (hasSubfolders) {
-      return await reconstructFromFolders(folderPath)
-    }
+    logger.info('Folder loaded with ID mapping', { 
+      path: folderPath,
+      mappingSize: folderMappingService.getBasePath() ? 'active' : 'inactive'
+    })
 
-    return result.data as Record<string, unknown>
+    return { data, format }
   } catch (error) {
     logger.error('Failed to load folder structure', { error: String(error) })
     return null

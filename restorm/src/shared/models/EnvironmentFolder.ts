@@ -19,7 +19,7 @@ import type { RuntimeId, Icon, FolderConfiguration, FolderType, BaseFolderItem }
  */
 @trackable()
 @searchable()
-@fileNaming({ pattern: '{index} - {name}', nameProperty: 'name' })
+@fileNaming({ pattern: '{index} - {name}', nameProperty: 'name', idProperty: 'id' })
 export class EnvironmentFolder {
   /** Runtime identifier (generated at runtime, not persisted) */
   @NonSerialised()

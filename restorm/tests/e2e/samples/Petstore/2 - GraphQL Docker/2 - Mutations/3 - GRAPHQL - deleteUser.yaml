@@ -1,0 +1,17 @@
+type: graphql
+name: deleteUser
+documentation: 'GraphQL mutation: deleteUser'
+tags:
+  - mutation
+url: http://localhost:4000
+operationType: mutation
+query: |-
+  mutation {
+    deleteUser(id: "example") {
+      # Add fields here
+    }
+  }
+headers:
+  - key: Content-Type
+    value: application/json
+variables: '{}'

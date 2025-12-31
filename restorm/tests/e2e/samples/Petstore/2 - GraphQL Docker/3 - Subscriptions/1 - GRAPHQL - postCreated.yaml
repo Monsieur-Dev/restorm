@@ -1,0 +1,16 @@
+type: graphql
+name: postCreated
+documentation: 'GraphQL subscription: postCreated'
+tags:
+  - subscription
+url: http://localhost:4000
+operationType: subscription
+query: |-
+  subscription {
+    postCreated {
+      # Add fields here
+    }
+  }
+headers:
+  - key: Content-Type
+    value: application/json

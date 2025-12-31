@@ -1,0 +1,17 @@
+type: websocket
+name: mqttPublishEcho
+documentation: Publish test message
+tags:
+  - publish
+  - mqtt
+url: mqtt://localhost:1883
+protocol: mqtt
+event: test/echo
+message: '{}'
+headers:
+  - key: s
+    value: s
+    description: ''
+    enabled: true
+notes: |
+  ugg

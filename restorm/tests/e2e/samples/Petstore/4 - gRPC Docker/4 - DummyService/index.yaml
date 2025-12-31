@@ -1,0 +1,5 @@
+name: DummyService
+documentation: DummyMessage service - generate dummy messages
+tags:
+  - service
+configuration: {}

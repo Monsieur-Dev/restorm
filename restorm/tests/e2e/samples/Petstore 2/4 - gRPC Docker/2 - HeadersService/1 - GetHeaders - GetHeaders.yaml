@@ -1,0 +1,11 @@
+type: grpc
+name: GetHeaders
+documentation: Returns request headers
+tags:
+  - unary
+url: localhost:9000
+service: grpcbin.HeadersService
+method: GetHeaders
+callType: unary
+requestMessage: '{}'
+metadata: []

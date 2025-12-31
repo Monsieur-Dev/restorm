@@ -1,0 +1,14 @@
+type: grpc
+name: GetOrder
+documentation: Get an order by ID
+tags:
+  - unary
+url: '{{baseUrl}}'
+service: petstore.StoreService
+method: GetOrder
+callType: unary
+requestMessage: |-
+  {
+    "id": 0
+  }
+metadata: []

@@ -18,7 +18,7 @@ import type { RuntimeId, Icon } from './types'
  */
 @trackable()
 @searchable()
-@fileNaming({ pattern: '{index} - {name}', nameProperty: 'name' })
+@fileNaming({ pattern: '{index} - {name}', nameProperty: 'name', idProperty: 'id' })
 export class Environment {
   /** Runtime identifier (generated at runtime, not persisted) */
   @NonSerialised()

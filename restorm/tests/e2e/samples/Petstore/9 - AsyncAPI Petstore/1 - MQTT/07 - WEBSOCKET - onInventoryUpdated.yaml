@@ -1,0 +1,11 @@
+type: websocket
+name: onInventoryUpdated
+documentation: Receive notifications when inventory changes
+tags:
+  - subscribe
+  - mqtt
+url: mqtt://localhost:1883
+protocol: mqtt
+event: inventory/updated
+message: '{}'
+headers: []

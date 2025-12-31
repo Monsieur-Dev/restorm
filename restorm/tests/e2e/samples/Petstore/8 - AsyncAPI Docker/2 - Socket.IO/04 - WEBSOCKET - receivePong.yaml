@@ -1,0 +1,14 @@
+type: websocket
+name: receivePong
+documentation: Receive pong with timestamp
+tags:
+  - subscribe
+  - socketio
+url: ws://localhost:3001
+protocol: socketio
+event: pong
+message: |-
+  {
+    "timestamp": 0
+  }
+headers: []

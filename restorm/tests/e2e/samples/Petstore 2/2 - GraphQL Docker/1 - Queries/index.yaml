@@ -1,0 +1,8 @@
+name: Queries
+documentation: |-
+  # GraphQL Queries
+
+  Read operations
+tags:
+  - query
+configuration: {}

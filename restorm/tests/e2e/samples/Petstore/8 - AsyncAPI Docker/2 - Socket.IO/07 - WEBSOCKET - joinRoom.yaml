@@ -1,0 +1,11 @@
+type: websocket
+name: joinRoom
+documentation: Join a room by name
+tags:
+  - publish
+  - socketio
+url: ws://localhost:3001
+protocol: socketio
+event: join-room
+message: '{}'
+headers: []

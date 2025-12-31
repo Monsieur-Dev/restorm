@@ -1,0 +1,17 @@
+type: graphql
+name: order
+documentation: 'GraphQL query: order'
+tags:
+  - query
+url: '{{baseUrl}}'
+operationType: query
+query: |-
+  query {
+    order(id: "example") {
+      # Add fields here
+    }
+  }
+headers:
+  - key: Content-Type
+    value: application/json
+variables: '{}'

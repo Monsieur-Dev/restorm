@@ -1,0 +1,11 @@
+type: websocket
+name: receiveEcho
+documentation: Receive echoed data
+tags:
+  - subscribe
+  - socketio
+url: ws://localhost:3001
+protocol: socketio
+event: echo
+message: '{}'
+headers: []

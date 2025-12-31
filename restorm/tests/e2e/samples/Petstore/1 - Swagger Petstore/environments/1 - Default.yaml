@@ -1,0 +1,30 @@
+name: Default
+variables:
+  - key: port
+    value: '8080'
+    description: ''
+    enabled: true
+  - key: scheme
+    value: http
+    description: ''
+    enabled: true
+  - key: domain
+    value: localhost
+    description: ''
+    enabled: true
+  - key: baseUrl
+    value: '{{scheme}}://{{domain}}:{{port}}'
+    description: ''
+    enabled: true
+subEnvironments:
+  - name: Production
+    variables:
+      - key: scheme
+        value: https
+        description: ''
+      - key: domain
+        value: petstore.com
+        description: ''
+      - key: baseUrl
+        value: '{{scheme}}://{{domain}}:{{port}}'
+        description: ''

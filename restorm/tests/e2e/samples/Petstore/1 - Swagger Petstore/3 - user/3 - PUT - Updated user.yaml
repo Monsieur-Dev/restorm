@@ -1,0 +1,90 @@
+type: http
+name: Updated user
+documentation: |-
+  # Updated user
+
+  This can only be done by the logged in user.
+
+  **Operation ID:** `updateUser`
+
+  ## Consumes
+
+  - `application/json`
+
+  ## Produces
+
+  - `application/json`
+  - `application/xml`
+
+  ## Parameters
+
+  | Name | Location | Type | Required | Description |
+  |------|----------|------|----------|-------------|
+  | `username` | path | string | Yes | name that need to be updated |
+  | `body` | body | #/definitions/User | Yes | Updated user object |
+
+  ## Types
+
+  ### User
+
+  **Reference:** `#/definitions/User`
+
+  ```mermaid
+  classDiagram
+    class User {
+      - id? : integer
+      - username? : string
+      - firstName? : string
+      - lastName? : string
+      - email? : string
+      - password? : string
+      - phone? : string
+      - userStatus? : integer
+    }
+  ```
+
+
+  | Property | Type | Required | Description |
+  |----------|------|----------|-------------|
+  | `id` | integer | No |  |
+  | `username` | string | No |  |
+  | `firstName` | string | No |  |
+  | `lastName` | string | No |  |
+  | `email` | string | No |  |
+  | `password` | string | No |  |
+  | `phone` | string | No |  |
+  | `userStatus` | integer | No | User Status |
+
+
+  ## Responses
+
+  ### 400
+  Invalid user supplied
+
+
+
+  ### 404
+  User not found
+tags:
+  - user
+method: PUT
+url: '{{baseUrl}}/api/user/{{username}}'
+headers: []
+params: []
+pathParams:
+  - key: username
+    value: ''
+    description: name that need to be updated
+body:
+  type: text
+  content: |-
+    {
+      "id": 0,
+      "username": "",
+      "firstName": "",
+      "lastName": "",
+      "email": "",
+      "password": "",
+      "phone": "",
+      "userStatus": 0
+    }

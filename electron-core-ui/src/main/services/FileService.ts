@@ -1,5 +1,5 @@
 import { dialog, BrowserWindow } from 'electron'
-import { readFileSync, writeFileSync, existsSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync, statSync } from 'fs'
 import { createHash } from 'crypto'
 import { basename, extname } from 'path'
 import yaml from 'js-yaml'
@@ -531,9 +531,9 @@ export class FileService {
   }
 
   /**
-   * Open a file
+   * Open a file (or folder if folderLoader callback is provided)
    */
-  public async open(path?: string): Promise<{ success: boolean; content?: unknown }> {
+  public async open(path?: string, folderLoader?: (folderPath: string) => Promise<unknown>): Promise<{ success: boolean; content?: unknown; isDirectory?: boolean }> {
     let filePath: string
 
     // Mark as loading to prevent dirty state during initialization
@@ -553,6 +553,22 @@ export class FileService {
     }
 
     try {
+      // Check if path is a directory
+      const stats = statSync(filePath)
+      if (stats.isDirectory()) {
+        if (folderLoader) {
+          // Use the provided folder loader callback
+          const content = await folderLoader(filePath)
+          if (content) {
+            this.setOpenedFolder(filePath, content)
+            return { success: true, content, isDirectory: true }
+          }
+        }
+        // No folder loader or loading failed - return indication that it's a directory
+        this._isLoading = false
+        return { success: false, isDirectory: true }
+      }
+
       const data = readFileSync(filePath, 'utf-8')
       const format = this.detectFormat(filePath)
       const content = this.deserialize(data, format)
@@ -580,6 +596,35 @@ export class FileService {
       logger.error('FileService: Failed to open file', { path: filePath, error: String(error) })
       return { success: false }
     }
+  }
+
+  /**
+   * Set file state after loading a folder (bypasses file reading)
+   * Used when content is already loaded from a folder structure
+   * @param folderPath The path to the folder
+   * @param content The loaded content
+   * @param format Optional format to use (from restorm.conf or default)
+   */
+  public setOpenedFolder(folderPath: string, content: unknown, format?: SerializationFormat): void {
+    const name = this.getDisplayName(folderPath)
+    
+    this.currentFile = {
+      path: folderPath,
+      name,
+      isDirty: false,
+      content,
+      format: format ?? this.config.defaultFormat,
+      contentChecksum: JSON.stringify(content)
+    }
+
+    this.addToRecentFiles(folderPath, name)
+    this.notifyStateChange()
+    this.notifyDirtyChange()
+    
+    // Broadcast file opened event
+    this.broadcastEvent('file:opened', this.getState())
+
+    logger.info('FileService: Folder opened', { path: folderPath, format: format ?? this.config.defaultFormat })
   }
 
   /**

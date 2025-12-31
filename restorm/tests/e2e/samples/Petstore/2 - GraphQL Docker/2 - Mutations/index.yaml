@@ -1,0 +1,8 @@
+name: Mutations
+documentation: |-
+  # GraphQL Mutations
+
+  Write operations
+tags:
+  - mutation
+configuration: {}

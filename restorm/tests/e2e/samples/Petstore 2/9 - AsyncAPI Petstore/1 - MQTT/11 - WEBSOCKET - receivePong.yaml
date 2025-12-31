@@ -1,0 +1,14 @@
+type: websocket
+name: receivePong
+documentation: Receive pong response
+tags:
+  - subscribe
+  - mqtt
+url: mqtt://localhost:1883
+protocol: mqtt
+event: pong
+message: |-
+  {
+    "timestamp": 0
+  }
+headers: []

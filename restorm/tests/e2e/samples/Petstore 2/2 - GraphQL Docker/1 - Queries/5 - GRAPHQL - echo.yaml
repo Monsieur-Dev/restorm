@@ -1,0 +1,17 @@
+type: graphql
+name: echo
+documentation: 'GraphQL query: echo'
+tags:
+  - query
+url: http://localhost:4000
+operationType: query
+query: |-
+  query {
+    echo(message: "example") {
+      # Add fields here
+    }
+  }
+headers:
+  - key: Content-Type
+    value: application/json
+variables: '{}'

@@ -101,19 +101,24 @@ contextBridge.exposeInMainWorld('restorm', {
       return result as SaveResult
     },
     /** Save as folder structure */
-    saveAsFolder: async (data: unknown, format: 'json' | 'yaml' | 'json5'): Promise<SaveResult> => {
-      const result: unknown = await ipcRenderer.invoke('restorm:save-as-folder', data, format)
+    saveAsFolder: async (data: unknown, format: 'json' | 'yaml' | 'json5', targetPath?: string): Promise<SaveResult> => {
+      const result: unknown = await ipcRenderer.invoke('restorm:save-as-folder', data, format, targetPath)
       return result as SaveResult
     },
     /** Open folder */
-    openFolder: async (): Promise<{ success: boolean; content?: unknown; path?: string }> => {
+    openFolder: async (): Promise<{ success: boolean; content?: unknown; path?: string; format?: 'json' | 'yaml' | 'json5' }> => {
       const result: unknown = await ipcRenderer.invoke('restorm:open-folder')
-      return result as { success: boolean; content?: unknown; path?: string }
+      return result as { success: boolean; content?: unknown; path?: string; format?: 'json' | 'yaml' | 'json5' }
     },
     /** Show save dialog for folder selection */
     showFolderDialog: async (): Promise<{ canceled: boolean; filePath?: string }> => {
       const result: unknown = await ipcRenderer.invoke('restorm:show-folder-dialog')
       return result as { canceled: boolean; filePath?: string }
+    },
+    /** Open a file or folder (smart detection) */
+    openPath: async (path: string): Promise<{ success: boolean; isDirectory?: boolean; content?: unknown; path?: string; format?: 'json' | 'yaml' | 'json5' }> => {
+      const result: unknown = await ipcRenderer.invoke('restorm:open-path', path)
+      return result as { success: boolean; isDirectory?: boolean; content?: unknown; path?: string; format?: 'json' | 'yaml' | 'json5' }
     }
   },
   getEditorFile: async (): Promise<{ title: string; content?: string } | undefined> => {

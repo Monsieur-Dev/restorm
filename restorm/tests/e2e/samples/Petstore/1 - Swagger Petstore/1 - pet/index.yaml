@@ -1,0 +1,5 @@
+name: pet
+documentation: "# pet\r\n\r\nEverything about your Pets\r\n\r\n## External Documentation\r\n\r\n[Find out more](http://swagger.io)"
+tags:
+  - pet
+configuration: {}

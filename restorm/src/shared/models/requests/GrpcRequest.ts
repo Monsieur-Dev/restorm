@@ -13,7 +13,7 @@ import type { GrpcCallType, RequestType, RuntimeId, Icon } from '../types'
 /**
  * gRPC request definition with service, method, and message.
  */
-@fileNaming({ pattern: '{index} - GRPC - {name}', nameProperty: 'name' })
+@fileNaming({ pattern: '{index} - GRPC - {name}', nameProperty: 'name', idProperty: 'id' })
 export class GrpcRequest extends BaseRequest {
   /** Request type discriminator */
   readonly type: RequestType = 'grpc'

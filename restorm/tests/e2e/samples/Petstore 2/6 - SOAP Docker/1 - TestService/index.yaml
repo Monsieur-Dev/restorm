@@ -1,0 +1,8 @@
+name: TestService
+documentation: |-
+  Castle Mock Test Services.
+        Import this WSDL into Castle Mock (http://localhost:8090/castlemock)
+        to create mock endpoints.
+tags:
+  - service
+configuration: {}

@@ -1,0 +1,10 @@
+folderType: environment
+name: SOAP Docker
+documentation: |-
+  # SOAP Docker
+
+  SOAP Web Service
+
+  Namespace: http://restorm.test/castlemock
+tags: []
+configuration: {}

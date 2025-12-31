@@ -1,0 +1,17 @@
+type: graphql
+name: createUsers
+documentation: 'GraphQL mutation: createUsers'
+tags:
+  - mutation
+url: '{{baseUrl}}'
+operationType: mutation
+query: |-
+  mutation {
+    createUsers(inputs: "") {
+      # Add fields here
+    }
+  }
+headers:
+  - key: Content-Type
+    value: application/json
+variables: '{}'

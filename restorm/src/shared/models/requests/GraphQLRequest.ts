@@ -13,7 +13,7 @@ import type { GraphQLOperationType, RequestType, RuntimeId, Icon } from '../type
 /**
  * GraphQL request definition with operation type, query, and variables.
  */
-@fileNaming({ pattern: '{index} - GRAPHQL - {name}', nameProperty: 'name' })
+@fileNaming({ pattern: '{index} - GRAPHQL - {name}', nameProperty: 'name', idProperty: 'id' })
 export class GraphQLRequest extends BaseRequest {
   /** Request type discriminator */
   readonly type: RequestType = 'graphql'

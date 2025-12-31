@@ -688,42 +688,67 @@ const App: React.FC = () => {
     groups: []
   })
 
-  // File save handlers (after rootFolders is defined)
-  // Deep clone to remove Proxy wrappers before IPC serialization, then strip runtime-only ids
-  const handleMenuSave = useCallback(() => {
-    const plainData = JSON.parse(JSON.stringify({ collections: rootFolders })) as unknown
-    const dataForSave = prepareForSerialization(plainData)
-    void saveFile(dataForSave)
-  }, [saveFile, rootFolders])
-
   // Save options modal state - declared early for use in handlers
   const [showSaveOptionsModal, setShowSaveOptionsModal] = useState(false)
+  
+  // Track if current file was opened as a folder (for save behavior)
+  const [isOpenedAsFolder, setIsOpenedAsFolder] = useState(false)
+  // Store the format used when opening a folder (defaults to yaml)
+  const [folderFormat, setFolderFormat] = useState<'json' | 'yaml' | 'json5'>('yaml')
+  // Store the folder path when working with a folder (separate from filePath)
+  const [currentFolderPath, setCurrentFolderPath] = useState<string | null>(null)
+
+  // File save handlers (after rootFolders is defined)
+  // Deep clone to remove Proxy wrappers before IPC serialization
+  const handleMenuSave = useCallback(() => {
+    const plainData = JSON.parse(JSON.stringify({ collections: rootFolders })) as Record<string, unknown>
+    
+    if (isOpenedAsFolder && currentFolderPath) {
+      // For folders, keep IDs for mapping service, main process will strip them during serialization
+      void (async () => {
+        const result = await window.restorm?.file.saveAsFolder(plainData, folderFormat, currentFolderPath)
+        if (result?.success) {
+          void clearDirty()
+        }
+      })()
+    } else {
+      // For single files, strip IDs before saving
+      const dataForSave = prepareForSerialization(plainData)
+      void saveFile(dataForSave)
+    }
+  }, [saveFile, rootFolders, isOpenedAsFolder, folderFormat, clearDirty, currentFolderPath])
 
   const handleMenuSaveAs = useCallback(() => {
     setShowSaveOptionsModal(true)
   }, [])
 
   const handleSaveWithOptions = useCallback(async (options: SaveOptions) => {
-    const plainData = JSON.parse(JSON.stringify({ collections: rootFolders })) as unknown
-    const dataForSave = prepareForSerialization(plainData) as Record<string, unknown>
+    const plainData = JSON.parse(JSON.stringify({ collections: rootFolders })) as Record<string, unknown>
     
     logger.info('[App] Saving with options', { mode: options.mode, format: options.format })
     
     try {
       if (options.mode === 'folder') {
-        // Save as folder structure
-        const result = await window.restorm?.file.saveAsFolder(dataForSave, options.format)
-        if (result?.success) {
+        // For folders, keep IDs for mapping service, main process will strip them during serialization
+        const result = await window.restorm?.file.saveAsFolder(plainData, options.format)
+        if (result?.success && result.path) {
           logger.info('[App] Folder saved successfully', { path: result.path })
+          // Update state to track that we're now working with a folder
+          setIsOpenedAsFolder(true)
+          setFolderFormat(options.format)
+          setCurrentFolderPath(result.path)
           await clearDirty()
         } else {
           logger.error('[App] Failed to save folder', { error: result?.error ?? 'Unknown error' })
         }
       } else {
-        // Save as single file
+        // For single files, strip IDs before saving
+        const dataForSave = prepareForSerialization(plainData)
         const result = await window.restorm?.file.saveAsFile(dataForSave, options.format)
         if (result?.success) {
           logger.info('[App] File saved successfully', { path: result.path })
+          // Update state to track that we're now working with a file
+          setIsOpenedAsFolder(false)
           await clearDirty()
         } else {
           logger.error('[App] Failed to save file', { error: result?.error ?? 'Unknown error' })
@@ -793,9 +818,25 @@ const App: React.FC = () => {
   const handleMenuOpen = useCallback(async () => {
     const canProceed = await checkUnsavedChanges()
     if (canProceed) {
+      setIsOpenedAsFolder(false)
       await openFile()
     }
   }, [checkUnsavedChanges, openFile])
+
+  const handleMenuOpenFolder = useCallback(async () => {
+    const canProceed = await checkUnsavedChanges()
+    if (canProceed) {
+      // openFolder() will trigger FileService.setOpenedFolder() which broadcasts file:opened
+      // handleFileOpened will then be called automatically via useFileEvents
+      const result = await window.restorm?.file.openFolder()
+      if (result?.success && result.path) {
+        setIsOpenedAsFolder(true)
+        // Use format from restorm.conf or default to yaml
+        setFolderFormat(result.format ?? 'yaml')
+        setCurrentFolderPath(result.path)
+      }
+    }
+  }, [checkUnsavedChanges])
 
   const handleMenuClose = useCallback(async () => {
     const canProceed = await checkUnsavedChanges()
@@ -809,23 +850,42 @@ const App: React.FC = () => {
     if (canProceed) {
       // Close current file first to trigger cleanup (clear index, clear context)
       await closeFile()
+      setIsOpenedAsFolder(false)
       await openFile(path)
     }
   }, [checkUnsavedChanges, closeFile, openFile])
 
-  // Flag to prevent double loading
-  const fileLoadingRef = useRef(false)
+  // Track the last loaded path to prevent double loading of the same file
+  const lastLoadedPathRef = useRef<string | null>(null)
+  const isLoadingRef = useRef(false)
 
   // Handler for file opened event - loads collections into workbench
-  const handleFileOpened = useCallback((state: { currentFile: { content: unknown } }) => {
-    // Prevent double loading
-    if (fileLoadingRef.current) {
+  const handleFileOpened = useCallback((state: { currentFile: { content: unknown; path?: string | null; format?: string } }) => {
+    const newPath = state.currentFile.path ?? null
+    
+    // Prevent double loading of the same file (but allow loading a different file)
+    if (isLoadingRef.current && newPath === lastLoadedPathRef.current) {
       return
     }
-    fileLoadingRef.current = true
+    
+    isLoadingRef.current = true
+    lastLoadedPathRef.current = newPath
 
     const content = state.currentFile.content as { collections?: EnvironmentFolder[] } | null
     const collections = content?.collections && Array.isArray(content.collections) ? content.collections : []
+    
+    // Detect if opened as folder (path doesn't end with a file extension)
+    const path = state.currentFile.path ?? ''
+    const isFolder = path !== '' && !/\.(json|yaml|yml|json5|restorm)$/i.test(path)
+    setIsOpenedAsFolder(isFolder)
+    if (isFolder) {
+      // Use format from FileService state (read from restorm.conf) or default to yaml
+      const format = state.currentFile.format as 'json' | 'yaml' | 'json5' | undefined
+      setFolderFormat(format ?? 'yaml')
+      setCurrentFolderPath(path)
+    } else {
+      setCurrentFolderPath(null)
+    }
     
     // Generate runtime ids for all objects after deserialization
     const collectionsWithIds = processAfterDeserialization(collections)
@@ -900,14 +960,18 @@ const App: React.FC = () => {
       await finishLoading()
 
       // Allow loading again (e.g., if user closes and reopens a file)
-      fileLoadingRef.current = false
+      isLoadingRef.current = false
     })()
   }, [])
 
   // Handler for file closed event - clears the workbench
   const handleFileClosed = useCallback(() => {
-    // Reset loading flag to allow loading a new file
-    fileLoadingRef.current = false
+    // Reset loading flags to allow loading a new file
+    isLoadingRef.current = false
+    lastLoadedPathRef.current = null
+    // Reset folder mode flag
+    setIsOpenedAsFolder(false)
+    setCurrentFolderPath(null)
     // Clear the workbench tree
     setWorkbenchTree({
       orientation: 'vertical',
@@ -950,13 +1014,15 @@ const App: React.FC = () => {
       } 
     }).__restormTestHelpers = {
       loadFile: (fileState: { currentFile: { content: unknown } }) => {
-        // Reset loading flag to allow loading
-        fileLoadingRef.current = false
+        // Reset loading flags to allow loading
+        isLoadingRef.current = false
+        lastLoadedPathRef.current = null
         // Use ref to ensure we call the latest version
         handleFileOpenedRef.current(fileState)
       },
       setRootFolders: (folders: EnvironmentFolder[]) => {
-        fileLoadingRef.current = false
+        isLoadingRef.current = false
+        lastLoadedPathRef.current = null
         // Make folders reactive before setting
         const reactiveFolders = folders.map(folder => makeReactiveFolder(folder) as EnvironmentFolder)
         setRootFolders(reactiveFolders)
@@ -973,7 +1039,8 @@ const App: React.FC = () => {
     
     // Also listen to eventBus for backward compatibility
     const subscription = eventBus.subscribe('restorm:test:file-opened', (fileState: { currentFile: { content: unknown } }) => {
-      fileLoadingRef.current = false
+      isLoadingRef.current = false
+      lastLoadedPathRef.current = null
       handleFileOpenedRef.current(fileState)
     })
     
@@ -2186,6 +2253,7 @@ const App: React.FC = () => {
               <MenuItem title={t('menuBar.new')} shortcut="Ctrl+N" onClick={() => { void handleMenuNew() }} />
               <MenuItemSeparator />
               <MenuItem title={t('menuBar.open')} shortcut="Ctrl+O" onClick={() => { void handleMenuOpen() }} />
+              <MenuItem title={t('menuBar.openFolder')} onClick={() => { void handleMenuOpenFolder() }} />
               {fileName && (
                 <>
                   <MenuItemSeparator />
