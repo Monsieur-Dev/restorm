@@ -49,7 +49,7 @@ export type { EventHandler, Subscription } from './services/EventBusService'
 export type { SearchDocument, SearchResult, SearchNavigation, GroupedResults, CategoryMeta } from './services/SearchService'
 export type { GraphQLServiceConfig, PubSub } from './services/GraphQLService'
 export type { PersistenceFormat, PersistenceMode, PersistenceConfig, FileNamingContext, SaveResult, LoadResult } from './services/PersistenceService'
-export type { SchemaGeneratorConfig } from './services/GraphQLSchemaGenerator'
+export type { SchemaGeneratorConfig, RegisterClassOptions } from './services/GraphQLSchemaGenerator'
 
 // Re-export feature types
 export type {

@@ -46,6 +46,37 @@ export interface SchemaGeneratorConfig {
   inputSuffix?: string
 }
 
+/** Custom query definition */
+interface CustomQuery {
+  name: string
+  args: string
+  returnType: string
+}
+
+/** Custom mutation definition */
+interface CustomMutation {
+  name: string
+  args: string
+  returnType: string
+}
+
+/** Custom subscription definition */
+interface CustomSubscription {
+  name: string
+  args: string
+  returnType: string
+}
+
+/** Options for class registration */
+export interface RegisterClassOptions {
+  /** Skip generating generic queries for this class */
+  skipGenericQueries?: boolean
+  /** Skip generating generic mutations for this class */
+  skipGenericMutations?: boolean
+  /** Skip generating generic subscriptions for this class */
+  skipGenericSubscriptions?: boolean
+}
+
 /** Registered class with its metadata */
 interface RegisteredClass {
   constructor: new (...args: unknown[]) => unknown
@@ -53,6 +84,7 @@ interface RegisteredClass {
   fields: FieldDefinition[]
   isUnion?: boolean
   unionTypes?: string[]
+  options: RegisterClassOptions | undefined
 }
 
 // ============================================================================
@@ -67,6 +99,10 @@ class GraphQLSchemaGenerator {
   private registeredClasses = new Map<string, RegisteredClass>()
   private enumTypes = new Map<string, string[]>()
   private unionTypes = new Map<string, string[]>()
+  private customQueries: CustomQuery[] = []
+  private customMutations: CustomMutation[] = []
+  private customSubscriptions: CustomSubscription[] = []
+  private customTypes: string[] = []
   private config: Required<SchemaGeneratorConfig> = {
     includeSubscriptions: true,
     customScalars: ['JSON'],
@@ -98,12 +134,45 @@ class GraphQLSchemaGenerator {
   }
 
   /**
+   * Register a custom query
+   */
+  registerQuery(name: string, args: string, returnType: string): void {
+    this.customQueries.push({ name, args, returnType })
+    logger.debug('[GraphQLSchemaGenerator] Registered custom query', { name, returnType })
+  }
+
+  /**
+   * Register a custom mutation
+   */
+  registerMutation(name: string, args: string, returnType: string): void {
+    this.customMutations.push({ name, args, returnType })
+    logger.debug('[GraphQLSchemaGenerator] Registered custom mutation', { name, returnType })
+  }
+
+  /**
+   * Register a custom subscription
+   */
+  registerSubscription(name: string, args: string, returnType: string): void {
+    this.customSubscriptions.push({ name, args, returnType })
+    logger.debug('[GraphQLSchemaGenerator] Registered custom subscription', { name, returnType })
+  }
+
+  /**
+   * Register a custom type definition (for types not backed by classes)
+   */
+  registerCustomType(typeDef: string): void {
+    this.customTypes.push(typeDef)
+    logger.debug('[GraphQLSchemaGenerator] Registered custom type')
+  }
+
+  /**
    * Register a class for schema generation
    */
   registerClass(
     constructor: new (...args: unknown[]) => unknown,
     typeName: string,
-    fields: FieldDefinition[]
+    fields: FieldDefinition[],
+    options?: RegisterClassOptions
   ): void {
     const nonSerialised = getNonSerialisedProperties(constructor)
     const searchableProps = getSearchableProperties(constructor)
@@ -125,13 +194,15 @@ class GraphQLSchemaGenerator {
     this.registeredClasses.set(typeName, {
       constructor,
       typeName,
-      fields: enrichedFields
+      fields: enrichedFields,
+      options
     })
 
     logger.debug('[GraphQLSchemaGenerator] Registered class', {
       typeName,
       fieldCount: enrichedFields.length,
-      hasFileNaming: !!fileNamingConfig
+      hasFileNaming: !!fileNamingConfig,
+      options
     })
   }
 
@@ -161,9 +232,16 @@ class GraphQLSchemaGenerator {
       parts.push(this.generateUnionType(name, types))
     }
 
-    // Add input types
+    // Add custom types
+    for (const customType of this.customTypes) {
+      parts.push(customType)
+    }
+
+    // Add input types (only for classes without skipGenericMutations)
     for (const [, registered] of this.registeredClasses) {
-      parts.push(this.generateInputType(registered))
+      if (!registered.options?.skipGenericMutations) {
+        parts.push(this.generateInputType(registered))
+      }
     }
 
     // Add Query type
@@ -257,7 +335,10 @@ class GraphQLSchemaGenerator {
   private generateQueryType(): string {
     const queries: string[] = []
 
+    // Add generic queries for classes that don't skip them
     for (const [, registered] of this.registeredClasses) {
+      if (registered.options?.skipGenericQueries) continue
+
       const typeName = registered.typeName
       const lowerName = typeName.charAt(0).toLowerCase() + typeName.slice(1)
 
@@ -268,8 +349,16 @@ class GraphQLSchemaGenerator {
       queries.push(`  ${lowerName}s: [${typeName}!]!`)
     }
 
-    // Add search query
-    queries.push(`  search(query: String!, limit: Int): [SearchResult!]!`)
+    // Add custom queries
+    for (const query of this.customQueries) {
+      const args = query.args ? `(${query.args})` : ''
+      queries.push(`  ${query.name}${args}: ${query.returnType}`)
+    }
+
+    if (queries.length === 0) {
+      // GraphQL requires at least one query
+      queries.push('  _empty: String')
+    }
 
     return `type Query {\n${queries.join('\n')}\n}`
   }
@@ -280,7 +369,10 @@ class GraphQLSchemaGenerator {
   private generateMutationType(): string {
     const mutations: string[] = []
 
+    // Add generic mutations for classes that don't skip them
     for (const [, registered] of this.registeredClasses) {
+      if (registered.options?.skipGenericMutations) continue
+
       const typeName = registered.typeName
       const inputName = `${this.config.inputPrefix}${typeName}${this.config.inputSuffix}`
 
@@ -297,6 +389,17 @@ class GraphQLSchemaGenerator {
       mutations.push(`  move${typeName}(id: String!, newParentId: String!, index: Int!): ${typeName}!`)
     }
 
+    // Add custom mutations
+    for (const mutation of this.customMutations) {
+      const args = mutation.args ? `(${mutation.args})` : ''
+      mutations.push(`  ${mutation.name}${args}: ${mutation.returnType}`)
+    }
+
+    if (mutations.length === 0) {
+      // GraphQL requires at least one mutation if type exists
+      mutations.push('  _empty: String')
+    }
+
     return `type Mutation {\n${mutations.join('\n')}\n}`
   }
 
@@ -306,7 +409,10 @@ class GraphQLSchemaGenerator {
   private generateSubscriptionType(): string {
     const subscriptions: string[] = []
 
+    // Add generic subscriptions for classes that don't skip them
     for (const [, registered] of this.registeredClasses) {
+      if (registered.options?.skipGenericSubscriptions) continue
+
       const typeName = registered.typeName
       const lower = typeName.charAt(0).toLowerCase() + typeName.slice(1)
 
@@ -318,6 +424,17 @@ class GraphQLSchemaGenerator {
 
       // Deleted subscription
       subscriptions.push(`  ${lower}Deleted: String!`)
+    }
+
+    // Add custom subscriptions
+    for (const subscription of this.customSubscriptions) {
+      const args = subscription.args ? `(${subscription.args})` : ''
+      subscriptions.push(`  ${subscription.name}${args}: ${subscription.returnType}`)
+    }
+
+    if (subscriptions.length === 0) {
+      // GraphQL requires at least one subscription if type exists
+      subscriptions.push('  _empty: String')
     }
 
     return `type Subscription {\n${subscriptions.join('\n')}\n}`
@@ -343,6 +460,10 @@ class GraphQLSchemaGenerator {
     this.registeredClasses.clear()
     this.enumTypes.clear()
     this.unionTypes.clear()
+    this.customQueries = []
+    this.customMutations = []
+    this.customSubscriptions = []
+    this.customTypes = []
   }
 }
 

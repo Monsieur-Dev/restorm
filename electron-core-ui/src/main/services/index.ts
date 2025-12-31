@@ -64,4 +64,4 @@ export {
   inferGraphQLType,
   createFieldDefinitions
 } from './GraphQLSchemaGenerator'
-export type { SchemaGeneratorConfig } from './GraphQLSchemaGenerator'
+export type { SchemaGeneratorConfig, RegisterClassOptions } from './GraphQLSchemaGenerator'

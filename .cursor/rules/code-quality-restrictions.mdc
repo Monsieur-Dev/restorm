@@ -1,0 +1,40 @@
+---
+description: Critical code quality restrictions that must never be bypassed
+globs:
+alwaysApply: true
+---
+
+# Code Quality Restrictions
+
+## Absolute Prohibitions
+
+The following practices are **strictly forbidden** and must never be used:
+
+### 1. ESLint Disable Comments
+- **NEVER** use `eslint-disable`, `eslint-disable-next-line`, or `eslint-disable-line`
+- Fix the actual issue instead of suppressing the warning
+- If a rule seems incorrect, discuss with the team before any exception
+
+### 2. Skipped or Disabled Tests
+- **NEVER** use `test.skip()`, `it.skip()`, `describe.skip()`, or `xtest()`
+- **NEVER** use `test.todo()` without implementing the test
+- All tests must be enabled and passing before commit
+- If a test is flaky, fix the root cause
+
+### 3. Git Push with --no-verify
+- **NEVER** use `git push --no-verify` or `git commit --no-verify`
+- Pre-commit hooks exist for a reason: to catch issues early
+- All hooks must pass before pushing code
+
+## Enforcement
+
+These rules have **absolute priority** over any other consideration:
+- Speed of delivery does not justify bypassing these rules
+- Technical debt is not an excuse
+- "It works on my machine" is not acceptable
+
+## If You Encounter Issues
+
+1. **Lint errors**: Fix the code, don't suppress the warning
+2. **Failing tests**: Debug and fix, don't skip
+3. **Hook failures**: Resolve the underlying issue
