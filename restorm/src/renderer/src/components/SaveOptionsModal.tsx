@@ -5,13 +5,12 @@
 import React, { useState, useCallback } from 'react'
 import {
   Modal,
-  SelectBox,
   Button,
-  type ISelectData,
   type PersistenceFormat
 } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
 import type { FolderItem, EnvironmentFolder } from '../types/collections'
+import './SaveOptionsModal.css'
 
 export type SaveMode = 'file' | 'folder'
 export type SaveFormat = PersistenceFormat
@@ -30,15 +29,15 @@ interface SaveOptionsModalProps {
   title?: string
 }
 
-const MODE_OPTIONS: { text: SaveMode; label: string }[] = [
-  { text: 'file', label: 'Single File' },
-  { text: 'folder', label: 'Folder Structure' }
+const MODE_OPTIONS: { value: SaveMode; label: string; icon: string; description: string }[] = [
+  { value: 'file', label: 'Single File', icon: 'codicon-file', description: 'All data in one file' },
+  { value: 'folder', label: 'Folder', icon: 'codicon-folder-opened', description: 'Organized structure' }
 ]
 
-const FORMAT_OPTIONS: { text: SaveFormat; label: string }[] = [
-  { text: 'json', label: 'JSON' },
-  { text: 'yaml', label: 'YAML' },
-  { text: 'json5', label: 'JSON5' }
+const FORMAT_OPTIONS: { value: SaveFormat; label: string; description: string }[] = [
+  { value: 'yaml', label: 'YAML', description: 'Human readable' },
+  { value: 'json', label: 'JSON', description: 'Standard format' },
+  { value: 'json5', label: 'JSON5', description: 'JSON + comments' }
 ]
 
 export function SaveOptionsModal({
@@ -52,28 +51,17 @@ export function SaveOptionsModal({
   const { t } = useTranslation()
 
   const [mode, setMode] = useState<SaveMode>(defaultOptions?.mode ?? 'file')
-  const [format, setFormat] = useState<SaveFormat>(defaultOptions?.format ?? 'json')
+  const [format, setFormat] = useState<SaveFormat>(defaultOptions?.format ?? 'yaml')
 
-  const modeIndex = MODE_OPTIONS.findIndex(opt => opt.text === mode)
-  const formatIndex = FORMAT_OPTIONS.findIndex(opt => opt.text === format)
-
-  const modeOptions = MODE_OPTIONS.map(opt => ({
-    text: opt.text,
-    label: t(`save.mode.${opt.text}`, opt.label)
-  }))
-
-  const handleModeChange = useCallback((data: ISelectData) => {
-    const selected = MODE_OPTIONS[data.index]
+  const handleModeChange = useCallback((index: number) => {
+    const selected = MODE_OPTIONS[index]
     if (selected) {
-      setMode(selected.text)
+      setMode(selected.value)
     }
   }, [])
 
-  const handleFormatChange = useCallback((data: ISelectData) => {
-    const selected = FORMAT_OPTIONS[data.index]
-    if (selected) {
-      setFormat(selected.text)
-    }
+  const handleFormatChange = useCallback((value: SaveFormat) => {
+    setFormat(value)
   }, [])
 
   const handleSave = useCallback(() => {
@@ -123,56 +111,65 @@ export function SaveOptionsModal({
       onClose={onClose}
       title={title ?? t('save.title', 'Save Options')}
     >
-      <div className="save-options-modal" data-testid="save-options-modal" style={{ minWidth: '400px', padding: '16px' }}>
-        <div className="save-option-group" data-testid="save-mode-group" style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
+      <div className="save-options-modal" data-testid="save-options-modal">
+        <div className="save-option-group" data-testid="save-mode-group">
+          <label className="save-option-label">
             {t('save.mode.label', 'Save Mode')}
           </label>
-          <SelectBox
-            options={modeOptions}
-            selected={modeIndex >= 0 ? modeIndex : 0}
-            onDidSelect={handleModeChange}
-            className="save-mode-select"
-            id="save-mode-select"
-          />
-          <p data-testid="save-mode-description" style={{ marginTop: '4px', fontSize: '12px', opacity: 0.7 }}>
+          <div className="save-mode-buttons">
+            {MODE_OPTIONS.map((opt, idx) => (
+              <button
+                key={opt.value}
+                type="button"
+                className={`save-mode-button ${mode === opt.value ? 'active' : ''}`}
+                onClick={() => { handleModeChange(idx) }}
+                data-testid={`save-mode-${opt.value}`}
+              >
+                <i className={`codicon ${opt.icon}`} />
+                <span className="save-mode-button-label">
+                  {t(`save.mode.${opt.value}`, opt.label)}
+                </span>
+                <span className="save-mode-button-description">
+                  {t(`save.mode.${opt.value}Description`, opt.description)}
+                </span>
+              </button>
+            ))}
+          </div>
+          <p data-testid="save-mode-description" className="save-option-description">
             {mode === 'file'
               ? t('save.mode.fileDescription', 'Save everything in a single file')
               : t('save.mode.folderDescription', 'Save as a folder structure with separate files')}
           </p>
         </div>
 
-        <div className="save-option-group" data-testid="save-format-group" style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
+        <div className="save-option-group" data-testid="save-format-group">
+          <label className="save-option-label">
             {t('save.format.label', 'Format')}
           </label>
-          <SelectBox
-            options={FORMAT_OPTIONS}
-            selected={formatIndex >= 0 ? formatIndex : 0}
-            onDidSelect={handleFormatChange}
-            className="save-format-select"
-            id="save-format-select"
-          />
+          <div className="save-format-buttons">
+            {FORMAT_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                className={`save-format-button ${format === opt.value ? 'active' : ''}`}
+                onClick={() => { handleFormatChange(opt.value) }}
+                data-testid={`save-format-${opt.value}`}
+              >
+                <span className="save-format-button-label">{opt.label}</span>
+                <span className="save-format-button-description">
+                  {t(`save.format.${opt.value}Description`, opt.description)}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
 
         {mode === 'folder' && previewLines.length > 0 && (
-          <div className="save-option-group" data-testid="save-preview-group" style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
+          <div className="save-option-group" data-testid="save-preview-group">
+            <label className="save-option-label">
               {t('save.preview.label', 'Structure Preview')}
             </label>
-            <div
-              data-testid="save-preview-content"
-              style={{
-                background: 'var(--vscode-editor-background)',
-                border: '1px solid var(--vscode-editorWidget-border)',
-                borderRadius: '4px',
-                padding: '8px',
-                maxHeight: '200px',
-                overflow: 'auto',
-                fontFamily: 'monospace',
-                fontSize: '12px'
-              }}
-            >
+            <div className="save-preview-content" data-testid="save-preview-content">
               {previewLines.map((line, i) => (
                 <div key={i} style={{ whiteSpace: 'pre' }}>{line}</div>
               ))}
@@ -180,7 +177,7 @@ export function SaveOptionsModal({
           </div>
         )}
 
-        <div className="save-options-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+        <div className="save-options-actions">
           <Button onClick={onClose} secondary data-testid="save-cancel-button">
             {t('common.cancel', 'Cancel')}
           </Button>

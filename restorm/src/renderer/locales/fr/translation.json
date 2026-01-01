@@ -294,7 +294,10 @@
       "folderDescription": "Enregistrer dans une structure de dossiers avec des fichiers séparés"
     },
     "format": {
-      "label": "Format"
+      "label": "Format",
+      "yamlDescription": "Lisible par l'humain",
+      "jsonDescription": "Format standard",
+      "json5Description": "JSON + commentaires"
     },
     "preview": {
       "label": "Aperçu de la structure"

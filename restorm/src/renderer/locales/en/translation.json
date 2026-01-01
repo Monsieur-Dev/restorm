@@ -294,7 +294,10 @@
       "folderDescription": "Save as a folder structure with separate files"
     },
     "format": {
-      "label": "Format"
+      "label": "Format",
+      "yamlDescription": "Human readable",
+      "jsonDescription": "Standard format",
+      "json5Description": "JSON + comments"
     },
     "preview": {
       "label": "Structure Preview"

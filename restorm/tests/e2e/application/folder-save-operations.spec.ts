@@ -159,20 +159,15 @@ test.describe('Folder Save Operations E2E', () => {
     await page.waitForSelector('[data-testid="save-options-modal"]', { timeout: 5000 })
     console.log('✓ Save Options modal opened')
 
-    // Select Folder mode from the first SelectBox (using the custom-trigger div)
-    const modeSelectTrigger = page.locator('[data-testid="save-mode-group"] .custom-trigger').first()
-    await modeSelectTrigger.click()
-    await page.waitForTimeout(300)
-    // Click on "Folder Structure" option in the dropdown
-    await page.locator('[role="option"]:has-text("Folder Structure")').click()
+    // Select Folder mode by clicking the folder button
+    const folderModeButton = page.locator('[data-testid="save-mode-folder"]')
+    await folderModeButton.click()
     await page.waitForTimeout(300)
     console.log('✓ Selected Folder mode')
 
-    // Select YAML format - second SelectBox
-    const formatSelectTrigger = page.locator('[data-testid="save-format-group"] .custom-trigger').first()
-    await formatSelectTrigger.click()
-    await page.waitForTimeout(300)
-    await page.locator('[role="option"]:has-text("YAML")').click()
+    // Select YAML format - click the YAML format button
+    const yamlFormatButton = page.locator('[data-testid="save-format-yaml"]')
+    await yamlFormatButton.click()
     await page.waitForTimeout(300)
     console.log('✓ Selected YAML format')
 

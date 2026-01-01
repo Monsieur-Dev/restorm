@@ -1,0 +1,139 @@
+.save-options-modal {
+  min-width: 420px;
+  padding: 16px;
+}
+
+.save-option-group {
+  margin-bottom: 20px;
+}
+
+.save-option-label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--vscode-foreground);
+}
+
+.save-option-description {
+  margin-top: 8px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* Big mode buttons */
+.save-mode-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.save-mode-button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 12px;
+  border: 2px solid var(--vscode-input-border, #3c3c3c);
+  border-radius: 8px;
+  background: var(--vscode-input-background, #1e1e1e);
+  color: var(--vscode-foreground);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.save-mode-button:hover {
+  border-color: var(--vscode-focusBorder, #007acc);
+  background: var(--vscode-list-hoverBackground, #2a2d2e);
+}
+
+.save-mode-button.active {
+  border-color: var(--vscode-focusBorder, #007acc);
+  background: var(--vscode-list-activeSelectionBackground, #094771);
+}
+
+.save-mode-button .codicon {
+  font-size: 28px;
+  opacity: 0.8;
+}
+
+.save-mode-button.active .codicon {
+  opacity: 1;
+  color: var(--vscode-focusBorder, #007acc);
+}
+
+.save-mode-button-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.save-mode-button-description {
+  font-size: 11px;
+  opacity: 0.7;
+  text-align: center;
+}
+
+/* Format buttons */
+.save-format-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.save-format-button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 8px;
+  border: 2px solid var(--vscode-input-border, #3c3c3c);
+  border-radius: 8px;
+  background: var(--vscode-input-background, #1e1e1e);
+  color: var(--vscode-foreground);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.save-format-button:hover {
+  border-color: var(--vscode-focusBorder, #007acc);
+  background: var(--vscode-list-hoverBackground, #2a2d2e);
+}
+
+.save-format-button.active {
+  border-color: var(--vscode-focusBorder, #007acc);
+  background: var(--vscode-list-activeSelectionBackground, #094771);
+}
+
+.save-format-button-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.save-format-button-description {
+  font-size: 10px;
+  opacity: 0.7;
+  text-align: center;
+}
+
+/* Preview styling */
+.save-preview-content {
+  background: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-editorWidget-border);
+  border-radius: 4px;
+  padding: 8px;
+  max-height: 200px;
+  overflow: auto;
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-size: 12px;
+}
+
+/* Actions */
+.save-options-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
