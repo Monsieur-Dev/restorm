@@ -15,7 +15,8 @@ Given('the title does not contain {string}', async ({ page }, text: string) => {
 When('I click on {string} folder', async ({ page }, folderName: string) => {
   const folder = page.locator(`[role="treeitem"]:has-text("${folderName}")`).first()
   await folder.click()
-  await page.waitForTimeout(1000)
+  // Wait for tab to open
+  await page.waitForSelector('.tab.active', { timeout: 5000 })
 })
 
 When('I click on the Notes inner tab', async ({ page }) => {
@@ -30,7 +31,8 @@ When('I click on the Notes inner tab', async ({ page }) => {
     const notesTab = page.locator(selector).first()
     if (await notesTab.isVisible({ timeout: 1000 }).catch(() => false)) {
       await notesTab.click()
-      await page.waitForTimeout(500)
+      // Wait for editor to be ready
+      await page.waitForSelector('.ProseMirror, .milkdown .editor, [role="textbox"]', { timeout: 3000 }).catch(() => { /* editor may already be visible */ })
       return
     }
   }
@@ -41,15 +43,13 @@ When('I click on the Notes inner tab', async ({ page }) => {
   for (const el of all) {
     if (await el.isVisible().catch(() => false)) {
       await el.click()
-      await page.waitForTimeout(500)
+      await page.waitForSelector('.ProseMirror, .milkdown .editor, [role="textbox"]', { timeout: 3000 }).catch(() => { /* editor may already be visible */ })
       break
     }
   }
 })
 
 When('I type {string} in the editor', async ({ page }, text: string) => {
-  await page.waitForTimeout(500)
-
   const editorSelectors = [
     '.ProseMirror[contenteditable="true"]',
     '.milkdown .editor',
@@ -71,7 +71,8 @@ When('I type {string} in the editor', async ({ page }, text: string) => {
 
   await editor.click()
   await page.keyboard.type(text)
-  await page.waitForTimeout(500)
+  // Wait for dirty indicator to appear
+  await page.waitForSelector('.dirty-indicator', { timeout: 3000 }).catch(() => { /* indicator may take time */ })
 })
 
 When('I undo multiple times', async ({ page }) => {
@@ -97,7 +98,11 @@ When('I undo multiple times', async ({ page }) => {
   for (let i = 0; i < 20; i++) {
     await page.keyboard.press('Control+z')
   }
-  await page.waitForTimeout(500)
+  // Wait for dirty indicator to potentially disappear
+  await page.waitForFunction(() => {
+    const indicator = document.querySelector('.dirty-indicator')
+    return !indicator || window.getComputedStyle(indicator).display === 'none'
+  }, { timeout: 3000 }).catch(() => { /* undo may not fully revert */ })
 })
 
 When('I modify an input field', async ({ page }) => {
@@ -108,7 +113,8 @@ When('I modify an input field', async ({ page }) => {
     await page.keyboard.type(' modified')
     await page.keyboard.press('Tab')
   }
-  await page.waitForTimeout(1500)
+  // Wait for dirty indicator to appear
+  await page.waitForSelector('.dirty-indicator', { timeout: 3000 }).catch(() => { /* indicator may take time */ })
 })
 
 Then('a tab should be open', async ({ page }) => {
@@ -123,10 +129,9 @@ Then('the tab should not have a dirty indicator', async ({ page }) => {
 })
 
 Then('the tab should have a dirty indicator', async ({ page }) => {
-  await page.waitForTimeout(1000)
   const tab = page.locator('[role="tab"]').first()
   const dirtyIndicator = tab.locator('.dirty-indicator')
-  await expect(dirtyIndicator).toBeVisible()
+  await expect(dirtyIndicator).toBeVisible({ timeout: 5000 })
 })
 
 Then('the title should contain {string}', async ({ page }, text: string) => {

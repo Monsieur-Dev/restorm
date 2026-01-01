@@ -11,7 +11,8 @@ When('I open the search bar', async ({ page }) => {
   const searchBar = page.locator('.search-bar-closed, .search-bar-container, [data-testid="search-bar"]').first()
   await expect(searchBar).toBeVisible({ timeout: 5000 })
   await searchBar.click()
-  await page.waitForTimeout(300)
+  // Wait for search input to appear
+  await page.waitForSelector('.search-bar-open input', { timeout: 3000 })
 })
 
 When('I search for {string}', async ({ page }, query: string) => {
@@ -19,23 +20,24 @@ When('I search for {string}', async ({ page }, query: string) => {
   await expect(searchInput).toBeVisible({ timeout: 2000 })
   await searchInput.fill('')
   await searchInput.fill(query)
-  await page.waitForTimeout(1500)
+  // Wait for search results to appear
+  await page.waitForSelector('[data-testid="search-results"][data-ready="true"], .search-result-item, .search-results-empty', { timeout: 5000 })
 })
 
 When('I click on the first search result', async ({ page }) => {
-  const searchResults = page.locator('.search-result-item')
   await page.waitForSelector('.search-result-item', { timeout: 5000, state: 'visible' })
-  const firstResult = searchResults.first()
+  const firstResult = page.locator('.search-result-item').first()
   await firstResult.click()
-  await page.waitForTimeout(1000)
+  // Wait for tab to open
+  await page.waitForSelector('.tab.active', { timeout: 5000 })
 })
 
 When('I hover over the first search result', async ({ page }) => {
-  const searchResults = page.locator('.search-result-item')
   await page.waitForSelector('.search-result-item', { timeout: 5000, state: 'visible' })
-  const firstResult = searchResults.first()
+  const firstResult = page.locator('.search-result-item').first()
   await firstResult.hover()
-  await page.waitForTimeout(800)
+  // Wait for tooltip to appear
+  await page.waitForSelector('[role="tooltip"], .search-result-tooltip', { timeout: 3000 }).catch(() => { /* tooltip may not appear */ })
 })
 
 Then('I should see search results', async ({ page }) => {

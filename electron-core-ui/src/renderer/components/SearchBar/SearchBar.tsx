@@ -363,7 +363,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                 options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false, fitContent: true }}
                 style={{ maxHeight: 350 }}
               >
-              <div className="search-results-content" role="tree" aria-label={t('search.resultsAriaLabel', 'Search results')} style={{ maxHeight: '350px' }}>
+              <div className="search-results-content" role="tree" aria-label={t('search.resultsAriaLabel', 'Search results')} style={{ maxHeight: '350px' }} data-testid="search-results" data-ready="true">
                 {results.map((group) => {
                   const isCollapsed = collapsedCategories.has(group.category)
                   return (

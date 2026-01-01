@@ -665,8 +665,10 @@ export const ListView: React.FC<ListViewProps> = ({
     }))
   }, [contextMenu, isRenameable, startRename])
 
+  const isReady = flatItems.length > 0 || initialItems.length === 0
+
   return (
-    <div className={rootClasses} style={style}>
+    <div className={rootClasses} style={style} data-testid="list-view" data-ready={isReady}>
       <ScrollableElement
         className="list-view-scrollable"
         options={{

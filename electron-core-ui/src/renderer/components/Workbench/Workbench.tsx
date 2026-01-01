@@ -33,7 +33,7 @@ const Workbench: React.FC<WorkbenchProps> = ({
   ].filter(Boolean).join(' ')
 
   return (
-    <div className={classes}>
+    <div className={classes} data-testid="workbench" data-ready="true">
       {children}
     </div>
   )

@@ -15,14 +15,17 @@ Given('the Test API folder is expanded', async ({ page }) => {
   } else {
     await folderRow.dblclick()
   }
-  await page.waitForTimeout(500)
+  // Wait for children to appear
+  await page.waitForSelector('[role="treeitem"]:has-text("Get User")', { timeout: 5000 })
 })
 
 When('I click on the {string} request', async ({ page }, requestName: string) => {
   const requestItem = page.locator(`text=${requestName}`).first()
   await expect(requestItem).toBeVisible({ timeout: 5000 })
   await requestItem.click()
-  await page.waitForTimeout(2000)
+  // Wait for tab to open and path params pane to be visible
+  await page.waitForSelector('.tab.active', { timeout: 5000 })
+  await page.waitForSelector('text=PATH PARAMS', { timeout: 5000 })
 })
 
 When('I change the path param {string} from {string} to {string}', async ({ page }, paramName: string, oldValue: string, newValue: string) => {
@@ -34,7 +37,8 @@ When('I change the path param {string} from {string} to {string}', async ({ page
   const isCollapsed = await paneHeader.locator('.pane-collapsed, [aria-expanded="false"]').count() > 0
   if (isCollapsed) {
     await pathParamsPane.click()
-    await page.waitForTimeout(500)
+    // Wait for pane to expand
+    await page.waitForSelector('.params-table-root', { timeout: 3000 })
   }
 
   const pathParamsSection = page.locator('.params-table-root').first()
@@ -54,7 +58,9 @@ When('I change the path param {string} from {string} to {string}', async ({ page
     }
   }
 
-  expect(targetEditor).not.toBeNull()
+  if (!targetEditor) {
+    throw new Error(`Could not find editor containing "${oldValue}"`)
+  }
 
   // Click on the editor and edit
   await targetEditor.click()
@@ -63,6 +69,9 @@ When('I change the path param {string} from {string} to {string}', async ({ page
 
   // Click outside to blur and trigger update
   await page.locator('.params-table th').first().click()
+  // Wait for reactivity to process the change
+  await page.waitForSelector('[data-testid="list-view"][data-ready="true"]', { timeout: 5000 })
+  // Additional wait for URL tooltip to update via Handlebars transformation
   await page.waitForTimeout(2000)
 })
 

@@ -58,13 +58,17 @@ Given('the file is loaded', async ({ page }) => {
 When('I open the File menu', async ({ page }) => {
   const fileMenu = page.locator('text=File').first()
   await fileMenu.click()
-  await page.waitForTimeout(500)
+  // Wait for menu to appear
+  await page.waitForSelector('[role="menuitem"]', { timeout: 3000 })
 })
 
 When('I click on {string}', async ({ page }, text: string) => {
   const item = page.locator(`text=${text}`).first()
   await item.click()
-  await page.waitForTimeout(500)
+  // Wait for modal if "Save As" clicked
+  if (text.includes('Save')) {
+    await page.waitForSelector('[data-testid="modal"][data-ready="true"]', { timeout: 5000 }).catch(() => { /* modal may not open */ })
+  }
 })
 
 Then('the save options modal should be open', async ({ page }) => {
@@ -74,19 +78,21 @@ Then('the save options modal should be open', async ({ page }) => {
 When('I select Folder mode', async ({ page }) => {
   const folderModeButton = page.locator('[data-testid="save-mode-folder"]')
   await folderModeButton.click()
-  await page.waitForTimeout(300)
 })
 
 When('I select YAML format', async ({ page }) => {
   const yamlFormatButton = page.locator('[data-testid="save-format-yaml"]')
   await yamlFormatButton.click()
-  await page.waitForTimeout(300)
 })
 
 When('I click the Save button', async ({ page }) => {
   const saveBtn = page.locator('.ecu-modal-body [role="button"]:has-text("Save")').first()
   await saveBtn.click()
-  await page.waitForTimeout(3000)
+  // Wait for modal to close and file system operation to complete
+  await page.waitForFunction(
+    () => document.querySelectorAll('[data-testid="modal"]').length === 0,
+    { timeout: 10000 }
+  )
   await page.screenshot({ path: 'test-results/debug-after-save-as.png' })
 })
 
@@ -122,7 +128,8 @@ When('I expand {string} in sidebar', async ({ page }, folderName: string) => {
   const chevronRight = folder.locator('.codicon-chevron-right').first()
   if (await chevronRight.isVisible({ timeout: 1000 }).catch(() => false)) {
     await folder.locator('.list-view-expander').click()
-    await page.waitForTimeout(500)
+    // Wait for children to appear
+    await page.waitForSelector(`[role="treeitem"]:has-text("${folderName}")`, { timeout: 5000 }).catch(() => { /* expansion may fail silently */ })
   }
   await page.screenshot({ path: `test-results/debug-after-expand-${folderName.replace(/\s/g, '-')}.png` })
 })
@@ -131,7 +138,8 @@ When('I right-click on {string} in sidebar', async ({ page }, itemName: string) 
   const item = page.locator(`[role="treeitem"]:has-text("${itemName}")`).first()
   await expect(item).toBeVisible({ timeout: 5000 })
   await item.click({ button: 'right' })
-  await page.waitForTimeout(300)
+  // Wait for context menu to appear
+  await page.waitForSelector('[role="menuitem"]', { timeout: 3000 })
 })
 
 When('I click {string} in context menu', async ({ page }, text: string) => {
@@ -139,50 +147,68 @@ When('I click {string} in context menu', async ({ page }, text: string) => {
   const menuItem = page.locator(`[role="menuitem"]:has-text("${text}")`).first()
   await expect(menuItem).toBeVisible({ timeout: 5000 })
   await menuItem.click()
-  await page.waitForTimeout(500)
+  // Wait for context menu to close
+  await page.waitForFunction(
+    () => document.querySelectorAll('[role="menu"]').length === 0,
+    { timeout: 3000 }
+  ).catch(() => { /* menu may close async */ })
   await page.screenshot({ path: `test-results/debug-after-click-${text.replace(/\s/g, '-')}.png` })
 })
 
 When('I confirm the deletion', async ({ page }) => {
-  await page.waitForTimeout(300)
   await page.screenshot({ path: 'test-results/debug-confirm-deletion-modal.png' })
   const confirmButton = page.locator('[role="button"]:has-text("Delete"), [role="button"]:has-text("Supprimer")').last()
   await expect(confirmButton).toBeVisible({ timeout: 5000 })
   await confirmButton.click()
-  await page.waitForTimeout(2000) // Wait for file system operation
+  // Wait for modal to close
+  await page.waitForFunction(
+    () => document.querySelectorAll('[data-testid="modal"]').length === 0,
+    { timeout: 10000 }
+  ).catch(() => { /* modal may close async */ })
   await page.screenshot({ path: 'test-results/debug-after-confirm-deletion.png' })
 })
 
 When('I confirm the deletion in modal', async ({ page }) => {
   const confirmButton = page.locator('.ecu-modal-body [role="button"]:has-text("Delete")').first()
   await confirmButton.click()
-  await page.waitForTimeout(500)
+  // Wait for modal to close
+  await page.waitForFunction(
+    () => document.querySelectorAll('[data-testid="modal"]').length === 0,
+    { timeout: 5000 }
+  ).catch(() => { /* modal may close async */ })
 })
 
 When('I click on {string} in sidebar', async ({ page }, itemName: string) => {
   const item = page.locator(`[role="treeitem"]:has-text("${itemName}")`).first()
   await expect(item).toBeVisible({ timeout: 10000 })
   await item.click()
-  await page.waitForTimeout(1000)
+  // Wait for tab to open
+  await page.waitForSelector('.tab.active', { timeout: 5000 })
 })
 
 When('I click on the breadcrumb name', async ({ page }) => {
   await page.keyboard.press('Escape')
-  await page.waitForTimeout(300)
   const visibleBreadcrumbItem = page.locator('button[aria-current="page"]:visible').first()
+  await expect(visibleBreadcrumbItem).toBeVisible({ timeout: 3000 })
   await visibleBreadcrumbItem.click()
-  await page.waitForTimeout(300)
+  // Wait for input to appear
+  await page.waitForSelector('.ecui-breadcrumb-input:visible', { timeout: 3000 })
 })
 
 When('I rename it to {string}', async ({ page }, newName: string) => {
   const breadcrumbInput = page.locator('.ecui-breadcrumb-input:visible')
   await breadcrumbInput.fill(newName)
   await page.keyboard.press('Enter')
-  await page.waitForTimeout(500)
+  // Wait for rename to complete (input disappears)
+  await page.waitForFunction(
+    () => document.querySelectorAll('.ecui-breadcrumb-input:not([style*="display: none"])').length === 0,
+    { timeout: 5000 }
+  ).catch(() => { /* input may hide async */ })
 })
 
 Then('the tab should contain {string}', async ({ page }, text: string) => {
   const tabs = page.locator('[role="tab"]')
+  await expect(tabs.first()).toBeVisible({ timeout: 5000 })
   const tabCount = await tabs.count()
 
   let found = false
@@ -198,7 +224,14 @@ Then('the tab should contain {string}', async ({ page }, text: string) => {
 
 When('I press Ctrl+S', async ({ page }) => {
   await page.keyboard.press('Control+s')
-  await page.waitForTimeout(2000)
+  // Wait for save to complete (dirty indicator should disappear)
+  await page.waitForFunction(
+    () => {
+      const indicator = document.querySelector('.dirty-indicator')
+      return !indicator || window.getComputedStyle(indicator).display === 'none'
+    },
+    { timeout: 10000 }
+  ).catch(() => { /* save may take time */ })
 })
 
 Then('the final folder structure should match the second reference', async ({ tempFolderPath, referenceFolder2Path }) => {

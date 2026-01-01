@@ -50,7 +50,8 @@ export const test = base.extend<PetstoreFileFixtures>({
 
     await page.waitForLoadState('domcontentloaded')
     await page.waitForLoadState('load')
-    await page.waitForTimeout(3000)
+    // Wait for list-view to be ready (replaces fixed timeout)
+    await page.waitForSelector('[data-testid="list-view"][data-ready="true"]', { timeout: 15000 })
 
     await use(page)
   }
