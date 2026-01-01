@@ -1,4 +1,5 @@
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from 'electron-core-ui/types'
+import type { PersistenceFormat } from 'electron-core-ui/main'
 
 declare global {
   interface Window {
@@ -40,11 +41,11 @@ declare global {
       forceClose: () => Promise<void>
       onSaveAndClose: (callback: () => void) => (() => void)
       file: {
-        saveAsFile: (data: unknown, format: 'json' | 'yaml' | 'json5') => Promise<SaveResult>
-        saveAsFolder: (data: unknown, format: 'json' | 'yaml' | 'json5', targetPath?: string) => Promise<SaveResult>
-        openFolder: () => Promise<{ success: boolean; content?: unknown; path?: string; format?: 'json' | 'yaml' | 'json5' }>
+        saveAsFile: (data: unknown, format: PersistenceFormat) => Promise<SaveResult>
+        saveAsFolder: (data: unknown, format: PersistenceFormat, targetPath?: string) => Promise<SaveResult>
+        openFolder: () => Promise<{ success: boolean; content?: unknown; path?: string; format?: PersistenceFormat }>
         showFolderDialog: () => Promise<{ canceled: boolean; filePath?: string }>
-        openPath: (path: string) => Promise<{ success: boolean; isDirectory?: boolean; content?: unknown; path?: string; format?: 'json' | 'yaml' | 'json5' }>
+        openPath: (path: string) => Promise<{ success: boolean; isDirectory?: boolean; content?: unknown; path?: string; format?: PersistenceFormat }>
       }
       context: {
         getAllTransformResults: () => Promise<Record<string, VariableTransformResult>>

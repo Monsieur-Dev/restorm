@@ -4,7 +4,8 @@
 
 import {
   searchable,
-  fileNaming
+  fileNaming,
+  graphqlField
 } from 'electron-core-ui/main'
 import { BaseRequest } from './BaseRequest'
 import { KeyValue } from '../KeyValue'
@@ -27,26 +28,33 @@ export class HTTPRequest extends BaseRequest {
   readonly type: RequestType = 'http'
 
   /** HTTP method (GET, POST, PUT, etc.) */
+  @graphqlField({ type: 'HTTPMethod' })
   @searchable.property({ filterable: true })
   method: HTTPMethod = 'GET'
 
   /** Request URL (may contain environment variable placeholders) */
+  @graphqlField({ type: 'String' })
   @searchable.property({ weight: 1.5 })
   url = ''
 
   /** HTTP headers */
+  @graphqlField({ type: 'KeyValue', isArray: true })
   headers: KeyValue[] = []
 
   /** URL query parameters (e.g. ?page=1) */
+  @graphqlField({ type: 'KeyValue', isArray: true })
   params: KeyValue[] = []
 
   /** URL path parameters (e.g. /users/{id}) */
+  @graphqlField({ type: 'KeyValue', isArray: true, nullable: true })
   pathParams: KeyValue[] = []
 
   /** Optional request body */
+  @graphqlField({ type: 'JSON', nullable: true })
   body?: HTTPRequestBody
 
   /** Whether this endpoint is deprecated */
+  @graphqlField({ type: 'Boolean', nullable: true })
   deprecated = false
 
   constructor(init?: Partial<HTTPRequest>) {

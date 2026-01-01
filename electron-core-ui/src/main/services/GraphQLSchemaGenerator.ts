@@ -14,7 +14,8 @@ import {
   getNonSerialisedProperties,
   getSeparateFilesProperties,
   getSeparateFoldersProperties,
-  getFileNamingConfig
+  getGraphQLFields,
+  getGraphQLTypeConfig
 } from '../decorators'
 import { logger } from './LoggerService'
 
@@ -178,7 +179,6 @@ class GraphQLSchemaGenerator {
     const searchableProps = getSearchableProperties(constructor)
     const separateFilesProps = getSeparateFilesProperties(constructor)
     const separateFoldersProps = getSeparateFoldersProperties(constructor)
-    const fileNamingConfig = getFileNamingConfig(constructor)
 
     // Filter out non-serialised fields
     const filteredFields = fields.filter(f => !nonSerialised.has(f.name))
@@ -197,13 +197,43 @@ class GraphQLSchemaGenerator {
       fields: enrichedFields,
       options
     })
+  }
 
-    logger.debug('[GraphQLSchemaGenerator] Registered class', {
-      typeName,
-      fieldCount: enrichedFields.length,
-      hasFileNaming: !!fileNamingConfig,
-      options
-    })
+  /**
+   * Register a class for schema generation using @graphqlField decorators.
+   * Automatically extracts type name and fields from decorator metadata.
+   */
+  registerClassAuto(
+    constructor: new (...args: unknown[]) => unknown,
+    options?: RegisterClassOptions
+  ): void {
+    // Get type name from @graphqlType decorator or class name
+    const typeConfig = getGraphQLTypeConfig(constructor)
+    const typeName = typeConfig?.name ?? constructor.name
+
+    // Get fields from @graphqlField decorators
+    const graphqlFields = getGraphQLFields(constructor)
+    const fields: FieldDefinition[] = []
+
+    for (const [key, config] of graphqlFields) {
+      const field: FieldDefinition = {
+        name: String(key),
+        type: config.type,
+        nullable: config.nullable ?? false,
+        isArray: config.isArray ?? false
+      }
+      if (config.description) {
+        field.description = config.description
+      }
+      fields.push(field)
+    }
+
+    if (fields.length === 0) {
+      logger.warn('[GraphQLSchemaGenerator] No @graphqlField decorators found on class', { typeName })
+    }
+
+    // Use the standard registerClass method
+    this.registerClass(constructor, typeName, fields, options)
   }
 
   /**

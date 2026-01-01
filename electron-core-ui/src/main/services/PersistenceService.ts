@@ -29,7 +29,8 @@ import {
 // ============================================================================
 
 /** Supported serialization formats */
-export type PersistenceFormat = 'json' | 'json5' | 'yaml'
+export const PERSISTENCE_FORMATS = ['json', 'json5', 'yaml'] as const
+export type PersistenceFormat = (typeof PERSISTENCE_FORMATS)[number]
 
 /** Persistence mode */
 export type PersistenceMode = 'single-file' | 'folder'

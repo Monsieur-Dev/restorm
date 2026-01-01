@@ -7,7 +7,8 @@ import {
   searchable,
   NonSerialised,
   separateFolders,
-  fileNaming
+  fileNaming,
+  graphqlField
 } from 'electron-core-ui/main'
 import { Environment } from './Environment'
 import type { RuntimeId, Icon, FolderConfiguration, FolderType, BaseFolderItem } from './types'
@@ -22,39 +23,47 @@ import type { RuntimeId, Icon, FolderConfiguration, FolderType, BaseFolderItem }
 @fileNaming({ pattern: '{index} - {name}', nameProperty: 'name', idProperty: 'id' })
 export class EnvironmentFolder {
   /** Runtime identifier (generated at runtime, not persisted) */
+  @graphqlField({ type: 'String' })
   @NonSerialised()
   id!: RuntimeId
 
   /** Display name of the folder */
+  @graphqlField({ type: 'String' })
   @searchable.property({ weight: 2 })
   name!: string
 
   /** Optional icon for the folder */
   icon?: Icon
 
+  /** Discriminator to identify environment folders */
+  @graphqlField({ type: 'String' })
+  folderType: FolderType = 'environment'
+
   /** Documentation describing the folder contents */
+  @graphqlField({ type: 'String', nullable: true })
   @searchable.property({ weight: 1 })
   documentation = ''
 
   /** Optional user notes */
+  @graphqlField({ type: 'String', nullable: true })
   @searchable.property({ weight: 0.5 })
   notes?: string
 
   /** Tags for categorization and filtering */
+  @graphqlField({ type: 'String', isArray: true })
   @searchable.property({ weight: 1.5, filterable: true })
   tags: string[] = []
-
-  /** Discriminator to identify environment folders */
-  folderType: FolderType = 'environment'
 
   /** Folder configuration */
   configuration: FolderConfiguration = {}
 
   /** Environment configurations for this folder */
+  @graphqlField({ type: 'Environment', isArray: true })
   @separateFolders()
   environments: Environment[] = []
 
   /** Folder contents: requests and sub-folders */
+  @graphqlField({ type: 'FolderItem', isArray: true })
   @separateFolders()
   items: BaseFolderItem[] = []
 

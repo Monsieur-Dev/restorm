@@ -1,5 +1,5 @@
 // Main process exports - with proper TypeScript types
-export { getThemeService, getStorageService, logger, initFeatureService, getFeatureService, isFeatureServiceInitialized, initFileService, getFileService, isFileServiceInitialized, eventBusService, searchService, i18nService, graphQLService, createSchema, createPubSub, initPersistenceService, getPersistenceService, isPersistenceServiceInitialized, PersistenceService, serialize, deserialize, detectFormat, filterNonSerialised, generateIndexedFileName, sanitizeFileName, calculateIndexPadding, graphQLSchemaGenerator, inferGraphQLType, createFieldDefinitions } from './services'
+export { getThemeService, getStorageService, logger, initFeatureService, getFeatureService, isFeatureServiceInitialized, initFileService, getFileService, isFileServiceInitialized, eventBusService, searchService, i18nService, graphQLService, createSchema, createPubSub, initPersistenceService, getPersistenceService, isPersistenceServiceInitialized, PersistenceService, serialize, deserialize, detectFormat, filterNonSerialised, generateIndexedFileName, sanitizeFileName, calculateIndexPadding, PERSISTENCE_FORMATS, graphQLSchemaGenerator, inferGraphQLType, createFieldDefinitions } from './services'
 
 // Decorators
 export {
@@ -9,6 +9,8 @@ export {
   separateFiles,
   separateFolders,
   fileNaming,
+  graphqlType,
+  graphqlField,
   isTrackable,
   getTrackableConfig,
   getTrackableProperties,
@@ -25,6 +27,10 @@ export {
   getSeparateFoldersProperties,
   getFileNamingConfig,
   generateFileName,
+  isGraphQLField,
+  getGraphQLTypeConfig,
+  getGraphQLFieldConfig,
+  getGraphQLFields,
   getAllMetadata,
   serializeWithDecorators
 } from './decorators'
@@ -34,6 +40,8 @@ export type {
   SeparateFilesConfig,
   SeparateFoldersConfig,
   FileNamingConfig,
+  GraphQLTypeConfig,
+  GraphQLFieldConfig,
   AllMetadata
 } from './decorators'
 export { BaseWindow, setupIPC, setupAppLifecycle, initializeApp, configureCommandLineSwitches, setupAppProtocol } from './managers'

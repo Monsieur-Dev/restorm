@@ -4,3 +4,5 @@ export { useStorage, saveToStorage, loadFromStorage, getStorageAPI } from './use
 export { useFeature, usePlatformFeature, useIsDesktop, checkFeature, getPlatform } from './useFeature'
 export { useFileService, useFileDirty, useFileEvents, getFileName, getFilePath, getContentChecksum, setContentChecksum, hasContentChanged, checkAndUpdateDirty, finishLoading, registerInitialChecksums, updateObjectChecksum, removeObjectChecksum, commitChecksums, getDirtyStateDetails } from './useFileService'
 export { useKeyboardShortcut } from './useKeyboardShortcut'
+export { useDirtyState, computeChecksum } from './useDirtyState'
+export type { DirtyStateItem, DirtyStateHook } from './useDirtyState'

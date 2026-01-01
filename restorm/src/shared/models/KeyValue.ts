@@ -5,7 +5,8 @@
 import {
   trackable,
   searchable,
-  NonSerialised
+  NonSerialised,
+  graphqlField
 } from 'electron-core-ui/main'
 import type { RuntimeId } from './types'
 
@@ -16,21 +17,26 @@ import type { RuntimeId } from './types'
 @trackable()
 export class KeyValue {
   /** Runtime identifier (optional, generated at runtime) */
+  @graphqlField({ type: 'String', nullable: true })
   @NonSerialised()
   id?: RuntimeId
 
   /** The key */
+  @graphqlField({ type: 'String' })
   @searchable.property({ weight: 1 })
   key = ''
 
   /** The value */
+  @graphqlField({ type: 'String' })
   @searchable.property({ weight: 0.5 })
   value = ''
 
   /** Optional description */
+  @graphqlField({ type: 'String', nullable: true })
   description?: string
 
   /** Whether this key-value is enabled (default: true) */
+  @graphqlField({ type: 'Boolean', nullable: true })
   enabled = true
 
   constructor(init?: Partial<KeyValue>) {

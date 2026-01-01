@@ -35,7 +35,7 @@ import {
   logger
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type DocumentChangedPayload } from './services/DocumentEvents'
-import type { WorkbenchTree, NavigationEvent, GroupNode, TabGroupNode, EditorTab, SearchResult } from 'electron-core-ui/renderer'
+import type { WorkbenchTree, NavigationEvent, GroupNode, TabGroupNode, EditorTab, SearchResult, PersistenceFormat } from 'electron-core-ui/renderer'
 import { RestormWorkbench } from './components/RestormWorkbench'
 import { Welcome } from './components/Welcome'
 import { EmptyBench } from './components/EmptyBench'
@@ -78,7 +78,7 @@ import type {
   WebSocketRequestTab,
   BreadcrumbItem
 } from './types/editor'
-import { useDirtyState, computeChecksum } from './hooks/useDirtyState'
+import { useDirtyState, computeChecksum } from 'electron-core-ui/renderer'
 
 const MIN_LEFT_WIDTH = 180
 const RIGHT_MIN_WIDTH = 240
@@ -695,7 +695,7 @@ const App: React.FC = () => {
   // Track if current file was opened as a folder (for save behavior)
   const [isOpenedAsFolder, setIsOpenedAsFolder] = useState(false)
   // Store the format used when opening a folder (defaults to yaml)
-  const [folderFormat, setFolderFormat] = useState<'json' | 'yaml' | 'json5'>('yaml')
+  const [folderFormat, setFolderFormat] = useState<PersistenceFormat>('yaml')
   // Store the folder path when working with a folder (separate from filePath)
   const [currentFolderPath, setCurrentFolderPath] = useState<string | null>(null)
 
@@ -919,7 +919,7 @@ const App: React.FC = () => {
     setIsOpenedAsFolder(openedAsFolder)
     if (openedAsFolder) {
       // Use format from FileService state (read from restorm.conf) or default to yaml
-      const format = state.currentFile.format as 'json' | 'yaml' | 'json5' | undefined
+      const format = state.currentFile.format as PersistenceFormat | undefined
       setFolderFormat(format ?? 'yaml')
       setCurrentFolderPath(path)
     } else {

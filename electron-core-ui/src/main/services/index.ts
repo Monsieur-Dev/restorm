@@ -48,7 +48,8 @@ export {
   filterNonSerialised,
   generateIndexedFileName,
   sanitizeFileName,
-  calculateIndexPadding
+  calculateIndexPadding,
+  PERSISTENCE_FORMATS
 } from './PersistenceService'
 export type {
   PersistenceFormat,

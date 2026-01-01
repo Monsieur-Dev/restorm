@@ -4,7 +4,8 @@
 
 import {
   searchable,
-  fileNaming
+  fileNaming,
+  graphqlField
 } from 'electron-core-ui/main'
 import { BaseRequest } from './BaseRequest'
 import { KeyValue } from '../KeyValue'
@@ -19,25 +20,31 @@ export class GrpcRequest extends BaseRequest {
   readonly type: RequestType = 'grpc'
 
   /** gRPC server URL (host:port) */
+  @graphqlField({ type: 'String' })
   @searchable.property({ weight: 1.5 })
   url = ''
 
   /** Service name (e.g., "grpcbin.HelloService") */
+  @graphqlField({ type: 'String' })
   @searchable.property({ weight: 1 })
   service = ''
 
   /** Method name (e.g., "SayHello") */
+  @graphqlField({ type: 'String' })
   @searchable.property({ weight: 1 })
   method = ''
 
   /** gRPC call type */
+  @graphqlField({ type: 'GrpcCallType' })
   @searchable.property({ filterable: true })
   callType: GrpcCallType = 'unary'
 
   /** Request message as JSON string */
+  @graphqlField({ type: 'String', nullable: true })
   requestMessage = ''
 
   /** Metadata (headers) */
+  @graphqlField({ type: 'KeyValue', isArray: true })
   metadata: KeyValue[] = []
 
   constructor(init?: Partial<GrpcRequest>) {

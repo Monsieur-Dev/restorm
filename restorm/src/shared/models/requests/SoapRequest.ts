@@ -4,7 +4,8 @@
 
 import {
   searchable,
-  fileNaming
+  fileNaming,
+  graphqlField
 } from 'electron-core-ui/main'
 import { BaseRequest } from './BaseRequest'
 import { KeyValue } from '../KeyValue'
@@ -19,24 +20,30 @@ export class SoapRequest extends BaseRequest {
   readonly type: RequestType = 'soap'
 
   /** SOAP endpoint URL */
+  @graphqlField({ type: 'String' })
   @searchable.property({ weight: 1.5 })
   url = ''
 
   /** SOAP action */
+  @graphqlField({ type: 'String', nullable: true })
   soapAction = ''
 
   /** Service name */
+  @graphqlField({ type: 'String', nullable: true })
   @searchable.property({ weight: 1 })
   service = ''
 
   /** Operation name */
+  @graphqlField({ type: 'String', nullable: true })
   @searchable.property({ weight: 1 })
   operation = ''
 
   /** SOAP envelope body as XML string */
+  @graphqlField({ type: 'String', nullable: true })
   body = ''
 
   /** HTTP headers */
+  @graphqlField({ type: 'KeyValue', isArray: true })
   headers: KeyValue[] = []
 
   constructor(init?: Partial<SoapRequest>) {

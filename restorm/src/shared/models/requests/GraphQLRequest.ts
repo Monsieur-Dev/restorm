@@ -4,7 +4,8 @@
 
 import {
   searchable,
-  fileNaming
+  fileNaming,
+  graphqlField
 } from 'electron-core-ui/main'
 import { BaseRequest } from './BaseRequest'
 import { KeyValue } from '../KeyValue'
@@ -19,21 +20,26 @@ export class GraphQLRequest extends BaseRequest {
   readonly type: RequestType = 'graphql'
 
   /** GraphQL endpoint URL */
+  @graphqlField({ type: 'String' })
   @searchable.property({ weight: 1.5 })
   url = ''
 
   /** GraphQL operation type */
+  @graphqlField({ type: 'GraphQLOperationType' })
   @searchable.property({ filterable: true })
   operationType: GraphQLOperationType = 'query'
 
   /** GraphQL query/mutation/subscription string */
+  @graphqlField({ type: 'String' })
   @searchable.property({ weight: 1 })
   query = ''
 
   /** GraphQL variables as JSON string */
+  @graphqlField({ type: 'String', nullable: true })
   variables?: string
 
   /** HTTP headers */
+  @graphqlField({ type: 'KeyValue', isArray: true })
   headers: KeyValue[] = []
 
   constructor(init?: Partial<GraphQLRequest>) {

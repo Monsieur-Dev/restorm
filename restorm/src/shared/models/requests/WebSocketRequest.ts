@@ -4,7 +4,8 @@
 
 import {
   searchable,
-  fileNaming
+  fileNaming,
+  graphqlField
 } from 'electron-core-ui/main'
 import { BaseRequest } from './BaseRequest'
 import { KeyValue } from '../KeyValue'
@@ -19,20 +20,25 @@ export class WebSocketRequest extends BaseRequest {
   readonly type: RequestType = 'websocket'
 
   /** WebSocket URL (ws:// or wss://) */
+  @graphqlField({ type: 'String' })
   @searchable.property({ weight: 1.5 })
   url = ''
 
   /** Protocol type */
+  @graphqlField({ type: 'WebSocketProtocol' })
   @searchable.property({ filterable: true })
   protocol: WebSocketProtocol = 'websocket'
 
   /** Event/channel name (for Socket.IO/MQTT) */
+  @graphqlField({ type: 'String', nullable: true })
   event?: string
 
   /** Message payload as JSON string */
+  @graphqlField({ type: 'String', nullable: true })
   message = ''
 
   /** Connection headers/options */
+  @graphqlField({ type: 'KeyValue', isArray: true })
   headers: KeyValue[] = []
 
   constructor(init?: Partial<WebSocketRequest>) {

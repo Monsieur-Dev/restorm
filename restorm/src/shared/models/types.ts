@@ -23,22 +23,28 @@ export interface Icon {
 }
 
 /** HTTP methods */
-export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS'
+export const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'] as const
+export type HTTPMethod = (typeof HTTP_METHODS)[number]
 
 /** GraphQL operation type */
-export type GraphQLOperationType = 'query' | 'mutation' | 'subscription'
+export const GRAPHQL_OPERATION_TYPES = ['query', 'mutation', 'subscription'] as const
+export type GraphQLOperationType = (typeof GRAPHQL_OPERATION_TYPES)[number]
 
 /** gRPC call type */
-export type GrpcCallType = 'unary' | 'server-stream' | 'client-stream' | 'bidirectional-stream'
+export const GRPC_CALL_TYPES = ['unary', 'serverStreaming', 'clientStreaming', 'bidirectional'] as const
+export type GrpcCallType = (typeof GRPC_CALL_TYPES)[number]
 
 /** WebSocket protocol type */
-export type WebSocketProtocol = 'websocket' | 'socketio' | 'mqtt'
+export const WEBSOCKET_PROTOCOLS = ['websocket', 'socketio', 'mqtt'] as const
+export type WebSocketProtocol = (typeof WEBSOCKET_PROTOCOLS)[number]
 
 /** Request type discriminator */
-export type RequestType = 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket'
+export const REQUEST_TYPES = ['http', 'graphql', 'grpc', 'soap', 'websocket'] as const
+export type RequestType = (typeof REQUEST_TYPES)[number]
 
 /** HTTP request body type discriminator */
-export type HTTPBodyType = 'text' | 'file' | 'form-data' | 'x-www-form-urlencoded'
+export const HTTP_BODY_TYPES = ['text', 'file', 'formData', 'xWwwFormUrlEncoded'] as const
+export type HTTPBodyType = (typeof HTTP_BODY_TYPES)[number]
 
 /** Folder type discriminator */
 export type FolderType = 'standard' | 'environment'

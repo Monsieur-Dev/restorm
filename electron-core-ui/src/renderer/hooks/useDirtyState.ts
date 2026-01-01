@@ -1,12 +1,12 @@
 /**
- * useDirtyState - Hook for tracking dirty state per tab in folder mode
+ * useDirtyState - Hook for tracking dirty state per item/tab
  *
- * In folder mode, each file can be individually dirty.
- * This hook manages the dirty state for each tab/document.
+ * Useful for applications with multiple documents or tabs where each
+ * can be individually dirty (modified but not saved).
  */
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
-import { logger } from 'electron-core-ui/renderer'
+import { logger } from '../services'
 
 export interface DirtyStateItem {
   id: string
@@ -39,7 +39,7 @@ export interface DirtyStateHook {
 /**
  * Compute a simple hash checksum of an object
  */
-function computeChecksum(data: unknown): string {
+export function computeChecksum(data: unknown): string {
   try {
     const str = JSON.stringify(data)
     let hash = 0
@@ -166,5 +166,3 @@ export function useDirtyState(): DirtyStateHook {
     clear
   }
 }
-
-export { computeChecksum }

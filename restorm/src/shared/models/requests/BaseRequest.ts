@@ -5,7 +5,8 @@
 import {
   trackable,
   searchable,
-  NonSerialised
+  NonSerialised,
+  graphqlField
 } from 'electron-core-ui/main'
 import type { RuntimeId, Icon, RequestType } from '../types'
 
@@ -17,13 +18,16 @@ import type { RuntimeId, Icon, RequestType } from '../types'
 @searchable()
 export abstract class BaseRequest {
   /** Runtime identifier (generated at runtime, not persisted) */
+  @graphqlField({ type: 'String' })
   @NonSerialised()
   id!: RuntimeId
 
   /** Request type discriminator */
+  @graphqlField({ type: 'RequestType' })
   abstract readonly type: RequestType
 
   /** Display name of the request */
+  @graphqlField({ type: 'String' })
   @searchable.property({ weight: 2 })
   name!: string
 
@@ -31,14 +35,17 @@ export abstract class BaseRequest {
   icon?: Icon
 
   /** Documentation describing the request purpose and usage */
+  @graphqlField({ type: 'String', nullable: true })
   @searchable.property({ weight: 1 })
   documentation = ''
 
   /** Optional user notes */
+  @graphqlField({ type: 'String', nullable: true })
   @searchable.property({ weight: 0.5 })
   notes?: string
 
   /** Tags for categorization and filtering */
+  @graphqlField({ type: 'String', isArray: true })
   @searchable.property({ weight: 1.5, filterable: true })
   tags: string[] = []
 

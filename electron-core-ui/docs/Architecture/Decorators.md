@@ -83,12 +83,61 @@ class Request { }
 - `nameProperty` - Property for `{name}` placeholder  
 - `idProperty` - Property used for tracking renames/deletes
 
+### @graphqlType(config)
+
+Optional class decorator to customize GraphQL type name.
+
+```typescript
+@graphqlType({ name: 'CustomTypeName', description: 'A custom type' })
+class MyClass { }
+```
+
+**Config options:**
+- `name` - GraphQL type name (defaults to class name)
+- `description` - Description for GraphQL schema
+
+### @graphqlField(config)
+
+Marks a property as a GraphQL field with type information. Used with `registerClassAuto()` to automatically generate GraphQL schema from decorators.
+
+```typescript
+class HTTPRequest {
+  @graphqlField({ type: 'String' })
+  id!: string
+
+  @graphqlField({ type: 'HTTPMethod' })
+  method: HTTPMethod = 'GET'
+
+  @graphqlField({ type: 'KeyValue', isArray: true })
+  headers: KeyValue[] = []
+
+  @graphqlField({ type: 'JSON', nullable: true })
+  body?: object
+}
+
+// In schema config:
+graphQLSchemaGenerator.registerClassAuto(HTTPRequest, { skipGenericQueries: true })
+```
+
+**Config options:**
+- `type` - GraphQL type name (e.g., 'String', 'Int', 'Boolean', 'KeyValue', enum name)
+- `nullable` - Whether the field can be null (default: false)
+- `isArray` - Whether the field is an array (default: false)
+- `description` - Description for GraphQL schema
+
 ## Metadata Access
 
 ```typescript
-import { getTrackableMetadata, getSearchableMetadata } from 'electron-core-ui/main'
+import {
+  getTrackableConfig,
+  getSearchableConfig,
+  getGraphQLFields,
+  getGraphQLTypeConfig
+} from 'electron-core-ui/main'
 
-const trackable = getTrackableMetadata(MyClass)
-const searchable = getSearchableMetadata(MyClass)
+const trackable = getTrackableConfig(MyClass)
+const searchable = getSearchableConfig(MyClass)
+const graphqlFields = getGraphQLFields(MyClass) // Map<string, GraphQLFieldConfig>
+const graphqlType = getGraphQLTypeConfig(MyClass)
 ```
 

@@ -7,7 +7,8 @@ import {
   searchable,
   NonSerialised,
   separateFiles,
-  fileNaming
+  fileNaming,
+  graphqlField
 } from 'electron-core-ui/main'
 import { KeyValue } from './KeyValue'
 import type { RuntimeId, Icon } from './types'
@@ -21,10 +22,12 @@ import type { RuntimeId, Icon } from './types'
 @fileNaming({ pattern: '{index} - {name}', nameProperty: 'name', idProperty: 'id' })
 export class Environment {
   /** Runtime identifier (generated at runtime, not persisted) */
+  @graphqlField({ type: 'String' })
   @NonSerialised()
   id!: RuntimeId
 
   /** Display name of the environment */
+  @graphqlField({ type: 'String' })
   @searchable.property({ weight: 2 })
   name!: string
 
@@ -32,10 +35,12 @@ export class Environment {
   icon?: Icon
 
   /** Key-value pairs for this environment */
+  @graphqlField({ type: 'KeyValue', isArray: true })
   @separateFiles()
   variables: KeyValue[] = []
 
   /** Optional nested sub-environments */
+  @graphqlField({ type: 'Environment', isArray: true, nullable: true })
   subEnvironments?: Environment[]
 
   constructor(init?: Partial<Environment>) {

@@ -7,13 +7,14 @@ import {
   Modal,
   SelectBox,
   Button,
-  type ISelectData
+  type ISelectData,
+  type PersistenceFormat
 } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
 import type { FolderItem, EnvironmentFolder } from '../types/collections'
 
 export type SaveMode = 'file' | 'folder'
-export type SaveFormat = 'json' | 'yaml' | 'json5'
+export type SaveFormat = PersistenceFormat
 
 export interface SaveOptions {
   mode: SaveMode
