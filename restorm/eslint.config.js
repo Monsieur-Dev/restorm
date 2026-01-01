@@ -69,4 +69,12 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-call': 'off',
     },
   },
+  {
+    // BDD test files use Playwright fixtures that look like React hooks but aren't
+    files: ['tests/e2e/bdd/**/*.ts'],
+    rules: {
+      'react-hooks/rules-of-hooks': 'off',
+      '@typescript-eslint/require-await': 'off',
+    },
+  },
 );
