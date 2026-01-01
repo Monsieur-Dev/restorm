@@ -115,6 +115,7 @@ vi.mock('electron-core-ui/renderer', async () => {
           })
         }
       }),
+      emitLocalSync: vi.fn(),
       emit: vi.fn()
     },
     DocumentEvents: {

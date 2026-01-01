@@ -60,18 +60,25 @@ export const Tab: React.FC<TabProps> = ({
 			<div className="tab-label">
 				<span className="label-name">{titleContent}</span>
 			</div>
-			<div className="tab-actions">
-				<button
-					aria-label="Close"
-					title="Close"
-					onClick={(e) => {
-						e.stopPropagation();
-						onClose?.(tab.id);
-					}}
-					className="action-label codicon codicon-close"
-					style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
+		<div className="tab-actions">
+			{tab.isDirty && (
+				<span
+					className="action-label codicon codicon-circle-filled dirty-indicator"
+					aria-label="Modified"
+					title="Modified"
 				/>
-			</div>
+			)}
+			<button
+				aria-label="Close"
+				title="Close"
+				onClick={(e) => {
+					e.stopPropagation();
+					onClose?.(tab.id);
+				}}
+				className="action-label codicon codicon-close"
+				style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
+			/>
+		</div>
 		</div>
 	);
 };

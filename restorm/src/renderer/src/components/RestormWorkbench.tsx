@@ -281,7 +281,8 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     // Environment folder tab
     if (isEnvironmentFolderTab(effectiveTab)) {
       // Get reactive environment folder if available, otherwise use tab's copy
-      const folder = getEnvironmentFolderById?.(effectiveTab.folder.id) ?? effectiveTab.folder
+      const reactiveFolder = getEnvironmentFolderById?.(effectiveTab.folder.id)
+      const folder = reactiveFolder ?? effectiveTab.folder
       return (
         <RestormWorkbenchTab
           breadcrumbs={breadcrumbs}

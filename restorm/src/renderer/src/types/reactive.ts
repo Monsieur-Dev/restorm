@@ -172,7 +172,10 @@ function emitUpdate(
     }
 
     logger.debug(`[Reactive] Emitting ${event} for ${docType} ${docId}`)
+    // Emit to main process (for FileService dirty state tracking)
     eventBus.emitSync(event, payload)
+    // Also emit locally in renderer (for per-tab dirty state tracking via useDirtyState)
+    eventBus.emitLocalSync(event, payload)
   }, DEBOUNCE_MS)
 
   pendingEmissions.set(docId, timeoutId)

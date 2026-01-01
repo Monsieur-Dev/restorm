@@ -78,6 +78,7 @@ import type {
   WebSocketRequestTab,
   BreadcrumbItem
 } from './types/editor'
+import { useDirtyState, computeChecksum } from './hooks/useDirtyState'
 
 const MIN_LEFT_WIDTH = 180
 const RIGHT_MIN_WIDTH = 240
@@ -698,6 +699,44 @@ const App: React.FC = () => {
   // Store the folder path when working with a folder (separate from filePath)
   const [currentFolderPath, setCurrentFolderPath] = useState<string | null>(null)
 
+  // Per-tab dirty state tracking (works in both file and folder modes)
+  const {
+    dirtyItemIds: dirtyTabIds,
+    registerItem: registerTabDirtyState,
+    updateItemChecksum: updateTabDirtyChecksum,
+    markAllSaved: markAllTabsSaved,
+    clear: clearTabDirtyState
+  } = useDirtyState()
+
+  // Create a Set for fast lookup of dirty item IDs
+  const dirtyItemIdsSet = useMemo(() => new Set(dirtyTabIds), [dirtyTabIds])
+
+  // Compute workbench tree with dirty states applied to all tabs
+  // This is computed during render, not in an effect, to avoid cascading renders
+  const workbenchTreeWithDirtyState = useMemo((): WorkbenchTree => {
+    const updateGroups = (groups: GroupNode[]): GroupNode[] => {
+      return groups.map(group => {
+        if (isTabGroupNode(group)) {
+          const updatedTabs = group.tabs.map(tab => {
+            // Extract item ID from tab ID (format: "request-{id}", "folder-{id}", etc.)
+            const itemId = tab.id.replace(/^(request|folder|env-folder)-/, '')
+            const shouldBeDirty = dirtyItemIdsSet.has(itemId)
+            if (tab.isDirty !== shouldBeDirty) {
+              return { ...tab, isDirty: shouldBeDirty }
+            }
+            return tab
+          })
+          return { ...group, tabs: updatedTabs }
+        } else if (isContainerNode(group)) {
+          return { ...group, groups: updateGroups(group.groups) }
+        }
+        return group
+      })
+    }
+    
+    return { ...workbenchTree, groups: updateGroups(workbenchTree.groups) }
+  }, [workbenchTree, dirtyItemIdsSet])
+
   // File save handlers (after rootFolders is defined)
   // Deep clone to remove Proxy wrappers before IPC serialization
   const handleMenuSave = useCallback(() => {
@@ -876,9 +915,9 @@ const App: React.FC = () => {
     
     // Detect if opened as folder (path doesn't end with a file extension)
     const path = state.currentFile.path ?? ''
-    const isFolder = path !== '' && !/\.(json|yaml|yml|json5|restorm)$/i.test(path)
-    setIsOpenedAsFolder(isFolder)
-    if (isFolder) {
+    const openedAsFolder = path !== '' && !/\.(json|yaml|yml|json5|restorm)$/i.test(path)
+    setIsOpenedAsFolder(openedAsFolder)
+    if (openedAsFolder) {
       // Use format from FileService state (read from restorm.conf) or default to yaml
       const format = state.currentFile.format as 'json' | 'yaml' | 'json5' | undefined
       setFolderFormat(format ?? 'yaml')
@@ -886,6 +925,9 @@ const App: React.FC = () => {
     } else {
       setCurrentFolderPath(null)
     }
+    
+    // Clear previous tab dirty state
+    clearTabDirtyState()
     
     // Generate runtime ids for all objects after deserialization
     const collectionsWithIds = processAfterDeserialization(collections)
@@ -895,6 +937,26 @@ const App: React.FC = () => {
       (folder) => makeReactiveFolder(folder) as EnvironmentFolder
     )
     setRootFolders(reactiveFolders)
+    
+    // Register items for per-tab dirty state tracking (folder mode)
+    if (openedAsFolder) {
+      const registerAllItems = (items: FolderItem[]): void => {
+        for (const item of items) {
+          const itemChecksum = computeChecksum(JSON.parse(JSON.stringify(item)))
+          registerTabDirtyState(item.id, itemChecksum)
+          
+          if (isAnyFolder(item)) {
+            registerAllItems((item as Folder).items)
+          }
+        }
+      }
+      
+      for (const folder of reactiveFolders) {
+        const folderChecksum = computeChecksum(JSON.parse(JSON.stringify(folder)))
+        registerTabDirtyState(folder.id, folderChecksum)
+        registerAllItems(folder.items)
+      }
+    }
     
     // Register initial checksums for all objects (granular dirty state tracking)
     // Use JSON.parse(JSON.stringify()) to strip Proxy wrappers and ensure serializable data
@@ -962,7 +1024,7 @@ const App: React.FC = () => {
       // Allow loading again (e.g., if user closes and reopens a file)
       isLoadingRef.current = false
     })()
-  }, [])
+  }, [clearTabDirtyState, registerTabDirtyState])
 
   // Handler for file closed event - clears the workbench
   const handleFileClosed = useCallback(() => {
@@ -983,7 +1045,9 @@ const App: React.FC = () => {
     void searchIndexService.clearIndex()
     // Clear context service data
     void window.restorm?.context.clearAll()
-  }, [])
+    // Clear per-tab dirty state
+    clearTabDirtyState()
+  }, [clearTabDirtyState])
 
   // Listen to file events (including from command line --open argument)
   useFileEvents(handleFileOpened, handleFileClosed)
@@ -1081,9 +1145,64 @@ const App: React.FC = () => {
       // Also update legacy content checksum for backward compatibility
       const dataForChecksum = prepareForSerialization({ collections: rootFolders })
       void setContentChecksum(JSON.stringify(dataForChecksum))
+      // Mark all tabs as saved (folder mode)
+      markAllTabsSaved()
     }
     wasDirtyRef.current = isDirty
-  }, [isDirty, fileName, rootFolders])
+  }, [isDirty, fileName, rootFolders, markAllTabsSaved])
+
+  // Listen to document changes and update per-tab dirty state (works in all modes)
+  useEffect(() => {
+    const handleFolderOrRequestUpdated = (payload: DocumentChangedPayload): void => {
+      const newChecksum = computeChecksum(JSON.parse(JSON.stringify(payload.document)))
+      updateTabDirtyChecksum(payload.id, newChecksum)
+    }
+
+    // For environments, we need to update the parent folder's dirty state
+    const handleEnvironmentUpdated = (payload: DocumentChangedPayload): void => {
+      // Find the parent environment folder and recalculate its checksum
+      const parentFolderId = payload.parentFolderId
+      if (parentFolderId) {
+        // Find the folder in rootFolders
+        const findFolder = (items: FolderItem[]): Folder | null => {
+          for (const item of items) {
+            if (isAnyFolder(item)) {
+              if (item.id === parentFolderId) return item
+              const found = findFolder((item as Folder).items)
+              if (found) return found
+            }
+          }
+          return null
+        }
+        
+        for (const rootFolder of rootFolders) {
+          if (rootFolder.id === parentFolderId) {
+            const newChecksum = computeChecksum(JSON.parse(JSON.stringify(rootFolder)))
+            updateTabDirtyChecksum(parentFolderId, newChecksum)
+            return
+          }
+          const found = findFolder(rootFolder.items)
+          if (found) {
+            const newChecksum = computeChecksum(JSON.parse(JSON.stringify(found)))
+            updateTabDirtyChecksum(parentFolderId, newChecksum)
+            return
+          }
+        }
+      }
+    }
+
+    const subscriptions = [
+      eventBus.subscribe(DocumentEvents.FOLDER_UPDATED, handleFolderOrRequestUpdated),
+      eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, handleFolderOrRequestUpdated),
+      eventBus.subscribe(DocumentEvents.ENVIRONMENT_UPDATED, handleEnvironmentUpdated)
+    ]
+
+    return () => {
+      for (const sub of subscriptions) {
+        sub.unsubscribe()
+      }
+    }
+  }, [updateTabDirtyChecksum, rootFolders])
 
   // Dirty state is now handled by FileService in the main process
   // It subscribes to DocumentEvents and compares checksums automatically
@@ -1111,6 +1230,10 @@ const App: React.FC = () => {
   // Open a folder tab in the workbench
   const openFolderTab = useCallback((folder: Folder, breadcrumbs: BreadcrumbItem[]) => {
     const tabId = `folder-${folder.id}`
+
+    // Register initial checksum for dirty state tracking
+    const folderChecksum = computeChecksum(JSON.parse(JSON.stringify(folder)))
+    registerTabDirtyState(folder.id, folderChecksum)
 
     setWorkbenchTree((prev) => {
       const newTab: FolderTab = {
@@ -1178,11 +1301,15 @@ const App: React.FC = () => {
         groups: updatedGroups
       }
     })
-  }, [focusedGroupId])
+  }, [focusedGroupId, registerTabDirtyState])
 
   // Open an environment folder tab in the workbench
   const openEnvironmentFolderTab = useCallback((folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[]) => {
     const tabId = `env-folder-${folder.id}`
+
+    // Register initial checksum for dirty state tracking
+    const folderChecksum = computeChecksum(JSON.parse(JSON.stringify(folder)))
+    registerTabDirtyState(folder.id, folderChecksum)
 
     setWorkbenchTree((prev) => {
       const newTab: EnvironmentFolderTab = {
@@ -1250,13 +1377,17 @@ const App: React.FC = () => {
         groups: updatedGroups
       }
     })
-  }, [focusedGroupId])
+  }, [focusedGroupId, registerTabDirtyState])
 
   // Open an HTTP request tab in the workbench
   // Generic function to open any request type tab
   const openAnyRequestTab = useCallback(
     (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[]) => {
     const tabId = `request-${request.id}`
+    
+    // Register initial checksum for dirty state tracking
+    const requestChecksum = computeChecksum(JSON.parse(JSON.stringify(request)))
+    registerTabDirtyState(request.id, requestChecksum)
     
     // Determine tab type and title based on request type
     let tabType: string
@@ -1349,7 +1480,7 @@ const App: React.FC = () => {
       }
     })
   },
-    [focusedGroupId]
+    [focusedGroupId, registerTabDirtyState]
   )
 
   // Rebuild tab callback for workbench autosave
@@ -2407,7 +2538,7 @@ const App: React.FC = () => {
             }}
           >
             <RestormWorkbench
-              tree={workbenchTree}
+              tree={workbenchTreeWithDirtyState}
               onTreeChange={handleTreeChange}
               focusedGroupId={focusedGroupId}
               onFocusedGroupChange={setFocusedGroupId}

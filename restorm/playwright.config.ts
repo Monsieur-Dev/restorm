@@ -12,6 +12,7 @@ export default defineConfig({
     '**/electron/**/*.spec.ts',
     '**/application/folder-save-operations.spec.ts',
     '**/application/open-folder.spec.ts',
+    '**/application/dirty-state.spec.ts',
   ],
   
   /* Timeouts */
