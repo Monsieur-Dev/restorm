@@ -23,12 +23,13 @@ When('I click on the {string} request', async ({ page }, requestName: string) =>
   const requestItem = page.locator(`text=${requestName}`).first()
   await expect(requestItem).toBeVisible({ timeout: 5000 })
   await requestItem.click()
-  // Wait for tab to open and path params pane to be visible
+  // Wait for tab to open and URL container to be resolved
   await page.waitForSelector('.tab.active', { timeout: 5000 })
+  await page.waitForSelector('[data-testid="url-container"][data-url-resolved="true"]', { timeout: 10000 })
   await page.waitForSelector('text=PATH PARAMS', { timeout: 5000 })
 })
 
-When('I change the path param {string} from {string} to {string}', async ({ page }, paramName: string, oldValue: string, newValue: string) => {
+When('I change the path param {string} from {string} to {string}', async ({ page }, _paramName: string, oldValue: string, newValue: string) => {
   // Find the PATH PARAMS pane header and expand if collapsed
   const pathParamsPane = page.locator('text=PATH PARAMS').first()
   await expect(pathParamsPane).toBeVisible({ timeout: 5000 })
@@ -44,21 +45,32 @@ When('I change the path param {string} from {string} to {string}', async ({ page
   const pathParamsSection = page.locator('.params-table-root').first()
   await expect(pathParamsSection).toBeVisible({ timeout: 5000 })
 
-  // Find the Monaco editor that contains the old value
-  const monacoEditors = page.locator('.params-table .monaco-editor')
+  // Wait for "Loading..." to disappear and actual values to appear
+  await page.waitForFunction(
+    () => {
+      const section = document.querySelector('.params-table-root')
+      const text = section?.textContent ?? ''
+      return section && !text.includes('Loading')
+    },
+    { timeout: 10000 }
+  )
+
+  // Find the Monaco editor that contains the old value in the path params section
+  const monacoEditors = pathParamsSection.locator('.monaco-editor')
   const editorCount = await monacoEditors.count()
 
   let targetEditor = null
   for (let i = 0; i < editorCount; i++) {
     const editor = monacoEditors.nth(i)
-    const text = await editor.locator('.view-line').first().textContent()
-    if (text?.includes(oldValue)) {
+    const lines = await editor.locator('.view-line').allTextContents()
+    if (lines.some(line => line.includes(oldValue))) {
       targetEditor = editor
       break
     }
   }
 
   if (!targetEditor) {
+    await page.screenshot({ path: 'test-results/debug-path-params.png' })
     throw new Error(`Could not find editor containing "${oldValue}"`)
   }
 
@@ -69,14 +81,21 @@ When('I change the path param {string} from {string} to {string}', async ({ page
 
   // Click outside to blur and trigger update
   await page.locator('.params-table th').first().click()
-  // Wait for reactivity to process the change
-  await page.waitForSelector('[data-testid="list-view"][data-ready="true"]', { timeout: 5000 })
-  // Additional wait for URL tooltip to update via Handlebars transformation
-  await page.waitForTimeout(2000)
+  
+  // Wait for URL tooltip to update with the new value
+  await page.waitForFunction(
+    (value: string) => {
+      const container = document.querySelector('[data-testid="url-container"]')
+      const title = container?.getAttribute('title') ?? ''
+      return title.includes(value)
+    },
+    newValue,
+    { timeout: 10000 }
+  )
 })
 
 Then('the URL tooltip should contain {string}', async ({ page }, expectedText: string) => {
-  const urlContainer = page.locator('div[title]').filter({ hasText: '{{baseUrl}}' }).first()
+  const urlContainer = page.locator('[data-testid="url-container"]').first()
   await expect(urlContainer).toBeVisible({ timeout: 10000 })
 
   const title = await urlContainer.getAttribute('title')
@@ -85,7 +104,7 @@ Then('the URL tooltip should contain {string}', async ({ page }, expectedText: s
 })
 
 Then('the URL tooltip should not contain {string}', async ({ page }, unexpectedText: string) => {
-  const urlContainer = page.locator('div[title]').filter({ hasText: '{{baseUrl}}' }).first()
+  const urlContainer = page.locator('[data-testid="url-container"]').first()
   await expect(urlContainer).toBeVisible({ timeout: 10000 })
 
   const title = await urlContainer.getAttribute('title')
