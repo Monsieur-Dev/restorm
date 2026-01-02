@@ -28,7 +28,7 @@ test.describe('Theme Structure Tests', () => {
   test.beforeEach(async () => {
     // Navigate to theme test page before each test
     await page.click('text=Theme Test')
-    await page.waitForTimeout(1000)
+    await page.waitForSelector('#theme-selector', { timeout: 5000 })
   })
 
   test('should have data-theme attribute set', async () => {
@@ -79,7 +79,11 @@ test.describe('Theme Structure Tests', () => {
     }
 
     await themeSelector.selectOption(secondThemeValue)
-    await page.waitForTimeout(1000)
+    // Wait for theme to apply
+    await page.waitForFunction(
+      () => getComputedStyle(document.documentElement).getPropertyValue('--editor-background').trim() !== '',
+      { timeout: 3000 }
+    )
 
     // Get new background color
     const newBg = await page.evaluate(() => {
@@ -149,7 +153,8 @@ test.describe('Theme Structure Tests', () => {
     }
 
     await themeSelector.selectOption(selectedValue)
-    await page.waitForTimeout(500)
+    // Wait for selection to be applied
+    await expect(themeSelector).toHaveValue(selectedValue, { timeout: 3000 })
 
     // Verify it's selected
     const currentValue = await themeSelector.inputValue()
@@ -178,7 +183,11 @@ test.describe('Theme Structure Tests', () => {
 
     if (lightTheme) {
       await themeSelector.selectOption(lightTheme)
-      await page.waitForTimeout(500)
+      // Wait for data-theme attribute to update
+      await page.waitForFunction(
+        () => ['light', 'hcLight'].includes(document.documentElement.getAttribute('data-theme') ?? ''),
+        { timeout: 3000 }
+      ).catch(() => { /* theme may not update data-theme */ })
 
       const dataTheme = await page.evaluate(() => {
         return document.documentElement.getAttribute('data-theme')
@@ -192,7 +201,11 @@ test.describe('Theme Structure Tests', () => {
 
     if (darkTheme) {
       await themeSelector.selectOption(darkTheme)
-      await page.waitForTimeout(500)
+      // Wait for data-theme attribute to update
+      await page.waitForFunction(
+        () => ['dark', 'hcDark'].includes(document.documentElement.getAttribute('data-theme') ?? ''),
+        { timeout: 3000 }
+      ).catch(() => { /* theme may not update data-theme */ })
 
       const dataTheme = await page.evaluate(() => {
         return document.documentElement.getAttribute('data-theme')
