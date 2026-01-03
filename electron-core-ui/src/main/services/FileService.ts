@@ -603,7 +603,7 @@ export class FileService {
    * Used when content is already loaded from a folder structure
    * @param folderPath The path to the folder
    * @param content The loaded content
-   * @param format Optional format to use (from restorm.conf or default)
+   * @param format Optional format to use (from config file or default)
    */
   public setOpenedFolder(folderPath: string, content: unknown, format?: SerializationFormat): void {
     const name = this.getDisplayName(folderPath)

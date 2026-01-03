@@ -5,7 +5,7 @@
 `KeyValueTable` is a themed, variable-aware key/value table built on top of `VariableInputBox`, `InputBox`, `Toggle` and `ScrollableElement`.
 It is designed for editing ordered lists of key/value pairs (with an optional description), with support for Handlebars-style `{{variables}}`, per-row enable/disable, and drag & drop reordering.
 
-This component is a generic, reusable version of the environment/headers/params editor used in the `restorm` project.
+This component is a generic, reusable key/value editor suitable for environment variables, HTTP headers, query params, and similar use cases.
 
 ## Component Location
 

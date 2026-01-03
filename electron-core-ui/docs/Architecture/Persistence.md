@@ -34,7 +34,7 @@ Hierarchical structure based on decorators.
 
 ```
 collection/
-├── restorm.conf           # Format configuration
+├── .ecu.conf              # Format configuration
 ├── index.yaml             # Root metadata
 ├── environments/
 │   ├── 1 - Production.yaml
@@ -65,7 +65,7 @@ class Collection {
 
 ### Config File
 
-`restorm.conf` at folder root stores format:
+`.ecu.conf` at folder root stores format:
 
 ```yaml
 format: yaml

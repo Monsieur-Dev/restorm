@@ -51,7 +51,7 @@ export interface CurrentFileState {
  * File service configuration
  */
 export interface FileServiceConfig {
-  /** File extension to use (e.g., '.restorm') */
+  /** File extension to use (e.g., '.myapp') */
   extension: string
   /** Default serialization format */
   defaultFormat: SerializationFormat
