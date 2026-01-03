@@ -1,4 +1,4 @@
-import { app, BrowserWindow, screen, BrowserWindowConstructorOptions, ipcMain, nativeImage, Menu } from "electron"
+import { BrowserWindow, screen, BrowserWindowConstructorOptions, ipcMain, nativeImage, Menu } from "electron"
 import { join } from "path"
 import { getStorageService, logger } from "../services"
 import { WindowConfiguration, WindowState, isDevToolsEnabled } from "./WindowManager"
@@ -574,22 +574,16 @@ export abstract class BaseWindow {
         window.loadURL(this.configuration.url).catch((error: unknown) => {
           logger.error('Failed to load URL', { error: String(error) })
         })
-      } else if (app.isPackaged) {
-        // In production, use app:// protocol for absolute paths to work
+      } else {
+        // Use app:// protocol for absolute paths to work (both dev and production)
         const fileName = this.configuration.file.split('/').pop() ?? 'index.html'
         const appUrl = `app://./${fileName}`
         logger.info(`BaseWindow: Loading via app:// protocol: ${appUrl}...`)
         window.loadURL(appUrl).catch((error: unknown) => {
-          logger.error('Failed to load app:// URL', { error: String(error) })
+          logger.error('Failed to load app:// URL, falling back to loadFile', { error: String(error) })
           window.loadFile(this.configuration.file).catch((err: unknown) => {
             logger.error('Failed to load file', { error: String(err) })
           })
-        })
-      } else {
-        // In development/test, use loadFile directly to avoid protocol issues
-        logger.info(`BaseWindow: Loading file: ${this.configuration.file}...`)
-        window.loadFile(this.configuration.file).catch((error: unknown) => {
-          logger.error('Failed to load file', { error: String(error) })
         })
       }
     }

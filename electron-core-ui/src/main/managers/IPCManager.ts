@@ -3,6 +3,15 @@ import { join } from 'path'
 import { pathToFileURL } from 'url'
 import { getThemeService, getStorageService, logger, isFeatureServiceInitialized, getFeatureService, isFileServiceInitialized, getFileService, eventBusService, searchService, i18nService, type SearchDocument, type CategoryMeta } from '../services'
 
+// Register custom protocol schemes BEFORE app.whenReady()
+// This is required for the app:// protocol to work correctly
+// Guard for unit tests where electron is mocked (process.type is undefined in tests)
+if (process.type === 'browser') {
+  protocol.registerSchemesAsPrivileged([
+    { scheme: 'app', privileges: { secure: true, standard: true, supportFetchAPI: true } }
+  ])
+}
+
 /**
  * Configure Electron command line switches
  * Disables sandbox and GPU acceleration for restricted environments (WSL, containers, etc.)
