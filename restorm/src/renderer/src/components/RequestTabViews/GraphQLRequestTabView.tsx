@@ -327,7 +327,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
   const urlSection = (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
       <Badge type="GQL" />
-      <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }} title={resolvedUrl || url}>
+      <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
         <RestormVariableInputBox
           value={url}
           onChange={setUrl}

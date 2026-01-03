@@ -1,4 +1,5 @@
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from 'electron-core-ui/types'
+import type { PersistenceFormat } from 'electron-core-ui/main'
 
 declare global {
   interface Window {
@@ -39,6 +40,13 @@ declare global {
       getEditorFile: () => Promise<{ title: string; content?: string } | undefined>
       forceClose: () => Promise<void>
       onSaveAndClose: (callback: () => void) => (() => void)
+      file: {
+        saveAsFile: (data: unknown, format: PersistenceFormat) => Promise<SaveResult>
+        saveAsFolder: (data: unknown, format: PersistenceFormat, targetPath?: string) => Promise<SaveResult>
+        openFolder: () => Promise<{ success: boolean; content?: unknown; path?: string; format?: PersistenceFormat }>
+        showFolderDialog: () => Promise<{ canceled: boolean; filePath?: string }>
+        openPath: (path: string) => Promise<{ success: boolean; isDirectory?: boolean; content?: unknown; path?: string; format?: PersistenceFormat }>
+      }
       context: {
         getAllTransformResults: () => Promise<Record<string, VariableTransformResult>>
         onVariableTransformed: (callback: (result: VariableTransformResult) => void) => (() => void)
@@ -96,6 +104,13 @@ declare global {
       }
     }
   }
+}
+
+/** Save result from file operations */
+export interface SaveResult {
+  success: boolean
+  path?: string
+  error?: string
 }
 
 /** KeyValue data for context service */

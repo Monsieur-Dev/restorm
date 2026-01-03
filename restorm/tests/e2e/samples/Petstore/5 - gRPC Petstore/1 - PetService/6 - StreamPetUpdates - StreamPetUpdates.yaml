@@ -1,0 +1,16 @@
+type: grpc
+name: StreamPetUpdates
+documentation: Stream pet updates in real-time
+tags:
+  - server-stream
+url: '{{baseUrl}}'
+service: petstore.PetService
+method: StreamPetUpdates
+callType: server-stream
+requestMessage: |-
+  {
+    "status_filter": [
+      {}
+    ]
+  }
+metadata: []

@@ -9,8 +9,10 @@ import {
 import type { Folder, EnvironmentFolder } from '../types/collections'
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
+// Uses direct property assignment to trigger proxy setter
 function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
-  Object.assign(obj, { [key]: value })
+  // Direct assignment triggers the proxy's set trap
+  (obj as Record<K, T[K]>)[key] = value
 }
 
 export interface BaseFolderViewProps {

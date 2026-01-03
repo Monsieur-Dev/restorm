@@ -1,0 +1,100 @@
+type: http
+name: Update an existing pet
+documentation: |-
+  # Update an existing pet
+
+  **Operation ID:** `updatePet`
+
+  ## Consumes
+
+  - `application/json`
+  - `application/xml`
+
+  ## Produces
+
+  - `application/json`
+  - `application/xml`
+
+  ## Parameters
+
+  | Name | Location | Type | Required | Description |
+  |------|----------|------|----------|-------------|
+  | `body` | body | #/definitions/Pet | Yes | Pet object that needs to be added to the store |
+
+  ## Types
+
+  ### Pet
+
+  **Reference:** `#/definitions/Pet`
+
+  ```mermaid
+  classDiagram
+    class Pet {
+      - id? : integer
+      - category? : Category
+      + name : string
+      + photoUrls : array<string>
+      - tags? : array<Tag>
+      - status? : string
+    }
+  ```
+
+
+  | Property | Type | Required | Description |
+  |----------|------|----------|-------------|
+  | `id` | integer | No |  |
+  | `category` | Category | No |  |
+  | `name` | string | Yes |  |
+  | `photoUrls` | array&lt;string&gt; | Yes |  |
+  | `tags` | array&lt;Tag&gt; | No |  |
+  | `status` | string | No | pet status in the store |
+
+
+  ## Responses
+
+  ### 400
+  Invalid ID supplied
+
+
+
+  ### 404
+  Pet not found
+
+
+
+  ### 405
+  Validation exception
+
+
+
+  ## Security
+
+  - **petstore_auth**: `write:pets`, `read:pets`
+tags:
+  - pet
+method: PUT
+url: '{{baseUrl}}/api/pet'
+headers: []
+params: []
+pathParams: []
+body:
+  type: text
+  content: |-
+    {
+      "id": 0,
+      "category": {
+        "id": 0,
+        "name": ""
+      },
+      "name": "",
+      "photoUrls": [
+        ""
+      ],
+      "tags": [
+        {
+          "id": 0,
+          "name": ""
+        }
+      ],
+      "status": "available"
+    }

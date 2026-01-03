@@ -1,0 +1,8 @@
+name: Subscriptions
+documentation: |-
+  # GraphQL Subscriptions
+
+  Real-time operations
+tags:
+  - subscription
+configuration: {}

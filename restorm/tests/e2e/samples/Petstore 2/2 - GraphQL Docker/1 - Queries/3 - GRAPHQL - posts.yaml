@@ -1,0 +1,16 @@
+type: graphql
+name: posts
+documentation: 'GraphQL query: posts'
+tags:
+  - query
+url: http://localhost:4000
+operationType: query
+query: |-
+  query {
+    posts {
+      # Add fields here
+    }
+  }
+headers:
+  - key: Content-Type
+    value: application/json

@@ -35,3 +35,4 @@ export type {
   FileServiceApi,
   WebFileEntry
 } from '../../types/file'
+export type { PersistenceFormat } from '../main/services/PersistenceService'

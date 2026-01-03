@@ -1,0 +1,11 @@
+type: grpc
+name: GetInventory
+documentation: Get store inventory
+tags:
+  - unary
+url: '{{baseUrl}}'
+service: petstore.StoreService
+method: GetInventory
+callType: unary
+requestMessage: '{}'
+metadata: []

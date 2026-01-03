@@ -1,0 +1,14 @@
+type: grpc
+name: GetPet
+documentation: Get a single pet by ID
+tags:
+  - unary
+url: '{{baseUrl}}'
+service: petstore.PetService
+method: GetPet
+callType: unary
+requestMessage: |-
+  {
+    "id": 0
+  }
+metadata: []

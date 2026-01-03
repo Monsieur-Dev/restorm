@@ -41,6 +41,13 @@
 	line-height: var(--editor-group-tab-height);
 }
 
+/* Dirty state indicator icon */
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab .dirty-indicator {
+	font-size: 10px;
+	margin-right: 2px;
+	color: var(--tab-activeForeground);
+}
+
 /* Apply opacity only to label-name content when dimmed */
 .workbench .part.editor > .content .editor-group-container > .title .tabs-container.dimmed > .tab .label-name {
 	opacity: 0.5;

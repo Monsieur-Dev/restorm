@@ -1,0 +1,79 @@
+type: http
+name: Place an order for a pet
+documentation: |-
+  # Place an order for a pet
+
+  **Operation ID:** `placeOrder`
+
+  ## Consumes
+
+  - `application/json`
+
+  ## Produces
+
+  - `application/json`
+  - `application/xml`
+
+  ## Parameters
+
+  | Name | Location | Type | Required | Description |
+  |------|----------|------|----------|-------------|
+  | `body` | body | #/definitions/Order | Yes | order placed for purchasing the pet |
+
+  ## Types
+
+  ### Order
+
+  **Reference:** `#/definitions/Order`
+
+  ```mermaid
+  classDiagram
+    class Order {
+      - id? : integer
+      - petId? : integer
+      - quantity? : integer
+      - shipDate? : string
+      - status? : string
+      - complete? : boolean
+    }
+  ```
+
+
+  | Property | Type | Required | Description |
+  |----------|------|----------|-------------|
+  | `id` | integer | No |  |
+  | `petId` | integer | No |  |
+  | `quantity` | integer | No |  |
+  | `shipDate` | string | No |  |
+  | `status` | string | No | Order Status |
+  | `complete` | boolean | No |  |
+
+
+  ## Responses
+
+  ### 200
+  successful operation
+
+  **Schema:** `#/definitions/Order`
+
+
+  ### 400
+  Invalid Order
+tags:
+  - store
+method: POST
+url: '{{baseUrl}}/api/store/order'
+headers: []
+params: []
+pathParams: []
+body:
+  type: text
+  content: |-
+    {
+      "id": 0,
+      "petId": 0,
+      "quantity": 0,
+      "shipDate": "",
+      "status": "placed",
+      "complete": false
+    }

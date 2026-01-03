@@ -1,0 +1,30 @@
+type: soap
+name: GetPet
+documentation: Find pet by ID
+tags:
+  - soap
+url: http://localhost:8090/petstore/pet
+soapAction: http://petstore.example.com/GetPet
+service: PetStoreService
+operation: GetPet
+body: |-
+  <?xml version="1.0" encoding="UTF-8"?>
+  <soap:Envelope 
+    xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+    xmlns:tns="http://petstore.example.com/wsdl">
+    <soap:Header/>
+    <soap:Body>
+      <tns:GetPetRequest>
+        <!-- Add request parameters here -->
+      </tns:GetPetRequest>
+    </soap:Body>
+  </soap:Envelope>
+headers:
+  - key: Content-Type
+    value: text/xml; charset=utf-8
+    description: ''
+    enabled: true
+  - key: SOAPAction
+    value: http://petstore.example.com/GetPet
+    description: ''
+    enabled: true

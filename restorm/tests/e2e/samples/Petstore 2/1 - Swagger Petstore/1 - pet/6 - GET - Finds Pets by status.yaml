@@ -1,0 +1,48 @@
+type: http
+name: Finds Pets by status
+documentation: |-
+  # Finds Pets by status
+
+  Multiple status values can be provided with comma separated strings
+
+  **Operation ID:** `findPetsByStatus`
+
+  ## Produces
+
+  - `application/json`
+  - `application/xml`
+
+  ## Parameters
+
+  | Name | Location | Type | Required | Description |
+  |------|----------|------|----------|-------------|
+  | `status` | query | array | Yes | Status values that need to be considered for filter |
+
+  ## Responses
+
+  ### 200
+  successful operation
+
+  **Schema:** `array`
+
+
+  ### 400
+  Invalid status value
+
+
+
+  ## Security
+
+  - **petstore_auth**: `write:pets`, `read:pets`
+tags:
+  - pet
+method: GET
+url: '{{baseUrl}}/api/pet/findByStatus'
+headers: []
+params:
+  - key: status
+    value: ''
+    description: Status values that need to be considered for filter
+    enabled: true
+pathParams: []
+notes: ''

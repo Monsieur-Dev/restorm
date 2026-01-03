@@ -1,0 +1,19 @@
+type: grpc
+name: CreateUser
+documentation: Create a new user
+tags:
+  - unary
+url: '{{baseUrl}}'
+service: petstore.UserService
+method: CreateUser
+callType: unary
+requestMessage: |-
+  {
+    "username": "",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "password": "",
+    "phone": ""
+  }
+metadata: []

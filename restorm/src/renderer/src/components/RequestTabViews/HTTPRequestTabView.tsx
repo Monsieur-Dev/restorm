@@ -696,7 +696,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           selectBoxOptions={{ ariaLabel: t('requestTab.methodSelect'), useCustomDrawn: true }}
         />
       </div>
-      <div style={{ flex: 1, minWidth: 0, paddingLeft: 15 }} title={resolvedUrl || url}>
+      <div style={{ flex: 1, minWidth: 0, paddingLeft: 15 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
         <RestormVariableInputBox
           value={url}
           onChange={(value: string) => { setUrl(value) }}

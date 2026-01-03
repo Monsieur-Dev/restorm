@@ -1,0 +1,10 @@
+folderType: environment
+name: SOAP Petstore
+documentation: |-
+  # SOAP Petstore
+
+  SOAP Web Service
+
+  Namespace: http://petstore.example.com/wsdl
+tags: []
+configuration: {}

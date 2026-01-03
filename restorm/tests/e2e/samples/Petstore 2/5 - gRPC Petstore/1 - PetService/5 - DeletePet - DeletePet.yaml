@@ -1,0 +1,14 @@
+type: grpc
+name: DeletePet
+documentation: Delete a pet
+tags:
+  - unary
+url: '{{baseUrl}}'
+service: petstore.PetService
+method: DeletePet
+callType: unary
+requestMessage: |-
+  {
+    "id": 0
+  }
+metadata: []

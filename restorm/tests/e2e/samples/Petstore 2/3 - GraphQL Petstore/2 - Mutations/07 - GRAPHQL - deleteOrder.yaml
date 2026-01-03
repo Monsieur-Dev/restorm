@@ -1,0 +1,17 @@
+type: graphql
+name: deleteOrder
+documentation: 'GraphQL mutation: deleteOrder'
+tags:
+  - mutation
+url: '{{baseUrl}}'
+operationType: mutation
+query: |-
+  mutation {
+    deleteOrder(id: "example") {
+      # Add fields here
+    }
+  }
+headers:
+  - key: Content-Type
+    value: application/json
+variables: '{}'

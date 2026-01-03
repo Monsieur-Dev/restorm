@@ -357,7 +357,7 @@ describe('Integration Tests with Docker Services', () => {
 
     it('should execute echo query with variables', async () => {
       if (!dockerAvailable || !containersStarted) {
-        test.skip()
+        console.warn('Skipping test: Docker not available or containers not started')
         return
       }
 
@@ -412,7 +412,7 @@ describe('Integration Tests with Docker Services', () => {
 
     it('should execute createUser mutation', async () => {
       if (!dockerAvailable || !containersStarted) {
-        test.skip()
+        console.warn('Skipping test: Docker not available or containers not started')
         return
       }
 
@@ -486,7 +486,7 @@ describe('Integration Tests with Docker Services', () => {
 
     it('should handle GraphQL errors properly', async () => {
       if (!dockerAvailable || !containersStarted) {
-        test.skip()
+        console.warn('Skipping test: Docker not available or containers not started')
         return
       }
 

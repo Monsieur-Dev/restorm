@@ -1,0 +1,12 @@
+folderType: environment
+name: AsyncAPI Petstore
+documentation: |-
+  # AsyncAPI Petstore
+
+  AsyncAPI specification for the Petstore.
+  Covers MQTT and Socket.IO event-driven operations.
+
+
+  Version: 1.0.0
+tags: []
+configuration: {}

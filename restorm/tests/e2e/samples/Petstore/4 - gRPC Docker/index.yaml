@@ -1,0 +1,37 @@
+folderType: environment
+name: gRPC Docker
+documentation: |-
+  # gRPC Docker
+
+  gRPC API
+
+  ## Messages
+
+  ### HelloRequest
+    - greeting: string
+
+  ### HelloResponse
+    - reply: string
+
+  ### HeadersResponse
+
+
+  ### IndexResponse
+    - services: repeated string
+
+  ### DummyMessage
+    - f_string: string
+    - f_strings: repeated string
+    - f_int32: int32
+    - f_int32s: repeated int32
+
+  ### SubMessage
+    - f_string: string
+
+  ### SpecificErrorRequest
+    - code: int32
+
+  ### AddrResponse
+    - addr: string
+tags: []
+configuration: {}

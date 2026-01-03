@@ -33,3 +33,36 @@ export type {
   GroupedResults,
   CategoryMeta
 } from './SearchService'
+
+export { graphQLService, createSchema, createPubSub } from './GraphQLService'
+export type { GraphQLServiceConfig, PubSub } from './GraphQLService'
+
+export {
+  initPersistenceService,
+  getPersistenceService,
+  isPersistenceServiceInitialized,
+  PersistenceService,
+  serialize,
+  deserialize,
+  detectFormat,
+  filterNonSerialised,
+  generateIndexedFileName,
+  sanitizeFileName,
+  calculateIndexPadding,
+  PERSISTENCE_FORMATS
+} from './PersistenceService'
+export type {
+  PersistenceFormat,
+  PersistenceMode,
+  PersistenceConfig,
+  FileNamingContext,
+  SaveResult,
+  LoadResult
+} from './PersistenceService'
+
+export {
+  graphQLSchemaGenerator,
+  inferGraphQLType,
+  createFieldDefinitions
+} from './GraphQLSchemaGenerator'
+export type { SchemaGeneratorConfig, RegisterClassOptions } from './GraphQLSchemaGenerator'

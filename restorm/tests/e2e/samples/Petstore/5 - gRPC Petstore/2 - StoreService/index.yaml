@@ -1,0 +1,5 @@
+name: StoreService
+documentation: Store service for managing orders
+tags:
+  - service
+configuration: {}

@@ -1,0 +1,21 @@
+type: grpc
+name: ListPets
+documentation: List all pets with optional filtering
+tags:
+  - unary
+url: '{{baseUrl}}'
+service: petstore.PetService
+method: ListPets
+callType: unary
+requestMessage: |-
+  {
+    "status": [
+      {}
+    ],
+    "tags": [
+      ""
+    ],
+    "limit": 0,
+    "offset": 0
+  }
+metadata: []

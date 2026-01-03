@@ -1,0 +1,8 @@
+name: Socket.IO
+documentation: |-
+  # Socket.IO Events
+
+  Real-time bidirectional communication
+tags:
+  - socketio
+configuration: {}

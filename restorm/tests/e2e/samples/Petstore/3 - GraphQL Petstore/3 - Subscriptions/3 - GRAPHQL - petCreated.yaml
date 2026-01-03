@@ -1,0 +1,16 @@
+type: graphql
+name: petCreated
+documentation: 'GraphQL subscription: petCreated'
+tags:
+  - subscription
+url: '{{baseUrl}}'
+operationType: subscription
+query: |-
+  subscription {
+    petCreated {
+      # Add fields here
+    }
+  }
+headers:
+  - key: Content-Type
+    value: application/json

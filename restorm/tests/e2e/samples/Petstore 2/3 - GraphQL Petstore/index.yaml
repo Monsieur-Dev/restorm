@@ -1,0 +1,59 @@
+folderType: environment
+name: GraphQL Petstore
+documentation: |-
+  # GraphQL Petstore
+
+  GraphQL API
+
+  ## Types
+
+  ### Category
+    - id: ID!
+    - name: String!
+
+  ### Tag
+    - id: ID!
+    - name: String!
+
+  ### Pet
+    - id: ID!
+    - name: String!
+    - category: Category
+    - photoUrls: [String!]!
+    - tags: [Tag!]
+    - status: PetStatus
+
+  ### Order
+    - id: ID!
+    - petId: ID!
+    - pet: Pet
+    - quantity: Int!
+    - shipDate: String
+    - status: OrderStatus
+    - complete: Boolean!
+
+  ### User
+    - id: ID!
+    - username: String!
+    - firstName: String
+    - lastName: String
+    - email: String!
+    - phone: String
+    - userStatus: Int
+
+  ### Inventory
+    - available: Int!
+    - pending: Int!
+    - sold: Int!
+
+  ### LoginResponse
+    - token: String!
+    - expiresAt: String!
+    - user: User!
+
+  ### ApiResponse
+    - code: Int!
+    - type: String!
+    - message: String!
+tags: []
+configuration: {}

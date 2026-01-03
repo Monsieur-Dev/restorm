@@ -1,0 +1,23 @@
+type: grpc
+name: UpdatePet
+documentation: Update an existing pet
+tags:
+  - unary
+url: '{{baseUrl}}'
+service: petstore.PetService
+method: UpdatePet
+callType: unary
+requestMessage: |-
+  {
+    "id": 0,
+    "name": "",
+    "category": {},
+    "photo_urls": [
+      ""
+    ],
+    "tags": [
+      {}
+    ],
+    "status": {}
+  }
+metadata: []

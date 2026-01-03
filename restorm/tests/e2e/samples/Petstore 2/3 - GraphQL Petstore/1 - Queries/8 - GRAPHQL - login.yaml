@@ -1,0 +1,17 @@
+type: graphql
+name: login
+documentation: 'GraphQL query: login'
+tags:
+  - query
+url: '{{baseUrl}}'
+operationType: query
+query: |-
+  query {
+    login(username: "example", password: "example") {
+      # Add fields here
+    }
+  }
+headers:
+  - key: Content-Type
+    value: application/json
+variables: '{}'

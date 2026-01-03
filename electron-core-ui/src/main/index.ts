@@ -1,5 +1,49 @@
 // Main process exports - with proper TypeScript types
-export { getThemeService, getStorageService, logger, initFeatureService, getFeatureService, isFeatureServiceInitialized, initFileService, getFileService, isFileServiceInitialized, eventBusService, searchService, i18nService } from './services'
+export { getThemeService, getStorageService, logger, initFeatureService, getFeatureService, isFeatureServiceInitialized, initFileService, getFileService, isFileServiceInitialized, eventBusService, searchService, i18nService, graphQLService, createSchema, createPubSub, initPersistenceService, getPersistenceService, isPersistenceServiceInitialized, PersistenceService, serialize, deserialize, detectFormat, filterNonSerialised, generateIndexedFileName, sanitizeFileName, calculateIndexPadding, PERSISTENCE_FORMATS, graphQLSchemaGenerator, inferGraphQLType, createFieldDefinitions } from './services'
+
+// Decorators
+export {
+  trackable,
+  searchable,
+  NonSerialised,
+  separateFiles,
+  separateFolders,
+  fileNaming,
+  graphqlType,
+  graphqlField,
+  isTrackable,
+  getTrackableConfig,
+  getTrackableProperties,
+  isSearchable,
+  getSearchableConfig,
+  getSearchableProperties,
+  isNonSerialised,
+  getNonSerialisedProperties,
+  hasSeparateFiles,
+  getSeparateFilesConfig,
+  getSeparateFilesProperties,
+  hasSeparateFolders,
+  getSeparateFoldersConfig,
+  getSeparateFoldersProperties,
+  getFileNamingConfig,
+  generateFileName,
+  isGraphQLField,
+  getGraphQLTypeConfig,
+  getGraphQLFieldConfig,
+  getGraphQLFields,
+  getAllMetadata,
+  serializeWithDecorators
+} from './decorators'
+export type {
+  TrackableConfig,
+  SearchableConfig,
+  SeparateFilesConfig,
+  SeparateFoldersConfig,
+  FileNamingConfig,
+  GraphQLTypeConfig,
+  GraphQLFieldConfig,
+  AllMetadata
+} from './decorators'
 export { BaseWindow, setupIPC, setupAppLifecycle, initializeApp, configureCommandLineSwitches, setupAppProtocol } from './managers'
 export type { WindowConfiguration, WindowState } from './managers'
 
@@ -11,6 +55,9 @@ export type { FeatureFlippingService } from './services/FeatureFlippingService'
 export type { FileService } from './services/FileService'
 export type { EventHandler, Subscription } from './services/EventBusService'
 export type { SearchDocument, SearchResult, SearchNavigation, GroupedResults, CategoryMeta } from './services/SearchService'
+export type { GraphQLServiceConfig, PubSub } from './services/GraphQLService'
+export type { PersistenceFormat, PersistenceMode, PersistenceConfig, FileNamingContext, SaveResult, LoadResult } from './services/PersistenceService'
+export type { SchemaGeneratorConfig, RegisterClassOptions } from './services/GraphQLSchemaGenerator'
 
 // Re-export feature types
 export type {

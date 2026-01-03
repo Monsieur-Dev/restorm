@@ -49,6 +49,6 @@ export async function loadRestormData(
     await testHelpers.loadRestormData(data)
   }, restormData)
   
-  // Wait for data to be processed
-  await page.waitForTimeout(1000)
+  // Wait for data to be processed (list-view becomes ready)
+  await page.waitForSelector('[data-testid="list-view"][data-ready="true"]', { timeout: 10000 })
 }

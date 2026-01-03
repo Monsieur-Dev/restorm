@@ -1,0 +1,17 @@
+type: graphql
+name: createPost
+documentation: 'GraphQL mutation: createPost'
+tags:
+  - mutation
+url: http://localhost:4000
+operationType: mutation
+query: |-
+  mutation {
+    createPost(title: "example", content: "example", authorId: "example") {
+      # Add fields here
+    }
+  }
+headers:
+  - key: Content-Type
+    value: application/json
+variables: '{}'

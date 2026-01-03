@@ -1,0 +1,15 @@
+type: websocket
+name: receiveEcho
+documentation: Receive echoed message
+tags:
+  - subscribe
+  - mqtt
+url: mqtt://localhost:1883
+protocol: mqtt
+event: echo
+message: |-
+  {
+    "message": "",
+    "data": {}
+  }
+headers: []

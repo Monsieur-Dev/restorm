@@ -72,3 +72,6 @@ temp/
 # Playwright
 playwright-report/
 test-results/
+
+# Playwright BDD generated files
+.features-gen/

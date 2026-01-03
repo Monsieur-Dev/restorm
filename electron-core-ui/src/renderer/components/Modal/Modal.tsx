@@ -80,6 +80,8 @@ export const Modal: React.FC<ModalProps> = ({ title, isOpen, onClose, children, 
           role="dialog"
           aria-modal="true"
           aria-label={typeof title === 'string' ? title : undefined}
+          data-testid="modal"
+          data-ready="true"
         >
           <div
             className="ecu-modal-header"

@@ -28,7 +28,8 @@ test.describe('Themes Visual Tests', () => {
   test('should navigate to theme test page', async () => {
     // Click the Theme Test button
     await page.click('text=Theme Test')
-    await page.waitForTimeout(1000)
+    // Wait for theme test page to load
+    await page.waitForSelector('h1:has-text("Theme Test")', { timeout: 5000 })
 
     // Verify we're on the theme test page
     const title = await page.textContent('h1')
@@ -38,7 +39,7 @@ test.describe('Themes Visual Tests', () => {
   test('should take screenshots of all themes', async () => {
     // Navigate to theme test page
     await page.click('text=Theme Test')
-    await page.waitForTimeout(1000)
+    await page.waitForSelector('#theme-selector', { timeout: 5000 })
 
     // Get all available themes
     const themeSelector = page.locator('#theme-selector')
@@ -52,7 +53,11 @@ test.describe('Themes Visual Tests', () => {
 
       // Select the theme
       await themeSelector.selectOption(themeValue)
-      await page.waitForTimeout(1000) // Wait for theme to apply
+      // Wait for theme CSS variables to update
+      await page.waitForFunction(
+        () => getComputedStyle(document.documentElement).getPropertyValue('--editor-background').trim() !== '',
+        { timeout: 3000 }
+      ).catch(() => { /* theme may already be applied */ })
 
       // Take screenshot
       const sanitizedName = themeValue.replace(/[^a-zA-Z0-9-]/g, '-')
@@ -66,7 +71,7 @@ test.describe('Themes Visual Tests', () => {
   test('should verify theme applies correctly', async () => {
     // Navigate to theme test page
     await page.click('text=Theme Test')
-    await page.waitForTimeout(1000)
+    await page.waitForSelector('#theme-selector', { timeout: 5000 })
 
     // Select a specific theme (Monokai)
     const themeSelector = page.locator('#theme-selector')
@@ -84,7 +89,11 @@ test.describe('Themes Visual Tests', () => {
 
     if (monokaiValue) {
       await themeSelector.selectOption(monokaiValue)
-      await page.waitForTimeout(1000)
+      // Wait for theme to apply
+      await page.waitForFunction(
+        () => getComputedStyle(document.documentElement).getPropertyValue('--editor-background').trim() !== '',
+        { timeout: 3000 }
+      )
 
       // Verify theme is applied by checking CSS variables
       const backgroundColor = await page.evaluate(() => {
@@ -99,7 +108,7 @@ test.describe('Themes Visual Tests', () => {
   test('should display all component types', async () => {
     // Navigate to theme test page
     await page.click('text=Theme Test')
-    await page.waitForTimeout(1000)
+    await page.waitForSelector('h1:has-text("Theme Test")', { timeout: 5000 })
 
     // Verify all component sections are present
     const sections = [

@@ -1,0 +1,14 @@
+type: grpc
+name: DeleteOrder
+documentation: Delete an order
+tags:
+  - unary
+url: '{{baseUrl}}'
+service: petstore.StoreService
+method: DeleteOrder
+callType: unary
+requestMessage: |-
+  {
+    "id": 0
+  }
+metadata: []

@@ -5,6 +5,7 @@ import { contextBridge, ipcRenderer } from 'electron'
 // - In prod: These are bundled into the preload script
 import { createCoreUIAPI } from '../../../../electron-core-ui/src/preload/api'
 import { createElectronAPI } from '../../../../electron-core-ui/src/preload/electronAPI'
+import type { PersistenceFormat } from '../../../../electron-core-ui/src/main/services/PersistenceService'
 
 // Expose core-ui APIs (imported from core-ui preload modules) and extend with restorm project API
 const coreUIAPI = createCoreUIAPI()
@@ -80,10 +81,46 @@ interface FullRequestData {
   message?: string
 }
 
+/** Save result type */
+interface SaveResult {
+  success: boolean
+  path?: string
+  error?: string
+}
+
 // Expose restorm-specific APIs
 contextBridge.exposeInMainWorld('restorm', {
   openEditor: async (file?: { title: string; content?: string; x?: number; y?: number }): Promise<void> => {
     await ipcRenderer.invoke('restorm:open-editor', file)
+  },
+  
+  // File operations with mode support
+  file: {
+    /** Save as single file */
+    saveAsFile: async (data: unknown, format: PersistenceFormat): Promise<SaveResult> => {
+      const result: unknown = await ipcRenderer.invoke('restorm:save-as-file', data, format)
+      return result as SaveResult
+    },
+    /** Save as folder structure */
+    saveAsFolder: async (data: unknown, format: PersistenceFormat, targetPath?: string): Promise<SaveResult> => {
+      const result: unknown = await ipcRenderer.invoke('restorm:save-as-folder', data, format, targetPath)
+      return result as SaveResult
+    },
+    /** Open folder */
+    openFolder: async (): Promise<{ success: boolean; content?: unknown; path?: string; format?: PersistenceFormat }> => {
+      const result: unknown = await ipcRenderer.invoke('restorm:open-folder')
+      return result as { success: boolean; content?: unknown; path?: string; format?: PersistenceFormat }
+    },
+    /** Show save dialog for folder selection */
+    showFolderDialog: async (): Promise<{ canceled: boolean; filePath?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('restorm:show-folder-dialog')
+      return result as { canceled: boolean; filePath?: string }
+    },
+    /** Open a file or folder (smart detection) */
+    openPath: async (path: string): Promise<{ success: boolean; isDirectory?: boolean; content?: unknown; path?: string; format?: PersistenceFormat }> => {
+      const result: unknown = await ipcRenderer.invoke('restorm:open-path', path)
+      return result as { success: boolean; isDirectory?: boolean; content?: unknown; path?: string; format?: PersistenceFormat }
+    }
   },
   getEditorFile: async (): Promise<{ title: string; content?: string } | undefined> => {
     const result: unknown = await ipcRenderer.invoke('restorm:get-editor-file')

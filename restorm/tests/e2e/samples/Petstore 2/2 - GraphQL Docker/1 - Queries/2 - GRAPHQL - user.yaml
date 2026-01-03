@@ -1,0 +1,19 @@
+type: graphql
+name: user
+documentation: 'GraphQL query: user'
+tags:
+  - query
+url: http://localhost:4000
+operationType: query
+query: |-
+  query {
+    user(id: "example") {
+      # Add fields here
+    }
+  }
+headers:
+  - key: Content-Type
+    value: application/json
+    description: ''
+    enabled: true
+variables: '{}'

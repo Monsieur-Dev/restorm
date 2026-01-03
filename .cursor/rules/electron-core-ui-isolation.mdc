@@ -1,0 +1,52 @@
+---
+description: "electron-core-ui must remain a generic library with no project-specific dependencies"
+globs:
+  - electron-core-ui/**/*
+alwaysApply: false
+---
+
+# electron-core-ui Library Isolation
+
+## Rule
+
+The `electron-core-ui` project is a **generic, reusable library**. It must remain completely independent from any specific project implementation.
+
+## Absolute Prohibitions
+
+The following are **strictly forbidden** in `electron-core-ui`:
+
+### 1. Project-Specific Imports
+- **NEVER** import from `restorm`, `gitable`, or `demo` projects
+- **NEVER** reference project-specific types, interfaces, or models
+- **NEVER** use project-specific constants or configurations
+
+### 2. Project-Specific Code
+- **NEVER** add code that only makes sense for a specific project
+- **NEVER** hardcode project-specific values (URLs, IDs, names)
+- **NEVER** add features that are not generalizable
+
+### 3. Project-Specific Dependencies
+- **NEVER** add dependencies that are only needed by a specific project
+- Keep dependencies minimal and generic
+
+## What Belongs in electron-core-ui
+
+✅ Generic UI components (Button, Modal, ListView, etc.)
+✅ Generic hooks (useEventBus, useDirtyState, etc.)
+✅ Generic services (PersistenceService, LoggerService, etc.)
+✅ Generic decorators (@trackable, @searchable, etc.)
+✅ Generic utilities and helpers
+
+## What Does NOT Belong in electron-core-ui
+
+❌ Restorm-specific models (HTTPRequest, Folder, Environment)
+❌ Gitable-specific logic
+❌ Demo-specific components or configurations
+❌ Any reference to specific API endpoints or data structures
+
+## Enforcement
+
+Before adding any code to `electron-core-ui`, ask yourself:
+> "Would this code be useful in ANY Electron application, or only in this specific project?"
+
+If the answer is "only in this specific project", the code belongs in that project, not in `electron-core-ui`.

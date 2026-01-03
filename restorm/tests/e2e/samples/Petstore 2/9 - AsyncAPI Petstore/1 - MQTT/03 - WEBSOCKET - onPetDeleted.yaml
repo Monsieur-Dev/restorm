@@ -1,0 +1,15 @@
+type: websocket
+name: onPetDeleted
+documentation: Receive notifications when a pet is deleted
+tags:
+  - subscribe
+  - mqtt
+url: mqtt://localhost:1883
+protocol: mqtt
+event: pet/deleted
+message: |-
+  {
+    "petId": 0,
+    "timestamp": ""
+  }
+headers: []

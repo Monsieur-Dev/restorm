@@ -1,0 +1,16 @@
+type: websocket
+name: receiveBroadcast
+documentation: Receive broadcast from any client
+tags:
+  - subscribe
+  - socketio
+url: ws://localhost:3001
+protocol: socketio
+event: broadcast
+message: |-
+  {
+    "from": "",
+    "data": {},
+    "timestamp": 0
+  }
+headers: []

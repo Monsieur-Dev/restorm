@@ -1,0 +1,17 @@
+type: graphql
+name: placeOrder
+documentation: 'GraphQL mutation: placeOrder'
+tags:
+  - mutation
+url: '{{baseUrl}}'
+operationType: mutation
+query: |-
+  mutation {
+    placeOrder(input: "") {
+      # Add fields here
+    }
+  }
+headers:
+  - key: Content-Type
+    value: application/json
+variables: '{}'

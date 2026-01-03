@@ -1,9 +1,10 @@
 import type { Page } from '@playwright/test';
+import type { PersistenceFormat } from 'electron-core-ui/main';
 
 export async function loadRestormFile(
   page: Page,
   filePath: string,
-  _format: 'json' | 'yaml' | 'json5'
+  _format: PersistenceFormat
 ): Promise<void> {
   // Wait for file menu to be available
   await page.waitForSelector('[role="menubar"]', { timeout: 5000 });

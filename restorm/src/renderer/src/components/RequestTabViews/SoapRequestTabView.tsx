@@ -311,7 +311,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <Badge type="SOAP" />
-        <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }} title={resolvedUrl || url}>
+        <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
           <RestormVariableInputBox
             value={url}
             onChange={setUrl}

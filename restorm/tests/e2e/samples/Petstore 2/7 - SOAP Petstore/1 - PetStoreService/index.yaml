@@ -1,0 +1,5 @@
+name: PetStoreService
+documentation: Petstore SOAP Web Service
+tags:
+  - service
+configuration: {}

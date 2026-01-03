@@ -1,0 +1,15 @@
+type: websocket
+name: sendRoomMessage
+documentation: Send message to a room
+tags:
+  - publish
+  - socketio
+url: ws://localhost:3001
+protocol: socketio
+event: room-message
+message: |-
+  {
+    "room": "",
+    "message": ""
+  }
+headers: []

@@ -1,0 +1,45 @@
+type: http
+name: Logs user into the system
+documentation: |-
+  # Logs user into the system
+
+  **Operation ID:** `loginUser`
+
+  ## Produces
+
+  - `application/json`
+  - `application/xml`
+
+  ## Parameters
+
+  | Name | Location | Type | Required | Description |
+  |------|----------|------|----------|-------------|
+  | `username` | query | string | Yes | The user name for login |
+  | `password` | query | string | Yes | The password for login in clear text |
+
+  ## Responses
+
+  ### 200
+  successful operation
+
+  **Schema:** `string`
+
+  **Headers:**
+  - `X-Expires-After`: date in UTC when token expires (string, date-time)
+  - `X-Rate-Limit`: calls per hour allowed by the user (integer, int32)
+
+  ### 400
+  Invalid username/password supplied
+tags:
+  - user
+method: GET
+url: '{{baseUrl}}/api/user/login'
+headers: []
+params:
+  - key: username
+    value: ''
+    description: The user name for login
+  - key: password
+    value: ''
+    description: The password for login in clear text
+pathParams: []

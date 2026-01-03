@@ -17,11 +17,21 @@
     "noPropertyAccessFromIndexSignature": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "baseUrl": ".",
+    "paths": {
+      "electron-core-ui/main": ["../electron-core-ui/src/main/index.ts"],
+      "electron-core-ui/types": ["../electron-core-ui/types/index.ts"]
+    }
   },
   "include": [
     "src/main",
     "src/preload",
-    "../electron-core-ui/src/preload/**/*"
+    "src/shared",
+    "../electron-core-ui/src/main/**/*",
+    "../electron-core-ui/src/preload/**/*",
+    "../electron-core-ui/types/**/*"
   ]
 }

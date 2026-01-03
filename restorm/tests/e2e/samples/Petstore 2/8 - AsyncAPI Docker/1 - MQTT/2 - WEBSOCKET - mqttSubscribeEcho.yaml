@@ -1,0 +1,11 @@
+type: websocket
+name: mqttSubscribeEcho
+documentation: Subscribe to test messages
+tags:
+  - subscribe
+  - mqtt
+url: mqtt://localhost:1883
+protocol: mqtt
+event: test/echo
+message: '{}'
+headers: []

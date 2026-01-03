@@ -7,6 +7,7 @@
     "file": "Fichier",
     "new": "Nouveau...",
     "open": "Ouvrir...",
+    "openFolder": "Ouvrir un dossier...",
     "recentFiles": "Fichiers récents",
     "favorites": "Favoris",
     "close": "Fermer",
@@ -282,6 +283,31 @@
     "removeFromFavorites": "Retirer des favoris",
     "confirmRemoveFavorite": "Voulez-vous vraiment retirer \"{{fileName}}\" des favoris ?",
     "noFilesHint": "Ouvrez un fichier ou créez-en un nouveau pour commencer"
+  },
+  "save": {
+    "title": "Options d'enregistrement",
+    "mode": {
+      "label": "Mode d'enregistrement",
+      "file": "Fichier unique",
+      "folder": "Structure de dossiers",
+      "fileDescription": "Enregistrer tout dans un seul fichier",
+      "folderDescription": "Enregistrer dans une structure de dossiers avec des fichiers séparés"
+    },
+    "format": {
+      "label": "Format",
+      "yamlDescription": "Lisible par l'humain",
+      "jsonDescription": "Format standard",
+      "json5Description": "JSON + commentaires"
+    },
+    "preview": {
+      "label": "Aperçu de la structure"
+    }
+  },
+  "common": {
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "ok": "OK",
+    "close": "Fermer"
   },
   "helpers": {
     "categories": {
