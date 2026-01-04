@@ -167,9 +167,8 @@ function getResourcesPath(): string {
   if (isDev) {
     // In development, point directly to the monorepo's electron-core-ui resources
     // so that changes to YAML/JSON themes are picked up without reinstalling.
-    // app.getAppPath() returns dist/main, so we go up 3 levels to reach monorepo root
-    const appPath = app.getAppPath()
-    return join(appPath, '../../../electron-core-ui/resources')
+    // __dirname is restorm/dist/main, so we go up 3 levels to reach monorepo root
+    return join(__dirname, '../../../electron-core-ui/resources')
   }
 
   // In production, resources are bundled under process.resourcesPath/resources
@@ -178,13 +177,8 @@ function getResourcesPath(): string {
 
 // Get renderer path for static assets (images, etc.)
 function getRendererPath(): string {
-  if (!app.isPackaged) {
-    // In development/test, point to dist/renderer for static assets
-    // app.getAppPath() returns dist/main, so we go up one level
-    const appPath = app.getAppPath()
-    return join(appPath, '../renderer')
-  }
-  // In production, renderer files are in the app resources
+  // __dirname is dist/main in compiled code
+  // In both dev and production, renderer is at ../renderer relative to main
   return join(__dirname, '../renderer')
 }
 
