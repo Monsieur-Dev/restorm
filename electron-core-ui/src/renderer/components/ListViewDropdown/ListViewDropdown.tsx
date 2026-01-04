@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Button } from '../Button'
 import type { ButtonProps } from '../Button'
 import { ListView } from '../ListView'
+import { ScrollableElement } from '../ScrollableElement/ScrollableElement'
 import type {
   ListViewItemData,
   ListViewItemEventPayload,
@@ -103,35 +104,41 @@ export const ListViewDropdown: React.FC<ListViewDropdownProps> = ({
             marginTop: 4,
             minWidth,
             maxHeight,
-            overflow: 'hidden',
             zIndex: 1000,
             backgroundColor: 'var(--editor-background)',
             border: '1px solid var(--dropdown-border)',
             boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)'
           }}
         >
-          {(() => {
-            const listViewProps: ListViewProps = {
-              items,
-              rootRole,
-              ariaLabel: menuAriaLabel ?? '',
-              selectedIds: selectedIds ?? [],
-              selectionMode,
-              onItemClick: (payload) => {
-                onItemClick?.(payload)
-                setIsOpen(false)
+          <ScrollableElement
+            style={{
+              height: maxHeight || 400,
+              width: '100%'
+            }}
+          >
+            {(() => {
+              const listViewProps: ListViewProps = {
+                items,
+                rootRole,
+                ariaLabel: menuAriaLabel ?? '',
+                selectedIds: selectedIds ?? [],
+                selectionMode,
+                onItemClick: (payload) => {
+                  onItemClick?.(payload)
+                  setIsOpen(false)
+                }
               }
-            }
 
-            if (expandedIds) {
-              listViewProps.expandedIds = expandedIds
-            }
-            if (onItemToggle) {
-              listViewProps.onItemToggle = onItemToggle
-            }
+              if (expandedIds) {
+                listViewProps.expandedIds = expandedIds
+              }
+              if (onItemToggle) {
+                listViewProps.onItemToggle = onItemToggle
+              }
 
-            return <ListView {...listViewProps} />
-          })()}
+              return <ListView {...listViewProps} />
+            })()}
+          </ScrollableElement>
         </div>
       )}
     </div>

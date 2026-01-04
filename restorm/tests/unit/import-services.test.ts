@@ -6,14 +6,14 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 
-import { importSwaggerFromJson } from '../../src/renderer/src/services/import/SwaggerImportService'
-import { importGraphQLFromString } from '../../src/renderer/src/services/import/GraphQLImportService'
-import { importGrpcFromString } from '../../src/renderer/src/services/import/GrpcImportService'
-import { importSoapFromString } from '../../src/renderer/src/services/import/SoapImportService'
-import { importAsyncAPIFromString } from '../../src/renderer/src/services/import/AsyncAPIImportService'
-import { importPostmanFromJson } from '../../src/renderer/src/services/import/PostmanImportService'
-import { importInsomniaFromJson } from '../../src/renderer/src/services/import/InsomniaImportService'
-import { importBrunoFromJson } from '../../src/renderer/src/services/import/BrunoImportService'
+import { importSwaggerFromJson } from '../../src/main/services/import/SwaggerImportService'
+import { importGraphQLFromString } from '../../src/main/services/import/GraphQLImportService'
+import { importGrpcFromString } from '../../src/main/services/import/GrpcImportService'
+import { importSoapFromString } from '../../src/main/services/import/SoapImportService'
+import { importAsyncAPIFromString } from '../../src/main/services/import/AsyncAPIImportService'
+import { importPostmanFromJson } from '../../src/main/services/import/PostmanImportService'
+import { importInsomniaFromJson } from '../../src/main/services/import/InsomniaImportService'
+import { importBrunoFromJson } from '../../src/main/services/import/BrunoImportService'
 import type { Folder, EnvironmentFolder, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest } from '../../src/renderer/src/types/collections'
 
 // Helper to load test files
@@ -74,7 +74,7 @@ describe('SwaggerImportService', () => {
 
   describe('importSwaggerFromJson', () => {
     it('should import Swagger spec and return an EnvironmentFolder', () => {
-      const result = importSwaggerFromJson(swaggerJson)
+      const result = importSwaggerFromJson(swaggerJson) as EnvironmentFolder
 
       expect(result).toBeDefined()
       expect(result.folderType).toBe('environment')
@@ -84,7 +84,7 @@ describe('SwaggerImportService', () => {
     })
 
     it('should create environment with baseUrl variable', () => {
-      const result = importSwaggerFromJson(swaggerJson)
+      const result = importSwaggerFromJson(swaggerJson) as EnvironmentFolder
       // Environment name is extracted from the host (localhost:8080 -> localhost)
       const env = result.environments.find((e) => e.name === 'localhost')
 
@@ -93,7 +93,7 @@ describe('SwaggerImportService', () => {
     })
 
     it('should create folders for each tag', () => {
-      const result = importSwaggerFromJson(swaggerJson)
+      const result = importSwaggerFromJson(swaggerJson) as EnvironmentFolder
 
       // Petstore has tags: pet, store, user
       const tagNames = result.items.filter(isFolder).map((f) => f.name)
@@ -103,7 +103,7 @@ describe('SwaggerImportService', () => {
     })
 
     it('should create HTTP requests for each endpoint', () => {
-      const result = importSwaggerFromJson(swaggerJson)
+      const result = importSwaggerFromJson(swaggerJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       expect(requests.length).toBeGreaterThan(0)
@@ -116,7 +116,7 @@ describe('SwaggerImportService', () => {
     })
 
     it('should correctly parse HTTP methods', () => {
-      const result = importSwaggerFromJson(swaggerJson)
+      const result = importSwaggerFromJson(swaggerJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       const methods = new Set(requests.map((r) => r.method))
@@ -130,7 +130,7 @@ describe('SwaggerImportService', () => {
     it('should use custom baseUrl option', () => {
       const result = importSwaggerFromJson(swaggerJson, {
         baseUrl: 'http://custom.url'
-      })
+      }) as EnvironmentFolder
 
       // Environment name is extracted from the host (localhost:8080 -> localhost)
       const env = result.environments.find((e) => e.name === 'localhost')
@@ -139,7 +139,7 @@ describe('SwaggerImportService', () => {
     })
 
     it('should mark deprecated endpoints', () => {
-      const result = importSwaggerFromJson(swaggerJson)
+      const result = importSwaggerFromJson(swaggerJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       // findPetsByTags is deprecated in the spec (operationId)
@@ -155,7 +155,7 @@ describe('SwaggerImportService', () => {
     })
 
     it('should generate unique IDs for all items', () => {
-      const result = importSwaggerFromJson(swaggerJson)
+      const result = importSwaggerFromJson(swaggerJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
       const ids = requests.map((r) => r.id)
 
@@ -164,7 +164,7 @@ describe('SwaggerImportService', () => {
     })
 
     it('should throw on invalid JSON', () => {
-      expect(() => importSwaggerFromJson('not valid json')).toThrow()
+      expect(() => { importSwaggerFromJson('not valid json') }).toThrow()
     })
   })
 })
@@ -178,7 +178,7 @@ describe('GraphQLImportService', () => {
 
   describe('importGraphQLFromString', () => {
     it('should import GraphQL schema and return an EnvironmentFolder', () => {
-      const result = importGraphQLFromString(graphqlSchema, { name: 'GraphQL Test' })
+      const result = importGraphQLFromString(graphqlSchema, { name: 'GraphQL Test' }) as EnvironmentFolder
 
       expect(result).toBeDefined()
       expect(result.folderType).toBe('environment')
@@ -186,7 +186,7 @@ describe('GraphQLImportService', () => {
     })
 
     it('should create folders for queries, mutations, and subscriptions', () => {
-      const result = importGraphQLFromString(graphqlSchema, { name: 'GraphQL Test' })
+      const result = importGraphQLFromString(graphqlSchema, { name: 'GraphQL Test' }) as EnvironmentFolder
       const folderNames = result.items.filter(isFolder).map((f) => f.name)
 
       expect(folderNames).toContain('Queries')
@@ -195,7 +195,7 @@ describe('GraphQLImportService', () => {
     })
 
     it('should create GraphQL requests for each operation', () => {
-      const result = importGraphQLFromString(graphqlSchema, { name: 'GraphQL Test' })
+      const result = importGraphQLFromString(graphqlSchema, { name: 'GraphQL Test' }) as EnvironmentFolder
       const requests = findAllRequests(result, isGraphQLRequest)
 
       expect(requests.length).toBeGreaterThan(0)
@@ -207,7 +207,7 @@ describe('GraphQLImportService', () => {
     })
 
     it('should correctly identify operation types', () => {
-      const result = importGraphQLFromString(graphqlSchema, { name: 'GraphQL Test' })
+      const result = importGraphQLFromString(graphqlSchema, { name: 'GraphQL Test' }) as EnvironmentFolder
       const requests = findAllRequests(result, isGraphQLRequest)
 
       const queries = requests.filter((r) => r.operationType === 'query')
@@ -223,7 +223,7 @@ describe('GraphQLImportService', () => {
     })
 
     it('should parse query arguments', () => {
-      const result = importGraphQLFromString(graphqlSchema, { name: 'GraphQL Test' })
+      const result = importGraphQLFromString(graphqlSchema, { name: 'GraphQL Test' }) as EnvironmentFolder
       const requests = findAllRequests(result, isGraphQLRequest)
 
       // echo query has a message argument
@@ -235,7 +235,7 @@ describe('GraphQLImportService', () => {
       const result = importGraphQLFromString(graphqlSchema, {
         name: 'GraphQL Test',
         baseUrl: 'http://localhost:4000/graphql'
-      })
+      }) as EnvironmentFolder
       const requests = findAllRequests(result, isGraphQLRequest)
 
       requests.forEach((req) => {
@@ -244,7 +244,7 @@ describe('GraphQLImportService', () => {
     })
 
     it('should set Content-Type header', () => {
-      const result = importGraphQLFromString(graphqlSchema, { name: 'GraphQL Test' })
+      const result = importGraphQLFromString(graphqlSchema, { name: 'GraphQL Test' }) as EnvironmentFolder
       const requests = findAllRequests(result, isGraphQLRequest)
 
       requests.forEach((req) => {
@@ -254,7 +254,7 @@ describe('GraphQLImportService', () => {
     })
 
     it('should generate unique IDs for all requests', () => {
-      const result = importGraphQLFromString(graphqlSchema, { name: 'GraphQL Test' })
+      const result = importGraphQLFromString(graphqlSchema, { name: 'GraphQL Test' }) as EnvironmentFolder
       const requests = findAllRequests(result, isGraphQLRequest)
       const ids = requests.map((r) => r.id)
 
@@ -272,7 +272,7 @@ describe('GrpcImportService', () => {
 
   describe('importGrpcFromString', () => {
     it('should import proto file and return an EnvironmentFolder', () => {
-      const result = importGrpcFromString(protoFile, { name: 'gRPC Test' })
+      const result = importGrpcFromString(protoFile, { name: 'gRPC Test' }) as EnvironmentFolder
 
       expect(result).toBeDefined()
       expect(result.folderType).toBe('environment')
@@ -280,7 +280,7 @@ describe('GrpcImportService', () => {
     })
 
     it('should create folders for each service', () => {
-      const result = importGrpcFromString(protoFile, { name: 'gRPC Test' })
+      const result = importGrpcFromString(protoFile, { name: 'gRPC Test' }) as EnvironmentFolder
       const folderNames = result.items.filter(isFolder).map((f) => f.name)
 
       // Docker proto has: HelloService, HeadersService, IndexService, DummyService
@@ -291,7 +291,7 @@ describe('GrpcImportService', () => {
     })
 
     it('should create gRPC requests for each method', () => {
-      const result = importGrpcFromString(protoFile, { name: 'gRPC Test' })
+      const result = importGrpcFromString(protoFile, { name: 'gRPC Test' }) as EnvironmentFolder
       const requests = findAllRequests(result, isGrpcRequest)
 
       expect(requests.length).toBeGreaterThan(0)
@@ -304,7 +304,7 @@ describe('GrpcImportService', () => {
     })
 
     it('should correctly identify call types', () => {
-      const result = importGrpcFromString(protoFile, { name: 'gRPC Test' })
+      const result = importGrpcFromString(protoFile, { name: 'gRPC Test' }) as EnvironmentFolder
       const requests = findAllRequests(result, isGrpcRequest)
 
       const callTypes = new Set(requests.map((r) => r.callType))
@@ -316,7 +316,7 @@ describe('GrpcImportService', () => {
     })
 
     it('should include package name in service', () => {
-      const result = importGrpcFromString(protoFile, { name: 'gRPC Test' })
+      const result = importGrpcFromString(protoFile, { name: 'gRPC Test' }) as EnvironmentFolder
       const requests = findAllRequests(result, isGrpcRequest)
 
       // All services should be prefixed with package name
@@ -329,7 +329,7 @@ describe('GrpcImportService', () => {
       const result = importGrpcFromString(protoFile, {
         name: 'gRPC Test',
         baseUrl: 'localhost:9000'
-      })
+      }) as EnvironmentFolder
       const requests = findAllRequests(result, isGrpcRequest)
 
       requests.forEach((req) => {
@@ -338,7 +338,7 @@ describe('GrpcImportService', () => {
     })
 
     it('should generate sample request messages', () => {
-      const result = importGrpcFromString(protoFile, { name: 'gRPC Test' })
+      const result = importGrpcFromString(protoFile, { name: 'gRPC Test' }) as EnvironmentFolder
       const requests = findAllRequests(result, isGrpcRequest)
 
       // HelloService.SayHello should have a greeting field
@@ -347,7 +347,7 @@ describe('GrpcImportService', () => {
     })
 
     it('should generate unique IDs for all requests', () => {
-      const result = importGrpcFromString(protoFile, { name: 'gRPC Test' })
+      const result = importGrpcFromString(protoFile, { name: 'gRPC Test' }) as EnvironmentFolder
       const requests = findAllRequests(result, isGrpcRequest)
       const ids = requests.map((r) => r.id)
 
@@ -365,7 +365,7 @@ describe('SoapImportService', () => {
 
   describe('importSoapFromString', () => {
     it('should import WSDL and return an EnvironmentFolder', () => {
-      const result = importSoapFromString(wsdlFile, { name: 'SOAP Test' })
+      const result = importSoapFromString(wsdlFile, { name: 'SOAP Test' }) as EnvironmentFolder
 
       expect(result).toBeDefined()
       expect(result.folderType).toBe('environment')
@@ -373,14 +373,14 @@ describe('SoapImportService', () => {
     })
 
     it('should create folders for each service', () => {
-      const result = importSoapFromString(wsdlFile, { name: 'SOAP Test' })
+      const result = importSoapFromString(wsdlFile, { name: 'SOAP Test' }) as EnvironmentFolder
       const folders = result.items.filter(isFolder)
 
       expect(folders.length).toBeGreaterThan(0)
     })
 
     it('should create SOAP requests for each operation', () => {
-      const result = importSoapFromString(wsdlFile, { name: 'SOAP Test' })
+      const result = importSoapFromString(wsdlFile, { name: 'SOAP Test' }) as EnvironmentFolder
       const requests = findAllRequests(result, isSoapRequest)
 
       expect(requests.length).toBeGreaterThan(0)
@@ -392,7 +392,7 @@ describe('SoapImportService', () => {
     })
 
     it('should generate SOAP envelope in body', () => {
-      const result = importSoapFromString(wsdlFile, { name: 'SOAP Test' })
+      const result = importSoapFromString(wsdlFile, { name: 'SOAP Test' }) as EnvironmentFolder
       const requests = findAllRequests(result, isSoapRequest)
 
       requests.forEach((req) => {
@@ -402,7 +402,7 @@ describe('SoapImportService', () => {
     })
 
     it('should set correct Content-Type header', () => {
-      const result = importSoapFromString(wsdlFile, { name: 'SOAP Test' })
+      const result = importSoapFromString(wsdlFile, { name: 'SOAP Test' }) as EnvironmentFolder
       const requests = findAllRequests(result, isSoapRequest)
 
       requests.forEach((req) => {
@@ -412,7 +412,7 @@ describe('SoapImportService', () => {
     })
 
     it('should set SOAPAction header', () => {
-      const result = importSoapFromString(wsdlFile, { name: 'SOAP Test' })
+      const result = importSoapFromString(wsdlFile, { name: 'SOAP Test' }) as EnvironmentFolder
       const requests = findAllRequests(result, isSoapRequest)
 
       requests.forEach((req) => {
@@ -425,7 +425,7 @@ describe('SoapImportService', () => {
       const result = importSoapFromString(wsdlFile, {
         name: 'SOAP Test',
         baseUrl: 'http://localhost:8080/soap'
-      })
+      }) as EnvironmentFolder
       const requests = findAllRequests(result, isSoapRequest)
 
       requests.forEach((req) => {
@@ -434,7 +434,7 @@ describe('SoapImportService', () => {
     })
 
     it('should generate unique IDs for all requests', () => {
-      const result = importSoapFromString(wsdlFile, { name: 'SOAP Test' })
+      const result = importSoapFromString(wsdlFile, { name: 'SOAP Test' }) as EnvironmentFolder
       const requests = findAllRequests(result, isSoapRequest)
       const ids = requests.map((r) => r.id)
 
@@ -452,7 +452,7 @@ describe('AsyncAPIImportService', () => {
 
   describe('importAsyncAPIFromString', () => {
     it('should import AsyncAPI spec and return an EnvironmentFolder', () => {
-      const result = importAsyncAPIFromString(asyncapiYaml, { name: 'AsyncAPI Test' })
+      const result = importAsyncAPIFromString(asyncapiYaml, { name: 'AsyncAPI Test' }) as EnvironmentFolder
 
       expect(result).toBeDefined()
       expect(result.folderType).toBe('environment')
@@ -460,7 +460,7 @@ describe('AsyncAPIImportService', () => {
     })
 
     it('should create folders for each protocol', () => {
-      const result = importAsyncAPIFromString(asyncapiYaml, { name: 'AsyncAPI Test' })
+      const result = importAsyncAPIFromString(asyncapiYaml, { name: 'AsyncAPI Test' }) as EnvironmentFolder
       const folderNames = result.items.filter(isFolder).map((f) => f.name)
 
       // Docker AsyncAPI has MQTT and Socket.IO
@@ -468,7 +468,7 @@ describe('AsyncAPIImportService', () => {
     })
 
     it('should create WebSocket requests for each channel', () => {
-      const result = importAsyncAPIFromString(asyncapiYaml, { name: 'AsyncAPI Test' })
+      const result = importAsyncAPIFromString(asyncapiYaml, { name: 'AsyncAPI Test' }) as EnvironmentFolder
       const requests = findAllRequests(result, isWebSocketRequest)
 
       expect(requests.length).toBeGreaterThan(0)
@@ -480,7 +480,7 @@ describe('AsyncAPIImportService', () => {
     })
 
     it('should correctly identify protocols', () => {
-      const result = importAsyncAPIFromString(asyncapiYaml, { name: 'AsyncAPI Test' })
+      const result = importAsyncAPIFromString(asyncapiYaml, { name: 'AsyncAPI Test' }) as EnvironmentFolder
       const requests = findAllRequests(result, isWebSocketRequest)
 
       const protocols = new Set(requests.map((r) => r.protocol))
@@ -489,7 +489,7 @@ describe('AsyncAPIImportService', () => {
     })
 
     it('should parse channel information', () => {
-      const result = importAsyncAPIFromString(asyncapiYaml, { name: 'AsyncAPI Test' })
+      const result = importAsyncAPIFromString(asyncapiYaml, { name: 'AsyncAPI Test' }) as EnvironmentFolder
       const requests = findAllRequests(result, isWebSocketRequest)
 
       // All requests should have names derived from channels
@@ -503,7 +503,7 @@ describe('AsyncAPIImportService', () => {
       const result = importAsyncAPIFromString(asyncapiYaml, {
         name: 'AsyncAPI Test',
         baseUrl: 'ws://localhost:3001'
-      })
+      }) as EnvironmentFolder
       const defaultEnv = result.environments.find((e) => e.name === 'Default')
       const baseUrlVar = defaultEnv?.variables.find((v) => v.key === 'baseUrl')
 
@@ -511,7 +511,7 @@ describe('AsyncAPIImportService', () => {
     })
 
     it('should set event/topic names', () => {
-      const result = importAsyncAPIFromString(asyncapiYaml, { name: 'AsyncAPI Test' })
+      const result = importAsyncAPIFromString(asyncapiYaml, { name: 'AsyncAPI Test' }) as EnvironmentFolder
       const requests = findAllRequests(result, isWebSocketRequest)
 
       // Socket.IO and MQTT requests should have event/topic
@@ -522,7 +522,7 @@ describe('AsyncAPIImportService', () => {
     })
 
     it('should generate unique IDs for all requests', () => {
-      const result = importAsyncAPIFromString(asyncapiYaml, { name: 'AsyncAPI Test' })
+      const result = importAsyncAPIFromString(asyncapiYaml, { name: 'AsyncAPI Test' }) as EnvironmentFolder
       const requests = findAllRequests(result, isWebSocketRequest)
       const ids = requests.map((r) => r.id)
 
@@ -540,7 +540,7 @@ describe('PostmanImportService', () => {
 
   describe('importPostmanFromJson', () => {
     it('should import Postman collection and return an EnvironmentFolder', () => {
-      const result = importPostmanFromJson(postmanJson)
+      const result = importPostmanFromJson(postmanJson) as EnvironmentFolder
 
       expect(result).toBeDefined()
       expect(result.folderType).toBe('environment')
@@ -550,7 +550,7 @@ describe('PostmanImportService', () => {
     })
 
     it('should create environment with baseUrl variable', () => {
-      const result = importPostmanFromJson(postmanJson)
+      const result = importPostmanFromJson(postmanJson) as EnvironmentFolder
       const env = result.environments[0]
 
       expect(env).toBeDefined()
@@ -558,7 +558,7 @@ describe('PostmanImportService', () => {
     })
 
     it('should create nested folders for Postman folder structure', () => {
-      const result = importPostmanFromJson(postmanJson)
+      const result = importPostmanFromJson(postmanJson) as EnvironmentFolder
 
       // Postman collection has pet, store, user folders
       const folderNames = result.items.filter(isFolder).map((f) => f.name)
@@ -568,7 +568,7 @@ describe('PostmanImportService', () => {
     })
 
     it('should create HTTP requests for each endpoint', () => {
-      const result = importPostmanFromJson(postmanJson)
+      const result = importPostmanFromJson(postmanJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       expect(requests.length).toBeGreaterThan(0)
@@ -580,7 +580,7 @@ describe('PostmanImportService', () => {
     })
 
     it('should correctly parse HTTP methods', () => {
-      const result = importPostmanFromJson(postmanJson)
+      const result = importPostmanFromJson(postmanJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       const methods = new Set(requests.map((r) => r.method))
@@ -592,7 +592,7 @@ describe('PostmanImportService', () => {
     })
 
     it('should parse headers from requests', () => {
-      const result = importPostmanFromJson(postmanJson)
+      const result = importPostmanFromJson(postmanJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       // At least some requests should have headers
@@ -601,7 +601,7 @@ describe('PostmanImportService', () => {
     })
 
     it('should parse query parameters', () => {
-      const result = importPostmanFromJson(postmanJson)
+      const result = importPostmanFromJson(postmanJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       // Find requests with query params (e.g., findByStatus)
@@ -610,7 +610,7 @@ describe('PostmanImportService', () => {
     })
 
     it('should parse path parameters', () => {
-      const result = importPostmanFromJson(postmanJson)
+      const result = importPostmanFromJson(postmanJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       // Find requests with path params (e.g., GET /pet/{petId})
@@ -619,7 +619,7 @@ describe('PostmanImportService', () => {
     })
 
     it('should convert path variables from :var to {{var}} format', () => {
-      const result = importPostmanFromJson(postmanJson)
+      const result = importPostmanFromJson(postmanJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       // URLs should use {{var}} format, not :var
@@ -635,7 +635,7 @@ describe('PostmanImportService', () => {
     })
 
     it('should parse request bodies', () => {
-      const result = importPostmanFromJson(postmanJson)
+      const result = importPostmanFromJson(postmanJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       // POST/PUT requests should have bodies
@@ -644,7 +644,7 @@ describe('PostmanImportService', () => {
     })
 
     it('should handle form-data bodies', () => {
-      const result = importPostmanFromJson(postmanJson)
+      const result = importPostmanFromJson(postmanJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       // Find requests with formdata body
@@ -655,7 +655,7 @@ describe('PostmanImportService', () => {
     })
 
     it('should handle urlencoded bodies', () => {
-      const result = importPostmanFromJson(postmanJson)
+      const result = importPostmanFromJson(postmanJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       // Find requests with urlencoded body
@@ -666,7 +666,7 @@ describe('PostmanImportService', () => {
     })
 
     it('should handle raw JSON bodies', () => {
-      const result = importPostmanFromJson(postmanJson)
+      const result = importPostmanFromJson(postmanJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       // Find requests with raw text body (JSON)
@@ -679,7 +679,7 @@ describe('PostmanImportService', () => {
     it('should use custom baseUrl option', () => {
       const result = importPostmanFromJson(postmanJson, {
         baseUrl: 'http://custom.url'
-      })
+      }) as EnvironmentFolder
 
       const env = result.environments[0]
       const baseUrlVar = env?.variables.find((v) => v.key === 'baseUrl')
@@ -687,7 +687,7 @@ describe('PostmanImportService', () => {
     })
 
     it('should generate unique IDs for all items', () => {
-      const result = importPostmanFromJson(postmanJson)
+      const result = importPostmanFromJson(postmanJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
       const ids = requests.map((r) => r.id)
 
@@ -696,8 +696,8 @@ describe('PostmanImportService', () => {
     })
 
     it('should generate deterministic IDs', () => {
-      const result1 = importPostmanFromJson(postmanJson)
-      const result2 = importPostmanFromJson(postmanJson)
+      const result1 = importPostmanFromJson(postmanJson) as EnvironmentFolder
+      const result2 = importPostmanFromJson(postmanJson) as EnvironmentFolder
 
       const requests1 = findAllRequests(result1, isHTTPRequest)
       const requests2 = findAllRequests(result2, isHTTPRequest)
@@ -710,7 +710,7 @@ describe('PostmanImportService', () => {
     })
 
     it('should include documentation from descriptions', () => {
-      const result = importPostmanFromJson(postmanJson)
+      const result = importPostmanFromJson(postmanJson) as EnvironmentFolder
       
       // Collection should have documentation from info.description
       expect(result.documentation).toBeDefined()
@@ -718,7 +718,7 @@ describe('PostmanImportService', () => {
     })
 
     it('should throw on invalid JSON', () => {
-      expect(() => importPostmanFromJson('not valid json')).toThrow()
+      expect(() => { importPostmanFromJson('not valid json') }).toThrow()
     })
 
     it('should throw on unsupported schema version', () => {
@@ -729,7 +729,7 @@ describe('PostmanImportService', () => {
         },
         item: []
       })
-      expect(() => importPostmanFromJson(invalidCollection)).toThrow(/Unsupported Postman collection schema/)
+      expect(() => { importPostmanFromJson(invalidCollection) }).toThrow(/Unsupported Postman collection schema/)
     })
   })
 })
@@ -743,7 +743,7 @@ describe('InsomniaImportService', () => {
 
   describe('importInsomniaFromJson', () => {
     it('should import Insomnia export and return an EnvironmentFolder', () => {
-      const result = importInsomniaFromJson(insomniaJson)
+      const result = importInsomniaFromJson(insomniaJson) as EnvironmentFolder
 
       expect(result).toBeDefined()
       expect(result.folderType).toBe('environment')
@@ -753,7 +753,7 @@ describe('InsomniaImportService', () => {
     })
 
     it('should create environments from Insomnia environments', () => {
-      const result = importInsomniaFromJson(insomniaJson)
+      const result = importInsomniaFromJson(insomniaJson) as EnvironmentFolder
 
       // Should have Production and Development environments
       const envNames = result.environments.map(e => e.name)
@@ -762,7 +762,7 @@ describe('InsomniaImportService', () => {
     })
 
     it('should extract environment variables', () => {
-      const result = importInsomniaFromJson(insomniaJson)
+      const result = importInsomniaFromJson(insomniaJson) as EnvironmentFolder
       const prodEnv = result.environments.find(e => e.name === 'Production')
 
       expect(prodEnv).toBeDefined()
@@ -771,7 +771,7 @@ describe('InsomniaImportService', () => {
     })
 
     it('should create nested folders from request groups', () => {
-      const result = importInsomniaFromJson(insomniaJson)
+      const result = importInsomniaFromJson(insomniaJson) as EnvironmentFolder
 
       const folderNames = result.items.filter(isFolder).map(f => f.name)
       expect(folderNames).toContain('Pets')
@@ -780,7 +780,7 @@ describe('InsomniaImportService', () => {
     })
 
     it('should create HTTP requests', () => {
-      const result = importInsomniaFromJson(insomniaJson)
+      const result = importInsomniaFromJson(insomniaJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       expect(requests.length).toBeGreaterThan(0)
@@ -792,7 +792,7 @@ describe('InsomniaImportService', () => {
     })
 
     it('should correctly parse HTTP methods', () => {
-      const result = importInsomniaFromJson(insomniaJson)
+      const result = importInsomniaFromJson(insomniaJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       const methods = new Set(requests.map(r => r.method))
@@ -804,7 +804,7 @@ describe('InsomniaImportService', () => {
     })
 
     it('should parse headers from requests', () => {
-      const result = importInsomniaFromJson(insomniaJson)
+      const result = importInsomniaFromJson(insomniaJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       const requestsWithHeaders = requests.filter(r => r.headers.length > 0)
@@ -812,7 +812,7 @@ describe('InsomniaImportService', () => {
     })
 
     it('should parse query parameters', () => {
-      const result = importInsomniaFromJson(insomniaJson)
+      const result = importInsomniaFromJson(insomniaJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       const requestsWithParams = requests.filter(r => r.params.length > 0)
@@ -820,7 +820,7 @@ describe('InsomniaImportService', () => {
     })
 
     it('should extract path parameters from URL', () => {
-      const result = importInsomniaFromJson(insomniaJson)
+      const result = importInsomniaFromJson(insomniaJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       const requestsWithPathParams = requests.filter(r => r.pathParams && r.pathParams.length > 0)
@@ -828,7 +828,7 @@ describe('InsomniaImportService', () => {
     })
 
     it('should parse JSON request bodies', () => {
-      const result = importInsomniaFromJson(insomniaJson)
+      const result = importInsomniaFromJson(insomniaJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       const requestsWithTextBody = requests.filter(r => r.body?.type === 'text')
@@ -836,7 +836,7 @@ describe('InsomniaImportService', () => {
     })
 
     it('should handle form-data bodies', () => {
-      const result = importInsomniaFromJson(insomniaJson)
+      const result = importInsomniaFromJson(insomniaJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       const formDataRequests = requests.filter(r => r.body?.type === 'form-data')
@@ -844,7 +844,7 @@ describe('InsomniaImportService', () => {
     })
 
     it('should handle urlencoded bodies', () => {
-      const result = importInsomniaFromJson(insomniaJson)
+      const result = importInsomniaFromJson(insomniaJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       const urlencodedRequests = requests.filter(r => r.body?.type === 'x-www-form-urlencoded')
@@ -852,7 +852,7 @@ describe('InsomniaImportService', () => {
     })
 
     it('should detect and convert GraphQL requests', () => {
-      const result = importInsomniaFromJson(insomniaJson)
+      const result = importInsomniaFromJson(insomniaJson) as EnvironmentFolder
       const requests = findAllRequests(result, isGraphQLRequest)
 
       expect(requests.length).toBeGreaterThan(0)
@@ -865,7 +865,7 @@ describe('InsomniaImportService', () => {
     it('should use custom baseUrl option', () => {
       const result = importInsomniaFromJson(insomniaJson, {
         baseUrl: 'http://custom.url'
-      })
+      }) as EnvironmentFolder
 
       const env = result.environments[0]
       const baseUrlVar = env?.variables.find(v => v.key === 'baseUrl')
@@ -873,7 +873,7 @@ describe('InsomniaImportService', () => {
     })
 
     it('should generate unique IDs for all items', () => {
-      const result = importInsomniaFromJson(insomniaJson)
+      const result = importInsomniaFromJson(insomniaJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
       const ids = requests.map(r => r.id)
 
@@ -881,8 +881,8 @@ describe('InsomniaImportService', () => {
     })
 
     it('should generate deterministic IDs', () => {
-      const result1 = importInsomniaFromJson(insomniaJson)
-      const result2 = importInsomniaFromJson(insomniaJson)
+      const result1 = importInsomniaFromJson(insomniaJson) as EnvironmentFolder
+      const result2 = importInsomniaFromJson(insomniaJson) as EnvironmentFolder
 
       const requests1 = findAllRequests(result1, isHTTPRequest)
       const requests2 = findAllRequests(result2, isHTTPRequest)
@@ -894,14 +894,14 @@ describe('InsomniaImportService', () => {
     })
 
     it('should include documentation from descriptions', () => {
-      const result = importInsomniaFromJson(insomniaJson)
+      const result = importInsomniaFromJson(insomniaJson) as EnvironmentFolder
 
       expect(result.documentation).toBeDefined()
       expect(result.documentation.length).toBeGreaterThan(0)
     })
 
     it('should throw on invalid JSON', () => {
-      expect(() => importInsomniaFromJson('not valid json')).toThrow()
+      expect(() => { importInsomniaFromJson('not valid json') }).toThrow()
     })
 
     it('should throw on unsupported export format', () => {
@@ -910,7 +910,7 @@ describe('InsomniaImportService', () => {
         __export_format: 3,
         resources: []
       })
-      expect(() => importInsomniaFromJson(invalidExport)).toThrow(/Unsupported Insomnia export format/)
+      expect(() => { importInsomniaFromJson(invalidExport) }).toThrow(/Unsupported Insomnia export format/)
     })
 
     it('should throw on invalid export type', () => {
@@ -919,7 +919,7 @@ describe('InsomniaImportService', () => {
         __export_format: 4,
         resources: []
       })
-      expect(() => importInsomniaFromJson(invalidExport)).toThrow(/Invalid Insomnia export/)
+      expect(() => { importInsomniaFromJson(invalidExport) }).toThrow(/Invalid Insomnia export/)
     })
   })
 })
@@ -933,7 +933,7 @@ describe('BrunoImportService', () => {
 
   describe('importBrunoFromJson', () => {
     it('should import Bruno collection and return an EnvironmentFolder', () => {
-      const result = importBrunoFromJson(brunoJson)
+      const result = importBrunoFromJson(brunoJson) as EnvironmentFolder
 
       expect(result).toBeDefined()
       expect(result.folderType).toBe('environment')
@@ -943,7 +943,7 @@ describe('BrunoImportService', () => {
     })
 
     it('should create environment', () => {
-      const result = importBrunoFromJson(brunoJson)
+      const result = importBrunoFromJson(brunoJson) as EnvironmentFolder
       const env = result.environments[0]
 
       expect(env).toBeDefined()
@@ -951,7 +951,7 @@ describe('BrunoImportService', () => {
     })
 
     it('should create nested folders', () => {
-      const result = importBrunoFromJson(brunoJson)
+      const result = importBrunoFromJson(brunoJson) as EnvironmentFolder
 
       const folderNames = result.items.filter(isFolder).map(f => f.name)
       expect(folderNames).toContain('Pets')
@@ -960,7 +960,7 @@ describe('BrunoImportService', () => {
     })
 
     it('should create HTTP requests', () => {
-      const result = importBrunoFromJson(brunoJson)
+      const result = importBrunoFromJson(brunoJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       expect(requests.length).toBeGreaterThan(0)
@@ -972,7 +972,7 @@ describe('BrunoImportService', () => {
     })
 
     it('should correctly parse HTTP methods', () => {
-      const result = importBrunoFromJson(brunoJson)
+      const result = importBrunoFromJson(brunoJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       const methods = new Set(requests.map(r => r.method))
@@ -984,7 +984,7 @@ describe('BrunoImportService', () => {
     })
 
     it('should parse headers from requests', () => {
-      const result = importBrunoFromJson(brunoJson)
+      const result = importBrunoFromJson(brunoJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       const requestsWithHeaders = requests.filter(r => r.headers.length > 0)
@@ -992,7 +992,7 @@ describe('BrunoImportService', () => {
     })
 
     it('should parse query parameters', () => {
-      const result = importBrunoFromJson(brunoJson)
+      const result = importBrunoFromJson(brunoJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       const requestsWithParams = requests.filter(r => r.params.length > 0)
@@ -1000,7 +1000,7 @@ describe('BrunoImportService', () => {
     })
 
     it('should parse path parameters', () => {
-      const result = importBrunoFromJson(brunoJson)
+      const result = importBrunoFromJson(brunoJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       const requestsWithPathParams = requests.filter(r => r.pathParams && r.pathParams.length > 0)
@@ -1008,7 +1008,7 @@ describe('BrunoImportService', () => {
     })
 
     it('should parse JSON request bodies', () => {
-      const result = importBrunoFromJson(brunoJson)
+      const result = importBrunoFromJson(brunoJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       const requestsWithTextBody = requests.filter(r => r.body?.type === 'text')
@@ -1016,7 +1016,7 @@ describe('BrunoImportService', () => {
     })
 
     it('should handle form-data bodies', () => {
-      const result = importBrunoFromJson(brunoJson)
+      const result = importBrunoFromJson(brunoJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       const formDataRequests = requests.filter(r => r.body?.type === 'form-data')
@@ -1024,7 +1024,7 @@ describe('BrunoImportService', () => {
     })
 
     it('should handle urlencoded bodies', () => {
-      const result = importBrunoFromJson(brunoJson)
+      const result = importBrunoFromJson(brunoJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       const urlencodedRequests = requests.filter(r => r.body?.type === 'x-www-form-urlencoded')
@@ -1032,7 +1032,7 @@ describe('BrunoImportService', () => {
     })
 
     it('should detect and convert GraphQL requests', () => {
-      const result = importBrunoFromJson(brunoJson)
+      const result = importBrunoFromJson(brunoJson) as EnvironmentFolder
       const requests = findAllRequests(result, isGraphQLRequest)
 
       expect(requests.length).toBeGreaterThan(0)
@@ -1045,7 +1045,7 @@ describe('BrunoImportService', () => {
     it('should use custom baseUrl option', () => {
       const result = importBrunoFromJson(brunoJson, {
         baseUrl: 'http://custom.url'
-      })
+      }) as EnvironmentFolder
 
       const env = result.environments[0]
       const baseUrlVar = env?.variables.find(v => v.key === 'baseUrl')
@@ -1053,7 +1053,7 @@ describe('BrunoImportService', () => {
     })
 
     it('should generate unique IDs for all items', () => {
-      const result = importBrunoFromJson(brunoJson)
+      const result = importBrunoFromJson(brunoJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
       const ids = requests.map(r => r.id)
 
@@ -1061,8 +1061,8 @@ describe('BrunoImportService', () => {
     })
 
     it('should generate deterministic IDs', () => {
-      const result1 = importBrunoFromJson(brunoJson)
-      const result2 = importBrunoFromJson(brunoJson)
+      const result1 = importBrunoFromJson(brunoJson) as EnvironmentFolder
+      const result2 = importBrunoFromJson(brunoJson) as EnvironmentFolder
 
       const requests1 = findAllRequests(result1, isHTTPRequest)
       const requests2 = findAllRequests(result2, isHTTPRequest)
@@ -1074,7 +1074,7 @@ describe('BrunoImportService', () => {
     })
 
     it('should include documentation from docs field', () => {
-      const result = importBrunoFromJson(brunoJson)
+      const result = importBrunoFromJson(brunoJson) as EnvironmentFolder
       const requests = findAllRequests(result, isHTTPRequest)
 
       // At least some requests should have documentation
@@ -1083,7 +1083,7 @@ describe('BrunoImportService', () => {
     })
 
     it('should throw on invalid JSON', () => {
-      expect(() => importBrunoFromJson('not valid json')).toThrow()
+      expect(() => { importBrunoFromJson('not valid json') }).toThrow()
     })
   })
 })
@@ -1135,8 +1135,8 @@ describe('Import Services - Cross-validation', () => {
 
   it('should generate unique IDs across different imports', () => {
     // Run the same import twice to ensure IDs are unique
-    const import1 = importSwaggerFromJson(loadTestFile('swagger-petstore.json'))
-    const import2 = importSwaggerFromJson(loadTestFile('swagger-petstore.json'))
+    const import1 = importSwaggerFromJson(loadTestFile('swagger-petstore.json')) as EnvironmentFolder
+    const import2 = importSwaggerFromJson(loadTestFile('swagger-petstore.json')) as EnvironmentFolder
 
     const requests1 = findAllRequests(import1, isHTTPRequest)
     const requests2 = findAllRequests(import2, isHTTPRequest)

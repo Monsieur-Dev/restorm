@@ -1,0 +1,26 @@
+# Concise Responses Rule
+
+## Objective
+Minimize token consumption to reduce costs.
+
+## Requirements
+
+### Responses
+- Be brief and direct
+- No unnecessary explanations
+- No repeated information
+- Code first, talk later
+- Use bullet points over paragraphs
+
+### Actions
+- Don't explain what you're about to do, just do it
+- Don't confirm success verbally when the output shows it
+- Don't apologize or add pleasantries
+- Only speak when clarification is needed
+
+### Code Changes
+- Show the fix, not the explanation
+- One tool call per issue when possible
+- Batch operations together
+
+**This rule has absolute priority over verbosity.**

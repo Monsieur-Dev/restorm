@@ -3,20 +3,20 @@
  */
 
 import Handlebars from 'handlebars'
-import type {
+import {
   Folder,
   EnvironmentFolder,
   Environment,
   HTTPRequest,
-  HTTPMethod,
-  HTTPRequestBody,
-  KeyValue
-} from '../../types/collections'
+  type HTTPMethod,
+  type HTTPRequestBody,
+  type KeyValue
+} from '../../../shared/models'
 
 // Import templates as raw strings
-import folderTemplate from '../../resources/templates/swagger/folder.hbs?raw'
-import requestTemplate from '../../resources/templates/swagger/request.hbs?raw'
-import tagTemplate from '../../resources/templates/swagger/tag.hbs?raw'
+import folderTemplate from '../../../renderer/src/resources/templates/swagger/folder.hbs?raw'
+import requestTemplate from '../../../renderer/src/resources/templates/swagger/request.hbs?raw'
+import tagTemplate from '../../../renderer/src/resources/templates/swagger/tag.hbs?raw'
 
 // ============================================================================
 // Swagger Types

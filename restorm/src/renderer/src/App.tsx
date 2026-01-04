@@ -41,6 +41,7 @@ import { Welcome } from './components/Welcome'
 import { EmptyBench } from './components/EmptyBench'
 import { Badge } from './components/Badge'
 import { SaveOptionsModal, type SaveOptions } from './components/SaveOptionsModal'
+import { ImportModal } from './components/ImportModal'
 import { mapToBadgeType } from './utils/badgeUtils'
 import { renderSearchTooltipContent } from './components/renderSearchTooltipContent'
 import { EnvironmentValuesProvider } from './contexts/EnvironmentValuesContext'
@@ -692,6 +693,9 @@ const App: React.FC = () => {
   // Save options modal state - declared early for use in handlers
   const [showSaveOptionsModal, setShowSaveOptionsModal] = useState(false)
   
+  // Import modal state
+  const [showImportModal, setShowImportModal] = useState(false)
+  
   // Track if current file was opened as a folder (for save behavior)
   const [isOpenedAsFolder, setIsOpenedAsFolder] = useState(false)
   // Store the format used when opening a folder (defaults to yaml)
@@ -797,6 +801,137 @@ const App: React.FC = () => {
       logger.error('[App] Save error', { error: String(error) })
     }
   }, [rootFolders, clearDirty])
+
+  // Handle import
+  const handleImport = useCallback((items: FolderItem[], targetFolderId?: string) => {
+    logger.info('[App] Importing items', { count: items.length, targetFolderId, rootFoldersCount: rootFolders.length })
+
+    // Regenerate all IDs to avoid conflicts with existing items
+    const regenerateIds = (item: FolderItem): FolderItem => {
+      if ('items' in item) {
+        // It's a folder (Folder or EnvironmentFolder)
+        const folder = item
+        return {
+          ...folder,
+          id: crypto.randomUUID(),
+          items: folder.items.map(child => regenerateIds(child))
+        }
+      } else {
+        // It's a request
+        const request = item
+        return {
+          ...request,
+          id: crypto.randomUUID()
+        }
+      }
+    }
+
+    // Emit creation events for all imported items recursively
+    const emitCreationEvents = (item: FolderItem, parentFolderId: string): void => {
+      if ('items' in item) {
+        // It's a folder
+        const folder = item
+        eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
+          id: folder.id,
+          type: 'folder',
+          document: JSON.parse(JSON.stringify(folder)) as Folder | EnvironmentFolder
+        })
+        // Recursively emit for children
+        folder.items.forEach(child => {
+          emitCreationEvents(child, folder.id)
+        })
+      } else {
+        // It's a request
+        const request = item
+        eventBus.emitSync(DocumentEvents.REQUEST_CREATED, {
+          id: request.id,
+          type: 'request',
+          document: JSON.parse(JSON.stringify(request)) as Request,
+          parentFolderId
+        })
+      }
+    }
+
+    const itemsWithNewIds = items.map(item => regenerateIds(item))
+
+    logger.info('[App] Items with new IDs', { count: itemsWithNewIds.length })
+
+    // If file is empty (no root folders), create the imported items as first root folders
+    if (rootFolders.length === 0 && !targetFolderId) {
+      const filteredItems = itemsWithNewIds.filter(item => 'items' in item)
+      logger.info('[App] Empty file - creating first root folders', { count: filteredItems.length })
+      const reactiveRootFolders = filteredItems.map(folder => makeReactiveFolder(folder)) as EnvironmentFolder[]
+      setRootFolders(reactiveRootFolders)
+      
+      // Emit creation events for indexing
+      filteredItems.forEach(folder => {
+        emitCreationEvents(folder, folder.id)
+      })
+      return
+    }
+
+    // If file is empty but targetFolderId is specified, this is an error
+    if (rootFolders.length === 0 && targetFolderId) {
+      logger.error('[App] Cannot import into specific folder when file is empty')
+      return
+    }
+
+    // Create deep copies of rootFolders to avoid mutating reactive objects
+    const clonedRootFolders = JSON.parse(JSON.stringify(rootFolders)) as EnvironmentFolder[]
+
+    // If no target folder specified, add to root (as new environment folders)
+    if (!targetFolderId) {
+      // Add imported items as new root-level environment folders
+      const filteredItems = itemsWithNewIds.filter(item => 'items' in item)
+      logger.info('[App] Filtered items (folders only)', { count: filteredItems.length })
+      const newRootFolders = [...clonedRootFolders, ...filteredItems] as EnvironmentFolder[]
+      logger.info('[App] New root folders after import', { count: newRootFolders.length, before: clonedRootFolders.length })
+      const reactiveRootFolders = newRootFolders.map(folder => makeReactiveFolder(folder)) as EnvironmentFolder[]
+      setRootFolders(reactiveRootFolders)
+      
+      // Emit creation events for indexing
+      filteredItems.forEach(folder => {
+        emitCreationEvents(folder, folder.id)
+      })
+      return
+    }
+
+    // Find target folder recursively in ALL root folders
+    const findAndUpdateFolder = (folder: Folder | EnvironmentFolder, targetId: string): boolean => {
+      if (folder.id === targetId) {
+        folder.items = [...folder.items, ...itemsWithNewIds]
+        return true
+      }
+
+      if (folder.items.length > 0) {
+        for (const item of folder.items) {
+          if ('items' in item) {
+            if (findAndUpdateFolder(item, targetId)) {
+              return true
+            }
+          }
+        }
+      }
+
+      return false
+    }
+
+    // Try to find and update in each cloned root folder
+    for (const rootFolder of clonedRootFolders) {
+      if (findAndUpdateFolder(rootFolder, targetFolderId)) {
+        break
+      }
+    }
+    
+    // Make all root folders reactive
+    const reactiveRootFolders = clonedRootFolders.map(folder => makeReactiveFolder(folder)) as EnvironmentFolder[]
+    setRootFolders(reactiveRootFolders)
+    
+    // Emit creation events for indexing
+    itemsWithNewIds.forEach(item => {
+      emitCreationEvents(item, targetFolderId)
+    })
+  }, [rootFolders, setRootFolders])
 
   // Listen for save-and-close event from main process (when closing window with unsaved changes)
   useEffect(() => {
@@ -2383,6 +2518,8 @@ const App: React.FC = () => {
             <MenuBarItem title={t('menuBar.file')}>
               <MenuItem title={t('menuBar.new')} shortcut="Ctrl+N" onClick={() => { void handleMenuNew() }} />
               <MenuItemSeparator />
+              <MenuItem title={t('menuBar.import')} shortcut="Ctrl+I" onClick={() => { setShowImportModal(true) }} />
+              <MenuItemSeparator />
               <MenuItem title={t('menuBar.open')} shortcut="Ctrl+O" onClick={() => { void handleMenuOpen() }} />
               <MenuItem title={t('menuBar.openFolder')} onClick={() => { void handleMenuOpenFolder() }} />
               {fileName && (
@@ -2476,7 +2613,7 @@ const App: React.FC = () => {
                     small
                     options={{ ariaLabel: t('sidebar.addRequest'), title: t('sidebar.addRequest') }}
                     onClick={() => {
-                      // TODO: hook this to real "add request" behavior
+                      setShowImportModal(true)
                     }}
                   >
                     <i className="codicon codicon-add" />
@@ -2608,6 +2745,19 @@ const App: React.FC = () => {
             onClose={() => { setShowSaveOptionsModal(false) }}
             onSave={handleSaveWithOptions}
             rootFolder={rootFolders[0]}
+          />
+
+          {/* Import Modal */}
+          <ImportModal
+            isOpen={showImportModal}
+            onClose={() => { setShowImportModal(false) }}
+            onImport={handleImport}
+            rootFolder={{
+              id: '__virtual_root__',
+              name: 'Root',
+              items: rootFolders
+            } as EnvironmentFolder}
+            selectedFolderId={selectedItemId ?? undefined}
           />
         </div>
       </VariableTransformProvider>

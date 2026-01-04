@@ -2,13 +2,13 @@
  * Service for importing GraphQL schemas into Restorm collections
  */
 
-import type {
+import {
   Folder,
   EnvironmentFolder,
   Environment,
   GraphQLRequest,
-  GraphQLOperationType
-} from '../../types/collections'
+  type GraphQLOperationType
+} from '../../../shared/models'
 
 // ============================================================================
 // GraphQL Schema Types

@@ -28,3 +28,4 @@ Feature: Search
     Then I should see search results
     And the first result should contain "user"
 
+    

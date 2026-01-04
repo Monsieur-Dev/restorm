@@ -478,5 +478,41 @@ contextBridge.exposeInMainWorld('restorm', {
         ipcRenderer.removeListener('websocket:message', handler)
       }
     }
+  },
+  import: {
+    /** Preview import from file path or URL (dry-run) */
+    preview: async (input: string): Promise<{
+      success: boolean
+      items: unknown[]
+      source: string
+      format?: string
+      error?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('import:preview', input)
+      return result as {
+        success: boolean
+        items: unknown[]
+        source: string
+        format?: string
+        error?: string
+      }
+    },
+    /** Actually import from file path or URL */
+    import: async (input: string): Promise<{
+      success: boolean
+      items: unknown[]
+      source: string
+      format?: string
+      error?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('import:import', input)
+      return result as {
+        success: boolean
+        items: unknown[]
+        source: string
+        format?: string
+        error?: string
+      }
+    }
   }
 })

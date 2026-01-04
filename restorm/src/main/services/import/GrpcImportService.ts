@@ -2,13 +2,13 @@
  * Service for importing gRPC proto files into Restorm collections
  */
 
-import type {
+import {
   Folder,
   EnvironmentFolder,
   Environment,
   GrpcRequest,
-  GrpcCallType
-} from '../../types/collections'
+  type GrpcCallType
+} from '../../../shared/models'
 
 // ============================================================================
 // Proto Types

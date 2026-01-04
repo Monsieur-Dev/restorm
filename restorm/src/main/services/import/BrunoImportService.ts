@@ -13,18 +13,18 @@
  * - Variables
  */
 
-import type {
+import {
   Folder,
   EnvironmentFolder,
   Environment,
   HTTPRequest,
-  HTTPMethod,
-  HTTPRequestBody,
-  KeyValue,
   GraphQLRequest,
-  Request,
-  FolderItem
-} from '../../types/collections'
+  type HTTPMethod,
+  type HTTPRequestBody,
+  type KeyValue,
+  type Request,
+  type FolderItem
+} from '../../../shared/models'
 
 // ============================================================================
 // Bruno Types

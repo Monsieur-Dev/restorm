@@ -3,13 +3,13 @@
  * Supports MQTT, Socket.IO, and WebSocket channels
  */
 
-import type {
+import {
   Folder,
   EnvironmentFolder,
   Environment,
   WebSocketRequest,
-  WebSocketProtocol
-} from '../../types/collections'
+  type WebSocketProtocol
+} from '../../../shared/models'
 import * as yaml from 'yaml'
 
 // ============================================================================

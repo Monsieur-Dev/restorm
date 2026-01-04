@@ -11,17 +11,17 @@
  * - Example responses
  */
 
-import type {
+import {
   Folder,
   EnvironmentFolder,
   Environment,
   HTTPRequest,
-  HTTPMethod,
-  HTTPRequestBody,
-  KeyValue,
   GraphQLRequest,
-  Request
-} from '../../types/collections'
+  type HTTPMethod,
+  type HTTPRequestBody,
+  type KeyValue,
+  type Request
+} from '../../../shared/models'
 
 // ============================================================================
 // Postman Collection v2.1.0 Types

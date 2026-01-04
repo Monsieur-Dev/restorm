@@ -2,12 +2,12 @@
  * Service for importing SOAP WSDL files into Restorm collections
  */
 
-import type {
+import {
   Folder,
   EnvironmentFolder,
   Environment,
   SoapRequest
-} from '../../types/collections'
+} from '../../../shared/models'
 
 // ============================================================================
 // WSDL Types

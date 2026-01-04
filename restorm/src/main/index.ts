@@ -1417,3 +1417,45 @@ ipcMain.handle('websocket:send', (_event, requestId: string, message: string, ev
 ipcMain.handle('websocket:is-active', (_event, requestId: string) => {
   return websocketExecutionService.isActive(requestId)
 })
+
+// ============================================================================
+// Import IPC Handlers
+// ============================================================================
+
+import { importFrom } from './services/import/ImportManager'
+
+// IPC handler to preview import (dry-run)
+ipcMain.handle('import:preview', async (_event, input: string) => {
+  logger.info('[IPC] Import preview requested:', { input })
+  try {
+    const result = await importFrom(input, { dryRun: true })
+    logger.info('[IPC] Import preview result:', { success: result.success, itemsCount: result.items.length })
+    return result
+  } catch (error) {
+    logger.error('[IPC] Import preview error:', error)
+    return {
+      success: false,
+      items: [],
+      source: input,
+      error: error instanceof Error ? error.message : String(error)
+    }
+  }
+})
+
+// IPC handler to actually import
+ipcMain.handle('import:import', async (_event, input: string) => {
+  logger.info('[IPC] Import requested:', { input })
+  try {
+    const result = await importFrom(input, { dryRun: false })
+    logger.info('[IPC] Import result:', { success: result.success, itemsCount: result.items.length })
+    return result
+  } catch (error) {
+    logger.error('[IPC] Import error:', error)
+    return {
+      success: false,
+      items: [],
+      source: input,
+      error: error instanceof Error ? error.message : String(error)
+    }
+  }
+})

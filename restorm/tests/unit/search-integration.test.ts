@@ -137,7 +137,7 @@ vi.mock('electron-core-ui/renderer', async () => {
 })
 
 import { searchService } from 'electron-core-ui/renderer'
-import { importSwaggerFromJson } from '../../src/renderer/src/services/import/SwaggerImportService'
+import { importSwaggerFromJson } from '../../src/main/services/import/SwaggerImportService'
 import { searchIndexService } from '../../src/renderer/src/services/SearchIndexService'
 import { makeReactiveFolder } from '../../src/renderer/src/types/reactive'
 import type { Folder, HTTPRequest } from '../../src/renderer/src/types/collections'
@@ -184,7 +184,7 @@ describe('Search Integration', () => {
 
   it('should import swagger petstore and search for "store"', () => {
     // Import swagger
-    const folder = importSwaggerFromJson(JSON.stringify(swaggerPetstore))
+    const folder = importSwaggerFromJson(JSON.stringify(swaggerPetstore)) as Folder
 
     // Make it reactive
     const reactiveFolder = makeReactiveFolder(folder)
@@ -203,7 +203,7 @@ describe('Search Integration', () => {
     const { eventBus } = await import('electron-core-ui/renderer')
 
     // Import swagger
-    const folder = importSwaggerFromJson(JSON.stringify(swaggerPetstore))
+    const folder = importSwaggerFromJson(JSON.stringify(swaggerPetstore)) as Folder
 
     // Make it reactive
     const reactiveFolder = makeReactiveFolder(folder)
@@ -240,7 +240,7 @@ describe('Search Integration', () => {
 
   it('should find multiple store-related items in petstore', () => {
     // Import swagger
-    const folder = importSwaggerFromJson(JSON.stringify(swaggerPetstore))
+    const folder = importSwaggerFromJson(JSON.stringify(swaggerPetstore)) as Folder
 
     // Make it reactive
     const reactiveFolder = makeReactiveFolder(folder)
