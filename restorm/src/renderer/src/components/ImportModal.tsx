@@ -15,12 +15,19 @@ import { useTranslation } from 'react-i18next'
 import type { FolderItem, EnvironmentFolder, Folder } from '../types/collections'
 import { isEnvironmentFolder } from '../types/collections'
 import { mapToBadgeType } from '../utils/badgeUtils'
+import { logger } from 'electron-core-ui/renderer'
 import './ImportModal.css'
+
+interface PendingFolder {
+  id: string
+  name: string
+  parentId: string
+}
 
 export interface ImportModalProps {
   isOpen: boolean
   onClose: () => void
-  onImport: (items: FolderItem[], targetFolderId?: string) => void
+  onImport: (items: FolderItem[], targetFolderId?: string, pendingFolders?: PendingFolder[]) => void
   rootFolder?: EnvironmentFolder
   selectedFolderId?: string
 }
@@ -40,6 +47,9 @@ export function ImportModal({
   const [error, setError] = useState<string | null>(null)
   const [targetFolderId, setTargetFolderId] = useState<string | undefined>(undefined)
   const [expandedFolderIds, setExpandedFolderIds] = useState<string[]>(['__root__'])
+  const [pendingFolders, setPendingFolders] = useState<PendingFolder[]>([])
+  const [showFolderNameInput, setShowFolderNameInput] = useState(false)
+  const [newFolderName, setNewFolderName] = useState('')
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Initialize targetFolderId from selectedFolderId or find parent folder
@@ -86,8 +96,8 @@ export function ImportModal({
     if (!rootFolder) return []
     
     // Recursively build folder tree, including both Folders and EnvironmentFolders
-    const buildFolderTree = (items: FolderItem[]): ListViewItemData[] => {
-      return items
+    const buildFolderTree = (items: FolderItem[], parentId: string): ListViewItemData[] => {
+      const folderListItems = items
         .filter(item => 'items' in item) // Only folders (both Folder and EnvironmentFolder)
         .map(item => {
           const folder = item
@@ -98,14 +108,27 @@ export function ImportModal({
             title: folder.name,
             icon: isEnvFolder ? 'folder-library' : 'folder',
             isExpandable: false,
-            children: folder.items.length > 0 ? buildFolderTree(folder.items) : []
+            children: folder.items.length > 0 ? buildFolderTree(folder.items, folder.id) : []
           }
           return folderItem
         })
+      
+      // Add pending folders for this parent
+      const pendingForThisParent = pendingFolders
+        .filter(pf => pf.parentId === parentId)
+        .map(pf => ({
+          id: pf.id,
+          title: pf.name,
+          icon: 'folder' as const,
+          isExpandable: false,
+          children: []
+        }))
+      
+      return [...folderListItems, ...pendingForThisParent]
     }
     
     // Start by building from root's items (which includes all EnvironmentFolders)
-    const rootChildren = buildFolderTree(rootFolder.items)
+    const rootChildren = buildFolderTree(rootFolder.items, '__root__')
     
     // Add root option at the top level
     const rootItem: ListViewItemData = {
@@ -116,7 +139,7 @@ export function ImportModal({
     }
     
     return [rootItem]
-  }, [rootFolder, t])
+  }, [rootFolder, t, pendingFolders])
   
   // Initialize expanded folders when rootFolder changes
   useEffect(() => {
@@ -140,9 +163,18 @@ export function ImportModal({
   
   // Get the display name for the selected folder
   const selectedFolderName = useMemo(() => {
+    logger.info('[ImportModal] selectedFolderName recalc', { targetFolderId, pendingFoldersCount: pendingFolders.length })
     if (!targetFolderId || targetFolderId === '__root__') {
       return t('import.destination.root')
     }
+    
+    // Check if it's a pending folder first
+    const pendingFolder = pendingFolders.find(pf => pf.id === targetFolderId)
+    if (pendingFolder) {
+      logger.info('[ImportModal] Found pending folder', { name: pendingFolder.name })
+      return pendingFolder.name
+    }
+    logger.info('[ImportModal] No pending folder found for', { targetFolderId })
     
     if (!rootFolder) return ''
     
@@ -160,7 +192,7 @@ export function ImportModal({
     }
     
     return findFolderName(rootFolder.items, targetFolderId) ?? t('import.destination.root')
-  }, [targetFolderId, rootFolder, t])
+  }, [targetFolderId, rootFolder, t, pendingFolders])
 
   // Handle input change with debounce
   const handleInputChange = useCallback((value: string) => {
@@ -174,8 +206,10 @@ export function ImportModal({
 
     // If input is empty, clear preview immediately
     if (!value.trim()) {
+      logger.warn('[ImportModal] Clearing preview items - input is empty', { value })
       setPreviewItems([])
       setIsLoading(false)
+      debounceTimerRef.current = null
       return
     }
 
@@ -224,6 +258,39 @@ export function ImportModal({
     event.stopPropagation()
   }, [])
 
+  // Handle new folder creation
+  const handleCreateFolder = useCallback(() => {
+    if (!newFolderName.trim()) return
+    
+    const newFolder: PendingFolder = {
+      id: `pending-${crypto.randomUUID()}`,
+      name: newFolderName.trim(),
+      parentId: targetFolderId ?? '__root__'
+    }
+    logger.info('[ImportModal] handleCreateFolder', { newFolder, currentTargetId: targetFolderId, previewItemsCount: previewItems.length, inputLength: input.length })
+    
+    setPendingFolders(prev => {
+      logger.info('[ImportModal] setPendingFolders', { prevCount: prev.length, newCount: prev.length + 1 })
+      return [...prev, newFolder]
+    })
+    setTargetFolderId(newFolder.id)
+    logger.info('[ImportModal] setTargetFolderId to', { newFolderId: newFolder.id })
+    setExpandedFolderIds(prev => [...prev, newFolder.parentId, newFolder.id])
+    setShowFolderNameInput(false)
+    setNewFolderName('')
+  }, [newFolderName, targetFolderId, previewItems.length, input.length])
+
+  // Handle import click
+  const handleImportClick = useCallback(() => {
+    if (previewItems.length === 0) return
+    
+    // Call import with current pending folders
+    onImport(previewItems, targetFolderId, pendingFolders)
+    
+    // Close modal (useEffect will clear state when modal closes)
+    onClose()
+  }, [previewItems, targetFolderId, pendingFolders, onImport, onClose])
+
   // Build preview ListView items
   const previewListItems: ListViewItemData[] = useMemo(() => {
     if (previewItems.length === 0) return []
@@ -260,19 +327,6 @@ export function ImportModal({
     return buildItems(previewItems)
   }, [previewItems])
 
-  // Handle import
-  const handleImportClick = useCallback(() => {
-    if (previewItems.length > 0) {
-      // Convert __root__ to undefined
-      const actualTargetId = targetFolderId === '__root__' ? undefined : targetFolderId
-      onImport(previewItems, actualTargetId)
-      // Close modal after a tick to allow state updates to complete
-      setTimeout(() => {
-        onClose()
-      }, 0)
-    }
-  }, [previewItems, targetFolderId, onImport, onClose])
-
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -289,6 +343,9 @@ export function ImportModal({
       setPreviewItems([])
       setError(null)
       setIsLoading(false)
+      setPendingFolders([])
+      setShowFolderNameInput(false)
+      setNewFolderName('')
     }
   }, [isOpen])
 
@@ -306,7 +363,7 @@ export function ImportModal({
             {t('import.destination.label')}
           </label>
           <div className="import-destination-row">
-            <div style={{ width: '100%' }}>
+            <div style={{ width: '100%' }} data-testid="destination-dropdown-container">
               <ListViewDropdown
                 items={folderItems}
                 selectedIds={targetFolderId ? [targetFolderId] : ['__root__']}
@@ -334,18 +391,20 @@ export function ImportModal({
                   }
                 }}
                 buttonProps={{ 
-                  secondary: true
+                  secondary: true,
+                  'data-testid': 'destination-dropdown-button'
                 }}
               />
             </div>
             <Button 
               secondary
+              icon="new-folder"
+              data-testid="new-folder-button"
               onClick={() => {
-                // TODO: Implement new folder creation
-                // console.log('Create new folder')
+                setNewFolderName('')
+                setShowFolderNameInput(true)
               }}
             >
-              <i className="codicon codicon-new-folder" />
               {t('import.destination.newFolder')}
             </Button>
           </div>
@@ -420,6 +479,46 @@ export function ImportModal({
           </Button>
         </div>
       </div>
+
+      {/* Folder Name Input Modal */}
+      {showFolderNameInput && (
+        <Modal
+          isOpen={showFolderNameInput}
+          onClose={() => {
+            setShowFolderNameInput(false)
+            setNewFolderName('')
+          }}
+          title={t('import.destination.newFolderTitle')}
+        >
+          <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px', minWidth: '300px' }} data-testid="new-folder-dialog">
+            <InputBox
+              value={newFolderName}
+              onChange={setNewFolderName}
+              options={{
+                placeholder: t('import.destination.newFolderPlaceholder')
+              }}
+            />
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <Button 
+                secondary 
+                onClick={() => {
+                  setShowFolderNameInput(false)
+                  setNewFolderName('')
+                }}
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button 
+                onClick={handleCreateFolder}
+                disabled={!newFolderName.trim()}
+                data-testid="new-folder-ok-button"
+              >
+                {t('common.ok')}
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </Modal>
   )
 }

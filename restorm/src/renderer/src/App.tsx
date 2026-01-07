@@ -188,10 +188,10 @@ const attachContextMenus = (
     return withMenu
   })
 
-// Initial root folders - empty at startup, populated when opening a file
-const initialRootFolders: EnvironmentFolder[] = []
+// Initial root items - empty at startup, populated when opening a file
+const initialRootItems: EnvironmentFolder[] = []
 
-const allFolderIds = initialRootFolders.flatMap((folder) => collectAllFolderIds(folder))
+const allFolderIds = initialRootItems.flatMap((folder) => collectAllFolderIds(folder))
 
 /** Find a folder by ID in a single folder tree (returns Folder or EnvironmentFolder) */
 function findFolderByIdInTree(folder: Folder | EnvironmentFolder, id: string): Folder | EnvironmentFolder | undefined {
@@ -205,9 +205,11 @@ function findFolderByIdInTree(folder: Folder | EnvironmentFolder, id: string): F
   return undefined
 }
 
-/** Find a folder by ID across multiple root folders */
-function findFolderById(rootFolders: EnvironmentFolder[], id: string): Folder | EnvironmentFolder | undefined {
-  for (const root of rootFolders) {
+/** Find a folder by ID across multiple root items */
+function findFolderById(rootItems: (EnvironmentFolder | Folder | Request)[], id: string): Folder | EnvironmentFolder | undefined {
+  for (const root of rootItems) {
+    // Skip if root is a Request (has no folder tree)
+    if (!('items' in root)) continue
     const found = findFolderByIdInTree(root, id)
     if (found) return found
   }
@@ -299,8 +301,10 @@ function findEnvironmentFolderByIdInTree(folder: Folder | EnvironmentFolder, id:
 }
 
 /** Find an environment folder by ID across multiple root folders */
-function findEnvironmentFolderById(rootFolders: EnvironmentFolder[], id: string): EnvironmentFolder | undefined {
-  for (const root of rootFolders) {
+function findEnvironmentFolderById(rootItems: (EnvironmentFolder | Folder | Request)[], id: string): EnvironmentFolder | undefined {
+  for (const root of rootItems) {
+    // Skip if root is a Request (has no folder tree)
+    if (!('items' in root)) continue
     const found = findEnvironmentFolderByIdInTree(root, id)
     if (found) return found
   }
@@ -320,10 +324,17 @@ function findRequestByIdInTree(folder: Folder | EnvironmentFolder, id: string): 
 }
 
 /** Find any request by ID across multiple root folders */
-function findRequestById(rootFolders: EnvironmentFolder[], id: string): Request | undefined {
-  for (const root of rootFolders) {
-    const found = findRequestByIdInTree(root, id)
-    if (found) return found
+function findRequestById(rootItems: (EnvironmentFolder | Folder | Request)[], id: string): Request | undefined {
+  for (const root of rootItems) {
+    // Check if root itself is the Request we're looking for
+    if (!('items' in root) && root.id === id) {
+      return root
+    }
+    // Otherwise search in folder tree
+    if ('items' in root) {
+      const found = findRequestByIdInTree(root, id)
+      if (found) return found
+    }
   }
   return undefined
 }
@@ -342,10 +353,17 @@ function findItemByIdInTree(folder: Folder | EnvironmentFolder, id: string): Fol
 }
 
 /** Find any item (folder or request) by ID across multiple root folders */
-function findItemById(rootFolders: EnvironmentFolder[], id: string): FolderItem | null {
-  for (const root of rootFolders) {
-    const found = findItemByIdInTree(root, id)
-    if (found) return found
+function findItemById(rootItems: (EnvironmentFolder | Folder | Request)[], id: string): FolderItem | null {
+  for (const root of rootItems) {
+    // Check if root itself is the item we're looking for
+    if (root.id === id) {
+      return root
+    }
+    // Otherwise search in folder tree if root has items
+    if ('items' in root) {
+      const found = findItemByIdInTree(root, id)
+      if (found) return found
+    }
   }
   return null
 }
@@ -394,19 +412,38 @@ function findItemWithBreadcrumbsInTree(
 
 /** Find an item (folder or request) by ID and build breadcrumbs including the item itself - across multiple root folders */
 function findItemWithBreadcrumbs(
-  rootFolders: EnvironmentFolder[],
+  rootItems: (EnvironmentFolder | Folder | Request)[],
   id: string
 ): { item: FolderItem | null; breadcrumbs: BreadcrumbItem[] } {
-  for (const root of rootFolders) {
-    const found = findItemWithBreadcrumbsInTree(root, id)
-    if (found.item) return found
+  for (const root of rootItems) {
+    // Check if root itself is the item (for root-level Requests)
+    if (root.id === id) {
+      // Convert icon to BreadcrumbIcon compatible format
+      const icon = root.icon && (root.icon.type === 'codicon' || root.icon.type === 'emoji' || root.icon.type === 'none')
+        ? { type: root.icon.type, value: root.icon.value }
+        : null
+      
+      const breadcrumbs: BreadcrumbItem[] = [
+        {
+          id: root.id,
+          label: root.name,
+          icon
+        }
+      ]
+      return { item: root, breadcrumbs }
+    }
+    // Otherwise search in folder tree
+    if ('items' in root) {
+      const found = findItemWithBreadcrumbsInTree(root, id)
+      if (found.item) return found
+    }
   }
   return { item: null, breadcrumbs: [] }
 }
 
 /** Get environments from the nearest ancestor EnvironmentFolder */
 function getNearestEnvironmentsForBreadcrumbs(
-  rootFolders: EnvironmentFolder[],
+  rootItems: (EnvironmentFolder | Folder | Request)[],
   breadcrumbs: BreadcrumbItem[]
 ): Environment[] {
   if (breadcrumbs.length === 0) {
@@ -420,7 +457,7 @@ function getNearestEnvironmentsForBreadcrumbs(
     if (!folderId) {
       continue
     }
-    const folder = findFolderById(rootFolders, folderId)
+    const folder = findFolderById(rootItems, folderId)
     if (folder && isEnvironmentFolder(folder as FolderItem)) {
       const envFolder = folder as EnvironmentFolder
       if (envFolder.environments.length > 0) {
@@ -460,10 +497,21 @@ function findItemWithParentInTree(
 
 /** Find an item and its parent folder across multiple root folders */
 function findItemWithParent(
-  rootFolders: EnvironmentFolder[],
+  rootItems: (EnvironmentFolder | Folder | Request)[],
   targetId: string
-): { item: FolderItem | null; parent: Folder | EnvironmentFolder | null; index: number; rootFolder: EnvironmentFolder | null } {
-  for (const root of rootFolders) {
+): { item: FolderItem | null; parent: Folder | EnvironmentFolder | null; index: number; rootFolder: EnvironmentFolder | Folder | null } {
+  // Check if any root item is directly the target (for root-level Requests)
+  const rootIndex = rootItems.findIndex(root => root.id === targetId)
+  if (rootIndex !== -1) {
+    const item = rootItems[rootIndex]
+    if (item) {
+      return { item, parent: null, index: rootIndex, rootFolder: null }
+    }
+  }
+  
+  // Otherwise search in folder trees
+  for (const root of rootItems) {
+    if (!('items' in root)) continue
     const found = findItemWithParentInTree(root, targetId)
     if (found.item) return { ...found, rootFolder: root }
   }
@@ -472,10 +520,10 @@ function findItemWithParent(
 
 /** Remove an item from its parent folder and return a copy of the item */
 function removeItemFromTree(
-  rootFolders: EnvironmentFolder[],
+  rootItems: (EnvironmentFolder | Folder | Request)[],
   itemId: string
 ): FolderItem | null {
-  const { item, parent, index } = findItemWithParent(rootFolders, itemId)
+  const { item, parent, index } = findItemWithParent(rootItems, itemId)
   if (!item || !parent || index < 0) return null
 
   // Remove from parent
@@ -485,12 +533,12 @@ function removeItemFromTree(
 
 /** Insert an item into the tree at the specified position */
 function insertItemIntoTree(
-  rootFolders: EnvironmentFolder[],
+  rootItems: (EnvironmentFolder | Folder | Request)[],
   item: FolderItem,
   targetId: string,
   position: 'before' | 'after' | 'into'
 ): boolean {
-  const { item: target, parent, index } = findItemWithParent(rootFolders, targetId)
+  const { item: target, parent, index } = findItemWithParent(rootItems, targetId)
   if (!target) return false
 
   if (position === 'into') {
@@ -544,10 +592,10 @@ function deepCloneItem(item: FolderItem): FolderItem {
 
 /** Clone an item and insert the clone after it */
 function cloneItemInTree(
-  rootFolders: EnvironmentFolder[],
+  rootItems: (EnvironmentFolder | Folder | Request)[],
   itemId: string
 ): FolderItem | null {
-  const { item, parent, index } = findItemWithParent(rootFolders, itemId)
+  const { item, parent, index } = findItemWithParent(rootItems, itemId)
   if (!item || !parent || index < 0) return null
 
   // Deep clone the item
@@ -671,9 +719,9 @@ const App: React.FC = () => {
     }
   }, [handleMenuExit])
 
-  // Root folders data (mutable for renaming)
-  // Each root folder is an independent EnvironmentFolder
-  const [rootFolders, setRootFolders] = useState<EnvironmentFolder[]>(initialRootFolders)
+  // Root items data (mutable for renaming)
+  // Can contain EnvironmentFolders, Folders, or standalone Requests
+  const [rootItems, setRootItems] = useState<(EnvironmentFolder | Folder | Request)[]>(initialRootItems)
 
   // Initialize with all folders expanded
   const [expandedIds, setExpandedIds] = useState<string[]>(allFolderIds)
@@ -741,10 +789,10 @@ const App: React.FC = () => {
     return { ...workbenchTree, groups: updateGroups(workbenchTree.groups) }
   }, [workbenchTree, dirtyItemIdsSet])
 
-  // File save handlers (after rootFolders is defined)
+  // File save handlers (after rootItems is defined)
   // Deep clone to remove Proxy wrappers before IPC serialization
   const handleMenuSave = useCallback(() => {
-    const plainData = JSON.parse(JSON.stringify({ collections: rootFolders })) as Record<string, unknown>
+    const plainData = JSON.parse(JSON.stringify({ collections: rootItems })) as Record<string, unknown>
     
     if (isOpenedAsFolder && currentFolderPath) {
       // For folders, keep IDs for mapping service, main process will strip them during serialization
@@ -759,14 +807,14 @@ const App: React.FC = () => {
       const dataForSave = prepareForSerialization(plainData)
       void saveFile(dataForSave)
     }
-  }, [saveFile, rootFolders, isOpenedAsFolder, folderFormat, clearDirty, currentFolderPath])
+  }, [saveFile, rootItems, isOpenedAsFolder, folderFormat, clearDirty, currentFolderPath])
 
   const handleMenuSaveAs = useCallback(() => {
     setShowSaveOptionsModal(true)
   }, [])
 
   const handleSaveWithOptions = useCallback(async (options: SaveOptions) => {
-    const plainData = JSON.parse(JSON.stringify({ collections: rootFolders })) as Record<string, unknown>
+    const plainData = JSON.parse(JSON.stringify({ collections: rootItems })) as Record<string, unknown>
     
     logger.info('[App] Saving with options', { mode: options.mode, format: options.format })
     
@@ -800,11 +848,11 @@ const App: React.FC = () => {
     } catch (error) {
       logger.error('[App] Save error', { error: String(error) })
     }
-  }, [rootFolders, clearDirty])
+  }, [rootItems, clearDirty])
 
   // Handle import
-  const handleImport = useCallback((items: FolderItem[], targetFolderId?: string) => {
-    logger.info('[App] Importing items', { count: items.length, targetFolderId, rootFoldersCount: rootFolders.length })
+  const handleImport = useCallback((items: FolderItem[], targetFolderId?: string, pendingFolders?: {id: string, name: string, parentId: string}[]) => {
+    logger.info('[App] Importing items', { count: items.length, targetFolderId, rootItemsCount: rootItems.length, pendingFoldersCount: pendingFolders?.length ?? 0 })
 
     // Regenerate all IDs to avoid conflicts with existing items
     const regenerateIds = (item: FolderItem): FolderItem => {
@@ -856,12 +904,39 @@ const App: React.FC = () => {
 
     logger.info('[App] Items with new IDs', { count: itemsWithNewIds.length })
 
+    // Create pending folders if any
+    const createdFoldersMap = new Map<string, Folder | EnvironmentFolder>()
+    if (pendingFolders && pendingFolders.length > 0) {
+      pendingFolders.forEach(pf => {
+        const newFolder: Folder = {
+          id: crypto.randomUUID(),
+          name: pf.name,
+          items: [],
+          documentation: '',
+          tags: [],
+          configuration: {}
+        }
+        createdFoldersMap.set(pf.id, newFolder)
+        logger.info('[App] Created pending folder', { name: pf.name, id: newFolder.id, parentId: pf.parentId })
+      })
+    }
+
+    // Resolve target folder ID: if it's a pending folder, use the created folder's ID
+    let actualTargetFolderId = targetFolderId
+    if (targetFolderId && createdFoldersMap.has(targetFolderId)) {
+      const createdFolder = createdFoldersMap.get(targetFolderId)
+      if (createdFolder) {
+        actualTargetFolderId = createdFolder.id
+        logger.info('[App] Target is a pending folder, using created folder ID', { pendingId: targetFolderId, actualId: actualTargetFolderId })
+      }
+    }
+
     // If file is empty (no root folders), create the imported items as first root folders
-    if (rootFolders.length === 0 && !targetFolderId) {
+    if (rootItems.length === 0 && !actualTargetFolderId) {
       const filteredItems = itemsWithNewIds.filter(item => 'items' in item)
       logger.info('[App] Empty file - creating first root folders', { count: filteredItems.length })
-      const reactiveRootFolders = filteredItems.map(folder => makeReactiveFolder(folder)) as EnvironmentFolder[]
-      setRootFolders(reactiveRootFolders)
+      const reactiveRootItems = filteredItems.map(folder => makeReactiveFolder(folder)) as EnvironmentFolder[]
+      setRootItems(reactiveRootItems)
       
       // Emit creation events for indexing
       filteredItems.forEach(folder => {
@@ -870,28 +945,46 @@ const App: React.FC = () => {
       return
     }
 
-    // If file is empty but targetFolderId is specified, this is an error
-    if (rootFolders.length === 0 && targetFolderId) {
-      logger.error('[App] Cannot import into specific folder when file is empty')
-      return
+    // Create deep copies of rootItems to avoid mutating reactive objects
+    const clonedRootItems = JSON.parse(JSON.stringify(rootItems)) as (EnvironmentFolder | Folder | Request)[]
+
+    // Helper to add pending folders to the tree
+    const addPendingFoldersToTree = (folders: FolderItem[], parentId: string): (FolderItem | Folder)[] => {
+      const pendingForParent = pendingFolders?.filter(pf => pf.parentId === parentId) ?? []
+      const createdForParent = pendingForParent.map(pf => createdFoldersMap.get(pf.id)).filter(Boolean) as Folder[]
+      return [...folders, ...createdForParent]
     }
 
-    // Create deep copies of rootFolders to avoid mutating reactive objects
-    const clonedRootFolders = JSON.parse(JSON.stringify(rootFolders)) as EnvironmentFolder[]
-
-    // If no target folder specified, add to root (as new environment folders)
-    if (!targetFolderId) {
-      // Add imported items as new root-level environment folders
-      const filteredItems = itemsWithNewIds.filter(item => 'items' in item)
-      logger.info('[App] Filtered items (folders only)', { count: filteredItems.length })
-      const newRootFolders = [...clonedRootFolders, ...filteredItems] as EnvironmentFolder[]
-      logger.info('[App] New root folders after import', { count: newRootFolders.length, before: clonedRootFolders.length })
-      const reactiveRootFolders = newRootFolders.map(folder => makeReactiveFolder(folder)) as EnvironmentFolder[]
-      setRootFolders(reactiveRootFolders)
+    // If no target folder specified OR target is a pending folder for root, add to root
+    if (!actualTargetFolderId || (targetFolderId && createdFoldersMap.has(targetFolderId) && pendingFolders?.find(pf => pf.id === targetFolderId)?.parentId === '__root__')) {
+      // Get pending folders for root
+      const pendingForRoot = pendingFolders?.filter(pf => pf.parentId === '__root__') ?? []
+      const createdForRoot = pendingForRoot.map(pf => createdFoldersMap.get(pf.id)).filter(Boolean) as (Folder | EnvironmentFolder)[]
       
-      // Emit creation events for indexing
-      filteredItems.forEach(folder => {
-        emitCreationEvents(folder, folder.id)
+      // If target IS a pending folder, put ALL items (folders + requests) inside it
+      if (targetFolderId && createdFoldersMap.has(targetFolderId)) {
+        // Get the created folder by the pending ID (not actualTargetFolderId)
+        const targetPendingFolder = createdFoldersMap.get(targetFolderId)
+        if (targetPendingFolder) {
+          targetPendingFolder.items = itemsWithNewIds
+          logger.info('[App] Put items inside root pending folder', { folderName: targetPendingFolder.name, itemsCount: itemsWithNewIds.length })
+        }
+      }
+      
+      // Build root items: existing + pending folders + direct imports (if no pending target)
+      // Note: itemsWithNewIds can contain Folders, EnvironmentFolders AND Requests
+      const directImports = (targetFolderId && createdFoldersMap.has(targetFolderId)) ? [] : itemsWithNewIds
+      const allRootItems = [...clonedRootItems, ...createdForRoot, ...directImports]
+      
+      // Make reactive - makeReactiveFolder handles Folders/EnvironmentFolders, Requests stay as-is
+      const reactiveRootItems = allRootItems.map(item => 
+        'items' in item ? makeReactiveFolder(item) : item
+      ) as (EnvironmentFolder | Folder | Request)[]
+      setRootItems(reactiveRootItems)
+      
+      // Emit creation events for ALL imported items (folders + requests)
+      itemsWithNewIds.forEach(item => {
+        emitCreationEvents(item, item.id)
       })
       return
     }
@@ -899,7 +992,22 @@ const App: React.FC = () => {
     // Find target folder recursively in ALL root folders
     const findAndUpdateFolder = (folder: Folder | EnvironmentFolder, targetId: string): boolean => {
       if (folder.id === targetId) {
-        folder.items = [...folder.items, ...itemsWithNewIds]
+        // Check if targetFolderId IS a pending folder that was just created
+        const isPendingTarget = targetFolderId ? createdFoldersMap.has(targetFolderId) : false
+        
+        if (isPendingTarget && targetFolderId) {
+          // Target IS the pending folder: put items directly inside it
+          const createdFolder = createdFoldersMap.get(targetFolderId)
+          if (createdFolder) {
+            createdFolder.items = itemsWithNewIds
+            folder.items = [...folder.items, createdFolder]
+            logger.info('[App] Put items inside nested pending folder', { folderName: createdFolder.name, itemsCount: itemsWithNewIds.length })
+          }
+        } else {
+          // Target is parent: add pending folders as children, then add imported items
+          const pendingForThis = addPendingFoldersToTree(folder.items, targetId)
+          folder.items = [...pendingForThis, ...itemsWithNewIds]
+        }
         return true
       }
 
@@ -916,27 +1024,36 @@ const App: React.FC = () => {
       return false
     }
 
-    // Try to find and update in each cloned root folder
-    for (const rootFolder of clonedRootFolders) {
-      if (findAndUpdateFolder(rootFolder, targetFolderId)) {
+    // Try to find and update in each cloned root folder (skip Requests at root)
+    for (const rootItem of clonedRootItems) {
+      if ('items' in rootItem && findAndUpdateFolder(rootItem, actualTargetFolderId)) {
         break
       }
     }
     
-    // Make all root folders reactive
-    const reactiveRootFolders = clonedRootFolders.map(folder => makeReactiveFolder(folder)) as EnvironmentFolder[]
-    setRootFolders(reactiveRootFolders)
+    // Make all root items reactive (folders become reactive, requests stay as-is)
+    const reactiveRootItems = clonedRootItems.map(item => 
+      'items' in item ? makeReactiveFolder(item) : item
+    ) as (EnvironmentFolder | Folder | Request)[]
+    setRootItems(reactiveRootItems)
     
     // Emit creation events for indexing
-    itemsWithNewIds.forEach(item => {
-      emitCreationEvents(item, targetFolderId)
+    // Emit for pending folders first
+    createdFoldersMap.forEach(folder => {
+      const parentId = actualTargetFolderId || '__root__'
+      emitCreationEvents(folder, parentId)
     })
-  }, [rootFolders, setRootFolders])
+    // Then emit for imported items
+    itemsWithNewIds.forEach(item => {
+      const parentId = actualTargetFolderId || '__root__'
+      emitCreationEvents(item, parentId)
+    })
+  }, [rootItems, setRootItems])
 
   // Listen for save-and-close event from main process (when closing window with unsaved changes)
   useEffect(() => {
     const handleSaveAndClose = async (): Promise<void> => {
-      const plainData = JSON.parse(JSON.stringify({ collections: rootFolders })) as unknown
+      const plainData = JSON.parse(JSON.stringify({ collections: rootItems })) as unknown
       const dataForSave = prepareForSerialization(plainData)
       const saved = await saveFile(dataForSave)
       if (saved) {
@@ -950,13 +1067,13 @@ const App: React.FC = () => {
     })
     
     return cleanup
-  }, [rootFolders, saveFile])
+  }, [rootItems, saveFile])
 
   // Helper to check for unsaved changes before proceeding
   const checkUnsavedChanges = useCallback(async (): Promise<boolean> => {
     // Compare current state with saved state checksum via FileService
     // Use the same structure as the file content for consistent comparison (without runtime ids)
-    const dataForChecksum = prepareForSerialization({ collections: rootFolders })
+    const dataForChecksum = prepareForSerialization({ collections: rootItems })
     const currentChecksum = JSON.stringify(dataForChecksum)
     const hasRealChanges = await hasContentChanged(currentChecksum)
     
@@ -973,13 +1090,13 @@ const App: React.FC = () => {
     if (result === 'cancel') return false // User cancelled
     if (result === 'save') {
       // Save first, then proceed
-      const plainData = JSON.parse(JSON.stringify({ collections: rootFolders })) as unknown
+      const plainData = JSON.parse(JSON.stringify({ collections: rootItems })) as unknown
       const dataForSave = prepareForSerialization(plainData)
       const saved = await saveFile(dataForSave)
       return saved // Only proceed if save was successful
     }
     return true // User chose to discard changes
-  }, [showUnsavedChangesDialog, rootFolders, saveFile, t, fileName])
+  }, [showUnsavedChangesDialog, rootItems, saveFile, t, fileName])
 
   // File menu handlers
   const handleMenuNew = useCallback(async () => {
@@ -1068,10 +1185,10 @@ const App: React.FC = () => {
     const collectionsWithIds = processAfterDeserialization(collections)
     
     // Make folders reactive and update state
-    const reactiveFolders = collectionsWithIds.map(
+    const reactiveItems = collectionsWithIds.map(
       (folder) => makeReactiveFolder(folder) as EnvironmentFolder
     )
-    setRootFolders(reactiveFolders)
+    setRootItems(reactiveItems)
     
     // Register items for per-tab dirty state tracking (folder mode)
     if (openedAsFolder) {
@@ -1086,7 +1203,7 @@ const App: React.FC = () => {
         }
       }
       
-      for (const folder of reactiveFolders) {
+      for (const folder of reactiveItems) {
         const folderChecksum = computeChecksum(JSON.parse(JSON.stringify(folder)))
         registerTabDirtyState(folder.id, folderChecksum)
         registerAllItems(folder.items)
@@ -1095,7 +1212,7 @@ const App: React.FC = () => {
     
     // Register initial checksums for all objects (granular dirty state tracking)
     // Use JSON.parse(JSON.stringify()) to strip Proxy wrappers and ensure serializable data
-    const objectsForChecksums = collectAllObjectsForChecksums(reactiveFolders)
+    const objectsForChecksums = collectAllObjectsForChecksums(reactiveItems)
     const serializableObjects = new Map<string, unknown>()
     for (const [id, data] of objectsForChecksums) {
       try {
@@ -1110,7 +1227,7 @@ const App: React.FC = () => {
       .catch((err: unknown) => { logger.error('[App] Failed to register initial checksums', { error: String(err) }) })
     
     // Also set legacy content checksum for backward compatibility
-    const dataForChecksum = prepareForSerialization({ collections: reactiveFolders })
+    const dataForChecksum = prepareForSerialization({ collections: reactiveItems })
     void setContentChecksum(JSON.stringify(dataForChecksum))
     
     // Clear previous data, emit events, then re-index for search
@@ -1138,7 +1255,7 @@ const App: React.FC = () => {
         }
       }
 
-      for (const folder of reactiveFolders) {
+      for (const folder of reactiveItems) {
         if (isEnvironmentFolder(folder as FolderItem)) {
           const envFolder = folder
           for (const env of envFolder.environments) {
@@ -1149,7 +1266,7 @@ const App: React.FC = () => {
 
       // 3. Initialize and index for search
       await searchIndexService.initialize()
-      for (const folder of reactiveFolders) {
+      for (const folder of reactiveItems) {
         await searchIndexService.indexFolderTree(folder)
       }
 
@@ -1175,7 +1292,7 @@ const App: React.FC = () => {
       groups: []
     })
     // Clear root folders
-    setRootFolders([])
+    setRootItems([])
     // Clear search index
     void searchIndexService.clearIndex()
     // Clear context service data
@@ -1209,7 +1326,7 @@ const App: React.FC = () => {
     ;(window as unknown as { 
       __restormTestHelpers?: { 
         loadFile: (fileState: { currentFile: { content: unknown } }) => void
-        setRootFolders: (folders: EnvironmentFolder[]) => void
+        setRootItems: (folders: EnvironmentFolder[]) => void
       } 
     }).__restormTestHelpers = {
       loadFile: (fileState: { currentFile: { content: unknown } }) => {
@@ -1219,17 +1336,17 @@ const App: React.FC = () => {
         // Use ref to ensure we call the latest version
         handleFileOpenedRef.current(fileState)
       },
-      setRootFolders: (folders: EnvironmentFolder[]) => {
+      setRootItems: (folders: EnvironmentFolder[]) => {
         isLoadingRef.current = false
         lastLoadedPathRef.current = null
         // Make folders reactive before setting
-        const reactiveFolders = folders.map(folder => makeReactiveFolder(folder) as EnvironmentFolder)
-        setRootFolders(reactiveFolders)
+        const reactiveItems = folders.map(folder => makeReactiveFolder(folder) as EnvironmentFolder)
+        setRootItems(reactiveItems)
         // Also trigger indexing
         void (async () => {
           await searchIndexService.clearIndex()
           await searchIndexService.initialize()
-          for (const folder of reactiveFolders) {
+          for (const folder of reactiveItems) {
             await searchIndexService.indexFolderTree(folder)
           }
         })()
@@ -1252,10 +1369,10 @@ const App: React.FC = () => {
   // Load file content on mount if a file is already open (e.g., after page refresh)
   const initialLoadDoneRef = useRef(false)
   useEffect(() => {
-    // Only run once and only if file is open but rootFolders is empty
+    // Only run once and only if file is open but rootItems is empty
     if (initialLoadDoneRef.current) return
     if (!fileState?.currentFile.path) return
-    if (rootFolders.length > 0) return
+    if (rootItems.length > 0) return
     
     // A file is open but content not loaded yet - load it
     initialLoadDoneRef.current = true
@@ -1263,7 +1380,7 @@ const App: React.FC = () => {
       handleFileOpened(fileState)
     })
     return (): void => { cancelAnimationFrame(rafId) }
-  }, [fileState, rootFolders.length, handleFileOpened])
+  }, [fileState, rootItems.length, handleFileOpened])
 
   // Counter to force re-render without breaking reactive proxies
   const [_updateCount, forceUpdate] = useState(0)
@@ -1278,13 +1395,13 @@ const App: React.FC = () => {
       void commitChecksums()
       logger.debug('[App] Checksums committed after save')
       // Also update legacy content checksum for backward compatibility
-      const dataForChecksum = prepareForSerialization({ collections: rootFolders })
+      const dataForChecksum = prepareForSerialization({ collections: rootItems })
       void setContentChecksum(JSON.stringify(dataForChecksum))
       // Mark all tabs as saved (folder mode)
       markAllTabsSaved()
     }
     wasDirtyRef.current = isDirty
-  }, [isDirty, fileName, rootFolders, markAllTabsSaved])
+  }, [isDirty, fileName, rootItems, markAllTabsSaved])
 
   // Listen to document changes and update per-tab dirty state (works in all modes)
   useEffect(() => {
@@ -1298,7 +1415,7 @@ const App: React.FC = () => {
       // Find the parent environment folder and recalculate its checksum
       const parentFolderId = payload.parentFolderId
       if (parentFolderId) {
-        // Find the folder in rootFolders
+        // Find the folder in rootItems
         const findFolder = (items: FolderItem[]): Folder | null => {
           for (const item of items) {
             if (isAnyFolder(item)) {
@@ -1310,17 +1427,20 @@ const App: React.FC = () => {
           return null
         }
         
-        for (const rootFolder of rootFolders) {
+        for (const rootFolder of rootItems) {
           if (rootFolder.id === parentFolderId) {
             const newChecksum = computeChecksum(JSON.parse(JSON.stringify(rootFolder)))
             updateTabDirtyChecksum(parentFolderId, newChecksum)
             return
           }
-          const found = findFolder(rootFolder.items)
-          if (found) {
-            const newChecksum = computeChecksum(JSON.parse(JSON.stringify(found)))
-            updateTabDirtyChecksum(parentFolderId, newChecksum)
-            return
+          // Only search in folders, not Requests
+          if ('items' in rootFolder) {
+            const found = findFolder(rootFolder.items)
+            if (found) {
+              const newChecksum = computeChecksum(JSON.parse(JSON.stringify(found)))
+              updateTabDirtyChecksum(parentFolderId, newChecksum)
+              return
+            }
           }
         }
       }
@@ -1337,7 +1457,7 @@ const App: React.FC = () => {
         sub.unsubscribe()
       }
     }
-  }, [updateTabDirtyChecksum, rootFolders])
+  }, [updateTabDirtyChecksum, rootItems])
 
   // Dirty state is now handled by FileService in the main process
   // It subscribes to DocumentEvents and compares checksums automatically
@@ -1352,15 +1472,17 @@ const App: React.FC = () => {
     
     void (async () => {
       await searchIndexService.initialize()
-      // Index all root folders
-      for (const folder of rootFolders) {
-        await searchIndexService.indexFolderTree(folder)
+      // Index all root folders (skip root-level Requests)
+      for (const folder of rootItems) {
+        if ('items' in folder) {
+          await searchIndexService.indexFolderTree(folder)
+        }
       }
     })()
     
     // Note: No cleanup needed - the service sends data to main process
     // which handles the actual indexing and event subscriptions.
-  }, [rootFolders])
+  }, [rootItems])
 
   // Open a folder tab in the workbench
   const openFolderTab = useCallback((folder: Folder, breadcrumbs: BreadcrumbItem[]) => {
@@ -1622,9 +1744,9 @@ const App: React.FC = () => {
   const handleRebuildTab = useCallback((tabId: string): EditorTab | null => {
     if (tabId.startsWith('env-folder-')) {
       const itemId = tabId.replace('env-folder-', '')
-      const folder = findEnvironmentFolderById(rootFolders, itemId)
+      const folder = findEnvironmentFolderById(rootItems, itemId)
       if (folder) {
-        const { breadcrumbs } = findItemWithBreadcrumbs(rootFolders, itemId)
+        const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
         return {
           id: tabId,
           tabType: 'environment-folder',
@@ -1637,9 +1759,9 @@ const App: React.FC = () => {
       }
     } else if (tabId.startsWith('folder-')) {
       const itemId = tabId.replace('folder-', '')
-      const folder = findFolderById(rootFolders, itemId)
+      const folder = findFolderById(rootItems, itemId)
       if (folder && !isEnvironmentFolder(folder as FolderItem)) {
-        const { breadcrumbs } = findItemWithBreadcrumbs(rootFolders, itemId)
+        const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
         return {
           id: tabId,
           tabType: 'folder',
@@ -1652,9 +1774,9 @@ const App: React.FC = () => {
       }
     } else if (tabId.startsWith('request-')) {
       const itemId = tabId.replace('request-', '')
-      const { item, breadcrumbs } = findItemWithBreadcrumbs(rootFolders, itemId)
+      const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
       if (item && isRequest(item)) {
-        const environments = getNearestEnvironmentsForBreadcrumbs(rootFolders, breadcrumbs)
+        const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
         
         if (isHTTPRequest(item)) {
           return {
@@ -1715,7 +1837,7 @@ const App: React.FC = () => {
       }
     }
     return null
-  }, [rootFolders])
+  }, [rootItems])
 
   // Handle workbench state restored
   const handleStateRestored = useCallback((restoredTree: WorkbenchTree | null) => {
@@ -1758,9 +1880,9 @@ const App: React.FC = () => {
 
       // Open appropriate tab based on navigation type
       if (params.type === 'folder' || params.type === 'environment-folder') {
-        const folder = findFolderById(rootFolders, key)
+        const folder = findFolderById(rootItems, key)
         if (folder) {
-          const { breadcrumbs } = findItemWithBreadcrumbs(rootFolders, key)
+          const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, key)
           if (isEnvironmentFolder(folder as FolderItem)) {
             openEnvironmentFolderTab(folder as EnvironmentFolder, breadcrumbs)
           } else {
@@ -1772,9 +1894,9 @@ const App: React.FC = () => {
       } else if (params.type === 'http-request' || params.type === 'graphql-request' || 
                  params.type === 'grpc-request' || params.type === 'soap-request' || 
                  params.type === 'websocket-request') {
-        const { item, breadcrumbs } = findItemWithBreadcrumbs(rootFolders, key)
+        const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, key)
         if (item && isRequest(item)) {
-          const environments = getNearestEnvironmentsForBreadcrumbs(rootFolders, breadcrumbs)
+          const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
           openAnyRequestTab(item, breadcrumbs, environments)
           // Focus the group containing the tab
           setFocusedGroupId('restorm-main-group')
@@ -1783,11 +1905,11 @@ const App: React.FC = () => {
     })
 
     return unsubscribe
-  }, [openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, rootFolders])
+  }, [openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, rootItems])
 
   // Handle item click in the sidebar - use navigation service
   const handleItemClick = useCallback((itemId: string) => {
-    const { item } = findItemWithBreadcrumbs(rootFolders, itemId)
+    const { item } = findItemWithBreadcrumbs(rootItems, itemId)
     if (!item) return
 
     if (isEnvironmentFolder(item)) {
@@ -1816,7 +1938,7 @@ const App: React.FC = () => {
         navigationService.navigateTo(itemId, 'sidebar', { type: 'websocket-request' })
       }
     }
-  }, [rootFolders])
+  }, [rootItems])
 
   // Handle drag & drop in the sidebar to reorder items
   const handleItemDrop = useCallback((payload: ListViewDropEventPayload) => {
@@ -1828,16 +1950,16 @@ const App: React.FC = () => {
     if (sourceId === targetId) return
 
     // Don't allow dropping a root folder (they are top-level)
-    const isRootFolder = rootFolders.some((f) => f.id === sourceId)
-    if (isRootFolder) return
+    const isRootItem = rootItems.some((f) => f.id === sourceId)
+    if (isRootItem) return
 
     // Don't allow dropping onto a root folder with 'before' or 'after' (only 'into')
-    const isTargetRootFolder = rootFolders.some((f) => f.id === targetId)
+    const isTargetRootFolder = rootItems.some((f) => f.id === targetId)
     if (isTargetRootFolder && position !== 'into') return
 
     // Don't allow dropping a folder into one of its descendants
     const isDescendant = (parentId: string, childId: string): boolean => {
-      const parent = findItemById(rootFolders, parentId)
+      const parent = findItemById(rootItems, parentId)
       if (!parent || !isAnyFolder(parent)) return false
       for (const item of parent.items) {
         if (item.id === childId) return true
@@ -1848,18 +1970,18 @@ const App: React.FC = () => {
     if (isDescendant(sourceId, targetId)) return
 
     // Remove the item from its current position
-    const removedItem = removeItemFromTree(rootFolders, sourceId)
+    const removedItem = removeItemFromTree(rootItems, sourceId)
     if (!removedItem) return
 
     // Insert at the new position
-    const inserted = insertItemIntoTree(rootFolders, removedItem, targetId, position)
+    const inserted = insertItemIntoTree(rootItems, removedItem, targetId, position)
     if (!inserted) {
       // If insertion failed, try to restore the item (this shouldn't happen)
       return
     }
 
     // Force React re-render by creating new reference
-    setRootFolders((prevFolders) => [...prevFolders])
+    setRootItems((prevItems) => [...prevItems])
 
     // Update breadcrumbs in open workbench tabs
     setWorkbenchTree((prevTree) => {
@@ -1880,12 +2002,12 @@ const App: React.FC = () => {
         }
 
         // Recalculate breadcrumbs for this tab
-        const { breadcrumbs: newBreadcrumbs } = findItemWithBreadcrumbs(rootFolders, itemId)
+        const { breadcrumbs: newBreadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
         if (newBreadcrumbs.length === 0) return tab
 
         // For HTTP request tabs, also recalculate environments
         if (restormTab.tabType === 'http-request') {
-          const newEnvironments = getNearestEnvironmentsForBreadcrumbs(rootFolders, newBreadcrumbs)
+          const newEnvironments = getNearestEnvironmentsForBreadcrumbs(rootItems, newBreadcrumbs)
           return {
             ...restormTab,
             breadcrumbs: newBreadcrumbs,
@@ -1904,21 +2026,21 @@ const App: React.FC = () => {
         groups: [{ ...group, tabs: updatedTabs }]
       }
     })
-  }, [rootFolders])
+  }, [rootItems])
 
   // Handle "Clone" context menu action
   const handleCloneItem = useCallback((itemId: string) => {
     // Don't allow cloning root folders
-    const isRootFolder = rootFolders.some((f) => f.id === itemId)
-    if (isRootFolder) return
+    const isRootItem = rootItems.some((f) => f.id === itemId)
+    if (isRootItem) return
 
     // Clone the item
-    const clonedItem = cloneItemInTree(rootFolders, itemId)
+    const clonedItem = cloneItemInTree(rootItems, itemId)
     if (!clonedItem) return
 
     // Force React re-render by creating new reference
-    setRootFolders((prevFolders) => [...prevFolders])
-  }, [rootFolders])
+    setRootItems((prevItems) => [...prevItems])
+  }, [rootItems])
 
   // State for sidebar editing (controlled rename mode)
   const [sidebarEditingItemId, setSidebarEditingItemId] = useState<string | null>(null)
@@ -1926,7 +2048,7 @@ const App: React.FC = () => {
   // Handle "Create subfolder" context menu action
   const handleCreateSubfolder = useCallback((parentFolderId: string) => {
     // Find the parent folder
-    const parentFolder = findFolderById(rootFolders, parentFolderId)
+    const parentFolder = findFolderById(rootItems, parentFolderId)
     if (!parentFolder) return
 
     // Create a new folder
@@ -1949,13 +2071,13 @@ const App: React.FC = () => {
     setSelectedItemId(newFolder.id)
 
     // Force React re-render by creating new reference
-    setRootFolders((prevFolders) => [...prevFolders])
+    setRootItems((prevItems) => [...prevItems])
 
     // Put the new folder in edit mode (after render)
     setTimeout(() => {
       setSidebarEditingItemId(newFolder.id)
     }, 0)
-  }, [rootFolders])
+  }, [rootItems])
 
   // State for delete confirmation modal
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
@@ -1968,11 +2090,11 @@ const App: React.FC = () => {
   // Handle "Delete" context menu action - show confirmation
   const handleDeleteItem = useCallback((itemId: string) => {
     // Don't allow deleting root folders
-    const isRootFolder = rootFolders.some((f) => f.id === itemId)
-    if (isRootFolder) return
+    const isRootItem = rootItems.some((f) => f.id === itemId)
+    if (isRootItem) return
 
     // Find the item to get its name and type
-    const item = findItemById(rootFolders, itemId)
+    const item = findItemById(rootItems, itemId)
     if (!item) return
 
     const isFolderItem = isAnyFolder(item)
@@ -1982,14 +2104,14 @@ const App: React.FC = () => {
       itemName: item.name,
       isFolder: isFolderItem
     })
-  }, [rootFolders])
+  }, [rootItems])
 
   // Confirm deletion
   const confirmDelete = useCallback(() => {
     const { itemId } = deleteConfirmation
 
     // Remove the item from the tree
-    removeItemFromTree(rootFolders, itemId)
+    removeItemFromTree(rootItems, itemId)
 
     // Close any tabs that reference the deleted item
     setWorkbenchTree((prevTree) => {
@@ -2032,11 +2154,11 @@ const App: React.FC = () => {
     })
 
     // Force React re-render
-    setRootFolders((prevFolders) => [...prevFolders])
+    setRootItems((prevItems) => [...prevItems])
 
     // Close the confirmation modal
     setDeleteConfirmation((prev) => ({ ...prev, isOpen: false }))
-  }, [deleteConfirmation, rootFolders])
+  }, [deleteConfirmation, rootItems])
 
   // Cancel deletion
   const cancelDelete = useCallback(() => {
@@ -2048,13 +2170,13 @@ const App: React.FC = () => {
     const itemId = payload.item.id
 
     // Find and update the reactive object directly (triggers search re-indexing)
-    const foundItem = findItemById(rootFolders, itemId)
+    const foundItem = findItemById(rootItems, itemId)
     if (foundItem) {
       foundItem.name = newName
     }
 
     // Force React re-render by creating new reference
-    setRootFolders((prevFolders) => [...prevFolders])
+    setRootItems((prevItems) => [...prevItems])
 
     // Also update the workbench tab title and breadcrumbs
     setWorkbenchTree((prevTree) => {
@@ -2118,7 +2240,7 @@ const App: React.FC = () => {
         groups: [{ ...group, tabs: updatedTabs }]
       }
     })
-  }, [rootFolders])
+  }, [rootItems])
 
   // Handle search result click - navigate to the selected item
   const handleSearchResultClick = useCallback((result: SearchResult) => {
@@ -2145,8 +2267,11 @@ const App: React.FC = () => {
       )
     }
     // Each root folder becomes a top-level item in the sidebar
-    return rootFolders.map((folder) => folderAsRootListViewItem(folder, options))
-  }, [expandedIds, rootFolders])
+    // Filter out Requests at root level (they need special handling)
+    return rootItems
+      .filter((item): item is Folder | EnvironmentFolder => 'items' in item)
+      .map((folder) => folderAsRootListViewItem(folder, options))
+  }, [expandedIds, rootItems])
 
   const sidebarItemsWithContextMenu: ListViewItemData[] = useMemo(
     () => attachContextMenus(sidebarItems, t, handleCloneItem, handleCreateSubfolder, handleDeleteItem),
@@ -2238,7 +2363,7 @@ const App: React.FC = () => {
       if (isLast) return
 
       // Determine item type by looking up in the root folders
-      const foundItem = findFolderById(rootFolders, item.id)
+      const foundItem = findFolderById(rootItems, item.id)
       if (foundItem) {
         if (isEnvironmentFolder(foundItem as FolderItem)) {
           navigationService.navigateTo(item.id, 'breadcrumb', { type: 'environment-folder' })
@@ -2247,26 +2372,26 @@ const App: React.FC = () => {
         }
       } else {
         // It might be a request
-        const { item: requestItem } = findItemWithBreadcrumbs(rootFolders, item.id)
+        const { item: requestItem } = findItemWithBreadcrumbs(rootItems, item.id)
         if (requestItem && isRequest(requestItem) && isHTTPRequest(requestItem)) {
           navigationService.navigateTo(item.id, 'breadcrumb', { type: 'http-request' })
         }
       }
     },
-    [rootFolders]
+    [rootItems]
   )
 
   // Handle item rename from breadcrumb
   const handleItemRename = useCallback(
     (item: BreadcrumbItem, newName: string) => {
       // Find and update the reactive object directly (triggers search re-indexing)
-      const foundItem = findItemById(rootFolders, item.id)
+      const foundItem = findItemById(rootItems, item.id)
       if (foundItem) {
         foundItem.name = newName
       }
 
       // Force React re-render by creating new reference
-      setRootFolders((prevFolders) => [...prevFolders])
+      setRootItems((prevItems) => [...prevItems])
 
       // Also update the workbench tab title and breadcrumbs
       setWorkbenchTree((prevTree) => {
@@ -2331,13 +2456,13 @@ const App: React.FC = () => {
       }
     })
   },
-    [rootFolders]
+    [rootItems]
   )
 
   // Handle tags changes from Workbench (folders or HTTP requests)
   const handleTagsChange = useCallback((targetId: string, newTags: string[]) => {
     // Find and update the reactive object directly (triggers search re-indexing)
-    const item = findItemById(rootFolders, targetId)
+    const item = findItemById(rootItems, targetId)
     if (item) {
       item.tags = newTags
     }
@@ -2382,12 +2507,12 @@ const App: React.FC = () => {
         groups: [{ ...group, tabs: updatedTabs }]
       }
     })
-  }, [rootFolders])
+  }, [rootItems])
 
   // Handle folder changes from FolderView
   const handleFolderChange = useCallback((folderId: string, updatedFolder: Folder) => {
     // Find and update the reactive folder directly to preserve proxies
-    const reactiveFolder = findFolderById(rootFolders, folderId)
+    const reactiveFolder = findFolderById(rootItems, folderId)
     if (reactiveFolder && !isEnvironmentFolder(reactiveFolder as FolderItem)) {
       // Update properties on the reactive object (triggers re-indexing)
       reactiveFolder.configuration = updatedFolder.configuration
@@ -2431,12 +2556,12 @@ const App: React.FC = () => {
         groups: updatedGroups
       }
     })
-  }, [rootFolders])
+  }, [rootItems])
 
   // Handle environment folder changes from EnvironmentFolderView
   const handleEnvironmentFolderChange = useCallback((folderId: string, updatedFolder: EnvironmentFolder) => {
     // Find and update the reactive folder directly to preserve proxies
-    const reactiveFolder = findEnvironmentFolderById(rootFolders, folderId)
+    const reactiveFolder = findEnvironmentFolderById(rootItems, folderId)
     if (reactiveFolder) {
       // Update properties on the reactive object (triggers re-indexing)
       reactiveFolder.environments = updatedFolder.environments
@@ -2474,7 +2599,7 @@ const App: React.FC = () => {
             const belongsToFolder = restormTab.breadcrumbs.some(bc => bc.id === folderId)
             if (belongsToFolder) {
               // Recalculate environments for this request
-              const newEnvironments = getNearestEnvironmentsForBreadcrumbs(rootFolders, restormTab.breadcrumbs)
+              const newEnvironments = getNearestEnvironmentsForBreadcrumbs(rootItems, restormTab.breadcrumbs)
               return {
                 ...restormTab,
                 environments: newEnvironments
@@ -2493,7 +2618,7 @@ const App: React.FC = () => {
         groups: updatedGroups
       }
     })
-  }, [rootFolders])
+  }, [rootItems])
 
   return (
     <AvailableVariablesProvider>
@@ -2692,9 +2817,9 @@ const App: React.FC = () => {
               autosave
               onRebuildTab={handleRebuildTab}
               onStateRestored={handleStateRestored}
-              getRequestById={(id) => findRequestById(rootFolders, id)}
-              getFolderById={(id) => findFolderById(rootFolders, id)}
-              getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootFolders, id)}
+              getRequestById={(id) => findRequestById(rootItems, id)}
+              getFolderById={(id) => findFolderById(rootItems, id)}
+              getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootItems, id)}
             />
           </div>
         </EnvironmentValuesProvider>
@@ -2744,7 +2869,7 @@ const App: React.FC = () => {
             isOpen={showSaveOptionsModal}
             onClose={() => { setShowSaveOptionsModal(false) }}
             onSave={handleSaveWithOptions}
-            rootFolder={rootFolders[0]}
+            rootFolder={rootItems[0]}
           />
 
           {/* Import Modal */}
@@ -2755,7 +2880,7 @@ const App: React.FC = () => {
             rootFolder={{
               id: '__virtual_root__',
               name: 'Root',
-              items: rootFolders
+              items: rootItems
             } as EnvironmentFolder}
             selectedFolderId={selectedItemId ?? undefined}
           />

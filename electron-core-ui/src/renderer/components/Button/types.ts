@@ -37,6 +37,7 @@ export interface ButtonProps {
   onMouseLeave?: ((event: React.MouseEvent<HTMLAnchorElement>) => void) | undefined;
   className?: string;
   id?: string;
+  'data-testid'?: string;
   children?: React.ReactNode;
 }
 

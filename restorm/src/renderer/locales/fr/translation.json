@@ -445,6 +445,8 @@
       "label": "Destination",
       "placeholder": "Sélectionner le dossier de destination",
       "newFolder": "Nouveau dossier",
+      "newFolderTitle": "Nouveau dossier",
+      "newFolderPlaceholder": "Saisir le nom du dossier...",
       "root": "<Racine>"
     },
     "source": {

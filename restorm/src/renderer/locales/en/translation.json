@@ -445,6 +445,8 @@
       "label": "Destination",
       "placeholder": "Select destination folder",
       "newFolder": "New Folder",
+      "newFolderTitle": "New Folder",
+      "newFolderPlaceholder": "Enter folder name...",
       "root": "<Root>"
     },
     "source": {

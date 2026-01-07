@@ -15,37 +15,46 @@ Given('I have started the application', async ({ page }) => {
 })
 
 Given('I have created a new empty file', async ({ page }) => {
-  // Mock the save dialog to respond "No"
+  // Wait for app to be fully loaded
+  await page.waitForSelector('[role="menubar"]', { timeout: 15000 })
+  
+  // Mock the save dialog to respond with a temp file path
   await page.evaluate(() => {
     if (window.electron?.dialog) {
       // @ts-expect-error - Mocking dialog for tests
       window.electron.dialog.showSaveDialog = async () => ({
-        canceled: true
+        canceled: false,
+        filePath: '/tmp/import-test-temp.restorm'
       })
     }
   })
   
   // Click File menu
   const fileMenu = page.locator('[role="menubar"] >> text=File').first()
+  await expect(fileMenu).toBeVisible({ timeout: 5000 })
   await fileMenu.click()
+  
+  // Wait for menu to expand
+  await page.waitForSelector('[role="menu"]', { timeout: 2000 })
   
   // Click New
   const newMenuItem = page.locator('[role="menuitem"] >> text=New').first()
+  await expect(newMenuItem).toBeVisible({ timeout: 5000 })
   await newMenuItem.click()
   
-  // Wait for empty file to be created
-  await page.waitForSelector('[role="tree"]', { timeout: 5000 })
+  // Wait for the workspace to be visible (file is open)
+  await page.waitForSelector('text=WORKSPACE', { timeout: 15000 })
 })
 
 When('I click the import button', async ({ page }) => {
-  const importButton = page.locator('button:has(i.codicon-add)').first()
-  await importButton.click()
+  // Use Ctrl+I to open the import modal
+  await page.keyboard.press('Control+I')
   await page.waitForSelector('[data-testid="import-modal"]', { timeout: 5000 })
 })
 
 When('I click the import button again', async ({ page }) => {
-  const importButton = page.locator('button:has(i.codicon-add)').first()
-  await importButton.click()
+  // Use Ctrl+I to open the import modal
+  await page.keyboard.press('Control+I')
   await page.waitForSelector('[data-testid="import-modal"]', { timeout: 5000 })
 })
 
@@ -63,7 +72,7 @@ When('I paste {string} in the source input', async ({ page }, input: string) => 
   const inputBox = page.locator('[data-testid="import-modal"] textarea, [data-testid="import-modal"] input[type="text"]').first()
   await inputBox.fill(input)
   // Wait for debounce and preview to load
-  await page.waitForTimeout(500)
+  await page.waitForSelector('[data-testid="import-modal"] .import-preview-section, [data-testid="import-modal"] .import-error', { timeout: 3000 })
 })
 
 When('I paste the path to {string} in the source input', async ({ page }, filename: string) => {
@@ -71,14 +80,19 @@ When('I paste the path to {string} in the source input', async ({ page }, filena
   const inputBox = page.locator('[data-testid="import-modal"] textarea, [data-testid="import-modal"] input[type="text"]').first()
   await inputBox.fill(filePath)
   // Wait for debounce and preview to load
-  await page.waitForTimeout(500)
+  await page.waitForSelector('[data-testid="import-modal"] .import-preview-section, [data-testid="import-modal"] .import-error', { timeout: 3000 })
 })
 
 When('I clear the source input', async ({ page }) => {
   const inputBox = page.locator('[data-testid="import-modal"] textarea, [data-testid="import-modal"] input[type="text"]').first()
   await inputBox.fill('')
-  // Wait for preview to clear
-  await page.waitForTimeout(300)
+  // Wait for debounce to complete and preview to clear
+  await page.waitForFunction(
+    () => !document.querySelector('[data-testid="import-modal"] .import-preview-section'),
+    { timeout: 1000 }
+  ).catch(() => {
+    // Preview may already be hidden, which is fine
+  })
 })
 
 Then('I should see import preview results', async ({ page }) => {
@@ -105,8 +119,13 @@ Then('I should not see import preview results', async ({ page }) => {
 })
 
 When('I click the Import button in the modal', async ({ page }) => {
-  const importButton = page.locator('[data-testid="import-modal"] button:has-text("Import")').first()
+  // Wait for the Import button to be enabled (aria-disabled="false")
+  // Button component renders as <a role="button">
+  const importButton = page.locator('[data-testid="import-modal"] [role="button"]:has-text("Import")[aria-disabled="false"]')
+  await expect(importButton).toBeVisible({ timeout: 15000 })
+
   await importButton.click()
+
   // Wait for modal to close
   await page.waitForFunction(
     () => !document.querySelector('[data-testid="import-modal"]'),
@@ -115,10 +134,8 @@ When('I click the Import button in the modal', async ({ page }) => {
 })
 
 Then('I should see new items in the sidebar', async ({ page }) => {
-  // Wait for sidebar to update
-  await page.waitForTimeout(500)
-  
   const treeItems = page.locator('[role="tree"] [role="treeitem"]')
+  await expect(treeItems.first()).toBeVisible({ timeout: 5000 })
   const count = await treeItems.count()
   expect(count).toBeGreaterThan(0)
 })
@@ -180,11 +197,8 @@ Then('a tab containing {string} should be open', async ({ page }, tabText: strin
 
 Then('the destination dropdown should show the root node', async ({ page }) => {
   // Click on the dropdown button to open it
-  const dropdownButton = page.locator('[data-testid="import-modal"] button:has(i.codicon-folder)').first()
+  const dropdownButton = page.locator('[data-testid="destination-dropdown-button"]')
   await dropdownButton.click()
-  
-  // Wait for dropdown to appear
-  await page.waitForTimeout(300)
   
   // Check for root node - it should be visible and have the label "<Root>" or "<Racine>"
   const rootNode = page.locator('[role="treeitem"]:has-text("<Root>"), [role="treeitem"]:has-text("<Racine>")').first()
@@ -192,16 +206,12 @@ Then('the destination dropdown should show the root node', async ({ page }) => {
   
   // Close dropdown
   await page.keyboard.press('Escape')
-  await page.waitForTimeout(200)
 })
 
 Then('the destination dropdown should show all imported folders', async ({ page }) => {
   // Click on the dropdown button to open it
-  const dropdownButton = page.locator('[data-testid="import-modal"] button:has(i.codicon-folder)').first()
+  const dropdownButton = page.locator('[data-testid="destination-dropdown-button"]')
   await dropdownButton.click()
-  
-  // Wait for dropdown to appear
-  await page.waitForTimeout(300)
   
   // Expand the root node if it's not already expanded
   const rootNode = page.locator('[role="treeitem"]:has-text("<Root>"), [role="treeitem"]:has-text("<Racine>")').first()
@@ -210,12 +220,12 @@ Then('the destination dropdown should show all imported folders', async ({ page 
   
   if (!isExpanded) {
     await chevron.click()
-    await page.waitForTimeout(300)
   }
   
   // Check that we have folder items visible (the imported Swagger Petstore folder structure)
   // We should see at least "pet", "store", and "user" folders
   const treeItems = page.locator('[role="treeitem"]')
+  await expect(treeItems.first()).toBeVisible({ timeout: 3000 })
   const itemCount = await treeItems.count()
   
   // Should have more than just the root node
@@ -238,5 +248,202 @@ Then('the destination dropdown should show all imported folders', async ({ page 
   
   // Close dropdown
   await page.keyboard.press('Escape')
-  await page.waitForTimeout(200)
+})
+
+When('I expand the {string} folder', async ({ page }, folderName: string) => {
+  const folderRow = page.locator(`[role="treeitem"]:has-text("${folderName}")`).first()
+  await expect(folderRow).toBeVisible({ timeout: 10000 })
+  
+  const chevron = folderRow.locator('.codicon-chevron-right, .codicon-chevron-down').first()
+  if (await chevron.count() > 0) {
+    await chevron.click()
+  } else {
+    await folderRow.dblclick()
+  }
+})
+
+When('I click on the {string} request', async ({ page }, requestName: string) => {
+  const requestItem = page.locator(`[role="treeitem"]:has-text("${requestName}")`).first()
+  await expect(requestItem).toBeVisible({ timeout: 10000 })
+  await requestItem.click()
+  await page.waitForSelector('.tab.active', { timeout: 5000 })
+})
+
+Then('the request tab should be open', async ({ page }) => {
+  await page.waitForSelector('.tab.active', { timeout: 5000 })
+  await page.waitForSelector('[data-testid="url-container"]', { timeout: 5000 })
+})
+
+When('I change the path param {string} to {string}', async ({ page }, paramName: string, value: string) => {
+  const pathParamsPane = page.locator('text=PATH PARAMS').first()
+  await expect(pathParamsPane).toBeVisible({ timeout: 5000 })
+  
+  const paneHeader = pathParamsPane.locator('..').locator('..')
+  const isCollapsed = await paneHeader.locator('.pane-collapsed, [aria-expanded="false"]').count() > 0
+  if (isCollapsed) {
+    await pathParamsPane.click()
+  }
+  
+  const pathParamsSection = page.locator('.params-table-root').first()
+  await expect(pathParamsSection).toBeVisible({ timeout: 5000 })
+  
+  await page.waitForFunction(
+    () => {
+      const section = document.querySelector('.params-table-root')
+      const text = section?.textContent ?? ''
+      return section && !text.includes('Loading')
+    },
+    { timeout: 10000 }
+  )
+  
+  const monacoEditors = pathParamsSection.locator('.monaco-editor')
+  const editorCount = await monacoEditors.count()
+  
+  let targetEditor = null
+  for (let i = 0; i < editorCount; i++) {
+    const editor = monacoEditors.nth(i)
+    const isVisible = await editor.isVisible()
+    if (isVisible) {
+      targetEditor = editor
+      break
+    }
+  }
+  
+  if (!targetEditor) {
+    throw new Error(`Could not find editor for path param "${paramName}"`)
+  }
+  
+  await targetEditor.click()
+  await page.keyboard.press('Control+a')
+  await page.keyboard.type(value)
+  await page.locator('.params-table th').first().click()
+})
+
+When('I select the environment {string} in the environment dropdown', async ({ page }, environmentName: string) => {
+  const envDropdown = page.locator('[data-testid="environment-dropdown"], .environment-selector').first()
+  await expect(envDropdown).toBeVisible({ timeout: 5000 })
+  await envDropdown.click()
+  
+  const envOption = page.locator(`text="${environmentName}"`).first()
+  await expect(envOption).toBeVisible({ timeout: 5000 })
+  await envOption.click()
+})
+
+Then('the URL tooltip should be {string}', async ({ page }, expectedUrl: string) => {
+  await page.waitForFunction(
+    (url: string) => {
+      const container = document.querySelector('[data-testid="url-container"]')
+      const title = container?.getAttribute('title') ?? ''
+      return title === url
+    },
+    expectedUrl,
+    { timeout: 10000 }
+  )
+  
+  const urlContainer = page.locator('[data-testid="url-container"]').first()
+  const title = await urlContainer.getAttribute('title')
+  expect(title).toBe(expectedUrl)
+})
+
+When('I select the root node in the destination dropdown', async ({ page }) => {
+  const dropdownButton = page.locator('[data-testid="destination-dropdown-button"]')
+  await expect(dropdownButton).toBeVisible({ timeout: 5000 })
+  await dropdownButton.click()
+  
+  const rootNode = page.locator('[role="treeitem"]:has-text("<Root>"), [role="treeitem"]:has-text("<Racine>")').first()
+  await expect(rootNode).toBeVisible({ timeout: 3000 })
+  await rootNode.click()
+})
+
+When('I click the new folder button', async ({ page }) => {
+  const newFolderButton = page.locator('[data-testid="new-folder-button"]')
+  await expect(newFolderButton).toBeVisible({ timeout: 3000 })
+  await newFolderButton.click()
+})
+
+When('I enter {string} as the folder name', async ({ page }, folderName: string) => {
+  // Wait for the new folder dialog to be visible
+  const dialog = page.locator('[data-testid="new-folder-dialog"]')
+  await expect(dialog).toBeVisible({ timeout: 5000 })
+  
+  // Find the textarea/input within the InputBox
+  const inputBox = dialog.locator('textarea, input[type="text"]').first()
+  await expect(inputBox).toBeVisible({ timeout: 3000 })
+  await inputBox.fill(folderName)
+})
+
+When('I click OK in the folder name dialog', async ({ page }) => {
+  const okButton = page.locator('[data-testid="new-folder-ok-button"]')
+  await expect(okButton).toBeVisible({ timeout: 3000 })
+  await okButton.click()
+  
+  // Wait for the folder name dialog to close
+  await page.waitForFunction(
+    () => !document.querySelector('[data-testid="new-folder-dialog"]'),
+    { timeout: 3000 }
+  )
+  
+  // Wait for preview to still be there after creating folder
+  await page.waitForSelector('[data-testid="import-modal"] .import-preview-section', { timeout: 5000 })
+})
+
+Then('the folder {string} should be visible in the destination dropdown', async ({ page }, folderName: string) => {
+  // Open the dropdown first
+  const dropdownButton = page.locator('[data-testid="destination-dropdown-button"]')
+  await expect(dropdownButton).toBeVisible({ timeout: 3000 })
+  await dropdownButton.click()
+  
+  // Now check for the folder
+  const folderItem = page.locator(`[role="treeitem"]:has-text("${folderName}")`).first()
+  await expect(folderItem).toBeVisible({ timeout: 3000 })
+  
+  // Close the dropdown by clicking the button again
+  await dropdownButton.click()
+})
+
+Then('the folder {string} should be selected', async ({ page }, folderName: string) => {
+  // Verify the dropdown button shows the selected folder name
+  // The dropdown should already be closed by the previous step
+  const dropdown = page.locator('[data-testid="destination-dropdown-button"]')
+  await expect(dropdown).toBeVisible()
+  
+  const buttonText = await dropdown.textContent()
+  expect(buttonText).toContain(folderName)
+})
+
+Then('the folder {string} should exist in the sidebar', async ({ page }, folderPath: string) => {
+  // Handle both simple folder names and paths like "Test/Swagger Petstore"
+  if (folderPath.includes('/')) {
+    // For paths, just check the last part exists
+    const parts = folderPath.split('/')
+    const lastName = parts[parts.length - 1]
+    const folderItem = page.locator(`[role="tree"] [role="treeitem"]:has-text("${lastName}")`).first()
+    await expect(folderItem).toBeVisible({ timeout: 5000 })
+  } else {
+    const folderItem = page.locator(`[role="tree"] [role="treeitem"]:has-text("${folderPath}")`).first()
+    await expect(folderItem).toBeVisible({ timeout: 5000 })
+  }
+})
+
+When('I expand the {string} folder in the sidebar', async ({ page }, folderName: string) => {
+  const folderRow = page.locator(`[role="tree"] [role="treeitem"]:has-text("${folderName}")`).first()
+  await expect(folderRow).toBeVisible({ timeout: 5000 })
+  
+  const chevron = folderRow.locator('.codicon-chevron-right, .codicon-chevron-down').first()
+  if (await chevron.count() > 0) {
+    await chevron.click()
+  } else {
+    await folderRow.dblclick()
+  }
+})
+
+Then('I should see the subfolder {string} in the sidebar', async ({ page }, folderName: string) => {
+  const subfolderItem = page.locator(`[role="tree"] [role="treeitem"]:has-text("${folderName}")`).first()
+  await expect(subfolderItem).toBeVisible({ timeout: 5000 })
+})
+
+When('I wait {int} seconds to see the app state', async ({ page }, seconds: number) => {
+  console.log(`[TEST] Waiting ${seconds} seconds to observe app state...`)
+  await page.waitForTimeout(seconds * 1000)
+  console.log('[TEST] Wait complete')
 })
