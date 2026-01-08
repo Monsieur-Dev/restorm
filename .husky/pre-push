@@ -1,0 +1,62 @@
+#!/bin/sh
+
+echo "🔒 Running pre-push security checks..."
+
+# Check for eslint-disable directives in all tracked files
+echo "📝 Checking for eslint-disable directives..."
+if git ls-files '*.ts' '*.tsx' '*.js' '*.jsx' | xargs grep -E '(^|[^a-zA-Z])(\/\/|\/\*)\s*eslint-disable' 2>/dev/null; then
+    echo "❌ ERROR: eslint-disable directives found in repository!"
+    echo ""
+    echo "Files with eslint-disable directives:"
+    git ls-files '*.ts' '*.tsx' '*.js' '*.jsx' | xargs grep -n -E '(^|[^a-zA-Z])(\/\/|\/\*)\s*eslint-disable' 2>/dev/null
+    echo ""
+    echo "⛔ This is STRICTLY FORBIDDEN by project rules."
+    echo "Please fix the underlying issues instead of suppressing warnings."
+    exit 1
+fi
+
+# Check the commits being pushed
+echo "🔍 Verifying commits being pushed..."
+
+REMOTE="$1"
+URL="$2"
+
+# Read from stdin (git sends push information here)
+zero=$(git hash-object --stdin </dev/null | tr '[0-9a-f]' '0')
+
+while read local_ref local_sha remote_ref remote_sha
+do
+    if [ "$local_sha" = "$zero" ]; then
+        # Branch deletion, skip
+        continue
+    fi
+    
+    if [ "$remote_sha" = "$zero" ]; then
+        # New branch, check last 20 commits (to avoid checking entire history)
+        commits=$(git rev-list --max-count=20 "$local_sha")
+    else
+        # Existing branch, check new commits
+        commits=$(git rev-list "$remote_sha".."$local_sha")
+    fi
+    
+    # Check each commit for eslint-disable in changed files
+    for commit in $commits; do
+        changed_files=$(git diff-tree --no-commit-id --name-only -r "$commit" | grep -E '\.(ts|tsx|js|jsx)$')
+        
+        for file in $changed_files; do
+            if [ -f "$file" ]; then
+                if grep -qE '(^|[^a-zA-Z])(\/\/|\/\*)\s*eslint-disable' "$file" 2>/dev/null; then
+                    echo "❌ ERROR: Commit $commit introduces eslint-disable directive in $file"
+                    echo "This suggests the commit was made with --no-verify"
+                    echo ""
+                    echo "Offending lines:"
+                    grep -nE '(^|[^a-zA-Z])(\/\/|\/\*)\s*eslint-disable' "$file"
+                    exit 1
+                fi
+            fi
+        done
+    done
+done
+
+echo "✅ Pre-push security checks passed!"
+

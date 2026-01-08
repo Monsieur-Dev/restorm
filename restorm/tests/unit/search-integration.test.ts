@@ -218,7 +218,6 @@ describe('Search Integration', () => {
     }
 
     // Clear previous emitSync calls
-    // eslint-disable-next-line @typescript-eslint/unbound-method -- vitest mock pattern
     const emitSyncMock = vi.mocked(eventBus.emitSync)
     emitSyncMock.mockClear()
 
