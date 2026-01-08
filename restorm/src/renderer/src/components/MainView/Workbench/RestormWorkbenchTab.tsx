@@ -1,7 +1,7 @@
 import React from 'react'
 import * as CoreUIRenderer from 'electron-core-ui/renderer'
 import { TagsView, Callout, type CalloutVariant } from 'electron-core-ui/renderer'
-import type { BreadcrumbItem } from '../types/editor'
+import type { BreadcrumbItem } from '../../../types/editor'
 
 const { Breadcrumb } = CoreUIRenderer as unknown as {
   Breadcrumb: React.ComponentType<{

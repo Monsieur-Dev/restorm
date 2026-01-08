@@ -6,7 +6,7 @@ import {
   MarkdownEditor,
   MarkdownViewer
 } from 'electron-core-ui/renderer'
-import type { Folder, EnvironmentFolder } from '../types/collections'
+import type { Folder, EnvironmentFolder } from '../../types/collections'
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
 // Uses direct property assignment to trigger proxy setter

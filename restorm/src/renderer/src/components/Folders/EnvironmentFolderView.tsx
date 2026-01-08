@@ -15,9 +15,9 @@ import {
   IconSelect,
   type KeyValueTableHandle
 } from 'electron-core-ui/renderer'
-import { RestormKeyValueTable } from './RestormKeyValueTable'
-import { useHandlebarsHelpers } from '../hooks/useHandlebarsHelpers'
-import type { EnvironmentFolder, Environment, KeyValue, Icon } from '../types/collections'
+import { RestormKeyValueTable } from '../RestormKeyValueTable'
+import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
+import type { EnvironmentFolder, Environment, KeyValue, Icon } from '../../types/collections'
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
 // Uses direct property assignment to trigger proxy setter

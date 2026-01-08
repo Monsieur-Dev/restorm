@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
 import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, type ContextMenuItem } from 'electron-core-ui/renderer'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback } from 'electron-core-ui/renderer'
-import type { RestormEditorTab, BreadcrumbItem } from '../types/editor'
+import type { RestormEditorTab, BreadcrumbItem } from '../../../types/editor'
 import {
   isFolderTab,
   isEnvironmentFolderTab,
@@ -10,7 +10,7 @@ import {
   isGrpcRequestTab,
   isSoapRequestTab,
   isWebSocketRequestTab
-} from '../types/editor'
+} from '../../../types/editor'
 import { EnvironmentDropdown } from './EnvironmentDropdown'
 import {
   HTTPRequestTabView,
@@ -18,13 +18,13 @@ import {
   GrpcRequestTabView,
   SoapRequestTabView,
   WebSocketRequestTabView 
-} from './RequestTabViews'
-import { EnvironmentProvider } from '../contexts/EnvironmentContext'
-import { FolderView } from './FolderView'
-import { EnvironmentFolderView } from './EnvironmentFolderView'
-import type { EnvironmentFolder } from '../types/collections'
-import { Badge } from './Badge'
-import { mapToBadgeType } from '../utils/badgeUtils'
+} from '../../RequestTabViews'
+import { EnvironmentProvider } from '../../../contexts/EnvironmentContext'
+import { FolderView } from '../../Folders/FolderView'
+import { EnvironmentFolderView } from '../../Folders/EnvironmentFolderView'
+import type { EnvironmentFolder } from '../../../types/collections'
+import { Badge } from '../../common/Badge'
+import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useTranslation } from 'react-i18next'
 import { RestormWorkbenchTab } from './RestormWorkbenchTab'
 

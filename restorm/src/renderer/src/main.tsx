@@ -6,7 +6,7 @@ import '@vscode/codicons/dist/codicon.css'
 import './httpMethods.css'
 import './app.css'
 import './components/Badge.css'
-import LoadingScreen from './components/LoadingScreen'
+import LoadingScreen from './components/Welcome/LoadingScreen'
 import { initializeGraphQL } from './services/GraphQLIntegration'
 
 const App = lazy(() => import('./App'))

@@ -1,4 +1,4 @@
-import type { BadgeType } from '../components/Badge'
+import type { BadgeType } from '../components/common/Badge'
 
 /**
  * Map raw protocol/type values to BadgeType

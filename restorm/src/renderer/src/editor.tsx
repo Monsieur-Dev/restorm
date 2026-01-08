@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom/client'
-import { RestormWorkbench } from './components/RestormWorkbench'
+import { RestormWorkbench } from './components/MainView/Workbench/RestormWorkbench'
 import type { WorkbenchTree, GroupNode } from 'electron-core-ui/renderer'
 import * as ElectronCoreUi from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'

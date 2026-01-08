@@ -12,9 +12,9 @@ import {
   ListViewDropdown
 } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
-import type { FolderItem, EnvironmentFolder, Folder } from '../types/collections'
-import { isEnvironmentFolder } from '../types/collections'
-import { mapToBadgeType } from '../utils/badgeUtils'
+import type { FolderItem, EnvironmentFolder, Folder } from '../../types/collections'
+import { isEnvironmentFolder } from '../../types/collections'
+import { mapToBadgeType } from '../../utils/badgeUtils'
 import { logger } from 'electron-core-ui/renderer'
 import './ImportModal.css'
 

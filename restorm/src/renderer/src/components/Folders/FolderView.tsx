@@ -1,5 +1,5 @@
 import React from 'react'
-import type { Folder } from '../types/collections'
+import type { Folder } from '../../types/collections'
 import { BaseFolderView } from './BaseFolderView'
 
 export interface FolderViewProps {
