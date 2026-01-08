@@ -4,37 +4,29 @@ import {
   Statusbar,
   StatusbarElement,
   Sash,
-  type IVerticalSashLayoutProvider,
-  type SashEvent,
   isTabGroupNode,
   isContainerNode,
   navigationService,
   useFileService,
-  useFileEvents,
-  setContentChecksum,
-  finishLoading,
-  hasContentChanged,
-  registerInitialChecksums,
-  commitChecksums,
+  useVerticalSash,
   eventBus,
-  logger
+  logger,
+  computeChecksum,
+  useDirtyState
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type DocumentChangedPayload } from './services/DocumentEvents'
-import type { WorkbenchTree, NavigationEvent, GroupNode, EditorTab, PersistenceFormat } from 'electron-core-ui/renderer'
+import type { WorkbenchTree, NavigationEvent, GroupNode, EditorTab } from 'electron-core-ui/renderer'
 import { Welcome } from './components/Welcome/Welcome'
 import { EmptyBench } from './components/MainView/Workbench/EmptyBench'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
 import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
 import { RestormWorkbenchContainer } from './components/MainView/Workbench/RestormWorkbenchContainer'
-import { SaveOptionsModal, type SaveOptions } from './components/Modals/SaveOptionsModal'
+import { SaveOptionsModal } from './components/Modals/SaveOptionsModal'
 import { DeleteConfirmationModal } from './components/Modals/DeleteConfirmationModal'
 import { ImportModal } from './components/Modals/ImportModal'
 import { AvailableVariablesProvider } from './contexts/AvailableVariablesContext'
 import { VariableTransformProvider } from './contexts/VariableTransformContext'
-import { searchIndexService } from './services/SearchIndexService'
-import { makeReactiveFolder } from './types/reactive'
 import { collectAllFolderIds } from './services/FolderToListView'
-import { prepareForSerialization, processAfterDeserialization } from './utils/serialization'
 import {
   findFolderById,
   findEnvironmentFolderById,
@@ -49,11 +41,12 @@ import {
   updateGroupById
 } from './utils/workbenchHelpers'
 import { DesktopIndicator } from './components/MainView/DesktopIndicator'
-import { collectAllObjectsForChecksums } from './utils/checksumHelpers'
 import { useItemOperations } from './hooks/useItemOperations'
 import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
 import { useSidebarState } from './hooks/useSidebarState'
+import { useFileManagement } from './hooks/useFileManagement'
+import { useImport } from './hooks/useImport'
 import type {
   Folder,
   FolderItem,
@@ -68,8 +61,7 @@ import {
   isGrpcRequest,
   isSoapRequest,
   isWebSocketRequest,
-  isEnvironmentFolder,
-  isAnyFolder
+  isEnvironmentFolder
 } from './types/collections'
 import type {
   FolderTab,
@@ -81,7 +73,6 @@ import type {
   WebSocketRequestTab,
   BreadcrumbItem
 } from './types/editor'
-import { useDirtyState, computeChecksum } from 'electron-core-ui/renderer'
 
 const MIN_LEFT_WIDTH = 180
 const RIGHT_MIN_WIDTH = 240
@@ -159,19 +150,6 @@ const App: React.FC = () => {
     groups: []
   })
 
-  // Save options modal state - declared early for use in handlers
-  const [showSaveOptionsModal, setShowSaveOptionsModal] = useState(false)
-  
-  // Import modal state
-  const [showImportModal, setShowImportModal] = useState(false)
-  
-  // Track if current file was opened as a folder (for save behavior)
-  const [isOpenedAsFolder, setIsOpenedAsFolder] = useState(false)
-  // Store the format used when opening a folder (defaults to yaml)
-  const [folderFormat, setFolderFormat] = useState<PersistenceFormat>('yaml')
-  // Store the folder path when working with a folder (separate from filePath)
-  const [currentFolderPath, setCurrentFolderPath] = useState<string | null>(null)
-
   // Per-tab dirty state tracking (works in both file and folder modes)
   const {
     dirtyItemIds: dirtyTabIds,
@@ -183,6 +161,40 @@ const App: React.FC = () => {
 
   // Create a Set for fast lookup of dirty item IDs
   const dirtyItemIdsSet = useMemo(() => new Set(dirtyTabIds), [dirtyTabIds])
+
+  // Use file management hook
+  const {
+    handleMenuNew,
+    handleMenuOpen,
+    handleMenuOpenFolder,
+    handleMenuSave,
+    handleMenuSaveAs,
+    handleMenuClose,
+    handleOpenRecentFile,
+    handleSaveWithOptions,
+    isOpenedAsFolder,
+    folderFormat,
+    currentFolderPath,
+    showSaveOptionsModal,
+    setShowSaveOptionsModal
+  } = useFileManagement({
+    rootItems,
+    setRootItems,
+    setWorkbenchTree,
+    clearTabDirtyState,
+    registerTabDirtyState,
+    markAllTabsSaved,
+    t
+  })
+
+  // Import modal state
+  const [showImportModal, setShowImportModal] = useState(false)
+
+  // Use import hook
+  const { handleImport } = useImport({
+    rootItems,
+    setRootItems
+  })
 
   // Compute workbench tree with dirty states applied to all tabs
   // This is computed during render, not in an effect, to avoid cascading renders
@@ -263,264 +275,6 @@ const App: React.FC = () => {
 
   // File save handlers (after rootItems is defined)
   // Deep clone to remove Proxy wrappers before IPC serialization
-  const handleMenuSave = useCallback(() => {
-    const plainData = JSON.parse(JSON.stringify({ collections: rootItems })) as Record<string, unknown>
-    
-    if (isOpenedAsFolder && currentFolderPath) {
-      // For folders, keep IDs for mapping service, main process will strip them during serialization
-      void (async () => {
-        const result = await window.restorm?.file.saveAsFolder(plainData, folderFormat, currentFolderPath)
-        if (result?.success) {
-          void clearDirty()
-        }
-      })()
-    } else {
-      // For single files, strip IDs before saving
-      const dataForSave = prepareForSerialization(plainData)
-      void saveFile(dataForSave)
-    }
-  }, [saveFile, rootItems, isOpenedAsFolder, folderFormat, clearDirty, currentFolderPath])
-
-  const handleMenuSaveAs = useCallback(() => {
-    setShowSaveOptionsModal(true)
-  }, [])
-
-  const handleSaveWithOptions = useCallback(async (options: SaveOptions) => {
-    const plainData = JSON.parse(JSON.stringify({ collections: rootItems })) as Record<string, unknown>
-    
-    logger.info('[App] Saving with options', { mode: options.mode, format: options.format })
-    
-    try {
-      if (options.mode === 'folder') {
-        // For folders, keep IDs for mapping service, main process will strip them during serialization
-        const result = await window.restorm?.file.saveAsFolder(plainData, options.format)
-        if (result?.success && result.path) {
-          logger.info('[App] Folder saved successfully', { path: result.path })
-          // Update state to track that we're now working with a folder
-          setIsOpenedAsFolder(true)
-          setFolderFormat(options.format)
-          setCurrentFolderPath(result.path)
-          await clearDirty()
-        } else {
-          logger.error('[App] Failed to save folder', { error: result?.error ?? 'Unknown error' })
-        }
-      } else {
-        // For single files, strip IDs before saving
-        const dataForSave = prepareForSerialization(plainData)
-        const result = await window.restorm?.file.saveAsFile(dataForSave, options.format)
-        if (result?.success) {
-          logger.info('[App] File saved successfully', { path: result.path })
-          // Update state to track that we're now working with a file
-          setIsOpenedAsFolder(false)
-          await clearDirty()
-        } else {
-          logger.error('[App] Failed to save file', { error: result?.error ?? 'Unknown error' })
-        }
-      }
-    } catch (error) {
-      logger.error('[App] Save error', { error: String(error) })
-    }
-  }, [rootItems, clearDirty])
-
-  // Handle import
-  const handleImport = useCallback((items: FolderItem[], targetFolderId?: string, pendingFolders?: {id: string, name: string, parentId: string}[]) => {
-    logger.info('[App] Importing items', { count: items.length, targetFolderId, rootItemsCount: rootItems.length, pendingFoldersCount: pendingFolders?.length ?? 0 })
-
-    // Regenerate all IDs to avoid conflicts with existing items
-    const regenerateIds = (item: FolderItem): FolderItem => {
-      if ('items' in item) {
-        // It's a folder (Folder or EnvironmentFolder)
-        const folder = item
-        return {
-          ...folder,
-          id: crypto.randomUUID(),
-          items: folder.items.map(child => regenerateIds(child))
-        }
-      } else {
-        // It's a request
-        const request = item
-        return {
-          ...request,
-          id: crypto.randomUUID()
-        }
-      }
-    }
-
-    // Emit creation events for all imported items recursively
-    const emitCreationEvents = (item: FolderItem, parentFolderId: string): void => {
-      if ('items' in item) {
-        // It's a folder
-        const folder = item
-        eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
-          id: folder.id,
-          type: 'folder',
-          document: JSON.parse(JSON.stringify(folder)) as Folder | EnvironmentFolder
-        })
-        // Recursively emit for children
-        folder.items.forEach(child => {
-          emitCreationEvents(child, folder.id)
-        })
-      } else {
-        // It's a request
-        const request = item
-        eventBus.emitSync(DocumentEvents.REQUEST_CREATED, {
-          id: request.id,
-          type: 'request',
-          document: JSON.parse(JSON.stringify(request)) as Request,
-          parentFolderId
-        })
-      }
-    }
-
-    const itemsWithNewIds = items.map(item => regenerateIds(item))
-
-    logger.info('[App] Items with new IDs', { count: itemsWithNewIds.length })
-
-    // Create pending folders if any
-    const createdFoldersMap = new Map<string, Folder | EnvironmentFolder>()
-    if (pendingFolders && pendingFolders.length > 0) {
-      pendingFolders.forEach(pf => {
-        const newFolder: Folder = {
-          id: crypto.randomUUID(),
-          name: pf.name,
-          items: [],
-          documentation: '',
-          tags: [],
-          configuration: {}
-        }
-        createdFoldersMap.set(pf.id, newFolder)
-        logger.info('[App] Created pending folder', { name: pf.name, id: newFolder.id, parentId: pf.parentId })
-      })
-    }
-
-    // Resolve target folder ID: if it's a pending folder, use the created folder's ID
-    let actualTargetFolderId = targetFolderId
-    if (targetFolderId && createdFoldersMap.has(targetFolderId)) {
-      const createdFolder = createdFoldersMap.get(targetFolderId)
-      if (createdFolder) {
-        actualTargetFolderId = createdFolder.id
-        logger.info('[App] Target is a pending folder, using created folder ID', { pendingId: targetFolderId, actualId: actualTargetFolderId })
-      }
-    }
-
-    // If file is empty (no root folders), create the imported items as first root folders
-    if (rootItems.length === 0 && !actualTargetFolderId) {
-      const filteredItems = itemsWithNewIds.filter(item => 'items' in item)
-      logger.info('[App] Empty file - creating first root folders', { count: filteredItems.length })
-      const reactiveRootItems = filteredItems.map(folder => makeReactiveFolder(folder)) as EnvironmentFolder[]
-      setRootItems(reactiveRootItems)
-      
-      // Emit creation events for indexing
-      filteredItems.forEach(folder => {
-        emitCreationEvents(folder, folder.id)
-      })
-      return
-    }
-
-    // Create deep copies of rootItems to avoid mutating reactive objects
-    const clonedRootItems = JSON.parse(JSON.stringify(rootItems)) as (EnvironmentFolder | Folder | Request)[]
-
-    // Helper to add pending folders to the tree
-    const addPendingFoldersToTree = (folders: FolderItem[], parentId: string): (FolderItem | Folder)[] => {
-      const pendingForParent = pendingFolders?.filter(pf => pf.parentId === parentId) ?? []
-      const createdForParent = pendingForParent.map(pf => createdFoldersMap.get(pf.id)).filter(Boolean) as Folder[]
-      return [...folders, ...createdForParent]
-    }
-
-    // If no target folder specified OR target is a pending folder for root, add to root
-    if (!actualTargetFolderId || (targetFolderId && createdFoldersMap.has(targetFolderId) && pendingFolders?.find(pf => pf.id === targetFolderId)?.parentId === '__root__')) {
-      // Get pending folders for root
-      const pendingForRoot = pendingFolders?.filter(pf => pf.parentId === '__root__') ?? []
-      const createdForRoot = pendingForRoot.map(pf => createdFoldersMap.get(pf.id)).filter(Boolean) as (Folder | EnvironmentFolder)[]
-      
-      // If target IS a pending folder, put ALL items (folders + requests) inside it
-      if (targetFolderId && createdFoldersMap.has(targetFolderId)) {
-        // Get the created folder by the pending ID (not actualTargetFolderId)
-        const targetPendingFolder = createdFoldersMap.get(targetFolderId)
-        if (targetPendingFolder) {
-          targetPendingFolder.items = itemsWithNewIds
-          logger.info('[App] Put items inside root pending folder', { folderName: targetPendingFolder.name, itemsCount: itemsWithNewIds.length })
-        }
-      }
-      
-      // Build root items: existing + pending folders + direct imports (if no pending target)
-      // Note: itemsWithNewIds can contain Folders, EnvironmentFolders AND Requests
-      const directImports = (targetFolderId && createdFoldersMap.has(targetFolderId)) ? [] : itemsWithNewIds
-      const allRootItems = [...clonedRootItems, ...createdForRoot, ...directImports]
-      
-      // Make reactive - makeReactiveFolder handles Folders/EnvironmentFolders, Requests stay as-is
-      const reactiveRootItems = allRootItems.map(item => 
-        'items' in item ? makeReactiveFolder(item) : item
-      ) as (EnvironmentFolder | Folder | Request)[]
-      setRootItems(reactiveRootItems)
-      
-      // Emit creation events for ALL imported items (folders + requests)
-      itemsWithNewIds.forEach(item => {
-        emitCreationEvents(item, item.id)
-      })
-      return
-    }
-
-    // Find target folder recursively in ALL root folders
-    const findAndUpdateFolder = (folder: Folder | EnvironmentFolder, targetId: string): boolean => {
-      if (folder.id === targetId) {
-        // Check if targetFolderId IS a pending folder that was just created
-        const isPendingTarget = targetFolderId ? createdFoldersMap.has(targetFolderId) : false
-        
-        if (isPendingTarget && targetFolderId) {
-          // Target IS the pending folder: put items directly inside it
-          const createdFolder = createdFoldersMap.get(targetFolderId)
-          if (createdFolder) {
-            createdFolder.items = itemsWithNewIds
-            folder.items = [...folder.items, createdFolder]
-            logger.info('[App] Put items inside nested pending folder', { folderName: createdFolder.name, itemsCount: itemsWithNewIds.length })
-          }
-        } else {
-          // Target is parent: add pending folders as children, then add imported items
-          const pendingForThis = addPendingFoldersToTree(folder.items, targetId)
-          folder.items = [...pendingForThis, ...itemsWithNewIds]
-        }
-        return true
-      }
-
-      if (folder.items.length > 0) {
-        for (const item of folder.items) {
-          if ('items' in item) {
-            if (findAndUpdateFolder(item, targetId)) {
-              return true
-            }
-          }
-        }
-      }
-
-      return false
-    }
-
-    // Try to find and update in each cloned root folder (skip Requests at root)
-    for (const rootItem of clonedRootItems) {
-      if ('items' in rootItem && findAndUpdateFolder(rootItem, actualTargetFolderId)) {
-        break
-      }
-    }
-    
-    // Make all root items reactive (folders become reactive, requests stay as-is)
-    const reactiveRootItems = clonedRootItems.map(item => 
-      'items' in item ? makeReactiveFolder(item) : item
-    ) as (EnvironmentFolder | Folder | Request)[]
-    setRootItems(reactiveRootItems)
-    
-    // Emit creation events for indexing
-    // Emit for pending folders first
-    createdFoldersMap.forEach(folder => {
-      const parentId = actualTargetFolderId || '__root__'
-      emitCreationEvents(folder, parentId)
-    })
-    // Then emit for imported items
-    itemsWithNewIds.forEach(item => {
-      const parentId = actualTargetFolderId || '__root__'
-      emitCreationEvents(item, parentId)
-    })
-  }, [rootItems, setRootItems])
 
   // Listen for save-and-close event from main process (when closing window with unsaved changes)
   useEffect(() => {
@@ -1391,56 +1145,19 @@ const App: React.FC = () => {
     getNearestEnvironmentsForBreadcrumbs
   })
 
-  // Sash layout state for sidebar resizing
-  const containerRef = useRef<HTMLDivElement | null>(null)
-  const [leftWidth, setLeftWidth] = useState<number>(260)
-  const [containerHeight, setContainerHeight] = useState<number>(0)
-  const sashStartLeftRef = useRef<number>(leftWidth)
-
-  const layoutProvider: IVerticalSashLayoutProvider = useMemo(
-    () => ({
-      getVerticalSashLeft: () => leftWidth,
-      getVerticalSashTop: () => 0,
-      getVerticalSashHeight: () => containerHeight
-    }),
-    [leftWidth, containerHeight]
-  )
-
-  const handleSashStart = useCallback(
-    (_event: SashEvent): void => {
-      sashStartLeftRef.current = leftWidth
-    },
-    [leftWidth]
-  )
-
-  const handleSashChange = useCallback((event: SashEvent): void => {
-      if (!containerRef.current) return
-
-      const delta = event.currentX - event.startX
-      const containerWidth = containerRef.current.clientWidth
-      const min = MIN_LEFT_WIDTH
-      const max = Math.max(min, containerWidth - RIGHT_MIN_WIDTH)
-      const start = sashStartLeftRef.current
-      const next = Math.min(max, Math.max(min, start + delta))
-
-      setLeftWidth(next)
-  }, [])
-
-  useEffect(() => {
-    if (!containerRef.current) {
-      return
-    }
-    const observer = new ResizeObserver(() => {
-      const el = containerRef.current
-      if (el) {
-        setContainerHeight(el.clientHeight)
-      }
-    })
-    observer.observe(containerRef.current)
-    return () => {
-      observer.disconnect()
-    }
-  }, [])
+  // Use vertical sash hook for sidebar resizing
+  const {
+    containerRef,
+    width: leftWidth,
+    layoutProvider,
+    handleSashStart,
+    handleSashChange
+  } = useVerticalSash({
+    initialWidth: 260,
+    minWidth: MIN_LEFT_WIDTH,
+    minRightWidth: RIGHT_MIN_WIDTH,
+    storageKey: 'restorm-sidebar-width'
+  })
 
   // Handle tree changes from workbench (drag-drop, close tab, etc.)
   const handleTreeChange = useCallback((newTree: WorkbenchTree) => {

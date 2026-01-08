@@ -6,3 +6,7 @@ export { useFileService, useFileDirty, useFileEvents, getFileName, getFilePath, 
 export { useKeyboardShortcut } from './useKeyboardShortcut'
 export { useDirtyState, computeChecksum } from './useDirtyState'
 export type { DirtyStateItem, DirtyStateHook } from './useDirtyState'
+export { useVerticalSash } from './useVerticalSash'
+export type { IVerticalSashLayoutProvider, UseVerticalSashOptions, UseVerticalSashReturn } from './useVerticalSash'
+export { useModalState } from './useModalState'
+export type { ModalState, UseModalStateReturn } from './useModalState'
