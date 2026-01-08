@@ -17,7 +17,7 @@ import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { VariableContext } from '../RestormKeyValueTable'
 import type { GRPCExecutionResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
-import { Badge } from '../Badge'
+import { Badge } from '../common/Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)

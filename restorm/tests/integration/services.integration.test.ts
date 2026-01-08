@@ -25,8 +25,8 @@ import { importSoapFromString } from '../../src/main/services/import/SoapImportS
 import { importAsyncAPIFromString } from '../../src/main/services/import/AsyncAPIImportService'
 
 // Request services
-import { executeHTTPRequest, type HTTPRequestInput } from '../../src/renderer/src/services/request/HTTPRequestService'
-import { executeGraphQLRequest, type GraphQLRequestInput } from '../../src/renderer/src/services/request/GraphQLRequestService'
+import { executeHTTPRequest, type HTTPRequestInput } from '../../src/main/services/request/HTTPRequestService'
+import { executeGraphQLRequest, type GraphQLRequestInput } from '../../src/main/services/request/GraphQLRequestService'
 
 // Types
 import type {

@@ -60,3 +60,22 @@ done
 
 echo "✅ Pre-push security checks passed!"
 
+# Run full lint check on each project
+echo "🔍 Running full lint check on all projects..."
+
+for project in restorm electron-core-ui demo gitable; do
+    if [ -d "$project" ]; then
+        echo "  Linting $project..."
+        cd "$project"
+        if [ -f "package.json" ] && grep -q '"lint"' package.json; then
+            pnpm run lint || {
+                echo "❌ ERROR: Lint failed in $project"
+                exit 1
+            }
+        fi
+        cd - > /dev/null
+    fi
+done
+
+echo "✅ All lint checks passed!"
+

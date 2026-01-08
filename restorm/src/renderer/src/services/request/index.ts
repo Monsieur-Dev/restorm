@@ -14,11 +14,13 @@ import type {
  * @returns Resolved URL result
  */
 export function resolveRequestURL(input: URLResolutionInput): Promise<ResolvedURLResult> {
-  if (!window.restorm?.request) {
-    throw new Error('[resolveRequestURL] window.restorm.request not available')
+  if (!window.restorm) {
+    throw new Error('[resolveRequestURL] window.restorm not available')
   }
-  const api = window.restorm.request as { resolveURL: (input: URLResolutionInput) => Promise<ResolvedURLResult> }
-  return api.resolveURL(input)
+  const restorm = window.restorm as typeof window.restorm & {
+    request: { resolveURL: (input: URLResolutionInput) => Promise<ResolvedURLResult> }
+  }
+  return restorm.request.resolveURL(input)
 }
 
 // Re-export types for convenience

@@ -12,7 +12,12 @@ import {
   eventBus,
   logger,
   computeChecksum,
-  useDirtyState
+  useDirtyState,
+  hasContentChanged,
+  setContentChecksum,
+  registerInitialChecksums,
+  commitChecksums,
+  finishLoading
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type DocumentChangedPayload } from './services/DocumentEvents'
 import type { WorkbenchTree, NavigationEvent, GroupNode, EditorTab } from 'electron-core-ui/renderer'
@@ -47,6 +52,10 @@ import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
 import { useSidebarState } from './hooks/useSidebarState'
 import { useFileManagement } from './hooks/useFileManagement'
 import { useImport } from './hooks/useImport'
+import { prepareForSerialization, processAfterDeserialization } from './utils/serialization'
+import { makeReactiveFolder } from './types/reactive'
+import { collectAllObjectsForChecksums } from './utils/checksumHelpers'
+import { searchIndexService } from './services/SearchIndexService'
 import type {
   Folder,
   FolderItem,
@@ -61,7 +70,8 @@ import {
   isGrpcRequest,
   isSoapRequest,
   isWebSocketRequest,
-  isEnvironmentFolder
+  isEnvironmentFolder,
+  isAnyFolder
 } from './types/collections'
 import type {
   FolderTab,
@@ -94,12 +104,11 @@ const App: React.FC = () => {
     isDirty,
     recentFiles,
     favorites,
-    newFile,
-    open: openFile,
+    newFile: _newFile,
+    open: _openFile,
     save: saveFile,
-    close: closeFile,
-    showUnsavedChangesDialog,
-    clearDirty
+    close: _closeFile,
+    showUnsavedChangesDialog
   } = useFileService()
 
   // Sync document.title with window title for taskbar
@@ -172,11 +181,14 @@ const App: React.FC = () => {
     handleMenuClose,
     handleOpenRecentFile,
     handleSaveWithOptions,
-    isOpenedAsFolder,
-    folderFormat,
-    currentFolderPath,
     showSaveOptionsModal,
-    setShowSaveOptionsModal
+    setShowSaveOptionsModal,
+    isOpenedAsFolder: _isOpenedAsFolder,
+    setIsOpenedAsFolder,
+    folderFormat: _folderFormat,
+    setFolderFormat,
+    currentFolderPath: _currentFolderPath,
+    setCurrentFolderPath
   } = useFileManagement({
     rootItems,
     setRootItems,
@@ -279,8 +291,8 @@ const App: React.FC = () => {
   // Listen for save-and-close event from main process (when closing window with unsaved changes)
   useEffect(() => {
     const handleSaveAndClose = async (): Promise<void> => {
-      const plainData = JSON.parse(JSON.stringify({ collections: rootItems })) as unknown
-      const dataForSave = prepareForSerialization(plainData)
+      const plainData = JSON.parse(JSON.stringify({ collections: rootItems })) as { collections: unknown[] }
+      const dataForSave = prepareForSerialization(plainData) as { collections: unknown[] }
       const saved = await saveFile(dataForSave)
       if (saved) {
         // Force close all windows after save
@@ -296,10 +308,10 @@ const App: React.FC = () => {
   }, [rootItems, saveFile])
 
   // Helper to check for unsaved changes before proceeding
-  const checkUnsavedChanges = useCallback(async (): Promise<boolean> => {
+  const _checkUnsavedChanges = useCallback(async (): Promise<boolean> => {
     // Compare current state with saved state checksum via FileService
     // Use the same structure as the file content for consistent comparison (without runtime ids)
-    const dataForChecksum = prepareForSerialization({ collections: rootItems })
+    const dataForChecksum = prepareForSerialization({ collections: rootItems }) as { collections: unknown[] }
     const currentChecksum = JSON.stringify(dataForChecksum)
     const hasRealChanges = await hasContentChanged(currentChecksum)
     
@@ -316,61 +328,13 @@ const App: React.FC = () => {
     if (result === 'cancel') return false // User cancelled
     if (result === 'save') {
       // Save first, then proceed
-      const plainData = JSON.parse(JSON.stringify({ collections: rootItems })) as unknown
-      const dataForSave = prepareForSerialization(plainData)
+      const plainData = JSON.parse(JSON.stringify({ collections: rootItems })) as { collections: unknown[] }
+      const dataForSave = prepareForSerialization(plainData) as { collections: unknown[] }
       const saved = await saveFile(dataForSave)
       return saved // Only proceed if save was successful
     }
     return true // User chose to discard changes
   }, [showUnsavedChangesDialog, rootItems, saveFile, t, fileName])
-
-  // File menu handlers
-  const handleMenuNew = useCallback(async () => {
-    const canProceed = await checkUnsavedChanges()
-    if (canProceed) {
-      await newFile()
-    }
-  }, [checkUnsavedChanges, newFile])
-
-  const handleMenuOpen = useCallback(async () => {
-    const canProceed = await checkUnsavedChanges()
-    if (canProceed) {
-      setIsOpenedAsFolder(false)
-      await openFile()
-    }
-  }, [checkUnsavedChanges, openFile])
-
-  const handleMenuOpenFolder = useCallback(async () => {
-    const canProceed = await checkUnsavedChanges()
-    if (canProceed) {
-      // openFolder() will trigger FileService.setOpenedFolder() which broadcasts file:opened
-      // handleFileOpened will then be called automatically via useFileEvents
-      const result = await window.restorm?.file.openFolder()
-      if (result?.success && result.path) {
-        setIsOpenedAsFolder(true)
-        // Use format from restorm.conf or default to yaml
-        setFolderFormat(result.format ?? 'yaml')
-        setCurrentFolderPath(result.path)
-      }
-    }
-  }, [checkUnsavedChanges])
-
-  const handleMenuClose = useCallback(async () => {
-    const canProceed = await checkUnsavedChanges()
-    if (canProceed) {
-      await closeFile()
-    }
-  }, [checkUnsavedChanges, closeFile])
-
-  const handleOpenRecentFile = useCallback(async (path: string) => {
-    const canProceed = await checkUnsavedChanges()
-    if (canProceed) {
-      // Close current file first to trigger cleanup (clear index, clear context)
-      await closeFile()
-      setIsOpenedAsFolder(false)
-      await openFile(path)
-    }
-  }, [checkUnsavedChanges, closeFile, openFile])
 
   // Track the last loaded path to prevent double loading of the same file
   const lastLoadedPathRef = useRef<string | null>(null)
@@ -397,8 +361,8 @@ const App: React.FC = () => {
     setIsOpenedAsFolder(openedAsFolder)
     if (openedAsFolder) {
       // Use format from FileService state (read from restorm.conf) or default to yaml
-      const format = state.currentFile.format as PersistenceFormat | undefined
-      setFolderFormat(format ?? 'yaml')
+      const format = state.currentFile.format
+      setFolderFormat((format ?? 'yaml') as 'json' | 'yaml' | 'json5')
       setCurrentFolderPath(path)
     } else {
       setCurrentFolderPath(null)
@@ -420,7 +384,7 @@ const App: React.FC = () => {
     if (openedAsFolder) {
       const registerAllItems = (items: FolderItem[]): void => {
         for (const item of items) {
-          const itemChecksum = computeChecksum(JSON.parse(JSON.stringify(item)))
+          const itemChecksum = computeChecksum(JSON.parse(JSON.stringify(item)) as FolderItem)
           registerTabDirtyState(item.id, itemChecksum)
           
           if (isAnyFolder(item)) {
@@ -430,7 +394,7 @@ const App: React.FC = () => {
       }
       
       for (const folder of reactiveItems) {
-        const folderChecksum = computeChecksum(JSON.parse(JSON.stringify(folder)))
+        const folderChecksum = computeChecksum(JSON.parse(JSON.stringify(folder)) as EnvironmentFolder)
         registerTabDirtyState(folder.id, folderChecksum)
         registerAllItems(folder.items)
       }
@@ -442,23 +406,23 @@ const App: React.FC = () => {
     const serializableObjects = new Map<string, unknown>()
     for (const [id, data] of objectsForChecksums) {
       try {
-        serializableObjects.set(id, JSON.parse(JSON.stringify(data)))
+        serializableObjects.set(id, JSON.parse(JSON.stringify(data)) as unknown)
       } catch (e) {
-        logger.warn('[App] Failed to serialize object for checksum', { id, error: e })
+        logger.warn('[App] Failed to serialize object for checksum', { id, error: String(e) })
       }
     }
     logger.info('[App] About to register initial checksums', { count: serializableObjects.size })
-    registerInitialChecksums(serializableObjects)
+    void registerInitialChecksums(serializableObjects)
       .then(() => { logger.info('[App] Initial checksums registered successfully') })
       .catch((err: unknown) => { logger.error('[App] Failed to register initial checksums', { error: String(err) }) })
     
     // Also set legacy content checksum for backward compatibility
-    const dataForChecksum = prepareForSerialization({ collections: reactiveItems })
+    const dataForChecksum = prepareForSerialization({ collections: reactiveItems }) as { collections: unknown[] }
     void setContentChecksum(JSON.stringify(dataForChecksum))
     
     // Clear previous data, emit events, then re-index for search
     // This must be done in correct order: clear first, then emit, then index
-    void (async () => {
+    void (async (): Promise<void> => {
       // 1. Clear previous data first
       await searchIndexService.clearIndex()
       await window.restorm?.context.clearAll()
@@ -502,16 +466,13 @@ const App: React.FC = () => {
       // Allow loading again (e.g., if user closes and reopens a file)
       isLoadingRef.current = false
     })()
-  }, [clearTabDirtyState, registerTabDirtyState])
+  }, [clearTabDirtyState, registerTabDirtyState, setCurrentFolderPath, setFolderFormat, setIsOpenedAsFolder])
 
   // Handler for file closed event - clears the workbench
   const handleFileClosed = useCallback(() => {
     // Reset loading flags to allow loading a new file
     isLoadingRef.current = false
     lastLoadedPathRef.current = null
-    // Reset folder mode flag
-    setIsOpenedAsFolder(false)
-    setCurrentFolderPath(null)
     // Clear the workbench tree
     setWorkbenchTree({
       orientation: 'vertical',
@@ -520,16 +481,30 @@ const App: React.FC = () => {
     // Clear root folders
     setRootItems([])
     // Clear search index
-    void searchIndexService.clearIndex()
+    void searchIndexService.clearIndex().catch((err: unknown) => {
+      logger.error('[App] Failed to clear search index', { error: String(err) })
+    })
     // Clear context service data
     void window.restorm?.context.clearAll()
     // Clear per-tab dirty state
     clearTabDirtyState()
   }, [clearTabDirtyState])
 
-  // Listen to file events (including from command line --open argument)
-  useFileEvents(handleFileOpened, handleFileClosed)
-  
+  // Listen to file events from FileService
+  useEffect(() => {
+    const subscription1 = eventBus.subscribe('file:opened', (state: { currentFile: { content: unknown; path?: string | null; format?: string } }) => {
+      handleFileOpened(state)
+    })
+    const subscription2 = eventBus.subscribe('file:closed', () => {
+      handleFileClosed()
+    })
+    
+    return () => {
+      subscription1.unsubscribe()
+      subscription2.unsubscribe()
+    }
+  }, [handleFileOpened, handleFileClosed])
+
   // Listen to test events for E2E tests (only in dev/test mode)
   // Expose handleFileOpened directly on window for E2E tests
   // This must be done outside useEffect to ensure it's available immediately
@@ -569,7 +544,7 @@ const App: React.FC = () => {
         const reactiveItems = folders.map(folder => makeReactiveFolder(folder) as EnvironmentFolder)
         setRootItems(reactiveItems)
         // Also trigger indexing
-        void (async () => {
+        void (async (): Promise<void> => {
           await searchIndexService.clearIndex()
           await searchIndexService.initialize()
           for (const folder of reactiveItems) {
@@ -580,7 +555,7 @@ const App: React.FC = () => {
     }
     
     // Also listen to eventBus for backward compatibility
-    const subscription = eventBus.subscribe('restorm:test:file-opened', (fileState: { currentFile: { content: unknown } }) => {
+    const subscription = eventBus.subscribe('restorm:test:file-opened', (fileState: { currentFile: { content: { collections?: unknown[] } } }) => {
       isLoadingRef.current = false
       lastLoadedPathRef.current = null
       handleFileOpenedRef.current(fileState)
@@ -614,11 +589,15 @@ const App: React.FC = () => {
     // Detect save: was dirty, now not dirty
     if (wasDirtyRef.current && !isDirty && fileName) {
       // File was just saved - commit checksums (current becomes new baseline)
-      void commitChecksums()
+      void commitChecksums().catch((err: unknown) => {
+        logger.error('[App] Failed to commit checksums', { error: String(err) })
+      })
       logger.debug('[App] Checksums committed after save')
       // Also update legacy content checksum for backward compatibility
-      const dataForChecksum = prepareForSerialization({ collections: rootItems })
-      void setContentChecksum(JSON.stringify(dataForChecksum))
+      const dataForChecksum = prepareForSerialization({ collections: rootItems }) as { collections: unknown[] }
+      void setContentChecksum(JSON.stringify(dataForChecksum)).catch((err: unknown) => {
+        logger.error('[App] Failed to set content checksum', { error: String(err) })
+      })
       // Mark all tabs as saved (folder mode)
       markAllTabsSaved()
     }
@@ -628,7 +607,7 @@ const App: React.FC = () => {
   // Listen to document changes and update per-tab dirty state (works in all modes)
   useEffect(() => {
     const handleFolderOrRequestUpdated = (payload: DocumentChangedPayload): void => {
-      const newChecksum = computeChecksum(JSON.parse(JSON.stringify(payload.document)))
+      const newChecksum = computeChecksum(JSON.parse(JSON.stringify(payload.document)) as FolderItem)
       updateTabDirtyChecksum(payload.id, newChecksum)
     }
 
@@ -636,33 +615,33 @@ const App: React.FC = () => {
     const handleEnvironmentUpdated = (payload: DocumentChangedPayload): void => {
       // Find the parent environment folder and recalculate its checksum
       const parentFolderId = payload.parentFolderId
-      if (parentFolderId) {
-        // Find the folder in rootItems
-        const findFolder = (items: FolderItem[]): Folder | null => {
-          for (const item of items) {
-            if (isAnyFolder(item)) {
-              if (item.id === parentFolderId) return item
-              const found = findFolder((item as Folder).items)
-              if (found) return found
-            }
+      if (!parentFolderId) return
+      
+      // Find the folder in rootItems
+      const findFolder = (items: FolderItem[]): Folder | null => {
+        for (const item of items) {
+          if (isAnyFolder(item)) {
+            if (item.id === parentFolderId) return item
+            const found = findFolder((item as Folder).items)
+            if (found) return found
           }
-          return null
         }
-        
-        for (const rootFolder of rootItems) {
-          if (rootFolder.id === parentFolderId) {
-            const newChecksum = computeChecksum(JSON.parse(JSON.stringify(rootFolder)))
+        return null
+      }
+      
+      for (const rootFolder of rootItems) {
+        if (rootFolder.id === parentFolderId) {
+          const newChecksum = computeChecksum(JSON.parse(JSON.stringify(rootFolder)) as EnvironmentFolder | Folder | Request)
+          updateTabDirtyChecksum(parentFolderId, newChecksum)
+          return
+        }
+        // Only search in folders, not Requests
+        if ('items' in rootFolder) {
+          const found = findFolder(rootFolder.items)
+          if (found) {
+            const newChecksum = computeChecksum(JSON.parse(JSON.stringify(found)) as Folder)
             updateTabDirtyChecksum(parentFolderId, newChecksum)
             return
-          }
-          // Only search in folders, not Requests
-          if ('items' in rootFolder) {
-            const found = findFolder(rootFolder.items)
-            if (found) {
-              const newChecksum = computeChecksum(JSON.parse(JSON.stringify(found)))
-              updateTabDirtyChecksum(parentFolderId, newChecksum)
-              return
-            }
           }
         }
       }
@@ -692,7 +671,7 @@ const App: React.FC = () => {
     if (searchIndexInitializedRef.current) return
     searchIndexInitializedRef.current = true
     
-    void (async () => {
+    void (async (): Promise<void> => {
       await searchIndexService.initialize()
       // Index all root folders (skip root-level Requests)
       for (const folder of rootItems) {
@@ -711,7 +690,7 @@ const App: React.FC = () => {
     const tabId = `folder-${folder.id}`
 
     // Register initial checksum for dirty state tracking
-    const folderChecksum = computeChecksum(JSON.parse(JSON.stringify(folder)))
+    const folderChecksum = computeChecksum(JSON.parse(JSON.stringify(folder)) as Folder)
     registerTabDirtyState(folder.id, folderChecksum)
 
     setWorkbenchTree((prev) => {

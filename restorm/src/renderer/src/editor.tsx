@@ -6,7 +6,7 @@ import * as ElectronCoreUi from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 import './httpMethods.css'
 import './app.css'
-import './components/Badge.css'
+import './components/common/Badge.css'
 
 const { isTabGroupNode, isContainerNode, initializeI18n, logger, Titlebar } = ElectronCoreUi
 

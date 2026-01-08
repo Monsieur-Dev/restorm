@@ -5,10 +5,10 @@
 import { useEffect, useCallback } from 'react'
 import { navigationService } from 'electron-core-ui/renderer'
 import type { NavigationEvent, SearchResult } from 'electron-core-ui/renderer'
-import type { Folder, EnvironmentFolder, Request } from '../types/collections'
+import type { Folder, EnvironmentFolder, Request, Environment } from '../types/collections'
 import { isFolder, isRequest, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest } from '../types/collections'
 import { findFolderById, findItemWithBreadcrumbs } from '../utils/treeSearch'
-import type { BreadcrumbItem, Environment } from '../types/collections'
+import type { BreadcrumbItem } from '../types/editor'
 
 export interface UseNavigationOptions {
   rootItems: (EnvironmentFolder | Folder | Request)[]

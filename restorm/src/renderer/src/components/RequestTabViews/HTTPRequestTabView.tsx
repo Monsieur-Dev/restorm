@@ -22,7 +22,7 @@ import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue } from '../../type
 import type { KeyValueTableRow } from 'electron-core-ui/renderer'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import { BaseRequestTabView } from './BaseRequestTabView'
-import { Badge } from '../Badge'
+import { Badge } from '../common/Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)

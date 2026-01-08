@@ -21,13 +21,13 @@ import { prepareForSerialization, processAfterDeserialization } from '../utils/s
 import { collectAllObjectsForChecksums } from '../utils/checksumHelpers'
 import type { Folder, EnvironmentFolder, Request, FolderItem, Environment } from '../types/collections'
 import { isEnvironmentFolder, isAnyFolder } from '../types/collections'
-import type { PersistenceFormat } from 'electron-core-ui/renderer'
+import type { PersistenceFormat, WorkbenchTree } from 'electron-core-ui/renderer'
 import type { SaveOptions } from '../components/Modals/SaveOptionsModal'
 
 export interface UseFileManagementOptions {
   rootItems: (EnvironmentFolder | Folder | Request)[]
   setRootItems: React.Dispatch<React.SetStateAction<(EnvironmentFolder | Folder | Request)[]>>
-  setWorkbenchTree: React.Dispatch<React.SetStateAction<unknown>>
+  setWorkbenchTree: React.Dispatch<React.SetStateAction<WorkbenchTree>>
   clearTabDirtyState: () => void
   registerTabDirtyState: (id: string, checksum: string) => void
   markAllTabsSaved: () => void
@@ -46,8 +46,11 @@ export interface UseFileManagementReturn {
   handleSaveWithOptions: (options: SaveOptions) => Promise<void>
   // File state
   isOpenedAsFolder: boolean
+  setIsOpenedAsFolder: React.Dispatch<React.SetStateAction<boolean>>
   folderFormat: PersistenceFormat
+  setFolderFormat: React.Dispatch<React.SetStateAction<PersistenceFormat>>
   currentFolderPath: string | null
+  setCurrentFolderPath: React.Dispatch<React.SetStateAction<string | null>>
   // Modals
   showSaveOptionsModal: boolean
   setShowSaveOptionsModal: (show: boolean) => void
@@ -360,7 +363,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   )
 
   // Handle file closed event
-  const handleFileClosed = useCallback(() => {
+  const _handleFileClosed = useCallback(() => {
     isLoadingRef.current = false
     lastLoadedPathRef.current = null
     setIsOpenedAsFolder(false)
@@ -374,23 +377,6 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     void window.restorm?.context.clearAll()
     clearTabDirtyState()
   }, [clearTabDirtyState, setWorkbenchTree, setRootItems])
-
-  // Listen to file events
-  useEffect(() => {
-    const handleOpened = (state: {
-      currentFile: { content: unknown; path?: string | null; format?: string }
-    }): void => {
-      handleFileOpened(state)
-    }
-
-    const cleanup1 = window.restorm?.onFileOpened?.(handleOpened)
-    const cleanup2 = window.restorm?.onFileClosed?.(handleFileClosed)
-
-    return () => {
-      cleanup1?.()
-      cleanup2?.()
-    }
-  }, [handleFileOpened, handleFileClosed])
 
   // Save-and-close handler
   useEffect(() => {
@@ -447,8 +433,11 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     handleOpenRecentFile,
     handleSaveWithOptions,
     isOpenedAsFolder,
+    setIsOpenedAsFolder,
     folderFormat,
+    setFolderFormat,
     currentFolderPath,
+    setCurrentFolderPath,
     showSaveOptionsModal,
     setShowSaveOptionsModal
   }

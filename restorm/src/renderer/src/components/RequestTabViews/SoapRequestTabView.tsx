@@ -17,7 +17,7 @@ import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { VariableContext } from '../RestormKeyValueTable'
 import type { SOAPExecutionResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
-import { Badge } from '../Badge'
+import { Badge } from '../common/Badge'
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
 function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {

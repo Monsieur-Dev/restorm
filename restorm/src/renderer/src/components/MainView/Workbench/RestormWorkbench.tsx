@@ -22,7 +22,7 @@ import {
 import { EnvironmentProvider } from '../../../contexts/EnvironmentContext'
 import { FolderView } from '../../Folders/FolderView'
 import { EnvironmentFolderView } from '../../Folders/EnvironmentFolderView'
-import type { EnvironmentFolder } from '../../../types/collections'
+import type { EnvironmentFolder, Folder, Request } from '../../../types/collections'
 import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useTranslation } from 'react-i18next'
@@ -61,7 +61,7 @@ export interface RestormWorkbenchProps {
   /** Callback fired when tags are changed for a folder or request */
   onTagsChange?: (targetId: string, tags: string[]) => void
   /** Callback fired when a folder's data changes (environments, etc.) */
-  onFolderChange?: (folderId: string, folder: import('../types/collections').Folder) => void
+  onFolderChange?: (folderId: string, folder: Folder) => void
   /** Fallback component displayed when no tabs are open */
   emptyFallback?: React.ReactNode
   /** Callback fired when group sizes change (sash dragging) */
@@ -75,9 +75,9 @@ export interface RestormWorkbenchProps {
   /** Called when state is restored from storage */
   onStateRestored?: (tree: WorkbenchTree | null) => void
   /** Get a reactive Request by ID (for reactivity support) */
-  getRequestById?: (id: string) => import('../types/collections').Request | undefined
+  getRequestById?: (id: string) => Request | undefined
   /** Get a reactive Folder by ID (for reactivity support) */
-  getFolderById?: (id: string) => import('../types/collections').Folder | undefined
+  getFolderById?: (id: string) => Folder | undefined
   /** Get a reactive EnvironmentFolder by ID (for reactivity support) */
   getEnvironmentFolderById?: (id: string) => EnvironmentFolder | undefined
   /** Callback fired when an environment folder's data changes */
@@ -268,7 +268,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         >
           <FolderView
             folder={folder}
-            onFolderChange={(updatedFolder) => {
+            onFolderChange={(updatedFolder: Folder) => {
               if (onFolderChange) {
                 onFolderChange(folder.id, updatedFolder)
               }

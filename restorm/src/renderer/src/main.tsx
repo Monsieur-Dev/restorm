@@ -5,7 +5,7 @@ import * as ElectronCoreUi from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 import './httpMethods.css'
 import './app.css'
-import './components/Badge.css'
+import './components/common/Badge.css'
 import LoadingScreen from './components/Welcome/LoadingScreen'
 import { initializeGraphQL } from './services/GraphQLIntegration'
 
