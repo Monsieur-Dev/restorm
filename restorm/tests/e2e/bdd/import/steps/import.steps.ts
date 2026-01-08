@@ -20,8 +20,9 @@ Given('I have created a new empty file', async ({ page }) => {
   
   // Mock the save dialog to respond with a temp file path
   await page.evaluate(() => {
+    // @ts-expect-error - Mocking electron dialog for tests
     if (window.electron?.dialog) {
-      // @ts-expect-error - Mocking dialog for tests
+      // @ts-expect-error - Mocking electron dialog for tests
       window.electron.dialog.showSaveDialog = async () => ({
         canceled: false,
         filePath: '/tmp/import-test-temp.restorm'
@@ -89,10 +90,12 @@ When('I clear the source input', async ({ page }) => {
   // Wait for debounce to complete and preview to clear
   await page.waitForFunction(
     () => !document.querySelector('[data-testid="import-modal"] .import-preview-section'),
-    { timeout: 1000 }
+    { timeout: 2000 }
   ).catch(() => {
     // Preview may already be hidden, which is fine
   })
+  // Wait an additional 300ms for the debounce timer to fully reset
+  await page.waitForTimeout(300)
 })
 
 Then('I should see import preview results', async ({ page }) => {
@@ -251,19 +254,28 @@ Then('the destination dropdown should show all imported folders', async ({ page 
 })
 
 When('I expand the {string} folder', async ({ page }, folderName: string) => {
-  const folderRow = page.locator(`[role="treeitem"]:has-text("${folderName}")`).first()
+  // Be ultra-specific: find the treeitem whose .list-view-title is EXACTLY the folder name
+  const folderRow = page.locator('[role="tree"] [role="treeitem"]').filter({
+    has: page.locator(`.list-view-title:text-is("${folderName}")`)
+  }).first()
   await expect(folderRow).toBeVisible({ timeout: 10000 })
   
-  const chevron = folderRow.locator('.codicon-chevron-right, .codicon-chevron-down').first()
-  if (await chevron.count() > 0) {
-    await chevron.click()
-  } else {
-    await folderRow.dblclick()
+  const chevronRight = folderRow.locator('.codicon-chevron-right').first()
+  const hasChevronRight = await chevronRight.count() > 0
+  
+  if (hasChevronRight) {
+    await chevronRight.click()
+    // Wait a bit for the expansion animation
+    await page.waitForTimeout(300)
   }
 })
 
 When('I click on the {string} request', async ({ page }, requestName: string) => {
-  const requestItem = page.locator(`[role="treeitem"]:has-text("${requestName}")`).first()
+  // Find the treeitem that contains the exact request name in its .list-view-title
+  const requestItem = page.locator(`[role="treeitem"]`).filter({ 
+    has: page.locator(`.list-view-title:text("${requestName}")`)
+  }).first()
+  
   await expect(requestItem).toBeVisible({ timeout: 10000 })
   await requestItem.click()
   await page.waitForSelector('.tab.active', { timeout: 5000 })
@@ -299,7 +311,7 @@ When('I change the path param {string} to {string}', async ({ page }, paramName:
   const monacoEditors = pathParamsSection.locator('.monaco-editor')
   const editorCount = await monacoEditors.count()
   
-  let targetEditor = null
+  let targetEditor
   for (let i = 0; i < editorCount; i++) {
     const editor = monacoEditors.nth(i)
     const isVisible = await editor.isVisible()

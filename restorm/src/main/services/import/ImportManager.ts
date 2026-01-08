@@ -161,9 +161,8 @@ async function importFromContent(
       }
         
       case 'bruno': {
-        const { importBruno } = await import('./BrunoImportService')
-        const json: unknown = JSON.parse(content)
-        folder = importBruno(json as Record<string, unknown>)
+        const { importBrunoFromJson } = await import('./BrunoImportService')
+        folder = importBrunoFromJson(content)
         break
       }
         
