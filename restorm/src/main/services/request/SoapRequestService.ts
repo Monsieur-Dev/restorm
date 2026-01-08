@@ -4,7 +4,7 @@
  */
 
 import axios from 'axios'
-import type { SoapRequest, SoapResponse, KeyValue } from '../../types/collections'
+import type { SoapRequest, SoapResponse, KeyValue } from '../../../shared/types/collections'
 // TODO: Variable resolution will be implemented in backend
 import type { VariableContext } from './types'
 

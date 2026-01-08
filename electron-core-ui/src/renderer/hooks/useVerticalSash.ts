@@ -132,4 +132,3 @@ export function useVerticalSash(options: UseVerticalSashOptions): UseVerticalSas
     handleSashChange
   }
 }
-

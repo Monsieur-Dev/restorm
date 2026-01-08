@@ -138,6 +138,12 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.removeListener('app:save-and-close', handler)
     }
   },
+  request: {
+    /** Resolve HTTP request URL with variables and parameters */
+    resolveURL: async (input: unknown): Promise<unknown> => {
+      return await ipcRenderer.invoke('request:resolve-url', input)
+    }
+  },
   context: {
     /** Get all variable transformation results */
     getAllTransformResults: async (): Promise<Record<string, VariableTransformResult>> => {

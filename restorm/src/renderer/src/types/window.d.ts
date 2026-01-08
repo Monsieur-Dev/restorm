@@ -16,6 +16,9 @@ declare global {
       }
       forceClose: () => Promise<void>
       onSaveAndClose: (callback: () => void) => () => void
+      request: {
+        resolveURL: <T = unknown>(input: unknown) => Promise<T>
+      }
       context: {
         getAllTransformResults: () => Promise<Record<string, unknown>>
         onVariableTransformed: (callback: (result: unknown) => void) => () => void

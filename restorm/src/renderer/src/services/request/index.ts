@@ -1,6 +1,26 @@
-export * from './types'
-export * from './GraphQLRequestService'
-export * from './GrpcRequestService'
-export * from './HTTPRequestService'
-export * from './SoapRequestService'
-export * from './WebSocketRequestService'
+/**
+ * Request Service Wrappers - Renderer Side
+ * These wrappers call the main process via IPC for request operations
+ */
+
+import type {
+  URLResolutionInput,
+  ResolvedURLResult
+} from '../../../../main/services/request/HTTPRequestService'
+
+/**
+ * Resolve HTTP request URL with variables and parameters
+ * @param input URL resolution input
+ * @returns Resolved URL result
+ */
+export function resolveRequestURL(input: URLResolutionInput): Promise<ResolvedURLResult> {
+  if (!window.restorm?.request) {
+    throw new Error('[resolveRequestURL] window.restorm.request not available')
+  }
+  const api = window.restorm.request as { resolveURL: (input: URLResolutionInput) => Promise<ResolvedURLResult> }
+  return api.resolveURL(input)
+}
+
+// Re-export types for convenience
+export type { URLResolutionInput, ResolvedURLResult }
+export * from '../../types/collections'

@@ -3,7 +3,7 @@
  * Handles real-time messaging connections
  */
 
-import type { WebSocketRequest, WebSocketResponse, WebSocketMessage, KeyValue } from '../../types/collections'
+import type { WebSocketRequest, WebSocketResponse, WebSocketMessage, KeyValue } from '../../../shared/types/collections'
 // TODO: Variable resolution will be implemented in backend
 import type { VariableContext } from './types'
 

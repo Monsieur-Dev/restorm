@@ -4,7 +4,7 @@
  */
 
 import axios from 'axios'
-import type { GraphQLRequest, GraphQLResponse, KeyValue } from '../../types/collections'
+import type { GraphQLRequest, GraphQLResponse, KeyValue } from '../../../shared/types/collections'
 import type { VariableContext } from './types'
 
 // Re-export for consumers

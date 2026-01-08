@@ -68,7 +68,11 @@ export function useModalState<K extends string, T = unknown>(
   const open = useCallback((name: K, data?: T): void => {
     setModals(prev => {
       const next = new Map(prev)
-      next.set(name, { isOpen: true, data })
+      const modalState: ModalState<T> = { isOpen: true }
+      if (data !== undefined) {
+        modalState.data = data
+      }
+      next.set(name, modalState)
       return next
     })
   }, [])
@@ -118,4 +122,3 @@ export function useModalState<K extends string, T = unknown>(
     closeAll
   }
 }
-

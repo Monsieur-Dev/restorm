@@ -1309,6 +1309,17 @@ ipcMain.handle('context:clear-all', () => {
 })
 
 // ========================
+// Request Service IPC handlers
+// ========================
+
+import { resolveRequestURL, type URLResolutionInput } from './services/request/HTTPRequestService'
+
+// IPC handler to resolve HTTP request URL
+ipcMain.handle('request:resolve-url', (_event, input: URLResolutionInput) => {
+  return resolveRequestURL(input)
+})
+
+// ========================
 // HTTP Execution IPC handlers
 // ========================
 

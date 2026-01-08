@@ -10,7 +10,7 @@ import type {
   HTTPRequestBody,
   KeyValue,
   HTTPMethod
-} from '../../types/collections'
+} from '../../../shared/types/collections'
 // TODO: Variable resolution will be implemented in backend
 import type { VariableContext } from './types'
 

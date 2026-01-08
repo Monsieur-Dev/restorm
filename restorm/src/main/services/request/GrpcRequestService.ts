@@ -6,7 +6,7 @@
  * This implementation uses HTTP/2 fetch for basic unary calls.
  */
 
-import type { GrpcRequest, GrpcResponse, KeyValue } from '../../types/collections'
+import type { GrpcRequest, GrpcResponse, KeyValue } from '../../../shared/types/collections'
 // TODO: Variable resolution will be implemented in backend
 import type { VariableContext } from './types'
 
