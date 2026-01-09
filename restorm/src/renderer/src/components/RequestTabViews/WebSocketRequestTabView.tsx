@@ -276,14 +276,13 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           <Button
             secondary
             small
+            icon="add"
             options={{ ariaLabel: t('requestTab.addHeader'), title: t('requestTab.addHeader') }}
             onClick={() => {
               if (collapsed) toggle()
               headersRef.current?.addRow()
             }}
-          >
-            <i className="codicon codicon-add" />
-          </Button>
+          />
         )}
       >
         <RestormKeyValueTable
@@ -378,16 +377,14 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         />
       </div>
       <Button 
+        icon={isSending ? 'debug-disconnect' : 'plug'}
         onClick={isSending ? handleDisconnect : handleSend} 
         options={{ 
           title: isSending ? t('websocket.disconnect') : t('websocket.connect'), 
           ariaLabel: isSending ? t('websocket.disconnect') : t('websocket.connect') 
         }}
       >
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <i className={isSending ? 'codicon codicon-debug-disconnect' : 'codicon codicon-plug'} />
-          <span>{isSending ? t('websocket.disconnect') : t('websocket.connect')}</span>
-        </span>
+        {isSending ? t('websocket.disconnect') : t('websocket.connect')}
       </Button>
     </div>
   )

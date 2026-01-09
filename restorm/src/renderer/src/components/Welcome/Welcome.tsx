@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useFileService } from 'electron-core-ui/renderer'
+import { useFileService, Button } from 'electron-core-ui/renderer'
 import './Welcome.css'
 
 /**
@@ -74,13 +74,14 @@ export const Welcome: React.FC = () => {
                       <i className="codicon codicon-file welcome-file-icon" />
                       <span className="welcome-file-name">{file.name}</span>
                       <span className="welcome-file-path">{file.path}</span>
-                      <button
+                      <Button
+                        icon="star-full"
+                        small
+                        secondary
                         className="welcome-favorite-btn is-favorite"
                         onClick={(e) => { handleRemoveFavorite(file.path, file.name, e) }}
-                        title={t('welcome.removeFromFavorites')}
-                      >
-                        <i className="codicon codicon-star-full" />
-                      </button>
+                        options={{ title: t('welcome.removeFromFavorites') }}
+                      />
                     </li>
                   ))}
                 </ul>
@@ -104,13 +105,16 @@ export const Welcome: React.FC = () => {
                       <i className="codicon codicon-file welcome-file-icon" />
                       <span className="welcome-file-name">{file.name}</span>
                       <span className="welcome-file-path">{file.path}</span>
-                      <button
+                      <Button
+                        icon={isFavorite(file.path) ? 'star-full' : 'star-empty'}
+                        small
+                        secondary
                         className={`welcome-favorite-btn ${isFavorite(file.path) ? 'is-favorite' : ''}`}
                         onClick={(e) => { handleToggleFavorite(file.path, file.name, isFavorite(file.path), e) }}
-                        title={isFavorite(file.path) ? t('welcome.removeFromFavorites') : t('welcome.addToFavorites')}
-                      >
-                        <i className={`codicon ${isFavorite(file.path) ? 'codicon-star-full' : 'codicon-star-empty'}`} />
-                      </button>
+                        options={{ 
+                          title: isFavorite(file.path) ? t('welcome.removeFromFavorites') : t('welcome.addToFavorites') 
+                        }}
+                      />
                     </li>
                   ))}
                 </ul>

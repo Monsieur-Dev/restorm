@@ -73,19 +73,17 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
               <Button
                 secondary
                 small
+                icon="add"
                 options={{ ariaLabel: t('sidebar.addRequest'), title: t('sidebar.addRequest') }}
                 onClick={onAddRequest}
-              >
-                <i className="codicon codicon-add" />
-              </Button>
+              />
               <Button
                 secondary
                 small
+                icon="collapse-all"
                 options={{ ariaLabel: t('sidebar.collapseAll'), title: t('sidebar.collapseAll') }}
                 onClick={onCollapseAll}
-              >
-                <i className="codicon codicon-collapse-all" />
-              </Button>
+              />
             </>
           }
         >

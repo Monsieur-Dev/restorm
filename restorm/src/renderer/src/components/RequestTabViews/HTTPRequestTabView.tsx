@@ -481,14 +481,13 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           <Button
             secondary
             small
+            icon="add"
             options={{ ariaLabel: t('requestTab.addHeader'), title: t('requestTab.addHeader') }}
             onClick={() => {
               if (collapsed) toggle()
               headersParamsRef.current?.addRow()
             }}
-          >
-            <i className="codicon codicon-add" />
-          </Button>
+          />
         )}
       >
         <RestormKeyValueTable
@@ -508,14 +507,13 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           <Button
             small
             secondary
+            icon="add"
             options={{ ariaLabel: t('requestTab.addParam'), title: t('requestTab.addParam') }}
             onClick={() => {
               if (collapsed) toggle()
               pathParamsRef.current?.addRow()
             }}
-          >
-            <i className="codicon codicon-add" />
-          </Button>
+          />
         )}
       >
         <RestormKeyValueTable
@@ -535,14 +533,13 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
           <Button
             small
             secondary
+            icon="add"
             options={{ ariaLabel: t('requestTab.addParam'), title: t('requestTab.addParam') }}
             onClick={() => {
               if (collapsed) toggle()
               queryParamsRef.current?.addRow()
             }}
-          >
-            <i className="codicon codicon-add" />
-          </Button>
+          />
         )}
       >
         <RestormKeyValueTable
@@ -706,18 +703,20 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
         />
       </div>
       {isSending ? (
-        <Button onClick={handleCancel} options={{ title: t('requestTab.cancel'), ariaLabel: t('requestTab.cancel') }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <i className="codicon codicon-close" aria-hidden="true" />
-            <span>{t('requestTab.cancel')}</span>
-          </span>
+        <Button 
+          icon="close"
+          onClick={handleCancel} 
+          options={{ title: t('requestTab.cancel'), ariaLabel: t('requestTab.cancel') }}
+        >
+          {t('requestTab.cancel')}
         </Button>
       ) : (
-        <Button onClick={handleSend} options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <i className="codicon codicon-send" aria-hidden="true" />
-            <span>{t('requestTab.send')}</span>
-          </span>
+        <Button 
+          icon="send"
+          onClick={handleSend} 
+          options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}
+        >
+          {t('requestTab.send')}
         </Button>
       )}
     </div>

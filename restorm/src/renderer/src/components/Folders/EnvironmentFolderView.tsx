@@ -432,21 +432,19 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                 <Button
                   secondary
                   small
+                  icon="add"
                   options={{ ariaLabel: t('environment.add'), title: t('environment.add') }}
                   onClick={handleAddEnvironment}
-                >
-                  <i className="codicon codicon-add" />
-                </Button>
+                />
                 <Button
                   secondary
                   small
+                  icon="collapse-all"
                   options={{ ariaLabel: t('sidebar.collapseAll'), title: t('sidebar.collapseAll') }}
                   onClick={() => {
                     setExpandedIds([])
                   }}
-                >
-                  <i className="codicon codicon-collapse-all" />
-                </Button>
+                />
               </>
             }
           >
@@ -511,13 +509,12 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                 <Button
                   secondary
                   small
+                  icon="add"
                   options={{ ariaLabel: t('folderView.addVariable'), title: t('folderView.addVariable') }}
                   onClick={() => {
                     variablesParamsRef.current?.addRow()
                   }}
-                >
-                  <i className="codicon codicon-add" />
-                </Button>
+                />
               }
             >
               <div

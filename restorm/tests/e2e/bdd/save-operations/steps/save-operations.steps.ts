@@ -86,7 +86,8 @@ When('I select YAML format', async ({ page }) => {
 })
 
 When('I click the Save button', async ({ page }) => {
-  const saveBtn = page.locator('.ecu-modal-body [role="button"]:has-text("Save")').first()
+  const saveBtn = page.locator('[data-testid="save-confirm-button"]').first()
+  await expect(saveBtn).toBeVisible({ timeout: 5000 })
   await saveBtn.click()
   // Wait for modal to close and file system operation to complete
   await page.waitForFunction(

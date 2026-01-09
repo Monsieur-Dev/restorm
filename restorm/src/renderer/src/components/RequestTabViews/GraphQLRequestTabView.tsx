@@ -257,14 +257,13 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
           <Button
             secondary
             small
+            icon="add"
             options={{ ariaLabel: t('requestTab.addHeader'), title: t('requestTab.addHeader') }}
             onClick={() => {
               if (collapsed) toggle()
               headersRef.current?.addRow()
             }}
-          >
-            <i className="codicon codicon-add" />
-          </Button>
+          />
         )}
       >
         <RestormKeyValueTable
@@ -337,16 +336,14 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
         />
       </div>
       <Button 
+        icon={isSending ? 'close' : 'send'}
         onClick={isSending ? handleCancel : handleSend} 
         options={{ 
           title: isSending ? t('cancel') : t('graphql.send'), 
           ariaLabel: isSending ? t('cancel') : t('graphql.send') 
         }}
       >
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <i className={isSending ? 'codicon codicon-close' : 'codicon codicon-send'} />
-          <span>{isSending ? t('cancel') : t('graphql.send')}</span>
-        </span>
+        {isSending ? t('cancel') : t('graphql.send')}
       </Button>
     </div>
   )

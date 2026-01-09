@@ -248,14 +248,13 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
           <Button
             secondary
             small
+            icon="add"
             options={{ ariaLabel: t('requestTab.addHeader'), title: t('requestTab.addHeader') }}
             onClick={() => {
               if (collapsed) toggle()
               metadataRef.current?.addRow()
             }}
-          >
-            <i className="codicon codicon-add" />
-          </Button>
+          />
         )}
       >
         <RestormKeyValueTable
@@ -345,16 +344,14 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
           />
         </div>
         <Button 
+          icon={isSending ? 'close' : 'send'}
           onClick={isSending ? handleCancel : handleSend} 
           options={{ 
             title: isSending ? t('cancel') : t('grpc.send'), 
             ariaLabel: isSending ? t('cancel') : t('grpc.send') 
           }}
         >
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <i className={isSending ? 'codicon codicon-close' : 'codicon codicon-send'} />
-            <span>{isSending ? t('cancel') : t('grpc.send')}</span>
-          </span>
+          {isSending ? t('cancel') : t('grpc.send')}
         </Button>
       </div>
       <div style={{ fontSize: 12, color: 'var(--descriptionForeground)' }}>

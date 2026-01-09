@@ -145,6 +145,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
         <Button
           small
           secondary
+          icon="gear"
           onClick={() => {
             showSettingsModal()
           }}
@@ -152,9 +153,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
             ariaLabel: t('app.openSettings'),
             title: t('app.openSettings')
           }}
-        >
-          <i className="codicon codicon-gear"></i>
-        </Button>
+        />
       }
     />
   )

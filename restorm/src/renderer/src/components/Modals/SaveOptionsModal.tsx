@@ -30,8 +30,8 @@ interface SaveOptionsModalProps {
 }
 
 const MODE_OPTIONS: { value: SaveMode; label: string; icon: string; description: string }[] = [
-  { value: 'file', label: 'Single File', icon: 'codicon-file', description: 'All data in one file' },
-  { value: 'folder', label: 'Folder', icon: 'codicon-folder-opened', description: 'Organized structure' }
+  { value: 'file', label: 'Single File', icon: 'file', description: 'All data in one file' },
+  { value: 'folder', label: 'Folder', icon: 'folder-opened', description: 'Organized structure' }
 ]
 
 const FORMAT_OPTIONS: { value: SaveFormat; label: string; description: string }[] = [
@@ -118,21 +118,21 @@ export function SaveOptionsModal({
           </label>
           <div className="save-mode-buttons">
             {MODE_OPTIONS.map((opt, idx) => (
-              <button
+              <Button
                 key={opt.value}
-                type="button"
+                icon={opt.icon}
+                secondary
                 className={`save-mode-button ${mode === opt.value ? 'active' : ''}`}
                 onClick={() => { handleModeChange(idx) }}
                 data-testid={`save-mode-${opt.value}`}
               >
-                <i className={`codicon ${opt.icon}`} />
                 <span className="save-mode-button-label">
                   {t(`save.mode.${opt.value}`, opt.label)}
                 </span>
                 <span className="save-mode-button-description">
                   {t(`save.mode.${opt.value}Description`, opt.description)}
                 </span>
-              </button>
+              </Button>
             ))}
           </div>
           <p data-testid="save-mode-description" className="save-option-description">
@@ -148,9 +148,9 @@ export function SaveOptionsModal({
           </label>
           <div className="save-format-buttons">
             {FORMAT_OPTIONS.map((opt) => (
-              <button
+              <Button
                 key={opt.value}
-                type="button"
+                secondary
                 className={`save-format-button ${format === opt.value ? 'active' : ''}`}
                 onClick={() => { handleFormatChange(opt.value) }}
                 data-testid={`save-format-${opt.value}`}
@@ -159,7 +159,7 @@ export function SaveOptionsModal({
                 <span className="save-format-button-description">
                   {t(`save.format.${opt.value}Description`, opt.description)}
                 </span>
-              </button>
+              </Button>
             ))}
           </div>
         </div>
