@@ -343,27 +343,24 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
                   <Button
                     secondary
                     small
+                    icon="zoom-in"
                     options={{ ariaLabel: 'Zoom in', title: 'Zoom in' }}
                     onClick={() => { graphRef.current?.zoomIn() }}
-                  >
-                    <i className="codicon codicon-zoom-in" />
-                  </Button>
+                  />
                   <Button
                     secondary
                     small
+                    icon="zoom-out"
                     options={{ ariaLabel: 'Zoom out', title: 'Zoom out' }}
                     onClick={() => { graphRef.current?.zoomOut() }}
-                  >
-                    <i className="codicon codicon-zoom-out" />
-                  </Button>
+                  />
                   <Button
                     secondary
                     small
+                    icon="screen-full"
                     options={{ ariaLabel: 'Center view', title: 'Center view' }}
                     onClick={() => { graphRef.current?.centerView() }}
-                  >
-                    <i className="codicon codicon-screen-full" />
-                  </Button>
+                  />
                 </div>
                 <Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}><i className="codicon codicon-loading codicon-modifier-spin" /></div>}>
                   <Graph

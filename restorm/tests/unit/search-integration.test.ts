@@ -136,13 +136,19 @@ vi.mock('electron-core-ui/renderer', async () => {
   }
 })
 
-import { searchService } from 'electron-core-ui/renderer'
-import { importSwaggerFromJson } from '../../src/renderer/src/services/import/SwaggerImportService'
+import { searchService, eventBus } from 'electron-core-ui/renderer'
+import { importSwaggerFromJson } from '../../src/main/services/import/SwaggerImportService'
 import { searchIndexService } from '../../src/renderer/src/services/SearchIndexService'
 import { makeReactiveFolder } from '../../src/renderer/src/types/reactive'
 import type { Folder, HTTPRequest } from '../../src/renderer/src/types/collections'
 import { isAnyFolder, isRequest, isHTTPRequest } from '../../src/renderer/src/types/collections'
 import swaggerPetstore from './swagger-petstore.json'
+
+// Type the mocked eventBus
+const mockedEventBus = eventBus as {
+  emitSync: ReturnType<typeof vi.fn>
+  subscribe: ReturnType<typeof vi.fn>
+}
 
 // Type the mocked search service
 const mockedSearchService = searchService as {
@@ -184,7 +190,7 @@ describe('Search Integration', () => {
 
   it('should import swagger petstore and search for "store"', () => {
     // Import swagger
-    const folder = importSwaggerFromJson(JSON.stringify(swaggerPetstore))
+    const folder = importSwaggerFromJson(JSON.stringify(swaggerPetstore)) as Folder
 
     // Make it reactive
     const reactiveFolder = makeReactiveFolder(folder)
@@ -200,10 +206,9 @@ describe('Search Integration', () => {
   })
 
   it('should emit update event when notes are modified', async () => {
-    const { eventBus } = await import('electron-core-ui/renderer')
 
     // Import swagger
-    const folder = importSwaggerFromJson(JSON.stringify(swaggerPetstore))
+    const folder = importSwaggerFromJson(JSON.stringify(swaggerPetstore)) as Folder
 
     // Make it reactive
     const reactiveFolder = makeReactiveFolder(folder)
@@ -217,11 +222,6 @@ describe('Search Integration', () => {
       throw new Error('Expected to find a request with "pet" in the name')
     }
 
-    // Clear previous emitSync calls
-    // eslint-disable-next-line @typescript-eslint/unbound-method -- vitest mock pattern
-    const emitSyncMock = vi.mocked(eventBus.emitSync)
-    emitSyncMock.mockClear()
-
     // Modify the notes to include "restorm"
     request.notes = 'This is a test note with restorm keyword'
 
@@ -229,7 +229,7 @@ describe('Search Integration', () => {
     vi.advanceTimersByTime(100)
 
     // Verify that REQUEST_UPDATED event was emitted (reindexing happens in main process)
-    expect(emitSyncMock).toHaveBeenCalledWith(
+    expect(mockedEventBus.emitSync).toHaveBeenCalledWith(
       'document:request:updated',
       expect.objectContaining({
         id: request.id,
@@ -240,7 +240,7 @@ describe('Search Integration', () => {
 
   it('should find multiple store-related items in petstore', () => {
     // Import swagger
-    const folder = importSwaggerFromJson(JSON.stringify(swaggerPetstore))
+    const folder = importSwaggerFromJson(JSON.stringify(swaggerPetstore)) as Folder
 
     // Make it reactive
     const reactiveFolder = makeReactiveFolder(folder)

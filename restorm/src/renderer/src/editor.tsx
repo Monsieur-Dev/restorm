@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom/client'
-import { RestormWorkbench } from './components/RestormWorkbench'
+import { RestormWorkbench } from './components/MainView/Workbench/RestormWorkbench'
 import type { WorkbenchTree, GroupNode } from 'electron-core-ui/renderer'
 import * as ElectronCoreUi from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 import './httpMethods.css'
 import './app.css'
-import './components/Badge.css'
+import './components/common/Badge.css'
 
 const { isTabGroupNode, isContainerNode, initializeI18n, logger, Titlebar } = ElectronCoreUi
 

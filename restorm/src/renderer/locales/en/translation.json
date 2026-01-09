@@ -6,6 +6,7 @@
   "menuBar": {
     "file": "File",
     "new": "New...",
+    "import": "Import...",
     "open": "Open...",
     "openFolder": "Open Folder...",
     "recentFiles": "Recent Files",
@@ -437,5 +438,30 @@
     "raw": "Block helper that renders raw content",
     "times": "Block helper that repeats n times",
     "range": "Generates array of numbers"
+  },
+  "import": {
+    "title": "Import Requests",
+    "destination": {
+      "label": "Destination",
+      "placeholder": "Select destination folder",
+      "newFolder": "New Folder",
+      "newFolderTitle": "New Folder",
+      "newFolderPlaceholder": "Enter folder name...",
+      "root": "<Root>"
+    },
+    "source": {
+      "label": "Source",
+      "placeholder": "Enter file path, URL, or paste curl/PowerShell command..."
+    },
+    "preview": {
+      "label": "Preview"
+    },
+    "loading": "Analyzing...",
+    "noResults": "No requests found",
+    "error": {
+      "unknown": "An unknown error occurred"
+    },
+    "ok": "Import",
+    "cancel": "Cancel"
   }
 }

@@ -1,0 +1,81 @@
+.import-modal {
+  min-width: 600px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.import-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.import-label {
+  display: block;
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--vscode-foreground);
+}
+
+.import-destination-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.import-destination-row > div:first-child {
+  flex: 1;
+}
+
+.import-loading,
+.import-error,
+.import-no-results {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.import-loading {
+  background: var(--vscode-inputValidation-infoBackground);
+  border: 1px solid var(--vscode-inputValidation-infoBorder);
+  color: var(--vscode-inputValidation-infoForeground);
+}
+
+.import-error {
+  background: var(--vscode-inputValidation-errorBackground);
+  border: 1px solid var(--vscode-inputValidation-errorBorder);
+  color: var(--vscode-inputValidation-errorForeground);
+}
+
+.import-no-results {
+  background: var(--vscode-inputValidation-warningBackground);
+  border: 1px solid var(--vscode-inputValidation-warningBorder);
+  color: var(--vscode-inputValidation-warningForeground);
+}
+
+.import-preview-section {
+  max-height: 300px;
+}
+
+.import-preview {
+  border: 1px solid var(--vscode-editorWidget-border);
+  border-radius: 4px;
+  overflow: auto;
+  max-height: 250px;
+  background: var(--vscode-editor-background);
+}
+
+.import-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--vscode-editorWidget-border);
+}
+

@@ -167,9 +167,8 @@ function getResourcesPath(): string {
   if (isDev) {
     // In development, point directly to the monorepo's electron-core-ui resources
     // so that changes to YAML/JSON themes are picked up without reinstalling.
-    // app.getAppPath() returns dist/main, so we go up 3 levels to reach monorepo root
-    const appPath = app.getAppPath()
-    return join(appPath, '../../../electron-core-ui/resources')
+    // __dirname is restorm/dist/main, so we go up 3 levels to reach monorepo root
+    return join(__dirname, '../../../electron-core-ui/resources')
   }
 
   // In production, resources are bundled under process.resourcesPath/resources
@@ -178,13 +177,8 @@ function getResourcesPath(): string {
 
 // Get renderer path for static assets (images, etc.)
 function getRendererPath(): string {
-  if (!app.isPackaged) {
-    // In development/test, point to dist/renderer for static assets
-    // app.getAppPath() returns dist/main, so we go up one level
-    const appPath = app.getAppPath()
-    return join(appPath, '../renderer')
-  }
-  // In production, renderer files are in the app resources
+  // __dirname is dist/main in compiled code
+  // In both dev and production, renderer is at ../renderer relative to main
   return join(__dirname, '../renderer')
 }
 
@@ -1315,6 +1309,17 @@ ipcMain.handle('context:clear-all', () => {
 })
 
 // ========================
+// Request Service IPC handlers
+// ========================
+
+import { resolveRequestURL, type URLResolutionInput } from './services/request/HTTPRequestService'
+
+// IPC handler to resolve HTTP request URL
+ipcMain.handle('request:resolve-url', (_event, input: URLResolutionInput) => {
+  return resolveRequestURL(input)
+})
+
+// ========================
 // HTTP Execution IPC handlers
 // ========================
 
@@ -1422,4 +1427,46 @@ ipcMain.handle('websocket:send', (_event, requestId: string, message: string, ev
 // IPC handler to check if connection is active
 ipcMain.handle('websocket:is-active', (_event, requestId: string) => {
   return websocketExecutionService.isActive(requestId)
+})
+
+// ============================================================================
+// Import IPC Handlers
+// ============================================================================
+
+import { importFrom } from './services/import/ImportManager'
+
+// IPC handler to preview import (dry-run)
+ipcMain.handle('import:preview', async (_event, input: string) => {
+  logger.info('[IPC] Import preview requested:', { input })
+  try {
+    const result = await importFrom(input, { dryRun: true })
+    logger.info('[IPC] Import preview result:', { success: result.success, itemsCount: result.items.length })
+    return result
+  } catch (error) {
+    logger.error('[IPC] Import preview error:', error)
+    return {
+      success: false,
+      items: [],
+      source: input,
+      error: error instanceof Error ? error.message : String(error)
+    }
+  }
+})
+
+// IPC handler to actually import
+ipcMain.handle('import:import', async (_event, input: string) => {
+  logger.info('[IPC] Import requested:', { input })
+  try {
+    const result = await importFrom(input, { dryRun: false })
+    logger.info('[IPC] Import result:', { success: result.success, itemsCount: result.items.length })
+    return result
+  } catch (error) {
+    logger.error('[IPC] Import error:', error)
+    return {
+      success: false,
+      items: [],
+      source: input,
+      error: error instanceof Error ? error.message : String(error)
+    }
+  }
 })

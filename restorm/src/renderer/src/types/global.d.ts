@@ -102,6 +102,22 @@ declare global {
         onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
         onMessage: (callback: (data: WebSocketMessageData) => void) => (() => void)
       }
+      import: {
+        preview: (input: string) => Promise<{
+          success: boolean
+          items: unknown[]
+          source: string
+          format?: string
+          error?: string
+        }>
+        import: (input: string) => Promise<{
+          success: boolean
+          items: unknown[]
+          source: string
+          format?: string
+          error?: string
+        }>
+      }
     }
   }
 }

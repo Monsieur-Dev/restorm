@@ -17,7 +17,7 @@ import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { VariableContext } from '../RestormKeyValueTable'
 import type { GRPCExecutionResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
-import { Badge } from '../Badge'
+import { Badge } from '../common/Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
@@ -248,14 +248,13 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
           <Button
             secondary
             small
+            icon="add"
             options={{ ariaLabel: t('requestTab.addHeader'), title: t('requestTab.addHeader') }}
             onClick={() => {
               if (collapsed) toggle()
               metadataRef.current?.addRow()
             }}
-          >
-            <i className="codicon codicon-add" />
-          </Button>
+          />
         )}
       >
         <RestormKeyValueTable
@@ -345,16 +344,14 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
           />
         </div>
         <Button 
+          icon={isSending ? 'close' : 'send'}
           onClick={isSending ? handleCancel : handleSend} 
           options={{ 
             title: isSending ? t('cancel') : t('grpc.send'), 
             ariaLabel: isSending ? t('cancel') : t('grpc.send') 
           }}
         >
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <i className={isSending ? 'codicon codicon-close' : 'codicon codicon-send'} />
-            <span>{isSending ? t('cancel') : t('grpc.send')}</span>
-          </span>
+          {isSending ? t('cancel') : t('grpc.send')}
         </Button>
       </div>
       <div style={{ fontSize: 12, color: 'var(--descriptionForeground)' }}>

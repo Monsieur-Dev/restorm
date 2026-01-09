@@ -13,6 +13,7 @@ const Button: React.FC<ButtonProps> = ({
   onMouseLeave,
   className = '',
   id,
+  'data-testid': dataTestId,
   children
 }) => {
   const buttonRef = useRef<HTMLAnchorElement>(null)
@@ -96,6 +97,7 @@ const Button: React.FC<ButtonProps> = ({
       <a
         ref={buttonRef}
         id={id}
+        data-testid={dataTestId}
         className={buttonClasses}
         style={inlineStyles}
         onClick={handleClick}

@@ -3,6 +3,7 @@ import tseslint from 'typescript-eslint';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
+import eslintComments from 'eslint-plugin-eslint-comments';
 
 export default tseslint.config(
   {
@@ -31,6 +32,7 @@ export default tseslint.config(
       react,
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
+      'eslint-comments': eslintComments,
     },
     settings: {
       react: {
@@ -58,6 +60,11 @@ export default tseslint.config(
       'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 0 }],
       // Allow numbers and booleans in template literals (common for CSS values)
       '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true, allowBoolean: true }],
+      // STRICT: Block all eslint-disable usage
+      'eslint-comments/no-restricted-disable': ['error', '*'],
+      'eslint-comments/no-unused-disable': 'error',
+      'eslint-comments/no-unlimited-disable': 'error',
+      'eslint-comments/no-use': ['error', { allow: [] }],
     },
   },
   {

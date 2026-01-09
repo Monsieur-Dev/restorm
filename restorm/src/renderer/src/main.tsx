@@ -5,8 +5,8 @@ import * as ElectronCoreUi from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 import './httpMethods.css'
 import './app.css'
-import './components/Badge.css'
-import LoadingScreen from './components/LoadingScreen'
+import './components/common/Badge.css'
+import LoadingScreen from './components/Welcome/LoadingScreen'
 import { initializeGraphQL } from './services/GraphQLIntegration'
 
 const App = lazy(() => import('./App'))
@@ -207,33 +207,16 @@ if (typeof window !== 'undefined') {
   if (shouldExpose) {
     // Load test helpers asynchronously to avoid blocking app initialization
     void Promise.all([
-      import('./services/import/SwaggerImportService'),
       import('./types/reactive'),
       import('./services/SearchIndexService'),
       import('./utils/serialization'),
       import('electron-core-ui/renderer')
-    ]).then(([swaggerModule, reactiveModule, searchModule, serializationModule, electronCoreUiModule]) => {
+    ]).then(([reactiveModule, searchModule, serializationModule, electronCoreUiModule]) => {
       ;(window as unknown as {
         __testHelpers?: {
-          importSwagger: (swaggerJson: string) => Promise<void>
           loadRestormData: (data: { collections: unknown[] }) => Promise<void>
         }
       }).__testHelpers = {
-        importSwagger: async (swaggerJson: string) => {
-          const folder = swaggerModule.importSwaggerFromJson(swaggerJson)
-          const reactiveFolder = reactiveModule.makeReactiveFolder(folder)
-          await searchModule.searchIndexService.indexFolderTree(reactiveFolder)
-          
-          // Also add to rootFolders so it appears in ListView
-          const windowWithRestormHelpers = window as unknown as {
-            __restormTestHelpers?: { 
-              setRootFolders: (folders: unknown[]) => void
-            }
-          }
-          if (windowWithRestormHelpers.__restormTestHelpers?.setRootFolders) {
-            windowWithRestormHelpers.__restormTestHelpers.setRootFolders([reactiveFolder])
-          }
-        },
         loadRestormData: async (data: { collections: unknown[] }) => {
           // Process collections to generate runtime IDs
           const collectionsWithIds = serializationModule.processAfterDeserialization(data.collections)

@@ -138,6 +138,12 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.removeListener('app:save-and-close', handler)
     }
   },
+  request: {
+    /** Resolve HTTP request URL with variables and parameters */
+    resolveURL: async (input: unknown): Promise<unknown> => {
+      return await ipcRenderer.invoke('request:resolve-url', input)
+    }
+  },
   context: {
     /** Get all variable transformation results */
     getAllTransformResults: async (): Promise<Record<string, VariableTransformResult>> => {
@@ -476,6 +482,42 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.on('websocket:message', handler)
       return () => {
         ipcRenderer.removeListener('websocket:message', handler)
+      }
+    }
+  },
+  import: {
+    /** Preview import from file path or URL (dry-run) */
+    preview: async (input: string): Promise<{
+      success: boolean
+      items: unknown[]
+      source: string
+      format?: string
+      error?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('import:preview', input)
+      return result as {
+        success: boolean
+        items: unknown[]
+        source: string
+        format?: string
+        error?: string
+      }
+    },
+    /** Actually import from file path or URL */
+    import: async (input: string): Promise<{
+      success: boolean
+      items: unknown[]
+      source: string
+      format?: string
+      error?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('import:import', input)
+      return result as {
+        success: boolean
+        items: unknown[]
+        source: string
+        format?: string
+        error?: string
       }
     }
   }

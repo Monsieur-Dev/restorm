@@ -6,6 +6,7 @@
   "menuBar": {
     "file": "Fichier",
     "new": "Nouveau...",
+    "import": "Importer...",
     "open": "Ouvrir...",
     "openFolder": "Ouvrir un dossier...",
     "recentFiles": "Fichiers récents",
@@ -437,5 +438,30 @@
     "raw": "Helper bloc qui affiche le contenu brut",
     "times": "Helper bloc qui répète n fois",
     "range": "Génère un tableau de nombres"
+  },
+  "import": {
+    "title": "Importer des requêtes",
+    "destination": {
+      "label": "Destination",
+      "placeholder": "Sélectionner le dossier de destination",
+      "newFolder": "Nouveau dossier",
+      "newFolderTitle": "Nouveau dossier",
+      "newFolderPlaceholder": "Saisir le nom du dossier...",
+      "root": "<Racine>"
+    },
+    "source": {
+      "label": "Source",
+      "placeholder": "Saisir le chemin du fichier, l'URL, ou coller une commande curl/PowerShell..."
+    },
+    "preview": {
+      "label": "Aperçu"
+    },
+    "loading": "Analyse en cours...",
+    "noResults": "Aucune requête trouvée",
+    "error": {
+      "unknown": "Une erreur inconnue s'est produite"
+    },
+    "ok": "Importer",
+    "cancel": "Annuler"
   }
 }

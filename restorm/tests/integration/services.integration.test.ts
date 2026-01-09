@@ -18,15 +18,15 @@ import {
 } from './docker-setup'
 
 // Import services
-import { importSwaggerFromJson } from '../../src/renderer/src/services/import/SwaggerImportService'
-import { importGraphQLFromString } from '../../src/renderer/src/services/import/GraphQLImportService'
-import { importGrpcFromString } from '../../src/renderer/src/services/import/GrpcImportService'
-import { importSoapFromString } from '../../src/renderer/src/services/import/SoapImportService'
-import { importAsyncAPIFromString } from '../../src/renderer/src/services/import/AsyncAPIImportService'
+import { importSwaggerFromJson } from '../../src/main/services/import/SwaggerImportService'
+import { importGraphQLFromString } from '../../src/main/services/import/GraphQLImportService'
+import { importGrpcFromString } from '../../src/main/services/import/GrpcImportService'
+import { importSoapFromString } from '../../src/main/services/import/SoapImportService'
+import { importAsyncAPIFromString } from '../../src/main/services/import/AsyncAPIImportService'
 
 // Request services
-import { executeHTTPRequest, type HTTPRequestInput } from '../../src/renderer/src/services/request/HTTPRequestService'
-import { executeGraphQLRequest, type GraphQLRequestInput } from '../../src/renderer/src/services/request/GraphQLRequestService'
+import { executeHTTPRequest, type HTTPRequestInput } from '../../src/main/services/request/HTTPRequestService'
+import { executeGraphQLRequest, type GraphQLRequestInput } from '../../src/main/services/request/GraphQLRequestService'
 
 // Types
 import type {
@@ -551,7 +551,7 @@ describe('Integration Tests with Docker Services', () => {
   describe('Import Services - Spec Validation', () => {
     it('should import Swagger spec and create valid structure', () => {
       const swaggerJson = loadTestFile('swagger-petstore.json')
-      const result = importSwaggerFromJson(swaggerJson)
+      const result = importSwaggerFromJson(swaggerJson) as EnvironmentFolder
 
       expect(result.folderType).toBe('environment')
       expect(result.environments.length).toBeGreaterThan(0)
@@ -570,7 +570,7 @@ describe('Integration Tests with Docker Services', () => {
 
     it('should import GraphQL schema and create valid structure', () => {
       const graphqlSchema = loadTestFile('graphql-docker.graphql')
-      const result = importGraphQLFromString(graphqlSchema, { name: 'GraphQL' })
+      const result = importGraphQLFromString(graphqlSchema, { name: 'GraphQL' }) as EnvironmentFolder
 
       expect(result.folderType).toBe('environment')
 
@@ -588,7 +588,7 @@ describe('Integration Tests with Docker Services', () => {
 
     it('should import gRPC proto and create valid structure', () => {
       const protoFile = loadTestFile('grpc-docker.proto')
-      const result = importGrpcFromString(protoFile, { name: 'gRPC' })
+      const result = importGrpcFromString(protoFile, { name: 'gRPC' }) as EnvironmentFolder
 
       expect(result.folderType).toBe('environment')
 
@@ -609,7 +609,7 @@ describe('Integration Tests with Docker Services', () => {
 
     it('should import SOAP WSDL and create valid structure', () => {
       const wsdlFile = loadTestFile('soap-docker.wsdl')
-      const result = importSoapFromString(wsdlFile, { name: 'SOAP' })
+      const result = importSoapFromString(wsdlFile, { name: 'SOAP' }) as EnvironmentFolder
 
       expect(result.folderType).toBe('environment')
 
@@ -626,7 +626,7 @@ describe('Integration Tests with Docker Services', () => {
 
     it('should import AsyncAPI and create valid structure', () => {
       const asyncapiYaml = loadTestFile('asyncapi-docker.yaml')
-      const result = importAsyncAPIFromString(asyncapiYaml, { name: 'AsyncAPI' })
+      const result = importAsyncAPIFromString(asyncapiYaml, { name: 'AsyncAPI' }) as EnvironmentFolder
 
       expect(result.folderType).toBe('environment')
 
