@@ -44,6 +44,9 @@ export interface UseFileManagementReturn {
   handleMenuClose: () => Promise<void>
   handleOpenRecentFile: (path: string) => Promise<void>
   handleSaveWithOptions: (options: SaveOptions) => Promise<void>
+  // File event handlers
+  handleFileOpened: (state: { currentFile: { content: unknown; path?: string | null; format?: string } }) => void
+  handleFileClosed: () => void
   // File state
   isOpenedAsFolder: boolean
   setIsOpenedAsFolder: React.Dispatch<React.SetStateAction<boolean>>
@@ -68,7 +71,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   } = options
 
   const {
-    state: fileState,
+    state: _fileState,
     fileName,
     isDirty,
     newFile,
@@ -87,7 +90,6 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   // Track loading state
   const lastLoadedPathRef = useRef<string | null>(null)
   const isLoadingRef = useRef(false)
-  const initialLoadDoneRef = useRef(false)
 
   // Save handlers
   const handleMenuSave = useCallback(() => {
@@ -363,7 +365,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   )
 
   // Handle file closed event
-  const _handleFileClosed = useCallback(() => {
+  const handleFileClosed = useCallback(() => {
     isLoadingRef.current = false
     lastLoadedPathRef.current = null
     setIsOpenedAsFolder(false)
@@ -396,21 +398,6 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     return cleanup
   }, [rootItems, saveFile])
 
-  // Load file on mount if needed
-  useEffect(() => {
-    if (initialLoadDoneRef.current) return
-    if (!fileState?.currentFile.path) return
-    if (rootItems.length > 0) return
-
-    initialLoadDoneRef.current = true
-    const rafId = requestAnimationFrame(() => {
-      handleFileOpened(fileState)
-    })
-    return (): void => {
-      cancelAnimationFrame(rafId)
-    }
-  }, [fileState, rootItems.length, handleFileOpened])
-
   // Commit checksums on save
   useEffect(() => {
     const wasDirtyRef = { current: isDirty }
@@ -432,6 +419,8 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     handleMenuClose,
     handleOpenRecentFile,
     handleSaveWithOptions,
+    handleFileOpened,
+    handleFileClosed,
     isOpenedAsFolder,
     setIsOpenedAsFolder,
     folderFormat,

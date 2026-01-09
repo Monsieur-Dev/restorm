@@ -15,9 +15,7 @@ import {
   useDirtyState,
   hasContentChanged,
   setContentChecksum,
-  registerInitialChecksums,
-  commitChecksums,
-  finishLoading
+  commitChecksums
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type DocumentChangedPayload } from './services/DocumentEvents'
 import type { WorkbenchTree, NavigationEvent, GroupNode, EditorTab } from 'electron-core-ui/renderer'
@@ -52,9 +50,8 @@ import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
 import { useSidebarState } from './hooks/useSidebarState'
 import { useFileManagement } from './hooks/useFileManagement'
 import { useImport } from './hooks/useImport'
-import { prepareForSerialization, processAfterDeserialization } from './utils/serialization'
+import { prepareForSerialization } from './utils/serialization'
 import { makeReactiveFolder } from './types/reactive'
-import { collectAllObjectsForChecksums } from './utils/checksumHelpers'
 import { searchIndexService } from './services/SearchIndexService'
 import type {
   Folder,
@@ -98,7 +95,7 @@ const allFolderIds = initialRootItems.flatMap((folder) => collectAllFolderIds(fo
 const App: React.FC = () => {
   const { t } = useTranslation()
   const {
-    state: fileState,
+    state: _fileState,
     fileName,
     filePath,
     isDirty,
@@ -181,14 +178,16 @@ const App: React.FC = () => {
     handleMenuClose,
     handleOpenRecentFile,
     handleSaveWithOptions,
+    handleFileOpened,
+    handleFileClosed,
     showSaveOptionsModal,
     setShowSaveOptionsModal,
     isOpenedAsFolder: _isOpenedAsFolder,
-    setIsOpenedAsFolder,
+    setIsOpenedAsFolder: _setIsOpenedAsFolder,
     folderFormat: _folderFormat,
-    setFolderFormat,
+    setFolderFormat: _setFolderFormat,
     currentFolderPath: _currentFolderPath,
-    setCurrentFolderPath
+    setCurrentFolderPath: _setCurrentFolderPath
   } = useFileManagement({
     rootItems,
     setRootItems,
@@ -336,172 +335,22 @@ const App: React.FC = () => {
     return true // User chose to discard changes
   }, [showUnsavedChangesDialog, rootItems, saveFile, t, fileName])
 
-  // Track the last loaded path to prevent double loading of the same file
-  const lastLoadedPathRef = useRef<string | null>(null)
-  const isLoadingRef = useRef(false)
-
-  // Handler for file opened event - loads collections into workbench
-  const handleFileOpened = useCallback((state: { currentFile: { content: unknown; path?: string | null; format?: string } }) => {
-    const newPath = state.currentFile.path ?? null
-    
-    // Prevent double loading of the same file (but allow loading a different file)
-    if (isLoadingRef.current && newPath === lastLoadedPathRef.current) {
-      return
-    }
-    
-    isLoadingRef.current = true
-    lastLoadedPathRef.current = newPath
-
-    const content = state.currentFile.content as { collections?: EnvironmentFolder[] } | null
-    const collections = content?.collections && Array.isArray(content.collections) ? content.collections : []
-    
-    // Detect if opened as folder (path doesn't end with a file extension)
-    const path = state.currentFile.path ?? ''
-    const openedAsFolder = path !== '' && !/\.(json|yaml|yml|json5|restorm)$/i.test(path)
-    setIsOpenedAsFolder(openedAsFolder)
-    if (openedAsFolder) {
-      // Use format from FileService state (read from restorm.conf) or default to yaml
-      const format = state.currentFile.format
-      setFolderFormat((format ?? 'yaml') as 'json' | 'yaml' | 'json5')
-      setCurrentFolderPath(path)
-    } else {
-      setCurrentFolderPath(null)
-    }
-    
-    // Clear previous tab dirty state
-    clearTabDirtyState()
-    
-    // Generate runtime ids for all objects after deserialization
-    const collectionsWithIds = processAfterDeserialization(collections)
-    
-    // Make folders reactive and update state
-    const reactiveItems = collectionsWithIds.map(
-      (folder) => makeReactiveFolder(folder) as EnvironmentFolder
-    )
-    setRootItems(reactiveItems)
-    
-    // Register items for per-tab dirty state tracking (folder mode)
-    if (openedAsFolder) {
-      const registerAllItems = (items: FolderItem[]): void => {
-        for (const item of items) {
-          const itemChecksum = computeChecksum(JSON.parse(JSON.stringify(item)) as FolderItem)
-          registerTabDirtyState(item.id, itemChecksum)
-          
-          if (isAnyFolder(item)) {
-            registerAllItems((item as Folder).items)
-          }
-        }
-      }
-      
-      for (const folder of reactiveItems) {
-        const folderChecksum = computeChecksum(JSON.parse(JSON.stringify(folder)) as EnvironmentFolder)
-        registerTabDirtyState(folder.id, folderChecksum)
-        registerAllItems(folder.items)
-      }
-    }
-    
-    // Register initial checksums for all objects (granular dirty state tracking)
-    // Use JSON.parse(JSON.stringify()) to strip Proxy wrappers and ensure serializable data
-    const objectsForChecksums = collectAllObjectsForChecksums(reactiveItems)
-    const serializableObjects = new Map<string, unknown>()
-    for (const [id, data] of objectsForChecksums) {
-      try {
-        serializableObjects.set(id, JSON.parse(JSON.stringify(data)) as unknown)
-      } catch (e) {
-        logger.warn('[App] Failed to serialize object for checksum', { id, error: String(e) })
-      }
-    }
-    logger.info('[App] About to register initial checksums', { count: serializableObjects.size })
-    void registerInitialChecksums(serializableObjects)
-      .then(() => { logger.info('[App] Initial checksums registered successfully') })
-      .catch((err: unknown) => { logger.error('[App] Failed to register initial checksums', { error: String(err) }) })
-    
-    // Also set legacy content checksum for backward compatibility
-    const dataForChecksum = prepareForSerialization({ collections: reactiveItems }) as { collections: unknown[] }
-    void setContentChecksum(JSON.stringify(dataForChecksum))
-    
-    // Clear previous data, emit events, then re-index for search
-    // This must be done in correct order: clear first, then emit, then index
-    void (async (): Promise<void> => {
-      // 1. Clear previous data first
-      await searchIndexService.clearIndex()
-      await window.restorm?.context.clearAll()
-      
-      // 2. Emit ENVIRONMENT_CREATED events for all environments
-      const emitEnvironmentCreated = (env: Environment, parentFolderId: string, parentEnvironmentId?: string): void => {
-        const payload: DocumentChangedPayload = {
-          id: env.id,
-          type: 'environment',
-          document: JSON.parse(JSON.stringify(env)),
-          parentFolderId,
-          parentEnvironmentId
-        }
-        eventBus.emitSync(DocumentEvents.ENVIRONMENT_CREATED, payload)
-        // Recursively emit for sub-environments
-        if (env.subEnvironments) {
-          for (const subEnv of env.subEnvironments) {
-            emitEnvironmentCreated(subEnv, parentFolderId, env.id)
-          }
-        }
-      }
-
-      for (const folder of reactiveItems) {
-        if (isEnvironmentFolder(folder as FolderItem)) {
-          const envFolder = folder
-          for (const env of envFolder.environments) {
-            emitEnvironmentCreated(env, envFolder.id)
-          }
-        }
-      }
-
-      // 3. Initialize and index for search
-      await searchIndexService.initialize()
-      for (const folder of reactiveItems) {
-        await searchIndexService.indexFolderTree(folder)
-      }
-
-      // 4. Signal that loading is complete - dirty state events can now be processed
-      await finishLoading()
-
-      // Allow loading again (e.g., if user closes and reopens a file)
-      isLoadingRef.current = false
-    })()
-  }, [clearTabDirtyState, registerTabDirtyState, setCurrentFolderPath, setFolderFormat, setIsOpenedAsFolder])
-
-  // Handler for file closed event - clears the workbench
-  const handleFileClosed = useCallback(() => {
-    // Reset loading flags to allow loading a new file
-    isLoadingRef.current = false
-    lastLoadedPathRef.current = null
-    // Clear the workbench tree
-    setWorkbenchTree({
-      orientation: 'vertical',
-      groups: []
-    })
-    // Clear root folders
-    setRootItems([])
-    // Clear search index
-    void searchIndexService.clearIndex().catch((err: unknown) => {
-      logger.error('[App] Failed to clear search index', { error: String(err) })
-    })
-    // Clear context service data
-    void window.restorm?.context.clearAll()
-    // Clear per-tab dirty state
-    clearTabDirtyState()
-  }, [clearTabDirtyState])
-
-  // Listen to file events from FileService
+  // Listen to file events from FileService via IPC
   useEffect(() => {
-    const subscription1 = eventBus.subscribe('file:opened', (state: { currentFile: { content: unknown; path?: string | null; format?: string } }) => {
+    const w = window as unknown as { api?: { file?: { onFileOpened: (callback: (state: { currentFile: { content: unknown; path?: string | null; format?: string } }) => void) => () => void; onFileClosed: (callback: () => void) => () => void } } }
+    const api = w.api?.file
+    if (!api) return
+
+    const unsubscribe1 = api.onFileOpened((state: { currentFile: { content: unknown; path?: string | null; format?: string } }) => {
       handleFileOpened(state)
     })
-    const subscription2 = eventBus.subscribe('file:closed', () => {
+    const unsubscribe2 = api.onFileClosed(() => {
       handleFileClosed()
     })
     
     return () => {
-      subscription1.unsubscribe()
-      subscription2.unsubscribe()
+      unsubscribe1()
+      unsubscribe2()
     }
   }, [handleFileOpened, handleFileClosed])
 
@@ -531,15 +380,10 @@ const App: React.FC = () => {
       } 
     }).__restormTestHelpers = {
       loadFile: (fileState: { currentFile: { content: unknown } }) => {
-        // Reset loading flags to allow loading
-        isLoadingRef.current = false
-        lastLoadedPathRef.current = null
         // Use ref to ensure we call the latest version
         handleFileOpenedRef.current(fileState)
       },
       setRootItems: (folders: EnvironmentFolder[]) => {
-        isLoadingRef.current = false
-        lastLoadedPathRef.current = null
         // Make folders reactive before setting
         const reactiveItems = folders.map(folder => makeReactiveFolder(folder) as EnvironmentFolder)
         setRootItems(reactiveItems)
@@ -556,8 +400,6 @@ const App: React.FC = () => {
     
     // Also listen to eventBus for backward compatibility
     const subscription = eventBus.subscribe('restorm:test:file-opened', (fileState: { currentFile: { content: { collections?: unknown[] } } }) => {
-      isLoadingRef.current = false
-      lastLoadedPathRef.current = null
       handleFileOpenedRef.current(fileState)
     })
     
@@ -566,22 +408,6 @@ const App: React.FC = () => {
       delete (window as unknown as { __restormTestHelpers?: unknown }).__restormTestHelpers
     }
   }, []) // Empty deps - set up once on mount
-
-  // Load file content on mount if a file is already open (e.g., after page refresh)
-  const initialLoadDoneRef = useRef(false)
-  useEffect(() => {
-    // Only run once and only if file is open but rootItems is empty
-    if (initialLoadDoneRef.current) return
-    if (!fileState?.currentFile.path) return
-    if (rootItems.length > 0) return
-    
-    // A file is open but content not loaded yet - load it
-    initialLoadDoneRef.current = true
-    const rafId = requestAnimationFrame(() => {
-      handleFileOpened(fileState)
-    })
-    return (): void => { cancelAnimationFrame(rafId) }
-  }, [fileState, rootItems.length, handleFileOpened])
 
   // Commit checksums when file is saved (isDirty becomes false)
   const wasDirtyRef = useRef(isDirty)
@@ -662,28 +488,6 @@ const App: React.FC = () => {
 
   // Dirty state is now handled by FileService in the main process
   // It subscribes to DocumentEvents and compares checksums automatically
-
-  // Ref to track if search index has been initialized
-  const searchIndexInitializedRef = useRef(false)
-
-  // Initialize search index service and index folder on initial load
-  useEffect(() => {
-    if (searchIndexInitializedRef.current) return
-    searchIndexInitializedRef.current = true
-    
-    void (async (): Promise<void> => {
-      await searchIndexService.initialize()
-      // Index all root folders (skip root-level Requests)
-      for (const folder of rootItems) {
-        if ('items' in folder) {
-          await searchIndexService.indexFolderTree(folder)
-        }
-      }
-    })()
-    
-    // Note: No cleanup needed - the service sends data to main process
-    // which handles the actual indexing and event subscriptions.
-  }, [rootItems])
 
   // Open a folder tab in the workbench
   const openFolderTab = useCallback((folder: Folder, breadcrumbs: BreadcrumbItem[]) => {

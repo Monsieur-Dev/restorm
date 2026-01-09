@@ -93,3 +93,47 @@ Then('a tooltip should be visible', async ({ page }) => {
   }
   // Tooltip might be in a portal - if not found, at least verify no errors occurred
 })
+
+When('I wait {int} seconds', async ({ page }, seconds: number) => {
+  const delayMs = seconds * 1000
+  await page.waitForTimeout(delayMs)
+})
+
+Then('the number of results should be {int}', async ({ page }, expectedCount: number) => {
+  const searchResults = page.locator('.search-result-item')
+  await page.waitForSelector('.search-result-item', { timeout: 5000, state: 'visible' }).catch(() => {
+    // If no results found, count should be 0
+  })
+  const actualCount = await searchResults.count()
+  expect(actualCount).toBe(expectedCount)
+})
+
+When('I close the file', async ({ page }) => {
+  // Click File menu
+  const fileMenu = page.locator('[role="menubar"] >> text=File').first()
+  await expect(fileMenu).toBeVisible({ timeout: 5000 })
+  await fileMenu.click()
+  
+  // Wait for menu to expand
+  await page.waitForSelector('[role="menu"]', { timeout: 2000 })
+  
+  // Click Close
+  const closeMenuItem = page.locator('[role="menuitem"] >> text=Close').first()
+  await expect(closeMenuItem).toBeVisible({ timeout: 5000 })
+  await closeMenuItem.click()
+  
+  // Wait for file to be closed (no file name in titlebar, or welcome screen appears)
+  await page.waitForSelector('text=WORKSPACE', { timeout: 10000 }).catch(() => {
+    // File might be closed, welcome screen might appear
+  })
+})
+
+Then('I should see no search results', async ({ page }) => {
+  // Wait for search results container to be ready (empty state or no results)
+  await page.waitForSelector('[data-testid="search-results"][data-ready="true"], .search-result-item, .search-results-empty', { timeout: 5000 })
+  
+  // Check that there are no search result items
+  const searchResults = page.locator('.search-result-item')
+  const resultCount = await searchResults.count()
+  expect(resultCount).toBe(0)
+})

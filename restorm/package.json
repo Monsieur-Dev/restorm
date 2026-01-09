@@ -11,6 +11,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "cross-env ELECTRON_DISABLE_SANDBOX=1 electron-vite dev",
+    "dev:petstore": "cross-env ELECTRON_DISABLE_SANDBOX=1 electron-vite dev -- --open tests/e2e/samples/Petstore.restorm",
     "dev:web": "vite --config vite.web.config.ts",
     "build": "electron-vite build",
     "preview": "electron-vite preview",
