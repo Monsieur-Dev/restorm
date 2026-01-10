@@ -180,8 +180,10 @@ class GraphQLSchemaGenerator {
     const separateFilesProps = getSeparateFilesProperties(constructor)
     const separateFoldersProps = getSeparateFoldersProperties(constructor)
 
-    // Filter out non-serialised fields
-    const filteredFields = fields.filter(f => !nonSerialised.has(f.name))
+    // Filter out non-serialised fields.
+    // Exception: keep `id` even if it's NonSerialised, because it is required for GraphQL identity
+    // while still being excluded from persistence files.
+    const filteredFields = fields.filter(f => f.name === 'id' || !nonSerialised.has(f.name))
 
     // Add searchable metadata to fields
     const enrichedFields = filteredFields.map(field => ({

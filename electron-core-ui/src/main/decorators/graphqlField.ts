@@ -85,5 +85,21 @@ export function getGraphQLFieldConfig(target: unknown, propertyKey: string | sym
  * Get all GraphQL fields for a class
  */
 export function getGraphQLFields(target: unknown): Map<string | symbol, GraphQLFieldConfig> {
-  return getAllPropertyMetadata(target, GRAPHQL_FIELD_KEY) as Map<string | symbol, GraphQLFieldConfig>
+  // Include inherited fields (base classes) so consumers can define common GraphQL fields
+  // in abstract base classes (e.g. BaseRequest) and still have them appear on derived types.
+  const result = new Map<string | symbol, GraphQLFieldConfig>()
+
+  let current: unknown = target
+  while (typeof current === 'function' && current !== Function.prototype) {
+    const currentFields = getAllPropertyMetadata(current, GRAPHQL_FIELD_KEY) as Map<string | symbol, GraphQLFieldConfig>
+    for (const [key, config] of currentFields) {
+      // Derived classes override base fields
+      if (!result.has(key)) {
+        result.set(key, config)
+      }
+    }
+    current = Object.getPrototypeOf(current)
+  }
+
+  return result
 }
