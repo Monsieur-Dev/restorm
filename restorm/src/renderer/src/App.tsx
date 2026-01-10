@@ -1023,7 +1023,7 @@ const App: React.FC = () => {
           minLeftWidth={MIN_LEFT_WIDTH}
           minRightWidth={RIGHT_MIN_WIDTH}
           storageKey="restorm-sidebar-width"
-          sashConfig={{ size: 4 }}
+          sashConfig={{ size: 4, className: 'always-visible' }}
           className="restorm-main-container"
         />
       ) : (

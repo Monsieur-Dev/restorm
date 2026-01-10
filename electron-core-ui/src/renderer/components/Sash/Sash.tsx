@@ -82,15 +82,20 @@ export const Sash: React.FC<SashProps> = ({
 
 	// Handle mouse enter with delay
 	const handleMouseEnter = useCallback(() => {
+		if (hoverTimeoutRef.current) {
+			clearTimeout(hoverTimeoutRef.current);
+			hoverTimeoutRef.current = null;
+		}
 		if (isActive) {
-			if (hoverTimeoutRef.current) {
-				clearTimeout(hoverTimeoutRef.current);
-				hoverTimeoutRef.current = null;
-			}
 			setIsHovered(true);
 		} else {
+			if (hoverDelay === 0) {
+				setIsHovered(true);
+				return;
+			}
 			hoverTimeoutRef.current = window.setTimeout(() => {
 				setIsHovered(true);
+				hoverTimeoutRef.current = null;
 			}, hoverDelay);
 		}
 	}, [isActive, hoverDelay]);
