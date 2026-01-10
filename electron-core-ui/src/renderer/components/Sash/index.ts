@@ -1,5 +1,6 @@
 export { Sash } from './Sash';
-export { default } from './Sash';
+export { VerticalSashContainer } from './VerticalSashContainer';
+export { HorizontalSashContainer } from './HorizontalSashContainer';
 export type {
 	SashOrientation,
 	SashState,
@@ -8,5 +9,8 @@ export type {
 	IHorizontalSashLayoutProvider,
 	SashLayoutProvider,
 	Sash as SashType,
-	SashProps
+	SashProps,
+	SashConfig,
+	VerticalSashContainerProps,
+	HorizontalSashContainerProps
 } from './types';

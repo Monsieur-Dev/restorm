@@ -52,7 +52,7 @@ export { ScrollableElement, defaultScrollableElementStyles } from './ScrollableE
 export type { IScrollableElementStyles, IScrollableElementOptions, ScrollableElementProps } from './ScrollableElement/index'
 
 // Sash exports
-export { Sash } from './Sash'
+export { VerticalSashContainer, HorizontalSashContainer } from './Sash'
 export type {
   SashOrientation,
   SashState,
@@ -60,7 +60,9 @@ export type {
   IVerticalSashLayoutProvider,
   IHorizontalSashLayoutProvider,
   SashLayoutProvider,
-  SashProps
+  SashConfig,
+  VerticalSashContainerProps,
+  HorizontalSashContainerProps
 } from './Sash'
 
 // ListView exports
