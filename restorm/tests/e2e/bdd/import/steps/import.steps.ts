@@ -272,8 +272,9 @@ When('I expand the {string} folder', async ({ page }, folderName: string) => {
 
 When('I click on the {string} request', async ({ page }, requestName: string) => {
   // Find the treeitem that contains the exact request name in its .list-view-title
+  // The title may contain badges, so we search for text that matches anywhere within .list-view-title
   const requestItem = page.locator(`[role="treeitem"]`).filter({ 
-    has: page.locator(`.list-view-title:text("${requestName}")`)
+    has: page.locator(`.list-view-title`).filter({ hasText: requestName })
   }).first()
   
   await expect(requestItem).toBeVisible({ timeout: 10000 })
