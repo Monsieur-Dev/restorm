@@ -16,30 +16,44 @@ export interface ModalProps {
 }
 
 export const Modal: React.FC<ModalProps> = ({ title, isOpen, onClose, children, size = 'full' }) => {
-  // Track if we're in the closing animation phase
-  const [isClosing, setIsClosing] = useState(false)
+  const [isRendered, setIsRendered] = useState(isOpen)
+  const [overlayState, setOverlayState] = useState<'open' | 'closing' | 'closed'>('closed')
   const wasOpenRef = useRef(isOpen)
-  
-  // Derive visible: shown when open OR during closing animation
-  const visible = isOpen || isClosing
+  const rafIdsRef = useRef<number[]>([])
 
-  // Handle closing animation - using setTimeout to make setState async
   useEffect(() => {
-    // Only trigger closing animation when transitioning from open to closed
-    if (wasOpenRef.current && !isOpen) {
-      // Use requestAnimationFrame to defer the setState to the next frame
-      const rafId = requestAnimationFrame(() => {
-        setIsClosing(true)
+    const wasOpen = wasOpenRef.current
+    wasOpenRef.current = isOpen
+
+    if (isOpen) {
+      // Mount first, then toggle to "open" on next frame to animate in.
+      const raf1 = requestAnimationFrame(() => {
+        setIsRendered(true)
+        setOverlayState('closed')
+        const raf2 = requestAnimationFrame(() => {
+          setOverlayState('open')
+        })
+        rafIdsRef.current = [raf2]
       })
-      const timeout = window.setTimeout(() => {
-        setIsClosing(false)
-      }, 150)
-      return () => { 
-        cancelAnimationFrame(rafId)
-        window.clearTimeout(timeout) 
+      return () => {
+        cancelAnimationFrame(raf1)
+        for (const id of rafIdsRef.current) cancelAnimationFrame(id)
+        rafIdsRef.current = []
       }
     }
-    wasOpenRef.current = isOpen
+
+    if (wasOpen) {
+      // Fade out, then unmount on transition end.
+      const raf = requestAnimationFrame(() => {
+        setOverlayState('closing')
+      })
+      rafIdsRef.current = [raf]
+      return () => {
+        for (const id of rafIdsRef.current) cancelAnimationFrame(id)
+        rafIdsRef.current = []
+      }
+    }
+
     return undefined
   }, [isOpen])
 
@@ -58,13 +72,13 @@ export const Modal: React.FC<ModalProps> = ({ title, isOpen, onClose, children, 
     }
   }, [isOpen, onClose])
 
-  if (!visible) {
+  if (!isRendered) {
     return null
   }
 
   const overlayClassName = [
     'ecu-modal-overlay',
-    !isOpen ? 'ecu-modal-closing' : ''
+    overlayState === 'closing' ? 'ecu-modal-closing' : ''
   ].filter(Boolean).join(' ')
 
   const containerClassName = [
@@ -73,7 +87,18 @@ export const Modal: React.FC<ModalProps> = ({ title, isOpen, onClose, children, 
   ].filter(Boolean).join(' ')
 
   const content = (
-    <div className={overlayClassName}>
+    <div
+      className={overlayClassName}
+      data-state={overlayState}
+      onTransitionEnd={(event) => {
+        if (event.target !== event.currentTarget) return
+        if (event.propertyName !== 'opacity') return
+        if (overlayState === 'closing') {
+          setIsRendered(false)
+          setOverlayState('closed')
+        }
+      }}
+    >
       <Workbench className="ecu-modal-workbench" border={false} fullscreen>
         <div
           className={containerClassName}
