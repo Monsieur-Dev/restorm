@@ -91,6 +91,16 @@ export class DateTimeValue extends Value {
   }
 
   toString(): string {
+    if (this.format === 'unix') {
+      return String(Math.floor(this.value.getTime() / 1000))
+    }
+    if (this.format === 'epoch') {
+      return String(this.value.getTime())
+    }
+    if (this.format === 'iso') {
+      return this.value.toISOString()
+    }
+
     // Simple date formatting - can be enhanced with a library like date-fns or moment
     const date = this.value
     const format = this.format

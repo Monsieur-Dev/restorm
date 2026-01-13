@@ -451,13 +451,29 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
       }
 
       if (resolved instanceof DateTimeValue) {
+        const outputMode =
+          resolved.format === 'unix' || resolved.format === 'epoch' || resolved.format === 'iso' ? resolved.format : 'pattern'
+        const pattern = outputMode === 'pattern' ? resolved.format : 'YYYY-MM-DD HH:mm:ss'
         return (
           <div style={{ width: '100%', height: '100%' }} onContextMenu={handleContextMenu}>
             <DateTimePicker
               value={resolved.value}
               onChange={(nextDate: Date) => {
                 if (id) valueTypeByRowIdRef.current.set(id, new DateTimeValue(nextDate, resolved.format))
-                onChange(nextDate.toString())
+                onChange(new DateTimeValue(nextDate, resolved.format).toString())
+              }}
+              outputMode={outputMode}
+              format={pattern}
+              onOutputModeChange={(nextMode: 'pattern' | 'unix' | 'epoch' | 'iso') => {
+                if (!id) return
+                const nextFormat = nextMode === 'pattern' ? pattern : nextMode
+                valueTypeByRowIdRef.current.set(id, new DateTimeValue(resolved.value, nextFormat))
+                onChange(new DateTimeValue(resolved.value, nextFormat).toString())
+              }}
+              onFormatChange={(nextPattern: string) => {
+                if (!id) return
+                valueTypeByRowIdRef.current.set(id, new DateTimeValue(resolved.value, nextPattern))
+                onChange(new DateTimeValue(resolved.value, nextPattern).toString())
               }}
             />
           </div>

@@ -95,5 +95,22 @@
       "symbols": "Symboles",
       "flags": "Drapeaux"
     }
+  },
+  "dateTimePicker": {
+    "ariaLabel": "Sélecteur date/heure",
+    "openCalendar": "Ouvrir le calendrier",
+    "previousMonth": "Mois précédent",
+    "nextMonth": "Mois suivant",
+    "includeTime": "Inclure l'heure",
+    "hours": "Heures",
+    "minutes": "Minutes",
+    "output": "Sortie",
+    "pattern": "Format",
+    "outputModes": {
+      "pattern": "Format",
+      "unix": "Unix (s)",
+      "epoch": "Epoch (ms)",
+      "iso": "ISO 8601"
+    }
   }
 }
