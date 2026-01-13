@@ -12,6 +12,7 @@ import {
   type HTTPRequestBody,
   type KeyValue
 } from '../../../shared/models'
+import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 
 // Import templates as raw strings
 import folderTemplate from '../../../renderer/src/resources/templates/swagger/folder.hbs?raw'
@@ -450,22 +451,28 @@ function extractBody(
     if (consumes.includes('multipart/form-data')) {
       return {
         type: 'form-data',
-        fields: formDataParams.map((p) => ({
-          key: p.name,
-          value: '',
-          description: p.description
-        }))
+        fields: formDataParams.map((p) =>
+          createTypedKeyValue({
+            key: p.name,
+            value: '',
+            description: p.description,
+            enabled: true
+          })
+        )
       }
     }
 
     // Default to x-www-form-urlencoded
     return {
       type: 'x-www-form-urlencoded',
-      fields: formDataParams.map((p) => ({
-        key: p.name,
-        value: '',
-        description: p.description
-      }))
+      fields: formDataParams.map((p) =>
+        createTypedKeyValue({
+          key: p.name,
+          value: '',
+          description: p.description,
+          enabled: true
+        })
+      )
     }
   }
 
@@ -476,11 +483,14 @@ function extractBody(
 function extractHeaders(parameters: SwaggerParameter[]): KeyValue[] {
   return parameters
     .filter((p) => p.in === 'header')
-    .map((p) => ({
-      key: p.name,
-      value: '',
-      description: p.description
-    }))
+    .map((p) =>
+      createTypedKeyValue({
+        key: p.name,
+        value: '',
+        description: p.description,
+        enabled: true
+      })
+    )
 }
 
 /** Extract query params from Swagger parameters */
@@ -497,11 +507,14 @@ function extractParams(parameters: SwaggerParameter[]): KeyValue[] {
       continue
     }
 
-    result.push({
-      key: param.name,
-      value: '',
-      description: param.description
-    })
+    result.push(
+      createTypedKeyValue({
+        key: param.name,
+        value: '',
+        description: param.description,
+        enabled: true
+      })
+    )
   }
 
   return result
@@ -521,11 +534,14 @@ function extractPathParams(parameters: SwaggerParameter[]): KeyValue[] {
       continue
     }
 
-    result.push({
-      key: param.name,
-      value: '',
-      description: param.description
-    })
+    result.push(
+      createTypedKeyValue({
+        key: param.name,
+        value: '',
+        description: param.description,
+        enabled: true
+      })
+    )
   }
 
   return result
@@ -655,7 +671,7 @@ function createSwaggerEnvironment(spec: SwaggerSpec, defaultBaseUrl: string): En
       subEnvironments.push({
         id: generateId(`env:root:${domainName}:${scheme}`),
         name: scheme,
-        variables: [{ key: 'baseUrl', value: schemeBaseUrl }]
+        variables: [createTypedKeyValue({ key: 'baseUrl', value: schemeBaseUrl, enabled: true })]
       })
     }
   }
@@ -663,7 +679,7 @@ function createSwaggerEnvironment(spec: SwaggerSpec, defaultBaseUrl: string): En
   return {
     id: generateId(`env:root:${domainName}`),
     name: domainName,
-    variables: [{ key: 'baseUrl', value: defaultBaseUrl }],
+    variables: [createTypedKeyValue({ key: 'baseUrl', value: defaultBaseUrl, enabled: true })],
     subEnvironments
   }
 }

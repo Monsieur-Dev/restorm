@@ -9,6 +9,7 @@ import {
   GrpcRequest,
   type GrpcCallType
 } from '../../../shared/models'
+import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 
 // ============================================================================
 // Proto Types
@@ -321,7 +322,7 @@ export function importGrpc(protoContent: string, options: GrpcImportOptions = {}
     id: generateId(`${name}:env:grpc:Default`),
     name: 'Default',
     variables: [
-      { key: 'baseUrl', value: options.baseUrl ?? 'localhost:9000' }
+      createTypedKeyValue({ key: 'baseUrl', value: options.baseUrl ?? 'localhost:9000', enabled: true })
     ]
   }
   

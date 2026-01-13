@@ -9,6 +9,8 @@ import {
   graphqlField
 } from 'electron-core-ui/main'
 import type { RuntimeId } from './types'
+import type { ValueType } from '../types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue } from '../types/collections'
 
 /**
  * Key-value pair with optional description and enabled state.
@@ -26,10 +28,10 @@ export class KeyValue {
   @searchable.property({ weight: 1 })
   key = ''
 
-  /** The value */
+  /** The value object implementing the Value abstract type */
   @graphqlField({ type: 'String' })
   @searchable.property({ weight: 0.5 })
-  value = ''
+  value: ValueType = new StringValue('')
 
   /** Optional description */
   @graphqlField({ type: 'String', nullable: true })
@@ -48,11 +50,21 @@ export class KeyValue {
   /**
    * Create a KeyValue from a plain object
    */
-  static fromPlain(obj: { id?: RuntimeId; key?: string; value?: string; description?: string; enabled?: boolean }): KeyValue {
+  static fromPlain(obj: { id?: RuntimeId; key?: string; value?: string | ValueType; description?: string; enabled?: boolean }): KeyValue {
+    let value: ValueType
+    if (typeof obj.value === 'string') {
+      // Backward compatibility: convert string to StringValue
+      value = new StringValue(obj.value)
+    } else if (obj.value instanceof StringValue || obj.value instanceof ColorValue || obj.value instanceof DateTimeValue || obj.value instanceof NumericValue || obj.value instanceof PasswordValue) {
+      value = obj.value
+    } else {
+      value = new StringValue('')
+    }
+
     return new KeyValue({
       id: obj.id,
       key: obj.key ?? '',
-      value: obj.value ?? '',
+      value,
       description: obj.description,
       enabled: obj.enabled ?? true
     })
@@ -64,7 +76,7 @@ export class KeyValue {
   toPlainObject(): Record<string, unknown> {
     return {
       key: this.key,
-      value: this.value,
+      value: this.value.toString(),
       description: this.description,
       enabled: this.enabled
     }

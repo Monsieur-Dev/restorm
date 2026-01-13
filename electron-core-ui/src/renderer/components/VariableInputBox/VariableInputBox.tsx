@@ -61,7 +61,8 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
     className,
     style,
     ariaLabel,
-    onMount: onMountProp
+    onMount: onMountProp,
+    contextMenuItems: extraContextMenuItems = []
   } = props
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
   const variablesRef = useRef<VariableDefinition[]>(variables)
@@ -90,14 +91,23 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
     editorRef.current?.trigger('keyboard', 'paste', { text })
   }, [])
 
-  const contextMenuItems = useMemo<ContextMenuItem[]>(
-    () => [
+  const contextMenuItems = useMemo<ContextMenuItem[]>(() => {
+    const base: ContextMenuItem[] = [
       { id: 'cut', label: t('contextMenu.cut'), onClick: handleCut },
       { id: 'copy', label: t('contextMenu.copy'), onClick: handleCopy },
       { id: 'paste', label: t('contextMenu.paste'), onClick: () => { void handlePaste() } }
-    ],
-    [t, handleCut, handleCopy, handlePaste]
-  )
+    ]
+
+    if (extraContextMenuItems.length === 0) {
+      return base
+    }
+
+    return [
+      ...base,
+      { id: 'sep-extra', label: '', isSeparator: true },
+      ...extraContextMenuItems
+    ]
+  }, [t, handleCut, handleCopy, handlePaste, extraContextMenuItems])
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault()

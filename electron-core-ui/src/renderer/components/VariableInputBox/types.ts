@@ -1,5 +1,6 @@
 import type React from 'react'
 import type * as monacoEditor from 'monaco-editor'
+import type { ContextMenuItem } from '../ContextMenu/ContextMenu'
 
 export interface VariableDefinition {
   name: string
@@ -24,4 +25,10 @@ export interface VariableInputBoxProps {
     editor: monacoEditor.editor.IStandaloneCodeEditor,
     monaco: typeof monacoEditor
   ) => void
+
+  /**
+   * Optional additional context menu items shown below cut/copy/paste.
+   * A separator is automatically inserted when items are provided.
+   */
+  contextMenuItems?: ContextMenuItem[]
 }

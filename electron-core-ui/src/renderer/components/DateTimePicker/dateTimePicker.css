@@ -1,0 +1,84 @@
+.ecu-date-time-picker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ecu-date-time-picker-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.ecu-date-time-picker-button {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.ecu-date-time-picker-button-target {
+  display: flex;
+  align-items: center;
+}
+
+.ecu-date-time-picker-popover {
+  width: 260px;
+  user-select: none;
+}
+
+.ecu-date-time-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.ecu-date-time-picker-month {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  color: var(--editor-foreground);
+  font-weight: 600;
+}
+
+.ecu-date-time-picker-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.ecu-date-time-picker-weekday {
+  text-align: center;
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.ecu-date-time-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.ecu-date-time-picker-day {
+  height: 28px;
+  border: 1px solid var(--panel-border);
+  background: var(--input-background);
+  color: var(--input-foreground);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.ecu-date-time-picker-day:hover {
+  background: var(--list-hoverBackground, rgb(0, 0, 0, 0.08));
+}
+
+.ecu-date-time-picker-day.is-outside {
+  opacity: 0.45;
+}
+
+.ecu-date-time-picker-day.is-selected {
+  border-color: var(--focusBorder);
+  box-shadow: 0 0 0 1px var(--focusBorder);
+}
+

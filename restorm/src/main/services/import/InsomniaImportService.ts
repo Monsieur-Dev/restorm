@@ -23,6 +23,7 @@ import {
   type Request,
   type FolderItem
 } from '../../../shared/models'
+import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 
 // ============================================================================
 // Insomnia Export v4 Types
@@ -196,10 +197,11 @@ function parseHeaders(headers: InsomniaHeader[] | undefined): KeyValue[] {
   
   return headers
     .filter(h => !h.disabled)
-    .map(h => ({
+    .map(h => createTypedKeyValue({
       key: h.name,
       value: h.value,
-      description: h.description ?? undefined
+      description: h.description ?? undefined,
+      enabled: true
     }))
 }
 
@@ -209,10 +211,11 @@ function parseParams(params: InsomniaParameter[] | undefined): KeyValue[] {
   
   return params
     .filter(p => !p.disabled)
-    .map(p => ({
+    .map(p => createTypedKeyValue({
       key: p.name,
       value: p.value,
-      description: p.description ?? undefined
+      description: p.description ?? undefined,
+      enabled: true
     }))
 }
 
@@ -228,10 +231,11 @@ function parseBody(body: InsomniaBody | undefined): HTTPRequestBody | undefined 
       type: 'form-data',
       fields: body.params
         .filter(p => !p.disabled)
-        .map(p => ({
+        .map(p => createTypedKeyValue({
           key: p.name,
           value: p.value,
-          description: p.description ?? undefined
+          description: p.description ?? undefined,
+          enabled: true
         }))
     }
   }
@@ -242,10 +246,11 @@ function parseBody(body: InsomniaBody | undefined): HTTPRequestBody | undefined 
       type: 'x-www-form-urlencoded',
       fields: body.params
         .filter(p => !p.disabled)
-        .map(p => ({
+        .map(p => createTypedKeyValue({
           key: p.name,
           value: p.value,
-          description: p.description ?? undefined
+          description: p.description ?? undefined,
+          enabled: true
         }))
     }
   }
@@ -506,7 +511,7 @@ function extractEnvironments(
 
     // Add user-provided baseUrl at the beginning
     if (baseUrl) {
-      variables.unshift({ key: 'baseUrl', value: baseUrl })
+      variables.unshift(createTypedKeyValue({ key: 'baseUrl', value: baseUrl, enabled: true }))
     }
 
     environments.push({
@@ -521,7 +526,7 @@ function extractEnvironments(
     environments.push({
       id: generateId('insomnia:env:default'),
       name: 'Default',
-      variables: baseUrl ? [{ key: 'baseUrl', value: baseUrl }] : []
+      variables: baseUrl ? [createTypedKeyValue({ key: 'baseUrl', value: baseUrl, enabled: true })] : []
     })
   }
 

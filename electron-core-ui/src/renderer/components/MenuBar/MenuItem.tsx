@@ -87,15 +87,15 @@ const MenuItem: React.FC<MenuItemProps> = ({
 
     if (!hasSubmenu) return
 
-    // Clear any existing timeout
-    if (submenuTimeoutRef.current) {
-      clearTimeout(submenuTimeoutRef.current)
-    }
-    
-    // Set timeout to show submenu after 300ms
-    submenuTimeoutRef.current = setTimeout(() => {
-      setShowSubmenu(true)
-    }, 300)
+      // Clear any existing timeout
+      if (submenuTimeoutRef.current) {
+        clearTimeout(submenuTimeoutRef.current)
+      }
+      
+      // Set timeout to show submenu after 300ms
+      submenuTimeoutRef.current = setTimeout(() => {
+        setShowSubmenu(true)
+      }, 300)
   }, [disabled, hasSubmenu])
 
   const handleMouseLeave = useCallback((): void => {

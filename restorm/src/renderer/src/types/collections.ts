@@ -28,11 +28,182 @@ export interface Icon {
   value: string
 }
 
+// ============================================================================
+// Value Types (Abstract and Concrete Implementations)
+// ============================================================================
+
+/**
+ * Abstract base type for value objects with a toString method
+ */
+export abstract class Value {
+  /**
+   * Convert the value to a string representation
+   */
+  abstract toString(): string
+}
+
+/**
+ * String value type
+ */
+export class StringValue extends Value {
+  readonly type = 'string' as const
+  value: string
+
+  constructor(value: string) {
+    super()
+    this.value = value
+  }
+
+  toString(): string {
+    return this.value
+  }
+}
+
+/**
+ * Color value type
+ */
+export class ColorValue extends Value {
+  readonly type = 'color' as const
+  value: string
+
+  constructor(value: string) {
+    super()
+    this.value = value
+  }
+
+  toString(): string {
+    return this.value
+  }
+}
+
+/**
+ * DateTime value type with formatting
+ */
+export class DateTimeValue extends Value {
+  readonly type = 'datetime' as const
+  value: Date
+  format: string
+
+  constructor(value: Date, format: string) {
+    super()
+    this.value = value
+    this.format = format
+  }
+
+  toString(): string {
+    // Simple date formatting - can be enhanced with a library like date-fns or moment
+    const date = this.value
+    const format = this.format
+
+    // Basic format support: YYYY-MM-DD, DD/MM/YYYY, etc.
+    // For more complex formatting, consider using a date library
+    return format
+      .replace(/YYYY/g, date.getFullYear().toString())
+      .replace(/MM/g, (date.getMonth() + 1).toString().padStart(2, '0'))
+      .replace(/DD/g, date.getDate().toString().padStart(2, '0'))
+      .replace(/HH/g, date.getHours().toString().padStart(2, '0'))
+      .replace(/mm/g, date.getMinutes().toString().padStart(2, '0'))
+      .replace(/ss/g, date.getSeconds().toString().padStart(2, '0'))
+  }
+}
+
+/**
+ * Numeric value type with formatting
+ */
+export class NumericValue extends Value {
+  readonly type = 'numeric' as const
+  value: number
+  format: string
+
+  constructor(value: number, format: string) {
+    super()
+    this.value = value
+    this.format = format
+  }
+
+  toString(): string {
+    // Simple number formatting - can be enhanced with Intl.NumberFormat
+    const num = this.value
+    const format = this.format
+
+    // Basic format support: decimal, currency, percentage, etc.
+    if (format === 'decimal' || format === '') {
+      return num.toString()
+    }
+    if (format === 'currency') {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num)
+    }
+    if (format === 'percentage') {
+      return `${(num * 100).toFixed(2)}%`
+    }
+    if (format.startsWith('decimal:')) {
+      const decimals = parseInt(format.split(':')[1] ?? '2', 10)
+      return num.toFixed(decimals)
+    }
+
+    // Default: return as string
+    return num.toString()
+  }
+}
+
+/**
+ * Password value type with non-serializable value property
+ * The value property should not be included in JSON serialization for security
+ */
+export class PasswordValue extends Value {
+  readonly type = 'password' as const
+  /** Non-serializable password value - excluded from JSON serialization */
+  private _value: string
+
+  constructor(value: string) {
+    super()
+    this._value = value
+  }
+
+  /**
+   * Get the password value (use with caution)
+   */
+  get value(): string {
+    return this._value
+  }
+
+  /**
+   * Set the password value
+   */
+  set value(val: string) {
+    this._value = val
+  }
+
+  /**
+   * Convert password to string representation
+   * Note: Masking should be handled at the UI level
+   */
+  toString(): string {
+    return this._value
+  }
+
+  /**
+   * Custom JSON serialization - exclude the value property
+   */
+  toJSON(): Record<string, unknown> {
+    return {
+      type: this.type
+      // value is intentionally excluded
+    }
+  }
+}
+
+/**
+ * Union type of all concrete Value implementations
+ */
+export type ValueType = StringValue | ColorValue | DateTimeValue | NumericValue | PasswordValue
+
 export interface KeyValue {
   /** Runtime-only identifier, excluded from serialization. Generated at runtime. */
   id?: RuntimeId
   key: string
-  value: string
+  /** The value object implementing the Value abstract type */
+  value: ValueType
   /** Optional description, when provided by Swagger or user input */
   description?: string | undefined
   /** Whether this key-value is enabled (default: true) */

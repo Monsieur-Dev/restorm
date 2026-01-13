@@ -9,6 +9,7 @@ import {
   GraphQLRequest,
   type GraphQLOperationType
 } from '../../../shared/models'
+import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 
 // ============================================================================
 // GraphQL Schema Types
@@ -228,7 +229,7 @@ function fieldToRequest(
     operationType,
     query,
     headers: [
-      { key: 'Content-Type', value: 'application/json' }
+      createTypedKeyValue({ key: 'Content-Type', value: 'application/json', enabled: true })
     ]
   }
   
@@ -308,7 +309,7 @@ export function importGraphQL(schemaString: string, options: GraphQLImportOption
     id: generateId(`${name}:env:graphql:Default`),
     name: 'Default',
     variables: [
-      { key: 'baseUrl', value: options.baseUrl ?? 'http://localhost:4000' }
+      createTypedKeyValue({ key: 'baseUrl', value: options.baseUrl ?? 'http://localhost:4000', enabled: true })
     ]
   }
   

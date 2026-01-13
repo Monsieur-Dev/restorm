@@ -26,6 +26,7 @@ import {
 } from './DocumentEvents'
 import { registerHandlebarsHelpers } from '../utils/handlebarsHelpers'
 import { pubsub, PUBSUB_TOPICS } from './CollectionStore'
+import type { ValueType } from '../../shared/types/collections'
 
 // ============================================================================
 // Types and Interfaces
@@ -35,7 +36,7 @@ import { pubsub, PUBSUB_TOPICS } from './CollectionStore'
 interface KeyValue {
   id?: string
   key: string
-  value: string
+  value: ValueType | string
   description?: string
   /** Whether this key-value is enabled (default: true) */
   enabled?: boolean
@@ -447,10 +448,11 @@ class ContextService {
 
         // Store and broadcast transformation result if variable has an id
         if (kv.id) {
+          const rawValue = typeof kv.value === 'string' ? kv.value : kv.value.toString()
           this.storeAndBroadcastTransformResult(kv.id, {
             contextUsed,
             transformedValue,
-            rawValue: kv.value,
+            rawValue,
             key: kv.key
           })
         }
@@ -510,20 +512,21 @@ class ContextService {
   /**
    * Transform a value using Handlebars
    */
-  private transformValue(value: string, context: TransformedContext): string {
-    if (!value.includes('{{')) {
-      return value
+  private transformValue(value: ValueType | string, context: TransformedContext): string {
+    const rawValue = typeof value === 'string' ? value : value.toString()
+    if (!rawValue.includes('{{')) {
+      return rawValue
     }
 
     try {
-      const template = Handlebars.compile(value, { noEscape: true })
+      const template = Handlebars.compile(rawValue, { noEscape: true })
       return template(context)
     } catch (error) {
       logger.warn('[ContextService] Handlebars transform error', {
-        value,
+        value: rawValue,
         error: String(error)
       })
-      return value
+      return rawValue
     }
   }
 
@@ -728,10 +731,11 @@ class ContextService {
           groupContext[kv.key] = transformedValue
 
           if (kv.id) {
+            const rawValue = typeof kv.value === 'string' ? kv.value : kv.value.toString()
             this.storeAndBroadcastTransformResult(kv.id, {
               contextUsed,
               transformedValue,
-              rawValue: kv.value,
+              rawValue,
               key: kv.key
             })
           }

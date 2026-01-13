@@ -25,6 +25,7 @@ import {
   type Request,
   type FolderItem
 } from '../../../shared/models'
+import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 
 // ============================================================================
 // Bruno Types
@@ -646,7 +647,7 @@ export function importBruno(
   const environment: Environment = {
     id: generateId(`bruno:env:${collectionName}`),
     name: 'Default',
-    variables: options.baseUrl ? [{ key: 'baseUrl', value: options.baseUrl }] : []
+    variables: options.baseUrl ? [createTypedKeyValue({ key: 'baseUrl', value: options.baseUrl, enabled: true })] : []
   }
 
   // Case: parentFolder provided without environmentFolder - error
@@ -771,16 +772,16 @@ export function importBrunoFromJson(
         // Convert headers
         const headers: KeyValue[] = (req.headers ?? [])
           .filter(h => h.enabled !== false)
-          .map(h => ({ key: h.name, value: h.value }))
+          .map(h => createTypedKeyValue({ key: h.name, value: h.value, enabled: true }))
 
         // Convert params
         const queryParams: KeyValue[] = (req.params ?? [])
           .filter(p => p.type === 'query' && p.enabled !== false)
-          .map(p => ({ key: p.name, value: p.value }))
+          .map(p => createTypedKeyValue({ key: p.name, value: p.value, enabled: true }))
 
         const pathParams: KeyValue[] = (req.params ?? [])
           .filter(p => p.type === 'path' && p.enabled !== false)
-          .map(p => ({ key: p.name, value: p.value }))
+          .map(p => createTypedKeyValue({ key: p.name, value: p.value, enabled: true }))
 
         // Convert body
         let body: HTTPRequestBody | undefined
@@ -798,13 +799,17 @@ export function importBrunoFromJson(
             case 'formUrlEncoded':
               body = req.body.formUrlEncoded ? {
                 type: 'x-www-form-urlencoded',
-                fields: req.body.formUrlEncoded.filter(f => f.enabled !== false).map(f => ({ key: f.name, value: f.value }))
+                fields: req.body.formUrlEncoded
+                  .filter(f => f.enabled !== false)
+                  .map(f => createTypedKeyValue({ key: f.name, value: f.value, enabled: true }))
               } : undefined
               break
             case 'multipartForm':
               body = req.body.multipartForm ? {
                 type: 'form-data',
-                fields: req.body.multipartForm.filter(f => f.enabled !== false).map(f => ({ key: f.name, value: f.value }))
+                fields: req.body.multipartForm
+                  .filter(f => f.enabled !== false)
+                  .map(f => createTypedKeyValue({ key: f.name, value: f.value, enabled: true }))
               } : undefined
               break
             case 'graphql':
@@ -870,7 +875,7 @@ export function importBrunoFromJson(
   const environment: Environment = {
     id: generateId(`bruno:env:${collectionName}`),
     name: 'Default',
-    variables: options.baseUrl ? [{ key: 'baseUrl', value: options.baseUrl }] : []
+    variables: options.baseUrl ? [createTypedKeyValue({ key: 'baseUrl', value: options.baseUrl, enabled: true })] : []
   }
 
   // Case: parentFolder provided without environmentFolder - error

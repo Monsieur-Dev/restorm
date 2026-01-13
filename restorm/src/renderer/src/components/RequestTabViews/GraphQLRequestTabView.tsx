@@ -7,8 +7,7 @@ import {
   SplitView,
   Pane,
   logger,
-  type VariableDefinition,
-  type KeyValueTableRow
+  type VariableDefinition
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
@@ -82,7 +81,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
     logger.debug('[GraphQLRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
     const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
+      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
 
     void restormContext.registerRequest(requestId, currentEnvId ?? null, {
       headers: toKeyValueData(currentRequest.headers)
@@ -145,7 +144,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
   // Notify ContextService when URL, query or variables change
   useEffect(() => {
     const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
+      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
 
     void window.restorm?.context.updateFullRequestData(request.id, {
       url,
@@ -177,12 +176,12 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
 
   // Callback for headers changes - notify both reactive object and ContextService
-  const handleHeadersChange = useCallback((rows: KeyValueTableRow[]): void => {
+  const handleHeadersChange = useCallback((rows: KeyValue[]): void => {
     updateReactiveProperty(request, 'headers', rows)
     void window.restorm?.context.updateRequestKeyValues(
       request.id,
       'headers',
-      rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
+      rows.map(r => ({ id: r.id, key: r.key, value: r.value.toString(), enabled: r.enabled }))
     )
   }, [request])
   

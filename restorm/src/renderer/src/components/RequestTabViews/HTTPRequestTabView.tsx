@@ -19,7 +19,7 @@ import {
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue } from '../../types/collections'
-import type { KeyValueTableRow } from 'electron-core-ui/renderer'
+import { StringValue } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { Badge } from '../common/Badge'
@@ -90,7 +90,7 @@ function keyValuesToListItems(keyValues: KeyValue[], prefix: string): ListViewIt
     title: (
       <span style={{ display: 'flex', gap: 8 }}>
         <span style={{ fontWeight: 600, color: 'var(--symbolIcon-propertyForeground)' }}>{kv.key}</span>
-        <span style={{ color: 'var(--descriptionForeground)' }}>{kv.value}</span>
+        <span style={{ color: 'var(--descriptionForeground)' }}>{kv.value.toString()}</span>
       </span>
     )
   }))
@@ -139,7 +139,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
   // Convert KeyValue arrays to plain objects for IPC
   const toKeyValueData = useCallback((kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
     kvs.map(kv => {
-      const result: { id?: string; key: string; value: string; enabled?: boolean } = { key: kv.key, value: kv.value }
+      const result: { id?: string; key: string; value: string; enabled?: boolean } = { key: kv.key, value: kv.value.toString() }
       if (kv.id !== undefined) result.id = kv.id
       if (kv.enabled !== undefined) result.enabled = kv.enabled
       return result
@@ -311,38 +311,38 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
   }, [urlVariableId])
 
   // Callbacks for KeyValue changes - notify both reactive object and ContextService
-  const handleHeadersChange = useCallback((rows: KeyValueTableRow[]): void => {
-    updateReactiveProperty(request, 'headers', rows as KeyValue[])
+  const handleHeadersChange = useCallback((rows: KeyValue[]): void => {
+    updateReactiveProperty(request, 'headers', rows)
     const requestId = request.id
     if (requestId) {
       void window.restorm?.context.updateRequestKeyValues(
         requestId,
         'headers',
-        rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
+        rows.map(r => ({ id: r.id, key: r.key, value: r.value.toString(), enabled: r.enabled }))
       )
     }
   }, [request])
 
-  const handleParamsChange = useCallback((rows: KeyValueTableRow[]): void => {
-    updateReactiveProperty(request, 'params', rows as KeyValue[])
+  const handleParamsChange = useCallback((rows: KeyValue[]): void => {
+    updateReactiveProperty(request, 'params', rows)
     const requestId = request.id
     if (requestId) {
       void window.restorm?.context.updateRequestKeyValues(
         requestId,
         'params',
-        rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
+        rows.map(r => ({ id: r.id, key: r.key, value: r.value.toString(), enabled: r.enabled }))
       )
     }
   }, [request])
 
-  const handlePathParamsChange = useCallback((rows: KeyValueTableRow[]): void => {
-    updateReactiveProperty(request, 'pathParams', rows as KeyValue[])
+  const handlePathParamsChange = useCallback((rows: KeyValue[]): void => {
+    updateReactiveProperty(request, 'pathParams', rows)
     const requestId = request.id
     if (requestId) {
       void window.restorm?.context.updateRequestKeyValues(
         requestId,
         'pathParams',
-        rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
+        rows.map(r => ({ id: r.id, key: r.key, value: r.value.toString(), enabled: r.enabled }))
       )
     }
   }, [request])
@@ -379,7 +379,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
             for (const [key, value] of Object.entries(result.headers)) {
               responseHeaders.push({
                 key,
-                value: Array.isArray(value) ? value.join(', ') : value
+                value: new StringValue(Array.isArray(value) ? value.join(', ') : value)
               })
             }
           }
@@ -583,7 +583,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
                 variables={emptyVariables}
                 helpers={handlebarsHelpers}
                 initialRows={request.body?.type === 'form-data' || request.body?.type === 'x-www-form-urlencoded' ? request.body.fields : []}
-                onRowsChange={(rows): void => { updateReactiveProperty(request, 'body', { type: bodyMode, fields: rows as KeyValue[] }) }}
+                onRowsChange={(rows): void => { updateReactiveProperty(request, 'body', { type: bodyMode, fields: rows }) }}
               />
             )}
             {bodyMode === 'file' && (

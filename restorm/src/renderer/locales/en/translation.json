@@ -105,6 +105,16 @@
   "codeEditor": {
     "goToDefinition": "Go to Definition"
   },
+  "keyValueTable": {
+    "transformTo": "Transform to",
+    "types": {
+      "string": "String",
+      "secret": "Secret",
+      "number": "Number",
+      "dateTime": "Date time",
+      "color": "Color"
+    }
+  },
   "graphql": {
     "send": "Send",
     "response": "Response",

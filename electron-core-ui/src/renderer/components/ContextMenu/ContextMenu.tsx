@@ -9,6 +9,8 @@ export interface ContextMenuItem {
   isSeparator?: boolean
   disabled?: boolean
   onClick?: () => void
+  /** Optional submenu items */
+  items?: ContextMenuItem[]
 }
 
 export interface ContextMenuProps {
@@ -27,6 +29,41 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   onRequestClose
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null)
+
+  const renderItems = (menuItems: ContextMenuItem[]): React.ReactNode =>
+    menuItems.map((item) => {
+      if (item.isSeparator) {
+        return <MenuItemSeparator key={item.id} />
+      }
+
+      const hasSubmenu = Array.isArray(item.items) && item.items.length > 0
+
+      return (
+        <MenuItem
+          key={item.id}
+          title={item.label}
+          {...(item.shortcut ? { shortcut: item.shortcut } : {})}
+          disabled={!!item.disabled}
+          icon={
+            item.icon ? (
+              <i
+                className={`codicon codicon-${item.icon}`}
+                aria-hidden="true"
+              />
+            ) : undefined
+          }
+          {...(!hasSubmenu && {
+            onClick: () => {
+              if (item.disabled) return
+              item.onClick?.()
+              onRequestClose()
+            }
+          })}
+        >
+          {hasSubmenu ? renderItems(item.items ?? []) : undefined}
+        </MenuItem>
+      )
+    })
 
   useEffect(() => {
     if (!visible) return
@@ -63,31 +100,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
       <div className="menu menubar-menu-items-holder menu-container">
         <div className="menu">
           <ul className="actions-container" role="menu">
-            {items.map((item) =>
-              item.isSeparator ? (
-                <MenuItemSeparator key={item.id} />
-              ) : (
-                <MenuItem
-                  key={item.id}
-                  title={item.label}
-                  {...(item.shortcut ? { shortcut: item.shortcut } : {})}
-                  disabled={!!item.disabled}
-                  icon={
-                    item.icon ? (
-                      <i
-                        className={`codicon codicon-${item.icon}`}
-                        aria-hidden="true"
-                      />
-                    ) : undefined
-                  }
-                  onClick={() => {
-                    if (item.disabled) return
-                    item.onClick?.()
-                    onRequestClose()
-                  }}
-                />
-              )
-            )}
+            {renderItems(items)}
           </ul>
         </div>
       </div>
