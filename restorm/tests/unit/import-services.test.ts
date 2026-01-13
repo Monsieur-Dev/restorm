@@ -135,7 +135,7 @@ describe('SwaggerImportService', () => {
       // Environment name is extracted from the host (localhost:8080 -> localhost)
       const env = result.environments.find((e) => e.name === 'localhost')
       const baseUrlVar = env?.variables.find((v) => v.key === 'baseUrl')
-      expect(baseUrlVar?.value).toBe('http://custom.url')
+      expect(baseUrlVar?.value.toString()).toBe('http://custom.url')
     })
 
     it('should mark deprecated endpoints', () => {
@@ -249,7 +249,7 @@ describe('GraphQLImportService', () => {
 
       requests.forEach((req) => {
         const contentTypeHeader = req.headers.find((h) => h.key === 'Content-Type')
-        expect(contentTypeHeader?.value).toBe('application/json')
+        expect(contentTypeHeader?.value.toString()).toBe('application/json')
       })
     })
 
@@ -407,7 +407,7 @@ describe('SoapImportService', () => {
 
       requests.forEach((req) => {
         const contentTypeHeader = req.headers.find((h) => h.key === 'Content-Type')
-        expect(contentTypeHeader?.value).toContain('text/xml')
+        expect(contentTypeHeader?.value.toString()).toContain('text/xml')
       })
     })
 
@@ -507,7 +507,7 @@ describe('AsyncAPIImportService', () => {
       const defaultEnv = result.environments.find((e) => e.name === 'Default')
       const baseUrlVar = defaultEnv?.variables.find((v) => v.key === 'baseUrl')
 
-      expect(baseUrlVar?.value).toBe('ws://localhost:3001')
+      expect(baseUrlVar?.value.toString()).toBe('ws://localhost:3001')
     })
 
     it('should set event/topic names', () => {
@@ -869,7 +869,7 @@ describe('InsomniaImportService', () => {
 
       const env = result.environments[0]
       const baseUrlVar = env?.variables.find(v => v.key === 'baseUrl')
-      expect(baseUrlVar?.value).toBe('http://custom.url')
+      expect(baseUrlVar?.value.toString()).toBe('http://custom.url')
     })
 
     it('should generate unique IDs for all items', () => {
@@ -1049,7 +1049,7 @@ describe('BrunoImportService', () => {
 
       const env = result.environments[0]
       const baseUrlVar = env?.variables.find(v => v.key === 'baseUrl')
-      expect(baseUrlVar?.value).toBe('http://custom.url')
+      expect(baseUrlVar?.value.toString()).toBe('http://custom.url')
     })
 
     it('should generate unique IDs for all items', () => {

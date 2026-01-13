@@ -28,8 +28,23 @@ const HEX_COLOR_REGEX = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-f
 const NUMBER_REGEX = /^[-+]?(?:\d+\.?\d*|\d*\.?\d+)(?:[eE][-+]?\d+)?$/
 
 function looksLikeIsoDate(value: string): boolean {
-  // Avoid treating plain numbers as dates.
-  return value.includes('-') || value.includes('T') || value.includes(':')
+  if (value.includes('://')) return false
+
+  // Strict-ish checks to avoid false positives (e.g. URLs with ":" or random strings).
+  // Supported examples:
+  // - 2026-01-13
+  // - 2026-01-13T12:34
+  // - 2026-01-13T12:34:56Z
+  // - 2026-01-13 12:34:56
+  const isoLike =
+    /^\d{4}-\d{2}-\d{2}(?:[T\s]\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})?)?$/.test(
+      value
+    )
+
+  const slashLike =
+    /^\d{4}\/\d{2}\/\d{2}(?:\s+\d{2}:\d{2}(?::\d{2})?)?$/.test(value)
+
+  return isoLike || slashLike
 }
 
 export function tryParseDateString(value: string): Date | null {
