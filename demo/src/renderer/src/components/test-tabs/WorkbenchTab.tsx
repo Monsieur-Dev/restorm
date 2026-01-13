@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type {
   EditorTab,
@@ -6,16 +6,14 @@ import type {
   GroupNode,
   TabGroupNode,
   ListViewItemData,
-  ListViewDropEventPayload,
-  IVerticalSashLayoutProvider,
-  SashEvent
+  ListViewDropEventPayload
 } from 'electron-core-ui/renderer'
 import {
   ListView,
   isContainerNode,
   isTabGroupNode,
   logger,
-  Sash
+  VerticalSashContainer
 } from 'electron-core-ui/renderer'
 import { Workbench } from '../Workbench'
 
@@ -323,8 +321,7 @@ const WorkbenchTab: React.FC = () => {
   const initialTabContentMap: Record<string, string> = {}
 
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const [leftWidth, setLeftWidth] = useState<number>(260)
-  const [containerHeight, setContainerHeight] = useState<number>(0)
+  const [leftWidth] = useState<number>(260)
 
   // Load file tree from project root on mount
   useEffect(() => {
@@ -478,58 +475,6 @@ const WorkbenchTab: React.FC = () => {
         setPendingFilePath(null)
       })
   }, [pendingFilePath, items, tree, lastFocusedGroupId])
-
-  const sashStartLeftRef = useRef(leftWidth)
-
-  const layoutProvider: IVerticalSashLayoutProvider = useMemo(
-    () => ({
-      getVerticalSashLeft: () => leftWidth,
-      getVerticalSashTop: () => 0,
-      getVerticalSashHeight: () => containerHeight
-    }),
-    [leftWidth, containerHeight]
-  )
-
-  const handleSashStart = useCallback(
-    (_event: SashEvent): void => {
-      // Remember the width at drag start so that we apply the delta
-      // relative to this value instead of accumulating it on each move.
-      sashStartLeftRef.current = leftWidth
-    },
-    [leftWidth]
-  )
-
-  const handleSashChange = useCallback(
-    (event: SashEvent): void => {
-      if (!containerRef.current) return
-      const delta = event.currentX - event.startX
-
-      const containerWidth = containerRef.current.clientWidth
-      const min = 150
-      const max = Math.max(min, containerWidth - 200)
-      const start = sashStartLeftRef.current
-      const next = Math.min(max, Math.max(min, start + delta))
-
-      setLeftWidth(next)
-    },
-    []
-  )
-
-  useEffect(() => {
-    if (!containerRef.current) {
-      return
-    }
-    const observer = new ResizeObserver(() => {
-      const el = containerRef.current
-      if (el) {
-        setContainerHeight(el.clientHeight)
-      }
-    })
-    observer.observe(containerRef.current)
-    return () => {
-      observer.disconnect()
-    }
-  }, [])
 
   // Hide context menu on any global click
   useEffect(() => {
@@ -719,62 +664,63 @@ const WorkbenchTab: React.FC = () => {
         minHeight: 0
       }}
     >
-      <div
-        style={{
-          width: leftWidth,
-          minWidth: 150,
-          maxWidth: '70%',
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: 0
-        }}
-      >
-        <ListView
-          items={items}
-          selectedIds={selectedIds}
-          activeId={selectedIds[0] ?? null}
-          rootRole="tree"
-          ariaLabel="Workbench items"
-          onSelectionChange={(ids, payload) => {
-            handleListSelectionChange(ids, payload)
-          }}
-          onItemClick={(payload) => {
-            handleItemClick(payload)
-          }}
-          onItemDrop={(payload) => {
-            handleItemDrop(payload)
-          }}
-          onItemContextMenu={(payload, event) => {
-            event.preventDefault()
-            handleContextMenu(payload, event)
-          }}
-        />
-      </div>
-
-      <div
-        style={{
-          flex: 1,
-          minWidth: 0,
-          minHeight: 0,
-          display: 'flex'
-        }}
-      >
-    <Workbench
-          tree={tree}
-      initialTabContentMap={initialTabContentMap}
-          onTreeChange={handleTreeChange}
-          style={{ flex: 1 }}
-          focusedGroupId={lastFocusedGroupId}
-          onFocusedGroupChange={setLastFocusedGroupId}
-        />
-      </div>
-
-      <Sash
-        orientation="vertical"
-        layoutProvider={layoutProvider}
-        onStart={handleSashStart}
-        onChange={handleSashChange}
-        size={4}
+      <VerticalSashContainer
+        Left={
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              width: '100%',
+              minWidth: 0,
+              minHeight: 0,
+              height: '100%'
+            }}
+          >
+            <ListView
+              items={items}
+              selectedIds={selectedIds}
+              activeId={selectedIds[0] ?? null}
+              rootRole="tree"
+              ariaLabel="Workbench items"
+              onSelectionChange={(ids, payload) => {
+                handleListSelectionChange(ids, payload)
+              }}
+              onItemClick={(payload) => {
+                handleItemClick(payload)
+              }}
+              onItemDrop={(payload) => {
+                handleItemDrop(payload)
+              }}
+              onItemContextMenu={(payload, event) => {
+                event.preventDefault()
+                handleContextMenu(payload, event)
+              }}
+            />
+          </div>
+        }
+        Right={
+          <div
+            style={{
+              flex: 1,
+              minWidth: 0,
+              minHeight: 0,
+              display: 'flex'
+            }}
+          >
+            <Workbench
+              tree={tree}
+              initialTabContentMap={initialTabContentMap}
+              onTreeChange={handleTreeChange}
+              style={{ flex: 1 }}
+              focusedGroupId={lastFocusedGroupId}
+              onFocusedGroupChange={setLastFocusedGroupId}
+            />
+          </div>
+        }
+        initialWidth={leftWidth}
+        minLeftWidth={150}
+        minRightWidth={200}
+        sashConfig={{ size: 4 }}
       />
 
       {contextMenu.visible && (

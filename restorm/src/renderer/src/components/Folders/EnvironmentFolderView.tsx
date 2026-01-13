@@ -5,9 +5,7 @@ import {
   type ListViewItemData,
   type ListViewItemEventPayload,
   type ContextMenuItem,
-  Sash,
-  type IVerticalSashLayoutProvider,
-  type SashEvent,
+  VerticalSashContainer,
   SplitView,
   Pane,
   Button,
@@ -330,10 +328,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
     [localEnvironments, expandedIds, envContextMenuItems, renderEnvLeftActions]
   )
 
-  const containerRef = useRef<HTMLDivElement | null>(null)
-  const [leftWidth, setLeftWidth] = useState<number>(220)
-  const [containerHeight, setContainerHeight] = useState<number>(0)
-  const sashStartLeftRef = useRef<number>(leftWidth)
+  const [leftWidth] = useState<number>(220)
   const variablesParamsRef = useRef<KeyValueTableHandle | null>(null)
 
   // Handler for persisting variable changes to the environment
@@ -348,225 +343,163 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
     [reactiveSelectedEnvironment]
   )
 
-  const layoutProvider: IVerticalSashLayoutProvider = useMemo(
-    () => ({
-      getVerticalSashLeft: () => leftWidth,
-      getVerticalSashTop: () => 0,
-      getVerticalSashHeight: () => containerHeight
-    }),
-    [leftWidth, containerHeight]
-  )
-
-  const handleSashStart = useCallback(
-    (_event: SashEvent): void => {
-      sashStartLeftRef.current = leftWidth
-    },
-    [leftWidth]
-  )
-
-  const handleSashChange = useCallback(
-    (event: SashEvent): void => {
-      if (!containerRef.current) return
-
-      const delta = event.currentX - event.startX
-      const containerWidth = containerRef.current.clientWidth
-      const min = MIN_LEFT_WIDTH
-      const max = Math.max(min, containerWidth - RIGHT_MIN_WIDTH)
-      const start = sashStartLeftRef.current
-      const next = Math.min(max, Math.max(min, start + delta))
-
-      setLeftWidth(next)
-    },
-    []
-  )
-
-  useEffect(() => {
-    if (!containerRef.current) {
-      return
-    }
-    const observer = new ResizeObserver(() => {
-      const el = containerRef.current
-      if (el) {
-        setContainerHeight(el.clientHeight)
-      }
-    })
-    observer.observe(containerRef.current)
-    return () => {
-      observer.disconnect()
-    }
-  }, [])
-
   return (
-    <div
-      ref={containerRef}
-      style={{
-        display: 'flex',
-        position: 'relative',
-        flex: 1,
-        minHeight: 0,
-        minWidth: 0
-      }}
-    >
-      <div
-        style={{
-          width: leftWidth,
-          minWidth: MIN_LEFT_WIDTH,
-          maxWidth: '70%',
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: 0,
-          borderRight: '1px solid var(--sideBar-border)',
-          backgroundColor: 'var(--sideBar-background)'
-        }}
-      >
-        <SplitView
-          orientation="vertical"
-          style={{ width: '100%', height: '100%' }}
+    <VerticalSashContainer
+      Left={
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%',
+            minWidth: 0,
+            minHeight: 0,
+            height: '100%',
+            borderRight: '1px solid var(--sideBar-border)',
+            backgroundColor: 'var(--sideBar-background)'
+          }}
         >
-          <Pane
-            title={t('folderView.environments')}
-            collapsible={false}
-            minSize={MIN_LEFT_WIDTH}
-            headerActions={
-              <>
-                <Button
-                  secondary
-                  small
-                  icon="add"
-                  options={{ ariaLabel: t('environment.add'), title: t('environment.add') }}
-                  onClick={handleAddEnvironment}
-                />
-                <Button
-                  secondary
-                  small
-                  icon="collapse-all"
-                  options={{ ariaLabel: t('sidebar.collapseAll'), title: t('sidebar.collapseAll') }}
-                  onClick={() => {
-                    setExpandedIds([])
-                  }}
-                />
-              </>
-            }
+          <SplitView
+            orientation="vertical"
+            style={{ width: '100%', height: '100%' }}
           >
-            <ListView
-              items={sidebarItems}
-              rootRole="tree"
-              ariaLabel={t('folderView.environmentsAriaLabel')}
-              selectedIds={selectedEnvId ? [selectedEnvId] : []}
-              isRenameable
-              expandOnChevronOnly
-              onItemClick={(payload) => {
-                const id = payload.item.id
-                if (id) {
-                  setSelectedEnvId(id)
-                }
-              }}
-              onItemToggle={(payload, expanded) => {
-                const id = payload.item.id
-                if (!id) return
-                setExpandedIds((prev) =>
-                  expanded
-                    ? Array.from(new Set([...prev, id]))
-                    : prev.filter((existingId) => existingId !== id)
-                )
-              }}
-              onItemRename={(payload: ListViewItemEventPayload, newValue: string) => {
-                handleRenameEnvironment(payload.item.id, newValue)
-              }}
-              onItemContextMenu={(payload) => {
-                // Select the item when right-clicking
-                setSelectedEnvId(payload.item.id)
-              }}
-            />
-          </Pane>
-        </SplitView>
-      </div>
-
-      <div
-        style={{
-          flex: 1,
-          minWidth: RIGHT_MIN_WIDTH,
-          minHeight: 0,
-          display: 'flex',
-          boxSizing: 'border-box',
-          backgroundColor: 'var(--editor-background)'
-        }}
-      >
-        <SplitView
-          orientation="vertical"
-          style={{ width: '100%', height: '100%' }}
-        >
-          {selectedEnvId ? (
             <Pane
-              title={
-                selectedEnvironment
-                  ? `${t('folderView.variables')} - ${selectedEnvironment.name}`
-                  : t('folderView.variables')
-              }
+              title={t('folderView.environments')}
               collapsible={false}
-              minSize={80}
+              minSize={MIN_LEFT_WIDTH}
               headerActions={
-                <Button
-                  secondary
-                  small
-                  icon="add"
-                  options={{ ariaLabel: t('folderView.addVariable'), title: t('folderView.addVariable') }}
-                  onClick={() => {
-                    variablesParamsRef.current?.addRow()
-                  }}
-                />
+                <>
+                  <Button
+                    secondary
+                    small
+                    icon="add"
+                    options={{ ariaLabel: t('environment.add'), title: t('environment.add') }}
+                    onClick={handleAddEnvironment}
+                  />
+                  <Button
+                    secondary
+                    small
+                    icon="collapse-all"
+                    options={{ ariaLabel: t('sidebar.collapseAll'), title: t('sidebar.collapseAll') }}
+                    onClick={() => {
+                      setExpandedIds([])
+                    }}
+                  />
+                </>
               }
             >
-              <div
-                style={{
-                  padding: '8px 8px 4px 8px',
-                  boxSizing: 'border-box'
+              <ListView
+                items={sidebarItems}
+                rootRole="tree"
+                ariaLabel={t('folderView.environmentsAriaLabel')}
+                selectedIds={selectedEnvId ? [selectedEnvId] : []}
+                isRenameable
+                expandOnChevronOnly
+                onItemClick={(payload) => {
+                  const id = payload.item.id
+                  if (id) {
+                    setSelectedEnvId(id)
+                  }
                 }}
-              >
-                <RestormKeyValueTable
-                  key={selectedEnvId}
-                  ref={variablesParamsRef}
-                  // At folder level, variables are defined sequentially:
-                  // no base variables, each row can only see previous rows.
-                  variables={[]}
-                  helpers={handlebarsHelpers}
-                  initialRows={reactiveSelectedEnvironment?.variables ?? []}
-                  onRowsChange={handleEnvironmentVariablesChange}
-                />
-              </div>
-            </Pane>
-          ) : (
-            <Pane
-              title={t('folderView.variables')}
-              collapsible={false}
-              minSize={80}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: '100%',
-                  color: 'var(--descriptionForeground)',
-                  fontStyle: 'italic',
-                  padding: 16
+                onItemToggle={(payload, expanded) => {
+                  const id = payload.item.id
+                  if (!id) return
+                  setExpandedIds((prev) =>
+                    expanded
+                      ? Array.from(new Set([...prev, id]))
+                      : prev.filter((existingId) => existingId !== id)
+                  )
                 }}
-              >
-                {t('folderView.selectEnvironment')}
-              </div>
+                onItemRename={(payload: ListViewItemEventPayload, newValue: string) => {
+                  handleRenameEnvironment(payload.item.id, newValue)
+                }}
+                onItemContextMenu={(payload) => {
+                  setSelectedEnvId(payload.item.id)
+                }}
+              />
             </Pane>
-          )}
-        </SplitView>
-      </div>
-
-      <Sash
-        orientation="vertical"
-        layoutProvider={layoutProvider}
-        onStart={handleSashStart}
-        onChange={handleSashChange}
-        size={4}
-      />
-    </div>
+          </SplitView>
+        </div>
+      }
+      Right={
+        <div
+          style={{
+            minHeight: 0,
+            display: 'flex',
+            boxSizing: 'border-box',
+            backgroundColor: 'var(--editor-background)'
+          }}
+        >
+          <SplitView
+            orientation="vertical"
+            style={{ width: '100%', height: '100%' }}
+          >
+            {selectedEnvId ? (
+              <Pane
+                title={
+                  selectedEnvironment
+                    ? `${t('folderView.variables')} - ${selectedEnvironment.name}`
+                    : t('folderView.variables')
+                }
+                collapsible={false}
+                minSize={80}
+                headerActions={
+                  <Button
+                    secondary
+                    small
+                    icon="add"
+                    options={{ ariaLabel: t('folderView.addVariable'), title: t('folderView.addVariable') }}
+                    onClick={() => {
+                      variablesParamsRef.current?.addRow()
+                    }}
+                  />
+                }
+              >
+                <div
+                  style={{
+                    padding: '8px 8px 4px 8px',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  <RestormKeyValueTable
+                    key={selectedEnvId}
+                    ref={variablesParamsRef}
+                    variables={[]}
+                    helpers={handlebarsHelpers}
+                    initialRows={reactiveSelectedEnvironment?.variables ?? []}
+                    onRowsChange={handleEnvironmentVariablesChange}
+                  />
+                </div>
+              </Pane>
+            ) : (
+              <Pane
+                title={t('folderView.variables')}
+                collapsible={false}
+                minSize={80}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '100%',
+                    color: 'var(--descriptionForeground)',
+                    fontStyle: 'italic',
+                    padding: 16
+                  }}
+                >
+                  {t('folderView.selectEnvironment')}
+                </div>
+              </Pane>
+            )}
+          </SplitView>
+        </div>
+      }
+      initialWidth={leftWidth}
+      minLeftWidth={MIN_LEFT_WIDTH}
+      minRightWidth={RIGHT_MIN_WIDTH}
+      sashConfig={{ size: 4 }}
+      className="environment-folder-view"
+    />
   )
 }
 

@@ -6,11 +6,9 @@ import {
   Button,
   MarkdownViewer,
   MarkdownEditor,
-  Sash,
+  VerticalSashContainer,
   ProgressBar,
-  type Tab,
-  type IVerticalSashLayoutProvider,
-  type SashEvent
+  type Tab
 } from 'electron-core-ui/renderer'
 
 // Lazy load Graph to avoid Monaco initialization conflicts at app startup
@@ -68,8 +66,6 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
   const { t } = useTranslation()
   const [activeTabId, setActiveTabId] = useState('request')
   const [responseTabId, setResponseTabId] = useState(responseContent ? 'response' : 'infos')
-  const [leftPaneWidth, setLeftPaneWidth] = useState(0)
-  // Key counter to force Graph remount when switching to jsoncrack tab (Monaco disposal issue)
   const [graphKey, setGraphKey] = useState(0)
   const [isDarkTheme, setIsDarkTheme] = useState<boolean>(() => {
     if (typeof document === 'undefined') return true
@@ -77,30 +73,23 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
     return themeAttr === 'dark' || themeAttr === 'hcDark'
   })
   
-  const splitContainerRef = useRef<HTMLDivElement | null>(null)
-  const sashStartLeftRef = useRef(0)
   const graphRef = useRef<GraphRef | null>(null)
   const prevResponseContentRef = useRef<typeof responseContent>(null)
   
-  // Ref for onChange to avoid recreating tabs callback
   const onNotesChangeRef = useRef(onNotesChange)
   useEffect(() => { onNotesChangeRef.current = onNotesChange }, [onNotesChange])
   
-  // Stable notes change handler that uses ref
   const handleNotesChange = useCallback((md: string) => {
     onNotesChangeRef.current?.(md)
   }, [])
 
-  // Switch to response tab only when content becomes available (new response), or to infos if it disappears
   React.useEffect(() => {
     const hadContent = prevResponseContentRef.current !== null && prevResponseContentRef.current !== undefined
     const hasContent = responseContent !== null && responseContent !== undefined
     
-    // New response arrived - switch to response tab
     if (!hadContent && hasContent) {
       setResponseTabId('response')
     }
-    // Response disappeared - switch to infos if currently on response
     else if (hadContent && !hasContent && responseTabId === 'response') {
       setResponseTabId('infos')
     }
@@ -108,7 +97,6 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
     prevResponseContentRef.current = responseContent
   }, [responseContent, responseTabId])
 
-  // Watch for theme changes
   React.useEffect(() => {
     if (typeof document === 'undefined') return
 
@@ -137,45 +125,6 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
       observer.disconnect()
     }
   }, [])
-  
-  // Sash layout provider
-  const splitLayoutProvider = useMemo<IVerticalSashLayoutProvider>(
-    () => ({
-      getVerticalSashLeft: () => {
-        if (leftPaneWidth !== 0) return leftPaneWidth
-        const width = splitContainerRef.current?.clientWidth ?? 0
-        return width > 0 ? width / 2 : 0
-      },
-      getVerticalSashTop: () => 0,
-      getVerticalSashHeight: () => splitContainerRef.current?.clientHeight ?? 0
-    }),
-    [leftPaneWidth]
-  )
-  
-  const handleSashStart = useCallback(
-    (_event: SashEvent): void => {
-      if (leftPaneWidth !== 0) {
-        sashStartLeftRef.current = leftPaneWidth
-      } else if (splitContainerRef.current) {
-        const width = splitContainerRef.current.clientWidth
-        sashStartLeftRef.current = width > 0 ? width / 2 : 0
-      }
-    },
-    [leftPaneWidth]
-  )
-  
-  const handleSashChange = useCallback(
-    (event: SashEvent): void => {
-      if (!splitContainerRef.current) return
-      const containerWidth = splitContainerRef.current.clientWidth
-      const minLeft = 320
-      const minRight = 260
-      const maxLeft = containerWidth - minRight
-      const newLeft = Math.max(minLeft, Math.min(maxLeft, sashStartLeftRef.current + event.currentX - event.startX))
-      setLeftPaneWidth(newLeft)
-    },
-    []
-  )
   
   // Handle response tab change - increment graphKey when switching to jsoncrack
   const handleResponseTabChange = useCallback((tabId: string) => {
@@ -401,26 +350,45 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
         {isLoading && <ProgressBar mode="infinite" />}
       </div>
       
-      {/* Main Content with Split */}
-      <div 
-        ref={splitContainerRef} 
-        style={{ 
-          flex: 1, 
-          minHeight: 0, 
-          display: 'flex', 
-          position: 'relative', 
-          overflow: 'hidden' 
-        }}
-      >
-        {/* Request Tabs Pane */}
-        <div style={{ 
-          width: showResponsePanel ? (leftPaneWidth !== 0 ? leftPaneWidth : '50%') : '100%',
-          minWidth: 320,
-          maxWidth: showResponsePanel ? '80%' : '100%',
-          minHeight: 0,
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
+      {showResponsePanel ? (
+        <VerticalSashContainer
+          Left={
+            <div style={{ 
+              minHeight: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              width: '100%',
+              minWidth: 0
+            }}>
+              <Tabs 
+                tabs={requestTabs} 
+                activeTabId={activeTabId} 
+                onTabChange={setActiveTabId}
+                keepMounted
+              />
+            </div>
+          }
+          Right={
+            <div style={{ 
+              minHeight: 0, 
+              display: 'flex', 
+              flexDirection: 'column', 
+              overflow: 'hidden'
+            }}>
+              <Tabs 
+                tabs={responseTabs} 
+                activeTabId={responseTabId} 
+                onTabChange={handleResponseTabChange} 
+              />
+            </div>
+          }
+          initialWidth={500}
+          minLeftWidth={320}
+          minRightWidth={260}
+          sashConfig={{ size: 4 }}
+        />
+      ) : (
+        <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           <Tabs 
             tabs={requestTabs} 
             activeTabId={activeTabId} 
@@ -428,39 +396,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
             keepMounted
           />
         </div>
-        
-        {/* Response Pane */}
-        {showResponsePanel && (
-          <>
-            <Sash
-              orientation="vertical"
-              layoutProvider={splitLayoutProvider}
-              onStart={handleSashStart}
-              onChange={handleSashChange}
-              size={4}
-            />
-            <div style={{ 
-              flex: 1,
-              minWidth: 260,
-              minHeight: 0, 
-              display: 'flex', 
-              flexDirection: 'column', 
-              marginLeft: 4,
-              overflow: 'hidden'
-            }}>
-              {/* Response Tabs (Response, Infos, JsonCrack) */}
-              <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                <Tabs 
-                  tabs={responseTabs} 
-                  activeTabId={responseTabId} 
-                  onTabChange={handleResponseTabChange} 
-                />
-              </div>
-              
-            </div>
-          </>
-        )}
-      </div>
+      )}
     </div>
   )
 }

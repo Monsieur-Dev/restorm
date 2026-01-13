@@ -386,9 +386,10 @@ export const SplitView: React.FC<SplitViewProps> = ({
 				return;
 			}
 
-			setCollapsed(prev => {
-				const nextCollapsed = [...prev];
-				nextCollapsed[index] = !prev[index];
+			setCollapsed(() => {
+				const currentCollapsed = collapsed;
+				const nextCollapsed = [...currentCollapsed];
+				nextCollapsed[index] = !currentCollapsed[index];
 
 				// Enable animated class briefly for collapse/expand transitions
 				if (collapseAnimationTimeoutRef.current !== null) {
@@ -413,7 +414,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
 				return nextCollapsed;
 			});
 		},
-		[panes.length, updateRatios, computeRatiosForState, setCollapsed]
+		[panes.length, updateRatios, computeRatiosForState, setCollapsed, collapsed]
 	);
 
 	// Notify external listener when ratios change

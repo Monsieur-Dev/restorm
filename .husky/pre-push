@@ -41,7 +41,9 @@ do
     
     # Check each commit for eslint-disable in changed files
     for commit in $commits; do
-        changed_files=$(git diff-tree --no-commit-id --name-only -r "$commit" | grep -E '\.(ts|tsx|js|jsx)$')
+        # NOTE: Husky runs hooks with `sh -e`, so any command substitution must not fail.
+        # Filter directly via pathspec to avoid `grep` returning exit code 1 when there are no JS/TS files.
+        changed_files=$(git diff-tree --no-commit-id --name-only -r "$commit" -- '*.ts' '*.tsx' '*.js' '*.jsx' || true)
         
         for file in $changed_files; do
             if [ -f "$file" ]; then

@@ -7,7 +7,7 @@ import eslintComments from 'eslint-plugin-eslint-comments';
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'out/**', 'node_modules/**', '*.config.ts'],
+    ignores: ['dist/**', 'out/**', 'node_modules/**', 'temp/**', '*.config.ts'],
   },
   {
     files: ['**/*.{ts,tsx}'],

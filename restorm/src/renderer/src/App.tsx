@@ -3,12 +3,11 @@ import { useTranslation } from 'react-i18next'
 import {
   Statusbar,
   StatusbarElement,
-  Sash,
+  VerticalSashContainer,
   isTabGroupNode,
   isContainerNode,
   navigationService,
   useFileService,
-  useVerticalSash,
   eventBus,
   logger,
   computeChecksum,
@@ -928,21 +927,6 @@ const App: React.FC = () => {
     getNearestEnvironmentsForBreadcrumbs
   })
 
-  // Use vertical sash hook for sidebar resizing
-  const {
-    containerRef,
-    width: leftWidth,
-    layoutProvider,
-    handleSashStart,
-    handleSashChange
-  } = useVerticalSash({
-    initialWidth: 260,
-    minWidth: MIN_LEFT_WIDTH,
-    minRightWidth: RIGHT_MIN_WIDTH,
-    storageKey: 'restorm-sidebar-width'
-  })
-
-  // Handle tree changes from workbench (drag-drop, close tab, etc.)
   const handleTreeChange = useCallback((newTree: WorkbenchTree) => {
     setWorkbenchTree(newTree)
   }, [])
@@ -976,82 +960,96 @@ const App: React.FC = () => {
         onSearchResultClick={handleSearchResultClick}
       />
 
-      <div
-        ref={containerRef}
-        style={{
-          display: 'flex',
-          position: 'relative',
-          flex: 1,
-          minHeight: 0
-        }}
-      >
-        {fileName && (
-          <div
-            style={{
-              width: leftWidth,
-              minWidth: MIN_LEFT_WIDTH,
-              maxWidth: '70%',
-              display: 'flex',
-              flexDirection: 'column',
-              minHeight: 0
-            }}
-          >
-            <RestormSidebar
-              items={sidebarItemsWithContextMenu}
-              selectedItemId={selectedItemId}
-              expandedIds={expandedIds}
-              editingItemId={sidebarEditingItemId}
-              onItemClick={handleItemClick}
-              onItemToggle={(payload, expanded) => {
-                const id = payload.item.id
-                if (!id) return
-                setExpandedIds((prev) =>
-                  expanded
-                    ? Array.from(new Set([...prev, id]))
-                    : prev.filter((existingId) => existingId !== id)
-                )
+      {fileName ? (
+        <VerticalSashContainer
+          Left={
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                width: '100%',
+                minWidth: 0,
+                minHeight: 0,
+                height: '100%'
               }}
-              onItemDrop={handleItemDrop}
-              onItemRename={handleSidebarItemRename}
-              onDeleteRequest={(payload) => { handleDeleteItem(payload.item.id) }}
-              onEditingEnd={() => { setSidebarEditingItemId(null) }}
-              onAddRequest={() => { setShowImportModal(true) }}
-              onCollapseAll={() => { setExpandedIds([]) }}
+            >
+              <RestormSidebar
+                items={sidebarItemsWithContextMenu}
+                selectedItemId={selectedItemId}
+                expandedIds={expandedIds}
+                editingItemId={sidebarEditingItemId}
+                onItemClick={handleItemClick}
+                onItemToggle={(payload, expanded) => {
+                  const id = payload.item.id
+                  if (!id) return
+                  setExpandedIds((prev) =>
+                    expanded
+                      ? Array.from(new Set([...prev, id]))
+                      : prev.filter((existingId) => existingId !== id)
+                  )
+                }}
+                onItemDrop={handleItemDrop}
+                onItemRename={handleSidebarItemRename}
+                onDeleteRequest={(payload) => { handleDeleteItem(payload.item.id) }}
+                onEditingEnd={() => { setSidebarEditingItemId(null) }}
+                onAddRequest={() => { setShowImportModal(true) }}
+                onCollapseAll={() => { setExpandedIds([]) }}
+              />
+            </div>
+          }
+          Right={
+            <RestormWorkbenchContainer
+              tree={workbenchTreeWithDirtyState}
+              onTreeChange={handleTreeChange}
+              focusedGroupId={focusedGroupId}
+              onFocusedGroupChange={setFocusedGroupId}
+              onTabActivate={handleTabActivate}
+              onBreadcrumbClick={handleBreadcrumbClick}
+              onItemRename={handleItemRename}
+              onTagsChange={handleTagsChange}
+              onFolderChange={handleFolderChange}
+              onEnvironmentFolderChange={handleEnvironmentFolderChange}
+              onSizesChange={handleSizesChange}
+              emptyFallback={<EmptyBench />}
+              workbenchId={WORKBENCH_ID}
+              onRebuildTab={handleRebuildTab}
+              onStateRestored={handleStateRestored}
+              getRequestById={(id) => findRequestById(rootItems, id)}
+              getFolderById={(id) => findFolderById(rootItems, id)}
+              getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootItems, id)}
             />
-          </div>
-        )}
-
-        <RestormWorkbenchContainer
-          tree={workbenchTreeWithDirtyState}
-          onTreeChange={handleTreeChange}
-          focusedGroupId={focusedGroupId}
-          onFocusedGroupChange={setFocusedGroupId}
-          onTabActivate={handleTabActivate}
-          onBreadcrumbClick={handleBreadcrumbClick}
-          onItemRename={handleItemRename}
-          onTagsChange={handleTagsChange}
-          onFolderChange={handleFolderChange}
-          onEnvironmentFolderChange={handleEnvironmentFolderChange}
-          onSizesChange={handleSizesChange}
-          emptyFallback={fileName ? <EmptyBench /> : <Welcome />}
-          workbenchId={WORKBENCH_ID}
-          onRebuildTab={handleRebuildTab}
-          onStateRestored={handleStateRestored}
-          getRequestById={(id) => findRequestById(rootItems, id)}
-          getFolderById={(id) => findFolderById(rootItems, id)}
-          getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootItems, id)}
+          }
+          initialWidth={260}
+          minLeftWidth={MIN_LEFT_WIDTH}
+          minRightWidth={RIGHT_MIN_WIDTH}
+          storageKey="restorm-sidebar-width"
+          sashConfig={{ size: 4, className: 'always-visible' }}
+          className="restorm-main-container"
         />
-
-        {fileName && (
-          <Sash
-            orientation="vertical"
-            layoutProvider={layoutProvider}
-            onStart={handleSashStart}
-            onChange={handleSashChange}
-            size={4}
+      ) : (
+        <div style={{ flex: 1, minHeight: 0 }}>
+          <RestormWorkbenchContainer
+            tree={workbenchTreeWithDirtyState}
+            onTreeChange={handleTreeChange}
+            focusedGroupId={focusedGroupId}
+            onFocusedGroupChange={setFocusedGroupId}
+            onTabActivate={handleTabActivate}
+            onBreadcrumbClick={handleBreadcrumbClick}
+            onItemRename={handleItemRename}
+            onTagsChange={handleTagsChange}
+            onFolderChange={handleFolderChange}
+            onEnvironmentFolderChange={handleEnvironmentFolderChange}
+            onSizesChange={handleSizesChange}
+            emptyFallback={<Welcome />}
+            workbenchId={WORKBENCH_ID}
+            onRebuildTab={handleRebuildTab}
+            onStateRestored={handleStateRestored}
+            getRequestById={(id) => findRequestById(rootItems, id)}
+            getFolderById={(id) => findFolderById(rootItems, id)}
+            getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootItems, id)}
           />
-        )}
-      </div>
+        </div>
+      )}
 
       <Statusbar>
         {filePath && <StatusbarElement title={filePath} />}

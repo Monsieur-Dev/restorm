@@ -71,17 +71,31 @@ const MenuItem: React.FC<MenuItemProps> = ({
   }, [disabled, hasSubmenu, onClick])
 
   const handleMouseEnter = useCallback((): void => {
-    if (!disabled && hasSubmenu) {
-      // Clear any existing timeout
-      if (submenuTimeoutRef.current) {
-        clearTimeout(submenuTimeoutRef.current)
+    if (disabled) return
+
+    // Always close sibling submenus at the same level, even if this item has no submenu.
+    if (itemRef.current) {
+      const parentMenu = itemRef.current.closest('ul.actions-container')
+      if (parentMenu) {
+        const closeEvent = new CustomEvent('close-other-submenus', {
+          bubbles: false,
+          detail: { excludeElement: itemRef.current }
+        })
+        parentMenu.dispatchEvent(closeEvent)
       }
-      
-      // Set timeout to show submenu after 300ms
-      submenuTimeoutRef.current = setTimeout(() => {
-        setShowSubmenu(true)
-      }, 300)
     }
+
+    if (!hasSubmenu) return
+
+    // Clear any existing timeout
+    if (submenuTimeoutRef.current) {
+      clearTimeout(submenuTimeoutRef.current)
+    }
+    
+    // Set timeout to show submenu after 300ms
+    submenuTimeoutRef.current = setTimeout(() => {
+      setShowSubmenu(true)
+    }, 300)
   }, [disabled, hasSubmenu])
 
   const handleMouseLeave = useCallback((): void => {
@@ -90,8 +104,6 @@ const MenuItem: React.FC<MenuItemProps> = ({
       clearTimeout(submenuTimeoutRef.current)
       submenuTimeoutRef.current = null
     }
-    // Don't hide submenu when mouse leaves - keep it open
-    // The submenu will only close when clicking outside or pressing Escape
   }, [])
 
   const handleSubmenuMouseEnter = useCallback((): void => {
@@ -101,6 +113,32 @@ const MenuItem: React.FC<MenuItemProps> = ({
   const handleSubmenuMouseLeave = useCallback((): void => {
     // Don't hide submenu when mouse leaves submenu - keep it open
     // The submenu will only close when clicking outside or pressing Escape
+  }, [])
+
+  // Listen for close-other-submenus event from sibling MenuItems
+  useEffect(() => {
+    if (!itemRef.current) return
+
+    const parentMenu = itemRef.current.closest('ul.actions-container')
+    if (!parentMenu) return
+
+    const handleCloseOtherSubmenus = (event: Event): void => {
+      const customEvent = event as CustomEvent<{ excludeElement: HTMLElement }>
+      // Close this submenu when another item of the same level is hovered.
+      if (customEvent.detail.excludeElement !== itemRef.current) {
+        setShowSubmenu(false)
+        // Clear any pending timeout
+        if (submenuTimeoutRef.current) {
+          clearTimeout(submenuTimeoutRef.current)
+          submenuTimeoutRef.current = null
+        }
+      }
+    }
+
+    parentMenu.addEventListener('close-other-submenus', handleCloseOtherSubmenus)
+    return () => {
+      parentMenu.removeEventListener('close-other-submenus', handleCloseOtherSubmenus)
+    }
   }, [])
 
   // Close submenu when clicking outside

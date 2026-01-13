@@ -3,10 +3,12 @@
  * 
  * Provides translation capabilities for Electron main process dialogs and messages.
  * Translations are loaded from the same JSON files used by the renderer.
+ * Language preference is persisted using StorageService.
  */
 import { join } from 'path'
 import { readFileSync, existsSync } from 'fs'
 import { logger } from './LoggerService'
+import { getStorageService } from './StorageService'
 
 // Import translations from renderer locales (shared with renderer)
 import coreEnTranslation from '../../renderer/locales/en/translation.json'
@@ -35,9 +37,6 @@ class I18nService {
       return
     }
 
-    this.currentLanguage = defaultLanguage
-    this.fallbackLanguage = 'en'
-
     // Load built-in translations from electron-core-ui (from JSON files)
     this.loadBuiltInTranslations()
 
@@ -46,8 +45,14 @@ class I18nService {
       this.loadTranslationsFromPath(resourcesPath)
     }
 
+    // Restore saved language preference or use default
+    const storageService = getStorageService()
+    const savedLanguage = storageService.get('language') as string | undefined
+    this.currentLanguage = savedLanguage ?? defaultLanguage
+    this.fallbackLanguage = 'en'
+
     this.initialized = true
-    logger.info('[I18nService] Initialized', { language: this.currentLanguage })
+    logger.info('[I18nService] Initialized', { language: this.currentLanguage, savedLanguage })
   }
 
   /**
@@ -101,11 +106,13 @@ class I18nService {
   }
 
   /**
-   * Set the current language
+   * Set the current language and persist it
    */
   public setLanguage(language: string): void {
     this.currentLanguage = language
-    logger.debug('[I18nService] Language changed', { language })
+    const storageService = getStorageService()
+    storageService.set('language', language)
+    logger.debug('[I18nService] Language changed and persisted', { language })
   }
 
   /**

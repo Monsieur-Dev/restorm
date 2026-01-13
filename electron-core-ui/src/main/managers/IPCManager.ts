@@ -109,13 +109,15 @@ export function setupIPC(resourcesPath?: string): void {
 
   // I18n IPC handlers
   ipcMain.handle('i18n:set-language', (_event, language: string) => {
+    storageService.set('language', language)
     i18nService.setLanguage(language)
     logger.debug('Language changed via IPC', { language })
     return true
   })
 
   ipcMain.handle('i18n:get-language', () => {
-    return i18nService.getLanguage()
+    const stored = storageService.get('language') as string | undefined
+    return stored ?? i18nService.getLanguage()
   })
 
   // Logger IPC handler

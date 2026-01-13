@@ -55,31 +55,56 @@ export function initializeI18n(resources: Resource, defaultLanguage = 'en'): Pro
   // Merge core resources with application resources (app overrides core)
   const mergedResources = mergeResources(coreResources, resources)
 
-  // Init with merged resources and return the promise
-  return i18n
-    .init({
-    resources: mergedResources,
-    lng: defaultLanguage,
-    fallbackLng: defaultLanguage,
-    interpolation: {
-      escapeValue: false // React already escapes values
+  const availableLanguages = new Set(Object.keys(mergedResources))
+
+  const resolveInitialLanguage = async (): Promise<string> => {
+    try {
+      const api = (window as unknown as { api?: { i18n?: { getLanguage?: () => Promise<string> } } }).api
+      const getLanguage = api?.i18n?.getLanguage
+      if (!getLanguage) {
+        return defaultLanguage
+      }
+      const stored = await getLanguage()
+      if (stored && availableLanguages.has(stored)) {
+        return stored
+      }
+      return defaultLanguage
+    } catch (error) {
+      logger.warn('Failed to resolve persisted language, falling back to default', { error: String(error) })
+      return defaultLanguage
     }
-  }).then(() => {
-    isInitialized = true
-    
-    // Synchronize initial language with main process
-    void window.api.i18n.setLanguage(defaultLanguage)
-    
-    // Listen for language changes and sync with main process
-    i18n.on('languageChanged', (lng: string) => {
-      void window.api.i18n.setLanguage(lng)
+  }
+
+  return resolveInitialLanguage()
+    .then((initialLanguage) => {
+      return i18n.init({
+        resources: mergedResources,
+        lng: initialLanguage,
+        fallbackLng: defaultLanguage,
+        interpolation: {
+          escapeValue: false // React already escapes values
+        }
+      })
     })
-    
-    return i18n
-  }).catch((error: unknown) => {
-    logger.error('Failed to initialize i18n', { error: String(error) })
-    throw error
-  })
+    .then(() => {
+      isInitialized = true
+
+      const api = (window as unknown as { api?: { i18n?: { setLanguage?: (lng: string) => Promise<boolean> } } }).api
+      const setLanguage = api?.i18n?.setLanguage
+
+      if (setLanguage) {
+        void setLanguage(i18n.language)
+        i18n.on('languageChanged', (lng: string) => {
+          void setLanguage(lng)
+        })
+      }
+
+      return i18n
+    })
+    .catch((error: unknown) => {
+      logger.error('Failed to initialize i18n', { error: String(error) })
+      throw error
+    })
 }
 
 // Export the i18n instance for direct use

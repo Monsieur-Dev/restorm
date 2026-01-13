@@ -5,7 +5,7 @@
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest } from '../types/collections'
 import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest } from '../types/collections'
-import type { ReactNode } from 'react'
+import React, { type ReactNode } from 'react'
 
 export interface FolderToListViewOptions {
   /** Set of expanded item IDs */
@@ -16,6 +16,23 @@ export interface FolderToListViewOptions {
   renderProtocolBadge?: (protocol: string, label?: string) => ReactNode
   /** Function to render deprecated request title (with strikethrough) */
   renderDeprecatedTitle?: (name: string) => ReactNode
+}
+
+function withInlineBadge(title: ReactNode, badge: ReactNode | undefined): ReactNode {
+  if (!badge) return title
+  return React.createElement(
+    'span',
+    {
+      style: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        minWidth: 0
+      }
+    },
+    React.createElement('span', { style: { flex: '0 0 auto' } }, badge),
+    React.createElement('span', { style: { minWidth: 0 } }, title)
+  )
 }
 
 /**
@@ -32,9 +49,9 @@ function httpRequestToListViewItem(
 
   return {
     id: request.id,
-    title,
+    title: withInlineBadge(title, options.renderMethodBadge(request.method)),
     icon: undefined,
-    leftActions: options.renderMethodBadge(request.method)
+    leftActions: undefined
   }
 }
 
@@ -45,11 +62,12 @@ function graphqlRequestToListViewItem(
   request: GraphQLRequest,
   options: FolderToListViewOptions
 ): ListViewItemData {
+  const badge = options.renderProtocolBadge?.(request.operationType)
   return {
     id: request.id,
-    title: request.name,
+    title: withInlineBadge(request.name, badge),
     icon: undefined,
-    leftActions: options.renderProtocolBadge?.(request.operationType)
+    leftActions: undefined
   }
 }
 
@@ -60,11 +78,12 @@ function grpcRequestToListViewItem(
   request: GrpcRequest,
   options: FolderToListViewOptions
 ): ListViewItemData {
+  const badge = options.renderProtocolBadge?.(request.callType)
   return {
     id: request.id,
-    title: request.name,
+    title: withInlineBadge(request.name, badge),
     icon: undefined,
-    leftActions: options.renderProtocolBadge?.(request.callType)
+    leftActions: undefined
   }
 }
 
@@ -75,11 +94,12 @@ function soapRequestToListViewItem(
   request: SoapRequest,
   options: FolderToListViewOptions
 ): ListViewItemData {
+  const badge = options.renderProtocolBadge?.('soap')
   return {
     id: request.id,
-    title: request.name,
+    title: withInlineBadge(request.name, badge),
     icon: undefined,
-    leftActions: options.renderProtocolBadge?.('soap')
+    leftActions: undefined
   }
 }
 
@@ -90,11 +110,12 @@ function websocketRequestToListViewItem(
   request: WebSocketRequest,
   options: FolderToListViewOptions
 ): ListViewItemData {
+  const badge = options.renderProtocolBadge?.(request.protocol)
   return {
     id: request.id,
-    title: request.name,
+    title: withInlineBadge(request.name, badge),
     icon: undefined,
-    leftActions: options.renderProtocolBadge?.(request.protocol)
+    leftActions: undefined
   }
 }
 
