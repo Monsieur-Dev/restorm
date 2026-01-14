@@ -122,6 +122,16 @@ contextBridge.exposeInMainWorld('restorm', {
       return result as { success: boolean; isDirectory?: boolean; content?: unknown; path?: string; format?: PersistenceFormat }
     }
   },
+  secrets: {
+    read: async (filePath: string): Promise<string | null> => {
+      const result: unknown = await ipcRenderer.invoke('restorm:secrets:read', filePath)
+      return typeof result === 'string' ? result : null
+    },
+    write: async (filePath: string, content: string): Promise<{ success: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('restorm:secrets:write', filePath, content)
+      return result as { success: boolean; error?: string }
+    }
+  },
   getEditorFile: async (): Promise<{ title: string; content?: string } | undefined> => {
     const result: unknown = await ipcRenderer.invoke('restorm:get-editor-file')
     return result as { title: string; content?: string } | undefined

@@ -1,7 +1,7 @@
 import { app, ipcMain, BrowserWindow, dialog } from 'electron'
 import { MainWindow } from './windows/MainWindow'
 import { initializeApp, logger, initFeatureService, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, getPersistenceService, isPersistenceServiceInitialized } from 'electron-core-ui'
-import { join, relative, basename } from 'path'
+import { join, relative, basename, dirname } from 'path'
 import { promises as fs, existsSync, mkdirSync, statSync, readFileSync, writeFileSync, renameSync, rmSync } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
 import { searchIndexService, contextService } from './services'
@@ -10,6 +10,8 @@ import { typeDefs, resolvers, pubsub } from './graphql'
 import type { PersistenceFormat } from 'electron-core-ui'
 import { randomUUID } from 'crypto'
 import { folderMappingService } from './services/FolderMappingService'
+import { saveFolderSecretsEnvFile, applyFolderSecretsEnvFile } from './services/SecretsEnvFileService'
+import { normalizeDocumentValuesForPersistence } from '../shared/utils/valuePersistence'
 // DocumentEvents are handled by FileService internally for dirty state tracking
 
 // Parse command line arguments for --open / -o
@@ -486,6 +488,35 @@ ipcMain.handle('restorm:show-folder-dialog', async (_event) => {
   }
 })
 
+// IPC handlers for PasswordValue secrets file (dotenv-like)
+ipcMain.handle('restorm:secrets:read', async (_event, filePath: string) => {
+  try {
+    if (!filePath || !existsSync(filePath)) return null
+    return await fs.readFile(filePath, 'utf-8')
+  } catch (error) {
+    logger.warn('Failed to read secrets file', { path: filePath, error: String(error) })
+    return null
+  }
+})
+
+ipcMain.handle('restorm:secrets:write', async (_event, filePath: string, content: string) => {
+  try {
+    if (!filePath) return { success: false, error: 'Missing path' }
+    await fs.mkdir(dirname(filePath), { recursive: true })
+    if (content.trim() === '') {
+      if (existsSync(filePath)) {
+        rmSync(filePath, { force: true })
+      }
+      return { success: true }
+    }
+    await fs.writeFile(filePath, content, 'utf-8')
+    return { success: true }
+  } catch (error) {
+    logger.warn('Failed to write secrets file', { path: filePath, error: String(error) })
+    return { success: false, error: String(error) }
+  }
+})
+
 // IPC handler to open a file or folder (smart detection)
 ipcMain.handle('restorm:open-path', async (_event, path: string) => {
   logger.info('📂 Open path requested', { path })
@@ -605,6 +636,7 @@ async function saveFolderStructure(
   const ext = format === 'json5' ? 'json5' : format
   
   try {
+    normalizeDocumentValuesForPersistence(data)
     // Start save session to track what's being saved
     folderMappingService.startSaveSession()
     
@@ -700,6 +732,13 @@ async function saveFolderStructure(
 
     // Commit the save session
     folderMappingService.commitSaveSession()
+
+    // Save PasswordValue secrets to restorm.env at the root of the folder
+    try {
+      await saveFolderSecretsEnvFile(folderPath, data)
+    } catch (error) {
+      logger.warn('Failed to save restorm.env secrets file', { error: String(error) })
+    }
 
     return { success: true, path: folderPath }
   } catch (error) {
@@ -1006,6 +1045,9 @@ async function loadFolderStructure(
         data = result.data as Record<string, unknown>
       }
     }
+
+    // Apply PasswordValue secrets from restorm.env (if present)
+    await applyFolderSecretsEnvFile(folderPath, data)
 
     // Generate runtime IDs for all objects
     generateRuntimeIds(data, 'id')

@@ -19,6 +19,11 @@ function getDirectoryStructure(dirPath: string, basePath?: string): string[] {
   const items = readdirSync(dirPath).sort()
 
   for (const item of items) {
+    // Ignore .env files (secrets are stored separately)
+    if (item.endsWith('.env') || item.endsWith('.restorm.env')) {
+      continue
+    }
+
     const fullPath = join(dirPath, item)
     const relativePath = fullPath.substring(base.length + 1)
     const stat = statSync(fullPath)

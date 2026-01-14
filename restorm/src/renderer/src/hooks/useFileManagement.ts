@@ -23,6 +23,8 @@ import type { Folder, EnvironmentFolder, Request, FolderItem, Environment } from
 import { isEnvironmentFolder, isAnyFolder } from '../types/collections'
 import type { PersistenceFormat, WorkbenchTree } from 'electron-core-ui/renderer'
 import type { SaveOptions } from '../components/Modals/SaveOptionsModal'
+import { collectPasswordSecretsFromCollections, applyPasswordSecretsToCollections } from '../../../shared/utils/passwordSecrets'
+import { serializeEnvFile, parseEnvFileDetailed } from '../../../shared/utils/dotenv'
 
 export interface UseFileManagementOptions {
   rootItems: (EnvironmentFolder | Folder | Request)[]
@@ -111,9 +113,16 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       })()
     } else {
       const dataForSave = prepareForSerialization(plainData)
-      void saveFile(dataForSave)
+      const secrets = collectPasswordSecretsFromCollections(plainData)
+      const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
+      void (async () => {
+        const saved = await saveFile(dataForSave)
+        if (saved && fileName) {
+          await window.restorm?.secrets.write(`${fileName}.env`, envContent)
+        }
+      })()
     }
-  }, [saveFile, rootItems, isOpenedAsFolder, folderFormat, clearDirty, currentFolderPath])
+  }, [saveFile, rootItems, isOpenedAsFolder, folderFormat, clearDirty, currentFolderPath, fileName])
 
   const handleMenuSaveAs = useCallback(() => {
     setShowSaveOptionsModal(true)
@@ -151,6 +160,11 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
           if (result?.success) {
             logger.info('[useFileManagement] File saved successfully', { path: result.path })
             setIsOpenedAsFolder(false)
+            if (result.path) {
+              const secrets = collectPasswordSecretsFromCollections(plainData)
+              const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
+              await window.restorm?.secrets.write(`${result.path}.env`, envContent)
+            }
             await clearDirty()
           } else {
             logger.error('[useFileManagement] Failed to save file', {
@@ -185,6 +199,11 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       const plainData = JSON.parse(JSON.stringify({ collections: rootItems })) as unknown
       const dataForSave = prepareForSerialization(plainData)
       const saved = await saveFile(dataForSave)
+      if (saved && fileName) {
+        const secrets = collectPasswordSecretsFromCollections(plainData)
+        const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
+        await window.restorm?.secrets.write(`${fileName}.env`, envContent)
+      }
       return saved
     }
     return true
@@ -239,86 +258,97 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   // Handle file opened event
   const handleFileOpened = useCallback(
     (state: { currentFile: { content: unknown; path?: string | null; format?: string } }) => {
-      const newPath = state.currentFile.path ?? null
+      void (async () => {
+        const newPath = state.currentFile.path ?? null
 
-      if (isLoadingRef.current && newPath === lastLoadedPathRef.current) {
-        return
-      }
+        if (isLoadingRef.current && newPath === lastLoadedPathRef.current) {
+          return
+        }
 
-      isLoadingRef.current = true
-      lastLoadedPathRef.current = newPath
+        isLoadingRef.current = true
+        lastLoadedPathRef.current = newPath
 
-      const content = state.currentFile.content as { collections?: EnvironmentFolder[] } | null
-      const collections =
-        content?.collections && Array.isArray(content.collections) ? content.collections : []
+        const path = state.currentFile.path ?? ''
+        const openedAsFolder = path !== '' && !/\.(json|yaml|yml|json5|restorm)$/i.test(path)
+        setIsOpenedAsFolder(openedAsFolder)
+        if (openedAsFolder) {
+          const format = state.currentFile.format as PersistenceFormat | undefined
+          setFolderFormat(format ?? 'yaml')
+          setCurrentFolderPath(path)
+        } else {
+          setCurrentFolderPath(null)
+        }
 
-      const path = state.currentFile.path ?? ''
-      const openedAsFolder = path !== '' && !/\.(json|yaml|yml|json5|restorm)$/i.test(path)
-      setIsOpenedAsFolder(openedAsFolder)
-      if (openedAsFolder) {
-        const format = state.currentFile.format as PersistenceFormat | undefined
-        setFolderFormat(format ?? 'yaml')
-        setCurrentFolderPath(path)
-      } else {
-        setCurrentFolderPath(null)
-      }
-
-      clearTabDirtyState()
-
-      const collectionsWithIds = processAfterDeserialization(collections)
-      const reactiveItems = collectionsWithIds.map((folder) =>
-        makeReactiveFolder(folder)
-      ) as EnvironmentFolder[]
-      setRootItems(reactiveItems)
-
-      if (openedAsFolder) {
-        const registerAllItems = (items: FolderItem[]): void => {
-          for (const item of items) {
-            const itemChecksum = computeChecksum(JSON.parse(JSON.stringify(item)))
-            registerTabDirtyState(item.id, itemChecksum)
-
-            if (isAnyFolder(item)) {
-              registerAllItems((item as Folder).items)
+        const content = state.currentFile.content as Record<string, unknown> | null
+        if (content && !openedAsFolder && path) {
+          const envText = await window.restorm?.secrets.read(`${path}.env`)
+          if (envText) {
+            const parsed = parseEnvFileDetailed(envText)
+            if (parsed.duplicates.length > 0) {
+              logger.warn('[useFileManagement] Duplicate keys found in .restorm.env (last wins)', {
+                duplicates: parsed.duplicates
+              })
             }
+            applyPasswordSecretsToCollections(content, parsed.vars)
           }
         }
 
-        for (const folder of reactiveItems) {
-          const folderChecksum = computeChecksum(JSON.parse(JSON.stringify(folder)))
-          registerTabDirtyState(folder.id, folderChecksum)
-          registerAllItems(folder.items)
+        const collectionsRaw = (content as { collections?: unknown } | null)?.collections
+        const collections = Array.isArray(collectionsRaw) ? (collectionsRaw as EnvironmentFolder[]) : []
+
+        clearTabDirtyState()
+
+        const collectionsWithIds = processAfterDeserialization(collections)
+        const reactiveItems = collectionsWithIds.map((folder) => makeReactiveFolder(folder)) as EnvironmentFolder[]
+        setRootItems(reactiveItems)
+
+        if (openedAsFolder) {
+          const registerAllItems = (items: FolderItem[]): void => {
+            for (const item of items) {
+              const itemChecksum = computeChecksum(JSON.parse(JSON.stringify(item)))
+              registerTabDirtyState(item.id, itemChecksum)
+
+              if (isAnyFolder(item)) {
+                registerAllItems((item as Folder).items)
+              }
+            }
+          }
+
+          for (const folder of reactiveItems) {
+            const folderChecksum = computeChecksum(JSON.parse(JSON.stringify(folder)))
+            registerTabDirtyState(folder.id, folderChecksum)
+            registerAllItems(folder.items)
+          }
         }
-      }
 
-      const objectsForChecksums = collectAllObjectsForChecksums(reactiveItems)
-      const serializableObjects = new Map<string, unknown>()
-      for (const [id, data] of objectsForChecksums) {
-        try {
-          serializableObjects.set(id, JSON.parse(JSON.stringify(data)))
-        } catch (e) {
-          logger.warn('[useFileManagement] Failed to serialize object for checksum', {
-            id,
-            error: e
-          })
+        const objectsForChecksums = collectAllObjectsForChecksums(reactiveItems)
+        const serializableObjects = new Map<string, unknown>()
+        for (const [id, data] of objectsForChecksums) {
+          try {
+            serializableObjects.set(id, JSON.parse(JSON.stringify(data)))
+          } catch (e) {
+            logger.warn('[useFileManagement] Failed to serialize object for checksum', {
+              id,
+              error: e
+            })
+          }
         }
-      }
-      logger.info('[useFileManagement] About to register initial checksums', {
-        count: serializableObjects.size
-      })
-      registerInitialChecksums(serializableObjects)
-        .then(() => {
-          logger.info('[useFileManagement] Initial checksums registered successfully')
+        logger.info('[useFileManagement] About to register initial checksums', {
+          count: serializableObjects.size
         })
-        .catch((err: unknown) => {
-          logger.error('[useFileManagement] Failed to register initial checksums', {
-            error: String(err)
+        registerInitialChecksums(serializableObjects)
+          .then(() => {
+            logger.info('[useFileManagement] Initial checksums registered successfully')
           })
-        })
+          .catch((err: unknown) => {
+            logger.error('[useFileManagement] Failed to register initial checksums', {
+              error: String(err)
+            })
+          })
 
-      const dataForChecksum = prepareForSerialization({ collections: reactiveItems })
-      void setContentChecksum(JSON.stringify(dataForChecksum))
+        const dataForChecksum = prepareForSerialization({ collections: reactiveItems })
+        void setContentChecksum(JSON.stringify(dataForChecksum))
 
-      void (async () => {
         await searchIndexService.clearIndex()
         await window.restorm?.context.clearAll()
 
@@ -387,6 +417,11 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       const dataForSave = prepareForSerialization(plainData)
       const saved = await saveFile(dataForSave)
       if (saved) {
+        if (fileName) {
+          const secrets = collectPasswordSecretsFromCollections(plainData)
+          const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
+          await window.restorm?.secrets.write(`${fileName}.env`, envContent)
+        }
         await window.restorm?.forceClose()
       }
     }
@@ -396,7 +431,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     })
 
     return cleanup
-  }, [rootItems, saveFile])
+  }, [rootItems, saveFile, fileName])
 
   // Commit checksums on save
   useEffect(() => {

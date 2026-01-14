@@ -132,6 +132,10 @@ function ensureRestormWebShim(): void {
         saveAndCloseCallbacks.delete(callback)
       }
     },
+    secrets: {
+      read: () => Promise.resolve(null),
+      write: () => Promise.resolve({ success: true })
+    },
     context: {
       getAllTransformResults: () => Promise.resolve({}),
       onVariableTransformed: () => () => { /* No-op unsubscribe */ },

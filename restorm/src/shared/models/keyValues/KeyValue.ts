@@ -7,6 +7,7 @@ import type { RuntimeId } from '../types'
 import type { ValueType } from '../../types/collections'
 import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue } from '../../types/collections'
 import { BaseKeyValue } from './BaseKeyValue'
+import { serializeValueForPersistence } from '../../utils/valuePersistence'
 
 @trackable()
 export class KeyValue extends BaseKeyValue {
@@ -77,18 +78,9 @@ export class KeyValue extends BaseKeyValue {
   }
 
   toPlainObject(): Record<string, unknown> {
-    if (this.value instanceof PasswordValue) {
-      return {
-        key: this.key,
-        value: { type: 'password' },
-        description: this.description,
-        enabled: this.enabled
-      }
-    }
-
     return {
       key: this.key,
-      value: this.value.toString(),
+      value: serializeValueForPersistence(this.value),
       description: this.description,
       enabled: this.enabled
     }

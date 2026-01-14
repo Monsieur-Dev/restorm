@@ -285,8 +285,13 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
 
     valueTypeByRowIdRef.current.set(rowId, nextValue)
     onChange(nextDisplayValue)
+    // Force persistence of the ValueType even if display value didn't change
+    if (initialRows && onRowsChange) {
+      const nextRows = initialRows.map((r) => (r.id === rowId ? { ...r, value: nextValue } : r))
+      onRowsChange(nextRows)
+    }
     closeContextMenu()
-  }, [contextMenu, closeContextMenu])
+  }, [contextMenu, closeContextMenu, initialRows, onRowsChange])
 
   const buildTransformMenuItems = useCallback(
     (rowId: string, currentValue: string, onChange: (next: string) => void): ContextMenuItem[] => {
@@ -329,6 +334,11 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
 
         valueTypeByRowIdRef.current.set(rowId, nextValue)
         onChange(nextDisplayValue)
+        // Force persistence of the ValueType even if display value didn't change
+        if (initialRows && onRowsChange) {
+          const nextRows = initialRows.map((r) => (r.id === rowId ? { ...r, value: nextValue } : r))
+          onRowsChange(nextRows)
+        }
       }
 
       return [
@@ -346,7 +356,7 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
         }
       ]
     },
-    [t]
+    [t, initialRows, onRowsChange]
   )
 
   const contextMenuNode = useMemo(() => {
