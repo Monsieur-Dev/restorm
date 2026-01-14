@@ -93,12 +93,13 @@ const allFolderIds = initialRootItems.flatMap((folder) => collectAllFolderIds(fo
 const App: React.FC = () => {
   const { t } = useTranslation()
   const {
-    state: _fileState,
+    state: fileState,
     fileName,
     filePath,
     isDirty,
     recentFiles,
     favorites,
+    isLoading: isFileServiceLoading,
     newFile: _newFile,
     open: _openFile,
     save: saveFile,
@@ -333,6 +334,32 @@ const App: React.FC = () => {
     return true // User chose to discard changes
   }, [showUnsavedChangesDialog, rootItems, saveFile, t, fileName])
 
+  // Restore file state on initial load (e.g., after page refresh)
+  const hasRestoredFileRef = useRef(false)
+  useEffect(() => {
+    // Wait for FileService to finish loading
+    if (isFileServiceLoading) return
+    
+    // Only restore once on initial mount
+    if (hasRestoredFileRef.current) return
+    
+    // Check if a file is already open
+    const currentFile = fileState?.currentFile
+    if (currentFile?.path && currentFile.content) {
+      hasRestoredFileRef.current = true
+      handleFileOpened({
+        currentFile: {
+          content: currentFile.content,
+          path: currentFile.path,
+          format: currentFile.format
+        }
+      })
+    } else {
+      // No file open, mark as restored to avoid re-checking
+      hasRestoredFileRef.current = true
+    }
+  }, [isFileServiceLoading, fileState, handleFileOpened])
+
   // Listen to file events from FileService via IPC
   useEffect(() => {
     const w = window as unknown as { api?: { file?: { onFileOpened: (callback: (state: { currentFile: { content: unknown; path?: string | null; format?: string } }) => void) => () => void; onFileClosed: (callback: () => void) => () => void } } }
@@ -340,9 +367,13 @@ const App: React.FC = () => {
     if (!api) return
 
     const unsubscribe1 = api.onFileOpened((state: { currentFile: { content: unknown; path?: string | null; format?: string } }) => {
+      // Mark as restored when a new file is opened via IPC
+      hasRestoredFileRef.current = true
       handleFileOpened(state)
     })
     const unsubscribe2 = api.onFileClosed(() => {
+      // Reset restore flag when file is closed
+      hasRestoredFileRef.current = false
       handleFileClosed()
     })
     
