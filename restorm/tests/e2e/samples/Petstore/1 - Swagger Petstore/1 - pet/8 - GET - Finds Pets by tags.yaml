@@ -43,7 +43,9 @@ url: '{{baseUrl}}/api/pet/findByTags'
 headers: []
 params:
   - key: tags
-    value: ''
+    value:
+      type: string
+      value: ''
     description: Tags to filter by
 pathParams: []
 deprecated: true

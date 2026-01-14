@@ -35,5 +35,7 @@ headers: []
 params: []
 pathParams:
   - key: username
-    value: ''
+    value:
+      type: string
+      value: ''
     description: The name that needs to be deleted

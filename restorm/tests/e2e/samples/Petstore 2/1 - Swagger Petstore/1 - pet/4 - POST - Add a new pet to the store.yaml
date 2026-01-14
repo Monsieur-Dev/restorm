@@ -67,7 +67,9 @@ url: '{{baseUrl}}/api/pet'
 headers: []
 params:
   - key: ''
-    value: ''
+    value:
+      type: string
+      value: ''
     description: ''
     enabled: true
 pathParams: []

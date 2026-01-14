@@ -1,4 +1,6 @@
 name: Default
 variables:
   - key: baseUrl
-    value: http://localhost:8090/petstore/pet
+    value:
+      type: string
+      value: http://localhost:8090/petstore/pet

@@ -41,7 +41,9 @@ url: '{{baseUrl}}/api/pet/findByStatus'
 headers: []
 params:
   - key: status
-    value: ''
+    value:
+      type: string
+      value: ''
     description: Status values that need to be considered for filter
     enabled: true
 pathParams: []

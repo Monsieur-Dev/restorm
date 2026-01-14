@@ -63,16 +63,22 @@ headers: []
 params: []
 pathParams:
   - key: petId
-    value: ''
+    value:
+      type: string
+      value: ''
     description: ID of pet to update
 body:
   type: form-data
   fields:
     - key: additionalMetadata
-      value: ''
+      value:
+        type: string
+        value: ''
       description: Additional data to pass to server
       enabled: true
     - key: file
-      value: ''
+      value:
+        type: string
+        value: ''
       description: file to upload
       enabled: true

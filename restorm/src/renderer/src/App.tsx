@@ -6,7 +6,6 @@ import {
   VerticalSashContainer,
   isTabGroupNode,
   isContainerNode,
-  navigationService,
   useFileService,
   eventBus,
   logger,
@@ -17,7 +16,7 @@ import {
   commitChecksums
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type DocumentChangedPayload } from './services/DocumentEvents'
-import type { WorkbenchTree, NavigationEvent, GroupNode, EditorTab } from 'electron-core-ui/renderer'
+import type { WorkbenchTree, GroupNode, EditorTab } from 'electron-core-ui/renderer'
 import { Welcome } from './components/Welcome/Welcome'
 import { EmptyBench } from './components/MainView/Workbench/EmptyBench'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
@@ -873,43 +872,6 @@ const App: React.FC = () => {
       return { ...prev, groups: updateNodeSizes(prev.groups) }
     })
   }, [])
-
-  // Handle navigation events from NavigationService
-  useEffect(() => {
-    const unsubscribe = navigationService.onNavigate((event: NavigationEvent) => {
-      const { key, params } = event
-
-      // Update sidebar selection
-      setSelectedItemId(key)
-
-      // Open appropriate tab based on navigation type
-      if (params.type === 'folder' || params.type === 'environment-folder') {
-        const folder = findFolderById(rootItems, key)
-        if (folder) {
-          const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, key)
-          if (isEnvironmentFolder(folder as FolderItem)) {
-            openEnvironmentFolderTab(folder as EnvironmentFolder, breadcrumbs)
-          } else {
-            openFolderTab(folder, breadcrumbs)
-          }
-          // Focus the group containing the tab
-          setFocusedGroupId('restorm-main-group')
-        }
-      } else if (params.type === 'http-request' || params.type === 'graphql-request' || 
-                 params.type === 'grpc-request' || params.type === 'soap-request' || 
-                 params.type === 'websocket-request') {
-        const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, key)
-        if (item && isRequest(item)) {
-          const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
-          openAnyRequestTab(item, breadcrumbs, environments)
-          // Focus the group containing the tab
-          setFocusedGroupId('restorm-main-group')
-        }
-      }
-    })
-
-    return unsubscribe
-  }, [openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, rootItems])
 
   // Use navigation hook for handling clicks and breadcrumbs
   const {

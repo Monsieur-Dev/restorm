@@ -19,7 +19,7 @@ import {
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue } from '../../types/collections'
-import { StringValue } from '../../types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, type ValueType } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { Badge } from '../common/Badge'
@@ -32,6 +32,54 @@ function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key
 
 export interface HTTPRequestTabViewProps {
   request: HTTPRequest
+}
+
+function normalizeValueType(input: unknown): ValueType {
+  if (
+    input instanceof StringValue ||
+    input instanceof ColorValue ||
+    input instanceof DateTimeValue ||
+    input instanceof NumericValue ||
+    input instanceof PasswordValue
+  ) {
+    return input
+  }
+
+  if (typeof input === 'string') {
+    return new StringValue(input)
+  }
+
+  if (input && typeof input === 'object') {
+    const plain = input as { type?: unknown; value?: unknown; format?: unknown }
+    const type = typeof plain.type === 'string' ? plain.type : ''
+
+    switch (type) {
+      case 'string':
+        return new StringValue(typeof plain.value === 'string' ? plain.value : '')
+      case 'color':
+        return new ColorValue(typeof plain.value === 'string' ? plain.value : '')
+      case 'numeric': {
+        const num = typeof plain.value === 'number' ? plain.value : typeof plain.value === 'string' ? Number(plain.value) : NaN
+        return new NumericValue(Number.isFinite(num) ? num : 0, typeof plain.format === 'string' ? plain.format : 'decimal')
+      }
+      case 'datetime': {
+        const raw = plain.value
+        const d =
+          raw instanceof Date
+            ? raw
+            : typeof raw === 'string' || typeof raw === 'number'
+              ? new Date(raw)
+              : new Date()
+        return new DateTimeValue(d, typeof plain.format === 'string' ? plain.format : 'yyyy-MM-dd HH:mm:ss')
+      }
+      case 'password':
+        return new PasswordValue(typeof plain.value === 'string' ? plain.value : '')
+      default:
+        return new StringValue('')
+    }
+  }
+
+  return new StringValue('')
 }
 
 /** Determine body mode from request body type */
@@ -98,7 +146,7 @@ function keyValuesToListItems(keyValues: KeyValue[], prefix: string): ListViewIt
 
 export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request }) => {
   const { t } = useTranslation()
-  const { selectedEnvId } = useEnvironmentContext()
+  const { selectedEnvId, environments } = useEnvironmentContext()
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
   
@@ -139,7 +187,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
   // Convert KeyValue arrays to plain objects for IPC
   const toKeyValueData = useCallback((kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
     kvs.map(kv => {
-      const result: { id?: string; key: string; value: string; enabled?: boolean } = { key: kv.key, value: kv.value.toString() }
+      const result: { id?: string; key: string; value: string; enabled?: boolean } = { key: kv.key, value: normalizeValueType(kv.value as unknown).toString() }
       if (kv.id !== undefined) result.id = kv.id
       if (kv.enabled !== undefined) result.enabled = kv.enabled
       return result
@@ -187,7 +235,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     const requestId = request.id
     if (!requestId) return
 
-    const currentEnvId = selectedEnvIdRef.current
+    const currentEnvId = selectedEnvIdRef.current ?? environments?.[0]?.id ?? null
     const currentRequest = requestRef.current
     logger.debug('[HTTPRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
@@ -203,14 +251,14 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
       logger.debug('[HTTPRequestTabView] Unregistering request from ContextService', { requestId })
       void window.restorm?.context.unregisterRequest(requestId)
     }
-  }, [request.id, toKeyValueData])
+  }, [request.id, environments, toKeyValueData])
 
   // Notify ContextService when selected environment changes
   useEffect(() => {
     const requestId = request.id
     if (!requestId) return
 
-    const currentEnvId = selectedEnvId ?? null
+    const currentEnvId = selectedEnvId ?? environments?.[0]?.id ?? null
     if (previousEnvIdRef.current !== currentEnvId) {
       logger.debug('[HTTPRequestTabView] Environment changed, notifying ContextService', {
         requestId,
@@ -220,7 +268,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
       void window.restorm?.context.setRequestEnvironment(requestId, currentEnvId)
       previousEnvIdRef.current = currentEnvId
     }
-  }, [selectedEnvId, request.id])
+  }, [selectedEnvId, environments, request.id])
 
   // Sync method changes to reactive object
   useEffect(() => {

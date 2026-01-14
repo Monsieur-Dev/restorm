@@ -111,6 +111,25 @@
       "unix": "Unix (s)",
       "epoch": "Epoch (ms)",
       "iso": "ISO 8601"
+    },
+    "preview": "Aperçu",
+    "formatHelp": {
+      "title": "Aide au formatage",
+      "note": "Utilise les jetons de formatage Luxon.",
+      "table": {
+        "token": "Jeton",
+        "description": "Description",
+        "output": "Sortie"
+      },
+      "rows": {
+        "year": "Année",
+        "month": "Mois (2 chiffres)",
+        "day": "Jour (2 chiffres)",
+        "hour24": "Heure (00-23)",
+        "minute": "Minute (00-59)",
+        "second": "Seconde (00-59)"
+      },
+      "more": "Exemple"
     }
   }
 }

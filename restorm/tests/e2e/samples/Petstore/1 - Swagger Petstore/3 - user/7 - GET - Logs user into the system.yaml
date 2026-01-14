@@ -37,9 +37,13 @@ url: '{{baseUrl}}/api/user/login'
 headers: []
 params:
   - key: username
-    value: ''
+    value:
+      type: string
+      value: ''
     description: The user name for login
   - key: password
-    value: ''
+    value:
+      type: string
+      value: ''
     description: The password for login in clear text
 pathParams: []

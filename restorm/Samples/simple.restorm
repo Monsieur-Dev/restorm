@@ -80,28 +80,42 @@ collections:
       - name: Default
         variables:
           - key: port
-            value: '8080'
+            value:
+              type: string
+              value: '8080'
             description: ''
           - key: scheme
-            value: http
+            value:
+              type: string
+              value: http
             description: ''
           - key: domain
-            value: localhost
+            value:
+              type: string
+              value: localhost
             description: ''
           - key: baseUrl
-            value: '{{scheme}}://{{domain}}:{{port}}'
+            value:
+              type: string
+              value: '{{scheme}}://{{domain}}:{{port}}'
             description: ''
         subEnvironments:
           - name: Production
             variables:
               - key: scheme
-                value: https
+                value:
+                  type: string
+                  value: https
                 description: ''
               - key: domain
-                value: petstore.com
+                value:
+                  type: string
+                  value: petstore.com
                 description: ''
               - key: baseUrl
-                value: '{{scheme}}://{{domain}}:{{port}}'
+                value:
+                  type: string
+                  value: '{{scheme}}://{{domain}}:{{port}}'
                 description: ''
     items:
       - name: pet
@@ -188,7 +202,9 @@ collections:
             params: []
             pathParams:
               - key: petId
-                value: ''
+                value:
+                  type: string
+                  value: ''
                 description: ID of pet to return
           - type: http
             name: Add a new pet to the store

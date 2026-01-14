@@ -23,6 +23,8 @@
 .ecu-date-time-picker-popover {
   width: 260px;
   user-select: none;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .ecu-date-time-picker-controls {
@@ -56,6 +58,7 @@
   color: var(--input-foreground);
   border-radius: 4px;
   padding: 0 8px;
+  box-sizing: border-box;
 }
 
 .ecu-date-time-picker-time-sep {
@@ -82,6 +85,7 @@
   color: var(--input-foreground);
   border-radius: 4px;
   padding: 0 8px;
+  box-sizing: border-box;
 }
 
 .ecu-date-time-picker-pattern-input {
@@ -92,6 +96,59 @@
   color: var(--input-foreground);
   border-radius: 4px;
   padding: 0 8px;
+  box-sizing: border-box;
+}
+
+.ecu-date-time-picker-pattern-wrapper {
+  width: 100%;
+}
+
+.ecu-date-time-picker-help-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.ecu-date-time-picker-help-table th,
+.ecu-date-time-picker-help-table td {
+  padding: 4px 6px;
+  vertical-align: top;
+  border: 1px solid var(--editorHoverWidget-border);
+}
+
+.ecu-date-time-picker-help-table th {
+  font-weight: 600;
+  background: var(--editorHoverWidget-background);
+}
+
+.ecu-date-time-picker-help-table td code {
+  white-space: nowrap;
+}
+
+.ecu-date-time-picker-preview {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--editor-foreground);
+}
+
+.ecu-date-time-picker-preview-label {
+  opacity: 0.7;
+  margin-bottom: 2px;
+}
+
+.ecu-date-time-picker-preview-value {
+  font-family: var(--monaco-monospace-font, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+      "Courier New", monospace);
+  font-size: 12px;
+  padding: 6px 8px;
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  background: var(--input-background);
+  color: var(--input-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
 }
 
 .ecu-date-time-picker-header {

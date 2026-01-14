@@ -38,13 +38,17 @@ method: DELETE
 url: '{{baseUrl}}/api/pet/{{petId}}'
 headers:
   - key: api_key
-    value: ''
+    value:
+      type: string
+      value: ''
     description: ''
     enabled: true
 params: []
 pathParams:
   - key: petId
-    value: ''
+    value:
+      type: string
+      value: ''
     description: Pet id to delete
     enabled: true
 body:

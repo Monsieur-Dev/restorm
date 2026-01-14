@@ -23,6 +23,54 @@ import { inferValueFromString, isHexColorString, tryParseDateString, tryParseNum
 
 export type VariableContext = Record<string, string>
 
+function normalizeValueType(input: unknown): ValueType {
+  if (
+    input instanceof StringValue ||
+    input instanceof ColorValue ||
+    input instanceof DateTimeValue ||
+    input instanceof NumericValue ||
+    input instanceof PasswordValue
+  ) {
+    return input
+  }
+
+  if (typeof input === 'string') {
+    return new StringValue(input)
+  }
+
+  if (input && typeof input === 'object') {
+    const plain = input as { type?: unknown; value?: unknown; format?: unknown }
+    const type = typeof plain.type === 'string' ? plain.type : ''
+
+    switch (type) {
+      case 'string':
+        return new StringValue(typeof plain.value === 'string' ? plain.value : '')
+      case 'color':
+        return new ColorValue(typeof plain.value === 'string' ? plain.value : '')
+      case 'numeric': {
+        const num = typeof plain.value === 'number' ? plain.value : typeof plain.value === 'string' ? Number(plain.value) : NaN
+        return new NumericValue(Number.isFinite(num) ? num : 0, typeof plain.format === 'string' ? plain.format : 'decimal')
+      }
+      case 'datetime': {
+        const raw = plain.value
+        const d =
+          raw instanceof Date
+            ? raw
+            : typeof raw === 'string' || typeof raw === 'number'
+              ? new Date(raw)
+              : new Date()
+        return new DateTimeValue(d, typeof plain.format === 'string' ? plain.format : 'yyyy-MM-dd HH:mm:ss')
+      }
+      case 'password':
+        return new PasswordValue(typeof plain.value === 'string' ? plain.value : '')
+      default:
+        return new StringValue('')
+    }
+  }
+
+  return new StringValue('')
+}
+
 interface ColorValueCellProps {
   hex: string
   onChangeHex: (nextHex: string) => void
@@ -165,7 +213,7 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
     const nextMap = new Map<string, ValueType>()
     for (const row of initialRows) {
       if (row.id) {
-        nextMap.set(row.id, row.value)
+        nextMap.set(row.id, normalizeValueType(row.value as unknown))
       }
     }
     valueTypeByRowIdRef.current = nextMap
@@ -222,8 +270,8 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
       case 'dateTime': {
         // If it's a string and is castable, keep the parsed date; otherwise default to now.
         const parsed = tryParseDateString(raw.trim())
-        nextValue = new DateTimeValue(parsed ?? new Date(), 'YYYY-MM-DD HH:mm:ss')
-        nextDisplayValue = (parsed ?? new Date()).toString()
+        nextValue = new DateTimeValue(parsed ?? new Date(), 'yyyy-MM-dd HH:mm:ss')
+        nextDisplayValue = nextValue.toString()
         break
       }
       case 'color': {
@@ -266,8 +314,8 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
           }
           case 'dateTime': {
             const parsed = tryParseDateString(raw.trim())
-            nextValue = new DateTimeValue(parsed ?? new Date(), 'YYYY-MM-DD HH:mm:ss')
-            nextDisplayValue = (parsed ?? new Date()).toString()
+            nextValue = new DateTimeValue(parsed ?? new Date(), 'yyyy-MM-dd HH:mm:ss')
+            nextDisplayValue = nextValue.toString()
             break
           }
           case 'color': {
@@ -336,7 +384,7 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
     return initialRows.map((r) => ({
       id: r.id,
       key: r.key,
-      value: r.value.toString(),
+      value: normalizeValueType(r.value as unknown).toString(),
       description: r.description,
       enabled: r.enabled
     }))
@@ -453,7 +501,7 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
       if (resolved instanceof DateTimeValue) {
         const outputMode =
           resolved.format === 'unix' || resolved.format === 'epoch' || resolved.format === 'iso' ? resolved.format : 'pattern'
-        const pattern = outputMode === 'pattern' ? resolved.format : 'YYYY-MM-DD HH:mm:ss'
+        const pattern = outputMode === 'pattern' ? resolved.format : 'yyyy-MM-dd HH:mm:ss'
         return (
           <div style={{ width: '100%', height: '100%' }} onContextMenu={handleContextMenu}>
             <DateTimePicker

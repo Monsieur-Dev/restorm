@@ -111,6 +111,25 @@
       "unix": "Unix (s)",
       "epoch": "Epoch (ms)",
       "iso": "ISO 8601"
+    },
+    "preview": "Preview",
+    "formatHelp": {
+      "title": "Formatting help",
+      "note": "Uses Luxon formatting tokens.",
+      "table": {
+        "token": "Token",
+        "description": "Description",
+        "output": "Output"
+      },
+      "rows": {
+        "year": "Year",
+        "month": "Month (2 digits)",
+        "day": "Day (2 digits)",
+        "hour24": "Hour (00-23)",
+        "minute": "Minute (00-59)",
+        "second": "Second (00-59)"
+      },
+      "more": "Example"
     }
   }
 }

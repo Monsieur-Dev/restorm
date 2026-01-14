@@ -35,5 +35,7 @@ headers: []
 params: []
 pathParams:
   - key: orderId
-    value: ''
+    value:
+      type: string
+      value: ''
     description: ID of the order that needs to be deleted

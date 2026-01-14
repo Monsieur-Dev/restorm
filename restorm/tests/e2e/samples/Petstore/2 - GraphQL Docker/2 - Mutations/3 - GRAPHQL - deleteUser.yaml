@@ -13,5 +13,7 @@ query: |-
   }
 headers:
   - key: Content-Type
-    value: application/json
+    value:
+      type: string
+      value: application/json
 variables: '{}'

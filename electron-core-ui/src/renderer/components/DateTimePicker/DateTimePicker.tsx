@@ -1,23 +1,64 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { DateTime } from 'luxon'
 import { Button } from '../Button'
 import { Tooltip } from '../Tooltip'
 import { InputBox } from '../InputBox'
 import type { DateTimePickerProps } from './types'
 import './dateTimePicker.css'
 
-function pad2(n: number): string {
-  return n.toString().padStart(2, '0')
+interface LuxonTokenRow {
+  token: string
+  descriptionKey: string
 }
 
-function formatDateWithPattern(date: Date, pattern: string): string {
-  return pattern
-    .replace(/YYYY/g, date.getFullYear().toString())
-    .replace(/MM/g, pad2(date.getMonth() + 1))
-    .replace(/DD/g, pad2(date.getDate()))
-    .replace(/HH/g, pad2(date.getHours()))
-    .replace(/mm/g, pad2(date.getMinutes()))
-    .replace(/ss/g, pad2(date.getSeconds()))
+const LUXON_HELP_ROWS: LuxonTokenRow[] = [
+  { token: 'yyyy', descriptionKey: 'dateTimePicker.formatHelp.rows.year' },
+  { token: 'MM', descriptionKey: 'dateTimePicker.formatHelp.rows.month' },
+  { token: 'dd', descriptionKey: 'dateTimePicker.formatHelp.rows.day' },
+  { token: 'HH', descriptionKey: 'dateTimePicker.formatHelp.rows.hour24' },
+  { token: 'mm', descriptionKey: 'dateTimePicker.formatHelp.rows.minute' },
+  { token: 'ss', descriptionKey: 'dateTimePicker.formatHelp.rows.second' }
+]
+
+function LuxonFormatHelpTable({ sampleDate }: { sampleDate: Date }): React.ReactNode {
+  const { t } = useTranslation()
+  const sample = DateTime.fromJSDate(sampleDate)
+
+  return (
+    <div style={{ maxWidth: 420 }}>
+      <div style={{ fontWeight: 600, marginBottom: 8 }}>{t('dateTimePicker.formatHelp.title')}</div>
+      <div style={{ marginBottom: 8, opacity: 0.85 }}>{t('dateTimePicker.formatHelp.note')}</div>
+
+      <table className="ecu-date-time-picker-help-table">
+        <thead>
+          <tr>
+            <th>{t('dateTimePicker.formatHelp.table.token')}</th>
+            <th>{t('dateTimePicker.formatHelp.table.description')}</th>
+            <th>{t('dateTimePicker.formatHelp.table.output')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {LUXON_HELP_ROWS.map((row) => (
+            <tr key={row.token}>
+              <td>
+                <code>{row.token}</code>
+              </td>
+              <td>{t(row.descriptionKey)}</td>
+              <td>
+                <code>{sample.toFormat(row.token)}</code>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <div style={{ marginTop: 10, opacity: 0.85 }}>
+        {t('dateTimePicker.formatHelp.more')}:{' '}
+        <code>yyyy-MM-dd HH:mm:ss</code>
+      </div>
+    </div>
+  )
 }
 
 function formatOutput(date: Date, outputMode: 'pattern' | 'unix' | 'epoch' | 'iso', pattern: string): string {
@@ -27,9 +68,9 @@ function formatOutput(date: Date, outputMode: 'pattern' | 'unix' | 'epoch' | 'is
     case 'epoch':
       return String(date.getTime())
     case 'iso':
-      return date.toISOString()
+      return DateTime.fromJSDate(date).toUTC().toISO() ?? ''
     default:
-      return formatDateWithPattern(date, pattern)
+      return DateTime.fromJSDate(date).toFormat(pattern)
   }
 }
 
@@ -74,7 +115,9 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
 }) => {
   const { t } = useTranslation()
   const targetRef = useRef<HTMLDivElement | null>(null)
+  const formatHelpTargetRef = useRef<HTMLDivElement | null>(null)
   const [isOpen, setIsOpen] = useState(false)
+  const [isFormatHelpOpen, setIsFormatHelpOpen] = useState(false)
 
   const [uncontrolledOutputMode, setUncontrolledOutputMode] = useState<'pattern' | 'unix' | 'epoch' | 'iso'>(
     outputMode ?? 'pattern'
@@ -82,7 +125,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
 
   const effectiveOutputMode = outputMode ?? uncontrolledOutputMode
 
-  const defaultPattern = 'YYYY-MM-DD'
+  const defaultPattern = 'yyyy-MM-dd HH:mm:ss'
   const [uncontrolledPattern, setUncontrolledPattern] = useState<string>(format ?? defaultPattern)
   const effectivePattern = format ?? uncontrolledPattern
 
@@ -97,6 +140,11 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
   const [viewMonth, setViewMonth] = useState<Date>(initialView)
 
   const displayValue = useMemo(() => {
+    if (!value) return ''
+    return formatOutput(value, effectiveOutputMode, effectivePattern)
+  }, [effectiveOutputMode, effectivePattern, value])
+
+  const previewValue = useMemo(() => {
     if (!value) return ''
     return formatOutput(value, effectiveOutputMode, effectivePattern)
   }, [effectiveOutputMode, effectivePattern, value])
@@ -365,17 +413,40 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
 
         {effectiveOutputMode === 'pattern' ? (
           <div className="ecu-date-time-picker-pattern">
-            <input
-              className="ecu-date-time-picker-pattern-input"
-              type="text"
-              value={effectivePattern}
-              onChange={(e) => {
-                handleSetPattern(e.target.value)
+            <div
+              ref={formatHelpTargetRef}
+              className="ecu-date-time-picker-pattern-wrapper"
+              onMouseEnter={() => {
+                setIsFormatHelpOpen(true)
               }}
-              disabled={disabled}
-              aria-label={t('dateTimePicker.pattern')}
-              placeholder="YYYY-MM-DD HH:mm:ss"
+              onMouseLeave={() => {
+                setIsFormatHelpOpen(false)
+              }}
+            >
+              <input
+                className="ecu-date-time-picker-pattern-input"
+                type="text"
+                value={effectivePattern}
+                onChange={(e) => {
+                  handleSetPattern(e.target.value)
+                }}
+                disabled={disabled}
+                aria-label={t('dateTimePicker.pattern')}
+                placeholder="yyyy-MM-dd HH:mm:ss"
+              />
+            </div>
+            <Tooltip
+              targetRef={formatHelpTargetRef as unknown as React.RefObject<HTMLElement | null>}
+              show={isFormatHelpOpen}
+              side="left"
+              content={
+                <LuxonFormatHelpTable sampleDate={value ?? new Date()} />
+              }
             />
+            <div className="ecu-date-time-picker-preview">
+              <div className="ecu-date-time-picker-preview-label">{t('dateTimePicker.preview')}</div>
+              <div className="ecu-date-time-picker-preview-value">{previewValue}</div>
+            </div>
           </div>
         ) : null}
       </div>
