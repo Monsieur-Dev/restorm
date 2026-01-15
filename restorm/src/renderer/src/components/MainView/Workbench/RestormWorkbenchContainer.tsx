@@ -1,11 +1,12 @@
 import React from 'react'
 import type { WorkbenchTree, RebuildTabCallback } from 'electron-core-ui/renderer'
-import { RestormWorkbench } from './RestormWorkbench'
+import { RestormWorkbench, type RestormWorkbenchHandle } from './RestormWorkbench'
 import { EnvironmentValuesProvider } from '../../../contexts/EnvironmentValuesContext'
 import type { BreadcrumbItem } from '../../../types/editor'
 import type { Request, Folder, EnvironmentFolder } from '../../../types/collections'
 
 export interface RestormWorkbenchContainerProps {
+  workbenchRef?: React.Ref<RestormWorkbenchHandle>
   tree: WorkbenchTree
   onTreeChange: (tree: WorkbenchTree) => void
   focusedGroupId: string | null
@@ -30,6 +31,7 @@ export interface RestormWorkbenchContainerProps {
  * Container for the main workbench with environment context
  */
 export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps> = ({
+  workbenchRef,
   tree,
   onTreeChange,
   focusedGroupId,
@@ -60,6 +62,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
         }}
       >
         <RestormWorkbench
+          ref={workbenchRef}
           tree={tree}
           onTreeChange={onTreeChange}
           focusedGroupId={focusedGroupId}

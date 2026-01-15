@@ -103,6 +103,11 @@ collections:
               value: '{{scheme}}://{{domain}}:{{port}}'
             description: ''
             enabled: true
+          - key: test
+            value:
+              type: password
+            description: ''
+            enabled: true
         subEnvironments:
           - name: Production
             variables:
