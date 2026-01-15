@@ -19,7 +19,7 @@ export interface RestormWorkbenchContainerProps {
   onEnvironmentFolderChange: (folderId: string, folder: EnvironmentFolder) => void
   onSizesChange: (nodeId: string, sizes: number[]) => void
   emptyFallback: React.ReactNode
-  workbenchId: string
+  workbenchId?: string
   onRebuildTab: RebuildTabCallback
   onStateRestored: (tree: WorkbenchTree | null) => void
   getRequestById: (id: string) => Request | undefined

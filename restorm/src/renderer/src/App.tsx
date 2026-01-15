@@ -108,6 +108,11 @@ const App: React.FC = () => {
     showUnsavedChangesDialog
   } = useFileService()
 
+  const workbenchId = useMemo((): string | undefined => {
+    if (!filePath) return undefined
+    return `${WORKBENCH_ID}:${filePath}`
+  }, [filePath])
+
   // Sync document.title with window title for taskbar
   useEffect(() => {
     const title = fileName ? `Restorm - ${fileName}${isDirty ? ' *' : ''}` : 'Restorm'
@@ -419,6 +424,15 @@ const App: React.FC = () => {
       hasRestoredFileRef.current = false
       hasRestoredWorkbenchRef.current = false
       handleFileClosed()
+      
+      // Close all open tabs for the currently opened file.
+      requestAnimationFrame(() => {
+        setWorkbenchTree({
+          orientation: 'vertical',
+          groups: []
+        })
+      })
+      setFocusedGroupId(null)
     })
     
     return () => {
@@ -429,7 +443,7 @@ const App: React.FC = () => {
 
   // Restore workbench state after rootItems are available (autosave relies on onRebuildTab)
   useEffect(() => {
-    if (!filePath || rootItems.length === 0 || hasRestoredWorkbenchRef.current) return
+    if (!workbenchId || rootItems.length === 0 || hasRestoredWorkbenchRef.current) return
     hasRestoredWorkbenchRef.current = true
     void (async (): Promise<void> => {
       try {
@@ -445,7 +459,7 @@ const App: React.FC = () => {
         })
       }
     })()
-  }, [filePath, rootItems])
+  }, [workbenchId, rootItems])
 
   // Listen to test events for E2E tests (only in dev/test mode)
   // Expose handleFileOpened directly on window for E2E tests
@@ -1156,7 +1170,7 @@ const App: React.FC = () => {
               onEnvironmentFolderChange={handleEnvironmentFolderChange}
               onSizesChange={handleSizesChange}
               emptyFallback={<EmptyBench />}
-              workbenchId={WORKBENCH_ID}
+              workbenchId={workbenchId}
               onRebuildTab={handleRebuildTab}
               onStateRestored={handleStateRestored}
               getRequestById={(id) => findRequestById(rootItems, id)}
@@ -1187,7 +1201,7 @@ const App: React.FC = () => {
             onEnvironmentFolderChange={handleEnvironmentFolderChange}
             onSizesChange={handleSizesChange}
             emptyFallback={<Welcome />}
-            workbenchId={WORKBENCH_ID}
+            workbenchId={workbenchId}
             onRebuildTab={handleRebuildTab}
             onStateRestored={handleStateRestored}
             getRequestById={(id) => findRequestById(rootItems, id)}
