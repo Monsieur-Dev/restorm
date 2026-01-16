@@ -5,7 +5,6 @@ import {
   InputBox,
   ColorPicker,
   DateTimePicker,
-  Button,
   Tooltip,
   MenuItem,
   MenuItemSeparator,
@@ -22,6 +21,16 @@ import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue } f
 import { inferValueFromString, isHexColorString, tryParseDateString, tryParseNumberString } from '../../../../shared/utils/valueCasting'
 
 export type VariableContext = Record<string, string>
+
+type ValueTypeKind = 'string' | 'secret' | 'number' | 'dateTime' | 'color'
+
+function resolveValueTypeKind(value: ValueType | undefined): ValueTypeKind {
+  if (value instanceof PasswordValue) return 'secret'
+  if (value instanceof NumericValue) return 'number'
+  if (value instanceof DateTimeValue) return 'dateTime'
+  if (value instanceof ColorValue) return 'color'
+  return 'string'
+}
 
 function normalizeValueType(input: unknown): ValueType {
   if (
@@ -124,14 +133,21 @@ const ColorValueCell: React.FC<ColorValueCellProps> = ({ hex, onChangeHex }) => 
       </div>
 
       <div ref={targetRef} style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center' }}>
-        <Button
-          small
-          secondary
-          icon="symbol-color"
-          options={{ ariaLabel: 'Open color picker' }}
+        <button
+          type="button"
+          aria-label="Open color picker"
           onClick={(e) => {
             e.preventDefault()
             setIsOpen((prev) => !prev)
+          }}
+          style={{
+            width: 24,
+            height: 24,
+            borderRadius: 4,
+            border: '1px solid var(--input-border, rgba(0, 0, 0, 0.3))',
+            backgroundColor: hex,
+            padding: 0,
+            cursor: 'pointer'
           }}
         />
       </div>
@@ -189,6 +205,7 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
   const variablesRef = useRef(variables)
   const helpersRef = useRef(helpers)
   const valueTypeByRowIdRef = useRef<Map<string, ValueType>>(new Map())
+  const initialRowsRef = useRef<KeyValue[] | undefined>(initialRows)
 
   const [contextMenu, setContextMenu] = useState<{
     visible: boolean
@@ -197,6 +214,7 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
     rowId: string
     currentValue: string
     onChange: (next: string) => void
+    activeType: ValueTypeKind
   } | null>(null)
   
   // Update refs via useEffect to avoid accessing during render
@@ -207,6 +225,10 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
   useEffect(() => {
     helpersRef.current = helpers
   }, [helpers])
+
+  useEffect(() => {
+    initialRowsRef.current = initialRows
+  }, [initialRows])
 
   useEffect(() => {
     if (!initialRows) return
@@ -294,7 +316,12 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
   }, [contextMenu, closeContextMenu, initialRows, onRowsChange])
 
   const buildTransformMenuItems = useCallback(
-    (rowId: string, currentValue: string, onChange: (next: string) => void): ContextMenuItem[] => {
+    (
+      rowId: string,
+      currentValue: string,
+      onChange: (next: string) => void,
+      activeType: ValueTypeKind
+    ): ContextMenuItem[] => {
       const transform = (target: 'string' | 'secret' | 'number' | 'dateTime' | 'color'): void => {
         const raw = currentValue
         let nextValue: ValueType
@@ -335,8 +362,9 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
         valueTypeByRowIdRef.current.set(rowId, nextValue)
         onChange(nextDisplayValue)
         // Force persistence of the ValueType even if display value didn't change
-        if (initialRows && onRowsChange) {
-          const nextRows = initialRows.map((r) => (r.id === rowId ? { ...r, value: nextValue } : r))
+        const currentRows = initialRowsRef.current
+        if (currentRows && onRowsChange) {
+          const nextRows = currentRows.map((r) => (r.id === rowId ? { ...r, value: nextValue } : r))
           onRowsChange(nextRows)
         }
       }
@@ -346,17 +374,42 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
           id: 'transform-to',
           label: t('keyValueTable.transformTo'),
           items: [
-            { id: 'transform-string', label: t('keyValueTable.types.string'), onClick: () => { transform('string') } },
-            { id: 'transform-secret', label: t('keyValueTable.types.secret'), onClick: () => { transform('secret') } },
+            {
+              id: 'transform-string',
+              label: t('keyValueTable.types.string'),
+              checked: activeType === 'string',
+              onClick: () => { transform('string') }
+            },
+            {
+              id: 'transform-secret',
+              label: t('keyValueTable.types.secret'),
+              checked: activeType === 'secret',
+              onClick: () => { transform('secret') }
+            },
             { id: 'sep-1', label: '', isSeparator: true },
-            { id: 'transform-number', label: t('keyValueTable.types.number'), onClick: () => { transform('number') } },
-            { id: 'transform-datetime', label: t('keyValueTable.types.dateTime'), onClick: () => { transform('dateTime') } },
-            { id: 'transform-color', label: t('keyValueTable.types.color'), onClick: () => { transform('color') } }
+            {
+              id: 'transform-number',
+              label: t('keyValueTable.types.number'),
+              checked: activeType === 'number',
+              onClick: () => { transform('number') }
+            },
+            {
+              id: 'transform-datetime',
+              label: t('keyValueTable.types.dateTime'),
+              checked: activeType === 'dateTime',
+              onClick: () => { transform('dateTime') }
+            },
+            {
+              id: 'transform-color',
+              label: t('keyValueTable.types.color'),
+              checked: activeType === 'color',
+              onClick: () => { transform('color') }
+            }
           ]
         }
       ]
     },
-    [t, initialRows, onRowsChange]
+    [t, onRowsChange]
   )
 
   const contextMenuNode = useMemo(() => {
@@ -376,12 +429,32 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
         <div className="menu">
           <ul className="actions-container" role="menu">
             <MenuItem title={t('keyValueTable.transformTo')}>
-              <MenuItem title={t('keyValueTable.types.string')} onClick={() => { castToType('string') }} />
-              <MenuItem title={t('keyValueTable.types.secret')} onClick={() => { castToType('secret') }} />
+              <MenuItem
+                title={t('keyValueTable.types.string')}
+                checked={contextMenu.activeType === 'string'}
+                onClick={() => { castToType('string') }}
+              />
+              <MenuItem
+                title={t('keyValueTable.types.secret')}
+                checked={contextMenu.activeType === 'secret'}
+                onClick={() => { castToType('secret') }}
+              />
               <MenuItemSeparator />
-              <MenuItem title={t('keyValueTable.types.number')} onClick={() => { castToType('number') }} />
-              <MenuItem title={t('keyValueTable.types.dateTime')} onClick={() => { castToType('dateTime') }} />
-              <MenuItem title={t('keyValueTable.types.color')} onClick={() => { castToType('color') }} />
+              <MenuItem
+                title={t('keyValueTable.types.number')}
+                checked={contextMenu.activeType === 'number'}
+                onClick={() => { castToType('number') }}
+              />
+              <MenuItem
+                title={t('keyValueTable.types.dateTime')}
+                checked={contextMenu.activeType === 'dateTime'}
+                onClick={() => { castToType('dateTime') }}
+              />
+              <MenuItem
+                title={t('keyValueTable.types.color')}
+                checked={contextMenu.activeType === 'color'}
+                onClick={() => { castToType('color') }}
+              />
             </MenuItem>
           </ul>
         </div>
@@ -463,6 +536,7 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
       }
 
       const resolved = id ? (valueTypeByRowIdRef.current.get(id) ?? new StringValue(value)) : new StringValue(value)
+      const activeType = resolveValueTypeKind(resolved)
 
       const handleContextMenu = (e: React.MouseEvent): void => {
         e.preventDefault()
@@ -473,7 +547,8 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
           y: e.clientY,
           rowId: id,
           currentValue: value,
-          onChange
+          onChange,
+          activeType
         })
       }
 
@@ -587,7 +662,9 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
           variables={variablesRef.current}
           helpers={helpersRef.current}
           variableId={id}
-          contextMenuItems={id ? buildTransformMenuItems(id, value, onChange) : undefined}
+          contextMenuItems={
+            id ? buildTransformMenuItems(id, value, onChange, activeType) : undefined
+          }
         />
       )
     },

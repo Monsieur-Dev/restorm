@@ -61,9 +61,12 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
     className,
     style,
     ariaLabel,
+    languageId,
+    disableDefaultProviders = false,
     onMount: onMountProp,
     contextMenuItems: extraContextMenuItems = []
   } = props
+  const effectiveLanguageId = languageId ?? LANGUAGE_ID
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
   const variablesRef = useRef<VariableDefinition[]>(variables)
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -123,12 +126,13 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
 
   // Update modelDataMap when variables change AND editor is mounted
   useEffect(() => {
+    if (disableDefaultProviders || effectiveLanguageId !== LANGUAGE_ID) return
     if (!editorMounted) return
     const model = editorRef.current?.getModel()
     if (model) {
       getProviderState().modelDataMap.set(model, { variables })
     }
-  }, [variables, editorMounted])
+  }, [variables, editorMounted, disableDefaultProviders, effectiveLanguageId])
 
   useEffect(() => {
     const state = getProviderState()
@@ -203,95 +207,97 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
 
     const state = getProviderState()
 
-    // Configure language, completion and hover for Handlebars-style variables
-    if (!state.languageConfigured) {
-      monacoInstance.languages.setMonarchTokensProvider(LANGUAGE_ID, {
-        tokenizer: {
-          root: [[/\{\{[^}]+\}\}/, 'variableToken']]
-        }
-      })
-      state.languageConfigured = true
+    if (!disableDefaultProviders && effectiveLanguageId === LANGUAGE_ID) {
+      // Configure language, completion and hover for Handlebars-style variables
+      if (!state.languageConfigured) {
+        monacoInstance.languages.setMonarchTokensProvider(LANGUAGE_ID, {
+          tokenizer: {
+            root: [[/\{\{[^}]+\}\}/, 'variableToken']]
+          }
+        })
+        state.languageConfigured = true
+      }
+
+      state.completionProviderDisposable ??= monacoInstance.languages.registerCompletionItemProvider(LANGUAGE_ID, {
+          triggerCharacters: ['{'],
+          provideCompletionItems(model: monacoEditor.editor.ITextModel, position: monacoEditor.Position) {
+            const range = {
+              startLineNumber: position.lineNumber,
+              endLineNumber: position.lineNumber,
+              startColumn: position.column,
+              endColumn: position.column
+            }
+
+            const data = getProviderState().modelDataMap.get(model) ?? { variables: [] }
+            const suggestions: monacoEditor.languages.CompletionItem[] = []
+
+            // Add variable suggestions
+            for (const v of data.variables) {
+              const labelObj: { label: string; description?: string } = { label: v.name }
+              if (v.value) {
+                labelObj.description = v.value
+              }
+              suggestions.push({
+                label: labelObj as monacoEditor.languages.CompletionItemLabel,
+                kind: monacoInstance.languages.CompletionItemKind.Variable,
+                insertText: `{{${v.name}}}`,
+                documentation: v.description ?? v.value,
+                detail: 'variable',
+                sortText: `0_${v.name}`,
+                range
+              })
+            }
+
+            // incomplete: true forces Monaco to always recalculate suggestions
+            // instead of using cached results when variables change
+            return { suggestions, incomplete: true }
+          }
+        })
+
+      state.hoverProviderDisposable ??= monacoInstance.languages.registerHoverProvider(LANGUAGE_ID, {
+          provideHover(model: monacoEditor.editor.ITextModel, position: monacoEditor.Position) {
+            const lineText = model.getLineContent(position.lineNumber)
+            const col = position.column
+
+            const openIndex = lineText.lastIndexOf('{{', col - 1)
+            const closeIndex = lineText.indexOf('}}', openIndex + 2)
+
+            if (openIndex === -1 || closeIndex === -1) {
+              return { contents: [] }
+            }
+
+            if (col < openIndex + 1 || col > closeIndex + 3) {
+              return { contents: [] }
+            }
+
+            // Extract the content between {{ and }}, get first word (variable name)
+            const innerContent = lineText.substring(openIndex + 2, closeIndex).trim()
+            const name = innerContent.split(/\s+/)[0] ?? ''
+
+            const data = getProviderState().modelDataMap.get(model) ?? { variables: [] }
+
+            // Check if it's a variable
+            const varMatch = data.variables.find((v) => v.name === name)
+            if (varMatch) {
+              const range = new monacoInstance.Range(
+                position.lineNumber,
+                openIndex + 1,
+                position.lineNumber,
+                closeIndex + 3
+              )
+              return {
+                range,
+                contents: [
+                  { value: `**${varMatch.name}** *(variable)*` },
+                  { value: '```text\n' + (varMatch.value || '(empty)') + '\n```' }
+                ]
+              }
+            }
+
+            return { contents: [] }
+          }
+        })
     }
-
-    state.completionProviderDisposable ??= monacoInstance.languages.registerCompletionItemProvider(LANGUAGE_ID, {
-        triggerCharacters: ['{'],
-        provideCompletionItems(model: monacoEditor.editor.ITextModel, position: monacoEditor.Position) {
-          const range = {
-            startLineNumber: position.lineNumber,
-            endLineNumber: position.lineNumber,
-            startColumn: position.column,
-            endColumn: position.column
-          }
-
-          const data = getProviderState().modelDataMap.get(model) ?? { variables: [] }
-          const suggestions: monacoEditor.languages.CompletionItem[] = []
-
-          // Add variable suggestions
-          for (const v of data.variables) {
-            const labelObj: { label: string; description?: string } = { label: v.name }
-            if (v.value) {
-              labelObj.description = v.value
-            }
-            suggestions.push({
-              label: labelObj as monacoEditor.languages.CompletionItemLabel,
-              kind: monacoInstance.languages.CompletionItemKind.Variable,
-              insertText: `{{${v.name}}}`,
-              documentation: v.description ?? v.value,
-              detail: 'variable',
-              sortText: `0_${v.name}`,
-              range
-            })
-          }
-
-          // incomplete: true forces Monaco to always recalculate suggestions
-          // instead of using cached results when variables change
-          return { suggestions, incomplete: true }
-        }
-      })
-
-    state.hoverProviderDisposable ??= monacoInstance.languages.registerHoverProvider(LANGUAGE_ID, {
-        provideHover(model: monacoEditor.editor.ITextModel, position: monacoEditor.Position) {
-          const lineText = model.getLineContent(position.lineNumber)
-          const col = position.column
-
-          const openIndex = lineText.lastIndexOf('{{', col - 1)
-          const closeIndex = lineText.indexOf('}}', openIndex + 2)
-
-          if (openIndex === -1 || closeIndex === -1) {
-            return { contents: [] }
-          }
-
-          if (col < openIndex + 1 || col > closeIndex + 3) {
-            return { contents: [] }
-          }
-
-          // Extract the content between {{ and }}, get first word (variable name)
-          const innerContent = lineText.substring(openIndex + 2, closeIndex).trim()
-          const name = innerContent.split(/\s+/)[0] ?? ''
-
-          const data = getProviderState().modelDataMap.get(model) ?? { variables: [] }
-
-          // Check if it's a variable
-          const varMatch = data.variables.find((v) => v.name === name)
-          if (varMatch) {
-            const range = new monacoInstance.Range(
-              position.lineNumber,
-              openIndex + 1,
-              position.lineNumber,
-              closeIndex + 3
-            )
-            return {
-              range,
-              contents: [
-                { value: `**${varMatch.name}** *(variable)*` },
-                { value: '```text\n' + (varMatch.value || '(empty)') + '\n```' }
-              ]
-            }
-          }
-
-          return { contents: [] }
-        }
-      })
 
     // Prevent multiline input to behave like a multi-line editor
     // Block Enter with any modifier (Ctrl+Enter, Shift+Enter, etc.)
@@ -387,7 +393,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
               onChange={(v) => {
                 onChange(v ?? '')
               }}
-              language={LANGUAGE_ID}
+              language={effectiveLanguageId}
               height={20}
               options={editorOptions}
               onMount={handleMount}

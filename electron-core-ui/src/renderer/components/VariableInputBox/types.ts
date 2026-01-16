@@ -18,6 +18,14 @@ export interface VariableInputBoxProps {
   style?: React.CSSProperties
   ariaLabel?: string
   /**
+   * Override the editor language ID. Defaults to "handlebars".
+   */
+  languageId?: string
+  /**
+   * Disable the built-in Handlebars providers (completion + hover).
+   */
+  disableDefaultProviders?: boolean
+  /**
    * Callback when the Monaco editor is mounted.
    * Allows extending the editor with custom providers.
    */

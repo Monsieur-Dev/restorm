@@ -81,8 +81,9 @@ collections:
         variables:
           - key: port
             value:
-              type: string
-              value: '8080'
+              type: numeric
+              value: 8080
+              format: decimal
             description: ''
             enabled: true
           - key: scheme
@@ -100,12 +101,25 @@ collections:
           - key: baseUrl
             value:
               type: string
-              value: '{{scheme}}://{{domain}}:{{port}}'
+              value: '{{scheme}}://{{domain}}:{{port}} '
             description: ''
             enabled: true
           - key: test
             value:
               type: password
+            description: ''
+            enabled: true
+          - key: col
+            value:
+              type: color
+              value: '#d81111'
+            description: ''
+            enabled: true
+          - key: dt
+            value:
+              type: datetime
+              value: '2026-01-23T01:47:42.000Z'
+              format: yyyy-MM-dd HH:mm:ss
             description: ''
             enabled: true
         subEnvironments:
@@ -206,14 +220,15 @@ collections:
             tags:
               - pet
             method: GET
-            url: '{{baseUrl}}/api/pet/{{petId}}'
+            url: '{{baseUrl}}/api/pet/{{petId}}1122z'
             headers: []
             params: []
             pathParams:
               - key: petId
                 value:
-                  type: string
-                  value: '1'
+                  type: numeric
+                  value: 1222234444211112
+                  format: decimal
                 description: ID of pet to return
                 enabled: true
             notes: ''

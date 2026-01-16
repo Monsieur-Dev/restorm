@@ -8,6 +8,7 @@ import type { Request, Folder, EnvironmentFolder } from '../../../types/collecti
 export interface RestormWorkbenchContainerProps {
   workbenchRef?: React.Ref<RestormWorkbenchHandle>
   tree: WorkbenchTree
+  dirtyItemIdsSet?: Set<string>
   onTreeChange: (tree: WorkbenchTree) => void
   focusedGroupId: string | null
   onFocusedGroupChange: (groupId: string | null) => void
@@ -33,6 +34,7 @@ export interface RestormWorkbenchContainerProps {
 export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps> = ({
   workbenchRef,
   tree,
+  dirtyItemIdsSet,
   onTreeChange,
   focusedGroupId,
   onFocusedGroupChange,
@@ -64,6 +66,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
         <RestormWorkbench
           ref={workbenchRef}
           tree={tree}
+          dirtyItemIdsSet={dirtyItemIdsSet}
           onTreeChange={onTreeChange}
           focusedGroupId={focusedGroupId}
           onFocusedGroupChange={onFocusedGroupChange}

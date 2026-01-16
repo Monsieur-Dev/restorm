@@ -4,7 +4,6 @@ import {
   Statusbar,
   StatusbarElement,
   VerticalSashContainer,
-  isTabGroupNode,
   isContainerNode,
   useFileService,
   eventBus,
@@ -242,41 +241,7 @@ const App: React.FC = () => {
     return `${prefix}-idx:${indexPath.join('.')}`
   }, [findIndexPathById, rootItems])
 
-  const getTabRuntimeId = useCallback((tab: EditorTab): string | null => {
-    const typed = tab as { tabType?: string; folder?: { id: string }; request?: { id: string } }
-    if (typed.tabType === 'folder' || typed.tabType === 'environment-folder') {
-      return typed.folder?.id ?? null
-    }
-    if (typed.tabType?.endsWith('request')) {
-      return typed.request?.id ?? null
-    }
-    return null
-  }, [])
-
-  // Compute workbench tree with dirty states applied to all tabs
-  // This is computed during render, not in an effect, to avoid cascading renders
-  const workbenchTreeWithDirtyState = useMemo((): WorkbenchTree => {
-    const updateGroups = (groups: GroupNode[]): GroupNode[] => {
-      return groups.map(group => {
-        if (isTabGroupNode(group)) {
-          const updatedTabs = group.tabs.map(tab => {
-            const itemId = getTabRuntimeId(tab)
-            const shouldBeDirty = itemId ? dirtyItemIdsSet.has(itemId) : false
-            if (tab.isDirty !== shouldBeDirty) {
-              return { ...tab, isDirty: shouldBeDirty }
-            }
-            return tab
-          })
-          return { ...group, tabs: updatedTabs }
-        } else if (isContainerNode(group)) {
-          return { ...group, groups: updateGroups(group.groups) }
-        }
-        return group
-      })
-    }
-    
-    return { ...workbenchTree, groups: updateGroups(workbenchTree.groups) }
-  }, [workbenchTree, dirtyItemIdsSet, getTabRuntimeId])
+  // Keep workbench tree stable to avoid focus loss on dirty-state updates.
 
   // State for sidebar editing and delete confirmation
   const [sidebarEditingItemId, setSidebarEditingItemId] = useState<string | null>(null)
@@ -439,7 +404,7 @@ const App: React.FC = () => {
       unsubscribe1()
       unsubscribe2()
     }
-  }, [handleFileOpened, handleFileClosed])
+  }, [handleFileOpened, handleFileClosed, filePath])
 
   // Restore workbench state after rootItems are available (autosave relies on onRebuildTab)
   useEffect(() => {
@@ -1040,6 +1005,10 @@ const App: React.FC = () => {
 
   // Handle workbench state restored
   const handleStateRestored = useCallback((restoredTree: WorkbenchTree | null) => {
+    logger.info('[App] workbench state restored', {
+      hasTree: Boolean(restoredTree),
+      groupCount: restoredTree?.groups.length ?? 0
+    })
     if (restoredTree) {
       setWorkbenchTree(restoredTree)
     }
@@ -1158,7 +1127,8 @@ const App: React.FC = () => {
           Right={
             <RestormWorkbenchContainer
               workbenchRef={workbenchRef}
-              tree={workbenchTreeWithDirtyState}
+              tree={workbenchTree}
+              dirtyItemIdsSet={dirtyItemIdsSet}
               onTreeChange={handleTreeChange}
               focusedGroupId={focusedGroupId}
               onFocusedGroupChange={setFocusedGroupId}
@@ -1189,7 +1159,8 @@ const App: React.FC = () => {
         <div style={{ flex: 1, minHeight: 0 }}>
           <RestormWorkbenchContainer
             workbenchRef={workbenchRef}
-            tree={workbenchTreeWithDirtyState}
+            tree={workbenchTree}
+            dirtyItemIdsSet={dirtyItemIdsSet}
             onTreeChange={handleTreeChange}
             focusedGroupId={focusedGroupId}
             onFocusedGroupChange={setFocusedGroupId}

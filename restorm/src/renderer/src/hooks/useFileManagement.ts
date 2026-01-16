@@ -75,6 +75,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   const {
     state: _fileState,
     fileName,
+    filePath,
     isDirty,
     newFile,
     open: openFile,
@@ -95,13 +96,17 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
 
   // Save handlers
   const handleMenuSave = useCallback(() => {
-    const plainData = JSON.parse(JSON.stringify({ collections: rootItems })) as Record<
-      string,
-      unknown
-    >
+    void (async () => {
+      const plainData = JSON.parse(JSON.stringify({ collections: rootItems })) as Record<
+        string,
+        unknown
+      >
+      const dataForChecksum = prepareForSerialization(plainData)
+      const currentChecksum = JSON.stringify(dataForChecksum)
+      const hasRealChanges = await hasContentChanged(currentChecksum)
+      if (!hasRealChanges) return
 
-    if (isOpenedAsFolder && currentFolderPath) {
-      void (async () => {
+      if (isOpenedAsFolder && currentFolderPath) {
         const result = await window.restorm?.file.saveAsFolder(
           plainData,
           folderFormat,
@@ -110,19 +115,17 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         if (result?.success) {
           void clearDirty()
         }
-      })()
-    } else {
-      const dataForSave = prepareForSerialization(plainData)
+        return
+      }
+
       const secrets = collectPasswordSecretsFromCollections(plainData)
       const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
-      void (async () => {
-        const saved = await saveFile(dataForSave)
-        if (saved && fileName) {
-          await window.restorm?.secrets.write(`${fileName}.env`, envContent)
-        }
-      })()
-    }
-  }, [saveFile, rootItems, isOpenedAsFolder, folderFormat, clearDirty, currentFolderPath, fileName])
+      const saved = await saveFile(dataForChecksum)
+      if (saved && filePath) {
+        await window.restorm?.secrets.write(`${filePath}.env`, envContent)
+      }
+    })()
+  }, [saveFile, rootItems, isOpenedAsFolder, folderFormat, clearDirty, currentFolderPath, filePath])
 
   const handleMenuSaveAs = useCallback(() => {
     setShowSaveOptionsModal(true)
@@ -199,15 +202,15 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       const plainData = JSON.parse(JSON.stringify({ collections: rootItems })) as unknown
       const dataForSave = prepareForSerialization(plainData)
       const saved = await saveFile(dataForSave)
-      if (saved && fileName) {
+      if (saved && filePath) {
         const secrets = collectPasswordSecretsFromCollections(plainData)
         const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
-        await window.restorm?.secrets.write(`${fileName}.env`, envContent)
+        await window.restorm?.secrets.write(`${filePath}.env`, envContent)
       }
       return saved
     }
     return true
-  }, [showUnsavedChangesDialog, rootItems, saveFile, t, fileName])
+  }, [showUnsavedChangesDialog, rootItems, saveFile, t, fileName, filePath])
 
   const handleMenuNew = useCallback(async () => {
     const canProceed = await checkUnsavedChanges()
@@ -257,7 +260,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
 
   // Handle file opened event
   const handleFileOpened = useCallback(
-    (state: { currentFile: { content: unknown; path?: string | null; format?: string } }) => {
+    (state: { currentFile: { content: unknown; path?: string | null; format?: string; name?: string } }) => {
       void (async () => {
         const newPath = state.currentFile.path ?? null
 
@@ -417,10 +420,10 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       const dataForSave = prepareForSerialization(plainData)
       const saved = await saveFile(dataForSave)
       if (saved) {
-        if (fileName) {
+        if (filePath) {
           const secrets = collectPasswordSecretsFromCollections(plainData)
           const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
-          await window.restorm?.secrets.write(`${fileName}.env`, envContent)
+          await window.restorm?.secrets.write(`${filePath}.env`, envContent)
         }
         await window.restorm?.forceClose()
       }
@@ -431,7 +434,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     })
 
     return cleanup
-  }, [rootItems, saveFile, fileName])
+  }, [rootItems, saveFile, filePath])
 
   // Commit checksums on save
   useEffect(() => {

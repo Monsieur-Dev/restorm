@@ -1,64 +1,32 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DateTime } from 'luxon'
+import type * as monacoEditor from 'monaco-editor'
 import { Button } from '../Button'
 import { Tooltip } from '../Tooltip'
 import { InputBox } from '../InputBox'
+import { VariableInputBox, type VariableDefinition } from '../VariableInputBox'
 import type { DateTimePickerProps } from './types'
 import './dateTimePicker.css'
 
-interface LuxonTokenRow {
-  token: string
-  descriptionKey: string
-}
+const LUXON_LANGUAGE_ID = 'luxon-format'
 
-const LUXON_HELP_ROWS: LuxonTokenRow[] = [
-  { token: 'yyyy', descriptionKey: 'dateTimePicker.formatHelp.rows.year' },
-  { token: 'MM', descriptionKey: 'dateTimePicker.formatHelp.rows.month' },
-  { token: 'dd', descriptionKey: 'dateTimePicker.formatHelp.rows.day' },
-  { token: 'HH', descriptionKey: 'dateTimePicker.formatHelp.rows.hour24' },
-  { token: 'mm', descriptionKey: 'dateTimePicker.formatHelp.rows.minute' },
-  { token: 'ss', descriptionKey: 'dateTimePicker.formatHelp.rows.second' }
+// List of all Luxon token names (in order from the documentation)
+const LUXON_TOKEN_NAMES = [
+  'S', 'SSS', 'u', 'uu', 'uuu', 's', 'ss', 'm', 'mm', 'h', 'hh', 'H', 'HH',
+  'Z', 'ZZ', 'ZZZ', 'ZZZZ', 'ZZZZZ', 'z', 'a', 'd', 'dd', 'c', 'ccc', 'cccc', 'ccccc',
+  'L', 'LL', 'LLL', 'LLLL', 'LLLLL', 'y', 'yy', 'yyyy', 'G', 'GG', 'GGGGG',
+  'kk', 'kkkk', 'W', 'WW', 'ii', 'iiii', 'n', 'nn', 'o', 'ooo', 'q', 'qq',
+  'D', 'DD', 'DDD', 'DDDD', 't', 'tt', 'ttt', 'tttt', 'T', 'TT', 'TTT', 'TTTT',
+  'f', 'ff', 'fff', 'ffff', 'F', 'FF', 'FFF', 'FFFF', 'X', 'x'
 ]
 
-function LuxonFormatHelpTable({ sampleDate }: { sampleDate: Date }): React.ReactNode {
-  const { t } = useTranslation()
-  const sample = DateTime.fromJSDate(sampleDate)
-
-  return (
-    <div style={{ maxWidth: 420 }}>
-      <div style={{ fontWeight: 600, marginBottom: 8 }}>{t('dateTimePicker.formatHelp.title')}</div>
-      <div style={{ marginBottom: 8, opacity: 0.85 }}>{t('dateTimePicker.formatHelp.note')}</div>
-
-      <table className="ecu-date-time-picker-help-table">
-        <thead>
-          <tr>
-            <th>{t('dateTimePicker.formatHelp.table.token')}</th>
-            <th>{t('dateTimePicker.formatHelp.table.description')}</th>
-            <th>{t('dateTimePicker.formatHelp.table.output')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {LUXON_HELP_ROWS.map((row) => (
-            <tr key={row.token}>
-              <td>
-                <code>{row.token}</code>
-              </td>
-              <td>{t(row.descriptionKey)}</td>
-              <td>
-                <code>{sample.toFormat(row.token)}</code>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <div style={{ marginTop: 10, opacity: 0.85 }}>
-        {t('dateTimePicker.formatHelp.more')}:{' '}
-        <code>yyyy-MM-dd HH:mm:ss</code>
-      </div>
-    </div>
-  )
+function getLuxonTokens(t: (key: string) => string): VariableDefinition[] {
+  return LUXON_TOKEN_NAMES.map(name => ({
+    name,
+    value: name,
+    description: t(`dateTimePicker.tokens.${name}`)
+  }))
 }
 
 function formatOutput(date: Date, outputMode: 'pattern' | 'unix' | 'epoch' | 'iso', pattern: string): string {
@@ -115,9 +83,10 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
 }) => {
   const { t } = useTranslation()
   const targetRef = useRef<HTMLDivElement | null>(null)
-  const formatHelpTargetRef = useRef<HTMLDivElement | null>(null)
   const [isOpen, setIsOpen] = useState(false)
-  const [isFormatHelpOpen, setIsFormatHelpOpen] = useState(false)
+  
+  // Get translated Luxon tokens
+  const luxonTokens = useMemo(() => getLuxonTokens(t), [t])
 
   const [uncontrolledOutputMode, setUncontrolledOutputMode] = useState<'pattern' | 'unix' | 'epoch' | 'iso'>(
     outputMode ?? 'pattern'
@@ -237,6 +206,96 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
     },
     [disabled, onFormatChange]
   )
+
+  const completionProviderDisposableRef = useRef<monacoEditor.IDisposable | null>(null)
+
+  // Custom completion provider for Luxon tokens (inserts tokens directly without {{}})
+  const handlePatternInputMount = useCallback(
+    (_editor: monacoEditor.editor.IStandaloneCodeEditor, monaco: typeof monacoEditor): void => {
+      const hasLanguage = monaco.languages.getLanguages().some((lang) => lang.id === LUXON_LANGUAGE_ID)
+      if (!hasLanguage) {
+        monaco.languages.register({ id: LUXON_LANGUAGE_ID })
+      }
+
+      // Dispose previous provider if it exists
+      if (completionProviderDisposableRef.current) {
+        completionProviderDisposableRef.current.dispose()
+      }
+
+      // Register completion provider that inserts tokens directly (without {{}})
+      // This provider MUST return incomplete: false to prevent other providers
+      completionProviderDisposableRef.current = monaco.languages.registerCompletionItemProvider(LUXON_LANGUAGE_ID, {
+        triggerCharacters: ['y', 'M', 'd', 'c', 'H', 'h', 'm', 's', 'S', 'a', 'Z', 'z', 'L', 'G', 'k', 'W', 'i', 'n', 'o', 'q', 'D', 't', 'T', 'f', 'F', 'X', 'x', 'u'],
+        provideCompletionItems(model: monacoEditor.editor.ITextModel, position: monacoEditor.Position, _context: monacoEditor.languages.CompletionContext) {
+          const word = model.getWordAtPosition(position)
+
+          // Always return Luxon tokens, regardless of context
+          // This prevents Handlebars functions from appearing
+          const suggestions: monacoEditor.languages.CompletionItem[] = []
+          
+          if (word && word.word.length > 0) {
+            // User is typing - filter tokens
+            const wordLower = word.word.toLowerCase()
+            for (const token of luxonTokens) {
+              if (token.name.toLowerCase().startsWith(wordLower) || wordLower.startsWith(token.name.toLowerCase())) {
+                const item: monacoEditor.languages.CompletionItem = {
+                  label: token.name,
+                  kind: monaco.languages.CompletionItemKind.Value,
+                  insertText: token.name,
+                  detail: token.description ?? 'Luxon token', // detail appears in right column
+                  range: {
+                    startLineNumber: position.lineNumber,
+                    endLineNumber: position.lineNumber,
+                    startColumn: word.startColumn,
+                    endColumn: word.endColumn
+                  }
+                }
+                if (token.description) {
+                  item.documentation = token.description
+                }
+                suggestions.push(item)
+              }
+            }
+          } else {
+            // No word selected (Ctrl+Space) - show all tokens
+            const range = {
+              startLineNumber: position.lineNumber,
+              endLineNumber: position.lineNumber,
+              startColumn: position.column,
+              endColumn: position.column
+            }
+            for (const token of luxonTokens) {
+              const item: monacoEditor.languages.CompletionItem = {
+                label: token.name,
+                kind: monaco.languages.CompletionItemKind.Value,
+                insertText: token.name,
+                detail: token.description ?? 'Luxon token', // detail appears in right column
+                range
+              }
+              if (token.description) {
+                item.documentation = token.description
+              }
+              suggestions.push(item)
+            }
+          }
+
+          // Return incomplete: false to prevent other providers (like Handlebars functions) from running
+          return { suggestions, incomplete: false }
+        }
+      })
+    },
+    [luxonTokens]
+  )
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (completionProviderDisposableRef.current) {
+        completionProviderDisposableRef.current.dispose()
+        completionProviderDisposableRef.current = null
+      }
+    }
+  }, [])
 
   const setTimeParts = useCallback(
     (hours: number, minutes: number): void => {
@@ -413,36 +472,19 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
 
         {effectiveOutputMode === 'pattern' ? (
           <div className="ecu-date-time-picker-pattern">
-            <div
-              ref={formatHelpTargetRef}
-              className="ecu-date-time-picker-pattern-wrapper"
-              onMouseEnter={() => {
-                setIsFormatHelpOpen(true)
-              }}
-              onMouseLeave={() => {
-                setIsFormatHelpOpen(false)
-              }}
-            >
-              <input
-                className="ecu-date-time-picker-pattern-input"
-                type="text"
+            <div className="ecu-date-time-picker-pattern-wrapper">
+              <VariableInputBox
                 value={effectivePattern}
-                onChange={(e) => {
-                  handleSetPattern(e.target.value)
-                }}
-                disabled={disabled}
-                aria-label={t('dateTimePicker.pattern')}
+                onChange={handleSetPattern}
+                variables={[]}
                 placeholder="yyyy-MM-dd HH:mm:ss"
+                ariaLabel={t('dateTimePicker.pattern')}
+                style={{ width: '100%', opacity: disabled ? 0.5 : 1, pointerEvents: disabled ? 'none' : 'auto' }}
+                onMount={handlePatternInputMount}
+                languageId={LUXON_LANGUAGE_ID}
+                disableDefaultProviders
               />
             </div>
-            <Tooltip
-              targetRef={formatHelpTargetRef as unknown as React.RefObject<HTMLElement | null>}
-              show={isFormatHelpOpen}
-              side="left"
-              content={
-                <LuxonFormatHelpTable sampleDate={value ?? new Date()} />
-              }
-            />
             <div className="ecu-date-time-picker-preview">
               <div className="ecu-date-time-picker-preview-label">{t('dateTimePicker.preview')}</div>
               <div className="ecu-date-time-picker-preview-value">{previewValue}</div>
