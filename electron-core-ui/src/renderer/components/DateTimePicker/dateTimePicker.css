@@ -1,0 +1,210 @@
+.ecu-date-time-picker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ecu-date-time-picker-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.ecu-date-time-picker-button {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.ecu-date-time-picker-button-target {
+  display: flex;
+  align-items: center;
+}
+
+.ecu-date-time-picker-popover {
+  width: 260px;
+  user-select: none;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.ecu-date-time-picker-controls {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--panel-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ecu-date-time-picker-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--editor-foreground);
+}
+
+.ecu-date-time-picker-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ecu-date-time-picker-time-input {
+  width: 64px;
+  height: 28px;
+  border: 1px solid var(--panel-border);
+  background: var(--input-background);
+  color: var(--input-foreground);
+  border-radius: 4px;
+  padding: 0 8px;
+  box-sizing: border-box;
+}
+
+.ecu-date-time-picker-time-sep {
+  opacity: 0.8;
+}
+
+.ecu-date-time-picker-output {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ecu-date-time-picker-output-label {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.ecu-date-time-picker-select {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  border: 1px solid var(--panel-border);
+  background: var(--input-background);
+  color: var(--input-foreground);
+  border-radius: 4px;
+  padding: 0 8px;
+  box-sizing: border-box;
+}
+
+.ecu-date-time-picker-pattern-input {
+  width: 100%;
+  height: 28px;
+  border: 1px solid var(--panel-border);
+  background: var(--input-background);
+  color: var(--input-foreground);
+  border-radius: 4px;
+  padding: 0 8px;
+  box-sizing: border-box;
+}
+
+.ecu-date-time-picker-pattern-wrapper {
+  width: 100%;
+}
+
+.ecu-date-time-picker-help-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.ecu-date-time-picker-help-table th,
+.ecu-date-time-picker-help-table td {
+  padding: 4px 6px;
+  vertical-align: top;
+  border: 1px solid var(--editorHoverWidget-border);
+}
+
+.ecu-date-time-picker-help-table th {
+  font-weight: 600;
+  background: var(--editorHoverWidget-background);
+}
+
+.ecu-date-time-picker-help-table td code {
+  white-space: nowrap;
+}
+
+.ecu-date-time-picker-preview {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--editor-foreground);
+}
+
+.ecu-date-time-picker-preview-label {
+  opacity: 0.7;
+  margin-bottom: 2px;
+}
+
+.ecu-date-time-picker-preview-value {
+  font-family: var(--monaco-monospace-font, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+      "Courier New", monospace);
+  font-size: 12px;
+  padding: 6px 8px;
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  background: var(--input-background);
+  color: var(--input-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+}
+
+.ecu-date-time-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.ecu-date-time-picker-month {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  color: var(--editor-foreground);
+  font-weight: 600;
+}
+
+.ecu-date-time-picker-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.ecu-date-time-picker-weekday {
+  text-align: center;
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.ecu-date-time-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.ecu-date-time-picker-day {
+  height: 28px;
+  border: 1px solid var(--panel-border);
+  background: var(--input-background);
+  color: var(--input-foreground);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.ecu-date-time-picker-day:hover {
+  background: var(--list-hoverBackground, rgb(0, 0, 0, 0.08));
+}
+
+.ecu-date-time-picker-day.is-outside {
+  opacity: 0.45;
+}
+
+.ecu-date-time-picker-day.is-selected {
+  border-color: var(--focusBorder);
+  box-shadow: 0 0 0 1px var(--focusBorder);
+}
+

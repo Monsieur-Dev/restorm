@@ -19,6 +19,7 @@ import {
   type KeyValue
 } from '../../../shared/models'
 import { logger } from 'electron-core-ui/main'
+import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 
 // ============================================================================
 // Helper Functions
@@ -49,11 +50,13 @@ function parseHashtable(hashtableStr: string): KeyValue[] {
           (value.startsWith("'") && value.endsWith("'"))) {
         value = value.slice(1, -1)
       }
-      result.push({
-        key,
-        value,
-        enabled: true
-      })
+      result.push(
+        createTypedKeyValue({
+          key,
+          value,
+          enabled: true
+        })
+      )
     }
   }
   
@@ -104,11 +107,13 @@ function parsePowerShellCommand(psCommand: string): HTTPRequest | null {
     // Extract ContentType
     const contentTypeMatch = /-ContentType\s+["']([^"']+)["']/.exec(normalized)
     if (contentTypeMatch && !headers.some(h => h.key.toLowerCase() === 'content-type')) {
-      headers.push({
-        key: 'Content-Type',
-        value: contentTypeMatch[1],
-        enabled: true
-      })
+      headers.push(
+        createTypedKeyValue({
+          key: 'Content-Type',
+          value: contentTypeMatch[1],
+          enabled: true
+        })
+      )
     }
 
     // Extract body
@@ -134,11 +139,13 @@ function parsePowerShellCommand(psCommand: string): HTTPRequest | null {
     const urlObj = new URL(url)
     const params: KeyValue[] = []
     urlObj.searchParams.forEach((value, key) => {
-      params.push({
-        key,
-        value,
-        enabled: true
-      })
+      params.push(
+        createTypedKeyValue({
+          key,
+          value,
+          enabled: true
+        })
+      )
     })
 
     // Generate request name from URL

@@ -1,4 +1,6 @@
 name: Default
 variables:
   - key: baseUrl
-    value: localhost:9000
+    value:
+      type: string
+      value: localhost:9000

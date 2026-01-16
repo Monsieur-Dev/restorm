@@ -11,6 +11,7 @@ import {
   type WebSocketProtocol
 } from '../../../shared/models'
 import * as yaml from 'yaml'
+import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 
 // ============================================================================
 // AsyncAPI Types
@@ -302,21 +303,27 @@ export function importAsyncAPI(specContent: string, options: AsyncAPIImportOptio
   }
   
   // Build environment variables from servers
-  const envVariables: { key: string; value: string }[] = []
+  const envVariables: Environment['variables'] = []
   const serverEntries = Object.entries(servers)
   const firstEntry = serverEntries[0]
   
   if (firstEntry) {
     const [, firstServer] = firstEntry
-    envVariables.push({
-      key: 'baseUrl',
-      value: options.baseUrl ?? firstServer.url
-    })
+    envVariables.push(
+      createTypedKeyValue({
+        key: 'baseUrl',
+        value: options.baseUrl ?? firstServer.url,
+        enabled: true
+      })
+    )
   } else {
-    envVariables.push({
-      key: 'baseUrl',
-      value: options.baseUrl ?? 'localhost:3001'
-    })
+    envVariables.push(
+      createTypedKeyValue({
+        key: 'baseUrl',
+        value: options.baseUrl ?? 'localhost:3001',
+        enabled: true
+      })
+    )
   }
   
   const environment: Environment = {

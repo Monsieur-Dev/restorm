@@ -76,7 +76,9 @@ headers: []
 params: []
 pathParams:
   - key: petId
-    value: '1'
+    value:
+      type: string
+      value: '1'
     description: ID of pet to return
     enabled: true
 notes: ''

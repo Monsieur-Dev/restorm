@@ -44,6 +44,7 @@ function getTabTitleString(tab: EditorTab & { titleString?: string }, fallback =
 
 export interface RestormWorkbenchProps {
   tree: WorkbenchTree
+  dirtyItemIdsSet?: Set<string>
   initialTabContentMap?: Record<string, string>
   onTreeChange?: (tree: WorkbenchTree) => void
   className?: string
@@ -96,6 +97,7 @@ const EditorWorkbenchAny = EditorWorkbench as unknown as React.ForwardRefExoticC
 /** Wrapper component for EditorWorkbench that handles restorm-specific tab rendering */
 export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbenchProps>(({
   tree: initialTree,
+  dirtyItemIdsSet,
   onTreeChange,
   className,
   style,
@@ -163,6 +165,35 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   )
 
   // Render tab title with icon and HTTP method badge (if applicable)
+  const getTabItemId = useCallback((tab: RestormEditorTab): string | null => {
+    if (isFolderTab(tab) || isEnvironmentFolderTab(tab)) {
+      return tab.folder.id
+    }
+    if (
+      isHTTPRequestTab(tab) ||
+      isGraphQLRequestTab(tab) ||
+      isGrpcRequestTab(tab) ||
+      isSoapRequestTab(tab) ||
+      isWebSocketRequestTab(tab)
+    ) {
+      return tab.request.id
+    }
+    return null
+  }, [])
+
+  const renderDirtyIndicator = useCallback((tab: RestormEditorTab): React.ReactNode => {
+    const itemId = getTabItemId(tab)
+    if (!itemId || !dirtyItemIdsSet?.has(itemId)) return null
+    return (
+      <span
+        className="codicon codicon-circle-filled dirty-indicator"
+        aria-label="Modified"
+        title="Modified"
+        style={{ marginLeft: 6 }}
+      />
+    )
+  }, [dirtyItemIdsSet, getTabItemId])
+
   const renderTabTitle = useCallback((tab: EditorTab): React.ReactNode => {
     // Check if this is a dropped tab with cached data
     const cachedTab = droppedTabsCacheRef.current.get(tab.id)
@@ -174,6 +205,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <i className="codicon codicon-folder-opened" aria-hidden="true" />
           <span>{restormTab.folder.name}</span>
+          {renderDirtyIndicator(restormTab)}
         </span>
       )
     }
@@ -184,6 +216,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <i className="codicon codicon-folder-library" aria-hidden="true" />
           <span>{restormTab.folder.name}</span>
+          {renderDirtyIndicator(restormTab)}
         </span>
       )
     }
@@ -194,6 +227,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Badge type={mapToBadgeType(restormTab.request.method)} />
           <span>{restormTab.request.name}</span>
+          {renderDirtyIndicator(restormTab)}
         </span>
       )
     }
@@ -204,6 +238,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Badge type="GQL" />
           <span>{restormTab.request.name}</span>
+          {renderDirtyIndicator(restormTab)}
         </span>
       )
     }
@@ -214,6 +249,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Badge type={mapToBadgeType(restormTab.request.callType)} />
           <span>{restormTab.request.name}</span>
+          {renderDirtyIndicator(restormTab)}
         </span>
       )
     }
@@ -224,6 +260,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Badge type="SOAP" />
           <span>{restormTab.request.name}</span>
+          {renderDirtyIndicator(restormTab)}
         </span>
       )
     }
@@ -234,12 +271,13 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Badge type={mapToBadgeType(restormTab.request.protocol)} />
           <span>{restormTab.request.name}</span>
+          {renderDirtyIndicator(restormTab)}
         </span>
       )
     }
 
     return null
-  }, [])
+  }, [renderDirtyIndicator])
 
   // Render tab content based on tab type
   const renderTabContent = useCallback((tab: RestormEditorTab): React.ReactNode => {

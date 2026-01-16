@@ -63,6 +63,8 @@ export interface InputBoxProps {
   id?: string
   style?: React.CSSProperties
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>
+  /** If true, renders the input as a password field (type="password"). Default: false */
+  password?: boolean
 }
 
 export const defaultInputBoxStyles: IInputBoxStyles = {

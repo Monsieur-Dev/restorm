@@ -11,6 +11,7 @@ import type {
   KeyValue,
   HTTPMethod
 } from '../../../shared/types/collections'
+import { StringValue } from '../../../shared/types/collections'
 // TODO: Variable resolution will be implemented in backend
 import type { VariableContext } from './types'
 
@@ -73,8 +74,9 @@ export interface HTTPRequestInput {
 function resolveKeyValues(keyValues: KeyValue[], context: VariableContext): KeyValue[] {
   return keyValues.map((kv) => ({
     key: resolveTemplate(kv.key, context),
-    value: resolveTemplate(kv.value, context),
-    description: kv.description
+    value: new StringValue(resolveTemplate(kv.value.toString(), context)),
+    description: kv.description,
+    enabled: kv.enabled
   }))
 }
 
@@ -85,7 +87,7 @@ function buildQueryString(params: KeyValue[]): string {
   const parts: string[] = []
   for (const param of params) {
     if (param.key) {
-      parts.push(`${encodeURIComponent(param.key)}=${encodeURIComponent(param.value)}`)
+      parts.push(`${encodeURIComponent(param.key)}=${encodeURIComponent(param.value.toString())}`)
     }
   }
   return parts.join('&')
@@ -103,7 +105,7 @@ export function resolveRequestURL(input: URLResolutionInput): ResolvedURLResult 
   const pathParamsContext: VariableContext = {}
   for (const pp of input.pathParams) {
     const resolvedKey = resolveTemplate(pp.key, input.environmentContext)
-    const resolvedValue = resolveTemplate(pp.value, input.environmentContext)
+    const resolvedValue = resolveTemplate(pp.value.toString(), input.environmentContext)
     if (resolvedKey) {
       // URL-encode path param values
       pathParamsContext[resolvedKey] = encodeURIComponent(resolvedValue)
@@ -149,7 +151,7 @@ function headersToKeyValues(headers: Record<string, unknown>): KeyValue[] {
     if (value !== undefined && value !== null) {
       result.push({
         key,
-        value: typeof value === 'string' ? value : JSON.stringify(value)
+        value: new StringValue(typeof value === 'string' ? value : JSON.stringify(value))
       })
     }
   }
@@ -175,7 +177,7 @@ function buildRequestBody(
       const fields = input.formFields ?? []
       for (const field of fields) {
         const key = resolveTemplate(field.key, context)
-        const value = resolveTemplate(field.value, context)
+        const value = resolveTemplate(field.value.toString(), context)
         if (key) {
           formData.append(key, value)
         }
@@ -188,7 +190,7 @@ function buildRequestBody(
       const fields = input.formFields ?? []
       for (const field of fields) {
         const key = resolveTemplate(field.key, context)
-        const value = resolveTemplate(field.value, context)
+        const value = resolveTemplate(field.value.toString(), context)
         if (key) {
           params.append(key, value)
         }
@@ -229,7 +231,7 @@ export async function executeHTTPRequest(input: HTTPRequestInput): Promise<HTTPR
   const headersObj: Record<string, string> = {}
   for (const h of resolvedHeaders) {
     if (h.key) {
-      headersObj[h.key] = h.value
+      headersObj[h.key] = h.value.toString()
     }
   }
 

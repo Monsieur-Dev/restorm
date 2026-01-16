@@ -24,6 +24,10 @@ export type {
   InputBoxProps
 } from './InputBox'
 
+// DateTimePicker exports
+export { DateTimePicker } from './DateTimePicker'
+export type { DateTimePickerProps } from './DateTimePicker'
+
 // VariableInputBox exports
 export { VariableInputBox } from './VariableInputBox'
 export type { VariableInputBoxProps, VariableDefinition } from './VariableInputBox'
@@ -50,6 +54,10 @@ export type { IProgressBarStyles, IProgressBarOptions, ProgressBarProps } from '
 // ScrollableElement exports
 export { ScrollableElement, defaultScrollableElementStyles } from './ScrollableElement/index'
 export type { IScrollableElementStyles, IScrollableElementOptions, ScrollableElementProps } from './ScrollableElement/index'
+
+// ColorPicker exports
+export { ColorPicker } from './ColorPicker'
+export type { ColorPickerProps } from './ColorPicker'
 
 // Sash exports
 export { VerticalSashContainer, HorizontalSashContainer } from './Sash'

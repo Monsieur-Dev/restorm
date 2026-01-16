@@ -80,32 +80,51 @@ collections:
       - name: Default
         variables:
           - key: port
-            value: '8080'
+            value:
+              type: string
+              value: '8080'
             description: ''
             enabled: true
           - key: scheme
-            value: http
+            value:
+              type: string
+              value: http
             description: ''
             enabled: true
           - key: domain
-            value: localhost
+            value:
+              type: string
+              value: localhost
             description: ''
             enabled: true
           - key: baseUrl
-            value: '{{scheme}}://{{domain}}:{{port}}'
+            value:
+              type: string
+              value: '{{scheme}}://{{domain}}:{{port}}'
+            description: ''
+            enabled: true
+          - key: test
+            value:
+              type: password
             description: ''
             enabled: true
         subEnvironments:
           - name: Production
             variables:
               - key: scheme
-                value: https
+                value:
+                  type: string
+                  value: https
                 description: ''
               - key: domain
-                value: petstore.com
+                value:
+                  type: string
+                  value: petstore.com
                 description: ''
               - key: baseUrl
-                value: '{{scheme}}://{{domain}}:{{port}}'
+                value:
+                  type: string
+                  value: '{{scheme}}://{{domain}}:{{port}}'
                 description: ''
     items:
       - name: pet
@@ -192,7 +211,9 @@ collections:
             params: []
             pathParams:
               - key: petId
-                value: '1'
+                value:
+                  type: string
+                  value: '1'
                 description: ID of pet to return
                 enabled: true
             notes: ''
@@ -241,18 +262,24 @@ collections:
             params: []
             pathParams:
               - key: petId
-                value: ''
+                value:
+                  type: string
+                  value: ''
                 description: ID of pet that needs to be updated
                 enabled: true
             body:
               type: x-www-form-urlencoded
               fields:
                 - key: name
-                  value: ''
+                  value:
+                    type: string
+                    value: ''
                   description: Updated name of the pet
                   enabled: true
                 - key: status
-                  value: ''
+                  value:
+                    type: string
+                    value: ''
                   description: Updated status of the pet
                   enabled: true
           - type: http
@@ -295,13 +322,17 @@ collections:
             url: '{{baseUrl}}/api/pet/{{petId}}'
             headers:
               - key: api_key
-                value: ''
+                value:
+                  type: string
+                  value: ''
                 description: ''
                 enabled: true
             params: []
             pathParams:
               - key: petId
-                value: ''
+                value:
+                  type: string
+                  value: ''
                 description: Pet id to delete
                 enabled: true
             body:
@@ -372,17 +403,23 @@ collections:
             params: []
             pathParams:
               - key: petId
-                value: ''
+                value:
+                  type: string
+                  value: ''
                 description: ID of pet to update
             body:
               type: form-data
               fields:
                 - key: additionalMetadata
-                  value: ''
+                  value:
+                    type: string
+                    value: ''
                   description: Additional data to pass to server
                   enabled: true
                 - key: file
-                  value: ''
+                  value:
+                    type: string
+                    value: ''
                   description: file to upload
                   enabled: true
           - type: http
@@ -454,7 +491,9 @@ collections:
             headers: []
             params:
               - key: ''
-                value: ''
+                value:
+                  type: string
+                  value: ''
                 description: ''
                 enabled: true
             pathParams: []
@@ -622,7 +661,9 @@ collections:
             headers: []
             params:
               - key: status
-                value: ''
+                value:
+                  type: string
+                  value: ''
                 description: Status values that need to be considered for filter
                 enabled: true
             pathParams: []
@@ -672,7 +713,9 @@ collections:
             headers: []
             params:
               - key: tags
-                value: ''
+                value:
+                  type: string
+                  value: ''
                 description: Tags to filter by
             pathParams: []
             deprecated: true
@@ -785,7 +828,9 @@ collections:
             params: []
             pathParams:
               - key: orderId
-                value: ''
+                value:
+                  type: string
+                  value: ''
                 description: ID of pet that needs to be fetched
           - type: http
             name: Delete purchase order by ID
@@ -824,7 +869,9 @@ collections:
             params: []
             pathParams:
               - key: orderId
-                value: ''
+                value:
+                  type: string
+                  value: ''
                 description: ID of the order that needs to be deleted
           - type: http
             name: Place an order for a pet
@@ -1033,7 +1080,9 @@ collections:
             params: []
             pathParams:
               - key: username
-                value: ''
+                value:
+                  type: string
+                  value: ''
                 description: 'The name that needs to be fetched. Use user1 for testing. '
           - type: http
             name: Updated user
@@ -1110,7 +1159,9 @@ collections:
             params: []
             pathParams:
               - key: username
-                value: ''
+                value:
+                  type: string
+                  value: ''
                 description: name that need to be updated
             body:
               type: text
@@ -1162,7 +1213,9 @@ collections:
             params: []
             pathParams:
               - key: username
-                value: ''
+                value:
+                  type: string
+                  value: ''
                 description: The name that needs to be deleted
           - type: http
             name: Create user
@@ -1332,10 +1385,14 @@ collections:
             headers: []
             params:
               - key: username
-                value: ''
+                value:
+                  type: string
+                  value: ''
                 description: The user name for login
               - key: password
-                value: ''
+                value:
+                  type: string
+                  value: ''
                 description: The password for login in clear text
             pathParams: []
           - type: http
@@ -1388,7 +1445,9 @@ collections:
       - name: Default
         variables:
           - key: baseUrl
-            value: http://localhost:4000
+            value:
+              type: string
+              value: http://localhost:4000
     items:
       - name: Queries
         documentation: |-
@@ -1414,7 +1473,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
                 description: ''
                 enabled: true
             variables: '{}'
@@ -1433,7 +1494,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
                 description: ''
                 enabled: true
             variables: '{}'
@@ -1452,7 +1515,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
           - type: graphql
             name: post
             documentation: 'GraphQL query: post'
@@ -1468,7 +1533,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
           - type: graphql
             name: echo
@@ -1485,7 +1552,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
       - name: Mutations
         documentation: |-
@@ -1511,7 +1580,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
           - type: graphql
             name: createPost
@@ -1528,7 +1599,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
           - type: graphql
             name: deleteUser
@@ -1545,7 +1618,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
           - type: graphql
             name: deletePost
@@ -1562,7 +1637,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
       - name: Subscriptions
         documentation: |-
@@ -1588,7 +1665,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
   - folderType: environment
     name: GraphQL Petstore
     documentation: |-
@@ -1652,7 +1731,9 @@ collections:
       - name: Default
         variables:
           - key: baseUrl
-            value: http://localhost:4000
+            value:
+              type: string
+              value: http://localhost:4000
     items:
       - name: Queries
         documentation: |-
@@ -1678,7 +1759,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
           - type: graphql
             name: petsByStatus
@@ -1695,7 +1778,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
           - type: graphql
             name: petsByTags
@@ -1712,7 +1797,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
           - type: graphql
             name: pets
@@ -1729,7 +1816,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
                 description: ''
                 enabled: true
             variables: '{}'
@@ -1748,7 +1837,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
           - type: graphql
             name: order
             documentation: 'GraphQL query: order'
@@ -1764,7 +1855,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
           - type: graphql
             name: user
@@ -1781,7 +1874,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
           - type: graphql
             name: login
@@ -1798,7 +1893,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
       - name: Mutations
         documentation: |-
@@ -1824,7 +1921,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
           - type: graphql
             name: updatePet
@@ -1841,7 +1940,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
           - type: graphql
             name: updatePetForm
@@ -1858,7 +1959,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
           - type: graphql
             name: deletePet
@@ -1875,7 +1978,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
           - type: graphql
             name: uploadPetImage
@@ -1892,7 +1997,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
           - type: graphql
             name: placeOrder
@@ -1909,7 +2016,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
           - type: graphql
             name: deleteOrder
@@ -1926,7 +2035,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
           - type: graphql
             name: createUser
@@ -1943,7 +2054,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
           - type: graphql
             name: createUsers
@@ -1960,7 +2073,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
           - type: graphql
             name: updateUser
@@ -1977,7 +2092,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
           - type: graphql
             name: deleteUser
@@ -1994,7 +2111,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
           - type: graphql
             name: logout
@@ -2011,7 +2130,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
       - name: Subscriptions
         documentation: |-
           # GraphQL Subscriptions
@@ -2036,7 +2157,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
             variables: '{}'
           - type: graphql
             name: orderPlaced
@@ -2053,7 +2176,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
           - type: graphql
             name: petCreated
             documentation: 'GraphQL subscription: petCreated'
@@ -2069,7 +2194,9 @@ collections:
               }
             headers:
               - key: Content-Type
-                value: application/json
+                value:
+                  type: string
+                  value: application/json
   - folderType: environment
     name: gRPC Docker
     documentation: |-
@@ -2111,7 +2238,9 @@ collections:
       - name: Default
         variables:
           - key: baseUrl
-            value: localhost:9000
+            value:
+              type: string
+              value: localhost:9000
     items:
       - name: HelloService
         documentation: Hello service - simple greeting
@@ -2440,7 +2569,9 @@ collections:
       - name: Default
         variables:
           - key: baseUrl
-            value: localhost:9000
+            value:
+              type: string
+              value: localhost:9000
     items:
       - name: PetService
         documentation: Pet service for managing pets in the store
@@ -2734,7 +2865,9 @@ collections:
       - name: Default
         variables:
           - key: baseUrl
-            value: http://localhost:8090/castlemock/mock/soap/echo
+            value:
+              type: string
+              value: http://localhost:8090/castlemock/mock/soap/echo
     items:
       - name: TestService
         documentation: |-
@@ -2768,11 +2901,15 @@ collections:
               </soap:Envelope>
             headers:
               - key: Content-Type
-                value: text/xml; charset=utf-8
+                value:
+                  type: string
+                  value: text/xml; charset=utf-8
                 description: ''
                 enabled: true
               - key: SOAPAction
-                value: http://restorm.test/castlemock/Echo
+                value:
+                  type: string
+                  value: http://restorm.test/castlemock/Echo
                 description: ''
                 enabled: true
   - folderType: environment
@@ -2789,7 +2926,9 @@ collections:
       - name: Default
         variables:
           - key: baseUrl
-            value: http://localhost:8090/petstore/pet
+            value:
+              type: string
+              value: http://localhost:8090/petstore/pet
     items:
       - name: PetStoreService
         documentation: Petstore SOAP Web Service
@@ -2820,11 +2959,15 @@ collections:
               </soap:Envelope>
             headers:
               - key: Content-Type
-                value: text/xml; charset=utf-8
+                value:
+                  type: string
+                  value: text/xml; charset=utf-8
                 description: ''
                 enabled: true
               - key: SOAPAction
-                value: http://petstore.example.com/GetPet
+                value:
+                  type: string
+                  value: http://petstore.example.com/GetPet
                 description: ''
                 enabled: true
           - type: soap
@@ -2850,9 +2993,13 @@ collections:
               </soap:Envelope>
             headers:
               - key: Content-Type
-                value: text/xml; charset=utf-8
+                value:
+                  type: string
+                  value: text/xml; charset=utf-8
               - key: SOAPAction
-                value: http://petstore.example.com/FindPetsByStatus
+                value:
+                  type: string
+                  value: http://petstore.example.com/FindPetsByStatus
           - type: soap
             name: CreatePet
             documentation: Add a new pet to the store
@@ -2876,9 +3023,13 @@ collections:
               </soap:Envelope>
             headers:
               - key: Content-Type
-                value: text/xml; charset=utf-8
+                value:
+                  type: string
+                  value: text/xml; charset=utf-8
               - key: SOAPAction
-                value: http://petstore.example.com/CreatePet
+                value:
+                  type: string
+                  value: http://petstore.example.com/CreatePet
           - type: soap
             name: UpdatePet
             documentation: Update an existing pet
@@ -2902,9 +3053,13 @@ collections:
               </soap:Envelope>
             headers:
               - key: Content-Type
-                value: text/xml; charset=utf-8
+                value:
+                  type: string
+                  value: text/xml; charset=utf-8
               - key: SOAPAction
-                value: http://petstore.example.com/UpdatePet
+                value:
+                  type: string
+                  value: http://petstore.example.com/UpdatePet
           - type: soap
             name: DeletePet
             documentation: Delete a pet
@@ -2928,9 +3083,13 @@ collections:
               </soap:Envelope>
             headers:
               - key: Content-Type
-                value: text/xml; charset=utf-8
+                value:
+                  type: string
+                  value: text/xml; charset=utf-8
               - key: SOAPAction
-                value: http://petstore.example.com/DeletePet
+                value:
+                  type: string
+                  value: http://petstore.example.com/DeletePet
   - folderType: environment
     name: AsyncAPI Docker
     documentation: |-
@@ -2947,7 +3106,9 @@ collections:
       - name: Default
         variables:
           - key: baseUrl
-            value: localhost:1883
+            value:
+              type: string
+              value: localhost:1883
     items:
       - name: MQTT
         documentation: |-
@@ -2970,7 +3131,9 @@ collections:
             message: '{}'
             headers:
               - key: s
-                value: s
+                value:
+                  type: string
+                  value: s
                 description: ''
                 enabled: true
             notes: |
@@ -3241,7 +3404,9 @@ collections:
       - name: Default
         variables:
           - key: baseUrl
-            value: localhost:1883
+            value:
+              type: string
+              value: localhost:1883
     items:
       - name: MQTT
         documentation: |-

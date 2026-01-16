@@ -7,5 +7,5 @@ export type {
   IInputValidator, 
   IInputValidationOptions, 
   IRange, 
-  InputBoxProps 
+  InputBoxProps,
 } from './types'

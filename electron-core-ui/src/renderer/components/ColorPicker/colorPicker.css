@@ -1,0 +1,38 @@
+.ecu-color-picker {
+  /* The wrapper is theme-driven using existing app tokens */
+  --ecu-color-picker-border: var(--panel-border, var(--focusBorder, rgb(128, 128, 128, 0.6)));
+  --ecu-color-picker-bg: var(--editor-background, var(--input-background));
+  --ecu-color-picker-fg: var(--editor-foreground, var(--input-foreground));
+  --ecu-color-picker-input-bg: var(--input-background, var(--editor-background));
+  --ecu-color-picker-input-fg: var(--input-foreground, var(--editor-foreground));
+  --ecu-color-picker-input-border: var(--input-border, var(--panel-border, var(--focusBorder, rgb(128, 128, 128, 0.6))));
+
+  color: var(--ecu-color-picker-fg);
+}
+
+/* Root container */
+.ecu-color-picker .w-color-sketch {
+  background: var(--ecu-color-picker-bg) !important;
+  border: 1px solid var(--ecu-color-picker-border) !important;
+  box-shadow: none !important;
+  color: var(--ecu-color-picker-fg) !important;
+}
+
+/* Section separators */
+.ecu-color-picker .w-color-swatch {
+  border-top: 1px solid var(--ecu-color-picker-border) !important;
+}
+
+/* Inputs */
+.ecu-color-picker .w-color-editable-input input {
+  background: var(--ecu-color-picker-input-bg) !important;
+  color: var(--ecu-color-picker-input-fg) !important;
+  border: 1px solid var(--ecu-color-picker-input-border) !important;
+  box-shadow: none !important;
+}
+
+.ecu-color-picker .w-color-editable-input label {
+  color: var(--ecu-color-picker-fg) !important;
+  opacity: 0.8;
+}
+

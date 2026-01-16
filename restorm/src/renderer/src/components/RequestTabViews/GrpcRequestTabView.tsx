@@ -7,8 +7,7 @@ import {
   SplitView,
   Pane,
   logger,
-  type VariableDefinition,
-  type KeyValueTableRow
+  type VariableDefinition
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
@@ -31,7 +30,7 @@ export interface GrpcRequestTabViewProps {
 
 export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request }) => {
   const { t } = useTranslation()
-  const { selectedEnvId } = useEnvironmentContext()
+  const { selectedEnvId, environments } = useEnvironmentContext()
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
   
@@ -69,14 +68,14 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
   // Register request with ContextService on mount, unregister on unmount
   useEffect(() => {
     const requestId = request.id
-    const currentEnvId = selectedEnvIdRef.current
+    const currentEnvId = selectedEnvIdRef.current ?? environments?.[0]?.id ?? null
     const currentRequest = requestRef.current
     logger.debug('[GrpcRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
     const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
+      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
 
-    void window.restorm?.context.registerRequest(requestId, currentEnvId ?? null, {
+    void window.restorm?.context.registerRequest(requestId, currentEnvId, {
       headers: toKeyValueData(currentRequest.metadata)
     })
 
@@ -118,11 +117,11 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
       unsubSnippets?.()
       void window.restorm?.context.unregisterRequest(requestId)
     }
-  }, [request.id])
+  }, [request.id, environments])
 
   // Notify ContextService when selected environment changes
   useEffect(() => {
-    const currentEnvId = selectedEnvId ?? null
+    const currentEnvId = selectedEnvId ?? environments?.[0]?.id ?? null
     if (previousEnvIdRef.current !== currentEnvId) {
       logger.debug('[GrpcRequestTabView] Environment changed, notifying ContextService', {
         requestId: request.id,
@@ -132,12 +131,12 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
       void window.restorm?.context.setRequestEnvironment(request.id, currentEnvId)
       previousEnvIdRef.current = currentEnvId
     }
-  }, [selectedEnvId, request.id])
+  }, [selectedEnvId, environments, request.id])
 
   // Notify ContextService when URL or request message changes
   useEffect(() => {
     const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
+      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
 
     void window.restorm?.context.updateFullRequestData(request.id, {
       url,
@@ -165,12 +164,12 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
 
   // Callback for metadata changes - notify both reactive object and ContextService
-  const handleMetadataChange = useCallback((rows: KeyValueTableRow[]): void => {
+  const handleMetadataChange = useCallback((rows: KeyValue[]): void => {
     updateReactiveProperty(request, 'metadata', rows)
     void window.restorm?.context.updateRequestKeyValues(
       request.id,
       'headers', // Use 'headers' as the group name for consistency
-      rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
+      rows.map(r => ({ id: r.id, key: r.key, value: r.value.toString(), enabled: r.enabled }))
     )
   }, [request])
 

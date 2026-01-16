@@ -8,6 +8,7 @@ import {
   Environment,
   SoapRequest
 } from '../../../shared/models'
+import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 
 // ============================================================================
 // WSDL Types
@@ -238,8 +239,8 @@ function operationToRequest(
     operation: operation.name,
     body: buildSampleEnvelope(operation, namespace),
     headers: [
-      { key: 'Content-Type', value: 'text/xml; charset=utf-8' },
-      { key: 'SOAPAction', value: operation.soapAction }
+      createTypedKeyValue({ key: 'Content-Type', value: 'text/xml; charset=utf-8', enabled: true }),
+      createTypedKeyValue({ key: 'SOAPAction', value: operation.soapAction, enabled: true })
     ]
   }
 }
@@ -301,7 +302,11 @@ export function importSoap(wsdlContent: string, options: SoapImportOptions = {})
     id: generateId(`${name}:env:soap:Default`),
     name: 'Default',
     variables: [
-      { key: 'baseUrl', value: options.baseUrl ?? parsed.services[0]?.ports[0]?.address ?? 'http://localhost:8090' }
+      createTypedKeyValue({
+        key: 'baseUrl',
+        value: options.baseUrl ?? parsed.services[0]?.ports[0]?.address ?? 'http://localhost:8090',
+        enabled: true
+      })
     ]
   }
   

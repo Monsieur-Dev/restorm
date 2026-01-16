@@ -14,6 +14,10 @@ declare global {
         showFolderDialog: () => Promise<{ canceled: boolean; filePath?: string }>
         openPath: (path: string) => Promise<{ success: boolean; isDirectory?: boolean; content?: unknown; path?: string; format?: unknown }>
       }
+      secrets: {
+        read: (filePath: string) => Promise<string | null>
+        write: (filePath: string, content: string) => Promise<{ success: boolean; error?: string }>
+      }
       forceClose: () => Promise<void>
       onSaveAndClose: (callback: () => void) => () => void
       request: {

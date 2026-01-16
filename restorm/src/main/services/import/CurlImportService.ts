@@ -18,6 +18,7 @@ import {
   type KeyValue
 } from '../../../shared/models'
 import { logger } from 'electron-core-ui/main'
+import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 
 // ============================================================================
 // Helper Functions
@@ -75,11 +76,13 @@ function parseCurlCommand(curlCommand: string): HTTPRequest | null {
       const headerValue = headerMatch[2]
       const colonIndex = headerValue.indexOf(':')
       if (colonIndex > 0) {
-        headers.push({
-          key: headerValue.substring(0, colonIndex).trim(),
-          value: headerValue.substring(colonIndex + 1).trim(),
-          enabled: true
-        })
+        headers.push(
+          createTypedKeyValue({
+            key: headerValue.substring(0, colonIndex).trim(),
+            value: headerValue.substring(colonIndex + 1).trim(),
+            enabled: true
+          })
+        )
       }
     }
 
@@ -103,11 +106,13 @@ function parseCurlCommand(curlCommand: string): HTTPRequest | null {
       const formValue = formMatch[2]
       const equalsIndex = formValue.indexOf('=')
       if (equalsIndex > 0) {
-        formFields.push({
-          key: formValue.substring(0, equalsIndex).trim(),
-          value: formValue.substring(equalsIndex + 1).trim(),
-          enabled: true
-        })
+        formFields.push(
+          createTypedKeyValue({
+            key: formValue.substring(0, equalsIndex).trim(),
+            value: formValue.substring(equalsIndex + 1).trim(),
+            enabled: true
+          })
+        )
       }
     }
     
@@ -122,11 +127,13 @@ function parseCurlCommand(curlCommand: string): HTTPRequest | null {
     const urlObj = new URL(url)
     const params: KeyValue[] = []
     urlObj.searchParams.forEach((value, key) => {
-      params.push({
-        key,
-        value,
-        enabled: true
-      })
+      params.push(
+        createTypedKeyValue({
+          key,
+          value,
+          enabled: true
+        })
+      )
     })
 
     // Generate request name from URL

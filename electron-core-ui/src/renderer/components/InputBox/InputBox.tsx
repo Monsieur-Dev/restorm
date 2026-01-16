@@ -15,7 +15,8 @@ const InputBox: React.FC<InputBoxProps> = ({
   className = '',
   id,
   style,
-  inputRef: externalInputRef
+  inputRef: externalInputRef,
+  password = false
 }) => {
   const [message, setMessage] = useState<IMessage | null>(null)
   const [state, setState] = useState<'idle' | 'focused'>('idle')
@@ -281,7 +282,7 @@ const InputBox: React.FC<InputBoxProps> = ({
             <input
               ref={inputRef as React.RefObject<HTMLInputElement>}
               {...baseProps}
-              type={options.type ?? 'text'}
+              type={password ? 'password' : (options.type ?? 'text')}
             />
           )}
         </div>

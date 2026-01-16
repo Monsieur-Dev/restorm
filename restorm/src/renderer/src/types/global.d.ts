@@ -47,6 +47,10 @@ declare global {
         showFolderDialog: () => Promise<{ canceled: boolean; filePath?: string }>
         openPath: (path: string) => Promise<{ success: boolean; isDirectory?: boolean; content?: unknown; path?: string; format?: PersistenceFormat }>
       }
+      secrets: {
+        read: (filePath: string) => Promise<string | null>
+        write: (filePath: string, content: string) => Promise<{ success: boolean; error?: string }>
+      }
       context: {
         getAllTransformResults: () => Promise<Record<string, VariableTransformResult>>
         onVariableTransformed: (callback: (result: VariableTransformResult) => void) => (() => void)

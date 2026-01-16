@@ -111,6 +111,38 @@
 	border-left: none;
 }
 
+/* Side positioning - tooltip to the left with beak on the right */
+[data-side="left"] .tooltip-content::before,
+[data-side="left"] .tooltip-content::after {
+	left: auto;
+	top: var(--beak-top-percent);
+	margin-left: 0;
+	margin-top: -6px;
+}
+
+/* Beak border (outer triangle) pointing right */
+[data-side="left"] .tooltip-content::before {
+	right: -6px;
+	width: 0;
+	height: 0;
+	border-top: 6px solid transparent;
+	border-bottom: 6px solid transparent;
+	border-left: 6px solid var(--editorHoverWidget-border);
+	border-right: none;
+}
+
+/* Beak (arrow) pointing right */
+[data-side="left"] .tooltip-content::after {
+	right: -5px;
+	margin-top: -5px;
+	width: 0;
+	height: 0;
+	border-top: 5px solid transparent;
+	border-bottom: 5px solid transparent;
+	border-left: 5px solid var(--editorHoverWidget-background);
+	border-right: none;
+}
+
 @keyframes fadein {
 	from {
 		opacity: 0;

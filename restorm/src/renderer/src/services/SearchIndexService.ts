@@ -101,7 +101,7 @@ function getBodyContent(body: HTTPRequest['body']): string {
       return body.path
     case 'form-data':
     case 'x-www-form-urlencoded':
-      return body.fields.map((f) => `${f.key} ${f.value}`).join(' ')
+      return body.fields.map((f) => `${f.key} ${f.value.toString()}`).join(' ')
     default:
       return ''
   }
@@ -126,9 +126,9 @@ function httpRequestToSearchDocument(
     request.method,
     request.url,
     ...request.tags,
-    ...request.headers.map((h) => `${h.key} ${h.value}`),
-    ...request.params.map((p) => `${p.key} ${p.value}`),
-    ...(request.pathParams?.map((p) => `${p.key} ${p.value}`) ?? []),
+    ...request.headers.map((h) => `${h.key} ${h.value.toString()}`),
+    ...request.params.map((p) => `${p.key} ${p.value.toString()}`),
+    ...(request.pathParams?.map((p) => `${p.key} ${p.value.toString()}`) ?? []),
     getBodyContent(request.body),
     request.notes ?? ''
   ].join(' ')
@@ -155,7 +155,7 @@ function httpRequestToSearchDocument(
           type: request.body.type,
           fields: request.body.fields.map((f) => ({
             key: f.key,
-            value: f.value
+            value: f.value.toString()
           }))
         }
         break
@@ -179,9 +179,9 @@ function httpRequestToSearchDocument(
       requestType: 'http',
       method: request.method,
       url: request.url,
-      headers: request.headers.map((h) => ({ key: h.key, value: h.value })),
-      params: request.params.map((p) => ({ key: p.key, value: p.value })),
-      ...(request.pathParams ? { pathParams: request.pathParams.map((p) => ({ key: p.key, value: p.value })) } : {}),
+      headers: request.headers.map((h) => ({ key: h.key, value: h.value.toString() })),
+      params: request.params.map((p) => ({ key: p.key, value: p.value.toString() })),
+      ...(request.pathParams ? { pathParams: request.pathParams.map((p) => ({ key: p.key, value: p.value.toString() })) } : {}),
       ...(bodyMetadata ? { body: bodyMetadata } : {}),
       tags: request.tags,
       ...(request.notes ? { notes: request.notes } : {}),
@@ -211,7 +211,7 @@ function graphqlRequestToSearchDocument(
     request.url,
     request.query,
     ...request.tags,
-    ...request.headers.map((h) => `${h.key} ${h.value}`),
+    ...request.headers.map((h) => `${h.key} ${h.value.toString()}`),
     request.variables ?? '',
     request.notes ?? ''
   ].join(' ')
@@ -266,7 +266,7 @@ function grpcRequestToSearchDocument(
     request.url,
     request.requestMessage,
     ...request.tags,
-    ...request.metadata.map((m) => `${m.key} ${m.value}`),
+    ...request.metadata.map((m) => `${m.key} ${m.value.toString()}`),
     request.notes ?? ''
   ].join(' ')
 
@@ -321,7 +321,7 @@ function soapRequestToSearchDocument(
     request.url,
     request.body,
     ...request.tags,
-    ...request.headers.map((h) => `${h.key} ${h.value}`),
+    ...request.headers.map((h) => `${h.key} ${h.value.toString()}`),
     request.notes ?? ''
   ].join(' ')
 
@@ -375,7 +375,7 @@ function websocketRequestToSearchDocument(
     request.event ?? '',
     request.message,
     ...request.tags,
-    ...request.headers.map((h) => `${h.key} ${h.value}`),
+    ...request.headers.map((h) => `${h.key} ${h.value.toString()}`),
     request.notes ?? ''
   ].join(' ')
 

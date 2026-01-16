@@ -21,10 +21,14 @@ body: |-
   </soap:Envelope>
 headers:
   - key: Content-Type
-    value: text/xml; charset=utf-8
+    value:
+      type: string
+      value: text/xml; charset=utf-8
     description: ''
     enabled: true
   - key: SOAPAction
-    value: http://restorm.test/castlemock/Echo
+    value:
+      type: string
+      value: http://restorm.test/castlemock/Echo
     description: ''
     enabled: true

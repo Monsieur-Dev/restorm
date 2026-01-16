@@ -7,6 +7,7 @@
  */
 
 import type { GrpcRequest, GrpcResponse, KeyValue } from '../../../shared/types/collections'
+import { StringValue } from '../../../shared/types/collections'
 // TODO: Variable resolution will be implemented in backend
 import type { VariableContext } from './types'
 
@@ -41,9 +42,9 @@ function generateResponseId(): string {
 /** Resolve KeyValue pairs with variable context */
 function resolveKeyValues(keyValues: KeyValue[], context: VariableContext): KeyValue[] {
   return keyValues.map((kv) => ({
+    ...kv,
     key: resolveTemplate(kv.key, context),
-    value: resolveTemplate(kv.value, context),
-    description: kv.description
+    value: new StringValue(resolveTemplate(kv.value.toString(), context))
   }))
 }
 

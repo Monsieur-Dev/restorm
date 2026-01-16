@@ -1,10 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import type * as monacoEditor from 'monaco-editor'
 import {
   VariableInputBox,
   Tooltip,
-  ContextMenu,
   type ContextMenuItem,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
@@ -96,10 +94,10 @@ export interface RestormVariableInputBoxProps {
   style?: React.CSSProperties
   ariaLabel?: string
   onGoToDefinition?: (variableName: string) => void
+  contextMenuItems?: ContextMenuItem[]
 }
 
 export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (props) => {
-  const { t } = useTranslation()
   const {
     value,
     onChange,
@@ -111,7 +109,8 @@ export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (
     className,
     style,
     ariaLabel,
-    onGoToDefinition
+    onGoToDefinition: _onGoToDefinition,
+    contextMenuItems
   } = props
 
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
@@ -121,11 +120,6 @@ export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (
   // Use centralized contexts for single IPC subscriptions
   const availableVariables = useAvailableVariables(variableId)
   const resolvedValue = useVariableTransform(variableId)
-  const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number }>({
-    visible: false,
-    x: 0,
-    y: 0
-  })
 
   // Suppress Monaco "Canceled" errors (normal when editor operations are interrupted)
   useEffect(() => {
@@ -167,75 +161,7 @@ export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (
 
   const hasResolvedTooltip = Boolean(resolvedValue && resolvedValue !== value)
 
-  // Go to definition handler
-  const handleGoToDefinition = useCallback(() => {
-    const editor = editorRef.current
-    if (!editor) return
-
-    const position = editor.getPosition()
-    if (!position) return
-
-    const model = editor.getModel()
-    if (!model) return
-
-    const lineText = model.getLineContent(position.lineNumber)
-    const col = position.column
-
-    // Find variable under cursor: {{variableName}}
-    const openIndex = lineText.lastIndexOf('{{', col - 1)
-    const closeIndex = lineText.indexOf('}}', openIndex + 2)
-
-    if (openIndex !== -1 && closeIndex !== -1 && col >= openIndex + 1 && col <= closeIndex + 3) {
-      const variableName = lineText.substring(openIndex + 2, closeIndex).trim()
-      onGoToDefinition?.(variableName)
-    }
-  }, [onGoToDefinition])
-
-  // Cut action handler
-  const handleCut = useCallback(() => {
-    editorRef.current?.focus()
-    editorRef.current?.trigger('keyboard', 'editor.action.clipboardCutAction', null)
-  }, [])
-
-  // Copy action handler
-  const handleCopy = useCallback(() => {
-    editorRef.current?.focus()
-    editorRef.current?.trigger('keyboard', 'editor.action.clipboardCopyAction', null)
-  }, [])
-
-  // Paste action handler
-  const handlePaste = useCallback(() => {
-    void (async () => {
-      editorRef.current?.focus()
-      const text = await navigator.clipboard.readText()
-      editorRef.current?.trigger('keyboard', 'paste', { text })
-    })()
-  }, [])
-
-  // Context menu items - built inline to avoid ref access during render
-  const baseItems: ContextMenuItem[] = [
-    { id: 'cut', label: t('contextMenu.cut'), onClick: handleCut },
-    { id: 'copy', label: t('contextMenu.copy'), onClick: handleCopy },
-    { id: 'paste', label: t('contextMenu.paste'), onClick: handlePaste }
-  ]
-
-  const contextMenuItems: ContextMenuItem[] = onGoToDefinition
-    ? [
-        ...baseItems,
-        { id: 'sep1', label: '', isSeparator: true },
-        { id: 'goToDefinition', label: t('contextMenu.goToDefinition'), onClick: handleGoToDefinition }
-      ]
-    : baseItems
-
-  const handleContextMenu = useCallback((e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setContextMenu({ visible: true, x: e.clientX, y: e.clientY })
-  }, [])
-
-  const closeContextMenu = useCallback(() => {
-    setContextMenu((prev) => ({ ...prev, visible: false }))
-  }, [])
+  // Note: ContextMenu has been removed to avoid conflicts with KeyValueTable value cell context menu.
 
   // Monaco mount handler to add helpers completion and hover
   const handleMount = useCallback(
@@ -340,7 +266,6 @@ export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (
           if (hasResolvedTooltip) setShowResolvedTooltip(true)
         }}
         onMouseLeave={() => { setShowResolvedTooltip(false) }}
-        onContextMenu={handleContextMenu}
         style={{ position: 'relative', width: '100%' }}
       >
         <VariableInputBox
@@ -353,6 +278,7 @@ export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (
           style={style}
           ariaLabel={ariaLabel}
           onMount={handleMount}
+          contextMenuItems={contextMenuItems}
         />
       </div>
       {hasResolvedTooltip && (
@@ -363,13 +289,6 @@ export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (
           placement="below"
         />
       )}
-      <ContextMenu
-        visible={contextMenu.visible}
-        x={contextMenu.x}
-        y={contextMenu.y}
-        items={contextMenuItems}
-        onRequestClose={closeContextMenu}
-      />
     </>
   )
 }

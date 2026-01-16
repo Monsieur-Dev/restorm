@@ -21,10 +21,14 @@ body: |-
   </soap:Envelope>
 headers:
   - key: Content-Type
-    value: text/xml; charset=utf-8
+    value:
+      type: string
+      value: text/xml; charset=utf-8
     description: ''
     enabled: true
   - key: SOAPAction
-    value: http://petstore.example.com/GetPet
+    value:
+      type: string
+      value: http://petstore.example.com/GetPet
     description: ''
     enabled: true

@@ -73,7 +73,9 @@ headers: []
 params: []
 pathParams:
   - key: username
-    value: ''
+    value:
+      type: string
+      value: ''
     description: name that need to be updated
 body:
   type: text

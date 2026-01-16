@@ -70,5 +70,7 @@ headers: []
 params: []
 pathParams:
   - key: orderId
-    value: ''
+    value:
+      type: string
+      value: ''
     description: ID of pet that needs to be fetched

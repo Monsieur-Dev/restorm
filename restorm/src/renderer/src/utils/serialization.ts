@@ -4,6 +4,7 @@
  */
 
 import type { RuntimeId } from '../types/collections'
+import { normalizeDocumentValuesForPersistence } from '../../../shared/utils/valuePersistence'
 
 /**
  * Generate a unique identifier (UUID v4)
@@ -129,7 +130,11 @@ function shouldHaveId(obj: Record<string, unknown>): boolean {
  * @returns Data ready for JSON/YAML serialization
  */
 export function prepareForSerialization<T>(data: T): T {
-  return stripIds(data)
+  const stripped = stripIds(data)
+  // Ensure ValueType objects are persisted as { type, ... } and never as plain strings.
+  // Also ensures PasswordValue never persists its actual value in the main file.
+  normalizeDocumentValuesForPersistence(stripped)
+  return stripped
 }
 
 /**

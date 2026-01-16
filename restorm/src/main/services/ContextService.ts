@@ -26,16 +26,22 @@ import {
 } from './DocumentEvents'
 import { registerHandlebarsHelpers } from '../utils/handlebarsHelpers'
 import { pubsub, PUBSUB_TOPICS } from './CollectionStore'
+import type { ValueType } from '../../shared/types/collections'
+import { KeyValue as KeyValueModel } from '../../shared/models'
 
 // ============================================================================
 // Types and Interfaces
 // ============================================================================
 
+function normalizeKeyValues(values: unknown[]): KeyValue[] {
+  return values.map((v) => KeyValueModel.fromPlain(v as Record<string, unknown>))
+}
+
 /** KeyValue structure from environment */
 interface KeyValue {
   id?: string
   key: string
-  value: string
+  value: ValueType
   description?: string
   /** Whether this key-value is enabled (default: true) */
   enabled?: boolean
@@ -282,6 +288,7 @@ class ContextService {
     const envId = payload.id
     const parentEnvId = payload.parentEnvironmentId ?? null
     const env = payload.document as Environment
+    env.variables = normalizeKeyValues(env.variables as unknown as unknown[])
 
     logger.info('[ContextService] ENVIRONMENT_CREATED', {
       id: envId,
@@ -307,6 +314,10 @@ class ContextService {
 
     // Calculate and store transformed context
     this.recalculateContext(envId)
+
+    // If a request tab was opened before this environment was processed,
+    // we must recalculate those requests now that the context exists.
+    this.recalculateRequestsUsingEnvironment(envId)
   }
 
   /**
@@ -315,6 +326,7 @@ class ContextService {
   private handleEnvironmentUpdated(payload: DocumentChangedPayload): void {
     const envId = payload.id
     const env = payload.document as Environment
+    env.variables = normalizeKeyValues(env.variables as unknown as unknown[])
 
     logger.info('[ContextService] ENVIRONMENT_UPDATED', {
       id: envId,
@@ -442,15 +454,16 @@ class ContextService {
       if (kv.key) {
         // Copy context before transformation for this variable
         const contextUsed = { ...finalContext }
-        const transformedValue = this.transformValue(kv.value, finalContext)
+        const transformedValue = this.transformValue(kv.value.toString(), finalContext)
         finalContext[kv.key] = transformedValue
 
         // Store and broadcast transformation result if variable has an id
         if (kv.id) {
+          const rawValue = kv.value.toString()
           this.storeAndBroadcastTransformResult(kv.id, {
             contextUsed,
             transformedValue,
-            rawValue: kv.value,
+            rawValue,
             key: kv.key
           })
         }
@@ -474,7 +487,7 @@ class ContextService {
       resolved: value
     }))
 
-    pubsub.publish(PUBSUB_TOPICS.CONTEXT_CHANGED, {
+    pubsub.publish(PUBSUB_TOPICS.CONTEXT_CHANGED, environmentId, {
       environmentId,
       variables
     })
@@ -511,19 +524,20 @@ class ContextService {
    * Transform a value using Handlebars
    */
   private transformValue(value: string, context: TransformedContext): string {
-    if (!value.includes('{{')) {
-      return value
+    const rawValue = value
+    if (!rawValue.includes('{{')) {
+      return rawValue
     }
 
     try {
-      const template = Handlebars.compile(value, { noEscape: true })
+      const template = Handlebars.compile(rawValue, { noEscape: true })
       return template(context)
     } catch (error) {
       logger.warn('[ContextService] Handlebars transform error', {
-        value,
+        value: rawValue,
         error: String(error)
       })
-      return value
+      return rawValue
     }
   }
 
@@ -724,14 +738,15 @@ class ContextService {
         }
         if (kv.key) {
           const contextUsed = { ...groupContext }
-          const transformedValue = this.transformValue(kv.value, groupContext)
+          const transformedValue = this.transformValue(kv.value.toString(), groupContext)
           groupContext[kv.key] = transformedValue
 
           if (kv.id) {
+            const rawValue = kv.value.toString()
             this.storeAndBroadcastTransformResult(kv.id, {
               contextUsed,
               transformedValue,
-              rawValue: kv.value,
+              rawValue,
               key: kv.key
             })
           }
@@ -823,7 +838,7 @@ class ContextService {
         for (const prev of cumulativePathParams) {
           contextForResolve[prev.name] = prev.value
         }
-        const resolvedValue = this.transformValue(pp.value, contextForResolve)
+        const resolvedValue = this.transformValue(pp.value.toString(), contextForResolve)
         addOrReplace(cumulativePathParams, pp.key, resolvedValue)
       }
     }
@@ -848,7 +863,7 @@ class ContextService {
         for (const prev of cumulativeHeaders) {
           contextForResolve[prev.name] = prev.value
         }
-        const resolvedValue = this.transformValue(h.value, contextForResolve)
+        const resolvedValue = this.transformValue(h.value.toString(), contextForResolve)
         addOrReplace(cumulativeHeaders, h.key, resolvedValue)
       }
     }
@@ -873,7 +888,7 @@ class ContextService {
         for (const prev of cumulativeParams) {
           contextForResolve[prev.name] = prev.value
         }
-        const resolvedValue = this.transformValue(p.value, contextForResolve)
+        const resolvedValue = this.transformValue(p.value.toString(), contextForResolve)
         addOrReplace(cumulativeParams, p.key, resolvedValue)
       }
     }
@@ -925,7 +940,7 @@ class ContextService {
       if (pp.key) {
         // Resolve using cumulative context (env + previous path params)
         const resolvedKey = this.transformValue(pp.key, cumulativeContext)
-        const resolvedValue = this.transformValue(pp.value, cumulativeContext)
+        const resolvedValue = this.transformValue(pp.value.toString(), cumulativeContext)
         // Store non-encoded value for next iterations (last value wins for same key)
         cumulativeContext[resolvedKey] = resolvedValue
       }
@@ -956,7 +971,7 @@ class ContextService {
       if (param.key) {
         // Resolve using cumulative context
         const resolvedKey = this.transformValue(param.key, cumulativeParamsContext)
-        const resolvedValue = this.transformValue(param.value, cumulativeParamsContext)
+        const resolvedValue = this.transformValue(param.value.toString(), cumulativeParamsContext)
         // Store for URL (last value wins for same key)
         resolvedParams.set(resolvedKey, resolvedValue)
         // Add to cumulative context for next params
@@ -1028,7 +1043,7 @@ class ContextService {
       .filter(h => h.key && h.enabled !== false)
       .map(h => ({
         key: this.transformValue(h.key, envContext),
-        value: this.transformValue(h.value, envContext)
+        value: this.transformValue(h.value.toString(), envContext)
       }))
 
     switch (data.requestType) {

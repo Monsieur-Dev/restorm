@@ -21,8 +21,9 @@ export interface TooltipProps {
    * Horizontal side positioning:
    * - 'auto' (default): use standard above/below placement
    * - 'right': position tooltip to the right of the target, beak on the left
+   * - 'left': position tooltip to the left of the target, beak on the right
    */
-  side?: 'auto' | 'right'
+  side?: 'auto' | 'right' | 'left'
   /**
    * Fixed top position in pixels. When set, overrides vertical placement calculation.
    */
@@ -106,6 +107,41 @@ const Tooltip: React.FC<TooltipProps> = ({
 
       setPosition({ top, left, beakLeftPercent: 0, beakTopPercent })
       setResolvedPlacement('below') // Not really used for side positioning
+      setIsPositioned(true)
+      return
+    }
+
+    // Side positioning (tooltip to the left of target)
+    if (side === 'left') {
+      // Position tooltip to the left of the target
+      left = targetRect.left - gap - beakWidth - tooltipWidth
+
+      // Use fixedTop if provided, otherwise align with target center
+      if (fixedTop !== undefined) {
+        top = fixedTop
+      } else {
+        const targetCenterY = targetRect.top + targetRect.height / 2
+        top = targetCenterY - tooltipHeight / 2
+      }
+
+      // Clamp to viewport
+      if (left < gap) {
+        left = gap
+      }
+      if (top < gap) {
+        top = gap
+      }
+      if (top + tooltipHeight + gap > viewportHeight) {
+        top = viewportHeight - tooltipHeight - gap
+      }
+
+      // Calculate beak vertical position as percentage
+      const targetCenterY = targetRect.top + targetRect.height / 2
+      beakTopPercent = ((targetCenterY - top) / tooltipHeight) * 100
+      beakTopPercent = Math.max(10, Math.min(90, beakTopPercent))
+
+      setPosition({ top, left, beakLeftPercent: 100, beakTopPercent })
+      setResolvedPlacement('below') // Not used for side positioning
       setIsPositioned(true)
       return
     }

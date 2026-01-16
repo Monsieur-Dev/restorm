@@ -5,6 +5,7 @@
 
 import axios from 'axios'
 import type { GraphQLRequest, GraphQLResponse, KeyValue } from '../../../shared/types/collections'
+import { StringValue } from '../../../shared/types/collections'
 import type { VariableContext } from './types'
 
 // Re-export for consumers
@@ -39,9 +40,9 @@ function generateResponseId(): string {
 /** Resolve KeyValue pairs with variable context */
 function resolveKeyValues(keyValues: KeyValue[], context: VariableContext): KeyValue[] {
   return keyValues.map((kv) => ({
+    ...kv,
     key: resolveTemplate(kv.key, context),
-    value: resolveTemplate(kv.value, context),
-    description: kv.description
+    value: new StringValue(resolveTemplate(kv.value.toString(), context))
   }))
 }
 
@@ -50,7 +51,7 @@ function headersToObject(headers: KeyValue[]): Record<string, string> {
   const result: Record<string, string> = {}
   for (const h of headers) {
     if (h.key) {
-      result[h.key] = h.value
+      result[h.key] = h.value.toString()
     }
   }
   return result
@@ -60,7 +61,7 @@ function headersToObject(headers: KeyValue[]): Record<string, string> {
 function objectToKeyValues(obj: Record<string, unknown>): KeyValue[] {
   return Object.entries(obj).map(([key, value]) => ({
     key,
-    value: String(value)
+    value: new StringValue(String(value))
   }))
 }
 

@@ -7,8 +7,7 @@ import {
   SplitView,
   Pane,
   logger,
-  type VariableDefinition,
-  type KeyValueTableRow
+  type VariableDefinition
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
@@ -30,7 +29,7 @@ export interface SoapRequestTabViewProps {
 
 export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request }) => {
   const { t } = useTranslation()
-  const { selectedEnvId } = useEnvironmentContext()
+  const { selectedEnvId, environments } = useEnvironmentContext()
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
   
@@ -68,14 +67,14 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
   // Register request with ContextService on mount, unregister on unmount
   useEffect(() => {
     const requestId = request.id
-    const currentEnvId = selectedEnvIdRef.current
+    const currentEnvId = selectedEnvIdRef.current ?? environments?.[0]?.id ?? null
     const currentRequest = requestRef.current
     logger.debug('[SoapRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
     const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
+      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
 
-    void window.restorm?.context.registerRequest(requestId, currentEnvId ?? null, {
+    void window.restorm?.context.registerRequest(requestId, currentEnvId, {
       headers: toKeyValueData(currentRequest.headers)
     })
 
@@ -117,11 +116,11 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
       unsubSnippets?.()
       void window.restorm?.context.unregisterRequest(requestId)
     }
-  }, [request.id])
+  }, [request.id, environments])
 
   // Notify ContextService when selected environment changes
   useEffect(() => {
-    const currentEnvId = selectedEnvId ?? null
+    const currentEnvId = selectedEnvId ?? environments?.[0]?.id ?? null
     if (previousEnvIdRef.current !== currentEnvId) {
       logger.debug('[SoapRequestTabView] Environment changed, notifying ContextService', {
         requestId: request.id,
@@ -131,12 +130,12 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
       void window.restorm?.context.setRequestEnvironment(request.id, currentEnvId)
       previousEnvIdRef.current = currentEnvId
     }
-  }, [selectedEnvId, request.id])
+  }, [selectedEnvId, environments, request.id])
 
   // Notify ContextService when URL or body changes
   useEffect(() => {
     const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value, enabled: kv.enabled }))
+      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
 
     void window.restorm?.context.updateFullRequestData(request.id, {
       url,
@@ -164,12 +163,12 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
 
   // Callback for headers changes - notify both reactive object and ContextService
-  const handleHeadersChange = useCallback((rows: KeyValueTableRow[]): void => {
+  const handleHeadersChange = useCallback((rows: KeyValue[]): void => {
     updateReactiveProperty(request, 'headers', rows)
     void window.restorm?.context.updateRequestKeyValues(
       request.id,
       'headers',
-      rows.map(r => ({ id: r.id, key: r.key, value: r.value, enabled: r.enabled }))
+      rows.map(r => ({ id: r.id, key: r.key, value: r.value.toString(), enabled: r.enabled }))
     )
   }, [request])
 

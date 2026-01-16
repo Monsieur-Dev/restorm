@@ -10,7 +10,9 @@ event: test/echo
 message: '{}'
 headers:
   - key: s
-    value: s
+    value:
+      type: string
+      value: s
     description: ''
     enabled: true
 notes: |

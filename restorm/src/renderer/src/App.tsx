@@ -4,9 +4,7 @@ import {
   Statusbar,
   StatusbarElement,
   VerticalSashContainer,
-  isTabGroupNode,
   isContainerNode,
-  navigationService,
   useFileService,
   eventBus,
   logger,
@@ -17,12 +15,13 @@ import {
   commitChecksums
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type DocumentChangedPayload } from './services/DocumentEvents'
-import type { WorkbenchTree, NavigationEvent, GroupNode, EditorTab } from 'electron-core-ui/renderer'
+import type { WorkbenchTree, GroupNode, EditorTab } from 'electron-core-ui/renderer'
 import { Welcome } from './components/Welcome/Welcome'
 import { EmptyBench } from './components/MainView/Workbench/EmptyBench'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
 import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
 import { RestormWorkbenchContainer } from './components/MainView/Workbench/RestormWorkbenchContainer'
+import type { RestormWorkbenchHandle } from './components/MainView/Workbench/RestormWorkbench'
 import { SaveOptionsModal } from './components/Modals/SaveOptionsModal'
 import { DeleteConfirmationModal } from './components/Modals/DeleteConfirmationModal'
 import { ImportModal } from './components/Modals/ImportModal'
@@ -94,18 +93,24 @@ const allFolderIds = initialRootItems.flatMap((folder) => collectAllFolderIds(fo
 const App: React.FC = () => {
   const { t } = useTranslation()
   const {
-    state: _fileState,
+    state: fileState,
     fileName,
     filePath,
     isDirty,
     recentFiles,
     favorites,
+    isLoading: isFileServiceLoading,
     newFile: _newFile,
     open: _openFile,
     save: saveFile,
     close: _closeFile,
     showUnsavedChangesDialog
   } = useFileService()
+
+  const workbenchId = useMemo((): string | undefined => {
+    if (!filePath) return undefined
+    return `${WORKBENCH_ID}:${filePath}`
+  }, [filePath])
 
   // Sync document.title with window title for taskbar
   useEffect(() => {
@@ -154,6 +159,8 @@ const App: React.FC = () => {
     orientation: 'vertical',
     groups: []
   })
+  const workbenchRef = useRef<RestormWorkbenchHandle>(null)
+  const hasRestoredWorkbenchRef = useRef(false)
 
   // Per-tab dirty state tracking (works in both file and folder modes)
   const {
@@ -206,31 +213,35 @@ const App: React.FC = () => {
     setRootItems
   })
 
-  // Compute workbench tree with dirty states applied to all tabs
-  // This is computed during render, not in an effect, to avoid cascading renders
-  const workbenchTreeWithDirtyState = useMemo((): WorkbenchTree => {
-    const updateGroups = (groups: GroupNode[]): GroupNode[] => {
-      return groups.map(group => {
-        if (isTabGroupNode(group)) {
-          const updatedTabs = group.tabs.map(tab => {
-            // Extract item ID from tab ID (format: "request-{id}", "folder-{id}", etc.)
-            const itemId = tab.id.replace(/^(request|folder|env-folder)-/, '')
-            const shouldBeDirty = dirtyItemIdsSet.has(itemId)
-            if (tab.isDirty !== shouldBeDirty) {
-              return { ...tab, isDirty: shouldBeDirty }
-            }
-            return tab
-          })
-          return { ...group, tabs: updatedTabs }
-        } else if (isContainerNode(group)) {
-          return { ...group, groups: updateGroups(group.groups) }
+  const findIndexPathById = useCallback(function findIndexPathByIdInner(
+    items: FolderItem[],
+    targetId: string
+  ): number[] | null {
+    for (let i = 0; i < items.length; i += 1) {
+      const item = items[i]
+      if (!item) continue
+      if (item.id === targetId) {
+        return [i]
+      }
+      if (isAnyFolder(item)) {
+        const childPath = findIndexPathByIdInner(item.items, targetId)
+        if (childPath) {
+          return [i, ...childPath]
         }
-        return group
-      })
+      }
     }
-    
-    return { ...workbenchTree, groups: updateGroups(workbenchTree.groups) }
-  }, [workbenchTree, dirtyItemIdsSet])
+    return null
+  }, [])
+
+  const buildTabId = useCallback((prefix: 'folder' | 'env-folder' | 'request', id: string): string => {
+    const indexPath = findIndexPathById(rootItems as FolderItem[], id)
+    if (!indexPath) {
+      return `${prefix}-id:${id}`
+    }
+    return `${prefix}-idx:${indexPath.join('.')}`
+  }, [findIndexPathById, rootItems])
+
+  // Keep workbench tree stable to avoid focus loss on dirty-state updates.
 
   // State for sidebar editing and delete confirmation
   const [sidebarEditingItemId, setSidebarEditingItemId] = useState<string | null>(null)
@@ -334,6 +345,34 @@ const App: React.FC = () => {
     return true // User chose to discard changes
   }, [showUnsavedChangesDialog, rootItems, saveFile, t, fileName])
 
+  // Restore file state on initial load (e.g., after page refresh)
+  const hasRestoredFileRef = useRef(false)
+  
+  useEffect(() => {
+    // Wait for FileService to finish loading
+    if (isFileServiceLoading) return
+    
+    // Only restore once on initial mount
+    if (hasRestoredFileRef.current) return
+    
+    // Check if a file is already open
+    const currentFile = fileState?.currentFile
+    if (currentFile?.path && currentFile.content) {
+      hasRestoredFileRef.current = true
+      handleFileOpened({
+        currentFile: {
+          content: currentFile.content,
+          path: currentFile.path,
+          format: currentFile.format
+        }
+      })
+      
+    } else {
+      // No file open, mark as restored to avoid re-checking
+      hasRestoredFileRef.current = true
+    }
+  }, [isFileServiceLoading, fileState, handleFileOpened])
+
   // Listen to file events from FileService via IPC
   useEffect(() => {
     const w = window as unknown as { api?: { file?: { onFileOpened: (callback: (state: { currentFile: { content: unknown; path?: string | null; format?: string } }) => void) => () => void; onFileClosed: (callback: () => void) => () => void } } }
@@ -341,17 +380,51 @@ const App: React.FC = () => {
     if (!api) return
 
     const unsubscribe1 = api.onFileOpened((state: { currentFile: { content: unknown; path?: string | null; format?: string } }) => {
+      // Mark as restored when a new file is opened via IPC
+      hasRestoredFileRef.current = true
       handleFileOpened(state)
     })
     const unsubscribe2 = api.onFileClosed(() => {
+      // Reset restore flags when file is closed
+      hasRestoredFileRef.current = false
+      hasRestoredWorkbenchRef.current = false
       handleFileClosed()
+      
+      // Close all open tabs for the currently opened file.
+      requestAnimationFrame(() => {
+        setWorkbenchTree({
+          orientation: 'vertical',
+          groups: []
+        })
+      })
+      setFocusedGroupId(null)
     })
     
     return () => {
       unsubscribe1()
       unsubscribe2()
     }
-  }, [handleFileOpened, handleFileClosed])
+  }, [handleFileOpened, handleFileClosed, filePath])
+
+  // Restore workbench state after rootItems are available (autosave relies on onRebuildTab)
+  useEffect(() => {
+    if (!workbenchId || rootItems.length === 0 || hasRestoredWorkbenchRef.current) return
+    hasRestoredWorkbenchRef.current = true
+    void (async (): Promise<void> => {
+      try {
+        const restoredTree = await workbenchRef.current?.loadState()
+        if (restoredTree) {
+          requestAnimationFrame(() => {
+            setWorkbenchTree(restoredTree)
+          })
+        }
+      } catch (error) {
+        logger.warn('[App] Failed to restore workbench state', {
+          error: error instanceof Error ? error.message : String(error)
+        })
+      }
+    })()
+  }, [workbenchId, rootItems])
 
   // Listen to test events for E2E tests (only in dev/test mode)
   // Expose handleFileOpened directly on window for E2E tests
@@ -490,7 +563,7 @@ const App: React.FC = () => {
 
   // Open a folder tab in the workbench
   const openFolderTab = useCallback((folder: Folder, breadcrumbs: BreadcrumbItem[]) => {
-    const tabId = `folder-${folder.id}`
+    const tabId = buildTabId('folder', folder.id)
 
     // Register initial checksum for dirty state tracking
     const folderChecksum = computeChecksum(JSON.parse(JSON.stringify(folder)) as Folder)
@@ -562,11 +635,11 @@ const App: React.FC = () => {
         groups: updatedGroups
       }
     })
-  }, [focusedGroupId, registerTabDirtyState])
+  }, [buildTabId, focusedGroupId, registerTabDirtyState])
 
   // Open an environment folder tab in the workbench
   const openEnvironmentFolderTab = useCallback((folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[]) => {
-    const tabId = `env-folder-${folder.id}`
+    const tabId = buildTabId('env-folder', folder.id)
 
     // Register initial checksum for dirty state tracking
     const folderChecksum = computeChecksum(JSON.parse(JSON.stringify(folder)))
@@ -638,13 +711,13 @@ const App: React.FC = () => {
         groups: updatedGroups
       }
     })
-  }, [focusedGroupId, registerTabDirtyState])
+  }, [buildTabId, focusedGroupId, registerTabDirtyState])
 
   // Open an HTTP request tab in the workbench
   // Generic function to open any request type tab
   const openAnyRequestTab = useCallback(
     (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[]) => {
-    const tabId = `request-${request.id}`
+    const tabId = buildTabId('request', request.id)
     
     // Register initial checksum for dirty state tracking
     const requestChecksum = computeChecksum(JSON.parse(JSON.stringify(request)))
@@ -741,110 +814,201 @@ const App: React.FC = () => {
       }
     })
   },
-    [focusedGroupId, registerTabDirtyState]
+    [buildTabId, focusedGroupId, registerTabDirtyState]
   )
 
-  // Rebuild tab callback for workbench autosave
-  const handleRebuildTab = useCallback((tabId: string): EditorTab | null => {
-    if (tabId.startsWith('env-folder-')) {
-      const itemId = tabId.replace('env-folder-', '')
-      const folder = findEnvironmentFolderById(rootItems, itemId)
-      if (folder) {
-        const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
-        return {
-          id: tabId,
-          tabType: 'environment-folder',
-          title: folder.name,
-          titleString: folder.name,
-          folder,
-          breadcrumbs,
-          allowFullscreen: true
-        } as EnvironmentFolderTab
+  const parseTabId = useCallback((tabId: string): { type: 'folder' | 'env-folder' | 'request'; indexPath?: number[]; legacyId?: string } | null => {
+    const indexMatch = /^(folder|env-folder|request)-idx:([0-9]+(?:\.[0-9]+)*)$/.exec(tabId)
+    if (indexMatch?.[1] && indexMatch[2]) {
+      return {
+        type: indexMatch[1] as 'folder' | 'env-folder' | 'request',
+        indexPath: indexMatch[2].split('.').map((part) => Number(part))
       }
-    } else if (tabId.startsWith('folder-')) {
-      const itemId = tabId.replace('folder-', '')
-      const folder = findFolderById(rootItems, itemId)
-      if (folder && !isEnvironmentFolder(folder as FolderItem)) {
-        const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
-        return {
-          id: tabId,
-          tabType: 'folder',
-          title: folder.name,
-          titleString: folder.name,
-          folder,
-          breadcrumbs,
-          allowFullscreen: true
-        } as FolderTab
+    }
+    const legacyMatch = /^(folder|env-folder|request)-id:(.+)$/.exec(tabId)
+    if (legacyMatch?.[1] && legacyMatch[2]) {
+      return {
+        type: legacyMatch[1] as 'folder' | 'env-folder' | 'request',
+        legacyId: legacyMatch[2]
       }
-    } else if (tabId.startsWith('request-')) {
-      const itemId = tabId.replace('request-', '')
-      const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
-      if (item && isRequest(item)) {
-        const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
-        
-        if (isHTTPRequest(item)) {
-          return {
-            id: tabId,
-            tabType: 'http-request',
-            title: `${item.method} ${item.name}`,
-            titleString: `${item.method} ${item.name}`,
-            request: item,
-            breadcrumbs,
-            environments,
-            allowFullscreen: true
-          } as HTTPRequestTab
-        } else if (isGraphQLRequest(item)) {
-          return {
-            id: tabId,
-            tabType: 'graphql-request',
-            title: `GraphQL ${item.name}`,
-            titleString: `GraphQL ${item.name}`,
-            request: item,
-            breadcrumbs,
-            environments,
-            allowFullscreen: true
-          } as GraphQLRequestTab
-        } else if (isGrpcRequest(item)) {
-          return {
-            id: tabId,
-            tabType: 'grpc-request',
-            title: `gRPC ${item.name}`,
-            titleString: `gRPC ${item.name}`,
-            request: item,
-            breadcrumbs,
-            environments,
-            allowFullscreen: true
-          } as GrpcRequestTab
-        } else if (isSoapRequest(item)) {
-          return {
-            id: tabId,
-            tabType: 'soap-request',
-            title: `SOAP ${item.name}`,
-            titleString: `SOAP ${item.name}`,
-            request: item,
-            breadcrumbs,
-            environments,
-            allowFullscreen: true
-          } as SoapRequestTab
-        } else if (isWebSocketRequest(item)) {
-          return {
-            id: tabId,
-            tabType: 'websocket-request',
-            title: `WS ${item.name}`,
-            titleString: `WS ${item.name}`,
-            request: item,
-            breadcrumbs,
-            environments,
-            allowFullscreen: true
-          } as WebSocketRequestTab
-        }
+    }
+    const oldMatch = /^(folder|env-folder|request)-(.+)$/.exec(tabId)
+    if (oldMatch?.[1] && oldMatch[2]) {
+      return {
+        type: oldMatch[1] as 'folder' | 'env-folder' | 'request',
+        legacyId: oldMatch[2]
       }
     }
     return null
-  }, [rootItems])
+  }, [])
+
+  const findItemByIndexPath = useCallback((items: FolderItem[], indexPath: number[]): FolderItem | null => {
+    if (indexPath.length === 0) return null
+    const firstIndex = indexPath[0]
+    if (firstIndex === undefined) return null
+    let current: FolderItem | undefined = items[firstIndex]
+    for (let i = 1; i < indexPath.length; i += 1) {
+      if (!current || !isAnyFolder(current)) {
+        return null
+      }
+      const nextIndex = indexPath[i]
+      if (nextIndex === undefined) return null
+      current = current.items[nextIndex]
+    }
+    return current ?? null
+  }, [])
+
+  // Rebuild tab callback for workbench autosave
+  const handleRebuildTab = useCallback((tabId: string): EditorTab | null => {
+    const parsed = parseTabId(tabId)
+    if (!parsed) return null
+
+    if (parsed.type === 'env-folder') {
+      if (parsed.indexPath) {
+        const item = findItemByIndexPath(rootItems as FolderItem[], parsed.indexPath)
+        if (item && isEnvironmentFolder(item)) {
+          const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, item.id)
+          return {
+            id: tabId,
+            tabType: 'environment-folder',
+            title: item.name,
+            titleString: item.name,
+            folder: item,
+            breadcrumbs,
+            allowFullscreen: true
+          } as EnvironmentFolderTab
+        }
+      } else if (parsed.legacyId) {
+        const folder = findEnvironmentFolderById(rootItems, parsed.legacyId)
+        if (folder) {
+          const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, folder.id)
+          return {
+            id: tabId,
+            tabType: 'environment-folder',
+            title: folder.name,
+            titleString: folder.name,
+            folder,
+            breadcrumbs,
+            allowFullscreen: true
+          } as EnvironmentFolderTab
+        }
+      }
+      return null
+    }
+
+    if (parsed.type === 'folder') {
+      if (parsed.indexPath) {
+        const item = findItemByIndexPath(rootItems as FolderItem[], parsed.indexPath)
+        if (item && isAnyFolder(item) && !isEnvironmentFolder(item)) {
+          const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, item.id)
+          return {
+            id: tabId,
+            tabType: 'folder',
+            title: item.name,
+            titleString: item.name,
+            folder: item,
+            breadcrumbs,
+            allowFullscreen: true
+          } as FolderTab
+        }
+      } else if (parsed.legacyId) {
+        const folder = findFolderById(rootItems, parsed.legacyId)
+        if (folder && !isEnvironmentFolder(folder as FolderItem)) {
+          const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, folder.id)
+          return {
+            id: tabId,
+            tabType: 'folder',
+            title: folder.name,
+            titleString: folder.name,
+            folder,
+            breadcrumbs,
+            allowFullscreen: true
+          } as FolderTab
+        }
+      }
+      return null
+    }
+
+    let requestItem: FolderItem | null = null
+    if (parsed.indexPath) {
+      requestItem = findItemByIndexPath(rootItems as FolderItem[], parsed.indexPath)
+    } else if (parsed.legacyId) {
+      requestItem = findRequestById(rootItems, parsed.legacyId) ?? null
+    }
+    if (requestItem && isRequest(requestItem)) {
+      const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, requestItem.id)
+      const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
+      
+      if (isHTTPRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'http-request',
+          title: `${requestItem.method} ${requestItem.name}`,
+          titleString: `${requestItem.method} ${requestItem.name}`,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as HTTPRequestTab
+      }
+      if (isGraphQLRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'graphql-request',
+          title: `GraphQL ${requestItem.name}`,
+          titleString: `GraphQL ${requestItem.name}`,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as GraphQLRequestTab
+      }
+      if (isGrpcRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'grpc-request',
+          title: `gRPC ${requestItem.name}`,
+          titleString: `gRPC ${requestItem.name}`,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as GrpcRequestTab
+      }
+      if (isSoapRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'soap-request',
+          title: `SOAP ${requestItem.name}`,
+          titleString: `SOAP ${requestItem.name}`,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as SoapRequestTab
+      }
+      if (isWebSocketRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'websocket-request',
+          title: `WS ${requestItem.name}`,
+          titleString: `WS ${requestItem.name}`,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as WebSocketRequestTab
+      }
+    }
+    return null
+  }, [findItemByIndexPath, parseTabId, rootItems])
 
   // Handle workbench state restored
   const handleStateRestored = useCallback((restoredTree: WorkbenchTree | null) => {
+    logger.info('[App] workbench state restored', {
+      hasTree: Boolean(restoredTree),
+      groupCount: restoredTree?.groups.length ?? 0
+    })
     if (restoredTree) {
       setWorkbenchTree(restoredTree)
     }
@@ -873,43 +1037,6 @@ const App: React.FC = () => {
       return { ...prev, groups: updateNodeSizes(prev.groups) }
     })
   }, [])
-
-  // Handle navigation events from NavigationService
-  useEffect(() => {
-    const unsubscribe = navigationService.onNavigate((event: NavigationEvent) => {
-      const { key, params } = event
-
-      // Update sidebar selection
-      setSelectedItemId(key)
-
-      // Open appropriate tab based on navigation type
-      if (params.type === 'folder' || params.type === 'environment-folder') {
-        const folder = findFolderById(rootItems, key)
-        if (folder) {
-          const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, key)
-          if (isEnvironmentFolder(folder as FolderItem)) {
-            openEnvironmentFolderTab(folder as EnvironmentFolder, breadcrumbs)
-          } else {
-            openFolderTab(folder, breadcrumbs)
-          }
-          // Focus the group containing the tab
-          setFocusedGroupId('restorm-main-group')
-        }
-      } else if (params.type === 'http-request' || params.type === 'graphql-request' || 
-                 params.type === 'grpc-request' || params.type === 'soap-request' || 
-                 params.type === 'websocket-request') {
-        const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, key)
-        if (item && isRequest(item)) {
-          const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
-          openAnyRequestTab(item, breadcrumbs, environments)
-          // Focus the group containing the tab
-          setFocusedGroupId('restorm-main-group')
-        }
-      }
-    })
-
-    return unsubscribe
-  }, [openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, rootItems])
 
   // Use navigation hook for handling clicks and breadcrumbs
   const {
@@ -999,7 +1126,9 @@ const App: React.FC = () => {
           }
           Right={
             <RestormWorkbenchContainer
-              tree={workbenchTreeWithDirtyState}
+              workbenchRef={workbenchRef}
+              tree={workbenchTree}
+              dirtyItemIdsSet={dirtyItemIdsSet}
               onTreeChange={handleTreeChange}
               focusedGroupId={focusedGroupId}
               onFocusedGroupChange={setFocusedGroupId}
@@ -1011,7 +1140,7 @@ const App: React.FC = () => {
               onEnvironmentFolderChange={handleEnvironmentFolderChange}
               onSizesChange={handleSizesChange}
               emptyFallback={<EmptyBench />}
-              workbenchId={WORKBENCH_ID}
+              workbenchId={workbenchId}
               onRebuildTab={handleRebuildTab}
               onStateRestored={handleStateRestored}
               getRequestById={(id) => findRequestById(rootItems, id)}
@@ -1029,7 +1158,9 @@ const App: React.FC = () => {
       ) : (
         <div style={{ flex: 1, minHeight: 0 }}>
           <RestormWorkbenchContainer
-            tree={workbenchTreeWithDirtyState}
+            workbenchRef={workbenchRef}
+            tree={workbenchTree}
+            dirtyItemIdsSet={dirtyItemIdsSet}
             onTreeChange={handleTreeChange}
             focusedGroupId={focusedGroupId}
             onFocusedGroupChange={setFocusedGroupId}
@@ -1041,7 +1172,7 @@ const App: React.FC = () => {
             onEnvironmentFolderChange={handleEnvironmentFolderChange}
             onSizesChange={handleSizesChange}
             emptyFallback={<Welcome />}
-            workbenchId={WORKBENCH_ID}
+            workbenchId={workbenchId}
             onRebuildTab={handleRebuildTab}
             onStateRestored={handleStateRestored}
             getRequestById={(id) => findRequestById(rootItems, id)}

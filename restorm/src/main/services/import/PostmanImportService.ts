@@ -22,6 +22,7 @@ import {
   type KeyValue,
   type Request
 } from '../../../shared/models'
+import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 
 // ============================================================================
 // Postman Collection v2.1.0 Types
@@ -239,17 +240,19 @@ function parsePostmanUrl(url: PostmanUrl | string | undefined): {
   // Extract query params
   const params: KeyValue[] = (url.query ?? [])
     .filter(q => !q.disabled)
-    .map(q => ({
+    .map(q => createTypedKeyValue({
       key: q.key,
       value: q.value ?? '',
-      description: extractDescription(q.description) || undefined
+      description: extractDescription(q.description) || undefined,
+      enabled: true
     }))
 
   // Extract path variables (Postman uses :variable or {{variable}} syntax)
-  const pathParams: KeyValue[] = (url.variable ?? []).map(v => ({
+  const pathParams: KeyValue[] = (url.variable ?? []).map(v => createTypedKeyValue({
     key: v.key,
     value: v.value ?? '',
-    description: extractDescription(v.description) || undefined
+    description: extractDescription(v.description) || undefined,
+    enabled: true
   }))
 
   // Convert Postman path variables (:var) to Restorm format ({{var}})
@@ -266,10 +269,11 @@ function parseHeaders(headers: PostmanHeader[] | string | undefined): KeyValue[]
   
   return headers
     .filter(h => !h.disabled)
-    .map(h => ({
+    .map(h => createTypedKeyValue({
       key: h.key,
       value: h.value,
-      description: extractDescription(h.description) || undefined
+      description: extractDescription(h.description) || undefined,
+      enabled: true
     }))
 }
 
@@ -289,10 +293,11 @@ function parseBody(body: PostmanBody | undefined): HTTPRequestBody | undefined {
         type: 'form-data',
         fields: (body.formdata ?? [])
           .filter(f => !f.disabled)
-          .map(f => ({
+          .map(f => createTypedKeyValue({
             key: f.key,
             value: f.value ?? '',
-            description: extractDescription(f.description) || undefined
+            description: extractDescription(f.description) || undefined,
+            enabled: true
           }))
       }
 
@@ -301,10 +306,11 @@ function parseBody(body: PostmanBody | undefined): HTTPRequestBody | undefined {
         type: 'x-www-form-urlencoded',
         fields: (body.urlencoded ?? [])
           .filter(f => !f.disabled)
-          .map(f => ({
+          .map(f => createTypedKeyValue({
             key: f.key,
             value: f.value ?? '',
-            description: extractDescription(f.description) || undefined
+            description: extractDescription(f.description) || undefined,
+            enabled: true
           }))
       }
 
@@ -591,7 +597,8 @@ function extractEnvironment(
   let envName = 'Default'
   if (baseUrlVar?.value) {
     try {
-      const url = new URL(baseUrlVar.value.replace(/\{\{.*?\}\}/g, 'placeholder'))
+      const baseUrlString = typeof baseUrlVar.value === 'string' ? baseUrlVar.value : String(baseUrlVar.value)
+      const url = new URL(baseUrlString.replace(/\{\{.*?\}\}/g, 'placeholder'))
       envName = url.hostname
     } catch {
       envName = 'Default'
