@@ -82,7 +82,8 @@
       "params": "Params",
       "pathParams": "Path params",
       "notes": "Notes",
-      "codeSnippets": "Code snippets"
+      "codeSnippets": "Code snippets",
+      "responsesHistory": "Responses history"
     },
     "responses": {
       "tabs": {
@@ -91,7 +92,14 @@
         "jsoncrack": "JSONCrack"
       },
       "loading": "Sending request...",
-      "noResponse": "Click Send to execute the request"
+      "noResponse": "Click Send to execute the request",
+      "history": {
+        "list": "Responses history list",
+        "empty": "No responses recorded yet",
+        "select": "Select a response to view details",
+        "pin": "Pin response",
+        "unpin": "Unpin response"
+      }
     }
   },
   "workbench": {

@@ -1,6 +1,7 @@
 export { searchIndexService } from './SearchIndexService'
 export { contextService } from './ContextService'
 export { collectionStore } from './CollectionStore'
+export { responseHistoryService } from './ResponseHistoryService'
 export { DocumentEvents } from './DocumentEvents'
 export {
   getFolderSecretsEnvPath,

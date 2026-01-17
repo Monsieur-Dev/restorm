@@ -495,6 +495,20 @@ contextBridge.exposeInMainWorld('restorm', {
       }
     }
   },
+  responsesHistory: {
+    list: async (requestId: string): Promise<unknown> => {
+      const result: unknown = await ipcRenderer.invoke('responses:history:list', requestId)
+      return result
+    },
+    get: async (guid: string): Promise<unknown> => {
+      const result: unknown = await ipcRenderer.invoke('responses:history:get', guid)
+      return result
+    },
+    togglePin: async (guid: string, pinned: boolean): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('responses:history:toggle-pin', guid, pinned)
+      return result as boolean
+    }
+  },
   import: {
     /** Preview import from file path or URL (dry-run) */
     preview: async (input: string): Promise<{

@@ -4,7 +4,7 @@ import { initializeApp, logger, initFeatureService, initFileService, getFileServ
 import { join, relative, basename, dirname } from 'path'
 import { promises as fs, existsSync, mkdirSync, statSync, readFileSync, writeFileSync, renameSync, rmSync } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
-import { searchIndexService, contextService } from './services'
+import { searchIndexService, contextService, responseHistoryService } from './services'
 import { graphQLService } from 'electron-core-ui/main'
 import { typeDefs, resolvers, pubsub } from './graphql'
 import type { PersistenceFormat } from 'electron-core-ui'
@@ -236,6 +236,10 @@ logger.info('✅ Search Index Service initialized')
 // Initialize Context Service (manages Handlebars context and resolved values)
 contextService.initialize()
 logger.info('✅ Context Service initialized')
+
+// Initialize Response History Service (stores executed responses)
+responseHistoryService.initialize()
+logger.info('✅ Response History Service initialized')
 
 // Initialize GraphQL Service
 graphQLService.initialize({
@@ -1369,7 +1373,11 @@ import { httpExecutionService, type HTTPExecutionInput } from './services/HTTPEx
 
 // IPC handler to execute HTTP request
 ipcMain.handle('http:execute', async (_event, input: HTTPExecutionInput) => {
-  return httpExecutionService.execute(input)
+  const result = await httpExecutionService.execute(input)
+  setImmediate(() => {
+    void responseHistoryService.storeExecutionResult(input.requestId, 'http', result)
+  })
+  return result
 })
 
 // IPC handler to cancel HTTP request
@@ -1390,7 +1398,11 @@ import { graphqlExecutionService, type GraphQLExecutionInput } from './services/
 
 // IPC handler to execute GraphQL request
 ipcMain.handle('graphql:execute', async (_event, input: GraphQLExecutionInput) => {
-  return graphqlExecutionService.execute(input)
+  const result = await graphqlExecutionService.execute(input)
+  setImmediate(() => {
+    void responseHistoryService.storeExecutionResult(input.requestId, 'graphql', result)
+  })
+  return result
 })
 
 // IPC handler to cancel GraphQL request
@@ -1411,7 +1423,11 @@ import { soapExecutionService, type SOAPExecutionInput } from './services/SOAPEx
 
 // IPC handler to execute SOAP request
 ipcMain.handle('soap:execute', async (_event, input: SOAPExecutionInput) => {
-  return soapExecutionService.execute(input)
+  const result = await soapExecutionService.execute(input)
+  setImmediate(() => {
+    void responseHistoryService.storeExecutionResult(input.requestId, 'soap', result)
+  })
+  return result
 })
 
 // IPC handler to cancel SOAP request
@@ -1432,7 +1448,11 @@ import { grpcExecutionService, type GRPCExecutionInput } from './services/GRPCEx
 
 // IPC handler to execute gRPC request
 ipcMain.handle('grpc:execute', (_event, input: GRPCExecutionInput) => {
-  return grpcExecutionService.execute(input)
+  const result = grpcExecutionService.execute(input)
+  setImmediate(() => {
+    void responseHistoryService.storeExecutionResult(input.requestId, 'grpc', result)
+  })
+  return result
 })
 
 // IPC handler to cancel gRPC request
@@ -1453,7 +1473,11 @@ import { websocketExecutionService, type WebSocketExecutionInput } from './servi
 
 // IPC handler to connect WebSocket
 ipcMain.handle('websocket:connect', async (_event, input: WebSocketExecutionInput) => {
-  return websocketExecutionService.execute(input)
+  const result = await websocketExecutionService.execute(input)
+  setImmediate(() => {
+    void responseHistoryService.storeExecutionResult(input.requestId, 'websocket', result)
+  })
+  return result
 })
 
 // IPC handler to disconnect WebSocket
@@ -1469,6 +1493,22 @@ ipcMain.handle('websocket:send', (_event, requestId: string, message: string, ev
 // IPC handler to check if connection is active
 ipcMain.handle('websocket:is-active', (_event, requestId: string) => {
   return websocketExecutionService.isActive(requestId)
+})
+
+// ========================
+// Responses History IPC handlers
+// ========================
+
+ipcMain.handle('responses:history:list', async (_event, requestId: string) => {
+  return responseHistoryService.list(requestId)
+})
+
+ipcMain.handle('responses:history:get', async (_event, guid: string) => {
+  return responseHistoryService.getDetail(guid)
+})
+
+ipcMain.handle('responses:history:toggle-pin', async (_event, guid: string, pinned: boolean) => {
+  return responseHistoryService.togglePin(guid, pinned)
 })
 
 // ============================================================================

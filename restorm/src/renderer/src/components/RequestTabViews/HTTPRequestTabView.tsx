@@ -18,10 +18,11 @@ import {
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
-import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue } from '../../types/collections'
+import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue, ResponseHistoryDetail } from '../../types/collections'
 import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, type ValueType } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import { BaseRequestTabView } from './BaseRequestTabView'
+import { ResponseHistoryTab } from './ResponseHistoryTab'
 import { Badge } from '../common/Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
 
@@ -80,6 +81,33 @@ function normalizeValueType(input: unknown): ValueType {
   }
 
   return new StringValue('')
+}
+
+function toKeyValuesFromHistory(values: { key: string; value: string; enabled?: boolean }[]): KeyValue[] {
+  return values.map((kv) => ({
+    key: kv.key,
+    value: new StringValue(kv.value),
+    enabled: kv.enabled
+  }))
+}
+
+function buildRequestBodyFromHistory(body: { type: string; content?: string; path?: string; fields?: { key: string; value: string; enabled?: boolean }[] } | undefined): HTTPResponse['requestBody'] {
+  if (!body) return undefined
+  if (body.type === 'text') {
+    return { type: 'text', content: body.content ?? '' }
+  }
+  if (body.type === 'file') {
+    return { type: 'file', path: body.path ?? '' }
+  }
+  if (body.type === 'form-data' || body.type === 'x-www-form-urlencoded') {
+    const fields = (body.fields ?? []).map((field) => ({
+      key: field.key,
+      value: new StringValue(field.value),
+      enabled: field.enabled
+    }))
+    return { type: body.type, fields }
+  }
+  return undefined
 }
 
 /** Determine body mode from request body type */
@@ -654,79 +682,108 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
   // Use backend-provided code snippets
   const codeSnippetsContent = backendCodeSnippets || t('requestTab.codeSnippets.loading', 'Loading code snippets...')
 
-  // Build general info items for response
-  const generalItems: ListViewItemData[] = useMemo(() => {
-    if (!httpResponse) return []
-    const items: ListViewItemData[] = [
-      { id: 'general-request-url', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Request URL</span><span>{httpResponse.requestUrl}</span></span> },
-      { id: 'general-request-method', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Request Method</span><span>{httpResponse.requestMethod}</span></span> },
-      { id: 'general-status-code', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Status Code</span><span style={{ color: getStatusColor(httpResponse.statusCode) === 'green' ? 'var(--testing-iconPassed)' : getStatusColor(httpResponse.statusCode) === 'orange' ? 'var(--editorWarning-foreground)' : 'var(--testing-iconFailed)' }}>{httpResponse.statusCode} {httpResponse.statusText}</span></span> },
-      { id: 'general-duration', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Duration</span><span>{formatDuration(httpResponse.timings.durationMs)}</span></span> }
-    ]
-    if (httpResponse.contentType) {
-      items.push({ id: 'general-content-type', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Content-Type</span><span>{httpResponse.contentType}</span></span> })
-    }
-    if (httpResponse.contentLength !== undefined) {
-      items.push({ id: 'general-content-length', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Content-Length</span><span>{formatBytes(httpResponse.contentLength)}</span></span> })
-    }
-    if (httpResponse.error) {
-      items.push({ id: 'general-error', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Error</span><span style={{ color: 'var(--testing-iconFailed)' }}>{httpResponse.error}</span></span> })
-    }
-    return items
-  }, [httpResponse])
-
-  const responseHeaderItems = useMemo(() => httpResponse ? keyValuesToListItems(httpResponse.responseHeaders, 'resp-header') : [], [httpResponse])
-  const requestHeaderItems = useMemo(() => httpResponse ? keyValuesToListItems(httpResponse.requestHeaders, 'req-header') : [], [httpResponse])
-
-  const headersTreeItems: ListViewItemData[] = useMemo(() => [
-    { id: 'group-general', title: 'General', icon: 'info', isExpandable: true, isExpanded: true, children: generalItems },
-    { id: 'group-response-headers', title: `Response headers (${responseHeaderItems.length})`, icon: 'call-incoming', isExpandable: true, isExpanded: true, children: responseHeaderItems },
-    { id: 'group-request-headers', title: `Request headers (${requestHeaderItems.length})`, icon: 'call-outgoing', isExpandable: true, isExpanded: true, children: requestHeaderItems }
-  ], [generalItems, responseHeaderItems, requestHeaderItems])
-
-  // Infos content (detailed info panel)
-  const infosContent = httpResponse ? (
-    <div style={{ height: '100%', boxSizing: 'border-box' }}>
-      <ListView items={headersTreeItems} rootRole="tree" ariaLabel="HTTP request and response headers" />
-    </div>
-  ) : null
-
-  // Response content (raw body)
-  const formattedResponseBody = useMemo(() => {
-    if (!httpResponse) return ''
-    const responseBody = httpResponse.responseBody
-    if (httpResponse.contentType?.includes('application/json')) {
-      try {
-        const parsed: unknown = JSON.parse(responseBody)
-        return JSON.stringify(parsed, null, 2)
-      } catch {
-        return responseBody
+  const buildHttpResponseView = useCallback((response: HTTPResponse | null) => {
+    const generalItems: ListViewItemData[] = []
+    if (response) {
+      generalItems.push(
+        { id: 'general-request-url', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Request URL</span><span>{response.requestUrl}</span></span> },
+        { id: 'general-request-method', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Request Method</span><span>{response.requestMethod}</span></span> },
+        { id: 'general-status-code', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Status Code</span><span style={{ color: getStatusColor(response.statusCode) === 'green' ? 'var(--testing-iconPassed)' : getStatusColor(response.statusCode) === 'orange' ? 'var(--editorWarning-foreground)' : 'var(--testing-iconFailed)' }}>{response.statusCode} {response.statusText}</span></span> },
+        { id: 'general-duration', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Duration</span><span>{formatDuration(response.timings.durationMs)}</span></span> }
+      )
+      if (response.contentType) {
+        generalItems.push({ id: 'general-content-type', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Content-Type</span><span>{response.contentType}</span></span> })
+      }
+      if (response.contentLength !== undefined) {
+        generalItems.push({ id: 'general-content-length', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Content-Length</span><span>{formatBytes(response.contentLength)}</span></span> })
+      }
+      if (response.error) {
+        generalItems.push({ id: 'general-error', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Error</span><span style={{ color: 'var(--testing-iconFailed)' }}>{response.error}</span></span> })
       }
     }
-    return responseBody
-  }, [httpResponse])
 
-  const responseContent = httpResponse && formattedResponseBody ? (
-    <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3, boxSizing: 'border-box' }}>
-      <CodeEditor
-        height="100%"
-        language="json"
-        value={formattedResponseBody}
-        options={{ minimap: { enabled: false }, wordWrap: 'on', scrollBeyondLastLine: false, automaticLayout: true, readOnly: true }}
-      />
-    </div>
-  ) : null
+    const responseHeaderItems = response ? keyValuesToListItems(response.responseHeaders, 'resp-header') : []
+    const requestHeaderItems = response ? keyValuesToListItems(response.requestHeaders, 'req-header') : []
+    const headersTreeItems: ListViewItemData[] = [
+      { id: 'group-general', title: 'General', icon: 'info', isExpandable: true, isExpanded: true, children: generalItems },
+      { id: 'group-response-headers', title: `Response headers (${responseHeaderItems.length})`, icon: 'call-incoming', isExpandable: true, isExpanded: true, children: responseHeaderItems },
+      { id: 'group-request-headers', title: `Request headers (${requestHeaderItems.length})`, icon: 'call-outgoing', isExpandable: true, isExpanded: true, children: requestHeaderItems }
+    ]
 
-  // Parse JSON for JsonCrack
-  const jsonData = useMemo(() => {
-    if (!httpResponse?.responseBody) return undefined
-    if (!httpResponse.contentType?.includes('application/json')) return undefined
-    try {
-      return JSON.parse(httpResponse.responseBody) as unknown
-    } catch {
-      return undefined
+    const infosContent = response ? (
+      <div style={{ height: '100%', boxSizing: 'border-box' }}>
+        <ListView items={headersTreeItems} rootRole="tree" ariaLabel="HTTP request and response headers" />
+      </div>
+    ) : null
+
+    const formattedResponseBody = (() => {
+      if (!response) return ''
+      const responseBody = response.responseBody
+      if (response.contentType?.includes('application/json')) {
+        try {
+          const parsed: unknown = JSON.parse(responseBody)
+          return JSON.stringify(parsed, null, 2)
+        } catch {
+          return responseBody
+        }
+      }
+      return responseBody
+    })()
+
+    const responseContent = response && formattedResponseBody ? (
+      <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3, boxSizing: 'border-box' }}>
+        <CodeEditor
+          height="100%"
+          language="json"
+          value={formattedResponseBody}
+          options={{ minimap: { enabled: false }, wordWrap: 'on', scrollBeyondLastLine: false, automaticLayout: true, readOnly: true }}
+        />
+      </div>
+    ) : null
+
+    const jsonData = (() => {
+      if (!response?.responseBody) return undefined
+      if (!response.contentType?.includes('application/json')) return undefined
+      try {
+        return JSON.parse(response.responseBody) as unknown
+      } catch {
+        return undefined
+      }
+    })()
+
+    return { infosContent, responseContent, jsonData }
+  }, [])
+
+  const { infosContent, responseContent, jsonData } = useMemo(
+    () => buildHttpResponseView(httpResponse),
+    [buildHttpResponseView, httpResponse]
+  )
+
+  const buildHistoryView = useCallback((detail: ResponseHistoryDetail) => {
+    if (detail.response.type !== 'http') {
+      return { infosContent: undefined, responseContent: undefined, jsonData: undefined }
     }
-  }, [httpResponse])
+    const historyResponse: HTTPResponse = {
+      id: detail.guid,
+      type: 'http',
+      requestId: detail.requestId,
+      requestUrl: detail.response.requestUrl,
+      requestMethod: detail.response.requestMethod as HTTPMethod,
+      requestHeaders: toKeyValuesFromHistory(detail.response.requestHeaders),
+      requestParams: toKeyValuesFromHistory(detail.response.requestParams),
+      requestPathParams: toKeyValuesFromHistory(detail.response.requestPathParams),
+      ...(detail.response.requestBody ? { requestBody: buildRequestBodyFromHistory(detail.response.requestBody) } : {}),
+      statusCode: detail.response.statusCode,
+      statusText: detail.response.statusText,
+      responseHeaders: toKeyValuesFromHistory(detail.response.responseHeaders),
+      responseBody: detail.response.responseBody,
+      ...(detail.response.contentType ? { contentType: detail.response.contentType } : {}),
+      ...(detail.response.contentLength !== undefined ? { contentLength: detail.response.contentLength } : {}),
+      timings: detail.response.timings,
+      ...(detail.response.error ? { error: detail.response.error } : {})
+    }
+    return buildHttpResponseView(historyResponse)
+  }, [buildHttpResponseView])
 
   // URL section
   const urlSection = (
@@ -784,6 +841,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
       infosContent={infosContent}
       responseContent={responseContent}
       jsonData={jsonData}
+      historyContent={<ResponseHistoryTab requestId={request.id} buildResponseView={buildHistoryView} />}
     />
   )
 }

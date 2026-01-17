@@ -43,6 +43,8 @@ export interface BaseRequestTabViewProps {
   responseContent?: ReactNode | undefined
   /** JSON data for JsonCrack tab (if any) */
   jsonData?: unknown
+  /** Content for Responses history tab */
+  historyContent?: ReactNode
 }
 
 // ============================================================================
@@ -61,7 +63,8 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
   showResponse,
   infosContent,
   responseContent,
-  jsonData
+  jsonData,
+  historyContent
 }) => {
   const { t } = useTranslation()
   const [activeTabId, setActiveTabId] = useState('request')
@@ -135,20 +138,21 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
   }, [responseTabId])
   
   // Build request tabs (Request, Docs, Notes, Code Snippets)
-  const requestTabs: Tab[] = useMemo(() => [
-    {
+  const requestTabs: Tab[] = useMemo(() => {
+    const tabs: Tab[] = [
+      {
       id: 'request',
       label: t('requestTab.tabs.requestLayout'),
       useScrollableElement: false,
       content: requestContent
-    },
-    {
+      },
+      {
       id: 'docs',
       label: t('requestTab.tabs.docs'),
       useScrollableElement: false,
       content: <MarkdownViewer value={documentation ?? ''} />
-    },
-    {
+      },
+      {
       id: 'notes',
       label: t('requestTab.tabs.notes'),
       useScrollableElement: false,
@@ -159,14 +163,26 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
           onChange={handleNotesChange}
         />
       )
-    },
-    {
+      },
+      {
       id: 'codeSnippets',
       label: t('requestTab.tabs.codeSnippets'),
       useScrollableElement: false,
       content: <MarkdownViewer value={codeSnippetsContent} />
+      }
+    ]
+
+    if (historyContent) {
+      tabs.push({
+        id: 'responsesHistory',
+        label: t('requestTab.tabs.responsesHistory'),
+        useScrollableElement: false,
+        content: historyContent
+      })
     }
-  ], [requestId, notes, requestContent, documentation, handleNotesChange, codeSnippetsContent, t])
+
+    return tabs
+  }, [requestId, notes, requestContent, documentation, handleNotesChange, codeSnippetsContent, t, historyContent])
 
   // Format JSON for display
   const formattedJson = useMemo(() => {

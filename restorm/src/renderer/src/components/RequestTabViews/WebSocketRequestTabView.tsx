@@ -12,11 +12,12 @@ import {
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
-import type { WebSocketRequest, WebSocketResponse, WebSocketMessage, KeyValue } from '../../types/collections'
+import type { WebSocketRequest, WebSocketResponse, WebSocketMessage, KeyValue, ResponseHistoryDetail } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { VariableContext } from '../RestormKeyValueTable'
 import type { WebSocketExecutionResult, WebSocketMessageItem } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
+import { ResponseHistoryTab } from './ResponseHistoryTab'
 import { Badge } from '../common/Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
 
@@ -297,70 +298,103 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   
   // Use backend-provided code snippets
   const codeSnippetsContent = backendCodeSnippets || t('requestTab.codeSnippets.loading', 'Loading code snippets...')
-  
-  // Infos content (detailed info panel)
-  const infosContent = response ? (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <span style={{ fontWeight: 600, minWidth: 100 }}>Status:</span>
-        <span style={{ color: response.connected ? 'var(--testing-iconPassed)' : 'var(--testing-iconFailed)' }}>
-          {response.connected ? t('websocket.connected') : t('websocket.disconnected')}
-        </span>
-      </div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <span style={{ fontWeight: 600, minWidth: 100 }}>Duration:</span>
-        <span>{response.timings.durationMs}ms</span>
-      </div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <span style={{ fontWeight: 600, minWidth: 100 }}>Protocol:</span>
-        <span>{request.protocol}</span>
-      </div>
-      {request.event && (
+
+  const buildWebSocketResponseView = useCallback((
+    resp: WebSocketResponse | null,
+    meta?: { protocol?: string; event?: string }
+  ) => {
+    const infosContent = resp ? (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>
         <div style={{ display: 'flex', gap: 8 }}>
-          <span style={{ fontWeight: 600, minWidth: 100 }}>Event:</span>
-          <span>{request.event}</span>
+          <span style={{ fontWeight: 600, minWidth: 100 }}>Status:</span>
+          <span style={{ color: resp.connected ? 'var(--testing-iconPassed)' : 'var(--testing-iconFailed)' }}>
+            {resp.connected ? t('websocket.connected') : t('websocket.disconnected')}
+          </span>
         </div>
-      )}
-      <div style={{ display: 'flex', gap: 8 }}>
-        <span style={{ fontWeight: 600, minWidth: 100 }}>Messages:</span>
-        <span>{response.messages.length}</span>
-      </div>
-      {response.error && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
-          <span style={{ fontWeight: 600, color: 'var(--testing-iconFailed)' }}>Error:</span>
-          <div style={{ padding: 4, background: 'var(--inputValidation-errorBackground)', borderRadius: 3 }}>
-            {response.error}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <span style={{ fontWeight: 600, minWidth: 100 }}>Duration:</span>
+          <span>{resp.timings.durationMs}ms</span>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <span style={{ fontWeight: 600, minWidth: 100 }}>Protocol:</span>
+          <span>{meta?.protocol ?? '-'}</span>
+        </div>
+        {meta?.event && (
+          <div style={{ display: 'flex', gap: 8 }}>
+            <span style={{ fontWeight: 600, minWidth: 100 }}>Event:</span>
+            <span>{meta.event}</span>
           </div>
+        )}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <span style={{ fontWeight: 600, minWidth: 100 }}>Messages:</span>
+          <span>{resp.messages.length}</span>
         </div>
-      )}
-    </div>
-  ) : null
-  
-  // Response content - messages list
-  const responseContent = response && response.messages.length > 0 ? (
-    <div style={{ height: '100%', overflow: 'auto', fontFamily: 'var(--editor-font-family)', fontSize: 12 }}>
-      {response.messages.map((msg, i) => (
-        <div
-          key={i}
-          style={{
-            padding: '4px 8px',
-            marginBottom: 4,
-            borderRadius: 3,
-            background: msg.direction === 'sent' ? 'var(--editor-selectionBackground)' : 'var(--editor-inactiveSelectionBackground)',
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-all'
-          }}
-        >
-          {formatMessage(msg)}
-        </div>
-      ))}
-      {response.messages.length === 0 && (
-        <div style={{ color: 'var(--descriptionForeground)' }}>
-          {t('websocket.noMessages')}
-        </div>
-      )}
-    </div>
-  ) : null
+        {resp.error && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
+            <span style={{ fontWeight: 600, color: 'var(--testing-iconFailed)' }}>Error:</span>
+            <div style={{ padding: 4, background: 'var(--inputValidation-errorBackground)', borderRadius: 3 }}>
+              {resp.error}
+            </div>
+          </div>
+        )}
+      </div>
+    ) : null
+
+    const responseContent = resp && resp.messages.length > 0 ? (
+      <div style={{ height: '100%', overflow: 'auto', fontFamily: 'var(--editor-font-family)', fontSize: 12 }}>
+        {resp.messages.map((msg, i) => (
+          <div
+            key={i}
+            style={{
+              padding: '4px 8px',
+              marginBottom: 4,
+              borderRadius: 3,
+              background: msg.direction === 'sent' ? 'var(--editor-selectionBackground)' : 'var(--editor-inactiveSelectionBackground)',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-all'
+            }}
+          >
+            {formatMessage(msg)}
+          </div>
+        ))}
+        {resp.messages.length === 0 && (
+          <div style={{ color: 'var(--descriptionForeground)' }}>
+            {t('websocket.noMessages')}
+          </div>
+        )}
+      </div>
+    ) : null
+
+    return { infosContent, responseContent, jsonData: undefined }
+  }, [t])
+
+  const { infosContent, responseContent } = useMemo(
+    () => buildWebSocketResponseView(response, { protocol: request.protocol, event: request.event }),
+    [buildWebSocketResponseView, response, request.protocol, request.event]
+  )
+
+  const buildHistoryView = useCallback((detail: ResponseHistoryDetail) => {
+    if (detail.response.type !== 'websocket') {
+      return { infosContent: undefined, responseContent: undefined, jsonData: undefined }
+    }
+    const historyResponse: WebSocketResponse = {
+      id: detail.guid,
+      type: 'websocket',
+      requestId: detail.requestId,
+      requestUrl: detail.response.requestUrl,
+      protocol: detail.response.protocol as WebSocketResponse['protocol'],
+      connected: detail.response.connected,
+      messages: detail.response.messages.map((msg) => ({
+        direction: msg.direction,
+        event: msg.event,
+        data: msg.data,
+        timestamp: msg.timestamp
+      })),
+      timings: detail.response.timings,
+      ...(detail.response.error ? { error: detail.response.error } : {})
+    }
+    return buildWebSocketResponseView(historyResponse, detail.requestMeta)
+  }, [buildWebSocketResponseView])
   
   // URL section
   const urlSection = (
@@ -401,6 +435,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       showResponse={response !== null}
       infosContent={infosContent}
       responseContent={responseContent}
+      historyContent={<ResponseHistoryTab requestId={request.id} buildResponseView={buildHistoryView} />}
     />
   )
 }

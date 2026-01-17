@@ -2,6 +2,8 @@
  * Type declarations for window.restorm API
  */
 
+import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../shared/types/collections'
+
 declare global {
   interface Window {
     restorm?: {
@@ -69,6 +71,11 @@ declare global {
         isActive: (requestId: string) => Promise<boolean>
         onProgress: (callback: (data: unknown) => void) => () => void
         onMessage: (callback: (data: unknown) => void) => () => void
+      }
+      responsesHistory: {
+        list: (requestId: string) => Promise<ResponseHistoryEntry[]>
+        get: (guid: string) => Promise<ResponseHistoryDetail | null>
+        togglePin: (guid: string, pinned: boolean) => Promise<boolean>
       }
       import: {
         preview: (input: string) => Promise<{

@@ -35,5 +35,22 @@ export type {
   Response
 } from './responses/index'
 
+export type {
+  ResponseHistoryEntry,
+  ResponseHistoryIndex,
+  ResponseHistoryKeyValue,
+  ResponseHistoryRequestMeta,
+  ResponseHistoryHttpBody,
+  ResponseHistoryHttpResponse,
+  ResponseHistoryGraphQLResponse,
+  ResponseHistoryGrpcResponse,
+  ResponseHistorySoapResponse,
+  ResponseHistoryWebSocketMessage,
+  ResponseHistoryWebSocketResponse,
+  ResponseHistoryResponse,
+  ResponseHistoryDetail,
+  ResponseHistoryRequestType
+} from './responseHistory'
+
 export type { Folder, EnvironmentFolder, FolderItem } from './folderTypes'
 export { isEnvironmentFolder, isFolder, isAnyFolder, isRequest } from './folderTypes'
