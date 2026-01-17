@@ -20,6 +20,8 @@ import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryTab } from './ResponseHistoryTab'
 import { Badge } from '../common/Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
+import { useRestormStore } from '../../store/restormStore'
+import { buildRequestPath } from '../../utils/requestPath'
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
 function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
@@ -33,6 +35,7 @@ export interface WebSocketRequestTabViewProps {
 export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = ({ request }) => {
   const { t } = useTranslation()
   const { selectedEnvId, environments } = useEnvironmentContext()
+  const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
   
@@ -41,6 +44,8 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   const [message, setMessageState] = useState(request.message)
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<WebSocketResponse | null>(null)
+
+  const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
   // Backend-provided resolved URL and code snippets
   const [resolvedUrl, setResolvedUrl] = useState<string>('')
@@ -186,7 +191,11 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     setIsSending(true)
     setResponse(null)
     
-    window.restorm?.websocket.connect({ requestId: request.id, timeout: 5000 })
+    window.restorm?.websocket.connect({
+      requestId: request.id,
+      timeout: 5000,
+      ...(requestPath ? { requestPath } : {})
+    })
       .then((res: WebSocketExecutionResult) => {
         // Convert backend result to WebSocketResponse format
         const wsResponse: WebSocketResponse = {

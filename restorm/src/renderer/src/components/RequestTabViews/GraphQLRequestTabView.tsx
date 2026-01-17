@@ -19,6 +19,8 @@ import type { GraphQLExecutionResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryTab } from './ResponseHistoryTab'
 import { Badge } from '../common/Badge'
+import { useRestormStore } from '../../store/restormStore'
+import { buildRequestPath } from '../../utils/requestPath'
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
 function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
@@ -40,6 +42,7 @@ export interface GraphQLRequestTabViewProps {
 export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ request }) => {
   const { t } = useTranslation()
   const { selectedEnvId, environments } = useEnvironmentContext()
+  const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
   
@@ -48,6 +51,8 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
   const [variables, setVariablesState] = useState(request.variables ?? '{}')
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<GraphQLResponse | null>(null)
+
+  const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
   // Backend-provided resolved URL and code snippets
   const [resolvedUrl, setResolvedUrl] = useState<string>('')
@@ -200,7 +205,10 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
     setIsSending(true)
     setResponse(null)
     
-    window.restorm?.graphql.execute({ requestId: request.id })
+    window.restorm?.graphql.execute({
+      requestId: request.id,
+      ...(requestPath ? { requestPath } : {})
+    })
       .then((res: GraphQLExecutionResult) => {
         // Convert backend result to GraphQLResponse format
         const graphqlResponse: GraphQLResponse = {

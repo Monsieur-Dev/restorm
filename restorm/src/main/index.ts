@@ -1375,7 +1375,10 @@ import { httpExecutionService, type HTTPExecutionInput } from './services/HTTPEx
 ipcMain.handle('http:execute', async (_event, input: HTTPExecutionInput) => {
   const result = await httpExecutionService.execute(input)
   setImmediate(() => {
-    void responseHistoryService.storeExecutionResult(input.requestId, 'http', result)
+    const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'
+      ? (input as { requestPath?: unknown }).requestPath
+      : undefined
+    void responseHistoryService.storeExecutionResult(input.requestId, 'http', result, requestPath)
   })
   return result
 })
@@ -1400,7 +1403,10 @@ import { graphqlExecutionService, type GraphQLExecutionInput } from './services/
 ipcMain.handle('graphql:execute', async (_event, input: GraphQLExecutionInput) => {
   const result = await graphqlExecutionService.execute(input)
   setImmediate(() => {
-    void responseHistoryService.storeExecutionResult(input.requestId, 'graphql', result)
+    const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'
+      ? (input as { requestPath?: unknown }).requestPath
+      : undefined
+    void responseHistoryService.storeExecutionResult(input.requestId, 'graphql', result, requestPath)
   })
   return result
 })
@@ -1425,7 +1431,10 @@ import { soapExecutionService, type SOAPExecutionInput } from './services/SOAPEx
 ipcMain.handle('soap:execute', async (_event, input: SOAPExecutionInput) => {
   const result = await soapExecutionService.execute(input)
   setImmediate(() => {
-    void responseHistoryService.storeExecutionResult(input.requestId, 'soap', result)
+    const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'
+      ? (input as { requestPath?: unknown }).requestPath
+      : undefined
+    void responseHistoryService.storeExecutionResult(input.requestId, 'soap', result, requestPath)
   })
   return result
 })
@@ -1450,7 +1459,10 @@ import { grpcExecutionService, type GRPCExecutionInput } from './services/GRPCEx
 ipcMain.handle('grpc:execute', (_event, input: GRPCExecutionInput) => {
   const result = grpcExecutionService.execute(input)
   setImmediate(() => {
-    void responseHistoryService.storeExecutionResult(input.requestId, 'grpc', result)
+    const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'
+      ? (input as { requestPath?: unknown }).requestPath
+      : undefined
+    void responseHistoryService.storeExecutionResult(input.requestId, 'grpc', result, requestPath)
   })
   return result
 })
@@ -1475,7 +1487,10 @@ import { websocketExecutionService, type WebSocketExecutionInput } from './servi
 ipcMain.handle('websocket:connect', async (_event, input: WebSocketExecutionInput) => {
   const result = await websocketExecutionService.execute(input)
   setImmediate(() => {
-    void responseHistoryService.storeExecutionResult(input.requestId, 'websocket', result)
+    const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'
+      ? (input as { requestPath?: unknown }).requestPath
+      : undefined
+    void responseHistoryService.storeExecutionResult(input.requestId, 'websocket', result, requestPath)
   })
   return result
 })
@@ -1509,6 +1524,10 @@ ipcMain.handle('responses:history:get', async (_event, guid: string) => {
 
 ipcMain.handle('responses:history:toggle-pin', async (_event, guid: string, pinned: boolean) => {
   return responseHistoryService.togglePin(guid, pinned)
+})
+
+ipcMain.handle('responses:history:update-path', async (_event, requestId: string, requestPath: string) => {
+  return responseHistoryService.updateRequestPath(requestId, requestPath)
 })
 
 // ============================================================================

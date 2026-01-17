@@ -25,6 +25,8 @@ import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryTab } from './ResponseHistoryTab'
 import { Badge } from '../common/Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
+import { useRestormStore } from '../../store/restormStore'
+import { buildRequestPath } from '../../utils/requestPath'
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
 function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
@@ -175,6 +177,7 @@ function keyValuesToListItems(keyValues: KeyValue[], prefix: string): ListViewIt
 export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request }) => {
   const { t } = useTranslation()
   const { selectedEnvId, environments } = useEnvironmentContext()
+  const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
   
@@ -185,6 +188,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
   const [bodyFilePath, setBodyFilePath] = useState<string>(getBodyFilePath(request))
   const [isSending, setIsSending] = useState<boolean>(false)
   const [httpResponse, setHttpResponse] = useState<HTTPResponse | null>(null)
+
+  const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
   // Backend-provided resolved URL and code snippets
   const [resolvedUrl, setResolvedUrl] = useState<string>('')
@@ -445,7 +450,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     window.restorm?.http.execute({
       requestId,
       method,
-      timeout: 30000
+      timeout: 30000,
+      ...(requestPath ? { requestPath } : {})
     })
       .then((result) => {
         if (result.success) {
@@ -519,7 +525,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
       .finally(() => {
         setIsSending(false)
       })
-  }, [isSending, request, method, url])
+  }, [isSending, request, method, url, requestPath])
 
   const handleCancel = useCallback((): void => {
     const requestId = request.id

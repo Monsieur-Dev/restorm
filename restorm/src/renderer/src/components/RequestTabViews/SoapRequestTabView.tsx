@@ -19,6 +19,8 @@ import type { SOAPExecutionResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryTab } from './ResponseHistoryTab'
 import { Badge } from '../common/Badge'
+import { useRestormStore } from '../../store/restormStore'
+import { buildRequestPath } from '../../utils/requestPath'
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
 function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
@@ -40,6 +42,7 @@ export interface SoapRequestTabViewProps {
 export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request }) => {
   const { t } = useTranslation()
   const { selectedEnvId, environments } = useEnvironmentContext()
+  const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
   
@@ -47,6 +50,8 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
   const [body, setBodyState] = useState(request.body)
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<SoapResponse | null>(null)
+
+  const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
   // Backend-provided resolved URL and code snippets
   const [resolvedUrl, setResolvedUrl] = useState<string>('')
@@ -187,7 +192,10 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
     setIsSending(true)
     setResponse(null)
     
-    window.restorm?.soap.execute({ requestId: request.id })
+    window.restorm?.soap.execute({
+      requestId: request.id,
+      ...(requestPath ? { requestPath } : {})
+    })
       .then((res: SOAPExecutionResult) => {
         // Convert backend result to SoapResponse format
         const soapResponse: SoapResponse = {

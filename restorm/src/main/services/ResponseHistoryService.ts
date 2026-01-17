@@ -86,7 +86,8 @@ class ResponseHistoryService {
   async storeExecutionResult(
     requestId: string,
     type: ResponseHistoryRequestType,
-    result: ExecutionResult
+    result: ExecutionResult,
+    requestPathOverride?: string
   ): Promise<void> {
     const archivePath = this.getArchivePath()
     if (!archivePath) {
@@ -94,7 +95,9 @@ class ResponseHistoryService {
       return
     }
 
-    const requestPath = this.getRequestPath(requestId)
+    const requestPath = typeof requestPathOverride === 'string' && requestPathOverride
+      ? requestPathOverride
+      : this.getRequestPath(requestId)
     if (!requestPath) {
       logger.warn('[ResponseHistoryService] Request path not found, skipping history save', { requestId })
       return
@@ -182,6 +185,35 @@ class ResponseHistoryService {
         }
       }
 
+      await this.writeArchive(archivePath, index, entriesData)
+      return true
+    })
+  }
+
+  async updateRequestPath(requestId: string, requestPath: string): Promise<boolean> {
+    const archivePath = this.getArchivePath()
+    if (!archivePath || !existsSync(archivePath)) return false
+
+    return this.queueWrite(async () => {
+      const { index, entriesData } = await this.readArchive(archivePath)
+      let changed = false
+      for (const entry of index.entries) {
+        if (entry.requestId !== requestId) continue
+        if (entry.requestPath !== requestPath) {
+          entry.requestPath = requestPath
+          changed = true
+          const detailName = this.getDetailEntryName(entry.guid)
+          const detailText = entriesData.get(detailName)
+          if (detailText) {
+            const parsed = this.parseHistoryDetail(detailText)
+            if (parsed) {
+              parsed.requestPath = requestPath
+              entriesData.set(detailName, JSON.stringify(parsed))
+            }
+          }
+        }
+      }
+      if (!changed) return false
       await this.writeArchive(archivePath, index, entriesData)
       return true
     })

@@ -68,6 +68,7 @@ import {
   isEnvironmentFolder,
   isAnyFolder
 } from './types/collections'
+import { buildRequestPath } from './utils/requestPath'
 import type {
   FolderTab,
   EnvironmentFolderTab,
@@ -78,6 +79,21 @@ import type {
   WebSocketRequestTab,
   BreadcrumbItem
 } from './types/editor'
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+function getResponsesHistoryApi(): { updatePath: (requestId: string, requestPath: string) => Promise<boolean> } | null {
+  const root = window as { restorm?: unknown }
+  const restorm = root.restorm
+  if (!isRecord(restorm)) return null
+  const responsesHistory = (restorm as { responsesHistory?: unknown }).responsesHistory
+  if (!isRecord(responsesHistory)) return null
+  const updatePath = (responsesHistory as { updatePath?: unknown }).updatePath
+  if (typeof updatePath !== 'function') return null
+  return { updatePath: updatePath as (requestId: string, requestPath: string) => Promise<boolean> }
+}
 
 const MIN_LEFT_WIDTH = 180
 const RIGHT_MIN_WIDTH = 240
@@ -507,6 +523,17 @@ const App: React.FC = () => {
     const handleFolderOrRequestUpdated = (payload: DocumentChangedPayload): void => {
       const newChecksum = computeChecksum(JSON.parse(JSON.stringify(payload.document)) as FolderItem)
       updateTabDirtyChecksum(payload.id, newChecksum)
+
+      if (payload.type === 'request') {
+        const collections = rootItems.filter(isEnvironmentFolder)
+        const requestPath = buildRequestPath(collections, payload.id)
+        if (requestPath) {
+          const api = getResponsesHistoryApi()
+          if (api) {
+            void api.updatePath(payload.id, requestPath)
+          }
+        }
+      }
     }
 
     // For environments, we need to update the parent folder's dirty state

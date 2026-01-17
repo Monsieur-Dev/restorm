@@ -20,6 +20,8 @@ import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryTab } from './ResponseHistoryTab'
 import { Badge } from '../common/Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
+import { useRestormStore } from '../../store/restormStore'
+import { buildRequestPath } from '../../utils/requestPath'
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
 function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
@@ -41,6 +43,7 @@ export interface GrpcRequestTabViewProps {
 export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request }) => {
   const { t } = useTranslation()
   const { selectedEnvId, environments } = useEnvironmentContext()
+  const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
   
@@ -48,6 +51,8 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
   const [requestMessage, setRequestMessageState] = useState(request.requestMessage)
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<GrpcResponse | null>(null)
+
+  const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
   // Backend-provided resolved URL and code snippets
   const [resolvedUrl, setResolvedUrl] = useState<string>('')
@@ -188,7 +193,10 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
     setIsSending(true)
     setResponse(null)
     
-    window.restorm?.grpc.execute({ requestId: request.id })
+    window.restorm?.grpc.execute({
+      requestId: request.id,
+      ...(requestPath ? { requestPath } : {})
+    })
       .then((res: GRPCExecutionResult) => {
         // Convert backend result to GrpcResponse format
         const grpcResponse: GrpcResponse = {
