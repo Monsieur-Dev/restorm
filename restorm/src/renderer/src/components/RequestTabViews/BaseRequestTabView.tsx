@@ -43,8 +43,6 @@ export interface BaseRequestTabViewProps {
   responseContent?: ReactNode | undefined
   /** JSON data for JsonCrack tab (if any) */
   jsonData?: unknown
-  /** Content for Responses history tab */
-  historyContent?: ReactNode
 }
 
 // ============================================================================
@@ -63,8 +61,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
   showResponse,
   infosContent,
   responseContent,
-  jsonData,
-  historyContent
+  jsonData
 }) => {
   const { t } = useTranslation()
   const [activeTabId, setActiveTabId] = useState('request')
@@ -172,17 +169,8 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
       }
     ]
 
-    if (historyContent) {
-      tabs.push({
-        id: 'responsesHistory',
-        label: t('requestTab.tabs.responsesHistory'),
-        useScrollableElement: false,
-        content: historyContent
-      })
-    }
-
     return tabs
-  }, [requestId, notes, requestContent, documentation, handleNotesChange, codeSnippetsContent, t, historyContent])
+  }, [requestId, notes, requestContent, documentation, handleNotesChange, codeSnippetsContent, t])
 
   // Format JSON for display
   const formattedJson = useMemo(() => {

@@ -22,11 +22,12 @@ import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue, ResponseHistoryDe
 import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, type ValueType } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import { BaseRequestTabView } from './BaseRequestTabView'
-import { ResponseHistoryTab } from './ResponseHistoryTab'
+import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { Badge } from '../common/Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
+import { getResponseHistoryList } from '../../services/GraphQLIntegration'
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
 function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
@@ -35,6 +36,9 @@ function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key
 
 export interface HTTPRequestTabViewProps {
   request: HTTPRequest
+  historyModalOpen?: boolean
+  onCloseHistoryModal?: () => void
+  onHistoryAvailabilityChange?: (hasHistory: boolean) => void
 }
 
 function normalizeValueType(input: unknown): ValueType {
@@ -174,7 +178,12 @@ function keyValuesToListItems(keyValues: KeyValue[], prefix: string): ListViewIt
   }))
 }
 
-export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request }) => {
+export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
+  request,
+  historyModalOpen = false,
+  onCloseHistoryModal,
+  onHistoryAvailabilityChange
+}) => {
   const { t } = useTranslation()
   const { selectedEnvId, environments } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
@@ -836,22 +845,49 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     </div>
   )
 
+  const handleCloseHistoryModal = useCallback(() => {
+    onCloseHistoryModal?.()
+  }, [onCloseHistoryModal])
+
+  useEffect(() => {
+    if (!onHistoryAvailabilityChange) return
+    const state = { active: true }
+    void (async (): Promise<void> => {
+      const entries = await getResponseHistoryList(request.id, requestPath ?? undefined)
+      if (state.active) {
+        onHistoryAvailabilityChange(entries.length > 0)
+      }
+    })()
+    return () => {
+      state.active = false
+    }
+  }, [onHistoryAvailabilityChange, request.id, requestPath, historyRefreshKey])
+
   return (
-    <BaseRequestTabView
-      requestId={request.id}
-      urlSection={urlSection}
-      requestContent={requestContent}
-      codeSnippetsContent={codeSnippetsContent}
-      documentation={request.documentation}
-      notes={request.notes}
-      onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
-      isLoading={isSending}
-      showResponse={httpResponse !== null}
-      infosContent={infosContent}
-      responseContent={responseContent}
-      jsonData={jsonData}
-      historyContent={<ResponseHistoryTab requestId={request.id} requestPath={requestPath ?? undefined} refreshKey={historyRefreshKey} buildResponseView={buildHistoryView} />}
-    />
+    <>
+      <BaseRequestTabView
+        requestId={request.id}
+        urlSection={urlSection}
+        requestContent={requestContent}
+        codeSnippetsContent={codeSnippetsContent}
+        documentation={request.documentation}
+        notes={request.notes}
+        onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
+        isLoading={isSending}
+        showResponse={httpResponse !== null}
+        infosContent={infosContent}
+        responseContent={responseContent}
+        jsonData={jsonData}
+      />
+      <ResponseHistoryModal
+        isOpen={historyModalOpen}
+        onClose={handleCloseHistoryModal}
+        requestId={request.id}
+        requestPath={requestPath ?? undefined}
+        refreshKey={historyRefreshKey}
+        buildResponseView={buildHistoryView}
+      />
+    </>
   )
 }
 
