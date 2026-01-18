@@ -391,7 +391,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     const historyResponse: WebSocketResponse = {
       id: detail.guid,
       type: 'websocket',
-      requestId: detail.requestId,
+      requestId: request.id,
       requestUrl: detail.response.requestUrl,
       protocol: detail.response.protocol as WebSocketResponse['protocol'],
       connected: detail.response.connected,
@@ -405,7 +405,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       ...(detail.response.error ? { error: detail.response.error } : {})
     }
     return buildWebSocketResponseView(historyResponse, detail.requestMeta)
-  }, [buildWebSocketResponseView])
+  }, [buildWebSocketResponseView, request.id])
   
   // URL section
   const urlSection = (
@@ -446,7 +446,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       showResponse={response !== null}
       infosContent={infosContent}
       responseContent={responseContent}
-      historyContent={<ResponseHistoryTab requestId={request.id} refreshKey={historyRefreshKey} buildResponseView={buildHistoryView} />}
+      historyContent={<ResponseHistoryTab requestId={request.id} requestPath={requestPath ?? undefined} refreshKey={historyRefreshKey} buildResponseView={buildHistoryView} />}
     />
   )
 }

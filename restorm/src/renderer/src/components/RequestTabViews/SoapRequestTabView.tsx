@@ -341,7 +341,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
     const historyResponse: SoapResponse = {
       id: detail.guid,
       type: 'soap',
-      requestId: detail.requestId,
+      requestId: request.id,
       requestUrl: detail.response.requestUrl,
       requestSoapAction: detail.response.requestSoapAction,
       requestBody: detail.response.requestBody,
@@ -354,7 +354,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
       ...(detail.response.error ? { error: detail.response.error } : {})
     }
     return buildSoapResponseView(historyResponse, detail.requestMeta)
-  }, [buildSoapResponseView])
+  }, [buildSoapResponseView, request.id])
   
   // URL section
   const urlSection = (
@@ -400,7 +400,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
       showResponse={response !== null}
       infosContent={infosContent}
       responseContent={responseContent}
-      historyContent={<ResponseHistoryTab requestId={request.id} refreshKey={historyRefreshKey} buildResponseView={buildHistoryView} />}
+      historyContent={<ResponseHistoryTab requestId={request.id} requestPath={requestPath ?? undefined} refreshKey={historyRefreshKey} buildResponseView={buildHistoryView} />}
     />
   )
 }

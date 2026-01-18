@@ -9,6 +9,7 @@ import {
   type Tab,
   type ContextMenuItem
 } from 'electron-core-ui/renderer'
+import { logger } from 'electron-core-ui/renderer'
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../types/collections'
 import { getResponseHistoryDetail, getResponseHistoryList } from '../../services/GraphQLIntegration'
 
@@ -21,6 +22,7 @@ interface ResponseHistoryStoreState {
 }
 
 class ResponseHistoryStore {
+  private requestPath: string | undefined
   private state: ResponseHistoryStoreState = {
     entries: [],
     selectedGuid: null,
@@ -43,8 +45,13 @@ class ResponseHistoryStore {
     }
   }
 
+  setRequestPath(requestPath?: string): void {
+    this.requestPath = requestPath
+  }
+
   async loadEntries(requestId: string): Promise<void> {
-    const result = await getResponseHistoryList(requestId)
+    logger.debug('[ResponseHistoryTab] Loading history entries', { requestId, requestPath: this.requestPath })
+    const result = await getResponseHistoryList(requestId, this.requestPath)
     const entries = Array.isArray(result) ? result.filter((item) => this.isHistoryEntry(item)) : []
     const selectedGuid = entries.find((item) => item.guid === this.state.selectedGuid)?.guid ?? entries[0]?.guid ?? null
     const selectedDetail = selectedGuid ? await this.loadDetail(selectedGuid) : null
@@ -84,9 +91,6 @@ class ResponseHistoryStore {
   private isHistoryEntry(value: unknown): value is ResponseHistoryEntry {
     if (!this.isRecord(value)) return false
     return typeof value.guid === 'string'
-      && typeof value.requestId === 'string'
-      && typeof value.requestPath === 'string'
-      && typeof value.type === 'string'
       && typeof value.timestamp === 'string'
       && typeof value.success === 'boolean'
       && typeof value.pinned === 'boolean'
@@ -95,7 +99,6 @@ class ResponseHistoryStore {
   private isHistoryDetail(value: unknown): value is ResponseHistoryDetail {
     if (!this.isRecord(value)) return false
     return typeof value.guid === 'string'
-      && typeof value.requestId === 'string'
       && typeof value.requestPath === 'string'
       && typeof value.type === 'string'
       && typeof value.timestamp === 'string'
@@ -110,6 +113,7 @@ class ResponseHistoryStore {
 
 export interface ResponseHistoryTabProps {
   requestId: string
+  requestPath?: string
   refreshKey?: number
   buildResponseView: (detail: ResponseHistoryDetail) => {
     infosContent?: React.ReactNode | undefined
@@ -120,6 +124,7 @@ export interface ResponseHistoryTabProps {
 
 export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
   requestId,
+  requestPath,
   refreshKey,
   buildResponseView
 }) => {
@@ -128,6 +133,7 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
   const { entries, selectedGuid, selectedDetail } = useSyncExternalStore(store.subscribe, store.getSnapshot)
   const graphRef = useRef<GraphRef | null>(null)
   const [graphKey, setGraphKey] = useState(0)
+  const [activeTabId, setActiveTabId] = useState('response')
   const [isDarkTheme, setIsDarkTheme] = useState<boolean>(() => {
     if (typeof document === 'undefined') return true
     const themeAttr = document.documentElement.getAttribute('data-theme') ?? 'dark'
@@ -146,8 +152,9 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
   }, [i18n.language])
 
   useEffect(() => {
+    store.setRequestPath(requestPath)
     void store.loadEntries(requestId)
-  }, [requestId, refreshKey, store])
+  }, [requestId, requestPath, refreshKey, store])
 
   const handleTogglePin = useCallback(async (entry: ResponseHistoryEntry) => {
     const nextPinned = !entry.pinned
@@ -246,6 +253,11 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
       setGraphKey(prev => prev + 1)
     }
   }, [])
+
+  const handleTabChange = useCallback((tabId: string) => {
+    setActiveTabId(tabId)
+    handleResponseTabChange(tabId)
+  }, [handleResponseTabChange])
 
   const responseTabs: Tab[] = useMemo(() => {
     if (!selectedDetail) {
@@ -357,6 +369,11 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
     return tabs
   }, [selectedDetail, responseContent, infosContent, formattedJson, isDarkTheme, graphKey, t, entries.length])
 
+  const resolvedActiveTabId = useMemo(() => {
+    if (responseTabs.some((tab) => tab.id === activeTabId)) return activeTabId
+    return responseTabs[0]?.id ?? ''
+  }, [activeTabId, responseTabs])
+
   return (
     <VerticalSashContainer
       Left={(
@@ -368,6 +385,7 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
             onSelectionChange={(ids) => {
               const next = ids[0] ?? null
               void store.select(next)
+              setActiveTabId('response')
             }}
             ariaLabel={t('requestTab.responses.history.list')}
           />
@@ -377,7 +395,8 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
         <div style={{ height: '100%', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           <Tabs
             tabs={responseTabs}
-            onTabChange={handleResponseTabChange}
+            activeTabId={resolvedActiveTabId}
+            onTabChange={handleTabChange}
           />
         </div>
       )}

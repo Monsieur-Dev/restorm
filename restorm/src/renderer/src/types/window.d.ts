@@ -52,6 +52,9 @@ declare global {
         isActive: (requestId: string) => Promise<boolean>
         onProgress: (callback: (data: unknown) => void) => () => void
       }
+      graphqlApi: {
+        query: (query: string, variables?: Record<string, unknown>) => Promise<unknown>
+      }
       soap: {
         execute: (input: unknown) => Promise<unknown>
         cancel: (requestId: string) => Promise<boolean>

@@ -341,6 +341,12 @@ contextBridge.exposeInMainWorld('restorm', {
       }
     }
   },
+  graphqlApi: {
+    query: async (query: string, variables?: Record<string, unknown>): Promise<unknown> => {
+      const result: unknown = await ipcRenderer.invoke('graphql:query', { query, variables })
+      return result
+    }
+  },
   soap: {
     /** Execute a SOAP request */
     execute: async (input: { requestId: string; timeout?: number }): Promise<{

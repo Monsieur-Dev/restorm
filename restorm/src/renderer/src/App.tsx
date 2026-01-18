@@ -507,6 +507,35 @@ const App: React.FC = () => {
 
   // Commit checksums when file is saved (isDirty becomes false)
   const wasDirtyRef = useRef(isDirty)
+  const requestPathCacheRef = useRef(new Map<string, string>())
+
+  useEffect(() => {
+    if (!fileName) {
+      requestPathCacheRef.current.clear()
+      return
+    }
+    if (requestPathCacheRef.current.size > 0) return
+    const collections = rootItems.filter(isEnvironmentFolder)
+    const requestIds: string[] = []
+    const collectRequestIds = (items: FolderItem[]): void => {
+      for (const item of items) {
+        if (isAnyFolder(item)) {
+          collectRequestIds(item.items)
+        } else if (isRequest(item)) {
+          requestIds.push(item.id)
+        }
+      }
+    }
+    for (const collection of collections) {
+      collectRequestIds(collection.items)
+    }
+    for (const requestId of requestIds) {
+      const requestPath = buildRequestPath(collections, requestId)
+      if (requestPath) {
+        requestPathCacheRef.current.set(requestId, requestPath)
+      }
+    }
+  }, [fileName, rootItems])
   useEffect(() => {
     // Detect save: was dirty, now not dirty
     if (wasDirtyRef.current && !isDirty && fileName) {
@@ -536,6 +565,11 @@ const App: React.FC = () => {
         const collections = rootItems.filter(isEnvironmentFolder)
         const requestPath = buildRequestPath(collections, payload.id)
         if (requestPath) {
+          const cachedPath = requestPathCacheRef.current.get(payload.id)
+          if (cachedPath === requestPath) {
+            return
+          }
+          requestPathCacheRef.current.set(payload.id, requestPath)
           const api = getResponsesHistoryApi()
           if (api) {
             void api.updatePath(payload.id, requestPath)

@@ -113,9 +113,6 @@ function registerCustomTypes(): void {
 
   graphQLSchemaGenerator.registerCustomType(`type ResponseHistoryEntry {
   guid: String!
-  requestId: String!
-  requestPath: String!
-  type: String!
   success: Boolean!
   timestamp: String!
   pinned: Boolean!
@@ -123,7 +120,6 @@ function registerCustomTypes(): void {
 
   graphQLSchemaGenerator.registerCustomType(`type ResponseHistoryDetail {
   guid: String!
-  requestId: String!
   requestPath: String!
   type: String!
   success: Boolean!
@@ -198,7 +194,7 @@ function registerQueries(): void {
   graphQLSchemaGenerator.registerQuery('search', 'query: String!, limit: Int', '[Request!]!')
 
   // Response history queries
-  graphQLSchemaGenerator.registerQuery('responseHistoryList', 'requestId: String!', '[ResponseHistoryEntry!]!')
+  graphQLSchemaGenerator.registerQuery('responseHistoryList', 'requestId: String, requestPath: String', '[ResponseHistoryEntry!]!')
   graphQLSchemaGenerator.registerQuery('responseHistoryDetail', 'guid: String!', 'ResponseHistoryDetail')
 }
 

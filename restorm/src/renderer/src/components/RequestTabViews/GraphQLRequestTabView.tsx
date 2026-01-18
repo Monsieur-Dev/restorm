@@ -355,7 +355,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
     const historyResponse: GraphQLResponse = {
       id: detail.guid,
       type: 'graphql',
-      requestId: detail.requestId,
+      requestId: request.id,
       requestUrl: detail.response.requestUrl,
       requestQuery: '',
       requestVariables: undefined,
@@ -368,7 +368,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
       ...(detail.response.error ? { error: detail.response.error } : {})
     }
     return buildGraphqlResponseView(historyResponse)
-  }, [buildGraphqlResponseView])
+  }, [buildGraphqlResponseView, request.id])
   
   // URL section
   const urlSection = (
@@ -410,7 +410,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
       infosContent={infosContent}
       responseContent={responseContent}
       jsonData={response ? { data: response.data, errors: response.errors } : undefined}
-      historyContent={<ResponseHistoryTab requestId={request.id} refreshKey={historyRefreshKey} buildResponseView={buildHistoryView} />}
+      historyContent={<ResponseHistoryTab requestId={request.id} requestPath={requestPath ?? undefined} refreshKey={historyRefreshKey} buildResponseView={buildHistoryView} />}
     />
   )
 }

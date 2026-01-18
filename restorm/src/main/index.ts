@@ -257,6 +257,26 @@ void graphQLService.start().then(() => {
   logger.error('❌ Failed to start GraphQL Service', { error: String(error) })
 })
 
+ipcMain.handle('graphql:query', async (_event, input: { query: string; variables?: Record<string, unknown> }) => {
+  const response = await fetch(graphQLService.getEndpoint(), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      query: input.query,
+      variables: input.variables
+    })
+  })
+
+  if (!response.ok) {
+    throw new Error(`GraphQL request failed: ${response.status}`)
+  }
+
+  const result: unknown = await response.json()
+  return result
+})
+
 // Initialize Electron application
 const resourcesPath = getResourcesPath()
 const rendererPath = getRendererPath()

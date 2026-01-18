@@ -20,7 +20,6 @@ import {
 } from 'electron-core-ui/main'
 import {
   DocumentEvents,
-  type DocumentChangedPayload,
   type DocumentDeletedPayload
 } from './DocumentEvents'
 import { collectionStore } from './CollectionStore'
@@ -72,9 +71,6 @@ class ResponseHistoryService {
     this.initialized = true
 
     this.subscriptions = [
-      eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.REQUEST_UPDATED, (payload) => {
-        void this.handleRequestUpdated(payload.id)
-      }),
       eventBusService.subscribe<DocumentDeletedPayload>(DocumentEvents.REQUEST_DELETED, (payload) => {
         void this.handleRequestDeleted(payload.id)
       })
@@ -109,6 +105,7 @@ class ResponseHistoryService {
         logger.warn('[ResponseHistoryService] Request path not found, skipping history save', { requestId })
         return
       }
+      logger.debug('[ResponseHistoryService] Storing history entry', { requestId, requestPath, type })
 
       const detail = this.buildDetail(requestId, requestPath, type, result)
       if (!detail) {
@@ -120,8 +117,7 @@ class ResponseHistoryService {
         const { index, entriesData } = await this.readArchive(archivePath)
         const guid = detail.guid
 
-        const updatedEntries = this.addEntryAndPrune(index, detail)
-        const keptGuids = new Set(updatedEntries.map((entry) => entry.guid))
+        const { updatedIndex, keptGuids } = this.addEntryAndPrune(index, detail)
 
         const nextEntriesData = new Map<string, string>()
         for (const [entryName, entryText] of entriesData.entries()) {
@@ -136,10 +132,7 @@ class ResponseHistoryService {
         }
 
         nextEntriesData.set(this.getDetailEntryName(guid), JSON.stringify(detail))
-        await this.writeArchive(archivePath, {
-          ...index,
-          entries: updatedEntries
-        }, nextEntriesData)
+        await this.writeArchive(archivePath, updatedIndex, nextEntriesData)
       })
     } catch (error) {
       logger.error('[ResponseHistoryService] Failed to store response history', {
@@ -154,10 +147,49 @@ class ResponseHistoryService {
     const archivePath = this.getArchivePath()
     if (!archivePath || !existsSync(archivePath)) return []
 
+    const { index, entriesData } = await this.readArchive(archivePath)
+    const entries: ResponseHistoryEntry[] = []
+
+    for (const request of index.requests) {
+      for (const entry of request.entries) {
+        const detailText = entriesData.get(this.getDetailEntryName(entry.guid))
+        if (!detailText) continue
+        const detail = this.parseHistoryDetail(detailText)
+        if (detail?.requestId === requestId) {
+          entries.push(entry)
+        }
+      }
+    }
+
+    return entries.sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+  }
+
+  async listByRequestPath(requestPath: string): Promise<ResponseHistoryEntry[]> {
+    const archivePath = this.getArchivePath()
+    if (!archivePath || !existsSync(archivePath)) return []
+
     const { index } = await this.readArchive(archivePath)
-    return index.entries
-      .filter((entry) => entry.requestId === requestId)
-      .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+    const exactRequest = index.requests.find((req) => req.requestPath === requestPath)
+    const exact = exactRequest?.entries.slice().sort((a, b) => b.timestamp.localeCompare(a.timestamp)) ?? []
+
+    logger.debug('[ResponseHistoryService] List by requestPath', {
+      requestPath,
+      requestsCount: index.requests.length,
+      entriesCount: exact.length
+    })
+
+    if (exact.length > 0) return exact
+
+    const normalizedTarget = this.normalizeRequestPath(requestPath)
+    const fallback = index.requests.find((req) => this.normalizeRequestPath(req.requestPath) === normalizedTarget)
+    return fallback?.entries.slice().sort((a, b) => b.timestamp.localeCompare(a.timestamp)) ?? []
+  }
+
+  private normalizeRequestPath(pathValue: string): string {
+    return pathValue
+      .split('/')
+      .map((segment) => segment.replace(/^\d+\s*-\s*/, '').trim())
+      .join('/')
   }
 
   async getDetail(guid: string): Promise<ResponseHistoryDetail | null> {
@@ -183,7 +215,14 @@ class ResponseHistoryService {
 
     return this.queueWrite(async () => {
       const { index, entriesData } = await this.readArchive(archivePath)
-      const entry = index.entries.find((item) => item.guid === guid)
+      let entry: ResponseHistoryEntry | null = null
+      for (const request of index.requests) {
+        const found = request.entries.find((item) => item.guid === guid)
+        if (found) {
+          entry = found
+          break
+        }
+      }
       if (!entry) return false
 
       entry.pinned = pinned
@@ -210,27 +249,48 @@ class ResponseHistoryService {
 
     return this.queueWrite(async () => {
       const { index, entriesData } = await this.readArchive(archivePath)
-      let changed = false
-      for (const entry of index.entries) {
-        if (entry.requestId !== requestId) continue
-        if (entry.requestPath !== requestPath) {
-          entry.requestPath = requestPath
-          changed = true
-          const detailName = this.getDetailEntryName(entry.guid)
-          const detailText = entriesData.get(detailName)
-          if (detailText) {
-            const parsed = this.parseHistoryDetail(detailText)
-            if (parsed) {
-              parsed.requestPath = requestPath
-              entriesData.set(detailName, JSON.stringify(parsed))
-            }
-          }
-        }
-      }
-      if (!changed) return false
-      await this.writeArchive(archivePath, index, entriesData)
+      const { updated, updatedIndex } = this.relocateEntriesForRequestId(index, entriesData, requestId, requestPath)
+      if (!updated) return false
+      await this.writeArchive(archivePath, updatedIndex, entriesData)
       return true
     })
+  }
+
+  private relocateEntriesForRequestId(
+    index: ResponseHistoryIndex,
+    entriesData: Map<string, string>,
+    requestId: string,
+    requestPath: string
+  ): { updated: boolean; updatedIndex: ResponseHistoryIndex } {
+    const requests = index.requests.map((req) => ({ requestPath: req.requestPath, entries: [...req.entries] }))
+    let updated = false
+    let target = requests.find((req) => req.requestPath === requestPath)
+    if (!target) {
+      target = { requestPath, entries: [] }
+      requests.push(target)
+    }
+
+    for (const req of requests) {
+      const nextEntries: ResponseHistoryEntry[] = []
+      for (const entry of req.entries) {
+        const detailText = entriesData.get(this.getDetailEntryName(entry.guid))
+        const detail = detailText ? this.parseHistoryDetail(detailText) : null
+        if (detail?.requestId === requestId) {
+          updated = true
+          if (detail.requestPath !== requestPath) {
+            detail.requestPath = requestPath
+            entriesData.set(this.getDetailEntryName(entry.guid), JSON.stringify(detail))
+          }
+          target.entries.push(entry)
+        } else {
+          nextEntries.push(entry)
+        }
+      }
+      req.entries = nextEntries
+    }
+
+    const cleaned = requests.filter((req) => req.entries.length > 0)
+    return { updated, updatedIndex: { ...index, requests: cleaned } }
   }
 
   private async handleRequestUpdated(requestId: string): Promise<void> {
@@ -242,28 +302,10 @@ class ResponseHistoryService {
 
     await this.queueWrite(async () => {
       const { index, entriesData } = await this.readArchive(archivePath)
-      let changed = false
-      for (const entry of index.entries) {
-        if (entry.requestId !== requestId) continue
-        if (entry.requestPath !== requestPath) {
-          entry.requestPath = requestPath
-          changed = true
-          const detailName = this.getDetailEntryName(entry.guid)
-          const detailText = entriesData.get(detailName)
-          if (detailText) {
-            const parsed = this.parseHistoryDetail(detailText)
-            if (parsed) {
-              parsed.requestPath = requestPath
-              entriesData.set(detailName, JSON.stringify(parsed))
-            } else {
-              logger.warn('[ResponseHistoryService] Failed to update detail requestPath', { guid: entry.guid })
-            }
-          }
-        }
-      }
-      if (!changed) return
+      const { updated, updatedIndex } = this.relocateEntriesForRequestId(index, entriesData, requestId, requestPath)
+      if (!updated) return
 
-      await this.writeArchive(archivePath, index, entriesData)
+      await this.writeArchive(archivePath, updatedIndex, entriesData)
     })
   }
 
@@ -273,17 +315,30 @@ class ResponseHistoryService {
 
     await this.queueWrite(async () => {
       const { index, entriesData } = await this.readArchive(archivePath)
-      const remainingEntries = index.entries.filter((entry) => entry.requestId !== requestId)
-      if (remainingEntries.length === index.entries.length) return
+      const removedGuids = new Set<string>()
+      const remainingRequests = index.requests.map((req) => {
+        const keptEntries: ResponseHistoryEntry[] = []
+        for (const entry of req.entries) {
+          const detailText = entriesData.get(this.getDetailEntryName(entry.guid))
+          const detail = detailText ? this.parseHistoryDetail(detailText) : null
+          if (detail?.requestId === requestId) {
+            removedGuids.add(entry.guid)
+          } else {
+            keptEntries.push(entry)
+          }
+        }
+        return { requestPath: req.requestPath, entries: keptEntries }
+      }).filter((req) => req.entries.length > 0)
 
-      const remainingGuids = new Set(remainingEntries.map((entry) => entry.guid))
+      if (removedGuids.size === 0) return
+
       const nextEntriesData = new Map<string, string>()
       for (const [entryName, entryText] of entriesData.entries()) {
         if (entryName === INDEX_FILE_NAME) continue
         const match = entryName.startsWith(`${RESPONSES_FOLDER}/`) ? entryName.slice(`${RESPONSES_FOLDER}/`.length) : null
         if (match?.endsWith('.json')) {
           const entryGuid = match.slice(0, -'.json'.length)
-          if (remainingGuids.has(entryGuid)) {
+          if (!removedGuids.has(entryGuid)) {
             nextEntriesData.set(entryName, entryText)
           }
         }
@@ -291,33 +346,49 @@ class ResponseHistoryService {
 
       await this.writeArchive(archivePath, {
         ...index,
-        entries: remainingEntries
+        requests: remainingRequests
       }, nextEntriesData)
     })
   }
 
-  private addEntryAndPrune(index: ResponseHistoryIndex, detail: ResponseHistoryDetail): ResponseHistoryEntry[] {
+  private addEntryAndPrune(index: ResponseHistoryIndex, detail: ResponseHistoryDetail): { updatedIndex: ResponseHistoryIndex; keptGuids: Set<string> } {
     const entry: ResponseHistoryEntry = {
       guid: detail.guid,
-      requestId: detail.requestId,
-      requestPath: detail.requestPath,
-      type: detail.type,
-      success: detail.success,
       timestamp: detail.timestamp,
-      pinned: detail.pinned
+      pinned: detail.pinned,
+      success: detail.success
     }
 
-    const entries = [...index.entries, entry]
-    const entriesForRequest = entries.filter((item) => item.requestId === detail.requestId)
-    const pinnedEntries = entriesForRequest.filter((item) => item.pinned)
-    const nonPinnedEntries = entriesForRequest
+    const requests = index.requests.map((req) => ({ ...req, entries: [...req.entries] }))
+    const target = requests.find((req) => req.requestPath === detail.requestPath)
+    if (target) {
+      target.entries.push(entry)
+    } else {
+      requests.push({ requestPath: detail.requestPath, entries: [entry] })
+    }
+
+    const requestEntries = requests.find((req) => req.requestPath === detail.requestPath)?.entries ?? []
+    const pinnedEntries = requestEntries.filter((item) => item.pinned)
+    const nonPinnedEntries = requestEntries
       .filter((item) => !item.pinned)
       .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
 
-    const keptNonPinned = nonPinnedEntries.slice(0, index.maxPerRequest)
+    const keptNonPinned = nonPinnedEntries.slice(0, DEFAULT_MAX_PER_REQUEST)
     const keepGuids = new Set([...pinnedEntries, ...keptNonPinned].map((item) => item.guid))
 
-    return entries.filter((item) => item.requestId !== detail.requestId || keepGuids.has(item.guid))
+    for (const req of requests) {
+      if (req.requestPath !== detail.requestPath) continue
+      req.entries = req.entries.filter((item) => keepGuids.has(item.guid))
+    }
+
+    const keptGuidsAll = new Set<string>()
+    for (const req of requests) {
+      for (const item of req.entries) {
+        keptGuidsAll.add(item.guid)
+      }
+    }
+
+    return { updatedIndex: { ...index, requests: requests.filter((req) => req.entries.length > 0) }, keptGuids: keptGuidsAll }
   }
 
   private buildDetail(
@@ -580,7 +651,6 @@ class ResponseHistoryService {
       const parsed: unknown = JSON.parse(text)
       if (!this.isRecord(parsed)) return null
       if (typeof parsed['guid'] !== 'string') return null
-      if (typeof parsed['requestId'] !== 'string') return null
       if (typeof parsed['requestPath'] !== 'string') return null
       if (typeof parsed['type'] !== 'string') return null
       if (typeof parsed['timestamp'] !== 'string') return null
@@ -595,14 +665,32 @@ class ResponseHistoryService {
     try {
       const parsed: unknown = JSON.parse(text)
       if (!this.isRecord(parsed)) return null
-      if (!Array.isArray(parsed['entries'])) return null
-      const maxPerRequest = parsed['maxPerRequest']
-      const version = parsed['version']
-      if (typeof maxPerRequest !== 'number' || typeof version !== 'number') return null
-      return parsed as ResponseHistoryIndex
+      if (!Array.isArray(parsed['requests'])) return null
+      const requests = parsed['requests']
+        .filter((item) => this.isRecord(item))
+        .map((req) => {
+          const requestPath = typeof req['requestPath'] === 'string' ? req['requestPath'] : ''
+          const entriesRaw = Array.isArray(req['entries']) ? req['entries'] : []
+          const entries = entriesRaw
+            .filter((item) => this.isRecord(item))
+            .map((entry) => this.parseHistoryEntry(entry))
+            .filter((entry): entry is ResponseHistoryEntry => entry !== null)
+          return requestPath ? { requestPath, entries } : null
+        })
+        .filter((req): req is { requestPath: string; entries: ResponseHistoryEntry[] } => req !== null)
+      return { version: 1, requests }
     } catch {
       return null
     }
+  }
+
+  private parseHistoryEntry(raw: Record<string, unknown>): ResponseHistoryEntry | null {
+    const guid = typeof raw['guid'] === 'string' ? raw['guid'] : ''
+    const timestamp = typeof raw['timestamp'] === 'string' ? raw['timestamp'] : ''
+    const pinned = typeof raw['pinned'] === 'boolean' ? raw['pinned'] : false
+    const success = typeof raw['success'] === 'boolean' ? raw['success'] : false
+    if (!guid || !timestamp) return null
+    return { guid, timestamp, pinned, success }
   }
 
   private getRequestFullData(requestId: string): Record<string, unknown> | null {
@@ -740,8 +828,7 @@ class ResponseHistoryService {
       return {
         index: {
           version: 1,
-          maxPerRequest: DEFAULT_MAX_PER_REQUEST,
-          entries: []
+          requests: []
         },
         entriesData: new Map()
       }
@@ -753,8 +840,7 @@ class ResponseHistoryService {
     const entriesData = new Map<string, string>()
     let index: ResponseHistoryIndex = {
       version: 1,
-      maxPerRequest: DEFAULT_MAX_PER_REQUEST,
-      entries: []
+      requests: []
     }
 
     for (const entry of entries) {
@@ -772,10 +858,6 @@ class ResponseHistoryService {
       }
     }
     await reader.close()
-
-    if (index.maxPerRequest <= 0) {
-      index.maxPerRequest = DEFAULT_MAX_PER_REQUEST
-    }
 
     return { index, entriesData }
   }
@@ -834,21 +916,9 @@ class ResponseHistoryService {
 
   private requestSegment(req: Record<string, unknown>, index0: number, count: number): string {
     const name = typeof req['name'] === 'string' ? req['name'] : ''
+    const method = typeof req['method'] === 'string' ? req['method'] : ''
     const type = typeof req['type'] === 'string' ? req['type'] : ''
-
-    let label = type.toUpperCase()
-    if (type === 'http') {
-      label = typeof req['method'] === 'string' ? req['method'] : 'HTTP'
-    } else if (type === 'graphql') {
-      label = 'GRAPHQL'
-    } else if (type === 'grpc') {
-      label = 'GRPC'
-    } else if (type === 'soap') {
-      label = 'SOAP'
-    } else if (type === 'websocket') {
-      label = 'WS'
-    }
-
+    const label = method || type || 'REQ'
     return `${this.formatIndex(index0, count)} - ${label} - ${this.sanitizeName(name)}`
   }
 

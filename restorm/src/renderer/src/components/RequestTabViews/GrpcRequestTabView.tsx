@@ -364,7 +364,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
     const historyResponse: GrpcResponse = {
       id: detail.guid,
       type: 'grpc',
-      requestId: detail.requestId,
+      requestId: request.id,
       requestUrl: detail.response.requestUrl,
       requestMethod: detail.response.requestMethod,
       requestMessage: detail.response.requestMessage,
@@ -377,7 +377,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
       ...(detail.response.error ? { error: detail.response.error } : {})
     }
     return buildGrpcResponseView(historyResponse, detail.requestMeta)
-  }, [buildGrpcResponseView])
+  }, [buildGrpcResponseView, request.id])
   
   // URL section
   const urlSection = (
@@ -424,7 +424,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
       infosContent={infosContent}
       responseContent={responseContent}
       jsonData={jsonData}
-      historyContent={<ResponseHistoryTab requestId={request.id} refreshKey={historyRefreshKey} buildResponseView={buildHistoryView} />}
+      historyContent={<ResponseHistoryTab requestId={request.id} requestPath={requestPath ?? undefined} refreshKey={historyRefreshKey} buildResponseView={buildHistoryView} />}
     />
   )
 }

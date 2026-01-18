@@ -2,18 +2,17 @@ export type ResponseHistoryRequestType = 'http' | 'graphql' | 'grpc' | 'soap' | 
 
 export interface ResponseHistoryEntry {
   guid: string
-  requestId: string
-  requestPath: string
-  type: ResponseHistoryRequestType
-  success: boolean
   timestamp: string
   pinned: boolean
+  success: boolean
 }
 
 export interface ResponseHistoryIndex {
   version: 1
-  maxPerRequest: number
-  entries: ResponseHistoryEntry[]
+  requests: {
+    requestPath: string
+    entries: ResponseHistoryEntry[]
+  }[]
 }
 
 export interface ResponseHistoryKeyValue {
@@ -138,7 +137,7 @@ export type ResponseHistoryResponse =
 
 export interface ResponseHistoryDetail {
   guid: string
-  requestId: string
+  requestId?: string
   requestPath: string
   type: ResponseHistoryRequestType
   success: boolean

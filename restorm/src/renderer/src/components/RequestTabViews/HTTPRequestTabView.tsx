@@ -775,7 +775,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
     const historyResponse: HTTPResponse = {
       id: detail.guid,
       type: 'http',
-      requestId: detail.requestId,
+      requestId: request.id,
       requestUrl: detail.response.requestUrl,
       requestMethod: detail.response.requestMethod as HTTPMethod,
       requestHeaders: toKeyValuesFromHistory(detail.response.requestHeaders),
@@ -792,7 +792,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
       ...(detail.response.error ? { error: detail.response.error } : {})
     }
     return buildHttpResponseView(historyResponse)
-  }, [buildHttpResponseView])
+  }, [buildHttpResponseView, request.id])
 
   // URL section
   const urlSection = (
@@ -850,7 +850,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
       infosContent={infosContent}
       responseContent={responseContent}
       jsonData={jsonData}
-      historyContent={<ResponseHistoryTab requestId={request.id} refreshKey={historyRefreshKey} buildResponseView={buildHistoryView} />}
+      historyContent={<ResponseHistoryTab requestId={request.id} requestPath={requestPath ?? undefined} refreshKey={historyRefreshKey} buildResponseView={buildHistoryView} />}
     />
   )
 }

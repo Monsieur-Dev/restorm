@@ -139,9 +139,15 @@ export const resolvers = {
       }).filter(Boolean)
     },
 
-    responseHistoryList: async (_: unknown, { requestId }: { requestId: string }): Promise<unknown[]> => {
-      logger.debug('[GraphQL] responseHistoryList query', { requestId })
-      return responseHistoryService.list(requestId)
+    responseHistoryList: async (_: unknown, { requestId, requestPath }: { requestId?: string; requestPath?: string }): Promise<unknown[]> => {
+      logger.debug('[GraphQL] responseHistoryList query', { requestId, requestPath })
+      if (typeof requestPath === 'string' && requestPath) {
+        return responseHistoryService.listByRequestPath(requestPath)
+      }
+      if (typeof requestId === 'string' && requestId) {
+        return responseHistoryService.list(requestId)
+      }
+      return []
     },
 
     responseHistoryDetail: async (_: unknown, { guid }: { guid: string }): Promise<unknown> => {

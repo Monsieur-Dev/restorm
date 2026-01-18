@@ -104,6 +104,7 @@ class GraphQLService {
         // Create HTTP server with yoga as request handler
         // The yoga handler is async but http.createServer handles it correctly
         this.server = createServer((req, res) => {
+          logger.debug('[GraphQLService] Request', { method: req.method, url: req.url })
           void yoga(req, res)
         })
         
