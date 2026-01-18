@@ -188,6 +188,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
   const [bodyFilePath, setBodyFilePath] = useState<string>(getBodyFilePath(request))
   const [isSending, setIsSending] = useState<boolean>(false)
   const [httpResponse, setHttpResponse] = useState<HTTPResponse | null>(null)
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
 
   const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
@@ -491,6 +492,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
             ...(contentLength !== undefined && !isNaN(contentLength) && { contentLength })
           }
           setHttpResponse(response)
+          setHistoryRefreshKey(prev => prev + 1)
           logger.info('HTTP request completed', {
             url: result.requestUrl,
             status: result.statusCode,
@@ -516,6 +518,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
             ...(request.body && { requestBody: request.body })
           }
           setHttpResponse(errorResponse)
+          setHistoryRefreshKey(prev => prev + 1)
           logger.error('HTTP request failed', { error: result.error })
         }
       })
@@ -847,7 +850,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({ request 
       infosContent={infosContent}
       responseContent={responseContent}
       jsonData={jsonData}
-      historyContent={<ResponseHistoryTab requestId={request.id} buildResponseView={buildHistoryView} />}
+      historyContent={<ResponseHistoryTab requestId={request.id} refreshKey={historyRefreshKey} buildResponseView={buildHistoryView} />}
     />
   )
 }

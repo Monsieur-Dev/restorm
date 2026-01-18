@@ -50,6 +50,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
   const [body, setBodyState] = useState(request.body)
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<SoapResponse | null>(null)
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
 
   const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
@@ -213,6 +214,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
           timings: res.timings
         }
         setResponse(soapResponse)
+        setHistoryRefreshKey(prev => prev + 1)
         logger.info('SOAP request completed', { url: res.requestUrl, status: res.statusCode })
       })
       .catch((err: unknown) => {
@@ -398,7 +400,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({ request 
       showResponse={response !== null}
       infosContent={infosContent}
       responseContent={responseContent}
-      historyContent={<ResponseHistoryTab requestId={request.id} buildResponseView={buildHistoryView} />}
+      historyContent={<ResponseHistoryTab requestId={request.id} refreshKey={historyRefreshKey} buildResponseView={buildHistoryView} />}
     />
   )
 }

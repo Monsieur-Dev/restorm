@@ -8,7 +8,8 @@ import {
   TextReader,
   TextWriter,
   Uint8ArrayReader,
-  Uint8ArrayWriter
+  Uint8ArrayWriter,
+  configure
 } from '@zip.js/zip.js'
 import {
   eventBusService,
@@ -48,6 +49,11 @@ import type { WebSocketExecutionResult } from './WebSocketExecutionService'
 const DEFAULT_MAX_PER_REQUEST = 10
 const INDEX_FILE_NAME = 'index.json'
 const RESPONSES_FOLDER = 'responses'
+
+configure({
+  useWebWorkers: false,
+  useCompressionStream: false
+})
 
 type ExecutionResult =
   | HTTPExecutionResult
@@ -89,51 +95,59 @@ class ResponseHistoryService {
     result: ExecutionResult,
     requestPathOverride?: string
   ): Promise<void> {
-    const archivePath = this.getArchivePath()
-    if (!archivePath) {
-      logger.debug('[ResponseHistoryService] No archive path, skipping history save')
-      return
-    }
-
-    const requestPath = typeof requestPathOverride === 'string' && requestPathOverride
-      ? requestPathOverride
-      : this.getRequestPath(requestId)
-    if (!requestPath) {
-      logger.warn('[ResponseHistoryService] Request path not found, skipping history save', { requestId })
-      return
-    }
-
-    const detail = this.buildDetail(requestId, requestPath, type, result)
-    if (!detail) {
-      logger.warn('[ResponseHistoryService] Failed to build response detail', { requestId, type })
-      return
-    }
-
-    await this.queueWrite(async () => {
-      const { index, entriesData } = await this.readArchive(archivePath)
-      const guid = detail.guid
-
-      const updatedEntries = this.addEntryAndPrune(index, detail)
-      const keptGuids = new Set(updatedEntries.map((entry) => entry.guid))
-
-      const nextEntriesData = new Map<string, string>()
-      for (const [entryName, entryText] of entriesData.entries()) {
-        if (entryName === INDEX_FILE_NAME) continue
-        const match = entryName.startsWith(`${RESPONSES_FOLDER}/`) ? entryName.slice(`${RESPONSES_FOLDER}/`.length) : null
-        if (match?.endsWith('.json')) {
-          const entryGuid = match.slice(0, -'.json'.length)
-          if (keptGuids.has(entryGuid)) {
-            nextEntriesData.set(entryName, entryText)
-          }
-        }
+    try {
+      const archivePath = this.getArchivePath()
+      if (!archivePath) {
+        logger.debug('[ResponseHistoryService] No archive path, skipping history save')
+        return
       }
 
-      nextEntriesData.set(this.getDetailEntryName(guid), JSON.stringify(detail))
-      await this.writeArchive(archivePath, {
-        ...index,
-        entries: updatedEntries
-      }, nextEntriesData)
-    })
+      const requestPath = typeof requestPathOverride === 'string' && requestPathOverride
+        ? requestPathOverride
+        : this.getRequestPath(requestId)
+      if (!requestPath) {
+        logger.warn('[ResponseHistoryService] Request path not found, skipping history save', { requestId })
+        return
+      }
+
+      const detail = this.buildDetail(requestId, requestPath, type, result)
+      if (!detail) {
+        logger.warn('[ResponseHistoryService] Failed to build response detail', { requestId, type })
+        return
+      }
+
+      await this.queueWrite(async () => {
+        const { index, entriesData } = await this.readArchive(archivePath)
+        const guid = detail.guid
+
+        const updatedEntries = this.addEntryAndPrune(index, detail)
+        const keptGuids = new Set(updatedEntries.map((entry) => entry.guid))
+
+        const nextEntriesData = new Map<string, string>()
+        for (const [entryName, entryText] of entriesData.entries()) {
+          if (entryName === INDEX_FILE_NAME) continue
+          const match = entryName.startsWith(`${RESPONSES_FOLDER}/`) ? entryName.slice(`${RESPONSES_FOLDER}/`.length) : null
+          if (match?.endsWith('.json')) {
+            const entryGuid = match.slice(0, -'.json'.length)
+            if (keptGuids.has(entryGuid)) {
+              nextEntriesData.set(entryName, entryText)
+            }
+          }
+        }
+
+        nextEntriesData.set(this.getDetailEntryName(guid), JSON.stringify(detail))
+        await this.writeArchive(archivePath, {
+          ...index,
+          entries: updatedEntries
+        }, nextEntriesData)
+      })
+    } catch (error) {
+      logger.error('[ResponseHistoryService] Failed to store response history', {
+        requestId,
+        type,
+        error: String(error)
+      })
+    }
   }
 
   async list(requestId: string): Promise<ResponseHistoryEntry[]> {

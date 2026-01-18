@@ -44,6 +44,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   const [message, setMessageState] = useState(request.message)
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<WebSocketResponse | null>(null)
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
 
   const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
@@ -215,6 +216,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           timings: res.timings
         }
         setResponse(wsResponse)
+        setHistoryRefreshKey(prev => prev + 1)
         logger.info('WebSocket request completed', { url: res.requestUrl, connected: res.connected })
       })
       .catch((err: unknown) => {
@@ -444,7 +446,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       showResponse={response !== null}
       infosContent={infosContent}
       responseContent={responseContent}
-      historyContent={<ResponseHistoryTab requestId={request.id} buildResponseView={buildHistoryView} />}
+      historyContent={<ResponseHistoryTab requestId={request.id} refreshKey={historyRefreshKey} buildResponseView={buildHistoryView} />}
     />
   )
 }

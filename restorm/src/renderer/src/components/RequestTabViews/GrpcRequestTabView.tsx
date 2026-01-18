@@ -51,6 +51,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
   const [requestMessage, setRequestMessageState] = useState(request.requestMessage)
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<GrpcResponse | null>(null)
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
 
   const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
@@ -215,6 +216,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
           timings: res.timings
         }
         setResponse(grpcResponse)
+        setHistoryRefreshKey(prev => prev + 1)
         logger.info('gRPC request completed', { method: res.requestMethod, status: res.statusCode })
       })
       .catch((err: unknown) => {
@@ -422,7 +424,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
       infosContent={infosContent}
       responseContent={responseContent}
       jsonData={jsonData}
-      historyContent={<ResponseHistoryTab requestId={request.id} buildResponseView={buildHistoryView} />}
+      historyContent={<ResponseHistoryTab requestId={request.id} refreshKey={historyRefreshKey} buildResponseView={buildHistoryView} />}
     />
   )
 }

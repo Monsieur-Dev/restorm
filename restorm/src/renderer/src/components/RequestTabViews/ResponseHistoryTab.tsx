@@ -135,6 +135,7 @@ class ResponseHistoryStore {
 
 export interface ResponseHistoryTabProps {
   requestId: string
+  refreshKey?: number
   buildResponseView: (detail: ResponseHistoryDetail) => {
     infosContent?: React.ReactNode | undefined
     responseContent?: React.ReactNode | undefined
@@ -144,6 +145,7 @@ export interface ResponseHistoryTabProps {
 
 export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
   requestId,
+  refreshKey,
   buildResponseView
 }) => {
   const { t, i18n } = useTranslation()
@@ -169,8 +171,13 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
   }, [i18n.language])
 
   useEffect(() => {
-    void store.loadEntries(requestId)
-  }, [requestId, store])
+    const timeoutId = setTimeout(() => {
+      void store.loadEntries(requestId)
+    }, 50)
+    return () => {
+      clearTimeout(timeoutId)
+    }
+  }, [requestId, refreshKey, store])
 
   const handleTogglePin = useCallback(async (entry: ResponseHistoryEntry) => {
     const nextPinned = !entry.pinned

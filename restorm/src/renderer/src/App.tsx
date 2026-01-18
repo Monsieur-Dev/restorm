@@ -51,6 +51,7 @@ import { useImport } from './hooks/useImport'
 import { prepareForSerialization } from './utils/serialization'
 import { makeReactiveFolder } from './types/reactive'
 import { searchIndexService } from './services/SearchIndexService'
+import { useRestormStore } from './store/restormStore'
 import type {
   Folder,
   FolderItem,
@@ -108,6 +109,7 @@ const allFolderIds = initialRootItems.flatMap((folder) => collectAllFolderIds(fo
 
 const App: React.FC = () => {
   const { t } = useTranslation()
+  const setCollections = useRestormStore((state) => state.setCollections)
   const {
     state: fileState,
     fileName,
@@ -441,6 +443,12 @@ const App: React.FC = () => {
       }
     })()
   }, [workbenchId, rootItems])
+
+  // Keep collections store in sync for request path resolution
+  useEffect(() => {
+    const collections = rootItems.filter(isEnvironmentFolder)
+    setCollections(collections, 'user')
+  }, [rootItems, setCollections])
 
   // Listen to test events for E2E tests (only in dev/test mode)
   // Expose handleFileOpened directly on window for E2E tests

@@ -51,6 +51,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
   const [variables, setVariablesState] = useState(request.variables ?? '{}')
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<GraphQLResponse | null>(null)
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
 
   const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
@@ -226,6 +227,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
           timings: res.timings
         }
         setResponse(graphqlResponse)
+        setHistoryRefreshKey(prev => prev + 1)
         logger.info('GraphQL request completed', { url: res.requestUrl, status: res.statusCode })
       })
       .catch((err: unknown) => {
@@ -408,7 +410,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
       infosContent={infosContent}
       responseContent={responseContent}
       jsonData={response ? { data: response.data, errors: response.errors } : undefined}
-      historyContent={<ResponseHistoryTab requestId={request.id} buildResponseView={buildHistoryView} />}
+      historyContent={<ResponseHistoryTab requestId={request.id} refreshKey={historyRefreshKey} buildResponseView={buildHistoryView} />}
     />
   )
 }
