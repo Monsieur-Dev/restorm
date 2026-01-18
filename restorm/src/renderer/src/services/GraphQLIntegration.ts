@@ -385,6 +385,36 @@ const DELETE_ENVIRONMENT_MUTATION = `
   }
 `
 
+const RESPONSE_HISTORY_LIST_QUERY = `
+  query ResponseHistoryList($requestId: String!) {
+    responseHistoryList(requestId: $requestId) {
+      guid
+      requestId
+      requestPath
+      type
+      success
+      timestamp
+      pinned
+    }
+  }
+`
+
+const RESPONSE_HISTORY_DETAIL_QUERY = `
+  query ResponseHistoryDetail($guid: String!) {
+    responseHistoryDetail(guid: $guid) {
+      guid
+      requestId
+      requestPath
+      type
+      success
+      timestamp
+      pinned
+      response
+      requestMeta
+    }
+  }
+`
+
 // ============================================================================
 // API Functions
 // ============================================================================
@@ -564,4 +594,50 @@ export async function deleteEnvironment(id: string): Promise<boolean> {
     { id }
   )
   return result.data?.deleteEnvironment ?? false
+}
+
+export async function getResponseHistoryList(requestId: string): Promise<{
+  guid: string
+  requestId: string
+  requestPath: string
+  type: string
+  success: boolean
+  timestamp: string
+  pinned: boolean
+}[]> {
+  const result = await graphQLClient.query<{ responseHistoryList: {
+    guid: string
+    requestId: string
+    requestPath: string
+    type: string
+    success: boolean
+    timestamp: string
+    pinned: boolean
+  }[] }>(RESPONSE_HISTORY_LIST_QUERY, { requestId })
+  return result.data?.responseHistoryList ?? []
+}
+
+export async function getResponseHistoryDetail(guid: string): Promise<{
+  guid: string
+  requestId: string
+  requestPath: string
+  type: string
+  success: boolean
+  timestamp: string
+  pinned: boolean
+  response: unknown
+  requestMeta?: unknown
+} | null> {
+  const result = await graphQLClient.query<{ responseHistoryDetail: {
+    guid: string
+    requestId: string
+    requestPath: string
+    type: string
+    success: boolean
+    timestamp: string
+    pinned: boolean
+    response: unknown
+    requestMeta?: unknown
+  } | null }>(RESPONSE_HISTORY_DETAIL_QUERY, { guid })
+  return result.data?.responseHistoryDetail ?? null
 }

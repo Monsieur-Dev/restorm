@@ -10,6 +10,7 @@ import {
   type ContextMenuItem
 } from 'electron-core-ui/renderer'
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../types/collections'
+import { getResponseHistoryDetail, getResponseHistoryList } from '../../services/GraphQLIntegration'
 
 const Graph = React.lazy(() => import('jsoncrack-react').then(mod => ({ default: mod.Graph })))
 
@@ -43,13 +44,7 @@ class ResponseHistoryStore {
   }
 
   async loadEntries(requestId: string): Promise<void> {
-    const api = this.getApi()
-    if (!api) {
-      this.state = { entries: [], selectedGuid: null, selectedDetail: null }
-      this.emit()
-      return
-    }
-    const result = await api.list(requestId)
+    const result = await getResponseHistoryList(requestId)
     const entries = Array.isArray(result) ? result.filter((item) => this.isHistoryEntry(item)) : []
     const selectedGuid = entries.find((item) => item.guid === this.state.selectedGuid)?.guid ?? entries[0]?.guid ?? null
     const selectedDetail = selectedGuid ? await this.loadDetail(selectedGuid) : null
@@ -69,9 +64,8 @@ class ResponseHistoryStore {
   }
 
   async togglePin(guid: string, pinned: boolean): Promise<boolean> {
-    const api = this.getApi()
-    if (!api) return false
-    const updated = await api.togglePin(guid, pinned)
+    const root = window as { restorm?: { responsesHistory?: { togglePin?: (guid: string, pinned: boolean) => Promise<boolean> } } }
+    const updated = await root.restorm?.responsesHistory?.togglePin?.(guid, pinned)
     if (!updated) return false
     const entries = this.state.entries.map((item) => (item.guid === guid ? { ...item, pinned } : item))
     const selectedDetail = this.state.selectedDetail?.guid === guid
@@ -83,9 +77,7 @@ class ResponseHistoryStore {
   }
 
   private async loadDetail(guid: string): Promise<ResponseHistoryDetail | null> {
-    const api = this.getApi()
-    if (!api) return null
-    const detail = await api.get(guid)
+    const detail = await getResponseHistoryDetail(guid)
     return this.isHistoryDetail(detail) ? detail : null
   }
 
@@ -113,23 +105,6 @@ class ResponseHistoryStore {
 
   private isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null
-  }
-
-  private getApi(): { list: (requestId: string) => Promise<unknown>; get: (guid: string) => Promise<unknown>; togglePin: (guid: string, pinned: boolean) => Promise<boolean> } | null {
-    const root = window as { restorm?: unknown }
-    const restorm = root.restorm
-    if (!this.isRecord(restorm)) return null
-    const responsesHistory = (restorm as { responsesHistory?: unknown }).responsesHistory
-    if (!this.isRecord(responsesHistory)) return null
-    const list = (responsesHistory as { list?: unknown }).list
-    const get = (responsesHistory as { get?: unknown }).get
-    const togglePin = (responsesHistory as { togglePin?: unknown }).togglePin
-    if (typeof list !== 'function' || typeof get !== 'function' || typeof togglePin !== 'function') return null
-    return {
-      list: list as (requestId: string) => Promise<unknown>,
-      get: get as (guid: string) => Promise<unknown>,
-      togglePin: togglePin as (guid: string, pinned: boolean) => Promise<boolean>
-    }
   }
 }
 
@@ -171,12 +146,7 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
   }, [i18n.language])
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      void store.loadEntries(requestId)
-    }, 50)
-    return () => {
-      clearTimeout(timeoutId)
-    }
+    void store.loadEntries(requestId)
   }, [requestId, refreshKey, store])
 
   const handleTogglePin = useCallback(async (entry: ResponseHistoryEntry) => {
