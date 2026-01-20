@@ -5,6 +5,7 @@ import {
   Tabs,
   VerticalSashContainer,
   ListView,
+  CodeEditor,
   type ListViewItemData,
   type Tab,
   type ContextMenuItem
@@ -14,6 +15,59 @@ import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../types/co
 import { getResponseHistoryDetail, getResponseHistoryList } from '../../services/GraphQLIntegration'
 
 const Graph = React.lazy(() => import('jsoncrack-react').then(mod => ({ default: mod.Graph })))
+
+function formatRequestBodyValue(text: string): { text: string; language: string } {
+  const trimmed = text.trim()
+  if (!trimmed) return { text, language: 'plaintext' }
+  if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+    try {
+      const parsed: unknown = JSON.parse(text)
+      return { text: JSON.stringify(parsed, null, 2), language: 'json' }
+    } catch {
+      return { text, language: 'plaintext' }
+    }
+  }
+  if (trimmed.startsWith('<')) {
+    return { text, language: 'xml' }
+  }
+  return { text, language: 'plaintext' }
+}
+
+function resolveRequestBody(detail: ResponseHistoryDetail | null): { text: string; language: string } | null {
+  if (!detail) return null
+  const response = detail.response
+  if (response.type === 'http') {
+    const body = response.requestBody
+    if (!body) return null
+    switch (body.type) {
+      case 'text': {
+        const content = body.content ?? ''
+        return content ? formatRequestBodyValue(content) : null
+      }
+      case 'file': {
+        const content = body.path ?? ''
+        return content ? { text: content, language: 'plaintext' } : null
+      }
+      case 'form-data':
+      case 'x-www-form-urlencoded': {
+        const fields = (body.fields ?? []).filter((item) => item.enabled !== false)
+        const content = fields.map((item) => `${item.key}=${item.value}`).join('\n')
+        return content ? { text: content, language: 'plaintext' } : null
+      }
+      default:
+        return null
+    }
+  }
+  if (response.type === 'grpc') {
+    const content = response.requestMessage
+    return content ? formatRequestBodyValue(content) : null
+  }
+  if (response.type === 'soap') {
+    const content = response.requestBody
+    return content ? formatRequestBodyValue(content) : null
+  }
+  return null
+}
 
 interface ResponseHistoryStoreState {
   entries: ResponseHistoryEntry[]
@@ -207,6 +261,8 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
     return buildResponseView(selectedDetail)
   }, [selectedDetail, buildResponseView])
 
+  const requestBodyPayload = useMemo(() => resolveRequestBody(selectedDetail), [selectedDetail])
+
   useEffect(() => {
     if (typeof document === 'undefined') return
     const handleThemeChange = (): void => {
@@ -293,6 +349,26 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
       })
     }
 
+    if (requestBodyPayload?.text) {
+      tabs.push({
+        id: 'requestBody',
+        label: t('requestTab.responses.tabs.requestBody'),
+        useScrollableElement: false,
+        content: (
+          <div style={{ height: '100%', boxSizing: 'border-box', padding: '8px 0px 0px 8px' }}>
+            <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3, boxSizing: 'border-box' }}>
+              <CodeEditor
+                height="100%"
+                language={requestBodyPayload.language}
+                value={requestBodyPayload.text}
+                options={{ minimap: { enabled: false }, wordWrap: 'on', scrollBeyondLastLine: false, automaticLayout: true, readOnly: true }}
+              />
+            </div>
+          </div>
+        )
+      })
+    }
+
     tabs.push({
       id: 'infos',
       label: 'Infos',
@@ -367,7 +443,7 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
     }
 
     return tabs
-  }, [selectedDetail, responseContent, infosContent, formattedJson, isDarkTheme, graphKey, t, entries.length])
+  }, [selectedDetail, responseContent, infosContent, formattedJson, isDarkTheme, graphKey, t, entries.length, requestBodyPayload])
 
   const resolvedActiveTabId = useMemo(() => {
     if (responseTabs.some((tab) => tab.id === activeTabId)) return activeTabId

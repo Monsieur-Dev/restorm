@@ -89,6 +89,7 @@
       "tabs": {
         "response": "Response",
         "prettyfied": "Prettyfied",
+        "requestBody": "Request body",
         "jsoncrack": "JSONCrack"
       },
       "loading": "Sending request...",
