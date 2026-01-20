@@ -47,7 +47,7 @@ describe('Password secrets (.env) helpers', () => {
     const secrets = collectPasswordSecretsFromCollections(data)
 
     expect(secrets['01 - Dossier/env parent/password']).toBe('s3cr3t')
-    expect(secrets['01 - Dossier/01 - Sub/01 - GET - GetUsers/headers/Authorization']).toBe('tok\nline2')
+    expect(secrets['01 - Dossier/01 - Sub/01 - GetUsers/headers/Authorization']).toBe('tok\nline2')
 
     const envText = serializeEnvFile(secrets)
     const parsed = parseEnvFileDetailed(envText)

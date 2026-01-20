@@ -69,22 +69,7 @@ function folderSegment(name: string, index0: number, count: number): string {
 
 function requestSegment(req: PlainRequest, index0: number, count: number): string {
   const name = typeof req.name === 'string' ? req.name : ''
-  const type = typeof req.type === 'string' ? req.type : ''
-
-  let label = type.toUpperCase()
-  if (type === 'http') {
-    label = typeof req.method === 'string' ? req.method : 'HTTP'
-  } else if (type === 'graphql') {
-    label = 'GRAPHQL'
-  } else if (type === 'grpc') {
-    label = 'GRPC'
-  } else if (type === 'soap') {
-    label = 'SOAP'
-  } else if (type === 'websocket') {
-    label = 'WS'
-  }
-
-  return `${formatIndex(index0, count)} - ${label} - ${sanitizeName(name)}`
+  return `${formatIndex(index0, count)} - ${sanitizeName(name)}`
 }
 
 function isPasswordValueType(value: unknown): value is PlainValueType {

@@ -916,10 +916,7 @@ class ResponseHistoryService {
 
   private requestSegment(req: Record<string, unknown>, index0: number, count: number): string {
     const name = typeof req['name'] === 'string' ? req['name'] : ''
-    const method = typeof req['method'] === 'string' ? req['method'] : ''
-    const type = typeof req['type'] === 'string' ? req['type'] : ''
-    const label = method || type || 'REQ'
-    return `${this.formatIndex(index0, count)} - ${label} - ${this.sanitizeName(name)}`
+    return `${this.formatIndex(index0, count)} - ${this.sanitizeName(name)}`
   }
 
   private folderSegment(name: string, index0: number, count: number): string {

@@ -101,7 +101,7 @@ collections:
           - key: baseUrl
             value:
               type: string
-              value: '{{scheme}}://{{domain}}:{{port}} '
+              value: '{{scheme}}://{{domain}}:{{port}}'
             description: ''
             enabled: true
           - key: test
@@ -220,14 +220,14 @@ collections:
             tags:
               - pet
             method: GET
-            url: '{{baseUrl}}/api/pet/{{petId}}1122z'
+            url: '{{baseUrl}}/api/pet/{{petId}}'
             headers: []
             params: []
             pathParams:
               - key: petId
                 value:
                   type: numeric
-                  value: 1222234444211112
+                  value: 20
                   format: decimal
                 description: ID of pet to return
                 enabled: true
@@ -503,7 +503,13 @@ collections:
               - pet
             method: POST
             url: '{{baseUrl}}/api/pet'
-            headers: []
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+                description: ''
+                enabled: true
             params:
               - key: ''
                 value:
@@ -516,21 +522,15 @@ collections:
               type: text
               content: |-
                 {
-                  "id": 0,
+                  "id": 20,
                   "category": {
-                    "id": 0,
-                    "name": ""
+                    "id": 3,
+                    "name": "string"
                   },
-                  "name": "",
+                  "name": "test111",
                   "photoUrls": [
-                    ""
                   ],
-                  "tags": [
-                    {
-                      "id": 0,
-                      "name": ""
-                    }
-                  ],
+                  "tags": [],
                   "status": "available"
                 }
           - type: http

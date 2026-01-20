@@ -1,6 +1,5 @@
 import type { EnvironmentFolder, FolderItem, Request } from '../types/collections'
 import { isAnyFolder, isRequest } from '../types/collections'
-import { isHTTPRequest } from '../types/requests'
 
 function getPaddingWidth(count: number): number {
   if (count <= 0) return 1
@@ -26,8 +25,7 @@ function folderSegment(name: string, index0: number, count: number): string {
 
 function requestSegment(req: Request, index0: number, count: number): string {
   const name = typeof req.name === 'string' ? req.name : ''
-  const label = isHTTPRequest(req) ? req.method : req.type
-  return `${formatIndex(index0, count)} - ${label} - ${sanitizeName(name)}`
+  return `${formatIndex(index0, count)} - ${sanitizeName(name)}`
 }
 
 function findRequestPathInItems(items: FolderItem[], prefix: string, requestId: string): string | null {

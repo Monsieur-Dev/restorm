@@ -16,11 +16,10 @@ import type { FileNamingConfig } from 'electron-core-ui/main'
 
 /**
  * File naming configuration for requests in folder mode
- * Pattern: "01 - POST - My Request.restorm"
+ * Pattern: "01 - My Request.restorm"
  */
 export const REQUEST_FILE_NAMING: FileNamingConfig = {
-  pattern: '{index} - {type} - {name}',
-  typeProperty: 'method', // For HTTP requests, use HTTP method
+  pattern: '{index} - {name}',
   nameProperty: 'name'
 }
 
@@ -160,36 +159,4 @@ export function getFileNamingForObject(obj: Record<string, unknown>): FileNaming
     return ENVIRONMENT_FILE_NAMING
   }
   return FOLDER_FILE_NAMING
-}
-
-/**
- * Get the request type for file naming (HTTP method or protocol type)
- */
-export function getRequestType(obj: Record<string, unknown>): string {
-  const type = obj['type']
-  
-  if (type === 'http') {
-    const method = obj['method']
-    return typeof method === 'string' ? method : 'HTTP'
-  }
-  
-  if (type === 'graphql') {
-    const opType = obj['operationType']
-    return typeof opType === 'string' ? opType.toUpperCase() : 'GRAPHQL'
-  }
-  
-  if (type === 'grpc') {
-    return 'GRPC'
-  }
-  
-  if (type === 'soap') {
-    return 'SOAP'
-  }
-  
-  if (type === 'websocket') {
-    const protocol = obj['protocol']
-    return typeof protocol === 'string' ? protocol.toUpperCase() : 'WS'
-  }
-  
-  return String(type).toUpperCase()
 }

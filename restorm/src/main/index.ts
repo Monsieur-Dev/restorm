@@ -817,9 +817,7 @@ async function saveFolderItems(
       }
     } else {
       // It's a request - save as file
-      const rawMethod = item['method']
-      const method = typeof rawMethod === 'string' ? rawMethod : (itemType?.toUpperCase() ?? 'REQ')
-      const newFilePath = join(parentPath, `${prefix} - ${method} - ${safeName}.${ext}`)
+      const newFilePath = join(parentPath, `${prefix} - ${safeName}.${ext}`)
       
       // Handle rename if path changed
       const filePath = handleRenameIfNeeded(itemId, newFilePath, false)

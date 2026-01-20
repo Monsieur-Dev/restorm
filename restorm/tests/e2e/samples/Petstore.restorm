@@ -81,8 +81,9 @@ collections:
         variables:
           - key: port
             value:
-              type: string
-              value: '8080'
+              type: numeric
+              value: 8080
+              format: decimal
             description: ''
             enabled: true
           - key: scheme
@@ -106,6 +107,19 @@ collections:
           - key: test
             value:
               type: password
+            description: ''
+            enabled: true
+          - key: col
+            value:
+              type: color
+              value: '#d81111'
+            description: ''
+            enabled: true
+          - key: dt
+            value:
+              type: datetime
+              value: '2026-01-23T01:47:42.000Z'
+              format: yyyy-MM-dd HH:mm:ss
             description: ''
             enabled: true
         subEnvironments:
@@ -212,8 +226,9 @@ collections:
             pathParams:
               - key: petId
                 value:
-                  type: string
-                  value: '1'
+                  type: numeric
+                  value: 20
+                  format: decimal
                 description: ID of pet to return
                 enabled: true
             notes: ''
@@ -488,7 +503,13 @@ collections:
               - pet
             method: POST
             url: '{{baseUrl}}/api/pet'
-            headers: []
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+                description: ''
+                enabled: true
             params:
               - key: ''
                 value:
@@ -501,21 +522,15 @@ collections:
               type: text
               content: |-
                 {
-                  "id": 0,
+                  "id": 20,
                   "category": {
-                    "id": 0,
-                    "name": ""
+                    "id": 3,
+                    "name": "string"
                   },
-                  "name": "",
+                  "name": "test111",
                   "photoUrls": [
-                    ""
                   ],
-                  "tags": [
-                    {
-                      "id": 0,
-                      "name": ""
-                    }
-                  ],
+                  "tags": [],
                   "status": "available"
                 }
           - type: http
