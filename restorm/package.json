@@ -55,6 +55,7 @@
     "react-i18next": "^16.5.0",
     "ws": "^8.18.3",
     "yaml": "^2.8.2",
+    "yargs": "^17.7.2",
     "zustand": "^5.0.9"
   },
   "devDependencies": {
@@ -68,6 +69,7 @@
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@types/ws": "^8.18.1",
+    "@types/yargs": "^17.0.35",
     "@typescript-eslint/eslint-plugin": "^8.50.0",
     "@typescript-eslint/parser": "^8.50.0",
     "@vitejs/plugin-react": "^5.1.2",

@@ -5,6 +5,7 @@ import { join, relative, basename, dirname } from 'path'
 import { promises as fs, existsSync, mkdirSync, statSync, readFileSync, writeFileSync, renameSync, rmSync } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
 import { searchIndexService, contextService, responseHistoryService } from './services'
+import { clearUserSettings, parseCliArgs } from './cli/args'
 import { graphQLService } from 'electron-core-ui/main'
 import { typeDefs, resolvers, pubsub } from './graphql'
 import type { PersistenceFormat } from 'electron-core-ui'
@@ -14,26 +15,12 @@ import { saveFolderSecretsEnvFile, applyFolderSecretsEnvFile } from './services/
 import { normalizeDocumentValuesForPersistence } from '../shared/utils/valuePersistence'
 // DocumentEvents are handled by FileService internally for dirty state tracking
 
-// Parse command line arguments for --open / -o
-function parseOpenFileArg(): string | undefined {
-  const args = process.argv.slice(app.isPackaged ? 1 : 2) // Skip electron executable and script in dev
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i]
-    if (!arg) continue
-    if (arg === '-o' || arg === '--open') {
-      return args[i + 1]
-    }
-    if (arg.startsWith('--open=')) {
-      return arg.substring('--open='.length)
-    }
-    if (arg.startsWith('-o=')) {
-      return arg.substring('-o='.length)
-    }
-  }
-  return undefined
+const cliArgs = parseCliArgs()
+if (cliArgs.clearSettings) {
+  clearUserSettings()
 }
 
-const fileToOpenOnStart = parseOpenFileArg()
+const fileToOpenOnStart = cliArgs.open
 if (fileToOpenOnStart) {
   logger.info('📂 File to open on start:', { path: fileToOpenOnStart })
 }
