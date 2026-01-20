@@ -89,6 +89,7 @@ class GraphQLClient {
     }
 
     try {
+      logger.debug('[GraphQLClient] Executing request', { endpoint: this.endpoint })
       const response = await fetch(this.endpoint, {
         method: 'POST',
         headers: {
@@ -105,6 +106,7 @@ class GraphQLClient {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
+      logger.debug('[GraphQLClient] Received response', { status: response.status })
       const result = await response.json() as GraphQLResult<T>
       
       if (result.errors) {

@@ -11,25 +11,47 @@ import {
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
-import type { GraphQLRequest, GraphQLResponse, KeyValue } from '../../types/collections'
+import type { GraphQLRequest, GraphQLResponse, KeyValue, ResponseHistoryDetail } from '../../types/collections'
+import { StringValue } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { VariableContext } from '../RestormKeyValueTable'
 import type { GraphQLExecutionResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
+import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { Badge } from '../common/Badge'
+import { useRestormStore } from '../../store/restormStore'
+import { buildRequestPath } from '../../utils/requestPath'
+import { getResponseHistoryList } from '../../services/GraphQLIntegration'
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
 function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
   Object.assign(obj, { [key]: value })
 }
 
-export interface GraphQLRequestTabViewProps {
-  request: GraphQLRequest
+function toKeyValuesFromHistory(values: { key: string; value: string; enabled?: boolean }[]): KeyValue[] {
+  return values.map((kv) => ({
+    key: kv.key,
+    value: new StringValue(kv.value),
+    enabled: kv.enabled
+  }))
 }
 
-export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ request }) => {
+export interface GraphQLRequestTabViewProps {
+  request: GraphQLRequest
+  historyModalOpen?: boolean
+  onCloseHistoryModal?: () => void
+  onHistoryAvailabilityChange?: (hasHistory: boolean) => void
+}
+
+export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
+  request,
+  historyModalOpen = false,
+  onCloseHistoryModal,
+  onHistoryAvailabilityChange
+}) => {
   const { t } = useTranslation()
   const { selectedEnvId, environments } = useEnvironmentContext()
+  const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
   
@@ -38,6 +60,9 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
   const [variables, setVariablesState] = useState(request.variables ?? '{}')
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<GraphQLResponse | null>(null)
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+
+  const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
   // Backend-provided resolved URL and code snippets
   const [resolvedUrl, setResolvedUrl] = useState<string>('')
@@ -190,7 +215,10 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
     setIsSending(true)
     setResponse(null)
     
-    window.restorm?.graphql.execute({ requestId: request.id })
+    window.restorm?.graphql.execute({
+      requestId: request.id,
+      ...(requestPath ? { requestPath } : {})
+    })
       .then((res: GraphQLExecutionResult) => {
         // Convert backend result to GraphQLResponse format
         const graphqlResponse: GraphQLResponse = {
@@ -208,6 +236,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
           timings: res.timings
         }
         setResponse(graphqlResponse)
+        setHistoryRefreshKey(prev => prev + 1)
         logger.info('GraphQL request completed', { url: res.requestUrl, status: res.statusCode })
       })
       .catch((err: unknown) => {
@@ -278,48 +307,77 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
   
   // Use backend-provided code snippets
   const codeSnippetsContent = backendCodeSnippets || t('requestTab.codeSnippets.loading', 'Loading code snippets...')
-  
-  // Infos content (detailed info panel)
-  const infosContent = response ? (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <span style={{ fontWeight: 600, minWidth: 100 }}>Status:</span>
-        <span style={{ color: response.statusCode >= 200 && response.statusCode < 300 ? 'var(--testing-iconPassed)' : 'var(--testing-iconFailed)' }}>
-          {response.statusCode}
-        </span>
-      </div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <span style={{ fontWeight: 600, minWidth: 100 }}>Duration:</span>
-        <span>{response.timings.durationMs}ms</span>
-      </div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <span style={{ fontWeight: 600, minWidth: 100 }}>URL:</span>
-        <span style={{ wordBreak: 'break-all' }}>{response.requestUrl}</span>
-      </div>
-      {response.errors && response.errors.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
-          <span style={{ fontWeight: 600, color: 'var(--testing-iconFailed)' }}>Errors:</span>
-          {response.errors.map((err, i) => (
-            <div key={i} style={{ padding: 4, background: 'var(--inputValidation-errorBackground)', borderRadius: 3 }}>
-              {err.message}
-            </div>
-          ))}
+
+  const buildGraphqlResponseView = useCallback((resp: GraphQLResponse | null) => {
+    const infosContent = resp ? (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <span style={{ fontWeight: 600, minWidth: 100 }}>Status:</span>
+          <span style={{ color: resp.statusCode >= 200 && resp.statusCode < 300 ? 'var(--testing-iconPassed)' : 'var(--testing-iconFailed)' }}>
+            {resp.statusCode}
+          </span>
         </div>
-      )}
-    </div>
-  ) : null
-  
-  // Response content (raw JSON)
-  const responseContent = response && (response.data ?? response.errors) ? (
-    <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
-      <CodeEditor
-        height="100%"
-        language="json"
-        value={JSON.stringify({ data: response.data, errors: response.errors }, null, 2)}
-        options={{ readOnly: true, minimap: { enabled: false }, automaticLayout: true }}
-      />
-    </div>
-  ) : null
+        <div style={{ display: 'flex', gap: 8 }}>
+          <span style={{ fontWeight: 600, minWidth: 100 }}>Duration:</span>
+          <span>{resp.timings.durationMs}ms</span>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <span style={{ fontWeight: 600, minWidth: 100 }}>URL:</span>
+          <span style={{ wordBreak: 'break-all' }}>{resp.requestUrl}</span>
+        </div>
+        {resp.errors && resp.errors.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
+            <span style={{ fontWeight: 600, color: 'var(--testing-iconFailed)' }}>Errors:</span>
+            {resp.errors.map((err, i) => (
+              <div key={i} style={{ padding: 4, background: 'var(--inputValidation-errorBackground)', borderRadius: 3 }}>
+                {err.message}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    ) : null
+
+    const responseContent = resp && (resp.data ?? resp.errors) ? (
+      <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
+        <CodeEditor
+          height="100%"
+          language="json"
+          value={JSON.stringify({ data: resp.data, errors: resp.errors }, null, 2)}
+          options={{ readOnly: true, minimap: { enabled: false }, automaticLayout: true }}
+        />
+      </div>
+    ) : null
+
+    return { infosContent, responseContent, jsonData: resp ? { data: resp.data, errors: resp.errors } : undefined }
+  }, [])
+
+  const { infosContent, responseContent } = useMemo(
+    () => buildGraphqlResponseView(response),
+    [buildGraphqlResponseView, response]
+  )
+
+  const buildHistoryView = useCallback((detail: ResponseHistoryDetail) => {
+    if (detail.response.type !== 'graphql') {
+      return { infosContent: undefined, responseContent: undefined, jsonData: undefined }
+    }
+    const historyResponse: GraphQLResponse = {
+      id: detail.guid,
+      type: 'graphql',
+      requestId: request.id,
+      requestUrl: detail.response.requestUrl,
+      requestQuery: '',
+      requestVariables: undefined,
+      requestHeaders: toKeyValuesFromHistory(detail.response.requestHeaders),
+      statusCode: detail.response.statusCode,
+      data: detail.response.data,
+      errors: detail.response.errors,
+      responseHeaders: toKeyValuesFromHistory(detail.response.responseHeaders),
+      timings: detail.response.timings,
+      ...(detail.response.error ? { error: detail.response.error } : {})
+    }
+    return buildGraphqlResponseView(historyResponse)
+  }, [buildGraphqlResponseView, request.id])
   
   // URL section
   const urlSection = (
@@ -347,21 +405,49 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({ re
     </div>
   )
   
+  const handleCloseHistoryModal = useCallback(() => {
+    onCloseHistoryModal?.()
+  }, [onCloseHistoryModal])
+
+  useEffect(() => {
+    if (!onHistoryAvailabilityChange) return
+    const state = { active: true }
+    void (async (): Promise<void> => {
+      const entries = await getResponseHistoryList(request.id, requestPath ?? undefined)
+      if (state.active) {
+        onHistoryAvailabilityChange(entries.length > 0)
+      }
+    })()
+    return () => {
+      state.active = false
+    }
+  }, [onHistoryAvailabilityChange, request.id, requestPath, historyRefreshKey])
+
   return (
-    <BaseRequestTabView
-      requestId={request.id}
-      urlSection={urlSection}
-      requestContent={requestContent}
-      codeSnippetsContent={codeSnippetsContent}
-      documentation={request.documentation}
-      notes={request.notes}
-      onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
-      isLoading={isSending}
-      showResponse={response !== null}
-      infosContent={infosContent}
-      responseContent={responseContent}
-      jsonData={response ? { data: response.data, errors: response.errors } : undefined}
-    />
+    <>
+      <BaseRequestTabView
+        requestId={request.id}
+        urlSection={urlSection}
+        requestContent={requestContent}
+        codeSnippetsContent={codeSnippetsContent}
+        documentation={request.documentation}
+        notes={request.notes}
+        onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
+        isLoading={isSending}
+        showResponse={response !== null}
+        infosContent={infosContent}
+        responseContent={responseContent}
+        jsonData={response ? { data: response.data, errors: response.errors } : undefined}
+      />
+      <ResponseHistoryModal
+        isOpen={historyModalOpen}
+        onClose={handleCloseHistoryModal}
+        requestId={request.id}
+        requestPath={requestPath ?? undefined}
+        refreshKey={historyRefreshKey}
+        buildResponseView={buildHistoryView}
+      />
+    </>
   )
 }
 

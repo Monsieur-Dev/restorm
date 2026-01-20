@@ -110,6 +110,24 @@ function registerCustomTypes(): void {
   documentId: String!
   documentType: String!
 }`)
+
+  graphQLSchemaGenerator.registerCustomType(`type ResponseHistoryEntry {
+  guid: String!
+  success: Boolean!
+  timestamp: String!
+  pinned: Boolean!
+}`)
+
+  graphQLSchemaGenerator.registerCustomType(`type ResponseHistoryDetail {
+  guid: String!
+  requestPath: String!
+  type: String!
+  success: Boolean!
+  timestamp: String!
+  pinned: Boolean!
+  response: JSON!
+  requestMeta: JSON
+}`)
 }
 
 // =============================================================================
@@ -174,6 +192,10 @@ function registerQueries(): void {
 
   // Search query
   graphQLSchemaGenerator.registerQuery('search', 'query: String!, limit: Int', '[Request!]!')
+
+  // Response history queries
+  graphQLSchemaGenerator.registerQuery('responseHistoryList', 'requestId: String, requestPath: String', '[ResponseHistoryEntry!]!')
+  graphQLSchemaGenerator.registerQuery('responseHistoryDetail', 'guid: String!', 'ResponseHistoryDetail')
 }
 
 // =============================================================================

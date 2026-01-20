@@ -28,6 +28,7 @@ export interface RestormWorkbenchTabProps {
   onTagsChange?: (nextTags: string[]) => void
   label: string
   headerRight?: React.ReactNode
+  tagsRight?: React.ReactNode
   /** Optional callout to display at the top of the tab */
   callout?: RestormWorkbenchTabCallout | undefined
   children: React.ReactNode
@@ -41,6 +42,7 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
   onTagsChange,
   label,
   headerRight,
+  tagsRight,
   callout,
   children
 }) => {
@@ -72,19 +74,22 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
           padding: '8px 16px 0 16px'
         }}
       >
-        <span
-          style={{
-            color: 'var(--descriptionForeground)'
-          }}
-        >
-          {label}
-        </span>
-        <TagsView
-          tags={tags}
-          onChange={(nextTags) => {
-            onTagsChange?.(nextTags)
-          }}
-        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+          <span
+            style={{
+              color: 'var(--descriptionForeground)'
+            }}
+          >
+            {label}
+          </span>
+          <TagsView
+            tags={tags}
+            onChange={(nextTags) => {
+              onTagsChange?.(nextTags)
+            }}
+          />
+        </div>
+        {tagsRight}
       </div>
 
       <div

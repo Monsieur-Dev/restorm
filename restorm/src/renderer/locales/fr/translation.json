@@ -82,16 +82,25 @@
       "params": "Paramètres",
       "pathParams": "Paramètres de chemin",
       "notes": "Notes",
-      "codeSnippets": "Exemples de code"
+      "codeSnippets": "Exemples de code",
+      "responsesHistory": "Historique des réponses"
     },
     "responses": {
       "tabs": {
         "response": "Réponse",
         "prettyfied": "Formattée",
+        "requestBody": "Corps de la requête",
         "jsoncrack": "JSONCrack"
       },
       "loading": "Envoi de la requête...",
-      "noResponse": "Cliquez sur Envoyer pour exécuter la requête"
+      "noResponse": "Cliquez sur Envoyer pour exécuter la requête",
+      "history": {
+        "list": "Liste de l'historique des réponses",
+        "empty": "Aucune réponse enregistrée pour l'instant",
+        "select": "Sélectionnez une réponse pour voir le détail",
+        "pin": "Épingler la réponse",
+        "unpin": "Désépingler la réponse"
+      }
     }
   },
   "workbench": {

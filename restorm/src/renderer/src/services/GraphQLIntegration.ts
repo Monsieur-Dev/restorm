@@ -385,6 +385,59 @@ const DELETE_ENVIRONMENT_MUTATION = `
   }
 `
 
+const RESPONSE_HISTORY_LIST_QUERY = `
+  query ResponseHistoryList($requestId: String, $requestPath: String) {
+    responseHistoryList(requestId: $requestId, requestPath: $requestPath) {
+      guid
+      success
+      timestamp
+      pinned
+    }
+  }
+`
+
+const RESPONSE_HISTORY_DETAIL_QUERY = `
+  query ResponseHistoryDetail($guid: String!) {
+    responseHistoryDetail(guid: $guid) {
+      guid
+      requestPath
+      type
+      success
+      timestamp
+      pinned
+      response
+      requestMeta
+    }
+  }
+`
+
+interface GraphQLResult<T> {
+  data?: T
+  errors?: {
+    message: string
+    locations?: { line: number; column: number }[]
+    path?: (string | number)[]
+  }[]
+}
+
+interface GraphQLApi {
+  query: (query: string, variables?: Record<string, unknown>) => Promise<unknown>
+}
+
+async function executeGraphQL<T>(
+  query: string,
+  variables?: Record<string, unknown>
+): Promise<GraphQLResult<T>> {
+  const restormWindow = typeof window !== 'undefined'
+    ? (window as unknown as { restorm?: { graphqlApi?: GraphQLApi } })
+    : undefined
+  const api = restormWindow?.restorm?.graphqlApi
+  if (api) {
+    return await api.query(query, variables) as GraphQLResult<T>
+  }
+  return await graphQLClient.query<T>(query, variables)
+}
+
 // ============================================================================
 // API Functions
 // ============================================================================
@@ -564,4 +617,70 @@ export async function deleteEnvironment(id: string): Promise<boolean> {
     { id }
   )
   return result.data?.deleteEnvironment ?? false
+}
+
+export async function getResponseHistoryList(requestId?: string, requestPath?: string): Promise<{
+  guid: string
+  success: boolean
+  timestamp: string
+  pinned: boolean
+}[]> {
+  logger.debug('[GraphQLIntegration] responseHistoryList query', { requestId, requestPath })
+  try {
+    const result = await executeGraphQL<{ responseHistoryList: {
+      guid: string
+      success: boolean
+      timestamp: string
+      pinned: boolean
+    }[] }>(RESPONSE_HISTORY_LIST_QUERY, { requestId, requestPath })
+    if (result.errors?.length) {
+      logger.warn('[GraphQLIntegration] responseHistoryList errors', { errors: result.errors })
+    }
+    const entries = result.data?.responseHistoryList ?? []
+    logger.debug('[GraphQLIntegration] responseHistoryList result', { count: entries.length })
+    return entries
+  } catch (error) {
+    logger.error('[GraphQLIntegration] responseHistoryList failed', {
+      error: String(error),
+      endpoint: graphQLClient.getEndpoint(),
+      initialized: graphQLClient.isClientInitialized()
+    })
+    return []
+  }
+}
+
+export async function getResponseHistoryDetail(guid: string): Promise<{
+  guid: string
+  requestPath: string
+  type: string
+  success: boolean
+  timestamp: string
+  pinned: boolean
+  response: unknown
+  requestMeta?: unknown
+} | null> {
+  try {
+    const result = await executeGraphQL<{ responseHistoryDetail: {
+      guid: string
+      requestPath: string
+      type: string
+      success: boolean
+      timestamp: string
+      pinned: boolean
+      response: unknown
+      requestMeta?: unknown
+    } | null }>(RESPONSE_HISTORY_DETAIL_QUERY, { guid })
+    if (result.errors?.length) {
+      logger.warn('[GraphQLIntegration] responseHistoryDetail errors', { errors: result.errors })
+    }
+    return result.data?.responseHistoryDetail ?? null
+  } catch (error) {
+    logger.error('[GraphQLIntegration] responseHistoryDetail failed', {
+      error: String(error),
+      endpoint: graphQLClient.getEndpoint(),
+      initialized: graphQLClient.isClientInitialized(),
+      guid
+    })
+    return null
+  }
 }

@@ -12,13 +12,17 @@ import {
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
-import type { WebSocketRequest, WebSocketResponse, WebSocketMessage, KeyValue } from '../../types/collections'
+import type { WebSocketRequest, WebSocketResponse, WebSocketMessage, KeyValue, ResponseHistoryDetail } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { VariableContext } from '../RestormKeyValueTable'
 import type { WebSocketExecutionResult, WebSocketMessageItem } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
+import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { Badge } from '../common/Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
+import { useRestormStore } from '../../store/restormStore'
+import { buildRequestPath } from '../../utils/requestPath'
+import { getResponseHistoryList } from '../../services/GraphQLIntegration'
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
 function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
@@ -27,11 +31,20 @@ function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key
 
 export interface WebSocketRequestTabViewProps {
   request: WebSocketRequest
+  historyModalOpen?: boolean
+  onCloseHistoryModal?: () => void
+  onHistoryAvailabilityChange?: (hasHistory: boolean) => void
 }
 
-export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = ({ request }) => {
+export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = ({
+  request,
+  historyModalOpen = false,
+  onCloseHistoryModal,
+  onHistoryAvailabilityChange
+}) => {
   const { t } = useTranslation()
   const { selectedEnvId, environments } = useEnvironmentContext()
+  const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
   
@@ -40,6 +53,9 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   const [message, setMessageState] = useState(request.message)
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<WebSocketResponse | null>(null)
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+
+  const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
   // Backend-provided resolved URL and code snippets
   const [resolvedUrl, setResolvedUrl] = useState<string>('')
@@ -185,7 +201,11 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     setIsSending(true)
     setResponse(null)
     
-    window.restorm?.websocket.connect({ requestId: request.id, timeout: 5000 })
+    window.restorm?.websocket.connect({
+      requestId: request.id,
+      timeout: 5000,
+      ...(requestPath ? { requestPath } : {})
+    })
       .then((res: WebSocketExecutionResult) => {
         // Convert backend result to WebSocketResponse format
         const wsResponse: WebSocketResponse = {
@@ -205,6 +225,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           timings: res.timings
         }
         setResponse(wsResponse)
+        setHistoryRefreshKey(prev => prev + 1)
         logger.info('WebSocket request completed', { url: res.requestUrl, connected: res.connected })
       })
       .catch((err: unknown) => {
@@ -297,70 +318,103 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   
   // Use backend-provided code snippets
   const codeSnippetsContent = backendCodeSnippets || t('requestTab.codeSnippets.loading', 'Loading code snippets...')
-  
-  // Infos content (detailed info panel)
-  const infosContent = response ? (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <span style={{ fontWeight: 600, minWidth: 100 }}>Status:</span>
-        <span style={{ color: response.connected ? 'var(--testing-iconPassed)' : 'var(--testing-iconFailed)' }}>
-          {response.connected ? t('websocket.connected') : t('websocket.disconnected')}
-        </span>
-      </div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <span style={{ fontWeight: 600, minWidth: 100 }}>Duration:</span>
-        <span>{response.timings.durationMs}ms</span>
-      </div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <span style={{ fontWeight: 600, minWidth: 100 }}>Protocol:</span>
-        <span>{request.protocol}</span>
-      </div>
-      {request.event && (
+
+  const buildWebSocketResponseView = useCallback((
+    resp: WebSocketResponse | null,
+    meta?: { protocol?: string; event?: string }
+  ) => {
+    const infosContent = resp ? (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>
         <div style={{ display: 'flex', gap: 8 }}>
-          <span style={{ fontWeight: 600, minWidth: 100 }}>Event:</span>
-          <span>{request.event}</span>
+          <span style={{ fontWeight: 600, minWidth: 100 }}>Status:</span>
+          <span style={{ color: resp.connected ? 'var(--testing-iconPassed)' : 'var(--testing-iconFailed)' }}>
+            {resp.connected ? t('websocket.connected') : t('websocket.disconnected')}
+          </span>
         </div>
-      )}
-      <div style={{ display: 'flex', gap: 8 }}>
-        <span style={{ fontWeight: 600, minWidth: 100 }}>Messages:</span>
-        <span>{response.messages.length}</span>
-      </div>
-      {response.error && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
-          <span style={{ fontWeight: 600, color: 'var(--testing-iconFailed)' }}>Error:</span>
-          <div style={{ padding: 4, background: 'var(--inputValidation-errorBackground)', borderRadius: 3 }}>
-            {response.error}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <span style={{ fontWeight: 600, minWidth: 100 }}>Duration:</span>
+          <span>{resp.timings.durationMs}ms</span>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <span style={{ fontWeight: 600, minWidth: 100 }}>Protocol:</span>
+          <span>{meta?.protocol ?? '-'}</span>
+        </div>
+        {meta?.event && (
+          <div style={{ display: 'flex', gap: 8 }}>
+            <span style={{ fontWeight: 600, minWidth: 100 }}>Event:</span>
+            <span>{meta.event}</span>
           </div>
+        )}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <span style={{ fontWeight: 600, minWidth: 100 }}>Messages:</span>
+          <span>{resp.messages.length}</span>
         </div>
-      )}
-    </div>
-  ) : null
-  
-  // Response content - messages list
-  const responseContent = response && response.messages.length > 0 ? (
-    <div style={{ height: '100%', overflow: 'auto', fontFamily: 'var(--editor-font-family)', fontSize: 12 }}>
-      {response.messages.map((msg, i) => (
-        <div
-          key={i}
-          style={{
-            padding: '4px 8px',
-            marginBottom: 4,
-            borderRadius: 3,
-            background: msg.direction === 'sent' ? 'var(--editor-selectionBackground)' : 'var(--editor-inactiveSelectionBackground)',
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-all'
-          }}
-        >
-          {formatMessage(msg)}
-        </div>
-      ))}
-      {response.messages.length === 0 && (
-        <div style={{ color: 'var(--descriptionForeground)' }}>
-          {t('websocket.noMessages')}
-        </div>
-      )}
-    </div>
-  ) : null
+        {resp.error && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
+            <span style={{ fontWeight: 600, color: 'var(--testing-iconFailed)' }}>Error:</span>
+            <div style={{ padding: 4, background: 'var(--inputValidation-errorBackground)', borderRadius: 3 }}>
+              {resp.error}
+            </div>
+          </div>
+        )}
+      </div>
+    ) : null
+
+    const responseContent = resp && resp.messages.length > 0 ? (
+      <div style={{ height: '100%', overflow: 'auto', fontFamily: 'var(--editor-font-family)', fontSize: 12 }}>
+        {resp.messages.map((msg, i) => (
+          <div
+            key={i}
+            style={{
+              padding: '4px 8px',
+              marginBottom: 4,
+              borderRadius: 3,
+              background: msg.direction === 'sent' ? 'var(--editor-selectionBackground)' : 'var(--editor-inactiveSelectionBackground)',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-all'
+            }}
+          >
+            {formatMessage(msg)}
+          </div>
+        ))}
+        {resp.messages.length === 0 && (
+          <div style={{ color: 'var(--descriptionForeground)' }}>
+            {t('websocket.noMessages')}
+          </div>
+        )}
+      </div>
+    ) : null
+
+    return { infosContent, responseContent, jsonData: undefined }
+  }, [t])
+
+  const { infosContent, responseContent } = useMemo(
+    () => buildWebSocketResponseView(response, { protocol: request.protocol, event: request.event }),
+    [buildWebSocketResponseView, response, request.protocol, request.event]
+  )
+
+  const buildHistoryView = useCallback((detail: ResponseHistoryDetail) => {
+    if (detail.response.type !== 'websocket') {
+      return { infosContent: undefined, responseContent: undefined, jsonData: undefined }
+    }
+    const historyResponse: WebSocketResponse = {
+      id: detail.guid,
+      type: 'websocket',
+      requestId: request.id,
+      requestUrl: detail.response.requestUrl,
+      protocol: detail.response.protocol as WebSocketResponse['protocol'],
+      connected: detail.response.connected,
+      messages: detail.response.messages.map((msg) => ({
+        direction: msg.direction,
+        event: msg.event,
+        data: msg.data,
+        timestamp: msg.timestamp
+      })),
+      timings: detail.response.timings,
+      ...(detail.response.error ? { error: detail.response.error } : {})
+    }
+    return buildWebSocketResponseView(historyResponse, detail.requestMeta)
+  }, [buildWebSocketResponseView, request.id])
   
   // URL section
   const urlSection = (
@@ -388,20 +442,48 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     </div>
   )
   
+  const handleCloseHistoryModal = useCallback(() => {
+    onCloseHistoryModal?.()
+  }, [onCloseHistoryModal])
+
+  useEffect(() => {
+    if (!onHistoryAvailabilityChange) return
+    const state = { active: true }
+    void (async (): Promise<void> => {
+      const entries = await getResponseHistoryList(request.id, requestPath ?? undefined)
+      if (state.active) {
+        onHistoryAvailabilityChange(entries.length > 0)
+      }
+    })()
+    return () => {
+      state.active = false
+    }
+  }, [onHistoryAvailabilityChange, request.id, requestPath, historyRefreshKey])
+
   return (
-    <BaseRequestTabView
-      requestId={request.id}
-      urlSection={urlSection}
-      requestContent={requestContent}
-      codeSnippetsContent={codeSnippetsContent}
-      documentation={request.documentation}
-      notes={request.notes}
-      onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
-      isLoading={isSending}
-      showResponse={response !== null}
-      infosContent={infosContent}
-      responseContent={responseContent}
-    />
+    <>
+      <BaseRequestTabView
+        requestId={request.id}
+        urlSection={urlSection}
+        requestContent={requestContent}
+        codeSnippetsContent={codeSnippetsContent}
+        documentation={request.documentation}
+        notes={request.notes}
+        onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
+        isLoading={isSending}
+        showResponse={response !== null}
+        infosContent={infosContent}
+        responseContent={responseContent}
+      />
+      <ResponseHistoryModal
+        isOpen={historyModalOpen}
+        onClose={handleCloseHistoryModal}
+        requestId={request.id}
+        requestPath={requestPath ?? undefined}
+        refreshKey={historyRefreshKey}
+        buildResponseView={buildHistoryView}
+      />
+    </>
   )
 }
 

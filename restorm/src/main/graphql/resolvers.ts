@@ -6,7 +6,7 @@
  */
 
 import { searchService, logger } from 'electron-core-ui/main'
-import { contextService } from '../services'
+import { contextService, responseHistoryService } from '../services'
 import { collectionStore, pubsub, PUBSUB_TOPICS } from '../services/CollectionStore'
 
 /**
@@ -137,6 +137,22 @@ export const resolvers = {
         const item = collectionStore.findById(result.id)
         return item
       }).filter(Boolean)
+    },
+
+    responseHistoryList: async (_: unknown, { requestId, requestPath }: { requestId?: string; requestPath?: string }): Promise<unknown[]> => {
+      logger.debug('[GraphQL] responseHistoryList query', { requestId, requestPath })
+      if (typeof requestPath === 'string' && requestPath) {
+        return responseHistoryService.listByRequestPath(requestPath)
+      }
+      if (typeof requestId === 'string' && requestId) {
+        return responseHistoryService.list(requestId)
+      }
+      return []
+    },
+
+    responseHistoryDetail: async (_: unknown, { guid }: { guid: string }): Promise<unknown> => {
+      logger.debug('[GraphQL] responseHistoryDetail query', { guid })
+      return responseHistoryService.getDetail(guid)
     }
   },
 

@@ -11,26 +11,48 @@ import {
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
-import type { GrpcRequest, GrpcResponse, KeyValue } from '../../types/collections'
+import type { GrpcRequest, GrpcResponse, KeyValue, ResponseHistoryDetail } from '../../types/collections'
+import { StringValue } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { VariableContext } from '../RestormKeyValueTable'
 import type { GRPCExecutionResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
+import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { Badge } from '../common/Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
+import { useRestormStore } from '../../store/restormStore'
+import { buildRequestPath } from '../../utils/requestPath'
+import { getResponseHistoryList } from '../../services/GraphQLIntegration'
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
 function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
   Object.assign(obj, { [key]: value })
 }
 
-export interface GrpcRequestTabViewProps {
-  request: GrpcRequest
+function toKeyValuesFromHistory(values: { key: string; value: string; enabled?: boolean }[]): KeyValue[] {
+  return values.map((kv) => ({
+    key: kv.key,
+    value: new StringValue(kv.value),
+    enabled: kv.enabled
+  }))
 }
 
-export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request }) => {
+export interface GrpcRequestTabViewProps {
+  request: GrpcRequest
+  historyModalOpen?: boolean
+  onCloseHistoryModal?: () => void
+  onHistoryAvailabilityChange?: (hasHistory: boolean) => void
+}
+
+export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
+  request,
+  historyModalOpen = false,
+  onCloseHistoryModal,
+  onHistoryAvailabilityChange
+}) => {
   const { t } = useTranslation()
   const { selectedEnvId, environments } = useEnvironmentContext()
+  const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
   
@@ -38,6 +60,9 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
   const [requestMessage, setRequestMessageState] = useState(request.requestMessage)
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<GrpcResponse | null>(null)
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+
+  const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
   // Backend-provided resolved URL and code snippets
   const [resolvedUrl, setResolvedUrl] = useState<string>('')
@@ -178,7 +203,10 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
     setIsSending(true)
     setResponse(null)
     
-    window.restorm?.grpc.execute({ requestId: request.id })
+    window.restorm?.grpc.execute({
+      requestId: request.id,
+      ...(requestPath ? { requestPath } : {})
+    })
       .then((res: GRPCExecutionResult) => {
         // Convert backend result to GrpcResponse format
         const grpcResponse: GrpcResponse = {
@@ -197,6 +225,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
           timings: res.timings
         }
         setResponse(grpcResponse)
+        setHistoryRefreshKey(prev => prev + 1)
         logger.info('gRPC request completed', { method: res.requestMethod, status: res.statusCode })
       })
       .catch((err: unknown) => {
@@ -269,64 +298,95 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
   
   // Use backend-provided code snippets
   const codeSnippetsContent = backendCodeSnippets || t('requestTab.codeSnippets.loading', 'Loading code snippets...')
-  
-  // Infos content (detailed info panel)
-  const infosContent = response ? (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <span style={{ fontWeight: 600, minWidth: 100 }}>Status:</span>
-        <span style={{ color: response.statusCode === 0 ? 'var(--testing-iconPassed)' : 'var(--editorWarning-foreground)' }}>
-          {response.statusCode} ({response.statusCode === 0 ? 'OK' : 'Error'})
-        </span>
-      </div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <span style={{ fontWeight: 600, minWidth: 100 }}>Duration:</span>
-        <span>{response.timings.durationMs}ms</span>
-      </div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <span style={{ fontWeight: 600, minWidth: 100 }}>Service:</span>
-        <span>{request.service}</span>
-      </div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <span style={{ fontWeight: 600, minWidth: 100 }}>Method:</span>
-        <span>{request.method}</span>
-      </div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <span style={{ fontWeight: 600, minWidth: 100 }}>Call Type:</span>
-        <span>{request.callType}</span>
-      </div>
-      {response.error && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
-          <span style={{ fontWeight: 600, color: 'var(--testing-iconFailed)' }}>Error:</span>
-          <div style={{ padding: 4, background: 'var(--inputValidation-errorBackground)', borderRadius: 3 }}>
-            {response.error}
-          </div>
+
+  const buildGrpcResponseView = useCallback((
+    resp: GrpcResponse | null,
+    meta?: { service?: string; method?: string; callType?: string }
+  ) => {
+    const infosContent = resp ? (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <span style={{ fontWeight: 600, minWidth: 100 }}>Status:</span>
+          <span style={{ color: resp.statusCode === 0 ? 'var(--testing-iconPassed)' : 'var(--editorWarning-foreground)' }}>
+            {resp.statusCode} ({resp.statusCode === 0 ? 'OK' : 'Error'})
+          </span>
         </div>
-      )}
-    </div>
-  ) : null
-  
-  // Response content (raw JSON)
-  const responseContent = response?.responseMessage ? (
-    <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
-      <CodeEditor
-        height="100%"
-        language="json"
-        value={response.responseMessage}
-        options={{ readOnly: true, minimap: { enabled: false }, automaticLayout: true }}
-      />
-    </div>
-  ) : null
-  
-  // Parse response for JsonCrack
-  const jsonData = useMemo(() => {
-    if (!response?.responseMessage) return undefined
-    try {
-      return JSON.parse(response.responseMessage) as unknown
-    } catch {
-      return undefined
+        <div style={{ display: 'flex', gap: 8 }}>
+          <span style={{ fontWeight: 600, minWidth: 100 }}>Duration:</span>
+          <span>{resp.timings.durationMs}ms</span>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <span style={{ fontWeight: 600, minWidth: 100 }}>Service:</span>
+          <span>{meta?.service ?? '-'}</span>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <span style={{ fontWeight: 600, minWidth: 100 }}>Method:</span>
+          <span>{meta?.method ?? '-'}</span>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <span style={{ fontWeight: 600, minWidth: 100 }}>Call Type:</span>
+          <span>{meta?.callType ?? '-'}</span>
+        </div>
+        {resp.error && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
+            <span style={{ fontWeight: 600, color: 'var(--testing-iconFailed)' }}>Error:</span>
+            <div style={{ padding: 4, background: 'var(--inputValidation-errorBackground)', borderRadius: 3 }}>
+              {resp.error}
+            </div>
+          </div>
+        )}
+      </div>
+    ) : null
+
+    const responseContent = resp?.responseMessage ? (
+      <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
+        <CodeEditor
+          height="100%"
+          language="json"
+          value={resp.responseMessage}
+          options={{ readOnly: true, minimap: { enabled: false }, automaticLayout: true }}
+        />
+      </div>
+    ) : null
+
+    const jsonData = (() => {
+      if (!resp?.responseMessage) return undefined
+      try {
+        return JSON.parse(resp.responseMessage) as unknown
+      } catch {
+        return undefined
+      }
+    })()
+
+    return { infosContent, responseContent, jsonData }
+  }, [])
+
+  const { infosContent, responseContent, jsonData } = useMemo(
+    () => buildGrpcResponseView(response, { service: request.service, method: request.method, callType: request.callType }),
+    [buildGrpcResponseView, response, request.service, request.method, request.callType]
+  )
+
+  const buildHistoryView = useCallback((detail: ResponseHistoryDetail) => {
+    if (detail.response.type !== 'grpc') {
+      return { infosContent: undefined, responseContent: undefined, jsonData: undefined }
     }
-  }, [response?.responseMessage])
+    const historyResponse: GrpcResponse = {
+      id: detail.guid,
+      type: 'grpc',
+      requestId: request.id,
+      requestUrl: detail.response.requestUrl,
+      requestMethod: detail.response.requestMethod,
+      requestMessage: detail.response.requestMessage,
+      requestMetadata: toKeyValuesFromHistory(detail.response.requestMetadata),
+      statusCode: detail.response.statusCode,
+      statusMessage: detail.response.statusMessage,
+      responseMessage: detail.response.responseMessage,
+      responseMetadata: toKeyValuesFromHistory(detail.response.responseMetadata),
+      timings: detail.response.timings,
+      ...(detail.response.error ? { error: detail.response.error } : {})
+    }
+    return buildGrpcResponseView(historyResponse, detail.requestMeta)
+  }, [buildGrpcResponseView, request.id])
   
   // URL section
   const urlSection = (
@@ -359,21 +419,49 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({ request 
     </>
   )
   
+  const handleCloseHistoryModal = useCallback(() => {
+    onCloseHistoryModal?.()
+  }, [onCloseHistoryModal])
+
+  useEffect(() => {
+    if (!onHistoryAvailabilityChange) return
+    const state = { active: true }
+    void (async (): Promise<void> => {
+      const entries = await getResponseHistoryList(request.id, requestPath ?? undefined)
+      if (state.active) {
+        onHistoryAvailabilityChange(entries.length > 0)
+      }
+    })()
+    return () => {
+      state.active = false
+    }
+  }, [onHistoryAvailabilityChange, request.id, requestPath, historyRefreshKey])
+
   return (
-    <BaseRequestTabView
-      requestId={request.id}
-      urlSection={urlSection}
-      requestContent={requestContent}
-      codeSnippetsContent={codeSnippetsContent}
-      documentation={request.documentation}
-      notes={request.notes}
-      onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
-      isLoading={isSending}
-      showResponse={response !== null}
-      infosContent={infosContent}
-      responseContent={responseContent}
-      jsonData={jsonData}
-    />
+    <>
+      <BaseRequestTabView
+        requestId={request.id}
+        urlSection={urlSection}
+        requestContent={requestContent}
+        codeSnippetsContent={codeSnippetsContent}
+        documentation={request.documentation}
+        notes={request.notes}
+        onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
+        isLoading={isSending}
+        showResponse={response !== null}
+        infosContent={infosContent}
+        responseContent={responseContent}
+        jsonData={jsonData}
+      />
+      <ResponseHistoryModal
+        isOpen={historyModalOpen}
+        onClose={handleCloseHistoryModal}
+        requestId={request.id}
+        requestPath={requestPath ?? undefined}
+        refreshKey={historyRefreshKey}
+        buildResponseView={buildHistoryView}
+      />
+    </>
   )
 }
 

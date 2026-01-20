@@ -16,6 +16,7 @@
     "dev:gitable": "pnpm --filter gitable run dev",
     "dev:demo": "pnpm --filter demo run dev",
     "dev:restorm": "pnpm --filter restorm run dev",
+    "dev:restorm:log": "pnpm run dev:restorm > restorm-dev.log 2>&1",
     "build:core-ui": "pnpm --filter electron-core-ui run build",
     "build:gitable": "pnpm --filter gitable run build",
     "build:demo": "pnpm --filter demo run build",

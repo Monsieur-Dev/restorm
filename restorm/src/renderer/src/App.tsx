@@ -51,6 +51,7 @@ import { useImport } from './hooks/useImport'
 import { prepareForSerialization } from './utils/serialization'
 import { makeReactiveFolder } from './types/reactive'
 import { searchIndexService } from './services/SearchIndexService'
+import { useRestormStore } from './store/restormStore'
 import type {
   Folder,
   FolderItem,
@@ -68,6 +69,7 @@ import {
   isEnvironmentFolder,
   isAnyFolder
 } from './types/collections'
+import { buildRequestPath } from './utils/requestPath'
 import type {
   FolderTab,
   EnvironmentFolderTab,
@@ -78,6 +80,21 @@ import type {
   WebSocketRequestTab,
   BreadcrumbItem
 } from './types/editor'
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+function getResponsesHistoryApi(): { updatePath: (requestId: string, requestPath: string) => Promise<boolean> } | null {
+  const root = window as { restorm?: unknown }
+  const restorm = root.restorm
+  if (!isRecord(restorm)) return null
+  const responsesHistory = (restorm as { responsesHistory?: unknown }).responsesHistory
+  if (!isRecord(responsesHistory)) return null
+  const updatePath = (responsesHistory as { updatePath?: unknown }).updatePath
+  if (typeof updatePath !== 'function') return null
+  return { updatePath: updatePath as (requestId: string, requestPath: string) => Promise<boolean> }
+}
 
 const MIN_LEFT_WIDTH = 180
 const RIGHT_MIN_WIDTH = 240
@@ -92,6 +109,7 @@ const allFolderIds = initialRootItems.flatMap((folder) => collectAllFolderIds(fo
 
 const App: React.FC = () => {
   const { t } = useTranslation()
+  const setCollections = useRestormStore((state) => state.setCollections)
   const {
     state: fileState,
     fileName,
@@ -426,6 +444,12 @@ const App: React.FC = () => {
     })()
   }, [workbenchId, rootItems])
 
+  // Keep collections store in sync for request path resolution
+  useEffect(() => {
+    const collections = rootItems.filter(isEnvironmentFolder)
+    setCollections(collections, 'user')
+  }, [rootItems, setCollections])
+
   // Listen to test events for E2E tests (only in dev/test mode)
   // Expose handleFileOpened directly on window for E2E tests
   // This must be done outside useEffect to ensure it's available immediately
@@ -483,6 +507,35 @@ const App: React.FC = () => {
 
   // Commit checksums when file is saved (isDirty becomes false)
   const wasDirtyRef = useRef(isDirty)
+  const requestPathCacheRef = useRef(new Map<string, string>())
+
+  useEffect(() => {
+    if (!fileName) {
+      requestPathCacheRef.current.clear()
+      return
+    }
+    if (requestPathCacheRef.current.size > 0) return
+    const collections = rootItems.filter(isEnvironmentFolder)
+    const requestIds: string[] = []
+    const collectRequestIds = (items: FolderItem[]): void => {
+      for (const item of items) {
+        if (isAnyFolder(item)) {
+          collectRequestIds(item.items)
+        } else if (isRequest(item)) {
+          requestIds.push(item.id)
+        }
+      }
+    }
+    for (const collection of collections) {
+      collectRequestIds(collection.items)
+    }
+    for (const requestId of requestIds) {
+      const requestPath = buildRequestPath(collections, requestId)
+      if (requestPath) {
+        requestPathCacheRef.current.set(requestId, requestPath)
+      }
+    }
+  }, [fileName, rootItems])
   useEffect(() => {
     // Detect save: was dirty, now not dirty
     if (wasDirtyRef.current && !isDirty && fileName) {
@@ -507,6 +560,22 @@ const App: React.FC = () => {
     const handleFolderOrRequestUpdated = (payload: DocumentChangedPayload): void => {
       const newChecksum = computeChecksum(JSON.parse(JSON.stringify(payload.document)) as FolderItem)
       updateTabDirtyChecksum(payload.id, newChecksum)
+
+      if (payload.type === 'request') {
+        const collections = rootItems.filter(isEnvironmentFolder)
+        const requestPath = buildRequestPath(collections, payload.id)
+        if (requestPath) {
+          const cachedPath = requestPathCacheRef.current.get(payload.id)
+          if (cachedPath === requestPath) {
+            return
+          }
+          requestPathCacheRef.current.set(payload.id, requestPath)
+          const api = getResponsesHistoryApi()
+          if (api) {
+            void api.updatePath(payload.id, requestPath)
+          }
+        }
+      }
     }
 
     // For environments, we need to update the parent folder's dirty state

@@ -341,6 +341,12 @@ contextBridge.exposeInMainWorld('restorm', {
       }
     }
   },
+  graphqlApi: {
+    query: async (query: string, variables?: Record<string, unknown>): Promise<unknown> => {
+      const result: unknown = await ipcRenderer.invoke('graphql:query', { query, variables })
+      return result
+    }
+  },
   soap: {
     /** Execute a SOAP request */
     execute: async (input: { requestId: string; timeout?: number }): Promise<{
@@ -493,6 +499,24 @@ contextBridge.exposeInMainWorld('restorm', {
       return () => {
         ipcRenderer.removeListener('websocket:message', handler)
       }
+    }
+  },
+  responsesHistory: {
+    list: async (requestId: string): Promise<unknown> => {
+      const result: unknown = await ipcRenderer.invoke('responses:history:list', requestId)
+      return result
+    },
+    get: async (guid: string): Promise<unknown> => {
+      const result: unknown = await ipcRenderer.invoke('responses:history:get', guid)
+      return result
+    },
+    updatePath: async (requestId: string, requestPath: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('responses:history:update-path', requestId, requestPath)
+      return result as boolean
+    },
+    togglePin: async (guid: string, pinned: boolean): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('responses:history:toggle-pin', guid, pinned)
+      return result as boolean
     }
   },
   import: {

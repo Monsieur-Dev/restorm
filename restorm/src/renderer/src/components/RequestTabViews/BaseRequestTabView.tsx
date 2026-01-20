@@ -135,20 +135,21 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
   }, [responseTabId])
   
   // Build request tabs (Request, Docs, Notes, Code Snippets)
-  const requestTabs: Tab[] = useMemo(() => [
-    {
+  const requestTabs: Tab[] = useMemo(() => {
+    const tabs: Tab[] = [
+      {
       id: 'request',
       label: t('requestTab.tabs.requestLayout'),
       useScrollableElement: false,
       content: requestContent
-    },
-    {
+      },
+      {
       id: 'docs',
       label: t('requestTab.tabs.docs'),
       useScrollableElement: false,
       content: <MarkdownViewer value={documentation ?? ''} />
-    },
-    {
+      },
+      {
       id: 'notes',
       label: t('requestTab.tabs.notes'),
       useScrollableElement: false,
@@ -159,14 +160,17 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
           onChange={handleNotesChange}
         />
       )
-    },
-    {
+      },
+      {
       id: 'codeSnippets',
       label: t('requestTab.tabs.codeSnippets'),
       useScrollableElement: false,
       content: <MarkdownViewer value={codeSnippetsContent} />
-    }
-  ], [requestId, notes, requestContent, documentation, handleNotesChange, codeSnippetsContent, t])
+      }
+    ]
+
+    return tabs
+  }, [requestId, notes, requestContent, documentation, handleNotesChange, codeSnippetsContent, t])
 
   // Format JSON for display
   const formattedJson = useMemo(() => {
