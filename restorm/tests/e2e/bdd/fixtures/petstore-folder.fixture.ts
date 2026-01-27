@@ -17,13 +17,13 @@ export const test = base.extend<PetstoreFolderFixtures>({
     await use(join(restormRoot, 'tests/e2e/samples/Petstore'))
   },
 
-  electronApp: async ({ restormRoot, petstoreFolderPath }, use) => {
+  electronApp: async ({ restormRoot, petstoreFolderPath: _petstoreFolderPath }, use) => {
     const electronExePath = electronPath as unknown as string
     const mainJsPath = join(restormRoot, 'dist/main/index.js')
 
     const app = await electron.launch({
       executablePath: electronExePath,
-      args: ['--no-sandbox', mainJsPath, '-o', petstoreFolderPath],
+      args: ['--no-sandbox', mainJsPath],
       env: {
         ...process.env,
         NODE_ENV: 'development'
@@ -50,8 +50,8 @@ export const test = base.extend<PetstoreFolderFixtures>({
 
     await page.waitForLoadState('domcontentloaded')
     await page.waitForLoadState('load')
-    // Wait for list-view to be ready (replaces fixed timeout)
-    await page.waitForSelector('[data-testid="list-view"][data-ready="true"]', { timeout: 15000 })
+    // App can start without any file/folder opened: wait for menubar instead of list-view.
+    await page.waitForSelector('[role="menubar"]', { timeout: 15000 })
 
     await use(page)
   }
