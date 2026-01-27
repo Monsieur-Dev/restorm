@@ -13,6 +13,14 @@
       "types": "./dist/src/main/index.d.ts",
       "default": "./dist/src/main/index.js"
     },
+    "./testing": {
+      "types": "./dist/src/main/testing/index.d.ts",
+      "default": "./dist/src/main/testing/index.js"
+    },
+    "./testing/playwright-bdd": {
+      "types": "./dist/src/main/testing/playwright-bdd/index.d.ts",
+      "default": "./dist/src/main/testing/playwright-bdd/index.js"
+    },
     "./renderer": {
       "types": "./dist/src/renderer/index.d.ts",
       "default": "./dist/src/renderer/index.js"
