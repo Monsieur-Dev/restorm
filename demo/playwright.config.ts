@@ -10,6 +10,15 @@ const breadcrumbTestDir = defineBddConfig({
   outputDir: '.features-gen/breadcrumb'
 })
 
+const buttonTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/button/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/button/steps/**/*.ts',
+    'tests/e2e/bdd/button/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/button'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -52,6 +61,11 @@ export default defineConfig({
     {
       name: 'breadcrumb',
       testDir: breadcrumbTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'button',
+      testDir: buttonTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],

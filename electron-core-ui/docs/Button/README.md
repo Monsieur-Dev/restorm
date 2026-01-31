@@ -8,7 +8,7 @@ The Button component suite includes four main components:
 - **Button**: Basic button with icon and label support
 - **ButtonWithDescription**: Button with description text below
 - **ButtonWithDropdown**: Button with dropdown menu for additional actions
-- **ButtonWithIcon**: Button with icon and markdown label support
+- **ButtonWithIcon**: Button with icon and inline codicon label support
 
 ## Installation
 
@@ -32,28 +32,25 @@ Basic button component with full theme styling and behavior.
 
 ```typescript
 interface ButtonProps {
-  options: IButtonOptions;
-  label?: string;
-  icon?: string;
-  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  className?: string;
-  id?: string;
+  options?: IButtonOptions
+  icon?: string
+  disabled?: boolean
+  secondary?: boolean
+  small?: boolean
+  onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void
+  className?: string
+  id?: string
+  'data-testid'?: string
+  children?: React.ReactNode
 }
 ```
 
 #### Usage
 
 ```typescript
-<Button
-  options={{
-    secondary: false,
-    disabled: false,
-    supportIcons: true
-  }}
-  label="Save"
-  icon="save"
-  onClick={() => console.log('Saved!')}
-/>
+<Button icon="save" data-testid="save-button" onClick={() => doSave()}>
+  Save
+</Button>
 ```
 
 ### ButtonWithDescription
@@ -64,13 +61,14 @@ Button with description text displayed below the main button.
 
 ```typescript
 interface ButtonWithDescriptionProps {
-  options: IButtonOptions;
-  label: string;
-  description: string;
-  icon?: string;
-  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  className?: string;
-  id?: string;
+  options?: IButtonOptions
+  description: string
+  icon?: string
+  onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void
+  className?: string
+  id?: string
+  'data-testid'?: string
+  children?: React.ReactNode
 }
 ```
 
@@ -78,15 +76,13 @@ interface ButtonWithDescriptionProps {
 
 ```typescript
 <ButtonWithDescription
-  options={{
-    secondary: false,
-    disabled: false
-  }}
-  label="Deploy"
   description="Deploy to production environment"
   icon="rocket"
-  onClick={() => console.log('Deploying...')}
-/>
+  data-testid="deploy-button"
+  onClick={() => deploy()}
+>
+  Deploy
+</ButtonWithDescription>
 ```
 
 ### ButtonWithDropdown
@@ -97,12 +93,13 @@ Button with dropdown menu for additional actions.
 
 ```typescript
 interface ButtonWithDropdownProps {
-  options: IButtonWithDropdownOptions;
-  label: string;
-  icon?: string;
-  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  className?: string;
-  id?: string;
+  options: IButtonWithDropdownOptions
+  label: string
+  icon?: string
+  onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void
+  className?: string
+  id?: string
+  'data-testid'?: string
 }
 ```
 
@@ -111,33 +108,34 @@ interface ButtonWithDropdownProps {
 ```typescript
 <ButtonWithDropdown
   options={{
-    secondary: false,
     disabled: false,
     actions: [
-      { label: 'Save', onClick: () => console.log('Save') },
-      { label: 'Save As...', onClick: () => console.log('Save As') },
-      { label: 'Export', onClick: () => console.log('Export') }
+      { label: 'Save', onClick: () => save() },
+      { label: 'Save As...', onClick: () => saveAs() },
+      { label: 'Export', onClick: () => exportFile() }
     ]
   }}
   label="File"
-  onClick={() => console.log('Primary action')}
+  data-testid="file-dropdown"
+  onClick={() => save()}
 />
 ```
 
 ### ButtonWithIcon
 
-Button with icon and markdown label support.
+Button helper that renders an inline codicon prefix: `$(${icon}) ${label}`.
 
 #### Props
 
 ```typescript
 interface ButtonWithIconProps {
-  options: IButtonOptions;
-  icon: string;
-  label: string;
-  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  className?: string;
-  id?: string;
+  options: IButtonOptions
+  icon: string
+  label: string
+  onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void
+  className?: string
+  id?: string
+  'data-testid'?: string
 }
 ```
 
@@ -145,13 +143,11 @@ interface ButtonWithIconProps {
 
 ```typescript
 <ButtonWithIcon
-  options={{
-    secondary: false,
-    disabled: false
-  }}
+  options={{ disabled: false }}
   icon="play"
-  label="$(play) Start Process"
-  onClick={() => console.log('Starting...')}
+  label="Start Process"
+  data-testid="start-button"
+  onClick={() => start()}
 />
 ```
 
@@ -223,10 +219,10 @@ Icons are supported via Codicons. Use the `icon` prop or include icons in labels
 
 ```typescript
 // Via icon prop
-<Button icon="save" label="Save" />
+<Button icon="save">Save</Button>
 
-// Via label with icon syntax
-<Button label="$(save) Save File" />
+// Via children with icon syntax
+<Button>$(save) Save File</Button>
 ```
 
 ### Keyboard Navigation
@@ -248,26 +244,30 @@ Icons are supported via Codicons. Use the `icon` prop or include icons in labels
 
 ```typescript
 <Button
-  options={{ disabled: false }}
-  label="Click Me"
-  onClick={() => alert('Clicked!')}
-/>
+  data-testid="click-me"
+  onClick={() => doSomething()}
+>
+  Click Me
+</Button>
 ```
 
 ### Secondary Button
 
 ```typescript
 <Button
-  options={{ secondary: true }}
-  label="Cancel"
-  onClick={() => console.log('Cancelled')}
-/>
+  secondary
+  data-testid="cancel-button"
+  onClick={() => cancel()}
+>
+  Cancel
+</Button>
 ```
 
 ### Button with Dropdown
 
 ```typescript
 <ButtonWithDropdown
+  data-testid="new-dropdown"
   options={{
     actions: [
       { label: 'New File', onClick: () => createFile() },
@@ -285,13 +285,55 @@ Icons are supported via Codicons. Use the `icon` prop or include icons in labels
 
 ```typescript
 <ButtonWithDescription
-  options={{ secondary: false }}
-  label="Deploy"
+  data-testid="deploy"
   description="Deploy current changes to production"
   icon="rocket"
   onClick={() => deploy()}
-/>
+>
+  Deploy
+</ButtonWithDescription>
 ```
+
+## Testing
+
+### Recommended stable hooks
+
+Buttons are rendered as `<a role="button">`.
+
+- Disabled state uses `aria-disabled="true"` and `tabIndex={-1}`.
+- The base `Button` supports `'data-testid'`.
+- `ButtonWithDescription`, `ButtonWithIcon`, and `ButtonWithDropdown` also support `'data-testid'`.
+
+For `ButtonWithDropdown`, the following sub-elements are tagged when `data-testid` is provided:
+
+- Primary action: `${testId}-primary`
+- Toggle button: `${testId}-toggle`
+- Menu: `${testId}-menu`
+- Actions: `${testId}-action-0`, `${testId}-action-1`, ...
+
+### E2E helpers
+
+`electron-core-ui/testing` exports selector helpers:
+
+- `buttonTestIdSelector(testId)`
+- `buttonAnchorSelector(testId)`
+- `buttonDropdownPrimarySelector(testId)`
+- `buttonDropdownToggleSelector(testId)`
+- `buttonDropdownMenuSelector(testId)`
+- `buttonDropdownActionByIndexSelector(testId, index)`
+
+### Playwright-BDD steps
+
+`electron-core-ui/testing/playwright-bdd` exports `defineButtonBddSteps(bdd)`.
+It registers generic steps such as:
+
+- `When I click button {string}`
+- `When I press {string} on button {string}`
+- `Then button {string} should be disabled`
+- `Then button {string} should contain codicon {string}`
+- `When I open dropdown {string}`
+- `When I click dropdown {string} action index {int}`
+- `Then dropdown {string} should be closed`
 
 ## Best Practices
 

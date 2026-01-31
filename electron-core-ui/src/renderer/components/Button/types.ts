@@ -48,6 +48,7 @@ export interface ButtonWithDescriptionProps {
   onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
   className?: string;
   id?: string;
+  'data-testid'?: string;
   children?: React.ReactNode;
 }
 
@@ -58,6 +59,7 @@ export interface ButtonWithDropdownProps {
   onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
   className?: string;
   id?: string;
+  'data-testid'?: string;
 }
 
 export interface ButtonWithIconProps {
@@ -67,6 +69,7 @@ export interface ButtonWithIconProps {
   onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
   className?: string;
   id?: string;
+  'data-testid'?: string;
 }
 
 // Default styles for buttons

@@ -8,7 +8,8 @@ const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
   icon,
   onClick,
   className = '',
-  id
+  id,
+  'data-testid': dataTestId
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -80,8 +81,12 @@ const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
   }
 
   return (
-    <div className="button-container" id={id}>
-      <div ref={containerRef} className={containerClasses}>
+    <div className="button-container" id={id} data-testid={dataTestId}>
+      <div
+        ref={containerRef}
+        className={containerClasses}
+        {...(dataTestId && { 'data-testid': `${dataTestId}-container` })}
+      >
         {/* Primary Button */}
         <a
           className="button text-button"
@@ -100,6 +105,7 @@ const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
             color: 'var(--button-foreground)',
             backgroundColor: 'var(--button-background)'
           }}
+          {...(dataTestId && { 'data-testid': `${dataTestId}-primary` })}
         >
           {icon && <span className={`codicon codicon-${icon}`} />}
           <span>{label}</span>
@@ -120,6 +126,7 @@ const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
           icon="chevron-down"
           onClick={handleDropdownClick}
           className="dropdown-button"
+          {...(dataTestId && { 'data-testid': `${dataTestId}-toggle` })}
         />
         
         {/* Dropdown Menu */}
@@ -127,6 +134,7 @@ const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
           <div
             ref={dropdownRef}
             className="button-dropdown-menu"
+            {...(dataTestId && { 'data-testid': `${dataTestId}-menu` })}
           >
             {options.actions.map((action, index) => (
               <a
@@ -135,6 +143,7 @@ const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
                 role="button"
                 tabIndex={0}
                 onClick={() => { handleActionClick(action); }}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-action-${String(index)}` })}
               >
                 {action.label}
               </a>
