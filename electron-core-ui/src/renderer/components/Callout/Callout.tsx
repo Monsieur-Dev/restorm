@@ -8,6 +8,8 @@ export interface CalloutProps {
   variant: CalloutVariant
   /** The message to display */
   message: string
+  /** Optional test id for stable E2E selectors */
+  'data-testid'?: string
   /** Optional custom icon (codicon name without 'codicon-' prefix). Defaults based on variant. */
   icon?: string
   /** Optional className for additional styling */
@@ -28,13 +30,19 @@ const defaultIcons: Record<CalloutVariant, string> = {
 export const Callout: React.FC<CalloutProps> = ({
   variant,
   message,
+  'data-testid': dataTestId,
   icon,
   className
 }) => {
   const iconName = icon ?? defaultIcons[variant]
 
   return (
-    <div className={`ecu-callout ecu-callout-${variant} ${className ?? ''}`}>
+    <div
+      className={`ecu-callout ecu-callout-${variant} ${className ?? ''}`}
+      data-variant={variant}
+      data-icon={iconName}
+      {...(dataTestId && { 'data-testid': dataTestId })}
+    >
       <i className={`codicon codicon-${iconName}`} />
       <span className="ecu-callout-message">{message}</span>
     </div>

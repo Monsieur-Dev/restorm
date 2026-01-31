@@ -51,5 +51,19 @@
     "documentation": "Documentation",
     "reportIssue": "Signaler un problème",
     "keyboardShortcuts": "Raccourcis clavier"
+  },
+  "callout": {
+    "tabLabel": "Callout",
+    "harness": {
+      "title": "Callout",
+      "message": {
+        "info": "Message d'information",
+        "warning": "Message d'avertissement",
+        "error": "Message d'erreur",
+        "debug": "Message de debug",
+        "customIcon": "Surcharge d'icône custom",
+        "extraClass": "className additionnelle appliquée"
+      }
+    }
   }
 }

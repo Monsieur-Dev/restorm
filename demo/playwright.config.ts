@@ -19,6 +19,15 @@ const buttonTestDir = defineBddConfig({
   outputDir: '.features-gen/button'
 })
 
+const calloutTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/callout/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/callout/steps/**/*.ts',
+    'tests/e2e/bdd/callout/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/callout'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -66,6 +75,11 @@ export default defineConfig({
     {
       name: 'button',
       testDir: buttonTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'callout',
+      testDir: calloutTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],

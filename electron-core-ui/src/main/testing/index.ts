@@ -42,3 +42,9 @@ export {
   buttonDropdownMenuSelector,
   buttonDropdownActionByIndexSelector
 } from './buttonSelectors'
+
+export {
+  calloutTestIdSelector,
+  calloutMessageSelector,
+  calloutIconSelector
+} from './calloutSelectors'
