@@ -4,6 +4,8 @@ import './custom-wco.css'
 export interface CustomWCOProps {
   className?: string
   platform?: string
+  /** Optional test id applied to the root element. */
+  'data-testid'?: string
 }
 
 // Extend Navigator type for windowControlsOverlay API
@@ -18,7 +20,8 @@ interface NavigatorWithWCO extends Navigator {
 
 const CustomWCO: React.FC<CustomWCOProps> = ({ 
   className = '', 
-  platform 
+  platform,
+  'data-testid': dataTestId
 }) => {
   // Track async platform detection separately
   const [asyncPlatform, setAsyncPlatform] = useState<string>('')
@@ -96,7 +99,8 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
           width: wcoWidth, 
           height: '100%',
           flexShrink: 0
-        }} 
+        }}
+        {...(dataTestId && { 'data-testid': dataTestId })}
       />
     )
   }
@@ -107,12 +111,13 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
   }
 
   return (
-    <div className={`custom-wco ${className}`}>
+    <div className={`custom-wco ${className}`} {...(dataTestId && { 'data-testid': dataTestId })}>
       <div className="window-controls-container">
         <div 
           className="window-button minimize" 
           onClick={handleMinimize}
           title="Minimize"
+          {...(dataTestId && { 'data-testid': `${dataTestId}-minimize` })}
         >
           <span className="codicon codicon-chrome-minimize"></span>
         </div>
@@ -120,6 +125,7 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
           className="window-button maximize" 
           onClick={handleMaximize}
           title={isMaximized ? "Restore" : "Maximize"}
+          {...(dataTestId && { 'data-testid': `${dataTestId}-maximize` })}
         >
           <span className={`codicon ${isMaximized ? 'codicon-chrome-restore' : 'codicon-chrome-maximize'}`}></span>
         </div>
@@ -127,6 +133,7 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
           className="window-button close" 
           onClick={handleClose}
           title="Close"
+          {...(dataTestId && { 'data-testid': `${dataTestId}-close` })}
         >
           <span className="codicon codicon-chrome-close"></span>
         </div>

@@ -46,6 +46,15 @@ const contextMenuTestDir = defineBddConfig({
   outputDir: '.features-gen/contextmenu'
 })
 
+const customWcoTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/customwco/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/customwco/steps/**/*.ts',
+    'tests/e2e/bdd/customwco/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/customwco'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -108,6 +117,11 @@ export default defineConfig({
     {
       name: 'contextmenu',
       testDir: contextMenuTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'customwco',
+      testDir: customWcoTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],
