@@ -69,3 +69,12 @@ export {
   contextMenuOpenSubmenuContainerSelector,
   contextMenuOpenSubmenuItemByLabelSelector
 } from './contextMenuSelectors'
+
+export {
+  customWcoRootSelector,
+  customWcoSpacerSelector,
+  customWcoMinimizeSelector,
+  customWcoMaximizeSelector,
+  customWcoCloseSelector,
+  customWcoMaximizeIconSelector
+} from './customWcoSelectors'

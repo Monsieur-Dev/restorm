@@ -13,6 +13,7 @@ It listens to `window.electronAPI` events to adapt to platform and window state.
 export interface CustomWCOProps {
   className?: string
   platform?: string
+  'data-testid'?: string
 }
 ```
 
@@ -21,10 +22,13 @@ export interface CustomWCOProps {
 - **className** (`string`, optional): Extra CSS classes applied to the root container.
 - **platform** (`string`, optional): Platform override (`'linux'`, `'darwin'`, `'win32'`, etc.).  
   When omitted, the component uses `window.electronAPI.onPlatform` to detect the platform.
+- **data-testid** (`string`, optional): Stable E2E hook applied to the root element (Linux root or win32/darwin spacer).
 
 ## Behavior
 
-- Only renders controls when the **current platform is `linux`**; returns `null` otherwise.
+- When the **current platform is `linux`**, renders custom window buttons (minimize / maximize-or-restore / close).
+- When the **current platform is `win32` or `darwin`**, renders a spacer (`custom-wco-spacer`) to reserve space for native window controls.
+- On other platforms, returns `null`.
 - Subscribes to:
   - `window.electronAPI.onPlatform((platform: string) => …)` to discover platform.
   - `window.electronAPI.onWindowState((state: string) => …)` to track maximized / restored state.
@@ -52,6 +56,41 @@ const AppShell: React.FC = ({ children }) => {
 
 ## Notes for AI Usage
 
-- Do not use `CustomWCO` on macOS or Windows unless you explicitly want to **replace** native window buttons; by default it hides itself on non-Linux platforms.
+- Do not use `CustomWCO` on macOS or Windows unless you explicitly want to manage reserved space; on `win32/darwin` it renders a spacer.
 - When integrating with a custom preload, ensure that `window.electronAPI.onPlatform`, `onWindowState` and `sendAction` are exposed with the same signatures as in the demo project.
 - Keep all user-facing strings (tooltips like `"Minimize"`, `"Restore"`, `"Close"`) consistent and, if needed, route them through the host app’s i18n system instead of inlining translations in this component.
+
+## Testing
+
+### Recommended stable hooks
+
+If you pass a `data-testid` to the component:
+
+- Linux root: `[data-testid="..."]` (element has `.custom-wco`)
+- Spacer (win32/darwin): `[data-testid="..."]` (element has `.custom-wco-spacer`)
+
+On Linux, button sub-elements are tagged when `data-testid` is provided:
+
+- Minimize: `${testId}-minimize`
+- Maximize/Restore: `${testId}-maximize`
+- Close: `${testId}-close`
+
+### E2E helpers
+
+`electron-core-ui/testing` exports selector helpers:
+
+- `customWcoRootSelector(testId)`
+- `customWcoSpacerSelector(testId)`
+- `customWcoMinimizeSelector(testId)`
+- `customWcoMaximizeSelector(testId)`
+- `customWcoCloseSelector(testId)`
+- `customWcoMaximizeIconSelector(testId, 'chrome-maximize' | 'chrome-restore')`
+
+### Playwright-BDD steps
+
+`electron-core-ui/testing/playwright-bdd` exports `defineCustomWcoBddSteps(bdd)`.
+It registers generic steps such as:
+
+- `Then custom wco {string} should be visible`
+- `Then custom wco {string} maximize icon should be {string}`
+- `When I click custom wco {string} close`

@@ -88,5 +88,18 @@
         "subDisabled": "Sub Disabled"
       }
     }
+  },
+  "customWco": {
+    "tabLabel": "CustomWCO",
+    "harness": {
+      "title": "CustomWCO",
+      "setMaximized": "Set maximized",
+      "setRestored": "Set restored",
+      "instances": "Instances",
+      "linux": "Linux (buttons)",
+      "win32": "Windows (spacer)",
+      "darwin": "macOS (spacer)",
+      "other": "Other (null)"
+    }
   }
 }
