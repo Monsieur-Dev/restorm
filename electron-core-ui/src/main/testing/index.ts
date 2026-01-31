@@ -26,3 +26,10 @@ export {
   getSystemModalsMockSnapshotForE2E
 } from './systemModalsMockClient'
 export type { ElectronAppLike } from './systemModalsMockClient'
+
+export {
+  breadcrumbRootSelector,
+  breadcrumbLastLabelSelector,
+  breadcrumbEditInputSelector,
+  breadcrumbNonLastItemsSelector
+} from './breadcrumbSelectors'
