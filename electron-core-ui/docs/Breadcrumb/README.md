@@ -29,13 +29,15 @@ export interface BreadcrumbItem {
 export interface BreadcrumbProps {
   /** Ordered list of breadcrumb items to display. */
   items: BreadcrumbItem[]
+  /** Optional test id applied to the root element. */
+  'data-testid'?: string
   /** Called when an item is clicked (including the last item when shown as a label). */
   onItemClick?: (item: BreadcrumbItem, index: number, event: React.MouseEvent<HTMLButtonElement>) => void
   /**
    * Called when the editable last item loses focus or is submitted (Enter key).
-   * Receives the new value and the index of the last item.
+   * Receives the item, the new value, and the index.
    */
-  onLastItemChange?: (value: string, index: number) => void
+  onLastItemChange?: (item: BreadcrumbItem, newValue: string, index: number) => void
   className?: string
   style?: React.CSSProperties
   ariaLabel?: string
@@ -60,7 +62,7 @@ const Example: React.FC = () => {
     // Perform navigation here
   }
 
-  const handleLastItemChange = (value: string, index: number): void => {
+  const handleLastItemChange = (_item: BreadcrumbItem, value: string, index: number): void => {
     setItems((prev) => {
       if (index < 0 || index >= prev.length) return prev
       const next = [...prev]
@@ -72,12 +74,51 @@ const Example: React.FC = () => {
   return (
     <Breadcrumb
       items={items}
+      data-testid="breadcrumb-main"
       onItemClick={handleItemClick}
       onLastItemChange={handleLastItemChange}
     />
   )
 }
 ```
+
+## Testing
+
+### Recommended stable selectors
+
+If you pass a `data-testid` to the component, you can target the whole breadcrumb with:
+
+- Root: `[data-testid="..."]`
+
+The component also exposes stable internal hooks for tests:
+
+- Last item label (view mode): `button[aria-current="page"]`
+- Edit input (edit mode): `input.ecui-breadcrumb-input`
+- Non-last items (navigation): `li.ecui-breadcrumb-item:not(.ecui-breadcrumb-item--last) button.ecui-breadcrumb-link`
+
+### E2E helpers
+
+The testing module exports pure selectors you can reuse in Playwright tests:
+
+- `breadcrumbRootSelector(testId)`
+- `breadcrumbNonLastItemsSelector(testId)`
+- `breadcrumbLastLabelSelector(testId)`
+- `breadcrumbEditInputSelector(testId)`
+
+They are available from `electron-core-ui/testing`.
+
+### Playwright-BDD steps
+
+If you use Playwright-BDD, you can register a reusable step pack from `electron-core-ui/testing/playwright-bdd`:
+
+- `defineBreadcrumbBddSteps(bdd)`
+
+This provides generic steps such as:
+
+- `When I click breadcrumb {string} item index {int}`
+- `When I start editing breadcrumb {string} last item`
+- `When I set breadcrumb {string} last item to {string}`
+- `Then the last breadcrumb label in {string} should be {string}`
 
 ## Styling
 

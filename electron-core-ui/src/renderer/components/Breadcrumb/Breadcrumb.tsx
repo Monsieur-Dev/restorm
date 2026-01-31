@@ -17,6 +17,11 @@ export interface BreadcrumbProps {
    */
   items: BreadcrumbItem[]
   /**
+   * Optional test id to put on the root element.
+   * Use this to target the whole breadcrumb in E2E tests.
+   */
+  'data-testid'?: string
+  /**
    * Called when a non-editing item is clicked (including the last item when shown as a label).
    */
   onItemClick?: (item: BreadcrumbItem, index: number, event: React.MouseEvent<HTMLButtonElement>) => void
@@ -47,6 +52,7 @@ function renderIcon(icon: Icon | null | undefined): React.ReactNode {
 
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   items,
+  'data-testid': dataTestId,
   onItemClick,
   onLastItemChange,
   showRoot: _showRoot = false,
@@ -61,6 +67,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   const [committedValue, setCommittedValue] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const shouldSelectOnMount = useRef(false)
+  const ignoreNextBlurCommit = useRef(false)
 
   // Derive the displayed value for the last item:
   // Show committedValue only if it differs from the current item.label
@@ -109,6 +116,8 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
     (event: React.KeyboardEvent<HTMLInputElement>, index: number): void => {
       if (event.key === 'Enter') {
         event.preventDefault()
+        // Avoid committing twice (keydown + blur).
+        ignoreNextBlurCommit.current = true
         handleCommitLast(index)
         // Blur to revert to label mode
         if (inputRef.current) {
@@ -116,6 +125,8 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
         }
       } else if (event.key === 'Escape') {
         event.preventDefault()
+        // Avoid committing on blur when cancelling.
+        ignoreNextBlurCommit.current = true
         handleCancelEditingLast()
         if (inputRef.current) {
           inputRef.current.blur()
@@ -133,7 +144,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   const rootClasses = ['ecui-breadcrumb', className].filter(Boolean).join(' ')
 
   return (
-    <nav className={rootClasses} style={style} aria-label={ariaLabel ?? 'Breadcrumb'}>
+    <nav className={rootClasses} style={style} aria-label={ariaLabel ?? 'Breadcrumb'} data-testid={dataTestId}>
       <ol className="ecui-breadcrumb-list">
         {items.map((item, index) => {
           const isLast = index === items.length - 1
@@ -172,6 +183,10 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
                     setEditingValue(event.target.value)
                   }}
                   onBlur={(): void => {
+                    if (ignoreNextBlurCommit.current) {
+                      ignoreNextBlurCommit.current = false
+                      return
+                    }
                     handleCommitLast(index)
                   }}
                   onKeyDown={(event): void => {
