@@ -82,6 +82,15 @@ const variableInputBoxTestDir = defineBddConfig({
   outputDir: '.features-gen/variableinputbox'
 })
 
+const keyValueTableTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/keyvaluetable/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/keyvaluetable/steps/**/*.ts',
+    'tests/e2e/bdd/keyvaluetable/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/keyvaluetable'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -164,6 +173,11 @@ export default defineConfig({
     {
       name: 'variableinputbox',
       testDir: variableInputBoxTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'keyvaluetable',
+      testDir: keyValueTableTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],

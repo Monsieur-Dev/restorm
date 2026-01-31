@@ -168,5 +168,17 @@
       "customMenuAriaLabel": "Variable input (custom menu)",
       "customActionLabel": "Custom action"
     }
+  },
+  "keyValueTable": {
+    "tabLabel": "KeyValueTable",
+    "harness": {
+      "title": "KeyValueTable",
+      "ready": "ready",
+      "addRow": "Add row",
+      "lastRows": "last rows",
+      "rowOrder": "row order",
+      "basic": "Basic",
+      "empty": "Empty"
+    }
   }
 }

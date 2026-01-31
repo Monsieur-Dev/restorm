@@ -15,7 +15,7 @@ A generic Electron + React foundation library with UI components and services.
   - `CustomDropdown`: Styled dropdown component
   - `Tabs` (formerly `CustomTabs`): Styled tabs component
   - `ListView` & `ListViewDropdown`: hierarchical lists and dropdown tree selector
-  - `InputTable` & `KeyValueTable`: editable tables for parameter/key-value style data
+  - `KeyValueTable`: editable table for key/value style data
   - `useTheme`: React hook for theme management
   - `logger`: Renderer logger that communicates with main process
 
