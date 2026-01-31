@@ -1,4 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
+import { defineBddConfig } from 'playwright-bdd'
+
+const breadcrumbTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/breadcrumb/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/breadcrumb/steps/**/*.ts',
+    'tests/e2e/bdd/breadcrumb/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/breadcrumb'
+})
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -39,6 +49,11 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
+    {
+      name: 'breadcrumb',
+      testDir: breadcrumbTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    }
   ],
 
   /* Run your local dev server before starting the tests */

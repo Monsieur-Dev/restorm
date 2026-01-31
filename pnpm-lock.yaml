@@ -109,6 +109,9 @@ importers:
       playwright:
         specifier: ^1.56.0
         version: 1.57.0
+      playwright-bdd:
+        specifier: ^8.4.2
+        version: 8.4.2(@playwright/test@1.57.0)
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
