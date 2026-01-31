@@ -113,3 +113,5 @@ export {
   keyValueTableRowDeleteSelector,
   keyValueTableRowDragHandleSelector
 } from './keyValueTableSelectors'
+
+export { tooltipRootSelector, tooltipContentSelector } from './tooltipSelectors'
