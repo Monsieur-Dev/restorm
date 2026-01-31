@@ -30,13 +30,19 @@ export interface IInputOptions {
 
 export interface InputBoxProps {
   options: IInputOptions
+  'data-testid'?: string
   value?: string
   onChange?: (value: string) => void
-  onBlur?: () => void
+  changeDebounceMs?: number
+  onBlur?: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void
   onFocus?: () => void
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void
   disabled?: boolean
   className?: string
   id?: string
+  style?: React.CSSProperties
+  inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>
+  password?: boolean
 }
 ```
 
@@ -102,3 +108,34 @@ const ValidatedNumber: React.FC = () => {
 - Keep validation logic in small, pure `IInputValidator` functions; avoid inlining complex conditions in JSX so that agents can reuse, replace or test them independently.
 - Use `ariaLabel` and `id` consistently so that form fields can be referenced by name in higher-level reasoning (e.g. "set the project name input to…" maps to a specific `InputBox`).
 - Prefer simple `type` values (`'text'`, `'number'`) and avoid mixing multiple concerns (e.g. format + validation + parsing) inside a single `onChange` handler; instead, chain small helpers.
+
+## Testing
+
+### Recommended stable hooks
+
+If you pass `data-testid`:
+
+- Root metadata node: `[data-testid="{id}"]` (hidden, used for stable state attributes)
+- Container: `[data-testid="{id}-container"]`
+- Input element (input/textarea): `[data-testid="{id}-input"]`
+- Message container (when visible): `[data-testid="{id}-message"]` with `data-message-type`
+- Mirror (multiline): `[data-testid="{id}-mirror"]`
+
+### E2E helpers
+
+`electron-core-ui/testing` exports selector helpers:
+
+- `inputBoxRootSelector(testId)`
+- `inputBoxContainerSelector(testId)`
+- `inputBoxInputSelector(testId)`
+- `inputBoxMessageSelector(testId)`
+- `inputBoxMirrorSelector(testId)`
+
+### Playwright-BDD steps
+
+`electron-core-ui/testing/playwright-bdd` exports `defineInputBoxBddSteps(bdd)`.
+It registers generic steps such as:
+
+- `When I set input box {string} value to {string}`
+- `Then input box {string} value should be {string}`
+- `Then input box {string} message should be {string}`

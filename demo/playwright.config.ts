@@ -64,6 +64,15 @@ const codeEditorTestDir = defineBddConfig({
   outputDir: '.features-gen/codeeditor'
 })
 
+const inputBoxTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/inputbox/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/inputbox/steps/**/*.ts',
+    'tests/e2e/bdd/inputbox/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/inputbox'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -136,6 +145,11 @@ export default defineConfig({
     {
       name: 'codeeditor',
       testDir: codeEditorTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'inputbox',
+      testDir: inputBoxTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],

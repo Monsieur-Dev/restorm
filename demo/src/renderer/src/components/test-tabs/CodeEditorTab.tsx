@@ -12,7 +12,7 @@ function getDocumentTheme(): 'dark' | 'light' {
   return value === 'light' ? 'light' : 'dark'
 }
 
-const INITIAL_TEXT = 'Hello {{petId}}'
+const INITIAL_TEXT = 'Hello {{foo}}'
 
 const CodeEditorTab: React.FC = () => {
   const { t } = useTranslation()
@@ -39,8 +39,8 @@ const CodeEditorTab: React.FC = () => {
     if (!editor) return
 
     editor.focus()
-    // Put cursor inside the variable name: "petId"
-    editor.setPosition({ lineNumber: 1, column: 11 })
+    // Put cursor inside the variable name: "foo"
+    editor.setPosition({ lineNumber: 1, column: 10 })
   }, [])
 
   const handleApplyValue = useCallback((target: 'basic' | 'no-debounce'): void => {

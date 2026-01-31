@@ -108,7 +108,7 @@
     "harness": {
       "title": "CodeEditor",
       "toggleTheme": "Basculer le thème du document",
-      "placeCursorOnVariable": "Placer le curseur sur {{petId}}",
+      "placeCursorOnVariable": "Placer le curseur sur {{foo}}",
       "runGoToDefinition": "Exécuter aller à la définition",
       "applyValueBasic": "Appliquer la valeur (basique)",
       "applyValueNoDebounce": "Appliquer la valeur (sans debounce)",
@@ -121,6 +121,29 @@
       "basic": "Basique (debounced)",
       "noDebounce": "Sans debounce (changeDebounceMs=0)",
       "themeForced": "Thème forcé (theme=\"vs\")"
+    }
+  },
+  "inputBox": {
+    "tabLabel": "InputBox",
+    "harness": {
+      "title": "InputBox",
+      "ready": "prêt",
+      "applyValueBasic": "Appliquer la valeur (basique)",
+      "applyValueDisabled": "Tenter d’appliquer la valeur (désactivé)",
+      "lastChange": "dernière valeur",
+      "focusCount": "compteur de focus",
+      "blurCount": "compteur de blur",
+      "lastValidation": "dernière validation",
+      "instances": "Instances",
+      "basic": "Basique",
+      "disabled": "Désactivé",
+      "placeholderOnFocus": "Placeholder au focus",
+      "validationError": "Validation erreur",
+      "validationWarning": "Validation warning",
+      "validationInfo": "Validation info",
+      "multiline": "Multi-ligne",
+      "password": "Mot de passe",
+      "debounced": "Debounced"
     }
   }
 }

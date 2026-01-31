@@ -5,6 +5,7 @@ import type { IMessage, InputBoxProps } from './types'
 
 const InputBox: React.FC<InputBoxProps> = ({
   options,
+  'data-testid': dataTestId,
   value = '',
   onChange,
   changeDebounceMs = 0,
@@ -77,6 +78,13 @@ const InputBox: React.FC<InputBoxProps> = ({
       default: return 'error'
     }
   }
+
+  const dataMessageType = useMemo((): string | undefined => {
+    if (!message) return undefined
+    if (message.type === MessageType.INFO) return 'info'
+    if (message.type === MessageType.WARNING) return 'warning'
+    return 'error'
+  }, [message])
 
   const validate = useCallback((val: string): IMessage | null => {
     if (!options.validationOptions?.validation) {
@@ -261,6 +269,7 @@ const InputBox: React.FC<InputBoxProps> = ({
         ref={containerRef}
         className={getContainerClasses()}
         style={getContainerStyles()}
+        {...(dataTestId && { 'data-testid': `${dataTestId}-container` })}
       >
         <div className="ibwrapper">
           {options.flexibleHeight ? (
@@ -268,12 +277,18 @@ const InputBox: React.FC<InputBoxProps> = ({
               <textarea
                 ref={inputRef as React.RefObject<HTMLTextAreaElement>}
                 {...baseProps}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-input` })}
                 rows={1}
                 wrap="off"
                 style={getTextareaStyles()}
               />
               {
-                <div ref={mirrorRef} className="mirror" aria-hidden="true">
+                <div
+                  ref={mirrorRef}
+                  className="mirror"
+                  aria-hidden="true"
+                  {...(dataTestId && { 'data-testid': `${dataTestId}-mirror` })}
+                >
                   {value || '\u00a0'}
                 </div>
               }
@@ -282,13 +297,21 @@ const InputBox: React.FC<InputBoxProps> = ({
             <input
               ref={inputRef as React.RefObject<HTMLInputElement>}
               {...baseProps}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-input` })}
               type={password ? 'password' : (options.type ?? 'text')}
             />
           )}
         </div>
       </div>
       {message?.content && state === 'focused' && (
-        <div className="inputbox-container">
+        <div
+          className="inputbox-container"
+          {...(dataTestId && {
+            'data-testid': `${dataTestId}-message`,
+            'data-message-type': dataMessageType,
+            'data-has-message': 'true'
+          })}
+        >
           <div
             className={`inputbox-message ${classForType(message.type)}`}
             style={{
@@ -301,6 +324,16 @@ const InputBox: React.FC<InputBoxProps> = ({
           </div>
         </div>
       )}
+      {dataTestId ? (
+        <div
+          data-testid={dataTestId}
+          data-focused={state === 'focused' ? 'true' : 'false'}
+          data-has-message={message?.content ? 'true' : 'false'}
+          data-message-type={dataMessageType}
+          data-multiline={options.flexibleHeight ? 'true' : 'false'}
+          style={{ display: 'none' }}
+        />
+      ) : null}
     </div>
   )
 }
