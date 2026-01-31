@@ -33,3 +33,12 @@ export {
   breadcrumbEditInputSelector,
   breadcrumbNonLastItemsSelector
 } from './breadcrumbSelectors'
+
+export {
+  buttonTestIdSelector,
+  buttonAnchorSelector,
+  buttonDropdownToggleSelector,
+  buttonDropdownPrimarySelector,
+  buttonDropdownMenuSelector,
+  buttonDropdownActionByIndexSelector
+} from './buttonSelectors'

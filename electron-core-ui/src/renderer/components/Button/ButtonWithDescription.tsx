@@ -9,6 +9,7 @@ const ButtonWithDescription: React.FC<ButtonWithDescriptionProps> = ({
   onClick,
   className = '',
   id,
+  'data-testid': dataTestId,
   children
 }) => {
   // Render icon if provided
@@ -37,7 +38,7 @@ const ButtonWithDescription: React.FC<ButtonWithDescriptionProps> = ({
   }
 
   return (
-    <div className={`description-button ${className}`} id={id}>
+    <div className={`description-button ${className}`} id={id} data-testid={dataTestId}>
       <Button
         options={options}
         icon={icon}

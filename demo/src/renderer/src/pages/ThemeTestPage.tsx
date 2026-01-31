@@ -7,6 +7,7 @@ import {
   InputsTab, 
   CheckboxesTab, 
   ButtonsTab, 
+  ButtonHarnessTab,
   DropdownsTab, 
   PanelsTab, 
   TextTab, 
@@ -126,6 +127,7 @@ const ThemeTestPage: React.FC = () => {
   const tabs: Tab[] = [
     { id: 'workbench', label: 'Workbench', content: <WorkbenchTab />, allowFullscreen: true },
     { id: 'breadcrumb', label: 'Breadcrumb', content: <BreadcrumbTab />, allowFullscreen: true },
+    { id: 'button', label: 'Button', content: <ButtonHarnessTab />, allowFullscreen: true },
     { id: 'sticky-headers', label: t('themeTest.components.stickyHeaders'), content: <StickHeadersTab />, allowFullscreen: true },
     { id: 'split-view', label: 'SplitView', content: <SplitViewTab />, allowFullscreen: true },
     { id: 'checkboxes', label: 'Checkboxes & Radio', content: <CheckboxesTab />, allowFullscreen: true },

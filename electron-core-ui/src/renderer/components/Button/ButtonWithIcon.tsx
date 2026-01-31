@@ -8,7 +8,8 @@ const ButtonWithIcon: React.FC<ButtonWithIconProps> = ({
   label,
   onClick,
   className = '',
-  id
+  id,
+  'data-testid': dataTestId
 }) => {
   // Combine icon and label into a single label with inline icon syntax
   const combinedLabel = icon ? `$(${icon}) ${label}` : label
@@ -19,6 +20,7 @@ const ButtonWithIcon: React.FC<ButtonWithIconProps> = ({
       onClick={onClick}
       className={className}
       {...(id && { id })}
+      {...(dataTestId && { 'data-testid': dataTestId })}
     >
       {combinedLabel}
     </Button>
