@@ -10,6 +10,7 @@ interface UiwColorResult {
 const ColorPicker: React.FC<ColorPickerProps> = ({
   value,
   onChange,
+  'data-testid': dataTestId,
   disableAlpha = true,
   className = '',
   style
@@ -22,7 +23,12 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
   )
 
   return (
-    <div className={['ecu-color-picker', className].filter(Boolean).join(' ')} style={style}>
+    <div
+      className={['ecu-color-picker', className].filter(Boolean).join(' ')}
+      style={style}
+      data-disable-alpha={String(disableAlpha)}
+      {...(dataTestId && { 'data-testid': dataTestId })}
+    >
       <Sketch color={value} onChange={handleChange} disableAlpha={disableAlpha} />
     </div>
   )

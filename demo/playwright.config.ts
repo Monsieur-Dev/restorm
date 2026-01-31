@@ -28,6 +28,15 @@ const calloutTestDir = defineBddConfig({
   outputDir: '.features-gen/callout'
 })
 
+const colorPickerTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/colorpicker/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/colorpicker/steps/**/*.ts',
+    'tests/e2e/bdd/colorpicker/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/colorpicker'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -80,6 +89,11 @@ export default defineConfig({
     {
       name: 'callout',
       testDir: calloutTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'colorpicker',
+      testDir: colorPickerTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],
