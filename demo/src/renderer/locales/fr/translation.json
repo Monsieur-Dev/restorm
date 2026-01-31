@@ -168,5 +168,17 @@
       "customMenuAriaLabel": "Champ variable (menu custom)",
       "customActionLabel": "Action custom"
     }
+  },
+  "keyValueTable": {
+    "tabLabel": "KeyValueTable",
+    "harness": {
+      "title": "KeyValueTable",
+      "ready": "prêt",
+      "addRow": "Ajouter une ligne",
+      "lastRows": "dernières lignes",
+      "rowOrder": "ordre des lignes",
+      "basic": "Basique",
+      "empty": "Vide"
+    }
   }
 }

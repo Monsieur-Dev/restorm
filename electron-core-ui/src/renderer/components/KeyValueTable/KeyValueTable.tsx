@@ -42,6 +42,8 @@ export interface CellRendererProps {
   value: string
   onChange: (value: string) => void
   placeholder?: string
+  /** Optional test id applied to the cell input. */
+  'data-testid'?: string
   /** Runtime ID of the row (if provided in KeyValueTableRow) */
   rowId?: string | undefined
 }
@@ -49,7 +51,7 @@ export interface CellRendererProps {
 /**
  * Default cell renderer using InputBox
  */
-const DefaultCellRenderer: React.FC<CellRendererProps> = ({ value, onChange, placeholder }) => {
+const DefaultCellRenderer: React.FC<CellRendererProps> = ({ value, onChange, placeholder, 'data-testid': dataTestId }) => {
   const [localValue, setLocalValue] = useState<string>(value)
 
   React.useEffect(() => {
@@ -58,6 +60,7 @@ const DefaultCellRenderer: React.FC<CellRendererProps> = ({ value, onChange, pla
 
   return (
     <InputBox
+      {...(dataTestId && { 'data-testid': dataTestId })}
       options={{
         placeholder: placeholder ?? '',
         type: 'text'
@@ -74,6 +77,8 @@ const DefaultCellRenderer: React.FC<CellRendererProps> = ({ value, onChange, pla
 export interface KeyValueTableProps {
   /** Initial rows to populate the table */
   initialRows?: KeyValueTableRow[]
+  /** Optional test id applied to the table root element. */
+  'data-testid'?: string
   /**
    * Optional callback when rows change (for persisting edits).
    */
@@ -102,7 +107,8 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
     onRowsChange,
     renderKeyCell: KeyCellRenderer = DefaultCellRenderer,
     renderValueCell: ValueCellRenderer = DefaultCellRenderer,
-    renderDescriptionCell: DescriptionCellRenderer = DefaultCellRenderer
+    renderDescriptionCell: DescriptionCellRenderer = DefaultCellRenderer,
+    'data-testid': dataTestId
   },
   ref
 ) => {
@@ -257,14 +263,17 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
   )
 
   return (
-    <div className="params-table-root">
+    <div
+      className="params-table-root"
+      {...(dataTestId && { 'data-testid': dataTestId })}
+    >
       <div className="params-table-frame">
         <ScrollableElement
           options={{ vertical: 'auto', horizontal: 'auto', useShadows: true }}
           style={{ flex: 1, minHeight: 0 }}
         >
           <div className="params-table-wrapper">
-            <table className="params-table">
+            <table className="params-table" {...(dataTestId && { 'data-testid': `${dataTestId}-table` })}>
               <thead>
                 <tr>
                   <th />
@@ -290,6 +299,7 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
                     <tr
                       key={index}
                       className={rowClassName}
+                      {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}` })}
                       onDragOver={(e) => {
                         e.preventDefault()
                         const rect = e.currentTarget.getBoundingClientRect()
@@ -322,6 +332,7 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
                         <span
                           className="params-table-drag-handle"
                           draggable
+                          {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-drag` })}
                           onDragStart={(e) => {
                             e.stopPropagation()
                             handleDragStart(e, index)
@@ -331,18 +342,21 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
                         </span>
                       </td>
                       <td>
-                        <Toggle
-                          isChecked={row.enabled}
-                          notFocusable
-                          onChange={(newChecked) => {
-                            updateData(index, 'enabled', newChecked)
-                          }}
-                        />
+                        <div {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-enabled` })}>
+                          <Toggle
+                            isChecked={row.enabled}
+                            notFocusable
+                            onChange={(newChecked) => {
+                              updateData(index, 'enabled', newChecked)
+                            }}
+                          />
+                        </div>
                       </td>
                       <td>
                         <KeyCellRenderer
                           value={row.key}
                           onChange={(v) => { updateData(index, 'key', v) }}
+                          {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-key` })}
                           rowId={row.id}
                         />
                       </td>
@@ -350,6 +364,7 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
                         <ValueCellRenderer
                           value={row.value}
                           onChange={(v) => { updateData(index, 'value', v) }}
+                          {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-value` })}
                           rowId={row.id}
                         />
                       </td>
@@ -358,6 +373,7 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
                           value={row.description}
                           onChange={(v) => { updateData(index, 'description', v) }}
                           placeholder="Description"
+                          {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-description` })}
                           rowId={row.id}
                         />
                       </td>
@@ -365,6 +381,7 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
                         <Button
                           small
                           secondary
+                          {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-delete` })}
                           options={{ ariaLabel: 'Delete row', title: 'Delete row' }}
                           onClick={() => {
                             handleRemoveRow(index)

@@ -101,3 +101,15 @@ export {
   variableInputBoxTextareaSelector,
   variableInputBoxContextMenuSelector
 } from './variableInputBoxSelectors'
+
+export {
+  keyValueTableRootSelector,
+  keyValueTableTableSelector,
+  keyValueTableRowSelector,
+  keyValueTableRowKeyCellSelector,
+  keyValueTableRowValueCellSelector,
+  keyValueTableRowDescriptionCellSelector,
+  keyValueTableRowEnabledToggleSelector,
+  keyValueTableRowDeleteSelector,
+  keyValueTableRowDragHandleSelector
+} from './keyValueTableSelectors'

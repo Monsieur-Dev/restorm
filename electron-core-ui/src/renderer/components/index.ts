@@ -134,10 +134,6 @@ export type { TooltipProps } from './Tooltip/index'
 export { ContextMenu } from './ContextMenu/ContextMenu'
 export type { ContextMenuProps, ContextMenuItem } from './ContextMenu/ContextMenu'
 
-// InputTable exports
-export { InputTable } from './InputTable'
-export type { InputTableProps, InputTableColumn, InputTableRow, InputTableColumnType } from './InputTable'
-
 // KeyValueTable exports
 export { KeyValueTable } from './KeyValueTable/KeyValueTable'
 export type {

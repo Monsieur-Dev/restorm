@@ -22,7 +22,8 @@ import {
   CustomWcoTab,
   CodeEditorTab,
   InputBoxTab,
-  VariableInputBoxTab
+  VariableInputBoxTab,
+  KeyValueTableTab
 } from '../components/test-tabs'
 import { WorkbenchTab } from '../components/test-tabs'
 
@@ -142,6 +143,7 @@ const ThemeTestPage: React.FC = () => {
     { id: 'codeeditor', label: t('codeEditor.tabLabel'), content: <CodeEditorTab />, allowFullscreen: true },
     { id: 'inputbox', label: t('inputBox.tabLabel'), content: <InputBoxTab />, allowFullscreen: true },
     { id: 'variableinputbox', label: t('variableInputBox.tabLabel'), content: <VariableInputBoxTab />, allowFullscreen: true },
+    { id: 'keyvaluetable', label: t('keyValueTable.tabLabel'), content: <KeyValueTableTab />, allowFullscreen: true },
     { id: 'sticky-headers', label: t('themeTest.components.stickyHeaders'), content: <StickHeadersTab />, allowFullscreen: true },
     { id: 'split-view', label: 'SplitView', content: <SplitViewTab />, allowFullscreen: true },
     { id: 'checkboxes', label: 'Checkboxes & Radio', content: <CheckboxesTab />, allowFullscreen: true },

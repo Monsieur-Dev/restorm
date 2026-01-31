@@ -342,7 +342,6 @@ The following files in the project use CSS variables:
 ### CSS Files
 - `src/renderer/components/SelectBox/selectBoxCustom.css`
 - `src/renderer/components/Sash/sash.css`
-- `src/renderer/components/InputTable/inputTable.css`
 - `src/renderer/assets/workbench.css`
 - `src/renderer/components/Workbench/styles/tabs.css`
 - `src/renderer/components/Tooltip/tooltip.css`
