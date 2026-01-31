@@ -65,5 +65,12 @@
         "extraClass": "Extra className applied"
       }
     }
+  },
+  "colorPicker": {
+    "tabLabel": "ColorPicker",
+    "harness": {
+      "basicTitle": "ColorPicker (basic)",
+      "alphaTitle": "ColorPicker (alpha enabled)"
+    }
   }
 }

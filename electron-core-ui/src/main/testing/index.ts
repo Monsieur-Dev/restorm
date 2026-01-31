@@ -48,3 +48,12 @@ export {
   calloutMessageSelector,
   calloutIconSelector
 } from './calloutSelectors'
+
+export {
+  colorPickerTestIdSelector,
+  colorPickerRootSelector,
+  colorPickerHexInputSelector,
+  colorPickerSaturationSelector,
+  colorPickerHueSelector,
+  colorPickerAlphaSelector
+} from './colorPickerSelectors'

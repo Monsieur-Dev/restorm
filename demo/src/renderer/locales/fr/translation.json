@@ -65,5 +65,12 @@
         "extraClass": "className additionnelle appliquée"
       }
     }
+  },
+  "colorPicker": {
+    "tabLabel": "ColorPicker",
+    "harness": {
+      "basicTitle": "ColorPicker (basique)",
+      "alphaTitle": "ColorPicker (alpha activé)"
+    }
   }
 }
