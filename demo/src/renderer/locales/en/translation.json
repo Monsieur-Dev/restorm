@@ -51,5 +51,19 @@
     "documentation": "Documentation",
     "reportIssue": "Report Issue",
     "keyboardShortcuts": "Keyboard Shortcuts"
+  },
+  "callout": {
+    "tabLabel": "Callout",
+    "harness": {
+      "title": "Callout",
+      "message": {
+        "info": "Information message",
+        "warning": "Warning message",
+        "error": "Error message",
+        "debug": "Debug message",
+        "customIcon": "Custom icon override",
+        "extraClass": "Extra className applied"
+      }
+    }
   }
 }
