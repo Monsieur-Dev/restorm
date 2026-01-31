@@ -6,6 +6,8 @@ export interface TooltipProps {
   targetRef: React.RefObject<HTMLElement | null>
   content: React.ReactNode
   show: boolean
+  /** Optional test id applied to the tooltip root element. */
+  'data-testid'?: string
   onMouseEnter?: () => void
   onMouseLeave?: () => void
   onMouseDown?: (e: React.MouseEvent) => void
@@ -39,6 +41,7 @@ const Tooltip: React.FC<TooltipProps> = ({
   targetRef,
   content,
   show,
+  'data-testid': dataTestId,
   onMouseEnter,
   onMouseLeave,
   onMouseDown,
@@ -292,8 +295,16 @@ const Tooltip: React.FC<TooltipProps> = ({
     <div
       ref={tooltipRef}
       className={tooltipClasses}
+      {...(dataTestId && { 'data-testid': dataTestId })}
       data-placement={resolvedPlacement}
       data-side={side}
+      data-is-positioned={isPositioned ? 'true' : 'false'}
+      data-top={String(Math.round(position.top))}
+      data-left={String(Math.round(position.left))}
+      data-beak-left-percent={String(Math.round(position.beakLeftPercent))}
+      {...(position.beakTopPercent !== undefined && {
+        'data-beak-top-percent': String(Math.round(position.beakTopPercent))
+      })}
       style={{
         position: 'fixed',
         top: `${position.top}px`,

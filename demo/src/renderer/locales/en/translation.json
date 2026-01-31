@@ -180,5 +180,24 @@
       "basic": "Basic",
       "empty": "Empty"
     }
+  },
+  "tooltip": {
+    "tabLabel": "Tooltip",
+    "harness": {
+      "title": "Tooltip",
+      "ready": "ready",
+      "activeTarget": "active target",
+      "lastPosition": "last position",
+      "show": "Show",
+      "hide": "Hide",
+      "switchTarget": "Switch target",
+      "bumpRepositionKey": "Bump repositionKey",
+      "placement": "placement",
+      "side": "side",
+      "fixedTop": "fixedTop",
+      "targetA": "Target A (top)",
+      "targetB": "Target B (bottom)",
+      "tooltipContent": "Tooltip content"
+    }
   }
 }

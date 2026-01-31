@@ -91,6 +91,15 @@ const keyValueTableTestDir = defineBddConfig({
   outputDir: '.features-gen/keyvaluetable'
 })
 
+const tooltipTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/tooltip/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/tooltip/steps/**/*.ts',
+    'tests/e2e/bdd/tooltip/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/tooltip'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -178,6 +187,11 @@ export default defineConfig({
     {
       name: 'keyvaluetable',
       testDir: keyValueTableTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'tooltip',
+      testDir: tooltipTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],

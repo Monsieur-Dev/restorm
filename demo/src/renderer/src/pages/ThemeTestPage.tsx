@@ -23,7 +23,8 @@ import {
   CodeEditorTab,
   InputBoxTab,
   VariableInputBoxTab,
-  KeyValueTableTab
+  KeyValueTableTab,
+  TooltipTab
 } from '../components/test-tabs'
 import { WorkbenchTab } from '../components/test-tabs'
 
@@ -144,6 +145,7 @@ const ThemeTestPage: React.FC = () => {
     { id: 'inputbox', label: t('inputBox.tabLabel'), content: <InputBoxTab />, allowFullscreen: true },
     { id: 'variableinputbox', label: t('variableInputBox.tabLabel'), content: <VariableInputBoxTab />, allowFullscreen: true },
     { id: 'keyvaluetable', label: t('keyValueTable.tabLabel'), content: <KeyValueTableTab />, allowFullscreen: true },
+    { id: 'tooltip', label: t('tooltip.tabLabel'), content: <TooltipTab />, allowFullscreen: true },
     { id: 'sticky-headers', label: t('themeTest.components.stickyHeaders'), content: <StickHeadersTab />, allowFullscreen: true },
     { id: 'split-view', label: 'SplitView', content: <SplitViewTab />, allowFullscreen: true },
     { id: 'checkboxes', label: 'Checkboxes & Radio', content: <CheckboxesTab />, allowFullscreen: true },
