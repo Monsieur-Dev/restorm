@@ -72,5 +72,21 @@
       "basicTitle": "ColorPicker (basic)",
       "alphaTitle": "ColorPicker (alpha enabled)"
     }
+  },
+  "contextMenu": {
+    "tabLabel": "ContextMenu",
+    "harness": {
+      "title": "ContextMenu",
+      "target": "Right-click here to open the context menu",
+      "items": {
+        "action": "Action",
+        "disabled": "Disabled",
+        "checked": "Checked",
+        "icon": "With Icon",
+        "submenu": "Submenu",
+        "subAction": "Sub Action",
+        "subDisabled": "Sub Disabled"
+      }
+    }
   }
 }

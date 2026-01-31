@@ -21,10 +21,14 @@ export interface ContextMenuItem {
   label: string
   /** Optional Codicon name without the `codicon-` prefix. */
   icon?: string
+  shortcut?: string
   /** When true, this entry is rendered as a visual separator line. */
   isSeparator?: boolean
   disabled?: boolean
+  checked?: boolean
   onClick?: () => void
+  /** Optional submenu items */
+  items?: ContextMenuItem[]
 }
 ```
 
@@ -40,6 +44,8 @@ export interface ContextMenuProps {
   items: ContextMenuItem[]
   /** Called when the menu should close (click outside, item click, etc.). */
   onRequestClose: () => void
+  /** Optional test id applied to the root element. */
+  'data-testid'?: string
 }
 ```
 
@@ -75,6 +81,7 @@ return (
       x={menu.x}
       y={menu.y}
       items={menu.items}
+      data-testid="contextmenu-main"
       onRequestClose={() => {
         setMenu(prev => ({ ...prev, visible: false }))
       }}
@@ -82,6 +89,46 @@ return (
   </>
 )
 ```
+
+## Testing
+
+### Recommended stable hooks
+
+If you pass a `data-testid` to the component, you can target:
+
+- Root: `[data-testid="..."]` (element has `.ecui-context-menu`)
+- Menu container: `[role="menu"]`
+- Menu items: `a[role="menuitem"]` (uses `aria-disabled`, `aria-checked`, and `aria-expanded` for submenus)
+- Separators: `[role="separator"]`
+
+The root element also exposes:
+
+- `data-x` and `data-y` (stringified coordinates)
+
+### E2E helpers
+
+`electron-core-ui/testing` exports selector helpers:
+
+- `contextMenuRootSelector(testId)`
+- `contextMenuMenuSelector(testId)`
+- `contextMenuSeparatorSelector(testId)`
+- `contextMenuItemSelectorByLabel(testId, label)`
+- `contextMenuItemIconSelector(testId, label, icon)`
+- `contextMenuSubmenuIndicatorSelector(testId, label)`
+- `contextMenuOpenSubmenuItemSelector(testId, label)`
+- `contextMenuOpenSubmenuContainerSelector(testId, label)`
+- `contextMenuOpenSubmenuItemByLabelSelector(testId, parentLabel, childLabel)`
+
+### Playwright-BDD steps
+
+`electron-core-ui/testing/playwright-bdd` exports `defineContextMenuBddSteps(bdd)`.
+It registers generic steps such as:
+
+- `Then context menu {string} should be visible`
+- `When I click context menu {string} item {string}`
+- `Then context menu {string} item {string} should be disabled`
+- `When I open context menu {string} submenu {string} with keyboard`
+- `When I open context menu {string} submenu {string} with hover`
 
 ## Integration with `ListView`
 

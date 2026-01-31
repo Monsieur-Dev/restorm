@@ -20,6 +20,8 @@ export interface ContextMenuProps {
   y: number
   items: ContextMenuItem[]
   onRequestClose: () => void
+  /** Optional test id applied to the root element. */
+  'data-testid'?: string
 }
 
 export const ContextMenu: React.FC<ContextMenuProps> = ({
@@ -27,14 +29,15 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   x,
   y,
   items,
-  onRequestClose
+  onRequestClose,
+  'data-testid': dataTestId
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null)
 
   const renderItems = (menuItems: ContextMenuItem[]): React.ReactNode =>
     menuItems.map((item) => {
       if (item.isSeparator) {
-        return <MenuItemSeparator key={item.id} />
+        return <MenuItemSeparator key={item.id} id={item.id} />
       }
 
       const hasSubmenu = Array.isArray(item.items) && item.items.length > 0
@@ -42,6 +45,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
       return (
         <MenuItem
           key={item.id}
+          id={item.id}
           title={item.label}
           {...(item.shortcut ? { shortcut: item.shortcut } : {})}
           disabled={!!item.disabled}
@@ -94,6 +98,9 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         left: x,
         zIndex: 1000,
       }}
+      data-x={String(x)}
+      data-y={String(y)}
+      {...(dataTestId && { 'data-testid': dataTestId })}
       ref={containerRef}
       onContextMenu={(e) => {
         e.preventDefault()

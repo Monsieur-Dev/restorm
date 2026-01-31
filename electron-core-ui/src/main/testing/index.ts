@@ -57,3 +57,15 @@ export {
   colorPickerHueSelector,
   colorPickerAlphaSelector
 } from './colorPickerSelectors'
+
+export {
+  contextMenuRootSelector,
+  contextMenuMenuSelector,
+  contextMenuSeparatorSelector,
+  contextMenuItemSelectorByLabel,
+  contextMenuItemIconSelector,
+  contextMenuSubmenuIndicatorSelector,
+  contextMenuOpenSubmenuItemSelector,
+  contextMenuOpenSubmenuContainerSelector,
+  contextMenuOpenSubmenuItemByLabelSelector
+} from './contextMenuSelectors'

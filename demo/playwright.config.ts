@@ -37,6 +37,15 @@ const colorPickerTestDir = defineBddConfig({
   outputDir: '.features-gen/colorpicker'
 })
 
+const contextMenuTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/contextmenu/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/contextmenu/steps/**/*.ts',
+    'tests/e2e/bdd/contextmenu/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/contextmenu'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -94,6 +103,11 @@ export default defineConfig({
     {
       name: 'colorpicker',
       testDir: colorPickerTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'contextmenu',
+      testDir: contextMenuTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],
