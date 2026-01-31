@@ -12,6 +12,8 @@ export interface VariableInputBoxProps {
   value: string
   onChange: (value: string) => void
   variables: VariableDefinition[]
+  /** Optional test id applied to the VariableInputBox root element. */
+  'data-testid'?: string
   placeholder?: string
   id?: string
   className?: string

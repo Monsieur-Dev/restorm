@@ -73,6 +73,15 @@ const inputBoxTestDir = defineBddConfig({
   outputDir: '.features-gen/inputbox'
 })
 
+const variableInputBoxTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/variableinputbox/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/variableinputbox/steps/**/*.ts',
+    'tests/e2e/bdd/variableinputbox/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/variableinputbox'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -150,6 +159,11 @@ export default defineConfig({
     {
       name: 'inputbox',
       testDir: inputBoxTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'variableinputbox',
+      testDir: variableInputBoxTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],

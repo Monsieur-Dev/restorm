@@ -51,6 +51,7 @@ export interface VariableInputBoxProps {
   value: string                          // Controlled value
   onChange: (value: string) => void      // Change handler
   variables: VariableDefinition[]        // List of available variables
+  'data-testid'?: string                 // Optional test id applied to the root element
   placeholder?: string                   // Placeholder text
   id?: string                            // HTML id attribute
   className?: string                     // Additional CSS classes for the outer input box
@@ -89,6 +90,7 @@ const urlVariables: VariableDefinition[] = [
 ]
 
 <VariableInputBox
+  data-testid="request-url"
   value={url}
   onChange={setUrl}
   variables={urlVariables}
@@ -100,6 +102,7 @@ const urlVariables: VariableDefinition[] = [
 
 ```tsx
 <VariableInputBox
+  data-testid="request-url"
   id="request-url-input"
   className="request-url-input"
   style={{ maxWidth: 800 }}
@@ -110,3 +113,38 @@ const urlVariables: VariableDefinition[] = [
   ariaLabel="Request URL"
 />
 ```
+
+## Testing
+
+### Stable `data-testid` conventions
+
+If you pass `data-testid`, the component exposes stable hooks:
+
+- Root: `{id}`
+- Editor wrapper: `{id}-editor`
+- Internal `CodeEditor` root: `{id}-codeeditor`
+- Internal Monaco textarea: `{id}-codeeditor-textarea` (see `CodeEditor` testing docs)
+- Context menu root: `{id}-contextmenu`
+
+It also exposes stable attributes on the root:
+
+- `data-language-id="..."`
+- `data-disable-default-providers="true|false"`
+
+### Selectors (`electron-core-ui/testing`)
+
+- `variableInputBoxRootSelector(testId)`
+- `variableInputBoxEditorSelector(testId)`
+- `variableInputBoxCodeEditorSelector(testId)`
+- `variableInputBoxTextareaSelector(testId)` (delegates to `CodeEditor` textarea selector)
+- `variableInputBoxContextMenuSelector(testId)`
+
+### Playwright-BDD steps (`electron-core-ui/testing/playwright-bdd`)
+
+Reusable steps are available via `defineVariableInputBoxBddSteps`:
+
+- `Then variable input box {string} should be visible`
+- `When I focus variable input box {string}`
+- `When I type in variable input box {string} {string}` (types character-by-character)
+- `When I press {string} in variable input box {string}`
+- `When I right click variable input box {string}`

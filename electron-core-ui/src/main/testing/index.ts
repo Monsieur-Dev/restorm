@@ -93,3 +93,11 @@ export {
   inputBoxMessageSelector,
   inputBoxMirrorSelector
 } from './inputBoxSelectors'
+
+export {
+  variableInputBoxRootSelector,
+  variableInputBoxEditorSelector,
+  variableInputBoxCodeEditorSelector,
+  variableInputBoxTextareaSelector,
+  variableInputBoxContextMenuSelector
+} from './variableInputBoxSelectors'
