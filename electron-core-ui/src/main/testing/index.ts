@@ -78,3 +78,10 @@ export {
   customWcoCloseSelector,
   customWcoMaximizeIconSelector
 } from './customWcoSelectors'
+
+export {
+  codeEditorRootSelector,
+  codeEditorMonacoContainerSelector,
+  codeEditorTextareaSelector,
+  codeEditorResolvedThemeAttrSelector
+} from './codeEditorSelectors'

@@ -19,7 +19,8 @@ import {
   CalloutTab,
   ColorPickerTab,
   ContextMenuTab,
-  CustomWcoTab
+  CustomWcoTab,
+  CodeEditorTab
 } from '../components/test-tabs'
 import { WorkbenchTab } from '../components/test-tabs'
 
@@ -136,6 +137,7 @@ const ThemeTestPage: React.FC = () => {
     { id: 'colorpicker', label: t('colorPicker.tabLabel'), content: <ColorPickerTab />, allowFullscreen: true },
     { id: 'contextmenu', label: t('contextMenu.tabLabel'), content: <ContextMenuTab />, allowFullscreen: true },
     { id: 'customwco', label: t('customWco.tabLabel'), content: <CustomWcoTab />, allowFullscreen: true },
+    { id: 'codeeditor', label: t('codeEditor.tabLabel'), content: <CodeEditorTab />, allowFullscreen: true },
     { id: 'sticky-headers', label: t('themeTest.components.stickyHeaders'), content: <StickHeadersTab />, allowFullscreen: true },
     { id: 'split-view', label: 'SplitView', content: <SplitViewTab />, allowFullscreen: true },
     { id: 'checkboxes', label: 'Checkboxes & Radio', content: <CheckboxesTab />, allowFullscreen: true },

@@ -35,6 +35,8 @@ function getVariableAtPosition(
  * Inherits all props from Monaco Editor
  */
 export interface CodeEditorProps extends Omit<EditorProps, 'theme'> {
+  /** Optional test id applied to the root element. */
+  'data-testid'?: string
   /**
    * Override the automatic theme detection
    * If not provided, the theme will be automatically determined based on the current app theme
@@ -129,7 +131,16 @@ function getMonacoTheme(): string {
  * ```
  */
 export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function CodeEditor(
-  { theme, changeDebounceMs = 200, onMount, onEditorMount, onGoToDefinition, goToDefinitionLabel = 'Go to Definition', ...props },
+  {
+    theme,
+    changeDebounceMs = 200,
+    onMount,
+    onEditorMount,
+    onGoToDefinition,
+    goToDefinitionLabel = 'Go to Definition',
+    'data-testid': dataTestId,
+    ...props
+  },
   ref
 ) {
   const { t } = useTranslation()
@@ -145,6 +156,7 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
 
   // Effective theme: use prop if provided, otherwise auto-detected
   const currentTheme = theme ?? autoDetectedTheme
+  const themeSource = theme === undefined ? 'auto' : 'prop'
 
   // Keep ref updated
   useEffect(() => {
@@ -206,6 +218,14 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
     setEditorInstance(editor)
     setMonacoInstance(monacoTyped)
 
+    if (dataTestId) {
+      const domNode = editor.getDomNode()
+      const textarea = domNode?.querySelector('textarea')
+      if (textarea) {
+        textarea.setAttribute('data-testid', `${dataTestId}-textarea`)
+      }
+    }
+
     // Register "Go to Definition" action for Handlebars variables
     editor.addAction({
       id: 'editor.action.goToVariableDefinition',
@@ -251,13 +271,21 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   }
 
   return (
-    <div className="ecui-code-editor" style={{ height: props.height, width: props.width }}>
-      <Editor
-        {...props}
-        theme={currentTheme}
-        onChange={handleChange}
-        onMount={handleMount}
-      />
+    <div
+      className="ecui-code-editor"
+      style={{ height: props.height, width: props.width }}
+      {...(dataTestId && { 'data-testid': dataTestId })}
+      data-theme-source={themeSource}
+      data-resolved-theme={currentTheme}
+    >
+      <div {...(dataTestId && { 'data-testid': `${dataTestId}-monaco` })}>
+        <Editor
+          {...props}
+          theme={currentTheme}
+          onChange={handleChange}
+          onMount={handleMount}
+        />
+      </div>
     </div>
   )
 })

@@ -55,6 +55,15 @@ const customWcoTestDir = defineBddConfig({
   outputDir: '.features-gen/customwco'
 })
 
+const codeEditorTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/codeeditor/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/codeeditor/steps/**/*.ts',
+    'tests/e2e/bdd/codeeditor/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/codeeditor'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -122,6 +131,11 @@ export default defineConfig({
     {
       name: 'customwco',
       testDir: customWcoTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'codeeditor',
+      testDir: codeEditorTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],
