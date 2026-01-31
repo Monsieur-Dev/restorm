@@ -101,5 +101,26 @@
       "darwin": "macOS (spacer)",
       "other": "Other (null)"
     }
+  },
+  "codeEditor": {
+    "tabLabel": "CodeEditor",
+    "goToDefinition": "Go to Definition",
+    "harness": {
+      "title": "CodeEditor",
+      "toggleTheme": "Toggle document theme",
+      "placeCursorOnVariable": "Place cursor on {{petId}}",
+      "runGoToDefinition": "Run go to definition",
+      "applyValueBasic": "Apply value (basic)",
+      "applyValueNoDebounce": "Apply value (no debounce)",
+      "currentTheme": "document data-theme",
+      "ready": "ready",
+      "lastChange": "last change",
+      "goToDefinition": "go to definition",
+      "mountCalls": "mount calls",
+      "instances": "Instances",
+      "basic": "Basic (debounced)",
+      "noDebounce": "No debounce (changeDebounceMs=0)",
+      "themeForced": "Theme forced (theme=\"vs\")"
+    }
   }
 }
