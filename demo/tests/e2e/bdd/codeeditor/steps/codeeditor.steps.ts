@@ -2,6 +2,19 @@ import { createBdd } from 'playwright-bdd'
 import { defineCodeEditorBddSteps } from 'electron-core-ui/testing/playwright-bdd'
 import { openCodeEditorTab } from '../fixtures/codeeditor.fixture'
 
+export async function setCodeEditorValueInput(page: { getByTestId: (id: string) => { fill: (value: string) => Promise<void> } }, value: string): Promise<void> {
+  await page.getByTestId('codeeditor-value-input').fill(value)
+}
+
+export async function setDocumentThemeFromHarness(
+  page: { getByTestId: (id: string) => { innerText: () => Promise<string>; click: () => Promise<void> } },
+  theme: string
+): Promise<void> {
+  const current = await page.getByTestId('codeeditor-theme-mode').innerText()
+  if (current === theme) return
+  await page.getByTestId('codeeditor-toggle-theme').click()
+}
+
 const bdd = createBdd()
 const { Given, When, Then } = bdd
 
@@ -55,7 +68,7 @@ When('I run go to definition in the demo code editor', async ({ page }) => {
 })
 
 When('I set code editor value input to {string}', async ({ page }, value: string) => {
-  await page.getByTestId('codeeditor-value-input').fill(value)
+  await setCodeEditorValueInput(page, value)
 })
 
 When('I apply code editor value to {string}', async ({ page }, target: string) => {
@@ -75,8 +88,6 @@ Then('code editor go to definition should be {string}', async ({ page }, expecte
 })
 
 When('I set document theme to {string}', async ({ page }, theme: string) => {
-  const current = await page.getByTestId('codeeditor-theme-mode').innerText()
-  if (current === theme) return
-  await page.getByTestId('codeeditor-toggle-theme').click()
+  await setDocumentThemeFromHarness(page, theme)
 })
 export {}

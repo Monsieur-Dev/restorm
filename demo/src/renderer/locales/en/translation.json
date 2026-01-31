@@ -108,7 +108,7 @@
     "harness": {
       "title": "CodeEditor",
       "toggleTheme": "Toggle document theme",
-      "placeCursorOnVariable": "Place cursor on {{petId}}",
+      "placeCursorOnVariable": "Place cursor on {{foo}}",
       "runGoToDefinition": "Run go to definition",
       "applyValueBasic": "Apply value (basic)",
       "applyValueNoDebounce": "Apply value (no debounce)",
@@ -121,6 +121,29 @@
       "basic": "Basic (debounced)",
       "noDebounce": "No debounce (changeDebounceMs=0)",
       "themeForced": "Theme forced (theme=\"vs\")"
+    }
+  },
+  "inputBox": {
+    "tabLabel": "InputBox",
+    "harness": {
+      "title": "InputBox",
+      "ready": "ready",
+      "applyValueBasic": "Apply value (basic)",
+      "applyValueDisabled": "Try apply value (disabled)",
+      "lastChange": "last change",
+      "focusCount": "focus count",
+      "blurCount": "blur count",
+      "lastValidation": "last validation",
+      "instances": "Instances",
+      "basic": "Basic",
+      "disabled": "Disabled",
+      "placeholderOnFocus": "Placeholder on focus",
+      "validationError": "Validation error",
+      "validationWarning": "Validation warning",
+      "validationInfo": "Validation info",
+      "multiline": "Multiline",
+      "password": "Password",
+      "debounced": "Debounced"
     }
   }
 }

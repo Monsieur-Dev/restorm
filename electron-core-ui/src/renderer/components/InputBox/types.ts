@@ -51,6 +51,8 @@ export interface IInputOptions {
 
 export interface InputBoxProps {
   options: IInputOptions
+  /** Optional test id applied to the input box root element. */
+  'data-testid'?: string
   value?: string
   onChange?: (value: string) => void
   /** Debounce delay (ms) before emitting onChange to parent. Default: 200ms. */
