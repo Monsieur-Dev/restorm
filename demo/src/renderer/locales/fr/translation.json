@@ -145,5 +145,28 @@
       "password": "Mot de passe",
       "debounced": "Debounced"
     }
+  },
+  "variableInputBox": {
+    "tabLabel": "VariableInputBox",
+    "harness": {
+      "title": "VariableInputBox",
+      "applyValueBasic": "Appliquer la valeur (basique)",
+      "applyValueNoProviders": "Appliquer la valeur (sans providers)",
+      "applyValueCustomMenu": "Appliquer la valeur (menu custom)",
+      "ready": "prêt",
+      "lastChange": "dernière valeur",
+      "lastContextAction": "dernière action du menu",
+      "instances": "Instances",
+      "basic": "Basique",
+      "noProviders": "disableDefaultProviders=true",
+      "customMenu": "Menu custom",
+      "basicPlaceholder": "Saisir une valeur (utiliser {{foo}})",
+      "basicAriaLabel": "Champ variable",
+      "noProvidersPlaceholder": "Sans providers",
+      "noProvidersAriaLabel": "Champ variable (sans providers)",
+      "customMenuPlaceholder": "Menu custom",
+      "customMenuAriaLabel": "Champ variable (menu custom)",
+      "customActionLabel": "Action custom"
+    }
   }
 }

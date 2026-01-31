@@ -145,5 +145,28 @@
       "password": "Password",
       "debounced": "Debounced"
     }
+  },
+  "variableInputBox": {
+    "tabLabel": "VariableInputBox",
+    "harness": {
+      "title": "VariableInputBox",
+      "applyValueBasic": "Apply value (basic)",
+      "applyValueNoProviders": "Apply value (no providers)",
+      "applyValueCustomMenu": "Apply value (custom menu)",
+      "ready": "ready",
+      "lastChange": "last change",
+      "lastContextAction": "last context action",
+      "instances": "Instances",
+      "basic": "Basic",
+      "noProviders": "disableDefaultProviders=true",
+      "customMenu": "Custom menu",
+      "basicPlaceholder": "Enter value (use {{foo}})",
+      "basicAriaLabel": "Variable input",
+      "noProvidersPlaceholder": "No providers",
+      "noProvidersAriaLabel": "Variable input (no providers)",
+      "customMenuPlaceholder": "Custom menu",
+      "customMenuAriaLabel": "Variable input (custom menu)",
+      "customActionLabel": "Custom action"
+    }
   }
 }

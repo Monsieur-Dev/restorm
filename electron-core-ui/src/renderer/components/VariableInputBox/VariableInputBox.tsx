@@ -56,6 +56,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
     value,
     onChange,
     variables,
+    'data-testid': dataTestId,
     placeholder,
     id,
     className,
@@ -363,6 +364,11 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
         }}
         ref={containerRef}
         onContextMenu={handleContextMenu}
+        {...(dataTestId && {
+          'data-testid': dataTestId,
+          'data-language-id': effectiveLanguageId,
+          'data-disable-default-providers': disableDefaultProviders ? 'true' : 'false'
+        })}
       >
         <div className="ibwrapper" style={{ display: 'flex', alignItems: 'center' }}>
           {placeholder && !value && (
@@ -387,6 +393,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
           <div
             className="input variable-inputbox-editor"
             style={{ padding: '0 6px', width: '100%' }}
+            {...(dataTestId && { 'data-testid': `${dataTestId}-editor` })}
           >
             <CodeEditor
               value={value}
@@ -397,11 +404,13 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
               height={20}
               options={editorOptions}
               onMount={handleMount}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-codeeditor` })}
             />
           </div>
         </div>
       </div>
       <ContextMenu
+        {...(dataTestId && { 'data-testid': `${dataTestId}-contextmenu` })}
         visible={contextMenu.visible}
         x={contextMenu.x}
         y={contextMenu.y}
