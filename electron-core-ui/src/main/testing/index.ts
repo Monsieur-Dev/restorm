@@ -129,3 +129,10 @@ export {
   scrollableElementHorizontalArrowLeftSelector,
   scrollableElementHorizontalArrowRightSelector
 } from './scrollableElementSelectors'
+
+export {
+  toggleRootSelector,
+  toggleActionSelector,
+  toggleLabelSelector,
+  toggleIconSelector
+} from './toggleSelectors'
