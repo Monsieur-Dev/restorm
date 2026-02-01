@@ -14,6 +14,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
   style,
   onScroll,
   contentRef: externalContentRef,
+  'data-testid': dataTestId,
   ...domProps
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -533,6 +534,15 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
       ref={containerRef}
       id={id}
       className={containerClasses}
+      {...(dataTestId && {
+        'data-testid': dataTestId,
+        'data-scroll-top': String(Math.round(scrollTop)),
+        'data-scroll-left': String(Math.round(scrollLeft)),
+        'data-container-width': String(Math.round(containerWidth)),
+        'data-container-height': String(Math.round(containerHeight)),
+        'data-content-width': String(Math.round(contentWidth)),
+        'data-content-height': String(Math.round(contentHeight)),
+      })}
       style={{
         position: 'relative',
         overflow: 'hidden',
@@ -543,13 +553,25 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
     >
       {/* Scroll shadows (only horizontal/left shadow kept for now) */}
       {mergedOptions.useShadows && scrollLeft > 0 && (
-        <div className="shadow left" />
+        <div
+          className="shadow left"
+          {...(dataTestId && { 'data-testid': `${dataTestId}-left-shadow` })}
+        />
       )}
 
       {/* Content wrapper */}
       <div
         ref={setContentRef}
         className={`scrollable-content${contentClassName ? ` ${contentClassName}` : ''}`}
+        {...(dataTestId && {
+          'data-testid': `${dataTestId}-content`,
+          'data-scroll-top': String(Math.round(scrollTop)),
+          'data-scroll-left': String(Math.round(scrollLeft)),
+          'data-container-width': String(Math.round(containerWidth)),
+          'data-container-height': String(Math.round(containerHeight)),
+          'data-content-width': String(Math.round(contentWidth)),
+          'data-content-height': String(Math.round(contentHeight)),
+        })}
         style={{
           width: '100%',
           height: mergedOptions.fitContent ? 'auto' : '100%',
@@ -586,6 +608,10 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
       {showVerticalScrollbar && (
         <div
           className={`scrollbar vertical ${shouldShowVerticalScrollbar ? 'visible' : 'invisible fade'}`}
+          {...(dataTestId && {
+            'data-testid': `${dataTestId}-v-scrollbar`,
+            'data-is-visible': shouldShowVerticalScrollbar ? 'true' : 'false'
+          })}
           style={{
             position: 'absolute',
             top: 0,
@@ -598,6 +624,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
           {mergedOptions.verticalHasArrows && (
             <div
               className="scra arrow-up"
+              {...(dataTestId && { 'data-testid': `${dataTestId}-v-arrow-up` })}
               style={{
                 position: 'absolute',
                 top: 0,
@@ -617,6 +644,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
           )}
           <div
             className="slider"
+            {...(dataTestId && { 'data-testid': `${dataTestId}-v-slider` })}
             style={{
               position: 'absolute',
               left: 0,
@@ -632,6 +660,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
           {mergedOptions.verticalHasArrows && (
             <div
               className="scra arrow-down"
+              {...(dataTestId && { 'data-testid': `${dataTestId}-v-arrow-down` })}
               style={{
                 position: 'absolute',
                 bottom: 0,
@@ -656,6 +685,10 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
       {showHorizontalScrollbar && (
         <div
           className={`scrollbar horizontal ${shouldShowHorizontalScrollbar ? 'visible' : 'invisible fade'}`}
+          {...(dataTestId && {
+            'data-testid': `${dataTestId}-h-scrollbar`,
+            'data-is-visible': shouldShowHorizontalScrollbar ? 'true' : 'false'
+          })}
           style={{
             position: 'absolute',
             bottom: 0,
@@ -668,6 +701,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
           {mergedOptions.horizontalHasArrows && (
             <div
               className="scra arrow-left"
+              {...(dataTestId && { 'data-testid': `${dataTestId}-h-arrow-left` })}
               style={{
                 position: 'absolute',
                 left: 0,
@@ -687,6 +721,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
           )}
           <div
             className="slider"
+            {...(dataTestId && { 'data-testid': `${dataTestId}-h-slider` })}
             style={{
               position: 'absolute',
               top: 0,
@@ -702,6 +737,7 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
           {mergedOptions.horizontalHasArrows && (
             <div
               className="scra arrow-right"
+              {...(dataTestId && { 'data-testid': `${dataTestId}-h-arrow-right` })}
               style={{
                 position: 'absolute',
                 right: 0,

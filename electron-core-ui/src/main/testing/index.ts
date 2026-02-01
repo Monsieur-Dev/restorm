@@ -115,3 +115,17 @@ export {
 } from './keyValueTableSelectors'
 
 export { tooltipRootSelector, tooltipContentSelector } from './tooltipSelectors'
+
+export {
+  scrollableElementRootSelector,
+  scrollableElementContentSelector,
+  scrollableElementLeftShadowSelector,
+  scrollableElementVerticalScrollbarSelector,
+  scrollableElementVerticalSliderSelector,
+  scrollableElementVerticalArrowUpSelector,
+  scrollableElementVerticalArrowDownSelector,
+  scrollableElementHorizontalScrollbarSelector,
+  scrollableElementHorizontalSliderSelector,
+  scrollableElementHorizontalArrowLeftSelector,
+  scrollableElementHorizontalArrowRightSelector
+} from './scrollableElementSelectors'

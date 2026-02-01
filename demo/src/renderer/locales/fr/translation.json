@@ -199,5 +199,23 @@
       "targetB": "Cible B (bas)",
       "tooltipContent": "Contenu du tooltip"
     }
+  },
+  "scrollableElement": {
+    "tabLabel": "ScrollableElement",
+    "harness": {
+      "title": "ScrollableElement",
+      "verticalAutoTitle": "Vertical (auto)",
+      "bothAxesArrowsTitle": "Deux axes (auto, flèches)",
+      "visibleTitle": "Scrollbars toujours visibles",
+      "hiddenTitle": "Scrollbars cachées",
+      "stickyTitle": "En-têtes collants",
+      "longContent": "Contenu long",
+      "bottomContent": "Contenu en bas",
+      "wideAndTallContent": "Contenu large et haut",
+      "visibleContent": "Contenu (scrollbars visibles)",
+      "hiddenContent": "Contenu (scrollbars cachées)",
+      "stickyHeader1": "En-tête collant (niveau 1)",
+      "stickyHeader2": "En-tête collant (niveau 2)"
+    }
   }
 }

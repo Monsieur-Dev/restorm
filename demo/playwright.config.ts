@@ -100,6 +100,15 @@ const tooltipTestDir = defineBddConfig({
   outputDir: '.features-gen/tooltip'
 })
 
+const scrollableElementTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/scrollableelement/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/scrollableelement/steps/**/*.ts',
+    'tests/e2e/bdd/scrollableelement/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/scrollableelement'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -192,6 +201,11 @@ export default defineConfig({
     {
       name: 'tooltip',
       testDir: tooltipTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'scrollableelement',
+      testDir: scrollableElementTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],

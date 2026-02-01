@@ -287,3 +287,54 @@ The component uses the following theme CSS variables for theming:
 - Smooth scrolling can be disabled for better performance on low-end devices
 - Auto-hide reduces visual clutter and improves focus
 - Minimal re-renders with optimized state management
+
+## Testing
+
+### `data-testid`
+
+The component supports an optional `data-testid` prop that is applied to the root element and used to derive stable hooks for E2E tests.
+
+When `data-testid="my-scroll"` is provided, the following test ids are available:
+
+- Root: `my-scroll`
+- Content (scrollable): `my-scroll-content`
+- Left shadow (when visible): `my-scroll-left-shadow`
+- Vertical scrollbar: `my-scroll-v-scrollbar`
+  - Slider: `my-scroll-v-slider`
+  - Arrows (if enabled): `my-scroll-v-arrow-up`, `my-scroll-v-arrow-down`
+- Horizontal scrollbar: `my-scroll-h-scrollbar`
+  - Slider: `my-scroll-h-slider`
+  - Arrows (if enabled): `my-scroll-h-arrow-left`, `my-scroll-h-arrow-right`
+
+### Data attributes
+
+When `data-testid` is provided, numeric data attributes are exposed on the root and content elements:
+
+- `data-scroll-top`, `data-scroll-left`
+- `data-container-width`, `data-container-height`
+- `data-content-width`, `data-content-height`
+
+### Selectors
+
+Use the pure string selectors from `electron-core-ui/testing`:
+
+- `scrollableElementRootSelector(testId)`
+- `scrollableElementContentSelector(testId)`
+- `scrollableElementVerticalScrollbarSelector(testId)` / `scrollableElementVerticalSliderSelector(testId)`
+- `scrollableElementHorizontalScrollbarSelector(testId)` / `scrollableElementHorizontalSliderSelector(testId)`
+- `scrollableElementLeftShadowSelector(testId)`
+
+### Playwright-BDD steps
+
+Reusable steps are available from `electron-core-ui/testing/playwright-bdd`:
+
+- `Then scrollable element {string} should be visible`
+- `When I wheel scroll scrollable element {string} vertically by {int}`
+- `When I wheel scroll scrollable element {string} horizontally by {int}`
+- `When I drag scrollable element {string} vertical slider by {int}`
+- `When I drag scrollable element {string} horizontal slider by {int}`
+- `Then scrollable element {string} scroll top should be >= {int}`
+- `Then scrollable element {string} scroll left should be >= {int}`
+- `Then scrollable element {string} vertical scrollbar should be visible|hidden`
+- `Then scrollable element {string} horizontal scrollbar should be visible|hidden`
+- `Then scrollable element {string} left shadow should be visible`

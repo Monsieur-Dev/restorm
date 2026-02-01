@@ -43,6 +43,8 @@ export interface ScrollableElementProps extends ScrollableElementDomProps {
   contentClassName?: string;
   id?: string;
   style?: React.CSSProperties;
+  /** Optional test id applied to the ScrollableElement root element. */
+  'data-testid'?: string;
   /** Logical scroll callback with numeric coordinates */
   onScroll?: (scrollTop: number, scrollLeft: number) => void;
   /** Optional ref to the inner scrollable content element */

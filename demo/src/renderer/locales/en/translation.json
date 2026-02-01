@@ -199,5 +199,23 @@
       "targetB": "Target B (bottom)",
       "tooltipContent": "Tooltip content"
     }
+  },
+  "scrollableElement": {
+    "tabLabel": "ScrollableElement",
+    "harness": {
+      "title": "ScrollableElement",
+      "verticalAutoTitle": "Vertical (auto)",
+      "bothAxesArrowsTitle": "Both axes (auto, arrows)",
+      "visibleTitle": "Always visible scrollbars",
+      "hiddenTitle": "Hidden scrollbars",
+      "stickyTitle": "Sticky headers",
+      "longContent": "Long content",
+      "bottomContent": "Bottom content",
+      "wideAndTallContent": "Wide and tall content",
+      "visibleContent": "Visible scrollbars content",
+      "hiddenContent": "Hidden scrollbars content",
+      "stickyHeader1": "Sticky header (level 1)",
+      "stickyHeader2": "Sticky header (level 2)"
+    }
   }
 }
