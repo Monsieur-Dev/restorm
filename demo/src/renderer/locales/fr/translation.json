@@ -217,5 +217,15 @@
       "stickyHeader1": "En-tête collant (niveau 1)",
       "stickyHeader2": "En-tête collant (niveau 2)"
     }
+  },
+  "toggle": {
+    "tabLabel": "Toggle",
+    "harness": {
+      "title": "Toggle",
+      "checkedLabel": "Toggle (coché)",
+      "uncheckedLabel": "Toggle (décoché)",
+      "disabledLabel": "Toggle (désactivé)",
+      "noFocusLabel": "Toggle (non focusable)"
+    }
   }
 }

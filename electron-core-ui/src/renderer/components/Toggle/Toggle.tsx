@@ -10,6 +10,7 @@ const Toggle: React.FC<ToggleProps> = ({
   disabled = false,
   className = '',
   id,
+  'data-testid': dataTestId,
   styles,
   icon,
   actionClassName,
@@ -75,10 +76,19 @@ const Toggle: React.FC<ToggleProps> = ({
   };
 
   return (
-    <div className="toggle-container" style={{ display: 'flex', alignItems: 'center', gap: '8px' }} >
+    <div
+      className="toggle-container"
+      {...(dataTestId && { 'data-testid': dataTestId })}
+      style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+    >
       <div
         id={id}
         className={classes}
+        {...(dataTestId && {
+          'data-testid': `${dataTestId}-action`,
+          'data-is-checked': checked ? 'true' : 'false',
+          'data-is-disabled': enabled ? 'false' : 'true'
+        })}
         tabIndex={notFocusable ? -1 : 0}
         role="checkbox"
         aria-checked={checked}
@@ -91,6 +101,7 @@ const Toggle: React.FC<ToggleProps> = ({
         {checked && (
           <span 
             className={`codicon codicon-${icon ?? 'check'}`}
+            {...(dataTestId && { 'data-testid': `${dataTestId}-icon` })}
             style={{
               fontSize: '16px',
               color: 'var(--checkbox-foreground)',
@@ -103,6 +114,7 @@ const Toggle: React.FC<ToggleProps> = ({
              {children && (
                <span
                  onClick={handleClick}
+                 {...(dataTestId && { 'data-testid': `${dataTestId}-label` })}
                  style={{
                    cursor: enabled ? 'pointer' : 'default',
                    color: enabled ? 'var(--foreground)' : 'var(--disabledForeground)',

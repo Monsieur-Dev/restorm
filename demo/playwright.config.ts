@@ -109,6 +109,15 @@ const scrollableElementTestDir = defineBddConfig({
   outputDir: '.features-gen/scrollableelement'
 })
 
+const toggleTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/toggle/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/toggle/steps/**/*.ts',
+    'tests/e2e/bdd/toggle/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/toggle'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -206,6 +215,11 @@ export default defineConfig({
     {
       name: 'scrollableelement',
       testDir: scrollableElementTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'toggle',
+      testDir: toggleTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],

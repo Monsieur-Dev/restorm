@@ -9,14 +9,6 @@ The `Toggle` component is a React implementation of the Toggle component. It pro
 ### Interfaces TypeScript
 
 ```typescript
-export interface IToggleOpts extends IToggleStyles {
-  readonly actionClassName?: string;
-  readonly icon?: string; // Nom de l'icône codicon (ex: 'check')
-  readonly title: string;
-  readonly isChecked: boolean;
-  readonly notFocusable?: boolean;
-}
-
 export interface IToggleStyles {
   readonly inputActiveOptionBorder: string | undefined;
   readonly inputActiveOptionForeground: string | undefined;
@@ -24,33 +16,35 @@ export interface IToggleStyles {
 }
 
 export interface ToggleProps {
-  opts: IToggleOpts;
+  isChecked: boolean;
   onChange?: (checked: boolean, viaKeyboard: boolean) => void;
   onKeyDown?: (event: React.KeyboardEvent) => void;
   disabled?: boolean;
   className?: string;
   id?: string;
+  'data-testid'?: string;
+  styles?: IToggleStyles;
+  icon?: string;
+  actionClassName?: string;
+  notFocusable?: boolean;
+  children?: React.ReactNode;
 }
 ```
 
 ### Props
 
-- **opts** (`IToggleOpts`) : Toggle configuration options
-  - `title` : Accessible label for the toggle
-  - `isChecked` : Initial checked/unchecked state
-  - `icon` : Codicon name (default 'check')
-  - `actionClassName` : Additional CSS classes
-  - `notFocusable` : Whether the toggle should not be focusable
-  - `inputActiveOptionBorder` : Border color when active
-  - `inputActiveOptionForeground` : Text color when active
-  - `inputActiveOptionBackground` : Background color when active
-
+- **isChecked** (`boolean`) : Initial checked/unchecked state
 - **onChange** (`(checked: boolean, viaKeyboard: boolean) => void`) : Callback called on state change
 - **onKeyDown** (`(event: React.KeyboardEvent) => void`) : Callback for keyboard events
 - **disabled** (`boolean`) : Disables the toggle
 - **className** (`string`) : Additional CSS classes
 - **id** (`string`) : HTML ID of the toggle
 - **styles** (`IToggleStyles`) : Custom styles (optional, uses default styles if not provided)
+- **icon** (`string`) : Codicon name (default 'check')
+- **actionClassName** (`string`) : Additional CSS class applied to the checkbox action
+- **notFocusable** (`boolean`) : Whether the checkbox action should not be focusable
+- **children** (`React.ReactNode`) : Optional label (also clickable)
+- **data-testid** (`string`) : Optional test id applied to the Toggle root element
 
 ## Usage Examples
 
@@ -62,48 +56,34 @@ import { Toggle } from 'electron-core-ui/renderer'
 const [checked, setChecked] = useState(false)
 
 <Toggle
-  opts={{
-    title: 'Enable notifications',
-    isChecked: checked,
-    icon: 'check',
-    inputActiveOptionBorder: 'var(--inputOption-activeBorder)',
-    inputActiveOptionForeground: 'var(--inputOption-activeForeground)',
-    inputActiveOptionBackground: 'var(--inputOption-activeBackground)'
-  }}
-  onChange={(checked) => setChecked(checked)}
-/>
+  isChecked={checked}
+  onChange={(nextChecked) => setChecked(nextChecked)}
+>
+  Enable notifications
+</Toggle>
 ```
 
 ### Disabled Toggle
 
 ```tsx
 <Toggle
-  opts={{
-    title: 'Disabled option',
-    isChecked: false,
-    icon: 'check',
-    inputActiveOptionBorder: 'var(--inputOption-activeBorder)',
-    inputActiveOptionForeground: 'var(--inputOption-activeForeground)',
-    inputActiveOptionBackground: 'var(--inputOption-activeBackground)'
-  }}
   disabled={true}
-/>
+  isChecked={false}
+>
+  Disabled option
+</Toggle>
 ```
 
 ### Toggle with Custom Icon
 
 ```tsx
 <Toggle
-  opts={{
-    title: 'Custom icon toggle',
-    isChecked: false,
-    icon: 'star', // Utilise l'icône star au lieu de check
-    inputActiveOptionBorder: 'var(--inputOption-activeBorder)',
-    inputActiveOptionForeground: 'var(--inputOption-activeForeground)',
-    inputActiveOptionBackground: 'var(--inputOption-activeBackground)'
-  }}
-  onChange={(checked) => console.log('Star toggled:', checked)}
-/>
+  isChecked={false}
+  icon="star"
+  onChange={(checked) => { /* ... */ }}
+>
+  Custom icon toggle
+</Toggle>
 ```
 
 ### Toggle with Custom Styles
@@ -112,18 +92,16 @@ const [checked, setChecked] = useState(false)
 import { Toggle, defaultToggleStyles } from 'electron-core-ui/renderer'
 
 <Toggle
-  opts={{
-    title: 'Custom styled toggle',
-    isChecked: false,
-    icon: 'check'
-  }}
+  isChecked={false}
   styles={{
     ...defaultToggleStyles,
     inputActiveOptionForeground: '#ff0000', // Rouge au lieu du style par défaut
     inputActiveOptionBackground: '#ffff00'  // Jaune au lieu du style par défaut
   }}
   onChange={(checked) => setChecked(checked)}
-/>
+>
+  Custom styled toggle
+</Toggle>
 ```
 
 ## DOM Structure
@@ -131,15 +109,9 @@ import { Toggle, defaultToggleStyles } from 'electron-core-ui/renderer'
 The component generates the following DOM structure:
 
 ```html
-<div
-  class="monaco-custom-toggle codicon codicon-check checked"
-  tabindex="0"
-  role="checkbox"
-  aria-checked="true"
-  aria-label="Toggle title"
-  aria-disabled="false"
-  style="color: var(--inputOption-activeForeground); background-color: var(--inputOption-activeBackground); border-color: var(--inputOption-activeBorder);"
->
+<div class="toggle-container">
+  <div class="custom-toggle checked" role="checkbox" aria-checked="true" aria-disabled="false"></div>
+  <span>Label</span>
 </div>
 ```
 
@@ -216,3 +188,42 @@ The component automatically adapts to themes through CSS variables. No additiona
 ### Performance
 
 The component uses `useCallback` to optimize performance and avoid unnecessary re-renders.
+
+## Testing
+
+### `data-testid`
+
+The component supports an optional `data-testid` prop that is applied to the root element and used to derive stable hooks for E2E tests.
+
+When `data-testid="my-toggle"` is provided, the following test ids are available:
+
+- Root: `my-toggle`
+- Action (role=checkbox): `my-toggle-action`
+- Label (if `children` is provided): `my-toggle-label`
+- Icon (only when checked): `my-toggle-icon`
+
+The action element also exposes:
+
+- `data-is-checked="true|false"`
+- `data-is-disabled="true|false"`
+
+### Selectors
+
+Use the pure string selectors from `electron-core-ui/testing`:
+
+- `toggleRootSelector(testId)`
+- `toggleActionSelector(testId)`
+- `toggleLabelSelector(testId)`
+- `toggleIconSelector(testId)`
+
+### Playwright-BDD steps
+
+Reusable steps are available from `electron-core-ui/testing/playwright-bdd`:
+
+- `Then toggle {string} should be visible`
+- `Then toggle {string} should be checked`
+- `Then toggle {string} should be unchecked`
+- `Then toggle {string} should be disabled`
+- `When I click toggle {string}`
+- `When I click toggle {string} label`
+- `When I press {string} on toggle {string}`

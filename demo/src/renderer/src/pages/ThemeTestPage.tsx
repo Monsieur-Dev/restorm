@@ -25,7 +25,8 @@ import {
   VariableInputBoxTab,
   KeyValueTableTab,
   TooltipTab,
-  ScrollableElementTab
+  ScrollableElementTab,
+  ToggleTab
 } from '../components/test-tabs'
 import { WorkbenchTab } from '../components/test-tabs'
 
@@ -148,6 +149,7 @@ const ThemeTestPage: React.FC = () => {
     { id: 'keyvaluetable', label: t('keyValueTable.tabLabel'), content: <KeyValueTableTab />, allowFullscreen: true },
     { id: 'tooltip', label: t('tooltip.tabLabel'), content: <TooltipTab />, allowFullscreen: true },
     { id: 'scrollableelement', label: t('scrollableElement.tabLabel'), content: <ScrollableElementTab />, allowFullscreen: true },
+    { id: 'toggle', label: t('toggle.tabLabel'), content: <ToggleTab />, allowFullscreen: true },
     { id: 'sticky-headers', label: t('themeTest.components.stickyHeaders'), content: <StickHeadersTab />, allowFullscreen: true },
     { id: 'split-view', label: 'SplitView', content: <SplitViewTab />, allowFullscreen: true },
     { id: 'checkboxes', label: 'Checkboxes & Radio', content: <CheckboxesTab />, allowFullscreen: true },

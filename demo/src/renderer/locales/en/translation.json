@@ -217,5 +217,15 @@
       "stickyHeader1": "Sticky header (level 1)",
       "stickyHeader2": "Sticky header (level 2)"
     }
+  },
+  "toggle": {
+    "tabLabel": "Toggle",
+    "harness": {
+      "title": "Toggle",
+      "checkedLabel": "Toggle (checked)",
+      "uncheckedLabel": "Toggle (unchecked)",
+      "disabledLabel": "Toggle (disabled)",
+      "noFocusLabel": "Toggle (not focusable)"
+    }
   }
 }

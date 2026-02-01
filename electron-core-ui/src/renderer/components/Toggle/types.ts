@@ -20,6 +20,8 @@ export interface ToggleProps {
   disabled?: boolean;
   className?: string;
   id?: string;
+  /** Optional test id applied to the Toggle root element. */
+  'data-testid'?: string;
   styles?: IToggleStyles;
   icon?: string;
   actionClassName?: string;
