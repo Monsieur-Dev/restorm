@@ -52,6 +52,13 @@
   outline: none;
 }
 
+.milkdown-editor-root {
+  height: 100%;
+  width: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
 /* Ensure the Milkdown React root fills the available space inside the tab. */
 [data-milkdown-root] {
   height: 100%;
