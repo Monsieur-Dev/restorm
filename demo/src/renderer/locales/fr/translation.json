@@ -89,6 +89,13 @@
       "sampleMarkdown": "# Exemple MarkdownViewer\n\nCeci est un exemple **MarkdownViewer**.\n\n- Élément A\n- Élément B\n\n| Col A | Col B |\n| --- | --- |\n| 1 | 2 |\n\nCode inline: `const x = 1`\n\nLien: [Example](https://example.com/)\n\n```ts\nexport function add(a: number, b: number): number {\n  return a + b\n}\n```\n\n```mermaid\nflowchart TD\n  A[Début] --> B{Décision}\n  B -->|Oui| C[OK]\n  B -->|Non| D[KO]\n```\n"
     }
   },
+  "markdownEditor": {
+    "tabLabel": "MarkdownEditor",
+    "harness": {
+      "title": "MarkdownEditor",
+      "initialValue": "# Mon doc\n\nCeci est le contenu initial.\n"
+    }
+  },
   "callout": {
     "tabLabel": "Callout",
     "harness": {

@@ -160,3 +160,9 @@ export {
   markdownViewerMermaidSelector,
   markdownViewerLinkSelector
 } from './markdownViewerSelectors'
+
+export {
+  markdownEditorRootSelector,
+  markdownEditorMilkdownRootSelector,
+  markdownEditorContentEditableSelector
+} from './markdownEditorSelectors'

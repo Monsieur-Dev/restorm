@@ -5,6 +5,7 @@
 ## Props
 
 - `initialValue?: string` : contenu Markdown initial affiché dans l’éditeur.
+- `data-testid?: string` : test id optionnel appliqué au root.
 
 ## Comportement
 
@@ -19,3 +20,32 @@ import { MarkdownEditor } from 'electron-core-ui/renderer'
 
 <MarkdownEditor initialValue={"# My doc"} />
 ```
+
+## Testing
+
+Quand `data-testid` est fourni, le composant expose des hooks stables pour les tests E2E.
+
+### data-testid conventions
+
+- Root: `{id}`
+- Milkdown root wrapper: `{id}-root`
+- Editor (contenteditable): `{id}-editor`
+
+### Stable data attributes (sur le root)
+
+- `data-is-dark`: `true | false`
+- `data-initial-length`: number
+
+### Selectors
+
+- `markdownEditorRootSelector(testId)`
+- `markdownEditorMilkdownRootSelector(testId)`
+- `markdownEditorContentEditableSelector(testId)`
+
+### Playwright-BDD steps
+
+- `Then markdown editor {string} should be visible`
+- `Then markdown editor {string} should be dark`
+- `When I focus markdown editor {string}`
+- `When I type in markdown editor {string} {string}` (typed letter-by-letter)
+- `Then markdown editor {string} should contain text {string}`

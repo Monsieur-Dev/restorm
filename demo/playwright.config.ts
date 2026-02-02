@@ -154,6 +154,15 @@ const markdownViewerTestDir = defineBddConfig({
   outputDir: '.features-gen/markdownviewer'
 })
 
+const markdownEditorTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/markdowneditor/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/markdowneditor/steps/**/*.ts',
+    'tests/e2e/bdd/markdowneditor/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/markdowneditor'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -276,6 +285,11 @@ export default defineConfig({
     {
       name: 'markdownviewer',
       testDir: markdownViewerTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'markdowneditor',
+      testDir: markdownEditorTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],
