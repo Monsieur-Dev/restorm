@@ -181,6 +181,15 @@ const menubarTestDir = defineBddConfig({
   outputDir: '.features-gen/menubar'
 })
 
+const statusbarTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/statusbar/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/statusbar/steps/**/*.ts',
+    'tests/e2e/bdd/statusbar/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/statusbar'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -318,6 +327,11 @@ export default defineConfig({
     {
       name: 'menubar',
       testDir: menubarTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'statusbar',
+      testDir: statusbarTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],

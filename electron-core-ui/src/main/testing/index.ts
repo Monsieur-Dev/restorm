@@ -192,3 +192,10 @@ export {
   menuBarItemSubmenuSelector,
   menuBarItemSubmenuScrollableSelector
 } from './menuBarSelectors'
+
+export {
+  statusbarRootSelector,
+  statusbarElementSelector,
+  statusbarElementLabelSelector,
+  statusbarElementTooltipSelector
+} from './statusbarSelectors'

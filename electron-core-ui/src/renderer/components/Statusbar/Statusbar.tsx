@@ -5,8 +5,11 @@ import { StatusbarProps } from './types'
 const Statusbar: React.FC<StatusbarProps> = ({
   children,
   className = '',
-  id
+  id,
+  'data-testid': dataTestId
 }) => {
+  const testId = dataTestId ?? 'statusbar'
+  const itemCount = React.Children.count(children)
   const statusbarClasses = [
     'statusbar',
     className
@@ -16,6 +19,8 @@ const Statusbar: React.FC<StatusbarProps> = ({
     <div
       id={id}
       className={statusbarClasses}
+      data-testid={testId}
+      data-item-count={String(itemCount)}
     >
       {children}
     </div>
