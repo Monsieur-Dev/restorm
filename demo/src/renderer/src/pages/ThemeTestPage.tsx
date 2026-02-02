@@ -32,7 +32,8 @@ import {
   SashTab,
   MarkdownViewerTab,
   MarkdownEditorTab,
-  EditorWorkbenchTab
+  EditorWorkbenchTab,
+  MenuBarTab
 } from '../components/test-tabs'
 import { WorkbenchTab } from '../components/test-tabs'
 
@@ -144,6 +145,7 @@ const ThemeTestPage: React.FC = () => {
   const tabs: Tab[] = useMemo(() => ([
     { id: 'workbench', label: 'Workbench', content: <WorkbenchTab />, allowFullscreen: true },
     { id: 'workbench-e2e', label: t('workbench.e2eTabLabel'), content: <EditorWorkbenchTab />, allowFullscreen: true },
+    { id: 'menubar-e2e', label: t('menuBar.e2eTabLabel'), content: <MenuBarTab />, allowFullscreen: true },
     { id: 'breadcrumb', label: 'Breadcrumb', content: <BreadcrumbTab />, allowFullscreen: true },
     { id: 'button', label: 'Button', content: <ButtonHarnessTab />, allowFullscreen: true },
     { id: 'callout', label: t('callout.tabLabel'), content: <CalloutTab />, allowFullscreen: true },

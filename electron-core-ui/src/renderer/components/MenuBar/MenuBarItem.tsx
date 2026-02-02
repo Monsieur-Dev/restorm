@@ -11,6 +11,7 @@ interface MenuBarItemProps {
   onMouseEnter?: () => void
   className?: string
   id?: string
+  'data-testid'?: string
 }
 
 /** Extract shortcut info from MenuItem children recursively */
@@ -58,8 +59,10 @@ const MenuBarItem = forwardRef<HTMLDivElement, MenuBarItemProps>(({
   onClick,
   onMouseEnter,
   className = '',
-  id
+  id,
+  'data-testid': dataTestId
 }, ref) => {
+  const testId = dataTestId
   const titleRef = useRef<HTMLDivElement>(null)
   // Store the calculated height only when active (null means use 'auto')
   const [activeHeight, setActiveHeight] = useState<string | null>(null)
@@ -185,17 +188,34 @@ const MenuBarItem = forwardRef<HTMLDivElement, MenuBarItemProps>(({
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      {...(testId && {
+        'data-testid': testId,
+        'data-is-focused': isFocused ? 'true' : 'false',
+        'data-is-active': isActive ? 'true' : 'false',
+        'data-has-children': children ? 'true' : 'false'
+      })}
     >
-      <div ref={titleRef} className="menubar-menu-title" role="none" aria-hidden="true">
+      <div
+        ref={titleRef}
+        className="menubar-menu-title"
+        role="none"
+        aria-hidden="true"
+        {...(testId && { 'data-testid': `${testId}-title` })}
+      >
         {title}
       </div>
       {children && isActive && (
-        <div ref={scrollableRef} className="menu menubar-menu-items-holder menu-container" style={{
+        <div
+          ref={scrollableRef}
+          className="menu menubar-menu-items-holder menu-container"
+          style={{
           position: 'fixed',
           zIndex: 2000,
           left: `${menuPosition.left}px`,
           top: `${menuPosition.top}px`
-        }}>
+          }}
+          {...(testId && { 'data-testid': `${testId}-menu` })}
+        >
           <ScrollableElement
             options={{
               vertical: 'auto',
@@ -212,11 +232,16 @@ const MenuBarItem = forwardRef<HTMLDivElement, MenuBarItemProps>(({
               maxWidth: '300px',
               padding: '2px 0'
             }}
+            {...(testId && { 'data-testid': `${testId}-scrollable` })}
           >
             <ul className="actions-container" role="menu">
               {React.Children.map(children, (child, index) => {
                 if (React.isValidElement(child)) {
-                  return React.cloneElement(child, { key: index })
+                  const childTestId = (child.props as { 'data-testid'?: unknown })['data-testid']
+                  return React.cloneElement(child, {
+                    key: index,
+                    ...(testId && childTestId === undefined && { 'data-testid': `${testId}-item-${index}` })
+                  })
                 }
                 return child
               })}

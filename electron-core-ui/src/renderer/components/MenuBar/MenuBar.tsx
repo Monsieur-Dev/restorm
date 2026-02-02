@@ -11,10 +11,13 @@ const MenuItemWrapper: React.FC<{
   isActive: boolean
   onClick: () => void
   onMouseEnter: () => void
-}> = ({ child, index, setRef, isFocused, isActive, onClick, onMouseEnter }) => {
+  dataTestId: string
+}> = ({ child, index, setRef, isFocused, isActive, onClick, onMouseEnter, dataTestId }) => {
   const refCallback = useCallback((el: HTMLDivElement | null) => {
     setRef(index, el)
   }, [index, setRef])
+
+  const childTestId = (child.props as { 'data-testid'?: unknown })['data-testid']
 
   return React.cloneElement(child as React.ReactElement<Record<string, unknown>>, {
     key: index,
@@ -22,15 +25,18 @@ const MenuItemWrapper: React.FC<{
     isFocused,
     isActive,
     onClick,
-    onMouseEnter
+    onMouseEnter,
+    ...(childTestId === undefined && { 'data-testid': dataTestId })
   })
 }
 
 const MenuBar: React.FC<MenuBarProps> = ({
   children,
   className = '',
-  id
+  id,
+  'data-testid': dataTestId
 }) => {
+  const testId = dataTestId ?? 'menubar'
   const [state, setState] = useState<MenuBarState>({
     focusedMenuIndex: null,
     isOpen: false,
@@ -192,6 +198,11 @@ const MenuBar: React.FC<MenuBarProps> = ({
       ref={menubarRef}
       id={id}
       className={menubarClasses}
+      data-testid={testId}
+      data-is-open={state.isOpen ? 'true' : 'false'}
+      data-focused-menu-index={state.focusedMenuIndex === null ? '' : String(state.focusedMenuIndex)}
+      data-active-menu-index={state.activeMenuIndex === null ? '' : String(state.activeMenuIndex)}
+      data-menu-count={String(menuItems.length)}
       role="menubar"
       style={{
         width: 'fit-content',
@@ -204,6 +215,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
 
         const isFocused = state.focusedMenuIndex === index
         const isActive = state.activeMenuIndex === index
+        const childTestId = `${testId}-menu-${index}`
 
         return (
           <MenuItemWrapper
@@ -215,6 +227,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
             isActive={isActive}
             onClick={(): void => { handleMenuClick(index) }}
             onMouseEnter={(): void => { handleMenuMouseEnter(index) }}
+            dataTestId={childTestId}
           />
         )
       })}

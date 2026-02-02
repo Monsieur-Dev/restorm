@@ -50,7 +50,14 @@
     "about": "À propos",
     "documentation": "Documentation",
     "reportIssue": "Signaler un problème",
-    "keyboardShortcuts": "Raccourcis clavier"
+    "keyboardShortcuts": "Raccourcis clavier",
+    "e2eTabLabel": "MenuBar (E2E)",
+    "harness": {
+      "title": "MenuBar",
+      "recentFile1": "Fichier récent 1",
+      "recentFile2": "Fichier récent 2",
+      "longItemPrefix": "Élément long"
+    }
   },
   "progressBar": {
     "tabLabel": "ProgressBar",

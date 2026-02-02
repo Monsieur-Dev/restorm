@@ -464,6 +464,83 @@ The component uses:
 - Efficient event handling
 - Minimal re-renders with proper state management
 
+## Testing
+
+### `data-testid` API
+
+`MenuBar` now supports test hooks via `data-testid` props:
+
+- `MenuBar`: `data-testid` (default: `menubar`)
+  - root attributes: `data-is-open`, `data-focused-menu-index`, `data-active-menu-index`, `data-menu-count`
+- `MenuBarItem`: `data-testid`
+  - root attributes: `data-is-focused`, `data-is-active`, `data-has-children`
+- `MenuItem`: `data-testid`
+  - root attributes: `data-disabled`, `data-checked`, `data-has-submenu`, `data-submenu-open`
+- `MenuItemSeparator`: `data-testid`
+
+### Derived test ids (sub-elements)
+
+When a base `data-testid` is provided, these sub-elements are exposed:
+
+- Menu bar item title: `${menuId}-title`
+- Dropdown container: `${menuId}-menu`
+- Dropdown scrollable element: `${menuId}-scrollable` (this is a `ScrollableElement`)
+- Menu item label: `${itemId}-label`
+- Menu item shortcut: `${itemId}-shortcut`
+- Submenu container: `${itemId}-submenu`
+- Submenu scrollable element: `${itemId}-submenu-scrollable` (this is a `ScrollableElement`)
+
+### Recommended conventions
+
+- Prefer explicit ids for top-level menus and important items:
+  - Example: `menubar-basic-file`, `menubar-basic-edit`, `menubar-basic-file-open`
+- Auto-generated ids are also provided when absent (for convenience), but explicit ids make `.feature` files more readable.
+
+### Selectors (electron-core-ui/testing)
+
+Available helpers:
+
+- `menuBarRootSelector(testId)`
+- `menuBarMenuButtonSelector(menuId)`
+- `menuBarMenuTitleSelector(menuId)`
+- `menuBarMenuDropdownSelector(menuId)`
+- `menuBarMenuScrollableSelector(menuId)`
+- `menuBarItemSelector(itemId)`
+- `menuBarItemLabelSelector(itemId)`
+- `menuBarItemShortcutSelector(itemId)`
+- `menuBarItemSubmenuSelector(itemId)`
+- `menuBarItemSubmenuScrollableSelector(itemId)`
+
+### Playwright-BDD steps (electron-core-ui/testing/playwright-bdd)
+
+Register steps:
+
+- `defineMenuBarBddSteps(bdd)`
+
+Core steps:
+
+- `Then menu bar {string} should be visible`
+- `When I open menu bar {string} menu {string}`
+- `Then menu bar {string} menu {string} should be open`
+- `Then menu bar {string} menu {string} should be closed`
+- `When I click outside to close menu bar {string}`
+- `When I click menu bar item {string}`
+- `When I hover menu bar item {string}`
+- `Then menu bar submenu {string} should be visible`
+- `When I press keys {string} in menu bar {string}` (comma-separated, ex: `ArrowRight,ArrowDown,Escape`)
+- `When I trigger menu shortcut {string}` (ex: `Ctrl+O`)
+
+### Wrapping `ScrollableElement`
+
+Since dropdowns/submenus use `ScrollableElement`, you can reuse its steps by targeting:
+
+- `${menuId}-scrollable`
+- `${itemId}-submenu-scrollable`
+
+Register with:
+
+- `defineScrollableElementBddSteps(bdd)`
+
 ## Notes for AI Usage
 
 ### Recommended Configuration

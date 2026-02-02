@@ -4,6 +4,7 @@ export interface MenuBarProps {
   children: React.ReactNode
   className?: string
   id?: string
+  'data-testid'?: string
 }
 
 export interface MenuItemProps {
@@ -20,11 +21,13 @@ export interface MenuItemProps {
   children?: React.ReactNode
   className?: string
   id?: string
+  'data-testid'?: string
 }
 
 export interface MenuItemSeparatorProps {
   className?: string
   id?: string
+  'data-testid'?: string
 }
 
 export interface MenuBarState {
