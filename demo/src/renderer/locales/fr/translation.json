@@ -227,5 +227,26 @@
       "disabledLabel": "Toggle (désactivé)",
       "noFocusLabel": "Toggle (non focusable)"
     }
+  },
+  "radio": {
+    "tabLabel": "Radio",
+    "harness": {
+      "title": "RadioGroup",
+      "basicTitle": "RadioGroup (basique)",
+      "disabledTitle": "RadioGroup avec option désactivée",
+      "tooltipsTitle": "RadioGroup avec tooltips",
+      "option1": "Option 1",
+      "option2": "Option 2",
+      "option3": "Option 3",
+      "enabledOption": "Option activée",
+      "disabledOption": "Option désactivée",
+      "anotherOption": "Une autre option",
+      "optionA": "Option A",
+      "optionB": "Option B",
+      "optionC": "Option C",
+      "tooltipA": "Ceci est l’option A",
+      "tooltipB": "Ceci est l’option B",
+      "tooltipC": "Ceci est l’option C"
+    }
   }
 }

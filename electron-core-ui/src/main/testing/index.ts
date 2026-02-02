@@ -136,3 +136,5 @@ export {
   toggleLabelSelector,
   toggleIconSelector
 } from './toggleSelectors'
+
+export { radioGroupRootSelector, radioGroupItemSelector } from './radioSelectors'

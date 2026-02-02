@@ -118,6 +118,15 @@ const toggleTestDir = defineBddConfig({
   outputDir: '.features-gen/toggle'
 })
 
+const radioTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/radio/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/radio/steps/**/*.ts',
+    'tests/e2e/bdd/radio/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/radio'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -220,6 +229,11 @@ export default defineConfig({
     {
       name: 'toggle',
       testDir: toggleTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'radio',
+      testDir: radioTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],
