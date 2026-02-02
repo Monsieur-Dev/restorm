@@ -138,3 +138,5 @@ export {
 } from './toggleSelectors'
 
 export { radioGroupRootSelector, radioGroupItemSelector } from './radioSelectors'
+
+export { progressBarRootSelector, progressBarBitSelector } from './progressBarSelectors'

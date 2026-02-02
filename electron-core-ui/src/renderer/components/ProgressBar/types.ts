@@ -13,6 +13,8 @@ export interface ProgressBarProps {
   total?: number;
   className?: string;
   id?: string;
+  /** Optional test id applied to the ProgressBar root element. */
+  'data-testid'?: string;
   onComplete?: () => void;
 }
 

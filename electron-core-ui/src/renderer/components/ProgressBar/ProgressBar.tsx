@@ -10,7 +10,8 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   total = 100,
   className = '',
   id,
-  onComplete
+  onComplete,
+  'data-testid': dataTestId
 }) => {
   // Track async states (timers)
   const [isLongRunning, setIsLongRunning] = useState(false);
@@ -45,20 +46,23 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
 
   // Handle mode changes - only for async operations
   useEffect(() => {
+    let rafId: number | null = null
+
     // Reset states on mode change and track if we came from discrete
     if (mode !== prevModeRef.current) {
-      const wasDiscrete = prevModeRef.current === 'discrete';
-      prevModeRef.current = mode;
+      const previousMode = prevModeRef.current
+      const wasDiscrete = previousMode === 'discrete'
+      prevModeRef.current = mode
       // Use requestAnimationFrame to defer the setState
-      const rafId = requestAnimationFrame(() => {
-        setIsLongRunning(false);
-        setHasCompletedAnimation(false);
+      rafId = requestAnimationFrame(() => {
+        setIsLongRunning(false)
+        setHasCompletedAnimation(false)
         // Track if we're transitioning to done from discrete
-        setWasDiscreteBeforeDone(mode === 'done' && wasDiscrete);
-      });
-      return () => { cancelAnimationFrame(rafId); };
+        setWasDiscreteBeforeDone(mode === 'done' && wasDiscrete)
+      })
+    } else {
+      prevModeRef.current = mode
     }
-    prevModeRef.current = mode;
 
     if (mode === 'infinite') {
       // Long running mode after 10 seconds
@@ -74,6 +78,9 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     }
 
     return () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId)
+      }
       if (longRunningTimeoutRef.current) {
         clearTimeout(longRunningTimeoutRef.current);
       }
@@ -104,6 +111,16 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     return 'inherit';
   }, [isInfinite, isDiscrete, currentValue, total]);
 
+  const widthPercent = (() => {
+    if (isInfinite) return 2;
+    if (isDiscrete) {
+      const percentage = total > 0 ? (currentValue / total) * 100 : 0;
+      return Math.round(Math.min(100, Math.max(0, percentage)));
+    }
+    // done
+    return wasDiscreteBeforeDone ? 100 : 0;
+  })();
+
   // Calculate opacity
   const getOpacity = useCallback(() => {
     if (isDone && isInfinite) return '0';
@@ -118,9 +135,19 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
       aria-valuemin={0}
       aria-valuemax={total}
       aria-valuenow={isDiscrete ? currentValue : undefined}
+      {...(dataTestId && {
+        'data-testid': dataTestId,
+        'data-mode': mode,
+        'data-is-active': isActive ? 'true' : 'false',
+        'data-is-long-running': isLongRunning ? 'true' : 'false',
+        'data-current-value': String(Math.round(currentValue)),
+        'data-total': String(Math.round(total)),
+        'data-width-percent': String(widthPercent)
+      })}
     >
       <div
         className="progress-bit"
+        {...(dataTestId && { 'data-testid': `${dataTestId}-bit` })}
         style={{
           backgroundColor: mergedStyles.progressBarBackground,
           width: getWidth(),

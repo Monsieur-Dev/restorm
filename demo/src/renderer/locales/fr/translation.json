@@ -52,6 +52,18 @@
     "reportIssue": "Signaler un problème",
     "keyboardShortcuts": "Raccourcis clavier"
   },
+  "progressBar": {
+    "tabLabel": "ProgressBar",
+    "harness": {
+      "title": "ProgressBar",
+      "infinite": "Infini",
+      "discrete50": "Discret (50%)",
+      "customColor": "Discret (couleur personnalisée)",
+      "doneFromDiscrete": "Terminé depuis discret",
+      "doneFromInfinite": "Terminé depuis infini",
+      "setDone": "Marquer terminé"
+    }
+  },
   "callout": {
     "tabLabel": "Callout",
     "harness": {
