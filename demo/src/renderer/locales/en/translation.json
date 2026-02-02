@@ -64,6 +64,22 @@
       "setDone": "Set done"
     }
   },
+  "sash": {
+    "tabLabel": "Sash",
+    "harness": {
+      "title": "Sash",
+      "verticalBasic": "VerticalSashContainer (basic)",
+      "horizontalBasic": "HorizontalSashContainer (basic)",
+      "verticalWithStorage": "VerticalSashContainer (storageKey)",
+      "horizontalWithStorage": "HorizontalSashContainer (storageKey)",
+      "verticalWithReset": "VerticalSashContainer (double click reset)",
+      "horizontalWithReset": "HorizontalSashContainer (double click reset)",
+      "leftPane": "Left pane",
+      "rightPane": "Right pane",
+      "topPane": "Top pane",
+      "bottomPane": "Bottom pane"
+    }
+  },
   "callout": {
     "tabLabel": "Callout",
     "harness": {

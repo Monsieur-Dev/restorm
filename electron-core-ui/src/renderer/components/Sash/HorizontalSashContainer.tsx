@@ -18,7 +18,8 @@ export const HorizontalSashContainer: React.FC<HorizontalSashContainerProps> = (
   minBottomHeight = 100,
   storageKey,
   className = '',
-  sashConfig
+  sashConfig,
+  'data-testid': dataTestId
 }) => {
   const [isResizing, setIsResizing] = useState(false)
   const topRef = useRef<HTMLDivElement>(null)
@@ -140,6 +141,15 @@ export const HorizontalSashContainer: React.FC<HorizontalSashContainerProps> = (
         flexDirection: 'column',
         overflow: 'hidden'
       }}
+      {...(dataTestId && {
+        'data-testid': dataTestId,
+        'data-top-height': String(Math.round(height)),
+        'data-container-height': String(Math.round(containerHeight)),
+        'data-min-top-height': String(Math.round(actualMinTopHeight)),
+        'data-min-bottom-height': String(Math.round(actualMinBottomHeight)),
+        'data-sash-state': sashState,
+        'data-is-resizing': isResizing ? 'true' : 'false'
+      })}
     >
       {topContent !== undefined && (
         <div
@@ -155,6 +165,7 @@ export const HorizontalSashContainer: React.FC<HorizontalSashContainerProps> = (
             display: 'flex',
             flexDirection: 'column'
           }}
+          {...(dataTestId && { 'data-testid': `${dataTestId}-top` })}
         >
           {topContent}
         </div>
@@ -163,6 +174,7 @@ export const HorizontalSashContainer: React.FC<HorizontalSashContainerProps> = (
         orientation="horizontal"
         layoutProvider={layoutProvider}
         state={sashState}
+        {...(dataTestId && { 'data-testid': `${dataTestId}-sash` })}
         {...(sashConfig?.size !== undefined && { size: sashConfig.size })}
         {...(sashConfig?.hoverDelay !== undefined && { hoverDelay: sashConfig.hoverDelay })}
         onStart={handleStart}
@@ -184,6 +196,7 @@ export const HorizontalSashContainer: React.FC<HorizontalSashContainerProps> = (
             display: 'flex',
             flexDirection: 'column'
           }}
+          {...(dataTestId && { 'data-testid': `${dataTestId}-bottom` })}
         >
           {bottomContent}
         </div>

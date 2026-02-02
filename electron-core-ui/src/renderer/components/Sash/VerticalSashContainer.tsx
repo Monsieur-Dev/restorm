@@ -18,7 +18,8 @@ export const VerticalSashContainer: React.FC<VerticalSashContainerProps> = ({
   minRightWidth = 240,
   storageKey,
   className = '',
-  sashConfig
+  sashConfig,
+  'data-testid': dataTestId
 }) => {
   const [isResizing, setIsResizing] = useState(false)
   const leftRef = useRef<HTMLDivElement>(null)
@@ -139,6 +140,15 @@ export const VerticalSashContainer: React.FC<VerticalSashContainerProps> = ({
         display: 'flex',
         overflow: 'hidden'
       }}
+      {...(dataTestId && {
+        'data-testid': dataTestId,
+        'data-left-width': String(Math.round(width)),
+        'data-container-width': String(Math.round(containerWidth)),
+        'data-min-left-width': String(Math.round(actualMinLeftWidth)),
+        'data-min-right-width': String(Math.round(actualMinRightWidth)),
+        'data-sash-state': sashState,
+        'data-is-resizing': isResizing ? 'true' : 'false'
+      })}
     >
       {leftContent !== undefined && (
         <div
@@ -154,6 +164,7 @@ export const VerticalSashContainer: React.FC<VerticalSashContainerProps> = ({
             display: 'flex',
             flexDirection: 'column'
           }}
+          {...(dataTestId && { 'data-testid': `${dataTestId}-left` })}
         >
           {leftContent}
         </div>
@@ -162,6 +173,7 @@ export const VerticalSashContainer: React.FC<VerticalSashContainerProps> = ({
         orientation="vertical"
         layoutProvider={layoutProvider}
         state={sashState}
+        {...(dataTestId && { 'data-testid': `${dataTestId}-sash` })}
         {...(sashConfig?.size !== undefined && { size: sashConfig.size })}
         {...(sashConfig?.hoverDelay !== undefined && { hoverDelay: sashConfig.hoverDelay })}
         onStart={handleStart}
@@ -183,6 +195,7 @@ export const VerticalSashContainer: React.FC<VerticalSashContainerProps> = ({
             display: 'flex',
             flexDirection: 'column'
           }}
+          {...(dataTestId && { 'data-testid': `${dataTestId}-right` })}
         >
           {rightContent}
         </div>

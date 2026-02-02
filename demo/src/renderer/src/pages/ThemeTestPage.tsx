@@ -28,7 +28,8 @@ import {
   ScrollableElementTab,
   ToggleTab,
   RadioTab,
-  ProgressBarTab
+  ProgressBarTab,
+  SashTab
 } from '../components/test-tabs'
 import { WorkbenchTab } from '../components/test-tabs'
 
@@ -154,6 +155,7 @@ const ThemeTestPage: React.FC = () => {
     { id: 'toggle', label: t('toggle.tabLabel'), content: <ToggleTab />, allowFullscreen: true },
     { id: 'radio', label: t('radio.tabLabel'), content: <RadioTab />, allowFullscreen: true },
     { id: 'progressbar', label: t('progressBar.tabLabel'), content: <ProgressBarTab />, allowFullscreen: true },
+    { id: 'sash', label: t('sash.tabLabel'), content: <SashTab />, allowFullscreen: true },
     { id: 'sticky-headers', label: t('themeTest.components.stickyHeaders'), content: <StickHeadersTab />, allowFullscreen: true },
     { id: 'split-view', label: 'SplitView', content: <SplitViewTab />, allowFullscreen: true },
     { id: 'checkboxes', label: 'Checkboxes & Radio', content: <CheckboxesTab />, allowFullscreen: true },

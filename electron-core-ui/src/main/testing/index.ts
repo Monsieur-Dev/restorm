@@ -140,3 +140,15 @@ export {
 export { radioGroupRootSelector, radioGroupItemSelector } from './radioSelectors'
 
 export { progressBarRootSelector, progressBarBitSelector } from './progressBarSelectors'
+
+export {
+  sashRootSelector,
+  verticalSashContainerRootSelector,
+  verticalSashContainerLeftSelector,
+  verticalSashContainerRightSelector,
+  verticalSashContainerSashSelector,
+  horizontalSashContainerRootSelector,
+  horizontalSashContainerTopSelector,
+  horizontalSashContainerBottomSelector,
+  horizontalSashContainerSashSelector
+} from './sashSelectors'
