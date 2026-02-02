@@ -96,6 +96,31 @@
       "initialValue": "# My doc\n\nThis is the initial content.\n"
     }
   },
+  "workbench": {
+    "e2eTabLabel": "Workbench (E2E)",
+    "harness": {
+      "actions": {
+        "reset": "Reset",
+        "save": "Save",
+        "load": "Load",
+        "clear": "Clear",
+        "openAux": "Open aux window",
+        "ipcInside": "IPC mode: inside",
+        "ipcCreate": "IPC mode: create",
+        "ipcSend": "IPC mode: send"
+      },
+      "contextMenu": {
+        "close": "Close tab",
+        "closeOthers": "Close other tabs"
+      },
+      "tabs": {
+        "a": { "title": "Tab A", "content": "Content A" },
+        "b": { "title": "Tab B", "content": "Content B" },
+        "c": { "title": "Tab C (fullscreen)", "content": "Content C" },
+        "d": { "title": "Tab D", "content": "Content D" }
+      }
+    }
+  },
   "callout": {
     "tabLabel": "Callout",
     "harness": {

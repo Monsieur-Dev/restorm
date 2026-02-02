@@ -166,3 +166,16 @@ export {
   markdownEditorMilkdownRootSelector,
   markdownEditorContentEditableSelector
 } from './markdownEditorSelectors'
+
+export {
+  editorWorkbenchRootSelector,
+  editorWorkbenchGroupSelector,
+  editorWorkbenchGroupContentSelector,
+  editorWorkbenchGroupTabsSelector,
+  editorWorkbenchGroupTabsContainerSelector,
+  editorWorkbenchTabSelector,
+  editorWorkbenchTabLabelSelector,
+  editorWorkbenchTabCloseSelector,
+  editorWorkbenchGroupTabsContextMenuSelector,
+  editorWorkbenchSashSelector
+} from './workbenchSelectors'

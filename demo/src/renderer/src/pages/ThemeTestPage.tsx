@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react'
+import React, { useEffect, useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useTheme, Tabs, logger, SelectBox, Titlebar, MenuBar, MenuBarItem, MenuItem, MenuItemSeparator, Button, Statusbar, StatusbarElement, useSettingsModal } from 'electron-core-ui/renderer'
 import type { Tab } from 'electron-core-ui/renderer'
@@ -31,7 +31,8 @@ import {
   ProgressBarTab,
   SashTab,
   MarkdownViewerTab,
-  MarkdownEditorTab
+  MarkdownEditorTab,
+  EditorWorkbenchTab
 } from '../components/test-tabs'
 import { WorkbenchTab } from '../components/test-tabs'
 
@@ -140,8 +141,9 @@ const ThemeTestPage: React.FC = () => {
     })
   }
 
-  const tabs: Tab[] = [
+  const tabs: Tab[] = useMemo(() => ([
     { id: 'workbench', label: 'Workbench', content: <WorkbenchTab />, allowFullscreen: true },
+    { id: 'workbench-e2e', label: t('workbench.e2eTabLabel'), content: <EditorWorkbenchTab />, allowFullscreen: true },
     { id: 'breadcrumb', label: 'Breadcrumb', content: <BreadcrumbTab />, allowFullscreen: true },
     { id: 'button', label: 'Button', content: <ButtonHarnessTab />, allowFullscreen: true },
     { id: 'callout', label: t('callout.tabLabel'), content: <CalloutTab />, allowFullscreen: true },
@@ -170,7 +172,14 @@ const ThemeTestPage: React.FC = () => {
     { id: 'inputs', label: 'Text Inputs', content: <InputsTab />, allowFullscreen: true },
     { id: 'panels', label: 'Panels & Lists', content: <PanelsTab />, allowFullscreen: true },
     { id: 'text', label: 'Text Styles', content: <TextTab />, allowFullscreen: true },
-  ]
+  ]), [t])
+
+  const initialTabFromUrl = useMemo(() => new URLSearchParams(window.location.search).get('tab'), [])
+  const [activeTabId, setActiveTabId] = useState<string>(() => {
+    if (initialTabFromUrl && tabs.some((tab) => tab.id === initialTabFromUrl)) return initialTabFromUrl
+    return tabs[0]?.id ?? ''
+  })
+  const resolvedActiveTabId = tabs.some((tab) => tab.id === activeTabId) ? activeTabId : (tabs[0]?.id ?? '')
 
   return (
     <div
@@ -365,7 +374,7 @@ const ThemeTestPage: React.FC = () => {
 
       {/* Tabs */}
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <Tabs tabs={tabs} />
+        <Tabs tabs={tabs} activeTabId={resolvedActiveTabId} onTabChange={setActiveTabId} />
       </div>
 
       {/* Statusbar */}

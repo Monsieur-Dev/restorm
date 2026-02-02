@@ -37,7 +37,11 @@ export function isEditorDragEvent(e: React.DragEvent | DragEvent): boolean {
 	try {
 		const types = e.dataTransfer?.types;
 		if (!types) return currentDragData !== undefined;
-		return Array.from(types).includes(DND_MIME.editor);
+		const arr = Array.from(types);
+		if (arr.includes(DND_MIME.editor)) return true;
+		// Fallback for environments (including some test runners) where custom MIME types are not preserved
+		// across drag events (dragover/drop), but we still have the in-memory payload.
+		return currentDragData !== undefined;
 	} catch {
 		return currentDragData !== undefined;
 	}

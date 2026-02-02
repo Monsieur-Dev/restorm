@@ -15,10 +15,14 @@ export interface EditorGroupViewProps extends EditorWorkbenchCallbacks {
 	 * Callback to notify parent when this group should receive focus.
 	 */
 	onFocusRequested?: (groupId: string) => void;
+	/**
+	 * Optional test id base for stable E2E selectors.
+	 */
+	'data-testid'?: string;
 }
 
 export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
-	const { group, renderTabContent, onSplitTab, onActivateTab, hasFocus = false, onFocusRequested } = props;
+	const { group, renderTabContent, onSplitTab, onActivateTab, hasFocus = false, onFocusRequested, 'data-testid': dataTestId } = props;
 	const [splitTarget, setSplitTarget] = useState<SplitDirection | 'center' | undefined>(undefined);
 	const [isEditorDrag, setIsEditorDrag] = useState<boolean>(false);
 	const [fullscreenTabId, setFullscreenTabId] = useState<string | null>(null);
@@ -169,14 +173,35 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 	);
 
 	return (
-		<div className="editor-group-container" data-group-id={group.id} style={{ display: 'flex', flexDirection: 'column', minWidth: 0, position: 'relative', height: '100%' }}>
+		<div
+			className="editor-group-container"
+			data-group-id={group.id}
+			{...(dataTestId && {
+				'data-testid': `${dataTestId}-group-${group.id}`,
+				'data-has-focus': hasFocus ? 'true' : 'false',
+				'data-active-tab-id': group.activeTabId ?? '',
+				'data-tab-count': String(group.tabs.length)
+			})}
+			style={{ display: 'flex', flexDirection: 'column', minWidth: 0, position: 'relative', height: '100%' }}
+		>
 			<div className="title" style={{ display: 'flex' }}>
-				<EditorTabs {...props} onActivateTab={handleActivateTab} dimmed={!hasFocus} onTabDoubleClick={handleTabDoubleClick} />
+				<EditorTabs
+					{...props}
+					onActivateTab={handleActivateTab}
+					dimmed={!hasFocus}
+					onTabDoubleClick={handleTabDoubleClick}
+					{...(dataTestId && { 'data-testid': `${dataTestId}-group-${group.id}-tabs` })}
+				/>
 			</div>
 			<div
 				ref={contentRef}
 				className="editor-group-content-placeholder"
 				data-group-id={group.id}
+				{...(dataTestId && {
+					'data-testid': `${dataTestId}-group-${group.id}-content`,
+					'data-split-target': (splitTarget ?? ''),
+					'data-is-editor-drag': isEditorDrag ? 'true' : 'false'
+				})}
 				tabIndex={-1}
 				onDragEnter={onDragEnterGroup}
 				onDragOver={onDragOverGroup}
@@ -238,6 +263,7 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 				</div>
 				<div
 					style={overlayStyle}
+					{...(dataTestId && { 'data-testid': `${dataTestId}-group-${group.id}-overlay` })}
 					onDragEnter={(e) => {
 						onDragEnterGroup(e);
 						e.stopPropagation();
