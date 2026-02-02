@@ -18,6 +18,7 @@ export interface EditorWorkbenchProps extends EditorWorkbenchCallbacks {
 	onChange?: (tree: WorkbenchTree) => void;
 	style?: React.CSSProperties;
 	className?: string;
+	'data-testid'?: string;
 	/**
 	 * Optional controlled focused group ID. When provided, focus visuals will follow this value.
 	 * When omitted, the workbench manages focus internally.
@@ -208,7 +209,8 @@ const GroupContainer: React.FC<{
 	callbacks: EditorWorkbenchCallbacks;
 	renderLeaf: (node: EditorGroup) => React.ReactNode;
 	onNodeSizesChange?: ((nodeId: string, sizes: number[]) => void) | undefined;
-}> = ({ node, callbacks, renderLeaf, onNodeSizesChange }) => {
+	dataTestIdBase?: string;
+}> = ({ node, callbacks, renderLeaf, onNodeSizesChange, dataTestIdBase }) => {
 	const isVertical = node.orientation === 'vertical';
 	const ref = useRef<HTMLDivElement | null>(null);
 	
@@ -272,10 +274,19 @@ const GroupContainer: React.FC<{
 	}, [isVertical, sizes]);
 
 	return (
-		<div ref={ref} style={{ display: 'flex', flex: 1, flexDirection: isVertical ? 'row' : 'column', minWidth: 0, minHeight: 0, position: 'relative' }}>
+		<div
+			ref={ref}
+			{...(dataTestIdBase && { 'data-testid': `${dataTestIdBase}-container-${node.id}`, 'data-orientation': node.orientation, 'data-child-count': String(node.groups.length) })}
+			style={{ display: 'flex', flex: 1, flexDirection: isVertical ? 'row' : 'column', minWidth: 0, minHeight: 0, position: 'relative' }}
+		>
 			{node.groups.map((child, i) => (
 				<React.Fragment key={i}>
 					<div
+						{...(dataTestIdBase && {
+							'data-testid': isTabGroupNode(child)
+								? `${dataTestIdBase}-slot-group-${child.id}`
+								: `${dataTestIdBase}-slot-container-${child.id}`
+						})}
 						style={{
 							display: 'flex',
 							flexDirection: 'column',
@@ -286,7 +297,15 @@ const GroupContainer: React.FC<{
 					>
 						{isTabGroupNode(child)
 							? renderLeaf(child)
-							: <GroupContainer node={child} callbacks={callbacks} renderLeaf={renderLeaf} onNodeSizesChange={onNodeSizesChange} />}
+							: (
+								<GroupContainer
+									node={child}
+									callbacks={callbacks}
+									renderLeaf={renderLeaf}
+									onNodeSizesChange={onNodeSizesChange}
+									{...(dataTestIdBase && { dataTestIdBase })}
+								/>
+							)}
 					</div>
 					{i < node.groups.length - 1 ? (
 						<Sash
@@ -295,6 +314,7 @@ const GroupContainer: React.FC<{
 							onStart={onSashStart(i)}
 							onChange={onSashChange(i)}
 							state="enabled"
+							{...(dataTestIdBase && { 'data-testid': `${dataTestIdBase}-sash-${node.id}-${i}` })}
 						/>
 					) : null}
 				</React.Fragment>
@@ -322,6 +342,7 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 	autosave,
 	onRebuildTab,
 	onStateRestored,
+	'data-testid': dataTestId,
 	...extCallbacks
 }, ref) => {
 	// Internal focus state when component is uncontrolled
@@ -329,6 +350,9 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 	
 	// Track if workbench state has been restored
 	const restoredRef = useRef(false);
+
+	const testId = dataTestId ?? 'editorworkbench';
+	const effectiveFocusedGroupId = focusedGroupId ?? internalFocusedGroupId;
 	
 	// Store latest tree for imperative methods
 	const treeRef = useRef(tree);
@@ -807,7 +831,6 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 			extras['getTabContextMenuItems'] = extCallbacks.getTabContextMenuItems;
 		}
 		// Determine if this group has focus
-		const effectiveFocusedGroupId = focusedGroupId ?? internalFocusedGroupId;
 		const hasFocus = effectiveFocusedGroupId === leaf.id;
 		return (
 			<EditorGroupView
@@ -819,6 +842,7 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 				onCloseOthersInGroup={handleCloseOthersInGroup}
 				hasFocus={hasFocus}
 				onFocusRequested={handleFocusRequested}
+				{...(testId && { 'data-testid': testId })}
 				{...extras}
 			/>
 		);
@@ -829,18 +853,24 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		handleCloseOthersInGroup,
 		handleActivate,
 		handleFocusRequested,
-		focusedGroupId,
-		internalFocusedGroupId,
 		extCallbacks.onDetachToNewWindow,
 		extCallbacks.renderTabContent,
 		extCallbacks.renderTabTitle,
 		extCallbacks.onGetTabContent,
-		extCallbacks.getTabContextMenuItems
+		extCallbacks.getTabContextMenuItems,
+		effectiveFocusedGroupId,
+		testId
 	]);
 
 	return (
 		<div
 			className={`part editor ${className ?? ''}`}
+			{...(testId && {
+				'data-testid': testId,
+				'data-root-orientation': tree.orientation,
+				'data-root-group-count': String(tree.groups.length),
+				'data-focused-group-id': effectiveFocusedGroupId ?? ''
+			})}
 			style={{ display: 'flex', flex: 1, minWidth: 0, minHeight: 0, ...style }}
 		>
 			<div className="content" style={{ display: 'flex', flex: 1, minWidth: 0, minHeight: 0 }}>
@@ -852,6 +882,7 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 						callbacks={extCallbacks}
 						renderLeaf={leafRenderer}
 						onNodeSizesChange={onSizesChange}
+						dataTestIdBase={testId}
 					/>
 				)}
 			</div>

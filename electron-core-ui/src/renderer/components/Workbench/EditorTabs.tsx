@@ -21,6 +21,10 @@ export interface EditorTabsProps extends EditorWorkbenchCallbacks {
 	 * Called when a tab is double-clicked. Used for fullscreen modal feature.
 	 */
 	onTabDoubleClick?: (tabId: string) => void;
+	/**
+	 * Optional test id base for stable E2E selectors.
+	 */
+	'data-testid'?: string;
 }
 
 export const EditorTabs: React.FC<EditorTabsProps> = ({
@@ -34,7 +38,8 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 	renderTabTitle,
 	getTabContextMenuItems,
 	dimmed,
-	onTabDoubleClick
+	onTabDoubleClick,
+	'data-testid': dataTestId
 }) => {
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const [_dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -54,6 +59,8 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 		y: 0,
 		items: []
 	});
+
+	const contextMenuTestId = dataTestId ? `${dataTestId}-contextmenu` : undefined
 
 	// FLIP animation: store previous rects per tab id and refs to elements
 	const tabElementByIdRef = useRef<Map<string, HTMLElement>>(new Map());
@@ -363,6 +370,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 					horizontalScrollbarSize: 3
 				}}
 				className={`tabs-container-wrapper${dimmed ? ' dimmed' : ''}`}
+				{...(dataTestId && { 'data-testid': dataTestId })}
 				style={{
 					flex: 1,
 					height: 'var(--editor-group-tab-height)',
@@ -374,6 +382,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 					className={`tabs-container${dimmed ? ' dimmed' : ''}`}
 					role="tablist"
 					aria-label="Editor tabs"
+					{...(dataTestId && { 'data-testid': `${dataTestId}-container` })}
 					onDragEnter={updateDragOver}
 					onDragOver={updateDragOver}
 					onDragLeave={onDragLeaveTabs}
@@ -390,6 +399,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 							isActive={tab.id === group.activeTabId}
 							draggable
 							{...(renderTabTitle && { renderTabTitle })}
+							{...(dataTestId && { 'data-testid': `${dataTestId}-tab-${tab.id}` })}
 							// Track DOM element for FLIP animations
 							refCallback={(el) => {
 								if (el) {
@@ -428,6 +438,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 				x={contextMenuState.x}
 				y={contextMenuState.y}
 				items={contextMenuState.items}
+				{...(contextMenuTestId && { 'data-testid': contextMenuTestId })}
 				onRequestClose={() => {
 					setContextMenuState((prev) => ({ ...prev, visible: false }));
 				}}

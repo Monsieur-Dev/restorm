@@ -16,6 +16,10 @@ export interface TabProps extends Pick<EditorWorkbenchCallbacks, 'renderTabTitle
 	 * Optional ref callback for FLIP animations. Receives the root div element.
 	 */
 	refCallback?: (el: HTMLDivElement | null) => void;
+	/**
+	 * Optional test id for stable E2E selectors.
+	 */
+	'data-testid'?: string;
 }
 
 export const Tab: React.FC<TabProps> = ({
@@ -30,7 +34,8 @@ export const Tab: React.FC<TabProps> = ({
 	onDragEnd,
 	showDropMarker,
 	refCallback,
-	renderTabTitle
+	renderTabTitle,
+	'data-testid': dataTestId
 }) => {
 	// Use renderTabTitle if provided, otherwise use tab.title directly
 	const titleContent = renderTabTitle ? renderTabTitle(tab) : tab.title;
@@ -43,6 +48,11 @@ export const Tab: React.FC<TabProps> = ({
 			}`}
 			role="tab"
 			aria-selected={isActive}
+			{...(dataTestId && {
+				'data-testid': dataTestId,
+				'data-is-active': isActive ? 'true' : 'false',
+				'data-is-dirty': tab.isDirty ? 'true' : 'false'
+			})}
 			onClick={() => onActivate?.(tab.id)}
 			onDoubleClick={() => onDoubleClick?.(tab.id)}
 			onContextMenu={onContextMenu}
@@ -58,7 +68,9 @@ export const Tab: React.FC<TabProps> = ({
 			onDragEnd={onDragEnd}
 		>
 			<div className="tab-label">
-				<span className="label-name">{titleContent}</span>
+				<span {...(dataTestId && { 'data-testid': `${dataTestId}-label` })} className="label-name">
+					{titleContent}
+				</span>
 			</div>
 		<div className="tab-actions">
 			{tab.isDirty && (
@@ -71,6 +83,7 @@ export const Tab: React.FC<TabProps> = ({
 			<button
 				aria-label="Close"
 				title="Close"
+				{...(dataTestId && { 'data-testid': `${dataTestId}-close` })}
 				onClick={(e) => {
 					e.stopPropagation();
 					onClose?.(tab.id);

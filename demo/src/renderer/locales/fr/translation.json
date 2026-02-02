@@ -96,6 +96,31 @@
       "initialValue": "# Mon doc\n\nCeci est le contenu initial.\n"
     }
   },
+  "workbench": {
+    "e2eTabLabel": "Workbench (E2E)",
+    "harness": {
+      "actions": {
+        "reset": "Réinitialiser",
+        "save": "Sauvegarder",
+        "load": "Charger",
+        "clear": "Effacer",
+        "openAux": "Ouvrir fenêtre auxiliaire",
+        "ipcInside": "Mode IPC : interne",
+        "ipcCreate": "Mode IPC : créer",
+        "ipcSend": "Mode IPC : envoyer"
+      },
+      "contextMenu": {
+        "close": "Fermer l'onglet",
+        "closeOthers": "Fermer les autres onglets"
+      },
+      "tabs": {
+        "a": { "title": "Onglet A", "content": "Contenu A" },
+        "b": { "title": "Onglet B", "content": "Contenu B" },
+        "c": { "title": "Onglet C (plein écran)", "content": "Contenu C" },
+        "d": { "title": "Onglet D", "content": "Contenu D" }
+      }
+    }
+  },
   "callout": {
     "tabLabel": "Callout",
     "harness": {
