@@ -4,6 +4,7 @@ export interface StatusbarProps {
   children?: React.ReactNode
   className?: string
   id?: string
+  'data-testid'?: string
 }
 
 export interface StatusbarElementProps {
@@ -14,4 +15,5 @@ export interface StatusbarElementProps {
   className?: string
   id?: string
   children?: React.ReactNode
+  'data-testid'?: string
 }

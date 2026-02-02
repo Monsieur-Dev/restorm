@@ -59,6 +59,18 @@
       "longItemPrefix": "Long item"
     }
   },
+  "statusbar": {
+    "e2eTabLabel": "Statusbar (E2E)",
+    "harness": {
+      "title": "Statusbar",
+      "readyTitle": "Ready",
+      "warningTitle": "Warnings",
+      "errorTitle": "Errors",
+      "clickableTitle": "Clickable",
+      "warningTooltip": "Some warning tooltip content",
+      "errorTooltip": "Some error tooltip content"
+    }
+  },
   "progressBar": {
     "tabLabel": "ProgressBar",
     "harness": {

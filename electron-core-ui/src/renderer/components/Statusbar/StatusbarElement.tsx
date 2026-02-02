@@ -9,8 +9,10 @@ const StatusbarElement: React.FC<StatusbarElementProps> = ({
   onClick,
   className = '',
   id,
-  children
+  children,
+  'data-testid': dataTestId
 }) => {
+  const testId = dataTestId
   const [showTooltip, setShowTooltip] = useState(false)
   const tooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -81,14 +83,25 @@ const StatusbarElement: React.FC<StatusbarElementProps> = ({
             onClick(e as unknown as React.MouseEvent<HTMLDivElement>)
           }
         } : undefined}
+        {...(testId && {
+          'data-testid': testId,
+          'data-warning': warning ? 'true' : 'false',
+          'data-error': error ? 'true' : 'false',
+          'data-clickable': onClick ? 'true' : 'false',
+          'data-has-tooltip': hasTooltip ? 'true' : 'false',
+          'data-tooltip-visible': showTooltip ? 'true' : 'false'
+        })}
       >
-        {title}
+        <span {...(testId && { 'data-testid': `${testId}-label` })}>
+          {title}
+        </span>
       </div>
       {hasTooltip && (
         <Tooltip
           targetRef={elementRef}
           content={children}
           show={showTooltip}
+          {...(testId && { 'data-testid': `${testId}-tooltip` })}
           onMouseEnter={() => {
             // Keep tooltip visible when mouse enters it
             if (hideTimeoutRef.current) {
