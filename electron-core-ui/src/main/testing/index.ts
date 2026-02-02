@@ -152,3 +152,11 @@ export {
   horizontalSashContainerBottomSelector,
   horizontalSashContainerSashSelector
 } from './sashSelectors'
+
+export {
+  markdownViewerRootSelector,
+  markdownViewerCodeBlockSelector,
+  markdownViewerCodeBlockCopySelector,
+  markdownViewerMermaidSelector,
+  markdownViewerLinkSelector
+} from './markdownViewerSelectors'
