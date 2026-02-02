@@ -11,6 +11,17 @@ import './dateTimePicker.css'
 
 const LUXON_LANGUAGE_ID = 'luxon-format'
 
+function pad2(n: number): string {
+  return String(n).padStart(2, '0')
+}
+
+function dayTestIdSuffix(d: Date): string {
+  const y = d.getFullYear()
+  const m = pad2(d.getMonth() + 1)
+  const day = pad2(d.getDate())
+  return `${y}-${m}-${day}`
+}
+
 // List of all Luxon token names (in order from the documentation)
 const LUXON_TOKEN_NAMES = [
   'S', 'SSS', 'u', 'uu', 'uuu', 's', 'ss', 'm', 'mm', 'h', 'hh', 'H', 'HH',
@@ -79,8 +90,10 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
   disabled = false,
   className = '',
   style,
-  inputOptions
+  inputOptions,
+  'data-testid': dataTestId
 }) => {
+  const testId = dataTestId ?? 'datetimepicker'
   const { t } = useTranslation()
   const targetRef = useRef<HTMLDivElement | null>(null)
   const [isOpen, setIsOpen] = useState(false)
@@ -351,6 +364,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
   const calendarContent = (
     <div
       className="ecu-date-time-picker-popover"
+      data-testid={`${testId}-popover-content`}
       onMouseDown={(e) => {
         e.stopPropagation()
       }}
@@ -360,16 +374,18 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
           small
           secondary
           icon="chevron-left"
+          data-testid={`${testId}-prev-month`}
           onClick={() => {
             setViewMonth((m) => addMonths(m, -1))
           }}
           options={{ ariaLabel: t('dateTimePicker.previousMonth') }}
         />
-        <div className="ecu-date-time-picker-month">{monthLabel}</div>
+        <div className="ecu-date-time-picker-month" data-testid={`${testId}-month-label`}>{monthLabel}</div>
         <Button
           small
           secondary
           icon="chevron-right"
+          data-testid={`${testId}-next-month`}
           onClick={() => {
             setViewMonth((m) => addMonths(m, 1))
           }}
@@ -377,7 +393,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
         />
       </div>
 
-      <div className="ecu-date-time-picker-weekdays">
+      <div className="ecu-date-time-picker-weekdays" data-testid={`${testId}-weekdays`}>
         {weekdayLabels.map((l) => (
           <div key={l} className="ecu-date-time-picker-weekday">
             {l}
@@ -385,10 +401,11 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
         ))}
       </div>
 
-      <div className="ecu-date-time-picker-grid">
+      <div className="ecu-date-time-picker-grid" data-testid={`${testId}-grid`}>
         {gridDays.map((d) => {
           const isInMonth = d.getMonth() === viewMonth.getMonth()
           const isSelected = value ? isSameDay(d, value) : false
+          const suffix = dayTestIdSuffix(d)
           return (
             <button
               key={`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`}
@@ -396,6 +413,9 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
               className={['ecu-date-time-picker-day', !isInMonth && 'is-outside', isSelected && 'is-selected']
                 .filter(Boolean)
                 .join(' ')}
+              data-testid={`${testId}-day-${suffix}`}
+              data-is-in-month={isInMonth ? 'true' : 'false'}
+              data-is-selected={isSelected ? 'true' : 'false'}
               onClick={() => {
                 handleSelectDay(d)
               }}
@@ -406,9 +426,10 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
         })}
       </div>
 
-      <div className="ecu-date-time-picker-controls">
+      <div className="ecu-date-time-picker-controls" data-testid={`${testId}-controls`}>
         <label className="ecu-date-time-picker-control">
           <input
+            data-testid={`${testId}-include-time`}
             type="checkbox"
             checked={effectiveIncludeTime}
             onChange={() => {
@@ -423,6 +444,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
           <div className="ecu-date-time-picker-time">
             <input
               className="ecu-date-time-picker-time-input"
+              data-testid={`${testId}-hours`}
               type="number"
               min={0}
               max={23}
@@ -438,6 +460,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
             <span className="ecu-date-time-picker-time-sep">:</span>
             <input
               className="ecu-date-time-picker-time-input"
+              data-testid={`${testId}-minutes`}
               type="number"
               min={0}
               max={59}
@@ -453,10 +476,11 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
           </div>
         ) : null}
 
-        <div className="ecu-date-time-picker-output">
+        <div className="ecu-date-time-picker-output" data-testid={`${testId}-output`}>
           <label className="ecu-date-time-picker-output-label">{t('dateTimePicker.output')}</label>
           <select
             className="ecu-date-time-picker-select"
+            data-testid={`${testId}-output-mode`}
             value={effectiveOutputMode}
             onChange={(e) => {
               handleSetOutputMode(e.target.value as 'pattern' | 'unix' | 'epoch' | 'iso')
@@ -471,9 +495,10 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
         </div>
 
         {effectiveOutputMode === 'pattern' ? (
-          <div className="ecu-date-time-picker-pattern">
+          <div className="ecu-date-time-picker-pattern" data-testid={`${testId}-pattern-section`}>
             <div className="ecu-date-time-picker-pattern-wrapper">
               <VariableInputBox
+                data-testid={`${testId}-pattern`}
                 value={effectivePattern}
                 onChange={handleSetPattern}
                 variables={[]}
@@ -487,7 +512,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
             </div>
             <div className="ecu-date-time-picker-preview">
               <div className="ecu-date-time-picker-preview-label">{t('dateTimePicker.preview')}</div>
-              <div className="ecu-date-time-picker-preview-value">{previewValue}</div>
+              <div className="ecu-date-time-picker-preview-value" data-testid={`${testId}-preview-value`}>{previewValue}</div>
             </div>
           </div>
         ) : null}
@@ -496,9 +521,18 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
   )
 
   return (
-    <div className={['ecu-date-time-picker', className].filter(Boolean).join(' ')} style={style}>
+    <div
+      className={['ecu-date-time-picker', className].filter(Boolean).join(' ')}
+      style={style}
+      data-testid={testId}
+      data-is-open={isOpen ? 'true' : 'false'}
+      data-disabled={disabled ? 'true' : 'false'}
+      data-output-mode={effectiveOutputMode}
+      data-include-time={effectiveIncludeTime ? 'true' : 'false'}
+    >
       <div className="ecu-date-time-picker-input">
         <InputBox
+          data-testid={`${testId}-input`}
           options={{
             ...(inputOptions?.placeholder !== undefined ? { placeholder: inputOptions.placeholder } : {}),
             ...(inputOptions?.tooltip !== undefined ? { tooltip: inputOptions.tooltip } : {}),
@@ -524,11 +558,16 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
       </div>
 
       <div className="ecu-date-time-picker-button">
-        <div ref={targetRef} className="ecu-date-time-picker-button-target">
+        <div
+          ref={targetRef}
+          className="ecu-date-time-picker-button-target"
+          data-testid={`${testId}-target`}
+        >
           <Button
             small
             secondary
             icon="clock"
+            data-testid={`${testId}-open`}
             disabled={disabled}
             onClick={(e) => {
               e.preventDefault()
@@ -545,6 +584,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
         content={calendarContent}
         className="ecu-date-time-picker-tooltip"
         placement="below"
+        data-testid={`${testId}-popover`}
         onMouseDown={(e) => {
           e.stopPropagation()
         }}

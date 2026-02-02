@@ -35,7 +35,8 @@ import {
   EditorWorkbenchTab,
   MenuBarTab,
   StatusbarTab,
-  TagsViewTab
+  TagsViewTab,
+  DateTimePickerTab
 } from '../components/test-tabs'
 import { WorkbenchTab } from '../components/test-tabs'
 
@@ -150,6 +151,7 @@ const ThemeTestPage: React.FC = () => {
     { id: 'menubar-e2e', label: t('menuBar.e2eTabLabel'), content: <MenuBarTab />, allowFullscreen: true },
     { id: 'statusbar-e2e', label: t('statusbar.e2eTabLabel'), content: <StatusbarTab />, allowFullscreen: true },
     { id: 'tagsview-e2e', label: t('tagsView.e2eTabLabel'), content: <TagsViewTab />, allowFullscreen: true },
+    { id: 'datetimepicker-e2e', label: t('dateTimePicker.e2eTabLabel'), content: <DateTimePickerTab />, allowFullscreen: true },
     { id: 'breadcrumb', label: 'Breadcrumb', content: <BreadcrumbTab />, allowFullscreen: true },
     { id: 'button', label: 'Button', content: <ButtonHarnessTab />, allowFullscreen: true },
     { id: 'callout', label: t('callout.tabLabel'), content: <CalloutTab />, allowFullscreen: true },

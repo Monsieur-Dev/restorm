@@ -199,6 +199,15 @@ const tagsViewTestDir = defineBddConfig({
   outputDir: '.features-gen/tagsview'
 })
 
+const dateTimePickerTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/datetimepicker/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/datetimepicker/steps/**/*.ts',
+    'tests/e2e/bdd/datetimepicker/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/datetimepicker'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -346,6 +355,11 @@ export default defineConfig({
     {
       name: 'tagsview',
       testDir: tagsViewTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'datetimepicker',
+      testDir: dateTimePickerTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],

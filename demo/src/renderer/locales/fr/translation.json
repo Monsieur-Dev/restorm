@@ -80,6 +80,28 @@
       "initialTagB": "beta"
     }
   },
+  "dateTimePicker": {
+    "e2eTabLabel": "DateTimePicker (E2E)",
+    "ariaLabel": "Date et heure",
+    "openCalendar": "Ouvrir le calendrier",
+    "previousMonth": "Mois précédent",
+    "nextMonth": "Mois suivant",
+    "includeTime": "Inclure l’heure",
+    "hours": "Heures",
+    "minutes": "Minutes",
+    "output": "Sortie",
+    "outputModes": {
+      "pattern": "Pattern",
+      "unix": "Unix",
+      "epoch": "Epoch",
+      "iso": "ISO"
+    },
+    "pattern": "Pattern",
+    "preview": "Aperçu",
+    "harness": {
+      "title": "DateTimePicker"
+    }
+  },
   "progressBar": {
     "tabLabel": "ProgressBar",
     "harness": {
