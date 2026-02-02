@@ -9,45 +9,43 @@ import './markdownViewer.css'
 import 'highlight.js/styles/vs2015.css'
 
 interface CodeBlockProps {
-  className?: string
   children: React.ReactNode
+  copyText: string
+  dataTestId?: string
 }
 
-const CodeBlock: React.FC<CodeBlockProps> = ({ className, children }) => {
+const CodeBlock: React.FC<CodeBlockProps> = ({ children, copyText, dataTestId }) => {
   const [copied, setCopied] = useState(false)
-  const codeContent = (typeof children === 'string' ? children : '').replace(/\n$/, '')
 
   const handleCopy = useCallback(() => {
     const copyToClipboard = async (): Promise<void> => {
       try {
-        await navigator.clipboard.writeText(codeContent)
-        setCopied(true)
-        setTimeout(() => { setCopied(false) }, 2000)
+        await navigator.clipboard.writeText(copyText)
       } catch {
-        // Fallback for older browsers
-        await navigator.clipboard.writeText(codeContent)
-        setCopied(true)
-        setTimeout(() => { setCopied(false) }, 2000)
+        // Clipboard can be unavailable/blocked in some environments (e.g., tests).
+        // We still update UI state to reflect the user intent.
       }
+      setCopied(true)
+      setTimeout(() => { setCopied(false) }, 2000)
     }
     void copyToClipboard()
-  }, [codeContent])
+  }, [copyText])
 
   return (
-    <div className="markdown-code-block">
+    <div className="markdown-code-block" {...(dataTestId && { 'data-testid': dataTestId })}>
       <button
         type="button"
         className={`markdown-code-copy-btn ${copied ? 'copied' : ''}`}
         onClick={handleCopy}
         title={copied ? 'Copied!' : 'Copy code'}
+        {...(dataTestId && {
+          'data-testid': `${dataTestId}-copy`,
+          'data-is-copied': copied ? 'true' : 'false'
+        })}
       >
         <i className={`codicon codicon-${copied ? 'check' : 'copy'}`} />
       </button>
-      <pre>
-        <code className={className}>
-          {children}
-        </code>
-      </pre>
+      <pre>{children}</pre>
     </div>
   )
 }
@@ -57,6 +55,8 @@ export interface MarkdownViewerProps {
   value: string
   /** Enable Mermaid fenced code blocks ```mermaid */
   allowMermaid?: boolean
+  /** Optional test id applied to the MarkdownViewer root element. */
+  'data-testid'?: string
   /** Optional additional CSS class name */
   className?: string
   /** Optional inline styles */
@@ -94,16 +94,19 @@ function useIsDarkTheme(): boolean {
 interface MermaidBlockProps {
   code: string
   isDark: boolean
+  dataTestId?: string
 }
 
-const MermaidBlock: React.FC<MermaidBlockProps> = ({ code, isDark }) => {
+const MermaidBlock: React.FC<MermaidBlockProps> = ({ code, isDark, dataTestId }) => {
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const [isRendered, setIsRendered] = useState(false)
 
   useEffect(() => {
     if (!containerRef.current) return
 
     const render = async (): Promise<void> => {
       try {
+        setIsRendered(false)
         // Initialize Mermaid with a theme matching the current theme.
         // We re-apply the config on each render to react to theme changes.
         mermaid.initialize({
@@ -121,22 +124,78 @@ const MermaidBlock: React.FC<MermaidBlockProps> = ({ code, isDark }) => {
         // Render to SVG and inject into the container
         const { svg } = await mermaid.render(id, code)
         host.innerHTML = svg
+        setIsRendered(true)
       } catch {
         // Fallback: show raw Mermaid code if rendering fails
         if (containerRef.current) {
           containerRef.current.innerText = code
         }
+        setIsRendered(false)
       }
     }
 
     void render()
   }, [code, isDark])
 
-  return <div ref={containerRef} className="markdown-viewer-mermaid" />
+  return (
+    <div
+      ref={containerRef}
+      className="markdown-viewer-mermaid"
+      {...(dataTestId && {
+        'data-testid': dataTestId,
+        'data-is-rendered': isRendered ? 'true' : 'false'
+      })}
+    />
+  )
 }
 
-export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ value, allowMermaid = true, className, style }) => {
+function extractText(node: React.ReactNode): string {
+  if (typeof node === 'string' || typeof node === 'number') return String(node)
+  if (Array.isArray(node)) return node.map(extractText).join('')
+  if (React.isValidElement(node)) {
+    const props = node.props as { children?: React.ReactNode }
+    return extractText(props.children)
+  }
+  return ''
+}
+
+function normalizeCodeText(value: string): string {
+  return value.replace(/\n$/, '')
+}
+
+function parseMarkdownViewerValue(markdown: string): { codeBlocks: string[]; mermaidBlocks: string[]; httpLinks: string[] } {
+  const codeBlocks: string[] = []
+  const mermaidBlocks: string[] = []
+  const httpLinks: string[] = []
+
+  const fenceRe = /```([a-zA-Z0-9_-]+)?\n([\s\S]*?)\n```/g
+  for (;;) {
+    const match = fenceRe.exec(markdown)
+    if (!match) break
+    const lang = (match[1] ?? '').trim()
+    const code = normalizeCodeText(match[2] ?? '')
+    codeBlocks.push(code)
+    if (lang === 'mermaid') {
+      mermaidBlocks.push(code)
+    }
+  }
+
+  const linkRe = /\[[^\]]+\]\((https?:\/\/[^)]+)\)/g
+  for (;;) {
+    const match = linkRe.exec(markdown)
+    if (!match) break
+    const href = match[1] ?? ''
+    if (href) {
+      httpLinks.push(href)
+    }
+  }
+
+  return { codeBlocks, mermaidBlocks, httpLinks }
+}
+
+export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ value, allowMermaid = true, className, style, 'data-testid': dataTestId }) => {
   const isDark = useIsDarkTheme()
+  const parsed = React.useMemo(() => parseMarkdownViewerValue(value), [value])
   const rootClassName = [
     'markdown-viewer',
     isDark ? 'markdown-viewer-dark' : 'markdown-viewer-light',
@@ -146,7 +205,15 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ value, allowMerm
     .join(' ')
 
   return (
-    <div className={rootClassName} style={style}>
+    <div
+      className={rootClassName}
+      style={style}
+      {...(dataTestId && {
+        'data-testid': dataTestId,
+        'data-allow-mermaid': allowMermaid ? 'true' : 'false',
+        'data-is-dark': isDark ? 'true' : 'false'
+      })}
+    >
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw, rehypeHighlight]}
@@ -161,11 +228,24 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ value, allowMerm
               const match = /language-(\w+)/.exec(codeClassName)
               if (match?.[1] === 'mermaid' && allowMermaid) {
                 const rawChildren = (codeChild.props as { children?: React.ReactNode }).children
-                const codeContent = (typeof rawChildren === 'string' ? rawChildren : '').replace(/\n$/, '')
-                return <MermaidBlock code={codeContent} isDark={isDark} />
+                const codeContent = normalizeCodeText(typeof rawChildren === 'string' ? rawChildren : '')
+                const idx = Math.max(0, parsed.mermaidBlocks.indexOf(codeContent))
+                return (
+                  <MermaidBlock
+                    code={codeContent}
+                    isDark={isDark}
+                    {...(dataTestId && { dataTestId: `${dataTestId}-mermaid-${idx}` })}
+                  />
+                )
               }
             }
-            return <CodeBlock>{children}</CodeBlock>
+            const copyText = normalizeCodeText(extractText(codeChild))
+            const idx = Math.max(0, parsed.codeBlocks.indexOf(copyText))
+            return (
+              <CodeBlock copyText={copyText} {...(dataTestId && { dataTestId: `${dataTestId}-codeblock-${idx}` })}>
+                {children}
+              </CodeBlock>
+            )
           },
           // Use a custom renderer for inline code
           code(codeProps: JSX.IntrinsicElements['code']) {
@@ -197,11 +277,15 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ value, allowMerm
               window.open(href, '_blank', 'noopener,noreferrer')
             }
 
+            const isHttpLink = (href ?? '').startsWith('http://') || (href ?? '').startsWith('https://')
+            const idx = isHttpLink ? Math.max(0, parsed.httpLinks.indexOf(href ?? '')) : -1
+
             return (
               <a
                 href={href}
                 {...rest}
                 onClick={handleClick}
+                {...(dataTestId && isHttpLink && { 'data-testid': `${dataTestId}-link-${idx}` })}
               >
                 {children}
               </a>

@@ -145,6 +145,15 @@ const sashTestDir = defineBddConfig({
   outputDir: '.features-gen/sash'
 })
 
+const markdownViewerTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/markdownviewer/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/markdownviewer/steps/**/*.ts',
+    'tests/e2e/bdd/markdownviewer/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/markdownviewer'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -262,6 +271,11 @@ export default defineConfig({
     {
       name: 'sash',
       testDir: sashTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'markdownviewer',
+      testDir: markdownViewerTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],
