@@ -179,3 +179,16 @@ export {
   editorWorkbenchGroupTabsContextMenuSelector,
   editorWorkbenchSashSelector
 } from './workbenchSelectors'
+
+export {
+  menuBarRootSelector,
+  menuBarMenuButtonSelector,
+  menuBarMenuTitleSelector,
+  menuBarMenuDropdownSelector,
+  menuBarMenuScrollableSelector,
+  menuBarItemSelector,
+  menuBarItemLabelSelector,
+  menuBarItemShortcutSelector,
+  menuBarItemSubmenuSelector,
+  menuBarItemSubmenuScrollableSelector
+} from './menuBarSelectors'

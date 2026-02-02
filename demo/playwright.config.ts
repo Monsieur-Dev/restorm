@@ -172,6 +172,15 @@ const workbenchTestDir = defineBddConfig({
   outputDir: '.features-gen/workbench'
 })
 
+const menubarTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/menubar/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/menubar/steps/**/*.ts',
+    'tests/e2e/bdd/menubar/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/menubar'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -304,6 +313,11 @@ export default defineConfig({
     {
       name: 'workbench',
       testDir: workbenchTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'menubar',
+      testDir: menubarTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],

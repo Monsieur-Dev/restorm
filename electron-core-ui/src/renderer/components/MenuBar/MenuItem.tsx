@@ -11,8 +11,10 @@ const MenuItem: React.FC<MenuItemProps> = ({
   icon,
   children,
   className = '',
-  id
+  id,
+  'data-testid': dataTestId
 }) => {
+  const testId = dataTestId
   // Note: Keyboard shortcuts are registered by MenuBarItem parent component
   // to keep them active even when the menu is closed
   const [showSubmenu, setShowSubmenu] = useState(false)
@@ -205,7 +207,11 @@ const MenuItem: React.FC<MenuItemProps> = ({
   const renderShortcut = (): React.ReactNode => {
     if (!shortcut) return null
     return (
-      <span className="keybinding" aria-label={`Keyboard shortcut: ${shortcut}`}>
+      <span
+        className="keybinding"
+        aria-label={`Keyboard shortcut: ${shortcut}`}
+        {...(testId && { 'data-testid': `${testId}-shortcut` })}
+      >
         {shortcut}
       </span>
     )
@@ -244,10 +250,17 @@ const MenuItem: React.FC<MenuItemProps> = ({
         onKeyDown={handleKeyDown}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        {...(testId && {
+          'data-testid': testId,
+          'data-disabled': disabled ? 'true' : 'false',
+          'data-checked': checked ? 'true' : 'false',
+          'data-has-submenu': hasSubmenu ? 'true' : 'false',
+          'data-submenu-open': showSubmenu ? 'true' : 'false'
+        })}
       >
         <div className="menu-content">
           {renderIcon()}
-          <span className="action-label">{title}</span>
+          <span className="action-label" {...(testId && { 'data-testid': `${testId}-label` })}>{title}</span>
         </div>
         <div className="menu-right">
           {renderShortcut()}
@@ -267,6 +280,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
           }}
           onMouseEnter={handleSubmenuMouseEnter}
           onMouseLeave={handleSubmenuMouseLeave}
+          {...(testId && { 'data-testid': `${testId}-submenu` })}
         >
             <ScrollableElement
               options={{
@@ -284,11 +298,16 @@ const MenuItem: React.FC<MenuItemProps> = ({
                 maxWidth: '300px',
                 padding: '2px 0'
               }}
+              {...(testId && { 'data-testid': `${testId}-submenu-scrollable` })}
             >
             <ul className="actions-container" role="menu">
               {React.Children.map(children, (child, index) => {
                 if (React.isValidElement(child)) {
-                  return React.cloneElement(child, { key: index })
+                  const childTestId = (child.props as { 'data-testid'?: unknown })['data-testid']
+                  return React.cloneElement(child, {
+                    key: index,
+                    ...(testId && childTestId === undefined && { 'data-testid': `${testId}-item-${index}` })
+                  })
                 }
                 return child
               })}
