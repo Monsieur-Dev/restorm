@@ -197,6 +197,40 @@ The component automatically adapts to themes through CSS variables. No additiona
 
 The component uses `useCallback` to optimize performance and avoid unnecessary re-renders.
 
+## Testing
+
+### `data-testid`
+
+The component supports an optional `data-testid` prop that is applied to the `RadioGroup` root element and used to derive stable hooks for E2E tests.
+
+When `data-testid="my-radio"` is provided, the following test ids are available:
+
+- Root: `my-radio`
+- Items: `my-radio-item-0`, `my-radio-item-1`, ...
+
+The root element also exposes:
+
+- `data-active-index="{int}"`
+- `data-items-count="{int}"`
+
+### Selectors
+
+Use the pure string selectors from `electron-core-ui/testing`:
+
+- `radioGroupRootSelector(testId)`
+- `radioGroupItemSelector(testId, index)`
+
+### Playwright-BDD steps
+
+Reusable steps are available from `electron-core-ui/testing/playwright-bdd`:
+
+- `Then radio group {string} should be visible`
+- `When I click radio group {string} item {int}`
+- `Then radio group {string} item {int} should be checked`
+- `Then radio group {string} item {int} should be unchecked`
+- `Then radio group {string} item {int} should be disabled`
+- `Then radio group {string} item {int} title should be {string}`
+
 ## Notes for AI Usage
 
 ### Recommended Configuration

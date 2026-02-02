@@ -25,6 +25,8 @@ export interface RadioGroupProps {
   onSelect?: (index: number) => void;
   className?: string;
   id?: string;
+  /** Optional test id applied to the RadioGroup root element. */
+  'data-testid'?: string;
 }
 
 // Default styles for radio buttons

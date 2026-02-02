@@ -6,7 +6,8 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
   options,
   onSelect,
   className = '',
-  id
+  id,
+  'data-testid': dataTestId
 }) => {
   const [activeIndex, setActiveIndex] = useState(() => {
     const idx = options.items.findIndex(item => item.isActive);
@@ -33,6 +34,11 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
       id={id}
       className={containerClasses}
       role="radiogroup"
+      {...(dataTestId && {
+        'data-testid': dataTestId,
+        'data-active-index': String(activeIndex),
+        'data-items-count': String(options.items.length)
+      })}
     >
       {options.items.map((item, index) => {
         const isActive = index === activeIndex;
@@ -49,6 +55,7 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
           <button
             key={index}
             className={buttonClasses}
+            {...(dataTestId && { 'data-testid': `${dataTestId}-item-${index}` })}
             onClick={() => { handleSelect(index); }}
             disabled={item.disabled}
             title={item.tooltip}
