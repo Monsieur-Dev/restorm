@@ -28,4 +28,6 @@ export interface DateTimePickerProps {
   style?: React.CSSProperties
   /** Optional overrides for the underlying InputBox options */
   inputOptions?: Partial<IInputOptions>
+  /** Optional test id applied to the root element. */
+  'data-testid'?: string
 }
