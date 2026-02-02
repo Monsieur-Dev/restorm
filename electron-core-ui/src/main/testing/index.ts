@@ -199,3 +199,13 @@ export {
   statusbarElementLabelSelector,
   statusbarElementTooltipSelector
 } from './statusbarSelectors'
+
+export {
+  tagsViewRootSelector,
+  tagsViewListSelector,
+  tagsViewTagSelector,
+  tagsViewTagLabelSelector,
+  tagsViewTagInputSelector,
+  tagsViewAddSelector,
+  tagsViewContextMenuSelector
+} from './tagsViewSelectors'

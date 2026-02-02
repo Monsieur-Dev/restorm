@@ -12,11 +12,14 @@ export interface TagsViewProps {
   onChange?: (tags: string[]) => void
   /** Label for the "Remove tag" menu item. @default Uses i18n translation key 'tagsView.removeTag' */
   removeTagLabel?: string
+  /** Optional test id applied to the root element. */
+  'data-testid'?: string
   className?: string
   style?: React.CSSProperties
 }
 
-export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLabel, className, style }) => {
+export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLabel, className, style, 'data-testid': dataTestId }) => {
+  const testId = dataTestId ?? 'tagsview'
   const { t } = useTranslation()
   const resolvedRemoveTagLabel = removeTagLabel ?? t('tagsView.removeTag')
   const [rawEditingIndex, setEditingIndex] = useState<number | null>(null)
@@ -119,8 +122,15 @@ export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLab
   )
 
   return (
-    <div className={rootClassName} style={style}>
-      <div className="ecui-tags-view-list">
+    <div
+      className={rootClassName}
+      style={style}
+      data-testid={testId}
+      data-tag-count={String(tags.length)}
+      data-editing-index={editingIndex === null ? '' : String(editingIndex)}
+      data-contextmenu-visible={contextMenu.visible ? 'true' : 'false'}
+    >
+      <div className="ecui-tags-view-list" data-testid={`${testId}-list`}>
         {tags.map((tag, index) => {
           const isEditing = editingIndex === index
 
@@ -129,9 +139,12 @@ export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLab
               <div
                 key={`${tag}-${index}`}
                 className="ecui-tag ecui-tag--editing"
+                data-testid={`${testId}-tag-${index}`}
+                data-is-editing="true"
               >
                 <input
                   ref={inputRef}
+                  data-testid={`${testId}-tag-${index}-input`}
                   className="ecui-tag-input"
                   type="text"
                   value={editingValue}
@@ -158,6 +171,8 @@ export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLab
               key={`${tag}-${index}`}
               type="button"
               className="ecui-tag"
+              data-testid={`${testId}-tag-${index}`}
+              data-is-editing="false"
               onClick={() => {
                 beginEditing(index)
               }}
@@ -172,7 +187,7 @@ export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLab
                 })
               }}
             >
-              <span className="ecui-tag-label">{tag}</span>
+              <span className="ecui-tag-label" data-testid={`${testId}-tag-${index}-label`}>{tag}</span>
             </button>
           )
         })}
@@ -182,6 +197,7 @@ export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLab
           secondary
           icon="add"
           onClick={handleAddTag}
+          data-testid={`${testId}-add`}
         />
       </div>
 
@@ -193,6 +209,7 @@ export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLab
         onRequestClose={() => {
           setContextMenu((prev) => ({ ...prev, visible: false }))
         }}
+        data-testid={`${testId}-contextmenu`}
       />
     </div>
   )

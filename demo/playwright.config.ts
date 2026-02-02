@@ -190,6 +190,15 @@ const statusbarTestDir = defineBddConfig({
   outputDir: '.features-gen/statusbar'
 })
 
+const tagsViewTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/tagsview/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/tagsview/steps/**/*.ts',
+    'tests/e2e/bdd/tagsview/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/tagsview'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -332,6 +341,11 @@ export default defineConfig({
     {
       name: 'statusbar',
       testDir: statusbarTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'tagsview',
+      testDir: tagsViewTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],

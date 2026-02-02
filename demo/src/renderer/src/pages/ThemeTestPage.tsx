@@ -34,7 +34,8 @@ import {
   MarkdownEditorTab,
   EditorWorkbenchTab,
   MenuBarTab,
-  StatusbarTab
+  StatusbarTab,
+  TagsViewTab
 } from '../components/test-tabs'
 import { WorkbenchTab } from '../components/test-tabs'
 
@@ -148,6 +149,7 @@ const ThemeTestPage: React.FC = () => {
     { id: 'workbench-e2e', label: t('workbench.e2eTabLabel'), content: <EditorWorkbenchTab />, allowFullscreen: true },
     { id: 'menubar-e2e', label: t('menuBar.e2eTabLabel'), content: <MenuBarTab />, allowFullscreen: true },
     { id: 'statusbar-e2e', label: t('statusbar.e2eTabLabel'), content: <StatusbarTab />, allowFullscreen: true },
+    { id: 'tagsview-e2e', label: t('tagsView.e2eTabLabel'), content: <TagsViewTab />, allowFullscreen: true },
     { id: 'breadcrumb', label: 'Breadcrumb', content: <BreadcrumbTab />, allowFullscreen: true },
     { id: 'button', label: 'Button', content: <ButtonHarnessTab />, allowFullscreen: true },
     { id: 'callout', label: t('callout.tabLabel'), content: <CalloutTab />, allowFullscreen: true },
