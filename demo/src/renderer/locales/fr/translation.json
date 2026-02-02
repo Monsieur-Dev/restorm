@@ -71,6 +71,15 @@
       "errorTooltip": "Contenu de tooltip d’erreur"
     }
   },
+  "tagsView": {
+    "e2eTabLabel": "TagsView (E2E)",
+    "removeTag": "Supprimer le tag",
+    "harness": {
+      "title": "TagsView",
+      "initialTagA": "alpha",
+      "initialTagB": "beta"
+    }
+  },
   "progressBar": {
     "tabLabel": "ProgressBar",
     "harness": {
