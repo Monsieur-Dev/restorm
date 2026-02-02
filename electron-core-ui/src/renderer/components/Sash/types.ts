@@ -104,6 +104,11 @@ export interface SashProps {
 	 * Additional CSS class name
 	 */
 	className?: string;
+
+	/**
+	 * Optional test id applied to the Sash root element.
+	 */
+	'data-testid'?: string;
 }
 
 /**
@@ -144,6 +149,8 @@ export interface VerticalSashContainerProps {
 	className?: string;
 	/** Configuration for the Sash component */
 	sashConfig?: SashConfig;
+	/** Optional test id applied to the VerticalSashContainer root element. */
+	'data-testid'?: string;
 }
 
 /**
@@ -170,4 +177,6 @@ export interface HorizontalSashContainerProps {
 	className?: string;
 	/** Configuration for the Sash component */
 	sashConfig?: SashConfig;
+	/** Optional test id applied to the HorizontalSashContainer root element. */
+	'data-testid'?: string;
 }

@@ -136,6 +136,15 @@ const progressBarTestDir = defineBddConfig({
   outputDir: '.features-gen/progressbar'
 })
 
+const sashTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/sash/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/sash/steps/**/*.ts',
+    'tests/e2e/bdd/sash/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/sash'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -248,6 +257,11 @@ export default defineConfig({
     {
       name: 'progressbar',
       testDir: progressBarTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'sash',
+      testDir: sashTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],

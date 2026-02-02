@@ -17,13 +17,20 @@ export const Sash: React.FC<SashProps> = ({
 	onChange,
 	onEnd,
 	onReset,
-	className = ''
+	className = '',
+	'data-testid': dataTestId
 }) => {
 	const elRef = useRef<HTMLDivElement>(null);
 	const [isHovered, setIsHovered] = useState(false);
 	const [isActive, setIsActive] = useState(false);
 	const hoverTimeoutRef = useRef<number | null>(null);
 	const isDraggingRef = useRef(false);
+	const [layoutMetrics, setLayoutMetrics] = useState<{ left: number; top: number; width: number; height: number }>({
+		left: 0,
+		top: 0,
+		width: 0,
+		height: 0
+	});
 
 	// Sash instance for layout provider
 	const sashInstance = useRef({ orientation } as const);
@@ -31,31 +38,56 @@ export const Sash: React.FC<SashProps> = ({
 	// Layout the sash based on the layout provider
 	const layout = useCallback(() => {
 		if (!elRef.current) return;
+		const container = elRef.current.parentElement;
 
 		if (orientation === 'vertical') {
 			const verticalProvider = layoutProvider as IVerticalSashLayoutProvider;
 			const left = verticalProvider.getVerticalSashLeft(sashInstance.current);
-			elRef.current.style.left = `${left - size / 2}px`;
+			const leftPx = left - size / 2;
+			elRef.current.style.left = `${leftPx}px`;
 
+			const topPx = verticalProvider.getVerticalSashTop ? verticalProvider.getVerticalSashTop(sashInstance.current) : 0;
 			if (verticalProvider.getVerticalSashTop) {
-				elRef.current.style.top = `${verticalProvider.getVerticalSashTop(sashInstance.current)}px`;
+				elRef.current.style.top = `${topPx}px`;
 			}
 
+			const heightPx = verticalProvider.getVerticalSashHeight
+				? verticalProvider.getVerticalSashHeight(sashInstance.current)
+				: (container?.clientHeight ?? 0);
 			if (verticalProvider.getVerticalSashHeight) {
-				elRef.current.style.height = `${verticalProvider.getVerticalSashHeight(sashInstance.current)}px`;
+				elRef.current.style.height = `${heightPx}px`;
 			}
+
+			setLayoutMetrics({
+				left: Math.round(leftPx),
+				top: Math.round(topPx),
+				width: Math.round(size),
+				height: Math.round(heightPx)
+			});
 		} else {
 			const horizontalProvider = layoutProvider as IHorizontalSashLayoutProvider;
 			const top = horizontalProvider.getHorizontalSashTop(sashInstance.current);
-			elRef.current.style.top = `${top - size / 2}px`;
+			const topPx = top - size / 2;
+			elRef.current.style.top = `${topPx}px`;
 
+			const leftPx = horizontalProvider.getHorizontalSashLeft ? horizontalProvider.getHorizontalSashLeft(sashInstance.current) : 0;
 			if (horizontalProvider.getHorizontalSashLeft) {
-				elRef.current.style.left = `${horizontalProvider.getHorizontalSashLeft(sashInstance.current)}px`;
+				elRef.current.style.left = `${leftPx}px`;
 			}
 
+			const widthPx = horizontalProvider.getHorizontalSashWidth
+				? horizontalProvider.getHorizontalSashWidth(sashInstance.current)
+				: (container?.clientWidth ?? 0);
 			if (horizontalProvider.getHorizontalSashWidth) {
-				elRef.current.style.width = `${horizontalProvider.getHorizontalSashWidth(sashInstance.current)}px`;
+				elRef.current.style.width = `${widthPx}px`;
 			}
+
+			setLayoutMetrics({
+				left: Math.round(leftPx),
+				top: Math.round(topPx),
+				width: Math.round(widthPx),
+				height: Math.round(size)
+			});
 		}
 	}, [orientation, layoutProvider, size]);
 
@@ -267,6 +299,17 @@ export const Sash: React.FC<SashProps> = ({
 			onMouseLeave={handleMouseLeave}
 			role="separator"
 			aria-orientation={orientation}
+			{...(dataTestId && {
+				'data-testid': dataTestId,
+				'data-orientation': orientation,
+				'data-state': state,
+				'data-is-hovered': isHovered ? 'true' : 'false',
+				'data-is-active': isActive ? 'true' : 'false',
+				'data-left': String(layoutMetrics.left),
+				'data-top': String(layoutMetrics.top),
+				'data-width': String(layoutMetrics.width),
+				'data-height': String(layoutMetrics.height)
+			})}
 		/>
 	);
 };
