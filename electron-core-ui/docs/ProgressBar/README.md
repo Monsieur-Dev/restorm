@@ -24,6 +24,7 @@ export interface ProgressBarProps {
   total?: number; // For discrete mode: total work units
   className?: string;
   id?: string;
+  'data-testid'?: string;
   onComplete?: () => void;
 }
 ```
@@ -42,6 +43,7 @@ export interface ProgressBarProps {
 - **total** (`number`) : Total work units (for discrete mode)
 - **className** (`string`) : Additional CSS classes
 - **id** (`string`) : HTML ID of the progress bar
+- **data-testid** (`string`) : Optional test id applied to the progress bar root element
 - **onComplete** (`() => void`) : Callback called when progress is completed
 
 ## Usage Examples
@@ -80,7 +82,7 @@ import { ProgressBar } from 'electron-core-ui/renderer'
 ```tsx
 <ProgressBar 
   mode="done" 
-  onComplete={() => console.log('Progress completed')}
+  onComplete={() => { /* Progress completed */ }}
 />
 ```
 
@@ -107,9 +109,42 @@ useEffect(() => {
   mode="discrete" 
   value={progress} 
   total={100}
-  onComplete={() => console.log('Download complete!')}
+  onComplete={() => { /* Download complete */ }}
 />
 ```
+
+## Testing
+
+When `data-testid` is provided, the component exposes stable hooks for E2E tests.
+
+### data-testid conventions
+
+- Root: `{id}`
+- Progress bit: `{id}-bit`
+
+### Stable data attributes (on root)
+
+- `data-mode`: `infinite | discrete | done`
+- `data-is-active`: `true | false`
+- `data-is-long-running`: `true | false`
+- `data-current-value`: number
+- `data-total`: number
+- `data-width-percent`: number (rounded)
+
+### Selectors
+
+- `progressBarRootSelector(testId)`
+- `progressBarBitSelector(testId)`
+
+### Playwright-BDD steps
+
+- `Then progress bar {string} should be visible`
+- `Then progress bar {string} data-mode should be {string}`
+- `Then progress bar {string} should be active`
+- `Then progress bar {string} should be inactive`
+- `Then progress bar {string} width percent should be {int}` (tolerance ±1)
+- `Then progress bar {string} aria-valuenow should be {int}`
+- `Then progress bar {string} should become long running`
 
 ## DOM Structure
 

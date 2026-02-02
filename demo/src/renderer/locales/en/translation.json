@@ -52,6 +52,18 @@
     "reportIssue": "Report Issue",
     "keyboardShortcuts": "Keyboard Shortcuts"
   },
+  "progressBar": {
+    "tabLabel": "ProgressBar",
+    "harness": {
+      "title": "ProgressBar",
+      "infinite": "Infinite",
+      "discrete50": "Discrete (50%)",
+      "customColor": "Discrete (custom color)",
+      "doneFromDiscrete": "Done from discrete",
+      "doneFromInfinite": "Done from infinite",
+      "setDone": "Set done"
+    }
+  },
   "callout": {
     "tabLabel": "Callout",
     "harness": {

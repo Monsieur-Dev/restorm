@@ -127,6 +127,15 @@ const radioTestDir = defineBddConfig({
   outputDir: '.features-gen/radio'
 })
 
+const progressBarTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/progressbar/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/progressbar/steps/**/*.ts',
+    'tests/e2e/bdd/progressbar/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/progressbar'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -234,6 +243,11 @@ export default defineConfig({
     {
       name: 'radio',
       testDir: radioTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'progressbar',
+      testDir: progressBarTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],
