@@ -235,6 +235,15 @@ const listViewTestDir = defineBddConfig({
   outputDir: '.features-gen/listview'
 })
 
+const splitViewTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/splitview/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/splitview/steps/**/*.ts',
+    'tests/e2e/bdd/splitview/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/splitview'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -402,6 +411,11 @@ export default defineConfig({
     {
       name: 'listview',
       testDir: listViewTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'splitview',
+      testDir: splitViewTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],

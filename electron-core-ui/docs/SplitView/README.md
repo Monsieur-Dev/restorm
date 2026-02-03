@@ -39,6 +39,10 @@ export interface SplitViewProps {
   className?: string;
   style?: React.CSSProperties;
   /**
+   * Optional test id for the SplitView root.
+   */
+  'data-testid'?: string;
+  /**
    * Called whenever pane size ratios change after a drag.
    * Ratios are normalized and always sum to 1.
    */
@@ -75,8 +79,8 @@ export interface SplitViewPaneProps {
 ## Behavior
 
 - **Orientation**
-  - `orientation="vertical"`: panes are laid out side-by-side with vertical `Sash` handles.
-  - `orientation="horizontal"`: panes are stacked with horizontal `Sash` handles.
+  - Current implementation renders a vertical stack (top/bottom panes) using a horizontal `Sash`.
+  - `orientation` is currently used as a CSS class name and does not change the layout direction.
 - **Resizing**
   - Dragging a `Sash` updates neighboring pane ratios while respecting `minSize` / `maxSize` when provided.
   - The `onSizesChange` callback receives updated ratios so parents can react (e.g. persist layout).
@@ -90,3 +94,46 @@ export interface SplitViewPaneProps {
     - `--sideBar-background`
 
 The main container uses the `monaco-split-view2` class name to stay close to theme’s DOM structure.
+
+## Testing
+
+### `data-testid` API
+
+`SplitView` exposes stable E2E hooks via `data-testid` (default: `split-view`).
+When `data-testid="my-split"` is provided:
+
+- Root: `my-split`
+  - attributes:
+    - `data-pane-count`: number
+    - `data-collapsed`: `true|false|...` (one per pane)
+    - `data-sizes`: `n|n|...` (integer percentages, sum to 100)
+- Pane container: `my-split-pane-{paneIdOrIndex}` (attribute `data-pane-id`)
+  - header: `my-split-pane-{paneIdOrIndex}-header` (attribute `data-is-collapsed`)
+  - body: `my-split-pane-{paneIdOrIndex}-body`
+- Internal sashes: `my-split-sash-{index}` (between pane index `index` and `index + 1`)
+
+### Selectors (electron-core-ui/testing)
+
+- `splitViewRootSelector(testId)`
+- `splitViewPaneTestId(testId, paneIdOrIndex)`
+- `splitViewPaneSelector(testId, paneIdOrIndex)`
+- `splitViewPaneHeaderSelector(testId, paneIdOrIndex)`
+- `splitViewPaneBodySelector(testId, paneIdOrIndex)`
+- `splitViewSashTestId(testId, index)`
+- `splitViewSashSelector(testId, index)`
+
+### Playwright-BDD steps (electron-core-ui/testing/playwright-bdd)
+
+Register:
+
+- `defineSplitViewBddSteps(bdd)`
+- `defineSashBddSteps(bdd)` (to drag internal sashes)
+
+Steps:
+
+- `Then split view {string} should be visible`
+- `Then split view {string} pane count should be {int}`
+- `Then split view {string} collapsed state should be {string}`
+- `Then split view {string} sizes should be {string}`
+- `Then split view {string} sizes should sum to {int}`
+- `When I toggle split view {string} pane {string}`

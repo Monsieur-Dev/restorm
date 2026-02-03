@@ -143,6 +143,16 @@
       "multipleSelection": "Multiple selection"
     }
   },
+  "splitView": {
+    "e2eTabLabel": "SplitView (E2E)",
+    "harness": {
+      "panes": {
+        "red": "Red",
+        "green": "Green",
+        "blue": "Blue"
+      }
+    }
+  },
   "progressBar": {
     "tabLabel": "ProgressBar",
     "harness": {
