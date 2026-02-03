@@ -103,32 +103,33 @@ const ScrollableElementTab: React.FC = () => {
           options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
           style={baseBoxStyle}
         >
-          <div style={{ ...longContentStyle, padding: 0 }}>
-            <div
-              data-sticky-level="1"
-              style={{
-                padding: 12,
-                backgroundColor: 'var(--panel-background)',
-                borderBottom: '1px solid var(--panel-border)'
-              }}
-            >
-              {t('scrollableElement.harness.stickyHeader1')}
-            </div>
-            <div
-              data-sticky-level="2"
-              style={{
-                padding: 12,
-                backgroundColor: 'var(--panel-background)',
-                borderBottom: '1px solid var(--panel-border)'
-              }}
-            >
-              {t('scrollableElement.harness.stickyHeader2')}
-            </div>
-            <div style={{ padding: 16 }}>
-              <div>{t('scrollableElement.harness.longContent')}</div>
-              <div style={{ height: 700 }} />
-              <div>{t('scrollableElement.harness.bottomContent')}</div>
-            </div>
+          {/* Sticky layout reads ONLY direct children of .scrollable-content */}
+          <div
+            data-testid="scrollableelement-sticky-level-1"
+            data-sticky-level="1"
+            style={{
+              padding: 12,
+              backgroundColor: 'var(--panel-background)',
+              borderBottom: '1px solid var(--panel-border)'
+            }}
+          >
+            {t('scrollableElement.harness.stickyHeader1')}
+          </div>
+          <div
+            data-testid="scrollableelement-sticky-level-2"
+            data-sticky-level="2"
+            style={{
+              padding: 12,
+              backgroundColor: 'var(--panel-background)',
+              borderBottom: '1px solid var(--panel-border)'
+            }}
+          >
+            {t('scrollableElement.harness.stickyHeader2')}
+          </div>
+          <div style={{ ...longContentStyle, padding: 16 }}>
+            <div>{t('scrollableElement.harness.longContent')}</div>
+            <div style={{ height: 700 }} />
+            <div>{t('scrollableElement.harness.bottomContent')}</div>
           </div>
         </ScrollableElement>
       </div>

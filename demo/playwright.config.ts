@@ -226,6 +226,15 @@ const selectBoxTestDir = defineBddConfig({
   outputDir: '.features-gen/selectbox'
 })
 
+const listViewTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/listview/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/listview/steps/**/*.ts',
+    'tests/e2e/bdd/listview/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/listview'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -388,6 +397,11 @@ export default defineConfig({
     {
       name: 'selectbox',
       testDir: selectBoxTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'listview',
+      testDir: listViewTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],

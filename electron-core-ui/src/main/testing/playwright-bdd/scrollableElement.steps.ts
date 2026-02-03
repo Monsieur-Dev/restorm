@@ -54,6 +54,15 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => { setTimeout(resolve, ms) })
 }
 
+function escapeAttributeValue(value: string): string {
+  // Minimal escaping for attribute selectors: keep it predictable for test ids.
+  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+}
+
+function testIdSelector(testId: string): string {
+  return `[data-testid="${escapeAttributeValue(testId)}"]`
+}
+
 async function waitForNumericAttribute(locator: LocatorLike, name: string, timeoutMs = 2500): Promise<number> {
   const start = Date.now()
   while (Date.now() - start <= timeoutMs) {
@@ -75,6 +84,39 @@ async function waitForNumericAttributeAtLeast(locator: LocatorLike, name: string
   }
   const final = await locator.getAttribute(name)
   throw new Error(`Expected ${name} to be >= ${minValue}, but got "${final ?? ''}"`)
+}
+
+async function waitForStyleContaining(locator: LocatorLike, fragment: string, timeoutMs = 2500): Promise<string> {
+  const start = Date.now()
+  while (Date.now() - start <= timeoutMs) {
+    const style = await locator.getAttribute('style')
+    if ((style ?? '').includes(fragment)) return style ?? ''
+    await sleep(50)
+  }
+  const final = await locator.getAttribute('style')
+  throw new Error(`Expected style to contain "${fragment}", but got "${final ?? ''}"`)
+}
+
+function extractPxFromStyle(style: string, propName: string): number {
+  const re = new RegExp(`${propName}\\s*:\\s*(-?\\d+(?:\\.\\d+)?)px`, 'i')
+  const m = style.match(re)
+  const raw = m?.[1]
+  const n = Number(raw)
+  if (!Number.isFinite(n)) {
+    throw new Error(`Missing numeric "${propName}: <n>px" in style. style="${style}"`)
+  }
+  return n
+}
+
+function extractNumberFromStyle(style: string, propName: string): number {
+  const re = new RegExp(`${propName}\\s*:\\s*(-?\\d+(?:\\.\\d+)?)\\s*;?`, 'i')
+  const m = style.match(re)
+  const raw = m?.[1]
+  const n = Number(raw)
+  if (!Number.isFinite(n)) {
+    throw new Error(`Missing numeric "${propName}: <n>" in style. style="${style}"`)
+  }
+  return n
 }
 
 async function getBoundingBoxOrThrow(locator: LocatorLike, label: string): Promise<BoundingBox> {
@@ -221,4 +263,64 @@ export function defineScrollableElementBddSteps({ When, Then }: BddFnsWithPage):
     const count = await shadow.count()
     if (count < 1) throw new Error(`Expected scrollable element "${testId}" left shadow to be visible`)
   })
+
+  Then(
+    'scrollable element {string} sticky element {string} should have position sticky',
+    async ({ page }, _scrollableTestId: unknown, stickyTestId: unknown) => {
+      if (typeof stickyTestId !== 'string') throw new Error('Invalid sticky element id')
+      const p = asPage(page)
+      const el = p.locator(testIdSelector(stickyTestId))
+      await el.waitFor({ state: 'attached', timeout: 5000 })
+      await waitForStyleContaining(el, 'position: sticky', 5000)
+    }
+  )
+
+  Then(
+    'scrollable element {string} sticky element {string} top should be >= {int}',
+    async ({ page }, _scrollableTestId: unknown, stickyTestId: unknown, minValue: unknown) => {
+      if (typeof stickyTestId !== 'string' || typeof minValue !== 'number') throw new Error('Invalid sticky element parameters')
+      const p = asPage(page)
+      const el = p.locator(testIdSelector(stickyTestId))
+      await el.waitFor({ state: 'attached', timeout: 5000 })
+      const style = await waitForStyleContaining(el, 'top:', 5000)
+      const topPx = extractPxFromStyle(style, 'top')
+      if (topPx < minValue) {
+        throw new Error(`Expected sticky element "${stickyTestId}" top >= ${minValue}px, but got ${topPx}px`)
+      }
+    }
+  )
+
+  Then(
+    'scrollable element {string} sticky element {string} z-index should be >= {int}',
+    async ({ page }, _scrollableTestId: unknown, stickyTestId: unknown, minValue: unknown) => {
+      if (typeof stickyTestId !== 'string' || typeof minValue !== 'number') throw new Error('Invalid sticky element parameters')
+      const p = asPage(page)
+      const el = p.locator(testIdSelector(stickyTestId))
+      await el.waitFor({ state: 'attached', timeout: 5000 })
+      const style = await waitForStyleContaining(el, 'z-index:', 5000)
+      const zIndex = extractNumberFromStyle(style, 'z-index')
+      if (zIndex < minValue) {
+        throw new Error(`Expected sticky element "${stickyTestId}" z-index >= ${minValue}, but got ${zIndex}`)
+      }
+    }
+  )
+
+  Then(
+    'scrollable element {string} sticky element {string} top should be > sticky element {string} top',
+    async ({ page }, _scrollableTestId: unknown, stickyA: unknown, stickyB: unknown) => {
+      if (typeof stickyA !== 'string' || typeof stickyB !== 'string') throw new Error('Invalid sticky element parameters')
+      const p = asPage(page)
+      const a = p.locator(testIdSelector(stickyA))
+      const b = p.locator(testIdSelector(stickyB))
+      await a.waitFor({ state: 'attached', timeout: 5000 })
+      await b.waitFor({ state: 'attached', timeout: 5000 })
+      const styleA = await waitForStyleContaining(a, 'top:', 5000)
+      const styleB = await waitForStyleContaining(b, 'top:', 5000)
+      const topA = extractPxFromStyle(styleA, 'top')
+      const topB = extractPxFromStyle(styleB, 'top')
+      if (!(topA > topB)) {
+        throw new Error(`Expected sticky "${stickyA}" top (${topA}px) > "${stickyB}" top (${topB}px)`)
+      }
+    }
+  )
 }

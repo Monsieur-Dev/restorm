@@ -134,6 +134,15 @@
       "longList": "Long list"
     }
   },
+  "listView": {
+    "e2eTabLabel": "ListView (E2E)",
+    "harness": {
+      "title": "ListView",
+      "basic": "Basic (selection, expand, sticky, rename, dnd, context menu)",
+      "controlledExpansion": "Controlled expansion (expandedIds)",
+      "multipleSelection": "Multiple selection"
+    }
+  },
   "progressBar": {
     "tabLabel": "ProgressBar",
     "harness": {
