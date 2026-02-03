@@ -14,6 +14,8 @@ function isPaneElement(child: React.ReactNode): child is React.ReactElement<Reac
 interface SplitViewPaneItemProps {
 	pane: InternalPaneConfig;
 	index: number;
+	paneKey: string;
+	baseTestId: string;
 	ratio: number;
 	isCollapsed: boolean;
 	isFirstCollapsedAfterExpanded: boolean;
@@ -36,7 +38,9 @@ const SplitViewPaneItem: React.FC<SplitViewPaneItemProps> = ({
 	onSashChange,
 	onToggleCollapsed,
 	showSash,
-	nextIsCollapsed
+	nextIsCollapsed,
+	paneKey,
+	baseTestId
 }) => {
 	const paneStyle: React.CSSProperties = isCollapsed
 		? {
@@ -54,15 +58,26 @@ const SplitViewPaneItem: React.FC<SplitViewPaneItemProps> = ({
 			minWidth: 0
 		};
 
+	const paneTestId = `${baseTestId}-pane-${paneKey}`;
+	const headerTestId = `${paneTestId}-header`;
+	const bodyTestId = `${paneTestId}-body`;
+
 	return (
 		<React.Fragment key={pane.id ?? index}>
-			<div className="split-view-view" style={paneStyle}>
+			<div
+				className="split-view-view"
+				style={paneStyle}
+				data-testid={paneTestId}
+				data-pane-id={paneKey}
+			>
 				{pane.title ? (
 					<div
 						className={[
 							'split-view-view-header',
 							pane.collapsible === false ? 'not-collapsible' : ''
 						].filter(Boolean).join(' ')}
+						data-testid={headerTestId}
+						data-is-collapsed={isCollapsed ? 'true' : 'false'}
 						onClick={pane.collapsible === false ? undefined : onToggleCollapsed}
 					>
 						<div className="split-view-view-header-main">
@@ -93,7 +108,7 @@ const SplitViewPaneItem: React.FC<SplitViewPaneItemProps> = ({
 					</div>
 				) : null}
 				{!isCollapsed ? (
-					<div className="split-view-view-body">
+					<div className="split-view-view-body" data-testid={bodyTestId}>
 						{pane.children}
 					</div>
 				) : null}
@@ -105,12 +120,39 @@ const SplitViewPaneItem: React.FC<SplitViewPaneItemProps> = ({
 					onStart={onSashStart}
 					onChange={onSashChange}
 					state={!isCollapsed && !nextIsCollapsed ? 'enabled' : 'disabled'}
+					data-testid={`${baseTestId}-sash-${index}`}
 				/>
 			) : null}
 		</React.Fragment>
 	);
 };
 SplitViewPaneItem.displayName = 'SplitViewPaneItem';
+
+function ratiosToPercentString(ratios: number[]): string {
+	if (!ratios.length) return '';
+	const raw = ratios.map((r) => (Number.isFinite(r) ? Math.max(0, r) : 0));
+	const sum = raw.reduce((a, b) => a + b, 0) || 1;
+	const normalized = raw.map((r) => r / sum);
+	const floors = normalized.map((r) => Math.floor(r * 100));
+	let remainder = 100 - floors.reduce((a, b) => a + b, 0);
+
+	const frac: { i: number; f: number }[] = [];
+	for (let i = 0; i < normalized.length; i++) {
+		const r = normalized[i];
+		const floor = floors[i] ?? 0;
+		frac.push({ i, f: (r ?? 0) * 100 - floor });
+	}
+	frac.sort((a, b) => b.f - a.f);
+	for (let k = 0; k < frac.length && remainder > 0; k++) {
+		const item = frac[k];
+		if (!item) break;
+		const idx = item.i;
+		floors[idx] = (floors[idx] ?? 0) + 1;
+		remainder--;
+	}
+
+	return floors.join('|');
+}
 
 function useSplitRatios(
 	count: number,
@@ -273,7 +315,8 @@ export const SplitView: React.FC<SplitViewProps> = ({
 	className,
 	style,
 	onSizesChange,
-	children
+	children,
+	'data-testid': dataTestId
 }) => {
 	// For now we only support a vertical pane view (panes stacked top to bottom).
 	// Orientation is kept for future extension but not used to change behavior.
@@ -493,6 +536,10 @@ export const SplitView: React.FC<SplitViewProps> = ({
 		className
 	].filter(Boolean).join(' ');
 
+	const rootTestId = dataTestId ?? 'split-view';
+	const collapsedAttr = collapsed.map((c) => (c ? 'true' : 'false')).join('|');
+	const sizesAttr = ratiosToPercentString(ratios);
+
 	// Find the first collapsed pane that comes after at least one expanded pane.
 	let firstCollapsedAfterExpanded = -1;
 	{
@@ -516,13 +563,22 @@ export const SplitView: React.FC<SplitViewProps> = ({
 	}, [panes, onSashStart, onSashChange, handleToggleCollapsed]);
 
 	return (
-		<div className={rootClassName} style={style}>
+		<div
+			className={rootClassName}
+			style={style}
+			data-testid={rootTestId}
+			data-pane-count={panes.length}
+			data-collapsed={collapsedAttr}
+			data-sizes={sizesAttr}
+		>
 			<div ref={containerRef} className="split-view-container">
 				{panes.map((pane, i) => (
 					<SplitViewPaneItem
 						key={pane.id ?? i}
 						pane={pane}
 						index={i}
+						paneKey={pane.id ?? String(i)}
+						baseTestId={rootTestId}
 						ratio={ratios[i] ?? (1 / Math.max(1, panes.length))}
 						isCollapsed={Boolean(collapsed[i])}
 						isFirstCollapsedAfterExpanded={i === firstCollapsedAfterExpanded}

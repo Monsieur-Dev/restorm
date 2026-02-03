@@ -60,6 +60,10 @@ export interface SplitViewProps {
 	className?: string;
 	style?: React.CSSProperties;
 	/**
+	 * Optional test id for the SplitView root.
+	 */
+	'data-testid'?: string;
+	/**
 	 * Called whenever pane size ratios change after a drag.
 	 * Sizes are normalized and always sum to 1.
 	 */

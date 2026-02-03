@@ -154,6 +154,16 @@ export {
 } from './sashSelectors'
 
 export {
+  splitViewRootSelector,
+  splitViewPaneTestId,
+  splitViewPaneSelector,
+  splitViewPaneHeaderSelector,
+  splitViewPaneBodySelector,
+  splitViewSashTestId,
+  splitViewSashSelector
+} from './splitViewSelectors'
+
+export {
   markdownViewerRootSelector,
   markdownViewerCodeBlockSelector,
   markdownViewerCodeBlockCopySelector,
