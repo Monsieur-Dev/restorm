@@ -102,14 +102,14 @@ export function defineScrollableElementBddSteps({ When, Then }: BddFnsWithPage):
   When('I wheel scroll scrollable element {string} vertically by {int}', async ({ page }, testId: unknown, deltaY: unknown) => {
     if (typeof testId !== 'string' || typeof deltaY !== 'number') throw new Error('Invalid scrollable element parameters')
     const p = asPage(page)
-    await p.locator(scrollableElementRootSelector(testId)).hover()
+    await p.locator(scrollableElementContentSelector(testId)).hover()
     await p.mouse.wheel(0, deltaY)
   })
 
   When('I wheel scroll scrollable element {string} horizontally by {int}', async ({ page }, testId: unknown, deltaX: unknown) => {
     if (typeof testId !== 'string' || typeof deltaX !== 'number') throw new Error('Invalid scrollable element parameters')
     const p = asPage(page)
-    await p.locator(scrollableElementRootSelector(testId)).hover()
+    await p.locator(scrollableElementContentSelector(testId)).hover()
     await p.mouse.wheel(deltaX, 0)
   })
 

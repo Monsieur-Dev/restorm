@@ -217,6 +217,15 @@ const iconSelectTestDir = defineBddConfig({
   outputDir: '.features-gen/iconselect'
 })
 
+const selectBoxTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/selectbox/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/selectbox/steps/**/*.ts',
+    'tests/e2e/bdd/selectbox/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/selectbox'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -374,6 +383,11 @@ export default defineConfig({
     {
       name: 'iconselect',
       testDir: iconSelectTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'selectbox',
+      testDir: selectBoxTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],

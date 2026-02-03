@@ -10,8 +10,10 @@ const SelectBoxNative: React.FC<SelectBoxNativeProps> = ({
   selectBoxOptions,
   styles,
   className,
-  id
+  id,
+  'data-testid': dataTestId
 }) => {
+  const testId = dataTestId ?? id
   const selectRef = useRef<HTMLSelectElement>(null)
 
   // Handle selection change
@@ -81,7 +83,12 @@ const SelectBoxNative: React.FC<SelectBoxNativeProps> = ({
   ].filter(Boolean).join(' ')
 
   return (
-    <div className="select-container">
+    <div
+      className="select-container"
+      data-testid={testId}
+      data-selected-index={String(selected)}
+      data-selected-value={options[selected]?.text ?? ''}
+    >
       <select
         ref={selectRef}
         id={id}
@@ -92,6 +99,9 @@ const SelectBoxNative: React.FC<SelectBoxNativeProps> = ({
         aria-label={selectBoxOptions.ariaLabel}
         aria-description={selectBoxOptions.ariaDescription}
         disabled={false} // We'll handle disabled state through styling
+        data-testid={`${testId}-native`}
+        data-selected-index={String(selected)}
+        data-selected-value={options[selected]?.text ?? ''}
       >
         {options.map((option, index) => (
           <option

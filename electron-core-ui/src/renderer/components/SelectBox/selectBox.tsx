@@ -11,8 +11,10 @@ const SelectBox: React.FC<SelectBoxProps> = ({
   selectBoxOptions,
   styles = defaultSelectBoxStyles,
   className,
-  id
+  id,
+  'data-testid': dataTestId
 }) => {
+  const testId = dataTestId ?? 'selectbox'
   // Use native select on macOS unless explicitly overridden
   const useCustomDrawn = selectBoxOptions?.useCustomDrawn ?? false
   const shouldUseNative = isMacintosh && !useCustomDrawn
@@ -27,6 +29,7 @@ const SelectBox: React.FC<SelectBoxProps> = ({
         styles={styles}
         className={className}
         id={id}
+        data-testid={testId}
       />
     )
   }
@@ -40,6 +43,7 @@ const SelectBox: React.FC<SelectBoxProps> = ({
       styles={styles}
       className={className}
       id={id}
+      data-testid={testId}
     />
   )
 }
