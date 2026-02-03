@@ -37,7 +37,8 @@ import {
   StatusbarTab,
   TagsViewTab,
   DateTimePickerTab,
-  IconSelectTab
+  IconSelectTab,
+  SelectBoxTab
 } from '../components/test-tabs'
 import { WorkbenchTab } from '../components/test-tabs'
 
@@ -154,6 +155,7 @@ const ThemeTestPage: React.FC = () => {
     { id: 'tagsview-e2e', label: t('tagsView.e2eTabLabel'), content: <TagsViewTab />, allowFullscreen: true },
     { id: 'datetimepicker-e2e', label: t('dateTimePicker.e2eTabLabel'), content: <DateTimePickerTab />, allowFullscreen: true },
     { id: 'iconselect-e2e', label: t('iconSelect.e2eTabLabel'), content: <IconSelectTab />, allowFullscreen: true },
+    { id: 'selectbox-e2e', label: t('selectBox.e2eTabLabel'), content: <SelectBoxTab />, allowFullscreen: true },
     { id: 'breadcrumb', label: 'Breadcrumb', content: <BreadcrumbTab />, allowFullscreen: true },
     { id: 'button', label: 'Button', content: <ButtonHarnessTab />, allowFullscreen: true },
     { id: 'callout', label: t('callout.tabLabel'), content: <CalloutTab />, allowFullscreen: true },

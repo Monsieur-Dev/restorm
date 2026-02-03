@@ -20,8 +20,10 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   selectBoxOptions,
   styles,
   className,
-  id
+  id,
+  'data-testid': dataTestId
 }) => {
+  const testId = dataTestId ?? id
   const [isVisible, setIsVisible] = useState(false)
   // Track internal selection override with the 'selected' value it was set for
   const [internalState, setInternalState] = useState<{
@@ -261,7 +263,13 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   const dropdownHeight = visibleItemCount * optionRowHeight
 
   return (
-    <div className="select-container custom">
+    <div
+      className="select-container custom"
+      data-testid={testId}
+      data-is-open={isVisible ? 'true' : 'false'}
+      data-selected-index={String(currentSelection)}
+      data-focused-index={String(focusedIndex)}
+    >
       {/* Hidden select element for accessibility */}
       <select
         ref={selectRef}
@@ -274,6 +282,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
         aria-description={selectBoxOptions.ariaDescription}
         aria-expanded={isVisible}
         tabIndex={0}
+        data-testid={`${testId}-select`}
       >
         {options.map((option, index) => (
           <option
@@ -297,6 +306,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
         aria-expanded={isVisible}
         aria-haspopup="listbox"
         aria-controls={`${id}-listbox`}
+        data-testid={`${testId}-trigger`}
       >
         <span className="select-text">
           {selectedOption ? (selectedOption.label ?? selectedOption.text) : 'Select...'}
@@ -309,11 +319,13 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
         <div
           ref={dropdownRef}
           className={`${dropdownClasses} positioned`}
+          data-testid={`${testId}-dropdown`}
         >
             <ScrollableElement
-              options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false, handleMouseWheel: true }}
+              options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false, handleMouseWheel: true, fitContent: true }}
               className="select-scrollable-wrapper"
               style={{ maxHeight: `${dropdownHeight}px`, width: '100%' }}
+              data-testid={`${testId}-scrollable`}
             >
               <div
                 id={`${id}-listbox`}
@@ -322,9 +334,11 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
                 className="select-list-container"
                 onKeyDown={handleDropdownKeyDown}
                 tabIndex={0}
+                data-testid={`${testId}-listbox`}
               >
               {options.map((option, index) => {
                 const isSelected = index === currentSelection
+                const isFocused = index === focusedIndex
                 return (
                   <div
                     key={index}
@@ -334,21 +348,25 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
                     onClick={() => { handleOptionClick(index); }}
                     className={`select-option ${isSelected ? 'focused' : ''} ${option.isDisabled ? 'disabled' : ''}`}
                     onMouseEnter={() => { handleOptionHover(index); }}
+                    data-testid={`${testId}-option-${index}`}
+                    data-is-selected={isSelected ? 'true' : 'false'}
+                    data-is-disabled={option.isDisabled ? 'true' : 'false'}
+                    data-is-focused={isFocused ? 'true' : 'false'}
                   >
                     <div className="select-option-content">
                       <div className="select-option-header">
-                        <span className="option-text">
+                        <span className="option-text" data-testid={`${testId}-option-${index}-label`}>
                           {option.label ?? option.text}
                         </span>
                         {option.detail && (
-                          <span className="option-detail">
+                          <span className="option-detail" data-testid={`${testId}-option-${index}-detail`}>
                             {option.detail}
                           </span>
                         )}
                       </div>
                     </div>
                     {option.decoratorRight && (
-                      <span className="select-option-decorator">
+                      <span className="select-option-decorator" data-testid={`${testId}-option-${index}-decorator`}>
                         {option.decoratorRight}
                       </span>
                     )}
@@ -360,7 +378,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
 
           {/* Details pane for descriptions */}
           {options.some(option => option.description !== undefined) && (
-            <div className="select-box-details-pane border-top">
+            <div className="select-box-details-pane border-top" data-testid={`${testId}-details`}>
               {selectedOption?.description}
             </div>
           )}

@@ -245,6 +245,73 @@ import { SelectBox } from 'electron-core-ui/renderer'
 </div>
 ```
 
+## Testing
+
+### `data-testid` API
+
+`SelectBox` exposes stable hooks via `data-testid` (default: `selectbox`):
+
+- Root: `data-testid={id}`
+  - attributes: `data-is-open`, `data-selected-index`, `data-focused-index`
+- Trigger: `${id}-trigger`
+- Dropdown: `${id}-dropdown`
+- ScrollableElement: `${id}-scrollable`
+- Listbox: `${id}-listbox`
+- Option row: `${id}-option-${index}` (attributes: `data-is-selected`, `data-is-disabled`, `data-is-focused`)
+  - label: `${id}-option-${index}-label`
+  - detail: `${id}-option-${index}-detail`
+  - decorator: `${id}-option-${index}-decorator`
+- Details pane: `${id}-details`
+
+Native variant:
+
+- Root: `data-testid={id}` + attributes `data-selected-index`, `data-selected-value`
+- `<select>`: `${id}-native` + same attributes
+
+### Selectors (electron-core-ui/testing)
+
+- `selectBoxRootSelector(testId)`
+- `selectBoxTriggerSelector(testId)`
+- `selectBoxDropdownSelector(testId)`
+- `selectBoxScrollableSelector(testId)`
+- `selectBoxListboxSelector(testId)`
+- `selectBoxOptionSelector(testId, index)`
+- `selectBoxOptionLabelSelector(testId, index)`
+- `selectBoxOptionDetailSelector(testId, index)`
+- `selectBoxOptionDecoratorSelector(testId, index)`
+- `selectBoxDetailsSelector(testId)`
+
+### Playwright-BDD steps (electron-core-ui/testing/playwright-bdd)
+
+Register:
+
+- `defineSelectBoxBddSteps(bdd)`
+- `defineScrollableElementBddSteps(bdd)` (for `${id}-scrollable`)
+
+Steps:
+
+- `Then select box {string} should be visible`
+- `Then select box {string} should be open`
+- `Then select box {string} should be closed`
+- `Then select box {string} selected index should be {int}`
+- `Then select box {string} selected label should be {string}`
+- `Then select box {string} focused index should be {int}`
+- `Then select box {string} focused label should be {string}`
+- `Then select box {string} option {int} should be disabled`
+- `Then select box {string} option with label {string} should be disabled`
+- `Then select box {string} details should contain {string}`
+- `When I open select box {string}`
+- `When I close select box {string}`
+- `When I select option {int} in select box {string}`
+- `When I select option with label {string} in select box {string}`
+- `When I press {string} in select box {string}`
+
+### Deterministic E2E configuration
+
+For reliable E2E tests, prefer forcing the custom dropdown:
+
+- `selectBoxOptions={{ useCustomDrawn: true }}`
+
 ### Native Select Structure
 
 ```html

@@ -124,6 +124,16 @@
       "readonly": "Lecture seule"
     }
   },
+  "selectBox": {
+    "e2eTabLabel": "SelectBox (E2E)",
+    "harness": {
+      "title": "SelectBox",
+      "basic": "Basique",
+      "withDisabled": "Avec option désactivée",
+      "withDetails": "Avec détails",
+      "longList": "Longue liste"
+    }
+  },
   "progressBar": {
     "tabLabel": "ProgressBar",
     "harness": {

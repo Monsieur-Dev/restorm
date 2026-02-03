@@ -107,6 +107,8 @@ export interface SelectBoxProps {
   styles?: ISelectBoxStyles
   className: string
   id: string
+  /** Optional test id applied to the root element. */
+  'data-testid'?: string
 }
 
 // React props interface for SelectBoxList component
@@ -118,6 +120,7 @@ export interface SelectBoxListProps {
   styles: ISelectBoxStyles
   className: string
   id: string
+  'data-testid'?: string
 }
 
 // React props interface for SelectBoxNative component
@@ -129,4 +132,5 @@ export interface SelectBoxNativeProps {
   styles: ISelectBoxStyles
   className: string
   id: string
+  'data-testid'?: string
 }
