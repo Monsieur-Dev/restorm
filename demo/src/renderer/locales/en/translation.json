@@ -102,6 +102,28 @@
       "title": "DateTimePicker"
     }
   },
+  "iconSelect": {
+    "e2eTabLabel": "IconSelect (E2E)",
+    "searchEmojis": "Search emojis",
+    "searchCodicons": "Search codicons",
+    "searchIconoir": "Search Iconoir icons",
+    "searchPhosphor": "Search Phosphor icons",
+    "searchMaterial": "Search Material icons",
+    "searchSimpleIcons": "Search Simple Icons",
+    "searchFeather": "Search Feather icons",
+    "searchFontAwesome": "Search Font Awesome icons",
+    "searchResults": "Search results",
+    "noEmojisFound": "No emojis found",
+    "noIconsFound": "No icons found",
+    "more": "{{count}} more",
+    "moreIcons": "{{count}} more icons",
+    "harness": {
+      "title": "IconSelect",
+      "basic": "Basic",
+      "disabled": "Disabled",
+      "readonly": "Readonly"
+    }
+  },
   "progressBar": {
     "tabLabel": "ProgressBar",
     "harness": {

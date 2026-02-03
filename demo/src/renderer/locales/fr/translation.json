@@ -102,6 +102,28 @@
       "title": "DateTimePicker"
     }
   },
+  "iconSelect": {
+    "e2eTabLabel": "IconSelect (E2E)",
+    "searchEmojis": "Rechercher des emojis",
+    "searchCodicons": "Rechercher des codicons",
+    "searchIconoir": "Rechercher des icônes Iconoir",
+    "searchPhosphor": "Rechercher des icônes Phosphor",
+    "searchMaterial": "Rechercher des icônes Material",
+    "searchSimpleIcons": "Rechercher des icônes Simple Icons",
+    "searchFeather": "Rechercher des icônes Feather",
+    "searchFontAwesome": "Rechercher des icônes Font Awesome",
+    "searchResults": "Résultats de recherche",
+    "noEmojisFound": "Aucun emoji trouvé",
+    "noIconsFound": "Aucune icône trouvée",
+    "more": "{{count}} de plus",
+    "moreIcons": "{{count}} icônes de plus",
+    "harness": {
+      "title": "IconSelect",
+      "basic": "Basique",
+      "disabled": "Désactivé",
+      "readonly": "Lecture seule"
+    }
+  },
   "progressBar": {
     "tabLabel": "ProgressBar",
     "harness": {

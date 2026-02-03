@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { ScrollableElement } from '../ScrollableElement'
 import type { IconCategory } from './iconCategories'
 import { getIconsForCategory, searchIcons } from './iconCategories'
+import type { IconType } from '../../../../types/icon'
 
 interface GroupedIconPickerProps {
   /** All icon names for this library */
@@ -19,6 +20,10 @@ interface GroupedIconPickerProps {
   maxPerCategory?: number
   /** Unique prefix for DOM IDs to avoid conflicts */
   idPrefix: string
+  /** Optional base test id for stable E2E selectors. */
+  dataTestIdBase?: string
+  /** Optional icon type string to expose in attributes. */
+  iconType?: IconType
 }
 
 export const GroupedIconPicker: React.FC<GroupedIconPickerProps> = ({
@@ -28,7 +33,9 @@ export const GroupedIconPicker: React.FC<GroupedIconPickerProps> = ({
   onSelect,
   searchPlaceholder,
   maxPerCategory = 100,
-  idPrefix
+  idPrefix,
+  dataTestIdBase,
+  iconType
 }) => {
   const { t } = useTranslation()
   const [searchTerm, setSearchTerm] = useState('')
@@ -74,7 +81,7 @@ export const GroupedIconPicker: React.FC<GroupedIconPickerProps> = ({
   }, [t])
 
   return (
-    <div className="ecui-grouped-icon-picker">
+    <div className="ecui-grouped-icon-picker" {...(dataTestIdBase ? { 'data-testid': dataTestIdBase } : {})}>
       {/* Category tabs */}
       <div className="ecui-grouped-icon-categories">
         {categories.map(cat => (
@@ -84,6 +91,8 @@ export const GroupedIconPicker: React.FC<GroupedIconPickerProps> = ({
             className={`ecui-grouped-icon-category ${activeCategory === cat.id ? 'active' : ''}`}
             onClick={() => { handleCategoryClick(cat.id) }}
             title={getCategoryName(cat.id, cat.name)}
+            {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-category-${cat.id}` } : {})}
+            data-category-id={cat.id}
           >
             <i className={`codicon codicon-${cat.icon}`} />
           </button>
@@ -99,12 +108,14 @@ export const GroupedIconPicker: React.FC<GroupedIconPickerProps> = ({
           onChange={(e) => { setSearchTerm(e.target.value) }}
           placeholder={searchPlaceholder}
           className="ecui-icon-select-search-input"
+          {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-search-input` } : {})}
         />
         {searchTerm && (
           <button
             type="button"
             className="ecui-icon-select-search-clear"
             onClick={handleClearSearch}
+            {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-search-clear` } : {})}
           >
             <i className="codicon codicon-close" />
           </button>
@@ -115,6 +126,7 @@ export const GroupedIconPicker: React.FC<GroupedIconPickerProps> = ({
       <ScrollableElement
         options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false }}
         className="ecui-grouped-icon-scroll"
+        {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-scroll` } : {})}
       >
         <div className="ecui-grouped-icon-sections">
           {filteredCategories.map(({ category, icons }) => (
@@ -122,6 +134,8 @@ export const GroupedIconPicker: React.FC<GroupedIconPickerProps> = ({
               key={category.id}
               id={`${idPrefix}-category-${category.id}`}
               className="ecui-grouped-icon-section"
+              {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-section-${category.id}` } : {})}
+              data-category-id={category.id}
             >
               <div className="ecui-grouped-icon-section-header">
                 <span>{getCategoryName(category.id, category.name)}</span>
@@ -135,6 +149,9 @@ export const GroupedIconPicker: React.FC<GroupedIconPickerProps> = ({
                     className="ecui-icon-select-codicon"
                     title={name}
                     onClick={() => { onSelect(name) }}
+                    {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-icon-${name}` } : {})}
+                    {...(iconType ? { 'data-icon-type': iconType } : {})}
+                    data-icon-name={name}
                   >
                     {renderIcon(name)}
                   </button>

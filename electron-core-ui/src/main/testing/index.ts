@@ -227,3 +227,16 @@ export {
   dateTimePickerPatternSelector,
   dateTimePickerPreviewValueSelector
 } from './dateTimePickerSelectors'
+
+export {
+  iconSelectRootSelector,
+  iconSelectButtonSelector,
+  iconSelectPickerSelector,
+  iconSelectTabSelector,
+  iconSelectClearSelector,
+  iconSelectPanelSelector,
+  iconSelectSearchInputSelector,
+  iconSelectSearchClearSelector,
+  iconSelectIconSelector,
+  iconSelectEmojiSelector
+} from './iconSelectSelectors'

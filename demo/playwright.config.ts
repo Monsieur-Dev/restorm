@@ -208,6 +208,15 @@ const dateTimePickerTestDir = defineBddConfig({
   outputDir: '.features-gen/datetimepicker'
 })
 
+const iconSelectTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/iconselect/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/iconselect/steps/**/*.ts',
+    'tests/e2e/bdd/iconselect/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/iconselect'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -360,6 +369,11 @@ export default defineConfig({
     {
       name: 'datetimepicker',
       testDir: dateTimePickerTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'iconselect',
+      testDir: iconSelectTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],
