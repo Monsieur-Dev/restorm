@@ -87,11 +87,9 @@ function flattenItems(
     const pathIds = [...parentIds, item.id]
     const pathIndices = [...parentIndices, index]
 
-    let isExpanded = hasChildren
-    if (hasChildren && expanded.size > 0) {
+    let isExpanded = false
+    if (hasChildren) {
       isExpanded = expanded.has(item.id)
-    } else if (hasChildren && item.isExpanded !== undefined) {
-      isExpanded = item.isExpanded
     }
 
     const flatItem: FlatItem = {
@@ -156,6 +154,9 @@ export const ListView: React.FC<ListViewProps> = ({
   children,
   className,
   style,
+  'data-testid': dataTestId,
+  scrollableTestId: scrollableTestIdProp,
+  contextMenuTestId: contextMenuTestIdProp,
   selectedIds: selectedIdsProp,
   activeId: activeIdProp,
   expandedIds: expandedIdsProp,
@@ -178,6 +179,10 @@ export const ListView: React.FC<ListViewProps> = ({
   onItemMouseLeave,
   onDeleteRequest
 }) => {
+  const rootTestId = dataTestId ?? 'list-view'
+  const scrollableTestId = scrollableTestIdProp ?? `${rootTestId}-scrollable`
+  const contextMenuTestId = contextMenuTestIdProp ?? `${rootTestId}-contextmenu`
+
   const initialItems = useMemo<ListViewItemData[]>(() => {
     if (items && items.length > 0) {
       return items
@@ -345,6 +350,16 @@ export const ListView: React.FC<ListViewProps> = ({
     (flat: FlatItem, event: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLDivElement>): void => {
       const hasChildren = Array.isArray(flat.item.children) && flat.item.children.length > 0
       if (!hasChildren) return
+
+      // Controlled expansion: delegate state to parent via onItemToggle only.
+      if (expandedIdsProp !== undefined) {
+        if (onItemToggle) {
+          const payload: ListViewItemEventPayload = { item: flat.item, path: flat.path }
+          onItemToggle(payload, !flat.isExpanded, event)
+        }
+        return
+      }
+
       setHasCustomExpansion(true)
       setExpandedIds((prev) => {
         const next = new Set(prev)
@@ -361,17 +376,21 @@ export const ListView: React.FC<ListViewProps> = ({
         onItemToggle(payload, !flat.isExpanded, event)
       }
     },
-    [onItemToggle]
+    [expandedIdsProp, onItemToggle]
   )
 
   // Recompute initial expansion when the item tree changes,
   // but only until the user has interacted with expansion state.
   React.useEffect(() => {
+    // Controlled expansion: do not recompute internal state.
+    if (expandedIdsProp !== undefined) {
+      return
+    }
     if (hasCustomExpansion) {
       return
     }
     setExpandedIds(computeInitialExpandedIds(initialItems))
-  }, [initialItems, hasCustomExpansion])
+  }, [initialItems, hasCustomExpansion, expandedIdsProp])
 
   const handleSelect = useCallback(
     (flat: FlatItem, event: React.MouseEvent<HTMLDivElement>): void => {
@@ -668,9 +687,10 @@ export const ListView: React.FC<ListViewProps> = ({
   const isReady = flatItems.length > 0 || initialItems.length === 0
 
   return (
-    <div className={rootClasses} style={style} data-testid="list-view" data-ready={isReady}>
+    <div className={rootClasses} style={style} data-testid={rootTestId} data-ready={isReady}>
       <ScrollableElement
         className="list-view-scrollable"
+        data-testid={scrollableTestId}
         options={{
           vertical: 'auto',
           horizontal: 'hidden',
@@ -744,6 +764,8 @@ export const ListView: React.FC<ListViewProps> = ({
                 ref={renameInputRef}
                 type="text"
                 className="list-view-rename-input"
+                data-testid={`${rootTestId}-rename-input`}
+                data-item-id={item.id}
                 value={editingValue}
                 onChange={(e): void => { setEditingValue(e.target.value) }}
                 onBlur={(): void => { commitRename(flat) }}
@@ -769,13 +791,18 @@ export const ListView: React.FC<ListViewProps> = ({
               )
 
             const rowStyle: React.CSSProperties = {}
+            const stickyLevel = item.isStickyHeader ? depth + 1 : 0
 
             return (
               <div
                 key={item.id}
                 className={rowClasses}
                 style={rowStyle}
-                data-sticky-level={isLeaf ? 0 : depth+1}
+                data-sticky-level={stickyLevel}
+                data-item-id={item.id}
+                data-depth={depth}
+                data-is-leaf={isLeaf ? 'true' : 'false'}
+                {...(!isLeaf ? { 'data-is-expanded': isExpanded ? 'true' : 'false' } : {})}
                 role={ariaRole}
                 aria-level={depth + 1}
                 aria-expanded={!isLeaf ? isExpanded : undefined}
@@ -853,6 +880,7 @@ export const ListView: React.FC<ListViewProps> = ({
       </ScrollableElement>
       {contextMenuItems && (
         <ContextMenu
+          data-testid={contextMenuTestId}
           visible={contextMenu.visible}
           x={contextMenu.x}
           y={contextMenu.y}

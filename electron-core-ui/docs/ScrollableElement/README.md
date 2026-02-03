@@ -338,3 +338,10 @@ Reusable steps are available from `electron-core-ui/testing/playwright-bdd`:
 - `Then scrollable element {string} vertical scrollbar should be visible|hidden`
 - `Then scrollable element {string} horizontal scrollbar should be visible|hidden`
 - `Then scrollable element {string} left shadow should be visible`
+
+Sticky helpers (assert sticky positioning by `data-testid`):
+
+- `Then scrollable element {string} sticky element {string} should have position sticky`
+- `Then scrollable element {string} sticky element {string} top should be >= {int}`
+- `Then scrollable element {string} sticky element {string} z-index should be >= {int}`
+- `Then scrollable element {string} sticky element {string} top should be > sticky element {string} top`

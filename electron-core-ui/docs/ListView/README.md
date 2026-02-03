@@ -47,6 +47,25 @@ export interface ListViewProps {
   children?: React.ReactNode
   className?: string
   style?: React.CSSProperties
+
+  /**
+   * Optional test id for the ListView root.
+   * When provided, internal test ids are derived for nested components unless overridden.
+   */
+  'data-testid'?: string
+
+  /**
+   * Optional test id for the internal ScrollableElement wrapper.
+   * Defaults to `${data-testid}-scrollable` when `data-testid` is provided.
+   */
+  scrollableTestId?: string
+
+  /**
+   * Optional test id for the internal ContextMenu.
+   * Defaults to `${data-testid}-contextmenu` when `data-testid` is provided.
+   */
+  contextMenuTestId?: string
+
   selectedIds?: string[]
   activeId?: string | null
   selectionMode?: ListViewSelectionMode
@@ -136,3 +155,78 @@ const FileTree: React.FC = () => {
 - Prefer **pure data trees** (`ListViewItemData[]`) over JSX when integrating with backends or IPC, since they are easy to serialize and diff.
 - Use the `data` field to attach stable metadata (like `filePath`, ids, etc.) instead of encoding those values in `id` or `title`.
 - When implementing complex drag/drop logic, handle all structural updates in a **pure helper** (e.g. `updateListAfterDrop`) and call it from `onItemDrop`; avoid mutating the `items` array in place.
+
+## Testing
+
+### `data-testid` API
+
+`ListView` exposes stable E2E hooks via `data-testid` (default: `list-view`).
+When `data-testid="my-list"` is provided, the following test ids are available:
+
+- Root: `my-list`
+- Internal ScrollableElement: `my-list-scrollable`
+  - Content: `my-list-scrollable-content`
+- Internal ContextMenu (when enabled): `my-list-contextmenu`
+- Rename input (when renaming): `my-list-rename-input` (attributes: `data-item-id`)
+
+Per-row data attributes are available on `.list-view-row`:
+
+- `data-item-id`
+- `data-depth`
+- `data-is-leaf`
+- `data-is-expanded` (only for non-leaf)
+
+### Selectors (electron-core-ui/testing)
+
+Use the pure string selectors from `electron-core-ui/testing`:
+
+- `listViewRootSelector(testId)`
+- `listViewScrollableTestId(testId)`
+- `listViewScrollableContentSelector(testId)`
+- `listViewContextMenuTestId(testId)`
+- `listViewRowSelectorByItemId(testId, itemId)`
+- `listViewRowExpanderSelectorByItemId(testId, itemId)`
+- `listViewRowTitleSelectorByItemId(testId, itemId)`
+- `listViewRenameInputSelector(testId, itemId?)`
+
+### Playwright-BDD steps (electron-core-ui/testing/playwright-bdd)
+
+Register:
+
+- `defineListViewBddSteps(bdd)`
+- `defineScrollableElementBddSteps(bdd)` (for `${testId}-scrollable`)
+
+Steps:
+
+- `Then list view {string} should be visible`
+- `When I focus list view {string}`
+- `When I press {string} in list view {string}`
+- `When I click list view {string} item {string}`
+- `When I double click list view {string} item {string}`
+- `Then list view {string} item {string} should be selected`
+- `Then list view {string} item {string} should not be selected`
+- `Then list view {string} item {string} aria-expanded should be {string}`
+- `When I click list view {string} item {string} expander`
+
+Sticky helpers:
+
+- `Then list view {string} item {string} should have position sticky`
+- `Then list view {string} item {string} top should be >= {int}`
+- `Then list view {string} item {string} top should be > item {string} top`
+
+Rename helpers:
+
+- `When I start renaming list view {string} item {string}`
+- `When I type {string} in list view {string} rename input letter by letter`
+- `When I submit list view {string} rename with Enter`
+- `When I cancel list view {string} rename with Escape`
+
+Context menu:
+
+- `When I open list view {string} context menu on item {string}`
+
+Drag and drop:
+
+- `When I drag list view {string} item {string} before item {string}`
+- `When I drag list view {string} item {string} into item {string}`
+- `When I drag list view {string} item {string} after item {string}`

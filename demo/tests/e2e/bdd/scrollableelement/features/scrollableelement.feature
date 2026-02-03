@@ -36,3 +36,15 @@ Feature: ScrollableElement
     When I drag scrollable element "scrollableelement-visible" vertical slider by 40
     Then scrollable element "scrollableelement-visible" scroll top should be >= 5
 
+  Scenario: Sticky levels stack on scroll
+    Given I open the scrollable element tab
+    Then scrollable element "scrollableelement-sticky" should be visible
+    When I wheel scroll scrollable element "scrollableelement-sticky" vertically by 350
+    Then scrollable element "scrollableelement-sticky" sticky element "scrollableelement-sticky-level-1" should have position sticky
+    Then scrollable element "scrollableelement-sticky" sticky element "scrollableelement-sticky-level-2" should have position sticky
+    Then scrollable element "scrollableelement-sticky" sticky element "scrollableelement-sticky-level-1" top should be >= 0
+    Then scrollable element "scrollableelement-sticky" sticky element "scrollableelement-sticky-level-2" top should be >= 0
+    Then scrollable element "scrollableelement-sticky" sticky element "scrollableelement-sticky-level-1" z-index should be >= 1
+    Then scrollable element "scrollableelement-sticky" sticky element "scrollableelement-sticky-level-2" z-index should be >= 1
+    Then scrollable element "scrollableelement-sticky" sticky element "scrollableelement-sticky-level-2" top should be > sticky element "scrollableelement-sticky-level-1" top
+

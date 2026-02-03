@@ -102,6 +102,24 @@ export interface ListViewProps {
   style?: React.CSSProperties
 
   /**
+   * Optional test id for the ListView root.
+   * When provided, internal test ids are derived for nested components unless overridden.
+   */
+  'data-testid'?: string
+
+  /**
+   * Optional test id for the internal ScrollableElement wrapper.
+   * Defaults to `${data-testid}-scrollable` when `data-testid` is provided.
+   */
+  scrollableTestId?: string
+
+  /**
+   * Optional test id for the internal ContextMenu.
+   * Defaults to `${data-testid}-contextmenu` when `data-testid` is provided.
+   */
+  contextMenuTestId?: string
+
+  /**
    * Optional controlled selection. When provided, the ListView will mirror
    * these ids as selected rows.
    */
