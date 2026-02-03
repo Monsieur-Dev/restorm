@@ -74,6 +74,8 @@ export interface IconSelectProps {
   readonly?: boolean
   className?: string
   style?: React.CSSProperties
+  /** Optional test id applied to the root element. */
+  'data-testid'?: string
 }
 
 /**
@@ -92,7 +94,9 @@ const SearchInput: React.FC<{
   value: string
   onChange: (value: string) => void
   placeholder: string
-}> = ({ value, onChange, placeholder }) => (
+  inputTestId?: string
+  clearTestId?: string
+}> = ({ value, onChange, placeholder, inputTestId, clearTestId }) => (
   <div className="ecui-icon-select-search">
     <i className="codicon codicon-search" />
     <input
@@ -101,6 +105,7 @@ const SearchInput: React.FC<{
       onChange={(e) => { onChange(e.target.value) }}
       placeholder={placeholder}
       className="ecui-icon-select-search-input"
+      {...(inputTestId ? { 'data-testid': inputTestId } : {})}
       autoFocus
     />
     {value && (
@@ -108,6 +113,7 @@ const SearchInput: React.FC<{
         type="button"
         className="ecui-icon-select-search-clear"
         onClick={() => { onChange('') }}
+        {...(clearTestId ? { 'data-testid': clearTestId } : {})}
       >
         <i className="codicon codicon-close" />
       </button>
@@ -124,7 +130,9 @@ const IconGrid: React.FC<{
   onSelect: (name: string) => void
   maxDisplay?: number
   moreHintText?: string
-}> = ({ icons, renderIcon, onSelect, maxDisplay = 500, moreHintText }) => {
+  dataTestIdBase?: string
+  iconType?: IconType
+}> = ({ icons, renderIcon, onSelect, maxDisplay = 500, moreHintText, dataTestIdBase, iconType }) => {
   const displayedIcons = icons.slice(0, maxDisplay)
   const hasMore = icons.length > maxDisplay
   
@@ -138,6 +146,9 @@ const IconGrid: React.FC<{
             className="ecui-icon-select-codicon"
             title={name}
             onClick={() => { onSelect(name) }}
+            {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-icon-${name}` } : {})}
+            {...(iconType ? { 'data-icon-type': iconType } : {})}
+            data-icon-name={name}
           >
             {renderIcon(name)}
           </button>
@@ -159,8 +170,10 @@ export const IconSelect: React.FC<IconSelectProps> = ({
   disabled = false,
   readonly = false,
   className,
-  style
+  style,
+  'data-testid': dataTestId
 }) => {
+  const testId = dataTestId ?? 'iconselect'
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<TabId>('emoji')
@@ -304,6 +317,9 @@ export const IconSelect: React.FC<IconSelectProps> = ({
     return <RenderLibraryIcon type={value.type} name={value.value} size={16} />
   }, [value, placeholder])
 
+  const selectedType = value && value.type !== 'none' ? value.type : ''
+  const selectedValue = value && value.type !== 'none' ? value.value : ''
+
   const rootClassName = useMemo(
     () => ['ecui-icon-select', readonly ? 'readonly' : '', className].filter(Boolean).join(' '),
     [className, readonly]
@@ -323,14 +339,33 @@ export const IconSelect: React.FC<IconSelectProps> = ({
       return null
     }
     return (
-      <span className={rootClassName} style={style}>
-        <span className="ecui-icon-select-value">{displayValue}</span>
+      <span
+        className={rootClassName}
+        style={style}
+        data-testid={testId}
+        data-is-open="false"
+        data-disabled={disabled ? 'true' : 'false'}
+        data-active-tab={activeTab}
+        data-selected-type={selectedType}
+        data-selected-value={selectedValue}
+      >
+        <span className="ecui-icon-select-value" data-testid={`${testId}-value`}>{displayValue}</span>
       </span>
     )
   }
 
   return (
-    <div ref={containerRef} className={rootClassName} style={style}>
+    <div
+      ref={containerRef}
+      className={rootClassName}
+      style={style}
+      data-testid={testId}
+      data-is-open={isOpen ? 'true' : 'false'}
+      data-disabled={disabled ? 'true' : 'false'}
+      data-active-tab={activeTab}
+      data-selected-type={selectedType}
+      data-selected-value={selectedValue}
+    >
       <button
         ref={buttonRef}
         type="button"
@@ -339,22 +374,24 @@ export const IconSelect: React.FC<IconSelectProps> = ({
         onClick={handleButtonClick}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
+        data-testid={`${testId}-button`}
       >
-        <span className="ecui-icon-select-value">{displayValue}</span>
+        <span className="ecui-icon-select-value" data-testid={`${testId}-value`}>{displayValue}</span>
       </button>
 
       {isOpen && createPortal(
         <div
           ref={pickerRef}
           className="ecui-icon-select-picker"
+          data-testid={`${testId}-picker`}
           style={{
             position: 'fixed',
             top: pickerPosition.top,
             left: pickerPosition.left
           }}
         >
-          <div className="ecui-icon-select-header">
-            <div className="ecui-icon-select-tabs">
+          <div className="ecui-icon-select-header" data-testid={`${testId}-header`}>
+            <div className="ecui-icon-select-tabs" data-testid={`${testId}-tabs`}>
               {TABS.map(tab => (
                 <button
                   key={tab.id}
@@ -362,128 +399,164 @@ export const IconSelect: React.FC<IconSelectProps> = ({
                   className={`ecui-icon-select-tab ${activeTab === tab.id ? 'active' : ''}`}
                   onClick={() => { setActiveTab(tab.id) }}
                   title={tab.title}
+                  data-testid={`${testId}-tab-${tab.id}`}
+                  data-is-active={activeTab === tab.id ? 'true' : 'false'}
                 >
                   {tab.icon}
                 </button>
               ))}
             </div>
-            <Button small secondary onClick={handleClear}>
+            <Button small secondary onClick={handleClear} data-testid={`${testId}-clear`}>
               <i className="codicon codicon-trash" />
             </Button>
           </div>
           
           {activeTab === 'emoji' && (
-            <EmojiPicker
+            <div data-testid={`${testId}-panel-emoji`}>
+              <EmojiPicker
               onEmojiSelect={handleEmojiSelect}
               theme={theme}
-            />
+              dataTestIdBase={`${testId}-emoji`}
+              />
+            </div>
           )}
           
           {activeTab === 'codicon' && (
-            <GroupedIconPicker
+            <div data-testid={`${testId}-panel-codicon`}>
+              <GroupedIconPicker
               iconNames={CODICONS}
               categories={CODICON_CATEGORIES}
               renderIcon={(name) => <i className={`codicon codicon-${name}`} />}
               onSelect={(name) => { handleIconSelect('codicon', name) }}
               searchPlaceholder={t('iconSelect.searchCodicons')}
               idPrefix="codicon"
-            />
+              dataTestIdBase={`${testId}-codicon`}
+              iconType="codicon"
+              />
+            </div>
           )}
 
           {activeTab === 'iconoir' && (
-            <GroupedIconPicker
+            <div data-testid={`${testId}-panel-iconoir`}>
+              <GroupedIconPicker
               iconNames={iconoirNames}
               categories={ICONOIR_CATEGORIES}
               renderIcon={(name) => <IconoirIcon name={name} size={16} />}
               onSelect={(name) => { handleIconSelect('iconoir', name) }}
               searchPlaceholder={t('iconSelect.searchIconoir')}
               idPrefix="iconoir"
-            />
+              dataTestIdBase={`${testId}-iconoir`}
+              iconType="iconoir"
+              />
+            </div>
           )}
 
           {activeTab === 'phosphor' && (
-            <GroupedIconPicker
+            <div data-testid={`${testId}-panel-phosphor`}>
+              <GroupedIconPicker
               iconNames={phosphorNames}
               categories={PHOSPHOR_CATEGORIES}
               renderIcon={(name) => <PhosphorIcon name={name} size={16} />}
               onSelect={(name) => { handleIconSelect('phosphor', name) }}
               searchPlaceholder={t('iconSelect.searchPhosphor')}
               idPrefix="phosphor"
-            />
+              dataTestIdBase={`${testId}-phosphor`}
+              iconType="phosphor"
+              />
+            </div>
           )}
 
           {activeTab === 'material' && (
-            <div className="ecui-icon-select-codicons">
+            <div className="ecui-icon-select-codicons" data-testid={`${testId}-panel-material`}>
               <SearchInput
                 value={materialSearch}
                 onChange={setMaterialSearch}
                 placeholder={t('iconSelect.searchMaterial')}
+                inputTestId={`${testId}-material-search-input`}
+                clearTestId={`${testId}-material-search-clear`}
               />
               <ScrollableElement
                 options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false }}
                 className="ecui-icon-select-scroll"
+                data-testid={`${testId}-material-scroll`}
               >
                 <IconGrid
                   icons={filteredMaterial}
                   renderIcon={(name) => <MdiIcon name={name} size={16} />}
                   onSelect={(name) => { handleIconSelect('material', name) }}
                   moreHintText={t('iconSelect.moreIcons', { count: filteredMaterial.length - 500 })}
+                  dataTestIdBase={`${testId}-material`}
+                  iconType="material"
                 />
               </ScrollableElement>
             </div>
           )}
 
           {activeTab === 'simpleicons' && (
-            <div className="ecui-icon-select-codicons">
+            <div className="ecui-icon-select-codicons" data-testid={`${testId}-panel-simpleicons`}>
               <SearchInput
                 value={simpleIconsSearch}
                 onChange={setSimpleIconsSearch}
                 placeholder={t('iconSelect.searchSimpleIcons')}
+                inputTestId={`${testId}-simpleicons-search-input`}
+                clearTestId={`${testId}-simpleicons-search-clear`}
               />
               <ScrollableElement
                 options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false }}
                 className="ecui-icon-select-scroll"
+                data-testid={`${testId}-simpleicons-scroll`}
               >
                 <IconGrid
                   icons={filteredSimpleIcons}
                   renderIcon={(name) => <SimpleIcon name={name} size={16} />}
                   onSelect={(name) => { handleIconSelect('simpleicons', name) }}
                   moreHintText={t('iconSelect.moreIcons', { count: filteredSimpleIcons.length - 500 })}
+                  dataTestIdBase={`${testId}-simpleicons`}
+                  iconType="simpleicons"
                 />
               </ScrollableElement>
             </div>
           )}
 
           {activeTab === 'feather' && (
-            <div className="ecui-icon-select-codicons">
+            <div className="ecui-icon-select-codicons" data-testid={`${testId}-panel-feather`}>
               <SearchInput
                 value={featherSearch}
                 onChange={setFeatherSearch}
                 placeholder={t('iconSelect.searchFeather')}
+                inputTestId={`${testId}-feather-search-input`}
+                clearTestId={`${testId}-feather-search-clear`}
               />
               <ScrollableElement
                 options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false }}
                 className="ecui-icon-select-scroll"
+                data-testid={`${testId}-feather-scroll`}
               >
                 <IconGrid
                   icons={filteredFeather}
                   renderIcon={(name) => <FeatherIcon name={name} size={16} />}
                   onSelect={(name) => { handleIconSelect('feather', name) }}
                   moreHintText={t('iconSelect.moreIcons', { count: filteredFeather.length - 500 })}
+                  dataTestIdBase={`${testId}-feather`}
+                  iconType="feather"
                 />
               </ScrollableElement>
             </div>
           )}
 
           {activeTab === 'fontawesome' && (
-            <GroupedIconPicker
+            <div data-testid={`${testId}-panel-fontawesome`}>
+              <GroupedIconPicker
               iconNames={fontAwesomeNames}
               categories={FONTAWESOME_CATEGORIES}
               renderIcon={(name) => <FaIcon name={name} size={16} />}
               onSelect={(name) => { handleIconSelect('fontawesome', name) }}
               searchPlaceholder={t('iconSelect.searchFontAwesome')}
               idPrefix="fontawesome"
-            />
+              dataTestIdBase={`${testId}-fontawesome`}
+              iconType="fontawesome"
+              />
+            </div>
           )}
         </div>,
         document.body

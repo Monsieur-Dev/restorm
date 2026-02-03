@@ -6,13 +6,14 @@ import { EMOJI_CATEGORIES, type EmojiCategory } from './emojiData'
 export interface EmojiPickerProps {
   onEmojiSelect: (emoji: string) => void
   theme?: 'light' | 'dark'
+  dataTestIdBase?: string
 }
 
 /**
  * Custom emoji picker component with categories and search
  * Replaces emoji-mart with a lightweight custom implementation
  */
-export const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect }) => {
+export const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect, dataTestIdBase }) => {
   const { t } = useTranslation()
   const [searchQuery, setSearchQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState<string>(EMOJI_CATEGORIES[0]?.id ?? 'people')
@@ -81,6 +82,8 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect }) => {
             className={`ecui-emoji-picker-category ${activeCategory === category.id ? 'active' : ''}`}
             onClick={() => { handleCategoryClick(category.id) }}
             title={getCategoryName(category.id, category.name)}
+            {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-category-${category.id}` } : {})}
+            data-category-id={category.id}
           >
             {category.icon}
           </button>
@@ -96,12 +99,14 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect }) => {
           onChange={handleSearchChange}
           placeholder={t('iconSelect.searchEmojis')}
           className="ecui-emoji-picker-search-input"
+          {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-search-input` } : {})}
         />
         {searchQuery && (
           <button
             type="button"
             className="ecui-emoji-picker-search-clear"
             onClick={handleClearSearch}
+            {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-search-clear` } : {})}
           >
             <i className="codicon codicon-close" />
           </button>
@@ -119,7 +124,13 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect }) => {
       >
         <div className="ecui-emoji-picker-content">
           {filteredCategories.map(category => (
-            <div key={category.id} id={`emoji-category-${category.id}`} className="ecui-emoji-picker-section">
+            <div
+              key={category.id}
+              id={`emoji-category-${category.id}`}
+              className="ecui-emoji-picker-section"
+              {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-section-${category.id}` } : {})}
+              data-category-id={category.id}
+            >
               <div className="ecui-emoji-picker-section-title">{getCategoryName(category.id, category.name)}</div>
               <div className="ecui-emoji-picker-grid">
                 {category.emojis.map((emoji, index) => (
@@ -129,6 +140,8 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect }) => {
                     className="ecui-emoji-picker-emoji"
                     onClick={() => { handleEmojiClick(emoji) }}
                     title={emoji}
+                    {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-emoji-${category.id}-${index}` } : {})}
+                    data-emoji={emoji}
                   >
                     {emoji}
                   </button>
