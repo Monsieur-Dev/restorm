@@ -244,6 +244,15 @@ const splitViewTestDir = defineBddConfig({
   outputDir: '.features-gen/splitview'
 })
 
+const searchBarTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/searchbar/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/searchbar/steps/**/*.ts',
+    'tests/e2e/bdd/searchbar/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/searchbar'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -416,6 +425,11 @@ export default defineConfig({
     {
       name: 'splitview',
       testDir: splitViewTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'searchbar',
+      testDir: searchBarTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],
