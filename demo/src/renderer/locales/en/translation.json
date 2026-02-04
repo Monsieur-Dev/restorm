@@ -80,6 +80,19 @@
       "initialTagB": "beta"
     }
   },
+  "searchBar": {
+    "e2eTabLabel": "SearchBar (E2E)",
+    "harness": {
+      "title": "Search",
+      "placeholder": "Search…",
+      "instructions": "Type \"item\" to show deterministic results and hover an item to display a tooltip.",
+      "sidePanelTitle": "Side panel",
+      "categories": {
+        "requests": "Requests",
+        "docs": "Docs"
+      }
+    }
+  },
   "dateTimePicker": {
     "e2eTabLabel": "DateTimePicker (E2E)",
     "ariaLabel": "Date and time",

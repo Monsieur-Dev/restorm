@@ -15,10 +15,14 @@ import './searchBar.css'
 export interface SearchBarProps {
   /** Title to display when search bar is closed */
   title?: string
+  /** Optional test id applied to the SearchBar root element. */
+  'data-testid'?: string
   /** Callback when a search result is clicked */
   onResultClick?: ((result: SearchResult) => void) | undefined
   /** Placeholder text for the search input */
   placeholder?: string
+  /** Optional search function override (useful for deterministic E2E tests). */
+  searchFn?: (query: string) => Promise<GroupedResults[]>
   /** Custom renderer for tooltip content. If not provided, uses default rendering with description. */
   renderTooltipContent?: (result: SearchResult) => React.ReactNode
   /** Custom renderer for method/type badge. If not provided, uses default request-type-badge styling. */
@@ -30,8 +34,10 @@ const DEBOUNCE_MS = 150
 
 export const SearchBar: React.FC<SearchBarProps> = ({
   title = '',
+  'data-testid': dataTestId,
   onResultClick,
   placeholder,
+  searchFn,
   renderTooltipContent,
   renderBadge
 }) => {
@@ -57,6 +63,29 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
   const placeholderText = placeholder ?? t('search.placeholder', 'Search...')
   const noResultsText = t('search.noResults', 'No results found')
+
+  const rootTestId = dataTestId ?? 'searchbar'
+  const closedTestId = `${rootTestId}-closed`
+  const openTestId = `${rootTestId}-open`
+  const inputBoxTestId = `${rootTestId}-inputbox`
+  const scrollableTestId = `${rootTestId}-scrollable`
+  const resultsTestId = `${rootTestId}-results`
+  const tooltipTestId = `${rootTestId}-tooltip`
+  const tooltipMarkdownTestId = `${rootTestId}-tooltip-markdown`
+
+  const effectiveSearchFn = useCallback(async (q: string): Promise<GroupedResults[]> => {
+    if (searchFn) return await searchFn(q)
+    return await searchService.search(q)
+  }, [searchFn])
+
+  const normalizeTestIdSegment = useCallback((value: string): string => {
+    const normalized = value
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+    return normalized || 'unknown'
+  }, [])
 
   // Clear tooltip hide timeout
   const clearHideTooltipTimeout = useCallback(() => {
@@ -84,13 +113,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
     debounceRef.current = setTimeout(() => {
       logger.debug('[SearchBar] Executing search', { searchQuery })
-      searchService.search(searchQuery).then((searchResults) => {
+      effectiveSearchFn(searchQuery).then((searchResults) => {
         setResults(searchResults)
       }).catch((error: unknown) => {
         logger.error('[SearchBar] Search error', { error: String(error) })
       })
     }, DEBOUNCE_MS)
-  }, [])
+  }, [effectiveSearchFn])
 
   // Handle query change
   const handleQueryChange = useCallback(
@@ -255,6 +284,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   // Determine state
   const hasResults = results.length > 0
   const hasQuery = query.trim().length > 0
+  const resultsCount = useMemo(() => {
+    let n = 0
+    for (const group of results) {
+      n += group.items.length
+    }
+    return n
+  }, [results])
 
   // Get currently hovered result for tooltip
   const hoveredResult = useMemo(() => {
@@ -289,7 +325,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             <strong>{resultTitle}</strong>
           </div>
           {description && (
-            <MarkdownViewer value={description} style={{ flex: 1, minHeight: 0, maxHeight: 'calc(100vh - 130px)' }} />
+            <MarkdownViewer
+              data-testid={tooltipMarkdownTestId}
+              value={description}
+              style={{ flex: 1, minHeight: 0, maxHeight: 'calc(100vh - 130px)' }}
+            />
           )}
         </div>
       )
@@ -302,18 +342,31 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           <strong>{resultTitle}</strong>
         </div>
         {description && (
-          <MarkdownViewer value={description} style={{ flex: 1, minHeight: 0, maxHeight: 'calc(100vh - 130px)' }} />
+          <MarkdownViewer
+            data-testid={tooltipMarkdownTestId}
+            value={description}
+            style={{ flex: 1, minHeight: 0, maxHeight: 'calc(100vh - 130px)' }}
+          />
         )}
       </div>
     )
-  }, [hoveredResult, renderTooltipContent, renderBadge])
+  }, [hoveredResult, renderTooltipContent, renderBadge, tooltipMarkdownTestId])
 
   return (
-    <div className="search-bar-container" ref={containerRef}>
+    <div
+      className="search-bar-container"
+      ref={containerRef}
+      data-testid={rootTestId}
+      data-is-open={isOpen ? 'true' : 'false'}
+      data-query-length={query.length}
+      data-results-count={resultsCount}
+      data-has-results={hasResults ? 'true' : 'false'}
+    >
       {/* Hidden element kept for position reference */}
       <div
         className="search-bar-closed"
         ref={closedRef}
+        data-testid={closedTestId}
         onClick={!isOpen ? handleOpenClick : undefined}
         role="button"
         tabIndex={isOpen ? -1 : 0}
@@ -331,6 +384,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         <div
           ref={openBoxRef}
           className={`search-bar-open ${hasResults ? 'has-results' : ''} ${hasQuery && !hasResults ? 'no-results' : ''} ${isClosing ? 'closing' : ''}`}
+          data-testid={openTestId}
           style={{
             top: openBoxPosition.top,
             left: openBoxPosition.left,
@@ -340,6 +394,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           <div className="search-bar-input-row">
             <InputBox
               inputRef={inputRef}
+              data-testid={inputBoxTestId}
               className="search-bar-input"
               value={query}
               onChange={handleQueryChange}
@@ -360,12 +415,21 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             <div onMouseDown={(e) => { e.preventDefault() }}>
               <ScrollableElement
                 className="search-results-wrapper"
+                data-testid={scrollableTestId}
                 options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false, fitContent: true }}
                 style={{ maxHeight: 350 }}
               >
-              <div className="search-results-content" role="tree" aria-label={t('search.resultsAriaLabel', 'Search results')} style={{ maxHeight: '350px' }} data-testid="search-results" data-ready="true">
+              <div
+                className="search-results-content"
+                role="tree"
+                aria-label={t('search.resultsAriaLabel', 'Search results')}
+                style={{ maxHeight: '350px' }}
+                data-testid={resultsTestId}
+                data-ready="true"
+              >
                 {results.map((group) => {
                   const isCollapsed = collapsedCategories.has(group.category)
+                  const categoryKey = normalizeTestIdSegment(group.category)
                   return (
                     <div key={group.category} className="search-results-group">
                       <div
@@ -373,6 +437,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                         data-sticky-level={1}
                         role="treeitem"
                         aria-expanded={!isCollapsed}
+                        data-testid={`${rootTestId}-category-${categoryKey}`}
+                        data-category={group.category}
+                        data-is-collapsed={isCollapsed ? 'true' : 'false'}
                         onClick={() => { toggleCategory(group.category) }}
                       >
                         <i className={`codicon codicon-chevron-${isCollapsed ? 'right' : 'down'} category-chevron`} />
@@ -382,6 +449,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                       </div>
                       {!isCollapsed && group.items.map((result) => {
                         const { category, icon, title: resultTitle } = result
+                        const resultKey = normalizeTestIdSegment(result.id)
 
                         return (
                           <div
@@ -391,6 +459,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                             className="search-result-item"
                             role="treeitem"
                             tabIndex={0}
+                            data-testid={`${rootTestId}-result-${resultKey}`}
+                            data-category={category}
                             onClick={() => { handleResultClick(result) }}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') handleResultClick(result)
@@ -474,6 +544,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             fixedTop={25}
             repositionKey={hoveredResultId}
             className="search-result-tooltip"
+            data-testid={tooltipTestId}
             onMouseEnter={() => {
               clearHideTooltipTimeout()
               setIsTooltipHovered(true)

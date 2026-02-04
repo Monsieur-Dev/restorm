@@ -131,6 +131,21 @@ export {
 } from './scrollableElementSelectors'
 
 export {
+  searchBarRootSelector,
+  searchBarClosedSelector,
+  searchBarOpenSelector,
+  searchBarInputBoxTestId,
+  searchBarInputBoxSelector,
+  searchBarInputSelector,
+  searchBarScrollableTestId,
+  searchBarResultsSelector,
+  searchBarCategorySelector,
+  searchBarResultSelector,
+  searchBarTooltipSelector,
+  searchBarTooltipMarkdownSelector
+} from './searchBarSelectors'
+
+export {
   toggleRootSelector,
   toggleActionSelector,
   toggleLabelSelector,
