@@ -217,7 +217,8 @@ Sticky helpers:
 Rename helpers:
 
 - `When I start renaming list view {string} item {string}`
-- `When I type {string} in list view {string} rename input letter by letter`
+- `When I type {string} in list view {string} rename input`
+- `When I type {string} in list view {string} rename input letter by letter` (legacy alias)
 - `When I submit list view {string} rename with Enter`
 - `When I cancel list view {string} rename with Escape`
 

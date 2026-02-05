@@ -253,6 +253,15 @@ const searchBarTestDir = defineBddConfig({
   outputDir: '.features-gen/searchbar'
 })
 
+const titlebarTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/titlebar/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/titlebar/steps/**/*.ts',
+    'tests/e2e/bdd/titlebar/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/titlebar'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -430,6 +439,11 @@ export default defineConfig({
     {
       name: 'searchbar',
       testDir: searchBarTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'titlebar',
+      testDir: titlebarTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],

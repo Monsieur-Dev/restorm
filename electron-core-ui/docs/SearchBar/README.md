@@ -106,10 +106,13 @@ Steps:
 - `Then search bar {string} should be closed`
 - `When I open search bar {string}`
 - `When I close search bar {string}`
-- `When I type in search bar {string} query letter by letter {string}`
+- `When I type in search bar {string} query {string}`
+- `When I type in search bar {string} query letter by letter {string}` (legacy alias)
 - `When I clear search bar {string} query`
 - `Then search bar {string} results count should be {int}`
 - `Then search bar {string} results should be visible`
+- `Then search bar {string} category {string} should be visible`
+- `Then search bar {string} result {string} should be visible`
 - `When I toggle search bar {string} category {string}`
 - `When I click search bar {string} result {string}`
 - `When I hover search bar {string} result {string}`

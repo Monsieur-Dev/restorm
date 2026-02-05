@@ -11,10 +11,13 @@ Feature: SearchBar
     Then search bar "searchbar" should be open
     Then input box "searchbar-inputbox" should be visible
 
-    When I type in search bar "searchbar" query letter by letter "item"
+    When I type in search bar "searchbar" query "item"
     Then search bar "searchbar" results should be visible
     Then search bar "searchbar" results count should be 3
     Then scrollable element "searchbar-scrollable" should be visible
+    Then search bar "searchbar" category "requests" should be visible
+    Then search bar "searchbar" category "docs" should be visible
+    Then search bar "searchbar" result "welcome-doc" should be visible
 
     When I hover search bar "searchbar" result "get-items"
     Then tooltip "searchbar-tooltip" should be visible

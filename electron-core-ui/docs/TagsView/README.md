@@ -67,7 +67,8 @@ Core steps:
 - `Then tags view {string} should have {int} tags`
 - `When I add a tag in tags view {string}`
 - `When I start editing tag {int} in tags view {string}`
-- `When I type {string} into tags view {string} tag {int} input letter by letter`
+- `When I type {string} into tags view {string} tag {int} input`
+- `When I type {string} into tags view {string} tag {int} input letter by letter` (legacy alias)
 - `When I commit tags view {string} tag {int} editing`
 - `When I blur tags view {string} tag {int} input`
 - `When I cancel tags view {string} tag {int} editing`

@@ -81,6 +81,25 @@ export function defineTagsViewBddSteps({ When, Then }: BddFnsWithPage): void {
   })
 
   When(
+    'I type {string} into tags view {string} tag {int} input',
+    async ({ page }, text: unknown, testId: unknown, index: unknown) => {
+      if (typeof text !== 'string' || typeof testId !== 'string' || typeof index !== 'number') {
+        throw new Error('Invalid tags view typing parameters')
+      }
+      const p = asPage(page)
+      const input = p.locator(tagsViewTagInputSelector(testId, index))
+      await input.waitFor({ state: 'attached', timeout: 5000 })
+      await input.focus()
+      // Clear existing value reliably (Ctrl+A then Backspace)
+      await input.press('Control+A')
+      await input.press('Backspace')
+      for (const ch of text) {
+        await p.keyboard.type(ch)
+      }
+    }
+  )
+
+  When(
     'I type {string} into tags view {string} tag {int} input letter by letter',
     async ({ page }, text: unknown, testId: unknown, index: unknown) => {
       if (typeof text !== 'string' || typeof testId !== 'string' || typeof index !== 'number') {
