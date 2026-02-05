@@ -251,6 +251,17 @@ export function defineListViewBddSteps({ When, Then }: BddFnsWithPage): void {
     await p.locator(listViewRenameInputSelector(testId, itemId)).waitFor({ state: 'visible', timeout: 5000 })
   })
 
+  When('I type {string} in list view {string} rename input', async ({ page }, text: unknown, testId: unknown) => {
+    if (typeof testId !== 'string' || typeof text !== 'string') throw new Error('Invalid list view rename typing parameters')
+    const p = asPage(page)
+    const input = p.locator(listViewRenameInputSelector(testId))
+    await input.waitFor({ state: 'visible', timeout: 5000 })
+    await input.click({ force: true })
+    await p.keyboard.press('Control+A')
+    await p.keyboard.press('Backspace')
+    await typeTextLetterByLetter(p, text)
+  })
+
   When('I type {string} in list view {string} rename input letter by letter', async ({ page }, text: unknown, testId: unknown) => {
     if (typeof testId !== 'string' || typeof text !== 'string') throw new Error('Invalid list view rename typing parameters')
     const p = asPage(page)

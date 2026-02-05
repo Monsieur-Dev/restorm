@@ -93,6 +93,17 @@
       }
     }
   },
+  "titlebar": {
+    "e2eTabLabel": "Titlebar (E2E)",
+    "harness": {
+      "title": "Demo",
+      "instructions": "Activez la barre de recherche, tapez \"item\" et cliquez sur un résultat.",
+      "showSearchBarLabel": "Afficher la barre de recherche",
+      "categories": {
+        "requests": "Requêtes"
+      }
+    }
+  },
   "dateTimePicker": {
     "e2eTabLabel": "DateTimePicker (E2E)",
     "ariaLabel": "Date et heure",

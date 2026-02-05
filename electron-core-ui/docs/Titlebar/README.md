@@ -12,9 +12,21 @@ The `Titlebar` component is a React implementation of a window title bar for Ele
 export interface TitlebarProps {
   icon?: string | React.ReactNode  // Icon (path or ReactNode)
   title: string                     // Window title
-  children?: React.ReactNode        // Central content (MenuBar)
+  leftContent?: React.ReactNode     // Left content (preferred)
+  centerContent?: React.ReactNode   // Optional center override (when not showing SearchBar)
+  rightContent?: React.ReactNode    // Right content (preferred)
+  children?: React.ReactNode        // Deprecated: use leftContent
   className?: string
   id?: string
+  'data-testid'?: string
+  showSearchBar?: boolean
+  onSearchResultClick?: (result: SearchResult) => void
+  renderSearchTooltipContent?: (result: SearchResult) => React.ReactNode
+  renderSearchBadge?: (method: string) => React.ReactNode
+  searchFn?: (query: string) => Promise<GroupedResults[]>
+  searchBarTestId?: string
+  customWcoTestId?: string
+  customWcoPlatform?: string
 }
 ```
 
@@ -22,9 +34,18 @@ export interface TitlebarProps {
 
 - **icon** (`string | React.ReactNode`) : Optional icon displayed on the left. Can be an image path (string) or a ReactNode for custom SVG/icons.
 - **title** (`string`) : Required title text for the window (displayed when no children provided).
-- **children** (`React.ReactNode`) : Optional content to display in the central area (typically a MenuBar component).
+- **leftContent** (`React.ReactNode`) : Optional content displayed on the left zone.
+- **centerContent** (`React.ReactNode`) : Optional content displayed in the center (when `showSearchBar` is false).
+- **rightContent** (`React.ReactNode`) : Optional content displayed on the right zone.
+- **children** (`React.ReactNode`) : Deprecated, use `leftContent`.
 - **className** (`string`) : Additional CSS classes.
 - **id** (`string`) : HTML ID of the titlebar.
+- **data-testid** (`string`) : Optional test id for stable E2E selectors.
+- **showSearchBar** (`boolean`) : When enabled, renders an internal `SearchBar` in the center.
+- **searchFn** (`(query: string) => Promise<GroupedResults[]>`) : Optional override to make E2E search deterministic.
+- **searchBarTestId** (`string`) : Optional override test id for the internal `SearchBar`.
+- **customWcoTestId** (`string`) : Optional override test id for the internal `CustomWCO`.
+- **customWcoPlatform** (`string`) : Optional platform override passed to the internal `CustomWCO` (useful for deterministic web E2E harnesses).
 
 ## Usage Examples
 
@@ -51,11 +72,11 @@ import { Titlebar } from 'electron-core-ui/renderer'
 <Titlebar icon="icon.png" title="Demo">
   <MenuBar>
     <MenuBarItem title="File">
-      <MenuItem title="New" onClick={() => console.log('New')} />
-      <MenuItem title="Open" onClick={() => console.log('Open')} />
+      <MenuItem title="New" onClick={handleNew} />
+      <MenuItem title="Open" onClick={handleOpen} />
     </MenuBarItem>
     <MenuBarItem title="Edit">
-      <MenuItem title="Undo" onClick={() => console.log('Undo')} />
+      <MenuItem title="Undo" onClick={handleUndo} />
     </MenuBarItem>
   </MenuBar>
 </Titlebar>
@@ -117,6 +138,60 @@ const CustomIcon = () => (
 ### Drag Region Behavior
 - **-webkit-app-region: drag** : Applied to `.titlebar` for window dragging
 - **-webkit-app-region: no-drag** : Applied to interactive elements (icon, content area, children)
+
+## Testing
+
+### `data-testid` API
+
+`Titlebar` exposes stable E2E hooks via `data-testid` (default: `titlebar`).
+When `data-testid="my-titlebar"` is provided:
+
+- Root: `my-titlebar`
+  - attributes:
+    - `data-show-searchbar`: `true|false`
+    - `data-has-icon`: `true|false`
+    - `data-has-left`: `true|false`
+    - `data-has-center`: `true|false`
+    - `data-has-right`: `true|false`
+- Left zone: `my-titlebar-left`
+- Center zone: `my-titlebar-center`
+- Right zone: `my-titlebar-right`
+- Icon container (when present): `my-titlebar-icon`
+- Title text (when `showSearchBar` is false): `my-titlebar-title`
+- Internal `SearchBar` (when enabled): `my-titlebar-searchbar` (override via `searchBarTestId`)
+- Internal `CustomWCO`: `my-titlebar-customwco` (override via `customWcoTestId`)
+
+### Selectors (electron-core-ui/testing)
+
+- `titlebarRootSelector(testId)`
+- `titlebarLeftSelector(testId)`
+- `titlebarCenterSelector(testId)`
+- `titlebarRightSelector(testId)`
+- `titlebarIconSelector(testId)`
+- `titlebarTitleSelector(testId)`
+- `titlebarSearchBarTestId(testId)`
+- `titlebarCustomWcoTestId(testId)`
+
+### Playwright-BDD steps (electron-core-ui/testing/playwright-bdd)
+
+Register:
+
+- `defineTitlebarBddSteps(bdd)`
+
+Steps:
+
+- `Then titlebar {string} should be visible`
+- `Then titlebar {string} left zone should be visible`
+- `Then titlebar {string} center zone should be visible`
+- `Then titlebar {string} right zone should be visible`
+- `Then titlebar {string} showSearchBar should be {string}`
+- `Then titlebar {string} icon should be visible`
+- `Then titlebar {string} icon should be hidden`
+- `Then titlebar {string} title should be {string}`
+
+You can reuse internal component steps as well:\n+
+- `defineSearchBarBddSteps(bdd)` (when `showSearchBar` is enabled)\n+
+- `defineCustomWcoBddSteps(bdd)`
 
 ## Window Controls Overlay
 

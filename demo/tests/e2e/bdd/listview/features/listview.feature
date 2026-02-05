@@ -37,12 +37,12 @@ Feature: ListView
     Then list view "listview-basic" item "folder-a-sub" should have position sticky
     Then list view "listview-basic" item "folder-a-sub" top should be > item "folder-a" top
 
-  Scenario: Context menu rename types letter by letter and commits
+  Scenario: Context menu rename commits
     Given I open the list view e2e tab
     When I open list view "listview-basic" context menu on item "file-root-0"
     Then context menu "listview-basic-contextmenu" should be visible
     When I click context menu "listview-basic-contextmenu" item "Rename"
-    When I type "Root file 0 renamed" in list view "listview-basic" rename input letter by letter
+    When I type "Root file 0 renamed" in list view "listview-basic" rename input
     When I submit list view "listview-basic" rename with Enter
     Then list view harness last rename listid should be "listview-basic"
     Then list view harness last rename itemid should be "file-root-0"

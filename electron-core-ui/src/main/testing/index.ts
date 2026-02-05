@@ -80,6 +80,17 @@ export {
 } from './customWcoSelectors'
 
 export {
+  titlebarRootSelector,
+  titlebarLeftSelector,
+  titlebarCenterSelector,
+  titlebarRightSelector,
+  titlebarIconSelector,
+  titlebarTitleSelector,
+  titlebarSearchBarTestId,
+  titlebarCustomWcoTestId
+} from './titlebarSelectors'
+
+export {
   codeEditorRootSelector,
   codeEditorMonacoContainerSelector,
   codeEditorTextareaSelector,
