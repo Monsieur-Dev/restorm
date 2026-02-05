@@ -6,15 +6,25 @@ import { SettingsModalContext, type SettingsModalContextValue } from './useSetti
 
 interface SettingsModalProviderProps {
   children: React.ReactNode
+  /** Optional test id applied to the underlying Modal. Defaults to `settings-modal`. */
+  'data-testid'?: string
+  /** Optional test id applied to the SettingsPage. Defaults to `settings-page`. */
+  settingsPageTestId?: string
 }
 
 /**
  * Provider component that enables settings modal functionality
  * Wrap your app with this to use useSettingsModal()
  */
-export function SettingsModalProvider({ children }: SettingsModalProviderProps): React.ReactElement {
+export function SettingsModalProvider({
+  children,
+  'data-testid': dataTestId,
+  settingsPageTestId
+}: SettingsModalProviderProps): React.ReactElement {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
+  const modalTestId = dataTestId ?? 'settings-modal'
+  const pageTestId = settingsPageTestId ?? 'settings-page'
 
   const showSettingsModal = useCallback(() => {
     setIsOpen(true)
@@ -34,11 +44,12 @@ export function SettingsModalProvider({ children }: SettingsModalProviderProps):
     <SettingsModalContext.Provider value={value}>
       {children}
       <Modal
+        data-testid={modalTestId}
         isOpen={isOpen}
         title={t('settings.title', 'Settings')}
         onClose={hideSettingsModal}
       >
-        <SettingsPage />
+        <SettingsPage data-testid={pageTestId} />
       </Modal>
     </SettingsModalContext.Provider>
   )

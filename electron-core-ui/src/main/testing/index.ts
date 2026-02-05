@@ -312,6 +312,21 @@ export {
 } from './listViewSelectors'
 
 export {
+  settingsModalRootSelector,
+  settingsPageRootSelector,
+  settingsPageThemeCarouselTestId,
+  settingsPageLanguageSelectBoxTestId,
+  themeCarouselRootSelector,
+  themeCarouselScrollableTestId
+} from './settingsSelectors'
+
+export {
+  settingsTreeViewRootSelector,
+  settingsTreeViewItemTestId,
+  settingsTreeViewItemSelector
+} from './settingsTreeViewSelectors'
+
+export {
   listViewDropdownRootSelector,
   listViewDropdownButtonTestId,
   listViewDropdownButtonAnchorSelector,
