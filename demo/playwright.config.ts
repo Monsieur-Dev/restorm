@@ -235,6 +235,15 @@ const listViewTestDir = defineBddConfig({
   outputDir: '.features-gen/listview'
 })
 
+const listViewDropdownTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/listviewdropdown/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/listviewdropdown/steps/**/*.ts',
+    'tests/e2e/bdd/listviewdropdown/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/listviewdropdown'
+})
+
 const splitViewTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/splitview/features/**/*.feature',
   steps: [
@@ -438,6 +447,11 @@ export default defineConfig({
     {
       name: 'listview',
       testDir: listViewTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'listviewdropdown',
+      testDir: listViewDropdownTestDir,
       use: { ...devices['Desktop Chrome'] }
     },
     {

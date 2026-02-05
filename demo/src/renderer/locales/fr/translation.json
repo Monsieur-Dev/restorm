@@ -178,6 +178,21 @@
       "multipleSelection": "Sélection multiple"
     }
   },
+  "listViewDropdown": {
+    "e2eTabLabel": "ListViewDropdown (E2E)",
+    "harness": {
+      "instructions": "Ouvrez la dropdown puis cliquez sur un élément pour mettre à jour la sélection.",
+      "menuAriaLabel": "Éléments de la dropdown",
+      "button": {
+        "default": "Choisir un élément"
+      },
+      "items": {
+        "alpha": "Alpha",
+        "beta": "Beta",
+        "gamma": "Gamma"
+      }
+    }
+  },
   "splitView": {
     "e2eTabLabel": "SplitView (E2E)",
     "harness": {

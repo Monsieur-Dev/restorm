@@ -310,3 +310,13 @@ export {
   listViewRowTitleSelectorByItemId,
   listViewRenameInputSelector
 } from './listViewSelectors'
+
+export {
+  listViewDropdownRootSelector,
+  listViewDropdownButtonTestId,
+  listViewDropdownButtonAnchorSelector,
+  listViewDropdownPanelSelector,
+  listViewDropdownScrollableTestId,
+  listViewDropdownScrollableSelector,
+  listViewDropdownListViewTestId
+} from './listViewDropdownSelectors'

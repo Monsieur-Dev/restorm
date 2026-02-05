@@ -32,6 +32,8 @@ export interface ListViewDropdownProps {
   onItemClick?: (payload: ListViewItemEventPayload) => void
   /** Called when an item is expanded/collapsed. */
   onItemToggle?: (payload: ListViewItemEventPayload, expanded: boolean) => void
+  /** Optional test id applied to the root element. Defaults to `listviewdropdown`. */
+  'data-testid'?: string
 }
 
 export const ListViewDropdown: React.FC<ListViewDropdownProps> = ({
@@ -47,10 +49,20 @@ export const ListViewDropdown: React.FC<ListViewDropdownProps> = ({
   buttonProps,
   buttonContent,
   onItemClick,
-  onItemToggle
+  onItemToggle,
+  'data-testid': dataTestId
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement | null>(null)
+
+  const rootTestId = dataTestId ?? 'listviewdropdown'
+  const buttonTestId = `${rootTestId}-button`
+  const panelTestId = `${rootTestId}-panel`
+  const scrollableTestId = `${rootTestId}-scrollable`
+  const listViewTestId = `${rootTestId}-listview`
+
+  const selectedIdsAttr = (selectedIds ?? []).join('|')
+  const expandedIdsAttr = (expandedIds ?? []).join('|')
 
   // Close dropdown when clicking outside or pressing Escape
   useEffect(() => {
@@ -81,6 +93,13 @@ export const ListViewDropdown: React.FC<ListViewDropdownProps> = ({
   return (
     <div
       ref={containerRef}
+      data-testid={rootTestId}
+      data-is-open={isOpen ? 'true' : 'false'}
+      data-align={align}
+      data-selection-mode={selectionMode}
+      data-root-role={rootRole}
+      data-selected-ids={selectedIdsAttr}
+      data-expanded-ids={expandedIdsAttr}
       style={{
         position: 'relative',
         display: 'inline-block'
@@ -88,6 +107,7 @@ export const ListViewDropdown: React.FC<ListViewDropdownProps> = ({
     >
       <Button
         {...buttonProps}
+        data-testid={buttonProps?.['data-testid'] ?? buttonTestId}
         onClick={() => {
           setIsOpen((prev) => !prev)
         }}
@@ -97,6 +117,7 @@ export const ListViewDropdown: React.FC<ListViewDropdownProps> = ({
 
       {isOpen && (
         <div
+          data-testid={panelTestId}
           style={{
             position: 'absolute',
             right: align === 'right' ? 0 : undefined,
@@ -111,6 +132,7 @@ export const ListViewDropdown: React.FC<ListViewDropdownProps> = ({
           }}
         >
           <ScrollableElement
+            data-testid={scrollableTestId}
             style={{
               height: maxHeight || 400,
               width: '100%'
@@ -123,6 +145,7 @@ export const ListViewDropdown: React.FC<ListViewDropdownProps> = ({
                 ariaLabel: menuAriaLabel ?? '',
                 selectedIds: selectedIds ?? [],
                 selectionMode,
+                'data-testid': listViewTestId,
                 onItemClick: (payload) => {
                   onItemClick?.(payload)
                   setIsOpen(false)
