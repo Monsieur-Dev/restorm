@@ -147,7 +147,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
       id: 'docs',
       label: t('requestTab.tabs.docs'),
       useScrollableElement: false,
-      content: <MarkdownViewer value={documentation ?? ''} />
+      content: <MarkdownViewer value={documentation ?? ''} data-testid="base-request-markdown-viewer-docs" />
       },
       {
       id: 'notes',
@@ -158,6 +158,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
           key={requestId}
           initialValue={notes ?? ''}
           onChange={handleNotesChange}
+          data-testid="base-request-markdown-editor-notes"
         />
       )
       },
@@ -165,7 +166,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
       id: 'codeSnippets',
       label: t('requestTab.tabs.codeSnippets'),
       useScrollableElement: false,
-      content: <MarkdownViewer value={codeSnippetsContent} />
+      content: <MarkdownViewer value={codeSnippetsContent} data-testid="base-request-markdown-viewer-code-snippets" />
       }
     ]
 
@@ -299,6 +300,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
                     icon="zoom-in"
                     options={{ ariaLabel: 'Zoom in', title: 'Zoom in' }}
                     onClick={() => { graphRef.current?.zoomIn() }}
+                    data-testid="base-request-button-zoom-in"
                   />
                   <Button
                     secondary
@@ -306,6 +308,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
                     icon="zoom-out"
                     options={{ ariaLabel: 'Zoom out', title: 'Zoom out' }}
                     onClick={() => { graphRef.current?.zoomOut() }}
+                    data-testid="base-request-button-zoom-out"
                   />
                   <Button
                     secondary
@@ -313,6 +316,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
                     icon="screen-full"
                     options={{ ariaLabel: 'Center view', title: 'Center view' }}
                     onClick={() => { graphRef.current?.centerView() }}
+                    data-testid="base-request-button-center-view"
                   />
                 </div>
                 <Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}><i className="codicon codicon-loading codicon-modifier-spin" /></div>}>
@@ -351,11 +355,12 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
       
       {/* Progress Bar */}
       <div style={{ width: '100%', height: 4 }}>
-        {isLoading && <ProgressBar mode="infinite" />}
+        {isLoading && <ProgressBar mode="infinite" data-testid="base-request-progress-bar" />}
       </div>
       
       {showResponsePanel ? (
         <VerticalSashContainer
+          data-testid="base-request-sash-container"
           Left={
             <div style={{ 
               minHeight: 0,
@@ -365,6 +370,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
               minWidth: 0
             }}>
               <Tabs 
+                data-testid="base-request-tabs-request"
                 tabs={requestTabs} 
                 activeTabId={activeTabId} 
                 onTabChange={setActiveTabId}
@@ -380,6 +386,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
               overflow: 'hidden'
             }}>
               <Tabs 
+                data-testid="base-request-tabs-response"
                 tabs={responseTabs} 
                 activeTabId={responseTabId} 
                 onTabChange={handleResponseTabChange} 
@@ -394,6 +401,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
       ) : (
         <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           <Tabs 
+            data-testid="base-request-tabs-request"
             tabs={requestTabs} 
             activeTabId={activeTabId} 
             onTabChange={setActiveTabId}

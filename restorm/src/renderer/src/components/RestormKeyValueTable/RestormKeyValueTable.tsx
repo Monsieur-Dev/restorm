@@ -83,9 +83,10 @@ function normalizeValueType(input: unknown): ValueType {
 interface ColorValueCellProps {
   hex: string
   onChangeHex: (nextHex: string) => void
+  dataTestId?: string
 }
 
-const ColorValueCell: React.FC<ColorValueCellProps> = ({ hex, onChangeHex }) => {
+const ColorValueCell: React.FC<ColorValueCellProps> = ({ hex, onChangeHex, dataTestId }) => {
   const targetRef = useRef<HTMLDivElement | null>(null)
   const [isOpen, setIsOpen] = useState(false)
   const tooltipClassName = 'restorm-color-picker-tooltip'
@@ -129,6 +130,7 @@ const ColorValueCell: React.FC<ColorValueCellProps> = ({ hex, onChangeHex }) => 
           value={hex}
           options={{ type: 'text' }}
           disabled
+          {...(dataTestId && { 'data-testid': `${dataTestId}-color-input` })}
         />
       </div>
 
@@ -157,6 +159,7 @@ const ColorValueCell: React.FC<ColorValueCellProps> = ({ hex, onChangeHex }) => 
         show={isOpen}
         placement="below"
         className={tooltipClassName}
+        {...(dataTestId && { 'data-testid': `${dataTestId}-color-tooltip` })}
         content={
           <div
             onMouseDown={(e) => {
@@ -169,6 +172,7 @@ const ColorValueCell: React.FC<ColorValueCellProps> = ({ hex, onChangeHex }) => 
                 onChangeHex(nextHex)
               }}
               disableAlpha
+              {...(dataTestId && { 'data-testid': `${dataTestId}-color-picker` })}
             />
           </div>
         }
@@ -188,6 +192,8 @@ export interface RestormKeyValueTableProps {
    * Optional callback when rows change (for persisting edits).
    */
   onRowsChange?: (rows: KeyValue[]) => void
+  /** Optional test id applied to the table root element. */
+  'data-testid'?: string
 }
 
 export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, RestormKeyValueTableProps>((
@@ -195,7 +201,8 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
     variables,
     helpers = [],
     initialRows,
-    onRowsChange
+    onRowsChange,
+    'data-testid': dataTestId
   },
   ref
 ) => {
@@ -425,42 +432,53 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
           zIndex: 3000
         }}
         onContextMenu={(e) => { e.preventDefault() }}
+        {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu` })}
       >
         <div className="menu">
           <ul className="actions-container" role="menu">
-            <MenuItem title={t('keyValueTable.transformTo')}>
+            <MenuItem
+              title={t('keyValueTable.transformTo')}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-transform-to` })}
+            >
               <MenuItem
                 title={t('keyValueTable.types.string')}
                 checked={contextMenu.activeType === 'string'}
                 onClick={() => { castToType('string') }}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-string` })}
               />
               <MenuItem
                 title={t('keyValueTable.types.secret')}
                 checked={contextMenu.activeType === 'secret'}
                 onClick={() => { castToType('secret') }}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-secret` })}
               />
-              <MenuItemSeparator />
+              <MenuItemSeparator
+                {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-separator` })}
+              />
               <MenuItem
                 title={t('keyValueTable.types.number')}
                 checked={contextMenu.activeType === 'number'}
                 onClick={() => { castToType('number') }}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-number` })}
               />
               <MenuItem
                 title={t('keyValueTable.types.dateTime')}
                 checked={contextMenu.activeType === 'dateTime'}
                 onClick={() => { castToType('dateTime') }}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-datetime` })}
               />
               <MenuItem
                 title={t('keyValueTable.types.color')}
                 checked={contextMenu.activeType === 'color'}
                 onClick={() => { castToType('color') }}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-color` })}
               />
             </MenuItem>
           </ul>
         </div>
       </div>
     )
-  }, [contextMenu, t, castToType])
+  }, [contextMenu, t, castToType, dataTestId])
 
   const tableInitialRows = React.useMemo<KeyValueTableRow[] | undefined>(() => {
     if (!initialRows) return undefined
@@ -519,9 +537,10 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
         value={value}
         onChange={onChange}
         options={{ type: 'text' }}
+        {...(dataTestId && { 'data-testid': `${dataTestId}-key-input` })}
       />
     ),
-    []
+    [dataTestId]
   )
 
   // RestormVariableInputBox renderer for values (with resolved value tooltips)
@@ -563,6 +582,7 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
               }}
               options={{ type: 'text' }}
               password
+              {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-password` })}
             />
           </div>
         )
@@ -578,6 +598,7 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
                 if (id) valueTypeByRowIdRef.current.set(id, new ColorValue(nextHex))
                 onChange(nextHex)
               }}
+              dataTestId={dataTestId ? `${dataTestId}-value-color` : undefined}
             />
           </div>
         )
@@ -608,6 +629,7 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
                 valueTypeByRowIdRef.current.set(id, new DateTimeValue(resolved.value, nextPattern))
                 onChange(new DateTimeValue(resolved.value, nextPattern).toString())
               }}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-value-datetime-picker` })}
             />
           </div>
         )
@@ -626,6 +648,7 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
                 onChange(next)
               }}
               options={{ type: 'number' }}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-number` })}
             />
           </div>
         )
@@ -665,10 +688,11 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
           contextMenuItems={
             id ? buildTransformMenuItems(id, value, onChange, activeType) : undefined
           }
+          {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-variable` })}
         />
       )
     },
-    [buildTransformMenuItems]
+    [buildTransformMenuItems, dataTestId]
   )
 
   return (
@@ -679,6 +703,7 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
         onRowsChange={handleRowsChange}
         renderKeyCell={KeyCellRenderer}
         renderValueCell={ValueCellRenderer}
+        {...(dataTestId && { 'data-testid': dataTestId })}
       />
       {contextMenuNode}
     </>

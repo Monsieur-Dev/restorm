@@ -34,6 +34,7 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
   defaultActiveTabId
 }) => {
   const { t } = useTranslation()
+  const testIdBase = `folder-view-${folder.id}`
   
   const defaultTabId = defaultActiveTabId ?? additionalTabs[0]?.id ?? 'docs'
   const [activeTabId, setActiveTabId] = useState<string>(defaultTabId)
@@ -46,6 +47,7 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
       content: (
         <MarkdownViewer
           value={folder.documentation || `# ${folder.name}\n\nNo documentation available.`}
+          data-testid={`${testIdBase}-markdown-viewer-docs`}
         />
       )
     },
@@ -59,6 +61,7 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
           onChange={(markdown): void => {
             updateReactiveProperty(folder, 'notes', markdown)
           }}
+          data-testid={`${testIdBase}-markdown-editor-notes`}
         />
       )
     }
@@ -80,6 +83,7 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
         tabs={allTabs}
         activeTabId={activeTabId}
         onTabChange={setActiveTabId}
+        data-testid={`${testIdBase}-tabs`}
       />
     </div>
   )

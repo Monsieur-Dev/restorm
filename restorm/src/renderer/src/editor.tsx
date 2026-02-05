@@ -180,7 +180,7 @@ void initI18n().then(() => {
       }
 
       return (
-        <ElectronCoreUiProvider fontAliasing="auto">
+        <ElectronCoreUiProvider fontAliasing="auto" data-testid="electron-core-ui-provider">
           <div
             style={{
               display: 'flex',
@@ -190,7 +190,7 @@ void initI18n().then(() => {
               color: 'var(--editor-foreground)'
             }}
           >
-            <Titlebar title={windowTitle} />
+            <Titlebar title={windowTitle} data-testid="editor-titlebar" />
             {renderBody()}
           </div>
         </ElectronCoreUiProvider>

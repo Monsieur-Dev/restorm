@@ -285,6 +285,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
         handleIconChange(env.id, icon)
       }}
       style={{ width: 24, height: 24 }}
+      data-testid={`environment-icon-select-${env.id}`}
     />
   ), [handleIconChange])
 
@@ -345,6 +346,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
 
   return (
     <VerticalSashContainer
+      data-testid="environment-folder-sash-container"
       Left={
         <div
           style={{
@@ -361,11 +363,13 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
           <SplitView
             orientation="vertical"
             style={{ width: '100%', height: '100%' }}
+            data-testid="environment-folder-sidebar-splitview"
           >
             <Pane
               title={t('folderView.environments')}
               collapsible={false}
               minSize={MIN_LEFT_WIDTH}
+              data-testid="environment-folder-sidebar-pane"
               headerActions={
                 <>
                   <Button
@@ -374,6 +378,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                     icon="add"
                     options={{ ariaLabel: t('environment.add'), title: t('environment.add') }}
                     onClick={handleAddEnvironment}
+                    data-testid="environment-folder-add-environment-button"
                   />
                   <Button
                     secondary
@@ -383,6 +388,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                     onClick={() => {
                       setExpandedIds([])
                     }}
+                    data-testid="environment-folder-collapse-all-button"
                   />
                 </>
               }
@@ -394,6 +400,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                 selectedIds={selectedEnvId ? [selectedEnvId] : []}
                 isRenameable
                 expandOnChevronOnly
+                data-testid="environment-folder-environment-list"
                 onItemClick={(payload) => {
                   const id = payload.item.id
                   if (id) {
@@ -432,6 +439,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
           <SplitView
             orientation="vertical"
             style={{ width: '100%', height: '100%' }}
+            data-testid="environment-folder-content-splitview"
           >
             {selectedEnvId ? (
               <Pane
@@ -442,6 +450,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                 }
                 collapsible={false}
                 minSize={80}
+                data-testid="environment-folder-variables-pane"
                 headerActions={
                   <Button
                     secondary
@@ -451,6 +460,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                     onClick={() => {
                       variablesParamsRef.current?.addRow()
                     }}
+                    data-testid="environment-folder-add-variable-button"
                   />
                 }
               >
@@ -467,6 +477,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                     helpers={handlebarsHelpers}
                     initialRows={reactiveSelectedEnvironment?.variables ?? []}
                     onRowsChange={handleEnvironmentVariablesChange}
+                    data-testid="environment-folder-variables-table"
                   />
                 </div>
               </Pane>
@@ -475,6 +486,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                 title={t('folderView.variables')}
                 collapsible={false}
                 minSize={80}
+                data-testid="environment-folder-variables-pane"
               >
                 <div
                   style={{

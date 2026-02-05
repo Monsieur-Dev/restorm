@@ -110,6 +110,7 @@ export function SaveOptionsModal({
       isOpen={isOpen}
       onClose={onClose}
       title={title ?? t('save.title', 'Save Options')}
+      data-testid="save-modal"
     >
       <div className="save-options-modal" data-testid="save-options-modal">
         <div className="save-option-group" data-testid="save-mode-group">

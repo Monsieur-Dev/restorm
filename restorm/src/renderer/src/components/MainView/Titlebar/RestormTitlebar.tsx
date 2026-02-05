@@ -87,32 +87,34 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
 
   return (
     <Titlebar
+      data-testid="main-titlebar"
       title={fileName ? `Restorm - ${fileName}${isDirty ? ' *' : ''}` : t('app.title')}
       showSearchBar
       onSearchResultClick={onSearchResultClick}
       renderSearchTooltipContent={renderSearchTooltipContent}
       renderSearchBadge={(method) => <Badge type={mapToBadgeType(method)} />}
       leftContent={
-        <MenuBar>
-          <MenuBarItem title={t('menuBar.file')}>
-            <MenuItem title={t('menuBar.new')} shortcut="Ctrl+N" onClick={handleMenuNew} />
-            <MenuItemSeparator />
-            <MenuItem title={t('menuBar.import')} shortcut="Ctrl+I" onClick={handleImport} />
-            <MenuItemSeparator />
-            <MenuItem title={t('menuBar.open')} shortcut="Ctrl+O" onClick={handleMenuOpen} />
-            <MenuItem title={t('menuBar.openFolder')} onClick={handleMenuOpenFolder} />
+        <MenuBar data-testid="titlebar-menubar">
+          <MenuBarItem title={t('menuBar.file')} data-testid="titlebar-menubar-item-file">
+            <MenuItem data-testid="titlebar-menu-item-new" title={t('menuBar.new')} shortcut="Ctrl+N" onClick={handleMenuNew} />
+            <MenuItemSeparator data-testid="titlebar-menu-separator-1" />
+            <MenuItem data-testid="titlebar-menu-item-import" title={t('menuBar.import')} shortcut="Ctrl+I" onClick={handleImport} />
+            <MenuItemSeparator data-testid="titlebar-menu-separator-2" />
+            <MenuItem data-testid="titlebar-menu-item-open" title={t('menuBar.open')} shortcut="Ctrl+O" onClick={handleMenuOpen} />
+            <MenuItem data-testid="titlebar-menu-item-open-folder" title={t('menuBar.openFolder')} onClick={handleMenuOpenFolder} />
             {fileName && (
               <>
-                <MenuItemSeparator />
-                <MenuItem title={t('menuBar.save')} shortcut="Ctrl+S" onClick={handleMenuSave} />
-                <MenuItem title={t('menuBar.saveAs')} shortcut="Ctrl+Shift+S" onClick={handleMenuSaveAs} />
+                <MenuItemSeparator data-testid="titlebar-menu-separator-3" />
+                <MenuItem data-testid="titlebar-menu-item-save" title={t('menuBar.save')} shortcut="Ctrl+S" onClick={handleMenuSave} />
+                <MenuItem data-testid="titlebar-menu-item-save-as" title={t('menuBar.saveAs')} shortcut="Ctrl+Shift+S" onClick={handleMenuSaveAs} />
               </>
             )}
             {recentFiles.length > 0 && (
-              <MenuItem title={t('menuBar.recentFiles')}>
-                {recentFiles.slice(0, 10).map((file) => (
+              <MenuItem data-testid="titlebar-menu-item-recent-files" title={t('menuBar.recentFiles')}>
+                {recentFiles.slice(0, 10).map((file, index) => (
                   <MenuItem
                     key={file.path}
+                    data-testid={`titlebar-menu-item-recent-file-${String(index)}`}
                     title={file.name}
                     onClick={() => { onOpenRecentFile(file.path) }}
                   />
@@ -120,10 +122,11 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
               </MenuItem>
             )}
             {favorites.length > 0 && (
-              <MenuItem title={t('menuBar.favorites')}>
-                {favorites.map((file) => (
+              <MenuItem data-testid="titlebar-menu-item-favorites" title={t('menuBar.favorites')}>
+                {favorites.map((file, index) => (
                   <MenuItem
                     key={file.path}
+                    data-testid={`titlebar-menu-item-favorite-${String(index)}`}
                     title={file.name}
                     onClick={() => { onOpenRecentFile(file.path) }}
                   />
@@ -132,17 +135,18 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
             )}
             {fileName && (
               <>
-                <MenuItemSeparator />
-                <MenuItem title={t('menuBar.close')} onClick={handleMenuClose} />
+                <MenuItemSeparator data-testid="titlebar-menu-separator-4" />
+                <MenuItem data-testid="titlebar-menu-item-close" title={t('menuBar.close')} onClick={handleMenuClose} />
               </>
             )}
-            <MenuItemSeparator />
-            <MenuItem title={t('menuBar.exit')} shortcut="Ctrl+Q" onClick={handleMenuExit} />
+            <MenuItemSeparator data-testid="titlebar-menu-separator-5" />
+            <MenuItem data-testid="titlebar-menu-item-exit" title={t('menuBar.exit')} shortcut="Ctrl+Q" onClick={handleMenuExit} />
           </MenuBarItem>
         </MenuBar>
       }
       rightContent={
         <Button
+          data-testid="titlebar-settings-button"
           small
           secondary
           icon="gear"

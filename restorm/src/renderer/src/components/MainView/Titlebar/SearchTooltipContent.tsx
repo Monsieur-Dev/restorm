@@ -54,7 +54,7 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
       tabs.push({
         id: 'documentation',
         label: t('requestTab.tabs.docs'),
-        content: <MarkdownViewer value={description} style={{ maxHeight: 'calc(100vh - 200px)' }} />,
+        content: <MarkdownViewer value={description} style={{ maxHeight: 'calc(100vh - 200px)' }} data-testid="markdown-viewer-documentation" />,
         useScrollableElement: false
       })
     }
@@ -63,7 +63,7 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
     tabs.push({
       id: 'request',
       label: t('requestTab.tabs.requestLayout'),
-      content: <MarkdownViewer value={requestDetailsMarkdown || t('search.tooltip.noDetails', 'No details available')} style={{ maxHeight: 'calc(100vh - 200px)' }} />,
+      content: <MarkdownViewer value={requestDetailsMarkdown || t('search.tooltip.noDetails', 'No details available')} style={{ maxHeight: 'calc(100vh - 200px)' }} data-testid="markdown-viewer-request" />,
       useScrollableElement: false
     })
     
@@ -72,7 +72,7 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
       tabs.push({
         id: 'notes',
         label: t('requestTab.tabs.notes'),
-        content: <MarkdownViewer value={notes} style={{ maxHeight: 'calc(100vh - 200px)' }} />,
+        content: <MarkdownViewer value={notes} style={{ maxHeight: 'calc(100vh - 200px)' }} data-testid="markdown-viewer-notes" />,
         useScrollableElement: false
       })
     }
@@ -103,7 +103,7 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
           )}
         </div>
         {/* Tabs - first tab in array is selected by default */}
-        <Tabs tabs={tabs} />
+        <Tabs tabs={tabs} data-testid="tabs-request-tooltip" />
       </div>
     )
   }
@@ -121,7 +121,7 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
     folderTabs.push({
       id: 'documentation',
       label: t('folderView.tabs.docs'),
-      content: <MarkdownViewer value={description} style={{ maxHeight: 'calc(100vh - 200px)' }} />,
+      content: <MarkdownViewer value={description} style={{ maxHeight: 'calc(100vh - 200px)' }} data-testid="markdown-viewer-documentation" />,
       useScrollableElement: false
     })
   }
@@ -130,7 +130,7 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
     folderTabs.push({
       id: 'notes',
       label: t('folderView.tabs.notes'),
-      content: <MarkdownViewer value={folderNotes} style={{ maxHeight: 'calc(100vh - 200px)' }} />,
+      content: <MarkdownViewer value={folderNotes} style={{ maxHeight: 'calc(100vh - 200px)' }} data-testid="markdown-viewer-notes" />,
       useScrollableElement: false
     })
   }
@@ -161,7 +161,7 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
       </div>
       {/* Content with tabs or direct display */}
       {folderTabs.length > 0 ? (
-        <Tabs tabs={folderTabs} />
+        <Tabs tabs={folderTabs} data-testid="tabs-folder-tooltip" />
       ) : (
         <div style={{ color: 'var(--descriptionForeground)', fontStyle: 'italic' }}>
           {t('search.tooltip.noContent', 'No documentation or notes')}

@@ -322,7 +322,7 @@ void initI18n()
 
     ReactDOM.createRoot(rootElement).render(
       <React.StrictMode>
-        <ElectronCoreUiProvider fontAliasing="auto">
+        <ElectronCoreUiProvider fontAliasing="auto" data-testid="electron-core-ui-provider">
           <Suspense fallback={<LoadingScreen />}>
             <App />
           </Suspense>

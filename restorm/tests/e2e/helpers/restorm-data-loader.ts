@@ -50,5 +50,5 @@ export async function loadRestormData(
   }, restormData)
   
   // Wait for data to be processed (list-view becomes ready)
-  await page.waitForSelector('[data-testid="list-view"][data-ready="true"]', { timeout: 10000 })
+  await page.waitForSelector('[data-testid="sidebar-listview"][data-ready="true"]', { timeout: 10000 })
 }

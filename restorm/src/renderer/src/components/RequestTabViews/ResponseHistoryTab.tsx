@@ -362,6 +362,7 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
                 language={requestBodyPayload.language}
                 value={requestBodyPayload.text}
                 options={{ minimap: { enabled: false }, wordWrap: 'on', scrollBeyondLastLine: false, automaticLayout: true, readOnly: true }}
+                data-testid="response-history-code-editor"
               />
             </div>
           </div>
@@ -464,6 +465,7 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
               setActiveTabId('response')
             }}
             ariaLabel={t('requestTab.responses.history.list')}
+            data-testid="response-history-list-view"
           />
         </div>
       )}
@@ -473,6 +475,7 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
             tabs={responseTabs}
             activeTabId={resolvedActiveTabId}
             onTabChange={handleTabChange}
+            data-testid="response-history-tabs"
           />
         </div>
       )}
@@ -480,6 +483,7 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
       minLeftWidth={240}
       minRightWidth={300}
       sashConfig={{ size: 4 }}
+      data-testid="response-history-vertical-sash-container"
     />
   )
 }

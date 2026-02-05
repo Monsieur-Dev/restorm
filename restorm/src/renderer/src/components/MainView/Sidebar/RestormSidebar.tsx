@@ -63,7 +63,11 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
         height: '100%'
       }}
     >
-      <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }}>
+      <SplitView
+        data-testid="sidebar-splitview"
+        orientation="vertical"
+        style={{ width: '100%', height: '100%' }}
+      >
         <Pane
           title={t('sidebar.workspace')}
           collapsible={false}
@@ -71,6 +75,7 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
           headerActions={
             <>
               <Button
+                data-testid="sidebar-add-request-button"
                 secondary
                 small
                 icon="add"
@@ -78,6 +83,7 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
                 onClick={onAddRequest}
               />
               <Button
+                data-testid="sidebar-collapse-all-button"
                 secondary
                 small
                 icon="collapse-all"
@@ -102,6 +108,7 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
             editingItemId={editingItemId}
             onEditingEnd={onEditingEnd}
             onDeleteRequest={onDeleteRequest}
+            data-testid="sidebar-listview"
           />
         </Pane>
       </SplitView>

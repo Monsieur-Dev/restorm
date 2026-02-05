@@ -253,8 +253,8 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   
   // Request content (SplitView with Query, Variables, Headers)
   const requestContent = (
-    <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }}>
-      <Pane title={t('graphql.tabs.query')} initialSize={0.5} minSize={150}>
+    <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }} data-testid="graphql-request-splitview">
+      <Pane title={t('graphql.tabs.query')} initialSize={0.5} minSize={150} data-testid="graphql-query-pane">
         <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
           <CodeEditor
             height="100%"
@@ -262,10 +262,11 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
             value={query}
             onChange={(v) => { setQuery(v ?? '') }}
             options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}
+            data-testid="graphql-query-editor"
           />
         </div>
       </Pane>
-      <Pane title={t('graphql.tabs.variables')} initialSize={0.25} minSize={100}>
+      <Pane title={t('graphql.tabs.variables')} initialSize={0.25} minSize={100} data-testid="graphql-variables-pane">
         <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
           <CodeEditor
             height="100%"
@@ -273,6 +274,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
             value={variables}
             onChange={(v) => { setVariables(v ?? '{}') }}
             options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}
+            data-testid="graphql-variables-editor"
           />
         </div>
       </Pane>
@@ -281,6 +283,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         initialSize={0.25}
         minSize={100}
         collapsed={request.headers.length === 0}
+        data-testid="graphql-headers-pane"
         headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
           <Button
             secondary
@@ -291,6 +294,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
               if (collapsed) toggle()
               headersRef.current?.addRow()
             }}
+            data-testid="graphql-add-header-button"
           />
         )}
       >
@@ -300,6 +304,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
           helpers={handlebarsHelpers}
           initialRows={request.headers}
           onRowsChange={handleHeadersChange}
+          data-testid="graphql-headers-table"
         />
       </Pane>
     </SplitView>
@@ -345,6 +350,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
           language="json"
           value={JSON.stringify({ data: resp.data, errors: resp.errors }, null, 2)}
           options={{ readOnly: true, minimap: { enabled: false }, automaticLayout: true }}
+          data-testid="graphql-response-editor"
         />
       </div>
     ) : null
@@ -390,6 +396,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
           variables={emptyVariables}
           helpers={handlebarsHelpers}
           placeholder={t('graphql.urlPlaceholder')}
+          data-testid="graphql-url-input"
         />
       </div>
       <Button 
@@ -399,6 +406,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
           title: isSending ? t('cancel') : t('graphql.send'), 
           ariaLabel: isSending ? t('cancel') : t('graphql.send') 
         }}
+        data-testid="graphql-action-button"
       >
         {isSending ? t('cancel') : t('graphql.send')}
       </Button>

@@ -240,8 +240,8 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
   
   // Request content (SplitView with Body, Headers)
   const requestContent = (
-    <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }}>
-      <Pane title={t('soap.tabs.body')} initialSize={0.7} minSize={150}>
+    <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }} data-testid="soap-request-split-view">
+      <Pane title={t('soap.tabs.body')} initialSize={0.7} minSize={150} data-testid="soap-request-body-pane">
         <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
           <CodeEditor
             height="100%"
@@ -249,6 +249,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
             value={body}
             onChange={(v) => { setBody(v ?? '') }}
             options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}
+            data-testid="soap-request-body-editor"
           />
         </div>
       </Pane>
@@ -257,6 +258,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
         initialSize={0.3}
         minSize={100}
         collapsed={request.headers.length === 0}
+        data-testid="soap-request-headers-pane"
         headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
           <Button
             secondary
@@ -267,6 +269,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
               if (collapsed) toggle()
               headersRef.current?.addRow()
             }}
+            data-testid="soap-request-add-header-button"
           />
         )}
       >
@@ -276,6 +279,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
           helpers={handlebarsHelpers}
           initialRows={request.headers}
           onRowsChange={handleHeadersChange}
+          data-testid="soap-request-headers-table"
         />
       </Pane>
     </SplitView>
@@ -331,6 +335,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
           language="xml"
           value={resp.responseBody}
           options={{ readOnly: true, minimap: { enabled: false }, automaticLayout: true }}
+          data-testid="soap-request-response-editor"
         />
       </div>
     ) : null
@@ -377,6 +382,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
             variables={emptyVariables}
             helpers={handlebarsHelpers}
             placeholder={t('soap.urlPlaceholder')}
+            data-testid="soap-url-input"
           />
         </div>
         <Button 
@@ -386,6 +392,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
             title: isSending ? t('cancel') : t('soap.send'), 
             ariaLabel: isSending ? t('cancel') : t('soap.send') 
           }}
+          data-testid="soap-request-action-button"
         >
           {isSending ? t('cancel') : t('soap.send')}
         </Button>
