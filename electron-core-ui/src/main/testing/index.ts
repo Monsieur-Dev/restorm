@@ -80,6 +80,16 @@ export {
 } from './customWcoSelectors'
 
 export {
+  modalRootSelector,
+  modalOverlaySelector,
+  modalHeaderSelector,
+  modalTitleSelector,
+  modalBodySelector,
+  modalCloseButtonTestId,
+  modalCloseButtonSelector
+} from './modalSelectors'
+
+export {
   titlebarRootSelector,
   titlebarLeftSelector,
   titlebarCenterSelector,
