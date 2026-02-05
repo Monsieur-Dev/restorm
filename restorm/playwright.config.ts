@@ -43,6 +43,7 @@ const importTestDir = defineBddConfig({
  * Each test group has its own project with a dedicated fixture.
  */
 export default defineConfig({
+  globalSetup: './tests/e2e/global-setup.ts',
   /* Timeouts */
   timeout: 120 * 1000,
   expect: {
