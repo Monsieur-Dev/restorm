@@ -115,6 +115,27 @@
       "bodyText": "Contenu de la modal"
     }
   },
+  "settings": {
+    "e2eTabLabel": "Settings (E2E)",
+    "harness": {
+      "instructions": "Ouvrez la modal Settings puis interagissez avec le sélecteur de langue.",
+      "openButtonLabel": "Ouvrir les settings",
+      "openButtonAriaLabel": "Ouvrir la modal des settings"
+    }
+  },
+  "settingsTreeView": {
+    "e2eTabLabel": "SettingsTreeView (E2E)",
+    "harness": {
+      "instructions": "Sélectionnez une catégorie et utilisez la recherche pour étendre les catégories imbriquées.",
+      "searchPlaceholder": "Rechercher…",
+      "categories": {
+        "general": "Général",
+        "appearance": "Apparence",
+        "theme": "Thème",
+        "workspace": "Espace de travail"
+      }
+    }
+  },
   "dateTimePicker": {
     "e2eTabLabel": "DateTimePicker (E2E)",
     "ariaLabel": "Date et heure",

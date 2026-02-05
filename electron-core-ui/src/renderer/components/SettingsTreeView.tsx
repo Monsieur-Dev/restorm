@@ -7,19 +7,38 @@ interface SettingsTreeViewProps {
   selectedCategory: string | null
   onSelectCategory: (categoryKey: string) => void
   searchQuery?: string
+  /** Optional test id applied to the root element. Defaults to `settingstreeview`. */
+  'data-testid'?: string
+}
+
+function normalizeTestIdSegment(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
 }
 
 export const SettingsTreeView: React.FC<SettingsTreeViewProps> = ({
   schema,
   selectedCategory,
   onSelectCategory,
-  searchQuery
+  searchQuery,
+  'data-testid': dataTestId
 }) => {
   // If there's a search query, show all categories (will be filtered by content)
   const shouldExpand = useMemo(() => Boolean(searchQuery && searchQuery.trim() !== ''), [searchQuery])
+  const rootTestId = dataTestId ?? 'settingstreeview'
+  const searchLen = (searchQuery ?? '').trim().length
 
   return (
-    <div className="settings-toc-tree">
+    <div
+      className="settings-toc-tree"
+      data-testid={rootTestId}
+      data-selected-category={selectedCategory ?? ''}
+      data-search-query-length={String(searchLen)}
+    >
       {Object.values(schema.categories).map((category) => (
         <CategoryNode
           key={category.key}
@@ -29,6 +48,7 @@ export const SettingsTreeView: React.FC<SettingsTreeViewProps> = ({
           onSelectCategory={onSelectCategory}
           level={0}
           forceExpand={shouldExpand}
+          rootTestId={rootTestId}
         />
       ))}
     </div>
@@ -42,6 +62,7 @@ interface CategoryNodeProps {
   onSelectCategory: (categoryKey: string) => void
   level: number
   forceExpand?: boolean
+  rootTestId: string
 }
 
 const CategoryNode: React.FC<CategoryNodeProps> = ({
@@ -50,10 +71,12 @@ const CategoryNode: React.FC<CategoryNodeProps> = ({
   selectedCategory,
   onSelectCategory,
   level,
-  forceExpand = false
+  forceExpand = false,
+  rootTestId
 }) => {
   // Build full category ID (e.g., "workbench-appearance-language")
   const fullCategoryId = categoryPath.join('-')
+  const itemTestId = `${rootTestId}-item-${normalizeTestIdSegment(fullCategoryId)}`
   
   // Check if this category or any of its children is selected
   const isThisSelected = selectedCategory === fullCategoryId
@@ -89,6 +112,13 @@ const CategoryNode: React.FC<CategoryNodeProps> = ({
   return (
     <>
       <div
+        data-testid={itemTestId}
+        data-category-id={fullCategoryId}
+        data-level={String(level)}
+        data-is-selected={isThisSelected ? 'true' : 'false'}
+        data-is-expanded={isExpanded ? 'true' : 'false'}
+        data-has-children={hasChildren ? 'true' : 'false'}
+        data-has-settings={hasSettings ? 'true' : 'false'}
         className={`settings-tree-item ${isThisSelected ? 'active' : ''} ${level > 0 ? 'nested' : ''}`}
         style={indentStyle}
         onClick={handleClick}
@@ -112,6 +142,7 @@ const CategoryNode: React.FC<CategoryNodeProps> = ({
               onSelectCategory={onSelectCategory}
               level={level + 1}
               forceExpand={forceExpand}
+              rootTestId={rootTestId}
             />
           ))}
         </>

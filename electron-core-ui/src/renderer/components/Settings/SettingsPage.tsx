@@ -5,6 +5,15 @@ import type { ISelectData } from '../SelectBox/types'
 import { ThemeCarousel } from './ThemeCarousel'
 import './settings.css'
 
+export interface SettingsPageProps {
+  /** Optional test id applied to the root element. Defaults to `settings-page`. */
+  'data-testid'?: string
+  /** Optional test id applied to the ThemeCarousel. Defaults to `{data-testid}-theme-carousel`. */
+  themeCarouselTestId?: string
+  /** Optional test id applied to the language SelectBox. Defaults to `{data-testid}-language-selectbox`. */
+  languageSelectBoxTestId?: string
+}
+
 /**
  * Available languages for the application
  */
@@ -17,8 +26,15 @@ const AVAILABLE_LANGUAGES = [
  * Settings page component
  * Contains application settings UI with theme and language selectors
  */
-export const SettingsPage: React.FC = () => {
+export const SettingsPage: React.FC<SettingsPageProps> = ({
+  'data-testid': dataTestId,
+  themeCarouselTestId,
+  languageSelectBoxTestId
+}) => {
   const { t, i18n } = useTranslation()
+  const rootTestId = dataTestId ?? 'settings-page'
+  const carouselTestId = themeCarouselTestId ?? `${rootTestId}-theme-carousel`
+  const languageTestId = languageSelectBoxTestId ?? `${rootTestId}-language-selectbox`
 
   // Build language options for SelectBox
   const languageOptions = useMemo(() => {
@@ -45,13 +61,13 @@ export const SettingsPage: React.FC = () => {
   }
 
   return (
-    <div className="settings-page">
+    <div className="settings-page" data-testid={rootTestId} data-language={i18n.language}>
       <div className="settings-section">
         <div className="settings-item">
           <h1 className="settings-label">
             {t('settings.theme', 'Theme')}
           </h1>
-          <ThemeCarousel />
+          <ThemeCarousel data-testid={carouselTestId} />
         </div>
 
         <div className="settings-item">
@@ -59,6 +75,7 @@ export const SettingsPage: React.FC = () => {
             {t('settings.language', 'Language')}
           </h1>
           <SelectBox
+            data-testid={languageTestId}
             id="language-select"
             className="settings-select"
             options={languageOptions}

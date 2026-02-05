@@ -280,6 +280,24 @@ const modalTestDir = defineBddConfig({
   outputDir: '.features-gen/modal'
 })
 
+const settingsTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/settings/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/settings/steps/**/*.ts',
+    'tests/e2e/bdd/settings/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/settings'
+})
+
+const settingsTreeViewTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/settingstreeview/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/settingstreeview/steps/**/*.ts',
+    'tests/e2e/bdd/settingstreeview/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/settingstreeview'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -472,6 +490,16 @@ export default defineConfig({
     {
       name: 'modal',
       testDir: modalTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'settings',
+      testDir: settingsTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'settingstreeview',
+      testDir: settingsTreeViewTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],

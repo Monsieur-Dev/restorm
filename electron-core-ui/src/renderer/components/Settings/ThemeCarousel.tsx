@@ -11,6 +11,10 @@ import './settings.css'
 
 interface ThemeCarouselProps {
   className?: string
+  /** Optional test id applied to the root element. Defaults to `theme-carousel`. */
+  'data-testid'?: string
+  /** Optional test id applied to the ScrollableElement. Defaults to `{data-testid}-scrollable`. */
+  scrollableTestId?: string
 }
 
 type ThemeTypeOrder = 'dark' | 'hcDark' | 'light' | 'hcLight'
@@ -31,8 +35,14 @@ const BEATLES_OPTIONS = [
   { value: 'ringo', label: 'Ringo Starr' }
 ] as const
 
-export const ThemeCarousel: React.FC<ThemeCarouselProps> = ({ className }) => {
+export const ThemeCarousel: React.FC<ThemeCarouselProps> = ({
+  className,
+  'data-testid': dataTestId,
+  scrollableTestId
+}) => {
   const { themes, currentThemeId, setTheme, isLoading } = useThemeContext()
+  const rootTestId = dataTestId ?? 'theme-carousel'
+  const scrollableId = scrollableTestId ?? `${rootTestId}-scrollable`
   const scrollContentRef = useRef<HTMLDivElement | null>(null)
   const selectedTileRef = useRef<HTMLButtonElement | null>(null)
   const [previewVariables, setPreviewVariables] = useState<ThemePreviewVariables>({})
@@ -131,8 +141,14 @@ export const ThemeCarousel: React.FC<ThemeCarouselProps> = ({ className }) => {
   }
 
   return (
-    <div className={`theme-carousel ${className ?? ''}`.trim()}>
+    <div
+      className={`theme-carousel ${className ?? ''}`.trim()}
+      data-testid={rootTestId}
+      data-theme-count={String(sortedThemes.length)}
+      data-selected-theme-id={currentThemeId ?? ''}
+    >
       <ScrollableElement
+        data-testid={scrollableId}
         options={{
           horizontal: 'visible',
           vertical: 'hidden',

@@ -54,6 +54,47 @@ export interface SettingCategory {
 
 Your `selectedCategory` must use the same format to correctly highlight and expand the tree.
 
+## Testing
+
+### Test ids
+
+`SettingsTreeView` supports an optional `data-testid` prop (defaults to `settingstreeview`).
+
+- Root: `data-testid="{root}"`
+- Category item: `data-testid="{root}-item-{categoryId}"`
+  - `categoryId` is normalized: trimmed, lowercased, non `a-z0-9-_` replaced with `-`.
+
+### Data attributes
+
+The root element exposes:
+
+- `data-selected-category`: current `selectedCategory` (or `""`)
+- `data-search-query-length`: length of the trimmed `searchQuery`
+
+Each category item exposes:
+
+- `data-category-id`: full category id (e.g. `workbench-appearance-theme`)
+- `data-level`: nesting level (0 for root)
+- `data-is-selected`: `"true" | "false"`
+- `data-is-expanded`: `"true" | "false"`
+- `data-has-children`: `"true" | "false"`
+- `data-has-settings`: `"true" | "false"`
+
+### Selectors (`electron-core-ui/testing`)
+
+- `settingsTreeViewRootSelector(testId)`
+- `settingsTreeViewItemTestId(testId, categoryId)`
+- `settingsTreeViewItemSelector(testId, categoryId)`
+
+### Playwright-BDD steps (`electron-core-ui/testing/playwright-bdd`)
+
+- `Then settings tree view "{id}" should be visible`
+- `Then settings tree view "{id}" category "{categoryId}" should be visible`
+- `Then settings tree view "{id}" category "{categoryId}" should be hidden`
+- `When I select settings tree view "{id}" category "{categoryId}"`
+- `Then settings tree view "{id}" selected category should be "{categoryId}"`
+- `Then settings tree view "{id}" category "{categoryId}" expanded should be "{true|false}"`
+
 ## Usage
 
 ```tsx

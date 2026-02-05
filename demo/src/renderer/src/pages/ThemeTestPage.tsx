@@ -44,7 +44,9 @@ import {
   SplitViewE2ETab,
   SearchBarE2ETab,
   TitlebarE2ETab,
-  ModalE2ETab
+  ModalE2ETab,
+  SettingsE2ETab,
+  SettingsTreeViewE2ETab
 } from '../components/test-tabs'
 import { WorkbenchTab } from '../components/test-tabs'
 
@@ -168,6 +170,8 @@ const ThemeTestPage: React.FC = () => {
     { id: 'searchbar-e2e', label: t('searchBar.e2eTabLabel'), content: <SearchBarE2ETab />, allowFullscreen: true },
     { id: 'titlebar-e2e', label: t('titlebar.e2eTabLabel'), content: <TitlebarE2ETab />, allowFullscreen: true },
     { id: 'modal-e2e', label: t('modal.e2eTabLabel'), content: <ModalE2ETab />, allowFullscreen: true },
+    { id: 'settings-e2e', label: t('settings.e2eTabLabel'), content: <SettingsE2ETab />, allowFullscreen: true },
+    { id: 'settingstreeview-e2e', label: t('settingsTreeView.e2eTabLabel'), content: <SettingsTreeViewE2ETab />, allowFullscreen: true },
     { id: 'breadcrumb', label: 'Breadcrumb', content: <BreadcrumbTab />, allowFullscreen: true },
     { id: 'button', label: 'Button', content: <ButtonHarnessTab />, allowFullscreen: true },
     { id: 'callout', label: t('callout.tabLabel'), content: <CalloutTab />, allowFullscreen: true },
