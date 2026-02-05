@@ -75,3 +75,17 @@ const ThemeSelector: React.FC = () => {
 - Use **controlled state** for `value` + `onChange`; do not store mutable option state inside the component.
 - When integrating with i18n, put translations on `label` only; keep `value` stable and non-localized.
 - For accessibility, always provide a semantic label via an external `<label htmlFor="id">` element instead of using placeholder text only.
+
+## Testing
+
+### `data-testid` API
+
+`CustomDropdown` does not currently expose `data-testid` hooks.
+
+### Recommended approach
+
+For E2E testing, consider:
+
+- Using ARIA attributes (`role="combobox"`, `aria-expanded`).
+- Targeting by the `id` prop (when provided).
+- Using text content selectors for options.

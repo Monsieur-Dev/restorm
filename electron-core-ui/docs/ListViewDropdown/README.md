@@ -97,16 +97,16 @@ The root element exposes stable state via `data-*` attributes:
 
 Dropdown-specific steps:
 
-- `Then list view dropdown "{id}" should be visible`
-- `Then list view dropdown "{id}" should be open`
-- `Then list view dropdown "{id}" should be closed`
-- `When I toggle list view dropdown "{id}"`
-- `Then list view dropdown "{id}" panel should be visible`
-- `When I close list view dropdown "{id}" with Escape`
-- `When I close list view dropdown "{id}" by clicking outside`
-- `Then list view dropdown "{id}" button text should be "{text}"`
-- `Then list view dropdown "{id}" item "{itemId}" should be visible`
-- `Then list view dropdown "{id}" selected ids should be "{ids}"`
+- `Then list view dropdown {string} should be visible`
+- `Then list view dropdown {string} should be open`
+- `Then list view dropdown {string} should be closed`
+- `When I toggle list view dropdown {string}`
+- `Then list view dropdown {string} panel should be visible`
+- `When I close list view dropdown {string} with Escape`
+- `When I close list view dropdown {string} by clicking outside`
+- `Then list view dropdown {string} button text should be {string}`
+- `Then list view dropdown {string} item {string} should be visible`
+- `Then list view dropdown {string} selected ids should be {string}`
 
 Reusing internal components (recommended):
 

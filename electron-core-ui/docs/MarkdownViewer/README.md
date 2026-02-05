@@ -1,45 +1,54 @@
 # MarkdownViewer
 
-`MarkdownViewer` est un composant de rendu Markdown **lecture seule** avec support de Mermaid.
+`MarkdownViewer` is a read-only Markdown renderer with optional Mermaid support.
 
 ## Props
 
-- `value: string` : contenu Markdown à afficher.
-- `allowMermaid?: boolean` (défaut `true`) : active le rendu des blocs ```mermaid```.
-- `data-testid?: string` : test id optionnel appliqué au root.
-- `className?: string` : classe CSS additionnelle sur le conteneur racine.
+- `value: string`: Markdown content to render.
+- `allowMermaid?: boolean` (default: `true`): enables rendering of fenced code blocks with language `mermaid`.
+- `data-testid?: string`: optional test id applied to the root.
+- `className?: string`: optional CSS class on the root container.
 
-## Comportement
+## Behavior
 
-- Utilise `react-markdown` + `remark-gfm` pour rendre le Markdown.
-- Les blocs de code avec la langue `mermaid` sont convertis en diagrammes via Mermaid.
-- Le thème clair/sombre est détecté via `document.documentElement.dataset.theme` et pilote les couleurs Mermaid.
-- Les liens HTTP/HTTPS sont ouverts dans le navigateur externe (`window.open`) sans changer le contenu de l’application.
+- Uses `react-markdown` + `remark-gfm` for Markdown rendering.
+- Converts `mermaid` code blocks into diagrams via Mermaid.
+- Detects dark mode via `document.documentElement.dataset.theme` to configure Mermaid theme.
+- Opens HTTP/HTTPS links in the external browser (`window.open`) without navigating inside the app.
 
-## Exemple d’utilisation
+## Usage example
 
 ```tsx
 import { MarkdownViewer } from 'electron-core-ui/renderer'
 
-<MarkdownViewer value={"# Title\n\n```mermaid\nclassDiagram\n  class User {\n    + id : integer\n  }\n```"} />
+<MarkdownViewer
+  value={"# Title\n\n```mermaid\nclassDiagram\n  class User {\n    + id : integer\n  }\n```"}
+/>
 ```
 
 ## Testing
 
-Quand `data-testid` est fourni, le composant expose des hooks stables pour les tests E2E.
+When `data-testid` is provided, the component exposes stable hooks for E2E tests.
 
-### data-testid conventions
+### `data-testid` conventions
 
 - Root: `{id}`
-- Code blocks (indexés): `{id}-codeblock-{index}`
-- Bouton copy: `{id}-codeblock-{index}-copy`
-- Mermaid blocks (indexés): `{id}-mermaid-{index}`
-- Liens HTTP(S) (indexés): `{id}-link-{index}`
+- Code blocks (indexed): `{id}-codeblock-{index}`
+- Copy button: `{id}-codeblock-{index}-copy`
+- Mermaid blocks (indexed): `{id}-mermaid-{index}`
+- HTTP(S) links (indexed): `{id}-link-{index}`
 
 ### Stable data attributes
 
-- Sur le root:\n  - `data-allow-mermaid`: `true | false`\n  - `data-is-dark`: `true | false`\n\n- Sur le bouton copy:\n  - `data-is-copied`: `true | false`\n\n- Sur le bloc mermaid:\n  - `data-is-rendered`: `true | false`\n
-### Selectors
+- On the root:
+  - `data-allow-mermaid`: `true | false`
+  - `data-is-dark`: `true | false`
+- On the copy button:
+  - `data-is-copied`: `true | false`
+- On the Mermaid block:
+  - `data-is-rendered`: `true | false`
+
+### Selectors (`electron-core-ui/testing`)
 
 - `markdownViewerRootSelector(testId)`
 - `markdownViewerCodeBlockSelector(testId, index)`
@@ -47,7 +56,7 @@ Quand `data-testid` est fourni, le composant expose des hooks stables pour les t
 - `markdownViewerMermaidSelector(testId, index)`
 - `markdownViewerLinkSelector(testId, index)`
 
-### Playwright-BDD steps
+### Playwright-BDD steps (`electron-core-ui/testing/playwright-bdd`)
 
 - `Then markdown viewer {string} should be visible`
 - `Then markdown viewer {string} should be dark`

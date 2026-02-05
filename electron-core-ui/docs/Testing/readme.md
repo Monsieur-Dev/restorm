@@ -43,7 +43,7 @@ import {
   configureNextConfirmationDialogForE2E
 } from 'electron-core-ui/testing'
 
-await configureNextOpenDialogForE2E(electronApp, { kind: 'openFolder', path: '/tmp/Petstore' })
+await configureNextOpenDialogForE2E(electronApp, { kind: 'openFolder', path: '/tmp/sample' })
 await configureNextSaveFileDialogForE2E(electronApp, { kind: 'saveFile', path: '/tmp/output.restorm' })
 
 await configureNextConfirmationDialogForE2E(electronApp, {
@@ -86,4 +86,42 @@ defineSystemModalsBddSteps(createBdd(test))
   - `Then a save dialog should have been shown`
   - `Then a confirmation dialog should have been shown`
   - `Then no system modal should have been shown`
+
+## Component Testing docs index
+
+- Breadcrumb → see [Testing](../Breadcrumb/README.md#testing)
+- Button → see [Testing](../Button/README.md#testing)
+- Callout → see [Testing](../Callout/README.md#testing)
+- CodeEditor → see [Testing](../CodeEditor/README.md#testing)
+- ColorPicker → see [Testing](../ColorPicker/README.md#testing)
+- ContextMenu → see [Testing](../ContextMenu/README.md#testing)
+- CustomDropdown → see [Testing](../CustomDropdown/README.md#testing)
+- CustomTabs → see [Testing](../CustomTabs/README.md#testing)
+- CustomWCO → see [Testing](../CustomWCO/README.md#testing)
+- DateTimePicker → see [Testing](../DateTimePicker/README.md#testing)
+- IconSelect → see [Testing](../IconSelect/README.md#testing)
+- InputBox → see [Testing](../InputBox/README.md#testing)
+- KeyValueTable → see [Testing](../KeyValueTable/README.md#testing)
+- ListView → see [Testing](../ListView/README.md#testing)
+- ListViewDropdown → see [Testing](../ListViewDropdown/README.md#testing)
+- MarkdownEditor → see [Testing](../MarkdownEditor/README.md#testing)
+- MarkdownViewer → see [Testing](../MarkdownViewer/README.md#testing)
+- MenuBar → see [Testing](../MenuBar/README.md#testing)
+- Modal → see [Testing](../Modal/README.md#testing)
+- ProgressBar → see [Testing](../ProgressBar/README.md#testing)
+- Radio → see [Testing](../Radio/README.md#testing)
+- Sash → see [Testing](../Sash/README.md#testing)
+- ScrollableElement → see [Testing](../ScrollableElement/README.md#testing)
+- SearchBar → see [Testing](../SearchBar/README.md#testing)
+- SelectBox → see [Testing](../SelectBox/README.md#testing)
+- Settings → see [Testing](../Settings/README.md#testing)
+- SettingsTreeView → see [Testing](../SettingsTreeView/README.md#testing)
+- SplitView → see [Testing](../SplitView/README.md#testing)
+- Statusbar → see [Testing](../Statusbar/README.md#testing)
+- TagsView → see [Testing](../TagsView/README.md#testing)
+- Titlebar → see [Testing](../Titlebar/README.md#testing)
+- Toggle → see [Testing](../Toggle/README.md#testing)
+- Tooltip → see [Testing](../Tooltip/README.md#testing)
+- VariableInputBox → see [Testing](../VariableInputBox/README.md#testing)
+- Workbench → see [Testing](../Workbench/README.md#testing)
 

@@ -1,19 +1,19 @@
 # MarkdownEditor
 
-`MarkdownEditor` est un composant d’édition Markdown basé sur Milkdown (preset Crepe) destiné à l’édition riche de documentation ou de notes.
+`MarkdownEditor` is a Markdown editor built on top of Milkdown (Crepe preset), designed for rich editing of documentation or notes.
 
 ## Props
 
-- `initialValue?: string` : contenu Markdown initial affiché dans l’éditeur.
-- `data-testid?: string` : test id optionnel appliqué au root.
+- `initialValue?: string`: initial Markdown content shown in the editor.
+- `data-testid?: string`: optional test id applied to the root.
 
-## Comportement
+## Behavior
 
-- Utilise Milkdown/Crepe pour fournir une expérience d’édition WYSIWYG.
-- S’adapte automatiquement au thème courant via l’attribut `data-theme` (`dark`, `hcDark`, etc.).
-- Occupe toute la surface disponible dans son conteneur (100% largeur/hauteur).
+- Uses Milkdown/Crepe to provide a WYSIWYG editing experience.
+- Adapts automatically to the current theme via the `data-theme` attribute (`dark`, `hcDark`, etc.).
+- Fills the available container space (100% width/height).
 
-## Exemple d’utilisation
+## Usage example
 
 ```tsx
 import { MarkdownEditor } from 'electron-core-ui/renderer'
@@ -23,26 +23,26 @@ import { MarkdownEditor } from 'electron-core-ui/renderer'
 
 ## Testing
 
-Quand `data-testid` est fourni, le composant expose des hooks stables pour les tests E2E.
+When `data-testid` is provided, the component exposes stable hooks for E2E tests.
 
-### data-testid conventions
+### `data-testid` conventions
 
 - Root: `{id}`
 - Milkdown root wrapper: `{id}-root`
 - Editor (contenteditable): `{id}-editor`
 
-### Stable data attributes (sur le root)
+### Stable data attributes (on the root)
 
 - `data-is-dark`: `true | false`
 - `data-initial-length`: number
 
-### Selectors
+### Selectors (`electron-core-ui/testing`)
 
 - `markdownEditorRootSelector(testId)`
 - `markdownEditorMilkdownRootSelector(testId)`
 - `markdownEditorContentEditableSelector(testId)`
 
-### Playwright-BDD steps
+### Playwright-BDD steps (`electron-core-ui/testing/playwright-bdd`)
 
 - `Then markdown editor {string} should be visible`
 - `Then markdown editor {string} should be dark`

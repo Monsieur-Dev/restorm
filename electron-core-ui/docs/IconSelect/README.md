@@ -126,11 +126,15 @@ Steps:
 - `When I close icon select {string}`
 - `Then icon select {string} should be open`
 - `Then icon select {string} should be closed`
+- `Then icon select {string} active tab should be {string}`
 - `Then icon select {string} should be readonly`
 - `When I select icon select {string} tab {string}`
 - `When I type in icon select {string} search for tab {string} {string}` (typing letter-by-letter)
+- `When I select emoji {string} in icon select {string}`
 - `When I select first emoji in icon select {string}`
+- `When I select icon {string} {string} in icon select {string}`
 - `When I select first icon of type {string} in icon select {string}`
 - `When I clear icon select {string}`
 - `Then icon select {string} selected type should be {string}`
+- `Then icon select {string} selected value should be {string}`
 - `Then icon select {string} selected value should not be empty`

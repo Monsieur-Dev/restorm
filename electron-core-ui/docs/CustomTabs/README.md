@@ -83,3 +83,17 @@ const Example: React.FC = () => {
 - Prefer creating **pure data** for `tabs` (no inline functions in `content`) and pass components instead, to keep serialization and debugging simple.
 - In controlled mode, always keep `activeTabId` **synchronized** with `onTabChange`; otherwise tabs may appear stuck.
 - Use stable `id` values (e.g. file paths, logical keys) rather than array indices to avoid issues when reordering or removing tabs.
+
+## Testing
+
+### `data-testid` API
+
+`Tabs` (formerly `CustomTabs`) does not currently expose `data-testid` hooks.
+
+### Recommended approach
+
+For E2E testing, consider:
+
+- Using ARIA attributes (`role="tablist"`, `role="tab"`, `role="tabpanel"`, `aria-selected`).
+- Targeting tabs by the `id` from the `tabs` array.
+- Using text content selectors for tab labels.

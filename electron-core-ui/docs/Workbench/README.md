@@ -99,4 +99,5 @@ Defined in `electron-core-ui/src/main/testing/playwright-bdd/workbench.steps.ts`
 - `When I open workbench {string} group {string} tab {string} context menu`
 - `When I reorder workbench {string} group {string} tab {string} to index {int}`
 - `When I drag workbench {string} group {string} tab {string} and drop on group {string} position {string}` (left|right|top|bottom|center)
+- `When I move workbench {string} tab {string} from group {string} to group {string} at index {int}`
 

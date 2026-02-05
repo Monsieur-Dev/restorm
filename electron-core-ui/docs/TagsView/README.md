@@ -1,24 +1,24 @@
 # TagsView
 
-`TagsView` est un composant d’affichage et d’édition de tags (liste de chaînes) utilisé pour annoter des entités (dossiers, requêtes HTTP, etc.).
+`TagsView` displays and edits a list of tags (strings), typically used to annotate entities (folders, requests, etc.).
 
 ## Props
 
-- `tags: string[]` : liste actuelle des tags.
-- `onChange?: (tags: string[]) => void` : callback appelé à chaque modification (ajout, renommage, suppression).
-- `className?: string` : classe CSS additionnelle.
-- `style?: React.CSSProperties` : styles inline optionnels.
+- `tags: string[]`: current tags.
+- `onChange?: (tags: string[]) => void`: called on any change (add, rename, remove).
+- `className?: string`: optional CSS class.
+- `style?: React.CSSProperties`: optional inline styles.
 
-## Comportement
+## Behavior
 
-- Affiche les tags sur une seule ligne, avec retour à la ligne automatique si nécessaire.
-- Clic sur un tag : passe en mode édition inline (comportement proche du dernier élément de `Breadcrumb`).
-- Clic droit sur un tag : ouvre un menu contextuel permettant de supprimer le tag.
-- Bouton `+` (small / secondary) en fin de ligne pour ajouter un nouveau tag.
-- Styles basés sur les variables de thème :
-  - `--tag-background`, `--tag-background-hover`, `--tag-foreground` (avec fallback vers `--*`).
+- Renders tags in a single row, wrapping when needed.
+- Click a tag: enters inline edit mode (similar UX to the last `Breadcrumb` segment).
+- Right click a tag: opens a context menu with a remove action.
+- `+` button (small/secondary) at the end to add a new tag.
+- Uses theme variables:
+  - `--tag-background`, `--tag-background-hover`, `--tag-foreground` (with fallbacks).
 
-## Exemple d’utilisation
+## Usage example
 
 ```tsx
 import { TagsView } from 'electron-core-ui/renderer'
