@@ -178,6 +178,21 @@
       "multipleSelection": "Multiple selection"
     }
   },
+  "listViewDropdown": {
+    "e2eTabLabel": "ListViewDropdown (E2E)",
+    "harness": {
+      "instructions": "Open the dropdown and click an item to update the selection.",
+      "menuAriaLabel": "Dropdown items",
+      "button": {
+        "default": "Choose an item"
+      },
+      "items": {
+        "alpha": "Alpha",
+        "beta": "Beta",
+        "gamma": "Gamma"
+      }
+    }
+  },
   "splitView": {
     "e2eTabLabel": "SplitView (E2E)",
     "harness": {

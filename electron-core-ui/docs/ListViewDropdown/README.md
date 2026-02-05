@@ -36,6 +36,8 @@ export interface ListViewDropdownProps {
   onItemClick?: (payload: ListViewItemEventPayload) => void
   /** Called when an item is expanded/collapsed. */
   onItemToggle?: (payload: ListViewItemEventPayload, expanded: boolean) => void
+  /** Optional test id applied to the root element. Defaults to `listviewdropdown`. */
+  'data-testid'?: string
 }
 ```
 
@@ -57,6 +59,60 @@ export interface ListViewDropdownProps {
   - The dropdown panel is absolutely positioned relative to the button container.
   - Use `align="left"` or `align="right"` to control horizontal alignment.
   - `minWidth` and `maxHeight` control panel size; overflow is hidden and scrollbars are handled by `ListView`.
+
+## Testing
+
+### Test ids
+
+`ListViewDropdown` supports an optional `data-testid` prop (defaults to `listviewdropdown`). When provided, internal test ids are derived:
+
+- Root: `data-testid="{root}"`
+- Trigger button: `data-testid="{root}-button"` (unless overridden by `buttonProps['data-testid']`)
+- Panel: `data-testid="{root}-panel"`
+- ScrollableElement: `data-testid="{root}-scrollable"`
+- ListView: `data-testid="{root}-listview"`
+
+### Data attributes
+
+The root element exposes stable state via `data-*` attributes:
+
+- `data-is-open`: `"true" | "false"`
+- `data-align`: `"left" | "right"`
+- `data-selection-mode`: `"single" | "multiple"`
+- `data-root-role`: `"tree" | "list"`
+- `data-selected-ids`: `selectedIds` joined with `|`
+- `data-expanded-ids`: `expandedIds` joined with `|`
+
+### Selectors (`electron-core-ui/testing`)
+
+- `listViewDropdownRootSelector(testId)`
+- `listViewDropdownButtonTestId(testId)`
+- `listViewDropdownButtonAnchorSelector(testId)`
+- `listViewDropdownPanelSelector(testId)`
+- `listViewDropdownScrollableTestId(testId)`
+- `listViewDropdownScrollableSelector(testId)`
+- `listViewDropdownListViewTestId(testId)`
+
+### Playwright-BDD steps (`electron-core-ui/testing/playwright-bdd`)
+
+Dropdown-specific steps:
+
+- `Then list view dropdown "{id}" should be visible`
+- `Then list view dropdown "{id}" should be open`
+- `Then list view dropdown "{id}" should be closed`
+- `When I toggle list view dropdown "{id}"`
+- `Then list view dropdown "{id}" panel should be visible`
+- `When I close list view dropdown "{id}" with Escape`
+- `When I close list view dropdown "{id}" by clicking outside`
+- `Then list view dropdown "{id}" button text should be "{text}"`
+- `Then list view dropdown "{id}" item "{itemId}" should be visible`
+- `Then list view dropdown "{id}" selected ids should be "{ids}"`
+
+Reusing internal components (recommended):
+
+- Use `defineButtonBddSteps` for the trigger button (id: `{root}-button`)
+- Use `defineScrollableElementBddSteps` for the scrollable wrapper (id: `{root}-scrollable`)
+- Use `defineListViewBddSteps` for list interactions inside the panel (id: `{root}-listview`)
 
 ## Usage Examples
 
