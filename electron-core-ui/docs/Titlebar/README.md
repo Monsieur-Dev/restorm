@@ -189,8 +189,8 @@ Steps:
 - `Then titlebar {string} icon should be hidden`
 - `Then titlebar {string} title should be {string}`
 
-You can reuse internal component steps as well:\n+
-- `defineSearchBarBddSteps(bdd)` (when `showSearchBar` is enabled)\n+
+You can reuse internal component steps as well:
+- `defineSearchBarBddSteps(bdd)` (when `showSearchBar` is enabled)
 - `defineCustomWcoBddSteps(bdd)`
 
 ## Window Controls Overlay

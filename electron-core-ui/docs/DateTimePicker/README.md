@@ -66,7 +66,9 @@ export function Example(): JSX.Element {
 - `dateTimePickerOpenSelector(testId)`
 - `dateTimePickerTargetSelector(testId)`
 - `dateTimePickerPopoverSelector(testId)`
-- `dateTimePickerPrevMonthSelector(testId)` / `dateTimePickerNextMonthSelector(testId)`
+- `dateTimePickerPrevMonthSelector(testId)`
+- `dateTimePickerNextMonthSelector(testId)`
+- `dateTimePickerMonthLabelSelector(testId)`
 - `dateTimePickerDaySelector(testId, isoDay)`
 - `dateTimePickerIncludeTimeSelector(testId)`
 - `dateTimePickerHoursSelector(testId)` / `dateTimePickerMinutesSelector(testId)`
@@ -89,6 +91,8 @@ Core steps:
 - `When I close date time picker {string}`
 - `Then date time picker {string} should be open`
 - `Then date time picker {string} should be closed`
+- `When I go to previous month in date time picker {string}`
+- `When I go to next month in date time picker {string}`
 - `When I select day {string} in date time picker {string}`
 - `Then date time picker {string} day {string} should be selected`
 - `When I set date time picker {string} include time to {string}`

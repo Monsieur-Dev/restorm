@@ -321,7 +321,9 @@ Use the pure string selectors from `electron-core-ui/testing`:
 - `scrollableElementRootSelector(testId)`
 - `scrollableElementContentSelector(testId)`
 - `scrollableElementVerticalScrollbarSelector(testId)` / `scrollableElementVerticalSliderSelector(testId)`
+- `scrollableElementVerticalArrowUpSelector(testId)` / `scrollableElementVerticalArrowDownSelector(testId)`
 - `scrollableElementHorizontalScrollbarSelector(testId)` / `scrollableElementHorizontalSliderSelector(testId)`
+- `scrollableElementHorizontalArrowLeftSelector(testId)` / `scrollableElementHorizontalArrowRightSelector(testId)`
 - `scrollableElementLeftShadowSelector(testId)`
 
 ### Playwright-BDD steps
@@ -331,6 +333,10 @@ Reusable steps are available from `electron-core-ui/testing/playwright-bdd`:
 - `Then scrollable element {string} should be visible`
 - `When I wheel scroll scrollable element {string} vertically by {int}`
 - `When I wheel scroll scrollable element {string} horizontally by {int}`
+- `When I click scrollable element {string} vertical arrow up`
+- `When I click scrollable element {string} vertical arrow down`
+- `When I click scrollable element {string} horizontal arrow left`
+- `When I click scrollable element {string} horizontal arrow right`
 - `When I drag scrollable element {string} vertical slider by {int}`
 - `When I drag scrollable element {string} horizontal slider by {int}`
 - `Then scrollable element {string} scroll top should be >= {int}`

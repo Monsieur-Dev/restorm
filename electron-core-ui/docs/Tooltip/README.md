@@ -126,3 +126,11 @@ Reusable steps are available via `defineTooltipBddSteps`:
 - `Then tooltip {string} should be hidden`
 - `Then tooltip {string} data-placement should be {string}`
 - `Then tooltip {string} data-side should be {string}`
+- `Then tooltip {string} should be right of {string}`
+- `Then tooltip {string} should be left of {string}`
+- `Then tooltip {string} should be above {string}`
+- `Then tooltip {string} should be below {string}`
+- `Then tooltip {string} beak left percent should be {int}`
+- `Then tooltip {string} beak should point to {string} vertically`
+- `Then tooltip {string} beak should point to {string} horizontally`
+- `Then tooltip {string} data-top should be {int}`
