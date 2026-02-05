@@ -9,6 +9,9 @@
     "email": "contact@oyo-fr.com"
   },
   "license": "MIT",
+  "engines": {
+    "node": ">=20 <21"
+  },
   "scripts": {
     "prepare": "husky",
     "clean": "npx rimraf node_modules electron-core-ui/node_modules electron-core-ui/dist gitable/node_modules gitable/dist gitable/out gitable/.vite demo/node_modules demo/dist demo/out demo/.vite restorm/node_modules restorm/dist restorm/out restorm/.vite",

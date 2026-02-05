@@ -9,6 +9,9 @@
     "email": "contact@oyo-fr.com"
   },
   "license": "MIT",
+  "engines": {
+    "node": ">=20 <21"
+  },
   "scripts": {
     "dev": "cross-env ELECTRON_DISABLE_SANDBOX=1 electron-vite dev",
     "dev:web": "vite --config vite.web.config.ts",

@@ -80,6 +80,9 @@
     "email": "contact@oyo-fr.com"
   },
   "license": "MIT",
+  "engines": {
+    "node": ">=20 <21"
+  },
   "peerDependencies": {
     "@milkdown/crepe": "^7.17.3",
     "@milkdown/kit": "^7.17.3",
