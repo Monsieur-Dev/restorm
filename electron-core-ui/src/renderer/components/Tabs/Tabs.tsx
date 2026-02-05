@@ -42,6 +42,8 @@ export interface TabsProps {
    * will also be triggered if the tab has allowFullscreen set to true.
    */
   onTabDoubleClick?: (tabId: string) => void
+  /** Optional test id applied to the Tabs root element. */
+  'data-testid'?: string
 }
 
 export const Tabs: React.FC<TabsProps> = ({
@@ -50,7 +52,8 @@ export const Tabs: React.FC<TabsProps> = ({
   onTabChange,
   onTabClose,
   keepMounted = false,
-  onTabDoubleClick: legacyDoubleClickCallback
+  onTabDoubleClick: legacyDoubleClickCallback,
+  'data-testid': dataTestId
 }) => {
   const [internalActiveTab, setInternalActiveTab] = useState(tabs[0]?.id ?? '')
   const [fullscreenTabId, setFullscreenTabId] = useState<string | null>(null)
@@ -85,6 +88,7 @@ export const Tabs: React.FC<TabsProps> = ({
         width: '100%',
         height: '100%'
       }}
+      {...(dataTestId && { 'data-testid': dataTestId })}
     >
       {/* Tab bar with horizontal ScrollableElement */}
       <ScrollableElement
