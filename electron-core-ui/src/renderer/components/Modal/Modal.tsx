@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useCallback, useEffect, useState, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import Workbench from '../Workbench/Workbench'
 import { Button } from '../Button'
@@ -13,13 +13,35 @@ export interface ModalProps {
   children: React.ReactNode
   /** Modal size: 'full' for fullscreen-like, 'dialog' for compact dialog box */
   size?: ModalSize
+  /** Optional test id applied to the modal container. Defaults to `modal`. */
+  'data-testid'?: string
 }
 
-export const Modal: React.FC<ModalProps> = ({ title, isOpen, onClose, children, size = 'full' }) => {
+export const Modal: React.FC<ModalProps> = ({
+  title,
+  isOpen,
+  onClose,
+  children,
+  size = 'full',
+  'data-testid': dataTestId
+}) => {
   const [isRendered, setIsRendered] = useState(isOpen)
   const [overlayState, setOverlayState] = useState<'open' | 'closing' | 'closed'>('closed')
   const wasOpenRef = useRef(isOpen)
   const rafIdsRef = useRef<number[]>([])
+
+  const rootTestId = dataTestId ?? 'modal'
+  const overlayTestId = `${rootTestId}-overlay`
+  const headerTestId = `${rootTestId}-header`
+  const titleTestId = `${rootTestId}-title`
+  const bodyTestId = `${rootTestId}-body`
+  const closeButtonTestId = `${rootTestId}-close`
+
+  const emitCloseRequest = useCallback((reason: 'escape' | 'button' | 'middle'): void => {
+    if (typeof window === 'undefined') return
+    if (typeof CustomEvent === 'undefined') return
+    window.dispatchEvent(new CustomEvent('ecu-modal-close-request', { detail: { testId: rootTestId, reason } }))
+  }, [rootTestId])
 
   useEffect(() => {
     const wasOpen = wasOpenRef.current
@@ -62,6 +84,7 @@ export const Modal: React.FC<ModalProps> = ({ title, isOpen, onClose, children, 
 
     const handleKeyDown = (event: KeyboardEvent): void => {
       if (event.key === 'Escape') {
+        emitCloseRequest('escape')
         onClose()
       }
     }
@@ -70,7 +93,7 @@ export const Modal: React.FC<ModalProps> = ({ title, isOpen, onClose, children, 
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isOpen, onClose])
+  }, [emitCloseRequest, isOpen, onClose])
 
   if (!isRendered) {
     return null
@@ -86,10 +109,21 @@ export const Modal: React.FC<ModalProps> = ({ title, isOpen, onClose, children, 
     size === 'dialog' ? 'ecu-modal-dialog' : ''
   ].filter(Boolean).join(' ')
 
+  const handleCloseFromButton = (): void => {
+    emitCloseRequest('button')
+    onClose()
+  }
+
+  const handleCloseFromMiddleClick = (): void => {
+    emitCloseRequest('middle')
+    onClose()
+  }
+
   const content = (
     <div
       className={overlayClassName}
       data-state={overlayState}
+      data-testid={overlayTestId}
       onTransitionEnd={(event) => {
         if (event.target !== event.currentTarget) return
         if (event.propertyName !== 'opacity') return
@@ -105,32 +139,36 @@ export const Modal: React.FC<ModalProps> = ({ title, isOpen, onClose, children, 
           role="dialog"
           aria-modal="true"
           aria-label={typeof title === 'string' ? title : undefined}
-          data-testid="modal"
+          data-testid={rootTestId}
           data-ready="true"
+          data-size={size}
+          data-is-open={isOpen ? 'true' : 'false'}
         >
           <div
             className="ecu-modal-header"
+            data-testid={headerTestId}
             onMouseDown={(event) => {
               // Middle-click on the modal titlebar closes the modal
               if (event.button === 1) {
                 event.preventDefault()
-                onClose()
+                handleCloseFromMiddleClick()
               }
             }}
           >
-            <div className="ecu-modal-title">
+            <div className="ecu-modal-title" data-testid={titleTestId}>
               {title}
             </div>
             <Button
               small
               secondary
               icon="close"
-              onClick={onClose}
+              onClick={handleCloseFromButton}
               options={{ ariaLabel: 'Close modal' }}
               className="ecu-modal-close"
+              data-testid={closeButtonTestId}
             />
           </div>
-          <div className="ecu-modal-body">
+          <div className="ecu-modal-body" data-testid={bodyTestId}>
             {children}
           </div>
         </div>

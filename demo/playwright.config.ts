@@ -262,6 +262,15 @@ const titlebarTestDir = defineBddConfig({
   outputDir: '.features-gen/titlebar'
 })
 
+const modalTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/modal/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/modal/steps/**/*.ts',
+    'tests/e2e/bdd/modal/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/modal'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -444,6 +453,11 @@ export default defineConfig({
     {
       name: 'titlebar',
       testDir: titlebarTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'modal',
+      testDir: modalTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],

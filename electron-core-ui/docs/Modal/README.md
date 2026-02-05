@@ -2,10 +2,10 @@
 
 ## Overview
 
-The `Modal` component renders a full–window modal dialog with a blurred overlay, using theme
+The `Modal` component renders a full–window modal dialog with an overlay, using theme
 variables and the same base styles as the workbench.
 
-- The modal covers the entire viewport with a semi‑transparent, blurred backdrop.
+- The modal covers the entire viewport with a semi‑transparent backdrop.
 - The inner dialog has a **20px margin** on all sides, a title bar, and a close button in the top‑right.
 - Pressing the **Escape** key or clicking the close button closes the modal.
 
@@ -31,6 +31,10 @@ export interface ModalProps {
   onClose: () => void
   /** Modal body content. Usually a layout or form. */
   children: React.ReactNode
+  /** Modal size: 'full' for fullscreen-like, 'dialog' for compact dialog box */
+  size?: 'full' | 'dialog'
+  /** Optional test id applied to the modal container. Defaults to `modal`. */
+  'data-testid'?: string
 }
 ```
 
@@ -76,7 +80,6 @@ const Example: React.FC = () => {
 
 - The overlay (`.ecu-modal-overlay`) uses:
   - `background-color: rgba(0, 0, 0, 0.4)`
-  - `backdrop-filter: blur(4px)` to softly blur the underlying workbench.
 - The container (`.ecu-modal-container`) is positioned with `top/left/right/bottom: 20px`,
   which ensures a **20px margin** around the dialog on all edges.
 - The header uses:
@@ -84,3 +87,49 @@ const Example: React.FC = () => {
   - `var(--titleBar-activeForeground)` for text and close icon.
 - Fonts, codicon sizes and focus outlines come from `Workbench` / `workbench.css`, so the modal feels
   visually integrated with the rest of the UI.
+
+## Testing
+
+### `data-testid` API
+
+`Modal` exposes stable E2E hooks via `data-testid` (default: `modal`).
+When `data-testid="my-modal"` is provided:
+
+- Overlay: `my-modal-overlay`
+  - attributes:
+    - `data-state`: `open|closing|closed`
+- Container: `my-modal`
+  - attributes:
+    - `data-size`: `full|dialog`
+    - `data-is-open`: `true|false`
+- Header: `my-modal-header`
+- Title: `my-modal-title`
+- Body: `my-modal-body`
+- Close button (`Button`): `my-modal-close`
+
+### Selectors (electron-core-ui/testing)
+
+- `modalRootSelector(testId)`
+- `modalOverlaySelector(testId)`
+- `modalHeaderSelector(testId)`
+- `modalTitleSelector(testId)`
+- `modalBodySelector(testId)`
+- `modalCloseButtonTestId(testId)`
+- `modalCloseButtonSelector(testId)`
+
+### Playwright-BDD steps (electron-core-ui/testing/playwright-bdd)
+
+Register:
+
+- `defineModalBddSteps(bdd)`
+- `defineButtonBddSteps(bdd)` (useful to interact with harness buttons)
+
+Steps:
+
+- `Then modal {string} should be visible`
+- `Then modal {string} should be hidden`
+- `Then modal {string} state should be {string}`
+- `Then modal {string} size should be {string}`
+- `When I close modal {string} with Escape`
+- `When I close modal {string} with close button`
+- `When I close modal {string} with header middle click`

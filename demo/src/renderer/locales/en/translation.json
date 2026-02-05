@@ -104,6 +104,17 @@
       }
     }
   },
+  "modal": {
+    "e2eTabLabel": "Modal (E2E)",
+    "harness": {
+      "title": "Modal",
+      "openFull": "Open full modal",
+      "openDialog": "Open dialog modal",
+      "closeExternal": "Close (external)",
+      "instructions": "Use the buttons to open the modal, then close it using Escape, the close button, or a middle click on the header.",
+      "bodyText": "Modal content"
+    }
+  },
   "dateTimePicker": {
     "e2eTabLabel": "DateTimePicker (E2E)",
     "ariaLabel": "Date and time",
