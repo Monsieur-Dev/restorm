@@ -1158,6 +1158,7 @@ const App: React.FC = () => {
 
       {fileName ? (
         <VerticalSashContainer
+          data-testid="app-vertical-sash-container"
           Left={
             <div
               style={{
@@ -1251,8 +1252,8 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <Statusbar>
-        {filePath && <StatusbarElement title={filePath} />}
+      <Statusbar data-testid="app-statusbar">
+        {filePath && <StatusbarElement data-testid="app-statusbar-element" title={filePath} />}
         <DesktopIndicator />
       </Statusbar>
 

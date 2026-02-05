@@ -31,6 +31,8 @@ export interface RestormWorkbenchTabProps {
   tagsRight?: React.ReactNode
   /** Optional callout to display at the top of the tab */
   callout?: RestormWorkbenchTabCallout | undefined
+  /** Optional tab ID for stable test IDs */
+  tabId?: string
   children: React.ReactNode
 }
 
@@ -44,8 +46,10 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
   headerRight,
   tagsRight,
   callout,
+  tabId,
   children
 }) => {
+  const testIdPrefix = tabId ? `tab-${tabId}` : 'workbench-tab'
   return (
     <div
       style={{
@@ -63,6 +67,7 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
             variant={callout.variant}
             message={callout.message}
             {...(callout.icon ? { icon: callout.icon } : {})}
+            data-testid={`${testIdPrefix}-callout`}
           />
         </div>
       )}
@@ -87,6 +92,7 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
             onChange={(nextTags) => {
               onTagsChange?.(nextTags)
             }}
+            data-testid={`${testIdPrefix}-tags`}
           />
         </div>
         {tagsRight}
@@ -110,6 +116,7 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
             onLastItemChange={(item, newValue) => {
               onBreadcrumbRename?.(item, newValue)
             }}
+            data-testid={`${testIdPrefix}-breadcrumb`}
           />
         </div>
         {headerRight}

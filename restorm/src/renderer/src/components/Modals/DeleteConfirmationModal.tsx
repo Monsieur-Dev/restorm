@@ -28,6 +28,7 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
       isOpen={isOpen}
       onClose={onCancel}
       size="dialog"
+      data-testid="delete-confirmation-modal"
     >
       <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <p style={{ margin: 0 }}>
@@ -36,10 +37,10 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
             : t('sidebar.deleteConfirm.itemMessage', { name: itemName })}
         </p>
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-          <Button secondary onClick={onCancel}>
+          <Button secondary onClick={onCancel} data-testid="delete-confirmation-cancel-button">
             {t('sidebar.deleteConfirm.cancel')}
           </Button>
-          <Button onClick={onConfirm}>
+          <Button onClick={onConfirm} data-testid="delete-confirmation-confirm-button">
             {t('sidebar.deleteConfirm.confirm')}
           </Button>
         </div>

@@ -102,6 +102,7 @@ const SettingsPage: React.FC = () => {
       {/* Settings Content with ScrollableElement */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <ScrollableElement
+          data-testid="settings-scrollable"
           options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
           style={{ flex: 1, width: '100%' }}
         >
@@ -119,6 +120,7 @@ const SettingsPage: React.FC = () => {
                     Font Size
                   </label>
                   <InputBox
+                    data-testid="font-size-input"
                     value={editorSettings.fontSize}
                     onChange={(value) => { setEditorSettings(prev => ({ ...prev, fontSize: value })) }}
                     options={{
@@ -134,6 +136,7 @@ const SettingsPage: React.FC = () => {
                     Font Family
                   </label>
                   <InputBox
+                    data-testid="font-family-input"
                     value={editorSettings.fontFamily}
                     onChange={(value) => { setEditorSettings(prev => ({ ...prev, fontFamily: value })) }}
                     options={{
@@ -147,6 +150,7 @@ const SettingsPage: React.FC = () => {
                     Tab Size
                   </label>
                   <InputBox
+                    data-testid="tab-size-input"
                     value={editorSettings.tabSize}
                     onChange={(value) => { setEditorSettings(prev => ({ ...prev, tabSize: value })) }}
                     options={{
@@ -160,6 +164,7 @@ const SettingsPage: React.FC = () => {
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                     <Toggle
+                      data-testid="word-wrap-toggle"
                       isChecked={editorSettings.wordWrap}
                       onChange={(checked: boolean) => { setEditorSettings(prev => ({ ...prev, wordWrap: checked })) }}
                     />
@@ -170,6 +175,7 @@ const SettingsPage: React.FC = () => {
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                     <Toggle
+                      data-testid="minimap-toggle"
                       isChecked={editorSettings.minimap}
                       onChange={(checked: boolean) => { setEditorSettings(prev => ({ ...prev, minimap: checked })) }}
                     />
@@ -180,6 +186,7 @@ const SettingsPage: React.FC = () => {
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                     <Toggle
+                      data-testid="line-numbers-toggle"
                       isChecked={editorSettings.lineNumbers}
                       onChange={(checked: boolean) => { setEditorSettings(prev => ({ ...prev, lineNumbers: checked })) }}
                     />
@@ -190,6 +197,7 @@ const SettingsPage: React.FC = () => {
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                     <Toggle
+                      data-testid="auto-save-toggle"
                       isChecked={editorSettings.autoSave}
                       onChange={(checked: boolean) => { setEditorSettings(prev => ({ ...prev, autoSave: checked })) }}
                     />
@@ -200,6 +208,7 @@ const SettingsPage: React.FC = () => {
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                     <Toggle
+                      data-testid="format-on-save-toggle"
                       isChecked={editorSettings.formatOnSave}
                       onChange={(checked: boolean) => { setEditorSettings(prev => ({ ...prev, formatOnSave: checked })) }}
                     />
@@ -221,6 +230,7 @@ const SettingsPage: React.FC = () => {
                     Color Theme
                   </label>
                   <CustomDropdown
+                    data-testid="theme-selector"
                     value={appearanceSettings.theme}
                     options={themeOptions}
                     onChange={handleThemeChange}
@@ -234,6 +244,7 @@ const SettingsPage: React.FC = () => {
                     Sidebar Location
                   </label>
                   <RadioGroup
+                    data-testid="sidebar-location-radio"
                     options={{
                       items: [
                         { text: 'Left', isActive: appearanceSettings.sidebarLocation === 'left' },
@@ -252,6 +263,7 @@ const SettingsPage: React.FC = () => {
                     Panel Location
                   </label>
                   <RadioGroup
+                    data-testid="panel-location-radio"
                     options={{
                       items: [
                         { text: 'Bottom', isActive: appearanceSettings.panelLocation === 'bottom' },
@@ -268,6 +280,7 @@ const SettingsPage: React.FC = () => {
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                     <Toggle
+                      data-testid="status-bar-toggle"
                       isChecked={appearanceSettings.statusBar}
                       onChange={(checked: boolean) => { setAppearanceSettings(prev => ({ ...prev, statusBar: checked })) }}
                     />
@@ -278,6 +291,7 @@ const SettingsPage: React.FC = () => {
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                     <Toggle
+                      data-testid="activity-bar-toggle"
                       isChecked={appearanceSettings.activityBar}
                       onChange={(checked: boolean) => { setAppearanceSettings(prev => ({ ...prev, activityBar: checked })) }}
                     />
@@ -297,6 +311,7 @@ const SettingsPage: React.FC = () => {
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                     <Toggle
+                      data-testid="telemetry-toggle"
                       isChecked={advancedSettings.telemetry}
                       onChange={(checked: boolean) => { setAdvancedSettings(prev => ({ ...prev, telemetry: checked })) }}
                     />
@@ -307,6 +322,7 @@ const SettingsPage: React.FC = () => {
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                     <Toggle
+                      data-testid="crash-reports-toggle"
                       isChecked={advancedSettings.crashReports}
                       onChange={(checked: boolean) => { setAdvancedSettings(prev => ({ ...prev, crashReports: checked })) }}
                     />
@@ -319,6 +335,7 @@ const SettingsPage: React.FC = () => {
                     Update Channel
                   </label>
                   <RadioGroup
+                    data-testid="update-channel-radio"
                     options={{
                       items: [
                         { text: 'Stable', isActive: advancedSettings.updateChannel === 'stable' },
@@ -337,6 +354,7 @@ const SettingsPage: React.FC = () => {
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                     <Toggle
+                      data-testid="experimental-features-toggle"
                       isChecked={advancedSettings.experimentalFeatures}
                       onChange={(checked: boolean) => { setAdvancedSettings(prev => ({ ...prev, experimentalFeatures: checked })) }}
                     />
@@ -374,9 +392,9 @@ const SettingsPage: React.FC = () => {
       </div>
 
       {/* Statusbar */}
-      <Statusbar>
-        <StatusbarElement title="Ready" />
-        <StatusbarElement title="Settings" />
+      <Statusbar data-testid="settings-statusbar">
+        <StatusbarElement data-testid="statusbar-ready" title="Ready" />
+        <StatusbarElement data-testid="statusbar-settings" title="Settings" />
       </Statusbar>
     </div>
   )

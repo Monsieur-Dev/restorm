@@ -95,6 +95,8 @@ export interface RestormVariableInputBoxProps {
   ariaLabel?: string
   onGoToDefinition?: (variableName: string) => void
   contextMenuItems?: ContextMenuItem[]
+  /** Optional test id applied to the VariableInputBox root element. */
+  'data-testid'?: string
 }
 
 export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (props) => {
@@ -110,7 +112,8 @@ export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (
     style,
     ariaLabel,
     onGoToDefinition: _onGoToDefinition,
-    contextMenuItems
+    contextMenuItems,
+    'data-testid': dataTestId
   } = props
 
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
@@ -279,6 +282,7 @@ export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (
           ariaLabel={ariaLabel}
           onMount={handleMount}
           contextMenuItems={contextMenuItems}
+          {...(dataTestId && { 'data-testid': dataTestId })}
         />
       </div>
       {hasResolvedTooltip && (
@@ -287,6 +291,7 @@ export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (
           content={<span>{resolvedValue}</span>}
           show={showResolvedTooltip}
           placement="below"
+          {...(dataTestId && { 'data-testid': `${dataTestId}-resolved-tooltip` })}
         />
       )}
     </>

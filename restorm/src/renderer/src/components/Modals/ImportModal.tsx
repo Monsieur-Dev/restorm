@@ -354,6 +354,7 @@ export function ImportModal({
       isOpen={isOpen}
       onClose={onClose}
       title={t('import.title')}
+      data-testid="import-modal-dialog"
     >
       <div className="import-modal" data-testid="import-modal">
         
@@ -372,6 +373,7 @@ export function ImportModal({
                 menuAriaLabel={t('import.destination.label')}
                 align="left"
                 minWidth={600}
+                data-testid="destination-dropdown"
                 buttonContent={
                   <>
                     <i className="codicon codicon-folder" style={{ marginRight: '6px' }} />
@@ -427,6 +429,7 @@ export function ImportModal({
                 flexibleHeight: true,
                 flexibleMaxHeight: 200
               }}
+              data-testid="source-input"
             />
           </div>
           {isLoading && (
@@ -454,6 +457,7 @@ export function ImportModal({
                 items={previewListItems}
                 onItemClick={() => { /* Preview only */ }}
                 onItemContextMenu={() => { /* Preview only */ }}
+                data-testid="preview-list"
               />
             </div>
           </div>
@@ -468,12 +472,13 @@ export function ImportModal({
 
         {/* Actions */}
         <div className="import-actions">
-          <Button secondary onClick={onClose}>
+          <Button secondary onClick={onClose} data-testid="cancel-button">
             {t('import.cancel')}
           </Button>
           <Button 
             onClick={handleImportClick}
             disabled={previewItems.length === 0}
+            data-testid="import-button"
           >
             {t('import.ok')}
           </Button>
@@ -489,6 +494,7 @@ export function ImportModal({
             setNewFolderName('')
           }}
           title={t('import.destination.newFolderTitle')}
+          data-testid="new-folder-modal"
         >
           <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px', minWidth: '300px' }} data-testid="new-folder-dialog">
             <InputBox
@@ -497,6 +503,7 @@ export function ImportModal({
               options={{
                 placeholder: t('import.destination.newFolderPlaceholder')
               }}
+              data-testid="new-folder-input"
             />
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
               <Button 
@@ -505,6 +512,7 @@ export function ImportModal({
                   setShowFolderNameInput(false)
                   setNewFolderName('')
                 }}
+                data-testid="new-folder-cancel-button"
               >
                 {t('common.cancel')}
               </Button>

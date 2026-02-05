@@ -555,12 +555,13 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
 
   // Request content (SplitView with Panes)
   const requestContent = (
-    <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }}>
+    <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }} data-testid="http-request-split-view">
       <Pane
         title={t('requestTab.tabs.authorization').toUpperCase()}
         initialSize={0.15}
         collapsed
         minSize={120}
+        data-testid="http-request-authorization-pane"
       >
         <div style={{ height: '100%', boxSizing: 'border-box', padding: 8 }}>
           {/* Authorization configuration UI will be added here */}
@@ -571,12 +572,14 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         initialSize={0.2}
         collapsed={request.headers.length === 0}
         minSize={150}
+        data-testid="http-request-headers-pane"
         headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
           <Button
             secondary
             small
             icon="add"
             options={{ ariaLabel: t('requestTab.addHeader'), title: t('requestTab.addHeader') }}
+            data-testid="http-request-add-header-button"
             onClick={() => {
               if (collapsed) toggle()
               headersParamsRef.current?.addRow()
@@ -590,6 +593,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           helpers={handlebarsHelpers}
           initialRows={request.headers}
           onRowsChange={handleHeadersChange}
+          data-testid="http-request-headers-table"
         />
       </Pane>
       <Pane
@@ -597,12 +601,14 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         initialSize={0.2}
         collapsed={(request.pathParams?.length ?? 0) === 0}
         minSize={150}
+        data-testid="http-request-path-params-pane"
         headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
           <Button
             small
             secondary
             icon="add"
             options={{ ariaLabel: t('requestTab.addParam'), title: t('requestTab.addParam') }}
+            data-testid="http-request-add-path-param-button"
             onClick={() => {
               if (collapsed) toggle()
               pathParamsRef.current?.addRow()
@@ -616,6 +622,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           helpers={handlebarsHelpers}
           initialRows={request.pathParams ?? []}
           onRowsChange={handlePathParamsChange}
+          data-testid="http-request-path-params-table"
         />
       </Pane>
       <Pane
@@ -623,12 +630,14 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         initialSize={0.2}
         collapsed={request.params.length === 0}
         minSize={150}
+        data-testid="http-request-params-pane"
         headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
           <Button
             small
             secondary
             icon="add"
             options={{ ariaLabel: t('requestTab.addParam'), title: t('requestTab.addParam') }}
+            data-testid="http-request-add-param-button"
             onClick={() => {
               if (collapsed) toggle()
               queryParamsRef.current?.addRow()
@@ -642,9 +651,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           helpers={handlebarsHelpers}
           initialRows={request.params}
           onRowsChange={handleParamsChange}
+          data-testid="http-request-query-params-table"
         />
       </Pane>
-      <Pane title={t('requestTab.tabs.body')} initialSize={0.4}>
+      <Pane title={t('requestTab.tabs.body')} initialSize={0.4} data-testid="http-request-body-pane">
         <div style={{ height: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: 8, minHeight: 0 }}>
           <RadioGroup
             options={{
@@ -655,6 +665,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
                 { text: 'file', isActive: bodyMode === 'file' }
               ]
             }}
+            data-testid="http-request-body-mode-radio"
             onSelect={(index: number) => {
               const modes: ('text' | 'form-data' | 'x-www-form-urlencoded' | 'file')[] = ['text', 'form-data', 'x-www-form-urlencoded', 'file']
               setBodyMode(modes[index] ?? 'text')
@@ -669,6 +680,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
                   value={body}
                   onChange={(value) => { setBody(value ?? '') }}
                   options={{ minimap: { enabled: false }, wordWrap: 'on', scrollBeyondLastLine: false, automaticLayout: true }}
+                  data-testid="http-request-body-editor"
                 />
               </div>
             )}
@@ -678,15 +690,16 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
                 helpers={handlebarsHelpers}
                 initialRows={request.body?.type === 'form-data' || request.body?.type === 'x-www-form-urlencoded' ? request.body.fields : []}
                 onRowsChange={(rows): void => { updateReactiveProperty(request, 'body', { type: bodyMode, fields: rows }) }}
+                data-testid="http-request-body-fields-table"
               />
             )}
             {bodyMode === 'file' && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ flexShrink: 0, fontSize: 12 }}>{t('requestTab.body.fileLabel')}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <InputBox options={{ placeholder: '', type: 'text' }} value={bodyFilePath} onChange={(value: string) => { setBodyFilePath(value) }} />
+                  <InputBox options={{ placeholder: '', type: 'text' }} value={bodyFilePath} onChange={(value: string) => { setBodyFilePath(value) }} data-testid="http-request-body-file-input" />
                 </div>
-                <Button options={{ ariaLabel: t('requestTab.body.browse'), title: t('requestTab.body.browse') }}>
+                <Button options={{ ariaLabel: t('requestTab.body.browse'), title: t('requestTab.body.browse') }} data-testid="http-request-body-browse-button">
                   {t('requestTab.body.browse')}
                 </Button>
               </div>
@@ -730,7 +743,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
 
     const infosContent = response ? (
       <div style={{ height: '100%', boxSizing: 'border-box' }}>
-        <ListView items={headersTreeItems} rootRole="tree" ariaLabel="HTTP request and response headers" />
+        <ListView items={headersTreeItems} rootRole="tree" ariaLabel="HTTP request and response headers" data-testid="http-response-headers-list" />
       </div>
     ) : null
 
@@ -755,6 +768,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           language="json"
           value={formattedResponseBody}
           options={{ minimap: { enabled: false }, wordWrap: 'on', scrollBeyondLastLine: false, automaticLayout: true, readOnly: true }}
+          data-testid="http-response-body-editor"
         />
       </div>
     ) : null
@@ -814,6 +828,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           selected={methodOptions.findIndex((opt) => opt.text === method)}
           onDidSelect={(data: ISelectData) => { setMethod(data.selected) }}
           selectBoxOptions={{ ariaLabel: t('requestTab.methodSelect'), useCustomDrawn: true }}
+          data-testid="http-request-method-select"
         />
       </div>
       <div style={{ flex: 1, minWidth: 0, paddingLeft: 15 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
@@ -823,6 +838,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           variables={urlVariables}
           helpers={handlebarsHelpers}
           placeholder={t('requestTab.urlPlaceholder')}
+          data-testid="http-request-url-input"
         />
       </div>
       {isSending ? (
@@ -830,6 +846,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           icon="close"
           onClick={handleCancel} 
           options={{ title: t('requestTab.cancel'), ariaLabel: t('requestTab.cancel') }}
+          data-testid="http-request-cancel-button"
         >
           {t('requestTab.cancel')}
         </Button>
@@ -838,6 +855,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           icon="send"
           onClick={handleSend} 
           options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}
+          data-testid="http-request-send-button"
         >
           {t('requestTab.send')}
         </Button>

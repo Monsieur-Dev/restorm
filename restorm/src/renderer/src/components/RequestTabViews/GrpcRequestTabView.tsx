@@ -255,8 +255,8 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
   
   // Request content (SplitView with Message, Metadata)
   const requestContent = (
-    <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }}>
-      <Pane title={t('grpc.tabs.message')} initialSize={0.7} minSize={150}>
+    <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }} data-testid="grpc-request-content-splitview">
+      <Pane title={t('grpc.tabs.message')} initialSize={0.7} minSize={150} data-testid="grpc-message-pane">
         <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
           <CodeEditor
             height="100%"
@@ -264,6 +264,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
             value={requestMessage}
             onChange={(v) => { setRequestMessage(v ?? '{}') }}
             options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}
+            data-testid="grpc-request-message-editor"
           />
         </div>
       </Pane>
@@ -272,6 +273,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
         initialSize={0.3}
         minSize={100}
         collapsed={request.metadata.length === 0}
+        data-testid="grpc-metadata-pane"
         headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
           <Button
             secondary
@@ -282,6 +284,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
               if (collapsed) toggle()
               metadataRef.current?.addRow()
             }}
+            data-testid="grpc-metadata-add-button"
           />
         )}
       >
@@ -291,6 +294,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
           helpers={handlebarsHelpers}
           initialRows={request.metadata}
           onRowsChange={handleMetadataChange}
+          data-testid="grpc-metadata-table"
         />
       </Pane>
     </SplitView>
@@ -345,6 +349,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
           language="json"
           value={resp.responseMessage}
           options={{ readOnly: true, minimap: { enabled: false }, automaticLayout: true }}
+          data-testid="grpc-response-message-editor"
         />
       </div>
     ) : null
@@ -400,6 +405,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
             variables={emptyVariables}
             helpers={handlebarsHelpers}
             placeholder={t('grpc.urlPlaceholder')}
+            data-testid="grpc-url-input"
           />
         </div>
         <Button 
@@ -409,6 +415,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
             title: isSending ? t('cancel') : t('grpc.send'), 
             ariaLabel: isSending ? t('cancel') : t('grpc.send') 
           }}
+          data-testid="grpc-send-button"
         >
           {isSending ? t('cancel') : t('grpc.send')}
         </Button>

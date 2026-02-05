@@ -81,6 +81,7 @@ export const Welcome: React.FC = () => {
                         className="welcome-favorite-btn is-favorite"
                         onClick={(e) => { handleRemoveFavorite(file.path, file.name, e) }}
                         options={{ title: t('welcome.removeFromFavorites') }}
+                        data-testid="remove-favorite-button"
                       />
                     </li>
                   ))}
@@ -114,6 +115,7 @@ export const Welcome: React.FC = () => {
                         options={{ 
                           title: isFavorite(file.path) ? t('welcome.removeFromFavorites') : t('welcome.addToFavorites') 
                         }}
+                        data-testid="toggle-favorite-button"
                       />
                     </li>
                   ))}

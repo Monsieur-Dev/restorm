@@ -261,8 +261,8 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   
   // Request content (SplitView with Message, Headers)
   const requestContent = (
-    <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }}>
-      <Pane title={t('websocket.tabs.message')} initialSize={0.7} minSize={150}>
+    <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }} data-testid="websocket-request-split-view">
+      <Pane title={t('websocket.tabs.message')} initialSize={0.7} minSize={150} data-testid="websocket-message-pane">
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {(request.protocol === 'socketio' || request.protocol === 'mqtt') && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 4px' }}>
@@ -272,6 +272,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
                   value={event}
                   onChange={setEvent}
                   options={{ placeholder: request.protocol === 'mqtt' ? 'topic/name' : 'event-name' }}
+                  data-testid="websocket-event-input"
                 />
               </div>
             </div>
@@ -283,6 +284,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
               value={message}
               onChange={(v) => { setMessage(v ?? '{}') }}
               options={{ minimap: { enabled: false }, wordWrap: 'on', automaticLayout: true }}
+              data-testid="websocket-message-editor"
             />
           </div>
         </div>
@@ -292,6 +294,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         initialSize={0.3}
         minSize={100}
         collapsed={request.headers.length === 0}
+        data-testid="websocket-headers-pane"
         headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
           <Button
             secondary
@@ -302,6 +305,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
               if (collapsed) toggle()
               headersRef.current?.addRow()
             }}
+            data-testid="websocket-add-header-button"
           />
         )}
       >
@@ -311,6 +315,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           helpers={handlebarsHelpers}
           initialRows={request.headers}
           onRowsChange={handleHeadersChange}
+          data-testid="websocket-headers-table"
         />
       </Pane>
     </SplitView>
@@ -427,6 +432,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           variables={emptyVariables}
           helpers={handlebarsHelpers}
           placeholder={t('websocket.urlPlaceholder')}
+          data-testid="websocket-url-input"
         />
       </div>
       <Button 
@@ -436,6 +442,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           title: isSending ? t('websocket.disconnect') : t('websocket.connect'), 
           ariaLabel: isSending ? t('websocket.disconnect') : t('websocket.connect') 
         }}
+        data-testid="websocket-connect-button"
       >
         {isSending ? t('websocket.disconnect') : t('websocket.connect')}
       </Button>

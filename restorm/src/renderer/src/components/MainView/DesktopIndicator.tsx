@@ -13,7 +13,7 @@ export const DesktopIndicator: React.FC = () => {
     return null
   }
 
-  return <StatusbarElement title="Desktop" />
+  return <StatusbarElement title="Desktop" data-testid="desktop-indicator" />
 }
 
 export default DesktopIndicator

@@ -45,6 +45,7 @@ interface RequestTabWithHistoryProps {
   callout?: RestormWorkbenchTabCallout | undefined
   historyLabel: string
   renderContent: (controls: RequestHistoryControls) => React.ReactNode
+  tabId: string
 }
 
 const RequestTabWithHistory: React.FC<RequestTabWithHistoryProps> = ({
@@ -57,7 +58,8 @@ const RequestTabWithHistory: React.FC<RequestTabWithHistoryProps> = ({
   headerRight,
   callout,
   historyLabel,
-  renderContent
+  renderContent,
+  tabId
 }) => {
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const [hasHistory, setHasHistory] = useState(false)
@@ -86,11 +88,13 @@ const RequestTabWithHistory: React.FC<RequestTabWithHistoryProps> = ({
           onClick={handleOpenHistory}
           disabled={!hasHistory}
           options={{ title: historyLabel, ariaLabel: historyLabel }}
+          data-testid={`tab-${tabId}-history-button`}
         >
           {historyLabel}
         </Button>
       )}
       callout={callout}
+      tabId={tabId}
     >
       <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
         {renderContent({
@@ -406,6 +410,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagsChange?.(folder.id, nextTags)
           }}
           label={t('workbench.tagsLabel')}
+          tabId={effectiveTab.id}
         >
           <EnvironmentFolderView
             folder={folder}
@@ -441,6 +446,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
               message: t('requestTab.deprecated')
             } : undefined}
             historyLabel={t('requestTab.tabs.responsesHistory')}
+            tabId={effectiveTab.id}
             renderContent={({ historyModalOpen, onCloseHistoryModal, onHistoryAvailabilityChange }) => (
               <HTTPRequestTabView
                 request={request}
@@ -470,6 +476,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             label={t('workbench.tagsLabel')}
             headerRight={<EnvironmentDropdown />}
             historyLabel={t('requestTab.tabs.responsesHistory')}
+            tabId={effectiveTab.id}
             renderContent={({ historyModalOpen, onCloseHistoryModal, onHistoryAvailabilityChange }) => (
               <GraphQLRequestTabView
                 request={request}
@@ -499,6 +506,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             label={t('workbench.tagsLabel')}
             headerRight={<EnvironmentDropdown />}
             historyLabel={t('requestTab.tabs.responsesHistory')}
+            tabId={effectiveTab.id}
             renderContent={({ historyModalOpen, onCloseHistoryModal, onHistoryAvailabilityChange }) => (
               <GrpcRequestTabView
                 request={request}
@@ -528,6 +536,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             label={t('workbench.tagsLabel')}
             headerRight={<EnvironmentDropdown />}
             historyLabel={t('requestTab.tabs.responsesHistory')}
+            tabId={effectiveTab.id}
             renderContent={({ historyModalOpen, onCloseHistoryModal, onHistoryAvailabilityChange }) => (
               <SoapRequestTabView
                 request={request}
@@ -557,6 +566,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             label={t('workbench.tagsLabel')}
             headerRight={<EnvironmentDropdown />}
             historyLabel={t('requestTab.tabs.responsesHistory')}
+            tabId={effectiveTab.id}
             renderContent={({ historyModalOpen, onCloseHistoryModal, onHistoryAvailabilityChange }) => (
               <WebSocketRequestTabView
                 request={request}
@@ -742,6 +752,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         autosave={autosave}
         onRebuildTab={onRebuildTab}
         onStateRestored={onStateRestored}
+        data-testid={workbenchId ? `workbench-${workbenchId}` : 'workbench'}
         {...callbacks}
       />
     </div>

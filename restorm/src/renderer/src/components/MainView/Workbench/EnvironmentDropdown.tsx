@@ -19,7 +19,7 @@ function environmentsToListViewItems(
     isExpandable: (env.subEnvironments?.length ?? 0) > 0,
     isExpanded: expandedIds.includes(env.id),
     icon: !env.icon ? (expandedIds.includes(env.id) ? 'folder-opened' : 'folder') : undefined,
-    leftActions: env.icon ? <IconSelect value={env.icon} readonly /> : undefined,
+    leftActions: env.icon ? <IconSelect value={env.icon} readonly data-testid={`environment-item-icon-${env.id}`} /> : undefined,
     children: env.subEnvironments ? environmentsToListViewItems(env.subEnvironments, expandedIds) : []
   }))
 }
@@ -100,6 +100,7 @@ export const EnvironmentDropdown: React.FC = () => {
         menuAriaLabel={t('requestTab.environmentSelector.listAriaLabel')}
         selectedIds={selectedEnvId ? [selectedEnvId] : []}
         expandedIds={expandedIds}
+        data-testid="environment-dropdown"
         buttonProps={{
           secondary: true,
           options: {
@@ -110,7 +111,12 @@ export const EnvironmentDropdown: React.FC = () => {
         buttonContent={
           <>
             {selectedEnvironment?.icon && (
-              <IconSelect value={selectedEnvironment.icon} readonly style={{ marginRight: 4 }} />
+              <IconSelect
+                value={selectedEnvironment.icon}
+                readonly
+                style={{ marginRight: 4 }}
+                data-testid={`environment-selected-icon-${selectedEnvironment.id}`}
+              />
             )}
             <span style={{ marginRight: 4, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {selectedEnvironmentName}

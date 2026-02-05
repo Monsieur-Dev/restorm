@@ -32,6 +32,7 @@ export const ResponseHistoryModal: React.FC<ResponseHistoryModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title={t('requestTab.tabs.responsesHistory')}
+      data-testid="response-history-modal"
     >
       <div style={{ height: '70vh', minHeight: 420, width: '80vw', minWidth: 720 }}>
         <ResponseHistoryTab
