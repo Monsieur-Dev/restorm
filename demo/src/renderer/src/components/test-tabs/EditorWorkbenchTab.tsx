@@ -323,16 +323,42 @@ const EditorWorkbenchTab: React.FC = () => {
       }
     }
 
-    Object.assign(window.api, apiShim)
+    // Use Object.defineProperty instead of Object.assign to handle read-only properties
+    const propertyNames: (keyof typeof apiShim)[] = [
+      'getCursorScreenPoint',
+      'getCurrentWindowBounds',
+      'getWindowUnderCursor',
+      'createAuxWindow',
+      'sendWorkbenchTabToWindow',
+      'onWorkbenchTabDropped'
+    ]
+    
+    for (const propName of propertyNames) {
+      try {
+        Object.defineProperty(window.api, propName, {
+          value: apiShim[propName],
+          writable: true,
+          configurable: true
+        })
+      } catch (error) {
+        logger.error('EditorWorkbenchTab: Failed to override API property', { property: propName, error: String(error) })
+      }
+    }
 
     return () => {
       bc?.close()
-      window.api.getCursorScreenPoint = original.getCursorScreenPoint
-      window.api.getCurrentWindowBounds = original.getCurrentWindowBounds
-      window.api.getWindowUnderCursor = original.getWindowUnderCursor
-      window.api.createAuxWindow = original.createAuxWindow
-      window.api.sendWorkbenchTabToWindow = original.sendWorkbenchTabToWindow
-      window.api.onWorkbenchTabDropped = original.onWorkbenchTabDropped
+      // Restore original properties using defineProperty
+      for (const propName of propertyNames) {
+        try {
+          Object.defineProperty(window.api, propName, {
+            value: original[propName],
+            writable: true,
+            configurable: true
+          })
+        } catch (error) {
+          logger.error('EditorWorkbenchTab: Failed to restore API property', { property: propName, error: String(error) })
+        }
+      }
     }
   }, [])
 

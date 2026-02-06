@@ -30,11 +30,40 @@ const CustomWcoTab: React.FC = () => {
   useLayoutEffect(() => {
     const container = getElectronApiContainer()
     previousApiRef.current = container.electronAPI
-    container.electronAPI = api
+    
+    // Use Object.defineProperty to handle read-only properties in web mode
+    try {
+      Object.defineProperty(window, 'electronAPI', {
+        value: api,
+        writable: true,
+        configurable: true
+      })
+    } catch {
+      // Fallback: try direct assignment if defineProperty fails
+      try {
+        container.electronAPI = api
+      } catch {
+        // Silently fail if both methods fail (e.g., in strict web environments)
+      }
+    }
 
     return () => {
-      container.electronAPI = previousApiRef.current
       windowStateCbsRef.current = []
+      // Restore original value using defineProperty
+      try {
+        Object.defineProperty(window, 'electronAPI', {
+          value: previousApiRef.current,
+          writable: true,
+          configurable: true
+        })
+      } catch {
+        // Fallback: try direct assignment if defineProperty fails
+        try {
+          container.electronAPI = previousApiRef.current
+        } catch {
+          // Silently fail if both methods fail
+        }
+      }
     }
   }, [api])
 
