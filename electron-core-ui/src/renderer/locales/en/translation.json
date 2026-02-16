@@ -99,8 +99,12 @@
   "dateTimePicker": {
     "ariaLabel": "Date/time picker",
     "openCalendar": "Open calendar",
+    "previousYear": "Previous year",
+    "nextYear": "Next year",
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
+    "selectMonth": "Select month",
+    "selectYear": "Select year",
     "includeTime": "Include time",
     "hours": "Hours",
     "minutes": "Minutes",

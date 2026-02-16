@@ -32,6 +32,7 @@ export interface ButtonProps {
    * When true, renders a compact 20x20 toolbar-style button.
    */
   small?: boolean;
+  line?: boolean;
   onClick?: ((event: React.MouseEvent<HTMLAnchorElement>) => void) | undefined;
   onMouseEnter?: ((event: React.MouseEvent<HTMLAnchorElement>) => void) | undefined;
   onMouseLeave?: ((event: React.MouseEvent<HTMLAnchorElement>) => void) | undefined;

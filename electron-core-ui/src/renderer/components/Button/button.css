@@ -267,6 +267,24 @@
 	outline: none;
 }
 
+/* Small toolbar-style button (20x20) */
+.text-button.line-button {
+	width: 28px;
+	min-width: 28px;
+	height: 28px;
+	min-height: 28px;
+	padding: 0;
+	border-radius: 3px;
+	background-color: transparent;
+	color: var(--titleBar-activeForeground);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: none;
+	outline: none;
+}
+
 .text-button.small-button .codicon {
 	margin: 0;
 	line-height: 1;

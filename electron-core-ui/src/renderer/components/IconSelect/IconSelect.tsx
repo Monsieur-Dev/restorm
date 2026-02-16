@@ -109,14 +109,12 @@ const SearchInput: React.FC<{
       autoFocus
     />
     {value && (
-      <button
-        type="button"
-        className="ecui-icon-select-search-clear"
+      <Button
+        line
+        icon="close"
         onClick={() => { onChange('') }}
         {...(clearTestId ? { 'data-testid': clearTestId } : {})}
-      >
-        <i className="codicon codicon-close" />
-      </button>
+      />
     )}
   </div>
 )
@@ -140,18 +138,16 @@ const IconGrid: React.FC<{
     <div className="ecui-icon-select-library">
       <div className="ecui-icon-select-codicons-grid">
         {displayedIcons.map(name => (
-          <button
+          <Button
             key={name}
-            type="button"
-            className="ecui-icon-select-codicon"
-            title={name}
+            line
             onClick={() => { onSelect(name) }}
-            {...(dataTestIdBase ? { 'data-testid': `${dataTestIdBase}-icon-${name}` } : {})}
-            {...(iconType ? { 'data-icon-type': iconType } : {})}
+            data-testid={`${dataTestIdBase}-icon-${name}`}
+            data-icon-type={iconType}
             data-icon-name={name}
           >
             {renderIcon(name)}
-          </button>
+          </Button>
         ))}
       </div>
       {hasMore && moreHintText && (
@@ -181,7 +177,7 @@ export const IconSelect: React.FC<IconSelectProps> = ({
   const [pickerPosition, setPickerPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 })
   const containerRef = useRef<HTMLDivElement | null>(null)
   const pickerRef = useRef<HTMLDivElement | null>(null)
-  const buttonRef = useRef<HTMLButtonElement | null>(null)
+  const buttonRef = useRef<HTMLDivElement | null>(null)
 
   // Search states for tabs without grouping
   const [materialSearch, setMaterialSearch] = useState('')
@@ -366,18 +362,17 @@ export const IconSelect: React.FC<IconSelectProps> = ({
       data-selected-type={selectedType}
       data-selected-value={selectedValue}
     >
-      <button
-        ref={buttonRef}
-        type="button"
-        className="ecui-icon-select-button"
-        disabled={disabled}
-        onClick={handleButtonClick}
-        aria-haspopup="dialog"
-        aria-expanded={isOpen}
-        data-testid={`${testId}-button`}
-      >
-        <span className="ecui-icon-select-value" data-testid={`${testId}-value`}>{displayValue}</span>
-      </button>
+      <div ref={buttonRef}>
+        <Button
+          line
+          secondary
+          disabled={disabled}
+          onClick={handleButtonClick}
+          data-testid={`${testId}-button`}
+        >
+          <span className="ecui-icon-select-value" data-testid={`${testId}-value`}>{displayValue}</span>
+        </Button>
+      </div>
 
       {isOpen && createPortal(
         <div
@@ -393,21 +388,17 @@ export const IconSelect: React.FC<IconSelectProps> = ({
           <div className="ecui-icon-select-header" data-testid={`${testId}-header`}>
             <div className="ecui-icon-select-tabs" data-testid={`${testId}-tabs`}>
               {TABS.map(tab => (
-                <button
+                <Button
+                  line
                   key={tab.id}
-                  type="button"
-                  className={`ecui-icon-select-tab ${activeTab === tab.id ? 'active' : ''}`}
                   onClick={() => { setActiveTab(tab.id) }}
-                  title={tab.title}
                   data-testid={`${testId}-tab-${tab.id}`}
-                  data-is-active={activeTab === tab.id ? 'true' : 'false'}
                 >
                   {tab.icon}
-                </button>
+                </Button>
               ))}
             </div>
-            <Button small secondary onClick={handleClear} data-testid={`${testId}-clear`}>
-              <i className="codicon codicon-trash" />
+            <Button small icon="trash" onClick={handleClear} data-testid={`${testId}-clear`}>
             </Button>
           </div>
           

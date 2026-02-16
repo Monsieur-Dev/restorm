@@ -206,13 +206,24 @@ const MenuItem: React.FC<MenuItemProps> = ({
 
   const renderShortcut = (): React.ReactNode => {
     if (!shortcut) return null
+    
+    // Split the shortcut by common separators (+, -, space)
+    const parts = shortcut.split(/([+\- ])/).filter(Boolean)
+    
     return (
       <span
         className="keybinding"
         aria-label={`Keyboard shortcut: ${shortcut}`}
         {...(testId && { 'data-testid': `${testId}-shortcut` })}
       >
-        {shortcut}
+        {parts.map((part, index) => {
+          // If it's a separator, render it as-is
+          if (/^[+\- ]$/.test(part)) {
+            return <span key={index}>{part}</span>
+          }
+          // Otherwise, wrap it in a kbd tag
+          return <kbd key={index}>{part}</kbd>
+        })}
       </span>
     )
   }
