@@ -2,6 +2,7 @@ import { test as base } from 'playwright-bdd'
 import type { ElectronApplication, Page } from '@playwright/test'
 import { join, resolve } from 'path'
 import { launchRestormElectronApp } from '../../helpers/launch-restorm'
+import { closeElectronAppForE2E, writeRendererIstanbulCoverage } from '../../helpers/coverage'
 
 interface UserPreferencesFixtures {
   electronApp: ElectronApplication
@@ -24,15 +25,10 @@ export const test = base.extend<UserPreferencesFixtures>({
     })
 
     await use(app)
-
-    try {
-      app.process().kill('SIGKILL')
-    } catch {
-      // Ignore kill errors
-    }
+    await closeElectronAppForE2E(app)
   },
 
-  page: async ({ electronApp }, use) => {
+  page: async ({ electronApp, restormRoot }, use, testInfo) => {
     const page = await electronApp.firstWindow()
 
     await page.waitForLoadState('domcontentloaded')
@@ -40,6 +36,8 @@ export const test = base.extend<UserPreferencesFixtures>({
     await page.waitForSelector('.welcome-container, [role="menubar"]', { timeout: 15000 })
 
     await use(page)
+
+    await writeRendererIstanbulCoverage(page, testInfo, restormRoot)
   }
 })
 

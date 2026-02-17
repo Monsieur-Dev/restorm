@@ -3,6 +3,11 @@ function escapeAttributeValue(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
 }
 
+function escapePlaywrightText(value: string): string {
+  // For Playwright `:has-text("...")` selectors.
+  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+}
+
 export function listViewRootSelector(testId: string): string {
   return `[data-testid="${escapeAttributeValue(testId)}"]`
 }
@@ -31,6 +36,19 @@ export function listViewRowExpanderSelectorByItemId(listViewTestId: string, item
 
 export function listViewRowTitleSelectorByItemId(listViewTestId: string, itemId: string): string {
   return `${listViewRowSelectorByItemId(listViewTestId, itemId)} .list-view-title`
+}
+
+export function listViewRowSelectorByTitle(listViewTestId: string, title: string): string {
+  const root = listViewRootSelector(listViewTestId)
+  return `${root} .list-view-row:has(.list-view-title:has-text("${escapePlaywrightText(title)}"))`
+}
+
+export function listViewRowExpanderSelectorByTitle(listViewTestId: string, title: string): string {
+  return `${listViewRowSelectorByTitle(listViewTestId, title)} button.list-view-expander`
+}
+
+export function listViewRowTitleSelectorByTitle(listViewTestId: string, title: string): string {
+  return `${listViewRowSelectorByTitle(listViewTestId, title)} .list-view-title`
 }
 
 export function listViewRenameInputSelector(listViewTestId: string, itemId?: string): string {

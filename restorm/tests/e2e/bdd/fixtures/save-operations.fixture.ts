@@ -3,6 +3,7 @@ import { _electron as electron, ElectronApplication, Page } from '@playwright/te
 import { join, resolve } from 'path'
 import { existsSync, rmSync, mkdirSync, copyFileSync } from 'fs'
 import electronPath from 'electron'
+import { closeElectronAppForE2E, withE2ECoverageEnv, writeRendererIstanbulCoverage } from '../../helpers/coverage'
 
 interface SaveOperationsFixtures {
   electronApp: ElectronApplication
@@ -58,7 +59,7 @@ export const test = base.extend<SaveOperationsFixtures>({
       executablePath: electronExePath,
       args: ['--no-sandbox', mainJsPath, '-o', petstoreFilePath],
       env: {
-        ...process.env,
+        ...withE2ECoverageEnv(restormRoot, process.env),
         NODE_ENV: 'development',
         E2E_MOCK_SAVE_FOLDER: tempFolderPath
       }
@@ -77,22 +78,11 @@ export const test = base.extend<SaveOperationsFixtures>({
     }, tempFolderPath)
 
     await use(app)
-
-    try {
-      app.process().kill('SIGKILL')
-    } catch {
-      // Ignore kill errors
-    }
+    await closeElectronAppForE2E(app)
   },
 
-  page: async ({ electronApp }, use) => {
+  page: async ({ electronApp, restormRoot }, use, testInfo) => {
     const page = await electronApp.firstWindow()
-
-    page.on('console', msg => {
-      if (msg.type() === 'error') {
-        console.log(`[Renderer ERROR] ${msg.text()}`)
-      }
-    })
 
     await page.waitForLoadState('domcontentloaded')
     await page.waitForLoadState('load')
@@ -100,6 +90,8 @@ export const test = base.extend<SaveOperationsFixtures>({
     await page.waitForSelector('[data-testid="sidebar-listview"][data-ready="true"]', { timeout: 15000 })
 
     await use(page)
+
+    await writeRendererIstanbulCoverage(page, testInfo, restormRoot)
   }
 })
 

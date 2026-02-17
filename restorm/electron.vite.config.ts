@@ -2,6 +2,7 @@ import { resolve } from 'path'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 import { copyFileSync, mkdirSync, readdirSync } from 'fs'
+import { createInstrumenter } from 'istanbul-lib-instrument'
 
 // Plugin to copy templates to dist
 function copyTemplatesPlugin() {
@@ -27,6 +28,32 @@ function copyTemplatesPlugin() {
   }
 }
 
+function rendererCoverageInstrumentationPlugin() {
+  const instrumenter = createInstrumenter({
+    esModules: true,
+    produceSourceMap: true
+  })
+
+  return {
+    name: 'restorm-renderer-coverage-instrumentation',
+    enforce: 'post',
+    transform(this: unknown, code: string, id: string) {
+      if (process.env.VITE_COVERAGE !== 'true') return null
+      if (!id.includes('/src/renderer/src/')) return null
+      if (!/\.(ts|tsx|js|jsx)$/.test(id)) return null
+      if (id.includes('/node_modules/')) return null
+
+      const ctx = this as { getCombinedSourcemap?: () => unknown }
+      const inputSourceMap = typeof ctx.getCombinedSourcemap === 'function' ? ctx.getCombinedSourcemap() : undefined
+
+      const instrumented = instrumenter.instrumentSync(code, id, inputSourceMap as never)
+      const map = instrumenter.lastSourceMap()
+
+      return { code: instrumented, map }
+    }
+  }
+}
+
 export default defineConfig({
   main: {
     plugins: [externalizeDepsPlugin({ exclude: ['electron-core-ui'] }), copyTemplatesPlugin()],
@@ -39,6 +66,7 @@ export default defineConfig({
     },
     build: {
       outDir: 'dist/main',
+      sourcemap: process.env.VITE_COVERAGE === 'true',
       rollupOptions: {
         input: {
           index: resolve(__dirname, 'src/main/index.ts')
@@ -49,6 +77,7 @@ export default defineConfig({
   preload: {
     plugins: [externalizeDepsPlugin()],
     build: {
+      sourcemap: process.env.VITE_COVERAGE === 'true',
       rollupOptions: {
         input: {
           index: resolve(__dirname, 'src/main/preload/index.ts')
@@ -60,6 +89,7 @@ export default defineConfig({
     root: resolve(__dirname, 'src/renderer'),
     build: {
       outDir: 'dist/renderer',
+      sourcemap: process.env.VITE_COVERAGE === 'true',
       rollupOptions: {
         input: {
           index: resolve(__dirname, 'src/renderer/index.html'),
@@ -74,7 +104,7 @@ export default defineConfig({
         'electron-core-ui/renderer': resolve(__dirname, '../electron-core-ui/src/renderer/index.ts')
       }
     },
-    plugins: [react()],
+    plugins: [react(), rendererCoverageInstrumentationPlugin()],
     optimizeDeps: {
       // Ne pas optimiser electron-core-ui
       exclude: ['electron-core-ui']

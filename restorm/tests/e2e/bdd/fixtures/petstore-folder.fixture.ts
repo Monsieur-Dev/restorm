@@ -2,6 +2,7 @@ import { test as base } from 'playwright-bdd'
 import { _electron as electron, ElectronApplication, Page } from '@playwright/test'
 import { join, resolve } from 'path'
 import electronPath from 'electron'
+import { closeElectronAppForE2E, withE2ECoverageEnv, writeRendererIstanbulCoverage } from '../../helpers/coverage'
 
 interface PetstoreFolderFixtures {
   electronApp: ElectronApplication
@@ -25,35 +26,26 @@ export const test = base.extend<PetstoreFolderFixtures>({
       executablePath: electronExePath,
       args: ['--no-sandbox', mainJsPath],
       env: {
-        ...process.env,
+        ...withE2ECoverageEnv(restormRoot, process.env),
         NODE_ENV: 'development'
       }
     })
 
     await use(app)
-
-    try {
-      app.process().kill('SIGKILL')
-    } catch {
-      // Ignore kill errors
-    }
+    await closeElectronAppForE2E(app)
   },
 
-  page: async ({ electronApp }, use) => {
+  page: async ({ electronApp, restormRoot }, use, testInfo) => {
     const page = await electronApp.firstWindow()
-
-    page.on('console', msg => {
-      if (msg.type() === 'error') {
-        console.log(`[Renderer ERROR] ${msg.text()}`)
-      }
-    })
 
     await page.waitForLoadState('domcontentloaded')
     await page.waitForLoadState('load')
     // App can start without any file/folder opened: wait for menubar instead of list-view.
-    await page.waitForSelector('[role="menubar"]', { timeout: 15000 })
+    await page.waitForSelector('[data-testid="titlebar-menubar"]', { timeout: 15000 })
 
     await use(page)
+
+    await writeRendererIstanbulCoverage(page, testInfo, restormRoot)
   }
 })
 

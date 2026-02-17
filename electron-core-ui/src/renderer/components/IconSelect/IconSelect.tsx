@@ -364,7 +364,7 @@ export const IconSelect: React.FC<IconSelectProps> = ({
     >
       <div ref={buttonRef}>
         <Button
-          line
+          small
           secondary
           disabled={disabled}
           onClick={handleButtonClick}

@@ -38,6 +38,12 @@ const importTestDir = defineBddConfig({
   outputDir: '.features-gen/import'
 })
 
+const userPreferencesTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/user_preferences/features/**/*.feature',
+  steps: ['tests/e2e/bdd/user_preferences/steps/**/*.ts', 'tests/e2e/bdd/fixtures/user-preferences.fixture.ts'],
+  outputDir: '.features-gen/user_preferences'
+})
+
 /**
  * Playwright configuration for Electron E2E tests using playwright-bdd.
  * Each test group has its own project with a dedicated fixture.
@@ -93,6 +99,10 @@ export default defineConfig({
     {
       name: 'import',
       testDir: importTestDir
+    },
+    {
+      name: 'user_preferences',
+      testDir: userPreferencesTestDir
     }
   ]
 })

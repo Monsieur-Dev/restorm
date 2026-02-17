@@ -88,7 +88,10 @@ export const Tabs: React.FC<TabsProps> = ({
         width: '100%',
         height: '100%'
       }}
-      {...(dataTestId && { 'data-testid': dataTestId })}
+      {...(dataTestId && {
+        'data-testid': dataTestId,
+        'data-active-tab-id': currentActiveTab
+      })}
     >
       {/* Tab bar with horizontal ScrollableElement */}
       <ScrollableElement
@@ -120,6 +123,7 @@ export const Tabs: React.FC<TabsProps> = ({
               <div
                 key={tab.id}
                 role="tab"
+                data-tab-id={tab.id}
                 aria-selected={isActive}
                 tabIndex={isActive ? 0 : -1}
                 onClick={() => {
@@ -128,6 +132,7 @@ export const Tabs: React.FC<TabsProps> = ({
                 onDoubleClick={() => {
                   handleTabDoubleClick(tab.id, tab)
                 }}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-tab-${tab.id}` })}
                 style={{
                   position: 'relative',
                   outline: 'none',
@@ -244,6 +249,7 @@ export const Tabs: React.FC<TabsProps> = ({
                   visibility: isActive ? 'visible' : 'hidden',
                   pointerEvents: isActive ? 'auto' : 'none'
                 }}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-tabpanel-${tab.id}` })}
               >
                 {tab.content}
               </ScrollableElement>
@@ -262,6 +268,7 @@ export const Tabs: React.FC<TabsProps> = ({
                   visibility: isActive ? 'visible' : 'hidden',
                   pointerEvents: isActive ? 'auto' : 'none'
                 }}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-tabpanel-${tab.id}` })}
               >
                 {tab.content}
               </div>

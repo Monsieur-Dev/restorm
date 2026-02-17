@@ -7,7 +7,19 @@ import eslintComments from 'eslint-plugin-eslint-comments';
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'out/**', 'node_modules/**', 'temp/**', '*.config.ts'],
+    ignores: [
+      'dist/**',
+      'out/**',
+      'node_modules/**',
+      'temp/**',
+      'coverage/**',
+      '.nyc_output/**',
+      '.v8-coverage/**',
+      'playwright-report/**',
+      'test-results/**',
+      '.features-gen/**',
+      '*.config.ts'
+    ],
   },
   {
     files: ['**/*.{ts,tsx}'],

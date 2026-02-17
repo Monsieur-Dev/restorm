@@ -1,6 +1,7 @@
 import { _electron as electron, type ElectronApplication } from '@playwright/test'
 import { join } from 'path'
 import electronPath from 'electron'
+import { withE2ECoverageEnv } from './coverage'
 
 export interface LaunchRestormOptions {
   restormRoot: string
@@ -29,7 +30,7 @@ export async function launchRestormElectronApp({
     executablePath: electronExePath,
     args: ['--no-sandbox', mainJsPath, ...extraArgs],
     env: {
-      ...env,
+      ...withE2ECoverageEnv(restormRoot, env),
       NODE_ENV: 'development'
     }
   })
