@@ -4,6 +4,8 @@ import { join, resolve } from 'path'
 import { writeFileSync, mkdirSync, existsSync, rmSync } from 'fs'
 import * as yaml from 'yaml'
 import electronPath from 'electron'
+import { listViewRootSelector } from 'electron-core-ui/testing'
+import { closeElectronAppForE2E, withE2ECoverageEnv, writeRendererIstanbulCoverage } from '../../helpers/coverage'
 
 // Test data with path params and variables in URL
 const testData = {
@@ -80,28 +82,25 @@ export const test = base.extend<HandlebarsFixtures>({
       executablePath: electronExePath,
       args: ['--no-sandbox', mainJsPath, '--open', testFilePath],
       env: {
-        ...process.env,
+        ...withE2ECoverageEnv(restormRoot, process.env),
         NODE_ENV: 'development'
       }
     })
 
     await use(app)
-
-    try {
-      app.process().kill('SIGKILL')
-    } catch {
-      // Ignore kill errors
-    }
+    await closeElectronAppForE2E(app)
   },
 
-  page: async ({ electronApp }, use) => {
+  page: async ({ electronApp, restormRoot }, use, testInfo) => {
     const page = await electronApp.firstWindow()
     await page.waitForLoadState('domcontentloaded')
     await page.waitForLoadState('load')
     // Wait for the main sidebar list view to be ready (replaces fixed timeout)
-    await page.waitForSelector('[data-testid="sidebar-listview"][data-ready="true"]', { timeout: 15000 })
+    await page.waitForSelector(`${listViewRootSelector('sidebar-listview')}[data-ready="true"]`, { timeout: 15000 })
 
     await use(page)
+
+    await writeRendererIstanbulCoverage(page, testInfo, restormRoot)
   }
 })
 

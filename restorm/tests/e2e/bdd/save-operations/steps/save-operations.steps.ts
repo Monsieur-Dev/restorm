@@ -2,8 +2,12 @@ import { createBdd } from 'playwright-bdd'
 import { test, expect } from '../../fixtures/save-operations.fixture'
 import { existsSync, readdirSync, statSync } from 'fs'
 import { join } from 'path'
+import { defineMenuBarBddSteps } from 'electron-core-ui/testing/playwright-bdd'
 
-const { Given, When, Then } = createBdd(test)
+const bdd = createBdd(test)
+const { Given, When, Then } = bdd
+
+defineMenuBarBddSteps(bdd)
 
 /**
  * Recursively get the structure of a directory as an array of relative paths
@@ -60,22 +64,6 @@ Given('the file is loaded', async ({ page }) => {
   await expect(page.locator('text=Swagger Petstore').first()).toBeVisible({ timeout: 15000 })
 })
 
-When('I open the File menu', async ({ page }) => {
-  const fileMenu = page.locator('text=File').first()
-  await fileMenu.click()
-  // Wait for menu to appear
-  await page.waitForSelector('[role="menuitem"]', { timeout: 3000 })
-})
-
-When('I click on {string}', async ({ page }, text: string) => {
-  const item = page.locator(`text=${text}`).first()
-  await item.click()
-  // Wait for modal if "Save As" clicked
-  if (text.includes('Save')) {
-    await page.waitForSelector('[data-testid="modal"][data-ready="true"]', { timeout: 5000 }).catch(() => { /* modal may not open */ })
-  }
-})
-
 Then('the save options modal should be open', async ({ page }) => {
   await page.waitForSelector('[data-testid="save-options-modal"]', { timeout: 5000 })
 })
@@ -109,8 +97,19 @@ Then('the folder structure should match the reference', async ({ tempFolderPath,
   const comparison = compareDirectoryStructures(actualStructure, expectedStructure)
 
   if (!comparison.match) {
-    console.log('Missing files:', comparison.missing)
-    console.log('Extra files:', comparison.extra)
+    const missing = comparison.missing.map((p) => `- ${p}`).join('\n')
+    const extra = comparison.extra.map((p) => `- ${p}`).join('\n')
+    throw new Error(
+      [
+        'Folder structure mismatch.',
+        '',
+        'Missing:',
+        missing.length > 0 ? missing : '(none)',
+        '',
+        'Extra:',
+        extra.length > 0 ? extra : '(none)'
+      ].join('\n')
+    )
   }
 
   expect(comparison.match).toBe(true)
@@ -247,8 +246,19 @@ Then('the final folder structure should match the second reference', async ({ te
   const comparison = compareDirectoryStructures(finalStructure, expectedStructure)
 
   if (!comparison.match) {
-    console.log('Missing files:', comparison.missing)
-    console.log('Extra files:', comparison.extra)
+    const missing = comparison.missing.map((p) => `- ${p}`).join('\n')
+    const extra = comparison.extra.map((p) => `- ${p}`).join('\n')
+    throw new Error(
+      [
+        'Folder structure mismatch.',
+        '',
+        'Missing:',
+        missing.length > 0 ? missing : '(none)',
+        '',
+        'Extra:',
+        extra.length > 0 ? extra : '(none)'
+      ].join('\n')
+    )
   }
 
   expect(comparison.match).toBe(true)

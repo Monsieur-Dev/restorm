@@ -27,17 +27,17 @@ const IconSelectTab: React.FC = () => {
 
       <div style={{ display: 'grid', gap: 12 }}>
         <div>
-          <div style={{ marginBottom: 6, opacity: 0.7 }}>{t('iconSelect.harness.basic')}</div>
+          <div style={{ marginBottom: 6 }}>{t('iconSelect.harness.basic')}</div>
           <IconSelect data-testid="iconselect-basic" value={selected} onChange={onChange} />
         </div>
 
         <div>
-          <div style={{ marginBottom: 6, opacity: 0.7 }}>{t('iconSelect.harness.disabled')}</div>
+          <div style={{ marginBottom: 6 }}>{t('iconSelect.harness.disabled')}</div>
           <IconSelect data-testid="iconselect-disabled" value={null} onChange={onChange} disabled />
         </div>
 
         <div>
-          <div style={{ marginBottom: 6, opacity: 0.7 }}>{t('iconSelect.harness.readonly')}</div>
+          <div style={{ marginBottom: 6 }}>{t('iconSelect.harness.readonly')}</div>
           <IconSelect data-testid="iconselect-readonly" value={readonlyValue} readonly />
         </div>
       </div>

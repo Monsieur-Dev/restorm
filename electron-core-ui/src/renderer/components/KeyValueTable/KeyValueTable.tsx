@@ -379,16 +379,15 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
                       </td>
                       <td>
                         <Button
-                          small
+                          line
                           secondary
                           {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-delete` })}
                           options={{ ariaLabel: 'Delete row', title: 'Delete row' }}
                           onClick={() => {
                             handleRemoveRow(index)
                           }}
-                        >
-                          <i className="codicon codicon-trash" />
-                        </Button>
+                          icon='trash'
+                        />
                       </td>
                     </tr>
                   )

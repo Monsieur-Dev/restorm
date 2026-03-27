@@ -4,8 +4,8 @@ Feature: Folder Save Operations
 
   Scenario: Should save as folder with correct structure
     Given the file is loaded
-    When I open the File menu
-    And I click on "Save As"
+    When I open menu bar "titlebar-menubar" menu "titlebar-menubar-item-file"
+    And I click menu bar item "titlebar-menu-item-save-as"
     Then the save options modal should be open
     When I select Folder mode
     And I select YAML format

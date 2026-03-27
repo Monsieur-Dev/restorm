@@ -1,6 +1,7 @@
 import { createBdd } from 'playwright-bdd'
 import { test, expect } from '../../fixtures/petstore-folder.fixture'
 import { defineSystemModalsBddSteps } from 'electron-core-ui/testing/playwright-bdd'
+import { listViewRowSelectorByTitle } from 'electron-core-ui/testing'
 
 const bdd = createBdd(test)
 const { Given, When, Then } = bdd
@@ -44,18 +45,18 @@ When('I request opening a folder', async ({ page }) => {
 })
 
 Given('the folder is loaded', async ({ page }) => {
-  await expect(page.locator('text=Swagger Petstore').first()).toBeVisible({ timeout: 15000 })
+  await expect(page.locator(listViewRowSelectorByTitle('sidebar-listview', 'Swagger Petstore')).first()).toBeVisible({ timeout: 15000 })
 })
 
 Then('I should see {string} folder', async ({ page }, folderName: string) => {
-  const folder = page.locator(`[role="treeitem"]:has-text("${folderName}")`).first()
+  const folder = page.locator(listViewRowSelectorByTitle('sidebar-listview', folderName)).first()
   await expect(folder).toBeVisible({ timeout: 5000 })
 })
 
 Then('I should see exactly {int} folders', async ({ page }, count: number) => {
   let foundCount = 0
   for (const name of FOLDER_NAMES) {
-    const folder = page.locator(`[role="treeitem"]:has-text("${name}")`).first()
+    const folder = page.locator(listViewRowSelectorByTitle('sidebar-listview', name)).first()
     if (await folder.isVisible()) {
       foundCount++
     }

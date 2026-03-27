@@ -1,10 +1,19 @@
 import { createBdd } from 'playwright-bdd'
 import { test, expect } from '../../fixtures/petstore-file.fixture'
+import {
+  editorWorkbenchRootSelector,
+  listViewRowSelectorByTitle,
+  markdownEditorContentEditableSelector,
+  tabsTabSelector
+} from 'electron-core-ui/testing'
 
 const { Given, When, Then } = createBdd(test)
 
+let activeFolderId: string | null = null
+let activeWorkbenchTestId: string | null = null
+
 Given('the file is loaded', async ({ page }) => {
-  await expect(page.locator('[role="treeitem"]:has-text("Swagger Petstore")').first()).toBeVisible({ timeout: 15000 })
+  await expect(page.locator(listViewRowSelectorByTitle('sidebar-listview', 'Swagger Petstore')).first()).toBeVisible({ timeout: 15000 })
 })
 
 Given('the title does not contain {string}', async ({ page }, text: string) => {
@@ -13,86 +22,49 @@ Given('the title does not contain {string}', async ({ page }, text: string) => {
 })
 
 When('I click on {string} folder', async ({ page }, folderName: string) => {
-  const folder = page.locator(`[role="treeitem"]:has-text("${folderName}")`).first()
+  const folder = page.locator(listViewRowSelectorByTitle('sidebar-listview', folderName)).first()
+  await expect(folder).toBeVisible({ timeout: 5000 })
+  activeFolderId = await folder.getAttribute('data-item-id')
+  if (!activeFolderId) {
+    throw new Error(`Could not read data-item-id for folder "${folderName}"`)
+  }
   await folder.click()
-  // Wait for tab to open
-  await page.waitForSelector('.tab.active', { timeout: 5000 })
+  // Workbench test id can be dynamic (e.g. workbench-{id})
+  const workbenchRoot = page.locator('[data-testid^="workbench"]').first()
+  await expect(workbenchRoot).toBeVisible({ timeout: 15000 })
+  activeWorkbenchTestId = await workbenchRoot.getAttribute('data-testid')
+  await page.waitForSelector('[role="tab"]', { timeout: 15000 })
 })
 
 When('I click on the Notes inner tab', async ({ page }) => {
-  const notesSelectors = [
-    '[role="tabpanel"] [role="tab"]:has-text("Notes")',
-    '[role="tablist"]:not(.tabs-container) [role="tab"]:has-text("Notes")',
-    'button:has-text("Notes")',
-    '[data-state] button:has-text("Notes")'
-  ]
-
-  for (const selector of notesSelectors) {
-    const notesTab = page.locator(selector).first()
-    if (await notesTab.isVisible({ timeout: 1000 }).catch(() => false)) {
-      await notesTab.click()
-      // Wait for editor to be ready
-      await page.waitForSelector('.ProseMirror, .milkdown .editor, [role="textbox"]', { timeout: 3000 }).catch(() => { /* editor may already be visible */ })
-      return
-    }
+  if (!activeFolderId) {
+    throw new Error('No active folder id found. Click a folder before opening Notes tab.')
   }
-
-  // Fallback
-  const notesText = page.getByText('Notes', { exact: true })
-  const all = await notesText.all()
-  for (const el of all) {
-    if (await el.isVisible().catch(() => false)) {
-      await el.click()
-      await page.waitForSelector('.ProseMirror, .milkdown .editor, [role="textbox"]', { timeout: 3000 }).catch(() => { /* editor may already be visible */ })
-      break
-    }
-  }
+  const tabsTestId = `folder-view-${activeFolderId}-tabs`
+  await page.locator(tabsTabSelector(tabsTestId, 'notes')).click()
+  await page.waitForSelector(markdownEditorContentEditableSelector(`folder-view-${activeFolderId}-markdown-editor-notes`), { timeout: 5000 })
 })
 
 When('I type {string} in the editor', async ({ page }, text: string) => {
-  const editorSelectors = [
-    '.ProseMirror[contenteditable="true"]',
-    '.milkdown .editor',
-    '[role="textbox"][contenteditable="true"]'
-  ]
-
-  let editor = null
-  for (const selector of editorSelectors) {
-    const loc = page.locator(selector).first()
-    if (await loc.isVisible({ timeout: 2000 }).catch(() => false)) {
-      editor = loc
-      break
-    }
+  if (!activeFolderId) {
+    throw new Error('No active folder id found. Open Notes tab before typing.')
   }
-
-  if (!editor) {
-    throw new Error('Could not find visible editor')
-  }
-
+  const editor = page.locator(markdownEditorContentEditableSelector(`folder-view-${activeFolderId}-markdown-editor-notes`)).first()
+  await expect(editor).toBeVisible({ timeout: 5000 })
   await editor.click()
-  await page.keyboard.type(text)
+  for (const ch of text) {
+    await page.keyboard.type(ch)
+  }
   // Wait for dirty indicator to appear
   await page.waitForSelector('.dirty-indicator', { timeout: 3000 }).catch(() => { /* indicator may take time */ })
 })
 
 When('I undo multiple times', async ({ page }) => {
-  const editorSelectors = [
-    '.ProseMirror[contenteditable="true"]',
-    '.milkdown .editor',
-    '[role="textbox"][contenteditable="true"]'
-  ]
-
-  let editor = null
-  for (const selector of editorSelectors) {
-    const loc = page.locator(selector).first()
-    if (await loc.isVisible({ timeout: 2000 }).catch(() => false)) {
-      editor = loc
-      break
+  if (activeFolderId) {
+    const editor = page.locator(markdownEditorContentEditableSelector(`folder-view-${activeFolderId}-markdown-editor-notes`)).first()
+    if (await editor.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await editor.click()
     }
-  }
-
-  if (editor) {
-    await editor.click()
   }
 
   for (let i = 0; i < 20; i++) {
@@ -118,7 +90,9 @@ When('I modify an input field', async ({ page }) => {
 })
 
 Then('a tab should be open', async ({ page }) => {
-  const tab = page.locator('[role="tab"]').first()
+  const rootSelector = activeWorkbenchTestId ? editorWorkbenchRootSelector(activeWorkbenchTestId) : '[data-testid^="workbench"]'
+  await page.waitForSelector(rootSelector, { timeout: 15000 })
+  const tab = page.locator(`${rootSelector} [role="tab"]`).first()
   await expect(tab).toBeVisible({ timeout: 5000 })
 })
 
