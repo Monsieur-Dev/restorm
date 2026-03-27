@@ -4,7 +4,7 @@ import type {
   FileMetadata,
   SerializationFormat,
   UnsavedChangesDialogLabels
-} from '../../../types/file'
+} from '../../types/file'
 import { logger } from '../services/logger'
 
 interface WindowFileApi {

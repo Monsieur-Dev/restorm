@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useThemeContext } from '../../contexts/useThemeContext'
-import type { ThemeInfo, ThemeVariables } from '../../../../types/theme'
+import type { ThemeInfo, ThemeVariables } from '../../../types/theme'
 import { Button } from '../Button'
 import { Toggle } from '../Toggle'
 import { InputBox } from '../InputBox'

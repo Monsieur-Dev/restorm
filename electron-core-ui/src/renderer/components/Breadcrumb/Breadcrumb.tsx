@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useRef, useEffect } from 'react'
-import type { Icon } from '../../../../types/icon'
+import type { Icon } from '../../../types/icon'
 
 import './breadcrumb.css'
 

@@ -5,7 +5,7 @@ import codiconsMapping from '@vscode/codicons/src/template/mapping.json'
 import { EmojiPicker } from './EmojiPicker'
 import { GroupedIconPicker } from './GroupedIconPicker'
 import { ScrollableElement } from '../ScrollableElement'
-import type { Icon, IconType } from '../../../../types/icon'
+import type { Icon, IconType } from '../../../types/icon'
 import { Button } from '../Button'
 import {
   getIconoirNames,

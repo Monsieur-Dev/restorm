@@ -68,7 +68,7 @@ export type {
   PlatformStrategy,
   FeatureConfig,
   FeaturesYamlConfig
-} from '../../types/feature'
+} from '../types/feature'
 
 // Re-export file types
 export type {
@@ -79,4 +79,4 @@ export type {
   FileServiceConfig,
   FileServiceState,
   FileServiceApi
-} from '../../types/file'
+} from '../types/file'

@@ -7,6 +7,6 @@
   },
   "include": [
     "src/renderer/**/*",
-    "types/**/*"
+    "src/types/**/*"
   ]
 }

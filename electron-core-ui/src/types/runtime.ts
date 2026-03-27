@@ -5,7 +5,7 @@
 /**
  * Runtime-only identifier for tracking individual object instances.
  * Used for dirty state tracking, change detection, and UI reconciliation.
- * 
+ *
  * RuntimeIds are:
  * - Generated at runtime when objects are loaded/created
  * - NOT persisted to files (excluded from serialization)
