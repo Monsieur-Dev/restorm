@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { ScrollableElement } from '../ScrollableElement'
 import type { IconCategory } from './iconCategories'
 import { getIconsForCategory, searchIcons } from './iconCategories'
-import type { IconType } from '../../../../types/icon'
+import type { IconType } from '../../../types/icon'
 
 interface GroupedIconPickerProps {
   /** All icon names for this library */

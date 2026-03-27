@@ -11,8 +11,8 @@ import type {
   SaveDialogResult,
   OpenDialogResult,
   FileServiceState
-} from '../../../types/file'
-import type { RuntimeId, ChecksumMap, DirtyStateResult } from '../../../types/runtime'
+} from '../../types/file'
+import type { RuntimeId, ChecksumMap, DirtyStateResult } from '../../types/runtime'
 import { logger } from './LoggerService'
 import { getStorageService } from './StorageService'
 import { i18nService } from './I18nService'

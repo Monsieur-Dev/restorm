@@ -38,16 +38,18 @@
       "default": "./dist/src/preload/electronAPI.js"
     },
     "./types": {
-      "types": "./types/index.d.ts",
-      "default": "./types/index.d.ts"
+      "types": "./dist/src/types/index.d.ts",
+      "default": "./dist/src/types/index.js"
     },
-    "./types/*": "./types/*",
+    "./types/*": {
+      "types": "./dist/src/types/*.d.ts",
+      "default": "./dist/src/types/*.js"
+    },
     "./fonts.css": "./fonts.css",
     "./resources/fonts/*": "./resources/fonts/*"
   },
   "files": [
     "dist",
-    "types",
     "resources",
     "fonts.css",
     "README.md",

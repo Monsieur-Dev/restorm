@@ -1,6 +1,6 @@
 /**
  * Feature Flipping types and definitions
- * 
+ *
  * Features can have multiple strategies that must ALL return true
  * for the feature to be considered enabled (AND logic).
  */

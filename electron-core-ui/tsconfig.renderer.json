@@ -3,10 +3,11 @@
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "outDir": "./dist-renderer"
+    "outDir": "./dist-renderer",
+    "rootDir": "."
   },
   "include": [
     "src/renderer/**/*",
-    "types/**/*"
+    "src/types/**/*"
   ]
 }

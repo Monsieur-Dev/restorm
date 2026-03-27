@@ -7,7 +7,7 @@ import type {
   FeatureStrategy,
   BasicStrategy,
   PlatformStrategy
-} from '../../../types/feature'
+} from '../../types/feature'
 import { logger } from './LoggerService'
 
 /**

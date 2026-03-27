@@ -1,7 +1,7 @@
 import { ipcRenderer } from 'electron'
-import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../types/theme'
-import type { FeaturePlatform } from '../../types/feature'
-import type { FileServiceState, FileMetadata, SerializationFormat } from '../../types/file'
+import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../types/theme'
+import type { FeaturePlatform } from '../types/feature'
+import type { FileServiceState, FileMetadata, SerializationFormat } from '../types/file'
 
 /**
  * Core UI API object for window.api

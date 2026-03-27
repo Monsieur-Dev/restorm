@@ -1,7 +1,7 @@
 import { readFileSync, existsSync } from 'fs'
 import { join, dirname, basename } from 'path'
 import yaml from 'js-yaml'
-import type { ThemeInfo, ThemeVariables, ThemeDefinition } from '../../../types/theme'
+import type { ThemeInfo, ThemeVariables, ThemeDefinition } from '../../types/theme'
 import { logger } from './LoggerService'
 
 /**

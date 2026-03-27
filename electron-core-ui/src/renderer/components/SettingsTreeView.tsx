@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { VscChevronRight, VscChevronDown } from 'react-icons/vsc'
-import { SettingsSchema, SettingCategory } from '../../../types/settings'
+import { SettingsSchema, SettingCategory } from '../../types/settings'
 
 interface SettingsTreeViewProps {
   schema: SettingsSchema
