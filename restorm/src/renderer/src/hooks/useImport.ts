@@ -6,7 +6,7 @@ import { useCallback } from 'react'
 import { eventBus, logger } from 'electron-core-ui/renderer'
 import { DocumentEvents } from '../services/DocumentEvents'
 import { makeReactiveFolder } from '../types/reactive'
-import type { Folder, EnvironmentFolder, Request, FolderItem } from '../types/collections'
+import type { Folder, EnvironmentFolder, Request, FolderItem } from '../../../shared/types/collections'
 
 export interface UseImportOptions {
   rootItems: (EnvironmentFolder | Folder | Request)[]

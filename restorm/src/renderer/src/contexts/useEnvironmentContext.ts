@@ -1,5 +1,5 @@
 import { useContext, createContext } from 'react'
-import type { Environment } from '../types/collections'
+import type { Environment } from '../../../shared/types/collections'
 
 export interface EnvironmentContextValue {
   environments?: Environment[] | undefined

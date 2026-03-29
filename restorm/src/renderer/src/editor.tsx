@@ -21,7 +21,7 @@ const { ElectronCoreUiProvider } = ElectronCoreUi as unknown as { ElectronCoreUi
 import enTranslation from '../locales/en/translation.json'
 import frTranslation from '../locales/fr/translation.json'
 
-import type { RestormEditorTab } from './types/editor'
+import type { RestormEditorTab } from '../../shared/types/editor'
 
 // Initialize i18n using core-ui's initializeI18n function
 type InitializeI18nFn = (

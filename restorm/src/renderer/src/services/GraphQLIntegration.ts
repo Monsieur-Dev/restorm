@@ -7,7 +7,7 @@
 
 import { graphQLClient, logger } from 'electron-core-ui/renderer'
 import { useRestormStore } from '../store/restormStore'
-import type { EnvironmentFolder, FolderItem, Environment, Request, Folder } from '../types/collections'
+import type { EnvironmentFolder, FolderItem, Environment, Request, Folder } from '../../../shared/types/collections'
 
 // GraphQL endpoint - must match the port in restorm/src/main/index.ts
 const GRAPHQL_ENDPOINT = 'http://localhost:4123/graphql'

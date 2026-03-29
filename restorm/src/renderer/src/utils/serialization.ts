@@ -3,7 +3,7 @@
  * Handles stripping and generating runtime-only properties (id fields)
  */
 
-import type { RuntimeId } from '../types/collections'
+import type { RuntimeId } from '../../../shared/types/collections'
 import { normalizeDocumentValuesForPersistence } from '../../../shared/utils/valuePersistence'
 
 /**

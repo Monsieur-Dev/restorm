@@ -11,7 +11,7 @@ import {
   type ContextMenuItem
 } from 'electron-core-ui/renderer'
 import { logger } from 'electron-core-ui/renderer'
-import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../types/collections'
+import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../../shared/types/collections'
 import { getResponseHistoryDetail, getResponseHistoryList } from '../../services/GraphQLIntegration'
 
 const Graph = React.lazy(() => import('jsoncrack-react').then(mod => ({ default: mod.Graph })))

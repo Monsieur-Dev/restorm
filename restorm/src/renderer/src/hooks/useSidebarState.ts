@@ -5,7 +5,7 @@
 import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ListViewItemData } from 'electron-core-ui/renderer'
-import type { Folder, EnvironmentFolder, Request } from '../types/collections'
+import type { Folder, EnvironmentFolder, Request } from '../../../shared/types/collections'
 import { folderAsRootListViewItem } from '../services/FolderToListView'
 import { attachContextMenus } from '../components/MainView/Sidebar/contextMenuBuilder'
 import { Badge } from '../components/common/Badge'
