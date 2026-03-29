@@ -4,6 +4,7 @@ import yaml from 'js-yaml'
 import type { ThemeInfo, ThemeVariables, ThemeDefinition } from '../../types/theme'
 import { logger } from './LoggerService'
 import { FileSystemError, errorMeta } from '../../errors'
+import { yamlBaseFileSchema, yamlTypeBaseFileSchema, yamlThemeFileSchema, themeIndexSchema } from '../schemas/configSchemas'
 
 /**
  * ThemeService manages YAML-based themes
@@ -17,44 +18,6 @@ import { FileSystemError, errorMeta } from '../../errors'
  * 2. {type}/_base.yaml (type-specific defaults: dark, light, hc_dark, hc_light)
  * 3. {type}/{theme}.yaml (theme-specific overrides)
  */
-
-interface YamlColorEntry {
-  id: string
-  value: string
-  description?: string
-}
-
-interface YamlVariableEntry {
-  id: string
-  value: string
-  description?: string
-}
-
-interface YamlBaseFile {
-  variables?: YamlVariableEntry[]
-}
-
-interface YamlTypeBaseFile {
-  colors?: YamlColorEntry[]
-}
-
-interface YamlThemeFile {
-  name: string
-  description?: string
-  colors?: Record<string, string>
-}
-
-interface ThemeIndexEntry {
-  id: string
-  name: string
-  type: 'dark' | 'light' | 'hc_dark' | 'hc_light'
-  description?: string
-  file: string
-}
-
-interface ThemeIndex {
-  themes: ThemeIndexEntry[]
-}
 
 type ThemeType = 'dark' | 'light' | 'hc_dark' | 'hc_light'
 
@@ -96,13 +59,18 @@ export class ThemeService {
     if (existsSync(basePath)) {
       try {
         const content = readFileSync(basePath, 'utf-8')
-        const data = yaml.load(content) as YamlBaseFile
-        
-        if (data.variables) {
-          for (const variable of data.variables) {
-            // Convert to CSS variable format
-            const cssVar = `--${variable.id}`
-            this.baseVariables[cssVar] = variable.value
+        const raw = yaml.load(content)
+        const parsed = yamlBaseFileSchema.safeParse(raw)
+        if (!parsed.success) {
+          logger.warn('Invalid base.yaml structure', { issues: parsed.error.issues.map(i => i.message).join('; ') })
+        } else {
+          const data = parsed.data
+          if (data.variables) {
+            for (const variable of data.variables) {
+              // Convert to CSS variable format
+              const cssVar = `--${variable.id}`
+              this.baseVariables[cssVar] = variable.value
+            }
           }
         }
       } catch (error) {
@@ -117,8 +85,14 @@ export class ThemeService {
       if (existsSync(typeBasePath)) {
         try {
           const content = readFileSync(typeBasePath, 'utf-8')
-          const data = yaml.load(content) as YamlTypeBaseFile
-          
+          const raw = yaml.load(content)
+          const parsed = yamlTypeBaseFileSchema.safeParse(raw)
+          if (!parsed.success) {
+            logger.warn(`Invalid ${themeType}/_base.yaml structure`, { issues: parsed.error.issues.map(i => i.message).join('; ') })
+            continue
+          }
+          const data = parsed.data
+
           if (data.colors) {
             for (const color of data.colors) {
               // Convert to CSS variable format
@@ -148,7 +122,13 @@ export class ThemeService {
 
     try {
       const content = readFileSync(indexPath, 'utf-8')
-      const index = JSON.parse(content) as ThemeIndex
+      const raw = JSON.parse(content) as unknown
+      const parsed = themeIndexSchema.safeParse(raw)
+      if (!parsed.success) {
+        logger.warn('Invalid theme index.json structure', { issues: parsed.error.issues.map(i => i.message).join('; ') })
+        return
+      }
+      const index = parsed.data
 
       for (const entry of index.themes) {
         const themePath = join(this.themesPath, entry.file)
@@ -262,7 +242,13 @@ export class ThemeService {
 
       // Load and apply theme-specific colors
       const content = readFileSync(themeInfo.path, 'utf-8')
-      const data = yaml.load(content) as YamlThemeFile
+      const raw = yaml.load(content)
+      const parsed = yamlThemeFileSchema.safeParse(raw)
+      if (!parsed.success) {
+        logger.warn(`Invalid theme file for "${themeId}"`, { issues: parsed.error.issues.map(i => i.message).join('; ') })
+        return null
+      }
+      const data = parsed.data
 
       if (data.colors) {
         for (const [key, value] of Object.entries(data.colors)) {

@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { join, dirname } from 'path'
 import { logger } from './LoggerService'
 import { PersistenceError, errorMeta } from '../../errors'
+import { storageFileSchema } from '../schemas/configSchemas'
 
 /**
  * StorageService provides a simple key-value store backed by a JSON file.
@@ -25,7 +26,13 @@ export class StorageService {
     try {
       if (existsSync(this.filePath)) {
         const content = readFileSync(this.filePath, 'utf-8')
-        return JSON.parse(content) as Record<string, unknown>
+        const raw: unknown = JSON.parse(content)
+        const parsed = storageFileSchema.safeParse(raw)
+        if (!parsed.success) {
+          logger.warn('Invalid storage file structure, using empty store')
+          return {}
+        }
+        return parsed.data
       }
     } catch (error) {
       const wrappedError = new PersistenceError('Failed to load storage file', 'PERSIST_LOAD_FAILED', { cause: error })
