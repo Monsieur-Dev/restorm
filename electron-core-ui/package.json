@@ -136,7 +136,8 @@
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
     "simple-icons": "^16.2.0",
-    "winston": "^3.19.0"
+    "winston": "^3.19.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@milkdown/crepe": "^7.17.3",
