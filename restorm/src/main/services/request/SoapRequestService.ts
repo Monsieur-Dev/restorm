@@ -6,13 +6,8 @@
 import axios from 'axios'
 import type { SoapRequest, SoapResponse, KeyValue } from '../../../shared/types/collections'
 import { StringValue } from '../../../shared/types/collections'
-// TODO: Variable resolution will be implemented in backend
 import type { VariableContext } from './types'
-
-/** Placeholder for variable resolution - returns template as-is (to be implemented in backend) */
-function resolveTemplate(template: string, _context: VariableContext): string {
-  return template
-}
+import { resolveTemplate } from './resolveTemplate'
 
 /** Input for executing a SOAP request */
 export interface SoapRequestInput {
