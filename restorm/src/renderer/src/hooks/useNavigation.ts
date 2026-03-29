@@ -160,10 +160,10 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
 
   // Handle search result click - navigate to the selected item
   const handleSearchResultClick = useCallback((result: SearchResult) => {
-    if (result.navigation?.type === 'request' && result.navigation.requestId) {
-      handleItemClick(result.navigation.requestId as string)
-    } else if (result.navigation?.type === 'folder' && result.navigation.folderId) {
-      handleItemClick(result.navigation.folderId as string)
+    if (result.navigation?.['type'] === 'request' && result.navigation['requestId']) {
+      handleItemClick(result.navigation['requestId'] as string)
+    } else if (result.navigation?.['type'] === 'folder' && result.navigation['folderId']) {
+      handleItemClick(result.navigation['folderId'] as string)
     }
   }, [handleItemClick])
 

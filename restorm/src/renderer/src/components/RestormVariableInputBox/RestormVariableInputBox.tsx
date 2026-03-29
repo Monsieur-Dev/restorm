@@ -88,13 +88,13 @@ export interface RestormVariableInputBoxProps {
   helpers?: TranslatedHelperDefinition[]
   placeholder?: string
   /** Runtime ID of the variable (KeyValue.id) - used to receive resolved values from backend */
-  variableId?: string
+  variableId?: string | undefined
   id?: string
   className?: string
   style?: React.CSSProperties
   ariaLabel?: string
   onGoToDefinition?: (variableName: string) => void
-  contextMenuItems?: ContextMenuItem[]
+  contextMenuItems?: ContextMenuItem[] | undefined
   /** Optional test id applied to the VariableInputBox root element. */
   'data-testid'?: string
 }

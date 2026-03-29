@@ -10,7 +10,6 @@ import {
   logger,
   computeChecksum,
   useDirtyState,
-  hasContentChanged,
   setContentChecksum,
   commitChecksums
 } from 'electron-core-ui/renderer'
@@ -121,8 +120,7 @@ const App: React.FC = () => {
     newFile: _newFile,
     open: _openFile,
     save: saveFile,
-    close: _closeFile,
-    showUnsavedChangesDialog
+    close: _closeFile
   } = useFileService()
 
   const workbenchId = useMemo((): string | undefined => {
@@ -335,34 +333,6 @@ const App: React.FC = () => {
   }, [rootItems, saveFile])
 
   // Helper to check for unsaved changes before proceeding
-  const _checkUnsavedChanges = useCallback(async (): Promise<boolean> => {
-    // Compare current state with saved state checksum via FileService
-    // Use the same structure as the file content for consistent comparison (without runtime ids)
-    const dataForChecksum = prepareForSerialization({ collections: rootItems }) as { collections: unknown[] }
-    const currentChecksum = JSON.stringify(dataForChecksum)
-    const hasRealChanges = await hasContentChanged(currentChecksum)
-    
-    if (!hasRealChanges) return true // No actual changes, proceed
-
-    const result = await showUnsavedChangesDialog({
-      title: t('file.unsavedChanges.title'),
-      message: t('file.unsavedChanges.message', { fileName: fileName ?? t('file.untitled') }),
-      detail: t('file.unsavedChanges.detail'),
-      save: t('file.unsavedChanges.save'),
-      dontSave: t('file.unsavedChanges.dontSave'),
-      cancel: t('file.unsavedChanges.cancel')
-    })
-    if (result === 'cancel') return false // User cancelled
-    if (result === 'save') {
-      // Save first, then proceed
-      const plainData = JSON.parse(JSON.stringify({ collections: rootItems })) as { collections: unknown[] }
-      const dataForSave = prepareForSerialization(plainData) as { collections: unknown[] }
-      const saved = await saveFile(dataForSave)
-      return saved // Only proceed if save was successful
-    }
-    return true // User chose to discard changes
-  }, [showUnsavedChangesDialog, rootItems, saveFile, t, fileName])
-
   // Restore file state on initial load (e.g., after page refresh)
   const hasRestoredFileRef = useRef(false)
   

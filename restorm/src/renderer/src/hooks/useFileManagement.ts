@@ -25,6 +25,7 @@ import type { PersistenceFormat, WorkbenchTree } from 'electron-core-ui/renderer
 import type { SaveOptions } from '../components/Modals/SaveOptionsModal'
 import { collectPasswordSecretsFromCollections, applyPasswordSecretsToCollections } from '../../../shared/utils/passwordSecrets'
 import { serializeEnvFile, parseEnvFileDetailed } from '../../../shared/utils/dotenv'
+import type { TFunction } from 'i18next'
 
 export interface UseFileManagementOptions {
   rootItems: (EnvironmentFolder | Folder | Request)[]
@@ -33,7 +34,7 @@ export interface UseFileManagementOptions {
   clearTabDirtyState: () => void
   registerTabDirtyState: (id: string, checksum: string) => void
   markAllTabsSaved: () => void
-  t: (key: string, options?: Record<string, unknown>) => string
+  t: TFunction
 }
 
 export interface UseFileManagementReturn {

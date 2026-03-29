@@ -25,7 +25,7 @@ export interface RestormWorkbenchTabProps {
   onBreadcrumbClick?: ((item: BreadcrumbItem, index: number, isLast: boolean) => void) | undefined
   onBreadcrumbRename?: ((item: BreadcrumbItem, newValue: string) => void) | undefined
   tags: string[]
-  onTagsChange?: (nextTags: string[]) => void
+  onTagsChange?: ((nextTags: string[]) => void) | undefined
   label: string
   headerRight?: React.ReactNode
   tagsRight?: React.ReactNode

@@ -144,20 +144,20 @@ class ResponseHistoryStore {
 
   private isHistoryEntry(value: unknown): value is ResponseHistoryEntry {
     if (!this.isRecord(value)) return false
-    return typeof value.guid === 'string'
-      && typeof value.timestamp === 'string'
-      && typeof value.success === 'boolean'
-      && typeof value.pinned === 'boolean'
+    return typeof value['guid'] === 'string'
+      && typeof value['timestamp'] === 'string'
+      && typeof value['success'] === 'boolean'
+      && typeof value['pinned'] === 'boolean'
   }
 
   private isHistoryDetail(value: unknown): value is ResponseHistoryDetail {
     if (!this.isRecord(value)) return false
-    return typeof value.guid === 'string'
-      && typeof value.requestPath === 'string'
-      && typeof value.type === 'string'
-      && typeof value.timestamp === 'string'
-      && typeof value.pinned === 'boolean'
-      && this.isRecord(value.response)
+    return typeof value['guid'] === 'string'
+      && typeof value['requestPath'] === 'string'
+      && typeof value['type'] === 'string'
+      && typeof value['timestamp'] === 'string'
+      && typeof value['pinned'] === 'boolean'
+      && this.isRecord(value['response'])
   }
 
   private isRecord(value: unknown): value is Record<string, unknown> {
@@ -167,8 +167,8 @@ class ResponseHistoryStore {
 
 export interface ResponseHistoryTabProps {
   requestId: string
-  requestPath?: string
-  refreshKey?: number
+  requestPath?: string | undefined
+  refreshKey?: number | undefined
   buildResponseView: (detail: ResponseHistoryDetail) => {
     infosContent?: React.ReactNode | undefined
     responseContent?: React.ReactNode | undefined

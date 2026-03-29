@@ -25,7 +25,7 @@ interface SaveOptionsModalProps {
   onClose: () => void
   onSave: (options: SaveOptions) => void | Promise<void>
   defaultOptions?: Partial<SaveOptions>
-  rootFolder?: FolderItem
+  rootFolder?: FolderItem | undefined
   title?: string
 }
 

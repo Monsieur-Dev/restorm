@@ -14,8 +14,7 @@ import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyVal
 import type { GraphQLRequest, GraphQLResponse, KeyValue, ResponseHistoryDetail } from '../../types/collections'
 import { StringValue } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
-import type { VariableContext } from '../RestormKeyValueTable'
-import type { GraphQLExecutionResult } from '../../types/global.d'
+import type { GraphQLExecutionResult, KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { Badge } from '../common/Badge'
@@ -105,7 +104,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     
     logger.debug('[GraphQLRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
-    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
       kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
 
     void restormContext.registerRequest(requestId, currentEnvId, {
@@ -168,7 +167,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
 
   // Notify ContextService when URL, query or variables change
   useEffect(() => {
-    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
       kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
 
     void window.restorm?.context.updateFullRequestData(request.id, {
@@ -193,9 +192,6 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     setVariablesState(value)
     updateReactiveProperty(request, 'variables', value)
   }, [request])
-  
-  // Variable resolution done in backend
-  const _environmentContext: VariableContext = {}
   
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])

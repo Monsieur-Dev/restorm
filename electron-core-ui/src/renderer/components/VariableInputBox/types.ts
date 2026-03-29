@@ -5,7 +5,7 @@ import type { ContextMenuItem } from '../ContextMenu/ContextMenu'
 export interface VariableDefinition {
   name: string
   value: string
-  description?: string
+  description?: string | undefined
 }
 
 export interface VariableInputBoxProps {
@@ -13,32 +13,32 @@ export interface VariableInputBoxProps {
   onChange: (value: string) => void
   variables: VariableDefinition[]
   /** Optional test id applied to the VariableInputBox root element. */
-  'data-testid'?: string
-  placeholder?: string
-  id?: string
-  className?: string
-  style?: React.CSSProperties
-  ariaLabel?: string
+  'data-testid'?: string | undefined
+  placeholder?: string | undefined
+  id?: string | undefined
+  className?: string | undefined
+  style?: React.CSSProperties | undefined
+  ariaLabel?: string | undefined
   /**
    * Override the editor language ID. Defaults to "handlebars".
    */
-  languageId?: string
+  languageId?: string | undefined
   /**
    * Disable the built-in Handlebars providers (completion + hover).
    */
-  disableDefaultProviders?: boolean
+  disableDefaultProviders?: boolean | undefined
   /**
    * Callback when the Monaco editor is mounted.
    * Allows extending the editor with custom providers.
    */
-  onMount?: (
+  onMount?: ((
     editor: monacoEditor.editor.IStandaloneCodeEditor,
     monaco: typeof monacoEditor
-  ) => void
+  ) => void) | undefined
 
   /**
    * Optional additional context menu items shown below cut/copy/paste.
    * A separator is automatically inserted when items are provided.
    */
-  contextMenuItems?: ContextMenuItem[]
+  contextMenuItems?: ContextMenuItem[] | undefined
 }

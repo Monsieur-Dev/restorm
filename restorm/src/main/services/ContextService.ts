@@ -39,12 +39,12 @@ function normalizeKeyValues(values: unknown[]): KeyValue[] {
 
 /** KeyValue structure from environment */
 interface KeyValue {
-  id?: string
+  id?: string | undefined
   key: string
   value: ValueType
-  description?: string
+  description?: string | undefined
   /** Whether this key-value is enabled (default: true) */
-  enabled?: boolean
+  enabled?: boolean | undefined
 }
 
 /** Environment structure */

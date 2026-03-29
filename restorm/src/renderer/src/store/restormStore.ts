@@ -24,7 +24,7 @@ export interface EditingState {
   /** ID of the item being edited */
   itemId: string
   /** Property being edited (optional) */
-  property?: string
+  property?: string | undefined
   /** Timestamp when editing started */
   startedAt: number
 }
