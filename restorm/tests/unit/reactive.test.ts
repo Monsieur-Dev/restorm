@@ -84,7 +84,7 @@ import {
   emitRequestCreated,
   emitRequestDeleted
 } from '../../src/renderer/src/types/reactive'
-import type { Folder, HTTPRequest } from '../../src/renderer/src/types/collections'
+import type { Folder, HTTPRequest } from '../../src/shared/types/collections'
 
 describe('Reactive Document System', () => {
   beforeEach(() => {

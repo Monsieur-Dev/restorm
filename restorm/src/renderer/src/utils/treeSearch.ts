@@ -8,9 +8,9 @@ import type {
   Environment,
   EnvironmentFolder,
   Request
-} from '../types/collections'
-import { isEnvironmentFolder, isAnyFolder, isRequest } from '../types/collections'
-import type { BreadcrumbItem } from '../types/editor'
+} from '../../../shared/types/collections'
+import { isEnvironmentFolder, isAnyFolder, isRequest } from '../../../shared/types/collections'
+import type { BreadcrumbItem } from '../../../shared/types/editor'
 
 /** Folder icon for breadcrumbs */
 const FOLDER_ICON = { type: 'codicon' as const, value: 'folder' }

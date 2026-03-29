@@ -140,8 +140,8 @@ import { searchService, eventBus } from 'electron-core-ui/renderer'
 import { importSwaggerFromJson } from '../../src/main/services/import/SwaggerImportService'
 import { searchIndexService } from '../../src/renderer/src/services/SearchIndexService'
 import { makeReactiveFolder } from '../../src/renderer/src/types/reactive'
-import type { Folder, HTTPRequest } from '../../src/renderer/src/types/collections'
-import { isAnyFolder, isRequest, isHTTPRequest } from '../../src/renderer/src/types/collections'
+import type { Folder, HTTPRequest } from '../../src/shared/types/collections'
+import { isAnyFolder, isRequest, isHTTPRequest } from '../../src/shared/types/collections'
 import swaggerPetstore from './swagger-petstore.json'
 
 // Type the mocked eventBus

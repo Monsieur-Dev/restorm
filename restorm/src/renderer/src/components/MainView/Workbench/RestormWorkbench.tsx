@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
 import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, Button, type ContextMenuItem } from 'electron-core-ui/renderer'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback } from 'electron-core-ui/renderer'
-import type { RestormEditorTab, BreadcrumbItem } from '../../../types/editor'
+import type { RestormEditorTab, BreadcrumbItem } from '../../../../../shared/types/editor'
 import {
   isFolderTab,
   isEnvironmentFolderTab,
@@ -10,7 +10,7 @@ import {
   isGrpcRequestTab,
   isSoapRequestTab,
   isWebSocketRequestTab
-} from '../../../types/editor'
+} from '../../../../../shared/types/editor'
 import { EnvironmentDropdown } from './EnvironmentDropdown'
 import {
   HTTPRequestTabView,
@@ -22,7 +22,7 @@ import {
 import { EnvironmentProvider } from '../../../contexts/EnvironmentContext'
 import { FolderView } from '../../Folders/FolderView'
 import { EnvironmentFolderView } from '../../Folders/EnvironmentFolderView'
-import type { EnvironmentFolder, Folder, Request } from '../../../types/collections'
+import type { EnvironmentFolder, Folder, Request } from '../../../../../shared/types/collections'
 import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useTranslation } from 'react-i18next'

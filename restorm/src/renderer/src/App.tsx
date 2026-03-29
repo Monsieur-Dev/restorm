@@ -57,7 +57,7 @@ import type {
   Environment,
   EnvironmentFolder,
   Request
-} from './types/collections'
+} from '../../shared/types/collections'
 import {
   isRequest,
   isHTTPRequest,
@@ -67,7 +67,7 @@ import {
   isWebSocketRequest,
   isEnvironmentFolder,
   isAnyFolder
-} from './types/collections'
+} from '../../shared/types/collections'
 import { buildRequestPath } from './utils/requestPath'
 import type {
   FolderTab,
@@ -78,7 +78,7 @@ import type {
   SoapRequestTab,
   WebSocketRequestTab,
   BreadcrumbItem
-} from './types/editor'
+} from '../../shared/types/editor'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null

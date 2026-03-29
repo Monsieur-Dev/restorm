@@ -2,8 +2,8 @@
  * Helper functions for checksum tracking
  */
 
-import type { EnvironmentFolder, Folder, Environment, FolderItem } from '../types/collections'
-import { isEnvironmentFolder, isAnyFolder } from '../types/collections'
+import type { EnvironmentFolder, Folder, Environment, FolderItem } from '../../../shared/types/collections'
+import { isEnvironmentFolder, isAnyFolder } from '../../../shared/types/collections'
 
 /**
  * Collect all objects (folders, requests, environments) with their runtimeIds for checksum tracking.

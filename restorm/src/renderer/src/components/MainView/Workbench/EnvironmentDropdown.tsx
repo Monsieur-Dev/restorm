@@ -5,7 +5,7 @@ import {
   type ListViewItemData,
   IconSelect
 } from 'electron-core-ui/renderer'
-import type { Environment } from '../../../types/collections'
+import type { Environment } from '../../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../../contexts/useEnvironmentContext'
 
 /** Convert environments to ListView items */

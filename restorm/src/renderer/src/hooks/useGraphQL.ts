@@ -8,7 +8,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { logger } from 'electron-core-ui/renderer'
 import * as graphqlApi from '../services/GraphQLIntegration'
-import type { EnvironmentFolder, FolderItem, Environment, Request, Folder } from '../types/collections'
+import type { EnvironmentFolder, FolderItem, Environment, Request, Folder } from '../../../shared/types/collections'
 
 /**
  * Hook state for async operations

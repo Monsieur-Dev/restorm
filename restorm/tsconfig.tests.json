@@ -19,5 +19,5 @@
     "exactOptionalPropertyTypes": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["tests", "scripts", "e2e"]
+  "include": ["tests", "scripts", "e2e", "src/shared"]
 }

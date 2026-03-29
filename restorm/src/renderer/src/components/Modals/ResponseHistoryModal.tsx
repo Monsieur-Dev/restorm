@@ -1,6 +1,6 @@
 import React from 'react'
 import { Modal } from 'electron-core-ui/renderer'
-import type { ResponseHistoryDetail } from '../../types/collections'
+import type { ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { ResponseHistoryTab } from '../RequestTabViews/ResponseHistoryTab'
 import { useTranslation } from 'react-i18next'
 

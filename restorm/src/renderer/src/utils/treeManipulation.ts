@@ -2,8 +2,8 @@
  * Utility functions for manipulating the folder tree structure
  */
 
-import type { FolderItem } from '../types/collections'
-import { isAnyFolder } from '../types/collections'
+import type { FolderItem } from '../../../shared/types/collections'
+import { isAnyFolder } from '../../../shared/types/collections'
 import { findItemWithParent } from './treeSearch'
 
 /** Generate a unique ID */

@@ -14,7 +14,7 @@ import { importAsyncAPIFromString } from '../../src/main/services/import/AsyncAP
 import { importPostmanFromJson } from '../../src/main/services/import/PostmanImportService'
 import { importInsomniaFromJson } from '../../src/main/services/import/InsomniaImportService'
 import { importBrunoFromJson } from '../../src/main/services/import/BrunoImportService'
-import type { Folder, EnvironmentFolder, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest } from '../../src/renderer/src/types/collections'
+import type { Folder, EnvironmentFolder, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest } from '../../src/shared/types/collections'
 
 // Helper to load test files
 const loadTestFile = (filename: string): string => {

@@ -20,7 +20,8 @@ export interface EnvironmentFolder extends Folder {
 export type FolderItem = Folder | EnvironmentFolder | Request
 
 export function isEnvironmentFolder(item: FolderItem): item is EnvironmentFolder {
-  if (!('items' in item) || !('configuration' in item) || !('folderType' in item)) {
+  // Some legacy/loaded objects may omit `configuration` at runtime; detection should rely on `folderType`.
+  if (!('items' in item) || !('folderType' in item)) {
     return false
   }
   return (item as { folderType: string }).folderType === 'environment'
