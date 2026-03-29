@@ -1,8 +1,7 @@
 import { ipcMain, BrowserWindow, dialog } from 'electron'
-import { logger, getFileService, isFileServiceInitialized, isPersistenceServiceInitialized, getPersistenceService } from 'electron-core-ui'
+import { logger, getFileService, isFileServiceInitialized, isPersistenceServiceInitialized, getPersistenceService, validatedHandle } from 'electron-core-ui'
 import { join, relative, dirname } from 'path'
 import { promises as fs, existsSync, statSync, rmSync } from 'fs'
-import type { PersistenceFormat } from 'electron-core-ui'
 import { EditorWindow } from './windows/EditorWindow'
 import { contextService, responseHistoryService } from './services'
 import { assertPathWithinParent } from './utils/pathSecurity'
@@ -14,6 +13,26 @@ import { soapExecutionService, type SOAPExecutionInput } from './services/SOAPEx
 import { grpcExecutionService, type GRPCExecutionInput } from './services/GRPCExecutionService'
 import { websocketExecutionService, type WebSocketExecutionInput } from './services/WebSocketExecutionService'
 import { importFrom } from './services/import/ImportManager'
+import {
+  openEditorArgs,
+  saveAsFileArgs, saveAsFolderArgs,
+  secretsReadArgs, secretsWriteArgs,
+  openPathArgs,
+  projectReadFileArgs,
+  contextRegisterRequestArgs, contextUnregisterRequestArgs,
+  contextSetRequestEnvironmentArgs, contextUpdateRequestKeyValuesArgs,
+  contextUpdateFullRequestDataArgs, contextGetResolvedUrlArgs,
+  contextGetCodeSnippetsArgs,
+  requestResolveUrlArgs,
+  httpExecuteArgs, httpCancelArgs, httpIsActiveArgs,
+  graphqlExecuteArgs, graphqlCancelArgs, graphqlIsActiveArgs,
+  soapExecuteArgs, soapCancelArgs, soapIsActiveArgs,
+  grpcExecuteArgs, grpcCancelArgs, grpcIsActiveArgs,
+  websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
+  responsesHistoryListArgs, responsesHistoryGetArgs,
+  responsesHistoryTogglePinArgs, responsesHistoryUpdatePathArgs,
+  importPreviewArgs, importImportArgs
+} from './ipc/schemas'
 
 /**
  * Get mocked folder path for E2E tests, if E2E_MOCK_SAVE_FOLDER env var is set.
@@ -43,7 +62,7 @@ export function registerRestormIPC(deps: {
   // ==========================================================================
 
   // IPC handler to open Editor window
-  ipcMain.handle('restorm:open-editor', (_event, file?: { title: string; content?: string; x?: number; y?: number }) => {
+  validatedHandle('restorm:open-editor', openEditorArgs, (_event, [file]) => {
     logger.info('Opening Restorm editor window...', { file })
     try {
       const editorWindow = new EditorWindow(file)
@@ -105,7 +124,7 @@ export function registerRestormIPC(deps: {
   // ==========================================================================
 
   // IPC handler to save as single file with format choice
-  ipcMain.handle('restorm:save-as-file', async (_event, data: unknown, format: PersistenceFormat) => {
+  validatedHandle('restorm:save-as-file', saveAsFileArgs, async (_event, [data, format]) => {
     logger.info('Save as single file requested', { format })
 
     try {
@@ -152,7 +171,7 @@ export function registerRestormIPC(deps: {
   })
 
   // IPC handler to save as folder structure
-  ipcMain.handle('restorm:save-as-folder', async (_event, data: unknown, format: PersistenceFormat, targetPath?: string) => {
+  validatedHandle('restorm:save-as-folder', saveAsFolderArgs, async (_event, [data, format, targetPath]) => {
     logger.info('Save as folder requested', { format, targetPath })
 
     try {
@@ -285,7 +304,7 @@ export function registerRestormIPC(deps: {
   // Secrets IPC Handlers
   // ==========================================================================
 
-  ipcMain.handle('restorm:secrets:read', async (_event, filePath: string) => {
+  validatedHandle('restorm:secrets:read', secretsReadArgs, async (_event, [filePath]) => {
     try {
       if (!filePath || !existsSync(filePath)) return null
 
@@ -309,7 +328,7 @@ export function registerRestormIPC(deps: {
     }
   })
 
-  ipcMain.handle('restorm:secrets:write', async (_event, filePath: string, content: string) => {
+  validatedHandle('restorm:secrets:write', secretsWriteArgs, async (_event, [filePath, content]) => {
     try {
       if (!filePath) return { success: false, error: 'Missing path' }
 
@@ -345,7 +364,7 @@ export function registerRestormIPC(deps: {
   // Open Path IPC Handler
   // ==========================================================================
 
-  ipcMain.handle('restorm:open-path', async (_event, path: string) => {
+  validatedHandle('restorm:open-path', openPathArgs, async (_event, [path]) => {
     logger.info('Open path requested', { path })
 
     try {
@@ -412,7 +431,7 @@ export function registerRestormIPC(deps: {
     }
   })
 
-  ipcMain.handle('project:read-file', async (_event, relPath: string) => {
+  validatedHandle('project:read-file', projectReadFileArgs, async (_event, [relPath]) => {
     const projectRoot = join(__dirname, '../..')
 
     // Path traversal protection: ensure resolved path stays under project root
@@ -442,7 +461,7 @@ export function registerRestormIPC(deps: {
     return contextService.getAllVariableTransformResults()
   })
 
-  ipcMain.handle('context:register-request', (_event, requestId: string, environmentId: string | null, requestData: { headers?: { id?: string; key: string; value: string }[]; params?: { id?: string; key: string; value: string }[]; pathParams?: { id?: string; key: string; value: string }[] }) => {
+  validatedHandle('context:register-request', contextRegisterRequestArgs, (_event, [requestId, environmentId, requestData]) => {
     contextService.registerRequest(requestId, environmentId, {
       id: requestId,
       headers: requestData.headers,
@@ -451,27 +470,27 @@ export function registerRestormIPC(deps: {
     })
   })
 
-  ipcMain.handle('context:unregister-request', (_event, requestId: string) => {
+  validatedHandle('context:unregister-request', contextUnregisterRequestArgs, (_event, [requestId]) => {
     contextService.unregisterRequest(requestId)
   })
 
-  ipcMain.handle('context:set-request-environment', (_event, requestId: string, environmentId: string | null) => {
+  validatedHandle('context:set-request-environment', contextSetRequestEnvironmentArgs, (_event, [requestId, environmentId]) => {
     contextService.setRequestEnvironment(requestId, environmentId)
   })
 
-  ipcMain.handle('context:update-request-keyvalues', (_event, requestId: string, groupName: string, keyValues: { id?: string; key: string; value: string }[]) => {
+  validatedHandle('context:update-request-keyvalues', contextUpdateRequestKeyValuesArgs, (_event, [requestId, groupName, keyValues]) => {
     contextService.updateRequestKeyValues(requestId, groupName, keyValues)
   })
 
-  ipcMain.handle('context:update-full-request-data', (_event, requestId: string, data: unknown) => {
+  validatedHandle('context:update-full-request-data', contextUpdateFullRequestDataArgs, (_event, [requestId, data]) => {
     contextService.updateFullRequestData(requestId, data as Parameters<typeof contextService.updateFullRequestData>[1])
   })
 
-  ipcMain.handle('context:get-resolved-url', (_event, requestId: string) => {
+  validatedHandle('context:get-resolved-url', contextGetResolvedUrlArgs, (_event, [requestId]) => {
     return contextService.getResolvedUrl(requestId)
   })
 
-  ipcMain.handle('context:get-code-snippets', (_event, requestId: string) => {
+  validatedHandle('context:get-code-snippets', contextGetCodeSnippetsArgs, (_event, [requestId]) => {
     return contextService.getCodeSnippets(requestId)
   })
 
@@ -483,16 +502,16 @@ export function registerRestormIPC(deps: {
   // Request Service IPC Handlers
   // ==========================================================================
 
-  ipcMain.handle('request:resolve-url', (_event, input: URLResolutionInput) => {
-    return resolveRequestURL(input)
+  validatedHandle('request:resolve-url', requestResolveUrlArgs, (_event, [input]) => {
+    return resolveRequestURL(input as URLResolutionInput)
   })
 
   // ==========================================================================
   // HTTP Execution IPC Handlers
   // ==========================================================================
 
-  ipcMain.handle('http:execute', async (_event, input: HTTPExecutionInput) => {
-    const result = await httpExecutionService.execute(input)
+  validatedHandle('http:execute', httpExecuteArgs, async (_event, [input]) => {
+    const result = await httpExecutionService.execute(input as HTTPExecutionInput)
     setImmediate(() => {
       const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'
         ? (input as { requestPath?: unknown }).requestPath
@@ -502,11 +521,11 @@ export function registerRestormIPC(deps: {
     return result
   })
 
-  ipcMain.handle('http:cancel', (_event, requestId: string) => {
+  validatedHandle('http:cancel', httpCancelArgs, (_event, [requestId]) => {
     return httpExecutionService.cancel(requestId)
   })
 
-  ipcMain.handle('http:is-active', (_event, requestId: string) => {
+  validatedHandle('http:is-active', httpIsActiveArgs, (_event, [requestId]) => {
     return httpExecutionService.isActive(requestId)
   })
 
@@ -514,8 +533,8 @@ export function registerRestormIPC(deps: {
   // GraphQL Execution IPC Handlers
   // ==========================================================================
 
-  ipcMain.handle('graphql:execute', async (_event, input: GraphQLExecutionInput) => {
-    const result = await graphqlExecutionService.execute(input)
+  validatedHandle('graphql:execute', graphqlExecuteArgs, async (_event, [input]) => {
+    const result = await graphqlExecutionService.execute(input as GraphQLExecutionInput)
     setImmediate(() => {
       const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'
         ? (input as { requestPath?: unknown }).requestPath
@@ -525,11 +544,11 @@ export function registerRestormIPC(deps: {
     return result
   })
 
-  ipcMain.handle('graphql:cancel', (_event, requestId: string) => {
+  validatedHandle('graphql:cancel', graphqlCancelArgs, (_event, [requestId]) => {
     return graphqlExecutionService.cancel(requestId)
   })
 
-  ipcMain.handle('graphql:is-active', (_event, requestId: string) => {
+  validatedHandle('graphql:is-active', graphqlIsActiveArgs, (_event, [requestId]) => {
     return graphqlExecutionService.isActive(requestId)
   })
 
@@ -537,8 +556,8 @@ export function registerRestormIPC(deps: {
   // SOAP Execution IPC Handlers
   // ==========================================================================
 
-  ipcMain.handle('soap:execute', async (_event, input: SOAPExecutionInput) => {
-    const result = await soapExecutionService.execute(input)
+  validatedHandle('soap:execute', soapExecuteArgs, async (_event, [input]) => {
+    const result = await soapExecutionService.execute(input as SOAPExecutionInput)
     setImmediate(() => {
       const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'
         ? (input as { requestPath?: unknown }).requestPath
@@ -548,11 +567,11 @@ export function registerRestormIPC(deps: {
     return result
   })
 
-  ipcMain.handle('soap:cancel', (_event, requestId: string) => {
+  validatedHandle('soap:cancel', soapCancelArgs, (_event, [requestId]) => {
     return soapExecutionService.cancel(requestId)
   })
 
-  ipcMain.handle('soap:is-active', (_event, requestId: string) => {
+  validatedHandle('soap:is-active', soapIsActiveArgs, (_event, [requestId]) => {
     return soapExecutionService.isActive(requestId)
   })
 
@@ -560,8 +579,8 @@ export function registerRestormIPC(deps: {
   // gRPC Execution IPC Handlers
   // ==========================================================================
 
-  ipcMain.handle('grpc:execute', (_event, input: GRPCExecutionInput) => {
-    const result = grpcExecutionService.execute(input)
+  validatedHandle('grpc:execute', grpcExecuteArgs, (_event, [input]) => {
+    const result = grpcExecutionService.execute(input as GRPCExecutionInput)
     setImmediate(() => {
       const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'
         ? (input as { requestPath?: unknown }).requestPath
@@ -571,11 +590,11 @@ export function registerRestormIPC(deps: {
     return result
   })
 
-  ipcMain.handle('grpc:cancel', (_event, requestId: string) => {
+  validatedHandle('grpc:cancel', grpcCancelArgs, (_event, [requestId]) => {
     return grpcExecutionService.cancel(requestId)
   })
 
-  ipcMain.handle('grpc:is-active', (_event, requestId: string) => {
+  validatedHandle('grpc:is-active', grpcIsActiveArgs, (_event, [requestId]) => {
     return grpcExecutionService.isActive(requestId)
   })
 
@@ -583,8 +602,8 @@ export function registerRestormIPC(deps: {
   // WebSocket Execution IPC Handlers
   // ==========================================================================
 
-  ipcMain.handle('websocket:connect', async (_event, input: WebSocketExecutionInput) => {
-    const result = await websocketExecutionService.execute(input)
+  validatedHandle('websocket:connect', websocketConnectArgs, async (_event, [input]) => {
+    const result = await websocketExecutionService.execute(input as WebSocketExecutionInput)
     setImmediate(() => {
       const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'
         ? (input as { requestPath?: unknown }).requestPath
@@ -594,15 +613,15 @@ export function registerRestormIPC(deps: {
     return result
   })
 
-  ipcMain.handle('websocket:disconnect', (_event, requestId: string) => {
+  validatedHandle('websocket:disconnect', websocketDisconnectArgs, (_event, [requestId]) => {
     return websocketExecutionService.disconnect(requestId)
   })
 
-  ipcMain.handle('websocket:send', (_event, requestId: string, message: string, event?: string) => {
+  validatedHandle('websocket:send', websocketSendArgs, (_event, [requestId, message, event]) => {
     return websocketExecutionService.send(requestId, message, event)
   })
 
-  ipcMain.handle('websocket:is-active', (_event, requestId: string) => {
+  validatedHandle('websocket:is-active', websocketIsActiveArgs, (_event, [requestId]) => {
     return websocketExecutionService.isActive(requestId)
   })
 
@@ -610,19 +629,19 @@ export function registerRestormIPC(deps: {
   // Responses History IPC Handlers
   // ==========================================================================
 
-  ipcMain.handle('responses:history:list', async (_event, requestId: string) => {
+  validatedHandle('responses:history:list', responsesHistoryListArgs, async (_event, [requestId]) => {
     return responseHistoryService.list(requestId)
   })
 
-  ipcMain.handle('responses:history:get', async (_event, guid: string) => {
+  validatedHandle('responses:history:get', responsesHistoryGetArgs, async (_event, [guid]) => {
     return responseHistoryService.getDetail(guid)
   })
 
-  ipcMain.handle('responses:history:toggle-pin', async (_event, guid: string, pinned: boolean) => {
+  validatedHandle('responses:history:toggle-pin', responsesHistoryTogglePinArgs, async (_event, [guid, pinned]) => {
     return responseHistoryService.togglePin(guid, pinned)
   })
 
-  ipcMain.handle('responses:history:update-path', async (_event, requestId: string, requestPath: string) => {
+  validatedHandle('responses:history:update-path', responsesHistoryUpdatePathArgs, async (_event, [requestId, requestPath]) => {
     return responseHistoryService.updateRequestPath(requestId, requestPath)
   })
 
@@ -630,7 +649,7 @@ export function registerRestormIPC(deps: {
   // Import IPC Handlers
   // ==========================================================================
 
-  ipcMain.handle('import:preview', async (_event, input: string) => {
+  validatedHandle('import:preview', importPreviewArgs, async (_event, [input]) => {
     logger.info('[IPC] Import preview requested:', { input })
     try {
       const result = await importFrom(input, { dryRun: true })
@@ -647,7 +666,7 @@ export function registerRestormIPC(deps: {
     }
   })
 
-  ipcMain.handle('import:import', async (_event, input: string) => {
+  validatedHandle('import:import', importImportArgs, async (_event, [input]) => {
     logger.info('[IPC] Import requested:', { input })
     try {
       const result = await importFrom(input, { dryRun: false })
