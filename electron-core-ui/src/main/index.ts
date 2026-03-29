@@ -59,6 +59,19 @@ export type { GraphQLServiceConfig, PubSub } from './services/GraphQLService'
 export type { PersistenceFormat, PersistenceMode, PersistenceConfig, FileNamingContext, SaveResult, LoadResult } from './services/PersistenceService'
 export type { SchemaGeneratorConfig, RegisterClassOptions } from './services/GraphQLSchemaGenerator'
 
+// Error classes and helpers
+export {
+  FileSystemError,
+  PersistenceError,
+  IpcError,
+  errorMeta
+} from '../errors'
+export type {
+  FileSystemErrorCode,
+  PersistenceErrorCode,
+  IpcErrorCode
+} from '../errors'
+
 // Re-export feature types
 export type {
   FeatureStrategyType,

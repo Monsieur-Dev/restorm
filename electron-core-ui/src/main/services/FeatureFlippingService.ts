@@ -9,6 +9,7 @@ import type {
   PlatformStrategy
 } from '../../types/feature'
 import { logger } from './LoggerService'
+import { FileSystemError, errorMeta } from '../../errors'
 
 /**
  * FeatureFlippingService manages feature flags with configurable strategies
@@ -54,7 +55,8 @@ export class FeatureFlippingService {
 
       logger.info(`FeatureFlippingService: Loaded ${String(this.features.size)} features`)
     } catch (error) {
-      logger.error('Failed to load features configuration', { error: String(error) })
+      const wrappedError = new FileSystemError('Failed to load features configuration', 'FS_READ_FAILED', { cause: error })
+      logger.error('Failed to load features configuration', errorMeta(wrappedError))
     }
   }
 

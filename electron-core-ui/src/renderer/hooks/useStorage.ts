@@ -73,7 +73,8 @@ export async function saveToStorage(key: string, value: unknown): Promise<boolea
   if (!api) return false
   try {
     return await api.set(key, value)
-  } catch {
+  } catch (error) {
+    logger.error('[saveToStorage] Failed to save value', { key, error: String(error) })
     return false
   }
 }
@@ -86,7 +87,8 @@ export async function loadFromStorage(key: string): Promise<unknown> {
   if (!api) return undefined
   try {
     return await api.get(key)
-  } catch {
+  } catch (error) {
+    logger.error('[loadFromStorage] Failed to load value', { key, error: String(error) })
     return undefined
   }
 }

@@ -8,6 +8,7 @@
 import { join } from 'path'
 import { readFileSync, existsSync } from 'fs'
 import { logger } from './LoggerService'
+import { FileSystemError, errorMeta } from '../../errors'
 import { getStorageService } from './StorageService'
 
 // Import translations from renderer locales (shared with renderer)
@@ -79,7 +80,8 @@ class I18nService {
           this.resources[lang] = this.deepMerge(this.resources[lang] ?? {}, translations)
           logger.debug(`[I18nService] Loaded translations for ${lang}`, { path: filePath })
         } catch (error) {
-          logger.error(`[I18nService] Failed to load translations for ${lang}`, { error: String(error) })
+          const wrappedError = new FileSystemError(`Failed to load translations for ${lang}`, 'FS_READ_FAILED', { cause: error })
+          logger.error(`[I18nService] Failed to load translations for ${lang}`, errorMeta(wrappedError))
         }
       }
     }

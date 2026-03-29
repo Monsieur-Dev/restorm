@@ -3,6 +3,7 @@ import { join, dirname, basename } from 'path'
 import yaml from 'js-yaml'
 import type { ThemeInfo, ThemeVariables, ThemeDefinition } from '../../types/theme'
 import { logger } from './LoggerService'
+import { FileSystemError, errorMeta } from '../../errors'
 
 /**
  * ThemeService manages YAML-based themes
@@ -105,7 +106,8 @@ export class ThemeService {
           }
         }
       } catch (error) {
-        logger.error(`Failed to load base.yaml`, { error: String(error) })
+        const wrappedError = new FileSystemError('Failed to load base.yaml', 'FS_READ_FAILED', { cause: error })
+        logger.error('Failed to load base.yaml', errorMeta(wrappedError))
       }
     }
 
@@ -125,7 +127,8 @@ export class ThemeService {
             }
           }
         } catch (error) {
-          logger.error(`Failed to load ${themeType}/_base.yaml`, { error: String(error) })
+          const wrappedError = new FileSystemError(`Failed to load ${themeType}/_base.yaml`, 'FS_READ_FAILED', { cause: error })
+          logger.error(`Failed to load ${themeType}/_base.yaml`, errorMeta(wrappedError))
         }
       }
     }
@@ -158,7 +161,8 @@ export class ThemeService {
         })
       }
     } catch (error) {
-      logger.error(`Failed to load theme index`, { error: String(error) })
+      const wrappedError = new FileSystemError('Failed to load theme index', 'FS_PARSE_FAILED', { cause: error })
+      logger.error('Failed to load theme index', errorMeta(wrappedError))
     }
   }
 
@@ -278,7 +282,8 @@ export class ThemeService {
       this.themeCache.set(themeId, { theme, variables })
       return { theme, variables }
     } catch (error) {
-      logger.error(`Failed to load theme ${themeId}`, { error: String(error) })
+      const wrappedError = new FileSystemError(`Failed to load theme ${themeId}`, 'FS_PARSE_FAILED', { cause: error })
+      logger.error(`Failed to load theme ${themeId}`, errorMeta(wrappedError))
       return null
     }
   }

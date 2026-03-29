@@ -14,6 +14,7 @@ import type {
 } from '../../types/file'
 import type { RuntimeId, ChecksumMap, DirtyStateResult } from '../../types/runtime'
 import { logger } from './LoggerService'
+import { FileSystemError, errorMeta } from '../../errors'
 import { getStorageService } from './StorageService'
 import { i18nService } from './I18nService'
 import { eventBusService } from './EventBusService'
@@ -332,7 +333,8 @@ export class FileService {
   private fileExists(path: string): boolean {
     try {
       return existsSync(path)
-    } catch {
+    } catch (error) {
+      logger.warn('FileService: fileExists check failed', errorMeta(error))
       return false
     }
   }
@@ -444,7 +446,7 @@ export class FileService {
       try {
         callback(state)
       } catch (error) {
-        logger.error('FileService: Error in state change callback', { error: String(error) })
+        logger.error('FileService: Error in state change callback', errorMeta(error))
       }
     }
     // Broadcast to all renderer windows via IPC
@@ -461,7 +463,7 @@ export class FileService {
       try {
         callback(this.currentFile.isDirty)
       } catch (error) {
-        logger.error('FileService: Error in dirty change callback', { error: String(error) })
+        logger.error('FileService: Error in dirty change callback', errorMeta(error))
       }
     }
     // Broadcast to all renderer windows via IPC
@@ -525,7 +527,8 @@ export class FileService {
       logger.info('FileService: New file created', { path: filePath })
       return true
     } catch (error) {
-      logger.error('FileService: Failed to create new file', { error: String(error) })
+      const wrappedError = new FileSystemError('Failed to create new file', 'FS_WRITE_FAILED', { cause: error })
+      logger.error('FileService: Failed to create new file', errorMeta(wrappedError))
       return false
     }
   }
@@ -593,7 +596,8 @@ export class FileService {
       logger.info('FileService: File opened', { path: filePath, format })
       return { success: true, content }
     } catch (error) {
-      logger.error('FileService: Failed to open file', { path: filePath, error: String(error) })
+      const wrappedError = new FileSystemError('Failed to open file', 'FS_READ_FAILED', { cause: error })
+      logger.error('FileService: Failed to open file', { path: filePath, ...errorMeta(wrappedError) })
       return { success: false }
     }
   }
@@ -649,7 +653,8 @@ export class FileService {
       logger.info('FileService: File saved', { path: this.currentFile.path })
       return true
     } catch (error) {
-      logger.error('FileService: Failed to save file', { error: String(error) })
+      const wrappedError = new FileSystemError('Failed to save file', 'FS_WRITE_FAILED', { cause: error })
+      logger.error('FileService: Failed to save file', errorMeta(wrappedError))
       return false
     }
   }
@@ -701,7 +706,8 @@ export class FileService {
       logger.info('FileService: File saved as', { path: filePath, format: fileFormat })
       return true
     } catch (error) {
-      logger.error('FileService: Failed to save file', { error: String(error) })
+      const wrappedError = new FileSystemError('Failed to save file', 'FS_WRITE_FAILED', { cause: error })
+      logger.error('FileService: Failed to save file', errorMeta(wrappedError))
       return false
     }
   }

@@ -14,6 +14,19 @@ export * from './contexts'
 export type { ThemeContextValue } from './contexts'
 export * from './services'
 export { initializeI18n, default as i18n } from './i18n'
+// Error classes and helpers
+export {
+  FileSystemError,
+  PersistenceError,
+  IpcError,
+  errorMeta
+} from '../errors'
+export type {
+  FileSystemErrorCode,
+  PersistenceErrorCode,
+  IpcErrorCode
+} from '../errors'
+
 export type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../types/theme'
 export type {
   FeatureStrategyType,

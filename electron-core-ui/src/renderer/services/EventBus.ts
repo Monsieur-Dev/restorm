@@ -7,6 +7,7 @@
  */
 
 import { logger } from './logger'
+import { IpcError, errorMeta } from '../../errors'
 
 /** Event handler function type */
 export type EventHandler<T = unknown> = (payload: T) => void | Promise<void>
@@ -74,7 +75,8 @@ class EventBusService {
   emitSync(event: string, payload: unknown): void {
     // Emit to main process (fire and forget)
     window.api.eventBus.emitSync(event, payload).catch((error: unknown) => {
-      logger.error(`[EventBus] Error emitting to main process "${event}":`, { error: String(error) })
+      const wrappedError = new IpcError(`Error emitting to main process "${event}"`, 'IPC_EMIT_FAILED', { cause: error })
+      logger.error(`[EventBus] Error emitting to main process "${event}":`, errorMeta(wrappedError))
     })
   }
 
@@ -93,7 +95,8 @@ class EventBusService {
       try {
         await handler(payload)
       } catch (error) {
-        logger.error(`[EventBus] Error in local handler for event "${event}":`, { error: String(error) })
+        const wrappedError = new IpcError(`Error in local handler for event "${event}"`, 'IPC_HANDLER_FAILED', { cause: error })
+        logger.error(`[EventBus] Error in local handler for event "${event}":`, errorMeta(wrappedError))
       }
     })
 
@@ -108,7 +111,8 @@ class EventBusService {
   emitLocalSync(event: string, payload: unknown): void {
     queueMicrotask(() => {
       this.emitLocal(event, payload).catch((error: unknown) => {
-        logger.error(`[EventBus] Unhandled error in emitLocal for "${event}":`, { error: String(error) })
+        const wrappedError = new IpcError(`Unhandled error in emitLocal for "${event}"`, 'IPC_EMIT_FAILED', { cause: error })
+        logger.error(`[EventBus] Unhandled error in emitLocal for "${event}":`, errorMeta(wrappedError))
       })
     })
   }

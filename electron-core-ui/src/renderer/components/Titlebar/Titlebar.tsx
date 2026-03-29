@@ -3,6 +3,7 @@ import './titlebar.css'
 import { TitlebarProps } from './types'
 import { CustomWCO } from '../CustomWCO'
 import { SearchBar } from '../SearchBar'
+import { logger } from '../../services/logger'
 
 const Titlebar: React.FC<TitlebarProps> = ({
   icon,
@@ -56,8 +57,8 @@ const Titlebar: React.FC<TitlebarProps> = ({
       .then((path) => {
         setAppIconPath(path)
       })
-      .catch(() => {
-        // Ignore errors when fetching app icon in non-Electron/web environments
+      .catch((error: unknown) => {
+        logger.warn('[Titlebar] Failed to fetch window icon', { error: String(error) })
       })
   }, [icon])
 

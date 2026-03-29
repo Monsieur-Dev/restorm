@@ -8,6 +8,10 @@
   },
   "include": [
     "src/renderer/**/*",
-    "src/types/**/*"
+    "src/types/**/*",
+    "src/errors/**/*"
+  ],
+  "exclude": [
+    "**/*.test.ts"
   ]
 }
