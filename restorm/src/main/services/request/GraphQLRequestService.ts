@@ -8,14 +8,10 @@ import type { GraphQLRequest, GraphQLResponse, KeyValue } from '../../../shared/
 import { StringValue } from '../../../shared/types/collections'
 import { logger } from 'electron-core-ui/main'
 import type { VariableContext } from './types'
+import { resolveTemplate } from './resolveTemplate'
 
 // Re-export for consumers
 export type { VariableContext } from './types'
-
-/** Placeholder for variable resolution - returns template as-is (to be implemented in backend) */
-function resolveTemplate(template: string, _context: VariableContext): string {
-  return template
-}
 
 /** Input for executing a GraphQL request */
 export interface GraphQLRequestInput {
