@@ -221,11 +221,13 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
       const pinIcon = (
         <i
           className="codicon codicon-pin"
+          aria-hidden="true"
           style={{ opacity: entry.pinned ? 1 : 0 }}
         />
       )
       const statusDot = (
         <span
+          aria-hidden="true"
           style={{
             width: 8,
             height: 8,
@@ -427,7 +429,7 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
                 position: 'relative',
                 overflow: 'hidden'
               }}>
-                <Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}><i className="codicon codicon-loading codicon-modifier-spin" /></div>}>
+                <Suspense fallback={<div role="status" aria-label="Loading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}><i className="codicon codicon-loading codicon-modifier-spin" aria-hidden="true" /></div>}>
                   <Graph
                     key={graphKey}
                     ref={graphRef}
