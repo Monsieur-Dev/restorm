@@ -121,7 +121,7 @@ export const EnvironmentDropdown: React.FC = () => {
             <span style={{ marginRight: 4, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {selectedEnvironmentName}
             </span>
-            <i className="codicon codicon-chevron-down" />
+            <i className="codicon codicon-chevron-down" aria-hidden="true" />
           </>
         }
         onItemClick={(payload) => {

@@ -376,9 +376,9 @@ export function ImportModal({
                 data-testid="destination-dropdown"
                 buttonContent={
                   <>
-                    <i className="codicon codicon-folder" style={{ marginRight: '6px' }} />
+                    <i className="codicon codicon-folder" aria-hidden="true" style={{ marginRight: '6px' }} />
                     <span>{selectedFolderName}</span>
-                    <i className="codicon codicon-chevron-down" style={{ marginLeft: 'auto', opacity: 0.7 }} />
+                    <i className="codicon codicon-chevron-down" aria-hidden="true" style={{ marginLeft: 'auto', opacity: 0.7 }} />
                   </>
                 }
                 onItemClick={(payload) => { 
@@ -433,14 +433,14 @@ export function ImportModal({
             />
           </div>
           {isLoading && (
-            <div className="import-loading">
-              <i className="codicon codicon-loading codicon-modifier-spin" />
+            <div className="import-loading" role="status">
+              <i className="codicon codicon-loading codicon-modifier-spin" aria-hidden="true" />
               {t('import.loading')}
             </div>
           )}
           {error && (
-            <div className="import-error">
-              <i className="codicon codicon-error" />
+            <div className="import-error" role="alert">
+              <i className="codicon codicon-error" aria-hidden="true" />
               {error}
             </div>
           )}
@@ -455,6 +455,7 @@ export function ImportModal({
             <div className="import-preview">
               <ListView
                 items={previewListItems}
+                ariaLabel={t('import.preview.label')}
                 onItemClick={() => { /* Preview only */ }}
                 onItemContextMenu={() => { /* Preview only */ }}
                 data-testid="preview-list"
@@ -464,8 +465,8 @@ export function ImportModal({
         )}
 
         {!isLoading && !error && previewItems.length === 0 && input.trim() !== '' && (
-          <div className="import-no-results">
-            <i className="codicon codicon-info" />
+          <div className="import-no-results" role="status">
+            <i className="codicon codicon-info" aria-hidden="true" />
             {t('import.noResults')}
           </div>
         )}
