@@ -34,4 +34,4 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
   )
 }
 
-export default ColorPicker
+export default React.memo(ColorPicker)

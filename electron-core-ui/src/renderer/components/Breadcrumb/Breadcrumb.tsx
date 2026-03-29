@@ -50,7 +50,7 @@ function renderIcon(icon: Icon | null | undefined): React.ReactNode {
   return <i className={`ecui-breadcrumb-icon codicon codicon-${icon.value}`} />
 }
 
-export const Breadcrumb: React.FC<BreadcrumbProps> = ({
+const BreadcrumbInner: React.FC<BreadcrumbProps> = ({
   items,
   'data-testid': dataTestId,
   onItemClick,
@@ -216,5 +216,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
     </nav>
   )
 }
+
+export const Breadcrumb = React.memo(BreadcrumbInner)
 
 export default Breadcrumb

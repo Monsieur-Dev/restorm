@@ -104,6 +104,23 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     }, 300)
   }, [clearHideTooltipTimeout])
 
+  // Tooltip mouse enter handler
+  const handleTooltipMouseEnter = useCallback(() => {
+    clearHideTooltipTimeout()
+    setIsTooltipHovered(true)
+  }, [clearHideTooltipTimeout])
+
+  // Tooltip mouse leave handler
+  const handleTooltipMouseLeave = useCallback(() => {
+    setIsTooltipHovered(false)
+    scheduleHideTooltip()
+  }, [scheduleHideTooltip])
+
+  // Prevent default handler for mouse down on results wrapper
+  const handleResultsMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+  }, [])
+
   // Perform search with debounce
   const performSearch = useCallback((searchQuery: string) => {
     logger.debug('[SearchBar] performSearch called', { searchQuery })
@@ -412,7 +429,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           )}
 
           {hasResults && (
-            <div onMouseDown={(e) => { e.preventDefault() }}>
+            <div onMouseDown={handleResultsMouseDown}>
               <ScrollableElement
                 className="search-results-wrapper"
                 data-testid={scrollableTestId}
@@ -545,14 +562,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             repositionKey={hoveredResultId}
             className="search-result-tooltip"
             data-testid={tooltipTestId}
-            onMouseEnter={() => {
-              clearHideTooltipTimeout()
-              setIsTooltipHovered(true)
-            }}
-            onMouseLeave={() => {
-              setIsTooltipHovered(false)
-              scheduleHideTooltip()
-            }}
+            onMouseEnter={handleTooltipMouseEnter}
+            onMouseLeave={handleTooltipMouseLeave}
           />
         </div>
       )}
@@ -560,4 +571,4 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   )
 }
 
-export default SearchBar
+export default React.memo(SearchBar)

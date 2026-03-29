@@ -36,7 +36,7 @@ export interface ListViewDropdownProps {
   'data-testid'?: string
 }
 
-export const ListViewDropdown: React.FC<ListViewDropdownProps> = ({
+const ListViewDropdownInner: React.FC<ListViewDropdownProps> = ({
   items,
   selectedIds,
   expandedIds,
@@ -167,3 +167,5 @@ export const ListViewDropdown: React.FC<ListViewDropdownProps> = ({
     </div>
   )
 }
+
+export const ListViewDropdown = React.memo(ListViewDropdownInner)
