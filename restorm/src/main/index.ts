@@ -13,6 +13,7 @@ import { randomUUID } from 'crypto'
 import { folderMappingService } from './services/FolderMappingService'
 import { saveFolderSecretsEnvFile, applyFolderSecretsEnvFile } from './services/SecretsEnvFileService'
 import { normalizeDocumentValuesForPersistence } from '../shared/utils/valuePersistence'
+import { assertPathWithinParent } from './utils/pathSecurity'
 // DocumentEvents are handled by FileService internally for dirty state tracking
 
 const cliArgs = parseCliArgs()
@@ -390,6 +391,18 @@ ipcMain.handle('restorm:save-as-folder', async (_event, data: unknown, format: P
     
     if (targetPath) {
       // Use provided path directly (for Ctrl+S on already opened folder)
+      // Path traversal protection: targetPath from renderer must be an absolute real path
+      if (isFileServiceInitialized()) {
+        const openedFolder = (getFileService() as { getOpenedFolderPath?: () => string | null }).getOpenedFolderPath?.()
+        if (openedFolder) {
+          try {
+            assertPathWithinParent(dirname(openedFolder), targetPath)
+          } catch {
+            logger.warn('Blocked save-as-folder - path traversal detected', { targetPath })
+            return { success: false, error: 'Path traversal detected' }
+          }
+        }
+      }
       folderPath = targetPath
     } else {
       // Check for E2E mock path first
@@ -503,6 +516,20 @@ ipcMain.handle('restorm:show-folder-dialog', async (_event) => {
 ipcMain.handle('restorm:secrets:read', async (_event, filePath: string) => {
   try {
     if (!filePath || !existsSync(filePath)) return null
+
+    // Path traversal protection: secrets must be within the opened folder
+    if (isFileServiceInitialized()) {
+      const openedFolder = (getFileService() as { getOpenedFolderPath?: () => string | null }).getOpenedFolderPath?.()
+      if (openedFolder) {
+        try {
+          assertPathWithinParent(openedFolder, filePath)
+        } catch {
+          logger.warn('Blocked secrets:read - path traversal detected', { filePath })
+          return null
+        }
+      }
+    }
+
     return await fs.readFile(filePath, 'utf-8')
   } catch (error) {
     logger.warn('Failed to read secrets file', { path: filePath, error: String(error) })
@@ -513,6 +540,20 @@ ipcMain.handle('restorm:secrets:read', async (_event, filePath: string) => {
 ipcMain.handle('restorm:secrets:write', async (_event, filePath: string, content: string) => {
   try {
     if (!filePath) return { success: false, error: 'Missing path' }
+
+    // Path traversal protection: secrets must be within the opened folder
+    if (isFileServiceInitialized()) {
+      const openedFolder = (getFileService() as { getOpenedFolderPath?: () => string | null }).getOpenedFolderPath?.()
+      if (openedFolder) {
+        try {
+          assertPathWithinParent(openedFolder, filePath)
+        } catch {
+          logger.warn('Blocked secrets:write - path traversal detected', { filePath })
+          return { success: false, error: 'Path traversal detected' }
+        }
+      }
+    }
+
     await fs.mkdir(dirname(filePath), { recursive: true })
     if (content.trim() === '') {
       if (existsSync(filePath)) {
@@ -616,26 +657,37 @@ function writeRestormConfig(folderPath: string, config: RestormConfig): void {
  * Handle rename if the path has changed for an item.
  * Returns the actual path to use (new path after rename, or new path for new items).
  */
-function handleRenameIfNeeded(id: string | undefined, newPath: string, _isDirectory: boolean): string {
+function handleRenameIfNeeded(id: string | undefined, newPath: string, _isDirectory: boolean, basePath?: string): string {
   if (!id) return newPath
-  
+
   const oldPath = folderMappingService.getPath(id)
-  
+
   if (oldPath && oldPath !== newPath && existsSync(oldPath)) {
+    // Path traversal protection: ensure both old and new paths stay within the save root
+    if (basePath) {
+      try {
+        assertPathWithinParent(basePath, oldPath)
+        assertPathWithinParent(basePath, newPath)
+      } catch {
+        logger.warn('Blocked rename - path traversal detected', { oldPath, newPath, basePath })
+        return newPath
+      }
+    }
+
     try {
       // Ensure parent directory exists
       const parentDir = join(newPath, '..')
       if (!existsSync(parentDir)) {
         mkdirSync(parentDir, { recursive: true })
       }
-      
+
       renameSync(oldPath, newPath)
       logger.debug('Renamed item', { from: oldPath, to: newPath })
     } catch (error) {
       logger.warn('Failed to rename, will create new', { oldPath, newPath, error: String(error) })
     }
   }
-  
+
   return newPath
 }
 
@@ -681,7 +733,7 @@ async function saveFolderStructure(
       const newCollectionPath = join(folderPath, `${formatIndex(collIdx, collectionCount)} - ${safeName}`)
       
       // Handle rename if path changed
-      const collectionPath = handleRenameIfNeeded(collectionId, newCollectionPath, true)
+      const collectionPath = handleRenameIfNeeded(collectionId, newCollectionPath, true, folderPath)
       
       if (!existsSync(collectionPath)) {
         mkdirSync(collectionPath, { recursive: true })
@@ -711,7 +763,7 @@ async function saveFolderStructure(
           const newEnvPath = join(envsPath, `${formatIndex(envIdx, envCount)} - ${safeEnvName}.${ext}`)
           
           // Handle rename if path changed
-          const envPath = handleRenameIfNeeded(envId, newEnvPath, false)
+          const envPath = handleRenameIfNeeded(envId, newEnvPath, false, folderPath)
           
           await saveFile(envPath, env, format)
           
@@ -724,7 +776,7 @@ async function saveFolderStructure(
 
       // Save items (folders and requests)
       if (collItems && Array.isArray(collItems)) {
-        await saveFolderItems(collectionPath, collItems as Record<string, unknown>[], format, ext)
+        await saveFolderItems(collectionPath, collItems as Record<string, unknown>[], format, ext, folderPath)
       }
     }
 
@@ -764,13 +816,14 @@ async function saveFolderItems(
   parentPath: string,
   items: Record<string, unknown>[],
   format: PersistenceFormat,
-  ext: string
+  ext: string,
+  basePath?: string
 ): Promise<void> {
   const itemCount = items.length
   for (let idx = 0; idx < itemCount; idx++) {
     const item = items[idx]
     if (!item) continue
-    
+
     const itemId = item['id'] as string | undefined
     const rawName = item['name']
     const itemName = typeof rawName === 'string' ? rawName : `Item_${idx + 1}`
@@ -781,14 +834,14 @@ async function saveFolderItems(
     if (itemType === 'folder' || item['items'] !== undefined) {
       // It's a folder - create subfolder
       const newFolderPath = join(parentPath, `${prefix} - ${safeName}`)
-      
+
       // Handle rename if path changed
-      const folderPath = handleRenameIfNeeded(itemId, newFolderPath, true)
-      
+      const folderPath = handleRenameIfNeeded(itemId, newFolderPath, true, basePath)
+
       if (!existsSync(folderPath)) {
         mkdirSync(folderPath, { recursive: true })
       }
-      
+
       // Mark as seen
       if (itemId) {
         folderMappingService.markAsSeen(itemId, folderPath)
@@ -800,14 +853,14 @@ async function saveFolderItems(
 
       // Recursively save sub-items
       if (subItems && Array.isArray(subItems)) {
-        await saveFolderItems(folderPath, subItems as Record<string, unknown>[], format, ext)
+        await saveFolderItems(folderPath, subItems as Record<string, unknown>[], format, ext, basePath)
       }
     } else {
       // It's a request - save as file
       const newFilePath = join(parentPath, `${prefix} - ${safeName}.${ext}`)
-      
+
       // Handle rename if path changed
-      const filePath = handleRenameIfNeeded(itemId, newFilePath, false)
+      const filePath = handleRenameIfNeeded(itemId, newFilePath, false, basePath)
       
       await saveFile(filePath, item, format)
       
@@ -1292,13 +1345,16 @@ ipcMain.handle('project:list-files', async () => {
 // IPC handler to read a project file (relative to the Restorm workspace root)
 ipcMain.handle('project:read-file', async (_event, relPath: string) => {
   const projectRoot = join(__dirname, '../..')
-  const safePath = join(projectRoot, relPath)
 
-  // Basic safety: ensure resolved path stays under project root
-  if (!safePath.startsWith(projectRoot)) {
+  // Path traversal protection: ensure resolved path stays under project root
+  try {
+    assertPathWithinParent(projectRoot, relPath)
+  } catch {
     logger.warn('Blocked attempt to read file outside project root', { relPath })
     return ''
   }
+
+  const safePath = join(projectRoot, relPath)
 
   try {
     const content = await fs.readFile(safePath, 'utf8')
