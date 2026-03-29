@@ -11,9 +11,6 @@
 import * as fs from 'fs/promises'
 import { logger } from 'electron-core-ui/main'
 import type { EnvironmentFolder, FolderItem } from '../../../shared/models'
-import { importSwaggerFromJson } from './SwaggerImportService'
-import { importPowerShell } from './PowerShellImportService'
-import { importCurl } from './CurlImportService'
 
 // ============================================================================
 // Types
@@ -134,17 +131,23 @@ async function importFromContent(
     let folder: EnvironmentFolder | null = null
     
     switch (format) {
-      case 'swagger':
+      case 'swagger': {
+        const { importSwaggerFromJson } = await import('./SwaggerImportService')
         folder = importSwaggerFromJson(content)
         break
-        
-      case 'curl':
+      }
+
+      case 'curl': {
+        const { importCurl } = await import('./CurlImportService')
         folder = importCurl(content)
         break
-        
-      case 'powershell':
+      }
+
+      case 'powershell': {
+        const { importPowerShell } = await import('./PowerShellImportService')
         folder = importPowerShell(content)
         break
+      }
         
       case 'postman': {
         const { importPostman } = await import('./PostmanImportService')
