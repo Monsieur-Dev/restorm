@@ -227,7 +227,7 @@ if (typeof window !== 'undefined') {
           
           // Make folders reactive
           const reactiveFolders = collectionsWithIds.map(
-            (folder) => reactiveModule.makeReactiveFolder(folder as import('./types/collections').Folder)
+            (folder) => reactiveModule.makeReactiveFolder(folder as import('../../shared/types/collections').Folder)
           )
           
           // Create file state to simulate file opened event

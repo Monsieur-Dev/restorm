@@ -1,5 +1,5 @@
-import type { EnvironmentFolder, FolderItem, Request } from '../types/collections'
-import { isAnyFolder, isRequest } from '../types/collections'
+import type { EnvironmentFolder, FolderItem, Request } from '../../../shared/types/collections'
+import { isAnyFolder, isRequest } from '../../../shared/types/collections'
 
 function getPaddingWidth(count: number): number {
   if (count <= 0) return 1
