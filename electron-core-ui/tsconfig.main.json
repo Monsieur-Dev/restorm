@@ -9,6 +9,10 @@
   "include": [
     "src/main/**/*",
     "src/preload/**/*",
-    "src/types/**/*"
+    "src/types/**/*",
+    "src/errors/**/*"
+  ],
+  "exclude": [
+    "**/*.test.ts"
   ]
 }
