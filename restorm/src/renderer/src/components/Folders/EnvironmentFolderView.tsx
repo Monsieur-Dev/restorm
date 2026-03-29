@@ -515,7 +515,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
   )
 }
 
-export const EnvironmentFolderView: React.FC<EnvironmentFolderViewProps> = ({ folder, onFolderChange }) => {
+const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ folder, onFolderChange }) => {
   const { t } = useTranslation()
 
   // Configuration tab with environment management
@@ -534,5 +534,7 @@ export const EnvironmentFolderView: React.FC<EnvironmentFolderViewProps> = ({ fo
     />
   )
 }
+
+export const EnvironmentFolderView = React.memo(EnvironmentFolderViewInner)
 
 export default EnvironmentFolderView
