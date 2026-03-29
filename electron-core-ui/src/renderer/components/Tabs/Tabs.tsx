@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { ScrollableElement } from '../ScrollableElement'
 import { Modal } from '../Modal'
 
@@ -46,7 +46,7 @@ export interface TabsProps {
   'data-testid'?: string
 }
 
-export const Tabs: React.FC<TabsProps> = ({
+const TabsInner: React.FC<TabsProps> = ({
   tabs,
   activeTabId,
   onTabChange,
@@ -59,24 +59,28 @@ export const Tabs: React.FC<TabsProps> = ({
   const [fullscreenTabId, setFullscreenTabId] = useState<string | null>(null)
   const currentActiveTab = activeTabId ?? internalActiveTab
 
-  const handleTabClick = (tabId: string): void => {
+  const handleTabClick = useCallback((tabId: string): void => {
     setInternalActiveTab(tabId)
     onTabChange?.(tabId)
-  }
+  }, [onTabChange])
 
-  const handleCloseClick = (e: React.MouseEvent, tabId: string): void => {
+  const handleCloseClick = useCallback((e: React.MouseEvent, tabId: string): void => {
     e.stopPropagation()
     onTabClose?.(tabId)
-  }
+  }, [onTabClose])
 
-  const handleTabDoubleClick = (tabId: string, tab: Tab): void => {
+  const handleTabDoubleClick = useCallback((tabId: string, tab: Tab): void => {
     // Call legacy callback if provided
     legacyDoubleClickCallback?.(tabId)
     // Open fullscreen modal if allowed
     if (tab.allowFullscreen) {
       setFullscreenTabId(tabId)
     }
-  }
+  }, [legacyDoubleClickCallback])
+
+  const handleFullscreenClose = useCallback((): void => {
+    setFullscreenTabId(null)
+  }, [])
 
   const fullscreenTab = fullscreenTabId ? tabs.find(tab => tab.id === fullscreenTabId) : null
 
@@ -310,9 +314,7 @@ export const Tabs: React.FC<TabsProps> = ({
       </div>
       <Modal
         isOpen={fullscreenTabId !== null}
-        onClose={() => {
-          setFullscreenTabId(null)
-        }}
+        onClose={handleFullscreenClose}
         title={fullscreenTab?.fullscreenModalTitle ?? fullscreenTab?.label ?? ''}
       >
         {fullscreenTab?.content}
@@ -320,5 +322,8 @@ export const Tabs: React.FC<TabsProps> = ({
     </div>
   )
 }
+
+export const Tabs = React.memo(TabsInner)
+Tabs.displayName = 'Tabs'
 
 export default Tabs
