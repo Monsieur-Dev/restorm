@@ -6,6 +6,7 @@
 import axios from 'axios'
 import type { GraphQLRequest, GraphQLResponse, KeyValue } from '../../../shared/types/collections'
 import { StringValue } from '../../../shared/types/collections'
+import { logger } from 'electron-core-ui/main'
 import type { VariableContext } from './types'
 
 // Re-export for consumers
@@ -93,8 +94,8 @@ export async function executeGraphQLRequest(input: GraphQLRequestInput): Promise
       if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
         variables = parsed as Record<string, unknown>
       }
-    } catch {
-      // Invalid JSON, use empty object
+    } catch (error) {
+      logger.warn('[GraphQLRequestService] Failed to parse JSON metadata', { error: String(error) })
     }
   }
   
