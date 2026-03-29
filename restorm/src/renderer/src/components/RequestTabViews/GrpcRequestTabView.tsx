@@ -14,8 +14,7 @@ import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyVal
 import type { GrpcRequest, GrpcResponse, KeyValue, ResponseHistoryDetail } from '../../types/collections'
 import { StringValue } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
-import type { VariableContext } from '../RestormKeyValueTable'
-import type { GRPCExecutionResult } from '../../types/global.d'
+import type { GRPCExecutionResult, KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { Badge } from '../common/Badge'
@@ -97,7 +96,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
     const currentRequest = requestRef.current
     logger.debug('[GrpcRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
-    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
       kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
 
     void window.restorm?.context.registerRequest(requestId, currentEnvId, {
@@ -160,7 +159,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
 
   // Notify ContextService when URL or request message changes
   useEffect(() => {
-    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
       kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
 
     void window.restorm?.context.updateFullRequestData(request.id, {
@@ -181,9 +180,6 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
     setRequestMessageState(value)
     updateReactiveProperty(request, 'requestMessage', value)
   }, [request])
-  
-  // Variable resolution done in backend
-  const _environmentContext: VariableContext = {}
   
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
@@ -239,20 +235,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
   const handleCancel = (): void => {
     void window.restorm?.grpc.cancel(request.id)
   }
-  
-  // Parse host and port from URL (kept for potential future use)
-  const _hostInfo = useMemo(() => {
-    try {
-      const urlObj = new URL(url.startsWith('http') ? url : `http://${url}`)
-      return {
-        host: urlObj.host,
-        port: urlObj.port || '443'
-      }
-    } catch {
-      return { host: url, port: '443' }
-    }
-  }, [url])
-  
+
   // Request content (SplitView with Message, Metadata)
   const requestContent = (
     <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }} data-testid="grpc-request-content-splitview">

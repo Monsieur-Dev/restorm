@@ -20,11 +20,11 @@ export interface Icon {
 }
 
 export interface KeyValue {
-  id?: RuntimeId
+  id?: RuntimeId | undefined
   key: string
   value: ValueType
   description?: string | undefined
-  enabled?: boolean
+  enabled?: boolean | undefined
 }
 
 export interface Environment {

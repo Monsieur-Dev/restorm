@@ -139,7 +139,7 @@ export interface KeyValueData {
   key: string
   value: string
   /** Whether this key-value is enabled (default: true) */
-  enabled?: boolean
+  enabled?: boolean | undefined
 }
 
 /** Variable transformation result from context service */
@@ -283,7 +283,7 @@ export interface WebSocketExecutionInput {
 export interface WebSocketMessageItem {
   direction: 'sent' | 'received'
   data: string
-  event?: string
+  event?: string | undefined
   timestamp: string
 }
 

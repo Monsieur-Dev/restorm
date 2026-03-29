@@ -14,8 +14,7 @@ import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { WebSocketRequest, WebSocketResponse, WebSocketMessage, KeyValue, ResponseHistoryDetail } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
-import type { VariableContext } from '../RestormKeyValueTable'
-import type { WebSocketExecutionResult, WebSocketMessageItem } from '../../types/global.d'
+import type { WebSocketExecutionResult, WebSocketMessageItem, KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { Badge } from '../common/Badge'
@@ -91,7 +90,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     const currentRequest = requestRef.current
     logger.debug('[WebSocketRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
-    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
       kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
 
     void window.restorm?.context.registerRequest(requestId, currentEnvId, {
@@ -154,7 +153,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
 
   // Notify ContextService when URL, event or message changes
   useEffect(() => {
-    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
       kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
 
     void window.restorm?.context.updateFullRequestData(request.id, {
@@ -179,9 +178,6 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     setMessageState(value)
     updateReactiveProperty(request, 'message', value)
   }, [request])
-  
-  // Variable resolution done in backend
-  const _environmentContext: VariableContext = {}
   
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
@@ -245,20 +241,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     const eventStr = msg.event ? `[${msg.event}] ` : ''
     return `${prefix} ${eventStr}${msg.data}`
   }
-  
-  // Parse host and port from URL (kept for potential future use)
-  const _hostInfo = useMemo(() => {
-    try {
-      const urlObj = new URL(url.replace(/^ws/, 'http'))
-      return {
-        host: urlObj.hostname,
-        port: urlObj.port || (url.startsWith('wss') ? '443' : '80')
-      }
-    } catch {
-      return { host: url, port: '80' }
-    }
-  }, [url])
-  
+
   // Request content (SplitView with Message, Headers)
   const requestContent = (
     <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }} data-testid="websocket-request-split-view">
@@ -326,7 +309,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
 
   const buildWebSocketResponseView = useCallback((
     resp: WebSocketResponse | null,
-    meta?: { protocol?: string; event?: string }
+    meta?: { protocol?: string | undefined; event?: string | undefined }
   ) => {
     const infosContent = resp ? (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>

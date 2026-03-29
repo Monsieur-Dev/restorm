@@ -39,7 +39,7 @@ interface RequestTabWithHistoryProps {
   onBreadcrumbClick?: ((item: BreadcrumbItem, index: number, isLast: boolean) => void) | undefined
   onBreadcrumbRename?: ((item: BreadcrumbItem, newValue: string) => void) | undefined
   tags: string[]
-  onTagsChange?: (nextTags: string[]) => void
+  onTagsChange?: ((nextTags: string[]) => void) | undefined
   label: string
   headerRight?: React.ReactNode
   callout?: RestormWorkbenchTabCallout | undefined
@@ -123,7 +123,7 @@ function getTabTitleString(tab: EditorTab & { titleString?: string }, fallback =
 
 export interface RestormWorkbenchProps {
   tree: WorkbenchTree
-  dirtyItemIdsSet?: Set<string>
+  dirtyItemIdsSet?: Set<string> | undefined
   initialTabContentMap?: Record<string, string>
   onTreeChange?: (tree: WorkbenchTree) => void
   className?: string
@@ -147,7 +147,7 @@ export interface RestormWorkbenchProps {
   /** Callback fired when group sizes change (sash dragging) */
   onSizesChange?: (nodeId: string, sizes: number[]) => void
   /** Unique identifier for workbench persistence (required if autosave is enabled) */
-  workbenchId?: string
+  workbenchId?: string | undefined
   /** Enable automatic save/load of workbench state */
   autosave?: boolean
   /** Callback to rebuild a tab from its ID (required if autosave is enabled) */

@@ -29,7 +29,7 @@ export interface ImportModalProps {
   onClose: () => void
   onImport: (items: FolderItem[], targetFolderId?: string, pendingFolders?: PendingFolder[]) => void
   rootFolder?: EnvironmentFolder
-  selectedFolderId?: string
+  selectedFolderId?: string | undefined
 }
 
 export function ImportModal({

@@ -21,6 +21,7 @@ import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyVal
 import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue, ResponseHistoryDetail } from '../../types/collections'
 import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, type ValueType } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
+import type { KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { Badge } from '../common/Badge'
@@ -228,9 +229,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   }, [request])
 
   // Convert KeyValue arrays to plain objects for IPC
-  const toKeyValueData = useCallback((kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+  const toKeyValueData = useCallback((kvs: KeyValue[]): KeyValueData[] =>
     kvs.map(kv => {
-      const result: { id?: string; key: string; value: string; enabled?: boolean } = { key: kv.key, value: normalizeValueType(kv.value as unknown).toString() }
+      const result: KeyValueData = { key: kv.key, value: normalizeValueType(kv.value as unknown).toString() }
       if (kv.id !== undefined) result.id = kv.id
       if (kv.enabled !== undefined) result.enabled = kv.enabled
       return result
@@ -349,7 +350,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     if (!requestId || requestIdRef.current !== request.id) return
 
     // Build body data
-    let bodyData: { type: string; content?: string; path?: string; fields?: { id?: string; key: string; value: string }[] } | undefined
+    let bodyData: { type: string; content?: string; path?: string; fields?: KeyValueData[] } | undefined
     if (bodyMode === 'text' && body) {
       bodyData = { type: 'text', content: body }
     } else if (bodyMode === 'file' && bodyFilePath) {

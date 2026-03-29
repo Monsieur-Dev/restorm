@@ -8,8 +8,8 @@ export interface ResponseHistoryModalProps {
   isOpen: boolean
   onClose: () => void
   requestId: string
-  requestPath?: string
-  refreshKey?: number
+  requestPath?: string | undefined
+  refreshKey?: number | undefined
   buildResponseView: (detail: ResponseHistoryDetail) => {
     infosContent?: React.ReactNode | undefined
     responseContent?: React.ReactNode | undefined

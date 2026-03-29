@@ -14,8 +14,7 @@ import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyVal
 import type { SoapRequest, SoapResponse, KeyValue, ResponseHistoryDetail } from '../../types/collections'
 import { StringValue } from '../../types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
-import type { VariableContext } from '../RestormKeyValueTable'
-import type { SOAPExecutionResult } from '../../types/global.d'
+import type { SOAPExecutionResult, KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { Badge } from '../common/Badge'
@@ -96,7 +95,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
     const currentRequest = requestRef.current
     logger.debug('[SoapRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
-    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
       kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
 
     void window.restorm?.context.registerRequest(requestId, currentEnvId, {
@@ -159,7 +158,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
 
   // Notify ContextService when URL or body changes
   useEffect(() => {
-    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
       kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
 
     void window.restorm?.context.updateFullRequestData(request.id, {
@@ -180,9 +179,6 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
     setBodyState(value)
     updateReactiveProperty(request, 'body', value)
   }, [request])
-  
-  // Variable resolution done in backend
-  const _environmentContext: VariableContext = {}
   
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])

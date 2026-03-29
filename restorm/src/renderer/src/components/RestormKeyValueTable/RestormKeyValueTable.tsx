@@ -83,7 +83,7 @@ function normalizeValueType(input: unknown): ValueType {
 interface ColorValueCellProps {
   hex: string
   onChangeHex: (nextHex: string) => void
-  dataTestId?: string
+  dataTestId?: string | undefined
 }
 
 const ColorValueCell: React.FC<ColorValueCellProps> = ({ hex, onChangeHex, dataTestId }) => {

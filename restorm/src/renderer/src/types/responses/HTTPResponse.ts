@@ -8,15 +8,15 @@ export interface HTTPResponse extends BaseResponse {
   requestMethod: HTTPMethod
   requestHeaders: KeyValue[]
   requestParams: KeyValue[]
-  requestPathParams?: KeyValue[]
-  requestBody?: HTTPRequestBody
+  requestPathParams?: KeyValue[] | undefined
+  requestBody?: HTTPRequestBody | undefined
   statusCode: number
   statusText: string
   responseHeaders: KeyValue[]
   responseBody: string
-  contentType?: string
-  contentLength?: number
+  contentType?: string | undefined
+  contentLength?: number | undefined
   timings: HTTPTimings
-  network?: HTTPNetworkInfo
-  referrerPolicy?: string
+  network?: HTTPNetworkInfo | undefined
+  referrerPolicy?: string | undefined
 }
