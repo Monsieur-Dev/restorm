@@ -149,7 +149,7 @@ export interface RestormKeyValueTableProps {
   'data-testid'?: string
 }
 
-export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, RestormKeyValueTableProps>((
+const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormKeyValueTableProps>((
   {
     variables,
     helpers = [],
@@ -663,4 +663,6 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
   )
 })
 
-RestormKeyValueTable.displayName = 'RestormKeyValueTable'
+RestormKeyValueTableInner.displayName = 'RestormKeyValueTable'
+
+export const RestormKeyValueTable = React.memo(RestormKeyValueTableInner)
