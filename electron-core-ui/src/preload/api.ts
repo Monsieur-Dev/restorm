@@ -2,12 +2,13 @@ import { ipcRenderer } from 'electron'
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../types/theme'
 import type { FeaturePlatform } from '../types/feature'
 import type { FileServiceState, FileMetadata, SerializationFormat } from '../types/file'
+import type { CoreUiApi } from '../types/api'
 
 /**
  * Core UI API object for window.api
  * This can be imported and reused in other preload scripts
  */
-export const createCoreUIAPI = (): Record<string, unknown> => ({
+export const createCoreUIAPI = (): CoreUiApi => ({
   platform: process.platform,
   
   // Theme API
@@ -94,19 +95,19 @@ export const createCoreUIAPI = (): Record<string, unknown> => ({
     const result: unknown = await ipcRenderer.invoke('tabs:get-current-window-bounds')
     return result as { x: number; y: number; width: number; height: number; windowId: number }
   },
-  createAuxWindow: async (payload: { editorId: string; title: string }, bounds: { x: number; y: number; width?: number; height?: number }): Promise<void> => {
+  createAuxWindow: async (payload: { editorId: string; title: string }, bounds: { x: number; y: number; width?: number | undefined; height?: number | undefined }): Promise<void> => {
     await ipcRenderer.invoke('tabs:create-aux-window', payload, bounds)
   },
   getWindowUnderCursor: async (): Promise<{ windowId: number; bounds: { x: number; y: number; width: number; height: number } } | null> => {
     const result: unknown = await ipcRenderer.invoke('tabs:get-window-under-cursor')
     return result as { windowId: number; bounds: { x: number; y: number; width: number; height: number } } | null
   },
-  sendWorkbenchTabToWindow: async (targetWindowId: number, tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }): Promise<boolean> => {
+  sendWorkbenchTabToWindow: async (targetWindowId: number, tabData: { tabId: string; title: string; groupId: string; content?: string | undefined; cursorX?: number | undefined; cursorY?: number | undefined }): Promise<boolean> => {
     const result: unknown = await ipcRenderer.invoke('tabs:send-workbench-tab-to-window', targetWindowId, tabData)
     return result as boolean
   },
-  onWorkbenchTabDropped: (callback: (tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }) => void): (() => void) => {
-    const handler = (_event: Electron.IpcRendererEvent, tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }): void => {
+  onWorkbenchTabDropped: (callback: (tabData: { tabId: string; title: string; groupId: string; content?: string | undefined; cursorX?: number | undefined; cursorY?: number | undefined }) => void): (() => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, tabData: { tabId: string; title: string; groupId: string; content?: string | undefined; cursorX?: number | undefined; cursorY?: number | undefined }): void => {
       callback(tabData)
     }
     ipcRenderer.on('tabs:workbench-tab-dropped', handler)
@@ -322,12 +323,12 @@ export const createCoreUIAPI = (): Record<string, unknown> => ({
     indexDocument: async (doc: {
       id: string
       title: string
-      description?: string
+      description?: string | undefined
       category: string
-      icon?: string
-      keywords?: string
-      navigation?: Record<string, unknown>
-      metadata?: Record<string, unknown>
+      icon?: string | undefined
+      keywords?: string | undefined
+      navigation?: Record<string, unknown> | undefined
+      metadata?: Record<string, unknown> | undefined
     }): Promise<boolean> => {
       const result: unknown = await ipcRenderer.invoke('search:index-document', doc)
       return result as boolean
@@ -335,12 +336,12 @@ export const createCoreUIAPI = (): Record<string, unknown> => ({
     indexDocuments: async (docs: {
       id: string
       title: string
-      description?: string
+      description?: string | undefined
       category: string
-      icon?: string
-      keywords?: string
-      navigation?: Record<string, unknown>
-      metadata?: Record<string, unknown>
+      icon?: string | undefined
+      keywords?: string | undefined
+      navigation?: Record<string, unknown> | undefined
+      metadata?: Record<string, unknown> | undefined
     }[]): Promise<boolean> => {
       const result: unknown = await ipcRenderer.invoke('search:index-documents', docs)
       return result as boolean
