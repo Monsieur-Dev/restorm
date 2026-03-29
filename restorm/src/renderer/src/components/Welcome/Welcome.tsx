@@ -61,17 +61,20 @@ export const Welcome: React.FC = () => {
             {favorites.length > 0 && (
               <div className="welcome-section">
                 <h3 className="welcome-section-title">
-                  <i className="codicon codicon-star-full welcome-section-icon favorite" />
+                  <i className="codicon codicon-star-full welcome-section-icon favorite" aria-hidden="true" />
                   {t('welcome.favorites')}
                 </h3>
                 <ul className="welcome-file-list">
                   {favorites.map((file) => (
-                    <li 
+                    <li
                       key={file.path}
                       className="welcome-file-item"
+                      role="button"
+                      tabIndex={0}
                       onClick={() => { handleOpenFile(file.path) }}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenFile(file.path) } }}
                     >
-                      <i className="codicon codicon-file welcome-file-icon" />
+                      <i className="codicon codicon-file welcome-file-icon" aria-hidden="true" />
                       <span className="welcome-file-name">{file.name}</span>
                       <span className="welcome-file-path">{file.path}</span>
                       <Button
@@ -80,7 +83,7 @@ export const Welcome: React.FC = () => {
                         secondary
                         className="welcome-favorite-btn is-favorite"
                         onClick={(e) => { handleRemoveFavorite(file.path, file.name, e) }}
-                        options={{ title: t('welcome.removeFromFavorites') }}
+                        options={{ title: t('welcome.removeFromFavorites'), ariaLabel: t('welcome.removeFromFavorites') }}
                         data-testid="remove-favorite-button"
                       />
                     </li>
@@ -93,17 +96,20 @@ export const Welcome: React.FC = () => {
             {recentFiles.length > 0 && (
               <div className="welcome-section">
                 <h3 className="welcome-section-title">
-                  <i className="codicon codicon-history welcome-section-icon" />
+                  <i className="codicon codicon-history welcome-section-icon" aria-hidden="true" />
                   {t('welcome.recentFiles')}
                 </h3>
                 <ul className="welcome-file-list">
                   {recentFiles.map((file) => (
-                    <li 
+                    <li
                       key={file.path}
                       className="welcome-file-item"
+                      role="button"
+                      tabIndex={0}
                       onClick={() => { handleOpenFile(file.path) }}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenFile(file.path) } }}
                     >
-                      <i className="codicon codicon-file welcome-file-icon" />
+                      <i className="codicon codicon-file welcome-file-icon" aria-hidden="true" />
                       <span className="welcome-file-name">{file.name}</span>
                       <span className="welcome-file-path">{file.path}</span>
                       <Button
@@ -112,8 +118,9 @@ export const Welcome: React.FC = () => {
                         secondary
                         className={`welcome-favorite-btn ${isFavorite(file.path) ? 'is-favorite' : ''}`}
                         onClick={(e) => { handleToggleFavorite(file.path, file.name, isFavorite(file.path), e) }}
-                        options={{ 
-                          title: isFavorite(file.path) ? t('welcome.removeFromFavorites') : t('welcome.addToFavorites') 
+                        options={{
+                          title: isFavorite(file.path) ? t('welcome.removeFromFavorites') : t('welcome.addToFavorites'),
+                          ariaLabel: isFavorite(file.path) ? t('welcome.removeFromFavorites') : t('welcome.addToFavorites')
                         }}
                         data-testid="toggle-favorite-button"
                       />
