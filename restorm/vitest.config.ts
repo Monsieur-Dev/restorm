@@ -24,7 +24,13 @@ export default defineConfig({
         '**/node_modules/**',
         '**/tests/**',
         '**/test-results/**'
-      ]
+      ],
+      thresholds: {
+        lines: 25,
+        functions: 20,
+        branches: 15,
+        statements: 25
+      }
     }
   }
 })
