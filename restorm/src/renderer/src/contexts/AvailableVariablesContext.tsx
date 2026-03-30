@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useRef } from 'react'
+import React, { useEffect, useCallback, useRef, useMemo } from 'react'
 import { AvailableVariablesContext, type VariableDefinition } from './availableVariablesContextValue'
 
 interface AvailableVariablesProviderProps {
@@ -68,8 +68,10 @@ export function AvailableVariablesProvider({ children }: AvailableVariablesProvi
     }
   }, [])
 
+  const contextValue = useMemo(() => ({ getVariables, subscribe }), [getVariables, subscribe])
+
   return (
-    <AvailableVariablesContext.Provider value={{ getVariables, subscribe }}>
+    <AvailableVariablesContext.Provider value={contextValue}>
       {children}
     </AvailableVariablesContext.Provider>
   )
