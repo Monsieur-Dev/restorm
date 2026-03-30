@@ -27,25 +27,13 @@ import { getResponseHistoryList } from '../../services/GraphQLIntegration'
 import { normalizeValueType } from '../../utils/normalizeValueType'
 import { buildHttpResponseViewData } from './HTTPResponsePanel'
 import { HTTPRequestBodySection } from './HTTPRequestBodySection'
-
-// Helper to update reactive proxy properties (intentional mutation for reactive objects)
-function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
-  Object.assign(obj, { [key]: value })
-}
+import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabViewUtils'
 
 export interface HTTPRequestTabViewProps {
   request: HTTPRequest
   historyModalOpen?: boolean
   onCloseHistoryModal?: () => void
   onHistoryAvailabilityChange?: (hasHistory: boolean) => void
-}
-
-function toKeyValuesFromHistory(values: { key: string; value: string; enabled?: boolean }[]): KeyValue[] {
-  return values.map((kv) => ({
-    key: kv.key,
-    value: new StringValue(kv.value),
-    enabled: kv.enabled
-  }))
 }
 
 function buildRequestBodyFromHistory(body: { type: string; content?: string; path?: string; fields?: { key: string; value: string; enabled?: boolean }[] } | undefined): HTTPResponse['requestBody'] {
