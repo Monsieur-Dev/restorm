@@ -8,10 +8,10 @@ import {
   EnvironmentFolder,
   Environment,
   HTTPRequest,
-  type HTTPMethod,
   type HTTPRequestBody,
   type KeyValue
 } from '../../../shared/models'
+import { toHTTPMethod } from './httpMethodValidator'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 
 // Import templates as raw strings
@@ -407,16 +407,6 @@ function buildGlobalModelsDiagram(spec: SwaggerSpec): string | undefined {
   }
 
   return lines.join('\n')
-}
-
-/** Convert Swagger HTTP method to HTTPMethod type */
-function toHTTPMethod(method: string): HTTPMethod {
-  const upper = method.toUpperCase()
-  const validMethods: HTTPMethod[] = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']
-  if (validMethods.includes(upper as HTTPMethod)) {
-    return upper as HTTPMethod
-  }
-  return 'GET'
 }
 
 /** Extract body from Swagger parameters */
