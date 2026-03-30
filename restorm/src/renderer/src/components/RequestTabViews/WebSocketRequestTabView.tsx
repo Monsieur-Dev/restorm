@@ -22,11 +22,7 @@ import { mapToBadgeType } from '../../utils/badgeUtils'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
 import { getResponseHistoryList } from '../../services/GraphQLIntegration'
-
-// Helper to update reactive proxy properties (intentional mutation for reactive objects)
-function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
-  Object.assign(obj, { [key]: value })
-}
+import { updateReactiveProperty } from './requestTabViewUtils'
 
 export interface WebSocketRequestTabViewProps {
   request: WebSocketRequest
