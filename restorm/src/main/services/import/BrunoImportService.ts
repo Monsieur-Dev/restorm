@@ -19,12 +19,12 @@ import {
   Environment,
   HTTPRequest,
   GraphQLRequest,
-  type HTTPMethod,
   type HTTPRequestBody,
   type KeyValue,
   type Request,
   type FolderItem
 } from '../../../shared/models'
+import { toHTTPMethod } from './httpMethodValidator'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 
 // ============================================================================
@@ -357,17 +357,6 @@ function generateId(seed?: string): string {
   }
   const hex = Math.abs(hash).toString(16).padStart(8, '0')
   return `${hex}-${seed.length.toString(16).padStart(4, '0')}-4000-8000-${hex}${hex.slice(0, 4)}`
-}
-
-/** Convert Bruno HTTP method to HTTPMethod type */
-function toHTTPMethod(method?: string): HTTPMethod {
-  if (!method) return 'GET'
-  const upper = method.toUpperCase()
-  const validMethods: HTTPMethod[] = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']
-  if (validMethods.includes(upper as HTTPMethod)) {
-    return upper as HTTPMethod
-  }
-  return 'GET'
 }
 
 /** Convert Bruno body to HTTPRequestBody */
