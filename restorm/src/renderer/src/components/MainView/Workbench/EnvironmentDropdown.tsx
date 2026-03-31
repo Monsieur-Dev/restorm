@@ -53,6 +53,12 @@ function findEnvironmentById(environments: Environment[], id: string): Environme
 export const EnvironmentDropdown: React.FC = () => {
   const { t } = useTranslation()
   const { environments, selectedEnvId, setSelectedEnvId } = useEnvironmentContext()
+
+  const allEnvironmentIds = useMemo(
+    () => (environments && environments.length > 0 ? collectEnvironmentIds(environments) : []),
+    [environments]
+  )
+
   const [expandedIds, setExpandedIds] = useState<string[]>(() =>
     environments && environments.length > 0 ? collectEnvironmentIds(environments) : []
   )
@@ -61,7 +67,7 @@ export const EnvironmentDropdown: React.FC = () => {
   useEffect(() => {
     const rafId = requestAnimationFrame(() => {
       if (environments && environments.length > 0) {
-        setExpandedIds(collectEnvironmentIds(environments))
+        setExpandedIds(allEnvironmentIds)
         // Keep current selected environment if still present (including sub-environments), otherwise default to first
         if (!selectedEnvId || !findEnvironmentById(environments, selectedEnvId)) {
           setSelectedEnvId(environments[0]?.id ?? null)
@@ -72,7 +78,7 @@ export const EnvironmentDropdown: React.FC = () => {
       }
     })
     return (): void => { cancelAnimationFrame(rafId) }
-  }, [environments, selectedEnvId, setSelectedEnvId])
+  }, [environments, selectedEnvId, setSelectedEnvId, allEnvironmentIds])
 
   const items = useMemo(
     () => (environments && environments.length > 0 ? environmentsToListViewItems(environments, expandedIds) : []),

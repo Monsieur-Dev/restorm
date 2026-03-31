@@ -376,11 +376,16 @@ const App: React.FC = () => {
     })()
   }, [workbenchId, rootItems, hasRestoredWorkbenchRef, workbenchRef])
 
+  // Memoize environment folder collections to avoid creating new arrays on every render
+  const environmentFolderCollections = useMemo(
+    () => rootItems.filter(isEnvironmentFolder),
+    [rootItems]
+  )
+
   // Keep collections store in sync for request path resolution
   useEffect(() => {
-    const collections = rootItems.filter(isEnvironmentFolder)
-    setCollections(collections, 'user')
-  }, [rootItems, setCollections])
+    setCollections(environmentFolderCollections, 'user')
+  }, [environmentFolderCollections, setCollections])
 
   // Listen to test events for E2E tests (only in dev/test mode)
   // Expose handleFileOpened directly on window for E2E tests
@@ -447,7 +452,7 @@ const App: React.FC = () => {
       return
     }
     if (requestPathCacheRef.current.size > 0) return
-    const collections = rootItems.filter(isEnvironmentFolder)
+    const collections = environmentFolderCollections
     const requestIds: string[] = []
     const collectRequestIds = (items: FolderItem[]): void => {
       for (const item of items) {
@@ -467,7 +472,7 @@ const App: React.FC = () => {
         requestPathCacheRef.current.set(requestId, requestPath)
       }
     }
-  }, [fileName, rootItems])
+  }, [fileName, rootItems, environmentFolderCollections])
   useEffect(() => {
     // Detect save: was dirty, now not dirty
     if (wasDirtyRef.current && !isDirty && fileName) {
@@ -494,8 +499,7 @@ const App: React.FC = () => {
       updateTabDirtyChecksum(payload.id, newChecksum)
 
       if (payload.type === 'request') {
-        const collections = rootItems.filter(isEnvironmentFolder)
-        const requestPath = buildRequestPath(collections, payload.id)
+        const requestPath = buildRequestPath(environmentFolderCollections, payload.id)
         if (requestPath) {
           const cachedPath = requestPathCacheRef.current.get(payload.id)
           if (cachedPath === requestPath) {
@@ -557,7 +561,7 @@ const App: React.FC = () => {
         sub.unsubscribe()
       }
     }
-  }, [updateTabDirtyChecksum, rootItems])
+  }, [updateTabDirtyChecksum, rootItems, environmentFolderCollections])
 
   // Dirty state is now handled by FileService in the main process
   // It subscribes to DocumentEvents and compares checksums automatically
