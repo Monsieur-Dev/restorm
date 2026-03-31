@@ -23,6 +23,7 @@ import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
 import { getResponseHistoryList } from '../../services/GraphQLIntegration'
 import { updateReactiveProperty } from './requestTabViewUtils'
+import { DEFAULT_WS_TIMEOUT_MS } from '../../../../shared/config/constants'
 
 export interface WebSocketRequestTabViewProps {
   request: WebSocketRequest
@@ -195,7 +196,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     
     window.restorm?.websocket.connect({
       requestId: request.id,
-      timeout: 5000,
+      timeout: DEFAULT_WS_TIMEOUT_MS,
       ...(requestPath ? { requestPath } : {})
     })
       .then((res: WebSocketExecutionResult) => {

@@ -8,6 +8,7 @@ import type { SoapRequest, SoapResponse, KeyValue } from '../../../shared/types/
 import { StringValue } from '../../../shared/types/collections'
 import type { VariableContext } from './types'
 import { resolveTemplate } from './resolveTemplate'
+import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../shared/config/constants'
 
 /** Input for executing a SOAP request */
 export interface SoapRequestInput {
@@ -103,7 +104,7 @@ export async function executeSoapRequest(input: SoapRequestInput): Promise<SoapR
       headers: headersObj,
       validateStatus: () => true,
       responseType: 'text',
-      timeout: 30000
+      timeout: DEFAULT_REQUEST_TIMEOUT_MS
     })
     
     const durationMs = Date.now() - startTime

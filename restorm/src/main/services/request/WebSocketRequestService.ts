@@ -6,6 +6,7 @@
 import type { WebSocketRequest, WebSocketResponse, WebSocketMessage, KeyValue } from '../../../shared/types/collections'
 import type { VariableContext } from './types'
 import { resolveTemplate } from './resolveTemplate'
+import { DEFAULT_WS_TIMEOUT_MS } from '../../../shared/config/constants'
 
 /** Input for executing a WebSocket request */
 export interface WebSocketRequestInput {
@@ -187,7 +188,7 @@ export function getActiveConnections(): WebSocketConnection[] {
  */
 export async function executeWebSocketRequest(
   input: WebSocketRequestInput,
-  timeoutMs = 5000
+  timeoutMs = DEFAULT_WS_TIMEOUT_MS
 ): Promise<WebSocketResponse> {
   const startTime = Date.now()
   const startedAt = new Date().toISOString()

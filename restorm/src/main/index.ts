@@ -8,6 +8,7 @@ import { clearUserSettings, parseCliArgs } from './cli/args'
 import { setupGraphQL } from './GraphQLSetup'
 import { registerRestormIPC } from './IPCHandlers'
 import { loadFolderStructure } from './FileOperations'
+import { DEFAULT_UI_DELAY_MS } from '../shared/config/constants'
 // DocumentEvents are handled by FileService internally for dirty state tracking
 
 const cliArgs = parseCliArgs()
@@ -107,7 +108,7 @@ function createWindow(): void {
             } else {
               logger.warn('FileService not initialized, cannot open file')
             }
-          }, 3000)
+          }, DEFAULT_UI_DELAY_MS)
         })
       }
     }

@@ -23,6 +23,7 @@ import { Badge } from '../common/Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
+import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
 import { getResponseHistoryList } from '../../services/GraphQLIntegration'
 import { normalizeValueType } from '../../utils/normalizeValueType'
 import { buildHttpResponseViewData } from './HTTPResponsePanel'
@@ -370,7 +371,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     window.restorm?.http.execute({
       requestId,
       method,
-      timeout: 30000,
+      timeout: DEFAULT_REQUEST_TIMEOUT_MS,
       ...(requestPath ? { requestPath } : {})
     })
       .then((result) => {

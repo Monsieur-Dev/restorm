@@ -9,6 +9,7 @@ import { StringValue } from '../../../shared/types/collections'
 import { logger } from 'electron-core-ui/main'
 import type { VariableContext } from './types'
 import { resolveTemplate } from './resolveTemplate'
+import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../shared/config/constants'
 
 // Re-export for consumers
 export type { VariableContext } from './types'
@@ -105,7 +106,7 @@ export async function executeGraphQLRequest(input: GraphQLRequestInput): Promise
     const response = await axios.post(resolvedUrl, payload, {
       headers: headersObj,
       validateStatus: () => true,
-      timeout: 30000
+      timeout: DEFAULT_REQUEST_TIMEOUT_MS
     })
     
     const durationMs = Date.now() - startTime
