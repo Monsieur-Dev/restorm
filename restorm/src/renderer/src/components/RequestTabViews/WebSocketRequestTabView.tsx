@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import { useRequestReset } from '../../hooks/useRequestReset'
 import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
@@ -57,21 +58,14 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
   
   const headersRef = useRef<KeyValueTableHandle | null>(null)
-  const requestIdRef = useRef(request.id)
-  
-  useEffect(() => {
-    if (requestIdRef.current !== request.id) {
-      requestIdRef.current = request.id
-      const rafId = requestAnimationFrame(() => {
-        setUrlState(request.url)
-        setEventState(request.event ?? '')
-        setMessageState(request.message)
-        setResponse(null)
-      })
-      return (): void => { cancelAnimationFrame(rafId) }
-    }
-    return undefined
+
+  const handleRequestReset = useCallback(() => {
+    setUrlState(request.url)
+    setEventState(request.event ?? '')
+    setMessageState(request.message)
+    setResponse(null)
   }, [request])
+  useRequestReset(request, handleRequestReset)
 
   // Refs to capture initial values for registration (avoid re-running effect when these change)
   const selectedEnvIdRef = useRef(selectedEnvId)

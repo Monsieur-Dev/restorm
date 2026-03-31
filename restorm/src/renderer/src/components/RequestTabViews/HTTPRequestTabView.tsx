@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
+import { useRequestReset } from '../../hooks/useRequestReset'
 import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
@@ -116,21 +117,17 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   const requestIdRef = useRef<string>(request.id)
 
   // Reset local state when switching to a different request
-  useEffect(() => {
-    if (requestIdRef.current !== request.id) {
-      requestIdRef.current = request.id
-      const rafId = requestAnimationFrame(() => {
-        setMethod(request.method)
-        setUrl(request.url)
-        setBody(getBodyContent(request))
-        setBodyMode(getBodyMode(request))
-        setBodyFilePath(getBodyFilePath(request))
-        setHttpResponse(null)
-      })
-      return (): void => { cancelAnimationFrame(rafId) }
-    }
-    return undefined
+  const handleRequestReset = useCallback(() => {
+    setMethod(request.method)
+    setUrl(request.url)
+    setBody(getBodyContent(request))
+    setBodyMode(getBodyMode(request))
+    setBodyFilePath(getBodyFilePath(request))
+    setHttpResponse(null)
   }, [request])
+  useRequestReset(request, handleRequestReset)
+  // Keep requestIdRef in sync for guard checks in other effects
+  useEffect(() => { requestIdRef.current = request.id }, [request.id])
 
   // Convert KeyValue arrays to plain objects for IPC
   const toKeyValueData = useCallback((kvs: KeyValue[]): KeyValueData[] =>
