@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { type CSSProperties, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
@@ -12,6 +12,14 @@ import type { HTTPRequest, KeyValue } from '../../../../shared/types/collections
 import type { TranslatedHelperDefinition } from '../../utils/handlebarsHelpersDefinitions'
 
 export type BodyMode = 'text' | 'form-data' | 'x-www-form-urlencoded' | 'file'
+
+const bodyContainerStyle: CSSProperties = { height: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: 8, minHeight: 0 }
+const flexFillStyle: CSSProperties = { flex: 1, minHeight: 0 }
+const editorContainerStyle: CSSProperties = { height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3, boxSizing: 'border-box' }
+const fileRowStyle: CSSProperties = { display: 'flex', alignItems: 'center', gap: 8 }
+const fileLabelStyle: CSSProperties = { flexShrink: 0, fontSize: 12 }
+const fileInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
+const BODY_MODES: BodyMode[] = ['text', 'form-data', 'x-www-form-urlencoded', 'file']
 
 export interface HTTPRequestBodySectionProps {
   bodyMode: BodyMode
@@ -41,27 +49,23 @@ export const HTTPRequestBodySection: React.FC<HTTPRequestBodySectionProps> = ({
   const { t } = useTranslation()
 
   const handleSelect = useCallback((index: number) => {
-    const modes: BodyMode[] = ['text', 'form-data', 'x-www-form-urlencoded', 'file']
-    onBodyModeChange(modes[index] ?? 'text')
+    onBodyModeChange(BODY_MODES[index] ?? 'text')
   }, [onBodyModeChange])
 
+  const radioItems = useMemo(() => ({
+    items: BODY_MODES.map((mode) => ({ text: mode, isActive: bodyMode === mode }))
+  }), [bodyMode])
+
   return (
-    <div style={{ height: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: 8, minHeight: 0 }}>
+    <div style={bodyContainerStyle}>
       <RadioGroup
-        options={{
-          items: [
-            { text: 'text', isActive: bodyMode === 'text' },
-            { text: 'form-data', isActive: bodyMode === 'form-data' },
-            { text: 'x-www-form-urlencoded', isActive: bodyMode === 'x-www-form-urlencoded' },
-            { text: 'file', isActive: bodyMode === 'file' }
-          ]
-        }}
+        options={radioItems}
         data-testid="http-request-body-mode-radio"
         onSelect={handleSelect}
       />
-      <div style={{ flex: 1, minHeight: 0 }}>
+      <div style={flexFillStyle}>
         {bodyMode === 'text' && (
-          <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3, boxSizing: 'border-box' }}>
+          <div style={editorContainerStyle}>
             <CodeEditor
               height="100%"
               language="json"
@@ -82,9 +86,9 @@ export const HTTPRequestBodySection: React.FC<HTTPRequestBodySectionProps> = ({
           />
         )}
         {bodyMode === 'file' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ flexShrink: 0, fontSize: 12 }}>{t('requestTab.body.fileLabel')}</span>
-            <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={fileRowStyle}>
+            <span style={fileLabelStyle}>{t('requestTab.body.fileLabel')}</span>
+            <div style={fileInputWrapperStyle}>
               <InputBox options={{ placeholder: '', type: 'text' }} value={bodyFilePath} onChange={(value: string) => { onBodyFilePathChange(value) }} data-testid="http-request-body-file-input" />
             </div>
             <Button options={{ ariaLabel: t('requestTab.body.browse'), title: t('requestTab.body.browse') }} data-testid="http-request-body-browse-button">
