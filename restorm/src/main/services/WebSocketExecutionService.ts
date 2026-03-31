@@ -7,6 +7,7 @@ import WebSocket from 'ws'
 import { BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
+import { DEFAULT_WS_TIMEOUT_MS } from '../../shared/config/constants'
 
 /** WebSocket request execution input */
 export interface WebSocketExecutionInput {
@@ -54,7 +55,7 @@ class WebSocketExecutionService {
    * Connect to a WebSocket endpoint and send a message
    */
   async execute(input: WebSocketExecutionInput): Promise<WebSocketExecutionResult> {
-    const { requestId, timeout = 5000 } = input
+    const { requestId, timeout = DEFAULT_WS_TIMEOUT_MS } = input
     const startTime = Date.now()
     const startedAt = new Date().toISOString()
 

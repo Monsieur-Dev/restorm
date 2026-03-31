@@ -12,6 +12,7 @@ import type {
   HTTPMethod
 } from '../../../shared/types/collections'
 import { StringValue } from '../../../shared/types/collections'
+import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../shared/config/constants'
 import type { VariableContext } from './types'
 import { resolveTemplate } from './resolveTemplate'
 
@@ -263,7 +264,7 @@ export async function executeHTTPRequest(input: HTTPRequestInput): Promise<HTTPR
     // Get response as text to preserve original format
     responseType: 'text',
     // Include timing info
-    timeout: 30000
+    timeout: DEFAULT_REQUEST_TIMEOUT_MS
   }
 
   try {
