@@ -3,10 +3,19 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
 import rehypeHighlight from 'rehype-highlight'
-import mermaid from 'mermaid'
-
 import './markdownViewer.css'
 import 'highlight.js/styles/vs2015.css'
+
+type MermaidAPI = typeof import('mermaid').default
+let mermaidInstance: MermaidAPI | undefined
+
+async function getMermaid(): Promise<MermaidAPI> {
+  if (!mermaidInstance) {
+    const mod = await import('mermaid')
+    mermaidInstance = mod.default
+  }
+  return mermaidInstance
+}
 
 interface CodeBlockProps {
   children: React.ReactNode
@@ -107,6 +116,9 @@ const MermaidBlock: React.FC<MermaidBlockProps> = ({ code, isDark, dataTestId })
     const render = async (): Promise<void> => {
       try {
         setIsRendered(false)
+        // Lazy-load mermaid only when a diagram is actually rendered.
+        const mermaid = await getMermaid()
+
         // Initialize Mermaid with a theme matching the current theme.
         // We re-apply the config on each render to react to theme changes.
         mermaid.initialize({
