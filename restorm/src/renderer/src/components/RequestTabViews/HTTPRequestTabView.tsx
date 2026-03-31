@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
+import React, { type CSSProperties, useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
@@ -28,6 +28,11 @@ import { normalizeValueType } from '../../utils/normalizeValueType'
 import { buildHttpResponseViewData } from './HTTPResponsePanel'
 import { HTTPRequestBodySection } from './HTTPRequestBodySection'
 import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabViewUtils'
+
+const authPaneContentStyle: CSSProperties = { height: '100%', boxSizing: 'border-box', padding: 8 }
+const urlRowStyle: CSSProperties = { display: 'flex', alignItems: 'center', gap: 8 }
+const methodSelectWrapperStyle: CSSProperties = { width: 90, flexShrink: 0 }
+const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0, paddingLeft: 15 }
 
 export interface HTTPRequestTabViewProps {
   request: HTTPRequest
@@ -468,7 +473,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         minSize={120}
         data-testid="http-request-authorization-pane"
       >
-        <div style={{ height: '100%', boxSizing: 'border-box', padding: 8 }}>
+        <div style={authPaneContentStyle}>
           {/* Authorization configuration UI will be added here */}
         </div>
       </Pane>
@@ -612,8 +617,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
 
   // URL section
   const urlSection = (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <div style={{ width: 90, flexShrink: 0 }}>
+    <div style={urlRowStyle}>
+      <div style={methodSelectWrapperStyle}>
         <SelectBox
           id="http-method-select"
           className=""
@@ -624,7 +629,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           data-testid="http-request-method-select"
         />
       </div>
-      <div style={{ flex: 1, minWidth: 0, paddingLeft: 15 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
+      <div style={urlInputWrapperStyle} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
         <RestormVariableInputBox
           value={url}
           onChange={(value: string) => { setUrl(value) }}

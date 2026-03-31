@@ -1,10 +1,18 @@
-import { type ReactNode } from 'react'
+import { type CSSProperties, type ReactNode } from 'react'
 import {
   CodeEditor,
   ListView,
   type ListViewItemData
 } from 'electron-core-ui/renderer'
 import type { HTTPResponse, KeyValue } from '../../../../shared/types/collections'
+
+const flexRowStyle: CSSProperties = { display: 'flex', gap: 8 }
+const boldLabelStyle: CSSProperties = { fontWeight: 600 }
+const kvKeyStyle: CSSProperties = { fontWeight: 600, color: 'var(--symbolIcon-propertyForeground)' }
+const kvValueStyle: CSSProperties = { color: 'var(--descriptionForeground)' }
+const fullHeightBoxStyle: CSSProperties = { height: '100%', boxSizing: 'border-box' }
+const editorContainerStyle: CSSProperties = { height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3, boxSizing: 'border-box' }
+const errorTextStyle: CSSProperties = { color: 'var(--testing-iconFailed)' }
 
 /** Format duration in a human-readable way */
 function formatDuration(ms: number): string {
@@ -32,9 +40,9 @@ function keyValuesToListItems(keyValues: KeyValue[], prefix: string): ListViewIt
     id: `${prefix}-${index}`,
     icon: 'blank',
     title: (
-      <span style={{ display: 'flex', gap: 8 }}>
-        <span style={{ fontWeight: 600, color: 'var(--symbolIcon-propertyForeground)' }}>{kv.key}</span>
-        <span style={{ color: 'var(--descriptionForeground)' }}>{kv.value.toString()}</span>
+      <span style={flexRowStyle}>
+        <span style={kvKeyStyle}>{kv.key}</span>
+        <span style={kvValueStyle}>{kv.value.toString()}</span>
       </span>
     )
   }))
@@ -51,19 +59,19 @@ export function buildHttpResponseViewData(response: HTTPResponse | null): HTTPRe
   const generalItems: ListViewItemData[] = []
   if (response) {
     generalItems.push(
-      { id: 'general-request-url', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Request URL</span><span>{response.requestUrl}</span></span> },
-      { id: 'general-request-method', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Request Method</span><span>{response.requestMethod}</span></span> },
-      { id: 'general-status-code', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Status Code</span><span style={{ color: getStatusColor(response.statusCode) === 'green' ? 'var(--testing-iconPassed)' : getStatusColor(response.statusCode) === 'orange' ? 'var(--editorWarning-foreground)' : 'var(--testing-iconFailed)' }}>{response.statusCode} {response.statusText}</span></span> },
-      { id: 'general-duration', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Duration</span><span>{formatDuration(response.timings.durationMs)}</span></span> }
+      { id: 'general-request-url', icon: 'blank', title: <span style={flexRowStyle}><span style={boldLabelStyle}>Request URL</span><span>{response.requestUrl}</span></span> },
+      { id: 'general-request-method', icon: 'blank', title: <span style={flexRowStyle}><span style={boldLabelStyle}>Request Method</span><span>{response.requestMethod}</span></span> },
+      { id: 'general-status-code', icon: 'blank', title: <span style={flexRowStyle}><span style={boldLabelStyle}>Status Code</span><span style={{ color: getStatusColor(response.statusCode) === 'green' ? 'var(--testing-iconPassed)' : getStatusColor(response.statusCode) === 'orange' ? 'var(--editorWarning-foreground)' : 'var(--testing-iconFailed)' }}>{response.statusCode} {response.statusText}</span></span> },
+      { id: 'general-duration', icon: 'blank', title: <span style={flexRowStyle}><span style={boldLabelStyle}>Duration</span><span>{formatDuration(response.timings.durationMs)}</span></span> }
     )
     if (response.contentType) {
-      generalItems.push({ id: 'general-content-type', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Content-Type</span><span>{response.contentType}</span></span> })
+      generalItems.push({ id: 'general-content-type', icon: 'blank', title: <span style={flexRowStyle}><span style={boldLabelStyle}>Content-Type</span><span>{response.contentType}</span></span> })
     }
     if (response.contentLength !== undefined) {
-      generalItems.push({ id: 'general-content-length', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Content-Length</span><span>{formatBytes(response.contentLength)}</span></span> })
+      generalItems.push({ id: 'general-content-length', icon: 'blank', title: <span style={flexRowStyle}><span style={boldLabelStyle}>Content-Length</span><span>{formatBytes(response.contentLength)}</span></span> })
     }
     if (response.error) {
-      generalItems.push({ id: 'general-error', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Error</span><span style={{ color: 'var(--testing-iconFailed)' }}>{response.error}</span></span> })
+      generalItems.push({ id: 'general-error', icon: 'blank', title: <span style={flexRowStyle}><span style={boldLabelStyle}>Error</span><span style={errorTextStyle}>{response.error}</span></span> })
     }
   }
 
@@ -76,7 +84,7 @@ export function buildHttpResponseViewData(response: HTTPResponse | null): HTTPRe
   ]
 
   const infosContent = response ? (
-    <div style={{ height: '100%', boxSizing: 'border-box' }}>
+    <div style={fullHeightBoxStyle}>
       <ListView items={headersTreeItems} rootRole="tree" ariaLabel="HTTP request and response headers" data-testid="http-response-headers-list" />
     </div>
   ) : null
@@ -96,7 +104,7 @@ export function buildHttpResponseViewData(response: HTTPResponse | null): HTTPRe
   })()
 
   const responseContent = response && formattedResponseBody ? (
-    <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3, boxSizing: 'border-box' }}>
+    <div style={editorContainerStyle}>
       <CodeEditor
         height="100%"
         language="json"
