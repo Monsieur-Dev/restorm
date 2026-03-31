@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { useRequestReset } from '../../hooks/useRequestReset'
 import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
@@ -55,21 +56,14 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
   
   const headersRef = useRef<KeyValueTableHandle | null>(null)
-  const requestIdRef = useRef(request.id)
-  
-  useEffect(() => {
-    if (requestIdRef.current !== request.id) {
-      requestIdRef.current = request.id
-      const rafId = requestAnimationFrame(() => {
-        setUrlState(request.url)
-        setQueryState(request.query)
-        setVariablesState(request.variables ?? '{}')
-        setResponse(null)
-      })
-      return (): void => { cancelAnimationFrame(rafId) }
-    }
-    return undefined
+
+  const handleRequestReset = useCallback(() => {
+    setUrlState(request.url)
+    setQueryState(request.query)
+    setVariablesState(request.variables ?? '{}')
+    setResponse(null)
   }, [request])
+  useRequestReset(request, handleRequestReset)
 
   // Refs to capture initial values for registration (avoid re-running effect when these change)
   const selectedEnvIdRef = useRef(selectedEnvId)
