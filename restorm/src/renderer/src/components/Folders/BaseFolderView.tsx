@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Tabs,
@@ -39,6 +39,10 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
   const defaultTabId = defaultActiveTabId ?? additionalTabs[0]?.id ?? 'docs'
   const [activeTabId, setActiveTabId] = useState<string>(defaultTabId)
 
+  const handleNotesChange = useCallback((markdown: string): void => {
+    updateReactiveProperty(folder, 'notes', markdown)
+  }, [folder])
+
   const docsTabs: Tab[] = [
     {
       id: 'docs',
@@ -58,9 +62,7 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
       content: (
         <MarkdownEditor
           initialValue={folder.notes ?? ''}
-          onChange={(markdown): void => {
-            updateReactiveProperty(folder, 'notes', markdown)
-          }}
+          onChange={handleNotesChange}
           data-testid={`${testIdBase}-markdown-editor-notes`}
         />
       )

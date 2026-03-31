@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   ListViewDropdown,
@@ -88,6 +88,21 @@ export const EnvironmentDropdown: React.FC = () => {
 
   const selectedEnvironmentName = selectedEnvironment?.name ?? t('requestTab.environmentSelector.noEnvironment')
 
+  const handleItemClick = useCallback((payload: { item: ListViewItemData }) => {
+    const id = payload.item.id
+    if (id) {
+      setSelectedEnvId(id)
+    }
+  }, [setSelectedEnvId])
+
+  const handleItemToggle = useCallback((payload: { item: ListViewItemData }, expanded: boolean) => {
+    const id = payload.item.id
+    if (!id) return
+    setExpandedIds((prev) =>
+      expanded ? Array.from(new Set([...prev, id])) : prev.filter((existingId) => existingId !== id)
+    )
+  }, [])
+
   if (!environments || environments.length === 0) {
     return null
   }
@@ -124,19 +139,8 @@ export const EnvironmentDropdown: React.FC = () => {
             <i className="codicon codicon-chevron-down" aria-hidden="true" />
           </>
         }
-        onItemClick={(payload) => {
-          const id = payload.item.id
-          if (id) {
-            setSelectedEnvId(id)
-          }
-        }}
-        onItemToggle={(payload, expanded) => {
-          const id = payload.item.id
-          if (!id) return
-          setExpandedIds((prev) =>
-            expanded ? Array.from(new Set([...prev, id])) : prev.filter((existingId) => existingId !== id)
-          )
-        }}
+        onItemClick={handleItemClick}
+        onItemToggle={handleItemToggle}
       />
     </div>
   )

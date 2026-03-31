@@ -1,3 +1,4 @@
+import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
@@ -39,6 +40,11 @@ export const HTTPRequestBodySection: React.FC<HTTPRequestBodySectionProps> = ({
 }) => {
   const { t } = useTranslation()
 
+  const handleSelect = useCallback((index: number) => {
+    const modes: BodyMode[] = ['text', 'form-data', 'x-www-form-urlencoded', 'file']
+    onBodyModeChange(modes[index] ?? 'text')
+  }, [onBodyModeChange])
+
   return (
     <div style={{ height: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: 8, minHeight: 0 }}>
       <RadioGroup
@@ -51,10 +57,7 @@ export const HTTPRequestBodySection: React.FC<HTTPRequestBodySectionProps> = ({
           ]
         }}
         data-testid="http-request-body-mode-radio"
-        onSelect={(index: number) => {
-          const modes: BodyMode[] = ['text', 'form-data', 'x-www-form-urlencoded', 'file']
-          onBodyModeChange(modes[index] ?? 'text')
-        }}
+        onSelect={handleSelect}
       />
       <div style={{ flex: 1, minHeight: 0 }}>
         {bodyMode === 'text' && (
