@@ -178,15 +178,17 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   // Refs to capture initial values for registration (avoid re-running effect when these change)
   const selectedEnvIdRef = useRef(selectedEnvId)
   const requestRef = useRef(request)
+  const environmentsRef = useRef(environments)
   useEffect(() => { selectedEnvIdRef.current = selectedEnvId }, [selectedEnvId])
   useEffect(() => { requestRef.current = request }, [request])
+  useEffect(() => { environmentsRef.current = environments }, [environments])
 
   // Register request with ContextService on mount, unregister on unmount
   useEffect(() => {
     const requestId = request.id
     if (!requestId) return
 
-    const currentEnvId = selectedEnvIdRef.current ?? environments?.[0]?.id ?? null
+    const currentEnvId = selectedEnvIdRef.current ?? environmentsRef.current?.[0]?.id ?? null
     const currentRequest = requestRef.current
     logger.debug('[HTTPRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
@@ -202,7 +204,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       logger.debug('[HTTPRequestTabView] Unregistering request from ContextService', { requestId })
       void window.restorm?.context.unregisterRequest(requestId)
     }
-  }, [request.id, environments, toKeyValueData])
+    // Only re-register when the request ID changes (mount/unmount).
+    // Environment changes are handled by the separate setRequestEnvironment effect below.
+    // toKeyValueData is a stable useCallback with [] deps, so it never changes.
+  }, [request.id, toKeyValueData])
 
   // Notify ContextService when selected environment changes
   useEffect(() => {

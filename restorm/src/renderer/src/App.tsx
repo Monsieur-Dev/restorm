@@ -382,6 +382,11 @@ const App: React.FC = () => {
     [rootItems]
   )
 
+  // Stable lookup callbacks — avoids re-render cascade through RestormWorkbench → EditorGroupView
+  const getRequestByIdCb = useCallback((id: string) => findRequestById(rootItems, id), [rootItems])
+  const getFolderByIdCb = useCallback((id: string) => findFolderById(rootItems, id), [rootItems])
+  const getEnvironmentFolderByIdCb = useCallback((id: string) => findEnvironmentFolderById(rootItems, id), [rootItems])
+
   // Keep collections store in sync for request path resolution
   useEffect(() => {
     setCollections(environmentFolderCollections, 'user')
@@ -668,9 +673,9 @@ const App: React.FC = () => {
               workbenchId={workbenchId}
               onRebuildTab={handleRebuildTab}
               onStateRestored={handleStateRestored}
-              getRequestById={(id) => findRequestById(rootItems, id)}
-              getFolderById={(id) => findFolderById(rootItems, id)}
-              getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootItems, id)}
+              getRequestById={getRequestByIdCb}
+              getFolderById={getFolderByIdCb}
+              getEnvironmentFolderById={getEnvironmentFolderByIdCb}
             />
           }
           initialWidth={260}

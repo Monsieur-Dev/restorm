@@ -153,7 +153,6 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     }
 
     if (itemId && itemType) {
-      // Navigate to sync sidebar selection
       navigationService.navigateTo(itemId, 'workbench', { type: itemType })
     }
   }, [])
