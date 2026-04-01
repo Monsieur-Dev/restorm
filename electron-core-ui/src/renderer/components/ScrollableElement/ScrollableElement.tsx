@@ -5,7 +5,7 @@ import { defaultScrollableElementStyles } from './types';
 
 const HIDE_TIMEOUT = 500;
 
-const ScrollableElement: React.FC<ScrollableElementProps> = ({
+const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
   children,
   options = {},
   className = '',
@@ -761,5 +761,6 @@ const ScrollableElement: React.FC<ScrollableElementProps> = ({
   );
 };
 
+const ScrollableElement = React.memo(ScrollableElementInner);
 export { ScrollableElement };
 export default ScrollableElement;

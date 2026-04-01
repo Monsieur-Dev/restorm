@@ -86,7 +86,7 @@ function buildCalendarGrid(viewMonth: Date, firstDayOfWeek: number): Date[] {
   return days
 }
 
-const DateTimePicker: React.FC<DateTimePickerProps> = ({
+const DateTimePickerInner: React.FC<DateTimePickerProps> = ({
   value,
   onChange,
   firstDayOfWeek = 1,
@@ -931,4 +931,5 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
   )
 }
 
+const DateTimePicker = React.memo(DateTimePickerInner)
 export default DateTimePicker

@@ -159,7 +159,7 @@ const IconGrid: React.FC<{
   )
 }
 
-export const IconSelect: React.FC<IconSelectProps> = ({
+const IconSelectInner: React.FC<IconSelectProps> = ({
   value,
   onChange,
   placeholder,
@@ -556,4 +556,5 @@ export const IconSelect: React.FC<IconSelectProps> = ({
   )
 }
 
+export const IconSelect = React.memo(IconSelectInner)
 export default IconSelect

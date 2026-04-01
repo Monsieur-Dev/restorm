@@ -101,7 +101,7 @@ export interface KeyValueTableHandle {
   addRow: () => void
 }
 
-export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTableProps>((
+export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, KeyValueTableProps>((
   {
     initialRows,
     onRowsChange,
@@ -399,6 +399,6 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
       </div>
     </div>
   )
-})
+}))
 
 KeyValueTable.displayName = 'KeyValueTable'
