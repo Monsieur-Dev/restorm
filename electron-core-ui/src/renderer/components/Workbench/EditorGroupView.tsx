@@ -28,6 +28,31 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 	const [fullscreenTabId, setFullscreenTabId] = useState<string | null>(null);
 	const contentRef = useRef<HTMLDivElement | null>(null);
 
+	// Cache rendered tab contents — render each tab only once, then reuse.
+	// This prevents React from unmounting/remounting heavy components (Monaco editors, etc.)
+	// when switching tabs — only the CSS display property toggles visibility.
+	// Using useState initializer as a persistent cache that survives re-renders.
+	const [tabContentCache] = useState(() => new Map<string, React.ReactNode>());
+
+	const tabContents = useMemo(() => {
+		// Prune entries for closed tabs
+		const tabIds = new Set(group.tabs.map(t => t.id));
+		for (const k of tabContentCache.keys()) {
+			if (!tabIds.has(k)) tabContentCache.delete(k);
+		}
+		// Render new tabs, reuse cached content for existing ones
+		const result = new Map<string, React.ReactNode>();
+		for (const tab of group.tabs) {
+			let content = tabContentCache.get(tab.id);
+			if (!content) {
+				content = renderTabContent?.(tab) ?? tab.content ?? <span>{tab.title}</span>;
+				tabContentCache.set(tab.id, content);
+			}
+			result.set(tab.id, content);
+		}
+		return result;
+	}, [group.tabs, renderTabContent, tabContentCache]);
+
 	// Handle tab double-click for fullscreen modal
 	const handleTabDoubleClick = useCallback((tabId: string) => {
 		const tab = group.tabs.find((t) => t.id === tabId);
@@ -243,10 +268,7 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 				<div className="editor-group-content-panel">
 				{group.tabs.map((tab) => {
 					const isActive = tab.id === group.activeTabId;
-					const content =
-						(renderTabContent?.(tab) ??
-							tab.content ??
-							<span>{tab.title}</span>);
+					const content = tabContents.get(tab.id);
 					return (
 						<div
 							key={tab.id}
