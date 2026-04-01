@@ -298,6 +298,15 @@ const settingsTreeViewTestDir = defineBddConfig({
   outputDir: '.features-gen/settingstreeview'
 })
 
+const tabsTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/tabs/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/tabs/steps/**/*.ts',
+    'tests/e2e/bdd/tabs/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/tabs'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -500,6 +509,11 @@ export default defineConfig({
     {
       name: 'settingstreeview',
       testDir: settingsTreeViewTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'tabs',
+      testDir: tabsTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],
