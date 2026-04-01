@@ -199,6 +199,9 @@ export type {
 	TabGroupNode
 } from './Workbench/types'
 
+// Lazy-loaded component exports (for code splitting)
+export { LazyCodeEditor, LazyMarkdownEditor, LazyMarkdownViewer } from './lazy'
+
 // Workbench IPC exports
 export { onWorkbenchTabDropped } from './Workbench/ipc'
 

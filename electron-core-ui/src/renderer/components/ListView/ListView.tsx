@@ -149,7 +149,7 @@ interface DropIndicatorState {
   position: ListViewDropPosition
 }
 
-export const ListView: React.FC<ListViewProps> = ({
+const ListViewInner: React.FC<ListViewProps> = ({
   items,
   children,
   className,
@@ -894,4 +894,5 @@ export const ListView: React.FC<ListViewProps> = ({
   )
 }
 
+export const ListView = React.memo(ListViewInner)
 export default ListView
