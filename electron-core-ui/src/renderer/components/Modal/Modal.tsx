@@ -17,7 +17,7 @@ export interface ModalProps {
   'data-testid'?: string
 }
 
-export const Modal: React.FC<ModalProps> = ({
+const ModalInner: React.FC<ModalProps> = ({
   title,
   isOpen,
   onClose,
@@ -183,4 +183,5 @@ export const Modal: React.FC<ModalProps> = ({
   return createPortal(content, document.body)
 }
 
+export const Modal = React.memo(ModalInner)
 export default Modal
