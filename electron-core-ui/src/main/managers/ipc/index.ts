@@ -1,0 +1,6 @@
+export { registerThemeHandlers } from './themeHandlers'
+export { registerFileHandlers } from './fileHandlers'
+export { registerStorageHandlers } from './storageHandlers'
+export { registerSearchHandlers } from './searchHandlers'
+export { registerWindowHandlers } from './windowHandlers'
+export { registerMiscHandlers } from './miscHandlers'
