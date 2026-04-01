@@ -8,6 +8,7 @@ import './app.css'
 import './components/common/Badge.css'
 import LoadingScreen from './components/Welcome/LoadingScreen'
 import { initializeGraphQL } from './services/GraphQLIntegration'
+import { DEFAULT_UI_DELAY_MS } from '../../shared/config/constants'
 
 const App = lazy(() => import('./App'))
 
@@ -227,7 +228,7 @@ if (typeof window !== 'undefined') {
           
           // Make folders reactive
           const reactiveFolders = collectionsWithIds.map(
-            (folder) => reactiveModule.makeReactiveFolder(folder as import('./types/collections').Folder)
+            (folder) => reactiveModule.makeReactiveFolder(folder as import('../../shared/types/collections').Folder)
           )
           
           // Create file state to simulate file opened event
@@ -301,7 +302,7 @@ if (typeof window !== 'undefined') {
           }
           
           // Wait longer for App to process the event and render
-          await new Promise(resolve => setTimeout(resolve, 3000))
+          await new Promise(resolve => setTimeout(resolve, DEFAULT_UI_DELAY_MS))
         }
       }
     }).catch(() => {

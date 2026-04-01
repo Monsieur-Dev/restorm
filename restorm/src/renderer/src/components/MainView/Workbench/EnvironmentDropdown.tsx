@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   ListViewDropdown,
   type ListViewItemData,
   IconSelect
 } from 'electron-core-ui/renderer'
-import type { Environment } from '../../../types/collections'
+import type { Environment } from '../../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../../contexts/useEnvironmentContext'
 
 /** Convert environments to ListView items */
@@ -53,6 +53,12 @@ function findEnvironmentById(environments: Environment[], id: string): Environme
 export const EnvironmentDropdown: React.FC = () => {
   const { t } = useTranslation()
   const { environments, selectedEnvId, setSelectedEnvId } = useEnvironmentContext()
+
+  const allEnvironmentIds = useMemo(
+    () => (environments && environments.length > 0 ? collectEnvironmentIds(environments) : []),
+    [environments]
+  )
+
   const [expandedIds, setExpandedIds] = useState<string[]>(() =>
     environments && environments.length > 0 ? collectEnvironmentIds(environments) : []
   )
@@ -61,7 +67,7 @@ export const EnvironmentDropdown: React.FC = () => {
   useEffect(() => {
     const rafId = requestAnimationFrame(() => {
       if (environments && environments.length > 0) {
-        setExpandedIds(collectEnvironmentIds(environments))
+        setExpandedIds(allEnvironmentIds)
         // Keep current selected environment if still present (including sub-environments), otherwise default to first
         if (!selectedEnvId || !findEnvironmentById(environments, selectedEnvId)) {
           setSelectedEnvId(environments[0]?.id ?? null)
@@ -72,7 +78,7 @@ export const EnvironmentDropdown: React.FC = () => {
       }
     })
     return (): void => { cancelAnimationFrame(rafId) }
-  }, [environments, selectedEnvId, setSelectedEnvId])
+  }, [environments, selectedEnvId, setSelectedEnvId, allEnvironmentIds])
 
   const items = useMemo(
     () => (environments && environments.length > 0 ? environmentsToListViewItems(environments, expandedIds) : []),
@@ -87,6 +93,21 @@ export const EnvironmentDropdown: React.FC = () => {
   }, [environments, selectedEnvId])
 
   const selectedEnvironmentName = selectedEnvironment?.name ?? t('requestTab.environmentSelector.noEnvironment')
+
+  const handleItemClick = useCallback((payload: { item: ListViewItemData }) => {
+    const id = payload.item.id
+    if (id) {
+      setSelectedEnvId(id)
+    }
+  }, [setSelectedEnvId])
+
+  const handleItemToggle = useCallback((payload: { item: ListViewItemData }, expanded: boolean) => {
+    const id = payload.item.id
+    if (!id) return
+    setExpandedIds((prev) =>
+      expanded ? Array.from(new Set([...prev, id])) : prev.filter((existingId) => existingId !== id)
+    )
+  }, [])
 
   if (!environments || environments.length === 0) {
     return null
@@ -121,22 +142,11 @@ export const EnvironmentDropdown: React.FC = () => {
             <span style={{ marginRight: 4, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {selectedEnvironmentName}
             </span>
-            <i className="codicon codicon-chevron-down" />
+            <i className="codicon codicon-chevron-down" aria-hidden="true" />
           </>
         }
-        onItemClick={(payload) => {
-          const id = payload.item.id
-          if (id) {
-            setSelectedEnvId(id)
-          }
-        }}
-        onItemToggle={(payload, expanded) => {
-          const id = payload.item.id
-          if (!id) return
-          setExpandedIds((prev) =>
-            expanded ? Array.from(new Set([...prev, id])) : prev.filter((existingId) => existingId !== id)
-          )
-        }}
+        onItemClick={handleItemClick}
+        onItemToggle={handleItemToggle}
       />
     </div>
   )

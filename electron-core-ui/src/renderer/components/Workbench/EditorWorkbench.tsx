@@ -526,9 +526,7 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		};
 		rec(next.groups);
 		change(next);
-		// Set focus to the group where the tab was activated
-			setFocus(groupId);
-			// Notify external listener about tab activation (tab selected event)
+		setFocus(groupId);
 			if (externalOnActivateTab) {
 				externalOnActivateTab(tabId, groupId);
 			}

@@ -47,6 +47,9 @@ export type {
 export { BaseWindow, setupIPC, setupAppLifecycle, initializeApp, configureCommandLineSwitches, setupAppProtocol } from './managers'
 export type { WindowConfiguration, WindowState } from './managers'
 
+// IPC validation
+export { validatedHandle } from './ipc/validate'
+
 // Re-export types for better type inference
 export type { ThemeService } from './services/ThemeService'
 export type { StorageService } from './services/StorageService'

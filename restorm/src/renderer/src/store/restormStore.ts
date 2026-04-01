@@ -9,8 +9,8 @@
 
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
-import type { EnvironmentFolder, FolderItem, Environment, Request, Folder } from '../types/collections'
-import { isAnyFolder, isEnvironmentFolder, isRequest } from '../types/collections'
+import type { EnvironmentFolder, FolderItem, Environment, Request, Folder } from '../../../shared/types/collections'
+import { isAnyFolder, isEnvironmentFolder, isRequest } from '../../../shared/types/collections'
 
 // ============================================================================
 // Types

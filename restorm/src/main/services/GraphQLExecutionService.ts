@@ -9,6 +9,7 @@ import { URL } from 'url'
 import { BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
+import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../shared/config/constants'
 
 /** GraphQL request execution input */
 export interface GraphQLExecutionInput {
@@ -49,7 +50,7 @@ class GraphQLExecutionService {
    * Execute a GraphQL request using the resolved URL and data from ContextService
    */
   async execute(input: GraphQLExecutionInput): Promise<GraphQLExecutionResult> {
-    const { requestId, timeout = 30000 } = input
+    const { requestId, timeout = DEFAULT_REQUEST_TIMEOUT_MS } = input
     const startTime = Date.now()
     const startedAt = new Date().toISOString()
 

@@ -16,9 +16,10 @@ import {
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import type { TranslatedHelperDefinition } from '../../utils/handlebarsHelpersDefinitions'
-import type { KeyValue, ValueType } from '../../types/collections'
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue } from '../../types/collections'
+import type { KeyValue, ValueType } from '../../../../shared/types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue } from '../../../../shared/types/collections'
 import { inferValueFromString, isHexColorString, tryParseDateString, tryParseNumberString } from '../../../../shared/utils/valueCasting'
+import { normalizeValueType } from '../../utils/normalizeValueType'
 
 export type VariableContext = Record<string, string>
 
@@ -30,54 +31,6 @@ function resolveValueTypeKind(value: ValueType | undefined): ValueTypeKind {
   if (value instanceof DateTimeValue) return 'dateTime'
   if (value instanceof ColorValue) return 'color'
   return 'string'
-}
-
-function normalizeValueType(input: unknown): ValueType {
-  if (
-    input instanceof StringValue ||
-    input instanceof ColorValue ||
-    input instanceof DateTimeValue ||
-    input instanceof NumericValue ||
-    input instanceof PasswordValue
-  ) {
-    return input
-  }
-
-  if (typeof input === 'string') {
-    return new StringValue(input)
-  }
-
-  if (input && typeof input === 'object') {
-    const plain = input as { type?: unknown; value?: unknown; format?: unknown }
-    const type = typeof plain.type === 'string' ? plain.type : ''
-
-    switch (type) {
-      case 'string':
-        return new StringValue(typeof plain.value === 'string' ? plain.value : '')
-      case 'color':
-        return new ColorValue(typeof plain.value === 'string' ? plain.value : '')
-      case 'numeric': {
-        const num = typeof plain.value === 'number' ? plain.value : typeof plain.value === 'string' ? Number(plain.value) : NaN
-        return new NumericValue(Number.isFinite(num) ? num : 0, typeof plain.format === 'string' ? plain.format : 'decimal')
-      }
-      case 'datetime': {
-        const raw = plain.value
-        const d =
-          raw instanceof Date
-            ? raw
-            : typeof raw === 'string' || typeof raw === 'number'
-              ? new Date(raw)
-              : new Date()
-        return new DateTimeValue(d, typeof plain.format === 'string' ? plain.format : 'yyyy-MM-dd HH:mm:ss')
-      }
-      case 'password':
-        return new PasswordValue(typeof plain.value === 'string' ? plain.value : '')
-      default:
-        return new StringValue('')
-    }
-  }
-
-  return new StringValue('')
 }
 
 interface ColorValueCellProps {
@@ -196,7 +149,7 @@ export interface RestormKeyValueTableProps {
   'data-testid'?: string
 }
 
-export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, RestormKeyValueTableProps>((
+const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormKeyValueTableProps>((
   {
     variables,
     helpers = [],
@@ -710,4 +663,6 @@ export const RestormKeyValueTable = React.forwardRef<KeyValueTableHandle, Restor
   )
 })
 
-RestormKeyValueTable.displayName = 'RestormKeyValueTable'
+RestormKeyValueTableInner.displayName = 'RestormKeyValueTable'
+
+export const RestormKeyValueTable = React.memo(RestormKeyValueTableInner)

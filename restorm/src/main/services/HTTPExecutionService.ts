@@ -9,6 +9,7 @@ import { URL } from 'url'
 import { BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
+import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../shared/config/constants'
 
 /** HTTP request execution input */
 export interface HTTPExecutionInput {
@@ -50,7 +51,7 @@ class HTTPExecutionService {
    * Execute an HTTP request using the resolved URL and data from ContextService
    */
   async execute(input: HTTPExecutionInput): Promise<HTTPExecutionResult> {
-    const { requestId, method, timeout = 30000 } = input
+    const { requestId, method, timeout = DEFAULT_REQUEST_TIMEOUT_MS } = input
     const startTime = Date.now()
     const startedAt = new Date().toISOString()
 

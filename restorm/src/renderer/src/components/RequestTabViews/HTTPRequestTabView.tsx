@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
+import React, { type CSSProperties, useEffect, useMemo, useRef, useState, useCallback } from 'react'
+import { useRequestReset } from '../../hooks/useRequestReset'
 import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
@@ -6,20 +7,15 @@ import {
   SelectBox,
   SplitView,
   Pane,
-  RadioGroup,
-  InputBox,
-  CodeEditor,
-  ListView,
   logger,
   type VariableDefinition,
   type ISelectOptionItem,
-  type ISelectData,
-  type ListViewItemData
+  type ISelectData
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
-import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue, ResponseHistoryDetail } from '../../types/collections'
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, type ValueType } from '../../types/collections'
+import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
+import { StringValue } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
@@ -28,74 +24,23 @@ import { Badge } from '../common/Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
+import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
 import { getResponseHistoryList } from '../../services/GraphQLIntegration'
+import { normalizeValueType } from '../../utils/normalizeValueType'
+import { buildHttpResponseViewData } from './HTTPResponsePanel'
+import { HTTPRequestBodySection } from './HTTPRequestBodySection'
+import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabViewUtils'
 
-// Helper to update reactive proxy properties (intentional mutation for reactive objects)
-function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
-  Object.assign(obj, { [key]: value })
-}
+const authPaneContentStyle: CSSProperties = { height: '100%', boxSizing: 'border-box', padding: 8 }
+const urlRowStyle: CSSProperties = { display: 'flex', alignItems: 'center', gap: 8 }
+const methodSelectWrapperStyle: CSSProperties = { width: 90, flexShrink: 0 }
+const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0, paddingLeft: 15 }
 
 export interface HTTPRequestTabViewProps {
   request: HTTPRequest
   historyModalOpen?: boolean
   onCloseHistoryModal?: () => void
   onHistoryAvailabilityChange?: (hasHistory: boolean) => void
-}
-
-function normalizeValueType(input: unknown): ValueType {
-  if (
-    input instanceof StringValue ||
-    input instanceof ColorValue ||
-    input instanceof DateTimeValue ||
-    input instanceof NumericValue ||
-    input instanceof PasswordValue
-  ) {
-    return input
-  }
-
-  if (typeof input === 'string') {
-    return new StringValue(input)
-  }
-
-  if (input && typeof input === 'object') {
-    const plain = input as { type?: unknown; value?: unknown; format?: unknown }
-    const type = typeof plain.type === 'string' ? plain.type : ''
-
-    switch (type) {
-      case 'string':
-        return new StringValue(typeof plain.value === 'string' ? plain.value : '')
-      case 'color':
-        return new ColorValue(typeof plain.value === 'string' ? plain.value : '')
-      case 'numeric': {
-        const num = typeof plain.value === 'number' ? plain.value : typeof plain.value === 'string' ? Number(plain.value) : NaN
-        return new NumericValue(Number.isFinite(num) ? num : 0, typeof plain.format === 'string' ? plain.format : 'decimal')
-      }
-      case 'datetime': {
-        const raw = plain.value
-        const d =
-          raw instanceof Date
-            ? raw
-            : typeof raw === 'string' || typeof raw === 'number'
-              ? new Date(raw)
-              : new Date()
-        return new DateTimeValue(d, typeof plain.format === 'string' ? plain.format : 'yyyy-MM-dd HH:mm:ss')
-      }
-      case 'password':
-        return new PasswordValue(typeof plain.value === 'string' ? plain.value : '')
-      default:
-        return new StringValue('')
-    }
-  }
-
-  return new StringValue('')
-}
-
-function toKeyValuesFromHistory(values: { key: string; value: string; enabled?: boolean }[]): KeyValue[] {
-  return values.map((kv) => ({
-    key: kv.key,
-    value: new StringValue(kv.value),
-    enabled: kv.enabled
-  }))
 }
 
 function buildRequestBodyFromHistory(body: { type: string; content?: string; path?: string; fields?: { key: string; value: string; enabled?: boolean }[] } | undefined): HTTPResponse['requestBody'] {
@@ -145,40 +90,6 @@ function getBodyFilePath(request: HTTPRequest): string {
   return ''
 }
 
-/** Format duration in a human-readable way */
-function formatDuration(ms: number): string {
-  if (ms < 1000) return `${ms}ms`
-  return `${(ms / 1000).toFixed(2)}s`
-}
-
-/** Format bytes in a human-readable way */
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`
-}
-
-/** Get status color based on status code */
-function getStatusColor(statusCode: number): 'green' | 'red' | 'orange' {
-  if (statusCode >= 200 && statusCode < 300) return 'green'
-  if (statusCode >= 300 && statusCode < 400) return 'orange'
-  return 'red'
-}
-
-/** Convert KeyValue array to ListView items */
-function keyValuesToListItems(keyValues: KeyValue[], prefix: string): ListViewItemData[] {
-  return keyValues.map((kv, index) => ({
-    id: `${prefix}-${index}`,
-    icon: 'blank',
-    title: (
-      <span style={{ display: 'flex', gap: 8 }}>
-        <span style={{ fontWeight: 600, color: 'var(--symbolIcon-propertyForeground)' }}>{kv.key}</span>
-        <span style={{ color: 'var(--descriptionForeground)' }}>{kv.value.toString()}</span>
-      </span>
-    )
-  }))
-}
-
 export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   request,
   historyModalOpen = false,
@@ -212,21 +123,17 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   const requestIdRef = useRef<string>(request.id)
 
   // Reset local state when switching to a different request
-  useEffect(() => {
-    if (requestIdRef.current !== request.id) {
-      requestIdRef.current = request.id
-      const rafId = requestAnimationFrame(() => {
-        setMethod(request.method)
-        setUrl(request.url)
-        setBody(getBodyContent(request))
-        setBodyMode(getBodyMode(request))
-        setBodyFilePath(getBodyFilePath(request))
-        setHttpResponse(null)
-      })
-      return (): void => { cancelAnimationFrame(rafId) }
-    }
-    return undefined
+  const handleRequestReset = useCallback(() => {
+    setMethod(request.method)
+    setUrl(request.url)
+    setBody(getBodyContent(request))
+    setBodyMode(getBodyMode(request))
+    setBodyFilePath(getBodyFilePath(request))
+    setHttpResponse(null)
   }, [request])
+  useRequestReset(request, handleRequestReset)
+  // Keep requestIdRef in sync for guard checks in other effects
+  useEffect(() => { requestIdRef.current = request.id }, [request.id])
 
   // Convert KeyValue arrays to plain objects for IPC
   const toKeyValueData = useCallback((kvs: KeyValue[]): KeyValueData[] =>
@@ -271,15 +178,17 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   // Refs to capture initial values for registration (avoid re-running effect when these change)
   const selectedEnvIdRef = useRef(selectedEnvId)
   const requestRef = useRef(request)
+  const environmentsRef = useRef(environments)
   useEffect(() => { selectedEnvIdRef.current = selectedEnvId }, [selectedEnvId])
   useEffect(() => { requestRef.current = request }, [request])
+  useEffect(() => { environmentsRef.current = environments }, [environments])
 
   // Register request with ContextService on mount, unregister on unmount
   useEffect(() => {
     const requestId = request.id
     if (!requestId) return
 
-    const currentEnvId = selectedEnvIdRef.current ?? environments?.[0]?.id ?? null
+    const currentEnvId = selectedEnvIdRef.current ?? environmentsRef.current?.[0]?.id ?? null
     const currentRequest = requestRef.current
     logger.debug('[HTTPRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
@@ -295,7 +204,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       logger.debug('[HTTPRequestTabView] Unregistering request from ContextService', { requestId })
       void window.restorm?.context.unregisterRequest(requestId)
     }
-  }, [request.id, environments, toKeyValueData])
+    // Only re-register when the request ID changes (mount/unmount).
+    // Environment changes are handled by the separate setRequestEnvironment effect below.
+    // toKeyValueData is a stable useCallback with [] deps, so it never changes.
+  }, [request.id, toKeyValueData])
 
   // Notify ContextService when selected environment changes
   useEffect(() => {
@@ -461,7 +373,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     window.restorm?.http.execute({
       requestId,
       method,
-      timeout: 30000,
+      timeout: DEFAULT_REQUEST_TIMEOUT_MS,
       ...(requestPath ? { requestPath } : {})
     })
       .then((result) => {
@@ -564,7 +476,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         minSize={120}
         data-testid="http-request-authorization-pane"
       >
-        <div style={{ height: '100%', boxSizing: 'border-box', padding: 8 }}>
+        <div style={authPaneContentStyle}>
           {/* Authorization configuration UI will be added here */}
         </div>
       </Pane>
@@ -656,57 +568,18 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         />
       </Pane>
       <Pane title={t('requestTab.tabs.body')} initialSize={0.4} data-testid="http-request-body-pane">
-        <div style={{ height: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: 8, minHeight: 0 }}>
-          <RadioGroup
-            options={{
-              items: [
-                { text: 'text', isActive: bodyMode === 'text' },
-                { text: 'form-data', isActive: bodyMode === 'form-data' },
-                { text: 'x-www-form-urlencoded', isActive: bodyMode === 'x-www-form-urlencoded' },
-                { text: 'file', isActive: bodyMode === 'file' }
-              ]
-            }}
-            data-testid="http-request-body-mode-radio"
-            onSelect={(index: number) => {
-              const modes: ('text' | 'form-data' | 'x-www-form-urlencoded' | 'file')[] = ['text', 'form-data', 'x-www-form-urlencoded', 'file']
-              setBodyMode(modes[index] ?? 'text')
-            }}
-          />
-          <div style={{ flex: 1, minHeight: 0 }}>
-            {bodyMode === 'text' && (
-              <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3, boxSizing: 'border-box' }}>
-                <CodeEditor
-                  height="100%"
-                  language="json"
-                  value={body}
-                  onChange={(value) => { setBody(value ?? '') }}
-                  options={{ minimap: { enabled: false }, wordWrap: 'on', scrollBeyondLastLine: false, automaticLayout: true }}
-                  data-testid="http-request-body-editor"
-                />
-              </div>
-            )}
-            {(bodyMode === 'form-data' || bodyMode === 'x-www-form-urlencoded') && (
-              <RestormKeyValueTable
-                variables={emptyVariables}
-                helpers={handlebarsHelpers}
-                initialRows={request.body?.type === 'form-data' || request.body?.type === 'x-www-form-urlencoded' ? request.body.fields : []}
-                onRowsChange={(rows): void => { updateReactiveProperty(request, 'body', { type: bodyMode, fields: rows }) }}
-                data-testid="http-request-body-fields-table"
-              />
-            )}
-            {bodyMode === 'file' && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ flexShrink: 0, fontSize: 12 }}>{t('requestTab.body.fileLabel')}</span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <InputBox options={{ placeholder: '', type: 'text' }} value={bodyFilePath} onChange={(value: string) => { setBodyFilePath(value) }} data-testid="http-request-body-file-input" />
-                </div>
-                <Button options={{ ariaLabel: t('requestTab.body.browse'), title: t('requestTab.body.browse') }} data-testid="http-request-body-browse-button">
-                  {t('requestTab.body.browse')}
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
+        <HTTPRequestBodySection
+          bodyMode={bodyMode}
+          onBodyModeChange={setBodyMode}
+          body={body}
+          onBodyChange={setBody}
+          bodyFilePath={bodyFilePath}
+          onBodyFilePathChange={setBodyFilePath}
+          request={request}
+          onBodyFieldsChange={(rows): void => { updateReactiveProperty(request, 'body', { type: bodyMode as 'form-data' | 'x-www-form-urlencoded', fields: rows }) }}
+          variables={emptyVariables}
+          helpers={handlebarsHelpers}
+        />
       </Pane>
     </SplitView>
   )
@@ -714,82 +587,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   // Use backend-provided code snippets
   const codeSnippetsContent = backendCodeSnippets || t('requestTab.codeSnippets.loading', 'Loading code snippets...')
 
-  const buildHttpResponseView = useCallback((response: HTTPResponse | null) => {
-    const generalItems: ListViewItemData[] = []
-    if (response) {
-      generalItems.push(
-        { id: 'general-request-url', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Request URL</span><span>{response.requestUrl}</span></span> },
-        { id: 'general-request-method', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Request Method</span><span>{response.requestMethod}</span></span> },
-        { id: 'general-status-code', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Status Code</span><span style={{ color: getStatusColor(response.statusCode) === 'green' ? 'var(--testing-iconPassed)' : getStatusColor(response.statusCode) === 'orange' ? 'var(--editorWarning-foreground)' : 'var(--testing-iconFailed)' }}>{response.statusCode} {response.statusText}</span></span> },
-        { id: 'general-duration', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Duration</span><span>{formatDuration(response.timings.durationMs)}</span></span> }
-      )
-      if (response.contentType) {
-        generalItems.push({ id: 'general-content-type', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Content-Type</span><span>{response.contentType}</span></span> })
-      }
-      if (response.contentLength !== undefined) {
-        generalItems.push({ id: 'general-content-length', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Content-Length</span><span>{formatBytes(response.contentLength)}</span></span> })
-      }
-      if (response.error) {
-        generalItems.push({ id: 'general-error', icon: 'blank', title: <span style={{ display: 'flex', gap: 8 }}><span style={{ fontWeight: 600 }}>Error</span><span style={{ color: 'var(--testing-iconFailed)' }}>{response.error}</span></span> })
-      }
-    }
-
-    const responseHeaderItems = response ? keyValuesToListItems(response.responseHeaders, 'resp-header') : []
-    const requestHeaderItems = response ? keyValuesToListItems(response.requestHeaders, 'req-header') : []
-    const headersTreeItems: ListViewItemData[] = [
-      { id: 'group-general', title: 'General', icon: 'info', isExpandable: true, isExpanded: true, children: generalItems },
-      { id: 'group-response-headers', title: `Response headers (${responseHeaderItems.length})`, icon: 'call-incoming', isExpandable: true, isExpanded: true, children: responseHeaderItems },
-      { id: 'group-request-headers', title: `Request headers (${requestHeaderItems.length})`, icon: 'call-outgoing', isExpandable: true, isExpanded: true, children: requestHeaderItems }
-    ]
-
-    const infosContent = response ? (
-      <div style={{ height: '100%', boxSizing: 'border-box' }}>
-        <ListView items={headersTreeItems} rootRole="tree" ariaLabel="HTTP request and response headers" data-testid="http-response-headers-list" />
-      </div>
-    ) : null
-
-    const formattedResponseBody = (() => {
-      if (!response) return ''
-      const responseBody = response.responseBody
-      if (response.contentType?.includes('application/json')) {
-        try {
-          const parsed: unknown = JSON.parse(responseBody)
-          return JSON.stringify(parsed, null, 2)
-        } catch {
-          return responseBody
-        }
-      }
-      return responseBody
-    })()
-
-    const responseContent = response && formattedResponseBody ? (
-      <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3, boxSizing: 'border-box' }}>
-        <CodeEditor
-          height="100%"
-          language="json"
-          value={formattedResponseBody}
-          options={{ minimap: { enabled: false }, wordWrap: 'on', scrollBeyondLastLine: false, automaticLayout: true, readOnly: true }}
-          data-testid="http-response-body-editor"
-        />
-      </div>
-    ) : null
-
-    const jsonData = (() => {
-      if (!response?.responseBody) return undefined
-      if (!response.contentType?.includes('application/json')) return undefined
-      try {
-        return JSON.parse(response.responseBody) as unknown
-      } catch {
-        return undefined
-      }
-    })()
-
-    return { infosContent, responseContent, jsonData }
-  }, [])
-
   const { infosContent, responseContent, jsonData } = useMemo(
-    () => buildHttpResponseView(httpResponse),
-    [buildHttpResponseView, httpResponse]
+    () => buildHttpResponseViewData(httpResponse),
+    [httpResponse]
   )
 
   const buildHistoryView = useCallback((detail: ResponseHistoryDetail) => {
@@ -815,13 +615,13 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       timings: detail.response.timings,
       ...(detail.response.error ? { error: detail.response.error } : {})
     }
-    return buildHttpResponseView(historyResponse)
-  }, [buildHttpResponseView, request.id])
+    return buildHttpResponseViewData(historyResponse)
+  }, [request.id])
 
   // URL section
   const urlSection = (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <div style={{ width: 90, flexShrink: 0 }}>
+    <div style={urlRowStyle}>
+      <div style={methodSelectWrapperStyle}>
         <SelectBox
           id="http-method-select"
           className=""
@@ -832,7 +632,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           data-testid="http-request-method-select"
         />
       </div>
-      <div style={{ flex: 1, minWidth: 0, paddingLeft: 15 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
+      <div style={urlInputWrapperStyle} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
         <RestormVariableInputBox
           value={url}
           onChange={(value: string) => { setUrl(value) }}

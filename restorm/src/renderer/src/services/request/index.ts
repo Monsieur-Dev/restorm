@@ -25,4 +25,4 @@ export function resolveRequestURL(input: URLResolutionInput): Promise<ResolvedUR
 
 // Re-export types for convenience
 export type { URLResolutionInput, ResolvedURLResult }
-export * from '../../types/collections'
+export * from '../../../../shared/types/collections'

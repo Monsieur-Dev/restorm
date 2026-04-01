@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { useRequestReset } from '../../hooks/useRequestReset'
 import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
@@ -11,8 +12,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
-import type { GraphQLRequest, GraphQLResponse, KeyValue, ResponseHistoryDetail } from '../../types/collections'
-import { StringValue } from '../../types/collections'
+import type { GraphQLRequest, GraphQLResponse, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { GraphQLExecutionResult, KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
@@ -21,19 +21,7 @@ import { Badge } from '../common/Badge'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
 import { getResponseHistoryList } from '../../services/GraphQLIntegration'
-
-// Helper to update reactive proxy properties (intentional mutation for reactive objects)
-function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
-  Object.assign(obj, { [key]: value })
-}
-
-function toKeyValuesFromHistory(values: { key: string; value: string; enabled?: boolean }[]): KeyValue[] {
-  return values.map((kv) => ({
-    key: kv.key,
-    value: new StringValue(kv.value),
-    enabled: kv.enabled
-  }))
-}
+import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabViewUtils'
 
 export interface GraphQLRequestTabViewProps {
   request: GraphQLRequest
@@ -68,21 +56,14 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
   
   const headersRef = useRef<KeyValueTableHandle | null>(null)
-  const requestIdRef = useRef(request.id)
-  
-  useEffect(() => {
-    if (requestIdRef.current !== request.id) {
-      requestIdRef.current = request.id
-      const rafId = requestAnimationFrame(() => {
-        setUrlState(request.url)
-        setQueryState(request.query)
-        setVariablesState(request.variables ?? '{}')
-        setResponse(null)
-      })
-      return (): void => { cancelAnimationFrame(rafId) }
-    }
-    return undefined
+
+  const handleRequestReset = useCallback(() => {
+    setUrlState(request.url)
+    setQueryState(request.query)
+    setVariablesState(request.variables ?? '{}')
+    setResponse(null)
   }, [request])
+  useRequestReset(request, handleRequestReset)
 
   // Refs to capture initial values for registration (avoid re-running effect when these change)
   const selectedEnvIdRef = useRef(selectedEnvId)

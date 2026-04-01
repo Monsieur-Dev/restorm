@@ -37,7 +37,7 @@ import type {
   GrpcRequest,
   SoapRequest,
   WebSocketRequest
-} from '../../src/renderer/src/types/collections'
+} from '../../src/shared/types/collections'
 import type { VariableContext } from '../../src/renderer/src/services/VariableResolutionService'
 
 // Test timeout for integration tests

@@ -99,7 +99,7 @@ export interface RestormVariableInputBoxProps {
   'data-testid'?: string
 }
 
-export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (props) => {
+const RestormVariableInputBoxInner: React.FC<RestormVariableInputBoxProps> = (props) => {
   const {
     value,
     onChange,
@@ -297,3 +297,5 @@ export const RestormVariableInputBox: React.FC<RestormVariableInputBoxProps> = (
     </>
   )
 }
+
+export const RestormVariableInputBox = React.memo(RestormVariableInputBoxInner)

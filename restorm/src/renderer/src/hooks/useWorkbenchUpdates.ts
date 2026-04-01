@@ -5,10 +5,10 @@
 import { useCallback, useState } from 'react'
 import { isTabGroupNode } from 'electron-core-ui/renderer'
 import type { WorkbenchTree } from 'electron-core-ui/renderer'
-import type { Folder, EnvironmentFolder, Request } from '../types/collections'
-import { isEnvironmentFolder } from '../types/collections'
+import type { Folder, EnvironmentFolder, Request } from '../../../shared/types/collections'
+import { isEnvironmentFolder } from '../../../shared/types/collections'
 import { findItemById, findEnvironmentFolderById, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
-import type { FolderTab, EnvironmentFolderTab, HTTPRequestTab, BreadcrumbItem } from '../types/editor'
+import type { FolderTab, EnvironmentFolderTab, HTTPRequestTab, BreadcrumbItem } from '../../../shared/types/editor'
 
 export interface UseWorkbenchUpdatesOptions {
   rootItems: (EnvironmentFolder | Folder | Request)[]

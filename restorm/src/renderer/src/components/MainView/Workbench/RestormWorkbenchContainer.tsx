@@ -2,8 +2,8 @@ import React from 'react'
 import type { WorkbenchTree, RebuildTabCallback } from 'electron-core-ui/renderer'
 import { RestormWorkbench, type RestormWorkbenchHandle } from './RestormWorkbench'
 import { EnvironmentValuesProvider } from '../../../contexts/EnvironmentValuesContext'
-import type { BreadcrumbItem } from '../../../types/editor'
-import type { Request, Folder, EnvironmentFolder } from '../../../types/collections'
+import type { BreadcrumbItem } from '../../../../../shared/types/editor'
+import type { Request, Folder, EnvironmentFolder } from '../../../../../shared/types/collections'
 
 export interface RestormWorkbenchContainerProps {
   workbenchRef?: React.Ref<RestormWorkbenchHandle>

@@ -5,10 +5,10 @@
 import { useEffect, useCallback } from 'react'
 import { navigationService } from 'electron-core-ui/renderer'
 import type { NavigationEvent, SearchResult } from 'electron-core-ui/renderer'
-import type { Folder, EnvironmentFolder, Request, Environment } from '../types/collections'
-import { isFolder, isRequest, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest } from '../types/collections'
+import type { Folder, EnvironmentFolder, Request, Environment } from '../../../shared/types/collections'
+import { isFolder, isRequest, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest } from '../../../shared/types/collections'
 import { findFolderById, findItemWithBreadcrumbs } from '../utils/treeSearch'
-import type { BreadcrumbItem } from '../types/editor'
+import type { BreadcrumbItem } from '../../../shared/types/editor'
 
 export interface UseNavigationOptions {
   rootItems: (EnvironmentFolder | Folder | Request)[]
@@ -153,7 +153,6 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     }
 
     if (itemId && itemType) {
-      // Navigate to sync sidebar selection
       navigationService.navigateTo(itemId, 'workbench', { type: itemType })
     }
   }, [])

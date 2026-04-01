@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useRef } from 'react'
+import React, { useEffect, useCallback, useRef, useMemo } from 'react'
 import { VariableTransformContext } from './variableTransformContextValue'
 import type { VariableTransformResult } from '../types/global.d'
 
@@ -69,8 +69,10 @@ export function VariableTransformProvider({ children }: VariableTransformProvide
     }
   }, [])
 
+  const contextValue = useMemo(() => ({ getTransformResult, subscribe }), [getTransformResult, subscribe])
+
   return (
-    <VariableTransformContext.Provider value={{ getTransformResult, subscribe }}>
+    <VariableTransformContext.Provider value={contextValue}>
       {children}
     </VariableTransformContext.Provider>
   )
