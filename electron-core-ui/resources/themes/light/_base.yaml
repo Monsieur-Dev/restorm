@@ -182,6 +182,22 @@ colors:
     value: "#CCCCCC"
     description: Secondary button hover background color
 
+  - id: button.background.emphasis.1
+    value: "#d97b2a"
+    description: Emphasis-1 button background (warm orange)
+
+  - id: button.border.emphasis.1
+    value: "#c06a1f"
+    description: Emphasis-1 button border
+
+  - id: button.hoverBackground.emphasis.1
+    value: "#e68a35"
+    description: Emphasis-1 button hover background
+
+  - id: button.foreground.emphasis.1
+    value: "#ffffff"
+    description: Emphasis-1 button foreground
+
   # Checkbox colors
   - id: checkbox.background
     value: "#ffffff"

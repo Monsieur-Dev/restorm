@@ -376,12 +376,13 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
           data-testid="graphql-url-input"
         />
       </div>
-      <Button 
+      <Button
         icon={isSending ? 'close' : 'send'}
-        onClick={isSending ? handleCancel : handleSend} 
-        options={{ 
-          title: isSending ? t('cancel') : t('graphql.send'), 
-          ariaLabel: isSending ? t('cancel') : t('graphql.send') 
+        onClick={isSending ? handleCancel : handleSend}
+        emphasis={isSending ? 0 : 1}
+        options={{
+          title: isSending ? t('cancel') : t('graphql.send'),
+          ariaLabel: isSending ? t('cancel') : t('graphql.send')
         }}
         data-testid="graphql-action-button"
       >

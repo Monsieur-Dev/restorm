@@ -17,7 +17,7 @@
 	justify-content: center;
 	align-items: center;
 	border: 1px solid var(--button-border);
-	line-height: 18px;
+	line-height: 20px;
 	color: var(--button-foreground);
 	background-color: var(--button-background);
 }
@@ -247,6 +247,19 @@
 
 .button-dropdown-action:hover {
 	background-color: var(--button-background);
+}
+
+/* Emphasis styles — prominent call-to-action buttons */
+.button.default-colors.emphasis-1,
+.button-dropdown.default-colors > .button.emphasis-1 {
+	background-color: var(--button-background-emphasis-1, var(--button-background));
+	border-color: var(--button-border-emphasis-1, var(--button-border));
+	color: var(--button-foreground-emphasis-1, var(--button-foreground));
+}
+
+.button.default-colors.emphasis-1:hover,
+.button-dropdown.default-colors > .button.emphasis-1:hover {
+	background-color: var(--button-hoverBackground-emphasis-1, var(--button-hoverBackground));
 }
 
 /* Small toolbar-style button (20x20) */

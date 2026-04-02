@@ -362,12 +362,13 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
             data-testid="soap-url-input"
           />
         </div>
-        <Button 
+        <Button
           icon={isSending ? 'close' : 'send'}
-          onClick={isSending ? handleCancel : handleSend} 
-          options={{ 
-            title: isSending ? t('cancel') : t('soap.send'), 
-            ariaLabel: isSending ? t('cancel') : t('soap.send') 
+          onClick={isSending ? handleCancel : handleSend}
+          emphasis={isSending ? 0 : 1}
+          options={{
+            title: isSending ? t('cancel') : t('soap.send'),
+            ariaLabel: isSending ? t('cancel') : t('soap.send')
           }}
           data-testid="soap-request-action-button"
         >

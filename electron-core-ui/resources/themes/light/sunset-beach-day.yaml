@@ -75,7 +75,11 @@ colors:
   button.secondaryBackground: "#f4a261"
   button.secondaryForeground: "#264653"
   button.secondaryHoverBackground: "#f7bc7a"
-  
+  button.background.emphasis.1: "#e76f51"
+  button.border.emphasis.1: "#d45a3d"
+  button.hoverBackground.emphasis.1: "#f0826a"
+  button.foreground.emphasis.1: "#ffffff"
+
   # Badge
   badge.background: "#b04530"
   badge.foreground: "#FFFFFF"

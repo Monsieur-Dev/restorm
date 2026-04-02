@@ -201,9 +201,9 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 		<div
 			className="editor-group-container"
 			data-group-id={group.id}
+			data-has-focus={hasFocus ? 'true' : 'false'}
 			{...(dataTestId && {
 				'data-testid': `${dataTestId}-group-${group.id}`,
-				'data-has-focus': hasFocus ? 'true' : 'false',
 				'data-active-tab-id': group.activeTabId ?? '',
 				'data-tab-count': String(group.tabs.length)
 			})}

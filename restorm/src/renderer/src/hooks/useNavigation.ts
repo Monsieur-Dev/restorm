@@ -56,8 +56,6 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
           } else {
             openFolderTab(folder, breadcrumbs)
           }
-          // Focus the group containing the tab
-          setFocusedGroupId('restorm-main-group')
         }
       } else if (params.type === 'http-request' || params.type === 'graphql-request' || 
                  params.type === 'grpc-request' || params.type === 'soap-request' || 
@@ -66,8 +64,6 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
         if (item && isRequest(item)) {
           const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
           openAnyRequestTab(item, breadcrumbs, environments)
-          // Focus the group containing the tab
-          setFocusedGroupId('restorm-main-group')
         }
       }
     })
