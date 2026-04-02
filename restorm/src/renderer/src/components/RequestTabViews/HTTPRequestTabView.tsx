@@ -652,9 +652,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           {t('requestTab.cancel')}
         </Button>
       ) : (
-        <Button 
+        <Button
           icon="send"
-          onClick={handleSend} 
+          onClick={handleSend}
+          emphasis={1}
           options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}
           data-testid="http-request-send-button"
         >

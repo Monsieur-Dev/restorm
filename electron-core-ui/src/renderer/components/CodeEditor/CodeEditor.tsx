@@ -278,12 +278,13 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
       data-theme-source={themeSource}
       data-resolved-theme={currentTheme}
     >
-      <div {...(dataTestId && { 'data-testid': `${dataTestId}-monaco` })}>
+      <div style={{ width: '100%', height: '100%' }} {...(dataTestId && { 'data-testid': `${dataTestId}-monaco` })}>
         <Editor
           {...props}
           theme={currentTheme}
           onChange={handleChange}
           onMount={handleMount}
+          loading={null}
         />
       </div>
     </div>

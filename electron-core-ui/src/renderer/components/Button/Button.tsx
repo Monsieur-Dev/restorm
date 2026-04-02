@@ -9,6 +9,7 @@ const Button: React.FC<ButtonProps> = ({
   secondary = false,
   small = false,
   line = false,
+  emphasis = 0,
   onClick,
   onMouseEnter,
   onMouseLeave,
@@ -87,6 +88,7 @@ const Button: React.FC<ButtonProps> = ({
     line ? 'line-button' : '',
     secondary ? 'secondary' : '',
     disabled ? 'disabled' : '',
+    emphasis > 0 ? `emphasis-${String(emphasis)}` : '',
     'default-colors',
     className
   ].filter(Boolean).join(' ')

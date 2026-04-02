@@ -409,12 +409,13 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           data-testid="websocket-url-input"
         />
       </div>
-      <Button 
+      <Button
         icon={isSending ? 'debug-disconnect' : 'plug'}
-        onClick={isSending ? handleDisconnect : handleSend} 
-        options={{ 
-          title: isSending ? t('websocket.disconnect') : t('websocket.connect'), 
-          ariaLabel: isSending ? t('websocket.disconnect') : t('websocket.connect') 
+        onClick={isSending ? handleDisconnect : handleSend}
+        emphasis={isSending ? 0 : 1}
+        options={{
+          title: isSending ? t('websocket.disconnect') : t('websocket.connect'),
+          ariaLabel: isSending ? t('websocket.disconnect') : t('websocket.connect')
         }}
         data-testid="websocket-connect-button"
       >

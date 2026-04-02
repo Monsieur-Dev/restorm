@@ -51,36 +51,13 @@ When('I change the path param {string} from {string} to {string}', async ({ page
   const pathParamsSection = page.locator('.params-table-root').first()
   await expect(pathParamsSection).toBeVisible({ timeout: 5000 })
 
-  // Wait for "Loading..." to disappear and actual values to appear
-  await page.waitForFunction(
-    () => {
-      const section = document.querySelector('.params-table-root')
-      const text = section?.textContent ?? ''
-      return section && !text.includes('Loading')
-    },
-    { timeout: 10000 }
-  )
+  // Wait for Monaco editors to render and contain the expected value
+  // Use a Playwright locator that waits for the view-line content with retry
+  const editorWithValue = pathParamsSection.locator(`.monaco-editor .view-line:has-text("${oldValue}")`).first()
+  await expect(editorWithValue).toBeVisible({ timeout: 10000 })
 
-  // Find the Monaco editor that contains the old value in the path params section
-  const monacoEditors = pathParamsSection.locator('.monaco-editor')
-  const editorCount = await monacoEditors.count()
-
-  let targetEditor = null
-  for (let i = 0; i < editorCount; i++) {
-    const editor = monacoEditors.nth(i)
-    const lines = await editor.locator('.view-line').allTextContents()
-    if (lines.some(line => line.includes(oldValue))) {
-      targetEditor = editor
-      break
-    }
-  }
-
-  if (!targetEditor) {
-    await page.screenshot({ path: 'test-results/debug-path-params.png' })
-    throw new Error(`Could not find editor containing "${oldValue}"`)
-  }
-
-  // Click on the editor and edit
+  // Click on the editor containing the old value
+  const targetEditor = editorWithValue.locator('xpath=ancestor::div[contains(@class,"monaco-editor")]').first()
   await targetEditor.click()
   await page.keyboard.press('Control+a')
   await page.keyboard.type(newValue)
