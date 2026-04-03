@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useContext } from 'react'
-import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../../types/theme'
+import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../types/theme'
 import { logger } from '../services/logger'
 import ThemeContext, { themeProviderActive } from '../contexts/ThemeContext'
 

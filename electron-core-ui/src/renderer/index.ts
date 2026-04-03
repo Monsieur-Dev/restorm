@@ -14,7 +14,20 @@ export * from './contexts'
 export type { ThemeContextValue } from './contexts'
 export * from './services'
 export { initializeI18n, default as i18n } from './i18n'
-export type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../types/theme'
+// Error classes and helpers
+export {
+  FileSystemError,
+  PersistenceError,
+  IpcError,
+  errorMeta
+} from '../errors'
+export type {
+  FileSystemErrorCode,
+  PersistenceErrorCode,
+  IpcErrorCode
+} from '../errors'
+
+export type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../types/theme'
 export type {
   FeatureStrategyType,
   FeaturePlatform,
@@ -24,7 +37,7 @@ export type {
   FeatureConfig,
   FeaturesYamlConfig,
   FeatureApi
-} from '../../types/feature'
+} from '../types/feature'
 export type {
   SerializationFormat,
   FilePlatform,
@@ -34,5 +47,5 @@ export type {
   FileServiceState,
   FileServiceApi,
   WebFileEntry
-} from '../../types/file'
+} from '../types/file'
 export type { PersistenceFormat } from '../main/services/PersistenceService'

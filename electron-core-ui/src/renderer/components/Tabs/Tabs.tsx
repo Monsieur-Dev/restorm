@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { ScrollableElement } from '../ScrollableElement'
 import { Modal } from '../Modal'
 
@@ -46,7 +46,7 @@ export interface TabsProps {
   'data-testid'?: string
 }
 
-export const Tabs: React.FC<TabsProps> = ({
+const TabsInner: React.FC<TabsProps> = ({
   tabs,
   activeTabId,
   onTabChange,
@@ -59,24 +59,28 @@ export const Tabs: React.FC<TabsProps> = ({
   const [fullscreenTabId, setFullscreenTabId] = useState<string | null>(null)
   const currentActiveTab = activeTabId ?? internalActiveTab
 
-  const handleTabClick = (tabId: string): void => {
+  const handleTabClick = useCallback((tabId: string): void => {
     setInternalActiveTab(tabId)
     onTabChange?.(tabId)
-  }
+  }, [onTabChange])
 
-  const handleCloseClick = (e: React.MouseEvent, tabId: string): void => {
+  const handleCloseClick = useCallback((e: React.MouseEvent, tabId: string): void => {
     e.stopPropagation()
     onTabClose?.(tabId)
-  }
+  }, [onTabClose])
 
-  const handleTabDoubleClick = (tabId: string, tab: Tab): void => {
+  const handleTabDoubleClick = useCallback((tabId: string, tab: Tab): void => {
     // Call legacy callback if provided
     legacyDoubleClickCallback?.(tabId)
     // Open fullscreen modal if allowed
     if (tab.allowFullscreen) {
       setFullscreenTabId(tabId)
     }
-  }
+  }, [legacyDoubleClickCallback])
+
+  const handleFullscreenClose = useCallback((): void => {
+    setFullscreenTabId(null)
+  }, [])
 
   const fullscreenTab = fullscreenTabId ? tabs.find(tab => tab.id === fullscreenTabId) : null
 
@@ -88,7 +92,10 @@ export const Tabs: React.FC<TabsProps> = ({
         width: '100%',
         height: '100%'
       }}
-      {...(dataTestId && { 'data-testid': dataTestId })}
+      {...(dataTestId && {
+        'data-testid': dataTestId,
+        'data-active-tab-id': currentActiveTab
+      })}
     >
       {/* Tab bar with horizontal ScrollableElement */}
       <ScrollableElement
@@ -120,6 +127,7 @@ export const Tabs: React.FC<TabsProps> = ({
               <div
                 key={tab.id}
                 role="tab"
+                data-tab-id={tab.id}
                 aria-selected={isActive}
                 tabIndex={isActive ? 0 : -1}
                 onClick={() => {
@@ -128,6 +136,7 @@ export const Tabs: React.FC<TabsProps> = ({
                 onDoubleClick={() => {
                   handleTabDoubleClick(tab.id, tab)
                 }}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-tab-${tab.id}` })}
                 style={{
                   position: 'relative',
                   outline: 'none',
@@ -158,20 +167,35 @@ export const Tabs: React.FC<TabsProps> = ({
                   }
                 }}
               >
-                {isActive && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      height: '2px',
-                      backgroundColor: 'var(--tab-activeBorder)',
-                      zIndex: 10
-                    }}
-                  />
-                )}
-                <span>{tab.label}</span>
+                {/* Glow effect — linear gradient from bottom (solid) to top (transparent) */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: '75%',
+                    background: 'linear-gradient(to top, var(--tab-activeGlow, rgba(255,255,255,0.1)) -75%, transparent 100%)',
+                    opacity: isActive ? 1 : 0,
+                    transition: 'opacity 0.5s ease',
+                    pointerEvents: 'none',
+                    zIndex: 0
+                  }}
+                />
+                {/* Active indicator line */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: '2px',
+                    backgroundColor: isActive ? 'var(--tab-activeBorder)' : 'transparent',
+                    transition: 'background-color 0.2s ease',
+                    zIndex: 10
+                  }}
+                />
+                <span style={{ position: 'relative', zIndex: 1 }}>{tab.label}</span>
                 {tab.closable && (
                   <button
                     type="button"
@@ -244,6 +268,7 @@ export const Tabs: React.FC<TabsProps> = ({
                   visibility: isActive ? 'visible' : 'hidden',
                   pointerEvents: isActive ? 'auto' : 'none'
                 }}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-tabpanel-${tab.id}` })}
               >
                 {tab.content}
               </ScrollableElement>
@@ -262,6 +287,7 @@ export const Tabs: React.FC<TabsProps> = ({
                   visibility: isActive ? 'visible' : 'hidden',
                   pointerEvents: isActive ? 'auto' : 'none'
                 }}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-tabpanel-${tab.id}` })}
               >
                 {tab.content}
               </div>
@@ -303,9 +329,7 @@ export const Tabs: React.FC<TabsProps> = ({
       </div>
       <Modal
         isOpen={fullscreenTabId !== null}
-        onClose={() => {
-          setFullscreenTabId(null)
-        }}
+        onClose={handleFullscreenClose}
         title={fullscreenTab?.fullscreenModalTitle ?? fullscreenTab?.label ?? ''}
       >
         {fullscreenTab?.content}
@@ -313,5 +337,8 @@ export const Tabs: React.FC<TabsProps> = ({
     </div>
   )
 }
+
+export const Tabs = React.memo(TabsInner)
+Tabs.displayName = 'Tabs'
 
 export default Tabs

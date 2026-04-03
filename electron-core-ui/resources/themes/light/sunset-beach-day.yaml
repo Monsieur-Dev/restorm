@@ -75,7 +75,11 @@ colors:
   button.secondaryBackground: "#f4a261"
   button.secondaryForeground: "#264653"
   button.secondaryHoverBackground: "#f7bc7a"
-  
+  button.background.emphasis.1: "#e76f51"
+  button.border.emphasis.1: "#d45a3d"
+  button.hoverBackground.emphasis.1: "#f0826a"
+  button.foreground.emphasis.1: "#ffffff"
+
   # Badge
   badge.background: "#b04530"
   badge.foreground: "#FFFFFF"
@@ -129,6 +133,7 @@ colors:
   tab.activeBackground: "#FDF8F3"
   tab.activeForeground: "#264653"
   tab.activeBorder: "#2a9d8f"
+  tab.activeGlow: "rgba(42, 157, 143, 0.18)"
   tab.inactiveBackground: "#EAE0D5"
   tab.inactiveForeground: "#5a6a6a"
   tab.border: "#d4c4b0"

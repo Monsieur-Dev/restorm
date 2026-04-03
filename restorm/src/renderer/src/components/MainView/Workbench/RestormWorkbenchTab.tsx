@@ -1,7 +1,7 @@
 import React from 'react'
 import * as CoreUIRenderer from 'electron-core-ui/renderer'
 import { TagsView, Callout, type CalloutVariant } from 'electron-core-ui/renderer'
-import type { BreadcrumbItem } from '../../../types/editor'
+import type { BreadcrumbItem } from '../../../../../shared/types/editor'
 
 const { Breadcrumb } = CoreUIRenderer as unknown as {
   Breadcrumb: React.ComponentType<{
@@ -25,7 +25,7 @@ export interface RestormWorkbenchTabProps {
   onBreadcrumbClick?: ((item: BreadcrumbItem, index: number, isLast: boolean) => void) | undefined
   onBreadcrumbRename?: ((item: BreadcrumbItem, newValue: string) => void) | undefined
   tags: string[]
-  onTagsChange?: (nextTags: string[]) => void
+  onTagsChange?: ((nextTags: string[]) => void) | undefined
   label: string
   headerRight?: React.ReactNode
   tagsRight?: React.ReactNode

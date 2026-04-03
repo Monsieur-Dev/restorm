@@ -178,6 +178,14 @@ export { radioGroupRootSelector, radioGroupItemSelector } from './radioSelectors
 export { progressBarRootSelector, progressBarBitSelector } from './progressBarSelectors'
 
 export {
+  tabsRootSelector,
+  tabsTabTestId,
+  tabsTabSelector,
+  tabsTabPanelTestId,
+  tabsTabPanelSelector
+} from './tabsSelectors'
+
+export {
   sashRootSelector,
   verticalSashContainerRootSelector,
   verticalSashContainerLeftSelector,
@@ -308,6 +316,9 @@ export {
   listViewRowSelectorByItemId,
   listViewRowExpanderSelectorByItemId,
   listViewRowTitleSelectorByItemId,
+  listViewRowSelectorByTitle,
+  listViewRowExpanderSelectorByTitle,
+  listViewRowTitleSelectorByTitle,
   listViewRenameInputSelector
 } from './listViewSelectors'
 

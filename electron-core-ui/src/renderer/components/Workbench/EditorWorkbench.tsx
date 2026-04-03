@@ -444,6 +444,35 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		[focusedGroupId, onFocusedGroupChange]
 	);
 
+	// Track activeTabIds to detect external tree changes (e.g. sidebar click opening a tab).
+	// When a group's activeTabId changes externally, auto-focus that group visually
+	// without moving the DOM focus (sidebar keeps focus).
+	const prevActiveTabIdsRef = useRef<Map<string, string | undefined>>(new Map());
+	useEffect(() => {
+		const current = new Map<string, string | undefined>();
+		const collectActiveTabIds = (nodes: GroupNode[]): void => {
+			for (const n of nodes) {
+				if (isTabGroupNode(n)) {
+					current.set(n.id, n.activeTabId);
+				} else if (isContainerNode(n)) {
+					collectActiveTabIds(n.groups);
+				}
+			}
+		};
+		collectActiveTabIds(tree.groups);
+
+		// Find the group whose activeTabId changed
+		for (const [groupId, activeTabId] of current) {
+			const prev = prevActiveTabIdsRef.current.get(groupId);
+			if (prev !== undefined && prev !== activeTabId && activeTabId) {
+				// A group's active tab changed — give it visual focus
+				setFocus(groupId);
+				break;
+			}
+		}
+		prevActiveTabIdsRef.current = current;
+	}, [tree, setFocus]);
+
 	const change = useCallback((next: WorkbenchTree) => {
 		if (onChange) onChange(normalizeTree(next));
 	}, [onChange]);
@@ -526,9 +555,7 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		};
 		rec(next.groups);
 		change(next);
-		// Set focus to the group where the tab was activated
-			setFocus(groupId);
-			// Notify external listener about tab activation (tab selected event)
+		setFocus(groupId);
 			if (externalOnActivateTab) {
 				externalOnActivateTab(tabId, groupId);
 			}

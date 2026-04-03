@@ -5,12 +5,12 @@
 import { useCallback } from 'react'
 import type { ListViewDropEventPayload, ListViewItemEventPayload } from 'electron-core-ui/renderer'
 import { isTabGroupNode } from 'electron-core-ui/renderer'
-import type { Folder, EnvironmentFolder, Request } from '../types/collections'
-import { isAnyFolder } from '../types/collections'
+import type { Folder, EnvironmentFolder, Request } from '../../../shared/types/collections'
+import { isAnyFolder } from '../../../shared/types/collections'
 import { findItemById, findItemWithBreadcrumbs } from '../utils/treeSearch'
 import { generateUniqueId, cloneItemInTree, removeItemFromTree, insertItemIntoTree } from '../utils/treeManipulation'
 import type { WorkbenchTree } from 'electron-core-ui/renderer'
-import type { FolderTab, EnvironmentFolderTab, HTTPRequestTab } from '../types/editor'
+import type { FolderTab, EnvironmentFolderTab, HTTPRequestTab } from '../../../shared/types/editor'
 
 export interface UseItemOperationsOptions {
   rootItems: (EnvironmentFolder | Folder | Request)[]

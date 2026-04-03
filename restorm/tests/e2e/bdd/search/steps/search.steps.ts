@@ -1,55 +1,77 @@
 import { createBdd } from 'playwright-bdd'
 import { test, expect } from '../../fixtures/petstore-file.fixture'
+import { defineMenuBarBddSteps } from 'electron-core-ui/testing/playwright-bdd'
+import {
+  searchBarClosedSelector,
+  searchBarInputSelector,
+  searchBarOpenSelector,
+  searchBarRootSelector,
+  searchBarResultsSelector,
+  searchBarTooltipSelector
+} from 'electron-core-ui/testing'
 
-const { Given, When, Then } = createBdd(test)
+const bdd = createBdd(test)
+const { Given, When, Then } = bdd
+
+defineMenuBarBddSteps(bdd)
 
 Given('the file is loaded', async ({ page }) => {
   await page.waitForSelector('[role="treeitem"]', { timeout: 10000 })
 })
 
 When('I open the search bar', async ({ page }) => {
-  const searchBar = page.locator('.search-bar-closed, .search-bar-container, [data-testid="search-bar"]').first()
-  await expect(searchBar).toBeVisible({ timeout: 5000 })
-  await searchBar.click()
-  // Wait for search input to appear
-  await page.waitForSelector('.search-bar-open input', { timeout: 3000 })
+  // Titlebar SearchBar is rendered by electron-core-ui Titlebar when showSearchBar=true
+  // and uses stable data-testid selectors from electron-core-ui/testing.
+  await page.waitForSelector('[data-testid="main-titlebar"]', { timeout: 15000 })
+  await page.waitForSelector('[data-testid="main-titlebar-searchbar"]', { timeout: 5000 })
+
+  const searchBarId = 'main-titlebar-searchbar'
+  await page.locator(searchBarClosedSelector(searchBarId)).click({ force: true })
+  await page.waitForSelector(searchBarOpenSelector(searchBarId), { timeout: 5000 })
 })
 
 When('I search for {string}', async ({ page }, query: string) => {
-  const searchInput = page.locator('.search-bar-input input, input.search-bar-input, .search-bar-open input').first()
-  await expect(searchInput).toBeVisible({ timeout: 2000 })
-  await searchInput.fill('')
-  await searchInput.fill(query)
-  // Wait for search results to appear
-  await page.waitForSelector('[data-testid="search-results"][data-ready="true"], .search-result-item, .search-results-empty', { timeout: 5000 })
+  const searchBarId = 'main-titlebar-searchbar'
+  // Clear existing query then type via keyboard to align with electron-core-ui testing behavior
+  const input = page.locator(searchBarInputSelector(searchBarId)).first()
+  await expect(input).toBeVisible({ timeout: 5000 })
+  await input.focus()
+  await page.keyboard.press('Control+A')
+  await page.keyboard.press('Backspace')
+  for (const ch of query) {
+    await page.keyboard.type(ch)
+  }
+  await page.waitForSelector(`[data-testid="${searchBarId}"][data-results-count]`, { timeout: 5000 })
 })
 
 When('I click on the first search result', async ({ page }) => {
-  await page.waitForSelector('.search-result-item', { timeout: 5000, state: 'visible' })
-  const firstResult = page.locator('.search-result-item').first()
-  await firstResult.click()
+  const searchBarId = 'main-titlebar-searchbar'
+  const first = page.locator(`${searchBarResultsSelector(searchBarId)} [data-testid^="main-titlebar-searchbar-result-"]`).first()
+  await expect(first).toBeVisible({ timeout: 5000 })
+  await first.click()
   // Wait for tab to open
   await page.waitForSelector('.tab.active', { timeout: 5000 })
 })
 
 When('I hover over the first search result', async ({ page }) => {
-  await page.waitForSelector('.search-result-item', { timeout: 5000, state: 'visible' })
-  const firstResult = page.locator('.search-result-item').first()
-  await firstResult.hover()
-  // Wait for tooltip to appear
-  await page.waitForSelector('[role="tooltip"], .search-result-tooltip', { timeout: 3000 }).catch(() => { /* tooltip may not appear */ })
+  const searchBarId = 'main-titlebar-searchbar'
+  const first = page.locator(`${searchBarResultsSelector(searchBarId)} [data-testid^="main-titlebar-searchbar-result-"]`).first()
+  await expect(first).toBeVisible({ timeout: 5000 })
+  await first.hover()
+  await page.waitForSelector('[data-testid="main-titlebar-searchbar-tooltip"]', { timeout: 5000 })
 })
 
 Then('I should see search results', async ({ page }) => {
-  const searchResults = page.locator('.search-result-item')
-  await page.waitForSelector('.search-result-item', { timeout: 5000, state: 'visible' })
+  const searchBarId = 'main-titlebar-searchbar'
+  const searchResults = page.locator(`${searchBarResultsSelector(searchBarId)} [data-testid^="main-titlebar-searchbar-result-"]`)
+  await expect(searchResults.first()).toBeVisible({ timeout: 5000 })
   const resultCount = await searchResults.count()
   expect(resultCount).toBeGreaterThan(0)
 })
 
 Then('the first result should contain {string}', async ({ page }, text: string) => {
-  const searchResults = page.locator('.search-result-item')
-  const firstResult = searchResults.first()
+  const searchBarId = 'main-titlebar-searchbar'
+  const firstResult = page.locator(`${searchBarResultsSelector(searchBarId)} [data-testid^="main-titlebar-searchbar-result-"]`).first()
   const resultText = await firstResult.textContent()
   expect(resultText?.toLowerCase()).toContain(text.toLowerCase())
 })
@@ -71,27 +93,10 @@ Then('a tab containing {string} should be open', async ({ page }, tabText: strin
 })
 
 Then('a tooltip should be visible', async ({ page }) => {
-  const tooltipSelectors = [
-    '[role="tooltip"]',
-    '[class*="Tooltip"]',
-    '[class*="tooltip"]',
-    '.tooltip-content',
-    '[data-testid*="tooltip"]'
-  ]
-
-  for (const selector of tooltipSelectors) {
-    const tooltip = page.locator(selector)
-    const count = await tooltip.count()
-    if (count > 0) {
-      const isVisible = await tooltip.first().isVisible().catch(() => false)
-      if (isVisible) {
-        const tooltipText = await tooltip.first().textContent()
-        expect(tooltipText?.trim().length).toBeGreaterThan(0)
-        return
-      }
-    }
-  }
-  // Tooltip might be in a portal - if not found, at least verify no errors occurred
+  const tooltip = page.locator(searchBarTooltipSelector('main-titlebar-searchbar'))
+  await expect(tooltip).toBeVisible({ timeout: 5000 })
+  const tooltipText = await tooltip.textContent()
+  expect((tooltipText ?? '').trim().length).toBeGreaterThan(0)
 })
 
 When('I wait {int} seconds', async ({ page }, seconds: number) => {
@@ -100,40 +105,17 @@ When('I wait {int} seconds', async ({ page }, seconds: number) => {
 })
 
 Then('the number of results should be {int}', async ({ page }, expectedCount: number) => {
-  const searchResults = page.locator('.search-result-item')
-  await page.waitForSelector('.search-result-item', { timeout: 5000, state: 'visible' }).catch(() => {
-    // If no results found, count should be 0
-  })
-  const actualCount = await searchResults.count()
+  const searchBarRoot = page.locator(searchBarRootSelector('main-titlebar-searchbar')).first()
+  await expect(searchBarRoot).toBeVisible({ timeout: 5000 })
+  const raw = await searchBarRoot.getAttribute('data-results-count')
+  const actualCount = Number(raw ?? '0')
   expect(actualCount).toBe(expectedCount)
 })
 
-When('I close the file', async ({ page }) => {
-  // Click File menu
-  const fileMenu = page.locator('[role="menubar"] >> text=File').first()
-  await expect(fileMenu).toBeVisible({ timeout: 5000 })
-  await fileMenu.click()
-  
-  // Wait for menu to expand
-  await page.waitForSelector('[role="menu"]', { timeout: 2000 })
-  
-  // Click Close
-  const closeMenuItem = page.locator('[role="menuitem"] >> text=Close').first()
-  await expect(closeMenuItem).toBeVisible({ timeout: 5000 })
-  await closeMenuItem.click()
-  
-  // Wait for file to be closed (no file name in titlebar, or welcome screen appears)
-  await page.waitForSelector('text=WORKSPACE', { timeout: 10000 }).catch(() => {
-    // File might be closed, welcome screen might appear
-  })
-})
-
 Then('I should see no search results', async ({ page }) => {
-  // Wait for search results container to be ready (empty state or no results)
-  await page.waitForSelector('[data-testid="search-results"][data-ready="true"], .search-result-item, .search-results-empty', { timeout: 5000 })
-  
-  // Check that there are no search result items
-  const searchResults = page.locator('.search-result-item')
-  const resultCount = await searchResults.count()
+  const searchBarRoot = page.locator(searchBarRootSelector('main-titlebar-searchbar')).first()
+  await expect(searchBarRoot).toBeVisible({ timeout: 5000 })
+  const raw = await searchBarRoot.getAttribute('data-results-count')
+  const resultCount = Number(raw ?? '0')
   expect(resultCount).toBe(0)
 })

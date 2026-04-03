@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { useRequestReset } from '../../hooks/useRequestReset'
 import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
@@ -11,30 +12,16 @@ import {
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
-import type { SoapRequest, SoapResponse, KeyValue, ResponseHistoryDetail } from '../../types/collections'
-import { StringValue } from '../../types/collections'
+import type { SoapRequest, SoapResponse, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
-import type { VariableContext } from '../RestormKeyValueTable'
-import type { SOAPExecutionResult } from '../../types/global.d'
+import type { SOAPExecutionResult, KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { Badge } from '../common/Badge'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
 import { getResponseHistoryList } from '../../services/GraphQLIntegration'
-
-// Helper to update reactive proxy properties (intentional mutation for reactive objects)
-function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
-  Object.assign(obj, { [key]: value })
-}
-
-function toKeyValuesFromHistory(values: { key: string; value: string; enabled?: boolean }[]): KeyValue[] {
-  return values.map((kv) => ({
-    key: kv.key,
-    value: new StringValue(kv.value),
-    enabled: kv.enabled
-  }))
-}
+import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabViewUtils'
 
 export interface SoapRequestTabViewProps {
   request: SoapRequest
@@ -68,20 +55,13 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
   const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
   
   const headersRef = useRef<KeyValueTableHandle | null>(null)
-  const requestIdRef = useRef(request.id)
-  
-  useEffect(() => {
-    if (requestIdRef.current !== request.id) {
-      requestIdRef.current = request.id
-      const rafId = requestAnimationFrame(() => {
-        setUrlState(request.url)
-        setBodyState(request.body)
-        setResponse(null)
-      })
-      return (): void => { cancelAnimationFrame(rafId) }
-    }
-    return undefined
+
+  const handleRequestReset = useCallback(() => {
+    setUrlState(request.url)
+    setBodyState(request.body)
+    setResponse(null)
   }, [request])
+  useRequestReset(request, handleRequestReset)
 
   // Refs to capture initial values for registration (avoid re-running effect when these change)
   const selectedEnvIdRef = useRef(selectedEnvId)
@@ -96,7 +76,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
     const currentRequest = requestRef.current
     logger.debug('[SoapRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
-    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
       kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
 
     void window.restorm?.context.registerRequest(requestId, currentEnvId, {
@@ -159,7 +139,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
 
   // Notify ContextService when URL or body changes
   useEffect(() => {
-    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
       kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
 
     void window.restorm?.context.updateFullRequestData(request.id, {
@@ -180,9 +160,6 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
     setBodyState(value)
     updateReactiveProperty(request, 'body', value)
   }, [request])
-  
-  // Variable resolution done in backend
-  const _environmentContext: VariableContext = {}
   
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
@@ -385,12 +362,13 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
             data-testid="soap-url-input"
           />
         </div>
-        <Button 
+        <Button
           icon={isSending ? 'close' : 'send'}
-          onClick={isSending ? handleCancel : handleSend} 
-          options={{ 
-            title: isSending ? t('cancel') : t('soap.send'), 
-            ariaLabel: isSending ? t('cancel') : t('soap.send') 
+          onClick={isSending ? handleCancel : handleSend}
+          emphasis={isSending ? 0 : 1}
+          options={{
+            title: isSending ? t('cancel') : t('soap.send'),
+            ariaLabel: isSending ? t('cancel') : t('soap.send')
           }}
           data-testid="soap-request-action-button"
         >

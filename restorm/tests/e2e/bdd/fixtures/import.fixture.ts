@@ -3,6 +3,7 @@ import { _electron as electron, type ElectronApplication, type Page } from '@pla
 import { join, resolve } from 'path'
 import { existsSync, mkdirSync, rmSync } from 'fs'
 import electronPath from 'electron'
+import { closeElectronAppForE2E, withE2ECoverageEnv, writeRendererIstanbulCoverage } from '../../helpers/coverage'
 
 interface ImportFixture {
   electronApp: ElectronApplication
@@ -26,7 +27,7 @@ export const test = base.extend<ImportFixture>({
     }
   },
 
-  electronApp: async ({ restormRoot, tempFilePath }, use) => {
+  electronApp: async ({ restormRoot }, use) => {
     const electronExePath = electronPath as unknown as string
     const mainJsPath = join(restormRoot, 'dist/main/index.js')
 
@@ -34,45 +35,25 @@ export const test = base.extend<ImportFixture>({
       executablePath: electronExePath,
       args: ['--no-sandbox', mainJsPath],
       env: {
-        ...process.env,
+        ...withE2ECoverageEnv(restormRoot, process.env),
         NODE_ENV: 'development'
       }
     })
 
-    // Mock dialogs - both message box (for unsaved changes) and save dialog
-    await app.evaluate(
-      ({ dialog }, tempPath) => {
-        dialog.showMessageBox = async () => ({ response: 1, checkboxChecked: false }) // "No" to save changes
-        dialog.showSaveDialog = async () => ({ canceled: false, filePath: tempPath }) // Provide temp path for new file
-      },
-      tempFilePath
-    )
-
     await use(app)
-
-    try {
-      app.process().kill('SIGKILL')
-    } catch {
-      // Ignore kill errors
-    }
+    await closeElectronAppForE2E(app)
   },
 
-  page: async ({ electronApp }, use) => {
+  page: async ({ electronApp, restormRoot }, use, testInfo) => {
     const page = await electronApp.firstWindow()
-
-    page.on('console', msg => {
-      if (msg.type() === 'error') {
-        console.log(`[Renderer ERROR] ${msg.text()}`)
-      }
-    })
 
     await page.waitForLoadState('domcontentloaded')
     await page.waitForLoadState('load')
 
     await use(page)
+
+    await writeRendererIstanbulCoverage(page, testInfo, restormRoot)
   }
 })
-
-export { expect } from '@playwright/test'
 
 export { expect } from '@playwright/test'

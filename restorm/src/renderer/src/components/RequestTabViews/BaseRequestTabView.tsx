@@ -319,7 +319,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
                     data-testid="base-request-button-center-view"
                   />
                 </div>
-                <Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}><i className="codicon codicon-loading codicon-modifier-spin" /></div>}>
+                <Suspense fallback={<div role="status" aria-label="Loading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}><i className="codicon codicon-loading codicon-modifier-spin" aria-hidden="true" /></div>}>
                   <Graph
                     key={graphKey}
                     ref={graphRef}

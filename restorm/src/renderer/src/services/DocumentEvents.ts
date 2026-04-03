@@ -22,9 +22,9 @@ export interface DocumentChangedPayload extends DocumentEventPayload {
   /** The document data */
   document: unknown
   /** Parent folder ID (for requests) */
-  parentFolderId?: string
+  parentFolderId?: string | undefined
   /** Parent environment ID (for sub-environments) */
-  parentEnvironmentId?: string
+  parentEnvironmentId?: string | undefined
 }
 
 /** Payload for document deleted events */

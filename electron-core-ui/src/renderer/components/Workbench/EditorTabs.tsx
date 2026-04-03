@@ -293,6 +293,31 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 		[group.id, group.tabs, onMoveTab]
 	);
 
+	const handleActivate = useCallback(
+		(tabId: string) => {
+			onActivateTab?.(tabId, group.id);
+		},
+		[onActivateTab, group.id]
+	);
+
+	const handleClose = useCallback(
+		(tabId: string) => {
+			onCloseTab?.(tabId, group.id);
+		},
+		[onCloseTab, group.id]
+	);
+
+	const handleDoubleClick = useCallback(
+		(tabId: string) => {
+			onTabDoubleClick?.(tabId);
+		},
+		[onTabDoubleClick]
+	);
+
+	const handleContextMenuClose = useCallback(() => {
+		setContextMenuState((prev) => ({ ...prev, visible: false }));
+	}, []);
+
 	const handleTabContextMenu = useCallback(
 		(event: React.MouseEvent, tab: EditorTab) => {
 			if (!getTabContextMenuItems) {
@@ -367,7 +392,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 					handleMouseWheel: true,
 					mouseWheelSmoothScroll: false,
 					mouseWheelHorizontal: true,
-					horizontalScrollbarSize: 3
+					horizontalScrollbarSize: 0
 				}}
 				className={`tabs-container-wrapper${dimmed ? ' dimmed' : ''}`}
 				{...(dataTestId && { 'data-testid': dataTestId })}
@@ -425,10 +450,10 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 								}
 								return undefined;
 							})()}
-							onActivate={() => { onActivateTab?.(tab.id, group.id); }}
-							onClose={(tabId) => onCloseTab?.(tabId, group.id)}
+							onActivate={handleActivate}
+							onClose={handleClose}
 							onContextMenu={(e) => { handleTabContextMenu(e, tab); }}
-							onDoubleClick={(tabId) => onTabDoubleClick?.(tabId)}
+							onDoubleClick={handleDoubleClick}
 						/>
 					))}
 				</div>
@@ -439,12 +464,10 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 				y={contextMenuState.y}
 				items={contextMenuState.items}
 				{...(contextMenuTestId && { 'data-testid': contextMenuTestId })}
-				onRequestClose={() => {
-					setContextMenuState((prev) => ({ ...prev, visible: false }));
-				}}
+				onRequestClose={handleContextMenuClose}
 			/>
 		</div>
 	);
 };
 
-export default EditorTabs;
+export default React.memo(EditorTabs);

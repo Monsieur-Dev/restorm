@@ -9,7 +9,7 @@ import {
   type PersistenceFormat
 } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
-import type { FolderItem, EnvironmentFolder } from '../../types/collections'
+import type { FolderItem, EnvironmentFolder } from '../../../../shared/types/collections'
 import './SaveOptionsModal.css'
 
 export type SaveMode = 'file' | 'folder'
@@ -25,7 +25,7 @@ interface SaveOptionsModalProps {
   onClose: () => void
   onSave: (options: SaveOptions) => void | Promise<void>
   defaultOptions?: Partial<SaveOptions>
-  rootFolder?: FolderItem
+  rootFolder?: FolderItem | undefined
   title?: string
 }
 

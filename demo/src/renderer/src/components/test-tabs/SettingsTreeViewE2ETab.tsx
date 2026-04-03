@@ -1,24 +1,14 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SettingsTreeView } from 'electron-core-ui/renderer'
-
-interface SettingsSchemaLocal {
-  categories: Record<string, SettingCategoryLocal>
-}
-
-interface SettingCategoryLocal {
-  key: string
-  name: string
-  categories?: Record<string, SettingCategoryLocal>
-  settings?: Record<string, unknown>
-}
+import type { SettingsSchema } from 'electron-core-ui/types'
 
 const SettingsTreeViewE2ETab: React.FC = () => {
   const { t } = useTranslation()
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState<string>('')
 
-  const schema = useMemo((): SettingsSchemaLocal => ({
+  const schema = useMemo((): SettingsSchema => ({
     categories: {
       general: {
         key: 'general',
@@ -31,7 +21,7 @@ const SettingsTreeViewE2ETab: React.FC = () => {
               theme: {
                 key: 'theme',
                 name: t('settingsTreeView.harness.categories.theme'),
-                settings: { enabled: true }
+                settings: { enabled: { type: 'boolean', title: 'Enabled' } }
               }
             }
           }
@@ -40,7 +30,7 @@ const SettingsTreeViewE2ETab: React.FC = () => {
       workspace: {
         key: 'workspace',
         name: t('settingsTreeView.harness.categories.workspace'),
-        settings: { enabled: true }
+        settings: { enabled: { type: 'boolean', title: 'Enabled' } }
       }
     }
   }), [t])

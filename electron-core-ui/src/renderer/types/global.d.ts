@@ -1,8 +1,8 @@
 // Global type definitions for electron-core-ui
 
-import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../../types/theme'
-import type { FeaturePlatform } from '../../../types/feature'
-import type { FileServiceState, FileMetadata, SerializationFormat } from '../../../types/file'
+import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../types/theme'
+import type { FeaturePlatform } from '../../types/feature'
+import type { FileServiceState, FileMetadata, SerializationFormat } from '../../types/file'
 
 interface WindowApiTheme {
   list: () => Promise<ThemeInfo[]>

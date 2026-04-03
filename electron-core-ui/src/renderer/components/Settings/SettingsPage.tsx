@@ -12,6 +12,8 @@ export interface SettingsPageProps {
   themeCarouselTestId?: string
   /** Optional test id applied to the language SelectBox. Defaults to `{data-testid}-language-selectbox`. */
   languageSelectBoxTestId?: string
+  /** Additional settings content rendered below the built-in settings */
+  children?: React.ReactNode
 }
 
 /**
@@ -29,7 +31,8 @@ const AVAILABLE_LANGUAGES = [
 export const SettingsPage: React.FC<SettingsPageProps> = ({
   'data-testid': dataTestId,
   themeCarouselTestId,
-  languageSelectBoxTestId
+  languageSelectBoxTestId,
+  children
 }) => {
   const { t, i18n } = useTranslation()
   const rootTestId = dataTestId ?? 'settings-page'
@@ -83,6 +86,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             onDidSelect={handleLanguageChange}
           />
         </div>
+        {children}
       </div>
     </div>
   )

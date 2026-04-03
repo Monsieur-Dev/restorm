@@ -3,7 +3,7 @@ import './inputBox.css'
 import { MessageType, defaultInputBoxStyles } from './types'
 import type { IMessage, InputBoxProps } from './types'
 
-const InputBox: React.FC<InputBoxProps> = ({
+const InputBoxInner: React.FC<InputBoxProps> = ({
   options,
   'data-testid': dataTestId,
   value = '',
@@ -338,4 +338,5 @@ const InputBox: React.FC<InputBoxProps> = ({
   )
 }
 
+const InputBox = React.memo(InputBoxInner)
 export default InputBox

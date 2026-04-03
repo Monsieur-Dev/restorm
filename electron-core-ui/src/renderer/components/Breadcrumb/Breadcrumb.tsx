@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useRef, useEffect } from 'react'
-import type { Icon } from '../../../../types/icon'
+import type { Icon } from '../../../types/icon'
 
 import './breadcrumb.css'
 
@@ -50,7 +50,7 @@ function renderIcon(icon: Icon | null | undefined): React.ReactNode {
   return <i className={`ecui-breadcrumb-icon codicon codicon-${icon.value}`} />
 }
 
-export const Breadcrumb: React.FC<BreadcrumbProps> = ({
+const BreadcrumbInner: React.FC<BreadcrumbProps> = ({
   items,
   'data-testid': dataTestId,
   onItemClick,
@@ -216,5 +216,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
     </nav>
   )
 }
+
+export const Breadcrumb = React.memo(BreadcrumbInner)
 
 export default Breadcrumb

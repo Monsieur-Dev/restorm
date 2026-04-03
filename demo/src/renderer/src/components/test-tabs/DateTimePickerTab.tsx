@@ -36,6 +36,18 @@ const DateTimePickerTab: React.FC = () => {
         <div data-testid="datetimepicker-value-utc-iso">{valueUtcIso}</div>
         <div data-testid="datetimepicker-value-utc-iso-minutes">{valueUtcIsoMinutes}</div>
       </div>
+
+      <h3 style={{ fontSize: 16, marginBottom: 0 }}>
+        Configuré avec le dimanche comme premier jour de la semaine.
+      </h3>
+      <div style={{ display: 'grid', gap: 10 }}>
+        <DateTimePicker
+          data-testid="datetimepicker-sunday-first"
+          value={value}
+          onChange={onChange}
+          firstDayOfWeek={0}
+        />
+      </div>
     </div>
   )
 }

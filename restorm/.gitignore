@@ -10,6 +10,8 @@ out/
 
 # Coverage
 coverage/
+.nyc_output/
+.v8-coverage/
 
 # Logs
 *.log

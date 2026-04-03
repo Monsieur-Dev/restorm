@@ -92,8 +92,8 @@ class GRPCExecutionService {
       let parsedMessage: unknown = {}
       try {
         parsedMessage = JSON.parse(resolvedMessage) as unknown
-      } catch {
-        // Invalid JSON, use empty object
+      } catch (error) {
+        logger.warn('[GRPCExecutionService] Failed to parse JSON metadata', { error: String(error) })
       }
 
       // Broadcast completion

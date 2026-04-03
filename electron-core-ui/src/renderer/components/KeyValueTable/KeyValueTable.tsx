@@ -19,7 +19,7 @@ export interface KeyValueTableRow {
   value: string
   description?: string | undefined
   /** Whether this row is enabled (default: true) */
-  enabled?: boolean
+  enabled?: boolean | undefined
 }
 
 interface ParamRow {
@@ -76,32 +76,32 @@ const DefaultCellRenderer: React.FC<CellRendererProps> = ({ value, onChange, pla
 
 export interface KeyValueTableProps {
   /** Initial rows to populate the table */
-  initialRows?: KeyValueTableRow[]
+  initialRows?: KeyValueTableRow[] | undefined
   /** Optional test id applied to the table root element. */
-  'data-testid'?: string
+  'data-testid'?: string | undefined
   /**
    * Optional callback when rows change (for persisting edits).
    */
-  onRowsChange?: (rows: KeyValueTableRow[]) => void
+  onRowsChange?: ((rows: KeyValueTableRow[]) => void) | undefined
   /**
    * Custom renderer for key cells. Defaults to InputBox.
    */
-  renderKeyCell?: React.ComponentType<CellRendererProps>
+  renderKeyCell?: React.ComponentType<CellRendererProps> | undefined
   /**
    * Custom renderer for value cells. Defaults to InputBox.
    */
-  renderValueCell?: React.ComponentType<CellRendererProps>
+  renderValueCell?: React.ComponentType<CellRendererProps> | undefined
   /**
    * Custom renderer for description cells. Defaults to InputBox.
    */
-  renderDescriptionCell?: React.ComponentType<CellRendererProps>
+  renderDescriptionCell?: React.ComponentType<CellRendererProps> | undefined
 }
 
 export interface KeyValueTableHandle {
   addRow: () => void
 }
 
-export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTableProps>((
+export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, KeyValueTableProps>((
   {
     initialRows,
     onRowsChange,
@@ -379,16 +379,15 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
                       </td>
                       <td>
                         <Button
-                          small
+                          line
                           secondary
                           {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-delete` })}
                           options={{ ariaLabel: 'Delete row', title: 'Delete row' }}
                           onClick={() => {
                             handleRemoveRow(index)
                           }}
-                        >
-                          <i className="codicon codicon-trash" />
-                        </Button>
+                          icon='trash'
+                        />
                       </td>
                     </tr>
                   )
@@ -400,6 +399,6 @@ export const KeyValueTable = React.forwardRef<KeyValueTableHandle, KeyValueTable
       </div>
     </div>
   )
-})
+}))
 
 KeyValueTable.displayName = 'KeyValueTable'

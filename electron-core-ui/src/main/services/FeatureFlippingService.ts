@@ -2,13 +2,14 @@ import { readFileSync, existsSync } from 'fs'
 import yaml from 'js-yaml'
 import type {
   FeatureConfig,
-  FeaturesYamlConfig,
   FeaturePlatform,
   FeatureStrategy,
   BasicStrategy,
   PlatformStrategy
-} from '../../../types/feature'
+} from '../../types/feature'
 import { logger } from './LoggerService'
+import { FileSystemError, errorMeta } from '../../errors'
+import { featuresYamlConfigSchema } from '../schemas/configSchemas'
 
 /**
  * FeatureFlippingService manages feature flags with configurable strategies
@@ -41,12 +42,14 @@ export class FeatureFlippingService {
 
     try {
       const content = readFileSync(configPath, 'utf-8')
-      const config = yaml.load(content) as FeaturesYamlConfig | undefined
-
-      if (!config || !Array.isArray(config.Features)) {
-        logger.warn('Invalid features configuration: Features array not found')
+      const raw = yaml.load(content)
+      const parsed = featuresYamlConfigSchema.safeParse(raw)
+      if (!parsed.success) {
+        const issues = parsed.error.issues.map(i => i.message).join('; ')
+        logger.warn('Invalid features configuration', { issues })
         return
       }
+      const config = parsed.data
 
       for (const feature of config.Features) {
         this.features.set(feature.Name, feature)
@@ -54,7 +57,8 @@ export class FeatureFlippingService {
 
       logger.info(`FeatureFlippingService: Loaded ${String(this.features.size)} features`)
     } catch (error) {
-      logger.error('Failed to load features configuration', { error: String(error) })
+      const wrappedError = new FileSystemError('Failed to load features configuration', 'FS_READ_FAILED', { cause: error })
+      logger.error('Failed to load features configuration', errorMeta(wrappedError))
     }
   }
 

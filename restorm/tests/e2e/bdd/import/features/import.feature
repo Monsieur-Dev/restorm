@@ -4,6 +4,7 @@ Feature: Import Requests
 
   Background:
     Given I have started the application
+    And system modals mocking is installed
     And I have created a new empty file
 
   Scenario: Import preview from URL

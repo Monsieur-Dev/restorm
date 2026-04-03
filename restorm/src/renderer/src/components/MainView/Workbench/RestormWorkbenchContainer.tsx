@@ -2,13 +2,13 @@ import React from 'react'
 import type { WorkbenchTree, RebuildTabCallback } from 'electron-core-ui/renderer'
 import { RestormWorkbench, type RestormWorkbenchHandle } from './RestormWorkbench'
 import { EnvironmentValuesProvider } from '../../../contexts/EnvironmentValuesContext'
-import type { BreadcrumbItem } from '../../../types/editor'
-import type { Request, Folder, EnvironmentFolder } from '../../../types/collections'
+import type { BreadcrumbItem } from '../../../../../shared/types/editor'
+import type { Request, Folder, EnvironmentFolder } from '../../../../../shared/types/collections'
 
 export interface RestormWorkbenchContainerProps {
   workbenchRef?: React.Ref<RestormWorkbenchHandle>
   tree: WorkbenchTree
-  dirtyItemIdsSet?: Set<string>
+  dirtyItemIdsSet?: Set<string> | undefined
   onTreeChange: (tree: WorkbenchTree) => void
   focusedGroupId: string | null
   onFocusedGroupChange: (groupId: string | null) => void
@@ -20,7 +20,7 @@ export interface RestormWorkbenchContainerProps {
   onEnvironmentFolderChange: (folderId: string, folder: EnvironmentFolder) => void
   onSizesChange: (nodeId: string, sizes: number[]) => void
   emptyFallback: React.ReactNode
-  workbenchId?: string
+  workbenchId?: string | undefined
   onRebuildTab: RebuildTabCallback
   onStateRestored: (tree: WorkbenchTree | null) => void
   getRequestById: (id: string) => Request | undefined

@@ -176,7 +176,7 @@
 	background-color: var(--menu-separatorBackground) !important;
 	border: none !important;
 	padding: 0 !important;
-	margin: 4px 8px !important;
+	margin: 4px 0 !important;
 }
 
 /* Context menu specific tuning to avoid visual overflow */
@@ -302,3 +302,24 @@
 	outline-width: 1px !important;
 	outline-offset: -8px !important;
 }
+
+kbd {
+	background-color: var(--button-background, var(--menu-background));
+	color: var(--button-foreground, var(--menu-foreground));
+	border: 1px solid var(--button-border, var(--dropdown-border, var(--menu-separatorBackground)));
+	border-radius: 4px;
+	box-shadow:
+	  0 1px 2px rgb(0, 0, 0, 0.15),
+	  0 1px 0 0 rgb(255, 255, 255, 0.1) inset,
+	  0 -1px 0 0 rgb(0, 0, 0, 0.1) inset;
+	display: inline-block;
+	font-size: 0.85em;
+	font-weight: 600;
+	line-height: 1.2;
+	padding: 3px 6px;
+	white-space: nowrap;
+	min-width: 1.2em;
+	text-align: center;
+	vertical-align: middle;
+  }
+  

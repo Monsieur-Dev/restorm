@@ -27,5 +27,6 @@ const ButtonWithIcon: React.FC<ButtonWithIconProps> = ({
   )
 }
 
-export { ButtonWithIcon }
-export default ButtonWithIcon
+const MemoizedButtonWithIcon = React.memo(ButtonWithIcon)
+export { MemoizedButtonWithIcon as ButtonWithIcon }
+export default MemoizedButtonWithIcon

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Modal } from 'electron-core-ui/renderer'
-import type { ResponseHistoryDetail } from '../../types/collections'
+import type { ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { ResponseHistoryTab } from '../RequestTabViews/ResponseHistoryTab'
 import { useTranslation } from 'react-i18next'
 
@@ -8,8 +8,8 @@ export interface ResponseHistoryModalProps {
   isOpen: boolean
   onClose: () => void
   requestId: string
-  requestPath?: string
-  refreshKey?: number
+  requestPath?: string | undefined
+  refreshKey?: number | undefined
   buildResponseView: (detail: ResponseHistoryDetail) => {
     infosContent?: React.ReactNode | undefined
     responseContent?: React.ReactNode | undefined

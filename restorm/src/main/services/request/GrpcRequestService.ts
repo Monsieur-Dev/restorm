@@ -8,13 +8,9 @@
 
 import type { GrpcRequest, GrpcResponse, KeyValue } from '../../../shared/types/collections'
 import { StringValue } from '../../../shared/types/collections'
-// TODO: Variable resolution will be implemented in backend
+import { logger } from 'electron-core-ui/main'
 import type { VariableContext } from './types'
-
-/** Placeholder for variable resolution - returns template as-is (to be implemented in backend) */
-function resolveTemplate(template: string, _context: VariableContext): string {
-  return template
-}
+import { resolveTemplate } from './resolveTemplate'
 
 /** Input for executing a gRPC request */
 export interface GrpcRequestInput {
@@ -80,8 +76,8 @@ export function executeGrpcRequest(input: GrpcRequestInput): Promise<GrpcRespons
   let parsedMessage: unknown = {}
   try {
     parsedMessage = JSON.parse(resolvedMessage) as unknown
-  } catch {
-    // Invalid JSON, use empty object
+  } catch (error) {
+    logger.warn('[GrpcRequestService] Failed to parse JSON metadata', { error: String(error) })
   }
   
   return Promise.resolve({

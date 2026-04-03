@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import { useRequestReset } from '../../hooks/useRequestReset'
 import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
@@ -12,10 +13,9 @@ import {
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
-import type { WebSocketRequest, WebSocketResponse, WebSocketMessage, KeyValue, ResponseHistoryDetail } from '../../types/collections'
+import type { WebSocketRequest, WebSocketResponse, WebSocketMessage, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
-import type { VariableContext } from '../RestormKeyValueTable'
-import type { WebSocketExecutionResult, WebSocketMessageItem } from '../../types/global.d'
+import type { WebSocketExecutionResult, WebSocketMessageItem, KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { Badge } from '../common/Badge'
@@ -23,11 +23,8 @@ import { mapToBadgeType } from '../../utils/badgeUtils'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
 import { getResponseHistoryList } from '../../services/GraphQLIntegration'
-
-// Helper to update reactive proxy properties (intentional mutation for reactive objects)
-function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key: K, value: T[K]): void {
-  Object.assign(obj, { [key]: value })
-}
+import { updateReactiveProperty } from './requestTabViewUtils'
+import { DEFAULT_WS_TIMEOUT_MS } from '../../../../shared/config/constants'
 
 export interface WebSocketRequestTabViewProps {
   request: WebSocketRequest
@@ -62,21 +59,14 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
   
   const headersRef = useRef<KeyValueTableHandle | null>(null)
-  const requestIdRef = useRef(request.id)
-  
-  useEffect(() => {
-    if (requestIdRef.current !== request.id) {
-      requestIdRef.current = request.id
-      const rafId = requestAnimationFrame(() => {
-        setUrlState(request.url)
-        setEventState(request.event ?? '')
-        setMessageState(request.message)
-        setResponse(null)
-      })
-      return (): void => { cancelAnimationFrame(rafId) }
-    }
-    return undefined
+
+  const handleRequestReset = useCallback(() => {
+    setUrlState(request.url)
+    setEventState(request.event ?? '')
+    setMessageState(request.message)
+    setResponse(null)
   }, [request])
+  useRequestReset(request, handleRequestReset)
 
   // Refs to capture initial values for registration (avoid re-running effect when these change)
   const selectedEnvIdRef = useRef(selectedEnvId)
@@ -91,7 +81,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     const currentRequest = requestRef.current
     logger.debug('[WebSocketRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
-    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
       kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
 
     void window.restorm?.context.registerRequest(requestId, currentEnvId, {
@@ -154,7 +144,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
 
   // Notify ContextService when URL, event or message changes
   useEffect(() => {
-    const toKeyValueData = (kvs: KeyValue[]): { id?: string; key: string; value: string; enabled?: boolean }[] =>
+    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
       kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
 
     void window.restorm?.context.updateFullRequestData(request.id, {
@@ -180,9 +170,6 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     updateReactiveProperty(request, 'message', value)
   }, [request])
   
-  // Variable resolution done in backend
-  const _environmentContext: VariableContext = {}
-  
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
 
@@ -203,7 +190,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     
     window.restorm?.websocket.connect({
       requestId: request.id,
-      timeout: 5000,
+      timeout: DEFAULT_WS_TIMEOUT_MS,
       ...(requestPath ? { requestPath } : {})
     })
       .then((res: WebSocketExecutionResult) => {
@@ -245,20 +232,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     const eventStr = msg.event ? `[${msg.event}] ` : ''
     return `${prefix} ${eventStr}${msg.data}`
   }
-  
-  // Parse host and port from URL (kept for potential future use)
-  const _hostInfo = useMemo(() => {
-    try {
-      const urlObj = new URL(url.replace(/^ws/, 'http'))
-      return {
-        host: urlObj.hostname,
-        port: urlObj.port || (url.startsWith('wss') ? '443' : '80')
-      }
-    } catch {
-      return { host: url, port: '80' }
-    }
-  }, [url])
-  
+
   // Request content (SplitView with Message, Headers)
   const requestContent = (
     <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }} data-testid="websocket-request-split-view">
@@ -326,7 +300,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
 
   const buildWebSocketResponseView = useCallback((
     resp: WebSocketResponse | null,
-    meta?: { protocol?: string; event?: string }
+    meta?: { protocol?: string | undefined; event?: string | undefined }
   ) => {
     const infosContent = resp ? (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>
@@ -435,12 +409,13 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           data-testid="websocket-url-input"
         />
       </div>
-      <Button 
+      <Button
         icon={isSending ? 'debug-disconnect' : 'plug'}
-        onClick={isSending ? handleDisconnect : handleSend} 
-        options={{ 
-          title: isSending ? t('websocket.disconnect') : t('websocket.connect'), 
-          ariaLabel: isSending ? t('websocket.disconnect') : t('websocket.connect') 
+        onClick={isSending ? handleDisconnect : handleSend}
+        emphasis={isSending ? 0 : 1}
+        options={{
+          title: isSending ? t('websocket.disconnect') : t('websocket.connect'),
+          ariaLabel: isSending ? t('websocket.disconnect') : t('websocket.connect')
         }}
         data-testid="websocket-connect-button"
       >

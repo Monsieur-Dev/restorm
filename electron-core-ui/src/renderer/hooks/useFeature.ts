@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import type { FeaturePlatform } from '../../../types/feature'
+import type { FeaturePlatform } from '../../types/feature'
 
 interface WindowApi {
   feature: {

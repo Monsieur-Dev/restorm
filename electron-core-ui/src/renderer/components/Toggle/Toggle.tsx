@@ -3,7 +3,7 @@ import './toggle.css'
 import type { ToggleProps } from './types'
 import { defaultToggleStyles } from './types'
 
-const Toggle: React.FC<ToggleProps> = ({
+const ToggleInner: React.FC<ToggleProps> = ({
   isChecked,
   onChange,
   onKeyDown,
@@ -128,5 +128,6 @@ const Toggle: React.FC<ToggleProps> = ({
   );
 };
 
+const Toggle = React.memo(ToggleInner);
 export { Toggle };
 export default Toggle;

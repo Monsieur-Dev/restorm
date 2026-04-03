@@ -55,5 +55,6 @@ const ButtonWithDescription: React.FC<ButtonWithDescriptionProps> = ({
   )
 }
 
-export { ButtonWithDescription }
-export default ButtonWithDescription
+const MemoizedButtonWithDescription = React.memo(ButtonWithDescription)
+export { MemoizedButtonWithDescription as ButtonWithDescription }
+export default MemoizedButtonWithDescription

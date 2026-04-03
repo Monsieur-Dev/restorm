@@ -47,6 +47,9 @@ export type {
 export { BaseWindow, setupIPC, setupAppLifecycle, initializeApp, configureCommandLineSwitches, setupAppProtocol } from './managers'
 export type { WindowConfiguration, WindowState } from './managers'
 
+// IPC validation
+export { validatedHandle } from './ipc/validate'
+
 // Re-export types for better type inference
 export type { ThemeService } from './services/ThemeService'
 export type { StorageService } from './services/StorageService'
@@ -59,6 +62,19 @@ export type { GraphQLServiceConfig, PubSub } from './services/GraphQLService'
 export type { PersistenceFormat, PersistenceMode, PersistenceConfig, FileNamingContext, SaveResult, LoadResult } from './services/PersistenceService'
 export type { SchemaGeneratorConfig, RegisterClassOptions } from './services/GraphQLSchemaGenerator'
 
+// Error classes and helpers
+export {
+  FileSystemError,
+  PersistenceError,
+  IpcError,
+  errorMeta
+} from '../errors'
+export type {
+  FileSystemErrorCode,
+  PersistenceErrorCode,
+  IpcErrorCode
+} from '../errors'
+
 // Re-export feature types
 export type {
   FeatureStrategyType,
@@ -68,7 +84,7 @@ export type {
   PlatformStrategy,
   FeatureConfig,
   FeaturesYamlConfig
-} from '../../types/feature'
+} from '../types/feature'
 
 // Re-export file types
 export type {
@@ -79,4 +95,4 @@ export type {
   FileServiceConfig,
   FileServiceState,
   FileServiceApi
-} from '../../types/file'
+} from '../types/file'

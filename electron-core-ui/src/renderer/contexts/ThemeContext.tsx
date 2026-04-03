@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useCallback, useRef, useMemo } from 'react'
-import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../../types/theme'
+import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../types/theme'
 import { logger } from '../services/logger'
 
 export interface ThemeContextValue {

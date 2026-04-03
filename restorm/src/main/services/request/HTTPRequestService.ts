@@ -12,13 +12,9 @@ import type {
   HTTPMethod
 } from '../../../shared/types/collections'
 import { StringValue } from '../../../shared/types/collections'
-// TODO: Variable resolution will be implemented in backend
+import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../shared/config/constants'
 import type { VariableContext } from './types'
-
-/** Placeholder for variable resolution - returns template as-is (to be implemented in backend) */
-function resolveTemplate(template: string, _context: VariableContext): string {
-  return template
-}
+import { resolveTemplate } from './resolveTemplate'
 
 /** Input for URL resolution */
 export interface URLResolutionInput {
@@ -268,7 +264,7 @@ export async function executeHTTPRequest(input: HTTPRequestInput): Promise<HTTPR
     // Get response as text to preserve original format
     responseType: 'text',
     // Include timing info
-    timeout: 30000
+    timeout: DEFAULT_REQUEST_TIMEOUT_MS
   }
 
   try {

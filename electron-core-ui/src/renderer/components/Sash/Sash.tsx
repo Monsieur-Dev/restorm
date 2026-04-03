@@ -7,7 +7,7 @@ import './sash.css';
  * Sash component for resizing panels
  * Sash implementation for resizable panes
  */
-export const Sash: React.FC<SashProps> = ({
+const SashInner: React.FC<SashProps> = ({
 	orientation,
 	layoutProvider,
 	state = 'enabled',
@@ -314,4 +314,5 @@ export const Sash: React.FC<SashProps> = ({
 	);
 };
 
+export const Sash = React.memo(SashInner);
 export default Sash;

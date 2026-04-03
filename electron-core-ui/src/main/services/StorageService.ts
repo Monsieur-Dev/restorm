@@ -2,6 +2,8 @@ import { app } from 'electron'
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { join, dirname } from 'path'
 import { logger } from './LoggerService'
+import { PersistenceError, errorMeta } from '../../errors'
+import { storageFileSchema } from '../schemas/configSchemas'
 
 /**
  * StorageService provides a simple key-value store backed by a JSON file.
@@ -24,10 +26,17 @@ export class StorageService {
     try {
       if (existsSync(this.filePath)) {
         const content = readFileSync(this.filePath, 'utf-8')
-        return JSON.parse(content) as Record<string, unknown>
+        const raw: unknown = JSON.parse(content)
+        const parsed = storageFileSchema.safeParse(raw)
+        if (!parsed.success) {
+          logger.warn('Invalid storage file structure, using empty store')
+          return {}
+        }
+        return parsed.data
       }
     } catch (error) {
-      logger.error('Failed to load storage file', { error: String(error) })
+      const wrappedError = new PersistenceError('Failed to load storage file', 'PERSIST_LOAD_FAILED', { cause: error })
+      logger.error('Failed to load storage file', errorMeta(wrappedError))
     }
     return {}
   }
@@ -43,7 +52,8 @@ export class StorageService {
       }
       writeFileSync(this.filePath, JSON.stringify(this.data, null, 2), 'utf-8')
     } catch (error) {
-      logger.error('Failed to save storage file', { error: String(error) })
+      const wrappedError = new PersistenceError('Failed to save storage file', 'PERSIST_SAVE_FAILED', { cause: error })
+      logger.error('Failed to save storage file', errorMeta(wrappedError))
     }
   }
 

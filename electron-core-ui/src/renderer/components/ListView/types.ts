@@ -129,7 +129,7 @@ export interface ListViewProps {
    * Optional controlled active item id. When provided, the ListView will
    * treat this item as the keyboard focus anchor.
    */
-  activeId?: string | null
+  activeId?: string | null | undefined
 
   /**
    * Selection behaviour. Defaults to single selection.

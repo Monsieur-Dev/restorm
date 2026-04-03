@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import type { Environment } from '../types/collections'
+import type { Environment } from '../../../shared/types/collections'
 import { EnvironmentContext, type EnvironmentContextValue } from './useEnvironmentContext'
 
 /** Find an environment by ID in a list (including sub-environments) */

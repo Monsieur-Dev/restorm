@@ -6,7 +6,7 @@ import { useCallback } from 'react'
 import { eventBus, logger } from 'electron-core-ui/renderer'
 import { DocumentEvents } from '../services/DocumentEvents'
 import { makeReactiveFolder } from '../types/reactive'
-import type { Folder, EnvironmentFolder, Request, FolderItem } from '../types/collections'
+import type { Folder, EnvironmentFolder, Request, FolderItem } from '../../../shared/types/collections'
 
 export interface UseImportOptions {
   rootItems: (EnvironmentFolder | Folder | Request)[]
@@ -169,7 +169,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         const pendingForRoot = pendingFolders?.filter((pf) => pf.parentId === '__root__') ?? []
         const createdForRoot = pendingForRoot
           .map((pf) => createdFoldersMap.get(pf.id))
-          .filter(Boolean) as (Folder | EnvironmentFolder)[]
+          .filter((f): f is Folder => f !== undefined)
 
         // If target IS a pending folder, put ALL items (folders + requests) inside it
         if (targetFolderId && createdFoldersMap.has(targetFolderId)) {
@@ -193,7 +193,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         // Make reactive - makeReactiveFolder handles Folders/EnvironmentFolders, Requests stay as-is
         const reactiveRootItems = allRootItems.map((item) =>
           'items' in item ? makeReactiveFolder(item) : item
-        ) as (EnvironmentFolder | Folder | Request)[]
+        )
         setRootItems(reactiveRootItems)
 
         // Emit creation events for ALL imported items (folders + requests)
@@ -251,7 +251,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
       // Make all root items reactive (folders become reactive, requests stay as-is)
       const reactiveRootItems = clonedRootItems.map((item) =>
         'items' in item ? makeReactiveFolder(item) : item
-      ) as (EnvironmentFolder | Folder | Request)[]
+      )
       setRootItems(reactiveRootItems)
 
       // Emit creation events for indexing

@@ -1,0 +1,20 @@
+{
+  "all": false,
+  "extension": [
+    ".ts",
+    ".tsx",
+    ".js",
+    ".jsx"
+  ],
+  "exclude": [
+    "**/*.test.*",
+    "**/*.d.ts",
+    "**/dist/**",
+    "**/node_modules/**",
+    "**/tests/**",
+    "**/test-results/**"
+  ],
+  "sourceMap": true,
+  "instrument": false
+}
+

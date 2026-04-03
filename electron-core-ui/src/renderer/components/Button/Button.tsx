@@ -8,10 +8,13 @@ const Button: React.FC<ButtonProps> = ({
   disabled = false,
   secondary = false,
   small = false,
+  line = false,
+  emphasis = 0,
   onClick,
   onMouseEnter,
   onMouseLeave,
   className = '',
+  style,
   id,
   'data-testid': dataTestId,
   children
@@ -83,14 +86,16 @@ const Button: React.FC<ButtonProps> = ({
     'button',
     'text-button',
     small ? 'small-button' : '',
+    line ? 'line-button' : '',
     secondary ? 'secondary' : '',
     disabled ? 'disabled' : '',
+    emphasis > 0 ? `emphasis-${String(emphasis)}` : '',
     'default-colors',
     className
   ].filter(Boolean).join(' ')
 
-  // No inline styles - let CSS handle colors via CSS variables
-  const inlineStyles: React.CSSProperties = {}
+  // Merge any caller-provided style overrides
+  const inlineStyles: React.CSSProperties = { ...style }
 
   return (
     <div className="button-container">

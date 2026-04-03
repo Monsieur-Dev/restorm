@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
 import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, Button, type ContextMenuItem } from 'electron-core-ui/renderer'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback } from 'electron-core-ui/renderer'
-import type { RestormEditorTab, BreadcrumbItem } from '../../../types/editor'
+import type { RestormEditorTab, BreadcrumbItem } from '../../../../../shared/types/editor'
 import {
   isFolderTab,
   isEnvironmentFolderTab,
@@ -10,7 +10,7 @@ import {
   isGrpcRequestTab,
   isSoapRequestTab,
   isWebSocketRequestTab
-} from '../../../types/editor'
+} from '../../../../../shared/types/editor'
 import { EnvironmentDropdown } from './EnvironmentDropdown'
 import {
   HTTPRequestTabView,
@@ -22,7 +22,7 @@ import {
 import { EnvironmentProvider } from '../../../contexts/EnvironmentContext'
 import { FolderView } from '../../Folders/FolderView'
 import { EnvironmentFolderView } from '../../Folders/EnvironmentFolderView'
-import type { EnvironmentFolder, Folder, Request } from '../../../types/collections'
+import type { EnvironmentFolder, Folder, Request } from '../../../../../shared/types/collections'
 import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useTranslation } from 'react-i18next'
@@ -39,7 +39,7 @@ interface RequestTabWithHistoryProps {
   onBreadcrumbClick?: ((item: BreadcrumbItem, index: number, isLast: boolean) => void) | undefined
   onBreadcrumbRename?: ((item: BreadcrumbItem, newValue: string) => void) | undefined
   tags: string[]
-  onTagsChange?: (nextTags: string[]) => void
+  onTagsChange?: ((nextTags: string[]) => void) | undefined
   label: string
   headerRight?: React.ReactNode
   callout?: RestormWorkbenchTabCallout | undefined
@@ -123,7 +123,7 @@ function getTabTitleString(tab: EditorTab & { titleString?: string }, fallback =
 
 export interface RestormWorkbenchProps {
   tree: WorkbenchTree
-  dirtyItemIdsSet?: Set<string>
+  dirtyItemIdsSet?: Set<string> | undefined
   initialTabContentMap?: Record<string, string>
   onTreeChange?: (tree: WorkbenchTree) => void
   className?: string
@@ -147,7 +147,7 @@ export interface RestormWorkbenchProps {
   /** Callback fired when group sizes change (sash dragging) */
   onSizesChange?: (nodeId: string, sizes: number[]) => void
   /** Unique identifier for workbench persistence (required if autosave is enabled) */
-  workbenchId?: string
+  workbenchId?: string | undefined
   /** Enable automatic save/load of workbench state */
   autosave?: boolean
   /** Callback to rebuild a tab from its ID (required if autosave is enabled) */

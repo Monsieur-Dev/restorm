@@ -15,7 +15,8 @@ Feature: Search
     And I search for "SayHello"
     Then I should see search results
     Then the number of results should be 1
-    When I close the file
+    When I open menu bar "titlebar-menubar" menu "titlebar-menubar-item-file"
+    And I click menu bar item "titlebar-menu-item-close"
     When I open the search bar
     And I search for "pet"
     Then I should see no search results

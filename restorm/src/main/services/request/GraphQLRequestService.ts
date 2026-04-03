@@ -6,15 +6,13 @@
 import axios from 'axios'
 import type { GraphQLRequest, GraphQLResponse, KeyValue } from '../../../shared/types/collections'
 import { StringValue } from '../../../shared/types/collections'
+import { logger } from 'electron-core-ui/main'
 import type { VariableContext } from './types'
+import { resolveTemplate } from './resolveTemplate'
+import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../shared/config/constants'
 
 // Re-export for consumers
 export type { VariableContext } from './types'
-
-/** Placeholder for variable resolution - returns template as-is (to be implemented in backend) */
-function resolveTemplate(template: string, _context: VariableContext): string {
-  return template
-}
 
 /** Input for executing a GraphQL request */
 export interface GraphQLRequestInput {
@@ -93,8 +91,8 @@ export async function executeGraphQLRequest(input: GraphQLRequestInput): Promise
       if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
         variables = parsed as Record<string, unknown>
       }
-    } catch {
-      // Invalid JSON, use empty object
+    } catch (error) {
+      logger.warn('[GraphQLRequestService] Failed to parse JSON metadata', { error: String(error) })
     }
   }
   
@@ -108,7 +106,7 @@ export async function executeGraphQLRequest(input: GraphQLRequestInput): Promise
     const response = await axios.post(resolvedUrl, payload, {
       headers: headersObj,
       validateStatus: () => true,
-      timeout: 30000
+      timeout: DEFAULT_REQUEST_TIMEOUT_MS
     })
     
     const durationMs = Date.now() - startTime

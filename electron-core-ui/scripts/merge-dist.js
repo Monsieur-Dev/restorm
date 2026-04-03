@@ -63,6 +63,12 @@ copyIfExists(
   path.join(distSrcDir, 'renderer')
 )
 
+// Copy errors (shared by both main and renderer)
+copyIfExists(
+  path.join(__dirname, '..', 'dist-main', 'src', 'errors'),
+  path.join(distSrcDir, 'errors')
+)
+
 // Copy types (try from dist-main first, then dist-renderer)
 if (!copyIfExists(
   path.join(__dirname, '..', 'dist-main', 'src', 'types'),

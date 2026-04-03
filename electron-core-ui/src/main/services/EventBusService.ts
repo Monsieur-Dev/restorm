@@ -8,6 +8,7 @@
 
 import { BrowserWindow } from 'electron'
 import { logger } from './LoggerService'
+import { IpcError, errorMeta } from '../../errors'
 
 /** Event handler function type */
 export type EventHandler<T = unknown> = (payload: T) => void | Promise<void>
@@ -73,7 +74,8 @@ class EventBusServiceImpl {
       try {
         await handler(payload)
       } catch (error) {
-        logger.error(`[EventBus] Error in handler for event "${event}":`, { error: String(error) })
+        const wrappedError = new IpcError(`Error in handler for event "${event}"`, 'IPC_HANDLER_FAILED', { cause: error })
+        logger.error(`[EventBus] Error in handler for event "${event}":`, errorMeta(wrappedError))
       }
     })
 
@@ -89,7 +91,8 @@ class EventBusServiceImpl {
   emitSync(event: string, payload: unknown): void {
     setImmediate(() => {
       this.emit(event, payload).catch((error: unknown) => {
-        logger.error(`[EventBus] Unhandled error in emit for "${event}":`, { error: String(error) })
+        const wrappedError = new IpcError(`Unhandled error in emit for "${event}"`, 'IPC_EMIT_FAILED', { cause: error })
+        logger.error(`[EventBus] Unhandled error in emit for "${event}":`, errorMeta(wrappedError))
       })
     })
   }

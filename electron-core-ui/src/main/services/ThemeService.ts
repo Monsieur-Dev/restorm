@@ -1,8 +1,10 @@
 import { readFileSync, existsSync } from 'fs'
 import { join, dirname, basename } from 'path'
 import yaml from 'js-yaml'
-import type { ThemeInfo, ThemeVariables, ThemeDefinition } from '../../../types/theme'
+import type { ThemeInfo, ThemeVariables, ThemeDefinition } from '../../types/theme'
 import { logger } from './LoggerService'
+import { FileSystemError, errorMeta } from '../../errors'
+import { yamlBaseFileSchema, yamlTypeBaseFileSchema, yamlThemeFileSchema, themeIndexSchema } from '../schemas/configSchemas'
 
 /**
  * ThemeService manages YAML-based themes
@@ -16,44 +18,6 @@ import { logger } from './LoggerService'
  * 2. {type}/_base.yaml (type-specific defaults: dark, light, hc_dark, hc_light)
  * 3. {type}/{theme}.yaml (theme-specific overrides)
  */
-
-interface YamlColorEntry {
-  id: string
-  value: string
-  description?: string
-}
-
-interface YamlVariableEntry {
-  id: string
-  value: string
-  description?: string
-}
-
-interface YamlBaseFile {
-  variables?: YamlVariableEntry[]
-}
-
-interface YamlTypeBaseFile {
-  colors?: YamlColorEntry[]
-}
-
-interface YamlThemeFile {
-  name: string
-  description?: string
-  colors?: Record<string, string>
-}
-
-interface ThemeIndexEntry {
-  id: string
-  name: string
-  type: 'dark' | 'light' | 'hc_dark' | 'hc_light'
-  description?: string
-  file: string
-}
-
-interface ThemeIndex {
-  themes: ThemeIndexEntry[]
-}
 
 type ThemeType = 'dark' | 'light' | 'hc_dark' | 'hc_light'
 
@@ -95,17 +59,23 @@ export class ThemeService {
     if (existsSync(basePath)) {
       try {
         const content = readFileSync(basePath, 'utf-8')
-        const data = yaml.load(content) as YamlBaseFile
-        
-        if (data.variables) {
-          for (const variable of data.variables) {
-            // Convert to CSS variable format
-            const cssVar = `--${variable.id}`
-            this.baseVariables[cssVar] = variable.value
+        const raw = yaml.load(content)
+        const parsed = yamlBaseFileSchema.safeParse(raw)
+        if (!parsed.success) {
+          logger.warn('Invalid base.yaml structure', { issues: parsed.error.issues.map(i => i.message).join('; ') })
+        } else {
+          const data = parsed.data
+          if (data.variables) {
+            for (const variable of data.variables) {
+              // Convert to CSS variable format
+              const cssVar = `--${variable.id}`
+              this.baseVariables[cssVar] = variable.value
+            }
           }
         }
       } catch (error) {
-        logger.error(`Failed to load base.yaml`, { error: String(error) })
+        const wrappedError = new FileSystemError('Failed to load base.yaml', 'FS_READ_FAILED', { cause: error })
+        logger.error('Failed to load base.yaml', errorMeta(wrappedError))
       }
     }
 
@@ -115,8 +85,14 @@ export class ThemeService {
       if (existsSync(typeBasePath)) {
         try {
           const content = readFileSync(typeBasePath, 'utf-8')
-          const data = yaml.load(content) as YamlTypeBaseFile
-          
+          const raw = yaml.load(content)
+          const parsed = yamlTypeBaseFileSchema.safeParse(raw)
+          if (!parsed.success) {
+            logger.warn(`Invalid ${themeType}/_base.yaml structure`, { issues: parsed.error.issues.map(i => i.message).join('; ') })
+            continue
+          }
+          const data = parsed.data
+
           if (data.colors) {
             for (const color of data.colors) {
               // Convert to CSS variable format
@@ -125,7 +101,8 @@ export class ThemeService {
             }
           }
         } catch (error) {
-          logger.error(`Failed to load ${themeType}/_base.yaml`, { error: String(error) })
+          const wrappedError = new FileSystemError(`Failed to load ${themeType}/_base.yaml`, 'FS_READ_FAILED', { cause: error })
+          logger.error(`Failed to load ${themeType}/_base.yaml`, errorMeta(wrappedError))
         }
       }
     }
@@ -145,7 +122,13 @@ export class ThemeService {
 
     try {
       const content = readFileSync(indexPath, 'utf-8')
-      const index = JSON.parse(content) as ThemeIndex
+      const raw = JSON.parse(content) as unknown
+      const parsed = themeIndexSchema.safeParse(raw)
+      if (!parsed.success) {
+        logger.warn('Invalid theme index.json structure', { issues: parsed.error.issues.map(i => i.message).join('; ') })
+        return
+      }
+      const index = parsed.data
 
       for (const entry of index.themes) {
         const themePath = join(this.themesPath, entry.file)
@@ -158,7 +141,8 @@ export class ThemeService {
         })
       }
     } catch (error) {
-      logger.error(`Failed to load theme index`, { error: String(error) })
+      const wrappedError = new FileSystemError('Failed to load theme index', 'FS_PARSE_FAILED', { cause: error })
+      logger.error('Failed to load theme index', errorMeta(wrappedError))
     }
   }
 
@@ -258,7 +242,13 @@ export class ThemeService {
 
       // Load and apply theme-specific colors
       const content = readFileSync(themeInfo.path, 'utf-8')
-      const data = yaml.load(content) as YamlThemeFile
+      const raw = yaml.load(content)
+      const parsed = yamlThemeFileSchema.safeParse(raw)
+      if (!parsed.success) {
+        logger.warn(`Invalid theme file for "${themeId}"`, { issues: parsed.error.issues.map(i => i.message).join('; ') })
+        return null
+      }
+      const data = parsed.data
 
       if (data.colors) {
         for (const [key, value] of Object.entries(data.colors)) {
@@ -278,7 +268,8 @@ export class ThemeService {
       this.themeCache.set(themeId, { theme, variables })
       return { theme, variables }
     } catch (error) {
-      logger.error(`Failed to load theme ${themeId}`, { error: String(error) })
+      const wrappedError = new FileSystemError(`Failed to load theme ${themeId}`, 'FS_PARSE_FAILED', { cause: error })
+      logger.error(`Failed to load theme ${themeId}`, errorMeta(wrappedError))
       return null
     }
   }

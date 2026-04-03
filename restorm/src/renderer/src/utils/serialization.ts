@@ -3,7 +3,7 @@
  * Handles stripping and generating runtime-only properties (id fields)
  */
 
-import type { RuntimeId } from '../types/collections'
+import type { RuntimeId } from '../../../shared/types/collections'
 import { normalizeDocumentValuesForPersistence } from '../../../shared/utils/valuePersistence'
 
 /**
@@ -65,7 +65,7 @@ export function generateIds<T>(obj: T): T {
 
     // Check if this object should have an id based on its structure
     if (shouldHaveId(record)) {
-      result.id = generateId()
+      result['id'] = generateId()
     }
 
     // Recursively process nested properties
@@ -92,30 +92,30 @@ export function generateIds<T>(obj: T): T {
  */
 function shouldHaveId(obj: Record<string, unknown>): boolean {
   // KeyValue: has key and value
-  if ('key' in obj && 'value' in obj && typeof obj.key === 'string') {
+  if ('key' in obj && 'value' in obj && typeof obj['key'] === 'string') {
     return true
   }
 
   // Environment: has name and variables array
-  if ('name' in obj && 'variables' in obj && Array.isArray(obj.variables)) {
+  if ('name' in obj && 'variables' in obj && Array.isArray(obj['variables'])) {
     return true
   }
 
   // Request types: has name and type (http, graphql, grpc, soap, websocket)
   if ('name' in obj && 'type' in obj) {
     const requestTypes = ['http', 'graphql', 'grpc', 'soap', 'websocket']
-    if (requestTypes.includes(obj.type as string)) {
+    if (requestTypes.includes(obj['type'] as string)) {
       return true
     }
   }
 
   // Folder: has name, items array, and configuration
-  if ('name' in obj && 'items' in obj && 'configuration' in obj && Array.isArray(obj.items)) {
+  if ('name' in obj && 'items' in obj && 'configuration' in obj && Array.isArray(obj['items'])) {
     return true
   }
 
   // Response types: has requestId
-  if ('requestId' in obj && typeof obj.requestId === 'string') {
+  if ('requestId' in obj && typeof obj['requestId'] === 'string') {
     return true
   }
 

@@ -1,0 +1,23 @@
+---
+description: Prefer electron-core-ui testing APIs and BDD steps in E2E
+globs: "{restorm,demo}/tests/e2e/**/*.{ts,feature}"
+alwaysApply: false
+---
+
+# E2E tests: always prefer electron-core-ui testing APIs
+
+When writing or updating E2E tests, always use the reusable testing APIs provided by `electron-core-ui` whenever possible.
+
+- Prefer **Playwright-BDD step libraries** from:
+  - `electron-core-ui/testing/playwright-bdd`
+  - Examples: `defineMenuBarBddSteps`, `defineSystemModalsBddSteps`, `defineListViewBddSteps`, `defineButtonBddSteps`, etc.
+
+- Prefer **selectors/helpers** from:
+  - `electron-core-ui/testing`
+  - Examples: `menuBarRootSelector`, `menuBarItemSelector`, `searchBarResultSelector`, etc.
+
+- Avoid **text-based selectors** (`text=File`, `text=Open`, etc.) and avoid relying on UI language.
+  - If you must interact via MenuBar, prefer `defineMenuBarBddSteps` + `data-testid` driven steps, or `When I trigger menu shortcut {string}`.
+
+- If a reusable helper/step is missing and it is **generic** (not Restorm-specific business logic), add it to `electron-core-ui/testing` (selectors and/or `playwright-bdd` steps) instead of re-implementing ad-hoc logic in app tests.
+

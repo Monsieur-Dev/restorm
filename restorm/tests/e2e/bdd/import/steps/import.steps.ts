@@ -1,8 +1,14 @@
 import { createBdd } from 'playwright-bdd'
 import { test, expect } from '../../fixtures/import.fixture'
 import * as path from 'path'
+import { defineMenuBarBddSteps, defineSystemModalsBddSteps } from 'electron-core-ui/testing/playwright-bdd'
+import { configureNextSaveFileDialogForE2E } from 'electron-core-ui/testing'
 
-const { Given, When, Then } = createBdd(test)
+const bdd = createBdd(test)
+const { Given, When, Then } = bdd
+
+defineMenuBarBddSteps(bdd)
+defineSystemModalsBddSteps(bdd)
 
 // Helper to get absolute path to test file
 function getTestFilePath(filename: string): string {
@@ -11,39 +17,20 @@ function getTestFilePath(filename: string): string {
 
 Given('I have started the application', async ({ page }) => {
   // Application should already be running via fixture
-  await page.waitForSelector('[role="menubar"]', { timeout: 10000 })
+  await page.waitForSelector('[data-testid="titlebar-menubar"]', { timeout: 15000 })
 })
 
-Given('I have created a new empty file', async ({ page }) => {
+Given('I have created a new empty file', async ({ page, electronApp, tempFilePath }) => {
   // Wait for app to be fully loaded
-  await page.waitForSelector('[role="menubar"]', { timeout: 15000 })
-  
-  // Mock the save dialog to respond with a temp file path
-  await page.evaluate(() => {
-    // @ts-expect-error - Mocking electron dialog for tests
-    if (window.electron?.dialog) {
-      // @ts-expect-error - Mocking electron dialog for tests
-      window.electron.dialog.showSaveDialog = async () => ({
-        canceled: false,
-        filePath: '/tmp/import-test-temp.restorm'
-      })
-    }
-  })
-  
-  // Click File menu
-  const fileMenu = page.locator('[role="menubar"] >> text=File').first()
-  await expect(fileMenu).toBeVisible({ timeout: 5000 })
-  await fileMenu.click()
-  
-  // Wait for menu to expand
-  await page.waitForSelector('[role="menu"]', { timeout: 2000 })
-  
-  // Click New
-  const newMenuItem = page.locator('[role="menuitem"] >> text=New').first()
-  await expect(newMenuItem).toBeVisible({ timeout: 5000 })
-  await newMenuItem.click()
-  
-  // Wait for the workspace to be visible (file is open)
+  await page.waitForSelector('[data-testid="titlebar-menubar"]', { timeout: 15000 })
+
+  // Generic system modal mocking: configure the save file dialog for the "New" flow.
+  await configureNextSaveFileDialogForE2E(electronApp, { kind: 'saveFile', path: tempFilePath })
+
+  // Trigger File > New via shortcut (defined on the MenuItem)
+  await page.keyboard.press('Control+N')
+
+  // Wait for workspace to be visible (a file is open)
   await page.waitForSelector('text=WORKSPACE', { timeout: 15000 })
 })
 
@@ -456,7 +443,5 @@ Then('I should see the subfolder {string} in the sidebar', async ({ page }, fold
 })
 
 When('I wait {int} seconds to see the app state', async ({ page }, seconds: number) => {
-  console.log(`[TEST] Waiting ${seconds} seconds to observe app state...`)
   await page.waitForTimeout(seconds * 1000)
-  console.log('[TEST] Wait complete')
 })

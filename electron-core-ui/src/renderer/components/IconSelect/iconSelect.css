@@ -3,32 +3,6 @@
   display: inline-block;
 }
 
-.ecui-icon-select-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: none;
-  border-radius: 4px;
-  background: transparent;
-  cursor: pointer;
-  font-size: 16px;
-  line-height: 1;
-  color: var(--foreground);
-  transition: background-color 0.1s;
-}
-
-.ecui-icon-select-button:hover:not(:disabled) {
-  background-color: var(--toolbar-hoverBackground);
-}
-
-.ecui-icon-select-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 .ecui-icon-select-value {
   display: flex;
   align-items: center;

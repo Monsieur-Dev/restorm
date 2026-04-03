@@ -3,11 +3,22 @@ import type { IInputOptions } from '../InputBox'
 
 export type DateTimePickerOutputMode = 'pattern' | 'unix' | 'epoch' | 'iso'
 
+/**
+ * First day of week, aligned with JavaScript Date.getDay():
+ * 0 = Sunday ... 6 = Saturday
+ */
+export type DateTimePickerFirstDayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6
+
 export interface DateTimePickerProps {
   /** Selected value */
   value: Date | null
   /** Called when the user selects a date */
   onChange: (next: Date) => void
+  /**
+   * First day of the week shown in the calendar header and grid.
+   * Default: Monday (1).
+   */
+  firstDayOfWeek?: DateTimePickerFirstDayOfWeek
   /** Output mode for the displayed value */
   outputMode?: DateTimePickerOutputMode
   /** Format used when outputMode is "pattern" */

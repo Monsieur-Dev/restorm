@@ -1,3 +1,7 @@
+.workbench .part.editor > .content .editor-group-container {
+	margin: 2px;;
+}
+
 .workbench .part.editor > .content .editor-group-container > .title > .tabs-and-actions-container {
 	display: flex;
 	position: relative;
@@ -8,6 +12,25 @@
 .workbench .part.editor > .content .editor-group-container > .title .tabs-container-wrapper {
 	flex: 1; /* expand to take remaining row width so blank area captures DnD */
 	min-width: 0;
+	position: relative;
+}
+
+/* Horizontal line at the bottom of the tabs bar — acts as the top border of the content panel.
+   The active tab covers this line with its own background (via z-index + overlap). */
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container-wrapper::after {
+	content: "";
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 1px;
+	background-color: var(--tab-inactiveBorder, var(--panel-border));
+	z-index: 0;
+}
+
+/* Focused group: use active border color for the horizontal line */
+.workbench .part.editor > .content .editor-group-container[data-has-focus="true"] > .title .tabs-container-wrapper::after {
+	background-color: var(--tab-activeBorder, var(--focusBorder));
 }
 
 .workbench .part.editor > .content .editor-group-container > .title .tabs-container {
@@ -22,7 +45,6 @@
 	align-items: center;
 	white-space: nowrap;
 	cursor: pointer;
-	height: 100%;
 	min-height: var(--editor-group-tab-height);
 	box-sizing: border-box;
 	padding: 0 10px;
@@ -30,11 +52,25 @@
 	color: var(--tab-inactiveForeground);
 	flex-shrink: 0; /* prevent tabs from shrinking below their content size */
 	min-width: fit-content; /* ensure tabs maintain their content width */
+	border: 1px solid var(--tab-border, transparent);
+	border-radius: 4px 4px 0 0;
+	margin: 2px 1px 0;
 }
 
+/* Active tab (unfocused group): use inactive border color */
 .workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.active {
-	background-color: var(--tab-activeBackground);
+	background-color: var(--editorWidget-background);
 	color: var(--tab-activeForeground);
+	border-color: var(--tab-inactiveBorder, var(--panel-border));
+	border-bottom-color: var(--editorWidget-background); /* paint over the horizontal line */
+	z-index: 1; /* sit above the ::after horizontal line */
+	padding-bottom: 1px; /* extend background down to fully cover the line */
+}
+
+/* Active tab (focused group): use active border color */
+.workbench .part.editor > .content .editor-group-container[data-has-focus="true"] > .title .tabs-container > .tab.active {
+	border-color: var(--tab-activeBorder, var(--focusBorder));
+	border-bottom-color: var(--editorWidget-background);
 }
 
 .workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab .tab-label {
@@ -108,25 +144,34 @@
 	left: 0;
 }
 
+/* Content area below tabs */
 .editor-group-content-placeholder {
 	flex: 1;
 	min-height: 0;
 	background-color: var(--editor-background);
 	color: var(--editor-foreground);
-	display: flex;             /* allow content to grow */
-	align-items: stretch;      /* let children take full height */
+	display: flex;
+	align-items: stretch;
 	justify-content: flex-start;
-	padding: 8px;
+	padding: 0;
 	box-sizing: border-box;
 }
 
+/* Content panel — no top border (the tabs-container-wrapper::after provides it) */
 .editor-group-content-panel {
 	flex: 1;
 	min-height: 0;
-	border-radius: 6px;
+	border: 1px solid var(--tab-inactiveBorder, var(--panel-border));
+	border-top: none;
+	border-radius: 0 0 4px 4px;
 	padding: 6px;
-	background-color: var(--editorWidget-background);
 	display: flex;
 	flex-direction: column;
 	box-sizing: border-box;
+}
+
+/* Focused group: use active border color for content panel */
+.editor-group-container[data-has-focus="true"] .editor-group-content-panel {
+	border-color: var(--tab-activeBorder, var(--focusBorder));
+	border-top: none;
 }

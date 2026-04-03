@@ -15,7 +15,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { RestormKeyValueTable } from '../RestormKeyValueTable'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
-import type { EnvironmentFolder, Environment, KeyValue, Icon } from '../../types/collections'
+import type { EnvironmentFolder, Environment, KeyValue, Icon } from '../../../../shared/types/collections'
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
 // Uses direct property assignment to trigger proxy setter
@@ -515,7 +515,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
   )
 }
 
-export const EnvironmentFolderView: React.FC<EnvironmentFolderViewProps> = ({ folder, onFolderChange }) => {
+const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ folder, onFolderChange }) => {
   const { t } = useTranslation()
 
   // Configuration tab with environment management
@@ -534,5 +534,7 @@ export const EnvironmentFolderView: React.FC<EnvironmentFolderViewProps> = ({ fo
     />
   )
 }
+
+export const EnvironmentFolderView = React.memo(EnvironmentFolderViewInner)
 
 export default EnvironmentFolderView

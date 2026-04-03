@@ -29,7 +29,7 @@
     "lint:fix": "pnpm -r run lint:fix",
     "typecheck": "pnpm -r run typecheck",
     "depcheck": "pnpm -r run depcheck",
-    "test": "pnpm --filter restorm run test",
+    "test": "pnpm --filter electron-core-ui run test && pnpm --filter restorm run test",
     "backup": "tar --exclude='node_modules' --exclude='*/node_modules/*' --exclude='bin' --exclude='*/bin/*' --exclude='out' --exclude='*/out/*' --exclude='dist' --exclude='*/dist/*' -czf ../gitable-backup-$(date +%Y%m%d-%H%M%S).tar.gz .",
     "restorm:docker:up": "pnpm --filter restorm run docker:up",
     "restorm:docker:down": "pnpm --filter restorm run docker:down"
