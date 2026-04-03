@@ -13,7 +13,49 @@
   "settings": {
     "title": "Paramètres",
     "theme": "Thème",
-    "language": "Langue"
+    "language": "Langue",
+    "searchPlaceholder": "Rechercher dans les paramètres...",
+    "noResults": "Aucun paramètre trouvé.",
+    "numberOutOfRange": "La valeur doit être comprise entre {{min}} et {{max}}.",
+    "resetSetting": "Réinitialiser le paramètre",
+    "copySettingId": "Copier l'identifiant du paramètre",
+    "settingOptions": "Options du paramètre",
+    "appearance": {
+      "title": "Apparence",
+      "theme": {
+        "title": "Thème",
+        "description": "Sélectionner le thème de couleurs de l'application"
+      },
+      "language": {
+        "title": "Langue",
+        "description": "Sélectionner la langue de l'application",
+        "en": "English",
+        "fr": "Français"
+      },
+      "editor": {
+        "title": "Éditeur",
+        "fontSize": {
+          "title": "Taille de police",
+          "description": "Contrôle la taille de police en pixels pour l'éditeur de code"
+        },
+        "fontFamily": {
+          "title": "Famille de police",
+          "description": "Contrôle la famille de police pour l'éditeur de code"
+        },
+        "wordWrap": {
+          "title": "Retour à la ligne",
+          "description": "Contrôle si les lignes doivent être coupées dans l'éditeur de code"
+        },
+        "minimap": {
+          "title": "Minimap",
+          "description": "Contrôle si la minimap est affichée dans l'éditeur de code"
+        },
+        "lineNumbers": {
+          "title": "Numéros de ligne",
+          "description": "Contrôle si les numéros de ligne sont affichés dans l'éditeur de code"
+        }
+      }
+    }
   },
   "codeEditor": {
     "goToDefinition": "Aller à la définition"

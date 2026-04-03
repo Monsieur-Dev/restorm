@@ -192,11 +192,21 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
   const computeElementsTopAndHeight = useCallback((container: HTMLElement): number => {
     elementsTopAndHeightMapRef.current = [];
     lastElementPerStickyLevelRef.current = new Map();
-    const nodeList = Array.from(container.children).filter(
-      (node): node is HTMLElement => node instanceof HTMLElement
+
+    // Support both direct children and nested elements with data-sticky-level
+    const stickyNodeList = Array.from(
+      container.querySelectorAll<HTMLElement>('[data-sticky-level]')
     );
+
+    // Ensure non-sticky direct children have correct z-index
+    for (const child of Array.from(container.children)) {
+      if (child instanceof HTMLElement && !child.hasAttribute('data-sticky-level')) {
+        child.style.zIndex = '0';
+      }
+    }
+
     let maxStickyLevel = 0;
-    nodeList.forEach((el: HTMLElement) => {
+    stickyNodeList.forEach((el: HTMLElement) => {
       const stickyLevel = Number(el.getAttribute('data-sticky-level'));
       if (stickyLevel > 0) {
         maxStickyLevel = Math.max(maxStickyLevel, stickyLevel);
@@ -238,8 +248,6 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
         lastElementPerStickyLevelRef.current.set(currentStickyLevel, currentlementTopAndHeight);
 
         elementsTopAndHeightMapRef.current.push(currentlementTopAndHeight);
-      } else {
-        el.style.zIndex = '0';
       }
 
     });

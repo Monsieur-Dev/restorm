@@ -10,8 +10,6 @@ interface SettingsModalProviderProps {
   'data-testid'?: string
   /** Optional test id applied to the SettingsPage. Defaults to `settings-page`. */
   settingsPageTestId?: string
-  /** Additional settings content rendered below the built-in theme/language settings */
-  additionalSettingsContent?: React.ReactNode
 }
 
 /**
@@ -21,8 +19,7 @@ interface SettingsModalProviderProps {
 export function SettingsModalProvider({
   children,
   'data-testid': dataTestId,
-  settingsPageTestId,
-  additionalSettingsContent
+  settingsPageTestId
 }: SettingsModalProviderProps): React.ReactElement {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
@@ -52,9 +49,7 @@ export function SettingsModalProvider({
         title={t('settings.title', 'Settings')}
         onClose={hideSettingsModal}
       >
-        <SettingsPage data-testid={pageTestId}>
-          {additionalSettingsContent}
-        </SettingsPage>
+        <SettingsPage data-testid={pageTestId} />
       </Modal>
     </SettingsModalContext.Provider>
   )

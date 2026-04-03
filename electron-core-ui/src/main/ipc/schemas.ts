@@ -120,3 +120,11 @@ const tabDataSchema = z.object({
 })
 
 export const tabsSendToWindowArgs = z.tuple([z.number(), tabDataSchema])
+
+// ==========================================================================
+// Settings
+// ==========================================================================
+export const settingsGetArgs = z.tuple([z.string()])
+export const settingsSetArgs = z.tuple([z.string(), z.union([z.string(), z.number(), z.boolean()])])
+export const settingsSearchArgs = z.tuple([z.string()])
+export const settingsResetArgs = z.tuple([z.string()])

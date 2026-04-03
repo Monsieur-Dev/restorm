@@ -1,6 +1,5 @@
 import CustomDropdown from './CustomDropdown'
 import Tabs from './Tabs'
-import { SettingsTreeView } from './SettingsTreeView'
 import Workbench from './Workbench/Workbench'
 import ElectronCoreUiProvider from './ElectronCoreUiProvider'
 import { EditorWorkbench } from './Workbench/EditorWorkbench'
@@ -151,7 +150,6 @@ export type { CustomWCOProps } from './CustomWCO/index'
 export {
   CustomDropdown,
   Tabs,
-  SettingsTreeView,
   Workbench,
   EditorWorkbench,
   MarkdownEditor,

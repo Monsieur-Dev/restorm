@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
+import DemoCustomRenderer from './components/DemoCustomRenderer'
 import type { i18n as I18nType } from 'i18next'
 import { initializeI18n, logger, i18n, ElectronCoreUiProvider } from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
@@ -54,7 +55,7 @@ void initI18n()
 
     ReactDOM.createRoot(rootElement).render(
       <React.StrictMode>
-        <ElectronCoreUiProvider fontAliasing="auto">
+        <ElectronCoreUiProvider fontAliasing="auto" customRenderers={{ 'demo-custom': DemoCustomRenderer }}>
           <App />
         </ElectronCoreUiProvider>
       </React.StrictMode>

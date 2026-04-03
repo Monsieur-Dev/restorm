@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef, useRef } from 'react'
+import React, { useState, useEffect, forwardRef, useRef, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import Editor, { type EditorProps, type OnMount } from '@monaco-editor/react'
 import type * as monacoEditor from 'monaco-editor'
@@ -54,6 +54,13 @@ export interface CodeEditorProps extends Omit<EditorProps, 'theme'> {
    * This is an alias for onMount to maintain consistency
    */
   onEditorMount?: OnMount
+
+  /**
+   * When true (default), applies user editor settings (fontSize, fontFamily, etc.)
+   * from the SettingsService. Set to false for compact editors like URL inputs
+   * and variable input boxes.
+   */
+  applyEditorSettings?: boolean
 
   /**
    * Callback fired when "Go to definition" is triggered on a variable.
@@ -134,6 +141,7 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   {
     theme,
     changeDebounceMs = 200,
+    applyEditorSettings = true,
     onMount,
     onEditorMount,
     onGoToDefinition,
@@ -153,6 +161,65 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastValueRef = useRef<string | undefined>(props.value)
   const lastEventRef = useRef<monacoEditor.editor.IModelContentChangedEvent | undefined>(undefined)
+
+  // Editor settings from SettingsService (fontSize, fontFamily, wordWrap, minimap, lineNumbers)
+  const [editorSettings, setEditorSettings] = useState<Record<string, unknown>>({})
+
+  useEffect(() => {
+    if (!applyEditorSettings) return
+    const w = window as unknown as Record<string, unknown>
+    const api = w['api'] as { settings?: { get: (k: string) => Promise<unknown>; onSettingChanged: (cb: (k: string, v: unknown) => void) => () => void } } | undefined
+    const settingsApi = api?.settings
+    if (!settingsApi) return
+
+    // Load initial values
+    const keys = [
+      'appearance.editor:fontSize',
+      'appearance.editor:fontFamily',
+      'appearance.editor:wordWrap',
+      'appearance.editor:minimap',
+      'appearance.editor:lineNumbers'
+    ]
+    const loadAll = async (): Promise<void> => {
+      const entries: Record<string, unknown> = {}
+      for (const k of keys) {
+        entries[k] = await settingsApi.get(k)
+      }
+      setEditorSettings(entries)
+    }
+    void loadAll()
+
+    // Listen for changes
+    const cleanup = settingsApi.onSettingChanged((key: string, value: unknown) => {
+      if (keys.includes(key)) {
+        setEditorSettings(prev => ({ ...prev, [key]: value }))
+      }
+    })
+    return cleanup
+  }, [applyEditorSettings])
+
+  // Merge editor settings into Monaco options
+  const settingsOptions = useMemo((): Record<string, unknown> => {
+    const opts: Record<string, unknown> = {}
+    const fs = editorSettings['appearance.editor:fontSize']
+    if (typeof fs === 'number') opts['fontSize'] = fs
+    const ff = editorSettings['appearance.editor:fontFamily']
+    if (typeof ff === 'string') opts['fontFamily'] = ff
+    const ww = editorSettings['appearance.editor:wordWrap']
+    if (typeof ww === 'boolean') opts['wordWrap'] = ww ? 'on' : 'off'
+    const mm = editorSettings['appearance.editor:minimap']
+    if (typeof mm === 'boolean') opts['minimap'] = { enabled: mm }
+    const ln = editorSettings['appearance.editor:lineNumbers']
+    if (typeof ln === 'boolean') opts['lineNumbers'] = ln ? 'on' : 'off'
+    return opts
+  }, [editorSettings])
+
+  // Apply settings changes to live editor instance
+  useEffect(() => {
+    if (editorInstance && Object.keys(settingsOptions).length > 0) {
+      editorInstance.updateOptions(settingsOptions)
+    }
+  }, [editorInstance, settingsOptions])
 
   // Effective theme: use prop if provided, otherwise auto-detected
   const currentTheme = theme ?? autoDetectedTheme
@@ -281,6 +348,7 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
       <div style={{ width: '100%', height: '100%' }} {...(dataTestId && { 'data-testid': `${dataTestId}-monaco` })}>
         <Editor
           {...props}
+          options={{ ...(props.options ?? {}), ...settingsOptions }}
           theme={currentTheme}
           onChange={handleChange}
           onMount={handleMount}

@@ -130,35 +130,52 @@ const InputBoxInner: React.FC<InputBoxProps> = ({
     emitChange(newValue)
   }
 
+  // Number input: increment/decrement helper
+  const isNumberInput = options.type === 'number'
+  const stepValue = options.step ?? 1
+  const incrementNumber = useCallback((delta: number): void => {
+    const current = parseFloat(value) || 0
+    let next = current + delta
+    if (options.min !== undefined) next = Math.max(next, options.min)
+    if (options.max !== undefined) next = Math.min(next, options.max)
+    const str = String(next)
+    emitChange(str)
+  }, [value, options.min, options.max, emitChange])
+
   // Use native event listeners for wheel events
   useEffect(() => {
-    const textarea = inputRef.current
-    if (!(textarea instanceof HTMLTextAreaElement)) return
+    const el = inputRef.current
+    if (!el) return
 
-    const handleWheel = (e: WheelEvent): void => {
-      e.stopPropagation()
-      e.preventDefault()
-      
-      // Manually handle the scroll
-      const deltaY = e.deltaY
-      const scrollTop = textarea.scrollTop
-      const maxScrollTop = textarea.scrollHeight - textarea.clientHeight
-      
-      if (deltaY > 0 && scrollTop < maxScrollTop) {
-        // Scroll down
-        textarea.scrollTop = Math.min(scrollTop + 30, maxScrollTop)
-      } else if (deltaY < 0 && scrollTop > 0) {
-        // Scroll up
-        textarea.scrollTop = Math.max(scrollTop - 30, 0)
+    if (el instanceof HTMLTextAreaElement) {
+      const handleWheel = (e: WheelEvent): void => {
+        e.stopPropagation()
+        e.preventDefault()
+        const deltaY = e.deltaY
+        const scrollTop = el.scrollTop
+        const maxScrollTop = el.scrollHeight - el.clientHeight
+        if (deltaY > 0 && scrollTop < maxScrollTop) {
+          el.scrollTop = Math.min(scrollTop + 30, maxScrollTop)
+        } else if (deltaY < 0 && scrollTop > 0) {
+          el.scrollTop = Math.max(scrollTop - 30, 0)
+        }
       }
+      el.addEventListener('wheel', handleWheel, { passive: false })
+      return () => { el.removeEventListener('wheel', handleWheel) }
     }
 
-    textarea.addEventListener('wheel', handleWheel, { passive: false })
-    
-    return () => {
-      textarea.removeEventListener('wheel', handleWheel)
+    // Number input: wheel to increment/decrement
+    if (isNumberInput) {
+      const handleWheel = (e: WheelEvent): void => {
+        e.preventDefault()
+        incrementNumber(e.deltaY < 0 ? stepValue : -stepValue)
+      }
+      el.addEventListener('wheel', handleWheel, { passive: false })
+      return () => { el.removeEventListener('wheel', handleWheel) }
     }
-  }, [value, inputRef]) // Re-attach when content changes
+
+    return undefined
+  }, [value, inputRef, isNumberInput, incrementNumber, stepValue])
 
   const handleFocus = (): void => {
     setState('focused')
@@ -238,13 +255,41 @@ const InputBoxInner: React.FC<InputBoxProps> = ({
 
   const inputClasses = ['input', value ? '' : 'empty'].filter(Boolean).join(' ')
 
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+    if (isNumberInput) {
+      // Arrow up/down: increment/decrement
+      if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        incrementNumber(stepValue)
+        return
+      }
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        incrementNumber(-stepValue)
+        return
+      }
+      // Block + and - keys: increment/decrement instead
+      if (e.key === '+') {
+        e.preventDefault()
+        incrementNumber(stepValue)
+        return
+      }
+      if (e.key === '-') {
+        e.preventDefault()
+        incrementNumber(-stepValue)
+        return
+      }
+    }
+    onKeyDown?.(e)
+  }, [isNumberInput, incrementNumber, stepValue, onKeyDown])
+
   const baseProps = {
     className: inputClasses,
     value: value,
     onChange: handleChange,
     onFocus: handleFocus,
     onBlur: handleBlur,
-    onKeyDown,
+    onKeyDown: handleKeyDown,
     disabled,
     placeholder: currentPlaceholder,
     autoCorrect: 'off' as const,

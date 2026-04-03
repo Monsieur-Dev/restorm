@@ -14,6 +14,23 @@ const coreResources: Resource = {
   fr: { translation: coreFrTranslation as unknown as Record<string, unknown> }
 }
 
+function deepMerge(base: Record<string, unknown>, override: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = { ...base }
+  for (const [key, overrideValue] of Object.entries(override)) {
+    const baseValue = result[key]
+    if (
+      baseValue && overrideValue &&
+      typeof baseValue === 'object' && !Array.isArray(baseValue) &&
+      typeof overrideValue === 'object' && !Array.isArray(overrideValue)
+    ) {
+      result[key] = deepMerge(baseValue as Record<string, unknown>, overrideValue as Record<string, unknown>)
+    } else {
+      result[key] = overrideValue
+    }
+  }
+  return result
+}
+
 function mergeResources(base: Resource, override: Resource): Resource {
   const result: Resource = { ...base }
 
@@ -22,15 +39,8 @@ function mergeResources(base: Resource, override: Resource): Resource {
     const nextNamespaces: Record<string, unknown> = { ...baseNamespaces }
 
     for (const [nsKey, overrideNsValue] of Object.entries(overrideNamespaces as Record<string, unknown>)) {
-      if (nsKey === 'translation') {
-        const baseTranslation = (baseNamespaces['translation'] ?? {}) as Record<string, unknown>
-        nextNamespaces['translation'] = {
-          ...baseTranslation,
-          ...(overrideNsValue as Record<string, unknown>)
-        }
-      } else {
-        nextNamespaces[nsKey] = overrideNsValue
-      }
+      const baseNs = (baseNamespaces[nsKey] ?? {}) as Record<string, unknown>
+      nextNamespaces[nsKey] = deepMerge(baseNs, overrideNsValue as Record<string, unknown>)
     }
 
     result[lang] = nextNamespaces as Resource[string]

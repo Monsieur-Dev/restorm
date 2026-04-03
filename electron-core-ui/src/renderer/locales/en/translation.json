@@ -13,7 +13,49 @@
   "settings": {
     "title": "Settings",
     "theme": "Theme",
-    "language": "Language"
+    "language": "Language",
+    "searchPlaceholder": "Search settings...",
+    "noResults": "No settings found.",
+    "numberOutOfRange": "Value must be between {{min}} and {{max}}.",
+    "resetSetting": "Reset Setting",
+    "copySettingId": "Copy Setting ID",
+    "settingOptions": "Setting options",
+    "appearance": {
+      "title": "Appearance",
+      "theme": {
+        "title": "Theme",
+        "description": "Select the application color theme"
+      },
+      "language": {
+        "title": "Language",
+        "description": "Select the application language",
+        "en": "English",
+        "fr": "Français"
+      },
+      "editor": {
+        "title": "Editor",
+        "fontSize": {
+          "title": "Font Size",
+          "description": "Controls the font size in pixels for the code editor"
+        },
+        "fontFamily": {
+          "title": "Font Family",
+          "description": "Controls the font family for the code editor"
+        },
+        "wordWrap": {
+          "title": "Word Wrap",
+          "description": "Controls whether lines should wrap in the code editor"
+        },
+        "minimap": {
+          "title": "Minimap",
+          "description": "Controls whether the minimap is shown in the code editor"
+        },
+        "lineNumbers": {
+          "title": "Line Numbers",
+          "description": "Controls whether line numbers are shown in the code editor"
+        }
+      }
+    }
   },
   "codeEditor": {
     "goToDefinition": "Go to Definition"

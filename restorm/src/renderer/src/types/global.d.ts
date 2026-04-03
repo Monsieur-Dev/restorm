@@ -1,4 +1,5 @@
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from 'electron-core-ui/types'
+import type { SettingValue, ResolvedSetting, SettingsGroup } from 'electron-core-ui/types'
 import type { PersistenceFormat } from 'electron-core-ui/main'
 
 declare global {
@@ -30,6 +31,17 @@ declare global {
       getWindowUnderCursor: () => Promise<{ windowId: number; bounds: { x: number; y: number; width: number; height: number } } | null>
       sendWorkbenchTabToWindow: (targetWindowId: number, tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }) => Promise<boolean>
       onWorkbenchTabDropped: (callback: (tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }) => void) => (() => void)
+      settings: {
+        get: (storageKey: string) => Promise<SettingValue | null>
+        set: (storageKey: string, value: SettingValue) => Promise<boolean>
+        getAll: () => Promise<ResolvedSetting[]>
+        getGroups: () => Promise<SettingsGroup[]>
+        getRenderers: () => Promise<Record<string, string>>
+        search: (query: string) => Promise<ResolvedSetting[]>
+        reset: (storageKey: string) => Promise<boolean>
+        reindex: () => Promise<void>
+        onSettingChanged: (callback: (storageKey: string, value: SettingValue) => void) => () => void
+      }
       project: {
         listFiles: () => Promise<{ path: string; isDirectory: boolean }[]>
         readFile: (filePath: string) => Promise<string>

@@ -47,6 +47,12 @@ export interface IInputOptions {
   readonly flexibleWidth?: boolean
   readonly flexibleMaxHeight?: number
   readonly inputBoxStyles?: IInputBoxStyles
+  /** Minimum value for number inputs. Used for wheel/arrow increment bounds. */
+  readonly min?: number
+  /** Maximum value for number inputs. Used for wheel/arrow increment bounds. */
+  readonly max?: number
+  /** Step value for number inputs. Defaults to 1. */
+  readonly step?: number
 }
 
 export interface InputBoxProps {
