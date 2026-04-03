@@ -14,6 +14,7 @@ const Button: React.FC<ButtonProps> = ({
   onMouseEnter,
   onMouseLeave,
   className = '',
+  style,
   id,
   'data-testid': dataTestId,
   children
@@ -93,8 +94,8 @@ const Button: React.FC<ButtonProps> = ({
     className
   ].filter(Boolean).join(' ')
 
-  // No inline styles - let CSS handle colors via CSS variables
-  const inlineStyles: React.CSSProperties = {}
+  // Merge any caller-provided style overrides
+  const inlineStyles: React.CSSProperties = { ...style }
 
   return (
     <div className="button-container">

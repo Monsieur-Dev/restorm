@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import {
   KeyValueTable,
   InputBox,
+  Button,
   ColorPicker,
   DateTimePicker,
   Tooltip,
@@ -88,22 +89,15 @@ const ColorValueCell: React.FC<ColorValueCellProps> = ({ hex, onChangeHex, dataT
       </div>
 
       <div ref={targetRef} style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center' }}>
-        <button
-          type="button"
-          aria-label="Open color picker"
+        <Button
+          line
+          options={{ ariaLabel: 'Open color picker' }}
           onClick={(e) => {
             e.preventDefault()
             setIsOpen((prev) => !prev)
           }}
-          style={{
-            width: 24,
-            height: 24,
-            borderRadius: 4,
-            border: '1px solid var(--input-border, rgba(0, 0, 0, 0.3))',
-            backgroundColor: hex,
-            padding: 0,
-            cursor: 'pointer'
-          }}
+          style={{ backgroundColor: hex }}
+          {...(dataTestId && { 'data-testid': `${dataTestId}-color-button` })}
         />
       </div>
 

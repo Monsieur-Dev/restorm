@@ -175,7 +175,7 @@ const TabsInner: React.FC<TabsProps> = ({
                     left: 0,
                     right: 0,
                     height: '75%',
-                    background: 'linear-gradient(to top, var(--tab-activeGlow, rgba(255,255,255,0.1)) -50%, transparent 100%)',
+                    background: 'linear-gradient(to top, var(--tab-activeGlow, rgba(255,255,255,0.1)) -75%, transparent 100%)',
                     opacity: isActive ? 1 : 0,
                     transition: 'opacity 0.5s ease',
                     pointerEvents: 'none',

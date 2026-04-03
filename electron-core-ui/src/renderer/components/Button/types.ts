@@ -43,6 +43,8 @@ export interface ButtonProps {
   onMouseEnter?: ((event: React.MouseEvent<HTMLAnchorElement>) => void) | undefined;
   onMouseLeave?: ((event: React.MouseEvent<HTMLAnchorElement>) => void) | undefined;
   className?: string;
+  /** Inline style overrides (e.g. for custom backgroundColor on color swatches) */
+  style?: React.CSSProperties;
   id?: string;
   'data-testid'?: string;
   children?: React.ReactNode;
