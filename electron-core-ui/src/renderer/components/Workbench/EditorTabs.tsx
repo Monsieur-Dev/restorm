@@ -392,7 +392,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 					handleMouseWheel: true,
 					mouseWheelSmoothScroll: false,
 					mouseWheelHorizontal: true,
-					horizontalScrollbarSize: 3
+					horizontalScrollbarSize: 0
 				}}
 				className={`tabs-container-wrapper${dimmed ? ' dimmed' : ''}`}
 				{...(dataTestId && { 'data-testid': dataTestId })}
