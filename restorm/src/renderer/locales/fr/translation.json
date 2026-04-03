@@ -458,6 +458,11 @@
     "times": "Helper bloc qui répète n fois",
     "range": "Génère un tableau de nombres"
   },
+  "behavior": {
+    "title": "Comportement",
+    "syncSidebarWithTabs": "Synchroniser la sélection du panneau latéral avec l'onglet actif",
+    "syncSidebarWithTabsDescription": "Lors du changement d'onglet dans l'espace de travail, sélectionner et afficher automatiquement l'élément correspondant dans le panneau latéral"
+  },
   "import": {
     "title": "Importer des requêtes",
     "destination": {

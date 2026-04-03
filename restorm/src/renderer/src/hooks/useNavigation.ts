@@ -2,8 +2,8 @@
  * Hook for managing navigation between sidebar and workbench
  */
 
-import { useEffect, useCallback } from 'react'
-import { navigationService } from 'electron-core-ui/renderer'
+import { useEffect, useCallback, useRef } from 'react'
+import { navigationService, loadFromStorage } from 'electron-core-ui/renderer'
 import type { NavigationEvent, SearchResult } from 'electron-core-ui/renderer'
 import type { Folder, EnvironmentFolder, Request, Environment } from '../../../shared/types/collections'
 import { isFolder, isRequest, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest } from '../../../shared/types/collections'
@@ -18,6 +18,7 @@ export interface UseNavigationOptions {
   setSelectedItemId: React.Dispatch<React.SetStateAction<string | null>>
   setFocusedGroupId: React.Dispatch<React.SetStateAction<string | null>>
   getNearestEnvironmentsForBreadcrumbs: (rootItems: (EnvironmentFolder | Folder | Request)[], breadcrumbs: BreadcrumbItem[]) => Environment[]
+  syncSidebarWithTabs?: boolean
 }
 
 export interface UseNavigationReturn {
@@ -35,8 +36,13 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     openAnyRequestTab,
     setSelectedItemId,
     setFocusedGroupId,
-    getNearestEnvironmentsForBreadcrumbs
+    getNearestEnvironmentsForBreadcrumbs,
+    syncSidebarWithTabs = true
   } = options
+
+  // Keep a ref to always read the latest value of the setting
+  const syncSidebarRef = useRef(syncSidebarWithTabs)
+  useEffect(() => { syncSidebarRef.current = syncSidebarWithTabs }, [syncSidebarWithTabs])
 
   // Handle navigation events from NavigationService
   useEffect(() => {
@@ -131,27 +137,53 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     [rootItems]
   )
 
+  // Resolve an index path (e.g. "0.0.1") to an actual item ID by walking rootItems
+  const resolveIndexPath = useCallback((indexPath: string): string | null => {
+    const indices = indexPath.split('.').map(Number)
+    let current: (EnvironmentFolder | Folder | Request)[] = rootItems
+    for (let i = 0; i < indices.length; i++) {
+      const idx = indices[i]
+      if (idx === undefined || idx >= current.length) return null
+      const item = current[idx]
+      if (!item) return null
+      if (i === indices.length - 1) return item.id
+      // Navigate into children
+      if ('items' in item && Array.isArray(item.items)) {
+        current = item.items as (EnvironmentFolder | Folder | Request)[]
+      } else {
+        return null
+      }
+    }
+    return null
+  }, [rootItems])
+
   // Handle tab activation in workbench - navigate to sync sidebar selection
   const handleTabActivate = useCallback((tabId: string) => {
-    // Extract the item ID from the tab ID
-    let itemId: string | null = null
-    let itemType: string | null = null
+    // Read setting fresh from storage to get the latest value
+    // (the setting may have been toggled in the settings modal since the callback was created)
+    void loadFromStorage('behavior.syncSidebarWithTabs').then((stored) => {
+      const syncEnabled = stored !== undefined ? (stored as boolean) : syncSidebarRef.current
 
-    if (tabId.startsWith('env-folder-')) {
-      itemId = tabId.replace('env-folder-', '')
-      itemType = 'environment-folder'
-    } else if (tabId.startsWith('folder-')) {
-      itemId = tabId.replace('folder-', '')
-      itemType = 'folder'
-    } else if (tabId.startsWith('request-')) {
-      itemId = tabId.replace('request-', '')
-      itemType = 'http-request'
-    }
+      // Parse tab ID format: "prefix-idx:0.0.1" or "prefix-id:uuid"
+      let itemId: string | null = null
+      let itemType: string | null = null
 
-    if (itemId && itemType) {
-      navigationService.navigateTo(itemId, 'workbench', { type: itemType })
-    }
-  }, [])
+      const indexMatch = /^(env-folder|folder|request)-idx:(.+)$/.exec(tabId)
+      const idMatch = /^(env-folder|folder|request)-id:(.+)$/.exec(tabId)
+
+      if (indexMatch?.[1] && indexMatch[2]) {
+        itemType = indexMatch[1] === 'request' ? 'http-request' : indexMatch[1]
+        itemId = resolveIndexPath(indexMatch[2])
+      } else if (idMatch?.[1] && idMatch[2]) {
+        itemType = idMatch[1] === 'request' ? 'http-request' : idMatch[1]
+        itemId = idMatch[2]
+      }
+
+      if (itemId && itemType && syncEnabled) {
+        navigationService.navigateTo(itemId, 'workbench', { type: itemType })
+      }
+    })
+  }, [resolveIndexPath])
 
   // Handle search result click - navigate to the selected item
   const handleSearchResultClick = useCallback((result: SearchResult) => {

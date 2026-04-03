@@ -13,6 +13,7 @@ import {
 export interface RestormSidebarProps {
   items: ListViewItemData[]
   selectedItemId: string | null
+  activeId?: string | null
   expandedIds: string[]
   editingItemId: string | null
   onItemClick: (itemId: string) => void
@@ -31,6 +32,7 @@ export interface RestormSidebarProps {
 export const RestormSidebar: React.FC<RestormSidebarProps> = ({
   items,
   selectedItemId,
+  activeId,
   expandedIds,
   editingItemId,
   onItemClick,
@@ -98,6 +100,7 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
             rootRole="tree"
             ariaLabel={t('sidebar.workspace')}
             selectedIds={selectedItemId ? [selectedItemId] : []}
+            activeId={activeId}
             expandedIds={expandedIds}
             isRenameable
             expandOnChevronOnly

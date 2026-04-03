@@ -7,6 +7,7 @@ import './httpMethods.css'
 import './app.css'
 import './components/common/Badge.css'
 import LoadingScreen from './components/Welcome/LoadingScreen'
+import BehaviorSettings from './components/Settings/BehaviorSettings'
 import { initializeGraphQL } from './services/GraphQLIntegration'
 import { DEFAULT_UI_DELAY_MS } from '../../shared/config/constants'
 
@@ -25,6 +26,7 @@ try {
 type ElectronCoreUiProviderComponent = React.ComponentType<{
   children: React.ReactNode
   fontAliasing?: 'auto' | 'antialiased' | 'none'
+  additionalSettingsContent?: React.ReactNode
 }>
 
 const { ElectronCoreUiProvider } = ElectronCoreUi as unknown as { ElectronCoreUiProvider: ElectronCoreUiProviderComponent }
@@ -323,7 +325,7 @@ void initI18n()
 
     ReactDOM.createRoot(rootElement).render(
       <React.StrictMode>
-        <ElectronCoreUiProvider fontAliasing="auto" data-testid="electron-core-ui-provider">
+        <ElectronCoreUiProvider fontAliasing="auto" data-testid="electron-core-ui-provider" additionalSettingsContent={<BehaviorSettings />}>
           <Suspense fallback={<LoadingScreen />}>
             <App />
           </Suspense>
