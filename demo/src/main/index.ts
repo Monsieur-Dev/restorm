@@ -3,6 +3,7 @@ import { MainWindow } from './windows/MainWindow'
 import { EditorWindow } from './windows/EditorWindow'
 import { initializeApp, logger } from 'electron-core-ui'
 import { join, relative } from 'path'
+import { existsSync } from 'fs'
 import { promises as fs } from 'fs'
 
 function createWindow(): void {
@@ -32,9 +33,20 @@ function getResourcesPath(): string {
   return join(process.resourcesPath, 'resources')
 }
 
+// Get settings configuration path for demo
+function getSettingsConfigPath(): string {
+  const isDev = process.env['NODE_ENV'] === 'development' || !app.isPackaged
+  if (isDev) {
+    const appPath = app.getAppPath()
+    return join(appPath, 'resources/settings.yaml')
+  }
+  return join(process.resourcesPath, 'demo-resources/settings.yaml')
+}
+
 // Initialize Electron application
 const resourcesPath = getResourcesPath()
-initializeApp('Demo', createWindow, resourcesPath)
+const settingsConfigPath = getSettingsConfigPath()
+initializeApp('Demo', createWindow, resourcesPath, undefined, undefined, existsSync(settingsConfigPath) ? settingsConfigPath : undefined)
 
 // Store file parameters for Editor window (keyed by window ID)
 const editorWindowFiles = new Map<number, { title: string; content?: string }>()

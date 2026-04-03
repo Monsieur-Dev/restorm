@@ -1,12 +1,11 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ThemeTestPage from './pages/ThemeTestPage'
-import SettingsPage from './pages/SettingsPage'
 import { logger, Statusbar, StatusbarElement } from 'electron-core-ui/renderer'
 
 const App: React.FC = () => {
   const { t, i18n } = useTranslation()
-  const [currentPage, setCurrentPage] = useState<'home' | 'theme-test' | 'settings'>('theme-test')
+  const [currentPage, setCurrentPage] = useState<'home' | 'theme-test'>('theme-test')
 
   const toggleLanguage = (): void => {
     const newLang = i18n.language === 'en' ? 'fr' : 'en'
@@ -18,11 +17,6 @@ const App: React.FC = () => {
   // Show theme test page
   if (currentPage === 'theme-test') {
     return <ThemeTestPage />
-  }
-
-  // Show settings page
-  if (currentPage === 'settings') {
-    return <SettingsPage />
   }
 
   // Home page
@@ -78,22 +72,6 @@ const App: React.FC = () => {
             }}
           >
             Theme Test
-          </button>
-          <button
-            onClick={() => {
-              setCurrentPage('settings')
-            }}
-            style={{
-              padding: '10px 20px',
-              fontSize: '16px',
-              cursor: 'pointer',
-              backgroundColor: 'var(--button-secondaryBackground)',
-              color: 'var(--button-secondaryForeground)',
-              border: 'none',
-              borderRadius: '2px'
-            }}
-          >
-            Settings
           </button>
         </div>
       </div>

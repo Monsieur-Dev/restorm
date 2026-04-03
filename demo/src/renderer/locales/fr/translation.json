@@ -117,23 +117,17 @@
   },
   "settings": {
     "e2eTabLabel": "Settings (E2E)",
+    "demo": {
+      "title": "Demo",
+      "customExample": {
+        "title": "Exemple de rendu personnalis\u00e9",
+        "description": "Ce param\u00e8tre utilise un composant de rendu personnalis\u00e9 fourni par l'application demo."
+      }
+    },
     "harness": {
       "instructions": "Ouvrez la modal Settings puis interagissez avec le sélecteur de langue.",
       "openButtonLabel": "Ouvrir les settings",
       "openButtonAriaLabel": "Ouvrir la modal des settings"
-    }
-  },
-  "settingsTreeView": {
-    "e2eTabLabel": "SettingsTreeView (E2E)",
-    "harness": {
-      "instructions": "Sélectionnez une catégorie et utilisez la recherche pour étendre les catégories imbriquées.",
-      "searchPlaceholder": "Rechercher…",
-      "categories": {
-        "general": "Général",
-        "appearance": "Apparence",
-        "theme": "Thème",
-        "workspace": "Espace de travail"
-      }
     }
   },
   "dateTimePicker": {

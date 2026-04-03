@@ -8,6 +8,7 @@
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from './theme'
 import type { FeaturePlatform } from './feature'
 import type { FileServiceState, FileMetadata, SerializationFormat } from './file'
+import type { SettingValue, ResolvedSetting, SettingsGroup } from './settings'
 
 export interface CoreUiThemeApi {
   list: () => Promise<ThemeInfo[]>
@@ -136,6 +137,19 @@ export interface CoreUiWindowBounds {
   height: number
 }
 
+export interface CoreUiSettingsApi {
+  get: (storageKey: string) => Promise<SettingValue | null>
+  set: (storageKey: string, value: SettingValue) => Promise<boolean>
+  getAll: () => Promise<ResolvedSetting[]>
+  getGroups: () => Promise<SettingsGroup[]>
+  getRenderers: () => Promise<Record<string, string>>
+  search: (query: string) => Promise<ResolvedSetting[]>
+  reset: (storageKey: string) => Promise<boolean>
+  reindex: () => Promise<void>
+  onSettingChanged: (callback: (storageKey: string, value: SettingValue) => void) => () => void
+  onConfigLoaded: (callback: () => void) => () => void
+}
+
 export interface CoreUiApi {
   platform: string
   theme: CoreUiThemeApi
@@ -146,6 +160,7 @@ export interface CoreUiApi {
   file: CoreUiFileApi
   eventBus: CoreUiEventBusApi
   search: CoreUiSearchApi
+  settings: CoreUiSettingsApi
   minimizeWindow: () => Promise<void>
   maximizeWindow: () => Promise<void>
   closeWindow: () => Promise<void>

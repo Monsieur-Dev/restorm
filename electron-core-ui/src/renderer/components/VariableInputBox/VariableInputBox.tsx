@@ -404,6 +404,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
               height={20}
               options={editorOptions}
               onMount={handleMount}
+              applyEditorSettings={false}
               {...(dataTestId && { 'data-testid': `${dataTestId}-codeeditor` })}
             />
           </div>

@@ -162,3 +162,220 @@
   gap: 4px;
 }
 
+/* SettingsView */
+.settings-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.settings-view--loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-view-search {
+  padding: 0 0 12px;
+  flex-shrink: 0;
+}
+
+.settings-view-no-results {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--descriptionForeground, #999);
+}
+
+.settings-view-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* TOC sidebar (left, 25%) */
+.settings-view-toc {
+  flex: 0 0 15%;
+  min-width: 150px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.settings-toc-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--editor-foreground);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.settings-toc-item:hover {
+  background-color: var(--list-hoverBackground, rgb(255, 255, 255, 0.04));
+}
+
+.settings-toc-item--active {
+  font-weight: 600;
+}
+
+.settings-toc-expander {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.settings-toc-expander-placeholder {
+  display: inline-block;
+  width: 16px;
+  flex-shrink: 0;
+}
+
+.settings-toc-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Main content (right, 75%) */
+.settings-view-scroll {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.settings-view-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-left: 28px; /* room for the gear icon outside the setting item */
+  padding-right: 20px; /* space for the scrollbar */
+}
+
+/* Settings group */
+.settings-group {
+  margin-bottom: 8px;
+}
+
+.settings-group-title {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sideBarSectionHeader-foreground, var(--editor-foreground));
+  background: var(--editor-background);
+  padding: 8px 0;
+  margin: 0;
+  border-bottom: 1px solid var(--editorWidget-border);
+}
+
+h1.settings-group-title {
+  font-size: 20px;
+}
+
+h2.settings-group-title {
+  font-size: 16px;
+}
+
+h3.settings-group-title {
+  font-size: 14px;
+}
+
+h4.settings-group-title {
+  font-size: 13px;
+}
+
+.settings-group-items {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Setting item */
+.setting-item {
+  position: relative;
+  padding: 8px 12px;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.1s ease;
+  overflow: visible;
+}
+
+.setting-item:hover {
+  background-color: var(--list-hoverBackground, rgb(255, 255, 255, 0.04));
+}
+
+/* Modified indicator: vertical bar inside the setting item, near left edge with a small gap */
+.setting-item--modified::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 2px;
+  background-color: var(--button-background, #0e639c);
+}
+
+.setting-item--focused {
+  border: 1px solid var(--focusBorder, #0e639c);
+  padding: 7px 11px; /* compensate border */
+}
+
+.setting-item-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.setting-item-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--editor-foreground);
+  flex: 1;
+}
+
+.setting-item-description {
+  display: block;
+  font-size: 12px;
+  color: var(--descriptionForeground, #999);
+  margin-bottom: 6px;
+}
+
+/* Gear icon: positioned outside the setting item, to its left */
+.setting-item-gear {
+  position: absolute;
+  left: -24px;
+  top: 8px;
+  background: none;
+  border: none;
+  color: var(--descriptionForeground, #999);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  z-index: 1;
+}
+
+.setting-item-gear:hover {
+  color: var(--editor-foreground);
+  background-color: var(--toolbar-hoverBackground, rgb(255, 255, 255, 0.1));
+}
+
+.setting-item-control {
+  margin-top: 4px;
+}
+
+.settings-number-input,
+.settings-text-input {
+  max-width: 300px;
+}
+
