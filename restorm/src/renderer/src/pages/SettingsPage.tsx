@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { useTheme, CustomDropdown, logger, InputBox, MessageType, Toggle, RadioGroup, ScrollableElement, Statusbar, StatusbarElement } from 'electron-core-ui/renderer'
+import { useTranslation } from 'react-i18next'
+import { useTheme, useStorage, CustomDropdown, logger, InputBox, MessageType, Toggle, RadioGroup, ScrollableElement, Statusbar, StatusbarElement } from 'electron-core-ui/renderer'
 import type { IInputValidator } from 'electron-core-ui/renderer'
 
 interface Theme {
@@ -9,8 +10,10 @@ interface Theme {
 }
 
 const SettingsPage: React.FC = () => {
+  const { t } = useTranslation()
   const { themes, currentThemeId, setTheme, isLoading } = useTheme()
-  
+  const [syncSidebarWithTabs, setSyncSidebarWithTabs] = useStorage<boolean>('behavior.syncSidebarWithTabs', true)
+
   const [editorSettings, setEditorSettings] = useState({
     fontSize: '14',
     fontFamily: 'Consolas',
@@ -297,6 +300,29 @@ const SettingsPage: React.FC = () => {
                     />
                     Show Activity Bar
                   </label>
+                </div>
+              </div>
+            </div>
+
+            {/* Behavior Settings */}
+            <div style={{ marginBottom: '40px' }}>
+              <h2 style={{ fontSize: '18px', marginBottom: '20px', color: 'var(--foreground)' }}>
+                {t('behavior.title')}
+              </h2>
+
+              <div style={{ display: 'grid', gap: '20px', maxWidth: '600px' }}>
+                <div>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
+                    <Toggle
+                      data-testid="sync-sidebar-with-tabs-toggle"
+                      isChecked={syncSidebarWithTabs}
+                      onChange={(checked: boolean) => { setSyncSidebarWithTabs(checked) }}
+                    />
+                    {t('behavior.syncSidebarWithTabs')}
+                  </label>
+                  <p style={{ margin: '4px 0 0 34px', fontSize: '12px', color: 'var(--descriptionForeground)' }}>
+                    {t('behavior.syncSidebarWithTabsDescription')}
+                  </p>
                 </div>
               </div>
             </div>

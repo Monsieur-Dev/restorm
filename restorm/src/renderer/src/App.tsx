@@ -5,6 +5,7 @@ import {
   StatusbarElement,
   VerticalSashContainer,
   useFileService,
+  useStorage,
   eventBus,
   logger,
   computeChecksum,
@@ -84,6 +85,7 @@ const allFolderIds = initialRootItems.flatMap((folder) => collectAllFolderIds(fo
 
 const App: React.FC = () => {
   const { t } = useTranslation()
+  const [syncSidebarWithTabs] = useStorage<boolean>('behavior.syncSidebarWithTabs', true)
   const setCollections = useRestormStore((state) => state.setCollections)
   const {
     state: fileState,
@@ -584,7 +586,8 @@ const App: React.FC = () => {
     openAnyRequestTab,
     setSelectedItemId,
     setFocusedGroupId,
-    getNearestEnvironmentsForBreadcrumbs
+    getNearestEnvironmentsForBreadcrumbs,
+    syncSidebarWithTabs
   })
 
   return (
@@ -633,6 +636,7 @@ const App: React.FC = () => {
               <RestormSidebar
                 items={sidebarItemsWithContextMenu}
                 selectedItemId={selectedItemId}
+                activeId={selectedItemId}
                 expandedIds={expandedIds}
                 editingItemId={sidebarEditingItemId}
                 onItemClick={handleItemClick}

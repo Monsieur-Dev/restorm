@@ -458,6 +458,11 @@
     "times": "Block helper that repeats n times",
     "range": "Generates array of numbers"
   },
+  "behavior": {
+    "title": "Behavior",
+    "syncSidebarWithTabs": "Sync sidebar selection with active tab",
+    "syncSidebarWithTabsDescription": "When switching tabs in the workspace, automatically select and reveal the corresponding item in the sidebar"
+  },
   "import": {
     "title": "Import Requests",
     "destination": {
