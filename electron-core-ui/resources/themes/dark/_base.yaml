@@ -247,6 +247,10 @@ colors:
     value: "#0078d4"
     description: Active tab border
 
+  - id: tab.activeGlow
+    value: "rgba(30, 144, 255, 0.3)"
+    description: Active tab glow effect color (radial gradient)
+
   - id: tab.inactiveForeground
     value: "rgba(255, 255, 255, 0.5)"
     description: Inactive tab foreground
