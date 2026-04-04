@@ -60,22 +60,11 @@ export interface SettingsGroup {
 }
 
 // ==========================================================================
-// Renderer Mapping
-// ==========================================================================
-
-export interface SettingsRendererMapping {
-  type: string
-  component: string  // '__builtin__/Toggle' or './components/Custom' (relative to consumer)
-}
-
-// ==========================================================================
 // YAML Configuration Root
 // ==========================================================================
 
 export interface SettingsYamlConfig {
-  overrideDefaultRenderers?: boolean | undefined
   overrideDefaultGroups?: boolean | undefined
-  renderers?: SettingsRendererMapping[] | undefined
   groups: SettingsGroup[]
 }
 

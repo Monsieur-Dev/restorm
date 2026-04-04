@@ -92,8 +92,6 @@ function makeConfig(overrides: Partial<SettingsYamlConfig> = {}): SettingsYamlCo
         ]
       }
     ],
-    ...(overrides.renderers !== undefined ? { renderers: overrides.renderers } : {}),
-    ...(overrides.overrideDefaultRenderers !== undefined ? { overrideDefaultRenderers: overrides.overrideDefaultRenderers } : {}),
     ...(overrides.overrideDefaultGroups !== undefined ? { overrideDefaultGroups: overrides.overrideDefaultGroups } : {})
   }
 }
@@ -139,20 +137,6 @@ describe('SettingsService', () => {
       expect(groups[0]?.items).toHaveLength(2)
     })
 
-    it('loads renderer mappings from config', () => {
-      const config = makeConfig({
-        renderers: [
-          { type: 'toggle', component: '__builtin__/Toggle' },
-          { type: 'custom', component: './MyCustomRenderer' }
-        ]
-      })
-      const service = createService(config)
-      const renderers = service.getRenderers()
-
-      expect(renderers['toggle']).toBe('__builtin__/Toggle')
-      expect(renderers['custom']).toBe('./MyCustomRenderer')
-    })
-
     it('handles missing config file gracefully', () => {
       vi.mocked(existsSync).mockReturnValue(false)
 
@@ -196,12 +180,12 @@ describe('SettingsService', () => {
       )
     })
 
-    it('logs initialization info with group and renderer counts', () => {
+    it('logs initialization info with group count', () => {
       createService()
 
       expect(logger.info).toHaveBeenCalledWith(
         expect.stringContaining('Initialized'),
-        expect.objectContaining({ groups: 1, renderers: 0 })
+        expect.objectContaining({ groups: 1 })
       )
     })
   })
@@ -596,63 +580,6 @@ describe('SettingsService', () => {
 
       expect(service.getGroups()).toHaveLength(1)
       expect(service.getGroups()[0]?.id).toBe('replacement')
-    })
-
-    it('overrideDefaultRenderers replaces all renderers', () => {
-      const defaultConfig = makeConfig({
-        renderers: [
-          { type: 'toggle', component: '__builtin__/Toggle' }
-        ]
-      })
-      vi.mocked(existsSync).mockReturnValue(true)
-      vi.mocked(readFileSync).mockReturnValue('yaml-placeholder')
-
-      let callCount = 0
-      vi.mocked(yaml.load).mockImplementation(() => {
-        callCount++
-        if (callCount === 1) return defaultConfig
-        return {
-          overrideDefaultRenderers: true,
-          renderers: [
-            { type: 'custom', component: './Custom' }
-          ],
-          groups: []
-        }
-      })
-
-      const service = new SettingsService('/fake/default.yaml', '/fake/app.yaml')
-      const renderers = service.getRenderers()
-
-      expect(renderers['toggle']).toBeUndefined()
-      expect(renderers['custom']).toBe('./Custom')
-    })
-
-    it('merges renderers when overrideDefaultRenderers is false', () => {
-      const defaultConfig = makeConfig({
-        renderers: [
-          { type: 'toggle', component: '__builtin__/Toggle' }
-        ]
-      })
-      vi.mocked(existsSync).mockReturnValue(true)
-      vi.mocked(readFileSync).mockReturnValue('yaml-placeholder')
-
-      let callCount = 0
-      vi.mocked(yaml.load).mockImplementation(() => {
-        callCount++
-        if (callCount === 1) return defaultConfig
-        return {
-          renderers: [
-            { type: 'custom', component: './Custom' }
-          ],
-          groups: []
-        }
-      })
-
-      const service = new SettingsService('/fake/default.yaml', '/fake/app.yaml')
-      const renderers = service.getRenderers()
-
-      expect(renderers['toggle']).toBe('__builtin__/Toggle')
-      expect(renderers['custom']).toBe('./Custom')
     })
 
     it('loadConfig with missing file logs warning', () => {

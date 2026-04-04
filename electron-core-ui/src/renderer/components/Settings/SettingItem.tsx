@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useMemo, useContext } from 'react'
+import React, { useState, useCallback, useRef, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ContextMenu } from '../ContextMenu/ContextMenu'
 import type { ContextMenuItem } from '../ContextMenu/ContextMenu'
@@ -7,7 +7,8 @@ import { NumberInput } from './renderers/NumberInput'
 import { TextInput } from './renderers/TextInput'
 import { EnumRenderer } from './renderers/EnumRenderer'
 import { ThemeRenderer } from './renderers/ThemeRenderer'
-import { SettingsContext } from '../../contexts/settingsContextDef'
+import { getCustomRenderer } from './renderers/registry'
+import logger from '../../services/logger'
 import type { ResolvedSetting, SettingValue } from '../../../types/settings'
 
 export interface SettingItemProps {
@@ -24,7 +25,6 @@ export const SettingItem: React.FC<SettingItemProps> = ({
   onReset
 }) => {
   const { t } = useTranslation()
-  const settingsCtx = useContext(SettingsContext)
   const [isFocused, setIsFocused] = useState(false)
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -93,10 +93,11 @@ export const SettingItem: React.FC<SettingItemProps> = ({
       case 'theme':
         return <ThemeRenderer {...rendererProps} />
       default: {
-        const CustomRenderer = settingsCtx?.customRenderers[setting.type]
+        const CustomRenderer = getCustomRenderer(setting.type)
         if (CustomRenderer) {
           return <CustomRenderer {...rendererProps} />
         }
+        logger.error(`[SettingItem] No renderer registered for type "${setting.type}" (setting: ${setting.storageKey}). Use registerSettingRenderer() to register a custom renderer.`)
         return null
       }
     }

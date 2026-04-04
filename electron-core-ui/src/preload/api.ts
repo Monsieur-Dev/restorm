@@ -413,10 +413,6 @@ export const createCoreUIAPI = (): CoreUiApi => ({
       const result: unknown = await ipcRenderer.invoke('settings:get-groups')
       return result as SettingsGroup[]
     },
-    getRenderers: async (): Promise<Record<string, string>> => {
-      const result: unknown = await ipcRenderer.invoke('settings:get-renderers')
-      return result as Record<string, string>
-    },
     search: async (query: string): Promise<ResolvedSetting[]> => {
       const result: unknown = await ipcRenderer.invoke('settings:search', query)
       return result as ResolvedSetting[]

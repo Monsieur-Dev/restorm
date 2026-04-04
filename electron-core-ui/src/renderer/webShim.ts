@@ -705,7 +705,6 @@ export function ensureCoreUiWebApiShim(): void {
     },
     getAll: (): Promise<ResolvedSetting[]> => Promise.resolve([]),
     getGroups: (): Promise<SettingsGroup[]> => Promise.resolve([]),
-    getRenderers: (): Promise<Record<string, string>> => Promise.resolve({}),
     search: (): Promise<ResolvedSetting[]> => Promise.resolve([]),
     reset: (storageKey: string): Promise<boolean> => {
       try {

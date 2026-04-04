@@ -1,20 +1,16 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { SettingValue, ResolvedSetting } from '../../types/settings'
-import type { SettingRendererProps } from '../components/Settings/renderers/types'
 import { SettingsContext } from './settingsContextDef'
 
 interface SettingsProviderProps {
   children: React.ReactNode
-  customRenderers?: Record<string, ComponentType<SettingRendererProps>> | undefined
 }
 
-export function SettingsProvider({ children, customRenderers }: SettingsProviderProps): React.ReactElement {
+export function SettingsProvider({ children }: SettingsProviderProps): React.ReactElement {
   const { i18n } = useTranslation()
   const [groups, setGroups] = useState<import('../../types/settings').SettingsGroup[]>([])
   const [settingsList, setSettingsList] = useState<ResolvedSetting[]>([])
-  const [renderers, setRenderers] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [filteredSettings, setFilteredSettings] = useState<ResolvedSetting[]>([])
@@ -32,14 +28,12 @@ export function SettingsProvider({ children, customRenderers }: SettingsProvider
   const loadData = useCallback(async () => {
     try {
       setIsLoading(true)
-      const [fetchedGroups, fetchedSettings, fetchedRenderers] = await Promise.all([
+      const [fetchedGroups, fetchedSettings] = await Promise.all([
         window.api.settings.getGroups(),
-        window.api.settings.getAll(),
-        window.api.settings.getRenderers()
+        window.api.settings.getAll()
       ])
       setGroups(fetchedGroups)
       setSettingsList(fetchedSettings)
-      setRenderers(fetchedRenderers)
     } catch {
       // Settings API may not be available
     } finally {
@@ -135,13 +129,9 @@ export function SettingsProvider({ children, customRenderers }: SettingsProvider
     )
   }, [])
 
-  const stableCustomRenderers = useMemo(() => customRenderers ?? {}, [customRenderers])
-
   const value = useMemo(() => ({
     groups,
     settings: settingsMap,
-    renderers,
-    customRenderers: stableCustomRenderers,
     isLoading,
     getSetting,
     setSetting,
@@ -149,7 +139,7 @@ export function SettingsProvider({ children, customRenderers }: SettingsProvider
     searchQuery,
     setSearchQuery,
     filteredSettings
-  }), [groups, settingsMap, renderers, stableCustomRenderers, isLoading, getSetting, setSetting, resetSetting, searchQuery, filteredSettings])
+  }), [groups, settingsMap, isLoading, getSetting, setSetting, resetSetting, searchQuery, filteredSettings])
 
   return (
     <SettingsContext.Provider value={value}>

@@ -268,20 +268,23 @@ const InputBoxInner: React.FC<InputBoxProps> = ({
         incrementNumber(-stepValue)
         return
       }
-      // Block + and - keys: increment/decrement instead
-      if (e.key === '+') {
-        e.preventDefault()
-        incrementNumber(stepValue)
-        return
-      }
-      if (e.key === '-') {
-        e.preventDefault()
-        incrementNumber(-stepValue)
-        return
+      // When min >= 0, negative values are not allowed: intercept +/- as increment/decrement
+      // When min is undefined or < 0, allow normal typing of - for negative numbers
+      if (options.min !== undefined && options.min >= 0) {
+        if (e.key === '+') {
+          e.preventDefault()
+          incrementNumber(stepValue)
+          return
+        }
+        if (e.key === '-') {
+          e.preventDefault()
+          incrementNumber(-stepValue)
+          return
+        }
       }
     }
     onKeyDown?.(e)
-  }, [isNumberInput, incrementNumber, stepValue, onKeyDown])
+  }, [isNumberInput, incrementNumber, stepValue, onKeyDown, options.min])
 
   const baseProps = {
     className: inputClasses,

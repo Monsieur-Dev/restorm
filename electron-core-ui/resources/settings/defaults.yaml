@@ -1,18 +1,6 @@
 # Default settings configuration for electron-core-ui
 # Consumer applications can override or extend these via their own YAML config.
 
-renderers:
-  - type: "enum"
-    component: "__builtin__/EnumRenderer"
-  - type: "number"
-    component: "__builtin__/NumberInput"
-  - type: "text"
-    component: "__builtin__/TextInput"
-  - type: "theme"
-    component: "__builtin__/ThemeRenderer"
-  - type: "toggle"
-    component: "__builtin__/ToggleRenderer"
-
 groups:
   - id: "appearance"
     titleKey: "settings.appearance.title"
