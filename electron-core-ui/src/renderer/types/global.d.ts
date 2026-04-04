@@ -3,6 +3,7 @@
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../types/theme'
 import type { FeaturePlatform } from '../../types/feature'
 import type { FileServiceState, FileMetadata, SerializationFormat } from '../../types/file'
+import type { SettingValue, ResolvedSetting, SettingsGroup } from '../../types/settings'
 
 interface WindowApiTheme {
   list: () => Promise<ThemeInfo[]>
@@ -112,6 +113,18 @@ interface WindowApiSearch {
   getDocumentCount: () => Promise<number>
 }
 
+interface WindowApiSettings {
+  get: (storageKey: string) => Promise<SettingValue | null>
+  set: (storageKey: string, value: SettingValue) => Promise<boolean>
+  getAll: () => Promise<ResolvedSetting[]>
+  getGroups: () => Promise<SettingsGroup[]>
+  search: (query: string) => Promise<ResolvedSetting[]>
+  reset: (storageKey: string) => Promise<boolean>
+  reindex: () => Promise<void>
+  onSettingChanged: (callback: (storageKey: string, value: SettingValue) => void) => () => void
+  onConfigLoaded: (callback: () => void) => () => void
+}
+
 interface WindowApi {
   platform: string
   theme: WindowApiTheme
@@ -124,6 +137,7 @@ interface WindowApi {
   file: WindowApiFile
   eventBus: WindowApiEventBus
   search: WindowApiSearch
+  settings: WindowApiSettings
   minimizeWindow: () => Promise<void>
   maximizeWindow: () => Promise<void>
   closeWindow: () => Promise<void>

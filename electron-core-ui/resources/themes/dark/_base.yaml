@@ -409,3 +409,40 @@ colors:
   - id: alert.debug.border
     value: "#4d4d4d"
     description: Alert debug border color
+
+  # Input validation
+  - id: inputValidation.errorBorder
+    value: "#be1100"
+    description: Input validation error border
+
+  - id: inputValidation.errorBackground
+    value: "#5a1d1d"
+    description: Input validation error background
+
+  - id: inputValidation.errorForeground
+    value: "#f48771"
+    description: Input validation error foreground
+
+  - id: inputValidation.warningBorder
+    value: "#9d8a5e"
+    description: Input validation warning border
+
+  - id: inputValidation.warningBackground
+    value: "#352a05"
+    description: Input validation warning background
+
+  - id: inputValidation.warningForeground
+    value: "#cca700"
+    description: Input validation warning foreground
+
+  - id: inputValidation.infoBorder
+    value: "#007acc"
+    description: Input validation info border
+
+  - id: inputValidation.infoBackground
+    value: "#063b49"
+    description: Input validation info background
+
+  - id: inputValidation.infoForeground
+    value: "#75bfcf"
+    description: Input validation info foreground

@@ -289,15 +289,6 @@ const settingsTestDir = defineBddConfig({
   outputDir: '.features-gen/settings'
 })
 
-const settingsTreeViewTestDir = defineBddConfig({
-  features: 'tests/e2e/bdd/settingstreeview/features/**/*.feature',
-  steps: [
-    'tests/e2e/bdd/settingstreeview/steps/**/*.ts',
-    'tests/e2e/bdd/settingstreeview/fixtures/**/*.ts'
-  ],
-  outputDir: '.features-gen/settingstreeview'
-})
-
 const tabsTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/tabs/features/**/*.feature',
   steps: [
@@ -504,11 +495,6 @@ export default defineConfig({
     {
       name: 'settings',
       testDir: settingsTestDir,
-      use: { ...devices['Desktop Chrome'] }
-    },
-    {
-      name: 'settingstreeview',
-      testDir: settingsTreeViewTestDir,
       use: { ...devices['Desktop Chrome'] }
     },
     {

@@ -1,0 +1,10 @@
+groups:
+  - id: "demo"
+    titleKey: "settings.demo.title"
+    items:
+      - setting:
+          id: "customExample"
+          titleKey: "settings.demo.customExample.title"
+          descriptionKey: "settings.demo.customExample.description"
+          type: "demo-custom"
+          default: "Hello from custom renderer!"

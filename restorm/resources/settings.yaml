@@ -1,0 +1,10 @@
+groups:
+  - id: "behavior"
+    titleKey: "behavior.title"
+    items:
+      - setting:
+          id: "syncSidebarWithTabs"
+          titleKey: "behavior.syncSidebarWithTabs"
+          descriptionKey: "behavior.syncSidebarWithTabsDescription"
+          type: "toggle"
+          default: true

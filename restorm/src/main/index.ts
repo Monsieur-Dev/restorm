@@ -169,6 +169,16 @@ function getFeaturesConfigPath(): string {
   return join(process.resourcesPath, 'restorm-resources/features.yaml')
 }
 
+// Get settings configuration path for restorm
+function getSettingsConfigPath(): string {
+  const isDev = process.env['NODE_ENV'] === 'development' || !app.isPackaged
+  if (isDev) {
+    const appPath = app.getAppPath()
+    return join(appPath, 'resources/settings.yaml')
+  }
+  return join(process.resourcesPath, 'restorm-resources/settings.yaml')
+}
+
 // Initialize Feature Flipping Service
 const featuresConfigPath = getFeaturesConfigPath()
 initFeatureService(featuresConfigPath, 'desktop')
@@ -222,7 +232,8 @@ setupGraphQL()
 // Initialize Electron application
 const resourcesPath = getResourcesPath()
 const rendererPath = getRendererPath()
-initializeApp('restorm', createWindow, resourcesPath, undefined, rendererPath || undefined)
+const settingsConfigPath = getSettingsConfigPath()
+initializeApp('restorm', createWindow, resourcesPath, undefined, rendererPath || undefined, settingsConfigPath)
 
 // Register all restorm-specific IPC handlers
 registerRestormIPC({ editorWindows, closeAllWindows })

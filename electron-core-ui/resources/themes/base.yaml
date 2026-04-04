@@ -94,3 +94,16 @@ variables:
   - id: tag-foreground
     value: "#ffffff"
     description: Default tag foreground color
+
+  # Input validation error feedback
+  - id: inputValidation-errorBorder
+    value: "#be1100"
+    description: Input validation error border color
+
+  - id: inputValidation-errorBackground
+    value: "#5a1d1d"
+    description: Input validation error background color
+
+  - id: inputValidation-errorForeground
+    value: "#f48771"
+    description: Input validation error foreground color

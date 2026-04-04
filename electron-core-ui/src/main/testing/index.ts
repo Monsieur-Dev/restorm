@@ -332,12 +332,6 @@ export {
 } from './settingsSelectors'
 
 export {
-  settingsTreeViewRootSelector,
-  settingsTreeViewItemTestId,
-  settingsTreeViewItemSelector
-} from './settingsTreeViewSelectors'
-
-export {
   listViewDropdownRootSelector,
   listViewDropdownButtonTestId,
   listViewDropdownButtonAnchorSelector,

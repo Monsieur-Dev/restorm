@@ -2,8 +2,8 @@
  * Hook for managing navigation between sidebar and workbench
  */
 
-import { useEffect, useCallback, useRef } from 'react'
-import { navigationService, loadFromStorage } from 'electron-core-ui/renderer'
+import { useEffect, useCallback } from 'react'
+import { navigationService } from 'electron-core-ui/renderer'
 import type { NavigationEvent, SearchResult } from 'electron-core-ui/renderer'
 import type { Folder, EnvironmentFolder, Request, Environment } from '../../../shared/types/collections'
 import { isFolder, isRequest, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest } from '../../../shared/types/collections'
@@ -18,7 +18,6 @@ export interface UseNavigationOptions {
   setSelectedItemId: React.Dispatch<React.SetStateAction<string | null>>
   setFocusedGroupId: React.Dispatch<React.SetStateAction<string | null>>
   getNearestEnvironmentsForBreadcrumbs: (rootItems: (EnvironmentFolder | Folder | Request)[], breadcrumbs: BreadcrumbItem[]) => Environment[]
-  syncSidebarWithTabs?: boolean
 }
 
 export interface UseNavigationReturn {
@@ -36,13 +35,8 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     openAnyRequestTab,
     setSelectedItemId,
     setFocusedGroupId,
-    getNearestEnvironmentsForBreadcrumbs,
-    syncSidebarWithTabs = true
+    getNearestEnvironmentsForBreadcrumbs
   } = options
-
-  // Keep a ref to always read the latest value of the setting
-  const syncSidebarRef = useRef(syncSidebarWithTabs)
-  useEffect(() => { syncSidebarRef.current = syncSidebarWithTabs }, [syncSidebarWithTabs])
 
   // Handle navigation events from NavigationService
   useEffect(() => {
@@ -159,10 +153,14 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
 
   // Handle tab activation in workbench - navigate to sync sidebar selection
   const handleTabActivate = useCallback((tabId: string) => {
-    // Read setting fresh from storage to get the latest value
-    // (the setting may have been toggled in the settings modal since the callback was created)
-    void loadFromStorage('behavior.syncSidebarWithTabs').then((stored) => {
-      const syncEnabled = stored !== undefined ? (stored as boolean) : syncSidebarRef.current
+    // Read setting fresh from SettingsService to get the latest value
+    const settingsApi = (window as unknown as { api?: { settings?: { get: (k: string) => Promise<unknown> } } }).api?.settings
+    const settingsPromise = settingsApi
+      ? settingsApi.get('behavior:syncSidebarWithTabs')
+      : Promise.resolve(true)
+
+    void settingsPromise.then((stored) => {
+      const syncEnabled = stored !== null && stored !== undefined ? (stored as boolean) : true
 
       // Parse tab ID format: "prefix-idx:0.0.1" or "prefix-id:uuid"
       let itemId: string | null = null

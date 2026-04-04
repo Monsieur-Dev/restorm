@@ -82,3 +82,35 @@ export const featuresYamlConfigSchema = z.object({
 // ==========================================================================
 
 export const storageFileSchema = z.record(z.string(), z.unknown())
+
+// ==========================================================================
+// Settings Schemas
+// ==========================================================================
+
+export const settingDefinitionSchema = z.object({
+  id: z.string(),
+  titleKey: z.string(),
+  descriptionKey: z.string().optional(),
+  type: z.string(),
+  default: z.union([z.string(), z.number(), z.boolean()]),
+  params: z.record(z.string(), z.unknown()).optional()
+})
+
+// Recursive schema for group items (setting or nested group)
+export const settingsGroupItemSchema: z.ZodType = z.lazy(() =>
+  z.union([
+    z.object({ setting: settingDefinitionSchema }),
+    z.object({ group: settingsGroupSchema })
+  ])
+)
+
+export const settingsGroupSchema = z.object({
+  id: z.string(),
+  titleKey: z.string(),
+  items: z.array(settingsGroupItemSchema)
+})
+
+export const settingsYamlConfigSchema = z.object({
+  overrideDefaultGroups: z.boolean().optional(),
+  groups: z.array(settingsGroupSchema)
+})

@@ -1,0 +1,63 @@
+# Default settings configuration for electron-core-ui
+# Consumer applications can override or extend these via their own YAML config.
+
+groups:
+  - id: "appearance"
+    titleKey: "settings.appearance.title"
+    items:
+      - setting:
+          id: "theme"
+          titleKey: "settings.appearance.theme.title"
+          descriptionKey: "settings.appearance.theme.description"
+          type: "theme"
+          default: "theme-defaults/dark_plus"
+      - setting:
+          id: "language"
+          titleKey: "settings.appearance.language.title"
+          descriptionKey: "settings.appearance.language.description"
+          type: "enum"
+          default: "en"
+          params:
+            values:
+              - value: "en"
+                labelKey: "settings.appearance.language.en"
+              - value: "fr"
+                labelKey: "settings.appearance.language.fr"
+      - group:
+          id: "editor"
+          titleKey: "settings.appearance.editor.title"
+          items:
+            - setting:
+                id: "fontSize"
+                titleKey: "settings.appearance.editor.fontSize.title"
+                descriptionKey: "settings.appearance.editor.fontSize.description"
+                type: "number"
+                default: 14
+                params:
+                  min: 8
+                  max: 72
+                  integer: true
+            - setting:
+                id: "fontFamily"
+                titleKey: "settings.appearance.editor.fontFamily.title"
+                descriptionKey: "settings.appearance.editor.fontFamily.description"
+                type: "text"
+                default: "Consolas, 'Courier New', monospace"
+            - setting:
+                id: "wordWrap"
+                titleKey: "settings.appearance.editor.wordWrap.title"
+                descriptionKey: "settings.appearance.editor.wordWrap.description"
+                type: "toggle"
+                default: false
+            - setting:
+                id: "minimap"
+                titleKey: "settings.appearance.editor.minimap.title"
+                descriptionKey: "settings.appearance.editor.minimap.description"
+                type: "toggle"
+                default: false
+            - setting:
+                id: "lineNumbers"
+                titleKey: "settings.appearance.editor.lineNumbers.title"
+                descriptionKey: "settings.appearance.editor.lineNumbers.description"
+                type: "toggle"
+                default: true

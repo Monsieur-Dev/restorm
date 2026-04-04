@@ -6,7 +6,8 @@
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../types/theme'
 import type { FeaturePlatform } from '../types/feature'
 import type { FileServiceState, FileMetadata } from '../types/file'
-import type { CoreUiApi, CoreUiThemeApi, CoreUiStorageApi, CoreUiFeatureApi, CoreUiFileApi, CoreUiEventBusApi, CoreUiI18nApi, CoreUiSearchApi, CoreUiSearchDocument, CoreUiSearchResult, CoreUiSearchResultGroup } from '../types/api'
+import type { CoreUiApi, CoreUiThemeApi, CoreUiStorageApi, CoreUiFeatureApi, CoreUiFileApi, CoreUiEventBusApi, CoreUiI18nApi, CoreUiSearchApi, CoreUiSettingsApi, CoreUiSearchDocument, CoreUiSearchResult, CoreUiSearchResultGroup } from '../types/api'
+import type { SettingValue, ResolvedSetting, SettingsGroup } from '../types/settings'
 import yaml from 'js-yaml'
 import themeIndexJson from '../../resources/themes/index.json'
 
@@ -678,6 +679,51 @@ export function ensureCoreUiWebApiShim(): void {
     }
   }
 
+  // Settings shim for web builds (localStorage-backed)
+  const WEB_SETTINGS_PREFIX = 'settings_'
+  const webSettingsChangeCallbacks = new Set<(storageKey: string, value: SettingValue) => void>()
+
+  const settingsApi: CoreUiSettingsApi = {
+    get: (storageKey: string): Promise<SettingValue | null> => {
+      try {
+        const item = localStorage.getItem(`${WEB_SETTINGS_PREFIX}${storageKey}`)
+        return Promise.resolve(item !== null ? JSON.parse(item) as SettingValue : null)
+      } catch {
+        return Promise.resolve(null)
+      }
+    },
+    set: (storageKey: string, value: SettingValue): Promise<boolean> => {
+      try {
+        localStorage.setItem(`${WEB_SETTINGS_PREFIX}${storageKey}`, JSON.stringify(value))
+        for (const cb of webSettingsChangeCallbacks) {
+          try { cb(storageKey, value) } catch { /* ignore */ }
+        }
+        return Promise.resolve(true)
+      } catch {
+        return Promise.resolve(false)
+      }
+    },
+    getAll: (): Promise<ResolvedSetting[]> => Promise.resolve([]),
+    getGroups: (): Promise<SettingsGroup[]> => Promise.resolve([]),
+    search: (): Promise<ResolvedSetting[]> => Promise.resolve([]),
+    reset: (storageKey: string): Promise<boolean> => {
+      try {
+        localStorage.removeItem(`${WEB_SETTINGS_PREFIX}${storageKey}`)
+        return Promise.resolve(true)
+      } catch {
+        return Promise.resolve(false)
+      }
+    },
+    reindex: (): Promise<void> => Promise.resolve(),
+    onSettingChanged: (callback: (storageKey: string, value: SettingValue) => void): (() => void) => {
+      webSettingsChangeCallbacks.add(callback)
+      return () => { webSettingsChangeCallbacks.delete(callback) }
+    },
+    onConfigLoaded: (): (() => void) => {
+      return () => { /* noop in web shim */ }
+    }
+  }
+
   const api: CoreUiApi = {
     platform: (navigator as { userAgentData?: { platform?: string } }).userAgentData?.platform ?? 'web',
     theme: themeApi,
@@ -692,6 +738,7 @@ export function ensureCoreUiWebApiShim(): void {
     file: fileApi,
     eventBus: eventBusApi,
     search: searchApi,
+    settings: settingsApi,
     minimizeWindow: () => Promise.resolve(),
     maximizeWindow: () => Promise.resolve(),
     closeWindow: () => Promise.resolve(),

@@ -267,7 +267,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
           }
           // Remove icon property if null
           const { icon: _removed, ...rest } = env
-          return rest as Environment
+          return rest
         }
         if (env.subEnvironments) {
           return { ...env, subEnvironments: updateIcon(env.subEnvironments) }

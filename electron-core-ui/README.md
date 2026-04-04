@@ -187,7 +187,7 @@ try {
 | `ProgressBar` | Progress indicator |
 | `ScrollableElement` | Custom scrollable container |
 | `Workbench`, `EditorWorkbench` | Multi-tab editor layout with groups |
-| `SettingsTreeView`, `SettingsPage` | Settings UI |
+| `SettingsPage` | Settings UI |
 | `ElectronCoreUiProvider` | Root context provider |
 
 Each component has its own documentation in [`docs/`](./docs/).

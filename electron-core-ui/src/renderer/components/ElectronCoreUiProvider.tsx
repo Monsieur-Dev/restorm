@@ -1,12 +1,11 @@
 import React from 'react'
 import { ThemeProvider } from '../contexts'
+import { SettingsProvider } from '../contexts/SettingsContext'
 import { SettingsModalProvider } from './Settings'
 import Workbench, { type WorkbenchProps } from './Workbench/Workbench'
 
 export interface ElectronCoreUiProviderProps extends Omit<WorkbenchProps, 'children'> {
   children: React.ReactNode
-  /** Additional settings content rendered in the settings modal below theme/language */
-  additionalSettingsContent?: React.ReactNode
 }
 
 /**
@@ -17,16 +16,17 @@ export interface ElectronCoreUiProviderProps extends Omit<WorkbenchProps, 'child
  */
 export const ElectronCoreUiProvider: React.FC<ElectronCoreUiProviderProps> = ({
   children,
-  additionalSettingsContent,
   ...workbenchProps
 }) => {
   return (
     <ThemeProvider>
-      <SettingsModalProvider additionalSettingsContent={additionalSettingsContent}>
-        <Workbench {...workbenchProps}>
-          {children}
-        </Workbench>
-      </SettingsModalProvider>
+      <SettingsProvider>
+        <SettingsModalProvider>
+          <Workbench {...workbenchProps}>
+            {children}
+          </Workbench>
+        </SettingsModalProvider>
+      </SettingsProvider>
     </ThemeProvider>
   )
 }
