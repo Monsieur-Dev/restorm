@@ -1,14 +1,11 @@
 import React from 'react'
-import type { ComponentType } from 'react'
 import { ThemeProvider } from '../contexts'
 import { SettingsProvider } from '../contexts/SettingsContext'
 import { SettingsModalProvider } from './Settings'
 import Workbench, { type WorkbenchProps } from './Workbench/Workbench'
-import type { SettingRendererProps } from './Settings/renderers/types'
 
 export interface ElectronCoreUiProviderProps extends Omit<WorkbenchProps, 'children'> {
   children: React.ReactNode
-  customRenderers?: Record<string, ComponentType<SettingRendererProps>>
 }
 
 /**
@@ -19,12 +16,11 @@ export interface ElectronCoreUiProviderProps extends Omit<WorkbenchProps, 'child
  */
 export const ElectronCoreUiProvider: React.FC<ElectronCoreUiProviderProps> = ({
   children,
-  customRenderers,
   ...workbenchProps
 }) => {
   return (
     <ThemeProvider>
-      <SettingsProvider customRenderers={customRenderers}>
+      <SettingsProvider>
         <SettingsModalProvider>
           <Workbench {...workbenchProps}>
             {children}

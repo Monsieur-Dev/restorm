@@ -138,16 +138,18 @@ const IconGrid: React.FC<{
     <div className="ecui-icon-select-library">
       <div className="ecui-icon-select-codicons-grid">
         {displayedIcons.map(name => (
-          <Button
+          <button
             key={name}
-            line
+            type="button"
+            className="ecui-icon-select-codicon"
+            title={name}
             onClick={() => { onSelect(name) }}
             data-testid={`${dataTestIdBase}-icon-${name}`}
             data-icon-type={iconType}
             data-icon-name={name}
           >
             {renderIcon(name)}
-          </Button>
+          </button>
         ))}
       </div>
       {hasMore && moreHintText && (

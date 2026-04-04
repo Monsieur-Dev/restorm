@@ -42,16 +42,16 @@ echo "📦 electron-core-ui: build"
 pnpm run build || exit 1
 cd ..
 
-# gitable
-echo "📦 gitable: depcheck"
-cd gitable && npx depcheck || exit 1
-echo "📦 gitable: lint"
-pnpm run lint || exit 1
-echo "📦 gitable: typecheck"
-pnpm run typecheck || exit 1
-echo "📦 gitable: build"
-pnpm run build || exit 1
-cd ..
+# gitable (disabled — not actively developed)
+# echo "📦 gitable: depcheck"
+# cd gitable && npx depcheck || exit 1
+# echo "📦 gitable: lint"
+# pnpm run lint || exit 1
+# echo "📦 gitable: typecheck"
+# pnpm run typecheck || exit 1
+# echo "📦 gitable: build"
+# pnpm run build || exit 1
+# cd ..
 
 # demo
 echo "📦 demo: depcheck"

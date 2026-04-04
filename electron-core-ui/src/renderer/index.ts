@@ -50,3 +50,4 @@ export type {
 } from '../types/file'
 export type { PersistenceFormat } from '../main/services/PersistenceService'
 export type { SettingRendererProps } from './components/Settings/renderers/types'
+export { registerSettingRenderer, unregisterSettingRenderer } from './components/Settings/renderers/registry'

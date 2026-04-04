@@ -142,7 +142,6 @@ export interface CoreUiSettingsApi {
   set: (storageKey: string, value: SettingValue) => Promise<boolean>
   getAll: () => Promise<ResolvedSetting[]>
   getGroups: () => Promise<SettingsGroup[]>
-  getRenderers: () => Promise<Record<string, string>>
   search: (query: string) => Promise<ResolvedSetting[]>
   reset: (storageKey: string) => Promise<boolean>
   reindex: () => Promise<void>

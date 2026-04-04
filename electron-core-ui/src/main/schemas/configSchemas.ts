@@ -87,11 +87,6 @@ export const storageFileSchema = z.record(z.string(), z.unknown())
 // Settings Schemas
 // ==========================================================================
 
-export const settingsRendererMappingSchema = z.object({
-  type: z.string(),
-  component: z.string()
-})
-
 export const settingDefinitionSchema = z.object({
   id: z.string(),
   titleKey: z.string(),
@@ -116,8 +111,6 @@ export const settingsGroupSchema = z.object({
 })
 
 export const settingsYamlConfigSchema = z.object({
-  overrideDefaultRenderers: z.boolean().optional(),
   overrideDefaultGroups: z.boolean().optional(),
-  renderers: z.array(settingsRendererMappingSchema).optional(),
   groups: z.array(settingsGroupSchema)
 })

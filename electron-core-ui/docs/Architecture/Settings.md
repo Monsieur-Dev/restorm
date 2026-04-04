@@ -6,12 +6,12 @@ Declarative, YAML-driven settings system with search, storage persistence, stick
 
 The settings system provides a complete settings management solution:
 
-- **YAML-driven configuration**: Define groups, settings, and renderers in YAML files
+- **YAML-driven configuration**: Define groups and settings in YAML files
 - **Full-text search**: MiniSearch-based fuzzy matching across setting titles and descriptions
 - **Persistence**: Values stored via `StorageService` with automatic default fallback
 - **Sticky-header navigation**: TOC sidebar with scroll-synced active group tracking
 - **Runtime mutations**: Add, remove, or update groups and settings programmatically
-- **Custom renderers**: Register app-specific renderer components for new setting types
+- **Custom renderers**: Register app-specific renderer components via `registerSettingRenderer()`
 
 ## Architecture
 
@@ -20,11 +20,10 @@ Main Process                          IPC                      Renderer
 +----------------------------+        |        +-------------------------------+
 |  SettingsService           |        |        |  SettingsProvider             |
 |  - groups (YAML-loaded)    | <------|------> |  - groups, settings state     |
-|  - renderers               |  IPC   |        |  - search query / results     |
-|  - MiniSearch index        |  Hndl  |        |  - side effects (i18n, theme) |
-|  - StorageService (r/w)    |        |        +-------------------------------+
-|  - BrowserWindow broadcast |        |                    |
-+----------------------------+        |        +-------------------------------+
+|  - MiniSearch index        |  IPC   |        |  - search query / results     |
+|  - StorageService (r/w)    |  Hndl  |        |  - side effects (i18n, theme) |
+|  - BrowserWindow broadcast |        |        +-------------------------------+
++----------------------------+        |
                                       |        |  SettingsView                 |
                                       |        |  - TOC sidebar (25%)          |
                                       |        |  - Scrollable content (75%)   |
@@ -44,20 +43,8 @@ Main Process                          IPC                      Renderer
 Settings are declared in YAML files. A default config ships with `electron-core-ui`, and consumer apps can provide their own to add or replace settings.
 
 ```yaml
-# Optional: replace all default renderers with this file's renderers
-overrideDefaultRenderers: false
-
 # Optional: replace all default groups with this file's groups
 overrideDefaultGroups: false
-
-# Renderer mappings (type -> component)
-renderers:
-  - type: theme
-    component: "__builtin__/ThemeCarousel"
-  - type: toggle
-    component: "__builtin__/Toggle"
-  - type: custom
-    component: "./components/MyCustomRenderer"
 
 # Settings hierarchy
 groups:
@@ -100,8 +87,6 @@ groups:
 | Field | Required | Description |
 |-------|----------|-------------|
 | `groups` | Yes | Array of `SettingsGroup` |
-| `renderers` | No | Maps setting `type` to a renderer component |
-| `overrideDefaultRenderers` | No | If `true`, clears all default renderers before merging |
 | `overrideDefaultGroups` | No | If `true`, replaces all default groups entirely |
 
 ### Setting Definition
@@ -148,6 +133,8 @@ items:
 
 ## Custom Renderers
 
+Custom renderers are registered programmatically via `registerSettingRenderer()`. Call it before rendering the settings UI -- typically once per custom type at app startup.
+
 To add a custom renderer:
 
 1. Create a component implementing `SettingRendererProps`:
@@ -166,23 +153,15 @@ const MyColorPicker: React.FC<SettingRendererProps> = ({ setting, value, onChang
 }
 ```
 
-2. Register it via the `customRenderers` prop on `ElectronCoreUiProvider`:
+2. Register it via `registerSettingRenderer()` before rendering:
 
 ```tsx
-import { ElectronCoreUiProvider } from 'electron-core-ui/renderer'
+import { registerSettingRenderer } from 'electron-core-ui/renderer'
 
-const customRenderers = {
-  'color-picker': MyColorPicker
-}
-
-function App() {
-  return (
-    <ElectronCoreUiProvider customRenderers={customRenderers}>
-      <MyApp />
-    </ElectronCoreUiProvider>
-  )
-}
+registerSettingRenderer('color-picker', MyColorPicker)
 ```
+
+One call per custom type. Register all custom renderers before rendering the settings UI (e.g. in your app's entry point or top-level component).
 
 3. Reference the type in your YAML config:
 
@@ -193,6 +172,8 @@ function App() {
     type: "color-picker"
     default: "#0078d4"
 ```
+
+> **Note:** If a setting references a `type` that has no registered renderer (built-in or custom), an error is logged to the console and the setting is rendered as empty.
 
 The `SettingRendererProps` interface:
 
@@ -223,7 +204,6 @@ isSettingsServiceInitialized(): boolean
 | `resetSetting(storageKey)` | Delete persisted value, broadcast default value |
 | `getAll()` | Flattened list of `ResolvedSetting` with current values |
 | `getGroups()` | Raw group hierarchy |
-| `getRenderers()` | Renderer type-to-component map |
 
 ### Runtime Mutations
 
@@ -272,7 +252,6 @@ Values are persisted via `StorageService` with the prefix `settings:`, resulting
 | `settings:set` | `storageKey: string, value: SettingValue` | `boolean` | Set and persist a value |
 | `settings:get-all` | -- | `ResolvedSetting[]` | All settings (flattened) |
 | `settings:get-groups` | -- | `SettingsGroup[]` | Raw group hierarchy |
-| `settings:get-renderers` | -- | `Record<string, string>` | Renderer type map |
 | `settings:search` | `query: string` | `ResolvedSetting[]` | Fuzzy search |
 | `settings:reset` | `storageKey: string` | `boolean` | Reset to default |
 | `settings:reindex` | -- | `void` | Rebuild search index |
@@ -288,10 +267,10 @@ Values are persisted via `StorageService` with the prefix `settings:`, resulting
 
 ### SettingsProvider
 
-Wraps the renderer tree to provide settings state. Automatically loads groups, settings, and renderers from the main process on mount.
+Wraps the renderer tree to provide settings state. Automatically loads groups and settings from the main process on mount.
 
 ```tsx
-<SettingsProvider customRenderers={customRenderers}>
+<SettingsProvider>
   {children}
 </SettingsProvider>
 ```
@@ -306,8 +285,6 @@ Returns the full `SettingsContextValue`:
 const {
   groups,           // SettingsGroup[]
   settings,         // Map<string, ResolvedSetting>
-  renderers,        // Record<string, string>
-  customRenderers,  // Record<string, ComponentType<SettingRendererProps>>
   isLoading,        // boolean
   getSetting,       // (storageKey) => ResolvedSetting | undefined
   setSetting,       // (storageKey, value) => Promise<void>
@@ -412,7 +389,7 @@ Or use `setupIPC` directly:
 setupIPC(devResourcesPath, appSettingsConfigPath)
 ```
 
-3. Settings from both the library defaults and app config are merged. Use `overrideDefaultGroups: true` or `overrideDefaultRenderers: true` in the app config to replace defaults entirely.
+3. Settings from both the library defaults and app config are merged. Use `overrideDefaultGroups: true` in the app config to replace default groups entirely. Custom renderers are registered separately via `registerSettingRenderer()` in the renderer process.
 
 ## Side Effects
 

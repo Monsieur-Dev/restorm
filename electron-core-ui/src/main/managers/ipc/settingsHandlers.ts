@@ -25,11 +25,6 @@ export function registerSettingsHandlers(): void {
     return getSettingsService().getGroups()
   })
 
-  ipcMain.handle('settings:get-renderers', () => {
-    if (!isSettingsServiceInitialized()) return {}
-    return getSettingsService().getRenderers()
-  })
-
   validatedHandle('settings:search', settingsSearchArgs, (_event, [query]) => {
     if (!isSettingsServiceInitialized()) return []
     return getSettingsService().search(query)

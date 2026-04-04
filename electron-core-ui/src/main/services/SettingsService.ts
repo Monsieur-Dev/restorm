@@ -22,7 +22,6 @@ import { i18nService } from './I18nService'
 
 export class SettingsService {
   private groups: SettingsGroup[] = []
-  private renderers = new Map<string, string>()
   private searchIndex = new MiniSearch<{ id: string; title: string; description: string }>({
     fields: ['title', 'description', 'id'],
     storeFields: ['id', 'title', 'description'],
@@ -36,7 +35,7 @@ export class SettingsService {
   constructor(defaultConfigPath: string, appConfigPath?: string) {
     // Load defaults
     if (existsSync(defaultConfigPath)) {
-      this.loadConfigInternal(defaultConfigPath, false, false)
+      this.loadConfigInternal(defaultConfigPath, false)
     } else {
       logger.warn('[SettingsService] Default config not found', { path: defaultConfigPath })
     }
@@ -48,8 +47,7 @@ export class SettingsService {
 
     this.reindexSearch()
     logger.info('[SettingsService] Initialized', {
-      groups: this.groups.length,
-      renderers: this.renderers.size
+      groups: this.groups.length
     })
   }
 
@@ -59,14 +57,14 @@ export class SettingsService {
 
   /**
    * Load and merge an additional YAML configuration.
-   * Handles overrideDefaultRenderers and overrideDefaultGroups flags.
+   * Handles overrideDefaultGroups flag.
    */
   public loadConfig(configPath: string): void {
     if (!existsSync(configPath)) {
       logger.warn('[SettingsService] Config file not found', { path: configPath })
       return
     }
-    this.loadConfigInternal(configPath, true, true)
+    this.loadConfigInternal(configPath, true)
     this.reindexSearch()
 
     // Broadcast to all windows so the renderer can reload groups
@@ -80,7 +78,6 @@ export class SettingsService {
 
   private loadConfigInternal(
     configPath: string,
-    handleOverrideRenderers: boolean,
     handleOverrideGroups: boolean
   ): void {
     try {
@@ -95,16 +92,6 @@ export class SettingsService {
       }
 
       const config = parsed.data as SettingsYamlConfig
-
-      // Handle renderers
-      if (config.renderers) {
-        if (handleOverrideRenderers && config.overrideDefaultRenderers === true) {
-          this.renderers.clear()
-        }
-        for (const r of config.renderers) {
-          this.renderers.set(r.type, r.component)
-        }
-      }
 
       // Handle groups
       if (handleOverrideGroups && config.overrideDefaultGroups === true) {
@@ -189,11 +176,6 @@ export class SettingsService {
   /** Get the raw group hierarchy */
   public getGroups(): SettingsGroup[] {
     return this.groups
-  }
-
-  /** Get all renderer mappings */
-  public getRenderers(): Record<string, string> {
-    return Object.fromEntries(this.renderers)
   }
 
   // ==========================================================================
