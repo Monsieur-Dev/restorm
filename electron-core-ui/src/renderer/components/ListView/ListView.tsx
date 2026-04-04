@@ -833,28 +833,27 @@ const ListViewInner: React.FC<ListViewProps> = ({
                   ))}
                   {depth > 0 && isLeaf && <span className="indent-spacer" />}
                 </div>
-                <div 
+                <div
                   className="list-view-row-inner"
-                  style={{ paddingLeft: depth * 12 + (depth > 0 && isLeaf ? 12 : 0) }}
+                  style={{ paddingLeft: depth * 12 }}
                 >
-                  {(!isLeaf || item.isExpandable) && (
-                    <button
-                      type="button"
-                      className="list-view-expander"
-                      aria-label={isExpanded ? 'Collapse' : 'Expand'}
-                      onClick={(event): void => {
-                        event.stopPropagation()
-                        handleToggle(flat, event as unknown as React.MouseEvent<HTMLDivElement>)
-                      }}
-                    >
-                      <i
-                        className={`codicon ${
-                          isExpanded ? 'codicon-chevron-down' : 'codicon-chevron-right'
-                        }`}
-                        aria-hidden="true"
-                      />
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    className="list-view-expander"
+                    aria-label={isExpanded ? 'Collapse' : 'Expand'}
+                    style={isLeaf && !item.isExpandable ? { visibility: 'hidden' } : undefined}
+                    onClick={(event): void => {
+                      event.stopPropagation()
+                      handleToggle(flat, event as unknown as React.MouseEvent<HTMLDivElement>)
+                    }}
+                  >
+                    <i
+                      className={`codicon ${
+                        isExpanded ? 'codicon-chevron-down' : 'codicon-chevron-right'
+                      }`}
+                      aria-hidden="true"
+                    />
+                  </button>
                   {iconContent && <span className="list-view-icon">{iconContent}</span>}
                   {item.leftActions && (
                     <span

@@ -169,14 +169,15 @@ function environmentFolderToListViewItem(
 ): ListViewItemData {
   const isExpanded = options.expandedIds.has(folder.id)
 
+  const children = folder.items.map((item) => folderItemToListViewItem(item, options))
   return {
     id: folder.id,
     title: folder.name,
-    isExpandable: true,
+    isExpandable: children.length > 0,
     isExpanded,
     // Use folder-library icon for environment folders
     icon: 'folder-library',
-    children: folder.items.map((item) => folderItemToListViewItem(item, options))
+    children
   }
 }
 
@@ -189,13 +190,14 @@ function folderToListViewItem(
 ): ListViewItemData {
   const isExpanded = options.expandedIds.has(folder.id)
 
+  const children = folder.items.map((item) => folderItemToListViewItem(item, options))
   return {
     id: folder.id,
     title: folder.name,
-    isExpandable: true,
+    isExpandable: children.length > 0,
     isExpanded,
     icon: isExpanded ? 'folder-opened' : 'folder',
-    children: folder.items.map((item) => folderItemToListViewItem(item, options))
+    children
   }
 }
 
