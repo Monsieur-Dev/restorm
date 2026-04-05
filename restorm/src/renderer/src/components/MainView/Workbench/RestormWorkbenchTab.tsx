@@ -1,6 +1,7 @@
 import React from 'react'
 import * as CoreUIRenderer from 'electron-core-ui/renderer'
 import { TagsView, Callout, type CalloutVariant } from 'electron-core-ui/renderer'
+import type { Icon } from 'electron-core-ui/types'
 import type { BreadcrumbItem } from '../../../../../shared/types/editor'
 
 const { Breadcrumb } = CoreUIRenderer as unknown as {
@@ -8,6 +9,10 @@ const { Breadcrumb } = CoreUIRenderer as unknown as {
     items: BreadcrumbItem[]
     onItemClick?: (item: BreadcrumbItem, index: number, event: React.MouseEvent<HTMLButtonElement>) => void
     onLastItemChange?: (item: BreadcrumbItem, newValue: string, index: number) => void
+    onLastItemIconChange?: (item: BreadcrumbItem, newIcon: Icon | null, index: number) => void
+    canEditIcon?: boolean
+    canEditName?: boolean
+    'data-testid'?: string
   }>
 }
 
@@ -24,6 +29,7 @@ export interface RestormWorkbenchTabProps {
   breadcrumbs: BreadcrumbItem[]
   onBreadcrumbClick?: ((item: BreadcrumbItem, index: number, isLast: boolean) => void) | undefined
   onBreadcrumbRename?: ((item: BreadcrumbItem, newValue: string) => void) | undefined
+  onBreadcrumbIconChange?: ((item: BreadcrumbItem, newIcon: Icon | null) => void) | undefined
   tags: string[]
   onTagsChange?: ((nextTags: string[]) => void) | undefined
   label: string
@@ -40,6 +46,7 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
   breadcrumbs,
   onBreadcrumbClick,
   onBreadcrumbRename,
+  onBreadcrumbIconChange,
   tags,
   onTagsChange,
   label,
@@ -109,12 +116,17 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
         <div style={{ flex: 1, minWidth: 0 }}>
           <Breadcrumb
             items={breadcrumbs}
+            canEditIcon
+            canEditName
             onItemClick={(item, index) => {
               const isLast = index === breadcrumbs.length - 1
               onBreadcrumbClick?.(item, index, isLast)
             }}
             onLastItemChange={(item, newValue) => {
               onBreadcrumbRename?.(item, newValue)
+            }}
+            onLastItemIconChange={(item, newIcon) => {
+              onBreadcrumbIconChange?.(item, newIcon)
             }}
             data-testid={`${testIdPrefix}-breadcrumb`}
           />

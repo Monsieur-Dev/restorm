@@ -22,8 +22,12 @@
     "addRequest": "Add request",
     "collapseAll": "Collapse all requests",
     "workspace": "Workspace",
+    "newFolder": "New Folder",
+    "newEnvironmentFolder": "New Environment Folder",
     "contextMenu": {
       "createSubfolder": "Create subfolder",
+      "createFolder": "Create folder",
+      "createEnvironmentFolder": "Create environment folder",
       "defineVariables": "Define variables",
       "delete": "Delete",
       "clone": "Clone",

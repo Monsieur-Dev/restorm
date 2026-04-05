@@ -22,8 +22,12 @@
     "addRequest": "Ajouter une requête",
     "collapseAll": "Tout réduire",
     "workspace": "Espace de travail",
+    "newFolder": "Nouveau dossier",
+    "newEnvironmentFolder": "Nouveau dossier de variables",
     "contextMenu": {
       "createSubfolder": "Créer un sous-dossier",
+      "createFolder": "Créer un dossier",
+      "createEnvironmentFolder": "Créer un dossier de variables",
       "defineVariables": "Définir les variables",
       "delete": "Supprimer",
       "clone": "Cloner",

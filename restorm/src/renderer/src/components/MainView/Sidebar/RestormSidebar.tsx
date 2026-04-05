@@ -1,7 +1,8 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   ListView,
+  ContextMenu,
   type ListViewItemData,
   type ListViewItemEventPayload,
   type ListViewDropEventPayload,
@@ -21,9 +22,13 @@ export interface RestormSidebarProps {
   onItemDrop: (payload: ListViewDropEventPayload) => void
   onItemRename: (payload: ListViewItemEventPayload, newName: string) => void
   onDeleteRequest: (payload: ListViewItemEventPayload) => void
+  onEditingStart: (itemId: string) => void
   onEditingEnd: () => void
   onAddRequest: () => void
   onCollapseAll: () => void
+  onCreateRootFolder: () => void
+  onCreateRootEnvironmentFolder: () => void
+  onDeselectAll: () => void
 }
 
 /**
@@ -40,11 +45,16 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
   onItemDrop,
   onItemRename,
   onDeleteRequest,
+  onEditingStart,
   onEditingEnd,
   onAddRequest,
-  onCollapseAll
+  onCollapseAll,
+  onCreateRootFolder,
+  onCreateRootEnvironmentFolder,
+  onDeselectAll
 }) => {
   const { t } = useTranslation()
+  const [emptyAreaMenu, setEmptyAreaMenu] = useState<{ visible: boolean; x: number; y: number }>({ visible: false, x: 0, y: 0 })
 
   const handleItemClick = useCallback((payload: ListViewItemEventPayload) => {
     const id = payload.item.id
@@ -52,6 +62,24 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
       onItemClick(id)
     }
   }, [onItemClick])
+
+  const handleEmptyAreaClick = useCallback((e: React.MouseEvent) => {
+    const target = e.target as HTMLElement
+    if (target.closest('.list-view-row')) return
+    onDeselectAll()
+  }, [onDeselectAll])
+
+  const handleEmptyAreaContextMenu = useCallback((e: React.MouseEvent) => {
+    const target = e.target as HTMLElement
+    if (target.closest('.list-view-row')) return
+    e.preventDefault()
+    onDeselectAll()
+    setEmptyAreaMenu({ visible: true, x: e.clientX, y: e.clientY })
+  }, [onDeselectAll])
+
+  const closeEmptyAreaMenu = useCallback(() => {
+    setEmptyAreaMenu(prev => ({ ...prev, visible: false }))
+  }, [])
 
   return (
     <div
@@ -95,23 +123,49 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
             </>
           }
         >
-          <ListView
-            items={items}
-            rootRole="tree"
-            ariaLabel={t('sidebar.workspace')}
-            selectedIds={selectedItemId ? [selectedItemId] : []}
-            activeId={activeId}
-            expandedIds={expandedIds}
-            isRenameable
-            expandOnChevronOnly
-            onItemToggle={onItemToggle}
-            onItemClick={handleItemClick}
-            onItemDrop={onItemDrop}
-            onItemRename={onItemRename}
-            editingItemId={editingItemId}
-            onEditingEnd={onEditingEnd}
-            onDeleteRequest={onDeleteRequest}
-            data-testid="sidebar-listview"
+          <div
+            style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
+            onClick={handleEmptyAreaClick}
+            onContextMenu={handleEmptyAreaContextMenu}
+          >
+            <ListView
+              items={items}
+              rootRole="tree"
+              ariaLabel={t('sidebar.workspace')}
+              selectedIds={selectedItemId ? [selectedItemId] : []}
+              activeId={activeId}
+              expandedIds={expandedIds}
+              isRenameable
+              expandOnChevronOnly
+              onItemToggle={onItemToggle}
+              onItemClick={handleItemClick}
+              onItemDrop={onItemDrop}
+              onItemRename={onItemRename}
+              editingItemId={editingItemId}
+              onEditingStart={onEditingStart}
+              onEditingEnd={onEditingEnd}
+              onDeleteRequest={onDeleteRequest}
+              data-testid="sidebar-listview"
+            />
+            <div style={{ flex: 1, minHeight: 20 }} />
+          </div>
+          <ContextMenu
+            visible={emptyAreaMenu.visible}
+            x={emptyAreaMenu.x}
+            y={emptyAreaMenu.y}
+            items={[
+              {
+                id: 'create-folder',
+                label: t('sidebar.contextMenu.createFolder'),
+                onClick: () => { onCreateRootFolder(); closeEmptyAreaMenu() }
+              },
+              {
+                id: 'create-env-folder',
+                label: t('sidebar.contextMenu.createEnvironmentFolder'),
+                onClick: () => { onCreateRootEnvironmentFolder(); closeEmptyAreaMenu() }
+              }
+            ]}
+            onRequestClose={closeEmptyAreaMenu}
           />
         </Pane>
       </SplitView>

@@ -2,6 +2,7 @@ import React from 'react'
 import type { WorkbenchTree, RebuildTabCallback } from 'electron-core-ui/renderer'
 import { RestormWorkbench, type RestormWorkbenchHandle } from './RestormWorkbench'
 import { EnvironmentValuesProvider } from '../../../contexts/EnvironmentValuesContext'
+import type { Icon } from 'electron-core-ui/types'
 import type { BreadcrumbItem } from '../../../../../shared/types/editor'
 import type { Request, Folder, EnvironmentFolder } from '../../../../../shared/types/collections'
 
@@ -15,6 +16,7 @@ export interface RestormWorkbenchContainerProps {
   onTabActivate: (tabId: string) => void
   onBreadcrumbClick: (item: BreadcrumbItem, index: number, isLast: boolean) => void
   onItemRename: (item: BreadcrumbItem, newName: string) => void
+  onItemIconChange?: (item: BreadcrumbItem, newIcon: Icon | null) => void
   onTagsChange: (targetId: string, tags: string[]) => void
   onFolderChange: (folderId: string, folder: Folder) => void
   onEnvironmentFolderChange: (folderId: string, folder: EnvironmentFolder) => void
@@ -41,6 +43,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
   onTabActivate,
   onBreadcrumbClick,
   onItemRename,
+  onItemIconChange,
   onTagsChange,
   onFolderChange,
   onEnvironmentFolderChange,
@@ -73,6 +76,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
           onTabActivate={onTabActivate}
           onBreadcrumbClick={onBreadcrumbClick}
           onItemRename={onItemRename}
+          onItemIconChange={onItemIconChange}
           onTagsChange={onTagsChange}
           onFolderChange={onFolderChange}
           onEnvironmentFolderChange={onEnvironmentFolderChange}

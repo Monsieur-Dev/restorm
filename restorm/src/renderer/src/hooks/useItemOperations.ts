@@ -3,11 +3,12 @@
  */
 
 import { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { ListViewDropEventPayload, ListViewItemEventPayload } from 'electron-core-ui/renderer'
 import { isTabGroupNode } from 'electron-core-ui/renderer'
 import type { Folder, EnvironmentFolder, Request } from '../../../shared/types/collections'
 import { isAnyFolder } from '../../../shared/types/collections'
-import { findItemById, findItemWithBreadcrumbs } from '../utils/treeSearch'
+import { findItemById, findItemWithBreadcrumbs, getFolderIcon } from '../utils/treeSearch'
 import { generateUniqueId, cloneItemInTree, removeItemFromTree, insertItemIntoTree } from '../utils/treeManipulation'
 import type { WorkbenchTree } from 'electron-core-ui/renderer'
 import type { FolderTab, EnvironmentFolderTab, HTTPRequestTab } from '../../../shared/types/editor'
@@ -25,12 +26,16 @@ export interface UseItemOperationsOptions {
     itemName: string
     isFolder: boolean
   }>>
+  openFolderTab: (folder: Folder, breadcrumbs: import('../../../shared/types/editor').BreadcrumbItem[]) => void
+  openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: import('../../../shared/types/editor').BreadcrumbItem[]) => void
 }
 
 export interface UseItemOperationsReturn {
   handleItemDrop: (payload: ListViewDropEventPayload) => void
   handleCloneItem: (itemId: string) => void
   handleCreateSubfolder: (parentFolderId: string) => void
+  handleCreateRootFolder: () => void
+  handleCreateRootEnvironmentFolder: () => void
   handleDeleteItem: (itemId: string) => void
   confirmDelete: (itemId: string) => void
   cancelDelete: () => void
@@ -47,6 +52,8 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     setWorkbenchTree,
     setDeleteConfirmation
   } = options
+  const { openFolderTab, openEnvironmentFolderTab } = options
+  const { t } = useTranslation()
 
   // Handle drag & drop in the sidebar to reorder items
   const handleItemDrop = useCallback((payload: ListViewDropEventPayload) => {
@@ -185,10 +192,6 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
 
   // Handle "Delete" context menu action - show confirmation
   const handleDeleteItem = useCallback((itemId: string) => {
-    // Don't allow deleting root folders
-    const isRootItem = rootItems.some((f) => f.id === itemId)
-    if (isRootItem) return
-
     // Find the item to get its name and type
     const item = findItemById(rootItems, itemId)
     if (!item) return
@@ -204,47 +207,40 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
 
   // Confirm deletion
   const confirmDelete = useCallback((itemId: string) => {
-    // Remove the item from the tree
-    removeItemFromTree(rootItems, itemId)
+    // Remove the item from the tree (handles nested items)
+    const removed = removeItemFromTree(rootItems, itemId)
+    if (!removed) {
+      // Root-level item: remove directly from rootItems
+      setRootItems((prev) => prev.filter((f) => f.id !== itemId))
+    }
 
-    // Close any tabs that reference the deleted item
+    // Close any tabs that reference the deleted item (all groups)
     setWorkbenchTree((prevTree) => {
-      const group = prevTree.groups[0]
-      if (!group || !isTabGroupNode(group)) return prevTree
+      const updatedGroups = prevTree.groups.map((group) => {
+        if (!isTabGroupNode(group)) return group
 
-      const filteredTabs = group.tabs.filter((tab) => {
-        const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
+        const filteredTabs = group.tabs.filter((tab) => {
+          const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
 
-        // Check if the tab is the deleted item
-        if (restormTab.tabType === 'folder' && restormTab.folder.id === itemId) return false
-        if (restormTab.tabType === 'environment-folder' && restormTab.folder.id === itemId) return false
-        if (restormTab.tabType === 'http-request' && restormTab.request.id === itemId) return false
+          if (restormTab.tabType === 'folder' && restormTab.folder.id === itemId) return false
+          if (restormTab.tabType === 'environment-folder' && restormTab.folder.id === itemId) return false
+          if (restormTab.tabType === 'http-request' && restormTab.request.id === itemId) return false
 
-        // Check if the tab's breadcrumbs contain the deleted item (item is inside deleted folder)
-        if (restormTab.breadcrumbs?.some((bc) => bc.id === itemId)) return false
+          if (restormTab.breadcrumbs?.some((bc) => bc.id === itemId)) return false
 
-        return true
-      })
+          return true
+        })
 
-      // If no tabs left, remove the group entirely to show emptyFallback
-      if (filteredTabs.length === 0) {
-        return {
-          ...prevTree,
-          groups: []
+        let newActiveTabId: string = group.activeTabId ?? ''
+        if (!filteredTabs.some((t) => t.id === group.activeTabId)) {
+          const firstTabId = filteredTabs[0]?.id
+          newActiveTabId = firstTabId ?? ''
         }
-      }
 
-      // Update activeTabId if current tab was closed
-      let newActiveTabId: string = group.activeTabId ?? ''
-      if (!filteredTabs.some((t) => t.id === group.activeTabId)) {
-        const firstTabId = filteredTabs[0]?.id
-        newActiveTabId = firstTabId ?? ''
-      }
+        return { ...group, tabs: filteredTabs, activeTabId: newActiveTabId }
+      }).filter((group) => !isTabGroupNode(group) || group.tabs.length > 0)
 
-      return {
-        ...prevTree,
-        groups: [{ ...group, tabs: filteredTabs, activeTabId: newActiveTabId }]
-      }
+      return { ...prevTree, groups: updatedGroups }
     })
 
     // Force React re-render
@@ -272,74 +268,120 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     // Force React re-render by creating new reference
     setRootItems((prevItems) => [...prevItems])
 
-    // Also update the workbench tab title and breadcrumbs
+    // Also update the workbench tab title and breadcrumbs (all groups)
     setWorkbenchTree((prevTree) => {
-      const group = prevTree.groups[0]
-      if (!group || !isTabGroupNode(group)) return prevTree
+      const updatedGroups = prevTree.groups.map((group) => {
+        if (!isTabGroupNode(group)) return group
 
-      const updatedTabs = group.tabs.map((tab) => {
-        const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
+        const updatedTabs = group.tabs.map((tab) => {
+          const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
 
-        // Update tab title if it's the renamed item
-        if (restormTab.tabType === 'folder' && restormTab.folder.id === itemId) {
-          return {
-            ...restormTab,
-            title: newName,
-            titleString: newName,
-            folder: { ...restormTab.folder, name: newName },
-            breadcrumbs: restormTab.breadcrumbs?.map((bc) =>
-              bc.id === itemId ? { ...bc, label: newName } : bc
-            )
+          // Update tab title if it's the renamed item
+          if (restormTab.tabType === 'folder' && restormTab.folder.id === itemId) {
+            return {
+              ...restormTab,
+              title: newName,
+              titleString: newName,
+              folder: { ...restormTab.folder, name: newName },
+              breadcrumbs: restormTab.breadcrumbs?.map((bc) =>
+                bc.id === itemId ? { ...bc, label: newName } : bc
+              ),
+              contentVersion: (restormTab.contentVersion ?? 0) + 1
+            }
           }
-        }
 
-        if (restormTab.tabType === 'environment-folder' && restormTab.folder.id === itemId) {
-          return {
-            ...restormTab,
-            title: newName,
-            titleString: newName,
-            folder: { ...restormTab.folder, name: newName },
-            breadcrumbs: restormTab.breadcrumbs?.map((bc) =>
-              bc.id === itemId ? { ...bc, label: newName } : bc
-            )
+          if (restormTab.tabType === 'environment-folder' && restormTab.folder.id === itemId) {
+            return {
+              ...restormTab,
+              title: newName,
+              titleString: newName,
+              folder: { ...restormTab.folder, name: newName },
+              breadcrumbs: restormTab.breadcrumbs?.map((bc) =>
+                bc.id === itemId ? { ...bc, label: newName } : bc
+              ),
+              contentVersion: (restormTab.contentVersion ?? 0) + 1
+            }
           }
-        }
 
-        if (restormTab.tabType === 'http-request' && restormTab.request.id === itemId) {
-          const newTitle = `${restormTab.request.method} ${newName}`
-          return {
-            ...restormTab,
-            title: newTitle,
-            titleString: newTitle,
-            request: { ...restormTab.request, name: newName },
-            breadcrumbs: restormTab.breadcrumbs?.map((bc) =>
-              bc.id === itemId ? { ...bc, label: newName } : bc
-            )
+          if (restormTab.tabType === 'http-request' && restormTab.request.id === itemId) {
+            const newTitle = `${restormTab.request.method} ${newName}`
+            return {
+              ...restormTab,
+              title: newTitle,
+              titleString: newTitle,
+              request: { ...restormTab.request, name: newName },
+              breadcrumbs: restormTab.breadcrumbs?.map((bc) =>
+                bc.id === itemId ? { ...bc, label: newName } : bc
+              ),
+              contentVersion: (restormTab.contentVersion ?? 0) + 1
+            }
           }
-        }
 
-        // Update breadcrumbs for other tabs that might reference this item
-        if (restormTab.breadcrumbs) {
-          const updatedBreadcrumbs = restormTab.breadcrumbs.map((bc) =>
-            bc.id === itemId ? { ...bc, label: newName } : bc
-          )
-          return { ...restormTab, breadcrumbs: updatedBreadcrumbs }
-        }
+          // Update breadcrumbs for other tabs that might reference this item
+          if (restormTab.breadcrumbs) {
+            const hasMatch = restormTab.breadcrumbs.some((bc) => bc.id === itemId)
+            if (hasMatch) {
+              const updatedBreadcrumbs = restormTab.breadcrumbs.map((bc) =>
+                bc.id === itemId ? { ...bc, label: newName } : bc
+              )
+              return { ...restormTab, breadcrumbs: updatedBreadcrumbs, contentVersion: (restormTab.contentVersion ?? 0) + 1 }
+            }
+          }
 
-        return tab
+          return tab
+        })
+
+        return { ...group, tabs: updatedTabs }
       })
 
-      return {
-        ...prevTree,
-        groups: [{ ...group, tabs: updatedTabs }]
-      }
+      return { ...prevTree, groups: updatedGroups }
     })
   }, [rootItems, setRootItems, setWorkbenchTree])
+
+  const handleCreateRootFolder = useCallback(() => {
+    const newFolder: Folder = {
+      id: generateUniqueId(),
+      name: t('sidebar.newFolder'),
+      documentation: '',
+      tags: [],
+      configuration: {},
+      items: []
+    }
+    setRootItems((prev) => [...prev, newFolder])
+    setSelectedItemId(newFolder.id)
+    const breadcrumbs = [{ id: newFolder.id, label: newFolder.name, icon: getFolderIcon(newFolder) }]
+    openFolderTab(newFolder, breadcrumbs)
+    setTimeout(() => {
+      setSidebarEditingItemId(newFolder.id)
+    }, 0)
+  }, [setRootItems, setSelectedItemId, setSidebarEditingItemId, openFolderTab, t])
+
+  const handleCreateRootEnvironmentFolder = useCallback(() => {
+    const newFolder: EnvironmentFolder = {
+      id: generateUniqueId(),
+      name: t('sidebar.newEnvironmentFolder'),
+      folderType: 'environment',
+      documentation: '',
+      tags: [],
+      configuration: {},
+      environments: [],
+      items: []
+    }
+    setRootItems((prev) => [...prev, newFolder])
+    setSelectedItemId(newFolder.id)
+    const breadcrumbs = [{ id: newFolder.id, label: newFolder.name, icon: getFolderIcon(newFolder) }]
+    openEnvironmentFolderTab(newFolder, breadcrumbs)
+    setTimeout(() => {
+      setSidebarEditingItemId(newFolder.id)
+    }, 0)
+  }, [setRootItems, setSelectedItemId, setSidebarEditingItemId, openEnvironmentFolderTab, t])
 
   return {
     handleItemDrop,
     handleCloneItem,
     handleCreateSubfolder,
+    handleCreateRootFolder,
+    handleCreateRootEnvironmentFolder,
     handleDeleteItem,
     confirmDelete,
     cancelDelete,

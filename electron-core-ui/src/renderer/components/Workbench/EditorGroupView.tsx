@@ -33,25 +33,32 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 	// when switching tabs — only the CSS display property toggles visibility.
 	// Using useState initializer as a persistent cache that survives re-renders.
 	const [tabContentCache] = useState(() => new Map<string, React.ReactNode>());
+	const [tabVersionCache] = useState(() => new Map<string, number>());
 
 	const tabContents = useMemo(() => {
 		// Prune entries for closed tabs
 		const tabIds = new Set(group.tabs.map(t => t.id));
 		for (const k of tabContentCache.keys()) {
-			if (!tabIds.has(k)) tabContentCache.delete(k);
+			if (!tabIds.has(k)) {
+				tabContentCache.delete(k);
+				tabVersionCache.delete(k);
+			}
 		}
-		// Render new tabs, reuse cached content for existing ones
+		// Render new tabs or tabs whose contentVersion changed, reuse cached content for others
 		const result = new Map<string, React.ReactNode>();
 		for (const tab of group.tabs) {
+			const cachedVersion = tabVersionCache.get(tab.id);
+			const currentVersion = tab.contentVersion ?? 0;
 			let content = tabContentCache.get(tab.id);
-			if (!content) {
+			if (!content || cachedVersion !== currentVersion) {
 				content = renderTabContent?.(tab) ?? tab.content ?? <span>{tab.title}</span>;
 				tabContentCache.set(tab.id, content);
+				tabVersionCache.set(tab.id, currentVersion);
 			}
 			result.set(tab.id, content);
 		}
 		return result;
-	}, [group.tabs, renderTabContent, tabContentCache]);
+	}, [group.tabs, renderTabContent, tabContentCache, tabVersionCache]);
 
 	// Handle tab double-click for fullscreen modal
 	const handleTabDoubleClick = useCallback((tabId: string) => {

@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
-import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, Button, type ContextMenuItem } from 'electron-core-ui/renderer'
+import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, Button, IconView, type ContextMenuItem } from 'electron-core-ui/renderer'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback } from 'electron-core-ui/renderer'
+import type { Icon } from 'electron-core-ui/types'
 import type { RestormEditorTab, BreadcrumbItem } from '../../../../../shared/types/editor'
 import {
   isFolderTab,
@@ -23,6 +24,7 @@ import { EnvironmentProvider } from '../../../contexts/EnvironmentContext'
 import { FolderView } from '../../Folders/FolderView'
 import { EnvironmentFolderView } from '../../Folders/EnvironmentFolderView'
 import type { EnvironmentFolder, Folder, Request } from '../../../../../shared/types/collections'
+import { getFolderIcon } from '../../../utils/treeSearch'
 import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useTranslation } from 'react-i18next'
@@ -38,6 +40,7 @@ interface RequestTabWithHistoryProps {
   breadcrumbs: BreadcrumbItem[]
   onBreadcrumbClick?: ((item: BreadcrumbItem, index: number, isLast: boolean) => void) | undefined
   onBreadcrumbRename?: ((item: BreadcrumbItem, newValue: string) => void) | undefined
+  onBreadcrumbIconChange?: ((item: BreadcrumbItem, newIcon: Icon | null) => void) | undefined
   tags: string[]
   onTagsChange?: ((nextTags: string[]) => void) | undefined
   label: string
@@ -52,6 +55,7 @@ const RequestTabWithHistory: React.FC<RequestTabWithHistoryProps> = ({
   breadcrumbs,
   onBreadcrumbClick,
   onBreadcrumbRename,
+  onBreadcrumbIconChange,
   tags,
   onTagsChange,
   label,
@@ -78,6 +82,7 @@ const RequestTabWithHistory: React.FC<RequestTabWithHistoryProps> = ({
       breadcrumbs={breadcrumbs}
       onBreadcrumbClick={onBreadcrumbClick}
       onBreadcrumbRename={onBreadcrumbRename}
+      onBreadcrumbIconChange={onBreadcrumbIconChange}
       tags={tags}
       onTagsChange={onTagsChange}
       label={label}
@@ -138,6 +143,8 @@ export interface RestormWorkbenchProps {
   onBreadcrumbClick?: (item: BreadcrumbItem, index: number, isLast: boolean) => void
   /** Callback fired when the last breadcrumb item is renamed */
   onItemRename?: (item: BreadcrumbItem, newName: string) => void
+  /** Callback fired when the last breadcrumb item's icon changes */
+  onItemIconChange?: ((item: BreadcrumbItem, newIcon: Icon | null) => void) | undefined
   /** Callback fired when tags are changed for a folder or request */
   onTagsChange?: (targetId: string, tags: string[]) => void
   /** Callback fired when a folder's data changes (environments, etc.) */
@@ -185,6 +192,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   onTabActivate,
   onBreadcrumbClick,
   onItemRename,
+  onItemIconChange,
   onTagsChange,
   onFolderChange,
   onEnvironmentFolderChange,
@@ -278,22 +286,22 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     const cachedTab = droppedTabsCacheRef.current.get(tab.id)
     const restormTab = cachedTab ?? (tab as RestormEditorTab)
 
-    // Folder tab: show folder icon
+    // Folder tab: show folder icon (custom or default)
     if (isFolderTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <i className="codicon codicon-folder-opened" aria-hidden="true" />
+          <IconView icon={getFolderIcon(restormTab.folder)} size={14} />
           <span>{restormTab.folder.name}</span>
           {renderDirtyIndicator(restormTab)}
         </span>
       )
     }
 
-    // Environment folder tab: show folder-library icon
+    // Environment folder tab: show folder-library icon (custom or default)
     if (isEnvironmentFolderTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <i className="codicon codicon-folder-library" aria-hidden="true" />
+          <IconView icon={getFolderIcon(restormTab.folder)} size={14} />
           <span>{restormTab.folder.name}</span>
           {renderDirtyIndicator(restormTab)}
         </span>
@@ -377,6 +385,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           breadcrumbs={breadcrumbs}
           onBreadcrumbClick={onBreadcrumbClick}
           onBreadcrumbRename={onItemRename}
+          onBreadcrumbIconChange={onItemIconChange}
           tags={folder.tags}
           onTagsChange={(nextTags) => {
             onTagsChange?.(folder.id, nextTags)
@@ -405,6 +414,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           breadcrumbs={breadcrumbs}
           onBreadcrumbClick={onBreadcrumbClick}
           onBreadcrumbRename={onItemRename}
+          onBreadcrumbIconChange={onItemIconChange}
           tags={folder.tags}
           onTagsChange={(nextTags) => {
             onTagsChange?.(folder.id, nextTags)
@@ -435,6 +445,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
             onBreadcrumbRename={onItemRename}
+          onBreadcrumbIconChange={onItemIconChange}
             tags={request.tags}
             onTagsChange={(nextTags) => {
               onTagsChange?.(request.id, nextTags)
@@ -469,6 +480,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
             onBreadcrumbRename={onItemRename}
+          onBreadcrumbIconChange={onItemIconChange}
             tags={request.tags}
             onTagsChange={(nextTags) => {
               onTagsChange?.(request.id, nextTags)
@@ -499,6 +511,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
             onBreadcrumbRename={onItemRename}
+          onBreadcrumbIconChange={onItemIconChange}
             tags={request.tags}
             onTagsChange={(nextTags) => {
               onTagsChange?.(request.id, nextTags)
@@ -529,6 +542,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
             onBreadcrumbRename={onItemRename}
+          onBreadcrumbIconChange={onItemIconChange}
             tags={request.tags}
             onTagsChange={(nextTags) => {
               onTagsChange?.(request.id, nextTags)
@@ -559,6 +573,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
             onBreadcrumbRename={onItemRename}
+          onBreadcrumbIconChange={onItemIconChange}
             tags={request.tags}
             onTagsChange={(nextTags) => {
               onTagsChange?.(request.id, nextTags)
@@ -582,7 +597,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [onBreadcrumbClick, onItemRename, onTagsChange, onFolderChange, onEnvironmentFolderChange, t, getRequestById, getFolderById, getEnvironmentFolderById])
+  }, [onBreadcrumbClick, onItemRename, onItemIconChange, onTagsChange, onFolderChange, onEnvironmentFolderChange, t, getRequestById, getFolderById, getEnvironmentFolderById])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(

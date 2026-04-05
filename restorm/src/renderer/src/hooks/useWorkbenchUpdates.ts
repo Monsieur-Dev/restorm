@@ -2,12 +2,14 @@
  * Hook for managing workbench updates (tags, folders, environment folders)
  */
 
-import { useCallback, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { isTabGroupNode } from 'electron-core-ui/renderer'
 import type { WorkbenchTree } from 'electron-core-ui/renderer'
+import type { Icon } from 'electron-core-ui/types'
 import type { Folder, EnvironmentFolder, Request } from '../../../shared/types/collections'
 import { isEnvironmentFolder } from '../../../shared/types/collections'
-import { findItemById, findEnvironmentFolderById, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
+import { findItemById, findEnvironmentFolderById, getNearestEnvironmentsForBreadcrumbs, getFolderIcon } from '../utils/treeSearch'
+import { isAnyFolder } from '../../../shared/types/collections'
 import type { FolderTab, EnvironmentFolderTab, HTTPRequestTab, BreadcrumbItem } from '../../../shared/types/editor'
 
 export interface UseWorkbenchUpdatesOptions {
@@ -20,6 +22,9 @@ export interface UseWorkbenchUpdatesReturn {
   handleFolderChange: (folderId: string, updatedFolder: Folder) => void
   handleEnvironmentFolderChange: (folderId: string, updatedFolder: EnvironmentFolder) => void
   handleItemRename: (item: BreadcrumbItem, newName: string) => void
+  handleItemIconChange: (item: BreadcrumbItem, newIcon: Icon | null) => void
+  /** Counter incremented on each in-place mutation, useful as a useMemo dependency */
+  updateCount: number
 }
 
 export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWorkbenchUpdatesReturn {
@@ -205,69 +210,141 @@ export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWor
       // Force React re-render
       forceUpdate()
 
-      // Also update the workbench tab title and breadcrumbs
+      // Also update the workbench tab title and breadcrumbs (all groups)
       setWorkbenchTree((prevTree) => {
-        const group = prevTree.groups[0]
-        if (!group || !isTabGroupNode(group)) return prevTree
+        const updatedGroups = prevTree.groups.map((group) => {
+          if (!isTabGroupNode(group)) return group
 
-        const updatedTabs = group.tabs.map((tab) => {
-          const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
+          const updatedTabs = group.tabs.map((tab) => {
+            const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
 
-          // Update tab title if it's the renamed item
-          if (restormTab.tabType === 'folder' && restormTab.folder.id === item.id) {
-            return {
-              ...restormTab,
-              title: newName,
-              titleString: newName,
-              folder: { ...restormTab.folder, name: newName },
-              breadcrumbs: restormTab.breadcrumbs?.map((bc) =>
-                bc.id === item.id ? { ...bc, label: newName } : bc
-              )
+            // Update tab title if it's the renamed item
+            if (restormTab.tabType === 'folder' && restormTab.folder.id === item.id) {
+              return {
+                ...restormTab,
+                title: newName,
+                titleString: newName,
+                folder: { ...restormTab.folder, name: newName },
+                breadcrumbs: restormTab.breadcrumbs?.map((bc) =>
+                  bc.id === item.id ? { ...bc, label: newName } : bc
+                ),
+                contentVersion: (restormTab.contentVersion ?? 0) + 1
+              }
             }
-          }
 
-          if (restormTab.tabType === 'environment-folder' && restormTab.folder.id === item.id) {
-            return {
-              ...restormTab,
-              title: newName,
-              titleString: newName,
-              folder: { ...restormTab.folder, name: newName },
-              breadcrumbs: restormTab.breadcrumbs?.map((bc) =>
-                bc.id === item.id ? { ...bc, label: newName } : bc
-              )
+            if (restormTab.tabType === 'environment-folder' && restormTab.folder.id === item.id) {
+              return {
+                ...restormTab,
+                title: newName,
+                titleString: newName,
+                folder: { ...restormTab.folder, name: newName },
+                breadcrumbs: restormTab.breadcrumbs?.map((bc) =>
+                  bc.id === item.id ? { ...bc, label: newName } : bc
+                ),
+                contentVersion: (restormTab.contentVersion ?? 0) + 1
+              }
             }
-          }
 
-          if (restormTab.tabType === 'http-request' && restormTab.request.id === item.id) {
-            const newTitle = `${restormTab.request.method} ${newName}`
-            return {
-              ...restormTab,
-              title: newTitle,
-              titleString: newTitle,
-              request: { ...restormTab.request, name: newName },
-              breadcrumbs: restormTab.breadcrumbs?.map((bc) =>
-                bc.id === item.id ? { ...bc, label: newName } : bc
-              )
+            if (restormTab.tabType === 'http-request' && restormTab.request.id === item.id) {
+              const newTitle = `${restormTab.request.method} ${newName}`
+              return {
+                ...restormTab,
+                title: newTitle,
+                titleString: newTitle,
+                request: { ...restormTab.request, name: newName },
+                breadcrumbs: restormTab.breadcrumbs?.map((bc) =>
+                  bc.id === item.id ? { ...bc, label: newName } : bc
+                ),
+                contentVersion: (restormTab.contentVersion ?? 0) + 1
+              }
             }
-          }
 
-          // Update breadcrumbs for other tabs that might reference this item
-          if (restormTab.breadcrumbs) {
-            const updatedBreadcrumbs = restormTab.breadcrumbs.map((bc) =>
-              bc.id === item.id ? { ...bc, label: newName } : bc
-            )
-            return { ...restormTab, breadcrumbs: updatedBreadcrumbs }
-          }
+            // Update breadcrumbs for other tabs that might reference this item
+            if (restormTab.breadcrumbs) {
+              const hasMatch = restormTab.breadcrumbs.some((bc) => bc.id === item.id)
+              if (hasMatch) {
+                const updatedBreadcrumbs = restormTab.breadcrumbs.map((bc) =>
+                  bc.id === item.id ? { ...bc, label: newName } : bc
+                )
+                return { ...restormTab, breadcrumbs: updatedBreadcrumbs, contentVersion: (restormTab.contentVersion ?? 0) + 1 }
+              }
+            }
 
-        return tab
+            return tab
+          })
+
+          return { ...group, tabs: updatedTabs }
+        })
+
+        return { ...prevTree, groups: updatedGroups }
       })
-
-      return {
-        ...prevTree,
-        groups: [{ ...group, tabs: updatedTabs }]
-      }
-    })
   },
+    [rootItems, forceUpdate, setWorkbenchTree]
+  )
+
+  const handleItemIconChange = useCallback(
+    (item: BreadcrumbItem, newIcon: Icon | null) => {
+      const foundItem = findItemById(rootItems, item.id)
+
+      // When clearing (null), reset to default icon for folders
+      let effectiveIcon = newIcon
+      if (!effectiveIcon && foundItem && isAnyFolder(foundItem)) {
+        delete foundItem.icon
+        effectiveIcon = getFolderIcon(foundItem)
+      } else if (foundItem) {
+        if (effectiveIcon) {
+          foundItem.icon = effectiveIcon
+        } else {
+          delete foundItem.icon
+        }
+      }
+
+      forceUpdate()
+
+      // Also update breadcrumbs in the workbench tree (all groups)
+      setWorkbenchTree((prevTree) => {
+        const updatedGroups = prevTree.groups.map((group) => {
+          if (!isTabGroupNode(group)) return group
+
+          const updatedTabs = group.tabs.map((tab) => {
+            const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
+
+            // Update folder icon + breadcrumbs for the affected tab
+            if ((restormTab.tabType === 'folder' || restormTab.tabType === 'environment-folder') && restormTab.folder.id === item.id && effectiveIcon) {
+              const updatedBreadcrumbs = restormTab.breadcrumbs?.map((bc) =>
+                bc.id === item.id ? { ...bc, icon: effectiveIcon } : bc
+              )
+              return {
+                ...restormTab,
+                folder: { ...restormTab.folder, icon: effectiveIcon },
+                breadcrumbs: updatedBreadcrumbs,
+                contentVersion: (restormTab.contentVersion ?? 0) + 1
+              }
+            }
+
+            // Update breadcrumbs for tabs that reference this item (e.g. child tabs)
+            if (restormTab.breadcrumbs) {
+              const hasMatch = restormTab.breadcrumbs.some((bc) => bc.id === item.id)
+              if (hasMatch) {
+                const updatedBreadcrumbs = restormTab.breadcrumbs.map((bc) =>
+                  bc.id === item.id ? { ...bc, icon: effectiveIcon } : bc
+                )
+                return {
+                  ...restormTab,
+                  breadcrumbs: updatedBreadcrumbs,
+                  contentVersion: (restormTab.contentVersion ?? 0) + 1
+                }
+              }
+            }
+            return tab
+          })
+
+          return { ...group, tabs: updatedTabs }
+        })
+
+        return { ...prevTree, groups: updatedGroups }
+      })
+    },
     [rootItems, forceUpdate, setWorkbenchTree]
   )
 
@@ -275,6 +352,8 @@ export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWor
     handleTagsChange,
     handleFolderChange,
     handleEnvironmentFolderChange,
-    handleItemRename
+    handleItemRename,
+    handleItemIconChange,
+    updateCount: _updateCount
   }
 }

@@ -97,6 +97,10 @@ export type { BreadcrumbProps, BreadcrumbItem } from './Breadcrumb'
 export { TagsView } from './TagsView/TagsView'
 export type { TagsViewProps } from './TagsView/TagsView'
 
+// IconView exports
+export { IconView } from './IconView'
+export type { IconViewProps } from './IconView'
+
 // IconSelect exports
 export { IconSelect, RenderLibraryIcon, IconoirIcon, PhosphorIcon, MdiIcon, SimpleIcon, ICON_LIBRARIES } from './IconSelect'
 export type { IconSelectProps, IconLibrary } from './IconSelect'

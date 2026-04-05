@@ -161,6 +161,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
   activeId: activeIdProp,
   expandedIds: expandedIdsProp,
   editingItemId: editingItemIdProp,
+  onEditingStart,
   onEditingEnd,
   selectionMode = 'single',
   rootRole = 'tree',
@@ -224,10 +225,13 @@ const ListViewInner: React.FC<ListViewProps> = ({
     if (!isEditingControlled) {
       setInternalEditingItemId(id)
     }
+    if (id !== null && isEditingControlled && onEditingStart) {
+      onEditingStart(id)
+    }
     if (id === null && onEditingEnd) {
       onEditingEnd()
     }
-  }, [isEditingControlled, onEditingEnd])
+  }, [isEditingControlled, onEditingStart, onEditingEnd])
 
   // Controlled selection support
   React.useEffect(() => {
@@ -600,6 +604,15 @@ const ListViewInner: React.FC<ListViewProps> = ({
     (flat: FlatItem, event: React.MouseEvent<HTMLDivElement>): void => {
       event.preventDefault()
 
+      // Select the item on right-click
+      setActiveId(flat.item.id)
+      if (selectionMode === 'single') {
+        const next = new Set([flat.item.id])
+        setSelectedIds(next)
+        const payload: ListViewItemEventPayload = { item: flat.item, path: flat.path }
+        emitSelectionChange(payload, next)
+      }
+
       const hasBuiltinMenu = Array.isArray(flat.item.contextMenuItems) && flat.item.contextMenuItems.length > 0
 
       if (hasBuiltinMenu) {
@@ -616,7 +629,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
         onItemContextMenu(payload, event)
       }
     },
-    [onItemContextMenu]
+    [onItemContextMenu, selectionMode, emitSelectionChange]
   )
 
   const handleDragStart = useCallback(

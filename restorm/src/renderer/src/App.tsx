@@ -235,6 +235,8 @@ const App: React.FC = () => {
     handleItemDrop,
     handleCloneItem,
     handleCreateSubfolder,
+    handleCreateRootFolder,
+    handleCreateRootEnvironmentFolder,
     handleDeleteItem,
     confirmDelete: confirmDeleteWithId,
     cancelDelete,
@@ -246,25 +248,35 @@ const App: React.FC = () => {
     setSelectedItemId,
     setSidebarEditingItemId,
     setWorkbenchTree,
-    setDeleteConfirmation
+    setDeleteConfirmation,
+    openFolderTab,
+    openEnvironmentFolderTab
   })
 
   const {
     handleTagsChange,
     handleFolderChange,
     handleEnvironmentFolderChange,
-    handleItemRename
+    handleItemRename,
+    handleItemIconChange,
+    updateCount
   } = useWorkbenchUpdates({
     rootItems,
     setWorkbenchTree
   })
 
+  const handleSidebarRenameItem = useCallback((itemId: string) => {
+    setSidebarEditingItemId(itemId)
+  }, [])
+
   const { sidebarItems: sidebarItemsWithContextMenu } = useSidebarState({
     rootItems,
     expandedIds,
+    updateCount,
     onCloneItem: handleCloneItem,
     onCreateSubfolder: handleCreateSubfolder,
-    onDeleteItem: handleDeleteItem
+    onDeleteItem: handleDeleteItem,
+    onRenameItem: handleSidebarRenameItem
   })
 
   // Wrapper for confirmDelete that uses deleteConfirmation.itemId
@@ -649,9 +661,13 @@ const App: React.FC = () => {
                 onItemDrop={handleItemDrop}
                 onItemRename={handleSidebarItemRename}
                 onDeleteRequest={(payload) => { handleDeleteItem(payload.item.id) }}
+                onEditingStart={(itemId) => { setSidebarEditingItemId(itemId) }}
                 onEditingEnd={() => { setSidebarEditingItemId(null) }}
                 onAddRequest={() => { setShowImportModal(true) }}
                 onCollapseAll={() => { setExpandedIds([]) }}
+                onCreateRootFolder={handleCreateRootFolder}
+                onCreateRootEnvironmentFolder={handleCreateRootEnvironmentFolder}
+                onDeselectAll={() => { setSelectedItemId(null) }}
               />
             </div>
           }
@@ -666,6 +682,7 @@ const App: React.FC = () => {
               onTabActivate={handleTabActivate}
               onBreadcrumbClick={handleBreadcrumbClick}
               onItemRename={handleItemRename}
+              onItemIconChange={handleItemIconChange}
               onTagsChange={handleTagsChange}
               onFolderChange={handleFolderChange}
               onEnvironmentFolderChange={handleEnvironmentFolderChange}
@@ -698,6 +715,7 @@ const App: React.FC = () => {
             onTabActivate={handleTabActivate}
             onBreadcrumbClick={handleBreadcrumbClick}
             onItemRename={handleItemRename}
+            onItemIconChange={handleItemIconChange}
             onTagsChange={handleTagsChange}
             onFolderChange={handleFolderChange}
             onEnvironmentFolderChange={handleEnvironmentFolderChange}

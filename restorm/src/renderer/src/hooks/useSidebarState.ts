@@ -14,9 +14,12 @@ import { mapToBadgeType } from '../utils/badgeUtils'
 export interface UseSidebarStateOptions {
   rootItems: (EnvironmentFolder | Folder | Request)[]
   expandedIds: string[]
+  /** Counter incremented on in-place mutations to trigger re-computation */
+  updateCount?: number
   onCloneItem: (itemId: string) => void
   onCreateSubfolder: (itemId: string) => void
   onDeleteItem: (itemId: string) => void
+  onRenameItem: (itemId: string) => void
 }
 
 export interface UseSidebarStateReturn {
@@ -24,11 +27,13 @@ export interface UseSidebarStateReturn {
 }
 
 export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStateReturn {
-  const { rootItems, expandedIds, onCloneItem, onCreateSubfolder, onDeleteItem } = options
+  const { rootItems, expandedIds, updateCount, onCloneItem, onCreateSubfolder, onDeleteItem, onRenameItem } = options
   const { t } = useTranslation()
 
   // Convert root folders to ListView items
+  // updateCount is used as a dependency to force re-computation when items are mutated in-place
   const sidebarItems: ListViewItemData[] = useMemo(() => {
+    void updateCount
     const expandedSet = new Set(expandedIds)
     const renderOptions = {
       expandedIds: expandedSet,
@@ -41,12 +46,12 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
     return rootItems
       .filter((item): item is Folder | EnvironmentFolder => 'items' in item)
       .map((folder) => folderAsRootListViewItem(folder, renderOptions))
-  }, [expandedIds, rootItems])
+  }, [expandedIds, rootItems, updateCount])
 
   // Attach context menus to sidebar items
   const sidebarItemsWithContextMenu: ListViewItemData[] = useMemo(
-    () => attachContextMenus(sidebarItems, t, onCloneItem, onCreateSubfolder, onDeleteItem),
-    [sidebarItems, t, onCloneItem, onCreateSubfolder, onDeleteItem]
+    () => attachContextMenus(sidebarItems, t, onCloneItem, onCreateSubfolder, onDeleteItem, onRenameItem),
+    [sidebarItems, t, onCloneItem, onCreateSubfolder, onDeleteItem, onRenameItem]
   )
 
   return {

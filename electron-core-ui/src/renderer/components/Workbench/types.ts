@@ -32,6 +32,11 @@ export interface EditorTab {
 	 * Custom title for the fullscreen modal. If not provided, the tab title will be used.
 	 */
 	fullscreenModalTitle?: React.ReactNode;
+	/**
+	 * Increment this counter to force the tab content to re-render.
+	 * Useful when tab metadata (breadcrumbs, icons) changes without changing the tab ID.
+	 */
+	contentVersion?: number;
 }
 
 export interface EditorGroup {

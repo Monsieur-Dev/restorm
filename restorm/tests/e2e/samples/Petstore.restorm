@@ -735,6 +735,7 @@ collections:
                 description: Tags to filter by
             pathParams: []
             deprecated: true
+        notes: ''
       - name: store
         documentation: "# store\r\n\r\nAccess to Petstore orders"
         tags:

@@ -21,10 +21,10 @@ export const buildContextMenuForItem = (
   t: TranslateFunction,
   onCloneItem: ContextMenuActionHandler,
   onCreateSubfolder: ContextMenuActionHandler,
-  onDeleteItem: ContextMenuActionHandler
+  onDeleteItem: ContextMenuActionHandler,
+  onRenameItem: ContextMenuActionHandler
 ): SidebarContextMenuItem[] => {
-  const hasChildren = Array.isArray(item.children) && item.children.length > 0
-  const isItemFolder = item.isExpandable ?? hasChildren
+  const isItemFolder = Array.isArray(item.children)
   const itemId = item.id
 
   if (isItemFolder) {
@@ -41,7 +41,10 @@ export const buildContextMenuForItem = (
         id: 'rename-item',
         label: t('sidebar.contextMenu.rename'),
         icon: 'edit',
-        shortcut: 'F2'
+        shortcut: 'F2',
+        onClick: () => {
+          onRenameItem(itemId)
+        }
       },
       { id: 'sep-folder', isSeparator: true, label: '' },
       {
@@ -90,15 +93,16 @@ export const attachContextMenus = (
   t: TranslateFunction,
   onCloneItem: ContextMenuActionHandler,
   onCreateSubfolder: ContextMenuActionHandler,
-  onDeleteItem: ContextMenuActionHandler
+  onDeleteItem: ContextMenuActionHandler,
+  onRenameItem: ContextMenuActionHandler
 ): ListViewItemData[] =>
   items.map((item) => {
     const withMenu = {
       ...item,
-      contextMenuItems: buildContextMenuForItem(item, t, onCloneItem, onCreateSubfolder, onDeleteItem)
+      contextMenuItems: buildContextMenuForItem(item, t, onCloneItem, onCreateSubfolder, onDeleteItem, onRenameItem)
     } as ListViewItemData
     if (item.children && item.children.length > 0) {
-      withMenu.children = attachContextMenus(item.children, t, onCloneItem, onCreateSubfolder, onDeleteItem)
+      withMenu.children = attachContextMenus(item.children, t, onCloneItem, onCreateSubfolder, onDeleteItem, onRenameItem)
     }
     return withMenu
   })

@@ -10,15 +10,17 @@ import type {
   Request
 } from '../../../shared/types/collections'
 import { isEnvironmentFolder, isAnyFolder, isRequest } from '../../../shared/types/collections'
+import type { Icon } from 'electron-core-ui/types'
 import type { BreadcrumbItem } from '../../../shared/types/editor'
 
 /** Folder icon for breadcrumbs */
-const FOLDER_ICON = { type: 'codicon' as const, value: 'folder' }
+const FOLDER_ICON: Icon = { type: 'codicon', value: 'folder' }
 /** Environment folder icon for breadcrumbs */
-const ENV_FOLDER_ICON = { type: 'codicon' as const, value: 'folder-library' }
+const ENV_FOLDER_ICON: Icon = { type: 'codicon', value: 'folder-library' }
 
-/** Get the appropriate icon for a folder */
-export function getFolderIcon(item: Folder | EnvironmentFolder): { type: 'codicon'; value: string } {
+/** Get the appropriate icon for a folder (custom icon if set, otherwise default) */
+export function getFolderIcon(item: Folder | EnvironmentFolder): Icon {
+  if (item.icon && item.icon.type !== 'none') return item.icon
   return isEnvironmentFolder(item as FolderItem) ? ENV_FOLDER_ICON : FOLDER_ICON
 }
 
@@ -152,8 +154,8 @@ function findItemWithBreadcrumbsInTree(
       if (found.item) return found
     } else if (isRequest(item)) {
       if (item.id === id) {
-        // Include the request itself as the last breadcrumb (no folder icon)
-        return { item, breadcrumbs: [...currentPath, { id: item.id, label: item.name }] }
+        // Include the request itself as the last breadcrumb (no icon, no IconSelect)
+        return { item, breadcrumbs: [...currentPath, { id: item.id, label: item.name, icon: null }] }
       }
     }
   }
@@ -169,11 +171,9 @@ export function findItemWithBreadcrumbs(
   for (const root of rootItems) {
     // Check if root itself is the item (for root-level Requests)
     if (root.id === id) {
-      // Convert icon to BreadcrumbIcon compatible format
-      const icon = root.icon && (root.icon.type === 'codicon' || root.icon.type === 'emoji' || root.icon.type === 'none')
-        ? { type: root.icon.type, value: root.icon.value }
-        : null
-      
+      // Folders get their icon (custom or default), requests get null (no IconSelect)
+      const icon = isAnyFolder(root) ? getFolderIcon(root) : null
+
       const breadcrumbs: BreadcrumbItem[] = [
         {
           id: root.id,
