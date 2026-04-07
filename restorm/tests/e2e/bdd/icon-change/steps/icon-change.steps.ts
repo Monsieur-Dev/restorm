@@ -177,3 +177,16 @@ Then('the sidebar item {string} should be visible', async ({ page }, itemName: s
   const row = page.locator(listViewRowSelectorByTitle('sidebar-listview', itemName)).first()
   await expect(row).toBeVisible({ timeout: 5000 })
 })
+
+Then('the color picker button should be visible in the variables table', async ({ page }) => {
+  // The color cell renders a Button with ariaLabel 'Open color picker'
+  const colorButton = page.locator('[data-testid="environment-folder-variables-table"] [aria-label="Open color picker"]').first()
+  await expect(colorButton).toBeVisible({ timeout: 5000 })
+})
+
+When('I click on the {string} environment', async ({ page }, envName: string) => {
+  const envItem = page.locator(listViewRowSelectorByTitle('environment-folder-environment-list', envName)).first()
+  await expect(envItem).toBeVisible({ timeout: 5000 })
+  await envItem.click()
+  await page.waitForTimeout(300)
+})

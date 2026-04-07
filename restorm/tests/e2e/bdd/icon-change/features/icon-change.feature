@@ -25,3 +25,12 @@ Feature: Breadcrumb Icon Change and Folder Management
     When I rename "pet" to "pet-renamed" in the sidebar
     Then the breadcrumb should show "pet-renamed"
     And the sidebar item "pet-renamed" should be visible
+
+  Scenario: Variable types are preserved after switching environments
+    Given the file is loaded
+    When I click on "Swagger Petstore" folder in the sidebar
+    Then a tab should be open for the folder
+    Then the color picker button should be visible in the variables table
+    When I click on the "Production" environment
+    When I click on the "Default" environment
+    Then the color picker button should be visible in the variables table

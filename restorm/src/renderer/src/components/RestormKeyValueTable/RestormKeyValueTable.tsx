@@ -498,7 +498,19 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
       const existing = id ? valueTypeByRowIdRef.current.get(id) : undefined
 
       if (id && !existing) {
-        valueTypeByRowIdRef.current.set(id, new StringValue(value))
+        // Infer the value type from the actual string value (color, datetime, etc.)
+        const cast = inferValueFromString(value)
+        let inferred: ValueType
+        if (cast.kind === 'color') {
+          inferred = new ColorValue(cast.color)
+        } else if (cast.kind === 'datetime') {
+          inferred = new DateTimeValue(cast.date, cast.format)
+        } else if (cast.kind === 'numeric') {
+          inferred = new NumericValue(cast.number, cast.format)
+        } else {
+          inferred = new StringValue(value)
+        }
+        valueTypeByRowIdRef.current.set(id, inferred)
       }
 
       const resolved = id ? (valueTypeByRowIdRef.current.get(id) ?? new StringValue(value)) : new StringValue(value)
