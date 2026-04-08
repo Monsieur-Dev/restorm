@@ -3,6 +3,7 @@ import './titlebar.css'
 import { TitlebarProps } from './types'
 import { CustomWCO } from '../CustomWCO'
 import { SearchBar } from '../SearchBar'
+import { NavigationButtons } from './NavigationButtons'
 import { logger } from '../../services/logger'
 
 const Titlebar: React.FC<TitlebarProps> = ({
@@ -22,7 +23,8 @@ const Titlebar: React.FC<TitlebarProps> = ({
   searchFn,
   searchBarTestId,
   customWcoTestId,
-  customWcoPlatform
+  customWcoPlatform,
+  showNavigation
 }) => {
   const rootTestId = dataTestId ?? 'titlebar'
   const leftZoneTestId = `${rootTestId}-left`
@@ -112,6 +114,9 @@ const Titlebar: React.FC<TitlebarProps> = ({
       
       {/* Center zone */}
       <div className="titlebar-center" data-testid={centerZoneTestId}>
+        {showNavigation && (
+          <NavigationButtons data-testid={`${rootTestId}-nav`} />
+        )}
         {showSearchBar ? (
           <SearchBar
             data-testid={derivedSearchBarTestId}

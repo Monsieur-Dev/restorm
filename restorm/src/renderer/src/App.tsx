@@ -5,12 +5,14 @@ import {
   StatusbarElement,
   VerticalSashContainer,
   useFileService,
+  useFeature,
   eventBus,
   logger,
   computeChecksum,
   useDirtyState,
   setContentChecksum,
-  commitChecksums
+  commitChecksums,
+  navigationService
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type DocumentChangedPayload } from './services/DocumentEvents'
 import type { WorkbenchTree } from 'electron-core-ui/renderer'
@@ -32,6 +34,7 @@ import {
   getNearestEnvironmentsForBreadcrumbs
 } from './utils/treeSearch'
 import { DesktopIndicator } from './components/MainView/DesktopIndicator'
+import { findItemById } from './utils/treeSearch'
 import { useItemOperations } from './hooks/useItemOperations'
 import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
@@ -84,6 +87,7 @@ const allFolderIds = initialRootItems.flatMap((folder) => collectAllFolderIds(fo
 
 const App: React.FC = () => {
   const { t } = useTranslation()
+  const { isEnabled: navigationEnabled } = useFeature('navigation')
   const setCollections = useRestormStore((state) => state.setCollections)
   const {
     state: fileState,
@@ -599,6 +603,33 @@ const App: React.FC = () => {
     getNearestEnvironmentsForBreadcrumbs
   })
 
+  // Initialize navigation history with restored active tab only
+  const hasInitializedNavRef = useRef(false)
+  useEffect(() => {
+    if (!navigationEnabled || hasInitializedNavRef.current) return
+    // Only seed the active tab of each group into navigation history.
+    // Other tabs appear in the tab switcher (from tree), but without a navigation order.
+    const seedNavigation = (): void => {
+      for (const group of workbenchTree.groups) {
+        if (!('tabs' in group)) continue
+        const tabGroup = group as { tabs: { id: string }[]; activeTabId?: string }
+        const activeTabId = tabGroup.activeTabId
+        if (!activeTabId) continue
+        const parts = activeTabId.split(':')
+        const itemId = parts.length > 1 ? parts.slice(1).join(':') : activeTabId
+        const item = findItemById(rootItems, itemId)
+        if (item) {
+          const type = 'method' in item ? 'request' : 'folder'
+          navigationService.navigateTo(itemId, 'restore', { type })
+        }
+      }
+      hasInitializedNavRef.current = true
+    }
+    if (workbenchTree.groups.length > 0) {
+      seedNavigation()
+    }
+  }, [navigationEnabled, workbenchTree.groups, rootItems])
+
   return (
     <AvailableVariablesProvider>
       <VariableTransformProvider>
@@ -616,12 +647,12 @@ const App: React.FC = () => {
         isDirty={isDirty}
         recentFiles={recentFiles}
         favorites={favorites}
-        onNew={() => { void handleMenuNew() }}
+        onNew={() => { navigationService.clearHistory(); void handleMenuNew() }}
         onOpen={() => { void handleMenuOpen() }}
         onOpenFolder={() => { void handleMenuOpenFolder() }}
         onSave={handleMenuSave}
         onSaveAs={handleMenuSaveAs}
-        onClose={() => { void handleMenuClose() }}
+        onClose={() => { navigationService.clearHistory(); void handleMenuClose() }}
         onExit={handleMenuExit}
         onImport={() => { setShowImportModal(true) }}
         onOpenRecentFile={(path) => { void handleOpenRecentFile(path) }}
@@ -694,6 +725,8 @@ const App: React.FC = () => {
               getRequestById={getRequestByIdCb}
               getFolderById={getFolderByIdCb}
               getEnvironmentFolderById={getEnvironmentFolderByIdCb}
+              navigationEnabled={navigationEnabled}
+              tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
             />
           }
           initialWidth={260}
@@ -727,6 +760,8 @@ const App: React.FC = () => {
             getRequestById={(id) => findRequestById(rootItems, id)}
             getFolderById={(id) => findFolderById(rootItems, id)}
             getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootItems, id)}
+            navigationEnabled={navigationEnabled}
+            tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
           />
         </div>
       )}

@@ -163,8 +163,8 @@ function getRendererPath(): string {
 function getFeaturesConfigPath(): string {
   const isDev = process.env['NODE_ENV'] === 'development' || !app.isPackaged
   if (isDev) {
-    const appPath = app.getAppPath()
-    return join(appPath, 'resources/features.yaml')
+    // __dirname is dist/main in compiled code, go up two levels to project root
+    return join(__dirname, '../../resources/features.yaml')
   }
   return join(process.resourcesPath, 'restorm-resources/features.yaml')
 }

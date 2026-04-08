@@ -3,6 +3,7 @@ export { navigationService } from './NavigationService'
 export type {
   NavigationParams,
   NavigationEvent,
+  HistoryEntry,
   NavigationListener,
   HistoryStateListener
 } from './NavigationService'

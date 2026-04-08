@@ -62,7 +62,7 @@ export interface NavigationEvent {
 }
 
 /** Entry in the navigation history */
-interface HistoryEntry {
+export interface HistoryEntry {
   key: string
   source: string
   params: NavigationParams
@@ -221,6 +221,21 @@ class NavigationService {
     return () => {
       this.historyStateListeners.delete(listener)
     }
+  }
+
+  /** Get the full navigation history */
+  getHistory(): HistoryEntry[] {
+    return [...this.history]
+  }
+
+  /** Get the number of entries in history */
+  getHistorySize(): number {
+    return this.history.length
+  }
+
+  /** Get the current position in history */
+  getCurrentIndex(): number {
+    return this.currentIndex
   }
 
   /**

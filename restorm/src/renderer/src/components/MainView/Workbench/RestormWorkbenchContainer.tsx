@@ -28,6 +28,8 @@ export interface RestormWorkbenchContainerProps {
   getRequestById: (id: string) => Request | undefined
   getFolderById: (id: string) => Folder | undefined
   getEnvironmentFolderById: (id: string) => EnvironmentFolder | undefined
+  navigationEnabled?: boolean | undefined
+  tabSwitcherAnchorSelector?: string | undefined
 }
 
 /**
@@ -54,7 +56,9 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
   onStateRestored,
   getRequestById,
   getFolderById,
-  getEnvironmentFolderById
+  getEnvironmentFolderById,
+  navigationEnabled,
+  tabSwitcherAnchorSelector
 }) => {
   return (
     <EnvironmentValuesProvider>
@@ -90,6 +94,8 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
           getRequestById={getRequestById}
           getFolderById={getFolderById}
           getEnvironmentFolderById={getEnvironmentFolderById}
+          navigationEnabled={navigationEnabled}
+          tabSwitcherAnchorSelector={tabSwitcherAnchorSelector}
         />
       </div>
     </EnvironmentValuesProvider>

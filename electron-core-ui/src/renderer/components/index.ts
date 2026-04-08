@@ -101,6 +101,10 @@ export type { TagsViewProps } from './TagsView/TagsView'
 export { IconView } from './IconView'
 export type { IconViewProps } from './IconView'
 
+// TabSwitcherOverlay exports
+export { TabSwitcherOverlay } from './TabSwitcherOverlay'
+export type { TabSwitcherOverlayProps, TabSwitcherItem } from './TabSwitcherOverlay'
+
 // IconSelect exports
 export { IconSelect, RenderLibraryIcon, IconoirIcon, PhosphorIcon, MdiIcon, SimpleIcon, ICON_LIBRARIES } from './IconSelect'
 export type { IconSelectProps, IconLibrary } from './IconSelect'

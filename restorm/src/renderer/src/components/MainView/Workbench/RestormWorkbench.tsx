@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
-import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, Button, IconView, type ContextMenuItem } from 'electron-core-ui/renderer'
-import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback } from 'electron-core-ui/renderer'
+import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, Button, IconView, TabSwitcherOverlay, navigationService, type ContextMenuItem } from 'electron-core-ui/renderer'
+import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback, TabSwitcherItem } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
 import type { RestormEditorTab, BreadcrumbItem } from '../../../../../shared/types/editor'
 import {
@@ -29,6 +29,7 @@ import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useTranslation } from 'react-i18next'
 import { RestormWorkbenchTab, type RestormWorkbenchTabCallout } from './RestormWorkbenchTab'
+import { useTabSwitcher } from '../../../hooks/useTabSwitcher'
 
 interface RequestHistoryControls {
   historyModalOpen: boolean
@@ -169,6 +170,10 @@ export interface RestormWorkbenchProps {
   getEnvironmentFolderById?: (id: string) => EnvironmentFolder | undefined
   /** Callback fired when an environment folder's data changes */
   onEnvironmentFolderChange?: (folderId: string, folder: EnvironmentFolder) => void
+  /** Whether navigation features (back/forward, Ctrl+Tab) are enabled */
+  navigationEnabled?: boolean | undefined
+  /** CSS selector for the element to anchor the tab switcher overlay to */
+  tabSwitcherAnchorSelector?: string | undefined
 }
 
 /** Imperative handle for Workbench component */
@@ -204,7 +209,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   onStateRestored,
   getRequestById,
   getFolderById,
-  getEnvironmentFolderById
+  getEnvironmentFolderById,
+  navigationEnabled,
+  tabSwitcherAnchorSelector
 }, ref) => {
   const { t } = useTranslation()
   const editorWorkbenchRef = useRef<EditorWorkbenchHandle>(null)
@@ -365,6 +372,93 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     return null
   }, [renderDirtyIndicator])
+
+  // Build tab switcher items from workbench tree tabs, sorted by navigation history
+  const buildTabSwitcherItems = useCallback((): TabSwitcherItem[] => {
+    const allTabs: RestormEditorTab[] = []
+    for (const group of tree.groups) {
+      if (isTabGroupNode(group)) {
+        for (const tab of group.tabs) {
+          allTabs.push(tab as RestormEditorTab)
+        }
+      }
+    }
+
+    // Navigation history ordering (most recent → order 0)
+    const history = navigationService.getHistory()
+    const historyOrder = new Map<string, number>()
+    for (let i = history.length - 1; i >= 0; i--) {
+      const entry = history[i]
+      if (entry && !historyOrder.has(entry.key)) {
+        historyOrder.set(entry.key, historyOrder.size)
+      }
+    }
+
+    // Sort by navigation order (most recent first), tabs without history at the end
+    const sorted = [...allTabs].sort((a, b) => {
+      const aItemId = getTabItemId(a)
+      const bItemId = getTabItemId(b)
+      const aOrder = (aItemId ? historyOrder.get(aItemId) : undefined) ?? 999
+      const bOrder = (bItemId ? historyOrder.get(bItemId) : undefined) ?? 999
+      return aOrder - bOrder
+    })
+
+    return sorted.map((tab) => {
+      const rendered = renderTabTitle(tab)
+      return {
+        id: tab.id,
+        title: tab.titleString ?? '',
+        icon: rendered
+      }
+    })
+  }, [tree.groups, renderTabTitle, getTabItemId])
+
+  const {
+    isOpen: tabSwitcherOpen,
+    items: tabSwitcherItems,
+    selectedIndex: tabSwitcherIndex,
+    handleClose: closeTabSwitcher,
+    handleSelect: selectTabSwitcherItem
+  } = useTabSwitcher({
+    enabled: navigationEnabled ?? false,
+    onTabSelect: (tabId) => {
+      // Record navigation synchronously so history is up-to-date for next Ctrl+Tab
+      // Find the tab in the tree to get the actual item ID
+      let resolvedItemId: string | null = null
+      for (const group of tree.groups) {
+        if (!isTabGroupNode(group)) continue
+        const tab = group.tabs.find((t) => t.id === tabId)
+        if (tab) {
+          resolvedItemId = getTabItemId(tab as RestormEditorTab)
+          break
+        }
+      }
+      if (resolvedItemId) {
+        const tabType = tabId.startsWith('env-folder') ? 'environment-folder'
+          : tabId.startsWith('folder') ? 'folder'
+          : 'http-request'
+        navigationService.navigateTo(resolvedItemId, 'tab-switcher', { type: tabType })
+      }
+
+      // Directly activate the tab in the workbench tree
+      const updatedGroups = tree.groups.map((group) => {
+        if (!isTabGroupNode(group)) return group
+        const hasTab = group.tabs.some((t) => t.id === tabId)
+        if (hasTab) {
+          return { ...group, activeTabId: tabId }
+        }
+        return group
+      })
+      if (onTreeChange) {
+        onTreeChange({ ...tree, groups: updatedGroups })
+      }
+      // Also notify the tab activate callback for sidebar sync etc.
+      if (onTabActivate) {
+        onTabActivate(tabId)
+      }
+    },
+    buildItems: buildTabSwitcherItems
+  })
 
   // Render tab content based on tab type
   const renderTabContent = useCallback((tab: RestormEditorTab): React.ReactNode => {
@@ -750,11 +844,31 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     [onTreeChange, isControlled, onTabActivate]
   )
 
+  // Compute overlay position from anchor element (covers the search bar)
+  const tabSwitcherStyle = useMemo((): React.CSSProperties | undefined => {
+    if (!tabSwitcherOpen || !tabSwitcherAnchorSelector) return undefined
+    const el = document.querySelector(tabSwitcherAnchorSelector)
+    if (!el) return undefined
+    const rect = el.getBoundingClientRect()
+    return { top: rect.top, left: rect.left, width: rect.width }
+  }, [tabSwitcherOpen, tabSwitcherAnchorSelector])
+
   return (
     <div
       style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', flex: 1, ...style }}
       className={className}
     >
+      {tabSwitcherOpen && (
+        <TabSwitcherOverlay
+          open={tabSwitcherOpen}
+          items={tabSwitcherItems}
+          selectedIndex={tabSwitcherIndex}
+          onSelect={selectTabSwitcherItem}
+          onClose={closeTabSwitcher}
+          style={tabSwitcherStyle ?? { top: 36, left: '50%', transform: 'translateX(-50%)', width: 400 }}
+          data-testid="tab-switcher"
+        />
+      )}
       <EditorWorkbenchAny
         ref={editorWorkbenchRef}
         tree={tree}

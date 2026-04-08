@@ -102,6 +102,15 @@
 	border-bottom: 1px solid var(--titleBar-border);
 }
 
+/* Navigation buttons */
+.titlebar-navigation-buttons {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	-webkit-app-region: no-drag;
+	flex-shrink: 0;
+}
+
 /* Inactive state */
 .window-inactive .titlebar {
 	background-color: var(--titleBar-inactiveBackground);

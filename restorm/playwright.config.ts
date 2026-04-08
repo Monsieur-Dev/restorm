@@ -44,6 +44,12 @@ const iconChangeTestDir = defineBddConfig({
   outputDir: '.features-gen/icon-change'
 })
 
+const navigationTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/navigation/features/**/*.feature',
+  steps: ['tests/e2e/bdd/navigation/steps/**/*.ts', 'tests/e2e/bdd/fixtures/petstore-file.fixture.ts'],
+  outputDir: '.features-gen/navigation'
+})
+
 const userPreferencesTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/user_preferences/features/**/*.feature',
   steps: ['tests/e2e/bdd/user_preferences/steps/**/*.ts', 'tests/e2e/bdd/fixtures/user-preferences.fixture.ts'],
@@ -109,6 +115,10 @@ export default defineConfig({
     {
       name: 'icon-change',
       testDir: iconChangeTestDir
+    },
+    {
+      name: 'navigation',
+      testDir: navigationTestDir
     },
     {
       name: 'user_preferences',

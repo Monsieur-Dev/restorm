@@ -41,10 +41,18 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
   // Handle navigation events from NavigationService
   useEffect(() => {
     const unsubscribe = navigationService.onNavigate((event: NavigationEvent) => {
-      const { key, params } = event
+      const { key, source, params, isHistoryNavigation } = event
 
-      // Update sidebar selection
-      setSelectedItemId(key)
+      // Update sidebar selection:
+      // - Always for history navigation (back/forward buttons)
+      // - Always for non-workbench sources (sidebar, breadcrumb, etc.)
+      // - For workbench/tab-switcher sources: handled in handleTabActivate with sync check
+      if ((source !== 'workbench' && source !== 'tab-switcher') || isHistoryNavigation) {
+        setSelectedItemId(key)
+      }
+
+      // Only open tabs for history navigation (back/forward) — direct clicks open tabs directly
+      if (!isHistoryNavigation) return
 
       // Open appropriate tab based on navigation type
       if (params.type === 'folder' || params.type === 'environment-folder') {
@@ -73,23 +81,26 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
 
   // Handle item click in the sidebar - use navigation service
   const handleItemClick = useCallback((itemId: string) => {
-    const { item } = findItemWithBreadcrumbs(rootItems, itemId)
+    const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
     if (!item) return
 
+    setSelectedItemId(itemId)
+
     if (isEnvironmentFolder(item)) {
-      // Open environment folder view
+      openEnvironmentFolderTab(item, breadcrumbs)
       navigationService.navigateTo(itemId, 'sidebar', { type: 'environment-folder' })
       return
     }
 
     if (isFolder(item)) {
-      // Open folder view (same as "Define variables" context menu)
+      openFolderTab(item, breadcrumbs)
       navigationService.navigateTo(itemId, 'sidebar', { type: 'folder' })
       return
     }
 
     if (isRequest(item)) {
-      // Navigate to request - determine type from request
+      const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
+      openAnyRequestTab(item, breadcrumbs, environments)
       if (isHTTPRequest(item)) {
         navigationService.navigateTo(itemId, 'sidebar', { type: 'http-request' })
       } else if (isGraphQLRequest(item)) {
@@ -102,7 +113,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
         navigationService.navigateTo(itemId, 'sidebar', { type: 'websocket-request' })
       }
     }
-  }, [rootItems])
+  }, [rootItems, setSelectedItemId, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
 
   // Handle breadcrumb item click - navigate to the clicked item
   const handleBreadcrumbClick = useCallback(
@@ -151,9 +162,36 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     return null
   }, [rootItems])
 
-  // Handle tab activation in workbench - navigate to sync sidebar selection
+  // Parse a tab ID to extract the item ID and type
+  const parseTabId = useCallback((tabId: string): { itemId: string | null; itemType: string | null } => {
+    const indexMatch = /^(env-folder|folder|request)-idx:(.+)$/.exec(tabId)
+    const idMatch = /^(env-folder|folder|request)-id:(.+)$/.exec(tabId)
+
+    if (indexMatch?.[1] && indexMatch[2]) {
+      return {
+        itemType: indexMatch[1] === 'request' ? 'http-request' : indexMatch[1],
+        itemId: resolveIndexPath(indexMatch[2])
+      }
+    }
+    if (idMatch?.[1] && idMatch[2]) {
+      return {
+        itemType: idMatch[1] === 'request' ? 'http-request' : idMatch[1],
+        itemId: idMatch[2]
+      }
+    }
+    return { itemId: null, itemType: null }
+  }, [resolveIndexPath])
+
+  // Handle tab activation in workbench - always record navigation, conditionally sync sidebar
   const handleTabActivate = useCallback((tabId: string) => {
-    // Read setting fresh from SettingsService to get the latest value
+    const { itemId, itemType } = parseTabId(tabId)
+
+    // Always record navigation for tab switcher history ordering
+    if (itemId && itemType) {
+      navigationService.navigateTo(itemId, 'workbench', { type: itemType })
+    }
+
+    // Conditionally sync sidebar selection based on user setting
     const settingsApi = (window as unknown as { api?: { settings?: { get: (k: string) => Promise<unknown> } } }).api?.settings
     const settingsPromise = settingsApi
       ? settingsApi.get('behavior:syncSidebarWithTabs')
@@ -161,27 +199,11 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
 
     void settingsPromise.then((stored) => {
       const syncEnabled = stored !== null && stored !== undefined ? (stored as boolean) : true
-
-      // Parse tab ID format: "prefix-idx:0.0.1" or "prefix-id:uuid"
-      let itemId: string | null = null
-      let itemType: string | null = null
-
-      const indexMatch = /^(env-folder|folder|request)-idx:(.+)$/.exec(tabId)
-      const idMatch = /^(env-folder|folder|request)-id:(.+)$/.exec(tabId)
-
-      if (indexMatch?.[1] && indexMatch[2]) {
-        itemType = indexMatch[1] === 'request' ? 'http-request' : indexMatch[1]
-        itemId = resolveIndexPath(indexMatch[2])
-      } else if (idMatch?.[1] && idMatch[2]) {
-        itemType = idMatch[1] === 'request' ? 'http-request' : idMatch[1]
-        itemId = idMatch[2]
-      }
-
-      if (itemId && itemType && syncEnabled) {
-        navigationService.navigateTo(itemId, 'workbench', { type: itemType })
+      if (syncEnabled && itemId) {
+        setSelectedItemId(itemId)
       }
     })
-  }, [resolveIndexPath])
+  }, [parseTabId, setSelectedItemId])
 
   // Handle search result click - navigate to the selected item
   const handleSearchResultClick = useCallback((result: SearchResult) => {
