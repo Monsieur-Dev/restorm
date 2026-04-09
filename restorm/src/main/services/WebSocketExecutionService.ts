@@ -224,7 +224,7 @@ class WebSocketExecutionService {
    */
   send(requestId: string, message: string, event?: string): boolean {
     const connection = this.activeConnections.get(requestId)
-    if (connection && connection.ws.readyState === WebSocket.OPEN) {
+    if (connection?.ws.readyState === WebSocket.OPEN) {
       const msgToSend = event ? JSON.stringify({ event, data: message }) : message
       connection.ws.send(msgToSend)
       
@@ -246,7 +246,7 @@ class WebSocketExecutionService {
    */
   isActive(requestId: string): boolean {
     const connection = this.activeConnections.get(requestId)
-    return connection !== undefined && connection.ws.readyState === WebSocket.OPEN
+    return connection?.ws.readyState === WebSocket.OPEN
   }
 
   /**

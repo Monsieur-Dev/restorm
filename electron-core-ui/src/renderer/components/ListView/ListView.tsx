@@ -722,7 +722,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
             const isSelected = selectedIds.has(item.id)
             const isActive = activeId === item.id
             const dropForThisRow =
-              dropIndicator && dropIndicator.targetId === item.id ? dropIndicator.position : null
+              dropIndicator?.targetId === item.id ? dropIndicator.position : null
 
             const rowClasses = [
               'list-view-row',

@@ -619,7 +619,7 @@ class ContextService {
       // Delegate URL resolution to URLResolver
       const urlResult = resolveUrl(updatedData, baseContext, this.transformValue.bind(this))
       const previousUrlResult = this.resolvedUrls.get(requestId)
-      if (!previousUrlResult || previousUrlResult.resolvedUrl !== urlResult.resolvedUrl) {
+      if (previousUrlResult?.resolvedUrl !== urlResult.resolvedUrl) {
         this.resolvedUrls.set(requestId, urlResult)
         this.broadcastToRenderer('context:url-resolved', { requestId, ...urlResult })
       }
@@ -633,7 +633,7 @@ class ContextService {
         this.transformValue.bind(this)
       )
       const previousSnippetResult = this.codeSnippets.get(requestId)
-      if (!previousSnippetResult || previousSnippetResult.markdown !== snippetResult.markdown) {
+      if (previousSnippetResult?.markdown !== snippetResult.markdown) {
         this.codeSnippets.set(requestId, snippetResult)
         this.broadcastToRenderer('context:code-snippets-updated', { requestId, ...snippetResult })
       }
@@ -770,8 +770,7 @@ class ContextService {
     variables: { name: string; value: string }[]
   ): void {
     const previous = this.availableVariablesPerField.get(variableId)
-    const hasChanged = !previous ||
-      previous.length !== variables.length ||
+    const hasChanged = previous?.length !== variables.length ||
       variables.some((v, i) => {
         const prevItem = previous[i]
         return prevItem && (prevItem.name !== v.name || prevItem.value !== v.value)
