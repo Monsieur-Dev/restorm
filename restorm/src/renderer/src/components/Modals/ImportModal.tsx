@@ -248,7 +248,7 @@ export function ImportModal({
     if (files.length > 0) {
       const file = files[0]
       if (file) {
-        handleInputChange(file.path)
+        handleInputChange((file as { path?: string }).path ?? file.name)
       }
     }
   }, [handleInputChange])

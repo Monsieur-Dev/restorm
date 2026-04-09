@@ -1,8 +1,7 @@
-import React, { useState, useEffect, forwardRef, useRef, useMemo, useCallback } from 'react'
+import React, { useState, useEffect, forwardRef, useRef, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import Editor, { type EditorProps, type OnMount } from '@monaco-editor/react'
 import type * as monacoEditor from 'monaco-editor'
-import { shouldRestoreMouseSelection } from './selectionGuard'
 import './codeEditor.css'
 
 /**
@@ -44,12 +43,12 @@ export interface CodeEditorProps extends Omit<EditorProps, 'theme'> {
    * @default auto-detected from data-theme attribute
    */
   theme?: string
-
+  
   /**
    * Debounce delay (ms) before emitting onChange to parent. Default: 200ms.
    */
   changeDebounceMs?: number
-
+  
   /**
    * Callback fired when the editor is mounted
    * This is an alias for onMount to maintain consistency
@@ -104,11 +103,11 @@ function getMonacoTheme(): string {
 
 /**
  * CodeEditor component that wraps Monaco Editor with automatic theme synchronization
- *
+ * 
  * This component provides the same API as Monaco Editor from @monaco-editor/react,
  * but automatically switches between vs-dark and vs themes based on the application's
  * current theme (detected via data-theme attribute on document.documentElement).
- *
+ * 
  * @example
  * ```tsx
  * // Basic usage - theme auto-detected
@@ -117,7 +116,7 @@ function getMonacoTheme(): string {
  *   language="typescript"
  *   onChange={(value) => setCode(value ?? '')}
  * />
- *
+ * 
  * // With custom options
  * <CodeEditor
  *   value={json}
@@ -129,7 +128,7 @@ function getMonacoTheme(): string {
  *     readOnly: true
  *   }}
  * />
- *
+ * 
  * // Override theme manually
  * <CodeEditor
  *   value={code}
@@ -162,13 +161,6 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastValueRef = useRef<string | undefined>(props.value)
   const lastEventRef = useRef<monacoEditor.editor.IModelContentChangedEvent | undefined>(undefined)
-  const onChangeRef = useRef(props.onChange)
-  const changeDebounceMsRef = useRef(changeDebounceMs)
-  const onMountRef = useRef(onMount)
-  const onEditorMountRef = useRef(onEditorMount)
-  const dataTestIdRef = useRef(dataTestId)
-  const resolvedLabelRef = useRef(resolvedLabel)
-  const isMouseDownRef = useRef(false)
 
   // Editor settings from SettingsService (fontSize, fontFamily, wordWrap, minimap, lineNumbers)
   const [editorSettings, setEditorSettings] = useState<Record<string, unknown>>({})
@@ -222,12 +214,6 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
     return opts
   }, [editorSettings])
 
-  // Memoize merged options to prevent unnecessary updateOptions calls during parent re-renders
-  const mergedOptions = useMemo(
-    () => ({ ...(props.options ?? {}), ...settingsOptions }),
-    [props.options, settingsOptions]
-  )
-
   // Apply settings changes to live editor instance
   useEffect(() => {
     if (editorInstance && Object.keys(settingsOptions).length > 0) {
@@ -239,19 +225,10 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   const currentTheme = theme ?? autoDetectedTheme
   const themeSource = theme === undefined ? 'auto' : 'prop'
 
-  // Keep refs updated for stable callbacks
+  // Keep ref updated
   useEffect(() => {
     goToDefinitionRef.current = onGoToDefinition
   }, [onGoToDefinition])
-
-  useEffect(() => {
-    onChangeRef.current = props.onChange
-    changeDebounceMsRef.current = changeDebounceMs
-    onMountRef.current = onMount
-    onEditorMountRef.current = onEditorMount
-    dataTestIdRef.current = dataTestId
-    resolvedLabelRef.current = resolvedLabel
-  }, [props.onChange, changeDebounceMs, onMount, onEditorMount, dataTestId, resolvedLabel])
 
   useEffect(() => {
     lastValueRef.current = props.value
@@ -297,109 +274,29 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
     }
   }, [theme])
 
-  // During a mouse drag, Monaco can emit a spurious non-mouse selection update
-  // after syncing its hidden textarea. Preserve the last genuine mouse selection
-  // and restore it if such an update collapses the drag selection.
-  useEffect(() => {
-    if (!editorInstance || !monacoInstance) return
-    const domNode = editorInstance.getDomNode()
-    if (!domNode) return
-    const hiddenTextarea = domNode.querySelector('textarea')
-
-    let restoringSelection = false
-    let lastGoodMouseSelection: {
-      anchorLine: number
-      anchorColumn: number
-      activeLine: number
-      activeColumn: number
-      isEmpty: boolean
-    } | null = null
-
-    const onMouseDown = (): void => {
-      isMouseDownRef.current = true
-      lastGoodMouseSelection = null
-    }
-
-    const onMouseUp = (): void => {
-      isMouseDownRef.current = false
-    }
-
-    domNode.addEventListener('mousedown', onMouseDown)
-    window.addEventListener('mouseup', onMouseUp)
-
-    const selectionDisposable = editorInstance.onDidChangeCursorSelection((e) => {
-      if (
-        isMouseDownRef.current &&
-        e.source === 'mouse' &&
-        hiddenTextarea instanceof HTMLTextAreaElement
-      ) {
-        lastGoodMouseSelection = {
-          anchorLine: e.selection.selectionStartLineNumber,
-          anchorColumn: e.selection.selectionStartColumn,
-          activeLine: e.selection.positionLineNumber,
-          activeColumn: e.selection.positionColumn,
-          isEmpty: e.selection.isEmpty()
-        }
-      }
-
-      if (!isMouseDownRef.current || restoringSelection) return
-
-      const mouseSelectionToRestore = lastGoodMouseSelection
-
-      if (shouldRestoreMouseSelection({
-        isMouseDown: isMouseDownRef.current,
-        source: e.source,
-        currentSelection: {
-          anchorLine: e.selection.selectionStartLineNumber,
-          anchorColumn: e.selection.selectionStartColumn,
-          activeLine: e.selection.positionLineNumber,
-          activeColumn: e.selection.positionColumn,
-          isEmpty: e.selection.isEmpty()
-        },
-        lastGoodMouseSelection: mouseSelectionToRestore
-      }) && mouseSelectionToRestore) {
-        restoringSelection = true
-        editorInstance.setSelection(new monacoInstance.Selection(
-          mouseSelectionToRestore.anchorLine,
-          mouseSelectionToRestore.anchorColumn,
-          mouseSelectionToRestore.activeLine,
-          mouseSelectionToRestore.activeColumn
-        ))
-        restoringSelection = false
-      }
-    })
-
-    return () => {
-      domNode.removeEventListener('mousedown', onMouseDown)
-      window.removeEventListener('mouseup', onMouseUp)
-      selectionDisposable.dispose()
-    }
-  }, [editorInstance, monacoInstance])
-
   // Expose ref
   React.useImperativeHandle(ref, () => ({
     editor: editorInstance,
     monaco: monacoInstance
   }), [editorInstance, monacoInstance])
 
-  const handleMount: OnMount = useCallback((editor, monaco) => {
+  const handleMount: OnMount = (editor, monaco) => {
     const monacoTyped = monaco as typeof monacoEditor
     setEditorInstance(editor)
     setMonacoInstance(monacoTyped)
 
-    const testId = dataTestIdRef.current
-    if (testId) {
+    if (dataTestId) {
       const domNode = editor.getDomNode()
       const textarea = domNode?.querySelector('textarea')
       if (textarea) {
-        textarea.setAttribute('data-testid', `${testId}-textarea`)
+        textarea.setAttribute('data-testid', `${dataTestId}-textarea`)
       }
     }
 
     // Register "Go to Definition" action for Handlebars variables
     editor.addAction({
       id: 'editor.action.goToVariableDefinition',
-      label: resolvedLabelRef.current,
+      label: resolvedLabel,
       contextMenuGroupId: 'navigation',
       contextMenuOrder: 1,
       keybindings: [monacoTyped.KeyMod.CtrlCmd | monacoTyped.KeyCode.F12],
@@ -416,29 +313,29 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
     })
 
     // Call user-provided callbacks
-    onMountRef.current?.(editor, monaco)
-    onEditorMountRef.current?.(editor, monaco)
-  }, [])
+    onMount?.(editor, monaco)
+    onEditorMount?.(editor, monaco)
+  }
 
-  const handleChange: EditorProps['onChange'] = useCallback((nextValue: string | undefined, ev: monacoEditor.editor.IModelContentChangedEvent) => {
+  const handleChange: EditorProps['onChange'] = (nextValue, ev) => {
     lastValueRef.current = nextValue
-    lastEventRef.current = ev
+    lastEventRef.current = ev as monacoEditor.editor.IModelContentChangedEvent | undefined
 
     if (debounceRef.current) {
       clearTimeout(debounceRef.current)
     }
 
-    if (changeDebounceMsRef.current <= 0) {
-      onChangeRef.current?.(nextValue, ev)
+    if (changeDebounceMs <= 0) {
+      props.onChange?.(nextValue, ev)
       return
     }
 
     debounceRef.current = setTimeout(() => {
       if (lastEventRef.current) {
-        onChangeRef.current?.(lastValueRef.current, lastEventRef.current)
+        props.onChange?.(lastValueRef.current, lastEventRef.current)
       }
-    }, changeDebounceMsRef.current)
-  }, [])
+    }, changeDebounceMs)
+  }
 
   return (
     <div
@@ -451,7 +348,7 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
       <div style={{ width: '100%', height: '100%' }} {...(dataTestId && { 'data-testid': `${dataTestId}-monaco` })}>
         <Editor
           {...props}
-          options={mergedOptions}
+          options={{ ...(props.options ?? {}), ...settingsOptions }}
           theme={currentTheme}
           onChange={handleChange}
           onMount={handleMount}

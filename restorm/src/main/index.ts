@@ -11,6 +11,10 @@ import { loadFolderStructure } from './FileOperations'
 import { DEFAULT_UI_DELAY_MS } from '../shared/config/constants'
 // DocumentEvents are handled by FileService internally for dirty state tracking
 
+// Set the app name for proper taskbar icon on Linux
+// Without this, Electron 38+ may use the default "Electron" identity
+app.name = 'restorm'
+
 const cliArgs = parseCliArgs()
 if (cliArgs.clearSettings) {
   clearUserSettings()

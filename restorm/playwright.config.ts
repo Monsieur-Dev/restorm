@@ -50,6 +50,12 @@ const navigationTestDir = defineBddConfig({
   outputDir: '.features-gen/navigation'
 })
 
+const windowStateTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/window-state/features/**/*.feature',
+  steps: ['tests/e2e/bdd/window-state/steps/**/*.ts', 'tests/e2e/bdd/fixtures/window-state.fixture.ts'],
+  outputDir: '.features-gen/window-state'
+})
+
 const userPreferencesTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/user_preferences/features/**/*.feature',
   steps: ['tests/e2e/bdd/user_preferences/steps/**/*.ts', 'tests/e2e/bdd/fixtures/user-preferences.fixture.ts'],
@@ -119,6 +125,10 @@ export default defineConfig({
     {
       name: 'navigation',
       testDir: navigationTestDir
+    },
+    {
+      name: 'window-state',
+      testDir: windowStateTestDir
     },
     {
       name: 'user_preferences',
