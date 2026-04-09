@@ -63,11 +63,11 @@ export interface CalendarGridProps {
   /** Test-id prefix. */
   testId: string
   /** Refs for the month and year label spans (used by parent for outside-click detection). */
-  monthPartRef: React.MutableRefObject<HTMLSpanElement | null>
-  yearPartRef: React.MutableRefObject<HTMLSpanElement | null>
+  monthPartRef: React.RefObject<HTMLSpanElement | null>
+  yearPartRef: React.RefObject<HTMLSpanElement | null>
   /** Refs for the month and year menus (used by parent for outside-click detection). */
-  monthMenuRef: React.MutableRefObject<HTMLDivElement | null>
-  yearMenuRef: React.MutableRefObject<HTMLDivElement | null>
+  monthMenuRef: React.RefObject<HTMLDivElement | null>
+  yearMenuRef: React.RefObject<HTMLDivElement | null>
   /** Whether each dropdown is open. */
   isMonthMenuOpen: boolean
   isYearMenuOpen: boolean

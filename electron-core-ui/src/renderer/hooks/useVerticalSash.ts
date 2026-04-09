@@ -27,7 +27,7 @@ export interface UseVerticalSashOptions {
 
 export interface UseVerticalSashReturn {
   /** Ref to attach to the container element */
-  containerRef: React.RefObject<HTMLDivElement>
+  containerRef: React.RefObject<HTMLDivElement | null>
   /** Current width of the panel */
   width: number
   /** Height of the container (from ResizeObserver) */

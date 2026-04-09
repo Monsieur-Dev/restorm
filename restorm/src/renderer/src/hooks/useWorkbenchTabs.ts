@@ -59,8 +59,8 @@ export interface UseWorkbenchTabsOptions {
 }
 
 export interface UseWorkbenchTabsReturn {
-  workbenchRef: React.RefObject<RestormWorkbenchHandle>
-  hasRestoredWorkbenchRef: React.MutableRefObject<boolean>
+  workbenchRef: React.RefObject<RestormWorkbenchHandle | null>
+  hasRestoredWorkbenchRef: React.RefObject<boolean>
   findIndexPathById: (items: FolderItem[], targetId: string) => number[] | null
   buildTabId: (prefix: 'folder' | 'env-folder' | 'request', id: string) => string
   openFolderTab: (folder: Folder, breadcrumbs: BreadcrumbItem[]) => void

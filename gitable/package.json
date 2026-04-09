@@ -28,18 +28,18 @@
     "depcheck": "depcheck"
   },
   "dependencies": {
-    "@vscode/codicons": "^0.0.44",
+    "@vscode/codicons": "^0.0.45",
     "electron-core-ui": "workspace:*",
-    "i18next": "^25.7.3",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-i18next": "^16.5.0"
+    "i18next": "^26.0.4",
+    "react": "^19.0.5",
+    "react-dom": "^19.0.5",
+    "react-i18next": "^17.0.2"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.0",
     "@types/node": "^25.5.2",
-    "@types/react": "^18.3.18",
-    "@types/react-dom": "^18.3.5",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8.58.1",
     "@typescript-eslint/parser": "^8.58.1",
     "@vitejs/plugin-react": "^5.2.0",
