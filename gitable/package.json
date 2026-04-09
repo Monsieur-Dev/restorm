@@ -10,7 +10,7 @@
   },
   "license": "MIT",
   "engines": {
-    "node": ">=20 <21"
+    "node": ">=20"
   },
   "scripts": {
     "dev": "cross-env ELECTRON_DISABLE_SANDBOX=1 electron-vite dev",
@@ -36,7 +36,7 @@
     "react-i18next": "^17.0.2"
   },
   "devDependencies": {
-    "@playwright/test": "^1.56.0",
+    "@playwright/test": "^1.59.1",
     "@types/node": "^25.5.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -45,16 +45,16 @@
     "@vitejs/plugin-react": "^5.2.0",
     "cross-env": "^10.1.0",
     "electron": "^41.2.0",
-    "electron-builder": "^26.0.12",
+    "electron-builder": "^26.8.1",
     "electron-vite": "^5.0.0",
     "eslint": "^9.39.2",
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.26",
-    "globals": "^16.5.0",
-    "playwright": "^1.56.0",
-    "typescript": "^5.3.3",
+    "globals": "^17.4.0",
+    "playwright": "^1.59.1",
+    "typescript": "^5.9.3",
     "typescript-eslint": "^8.58.1",
     "vite": "^7.3.2"
   },
