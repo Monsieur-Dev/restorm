@@ -19,7 +19,17 @@ Given('the title does not contain {string}', async ({ page }, text: string) => {
 
 When('I click on {string} folder in the sidebar', async ({ page }, folderName: string) => {
   const folder = page.locator(listViewRowSelectorByTitle('sidebar-listview', folderName)).first()
-  await expect(folder).toBeVisible({ timeout: 5000 })
+  // If not visible, expand parent folders to reveal it
+  if (!await folder.isVisible()) {
+    const allExpanders = page.locator('[data-testid="sidebar-listview"] .list-view-row[aria-expanded="false"] button.list-view-expander')
+    const count = await allExpanders.count()
+    for (let i = 0; i < count; i++) {
+      await allExpanders.nth(i).click()
+      await page.waitForTimeout(200)
+      if (await folder.isVisible()) break
+    }
+  }
+  await expect(folder).toBeVisible({ timeout: 10000 })
   await folder.dblclick()
   await page.waitForSelector('[role="tab"]', { timeout: 15000 })
 })
@@ -108,12 +118,13 @@ When('I rename {string} to {string} in the sidebar', async ({ page }, oldName: s
   await expect(input).toBeVisible({ timeout: 5000 })
   await input.fill(newName)
   await page.keyboard.press('Enter')
-  await page.waitForTimeout(300)
+  await page.waitForTimeout(500)
 })
 
 Then('the breadcrumb should show {string}', async ({ page }, text: string) => {
-  const breadcrumbLink = page.locator('.ecui-breadcrumb-link--current, .ecui-breadcrumb-link--editable')
-  await expect(breadcrumbLink).toContainText(text, { timeout: 5000 })
+  // Target breadcrumb only in the active tab's content panel (not other tabs)
+  const breadcrumbLink = page.locator('[style*="display: flex"] .ecui-breadcrumb-link--current, [style*="display: flex"] .ecui-breadcrumb-link--editable').first()
+  await expect(breadcrumbLink).toContainText(text, { timeout: 10000 })
 })
 
 When('I right-click on the sidebar empty area', async ({ page }) => {

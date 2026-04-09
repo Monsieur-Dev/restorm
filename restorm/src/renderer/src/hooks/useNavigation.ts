@@ -16,6 +16,7 @@ export interface UseNavigationOptions {
   openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[]) => void
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[]) => void
   setSelectedItemId: React.Dispatch<React.SetStateAction<string | null>>
+  setExpandedIds: React.Dispatch<React.SetStateAction<string[]>>
   setFocusedGroupId: React.Dispatch<React.SetStateAction<string | null>>
   getNearestEnvironmentsForBreadcrumbs: (rootItems: (EnvironmentFolder | Folder | Request)[], breadcrumbs: BreadcrumbItem[]) => Environment[]
 }
@@ -34,6 +35,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     openEnvironmentFolderTab,
     openAnyRequestTab,
     setSelectedItemId,
+    setExpandedIds,
     setFocusedGroupId,
     getNearestEnvironmentsForBreadcrumbs
   } = options
@@ -197,13 +199,31 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       ? settingsApi.get('behavior:syncSidebarWithTabs')
       : Promise.resolve(true)
 
+    // Always expand ancestor folders so the selected item is visible in the sidebar
+    if (itemId) {
+      const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
+      if (breadcrumbs.length > 0) {
+        const ancestorIds = breadcrumbs.slice(0, -1).map((bc) => bc.id)
+        if (ancestorIds.length > 0) {
+          setExpandedIds((prev) => {
+            const next = new Set(prev)
+            for (const id of ancestorIds) {
+              next.add(id)
+            }
+            return Array.from(next)
+          })
+        }
+      }
+    }
+
+    // Conditionally sync sidebar selection highlight based on user setting
     void settingsPromise.then((stored) => {
       const syncEnabled = stored !== null && stored !== undefined ? (stored as boolean) : true
       if (syncEnabled && itemId) {
         setSelectedItemId(itemId)
       }
     })
-  }, [parseTabId, setSelectedItemId])
+  }, [parseTabId, setSelectedItemId, setExpandedIds, rootItems])
 
   // Handle search result click - navigate to the selected item
   const handleSearchResultClick = useCallback((result: SearchResult) => {

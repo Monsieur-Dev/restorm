@@ -44,6 +44,12 @@ const iconChangeTestDir = defineBddConfig({
   outputDir: '.features-gen/icon-change'
 })
 
+const sidebarSyncTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/sidebar-sync/features/**/*.feature',
+  steps: ['tests/e2e/bdd/sidebar-sync/steps/**/*.ts', 'tests/e2e/bdd/fixtures/petstore-file.fixture.ts'],
+  outputDir: '.features-gen/sidebar-sync'
+})
+
 const navigationTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/navigation/features/**/*.feature',
   steps: ['tests/e2e/bdd/navigation/steps/**/*.ts', 'tests/e2e/bdd/fixtures/petstore-file.fixture.ts'],
@@ -117,6 +123,10 @@ export default defineConfig({
     {
       name: 'import',
       testDir: importTestDir
+    },
+    {
+      name: 'sidebar-sync',
+      testDir: sidebarSyncTestDir
     },
     {
       name: 'icon-change',

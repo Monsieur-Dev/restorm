@@ -599,6 +599,7 @@ const App: React.FC = () => {
     openEnvironmentFolderTab,
     openAnyRequestTab,
     setSelectedItemId,
+    setExpandedIds,
     setFocusedGroupId,
     getNearestEnvironmentsForBreadcrumbs
   })
