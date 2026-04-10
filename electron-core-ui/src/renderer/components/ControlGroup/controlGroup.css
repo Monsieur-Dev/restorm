@@ -1,0 +1,79 @@
+/* ==========================================================================
+   ControlGroup — joins multiple controls into a continuous strip.
+
+   Child combinators go 2 levels deep to reach bordered elements
+   (custom-trigger, inputbox, a.button) without affecting deeper
+   internal elements (badges, icons, dropdown content).
+   Dropdowns are portaled to document.body so they are not descendants.
+   ========================================================================== */
+
+.ecu-control-group {
+	display: flex;
+	align-items: stretch;
+}
+
+/* --- Horizontal orientation --- */
+
+.ecu-control-group--horizontal {
+	flex-direction: row;
+}
+
+.ecu-control-group--horizontal > * {
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+}
+
+/* Force inline-block children (e.g. button-container) to stretch vertically */
+.ecu-control-group > .button-container {
+	display: flex !important;
+}
+
+.ecu-control-group > .button-container > .text-button {
+	height: 100% !important;
+	max-width: none !important;
+}
+
+/* Non-last children: hide right border + right radius */
+.ecu-control-group--horizontal > *:not(:last-child),
+.ecu-control-group--horizontal > *:not(:last-child) > *,
+.ecu-control-group--horizontal > *:not(:last-child) > * > * {
+	border-top-right-radius: 0 !important;
+	border-bottom-right-radius: 0 !important;
+	border-right-color: transparent !important;
+}
+
+/* Non-first children: remove left radius only */
+.ecu-control-group--horizontal > *:not(:first-child),
+.ecu-control-group--horizontal > *:not(:first-child) > *,
+.ecu-control-group--horizontal > *:not(:first-child) > * > * {
+	border-top-left-radius: 0 !important;
+	border-bottom-left-radius: 0 !important;
+}
+
+/* --- Vertical orientation --- */
+
+.ecu-control-group--vertical {
+	flex-direction: column;
+}
+
+.ecu-control-group--vertical > * {
+	margin-top: 0 !important;
+	margin-bottom: 0 !important;
+}
+
+/* Non-last children: hide bottom border + bottom radius */
+.ecu-control-group--vertical > *:not(:last-child),
+.ecu-control-group--vertical > *:not(:last-child) > *,
+.ecu-control-group--vertical > *:not(:last-child) > * > * {
+	border-bottom-left-radius: 0 !important;
+	border-bottom-right-radius: 0 !important;
+	border-bottom-color: transparent !important;
+}
+
+/* Non-first children: remove top radius only */
+.ecu-control-group--vertical > *:not(:first-child),
+.ecu-control-group--vertical > *:not(:first-child) > *,
+.ecu-control-group--vertical > *:not(:first-child) > * > * {
+	border-top-left-radius: 0 !important;
+	border-top-right-radius: 0 !important;
+}

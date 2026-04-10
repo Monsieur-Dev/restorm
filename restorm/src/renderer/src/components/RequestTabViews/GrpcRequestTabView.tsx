@@ -7,6 +7,7 @@ import {
   CodeEditor,
   SplitView,
   Pane,
+  ControlGroup,
   logger,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
@@ -360,9 +361,9 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
   // URL section
   const urlSection = (
     <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <ControlGroup data-testid="grpc-url-section">
         <Badge type={mapToBadgeType(request.callType)} />
-        <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
+        <div style={{ flex: 1, minWidth: 0 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
           <RestormVariableInputBox
             value={url}
             onChange={setUrl}
@@ -381,10 +382,8 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
             ariaLabel: isSending ? t('cancel') : t('grpc.send')
           }}
           data-testid="grpc-send-button"
-        >
-          {isSending ? t('cancel') : t('grpc.send')}
-        </Button>
-      </div>
+        />
+      </ControlGroup>
       <div style={{ fontSize: 12, color: 'var(--descriptionForeground)' }}>
         {request.service}/{request.method}
       </div>

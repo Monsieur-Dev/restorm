@@ -7,6 +7,7 @@ import {
   CodeEditor,
   SplitView,
   Pane,
+  ControlGroup,
   logger,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
@@ -364,9 +365,9 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   
   // URL section
   const urlSection = (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <ControlGroup data-testid="graphql-url-section">
       <Badge type="GQL" />
-      <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
+      <div style={{ flex: 1, minWidth: 0 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
         <RestormVariableInputBox
           value={url}
           onChange={setUrl}
@@ -385,10 +386,8 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
           ariaLabel: isSending ? t('cancel') : t('graphql.send')
         }}
         data-testid="graphql-action-button"
-      >
-        {isSending ? t('cancel') : t('graphql.send')}
-      </Button>
-    </div>
+      />
+    </ControlGroup>
   )
   
   const handleCloseHistoryModal = useCallback(() => {

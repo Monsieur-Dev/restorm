@@ -8,6 +8,7 @@ import {
   CodeEditor,
   SplitView,
   Pane,
+  ControlGroup,
   logger,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
@@ -397,9 +398,9 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   
   // URL section
   const urlSection = (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <ControlGroup data-testid="websocket-url-section">
       <Badge type={mapToBadgeType(request.protocol)} />
-      <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
+      <div style={{ flex: 1, minWidth: 0 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
         <RestormVariableInputBox
           value={url}
           onChange={setUrl}
@@ -418,10 +419,8 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           ariaLabel: isSending ? t('websocket.disconnect') : t('websocket.connect')
         }}
         data-testid="websocket-connect-button"
-      >
-        {isSending ? t('websocket.disconnect') : t('websocket.connect')}
-      </Button>
-    </div>
+      />
+    </ControlGroup>
   )
   
   const handleCloseHistoryModal = useCallback(() => {

@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 interface CustomDropdownOption {
   value: string
@@ -25,16 +26,30 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
   const [isOpen, setIsOpen] = useState(false)
   const [focusedIndex, setFocusedIndex] = useState(-1)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLDivElement>(null)
+  const portalContainerRef = useRef<Element | null>(null)
   const listRef = useRef<HTMLDivElement>(null)
+  const [listPos, setListPos] = useState({ top: 0, left: 0, width: 0 })
 
   const selectedOption = options.find(opt => opt.value === value)
+
+  // Calculate list position when opened
+  useLayoutEffect(() => {
+    if (isOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect()
+      setListPos({ top: rect.bottom + 4, left: rect.left, width: rect.width })
+    }
+  }, [isOpen])
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent): void => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
+      const target = event.target as Node
+      // If click is inside the trigger container, ignore (trigger handles its own toggle)
+      if (dropdownRef.current?.contains(target)) return
+      // If click is inside the portaled list, ignore
+      if (listRef.current?.contains(target)) return
+      setIsOpen(false)
     }
 
     if (isOpen) {
@@ -126,6 +141,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
     >
       {/* Dropdown button */}
       <div
+        ref={triggerRef}
         role="combobox"
         aria-expanded={isOpen}
         aria-haspopup="listbox"
@@ -180,26 +196,25 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
         </svg>
       </div>
 
-      {/* Dropdown list */}
-      {isOpen && (
+      {/* Dropdown list — portaled to body to escape overflow:hidden ancestors */}
+      {isOpen && createPortal(
         <div
           ref={listRef}
           id={`${id}-listbox`}
           role="listbox"
           aria-activedescendant={focusedIndex >= 0 ? `${id}-option-${focusedIndex}` : undefined}
           style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            marginTop: '4px',
+            position: 'fixed',
+            top: listPos.top,
+            left: listPos.left,
+            width: listPos.width,
             maxHeight: '300px',
             overflowY: 'auto',
             backgroundColor: 'var(--editor-background)',
             border: '1px solid var(--dropdown-border)',
             borderRadius: '2px',
             boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
-            zIndex: 1000
+            zIndex: 10001
           }}
         >
           {options.map((option, index) => (
@@ -237,7 +252,8 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
               {option.label}
             </div>
           ))}
-        </div>
+        </div>,
+        (portalContainerRef.current ??= triggerRef.current?.closest('.workbench') ?? document.body)
       )}
     </div>
   )

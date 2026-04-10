@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useEffect, useCallback, useLayoutEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { isMacintosh } from '../../hooks/usePlatform'
 import { SelectBoxListProps } from './types'
 import { ScrollableElement } from '../ScrollableElement'
@@ -53,6 +54,9 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   
   const selectRef = useRef<HTMLSelectElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLDivElement>(null)
+  const portalContainerRef = useRef<Element | null>(null)
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 })
 
   // Handle selection change
   const handleSelectChange = useCallback((index: number): void => {
@@ -198,8 +202,10 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   // Handle click outside to close dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent): void => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) &&
-          selectRef.current && !selectRef.current.contains(event.target as Node)) {
+      const target = event.target as Node
+      if (dropdownRef.current && !dropdownRef.current.contains(target) &&
+          triggerRef.current && !triggerRef.current.contains(target) &&
+          selectRef.current && !selectRef.current.contains(target)) {
         hideDropdown(false)
       }
     }
@@ -223,18 +229,15 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
     }
   }, [styles])
 
-  // Calculate dropdown width when it becomes visible
-  useEffect(() => {
-    if (isVisible && dropdownRef.current) {
-      const dropdownElement = dropdownRef.current
-      const triggerElement = dropdownElement.previousElementSibling as HTMLElement | null
-      
-      // Get the width of the trigger element, fallback to dropdown width
-      const triggerWidth = triggerElement?.offsetWidth ?? dropdownElement.offsetWidth
-      
-      // Set the dropdown width to match the trigger width
-      dropdownElement.style.width = `${triggerWidth}px`
-      dropdownElement.style.minWidth = `${triggerWidth}px`
+  // Calculate dropdown position from the trigger when it becomes visible
+  useLayoutEffect(() => {
+    if (isVisible && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect()
+      setDropdownPos({
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width
+      })
     }
   }, [isVisible])
 
@@ -297,6 +300,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
 
       {/* Custom dropdown trigger */}
       <div
+        ref={triggerRef}
         className={`${selectClasses} custom-trigger`}
         onClick={handleSelectClick}
         onMouseDown={handleSelectMouseDown}
@@ -314,12 +318,19 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
         <span className="codicon codicon-chevron-down select-arrow" />
       </div>
 
-      {/* Custom dropdown */}
-      {isVisible && (
+      {/* Custom dropdown — portaled to body to escape overflow:hidden ancestors */}
+      {isVisible && createPortal(
         <div
           ref={dropdownRef}
           className={`${dropdownClasses} positioned`}
           data-testid={`${testId}-dropdown`}
+          style={{
+            position: 'fixed',
+            top: dropdownPos.top,
+            left: dropdownPos.left,
+            width: dropdownPos.width,
+            minWidth: dropdownPos.width
+          }}
         >
             <ScrollableElement
               options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false, handleMouseWheel: true, fitContent: true }}
@@ -382,7 +393,8 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
               {selectedOption?.description}
             </div>
           )}
-        </div>
+        </div>,
+        (portalContainerRef.current ??= triggerRef.current?.closest('.workbench') ?? document.body)
       )}
     </div>
   )

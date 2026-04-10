@@ -7,6 +7,7 @@ import {
   CodeEditor,
   SplitView,
   Pane,
+  ControlGroup,
   logger,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
@@ -350,9 +351,9 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
   // URL section
   const urlSection = (
     <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <ControlGroup data-testid="soap-url-section">
         <Badge type="SOAP" />
-        <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
+        <div style={{ flex: 1, minWidth: 0 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
           <RestormVariableInputBox
             value={url}
             onChange={setUrl}
@@ -371,10 +372,8 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
             ariaLabel: isSending ? t('cancel') : t('soap.send')
           }}
           data-testid="soap-request-action-button"
-        >
-          {isSending ? t('cancel') : t('soap.send')}
-        </Button>
-      </div>
+        />
+      </ControlGroup>
       <div style={{ fontSize: 12, color: 'var(--descriptionForeground)' }}>
         {request.service}/{request.operation} • SOAPAction: {request.soapAction}
       </div>

@@ -7,6 +7,10 @@ import { MarkdownEditor } from './MarkdownEditor/MarkdownEditor'
 import { MarkdownViewer } from './MarkdownViewer/MarkdownViewer'
 import { SplitView, Pane } from './SplitView'
 
+// ControlGroup exports
+export { ControlGroup } from './ControlGroup'
+export type { ControlGroupProps, ControlGroupOrientation } from './ControlGroup'
+
 // Callout exports
 export { Callout } from './Callout'
 export type { CalloutProps, CalloutVariant } from './Callout'

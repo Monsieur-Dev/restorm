@@ -7,6 +7,7 @@ import {
   SelectBox,
   SplitView,
   Pane,
+  ControlGroup,
   logger,
   type VariableDefinition,
   type ISelectOptionItem,
@@ -32,9 +33,8 @@ import { HTTPRequestBodySection } from './HTTPRequestBodySection'
 import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabViewUtils'
 
 const authPaneContentStyle: CSSProperties = { height: '100%', boxSizing: 'border-box', padding: 8 }
-const urlRowStyle: CSSProperties = { display: 'flex', alignItems: 'center', gap: 8 }
 const methodSelectWrapperStyle: CSSProperties = { width: 90, flexShrink: 0 }
-const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0, paddingLeft: 15 }
+const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
 
 export interface HTTPRequestTabViewProps {
   request: HTTPRequest
@@ -620,7 +620,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
 
   // URL section
   const urlSection = (
-    <div style={urlRowStyle}>
+    <ControlGroup data-testid="http-request-url-section">
       <div style={methodSelectWrapperStyle}>
         <SelectBox
           id="http-method-select"
@@ -643,14 +643,12 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         />
       </div>
       {isSending ? (
-        <Button 
+        <Button
           icon="close"
-          onClick={handleCancel} 
+          onClick={handleCancel}
           options={{ title: t('requestTab.cancel'), ariaLabel: t('requestTab.cancel') }}
           data-testid="http-request-cancel-button"
-        >
-          {t('requestTab.cancel')}
-        </Button>
+        />
       ) : (
         <Button
           icon="send"
@@ -658,11 +656,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           emphasis={1}
           options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}
           data-testid="http-request-send-button"
-        >
-          {t('requestTab.send')}
-        </Button>
+        />
       )}
-    </div>
+    </ControlGroup>
   )
 
   const handleCloseHistoryModal = useCallback(() => {
