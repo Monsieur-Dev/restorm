@@ -42,6 +42,10 @@ export interface SettingDefinition {
   type: string        // 'enum' | 'number' | 'text' | 'theme' | 'toggle' | custom
   default: SettingValue
   params?: SettingParams | undefined
+  /** Feature flag name that gates this setting. When set, the setting is hidden from the UI if the feature is disabled. */
+  feature?: string | undefined
+  /** Default value to use when the associated feature is disabled. Required when `feature` is set. */
+  featureDisabledDefault?: SettingValue | undefined
 }
 
 // ==========================================================================

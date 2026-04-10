@@ -22,7 +22,7 @@ export function registerSettingsHandlers(): void {
 
   ipcMain.handle('settings:get-groups', () => {
     if (!isSettingsServiceInitialized()) return []
-    return getSettingsService().getGroups()
+    return getSettingsService().getFilteredGroups()
   })
 
   validatedHandle('settings:search', settingsSearchArgs, (_event, [query]) => {

@@ -1,0 +1,5 @@
+Features:
+  - Name: "advancedGraphics"
+    Strategies:
+      - Type: Basic
+        Enabled: true

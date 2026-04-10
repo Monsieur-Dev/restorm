@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EditorTabs } from './EditorTabs';
 import { Modal } from '../Modal';
+import { useSetting } from '../../hooks/useSettings';
 import type { EditorGroup, EditorWorkbenchCallbacks, SplitDirection } from './types';
 import { getEditorDragData, isEditorDragEvent } from './dnd';
 import { getTabTitleString } from './utils';
@@ -27,6 +28,7 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 	const [isEditorDrag, setIsEditorDrag] = useState<boolean>(false);
 	const [fullscreenTabId, setFullscreenTabId] = useState<string | null>(null);
 	const contentRef = useRef<HTMLDivElement | null>(null);
+	const [advancedEffects] = useSetting('appearance:advancedVisualEffects');
 
 	// Cache rendered tab contents — render each tab only once, then reuse.
 	// This prevents React from unmounting/remounting heavy components (Monaco editors, etc.)
@@ -104,8 +106,8 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 			inset: 0,
 			// Only start intercepting events when an editor tab is being dragged
 			pointerEvents: splitTarget && isEditorDrag ? 'auto' : 'none',
-			backgroundColor: 'rgba(0, 0, 0, 0.40)', // 20% black
-			//backdropFilter: 'blur(1px)', // slight blur (removed... too laggy)
+			backgroundColor: 'rgba(0, 0, 0, 0.40)',
+			backdropFilter: advancedEffects ? 'blur(8px)' : undefined,
 			transition: 'clip-path 150ms ease, opacity 120ms ease',
 			willChange: 'clip-path, opacity',
 			boxSizing: 'border-box',
@@ -122,7 +124,7 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 		if (splitTarget === 'top') return { ...base, clipPath: 'inset(0 0 50% 0)' };
 		// bottom
 		return { ...base, clipPath: 'inset(50% 0 0 0)' };
-	}, [splitTarget, isEditorDrag]);
+	}, [splitTarget, isEditorDrag, advancedEffects]);
 
 	const isBlockedDrop = useCallback((e: React.DragEvent<HTMLDivElement>): boolean => {
 		const data = getEditorDragData(e);

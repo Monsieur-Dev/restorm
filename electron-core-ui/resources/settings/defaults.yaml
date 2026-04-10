@@ -23,6 +23,14 @@ groups:
                 labelKey: "settings.appearance.language.en"
               - value: "fr"
                 labelKey: "settings.appearance.language.fr"
+      - setting:
+          id: "advancedVisualEffects"
+          titleKey: "settings.appearance.advancedVisualEffects.title"
+          descriptionKey: "settings.appearance.advancedVisualEffects.description"
+          type: "toggle"
+          default: true
+          feature: "advancedGraphics"
+          featureDisabledDefault: false
       - group:
           id: "editor"
           titleKey: "settings.appearance.editor.title"

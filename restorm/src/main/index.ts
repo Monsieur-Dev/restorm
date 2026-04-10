@@ -1,6 +1,6 @@
 import { app, BrowserWindow } from 'electron'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFeatureService, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized } from 'electron-core-ui'
+import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized } from 'electron-core-ui'
 import { join } from 'path'
 import { existsSync, statSync } from 'fs'
 import { searchIndexService, contextService, responseHistoryService } from './services'
@@ -183,11 +183,6 @@ function getSettingsConfigPath(): string {
   return join(process.resourcesPath, 'restorm-resources/settings.yaml')
 }
 
-// Initialize Feature Flipping Service
-const featuresConfigPath = getFeaturesConfigPath()
-initFeatureService(featuresConfigPath, 'desktop')
-logger.info('Feature Flipping Service initialized', { configPath: featuresConfigPath })
-
 // Initialize I18n Service for main process translations
 // Default to system locale or 'en', will be synchronized with renderer via IPC
 const systemLocale = app.getLocale().split('-')[0] ?? 'en'
@@ -237,7 +232,8 @@ setupGraphQL()
 const resourcesPath = getResourcesPath()
 const rendererPath = getRendererPath()
 const settingsConfigPath = getSettingsConfigPath()
-initializeApp('restorm', createWindow, resourcesPath, undefined, rendererPath || undefined, settingsConfigPath)
+const featuresConfigPath = getFeaturesConfigPath()
+initializeApp('restorm', createWindow, resourcesPath, undefined, rendererPath || undefined, settingsConfigPath, featuresConfigPath)
 
 // Register all restorm-specific IPC handlers
 registerRestormIPC({ editorWindows, closeAllWindows })

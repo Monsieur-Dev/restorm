@@ -103,6 +103,44 @@ Props:
 
 A scrollable theme preview component used by `ThemeRenderer` (in `SettingsView`) and the fallback `SettingsPage`.
 
+## Feature-Gated Settings
+
+Settings can be conditionally shown based on feature flags. This allows settings to be hidden when their associated feature is disabled.
+
+### YAML Configuration
+
+Add `feature` and `featureDisabledDefault` to a setting definition:
+
+```yaml
+- setting:
+    id: "advancedVisualEffects"
+    titleKey: "settings.appearance.advancedVisualEffects.title"
+    type: "toggle"
+    default: true
+    feature: "advancedGraphics"
+    featureDisabledDefault: false
+```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `feature` | No | Name of the feature flag that gates this setting |
+| `featureDisabledDefault` | Only when `feature` is set | Value returned when the feature is disabled |
+
+### Behavior
+
+- **Feature disabled:** The setting is hidden from the settings UI (`getFilteredGroups()` strips it). `get()` returns `featureDisabledDefault` regardless of the stored value. Components using `useSetting()` receive the disabled default.
+- **Feature enabled:** The setting appears in the UI and behaves normally. `get()` returns the stored value or `default`.
+- **No feature set:** The setting always appears and behaves normally.
+- **Empty groups:** If all settings in a group are feature-gated and disabled, the group is removed from the UI.
+
+### Usage in Code
+
+```typescript
+// Works regardless of feature state.
+// Returns true when feature is enabled (or stored value), false when disabled.
+const [advancedEffects] = useSetting('appearance:advancedVisualEffects')
+```
+
 ## Test IDs and Data Attributes
 
 ### SettingsPage

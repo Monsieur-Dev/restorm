@@ -32,6 +32,10 @@
         "en": "English",
         "fr": "Français"
       },
+      "advancedVisualEffects": {
+        "title": "Effets visuels avancés",
+        "description": "Active les effets visuels avancés tels que le flou d'arrière-plan sur les overlays et les animations CSS. Désactiver pour de meilleures performances sur du matériel modeste."
+      },
       "editor": {
         "title": "Éditeur",
         "fontSize": {

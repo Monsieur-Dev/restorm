@@ -13,6 +13,7 @@ import { isSettingItem, isGroupItem } from '../../types/settings'
 import { settingsYamlConfigSchema } from '../schemas/configSchemas'
 import { logger } from './LoggerService'
 import { getStorageService } from './StorageService'
+import { isFeatureServiceInitialized, getFeatureService } from './FeatureFlippingService'
 import { FileSystemError, errorMeta } from '../../errors'
 import { i18nService } from './I18nService'
 
@@ -112,15 +113,19 @@ export class SettingsService {
   /**
    * Get the current value of a setting by its storage key.
    * Falls back to default if not persisted.
+   * Returns featureDisabledDefault when the setting's feature is disabled.
    */
   public get(storageKey: string): SettingValue {
+    const setting = this.findSettingByStorageKey(storageKey)
+    if (setting?.feature && !this.isSettingFeatureEnabled(setting)) {
+      return setting.featureDisabledDefault ?? setting.default
+    }
+
     const storage = getStorageService()
     const stored = storage.get(`settings:${storageKey}`)
     if (stored !== undefined) {
       return stored as SettingValue
     }
-    // Find default
-    const setting = this.findSettingByStorageKey(storageKey)
     return setting ? setting.default : ''
   }
 
@@ -176,6 +181,11 @@ export class SettingsService {
   /** Get the raw group hierarchy */
   public getGroups(): SettingsGroup[] {
     return this.groups
+  }
+
+  /** Get the group hierarchy with feature-gated settings removed */
+  public getFilteredGroups(): SettingsGroup[] {
+    return this.filterGroupsByFeature(this.groups)
   }
 
   // ==========================================================================
@@ -282,9 +292,18 @@ export class SettingsService {
       for (const item of group.items) {
         if (isSettingItem(item)) {
           const storageKey = this.buildStorageKey(currentPath, item.setting.id)
-          const stored = storage.get(`settings:${storageKey}`)
-          const currentValue = stored !== undefined ? (stored as SettingValue) : item.setting.default
-          const isModified = stored !== undefined && stored !== item.setting.default
+          const featureDisabled = item.setting.feature != null && !this.isSettingFeatureEnabled(item.setting)
+          let currentValue: SettingValue
+          let isModified: boolean
+
+          if (featureDisabled) {
+            currentValue = item.setting.featureDisabledDefault ?? item.setting.default
+            isModified = false
+          } else {
+            const stored = storage.get(`settings:${storageKey}`)
+            currentValue = stored !== undefined ? (stored as SettingValue) : item.setting.default
+            isModified = stored !== undefined && stored !== item.setting.default
+          }
 
           result.push({
             ...item.setting,
@@ -345,6 +364,39 @@ export class SettingsService {
       }
     }
     return false
+  }
+
+  /** Check whether a setting's associated feature is enabled */
+  private isSettingFeatureEnabled(setting: SettingDefinition): boolean {
+    if (!setting.feature) return true
+    if (!isFeatureServiceInitialized()) return false
+    return getFeatureService().isEnabled(setting.feature)
+  }
+
+  /** Return a deep copy of the group tree with feature-gated settings removed */
+  private filterGroupsByFeature(groups: SettingsGroup[]): SettingsGroup[] {
+    const filtered: SettingsGroup[] = []
+
+    for (const group of groups) {
+      const filteredItems = group.items
+        .map((item) => {
+          if (isSettingItem(item)) {
+            return this.isSettingFeatureEnabled(item.setting) ? item : null
+          }
+          // Nested group — recurse
+          const childGroups = this.filterGroupsByFeature([item.group])
+          const firstChild = childGroups[0]
+          return firstChild ? { group: firstChild } : null
+        })
+        .filter((item): item is NonNullable<typeof item> => item !== null)
+
+      // Only include groups that still have items after filtering
+      if (filteredItems.length > 0) {
+        filtered.push({ ...group, items: filteredItems })
+      }
+    }
+
+    return filtered
   }
 
   /** Remove a setting by storage key recursively */

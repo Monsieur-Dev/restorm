@@ -10,6 +10,7 @@ export {
   initFeatureService,
   getFeatureService,
   isFeatureServiceInitialized,
+  resetFeatureService,
   FeatureFlippingService
 } from './FeatureFlippingService'
 

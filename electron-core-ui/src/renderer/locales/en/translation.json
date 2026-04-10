@@ -32,6 +32,10 @@
         "en": "English",
         "fr": "Français"
       },
+      "advancedVisualEffects": {
+        "title": "Advanced visual effects",
+        "description": "Enable advanced visual effects such as backdrop blur on overlays and CSS animations. Disable for better performance on low-end hardware."
+      },
       "editor": {
         "title": "Editor",
         "fontSize": {

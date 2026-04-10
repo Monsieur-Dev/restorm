@@ -55,6 +55,16 @@ vi.mock('./I18nService', () => ({
   }
 }))
 
+// Mock FeatureFlippingService
+const mockIsEnabled = vi.fn()
+const mockIsFeatureServiceInitialized = vi.fn(() => true)
+vi.mock('./FeatureFlippingService', () => ({
+  isFeatureServiceInitialized: () => mockIsFeatureServiceInitialized(),
+  getFeatureService: () => ({
+    isEnabled: mockIsEnabled
+  })
+}))
+
 import { existsSync, readFileSync } from 'fs'
 import { SettingsService } from './SettingsService'
 import { logger } from './LoggerService'
@@ -118,6 +128,8 @@ describe('SettingsService', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockStorageGet.mockReturnValue(undefined)
+    mockIsFeatureServiceInitialized.mockReturnValue(true)
+    mockIsEnabled.mockReturnValue(true)
   })
 
   afterEach(() => {
@@ -605,6 +617,271 @@ describe('SettingsService', () => {
       const service = createService()
       const groups = service.getGroups()
       expect(groups[0]?.id).toBe('general')
+    })
+  })
+
+  // ---------------------------------------------------------------
+  // Feature-gating
+  // ---------------------------------------------------------------
+  describe('feature-gating', () => {
+    function makeFeatureGatedConfig(): SettingsYamlConfig {
+      return {
+        groups: [
+          {
+            id: 'appearance',
+            titleKey: 'settings.appearance',
+            items: [
+              {
+                setting: {
+                  id: 'theme',
+                  titleKey: 'settings.theme',
+                  type: 'enum',
+                  default: 'light'
+                }
+              },
+              {
+                setting: {
+                  id: 'effects',
+                  titleKey: 'settings.effects',
+                  type: 'toggle',
+                  default: true,
+                  feature: 'advancedEffects',
+                  featureDisabledDefault: false
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+
+    function makeNestedFeatureGatedConfig(): SettingsYamlConfig {
+      return {
+        groups: [
+          {
+            id: 'root',
+            titleKey: 'settings.root',
+            items: [
+              {
+                group: {
+                  id: 'experimental',
+                  titleKey: 'settings.experimental',
+                  items: [
+                    {
+                      setting: {
+                        id: 'beta',
+                        titleKey: 'settings.beta',
+                        type: 'toggle',
+                        default: true,
+                        feature: 'betaFeature',
+                        featureDisabledDefault: false
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                setting: {
+                  id: 'stable',
+                  titleKey: 'settings.stable',
+                  type: 'text',
+                  default: 'ok'
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+
+    describe('get()', () => {
+      it('returns featureDisabledDefault when feature is disabled', () => {
+        mockIsEnabled.mockReturnValue(false)
+        const service = createService(makeFeatureGatedConfig())
+        mockStorageGet.mockReturnValue(true) // stored value should be ignored
+
+        expect(service.get('appearance:effects')).toBe(false)
+      })
+
+      it('returns stored value when feature is enabled', () => {
+        mockIsEnabled.mockReturnValue(true)
+        const service = createService(makeFeatureGatedConfig())
+        mockStorageGet.mockReturnValue('dark')
+
+        expect(service.get('appearance:effects')).toBe('dark')
+      })
+
+      it('returns default when feature is disabled and no featureDisabledDefault', () => {
+        mockIsEnabled.mockReturnValue(false)
+        const config: SettingsYamlConfig = {
+          groups: [
+            {
+              id: 'g',
+              titleKey: 'g',
+              items: [
+                {
+                  setting: {
+                    id: 's',
+                    titleKey: 's',
+                    type: 'toggle',
+                    default: true,
+                    feature: 'someFeature'
+                  }
+                }
+              ]
+            }
+          ]
+        }
+        const service = createService(config)
+
+        expect(service.get('g:s')).toBe(true) // falls back to setting.default
+      })
+
+      it('returns featureDisabledDefault when feature service is not initialized', () => {
+        mockIsFeatureServiceInitialized.mockReturnValue(false)
+        const service = createService(makeFeatureGatedConfig())
+        mockStorageGet.mockReturnValue(true) // stored value ignored
+
+        expect(service.get('appearance:effects')).toBe(false)
+      })
+
+      it('returns stored value for settings without feature field regardless of feature service state', () => {
+        mockIsEnabled.mockReturnValue(false) // other features disabled
+        const service = createService(makeFeatureGatedConfig())
+        mockStorageGet.mockReturnValue('dark')
+
+        // Non-feature-gated setting still returns stored value
+        expect(service.get('appearance:theme')).toBe('dark')
+      })
+    })
+
+    describe('flattenSettings / getAll()', () => {
+      it('returns featureDisabledDefault and isModified=false when feature disabled', () => {
+        mockIsEnabled.mockReturnValue(false)
+        mockStorageGet.mockReturnValue(true) // stored value should be ignored
+
+        const service = createService(makeFeatureGatedConfig())
+        const all = service.getAll()
+
+        const effects = all.find(s => s.storageKey === 'appearance:effects')
+        expect(effects?.currentValue).toBe(false)
+        expect(effects?.isModified).toBe(false)
+      })
+
+      it('returns stored value and isModified=true when feature enabled and value differs from default', () => {
+        mockIsEnabled.mockReturnValue(true)
+        mockStorageGet.mockImplementation((key: string) => {
+          if (key === 'settings:appearance:effects') return false
+          return undefined
+        })
+
+        const service = createService(makeFeatureGatedConfig())
+        const all = service.getAll()
+
+        const effects = all.find(s => s.storageKey === 'appearance:effects')
+        expect(effects?.currentValue).toBe(false)
+        expect(effects?.isModified).toBe(true)
+      })
+
+      it('includes all settings regardless of feature state', () => {
+        mockIsEnabled.mockReturnValue(false)
+
+        const service = createService(makeFeatureGatedConfig())
+        const all = service.getAll()
+
+        expect(all).toHaveLength(2)
+        expect(all.some(s => s.id === 'effects')).toBe(true)
+        expect(all.some(s => s.id === 'theme')).toBe(true)
+      })
+    })
+
+    describe('getFilteredGroups()', () => {
+      it('removes feature-gated settings when feature is disabled', () => {
+        mockIsEnabled.mockReturnValue(false)
+
+        const service = createService(makeFeatureGatedConfig())
+        const filtered = service.getFilteredGroups()
+
+        expect(filtered).toHaveLength(1)
+        expect(filtered[0]?.items).toHaveLength(1)
+        expect((filtered[0]?.items[0] as { setting: SettingDefinition }).setting.id).toBe('theme')
+      })
+
+      it('includes feature-gated settings when feature is enabled', () => {
+        mockIsEnabled.mockReturnValue(true)
+
+        const service = createService(makeFeatureGatedConfig())
+        const filtered = service.getFilteredGroups()
+
+        expect(filtered).toHaveLength(1)
+        expect(filtered[0]?.items).toHaveLength(2)
+      })
+
+      it('removes groups that become empty after filtering', () => {
+        mockIsEnabled.mockReturnValue(false)
+
+        const service = createService(makeNestedFeatureGatedConfig())
+        const filtered = service.getFilteredGroups()
+
+        // The 'experimental' nested group should be gone (only had the gated setting)
+        expect(filtered).toHaveLength(1)
+        const rootGroup = filtered[0]
+        expect(rootGroup).toBeDefined()
+        expect(rootGroup?.items).toHaveLength(1)
+        expect((rootGroup?.items[0] as { setting: SettingDefinition }).setting.id).toBe('stable')
+      })
+
+      it('preserves nested groups when their feature-gated settings are enabled', () => {
+        mockIsEnabled.mockReturnValue(true)
+
+        const service = createService(makeNestedFeatureGatedConfig())
+        const filtered = service.getFilteredGroups()
+
+        expect(filtered).toHaveLength(1)
+        const rootGroup = filtered[0]
+        expect(rootGroup).toBeDefined()
+        expect(rootGroup?.items).toHaveLength(2)
+      })
+
+      it('does not mutate the original groups', () => {
+        mockIsEnabled.mockReturnValue(false)
+
+        const service = createService(makeFeatureGatedConfig())
+        service.getFilteredGroups()
+
+        // Original groups should still have both items
+        const rawGroups = service.getGroups()
+        expect(rawGroups[0]?.items).toHaveLength(2)
+      })
+
+      it('returns empty array when all groups become empty', () => {
+        mockIsEnabled.mockReturnValue(false)
+        const config: SettingsYamlConfig = {
+          groups: [
+            {
+              id: 'onlyGated',
+              titleKey: 'settings.onlyGated',
+              items: [
+                {
+                  setting: {
+                    id: 'gated',
+                    titleKey: 'settings.gated',
+                    type: 'toggle',
+                    default: true,
+                    feature: 'someFeature',
+                    featureDisabledDefault: false
+                  }
+                }
+              ]
+            }
+          ]
+        }
+
+        const service = createService(config)
+        const filtered = service.getFilteredGroups()
+
+        expect(filtered).toEqual([])
+      })
     })
   })
 })
