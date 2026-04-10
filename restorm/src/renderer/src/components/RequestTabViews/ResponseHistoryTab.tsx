@@ -5,13 +5,13 @@ import {
   ListView,
   SelectBox,
   CodeEditor,
+  JsonViewer,
   type ListViewItemData,
   type Tab,
   type ContextMenuItem,
   type ISelectOptionItem,
   type ISelectData
 } from 'electron-core-ui/renderer'
-import { JsonViewer } from '../common/JsonViewer'
 import { logger } from 'electron-core-ui/renderer'
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../../shared/types/collections'
 import { getResponseHistoryDetail, getResponseHistoryList } from '../../services/GraphQLIntegration'

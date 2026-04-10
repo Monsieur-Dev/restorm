@@ -101,6 +101,10 @@ export type { TagsViewProps } from './TagsView/TagsView'
 export { IconView } from './IconView'
 export type { IconViewProps } from './IconView'
 
+// JsonViewer exports
+export { JsonViewer } from './JsonViewer'
+export type { JsonViewerProps } from './JsonViewer'
+
 // TabSwitcherOverlay exports
 export { TabSwitcherOverlay } from './TabSwitcherOverlay'
 export type { TabSwitcherOverlayProps, TabSwitcherItem } from './TabSwitcherOverlay'

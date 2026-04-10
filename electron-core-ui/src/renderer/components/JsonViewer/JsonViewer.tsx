@@ -1,24 +1,36 @@
 /**
  * JsonViewer — reusable JSONCrack graph viewer with zoom controls.
  *
+ * Renders a JSON string as an interactive node-based graph using
+ * [jsoncrack-react](https://github.com/AykutSarac/jsoncrack.com).
+ *
  * Features:
  * - Zoom in / zoom out / center view buttons
  * - Mouse wheel zoom (via zoomIn/zoomOut API, non-passive listener)
  * - Auto-centers the view on mount
+ * - Dark/light theme support
+ * - Lazy-loaded Graph component (code-split)
+ *
+ * @example
+ * ```tsx
+ * import { JsonViewer } from 'electron-core-ui/renderer'
+ *
+ * <JsonViewer json='{"key": "value"}' darkTheme />
+ * ```
  */
 
 import React, { Suspense, useEffect, useRef, useState } from 'react'
 import type { GraphRef } from 'jsoncrack-react'
-import { Button } from 'electron-core-ui/renderer'
+import { Button } from '../Button'
 
 const Graph = React.lazy(() => import('jsoncrack-react').then(mod => ({ default: mod.Graph })))
 
 export interface JsonViewerProps {
-  /** JSON string to visualize */
+  /** JSON string to visualize as a graph */
   json: string
-  /** Whether to use dark theme */
+  /** Whether to use dark theme (defaults to true) */
   darkTheme?: boolean
-  /** Test ID prefix */
+  /** Test ID prefix for E2E selectors */
   'data-testid'?: string
 }
 

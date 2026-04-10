@@ -6,9 +6,9 @@ import {
   MarkdownEditor,
   VerticalSashContainer,
   ProgressBar,
+  JsonViewer,
   type Tab
 } from 'electron-core-ui/renderer'
-import { JsonViewer } from '../common/JsonViewer'
 
 // ============================================================================
 // Types

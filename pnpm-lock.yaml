@@ -175,6 +175,9 @@ importers:
       json5:
         specifier: ^2.2.3
         version: 2.2.3
+      jsoncrack-react:
+        specifier: 0.0.1-beta.4
+        version: 0.0.1-beta.4(@emotion/is-prop-valid@1.4.0)(@types/react@19.2.14)(prop-types@15.8.1)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(styled-components@6.4.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5))
       luxon:
         specifier: ^3.7.2
         version: 3.7.2
@@ -411,9 +414,6 @@ importers:
       i18next:
         specifier: ^26.0.4
         version: 26.0.4(typescript@5.9.3)
-      jsoncrack-react:
-        specifier: ^0.0.1-beta.4
-        version: 0.0.1-beta.4(@emotion/is-prop-valid@1.4.0)(@types/react@19.2.14)(prop-types@15.8.1)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(styled-components@6.4.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5))
       luxon:
         specifier: ^3.7.2
         version: 3.7.2
