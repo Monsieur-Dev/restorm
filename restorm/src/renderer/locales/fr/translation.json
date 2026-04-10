@@ -465,7 +465,11 @@
   "behavior": {
     "title": "Comportement",
     "syncSidebarWithTabs": "Synchroniser la sélection du panneau latéral avec l'onglet actif",
-    "syncSidebarWithTabsDescription": "Lors du changement d'onglet dans l'espace de travail, sélectionner et afficher automatiquement l'élément correspondant dans le panneau latéral"
+    "syncSidebarWithTabsDescription": "Lors du changement d'onglet dans l'espace de travail, sélectionner et afficher automatiquement l'élément correspondant dans le panneau latéral",
+    "dateTimeFormat": "Format date/heure",
+    "dateTimeFormatDescription": "Format utilisé pour afficher les dates et heures dans l'application",
+    "dateTimeFormat.us": "Format US (MM/JJ/AAAA, 12h)",
+    "dateTimeFormat.iso": "Format ISO (AAAA-MM-JJ, 24h)"
   },
   "import": {
     "title": "Importer des requêtes",

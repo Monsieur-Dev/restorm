@@ -465,7 +465,11 @@
   "behavior": {
     "title": "Behavior",
     "syncSidebarWithTabs": "Sync sidebar selection with active tab",
-    "syncSidebarWithTabsDescription": "When switching tabs in the workspace, automatically select and reveal the corresponding item in the sidebar"
+    "syncSidebarWithTabsDescription": "When switching tabs in the workspace, automatically select and reveal the corresponding item in the sidebar",
+    "dateTimeFormat": "Date/time format",
+    "dateTimeFormatDescription": "Format used to display dates and times in the application",
+    "dateTimeFormat.us": "US format (MM/DD/YYYY, 12h)",
+    "dateTimeFormat.iso": "ISO format (YYYY-MM-DD, 24h)"
   },
   "import": {
     "title": "Import Requests",

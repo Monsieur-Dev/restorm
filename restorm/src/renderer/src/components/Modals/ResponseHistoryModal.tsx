@@ -34,7 +34,7 @@ export const ResponseHistoryModal: React.FC<ResponseHistoryModalProps> = ({
       title={t('requestTab.tabs.responsesHistory')}
       data-testid="response-history-modal"
     >
-      <div style={{ height: '70vh', minHeight: 420, width: '80vw', minWidth: 720 }}>
+      <div style={{ flex: 1, minHeight: 0, minWidth: 0 }}>
         <ResponseHistoryTab
           requestId={requestId}
           requestPath={requestPath}

@@ -1,18 +1,14 @@
-import React, { useState, useMemo, useRef, useCallback, Suspense, useEffect, type ReactNode } from 'react'
+import React, { useState, useMemo, useRef, useCallback, useEffect, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { GraphRef } from 'jsoncrack-react'
 import {
   Tabs,
-  Button,
   MarkdownViewer,
   MarkdownEditor,
   VerticalSashContainer,
   ProgressBar,
   type Tab
 } from 'electron-core-ui/renderer'
-
-// Lazy load Graph to avoid Monaco initialization conflicts at app startup
-const Graph = React.lazy(() => import('jsoncrack-react').then(mod => ({ default: mod.Graph })))
+import { JsonViewer } from '../common/JsonViewer'
 
 // ============================================================================
 // Types
@@ -66,14 +62,12 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
   const { t } = useTranslation()
   const [activeTabId, setActiveTabId] = useState('request')
   const [responseTabId, setResponseTabId] = useState(responseContent ? 'response' : 'infos')
-  const [graphKey, setGraphKey] = useState(0)
   const [isDarkTheme, setIsDarkTheme] = useState<boolean>(() => {
     if (typeof document === 'undefined') return true
     const themeAttr = document.documentElement.getAttribute('data-theme') ?? 'dark'
     return themeAttr === 'dark' || themeAttr === 'hcDark'
   })
-  
-  const graphRef = useRef<GraphRef | null>(null)
+
   const prevResponseContentRef = useRef<typeof responseContent>(null)
   
   const onNotesChangeRef = useRef(onNotesChange)
@@ -126,13 +120,10 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
     }
   }, [])
   
-  // Handle response tab change - increment graphKey when switching to jsoncrack
+  // Handle response tab change
   const handleResponseTabChange = useCallback((tabId: string) => {
-    if (tabId === 'jsoncrack' && responseTabId !== 'jsoncrack') {
-      setGraphKey(prev => prev + 1)
-    }
     setResponseTabId(tabId)
-  }, [responseTabId])
+  }, [])
   
   // Build request tabs (Request, Docs, Notes, Code Snippets)
   const requestTabs: Tab[] = useMemo(() => {
@@ -255,88 +246,17 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
         label: t('requestTab.responses.tabs.jsoncrack'),
         useScrollableElement: false,
         content: (
-          <div
-            style={{
-              boxSizing: 'border-box',
-              padding: '8px 0px 0px 8px',
-              width: '100%',
-              height: '100%',
-              overflow: 'hidden'
-            }}
-            onWheelCapture={(event) => {
-              event.preventDefault()
-              event.stopPropagation()
-              const api = graphRef.current
-              if (!api) return
-              if (event.deltaY < 0) {
-                api.zoomIn()
-              } else if (event.deltaY > 0) {
-                api.zoomOut()
-              }
-            }}
-          >
-            <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
-              <div style={{
-                flex: 1,
-                minHeight: 0,
-                border: '1px solid var(--panel-border)',
-                borderRadius: 3,
-                boxSizing: 'border-box',
-                position: 'relative',
-                overflow: 'hidden'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  gap: 4,
-                  position: 'absolute',
-                  top: 4,
-                  right: 4,
-                  zIndex: 1
-                }}>
-                  <Button
-                    secondary
-                    small
-                    icon="zoom-in"
-                    options={{ ariaLabel: 'Zoom in', title: 'Zoom in' }}
-                    onClick={() => { graphRef.current?.zoomIn() }}
-                    data-testid="base-request-button-zoom-in"
-                  />
-                  <Button
-                    secondary
-                    small
-                    icon="zoom-out"
-                    options={{ ariaLabel: 'Zoom out', title: 'Zoom out' }}
-                    onClick={() => { graphRef.current?.zoomOut() }}
-                    data-testid="base-request-button-zoom-out"
-                  />
-                  <Button
-                    secondary
-                    small
-                    icon="screen-full"
-                    options={{ ariaLabel: 'Center view', title: 'Center view' }}
-                    onClick={() => { graphRef.current?.centerView() }}
-                    data-testid="base-request-button-center-view"
-                  />
-                </div>
-                <Suspense fallback={<div role="status" aria-label="Loading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}><i className="codicon codicon-loading codicon-modifier-spin" aria-hidden="true" /></div>}>
-                  <Graph
-                    key={graphKey}
-                    ref={graphRef}
-                    json={formattedJson || '{}'}
-                    layout={{ theme: isDarkTheme ? 'dark' : 'light' }}
-                    style={{ width: '100%', height: '100%' }}
-                  />
-                </Suspense>
-              </div>
-            </div>
-          </div>
+          <JsonViewer
+            json={formattedJson}
+            darkTheme={isDarkTheme}
+            data-testid="base-request-jsoncrack"
+          />
         )
       })
     }
     
     return tabs
-  }, [showResponse, isLoading, infosContent, responseContent, formattedJson, isDarkTheme, graphKey, t])
+  }, [showResponse, isLoading, infosContent, responseContent, formattedJson, isDarkTheme, t])
   
   const showResponsePanel = showResponse || isLoading
   

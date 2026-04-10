@@ -364,7 +364,7 @@ export function ImportModal({
             {t('import.destination.label')}
           </label>
           <div className="import-destination-row">
-            <div style={{ width: '100%' }} data-testid="destination-dropdown-container">
+            <div data-testid="destination-dropdown-container">
               <ListViewDropdown
                 items={folderItems}
                 selectedIds={targetFolderId ? [targetFolderId] : ['__root__']}
@@ -372,7 +372,6 @@ export function ImportModal({
                 rootRole="tree"
                 menuAriaLabel={t('import.destination.label')}
                 align="left"
-                minWidth={600}
                 data-testid="destination-dropdown"
                 buttonContent={
                   <>

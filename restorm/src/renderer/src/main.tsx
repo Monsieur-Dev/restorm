@@ -61,6 +61,10 @@ window.console.error = (...args: unknown[]): void => {
     if (first.includes('Support for defaultProps will be removed from function components in a future major release')) {
       return
     }
+    // jsoncrack-react internally passes width/style to React.Fragment (library bug)
+    if (first.includes('supplied to `React.Fragment`')) {
+      return
+    }
   }
   originalConsoleError(...args)
 }

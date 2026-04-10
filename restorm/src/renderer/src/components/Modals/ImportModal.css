@@ -1,9 +1,10 @@
 .import-modal {
-  min-width: 600px;
+  width: 100%;
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  box-sizing: border-box;
 }
 
 .import-section {
@@ -24,10 +25,16 @@
   gap: 8px;
   align-items: flex-start;
   width: 100%;
+  min-width: 0;
 }
 
 .import-destination-row > div:first-child {
   flex: 1;
+  min-width: 0;
+}
+
+.import-destination-row > button {
+  flex-shrink: 0;
 }
 
 .import-loading,
