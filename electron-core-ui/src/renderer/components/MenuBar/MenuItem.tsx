@@ -41,11 +41,13 @@ const MenuItem: React.FC<MenuItemProps> = ({
   const handleClick = useCallback((event: React.MouseEvent): void => {
     if (disabled) {
       event.preventDefault()
+      event.stopPropagation()
       return
     }
 
     if (hasSubmenu) {
       event.preventDefault()
+      event.stopPropagation()
       return
     }
 
@@ -174,7 +176,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
         if (availableHeight < currentHeight) {
           setActiveHeight(`${availableHeight}px`)
         } else {
-          setActiveHeight(`${currentHeight}px`)
+          setActiveHeight(null)
         }
       }
     }, 0)
@@ -228,8 +230,8 @@ const MenuItem: React.FC<MenuItemProps> = ({
     )
   }
 
-  const renderSubmenuIndicator = (): React.JSX.Element => {
-    if (!hasSubmenu) return <span className="codicon-placeholder" aria-hidden="true" />
+  const renderSubmenuIndicator = (): React.JSX.Element | null => {
+    if (!hasSubmenu) return null
     return <span className="codicon codicon-chevron-right" aria-hidden="true" />
   }
 
@@ -307,7 +309,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
                 width: '300px',
                 minWidth: '300px',
                 maxWidth: '300px',
-                padding: '2px 0'
+                padding: 0
               }}
               {...(testId && { 'data-testid': `${testId}-submenu-scrollable` })}
             >

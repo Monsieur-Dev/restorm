@@ -235,7 +235,7 @@ const CalendarGridInner: React.FC<CalendarGridProps> = ({
         />
         <div className="ecu-date-time-picker-month-year" data-testid={`${testId}-month-year`}>
           <span
-            ref={(el) => { monthPartRef.current = el }}
+            ref={monthPartRef}
             className="ecu-date-time-picker-month-part"
             data-testid={`${testId}-month-part`}
             role="button"
@@ -258,7 +258,7 @@ const CalendarGridInner: React.FC<CalendarGridProps> = ({
           </span>
           <span className="ecu-date-time-picker-month-year-sep"> </span>
           <span
-            ref={(el) => { yearPartRef.current = el }}
+            ref={yearPartRef}
             className="ecu-date-time-picker-year-part"
             data-testid={`${testId}-year-part`}
             role="button"
@@ -282,7 +282,7 @@ const CalendarGridInner: React.FC<CalendarGridProps> = ({
 
           {isMonthMenuOpen && (
             <div
-              ref={(el) => { monthMenuRef.current = el }}
+              ref={monthMenuRef}
               className="ecu-date-time-picker-month-menu"
               data-testid={`${testId}-month-menu`}
               onMouseDown={(e) => {
@@ -326,7 +326,7 @@ const CalendarGridInner: React.FC<CalendarGridProps> = ({
 
           {isYearMenuOpen && (
             <div
-              ref={(el) => { yearMenuRef.current = el }}
+              ref={yearMenuRef}
               className="ecu-date-time-picker-year-menu"
               data-testid={`${testId}-year-menu`}
               onMouseDown={(e) => {

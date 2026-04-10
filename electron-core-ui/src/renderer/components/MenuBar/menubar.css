@@ -102,7 +102,10 @@
 	min-width: 300px !important;
 	max-width: 300px !important;
 	background-color: var(--menu-background) !important;
-	box-shadow: 5px 5px 5px  rgb(0,0,0,0.5) !important;
+	border: 1px solid var(--menu-border, var(--widget-border, rgb(255, 255, 255, 0.1))) !important;
+	border-radius: 4px !important;
+	box-shadow: 0 2px 8px rgb(0, 0, 0, 0.35) !important;
+	padding: 4px !important;
 }
 
 .menu {
@@ -128,26 +131,27 @@
 
 .action-menu-item {
 	height: auto !important;
-	min-height: 22px;
+	min-height: 26px;
 	max-height: none !important;
-	padding: 4px 8px !important;
+	padding: 4px !important;
 	line-height: 1.4 !important;
 	background-color: transparent !important;
 	color: var(--menu-foreground) !important;
 	border: none !important;
 	text-decoration: none !important;
 	cursor: pointer !important;
+	border-radius: 4px !important;
 }
 
 .action-menu-item:hover,
 .action-menu-item.submenu-open {
-	background-color: var(--list-hoverBackground) !important;
-	color: var(--list-hoverForeground) !important;
+	background-color: var(--menu-selectionBackground, var(--list-hoverBackground)) !important;
+	color: var(--menu-selectionForeground, var(--list-hoverForeground)) !important;
 }
 
 .action-menu-item:focus {
-	background-color: var(--list-activeSelectionBackground) !important;
-	color: var(--list-activeSelectionForeground) !important;
+	background-color: var(--menu-selectionBackground, var(--list-activeSelectionBackground)) !important;
+	color: var(--menu-selectionForeground, var(--list-activeSelectionForeground)) !important;
 	outline: none !important;
 }
 
@@ -166,7 +170,7 @@
 .action-item.separator {
 	height: 1px !important;
 	min-height: 1px !important;
-	margin: 4px !important;
+	margin: 4px 8px !important;
 	padding: 0 !important;
 }
 
@@ -176,16 +180,7 @@
 	background-color: var(--menu-separatorBackground) !important;
 	border: none !important;
 	padding: 0 !important;
-	margin: 4px 0 !important;
-}
-
-/* Context menu specific tuning to avoid visual overflow */
-.ecui-context-menu .action-item.separator {
-	margin: 4px 0 !important;
-}
-
-.ecui-context-menu .action-menu-item.separator {
-	margin: 6px -2px !important;
+	margin: 4px 8px !important;
 }
 
 /* Keybinding styles */

@@ -104,6 +104,7 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 		const base: React.CSSProperties = {
 			position: 'absolute',
 			inset: 0,
+			zIndex: 10,
 			// Only start intercepting events when an editor tab is being dragged
 			pointerEvents: splitTarget && isEditorDrag ? 'auto' : 'none',
 			backgroundColor: 'rgba(0, 0, 0, 0.40)',
