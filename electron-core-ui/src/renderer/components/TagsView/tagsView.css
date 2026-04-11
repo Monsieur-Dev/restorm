@@ -14,14 +14,38 @@
 .ecui-tag {
   display: inline-flex;
   align-items: center;
-  padding: 3px 8px;
-  border-radius: 3px;
+  padding: 3px 8px 3px 16px;
+  border-radius: 0 3px 3px 0;
   border: none;
   background-color: var(--tag-background);
   color: var(--tag-foreground);
   font-weight: bold;
   font-size: 12px;
   cursor: pointer;
+  position: relative;
+
+  /* Label shape: arrow-like left edge with a flat vertical tip */
+  clip-path: polygon(
+    8px 0%,
+    100% 0%,
+    100% 100%,
+    8px 100%,
+    0% 65%,
+    0% 35%
+  );
+}
+
+/* Hole punch */
+.ecui-tag::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--editor-background);
 }
 
 .ecui-tag:hover {
