@@ -97,6 +97,10 @@ export type { ListViewDropdownProps } from './ListViewDropdown/ListViewDropdown'
 export { Breadcrumb } from './Breadcrumb'
 export type { BreadcrumbProps, BreadcrumbItem } from './Breadcrumb'
 
+// Tag exports
+export { Tag } from './Tag'
+export type { TagProps } from './Tag'
+
 // TagsView exports
 export { TagsView } from './TagsView/TagsView'
 export type { TagsViewProps } from './TagsView/TagsView'

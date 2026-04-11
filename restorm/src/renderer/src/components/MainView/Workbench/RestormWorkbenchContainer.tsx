@@ -18,6 +18,7 @@ export interface RestormWorkbenchContainerProps {
   onItemRename: (item: BreadcrumbItem, newName: string) => void
   onItemIconChange?: (item: BreadcrumbItem, newIcon: Icon | null) => void
   onTagsChange: (targetId: string, tags: string[]) => void
+  onTagColorChange?: (envFolderId: string, tag: string, color: string | null) => void
   onFolderChange: (folderId: string, folder: Folder) => void
   onEnvironmentFolderChange: (folderId: string, folder: EnvironmentFolder) => void
   onSizesChange: (nodeId: string, sizes: number[]) => void
@@ -47,6 +48,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
   onItemRename,
   onItemIconChange,
   onTagsChange,
+  onTagColorChange,
   onFolderChange,
   onEnvironmentFolderChange,
   onSizesChange,
@@ -82,6 +84,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
           onItemRename={onItemRename}
           onItemIconChange={onItemIconChange}
           onTagsChange={onTagsChange}
+          onTagColorChange={onTagColorChange}
           onFolderChange={onFolderChange}
           onEnvironmentFolderChange={onEnvironmentFolderChange}
           onSizesChange={onSizesChange}

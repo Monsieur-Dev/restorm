@@ -259,6 +259,7 @@ const App: React.FC = () => {
 
   const {
     handleTagsChange,
+    handleTagColorChange,
     handleFolderChange,
     handleEnvironmentFolderChange,
     handleItemRename,
@@ -716,6 +717,7 @@ const App: React.FC = () => {
               onItemRename={handleItemRename}
               onItemIconChange={handleItemIconChange}
               onTagsChange={handleTagsChange}
+              onTagColorChange={handleTagColorChange}
               onFolderChange={handleFolderChange}
               onEnvironmentFolderChange={handleEnvironmentFolderChange}
               onSizesChange={handleSizesChange}

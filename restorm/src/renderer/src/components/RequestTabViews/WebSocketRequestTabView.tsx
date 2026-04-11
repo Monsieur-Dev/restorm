@@ -10,6 +10,7 @@ import {
   Pane,
   ControlGroup,
   logger,
+  getContrastColor,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
@@ -41,11 +42,14 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   onHistoryAvailabilityChange
 }) => {
   const { t } = useTranslation()
-  const { selectedEnvId, environments } = useEnvironmentContext()
+  const { selectedEnvId, environments, envColor } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
-  
+  const sendButtonStyle: React.CSSProperties | undefined = envColor
+    ? { backgroundColor: envColor, color: getContrastColor(envColor), borderColor: envColor }
+    : undefined
+
   const [url, setUrlState] = useState(request.url)
   const [event, setEventState] = useState(request.event ?? '')
   const [message, setMessageState] = useState(request.message)
@@ -413,7 +417,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       <Button
         icon={isSending ? 'debug-disconnect' : 'plug'}
         onClick={isSending ? handleDisconnect : handleSend}
-        emphasis={isSending ? 0 : 1}
+        {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
         options={{
           title: isSending ? t('websocket.disconnect') : t('websocket.connect'),
           ariaLabel: isSending ? t('websocket.disconnect') : t('websocket.connect')

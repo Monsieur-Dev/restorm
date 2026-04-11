@@ -1,6 +1,6 @@
 import { join } from 'path'
 import { existsSync, rmSync, mkdirSync, copyFileSync } from 'fs'
-import { restormBaseTest, expect } from '../../helpers/base-fixture'
+import { restormBaseTest, expect, writeAppLogs } from '../../helpers/base-fixture'
 import { launchRestormElectronApp } from '../../helpers/launch-restorm'
 import { closeElectronAppForE2E } from '../../helpers/coverage'
 
@@ -36,7 +36,7 @@ export const test = restormBaseTest.extend<SaveOperationsFixtures>({
     await use(join(restormRoot, 'tests/e2e/samples/Petstore 2'))
   },
 
-  electronApp: async ({ restormRoot, petstoreFilePath, tempFolderPath }, use) => {
+  electronApp: async ({ restormRoot, petstoreFilePath, tempFolderPath }, use, testInfo) => {
     // Restore the original Petstore.restorm from Samples
     const petstoreOriginalPath = join(restormRoot, 'Samples/Petstore.restorm')
     copyFileSync(petstoreOriginalPath, petstoreFilePath)
@@ -60,6 +60,10 @@ export const test = restormBaseTest.extend<SaveOperationsFixtures>({
     }, tempFolderPath)
 
     await use(app)
+    const logFile = writeAppLogs(app, testInfo.outputDir)
+    if (logFile) {
+      await testInfo.attach('electron-logs', { path: logFile, contentType: 'text/plain' })
+    }
     await closeElectronAppForE2E(app)
   },
 

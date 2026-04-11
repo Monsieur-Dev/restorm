@@ -9,6 +9,7 @@ import { MarkdownViewer, Tabs, type Tab, type SearchResult } from 'electron-core
 import type { RestormSearchMetadata } from '../../../services/SearchIndexService'
 import requestDetailsTemplate from '../../../resources/templates/search/request-details.hbs?raw'
 import { Badge } from '../../common/Badge'
+import { Tag } from 'electron-core-ui/renderer'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import './SearchTooltipContent.css'
 
@@ -97,7 +98,7 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
           {tags.length > 0 && (
             <div className="search-tooltip-tags">
               {tags.map((tag, index) => (
-                <span key={index} className="tag-badge">{tag}</span>
+                <Tag key={index} label={tag} compact data-testid={`search-tag-${index}`} />
               ))}
             </div>
           )}
@@ -154,7 +155,7 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
         {folderTags.length > 0 && (
           <div className="search-tooltip-tags">
             {folderTags.map((tag, index) => (
-              <span key={index} className="tag-badge">{tag}</span>
+              <Tag key={index} label={tag} compact data-testid={`search-tag-${index}`} />
             ))}
           </div>
         )}

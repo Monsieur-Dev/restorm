@@ -9,6 +9,7 @@ import {
   Pane,
   ControlGroup,
   logger,
+  getContrastColor,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
@@ -39,11 +40,14 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
   onHistoryAvailabilityChange
 }) => {
   const { t } = useTranslation()
-  const { selectedEnvId, environments } = useEnvironmentContext()
+  const { selectedEnvId, environments, envColor } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
-  
+  const sendButtonStyle: React.CSSProperties | undefined = envColor
+    ? { backgroundColor: envColor, color: getContrastColor(envColor), borderColor: envColor }
+    : undefined
+
   const [url, setUrlState] = useState(request.url)
   const [requestMessage, setRequestMessageState] = useState(request.requestMessage)
   const [isSending, setIsSending] = useState(false)
@@ -376,7 +380,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
         <Button
           icon={isSending ? 'close' : 'send'}
           onClick={isSending ? handleCancel : handleSend}
-          emphasis={isSending ? 0 : 1}
+          {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
           options={{
             title: isSending ? t('cancel') : t('grpc.send'),
             ariaLabel: isSending ? t('cancel') : t('grpc.send')

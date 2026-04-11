@@ -31,6 +31,7 @@ export interface Environment {
   id: RuntimeId
   name: string
   icon?: Icon
+  color?: string
   variables: KeyValue[]
   subEnvironments?: Environment[]
 }

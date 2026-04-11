@@ -34,6 +34,9 @@ export class Environment {
   /** Optional icon for the environment */
   icon?: Icon
 
+  /** Optional custom color (hex string, e.g. "#ff6600") */
+  color?: string
+
   /** Key-value pairs for this environment */
   @graphqlField({ type: 'KeyValue', isArray: true })
   @separateFiles()
@@ -68,13 +71,15 @@ export class Environment {
     id?: RuntimeId
     name?: string
     icon?: Icon
+    color?: string
     variables?: Parameters<typeof KeyValue.fromPlain>[0][]
     subEnvironments?: Parameters<typeof Environment.fromPlain>[0][]
   }): Environment {
     const env = new Environment({
       id: obj.id,
       name: obj.name ?? '',
-      icon: obj.icon
+      icon: obj.icon,
+      color: obj.color
     })
     if (Array.isArray(obj.variables)) {
       env.variables = obj.variables.map(v => KeyValue.fromPlain(v))
@@ -92,6 +97,7 @@ export class Environment {
     return {
       name: this.name,
       icon: this.icon,
+      color: this.color,
       variables: this.variables.map(v => v.toPlainObject()),
       subEnvironments: this.subEnvironments?.map(e => e.toPlainObject())
     }

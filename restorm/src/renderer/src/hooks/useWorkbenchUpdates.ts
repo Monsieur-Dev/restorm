@@ -19,6 +19,7 @@ export interface UseWorkbenchUpdatesOptions {
 
 export interface UseWorkbenchUpdatesReturn {
   handleTagsChange: (targetId: string, newTags: string[]) => void
+  handleTagColorChange: (envFolderId: string, tag: string, color: string | null) => void
   handleFolderChange: (folderId: string, updatedFolder: Folder) => void
   handleEnvironmentFolderChange: (folderId: string, updatedFolder: EnvironmentFolder) => void
   handleItemRename: (item: BreadcrumbItem, newName: string) => void
@@ -47,42 +48,85 @@ export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWor
     // Force React re-render without breaking reactive proxies
     forceUpdate()
 
-    // Update tags in open workbench tabs
+    // Update tags in open workbench tabs (all groups)
     setWorkbenchTree((prevTree) => {
-      const group = prevTree.groups[0]
-      if (!group || !isTabGroupNode(group)) return prevTree
+      const updatedGroups = prevTree.groups.map((group) => {
+        if (!isTabGroupNode(group)) return group
 
-      const updatedTabs = group.tabs.map((tab) => {
-        const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
+        const updatedTabs = group.tabs.map((tab) => {
+          const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
 
-        if (restormTab.tabType === 'folder' && restormTab.folder.id === targetId) {
-          return {
-            ...restormTab,
-            folder: { ...restormTab.folder, tags: newTags }
+          if (restormTab.tabType === 'folder' && restormTab.folder.id === targetId) {
+            return {
+              ...restormTab,
+              folder: { ...restormTab.folder, tags: newTags },
+              contentVersion: (restormTab.contentVersion ?? 0) + 1
+            }
           }
-        }
 
-        if (restormTab.tabType === 'environment-folder' && restormTab.folder.id === targetId) {
-          return {
-            ...restormTab,
-            folder: { ...restormTab.folder, tags: newTags }
+          if (restormTab.tabType === 'environment-folder' && restormTab.folder.id === targetId) {
+            return {
+              ...restormTab,
+              folder: { ...restormTab.folder, tags: newTags },
+              contentVersion: (restormTab.contentVersion ?? 0) + 1
+            }
           }
-        }
 
-        if (restormTab.tabType === 'http-request' && restormTab.request.id === targetId) {
-          return {
-            ...restormTab,
-            request: { ...restormTab.request, tags: newTags }
+          if ('request' in restormTab && restormTab.request.id === targetId) {
+            return {
+              ...restormTab,
+              request: { ...restormTab.request, tags: newTags },
+              contentVersion: (restormTab.contentVersion ?? 0) + 1
+            }
           }
-        }
 
-        return restormTab
+          return restormTab
+        })
+
+        return { ...group, tabs: updatedTabs }
       })
 
       return {
         ...prevTree,
-        groups: [{ ...group, tabs: updatedTabs }]
+        groups: updatedGroups
       }
+    })
+  }, [rootItems, forceUpdate, setWorkbenchTree])
+
+  // Handle tag color changes (update tagColors on the parent EnvironmentFolder)
+  const handleTagColorChange = useCallback((envFolderId: string, tag: string, color: string | null) => {
+    const folder = findEnvironmentFolderById(rootItems, envFolderId)
+    if (!folder) return
+
+    const newTagColors = { ...folder.tagColors }
+    if (color === null) {
+      Reflect.deleteProperty(newTagColors, tag)
+    } else {
+      newTagColors[tag] = color
+    }
+    folder.tagColors = newTagColors
+
+    forceUpdate()
+
+    // Update workbench tabs that display this folder or its children
+    setWorkbenchTree((prevTree) => {
+      const updatedGroups = prevTree.groups.map((group) => {
+        if (!isTabGroupNode(group)) return group
+        const updatedTabs = group.tabs.map((tab) => {
+          const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
+          // Bump contentVersion on the env folder tab itself
+          if (restormTab.tabType === 'environment-folder' && restormTab.folder.id === envFolderId) {
+            return { ...restormTab, contentVersion: (restormTab.contentVersion ?? 0) + 1 }
+          }
+          // Bump contentVersion on any request tab that belongs to this folder
+          if ('request' in restormTab && restormTab.breadcrumbs?.some(bc => bc.id === envFolderId)) {
+            return { ...restormTab, contentVersion: (restormTab.contentVersion ?? 0) + 1 }
+          }
+          return restormTab
+        })
+        return { ...group, tabs: updatedTabs }
+      })
+      return { ...prevTree, groups: updatedGroups }
     })
   }, [rootItems, forceUpdate, setWorkbenchTree])
 
@@ -172,15 +216,17 @@ export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWor
             }
           }
           
-          // Update http-request tabs that belong to this folder (check breadcrumbs)
-          if (restormTab.tabType === 'http-request' && restormTab.breadcrumbs) {
+          // Update any request tabs that belong to this folder (check breadcrumbs)
+          if ('request' in restormTab && restormTab.breadcrumbs) {
             const belongsToFolder = restormTab.breadcrumbs.some(bc => bc.id === folderId)
             if (belongsToFolder) {
-              // Recalculate environments for this request
+              // Recalculate environments for this request (shallow clone to trigger re-render)
               const newEnvironments = getNearestEnvironmentsForBreadcrumbs(rootItems, restormTab.breadcrumbs)
+                .map(env => ({ ...env }))
               return {
                 ...restormTab,
-                environments: newEnvironments
+                environments: newEnvironments,
+                contentVersion: (restormTab.contentVersion ?? 0) + 1
               }
             }
           }
@@ -350,6 +396,7 @@ export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWor
 
   return {
     handleTagsChange,
+    handleTagColorChange,
     handleFolderChange,
     handleEnvironmentFolderChange,
     handleItemRename,

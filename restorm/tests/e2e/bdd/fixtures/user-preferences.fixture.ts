@@ -1,4 +1,4 @@
-import { restormBaseTest, expect } from '../../helpers/base-fixture'
+import { restormBaseTest, expect, writeAppLogs } from '../../helpers/base-fixture'
 import { launchRestormElectronApp } from '../../helpers/launch-restorm'
 import { closeElectronAppForE2E } from '../../helpers/coverage'
 
@@ -12,12 +12,16 @@ export const test = restormBaseTest.extend<UserPreferencesFixtures>({
     await use(join(restormRoot, 'tests/e2e/samples/Petstore.restorm'))
   },
 
-  electronApp: async ({ restormRoot }, use) => {
+  electronApp: async ({ restormRoot }, use, testInfo) => {
     const app = await launchRestormElectronApp({
       restormRoot,
       args: ['--clear-settings']
     })
     await use(app)
+    const logFile = writeAppLogs(app, testInfo.outputDir)
+    if (logFile) {
+      await testInfo.attach('electron-logs', { path: logFile, contentType: 'text/plain' })
+    }
     await closeElectronAppForE2E(app)
   },
 

@@ -11,6 +11,8 @@ import {
   Button,
   type Tab,
   IconSelect,
+  ColorPicker,
+  Tooltip,
   type KeyValueTableHandle
 } from 'electron-core-ui/renderer'
 import { RestormKeyValueTable } from '../RestormKeyValueTable'
@@ -192,6 +194,35 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
     () => localEnvironments[0]?.id ?? null
   )
 
+  // Track which environment's color picker is open
+  const [colorPickerEnvId, setColorPickerEnvId] = useState<string | null>(null)
+  const colorButtonRef = useRef<HTMLButtonElement | null>(null)
+  const tooltipClassName = 'restorm-env-color-picker-tooltip'
+
+  // Close color picker on outside mousedown
+  useEffect(() => {
+    if (!colorPickerEnvId) return
+
+    const handleMouseDown = (event: MouseEvent): void => {
+      const target = event.target as Node | null
+      if (!target) return
+
+      // Ignore clicks on the color button itself
+      if (colorButtonRef.current?.contains(target)) return
+
+      // Ignore clicks inside the tooltip
+      const tooltipEl = document.querySelector(`.${tooltipClassName}`)
+      if (tooltipEl?.contains(target)) return
+
+      setColorPickerEnvId(null)
+    }
+
+    document.addEventListener('mousedown', handleMouseDown)
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown)
+    }
+  }, [colorPickerEnvId])
+
   // Track item being renamed (used by context menu to trigger rename mode)
   const [_renamingEnvId, setRenamingEnvId] = useState<string | null>(null)
   void _renamingEnvId // Will be used when ListView supports external rename trigger
@@ -277,17 +308,76 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
     updateEnvironments(updateIcon(localEnvironments))
   }, [localEnvironments, updateEnvironments])
 
-  // Render the icon selector for each environment item
+  // Handler for changing an environment's color
+  const handleEnvColorChange = useCallback((envId: string, color: string) => {
+    const updateColor = (envs: Environment[]): Environment[] =>
+      envs.map(env => {
+        if (env.id === envId) {
+          updateReactiveProperty(env, 'color', color)
+          return env
+        }
+        if (env.subEnvironments) {
+          return { ...env, subEnvironments: updateColor(env.subEnvironments) }
+        }
+        return env
+      })
+    updateEnvironments(updateColor(localEnvironments))
+  }, [localEnvironments, updateEnvironments])
+
+  // Find the current color for an environment by ID
+  const findEnvColor = useCallback((envId: string): string | undefined => {
+    const findColor = (envs: Environment[]): string | undefined => {
+      for (const env of envs) {
+        if (env.id === envId) return env.color
+        if (env.subEnvironments) {
+          const found = findColor(env.subEnvironments)
+          if (found) return found
+        }
+      }
+      return undefined
+    }
+    return findColor(localEnvironments)
+  }, [localEnvironments])
+
+  // Render the icon selector and color button for each environment item
   const renderEnvLeftActions = useCallback((env: Environment): React.ReactNode => (
-    <IconSelect
-      value={env.icon ?? null}
-      onChange={(icon) => {
-        handleIconChange(env.id, icon)
-      }}
-      style={{ width: 24, height: 24 }}
-      data-testid={`environment-icon-select-${env.id}`}
-    />
-  ), [handleIconChange])
+    <>
+      <IconSelect
+        value={env.icon ?? null}
+        onChange={(icon) => {
+          handleIconChange(env.id, icon)
+        }}
+        style={{ width: 24, height: 24 }}
+        data-testid={`environment-icon-select-${env.id}`}
+      />
+      <button
+        ref={(el) => {
+          // Store ref when this is the active color picker target
+          if (colorPickerEnvId === env.id || !colorButtonRef.current) {
+            colorButtonRef.current = el
+          }
+        }}
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation()
+          colorButtonRef.current = e.currentTarget as HTMLButtonElement
+          setColorPickerEnvId(prev => prev === env.id ? null : env.id)
+        }}
+        style={{
+          width: 14,
+          height: 14,
+          minWidth: 14,
+          padding: 0,
+          border: '1px solid var(--panel-border)',
+          borderRadius: 3,
+          backgroundColor: env.color ?? 'var(--button-background-emphasis-1, #c75000)',
+          cursor: 'pointer',
+          flexShrink: 0
+        }}
+        data-testid={`environment-color-button-${env.id}`}
+      />
+    </>
+  ), [handleIconChange, colorPickerEnvId])
 
   // Context menu items for environments
   const envContextMenuItems = useMemo<ContextMenuItem[]>(() => [
@@ -422,6 +512,28 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                 onItemContextMenu={(payload) => {
                   setSelectedEnvId(payload.item.id)
                 }}
+              />
+              <Tooltip
+                targetRef={colorButtonRef as unknown as React.RefObject<HTMLElement | null>}
+                show={colorPickerEnvId !== null}
+                placement="below"
+                className={tooltipClassName}
+                data-testid="environment-color-picker-tooltip"
+                repositionKey={colorPickerEnvId}
+                content={
+                  <div onMouseDown={(e) => { e.stopPropagation() }}>
+                    <ColorPicker
+                      value={colorPickerEnvId ? (findEnvColor(colorPickerEnvId) ?? '#c75000') : '#c75000'}
+                      onChange={(color) => {
+                        if (colorPickerEnvId) {
+                          handleEnvColorChange(colorPickerEnvId, color)
+                        }
+                      }}
+                      disableAlpha
+                      data-testid="environment-color-picker"
+                    />
+                  </div>
+                }
               />
             </Pane>
           </SplitView>

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '../Button'
 import { ContextMenu, type ContextMenuItem } from '../ContextMenu/ContextMenu'
 
+import '../Tag/tag.css'
 import './tagsView.css'
 
 export interface TagsViewProps {
@@ -16,9 +17,13 @@ export interface TagsViewProps {
   'data-testid'?: string
   className?: string
   style?: React.CSSProperties
+  /** Custom tag renderer. Replaces the default tag button. */
+  renderTag?: ((tag: string, index: number, handlers: { onClick: () => void; onContextMenu: (e: React.MouseEvent) => void }) => React.ReactNode) | undefined
+  /** Additional context menu items added before the default items */
+  additionalContextMenuItems?: ((tag: string, index: number) => ContextMenuItem[]) | undefined
 }
 
-export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLabel, className, style, 'data-testid': dataTestId }) => {
+export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLabel, className, style, 'data-testid': dataTestId, renderTag, additionalContextMenuItems }) => {
   const testId = dataTestId ?? 'tagsview'
   const { t } = useTranslation()
   const resolvedRemoveTagLabel = removeTagLabel ?? t('tagsView.removeTag')
@@ -101,19 +106,26 @@ export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLab
   )
 
   const menuItems = useMemo<ContextMenuItem[]>(
-    () => [
-      {
-        id: 'remove',
-        label: resolvedRemoveTagLabel,
-        icon: 'close',
-        onClick: () => {
-          if (contextMenu.index != null) {
-            handleRemoveAt(contextMenu.index)
+    () => {
+      const extra = (contextMenu.index != null && additionalContextMenuItems)
+        ? additionalContextMenuItems(tags[contextMenu.index] ?? '', contextMenu.index)
+        : []
+      return [
+        ...extra,
+        ...(extra.length > 0 ? [{ id: 'separator-before-remove', label: '', isSeparator: true }] : []),
+        {
+          id: 'remove',
+          label: resolvedRemoveTagLabel,
+          icon: 'close',
+          onClick: () => {
+            if (contextMenu.index != null) {
+              handleRemoveAt(contextMenu.index)
+            }
           }
         }
-      }
-    ],
-    [contextMenu.index, handleRemoveAt, resolvedRemoveTagLabel]
+      ]
+    },
+    [contextMenu.index, handleRemoveAt, resolvedRemoveTagLabel, additionalContextMenuItems, tags]
   )
 
   const rootClassName = useMemo(
@@ -166,6 +178,28 @@ export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLab
             )
           }
 
+          const tagHandlers = {
+            onClick: (): void => { beginEditing(index) },
+            onContextMenu: (event: React.MouseEvent): void => {
+              event.preventDefault()
+              event.stopPropagation()
+              setContextMenu({
+                visible: true,
+                x: event.clientX,
+                y: event.clientY,
+                index
+              })
+            }
+          }
+
+          if (renderTag) {
+            return (
+              <React.Fragment key={`${tag}-${index}`}>
+                {renderTag(tag, index, tagHandlers)}
+              </React.Fragment>
+            )
+          }
+
           return (
             <button
               key={`${tag}-${index}`}
@@ -173,19 +207,8 @@ export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLab
               className="ecui-tag"
               data-testid={`${testId}-tag-${index}`}
               data-is-editing="false"
-              onClick={() => {
-                beginEditing(index)
-              }}
-              onContextMenu={(event) => {
-                event.preventDefault()
-                event.stopPropagation()
-                setContextMenu({
-                  visible: true,
-                  x: event.clientX,
-                  y: event.clientY,
-                  index
-                })
-              }}
+              onClick={tagHandlers.onClick}
+              onContextMenu={tagHandlers.onContextMenu}
             >
               <span className="ecui-tag-label" data-testid={`${testId}-tag-${index}-label`}>{tag}</span>
             </button>

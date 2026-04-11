@@ -65,7 +65,9 @@
     "goToDefinition": "Aller à la définition"
   },
   "tagsView": {
-    "removeTag": "Supprimer le tag"
+    "removeTag": "Supprimer le tag",
+    "changeColor": "Changer la couleur du tag...",
+    "removeColor": "Supprimer la couleur du tag"
   },
   "contextMenu": {
     "cut": "Couper",

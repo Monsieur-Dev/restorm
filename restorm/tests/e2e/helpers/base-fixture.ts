@@ -1,7 +1,7 @@
 import { test as base } from 'playwright-bdd'
 import type { ElectronApplication, Page, TestInfo } from '@playwright/test'
 import { resolve } from 'path'
-import { launchRestormElectronApp } from './launch-restorm'
+import { launchRestormElectronApp, writeAppLogs } from './launch-restorm'
 import { closeElectronAppForE2E, writeRendererIstanbulCoverage } from './coverage'
 
 export interface BaseRestormFixtures {
@@ -13,18 +13,22 @@ export interface BaseRestormFixtures {
 /**
  * Base Playwright-BDD fixture for Restorm Electron E2E tests.
  *
- * Provides `restormRoot`, `electronApp` (launched with optional CLI args),
- * and `page` (first window with coverage teardown).
- *
- * Extend this fixture to add test-specific data or override `electronApp`
- * for custom launch args / env / post-launch hooks.
+ * All main process and renderer console logs are automatically captured
+ * by `launchRestormElectronApp` and saved to `electron-logs.txt` on teardown.
  */
 export const restormBaseTest = base.extend<BaseRestormFixtures>({
   restormRoot: [resolve(__dirname, '../../..'), { option: true }],
 
-  electronApp: async ({ restormRoot }, use) => {
+  electronApp: async ({ restormRoot }, use, testInfo: TestInfo) => {
     const app = await launchRestormElectronApp({ restormRoot })
     await use(app)
+
+    // Save captured logs
+    const logFile = writeAppLogs(app, testInfo.outputDir)
+    if (logFile) {
+      await testInfo.attach('electron-logs', { path: logFile, contentType: 'text/plain' })
+    }
+
     await closeElectronAppForE2E(app)
   },
 
@@ -40,3 +44,6 @@ export const restormBaseTest = base.extend<BaseRestormFixtures>({
 })
 
 export { expect } from '@playwright/test'
+
+// Re-export for fixtures that override electronApp
+export { writeAppLogs } from './launch-restorm'

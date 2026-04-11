@@ -5,6 +5,8 @@ export interface EnvironmentContextValue {
   environments?: Environment[] | undefined
   selectedEnvId: string | null
   setSelectedEnvId: (id: string | null) => void
+  tagColors?: Record<string, string> | undefined
+  envColor?: string | undefined
 }
 
 export const EnvironmentContext = createContext<EnvironmentContextValue | undefined>(undefined)

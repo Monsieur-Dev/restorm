@@ -143,6 +143,6 @@ export default defineConfig({
     {
       name: 'user_preferences',
       testDir: userPreferencesTestDir
-    }
+    },
   ]
 })

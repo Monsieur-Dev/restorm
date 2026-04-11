@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import * as CoreUIRenderer from 'electron-core-ui/renderer'
-import { TagsView, Callout, type CalloutVariant } from 'electron-core-ui/renderer'
+import { TagsView, Tag, Callout, ColorPicker, Tooltip, type CalloutVariant, type ContextMenuItem } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
 import type { BreadcrumbItem } from '../../../../../shared/types/editor'
+import { useTranslation } from 'react-i18next'
 
 const { Breadcrumb } = CoreUIRenderer as unknown as {
   Breadcrumb: React.ComponentType<{
@@ -32,6 +33,10 @@ export interface RestormWorkbenchTabProps {
   onBreadcrumbIconChange?: ((item: BreadcrumbItem, newIcon: Icon | null) => void) | undefined
   tags: string[]
   onTagsChange?: ((nextTags: string[]) => void) | undefined
+  /** Tag color map (tag label -> hex color) */
+  tagColors?: Record<string, string> | undefined
+  /** Called when a tag color changes. Pass null to remove the color. */
+  onTagColorChange?: ((tag: string, color: string | null) => void) | undefined
   label: string
   headerRight?: React.ReactNode
   tagsRight?: React.ReactNode
@@ -49,6 +54,8 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
   onBreadcrumbIconChange,
   tags,
   onTagsChange,
+  tagColors,
+  onTagColorChange,
   label,
   headerRight,
   tagsRight,
@@ -57,6 +64,95 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
   children
 }) => {
   const testIdPrefix = tabId ? `tab-${tabId}` : 'workbench-tab'
+  const { t } = useTranslation()
+
+  // Color picker state
+  const [colorPickerTag, setColorPickerTag] = useState<string | null>(null)
+  const colorPickerTargetRef = useRef<HTMLElement | null>(null)
+  const tooltipClassName = 'restorm-tag-color-picker-tooltip'
+
+  // Close color picker on outside mousedown
+  useEffect(() => {
+    if (!colorPickerTag) return
+
+    const handleMouseDown = (event: MouseEvent): void => {
+      const target = event.target as Node | null
+      if (!target) return
+
+      // Ignore clicks on the tag target element
+      if (colorPickerTargetRef.current?.contains(target)) return
+
+      // Ignore clicks inside the tooltip
+      const tooltipEl = document.querySelector(`.${tooltipClassName}`)
+      if (tooltipEl?.contains(target)) return
+
+      setColorPickerTag(null)
+    }
+
+    document.addEventListener('mousedown', handleMouseDown)
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown)
+    }
+  }, [colorPickerTag])
+
+  const handleRenderTag = useCallback(
+    (tag: string, index: number, handlers: { onClick: () => void; onContextMenu: (e: React.MouseEvent) => void }) => {
+      const color = tagColors?.[tag]
+      return (
+        <Tag
+          label={tag}
+          color={color}
+          onClick={handlers.onClick}
+          onContextMenu={(e) => {
+            // Store the tag element as the tooltip target before opening context menu
+            colorPickerTargetRef.current = e.currentTarget as HTMLElement
+            handlers.onContextMenu(e)
+          }}
+          data-testid={`${testIdPrefix}-tag-${index}`}
+        />
+      )
+    },
+    [tagColors, testIdPrefix]
+  )
+
+  const handleAdditionalContextMenuItems = useCallback(
+    (tag: string, _index: number): ContextMenuItem[] => {
+      if (!onTagColorChange) return []
+      const hasColor = !!tagColors?.[tag]
+      const items: ContextMenuItem[] = [
+        {
+          id: 'change-tag-color',
+          label: t('tagsView.changeColor', 'Change tag color...'),
+          icon: 'symbol-color',
+          onClick: () => {
+            setColorPickerTag(tag)
+          }
+        }
+      ]
+      if (hasColor) {
+        items.push({
+          id: 'remove-tag-color',
+          label: t('tagsView.removeColor', 'Remove tag color'),
+          icon: 'close',
+          onClick: () => {
+            onTagColorChange(tag, null)
+          }
+        })
+      }
+      return items
+    },
+    [onTagColorChange, tagColors, t]
+  )
+
+  const handleColorPickerChange = useCallback(
+    (hex: string) => {
+      if (colorPickerTag) {
+        onTagColorChange?.(colorPickerTag, hex)
+      }
+    },
+    [colorPickerTag, onTagColorChange]
+  )
+
   return (
     <div
       style={{
@@ -99,6 +195,8 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
             onChange={(nextTags) => {
               onTagsChange?.(nextTags)
             }}
+            renderTag={handleRenderTag}
+            additionalContextMenuItems={onTagColorChange ? handleAdditionalContextMenuItems : undefined}
             data-testid={`${testIdPrefix}-tags`}
           />
         </div>
@@ -134,6 +232,25 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
         {headerRight}
       </div>
         {children}
+
+      {/* Color picker tooltip */}
+      <Tooltip
+        targetRef={colorPickerTargetRef as unknown as React.RefObject<HTMLElement | null>}
+        show={colorPickerTag !== null}
+        placement="below"
+        className={tooltipClassName}
+        data-testid={`${testIdPrefix}-color-picker-tooltip`}
+        content={
+          <div onMouseDown={(e) => { e.stopPropagation() }}>
+            <ColorPicker
+              value={colorPickerTag ? (tagColors?.[colorPickerTag] ?? '#3498db') : '#3498db'}
+              onChange={handleColorPickerChange}
+              disableAlpha
+              data-testid={`${testIdPrefix}-color-picker`}
+            />
+          </div>
+        }
+      />
     </div>
   )
 }

@@ -16,10 +16,11 @@ function findEnvironmentById(environments: Environment[], id: string): Environme
 
 export interface EnvironmentProviderProps {
   environments: Environment[] | undefined
+  tagColors?: Record<string, string> | undefined
   children: React.ReactNode
 }
 
-export const EnvironmentProvider: React.FC<EnvironmentProviderProps> = ({ environments, children }) => {
+export const EnvironmentProvider: React.FC<EnvironmentProviderProps> = ({ environments, tagColors, children }) => {
   const [selectedEnvId, setSelectedEnvId] = useState<string | null>(() => environments?.[0]?.id ?? null)
 
   // Reset selection when environments list changes
@@ -50,13 +51,22 @@ export const EnvironmentProvider: React.FC<EnvironmentProviderProps> = ({ enviro
     return undefined
   }, [environments, selectedEnvId])
 
+  // Derive envColor from the selected environment's color property
+  const envColor = useMemo<string | undefined>(() => {
+    if (!selectedEnvId || !environments) return undefined
+    const env = findEnvironmentById(environments, selectedEnvId)
+    return env?.color
+  }, [environments, selectedEnvId])
+
   const value = useMemo<EnvironmentContextValue>(
     () => ({
       environments,
       selectedEnvId,
-      setSelectedEnvId
+      setSelectedEnvId,
+      tagColors,
+      envColor
     }),
-    [environments, selectedEnvId]
+    [environments, selectedEnvId, tagColors, envColor]
   )
 
   return <EnvironmentContext.Provider value={value}>{children}</EnvironmentContext.Provider>

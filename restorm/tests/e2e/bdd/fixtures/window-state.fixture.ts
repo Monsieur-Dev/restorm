@@ -3,6 +3,7 @@ import { _electron as electron, type ElectronApplication, expect } from '@playwr
 import { join, resolve } from 'path'
 import electronPath from 'electron'
 import { withE2ECoverageEnv } from '../../helpers/coverage'
+import { writeAppLogs } from '../../helpers/base-fixture'
 
 interface WindowStateFixtures {
   restormRoot: string
@@ -14,7 +15,7 @@ interface WindowStateFixtures {
 export const test = base.extend<WindowStateFixtures>({
   restormRoot: [resolve(__dirname, '../../../..'), { option: true }],
 
-  launchApp: async ({ restormRoot }, use) => {
+  launchApp: async ({ restormRoot }, use, testInfo) => {
     const apps: ElectronApplication[] = []
 
     const launcher = async (clearSettings: boolean): Promise<ElectronApplication> => {
@@ -41,6 +42,10 @@ export const test = base.extend<WindowStateFixtures>({
     // Cleanup all apps
     for (const app of apps) {
       try {
+        const logFile = writeAppLogs(app, testInfo.outputDir)
+        if (logFile) {
+          await testInfo.attach('electron-logs', { path: logFile, contentType: 'text/plain' })
+        }
         app.process().kill('SIGKILL')
       } catch {
         // ignore

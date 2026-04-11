@@ -9,6 +9,7 @@ import {
   Pane,
   ControlGroup,
   logger,
+  getContrastColor,
   type VariableDefinition,
   type ISelectOptionItem,
   type ISelectData
@@ -97,11 +98,14 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   onHistoryAvailabilityChange
 }) => {
   const { t } = useTranslation()
-  const { selectedEnvId, environments } = useEnvironmentContext()
+  const { selectedEnvId, environments, envColor } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
-  
+  const sendButtonStyle: React.CSSProperties | undefined = envColor
+    ? { backgroundColor: envColor, color: getContrastColor(envColor), borderColor: envColor }
+    : undefined
+
   const [method, setMethod] = useState<string>(request.method)
   const [url, setUrl] = useState<string>(request.url)
   const [body, setBody] = useState<string>(getBodyContent(request))
@@ -653,7 +657,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         <Button
           icon="send"
           onClick={handleSend}
-          emphasis={1}
+          {...(sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
           options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}
           data-testid="http-request-send-button"
         />
