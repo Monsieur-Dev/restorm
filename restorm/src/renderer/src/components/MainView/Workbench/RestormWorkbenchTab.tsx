@@ -37,9 +37,7 @@ export interface RestormWorkbenchTabProps {
   tagColors?: Record<string, string> | undefined
   /** Called when a tag color changes. Pass null to remove the color. */
   onTagColorChange?: ((tag: string, color: string | null) => void) | undefined
-  label: string
   headerRight?: React.ReactNode
-  tagsRight?: React.ReactNode
   /** Optional callout to display at the top of the tab */
   callout?: RestormWorkbenchTabCallout | undefined
   /** Optional tab ID for stable test IDs */
@@ -56,9 +54,7 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
   onTagsChange,
   tagColors,
   onTagColorChange,
-  label,
   headerRight,
-  tagsRight,
   callout,
   tabId,
   children
@@ -212,38 +208,21 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
             data-testid={`${testIdPrefix}-breadcrumb`}
           />
         </div>
+        <span style={{ color: 'var(--descriptionForeground)' }}>
+          {t('workbench.tagsLabel')}
+        </span>
+        <TagsView
+          tags={tags}
+          onChange={(nextTags) => {
+            onTagsChange?.(nextTags)
+          }}
+          renderTag={handleRenderTag}
+          additionalContextMenuItems={onTagColorChange ? handleAdditionalContextMenuItems : undefined}
+          data-testid={`${testIdPrefix}-tags`}
+        />
         {headerRight}
       </div>
-
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          padding: '8px 16px 0 16px'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
-          <span
-            style={{
-              color: 'var(--descriptionForeground)'
-            }}
-          >
-            {label}
-          </span>
-          <TagsView
-            tags={tags}
-            onChange={(nextTags) => {
-              onTagsChange?.(nextTags)
-            }}
-            renderTag={handleRenderTag}
-            additionalContextMenuItems={onTagColorChange ? handleAdditionalContextMenuItems : undefined}
-            data-testid={`${testIdPrefix}-tags`}
-          />
-        </div>
-        {tagsRight}
-      </div>
-        {children}
+      {children}
 
       {/* Color picker tooltip */}
       <Tooltip

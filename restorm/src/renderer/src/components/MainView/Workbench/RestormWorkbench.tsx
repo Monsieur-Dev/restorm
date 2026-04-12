@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
-import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, Button, IconView, TabSwitcherOverlay, navigationService, type ContextMenuItem } from 'electron-core-ui/renderer'
+import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, Button, ControlGroup, IconView, TabSwitcherOverlay, navigationService, type ContextMenuItem } from 'electron-core-ui/renderer'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback, TabSwitcherItem } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
 import type { RestormEditorTab, BreadcrumbItem } from '../../../../../shared/types/editor'
@@ -46,7 +46,6 @@ interface RequestTabWithHistoryProps {
   onTagsChange?: ((nextTags: string[]) => void) | undefined
   tagColors?: Record<string, string> | undefined
   onTagColorChange?: ((tag: string, color: string | null) => void) | undefined
-  label: string
   headerRight?: React.ReactNode
   callout?: RestormWorkbenchTabCallout | undefined
   historyLabel: string
@@ -63,7 +62,6 @@ const RequestTabWithHistory: React.FC<RequestTabWithHistoryProps> = ({
   onTagsChange,
   tagColors,
   onTagColorChange,
-  label,
   headerRight,
   callout,
   historyLabel,
@@ -92,18 +90,17 @@ const RequestTabWithHistory: React.FC<RequestTabWithHistoryProps> = ({
       onTagsChange={onTagsChange}
       tagColors={tagColors}
       onTagColorChange={onTagColorChange}
-      label={label}
-      headerRight={headerRight}
-      tagsRight={(
-        <Button
-          icon="history"
-          onClick={handleOpenHistory}
-          disabled={!hasHistory}
-          options={{ title: historyLabel, ariaLabel: historyLabel }}
-          data-testid={`tab-${tabId}-history-button`}
-        >
-          {historyLabel}
-        </Button>
+      headerRight={(
+        <ControlGroup>
+          {headerRight}
+          <Button
+            icon="history"
+            onClick={handleOpenHistory}
+            disabled={!hasHistory}
+            options={{ title: historyLabel, ariaLabel: historyLabel }}
+            data-testid={`tab-${tabId}-history-button`}
+          />
+        </ControlGroup>
       )}
       callout={callout}
       tabId={tabId}
@@ -534,7 +531,6 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           }}
           tagColors={folderTagColors}
           onTagColorChange={handleFolderTagColorChange}
-          label={t('workbench.tagsLabel')}
         >
           <FolderView
             folder={folder}
@@ -568,7 +564,6 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           }}
           tagColors={folder.tagColors}
           onTagColorChange={handleEnvFolderTagColorChange}
-          label={t('workbench.tagsLabel')}
           tabId={effectiveTab.id}
         >
           <EnvironmentFolderView
@@ -608,7 +603,6 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             }}
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
-            label={t('workbench.tagsLabel')}
             headerRight={<EnvironmentDropdown />}
             callout={request.deprecated ? {
               variant: 'warning',
@@ -645,7 +639,6 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             }}
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
-            label={t('workbench.tagsLabel')}
             headerRight={<EnvironmentDropdown />}
             historyLabel={t('requestTab.tabs.responsesHistory')}
             tabId={effectiveTab.id}
@@ -678,7 +671,6 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             }}
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
-            label={t('workbench.tagsLabel')}
             headerRight={<EnvironmentDropdown />}
             historyLabel={t('requestTab.tabs.responsesHistory')}
             tabId={effectiveTab.id}
@@ -711,7 +703,6 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             }}
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
-            label={t('workbench.tagsLabel')}
             headerRight={<EnvironmentDropdown />}
             historyLabel={t('requestTab.tabs.responsesHistory')}
             tabId={effectiveTab.id}
@@ -744,7 +735,6 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             }}
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
-            label={t('workbench.tagsLabel')}
             headerRight={<EnvironmentDropdown />}
             historyLabel={t('requestTab.tabs.responsesHistory')}
             tabId={effectiveTab.id}
