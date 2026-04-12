@@ -78,7 +78,7 @@ declare global {
         unregisterRequest: (requestId: string) => Promise<void>
         setRequestEnvironment: (requestId: string, environmentId: string | null) => Promise<void>
         updateRequestKeyValues: (requestId: string, groupName: string, keyValues: KeyValueData[]) => Promise<void>
-        updateFullRequestData: (requestId: string, data: Partial<FullRequestData>) => Promise<void>
+        updateFullRequestData: (requestId: string, data: Partial<FullRequestData>, sourceId?: string) => Promise<void>
         getResolvedUrl: (requestId: string) => Promise<ResolvedUrlResult | undefined>
         getCodeSnippets: (requestId: string) => Promise<CodeSnippetsResult | undefined>
         onUrlResolved: (callback: (result: ResolvedUrlResult) => void) => (() => void)
@@ -169,18 +169,22 @@ export interface ResolvedUrlResult {
   resolvedUrl: string
   baseUrl: string
   queryString: string
+  sourceId?: string
 }
 
 /** Code snippets result from context service */
 export interface CodeSnippetsResult {
   requestId: string
   markdown: string
+  sourceId?: string
 }
 
 /** Available variables result for autocompletion (per field) */
 export interface AvailableVariablesResult {
   variableId: string
   variables: { name: string; value: string }[]
+  /** Echo of the sourceId of the renderer call that triggered this update (if any). */
+  sourceId?: string
 }
 
 /** HTTP execution input for backend */

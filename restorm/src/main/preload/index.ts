@@ -40,18 +40,22 @@ interface ResolvedUrlResult {
   resolvedUrl: string
   baseUrl: string
   queryString: string
+  sourceId?: string
 }
 
 /** Code snippets result from context service */
 interface CodeSnippetsResult {
   requestId: string
   markdown: string
+  sourceId?: string
 }
 
 /** Available variables for autocompletion (per field) */
 interface AvailableVariablesResult {
   variableId: string
   variables: { name: string; value: string }[]
+  /** Echo of the sourceId of the renderer call that triggered this update (if any). */
+  sourceId?: string
 }
 
 /** Full request data for backend processing */
@@ -199,8 +203,8 @@ contextBridge.exposeInMainWorld('restorm', {
       await ipcRenderer.invoke('context:update-request-keyvalues', requestId, groupName, keyValues)
     },
     /** Update full request data for URL resolution and code snippet generation */
-    updateFullRequestData: async (requestId: string, data: FullRequestData): Promise<void> => {
-      await ipcRenderer.invoke('context:update-full-request-data', requestId, data)
+    updateFullRequestData: async (requestId: string, data: FullRequestData, sourceId?: string): Promise<void> => {
+      await ipcRenderer.invoke('context:update-full-request-data', requestId, data, sourceId)
     },
     /** Get resolved URL for a request */
     getResolvedUrl: async (requestId: string): Promise<ResolvedUrlResult | undefined> => {

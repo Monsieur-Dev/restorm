@@ -59,7 +59,8 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
   // Backend-provided resolved URL and code snippets
   const [resolvedUrl, setResolvedUrl] = useState<string>('')
   const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
-  
+  const sourceIdRef = useRef<string>(crypto.randomUUID())
+
   const metadataRef = useRef<KeyValueTableHandle | null>(null)
 
   const handleRequestReset = useCallback(() => {
@@ -96,7 +97,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
       requestType: 'grpc',
       headers: toKeyValueData(currentRequest.metadata),
       body: { type: 'text', content: currentRequest.requestMessage }
-    })
+    }, sourceIdRef.current)
 
     // Subscribe to backend events
     const unsubUrl = window.restorm?.context.onUrlResolved((result) => {
@@ -154,7 +155,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
       requestType: 'grpc',
       headers: toKeyValueData(request.metadata),
       body: { type: 'text', content: requestMessage }
-    })
+    }, sourceIdRef.current)
   }, [request.id, request.callType, request.metadata, url, requestMessage])
 
   // Sync state changes to reactive request object

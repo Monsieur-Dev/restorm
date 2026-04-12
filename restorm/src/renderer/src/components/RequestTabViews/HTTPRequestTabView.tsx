@@ -125,6 +125,18 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   const queryParamsRef = useRef<KeyValueTableHandle | null>(null)
   const pathParamsRef = useRef<KeyValueTableHandle | null>(null)
   const requestIdRef = useRef<string>(request.id)
+  const sourceIdRef = useRef<string>('')
+  sourceIdRef.current ||= crypto.randomUUID()
+  const urlVariablesBootstrappedRef = useRef<boolean>(false)
+
+  // Own-echo handling for resolvedUrl + codeSnippets : skipped during an active typing burst
+  // to avoid re-rendering Monaco's parent (which would desync value prop vs editor content
+  // and cause cursor jumps), then flushed after a short idle delay so the tooltip / snippets
+  // catch up with the latest typed state.
+  const pendingResolvedUrlRef = useRef<string | null>(null)
+  const pendingCodeSnippetsRef = useRef<string | null>(null)
+  const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const SETTLE_DELAY_MS = 400
 
   // Reset local state when switching to a different request
   const handleRequestReset = useCallback(() => {
@@ -148,21 +160,50 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       return result
     }), [])
 
-  // Subscribe to backend URL and code snippets updates
+  // Own-echo handling: during an active typing burst we buffer the latest resolved URL /
+  // code snippets in refs (no setState → no re-render). After a short idle delay we apply the
+  // latest buffered value so the tooltip / snippets catch up with what the user typed.
+  const scheduleSettleFlush = useCallback((): void => {
+    if (settleTimerRef.current) clearTimeout(settleTimerRef.current)
+    settleTimerRef.current = setTimeout(() => {
+      settleTimerRef.current = null
+      if (pendingResolvedUrlRef.current !== null) {
+        const value = pendingResolvedUrlRef.current
+        pendingResolvedUrlRef.current = null
+        setResolvedUrl(value)
+      }
+      if (pendingCodeSnippetsRef.current !== null) {
+        const value = pendingCodeSnippetsRef.current
+        pendingCodeSnippetsRef.current = null
+        setBackendCodeSnippets(value)
+      }
+    }, SETTLE_DELAY_MS)
+  }, [])
+
+  // Subscribe to backend URL and code snippets updates. Own-echoes are buffered + flushed
+  // after idle (see scheduleSettleFlush) to avoid disturbing Monaco during active typing.
   useEffect(() => {
     const requestId = request.id
     if (!requestId) return
 
     const unsubUrl = window.restorm?.context.onUrlResolved((result) => {
-      if (result.requestId === requestId) {
-        setResolvedUrl(result.resolvedUrl)
+      if (result.requestId !== requestId) return
+      if (result.sourceId === sourceIdRef.current) {
+        pendingResolvedUrlRef.current = result.resolvedUrl
+        scheduleSettleFlush()
+        return
       }
+      setResolvedUrl(result.resolvedUrl)
     })
 
     const unsubSnippets = window.restorm?.context.onCodeSnippetsUpdated((result) => {
-      if (result.requestId === requestId) {
-        setBackendCodeSnippets(result.markdown)
+      if (result.requestId !== requestId) return
+      if (result.sourceId === sourceIdRef.current) {
+        pendingCodeSnippetsRef.current = result.markdown
+        scheduleSettleFlush()
+        return
       }
+      setBackendCodeSnippets(result.markdown)
     })
 
     // Get initial values if they exist
@@ -176,8 +217,12 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     return () => {
       unsubUrl?.()
       unsubSnippets?.()
+      if (settleTimerRef.current) {
+        clearTimeout(settleTimerRef.current)
+        settleTimerRef.current = null
+      }
     }
-  }, [request.id])
+  }, [request.id, scheduleSettleFlush])
 
   // Refs to capture initial values for registration (avoid re-running effect when these change)
   const selectedEnvIdRef = useRef(selectedEnvId)
@@ -284,7 +329,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       params: toKeyValueData(request.params),
       pathParams: request.pathParams ? toKeyValueData(request.pathParams) : [],
       body: bodyData
-    })
+    }, sourceIdRef.current)
   }, [request.id, url, method, request.headers, request.params, request.pathParams, body, bodyMode, bodyFilePath, request.body, toKeyValueData])
   
   // Stable empty array for components that get variables via their own variableId
@@ -302,19 +347,24 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     if (!varId || varId === 'undefined:url') return
     
     const unsubscribe = window.restorm?.context.onAvailableVariables((result) => {
-      if (result.variableId === varId) {
-        setUrlVariables(prev => {
-          const newVars = result.variables
-          if (prev.length !== newVars.length) return newVars
-          const hasChanges = newVars.some((v, i) => {
-            const prevItem = prev[i]
-            return prevItem && (prevItem.name !== v.name || prevItem.value !== v.value)
-          })
-          return hasChanges ? newVars : prev
-        })
+      if (result.variableId !== varId) return
+      // First own-echo bootstraps the variables list (needed for Monaco hover + autocomplete
+      // to show resolved values). After that, own-echoes are skipped to avoid mid-typing renders.
+      if (result.sourceId === sourceIdRef.current && urlVariablesBootstrappedRef.current) {
+        return
       }
+      urlVariablesBootstrappedRef.current = true
+      const newVars = result.variables
+      setUrlVariables(prev => {
+        if (prev.length !== newVars.length) return newVars
+        const hasChanges = newVars.some((v, i) => {
+          const prevItem = prev[i]
+          return prevItem && (prevItem.name !== v.name || prevItem.value !== v.value)
+        })
+        return hasChanges ? newVars : prev
+      })
     })
-    
+
     return () => { unsubscribe?.() }
   }, [urlVariableId])
 

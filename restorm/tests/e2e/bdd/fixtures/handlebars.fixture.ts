@@ -34,6 +34,19 @@ const testData = {
       pathParams: [
         { id: 'pp-1', key: 'userId', value: '12345', description: 'User ID', enabled: true }
       ],
+      body: { type: 'text', content: '{{baseUrl}}/users/{{userId}}' },
+      documentation: '',
+      notes: '',
+      tags: []
+    }, {
+      id: 'req-gql',
+      name: 'Get Users GQL',
+      type: 'graphql',
+      url: '{{baseUrl}}/graphql',
+      operationType: 'query',
+      query: 'query { users { id name } }',
+      variables: '{}',
+      headers: [],
       documentation: '',
       notes: '',
       tags: []

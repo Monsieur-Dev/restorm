@@ -514,11 +514,27 @@ const App: React.FC = () => {
     wasDirtyRef.current = isDirty
   }, [isDirty, fileName, rootItems, markAllTabsSaved])
 
-  // Listen to document changes and update per-tab dirty state (works in all modes)
+  // Listen to document changes and update per-tab dirty state (works in all modes).
+  // The checksum update triggers a setState in useDirtyState, which re-renders App and
+  // cascades to every tab view. To avoid disturbing actively-typed Monaco editors, we
+  // debounce the checksum update per document id so a typing burst produces a single
+  // update after the user settles.
+  const dirtyChecksumTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
+  const DIRTY_CHECKSUM_DEBOUNCE_MS = 300
   useEffect(() => {
+    const scheduleChecksumUpdate = (id: string, compute: () => string): void => {
+      const existing = dirtyChecksumTimersRef.current.get(id)
+      if (existing) clearTimeout(existing)
+      const timer = setTimeout(() => {
+        dirtyChecksumTimersRef.current.delete(id)
+        updateTabDirtyChecksum(id, compute())
+      }, DIRTY_CHECKSUM_DEBOUNCE_MS)
+      dirtyChecksumTimersRef.current.set(id, timer)
+    }
+
     const handleFolderOrRequestUpdated = (payload: DocumentChangedPayload): void => {
-      const newChecksum = computeChecksum(JSON.parse(JSON.stringify(payload.document)) as FolderItem)
-      updateTabDirtyChecksum(payload.id, newChecksum)
+      const doc = payload.document
+      scheduleChecksumUpdate(payload.id, () => computeChecksum(JSON.parse(JSON.stringify(doc)) as FolderItem))
 
       if (payload.type === 'request') {
         const requestPath = buildRequestPath(environmentFolderCollections, payload.id)
@@ -541,7 +557,7 @@ const App: React.FC = () => {
       // Find the parent environment folder and recalculate its checksum
       const parentFolderId = payload.parentFolderId
       if (!parentFolderId) return
-      
+
       // Find the folder in rootItems
       const findFolder = (items: FolderItem[]): Folder | null => {
         for (const item of items) {
@@ -553,19 +569,17 @@ const App: React.FC = () => {
         }
         return null
       }
-      
+
       for (const rootFolder of rootItems) {
         if (rootFolder.id === parentFolderId) {
-          const newChecksum = computeChecksum(JSON.parse(JSON.stringify(rootFolder)) as EnvironmentFolder | Folder | Request)
-          updateTabDirtyChecksum(parentFolderId, newChecksum)
+          scheduleChecksumUpdate(parentFolderId, () => computeChecksum(JSON.parse(JSON.stringify(rootFolder)) as EnvironmentFolder | Folder | Request))
           return
         }
         // Only search in folders, not Requests
         if ('items' in rootFolder) {
           const found = findFolder(rootFolder.items)
           if (found) {
-            const newChecksum = computeChecksum(JSON.parse(JSON.stringify(found)) as Folder)
-            updateTabDirtyChecksum(parentFolderId, newChecksum)
+            scheduleChecksumUpdate(parentFolderId, () => computeChecksum(JSON.parse(JSON.stringify(found)) as Folder))
             return
           }
         }
@@ -578,10 +592,15 @@ const App: React.FC = () => {
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_UPDATED, handleEnvironmentUpdated)
     ]
 
+    const timersMap = dirtyChecksumTimersRef.current
     return () => {
       for (const sub of subscriptions) {
         sub.unsubscribe()
       }
+      for (const timer of timersMap.values()) {
+        clearTimeout(timer)
+      }
+      timersMap.clear()
     }
   }, [updateTabDirtyChecksum, rootItems, environmentFolderCollections])
 

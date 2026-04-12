@@ -162,6 +162,17 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   const lastValueRef = useRef<string | undefined>(props.value)
   const lastEventRef = useRef<monacoEditor.editor.IModelContentChangedEvent | undefined>(undefined)
 
+  // Monaco is driven uncontrolled on our side: we pass an initial value via `defaultValue`
+  // at mount, then manage sync manually. When the parent's `value` prop changes, we compare
+  // it to the last value Monaco emitted through onChange:
+  //   - If equal → React is just catching up to the user's typing, don't touch Monaco.
+  //   - If different → external override (e.g. request switch), call editor.setValue imperatively.
+  // This avoids @monaco-editor/react's built-in value-sync effect calling executeEdits with a
+  // stale value during the CodeEditor debounce window, which resets the cursor when typing at
+  // a cadence close to the debounce interval.
+  const [initialValue] = useState<string>(props.value ?? props.defaultValue ?? '')
+  const lastEmittedValueRef = useRef<string | undefined>(props.value)
+
   // Editor settings from SettingsService (fontSize, fontFamily, wordWrap, minimap, lineNumbers)
   const [editorSettings, setEditorSettings] = useState<Record<string, unknown>>({})
 
@@ -320,6 +331,9 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   const handleChange: EditorProps['onChange'] = (nextValue, ev) => {
     lastValueRef.current = nextValue
     lastEventRef.current = ev as monacoEditor.editor.IModelContentChangedEvent | undefined
+    // Track the latest user-typed value so external value-prop changes can be distinguished
+    // from React catching up.
+    lastEmittedValueRef.current = nextValue
 
     if (debounceRef.current) {
       clearTimeout(debounceRef.current)
@@ -331,11 +345,35 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
     }
 
     debounceRef.current = setTimeout(() => {
+      debounceRef.current = null
       if (lastEventRef.current) {
         props.onChange?.(lastValueRef.current, lastEventRef.current)
       }
     }, changeDebounceMs)
   }
+
+  // Strip `value` from the props we forward to @monaco-editor/react so its internal
+  // value-sync effect is fully inert.
+  const { value: _propsValue, defaultValue: _propsDefaultValue, ...editorPropsWithoutValue } = props
+  void _propsValue
+  void _propsDefaultValue
+
+  // Manual sync: push the value prop into Monaco only when it represents a true external
+  // override (different from the last value the user typed). If a debounce is still pending,
+  // Monaco's internal content is ahead of React state — skip the sync to avoid rolling back
+  // unsaved keystrokes.
+  useEffect(() => {
+    if (!editorInstance) return
+    if (props.value === undefined) return
+    if (debounceRef.current !== null) return
+    if (props.value === lastEmittedValueRef.current) return
+    if (editorInstance.getValue() === props.value) {
+      lastEmittedValueRef.current = props.value
+      return
+    }
+    editorInstance.setValue(props.value)
+    lastEmittedValueRef.current = props.value
+  }, [editorInstance, props.value])
 
   return (
     <div
@@ -347,7 +385,10 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
     >
       <div style={{ width: '100%', height: '100%' }} {...(dataTestId && { 'data-testid': `${dataTestId}-monaco` })}>
         <Editor
-          {...props}
+          {...editorPropsWithoutValue}
+          // Uncontrolled from @monaco-editor/react's point of view: omit `value` entirely so its
+          // internal value-sync effect never runs. We push updates imperatively above.
+          defaultValue={initialValue}
           options={{ ...(props.options ?? {}), ...settingsOptions }}
           theme={currentTheme}
           onChange={handleChange}

@@ -59,6 +59,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   // Backend-provided resolved URL and code snippets
   const [resolvedUrl, setResolvedUrl] = useState<string>('')
   const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
+  const sourceIdRef = useRef<string>(crypto.randomUUID())
   
   const headersRef = useRef<KeyValueTableHandle | null>(null)
 
@@ -104,7 +105,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       requestType: 'graphql',
       headers: toKeyValueData(currentRequest.headers),
       body: { type: 'text', content: JSON.stringify({ query: currentRequest.query, variables: currentRequest.variables }) }
-    })
+    }, sourceIdRef.current)
 
     // Subscribe to backend events
     const unsubUrl = restormContext.onUrlResolved((result) => {
@@ -162,7 +163,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       requestType: 'graphql',
       headers: toKeyValueData(request.headers),
       body: { type: 'text', content: JSON.stringify({ query, variables }) }
-    })
+    }, sourceIdRef.current)
   }, [request.id, request.headers, url, query, variables])
 
   // Sync state changes to reactive request object

@@ -58,7 +58,8 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
   // Backend-provided resolved URL and code snippets
   const [resolvedUrl, setResolvedUrl] = useState<string>('')
   const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
-  
+  const sourceIdRef = useRef<string>(crypto.randomUUID())
+
   const headersRef = useRef<KeyValueTableHandle | null>(null)
 
   const handleRequestReset = useCallback(() => {
@@ -95,7 +96,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
       requestType: 'soap',
       headers: toKeyValueData(currentRequest.headers),
       body: { type: 'text', content: currentRequest.body }
-    })
+    }, sourceIdRef.current)
 
     // Subscribe to backend events
     const unsubUrl = window.restorm?.context.onUrlResolved((result) => {
@@ -153,7 +154,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
       requestType: 'soap',
       headers: toKeyValueData(request.headers),
       body: { type: 'text', content: body }
-    })
+    }, sourceIdRef.current)
   }, [request.id, request.headers, url, body])
 
   // Sync state changes to reactive request object

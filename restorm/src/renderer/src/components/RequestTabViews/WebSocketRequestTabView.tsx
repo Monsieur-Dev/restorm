@@ -62,7 +62,8 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   // Backend-provided resolved URL and code snippets
   const [resolvedUrl, setResolvedUrl] = useState<string>('')
   const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
-  
+  const sourceIdRef = useRef<string>(crypto.randomUUID())
+
   const headersRef = useRef<KeyValueTableHandle | null>(null)
 
   const handleRequestReset = useCallback(() => {
@@ -100,7 +101,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       requestType: 'websocket',
       headers: toKeyValueData(currentRequest.headers),
       body: { type: 'text', content: currentRequest.message }
-    })
+    }, sourceIdRef.current)
 
     // Subscribe to backend events
     const unsubUrl = window.restorm?.context.onUrlResolved((result) => {
@@ -158,7 +159,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       requestType: 'websocket',
       headers: toKeyValueData(request.headers),
       body: { type: 'text', content: message }
-    })
+    }, sourceIdRef.current)
   }, [request.id, request.protocol, request.headers, url, message])
 
   // Sync state changes to reactive request object

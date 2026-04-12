@@ -68,6 +68,12 @@ const userPreferencesTestDir = defineBddConfig({
   outputDir: '.features-gen/user_preferences'
 })
 
+const monacoTypingTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/monaco-typing/features/**/*.feature',
+  steps: ['tests/e2e/bdd/monaco-typing/steps/**/*.ts', 'tests/e2e/bdd/fixtures/handlebars.fixture.ts'],
+  outputDir: '.features-gen/monaco-typing'
+})
+
 /**
  * Playwright configuration for Electron E2E tests using playwright-bdd.
  * Each test group has its own project with a dedicated fixture.
@@ -143,6 +149,10 @@ export default defineConfig({
     {
       name: 'user_preferences',
       testDir: userPreferencesTestDir
+    },
+    {
+      name: 'monaco-typing',
+      testDir: monacoTypingTestDir
     },
   ]
 })
