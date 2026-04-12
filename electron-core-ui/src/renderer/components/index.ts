@@ -1,12 +1,15 @@
 import CustomDropdown from './CustomDropdown'
 import Tabs from './Tabs'
-import { SettingsTreeView } from './SettingsTreeView'
 import Workbench from './Workbench/Workbench'
 import ElectronCoreUiProvider from './ElectronCoreUiProvider'
 import { EditorWorkbench } from './Workbench/EditorWorkbench'
 import { MarkdownEditor } from './MarkdownEditor/MarkdownEditor'
 import { MarkdownViewer } from './MarkdownViewer/MarkdownViewer'
 import { SplitView, Pane } from './SplitView'
+
+// ControlGroup exports
+export { ControlGroup } from './ControlGroup'
+export type { ControlGroupProps, ControlGroupOrientation } from './ControlGroup'
 
 // Callout exports
 export { Callout } from './Callout'
@@ -94,9 +97,25 @@ export type { ListViewDropdownProps } from './ListViewDropdown/ListViewDropdown'
 export { Breadcrumb } from './Breadcrumb'
 export type { BreadcrumbProps, BreadcrumbItem } from './Breadcrumb'
 
+// Tag exports
+export { Tag } from './Tag'
+export type { TagProps } from './Tag'
+
 // TagsView exports
 export { TagsView } from './TagsView/TagsView'
 export type { TagsViewProps } from './TagsView/TagsView'
+
+// IconView exports
+export { IconView } from './IconView'
+export type { IconViewProps } from './IconView'
+
+// JsonViewer exports
+export { JsonViewer } from './JsonViewer'
+export type { JsonViewerProps } from './JsonViewer'
+
+// TabSwitcherOverlay exports
+export { TabSwitcherOverlay } from './TabSwitcherOverlay'
+export type { TabSwitcherOverlayProps, TabSwitcherItem } from './TabSwitcherOverlay'
 
 // IconSelect exports
 export { IconSelect, RenderLibraryIcon, IconoirIcon, PhosphorIcon, MdiIcon, SimpleIcon, ICON_LIBRARIES } from './IconSelect'
@@ -151,7 +170,6 @@ export type { CustomWCOProps } from './CustomWCO/index'
 export {
   CustomDropdown,
   Tabs,
-  SettingsTreeView,
   Workbench,
   EditorWorkbench,
   MarkdownEditor,

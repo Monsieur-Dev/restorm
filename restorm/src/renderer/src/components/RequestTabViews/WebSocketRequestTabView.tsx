@@ -8,7 +8,9 @@ import {
   CodeEditor,
   SplitView,
   Pane,
+  ControlGroup,
   logger,
+  getContrastColor,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
@@ -40,11 +42,14 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   onHistoryAvailabilityChange
 }) => {
   const { t } = useTranslation()
-  const { selectedEnvId, environments } = useEnvironmentContext()
+  const { selectedEnvId, environments, envColor } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
-  
+  const sendButtonStyle: React.CSSProperties | undefined = envColor
+    ? { backgroundColor: envColor, color: getContrastColor(envColor), borderColor: envColor }
+    : undefined
+
   const [url, setUrlState] = useState(request.url)
   const [event, setEventState] = useState(request.event ?? '')
   const [message, setMessageState] = useState(request.message)
@@ -57,7 +62,8 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   // Backend-provided resolved URL and code snippets
   const [resolvedUrl, setResolvedUrl] = useState<string>('')
   const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
-  
+  const sourceIdRef = useRef<string>(crypto.randomUUID())
+
   const headersRef = useRef<KeyValueTableHandle | null>(null)
 
   const handleRequestReset = useCallback(() => {
@@ -95,7 +101,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       requestType: 'websocket',
       headers: toKeyValueData(currentRequest.headers),
       body: { type: 'text', content: currentRequest.message }
-    })
+    }, sourceIdRef.current)
 
     // Subscribe to backend events
     const unsubUrl = window.restorm?.context.onUrlResolved((result) => {
@@ -153,7 +159,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       requestType: 'websocket',
       headers: toKeyValueData(request.headers),
       body: { type: 'text', content: message }
-    })
+    }, sourceIdRef.current)
   }, [request.id, request.protocol, request.headers, url, message])
 
   // Sync state changes to reactive request object
@@ -397,9 +403,9 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   
   // URL section
   const urlSection = (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <ControlGroup data-testid="websocket-url-section">
       <Badge type={mapToBadgeType(request.protocol)} />
-      <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
+      <div style={{ flex: 1, minWidth: 0 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
         <RestormVariableInputBox
           value={url}
           onChange={setUrl}
@@ -409,18 +415,17 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           data-testid="websocket-url-input"
         />
       </div>
-      <Button 
+      <Button
         icon={isSending ? 'debug-disconnect' : 'plug'}
-        onClick={isSending ? handleDisconnect : handleSend} 
-        options={{ 
-          title: isSending ? t('websocket.disconnect') : t('websocket.connect'), 
-          ariaLabel: isSending ? t('websocket.disconnect') : t('websocket.connect') 
+        onClick={isSending ? handleDisconnect : handleSend}
+        {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+        options={{
+          title: isSending ? t('websocket.disconnect') : t('websocket.connect'),
+          ariaLabel: isSending ? t('websocket.disconnect') : t('websocket.connect')
         }}
         data-testid="websocket-connect-button"
-      >
-        {isSending ? t('websocket.disconnect') : t('websocket.connect')}
-      </Button>
-    </div>
+      />
+    </ControlGroup>
   )
   
   const handleCloseHistoryModal = useCallback(() => {

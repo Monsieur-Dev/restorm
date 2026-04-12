@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EditorTabs } from './EditorTabs';
 import { Modal } from '../Modal';
+import { useSetting } from '../../hooks/useSettings';
 import type { EditorGroup, EditorWorkbenchCallbacks, SplitDirection } from './types';
 import { getEditorDragData, isEditorDragEvent } from './dnd';
 import { getTabTitleString } from './utils';
@@ -27,31 +28,39 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 	const [isEditorDrag, setIsEditorDrag] = useState<boolean>(false);
 	const [fullscreenTabId, setFullscreenTabId] = useState<string | null>(null);
 	const contentRef = useRef<HTMLDivElement | null>(null);
+	const [advancedEffects] = useSetting('appearance:advancedVisualEffects');
 
 	// Cache rendered tab contents — render each tab only once, then reuse.
 	// This prevents React from unmounting/remounting heavy components (Monaco editors, etc.)
 	// when switching tabs — only the CSS display property toggles visibility.
 	// Using useState initializer as a persistent cache that survives re-renders.
 	const [tabContentCache] = useState(() => new Map<string, React.ReactNode>());
+	const [tabVersionCache] = useState(() => new Map<string, number>());
 
 	const tabContents = useMemo(() => {
 		// Prune entries for closed tabs
 		const tabIds = new Set(group.tabs.map(t => t.id));
 		for (const k of tabContentCache.keys()) {
-			if (!tabIds.has(k)) tabContentCache.delete(k);
+			if (!tabIds.has(k)) {
+				tabContentCache.delete(k);
+				tabVersionCache.delete(k);
+			}
 		}
-		// Render new tabs, reuse cached content for existing ones
+		// Render new tabs or tabs whose contentVersion changed, reuse cached content for others
 		const result = new Map<string, React.ReactNode>();
 		for (const tab of group.tabs) {
+			const cachedVersion = tabVersionCache.get(tab.id);
+			const currentVersion = tab.contentVersion ?? 0;
 			let content = tabContentCache.get(tab.id);
-			if (!content) {
+			if (!content || cachedVersion !== currentVersion) {
 				content = renderTabContent?.(tab) ?? tab.content ?? <span>{tab.title}</span>;
 				tabContentCache.set(tab.id, content);
+				tabVersionCache.set(tab.id, currentVersion);
 			}
 			result.set(tab.id, content);
 		}
 		return result;
-	}, [group.tabs, renderTabContent, tabContentCache]);
+	}, [group.tabs, renderTabContent, tabContentCache, tabVersionCache]);
 
 	// Handle tab double-click for fullscreen modal
 	const handleTabDoubleClick = useCallback((tabId: string) => {
@@ -95,10 +104,11 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 		const base: React.CSSProperties = {
 			position: 'absolute',
 			inset: 0,
+			zIndex: 10,
 			// Only start intercepting events when an editor tab is being dragged
 			pointerEvents: splitTarget && isEditorDrag ? 'auto' : 'none',
-			backgroundColor: 'rgba(0, 0, 0, 0.40)', // 20% black
-			//backdropFilter: 'blur(1px)', // slight blur (removed... too laggy)
+			backgroundColor: 'rgba(0, 0, 0, 0.40)',
+			backdropFilter: advancedEffects ? 'blur(8px)' : undefined,
 			transition: 'clip-path 150ms ease, opacity 120ms ease',
 			willChange: 'clip-path, opacity',
 			boxSizing: 'border-box',
@@ -115,7 +125,7 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 		if (splitTarget === 'top') return { ...base, clipPath: 'inset(0 0 50% 0)' };
 		// bottom
 		return { ...base, clipPath: 'inset(50% 0 0 0)' };
-	}, [splitTarget, isEditorDrag]);
+	}, [splitTarget, isEditorDrag, advancedEffects]);
 
 	const isBlockedDrop = useCallback((e: React.DragEvent<HTMLDivElement>): boolean => {
 		const data = getEditorDragData(e);
@@ -201,9 +211,9 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 		<div
 			className="editor-group-container"
 			data-group-id={group.id}
+			data-has-focus={hasFocus ? 'true' : 'false'}
 			{...(dataTestId && {
 				'data-testid': `${dataTestId}-group-${group.id}`,
-				'data-has-focus': hasFocus ? 'true' : 'false',
 				'data-active-tab-id': group.activeTabId ?? '',
 				'data-tab-count': String(group.tabs.length)
 			})}

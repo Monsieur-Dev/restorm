@@ -1,20 +1,20 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState, Suspense, useSyncExternalStore } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { GraphRef } from 'jsoncrack-react'
 import {
   Tabs,
-  VerticalSashContainer,
   ListView,
+  SelectBox,
   CodeEditor,
+  JsonViewer,
   type ListViewItemData,
   type Tab,
-  type ContextMenuItem
+  type ContextMenuItem,
+  type ISelectOptionItem,
+  type ISelectData
 } from 'electron-core-ui/renderer'
 import { logger } from 'electron-core-ui/renderer'
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../../shared/types/collections'
 import { getResponseHistoryDetail, getResponseHistoryList } from '../../services/GraphQLIntegration'
-
-const Graph = React.lazy(() => import('jsoncrack-react').then(mod => ({ default: mod.Graph })))
 
 function formatRequestBodyValue(text: string): { text: string; language: string } {
   const trimmed = text.trim()
@@ -185,8 +185,6 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
   const { t, i18n } = useTranslation()
   const store = useMemo(() => new ResponseHistoryStore(), [])
   const { entries, selectedGuid, selectedDetail } = useSyncExternalStore(store.subscribe, store.getSnapshot)
-  const graphRef = useRef<GraphRef | null>(null)
-  const [graphKey, setGraphKey] = useState(0)
   const [activeTabId, setActiveTabId] = useState('response')
   const [isDarkTheme, setIsDarkTheme] = useState<boolean>(() => {
     if (typeof document === 'undefined') return true
@@ -194,7 +192,27 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
     return themeAttr === 'dark' || themeAttr === 'hcDark'
   })
 
-  const dateFormatter = useMemo(() => {
+  // Read date format setting
+  const [dateFormat, setDateFormat] = useState<'us' | 'iso'>('us')
+  useEffect(() => {
+    const settingsApi = (window as unknown as { api?: { settings?: { get: (k: string) => Promise<unknown> } } }).api?.settings
+    if (settingsApi) {
+      void settingsApi.get('behavior:dateTimeFormat').then((value) => {
+        if (value === 'iso' || value === 'us') setDateFormat(value)
+      })
+    }
+  }, [])
+
+  const formatDate = useCallback((date: Date): string => {
+    if (dateFormat === 'iso') {
+      const y = date.getFullYear()
+      const m = String(date.getMonth() + 1).padStart(2, '0')
+      const d = String(date.getDate()).padStart(2, '0')
+      const h = String(date.getHours()).padStart(2, '0')
+      const min = String(date.getMinutes()).padStart(2, '0')
+      const s = String(date.getSeconds()).padStart(2, '0')
+      return `${String(y)}-${m}-${d} ${h}:${min}:${s}`
+    }
     return new Intl.DateTimeFormat(i18n.language, {
       day: '2-digit',
       month: '2-digit',
@@ -202,8 +220,8 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit'
-    })
-  }, [i18n.language])
+    }).format(date)
+  }, [dateFormat, i18n.language])
 
   useEffect(() => {
     store.setRequestPath(requestPath)
@@ -217,13 +235,18 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
 
   const listItems: ListViewItemData[] = useMemo(() => {
     return entries.map((entry) => {
-      const dateLabel = dateFormatter.format(new Date(entry.timestamp))
-      const pinIcon = (
-        <i
-          className="codicon codicon-pin"
-          aria-hidden="true"
-          style={{ opacity: entry.pinned ? 1 : 0 }}
-        />
+      const dateLabel = formatDate(new Date(entry.timestamp))
+      const titleContent = (
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap' }}>
+          {dateLabel}
+          {entry.pinned && (
+            <i
+              className="codicon codicon-pin"
+              aria-hidden="true"
+              style={{ fontSize: 12, opacity: 0.7 }}
+            />
+          )}
+        </span>
       )
       const statusDot = (
         <span
@@ -232,6 +255,7 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
             width: 8,
             height: 8,
             borderRadius: '50%',
+            flexShrink: 0,
             backgroundColor: entry.success ? 'var(--testing-iconPassed)' : 'var(--testing-iconFailed)'
           }}
         />
@@ -246,17 +270,16 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
 
       return {
         id: entry.guid,
-        title: dateLabel,
+        title: titleContent,
         contextMenuItems,
         leftActions: (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingRight: 6 }}>
-            <span style={{ width: 16, display: 'flex', justifyContent: 'center' }}>{pinIcon}</span>
+          <div style={{ display: 'flex', alignItems: 'center', paddingRight: 6 }}>
             {statusDot}
           </div>
         )
       }
     })
-  }, [entries, dateFormatter, handleTogglePin, t])
+  }, [entries, formatDate, handleTogglePin, t])
 
   const { infosContent, responseContent, jsonData } = useMemo(() => {
     if (!selectedDetail) return { infosContent: undefined, responseContent: undefined, jsonData: undefined }
@@ -307,9 +330,7 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
   }, [jsonData])
 
   const handleResponseTabChange = useCallback((tabId: string) => {
-    if (tabId === 'jsoncrack') {
-      setGraphKey(prev => prev + 1)
-    }
+    void tabId
   }, [])
 
   const handleTabChange = useCallback((tabId: string) => {
@@ -399,94 +420,122 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
         label: t('requestTab.responses.tabs.jsoncrack'),
         useScrollableElement: false,
         content: (
-          <div
-            style={{
-              boxSizing: 'border-box',
-              padding: '8px 0px 0px 8px',
-              width: '100%',
-              height: '100%',
-              overflow: 'hidden'
-            }}
-            onWheelCapture={(event) => {
-              event.preventDefault()
-              event.stopPropagation()
-              const api = graphRef.current
-              if (!api) return
-              if (event.deltaY < 0) {
-                api.zoomIn()
-              } else if (event.deltaY > 0) {
-                api.zoomOut()
-              }
-            }}
-          >
-            <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
-              <div style={{
-                flex: 1,
-                minHeight: 0,
-                border: '1px solid var(--panel-border)',
-                borderRadius: 3,
-                boxSizing: 'border-box',
-                position: 'relative',
-                overflow: 'hidden'
-              }}>
-                <Suspense fallback={<div role="status" aria-label="Loading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}><i className="codicon codicon-loading codicon-modifier-spin" aria-hidden="true" /></div>}>
-                  <Graph
-                    key={graphKey}
-                    ref={graphRef}
-                    json={formattedJson || '{}'}
-                    layout={{ theme: isDarkTheme ? 'dark' : 'light' }}
-                    style={{ width: '100%', height: '100%' }}
-                  />
-                </Suspense>
-              </div>
-            </div>
-          </div>
+          <JsonViewer
+            json={formattedJson}
+            darkTheme={isDarkTheme}
+            data-testid="history-jsoncrack"
+          />
         )
       })
     }
 
     return tabs
-  }, [selectedDetail, responseContent, infosContent, formattedJson, isDarkTheme, graphKey, t, entries.length, requestBodyPayload])
+  }, [selectedDetail, responseContent, infosContent, formattedJson, isDarkTheme, t, entries.length, requestBodyPayload])
 
   const resolvedActiveTabId = useMemo(() => {
     if (responseTabs.some((tab) => tab.id === activeTabId)) return activeTabId
     return responseTabs[0]?.id ?? ''
   }, [activeTabId, responseTabs])
 
+  // Responsive: detect narrow width to switch from sidebar to dropdown
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const [isNarrow, setIsNarrow] = useState(false)
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const observer = new ResizeObserver((obs) => {
+      const entry = obs[0]
+      if (entry) {
+        setIsNarrow(entry.contentRect.width < 550)
+      }
+    })
+    observer.observe(el)
+    return () => { observer.disconnect() }
+  }, [])
+
+  // SelectBox options for narrow mode
+  const selectOptions: ISelectOptionItem[] = useMemo(() => {
+    return entries.map((entry) => {
+      const dateLabel = formatDate(new Date(entry.timestamp))
+      const statusColor = entry.success ? 'var(--testing-iconPassed)' : 'var(--testing-iconFailed)'
+      return {
+        text: entry.guid,
+        label: (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, backgroundColor: statusColor }} />
+            <span>{dateLabel}</span>
+            {entry.pinned && <i className="codicon codicon-pin" aria-hidden="true" style={{ fontSize: 12, opacity: 0.7 }} />}
+          </span>
+        )
+      }
+    })
+  }, [entries, formatDate])
+
+  const selectedSelectIndex = useMemo(() => {
+    if (!selectedGuid) return 0
+    const idx = entries.findIndex((e) => e.guid === selectedGuid)
+    return idx >= 0 ? idx : 0
+  }, [entries, selectedGuid])
+
+  const handleSelectChange = useCallback((data: ISelectData) => {
+    const entry = entries[data.index]
+    if (entry) {
+      void store.select(entry.guid)
+      setActiveTabId('response')
+    }
+  }, [entries, store])
+
   return (
-    <VerticalSashContainer
-      Left={(
-        <div style={{ height: '100%', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-          <ListView
-            items={listItems}
-            selectedIds={selectedGuid ? [selectedGuid] : []}
-            activeId={selectedGuid ?? undefined}
-            onSelectionChange={(ids) => {
-              const next = ids[0] ?? null
-              void store.select(next)
-              setActiveTabId('response')
-            }}
-            ariaLabel={t('requestTab.responses.history.list')}
-            data-testid="response-history-list-view"
-          />
+    <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }} data-testid="response-history-container">
+      {isNarrow ? (
+        <>
+          <div style={{ flexShrink: 0, padding: '4px 8px' }}>
+            <SelectBox
+              id="response-history-select"
+              className=""
+              options={selectOptions}
+              selected={selectedSelectIndex}
+              onDidSelect={handleSelectChange}
+              selectBoxOptions={{ useCustomDrawn: true, ariaLabel: t('requestTab.responses.history.list') }}
+              data-testid="response-history-select"
+            />
+          </div>
+          <div style={{ flex: 1, minHeight: 0, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+            <Tabs
+              tabs={responseTabs}
+              activeTabId={resolvedActiveTabId}
+              onTabChange={handleTabChange}
+              data-testid="response-history-tabs"
+            />
+          </div>
+        </>
+      ) : (
+        <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
+          <div style={{ flexShrink: 0, minHeight: 0, display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--panel-border)' }}>
+            <ListView
+              items={listItems}
+              selectedIds={selectedGuid ? [selectedGuid] : []}
+              activeId={selectedGuid ?? undefined}
+              onSelectionChange={(ids) => {
+                const next = ids[0] ?? null
+                void store.select(next)
+                setActiveTabId('response')
+              }}
+              ariaLabel={t('requestTab.responses.history.list')}
+              data-testid="response-history-list-view"
+            />
+          </div>
+          <div style={{ flex: 1, minHeight: 0, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+            <Tabs
+              tabs={responseTabs}
+              activeTabId={resolvedActiveTabId}
+              onTabChange={handleTabChange}
+              data-testid="response-history-tabs"
+            />
+          </div>
         </div>
       )}
-      Right={(
-        <div style={{ height: '100%', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-          <Tabs
-            tabs={responseTabs}
-            activeTabId={resolvedActiveTabId}
-            onTabChange={handleTabChange}
-            data-testid="response-history-tabs"
-          />
-        </div>
-      )}
-      initialWidth={320}
-      minLeftWidth={240}
-      minRightWidth={300}
-      sashConfig={{ size: 4 }}
-      data-testid="response-history-vertical-sash-container"
-    />
+    </div>
   )
 }
 

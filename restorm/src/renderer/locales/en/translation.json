@@ -22,8 +22,12 @@
     "addRequest": "Add request",
     "collapseAll": "Collapse all requests",
     "workspace": "Workspace",
+    "newFolder": "New Folder",
+    "newEnvironmentFolder": "New Environment Folder",
     "contextMenu": {
       "createSubfolder": "Create subfolder",
+      "createFolder": "Create folder",
+      "createEnvironmentFolder": "Create environment folder",
       "defineVariables": "Define variables",
       "delete": "Delete",
       "clone": "Clone",
@@ -104,7 +108,7 @@
     }
   },
   "workbench": {
-    "tagsLabel": "Tags:",
+    "tagsLabel": "Tags",
     "removeTag": "Remove tag",
     "tabContextMenu": {
       "close": "Close",
@@ -457,6 +461,15 @@
     "raw": "Block helper that renders raw content",
     "times": "Block helper that repeats n times",
     "range": "Generates array of numbers"
+  },
+  "behavior": {
+    "title": "Behavior",
+    "syncSidebarWithTabs": "Sync sidebar selection with active tab",
+    "syncSidebarWithTabsDescription": "When switching tabs in the workspace, automatically select and reveal the corresponding item in the sidebar",
+    "dateTimeFormat": "Date/time format",
+    "dateTimeFormatDescription": "Format used to display dates and times in the application",
+    "dateTimeFormat.us": "US format (MM/DD/YYYY, 12h)",
+    "dateTimeFormat.iso": "ISO format (YYYY-MM-DD, 24h)"
   },
   "import": {
     "title": "Import Requests",

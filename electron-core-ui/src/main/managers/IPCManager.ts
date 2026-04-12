@@ -1,14 +1,15 @@
 import { BrowserWindow, app, protocol, net } from 'electron'
 import { join } from 'path'
 import { pathToFileURL } from 'url'
-import { getThemeService, getStorageService, logger } from '../services'
+import { getThemeService, getStorageService, initSettingsService, initFeatureService, logger } from '../services'
 import {
   registerThemeHandlers,
   registerFileHandlers,
   registerStorageHandlers,
   registerSearchHandlers,
   registerWindowHandlers,
-  registerMiscHandlers
+  registerMiscHandlers,
+  registerSettingsHandlers
 } from './ipc'
 
 // Register custom protocol schemes BEFORE app.whenReady()
@@ -38,8 +39,10 @@ export function configureCommandLineSwitches(): void {
 /**
  * Setup all IPC handlers for the application
  * @param resourcesPath - Path to resources directory containing themes
+ * @param appSettingsConfigPath - Optional path to app-specific settings YAML (loaded after defaults)
+ * @param appFeaturesConfigPath - Optional path to app-specific features YAML (loaded after defaults)
  */
-export function setupIPC(resourcesPath?: string): void {
+export function setupIPC(resourcesPath?: string, appSettingsConfigPath?: string, appFeaturesConfigPath?: string): void {
   logger.info('🔧 Setting up IPC handlers...')
 
   // Get resources path if not provided
@@ -54,6 +57,15 @@ export function setupIPC(resourcesPath?: string): void {
   const themeService = getThemeService(finalResourcesPath)
   logger.info('💾 Initializing storage service...')
   const storageService = getStorageService()
+
+  logger.info('⚙️ Initializing settings service...')
+  const settingsDefaultPath = join(finalResourcesPath, 'settings', 'defaults.yaml')
+  initSettingsService(settingsDefaultPath, appSettingsConfigPath)
+
+  logger.info('🚩 Initializing feature service...')
+  const featuresDefaultPath = join(finalResourcesPath, 'features', 'defaults.yaml')
+  initFeatureService(featuresDefaultPath, appFeaturesConfigPath)
+
   logger.info('✅ Services initialized successfully')
 
   logger.info('🔗 Setting up IPC handlers...')
@@ -64,6 +76,7 @@ export function setupIPC(resourcesPath?: string): void {
   registerStorageHandlers()
   registerFileHandlers()
   registerSearchHandlers()
+  registerSettingsHandlers()
 
   logger.info('✅ IPC handlers setup complete')
 }
@@ -103,13 +116,17 @@ export function setupAppProtocol(rendererPath: string): void {
  * @param devResourcesPath - Optional path to resources directory in development mode
  * @param onActivate - Optional function to handle macOS activate event
  * @param rendererPath - Optional path to renderer directory for static assets (used for app:// protocol)
+ * @param appSettingsConfigPath - Optional path to app-specific settings YAML (loaded after defaults)
+ * @param appFeaturesConfigPath - Optional path to app-specific features YAML (loaded after defaults)
  */
 export function initializeApp(
   appName: string,
   createWindow: () => void,
   devResourcesPath?: string,
   onActivate?: () => void,
-  rendererPath?: string
+  rendererPath?: string,
+  appSettingsConfigPath?: string,
+  appFeaturesConfigPath?: string
 ): void {
   configureCommandLineSwitches()
 
@@ -124,7 +141,7 @@ export function initializeApp(
     }
 
     logger.info('🔧 Starting setupIPC...')
-    setupIPC(devResourcesPath)
+    setupIPC(devResourcesPath, appSettingsConfigPath, appFeaturesConfigPath)
     logger.info('🔧 setupIPC completed')
 
     logger.info('🔧 Starting setupAppLifecycle...')

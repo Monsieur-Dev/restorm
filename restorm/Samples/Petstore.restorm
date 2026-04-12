@@ -227,7 +227,7 @@ collections:
               - key: petId
                 value:
                   type: numeric
-                  value: 20
+                  value: 1
                   format: decimal
                 description: ID of pet to return
                 enabled: true
@@ -278,8 +278,9 @@ collections:
             pathParams:
               - key: petId
                 value:
-                  type: string
-                  value: ''
+                  type: numeric
+                  value: 1
+                  format: decimal
                 description: ID of pet that needs to be updated
                 enabled: true
             body:
@@ -734,6 +735,7 @@ collections:
                 description: Tags to filter by
             pathParams: []
             deprecated: true
+        notes: ''
       - name: store
         documentation: "# store\r\n\r\nAccess to Petstore orders"
         tags:

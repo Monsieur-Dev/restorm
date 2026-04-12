@@ -2,6 +2,7 @@ import { ipcRenderer } from 'electron'
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../types/theme'
 import type { FeaturePlatform } from '../types/feature'
 import type { FileServiceState, FileMetadata, SerializationFormat } from '../types/file'
+import type { SettingValue, ResolvedSetting, SettingsGroup } from '../types/settings'
 import type { CoreUiApi } from '../types/api'
 
 /**
@@ -391,6 +392,55 @@ export const createCoreUIAPI = (): CoreUiApi => ({
     getDocumentCount: async (): Promise<number> => {
       const result: unknown = await ipcRenderer.invoke('search:get-document-count')
       return result as number
+    }
+  },
+
+  // Settings Service API
+  settings: {
+    get: async (storageKey: string): Promise<SettingValue | null> => {
+      const result: unknown = await ipcRenderer.invoke('settings:get', storageKey)
+      return result as SettingValue | null
+    },
+    set: async (storageKey: string, value: SettingValue): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('settings:set', storageKey, value)
+      return result as boolean
+    },
+    getAll: async (): Promise<ResolvedSetting[]> => {
+      const result: unknown = await ipcRenderer.invoke('settings:get-all')
+      return result as ResolvedSetting[]
+    },
+    getGroups: async (): Promise<SettingsGroup[]> => {
+      const result: unknown = await ipcRenderer.invoke('settings:get-groups')
+      return result as SettingsGroup[]
+    },
+    search: async (query: string): Promise<ResolvedSetting[]> => {
+      const result: unknown = await ipcRenderer.invoke('settings:search', query)
+      return result as ResolvedSetting[]
+    },
+    reset: async (storageKey: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('settings:reset', storageKey)
+      return result as boolean
+    },
+    reindex: async (): Promise<void> => {
+      await ipcRenderer.invoke('settings:reindex')
+    },
+    onSettingChanged: (callback: (storageKey: string, value: SettingValue) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, storageKey: string, value: SettingValue): void => {
+        callback(storageKey, value)
+      }
+      ipcRenderer.on('settings:changed', handler)
+      return () => {
+        ipcRenderer.removeListener('settings:changed', handler)
+      }
+    },
+    onConfigLoaded: (callback: () => void): (() => void) => {
+      const handler = (): void => {
+        callback()
+      }
+      ipcRenderer.on('settings:config-loaded', handler)
+      return () => {
+        ipcRenderer.removeListener('settings:config-loaded', handler)
+      }
     }
   }
 })

@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Edit(*)",
+      "Write(*)",
+      "mcp__linear__*",
+      "mcp__plugin_linear_linear__save_issue",
+      "mcp__plugin_linear_linear__get_issue",
+      "WebSearch",
+      "Skill(telegram:configure)",
+      "mcp__plugin_telegram_telegram__reply"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "linear"
+  ]
+}

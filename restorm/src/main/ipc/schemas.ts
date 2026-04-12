@@ -86,7 +86,8 @@ export const contextUpdateRequestKeyValuesArgs = z.tuple([
 
 export const contextUpdateFullRequestDataArgs = z.tuple([
   requestIdArg,
-  z.unknown()
+  z.unknown(),
+  z.string().optional()
 ])
 
 export const contextGetResolvedUrlArgs = z.tuple([requestIdArg])

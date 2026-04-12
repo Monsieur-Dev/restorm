@@ -17,6 +17,7 @@ import { isAnyFolder, isHTTPRequest, isRequest, isGraphQLRequest, isGrpcRequest,
 /** Properties that trigger re-indexing when modified */
 const FOLDER_INDEXABLE_KEYS = new Set([
   'name',
+  'icon',
   'documentation',
   'notes',
   'tags'

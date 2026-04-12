@@ -20,7 +20,7 @@
     "noPropertyAccessFromIndexSignature": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
   },
   "include": ["src/renderer/src"],
   "references": [{ "path": "./tsconfig.node.json" }]

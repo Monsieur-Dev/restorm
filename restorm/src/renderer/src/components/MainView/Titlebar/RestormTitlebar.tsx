@@ -8,6 +8,7 @@ import {
   MenuItemSeparator,
   Button,
   useSettingsModal,
+  useFeature,
   type SearchResult
 } from 'electron-core-ui/renderer'
 import { renderSearchTooltipContent } from './renderSearchTooltipContent'
@@ -52,6 +53,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
 }) => {
   const { t } = useTranslation()
   const { showSettingsModal } = useSettingsModal()
+  const { isEnabled: navigationEnabled } = useFeature('navigation')
 
   const handleMenuNew = useCallback(() => {
     onNew()
@@ -90,6 +92,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
       data-testid="main-titlebar"
       title={fileName ? `Restorm - ${fileName}${isDirty ? ' *' : ''}` : t('app.title')}
       showSearchBar
+      showNavigation={navigationEnabled}
       onSearchResultClick={onSearchResultClick}
       renderSearchTooltipContent={renderSearchTooltipContent}
       renderSearchBadge={(method) => <Badge type={mapToBadgeType(method)} />}

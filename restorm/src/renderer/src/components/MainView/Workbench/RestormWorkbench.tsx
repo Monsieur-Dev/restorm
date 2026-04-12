@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
-import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, Button, type ContextMenuItem } from 'electron-core-ui/renderer'
-import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback } from 'electron-core-ui/renderer'
+import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, Button, ControlGroup, IconView, TabSwitcherOverlay, navigationService, type ContextMenuItem } from 'electron-core-ui/renderer'
+import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback, TabSwitcherItem } from 'electron-core-ui/renderer'
+import type { Icon } from 'electron-core-ui/types'
 import type { RestormEditorTab, BreadcrumbItem } from '../../../../../shared/types/editor'
 import {
   isFolderTab,
@@ -23,10 +24,12 @@ import { EnvironmentProvider } from '../../../contexts/EnvironmentContext'
 import { FolderView } from '../../Folders/FolderView'
 import { EnvironmentFolderView } from '../../Folders/EnvironmentFolderView'
 import type { EnvironmentFolder, Folder, Request } from '../../../../../shared/types/collections'
+import { getFolderIcon } from '../../../utils/treeSearch'
 import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useTranslation } from 'react-i18next'
 import { RestormWorkbenchTab, type RestormWorkbenchTabCallout } from './RestormWorkbenchTab'
+import { useTabSwitcher } from '../../../hooks/useTabSwitcher'
 
 interface RequestHistoryControls {
   historyModalOpen: boolean
@@ -38,9 +41,11 @@ interface RequestTabWithHistoryProps {
   breadcrumbs: BreadcrumbItem[]
   onBreadcrumbClick?: ((item: BreadcrumbItem, index: number, isLast: boolean) => void) | undefined
   onBreadcrumbRename?: ((item: BreadcrumbItem, newValue: string) => void) | undefined
+  onBreadcrumbIconChange?: ((item: BreadcrumbItem, newIcon: Icon | null) => void) | undefined
   tags: string[]
   onTagsChange?: ((nextTags: string[]) => void) | undefined
-  label: string
+  tagColors?: Record<string, string> | undefined
+  onTagColorChange?: ((tag: string, color: string | null) => void) | undefined
   headerRight?: React.ReactNode
   callout?: RestormWorkbenchTabCallout | undefined
   historyLabel: string
@@ -52,9 +57,11 @@ const RequestTabWithHistory: React.FC<RequestTabWithHistoryProps> = ({
   breadcrumbs,
   onBreadcrumbClick,
   onBreadcrumbRename,
+  onBreadcrumbIconChange,
   tags,
   onTagsChange,
-  label,
+  tagColors,
+  onTagColorChange,
   headerRight,
   callout,
   historyLabel,
@@ -78,20 +85,22 @@ const RequestTabWithHistory: React.FC<RequestTabWithHistoryProps> = ({
       breadcrumbs={breadcrumbs}
       onBreadcrumbClick={onBreadcrumbClick}
       onBreadcrumbRename={onBreadcrumbRename}
+      onBreadcrumbIconChange={onBreadcrumbIconChange}
       tags={tags}
       onTagsChange={onTagsChange}
-      label={label}
-      headerRight={headerRight}
-      tagsRight={(
-        <Button
-          icon="history"
-          onClick={handleOpenHistory}
-          disabled={!hasHistory}
-          options={{ title: historyLabel, ariaLabel: historyLabel }}
-          data-testid={`tab-${tabId}-history-button`}
-        >
-          {historyLabel}
-        </Button>
+      tagColors={tagColors}
+      onTagColorChange={onTagColorChange}
+      headerRight={(
+        <ControlGroup>
+          {headerRight}
+          <Button
+            icon="history"
+            onClick={handleOpenHistory}
+            disabled={!hasHistory}
+            options={{ title: historyLabel, ariaLabel: historyLabel }}
+            data-testid={`tab-${tabId}-history-button`}
+          />
+        </ControlGroup>
       )}
       callout={callout}
       tabId={tabId}
@@ -138,8 +147,12 @@ export interface RestormWorkbenchProps {
   onBreadcrumbClick?: (item: BreadcrumbItem, index: number, isLast: boolean) => void
   /** Callback fired when the last breadcrumb item is renamed */
   onItemRename?: (item: BreadcrumbItem, newName: string) => void
+  /** Callback fired when the last breadcrumb item's icon changes */
+  onItemIconChange?: ((item: BreadcrumbItem, newIcon: Icon | null) => void) | undefined
   /** Callback fired when tags are changed for a folder or request */
   onTagsChange?: (targetId: string, tags: string[]) => void
+  /** Callback fired when a tag color changes for an environment folder */
+  onTagColorChange?: ((envFolderId: string, tag: string, color: string | null) => void) | undefined
   /** Callback fired when a folder's data changes (environments, etc.) */
   onFolderChange?: (folderId: string, folder: Folder) => void
   /** Fallback component displayed when no tabs are open */
@@ -162,6 +175,10 @@ export interface RestormWorkbenchProps {
   getEnvironmentFolderById?: (id: string) => EnvironmentFolder | undefined
   /** Callback fired when an environment folder's data changes */
   onEnvironmentFolderChange?: (folderId: string, folder: EnvironmentFolder) => void
+  /** Whether navigation features (back/forward, Ctrl+Tab) are enabled */
+  navigationEnabled?: boolean | undefined
+  /** CSS selector for the element to anchor the tab switcher overlay to */
+  tabSwitcherAnchorSelector?: string | undefined
 }
 
 /** Imperative handle for Workbench component */
@@ -185,7 +202,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   onTabActivate,
   onBreadcrumbClick,
   onItemRename,
+  onItemIconChange,
   onTagsChange,
+  onTagColorChange,
   onFolderChange,
   onEnvironmentFolderChange,
   emptyFallback,
@@ -196,7 +215,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   onStateRestored,
   getRequestById,
   getFolderById,
-  getEnvironmentFolderById
+  getEnvironmentFolderById,
+  navigationEnabled,
+  tabSwitcherAnchorSelector
 }, ref) => {
   const { t } = useTranslation()
   const editorWorkbenchRef = useRef<EditorWorkbenchHandle>(null)
@@ -278,22 +299,22 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     const cachedTab = droppedTabsCacheRef.current.get(tab.id)
     const restormTab = cachedTab ?? (tab as RestormEditorTab)
 
-    // Folder tab: show folder icon
+    // Folder tab: show folder icon (custom or default)
     if (isFolderTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <i className="codicon codicon-folder-opened" aria-hidden="true" />
+          <IconView icon={getFolderIcon(restormTab.folder)} size={14} />
           <span>{restormTab.folder.name}</span>
           {renderDirtyIndicator(restormTab)}
         </span>
       )
     }
 
-    // Environment folder tab: show folder-library icon
+    // Environment folder tab: show folder-library icon (custom or default)
     if (isEnvironmentFolderTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <i className="codicon codicon-folder-library" aria-hidden="true" />
+          <IconView icon={getFolderIcon(restormTab.folder)} size={14} />
           <span>{restormTab.folder.name}</span>
           {renderDirtyIndicator(restormTab)}
         </span>
@@ -358,12 +379,133 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     return null
   }, [renderDirtyIndicator])
 
+  // Build tab switcher items from workbench tree tabs, sorted by navigation history
+  const buildTabSwitcherItems = useCallback((): TabSwitcherItem[] => {
+    const allTabs: RestormEditorTab[] = []
+    for (const group of tree.groups) {
+      if (isTabGroupNode(group)) {
+        for (const tab of group.tabs) {
+          allTabs.push(tab as RestormEditorTab)
+        }
+      }
+    }
+
+    // Navigation history ordering (most recent → order 0)
+    const history = navigationService.getHistory()
+    const historyOrder = new Map<string, number>()
+    for (let i = history.length - 1; i >= 0; i--) {
+      const entry = history[i]
+      if (entry && !historyOrder.has(entry.key)) {
+        historyOrder.set(entry.key, historyOrder.size)
+      }
+    }
+
+    // Sort by navigation order (most recent first), tabs without history at the end
+    const sorted = [...allTabs].sort((a, b) => {
+      const aItemId = getTabItemId(a)
+      const bItemId = getTabItemId(b)
+      const aOrder = (aItemId ? historyOrder.get(aItemId) : undefined) ?? 999
+      const bOrder = (bItemId ? historyOrder.get(bItemId) : undefined) ?? 999
+      return aOrder - bOrder
+    })
+
+    return sorted.map((tab) => {
+      const rendered = renderTabTitle(tab)
+      return {
+        id: tab.id,
+        title: tab.titleString ?? '',
+        icon: rendered
+      }
+    })
+  }, [tree.groups, renderTabTitle, getTabItemId])
+
+  const {
+    isOpen: tabSwitcherOpen,
+    items: tabSwitcherItems,
+    selectedIndex: tabSwitcherIndex,
+    handleClose: closeTabSwitcher,
+    handleSelect: selectTabSwitcherItem
+  } = useTabSwitcher({
+    enabled: navigationEnabled ?? false,
+    onTabSelect: (tabId) => {
+      // Walk the tree recursively to find which group (possibly nested) owns the tab,
+      // update its activeTabId, and capture the owning group id for focus sync.
+      const found: { groupId?: string; itemId?: string | null } = {}
+      const updateGroups = (nodes: typeof tree.groups): typeof tree.groups => {
+        return nodes.map((node) => {
+          if (isTabGroupNode(node)) {
+            const tab = node.tabs.find((t) => t.id === tabId)
+            if (tab) {
+              found.groupId = node.id
+              found.itemId = getTabItemId(tab as RestormEditorTab)
+              return { ...node, activeTabId: tabId }
+            }
+            return node
+          }
+          if (isContainerNode(node)) {
+            return { ...node, groups: updateGroups(node.groups) }
+          }
+          return node
+        })
+      }
+      const updatedGroups = updateGroups(tree.groups)
+
+      // Record navigation synchronously so history is up-to-date for next Ctrl+Tab
+      if (found.itemId) {
+        const tabType = tabId.startsWith('env-folder') ? 'environment-folder'
+          : tabId.startsWith('folder') ? 'folder'
+          : 'http-request'
+        navigationService.navigateTo(found.itemId, 'tab-switcher', { type: tabType })
+      }
+
+      if (onTreeChange) {
+        onTreeChange({ ...tree, groups: updatedGroups })
+      }
+      // Move focus to the group that owns the activated tab so its tab strip reflects the change.
+      if (found.groupId && onFocusedGroupChange) {
+        onFocusedGroupChange(found.groupId)
+      }
+      // Also notify the tab activate callback for sidebar sync etc.
+      if (onTabActivate) {
+        onTabActivate(tabId)
+      }
+    },
+    buildItems: buildTabSwitcherItems
+  })
+
+  /** Find tagColors from the nearest ancestor EnvironmentFolder via breadcrumbs */
+  const getTagColorsFromBreadcrumbs = useCallback((breadcrumbs: BreadcrumbItem[]): Record<string, string> | undefined => {
+    if (!getEnvironmentFolderById) return undefined
+    // Walk breadcrumbs from parent (second-to-last) upward, skip the item itself (last)
+    for (let i = breadcrumbs.length - 2; i >= 0; i -= 1) {
+      const crumb = breadcrumbs[i]
+      if (!crumb) continue
+      const envFolder = getEnvironmentFolderById(crumb.id)
+      if (envFolder?.tagColors) {
+        return envFolder.tagColors
+      }
+    }
+    return undefined
+  }, [getEnvironmentFolderById])
+
+  /** Find the nearest ancestor EnvironmentFolder ID from breadcrumbs */
+  const getEnvFolderIdFromBreadcrumbs = useCallback((breadcrumbs: BreadcrumbItem[]): string | undefined => {
+    if (!getEnvironmentFolderById) return undefined
+    for (let i = breadcrumbs.length - 2; i >= 0; i -= 1) {
+      const crumb = breadcrumbs[i]
+      if (!crumb) continue
+      const envFolder = getEnvironmentFolderById(crumb.id)
+      if (envFolder) return envFolder.id
+    }
+    return undefined
+  }, [getEnvironmentFolderById])
+
   // Render tab content based on tab type
   const renderTabContent = useCallback((tab: RestormEditorTab): React.ReactNode => {
     // Check if this is a dropped tab with cached data
     const cachedTab = droppedTabsCacheRef.current.get(tab.id)
     const effectiveTab = cachedTab ?? tab
-    
+
     const breadcrumbs = effectiveTab.breadcrumbs ?? [
       { id: 'root', label: 'Root' }
     ]
@@ -372,16 +514,23 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isFolderTab(effectiveTab)) {
       // Get reactive folder if available, otherwise use tab's copy
       const folder = getFolderById?.(effectiveTab.folder.id) ?? effectiveTab.folder
+      const folderTagColors = getTagColorsFromBreadcrumbs(breadcrumbs)
+      const folderEnvFolderId = getEnvFolderIdFromBreadcrumbs(breadcrumbs)
+      const handleFolderTagColorChange = folderEnvFolderId && onTagColorChange
+        ? (tag: string, color: string | null): void => { onTagColorChange(folderEnvFolderId, tag, color) }
+        : undefined
       return (
         <RestormWorkbenchTab
           breadcrumbs={breadcrumbs}
           onBreadcrumbClick={onBreadcrumbClick}
           onBreadcrumbRename={onItemRename}
+          onBreadcrumbIconChange={onItemIconChange}
           tags={folder.tags}
           onTagsChange={(nextTags) => {
             onTagsChange?.(folder.id, nextTags)
           }}
-          label={t('workbench.tagsLabel')}
+          tagColors={folderTagColors}
+          onTagColorChange={handleFolderTagColorChange}
         >
           <FolderView
             folder={folder}
@@ -400,16 +549,21 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       // Get reactive environment folder if available, otherwise use tab's copy
       const reactiveFolder = getEnvironmentFolderById?.(effectiveTab.folder.id)
       const folder = reactiveFolder ?? effectiveTab.folder
+      const handleEnvFolderTagColorChange = onTagColorChange
+        ? (tag: string, color: string | null): void => { onTagColorChange(folder.id, tag, color) }
+        : undefined
       return (
         <RestormWorkbenchTab
           breadcrumbs={breadcrumbs}
           onBreadcrumbClick={onBreadcrumbClick}
           onBreadcrumbRename={onItemRename}
-          tags={folder.tags}
+          onBreadcrumbIconChange={onItemIconChange}
+          tags={effectiveTab.folder.tags}
           onTagsChange={(nextTags) => {
             onTagsChange?.(folder.id, nextTags)
           }}
-          label={t('workbench.tagsLabel')}
+          tagColors={folder.tagColors}
+          onTagColorChange={handleEnvFolderTagColorChange}
           tabId={effectiveTab.id}
         >
           <EnvironmentFolderView
@@ -424,22 +578,31 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       )
     }
 
+    // Shared tag color props for request tabs
+    const requestTagColors = getTagColorsFromBreadcrumbs(breadcrumbs)
+    const envFolderId = getEnvFolderIdFromBreadcrumbs(breadcrumbs)
+    const handleRequestTagColorChange = envFolderId && onTagColorChange
+      ? (tag: string, color: string | null): void => { onTagColorChange(envFolderId, tag, color) }
+      : undefined
+
     // HTTP request tab
     if (isHTTPRequestTab(effectiveTab)) {
       // Get reactive request if available, otherwise use tab's copy
       const reactiveRequest = getRequestById?.(effectiveTab.request.id)
       const request = (reactiveRequest?.type === 'http') ? reactiveRequest : effectiveTab.request
       return (
-        <EnvironmentProvider environments={effectiveTab.environments}>
+        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors}>
           <RequestTabWithHistory
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
             onBreadcrumbRename={onItemRename}
+          onBreadcrumbIconChange={onItemIconChange}
             tags={request.tags}
             onTagsChange={(nextTags) => {
               onTagsChange?.(request.id, nextTags)
             }}
-            label={t('workbench.tagsLabel')}
+            tagColors={requestTagColors}
+            onTagColorChange={handleRequestTagColorChange}
             headerRight={<EnvironmentDropdown />}
             callout={request.deprecated ? {
               variant: 'warning',
@@ -464,16 +627,18 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isGraphQLRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={effectiveTab.environments}>
+        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors}>
           <RequestTabWithHistory
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
             onBreadcrumbRename={onItemRename}
+          onBreadcrumbIconChange={onItemIconChange}
             tags={request.tags}
             onTagsChange={(nextTags) => {
               onTagsChange?.(request.id, nextTags)
             }}
-            label={t('workbench.tagsLabel')}
+            tagColors={requestTagColors}
+            onTagColorChange={handleRequestTagColorChange}
             headerRight={<EnvironmentDropdown />}
             historyLabel={t('requestTab.tabs.responsesHistory')}
             tabId={effectiveTab.id}
@@ -494,16 +659,18 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isGrpcRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={effectiveTab.environments}>
+        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors}>
           <RequestTabWithHistory
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
             onBreadcrumbRename={onItemRename}
+          onBreadcrumbIconChange={onItemIconChange}
             tags={request.tags}
             onTagsChange={(nextTags) => {
               onTagsChange?.(request.id, nextTags)
             }}
-            label={t('workbench.tagsLabel')}
+            tagColors={requestTagColors}
+            onTagColorChange={handleRequestTagColorChange}
             headerRight={<EnvironmentDropdown />}
             historyLabel={t('requestTab.tabs.responsesHistory')}
             tabId={effectiveTab.id}
@@ -524,16 +691,18 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isSoapRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={effectiveTab.environments}>
+        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors}>
           <RequestTabWithHistory
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
             onBreadcrumbRename={onItemRename}
+          onBreadcrumbIconChange={onItemIconChange}
             tags={request.tags}
             onTagsChange={(nextTags) => {
               onTagsChange?.(request.id, nextTags)
             }}
-            label={t('workbench.tagsLabel')}
+            tagColors={requestTagColors}
+            onTagColorChange={handleRequestTagColorChange}
             headerRight={<EnvironmentDropdown />}
             historyLabel={t('requestTab.tabs.responsesHistory')}
             tabId={effectiveTab.id}
@@ -554,16 +723,18 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isWebSocketRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={effectiveTab.environments}>
+        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors}>
           <RequestTabWithHistory
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
             onBreadcrumbRename={onItemRename}
+          onBreadcrumbIconChange={onItemIconChange}
             tags={request.tags}
             onTagsChange={(nextTags) => {
               onTagsChange?.(request.id, nextTags)
             }}
-            label={t('workbench.tagsLabel')}
+            tagColors={requestTagColors}
+            onTagColorChange={handleRequestTagColorChange}
             headerRight={<EnvironmentDropdown />}
             historyLabel={t('requestTab.tabs.responsesHistory')}
             tabId={effectiveTab.id}
@@ -582,7 +753,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [onBreadcrumbClick, onItemRename, onTagsChange, onFolderChange, onEnvironmentFolderChange, t, getRequestById, getFolderById, getEnvironmentFolderById])
+  }, [onBreadcrumbClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, t, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(
@@ -689,9 +860,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       renderTabTitle,
       onDetachToNewWindow: handleDetachToNewWindow,
       getTabContextMenuItems,
-      onGetTabContent: getTabContent
+      onGetTabContent: getTabContent,
+      // Forward tab activation from any group (incl. non-main split groups) so the sidebar can sync.
+      onActivateTab: (tabId) => {
+        if (lastActiveTabIdRef.current === tabId) return
+        lastActiveTabIdRef.current = tabId
+        onTabActivate?.(tabId)
+      }
     }
-  }, [handleTabDropped, workbenchRenderTabContent, renderTabTitle, handleDetachToNewWindow, getTabContextMenuItems, getTabContent])
+  }, [handleTabDropped, workbenchRenderTabContent, renderTabTitle, handleDetachToNewWindow, getTabContextMenuItems, getTabContent, onTabActivate])
 
   const handleTreeChange = useCallback(
     (newTree: WorkbenchTree) => {
@@ -735,11 +912,31 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     [onTreeChange, isControlled, onTabActivate]
   )
 
+  // Compute overlay position from anchor element (covers the search bar)
+  const tabSwitcherStyle = useMemo((): React.CSSProperties | undefined => {
+    if (!tabSwitcherOpen || !tabSwitcherAnchorSelector) return undefined
+    const el = document.querySelector(tabSwitcherAnchorSelector)
+    if (!el) return undefined
+    const rect = el.getBoundingClientRect()
+    return { top: rect.top, left: rect.left, width: rect.width }
+  }, [tabSwitcherOpen, tabSwitcherAnchorSelector])
+
   return (
     <div
       style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', flex: 1, ...style }}
       className={className}
     >
+      {tabSwitcherOpen && (
+        <TabSwitcherOverlay
+          open={tabSwitcherOpen}
+          items={tabSwitcherItems}
+          selectedIndex={tabSwitcherIndex}
+          onSelect={selectTabSwitcherItem}
+          onClose={closeTabSwitcher}
+          style={tabSwitcherStyle ?? { top: 36, left: '50%', transform: 'translateX(-50%)', width: 400 }}
+          data-testid="tab-switcher"
+        />
+      )}
       <EditorWorkbenchAny
         ref={editorWorkbenchRef}
         tree={tree}

@@ -38,10 +38,40 @@ const importTestDir = defineBddConfig({
   outputDir: '.features-gen/import'
 })
 
+const iconChangeTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/icon-change/features/**/*.feature',
+  steps: ['tests/e2e/bdd/icon-change/steps/**/*.ts', 'tests/e2e/bdd/fixtures/petstore-file.fixture.ts'],
+  outputDir: '.features-gen/icon-change'
+})
+
+const sidebarSyncTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/sidebar-sync/features/**/*.feature',
+  steps: ['tests/e2e/bdd/sidebar-sync/steps/**/*.ts', 'tests/e2e/bdd/fixtures/petstore-file.fixture.ts'],
+  outputDir: '.features-gen/sidebar-sync'
+})
+
+const navigationTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/navigation/features/**/*.feature',
+  steps: ['tests/e2e/bdd/navigation/steps/**/*.ts', 'tests/e2e/bdd/fixtures/petstore-file.fixture.ts'],
+  outputDir: '.features-gen/navigation'
+})
+
+const windowStateTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/window-state/features/**/*.feature',
+  steps: ['tests/e2e/bdd/window-state/steps/**/*.ts', 'tests/e2e/bdd/fixtures/window-state.fixture.ts'],
+  outputDir: '.features-gen/window-state'
+})
+
 const userPreferencesTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/user_preferences/features/**/*.feature',
   steps: ['tests/e2e/bdd/user_preferences/steps/**/*.ts', 'tests/e2e/bdd/fixtures/user-preferences.fixture.ts'],
   outputDir: '.features-gen/user_preferences'
+})
+
+const monacoTypingTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/monaco-typing/features/**/*.feature',
+  steps: ['tests/e2e/bdd/monaco-typing/steps/**/*.ts', 'tests/e2e/bdd/fixtures/handlebars.fixture.ts'],
+  outputDir: '.features-gen/monaco-typing'
 })
 
 /**
@@ -101,8 +131,28 @@ export default defineConfig({
       testDir: importTestDir
     },
     {
+      name: 'sidebar-sync',
+      testDir: sidebarSyncTestDir
+    },
+    {
+      name: 'icon-change',
+      testDir: iconChangeTestDir
+    },
+    {
+      name: 'navigation',
+      testDir: navigationTestDir
+    },
+    {
+      name: 'window-state',
+      testDir: windowStateTestDir
+    },
+    {
       name: 'user_preferences',
       testDir: userPreferencesTestDir
-    }
+    },
+    {
+      name: 'monaco-typing',
+      testDir: monacoTypingTestDir
+    },
   ]
 })

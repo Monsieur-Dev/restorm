@@ -35,6 +35,24 @@ export class FeatureFlippingService {
    * Load features configuration from YAML file
    */
   private loadFeatures(configPath: string): void {
+    this.mergeConfigFromFile(configPath)
+    logger.info(`FeatureFlippingService: Loaded ${String(this.features.size)} features`)
+  }
+
+  /**
+   * Load an additional YAML config and merge it into existing features (last wins by Name)
+   */
+  public loadAdditionalConfig(configPath: string): void {
+    const before = this.features.size
+    this.mergeConfigFromFile(configPath)
+    const added = this.features.size - before
+    logger.info(`FeatureFlippingService: Merged additional config, ${String(added)} new feature(s), ${String(this.features.size)} total`)
+  }
+
+  /**
+   * Parse a YAML config file and merge its features into the Map (last wins by Name)
+   */
+  private mergeConfigFromFile(configPath: string): void {
     if (!existsSync(configPath)) {
       logger.warn(`Features configuration file not found: ${configPath}`)
       return
@@ -54,8 +72,6 @@ export class FeatureFlippingService {
       for (const feature of config.Features) {
         this.features.set(feature.Name, feature)
       }
-
-      logger.info(`FeatureFlippingService: Loaded ${String(this.features.size)} features`)
     } catch (error) {
       const wrappedError = new FileSystemError('Failed to load features configuration', 'FS_READ_FAILED', { cause: error })
       logger.error('Failed to load features configuration', errorMeta(wrappedError))
@@ -149,18 +165,44 @@ let featureServiceInstance: FeatureFlippingService | null = null
 /**
  * Initialize the singleton instance of FeatureFlippingService
  * Must be called before getFeatureService()
+ *
+ * Supports two signatures for backward compatibility:
+ * - initFeatureService(configPath, platform?)               — legacy
+ * - initFeatureService(defaultPath, appConfigPath, platform?) — new (with app overrides)
+ *
+ * Disambiguation: if the second argument is a FeaturePlatform string ('desktop' | 'web'),
+ * it is treated as the platform (legacy call). Otherwise it is treated as appConfigPath.
  */
 export function initFeatureService(
-  featuresConfigPath: string,
-  platform: FeaturePlatform = 'desktop'
+  defaultConfigPath: string,
+  appConfigPathOrPlatform?: string,
+  platform?: FeaturePlatform
 ): FeatureFlippingService {
   if (featureServiceInstance) {
     logger.warn('FeatureFlippingService already initialized, returning existing instance')
     return featureServiceInstance
   }
 
+  // Disambiguate legacy vs new signature
+  let appConfigPath: string | undefined
+  let resolvedPlatform: FeaturePlatform = 'desktop'
+
+  if (appConfigPathOrPlatform === 'desktop' || appConfigPathOrPlatform === 'web') {
+    // Legacy call: initFeatureService(path, platform)
+    resolvedPlatform = appConfigPathOrPlatform
+  } else if (appConfigPathOrPlatform !== undefined) {
+    // New call: initFeatureService(defaultPath, appConfigPath, platform?)
+    appConfigPath = appConfigPathOrPlatform
+    resolvedPlatform = platform ?? 'desktop'
+  }
+
   logger.info('FeatureFlippingService: Creating singleton instance...')
-  featureServiceInstance = new FeatureFlippingService(featuresConfigPath, platform)
+  featureServiceInstance = new FeatureFlippingService(defaultConfigPath, resolvedPlatform)
+
+  if (appConfigPath) {
+    featureServiceInstance.loadAdditionalConfig(appConfigPath)
+  }
+
   return featureServiceInstance
 }
 
@@ -180,4 +222,11 @@ export function getFeatureService(): FeatureFlippingService {
  */
 export function isFeatureServiceInitialized(): boolean {
   return featureServiceInstance !== null
+}
+
+/**
+ * Reset the singleton instance (for testing only)
+ */
+export function resetFeatureService(): void {
+  featureServiceInstance = null
 }

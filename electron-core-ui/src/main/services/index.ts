@@ -10,6 +10,7 @@ export {
   initFeatureService,
   getFeatureService,
   isFeatureServiceInitialized,
+  resetFeatureService,
   FeatureFlippingService
 } from './FeatureFlippingService'
 
@@ -66,3 +67,10 @@ export {
   createFieldDefinitions
 } from './GraphQLSchemaGenerator'
 export type { SchemaGeneratorConfig, RegisterClassOptions } from './GraphQLSchemaGenerator'
+
+export {
+  initSettingsService,
+  getSettingsService,
+  isSettingsServiceInitialized,
+  SettingsService
+} from './SettingsService'

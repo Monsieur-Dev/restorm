@@ -6,16 +6,6 @@
   flex-shrink: 0;
 }
 
-.search-tooltip-tags .tag-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  border-radius: 3px;
-  font-size: 11px;
-  background-color: var(--badge-background);
-  color: var(--badge-foreground);
-}
-
 /* Tooltip breadcrumb */
 .search-tooltip-breadcrumb {
   display: flex;

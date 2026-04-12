@@ -3,9 +3,18 @@
  */
 
 import type { ListViewItemData } from 'electron-core-ui/renderer'
+import { IconView } from 'electron-core-ui/renderer'
+import type { Icon } from 'electron-core-ui/types'
 import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest } from '../../../shared/types/collections'
 import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest } from '../../../shared/types/collections'
 import React, { type ReactNode } from 'react'
+
+/** Convert an Icon to a ListView-compatible icon (string for codicons, ReactNode for others) */
+function toListViewIcon(icon: Icon | undefined, fallback: string): string | ReactNode {
+  if (!icon || icon.type === 'none') return fallback
+  if (icon.type === 'codicon') return icon.value
+  return React.createElement(IconView, { icon, size: 16 })
+}
 
 export interface FolderToListViewOptions {
   /** Set of expanded item IDs */
@@ -16,23 +25,6 @@ export interface FolderToListViewOptions {
   renderProtocolBadge?: (protocol: string, label?: string) => ReactNode
   /** Function to render deprecated request title (with strikethrough) */
   renderDeprecatedTitle?: (name: string) => ReactNode
-}
-
-function withInlineBadge(title: ReactNode, badge: ReactNode | undefined): ReactNode {
-  if (!badge) return title
-  return React.createElement(
-    'span',
-    {
-      style: {
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 6,
-        minWidth: 0
-      }
-    },
-    React.createElement('span', { style: { flex: '0 0 auto' } }, badge),
-    React.createElement('span', { style: { minWidth: 0 } }, title)
-  )
 }
 
 /**
@@ -49,9 +41,8 @@ function httpRequestToListViewItem(
 
   return {
     id: request.id,
-    title: withInlineBadge(title, options.renderMethodBadge(request.method)),
-    icon: undefined,
-    leftActions: undefined
+    title,
+    icon: options.renderMethodBadge(request.method)
   }
 }
 
@@ -65,9 +56,8 @@ function graphqlRequestToListViewItem(
   const badge = options.renderProtocolBadge?.(request.operationType)
   return {
     id: request.id,
-    title: withInlineBadge(request.name, badge),
-    icon: undefined,
-    leftActions: undefined
+    title: request.name,
+    icon: badge
   }
 }
 
@@ -81,9 +71,8 @@ function grpcRequestToListViewItem(
   const badge = options.renderProtocolBadge?.(request.callType)
   return {
     id: request.id,
-    title: withInlineBadge(request.name, badge),
-    icon: undefined,
-    leftActions: undefined
+    title: request.name,
+    icon: badge
   }
 }
 
@@ -97,9 +86,8 @@ function soapRequestToListViewItem(
   const badge = options.renderProtocolBadge?.('soap')
   return {
     id: request.id,
-    title: withInlineBadge(request.name, badge),
-    icon: undefined,
-    leftActions: undefined
+    title: request.name,
+    icon: badge
   }
 }
 
@@ -113,9 +101,8 @@ function websocketRequestToListViewItem(
   const badge = options.renderProtocolBadge?.(request.protocol)
   return {
     id: request.id,
-    title: withInlineBadge(request.name, badge),
-    icon: undefined,
-    leftActions: undefined
+    title: request.name,
+    icon: badge
   }
 }
 
@@ -169,14 +156,14 @@ function environmentFolderToListViewItem(
 ): ListViewItemData {
   const isExpanded = options.expandedIds.has(folder.id)
 
+  const children = folder.items.map((item) => folderItemToListViewItem(item, options))
   return {
     id: folder.id,
     title: folder.name,
-    isExpandable: true,
+    isExpandable: children.length > 0,
     isExpanded,
-    // Use folder-library icon for environment folders
-    icon: 'folder-library',
-    children: folder.items.map((item) => folderItemToListViewItem(item, options))
+    icon: toListViewIcon(folder.icon, 'folder-library'),
+    children
   }
 }
 
@@ -189,13 +176,14 @@ function folderToListViewItem(
 ): ListViewItemData {
   const isExpanded = options.expandedIds.has(folder.id)
 
+  const children = folder.items.map((item) => folderItemToListViewItem(item, options))
   return {
     id: folder.id,
     title: folder.name,
-    isExpandable: true,
+    isExpandable: children.length > 0,
     isExpanded,
-    icon: isExpanded ? 'folder-opened' : 'folder',
-    children: folder.items.map((item) => folderItemToListViewItem(item, options))
+    icon: toListViewIcon(folder.icon, isExpanded ? 'folder-opened' : 'folder'),
+    children
   }
 }
 

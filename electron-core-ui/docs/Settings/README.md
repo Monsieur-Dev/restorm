@@ -1,51 +1,193 @@
+# Settings Components
+
 ## Overview
 
-The Settings UI in `electron-core-ui` is composed of:
+The Settings UI in `electron-core-ui` is composed of the following components:
 
-- `SettingsModalProvider`: a provider that renders a `Modal` containing `SettingsPage`, and exposes `useSettingsModal()` helpers.
-- `SettingsPage`: the settings page content (theme carousel + language select).
-- `ThemeCarousel`: a small theme preview carousel used inside `SettingsPage`.
+- `SettingsModalProvider` / `useSettingsModal` -- modal wrapper for the settings page
+- `SettingsPage` -- conditional rendering: dynamic `SettingsView` or hardcoded fallback
+- `SettingsView` -- TOC sidebar + scrollable content with search
+- `SettingItem` -- individual setting with renderer, gear menu, and modified indicator
+- `ThemeCarousel` -- theme preview carousel (used inside `ThemeRenderer` and fallback `SettingsPage`)
 
-### Component locations
+### Component Locations
 
-- Source:
-  - `electron-core-ui/src/renderer/components/Settings/SettingsModal.tsx`
-  - `electron-core-ui/src/renderer/components/Settings/SettingsPage.tsx`
-  - `electron-core-ui/src/renderer/components/Settings/ThemeCarousel.tsx`
-- Exports:
-  - `SettingsPage`, `SettingsModalProvider`, `useSettingsModal`, `ThemeCarousel` from `electron-core-ui/renderer`
+- Source: `electron-core-ui/src/renderer/components/Settings/`
+  - `SettingsModal.tsx` -- `SettingsModalProvider`
+  - `SettingsPage.tsx` -- `SettingsPage`, `SettingsPageFallback`
+  - `SettingsView.tsx` -- `SettingsView`, `TocItemRenderer`
+  - `SettingItem.tsx` -- `SettingItem`
+  - `ThemeCarousel.tsx` -- `ThemeCarousel`
+  - `useSettingsModal.ts` -- `SettingsModalContext`, `useSettingsModal`
+  - `renderers/` -- `ToggleRenderer`, `NumberInput`, `TextInput`, `EnumRenderer`, `ThemeRenderer`
+- Exports from `electron-core-ui/renderer`:
+  - `SettingsPage`, `SettingsModalProvider`, `useSettingsModal`, `ThemeCarousel`, `SettingsView`, `SettingItem`
 
-## Testing
+## SettingsModalProvider / useSettingsModal
 
-### Test ids
+Wraps your app to enable the settings modal:
 
-Defaults (unless overridden via props):
+```tsx
+<SettingsModalProvider>
+  <MyApp />
+</SettingsModalProvider>
+```
 
-- Settings modal (`Modal`): `data-testid="settings-modal"`
-- Settings page: `data-testid="settings-page"`
-- Theme carousel: `data-testid="settings-page-theme-carousel"`
-- Theme carousel scrollable: `data-testid="settings-page-theme-carousel-scrollable"`
-- Language select box: `data-testid="settings-page-language-selectbox"`
+Open/close from anywhere:
 
-### Data attributes
+```tsx
+const { isOpen, showSettingsModal, hideSettingsModal } = useSettingsModal()
+```
 
-`SettingsPage` exposes `data-language` on its root (current `i18n.language`).
+Renders a `Modal` (test id: `settings-modal`) containing a `SettingsPage` (test id: `settings-page`).
 
-`ThemeCarousel` exposes:
+## SettingsPage
 
-- `data-theme-count`
-- `data-selected-theme-id`
+Conditional rendering based on `SettingsContext`:
 
-### Selectors (`electron-core-ui/testing`)
+- **When `SettingsProvider` is active** and has loaded groups: renders `SettingsView` (the full YAML-driven settings UI)
+- **Otherwise**: falls back to a hardcoded UI with `ThemeCarousel` + language `SelectBox`
 
-- `settingsModalRootSelector(testId)`
-- `settingsPageRootSelector(testId)`
-- `settingsPageThemeCarouselTestId(settingsPageTestId)`
-- `settingsPageLanguageSelectBoxTestId(settingsPageTestId)`
-- `themeCarouselRootSelector(testId)`
-- `themeCarouselScrollableTestId(themeCarouselTestId)`
+Props:
 
-### Playwright-BDD steps (`electron-core-ui/testing/playwright-bdd`)
+| Prop | Default | Description |
+|------|---------|-------------|
+| `data-testid` | `"settings-page"` | Root element test id |
+| `themeCarouselTestId` | `"{data-testid}-theme-carousel"` | ThemeCarousel test id (fallback only) |
+| `languageSelectBoxTestId` | `"{data-testid}-language-selectbox"` | Language SelectBox test id (fallback only) |
+| `children` | -- | Additional content rendered below settings |
+
+## SettingsView
+
+The primary settings UI with two-panel layout:
+
+- **Left panel (~25%)**: TOC sidebar with a tree of group names
+  - Scroll-synced: active group updates as user scrolls content
+  - Click a TOC entry to smooth-scroll to that group
+  - Expand/collapse nested groups via chevron icons
+  - During search, only groups with matching settings are shown
+- **Right panel (~75%)**: Scrollable content area
+  - Groups rendered with heading tags (h1-h4 based on depth)
+  - Sticky group headers with `data-sticky-level` attribute indicating nesting depth
+  - Settings filtered when a search query is active
+- **Search bar**: `InputBox` at the top; delegates search to the main process via `SettingsContext`
+
+Props:
+
+| Prop | Default | Description |
+|------|---------|-------------|
+| `data-testid` | `"settings-view"` | Root element test id |
+
+## SettingItem
+
+Renders a single setting:
+
+- **Title**: translated via `titleKey`
+- **Description**: translated via `descriptionKey` (hidden for `toggle` type)
+- **Renderer**: selected by `type` field from built-in or custom renderers
+- **Gear menu**: visible when the item is focused; opens a `ContextMenu` with:
+  - "Reset Setting" -- resets to default value
+  - "Copy Setting ID" -- copies `storageKey` to clipboard
+- **Modified indicator**: CSS class `setting-item--modified` applied when `currentValue !== default`
+
+Props:
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `setting` | `ResolvedSetting` | The setting definition with current value |
+| `value` | `SettingValue` | Current value |
+| `onChange` | `(storageKey, value) => void` | Change handler |
+| `onReset` | `(storageKey) => void` | Reset handler |
+
+## ThemeCarousel
+
+A scrollable theme preview component used by `ThemeRenderer` (in `SettingsView`) and the fallback `SettingsPage`.
+
+## Feature-Gated Settings
+
+Settings can be conditionally shown based on feature flags. This allows settings to be hidden when their associated feature is disabled.
+
+### YAML Configuration
+
+Add `feature` and `featureDisabledDefault` to a setting definition:
+
+```yaml
+- setting:
+    id: "advancedVisualEffects"
+    titleKey: "settings.appearance.advancedVisualEffects.title"
+    type: "toggle"
+    default: true
+    feature: "advancedGraphics"
+    featureDisabledDefault: false
+```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `feature` | No | Name of the feature flag that gates this setting |
+| `featureDisabledDefault` | Only when `feature` is set | Value returned when the feature is disabled |
+
+### Behavior
+
+- **Feature disabled:** The setting is hidden from the settings UI (`getFilteredGroups()` strips it). `get()` returns `featureDisabledDefault` regardless of the stored value. Components using `useSetting()` receive the disabled default.
+- **Feature enabled:** The setting appears in the UI and behaves normally. `get()` returns the stored value or `default`.
+- **No feature set:** The setting always appears and behaves normally.
+- **Empty groups:** If all settings in a group are feature-gated and disabled, the group is removed from the UI.
+
+### Usage in Code
+
+```typescript
+// Works regardless of feature state.
+// Returns true when feature is enabled (or stored value), false when disabled.
+const [advancedEffects] = useSetting('appearance:advancedVisualEffects')
+```
+
+## Test IDs and Data Attributes
+
+### SettingsPage
+
+- Root: `data-testid="settings-page"`
+- Data attribute: `data-language` (current `i18n.language`)
+- When dynamic: embeds `SettingsView` with `data-testid="{rootTestId}-settings-view"`
+- When fallback:
+  - Theme carousel: `data-testid="{rootTestId}-theme-carousel"`
+  - Language select box: `data-testid="{rootTestId}-language-selectbox"`
+
+### SettingsView
+
+- Root: `data-testid="settings-view"`
+- Search input: `data-testid="{rootTestId}-search"`
+- Group containers: `data-testid="settings-group-{groupId}"`
+- Group titles: `data-sticky-level="{depth}"` attribute
+
+### SettingItem
+
+- Container: `data-testid="setting-item-{storageKey}"`
+- Gear button: `data-testid="setting-gear-{storageKey}"`
+
+### ThemeCarousel
+
+- Root: `data-testid="{testId}"`
+- Scrollable: `data-testid="{testId}-scrollable"`
+- Data attributes: `data-theme-count`, `data-selected-theme-id`
+
+### SettingsModal
+
+- Modal root: `data-testid="settings-modal"`
+
+## Selectors (`electron-core-ui/testing`)
+
+```typescript
+settingsModalRootSelector(testId: string): string
+settingsPageRootSelector(testId: string): string
+settingsPageThemeCarouselTestId(settingsPageTestId: string): string
+settingsPageLanguageSelectBoxTestId(settingsPageTestId: string): string
+themeCarouselRootSelector(testId: string): string
+themeCarouselScrollableTestId(themeCarouselTestId: string): string
+```
+
+## Playwright-BDD Step Definitions (`electron-core-ui/testing/playwright-bdd`)
+
+### `defineSettingsBddSteps`
 
 Settings-specific steps:
 
@@ -54,7 +196,7 @@ Settings-specific steps:
 - `Then settings page "{id}" theme carousel should be visible`
 - `Then settings page "{id}" language select box should be visible`
 
-Reusing internal components (recommended):
+### Reusing internal component steps (recommended)
 
 - `defineModalBddSteps` for the modal (`settings-modal`)
 - `defineSelectBoxBddSteps` for the language SelectBox (`settings-page-language-selectbox`)

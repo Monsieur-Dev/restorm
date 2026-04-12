@@ -7,7 +7,9 @@ import {
   CodeEditor,
   SplitView,
   Pane,
+  ControlGroup,
   logger,
+  getContrastColor,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
@@ -38,11 +40,14 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
   onHistoryAvailabilityChange
 }) => {
   const { t } = useTranslation()
-  const { selectedEnvId, environments } = useEnvironmentContext()
+  const { selectedEnvId, environments, envColor } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
-  
+  const sendButtonStyle: React.CSSProperties | undefined = envColor
+    ? { backgroundColor: envColor, color: getContrastColor(envColor), borderColor: envColor }
+    : undefined
+
   const [url, setUrlState] = useState(request.url)
   const [requestMessage, setRequestMessageState] = useState(request.requestMessage)
   const [isSending, setIsSending] = useState(false)
@@ -54,7 +59,8 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
   // Backend-provided resolved URL and code snippets
   const [resolvedUrl, setResolvedUrl] = useState<string>('')
   const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
-  
+  const sourceIdRef = useRef<string>(crypto.randomUUID())
+
   const metadataRef = useRef<KeyValueTableHandle | null>(null)
 
   const handleRequestReset = useCallback(() => {
@@ -91,7 +97,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
       requestType: 'grpc',
       headers: toKeyValueData(currentRequest.metadata),
       body: { type: 'text', content: currentRequest.requestMessage }
-    })
+    }, sourceIdRef.current)
 
     // Subscribe to backend events
     const unsubUrl = window.restorm?.context.onUrlResolved((result) => {
@@ -149,7 +155,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
       requestType: 'grpc',
       headers: toKeyValueData(request.metadata),
       body: { type: 'text', content: requestMessage }
-    })
+    }, sourceIdRef.current)
   }, [request.id, request.callType, request.metadata, url, requestMessage])
 
   // Sync state changes to reactive request object
@@ -360,9 +366,9 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
   // URL section
   const urlSection = (
     <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <ControlGroup data-testid="grpc-url-section">
         <Badge type={mapToBadgeType(request.callType)} />
-        <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
+        <div style={{ flex: 1, minWidth: 0 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
           <RestormVariableInputBox
             value={url}
             onChange={setUrl}
@@ -372,18 +378,17 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
             data-testid="grpc-url-input"
           />
         </div>
-        <Button 
+        <Button
           icon={isSending ? 'close' : 'send'}
-          onClick={isSending ? handleCancel : handleSend} 
-          options={{ 
-            title: isSending ? t('cancel') : t('grpc.send'), 
-            ariaLabel: isSending ? t('cancel') : t('grpc.send') 
+          onClick={isSending ? handleCancel : handleSend}
+          {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+          options={{
+            title: isSending ? t('cancel') : t('grpc.send'),
+            ariaLabel: isSending ? t('cancel') : t('grpc.send')
           }}
           data-testid="grpc-send-button"
-        >
-          {isSending ? t('cancel') : t('grpc.send')}
-        </Button>
-      </div>
+        />
+      </ControlGroup>
       <div style={{ fontSize: 12, color: 'var(--descriptionForeground)' }}>
         {request.service}/{request.method}
       </div>

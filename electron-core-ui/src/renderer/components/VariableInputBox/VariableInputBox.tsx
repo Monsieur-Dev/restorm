@@ -65,7 +65,8 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
     languageId,
     disableDefaultProviders = false,
     onMount: onMountProp,
-    contextMenuItems: extraContextMenuItems = []
+    contextMenuItems: extraContextMenuItems = [],
+    changeDebounceMs
   } = props
   const effectiveLanguageId = languageId ?? LANGUAGE_ID
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
@@ -404,6 +405,8 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
               height={20}
               options={editorOptions}
               onMount={handleMount}
+              applyEditorSettings={false}
+              {...(changeDebounceMs !== undefined && { changeDebounceMs })}
               {...(dataTestId && { 'data-testid': `${dataTestId}-codeeditor` })}
             />
           </div>

@@ -15,6 +15,7 @@ export interface Folder {
 export interface EnvironmentFolder extends Folder {
   folderType: 'environment'
   environments: Environment[]
+  tagColors?: Record<string, string>
 }
 
 export type FolderItem = Folder | EnvironmentFolder | Request

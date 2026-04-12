@@ -1,5 +1,5 @@
 // Main process exports - with proper TypeScript types
-export { getThemeService, getStorageService, logger, initFeatureService, getFeatureService, isFeatureServiceInitialized, initFileService, getFileService, isFileServiceInitialized, eventBusService, searchService, i18nService, graphQLService, createSchema, createPubSub, initPersistenceService, getPersistenceService, isPersistenceServiceInitialized, PersistenceService, serialize, deserialize, detectFormat, filterNonSerialised, generateIndexedFileName, sanitizeFileName, calculateIndexPadding, PERSISTENCE_FORMATS, graphQLSchemaGenerator, inferGraphQLType, createFieldDefinitions } from './services'
+export { getThemeService, getStorageService, logger, initFeatureService, getFeatureService, isFeatureServiceInitialized, resetFeatureService, initFileService, getFileService, isFileServiceInitialized, eventBusService, searchService, i18nService, graphQLService, createSchema, createPubSub, initPersistenceService, getPersistenceService, isPersistenceServiceInitialized, PersistenceService, serialize, deserialize, detectFormat, filterNonSerialised, generateIndexedFileName, sanitizeFileName, calculateIndexPadding, PERSISTENCE_FORMATS, graphQLSchemaGenerator, inferGraphQLType, createFieldDefinitions, initSettingsService, getSettingsService, isSettingsServiceInitialized } from './services'
 
 // Decorators
 export {

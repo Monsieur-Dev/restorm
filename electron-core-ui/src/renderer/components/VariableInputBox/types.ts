@@ -41,4 +41,11 @@ export interface VariableInputBoxProps {
    * A separator is automatically inserted when items are provided.
    */
   contextMenuItems?: ContextMenuItem[] | undefined
+
+  /**
+   * Forwarded to the underlying CodeEditor. When 0, `onChange` fires synchronously
+   * on every keystroke (keeps the React state in lockstep with Monaco's internal
+   * content, useful for single-line inputs). Defaults to the CodeEditor default.
+   */
+  changeDebounceMs?: number | undefined
 }

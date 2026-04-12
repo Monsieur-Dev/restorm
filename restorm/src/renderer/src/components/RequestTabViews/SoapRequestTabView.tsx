@@ -7,7 +7,9 @@ import {
   CodeEditor,
   SplitView,
   Pane,
+  ControlGroup,
   logger,
+  getContrastColor,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
@@ -37,11 +39,14 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
   onHistoryAvailabilityChange
 }) => {
   const { t } = useTranslation()
-  const { selectedEnvId, environments } = useEnvironmentContext()
+  const { selectedEnvId, environments, envColor } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
-  
+  const sendButtonStyle: React.CSSProperties | undefined = envColor
+    ? { backgroundColor: envColor, color: getContrastColor(envColor), borderColor: envColor }
+    : undefined
+
   const [url, setUrlState] = useState(request.url)
   const [body, setBodyState] = useState(request.body)
   const [isSending, setIsSending] = useState(false)
@@ -53,7 +58,8 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
   // Backend-provided resolved URL and code snippets
   const [resolvedUrl, setResolvedUrl] = useState<string>('')
   const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
-  
+  const sourceIdRef = useRef<string>(crypto.randomUUID())
+
   const headersRef = useRef<KeyValueTableHandle | null>(null)
 
   const handleRequestReset = useCallback(() => {
@@ -90,7 +96,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
       requestType: 'soap',
       headers: toKeyValueData(currentRequest.headers),
       body: { type: 'text', content: currentRequest.body }
-    })
+    }, sourceIdRef.current)
 
     // Subscribe to backend events
     const unsubUrl = window.restorm?.context.onUrlResolved((result) => {
@@ -148,7 +154,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
       requestType: 'soap',
       headers: toKeyValueData(request.headers),
       body: { type: 'text', content: body }
-    })
+    }, sourceIdRef.current)
   }, [request.id, request.headers, url, body])
 
   // Sync state changes to reactive request object
@@ -350,9 +356,9 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
   // URL section
   const urlSection = (
     <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <ControlGroup data-testid="soap-url-section">
         <Badge type="SOAP" />
-        <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
+        <div style={{ flex: 1, minWidth: 0 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
           <RestormVariableInputBox
             value={url}
             onChange={setUrl}
@@ -362,18 +368,17 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
             data-testid="soap-url-input"
           />
         </div>
-        <Button 
+        <Button
           icon={isSending ? 'close' : 'send'}
-          onClick={isSending ? handleCancel : handleSend} 
-          options={{ 
-            title: isSending ? t('cancel') : t('soap.send'), 
-            ariaLabel: isSending ? t('cancel') : t('soap.send') 
+          onClick={isSending ? handleCancel : handleSend}
+          {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+          options={{
+            title: isSending ? t('cancel') : t('soap.send'),
+            ariaLabel: isSending ? t('cancel') : t('soap.send')
           }}
           data-testid="soap-request-action-button"
-        >
-          {isSending ? t('cancel') : t('soap.send')}
-        </Button>
-      </div>
+        />
+      </ControlGroup>
       <div style={{ fontSize: 12, color: 'var(--descriptionForeground)' }}>
         {request.service}/{request.operation} • SOAPAction: {request.soapAction}
       </div>

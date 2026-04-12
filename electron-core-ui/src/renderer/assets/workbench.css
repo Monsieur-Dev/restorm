@@ -2,6 +2,18 @@
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+/* Disable all animations and transitions when advanced visual effects are off.
+   Use 0.01ms (not 0s) so that transitionend/animationend events still fire —
+   components like Modal rely on those events to unmount. */
+.ecu-reduced-motion *,
+.ecu-reduced-motion *::before,
+.ecu-reduced-motion *::after {
+	animation-duration: 0.01ms !important;
+	animation-delay: 0s !important;
+	transition-duration: 0.01ms !important;
+	transition-delay: 0s !important;
+}
+
 /* Font Families (with CJK support) */
 
 .workbench.mac { font-family: -apple-system, BlinkMacSystemFont, sans-serif; }

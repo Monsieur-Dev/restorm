@@ -1,11 +1,10 @@
-import { test as base } from 'playwright-bdd'
-import { _electron as electron, ElectronApplication, Page } from '@playwright/test'
-import { join, resolve } from 'path'
+import { join } from 'path'
 import { writeFileSync, mkdirSync, existsSync, rmSync } from 'fs'
 import * as yaml from 'yaml'
-import electronPath from 'electron'
 import { listViewRootSelector } from 'electron-core-ui/testing'
-import { closeElectronAppForE2E, withE2ECoverageEnv, writeRendererIstanbulCoverage } from '../../helpers/coverage'
+import { restormBaseTest, expect, writeAppLogs } from '../../helpers/base-fixture'
+import { launchRestormElectronApp } from '../../helpers/launch-restorm'
+import { closeElectronAppForE2E } from '../../helpers/coverage'
 
 // Test data with path params and variables in URL
 const testData = {
@@ -35,6 +34,19 @@ const testData = {
       pathParams: [
         { id: 'pp-1', key: 'userId', value: '12345', description: 'User ID', enabled: true }
       ],
+      body: { type: 'text', content: '{{baseUrl}}/users/{{userId}}' },
+      documentation: '',
+      notes: '',
+      tags: []
+    }, {
+      id: 'req-gql',
+      name: 'Get Users GQL',
+      type: 'graphql',
+      url: '{{baseUrl}}/graphql',
+      operationType: 'query',
+      query: 'query { users { id name } }',
+      variables: '{}',
+      headers: [],
       documentation: '',
       notes: '',
       tags: []
@@ -43,20 +55,14 @@ const testData = {
 }
 
 interface HandlebarsFixtures {
-  electronApp: ElectronApplication
-  page: Page
-  restormRoot: string
   testFilePath: string
 }
 
-export const test = base.extend<HandlebarsFixtures>({
-  restormRoot: [resolve(__dirname, '../../../..'), { option: true }],
-
+export const test = restormBaseTest.extend<HandlebarsFixtures>({
   testFilePath: async ({ restormRoot }, use) => {
     const testDataDir = join(restormRoot, 'tests/temp-test-data')
     const testFilePath = join(testDataDir, 'handlebars-test.restorm')
 
-    // Create temp directory and test file
     if (!existsSync(testDataDir)) {
       mkdirSync(testDataDir, { recursive: true })
     }
@@ -64,7 +70,6 @@ export const test = base.extend<HandlebarsFixtures>({
 
     await use(testFilePath)
 
-    // Cleanup
     try {
       if (existsSync(testFilePath)) {
         rmSync(testFilePath)
@@ -74,20 +79,16 @@ export const test = base.extend<HandlebarsFixtures>({
     }
   },
 
-  electronApp: async ({ restormRoot, testFilePath }, use) => {
-    const electronExePath = electronPath as unknown as string
-    const mainJsPath = join(restormRoot, 'dist/main/index.js')
-
-    const app = await electron.launch({
-      executablePath: electronExePath,
-      args: ['--no-sandbox', mainJsPath, '--open', testFilePath],
-      env: {
-        ...withE2ECoverageEnv(restormRoot, process.env),
-        NODE_ENV: 'development'
-      }
+  electronApp: async ({ restormRoot, testFilePath }, use, testInfo) => {
+    const app = await launchRestormElectronApp({
+      restormRoot,
+      args: ['--open', testFilePath]
     })
-
     await use(app)
+    const logFile = writeAppLogs(app, testInfo.outputDir)
+    if (logFile) {
+      await testInfo.attach('electron-logs', { path: logFile, contentType: 'text/plain' })
+    }
     await closeElectronAppForE2E(app)
   },
 
@@ -95,13 +96,11 @@ export const test = base.extend<HandlebarsFixtures>({
     const page = await electronApp.firstWindow()
     await page.waitForLoadState('domcontentloaded')
     await page.waitForLoadState('load')
-    // Wait for the main sidebar list view to be ready (replaces fixed timeout)
     await page.waitForSelector(`${listViewRootSelector('sidebar-listview')}[data-ready="true"]`, { timeout: 15000 })
-
     await use(page)
-
+    const { writeRendererIstanbulCoverage } = await import('../../helpers/coverage')
     await writeRendererIstanbulCoverage(page, testInfo, restormRoot)
   }
 })
 
-export { expect } from '@playwright/test'
+export { expect }

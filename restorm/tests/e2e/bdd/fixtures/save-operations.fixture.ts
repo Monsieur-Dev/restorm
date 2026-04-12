@@ -1,39 +1,28 @@
-import { test as base } from 'playwright-bdd'
-import { _electron as electron, ElectronApplication, Page } from '@playwright/test'
-import { join, resolve } from 'path'
+import { join } from 'path'
 import { existsSync, rmSync, mkdirSync, copyFileSync } from 'fs'
-import electronPath from 'electron'
-import { closeElectronAppForE2E, withE2ECoverageEnv, writeRendererIstanbulCoverage } from '../../helpers/coverage'
+import { restormBaseTest, expect, writeAppLogs } from '../../helpers/base-fixture'
+import { launchRestormElectronApp } from '../../helpers/launch-restorm'
+import { closeElectronAppForE2E } from '../../helpers/coverage'
 
 interface SaveOperationsFixtures {
-  electronApp: ElectronApplication
-  page: Page
-  restormRoot: string
   petstoreFilePath: string
   tempFolderPath: string
   referenceFolderPath: string
   referenceFolder2Path: string
 }
 
-export const test = base.extend<SaveOperationsFixtures>({
-  restormRoot: [resolve(__dirname, '../../../..'), { option: true }],
-
+export const test = restormBaseTest.extend<SaveOperationsFixtures>({
   petstoreFilePath: async ({ restormRoot }, use) => {
     await use(join(restormRoot, 'tests/e2e/samples/Petstore.restorm'))
   },
 
   tempFolderPath: async ({ restormRoot }, use) => {
     const tempPath = join(restormRoot, 'tests/e2e/temp-save-test')
-
-    // Clean and create temp folder
     if (existsSync(tempPath)) {
       rmSync(tempPath, { recursive: true, force: true })
     }
     mkdirSync(tempPath, { recursive: true })
-
     await use(tempPath)
-
-    // Cleanup after test
     if (existsSync(tempPath)) {
       rmSync(tempPath, { recursive: true, force: true })
     }
@@ -47,22 +36,15 @@ export const test = base.extend<SaveOperationsFixtures>({
     await use(join(restormRoot, 'tests/e2e/samples/Petstore 2'))
   },
 
-  electronApp: async ({ restormRoot, petstoreFilePath, tempFolderPath }, use) => {
+  electronApp: async ({ restormRoot, petstoreFilePath, tempFolderPath }, use, testInfo) => {
     // Restore the original Petstore.restorm from Samples
     const petstoreOriginalPath = join(restormRoot, 'Samples/Petstore.restorm')
     copyFileSync(petstoreOriginalPath, petstoreFilePath)
 
-    const electronExePath = electronPath as unknown as string
-    const mainJsPath = join(restormRoot, 'dist/main/index.js')
-
-    const app = await electron.launch({
-      executablePath: electronExePath,
-      args: ['--no-sandbox', mainJsPath, '-o', petstoreFilePath],
-      env: {
-        ...withE2ECoverageEnv(restormRoot, process.env),
-        NODE_ENV: 'development',
-        E2E_MOCK_SAVE_FOLDER: tempFolderPath
-      }
+    const app = await launchRestormElectronApp({
+      restormRoot,
+      args: ['-o', petstoreFilePath],
+      extraEnv: { E2E_MOCK_SAVE_FOLDER: tempFolderPath }
     })
 
     // Mock dialogs immediately after launch
@@ -78,21 +60,22 @@ export const test = base.extend<SaveOperationsFixtures>({
     }, tempFolderPath)
 
     await use(app)
+    const logFile = writeAppLogs(app, testInfo.outputDir)
+    if (logFile) {
+      await testInfo.attach('electron-logs', { path: logFile, contentType: 'text/plain' })
+    }
     await closeElectronAppForE2E(app)
   },
 
   page: async ({ electronApp, restormRoot }, use, testInfo) => {
     const page = await electronApp.firstWindow()
-
     await page.waitForLoadState('domcontentloaded')
     await page.waitForLoadState('load')
-    // Wait for the main sidebar list view to be ready (replaces fixed timeout)
     await page.waitForSelector('[data-testid="sidebar-listview"][data-ready="true"]', { timeout: 15000 })
-
     await use(page)
-
+    const { writeRendererIstanbulCoverage } = await import('../../helpers/coverage')
     await writeRendererIstanbulCoverage(page, testInfo, restormRoot)
   }
 })
 
-export { expect } from '@playwright/test'
+export { expect }

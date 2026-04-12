@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import {
   ListViewDropdown,
   type ListViewItemData,
-  IconSelect
+  IconSelect,
+  getContrastColor
 } from 'electron-core-ui/renderer'
 import type { Environment } from '../../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../../contexts/useEnvironmentContext'
@@ -52,7 +53,10 @@ function findEnvironmentById(environments: Environment[], id: string): Environme
 
 export const EnvironmentDropdown: React.FC = () => {
   const { t } = useTranslation()
-  const { environments, selectedEnvId, setSelectedEnvId } = useEnvironmentContext()
+  const { environments, selectedEnvId, setSelectedEnvId, envColor } = useEnvironmentContext()
+  const envButtonStyle: React.CSSProperties | undefined = envColor
+    ? { backgroundColor: envColor, color: getContrastColor(envColor), borderColor: envColor }
+    : undefined
 
   const allEnvironmentIds = useMemo(
     () => (environments && environments.length > 0 ? collectEnvironmentIds(environments) : []),
@@ -114,41 +118,39 @@ export const EnvironmentDropdown: React.FC = () => {
   }
 
   return (
-    <div style={{ marginLeft: 8 }}>
-      <ListViewDropdown
-        items={items}
-        rootRole="tree"
-        menuAriaLabel={t('requestTab.environmentSelector.listAriaLabel')}
-        selectedIds={selectedEnvId ? [selectedEnvId] : []}
-        expandedIds={expandedIds}
-        data-testid="environment-dropdown"
-        buttonProps={{
-          secondary: true,
-          options: {
-            ariaLabel: t('requestTab.environmentSelector.ariaLabel'),
-            title: t('requestTab.environmentSelector.ariaLabel')
-          }
-        }}
-        buttonContent={
-          <>
-            {selectedEnvironment?.icon && (
-              <IconSelect
-                value={selectedEnvironment.icon}
-                readonly
-                style={{ marginRight: 4 }}
-                data-testid={`environment-selected-icon-${selectedEnvironment.id}`}
-              />
-            )}
-            <span style={{ marginRight: 4, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {selectedEnvironmentName}
-            </span>
-            <i className="codicon codicon-chevron-down" aria-hidden="true" />
-          </>
+    <ListViewDropdown
+      items={items}
+      rootRole="tree"
+      menuAriaLabel={t('requestTab.environmentSelector.listAriaLabel')}
+      selectedIds={selectedEnvId ? [selectedEnvId] : []}
+      expandedIds={expandedIds}
+      data-testid="environment-dropdown"
+      buttonProps={{
+        ...(envButtonStyle ? { style: envButtonStyle } : { emphasis: 1 }),
+        options: {
+          ariaLabel: t('requestTab.environmentSelector.ariaLabel'),
+          title: t('requestTab.environmentSelector.ariaLabel')
         }
-        onItemClick={handleItemClick}
-        onItemToggle={handleItemToggle}
-      />
-    </div>
+      }}
+      buttonContent={
+        <>
+          {selectedEnvironment?.icon && (
+            <IconSelect
+              value={selectedEnvironment.icon}
+              readonly
+              style={{ marginRight: 4 }}
+              data-testid={`environment-selected-icon-${selectedEnvironment.id}`}
+            />
+          )}
+          <span style={{ marginRight: 4, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {selectedEnvironmentName}
+          </span>
+          <i className="codicon codicon-chevron-down" aria-hidden="true" />
+        </>
+      }
+      onItemClick={handleItemClick}
+      onItemToggle={handleItemToggle}
+    />
   )
 }
 

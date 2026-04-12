@@ -22,7 +22,7 @@ export interface UseHorizontalSashOptions {
 
 export interface UseHorizontalSashReturn {
   /** Ref to attach to the container element */
-  containerRef: React.RefObject<HTMLDivElement>
+  containerRef: React.RefObject<HTMLDivElement | null>
   /** Current height of the panel */
   height: number
   /** Width of the container (from ResizeObserver) */

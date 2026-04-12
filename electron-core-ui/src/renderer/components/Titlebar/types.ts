@@ -39,4 +39,7 @@ export interface TitlebarProps {
    * Useful to make E2E harnesses deterministic in web environments.
    */
   customWcoPlatform?: string
+
+  /** Show back/forward navigation buttons before the center zone */
+  showNavigation?: boolean
 }

@@ -167,20 +167,35 @@ const TabsInner: React.FC<TabsProps> = ({
                   }
                 }}
               >
-                {isActive && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      height: '2px',
-                      backgroundColor: 'var(--tab-activeBorder)',
-                      zIndex: 10
-                    }}
-                  />
-                )}
-                <span>{tab.label}</span>
+                {/* Glow effect — linear gradient from bottom (solid) to top (transparent) */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: '75%',
+                    background: 'linear-gradient(to top, var(--tab-activeGlow, rgba(255,255,255,0.1)) -75%, transparent 100%)',
+                    opacity: isActive ? 1 : 0,
+                    transition: 'opacity 0.5s ease',
+                    pointerEvents: 'none',
+                    zIndex: 0
+                  }}
+                />
+                {/* Active indicator line */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: '2px',
+                    backgroundColor: isActive ? 'var(--tab-activeBorder)' : 'transparent',
+                    transition: 'background-color 0.2s ease',
+                    zIndex: 10
+                  }}
+                />
+                <span style={{ position: 'relative', zIndex: 1 }}>{tab.label}</span>
                 {tab.closable && (
                   <button
                     type="button"

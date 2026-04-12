@@ -17,3 +17,12 @@ Feature: Settings
 
     When I close modal "settings-modal" with Escape
     Then modal "settings-modal" state should be "closed"
+
+  Scenario: Open settings modal via gear icon in titlebar
+    Given I am on the theme test page
+    When I click button "settings-gear"
+    Then modal "settings-modal" should be visible
+    Then settings page "settings-page" should be visible
+
+    When I close modal "settings-modal" with Escape
+    Then modal "settings-modal" state should be "closed"

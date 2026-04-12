@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '25'
       
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -77,7 +77,7 @@ jobs:
       - name: Build gitable application
         run: |
           cd gitable
-          pnpm run build
+          NODE_OPTIONS="--max-old-space-size=4096" pnpm run build
 
       - name: Install restorm dependencies
         run: |
@@ -140,7 +140,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '25'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4

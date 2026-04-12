@@ -54,6 +54,9 @@ export class EnvironmentFolder {
   @searchable.property({ weight: 1.5, filterable: true })
   tags: string[] = []
 
+  /** Map of tag text to hex color (e.g. { "query": "#ff0000" }) */
+  tagColors: Record<string, string> = {}
+
   /** Folder configuration */
   configuration: FolderConfiguration = {}
 
@@ -89,6 +92,7 @@ export class EnvironmentFolder {
     documentation?: string
     notes?: string
     tags?: string[]
+    tagColors?: Record<string, string>
     folderType?: FolderType
     configuration?: FolderConfiguration
     environments?: Parameters<typeof Environment.fromPlain>[0][]
@@ -101,6 +105,7 @@ export class EnvironmentFolder {
       documentation: obj.documentation ?? '',
       notes: obj.notes,
       tags: obj.tags ?? [],
+      tagColors: obj.tagColors ?? {},
       folderType: 'environment',
       configuration: obj.configuration ?? {}
     })
@@ -124,6 +129,7 @@ export class EnvironmentFolder {
       documentation: this.documentation,
       notes: this.notes,
       tags: this.tags,
+      tagColors: this.tagColors,
       folderType: this.folderType,
       configuration: this.configuration,
       environments: this.environments.map(e => e.toPlainObject()),

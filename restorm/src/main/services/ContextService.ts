@@ -485,7 +485,7 @@ class ContextService {
    * Update full request data for URL resolution and code snippet generation.
    * Called when request properties change (url, body, headers, etc.)
    */
-  updateFullRequestData(requestId: string, data: FullRequestData): void {
+  updateFullRequestData(requestId: string, data: FullRequestData, sourceId?: string): void {
     const ctx = this.requestContexts.get(requestId)
     if (!ctx) {
       logger.warn('[ContextService] updateFullRequestData: request not registered', { requestId })
@@ -500,8 +500,8 @@ class ContextService {
     if (data.pathParams && data.pathParams.length > 0) ctx.keyValueGroups.set('pathParams', data.pathParams)
     if (data.metadata && data.metadata.length > 0) ctx.keyValueGroups.set('metadata', data.metadata)
 
-    // Recalculate everything
-    this.recalculateRequestContext(requestId)
+    // Recalculate everything; sourceId echoed in broadcasts so the originating renderer can ignore its own echo
+    this.recalculateRequestContext(requestId, sourceId)
   }
 
   /**
@@ -548,7 +548,7 @@ class ContextService {
   /**
    * Recalculate all KeyValue transformations for a request
    */
-  private recalculateRequestContext(requestId: string): void {
+  private recalculateRequestContext(requestId: string, sourceId?: string): void {
     const ctx = this.requestContexts.get(requestId)
     if (!ctx) return
 
@@ -619,9 +619,9 @@ class ContextService {
       // Delegate URL resolution to URLResolver
       const urlResult = resolveUrl(updatedData, baseContext, this.transformValue.bind(this))
       const previousUrlResult = this.resolvedUrls.get(requestId)
-      if (!previousUrlResult || previousUrlResult.resolvedUrl !== urlResult.resolvedUrl) {
+      if (previousUrlResult?.resolvedUrl !== urlResult.resolvedUrl) {
         this.resolvedUrls.set(requestId, urlResult)
-        this.broadcastToRenderer('context:url-resolved', { requestId, ...urlResult })
+        this.broadcastToRenderer('context:url-resolved', { requestId, ...urlResult, sourceId })
       }
 
       // Delegate code snippet generation to CodeSnippetGenerator
@@ -633,12 +633,12 @@ class ContextService {
         this.transformValue.bind(this)
       )
       const previousSnippetResult = this.codeSnippets.get(requestId)
-      if (!previousSnippetResult || previousSnippetResult.markdown !== snippetResult.markdown) {
+      if (previousSnippetResult?.markdown !== snippetResult.markdown) {
         this.codeSnippets.set(requestId, snippetResult)
-        this.broadcastToRenderer('context:code-snippets-updated', { requestId, ...snippetResult })
+        this.broadcastToRenderer('context:code-snippets-updated', { requestId, ...snippetResult, sourceId })
       }
 
-      this.calculateAvailableVariables(requestId, updatedData, baseContext)
+      this.calculateAvailableVariables(requestId, updatedData, baseContext, sourceId)
     }
   }
 
@@ -659,7 +659,8 @@ class ContextService {
   private calculateAvailableVariables(
     requestId: string,
     data: FullRequestData,
-    envContext: TransformedContext
+    envContext: TransformedContext,
+    sourceId?: string
   ): void {
     // Base environment variables
     const envVars: { name: string; value: string }[] = []
@@ -693,7 +694,7 @@ class ContextService {
 
       if (pp.id) {
         const varsForThisField = [...envVars, ...cumulativePathParams]
-        this.broadcastFieldVariables(pp.id, varsForThisField)
+        this.broadcastFieldVariables(pp.id, varsForThisField, sourceId)
       }
 
       if (pp.key && pp.key.trim() !== '') {
@@ -718,7 +719,7 @@ class ContextService {
 
       if (h.id) {
         const varsForThisField = [...envVars, ...cumulativeHeaders]
-        this.broadcastFieldVariables(h.id, varsForThisField)
+        this.broadcastFieldVariables(h.id, varsForThisField, sourceId)
       }
 
       if (h.key && h.key.trim() !== '') {
@@ -743,7 +744,7 @@ class ContextService {
 
       if (p.id) {
         const varsForThisField = [...envVars, ...cumulativeParams]
-        this.broadcastFieldVariables(p.id, varsForThisField)
+        this.broadcastFieldVariables(p.id, varsForThisField, sourceId)
       }
 
       if (p.key && p.key.trim() !== '') {
@@ -759,7 +760,7 @@ class ContextService {
     // URL field gets env + ALL path params
     const urlVariableId = `${requestId}:url`
     const urlVars = [...envVars, ...cumulativePathParams]
-    this.broadcastFieldVariables(urlVariableId, urlVars)
+    this.broadcastFieldVariables(urlVariableId, urlVars, sourceId)
   }
 
   /**
@@ -767,11 +768,11 @@ class ContextService {
    */
   private broadcastFieldVariables(
     variableId: string,
-    variables: { name: string; value: string }[]
+    variables: { name: string; value: string }[],
+    sourceId?: string
   ): void {
     const previous = this.availableVariablesPerField.get(variableId)
-    const hasChanged = !previous ||
-      previous.length !== variables.length ||
+    const hasChanged = previous?.length !== variables.length ||
       variables.some((v, i) => {
         const prevItem = previous[i]
         return prevItem && (prevItem.name !== v.name || prevItem.value !== v.value)
@@ -779,7 +780,7 @@ class ContextService {
 
     if (hasChanged) {
       this.availableVariablesPerField.set(variableId, variables)
-      this.broadcastToRenderer('context:available-variables', { variableId, variables })
+      this.broadcastToRenderer('context:available-variables', { variableId, variables, sourceId })
     }
   }
 

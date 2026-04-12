@@ -117,23 +117,17 @@
   },
   "settings": {
     "e2eTabLabel": "Settings (E2E)",
+    "demo": {
+      "title": "Demo",
+      "customExample": {
+        "title": "Custom Renderer Example",
+        "description": "This setting uses a custom renderer provided by the demo app."
+      }
+    },
     "harness": {
       "instructions": "Open the settings modal and interact with the language selector.",
       "openButtonLabel": "Open settings",
       "openButtonAriaLabel": "Open settings modal"
-    }
-  },
-  "settingsTreeView": {
-    "e2eTabLabel": "SettingsTreeView (E2E)",
-    "harness": {
-      "instructions": "Select a category and use search to expand nested categories.",
-      "searchPlaceholder": "Search…",
-      "categories": {
-        "general": "General",
-        "appearance": "Appearance",
-        "theme": "Theme",
-        "workspace": "Workspace"
-      }
     }
   },
   "dateTimePicker": {

@@ -1,0 +1,22 @@
+groups:
+  - id: "behavior"
+    titleKey: "behavior.title"
+    items:
+      - setting:
+          id: "dateTimeFormat"
+          titleKey: "behavior.dateTimeFormat"
+          descriptionKey: "behavior.dateTimeFormatDescription"
+          type: "enum"
+          default: "us"
+          params:
+            values:
+              - value: "us"
+                labelKey: "behavior.dateTimeFormat.us"
+              - value: "iso"
+                labelKey: "behavior.dateTimeFormat.iso"
+      - setting:
+          id: "syncSidebarWithTabs"
+          titleKey: "behavior.syncSidebarWithTabs"
+          descriptionKey: "behavior.syncSidebarWithTabsDescription"
+          type: "toggle"
+          default: true

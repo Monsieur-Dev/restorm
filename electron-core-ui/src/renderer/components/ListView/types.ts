@@ -172,6 +172,11 @@ export interface ListViewProps {
   editingItemId?: string | null
 
   /**
+   * Called when editing mode starts (F2, context menu rename).
+   * Useful for controlled editingItemId to sync state.
+   */
+  onEditingStart?: (itemId: string) => void
+  /**
    * Called when editing mode ends (either by commit or cancel).
    * Useful for controlled editingItemId to sync state.
    */

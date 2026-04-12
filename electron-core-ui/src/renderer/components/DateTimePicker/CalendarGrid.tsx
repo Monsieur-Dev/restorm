@@ -63,11 +63,11 @@ export interface CalendarGridProps {
   /** Test-id prefix. */
   testId: string
   /** Refs for the month and year label spans (used by parent for outside-click detection). */
-  monthPartRef: React.MutableRefObject<HTMLSpanElement | null>
-  yearPartRef: React.MutableRefObject<HTMLSpanElement | null>
+  monthPartRef: React.RefObject<HTMLSpanElement | null>
+  yearPartRef: React.RefObject<HTMLSpanElement | null>
   /** Refs for the month and year menus (used by parent for outside-click detection). */
-  monthMenuRef: React.MutableRefObject<HTMLDivElement | null>
-  yearMenuRef: React.MutableRefObject<HTMLDivElement | null>
+  monthMenuRef: React.RefObject<HTMLDivElement | null>
+  yearMenuRef: React.RefObject<HTMLDivElement | null>
   /** Whether each dropdown is open. */
   isMonthMenuOpen: boolean
   isYearMenuOpen: boolean
@@ -235,7 +235,7 @@ const CalendarGridInner: React.FC<CalendarGridProps> = ({
         />
         <div className="ecu-date-time-picker-month-year" data-testid={`${testId}-month-year`}>
           <span
-            ref={(el) => { monthPartRef.current = el }}
+            ref={monthPartRef}
             className="ecu-date-time-picker-month-part"
             data-testid={`${testId}-month-part`}
             role="button"
@@ -258,7 +258,7 @@ const CalendarGridInner: React.FC<CalendarGridProps> = ({
           </span>
           <span className="ecu-date-time-picker-month-year-sep"> </span>
           <span
-            ref={(el) => { yearPartRef.current = el }}
+            ref={yearPartRef}
             className="ecu-date-time-picker-year-part"
             data-testid={`${testId}-year-part`}
             role="button"
@@ -282,7 +282,7 @@ const CalendarGridInner: React.FC<CalendarGridProps> = ({
 
           {isMonthMenuOpen && (
             <div
-              ref={(el) => { monthMenuRef.current = el }}
+              ref={monthMenuRef}
               className="ecu-date-time-picker-month-menu"
               data-testid={`${testId}-month-menu`}
               onMouseDown={(e) => {
@@ -326,7 +326,7 @@ const CalendarGridInner: React.FC<CalendarGridProps> = ({
 
           {isYearMenuOpen && (
             <div
-              ref={(el) => { yearMenuRef.current = el }}
+              ref={yearMenuRef}
               className="ecu-date-time-picker-year-menu"
               data-testid={`${testId}-year-menu`}
               onMouseDown={(e) => {

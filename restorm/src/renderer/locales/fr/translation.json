@@ -22,8 +22,12 @@
     "addRequest": "Ajouter une requête",
     "collapseAll": "Tout réduire",
     "workspace": "Espace de travail",
+    "newFolder": "Nouveau dossier",
+    "newEnvironmentFolder": "Nouveau dossier de variables",
     "contextMenu": {
       "createSubfolder": "Créer un sous-dossier",
+      "createFolder": "Créer un dossier",
+      "createEnvironmentFolder": "Créer un dossier de variables",
       "defineVariables": "Définir les variables",
       "delete": "Supprimer",
       "clone": "Cloner",
@@ -104,7 +108,7 @@
     }
   },
   "workbench": {
-    "tagsLabel": "Tags :",
+    "tagsLabel": "Tags",
     "removeTag": "Supprimer le tag",
     "tabContextMenu": {
       "close": "Fermer",
@@ -457,6 +461,15 @@
     "raw": "Helper bloc qui affiche le contenu brut",
     "times": "Helper bloc qui répète n fois",
     "range": "Génère un tableau de nombres"
+  },
+  "behavior": {
+    "title": "Comportement",
+    "syncSidebarWithTabs": "Synchroniser la sélection du panneau latéral avec l'onglet actif",
+    "syncSidebarWithTabsDescription": "Lors du changement d'onglet dans l'espace de travail, sélectionner et afficher automatiquement l'élément correspondant dans le panneau latéral",
+    "dateTimeFormat": "Format date/heure",
+    "dateTimeFormatDescription": "Format utilisé pour afficher les dates et heures dans l'application",
+    "dateTimeFormat.us": "Format US (MM/JJ/AAAA, 12h)",
+    "dateTimeFormat.iso": "Format ISO (AAAA-MM-JJ, 24h)"
   },
   "import": {
     "title": "Importer des requêtes",

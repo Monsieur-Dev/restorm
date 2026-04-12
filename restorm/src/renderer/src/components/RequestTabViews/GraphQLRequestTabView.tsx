@@ -7,7 +7,9 @@ import {
   CodeEditor,
   SplitView,
   Pane,
+  ControlGroup,
   logger,
+  getContrastColor,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
@@ -37,11 +39,14 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   onHistoryAvailabilityChange
 }) => {
   const { t } = useTranslation()
-  const { selectedEnvId, environments } = useEnvironmentContext()
+  const { selectedEnvId, environments, envColor } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const previousEnvIdRef = useRef<string | null>(null)
-  
+  const sendButtonStyle: React.CSSProperties | undefined = envColor
+    ? { backgroundColor: envColor, color: getContrastColor(envColor), borderColor: envColor }
+    : undefined
+
   const [url, setUrlState] = useState(request.url)
   const [query, setQueryState] = useState(request.query)
   const [variables, setVariablesState] = useState(request.variables ?? '{}')
@@ -54,6 +59,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   // Backend-provided resolved URL and code snippets
   const [resolvedUrl, setResolvedUrl] = useState<string>('')
   const [backendCodeSnippets, setBackendCodeSnippets] = useState<string>('')
+  const sourceIdRef = useRef<string>(crypto.randomUUID())
   
   const headersRef = useRef<KeyValueTableHandle | null>(null)
 
@@ -99,7 +105,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       requestType: 'graphql',
       headers: toKeyValueData(currentRequest.headers),
       body: { type: 'text', content: JSON.stringify({ query: currentRequest.query, variables: currentRequest.variables }) }
-    })
+    }, sourceIdRef.current)
 
     // Subscribe to backend events
     const unsubUrl = restormContext.onUrlResolved((result) => {
@@ -157,7 +163,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       requestType: 'graphql',
       headers: toKeyValueData(request.headers),
       body: { type: 'text', content: JSON.stringify({ query, variables }) }
-    })
+    }, sourceIdRef.current)
   }, [request.id, request.headers, url, query, variables])
 
   // Sync state changes to reactive request object
@@ -364,9 +370,9 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   
   // URL section
   const urlSection = (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <ControlGroup data-testid="graphql-url-section">
       <Badge type="GQL" />
-      <div style={{ flex: 1, minWidth: 0, paddingLeft: 8 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
+      <div style={{ flex: 1, minWidth: 0 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
         <RestormVariableInputBox
           value={url}
           onChange={setUrl}
@@ -376,18 +382,17 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
           data-testid="graphql-url-input"
         />
       </div>
-      <Button 
+      <Button
         icon={isSending ? 'close' : 'send'}
-        onClick={isSending ? handleCancel : handleSend} 
-        options={{ 
-          title: isSending ? t('cancel') : t('graphql.send'), 
-          ariaLabel: isSending ? t('cancel') : t('graphql.send') 
+        onClick={isSending ? handleCancel : handleSend}
+        {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+        options={{
+          title: isSending ? t('cancel') : t('graphql.send'),
+          ariaLabel: isSending ? t('cancel') : t('graphql.send')
         }}
         data-testid="graphql-action-button"
-      >
-        {isSending ? t('cancel') : t('graphql.send')}
-      </Button>
-    </div>
+      />
+    </ControlGroup>
   )
   
   const handleCloseHistoryModal = useCallback(() => {

@@ -90,4 +90,13 @@
 	flex-direction: column;
 }
 
+/* Enhanced visual effects when advanced effects are enabled */
+.ecu-advanced-effects .ecu-modal-overlay {
+	backdrop-filter: blur(8px);
+}
+
+.ecu-advanced-effects .ecu-modal-container {
+	box-shadow: 0 12px 40px rgb(0, 0, 0, 0.6), 0 4px 12px rgb(0, 0, 0, 0.3);
+}
+
 /* Opacity is handled with transitions via [data-state] */

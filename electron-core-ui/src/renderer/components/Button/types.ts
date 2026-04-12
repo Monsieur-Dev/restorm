@@ -33,10 +33,18 @@ export interface ButtonProps {
    */
   small?: boolean;
   line?: boolean;
+  /**
+   * Emphasis level (0 = default, 1+ = emphasized).
+   * When > 0, uses CSS variables --button-background-emphasis-N, --button-border-emphasis-N,
+   * --button-hoverBackground-emphasis-N for styling.
+   */
+  emphasis?: number;
   onClick?: ((event: React.MouseEvent<HTMLAnchorElement>) => void) | undefined;
   onMouseEnter?: ((event: React.MouseEvent<HTMLAnchorElement>) => void) | undefined;
   onMouseLeave?: ((event: React.MouseEvent<HTMLAnchorElement>) => void) | undefined;
   className?: string;
+  /** Inline style overrides (e.g. for custom backgroundColor on color swatches) */
+  style?: React.CSSProperties;
   id?: string;
   'data-testid'?: string;
   children?: React.ReactNode;

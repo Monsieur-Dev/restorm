@@ -1,13 +1,17 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
+import DemoCustomRenderer from './components/DemoCustomRenderer'
 import type { i18n as I18nType } from 'i18next'
-import { initializeI18n, logger, i18n, ElectronCoreUiProvider } from 'electron-core-ui/renderer'
+import { initializeI18n, logger, i18n, ElectronCoreUiProvider, registerSettingRenderer } from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 
 // Import translations
 import enTranslation from '../locales/en/translation.json'
 import frTranslation from '../locales/fr/translation.json'
+
+// Register custom setting renderers (must be called before rendering)
+registerSettingRenderer('demo-custom', DemoCustomRenderer)
 
 // Log when script starts (after all imports)
 const scriptStartTime = performance.now()

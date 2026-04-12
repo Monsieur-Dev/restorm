@@ -112,7 +112,11 @@ export default defineConfig({
     publicDir: resolve(__dirname, 'assets'),
     // Define env variables for test helpers
     define: {
-      'import.meta.env.VITE_ENABLE_TEST_HELPERS': JSON.stringify(process.env.VITE_ENABLE_TEST_HELPERS ?? 'false')
+      'import.meta.env.VITE_ENABLE_TEST_HELPERS': JSON.stringify(process.env.VITE_ENABLE_TEST_HELPERS ?? 'false'),
+      // Suppress Vue feature flag warnings from milkdown (which uses Vue internally)
+      '__VUE_OPTIONS_API__': JSON.stringify(false),
+      '__VUE_PROD_DEVTOOLS__': JSON.stringify(false),
+      '__VUE_PROD_HYDRATION_MISMATCH_DETAILS__': JSON.stringify(false)
     }
   }
 })

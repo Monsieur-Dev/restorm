@@ -230,7 +230,7 @@ const MenuBarItem = forwardRef<HTMLDivElement, MenuBarItemProps>(({
               width: '300px',
               minWidth: '300px',
               maxWidth: '300px',
-              padding: '2px 0'
+              padding: 0
             }}
             {...(testId && { 'data-testid': `${testId}-scrollable` })}
           >

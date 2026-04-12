@@ -18,7 +18,7 @@ vi.mock('./LoggerService', () => ({
 }))
 
 import { existsSync, readFileSync } from 'fs'
-import { FeatureFlippingService } from './FeatureFlippingService'
+import { FeatureFlippingService, initFeatureService, getFeatureService, isFeatureServiceInitialized, resetFeatureService } from './FeatureFlippingService'
 import { logger } from './LoggerService'
 import type { FeaturesYamlConfig } from '../../types/feature'
 
@@ -220,6 +220,197 @@ describe('FeatureFlippingService', () => {
       const service = new FeatureFlippingService('/fake/features.yml')
 
       expect(service.listFeatures()).toEqual(['a', 'b'])
+    })
+  })
+
+  // ---------------------------------------------------------------
+  // loadAdditionalConfig — merge behavior
+  // ---------------------------------------------------------------
+  describe('loadAdditionalConfig', () => {
+    it('merges new features into existing ones', () => {
+      const defaultConfig: FeaturesYamlConfig = {
+        Features: [
+          { Name: 'feat-a', Strategies: [{ Type: 'Basic', Enabled: true }] }
+        ]
+      }
+      const appConfig: FeaturesYamlConfig = {
+        Features: [
+          { Name: 'feat-b', Strategies: [{ Type: 'Basic', Enabled: false }] }
+        ]
+      }
+      vi.mocked(existsSync).mockReturnValue(true)
+      vi.mocked(readFileSync)
+        .mockReturnValueOnce(makeYaml(defaultConfig))
+        .mockReturnValueOnce(makeYaml(appConfig))
+
+      const service = new FeatureFlippingService('/fake/default.yml')
+      service.loadAdditionalConfig('/fake/app.yml')
+
+      expect(service.listFeatures()).toEqual(['feat-a', 'feat-b'])
+      expect(service.isEnabled('feat-a')).toBe(true)
+      expect(service.isEnabled('feat-b')).toBe(false)
+    })
+
+    it('overrides existing feature by Name (last wins)', () => {
+      const defaultConfig: FeaturesYamlConfig = {
+        Features: [
+          { Name: 'shared', Strategies: [{ Type: 'Basic', Enabled: false }] }
+        ]
+      }
+      const appConfig: FeaturesYamlConfig = {
+        Features: [
+          { Name: 'shared', Strategies: [{ Type: 'Basic', Enabled: true }] }
+        ]
+      }
+      vi.mocked(existsSync).mockReturnValue(true)
+      vi.mocked(readFileSync)
+        .mockReturnValueOnce(makeYaml(defaultConfig))
+        .mockReturnValueOnce(makeYaml(appConfig))
+
+      const service = new FeatureFlippingService('/fake/default.yml')
+
+      // Before merge: disabled
+      expect(service.isEnabled('shared')).toBe(false)
+
+      service.loadAdditionalConfig('/fake/app.yml')
+
+      // After merge: overridden to enabled
+      expect(service.isEnabled('shared')).toBe(true)
+    })
+
+    it('handles missing additional config file gracefully', () => {
+      const defaultConfig: FeaturesYamlConfig = {
+        Features: [
+          { Name: 'feat-a', Strategies: [{ Type: 'Basic', Enabled: true }] }
+        ]
+      }
+      vi.mocked(existsSync)
+        .mockReturnValueOnce(true)   // default config exists
+        .mockReturnValueOnce(false)  // additional config missing
+      vi.mocked(readFileSync).mockReturnValue(makeYaml(defaultConfig))
+
+      const service = new FeatureFlippingService('/fake/default.yml')
+      service.loadAdditionalConfig('/fake/missing.yml')
+
+      // Original features still intact
+      expect(service.listFeatures()).toEqual(['feat-a'])
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('not found'))
+    })
+
+    it('handles invalid additional config gracefully', () => {
+      const defaultConfig: FeaturesYamlConfig = {
+        Features: [
+          { Name: 'feat-a', Strategies: [{ Type: 'Basic', Enabled: true }] }
+        ]
+      }
+      const invalidConfig = yaml.dump({ NotFeatures: 'wrong shape' })
+      vi.mocked(existsSync).mockReturnValue(true)
+      vi.mocked(readFileSync)
+        .mockReturnValueOnce(makeYaml(defaultConfig))
+        .mockReturnValueOnce(invalidConfig)
+
+      const service = new FeatureFlippingService('/fake/default.yml')
+      service.loadAdditionalConfig('/fake/bad.yml')
+
+      // Original features still intact
+      expect(service.listFeatures()).toEqual(['feat-a'])
+      expect(logger.warn).toHaveBeenCalledWith('Invalid features configuration', expect.any(Object))
+    })
+  })
+
+  // ---------------------------------------------------------------
+  // initFeatureService — backward-compatible overloads
+  // ---------------------------------------------------------------
+  describe('initFeatureService', () => {
+    beforeEach(() => {
+      resetFeatureService()
+    })
+
+    afterEach(() => {
+      resetFeatureService()
+    })
+
+    it('legacy call: initFeatureService(path, platform) works', () => {
+      const config: FeaturesYamlConfig = {
+        Features: [
+          { Name: 'feat', Strategies: [{ Type: 'Platform', AvailableOn: ['web'] }] }
+        ]
+      }
+      vi.mocked(existsSync).mockReturnValue(true)
+      vi.mocked(readFileSync).mockReturnValue(makeYaml(config))
+
+      const service = initFeatureService('/fake/features.yml', 'web')
+
+      expect(service.getPlatform()).toBe('web')
+      expect(service.isEnabled('feat')).toBe(true)
+      expect(isFeatureServiceInitialized()).toBe(true)
+      expect(getFeatureService()).toBe(service)
+    })
+
+    it('legacy call: initFeatureService(path) defaults platform to desktop', () => {
+      const config: FeaturesYamlConfig = {
+        Features: [
+          { Name: 'feat', Strategies: [{ Type: 'Platform', AvailableOn: ['desktop'] }] }
+        ]
+      }
+      vi.mocked(existsSync).mockReturnValue(true)
+      vi.mocked(readFileSync).mockReturnValue(makeYaml(config))
+
+      const service = initFeatureService('/fake/features.yml')
+
+      expect(service.getPlatform()).toBe('desktop')
+      expect(service.isEnabled('feat')).toBe(true)
+    })
+
+    it('new call: initFeatureService(defaultPath, appPath) merges configs', () => {
+      const defaultConfig: FeaturesYamlConfig = {
+        Features: [
+          { Name: 'default-feat', Strategies: [{ Type: 'Basic', Enabled: true }] },
+          { Name: 'overridden', Strategies: [{ Type: 'Basic', Enabled: false }] }
+        ]
+      }
+      const appConfig: FeaturesYamlConfig = {
+        Features: [
+          { Name: 'overridden', Strategies: [{ Type: 'Basic', Enabled: true }] },
+          { Name: 'app-feat', Strategies: [{ Type: 'Basic', Enabled: true }] }
+        ]
+      }
+      vi.mocked(existsSync).mockReturnValue(true)
+      vi.mocked(readFileSync)
+        .mockReturnValueOnce(makeYaml(defaultConfig))
+        .mockReturnValueOnce(makeYaml(appConfig))
+
+      const service = initFeatureService('/fake/default.yml', '/fake/app.yml')
+
+      expect(service.getPlatform()).toBe('desktop')
+      expect(service.isEnabled('default-feat')).toBe(true)
+      expect(service.isEnabled('overridden')).toBe(true) // overridden to true
+      expect(service.isEnabled('app-feat')).toBe(true)
+    })
+
+    it('new call: initFeatureService(defaultPath, appPath, platform) sets platform', () => {
+      const config: FeaturesYamlConfig = {
+        Features: [
+          { Name: 'feat', Strategies: [{ Type: 'Platform', AvailableOn: ['web'] }] }
+        ]
+      }
+      vi.mocked(existsSync).mockReturnValue(true)
+      vi.mocked(readFileSync).mockReturnValue(makeYaml(config))
+
+      const service = initFeatureService('/fake/default.yml', '/fake/app.yml', 'web')
+
+      expect(service.getPlatform()).toBe('web')
+      expect(service.isEnabled('feat')).toBe(true)
+    })
+
+    it('returns existing instance if already initialized', () => {
+      vi.mocked(existsSync).mockReturnValue(false)
+
+      const first = initFeatureService('/fake/a.yml')
+      const second = initFeatureService('/fake/b.yml')
+
+      expect(second).toBe(first)
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('already initialized'))
     })
   })
 })

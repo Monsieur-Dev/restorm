@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef, useRef } from 'react'
+import React, { useState, useEffect, forwardRef, useRef, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import Editor, { type EditorProps, type OnMount } from '@monaco-editor/react'
 import type * as monacoEditor from 'monaco-editor'
@@ -54,6 +54,13 @@ export interface CodeEditorProps extends Omit<EditorProps, 'theme'> {
    * This is an alias for onMount to maintain consistency
    */
   onEditorMount?: OnMount
+
+  /**
+   * When true (default), applies user editor settings (fontSize, fontFamily, etc.)
+   * from the SettingsService. Set to false for compact editors like URL inputs
+   * and variable input boxes.
+   */
+  applyEditorSettings?: boolean
 
   /**
    * Callback fired when "Go to definition" is triggered on a variable.
@@ -134,6 +141,7 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   {
     theme,
     changeDebounceMs = 200,
+    applyEditorSettings = true,
     onMount,
     onEditorMount,
     onGoToDefinition,
@@ -153,6 +161,76 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastValueRef = useRef<string | undefined>(props.value)
   const lastEventRef = useRef<monacoEditor.editor.IModelContentChangedEvent | undefined>(undefined)
+
+  // Monaco is driven uncontrolled on our side: we pass an initial value via `defaultValue`
+  // at mount, then manage sync manually. When the parent's `value` prop changes, we compare
+  // it to the last value Monaco emitted through onChange:
+  //   - If equal → React is just catching up to the user's typing, don't touch Monaco.
+  //   - If different → external override (e.g. request switch), call editor.setValue imperatively.
+  // This avoids @monaco-editor/react's built-in value-sync effect calling executeEdits with a
+  // stale value during the CodeEditor debounce window, which resets the cursor when typing at
+  // a cadence close to the debounce interval.
+  const [initialValue] = useState<string>(props.value ?? props.defaultValue ?? '')
+  const lastEmittedValueRef = useRef<string | undefined>(props.value)
+
+  // Editor settings from SettingsService (fontSize, fontFamily, wordWrap, minimap, lineNumbers)
+  const [editorSettings, setEditorSettings] = useState<Record<string, unknown>>({})
+
+  useEffect(() => {
+    if (!applyEditorSettings) return
+    const w = window as unknown as Record<string, unknown>
+    const api = w['api'] as { settings?: { get: (k: string) => Promise<unknown>; onSettingChanged: (cb: (k: string, v: unknown) => void) => () => void } } | undefined
+    const settingsApi = api?.settings
+    if (!settingsApi) return
+
+    // Load initial values
+    const keys = [
+      'appearance.editor:fontSize',
+      'appearance.editor:fontFamily',
+      'appearance.editor:wordWrap',
+      'appearance.editor:minimap',
+      'appearance.editor:lineNumbers'
+    ]
+    const loadAll = async (): Promise<void> => {
+      const entries: Record<string, unknown> = {}
+      for (const k of keys) {
+        entries[k] = await settingsApi.get(k)
+      }
+      setEditorSettings(entries)
+    }
+    void loadAll()
+
+    // Listen for changes
+    const cleanup = settingsApi.onSettingChanged((key: string, value: unknown) => {
+      if (keys.includes(key)) {
+        setEditorSettings(prev => ({ ...prev, [key]: value }))
+      }
+    })
+    return cleanup
+  }, [applyEditorSettings])
+
+  // Merge editor settings into Monaco options
+  const settingsOptions = useMemo((): Record<string, unknown> => {
+    const opts: Record<string, unknown> = {}
+    const fs = editorSettings['appearance.editor:fontSize']
+    if (typeof fs === 'number') opts['fontSize'] = fs
+    const ff = editorSettings['appearance.editor:fontFamily']
+    if (typeof ff === 'string') opts['fontFamily'] = ff
+    const ww = editorSettings['appearance.editor:wordWrap']
+    if (typeof ww === 'boolean') opts['wordWrap'] = ww ? 'on' : 'off'
+    const mm = editorSettings['appearance.editor:minimap']
+    if (typeof mm === 'boolean') opts['minimap'] = { enabled: mm }
+    const ln = editorSettings['appearance.editor:lineNumbers']
+    if (typeof ln === 'boolean') opts['lineNumbers'] = ln ? 'on' : 'off'
+    return opts
+  }, [editorSettings])
+
+  // Apply settings changes to live editor instance
+  useEffect(() => {
+    if (editorInstance && Object.keys(settingsOptions).length > 0) {
+      editorInstance.updateOptions(settingsOptions)
+    }
+  }, [editorInstance, settingsOptions])
 
   // Effective theme: use prop if provided, otherwise auto-detected
   const currentTheme = theme ?? autoDetectedTheme
@@ -253,6 +331,9 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   const handleChange: EditorProps['onChange'] = (nextValue, ev) => {
     lastValueRef.current = nextValue
     lastEventRef.current = ev as monacoEditor.editor.IModelContentChangedEvent | undefined
+    // Track the latest user-typed value so external value-prop changes can be distinguished
+    // from React catching up.
+    lastEmittedValueRef.current = nextValue
 
     if (debounceRef.current) {
       clearTimeout(debounceRef.current)
@@ -264,11 +345,35 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
     }
 
     debounceRef.current = setTimeout(() => {
+      debounceRef.current = null
       if (lastEventRef.current) {
         props.onChange?.(lastValueRef.current, lastEventRef.current)
       }
     }, changeDebounceMs)
   }
+
+  // Strip `value` from the props we forward to @monaco-editor/react so its internal
+  // value-sync effect is fully inert.
+  const { value: _propsValue, defaultValue: _propsDefaultValue, ...editorPropsWithoutValue } = props
+  void _propsValue
+  void _propsDefaultValue
+
+  // Manual sync: push the value prop into Monaco only when it represents a true external
+  // override (different from the last value the user typed). If a debounce is still pending,
+  // Monaco's internal content is ahead of React state — skip the sync to avoid rolling back
+  // unsaved keystrokes.
+  useEffect(() => {
+    if (!editorInstance) return
+    if (props.value === undefined) return
+    if (debounceRef.current !== null) return
+    if (props.value === lastEmittedValueRef.current) return
+    if (editorInstance.getValue() === props.value) {
+      lastEmittedValueRef.current = props.value
+      return
+    }
+    editorInstance.setValue(props.value)
+    lastEmittedValueRef.current = props.value
+  }, [editorInstance, props.value])
 
   return (
     <div
@@ -278,12 +383,17 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
       data-theme-source={themeSource}
       data-resolved-theme={currentTheme}
     >
-      <div {...(dataTestId && { 'data-testid': `${dataTestId}-monaco` })}>
+      <div style={{ width: '100%', height: '100%' }} {...(dataTestId && { 'data-testid': `${dataTestId}-monaco` })}>
         <Editor
-          {...props}
+          {...editorPropsWithoutValue}
+          // Uncontrolled from @monaco-editor/react's point of view: omit `value` entirely so its
+          // internal value-sync effect never runs. We push updates imperatively above.
+          defaultValue={initialValue}
+          options={{ ...(props.options ?? {}), ...settingsOptions }}
           theme={currentTheme}
           onChange={handleChange}
           onMount={handleMount}
+          loading={null}
         />
       </div>
     </div>

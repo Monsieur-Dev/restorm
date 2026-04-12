@@ -14,6 +14,9 @@ export * from './contexts'
 export type { ThemeContextValue } from './contexts'
 export * from './services'
 export { initializeI18n, default as i18n } from './i18n'
+// Utilities
+export { getContrastColor } from './utils/colorContrast'
+
 // Error classes and helpers
 export {
   FileSystemError,
@@ -49,3 +52,5 @@ export type {
   WebFileEntry
 } from '../types/file'
 export type { PersistenceFormat } from '../main/services/PersistenceService'
+export type { SettingRendererProps } from './components/Settings/renderers/types'
+export { registerSettingRenderer, unregisterSettingRenderer } from './components/Settings/renderers/registry'

@@ -1,7 +1,30 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { ThemeProvider } from '../contexts'
+import { SettingsProvider } from '../contexts/SettingsContext'
 import { SettingsModalProvider } from './Settings'
+import { useSetting } from '../hooks/useSettings'
 import Workbench, { type WorkbenchProps } from './Workbench/Workbench'
+
+/** Toggles CSS classes on documentElement based on advancedVisualEffects setting */
+const AdvancedEffectsManager: React.FC = () => {
+  const [enabled] = useSetting('appearance:advancedVisualEffects')
+
+  useEffect(() => {
+    const root = document.documentElement
+    if (enabled) {
+      root.classList.add('ecu-advanced-effects')
+      root.classList.remove('ecu-reduced-motion')
+    } else {
+      root.classList.remove('ecu-advanced-effects')
+      root.classList.add('ecu-reduced-motion')
+    }
+    return () => {
+      root.classList.remove('ecu-advanced-effects', 'ecu-reduced-motion')
+    }
+  }, [enabled])
+
+  return null
+}
 
 export interface ElectronCoreUiProviderProps extends Omit<WorkbenchProps, 'children'> {
   children: React.ReactNode
@@ -19,11 +42,14 @@ export const ElectronCoreUiProvider: React.FC<ElectronCoreUiProviderProps> = ({
 }) => {
   return (
     <ThemeProvider>
-      <SettingsModalProvider>
-        <Workbench {...workbenchProps}>
-          {children}
-        </Workbench>
-      </SettingsModalProvider>
+      <SettingsProvider>
+        <AdvancedEffectsManager />
+        <SettingsModalProvider>
+          <Workbench {...workbenchProps}>
+            {children}
+          </Workbench>
+        </SettingsModalProvider>
+      </SettingsProvider>
     </ThemeProvider>
   )
 }

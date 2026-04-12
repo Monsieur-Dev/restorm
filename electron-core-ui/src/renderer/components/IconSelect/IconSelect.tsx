@@ -6,6 +6,7 @@ import { EmojiPicker } from './EmojiPicker'
 import { GroupedIconPicker } from './GroupedIconPicker'
 import { ScrollableElement } from '../ScrollableElement'
 import type { Icon, IconType } from '../../../types/icon'
+import { IconView } from '../IconView'
 import { Button } from '../Button'
 import {
   getIconoirNames,
@@ -22,7 +23,6 @@ import {
   SimpleIcon,
   FeatherIcon,
   FaIcon,
-  RenderLibraryIcon,
 } from './iconLibraries'
 import {
   CODICON_CATEGORIES,
@@ -138,16 +138,18 @@ const IconGrid: React.FC<{
     <div className="ecui-icon-select-library">
       <div className="ecui-icon-select-codicons-grid">
         {displayedIcons.map(name => (
-          <Button
+          <button
             key={name}
-            line
+            type="button"
+            className="ecui-icon-select-codicon"
+            title={name}
             onClick={() => { onSelect(name) }}
             data-testid={`${dataTestIdBase}-icon-${name}`}
             data-icon-type={iconType}
             data-icon-name={name}
           >
             {renderIcon(name)}
-          </Button>
+          </button>
         ))}
       </div>
       {hasMore && moreHintText && (
@@ -303,14 +305,7 @@ const IconSelectInner: React.FC<IconSelectProps> = ({
     if (!value || value.type === 'none') {
       return placeholder ?? <i className="codicon codicon-symbol-misc" style={{ opacity: 0.4 }} />
     }
-    if (value.type === 'emoji') {
-      return value.value
-    }
-    if (value.type === 'codicon') {
-      return <i className={`codicon codicon-${value.value}`} />
-    }
-    // Library icons
-    return <RenderLibraryIcon type={value.type} name={value.value} size={16} />
+    return <IconView icon={value} size={16} />
   }, [value, placeholder])
 
   const selectedType = value && value.type !== 'none' ? value.type : ''
@@ -369,6 +364,7 @@ const IconSelectInner: React.FC<IconSelectProps> = ({
           disabled={disabled}
           onClick={handleButtonClick}
           data-testid={`${testId}-button`}
+          style={{ backgroundColor: 'transparent' }}
         >
           <span className="ecui-icon-select-value" data-testid={`${testId}-value`}>{displayValue}</span>
         </Button>

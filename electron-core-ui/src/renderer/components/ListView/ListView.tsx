@@ -161,6 +161,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
   activeId: activeIdProp,
   expandedIds: expandedIdsProp,
   editingItemId: editingItemIdProp,
+  onEditingStart,
   onEditingEnd,
   selectionMode = 'single',
   rootRole = 'tree',
@@ -224,10 +225,13 @@ const ListViewInner: React.FC<ListViewProps> = ({
     if (!isEditingControlled) {
       setInternalEditingItemId(id)
     }
+    if (id !== null && isEditingControlled && onEditingStart) {
+      onEditingStart(id)
+    }
     if (id === null && onEditingEnd) {
       onEditingEnd()
     }
-  }, [isEditingControlled, onEditingEnd])
+  }, [isEditingControlled, onEditingStart, onEditingEnd])
 
   // Controlled selection support
   React.useEffect(() => {
@@ -600,6 +604,15 @@ const ListViewInner: React.FC<ListViewProps> = ({
     (flat: FlatItem, event: React.MouseEvent<HTMLDivElement>): void => {
       event.preventDefault()
 
+      // Select the item on right-click
+      setActiveId(flat.item.id)
+      if (selectionMode === 'single') {
+        const next = new Set([flat.item.id])
+        setSelectedIds(next)
+        const payload: ListViewItemEventPayload = { item: flat.item, path: flat.path }
+        emitSelectionChange(payload, next)
+      }
+
       const hasBuiltinMenu = Array.isArray(flat.item.contextMenuItems) && flat.item.contextMenuItems.length > 0
 
       if (hasBuiltinMenu) {
@@ -616,7 +629,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
         onItemContextMenu(payload, event)
       }
     },
-    [onItemContextMenu]
+    [onItemContextMenu, selectionMode, emitSelectionChange]
   )
 
   const handleDragStart = useCallback(
@@ -709,7 +722,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
             const isSelected = selectedIds.has(item.id)
             const isActive = activeId === item.id
             const dropForThisRow =
-              dropIndicator && dropIndicator.targetId === item.id ? dropIndicator.position : null
+              dropIndicator?.targetId === item.id ? dropIndicator.position : null
 
             const rowClasses = [
               'list-view-row',
@@ -833,28 +846,27 @@ const ListViewInner: React.FC<ListViewProps> = ({
                   ))}
                   {depth > 0 && isLeaf && <span className="indent-spacer" />}
                 </div>
-                <div 
+                <div
                   className="list-view-row-inner"
-                  style={{ paddingLeft: depth * 12 + (depth > 0 && isLeaf ? 12 : 0) }}
+                  style={{ paddingLeft: depth * 12 }}
                 >
-                  {(!isLeaf || item.isExpandable) && (
-                    <button
-                      type="button"
-                      className="list-view-expander"
-                      aria-label={isExpanded ? 'Collapse' : 'Expand'}
-                      onClick={(event): void => {
-                        event.stopPropagation()
-                        handleToggle(flat, event as unknown as React.MouseEvent<HTMLDivElement>)
-                      }}
-                    >
-                      <i
-                        className={`codicon ${
-                          isExpanded ? 'codicon-chevron-down' : 'codicon-chevron-right'
-                        }`}
-                        aria-hidden="true"
-                      />
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    className="list-view-expander"
+                    aria-label={isExpanded ? 'Collapse' : 'Expand'}
+                    style={isLeaf && !item.isExpandable ? { visibility: 'hidden' } : undefined}
+                    onClick={(event): void => {
+                      event.stopPropagation()
+                      handleToggle(flat, event as unknown as React.MouseEvent<HTMLDivElement>)
+                    }}
+                  >
+                    <i
+                      className={`codicon ${
+                        isExpanded ? 'codicon-chevron-down' : 'codicon-chevron-right'
+                      }`}
+                      aria-hidden="true"
+                    />
+                  </button>
                   {iconContent && <span className="list-view-icon">{iconContent}</span>}
                   {item.leftActions && (
                     <span

@@ -91,7 +91,7 @@ export default tseslint.config(
   },
   {
     // BDD test files use Playwright fixtures that look like React hooks but aren't
-    files: ['tests/e2e/bdd/**/*.ts'],
+    files: ['tests/e2e/bdd/**/*.ts', 'tests/e2e/helpers/**/*.ts'],
     rules: {
       'react-hooks/rules-of-hooks': 'off',
       '@typescript-eslint/require-await': 'off',

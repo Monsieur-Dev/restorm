@@ -1,3 +1,6 @@
 export { ThemeProvider, default as ThemeContext } from './ThemeContext'
 export type { ThemeContextValue } from './ThemeContext'
 export { useThemeContext } from './useThemeContext'
+export { SettingsProvider } from './SettingsContext'
+export { SettingsContext } from './settingsContextDef'
+export type { SettingsContextValue } from './settingsContextDef'

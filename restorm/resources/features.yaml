@@ -22,3 +22,9 @@ Features:
     Strategies:
       - Type: Basic
         Enabled: true
+
+  # Navigation back/forward and Ctrl+Tab tab switching
+  - Name: "navigation"
+    Strategies:
+      - Type: Basic
+        Enabled: true

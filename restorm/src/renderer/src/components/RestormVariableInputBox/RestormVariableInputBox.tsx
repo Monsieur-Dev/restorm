@@ -97,6 +97,8 @@ export interface RestormVariableInputBoxProps {
   contextMenuItems?: ContextMenuItem[] | undefined
   /** Optional test id applied to the VariableInputBox root element. */
   'data-testid'?: string
+  /** Forwarded to the underlying CodeEditor. 0 = onChange fires on every keystroke. */
+  changeDebounceMs?: number
 }
 
 const RestormVariableInputBoxInner: React.FC<RestormVariableInputBoxProps> = (props) => {
@@ -113,7 +115,8 @@ const RestormVariableInputBoxInner: React.FC<RestormVariableInputBoxProps> = (pr
     ariaLabel,
     onGoToDefinition: _onGoToDefinition,
     contextMenuItems,
-    'data-testid': dataTestId
+    'data-testid': dataTestId,
+    changeDebounceMs
   } = props
 
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
@@ -282,6 +285,7 @@ const RestormVariableInputBoxInner: React.FC<RestormVariableInputBoxProps> = (pr
           ariaLabel={ariaLabel}
           onMount={handleMount}
           contextMenuItems={contextMenuItems}
+          {...(changeDebounceMs !== undefined && { changeDebounceMs })}
           {...(dataTestId && { 'data-testid': dataTestId })}
         />
       </div>

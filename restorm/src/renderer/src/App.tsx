@@ -5,12 +5,14 @@ import {
   StatusbarElement,
   VerticalSashContainer,
   useFileService,
+  useFeature,
   eventBus,
   logger,
   computeChecksum,
   useDirtyState,
   setContentChecksum,
-  commitChecksums
+  commitChecksums,
+  navigationService
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type DocumentChangedPayload } from './services/DocumentEvents'
 import type { WorkbenchTree } from 'electron-core-ui/renderer'
@@ -32,6 +34,7 @@ import {
   getNearestEnvironmentsForBreadcrumbs
 } from './utils/treeSearch'
 import { DesktopIndicator } from './components/MainView/DesktopIndicator'
+import { findItemById } from './utils/treeSearch'
 import { useItemOperations } from './hooks/useItemOperations'
 import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
@@ -84,6 +87,7 @@ const allFolderIds = initialRootItems.flatMap((folder) => collectAllFolderIds(fo
 
 const App: React.FC = () => {
   const { t } = useTranslation()
+  const { isEnabled: navigationEnabled } = useFeature('navigation')
   const setCollections = useRestormStore((state) => state.setCollections)
   const {
     state: fileState,
@@ -235,6 +239,8 @@ const App: React.FC = () => {
     handleItemDrop,
     handleCloneItem,
     handleCreateSubfolder,
+    handleCreateRootFolder,
+    handleCreateRootEnvironmentFolder,
     handleDeleteItem,
     confirmDelete: confirmDeleteWithId,
     cancelDelete,
@@ -246,25 +252,36 @@ const App: React.FC = () => {
     setSelectedItemId,
     setSidebarEditingItemId,
     setWorkbenchTree,
-    setDeleteConfirmation
+    setDeleteConfirmation,
+    openFolderTab,
+    openEnvironmentFolderTab
   })
 
   const {
     handleTagsChange,
+    handleTagColorChange,
     handleFolderChange,
     handleEnvironmentFolderChange,
-    handleItemRename
+    handleItemRename,
+    handleItemIconChange,
+    updateCount
   } = useWorkbenchUpdates({
     rootItems,
     setWorkbenchTree
   })
 
+  const handleSidebarRenameItem = useCallback((itemId: string) => {
+    setSidebarEditingItemId(itemId)
+  }, [])
+
   const { sidebarItems: sidebarItemsWithContextMenu } = useSidebarState({
     rootItems,
     expandedIds,
+    updateCount,
     onCloneItem: handleCloneItem,
     onCreateSubfolder: handleCreateSubfolder,
-    onDeleteItem: handleDeleteItem
+    onDeleteItem: handleDeleteItem,
+    onRenameItem: handleSidebarRenameItem
   })
 
   // Wrapper for confirmDelete that uses deleteConfirmation.itemId
@@ -497,11 +514,27 @@ const App: React.FC = () => {
     wasDirtyRef.current = isDirty
   }, [isDirty, fileName, rootItems, markAllTabsSaved])
 
-  // Listen to document changes and update per-tab dirty state (works in all modes)
+  // Listen to document changes and update per-tab dirty state (works in all modes).
+  // The checksum update triggers a setState in useDirtyState, which re-renders App and
+  // cascades to every tab view. To avoid disturbing actively-typed Monaco editors, we
+  // debounce the checksum update per document id so a typing burst produces a single
+  // update after the user settles.
+  const dirtyChecksumTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
+  const DIRTY_CHECKSUM_DEBOUNCE_MS = 300
   useEffect(() => {
+    const scheduleChecksumUpdate = (id: string, compute: () => string): void => {
+      const existing = dirtyChecksumTimersRef.current.get(id)
+      if (existing) clearTimeout(existing)
+      const timer = setTimeout(() => {
+        dirtyChecksumTimersRef.current.delete(id)
+        updateTabDirtyChecksum(id, compute())
+      }, DIRTY_CHECKSUM_DEBOUNCE_MS)
+      dirtyChecksumTimersRef.current.set(id, timer)
+    }
+
     const handleFolderOrRequestUpdated = (payload: DocumentChangedPayload): void => {
-      const newChecksum = computeChecksum(JSON.parse(JSON.stringify(payload.document)) as FolderItem)
-      updateTabDirtyChecksum(payload.id, newChecksum)
+      const doc = payload.document
+      scheduleChecksumUpdate(payload.id, () => computeChecksum(JSON.parse(JSON.stringify(doc)) as FolderItem))
 
       if (payload.type === 'request') {
         const requestPath = buildRequestPath(environmentFolderCollections, payload.id)
@@ -524,7 +557,7 @@ const App: React.FC = () => {
       // Find the parent environment folder and recalculate its checksum
       const parentFolderId = payload.parentFolderId
       if (!parentFolderId) return
-      
+
       // Find the folder in rootItems
       const findFolder = (items: FolderItem[]): Folder | null => {
         for (const item of items) {
@@ -536,19 +569,17 @@ const App: React.FC = () => {
         }
         return null
       }
-      
+
       for (const rootFolder of rootItems) {
         if (rootFolder.id === parentFolderId) {
-          const newChecksum = computeChecksum(JSON.parse(JSON.stringify(rootFolder)) as EnvironmentFolder | Folder | Request)
-          updateTabDirtyChecksum(parentFolderId, newChecksum)
+          scheduleChecksumUpdate(parentFolderId, () => computeChecksum(JSON.parse(JSON.stringify(rootFolder)) as EnvironmentFolder | Folder | Request))
           return
         }
         // Only search in folders, not Requests
         if ('items' in rootFolder) {
           const found = findFolder(rootFolder.items)
           if (found) {
-            const newChecksum = computeChecksum(JSON.parse(JSON.stringify(found)) as Folder)
-            updateTabDirtyChecksum(parentFolderId, newChecksum)
+            scheduleChecksumUpdate(parentFolderId, () => computeChecksum(JSON.parse(JSON.stringify(found)) as Folder))
             return
           }
         }
@@ -561,10 +592,15 @@ const App: React.FC = () => {
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_UPDATED, handleEnvironmentUpdated)
     ]
 
+    const timersMap = dirtyChecksumTimersRef.current
     return () => {
       for (const sub of subscriptions) {
         sub.unsubscribe()
       }
+      for (const timer of timersMap.values()) {
+        clearTimeout(timer)
+      }
+      timersMap.clear()
     }
   }, [updateTabDirtyChecksum, rootItems, environmentFolderCollections])
 
@@ -583,9 +619,37 @@ const App: React.FC = () => {
     openEnvironmentFolderTab,
     openAnyRequestTab,
     setSelectedItemId,
+    setExpandedIds,
     setFocusedGroupId,
     getNearestEnvironmentsForBreadcrumbs
   })
+
+  // Initialize navigation history with restored active tab only
+  const hasInitializedNavRef = useRef(false)
+  useEffect(() => {
+    if (!navigationEnabled || hasInitializedNavRef.current) return
+    // Only seed the active tab of each group into navigation history.
+    // Other tabs appear in the tab switcher (from tree), but without a navigation order.
+    const seedNavigation = (): void => {
+      for (const group of workbenchTree.groups) {
+        if (!('tabs' in group)) continue
+        const tabGroup = group as { tabs: { id: string }[]; activeTabId?: string }
+        const activeTabId = tabGroup.activeTabId
+        if (!activeTabId) continue
+        const parts = activeTabId.split(':')
+        const itemId = parts.length > 1 ? parts.slice(1).join(':') : activeTabId
+        const item = findItemById(rootItems, itemId)
+        if (item) {
+          const type = 'method' in item ? 'request' : 'folder'
+          navigationService.navigateTo(itemId, 'restore', { type })
+        }
+      }
+      hasInitializedNavRef.current = true
+    }
+    if (workbenchTree.groups.length > 0) {
+      seedNavigation()
+    }
+  }, [navigationEnabled, workbenchTree.groups, rootItems])
 
   return (
     <AvailableVariablesProvider>
@@ -604,12 +668,12 @@ const App: React.FC = () => {
         isDirty={isDirty}
         recentFiles={recentFiles}
         favorites={favorites}
-        onNew={() => { void handleMenuNew() }}
+        onNew={() => { navigationService.clearHistory(); void handleMenuNew() }}
         onOpen={() => { void handleMenuOpen() }}
         onOpenFolder={() => { void handleMenuOpenFolder() }}
         onSave={handleMenuSave}
         onSaveAs={handleMenuSaveAs}
-        onClose={() => { void handleMenuClose() }}
+        onClose={() => { navigationService.clearHistory(); void handleMenuClose() }}
         onExit={handleMenuExit}
         onImport={() => { setShowImportModal(true) }}
         onOpenRecentFile={(path) => { void handleOpenRecentFile(path) }}
@@ -633,6 +697,7 @@ const App: React.FC = () => {
               <RestormSidebar
                 items={sidebarItemsWithContextMenu}
                 selectedItemId={selectedItemId}
+                activeId={selectedItemId}
                 expandedIds={expandedIds}
                 editingItemId={sidebarEditingItemId}
                 onItemClick={handleItemClick}
@@ -648,9 +713,13 @@ const App: React.FC = () => {
                 onItemDrop={handleItemDrop}
                 onItemRename={handleSidebarItemRename}
                 onDeleteRequest={(payload) => { handleDeleteItem(payload.item.id) }}
+                onEditingStart={(itemId) => { setSidebarEditingItemId(itemId) }}
                 onEditingEnd={() => { setSidebarEditingItemId(null) }}
                 onAddRequest={() => { setShowImportModal(true) }}
                 onCollapseAll={() => { setExpandedIds([]) }}
+                onCreateRootFolder={handleCreateRootFolder}
+                onCreateRootEnvironmentFolder={handleCreateRootEnvironmentFolder}
+                onDeselectAll={() => { setSelectedItemId(null) }}
               />
             </div>
           }
@@ -665,7 +734,9 @@ const App: React.FC = () => {
               onTabActivate={handleTabActivate}
               onBreadcrumbClick={handleBreadcrumbClick}
               onItemRename={handleItemRename}
+              onItemIconChange={handleItemIconChange}
               onTagsChange={handleTagsChange}
+              onTagColorChange={handleTagColorChange}
               onFolderChange={handleFolderChange}
               onEnvironmentFolderChange={handleEnvironmentFolderChange}
               onSizesChange={handleSizesChange}
@@ -676,6 +747,8 @@ const App: React.FC = () => {
               getRequestById={getRequestByIdCb}
               getFolderById={getFolderByIdCb}
               getEnvironmentFolderById={getEnvironmentFolderByIdCb}
+              navigationEnabled={navigationEnabled}
+              tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
             />
           }
           initialWidth={260}
@@ -697,6 +770,7 @@ const App: React.FC = () => {
             onTabActivate={handleTabActivate}
             onBreadcrumbClick={handleBreadcrumbClick}
             onItemRename={handleItemRename}
+            onItemIconChange={handleItemIconChange}
             onTagsChange={handleTagsChange}
             onFolderChange={handleFolderChange}
             onEnvironmentFolderChange={handleEnvironmentFolderChange}
@@ -708,6 +782,8 @@ const App: React.FC = () => {
             getRequestById={(id) => findRequestById(rootItems, id)}
             getFolderById={(id) => findFolderById(rootItems, id)}
             getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootItems, id)}
+            navigationEnabled={navigationEnabled}
+            tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
           />
         </div>
       )}

@@ -1,6 +1,6 @@
 import { app, BrowserWindow } from 'electron'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFeatureService, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized } from 'electron-core-ui'
+import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized } from 'electron-core-ui'
 import { join } from 'path'
 import { existsSync, statSync } from 'fs'
 import { searchIndexService, contextService, responseHistoryService } from './services'
@@ -10,6 +10,10 @@ import { registerRestormIPC } from './IPCHandlers'
 import { loadFolderStructure } from './FileOperations'
 import { DEFAULT_UI_DELAY_MS } from '../shared/config/constants'
 // DocumentEvents are handled by FileService internally for dirty state tracking
+
+// Set the app name for proper taskbar icon on Linux
+// Without this, Electron 38+ may use the default "Electron" identity
+app.name = 'restorm'
 
 const cliArgs = parseCliArgs()
 if (cliArgs.clearSettings) {
@@ -163,16 +167,21 @@ function getRendererPath(): string {
 function getFeaturesConfigPath(): string {
   const isDev = process.env['NODE_ENV'] === 'development' || !app.isPackaged
   if (isDev) {
-    const appPath = app.getAppPath()
-    return join(appPath, 'resources/features.yaml')
+    // __dirname is dist/main in compiled code, go up two levels to project root
+    return join(__dirname, '../../resources/features.yaml')
   }
   return join(process.resourcesPath, 'restorm-resources/features.yaml')
 }
 
-// Initialize Feature Flipping Service
-const featuresConfigPath = getFeaturesConfigPath()
-initFeatureService(featuresConfigPath, 'desktop')
-logger.info('Feature Flipping Service initialized', { configPath: featuresConfigPath })
+// Get settings configuration path for restorm
+function getSettingsConfigPath(): string {
+  const isDev = process.env['NODE_ENV'] === 'development' || !app.isPackaged
+  if (isDev) {
+    const appPath = app.getAppPath()
+    return join(appPath, 'resources/settings.yaml')
+  }
+  return join(process.resourcesPath, 'restorm-resources/settings.yaml')
+}
 
 // Initialize I18n Service for main process translations
 // Default to system locale or 'en', will be synchronized with renderer via IPC
@@ -222,7 +231,9 @@ setupGraphQL()
 // Initialize Electron application
 const resourcesPath = getResourcesPath()
 const rendererPath = getRendererPath()
-initializeApp('restorm', createWindow, resourcesPath, undefined, rendererPath || undefined)
+const settingsConfigPath = getSettingsConfigPath()
+const featuresConfigPath = getFeaturesConfigPath()
+initializeApp('restorm', createWindow, resourcesPath, undefined, rendererPath || undefined, settingsConfigPath, featuresConfigPath)
 
 // Register all restorm-specific IPC handlers
 registerRestormIPC({ editorWindows, closeAllWindows })

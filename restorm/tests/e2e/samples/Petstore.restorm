@@ -140,6 +140,7 @@ collections:
                   type: string
                   value: '{{scheme}}://{{domain}}:{{port}}'
                 description: ''
+        color: '#3200c7'
     items:
       - name: pet
         documentation: "# pet\r\n\r\nEverything about your Pets\r\n\r\n## External Documentation\r\n\r\n[Find out more](http://swagger.io)"
@@ -219,6 +220,7 @@ collections:
               - **api_key**
             tags:
               - pet
+              - pet
             method: GET
             url: '{{baseUrl}}/api/pet/{{petId}}'
             headers: []
@@ -227,7 +229,7 @@ collections:
               - key: petId
                 value:
                   type: numeric
-                  value: 20
+                  value: 1
                   format: decimal
                 description: ID of pet to return
                 enabled: true
@@ -278,8 +280,9 @@ collections:
             pathParams:
               - key: petId
                 value:
-                  type: string
-                  value: ''
+                  type: numeric
+                  value: 1
+                  format: decimal
                 description: ID of pet that needs to be updated
                 enabled: true
             body:
@@ -734,6 +737,7 @@ collections:
                 description: Tags to filter by
             pathParams: []
             deprecated: true
+        notes: ''
       - name: store
         documentation: "# store\r\n\r\nAccess to Petstore orders"
         tags:
