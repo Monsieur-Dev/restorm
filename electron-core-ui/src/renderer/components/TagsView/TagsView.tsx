@@ -87,12 +87,18 @@ export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLab
     setEditingValue('')
   }, [])
 
+  const newTagLabel = t('tagsView.newTag', 'New tag')
+
   const handleAddTag = useCallback(() => {
-    const next = [...tags, '']
+    const next = [...tags, newTagLabel]
     onChange?.(next)
-    setEditingIndex(next.length - 1)
-    setEditingValue('')
-  }, [onChange, tags])
+    // Only enter built-in editing mode if no custom renderTag is provided.
+    // When renderTag is used, the Tag component handles editing via startEditing.
+    if (!renderTag) {
+      setEditingIndex(next.length - 1)
+      setEditingValue(newTagLabel)
+    }
+  }, [onChange, tags, renderTag, newTagLabel])
 
   const handleRemoveAt = useCallback(
     (index: number) => {
@@ -146,7 +152,9 @@ export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLab
         {tags.map((tag, index) => {
           const isEditing = editingIndex === index
 
-          if (isEditing) {
+          // When renderTag is provided, skip the built-in editing UI —
+          // the custom tag component handles editing internally.
+          if (isEditing && !renderTag) {
             return (
               <div
                 key={`${tag}-${index}`}

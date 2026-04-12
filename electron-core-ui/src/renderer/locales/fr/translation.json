@@ -67,7 +67,8 @@
   "tagsView": {
     "removeTag": "Supprimer le tag",
     "changeColor": "Changer la couleur du tag...",
-    "removeColor": "Supprimer la couleur du tag"
+    "removeColor": "Supprimer la couleur du tag",
+    "newTag": "Nouveau tag"
   },
   "contextMenu": {
     "cut": "Couper",

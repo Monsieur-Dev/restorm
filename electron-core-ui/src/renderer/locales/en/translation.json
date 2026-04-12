@@ -67,7 +67,8 @@
   "tagsView": {
     "removeTag": "Remove tag",
     "changeColor": "Change tag color...",
-    "removeColor": "Remove tag color"
+    "removeColor": "Remove tag color",
+    "newTag": "New tag"
   },
   "contextMenu": {
     "cut": "Cut",

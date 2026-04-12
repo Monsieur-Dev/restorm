@@ -95,16 +95,28 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
     }
   }, [colorPickerTag])
 
+  const newTagLabel = t('tagsView.newTag', 'New tag')
+
   const handleRenderTag = useCallback(
     (tag: string, index: number, handlers: { onClick: () => void; onContextMenu: (e: React.MouseEvent) => void }) => {
       const color = tagColors?.[tag]
+      const isNew = tag === newTagLabel
       return (
         <Tag
           label={tag}
           color={color}
-          onClick={handlers.onClick}
+          editable
+          startEditing={isNew}
+          onLabelChange={(newLabel) => {
+            const nextTags = [...tags]
+            nextTags[index] = newLabel
+            onTagsChange?.(nextTags)
+          }}
+          onRemove={() => {
+            const nextTags = tags.filter((_t, i) => i !== index)
+            onTagsChange?.(nextTags)
+          }}
           onContextMenu={(e) => {
-            // Store the tag element as the tooltip target before opening context menu
             colorPickerTargetRef.current = e.currentTarget as HTMLElement
             handlers.onContextMenu(e)
           }}
@@ -112,7 +124,7 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
         />
       )
     },
-    [tagColors, testIdPrefix]
+    [tagColors, testIdPrefix, tags, onTagsChange, newTagLabel]
   )
 
   const handleAdditionalContextMenuItems = useCallback(
@@ -182,35 +194,6 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
           padding: '8px 16px 0 16px'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
-          <span
-            style={{
-              color: 'var(--descriptionForeground)'
-            }}
-          >
-            {label}
-          </span>
-          <TagsView
-            tags={tags}
-            onChange={(nextTags) => {
-              onTagsChange?.(nextTags)
-            }}
-            renderTag={handleRenderTag}
-            additionalContextMenuItems={onTagColorChange ? handleAdditionalContextMenuItems : undefined}
-            data-testid={`${testIdPrefix}-tags`}
-          />
-        </div>
-        {tagsRight}
-      </div>
-
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          padding: '8px 16px 0 16px'
-        }}
-      >
         <div style={{ flex: 1, minWidth: 0 }}>
           <Breadcrumb
             items={breadcrumbs}
@@ -230,6 +213,35 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
           />
         </div>
         {headerRight}
+      </div>
+
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '8px 16px 0 16px'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+          <span
+            style={{
+              color: 'var(--descriptionForeground)'
+            }}
+          >
+            {label}
+          </span>
+          <TagsView
+            tags={tags}
+            onChange={(nextTags) => {
+              onTagsChange?.(nextTags)
+            }}
+            renderTag={handleRenderTag}
+            additionalContextMenuItems={onTagColorChange ? handleAdditionalContextMenuItems : undefined}
+            data-testid={`${testIdPrefix}-tags`}
+          />
+        </div>
+        {tagsRight}
       </div>
         {children}
 

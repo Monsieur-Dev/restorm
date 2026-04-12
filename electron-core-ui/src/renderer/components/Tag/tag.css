@@ -5,7 +5,7 @@
 .ecui-tag {
   display: inline-flex;
   align-items: center;
-  padding: 3px 8px 3px 16px;
+  padding: 3px 8px 3px 20px;
   border-radius: 0 3px 3px 0;
   border: none;
   font-weight: bold;
@@ -15,10 +15,10 @@
 
   /* Label shape: arrow-like left edge with a flat vertical tip */
   clip-path: polygon(
-    12px 0%,
+    14px 0%,
     100% 0%,
     100% 100%,
-    12px 100%,
+    14px 100%,
     0% 65%,
     0% 40%
   );
@@ -49,9 +49,9 @@
 
 /* Compact variant (smaller font, tighter padding) */
 .ecui-tag--compact {
-  padding: 2px 6px 2px 14px;
+  padding: 3px 8px 3px 20px;
   font-size: 11px;
-  font-weight: normal;
+  font-weight: bold;
 }
 
 /* Editing mode — keep shape, change cursor */
@@ -59,16 +59,14 @@
   cursor: text;
 }
 
-/* Inline input inherits tag styling */
+/* Inline editable span inherits tag styling */
 .ecui-tag-input {
-  background: transparent;
-  border: none;
   outline: none;
   color: inherit;
   font-weight: inherit;
   font-size: inherit;
   font-family: inherit;
-  padding: 0;
-  margin: 0;
+  white-space: nowrap;
   min-width: 1ch;
+  cursor: text;
 }

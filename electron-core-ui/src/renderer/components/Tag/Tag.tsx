@@ -1,11 +1,8 @@
 /**
  * Tag — a label-shaped tag with optional custom color and inline editing.
  *
- * Features:
- * - Clothing-label shape (angled left notch with decorative hole punch)
- * - Custom background color with auto-computed contrast text color (black/white)
- * - Compact variant for smaller contexts (e.g. search results)
- * - Optional inline editing with auto-sizing input
+ * Uses a single contentEditable span for both display and editing,
+ * seamlessly integrating with the tag shape.
  *
  * @example
  * ```tsx
@@ -14,7 +11,6 @@
  * <Tag label="query" />
  * <Tag label="pet" color="#ff0000" />
  * <Tag label="edit me" editable onLabelChange={(v) => console.log(v)} />
- * <Tag label="small" compact />
  * ```
  */
 
@@ -33,6 +29,10 @@ export interface TagProps {
   editable?: boolean
   /** Called when the tag label changes (only when editable) */
   onLabelChange?: (newLabel: string) => void
+  /** Called when the tag should be removed (empty text on edit commit) */
+  onRemove?: () => void
+  /** Start in editing mode (for newly created tags) */
+  startEditing?: boolean
   /** Click handler */
   onClick?: () => void
   /** Context menu handler */
@@ -41,51 +41,70 @@ export interface TagProps {
   'data-testid'?: string
 }
 
+function selectAll(el: HTMLElement): void {
+  const range = document.createRange()
+  range.selectNodeContents(el)
+  const sel = window.getSelection()
+  sel?.removeAllRanges()
+  sel?.addRange(range)
+}
+
 export const Tag: React.FC<TagProps> = ({
   label,
   color,
   compact = false,
   editable = false,
   onLabelChange,
+  onRemove,
+  startEditing = false,
   onClick,
   onContextMenu,
   'data-testid': testId
 }) => {
-  const [isEditing, setIsEditing] = useState(false)
-  const [editValue, setEditValue] = useState(label)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const [isEditing, setIsEditing] = useState(startEditing)
+  const spanRef = useRef<HTMLSpanElement>(null)
 
   const hasCustomColor = !!color
   const textColor = hasCustomColor ? getContrastColor(color) : undefined
 
+  // Enter editing mode: focus + select all
   useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus()
-      inputRef.current.select()
+    if (isEditing && spanRef.current) {
+      spanRef.current.focus()
+      selectAll(spanRef.current)
     }
   }, [isEditing])
 
   const commitEdit = useCallback(() => {
-    const trimmed = editValue.trim()
-    if (trimmed && trimmed !== label) {
+    const text = spanRef.current?.textContent ?? ''
+    const trimmed = text.trim()
+    if (!trimmed) {
+      onRemove?.()
+    } else if (trimmed !== label) {
       onLabelChange?.(trimmed)
+    } else if (spanRef.current) {
+      // Reset text to label (in case of whitespace changes)
+      spanRef.current.textContent = label
     }
     setIsEditing(false)
-  }, [editValue, label, onLabelChange])
+  }, [label, onLabelChange, onRemove])
 
   const cancelEdit = useCallback(() => {
-    setEditValue(label)
+    if (!label.trim()) {
+      onRemove?.()
+    } else if (spanRef.current) {
+      spanRef.current.textContent = label
+    }
     setIsEditing(false)
-  }, [label])
+  }, [label, onRemove])
 
   const handleClick = useCallback(() => {
-    if (editable) {
-      setEditValue(label)
+    if (editable && !isEditing) {
       setIsEditing(true)
-    } else {
+    } else if (!editable) {
       onClick?.()
     }
-  }, [editable, label, onClick])
+  }, [editable, isEditing, onClick])
 
   const className = [
     'ecui-tag',
@@ -102,28 +121,36 @@ export const Tag: React.FC<TagProps> = ({
     <span
       className={className}
       style={style}
-      onClick={isEditing ? undefined : handleClick}
+      onClick={handleClick}
       onContextMenu={isEditing ? undefined : onContextMenu}
       data-testid={testId}
     >
-      {isEditing ? (
-        <input
-          ref={inputRef}
-          className="ecui-tag-input"
-          type="text"
-          value={editValue}
-          maxLength={30}
-          style={{ width: `${Math.max(0.5, editValue.length * 0.85)}ch` }}
-          onChange={(e) => { setEditValue(e.target.value) }}
-          onBlur={commitEdit}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') { e.preventDefault(); commitEdit() }
-            if (e.key === 'Escape') { e.preventDefault(); cancelEdit() }
-          }}
-        />
-      ) : (
-        label
-      )}
+      <span
+        ref={spanRef}
+        className={isEditing ? 'ecui-tag-input' : undefined}
+        contentEditable={isEditing}
+        suppressContentEditableWarning
+        role={isEditing ? 'textbox' : undefined}
+        onBlur={isEditing ? commitEdit : undefined}
+        onKeyDown={isEditing ? (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); commitEdit() }
+          if (e.key === 'Escape') { e.preventDefault(); cancelEdit() }
+        } : undefined}
+        onInput={isEditing ? (e) => {
+          const text = (e.target as HTMLSpanElement).textContent
+          if (text && text.length > 30) {
+            (e.target as HTMLSpanElement).textContent = text.substring(0, 30)
+            const range = document.createRange()
+            range.selectNodeContents(e.target as HTMLSpanElement)
+            range.collapse(false)
+            const sel = window.getSelection()
+            sel?.removeAllRanges()
+            sel?.addRange(range)
+          }
+        } : undefined}
+      >
+        {label}
+      </span>
     </span>
   )
 }
