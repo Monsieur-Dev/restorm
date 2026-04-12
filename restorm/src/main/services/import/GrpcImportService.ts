@@ -10,6 +10,7 @@ import {
   type GrpcCallType
 } from '../../../shared/models'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
+import { grpcToApiDocumentation } from './transformers/grpcToApiDocumentation'
 
 // ============================================================================
 // Proto Types
@@ -263,7 +264,7 @@ function methodToRequest(
     type: 'grpc',
     id: generateId(`${collectionName}:grpc:${fullServiceName}:${method.name}`),
     name: method.name,
-    documentation: method.comment ?? `gRPC method: ${method.name}\n\nInput: ${method.inputType}\nOutput: ${method.outputType}`,
+    documentation: '',
     tags: [getCallType(method)],
     url: baseUrl,
     service: fullServiceName,
@@ -283,6 +284,8 @@ export interface GrpcImportOptions {
   baseUrl?: string
   /** Name for the imported collection */
   name?: string
+  /** Original URL the proto was fetched from (stored on ApiDocumentation.sourceUrl). */
+  sourceUrl?: string
 }
 
 /**
@@ -300,24 +303,16 @@ export function importGrpc(protoContent: string, options: GrpcImportOptions = {}
     const serviceFolder: Folder = {
       id: generateId(`${name}:folder:grpc:${service.name}`),
       name: service.name,
-      documentation: service.comment ?? `# ${service.name}\n\ngRPC Service`,
+      documentation: '',
       tags: ['service'],
       configuration: {},
-      items: service.methods.map(method => 
+      items: service.methods.map(method =>
         methodToRequest(service, method, parsed.package, parsed.messages, baseUrl, name)
       )
     }
     items.push(serviceFolder)
   }
-  
-  // Build messages documentation
-  const messagesDoc = parsed.messages.map(m => {
-    const fieldsDoc = m.fields.map(f => 
-      `  - ${f.name}: ${f.repeated ? 'repeated ' : ''}${f.type}`
-    ).join('\n')
-    return `### ${m.name}\n${fieldsDoc}`
-  }).join('\n\n')
-  
+
   const environment: Environment = {
     id: generateId(`${name}:env:grpc:Default`),
     name: 'Default',
@@ -325,18 +320,25 @@ export function importGrpc(protoContent: string, options: GrpcImportOptions = {}
       createTypedKeyValue({ key: 'baseUrl', value: options.baseUrl ?? 'localhost:9000', enabled: true })
     ]
   }
-  
+
+  const apiDocumentation = grpcToApiDocumentation(parsed, {
+    name,
+    ...(options.baseUrl !== undefined ? { baseUrl: options.baseUrl } : {}),
+    ...(options.sourceUrl !== undefined ? { sourceUrl: options.sourceUrl } : {})
+  })
+
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
     id: generateId(`${name}:folder:grpc:root`),
     name,
-    documentation: `# ${name}\n\ngRPC API\n\n## Messages\n\n${messagesDoc}`,
+    documentation: '',
     tags: [],
     configuration: {},
     environments: [environment],
-    items
+    items,
+    apiDocumentation
   }
-  
+
   return rootFolder
 }
 

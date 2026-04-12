@@ -24,6 +24,7 @@ import {
 } from '../../../shared/models'
 import { toHTTPMethod } from './httpMethodValidator'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
+import { insomniaToApiDocumentation } from './transformers/insomniaToApiDocumentation'
 
 // ============================================================================
 // Insomnia Export v4 Types
@@ -160,11 +161,6 @@ interface InsomniaWebSocketRequest extends InsomniaBaseResource {
 // Helper Functions
 // ============================================================================
 
-/** Extract text from description */
-function extractDescription(desc: string | undefined): string {
-  return desc ?? ''
-}
-
 /** Generate a deterministic ID from a seed string */
 function generateId(seed?: string): string {
   if (!seed) {
@@ -263,46 +259,6 @@ function parseBody(body: InsomniaBody | undefined): HTTPRequestBody | undefined 
   return undefined
 }
 
-/** Build authentication documentation from Insomnia auth */
-function buildAuthDocumentation(auth: InsomniaAuth | undefined): string {
-  if (!auth || auth.type === 'none' || auth.disabled) return ''
-
-  const lines: string[] = ['## Authentication', '', `**Type:** ${auth.type}`, '']
-
-  switch (auth.type) {
-    case 'basic':
-      lines.push(`- Username: ${auth.username ?? ''}`)
-      lines.push(`- Password: ***`)
-      break
-    case 'bearer':
-      lines.push(`- Token: ***`)
-      if (auth.prefix) {
-        lines.push(`- Prefix: ${auth.prefix}`)
-      }
-      break
-    case 'oauth2':
-      if (auth.grantType) lines.push(`- Grant Type: ${auth.grantType}`)
-      if (auth.accessTokenUrl) lines.push(`- Access Token URL: ${auth.accessTokenUrl}`)
-      if (auth.authorizationUrl) lines.push(`- Authorization URL: ${auth.authorizationUrl}`)
-      if (auth.clientId) lines.push(`- Client ID: ${auth.clientId}`)
-      if (auth.scope) lines.push(`- Scope: ${auth.scope}`)
-      break
-    case 'apikey':
-      lines.push(`- Key: ${auth.key ?? ''}`)
-      lines.push(`- Add to: ${auth.addTo ?? 'header'}`)
-      break
-    case 'aws':
-    case 'hawk':
-    case 'digest':
-    case 'ntlm':
-      lines.push(`- Configuration: See request settings`)
-      break
-  }
-
-  lines.push('')
-  return lines.join('\n')
-}
-
 /** Check if a request is a GraphQL request */
 function isGraphQLRequest(request: InsomniaRequest): boolean {
   const mimeType = request.body?.mimeType ?? ''
@@ -319,24 +275,11 @@ function requestToHTTPRequest(request: InsomniaRequest): HTTPRequest {
     value: ''
   }))
 
-  // Build documentation
-  const docParts: string[] = []
-  
-  const description = extractDescription(request.description)
-  if (description) {
-    docParts.push(description, '')
-  }
-
-  const authDoc = buildAuthDocumentation(request.authentication)
-  if (authDoc) {
-    docParts.push(authDoc)
-  }
-
   const httpRequest: HTTPRequest = {
     type: 'http',
     id: generateId(`insomnia:request:${request._id}`),
     name: request.name,
-    documentation: docParts.join('\n').trim(),
+    documentation: '',
     tags: [],
     method: toHTTPMethod(request.method),
     url: request.url,
@@ -375,18 +318,6 @@ function requestToGraphQLRequest(request: InsomniaRequest): GraphQLRequest {
     }
   }
 
-  // Build documentation
-  const docParts: string[] = []
-  const description = extractDescription(request.description)
-  if (description) {
-    docParts.push(description, '')
-  }
-
-  const authDoc = buildAuthDocumentation(request.authentication)
-  if (authDoc) {
-    docParts.push(authDoc)
-  }
-
   // Determine operation type from query
   let operationType: 'query' | 'mutation' | 'subscription' = 'query'
   const queryLower = query.trim().toLowerCase()
@@ -400,7 +331,7 @@ function requestToGraphQLRequest(request: InsomniaRequest): GraphQLRequest {
     type: 'graphql',
     id: generateId(`insomnia:graphql:${request._id}`),
     name: request.name,
-    documentation: docParts.join('\n').trim(),
+    documentation: '',
     tags: [],
     url: request.url,
     operationType,
@@ -434,7 +365,7 @@ function buildFolderTree(
     const folder: Folder = {
       id: generateId(`insomnia:folder:${group._id}`),
       name: group.name,
-      documentation: extractDescription(group.description),
+      documentation: '',
       tags: [],
       configuration: {},
       items: buildFolderTree(resources, group._id)
@@ -539,6 +470,8 @@ export interface InsomniaImportOptions {
    * If provided with environmentFolder, requests will be imported here instead of environmentFolder.
    */
   parentFolder?: Folder
+  /** Original URL the Insomnia export was fetched from (stored on ApiDocumentation.sourceUrl). */
+  sourceUrl?: string
 }
 
 /**
@@ -566,7 +499,6 @@ export function importInsomnia(
   )
 
   const workspaceName = workspace?.name ?? 'Insomnia Import'
-  const workspaceDescription = workspace?.description ?? ''
 
   // Find the workspace ID to use as root parent
   const rootParentId = workspace?._id ?? null
@@ -596,15 +528,21 @@ export function importInsomnia(
   }
 
   // Case: No options - create new EnvironmentFolder as root
+  const apiDocumentation = insomniaToApiDocumentation(
+    exportData,
+    options.sourceUrl !== undefined ? { sourceUrl: options.sourceUrl } : {}
+  )
+
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
     id: generateId(`insomnia:root:${workspaceName}`),
     name: workspaceName,
-    documentation: workspaceDescription,
+    documentation: '',
     tags: [],
     configuration: {},
     environments,
-    items
+    items,
+    apiDocumentation
   }
 
   return rootFolder

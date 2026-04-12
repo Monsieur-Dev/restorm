@@ -10,6 +10,7 @@ import {
   type GraphQLOperationType
 } from '../../../shared/models'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
+import { graphqlToApiDocumentation } from './transformers/graphqlToApiDocumentation'
 
 // ============================================================================
 // GraphQL Schema Types
@@ -223,7 +224,7 @@ function fieldToRequest(
     type: 'graphql',
     id: generateId(`${collectionName}:graphql:${operationType}:${field.name}`),
     name: field.name,
-    documentation: field.description ?? `GraphQL ${operationType}: ${field.name}`,
+    documentation: '',
     tags: [operationType],
     url: baseUrl,
     operationType,
@@ -249,6 +250,8 @@ export interface GraphQLImportOptions {
   baseUrl?: string
   /** Name for the imported collection */
   name?: string
+  /** Original URL the GraphQL schema was fetched from (stored on ApiDocumentation.sourceUrl). */
+  sourceUrl?: string
 }
 
 /**
@@ -267,44 +270,38 @@ export function importGraphQL(schemaString: string, options: GraphQLImportOption
     const queriesFolder: Folder = {
       id: generateId(`${name}:folder:graphql:queries`),
       name: 'Queries',
-      documentation: '# GraphQL Queries\n\nRead operations',
+      documentation: '',
       tags: ['query'],
       configuration: {},
       items: schema.queries.map(field => fieldToRequest(field, 'query', baseUrl, name))
     }
     items.push(queriesFolder)
   }
-  
+
   if (schema.mutations.length > 0) {
     const mutationsFolder: Folder = {
       id: generateId(`${name}:folder:graphql:mutations`),
       name: 'Mutations',
-      documentation: '# GraphQL Mutations\n\nWrite operations',
+      documentation: '',
       tags: ['mutation'],
       configuration: {},
       items: schema.mutations.map(field => fieldToRequest(field, 'mutation', baseUrl, name))
     }
     items.push(mutationsFolder)
   }
-  
+
   if (schema.subscriptions.length > 0) {
     const subscriptionsFolder: Folder = {
       id: generateId(`${name}:folder:graphql:subscriptions`),
       name: 'Subscriptions',
-      documentation: '# GraphQL Subscriptions\n\nReal-time operations',
+      documentation: '',
       tags: ['subscription'],
       configuration: {},
       items: schema.subscriptions.map(field => fieldToRequest(field, 'subscription', baseUrl, name))
     }
     items.push(subscriptionsFolder)
   }
-  
-  // Build types documentation
-  const typesDoc = schema.types.map(t => {
-    const fieldsDoc = t.fields.map(f => `  - ${f.name}: ${f.type}`).join('\n')
-    return `### ${t.name}\n${fieldsDoc}`
-  }).join('\n\n')
-  
+
   const environment: Environment = {
     id: generateId(`${name}:env:graphql:Default`),
     name: 'Default',
@@ -312,18 +309,25 @@ export function importGraphQL(schemaString: string, options: GraphQLImportOption
       createTypedKeyValue({ key: 'baseUrl', value: options.baseUrl ?? 'http://localhost:4000', enabled: true })
     ]
   }
-  
+
+  const apiDocumentation = graphqlToApiDocumentation(schema, {
+    name,
+    ...(options.baseUrl !== undefined ? { baseUrl: options.baseUrl } : {}),
+    ...(options.sourceUrl !== undefined ? { sourceUrl: options.sourceUrl } : {})
+  })
+
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
     id: generateId(`${name}:folder:graphql:root`),
     name,
-    documentation: `# ${name}\n\nGraphQL API\n\n## Types\n\n${typesDoc}`,
+    documentation: '',
     tags: [],
     configuration: {},
     environments: [environment],
-    items
+    items,
+    apiDocumentation
   }
-  
+
   return rootFolder
 }
 

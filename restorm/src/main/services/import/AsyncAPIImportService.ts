@@ -12,6 +12,7 @@ import {
 } from '../../../shared/models'
 import * as yaml from 'yaml'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
+import { asyncapiToApiDocumentation } from './transformers/asyncapiToApiDocumentation'
 
 // ============================================================================
 // AsyncAPI Types
@@ -174,7 +175,7 @@ function channelToRequests(
       type: 'websocket',
       id: generateId(`${collectionName}:ws:publish:${channelPath}`),
       name: op.operationId ?? `Publish to ${channelPath}`,
-      documentation: op.description ?? op.summary ?? `Publish to channel: ${channelPath}`,
+      documentation: '',
       tags: ['publish', protocol],
       url: baseUrl,
       protocol,
@@ -193,7 +194,7 @@ function channelToRequests(
       type: 'websocket',
       id: generateId(`${collectionName}:ws:subscribe:${channelPath}`),
       name: op.operationId ?? `Subscribe to ${channelPath}`,
-      documentation: op.description ?? op.summary ?? `Subscribe to channel: ${channelPath}`,
+      documentation: '',
       tags: ['subscribe', protocol],
       url: baseUrl,
       protocol,
@@ -209,7 +210,7 @@ function channelToRequests(
       type: 'websocket',
       id: generateId(`${collectionName}:ws:channel:${channelPath}`),
       name: channelPath,
-      documentation: channel.description ?? `Channel: ${channelPath}`,
+      documentation: '',
       tags: [protocol],
       url: baseUrl,
       protocol,
@@ -231,6 +232,8 @@ export interface AsyncAPIImportOptions {
   baseUrl?: string
   /** Name for the imported collection */
   name?: string
+  /** Original URL the AsyncAPI spec was fetched from (stored on ApiDocumentation.sourceUrl). */
+  sourceUrl?: string
 }
 
 /**
@@ -273,7 +276,7 @@ export function importAsyncAPI(specContent: string, options: AsyncAPIImportOptio
     items.push({
       id: generateId(`${name}:folder:asyncapi:mqtt`),
       name: 'MQTT',
-      documentation: '# MQTT Channels\n\nMessage broker pub/sub',
+      documentation: '',
       tags: ['mqtt'],
       configuration: {},
       items: mqttRequests
@@ -284,7 +287,7 @@ export function importAsyncAPI(specContent: string, options: AsyncAPIImportOptio
     items.push({
       id: generateId(`${name}:folder:asyncapi:socketio`),
       name: 'Socket.IO',
-      documentation: '# Socket.IO Events\n\nReal-time bidirectional communication',
+      documentation: '',
       tags: ['socketio'],
       configuration: {},
       items: socketioRequests
@@ -295,7 +298,7 @@ export function importAsyncAPI(specContent: string, options: AsyncAPIImportOptio
     items.push({
       id: generateId(`${name}:folder:asyncapi:websocket`),
       name: 'WebSocket',
-      documentation: '# WebSocket Channels\n\nRaw WebSocket connections',
+      documentation: '',
       tags: ['websocket'],
       configuration: {},
       items: websocketRequests
@@ -332,15 +335,21 @@ export function importAsyncAPI(specContent: string, options: AsyncAPIImportOptio
     variables: envVariables
   }
   
+  const apiDocumentation = asyncapiToApiDocumentation(
+    spec,
+    options.sourceUrl !== undefined ? { sourceUrl: options.sourceUrl } : {}
+  )
+
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
     id: generateId(`${name}:folder:asyncapi:root`),
     name,
-    documentation: `# ${name}\n\n${spec.info.description ?? 'AsyncAPI Specification'}\n\nVersion: ${spec.info.version}`,
+    documentation: '',
     tags: [],
     configuration: {},
     environments: [environment],
-    items
+    items,
+    apiDocumentation
   }
   
   return rootFolder

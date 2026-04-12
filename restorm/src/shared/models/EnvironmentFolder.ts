@@ -12,6 +12,7 @@ import {
 } from 'electron-core-ui/main'
 import { Environment } from './Environment'
 import type { RuntimeId, Icon, FolderConfiguration, FolderType, BaseFolderItem } from './types'
+import type { ApiDocumentation } from '../types/apiDocumentation'
 
 /**
  * Environment folder containing both items and environment configurations.
@@ -70,6 +71,12 @@ export class EnvironmentFolder {
   @separateFolders()
   items: BaseFolderItem[] = []
 
+  /**
+   * Structured API documentation (imported specs only). Compiled markdown for
+   * individual routes is derived from this on the fly — never persisted on routes.
+   */
+  apiDocumentation?: ApiDocumentation
+
   constructor(init?: Partial<EnvironmentFolder>) {
     if (init) {
       Object.assign(this, init)
@@ -97,6 +104,7 @@ export class EnvironmentFolder {
     configuration?: FolderConfiguration
     environments?: Parameters<typeof Environment.fromPlain>[0][]
     items?: BaseFolderItem[]
+    apiDocumentation?: ApiDocumentation
   }): EnvironmentFolder {
     const folder = new EnvironmentFolder({
       id: obj.id,
@@ -116,6 +124,9 @@ export class EnvironmentFolder {
       // Items will be converted by the caller with proper type knowledge
       folder.items = obj.items
     }
+    if (obj.apiDocumentation) {
+      folder.apiDocumentation = obj.apiDocumentation
+    }
     return folder
   }
 
@@ -123,7 +134,7 @@ export class EnvironmentFolder {
    * Create a plain object from this EnvironmentFolder
    */
   toPlainObject(): Record<string, unknown> {
-    return {
+    const plain: Record<string, unknown> = {
       name: this.name,
       icon: this.icon,
       documentation: this.documentation,
@@ -135,5 +146,7 @@ export class EnvironmentFolder {
       environments: this.environments.map(e => e.toPlainObject()),
       items: this.items.map(item => item.toPlainObject())
     }
+    if (this.apiDocumentation) plain.apiDocumentation = this.apiDocumentation
+    return plain
   }
 }
