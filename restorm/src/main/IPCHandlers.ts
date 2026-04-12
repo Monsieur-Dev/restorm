@@ -31,8 +31,15 @@ import {
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
   responsesHistoryListArgs, responsesHistoryGetArgs,
   responsesHistoryTogglePinArgs, responsesHistoryUpdatePathArgs,
-  importPreviewArgs, importImportArgs
+  importPreviewArgs, importImportArgs,
+  docsCompileRouteArgs, docsCompileRootArgs
 } from './ipc/schemas'
+import {
+  compileDocumentationForRoute,
+  compileRootMarkdown,
+  type RouteLike
+} from './services/DocumentationCompiler'
+import type { ApiDocumentation } from '../shared/types/apiDocumentation'
 
 /**
  * Get mocked folder path for E2E tests, if E2E_MOCK_SAVE_FOLDER env var is set.
@@ -663,6 +670,30 @@ export function registerRestormIPC(deps: {
         source: input,
         error: error instanceof Error ? error.message : String(error)
       }
+    }
+  })
+
+  // ==========================================================================
+  // Documentation Compiler
+  // ==========================================================================
+
+  validatedHandle('docs:compile-for-route', docsCompileRouteArgs, (_event, [apiDoc, route]) => {
+    try {
+      const result = compileDocumentationForRoute(apiDoc as ApiDocumentation, route as RouteLike)
+      if (!result) return { matched: false, markdown: '' }
+      return { matched: true, markdown: result.markdown, operationId: result.operation.operationId }
+    } catch (error) {
+      logger.error('[IPC] docs:compile-for-route error', error)
+      return { matched: false, markdown: '', error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  validatedHandle('docs:compile-root', docsCompileRootArgs, (_event, [apiDoc]) => {
+    try {
+      return { markdown: compileRootMarkdown(apiDoc as ApiDocumentation) }
+    } catch (error) {
+      logger.error('[IPC] docs:compile-root error', error)
+      return { markdown: '', error: error instanceof Error ? error.message : String(error) }
     }
   })
 

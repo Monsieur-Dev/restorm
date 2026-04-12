@@ -1,25 +1,32 @@
 import { resolve } from 'path'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react'
-import { copyFileSync, mkdirSync, readdirSync } from 'fs'
+import { copyFileSync, mkdirSync, readdirSync, statSync } from 'fs'
 import { createInstrumenter } from 'istanbul-lib-instrument'
 
-// Plugin to copy templates to dist
+// Plugin to copy templates to dist (recursively, preserving subdirectories)
 function copyTemplatesPlugin() {
+  function copyHbsRecursive(srcDir: string, destDir: string): void {
+    mkdirSync(destDir, { recursive: true })
+    for (const entry of readdirSync(srcDir)) {
+      const srcPath = resolve(srcDir, entry)
+      const destPath = resolve(destDir, entry)
+      if (statSync(srcPath).isDirectory()) {
+        copyHbsRecursive(srcPath, destPath)
+      } else if (entry.endsWith('.hbs')) {
+        copyFileSync(srcPath, destPath)
+      }
+    }
+  }
+
   return {
     name: 'copy-templates',
     closeBundle() {
       const srcDir = resolve(__dirname, 'src/main/resources/templates')
       const destDir = resolve(__dirname, 'dist/main/resources/templates')
-      
+
       try {
-        mkdirSync(destDir, { recursive: true })
-        const files = readdirSync(srcDir)
-        for (const file of files) {
-          if (file.endsWith('.hbs')) {
-            copyFileSync(resolve(srcDir, file), resolve(destDir, file))
-          }
-        }
+        copyHbsRecursive(srcDir, destDir)
         console.log('✓ Templates copied to dist/main/resources/templates')
       } catch (error) {
         console.error('Failed to copy templates:', error)
