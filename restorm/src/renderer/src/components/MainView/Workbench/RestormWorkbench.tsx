@@ -431,35 +431,42 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   } = useTabSwitcher({
     enabled: navigationEnabled ?? false,
     onTabSelect: (tabId) => {
-      // Record navigation synchronously so history is up-to-date for next Ctrl+Tab
-      // Find the tab in the tree to get the actual item ID
-      let resolvedItemId: string | null = null
-      for (const group of tree.groups) {
-        if (!isTabGroupNode(group)) continue
-        const tab = group.tabs.find((t) => t.id === tabId)
-        if (tab) {
-          resolvedItemId = getTabItemId(tab as RestormEditorTab)
-          break
-        }
+      // Walk the tree recursively to find which group (possibly nested) owns the tab,
+      // update its activeTabId, and capture the owning group id for focus sync.
+      const found: { groupId?: string; itemId?: string | null } = {}
+      const updateGroups = (nodes: typeof tree.groups): typeof tree.groups => {
+        return nodes.map((node) => {
+          if (isTabGroupNode(node)) {
+            const tab = node.tabs.find((t) => t.id === tabId)
+            if (tab) {
+              found.groupId = node.id
+              found.itemId = getTabItemId(tab as RestormEditorTab)
+              return { ...node, activeTabId: tabId }
+            }
+            return node
+          }
+          if (isContainerNode(node)) {
+            return { ...node, groups: updateGroups(node.groups) }
+          }
+          return node
+        })
       }
-      if (resolvedItemId) {
+      const updatedGroups = updateGroups(tree.groups)
+
+      // Record navigation synchronously so history is up-to-date for next Ctrl+Tab
+      if (found.itemId) {
         const tabType = tabId.startsWith('env-folder') ? 'environment-folder'
           : tabId.startsWith('folder') ? 'folder'
           : 'http-request'
-        navigationService.navigateTo(resolvedItemId, 'tab-switcher', { type: tabType })
+        navigationService.navigateTo(found.itemId, 'tab-switcher', { type: tabType })
       }
 
-      // Directly activate the tab in the workbench tree
-      const updatedGroups = tree.groups.map((group) => {
-        if (!isTabGroupNode(group)) return group
-        const hasTab = group.tabs.some((t) => t.id === tabId)
-        if (hasTab) {
-          return { ...group, activeTabId: tabId }
-        }
-        return group
-      })
       if (onTreeChange) {
         onTreeChange({ ...tree, groups: updatedGroups })
+      }
+      // Move focus to the group that owns the activated tab so its tab strip reflects the change.
+      if (found.groupId && onFocusedGroupChange) {
+        onFocusedGroupChange(found.groupId)
       }
       // Also notify the tab activate callback for sidebar sync etc.
       if (onTabActivate) {
@@ -863,9 +870,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       renderTabTitle,
       onDetachToNewWindow: handleDetachToNewWindow,
       getTabContextMenuItems,
-      onGetTabContent: getTabContent
+      onGetTabContent: getTabContent,
+      // Forward tab activation from any group (incl. non-main split groups) so the sidebar can sync.
+      onActivateTab: (tabId) => {
+        if (lastActiveTabIdRef.current === tabId) return
+        lastActiveTabIdRef.current = tabId
+        onTabActivate?.(tabId)
+      }
     }
-  }, [handleTabDropped, workbenchRenderTabContent, renderTabTitle, handleDetachToNewWindow, getTabContextMenuItems, getTabContent])
+  }, [handleTabDropped, workbenchRenderTabContent, renderTabTitle, handleDetachToNewWindow, getTabContextMenuItems, getTabContent, onTabActivate])
 
   const handleTreeChange = useCallback(
     (newTree: WorkbenchTree) => {
