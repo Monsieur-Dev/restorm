@@ -89,7 +89,6 @@ export interface SwaggerSpec {
 // ---------- Helpers ----------
 
 const HTTP_METHODS = ['get', 'post', 'put', 'delete', 'patch', 'head', 'options'] as const
-type HttpMethod = (typeof HTTP_METHODS)[number]
 
 function refName(ref: string): string {
   const parts = ref.split('/')
@@ -204,9 +203,9 @@ export function swaggerToApiDocumentation(
 ): ApiDocumentation {
   const operations: OperationDocumentation[] = []
 
-  for (const [path, pathItem] of Object.entries(spec.paths ?? {})) {
+  for (const [path, pathItem] of Object.entries(spec.paths)) {
     for (const method of HTTP_METHODS) {
-      const op = pathItem[method as HttpMethod]
+      const op = pathItem[method]
       if (!op) continue
 
       const doc: OperationDocumentation = {
