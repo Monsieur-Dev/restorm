@@ -95,24 +95,15 @@ Feature: Import Requests
   # load (the scenario still passes in isolation). It will be restored
   # in Phase 5 once the compiler (Phase 3) re-produces per-request docs.
 
-  # TEMPORARILY DISABLED - OYO-157
-  # Even after bumping the sidebar/tab timeouts to 10–15s, this scenario
-  # still misses its visibility poll under full-suite load. The Phase 4
-  # compiled-docs hook adds a store subscription + IPC round-trip on
-  # every request-tab mount; isolating the underlying slowdown deserves
-  # its own pass. The scenario is replaced by
-  # `documentation-compile.feature` which covers the same
-  # "import → open request → see compiled docs" path more directly.
-  #
-  # Scenario: Import to root and open request
-  #   When I click the import button
-  #   And I paste "http://localhost:8080/api/swagger.json" in the source input
-  #   Then I should see import preview results
-  #   When I click the Import button in the modal
-  #   Then the import modal should be closed
-  #   And I should see new items in the sidebar
-  #   When I expand the "Swagger Petstore" folder
-  #   And I expand the "pet" folder
-  #   And I click on the "Find pet by ID" request
-  #   Then the request tab should be open
+  Scenario: Import to root and open request
+    When I click the import button
+    And I paste "http://localhost:8080/api/swagger.json" in the source input
+    Then I should see import preview results
+    When I click the Import button in the modal
+    Then the import modal should be closed
+    And I should see new items in the sidebar
+    When I expand the "Swagger Petstore" folder
+    And I expand the "pet" folder
+    And I click on the "Find pet by ID" request
+    Then the request tab should be open
 

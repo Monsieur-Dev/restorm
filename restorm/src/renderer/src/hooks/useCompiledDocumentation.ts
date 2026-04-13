@@ -134,7 +134,13 @@ export function useCompiledDocumentation(request: Request | null): CompiledDocum
       if (!cancelled) setLoading(true)
     })
 
-    api(apiDoc, route).then(res => {
+    // Sanitise via a JSON round-trip: reactive-proxy descendants (both on
+    // the folder tree and on the request that `route` was built from) break
+    // structured-clone when the object goes through the renderer → main
+    // IPC boundary.
+    const plainApiDoc: unknown = JSON.parse(JSON.stringify(apiDoc))
+    const plainRoute = JSON.parse(JSON.stringify(route)) as CompilableRoute
+    api(plainApiDoc, plainRoute).then(res => {
       if (cancelled) return
       setCompiled({ markdown: res.markdown, matched: res.matched })
       setLoading(false)

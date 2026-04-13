@@ -662,7 +662,11 @@ const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ fold
       restorm?: { docs?: { compileRoot?: (apiDoc: unknown) => Promise<{ markdown: string }> } }
     }).restorm?.docs?.compileRoot
     if (!compile) return
-    compile(apiDocumentation).then(res => {
+    // structured-clone through the renderer boundary chokes on the
+    // reactive-proxy descendants that live on the folder tree — shave them
+    // off with a JSON round-trip before the IPC call.
+    const plainApiDoc: unknown = JSON.parse(JSON.stringify(apiDocumentation))
+    compile(plainApiDoc).then(res => {
       if (cancelled) return
       setCompiledRootDocs(res.markdown)
     }).catch(() => { /* fall back to empty docs */ })

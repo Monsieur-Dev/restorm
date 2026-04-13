@@ -23,16 +23,15 @@ When('I select the imported root folder', async ({ page }) => {
 })
 
 Then('the folder Docs tab should be populated with compiled markdown', async ({ page }) => {
-  // BaseFolderView renders the compiled root markdown in a
-  // `folder-view-<id>-markdown-viewer-docs` element. We don't know the id
-  // upfront, so match on the suffix.
-  const docsViewer = page.locator('[data-testid$="-markdown-viewer-docs"]').first()
-  // The Docs tab may not be active by default (Configuration is the default for
-  // EnvironmentFolders) — activate it explicitly.
-  const docsTab = page.locator('[role="tab"]').filter({ hasText: /^Docs$/ }).first()
+  // Scope to the folder-view tab bar (data-testid prefix
+  // `folder-view-<id>-tabs`) to avoid matching the request-view Docs tab
+  // that can stick around from a previous scenario.
+  const folderTabs = page.locator('[data-testid^="folder-view-"][data-testid$="-tabs"]').first()
+  const docsTab = folderTabs.locator('[role="tab"]').filter({ hasText: /^Docs$/ }).first()
   if (await docsTab.count() > 0) {
     await docsTab.click()
   }
+  const docsViewer = page.locator('[data-testid$="-markdown-viewer-docs"]').first()
   await expect(docsViewer).toBeVisible({ timeout: 10000 })
   // The compiled markdown always starts with the API title (`# Title`).
   // Check the rendered content has at least one H1 heading.
