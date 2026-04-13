@@ -22,6 +22,17 @@ export interface BaseFolderViewProps {
   additionalTabs?: Tab[]
   /** Default active tab ID (defaults to first additional tab or 'docs') */
   defaultActiveTabId?: string
+  /**
+   * Override for the Docs tab's Markdown content. When provided, this string
+   * is rendered instead of `folder.documentation`; an empty string hides the
+   * Docs tab entirely. Used by EnvironmentFolderView to inject the compiled
+   * root.hbs output.
+   */
+  documentationOverride?: string
+  /** When true, the Docs tab stays visible even if `documentation` is empty. */
+  alwaysShowDocs?: boolean
+  /** Node rendered above the Docs tab markdown (e.g., a Refresh button). */
+  docsHeader?: React.ReactNode
 }
 
 /**
@@ -31,43 +42,61 @@ export interface BaseFolderViewProps {
 export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
   folder,
   additionalTabs = [],
-  defaultActiveTabId
+  defaultActiveTabId,
+  documentationOverride,
+  alwaysShowDocs = false,
+  docsHeader
 }) => {
   const { t } = useTranslation()
   const testIdBase = `folder-view-${folder.id}`
-  
-  const defaultTabId = defaultActiveTabId ?? additionalTabs[0]?.id ?? 'docs'
+
+  const docs = documentationOverride ?? folder.documentation
+  const hasDocs = docs.trim().length > 0 || alwaysShowDocs
+
+  const defaultTabId = defaultActiveTabId
+    ?? additionalTabs[0]?.id
+    ?? (hasDocs ? 'docs' : 'notes')
   const [activeTabId, setActiveTabId] = useState<string>(defaultTabId)
+
+  // Fall back to Notes at render time when the Docs tab disappears — avoids a
+  // sync setState in effect (banned by react-hooks/set-state-in-effect).
+  const effectiveActiveTabId = activeTabId === 'docs' && !hasDocs ? 'notes' : activeTabId
 
   const handleNotesChange = useCallback((markdown: string): void => {
     updateReactiveProperty(folder, 'notes', markdown)
   }, [folder])
 
-  const docsTabs: Tab[] = [
-    {
+  const docsTabs: Tab[] = []
+  if (hasDocs) {
+    docsTabs.push({
       id: 'docs',
       label: t('folderView.tabs.docs'),
       useScrollableElement: false,
       content: (
-        <MarkdownViewer
-          value={folder.documentation || `# ${folder.name}\n\nNo documentation available.`}
-          data-testid={`${testIdBase}-markdown-viewer-docs`}
-        />
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
+          {docsHeader}
+          <div style={{ flex: 1, minHeight: 0 }}>
+            <MarkdownViewer
+              value={docs || `# ${folder.name}\n\nNo documentation available.`}
+              data-testid={`${testIdBase}-markdown-viewer-docs`}
+            />
+          </div>
+        </div>
       )
-    },
-    {
-      id: 'notes',
-      label: t('folderView.tabs.notes'),
-      useScrollableElement: false,
-      content: (
-        <MarkdownEditor
-          initialValue={folder.notes ?? ''}
-          onChange={handleNotesChange}
-          data-testid={`${testIdBase}-markdown-editor-notes`}
-        />
-      )
-    }
-  ]
+    })
+  }
+  docsTabs.push({
+    id: 'notes',
+    label: t('folderView.tabs.notes'),
+    useScrollableElement: false,
+    content: (
+      <MarkdownEditor
+        initialValue={folder.notes ?? ''}
+        onChange={handleNotesChange}
+        data-testid={`${testIdBase}-markdown-editor-notes`}
+      />
+    )
+  })
 
   const allTabs = [...additionalTabs, ...docsTabs]
 
@@ -83,7 +112,7 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
     >
       <Tabs
         tabs={allTabs}
-        activeTabId={activeTabId}
+        activeTabId={effectiveActiveTabId}
         onTabChange={setActiveTabId}
         data-testid={`${testIdBase}-tabs`}
       />

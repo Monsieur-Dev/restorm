@@ -25,6 +25,7 @@ import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
 import { getResponseHistoryList } from '../../services/GraphQLIntegration'
 import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabViewUtils'
+import { useCompiledDocumentation } from '../../hooks/useCompiledDocumentation'
 
 export interface GrpcRequestTabViewProps {
   request: GrpcRequest
@@ -43,6 +44,8 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
   const { selectedEnvId, environments, envColor } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
+  const compiled = useCompiledDocumentation(request)
+  const compiledDocumentation = compiled.matched ? compiled.markdown : request.documentation
   const previousEnvIdRef = useRef<string | null>(null)
   const sendButtonStyle: React.CSSProperties | undefined = envColor
     ? { backgroundColor: envColor, color: getContrastColor(envColor), borderColor: envColor }
@@ -420,7 +423,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
         urlSection={urlSection}
         requestContent={requestContent}
         codeSnippetsContent={codeSnippetsContent}
-        documentation={request.documentation}
+        documentation={compiledDocumentation}
         notes={request.notes}
         onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
         isLoading={isSending}

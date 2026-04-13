@@ -58,6 +58,11 @@
       "docs": "Docs",
       "configuration": "Configuration",
       "notes": "Notes"
+    },
+    "docs": {
+      "source": "Source :",
+      "refresh": "Actualiser la doc",
+      "refreshing": "Actualisation..."
     }
   },
   "requestTab": {
