@@ -38,6 +38,17 @@ const importTestDir = defineBddConfig({
   outputDir: '.features-gen/import'
 })
 
+const documentationCompileTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/documentation-compile/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/documentation-compile/steps/**/*.ts',
+    // Reuse existing import steps (click import, paste path, etc.).
+    'tests/e2e/bdd/import/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/import.fixture.ts'
+  ],
+  outputDir: '.features-gen/documentation-compile'
+})
+
 const iconChangeTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/icon-change/features/**/*.feature',
   steps: ['tests/e2e/bdd/icon-change/steps/**/*.ts', 'tests/e2e/bdd/fixtures/petstore-file.fixture.ts'],
@@ -129,6 +140,10 @@ export default defineConfig({
     {
       name: 'import',
       testDir: importTestDir
+    },
+    {
+      name: 'documentation-compile',
+      testDir: documentationCompileTestDir
     },
     {
       name: 'sidebar-sync',

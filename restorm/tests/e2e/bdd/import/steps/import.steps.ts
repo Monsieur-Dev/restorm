@@ -125,7 +125,10 @@ When('I click the Import button in the modal', async ({ page }) => {
 
 Then('I should see new items in the sidebar', async ({ page }) => {
   const treeItems = page.locator('[role="tree"] [role="treeitem"]')
-  await expect(treeItems.first()).toBeVisible({ timeout: 5000 })
+  // 10s timeout — the post-import tree render now waits on a reactive
+  // subscription set up by the compiled-docs hook in each request tab
+  // view, which adds a small IPC-round-trip delay on cold open.
+  await expect(treeItems.first()).toBeVisible({ timeout: 10000 })
   const count = await treeItems.count()
   expect(count).toBeGreaterThan(0)
 })
@@ -260,18 +263,20 @@ When('I expand the {string} folder', async ({ page }, folderName: string) => {
 When('I click on the {string} request', async ({ page }, requestName: string) => {
   // Find the treeitem that contains the exact request name in its .list-view-title
   // The title may contain badges, so we search for text that matches anywhere within .list-view-title
-  const requestItem = page.locator(`[role="treeitem"]`).filter({ 
+  const requestItem = page.locator(`[role="treeitem"]`).filter({
     has: page.locator(`.list-view-title`).filter({ hasText: requestName })
   }).first()
-  
+
   await expect(requestItem).toBeVisible({ timeout: 10000 })
   await requestItem.click()
-  await page.waitForSelector('.tab.active', { timeout: 5000 })
+  // 15s — HTTPRequestTabView now subscribes to the compiled-docs hook,
+  // which adds an IPC round-trip on mount.
+  await page.waitForSelector('.tab.active', { timeout: 15000 })
 })
 
 Then('the request tab should be open', async ({ page }) => {
-  await page.waitForSelector('.tab.active', { timeout: 5000 })
-  await page.waitForSelector('[data-testid="url-container"]', { timeout: 5000 })
+  await page.waitForSelector('.tab.active', { timeout: 15000 })
+  await page.waitForSelector('[data-testid="url-container"]', { timeout: 15000 })
 })
 
 When('I change the path param {string} to {string}', async ({ page }, paramName: string, value: string) => {
