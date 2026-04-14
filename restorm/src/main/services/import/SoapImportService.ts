@@ -9,6 +9,7 @@ import {
   SoapRequest
 } from '../../../shared/models'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
+import { wsdlToApiDocumentation } from './transformers/wsdlToApiDocumentation'
 
 // ============================================================================
 // WSDL Types
@@ -231,7 +232,7 @@ function operationToRequest(
     type: 'soap',
     id: generateId(`${collectionName}:soap:${service.name}:${operation.name}`),
     name: operation.name,
-    documentation: operation.documentation ?? `SOAP operation: ${operation.name}`,
+    documentation: '',
     tags: ['soap'],
     url: baseUrl,
     soapAction: operation.soapAction,
@@ -254,6 +255,8 @@ export interface SoapImportOptions {
   baseUrl?: string
   /** Name for the imported collection */
   name?: string
+  /** Original URL the WSDL was fetched from (stored on ApiDocumentation.sourceUrl). */
+  sourceUrl?: string
 }
 
 /**
@@ -288,10 +291,10 @@ export function importSoap(wsdlContent: string, options: SoapImportOptions = {})
     const serviceFolder: Folder = {
       id: generateId(`${name}:folder:soap:${service.name}`),
       name: service.name,
-      documentation: service.documentation ?? `# ${service.name}\n\nSOAP Service`,
+      documentation: '',
       tags: ['service'],
       configuration: {},
-      items: operations.map(op => 
+      items: operations.map(op =>
         operationToRequest(service, op, parsed.targetNamespace, baseUrl, name)
       )
     }
@@ -310,17 +313,24 @@ export function importSoap(wsdlContent: string, options: SoapImportOptions = {})
     ]
   }
   
+  const apiDocumentation = wsdlToApiDocumentation(parsed, {
+    name,
+    ...(options.baseUrl !== undefined ? { baseUrl: options.baseUrl } : {}),
+    ...(options.sourceUrl !== undefined ? { sourceUrl: options.sourceUrl } : {})
+  })
+
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
     id: generateId(`${name}:folder:soap:root`),
     name,
-    documentation: `# ${name}\n\nSOAP Web Service\n\nNamespace: ${parsed.targetNamespace}`,
+    documentation: '',
     tags: [],
     configuration: {},
     environments: [environment],
-    items
+    items,
+    apiDocumentation
   }
-  
+
   return rootFolder
 }
 

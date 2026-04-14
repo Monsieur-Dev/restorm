@@ -1,0 +1,72 @@
+# {{api.title}}
+
+{{#if api.version}}
+**Version:** `{{api.version}}`
+{{/if}}
+
+{{#if api.description}}
+{{api.description}}
+{{/if}}
+
+{{#if api.externalDocs}}
+> [{{#if api.externalDocs.description}}{{api.externalDocs.description}}{{else}}External documentation{{/if}}]({{api.externalDocs.url}})
+{{/if}}
+
+{{#if hasServer}}
+## Server
+
+{{#if server.schemes.length}}
+- **Schemes:** {{#each server.schemes}}`{{this}}`{{#unless @last}}, {{/unless}}{{/each}}
+{{/if}}
+{{#if server.host}}- **Host:** `{{server.host}}`
+{{/if}}
+{{#if server.basePath}}- **Base path:** `{{server.basePath}}`
+{{/if}}
+{{#if server.namespace}}- **Namespace:** `{{server.namespace}}`
+{{/if}}
+{{/if}}
+
+{{#if api.contact}}
+## Contact
+
+{{#if api.contact.name}}- **Name:** {{api.contact.name}}
+{{/if}}
+{{#if api.contact.email}}- **Email:** {{api.contact.email}}
+{{/if}}
+{{#if api.contact.url}}- **URL:** {{api.contact.url}}
+{{/if}}
+{{/if}}
+
+{{#if api.license}}
+## License
+
+{{#if api.license.url}}[{{api.license.name}}]({{api.license.url}}){{else}}{{api.license.name}}{{/if}}
+{{/if}}
+
+{{#if api.termsOfService}}
+## Terms of service
+
+{{api.termsOfService}}
+{{/if}}
+
+{{#if groupSummaries.length}}
+## Groups
+
+{{#each groupSummaries}}
+### {{name}}
+
+{{#if description}}{{description}}
+
+{{/if}}{{#if operations.length}}{{#each operations}}- {{#if this.match.method}}**`{{this.match.method}}`** `{{#if ../../server.basePath}}{{../../server.basePath}}{{/if}}{{this.match.urlPattern}}`{{/if}}{{#if this.match.operationType}}**`{{this.match.operationType}}`** `{{this.match.operationName}}`{{/if}}{{#if this.match.serviceName}}**`{{this.match.serviceName}}.{{this.match.operationName}}`**{{/if}}{{#if this.match.event}}**`{{this.match.event}}`**{{/if}} — {{#if this.summary}}{{this.summary}}{{else}}{{#if this.operationId}}{{this.operationId}}{{else}}_(no summary)_{{/if}}{{/if}}
+{{/each}}{{/if}}
+
+{{/each}}
+{{/if}}
+
+{{#if ungroupedOperations.length}}
+## Operations
+
+{{#each ungroupedOperations}}
+- {{#if this.match.method}}**`{{this.match.method}}`** `{{#if ../server.basePath}}{{../server.basePath}}{{/if}}{{this.match.urlPattern}}`{{/if}}{{#if this.match.operationType}}**`{{this.match.operationType}}`** `{{this.match.operationName}}`{{/if}}{{#if this.match.serviceName}}**`{{this.match.serviceName}}.{{this.match.operationName}}`**{{/if}}{{#if this.match.event}}**`{{this.match.event}}`**{{/if}} — {{#if this.summary}}{{this.summary}}{{else}}{{#if this.operationId}}{{this.operationId}}{{else}}_(no summary)_{{/if}}{{/if}}
+{{/each}}
+{{/if}}

@@ -68,6 +68,7 @@ export interface RestormState {
   findItemById: (id: string) => FolderItem | null
   findEnvironmentById: (id: string) => Environment | null
   findParentFolder: (itemId: string) => Folder | EnvironmentFolder | null
+  findOwningEnvironmentFolder: (itemId: string) => EnvironmentFolder | null
 }
 
 // ============================================================================
@@ -126,6 +127,40 @@ function findInSubEnvironments(subEnvs: Environment[] | undefined, id: string): 
 function findParentFolderInTree(collections: EnvironmentFolder[], itemId: string): Folder | EnvironmentFolder | null {
   for (const collection of collections) {
     const found = findParentInFolder(collection, itemId)
+    if (found) return found
+  }
+  return null
+}
+
+/**
+ * Walk down the tree looking for `itemId`, keeping track of the closest
+ * EnvironmentFolder ancestor on the way. When found, return that ancestor —
+ * that's the folder that owns the `apiDocumentation` used to compile docs for
+ * the item.
+ *
+ * Returns `null` when the id isn't in the tree.
+ */
+function findOwningEnvironmentFolderInTree(
+  collections: EnvironmentFolder[],
+  itemId: string
+): EnvironmentFolder | null {
+  function walk(
+    items: readonly FolderItem[],
+    closestEnv: EnvironmentFolder | null
+  ): EnvironmentFolder | null {
+    for (const item of items) {
+      if (item.id === itemId) return closestEnv
+      if (!isAnyFolder(item)) continue
+      const nextClosest = isEnvironmentFolder(item) ? item : closestEnv
+      const found = walk(item.items, nextClosest)
+      if (found) return found
+    }
+    return null
+  }
+
+  for (const collection of collections) {
+    if (collection.id === itemId) return collection
+    const found = walk(collection.items, collection)
     if (found) return found
   }
   return null
@@ -355,6 +390,12 @@ export const useRestormStore = create<RestormState>()(
     // Find parent folder
     findParentFolder: (itemId) => {
       return findParentFolderInTree(get().collections, itemId)
+    },
+
+    // Find the nearest ancestor EnvironmentFolder for an item (carries the
+    // root `apiDocumentation` used by the on-the-fly docs compiler).
+    findOwningEnvironmentFolder: (itemId) => {
+      return findOwningEnvironmentFolderInTree(get().collections, itemId)
     }
   }))
 )

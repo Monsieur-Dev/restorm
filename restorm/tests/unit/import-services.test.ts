@@ -83,13 +83,27 @@ describe('SwaggerImportService', () => {
       expect(result.environments.length).toBeGreaterThan(0)
     })
 
-    it('should create environment with baseUrl variable', () => {
+    it('should create a structured environment with scheme/host/port/baseRoute on the root and baseUrl on each scheme sub-env', () => {
       const result = importSwaggerFromJson(swaggerJson) as EnvironmentFolder
       // Environment name is extracted from the host (localhost:8080 -> localhost)
       const env = result.environments.find((e) => e.name === 'localhost')
-
       expect(env).toBeDefined()
-      expect(env?.variables.some((v) => v.key === 'baseUrl')).toBe(true)
+
+      // Structural root vars — the resolved baseUrl is composed from these
+      // in each scheme sub-env.
+      const rootKeys = env?.variables.map((v) => v.key) ?? []
+      expect(rootKeys).toContain('scheme')
+      expect(rootKeys).toContain('host')
+      expect(rootKeys).toContain('port')
+      expect(rootKeys).toContain('baseRoute')
+      expect(rootKeys).not.toContain('baseUrl')
+
+      const subEnvs = env?.subEnvironments ?? []
+      expect(subEnvs.length).toBeGreaterThan(0)
+      for (const sub of subEnvs) {
+        const baseUrlVar = sub.variables.find((v) => v.key === 'baseUrl')
+        expect(baseUrlVar?.value.toString()).toBe('{{scheme}}://{{host}}:{{port}}{{baseRoute}}')
+      }
     })
 
     it('should create folders for each tag', () => {
@@ -711,10 +725,10 @@ describe('PostmanImportService', () => {
 
     it('should include documentation from descriptions', () => {
       const result = importPostmanFromJson(postmanJson) as EnvironmentFolder
-      
-      // Collection should have documentation from info.description
-      expect(result.documentation).toBeDefined()
-      expect(result.documentation.length).toBeGreaterThan(0)
+
+      // Docs are now stored on the root ApiDocumentation object
+      expect(result.apiDocumentation).toBeDefined()
+      expect(result.apiDocumentation?.api.title).toBeTruthy()
     })
 
     it('should throw on invalid JSON', () => {
@@ -896,8 +910,9 @@ describe('InsomniaImportService', () => {
     it('should include documentation from descriptions', () => {
       const result = importInsomniaFromJson(insomniaJson) as EnvironmentFolder
 
-      expect(result.documentation).toBeDefined()
-      expect(result.documentation.length).toBeGreaterThan(0)
+      // Docs are now stored on the root ApiDocumentation object
+      expect(result.apiDocumentation).toBeDefined()
+      expect(result.apiDocumentation?.api.title).toBeTruthy()
     })
 
     it('should throw on invalid JSON', () => {
@@ -1075,11 +1090,10 @@ describe('BrunoImportService', () => {
 
     it('should include documentation from docs field', () => {
       const result = importBrunoFromJson(brunoJson) as EnvironmentFolder
-      const requests = findAllRequests(result, isHTTPRequest)
 
-      // At least some requests should have documentation
-      const requestsWithDocs = requests.filter(r => r.documentation.length > 0)
-      expect(requestsWithDocs.length).toBeGreaterThan(0)
+      // Docs are now stored on the root ApiDocumentation object
+      expect(result.apiDocumentation).toBeDefined()
+      expect(result.apiDocumentation?.operations.length).toBeGreaterThan(0)
     })
 
     it('should throw on invalid JSON', () => {

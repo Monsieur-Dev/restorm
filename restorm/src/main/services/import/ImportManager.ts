@@ -123,17 +123,19 @@ function detectFormat(content: string, filePath?: string): string | null {
 async function importFromContent(
   content: string,
   format: string,
-  source: string
+  source: string,
+  sourceUrl?: string
 ): Promise<ImportResult> {
   try {
     logger.info(`[ImportManager] Importing from ${source} as ${format}`)
-    
+
     let folder: EnvironmentFolder | null = null
-    
+    const urlOpt = sourceUrl !== undefined ? { sourceUrl } : {}
+
     switch (format) {
       case 'swagger': {
         const { importSwaggerFromJson } = await import('./SwaggerImportService')
-        folder = importSwaggerFromJson(content)
+        folder = importSwaggerFromJson(content, urlOpt)
         break
       }
 
@@ -148,48 +150,48 @@ async function importFromContent(
         folder = importPowerShell(content)
         break
       }
-        
+
       case 'postman': {
         const { importPostman } = await import('./PostmanImportService')
         const json: unknown = JSON.parse(content)
-        folder = importPostman(json as Record<string, unknown>)
+        folder = importPostman(json as Record<string, unknown>, urlOpt)
         break
       }
-        
+
       case 'insomnia': {
         const { importInsomnia } = await import('./InsomniaImportService')
         const json: unknown = JSON.parse(content)
-        folder = importInsomnia(json as Record<string, unknown>)
+        folder = importInsomnia(json as Record<string, unknown>, urlOpt)
         break
       }
-        
+
       case 'bruno': {
         const { importBrunoFromJson } = await import('./BrunoImportService')
-        folder = importBrunoFromJson(content)
+        folder = importBrunoFromJson(content, urlOpt)
         break
       }
-        
+
       case 'asyncapi': {
         const { importAsyncAPI } = await import('./AsyncAPIImportService')
-        folder = importAsyncAPI(content)
+        folder = importAsyncAPI(content, urlOpt)
         break
       }
-        
+
       case 'graphql': {
         const { importGraphQL } = await import('./GraphQLImportService')
-        folder = importGraphQL(content)
+        folder = importGraphQL(content, urlOpt)
         break
       }
-        
+
       case 'grpc': {
         const { importGrpc } = await import('./GrpcImportService')
-        folder = importGrpc(content)
+        folder = importGrpc(content, urlOpt)
         break
       }
-        
+
       case 'soap': {
         const { importSoap } = await import('./SoapImportService')
-        folder = importSoap(content)
+        folder = importSoap(content, urlOpt)
         break
       }
         
@@ -231,11 +233,12 @@ export async function importFrom(
     let source: string
     let detectedFormat: string | null = null
     
+    const isUrl = input.startsWith('http://') || input.startsWith('https://')
     // Check if input is a URL
-    if (input.startsWith('http://') || input.startsWith('https://')) {
+    if (isUrl) {
       logger.info(`[ImportManager] Fetching from URL: ${input}`)
       source = input
-      
+
       try {
         const response = await fetch(input)
         if (!response.ok) {
@@ -283,7 +286,7 @@ export async function importFrom(
     }
     
     // Import using detected format
-    return await importFromContent(content, detectedFormat, source)
+    return await importFromContent(content, detectedFormat, source, isUrl ? input : undefined)
   } catch (error) {
     logger.error(`[ImportManager] Unexpected error:`, error)
     return {
@@ -305,9 +308,10 @@ export async function tryAllImports(
   // Try to determine if it's a URL or file path
   let content: string
   let source: string
-  
+  const isUrl = input.startsWith('http://') || input.startsWith('https://')
+
   try {
-    if (input.startsWith('http://') || input.startsWith('https://')) {
+    if (isUrl) {
       source = input
       const response = await fetch(input)
       if (!response.ok) {
@@ -342,7 +346,7 @@ export async function tryAllImports(
   ]
   
   const results = await Promise.all(
-    formats.map(format => importFromContent(content, format, source))
+    formats.map(format => importFromContent(content, format, source, isUrl ? input : undefined))
   )
   
   // Return only successful results

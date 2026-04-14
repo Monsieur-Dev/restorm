@@ -23,6 +23,7 @@ import {
 } from '../../../shared/models'
 import { toHTTPMethod } from './httpMethodValidator'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
+import { postmanToApiDocumentation } from './transformers/postmanToApiDocumentation'
 
 // ============================================================================
 // Postman Collection v2.1.0 Types
@@ -321,81 +322,6 @@ function parseBody(body: PostmanBody | undefined): HTTPRequestBody | undefined {
   }
 }
 
-/** Build authentication documentation from Postman auth */
-function buildAuthDocumentation(auth: PostmanAuth | undefined): string {
-  if (!auth || auth.type === 'noauth') return ''
-
-  const lines: string[] = ['## Authentication', '', `**Type:** ${auth.type}`, '']
-
-  const authParams = auth[auth.type as keyof Omit<PostmanAuth, 'type'>]
-  if (authParams && authParams.length > 0) {
-    lines.push('| Parameter | Value |')
-    lines.push('|-----------|-------|')
-    for (const param of authParams) {
-      const value = param.value ?? ''
-      // Mask sensitive values
-      const displayValue = param.key.toLowerCase().includes('secret') || 
-                          param.key.toLowerCase().includes('password') ||
-                          param.key.toLowerCase().includes('token')
-        ? '***' : value
-      lines.push(`| ${param.key} | ${displayValue} |`)
-    }
-    lines.push('')
-  }
-
-  return lines.join('\n')
-}
-
-/** Build scripts documentation from Postman events */
-function buildScriptsDocumentation(events: PostmanEvent[] | undefined): string {
-  if (!events || events.length === 0) return ''
-
-  const lines: string[] = []
-
-  const prerequest = events.find(e => e.listen === 'prerequest')
-  if (prerequest?.script?.exec && prerequest.script.exec.length > 0) {
-    const code = prerequest.script.exec.join('\n')
-    if (code.trim()) {
-      lines.push('## Pre-request Script', '', '```javascript', code, '```', '')
-    }
-  }
-
-  const test = events.find(e => e.listen === 'test')
-  if (test?.script?.exec && test.script.exec.length > 0) {
-    const code = test.script.exec.join('\n')
-    if (code.trim()) {
-      lines.push('## Test Script', '', '```javascript', code, '```', '')
-    }
-  }
-
-  return lines.join('\n')
-}
-
-/** Build example responses documentation */
-function buildResponsesDocumentation(responses: PostmanResponse[] | undefined): string {
-  if (!responses || responses.length === 0) return ''
-
-  const lines: string[] = ['## Example Responses', '']
-
-  for (const response of responses) {
-    const name = response.name ?? 'Response'
-    const status = response.status ?? 'Unknown'
-    const code = response.code ?? 0
-    
-    lines.push(`### ${name}`, '')
-    lines.push(`**Status:** ${code} ${status}`, '')
-    
-    if (response.body) {
-      const lang = response._postman_previewlanguage ?? 'text'
-      lines.push('```' + lang)
-      lines.push(response.body)
-      lines.push('```', '')
-    }
-  }
-
-  return lines.join('\n')
-}
-
 /** Check if a request is a GraphQL request */
 function isGraphQLRequest(item: PostmanItem): boolean {
   const body = item.request?.body
@@ -407,35 +333,12 @@ function isGraphQLRequest(item: PostmanItem): boolean {
 function itemToHTTPRequest(item: PostmanItem, pathPrefix: string): HTTPRequest {
   const request = item.request
   const { rawUrl, params, pathParams } = parsePostmanUrl(request?.url)
-  
-  // Build documentation
-  const docParts: string[] = []
-  
-  const description = extractDescription(item.description ?? request?.description)
-  if (description) {
-    docParts.push(description, '')
-  }
-
-  const authDoc = buildAuthDocumentation(request?.auth)
-  if (authDoc) {
-    docParts.push(authDoc)
-  }
-
-  const scriptsDoc = buildScriptsDocumentation(item.event)
-  if (scriptsDoc) {
-    docParts.push(scriptsDoc)
-  }
-
-  const responsesDoc = buildResponsesDocumentation(item.response)
-  if (responsesDoc) {
-    docParts.push(responsesDoc)
-  }
 
   const httpRequest: HTTPRequest = {
     type: 'http',
     id: generateId(`postman:request:${pathPrefix}:${item.name}`),
     name: item.name,
-    documentation: docParts.join('\n').trim(),
+    documentation: '',
     tags: [],
     method: toHTTPMethod(request?.method),
     url: rawUrl,
@@ -474,28 +377,6 @@ function itemToGraphQLRequest(item: PostmanItem, pathPrefix: string): GraphQLReq
     query = body.raw
   }
 
-  // Build documentation
-  const docParts: string[] = []
-  const description = extractDescription(item.description ?? request?.description)
-  if (description) {
-    docParts.push(description, '')
-  }
-
-  const authDoc = buildAuthDocumentation(request?.auth)
-  if (authDoc) {
-    docParts.push(authDoc)
-  }
-
-  const scriptsDoc = buildScriptsDocumentation(item.event)
-  if (scriptsDoc) {
-    docParts.push(scriptsDoc)
-  }
-
-  const responsesDoc = buildResponsesDocumentation(item.response)
-  if (responsesDoc) {
-    docParts.push(responsesDoc)
-  }
-
   // Determine operation type from query
   let operationType: 'query' | 'mutation' | 'subscription' = 'query'
   const queryLower = query.trim().toLowerCase()
@@ -509,7 +390,7 @@ function itemToGraphQLRequest(item: PostmanItem, pathPrefix: string): GraphQLReq
     type: 'graphql',
     id: generateId(`postman:graphql:${pathPrefix}:${item.name}`),
     name: item.name,
-    documentation: docParts.join('\n').trim(),
+    documentation: '',
     tags: [],
     url: rawUrl,
     operationType,
@@ -534,7 +415,7 @@ function convertItem(item: PostmanItem, pathPrefix: string): Folder | Request {
     const folder: Folder = {
       id: generateId(`postman:folder:${folderPath}`),
       name: item.name,
-      documentation: extractDescription(item.description),
+      documentation: '',
       tags: [],
       configuration: {},
       items: item.item.map(child => convertItem(child, folderPath))
@@ -618,6 +499,8 @@ export interface PostmanImportOptions {
    * If provided with environmentFolder, requests will be imported here instead of environmentFolder.
    */
   parentFolder?: Folder
+  /** Original URL the Postman collection was fetched from (stored on ApiDocumentation.sourceUrl). */
+  sourceUrl?: string
 }
 
 /**
@@ -639,19 +522,6 @@ export function importPostman(
   // Convert all items
   const items = collection.item.map(item => convertItem(item, ''))
 
-  // Build collection documentation
-  const docParts: string[] = []
-  
-  const description = extractDescription(collection.info.description)
-  if (description) {
-    docParts.push(description, '')
-  }
-
-  const scriptsDoc = buildScriptsDocumentation(collection.event)
-  if (scriptsDoc) {
-    docParts.push('## Collection Scripts', '', scriptsDoc)
-  }
-
   // Case: parentFolder provided without environmentFolder - error
   if (options.parentFolder && !options.environmentFolder) {
     throw new Error('parentFolder requires an environmentFolder to store the environment configuration')
@@ -671,15 +541,21 @@ export function importPostman(
   }
 
   // Case: No options - create new EnvironmentFolder as root
+  const apiDocumentation = postmanToApiDocumentation(
+    collection,
+    options.sourceUrl !== undefined ? { sourceUrl: options.sourceUrl } : {}
+  )
+
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
     id: generateId(`postman:root:${collection.info.name}`),
     name: collection.info.name,
-    documentation: docParts.join('\n').trim(),
+    documentation: '',
     tags: [],
     configuration: {},
     environments: [environment],
-    items
+    items,
+    apiDocumentation
   }
 
   return rootFolder

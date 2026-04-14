@@ -627,6 +627,10 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
   )
 }
 
+interface ApiDocWithSource {
+  sourceUrl?: string
+}
+
 const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ folder, onFolderChange }) => {
   const { t } = useTranslation()
 
@@ -638,11 +642,88 @@ const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ fold
     content: <EnvironmentConfigPanel folder={folder} onFolderChange={onFolderChange} />
   }
 
+  // API-level documentation (root.hbs) compiled on the fly whenever the
+  // folder holds an `apiDocumentation` object. The root is the only place
+  // where a synthesised overview is always useful, so the Docs tab is
+  // pinned visible even if `folder.documentation` is empty.
+  const [compiledRootDocs, setCompiledRootDocs] = useState<string>(folder.documentation)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [refreshTick, setRefreshTick] = useState(0)
+  const apiDocumentation = (folder as unknown as { apiDocumentation?: unknown }).apiDocumentation as (ApiDocWithSource & Record<string, unknown>) | undefined
+  const sourceUrl = apiDocumentation?.sourceUrl
+
+  useEffect(() => {
+    let cancelled = false
+    if (!apiDocumentation) {
+      setCompiledRootDocs(folder.documentation)
+      return
+    }
+    const compile = (window as unknown as {
+      restorm?: { docs?: { compileRoot?: (apiDoc: unknown) => Promise<{ markdown: string }> } }
+    }).restorm?.docs?.compileRoot
+    if (!compile) return
+    // structured-clone through the renderer boundary chokes on the
+    // reactive-proxy descendants that live on the folder tree — shave them
+    // off with a JSON round-trip before the IPC call.
+    const plainApiDoc: unknown = JSON.parse(JSON.stringify(apiDocumentation))
+    compile(plainApiDoc).then(res => {
+      if (cancelled) return
+      setCompiledRootDocs(res.markdown)
+    }).catch(() => { /* fall back to empty docs */ })
+    return () => { cancelled = true }
+  }, [apiDocumentation, folder.documentation, refreshTick])
+
+  const handleRefreshDocs = useCallback(async () => {
+    if (!sourceUrl || isRefreshing) return
+    setIsRefreshing(true)
+    try {
+      const importer = (window as unknown as {
+        restorm?: { import?: { import?: (input: string) => Promise<{
+          success: boolean
+          items?: { apiDocumentation?: unknown }[]
+          error?: string
+        }> } }
+      }).restorm?.import?.import
+      if (!importer) return
+      const result = await importer(sourceUrl)
+      if (!result.success) return
+      const freshApiDoc = result.items?.[0]?.apiDocumentation
+      if (!freshApiDoc) return
+      // Mutate through the reactive proxy so indexing and UI react.
+      updateReactiveProperty(folder as unknown as Record<'apiDocumentation', unknown>, 'apiDocumentation', freshApiDoc)
+      setRefreshTick(t => t + 1)
+    } finally {
+      setIsRefreshing(false)
+    }
+  }, [sourceUrl, isRefreshing, folder])
+
+  const docsHeader = sourceUrl ? (
+    <div
+      style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', borderBottom: '1px solid var(--editorWidget-border, rgba(0,0,0,0.1))' }}
+      data-testid={`env-folder-view-docs-header-${folder.id}`}
+    >
+      <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.75, fontSize: 12 }} title={sourceUrl}>
+        {t('folderView.docs.source')} <code>{sourceUrl}</code>
+      </span>
+      <Button
+        secondary
+        icon="refresh"
+        onClick={() => { void handleRefreshDocs() }}
+        disabled={isRefreshing}
+        data-testid={`env-folder-view-refresh-docs-${folder.id}`}
+      >
+        {isRefreshing ? t('folderView.docs.refreshing') : t('folderView.docs.refresh')}
+      </Button>
+    </div>
+  ) : undefined
+
   return (
     <BaseFolderView
       folder={folder}
       additionalTabs={[configurationTab]}
       defaultActiveTabId="configuration"
+      documentationOverride={compiledRootDocs}
+      docsHeader={docsHeader}
     />
   )
 }

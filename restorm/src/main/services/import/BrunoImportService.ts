@@ -26,6 +26,11 @@ import {
 } from '../../../shared/models'
 import { toHTTPMethod } from './httpMethodValidator'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
+import {
+  brunoToApiDocumentation,
+  type BrunoRequestData,
+  type BrunoSourceData
+} from './transformers/brunoToApiDocumentation'
 
 // ============================================================================
 // Bruno Types
@@ -385,58 +390,6 @@ function parseBody(body: BrunoBody): HTTPRequestBody | undefined {
   }
 }
 
-/** Build authentication documentation from Bruno auth */
-function buildAuthDocumentation(auth: BrunoAuth): string {
-  if (auth.type === 'none') return ''
-
-  const lines: string[] = ['## Authentication', '', `**Type:** ${auth.type}`, '']
-
-  switch (auth.type) {
-    case 'basic':
-      if (auth.basic) {
-        lines.push(`- Username: ${auth.basic.username}`)
-        lines.push(`- Password: ***`)
-      }
-      break
-    case 'bearer':
-      lines.push(`- Token: ***`)
-      break
-    case 'apikey':
-      if (auth.apikey) {
-        lines.push(`- Key: ${auth.apikey.key}`)
-        lines.push(`- Placement: ${auth.apikey.placement}`)
-      }
-      break
-    case 'oauth2':
-    case 'awsv4':
-    case 'digest':
-      lines.push(`- Configuration: See request settings`)
-      break
-  }
-
-  lines.push('')
-  return lines.join('\n')
-}
-
-/** Build scripts documentation from Bruno scripts */
-function buildScriptsDocumentation(script: BrunoRequest['script'], tests?: string): string {
-  const lines: string[] = []
-
-  if (script?.prerequest) {
-    lines.push('## Pre-request Script', '', '```javascript', script.prerequest, '```', '')
-  }
-
-  if (script?.postresponse) {
-    lines.push('## Post-response Script', '', '```javascript', script.postresponse, '```', '')
-  }
-
-  if (tests) {
-    lines.push('## Tests', '', '```javascript', tests, '```', '')
-  }
-
-  return lines.join('\n')
-}
-
 /** Check if a request is a GraphQL request */
 function isGraphQLRequest(request: BrunoRequest): boolean {
   return request.body.type === 'graphql'
@@ -444,28 +397,11 @@ function isGraphQLRequest(request: BrunoRequest): boolean {
 
 /** Convert Bruno request to HTTPRequest */
 function brunoToHTTPRequest(request: BrunoRequest, pathPrefix: string): HTTPRequest {
-  // Build documentation
-  const docParts: string[] = []
-  
-  if (request.docs) {
-    docParts.push(request.docs, '')
-  }
-
-  const authDoc = buildAuthDocumentation(request.auth)
-  if (authDoc) {
-    docParts.push(authDoc)
-  }
-
-  const scriptsDoc = buildScriptsDocumentation(request.script, request.tests)
-  if (scriptsDoc) {
-    docParts.push(scriptsDoc)
-  }
-
   const httpRequest: HTTPRequest = {
     type: 'http',
     id: generateId(`bruno:request:${pathPrefix}:${request.meta.name}`),
     name: request.meta.name,
-    documentation: docParts.join('\n').trim(),
+    documentation: '',
     tags: [],
     method: toHTTPMethod(request.method),
     url: request.url,
@@ -487,23 +423,6 @@ function brunoToHTTPRequest(request: BrunoRequest, pathPrefix: string): HTTPRequ
 
 /** Convert Bruno request to GraphQLRequest */
 function brunoToGraphQLRequest(request: BrunoRequest, pathPrefix: string): GraphQLRequest {
-  // Build documentation
-  const docParts: string[] = []
-  
-  if (request.docs) {
-    docParts.push(request.docs, '')
-  }
-
-  const authDoc = buildAuthDocumentation(request.auth)
-  if (authDoc) {
-    docParts.push(authDoc)
-  }
-
-  const scriptsDoc = buildScriptsDocumentation(request.script, request.tests)
-  if (scriptsDoc) {
-    docParts.push(scriptsDoc)
-  }
-
   const query = request.body.graphql?.query ?? ''
   const variables = request.body.graphql?.variables
 
@@ -520,7 +439,7 @@ function brunoToGraphQLRequest(request: BrunoRequest, pathPrefix: string): Graph
     type: 'graphql',
     id: generateId(`bruno:graphql:${pathPrefix}:${request.meta.name}`),
     name: request.meta.name,
-    documentation: docParts.join('\n').trim(),
+    documentation: '',
     tags: [],
     url: request.url,
     operationType,
@@ -560,6 +479,8 @@ export interface BrunoImportOptions {
    * If provided with environmentFolder, requests will be imported here instead of environmentFolder.
    */
   parentFolder?: Folder
+  /** Original URL the Bruno collection was fetched from (stored on ApiDocumentation.sourceUrl). */
+  sourceUrl?: string
 }
 
 export interface BrunoCollectionData {
@@ -658,6 +579,27 @@ export function importBruno(
   }
 
   // Case: No options - create new EnvironmentFolder as root
+  const brunoSource: BrunoSourceData = {
+    requests: requests.map(r => ({
+      path: r.path,
+      request: {
+        meta: r.request.meta,
+        method: r.request.method,
+        url: r.request.url,
+        auth: r.request.auth,
+        ...(r.request.docs !== undefined ? { docs: r.request.docs } : {}),
+        ...(r.request.script !== undefined ? { script: r.request.script } : {})
+      }
+    }))
+  }
+  if (data.collection) {
+    brunoSource.collection = { name: data.collection.name }
+  }
+  const apiDocumentation = brunoToApiDocumentation(brunoSource, {
+    name: collectionName,
+    ...(options.sourceUrl !== undefined ? { sourceUrl: options.sourceUrl } : {})
+  })
+
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
     id: generateId(`bruno:root:${collectionName}`),
@@ -666,7 +608,8 @@ export function importBruno(
     tags: [],
     configuration: {},
     environments: [environment],
-    items: rootItems
+    items: rootItems,
+    apiDocumentation
   }
 
   return rootFolder
@@ -750,13 +693,6 @@ export function importBrunoFromJson(
         result.push(folder)
       } else if (item.request) {
         const req = item.request
-        
-        // Build documentation
-        const docParts: string[] = []
-        if (req.docs) docParts.push(req.docs, '')
-        if (req.script?.req) docParts.push('## Pre-request Script', '', '```javascript', req.script.req, '```', '')
-        if (req.script?.res) docParts.push('## Post-response Script', '', '```javascript', req.script.res, '```', '')
-        if (req.tests) docParts.push('## Tests', '', '```javascript', req.tests, '```', '')
 
         // Convert headers
         const headers: KeyValue[] = (req.headers ?? [])
@@ -814,7 +750,7 @@ export function importBrunoFromJson(
                   type: 'graphql',
                   id: generateId(`bruno:graphql:${pathPrefix}/${item.name}`),
                   name: item.name,
-                  documentation: docParts.join('\n').trim(),
+                  documentation: '',
                   tags: [],
                   url: req.url,
                   operationType,
@@ -835,7 +771,7 @@ export function importBrunoFromJson(
           type: 'http',
           id: generateId(`bruno:request:${pathPrefix}/${item.name}`),
           name: item.name,
-          documentation: docParts.join('\n').trim(),
+          documentation: '',
           tags: [],
           method: toHTTPMethod(req.method),
           url: req.url,
@@ -886,6 +822,43 @@ export function importBrunoFromJson(
   }
 
   // Case: No options - create new EnvironmentFolder
+  // Flatten the JSON item tree into BrunoRequestData[] for the transformer.
+  const flatRequests: { path: string; request: BrunoRequestData }[] = []
+  function collect(items: typeof data.items, pathPrefix: string): void {
+    if (!items) return
+    for (const item of items) {
+      if (item.type === 'folder') {
+        collect(item.items as typeof data.items, pathPrefix ? `${pathPrefix}/${item.name}` : item.name)
+      } else if (item.request) {
+        const req = item.request
+        const bruReq: BrunoRequestData = {
+          meta: { name: item.name },
+          method: req.method,
+          url: req.url,
+          auth: { type: req.auth?.mode ?? 'none' }
+        }
+        if (req.docs !== undefined) bruReq.docs = req.docs
+        if (req.script) {
+          const script: { prerequest?: string; postresponse?: string } = {}
+          if (req.script.req !== undefined) script.prerequest = req.script.req
+          if (req.script.res !== undefined) script.postresponse = req.script.res
+          if (Object.keys(script).length > 0) bruReq.script = script
+        }
+        flatRequests.push({ path: pathPrefix ? `${pathPrefix}/${item.name}` : item.name, request: bruReq })
+      }
+    }
+  }
+  collect(data.items, '')
+
+  const brunoSource: BrunoSourceData = {
+    collection: { name: collectionName },
+    requests: flatRequests
+  }
+  const apiDocumentation = brunoToApiDocumentation(brunoSource, {
+    name: collectionName,
+    ...(options.sourceUrl !== undefined ? { sourceUrl: options.sourceUrl } : {})
+  })
+
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
     id: generateId(`bruno:root:${collectionName}`),
@@ -894,7 +867,8 @@ export function importBrunoFromJson(
     tags: [],
     configuration: {},
     environments: [environment],
-    items
+    items,
+    apiDocumentation
   }
 
   return rootFolder

@@ -32,6 +32,7 @@ import { normalizeValueType } from '../../utils/normalizeValueType'
 import { buildHttpResponseViewData } from './HTTPResponsePanel'
 import { HTTPRequestBodySection } from './HTTPRequestBodySection'
 import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabViewUtils'
+import { useCompiledDocumentation } from '../../hooks/useCompiledDocumentation'
 
 const authPaneContentStyle: CSSProperties = { height: '100%', boxSizing: 'border-box', padding: 8 }
 const methodSelectWrapperStyle: CSSProperties = { width: 90, flexShrink: 0 }
@@ -101,6 +102,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   const { selectedEnvId, environments, envColor } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
+  const compiled = useCompiledDocumentation(request)
+  const compiledDocumentation = compiled.matched ? compiled.markdown : request.documentation
   const previousEnvIdRef = useRef<string | null>(null)
   const sendButtonStyle: React.CSSProperties | undefined = envColor
     ? { backgroundColor: envColor, color: getContrastColor(envColor), borderColor: envColor }
@@ -740,7 +743,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         urlSection={urlSection}
         requestContent={requestContent}
         codeSnippetsContent={codeSnippetsContent}
-        documentation={request.documentation}
+        documentation={compiledDocumentation}
         notes={request.notes}
         onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
         isLoading={isSending}
