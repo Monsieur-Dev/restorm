@@ -4,7 +4,7 @@
 > ⚠️ **Deprecated**
 {{/if}}
 
-{{#if operation.match.method}}**`{{operation.match.method}}`** `{{operation.match.urlPattern}}`{{/if}}
+{{#if operation.match.method}}**`{{operation.match.method}}`** `{{#if server.basePath}}{{server.basePath}}{{/if}}{{operation.match.urlPattern}}`{{/if}}
 {{~#if operation.match.operationType}}**`{{operation.match.operationType}}`** `{{operation.match.operationName}}`{{/if}}
 {{~#if operation.match.serviceName}}**Service:** `{{operation.match.serviceName}}` · **Method:** `{{operation.match.operationName}}`{{/if}}
 {{~#if operation.match.soapAction}}**SOAPAction:** `{{operation.match.soapAction}}`{{/if}}

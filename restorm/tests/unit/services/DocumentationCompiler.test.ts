@@ -168,17 +168,19 @@ function makeAsyncapiDoc(): ApiDocumentation {
 // ============================================================================
 
 describe('findOperationForRoute — HTTP', () => {
-  it('matches a templated URL against a basePath-prefixed pattern', () => {
+  it('matches a templated URL against the operation urlPattern', () => {
+    // `basePath` is folded into the resolved `{{baseUrl}}` at import time,
+    // so request URL templates no longer carry the `/api` prefix.
     const doc = makeSwaggerDoc()
     const op = findOperationForRoute(doc, {
       type: 'http',
-      url: '{{baseUrl}}/api/pet/{{petId}}',
+      url: '{{baseUrl}}/pet/{{petId}}',
       method: 'GET'
     })
     expect(op?.operationId).toBe('getPetById')
   })
 
-  it('falls back to suffix-matching when basePath is missing from the URL', () => {
+  it('matches an absolute URL whose path aligns with urlPattern', () => {
     const doc = makeSwaggerDoc()
     const op = findOperationForRoute(doc, {
       type: 'http',
@@ -192,7 +194,7 @@ describe('findOperationForRoute — HTTP', () => {
     const doc = makeSwaggerDoc()
     const op = findOperationForRoute(doc, {
       type: 'http',
-      url: '{{baseUrl}}/api/pet',
+      url: '{{baseUrl}}/pet',
       method: 'POST'
     })
     expect(op?.operationId).toBe('addPet')
@@ -202,10 +204,19 @@ describe('findOperationForRoute — HTTP', () => {
     const doc = makeSwaggerDoc()
     const op = findOperationForRoute(doc, {
       type: 'http',
-      url: '{{baseUrl}}/api/store/order/1',
+      url: '{{baseUrl}}/store/order/1',
       method: 'GET'
     })
     expect(op).toBeUndefined()
+  })
+
+  it('rejects an edited URL whose segments no longer line up (no fuzzy suffix matching)', () => {
+    // Host-prefix tampering shouldn't accidentally match: `/petXXX/1` must
+    // not match `/pet/{petId}`, and neither should a wrong prefix like
+    // `/apiXXX/pet/1` when the spec sets basePath = `/api`.
+    const doc = makeSwaggerDoc()
+    expect(findOperationForRoute(doc, { type: 'http', url: '{{baseUrl}}/petXXX/1', method: 'GET' })).toBeUndefined()
+    expect(findOperationForRoute(doc, { type: 'http', url: '{{baseUrl}}/apiXXX/pet/1', method: 'GET' })).toBeUndefined()
   })
 })
 
@@ -305,7 +316,9 @@ describe('compileOperationMarkdown', () => {
     const md = compileOperationMarkdown(doc, firstOp)
 
     expect(md).toContain('# Find pet by ID')
-    expect(md).toContain('**`GET`** `/pet/{petId}`')
+    // The rendered URL includes the server's basePath (folded out of the
+    // operation's urlPattern to keep it reusable across environments).
+    expect(md).toContain('**`GET`** `/api/pet/{petId}`')
     expect(md).toContain('Returns a single pet.')
     expect(md).toContain('| `petId` | path | `integer` | ✓ | ID of pet to return |')
     expect(md).toContain('### `200`')
@@ -321,7 +334,7 @@ describe('compileOperationMarkdown', () => {
     const md = compileOperationMarkdown(doc, secondOp)
 
     expect(md).toContain('# Add a new pet')
-    expect(md).toContain('**`POST`** `/pet`')
+    expect(md).toContain('**`POST`** `/api/pet`')
     expect(md).not.toContain('## Parameters')
     // The referencedModels section should still render (Pet is referenced).
     expect(md).toContain('### `Pet`')
@@ -343,7 +356,7 @@ describe('compileGroupMarkdown', () => {
     const md = compileGroupMarkdown(doc, 'pet')
     expect(md).toContain('# pet')
     expect(md).toContain('Pet operations')
-    expect(md).toContain('**`GET`** `/pet/{petId}`')
+    expect(md).toContain('**`GET`** `/api/pet/{petId}`')
     expect(md).toContain('Find pet by ID')
   })
 
@@ -371,7 +384,7 @@ describe('compileDocumentationForRoute', () => {
     const doc = makeSwaggerDoc()
     const out = compileDocumentationForRoute(doc, {
       type: 'http',
-      url: '{{baseUrl}}/api/pet/{{petId}}',
+      url: '{{baseUrl}}/pet/{{petId}}',
       method: 'GET'
     })
     if (!out) throw new Error('expected a matched operation')

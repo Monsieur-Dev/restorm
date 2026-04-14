@@ -99,18 +99,17 @@ function matchHttpOperation(apiDoc: ApiDocumentation, route: RouteLike): Operati
   if (!route.url) return undefined
   const method = (route.method ?? '').toUpperCase()
   const requestPath = extractPath(route.url)
-  const basePath = apiDoc.server?.basePath ?? ''
 
+  // The Swagger importer folds `basePath` into the resolved `baseUrl`
+  // environment variable, so the request URL template no longer carries
+  // that prefix — matching only the operation's own `urlPattern` (strict,
+  // full-path, anchored) is both sufficient and correct. No fuzzy
+  // suffix-matching: an edited URL that deviates from the pattern should
+  // drop the doc match on purpose.
   for (const op of apiDoc.operations) {
     if (!op.match.urlPattern) continue
     if (op.match.method && method && op.match.method.toUpperCase() !== method) continue
-
-    const fullRegex = opPatternToRegex(`${basePath}${op.match.urlPattern}`)
-    const bareRegex = opPatternToRegex(op.match.urlPattern)
-    if (fullRegex.test(requestPath) || bareRegex.test(requestPath)) return op
-    // Fallback: allow the request path to carry an extra prefix before the urlPattern.
-    const suffixRegex = new RegExp(bareRegex.source.slice(1)) // drop leading `^`
-    if (suffixRegex.test(requestPath)) return op
+    if (opPatternToRegex(op.match.urlPattern).test(requestPath)) return op
   }
   return undefined
 }
@@ -325,7 +324,7 @@ export function compileGroupMarkdown(
   const group: GroupDocumentation | undefined = apiDoc.groups[groupName]
   if (!group) return ''
   const operations = apiDoc.operations.filter(op => op.group === groupName)
-  return tpl.group({ group, operations })
+  return tpl.group({ group, operations, basePath: apiDoc.server?.basePath ?? '' })
 }
 
 export function compileRootMarkdown(apiDoc: ApiDocumentation): string {

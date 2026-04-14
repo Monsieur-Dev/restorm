@@ -723,7 +723,6 @@ const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ fold
       additionalTabs={[configurationTab]}
       defaultActiveTabId="configuration"
       documentationOverride={compiledRootDocs}
-      alwaysShowDocs
       docsHeader={docsHeader}
     />
   )

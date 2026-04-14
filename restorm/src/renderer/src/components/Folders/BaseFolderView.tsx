@@ -29,8 +29,6 @@ export interface BaseFolderViewProps {
    * root.hbs output.
    */
   documentationOverride?: string
-  /** When true, the Docs tab stays visible even if `documentation` is empty. */
-  alwaysShowDocs?: boolean
   /** Node rendered above the Docs tab markdown (e.g., a Refresh button). */
   docsHeader?: React.ReactNode
 }
@@ -44,14 +42,13 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
   additionalTabs = [],
   defaultActiveTabId,
   documentationOverride,
-  alwaysShowDocs = false,
   docsHeader
 }) => {
   const { t } = useTranslation()
   const testIdBase = `folder-view-${folder.id}`
 
   const docs = documentationOverride ?? folder.documentation
-  const hasDocs = docs.trim().length > 0 || alwaysShowDocs
+  const hasDocs = docs.trim().length > 0
 
   const defaultTabId = defaultActiveTabId
     ?? additionalTabs[0]?.id

@@ -57,7 +57,7 @@
 
 {{#if description}}{{description}}
 
-{{/if}}{{#if operations.length}}{{#each operations}}- {{#if this.match.method}}**`{{this.match.method}}`** `{{this.match.urlPattern}}`{{/if}}{{#if this.match.operationType}}**`{{this.match.operationType}}`** `{{this.match.operationName}}`{{/if}}{{#if this.match.serviceName}}**`{{this.match.serviceName}}.{{this.match.operationName}}`**{{/if}}{{#if this.match.event}}**`{{this.match.event}}`**{{/if}} — {{#if this.summary}}{{this.summary}}{{else}}{{#if this.operationId}}{{this.operationId}}{{else}}_(no summary)_{{/if}}{{/if}}
+{{/if}}{{#if operations.length}}{{#each operations}}- {{#if this.match.method}}**`{{this.match.method}}`** `{{#if ../../server.basePath}}{{../../server.basePath}}{{/if}}{{this.match.urlPattern}}`{{/if}}{{#if this.match.operationType}}**`{{this.match.operationType}}`** `{{this.match.operationName}}`{{/if}}{{#if this.match.serviceName}}**`{{this.match.serviceName}}.{{this.match.operationName}}`**{{/if}}{{#if this.match.event}}**`{{this.match.event}}`**{{/if}} — {{#if this.summary}}{{this.summary}}{{else}}{{#if this.operationId}}{{this.operationId}}{{else}}_(no summary)_{{/if}}{{/if}}
 {{/each}}{{/if}}
 
 {{/each}}
@@ -67,6 +67,6 @@
 ## Operations
 
 {{#each ungroupedOperations}}
-- {{#if this.match.method}}**`{{this.match.method}}`** `{{this.match.urlPattern}}`{{/if}}{{#if this.match.operationType}}**`{{this.match.operationType}}`** `{{this.match.operationName}}`{{/if}}{{#if this.match.serviceName}}**`{{this.match.serviceName}}.{{this.match.operationName}}`**{{/if}}{{#if this.match.event}}**`{{this.match.event}}`**{{/if}} — {{#if this.summary}}{{this.summary}}{{else}}{{#if this.operationId}}{{this.operationId}}{{else}}_(no summary)_{{/if}}{{/if}}
+- {{#if this.match.method}}**`{{this.match.method}}`** `{{#if ../server.basePath}}{{../server.basePath}}{{/if}}{{this.match.urlPattern}}`{{/if}}{{#if this.match.operationType}}**`{{this.match.operationType}}`** `{{this.match.operationName}}`{{/if}}{{#if this.match.serviceName}}**`{{this.match.serviceName}}.{{this.match.operationName}}`**{{/if}}{{#if this.match.event}}**`{{this.match.event}}`**{{/if}} — {{#if this.summary}}{{this.summary}}{{else}}{{#if this.operationId}}{{this.operationId}}{{else}}_(no summary)_{{/if}}{{/if}}
 {{/each}}
 {{/if}}

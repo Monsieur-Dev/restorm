@@ -146,22 +146,33 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
     setResponseTabId(tabId)
   }, [])
 
+  // The Docs tab is hidden when there is no documentation to show — both the
+  // compiled-from-apiDocumentation variant and the user-authored
+  // `request.documentation` funnel through the same prop, so an empty string
+  // means "nothing to render".
+  const hasDocs = (documentation ?? '').trim().length > 0
+
   // Build request tabs (Request, Docs, Notes, Code Snippets)
   const requestTabs: Tab[] = useMemo(() => {
     const tabs: Tab[] = [
       {
-      id: 'request',
-      label: t('requestTab.tabs.requestLayout'),
-      useScrollableElement: false,
-      content: requestContent
-      },
-      {
-      id: 'docs',
-      label: t('requestTab.tabs.docs'),
-      useScrollableElement: false,
-      content: <MarkdownViewer value={documentation ?? ''} data-testid="base-request-markdown-viewer-docs" />
-      },
-      {
+        id: 'request',
+        label: t('requestTab.tabs.requestLayout'),
+        useScrollableElement: false,
+        content: requestContent
+      }
+    ]
+
+    if (hasDocs) {
+      tabs.push({
+        id: 'docs',
+        label: t('requestTab.tabs.docs'),
+        useScrollableElement: false,
+        content: <MarkdownViewer value={documentation ?? ''} data-testid="base-request-markdown-viewer-docs" />
+      })
+    }
+
+    tabs.push({
       id: 'notes',
       label: t('requestTab.tabs.notes'),
       useScrollableElement: false,
@@ -173,17 +184,22 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
           data-testid="base-request-markdown-editor-notes"
         />
       )
-      },
-      {
+    })
+
+    tabs.push({
       id: 'codeSnippets',
       label: t('requestTab.tabs.codeSnippets'),
       useScrollableElement: false,
       content: <MarkdownViewer value={codeSnippetsContent} data-testid="base-request-markdown-viewer-code-snippets" />
-      }
-    ]
+    })
 
     return tabs
-  }, [requestId, notes, requestContent, documentation, handleNotesChange, codeSnippetsContent, t])
+  }, [requestId, notes, requestContent, documentation, hasDocs, handleNotesChange, codeSnippetsContent, t])
+
+  // If the active tab vanishes (e.g., user was on Docs and the request's URL
+  // changed so no operation matches anymore), fall back to the Request tab
+  // during render — avoids a sync setState inside an effect.
+  const effectiveActiveTabId = activeTabId === 'docs' && !hasDocs ? 'request' : activeTabId
 
   // Format JSON for display
   const formattedJson = useMemo(() => {
@@ -327,7 +343,8 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
     setCompactTabId(null)
   }
 
-  const effectiveCompactTabId = compactTabId ?? activeTabId
+  const compactSelection = compactTabId ?? activeTabId
+  const effectiveCompactTabId = compactSelection === 'docs' && !hasDocs ? 'request' : compactSelection
 
   const mergedTabs = useMemo(() => {
     if (!useCompactLayout) return requestTabs
@@ -391,7 +408,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
               <Tabs
                 data-testid="base-request-tabs-request"
                 tabs={requestTabs}
-                activeTabId={activeTabId}
+                activeTabId={effectiveActiveTabId}
                 onTabChange={setActiveTabId}
                 keepMounted
               />
@@ -423,7 +440,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
           <Tabs
             data-testid="base-request-tabs-request"
             tabs={requestTabs}
-            activeTabId={activeTabId}
+            activeTabId={effectiveActiveTabId}
             onTabChange={setActiveTabId}
             keepMounted
           />

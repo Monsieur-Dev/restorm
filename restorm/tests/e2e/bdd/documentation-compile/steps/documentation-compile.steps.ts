@@ -24,14 +24,17 @@ When('I select the imported root folder', async ({ page }) => {
 
 Then('the folder Docs tab should be populated with compiled markdown', async ({ page }) => {
   // Scope to the folder-view tab bar (data-testid prefix
-  // `folder-view-<id>-tabs`) to avoid matching the request-view Docs tab
-  // that can stick around from a previous scenario.
+  // `folder-view-<id>-tabs`) so we don't pick up a request-view Docs tab
+  // that the workbench may have auto-opened for one of the imported
+  // requests in the background.
   const folderTabs = page.locator('[data-testid^="folder-view-"][data-testid$="-tabs"]').first()
+  await expect(folderTabs).toBeVisible({ timeout: 10000 })
   const docsTab = folderTabs.locator('[role="tab"]').filter({ hasText: /^Docs$/ }).first()
   if (await docsTab.count() > 0) {
     await docsTab.click()
   }
-  const docsViewer = page.locator('[data-testid$="-markdown-viewer-docs"]').first()
+  // The folder-view markdown viewer uses `folder-view-<id>-markdown-viewer-docs`.
+  const docsViewer = page.locator('[data-testid^="folder-view-"][data-testid$="-markdown-viewer-docs"]').first()
   await expect(docsViewer).toBeVisible({ timeout: 10000 })
   // The compiled markdown always starts with the API title (`# Title`).
   // Check the rendered content has at least one H1 heading.

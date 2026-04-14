@@ -83,13 +83,27 @@ describe('SwaggerImportService', () => {
       expect(result.environments.length).toBeGreaterThan(0)
     })
 
-    it('should create environment with baseUrl variable', () => {
+    it('should create a structured environment with scheme/host/port/baseRoute on the root and baseUrl on each scheme sub-env', () => {
       const result = importSwaggerFromJson(swaggerJson) as EnvironmentFolder
       // Environment name is extracted from the host (localhost:8080 -> localhost)
       const env = result.environments.find((e) => e.name === 'localhost')
-
       expect(env).toBeDefined()
-      expect(env?.variables.some((v) => v.key === 'baseUrl')).toBe(true)
+
+      // Structural root vars — the resolved baseUrl is composed from these
+      // in each scheme sub-env.
+      const rootKeys = env?.variables.map((v) => v.key) ?? []
+      expect(rootKeys).toContain('scheme')
+      expect(rootKeys).toContain('host')
+      expect(rootKeys).toContain('port')
+      expect(rootKeys).toContain('baseRoute')
+      expect(rootKeys).not.toContain('baseUrl')
+
+      const subEnvs = env?.subEnvironments ?? []
+      expect(subEnvs.length).toBeGreaterThan(0)
+      for (const sub of subEnvs) {
+        const baseUrlVar = sub.variables.find((v) => v.key === 'baseUrl')
+        expect(baseUrlVar?.value.toString()).toBe('{{scheme}}://{{host}}:{{port}}{{baseRoute}}')
+      }
     })
 
     it('should create folders for each tag', () => {

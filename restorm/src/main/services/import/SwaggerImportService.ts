@@ -356,9 +356,16 @@ function extractPathParams(parameters: SwaggerParameter[]): KeyValue[] {
   return result
 }
 
-/** Build URL with path parameters as placeholders */
-function buildUrl(basePath: string, path: string, parameters: SwaggerParameter[]): string {
-  let url = `{{baseUrl}}${basePath}${path}`
+/**
+ * Build URL with path parameters as placeholders.
+ *
+ * `basePath` is intentionally NOT prepended here: the Swagger importer folds
+ * it into the resolved `baseUrl` environment variable (via the structured
+ * `scheme`/`host`/`port`/`baseRoute` env) so adding it to the request URL
+ * template would duplicate the `/api` prefix at send time.
+ */
+function buildUrl(path: string, parameters: SwaggerParameter[]): string {
+  let url = `{{baseUrl}}${path}`
 
   // Replace path parameters with environment variable placeholders
   const pathParams = parameters.filter((p) => p.in === 'path')
@@ -375,7 +382,6 @@ function operationToRequest(
   path: string,
   method: string,
   operation: SwaggerOperation,
-  basePath: string,
   spec: SwaggerSpec
 ): HTTPRequest {
   const parameters = operation.parameters ?? []
@@ -387,7 +393,7 @@ function operationToRequest(
     documentation: '',
     tags: operation.tags ?? [],
     method: toHTTPMethod(method),
-    url: buildUrl(basePath, path, parameters),
+    url: buildUrl(path, parameters),
     headers: extractHeaders(parameters),
     params: extractParams(parameters),
     pathParams: extractPathParams(parameters)
@@ -447,37 +453,78 @@ function extractDomainName(urlOrHost: string): string {
 }
 
 /**
- * Create a new environment for the imported Swagger spec
- * The environment name is the domain from the host URL
- * If multiple schemes are defined, sub-environments are created for each
+ * Split a Swagger `host` field (`"example.com:8080"`) into its hostname and
+ * port components. Either can be empty.
  */
-function createSwaggerEnvironment(spec: SwaggerSpec, defaultBaseUrl: string): Environment {
+function splitHostAndPort(host: string): { hostname: string; port: string } {
+  const [hostname = '', port = ''] = host.split(':')
+  return { hostname, port }
+}
+
+/**
+ * Create a new environment for the imported Swagger spec.
+ *
+ * Structured layout (target behavior: `{{baseUrl}}` resolves to the full
+ * `scheme://host:port/baseRoute` — per-request URLs therefore carry no
+ * basePath of their own):
+ *
+ *   localhost (root)
+ *     scheme     = first scheme from the spec
+ *     host       = hostname parsed from `spec.host`
+ *     port       = port parsed from `spec.host`
+ *     baseRoute  = spec.basePath
+ *   https (sub-env)  — one per scheme in the spec
+ *     scheme     = "https"
+ *     baseUrl    = "{{scheme}}://{{host}}:{{port}}{{baseRoute}}"
+ *
+ * When the caller passes `options.baseUrl`, that raw value replaces the whole
+ * structure (single-env, `baseUrl` set directly). This keeps the explicit
+ * override simple and predictable.
+ */
+function createSwaggerEnvironment(spec: SwaggerSpec, overrideBaseUrl: string | undefined): Environment {
   const host = spec.host ?? ''
   const basePath = spec.basePath ?? ''
   const schemes = spec.schemes ?? []
-  
-  // Extract domain name for the environment name
-  const domainName = extractDomainName(host !== '' ? host : defaultBaseUrl)
-  
-  // Build sub-environments for each scheme if multiple schemes exist
-  const subEnvironments: Environment['subEnvironments'] = []
-  
-  if (schemes.length > 1) {
-    // Multiple schemes - create a sub-environment for each
-    for (const scheme of schemes) {
-      const schemeBaseUrl = `${scheme}://${host}${basePath}`
-      subEnvironments.push({
-        id: generateId(`env:root:${domainName}:${scheme}`),
-        name: scheme,
-        variables: [createTypedKeyValue({ key: 'baseUrl', value: schemeBaseUrl, enabled: true })]
-      })
+  const { hostname, port } = splitHostAndPort(host)
+
+  const domainName = extractDomainName(host !== '' ? host : (overrideBaseUrl ?? ''))
+
+  // Explicit override — bypass the structured layout.
+  if (overrideBaseUrl !== undefined) {
+    return {
+      id: generateId(`env:root:${domainName}`),
+      name: domainName,
+      variables: [createTypedKeyValue({ key: 'baseUrl', value: overrideBaseUrl, enabled: true })],
+      subEnvironments: []
     }
   }
-  
+
+  const defaultScheme = schemes[0] ?? 'https'
+
+  const rootVariables: ReturnType<typeof createTypedKeyValue>[] = [
+    createTypedKeyValue({ key: 'scheme', value: defaultScheme, enabled: true })
+  ]
+  if (hostname !== '') rootVariables.push(createTypedKeyValue({ key: 'host', value: hostname, enabled: true }))
+  if (port !== '') rootVariables.push(createTypedKeyValue({ key: 'port', value: port, enabled: true }))
+  if (basePath !== '') rootVariables.push(createTypedKeyValue({ key: 'baseRoute', value: basePath, enabled: true }))
+
+  // Build a `{{scheme}}://{{host}}[:{{port}}][{{baseRoute}}]` template whose
+  // literal parts are only emitted when the corresponding root var exists.
+  const baseUrlTemplate = `{{scheme}}://{{host}}${port !== '' ? ':{{port}}' : ''}${basePath !== '' ? '{{baseRoute}}' : ''}`
+
+  const subEnvironments: Environment['subEnvironments'] = (schemes.length > 0 ? schemes : [defaultScheme]).map(scheme => ({
+    id: generateId(`env:root:${domainName}:${scheme}`),
+    name: scheme,
+    variables: [
+      createTypedKeyValue({ key: 'scheme', value: scheme, enabled: true }),
+      createTypedKeyValue({ key: 'baseUrl', value: baseUrlTemplate, enabled: true })
+    ]
+  }))
+
   return {
     id: generateId(`env:root:${domainName}`),
     name: domainName,
-    variables: [createTypedKeyValue({ key: 'baseUrl', value: defaultBaseUrl, enabled: true })],
+    variables: rootVariables,
     subEnvironments
   }
 }
@@ -485,7 +532,7 @@ function createSwaggerEnvironment(spec: SwaggerSpec, defaultBaseUrl: string): En
 /**
  * Build the imported folder items from a Swagger spec (tag folders and requests)
  */
-function buildSwaggerFolderItems(spec: SwaggerSpec, basePath: string): Folder['items'] {
+function buildSwaggerFolderItems(spec: SwaggerSpec): Folder['items'] {
   // Create tag folders map
   const tagFolders = new Map<string, Folder>()
 
@@ -520,7 +567,7 @@ function buildSwaggerFolderItems(spec: SwaggerSpec, basePath: string): Folder['i
       const operation = pathItem[method]
       if (!operation) continue
 
-      const request = operationToRequest(path, method, operation, basePath, spec)
+      const request = operationToRequest(path, method, operation, spec)
       const tags = operation.tags ?? []
 
       if (tags.length === 0) {
@@ -591,16 +638,13 @@ export interface SwaggerImportResult {
  * - parentFolder only: Throws error (needs an EnvironmentFolder for the environment)
  */
 export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions = {}): EnvironmentFolder {
-  const basePath = spec.basePath ?? ''
-  const defaultScheme = spec.schemes?.[0] ?? 'https'
-  const defaultHost = spec.host ?? 'localhost'
-  const defaultBaseUrl = options.baseUrl ?? `${defaultScheme}://${defaultHost}`
+  // Create the environment for this import. When `options.baseUrl` is provided
+  // it bypasses the structured scheme/host/port/baseRoute layout.
+  const newEnvironment = createSwaggerEnvironment(spec, options.baseUrl)
 
-  // Create the environment for this import
-  const newEnvironment = createSwaggerEnvironment(spec, defaultBaseUrl)
-
-  // Build the imported items (tag folders and requests)
-  const importedItems = buildSwaggerFolderItems(spec, basePath)
+  // Build the imported items (tag folders and requests) — request URLs no
+  // longer carry `basePath`; it's absorbed by the resolved `{{baseUrl}}`.
+  const importedItems = buildSwaggerFolderItems(spec)
 
   // Case: parentFolder provided without environmentFolder - error
   if (options.parentFolder && !options.environmentFolder) {
