@@ -27,8 +27,14 @@ Given('I have created a new empty file', async ({ page, electronApp, tempFilePat
   // Generic system modal mocking: configure the save file dialog for the "New" flow.
   await configureNextSaveFileDialogForE2E(electronApp, { kind: 'saveFile', path: tempFilePath })
 
-  // Trigger File > New via shortcut (defined on the MenuItem)
+  // Trigger File > New via shortcut (defined on the MenuItem) — this opens
+  // the save-options modal so the user picks file/folder + format up front.
   await page.keyboard.press('Control+N')
+
+  // Confirm with the default options (File + YAML) so the empty collection
+  // is written to tempFilePath via the mocked save dialog.
+  await page.waitForSelector('[data-testid="save-options-modal"]', { timeout: 5000 })
+  await page.locator('[data-testid="save-confirm-button"]').first().click()
 
   // Wait for workspace to be visible (a file is open)
   await page.waitForSelector('text=WORKSPACE', { timeout: 15000 })
