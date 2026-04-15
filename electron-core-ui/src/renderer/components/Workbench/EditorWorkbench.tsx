@@ -401,33 +401,50 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		clearState: clearStateImpl
 	}), [saveStateImpl, loadStateImpl, clearStateImpl]);
 	
+	// Tracks whether the initial restore (if any) has completed. The
+	// autosave writer below gates on this flag so the empty default tree
+	// at mount doesn't clobber the persisted state before `loadState` has
+	// had a chance to run.
+	const restoreCompleteRef = useRef(false);
+
 	// Autosave: restore state on mount
 	useEffect(() => {
 		if (!autosave || !workbenchId || !onRebuildTab || restoredRef.current) {
 			return;
 		}
 		restoredRef.current = true;
-		
+
 		const restore = async (): Promise<void> => {
 			const restoredTree = await loadStateImpl();
 			if (restoredTree && onChange) {
 				onChange(restoredTree);
 			}
 			onStateRestored?.(restoredTree);
+			restoreCompleteRef.current = true;
 		};
 		void restore();
 	}, [autosave, workbenchId, onRebuildTab, loadStateImpl, onChange, onStateRestored]);
-	
-	// Autosave: save state on tree changes
+
+	// Autosave: save state on tree changes. When the tree becomes empty
+	// (the user closed every tab) we clear the persisted state instead of
+	// calling `saveWorkbenchState` — otherwise the previously-saved tab
+	// stays in storage and gets resurrected the next time the file is
+	// reopened.
 	useEffect(() => {
 		if (!autosave || !workbenchId) {
 			return;
 		}
-		// Skip saving empty trees
-		if (tree.groups.length === 0) {
+		// Wait until the initial restore has had a chance to run before we
+		// start overwriting storage — otherwise the empty default tree at
+		// mount wipes the persisted state.
+		if (!restoreCompleteRef.current) {
 			return;
 		}
-		void saveWorkbenchState(workbenchId, tree);
+		if (tree.groups.length === 0) {
+			void clearWorkbenchState(workbenchId);
+		} else {
+			void saveWorkbenchState(workbenchId, tree);
+		}
 	}, [autosave, workbenchId, tree]);
 
 	// Helper to update focus in controlled/uncontrolled modes and notify parent

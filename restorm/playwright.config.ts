@@ -61,6 +61,18 @@ const sidebarSyncTestDir = defineBddConfig({
   outputDir: '.features-gen/sidebar-sync'
 })
 
+const workbenchPersistenceTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/workbench-persistence/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/workbench-persistence/steps/**/*.ts',
+    // Reuse the sidebar-sync verbs (`the file is loaded`,
+    // `I expand … in the sidebar`, `I open … from the sidebar`).
+    'tests/e2e/bdd/sidebar-sync/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/petstore-file.fixture.ts'
+  ],
+  outputDir: '.features-gen/workbench-persistence'
+})
+
 const navigationTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/navigation/features/**/*.feature',
   steps: ['tests/e2e/bdd/navigation/steps/**/*.ts', 'tests/e2e/bdd/fixtures/petstore-file.fixture.ts'],
@@ -148,6 +160,10 @@ export default defineConfig({
     {
       name: 'sidebar-sync',
       testDir: sidebarSyncTestDir
+    },
+    {
+      name: 'workbench-persistence',
+      testDir: workbenchPersistenceTestDir
     },
     {
       name: 'icon-change',
