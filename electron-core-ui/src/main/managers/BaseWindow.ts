@@ -365,25 +365,36 @@ export abstract class BaseWindow {
       // Intercept keyboard shortcuts before Chromium handles them
       // This allows shortcuts like Ctrl+N, Ctrl+O to reach the renderer
       this.window.webContents.on('before-input-event', (event, input) => {
-        if (input.type === 'keyDown') {
-          // Handle DevTools shortcuts if enabled
-          if (devToolsEnabled) {
-            const isDevToolsShortcut =
-              input.key === 'F12' ||
-              (input.control && input.shift && input.key === 'I') ||
-              (input.meta && input.alt && input.key === 'I')
-            
-            if (isDevToolsShortcut && this.window) {
-              this.window.webContents.toggleDevTools()
-              event.preventDefault()
-              return
-            }
-          }
+        // DevTools shortcuts stay on `keyDown` — `toggleDevTools()` doesn't
+        // fire reliably from the earlier `rawKeyDown` stage on Linux.
+        // Intentionally NOT calling `event.preventDefault()` here: letting
+        // Chromium dispatch the DevTools shortcut naturally (on top of our
+        // explicit `toggleDevTools()`) avoids the Linux input-pipeline
+        // freeze that `preventDefault` at the `keyDown` stage causes, and
+        // the duplicate "toggle" is harmless because Chromium's built-in
+        // F12 handling doesn't fire when we open DevTools ourselves.
+        if (input.type === 'keyDown' && devToolsEnabled) {
+          const isDevToolsShortcut =
+            input.key === 'F12' ||
+            (input.control && input.shift && input.key === 'I') ||
+            (input.meta && input.alt && input.key === 'I')
 
-          // Only intercept specific shortcuts that the renderer has registered
-          // These are shortcuts that Chromium would handle by default (Ctrl+N, Ctrl+O, etc.)
+          if (isDevToolsShortcut && this.window) {
+            this.window.webContents.toggleDevTools()
+            return
+          }
+        }
+
+        // Registered Ctrl/Meta+letter shortcuts are intercepted on
+        // `rawKeyDown` (earliest stage, before Chromium's modifier / IME
+        // pipeline runs). Calling `preventDefault` at the later `keyDown`
+        // stage leaves Chromium's input pipeline in a stuck composition-
+        // like state on Linux, swallowing the next printable keystroke in
+        // every text field (plain <input> and Monaco) until any
+        // non-character key resynchronises things.
+        if (input.type === 'rawKeyDown') {
           const isModifiedKey = input.control || input.meta
-          
+
           if (isModifiedKey && input.key.length === 1 && this.window) {
             const webContentsId = this.window.webContents.id
             const shortcutsToIntercept = BaseWindow.interceptedShortcutsPerWindow.get(webContentsId) ?? new Set<string>()
@@ -399,7 +410,7 @@ export abstract class BaseWindow {
               if (input.alt) parts.push('Alt')
               parts.push(input.key.toUpperCase())
               const shortcut = parts.join('+')
-              
+
               // Send to renderer and prevent default Chromium behavior
               this.window.webContents.send('keyboard-shortcut', shortcut)
               event.preventDefault()
