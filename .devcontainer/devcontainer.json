@@ -1,0 +1,35 @@
+{
+  "name": "gitable E2E desktop (XFCE + KasmVNC)",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "devcontainer",
+  // Fixed container path — independent of host layout (see docker-compose.yml).
+  "workspaceFolder": "/workspaces/gitable",
+
+  // Keep the image's own entrypoint (s6-overlay) so Xorg/XFCE/KasmVNC start.
+  // Without this, VS Code replaces the command with `sleep infinity` and
+  // the desktop never comes up.
+  "overrideCommand": false,
+
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": {
+      "label": "Webtop (desktop in browser, HTTP)",
+      "onAutoForward": "openBrowser"
+    }
+  },
+
+  "postCreateCommand": "bash .devcontainer/postinstall.sh",
+  "postStartCommand": "bash .devcontainer/forward-test-ports.sh",
+
+  "remoteUser": "root",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-playwright.playwright"
+      ]
+    }
+  }
+}

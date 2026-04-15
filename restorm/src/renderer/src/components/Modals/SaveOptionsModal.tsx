@@ -64,8 +64,8 @@ export function SaveOptionsModal({
     setFormat(value)
   }, [])
 
-  const handleSave = useCallback(() => {
-    void onSave({ mode, format })
+  const handleSave = useCallback(async () => {
+    await onSave({ mode, format })
     onClose()
   }, [mode, format, onSave, onClose])
 
@@ -182,7 +182,7 @@ export function SaveOptionsModal({
           <Button onClick={onClose} secondary data-testid="save-cancel-button">
             {t('common.cancel', 'Cancel')}
           </Button>
-          <Button onClick={handleSave} data-testid="save-confirm-button">
+          <Button onClick={() => { void handleSave() }} data-testid="save-confirm-button">
             {t('common.save', 'Save')}
           </Button>
         </div>

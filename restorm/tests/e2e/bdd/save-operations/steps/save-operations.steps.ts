@@ -79,14 +79,19 @@ When('I select YAML format', async ({ page }) => {
 })
 
 When('I click the Save button', async ({ page }) => {
+  await page.screenshot({ path: 'test-results/debug-before-save-click.png', fullPage: true })
   const saveBtn = page.locator('[data-testid="save-confirm-button"]').first()
   await expect(saveBtn).toBeVisible({ timeout: 5000 })
   await saveBtn.click()
-  // Wait for modal to close and file system operation to complete
+  // Wait for modal to close and file system operation to complete.
+  // The save can be slow on constrained environments (e.g. devcontainer +
+  // Xvfb) — wait generously for modal teardown, then give the final fs
+  // flushes a moment to settle.
   await page.waitForFunction(
-    () => document.querySelectorAll('[data-testid="modal"]').length === 0,
-    { timeout: 10000 }
+    () => document.querySelectorAll('[data-testid="save-options-modal"]').length === 0,
+    { timeout: 60000 }
   )
+  await page.waitForTimeout(500)
   await page.screenshot({ path: 'test-results/debug-after-save-as.png' })
 })
 

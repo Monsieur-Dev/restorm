@@ -1,0 +1,69 @@
+services:
+  devcontainer:
+    # Multi-arch (amd64 + arm64), XFCE desktop exposed via KasmVNC on :3000.
+    # Docs: https://docs.linuxserver.io/images/docker-webtop
+    image: lscr.io/linuxserver/webtop:ubuntu-xfce
+    # Shared memory bump — Chromium / Electron crash with the default 64MB.
+    shm_size: '2gb'
+    ports:
+      # Desktop in the browser: http://localhost:3000
+      - '3000:3000'
+      # NOTE: port 3001 (webtop HTTPS, optional) is intentionally NOT published
+      # — it collides with restorm-socketio's port on the host, and the
+      # devcontainer forwards localhost:3001 to that test service instead
+      # (see .devcontainer/forward-test-ports.sh).
+    volumes:
+      # Mount the repo root (parent of this compose file) at a fixed container
+      # path so nothing inside the container depends on the host layout
+      # (Windows vs Linux, user home, clone location, etc.).
+      - ..:/workspaces/gitable:cached
+      # Shadow every node_modules path with a named volume. Docker applies
+      # the more-specific mount, so the host's (potentially Windows-built)
+      # node_modules is hidden and the container gets its own Linux-native
+      # copy, which also persists across rebuilds (faster `pnpm install`).
+      - node-modules-root:/workspaces/gitable/node_modules
+      - node-modules-core-ui:/workspaces/gitable/electron-core-ui/node_modules
+      - node-modules-gitable:/workspaces/gitable/gitable/node_modules
+      - node-modules-demo:/workspaces/gitable/demo/node_modules
+      - node-modules-restorm:/workspaces/gitable/restorm/node_modules
+      # pnpm global store — keep the content-addressable cache out of the
+      # bind mount too, so resolving packages stays fast.
+      - pnpm-store:/root/.local/share/pnpm/store
+      # Persistent user state for the desktop session (panel layout, etc.).
+      - webtop-config:/config
+      # Host Docker socket — lets the container's `docker` CLI talk to the
+      # host daemon. Note: sibling containers spawned via this socket (e.g.
+      # restorm's testcontainers-based E2E) bind-mount against the HOST
+      # filesystem, not /workspaces/gitable — run those flows on the host
+      # or in CI, not from inside this devcontainer.
+      - /var/run/docker.sock:/var/run/docker.sock
+    working_dir: /workspaces/gitable
+    # Join the external `gitable-tests` network so we can reach the sibling
+    # test containers (restorm-petstore, restorm-graphql, …) by their service
+    # name — `localhost` doesn't reach sibling containers, and on Docker
+    # Desktop / WSL2 `host.docker.internal` routing to host-published ports is
+    # unreliable. Create once on the host: `docker network create gitable-tests`.
+    networks:
+      - default
+      - gitable-tests
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - TITLE=gitable E2E
+      # No CUSTOM_USER / PASSWORD → desktop is reachable without auth on
+      # port 3000 for local development. Set them for CI or shared envs.
+
+networks:
+  default:
+  gitable-tests:
+    external: true
+
+volumes:
+  webtop-config:
+  node-modules-root:
+  node-modules-core-ui:
+  node-modules-gitable:
+  node-modules-demo:
+  node-modules-restorm:
+  pnpm-store:
