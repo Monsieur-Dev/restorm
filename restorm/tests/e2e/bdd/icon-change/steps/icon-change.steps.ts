@@ -12,6 +12,20 @@ Given('the file is loaded', async ({ page }) => {
   ).toBeVisible({ timeout: 15000 })
 })
 
+When('I close every open tab', async ({ page }) => {
+  // Middle-click tabs one at a time until none remain. Removes any state
+  // leftover from prior scenarios that share the same Electron app instance,
+  // so single-tab assertions (e.g. breadcrumb selectors) aren't disturbed.
+  const tabLocator = page.locator('.tab[role="tab"]')
+  for (let i = 0; i < 50; i += 1) {
+    const count = await tabLocator.count()
+    if (count === 0) return
+    await tabLocator.first().click({ button: 'middle' })
+    await expect(tabLocator).toHaveCount(count - 1, { timeout: 5000 })
+  }
+  throw new Error('Failed to close all tabs after 50 middle-click attempts')
+})
+
 Given('the title does not contain {string}', async ({ page }, text: string) => {
   const title = await page.title()
   expect(title).not.toContain(text)

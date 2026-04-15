@@ -179,6 +179,14 @@ export interface RestormWorkbenchProps {
   navigationEnabled?: boolean | undefined
   /** CSS selector for the element to anchor the tab switcher overlay to */
   tabSwitcherAnchorSelector?: string | undefined
+  /**
+   * Absolute path of the currently open file — plumbed down to
+   * EnvironmentProvider so per-request environment selections persist
+   * across sessions in the user config.
+   */
+  filePath?: string | undefined
+  /** Build the tree path for a request ID (used as the per-request persistence key). */
+  getRequestPath?: ((requestId: string) => string | null) | undefined
 }
 
 /** Imperative handle for Workbench component */
@@ -217,7 +225,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   getFolderById,
   getEnvironmentFolderById,
   navigationEnabled,
-  tabSwitcherAnchorSelector
+  tabSwitcherAnchorSelector,
+  filePath,
+  getRequestPath
 }, ref) => {
   const { t } = useTranslation()
   const editorWorkbenchRef = useRef<EditorWorkbenchHandle>(null)
@@ -585,13 +595,23 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       ? (tag: string, color: string | null): void => { onTagColorChange(envFolderId, tag, color) }
       : undefined
 
+    // Build the per-request persistence key for the environment dropdown.
+    // Falls back to `undefined` when the tab isn't tied to a file+request
+    // pair, which disables persistence.
+    const envPersistenceKey = (requestId: string): { filePath: string; requestPath: string } | undefined => {
+      if (!filePath || !getRequestPath) return undefined
+      const requestPath = getRequestPath(requestId)
+      if (!requestPath) return undefined
+      return { filePath, requestPath }
+    }
+
     // HTTP request tab
     if (isHTTPRequestTab(effectiveTab)) {
       // Get reactive request if available, otherwise use tab's copy
       const reactiveRequest = getRequestById?.(effectiveTab.request.id)
       const request = (reactiveRequest?.type === 'http') ? reactiveRequest : effectiveTab.request
       return (
-        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors}>
+        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
           <RequestTabWithHistory
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -627,7 +647,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isGraphQLRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors}>
+        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
           <RequestTabWithHistory
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -659,7 +679,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isGrpcRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors}>
+        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
           <RequestTabWithHistory
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -691,7 +711,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isSoapRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors}>
+        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
           <RequestTabWithHistory
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -723,7 +743,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isWebSocketRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors}>
+        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
           <RequestTabWithHistory
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -753,7 +773,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [onBreadcrumbClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, t, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs])
+  }, [onBreadcrumbClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, t, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, filePath, getRequestPath])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(

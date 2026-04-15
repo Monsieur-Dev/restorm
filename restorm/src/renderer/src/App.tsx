@@ -58,6 +58,7 @@ import {
   isAnyFolder
 } from '../../shared/types/collections'
 import { buildRequestPath } from './utils/requestPath'
+import { renameStoredRequestPath, renameSessionEnvSelection } from './services/environmentSelectionStore'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
@@ -404,6 +405,15 @@ const App: React.FC = () => {
   const getFolderByIdCb = useCallback((id: string) => findFolderById(rootItems, id), [rootItems])
   const getEnvironmentFolderByIdCb = useCallback((id: string) => findEnvironmentFolderById(rootItems, id), [rootItems])
 
+  const environmentFolderCollectionsRef = useRef(environmentFolderCollections)
+  useEffect(() => {
+    environmentFolderCollectionsRef.current = environmentFolderCollections
+  }, [environmentFolderCollections])
+  const buildRequestPathForCurrentTree = useCallback(
+    (requestId: string) => buildRequestPath(environmentFolderCollectionsRef.current, requestId),
+    []
+  )
+
   // Keep collections store in sync for request path resolution
   useEffect(() => {
     setCollections(environmentFolderCollections, 'user')
@@ -548,6 +558,10 @@ const App: React.FC = () => {
           if (api) {
             void api.updatePath(payload.id, requestPath)
           }
+          if (filePath && cachedPath) {
+            renameSessionEnvSelection(filePath, cachedPath, requestPath)
+            void renameStoredRequestPath(filePath, cachedPath, requestPath)
+          }
         }
       }
     }
@@ -602,7 +616,7 @@ const App: React.FC = () => {
       }
       timersMap.clear()
     }
-  }, [updateTabDirtyChecksum, rootItems, environmentFolderCollections])
+  }, [updateTabDirtyChecksum, rootItems, environmentFolderCollections, filePath])
 
   // Dirty state is now handled by FileService in the main process
   // It subscribes to DocumentEvents and compares checksums automatically
@@ -749,6 +763,8 @@ const App: React.FC = () => {
               getEnvironmentFolderById={getEnvironmentFolderByIdCb}
               navigationEnabled={navigationEnabled}
               tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
+              filePath={filePath ?? undefined}
+              getRequestPath={buildRequestPathForCurrentTree}
             />
           }
           initialWidth={260}
@@ -784,6 +800,8 @@ const App: React.FC = () => {
             getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootItems, id)}
             navigationEnabled={navigationEnabled}
             tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
+            filePath={filePath ?? undefined}
+            getRequestPath={buildRequestPathForCurrentTree}
           />
         </div>
       )}

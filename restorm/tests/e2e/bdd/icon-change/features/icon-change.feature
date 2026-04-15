@@ -5,7 +5,8 @@ Feature: Breadcrumb Icon Change and Folder Management
   Scenario: Changing a folder icon updates breadcrumb, sidebar, tab, and dirty state
     Given the file is loaded
     And the title does not contain "*"
-    When I click on "Swagger Petstore" folder in the sidebar
+    When I close every open tab
+    And I click on "Swagger Petstore" folder in the sidebar
     Then a tab should be open for the folder
     And the tab should not have a dirty indicator
     When I open the breadcrumb icon select
@@ -20,7 +21,8 @@ Feature: Breadcrumb Icon Change and Folder Management
 
   Scenario: Renaming a folder via sidebar updates breadcrumb
     Given the file is loaded
-    When I click on "pet" folder in the sidebar
+    When I close every open tab
+    And I click on "pet" folder in the sidebar
     Then a tab should be open for the folder
     When I rename "pet" to "pet-renamed" in the sidebar
     Then the breadcrumb should show "pet-renamed"
