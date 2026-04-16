@@ -32,7 +32,6 @@ export interface RestormWorkbenchContainerProps {
   navigationEnabled?: boolean | undefined
   tabSwitcherAnchorSelector?: string | undefined
   filePath?: string | undefined
-  getRequestPath?: (requestId: string) => string | null
 }
 
 /**
@@ -63,8 +62,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
   getEnvironmentFolderById,
   navigationEnabled,
   tabSwitcherAnchorSelector,
-  filePath,
-  getRequestPath
+  filePath
 }) => {
   return (
     <EnvironmentValuesProvider>
@@ -104,7 +102,6 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
           navigationEnabled={navigationEnabled}
           tabSwitcherAnchorSelector={tabSwitcherAnchorSelector}
           filePath={filePath}
-          getRequestPath={getRequestPath}
         />
       </div>
     </EnvironmentValuesProvider>

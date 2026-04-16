@@ -185,8 +185,6 @@ export interface RestormWorkbenchProps {
    * across sessions in the user config.
    */
   filePath?: string | undefined
-  /** Build the tree path for a request ID (used as the per-request persistence key). */
-  getRequestPath?: ((requestId: string) => string | null) | undefined
 }
 
 /** Imperative handle for Workbench component */
@@ -226,8 +224,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   getEnvironmentFolderById,
   navigationEnabled,
   tabSwitcherAnchorSelector,
-  filePath,
-  getRequestPath
+  filePath
 }, ref) => {
   const { t } = useTranslation()
   const editorWorkbenchRef = useRef<EditorWorkbenchHandle>(null)
@@ -235,7 +232,10 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   const [localTree, setLocalTree] = useState<WorkbenchTree>(initialTree)
   const tree = isControlled ? initialTree : localTree
   const lastTabCountRef = useRef<number>(0)
-  const lastActiveTabIdRef = useRef<string | null>(null)
+  // Per-group active-tab tracker so we can detect activations in any
+  // split pane (not just `groups[0]`) when the tree mutates
+  // programmatically (e.g. via back/forward navigation).
+  const lastActiveByGroupRef = useRef<Map<string, string>>(new Map())
   
   // Cache for tabs dropped from other windows (stores the full RestormEditorTab data)
   const droppedTabsCacheRef = useRef<Map<string, RestormEditorTab>>(new Map())
@@ -391,14 +391,22 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
   // Build tab switcher items from workbench tree tabs, sorted by navigation history
   const buildTabSwitcherItems = useCallback((): TabSwitcherItem[] => {
+    // Walk the whole tree: without recursion into container nodes, tabs
+    // that live inside a split (side-by-side, nested) would never show
+    // up in the Ctrl+Tab overlay.
     const allTabs: RestormEditorTab[] = []
-    for (const group of tree.groups) {
-      if (isTabGroupNode(group)) {
-        for (const tab of group.tabs) {
-          allTabs.push(tab as RestormEditorTab)
+    const collectTabs = (nodes: WorkbenchTree['groups']): void => {
+      for (const node of nodes) {
+        if (isTabGroupNode(node)) {
+          for (const tab of node.tabs) {
+            allTabs.push(tab as RestormEditorTab)
+          }
+        } else if (isContainerNode(node)) {
+          collectTabs(node.groups)
         }
       }
     }
+    collectTabs(tree.groups)
 
     // Navigation history ordering (most recent → order 0)
     const history = navigationService.getHistory()
@@ -596,13 +604,11 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       : undefined
 
     // Build the per-request persistence key for the environment dropdown.
-    // Falls back to `undefined` when the tab isn't tied to a file+request
-    // pair, which disables persistence.
-    const envPersistenceKey = (requestId: string): { filePath: string; requestPath: string } | undefined => {
-      if (!filePath || !getRequestPath) return undefined
-      const requestPath = getRequestPath(requestId)
-      if (!requestPath) return undefined
-      return { filePath, requestPath }
+    // Falls back to `undefined` when we don't have a file path — the id
+    // itself is always stable since document ids are persisted now.
+    const envPersistenceKey = (requestId: string): { filePath: string; requestId: string } | undefined => {
+      if (!filePath) return undefined
+      return { filePath, requestId }
     }
 
     // HTTP request tab
@@ -773,7 +779,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [onBreadcrumbClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, t, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, filePath, getRequestPath])
+  }, [onBreadcrumbClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, t, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, filePath])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(
@@ -881,10 +887,14 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       onDetachToNewWindow: handleDetachToNewWindow,
       getTabContextMenuItems,
       onGetTabContent: getTabContent,
-      // Forward tab activation from any group (incl. non-main split groups) so the sidebar can sync.
+      // Forward tab activation from any group (incl. non-main split
+      // groups) so the sidebar can sync. Intentionally no dedup here:
+      // clicking an already-active tab must still re-trigger ancestor
+      // expansion (e.g. after the user manually collapsed the parent
+      // folder). Downstream handlers (`navigationService.navigateTo`,
+      // `setExpandedIds` with Set semantics) are idempotent, so a
+      // repeat fire is safe.
       onActivateTab: (tabId) => {
-        if (lastActiveTabIdRef.current === tabId) return
-        lastActiveTabIdRef.current = tabId
         onTabActivate?.(tabId)
       }
     }
@@ -915,12 +925,38 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
       lastTabCountRef.current = tabCount
 
-      // Detect active tab change and notify
-      const firstGroup = newTree.groups[0]
-      const newActiveTabId = firstGroup && isTabGroupNode(firstGroup) ? firstGroup.activeTabId : null
-      if (newActiveTabId && newActiveTabId !== lastActiveTabIdRef.current) {
-        lastActiveTabIdRef.current = newActiveTabId
-        onTabActivate?.(newActiveTabId)
+      // Detect active tab changes across every group (including those
+      // nested inside split containers). Previously we only watched
+      // `groups[0].activeTabId`, so programmatic activations that landed
+      // in a non-primary pane — e.g. the back/forward button re-focusing
+      // a tab in a side-by-side split — were invisible to the history /
+      // sidebar-sync listener. Track the active tab *per group id* and
+      // fire `onTabActivate` for each group whose active tab changed.
+      const currentActiveByGroup = new Map<string, string>()
+      const collectActiveTabs = (nodes: WorkbenchTree['groups']): void => {
+        for (const node of nodes) {
+          if (isTabGroupNode(node)) {
+            if (node.activeTabId) {
+              currentActiveByGroup.set(node.id, node.activeTabId)
+            }
+          } else if (isContainerNode(node)) {
+            collectActiveTabs(node.groups)
+          }
+        }
+      }
+      collectActiveTabs(newTree.groups)
+      for (const [groupId, tabId] of currentActiveByGroup) {
+        const prev = lastActiveByGroupRef.current.get(groupId)
+        lastActiveByGroupRef.current.set(groupId, tabId)
+        if (prev !== tabId) {
+          onTabActivate?.(tabId)
+        }
+      }
+      // Drop entries for groups that no longer exist so we don't leak.
+      for (const groupId of Array.from(lastActiveByGroupRef.current.keys())) {
+        if (!currentActiveByGroup.has(groupId)) {
+          lastActiveByGroupRef.current.delete(groupId)
+        }
       }
 
       if (isControlled) {

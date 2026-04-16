@@ -618,26 +618,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
           value={value}
           onChange={(next) => {
             if (id) {
-              // When the current value is a string, and it can be casted (date/number/color),
-              // we keep the casted type (same logic as import).
-              const inferred = inferValueFromString(next)
-              if (resolved instanceof StringValue) {
-                switch (inferred.kind) {
-                  case 'datetime':
-                    valueTypeByRowIdRef.current.set(id, new DateTimeValue(inferred.date, inferred.format))
-                    break
-                  case 'numeric':
-                    valueTypeByRowIdRef.current.set(id, new NumericValue(inferred.number, inferred.format))
-                    break
-                  case 'color':
-                    valueTypeByRowIdRef.current.set(id, new ColorValue(inferred.color))
-                    break
-                  default:
-                    valueTypeByRowIdRef.current.set(id, new StringValue(inferred.value))
-                }
-              } else {
-                valueTypeByRowIdRef.current.set(id, new StringValue(next))
-              }
+              valueTypeByRowIdRef.current.set(id, new StringValue(next))
             }
             onChange(next)
           }}

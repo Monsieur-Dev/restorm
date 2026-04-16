@@ -140,7 +140,6 @@ collections:
                   type: string
                   value: '{{scheme}}://{{domain}}:{{port}}'
                 description: ''
-        color: '#3200c7'
     items:
       - name: pet
         documentation: "# pet\r\n\r\nEverything about your Pets\r\n\r\n## External Documentation\r\n\r\n[Find out more](http://swagger.io)"
@@ -219,7 +218,6 @@ collections:
 
               - **api_key**
             tags:
-              - pet
               - pet
             method: GET
             url: '{{baseUrl}}/api/pet/{{petId}}'

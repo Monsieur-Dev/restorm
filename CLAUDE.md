@@ -46,3 +46,7 @@ When writing E2E tests in `restorm/` or `demo/`:
 - Use selectors/helpers from `electron-core-ui/testing` (`menuBarRootSelector`, `menuBarItemSelector`, etc.)
 - Avoid text-based selectors (`text=File`, `text=Open`) — use `data-testid` driven steps
 - If a generic reusable helper is missing, add it to `electron-core-ui/testing`, not ad-hoc in app tests
+
+### Debugging e2e failures
+
+When an e2e test fails, before guessing at a fix: open the end-of-test screenshot Playwright attached under `restorm/test-results/<test-dir>/attachments/end-state-screenshot-*.png` (or the step-scoped screenshot the step itself produced) with the `Read` tool. The UI state at the point of failure frequently tells you whether the production code actually broke or whether the selector / expectation is wrong. Also check `electron-logs.txt` in the same directory for main-process + renderer console messages + uncaught page errors.

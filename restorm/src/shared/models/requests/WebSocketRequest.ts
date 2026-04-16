@@ -89,6 +89,7 @@ export class WebSocketRequest extends BaseRequest {
    */
   toPlainObject(): Record<string, unknown> {
     return {
+      id: this.id,
       type: this.type,
       name: this.name,
       icon: this.icon,

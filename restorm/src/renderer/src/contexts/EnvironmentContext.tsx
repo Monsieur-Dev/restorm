@@ -2,26 +2,12 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Environment } from '../../../shared/types/collections'
 import { EnvironmentContext, type EnvironmentContextValue } from './useEnvironmentContext'
 import {
-  findEnvIdByNamePath,
-  findNamePathByEnvId,
+  findEnvironmentById,
   getStoredEnvForRequest,
   setStoredEnvForRequest,
   getSessionEnvSelection,
-  setSessionEnvSelection,
-  hasSessionEnvSelection
+  setSessionEnvSelection
 } from '../services/environmentSelectionStore'
-
-/** Find an environment by ID in a list (including sub-environments) */
-function findEnvironmentById(environments: Environment[], id: string): Environment | null {
-  for (const env of environments) {
-    if (env.id === id) return env
-    if (env.subEnvironments) {
-      const found = findEnvironmentById(env.subEnvironments, id)
-      if (found) return found
-    }
-  }
-  return null
-}
 
 export interface EnvironmentProviderProps {
   environments: Environment[] | undefined
@@ -31,93 +17,77 @@ export interface EnvironmentProviderProps {
    * choice across sessions. When either is missing (e.g., folder tab), the
    * provider falls back to in-memory state with no persistence.
    */
-  persistenceKey?: { filePath: string; requestPath: string } | undefined
+  persistenceKey?: { filePath: string; requestId: string } | undefined
   children: React.ReactNode
 }
 
 export const EnvironmentProvider: React.FC<EnvironmentProviderProps> = ({ environments, tagColors, persistenceKey, children }) => {
+  // Synchronous hydration: if the persistence key and env tree are both
+  // known at mount, pick the cached value (if any) or fall back to the
+  // first env. Otherwise start null and resolve in the effect below.
   const [selectedEnvId, setSelectedEnvIdRaw] = useState<string | null>(() => {
-    // Synchronously hydrate from the session cache on mount. This is the
-    // remount-safe path: async storage restore only covers first-ever load.
-    if (persistenceKey && environments) {
-      const cachedName = getSessionEnvSelection(persistenceKey.filePath, persistenceKey.requestPath)
-      if (cachedName) {
-        const matchedId = findEnvIdByNamePath(environments, cachedName)
-        if (matchedId) return matchedId
-      }
-    }
-    return environments?.[0]?.id ?? null
+    if (!persistenceKey || !environments) return environments?.[0]?.id ?? null
+    const cachedId = getSessionEnvSelection(persistenceKey.filePath, persistenceKey.requestId)
+    if (cachedId && findEnvironmentById(environments, cachedId)) return cachedId
+    return environments[0]?.id ?? null
   })
-  // Track whether the initial restore from user config has run, so we don't
-  // overwrite the stored value with the default first-env selection that was
-  // picked before the async lookup had a chance to resolve.
+
+  // Track whether the async-storage restore has completed so we don't
+  // persist the "first env" placeholder picked while the storage round-
+  // trip is in flight.
   const restoreLoadedRef = useRef(false)
 
-  // Keep the live `environments` array in a ref so the restore effect can
-  // resolve the stored name path without listing `environments` in its deps
-  // (the reactive proxy rewraps it often — we only want to restore once per
-  // persistence-key pair).
-  const environmentsRef = useRef(environments)
-  useEffect(() => {
-    environmentsRef.current = environments
-  }, [environments])
-
   const persistenceFilePath = persistenceKey?.filePath ?? ''
-  const persistenceRequestPath = persistenceKey?.requestPath ?? ''
+  const persistenceRequestId = persistenceKey?.requestId ?? ''
 
-  // Restore the environment selection from user config (if we have a
-  // persistence key). Runs once per persistence-key pair.
+  // Consolidated restore/reset effect: whenever the persistence key or
+  // the env tree changes, recompute the right selection in priority
+  // order (session cache → on-disk storage → first env). Previously the
+  // logic was split across two effects that raced with each other —
+  // the "reset" effect kept overwriting the restore with the first-env
+  // default before the async lookup had a chance to land.
   useEffect(() => {
-    if (!persistenceFilePath || !persistenceRequestPath) {
-      restoreLoadedRef.current = true
-      return
-    }
-    if (hasSessionEnvSelection(persistenceFilePath, persistenceRequestPath)) {
-      // Already restored in this session — skip the async round-trip.
-      restoreLoadedRef.current = true
-      return
-    }
-    const cancelledRef = { current: false }
-    void (async () => {
-      const storedNamePath = await getStoredEnvForRequest(persistenceFilePath, persistenceRequestPath)
-      if (cancelledRef.current) return
-      if (storedNamePath) {
-        setSessionEnvSelection(persistenceFilePath, persistenceRequestPath, storedNamePath)
-        const matchedId = findEnvIdByNamePath(environmentsRef.current, storedNamePath)
-        if (matchedId) setSelectedEnvIdRaw(matchedId)
-      }
-      restoreLoadedRef.current = true
-    })()
-    return () => { cancelledRef.current = true }
-  }, [persistenceFilePath, persistenceRequestPath])
-
-  // Reset selection when environments list changes
-  useEffect(() => {
-    let rafId: number | undefined
-
     if (!environments || environments.length === 0) {
-      rafId = requestAnimationFrame(() => {
-        setSelectedEnvIdRaw(null)
-      })
-      return (): void => { if (rafId !== undefined) cancelAnimationFrame(rafId) }
-    }
-    // Keep current selection if still present (including sub-environments), otherwise default to first env
-    if (!selectedEnvId) {
-      rafId = requestAnimationFrame(() => {
-        setSelectedEnvIdRaw(environments[0]?.id ?? null)
-      })
-      return (): void => { if (rafId !== undefined) cancelAnimationFrame(rafId) }
+      const rafId = requestAnimationFrame(() => { setSelectedEnvIdRaw(null) })
+      return (): void => { cancelAnimationFrame(rafId) }
     }
 
-    const found = findEnvironmentById(environments, selectedEnvId)
-    if (!found) {
-      rafId = requestAnimationFrame(() => {
-        setSelectedEnvIdRaw(environments[0]?.id ?? null)
-      })
-      return (): void => { if (rafId !== undefined) cancelAnimationFrame(rafId) }
+    // Always prefer the session cache — it's updated in-memory every time
+    // the user flips the dropdown, so it's the most authoritative source.
+    if (persistenceFilePath && persistenceRequestId) {
+      const cachedId = getSessionEnvSelection(persistenceFilePath, persistenceRequestId)
+      if (cachedId && findEnvironmentById(environments, cachedId)) {
+        restoreLoadedRef.current = true
+        if (selectedEnvId !== cachedId) {
+          const rafId = requestAnimationFrame(() => { setSelectedEnvIdRaw(cachedId) })
+          return (): void => { cancelAnimationFrame(rafId) }
+        }
+        return undefined
+      }
+
+      // Cache miss — fall back to disk. Keep the provisional state (null
+      // or first-env) until the async lookup resolves.
+      const cancelledRef = { current: false }
+      void (async () => {
+        const storedEnvId = await getStoredEnvForRequest(persistenceFilePath, persistenceRequestId)
+        if (cancelledRef.current) return
+        restoreLoadedRef.current = true
+        if (storedEnvId && findEnvironmentById(environments, storedEnvId)) {
+          setSessionEnvSelection(persistenceFilePath, persistenceRequestId, storedEnvId)
+          setSelectedEnvIdRaw(storedEnvId)
+        } else if (!selectedEnvId) {
+          setSelectedEnvIdRaw(environments[0]?.id ?? null)
+        }
+      })()
+      return (): void => { cancelledRef.current = true }
     }
-    return undefined
-  }, [environments, selectedEnvId])
+
+    // No persistence key: just make sure the current selection is valid.
+    restoreLoadedRef.current = true
+    if (selectedEnvId && findEnvironmentById(environments, selectedEnvId)) return undefined
+    const rafId = requestAnimationFrame(() => { setSelectedEnvIdRaw(environments[0]?.id ?? null) })
+    return (): void => { cancelAnimationFrame(rafId) }
+  }, [environments, persistenceFilePath, persistenceRequestId, selectedEnvId])
 
   // Wrap the setter to mirror the new selection into user config. Only
   // persists after the initial restore has run — otherwise the default
@@ -125,10 +95,9 @@ export const EnvironmentProvider: React.FC<EnvironmentProviderProps> = ({ enviro
   const setSelectedEnvId = useCallback((id: string | null) => {
     setSelectedEnvIdRaw(id)
     if (!restoreLoadedRef.current || !persistenceKey || !environments || !id) return
-    const namePath = findNamePathByEnvId(environments, id)
-    if (namePath !== null) {
-      setSessionEnvSelection(persistenceKey.filePath, persistenceKey.requestPath, namePath)
-      void setStoredEnvForRequest(persistenceKey.filePath, persistenceKey.requestPath, namePath)
+    if (findEnvironmentById(environments, id)) {
+      setSessionEnvSelection(persistenceKey.filePath, persistenceKey.requestId, id)
+      void setStoredEnvForRequest(persistenceKey.filePath, persistenceKey.requestId, id)
     }
   }, [environments, persistenceKey])
 

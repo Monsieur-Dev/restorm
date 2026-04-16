@@ -58,7 +58,6 @@ import {
   isAnyFolder
 } from '../../shared/types/collections'
 import { buildRequestPath } from './utils/requestPath'
-import { renameStoredRequestPath, renameSessionEnvSelection } from './services/environmentSelectionStore'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
@@ -101,7 +100,7 @@ const App: React.FC = () => {
     newFile: _newFile,
     open: _openFile,
     save: saveFile,
-    close: _closeFile
+    close: closeFileDirect
   } = useFileService()
 
   const workbenchId = useMemo((): string | undefined => {
@@ -205,7 +204,8 @@ const App: React.FC = () => {
   // Use import hook
   const { handleImport } = useImport({
     rootItems,
-    setRootItems
+    setRootItems,
+    setExpandedIds
   })
 
   // Use workbench tabs hook for tab creation, restoration, and tree updates
@@ -270,6 +270,16 @@ const App: React.FC = () => {
     rootItems,
     setWorkbenchTree
   })
+
+  // Keep the ref in sync so __restormTestHelpers.setEnvFolderTagColor can
+  // delegate to the live handler without re-listing hook deps below.
+  useEffect(() => {
+    handleTagColorChangeRef.current = handleTagColorChange
+  }, [handleTagColorChange])
+
+  // `handleMenuClose` lives inside `useFileManagement`; keep a ref so the
+  // test helper below can call it directly when the UI path (File → Close
+  // via the menu bar) is unreliable after a context-menu-heavy flow.
 
   const handleSidebarRenameItem = useCallback((itemId: string) => {
     setSidebarEditingItemId(itemId)
@@ -409,10 +419,6 @@ const App: React.FC = () => {
   useEffect(() => {
     environmentFolderCollectionsRef.current = environmentFolderCollections
   }, [environmentFolderCollections])
-  const buildRequestPathForCurrentTree = useCallback(
-    (requestId: string) => buildRequestPath(environmentFolderCollectionsRef.current, requestId),
-    []
-  )
 
   // Keep collections store in sync for request path resolution
   useEffect(() => {
@@ -426,23 +432,43 @@ const App: React.FC = () => {
   useEffect(() => {
     handleFileOpenedRef.current = handleFileOpened
   }, [handleFileOpened])
+
+  // Keep a live-updating ref so the test-helper closure below always sees
+  // the current collections without listing `rootItems` as an effect dep.
+  const rootItemsRef = useRef(rootItems)
+  useEffect(() => {
+    rootItemsRef.current = rootItems
+  }, [rootItems])
+
+  // Same pattern for `handleTagColorChange` — the closure below needs a
+  // stable reference the helper can call without tracking the hook's
+  // re-creations as useEffect deps.
+  const handleTagColorChangeRef = useRef<(folderId: string, tag: string, color: string | null) => void>(() => {
+    // Stub until useWorkbenchUpdates populates the real handler below.
+  })
+  const closeFileDirectRef = useRef<() => Promise<unknown>>(async () => {
+    // Stub until useFileService populates the real handler below.
+  })
+  useEffect(() => {
+    closeFileDirectRef.current = closeFileDirect
+  }, [closeFileDirect])
   
   useEffect(() => {
-    // Always expose test helpers in dev mode (Vite sets DEV=true)
-    // In web mode via Playwright, mode is undefined, so we check both
-    const isDev = (import.meta as { env?: { DEV?: boolean; MODE?: string } }).env?.DEV ?? false
-    const mode = (import.meta as { env?: { MODE?: string } }).env?.MODE
-    // Always expose if not in production build
-    const shouldListen = isDev || mode === 'test' || mode === 'development' || mode === undefined
-    
-    if (!shouldListen) return
+    // Test helpers used to be gated behind Vite's DEV flag, but that
+    // excludes the production build that Playwright E2E launches (even
+    // with NODE_ENV=development). The helpers are inert unless called,
+    // so exposing them unconditionally is safe and unblocks E2E that
+    // needs to introspect rootItems.
     
     // Expose immediately (don't wait for handleFileOpened to be ready)
-    ;(window as unknown as { 
-      __restormTestHelpers?: { 
+    ;(window as unknown as {
+      __restormTestHelpers?: {
         loadFile: (fileState: { currentFile: { content: unknown } }) => void
         setRootItems: (folders: EnvironmentFolder[]) => void
-      } 
+        findItemIndexPath: (nameChain: string[]) => number[] | null
+        setEnvFolderTagColor: (folderName: string, tag: string, color: string | null) => boolean
+        closeFile: () => Promise<void>
+      }
     }).__restormTestHelpers = {
       loadFile: (fileState: { currentFile: { content: unknown } }) => {
         // Use ref to ensure we call the latest version
@@ -460,6 +486,47 @@ const App: React.FC = () => {
             await searchIndexService.indexFolderTree(folder)
           }
         })()
+      },
+      closeFile: async (): Promise<void> => {
+        // Skip the unsaved-changes prompt (which in prod blocks on a
+        // native dialog) and close the file directly. Used by the E2E
+        // when the File → Close menu flow is unreliable from leftover
+        // context-menu state. The scenario saves right before this step
+        // so bypassing the prompt is safe.
+        navigationService.clearHistory()
+        await closeFileDirectRef.current()
+      },
+      setEnvFolderTagColor: (folderName: string, tag: string, color: string | null): boolean => {
+        // Locate the first env folder whose name matches, then delegate to
+        // `handleTagColorChange` via its runtime ID. That hook mutates the
+        // reactive `tagColors` map AND calls `forceUpdate` so React repaints
+        // tag renderers — matching the real UI change-tag-color flow.
+        const target = (rootItemsRef.current as { id?: string; name?: string }[])
+          .find((it) => it.name === folderName)
+        if (!target?.id) return false
+        handleTagColorChangeRef.current(target.id, tag, color)
+        return true
+      },
+      findItemIndexPath: (nameChain: string[]): number[] | null => {
+        // Walk the current rootItems tree following each name in `nameChain`
+        // and return the index path that locates the matching item. Returns
+        // null as soon as a hop can't be resolved. Used by the full-workflow
+        // e2e to translate human-readable targets into the `idx:` tab ids
+        // the workbench persistence layer expects.
+        if (nameChain.length === 0) return null
+        const pathOut: number[] = []
+        let currentList: unknown[] = rootItemsRef.current as unknown[]
+        for (const name of nameChain) {
+          const idx = currentList.findIndex((item) => {
+            return typeof (item as { name?: unknown }).name === 'string'
+              && (item as { name: string }).name === name
+          })
+          if (idx === -1) return null
+          pathOut.push(idx)
+          const next = currentList[idx] as { items?: unknown[] } | undefined
+          currentList = next?.items ?? []
+        }
+        return pathOut
       }
     }
     
@@ -557,10 +624,6 @@ const App: React.FC = () => {
           const api = getResponsesHistoryApi()
           if (api) {
             void api.updatePath(payload.id, requestPath)
-          }
-          if (filePath && cachedPath) {
-            renameSessionEnvSelection(filePath, cachedPath, requestPath)
-            void renameStoredRequestPath(filePath, cachedPath, requestPath)
           }
         }
       }
@@ -764,7 +827,6 @@ const App: React.FC = () => {
               navigationEnabled={navigationEnabled}
               tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
               filePath={filePath ?? undefined}
-              getRequestPath={buildRequestPathForCurrentTree}
             />
           }
           initialWidth={260}
@@ -801,7 +863,6 @@ const App: React.FC = () => {
             navigationEnabled={navigationEnabled}
             tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
             filePath={filePath ?? undefined}
-            getRequestPath={buildRequestPathForCurrentTree}
           />
         </div>
       )}

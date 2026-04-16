@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useImperativeHandle, useLayoutEffect, us
 import type { ContainerGroupNode, EditorGroup, EditorTab, EditorWorkbenchCallbacks, GroupNode, SplitDirection, WorkbenchTree } from './types';
 import { isContainerNode, isTabGroupNode } from './types';
 import { EditorGroupView } from './EditorGroupView';
-import { insertTabAt, normalizeTree, removeTab } from './tree';
+import { insertTabAt, moveTabToAdjacentGroup, normalizeTree, removeTab } from './tree';
 import { computeDropIndex } from './dnd';
 import { getCurrentWindowBounds } from './ipc';
 import { onWorkbenchTabDropped } from './ipc';
@@ -465,6 +465,10 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 	// When a group's activeTabId changes externally, auto-focus that group visually
 	// without moving the DOM focus (sidebar keeps focus).
 	const prevActiveTabIdsRef = useRef<Map<string, string | undefined>>(new Map());
+	// Set by the Ctrl+Alt+Arrow handler to mark the next tree change as
+	// "explicitly focused" so the auto-focus effect below doesn't steal
+	// focus from the destination group of a tab move.
+	const skipNextAutoFocusRef = useRef(false);
 	useEffect(() => {
 		const current = new Map<string, string | undefined>();
 		const collectActiveTabIds = (nodes: GroupNode[]): void => {
@@ -477,6 +481,12 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 			}
 		};
 		collectActiveTabIds(tree.groups);
+
+		if (skipNextAutoFocusRef.current) {
+			skipNextAutoFocusRef.current = false;
+			prevActiveTabIdsRef.current = current;
+			return;
+		}
 
 		// Find the group whose activeTabId changed
 		for (const [groupId, activeTabId] of current) {
@@ -587,6 +597,62 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		},
 		[setFocus]
 	);
+
+	// Ctrl+Alt+Left / Ctrl+Alt+Right — move the currently active tab of the
+	// focused group into the adjacent tab group on that side, creating the
+	// group on demand. No-op when the source has a single tab and no
+	// destination already exists (moving would leave the layout unchanged).
+	const handleMoveActiveTabRef = useRef<(direction: 'left' | 'right') => void>((): void => {
+		/* replaced by the effect below once the workbench renders */
+	});
+	useEffect(() => {
+		handleMoveActiveTabRef.current = (direction: 'left' | 'right'): void => {
+			const groupId = effectiveFocusedGroupId;
+			logger.debug('[Workbench] move-tab', { direction, focusedGroupId: groupId });
+			if (!groupId) return;
+			const loc = (() => {
+				const rec = (nodes: GroupNode[]): GroupNode | null => {
+					for (const n of nodes) {
+						if (isTabGroupNode(n) && n.id === groupId) return n;
+						if (isContainerNode(n)) {
+							const found = rec(n.groups);
+							if (found) return found;
+						}
+					}
+					return null;
+				};
+				return rec(tree.groups);
+			})();
+			if (!loc || !isTabGroupNode(loc) || !loc.activeTabId) {
+				logger.debug('[Workbench] move-tab abort', { reason: !loc ? 'no-loc' : !isTabGroupNode(loc) ? 'not-tab-group' : 'no-activeTabId' });
+				return;
+			}
+			const { tree: next, destGroupId } = moveTabToAdjacentGroup(tree, groupId, loc.activeTabId, direction);
+			if (next === tree) {
+				logger.debug('[Workbench] move-tab noop', { groupId, activeTabId: loc.activeTabId, tabCount: loc.tabs.length });
+				return;
+			}
+			logger.debug('[Workbench] move-tab applied', { from: groupId, dest: destGroupId, tabId: loc.activeTabId });
+			skipNextAutoFocusRef.current = true;
+			change(next);
+			if (destGroupId) setFocus(destGroupId);
+		};
+	}, [tree, effectiveFocusedGroupId, change, setFocus]);
+
+	useEffect(() => {
+		const onKeyDown = (e: KeyboardEvent): void => {
+			if (!e.ctrlKey || !e.altKey) return;
+			if (e.key === 'ArrowRight') {
+				e.preventDefault();
+				handleMoveActiveTabRef.current('right');
+			} else if (e.key === 'ArrowLeft') {
+				e.preventDefault();
+				handleMoveActiveTabRef.current('left');
+			}
+		};
+		window.addEventListener('keydown', onKeyDown);
+		return (): void => { window.removeEventListener('keydown', onKeyDown); };
+	}, []);
 
 	const handleClose = useCallback((tabId: string, groupId: string) => {
 		const { tree: t } = removeTab(tree, groupId, tabId);

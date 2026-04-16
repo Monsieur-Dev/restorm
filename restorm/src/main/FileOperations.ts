@@ -266,7 +266,9 @@ function handleRenameIfNeeded(id: string | undefined, newPath: string, _isDirect
 // ==========================================================================
 
 /**
- * Recursively strip 'id' properties from an object for serialization
+ * Recursively strip 'id' properties from key-value objects only.
+ * Document ids (folders, environments, requests) are persisted now; only
+ * the per-row KeyValue ids are still runtime-only.
  */
 function stripIds<T>(obj: T): T {
   if (obj === null || obj === undefined) return obj
@@ -274,9 +276,11 @@ function stripIds<T>(obj: T): T {
     return obj.map((item: unknown) => stripIds(item)) as T
   }
   if (typeof obj === 'object') {
+    const record = obj as Record<string, unknown>
+    const isKeyValueLike = 'key' in record && 'value' in record && typeof record['key'] === 'string'
     const result: Record<string, unknown> = {}
-    for (const [key, value] of Object.entries(obj)) {
-      if (key === 'id') continue // Skip id properties
+    for (const [key, value] of Object.entries(record)) {
+      if (key === 'id' && isKeyValueLike) continue
       result[key] = stripIds(value)
     }
     return result as T

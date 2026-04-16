@@ -5,7 +5,6 @@
 import {
   trackable,
   searchable,
-  NonSerialised,
   separateFolders,
   fileNaming,
   graphqlField
@@ -20,9 +19,11 @@ import type { RuntimeId, Icon, FolderConfiguration, BaseFolderItem } from './typ
 @searchable()
 @fileNaming({ pattern: '{index} - {name}', nameProperty: 'name', idProperty: 'id' })
 export class Folder {
-  /** Runtime identifier (generated at runtime, not persisted) */
+  /** Stable identifier persisted with the document so workbench layout,
+   * per-request env selection, and other settings can reference it across
+   * app executions. Generated on first save or first load of a legacy
+   * file that lacks one. */
   @graphqlField({ type: 'String' })
-  @NonSerialised()
   id!: RuntimeId
 
   /** Display name of the folder */
@@ -68,6 +69,7 @@ export class Folder {
    */
   toPlainObject(): Record<string, unknown> {
     return {
+      id: this.id,
       name: this.name,
       icon: this.icon,
       documentation: this.documentation,

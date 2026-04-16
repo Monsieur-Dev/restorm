@@ -11,9 +11,16 @@ import {
   EnvironmentFolder,
   Environment,
   HTTPRequest,
-  type HTTPRequestBody,
-  type KeyValue
+  KeyValue,
+  type HTTPRequestBody
 } from '../../../shared/models'
+import {
+  StringValue,
+  NumericValue,
+  DateTimeValue,
+  PasswordValue,
+  type ValueType
+} from '../../../shared/types/collections'
 import { toHTTPMethod } from './httpMethodValidator'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 import { swaggerToApiDocumentation } from './transformers/swaggerToApiDocumentation'
@@ -126,6 +133,45 @@ interface SwaggerSpec {
 // ============================================================================
 // Helper Functions
 // ============================================================================
+
+/**
+ * Build a default typed ValueType from a Swagger parameter's declared type.
+ *
+ * Respecting the spec's type up front means the variables table renders the
+ * right input control (numeric spinner for integers, date picker for dates)
+ * immediately after import, without relying on an implicit cast when the user
+ * types a value. Unknown / unspecified types fall back to StringValue('').
+ */
+function buildTypedValueFromSwaggerType(type: string | undefined, format: string | undefined): ValueType {
+  switch (type) {
+    case 'integer':
+    case 'number':
+      return new NumericValue(0, 'decimal')
+    case 'boolean':
+      return new StringValue('false')
+    case 'string':
+      if (format === 'date' || format === 'date-time') {
+        const datePattern = format === 'date' ? 'yyyy-MM-dd' : 'yyyy-MM-dd HH:mm:ss'
+        return new DateTimeValue(new Date(), datePattern)
+      }
+      if (format === 'password') {
+        return new PasswordValue('')
+      }
+      return new StringValue('')
+    default:
+      return new StringValue('')
+  }
+}
+
+/** Build a KeyValue from a Swagger parameter, typed per its spec. */
+function keyValueFromSwaggerParam(param: SwaggerParameter): KeyValue {
+  return new KeyValue({
+    key: param.name,
+    value: buildTypedValueFromSwaggerType(param.type, param.format),
+    description: param.description ?? '',
+    enabled: true
+  })
+}
 
 /** Resolve a JSON pointer reference (e.g. "#/definitions/Pet") into a schema */
 function resolveSchemaRef(ref: string, spec: SwaggerSpec): SwaggerSchema | undefined {
@@ -260,28 +306,14 @@ function extractBody(
     if (consumes.includes('multipart/form-data')) {
       return {
         type: 'form-data',
-        fields: formDataParams.map((p) =>
-          createTypedKeyValue({
-            key: p.name,
-            value: '',
-            description: p.description,
-            enabled: true
-          })
-        )
+        fields: formDataParams.map(keyValueFromSwaggerParam)
       }
     }
 
     // Default to x-www-form-urlencoded
     return {
       type: 'x-www-form-urlencoded',
-      fields: formDataParams.map((p) =>
-        createTypedKeyValue({
-          key: p.name,
-          value: '',
-          description: p.description,
-          enabled: true
-        })
-      )
+      fields: formDataParams.map(keyValueFromSwaggerParam)
     }
   }
 
@@ -290,16 +322,7 @@ function extractBody(
 
 /** Extract headers from Swagger parameters */
 function extractHeaders(parameters: SwaggerParameter[]): KeyValue[] {
-  return parameters
-    .filter((p) => p.in === 'header')
-    .map((p) =>
-      createTypedKeyValue({
-        key: p.name,
-        value: '',
-        description: p.description,
-        enabled: true
-      })
-    )
+  return parameters.filter((p) => p.in === 'header').map(keyValueFromSwaggerParam)
 }
 
 /** Extract query params from Swagger parameters */
@@ -316,14 +339,7 @@ function extractParams(parameters: SwaggerParameter[]): KeyValue[] {
       continue
     }
 
-    result.push(
-      createTypedKeyValue({
-        key: param.name,
-        value: '',
-        description: param.description,
-        enabled: true
-      })
-    )
+    result.push(keyValueFromSwaggerParam(param))
   }
 
   return result
@@ -343,14 +359,7 @@ function extractPathParams(parameters: SwaggerParameter[]): KeyValue[] {
       continue
     }
 
-    result.push(
-      createTypedKeyValue({
-        key: param.name,
-        value: '',
-        description: param.description,
-        enabled: true
-      })
-    )
+    result.push(keyValueFromSwaggerParam(param))
   }
 
   return result

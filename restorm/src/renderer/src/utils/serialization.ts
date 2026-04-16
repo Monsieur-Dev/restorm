@@ -14,11 +14,14 @@ export function generateId(): RuntimeId {
 }
 
 /**
- * Recursively strip all 'id' properties from an object for serialization.
- * Creates a deep clone without any 'id' fields.
+ * Recursively strip 'id' properties from key-value objects only.
+ * Document ids (folders, environments, requests) are now persisted so the
+ * per-request settings store (workbench layout, env selection) can key by
+ * a stable id instead of a fragile name path. Key-value ids remain runtime-
+ * only — they're not user-facing and regenerating them on load is cheap.
  *
  * @param obj - The object to strip ids from
- * @returns A new object without id properties
+ * @returns A new object with key-value ids removed
  */
 export function stripIds<T>(obj: T): T {
   if (obj === null || obj === undefined) {
@@ -30,10 +33,12 @@ export function stripIds<T>(obj: T): T {
   }
 
   if (typeof obj === 'object') {
+    const record = obj as Record<string, unknown>
+    const isKeyValueLike = 'key' in record && 'value' in record && typeof record['key'] === 'string'
     const result: Record<string, unknown> = {}
-    for (const [key, value] of Object.entries(obj)) {
-      if (key === 'id') {
-        continue // Skip id properties
+    for (const [key, value] of Object.entries(record)) {
+      if (key === 'id' && isKeyValueLike) {
+        continue
       }
       result[key] = stripIds(value)
     }
@@ -47,38 +52,53 @@ export function stripIds<T>(obj: T): T {
  * Recursively generate 'id' properties for all objects that should have them.
  * This function adds ids to objects matching known collection types.
  *
+ * Documents (folders, environments, requests) persist their ids now, so
+ * the usual path is to keep whatever id the file carries. Two edge cases
+ * still require a fresh id:
+ *   1. the object has no id (legacy file written before id persistence, or
+ *      an object freshly built in memory);
+ *   2. the id is already in use elsewhere in the same load — e.g. the user
+ *      copy-pasted a document between sub-folders in folder mode. Keeping
+ *      duplicate ids would make per-request persistence (env selection,
+ *      workbench tab layout, …) collide between the original and the copy.
+ *
+ * Tracking ids in a `seen` Set scoped to the top-level call is enough —
+ * every traversal gets a fresh set so reloading the same file keeps its
+ * persisted ids intact.
+ *
  * @param obj - The deserialized object to add ids to
  * @returns The object with generated ids
  */
 export function generateIds<T>(obj: T): T {
-  if (obj === null || obj === undefined) {
-    return obj
-  }
+  const seen = new Set<string>()
 
-  if (Array.isArray(obj)) {
-    return obj.map((item: unknown) => generateIds(item)) as T
-  }
+  const walk = <U>(value: U): U => {
+    if (value === null || value === undefined) return value
+    if (Array.isArray(value)) {
+      return value.map((item: unknown) => walk(item)) as U
+    }
+    if (typeof value !== 'object') return value
 
-  if (typeof obj === 'object') {
-    const record = obj as Record<string, unknown>
+    const record = value as Record<string, unknown>
     const result: Record<string, unknown> = { ...record }
 
-    // Check if this object should have an id based on its structure
     if (shouldHaveId(record)) {
-      result['id'] = generateId()
+      const existing = typeof record['id'] === 'string' ? record['id'] : undefined
+      if (!existing || seen.has(existing)) {
+        result['id'] = generateId()
+      }
+      seen.add(result['id'] as string)
     }
 
-    // Recursively process nested properties
-    for (const [key, value] of Object.entries(result)) {
-      if (key !== 'id' && typeof value === 'object' && value !== null) {
-        result[key] = generateIds(value)
+    for (const [key, v] of Object.entries(result)) {
+      if (key !== 'id' && typeof v === 'object' && v !== null) {
+        result[key] = walk(v)
       }
     }
-
-    return result as T
+    return result as U
   }
 
-  return obj
+  return walk(obj)
 }
 
 /**

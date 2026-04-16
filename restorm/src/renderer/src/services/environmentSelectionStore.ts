@@ -1,18 +1,15 @@
 /**
  * Per-file, per-request environment-selection persistence.
  *
- * When the user switches the environment dropdown on a request, we save the
- * selected environment's *name path* (join of environment names from the
- * root env down to the selected sub-env) keyed by the request's tree path.
- * Environment / request runtime IDs are regenerated at every load so they
- * can't be used as stable keys.
+ * Request and environment document ids are now persisted in the collection
+ * file, so this store keys by `requestId` and saves the selected env by
+ * `envId` directly — no more name-path walking, and duplicates at any
+ * level of the tree no longer collide.
  *
  * Storage layout (`window.api.storage`):
  *
  *   key:   `request_env_selections:${filePath}`
- *   value: `Record<requestPath, envNamePath>`
- *
- * e.g. `{ "1 - Swagger Petstore/1 - pet/1 - Find pet by ID": "Default/Production" }`.
+ *   value: `Record<requestId, envId>`
  */
 
 import type { Environment } from '../../../shared/types/collections'
@@ -53,33 +50,15 @@ async function writeAll(filePath: string, selections: Selections): Promise<void>
   await api.set(storageKey(filePath), selections)
 }
 
-// ---------- Environment tree traversal helpers ----------
+// ---------- Environment tree lookup ----------
 
-/** Walk the full env tree (including nested sub-environments) depth-first. */
-function* walkEnvironments(environments: Environment[], parentNames: readonly string[] = []): Generator<{ env: Environment; namePath: string[] }> {
+/** Find an environment (including nested sub-envs) by its id. */
+export function findEnvironmentById(environments: Environment[] | undefined, envId: string): Environment | null {
+  if (!environments) return null
   for (const env of environments) {
-    const namePath = [...parentNames, env.name]
-    yield { env, namePath }
-    if (env.subEnvironments && env.subEnvironments.length > 0) {
-      yield* walkEnvironments(env.subEnvironments, namePath)
-    }
-  }
-}
-
-/** Find the runtime ID of the environment whose name path (joined by `/`) matches. */
-export function findEnvIdByNamePath(environments: Environment[] | undefined, namePath: string): string | null {
-  if (!environments) return null
-  for (const { env, namePath: candidate } of walkEnvironments(environments)) {
-    if (candidate.join('/') === namePath) return env.id
-  }
-  return null
-}
-
-/** Build the name path for a given runtime env ID by walking the tree. */
-export function findNamePathByEnvId(environments: Environment[] | undefined, envId: string): string | null {
-  if (!environments) return null
-  for (const { env, namePath } of walkEnvironments(environments)) {
-    if (env.id === envId) return namePath.join('/')
+    if (env.id === envId) return env
+    const nested = findEnvironmentById(env.subEnvironments, envId)
+    if (nested) return nested
   }
   return null
 }
@@ -87,74 +66,46 @@ export function findNamePathByEnvId(environments: Environment[] | undefined, env
 // ---------- Session in-memory cache ----------
 
 /**
- * In-memory session cache mapping `${filePath}::${requestPath}` to the env
- * name path most recently chosen during the session. Survives
- * EnvironmentProvider remounts so reactive re-renders of the workbench
- * don't revert to the default environment.
+ * In-memory session cache mapping `${filePath}::${requestId}` to the most
+ * recently chosen env id during the session. Survives EnvironmentProvider
+ * remounts so reactive re-renders of the workbench don't revert to the
+ * default environment.
  */
 const sessionSelectionCache = new Map<string, string>()
 
-function sessionCacheKey(filePath: string, requestPath: string): string {
-  return `${filePath}::${requestPath}`
+function sessionCacheKey(filePath: string, requestId: string): string {
+  return `${filePath}::${requestId}`
 }
 
-export function getSessionEnvSelection(filePath: string, requestPath: string): string | undefined {
-  return sessionSelectionCache.get(sessionCacheKey(filePath, requestPath))
+export function getSessionEnvSelection(filePath: string, requestId: string): string | undefined {
+  return sessionSelectionCache.get(sessionCacheKey(filePath, requestId))
 }
 
-export function setSessionEnvSelection(filePath: string, requestPath: string, envNamePath: string): void {
-  sessionSelectionCache.set(sessionCacheKey(filePath, requestPath), envNamePath)
+export function setSessionEnvSelection(filePath: string, requestId: string, envId: string): void {
+  sessionSelectionCache.set(sessionCacheKey(filePath, requestId), envId)
 }
 
-export function hasSessionEnvSelection(filePath: string, requestPath: string): boolean {
-  return sessionSelectionCache.has(sessionCacheKey(filePath, requestPath))
-}
-
-export function renameSessionEnvSelection(filePath: string, oldRequestPath: string, newRequestPath: string): void {
-  if (oldRequestPath === newRequestPath) return
-  const oldKey = sessionCacheKey(filePath, oldRequestPath)
-  const existing = sessionSelectionCache.get(oldKey)
-  if (existing === undefined) return
-  sessionSelectionCache.delete(oldKey)
-  sessionSelectionCache.set(sessionCacheKey(filePath, newRequestPath), existing)
+export function hasSessionEnvSelection(filePath: string, requestId: string): boolean {
+  return sessionSelectionCache.has(sessionCacheKey(filePath, requestId))
 }
 
 // ---------- Public API ----------
 
 export async function getStoredEnvForRequest(
   filePath: string,
-  requestPath: string
+  requestId: string
 ): Promise<string | undefined> {
   const selections = await readAll(filePath)
-  return selections[requestPath]
+  return selections[requestId]
 }
 
 export async function setStoredEnvForRequest(
   filePath: string,
-  requestPath: string,
-  envNamePath: string
+  requestId: string,
+  envId: string
 ): Promise<void> {
   const selections = await readAll(filePath)
-  if (selections[requestPath] === envNamePath) return
-  selections[requestPath] = envNamePath
+  if (selections[requestId] === envId) return
+  selections[requestId] = envId
   await writeAll(filePath, selections)
-}
-
-/**
- * Rename a request's stored path so its saved environment survives a rename.
- * No-op if there's nothing saved under `oldPath`.
- */
-export async function renameStoredRequestPath(
-  filePath: string,
-  oldPath: string,
-  newPath: string
-): Promise<void> {
-  if (oldPath === newPath) return
-  const selections = await readAll(filePath)
-  const existing = selections[oldPath]
-  if (existing === undefined) return
-  const { [oldPath]: _removed, ...rest } = selections
-  void _removed
-  rest[newPath] = existing
-  await writeAll(filePath, rest)
 }

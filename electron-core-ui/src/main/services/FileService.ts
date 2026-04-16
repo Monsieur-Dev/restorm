@@ -121,8 +121,17 @@ export class FileService {
       this.recalculateDirtyState()
     }
 
-    // Subscribe to UPDATE events only - CREATED events are handled by registerInitialChecksums
-    // to avoid race conditions during file loading
+    // Subscribe to CREATE events too so post-load additions (imports, new
+    // requests/folders created by the user) register in `currentChecksums`
+    // without a matching `savedChecksums` entry — that's what flags the
+    // file as dirty. During the initial file load, `registerInitialChecksums`
+    // clears both maps and repopulates them in lockstep, so any CREATE
+    // events emitted before baseline is set are overwritten cleanly.
+    eventBusService.subscribe(DOCUMENT_EVENTS.FOLDER_CREATED, handleDocumentChanged)
+    eventBusService.subscribe(DOCUMENT_EVENTS.REQUEST_CREATED, handleDocumentChanged)
+    eventBusService.subscribe(DOCUMENT_EVENTS.ENVIRONMENT_CREATED, handleDocumentChanged)
+
+    // Subscribe to UPDATE events
     eventBusService.subscribe(DOCUMENT_EVENTS.FOLDER_UPDATED, handleDocumentChanged)
     eventBusService.subscribe(DOCUMENT_EVENTS.REQUEST_UPDATED, handleDocumentChanged)
     eventBusService.subscribe(DOCUMENT_EVENTS.ENVIRONMENT_UPDATED, handleDocumentChanged)
@@ -132,7 +141,7 @@ export class FileService {
     eventBusService.subscribe(DOCUMENT_EVENTS.REQUEST_DELETED, handleDocumentDeleted)
     eventBusService.subscribe(DOCUMENT_EVENTS.ENVIRONMENT_DELETED, handleDocumentDeleted)
 
-    logger.info('[FileService] Subscribed to DocumentEvents (UPDATE/DELETE only) for dirty state tracking')
+    logger.info('[FileService] Subscribed to DocumentEvents (CREATE/UPDATE/DELETE) for dirty state tracking')
   }
 
   /**
