@@ -295,6 +295,14 @@ async function runImport(currentPage: Page, source: string): Promise<void> {
   await importButton.click()
 
   await expect(modal).not.toBeVisible({ timeout: 10000 })
+
+  // Importing a spec now auto-opens the created env folder as a tab.
+  // Verify a new active tab appeared, then close it so subsequent
+  // imports don't accumulate tabs that obscure other tab-based assertions.
+  const activeTab = currentPage.locator('.tab[role="tab"][aria-selected="true"]').first()
+  await expect(activeTab).toBeVisible({ timeout: 10000 })
+  await activeTab.locator('button[aria-label="Close"]').first().click()
+  await expect(currentPage.locator('.tab[role="tab"]')).toHaveCount(0, { timeout: 5000 })
 }
 
 When(

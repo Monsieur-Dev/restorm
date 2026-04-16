@@ -201,13 +201,6 @@ const App: React.FC = () => {
   // Import modal state
   const [showImportModal, setShowImportModal] = useState(false)
 
-  // Use import hook
-  const { handleImport } = useImport({
-    rootItems,
-    setRootItems,
-    setExpandedIds
-  })
-
   // Use workbench tabs hook for tab creation, restoration, and tree updates
   const {
     workbenchRef,
@@ -225,6 +218,29 @@ const App: React.FC = () => {
     setWorkbenchTree,
     registerTabDirtyState
   })
+
+  // Use import hook — pendingEnvFolderIds triggers tab-opening below.
+  const { handleImport, pendingEnvFolderIds, clearPendingEnvFolderIds } = useImport({
+    rootItems,
+    setRootItems,
+    setExpandedIds
+  })
+
+  // After an import, open a workbench tab for each newly-created env folder.
+  // This runs in a useEffect so rootItems has already committed — the
+  // openEnvironmentFolderTab call sees the up-to-date tree.
+  useEffect(() => {
+    if (pendingEnvFolderIds.length === 0) return
+    for (const id of pendingEnvFolderIds) {
+      const folder = rootItems.find((item) => item.id === id)
+      if (folder && isEnvironmentFolder(folder)) {
+        openEnvironmentFolderTab(folder, [
+          { id: folder.id, label: folder.name }
+        ])
+      }
+    }
+    clearPendingEnvFolderIds()
+  }, [pendingEnvFolderIds, rootItems, openEnvironmentFolderTab, clearPendingEnvFolderIds])
 
   // State for sidebar editing and delete confirmation
   const [sidebarEditingItemId, setSidebarEditingItemId] = useState<string | null>(null)

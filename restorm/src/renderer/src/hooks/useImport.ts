@@ -2,7 +2,7 @@
  * Hook for managing import operations
  */
 
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 import { eventBus, logger } from 'electron-core-ui/renderer'
 import { DocumentEvents } from '../services/DocumentEvents'
 import { makeReactiveFolder } from '../types/reactive'
@@ -12,6 +12,16 @@ export interface UseImportOptions {
   rootItems: (EnvironmentFolder | Folder | Request)[]
   setRootItems: React.Dispatch<React.SetStateAction<(EnvironmentFolder | Folder | Request)[]>>
   setExpandedIds: React.Dispatch<React.SetStateAction<string[]>>
+}
+
+export interface UseImportReturn {
+  handleImport: (
+    items: FolderItem[],
+    targetFolderId?: string,
+    pendingFolders?: { id: string; name: string; parentId: string }[]
+  ) => void
+  pendingEnvFolderIds: string[]
+  clearPendingEnvFolderIds: () => void
 }
 
 /** Collect every folder id reachable from the given items (inclusive). */
@@ -26,16 +36,11 @@ function collectFolderIds(items: FolderItem[]): string[] {
   return ids
 }
 
-export interface UseImportReturn {
-  handleImport: (
-    items: FolderItem[],
-    targetFolderId?: string,
-    pendingFolders?: { id: string; name: string; parentId: string }[]
-  ) => void
-}
-
 export function useImport(options: UseImportOptions): UseImportReturn {
   const { rootItems, setRootItems, setExpandedIds } = options
+
+  const [pendingEnvFolderIds, setPendingEnvFolderIds] = useState<string[]>([])
+  const clearPendingEnvFolderIds = useCallback(() => { setPendingEnvFolderIds([]) }, [])
 
   const handleImport = useCallback(
     (
@@ -160,6 +165,13 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         setExpandedIds((prev) => Array.from(new Set([...prev, ...newlyExpanded])))
       }
 
+      // Collect env-folder IDs from the top-level imported items for
+      // automatic tab-opening after the import.
+      const collectEnvFolderIds = (importedItems: FolderItem[]): string[] =>
+        importedItems
+          .filter((item) => 'items' in item && 'environments' in item)
+          .map((item) => item.id)
+
       // Resolve target folder ID: if it's a pending folder, use the created folder's ID
       let actualTargetFolderId = targetFolderId
       if (targetFolderId && createdFoldersMap.has(targetFolderId)) {
@@ -189,6 +201,8 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         filteredItems.forEach((folder) => {
           emitCreationEvents(folder, folder.id)
         })
+
+        setPendingEnvFolderIds(collectEnvFolderIds(filteredItems))
         return
       }
 
@@ -254,6 +268,8 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         itemsWithNewIds.forEach((item) => {
           emitCreationEvents(item, item.id)
         })
+
+        setPendingEnvFolderIds(collectEnvFolderIds(itemsWithNewIds))
         return
       }
 
@@ -325,6 +341,8 @@ export function useImport(options: UseImportOptions): UseImportReturn {
   )
 
   return {
-    handleImport
+    handleImport,
+    pendingEnvFolderIds,
+    clearPendingEnvFolderIds
   }
 }
