@@ -19,10 +19,10 @@ import {
   NumericValue,
   DateTimeValue,
   PasswordValue,
+  ExpressionValue,
   type ValueType
 } from '../../../shared/types/collections'
 import { toHTTPMethod } from './httpMethodValidator'
-import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 import { swaggerToApiDocumentation } from './transformers/swaggerToApiDocumentation'
 
 // ============================================================================
@@ -133,6 +133,16 @@ interface SwaggerSpec {
 // ============================================================================
 // Helper Functions
 // ============================================================================
+
+/** Build a KeyValue with an explicitly-typed value. */
+function kvOfType(key: string, value: ValueType, description?: string): KeyValue {
+  return new KeyValue({
+    key,
+    value,
+    description: description ?? '',
+    enabled: true
+  })
+}
 
 /**
  * Build a default typed ValueType from a Swagger parameter's declared type.
@@ -498,24 +508,33 @@ function createSwaggerEnvironment(spec: SwaggerSpec, overrideBaseUrl: string | u
 
   const domainName = extractDomainName(host !== '' ? host : (overrideBaseUrl ?? ''))
 
-  // Explicit override — bypass the structured layout.
+  // Explicit override — bypass the structured layout. The override is
+  // almost always a Handlebars template (`{{scheme}}://…`) so persist it
+  // as an ExpressionValue.
   if (overrideBaseUrl !== undefined) {
     return {
       id: generateId(`env:root:${domainName}`),
       name: domainName,
-      variables: [createTypedKeyValue({ key: 'baseUrl', value: overrideBaseUrl, enabled: true })],
+      variables: [kvOfType('baseUrl', new ExpressionValue(overrideBaseUrl))],
       subEnvironments: []
     }
   }
 
   const defaultScheme = schemes[0] ?? 'https'
 
-  const rootVariables: ReturnType<typeof createTypedKeyValue>[] = [
-    createTypedKeyValue({ key: 'scheme', value: defaultScheme, enabled: true })
+  const rootVariables = [
+    kvOfType('scheme', new StringValue(defaultScheme))
   ]
-  if (hostname !== '') rootVariables.push(createTypedKeyValue({ key: 'host', value: hostname, enabled: true }))
-  if (port !== '') rootVariables.push(createTypedKeyValue({ key: 'port', value: port, enabled: true }))
-  if (basePath !== '') rootVariables.push(createTypedKeyValue({ key: 'baseRoute', value: basePath, enabled: true }))
+  if (hostname !== '') rootVariables.push(kvOfType('host', new StringValue(hostname)))
+  if (port !== '') {
+    const portNum = Number(port)
+    rootVariables.push(
+      Number.isFinite(portNum)
+        ? kvOfType('port', new NumericValue(portNum, 'decimal'))
+        : kvOfType('port', new StringValue(port))
+    )
+  }
+  if (basePath !== '') rootVariables.push(kvOfType('baseRoute', new StringValue(basePath)))
 
   // Build a `{{scheme}}://{{host}}[:{{port}}][{{baseRoute}}]` template whose
   // literal parts are only emitted when the corresponding root var exists.
@@ -525,8 +544,8 @@ function createSwaggerEnvironment(spec: SwaggerSpec, overrideBaseUrl: string | u
     id: generateId(`env:root:${domainName}:${scheme}`),
     name: scheme,
     variables: [
-      createTypedKeyValue({ key: 'scheme', value: scheme, enabled: true }),
-      createTypedKeyValue({ key: 'baseUrl', value: baseUrlTemplate, enabled: true })
+      kvOfType('scheme', new StringValue(scheme)),
+      kvOfType('baseUrl', new ExpressionValue(baseUrlTemplate))
     ]
   }))
 

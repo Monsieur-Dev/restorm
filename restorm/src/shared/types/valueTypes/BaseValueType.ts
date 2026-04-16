@@ -1,4 +1,4 @@
-export type ValueTypeName = 'string' | 'color' | 'datetime' | 'numeric' | 'password'
+export type ValueTypeName = 'string' | 'color' | 'datetime' | 'numeric' | 'password' | 'expression' | 'boolean'
 
 /**
  * Abstract base class for all value objects.

@@ -5,6 +5,7 @@
  */
 
 import type { FullRequestData, ResolvedUrlResult, TransformedContext, TransformValueFn } from './ContextServiceTypes'
+import { ExpressionValue } from '../../shared/types/collections'
 
 /**
  * Calculate the resolved URL for a request.
@@ -31,7 +32,12 @@ export function resolveUrl(
     if (pp.key) {
       // Resolve using cumulative context (env + previous path params)
       const resolvedKey = transformValue(pp.key, cumulativeContext)
-      const resolvedValue = transformValue(pp.value.toString(), cumulativeContext)
+      // Only `ExpressionValue` values go through Handlebars — plain
+      // strings/numbers/dates etc. are taken literally.
+      const raw = pp.value.toString()
+      const resolvedValue = pp.value instanceof ExpressionValue
+        ? transformValue(raw, cumulativeContext)
+        : raw
       // Store non-encoded value for next iterations (last value wins for same key)
       cumulativeContext[resolvedKey] = resolvedValue
     }
@@ -62,7 +68,11 @@ export function resolveUrl(
     if (param.key) {
       // Resolve using cumulative context
       const resolvedKey = transformValue(param.key, cumulativeParamsContext)
-      const resolvedValue = transformValue(param.value.toString(), cumulativeParamsContext)
+      // Only `ExpressionValue` values go through Handlebars.
+      const raw = param.value.toString()
+      const resolvedValue = param.value instanceof ExpressionValue
+        ? transformValue(raw, cumulativeParamsContext)
+        : raw
       // Store for URL (last value wins for same key)
       resolvedParams.set(resolvedKey, resolvedValue)
       // Add to cumulative context for next params

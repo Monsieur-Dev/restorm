@@ -1,4 +1,4 @@
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, type ValueType } from '../../../shared/types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, type ValueType } from '../../../shared/types/collections'
 
 export function normalizeValueType(input: unknown): ValueType {
   if (
@@ -6,7 +6,9 @@ export function normalizeValueType(input: unknown): ValueType {
     input instanceof ColorValue ||
     input instanceof DateTimeValue ||
     input instanceof NumericValue ||
-    input instanceof PasswordValue
+    input instanceof PasswordValue ||
+    input instanceof ExpressionValue ||
+    input instanceof BooleanValue
   ) {
     return input
   }
@@ -40,6 +42,10 @@ export function normalizeValueType(input: unknown): ValueType {
       }
       case 'password':
         return new PasswordValue(typeof plain.value === 'string' ? plain.value : '')
+      case 'expression':
+        return new ExpressionValue(typeof plain.value === 'string' ? plain.value : '')
+      case 'boolean':
+        return new BooleanValue(plain.value === true || plain.value === 'true')
       default:
         return new StringValue('')
     }

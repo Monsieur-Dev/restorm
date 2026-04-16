@@ -1,6 +1,6 @@
 import type { ValueTypeName } from '../types/valueTypes/BaseValueType'
 import type { ValueType } from '../types/collections'
-import { DateTimeValue, NumericValue, PasswordValue, StringValue, ColorValue } from '../types/collections'
+import { DateTimeValue, NumericValue, PasswordValue, StringValue, ColorValue, ExpressionValue, BooleanValue } from '../types/collections'
 
 export type PersistedValue =
   | { type: 'string'; value: string }
@@ -8,13 +8,15 @@ export type PersistedValue =
   | { type: 'numeric'; value: number; format: string }
   | { type: 'datetime'; value: string; format: string }
   | { type: 'password' }
+  | { type: 'expression'; value: string }
+  | { type: 'boolean'; value: boolean }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
 
 function isValueTypeName(value: unknown): value is ValueTypeName {
-  return value === 'string' || value === 'color' || value === 'numeric' || value === 'datetime' || value === 'password'
+  return value === 'string' || value === 'color' || value === 'numeric' || value === 'datetime' || value === 'password' || value === 'expression' || value === 'boolean'
 }
 
 /**
@@ -34,6 +36,12 @@ export function serializeValueForPersistence(value: unknown): PersistedValue {
   }
   if (value instanceof ColorValue) {
     return { type: 'color', value: value.value }
+  }
+  if (value instanceof ExpressionValue) {
+    return { type: 'expression', value: value.value }
+  }
+  if (value instanceof BooleanValue) {
+    return { type: 'boolean', value: value.value }
   }
   if (value instanceof StringValue) {
     return { type: 'string', value: value.value }
@@ -62,6 +70,14 @@ export function serializeValueForPersistence(value: unknown): PersistedValue {
     if (type === 'color') {
       const raw = (value as { value?: unknown }).value
       return { type: 'color', value: typeof raw === 'string' ? raw : '' }
+    }
+    if (type === 'expression') {
+      const raw = (value as { value?: unknown }).value
+      return { type: 'expression', value: typeof raw === 'string' ? raw : '' }
+    }
+    if (type === 'boolean') {
+      const raw = (value as { value?: unknown }).value
+      return { type: 'boolean', value: raw === true || raw === 'true' }
     }
     const raw = (value as { value?: unknown }).value
     return { type: 'string', value: typeof raw === 'string' ? raw : '' }

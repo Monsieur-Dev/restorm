@@ -130,7 +130,9 @@
       "secret": "Secret",
       "number": "Nombre",
       "dateTime": "Date/heure",
-      "color": "Couleur"
+      "color": "Couleur",
+      "expression": "Expression",
+      "boolean": "Booléen"
     }
   },
   "graphql": {

@@ -5,7 +5,7 @@
 import { trackable } from 'electron-core-ui/main'
 import type { RuntimeId } from '../types'
 import type { ValueType } from '../../types/collections'
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue } from '../../types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue } from '../../types/collections'
 import { BaseKeyValue } from './BaseKeyValue'
 import { serializeValueForPersistence } from '../../utils/valuePersistence'
 
@@ -28,7 +28,9 @@ export class KeyValue extends BaseKeyValue {
       obj.value instanceof ColorValue ||
       obj.value instanceof DateTimeValue ||
       obj.value instanceof NumericValue ||
-      obj.value instanceof PasswordValue
+      obj.value instanceof PasswordValue ||
+      obj.value instanceof ExpressionValue ||
+      obj.value instanceof BooleanValue
     ) {
       value = obj.value
     } else if (obj.value && typeof obj.value === 'object') {
@@ -60,6 +62,12 @@ export class KeyValue extends BaseKeyValue {
         }
         case 'password':
           value = new PasswordValue(typeof plain.value === 'string' ? plain.value : '')
+          break
+        case 'expression':
+          value = new ExpressionValue(typeof plain.value === 'string' ? plain.value : '')
+          break
+        case 'boolean':
+          value = new BooleanValue(plain.value === true || plain.value === 'true')
           break
         default:
           value = new StringValue('')

@@ -28,6 +28,7 @@ import {
 import { registerHandlebarsHelpers } from '../utils/handlebarsHelpers'
 import { pubsub, PUBSUB_TOPICS } from './CollectionStore'
 import { KeyValue as KeyValueModel } from '../../shared/models'
+import { ExpressionValue } from '../../shared/types/collections'
 import { resolveUrl } from './URLResolver'
 import { compileSnippetTemplates, generateCodeSnippets, type CompiledSnippetTemplates } from './CodeSnippetGenerator'
 import type {
@@ -296,7 +297,7 @@ class ContextService {
       if (kv.key) {
         // Copy context before transformation for this variable
         const contextUsed = { ...finalContext }
-        const transformedValue = this.transformValue(kv.value.toString(), finalContext)
+        const transformedValue = this.resolveKeyValue(kv, finalContext)
         finalContext[kv.key] = transformedValue
 
         // Store and broadcast transformation result if variable has an id
@@ -363,7 +364,10 @@ class ContextService {
   }
 
   /**
-   * Transform a value using Handlebars
+   * Transform a value using Handlebars. Always resolves — gating on
+   * `ExpressionValue` happens in `resolveKeyValue` so the URL-field
+   * template resolution path (which operates on a plain string field,
+   * not a typed `KeyValue`) stays intact.
    */
   private transformValue(value: string, context: TransformedContext): string {
     const rawValue = value
@@ -381,6 +385,21 @@ class ContextService {
       })
       return rawValue
     }
+  }
+
+  /**
+   * Resolve a `KeyValue`'s value. Only `ExpressionValue`s are run
+   * through Handlebars — every other type is taken literally, so a
+   * `StringValue("{{unresolved}}")` stays as-is. This is the rule the
+   * product asked for: variable substitution is opt-in, the user marks
+   * a variable as "expression" when they want templating.
+   */
+  private resolveKeyValue(kv: KeyValue, context: TransformedContext): string {
+    const raw = kv.value.toString()
+    if (kv.value instanceof ExpressionValue) {
+      return this.transformValue(raw, context)
+    }
+    return raw
   }
 
   /**
@@ -580,7 +599,7 @@ class ContextService {
         }
         if (kv.key) {
           const contextUsed = { ...groupContext }
-          const transformedValue = this.transformValue(kv.value.toString(), groupContext)
+          const transformedValue = this.resolveKeyValue(kv, groupContext)
           groupContext[kv.key] = transformedValue
 
           if (kv.id) {
@@ -702,7 +721,7 @@ class ContextService {
         for (const prev of cumulativePathParams) {
           contextForResolve[prev.name] = prev.value
         }
-        const resolvedValue = this.transformValue(pp.value.toString(), contextForResolve)
+        const resolvedValue = this.resolveKeyValue(pp, contextForResolve)
         addOrReplace(cumulativePathParams, pp.key, resolvedValue)
       }
     }
@@ -727,7 +746,7 @@ class ContextService {
         for (const prev of cumulativeHeaders) {
           contextForResolve[prev.name] = prev.value
         }
-        const resolvedValue = this.transformValue(h.value.toString(), contextForResolve)
+        const resolvedValue = this.resolveKeyValue(h, contextForResolve)
         addOrReplace(cumulativeHeaders, h.key, resolvedValue)
       }
     }
@@ -752,7 +771,7 @@ class ContextService {
         for (const prev of cumulativeParams) {
           contextForResolve[prev.name] = prev.value
         }
-        const resolvedValue = this.transformValue(p.value.toString(), contextForResolve)
+        const resolvedValue = this.resolveKeyValue(p, contextForResolve)
         addOrReplace(cumulativeParams, p.key, resolvedValue)
       }
     }

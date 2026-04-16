@@ -6,6 +6,7 @@ import {
   Button,
   ColorPicker,
   DateTimePicker,
+  Toggle,
   Tooltip,
   MenuItem,
   MenuItemSeparator,
@@ -18,21 +19,49 @@ import {
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import type { TranslatedHelperDefinition } from '../../utils/handlebarsHelpersDefinitions'
 import type { KeyValue, ValueType } from '../../../../shared/types/collections'
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue } from '../../../../shared/types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue } from '../../../../shared/types/collections'
 import { inferValueFromString, isHexColorString, tryParseDateString, tryParseNumberString } from '../../../../shared/utils/valueCasting'
 import { normalizeValueType } from '../../utils/normalizeValueType'
 
 export type VariableContext = Record<string, string>
 
-type ValueTypeKind = 'string' | 'secret' | 'number' | 'dateTime' | 'color'
+type ValueTypeKind = 'string' | 'secret' | 'number' | 'dateTime' | 'color' | 'expression' | 'boolean'
 
 function resolveValueTypeKind(value: ValueType | undefined): ValueTypeKind {
   if (value instanceof PasswordValue) return 'secret'
   if (value instanceof NumericValue) return 'number'
   if (value instanceof DateTimeValue) return 'dateTime'
   if (value instanceof ColorValue) return 'color'
+  if (value instanceof ExpressionValue) return 'expression'
+  if (value instanceof BooleanValue) return 'boolean'
   return 'string'
 }
+
+/**
+ * Small square indicator button rendered to the right of a value cell so
+ * the user can see at a glance what type a variable holds without having
+ * to click into the cell. Mirrors the visual weight of the date / colour
+ * picker buttons already present for those types. Decorative for now —
+ * the click handler is reserved for a future "transform value type"
+ * shortcut.
+ */
+interface TypeIndicatorProps {
+  icon: string
+  ariaLabel: string
+  dataTestId?: string | undefined
+}
+
+const TypeIndicator: React.FC<TypeIndicatorProps> = ({ icon, ariaLabel, dataTestId }) => (
+  <div style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center' }}>
+    <Button
+      line
+      icon={icon}
+      options={{ ariaLabel }}
+      onClick={(e) => { e.preventDefault() }}
+      {...(dataTestId && { 'data-testid': dataTestId })}
+    />
+  </div>
+)
 
 interface ColorValueCellProps {
   hex: string
@@ -217,7 +246,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
     }
   }, [contextMenu?.visible, closeContextMenu])
 
-  const castToType = useCallback((target: 'string' | 'secret' | 'number' | 'dateTime' | 'color'): void => {
+  const castToType = useCallback((target: 'string' | 'secret' | 'number' | 'dateTime' | 'color' | 'expression' | 'boolean'): void => {
     if (!contextMenu) return
 
     const { rowId, currentValue, onChange } = contextMenu
@@ -257,6 +286,17 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         nextDisplayValue = color
         break
       }
+      case 'expression': {
+        nextValue = new ExpressionValue(raw)
+        nextDisplayValue = raw
+        break
+      }
+      case 'boolean': {
+        const asBool = raw.trim().toLowerCase() === 'true' || raw.trim() === '1'
+        nextValue = new BooleanValue(asBool)
+        nextDisplayValue = asBool ? 'true' : 'false'
+        break
+      }
     }
 
     valueTypeByRowIdRef.current.set(rowId, nextValue)
@@ -276,7 +316,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
       onChange: (next: string) => void,
       activeType: ValueTypeKind
     ): ContextMenuItem[] => {
-      const transform = (target: 'string' | 'secret' | 'number' | 'dateTime' | 'color'): void => {
+      const transform = (target: 'string' | 'secret' | 'number' | 'dateTime' | 'color' | 'expression' | 'boolean'): void => {
         const raw = currentValue
         let nextValue: ValueType
         let nextDisplayValue = raw
@@ -309,6 +349,17 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
             const color = isHexColorString(trimmed) ? trimmed : '#000000'
             nextValue = new ColorValue(color)
             nextDisplayValue = color
+            break
+          }
+          case 'expression': {
+            nextValue = new ExpressionValue(raw)
+            nextDisplayValue = raw
+            break
+          }
+          case 'boolean': {
+            const asBool = raw.trim().toLowerCase() === 'true' || raw.trim() === '1'
+            nextValue = new BooleanValue(asBool)
+            nextDisplayValue = asBool ? 'true' : 'false'
             break
           }
         }
@@ -358,6 +409,19 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
               label: t('keyValueTable.types.color'),
               checked: activeType === 'color',
               onClick: () => { transform('color') }
+            },
+            { id: 'sep-2', label: '', isSeparator: true },
+            {
+              id: 'transform-expression',
+              label: t('keyValueTable.types.expression'),
+              checked: activeType === 'expression',
+              onClick: () => { transform('expression') }
+            },
+            {
+              id: 'transform-boolean',
+              label: t('keyValueTable.types.boolean'),
+              checked: activeType === 'boolean',
+              onClick: () => { transform('boolean') }
             }
           ]
         }
@@ -532,16 +596,26 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
 
       if (resolved instanceof PasswordValue) {
         return (
-          <div style={{ width: '100%', height: '100%' }} onContextMenu={handleContextMenu}>
-            <InputBox
-              value={value}
-              onChange={(next) => {
-                if (id) valueTypeByRowIdRef.current.set(id, new PasswordValue(next))
-                onChange(next)
-              }}
-              options={{ type: 'text' }}
-              password
-              {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-password` })}
+          <div
+            style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', height: '100%', minWidth: 0 }}
+            onContextMenu={handleContextMenu}
+          >
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <InputBox
+                value={value}
+                onChange={(next) => {
+                  if (id) valueTypeByRowIdRef.current.set(id, new PasswordValue(next))
+                  onChange(next)
+                }}
+                options={{ type: 'text' }}
+                password
+                {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-password` })}
+              />
+            </div>
+            <TypeIndicator
+              icon="lock"
+              ariaLabel="Password value"
+              {...(dataTestId && { dataTestId: `${dataTestId}-value-type-password` })}
             />
           </div>
         )
@@ -596,40 +670,121 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
 
       if (resolved instanceof NumericValue) {
         return (
-          <div style={{ width: '100%', height: '100%' }} onContextMenu={handleContextMenu}>
-            <InputBox
-              value={value}
-              onChange={(next) => {
-                const parsed = Number(next)
-                if (id && Number.isFinite(parsed)) {
-                  valueTypeByRowIdRef.current.set(id, new NumericValue(parsed, resolved.format))
+          <div
+            style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', height: '100%', minWidth: 0 }}
+            onContextMenu={handleContextMenu}
+          >
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <InputBox
+                value={value}
+                onChange={(next) => {
+                  const parsed = Number(next)
+                  if (id && Number.isFinite(parsed)) {
+                    valueTypeByRowIdRef.current.set(id, new NumericValue(parsed, resolved.format))
+                  }
+                  onChange(next)
+                }}
+                options={{ type: 'number' }}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-number` })}
+              />
+            </div>
+            <TypeIndicator
+              icon="symbol-numeric"
+              ariaLabel="Numeric value"
+              {...(dataTestId && { dataTestId: `${dataTestId}-value-type-numeric` })}
+            />
+          </div>
+        )
+      }
+
+      if (resolved instanceof BooleanValue) {
+        const isTrue = resolved.value
+        return (
+          <div
+            style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', height: '100%', minWidth: 0 }}
+            onContextMenu={handleContextMenu}
+          >
+            <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Toggle
+                isChecked={isTrue}
+                onChange={(next) => {
+                  if (id) valueTypeByRowIdRef.current.set(id, new BooleanValue(next))
+                  onChange(next ? 'true' : 'false')
+                }}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-boolean` })}
+              />
+            </div>
+            <TypeIndicator
+              icon="symbol-boolean"
+              ariaLabel="Boolean value"
+              {...(dataTestId && { dataTestId: `${dataTestId}-value-type-boolean` })}
+            />
+          </div>
+        )
+      }
+
+      if (resolved instanceof ExpressionValue) {
+        return (
+          <div
+            style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', height: '100%', minWidth: 0 }}
+            onContextMenu={handleContextMenu}
+          >
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <RestormVariableInputBox
+                value={value}
+                onChange={(next) => {
+                  if (id) {
+                    valueTypeByRowIdRef.current.set(id, new ExpressionValue(next))
+                  }
+                  onChange(next)
+                }}
+                variables={variablesRef.current}
+                helpers={helpersRef.current}
+                variableId={id}
+                contextMenuItems={
+                  id ? buildTransformMenuItems(id, value, onChange, activeType) : undefined
                 }
-                onChange(next)
-              }}
-              options={{ type: 'number' }}
-              {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-number` })}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-expression` })}
+              />
+            </div>
+            <TypeIndicator
+              icon="code"
+              ariaLabel="Expression (Handlebars template)"
+              {...(dataTestId && { dataTestId: `${dataTestId}-value-type-expression` })}
             />
           </div>
         )
       }
 
       return (
-        <RestormVariableInputBox
-          value={value}
-          onChange={(next) => {
-            if (id) {
-              valueTypeByRowIdRef.current.set(id, new StringValue(next))
-            }
-            onChange(next)
-          }}
-          variables={variablesRef.current}
-          helpers={helpersRef.current}
-          variableId={id}
-          contextMenuItems={
-            id ? buildTransformMenuItems(id, value, onChange, activeType) : undefined
-          }
-          {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-variable` })}
-        />
+        <div
+          style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', height: '100%', minWidth: 0 }}
+          onContextMenu={handleContextMenu}
+        >
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <RestormVariableInputBox
+              value={value}
+              onChange={(next) => {
+                if (id) {
+                  valueTypeByRowIdRef.current.set(id, new StringValue(next))
+                }
+                onChange(next)
+              }}
+              variables={variablesRef.current}
+              helpers={helpersRef.current}
+              variableId={id}
+              contextMenuItems={
+                id ? buildTransformMenuItems(id, value, onChange, activeType) : undefined
+              }
+              {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-variable` })}
+            />
+          </div>
+          <TypeIndicator
+            icon="symbol-string"
+            ariaLabel="String value"
+            {...(dataTestId && { dataTestId: `${dataTestId}-value-type-string` })}
+          />
+        </div>
       )
     },
     [buildTransformMenuItems, dataTestId]
