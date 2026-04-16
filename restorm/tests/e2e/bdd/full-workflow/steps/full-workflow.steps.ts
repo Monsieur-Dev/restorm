@@ -741,22 +741,12 @@ async function transformLastRowTo(currentPage: Page, typeMenuTestId: string): Pr
   // the value <td> so the handler is on the event's currentTarget chain.
   const valueTd = lastRow.locator('td').nth(3)
   await valueTd.click({ button: 'right', force: true })
-  // The "Transform to" submenu must be hovered / clicked to reveal its
-  // leaf items (one per value type).
-  // MenuItem doesn't forward data-testid to every DOM node; match by text.
-  const transformToParent = currentPage
-    .getByRole('menuitem', { name: /Transform to|Transformer en/ })
-    .first()
-  await expect(transformToParent).toBeVisible({ timeout: 5000 })
-  await transformToParent.hover()
-  await currentPage.waitForTimeout(200)
-  const typeLabel = typeMenuTestId.endsWith('-color')
-    ? /^Color$|^Couleur$/
-    : typeMenuTestId.endsWith('-datetime')
-      ? /Date time|Date-heure/
-      : null
-  if (!typeLabel) throw new Error(`unsupported type menu id: ${typeMenuTestId}`)
-  const target = currentPage.getByRole('menuitem', { name: typeLabel }).first()
+  // Type-transform entries are now rendered directly at the top level of
+  // the context menu — no more "Transform to" submenu hover. Target the
+  // JSX context menu explicitly via its data-testid; Monaco renders its
+  // own contextMenuItems flyout with the same labels and would otherwise
+  // collide with the JSX menu.
+  const target = currentPage.locator(`[data-testid="${typeMenuTestId}"]`).first()
   await expect(target).toBeVisible({ timeout: 5000 })
   await target.click()
   await currentPage.waitForTimeout(200)

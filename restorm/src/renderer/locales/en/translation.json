@@ -124,7 +124,6 @@
     "goToDefinition": "Go to Definition"
   },
   "keyValueTable": {
-    "transformTo": "Transform to",
     "types": {
       "string": "String",
       "secret": "Secret",

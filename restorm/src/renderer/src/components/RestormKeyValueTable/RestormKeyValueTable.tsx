@@ -376,54 +376,48 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
 
       return [
         {
-          id: 'transform-to',
-          label: t('keyValueTable.transformTo'),
-          items: [
-            {
-              id: 'transform-string',
-              label: t('keyValueTable.types.string'),
-              checked: activeType === 'string',
-              onClick: () => { transform('string') }
-            },
-            {
-              id: 'transform-secret',
-              label: t('keyValueTable.types.secret'),
-              checked: activeType === 'secret',
-              onClick: () => { transform('secret') }
-            },
-            { id: 'sep-1', label: '', isSeparator: true },
-            {
-              id: 'transform-number',
-              label: t('keyValueTable.types.number'),
-              checked: activeType === 'number',
-              onClick: () => { transform('number') }
-            },
-            {
-              id: 'transform-datetime',
-              label: t('keyValueTable.types.dateTime'),
-              checked: activeType === 'dateTime',
-              onClick: () => { transform('dateTime') }
-            },
-            {
-              id: 'transform-color',
-              label: t('keyValueTable.types.color'),
-              checked: activeType === 'color',
-              onClick: () => { transform('color') }
-            },
-            { id: 'sep-2', label: '', isSeparator: true },
-            {
-              id: 'transform-expression',
-              label: t('keyValueTable.types.expression'),
-              checked: activeType === 'expression',
-              onClick: () => { transform('expression') }
-            },
-            {
-              id: 'transform-boolean',
-              label: t('keyValueTable.types.boolean'),
-              checked: activeType === 'boolean',
-              onClick: () => { transform('boolean') }
-            }
-          ]
+          id: 'transform-string',
+          label: t('keyValueTable.types.string'),
+          checked: activeType === 'string',
+          onClick: () => { transform('string') }
+        },
+        {
+          id: 'transform-secret',
+          label: t('keyValueTable.types.secret'),
+          checked: activeType === 'secret',
+          onClick: () => { transform('secret') }
+        },
+        { id: 'sep-1', label: '', isSeparator: true },
+        {
+          id: 'transform-number',
+          label: t('keyValueTable.types.number'),
+          checked: activeType === 'number',
+          onClick: () => { transform('number') }
+        },
+        {
+          id: 'transform-datetime',
+          label: t('keyValueTable.types.dateTime'),
+          checked: activeType === 'dateTime',
+          onClick: () => { transform('dateTime') }
+        },
+        {
+          id: 'transform-color',
+          label: t('keyValueTable.types.color'),
+          checked: activeType === 'color',
+          onClick: () => { transform('color') }
+        },
+        { id: 'sep-2', label: '', isSeparator: true },
+        {
+          id: 'transform-expression',
+          label: t('keyValueTable.types.expression'),
+          checked: activeType === 'expression',
+          onClick: () => { transform('expression') }
+        },
+        {
+          id: 'transform-boolean',
+          label: t('keyValueTable.types.boolean'),
+          checked: activeType === 'boolean',
+          onClick: () => { transform('boolean') }
         }
       ]
     },
@@ -448,43 +442,53 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         <div className="menu">
           <ul className="actions-container" role="menu">
             <MenuItem
-              title={t('keyValueTable.transformTo')}
-              {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-transform-to` })}
-            >
-              <MenuItem
-                title={t('keyValueTable.types.string')}
-                checked={contextMenu.activeType === 'string'}
-                onClick={() => { castToType('string') }}
-                {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-string` })}
-              />
-              <MenuItem
-                title={t('keyValueTable.types.secret')}
-                checked={contextMenu.activeType === 'secret'}
-                onClick={() => { castToType('secret') }}
-                {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-secret` })}
-              />
-              <MenuItemSeparator
-                {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-separator` })}
-              />
-              <MenuItem
-                title={t('keyValueTable.types.number')}
-                checked={contextMenu.activeType === 'number'}
-                onClick={() => { castToType('number') }}
-                {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-number` })}
-              />
-              <MenuItem
-                title={t('keyValueTable.types.dateTime')}
-                checked={contextMenu.activeType === 'dateTime'}
-                onClick={() => { castToType('dateTime') }}
-                {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-datetime` })}
-              />
-              <MenuItem
-                title={t('keyValueTable.types.color')}
-                checked={contextMenu.activeType === 'color'}
-                onClick={() => { castToType('color') }}
-                {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-color` })}
-              />
-            </MenuItem>
+              title={t('keyValueTable.types.string')}
+              checked={contextMenu.activeType === 'string'}
+              onClick={() => { castToType('string') }}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-string` })}
+            />
+            <MenuItem
+              title={t('keyValueTable.types.secret')}
+              checked={contextMenu.activeType === 'secret'}
+              onClick={() => { castToType('secret') }}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-secret` })}
+            />
+            <MenuItemSeparator
+              {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-separator-1` })}
+            />
+            <MenuItem
+              title={t('keyValueTable.types.number')}
+              checked={contextMenu.activeType === 'number'}
+              onClick={() => { castToType('number') }}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-number` })}
+            />
+            <MenuItem
+              title={t('keyValueTable.types.dateTime')}
+              checked={contextMenu.activeType === 'dateTime'}
+              onClick={() => { castToType('dateTime') }}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-datetime` })}
+            />
+            <MenuItem
+              title={t('keyValueTable.types.color')}
+              checked={contextMenu.activeType === 'color'}
+              onClick={() => { castToType('color') }}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-color` })}
+            />
+            <MenuItemSeparator
+              {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-separator-2` })}
+            />
+            <MenuItem
+              title={t('keyValueTable.types.expression')}
+              checked={contextMenu.activeType === 'expression'}
+              onClick={() => { castToType('expression') }}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-expression` })}
+            />
+            <MenuItem
+              title={t('keyValueTable.types.boolean')}
+              checked={contextMenu.activeType === 'boolean'}
+              onClick={() => { castToType('boolean') }}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-boolean` })}
+            />
           </ul>
         </div>
       </div>

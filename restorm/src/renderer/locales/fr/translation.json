@@ -124,7 +124,6 @@
     "goToDefinition": "Aller à la définition"
   },
   "keyValueTable": {
-    "transformTo": "Transformer en",
     "types": {
       "string": "Chaîne de caractères",
       "secret": "Secret",
