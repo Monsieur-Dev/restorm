@@ -20,7 +20,12 @@ const FOLDER_INDEXABLE_KEYS = new Set([
   'icon',
   'documentation',
   'notes',
-  'tags'
+  'tags',
+  // `tagColors` isn't a searchable field, but it *is* part of the folder
+  // document we serialise: treating it as indexable ensures a FOLDER_UPDATED
+  // event fires when its map changes, so tag renderers repaint and the
+  // dirty-state tracker can detect the diff.
+  'tagColors'
 ])
 
 /** Properties that trigger re-indexing when modified (HTTP requests) */

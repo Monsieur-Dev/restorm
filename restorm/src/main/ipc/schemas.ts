@@ -81,7 +81,8 @@ export const contextSetRequestEnvironmentArgs = z.tuple([
 export const contextUpdateRequestKeyValuesArgs = z.tuple([
   requestIdArg,
   z.string(),
-  z.array(keyValueSchema)
+  z.array(keyValueSchema),
+  z.string().optional()
 ])
 
 export const contextUpdateFullRequestDataArgs = z.tuple([

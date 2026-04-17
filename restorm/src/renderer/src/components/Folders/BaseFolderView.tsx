@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Tabs,
@@ -22,6 +22,8 @@ export interface BaseFolderViewProps {
   additionalTabs?: Tab[]
   /** Default active tab ID (defaults to first additional tab or 'docs') */
   defaultActiveTabId?: string
+  /** Callback receiving the setActiveTabId function when the component mounts. */
+  onSwitchTabReady?: (switchTab: (tabId: string) => void) => void
   /**
    * Override for the Docs tab's Markdown content. When provided, this string
    * is rendered instead of `folder.documentation`; an empty string hides the
@@ -42,7 +44,8 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
   additionalTabs = [],
   defaultActiveTabId,
   documentationOverride,
-  docsHeader
+  docsHeader,
+  onSwitchTabReady
 }) => {
   const { t } = useTranslation()
   const testIdBase = `folder-view-${folder.id}`
@@ -55,12 +58,20 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
     ?? (hasDocs ? 'docs' : 'notes')
   const [activeTabId, setActiveTabId] = useState<string>(defaultTabId)
 
+  // Expose setActiveTabId to parent
+  useEffect(() => {
+    onSwitchTabReady?.(setActiveTabId)
+  }, [onSwitchTabReady, setActiveTabId])
+
   // Fall back to Notes at render time when the Docs tab disappears — avoids a
   // sync setState in effect (banned by react-hooks/set-state-in-effect).
   const effectiveActiveTabId = activeTabId === 'docs' && !hasDocs ? 'notes' : activeTabId
 
   const handleNotesChange = useCallback((markdown: string): void => {
-    updateReactiveProperty(folder, 'notes', markdown)
+    // Normalize blank content to undefined so the checksum matches the
+    // initial state (folder.notes starts as undefined before first edit).
+    const normalized = markdown.trim() ? markdown : undefined
+    updateReactiveProperty(folder, 'notes', normalized)
   }, [folder])
 
   const docsTabs: Tab[] = []

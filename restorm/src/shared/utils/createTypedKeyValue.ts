@@ -1,5 +1,5 @@
 import { KeyValue } from '../models'
-import { ColorValue, DateTimeValue, NumericValue, StringValue } from '../types/collections'
+import { ColorValue, DateTimeValue, ExpressionValue, NumericValue, StringValue } from '../types/collections'
 import { inferValueFromString } from './valueCasting'
 
 export interface CreateKeyValueInput {
@@ -9,7 +9,14 @@ export interface CreateKeyValueInput {
   enabled?: boolean | undefined
 }
 
-function inferValueType(rawValue: string): StringValue | ColorValue | DateTimeValue | NumericValue {
+function inferValueType(rawValue: string): StringValue | ColorValue | DateTimeValue | NumericValue | ExpressionValue {
+  // If the raw value carries a Handlebars placeholder, treat the whole
+  // thing as an expression — only ExpressionValues get resolved at
+  // runtime, so anything expected to interpolate variables has to be
+  // marked up front.
+  if (rawValue.includes('{{')) {
+    return new ExpressionValue(rawValue)
+  }
   const cast = inferValueFromString(rawValue)
   switch (cast.kind) {
     case 'datetime':

@@ -31,7 +31,9 @@
       "defineVariables": "Définir les variables",
       "delete": "Supprimer",
       "clone": "Cloner",
-      "rename": "Renommer"
+      "rename": "Renommer",
+      "addToFavorites": "Ajouter aux favoris",
+      "removeFromFavorites": "Retirer des favoris"
     },
     "deleteConfirm": {
       "title": "Confirmer la suppression",
@@ -59,10 +61,27 @@
       "configuration": "Configuration",
       "notes": "Notes"
     },
+    "home": {
+      "configureEnvs": "Configurer les environnements",
+      "configureEnvsDesc": "Configurez vos URLs de base, variables et authentification pour chaque environnement",
+      "viewDocs": "Voir la documentation",
+      "viewDocsDesc": "Parcourez la documentation de l'API, les modèles et les endpoints",
+      "favoriteRequests": "Requêtes favorites",
+      "removeFavorite": "Retirer des favoris",
+      "refresh": "Rafraîchir",
+      "refreshing": "Actualisation..."
+    },
     "docs": {
       "source": "Source :",
       "refresh": "Actualiser la doc",
       "refreshing": "Actualisation..."
+    },
+    "contextVariables": {
+      "title": "Variables de contexte disponibles",
+      "description": "Utilisez ces variables dans vos URLs de requêtes et dans vos variables de type expression avec la syntaxe {{handlebars}}.",
+      "name": "Variable",
+      "value": "Valeur résolue",
+      "copied": "Copié !"
     }
   },
   "requestTab": {
@@ -117,21 +136,25 @@
     "removeTag": "Supprimer le tag",
     "tabContextMenu": {
       "close": "Fermer",
-      "closeOthers": "Fermer les autres"
+      "closeOthers": "Fermer les autres",
+      "addToFavorites": "Ajouter aux favoris",
+      "removeFromFavorites": "Retirer des favoris"
     }
   },
   "codeEditor": {
     "goToDefinition": "Aller à la définition"
   },
   "keyValueTable": {
-    "transformTo": "Transformer en",
     "types": {
       "string": "Chaîne de caractères",
       "secret": "Secret",
       "number": "Nombre",
       "dateTime": "Date/heure",
-      "color": "Couleur"
-    }
+      "color": "Couleur",
+      "expression": "Expression",
+      "boolean": "Booléen"
+    },
+    "apiEnums": "Types définis dans l'API"
   },
   "graphql": {
     "send": "Envoyer",

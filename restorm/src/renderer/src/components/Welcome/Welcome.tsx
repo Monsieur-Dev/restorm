@@ -49,9 +49,9 @@ export const Welcome: React.FC = () => {
   return (
     <div className="welcome-container">
       <div className="welcome-content">
-        <img 
-          src="/imgs/logo_400.png" 
-          alt="Restorm" 
+        <img
+          src="/imgs/logo_400.png"
+          alt="Restorm"
           className="welcome-logo"
         />
         

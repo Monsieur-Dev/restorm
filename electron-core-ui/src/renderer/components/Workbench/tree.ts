@@ -155,3 +155,74 @@ export function normalizeTree(tree: WorkbenchTree): WorkbenchTree {
 	// we still keep the root orientation as-is; it only affects top-level splitters.
 	return result;
 }
+
+/**
+ * Move a tab to the adjacent tab group in the given direction, creating a
+ * new group when none exists but the source still has other tabs to keep.
+ * Returns the tree unchanged when the source has only one tab *and* there
+ * is no existing destination — that case is a no-op because relocating
+ * the single tab would just rename its group without changing layout.
+ *
+ * The function also returns the destination group id so the caller can
+ * move focus onto the new location.
+ */
+export function moveTabToAdjacentGroup(
+	tree: WorkbenchTree,
+	fromGroupId: string,
+	tabId: string,
+	direction: 'left' | 'right'
+): { tree: WorkbenchTree; destGroupId: string | null } {
+	const sourceLoc = findGroup(tree, fromGroupId);
+	if (!sourceLoc.node || !isTabGroupNode(sourceLoc.node)) {
+		return { tree, destGroupId: null };
+	}
+	const sourceGroup = sourceLoc.node;
+	const tab = sourceGroup.tabs.find(t => t.id === tabId);
+	if (!tab) return { tree, destGroupId: null };
+
+	// Determine the parent container — fall back to a virtual root when at top.
+	const parentOrientation = sourceLoc.parent
+		? sourceLoc.parent.orientation
+		: tree.orientation;
+	const parentGroups = sourceLoc.parent ? sourceLoc.parent.groups : tree.groups;
+
+	// `vertical` sash orientation = groups arranged side-by-side (horizontal layout).
+	if (parentOrientation === 'vertical') {
+		const siblingIdx = direction === 'left' ? sourceLoc.indexInParent - 1 : sourceLoc.indexInParent + 1;
+		const sibling = parentGroups[siblingIdx];
+		if (sibling && isTabGroupNode(sibling)) {
+			const { tree: afterRemove } = removeTab(tree, fromGroupId, tabId);
+			return { tree: insertTabAt(afterRemove, sibling.id, 'full', tab), destGroupId: sibling.id };
+		}
+	}
+
+	// No existing adjacent group at the right orientation: skip if the
+	// source would end up empty (the move would be invisible).
+	if (sourceGroup.tabs.length <= 1) return { tree, destGroupId: null };
+
+	const { tree: afterRemove } = removeTab(tree, fromGroupId, tabId);
+	// `removeTab` normalises; the source still exists because it had >1 tab.
+	// `insertTabAt` with a zone creates a fresh sibling group and handles the
+	// wrap-in-container case when the parent orientation doesn't match yet.
+	const next = insertTabAt(afterRemove, fromGroupId, direction, tab);
+	// The new group id is generated inside insertTabAt — locate it by finding
+	// the group that now owns our tab.
+	const newLoc = findGroupContainingTab(next, tab.id);
+	return { tree: next, destGroupId: newLoc };
+}
+
+/** Walk the tree to find the id of the group currently containing `tabId`. */
+function findGroupContainingTab(tree: WorkbenchTree, tabId: string): string | null {
+	const rec = (nodes: GroupNode[]): string | null => {
+		for (const n of nodes) {
+			if (isTabGroupNode(n)) {
+				if (n.tabs.some(t => t.id === tabId)) return n.id;
+			} else if (isContainerNode(n)) {
+				const found = rec(n.groups);
+				if (found) return found;
+			}
+		}
+		return null;
+	};
+	return rec(tree.groups);
+}

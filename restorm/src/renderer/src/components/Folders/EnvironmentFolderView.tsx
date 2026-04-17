@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import EnvironmentFolderHome from './EnvironmentFolderHome'
 import { useTranslation } from 'react-i18next'
 import {
   ListView,
@@ -422,6 +423,10 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
   const [leftWidth] = useState<number>(220)
   const variablesParamsRef = useRef<KeyValueTableHandle | null>(null)
 
+  // Context variables state is managed inside ContextVariablesSection
+  // (a separate memoized component) to avoid re-rendering the KV table
+  // inputs when the resolved context updates during typing.
+
   // Handler for persisting variable changes to the environment
   // Updates the reactive object directly without triggering React re-renders
   const handleEnvironmentVariablesChange = useCallback(
@@ -592,6 +597,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                     data-testid="environment-folder-variables-table"
                   />
                 </div>
+                <ContextVariablesSection envId={selectedEnvId} />
               </Pane>
             ) : (
               <Pane
@@ -627,12 +633,111 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
   )
 }
 
+/**
+ * Isolated component for the context variables table. Manages its own
+ * IPC subscription so that live context updates don't re-render the
+ * parent panel (which holds the KV table inputs — re-rendering during
+ * typing would steal focus).
+ */
+const ContextVariablesSection = React.memo<{ envId: string | null }>(({ envId }) => {
+  const { t } = useTranslation()
+  const [contextVars, setContextVars] = useState<Record<string, string>>({})
+  const [copiedKey, setCopiedKey] = useState<string | null>(null)
+
+  useEffect(() => {
+    const ctx = window.restorm?.context
+    if (!envId || !ctx) return
+    let cancelled = false
+    void ctx.getEnvironmentContext(envId).then((result: Record<string, string>) => {
+      if (!cancelled) setContextVars(result)
+    })
+    const unsubscribe = ctx.onEnvironmentContextChanged((result: { environmentId: string; context: Record<string, string> }) => {
+      if (!cancelled && result.environmentId === envId) setContextVars(result.context)
+    })
+    return () => { cancelled = true; unsubscribe() }
+  }, [envId])
+
+  const handleCopy = useCallback((key: string) => {
+    void navigator.clipboard.writeText(`{{${key}}}`)
+    setCopiedKey(key)
+    setTimeout(() => { setCopiedKey(null) }, 1500)
+  }, [])
+
+  const keys = Object.keys(contextVars)
+  if (keys.length === 0) return null
+
+  return (
+    <div data-testid="environment-folder-context-pane" style={{ marginTop: 16, padding: '0 4px' }}>
+      <h3 style={{
+        margin: '0 0 8px', fontSize: 12, fontWeight: 600, textTransform: 'uppercase',
+        opacity: 0.4, letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 6
+      }}>
+        <span className="codicon codicon-symbol-variable" style={{ fontSize: 14 }} />
+        {t('folderView.contextVariables.title')}
+      </h3>
+      <p style={{ margin: '0 0 10px', fontSize: 12, lineHeight: 1.5, color: 'var(--descriptionForeground)' }}>
+        {t('folderView.contextVariables.description')}
+      </p>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }} data-testid="context-variables-table">
+        <thead>
+          <tr style={{ borderBottom: '1px solid var(--panel-border)' }}>
+            <th style={{ textAlign: 'left', padding: '4px 8px', fontWeight: 600, opacity: 0.6, width: 28 }} />
+            <th style={{ textAlign: 'left', padding: '4px 8px', fontWeight: 600, opacity: 0.6 }}>{t('folderView.contextVariables.name')}</th>
+            <th style={{ textAlign: 'left', padding: '4px 8px', fontWeight: 600, opacity: 0.6 }}>{t('folderView.contextVariables.value')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {Object.entries(contextVars).map(([key, value]) => (
+            <tr
+              key={key}
+              style={{ borderBottom: '1px solid var(--panel-border)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--list-hoverBackground)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+            >
+              <td style={{ padding: '3px 4px', textAlign: 'center' }}>
+                <button
+                  type="button"
+                  onClick={() => { handleCopy(key) }}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: 2,
+                    opacity: copiedKey === key ? 1 : 0.5,
+                    color: copiedKey === key ? 'var(--notificationsInfoIcon-foreground)' : 'inherit',
+                    fontSize: 14, lineHeight: 1
+                  }}
+                  title={copiedKey === key ? t('folderView.contextVariables.copied') : `{{${key}}}`}
+                  data-testid={`context-var-copy-${key}`}
+                >
+                  <span className={`codicon codicon-${copiedKey === key ? 'check' : 'copy'}`} />
+                </button>
+              </td>
+              <td style={{ padding: '3px 8px', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{`{{${key}}}`}</td>
+              <td style={{ padding: '3px 8px', fontFamily: 'monospace', opacity: 0.7, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 0 }}>{value}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+})
+
+ContextVariablesSection.displayName = 'ContextVariablesSection'
+
 interface ApiDocWithSource {
   sourceUrl?: string
 }
 
 const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ folder, onFolderChange }) => {
   const { t } = useTranslation()
+  const switchTabFnRef = useRef<((tabId: string) => void) | null>(null)
+  const handleSwitchTab = useCallback((tabId: string) => { switchTabFnRef.current?.(tabId) }, [])
+  const handleSwitchTabReady = useCallback((fn: (tabId: string) => void) => { switchTabFnRef.current = fn }, [])
+
+  // Home tab — overview page for the environment folder
+  const homeTab: Tab = {
+    id: 'home',
+    label: <span className="codicon codicon-home" />,
+    content: <EnvironmentFolderHome folder={folder} onSwitchTab={handleSwitchTab} />
+  }
 
   // Configuration tab with environment management
   const configurationTab: Tab = {
@@ -720,8 +825,9 @@ const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ fold
   return (
     <BaseFolderView
       folder={folder}
-      additionalTabs={[configurationTab]}
-      defaultActiveTabId="configuration"
+      additionalTabs={[homeTab, configurationTab]}
+      defaultActiveTabId="home"
+      onSwitchTabReady={handleSwitchTabReady}
       documentationOverride={compiledRootDocs}
       docsHeader={docsHeader}
     />

@@ -6,33 +6,85 @@ import {
   Button,
   ColorPicker,
   DateTimePicker,
+  Toggle,
   Tooltip,
   MenuItem,
   MenuItemSeparator,
+  MultiSelectCombo,
+  SelectBox,
   type KeyValueTableHandle,
   type KeyValueTableRow,
   type CellRendererProps,
-  type ContextMenuItem,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import type { TranslatedHelperDefinition } from '../../utils/handlebarsHelpersDefinitions'
-import type { KeyValue, ValueType } from '../../../../shared/types/collections'
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue } from '../../../../shared/types/collections'
+import type { KeyValue, ValueType, EnumDefinition } from '../../../../shared/types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue } from '../../../../shared/types/collections'
+import { isPasswordValue, isNumericValue, isDateTimeValue, isColorValue, isExpressionValue, isBooleanValue, isEnumValue, isEnumListValue } from '../../../../shared/utils/valueHelpers'
 import { inferValueFromString, isHexColorString, tryParseDateString, tryParseNumberString } from '../../../../shared/utils/valueCasting'
 import { normalizeValueType } from '../../utils/normalizeValueType'
 
 export type VariableContext = Record<string, string>
 
-type ValueTypeKind = 'string' | 'secret' | 'number' | 'dateTime' | 'color'
+type ValueTypeKind = 'string' | 'secret' | 'number' | 'dateTime' | 'color' | 'expression' | 'boolean' | 'enum' | 'enumList'
 
 function resolveValueTypeKind(value: ValueType | undefined): ValueTypeKind {
-  if (value instanceof PasswordValue) return 'secret'
-  if (value instanceof NumericValue) return 'number'
-  if (value instanceof DateTimeValue) return 'dateTime'
-  if (value instanceof ColorValue) return 'color'
+  if (!value) return 'string'
+  if (isPasswordValue(value)) return 'secret'
+  if (isNumericValue(value)) return 'number'
+  if (isDateTimeValue(value)) return 'dateTime'
+  if (isColorValue(value)) return 'color'
+  if (isExpressionValue(value)) return 'expression'
+  if (isBooleanValue(value)) return 'boolean'
+  if (isEnumValue(value)) return 'enum'
+  if (isEnumListValue(value)) return 'enumList'
   return 'string'
 }
+
+/**
+ * Small square indicator button rendered to the right of a value cell so
+ * the user can see at a glance what type a variable holds without having
+ * to click into the cell. Mirrors the visual weight of the date / colour
+ * picker buttons already present for those types. Decorative for now —
+ * the click handler is reserved for a future "transform value type"
+ * shortcut.
+ */
+interface TypeIndicatorProps {
+  icon: string
+  ariaLabel: string
+  dataTestId?: string | undefined
+  onMenuOpen?: (e: React.MouseEvent) => void
+}
+
+const typeIndicatorStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 28,
+  height: 28,
+  borderRadius: 4,
+  border: '1px solid var(--vscode-editorWidget-border, rgba(255,255,255,0.12))',
+  cursor: 'pointer',
+  fontSize: 14,
+  opacity: 0.7,
+  boxSizing: 'border-box'
+}
+
+const TypeIndicator: React.FC<TypeIndicatorProps> = ({ icon, ariaLabel, dataTestId, onMenuOpen }) => (
+  <div
+    style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center' }}
+    onClick={onMenuOpen}
+    onContextMenu={(e) => { e.preventDefault(); onMenuOpen?.(e) }}
+  >
+    <div
+      style={typeIndicatorStyle}
+      {...(dataTestId && { 'data-testid': dataTestId })}
+    >
+      <span className={`codicon codicon-${icon}`} aria-label={ariaLabel} />
+    </div>
+  </div>
+)
 
 interface ColorValueCellProps {
   hex: string
@@ -139,6 +191,12 @@ export interface RestormKeyValueTableProps {
    * Optional callback when rows change (for persisting edits).
    */
   onRowsChange?: (rows: KeyValue[]) => void
+  /** Enum definitions from the parent EnvironmentFolder (for enum type transforms). */
+  enumDefinitions?: EnumDefinition[] | undefined
+  /** URL pattern of the current request (for matching route-specific enums). */
+  requestUrl?: string | undefined
+  /** HTTP method of the current request (for matching route-specific enums). */
+  requestMethod?: string | undefined
   /** Optional test id applied to the table root element. */
   'data-testid'?: string
 }
@@ -149,6 +207,9 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
     helpers = [],
     initialRows,
     onRowsChange,
+    enumDefinitions,
+    requestUrl,
+    requestMethod,
     'data-testid': dataTestId
   },
   ref
@@ -169,6 +230,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
     currentValue: string
     onChange: (next: string) => void
     activeType: ValueTypeKind
+    activeEnumDefId?: string | undefined
   } | null>(null)
   
   // Update refs via useEffect to avoid accessing during render
@@ -184,15 +246,25 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
     initialRowsRef.current = initialRows
   }, [initialRows])
 
+  // Key-based type map for rows that don't have an id (e.g. freshly imported KeyValues).
+  // The ValueCellRenderer uses this as a fallback when the id-based ref has no match.
+  const valueTypeByKeyRef = useRef(new Map<string, ValueType>())
+
   useEffect(() => {
     if (!initialRows) return
     const nextMap = new Map<string, ValueType>()
+    const nextKeyMap = new Map<string, ValueType>()
     for (const row of initialRows) {
+      const normalized = normalizeValueType(row.value as unknown)
       if (row.id) {
-        nextMap.set(row.id, normalizeValueType(row.value as unknown))
+        nextMap.set(row.id, normalized)
+      }
+      if (row.key) {
+        nextKeyMap.set(row.key, normalized)
       }
     }
     valueTypeByRowIdRef.current = nextMap
+    valueTypeByKeyRef.current = nextKeyMap
   }, [initialRows])
 
   const closeContextMenu = useCallback((): void => {
@@ -217,7 +289,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
     }
   }, [contextMenu?.visible, closeContextMenu])
 
-  const castToType = useCallback((target: 'string' | 'secret' | 'number' | 'dateTime' | 'color'): void => {
+  const castToType = useCallback((target: string, enumDefId?: string): void => {
     if (!contextMenu) return
 
     const { rowId, currentValue, onChange } = contextMenu
@@ -244,7 +316,6 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         break
       }
       case 'dateTime': {
-        // If it's a string and is castable, keep the parsed date; otherwise default to now.
         const parsed = tryParseDateString(raw.trim())
         nextValue = new DateTimeValue(parsed ?? new Date(), 'yyyy-MM-dd HH:mm:ss')
         nextDisplayValue = nextValue.toString()
@@ -257,6 +328,29 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         nextDisplayValue = color
         break
       }
+      case 'expression': {
+        nextValue = new ExpressionValue(raw)
+        nextDisplayValue = raw
+        break
+      }
+      case 'boolean': {
+        const asBool = raw.trim().toLowerCase() === 'true' || raw.trim() === '1'
+        nextValue = new BooleanValue(asBool)
+        nextDisplayValue = asBool ? 'true' : 'false'
+        break
+      }
+      case 'enum': {
+        nextValue = new EnumValue(raw, enumDefId ?? '')
+        nextDisplayValue = raw
+        break
+      }
+      case 'enumList': {
+        nextValue = new EnumListValue(raw ? raw.split(',').map((s) => s.trim()) : [], enumDefId ?? '')
+        nextDisplayValue = nextValue.toString()
+        break
+      }
+      default:
+        return
     }
 
     valueTypeByRowIdRef.current.set(rowId, nextValue)
@@ -269,105 +363,43 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
     closeContextMenu()
   }, [contextMenu, closeContextMenu, initialRows, onRowsChange])
 
-  const buildTransformMenuItems = useCallback(
-    (
-      rowId: string,
-      currentValue: string,
-      onChange: (next: string) => void,
-      activeType: ValueTypeKind
-    ): ContextMenuItem[] => {
-      const transform = (target: 'string' | 'secret' | 'number' | 'dateTime' | 'color'): void => {
-        const raw = currentValue
-        let nextValue: ValueType
-        let nextDisplayValue = raw
+  // Compute route-matched and all enum definitions for the context menu
+  const { routeEnums, allEnums } = useMemo(() => {
+    if (!enumDefinitions || enumDefinitions.length === 0) return { routeEnums: [], allEnums: [] }
+    const sorted = [...enumDefinitions].sort((a, b) => a.name.localeCompare(b.name))
+    if (!requestUrl || !requestMethod) return { routeEnums: [], allEnums: sorted }
 
-        switch (target) {
-          case 'string': {
-            nextValue = new StringValue(raw)
-            nextDisplayValue = raw
-            break
-          }
-          case 'secret': {
-            nextValue = new PasswordValue(raw)
-            nextDisplayValue = raw
-            break
-          }
-          case 'number': {
-            const parsed = tryParseNumberString(raw.trim())
-            nextValue = new NumericValue(parsed ?? 0, 'decimal')
-            nextDisplayValue = parsed !== null ? String(parsed) : '0'
-            break
-          }
-          case 'dateTime': {
-            const parsed = tryParseDateString(raw.trim())
-            nextValue = new DateTimeValue(parsed ?? new Date(), 'yyyy-MM-dd HH:mm:ss')
-            nextDisplayValue = nextValue.toString()
-            break
-          }
-          case 'color': {
-            const trimmed = raw.trim()
-            const color = isHexColorString(trimmed) ? trimmed : '#000000'
-            nextValue = new ColorValue(color)
-            nextDisplayValue = color
-            break
-          }
-        }
+    // Extract path from URL template (strip {{baseUrl}} prefix)
+    const urlPath = requestUrl.replace(/\{\{[^}]+\}\}/g, '').replace(/^\/+/, '/')
+    const method = requestMethod.toLowerCase()
 
-        valueTypeByRowIdRef.current.set(rowId, nextValue)
-        onChange(nextDisplayValue)
-        // Force persistence of the ValueType even if display value didn't change
-        const currentRows = initialRowsRef.current
-        if (currentRows && onRowsChange) {
-          const nextRows = currentRows.map((r) => (r.id === rowId ? { ...r, value: nextValue } : r))
-          onRowsChange(nextRows)
-        }
-      }
-
-      return [
-        {
-          id: 'transform-to',
-          label: t('keyValueTable.transformTo'),
-          items: [
-            {
-              id: 'transform-string',
-              label: t('keyValueTable.types.string'),
-              checked: activeType === 'string',
-              onClick: () => { transform('string') }
-            },
-            {
-              id: 'transform-secret',
-              label: t('keyValueTable.types.secret'),
-              checked: activeType === 'secret',
-              onClick: () => { transform('secret') }
-            },
-            { id: 'sep-1', label: '', isSeparator: true },
-            {
-              id: 'transform-number',
-              label: t('keyValueTable.types.number'),
-              checked: activeType === 'number',
-              onClick: () => { transform('number') }
-            },
-            {
-              id: 'transform-datetime',
-              label: t('keyValueTable.types.dateTime'),
-              checked: activeType === 'dateTime',
-              onClick: () => { transform('dateTime') }
-            },
-            {
-              id: 'transform-color',
-              label: t('keyValueTable.types.color'),
-              checked: activeType === 'color',
-              onClick: () => { transform('color') }
-            }
-          ]
-        }
-      ]
-    },
-    [t, onRowsChange]
-  )
+    const matched = sorted.filter((def) =>
+      def.matchingRules.some((rule) =>
+        urlPath.includes(rule.pathPattern) && (rule.method === '' || rule.method === method)
+      )
+    )
+    return { routeEnums: matched, allEnums: sorted }
+  }, [enumDefinitions, requestUrl, requestMethod])
 
   const contextMenuNode = useMemo(() => {
     if (!contextMenu?.visible) return null
+
+    const enumMenuItems = (defs: EnumDefinition[]): React.ReactNode => defs.map((def) => (
+      <React.Fragment key={def.id}>
+        <MenuItem
+          title={def.name}
+          checked={contextMenu.activeType === 'enum' && contextMenu.activeEnumDefId === def.id}
+          onClick={() => { castToType('enum', def.id) }}
+          {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-enum-${def.id}` })}
+        />
+        <MenuItem
+          title={`${def.name} (list)`}
+          checked={contextMenu.activeType === 'enumList' && contextMenu.activeEnumDefId === def.id}
+          onClick={() => { castToType('enumList', def.id) }}
+          {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-enumlist-${def.id}` })}
+        />
+      </React.Fragment>
+    ))
 
     return (
       <div
@@ -384,48 +416,66 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         <div className="menu">
           <ul className="actions-container" role="menu">
             <MenuItem
-              title={t('keyValueTable.transformTo')}
-              {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-transform-to` })}
-            >
-              <MenuItem
-                title={t('keyValueTable.types.string')}
-                checked={contextMenu.activeType === 'string'}
-                onClick={() => { castToType('string') }}
-                {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-string` })}
-              />
-              <MenuItem
-                title={t('keyValueTable.types.secret')}
-                checked={contextMenu.activeType === 'secret'}
-                onClick={() => { castToType('secret') }}
-                {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-secret` })}
-              />
-              <MenuItemSeparator
-                {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-separator` })}
-              />
-              <MenuItem
-                title={t('keyValueTable.types.number')}
-                checked={contextMenu.activeType === 'number'}
-                onClick={() => { castToType('number') }}
-                {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-number` })}
-              />
-              <MenuItem
-                title={t('keyValueTable.types.dateTime')}
-                checked={contextMenu.activeType === 'dateTime'}
-                onClick={() => { castToType('dateTime') }}
-                {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-datetime` })}
-              />
-              <MenuItem
-                title={t('keyValueTable.types.color')}
-                checked={contextMenu.activeType === 'color'}
-                onClick={() => { castToType('color') }}
-                {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-color` })}
-              />
-            </MenuItem>
+              title={t('keyValueTable.types.string')}
+              checked={contextMenu.activeType === 'string'}
+              onClick={() => { castToType('string') }}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-string` })}
+            />
+            <MenuItem
+              title={t('keyValueTable.types.number')}
+              checked={contextMenu.activeType === 'number'}
+              onClick={() => { castToType('number') }}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-number` })}
+            />
+            <MenuItem
+              title={t('keyValueTable.types.dateTime')}
+              checked={contextMenu.activeType === 'dateTime'}
+              onClick={() => { castToType('dateTime') }}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-datetime` })}
+            />
+            <MenuItem
+              title={t('keyValueTable.types.boolean')}
+              checked={contextMenu.activeType === 'boolean'}
+              onClick={() => { castToType('boolean') }}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-boolean` })}
+            />
+            <MenuItem
+              title={t('keyValueTable.types.color')}
+              checked={contextMenu.activeType === 'color'}
+              onClick={() => { castToType('color') }}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-color` })}
+            />
+            {routeEnums.length > 0 && (
+              <>
+                <MenuItemSeparator />
+                {enumMenuItems(routeEnums)}
+              </>
+            )}
+            {allEnums.length > 0 && allEnums.length !== routeEnums.length && (
+              <MenuItem title={t('keyValueTable.apiEnums')}>
+                {enumMenuItems(allEnums)}
+              </MenuItem>
+            )}
+            <MenuItemSeparator
+              {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-separator` })}
+            />
+            <MenuItem
+              title={t('keyValueTable.types.secret')}
+              checked={contextMenu.activeType === 'secret'}
+              onClick={() => { castToType('secret') }}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-secret` })}
+            />
+            <MenuItem
+              title={t('keyValueTable.types.expression')}
+              checked={contextMenu.activeType === 'expression'}
+              onClick={() => { castToType('expression') }}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-expression` })}
+            />
           </ul>
         </div>
       </div>
     )
-  }, [contextMenu, t, castToType, dataTestId])
+  }, [contextMenu, t, castToType, dataTestId, routeEnums, allEnums])
 
   const tableInitialRows = React.useMemo<KeyValueTableRow[] | undefined>(() => {
     if (!initialRows) return undefined
@@ -437,6 +487,11 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
       enabled: r.enabled
     }))
   }, [initialRows])
+
+  // Ref mirror of tableInitialRows for use inside stable callbacks
+  // (avoids recreating cell renderers when initialRows changes).
+  const tableInitialRowsRef = useRef(tableInitialRows)
+  useEffect(() => { tableInitialRowsRef.current = tableInitialRows }, [tableInitialRows])
 
   const handleRowsChange = useCallback((rows: KeyValueTableRow[]): void => {
     if (!onRowsChange) return
@@ -457,6 +512,14 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         nextValue = new ColorValue(raw)
       } else if (currentType instanceof PasswordValue) {
         nextValue = new PasswordValue(raw)
+      } else if (currentType instanceof ExpressionValue) {
+        nextValue = new ExpressionValue(raw)
+      } else if (currentType instanceof BooleanValue) {
+        nextValue = new BooleanValue(raw === 'true' || raw === '1')
+      } else if (currentType instanceof EnumValue) {
+        nextValue = new EnumValue(raw, currentType.enumDefinitionId)
+      } else if (currentType instanceof EnumListValue) {
+        nextValue = new EnumListValue(raw ? raw.split(',').map((s) => s.trim()) : [], currentType.enumDefinitionId)
       } else {
         nextValue = new StringValue(raw)
       }
@@ -492,25 +555,39 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
 
   // RestormVariableInputBox renderer for values (with resolved value tooltips)
   // Use refs to avoid recreating the renderer when variables/helpers change
-  const ValueCellRenderer = useCallback<React.FC<CellRendererProps>>(
-    ({ value, onChange, rowId }) => {
+  const ValueCellRenderer = useCallback(
+    ({ value, onChange, rowId }: CellRendererProps) => {
       const id = rowId
-      const existing = id ? valueTypeByRowIdRef.current.get(id) : undefined
+      let existing = id ? valueTypeByRowIdRef.current.get(id) : undefined
 
       if (id && !existing) {
-        // Infer the value type from the actual string value (color, datetime, etc.)
-        const cast = inferValueFromString(value)
-        let inferred: ValueType
-        if (cast.kind === 'color') {
-          inferred = new ColorValue(cast.color)
-        } else if (cast.kind === 'datetime') {
-          inferred = new DateTimeValue(cast.date, cast.format)
-        } else if (cast.kind === 'numeric') {
-          inferred = new NumericValue(cast.number, cast.format)
+        // The useEffect that populates valueTypeByRowIdRef from initialRows
+        // runs AFTER render, so on the first render with new data the ref
+        // may not contain the correct type yet. Look up the authoritative
+        // ValueType directly from initialRows before falling back to
+        // string-based inference. Try by ID first, then by key (for imported
+        // KeyValues that don't have a persistent ID yet).
+        // Look up the matching row in initialRows: first by id, then by matching
+        // the table row's key (for imported KeyValues without persistent IDs).
+        const tableRow = tableInitialRowsRef.current?.find((tr) => tr.id === id)
+        const rowKey = tableRow?.key
+        const sourceRow = initialRowsRef.current?.find((r) => r.id === id)
+          ?? (rowKey ? initialRowsRef.current?.find((r) => r.key === rowKey) : undefined)
+        if (sourceRow) {
+          existing = normalizeValueType(sourceRow.value as unknown)
         } else {
-          inferred = new StringValue(value)
+          const cast = inferValueFromString(value)
+          if (cast.kind === 'color') {
+            existing = new ColorValue(cast.color)
+          } else if (cast.kind === 'datetime') {
+            existing = new DateTimeValue(cast.date, cast.format)
+          } else if (cast.kind === 'numeric') {
+            existing = new NumericValue(cast.number, cast.format)
+          } else {
+            existing = new StringValue(value)
+          }
         }
-        valueTypeByRowIdRef.current.set(id, inferred)
+        valueTypeByRowIdRef.current.set(id, existing)
       }
 
       const resolved = id ? (valueTypeByRowIdRef.current.get(id) ?? new StringValue(value)) : new StringValue(value)
@@ -526,22 +603,31 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
           rowId: id,
           currentValue: value,
           onChange,
-          activeType
+          activeType,
+          activeEnumDefId: (resolved as { enumDefinitionId?: string }).enumDefinitionId
         })
       }
 
       if (resolved instanceof PasswordValue) {
         return (
-          <div style={{ width: '100%', height: '100%' }} onContextMenu={handleContextMenu}>
-            <InputBox
-              value={value}
-              onChange={(next) => {
-                if (id) valueTypeByRowIdRef.current.set(id, new PasswordValue(next))
-                onChange(next)
-              }}
-              options={{ type: 'text' }}
-              password
-              {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-password` })}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', height: '100%', minWidth: 0 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <InputBox
+                value={value}
+                onChange={(next) => {
+                  if (id) valueTypeByRowIdRef.current.set(id, new PasswordValue(next))
+                  onChange(next)
+                }}
+                options={{ type: 'text' }}
+                password
+                {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-password` })}
+              />
+            </div>
+            <TypeIndicator
+              icon="lock"
+              ariaLabel="Password value"
+              onMenuOpen={handleContextMenu}
+              {...(dataTestId && { dataTestId: `${dataTestId}-value-type-password` })}
             />
           </div>
         )
@@ -596,62 +682,166 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
 
       if (resolved instanceof NumericValue) {
         return (
-          <div style={{ width: '100%', height: '100%' }} onContextMenu={handleContextMenu}>
-            <InputBox
-              value={value}
-              onChange={(next) => {
-                const parsed = Number(next)
-                if (id && Number.isFinite(parsed)) {
-                  valueTypeByRowIdRef.current.set(id, new NumericValue(parsed, resolved.format))
-                }
-                onChange(next)
-              }}
-              options={{ type: 'number' }}
-              {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-number` })}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', height: '100%', minWidth: 0 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <InputBox
+                value={value}
+                onChange={(next) => {
+                  const parsed = Number(next)
+                  if (id && Number.isFinite(parsed)) {
+                    valueTypeByRowIdRef.current.set(id, new NumericValue(parsed, resolved.format))
+                  }
+                  onChange(next)
+                }}
+                options={{ type: 'number' }}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-number` })}
+              />
+            </div>
+            <TypeIndicator
+              icon="symbol-numeric"
+              ariaLabel="Numeric value"
+              onMenuOpen={handleContextMenu}
+              {...(dataTestId && { dataTestId: `${dataTestId}-value-type-numeric` })}
+            />
+          </div>
+        )
+      }
+
+      if (resolved instanceof BooleanValue) {
+        const isTrue = resolved.value
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', height: '100%', minWidth: 0 }}>
+            <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Toggle
+                isChecked={isTrue}
+                onChange={(next) => {
+                  if (id) valueTypeByRowIdRef.current.set(id, new BooleanValue(next))
+                  onChange(next ? 'true' : 'false')
+                }}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-boolean` })}
+              />
+            </div>
+            <TypeIndicator
+              icon="symbol-boolean"
+              ariaLabel="Boolean value"
+              onMenuOpen={handleContextMenu}
+              {...(dataTestId && { dataTestId: `${dataTestId}-value-type-boolean` })}
+            />
+          </div>
+        )
+      }
+
+      if (resolved instanceof ExpressionValue) {
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', height: '100%', minWidth: 0 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <RestormVariableInputBox
+                value={value}
+                onChange={(next) => {
+                  if (id) {
+                    valueTypeByRowIdRef.current.set(id, new ExpressionValue(next))
+                  }
+                  onChange(next)
+                }}
+                variables={variablesRef.current}
+                helpers={helpersRef.current}
+                variableId={id}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-expression` })}
+              />
+            </div>
+            <TypeIndicator
+              icon="code"
+              ariaLabel="Expression (Handlebars template)"
+              onMenuOpen={handleContextMenu}
+              {...(dataTestId && { dataTestId: `${dataTestId}-value-type-expression` })}
+            />
+          </div>
+        )
+      }
+
+      // EnumListValue → MultiSelectCombo
+      if (resolved instanceof EnumListValue) {
+        const enumDef = enumDefinitions?.find((d) => d.id === resolved.enumDefinitionId)
+        const options = (enumDef?.values ?? []).map((v) => ({ value: v, label: v }))
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', height: '100%', minWidth: 0 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <MultiSelectCombo
+                options={options}
+                selected={resolved.value}
+                onChange={(next) => {
+                  if (id) valueTypeByRowIdRef.current.set(id, new EnumListValue(next, resolved.enumDefinitionId))
+                  onChange(next.join(','))
+                }}
+                placeholder={enumDef?.name ?? 'Select...'}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-enumlist` })}
+              />
+            </div>
+            <TypeIndicator
+              icon="list-unordered"
+              ariaLabel="Enum list value"
+              onMenuOpen={handleContextMenu}
+              {...(dataTestId && { dataTestId: `${dataTestId}-value-type-enumlist` })}
+            />
+          </div>
+        )
+      }
+
+      // EnumValue → SelectBox
+      if (resolved instanceof EnumValue) {
+        const enumDef = enumDefinitions?.find((d) => d.id === resolved.enumDefinitionId)
+        const options = (enumDef?.values ?? []).map((v) => ({ text: v }))
+        const selectedIndex = options.findIndex((o) => o.text === resolved.value)
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', height: '100%', minWidth: 0 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <SelectBox
+                options={options}
+                selected={selectedIndex >= 0 ? selectedIndex : 0}
+                onDidSelect={(data) => {
+                  if (id) valueTypeByRowIdRef.current.set(id, new EnumValue(data.selected, resolved.enumDefinitionId))
+                  onChange(data.selected)
+                }}
+                className=""
+                id={id ?? 'enum-select'}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-enum` })}
+              />
+            </div>
+            <TypeIndicator
+              icon="list-unordered"
+              ariaLabel="Enum value"
+              onMenuOpen={handleContextMenu}
+              {...(dataTestId && { dataTestId: `${dataTestId}-value-type-enum` })}
             />
           </div>
         )
       }
 
       return (
-        <RestormVariableInputBox
-          value={value}
-          onChange={(next) => {
-            if (id) {
-              // When the current value is a string, and it can be casted (date/number/color),
-              // we keep the casted type (same logic as import).
-              const inferred = inferValueFromString(next)
-              if (resolved instanceof StringValue) {
-                switch (inferred.kind) {
-                  case 'datetime':
-                    valueTypeByRowIdRef.current.set(id, new DateTimeValue(inferred.date, inferred.format))
-                    break
-                  case 'numeric':
-                    valueTypeByRowIdRef.current.set(id, new NumericValue(inferred.number, inferred.format))
-                    break
-                  case 'color':
-                    valueTypeByRowIdRef.current.set(id, new ColorValue(inferred.color))
-                    break
-                  default:
-                    valueTypeByRowIdRef.current.set(id, new StringValue(inferred.value))
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', height: '100%', minWidth: 0 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <InputBox
+              value={value}
+              onChange={(next) => {
+                if (id) {
+                  valueTypeByRowIdRef.current.set(id, new StringValue(next))
                 }
-              } else {
-                valueTypeByRowIdRef.current.set(id, new StringValue(next))
-              }
-            }
-            onChange(next)
-          }}
-          variables={variablesRef.current}
-          helpers={helpersRef.current}
-          variableId={id}
-          contextMenuItems={
-            id ? buildTransformMenuItems(id, value, onChange, activeType) : undefined
-          }
-          {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-variable` })}
-        />
+                onChange(next)
+              }}
+              options={{ type: 'text' }}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-string` })}
+            />
+          </div>
+          <TypeIndicator
+            icon="symbol-string"
+            ariaLabel="String value"
+            onMenuOpen={handleContextMenu}
+            {...(dataTestId && { dataTestId: `${dataTestId}-value-type-string` })}
+          />
+        </div>
       )
     },
-    [buildTransformMenuItems, dataTestId]
+    [dataTestId, enumDefinitions]
   )
 
   return (

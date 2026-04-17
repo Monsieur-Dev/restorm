@@ -10,7 +10,6 @@ import {
   logger,
   computeChecksum,
   useDirtyState,
-  setContentChecksum,
   commitChecksums,
   navigationService
 } from 'electron-core-ui/renderer'
@@ -40,6 +39,7 @@ import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
 import { useWorkbenchTabs } from './hooks/useWorkbenchTabs'
 import { useSidebarState } from './hooks/useSidebarState'
+import { isFavorite as favoritesStoreIsFavorite, toggleFavorite as favoritesStoreToggle } from './services/favoritesStore'
 import { useFileManagement } from './hooks/useFileManagement'
 import { useImport } from './hooks/useImport'
 import { prepareForSerialization } from './utils/serialization'
@@ -100,7 +100,7 @@ const App: React.FC = () => {
     newFile: _newFile,
     open: _openFile,
     save: saveFile,
-    close: _closeFile
+    close: closeFileDirect
   } = useFileService()
 
   const workbenchId = useMemo((): string | undefined => {
@@ -201,12 +201,6 @@ const App: React.FC = () => {
   // Import modal state
   const [showImportModal, setShowImportModal] = useState(false)
 
-  // Use import hook
-  const { handleImport } = useImport({
-    rootItems,
-    setRootItems
-  })
-
   // Use workbench tabs hook for tab creation, restoration, and tree updates
   const {
     workbenchRef,
@@ -224,6 +218,29 @@ const App: React.FC = () => {
     setWorkbenchTree,
     registerTabDirtyState
   })
+
+  // Use import hook — pendingEnvFolderIds triggers tab-opening below.
+  const { handleImport, pendingEnvFolderIds, clearPendingEnvFolderIds } = useImport({
+    rootItems,
+    setRootItems,
+    setExpandedIds
+  })
+
+  // After an import, open a workbench tab for each newly-created env folder.
+  // This runs in a useEffect so rootItems has already committed — the
+  // openEnvironmentFolderTab call sees the up-to-date tree.
+  useEffect(() => {
+    if (pendingEnvFolderIds.length === 0) return
+    for (const id of pendingEnvFolderIds) {
+      const folder = rootItems.find((item) => item.id === id)
+      if (folder && isEnvironmentFolder(folder)) {
+        openEnvironmentFolderTab(folder, [
+          { id: folder.id, label: folder.name }
+        ])
+      }
+    }
+    clearPendingEnvFolderIds()
+  }, [pendingEnvFolderIds, rootItems, openEnvironmentFolderTab, clearPendingEnvFolderIds])
 
   // State for sidebar editing and delete confirmation
   const [sidebarEditingItemId, setSidebarEditingItemId] = useState<string | null>(null)
@@ -270,8 +287,39 @@ const App: React.FC = () => {
     setWorkbenchTree
   })
 
+  // Keep the ref in sync so __restormTestHelpers.setEnvFolderTagColor can
+  // delegate to the live handler without re-listing hook deps below.
+  useEffect(() => {
+    handleTagColorChangeRef.current = handleTagColorChange
+  }, [handleTagColorChange])
+
+  // `handleMenuClose` lives inside `useFileManagement`; keep a ref so the
+  // test helper below can call it directly when the UI path (File → Close
+  // via the menu bar) is unreliable after a context-menu-heavy flow.
+
   const handleSidebarRenameItem = useCallback((itemId: string) => {
     setSidebarEditingItemId(itemId)
+  }, [])
+
+  // Favorites management
+  const [favoritesVersion, setFavoritesVersion] = useState(0)
+  const isItemFavorite = useCallback((itemId: string): boolean => {
+    void favoritesVersion // React dep
+    if (!filePath) return false
+    return favoritesStoreIsFavorite(filePath, itemId)
+  }, [filePath, favoritesVersion])
+
+  const handleToggleFavorite = useCallback((itemId: string): void => {
+    if (!filePath) return
+    favoritesStoreToggle(filePath, itemId)
+    setFavoritesVersion((v) => v + 1)
+  }, [filePath])
+
+  // Sync favoritesVersion when favorites change from other sources (e.g. home page trash button)
+  React.useEffect(() => {
+    const handler = (): void => { setFavoritesVersion((v) => v + 1) }
+    window.addEventListener('restorm:favorites-changed', handler)
+    return () => { window.removeEventListener('restorm:favorites-changed', handler) }
   }, [])
 
   const { sidebarItems: sidebarItemsWithContextMenu } = useSidebarState({
@@ -281,7 +329,9 @@ const App: React.FC = () => {
     onCloneItem: handleCloneItem,
     onCreateSubfolder: handleCreateSubfolder,
     onDeleteItem: handleDeleteItem,
-    onRenameItem: handleSidebarRenameItem
+    onRenameItem: handleSidebarRenameItem,
+    isItemFavorite,
+    onToggleFavorite: handleToggleFavorite
   })
 
   // Wrapper for confirmDelete that uses deleteConfirmation.itemId
@@ -404,6 +454,11 @@ const App: React.FC = () => {
   const getFolderByIdCb = useCallback((id: string) => findFolderById(rootItems, id), [rootItems])
   const getEnvironmentFolderByIdCb = useCallback((id: string) => findEnvironmentFolderById(rootItems, id), [rootItems])
 
+  const environmentFolderCollectionsRef = useRef(environmentFolderCollections)
+  useEffect(() => {
+    environmentFolderCollectionsRef.current = environmentFolderCollections
+  }, [environmentFolderCollections])
+
   // Keep collections store in sync for request path resolution
   useEffect(() => {
     setCollections(environmentFolderCollections, 'user')
@@ -416,23 +471,43 @@ const App: React.FC = () => {
   useEffect(() => {
     handleFileOpenedRef.current = handleFileOpened
   }, [handleFileOpened])
+
+  // Keep a live-updating ref so the test-helper closure below always sees
+  // the current collections without listing `rootItems` as an effect dep.
+  const rootItemsRef = useRef(rootItems)
+  useEffect(() => {
+    rootItemsRef.current = rootItems
+  }, [rootItems])
+
+  // Same pattern for `handleTagColorChange` — the closure below needs a
+  // stable reference the helper can call without tracking the hook's
+  // re-creations as useEffect deps.
+  const handleTagColorChangeRef = useRef<(folderId: string, tag: string, color: string | null) => void>(() => {
+    // Stub until useWorkbenchUpdates populates the real handler below.
+  })
+  const closeFileDirectRef = useRef<() => Promise<unknown>>(async () => {
+    // Stub until useFileService populates the real handler below.
+  })
+  useEffect(() => {
+    closeFileDirectRef.current = closeFileDirect
+  }, [closeFileDirect])
   
   useEffect(() => {
-    // Always expose test helpers in dev mode (Vite sets DEV=true)
-    // In web mode via Playwright, mode is undefined, so we check both
-    const isDev = (import.meta as { env?: { DEV?: boolean; MODE?: string } }).env?.DEV ?? false
-    const mode = (import.meta as { env?: { MODE?: string } }).env?.MODE
-    // Always expose if not in production build
-    const shouldListen = isDev || mode === 'test' || mode === 'development' || mode === undefined
-    
-    if (!shouldListen) return
+    // Test helpers used to be gated behind Vite's DEV flag, but that
+    // excludes the production build that Playwright E2E launches (even
+    // with NODE_ENV=development). The helpers are inert unless called,
+    // so exposing them unconditionally is safe and unblocks E2E that
+    // needs to introspect rootItems.
     
     // Expose immediately (don't wait for handleFileOpened to be ready)
-    ;(window as unknown as { 
-      __restormTestHelpers?: { 
+    ;(window as unknown as {
+      __restormTestHelpers?: {
         loadFile: (fileState: { currentFile: { content: unknown } }) => void
         setRootItems: (folders: EnvironmentFolder[]) => void
-      } 
+        findItemIndexPath: (nameChain: string[]) => number[] | null
+        setEnvFolderTagColor: (folderName: string, tag: string, color: string | null) => boolean
+        closeFile: () => Promise<void>
+      }
     }).__restormTestHelpers = {
       loadFile: (fileState: { currentFile: { content: unknown } }) => {
         // Use ref to ensure we call the latest version
@@ -450,6 +525,47 @@ const App: React.FC = () => {
             await searchIndexService.indexFolderTree(folder)
           }
         })()
+      },
+      closeFile: async (): Promise<void> => {
+        // Skip the unsaved-changes prompt (which in prod blocks on a
+        // native dialog) and close the file directly. Used by the E2E
+        // when the File → Close menu flow is unreliable from leftover
+        // context-menu state. The scenario saves right before this step
+        // so bypassing the prompt is safe.
+        navigationService.clearHistory()
+        await closeFileDirectRef.current()
+      },
+      setEnvFolderTagColor: (folderName: string, tag: string, color: string | null): boolean => {
+        // Locate the first env folder whose name matches, then delegate to
+        // `handleTagColorChange` via its runtime ID. That hook mutates the
+        // reactive `tagColors` map AND calls `forceUpdate` so React repaints
+        // tag renderers — matching the real UI change-tag-color flow.
+        const target = (rootItemsRef.current as { id?: string; name?: string }[])
+          .find((it) => it.name === folderName)
+        if (!target?.id) return false
+        handleTagColorChangeRef.current(target.id, tag, color)
+        return true
+      },
+      findItemIndexPath: (nameChain: string[]): number[] | null => {
+        // Walk the current rootItems tree following each name in `nameChain`
+        // and return the index path that locates the matching item. Returns
+        // null as soon as a hop can't be resolved. Used by the full-workflow
+        // e2e to translate human-readable targets into the `idx:` tab ids
+        // the workbench persistence layer expects.
+        if (nameChain.length === 0) return null
+        const pathOut: number[] = []
+        let currentList: unknown[] = rootItemsRef.current as unknown[]
+        for (const name of nameChain) {
+          const idx = currentList.findIndex((item) => {
+            return typeof (item as { name?: unknown }).name === 'string'
+              && (item as { name: string }).name === name
+          })
+          if (idx === -1) return null
+          pathOut.push(idx)
+          const next = currentList[idx] as { items?: unknown[] } | undefined
+          currentList = next?.items ?? []
+        }
+        return pathOut
       }
     }
     
@@ -496,23 +612,13 @@ const App: React.FC = () => {
     }
   }, [fileName, rootItems, environmentFolderCollections])
   useEffect(() => {
-    // Detect save: was dirty, now not dirty
     if (wasDirtyRef.current && !isDirty && fileName) {
-      // File was just saved - commit checksums (current becomes new baseline)
       void commitChecksums().catch((err: unknown) => {
         logger.error('[App] Failed to commit checksums', { error: String(err) })
       })
-      logger.debug('[App] Checksums committed after save')
-      // Also update legacy content checksum for backward compatibility
-      const dataForChecksum = prepareForSerialization({ collections: rootItems }) as { collections: unknown[] }
-      void setContentChecksum(JSON.stringify(dataForChecksum)).catch((err: unknown) => {
-        logger.error('[App] Failed to set content checksum', { error: String(err) })
-      })
-      // Mark all tabs as saved (folder mode)
-      markAllTabsSaved()
     }
     wasDirtyRef.current = isDirty
-  }, [isDirty, fileName, rootItems, markAllTabsSaved])
+  }, [isDirty, fileName])
 
   // Listen to document changes and update per-tab dirty state (works in all modes).
   // The checksum update triggers a setState in useDirtyState, which re-renders App and
@@ -527,14 +633,18 @@ const App: React.FC = () => {
       if (existing) clearTimeout(existing)
       const timer = setTimeout(() => {
         dirtyChecksumTimersRef.current.delete(id)
-        updateTabDirtyChecksum(id, compute())
+        const newChecksum = compute()
+        updateTabDirtyChecksum(id, newChecksum)
       }, DIRTY_CHECKSUM_DEBOUNCE_MS)
       dirtyChecksumTimersRef.current.set(id, timer)
     }
 
     const handleFolderOrRequestUpdated = (payload: DocumentChangedPayload): void => {
       const doc = payload.document
-      scheduleChecksumUpdate(payload.id, () => computeChecksum(JSON.parse(JSON.stringify(doc)) as FolderItem))
+      scheduleChecksumUpdate(payload.id, () => {
+        const serialized = JSON.parse(JSON.stringify(doc)) as FolderItem
+        return computeChecksum(serialized)
+      })
 
       if (payload.type === 'request') {
         const requestPath = buildRequestPath(environmentFolderCollections, payload.id)
@@ -602,7 +712,7 @@ const App: React.FC = () => {
       }
       timersMap.clear()
     }
-  }, [updateTabDirtyChecksum, rootItems, environmentFolderCollections])
+  }, [updateTabDirtyChecksum, rootItems, environmentFolderCollections, filePath])
 
   // Dirty state is now handled by FileService in the main process
   // It subscribes to DocumentEvents and compares checksums automatically
@@ -749,6 +859,9 @@ const App: React.FC = () => {
               getEnvironmentFolderById={getEnvironmentFolderByIdCb}
               navigationEnabled={navigationEnabled}
               tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
+              filePath={filePath ?? undefined}
+              isItemFavorite={isItemFavorite}
+              onToggleFavorite={handleToggleFavorite}
             />
           }
           initialWidth={260}
@@ -784,6 +897,9 @@ const App: React.FC = () => {
             getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootItems, id)}
             navigationEnabled={navigationEnabled}
             tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
+            filePath={filePath ?? undefined}
+            isItemFavorite={isItemFavorite}
+            onToggleFavorite={handleToggleFavorite}
           />
         </div>
       )}

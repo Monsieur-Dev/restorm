@@ -548,6 +548,7 @@ export function importPostman(
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
+    importSource: 'postman',
     id: generateId(`postman:root:${collection.info.name}`),
     name: collection.info.name,
     documentation: '',

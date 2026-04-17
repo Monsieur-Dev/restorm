@@ -20,6 +20,8 @@ export interface UseSidebarStateOptions {
   onCreateSubfolder: (itemId: string) => void
   onDeleteItem: (itemId: string) => void
   onRenameItem: (itemId: string) => void
+  isItemFavorite?: (itemId: string) => boolean
+  onToggleFavorite?: (itemId: string) => void
 }
 
 export interface UseSidebarStateReturn {
@@ -27,7 +29,7 @@ export interface UseSidebarStateReturn {
 }
 
 export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStateReturn {
-  const { rootItems, expandedIds, updateCount, onCloneItem, onCreateSubfolder, onDeleteItem, onRenameItem } = options
+  const { rootItems, expandedIds, updateCount, onCloneItem, onCreateSubfolder, onDeleteItem, onRenameItem, isItemFavorite, onToggleFavorite } = options
   const { t } = useTranslation()
 
   // Convert root folders to ListView items
@@ -50,8 +52,8 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
 
   // Attach context menus to sidebar items
   const sidebarItemsWithContextMenu: ListViewItemData[] = useMemo(
-    () => attachContextMenus(sidebarItems, t, onCloneItem, onCreateSubfolder, onDeleteItem, onRenameItem),
-    [sidebarItems, t, onCloneItem, onCreateSubfolder, onDeleteItem, onRenameItem]
+    () => attachContextMenus(sidebarItems, t, onCloneItem, onCreateSubfolder, onDeleteItem, onRenameItem, isItemFavorite, onToggleFavorite),
+    [sidebarItems, t, onCloneItem, onCreateSubfolder, onDeleteItem, onRenameItem, isItemFavorite, onToggleFavorite]
   )
 
   return {

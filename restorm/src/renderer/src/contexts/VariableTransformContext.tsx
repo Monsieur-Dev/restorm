@@ -24,12 +24,29 @@ export function VariableTransformProvider({ children }: VariableTransformProvide
       return
     }
 
-    const unsubscribe = restormContext.onVariableTransformed((result: VariableTransformResult) => {
-      const { variableId, transformedValue } = result
-      
+    const pendingFlushTimers = new Map<string, ReturnType<typeof setTimeout>>()
+
+    const unsubscribe = restormContext.onVariableTransformed((result: VariableTransformResult & { sourceId?: string }) => {
+      const { variableId, transformedValue, sourceId } = result
+
       // Update stored result
       transformResultsRef.current.set(variableId, transformedValue)
-      
+
+      // If this is an own-echo (has sourceId), defer notification to avoid
+      // stealing focus from inputs during typing bursts.
+      if (sourceId) {
+        const existing = pendingFlushTimers.get(variableId)
+        if (existing) clearTimeout(existing)
+        pendingFlushTimers.set(variableId, setTimeout(() => {
+          pendingFlushTimers.delete(variableId)
+          const latest = transformResultsRef.current.get(variableId)
+          if (latest === undefined) return
+          const subs = subscribersRef.current.get(variableId)
+          if (subs) { for (const cb of subs) cb(latest) }
+        }, 400))
+        return
+      }
+
       // Notify all subscribers for this variableId
       const subscribers = subscribersRef.current.get(variableId)
       if (subscribers) {

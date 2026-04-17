@@ -272,6 +272,7 @@ const RestormVariableInputBoxInner: React.FC<RestormVariableInputBoxProps> = (pr
           if (hasResolvedTooltip) setShowResolvedTooltip(true)
         }}
         onMouseLeave={() => { setShowResolvedTooltip(false) }}
+        onContextMenu={() => { setShowResolvedTooltip(false) }}
         style={{ position: 'relative', width: '100%' }}
       >
         <VariableInputBox

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { removeTab, normalizeTree, cloneTree } from './tree'
+import { removeTab, normalizeTree, cloneTree, moveTabToAdjacentGroup } from './tree'
 import type { WorkbenchTree, TabGroupNode, EditorTab } from './types'
 import { isTabGroupNode } from './types'
 
@@ -168,5 +168,91 @@ describe('tab move between groups (inter-group)', () => {
     expect(tree.groups).toHaveLength(2)
     const g2 = tree.groups[1] as TabGroupNode
     expect(g2.tabs).toHaveLength(1)
+  })
+})
+
+// Helper: snapshot the tree as a string — each group rendered as
+// `[tab1,tab2,...]` with the active tab marked `*`.
+function snapshot(tree: WorkbenchTree): string {
+  return tree.groups
+    .filter(isTabGroupNode)
+    .map((g) => {
+      const ids = g.tabs.map((t) => (g.activeTabId === t.id ? `${t.id}*` : t.id))
+      return `[${ids.join(',')}]`
+    })
+    .join('')
+}
+
+describe('moveTabToAdjacentGroup — Ctrl+Alt+Left/Right', () => {
+  it('[A*,B] right → [B*][A*]: creates a new group on the right when none exists', () => {
+    const tree: WorkbenchTree = {
+      orientation: 'vertical',
+      groups: [{ id: 'g1', tabs: [tab('A'), tab('B')], activeTabId: 'A' }]
+    }
+    const { tree: next, destGroupId } = moveTabToAdjacentGroup(tree, 'g1', 'A', 'right')
+    expect(snapshot(next)).toBe('[B*][A*]')
+    expect(destGroupId).toBeTruthy()
+  })
+
+  it('[B][A*] left → [B,A*]: moves the tab to the end of the left sibling', () => {
+    const tree: WorkbenchTree = {
+      orientation: 'vertical',
+      groups: [
+        { id: 'g1', tabs: [tab('B')], activeTabId: 'B' },
+        { id: 'g2', tabs: [tab('A')], activeTabId: 'A' }
+      ]
+    }
+    const { tree: next, destGroupId } = moveTabToAdjacentGroup(tree, 'g2', 'A', 'left')
+    expect(snapshot(next)).toBe('[B,A*]')
+    expect(destGroupId).toBe('g1')
+  })
+
+  it('[B,A*] left → [A*][B*]: creates a new left group when none exists', () => {
+    const tree: WorkbenchTree = {
+      orientation: 'vertical',
+      groups: [{ id: 'g1', tabs: [tab('B'), tab('A')], activeTabId: 'A' }]
+    }
+    const { tree: next } = moveTabToAdjacentGroup(tree, 'g1', 'A', 'left')
+    expect(snapshot(next)).toBe('[A*][B*]')
+  })
+
+  it('[A*,B][C] right → [B*][C,A*]: appends to the existing right group', () => {
+    const tree: WorkbenchTree = {
+      orientation: 'vertical',
+      groups: [
+        { id: 'g1', tabs: [tab('A'), tab('B')], activeTabId: 'A' },
+        { id: 'g2', tabs: [tab('C')], activeTabId: 'C' }
+      ]
+    }
+    const { tree: next, destGroupId } = moveTabToAdjacentGroup(tree, 'g1', 'A', 'right')
+    expect(snapshot(next)).toBe('[B*][C,A*]')
+    expect(destGroupId).toBe('g2')
+  })
+
+  it('[B][C,A*] right → [B*][C*][A*]: creates a new rightmost group', () => {
+    const tree: WorkbenchTree = {
+      orientation: 'vertical',
+      groups: [
+        { id: 'g1', tabs: [tab('B')], activeTabId: 'B' },
+        { id: 'g2', tabs: [tab('C'), tab('A')], activeTabId: 'A' }
+      ]
+    }
+    const { tree: next } = moveTabToAdjacentGroup(tree, 'g2', 'A', 'right')
+    expect(snapshot(next)).toBe('[B*][C*][A*]')
+  })
+
+  it('[B][C][A*] right → no-op when no destination and source has a single tab', () => {
+    const tree: WorkbenchTree = {
+      orientation: 'vertical',
+      groups: [
+        { id: 'g1', tabs: [tab('B')], activeTabId: 'B' },
+        { id: 'g2', tabs: [tab('C')], activeTabId: 'C' },
+        { id: 'g3', tabs: [tab('A')], activeTabId: 'A' }
+      ]
+    }
+    const { tree: next, destGroupId } = moveTabToAdjacentGroup(tree, 'g3', 'A', 'right')
+    expect(snapshot(next)).toBe('[B*][C*][A*]')
+    expect(next).toBe(tree) // unchanged reference
+    expect(destGroupId).toBeNull()
   })
 })

@@ -1,4 +1,4 @@
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, type ValueType } from '../../../shared/types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, type ValueType } from '../../../shared/types/collections'
 
 export function normalizeValueType(input: unknown): ValueType {
   if (
@@ -6,7 +6,11 @@ export function normalizeValueType(input: unknown): ValueType {
     input instanceof ColorValue ||
     input instanceof DateTimeValue ||
     input instanceof NumericValue ||
-    input instanceof PasswordValue
+    input instanceof PasswordValue ||
+    input instanceof ExpressionValue ||
+    input instanceof BooleanValue ||
+    input instanceof EnumValue ||
+    input instanceof EnumListValue
   ) {
     return input
   }
@@ -40,6 +44,25 @@ export function normalizeValueType(input: unknown): ValueType {
       }
       case 'password':
         return new PasswordValue(typeof plain.value === 'string' ? plain.value : '')
+      case 'expression':
+        return new ExpressionValue(typeof plain.value === 'string' ? plain.value : '')
+      case 'boolean':
+        return new BooleanValue(plain.value === true || plain.value === 'true')
+      case 'enum': {
+        const defId = (plain as { enumDefinitionId?: unknown }).enumDefinitionId
+        return new EnumValue(
+          typeof plain.value === 'string' ? plain.value : '',
+          typeof defId === 'string' ? defId : ''
+        )
+      }
+      case 'enumList': {
+        const raw = plain.value
+        const defId = (plain as { enumDefinitionId?: unknown }).enumDefinitionId
+        return new EnumListValue(
+          Array.isArray(raw) ? raw.filter((v): v is string => typeof v === 'string') : [],
+          typeof defId === 'string' ? defId : ''
+        )
+      }
       default:
         return new StringValue('')
     }

@@ -4,7 +4,7 @@ import { Modal } from '../Modal'
 
 export interface Tab {
   id: string
-  label: string
+  label: React.ReactNode
   content: React.ReactNode
   closable?: boolean
   /**
@@ -224,7 +224,7 @@ const TabsInner: React.FC<TabsProps> = ({
                       e.currentTarget.style.opacity = '0.7'
                       e.currentTarget.style.backgroundColor = 'transparent'
                     }}
-                    aria-label={`Close ${tab.label}`}
+                    aria-label={`Close ${typeof tab.label === 'string' ? tab.label : tab.id}`}
                   >
                     <svg
                       width="12"

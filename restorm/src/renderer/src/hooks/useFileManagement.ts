@@ -9,7 +9,6 @@ import {
   finishLoading,
   hasContentChanged,
   registerInitialChecksums,
-  commitChecksums,
   eventBus,
   logger,
   computeChecksum
@@ -77,8 +76,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     state: _fileState,
     fileName,
     filePath,
-    isDirty,
-    newFile,
+    isDirty: _isDirty,
     open: openFile,
     save: saveFile,
     close: closeFile,
@@ -87,6 +85,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   } = useFileService()
 
   const [showSaveOptionsModal, setShowSaveOptionsModal] = useState(false)
+  const [saveOptionsIntent, setSaveOptionsIntent] = useState<'saveAs' | 'new'>('saveAs')
   const [isOpenedAsFolder, setIsOpenedAsFolder] = useState(false)
   const [folderFormat, setFolderFormat] = useState<PersistenceFormat>('yaml')
   const [currentFolderPath, setCurrentFolderPath] = useState<string | null>(null)
@@ -115,6 +114,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         )
         if (result?.success) {
           void clearDirty()
+          markAllTabsSaved()
         }
         return
       }
@@ -122,24 +122,29 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       const secrets = collectPasswordSecretsFromCollections(plainData)
       const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
       const saved = await saveFile(dataForChecksum)
-      if (saved && filePath) {
-        await window.restorm?.secrets.write(`${filePath}.env`, envContent)
+      if (saved) {
+        markAllTabsSaved()
+        if (filePath) {
+          await window.restorm?.secrets.write(`${filePath}.env`, envContent)
+        }
       }
     })()
-  }, [saveFile, rootItems, isOpenedAsFolder, folderFormat, clearDirty, currentFolderPath, filePath])
+  }, [saveFile, rootItems, isOpenedAsFolder, folderFormat, clearDirty, currentFolderPath, filePath, markAllTabsSaved])
 
   const handleMenuSaveAs = useCallback(() => {
+    setSaveOptionsIntent('saveAs')
     setShowSaveOptionsModal(true)
   }, [])
 
   const handleSaveWithOptions = useCallback(
     async (saveOptions: SaveOptions) => {
-      const plainData = JSON.parse(JSON.stringify({ collections: rootItems })) as Record<
-        string,
-        unknown
-      >
+      const isNew = saveOptionsIntent === 'new'
+      const plainData = isNew
+        ? ({ collections: [] } as Record<string, unknown>)
+        : (JSON.parse(JSON.stringify({ collections: rootItems })) as Record<string, unknown>)
 
       logger.info('[useFileManagement] Saving with options', {
+        intent: saveOptionsIntent,
         mode: saveOptions.mode,
         format: saveOptions.format
       })
@@ -149,6 +154,10 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
           const result = await window.restorm?.file.saveAsFolder(plainData, saveOptions.format)
           if (result?.success && result.path) {
             logger.info('[useFileManagement] Folder saved successfully', { path: result.path })
+            if (isNew) {
+              setRootItems([])
+              clearTabDirtyState()
+            }
             setIsOpenedAsFolder(true)
             setFolderFormat(saveOptions.format)
             setCurrentFolderPath(result.path)
@@ -170,6 +179,10 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
               await window.restorm?.secrets.write(`${result.path}.env`, envContent)
             }
             await clearDirty()
+            if (isNew && result.path) {
+              await closeFile()
+              await openFile(result.path)
+            }
           } else {
             logger.error('[useFileManagement] Failed to save file', {
               error: result?.error ?? 'Unknown error'
@@ -180,7 +193,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         logger.error('[useFileManagement] Save error', { error: String(error) })
       }
     },
-    [rootItems, clearDirty]
+    [rootItems, clearDirty, saveOptionsIntent, setRootItems, clearTabDirtyState, closeFile, openFile]
   )
 
   const checkUnsavedChanges = useCallback(async (): Promise<boolean> => {
@@ -216,9 +229,10 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   const handleMenuNew = useCallback(async () => {
     const canProceed = await checkUnsavedChanges()
     if (canProceed) {
-      await newFile()
+      setSaveOptionsIntent('new')
+      setShowSaveOptionsModal(true)
     }
-  }, [checkUnsavedChanges, newFile])
+  }, [checkUnsavedChanges])
 
   const handleMenuOpen = useCallback(async () => {
     const canProceed = await checkUnsavedChanges()
@@ -436,18 +450,6 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
 
     return cleanup
   }, [rootItems, saveFile, filePath])
-
-  // Commit checksums on save
-  useEffect(() => {
-    const wasDirtyRef = { current: isDirty }
-    if (wasDirtyRef.current && !isDirty && fileName) {
-      void commitChecksums()
-      logger.debug('[useFileManagement] Checksums committed after save')
-      const dataForChecksum = prepareForSerialization({ collections: rootItems })
-      void setContentChecksum(JSON.stringify(dataForChecksum))
-      markAllTabsSaved()
-    }
-  }, [isDirty, fileName, rootItems, markAllTabsSaved])
 
   return {
     handleMenuNew,

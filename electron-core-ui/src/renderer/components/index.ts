@@ -129,6 +129,10 @@ export type { IButtonOptions, IButtonStyles, IButtonWithDropdownOptions, ButtonP
 export { SelectBox, SelectBoxNative, SelectBoxList, defaultSelectBoxStyles } from './SelectBox/index'
 export type { ISelectBoxDelegate, ISelectBoxOptions, ISelectOptionItem, ISelectBoxStyles, ISelectData, SelectBoxProps, SelectBoxNativeProps, SelectBoxListProps } from './SelectBox/index'
 
+// MultiSelectCombo exports
+export { MultiSelectCombo } from './MultiSelectCombo/MultiSelectCombo'
+export type { MultiSelectComboOption, MultiSelectComboProps } from './MultiSelectCombo/MultiSelectCombo'
+
 // MenuBar exports
 export { MenuBar, MenuBarItem, MenuItem, MenuItemSeparator } from './MenuBar/index'
 export type { MenuBarProps, MenuItemProps, MenuItemSeparatorProps, MenuBarState, MenuItemState } from './MenuBar/index'

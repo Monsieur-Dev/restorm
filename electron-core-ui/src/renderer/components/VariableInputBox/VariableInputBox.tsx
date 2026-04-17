@@ -318,6 +318,17 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
       // Do nothing - prevent Shift+Enter from inserting a line
     })
 
+    // Strip newlines from pasted content so multi-line pastes collapse to a single line
+    editor.onDidPaste(() => {
+      const model = editor.getModel()
+      if (!model) return
+      const content = model.getValue()
+      if (content.includes('\n') || content.includes('\r')) {
+        const cleaned = content.replace(/[\r\n]+/g, ' ')
+        model.setValue(cleaned)
+      }
+    })
+
     // Block local Ctrl/Cmd+F inside this compact editor only
     const domNode = editor.getDomNode()
     if (domNode) {
@@ -360,7 +371,9 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
           backgroundColor: defaultInputBoxStyles.inputBackground,
           color: defaultInputBoxStyles.inputForeground,
           border: `1px solid ${defaultInputBoxStyles.inputBorder ?? 'transparent'}`,
-          minHeight: 28,
+          height: 28,
+          maxHeight: 28,
+          overflow: 'hidden',
           ...(style ?? {})
         }}
         ref={containerRef}

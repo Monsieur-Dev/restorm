@@ -9,6 +9,7 @@ import {
   GrpcRequest,
   type GrpcCallType
 } from '../../../shared/models'
+import type { EnumDefinition } from '../../../shared/types/collections'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 import { grpcToApiDocumentation } from './transformers/grpcToApiDocumentation'
 
@@ -43,10 +44,16 @@ interface ProtoService {
   comment?: string | undefined
 }
 
+interface ProtoEnum {
+  name: string
+  values: string[]
+}
+
 interface ParsedProto {
   package: string
   services: ProtoService[]
   messages: ProtoMessage[]
+  enums: ProtoEnum[]
 }
 
 // ============================================================================
@@ -58,7 +65,8 @@ function parseProto(content: string): ParsedProto {
   const result: ParsedProto = {
     package: '',
     services: [],
-    messages: []
+    messages: [],
+    enums: []
   }
   
   // Extract package
@@ -104,7 +112,23 @@ function parseProto(content: string): ParsedProto {
       fields
     })
   }
-  
+
+  // Extract proto enums: enum Name { VALUE1 = 0; VALUE2 = 1; }
+  const protoEnumRegex = /enum\s+(\w+)\s*\{([^}]+)\}/g
+  let protoEnumMatch
+  while ((protoEnumMatch = protoEnumRegex.exec(content)) !== null) {
+    const enumName = protoEnumMatch[1]
+    const enumBody = protoEnumMatch[2]
+    if (!enumName || !enumBody) continue
+    const values = enumBody
+      .split('\n')
+      .map((l) => l.trim().replace(/\s*=\s*\d+\s*;.*$/, ''))
+      .filter((l) => l.length > 0 && !l.startsWith('//') && !l.startsWith('option'))
+    if (values.length > 0) {
+      result.enums.push({ name: enumName, values })
+    }
+  }
+
   return result
 }
 
@@ -327,8 +351,16 @@ export function importGrpc(protoContent: string, options: GrpcImportOptions = {}
     ...(options.sourceUrl !== undefined ? { sourceUrl: options.sourceUrl } : {})
   })
 
+  const enumDefinitions: EnumDefinition[] = parsed.enums.map((e) => ({
+    id: generateId(`enum:grpc:${e.name}`),
+    name: e.name,
+    values: e.values,
+    matchingRules: []
+  }))
+
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
+    importSource: 'grpc',
     id: generateId(`${name}:folder:grpc:root`),
     name,
     documentation: '',
@@ -336,7 +368,8 @@ export function importGrpc(protoContent: string, options: GrpcImportOptions = {}
     configuration: {},
     environments: [environment],
     items,
-    apiDocumentation
+    apiDocumentation,
+    ...(enumDefinitions.length > 0 ? { enumDefinitions } : {})
   }
 
   return rootFolder

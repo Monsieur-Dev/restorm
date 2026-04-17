@@ -2,7 +2,7 @@
  * Helper functions for working with Value types
  */
 
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, type ValueType } from '../types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, type ValueType } from '../types/collections'
 
 /**
  * Convert a ValueType to a string using its toString() method
@@ -58,4 +58,32 @@ export function isNumericValue(value: ValueType): value is NumericValue {
  */
 export function isPasswordValue(value: ValueType): value is PasswordValue {
   return value instanceof PasswordValue || (value as { type?: string }).type === 'password'
+}
+
+/**
+ * Check if a value is an ExpressionValue (Handlebars template).
+ */
+export function isExpressionValue(value: ValueType): value is ExpressionValue {
+  return value instanceof ExpressionValue || (value as { type?: string }).type === 'expression'
+}
+
+/**
+ * Check if a value is a BooleanValue.
+ */
+export function isBooleanValue(value: ValueType): value is BooleanValue {
+  return value instanceof BooleanValue || (value as { type?: string }).type === 'boolean'
+}
+
+/**
+ * Check if a value is an EnumValue (single-select from a closed list).
+ */
+export function isEnumValue(value: ValueType): value is EnumValue {
+  return value instanceof EnumValue || (value as { type?: string }).type === 'enum'
+}
+
+/**
+ * Check if a value is an EnumListValue (multi-select from a closed list).
+ */
+export function isEnumListValue(value: ValueType): value is EnumListValue {
+  return value instanceof EnumListValue || (value as { type?: string }).type === 'enumList'
 }

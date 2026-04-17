@@ -5,7 +5,6 @@
 import {
   trackable,
   searchable,
-  NonSerialised,
   graphqlField
 } from 'electron-core-ui/main'
 import type { RuntimeId, Icon, RequestType } from '../types'
@@ -17,9 +16,8 @@ import type { RuntimeId, Icon, RequestType } from '../types'
 @trackable()
 @searchable()
 export abstract class BaseRequest {
-  /** Runtime identifier (generated at runtime, not persisted) */
+  /** Stable identifier persisted with the request. See `Folder.id`. */
   @graphqlField({ type: 'String' })
-  @NonSerialised()
   id!: RuntimeId
 
   /** Request type discriminator */

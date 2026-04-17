@@ -5,7 +5,6 @@
 import {
   trackable,
   searchable,
-  NonSerialised,
   separateFiles,
   fileNaming,
   graphqlField
@@ -21,9 +20,8 @@ import type { RuntimeId, Icon } from './types'
 @searchable()
 @fileNaming({ pattern: '{index} - {name}', nameProperty: 'name', idProperty: 'id' })
 export class Environment {
-  /** Runtime identifier (generated at runtime, not persisted) */
+  /** Stable identifier persisted with the document. See `Folder.id`. */
   @graphqlField({ type: 'String' })
-  @NonSerialised()
   id!: RuntimeId
 
   /** Display name of the environment */
@@ -95,6 +93,7 @@ export class Environment {
    */
   toPlainObject(): Record<string, unknown> {
     return {
+      id: this.id,
       name: this.name,
       icon: this.icon,
       color: this.color,

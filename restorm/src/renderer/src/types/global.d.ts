@@ -65,6 +65,8 @@ declare global {
       }
       context: {
         getAllTransformResults: () => Promise<Record<string, VariableTransformResult>>
+        getEnvironmentContext: (environmentId: string) => Promise<Record<string, string>>
+        onEnvironmentContextChanged: (callback: (result: { environmentId: string; context: Record<string, string> }) => void) => (() => void)
         onVariableTransformed: (callback: (result: VariableTransformResult) => void) => (() => void)
         registerRequest: (
           requestId: string,
@@ -77,7 +79,7 @@ declare global {
         ) => Promise<void>
         unregisterRequest: (requestId: string) => Promise<void>
         setRequestEnvironment: (requestId: string, environmentId: string | null) => Promise<void>
-        updateRequestKeyValues: (requestId: string, groupName: string, keyValues: KeyValueData[]) => Promise<void>
+        updateRequestKeyValues: (requestId: string, groupName: string, keyValues: KeyValueData[], sourceId?: string) => Promise<void>
         updateFullRequestData: (requestId: string, data: Partial<FullRequestData>, sourceId?: string) => Promise<void>
         getResolvedUrl: (requestId: string) => Promise<ResolvedUrlResult | undefined>
         getCodeSnippets: (requestId: string) => Promise<CodeSnippetsResult | undefined>

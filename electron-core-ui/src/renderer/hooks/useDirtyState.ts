@@ -39,9 +39,26 @@ export interface DirtyStateHook {
 /**
  * Compute a simple hash checksum of an object
  */
+function sortedReplacer(key: string, value: unknown): unknown {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    const raw = value as Record<string, unknown>
+    const sorted: Record<string, unknown> = {}
+    for (const k of Object.keys(raw).sort()) {
+      // Skip runtime-only IDs on KeyValue-like objects (they have `key` +
+      // `value` properties). These IDs are assigned lazily by the UI table
+      // and must not affect the checksum.
+      if (k === 'id' && 'key' in raw && 'value' in raw) continue
+      sorted[k] = raw[k]
+    }
+    return sorted
+  }
+  return value
+  void key
+}
+
 export function computeChecksum(data: unknown): string {
   try {
-    const str = JSON.stringify(data)
+    const str = JSON.stringify(data, sortedReplacer)
     let hash = 0
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i)

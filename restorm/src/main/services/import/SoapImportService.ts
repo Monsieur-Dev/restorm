@@ -8,6 +8,7 @@ import {
   Environment,
   SoapRequest
 } from '../../../shared/models'
+import type { EnumDefinition } from '../../../shared/types/collections'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 import { wsdlToApiDocumentation } from './transformers/wsdlToApiDocumentation'
 
@@ -319,8 +320,33 @@ export function importSoap(wsdlContent: string, options: SoapImportOptions = {})
     ...(options.sourceUrl !== undefined ? { sourceUrl: options.sourceUrl } : {})
   })
 
+  // Extract XSD enum types: <simpleType name="X"><restriction><enumeration value="V"/></restriction></simpleType>
+  const enumDefinitions: EnumDefinition[] = []
+  const simpleTypeRegex = /<(?:\w+:)?simpleType[^>]*name\s*=\s*["']([^"']+)["'][^>]*>([\s\S]*?)<\/(?:\w+:)?simpleType>/gi
+  let stMatch
+  while ((stMatch = simpleTypeRegex.exec(wsdlContent)) !== null) {
+    const typeName = stMatch[1]
+    const typeBody = stMatch[2]
+    if (!typeName || !typeBody) continue
+    const values: string[] = []
+    const enumValRegex = /<(?:\w+:)?enumeration[^>]*value\s*=\s*["']([^"']+)["']/gi
+    let evMatch
+    while ((evMatch = enumValRegex.exec(typeBody)) !== null) {
+      if (evMatch[1]) values.push(evMatch[1])
+    }
+    if (values.length > 0) {
+      enumDefinitions.push({
+        id: generateId(`enum:soap:${typeName}`),
+        name: typeName,
+        values,
+        matchingRules: []
+      })
+    }
+  }
+
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
+    importSource: 'wsdl',
     id: generateId(`${name}:folder:soap:root`),
     name,
     documentation: '',
@@ -328,7 +354,8 @@ export function importSoap(wsdlContent: string, options: SoapImportOptions = {})
     configuration: {},
     environments: [environment],
     items,
-    apiDocumentation
+    apiDocumentation,
+    ...(enumDefinitions.length > 0 ? { enumDefinitions } : {})
   }
 
   return rootFolder

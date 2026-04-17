@@ -2,6 +2,10 @@ import React, { useState, useCallback, useRef, useEffect, useLayoutEffect } from
 import { MenuItemProps } from './types'
 import { ScrollableElement } from '../ScrollableElement'
 
+const SUBMENU_WIDTH = 300
+const VIEWPORT_PADDING = 8
+const OVERLAP_OFFSET = 8
+
 const MenuItem: React.FC<MenuItemProps> = ({
   title,
   shortcut,
@@ -23,17 +27,42 @@ const MenuItem: React.FC<MenuItemProps> = ({
   const submenuTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   // Store the calculated height only when submenu is shown (null means use 'auto')
   const [activeHeight, setActiveHeight] = useState<string | null>(null)
-  const [submenuPosition, setSubmenuPosition] = useState({ left: 0, top: 0 })
 
   // Derive effective height: 'auto' when not shown, calculated value when shown
   const calculatedHeight = showSubmenu && activeHeight !== null ? activeHeight : 'auto'
 
-  // Calculate submenu position when showing
+  // Position the submenu via direct DOM mutation on the ref. This runs before paint,
+  // flipping or overlapping when the submenu would overflow the viewport horizontally.
+  // Vertical overflow is handled separately via clipping + scroll.
   useLayoutEffect(() => {
-    if (showSubmenu && itemRef.current) {
-      const rect = itemRef.current.getBoundingClientRect()
-      setSubmenuPosition({ left: rect.right, top: rect.top })
+    if (!showSubmenu || !itemRef.current || !submenuRef.current) return
+
+    const itemRect = itemRef.current.getBoundingClientRect()
+    const winWidth = window.innerWidth
+
+    let left = itemRect.right
+    let top = itemRect.top
+
+    const overflowsRight = left + SUBMENU_WIDTH + VIEWPORT_PADDING > winWidth
+
+    if (overflowsRight) {
+      const flippedLeft = itemRect.left - SUBMENU_WIDTH
+      if (flippedLeft >= VIEWPORT_PADDING) {
+        left = flippedLeft
+      } else {
+        const parentMenu = itemRef.current.closest('.menu-container')
+        if (parentMenu) {
+          const parentRect = parentMenu.getBoundingClientRect()
+          left = parentRect.left + OVERLAP_OFFSET
+          top = parentRect.top + OVERLAP_OFFSET
+        } else {
+          left = Math.max(VIEWPORT_PADDING, winWidth - SUBMENU_WIDTH - VIEWPORT_PADDING)
+        }
+      }
     }
+
+    submenuRef.current.style.left = `${left}px`
+    submenuRef.current.style.top = `${top}px`
   }, [showSubmenu])
 
   const hasSubmenu = React.Children.count(children) > 0
@@ -287,9 +316,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
           className="menu menubar-menu-items-holder menu-container"
           style={{
             position: 'fixed',
-            zIndex: 2000,
-            left: `${submenuPosition.left}px`,
-            top: `${submenuPosition.top}px`
+            zIndex: 2000
           }}
           onMouseEnter={handleSubmenuMouseEnter}
           onMouseLeave={handleSubmenuMouseLeave}

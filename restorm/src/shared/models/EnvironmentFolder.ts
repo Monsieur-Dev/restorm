@@ -5,7 +5,6 @@
 import {
   trackable,
   searchable,
-  NonSerialised,
   separateFolders,
   fileNaming,
   graphqlField
@@ -23,9 +22,11 @@ import type { ApiDocumentation } from '../types/apiDocumentation'
 @searchable()
 @fileNaming({ pattern: '{index} - {name}', nameProperty: 'name', idProperty: 'id' })
 export class EnvironmentFolder {
-  /** Runtime identifier (generated at runtime, not persisted) */
+  /** Stable identifier persisted with the document so workbench layout,
+   * per-request env selection, and other settings can reference it across
+   * app executions. Generated on first save or first load of a legacy
+   * file that lacks one. */
   @graphqlField({ type: 'String' })
-  @NonSerialised()
   id!: RuntimeId
 
   /** Display name of the folder */
@@ -135,6 +136,7 @@ export class EnvironmentFolder {
    */
   toPlainObject(): Record<string, unknown> {
     const plain: Record<string, unknown> = {
+      id: this.id,
       name: this.name,
       icon: this.icon,
       documentation: this.documentation,

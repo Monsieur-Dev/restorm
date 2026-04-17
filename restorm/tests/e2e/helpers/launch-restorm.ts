@@ -81,10 +81,15 @@ export async function launchRestormElectronApp({
     }
   })
 
-  // Renderer console — auto-attach to every window
+  // Renderer console + uncaught page errors — auto-attach to every window.
+  // Uncaught errors go through `pageerror`, not `console`, so capturing both
+  // gives us the same visibility as DevTools open.
   app.on('window', (page) => {
     page.on('console', (msg) => {
       logs.push(`[renderer:${msg.type()}] ${msg.text()}`)
+    })
+    page.on('pageerror', (err) => {
+      logs.push(`[renderer:pageerror] ${err.message}\n${err.stack ?? ''}`)
     })
   })
 

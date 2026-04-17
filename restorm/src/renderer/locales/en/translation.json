@@ -31,7 +31,9 @@
       "defineVariables": "Define variables",
       "delete": "Delete",
       "clone": "Clone",
-      "rename": "Rename"
+      "rename": "Rename",
+      "addToFavorites": "Add to favorites",
+      "removeFromFavorites": "Remove from favorites"
     },
     "deleteConfirm": {
       "title": "Confirm deletion",
@@ -59,10 +61,27 @@
       "configuration": "Configuration",
       "notes": "Notes"
     },
+    "home": {
+      "configureEnvs": "Configure environments",
+      "configureEnvsDesc": "Set up your base URLs, variables, and authentication for each environment",
+      "viewDocs": "View documentation",
+      "viewDocsDesc": "Browse the API documentation, models, and endpoints",
+      "favoriteRequests": "Favorite requests",
+      "removeFavorite": "Remove from favorites",
+      "refresh": "Refresh",
+      "refreshing": "Refreshing..."
+    },
     "docs": {
       "source": "Source:",
       "refresh": "Refresh docs",
       "refreshing": "Refreshing..."
+    },
+    "contextVariables": {
+      "title": "Available context variables",
+      "description": "Use these variables in your request URLs and expression-type variables with the {{handlebars}} syntax.",
+      "name": "Variable",
+      "value": "Resolved value",
+      "copied": "Copied!"
     }
   },
   "requestTab": {
@@ -117,21 +136,25 @@
     "removeTag": "Remove tag",
     "tabContextMenu": {
       "close": "Close",
-      "closeOthers": "Close others"
+      "closeOthers": "Close others",
+      "addToFavorites": "Add to favorites",
+      "removeFromFavorites": "Remove from favorites"
     }
   },
   "codeEditor": {
     "goToDefinition": "Go to Definition"
   },
   "keyValueTable": {
-    "transformTo": "Transform to",
     "types": {
       "string": "String",
       "secret": "Secret",
       "number": "Number",
       "dateTime": "Date time",
-      "color": "Color"
-    }
+      "color": "Color",
+      "expression": "Expression",
+      "boolean": "Boolean"
+    },
+    "apiEnums": "API defined types"
   },
   "graphql": {
     "send": "Send",

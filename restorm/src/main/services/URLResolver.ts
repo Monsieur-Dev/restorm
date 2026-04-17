@@ -5,6 +5,7 @@
  */
 
 import type { FullRequestData, ResolvedUrlResult, TransformedContext, TransformValueFn } from './ContextServiceTypes'
+import { isExpressionValue, isEnumListValue, isEnumValue } from '../../shared/utils/valueHelpers'
 
 /**
  * Calculate the resolved URL for a request.
@@ -31,7 +32,12 @@ export function resolveUrl(
     if (pp.key) {
       // Resolve using cumulative context (env + previous path params)
       const resolvedKey = transformValue(pp.key, cumulativeContext)
-      const resolvedValue = transformValue(pp.value.toString(), cumulativeContext)
+      // Only `ExpressionValue` values go through Handlebars — plain
+      // strings/numbers/dates etc. are taken literally.
+      const raw = pp.value.toString()
+      const resolvedValue = isExpressionValue(pp.value)
+        ? transformValue(raw, cumulativeContext)
+        : raw
       // Store non-encoded value for next iterations (last value wins for same key)
       cumulativeContext[resolvedKey] = resolvedValue
     }
@@ -52,28 +58,47 @@ export function resolveUrl(
   // Build query string from params with cumulative resolution
   const params = data.params ?? []
   const cumulativeParamsContext = { ...envContext }
-  const resolvedParams = new Map<string, string>() // key -> resolved value (last wins)
+  // Use an array of [key, value] pairs instead of a Map to support
+  // repeated keys (EnumListValue with collectionFormat: multi).
+  const queryParts: string[] = []
 
   for (const param of params) {
-    // Skip disabled params (enabled defaults to true if undefined)
     if (param.enabled === false) {
       continue
     }
     if (param.key) {
-      // Resolve using cumulative context
       const resolvedKey = transformValue(param.key, cumulativeParamsContext)
-      const resolvedValue = transformValue(param.value.toString(), cumulativeParamsContext)
-      // Store for URL (last value wins for same key)
-      resolvedParams.set(resolvedKey, resolvedValue)
-      // Add to cumulative context for next params
+
+      // EnumListValue: repeat the key for each selected value (multi format)
+      if (isEnumListValue(param.value)) {
+        const values = param.value.value
+        for (const v of values) {
+          queryParts.push(`${encodeURIComponent(resolvedKey)}=${encodeURIComponent(v)}`)
+        }
+        cumulativeParamsContext[resolvedKey] = values.join(',')
+        continue
+      }
+
+      // EnumValue: single value
+      if (isEnumValue(param.value)) {
+        const v = param.value.value
+        if (v) {
+          queryParts.push(`${encodeURIComponent(resolvedKey)}=${encodeURIComponent(v)}`)
+          cumulativeParamsContext[resolvedKey] = v
+        }
+        continue
+      }
+
+      // ExpressionValue goes through Handlebars, others taken literally
+      const raw = param.value.toString()
+      const resolvedValue = isExpressionValue(param.value)
+        ? transformValue(raw, cumulativeParamsContext)
+        : raw
+      queryParts.push(`${encodeURIComponent(resolvedKey)}=${encodeURIComponent(resolvedValue)}`)
       cumulativeParamsContext[resolvedKey] = resolvedValue
     }
   }
 
-  const queryParts: string[] = []
-  for (const [key, value] of resolvedParams) {
-    queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-  }
   const queryString = queryParts.join('&')
 
   // Combine base URL and query string

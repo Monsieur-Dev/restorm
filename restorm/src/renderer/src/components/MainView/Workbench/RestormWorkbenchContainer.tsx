@@ -31,6 +31,9 @@ export interface RestormWorkbenchContainerProps {
   getEnvironmentFolderById: (id: string) => EnvironmentFolder | undefined
   navigationEnabled?: boolean | undefined
   tabSwitcherAnchorSelector?: string | undefined
+  filePath?: string | undefined
+  isItemFavorite?: (itemId: string) => boolean
+  onToggleFavorite?: (itemId: string) => void
 }
 
 /**
@@ -60,7 +63,10 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
   getFolderById,
   getEnvironmentFolderById,
   navigationEnabled,
-  tabSwitcherAnchorSelector
+  tabSwitcherAnchorSelector,
+  filePath,
+  isItemFavorite,
+  onToggleFavorite
 }) => {
   return (
     <EnvironmentValuesProvider>
@@ -99,6 +105,9 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
           getEnvironmentFolderById={getEnvironmentFolderById}
           navigationEnabled={navigationEnabled}
           tabSwitcherAnchorSelector={tabSwitcherAnchorSelector}
+          filePath={filePath}
+          isItemFavorite={isItemFavorite}
+          onToggleFavorite={onToggleFavorite}
         />
       </div>
     </EnvironmentValuesProvider>

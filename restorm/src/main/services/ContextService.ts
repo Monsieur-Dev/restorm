@@ -28,6 +28,7 @@ import {
 import { registerHandlebarsHelpers } from '../utils/handlebarsHelpers'
 import { pubsub, PUBSUB_TOPICS } from './CollectionStore'
 import { KeyValue as KeyValueModel } from '../../shared/models'
+import { isExpressionValue } from '../../shared/utils/valueHelpers'
 import { resolveUrl } from './URLResolver'
 import { compileSnippetTemplates, generateCodeSnippets, type CompiledSnippetTemplates } from './CodeSnippetGenerator'
 import type {
@@ -296,7 +297,7 @@ class ContextService {
       if (kv.key) {
         // Copy context before transformation for this variable
         const contextUsed = { ...finalContext }
-        const transformedValue = this.transformValue(kv.value.toString(), finalContext)
+        const transformedValue = this.resolveKeyValue(kv, finalContext)
         finalContext[kv.key] = transformedValue
 
         // Store and broadcast transformation result if variable has an id
@@ -308,6 +309,46 @@ class ContextService {
             rawValue,
             key: kv.key
           })
+        }
+      }
+    }
+
+    // Second pass: re-resolve all ExpressionValues with the complete context.
+    // This allows an Expression defined in a parent env to reference variables
+    // that are overridden by a child env (e.g. baseUrl in root uses scheme
+    // that is overridden by sub-envs http/https).
+    for (const kv of meta.rawVariables) {
+      if (kv.enabled === false) continue
+      if (kv.key && isExpressionValue(kv.value)) {
+        const raw = kv.value.toString()
+        const reResolved = this.transformValue(raw, finalContext)
+        if (reResolved !== finalContext[kv.key]) {
+          finalContext[kv.key] = reResolved
+          if (kv.id) {
+            this.storeAndBroadcastTransformResult(kv.id, {
+              contextUsed: { ...finalContext },
+              transformedValue: reResolved,
+              rawValue: raw,
+              key: kv.key
+            })
+          }
+        }
+      }
+    }
+
+    // Also re-resolve inherited parent ExpressionValues that may depend
+    // on variables overridden by this environment.
+    for (const parentId of parentChain) {
+      const parentMeta = this.environmentMeta.get(parentId)
+      if (!parentMeta) continue
+      for (const kv of parentMeta.rawVariables) {
+        if (kv.enabled === false) continue
+        if (kv.key && isExpressionValue(kv.value)) {
+          const raw = kv.value.toString()
+          const reResolved = this.transformValue(raw, finalContext)
+          if (reResolved !== finalContext[kv.key]) {
+            finalContext[kv.key] = reResolved
+          }
         }
       }
     }
@@ -332,6 +373,12 @@ class ContextService {
     pubsub.publish(PUBSUB_TOPICS.CONTEXT_CHANGED, environmentId, {
       environmentId,
       variables
+    })
+
+    // Broadcast to renderer for UI components (e.g. environment config panel)
+    this.broadcastToRenderer('context:environment-context-changed', {
+      environmentId,
+      context
     })
   }
 
@@ -363,7 +410,10 @@ class ContextService {
   }
 
   /**
-   * Transform a value using Handlebars
+   * Transform a value using Handlebars. Always resolves — gating on
+   * `ExpressionValue` happens in `resolveKeyValue` so the URL-field
+   * template resolution path (which operates on a plain string field,
+   * not a typed `KeyValue`) stays intact.
    */
   private transformValue(value: string, context: TransformedContext): string {
     const rawValue = value
@@ -384,13 +434,29 @@ class ContextService {
   }
 
   /**
+   * Resolve a `KeyValue`'s value. Only `ExpressionValue`s are run
+   * through Handlebars — every other type is taken literally, so a
+   * `StringValue("{{unresolved}}")` stays as-is. This is the rule the
+   * product asked for: variable substitution is opt-in, the user marks
+   * a variable as "expression" when they want templating.
+   */
+  private resolveKeyValue(kv: KeyValue, context: TransformedContext): string {
+    const raw = kv.value.toString()
+    if (isExpressionValue(kv.value)) {
+      return this.transformValue(raw, context)
+    }
+    return raw
+  }
+
+  /**
    * Store a transformation result and broadcast it to the renderer
    */
-  private storeAndBroadcastTransformResult(variableId: string, result: VariableTransformResult): void {
+  private storeAndBroadcastTransformResult(variableId: string, result: VariableTransformResult, sourceId?: string): void {
     this.variableTransformResults.set(variableId, result)
     this.broadcastToRenderer('context:variable-transformed', {
       variableId,
-      ...result
+      ...result,
+      sourceId
     })
   }
 
@@ -524,7 +590,7 @@ class ContextService {
    * Update a KeyValue group for a request (e.g., headers, params).
    * Called when the user modifies headers/params/etc in the UI.
    */
-  updateRequestKeyValues(requestId: string, groupName: string, keyValues: KeyValue[]): void {
+  updateRequestKeyValues(requestId: string, groupName: string, keyValues: KeyValue[], sourceId?: string): void {
     const ctx = this.requestContexts.get(requestId)
     if (!ctx) {
       logger.warn('[ContextService] updateRequestKeyValues: request not registered', { requestId })
@@ -542,7 +608,7 @@ class ContextService {
     }
 
     ctx.keyValueGroups.set(groupName, keyValues)
-    this.recalculateRequestContext(requestId)
+    this.recalculateRequestContext(requestId, sourceId)
   }
 
   /**
@@ -580,7 +646,7 @@ class ContextService {
         }
         if (kv.key) {
           const contextUsed = { ...groupContext }
-          const transformedValue = this.transformValue(kv.value.toString(), groupContext)
+          const transformedValue = this.resolveKeyValue(kv, groupContext)
           groupContext[kv.key] = transformedValue
 
           if (kv.id) {
@@ -590,7 +656,7 @@ class ContextService {
               transformedValue,
               rawValue,
               key: kv.key
-            })
+            }, sourceId)
           }
         }
       }
@@ -702,7 +768,7 @@ class ContextService {
         for (const prev of cumulativePathParams) {
           contextForResolve[prev.name] = prev.value
         }
-        const resolvedValue = this.transformValue(pp.value.toString(), contextForResolve)
+        const resolvedValue = this.resolveKeyValue(pp, contextForResolve)
         addOrReplace(cumulativePathParams, pp.key, resolvedValue)
       }
     }
@@ -727,7 +793,7 @@ class ContextService {
         for (const prev of cumulativeHeaders) {
           contextForResolve[prev.name] = prev.value
         }
-        const resolvedValue = this.transformValue(h.value.toString(), contextForResolve)
+        const resolvedValue = this.resolveKeyValue(h, contextForResolve)
         addOrReplace(cumulativeHeaders, h.key, resolvedValue)
       }
     }
@@ -752,7 +818,7 @@ class ContextService {
         for (const prev of cumulativeParams) {
           contextForResolve[prev.name] = prev.value
         }
-        const resolvedValue = this.transformValue(p.value.toString(), contextForResolve)
+        const resolvedValue = this.resolveKeyValue(p, contextForResolve)
         addOrReplace(cumulativeParams, p.key, resolvedValue)
       }
     }

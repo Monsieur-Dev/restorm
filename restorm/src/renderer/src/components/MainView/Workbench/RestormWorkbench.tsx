@@ -171,6 +171,10 @@ export interface RestormWorkbenchProps {
   getRequestById?: (id: string) => Request | undefined
   /** Get a reactive Folder by ID (for reactivity support) */
   getFolderById?: (id: string) => Folder | undefined
+  /** Check if a request is a favorite */
+  isItemFavorite?: ((itemId: string) => boolean) | undefined
+  /** Toggle favorite status on a request */
+  onToggleFavorite?: ((itemId: string) => void) | undefined
   /** Get a reactive EnvironmentFolder by ID (for reactivity support) */
   getEnvironmentFolderById?: (id: string) => EnvironmentFolder | undefined
   /** Callback fired when an environment folder's data changes */
@@ -179,6 +183,12 @@ export interface RestormWorkbenchProps {
   navigationEnabled?: boolean | undefined
   /** CSS selector for the element to anchor the tab switcher overlay to */
   tabSwitcherAnchorSelector?: string | undefined
+  /**
+   * Absolute path of the currently open file — plumbed down to
+   * EnvironmentProvider so per-request environment selections persist
+   * across sessions in the user config.
+   */
+  filePath?: string | undefined
 }
 
 /** Imperative handle for Workbench component */
@@ -217,7 +227,10 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   getFolderById,
   getEnvironmentFolderById,
   navigationEnabled,
-  tabSwitcherAnchorSelector
+  tabSwitcherAnchorSelector,
+  filePath,
+  isItemFavorite,
+  onToggleFavorite
 }, ref) => {
   const { t } = useTranslation()
   const editorWorkbenchRef = useRef<EditorWorkbenchHandle>(null)
@@ -225,7 +238,10 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   const [localTree, setLocalTree] = useState<WorkbenchTree>(initialTree)
   const tree = isControlled ? initialTree : localTree
   const lastTabCountRef = useRef<number>(0)
-  const lastActiveTabIdRef = useRef<string | null>(null)
+  // Per-group active-tab tracker so we can detect activations in any
+  // split pane (not just `groups[0]`) when the tree mutates
+  // programmatically (e.g. via back/forward navigation).
+  const lastActiveByGroupRef = useRef<Map<string, string>>(new Map())
   
   // Cache for tabs dropped from other windows (stores the full RestormEditorTab data)
   const droppedTabsCacheRef = useRef<Map<string, RestormEditorTab>>(new Map())
@@ -381,14 +397,22 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
   // Build tab switcher items from workbench tree tabs, sorted by navigation history
   const buildTabSwitcherItems = useCallback((): TabSwitcherItem[] => {
+    // Walk the whole tree: without recursion into container nodes, tabs
+    // that live inside a split (side-by-side, nested) would never show
+    // up in the Ctrl+Tab overlay.
     const allTabs: RestormEditorTab[] = []
-    for (const group of tree.groups) {
-      if (isTabGroupNode(group)) {
-        for (const tab of group.tabs) {
-          allTabs.push(tab as RestormEditorTab)
+    const collectTabs = (nodes: WorkbenchTree['groups']): void => {
+      for (const node of nodes) {
+        if (isTabGroupNode(node)) {
+          for (const tab of node.tabs) {
+            allTabs.push(tab as RestormEditorTab)
+          }
+        } else if (isContainerNode(node)) {
+          collectTabs(node.groups)
         }
       }
     }
+    collectTabs(tree.groups)
 
     // Navigation history ordering (most recent → order 0)
     const history = navigationService.getHistory()
@@ -585,13 +609,21 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       ? (tag: string, color: string | null): void => { onTagColorChange(envFolderId, tag, color) }
       : undefined
 
+    // Build the per-request persistence key for the environment dropdown.
+    // Falls back to `undefined` when we don't have a file path — the id
+    // itself is always stable since document ids are persisted now.
+    const envPersistenceKey = (requestId: string): { filePath: string; requestId: string } | undefined => {
+      if (!filePath) return undefined
+      return { filePath, requestId }
+    }
+
     // HTTP request tab
     if (isHTTPRequestTab(effectiveTab)) {
       // Get reactive request if available, otherwise use tab's copy
       const reactiveRequest = getRequestById?.(effectiveTab.request.id)
       const request = (reactiveRequest?.type === 'http') ? reactiveRequest : effectiveTab.request
       return (
-        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors}>
+        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
           <RequestTabWithHistory
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -627,7 +659,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isGraphQLRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors}>
+        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
           <RequestTabWithHistory
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -659,7 +691,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isGrpcRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors}>
+        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
           <RequestTabWithHistory
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -691,7 +723,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isSoapRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors}>
+        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
           <RequestTabWithHistory
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -723,7 +755,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isWebSocketRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors}>
+        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
           <RequestTabWithHistory
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -753,7 +785,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [onBreadcrumbClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, t, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs])
+  }, [onBreadcrumbClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, t, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, filePath])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(
@@ -792,25 +824,39 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   )
 
   const getTabContextMenuItems = useCallback(
-    (_tab: EditorTab, _groupId: string, actions: { close: () => void; closeOthersInGroup: () => void }): ContextMenuItem[] => {
-      const items: ContextMenuItem[] = [
-        {
-          id: 'close',
-          label: t('workbench.tabContextMenu.close'),
-          icon: 'close',
-          onClick: actions.close
-        },
-        {
-          id: 'close-others',
-          label: t('workbench.tabContextMenu.closeOthers'),
-          icon: 'close-all',
-          onClick: actions.closeOthersInGroup
-        }
-      ]
+    (tab: EditorTab, _groupId: string, actions: { close: () => void; closeOthersInGroup: () => void }): ContextMenuItem[] => {
+      const items: ContextMenuItem[] = []
+      const typed = tab as { request?: { id: string }; tabType?: string }
+      const isRequest = typed.tabType?.includes('request')
+      const requestId = typed.request?.id
+
+      if (isRequest && requestId && isItemFavorite && onToggleFavorite) {
+        const isFav = isItemFavorite(requestId)
+        items.push({
+          id: 'toggle-favorite',
+          label: isFav ? t('workbench.tabContextMenu.removeFromFavorites') : t('workbench.tabContextMenu.addToFavorites'),
+          icon: isFav ? 'star-full' : 'star-empty',
+          onClick: () => { onToggleFavorite(requestId) }
+        })
+        items.push({ id: 'sep-fav', label: '', isSeparator: true })
+      }
+
+      items.push({
+        id: 'close',
+        label: t('workbench.tabContextMenu.close'),
+        icon: 'close',
+        onClick: actions.close
+      })
+      items.push({
+        id: 'close-others',
+        label: t('workbench.tabContextMenu.closeOthers'),
+        icon: 'close-all',
+        onClick: actions.closeOthersInGroup
+      })
 
       return items
     },
-    [t]
+    [t, isItemFavorite, onToggleFavorite]
   )
 
   const workbenchRenderTabContent = useMemo(() => {
@@ -861,10 +907,14 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       onDetachToNewWindow: handleDetachToNewWindow,
       getTabContextMenuItems,
       onGetTabContent: getTabContent,
-      // Forward tab activation from any group (incl. non-main split groups) so the sidebar can sync.
+      // Forward tab activation from any group (incl. non-main split
+      // groups) so the sidebar can sync. Intentionally no dedup here:
+      // clicking an already-active tab must still re-trigger ancestor
+      // expansion (e.g. after the user manually collapsed the parent
+      // folder). Downstream handlers (`navigationService.navigateTo`,
+      // `setExpandedIds` with Set semantics) are idempotent, so a
+      // repeat fire is safe.
       onActivateTab: (tabId) => {
-        if (lastActiveTabIdRef.current === tabId) return
-        lastActiveTabIdRef.current = tabId
         onTabActivate?.(tabId)
       }
     }
@@ -895,12 +945,38 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
       lastTabCountRef.current = tabCount
 
-      // Detect active tab change and notify
-      const firstGroup = newTree.groups[0]
-      const newActiveTabId = firstGroup && isTabGroupNode(firstGroup) ? firstGroup.activeTabId : null
-      if (newActiveTabId && newActiveTabId !== lastActiveTabIdRef.current) {
-        lastActiveTabIdRef.current = newActiveTabId
-        onTabActivate?.(newActiveTabId)
+      // Detect active tab changes across every group (including those
+      // nested inside split containers). Previously we only watched
+      // `groups[0].activeTabId`, so programmatic activations that landed
+      // in a non-primary pane — e.g. the back/forward button re-focusing
+      // a tab in a side-by-side split — were invisible to the history /
+      // sidebar-sync listener. Track the active tab *per group id* and
+      // fire `onTabActivate` for each group whose active tab changed.
+      const currentActiveByGroup = new Map<string, string>()
+      const collectActiveTabs = (nodes: WorkbenchTree['groups']): void => {
+        for (const node of nodes) {
+          if (isTabGroupNode(node)) {
+            if (node.activeTabId) {
+              currentActiveByGroup.set(node.id, node.activeTabId)
+            }
+          } else if (isContainerNode(node)) {
+            collectActiveTabs(node.groups)
+          }
+        }
+      }
+      collectActiveTabs(newTree.groups)
+      for (const [groupId, tabId] of currentActiveByGroup) {
+        const prev = lastActiveByGroupRef.current.get(groupId)
+        lastActiveByGroupRef.current.set(groupId, tabId)
+        if (prev !== tabId) {
+          onTabActivate?.(tabId)
+        }
+      }
+      // Drop entries for groups that no longer exist so we don't leak.
+      for (const groupId of Array.from(lastActiveByGroupRef.current.keys())) {
+        if (!currentActiveByGroup.has(groupId)) {
+          lastActiveByGroupRef.current.delete(groupId)
+        }
       }
 
       if (isControlled) {
