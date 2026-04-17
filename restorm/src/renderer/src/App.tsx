@@ -315,6 +315,13 @@ const App: React.FC = () => {
     setFavoritesVersion((v) => v + 1)
   }, [filePath])
 
+  // Sync favoritesVersion when favorites change from other sources (e.g. home page trash button)
+  React.useEffect(() => {
+    const handler = (): void => { setFavoritesVersion((v) => v + 1) }
+    window.addEventListener('restorm:favorites-changed', handler)
+    return () => { window.removeEventListener('restorm:favorites-changed', handler) }
+  }, [])
+
   const { sidebarItems: sidebarItemsWithContextMenu } = useSidebarState({
     rootItems,
     expandedIds,
@@ -634,7 +641,10 @@ const App: React.FC = () => {
 
     const handleFolderOrRequestUpdated = (payload: DocumentChangedPayload): void => {
       const doc = payload.document
-      scheduleChecksumUpdate(payload.id, () => computeChecksum(JSON.parse(JSON.stringify(doc)) as FolderItem))
+      scheduleChecksumUpdate(payload.id, () => {
+        const serialized = JSON.parse(JSON.stringify(doc)) as FolderItem
+        return computeChecksum(serialized)
+      })
 
       if (payload.type === 'request') {
         const requestPath = buildRequestPath(environmentFolderCollections, payload.id)

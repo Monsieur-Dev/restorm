@@ -412,8 +412,7 @@ When(
     await expect(row).toBeVisible({ timeout: 5000 })
     const plainInput = row.locator('td').nth(3).locator('input').first()
     if (await plainInput.count() > 0 && await plainInput.isVisible()) {
-      await plainInput.click()
-      await plainInput.fill(value)
+      await clearAndType(page, plainInput, value)
       await page.keyboard.press('Tab')
     } else {
       const monacoCell = row.locator('.monaco-editor').first()
@@ -554,7 +553,7 @@ When('I rename the sidebar request {string} to {string}', async ({}, oldName: st
   await page.waitForTimeout(200)
   const input = page.locator('[data-testid="sidebar-listview"] input[type="text"]').first()
   await expect(input).toBeVisible({ timeout: 2000 })
-  await input.fill(newName)
+  await clearAndType(page, input, newName)
   await page.keyboard.press('Enter')
   await page.waitForTimeout(500)
 })
@@ -758,7 +757,7 @@ When(
     await page.keyboard.press('F2')
     const input = page.locator('[data-testid="sidebar-listview"] input[type="text"]').first()
     await expect(input).toBeVisible({ timeout: 5000 })
-    await input.fill(newName)
+    await clearAndType(page, input, newName)
     await page.keyboard.press('Enter')
     await page.waitForTimeout(500)
   }
@@ -858,6 +857,13 @@ When('I focus the {string} tab', async ({}, tabText: string) => {
 // Env folder variables: add typed variables (color, dateTime)
 // ---------------------------------------------------------------------------
 
+/** Clear an input and type a value character by character (200ms delay). */
+async function clearAndType(currentPage: Page, locator: ReturnType<typeof currentPage.locator>, text: string): Promise<void> {
+  await locator.click()
+  await currentPage.keyboard.press('Control+a')
+  await currentPage.keyboard.type(text, { delay: 200 })
+}
+
 async function addEnvVariable(currentPage: Page, key: string): Promise<void> {
   const addBtn = currentPage.locator('[data-testid="environment-folder-add-variable-button"]').first()
   await expect(addBtn).toBeVisible({ timeout: 5000 })
@@ -868,8 +874,7 @@ async function addEnvVariable(currentPage: Page, key: string): Promise<void> {
   const lastRow = rows.last()
   await expect(lastRow).toBeVisible({ timeout: 5000 })
   const keyInput = lastRow.locator('input').nth(0)
-  await keyInput.click()
-  await keyInput.fill(key)
+  await clearAndType(currentPage, keyInput, key)
   await currentPage.keyboard.press('Tab')
 }
 
@@ -898,12 +903,10 @@ When('I edit and revert the first env folder variable', async () => {
   await expect(valueInput).toBeVisible({ timeout: 2000 })
   const originalValue = await valueInput.inputValue()
   // Modify then revert
-  await valueInput.click()
-  await valueInput.fill('MODIFIED-REVERT-TEST')
+  await clearAndType(page, valueInput, 'MODIFIED-REVERT-TEST')
   await page.keyboard.press('Tab')
   await page.waitForTimeout(500)
-  await valueInput.click()
-  await valueInput.fill(originalValue)
+  await clearAndType(page, valueInput, originalValue)
   await page.keyboard.press('Tab')
   await page.waitForTimeout(1000)
 })
@@ -917,8 +920,7 @@ When(
     await expect(firstRow).toBeVisible({ timeout: 5000 })
     const valueInput = firstRow.locator('td').nth(3).locator('input').first()
     await expect(valueInput).toBeVisible({ timeout: 5000 })
-    await valueInput.click()
-    await valueInput.fill(newValue)
+    await clearAndType(page, valueInput, newValue)
     await page.keyboard.press('Tab')
     await page.waitForTimeout(300)
   }
@@ -1052,8 +1054,7 @@ When(
       if (keyVal === varKey) {
         const valueInput = r.locator('td').nth(3).locator('input').first()
         await expect(valueInput).toBeVisible({ timeout: 2000 })
-        await valueInput.click()
-        await valueInput.fill(newValue)
+        await clearAndType(page, valueInput, newValue)
         await page.keyboard.press('Tab')
         await page.waitForTimeout(1500)
         return
@@ -1075,14 +1076,12 @@ When(
     const lastRow = rows.last()
     await expect(lastRow).toBeVisible({ timeout: 2000 })
     const keyInput = lastRow.locator('input').nth(0)
-    await keyInput.click()
-    await keyInput.fill(key)
+    await clearAndType(page, keyInput, key)
     await page.keyboard.press('Tab')
 
     const valueInput = lastRow.locator('td').nth(3).locator('input').first()
     await expect(valueInput).toBeVisible({ timeout: 2000 })
-    await valueInput.click()
-    await valueInput.fill(value)
+    await clearAndType(page, valueInput, value)
     await page.keyboard.press('Tab')
     await page.waitForTimeout(500)
   }
@@ -1107,6 +1106,33 @@ When(
     throw new Error(`Variable row with key "${varKey}" not found`)
   }
 )
+
+// ---------------------------------------------------------------------------
+// Notes editor
+// ---------------------------------------------------------------------------
+
+When('I type {string} in the notes editor', async ({}, text: string) => {
+  if (!page) throw new Error('app must be launched')
+  const editor = page.locator('[data-testid$="-markdown-editor-notes-editor"]').first()
+  await expect(editor).toBeVisible({ timeout: 2000 })
+  await editor.click()
+  await page.keyboard.type(text)
+  await page.mouse.click(5, 5)
+  await page.waitForTimeout(500)
+})
+
+When('I undo all changes in the notes editor', async () => {
+  if (!page) throw new Error('app must be launched')
+  const editor = page.locator('[data-testid$="-markdown-editor-notes-editor"]').first()
+  await expect(editor).toBeVisible({ timeout: 2000 })
+  await editor.click()
+  // Undo repeatedly until the original state is restored
+  for (let i = 0; i < 30; i++) {
+    await page.keyboard.press('Control+z')
+  }
+  await page.mouse.click(5, 5)
+  await page.waitForTimeout(1000)
+})
 
 // ---------------------------------------------------------------------------
 // Tag color change + propagation
@@ -1317,7 +1343,7 @@ When('I set the folder tab icon to codicon {string}', async ({}, iconName: strin
   await codiconTabButton.click()
   await page.waitForTimeout(200)
   const search = page.locator('.ecui-icon-select-picker input').first()
-  await search.fill(iconName)
+  await clearAndType(page, search, iconName)
   await page.waitForTimeout(500)
   const firstResult = page.locator(`[data-icon-type="codicon"][data-icon-name="${iconName}"]`).first()
   await expect(firstResult).toBeVisible({ timeout: 5000 })

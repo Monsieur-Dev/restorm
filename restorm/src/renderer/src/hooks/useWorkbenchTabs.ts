@@ -205,8 +205,10 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     // Computing the checksum synchronously would capture the pre-mutation
     // state, creating a baseline that never matches subsequent updates.
     // A short deferral lets the first render cycle settle.
-    const folderChecksum = computeChecksum(JSON.parse(JSON.stringify(folder)))
-    registerTabDirtyState(folder.id, folderChecksum)
+    setTimeout(() => {
+      const folderChecksum = computeChecksum(JSON.parse(JSON.stringify(folder)))
+      registerTabDirtyState(folder.id, folderChecksum)
+    }, 500)
 
     setWorkbenchTree((prev) => {
       const newTab: EnvironmentFolderTab = {

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { InputBox, Button, ControlGroup, useFileService, ContextMenu, type ContextMenuItem } from 'electron-core-ui/renderer'
 import { getFavorites, removeFavorite, reorderFavorites } from '../../services/favoritesStore'
@@ -21,7 +21,7 @@ interface Props {
 }
 
 const SOURCE_CONFIG: Record<string, { logo?: string; icon?: string; label: string; color: string }> = {
-  swagger: { logo: '/imgs/import-sources/swagger.svg', label: 'OpenAPI / Swagger', color: '#85ea2d' },
+  swagger: { logo: '/imgs/import-sources/swagger.svg', label: 'OpenAPI / Swagger', color: '#c75000' },
   graphql: { logo: '/imgs/import-sources/graphql.svg', label: 'GraphQL', color: '#e535ab' },
   grpc: { logo: '/imgs/import-sources/grpc.svg', label: 'gRPC', color: '#244c5a' },
   wsdl: { icon: 'file-code', label: 'SOAP / WSDL', color: '#0076d6' },
@@ -59,8 +59,9 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
     const ids = getFavorites(filePath)
     if (ids.length === 0) return []
     const allRequests = collectRequests(folder.items)
-    const idSet = new Set(ids)
-    return allRequests.filter((r) => idSet.has(r.id))
+    const requestMap = new Map(allRequests.map((r) => [r.id, r]))
+    // Preserve favorites insertion order (not tree order)
+    return ids.map((id) => requestMap.get(id)).filter((r): r is FavoriteRequest => r !== undefined)
   }, [filePath, folder.items, favVersion])
 
   const [dragIndex, setDragIndex] = useState<number | null>(null)
@@ -113,6 +114,35 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
       window.removeEventListener('storage', handler)
     }
   }, [])
+  // Source URL editing + refresh
+  const [sourceUrl, setSourceUrl] = useState(apiDoc?.sourceUrl ?? '')
+  const [isRefreshing, setIsRefreshing] = useState(false)
+
+  const handleRefresh = useCallback(async () => {
+    if (!sourceUrl.trim() || isRefreshing) return
+    setIsRefreshing(true)
+    try {
+      const importer = (window as unknown as {
+        restorm?: { import?: { import?: (input: string) => Promise<{
+          success: boolean
+          items?: { apiDocumentation?: unknown }[]
+          error?: string
+        }> } }
+      }).restorm?.import?.import
+      if (!importer) return
+      const result = await importer(sourceUrl.trim())
+      if (!result.success) return
+      const freshApiDoc = result.items?.[0]?.apiDocumentation
+      if (!freshApiDoc) return
+      // Update the sourceUrl on the fresh doc to match what the user typed
+      ;(freshApiDoc as { sourceUrl?: string }).sourceUrl = sourceUrl.trim()
+      // Mutate through the reactive proxy
+      ;(folder as unknown as Record<string, unknown>)['apiDocumentation'] = freshApiDoc
+    } finally {
+      setIsRefreshing(false)
+    }
+  }, [sourceUrl, isRefreshing, folder])
+
   const importSource = folder.importSource
   const sourceConfig = importSource ? SOURCE_CONFIG[importSource] : undefined
 
@@ -180,12 +210,17 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
         <div className="home-source-url">
           <ControlGroup>
             <InputBox
-              value={apiDoc.sourceUrl}
+              value={sourceUrl}
+              onChange={setSourceUrl}
               options={{ type: 'text', ariaLabel: 'Source URL' }}
-              disabled
             />
-            <Button icon="refresh" options={{ ariaLabel: t('folderView.home.refresh') }}>
-              {t('folderView.home.refresh')}
+            <Button
+              icon="refresh"
+              options={{ ariaLabel: t('folderView.home.refresh') }}
+              disabled={isRefreshing}
+              onClick={() => { void handleRefresh() }}
+            >
+              {isRefreshing ? t('folderView.home.refreshing') : t('folderView.home.refresh')}
             </Button>
           </ControlGroup>
         </div>
@@ -279,6 +314,7 @@ const RequestRow: React.FC<{
     onContextMenu={onContextMenu}
     onDragOver={onDragOver}
     onDragEnd={onDragEnd}
+    onDrop={(e) => { e.preventDefault(); onDragEnd?.() }}
     {...(dataTestId ? { 'data-testid': dataTestId } : {})}
   >
     {draggable && (

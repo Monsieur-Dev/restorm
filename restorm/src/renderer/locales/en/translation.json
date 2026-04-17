@@ -68,7 +68,8 @@
       "viewDocsDesc": "Browse the API documentation, models, and endpoints",
       "favoriteRequests": "Favorite requests",
       "removeFavorite": "Remove from favorites",
-      "refresh": "Refresh"
+      "refresh": "Refresh",
+      "refreshing": "Refreshing..."
     },
     "docs": {
       "source": "Source:",

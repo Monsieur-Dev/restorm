@@ -216,6 +216,17 @@ Feature: Full workflow end-to-end scenario
     When I delete the env variable "apiKey"
     Then the context variables table should not contain "apiKey"
 
+    # ── Notes dirty state: edit + revert ──
+    # After saving, modify notes → dirty. Revert → clean.
+    When I switch to the "Notes" inner tab
+    And I type "test note content" in the notes editor
+    Then the file's dirty-state should be: dirty
+    And the active tab should have a dirty dot
+    When I undo all changes in the notes editor
+    Then the file's dirty-state should be: clean
+    And the active tab should not have a dirty dot
+    When I switch to the "Configuration" inner tab
+
     When I add tag "pet" to the active folder tab
     Then the active folder tab should have tag "pet"
     And the file's dirty-state should be: dirty

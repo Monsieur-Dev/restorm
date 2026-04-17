@@ -79,7 +79,7 @@ declare global {
         ) => Promise<void>
         unregisterRequest: (requestId: string) => Promise<void>
         setRequestEnvironment: (requestId: string, environmentId: string | null) => Promise<void>
-        updateRequestKeyValues: (requestId: string, groupName: string, keyValues: KeyValueData[]) => Promise<void>
+        updateRequestKeyValues: (requestId: string, groupName: string, keyValues: KeyValueData[], sourceId?: string) => Promise<void>
         updateFullRequestData: (requestId: string, data: Partial<FullRequestData>, sourceId?: string) => Promise<void>
         getResolvedUrl: (requestId: string) => Promise<ResolvedUrlResult | undefined>
         getCodeSnippets: (requestId: string) => Promise<CodeSnippetsResult | undefined>

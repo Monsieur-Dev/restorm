@@ -180,7 +180,8 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
     void window.restorm?.context.updateRequestKeyValues(
       request.id,
       'headers', // Use 'headers' as the group name for consistency
-      rows.map(r => ({ id: r.id, key: r.key, value: r.value.toString(), enabled: r.enabled }))
+      rows.map(r => ({ id: r.id, key: r.key, value: r.value.toString(), enabled: r.enabled })),
+      sourceIdRef.current
     )
   }, [request])
 

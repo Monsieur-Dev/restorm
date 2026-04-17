@@ -392,7 +392,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       void window.restorm?.context.updateRequestKeyValues(
         requestId,
         'headers',
-        rows.map(r => ({ id: r.id, key: r.key, value: r.value.toString(), enabled: r.enabled }))
+        rows.map(r => ({ id: r.id, key: r.key, value: r.value.toString(), enabled: r.enabled })),
+        sourceIdRef.current
       )
     }
   }, [request])
@@ -404,7 +405,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       void window.restorm?.context.updateRequestKeyValues(
         requestId,
         'params',
-        rows.map(r => ({ id: r.id, key: r.key, value: r.value.toString(), enabled: r.enabled }))
+        rows.map(r => ({ id: r.id, key: r.key, value: r.value.toString(), enabled: r.enabled })),
+        sourceIdRef.current
       )
     }
   }, [request])
@@ -416,7 +418,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       void window.restorm?.context.updateRequestKeyValues(
         requestId,
         'pathParams',
-        rows.map(r => ({ id: r.id, key: r.key, value: r.value.toString(), enabled: r.enabled }))
+        rows.map(r => ({ id: r.id, key: r.key, value: r.value.toString(), enabled: r.enabled })),
+        sourceIdRef.current
       )
     }
   }, [request])

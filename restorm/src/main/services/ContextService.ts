@@ -451,11 +451,12 @@ class ContextService {
   /**
    * Store a transformation result and broadcast it to the renderer
    */
-  private storeAndBroadcastTransformResult(variableId: string, result: VariableTransformResult): void {
+  private storeAndBroadcastTransformResult(variableId: string, result: VariableTransformResult, sourceId?: string): void {
     this.variableTransformResults.set(variableId, result)
     this.broadcastToRenderer('context:variable-transformed', {
       variableId,
-      ...result
+      ...result,
+      sourceId
     })
   }
 
@@ -589,7 +590,7 @@ class ContextService {
    * Update a KeyValue group for a request (e.g., headers, params).
    * Called when the user modifies headers/params/etc in the UI.
    */
-  updateRequestKeyValues(requestId: string, groupName: string, keyValues: KeyValue[]): void {
+  updateRequestKeyValues(requestId: string, groupName: string, keyValues: KeyValue[], sourceId?: string): void {
     const ctx = this.requestContexts.get(requestId)
     if (!ctx) {
       logger.warn('[ContextService] updateRequestKeyValues: request not registered', { requestId })
@@ -607,7 +608,7 @@ class ContextService {
     }
 
     ctx.keyValueGroups.set(groupName, keyValues)
-    this.recalculateRequestContext(requestId)
+    this.recalculateRequestContext(requestId, sourceId)
   }
 
   /**
@@ -655,7 +656,7 @@ class ContextService {
               transformedValue,
               rawValue,
               key: kv.key
-            })
+            }, sourceId)
           }
         }
       }

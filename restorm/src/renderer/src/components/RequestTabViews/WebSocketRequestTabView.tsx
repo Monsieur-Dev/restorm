@@ -188,7 +188,8 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     void window.restorm?.context.updateRequestKeyValues(
       request.id,
       'headers',
-      rows.map(r => ({ id: r.id, key: r.key, value: r.value.toString(), enabled: r.enabled }))
+      rows.map(r => ({ id: r.id, key: r.key, value: r.value.toString(), enabled: r.enabled })),
+      sourceIdRef.current
     )
   }, [request])
 

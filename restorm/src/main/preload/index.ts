@@ -213,9 +213,10 @@ contextBridge.exposeInMainWorld('restorm', {
     updateRequestKeyValues: async (
       requestId: string,
       groupName: string,
-      keyValues: { id?: string; key: string; value: string; enabled?: boolean }[]
+      keyValues: { id?: string; key: string; value: string; enabled?: boolean }[],
+      sourceId?: string
     ): Promise<void> => {
-      await ipcRenderer.invoke('context:update-request-keyvalues', requestId, groupName, keyValues)
+      await ipcRenderer.invoke('context:update-request-keyvalues', requestId, groupName, keyValues, sourceId)
     },
     /** Update full request data for URL resolution and code snippet generation */
     updateFullRequestData: async (requestId: string, data: FullRequestData, sourceId?: string): Promise<void> => {

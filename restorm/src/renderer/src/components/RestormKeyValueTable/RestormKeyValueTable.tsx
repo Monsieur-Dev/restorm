@@ -488,6 +488,11 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
     }))
   }, [initialRows])
 
+  // Ref mirror of tableInitialRows for use inside stable callbacks
+  // (avoids recreating cell renderers when initialRows changes).
+  const tableInitialRowsRef = useRef(tableInitialRows)
+  useEffect(() => { tableInitialRowsRef.current = tableInitialRows }, [tableInitialRows])
+
   const handleRowsChange = useCallback((rows: KeyValueTableRow[]): void => {
     if (!onRowsChange) return
 
@@ -564,7 +569,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         // KeyValues that don't have a persistent ID yet).
         // Look up the matching row in initialRows: first by id, then by matching
         // the table row's key (for imported KeyValues without persistent IDs).
-        const tableRow = tableInitialRows?.find((tr) => tr.id === id)
+        const tableRow = tableInitialRowsRef.current?.find((tr) => tr.id === id)
         const rowKey = tableRow?.key
         const sourceRow = initialRowsRef.current?.find((r) => r.id === id)
           ?? (rowKey ? initialRowsRef.current?.find((r) => r.key === rowKey) : undefined)
@@ -836,7 +841,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         </div>
       )
     },
-    [dataTestId, enumDefinitions, tableInitialRows]
+    [dataTestId, enumDefinitions]
   )
 
   return (

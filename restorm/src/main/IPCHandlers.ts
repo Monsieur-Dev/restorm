@@ -489,8 +489,8 @@ export function registerRestormIPC(deps: {
     contextService.setRequestEnvironment(requestId, environmentId)
   })
 
-  validatedHandle('context:update-request-keyvalues', contextUpdateRequestKeyValuesArgs, (_event, [requestId, groupName, keyValues]) => {
-    contextService.updateRequestKeyValues(requestId, groupName, keyValues)
+  validatedHandle('context:update-request-keyvalues', contextUpdateRequestKeyValuesArgs, (_event, [requestId, groupName, keyValues, sourceId]) => {
+    contextService.updateRequestKeyValues(requestId, groupName, keyValues, sourceId)
   })
 
   validatedHandle('context:update-full-request-data', contextUpdateFullRequestDataArgs, (_event, [requestId, data, sourceId]) => {

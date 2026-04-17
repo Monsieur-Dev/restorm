@@ -124,6 +124,15 @@
   margin-bottom: 32px;
 }
 
+.home-source-url .ecu-control-group {
+  width: 100%;
+}
+
+.home-source-url .ecu-control-group > *:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
 /* ── Section ── */
 
 .home-section {
@@ -220,6 +229,11 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px 16px;
+}
+
+.home-footer > span {
+  display: flex;
+  align-items: center;
 }
 
 .home-footer .codicon {

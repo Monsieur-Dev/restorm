@@ -68,7 +68,10 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
   const effectiveActiveTabId = activeTabId === 'docs' && !hasDocs ? 'notes' : activeTabId
 
   const handleNotesChange = useCallback((markdown: string): void => {
-    updateReactiveProperty(folder, 'notes', markdown)
+    // Normalize blank content to undefined so the checksum matches the
+    // initial state (folder.notes starts as undefined before first edit).
+    const normalized = markdown.trim() ? markdown : undefined
+    updateReactiveProperty(folder, 'notes', normalized)
   }, [folder])
 
   const docsTabs: Tab[] = []
