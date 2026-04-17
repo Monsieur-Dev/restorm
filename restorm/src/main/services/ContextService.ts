@@ -171,8 +171,6 @@ class ContextService {
     const env = payload.document as Environment
     env.variables = normalizeKeyValues(env.variables as unknown as unknown[])
 
-    env.variables = normalizeKeyValues(env.variables as unknown as unknown[])
-
     logger.info('[ContextService] ENVIRONMENT_UPDATED', {
       id: envId,
       name: env.name,

@@ -42,8 +42,14 @@ export function addFavorite(filePath: string, requestId: string): void {
 export function removeFavorite(filePath: string, requestId: string): void {
   const state = load()
   const list = state[filePath] ?? []
-  state[filePath] = list.filter((id) => id !== requestId)
-  save(state)
+  const filtered = list.filter((id) => id !== requestId)
+  if (filtered.length === 0) {
+    const { [filePath]: _, ...rest } = state
+    save(rest)
+  } else {
+    state[filePath] = filtered
+    save(state)
+  }
 }
 
 export function toggleFavorite(filePath: string, requestId: string): boolean {

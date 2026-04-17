@@ -207,6 +207,12 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
               name={req.name}
               onClick={() => { onRequestClick?.(req.id) }}
               onContextMenu={(e) => { handleFavContextMenu(e, req.id) }}
+              onDelete={() => {
+                if (filePath) {
+                  removeFavorite(filePath, req.id)
+                  setFavVersion((v) => v + 1)
+                }
+              }}
               draggable
               onDragStart={() => { handleDragStart(i) }}
               onDragOver={(e) => { handleDragOver(e, i) }}
@@ -277,9 +283,10 @@ const Section: React.FC<{ title: string; icon: string; children: React.ReactNode
 const RequestRow: React.FC<{
   method: string; path: string; name: string
   onClick?: () => void; onContextMenu?: (e: React.MouseEvent) => void
+  onDelete?: () => void
   draggable?: boolean; onDragStart?: () => void; onDragOver?: (e: React.DragEvent) => void; onDragEnd?: () => void
   isDragOver?: boolean; dataTestId?: string
-}> = ({ method, path, name, onClick, onContextMenu, draggable, onDragStart, onDragOver, onDragEnd, isDragOver, dataTestId }) => (
+}> = ({ method, path, name, onClick, onContextMenu, onDelete, draggable, onDragStart, onDragOver, onDragEnd, isDragOver, dataTestId }) => (
   <div
     style={{
       display: 'flex', alignItems: 'center', gap: 10, padding: '7px 12px',
@@ -304,6 +311,21 @@ const RequestRow: React.FC<{
     <Badge type={method.toUpperCase() as BadgeType} />
     <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
     <span style={{ fontSize: 11, opacity: 0.35, fontFamily: 'monospace' }}>{path}</span>
+    {onDelete && (
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onDelete() }}
+        style={{
+          background: 'none', border: 'none', cursor: 'pointer', padding: 2,
+          opacity: 0.4, fontSize: 14, lineHeight: 1, color: 'inherit', flexShrink: 0
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.opacity = '1' }}
+        onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.4' }}
+        data-testid={dataTestId ? `${dataTestId}-delete` : undefined}
+      >
+        <span className="codicon codicon-trash" />
+      </button>
+    )}
   </div>
 )
 
