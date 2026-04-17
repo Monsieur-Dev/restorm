@@ -9,6 +9,7 @@ import {
   GraphQLRequest,
   type GraphQLOperationType
 } from '../../../shared/models'
+import type { EnumDefinition } from '../../../shared/types/collections'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 import { graphqlToApiDocumentation } from './transformers/graphqlToApiDocumentation'
 
@@ -36,11 +37,17 @@ interface GraphQLType {
   fields: GraphQLField[]
 }
 
+interface GraphQLEnumType {
+  name: string
+  values: string[]
+}
+
 interface ParsedGraphQLSchema {
   types: GraphQLType[]
   queries: GraphQLField[]
   mutations: GraphQLField[]
   subscriptions: GraphQLField[]
+  enums: GraphQLEnumType[]
 }
 
 // ============================================================================
@@ -80,7 +87,8 @@ function parseGraphQLSchema(schemaString: string): ParsedGraphQLSchema {
     types: [],
     queries: [],
     mutations: [],
-    subscriptions: []
+    subscriptions: [],
+    enums: []
   }
   
   // Remove comments
@@ -117,6 +125,22 @@ function parseGraphQLSchema(schemaString: string): ParsedGraphQLSchema {
     }
   }
   
+  // Parse enum definitions: enum Name { VALUE1 VALUE2 ... }
+  const enumRegex = /enum\s+(\w+)\s*\{([^}]+)\}/g
+  let enumMatch
+  while ((enumMatch = enumRegex.exec(cleanedSchema)) !== null) {
+    const enumName = enumMatch[1]
+    const valuesBlock = enumMatch[2]
+    if (!enumName || !valuesBlock) continue
+    const values = valuesBlock
+      .split('\n')
+      .map((l) => l.replace(/__DESC__[\s\S]*?__DESC__/g, '').trim())
+      .filter((l) => l.length > 0 && !l.startsWith('@'))
+    if (values.length > 0) {
+      result.enums.push({ name: enumName, values })
+    }
+  }
+
   return result
 }
 
@@ -316,6 +340,14 @@ export function importGraphQL(schemaString: string, options: GraphQLImportOption
     ...(options.sourceUrl !== undefined ? { sourceUrl: options.sourceUrl } : {})
   })
 
+  // Extract enum definitions from parsed schema
+  const enumDefinitions: EnumDefinition[] = schema.enums.map((e) => ({
+    id: generateId(`enum:graphql:${e.name}`),
+    name: e.name,
+    values: e.values,
+    matchingRules: []
+  }))
+
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
     id: generateId(`${name}:folder:graphql:root`),
@@ -325,7 +357,8 @@ export function importGraphQL(schemaString: string, options: GraphQLImportOption
     configuration: {},
     environments: [environment],
     items,
-    apiDocumentation
+    apiDocumentation,
+    ...(enumDefinitions.length > 0 ? { enumDefinitions } : {})
   }
 
   return rootFolder

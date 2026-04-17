@@ -12,7 +12,7 @@ import { withE2ECoverageEnv } from '../../helpers/coverage'
  * Lives under `restorm/tests/e2e/.tmp/` and is wiped at the start of
  * each scenario. Gitignored.
  */
-export const FULL_WORKFLOW_TEMP_DIR = resolve(__dirname, '../../.tmp')
+export const FULL_WORKFLOW_TEMP_DIR = resolve(__dirname, '../../.tmp/full-workflow')
 
 function resetTempDir(): void {
   rmSync(FULL_WORKFLOW_TEMP_DIR, { recursive: true, force: true })

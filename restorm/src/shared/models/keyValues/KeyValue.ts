@@ -5,7 +5,7 @@
 import { trackable } from 'electron-core-ui/main'
 import type { RuntimeId } from '../types'
 import type { ValueType } from '../../types/collections'
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue } from '../../types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue } from '../../types/collections'
 import { BaseKeyValue } from './BaseKeyValue'
 import { serializeValueForPersistence } from '../../utils/valuePersistence'
 
@@ -30,7 +30,9 @@ export class KeyValue extends BaseKeyValue {
       obj.value instanceof NumericValue ||
       obj.value instanceof PasswordValue ||
       obj.value instanceof ExpressionValue ||
-      obj.value instanceof BooleanValue
+      obj.value instanceof BooleanValue ||
+      obj.value instanceof EnumValue ||
+      obj.value instanceof EnumListValue
     ) {
       value = obj.value
     } else if (obj.value && typeof obj.value === 'object') {
@@ -69,6 +71,23 @@ export class KeyValue extends BaseKeyValue {
         case 'boolean':
           value = new BooleanValue(plain.value === true || plain.value === 'true')
           break
+        case 'enum': {
+          const defId = (plain as { enumDefinitionId?: unknown }).enumDefinitionId
+          value = new EnumValue(
+            typeof plain.value === 'string' ? plain.value : '',
+            typeof defId === 'string' ? defId : ''
+          )
+          break
+        }
+        case 'enumList': {
+          const raw = plain.value
+          const defId = (plain as { enumDefinitionId?: unknown }).enumDefinitionId
+          value = new EnumListValue(
+            Array.isArray(raw) ? raw.filter((v): v is string => typeof v === 'string') : [],
+            typeof defId === 'string' ? defId : ''
+          )
+          break
+        }
         default:
           value = new StringValue('')
       }

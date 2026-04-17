@@ -16,7 +16,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
-import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
+import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue, ResponseHistoryDetail, EnvironmentFolder } from '../../../../shared/types/collections'
 import { StringValue } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { KeyValueData } from '../../types/global.d'
@@ -101,6 +101,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   const { t } = useTranslation()
   const { selectedEnvId, environments, envColor } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
+  const findParentFolder = useRestormStore((state) => state.findParentFolder)
   const handlebarsHelpers = useHandlebarsHelpers()
   const compiled = useCompiledDocumentation(request)
   const compiledDocumentation = compiled.matched ? compiled.markdown : request.documentation
@@ -108,6 +109,18 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   const sendButtonStyle: React.CSSProperties | undefined = envColor
     ? { backgroundColor: envColor, color: getContrastColor(envColor), borderColor: envColor }
     : undefined
+
+  // Resolve enum definitions from the nearest ancestor EnvironmentFolder
+  const enumDefinitions = useMemo(() => {
+    let current: ReturnType<typeof findParentFolder> = findParentFolder(request.id)
+    while (current) {
+      if ('folderType' in current && (current as { folderType?: string }).folderType === 'environment') {
+        return (current as unknown as EnvironmentFolder).enumDefinitions
+      }
+      current = findParentFolder(current.id)
+    }
+    return undefined
+  }, [request.id, findParentFolder])
 
   const [method, setMethod] = useState<string>(request.method)
   const [url, setUrl] = useState<string>(request.url)
@@ -592,6 +605,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           helpers={handlebarsHelpers}
           initialRows={request.pathParams ?? []}
           onRowsChange={handlePathParamsChange}
+          enumDefinitions={enumDefinitions}
+          requestUrl={request.url}
+          requestMethod={request.method}
           data-testid="http-request-path-params-table"
         />
       </Pane>
@@ -621,6 +637,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           helpers={handlebarsHelpers}
           initialRows={request.params}
           onRowsChange={handleParamsChange}
+          enumDefinitions={enumDefinitions}
+          requestUrl={request.url}
+          requestMethod={request.method}
           data-testid="http-request-query-params-table"
         />
       </Pane>

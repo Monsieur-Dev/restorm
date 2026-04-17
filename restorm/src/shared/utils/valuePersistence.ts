@@ -1,6 +1,6 @@
 import type { ValueTypeName } from '../types/valueTypes/BaseValueType'
 import type { ValueType } from '../types/collections'
-import { DateTimeValue, NumericValue, PasswordValue, StringValue, ColorValue, ExpressionValue, BooleanValue } from '../types/collections'
+import { DateTimeValue, NumericValue, PasswordValue, StringValue, ColorValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue } from '../types/collections'
 
 export type PersistedValue =
   | { type: 'string'; value: string }
@@ -10,13 +10,15 @@ export type PersistedValue =
   | { type: 'password' }
   | { type: 'expression'; value: string }
   | { type: 'boolean'; value: boolean }
+  | { type: 'enum'; value: string; enumDefinitionId: string }
+  | { type: 'enumList'; value: string[]; enumDefinitionId: string }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
 
 function isValueTypeName(value: unknown): value is ValueTypeName {
-  return value === 'string' || value === 'color' || value === 'numeric' || value === 'datetime' || value === 'password' || value === 'expression' || value === 'boolean'
+  return value === 'string' || value === 'color' || value === 'numeric' || value === 'datetime' || value === 'password' || value === 'expression' || value === 'boolean' || value === 'enum' || value === 'enumList'
 }
 
 /**
@@ -42,6 +44,12 @@ export function serializeValueForPersistence(value: unknown): PersistedValue {
   }
   if (value instanceof BooleanValue) {
     return { type: 'boolean', value: value.value }
+  }
+  if (value instanceof EnumValue) {
+    return { type: 'enum', value: value.value, enumDefinitionId: value.enumDefinitionId }
+  }
+  if (value instanceof EnumListValue) {
+    return { type: 'enumList', value: value.value, enumDefinitionId: value.enumDefinitionId }
   }
   if (value instanceof StringValue) {
     return { type: 'string', value: value.value }
@@ -78,6 +86,16 @@ export function serializeValueForPersistence(value: unknown): PersistedValue {
     if (type === 'boolean') {
       const raw = (value as { value?: unknown }).value
       return { type: 'boolean', value: raw === true || raw === 'true' }
+    }
+    if (type === 'enum') {
+      const raw = (value as { value?: unknown }).value
+      const defId = (value as { enumDefinitionId?: unknown }).enumDefinitionId
+      return { type: 'enum', value: typeof raw === 'string' ? raw : '', enumDefinitionId: typeof defId === 'string' ? defId : '' }
+    }
+    if (type === 'enumList') {
+      const raw = (value as { value?: unknown }).value
+      const defId = (value as { enumDefinitionId?: unknown }).enumDefinitionId
+      return { type: 'enumList', value: Array.isArray(raw) ? raw.filter((v): v is string => typeof v === 'string') : [], enumDefinitionId: typeof defId === 'string' ? defId : '' }
     }
     const raw = (value as { value?: unknown }).value
     return { type: 'string', value: typeof raw === 'string' ? raw : '' }

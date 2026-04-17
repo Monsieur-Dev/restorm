@@ -20,6 +20,12 @@ const fullWorkflowTestDir = defineBddConfig({
   outputDir: '.features-gen/full-workflow'
 })
 
+const swaggerImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/swagger-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/swagger-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/swagger-import.fixture.ts'],
+  outputDir: '.features-gen/swagger-import'
+})
+
 /**
  * Playwright configuration for Electron E2E tests using playwright-bdd.
  * Each test group has its own project with a dedicated fixture.
@@ -63,6 +69,10 @@ export default defineConfig({
     {
       name: 'full-workflow',
       testDir: fullWorkflowTestDir
+    },
+    {
+      name: 'swagger-import',
+      testDir: swaggerImportTestDir
     }
   ]
 })

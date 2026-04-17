@@ -1,0 +1,106 @@
+.ecu-multi-select-combo {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  border: 1px solid var(--dropdown-border, var(--panel-border));
+  border-radius: 2px;
+  background: var(--dropdown-background, var(--input-background));
+  color: var(--dropdown-foreground, var(--input-foreground));
+  cursor: pointer;
+  padding: 0 4px 0 8px;
+  box-sizing: border-box;
+  position: relative;
+  user-select: none;
+  min-width: 0;
+}
+
+.ecu-multi-select-combo:focus-within {
+  border-color: var(--focusBorder);
+}
+
+.ecu-multi-select-combo-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  line-height: 26px;
+}
+
+.ecu-multi-select-combo-label-placeholder {
+  opacity: 0.5;
+}
+
+.ecu-multi-select-combo-arrow {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 100%;
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+/* ── Dropdown panel ── */
+
+.ecu-multi-select-combo-dropdown {
+  position: fixed;
+  z-index: 3000;
+  border: 1px solid var(--dropdown-border, var(--panel-border));
+  border-radius: 4px;
+  background: var(--dropdown-background, var(--editor-background));
+  color: var(--dropdown-foreground, var(--editor-foreground));
+  box-shadow: 0 4px 12px rgb(0, 0, 0, 0.35);
+  padding: 4px 0;
+}
+
+/* ── Option row ── */
+
+.ecu-multi-select-combo-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  padding: 0 10px;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.ecu-multi-select-combo-option:hover {
+  background: var(--list-hoverBackground);
+  color: var(--list-hoverForeground);
+}
+
+.ecu-multi-select-combo-option[data-focused="true"] {
+  background: var(--list-activeSelectionBackground);
+  color: var(--list-activeSelectionForeground);
+}
+
+.ecu-multi-select-combo-checkbox {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--checkbox-border, var(--panel-border));
+  border-radius: 3px;
+  background: var(--checkbox-background, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.ecu-multi-select-combo-checkbox[data-checked="true"] {
+  background: var(--checkbox-selectBackground, var(--button-background));
+  border-color: var(--checkbox-selectBorder, var(--button-background));
+  color: var(--checkbox-selectForeground, var(--button-foreground));
+}
+
+.ecu-multi-select-combo-option-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

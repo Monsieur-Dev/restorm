@@ -5,7 +5,7 @@
  */
 
 import type { FullRequestData, ResolvedUrlResult, TransformedContext, TransformValueFn } from './ContextServiceTypes'
-import { ExpressionValue } from '../../shared/types/collections'
+import { ExpressionValue, EnumListValue, EnumValue } from '../../shared/types/collections'
 
 /**
  * Calculate the resolved URL for a request.
@@ -58,32 +58,47 @@ export function resolveUrl(
   // Build query string from params with cumulative resolution
   const params = data.params ?? []
   const cumulativeParamsContext = { ...envContext }
-  const resolvedParams = new Map<string, string>() // key -> resolved value (last wins)
+  // Use an array of [key, value] pairs instead of a Map to support
+  // repeated keys (EnumListValue with collectionFormat: multi).
+  const queryParts: string[] = []
 
   for (const param of params) {
-    // Skip disabled params (enabled defaults to true if undefined)
     if (param.enabled === false) {
       continue
     }
     if (param.key) {
-      // Resolve using cumulative context
       const resolvedKey = transformValue(param.key, cumulativeParamsContext)
-      // Only `ExpressionValue` values go through Handlebars.
+
+      // EnumListValue: repeat the key for each selected value (multi format)
+      if (param.value instanceof EnumListValue || (param.value as { type?: string }).type === 'enumList') {
+        const values = (param.value as EnumListValue).value
+        for (const v of values) {
+          queryParts.push(`${encodeURIComponent(resolvedKey)}=${encodeURIComponent(v)}`)
+        }
+        cumulativeParamsContext[resolvedKey] = values.join(',')
+        continue
+      }
+
+      // EnumValue: single value
+      if (param.value instanceof EnumValue || (param.value as { type?: string }).type === 'enum') {
+        const v = (param.value as EnumValue).value
+        if (v) {
+          queryParts.push(`${encodeURIComponent(resolvedKey)}=${encodeURIComponent(v)}`)
+          cumulativeParamsContext[resolvedKey] = v
+        }
+        continue
+      }
+
+      // ExpressionValue goes through Handlebars, others taken literally
       const raw = param.value.toString()
       const resolvedValue = param.value instanceof ExpressionValue
         ? transformValue(raw, cumulativeParamsContext)
         : raw
-      // Store for URL (last value wins for same key)
-      resolvedParams.set(resolvedKey, resolvedValue)
-      // Add to cumulative context for next params
+      queryParts.push(`${encodeURIComponent(resolvedKey)}=${encodeURIComponent(resolvedValue)}`)
       cumulativeParamsContext[resolvedKey] = resolvedValue
     }
   }
 
-  const queryParts: string[] = []
-  for (const [key, value] of resolvedParams) {
-    queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-  }
   const queryString = queryParts.join('&')
 
   // Combine base URL and query string

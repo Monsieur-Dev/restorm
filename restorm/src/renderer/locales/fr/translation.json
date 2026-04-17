@@ -132,7 +132,8 @@
       "color": "Couleur",
       "expression": "Expression",
       "boolean": "Booléen"
-    }
+    },
+    "apiEnums": "Types définis dans l'API"
   },
   "graphql": {
     "send": "Envoyer",

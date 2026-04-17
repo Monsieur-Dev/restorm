@@ -20,7 +20,11 @@ import {
   DateTimeValue,
   PasswordValue,
   ExpressionValue,
-  type ValueType
+  EnumValue,
+  EnumListValue,
+  type ValueType,
+  type EnumDefinition,
+  type EnumMatchingRule
 } from '../../../shared/types/collections'
 import { toHTTPMethod } from './httpMethodValidator'
 import { swaggerToApiDocumentation } from './transformers/swaggerToApiDocumentation'
@@ -67,6 +71,12 @@ interface SwaggerParameter {
   required?: boolean
   type?: string
   format?: string
+  enum?: string[]
+  default?: unknown
+  example?: unknown
+  'x-example'?: unknown
+  items?: { type?: string; enum?: string[]; default?: unknown }
+  collectionFormat?: string
   schema?: SwaggerSchema
 }
 
@@ -134,9 +144,10 @@ interface SwaggerSpec {
 // Helper Functions
 // ============================================================================
 
-/** Build a KeyValue with an explicitly-typed value. */
+/** Build a KeyValue with an explicitly-typed value and a runtime id. */
 function kvOfType(key: string, value: ValueType, description?: string): KeyValue {
   return new KeyValue({
+    id: generateId(`kv:${key}:${Math.random().toString(36).slice(2, 8)}`),
     key,
     value,
     description: description ?? '',
@@ -152,13 +163,15 @@ function kvOfType(key: string, value: ValueType, description?: string): KeyValue
  * immediately after import, without relying on an implicit cast when the user
  * types a value. Unknown / unspecified types fall back to StringValue('').
  */
-function buildTypedValueFromSwaggerType(type: string | undefined, format: string | undefined): ValueType {
+function buildTypedValueFromSwaggerType(type: string | undefined, format: string | undefined, defaultValue?: unknown): ValueType {
   switch (type) {
     case 'integer':
-    case 'number':
-      return new NumericValue(0, 'decimal')
+    case 'number': {
+      const num = typeof defaultValue === 'number' ? defaultValue : typeof defaultValue === 'string' ? Number(defaultValue) : 0
+      return new NumericValue(Number.isFinite(num) ? num : 0, 'decimal')
+    }
     case 'boolean':
-      return new StringValue('false')
+      return new StringValue(defaultValue === true ? 'true' : defaultValue === false ? 'false' : typeof defaultValue === 'string' ? defaultValue : 'false')
     case 'string':
       if (format === 'date' || format === 'date-time') {
         const datePattern = format === 'date' ? 'yyyy-MM-dd' : 'yyyy-MM-dd HH:mm:ss'
@@ -167,20 +180,139 @@ function buildTypedValueFromSwaggerType(type: string | undefined, format: string
       if (format === 'password') {
         return new PasswordValue('')
       }
-      return new StringValue('')
+      return new StringValue(typeof defaultValue === 'string' ? defaultValue : '')
     default:
-      return new StringValue('')
+      return new StringValue(typeof defaultValue === 'string' ? defaultValue : '')
   }
 }
 
+// ============================================================================
+// Enum Extraction
+// ============================================================================
+
+/**
+ * Build a reverse-lookup from enum values signature → user-friendly name
+ * by scanning the spec's `definitions` (Swagger 2) / `components.schemas` (OAS3).
+ * E.g. Pet.status with enum [available,pending,sold] → "Pet Status".
+ */
+function buildEnumNameLookup(spec: SwaggerSpec): Map<string, string> {
+  const sigToName = new Map<string, string>()
+  const definitions = spec.definitions ?? {}
+
+  for (const [modelName, schema] of Object.entries(definitions)) {
+    // Top-level enum (the whole definition is an enum)
+    if (schema.enum && Array.isArray(schema.enum)) {
+      const sig = schema.enum.slice().sort().join('|')
+      sigToName.set(sig, modelName)
+    }
+    // Property-level enums
+    if (schema.properties) {
+      for (const [propName, propSchema] of Object.entries(schema.properties)) {
+        if (propSchema.enum && Array.isArray(propSchema.enum)) {
+          const sig = propSchema.enum.slice().sort().join('|')
+          // Use "Model PropName" format, e.g. "Pet Status"
+          sigToName.set(sig, `${modelName} ${propName}`)
+        }
+      }
+    }
+  }
+
+  return sigToName
+}
+
+/**
+ * Scan all paths in the spec and extract enum definitions.
+ * Returns a list of EnumDefinition objects and a lookup map from
+ * (path + method + paramName) → enumDefinitionId.
+ */
+function extractEnumDefinitions(spec: SwaggerSpec): {
+  definitions: EnumDefinition[]
+  lookup: Map<string, string>
+} {
+  const definitions: EnumDefinition[] = []
+  const lookup = new Map<string, string>()
+  const valuesSigToId = new Map<string, string>()
+  const enumNames = buildEnumNameLookup(spec)
+
+  const httpMethods = ['get', 'post', 'put', 'delete', 'patch', 'head', 'options'] as const
+
+  for (const [path, pathItem] of Object.entries(spec.paths)) {
+    for (const method of httpMethods) {
+      const operation = pathItem[method]
+      if (!operation) continue
+
+      const params: SwaggerParameter[] = [...(operation.parameters ?? []), ...((pathItem.parameters ?? []) as SwaggerParameter[])]
+
+      for (const param of params) {
+        const enumValues: string[] | undefined = param.enum ?? param.items?.enum
+        if (!enumValues || enumValues.length === 0) continue
+
+        const sig = enumValues.slice().sort().join('|')
+        let defId = valuesSigToId.get(sig)
+
+        if (!defId) {
+          // Use model-derived name if available, otherwise fall back to operation + param
+          const name = enumNames.get(sig)
+            ?? `${operation.operationId ?? `${method}_${path.replace(/[^a-zA-Z0-9]/g, '_')}`}_${param.name}`
+          defId = generateId(`enum:${name}`)
+          const matchingRule: EnumMatchingRule = { pathPattern: path, method, paramName: param.name }
+          definitions.push({ id: defId, name, values: enumValues, matchingRules: [matchingRule] })
+          valuesSigToId.set(sig, defId)
+        } else {
+          const existing = definitions.find((d) => d.id === defId)
+          if (existing) {
+            existing.matchingRules.push({ pathPattern: path, method, paramName: param.name })
+          }
+        }
+
+        const key = `${method}:${path}:${param.name}`
+        lookup.set(key, defId)
+      }
+    }
+  }
+
+  // Second pass: extract enums from model definitions that weren't already
+  // found via route parameters. These have no matching rules but are available
+  // in the "API defined types" submenu for manual assignment.
+  for (const [sig, name] of enumNames) {
+    if (valuesSigToId.has(sig)) continue
+    const values = sig.split('|').sort()
+    const defId = generateId(`enum:${name}`)
+    definitions.push({ id: defId, name, values, matchingRules: [] })
+    valuesSigToId.set(sig, defId)
+  }
+
+  return { definitions, lookup }
+}
+
 /** Build a KeyValue from a Swagger parameter, typed per its spec. */
-function keyValueFromSwaggerParam(param: SwaggerParameter): KeyValue {
-  return new KeyValue({
-    key: param.name,
-    value: buildTypedValueFromSwaggerType(param.type, param.format),
-    description: param.description ?? '',
-    enabled: true
-  })
+function keyValueFromSwaggerParam(
+  param: SwaggerParameter,
+  enumLookup?: Map<string, string>,
+  method?: string,
+  path?: string
+): KeyValue {
+  // Resolve default/example value: prefer example, then default, then items.default
+  const defaultVal = param.example ?? param['x-example'] ?? param.default ?? param.items?.default
+
+  // Check if this param has an enum definition
+  if (enumLookup && method && path) {
+    const lookupKey = `${method}:${path}:${param.name}`
+    const defId = enumLookup.get(lookupKey)
+    if (defId) {
+      if (param.type === 'array') {
+        // Pre-fill with default value(s)
+        const preSelected = Array.isArray(defaultVal)
+          ? defaultVal.filter((v): v is string => typeof v === 'string')
+          : typeof defaultVal === 'string' ? [defaultVal] : []
+        return kvOfType(param.name, new EnumListValue(preSelected, defId), param.description)
+      }
+      const preSelected = typeof defaultVal === 'string' ? defaultVal : ''
+      return kvOfType(param.name, new EnumValue(preSelected, defId), param.description)
+    }
+  }
+
+  return kvOfType(param.name, buildTypedValueFromSwaggerType(param.type, param.format, defaultVal), param.description)
 }
 
 /** Resolve a JSON pointer reference (e.g. "#/definitions/Pet") into a schema */
@@ -330,13 +462,19 @@ function extractBody(
   return undefined
 }
 
+interface EnumContext {
+  lookup: Map<string, string>
+  method: string
+  path: string
+}
+
 /** Extract headers from Swagger parameters */
-function extractHeaders(parameters: SwaggerParameter[]): KeyValue[] {
-  return parameters.filter((p) => p.in === 'header').map(keyValueFromSwaggerParam)
+function extractHeaders(parameters: SwaggerParameter[], ctx?: EnumContext): KeyValue[] {
+  return parameters.filter((p) => p.in === 'header').map((p) => keyValueFromSwaggerParam(p, ctx?.lookup, ctx?.method, ctx?.path))
 }
 
 /** Extract query params from Swagger parameters */
-function extractParams(parameters: SwaggerParameter[]): KeyValue[] {
+function extractParams(parameters: SwaggerParameter[], ctx?: EnumContext): KeyValue[] {
   const result: KeyValue[] = []
 
   for (const param of parameters) {
@@ -344,19 +482,18 @@ function extractParams(parameters: SwaggerParameter[]): KeyValue[] {
       continue
     }
 
-    // Avoid duplicate keys if the same parameter is defined multiple times
     if (result.some((existing) => existing.key === param.name)) {
       continue
     }
 
-    result.push(keyValueFromSwaggerParam(param))
+    result.push(keyValueFromSwaggerParam(param, ctx?.lookup, ctx?.method, ctx?.path))
   }
 
   return result
 }
 
 /** Extract path params from Swagger parameters */
-function extractPathParams(parameters: SwaggerParameter[]): KeyValue[] {
+function extractPathParams(parameters: SwaggerParameter[], ctx?: EnumContext): KeyValue[] {
   const result: KeyValue[] = []
 
   for (const param of parameters) {
@@ -364,12 +501,11 @@ function extractPathParams(parameters: SwaggerParameter[]): KeyValue[] {
       continue
     }
 
-    // Avoid duplicate keys if the same parameter is defined multiple times
     if (result.some((existing) => existing.key === param.name)) {
       continue
     }
 
-    result.push(keyValueFromSwaggerParam(param))
+    result.push(keyValueFromSwaggerParam(param, ctx?.lookup, ctx?.method, ctx?.path))
   }
 
   return result
@@ -401,9 +537,11 @@ function operationToRequest(
   path: string,
   method: string,
   operation: SwaggerOperation,
-  spec: SwaggerSpec
+  spec: SwaggerSpec,
+  enumLookup?: Map<string, string>
 ): HTTPRequest {
   const parameters = operation.parameters ?? []
+  const ctx: EnumContext | undefined = enumLookup ? { lookup: enumLookup, method, path } : undefined
 
   const request: HTTPRequest = {
     type: 'http',
@@ -413,9 +551,9 @@ function operationToRequest(
     tags: operation.tags ?? [],
     method: toHTTPMethod(method),
     url: buildUrl(path, parameters),
-    headers: extractHeaders(parameters),
-    params: extractParams(parameters),
-    pathParams: extractPathParams(parameters)
+    headers: extractHeaders(parameters, ctx),
+    params: extractParams(parameters, ctx),
+    pathParams: extractPathParams(parameters, ctx)
   }
 
   if (operation.deprecated) {
@@ -560,7 +698,7 @@ function createSwaggerEnvironment(spec: SwaggerSpec, overrideBaseUrl: string | u
 /**
  * Build the imported folder items from a Swagger spec (tag folders and requests)
  */
-function buildSwaggerFolderItems(spec: SwaggerSpec): Folder['items'] {
+function buildSwaggerFolderItems(spec: SwaggerSpec, enumLookup?: Map<string, string>): Folder['items'] {
   // Create tag folders map
   const tagFolders = new Map<string, Folder>()
 
@@ -595,7 +733,7 @@ function buildSwaggerFolderItems(spec: SwaggerSpec): Folder['items'] {
       const operation = pathItem[method]
       if (!operation) continue
 
-      const request = operationToRequest(path, method, operation, spec)
+      const request = operationToRequest(path, method, operation, spec, enumLookup)
       const tags = operation.tags ?? []
 
       if (tags.length === 0) {
@@ -670,9 +808,12 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
   // it bypasses the structured scheme/host/port/baseRoute layout.
   const newEnvironment = createSwaggerEnvironment(spec, options.baseUrl)
 
+  // Extract enum definitions from the spec and build a lookup map
+  const { definitions: enumDefs, lookup: enumLookup } = extractEnumDefinitions(spec)
+
   // Build the imported items (tag folders and requests) — request URLs no
   // longer carry `basePath`; it's absorbed by the resolved `{{baseUrl}}`.
-  const importedItems = buildSwaggerFolderItems(spec)
+  const importedItems = buildSwaggerFolderItems(spec, enumLookup)
 
   // Case: parentFolder provided without environmentFolder - error
   if (options.parentFolder && !options.environmentFolder) {
@@ -699,6 +840,12 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
     // Add imported items to target folder
     targetFolder.items = [...targetFolder.items, ...importedItems]
 
+    // Merge enum definitions into the existing environment folder
+    if (enumDefs.length > 0) {
+      const existing = (options.environmentFolder.enumDefinitions ?? []) as EnumDefinition[]
+      options.environmentFolder.enumDefinitions = [...existing, ...enumDefs]
+    }
+
     // Store documentation on the root environment folder (even if we imported into a sub-folder).
     options.environmentFolder.apiDocumentation = apiDocumentation
 
@@ -715,7 +862,8 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
     configuration: {},
     environments: [newEnvironment],
     items: importedItems,
-    apiDocumentation
+    apiDocumentation,
+    ...(enumDefs.length > 0 ? { enumDefinitions: enumDefs } : {})
   }
 
   return rootFolder

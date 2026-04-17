@@ -413,9 +413,7 @@ When(
     const plainInput = row.locator('td').nth(3).locator('input').first()
     if (await plainInput.count() > 0 && await plainInput.isVisible()) {
       await plainInput.click()
-      await page.keyboard.press('Control+A')
-      await page.keyboard.press('Delete')
-      await page.keyboard.type(value)
+      await plainInput.fill(value)
       await page.keyboard.press('Tab')
     } else {
       const monacoCell = row.locator('.monaco-editor').first()
