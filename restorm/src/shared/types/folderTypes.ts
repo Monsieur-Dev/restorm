@@ -1,4 +1,4 @@
-import type { RuntimeId, Icon, Environment, FolderConfiguration, EnumDefinition } from './baseTypes'
+import type { RuntimeId, Icon, Environment, FolderConfiguration, EnumDefinition, ImportSourceType } from './baseTypes'
 import type { Request } from './requests/index'
 
 export interface Folder {
@@ -17,6 +17,8 @@ export interface EnvironmentFolder extends Folder {
   environments: Environment[]
   tagColors?: Record<string, string>
   enumDefinitions?: EnumDefinition[]
+  /** How this folder was created (swagger, grpc, graphql, etc.). Absent for manually created folders. */
+  importSource?: ImportSourceType
 }
 
 export type FolderItem = Folder | EnvironmentFolder | Request

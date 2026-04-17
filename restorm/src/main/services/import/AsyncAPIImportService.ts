@@ -342,6 +342,7 @@ export function importAsyncAPI(specContent: string, options: AsyncAPIImportOptio
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
+    importSource: 'asyncapi',
     id: generateId(`${name}:folder:asyncapi:root`),
     name,
     documentation: '',

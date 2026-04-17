@@ -634,6 +634,13 @@ interface ApiDocWithSource {
 const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ folder, onFolderChange }) => {
   const { t } = useTranslation()
 
+  // Home tab — placeholder for future environment folder overview page
+  const homeTab: Tab = {
+    id: 'home',
+    label: <span className="codicon codicon-home" />,
+    content: <div style={{ padding: 24, opacity: 0.5, textAlign: 'center' }}>{t('folderView.tabs.homePlaceholder')}</div>
+  }
+
   // Configuration tab with environment management
   const configurationTab: Tab = {
     id: 'configuration',
@@ -720,7 +727,7 @@ const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ fold
   return (
     <BaseFolderView
       folder={folder}
-      additionalTabs={[configurationTab]}
+      additionalTabs={[homeTab, configurationTab]}
       defaultActiveTabId="configuration"
       documentationOverride={compiledRootDocs}
       docsHeader={docsHeader}

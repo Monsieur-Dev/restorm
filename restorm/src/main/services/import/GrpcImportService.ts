@@ -360,6 +360,7 @@ export function importGrpc(protoContent: string, options: GrpcImportOptions = {}
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
+    importSource: 'grpc',
     id: generateId(`${name}:folder:grpc:root`),
     name,
     documentation: '',

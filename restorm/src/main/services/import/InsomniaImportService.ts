@@ -535,6 +535,7 @@ export function importInsomnia(
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
+    importSource: 'insomnia',
     id: generateId(`insomnia:root:${workspaceName}`),
     name: workspaceName,
     documentation: '',

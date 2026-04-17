@@ -862,6 +862,7 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
     configuration: {},
     environments: [newEnvironment],
     items: importedItems,
+    importSource: 'swagger',
     apiDocumentation,
     ...(enumDefs.length > 0 ? { enumDefinitions: enumDefs } : {})
   }

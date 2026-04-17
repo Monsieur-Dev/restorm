@@ -57,7 +57,8 @@
     "tabs": {
       "docs": "Docs",
       "configuration": "Configuration",
-      "notes": "Notes"
+      "notes": "Notes",
+      "homePlaceholder": "Environment folder home page — coming soon"
     },
     "docs": {
       "source": "Source:",

@@ -38,6 +38,20 @@ export interface Environment {
 
 export type FolderConfiguration = Record<string, never>
 
+/** Identifies how an EnvironmentFolder was created. */
+export type ImportSourceType =
+  | 'swagger'
+  | 'graphql'
+  | 'grpc'
+  | 'wsdl'
+  | 'asyncapi'
+  | 'postman'
+  | 'insomnia'
+  | 'bruno'
+  | 'curl'
+  | 'powershell'
+  | 'url'
+
 /**
  * Rule that matches an enum definition to request URLs/parameters.
  * When a request's URL matches `pathPattern`, the parameter named

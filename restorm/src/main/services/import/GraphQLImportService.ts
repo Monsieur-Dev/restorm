@@ -350,6 +350,7 @@ export function importGraphQL(schemaString: string, options: GraphQLImportOption
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
+    importSource: 'graphql',
     id: generateId(`${name}:folder:graphql:root`),
     name,
     documentation: '',

@@ -602,6 +602,7 @@ export function importBruno(
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
+    importSource: 'bruno',
     id: generateId(`bruno:root:${collectionName}`),
     name: collectionName,
     documentation: '',
@@ -861,6 +862,7 @@ export function importBrunoFromJson(
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
+    importSource: 'bruno',
     id: generateId(`bruno:root:${collectionName}`),
     name: collectionName,
     documentation: '',

@@ -346,6 +346,7 @@ export function importSoap(wsdlContent: string, options: SoapImportOptions = {})
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
+    importSource: 'wsdl',
     id: generateId(`${name}:folder:soap:root`),
     name,
     documentation: '',
