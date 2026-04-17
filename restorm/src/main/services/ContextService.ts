@@ -28,7 +28,7 @@ import {
 import { registerHandlebarsHelpers } from '../utils/handlebarsHelpers'
 import { pubsub, PUBSUB_TOPICS } from './CollectionStore'
 import { KeyValue as KeyValueModel } from '../../shared/models'
-import { ExpressionValue } from '../../shared/types/collections'
+import { isExpressionValue } from '../../shared/utils/valueHelpers'
 import { resolveUrl } from './URLResolver'
 import { compileSnippetTemplates, generateCodeSnippets, type CompiledSnippetTemplates } from './CodeSnippetGenerator'
 import type {
@@ -319,7 +319,7 @@ class ContextService {
     // that is overridden by sub-envs http/https).
     for (const kv of meta.rawVariables) {
       if (kv.enabled === false) continue
-      if (kv.key && this.isExpressionValue(kv.value)) {
+      if (kv.key && isExpressionValue(kv.value)) {
         const raw = kv.value.toString()
         const reResolved = this.transformValue(raw, finalContext)
         if (reResolved !== finalContext[kv.key]) {
@@ -343,7 +343,7 @@ class ContextService {
       if (!parentMeta) continue
       for (const kv of parentMeta.rawVariables) {
         if (kv.enabled === false) continue
-        if (kv.key && this.isExpressionValue(kv.value)) {
+        if (kv.key && isExpressionValue(kv.value)) {
           const raw = kv.value.toString()
           const reResolved = this.transformValue(raw, finalContext)
           if (reResolved !== finalContext[kv.key]) {
@@ -442,23 +442,10 @@ class ContextService {
    */
   private resolveKeyValue(kv: KeyValue, context: TransformedContext): string {
     const raw = kv.value.toString()
-    if (this.isExpressionValue(kv.value)) {
+    if (isExpressionValue(kv.value)) {
       return this.transformValue(raw, context)
     }
     return raw
-  }
-
-  /**
-   * Check if a value is an ExpressionValue. Uses instanceof first,
-   * then falls back to checking the `.type` property for reactive proxy
-   * objects that lose their prototype chain.
-   */
-  private isExpressionValue(value: unknown): boolean {
-    if (value instanceof ExpressionValue) return true
-    if (value && typeof value === 'object' && 'type' in value) {
-      return (value as { type: string }).type === 'expression'
-    }
-    return false
   }
 
   /**

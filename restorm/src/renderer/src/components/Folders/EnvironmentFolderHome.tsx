@@ -5,6 +5,7 @@ import { getFavorites, removeFavorite, reorderFavorites } from '../../services/f
 import type { EnvironmentFolder, FolderItem } from '../../../../shared/types/collections'
 import type { ApiDocumentation } from '../../../../shared/types/apiDocumentation'
 import { Badge, type BadgeType } from '../common/Badge'
+import './environmentFolderHome.css'
 
 interface FavoriteRequest {
   id: string
@@ -116,35 +117,29 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
   const sourceConfig = importSource ? SOURCE_CONFIG[importSource] : undefined
 
   return (
-    <div style={{ padding: '32px', maxWidth: 640, margin: '0 auto' }}>
+    <div className="home-container">
 
       {/* ── Header: logo + title ── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
+      <div className="home-header">
         {sourceConfig && (
           sourceConfig.logo ? (
-            <img src={sourceConfig.logo} alt={sourceConfig.label} style={{ width: 48, height: 48, flexShrink: 0 }} />
+            <img src={sourceConfig.logo} alt={sourceConfig.label} className="home-logo" />
           ) : sourceConfig.icon ? (
-            <div style={{
-              width: 48, height: 48, borderRadius: 10, background: sourceConfig.color, color: '#fff',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0
-            }}>
+            <div className="home-icon-badge" style={{ background: sourceConfig.color }}>
               <span className={`codicon codicon-${sourceConfig.icon}`} />
             </div>
           ) : null
         )}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 600, lineHeight: 1.3 }}>
+        <div className="home-title-wrapper">
+          <h1 className="home-title">
             {apiDoc?.api.title ?? folder.name}
             {apiDoc?.api.version && (
-              <span style={{ fontSize: 12, fontWeight: 400, opacity: 0.5, marginLeft: 8 }}>v{apiDoc.api.version}</span>
+              <span className="home-version">v{apiDoc.api.version}</span>
             )}
           </h1>
           {sourceConfig && (
-            <div style={{ marginTop: 4 }}>
-              <span style={{
-                background: sourceConfig.color, color: '#fff',
-                padding: '1px 8px', borderRadius: 10, fontSize: 11, fontWeight: 500
-              }}>
+            <div>
+              <span className="home-source-label" style={{ background: sourceConfig.color }}>
                 {sourceConfig.label}
               </span>
             </div>
@@ -153,11 +148,11 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
       </div>
 
       {/* ── Separator ── */}
-      <hr style={{ border: 'none', borderTop: '1px solid var(--panel-border)', margin: '0 0 20px' }} />
+      <hr className="home-separator" />
 
       {/* ── Description ── */}
       {apiDoc?.api.description && (
-        <p style={{ margin: '0 0 24px', fontSize: 13, lineHeight: 1.7, opacity: 0.7 }}>
+        <p className="home-description">
           {apiDoc.api.description.length > 400
             ? `${apiDoc.api.description.slice(0, 400)}…`
             : apiDoc.api.description}
@@ -165,7 +160,7 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
       )}
 
       {/* ── Big action buttons ── */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 32 }}>
+      <div className="home-actions">
         <ActionButton
           icon="settings-gear"
           label={t('folderView.home.configureEnvs')}
@@ -182,7 +177,7 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
 
       {/* ── Source URL ── */}
       {apiDoc?.sourceUrl && (
-        <div style={{ marginBottom: 32 }}>
+        <div className="home-source-url">
           <ControlGroup>
             <InputBox
               value={apiDoc.sourceUrl}
@@ -233,12 +228,12 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
       />
 
       {/* ── Footer: contact + source ── */}
-      <div style={{ marginTop: 24, fontSize: 11, opacity: 0.4, display: 'flex', flexWrap: 'wrap', gap: '4px 16px' }}>
+      <div className="home-footer">
         {apiDoc?.api.contact?.email && (
-          <span><span className="codicon codicon-mail" style={{ marginRight: 4 }} />{apiDoc.api.contact.email}</span>
+          <span><span className="codicon codicon-mail" />{apiDoc.api.contact.email}</span>
         )}
         {apiDoc?.api.license && (
-          <span><span className="codicon codicon-law" style={{ marginRight: 4 }} />{apiDoc.api.license.name}</span>
+          <span><span className="codicon codicon-law" />{apiDoc.api.license.name}</span>
         )}
       </div>
     </div>
@@ -248,31 +243,22 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
 // ── Action button ──
 
 const ActionButton: React.FC<{ icon: string; label: string; description: string; onClick: () => void }> = ({ icon, label, description, onClick }) => (
-  <div
-    onClick={onClick}
-    style={{
-      flex: 1, padding: '20px', borderRadius: 10,
-      border: '1px solid var(--panel-border)', background: 'var(--editor-background)',
-      cursor: 'pointer', transition: 'border-color 0.15s', textAlign: 'center'
-    }}
-    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--focusBorder)' }}
-    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--panel-border)' }}
-  >
-    <span className={`codicon codicon-${icon}`} style={{ fontSize: 28, opacity: 0.6, display: 'block', marginBottom: 10 }} />
-    <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{label}</div>
-    <div style={{ fontSize: 11, opacity: 0.5 }}>{description}</div>
+  <div className="action-button" onClick={onClick}>
+    <span className={`codicon codicon-${icon} action-button-icon`} />
+    <div className="action-button-label">{label}</div>
+    <div className="action-button-desc">{description}</div>
   </div>
 )
 
 // ── Section ──
 
 const Section: React.FC<{ title: string; icon: string; children: React.ReactNode; dataTestId?: string }> = ({ title, icon, children, dataTestId }) => (
-  <div style={{ marginBottom: 24 }} {...(dataTestId ? { 'data-testid': dataTestId } : {})}>
-    <h3 style={{ margin: '0 0 10px', fontSize: 12, fontWeight: 600, textTransform: 'uppercase', opacity: 0.4, letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 6 }}>
-      <span className={`codicon codicon-${icon}`} style={{ fontSize: 14 }} />
+  <div className="home-section" {...(dataTestId ? { 'data-testid': dataTestId } : {})}>
+    <h3 className="home-section-title">
+      <span className={`codicon codicon-${icon}`} />
       {title}
     </h3>
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <div className="home-section-content">
       {children}
     </div>
   </div>
@@ -288,39 +274,28 @@ const RequestRow: React.FC<{
   isDragOver?: boolean; dataTestId?: string
 }> = ({ method, path, name, onClick, onContextMenu, onDelete, draggable, onDragStart, onDragOver, onDragEnd, isDragOver, dataTestId }) => (
   <div
-    style={{
-      display: 'flex', alignItems: 'center', gap: 10, padding: '7px 12px',
-      borderRadius: 6, cursor: 'pointer', fontSize: 13,
-      borderTop: isDragOver ? '2px solid var(--focusBorder)' : '2px solid transparent'
-    }}
+    className={`request-row${isDragOver ? ' drag-over' : ''}`}
     onClick={onClick}
     onContextMenu={onContextMenu}
     onDragOver={onDragOver}
     onDragEnd={onDragEnd}
-    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--list-hoverBackground)' }}
-    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
     {...(dataTestId ? { 'data-testid': dataTestId } : {})}
   >
     {draggable && (
       <span
         draggable
         onDragStart={(e) => { e.stopPropagation(); onDragStart?.() }}
-        style={{ cursor: 'grab', opacity: 0.4, fontSize: 12, userSelect: 'none', lineHeight: 1 }}
+        className="request-row-drag"
       >⋮⋮</span>
     )}
     <Badge type={method.toUpperCase() as BadgeType} />
-    <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
-    <span style={{ fontSize: 11, opacity: 0.35, fontFamily: 'monospace' }}>{path}</span>
+    <span className="request-row-name">{name}</span>
+    <span className="request-row-path">{path}</span>
     {onDelete && (
       <button
         type="button"
+        className="request-row-delete"
         onClick={(e) => { e.stopPropagation(); onDelete() }}
-        style={{
-          background: 'none', border: 'none', cursor: 'pointer', padding: 2,
-          opacity: 0.4, fontSize: 14, lineHeight: 1, color: 'inherit', flexShrink: 0
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.opacity = '1' }}
-        onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.4' }}
         data-testid={dataTestId ? `${dataTestId}-delete` : undefined}
       >
         <span className="codicon codicon-trash" />

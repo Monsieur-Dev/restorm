@@ -21,6 +21,7 @@ import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import type { TranslatedHelperDefinition } from '../../utils/handlebarsHelpersDefinitions'
 import type { KeyValue, ValueType, EnumDefinition } from '../../../../shared/types/collections'
 import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue } from '../../../../shared/types/collections'
+import { isPasswordValue, isNumericValue, isDateTimeValue, isColorValue, isExpressionValue, isBooleanValue, isEnumValue, isEnumListValue } from '../../../../shared/utils/valueHelpers'
 import { inferValueFromString, isHexColorString, tryParseDateString, tryParseNumberString } from '../../../../shared/utils/valueCasting'
 import { normalizeValueType } from '../../utils/normalizeValueType'
 
@@ -29,24 +30,15 @@ export type VariableContext = Record<string, string>
 type ValueTypeKind = 'string' | 'secret' | 'number' | 'dateTime' | 'color' | 'expression' | 'boolean' | 'enum' | 'enumList'
 
 function resolveValueTypeKind(value: ValueType | undefined): ValueTypeKind {
-  if (value instanceof PasswordValue) return 'secret'
-  if (value instanceof NumericValue) return 'number'
-  if (value instanceof DateTimeValue) return 'dateTime'
-  if (value instanceof ColorValue) return 'color'
-  if (value instanceof ExpressionValue) return 'expression'
-  if (value instanceof BooleanValue) return 'boolean'
-  if (value instanceof EnumValue) return 'enum'
-  if (value instanceof EnumListValue) return 'enumList'
-  // Fallback for reactive proxies where instanceof fails
-  const typeProp = (value as { type?: string } | undefined)?.type
-  if (typeProp === 'password') return 'secret'
-  if (typeProp === 'numeric') return 'number'
-  if (typeProp === 'datetime') return 'dateTime'
-  if (typeProp === 'color') return 'color'
-  if (typeProp === 'expression') return 'expression'
-  if (typeProp === 'boolean') return 'boolean'
-  if (typeProp === 'enum') return 'enum'
-  if (typeProp === 'enumList') return 'enumList'
+  if (!value) return 'string'
+  if (isPasswordValue(value)) return 'secret'
+  if (isNumericValue(value)) return 'number'
+  if (isDateTimeValue(value)) return 'dateTime'
+  if (isColorValue(value)) return 'color'
+  if (isExpressionValue(value)) return 'expression'
+  if (isBooleanValue(value)) return 'boolean'
+  if (isEnumValue(value)) return 'enum'
+  if (isEnumListValue(value)) return 'enumList'
   return 'string'
 }
 

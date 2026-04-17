@@ -5,7 +5,7 @@
  */
 
 import type { FullRequestData, ResolvedUrlResult, TransformedContext, TransformValueFn } from './ContextServiceTypes'
-import { ExpressionValue, EnumListValue, EnumValue } from '../../shared/types/collections'
+import { isExpressionValue, isEnumListValue, isEnumValue } from '../../shared/utils/valueHelpers'
 
 /**
  * Calculate the resolved URL for a request.
@@ -35,7 +35,7 @@ export function resolveUrl(
       // Only `ExpressionValue` values go through Handlebars — plain
       // strings/numbers/dates etc. are taken literally.
       const raw = pp.value.toString()
-      const resolvedValue = pp.value instanceof ExpressionValue
+      const resolvedValue = isExpressionValue(pp.value)
         ? transformValue(raw, cumulativeContext)
         : raw
       // Store non-encoded value for next iterations (last value wins for same key)
@@ -70,8 +70,8 @@ export function resolveUrl(
       const resolvedKey = transformValue(param.key, cumulativeParamsContext)
 
       // EnumListValue: repeat the key for each selected value (multi format)
-      if (param.value instanceof EnumListValue || (param.value as { type?: string }).type === 'enumList') {
-        const values = (param.value as EnumListValue).value
+      if (isEnumListValue(param.value)) {
+        const values = param.value.value
         for (const v of values) {
           queryParts.push(`${encodeURIComponent(resolvedKey)}=${encodeURIComponent(v)}`)
         }
@@ -80,8 +80,8 @@ export function resolveUrl(
       }
 
       // EnumValue: single value
-      if (param.value instanceof EnumValue || (param.value as { type?: string }).type === 'enum') {
-        const v = (param.value as EnumValue).value
+      if (isEnumValue(param.value)) {
+        const v = param.value.value
         if (v) {
           queryParts.push(`${encodeURIComponent(resolvedKey)}=${encodeURIComponent(v)}`)
           cumulativeParamsContext[resolvedKey] = v
@@ -91,7 +91,7 @@ export function resolveUrl(
 
       // ExpressionValue goes through Handlebars, others taken literally
       const raw = param.value.toString()
-      const resolvedValue = param.value instanceof ExpressionValue
+      const resolvedValue = isExpressionValue(param.value)
         ? transformValue(raw, cumulativeParamsContext)
         : raw
       queryParts.push(`${encodeURIComponent(resolvedKey)}=${encodeURIComponent(resolvedValue)}`)

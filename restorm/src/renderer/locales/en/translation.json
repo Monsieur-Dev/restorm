@@ -59,8 +59,7 @@
     "tabs": {
       "docs": "Docs",
       "configuration": "Configuration",
-      "notes": "Notes",
-      "homePlaceholder": "Environment folder home page — coming soon"
+      "notes": "Notes"
     },
     "home": {
       "configureEnvs": "Configure environments",
@@ -81,8 +80,7 @@
       "description": "Use these variables in your request URLs and expression-type variables with the {{handlebars}} syntax.",
       "name": "Variable",
       "value": "Resolved value",
-      "copied": "Copied!",
-      "empty": "No context variables resolved for this environment."
+      "copied": "Copied!"
     }
   },
   "requestTab": {
