@@ -10,7 +10,6 @@ import {
   logger,
   computeChecksum,
   useDirtyState,
-  setContentChecksum,
   commitChecksums,
   navigationService
 } from 'electron-core-ui/renderer'
@@ -589,23 +588,13 @@ const App: React.FC = () => {
     }
   }, [fileName, rootItems, environmentFolderCollections])
   useEffect(() => {
-    // Detect save: was dirty, now not dirty
     if (wasDirtyRef.current && !isDirty && fileName) {
-      // File was just saved - commit checksums (current becomes new baseline)
       void commitChecksums().catch((err: unknown) => {
         logger.error('[App] Failed to commit checksums', { error: String(err) })
       })
-      logger.debug('[App] Checksums committed after save')
-      // Also update legacy content checksum for backward compatibility
-      const dataForChecksum = prepareForSerialization({ collections: rootItems }) as { collections: unknown[] }
-      void setContentChecksum(JSON.stringify(dataForChecksum)).catch((err: unknown) => {
-        logger.error('[App] Failed to set content checksum', { error: String(err) })
-      })
-      // Mark all tabs as saved (folder mode)
-      markAllTabsSaved()
     }
     wasDirtyRef.current = isDirty
-  }, [isDirty, fileName, rootItems, markAllTabsSaved])
+  }, [isDirty, fileName])
 
   // Listen to document changes and update per-tab dirty state (works in all modes).
   // The checksum update triggers a setState in useDirtyState, which re-renders App and
@@ -620,7 +609,8 @@ const App: React.FC = () => {
       if (existing) clearTimeout(existing)
       const timer = setTimeout(() => {
         dirtyChecksumTimersRef.current.delete(id)
-        updateTabDirtyChecksum(id, compute())
+        const newChecksum = compute()
+        updateTabDirtyChecksum(id, newChecksum)
       }, DIRTY_CHECKSUM_DEBOUNCE_MS)
       dirtyChecksumTimersRef.current.set(id, timer)
     }

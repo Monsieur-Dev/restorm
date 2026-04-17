@@ -9,7 +9,6 @@ import {
   finishLoading,
   hasContentChanged,
   registerInitialChecksums,
-  commitChecksums,
   eventBus,
   logger,
   computeChecksum
@@ -77,7 +76,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     state: _fileState,
     fileName,
     filePath,
-    isDirty,
+    isDirty: _isDirty,
     open: openFile,
     save: saveFile,
     close: closeFile,
@@ -115,6 +114,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         )
         if (result?.success) {
           void clearDirty()
+          markAllTabsSaved()
         }
         return
       }
@@ -122,11 +122,14 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       const secrets = collectPasswordSecretsFromCollections(plainData)
       const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
       const saved = await saveFile(dataForChecksum)
-      if (saved && filePath) {
-        await window.restorm?.secrets.write(`${filePath}.env`, envContent)
+      if (saved) {
+        markAllTabsSaved()
+        if (filePath) {
+          await window.restorm?.secrets.write(`${filePath}.env`, envContent)
+        }
       }
     })()
-  }, [saveFile, rootItems, isOpenedAsFolder, folderFormat, clearDirty, currentFolderPath, filePath])
+  }, [saveFile, rootItems, isOpenedAsFolder, folderFormat, clearDirty, currentFolderPath, filePath, markAllTabsSaved])
 
   const handleMenuSaveAs = useCallback(() => {
     setSaveOptionsIntent('saveAs')
@@ -447,18 +450,6 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
 
     return cleanup
   }, [rootItems, saveFile, filePath])
-
-  // Commit checksums on save
-  useEffect(() => {
-    const wasDirtyRef = { current: isDirty }
-    if (wasDirtyRef.current && !isDirty && fileName) {
-      void commitChecksums()
-      logger.debug('[useFileManagement] Checksums committed after save')
-      const dataForChecksum = prepareForSerialization({ collections: rootItems })
-      void setContentChecksum(JSON.stringify(dataForChecksum))
-      markAllTabsSaved()
-    }
-  }, [isDirty, fileName, rootItems, markAllTabsSaved])
 
   return {
     handleMenuNew,

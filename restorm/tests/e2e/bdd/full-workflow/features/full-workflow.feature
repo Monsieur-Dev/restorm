@@ -171,6 +171,21 @@ Feature: Full workflow end-to-end scenario
     And the file's dirty-state should be: dirty
     When I save the file with Ctrl+S
     Then the file's dirty-state should be: clean
+    # ── Tab dirty state: modify + revert after save ──
+    # After saving, modify a variable → tab dirty dot should appear.
+    # Revert to original → both tab and file dirty should clear.
+    When I edit and revert the first env folder variable
+    Then the active tab should not have a dirty dot
+    And the file's dirty-state should be: clean
+    # ── Tab dirty state: modify + revert after close/reopen ──
+    # Close and reopen the file, open the env folder tab from the
+    # sidebar, modify + revert → dirty state must clear.
+    When I close the current file
+    When I open the welcome recent file "workflow-collection.restorm"
+    When I click the sidebar env folder "Swagger Petstore"
+    When I edit and revert the first env folder variable
+    Then the active tab should not have a dirty dot
+    And the file's dirty-state should be: clean
     # Variable types must be preserved across env switches: `themeColor`
     # lives on the `localhost` env. Switch to the `http` sub-env and
     # back — the color picker cell should re-appear on the parent env

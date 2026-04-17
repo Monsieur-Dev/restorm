@@ -8,6 +8,17 @@ set -euo pipefail
 
 log() { printf '\n\033[1;36m[postinstall]\033[0m %s\n' "$*"; }
 
+log 'Configuring apt for slow / flaky networks (retries + longer timeouts)…'
+# archive.ubuntu.com is frequently slow or drops connections mid-download,
+# which fails `apt-get install` and the whole postCreateCommand. These
+# settings make apt retry each transfer up to 5 times and wait longer per
+# connection attempt.
+cat >/etc/apt/apt.conf.d/99-devcontainer-retries <<'APTCONF'
+Acquire::Retries "5";
+Acquire::http::Timeout "120";
+Acquire::https::Timeout "120";
+APTCONF
+
 log 'Updating apt cache and installing prerequisites…'
 apt-get update
 apt-get install -y --no-install-recommends \
@@ -52,5 +63,9 @@ log "pnpm:  $(pnpm --version)"
 log 'Installing Claude Code CLI globally…'
 npm install -g @anthropic-ai/claude-code
 log "claude: $(claude --version 2>/dev/null || echo 'installed')"
+
+log 'Installing workspace dependencies (pnpm install)…'
+cd /workspaces/gitable
+pnpm install --frozen-lockfile=false
 
 log 'Done.'

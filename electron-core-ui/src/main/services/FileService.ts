@@ -162,10 +162,13 @@ export class FileService {
       return obj.map(item => this.sortObjectKeys(item))
     }
     if (typeof obj === 'object') {
+      const raw = obj as Record<string, unknown>
+      const isKeyValue = 'key' in raw && 'value' in raw
       const sorted: Record<string, unknown> = {}
-      const keys = Object.keys(obj as Record<string, unknown>).sort()
+      const keys = Object.keys(raw).sort()
       for (const key of keys) {
-        sorted[key] = this.sortObjectKeys((obj as Record<string, unknown>)[key])
+        if (key === 'id' && isKeyValue) continue
+        sorted[key] = this.sortObjectKeys(raw[key])
       }
       return sorted
     }

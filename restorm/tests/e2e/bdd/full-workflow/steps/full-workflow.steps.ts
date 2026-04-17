@@ -437,6 +437,23 @@ Then('the active tab should have a dirty dot', async () => {
   await expect(dirty).toBeVisible({ timeout: 10000 })
 })
 
+Then('the active tab should not have a dirty dot', async () => {
+  if (!page) throw new Error('app must be launched')
+  const dirty = page.locator('[role="tab"][aria-selected="true"] .dirty-indicator').first()
+  await expect(dirty).not.toBeVisible({ timeout: 10000 })
+})
+
+When('I click the sidebar env folder {string}', async ({}, folderName: string) => {
+  if (!page) throw new Error('app must be launched')
+  const row = page
+    .locator('[data-testid="sidebar-listview"] .list-view-row')
+    .filter({ has: page.getByText(folderName, { exact: true }) })
+    .first()
+  await expect(row).toBeVisible({ timeout: 10000 })
+  await row.click()
+  await page.waitForTimeout(500)
+})
+
 // ---------------------------------------------------------------------------
 // URL tooltip + searchbar interactions
 // ---------------------------------------------------------------------------
@@ -744,21 +761,53 @@ async function addEnvVariable(currentPage: Page, key: string): Promise<void> {
 async function transformLastRowTo(currentPage: Page, typeMenuTestId: string): Promise<void> {
   const rows = currentPage.locator('[data-testid="environment-folder-variables-table"] tbody tr')
   const lastRow = rows.last()
-  // The RestormKeyValueTable attaches `onContextMenu` to the wrapping div
-  // around the value cell renderer, not the <input> itself. Right-click
-  // the value <td> so the handler is on the event's currentTarget chain.
-  const valueTd = lastRow.locator('td').nth(3)
-  await valueTd.click({ button: 'right', force: true })
-  // Type-transform entries are now rendered directly at the top level of
-  // the context menu — no more "Transform to" submenu hover. Target the
-  // JSX context menu explicitly via its data-testid; Monaco renders its
-  // own contextMenuItems flyout with the same labels and would otherwise
-  // collide with the JSX menu.
+  // The context menu now opens exclusively via the TypeIndicator button
+  // on the right edge of the value cell. For a freshly-added variable
+  // (always StringValue by default), the button carries
+  // data-testid="...-value-type-string".
+  const typeBtn = lastRow.locator('[data-testid$="-value-type-string"]').first()
+  await expect(typeBtn).toBeVisible({ timeout: 5000 })
+  await typeBtn.click()
   const target = currentPage.locator(`[data-testid="${typeMenuTestId}"]`).first()
   await expect(target).toBeVisible({ timeout: 5000 })
   await target.click()
   await currentPage.waitForTimeout(200)
 }
+
+When('I edit and revert the first env folder variable', async () => {
+  if (!page) throw new Error('app must be launched')
+  const rows = page.locator('[data-testid="environment-folder-variables-table"] tbody tr')
+  const firstRow = rows.first()
+  await expect(firstRow).toBeVisible({ timeout: 2000 })
+  const valueInput = firstRow.locator('td').nth(3).locator('input').first()
+  await expect(valueInput).toBeVisible({ timeout: 2000 })
+  const originalValue = await valueInput.inputValue()
+  // Modify then revert
+  await valueInput.click()
+  await valueInput.fill('MODIFIED-REVERT-TEST')
+  await page.keyboard.press('Tab')
+  await page.waitForTimeout(500)
+  await valueInput.click()
+  await valueInput.fill(originalValue)
+  await page.keyboard.press('Tab')
+  await page.waitForTimeout(1000)
+})
+
+When(
+  'I edit the first env folder variable value to {string}',
+  async ({}, newValue: string) => {
+    if (!page) throw new Error('app must be launched')
+    const rows = page.locator('[data-testid="environment-folder-variables-table"] tbody tr')
+    const firstRow = rows.first()
+    await expect(firstRow).toBeVisible({ timeout: 5000 })
+    const valueInput = firstRow.locator('td').nth(3).locator('input').first()
+    await expect(valueInput).toBeVisible({ timeout: 5000 })
+    await valueInput.click()
+    await valueInput.fill(newValue)
+    await page.keyboard.press('Tab')
+    await page.waitForTimeout(300)
+  }
+)
 
 When(
   'I add a variable {string} of type color to the env folder',
@@ -775,6 +824,38 @@ When(
     if (!page) throw new Error('app must be launched')
     await addEnvVariable(page, key)
     await transformLastRowTo(page, 'environment-folder-variables-table-context-menu-item-datetime')
+  }
+)
+
+When(
+  'I edit the env folder expression variable {string} to {string}',
+  async ({}, varKey: string, newValue: string) => {
+    if (!page) throw new Error('app must be launched')
+    const rows = page.locator('[data-testid="environment-folder-variables-table"] tbody tr')
+    const targetRow = rows.filter({ has: page.locator('input').first().filter({ has: page.getByDisplayValue(varKey) }) }).first()
+
+    // If the row can't be found by display value, fall back to checking each row's key input
+    let row = targetRow
+    if (await targetRow.count() === 0) {
+      const allRows = await rows.all()
+      for (const r of allRows) {
+        const keyVal = await r.locator('td').nth(2).locator('input').first().inputValue().catch(() => '')
+        if (keyVal === varKey) {
+          row = r
+          break
+        }
+      }
+    }
+    await expect(row).toBeVisible({ timeout: 5000 })
+    // Expression fields use Monaco — find the editor and type into it
+    const monacoEditor = row.locator('.monaco-editor').first()
+    await expect(monacoEditor).toBeVisible({ timeout: 5000 })
+    await monacoEditor.click()
+    // Select all and replace
+    await page.keyboard.press('Control+a')
+    await page.keyboard.type(newValue)
+    await page.keyboard.press('Tab')
+    await page.waitForTimeout(500)
   }
 )
 

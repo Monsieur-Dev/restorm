@@ -5,13 +5,14 @@ services:
     image: lscr.io/linuxserver/webtop:ubuntu-xfce
     # Shared memory bump — Chromium / Electron crash with the default 64MB.
     shm_size: '2gb'
-    ports:
-      # Desktop in the browser: http://localhost:3000
-      - '3000:3000'
-      # NOTE: port 3001 (webtop HTTPS, optional) is intentionally NOT published
-      # — it collides with restorm-socketio's port on the host, and the
-      # devcontainer forwards localhost:3001 to that test service instead
-      # (see .devcontainer/forward-test-ports.sh).
+    # No `ports:` block on purpose. Port 3000 (webtop desktop) is forwarded by
+    # VS Code via `forwardPorts` in devcontainer.json so its `onAutoForward`
+    # handler fires and opens the webtop in the Simple Browser automatically.
+    # Compose-published ports are treated as "already exposed" and bypass that
+    # handler, which is why we don't publish here.
+    # (port 3001 webtop HTTPS is also not published — it collides with
+    # restorm-socketio on the host; forward-test-ports.sh forwards
+    # localhost:3001 to that test service instead.)
     volumes:
       # Mount the repo root (parent of this compose file) at a fixed container
       # path so nothing inside the container depends on the host layout

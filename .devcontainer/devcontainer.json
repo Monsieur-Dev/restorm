@@ -10,16 +10,45 @@
   // the desktop never comes up.
   "overrideCommand": false,
 
+  // Runs on the HOST before `docker compose up`. Prepares prerequisites the
+  // compose file assumes exist (external `gitable-tests` network, host-side
+  // `~/.claude` for the bind mount below) so a fresh machine just works.
+  // Bash is available on Linux, macOS, WSL2 and via Git Bash on Windows.
+  "initializeCommand": "bash .devcontainer/initialize.sh",
+
+  // Persist Claude Code sessions/config across devcontainer rebuilds.
+  // The concat trick picks HOME on Linux/macOS and USERPROFILE on Windows —
+  // only one is set at a time. `initializeCommand` above guarantees the
+  // source directory exists, so the bind mount never fails on first run.
+  "mounts": [
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.claude,target=/root/.claude,type=bind,consistency=cached"
+  ],
+
+  // The webtop image's s6 entrypoint sets HOME=/config (home of its `abc`
+  // user). VS Code attaches as root, but inherits that HOME, so the Claude
+  // CLI / VS Code extension look for credentials in /config/.claude
+  // instead of /root/.claude where we bind-mount them. Force HOME=/root
+  // for VS Code-spawned processes so the mount is actually picked up.
+  "containerEnv": {
+    "HOME": "/root"
+  },
+
   "forwardPorts": [3000],
   "portsAttributes": {
     "3000": {
       "label": "Webtop (desktop in browser, HTTP)",
-      "onAutoForward": "openBrowser"
+      // Opens the webtop desktop inside VS Code's Simple Browser panel
+      // each time the port is forwarded.
+      "onAutoForward": "openPreview"
     }
   },
 
   "postCreateCommand": "bash .devcontainer/postinstall.sh",
   "postStartCommand": "bash .devcontainer/forward-test-ports.sh",
+  // Launches the restorm Electron dev server once VS Code has attached.
+  // This command is long-running and never returns — that's expected;
+  // postAttachCommand runs async and doesn't block the container ready state.
+  "postAttachCommand": "pnpm dev:restorm",
 
   "remoteUser": "root",
 
@@ -28,8 +57,18 @@
       "extensions": [
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
-        "ms-playwright.playwright"
-      ]
+        "ms-playwright.playwright",
+        "anthropic.claude-code"
+      ],
+      "settings": {
+        // Belt-and-braces with containerEnv.HOME above: the webtop image's
+        // /etc/profile.d scripts re-export HOME=/config for interactive
+        // shells, so integrated terminals still see /config unless we
+        // override here explicitly.
+        "terminal.integrated.env.linux": {
+          "HOME": "/root"
+        }
+      }
     }
   }
 }

@@ -177,9 +177,10 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
   const openFolderTab = useCallback((folder: Folder, breadcrumbs: BreadcrumbItem[]) => {
     const tabId = buildTabId('folder', folder.id)
 
-    // Register initial checksum for dirty state tracking
-    const folderChecksum = computeChecksum(JSON.parse(JSON.stringify(folder)) as Folder)
-    registerTabDirtyState(folder.id, folderChecksum)
+    setTimeout(() => {
+      const folderChecksum = computeChecksum(JSON.parse(JSON.stringify(folder)) as Folder)
+      registerTabDirtyState(folder.id, folderChecksum)
+    }, 500)
 
     setWorkbenchTree((prev) => {
       const newTab: FolderTab = {
@@ -199,7 +200,11 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
   const openEnvironmentFolderTab = useCallback((folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[]) => {
     const tabId = buildTabId('env-folder', folder.id)
 
-    // Register initial checksum for dirty state tracking
+    // Defer checksum registration: the KV table mutates the folder's
+    // variables (adding runtime IDs, normalizing types) on first render.
+    // Computing the checksum synchronously would capture the pre-mutation
+    // state, creating a baseline that never matches subsequent updates.
+    // A short deferral lets the first render cycle settle.
     const folderChecksum = computeChecksum(JSON.parse(JSON.stringify(folder)))
     registerTabDirtyState(folder.id, folderChecksum)
 
@@ -460,8 +465,27 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     })
     if (restoredTree) {
       setWorkbenchTree(restoredTree)
+      // Register dirty-state baselines for every restored tab so the
+      // dirty-dot tracking works for modify + revert cycles.
+      const registerRestoredTabs = (groups: GroupNode[]): void => {
+        for (const node of groups) {
+          if (isContainerNode(node)) {
+            registerRestoredTabs(node.groups)
+          } else {
+            for (const tab of node.tabs) {
+              const typed = tab as { folder?: EnvironmentFolder | Folder; request?: Request }
+              const doc = typed.folder ?? typed.request
+              if (doc) {
+                const checksum = computeChecksum(JSON.parse(JSON.stringify(doc)))
+                registerTabDirtyState(doc.id, checksum)
+              }
+            }
+          }
+        }
+      }
+      registerRestoredTabs(restoredTree.groups)
     }
-  }, [setWorkbenchTree])
+  }, [setWorkbenchTree, registerTabDirtyState])
 
   // Handle sizes change from workbench sash dragging
   const handleSizesChange = useCallback((nodeId: string, sizes: number[]) => {
