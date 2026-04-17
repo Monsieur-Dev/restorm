@@ -1,13 +1,22 @@
-import React from 'react'
+import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { InputBox, Button, ControlGroup } from 'electron-core-ui/renderer'
-import type { EnvironmentFolder } from '../../../../shared/types/collections'
+import { InputBox, Button, ControlGroup, useFileService, ContextMenu, type ContextMenuItem } from 'electron-core-ui/renderer'
+import { getFavorites, removeFavorite, reorderFavorites } from '../../services/favoritesStore'
+import type { EnvironmentFolder, FolderItem } from '../../../../shared/types/collections'
 import type { ApiDocumentation } from '../../../../shared/types/apiDocumentation'
 import { Badge, type BadgeType } from '../common/Badge'
+
+interface FavoriteRequest {
+  id: string
+  name: string
+  method: string
+  path: string
+}
 
 interface Props {
   folder: EnvironmentFolder
   onSwitchTab: (tabId: string) => void
+  onRequestClick?: (requestId: string) => void
 }
 
 const SOURCE_CONFIG: Record<string, { logo?: string; icon?: string; label: string; color: string }> = {
@@ -24,9 +33,85 @@ const SOURCE_CONFIG: Record<string, { logo?: string; icon?: string; label: strin
   url: { icon: 'link', label: 'URL Import', color: '#888' }
 }
 
-const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab }) => {
+function collectRequests(items: FolderItem[], parentPath: string[] = []): FavoriteRequest[] {
+  const result: FavoriteRequest[] = []
+  for (const item of items) {
+    if ('items' in item) {
+      result.push(...collectRequests(item.items, [...parentPath, item.name]))
+    } else if ('method' in item) {
+      const req = item as { id: string; name: string; method: string }
+      result.push({ id: req.id, name: req.name, method: req.method, path: parentPath.join(' / ') })
+    }
+  }
+  return result
+}
+
+const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequestClick }) => {
   const { t } = useTranslation()
+  const { filePath } = useFileService()
+  const [favVersion, setFavVersion] = useState(0)
   const apiDoc = (folder as unknown as { apiDocumentation?: ApiDocumentation }).apiDocumentation
+
+  const favoriteRequests = useMemo(() => {
+    void favVersion // reactivity dep
+    if (!filePath) return []
+    const ids = getFavorites(filePath)
+    if (ids.length === 0) return []
+    const allRequests = collectRequests(folder.items)
+    const idSet = new Set(ids)
+    return allRequests.filter((r) => idSet.has(r.id))
+  }, [filePath, folder.items, favVersion])
+
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const [dropIndex, setDropIndex] = useState<number | null>(null)
+  const [favContextMenu, setFavContextMenu] = useState<{ visible: boolean; x: number; y: number; requestId: string }>({ visible: false, x: 0, y: 0, requestId: '' })
+
+  const handleDragStart = (index: number): void => { setDragIndex(index) }
+  const handleDragOver = (e: React.DragEvent, index: number): void => { e.preventDefault(); setDropIndex(index) }
+  const handleDragEnd = (): void => {
+    if (dragIndex !== null && dropIndex !== null && dragIndex !== dropIndex && filePath) {
+      const ids = favoriteRequests.map((r) => r.id)
+      const removed = ids.splice(dragIndex, 1)
+      if (removed[0]) {
+        ids.splice(dropIndex, 0, removed[0])
+        reorderFavorites(filePath, ids)
+      }
+    }
+    setDragIndex(null)
+    setDropIndex(null)
+  }
+
+  const handleFavContextMenu = (e: React.MouseEvent, requestId: string): void => {
+    e.preventDefault()
+    setFavContextMenu({ visible: true, x: e.clientX, y: e.clientY, requestId })
+  }
+
+  const handleRemoveFavorite = (): void => {
+    if (filePath && favContextMenu.requestId) {
+      removeFavorite(filePath, favContextMenu.requestId)
+    }
+    setFavContextMenu((prev) => ({ ...prev, visible: false }))
+  }
+
+  const favContextMenuItems: ContextMenuItem[] = [
+    {
+      id: 'remove-favorite',
+      label: t('folderView.home.removeFavorite'),
+      icon: 'star-full',
+      onClick: handleRemoveFavorite
+    }
+  ]
+
+  // Listen for favorite changes (custom event from favoritesStore)
+  React.useEffect(() => {
+    const handler = (): void => { setFavVersion((v) => v + 1) }
+    window.addEventListener('restorm:favorites-changed', handler)
+    window.addEventListener('storage', handler)
+    return () => {
+      window.removeEventListener('restorm:favorites-changed', handler)
+      window.removeEventListener('storage', handler)
+    }
+  }, [])
   const importSource = folder.importSource
   const sourceConfig = importSource ? SOURCE_CONFIG[importSource] : undefined
 
@@ -111,11 +196,35 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab }) => {
         </div>
       )}
 
-      {/* ── Favorite requests (static placeholder) ── */}
-      <Section title={t('folderView.home.favoriteRequests')} icon="star-full">
-        <RequestRow method="GET" path="/pet/findByStatus" name="Finds Pets by status" />
-        <RequestRow method="GET" path="/pet/{petId}" name="Find pet by ID" />
-      </Section>
+      {/* ── Favorite requests ── */}
+      {favoriteRequests.length > 0 && (
+        <Section title={t('folderView.home.favoriteRequests')} icon="star-full" dataTestId="home-favorites-section">
+          {favoriteRequests.map((req, i) => (
+            <RequestRow
+              key={req.id}
+              method={req.method}
+              path={req.path}
+              name={req.name}
+              onClick={() => { onRequestClick?.(req.id) }}
+              onContextMenu={(e) => { handleFavContextMenu(e, req.id) }}
+              draggable
+              onDragStart={() => { handleDragStart(i) }}
+              onDragOver={(e) => { handleDragOver(e, i) }}
+              onDragEnd={handleDragEnd}
+              isDragOver={dropIndex === i && dragIndex !== i}
+              dataTestId={`home-favorite-${req.id}`}
+            />
+          ))}
+        </Section>
+      )}
+      <ContextMenu
+        visible={favContextMenu.visible}
+        x={favContextMenu.x}
+        y={favContextMenu.y}
+        items={favContextMenuItems}
+        onRequestClose={() => { setFavContextMenu((prev) => ({ ...prev, visible: false })) }}
+        data-testid="home-favorites-context-menu"
+      />
 
       {/* ── Footer: contact + source ── */}
       <div style={{ marginTop: 24, fontSize: 11, opacity: 0.4, display: 'flex', flexWrap: 'wrap', gap: '4px 16px' }}>
@@ -151,8 +260,8 @@ const ActionButton: React.FC<{ icon: string; label: string; description: string;
 
 // ── Section ──
 
-const Section: React.FC<{ title: string; icon: string; children: React.ReactNode }> = ({ title, icon, children }) => (
-  <div style={{ marginBottom: 24 }}>
+const Section: React.FC<{ title: string; icon: string; children: React.ReactNode; dataTestId?: string }> = ({ title, icon, children, dataTestId }) => (
+  <div style={{ marginBottom: 24 }} {...(dataTestId ? { 'data-testid': dataTestId } : {})}>
     <h3 style={{ margin: '0 0 10px', fontSize: 12, fontWeight: 600, textTransform: 'uppercase', opacity: 0.4, letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 6 }}>
       <span className={`codicon codicon-${icon}`} style={{ fontSize: 14 }} />
       {title}
@@ -165,15 +274,33 @@ const Section: React.FC<{ title: string; icon: string; children: React.ReactNode
 
 // ── Request row with method badge ──
 
-const RequestRow: React.FC<{ method: string; path: string; name: string }> = ({ method, path, name }) => (
+const RequestRow: React.FC<{
+  method: string; path: string; name: string
+  onClick?: () => void; onContextMenu?: (e: React.MouseEvent) => void
+  draggable?: boolean; onDragStart?: () => void; onDragOver?: (e: React.DragEvent) => void; onDragEnd?: () => void
+  isDragOver?: boolean; dataTestId?: string
+}> = ({ method, path, name, onClick, onContextMenu, draggable, onDragStart, onDragOver, onDragEnd, isDragOver, dataTestId }) => (
   <div
     style={{
       display: 'flex', alignItems: 'center', gap: 10, padding: '7px 12px',
-      borderRadius: 6, cursor: 'pointer', fontSize: 13
+      borderRadius: 6, cursor: 'pointer', fontSize: 13,
+      borderTop: isDragOver ? '2px solid var(--focusBorder)' : '2px solid transparent'
     }}
+    onClick={onClick}
+    onContextMenu={onContextMenu}
+    onDragOver={onDragOver}
+    onDragEnd={onDragEnd}
     onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--list-hoverBackground)' }}
     onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+    {...(dataTestId ? { 'data-testid': dataTestId } : {})}
   >
+    {draggable && (
+      <span
+        draggable
+        onDragStart={(e) => { e.stopPropagation(); onDragStart?.() }}
+        style={{ cursor: 'grab', opacity: 0.4, fontSize: 12, userSelect: 'none', lineHeight: 1 }}
+      >⋮⋮</span>
+    )}
     <Badge type={method.toUpperCase() as BadgeType} />
     <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
     <span style={{ fontSize: 11, opacity: 0.35, fontFamily: 'monospace' }}>{path}</span>

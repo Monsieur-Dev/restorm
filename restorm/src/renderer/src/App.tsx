@@ -888,6 +888,8 @@ const App: React.FC = () => {
             navigationEnabled={navigationEnabled}
             tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
             filePath={filePath ?? undefined}
+            isItemFavorite={isItemFavorite}
+            onToggleFavorite={handleToggleFavorite}
           />
         </div>
       )}

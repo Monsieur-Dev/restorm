@@ -454,10 +454,119 @@ When('I click the sidebar env folder {string}', async ({}, folderName: string) =
 
 When('I switch to the {string} inner tab', async ({}, tabLabel: string) => {
   if (!page) throw new Error('app must be launched')
-  const tab = page.locator('[role="tab"]').filter({ hasText: new RegExp(`^${tabLabel}$`) }).first()
+  let tab
+  if (tabLabel === 'home') {
+    // Home tab uses a codicon icon, not text
+    tab = page.locator('[role="tab"]').filter({ has: page.locator('.codicon-home') }).first()
+  } else {
+    tab = page.locator('[role="tab"]').filter({ hasText: new RegExp(`^${tabLabel}$`) }).first()
+  }
   await expect(tab).toBeVisible({ timeout: 2000 })
   await tab.click()
   await page.waitForTimeout(300)
+})
+
+// ---------------------------------------------------------------------------
+// Favorites
+// ---------------------------------------------------------------------------
+
+async function clickContextMenuItem(currentPage: Page, pattern: RegExp): Promise<void> {
+  // Context menu items may render as <a> or <li> elements — match by visible text
+  const item = currentPage.locator('.action-menu-item, [role="menuitem"]')
+    .filter({ hasText: pattern }).first()
+  await expect(item).toBeVisible({ timeout: 2000 })
+  await item.click()
+  await currentPage.waitForTimeout(300)
+}
+
+When('I right-click the sidebar request {string} and add to favorites', async ({}, requestName: string) => {
+  if (!page) throw new Error('app must be launched')
+  const row = page.locator('[data-testid="sidebar-listview"] .list-view-row')
+    .filter({ has: page.getByText(requestName, { exact: true }) }).first()
+  await expect(row).toBeVisible({ timeout: 2000 })
+  await row.click({ button: 'right' })
+  await page.waitForTimeout(200)
+  await clickContextMenuItem(page, /Add to favorites|Ajouter aux favoris/)
+})
+
+When('I right-click the sidebar request {string} and remove from favorites', async ({}, requestName: string) => {
+  if (!page) throw new Error('app must be launched')
+  const row = page.locator('[data-testid="sidebar-listview"] .list-view-row')
+    .filter({ has: page.getByText(requestName, { exact: true }) }).first()
+  await expect(row).toBeVisible({ timeout: 2000 })
+  await row.click({ button: 'right' })
+  await page.waitForTimeout(200)
+  await clickContextMenuItem(page, /Remove from favorites|Retirer des favoris/)
+})
+
+When('I right-click the tab {string} and add to favorites', async ({}, tabName: string) => {
+  if (!page) throw new Error('app must be launched')
+  const tab = page.locator('.tab[role="tab"]')
+    .filter({ has: page.getByText(tabName, { exact: true }) }).first()
+  await expect(tab).toBeVisible({ timeout: 2000 })
+  await tab.click({ button: 'right' })
+  await page.waitForTimeout(500)
+  await clickContextMenuItem(page, /Add to favorites|Ajouter aux favoris/)
+})
+
+When('I right-click the tab {string} and remove from favorites', async ({}, tabName: string) => {
+  if (!page) throw new Error('app must be launched')
+  const tab = page.locator('.tab[role="tab"]')
+    .filter({ has: page.getByText(tabName, { exact: true }) }).first()
+  await expect(tab).toBeVisible({ timeout: 2000 })
+  await tab.click({ button: 'right' })
+  await page.waitForTimeout(500)
+  await clickContextMenuItem(page, /Remove from favorites|Retirer des favoris/)
+})
+
+When('I right-click {string} in the home favorites and remove', async ({}, requestName: string) => {
+  if (!page) throw new Error('app must be launched')
+  const section = page.locator('[data-testid="home-favorites-section"]')
+  await expect(section).toBeVisible({ timeout: 2000 })
+  const row = section.getByText(requestName).first()
+  await expect(row).toBeVisible({ timeout: 2000 })
+  await row.click({ button: 'right' })
+  await page.waitForTimeout(300)
+  await clickContextMenuItem(page, /Remove from favorites|Retirer des favoris/)
+})
+
+Then('the home favorites section should contain {string}', async ({}, requestName: string) => {
+  if (!page) throw new Error('app must be launched')
+  const section = page.locator('[data-testid="home-favorites-section"]')
+  await expect(section).toBeVisible({ timeout: 2000 })
+  await expect(section.getByText(requestName)).toBeVisible({ timeout: 2000 })
+})
+
+Then('the home favorites section should not be visible', async () => {
+  if (!page) throw new Error('app must be launched')
+  const section = page.locator('[data-testid="home-favorites-section"]')
+  await expect(section).not.toBeVisible({ timeout: 2000 })
+})
+
+When('I rename the sidebar request {string} to {string}', async ({}, oldName: string, newName: string) => {
+  if (!page) throw new Error('app must be launched')
+  const row = page.locator('[data-testid="sidebar-listview"] .list-view-row')
+    .filter({ has: page.getByText(oldName, { exact: true }) }).first()
+  await expect(row).toBeVisible({ timeout: 2000 })
+  // Double-click or F2 to enter rename mode
+  await row.click()
+  await page.keyboard.press('F2')
+  await page.waitForTimeout(200)
+  const input = page.locator('[data-testid="sidebar-listview"] input[type="text"]').first()
+  await expect(input).toBeVisible({ timeout: 2000 })
+  await input.fill(newName)
+  await page.keyboard.press('Enter')
+  await page.waitForTimeout(500)
+})
+
+When('I delete the sidebar request {string}', async ({}, requestName: string) => {
+  if (!page) throw new Error('app must be launched')
+  const row = page.locator('[data-testid="sidebar-listview"] .list-view-row')
+    .filter({ has: page.getByText(requestName, { exact: true }) }).first()
+  await expect(row).toBeVisible({ timeout: 2000 })
+  await row.click({ button: 'right' })
+  await page.waitForTimeout(200)
+  await clickContextMenuItem(page, /^Delete$|^Supprimer$/)
 })
 
 // ---------------------------------------------------------------------------

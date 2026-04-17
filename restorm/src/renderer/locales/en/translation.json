@@ -68,6 +68,7 @@
       "viewDocs": "View documentation",
       "viewDocsDesc": "Browse the API documentation, models, and endpoints",
       "favoriteRequests": "Favorite requests",
+      "removeFavorite": "Remove from favorites",
       "refresh": "Refresh"
     },
     "docs": {

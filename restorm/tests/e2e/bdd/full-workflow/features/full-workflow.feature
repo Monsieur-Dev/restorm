@@ -213,6 +213,30 @@ Feature: Full workflow end-to-end scenario
     When I save the file with Ctrl+S
     Then the file's dirty-state should be: clean
 
+    # ── Favorites: sidebar context menu ──
+    When I focus the "Swagger Petstore" folder tab
+    When I switch to the "home" inner tab
+    When I expand the sidebar folder "Swagger Petstore"
+    When I expand the sidebar folder "pet"
+    When I right-click the sidebar request "Find pet by ID" and add to favorites
+    Then the home favorites section should contain "Find pet by ID"
+    When I right-click the sidebar request "Find pet by ID" and remove from favorites
+    Then the home favorites section should not be visible
+    # ── Favorites: tab context menu ──
+    When I right-click the tab "Find pet by ID" and add to favorites
+    When I focus the "Swagger Petstore" folder tab
+    When I switch to the "home" inner tab
+    Then the home favorites section should contain "Find pet by ID"
+    When I right-click the tab "Find pet by ID" and remove from favorites
+    When I focus the "Swagger Petstore" folder tab
+    When I switch to the "home" inner tab
+    Then the home favorites section should not be visible
+    # ── Favorites: remove from home page context menu ──
+    When I right-click the sidebar request "Find pet by ID" and add to favorites
+    Then the home favorites section should contain "Find pet by ID"
+    When I right-click "Find pet by ID" in the home favorites and remove
+    Then the home favorites section should not be visible
+
     When I focus the "Swagger Petstore" folder tab
     And I expand the sidebar folder "Swagger Petstore"
     And I expand the sidebar folder "pet"

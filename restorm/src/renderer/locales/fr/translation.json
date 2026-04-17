@@ -68,6 +68,7 @@
       "viewDocs": "Voir la documentation",
       "viewDocsDesc": "Parcourez la documentation de l'API, les modèles et les endpoints",
       "favoriteRequests": "Requêtes favorites",
+      "removeFavorite": "Retirer des favoris",
       "refresh": "Rafraîchir"
     },
     "docs": {

@@ -18,6 +18,8 @@ function load(): FavoritesState {
 
 function save(state: FavoritesState): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+  // Dispatch a custom event so same-window listeners can react immediately
+  window.dispatchEvent(new CustomEvent('restorm:favorites-changed'))
 }
 
 export function getFavorites(filePath: string): string[] {
@@ -51,4 +53,10 @@ export function toggleFavorite(filePath: string, requestId: string): boolean {
   }
   addFavorite(filePath, requestId)
   return true
+}
+
+export function reorderFavorites(filePath: string, orderedIds: string[]): void {
+  const state = load()
+  state[filePath] = orderedIds
+  save(state)
 }
