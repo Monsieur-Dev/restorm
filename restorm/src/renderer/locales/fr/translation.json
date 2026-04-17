@@ -60,6 +60,14 @@
       "notes": "Notes",
       "homePlaceholder": "Page d'accueil du dossier d'environnement — bientôt disponible"
     },
+    "home": {
+      "configureEnvs": "Configurer les environnements",
+      "configureEnvsDesc": "Configurez vos URLs de base, variables et authentification pour chaque environnement",
+      "viewDocs": "Voir la documentation",
+      "viewDocsDesc": "Parcourez la documentation de l'API, les modèles et les endpoints",
+      "favoriteRequests": "Requêtes favorites",
+      "refresh": "Rafraîchir"
+    },
     "docs": {
       "source": "Source :",
       "refresh": "Actualiser la doc",

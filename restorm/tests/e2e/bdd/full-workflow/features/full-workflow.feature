@@ -164,6 +164,7 @@ Feature: Full workflow end-to-end scenario
     When I save the file with Ctrl+S
     Then the file's dirty-state should be: clean
 
+    When I switch to the "Configuration" inner tab
     When I add a variable "themeColor" of type color to the env folder
     Then the environment-folder variables table color picker should be visible
     When I add a variable "launchDate" of type dateTime to the env folder
@@ -183,6 +184,7 @@ Feature: Full workflow end-to-end scenario
     When I close the current file
     When I open the welcome recent file "workflow-collection.restorm"
     When I click the sidebar env folder "Swagger Petstore"
+    When I switch to the "Configuration" inner tab
     When I edit and revert the first env folder variable
     Then the active tab should not have a dirty dot
     And the file's dirty-state should be: clean

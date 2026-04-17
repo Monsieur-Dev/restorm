@@ -452,6 +452,14 @@ When('I click the sidebar env folder {string}', async ({}, folderName: string) =
   await page.waitForTimeout(500)
 })
 
+When('I switch to the {string} inner tab', async ({}, tabLabel: string) => {
+  if (!page) throw new Error('app must be launched')
+  const tab = page.locator('[role="tab"]').filter({ hasText: new RegExp(`^${tabLabel}$`) }).first()
+  await expect(tab).toBeVisible({ timeout: 2000 })
+  await tab.click()
+  await page.waitForTimeout(300)
+})
+
 // ---------------------------------------------------------------------------
 // URL tooltip + searchbar interactions
 // ---------------------------------------------------------------------------

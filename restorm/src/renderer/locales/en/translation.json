@@ -60,6 +60,14 @@
       "notes": "Notes",
       "homePlaceholder": "Environment folder home page — coming soon"
     },
+    "home": {
+      "configureEnvs": "Configure environments",
+      "configureEnvsDesc": "Set up your base URLs, variables, and authentication for each environment",
+      "viewDocs": "View documentation",
+      "viewDocsDesc": "Browse the API documentation, models, and endpoints",
+      "favoriteRequests": "Favorite requests",
+      "refresh": "Refresh"
+    },
     "docs": {
       "source": "Source:",
       "refresh": "Refresh docs",

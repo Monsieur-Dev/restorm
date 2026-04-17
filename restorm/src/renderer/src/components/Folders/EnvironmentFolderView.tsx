@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import EnvironmentFolderHome from './EnvironmentFolderHome'
 import { useTranslation } from 'react-i18next'
 import {
   ListView,
@@ -633,12 +634,15 @@ interface ApiDocWithSource {
 
 const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ folder, onFolderChange }) => {
   const { t } = useTranslation()
+  const switchTabFnRef = useRef<((tabId: string) => void) | null>(null)
+  const handleSwitchTab = useCallback((tabId: string) => { switchTabFnRef.current?.(tabId) }, [])
+  const handleSwitchTabReady = useCallback((fn: (tabId: string) => void) => { switchTabFnRef.current = fn }, [])
 
-  // Home tab — placeholder for future environment folder overview page
+  // Home tab — overview page for the environment folder
   const homeTab: Tab = {
     id: 'home',
     label: <span className="codicon codicon-home" />,
-    content: <div style={{ padding: 24, opacity: 0.5, textAlign: 'center' }}>{t('folderView.tabs.homePlaceholder')}</div>
+    content: <EnvironmentFolderHome folder={folder} onSwitchTab={handleSwitchTab} />
   }
 
   // Configuration tab with environment management
@@ -728,7 +732,8 @@ const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ fold
     <BaseFolderView
       folder={folder}
       additionalTabs={[homeTab, configurationTab]}
-      defaultActiveTabId="configuration"
+      defaultActiveTabId="home"
+      onSwitchTabReady={handleSwitchTabReady}
       documentationOverride={compiledRootDocs}
       docsHeader={docsHeader}
     />
