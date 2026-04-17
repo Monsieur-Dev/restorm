@@ -31,7 +31,9 @@
       "defineVariables": "Définir les variables",
       "delete": "Supprimer",
       "clone": "Cloner",
-      "rename": "Renommer"
+      "rename": "Renommer",
+      "addToFavorites": "Ajouter aux favoris",
+      "removeFromFavorites": "Retirer des favoris"
     },
     "deleteConfirm": {
       "title": "Confirmer la suppression",
@@ -126,7 +128,9 @@
     "removeTag": "Supprimer le tag",
     "tabContextMenu": {
       "close": "Fermer",
-      "closeOthers": "Fermer les autres"
+      "closeOthers": "Fermer les autres",
+      "addToFavorites": "Ajouter aux favoris",
+      "removeFromFavorites": "Retirer des favoris"
     }
   },
   "codeEditor": {

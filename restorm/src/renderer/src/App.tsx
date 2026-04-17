@@ -39,6 +39,7 @@ import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
 import { useWorkbenchTabs } from './hooks/useWorkbenchTabs'
 import { useSidebarState } from './hooks/useSidebarState'
+import { isFavorite as favoritesStoreIsFavorite, toggleFavorite as favoritesStoreToggle } from './services/favoritesStore'
 import { useFileManagement } from './hooks/useFileManagement'
 import { useImport } from './hooks/useImport'
 import { prepareForSerialization } from './utils/serialization'
@@ -300,6 +301,20 @@ const App: React.FC = () => {
     setSidebarEditingItemId(itemId)
   }, [])
 
+  // Favorites management
+  const [favoritesVersion, setFavoritesVersion] = useState(0)
+  const isItemFavorite = useCallback((itemId: string): boolean => {
+    void favoritesVersion // React dep
+    if (!filePath) return false
+    return favoritesStoreIsFavorite(filePath, itemId)
+  }, [filePath, favoritesVersion])
+
+  const handleToggleFavorite = useCallback((itemId: string): void => {
+    if (!filePath) return
+    favoritesStoreToggle(filePath, itemId)
+    setFavoritesVersion((v) => v + 1)
+  }, [filePath])
+
   const { sidebarItems: sidebarItemsWithContextMenu } = useSidebarState({
     rootItems,
     expandedIds,
@@ -307,7 +322,9 @@ const App: React.FC = () => {
     onCloneItem: handleCloneItem,
     onCreateSubfolder: handleCreateSubfolder,
     onDeleteItem: handleDeleteItem,
-    onRenameItem: handleSidebarRenameItem
+    onRenameItem: handleSidebarRenameItem,
+    isItemFavorite,
+    onToggleFavorite: handleToggleFavorite
   })
 
   // Wrapper for confirmDelete that uses deleteConfirmation.itemId
@@ -833,6 +850,8 @@ const App: React.FC = () => {
               navigationEnabled={navigationEnabled}
               tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
               filePath={filePath ?? undefined}
+              isItemFavorite={isItemFavorite}
+              onToggleFavorite={handleToggleFavorite}
             />
           }
           initialWidth={260}

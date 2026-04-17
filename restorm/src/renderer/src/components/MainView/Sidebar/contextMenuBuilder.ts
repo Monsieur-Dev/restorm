@@ -22,7 +22,9 @@ export const buildContextMenuForItem = (
   onCloneItem: ContextMenuActionHandler,
   onCreateSubfolder: ContextMenuActionHandler,
   onDeleteItem: ContextMenuActionHandler,
-  onRenameItem: ContextMenuActionHandler
+  onRenameItem: ContextMenuActionHandler,
+  isItemFavorite?: (itemId: string) => boolean,
+  onToggleFavorite?: ContextMenuActionHandler
 ): SidebarContextMenuItem[] => {
   const isItemFolder = Array.isArray(item.children)
   const itemId = item.id
@@ -59,7 +61,16 @@ export const buildContextMenuForItem = (
     ]
   }
 
+  const isFav = isItemFavorite?.(itemId) ?? false
+
   return [
+    {
+      id: 'toggle-favorite',
+      label: isFav ? t('sidebar.contextMenu.removeFromFavorites') : t('sidebar.contextMenu.addToFavorites'),
+      icon: isFav ? 'star-full' : 'star-empty',
+      onClick: () => { onToggleFavorite?.(itemId) }
+    },
+    { id: 'sep-fav', isSeparator: true, label: '' },
     {
       id: 'clone-item',
       label: t('sidebar.contextMenu.clone'),
@@ -94,15 +105,17 @@ export const attachContextMenus = (
   onCloneItem: ContextMenuActionHandler,
   onCreateSubfolder: ContextMenuActionHandler,
   onDeleteItem: ContextMenuActionHandler,
-  onRenameItem: ContextMenuActionHandler
+  onRenameItem: ContextMenuActionHandler,
+  isItemFavorite?: (itemId: string) => boolean,
+  onToggleFavorite?: ContextMenuActionHandler
 ): ListViewItemData[] =>
   items.map((item) => {
     const withMenu = {
       ...item,
-      contextMenuItems: buildContextMenuForItem(item, t, onCloneItem, onCreateSubfolder, onDeleteItem, onRenameItem)
+      contextMenuItems: buildContextMenuForItem(item, t, onCloneItem, onCreateSubfolder, onDeleteItem, onRenameItem, isItemFavorite, onToggleFavorite)
     } as ListViewItemData
     if (item.children && item.children.length > 0) {
-      withMenu.children = attachContextMenus(item.children, t, onCloneItem, onCreateSubfolder, onDeleteItem, onRenameItem)
+      withMenu.children = attachContextMenus(item.children, t, onCloneItem, onCreateSubfolder, onDeleteItem, onRenameItem, isItemFavorite, onToggleFavorite)
     }
     return withMenu
   })

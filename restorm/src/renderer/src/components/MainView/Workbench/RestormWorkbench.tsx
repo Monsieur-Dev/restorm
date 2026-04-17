@@ -171,6 +171,10 @@ export interface RestormWorkbenchProps {
   getRequestById?: (id: string) => Request | undefined
   /** Get a reactive Folder by ID (for reactivity support) */
   getFolderById?: (id: string) => Folder | undefined
+  /** Check if a request is a favorite */
+  isItemFavorite?: ((itemId: string) => boolean) | undefined
+  /** Toggle favorite status on a request */
+  onToggleFavorite?: ((itemId: string) => void) | undefined
   /** Get a reactive EnvironmentFolder by ID (for reactivity support) */
   getEnvironmentFolderById?: (id: string) => EnvironmentFolder | undefined
   /** Callback fired when an environment folder's data changes */
@@ -224,7 +228,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   getEnvironmentFolderById,
   navigationEnabled,
   tabSwitcherAnchorSelector,
-  filePath
+  filePath,
+  isItemFavorite,
+  onToggleFavorite
 }, ref) => {
   const { t } = useTranslation()
   const editorWorkbenchRef = useRef<EditorWorkbenchHandle>(null)
@@ -818,25 +824,39 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   )
 
   const getTabContextMenuItems = useCallback(
-    (_tab: EditorTab, _groupId: string, actions: { close: () => void; closeOthersInGroup: () => void }): ContextMenuItem[] => {
-      const items: ContextMenuItem[] = [
-        {
-          id: 'close',
-          label: t('workbench.tabContextMenu.close'),
-          icon: 'close',
-          onClick: actions.close
-        },
-        {
-          id: 'close-others',
-          label: t('workbench.tabContextMenu.closeOthers'),
-          icon: 'close-all',
-          onClick: actions.closeOthersInGroup
-        }
-      ]
+    (tab: EditorTab, _groupId: string, actions: { close: () => void; closeOthersInGroup: () => void }): ContextMenuItem[] => {
+      const items: ContextMenuItem[] = []
+      const typed = tab as { request?: { id: string }; tabType?: string }
+      const isRequest = typed.tabType?.includes('request')
+      const requestId = typed.request?.id
+
+      if (isRequest && requestId && isItemFavorite && onToggleFavorite) {
+        const isFav = isItemFavorite(requestId)
+        items.push({
+          id: 'toggle-favorite',
+          label: isFav ? t('workbench.tabContextMenu.removeFromFavorites') : t('workbench.tabContextMenu.addToFavorites'),
+          icon: isFav ? 'star-full' : 'star-empty',
+          onClick: () => { onToggleFavorite(requestId) }
+        })
+        items.push({ id: 'sep-fav', label: '', isSeparator: true })
+      }
+
+      items.push({
+        id: 'close',
+        label: t('workbench.tabContextMenu.close'),
+        icon: 'close',
+        onClick: actions.close
+      })
+      items.push({
+        id: 'close-others',
+        label: t('workbench.tabContextMenu.closeOthers'),
+        icon: 'close-all',
+        onClick: actions.closeOthersInGroup
+      })
 
       return items
     },
-    [t]
+    [t, isItemFavorite, onToggleFavorite]
   )
 
   const workbenchRenderTabContent = useMemo(() => {

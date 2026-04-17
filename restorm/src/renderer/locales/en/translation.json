@@ -31,7 +31,9 @@
       "defineVariables": "Define variables",
       "delete": "Delete",
       "clone": "Clone",
-      "rename": "Rename"
+      "rename": "Rename",
+      "addToFavorites": "Add to favorites",
+      "removeFromFavorites": "Remove from favorites"
     },
     "deleteConfirm": {
       "title": "Confirm deletion",
@@ -126,7 +128,9 @@
     "removeTag": "Remove tag",
     "tabContextMenu": {
       "close": "Close",
-      "closeOthers": "Close others"
+      "closeOthers": "Close others",
+      "addToFavorites": "Add to favorites",
+      "removeFromFavorites": "Remove from favorites"
     }
   },
   "codeEditor": {
