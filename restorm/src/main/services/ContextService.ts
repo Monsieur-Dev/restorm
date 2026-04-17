@@ -313,6 +313,46 @@ class ContextService {
       }
     }
 
+    // Second pass: re-resolve all ExpressionValues with the complete context.
+    // This allows an Expression defined in a parent env to reference variables
+    // that are overridden by a child env (e.g. baseUrl in root uses scheme
+    // that is overridden by sub-envs http/https).
+    for (const kv of meta.rawVariables) {
+      if (kv.enabled === false) continue
+      if (kv.key && kv.value instanceof ExpressionValue) {
+        const raw = kv.value.toString()
+        const reResolved = this.transformValue(raw, finalContext)
+        if (reResolved !== finalContext[kv.key]) {
+          finalContext[kv.key] = reResolved
+          if (kv.id) {
+            this.storeAndBroadcastTransformResult(kv.id, {
+              contextUsed: { ...finalContext },
+              transformedValue: reResolved,
+              rawValue: raw,
+              key: kv.key
+            })
+          }
+        }
+      }
+    }
+
+    // Also re-resolve inherited parent ExpressionValues that may depend
+    // on variables overridden by this environment.
+    for (const parentId of parentChain) {
+      const parentMeta = this.environmentMeta.get(parentId)
+      if (!parentMeta) continue
+      for (const kv of parentMeta.rawVariables) {
+        if (kv.enabled === false) continue
+        if (kv.key && kv.value instanceof ExpressionValue) {
+          const raw = kv.value.toString()
+          const reResolved = this.transformValue(raw, finalContext)
+          if (reResolved !== finalContext[kv.key]) {
+            finalContext[kv.key] = reResolved
+          }
+        }
+      }
+    }
+
     // Store the result
     this.transformedContexts.set(envId, finalContext)
 

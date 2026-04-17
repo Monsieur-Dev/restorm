@@ -658,7 +658,11 @@ function createSwaggerEnvironment(spec: SwaggerSpec, overrideBaseUrl: string | u
     }
   }
 
-  const defaultScheme = schemes[0] ?? 'https'
+  // For localhost, default to http (dev servers rarely use https)
+  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1'
+  const defaultScheme = isLocalhost
+    ? (schemes.includes('http') ? 'http' : (schemes[0] ?? 'http'))
+    : (schemes[0] ?? 'https')
 
   const rootVariables = [
     kvOfType('scheme', new StringValue(defaultScheme))
@@ -674,18 +678,24 @@ function createSwaggerEnvironment(spec: SwaggerSpec, overrideBaseUrl: string | u
   }
   if (basePath !== '') rootVariables.push(kvOfType('baseRoute', new StringValue(basePath)))
 
-  // Build a `{{scheme}}://{{host}}[:{{port}}][{{baseRoute}}]` template whose
-  // literal parts are only emitted when the corresponding root var exists.
+  // Build a `{{scheme}}://{{host}}[:{{port}}][{{baseRoute}}]` template.
+  // Placed on root so all sub-envs inherit it; the second-pass resolution
+  // in ContextService re-evaluates it with the child's overridden `scheme`.
   const baseUrlTemplate = `{{scheme}}://{{host}}${port !== '' ? ':{{port}}' : ''}${basePath !== '' ? '{{baseRoute}}' : ''}`
+  rootVariables.push(kvOfType('baseUrl', new ExpressionValue(baseUrlTemplate)))
 
-  const subEnvironments: Environment['subEnvironments'] = (schemes.length > 0 ? schemes : [defaultScheme]).map(scheme => ({
-    id: generateId(`env:root:${domainName}:${scheme}`),
-    name: scheme,
-    variables: [
-      kvOfType('scheme', new StringValue(scheme)),
-      kvOfType('baseUrl', new ExpressionValue(baseUrlTemplate))
-    ]
-  }))
+  // Sub-environments only override `scheme`. Skip sub-envs whose variables
+  // are identical to the root (e.g. the default scheme matches root — no
+  // point creating a redundant sub-env).
+  const subEnvironments: Environment['subEnvironments'] = (schemes.length > 0 ? schemes : [defaultScheme])
+    .filter((scheme) => scheme !== defaultScheme)
+    .map(scheme => ({
+      id: generateId(`env:root:${domainName}:${scheme}`),
+      name: scheme,
+      variables: [
+        kvOfType('scheme', new StringValue(scheme))
+      ]
+    }))
 
   return {
     id: generateId(`env:root:${domainName}`),

@@ -97,7 +97,7 @@ Feature: Full workflow end-to-end scenario
     Then the folder "pet" should be expanded
     When I click the sidebar request "Find pet by ID"
     Then a request tab for "Find pet by ID" should be open
-    When I select the "http" environment on the active request tab
+    When I select the "localhost" environment on the active request tab
     Then the file's dirty-state should be: clean
     When I fill the first path-param value with "1"
     Then the file's dirty-state should be: dirty
@@ -131,7 +131,7 @@ Feature: Full workflow end-to-end scenario
     Then a folder tab for "Swagger Petstore" should be open
     And a request tab for "Find pet by ID" should be open
     When I focus the "Find pet by ID" tab
-    Then the active request tab should show the "http" environment
+    Then the active request tab should show the "localhost" environment
     And the active request URL tooltip should be "http://localhost:8080/api/pet/1"
     # When a folder was imported from any supported spec (Swagger,
     # AsyncAPI, GraphQL, gRPC, SOAP, Postman, Insomnia, Bruno) its Docs
@@ -189,10 +189,10 @@ Feature: Full workflow end-to-end scenario
     Then the active tab should not have a dirty dot
     And the file's dirty-state should be: clean
     # Variable types must be preserved across env switches: `themeColor`
-    # lives on the `localhost` env. Switch to the `http` sub-env and
+    # lives on the `localhost` env. Switch to the `https` sub-env and
     # back — the color picker cell should re-appear on the parent env
     # unchanged (type preserved).
-    When I click the env folder environment named "http"
+    When I click the env folder environment named "https"
     When I click the env folder environment named "localhost"
     Then the environment-folder variables table color picker should be visible
 
@@ -371,19 +371,19 @@ Feature: Full workflow end-to-end scenario
     When I close the search bar
 
     # The env selected on a request must survive a rename + close-tab
-    # + reopen cycle. The "http" env was selected on "Find pet by ID"
+    # + reopen cycle. The "localhost" env was selected on "Find pet by ID"
     # earlier; after renaming to "SearchableRenamed" and middle-
     # closing the tab, reopening from the sidebar should bring the
-    # "http" env back — the selection is keyed by stable id, not by
+    # "localhost" env back — the selection is keyed by stable id, not by
     # request name.
     When I focus the "SearchableRenamed" tab
-    Then the active request tab should show the "http" environment
+    Then the active request tab should show the "localhost" environment
     When I middle-click the tab "SearchableRenamed"
     Then no tab with title "SearchableRenamed" should be open
     When I open the sidebar request "SearchableRenamed"
     Then a request tab for "SearchableRenamed" should be open
     When I focus the "SearchableRenamed" tab
-    Then the active request tab should show the "http" environment
+    Then the active request tab should show the "localhost" environment
 
     # Ctrl+Alt+Left/Right: send the focused tab to the adjacent group
     # (create a new one on demand). Exercises the 6 canonical layout
