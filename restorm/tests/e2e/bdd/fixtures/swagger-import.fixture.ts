@@ -18,7 +18,7 @@ export const test = base.extend<SwaggerImportFixtures>({
   restormRoot: [RESTORM_ROOT, { option: true }],
 
   launchApp: async ({ restormRoot }, use, testInfo) => {
-    const apps: ElectronApplication[] = []
+    const apps: { app: ElectronApplication; logs: string[] }[] = []
 
     rmSync(SWAGGER_IMPORT_TEMP_DIR, { recursive: true, force: true })
     mkdirSync(SWAGGER_IMPORT_TEMP_DIR, { recursive: true })
@@ -51,15 +51,16 @@ export const test = base.extend<SwaggerImportFixtures>({
       await page.evaluate(() => { window.confirm = () => true; window.alert = () => undefined })
       await page.waitForTimeout(1500)
 
-      apps.push(app)
+      apps.push({ app, logs })
       return { app, page }
     }
 
     await use(launcher)
 
     // Teardown
+    const { writeFileSync } = await import('fs')
     mkdirSync(testInfo.outputDir, { recursive: true })
-    for (const app of apps) {
+    for (const { app, logs } of apps) {
       if (testInfo.status !== 'passed') {
         try {
           const p = await app.firstWindow().catch(() => null)
@@ -70,6 +71,13 @@ export const test = base.extend<SwaggerImportFixtures>({
           }
         } catch { /* ignore */ }
       }
+      try {
+        if (logs.length > 0) {
+          const logFile = join(testInfo.outputDir, 'electron-logs.txt')
+          writeFileSync(logFile, logs.join('\n'), 'utf-8')
+          await testInfo.attach('electron-logs', { path: logFile, contentType: 'text/plain' })
+        }
+      } catch { /* ignore */ }
       try { app.process().kill('SIGKILL') } catch { /* ignore */ }
     }
   }

@@ -196,6 +196,26 @@ Feature: Full workflow end-to-end scenario
     When I click the env folder environment named "localhost"
     Then the environment-folder variables table color picker should be visible
 
+    # ── Context variables table: resolved values ──
+    # The context pane shows resolved variables with {{handlebars}} names.
+    Then the context variables table should contain "scheme" with value "http"
+    And the context variables table should contain "host" with value "localhost"
+    And the context variables table should contain "port" with value "8080"
+    And the context variables table should contain "baseUrl" with value "http://localhost:8080/api"
+    # Editing a variable should update the resolved context in real time
+    When I change the env variable "port" value to "9090"
+    Then the context variables table should contain "port" with value "9090"
+    And the context variables table should contain "baseUrl" with value "http://localhost:9090/api"
+    # Revert the change
+    When I change the env variable "port" value to "8080"
+    Then the context variables table should contain "baseUrl" with value "http://localhost:8080/api"
+    # Adding a new variable should appear in the context table
+    When I add a new env variable "apiKey" with value "test-key-123"
+    Then the context variables table should contain "apiKey" with value "test-key-123"
+    # Deleting the variable should remove it from the context table
+    When I delete the env variable "apiKey"
+    Then the context variables table should not contain "apiKey"
+
     When I add tag "pet" to the active folder tab
     Then the active folder tab should have tag "pet"
     And the file's dirty-state should be: dirty

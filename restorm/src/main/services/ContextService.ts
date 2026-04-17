@@ -171,6 +171,8 @@ class ContextService {
     const env = payload.document as Environment
     env.variables = normalizeKeyValues(env.variables as unknown as unknown[])
 
+    env.variables = normalizeKeyValues(env.variables as unknown as unknown[])
+
     logger.info('[ContextService] ENVIRONMENT_UPDATED', {
       id: envId,
       name: env.name,
@@ -319,7 +321,7 @@ class ContextService {
     // that is overridden by sub-envs http/https).
     for (const kv of meta.rawVariables) {
       if (kv.enabled === false) continue
-      if (kv.key && kv.value instanceof ExpressionValue) {
+      if (kv.key && this.isExpressionValue(kv.value)) {
         const raw = kv.value.toString()
         const reResolved = this.transformValue(raw, finalContext)
         if (reResolved !== finalContext[kv.key]) {
@@ -343,7 +345,7 @@ class ContextService {
       if (!parentMeta) continue
       for (const kv of parentMeta.rawVariables) {
         if (kv.enabled === false) continue
-        if (kv.key && kv.value instanceof ExpressionValue) {
+        if (kv.key && this.isExpressionValue(kv.value)) {
           const raw = kv.value.toString()
           const reResolved = this.transformValue(raw, finalContext)
           if (reResolved !== finalContext[kv.key]) {
@@ -373,6 +375,12 @@ class ContextService {
     pubsub.publish(PUBSUB_TOPICS.CONTEXT_CHANGED, environmentId, {
       environmentId,
       variables
+    })
+
+    // Broadcast to renderer for UI components (e.g. environment config panel)
+    this.broadcastToRenderer('context:environment-context-changed', {
+      environmentId,
+      context
     })
   }
 
@@ -436,10 +444,23 @@ class ContextService {
    */
   private resolveKeyValue(kv: KeyValue, context: TransformedContext): string {
     const raw = kv.value.toString()
-    if (kv.value instanceof ExpressionValue) {
+    if (this.isExpressionValue(kv.value)) {
       return this.transformValue(raw, context)
     }
     return raw
+  }
+
+  /**
+   * Check if a value is an ExpressionValue. Uses instanceof first,
+   * then falls back to checking the `.type` property for reactive proxy
+   * objects that lose their prototype chain.
+   */
+  private isExpressionValue(value: unknown): boolean {
+    if (value instanceof ExpressionValue) return true
+    if (value && typeof value === 'object' && 'type' in value) {
+      return (value as { type: string }).type === 'expression'
+    }
+    return false
   }
 
   /**

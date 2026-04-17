@@ -65,6 +65,8 @@ declare global {
       }
       context: {
         getAllTransformResults: () => Promise<Record<string, VariableTransformResult>>
+        getEnvironmentContext: (environmentId: string) => Promise<Record<string, string>>
+        onEnvironmentContextChanged: (callback: (result: { environmentId: string; context: Record<string, string> }) => void) => (() => void)
         onVariableTransformed: (callback: (result: VariableTransformResult) => void) => (() => void)
         registerRequest: (
           requestId: string,

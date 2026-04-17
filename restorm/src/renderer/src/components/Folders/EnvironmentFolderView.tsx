@@ -423,6 +423,36 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
   const [leftWidth] = useState<number>(220)
   const variablesParamsRef = useRef<KeyValueTableHandle | null>(null)
 
+  // Context variables for the selected environment
+  const [contextVariablesRaw, setContextVariablesRaw] = useState<{ envId: string | null; vars: Record<string, string> }>({ envId: null, vars: {} })
+  const contextVariables = contextVariablesRaw.envId === selectedEnvId ? contextVariablesRaw.vars : {}
+  const [copiedKey, setCopiedKey] = useState<string | null>(null)
+
+  // Fetch context when environment selection changes + listen for live updates
+  useEffect(() => {
+    const ctx = window.restorm?.context
+    if (!selectedEnvId || !ctx) return
+
+    let cancelled = false
+
+    void ctx.getEnvironmentContext(selectedEnvId).then((result: Record<string, string>) => {
+      if (!cancelled) setContextVariablesRaw({ envId: selectedEnvId, vars: result })
+    })
+
+    const unsubscribe = ctx.onEnvironmentContextChanged((result: { environmentId: string; context: Record<string, string> }) => {
+      if (!cancelled && result.environmentId === selectedEnvId) {
+        setContextVariablesRaw({ envId: selectedEnvId, vars: result.context })
+      }
+    })
+    return () => { cancelled = true; unsubscribe() }
+  }, [selectedEnvId])
+
+  const handleCopyVariable = useCallback((key: string) => {
+    void navigator.clipboard.writeText(`{{${key}}}`)
+    setCopiedKey(key)
+    setTimeout(() => { setCopiedKey(null) }, 1500)
+  }, [])
+
   // Handler for persisting variable changes to the environment
   // Updates the reactive object directly without triggering React re-renders
   const handleEnvironmentVariablesChange = useCallback(
@@ -593,6 +623,98 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                     data-testid="environment-folder-variables-table"
                   />
                 </div>
+                {Object.keys(contextVariables).length > 0 && (
+                  <div data-testid="environment-folder-context-pane" style={{ marginTop: 16, padding: '0 4px' }}>
+                    <h3 style={{
+                      margin: '0 0 8px',
+                      fontSize: 12,
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                      opacity: 0.4,
+                      letterSpacing: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6
+                    }}>
+                      <span className="codicon codicon-symbol-variable" style={{ fontSize: 14 }} />
+                      {t('folderView.contextVariables.title')}
+                    </h3>
+                    <p style={{
+                      margin: '0 0 10px',
+                      fontSize: 12,
+                      lineHeight: 1.5,
+                      color: 'var(--descriptionForeground)'
+                    }}>
+                      {t('folderView.contextVariables.description')}
+                    </p>
+                    <table style={{
+                      width: '100%',
+                      borderCollapse: 'collapse',
+                      fontSize: 12
+                    }} data-testid="context-variables-table">
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid var(--panel-border)' }}>
+                          <th style={{ textAlign: 'left', padding: '4px 8px', fontWeight: 600, opacity: 0.6, width: 28 }} />
+                          <th style={{ textAlign: 'left', padding: '4px 8px', fontWeight: 600, opacity: 0.6 }}>
+                            {t('folderView.contextVariables.name')}
+                          </th>
+                          <th style={{ textAlign: 'left', padding: '4px 8px', fontWeight: 600, opacity: 0.6 }}>
+                            {t('folderView.contextVariables.value')}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.entries(contextVariables).map(([key, value]) => (
+                          <tr
+                            key={key}
+                            style={{ borderBottom: '1px solid var(--panel-border)' }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--list-hoverBackground)' }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+                          >
+                            <td style={{ padding: '3px 4px', textAlign: 'center' }}>
+                              <button
+                                type="button"
+                                onClick={() => { handleCopyVariable(key) }}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  padding: 2,
+                                  opacity: copiedKey === key ? 1 : 0.5,
+                                  color: copiedKey === key ? 'var(--notificationsInfoIcon-foreground)' : 'inherit',
+                                  fontSize: 14,
+                                  lineHeight: 1
+                                }}
+                                title={copiedKey === key ? t('folderView.contextVariables.copied') : `{{${key}}}`}
+                                data-testid={`context-var-copy-${key}`}
+                              >
+                                <span className={`codicon codicon-${copiedKey === key ? 'check' : 'copy'}`} />
+                              </button>
+                            </td>
+                            <td style={{
+                              padding: '3px 8px',
+                              fontFamily: 'monospace',
+                              whiteSpace: 'nowrap'
+                            }}>
+                              {`{{${key}}}`}
+                            </td>
+                            <td style={{
+                              padding: '3px 8px',
+                              fontFamily: 'monospace',
+                              opacity: 0.7,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              maxWidth: 0
+                            }}>
+                              {value}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </Pane>
             ) : (
               <Pane

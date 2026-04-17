@@ -1000,6 +1000,115 @@ Then('the env folder variables should have a dateTime cell', async () => {
 })
 
 // ---------------------------------------------------------------------------
+// Context variables table
+// ---------------------------------------------------------------------------
+
+Then(
+  'the context variables table should contain {string} with value {string}',
+  async ({}, varName: string, expectedValue: string) => {
+    if (!page) throw new Error('app must be launched')
+    const contextSection = page.locator('[data-testid="environment-folder-context-pane"]')
+    await expect(contextSection).toBeVisible({ timeout: 2000 })
+    const table = page.locator('[data-testid="context-variables-table"]')
+    await expect(table).toBeVisible({ timeout: 2000 })
+
+    const rows = await table.locator('tbody tr').all()
+    let matched = false
+    for (const row of rows) {
+      const nameText = (await row.locator('td').nth(1).textContent() ?? '').trim()
+      if (nameText === `{{${varName}}}`) {
+        await expect(row.locator('td').last()).toHaveText(expectedValue, { timeout: 2000 })
+        matched = true
+        break
+      }
+    }
+    expect(matched, `Variable {{${varName}}} not found in context variables table`).toBe(true)
+  }
+)
+
+Then(
+  'the context variables table should not contain {string}',
+  async ({}, varName: string) => {
+    if (!page) throw new Error('app must be launched')
+    const table = page.locator('[data-testid="context-variables-table"]')
+    await expect(table).toBeVisible({ timeout: 2000 })
+
+    const rows = await table.locator('tbody tr').all()
+    for (const row of rows) {
+      const nameText = (await row.locator('td').nth(1).textContent() ?? '').trim()
+      expect(nameText, `Variable {{${varName}}} should not be in context table`).not.toBe(`{{${varName}}}`)
+    }
+  }
+)
+
+When(
+  'I change the env variable {string} value to {string}',
+  async ({}, varKey: string, newValue: string) => {
+    if (!page) throw new Error('app must be launched')
+    const rows = page.locator('[data-testid="environment-folder-variables-table"] tbody tr')
+    const allRows = await rows.all()
+    for (const r of allRows) {
+      const keyVal = await r.locator('td').nth(2).locator('input').first().inputValue().catch(() => '')
+      if (keyVal === varKey) {
+        const valueInput = r.locator('td').nth(3).locator('input').first()
+        await expect(valueInput).toBeVisible({ timeout: 2000 })
+        await valueInput.click()
+        await valueInput.fill(newValue)
+        await page.keyboard.press('Tab')
+        await page.waitForTimeout(1500)
+        return
+      }
+    }
+    throw new Error(`Variable row with key "${varKey}" not found`)
+  }
+)
+
+When(
+  'I add a new env variable {string} with value {string}',
+  async ({}, key: string, value: string) => {
+    if (!page) throw new Error('app must be launched')
+    const addBtn = page.locator('[data-testid="environment-folder-add-variable-button"]').first()
+    await expect(addBtn).toBeVisible({ timeout: 2000 })
+    await addBtn.click({ force: true })
+
+    const rows = page.locator('[data-testid="environment-folder-variables-table"] tbody tr')
+    const lastRow = rows.last()
+    await expect(lastRow).toBeVisible({ timeout: 2000 })
+    const keyInput = lastRow.locator('input').nth(0)
+    await keyInput.click()
+    await keyInput.fill(key)
+    await page.keyboard.press('Tab')
+
+    const valueInput = lastRow.locator('td').nth(3).locator('input').first()
+    await expect(valueInput).toBeVisible({ timeout: 2000 })
+    await valueInput.click()
+    await valueInput.fill(value)
+    await page.keyboard.press('Tab')
+    await page.waitForTimeout(500)
+  }
+)
+
+When(
+  'I delete the env variable {string}',
+  async ({}, varKey: string) => {
+    if (!page) throw new Error('app must be launched')
+    const rows = page.locator('[data-testid="environment-folder-variables-table"] tbody tr')
+    const allRows = await rows.all()
+    for (const r of allRows) {
+      const keyVal = await r.locator('td').nth(2).locator('input').first().inputValue().catch(() => '')
+      if (keyVal === varKey) {
+        const deleteBtn = r.locator('.codicon-trash').first()
+        await expect(deleteBtn).toBeVisible({ timeout: 2000 })
+        await deleteBtn.click()
+        await page.waitForTimeout(500)
+        return
+      }
+    }
+    throw new Error(`Variable row with key "${varKey}" not found`)
+  }
+)
+
+// ---------------------------------------------------------------------------
 // Tag color change + propagation
 // ---------------------------------------------------------------------------
 

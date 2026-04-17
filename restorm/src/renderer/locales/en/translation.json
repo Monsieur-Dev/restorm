@@ -75,6 +75,14 @@
       "source": "Source:",
       "refresh": "Refresh docs",
       "refreshing": "Refreshing..."
+    },
+    "contextVariables": {
+      "title": "Available context variables",
+      "description": "Use these variables in your request URLs and expression-type variables with the {{handlebars}} syntax.",
+      "name": "Variable",
+      "value": "Resolved value",
+      "copied": "Copied!",
+      "empty": "No context variables resolved for this environment."
     }
   },
   "requestTab": {

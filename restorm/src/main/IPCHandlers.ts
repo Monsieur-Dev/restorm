@@ -468,6 +468,10 @@ export function registerRestormIPC(deps: {
     return contextService.getAllVariableTransformResults()
   })
 
+  ipcMain.handle('context:get-environment-context', (_event, environmentId: string) => {
+    return contextService.getContext(environmentId) ?? {}
+  })
+
   validatedHandle('context:register-request', contextRegisterRequestArgs, (_event, [requestId, environmentId, requestData]) => {
     contextService.registerRequest(requestId, environmentId, {
       id: requestId,

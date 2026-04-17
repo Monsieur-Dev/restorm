@@ -515,6 +515,10 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         nextValue = new ColorValue(raw)
       } else if (currentType instanceof PasswordValue) {
         nextValue = new PasswordValue(raw)
+      } else if (currentType instanceof ExpressionValue) {
+        nextValue = new ExpressionValue(raw)
+      } else if (currentType instanceof BooleanValue) {
+        nextValue = new BooleanValue(raw === 'true' || raw === '1')
       } else if (currentType instanceof EnumValue) {
         nextValue = new EnumValue(raw, currentType.enumDefinitionId)
       } else if (currentType instanceof EnumListValue) {

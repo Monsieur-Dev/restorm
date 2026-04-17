@@ -164,6 +164,21 @@ contextBridge.exposeInMainWorld('restorm', {
       const result: unknown = await ipcRenderer.invoke('context:get-all-transform-results')
       return result as Record<string, VariableTransformResult>
     },
+    /** Get the resolved context for a specific environment */
+    getEnvironmentContext: async (environmentId: string): Promise<Record<string, string>> => {
+      const result: unknown = await ipcRenderer.invoke('context:get-environment-context', environmentId)
+      return result as Record<string, string>
+    },
+    /** Listen for environment context changes */
+    onEnvironmentContextChanged: (callback: (result: { environmentId: string; context: Record<string, string> }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, result: { environmentId: string; context: Record<string, string> }): void => {
+        callback(result)
+      }
+      ipcRenderer.on('context:environment-context-changed', handler)
+      return () => {
+        ipcRenderer.removeListener('context:environment-context-changed', handler)
+      }
+    },
     /** Listen for variable transformation updates */
     onVariableTransformed: (callback: (result: VariableTransformResult) => void): (() => void) => {
       const handler = (_event: Electron.IpcRendererEvent, result: VariableTransformResult): void => {
