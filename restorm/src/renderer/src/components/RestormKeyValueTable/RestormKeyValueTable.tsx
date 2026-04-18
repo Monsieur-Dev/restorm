@@ -197,6 +197,12 @@ export interface RestormKeyValueTableProps {
   requestUrl?: string | undefined
   /** HTTP method of the current request (for matching route-specific enums). */
   requestMethod?: string | undefined
+  /**
+   * Optional persistence key for column widths. Passed through to the
+   * underlying Table, which saves widths to localStorage under
+   * `ecu:table:<persistenceId>:column-widths`.
+   */
+  persistenceId?: string | undefined
   /** Optional test id applied to the table root element. */
   'data-testid'?: string
 }
@@ -210,6 +216,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
     enumDefinitions,
     requestUrl,
     requestMethod,
+    persistenceId,
     'data-testid': dataTestId
   },
   ref
@@ -852,6 +859,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         onRowsChange={handleRowsChange}
         renderKeyCell={KeyCellRenderer}
         renderValueCell={ValueCellRenderer}
+        {...(persistenceId && { persistenceId })}
         {...(dataTestId && { 'data-testid': dataTestId })}
       />
       {contextMenuNode}

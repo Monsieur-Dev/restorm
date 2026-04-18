@@ -4,12 +4,14 @@ import React, {
   useImperativeHandle,
   useMemo,
   useRef,
-  useState
+  useState,
+  type ComponentType
 } from 'react'
 import { Toggle } from '../Toggle'
 import { InputBox } from '../InputBox'
 import { ScrollableElement } from '../ScrollableElement'
 import { Button } from '../Button'
+import { Table, type TableColumn } from '../Table/Table'
 import './keyValueTable.css'
 
 export interface KeyValueTableRow {
@@ -95,6 +97,12 @@ export interface KeyValueTableProps {
    * Custom renderer for description cells. Defaults to InputBox.
    */
   renderDescriptionCell?: React.ComponentType<CellRendererProps> | undefined
+  /**
+   * Optional persistence key for column widths. Widths are saved to
+   * localStorage under `ecu:table:<persistenceId>:column-widths`. When
+   * omitted, widths live in memory for the component lifetime only.
+   */
+  persistenceId?: string | undefined
 }
 
 export interface KeyValueTableHandle {
@@ -108,6 +116,7 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
     renderKeyCell: KeyCellRenderer = DefaultCellRenderer,
     renderValueCell: ValueCellRenderer = DefaultCellRenderer,
     renderDescriptionCell: DescriptionCellRenderer = DefaultCellRenderer,
+    persistenceId,
     'data-testid': dataTestId
   },
   ref
@@ -119,7 +128,7 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
     }
     return initialRows.map((kv): ParamRow => ({
       id: kv.id ?? generateRowId(),
-      enabled: kv.enabled !== false, // Default to true if undefined
+      enabled: kv.enabled !== false,
       key: kv.key,
       value: kv.value,
       description: kv.description ?? ''
@@ -127,9 +136,6 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
   }, [initialRows])
 
   const [rows, setRows] = useState<ParamRow[]>(defaultRows)
-  // dropIndex represents the insertion position between rows (0..rows.length)
-  const [dropIndex, setDropIndex] = useState<number | null>(null)
-  const dragGhostRef = useRef<HTMLDivElement | null>(null)
 
   const updateData = useCallback(
     (rowIndex: number, columnId: keyof ParamRow, value: unknown): void => {
@@ -162,7 +168,6 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
   const lastRowsRef = useRef<string | null>(null)
   useEffect(() => {
     if (!onRowsChange) return
-    // Only notify if rows actually changed (avoid initial call)
     const rowsJson = JSON.stringify(keyValues)
     if (lastRowsRef.current !== null && lastRowsRef.current !== rowsJson) {
       onRowsChange(keyValues)
@@ -177,90 +182,114 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
     ])
   }, [])
 
-  const handleRemoveRow = useCallback((rowIndex: number) => {
-    setRows((oldRows) => oldRows.filter((_, index) => index !== rowIndex))
+  const handleRemoveRow = useCallback((rowId: string) => {
+    setRows((oldRows) => oldRows.filter((r) => r.id !== rowId))
   }, [])
 
-  const handleDragStart = useCallback(
-    (event: React.DragEvent<HTMLElement>, index: number) => {
-      event.dataTransfer.effectAllowed = 'move'
-      event.dataTransfer.setData('text/plain', String(index))
+  useImperativeHandle(ref, () => ({ addRow: handleAddRow }), [handleAddRow])
 
-      // Clean up any previous ghost
-      if (dragGhostRef.current) {
-        document.body.removeChild(dragGhostRef.current)
-        dragGhostRef.current = null
+  const handleRowsReorder = useCallback((orderedIds: string[]) => {
+    setRows((oldRows) => {
+      const byId = new Map(oldRows.map((r) => [r.id, r]))
+      const next: ParamRow[] = []
+      for (const id of orderedIds) {
+        const row = byId.get(id)
+        if (row) next.push(row)
       }
+      return next
+    })
+  }, [])
 
-      // Create a mini table containing only the cloned row
-      const maybeRow = event.currentTarget.closest('tr')
-      const rowElement = (maybeRow ?? event.currentTarget) as HTMLElement
-      const rect = rowElement.getBoundingClientRect()
-
-      const table = document.createElement('table')
-      const tbody = document.createElement('tbody')
-      const ghostRow = rowElement.cloneNode(true) as HTMLTableRowElement
-
-      table.appendChild(tbody)
-      tbody.appendChild(ghostRow)
-
-      const container = document.createElement('div')
-      container.style.position = 'fixed'
-      container.style.top = '-1000px'
-      container.style.left = '-1000px'
-      container.style.pointerEvents = 'none'
-      container.style.backgroundColor = 'var(--editor-background)'
-      container.style.borderRadius = '2px'
-      container.appendChild(table)
-
-      document.body.appendChild(container)
-      dragGhostRef.current = container
-
-      // Keep same relative position between mouse and row
-      const offsetX = event.clientX - rect.left
-      const offsetY = event.clientY - rect.top
-      event.dataTransfer.setDragImage(container, offsetX, offsetY)
-    },
-    []
-  )
-
-  const handleDrop = useCallback(
-    (event: React.DragEvent<HTMLTableRowElement>) => {
-      event.preventDefault()
-      const sourceIndexText = event.dataTransfer.getData('text/plain')
-      const sourceIndex = Number(sourceIndexText)
-      if (Number.isNaN(sourceIndex) || dropIndex === null) return
-
-      const insertionFromState = dropIndex
-
-      setRows((oldRows) => {
-        const updated = [...oldRows]
-        const [moved] = updated.splice(sourceIndex, 1)
-        if (!moved) return oldRows
-        let insertionIndex = insertionFromState
-        if (sourceIndex < insertionIndex) {
-          insertionIndex -= 1
+  // Build table columns. Renderers are looked up by row id at render time
+  // so the ref-stable row index never drifts from the actual row position.
+  const columns = useMemo<TableColumn<ParamRow>[]>(() => {
+    const KeyRenderer = KeyCellRenderer as ComponentType<CellRendererProps>
+    const ValueRenderer = ValueCellRenderer as ComponentType<CellRendererProps>
+    const DescRenderer = DescriptionCellRenderer as ComponentType<CellRendererProps>
+    return [
+      {
+        id: 'enabled',
+        header: '',
+        autoWidth: true,
+        renderCell: (row) => {
+          const idx = rows.findIndex((r) => r.id === row.id)
+          return (
+            <div {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-enabled` })}>
+              <Toggle
+                isChecked={row.enabled}
+                notFocusable
+                onChange={(newChecked) => { updateData(idx, 'enabled', newChecked) }}
+              />
+            </div>
+          )
         }
-
-        if (insertionIndex < 0) insertionIndex = 0
-        if (insertionIndex > updated.length) insertionIndex = updated.length
-
-        updated.splice(insertionIndex, 0, moved)
-        return updated
-      })
-
-      setDropIndex(null)
-    },
-    [dropIndex]
-  )
-
-  useImperativeHandle(
-    ref,
-    () => ({
-      addRow: handleAddRow
-    }),
-    [handleAddRow]
-  )
+      },
+      {
+        id: 'key',
+        header: 'Key',
+        resizable: true,
+        minWidth: 80,
+        renderCell: (row) => {
+          const idx = rows.findIndex((r) => r.id === row.id)
+          return (
+            <KeyRenderer
+              value={row.key}
+              onChange={(v) => { updateData(idx, 'key', v) }}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-key` })}
+              rowId={row.id}
+            />
+          )
+        }
+      },
+      {
+        id: 'value',
+        header: 'Value',
+        resizable: true,
+        minWidth: 80,
+        renderCell: (row) => {
+          const idx = rows.findIndex((r) => r.id === row.id)
+          return (
+            <ValueRenderer
+              value={row.value}
+              onChange={(v) => { updateData(idx, 'value', v) }}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-value` })}
+              rowId={row.id}
+            />
+          )
+        }
+      },
+      {
+        id: 'description',
+        header: 'Description',
+        resizable: true,
+        minWidth: 120,
+        renderCell: (row) => {
+          const idx = rows.findIndex((r) => r.id === row.id)
+          return (
+            <div className="params-table-desc-cell">
+              <div className="params-table-desc-input">
+                <DescRenderer
+                  value={row.description}
+                  onChange={(v) => { updateData(idx, 'description', v) }}
+                  placeholder="Description"
+                  {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-description` })}
+                  rowId={row.id}
+                />
+              </div>
+              <Button
+                line
+                secondary
+                {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-delete` })}
+                options={{ ariaLabel: 'Delete row', title: 'Delete row' }}
+                onClick={() => { handleRemoveRow(row.id) }}
+                icon="trash"
+              />
+            </div>
+          )
+        }
+      }
+    ]
+  }, [KeyCellRenderer, ValueCellRenderer, DescriptionCellRenderer, rows, updateData, dataTestId, handleRemoveRow])
 
   return (
     <div
@@ -273,127 +302,15 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
           style={{ flex: 1, minHeight: 0 }}
         >
           <div className="params-table-wrapper">
-            <table className="params-table" {...(dataTestId && { 'data-testid': `${dataTestId}-table` })}>
-              <thead>
-                <tr>
-                  <th />
-                  <th />
-                  <th>Key</th>
-                  <th>Value</th>
-                  <th>Description</th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row, index) => {
-                  const isDropBefore = dropIndex === index
-                  const isDropAfter = dropIndex === index + 1
-                  const rowClassName = [
-                    isDropBefore ? 'params-table-row-drop-before' : '',
-                    isDropAfter ? 'params-table-row-drop-after' : ''
-                  ]
-                    .filter(Boolean)
-                    .join(' ') || undefined
-
-                  return (
-                    <tr
-                      key={index}
-                      className={rowClassName}
-                      {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}` })}
-                      onDragOver={(e) => {
-                        e.preventDefault()
-                        const rect = e.currentTarget.getBoundingClientRect()
-                        const offsetY = e.clientY - rect.top
-                        const after = offsetY > rect.height / 2
-                        const insertionIndex = index + (after ? 1 : 0)
-                        setDropIndex(insertionIndex)
-                      }}
-                      onDragLeave={(e) => {
-                        if (e.currentTarget.contains(e.relatedTarget as Node | null)) return
-                        setDropIndex((current) => {
-                          if (current === null) return null
-                          const beforeIndex = index
-                          const afterIndex = index + 1
-                          return current === beforeIndex || current === afterIndex ? null : current
-                        })
-                      }}
-                      onDrop={(e) => {
-                        handleDrop(e)
-                      }}
-                      onDragEnd={() => {
-                        setDropIndex(null)
-                        if (dragGhostRef.current) {
-                          document.body.removeChild(dragGhostRef.current)
-                          dragGhostRef.current = null
-                        }
-                      }}
-                    >
-                      <td>
-                        <span
-                          className="params-table-drag-handle"
-                          draggable
-                          {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-drag` })}
-                          onDragStart={(e) => {
-                            e.stopPropagation()
-                            handleDragStart(e, index)
-                          }}
-                        >
-                          ⋮⋮
-                        </span>
-                      </td>
-                      <td>
-                        <div {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-enabled` })}>
-                          <Toggle
-                            isChecked={row.enabled}
-                            notFocusable
-                            onChange={(newChecked) => {
-                              updateData(index, 'enabled', newChecked)
-                            }}
-                          />
-                        </div>
-                      </td>
-                      <td>
-                        <KeyCellRenderer
-                          value={row.key}
-                          onChange={(v) => { updateData(index, 'key', v) }}
-                          {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-key` })}
-                          rowId={row.id}
-                        />
-                      </td>
-                      <td>
-                        <ValueCellRenderer
-                          value={row.value}
-                          onChange={(v) => { updateData(index, 'value', v) }}
-                          {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-value` })}
-                          rowId={row.id}
-                        />
-                      </td>
-                      <td>
-                        <DescriptionCellRenderer
-                          value={row.description}
-                          onChange={(v) => { updateData(index, 'description', v) }}
-                          placeholder="Description"
-                          {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-description` })}
-                          rowId={row.id}
-                        />
-                      </td>
-                      <td>
-                        <Button
-                          line
-                          secondary
-                          {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-delete` })}
-                          options={{ ariaLabel: 'Delete row', title: 'Delete row' }}
-                          onClick={() => {
-                            handleRemoveRow(index)
-                          }}
-                          icon='trash'
-                        />
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+            <Table<ParamRow>
+              id={persistenceId}
+              columns={columns}
+              rows={rows}
+              getRowId={(r) => r.id}
+              reorderable
+              onRowsReorder={handleRowsReorder}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-table` })}
+            />
           </div>
         </ScrollableElement>
       </div>

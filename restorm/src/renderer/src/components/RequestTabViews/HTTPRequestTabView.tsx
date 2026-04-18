@@ -579,6 +579,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           helpers={handlebarsHelpers}
           initialRows={request.headers}
           onRowsChange={handleHeadersChange}
+          persistenceId={`http-headers:${request.id}`}
           data-testid="http-request-headers-table"
         />
       </Pane>
@@ -611,6 +612,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           enumDefinitions={enumDefinitions}
           requestUrl={request.url}
           requestMethod={request.method}
+          persistenceId={`http-path-params:${request.id}`}
           data-testid="http-request-path-params-table"
         />
       </Pane>
@@ -643,6 +645,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           enumDefinitions={enumDefinitions}
           requestUrl={request.url}
           requestMethod={request.method}
+          persistenceId={`http-query-params:${request.id}`}
           data-testid="http-request-query-params-table"
         />
       </Pane>

@@ -291,6 +291,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
           helpers={handlebarsHelpers}
           initialRows={request.headers}
           onRowsChange={handleHeadersChange}
+          persistenceId={`graphql-headers:${request.id}`}
           data-testid="graphql-headers-table"
         />
       </Pane>

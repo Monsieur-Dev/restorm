@@ -82,6 +82,7 @@ export const HTTPRequestBodySection: React.FC<HTTPRequestBodySectionProps> = ({
             helpers={helpers}
             initialRows={request.body?.type === 'form-data' || request.body?.type === 'x-www-form-urlencoded' ? request.body.fields : []}
             onRowsChange={onBodyFieldsChange}
+            persistenceId={`http-body-fields:${request.id}`}
             data-testid="http-request-body-fields-table"
           />
         )}

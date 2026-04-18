@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { InputBox, Button, ControlGroup, useFileService, ContextMenu, type ContextMenuItem } from 'electron-core-ui/renderer'
+import { InputBox, Button, ControlGroup, useFileService, ContextMenu, Table, type ContextMenuItem, type TableColumn } from 'electron-core-ui/renderer'
 import { getFavorites, removeFavorite, reorderFavorites } from '../../services/favoritesStore'
 import type { EnvironmentFolder, FolderItem } from '../../../../shared/types/collections'
 import type { ApiDocumentation } from '../../../../shared/types/apiDocumentation'
@@ -64,24 +64,11 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
     return ids.map((id) => requestMap.get(id)).filter((r): r is FavoriteRequest => r !== undefined)
   }, [filePath, folder.items, favVersion])
 
-  const [dragIndex, setDragIndex] = useState<number | null>(null)
-  const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [favContextMenu, setFavContextMenu] = useState<{ visible: boolean; x: number; y: number; requestId: string }>({ visible: false, x: 0, y: 0, requestId: '' })
 
-  const handleDragStart = (index: number): void => { setDragIndex(index) }
-  const handleDragOver = (e: React.DragEvent, index: number): void => { e.preventDefault(); setDropIndex(index) }
-  const handleDragEnd = (): void => {
-    if (dragIndex !== null && dropIndex !== null && dragIndex !== dropIndex && filePath) {
-      const ids = favoriteRequests.map((r) => r.id)
-      const removed = ids.splice(dragIndex, 1)
-      if (removed[0]) {
-        ids.splice(dropIndex, 0, removed[0])
-        reorderFavorites(filePath, ids)
-      }
-    }
-    setDragIndex(null)
-    setDropIndex(null)
-  }
+  const handleRowsReorder = useCallback((orderedIds: string[]): void => {
+    if (filePath) reorderFavorites(filePath, orderedIds)
+  }, [filePath])
 
   const handleFavContextMenu = (e: React.MouseEvent, requestId: string): void => {
     e.preventDefault()
@@ -145,6 +132,39 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
 
   const importSource = folder.importSource
   const sourceConfig = importSource ? SOURCE_CONFIG[importSource] : undefined
+
+  const favoriteColumns = useMemo<TableColumn<FavoriteRequest>[]>(() => [
+    {
+      id: 'favorite',
+      header: '',
+      renderCell: (req) => (
+        <div
+          className="home-favorite-cell"
+          onClick={() => { onRequestClick?.(req.id) }}
+          onContextMenu={(e) => { handleFavContextMenu(e, req.id) }}
+          data-testid={`home-favorite-${req.id}`}
+        >
+          <Badge type={req.method.toUpperCase() as BadgeType} />
+          <span className="home-favorite-name">{req.name}</span>
+          <span className="home-favorite-path">{req.path}</span>
+          <button
+            type="button"
+            className="home-favorite-delete"
+            onClick={(e) => {
+              e.stopPropagation()
+              if (filePath) {
+                removeFavorite(filePath, req.id)
+                setFavVersion((v) => v + 1)
+              }
+            }}
+            data-testid={`home-favorite-${req.id}-delete`}
+          >
+            <span className="codicon codicon-trash" />
+          </button>
+        </div>
+      )
+    }
+  ], [onRequestClick, filePath])
 
   return (
     <div className="home-container">
@@ -229,28 +249,14 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
       {/* ── Favorite requests ── */}
       {favoriteRequests.length > 0 && (
         <Section title={t('folderView.home.favoriteRequests')} icon="star-full" dataTestId="home-favorites-section">
-          {favoriteRequests.map((req, i) => (
-            <RequestRow
-              key={req.id}
-              method={req.method}
-              path={req.path}
-              name={req.name}
-              onClick={() => { onRequestClick?.(req.id) }}
-              onContextMenu={(e) => { handleFavContextMenu(e, req.id) }}
-              onDelete={() => {
-                if (filePath) {
-                  removeFavorite(filePath, req.id)
-                  setFavVersion((v) => v + 1)
-                }
-              }}
-              draggable
-              onDragStart={() => { handleDragStart(i) }}
-              onDragOver={(e) => { handleDragOver(e, i) }}
-              onDragEnd={handleDragEnd}
-              isDragOver={dropIndex === i && dragIndex !== i}
-              dataTestId={`home-favorite-${req.id}`}
-            />
-          ))}
+          <Table<FavoriteRequest>
+            columns={favoriteColumns}
+            rows={favoriteRequests}
+            getRowId={(r) => r.id}
+            reorderable
+            onRowsReorder={handleRowsReorder}
+            data-testid="home-favorites-table"
+          />
         </Section>
       )}
       <ContextMenu
@@ -296,47 +302,6 @@ const Section: React.FC<{ title: string; icon: string; children: React.ReactNode
     <div className="home-section-content">
       {children}
     </div>
-  </div>
-)
-
-// ── Request row with method badge ──
-
-const RequestRow: React.FC<{
-  method: string; path: string; name: string
-  onClick?: () => void; onContextMenu?: (e: React.MouseEvent) => void
-  onDelete?: () => void
-  draggable?: boolean; onDragStart?: () => void; onDragOver?: (e: React.DragEvent) => void; onDragEnd?: () => void
-  isDragOver?: boolean; dataTestId?: string
-}> = ({ method, path, name, onClick, onContextMenu, onDelete, draggable, onDragStart, onDragOver, onDragEnd, isDragOver, dataTestId }) => (
-  <div
-    className={`request-row${isDragOver ? ' drag-over' : ''}`}
-    onClick={onClick}
-    onContextMenu={onContextMenu}
-    onDragOver={onDragOver}
-    onDragEnd={onDragEnd}
-    onDrop={(e) => { e.preventDefault(); onDragEnd?.() }}
-    {...(dataTestId ? { 'data-testid': dataTestId } : {})}
-  >
-    {draggable && (
-      <span
-        draggable
-        onDragStart={(e) => { e.stopPropagation(); onDragStart?.() }}
-        className="request-row-drag"
-      >⋮⋮</span>
-    )}
-    <Badge type={method.toUpperCase() as BadgeType} />
-    <span className="request-row-name">{name}</span>
-    <span className="request-row-path">{path}</span>
-    {onDelete && (
-      <button
-        type="button"
-        className="request-row-delete"
-        onClick={(e) => { e.stopPropagation(); onDelete() }}
-        data-testid={dataTestId ? `${dataTestId}-delete` : undefined}
-      >
-        <span className="codicon codicon-trash" />
-      </button>
-    )}
   </div>
 )
 

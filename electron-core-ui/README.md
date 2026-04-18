@@ -175,7 +175,8 @@ try {
 | `ContextMenu` | Right-click menu |
 | `Breadcrumb` | Navigation breadcrumb trail |
 | `ListView`, `ListViewDropdown` | Tree/list with drag-and-drop and selection |
-| `KeyValueTable` | Editable key-value pair table |
+| `Table` | Generic controlled table with resizable columns, row reordering, and width persistence ([README](src/renderer/components/Table/README.md)) |
+| `KeyValueTable` | Editable key-value pair table (built on top of `Table`) |
 | `SplitView`, `Sash` | Resizable split panes |
 | `CodeEditor` | Monaco-based code editor |
 | `MarkdownEditor`, `MarkdownViewer` | Rich markdown editing and rendering |
@@ -194,7 +195,7 @@ Each component has its own documentation in [`docs/`](./docs/).
 
 ```typescript
 import {
-  Button, InputBox, Modal, ListView, Tabs,
+  Button, InputBox, Modal, ListView, Tabs, Table,
   Titlebar, MenuBar, SplitView, CodeEditor,
   ElectronCoreUiProvider
 } from 'electron-core-ui/renderer'

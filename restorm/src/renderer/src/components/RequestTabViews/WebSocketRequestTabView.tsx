@@ -299,6 +299,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           helpers={handlebarsHelpers}
           initialRows={request.headers}
           onRowsChange={handleHeadersChange}
+          persistenceId={`websocket-headers:${request.id}`}
           data-testid="websocket-headers-table"
         />
       </Pane>
