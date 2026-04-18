@@ -170,6 +170,20 @@ export type {
 export { Table } from './Table/Table'
 export type { TableColumn, TableProps, TableHandle } from './Table/Table'
 
+// Toaster exports
+export { Toaster, toasterService, useToasts, StatusBarBellButton } from './Toaster/index'
+export type {
+  ToasterPosition,
+  ToasterOrder,
+  ScrollDismissBehavior,
+  ToastInput,
+  Toast,
+  AnimationDurations,
+  ToasterProps,
+  ToasterEvent,
+  StatusBarBellButtonProps
+} from './Toaster/index'
+
 // CustomWCO exports
 export { CustomWCO } from './CustomWCO/index'
 export type { CustomWCOProps } from './CustomWCO/index'

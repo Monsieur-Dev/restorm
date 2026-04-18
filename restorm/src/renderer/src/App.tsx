@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import {
   Statusbar,
   StatusbarElement,
+  StatusBarBellButton,
+  Toaster,
   VerticalSashContainer,
   useFileService,
   useFeature,
@@ -907,7 +909,11 @@ const App: React.FC = () => {
       <Statusbar data-testid="app-statusbar">
         {filePath && <StatusbarElement data-testid="app-statusbar-element" title={filePath} />}
         <DesktopIndicator />
+        <StatusBarBellButton toasterId="app" className="right-aligned" />
       </Statusbar>
+
+      {/* Global toaster anchored to the bottom-right, toggled by the statusbar bell. */}
+      <Toaster id="app" position="bottom-right" data-testid="app-toaster" />
 
       {/* Delete confirmation modal */}
       <DeleteConfirmationModal

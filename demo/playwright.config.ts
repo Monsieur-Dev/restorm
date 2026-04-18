@@ -298,6 +298,15 @@ const tabsTestDir = defineBddConfig({
   outputDir: '.features-gen/tabs'
 })
 
+const toasterTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/toaster/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/toaster/steps/**/*.ts',
+    'tests/e2e/bdd/toaster/fixtures/**/*.ts'
+  ],
+  outputDir: '.features-gen/toaster'
+})
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -500,6 +509,11 @@ export default defineConfig({
     {
       name: 'tabs',
       testDir: tabsTestDir,
+      use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'toaster',
+      testDir: toasterTestDir,
       use: { ...devices['Desktop Chrome'] }
     }
   ],

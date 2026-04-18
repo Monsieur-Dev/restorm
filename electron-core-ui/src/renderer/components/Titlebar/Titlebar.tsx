@@ -43,6 +43,17 @@ const Titlebar: React.FC<TitlebarProps> = ({
   // State for app icon
   const [appIconPath, setAppIconPath] = useState<string | undefined>(undefined)
 
+  // Expose the titlebar height on document.body so other components
+  // (e.g. Toaster) can anchor themselves below the bar without hard-coding
+  // the value. Matches the 32px height defined in titlebar.css.
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    document.body.style.setProperty('--titlebar-height', '32px')
+    return () => {
+      document.body.style.removeProperty('--titlebar-height')
+    }
+  }, [])
+
   // Fetch app icon if no custom icon is provided
   useEffect(() => {
     if (icon) return
