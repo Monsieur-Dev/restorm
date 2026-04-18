@@ -1,0 +1,123 @@
+/* ── Root table ── */
+
+.ecu-table {
+	width: 100%;
+	border-collapse: collapse;
+	table-layout: fixed;
+}
+
+.ecu-table th,
+.ecu-table td {
+	box-sizing: border-box;
+	padding: 2px 4px;
+	text-align: left;
+	vertical-align: middle;
+	overflow: hidden;
+}
+
+.ecu-table thead th {
+	font-weight: 600;
+	font-size: 11px;
+	text-transform: uppercase;
+	opacity: 0.55;
+	letter-spacing: 0.3px;
+	border-bottom: 1px solid var(--panel-border);
+	position: relative;
+}
+
+/* ── Resize handle ── */
+
+.ecu-table th.ecu-table-th--resizable {
+	position: relative;
+
+	/* Let the resize handle extend vertically past the header row.
+	   Specificity is bumped with `th` so this wins over the generic
+	   `.ecu-table th { overflow: hidden }` rule. */
+	overflow: visible;
+}
+
+.ecu-table-resize-handle {
+	position: absolute;
+	top: 0;
+	right: -4px;
+	width: 9px;
+
+	/* Span the full table height, not just the header row. The
+	   --ecu-table-height variable is set imperatively by a
+	   ResizeObserver on the <table>; fall back to 100% when the
+	   variable isn't available yet. */
+	height: var(--ecu-table-height, 100%);
+	cursor: col-resize;
+	z-index: 2;
+	user-select: none;
+}
+
+/* Highlight on hover / active drag. The bar is drawn on the sash itself
+   so it spans the full table height. Hover targets only the sash (not
+   the whole header cell) so the bar doesn't flicker on when the user
+   just rolls over the header. */
+.ecu-table-resize-handle:hover::after,
+.ecu-table-th--resizing .ecu-table-resize-handle::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: 3px;
+	width: 2px;
+	background: var(--focusBorder);
+	pointer-events: none;
+}
+
+/* ── Rows ── */
+
+.ecu-table-row {
+	border-top: 2px solid transparent;
+	border-bottom: 2px solid transparent;
+}
+
+.ecu-table-row > td {
+	transition: opacity 120ms ease;
+}
+
+.ecu-table-row--drop-before {
+	border-top-color: var(--focusBorder);
+}
+
+.ecu-table-row--drop-after {
+	border-bottom-color: var(--focusBorder);
+}
+
+/* While a row is being dragged, fade it in place so the layout doesn't
+   shift but the ghost is visually the only representation. We use
+   opacity rather than `visibility: hidden` / `display: none` so the row
+   still receives `dragover` events — the drop-index calculation needs
+   the source row to be a valid event target. */
+.ecu-table-row--dragging > td {
+	opacity: 0;
+}
+
+/* ── Drag handle (auto-injected when reorderable) ── */
+
+.ecu-table-drag-handle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	cursor: grab;
+	opacity: 0.4;
+	user-select: none;
+	line-height: 1;
+	font-size: 12px;
+}
+
+.ecu-table-drag-handle:hover {
+	opacity: 0.8;
+}
+
+/* Auto-width cell content wrapper — sized to its intrinsic content
+   instead of filling the cell, so we can measure the natural width. */
+.ecu-table-auto-cell {
+	display: inline-flex;
+	align-items: center;
+}

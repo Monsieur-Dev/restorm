@@ -268,6 +268,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
           helpers={handlebarsHelpers}
           initialRows={request.metadata}
           onRowsChange={handleMetadataChange}
+          persistenceId={`grpc-metadata:${request.id}`}
           data-testid="grpc-metadata-table"
         />
       </Pane>

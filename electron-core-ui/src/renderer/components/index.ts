@@ -166,6 +166,10 @@ export type {
   CellRendererProps
 } from './KeyValueTable/KeyValueTable'
 
+// Table exports
+export { Table } from './Table/Table'
+export type { TableColumn, TableProps, TableHandle } from './Table/Table'
+
 // CustomWCO exports
 export { CustomWCO } from './CustomWCO/index'
 export type { CustomWCOProps } from './CustomWCO/index'

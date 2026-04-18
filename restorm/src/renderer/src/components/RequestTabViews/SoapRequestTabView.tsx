@@ -266,6 +266,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
           helpers={handlebarsHelpers}
           initialRows={request.headers}
           onRowsChange={handleHeadersChange}
+          persistenceId={`soap-headers:${request.id}`}
           data-testid="soap-request-headers-table"
         />
       </Pane>

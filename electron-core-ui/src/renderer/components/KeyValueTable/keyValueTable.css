@@ -14,90 +14,38 @@
   background-color: var(--editor-background);
 }
 
-.params-table-toolbar {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.params-table-add-button {
-  border: 1px solid var(--button-border);
-  background-color: var(--button-secondaryBackground);
-  color: var(--button-secondaryForeground);
-  padding: 2px 8px;
-  border-radius: 2px;
-  font-size: 12px;
-  cursor: pointer;
-}
-
 .params-table-wrapper {
   flex: 1;
   min-height: 0;
 }
 
-.params-table {
-  width: 100%;
-  min-width: 365px; /* 3 * 100px (Key/Value/Description min) + 15px drag + 25px checkbox + 25px trash */
-  table-layout: fixed;
-  border-collapse: collapse;
+/* Keep tbody row hover styling, independent of the shared .ecu-table rules.
+   Scoped by the wrapper so it doesn't leak to other Tables. */
+.params-table-wrapper .ecu-table tbody tr:hover {
+  background-color: var(--list-hoverBackground);
+}
+
+/* Use the same 12px base font as before for the KV table contents. */
+.params-table-wrapper .ecu-table {
   font-family: var(--font-family);
   font-size: 12px;
   color: var(--editor-foreground);
 }
 
-.params-table th,
-.params-table td {
+.params-table-wrapper .ecu-table th,
+.params-table-wrapper .ecu-table td {
   padding: 2px 6px;
 }
 
-/* Fixed width for drag handle column */
-.params-table th:nth-child(1),
-.params-table td:nth-child(1) {
-  width: 15px;
-  max-width: 15px;
-  text-align: center;
+/* Description + delete merged cell: input takes remaining space,
+   delete button stays on the right edge. */
+.params-table-desc-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.params-table-drag-handle {
-  opacity: 0.6;
-  cursor: grab;
-}
-
-/* Fixed width for checkbox column */
-.params-table th:nth-child(2),
-.params-table td:nth-child(2) {
-  width: 25px;
-  max-width: 25px;
-}
-
-/* Fixed width for delete (trash) column */
-.params-table th:nth-child(6),
-.params-table td:nth-child(6) {
-  width: 25px;
-  max-width: 25px;
-  text-align: left;
-  padding-left: 0;
-  padding-right: 12px;
-}
-
-/* Key, Value and Description share remaining space equally, with a minimum width */
-.params-table th:nth-child(3),
-.params-table td:nth-child(3),
-.params-table th:nth-child(4),
-.params-table td:nth-child(4),
-.params-table th:nth-child(5),
-.params-table td:nth-child(5) {
-  width: calc((100% - 65px) / 3); /* 65px = drag (15) + checkbox (25) + trash (25) */
-  min-width: 100px;
-}
-
-.params-table tbody tr:hover {
-  background-color: var(--list-hoverBackground);
-}
-
-.params-table-row-drop-before td {
-  border-top: 2px solid var(--focusBorder);
-}
-
-.params-table-row-drop-after td {
-  border-bottom: 2px solid var(--focusBorder);
+.params-table-desc-input {
+  flex: 1;
+  min-width: 0;
 }

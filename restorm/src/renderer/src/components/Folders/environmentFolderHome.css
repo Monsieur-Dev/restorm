@@ -161,36 +161,26 @@
   gap: 2px;
 }
 
-/* ── Request row ── */
+/* ── Favorites table (cells) ──
+ * The Table component renders the wrapping <tr>/<td>; we only style the
+ * content laid out inside the single "favorite" column cell.
+ */
 
-.request-row {
+.home-favorite-cell {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 7px 12px;
+  padding: 5px 8px;
   border-radius: 6px;
   cursor: pointer;
   font-size: 13px;
-  border-top: 2px solid transparent;
 }
 
-.request-row:hover {
+.home-favorite-cell:hover {
   background: var(--list-hoverBackground);
 }
 
-.request-row.drag-over {
-  border-top-color: var(--focusBorder);
-}
-
-.request-row-drag {
-  cursor: grab;
-  opacity: 0.4;
-  font-size: 12px;
-  user-select: none;
-  line-height: 1;
-}
-
-.request-row-name {
+.home-favorite-name {
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -198,13 +188,13 @@
   white-space: nowrap;
 }
 
-.request-row-path {
+.home-favorite-path {
   font-size: 11px;
   opacity: 0.35;
   font-family: monospace;
 }
 
-.request-row-delete {
+.home-favorite-delete {
   background: none;
   border: none;
   cursor: pointer;
@@ -216,7 +206,7 @@
   flex-shrink: 0;
 }
 
-.request-row-delete:hover {
+.home-favorite-delete:hover {
   opacity: 1;
 }
 
