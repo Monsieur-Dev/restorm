@@ -138,6 +138,18 @@ export {
 export { tooltipRootSelector, tooltipContentSelector } from './tooltipSelectors'
 
 export {
+  toasterRootSelector,
+  toasterHeaderSelector,
+  toasterClearButtonSelector,
+  toasterDndButtonSelector,
+  toasterHideButtonSelector,
+  toasterEmptyLabelSelector,
+  toastSelector,
+  toastByTitleSelector,
+  toastCloseByTitleSelector
+} from './toasterSelectors'
+
+export {
   scrollableElementRootSelector,
   scrollableElementContentSelector,
   scrollableElementLeftShadowSelector,

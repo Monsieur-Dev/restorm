@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useTheme, Tabs, logger, SelectBox, Titlebar, MenuBar, MenuBarItem, MenuItem, MenuItemSeparator, Button, Statusbar, StatusbarElement, useSettingsModal } from 'electron-core-ui/renderer'
+import { useTheme, Tabs, logger, SelectBox, Titlebar, MenuBar, MenuBarItem, MenuItem, MenuItemSeparator, Button, Statusbar, StatusbarElement, useSettingsModal, Toaster, StatusBarBellButton } from 'electron-core-ui/renderer'
 import type { Tab } from 'electron-core-ui/renderer'
 import '@vscode/codicons/dist/codicon.css'
 import { 
@@ -46,7 +46,8 @@ import {
   TitlebarE2ETab,
   ModalE2ETab,
   SettingsE2ETab,
-  TabsTab
+  TabsTab,
+  ToasterTab
 } from '../components/test-tabs'
 import { WorkbenchTab } from '../components/test-tabs'
 
@@ -172,6 +173,7 @@ const ThemeTestPage: React.FC = () => {
     { id: 'modal-e2e', label: t('modal.e2eTabLabel'), content: <ModalE2ETab />, allowFullscreen: true },
     { id: 'settings-e2e', label: t('settings.e2eTabLabel'), content: <SettingsE2ETab />, allowFullscreen: true },
 { id: 'tabs-e2e', label: 'Tabs', content: <TabsTab />, allowFullscreen: true },
+    { id: 'toaster-e2e', label: 'Toaster', content: <ToasterTab />, allowFullscreen: true },
     { id: 'breadcrumb', label: 'Breadcrumb', content: <BreadcrumbTab />, allowFullscreen: true },
     { id: 'button', label: 'Button', content: <ButtonHarnessTab />, allowFullscreen: true },
     { id: 'callout', label: t('callout.tabLabel'), content: <CalloutTab />, allowFullscreen: true },
@@ -423,22 +425,15 @@ const ThemeTestPage: React.FC = () => {
         >
           Contenu de l&apos;infobulle cliquable
         </StatusbarElement>
-        <StatusbarElement
-          title={<i className="codicon codicon-bell"></i>}
-          className="right-aligned"
-          onClick={() => {
-            logger.info('Notifications clicked')
-          }}
-        >
-          <div>
-            <div style={{ marginBottom: '8px', fontWeight: 'bold' }}>Notifications</div>
-            <div style={{ marginBottom: '4px' }}>• Nouvelle mise à jour disponible</div>
-            <div style={{ marginBottom: '4px' }}>• 3 fichiers modifiés</div>
-            <div style={{ marginBottom: '4px' }}>• Build terminé avec succès</div>
-            <div>• 2 erreurs dans le projet</div>
-          </div>
-        </StatusbarElement>
+        <StatusBarBellButton toasterId="demo" className="right-aligned" />
       </Statusbar>
+
+      {/* Global toaster, bottom-right corner of the window. */}
+      <Toaster
+        id="demo"
+        position="bottom-right"
+        data-testid="demo-toaster"
+      />
     </div>
   )
 }

@@ -1,0 +1,277 @@
+/* ── Toaster container ──────────────────────────────────────────── */
+
+.toaster {
+	position: fixed;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	box-sizing: border-box;
+
+	/* Match the framed chrome even in transparent mode so toggling the
+	   frame doesn't shift the toasts sideways. The border is transparent
+	   by default; framed mode just repaints it. */
+	padding: 8px;
+	border: 1px solid transparent;
+
+	/* Clip the horizontal slide-in/slide-out animation so it doesn't
+	   push past the viewport edge and trigger a scrollbar. `clip`
+	   (vs. `hidden`) avoids creating a scrolling context. */
+	overflow-x: clip;
+
+	/* Smoothly fade the chrome (background + border + shadow) when the
+	   frame toggles, and the whole container when it mounts/unmounts. */
+	transition:
+		background var(--toaster-exit-duration, 150ms) ease,
+		border-color var(--toaster-exit-duration, 150ms) ease,
+		box-shadow var(--toaster-exit-duration, 150ms) ease,
+		opacity var(--toaster-exit-duration, 150ms) ease;
+
+	/* width is set inline from the prop */
+}
+
+/* Initial paint after mount: opacity 0, no transition. The class is
+   removed on the next frame to trigger a fade-in. */
+.toaster--entering {
+	opacity: 0;
+	transition: none;
+}
+
+/* Held for `exitMs` after `wantsRender` goes false so the opacity
+   transition can play before the component unmounts. */
+.toaster--closing {
+	opacity: 0;
+	pointer-events: none;
+}
+
+.toaster[data-position='top-right'] {
+	top: var(--titlebar-height, 0);
+	right: var(--toaster-margin, 8px);
+}
+
+.toaster[data-position='top-left'] {
+	top: var(--titlebar-height, 0);
+	left: var(--toaster-margin, 8px);
+}
+
+.toaster[data-position='bottom-right'] {
+	bottom: calc(var(--statusbar-height, 0px) + var(--toaster-margin, 8px));
+	right: var(--toaster-margin, 8px);
+}
+
+.toaster[data-position='bottom-left'] {
+	bottom: calc(var(--statusbar-height, 0px) + var(--toaster-margin, 8px));
+	left: var(--toaster-margin, 8px);
+}
+
+/* The ScrollableElement outer container — fills the available space
+   inside the toaster. The .toaster-body inside it is the actual flex
+   column of toasts (styled below). */
+.toaster-scroll {
+	flex: 1;
+	min-height: 0;
+	width: 100%;
+}
+
+.toaster-body {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+
+	/* Room for the downward drop shadow of the last toast; applied in
+	   both modes so toggling the frame doesn't shift the stack. */
+	padding-bottom: 8px;
+}
+
+/* Max height clamps the toaster to the region between the titlebar and
+   the statusbar (each defaults to 0px when its component is absent). */
+.toaster:not(.toaster--framed) {
+	max-height: calc(
+		100vh
+		- var(--titlebar-height, 0px)
+		- var(--statusbar-height, 0px)
+		- 2 * var(--toaster-margin, 8px)
+	);
+}
+
+/* Framed mode — Tooltip-styled container with a sticky header.
+   Padding + border dimensions are already inherited from `.toaster`
+   so the content position stays identical to transparent mode. The
+   max-height rule is duplicated from the transparent selector so it
+   still applies when `.toaster--framed` is present (stylelint rejects
+   a single `.toaster` selector covering both states via `:not`). */
+.toaster--framed {
+	background: var(--editorHoverWidget-background);
+	color: var(--editorHoverWidget-foreground);
+	border-color: var(--editorHoverWidget-border);
+	border-radius: 3px;
+	box-shadow: 0 2px 8px rgb(0, 0, 0, 0.2);
+	gap: 0;
+	max-height: calc(
+		100vh
+		- var(--titlebar-height, 0px)
+		- var(--statusbar-height, 0px)
+		- 2 * var(--toaster-margin, 8px)
+	);
+}
+
+.toaster--framed .toaster-header {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.3px;
+	opacity: 0.9;
+	padding-bottom: 6px;
+	border-bottom: 1px solid var(--editorHoverWidget-border);
+	margin-bottom: 6px;
+}
+
+.toaster-header-label {
+	flex: 1;
+	text-transform: uppercase;
+	opacity: 0.55;
+}
+
+.toaster-header-label--hidden {
+	visibility: hidden;
+}
+
+.toaster-header-actions {
+	display: flex;
+	gap: 2px;
+	align-items: center;
+}
+
+/* ── Toast ──────────────────────────────────────────────────────── */
+
+.toast {
+	background: var(--editorHoverWidget-background);
+	color: var(--editorHoverWidget-foreground);
+	border: 1px solid var(--editorHoverWidget-border);
+	border-radius: 3px;
+
+	/* Downward drop shadow; negative spread keeps it tight on the sides
+	   so it stays inside the toaster's clip region. */
+	box-shadow: 0 6px 12px -4px rgb(0, 0, 0, 0.45);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	flex-shrink: 0;
+	transform-origin: center;
+	will-change: transform, opacity;
+}
+
+/* Inside a framed toaster, toasts reuse the parent's chrome — they
+   only need a subtle divider. */
+.toaster--framed .toast {
+	background: transparent;
+	border: 1px solid var(--panel-border, rgb(128, 128, 128, 0.2));
+	box-shadow: none;
+}
+
+.toast-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 8px 4px;
+}
+
+.toast-title {
+	flex: 1;
+	font-weight: 600;
+	font-size: 13px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	min-width: 0;
+}
+
+.toast-close {
+	border: none;
+	background: transparent;
+	color: inherit;
+	cursor: pointer;
+	padding: 2px 4px;
+	border-radius: 3px;
+	line-height: 1;
+	font-size: 14px;
+	flex-shrink: 0;
+	opacity: 0.7;
+}
+
+.toast-close:hover {
+	opacity: 1;
+	background: var(--list-hoverBackground, rgb(128, 128, 128, 0.15));
+}
+
+.toast-close:focus-visible {
+	outline: 1px solid var(--focusBorder);
+	outline-offset: 1px;
+}
+
+.toast-body {
+	padding: 0 8px 8px;
+	font-size: 12px;
+	line-height: 1.4;
+}
+
+.toast-progress {
+	height: 2px;
+	background: transparent;
+	overflow: hidden;
+}
+
+.toast-progress-bar {
+	height: 100%;
+	background: var(--progressBar-background, var(--focusBorder));
+	width: 100%;
+	transform-origin: left center;
+}
+
+/* ── Animations ─────────────────────────────────────────────────── */
+
+.toast {
+	transition:
+		transform var(--toaster-enter-duration, 200ms) ease-out,
+		opacity var(--toaster-enter-duration, 200ms) ease-out;
+}
+
+.toast--pending {
+	opacity: 0;
+}
+
+.toast--pending.toast--from-right {
+	transform: translateX(20px);
+}
+
+.toast--pending.toast--from-left {
+	transform: translateX(-20px);
+}
+
+.toast--exiting {
+	opacity: 0;
+
+	/* Collapse the toast's layout footprint in sync with the fade/slide
+	   animation. The inline `max-height` set in Toast.tsx gives the
+	   transition a concrete starting value; the negative margin-bottom
+	   cancels the 8px flex gap so no residual space is left behind. */
+	max-height: 0 !important;
+	margin-bottom: -8px;
+	overflow: hidden;
+	transition:
+		transform var(--toaster-exit-duration, 150ms) ease-in,
+		opacity var(--toaster-exit-duration, 150ms) ease-in,
+		max-height var(--toaster-exit-duration, 150ms) ease-in,
+		margin-bottom var(--toaster-exit-duration, 150ms) ease-in;
+	pointer-events: none;
+}
+
+.toast--exiting.toast--from-right {
+	transform: translateX(20px);
+}
+
+.toast--exiting.toast--from-left {
+	transform: translateX(-20px);
+}

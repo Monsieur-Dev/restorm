@@ -185,6 +185,7 @@ try {
 | `IconSelect` | Icon picker with multiple libraries |
 | `TagsView` | Tag input and display |
 | `Tooltip`, `Callout` | Information overlays |
+| `Toaster`, `toasterService`, `useToasts` | Portal-rendered toast container driven by a singleton service ([README](src/renderer/components/Toaster/README.md)) |
 | `ProgressBar` | Progress indicator |
 | `ScrollableElement` | Custom scrollable container |
 | `Workbench`, `EditorWorkbench` | Multi-tab editor layout with groups |

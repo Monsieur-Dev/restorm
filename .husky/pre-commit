@@ -18,11 +18,11 @@ if git diff --cached --name-only | grep -E '\.(ts|tsx|js|jsx)$' | xargs grep -E 
 fi
 
 # Check for skipped tests
-if git diff --cached --name-only | grep -E '\.test\.(ts|tsx|js|jsx)$' | xargs grep -l -E "(test\.skip|it\.skip|describe\.skip|xtest|xit|xdescribe)" 2>/dev/null; then
+if git diff --cached --name-only | grep -E '\.test\.(ts|tsx|js|jsx)$' | xargs grep -l -E "(\btest\.skip\b|\bit\.skip\b|\bdescribe\.skip\b|\bxtest\s*\(|\bxit\s*\(|\bxdescribe\s*\()" 2>/dev/null; then
     echo "❌ BLOCKED: Skipped tests detected!"
     echo ""
     echo "Files with skipped tests:"
-    git diff --cached --name-only | grep -E '\.test\.(ts|tsx|js|jsx)$' | xargs grep -n -E "(test\.skip|it\.skip|describe\.skip|xtest|xit|xdescribe)" 2>/dev/null
+    git diff --cached --name-only | grep -E '\.test\.(ts|tsx|js|jsx)$' | xargs grep -n -E "(\btest\.skip\b|\bit\.skip\b|\bdescribe\.skip\b|\bxtest\s*\(|\bxit\s*\(|\bxdescribe\s*\()" 2>/dev/null
     echo ""
     echo "⛔ Project rule: All tests must be enabled and passing."
     exit 1

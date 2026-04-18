@@ -84,7 +84,10 @@
 	margin-left: auto;
 }
 
-/* Codicon support in statusbar items */
+/* Codicon support in statusbar items. The codicon font renders its
+   glyphs in the upper portion of the em box, so icons look vertically
+   off-centered in the 22px bar. Nudge them down by 2px visually to
+   compensate — transform keeps the hit area put. */
 .statusbar-item .codicon {
 	font-size: 16px;
 	width: 16px;
@@ -93,4 +96,5 @@
 	align-items: center;
 	justify-content: center;
 	margin-right: 4px;
+	transform: translateY(2px);
 }
