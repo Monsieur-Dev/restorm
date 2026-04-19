@@ -12,7 +12,6 @@ import {
   isSoapRequestTab,
   isWebSocketRequestTab
 } from '../../../../../shared/types/editor'
-import { EnvironmentDropdown } from './EnvironmentDropdown'
 import {
   HTTPRequestTabView,
   GraphQLRequestTabView,
@@ -548,7 +547,6 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagsChange={(nextTags) => { onTagsChange?.(request.id, nextTags) }}
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
-            headerRight={<EnvironmentDropdown />}
             callout={request.deprecated ? { variant: 'warning', message: t('requestTab.deprecated') } : undefined}
             tabId={effectiveTab.id}
           >
@@ -574,7 +572,6 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagsChange={(nextTags) => { onTagsChange?.(request.id, nextTags) }}
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
-            headerRight={<EnvironmentDropdown />}
             tabId={effectiveTab.id}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
@@ -599,7 +596,6 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagsChange={(nextTags) => { onTagsChange?.(request.id, nextTags) }}
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
-            headerRight={<EnvironmentDropdown />}
             tabId={effectiveTab.id}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
@@ -624,7 +620,6 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagsChange={(nextTags) => { onTagsChange?.(request.id, nextTags) }}
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
-            headerRight={<EnvironmentDropdown />}
             tabId={effectiveTab.id}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
@@ -649,7 +644,6 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagsChange={(nextTags) => { onTagsChange?.(request.id, nextTags) }}
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
-            headerRight={<EnvironmentDropdown />}
             tabId={effectiveTab.id}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>

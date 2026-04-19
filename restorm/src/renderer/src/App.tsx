@@ -76,10 +76,13 @@ import {
   findFolderById,
   findEnvironmentFolderById,
   findRequestById,
+  findItemWithBreadcrumbs,
   getNearestEnvironmentsForBreadcrumbs
 } from './utils/treeSearch'
 import { DesktopIndicator } from './components/MainView/DesktopIndicator'
 import { findItemById } from './utils/treeSearch'
+import { EnvironmentProvider } from './contexts/EnvironmentContext'
+import { StatusbarEnvironmentSelector } from './components/MainView/StatusbarEnvironmentSelector'
 import { useItemOperations } from './hooks/useItemOperations'
 import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
@@ -453,6 +456,14 @@ const App: React.FC = () => {
     return { id: request.id, path: buildRequestPath(rootItems as EnvironmentFolder[], request.id) }
   }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, rootItems])
 
+  // `EnvironmentProvider` expects `{ filePath, requestId }` to wire up
+  // persistence. Fall back to `undefined` when the file isn't saved
+  // yet — the provider then runs in in-memory-only mode.
+  const activeEnvPersistenceKey = useMemo(() => {
+    if (!activeRequest || !filePath) return undefined
+    return { filePath, requestId: activeRequest.id }
+  }, [activeRequest, filePath])
+
   // Reactive "does the active request have any history yet?" used to
   // drive the statusbar button's disabled state. The probe is tagged
   // with the `requestId` it was fetched for so the button only trusts
@@ -616,6 +627,29 @@ const App: React.FC = () => {
     rootItems,
     setWorkbenchTree
   })
+
+  // Environments of the active request's nearest ancestor env-folder,
+  // used to feed the status-bar env selector. Empty when the active
+  // request has no env-folder ancestor (the selector then hides).
+  //
+  // `updateCount` ticks every time the reactive tree mutates in place
+  // (env color, icon, rename, etc.) — env-folder edits bump it via
+  // `handleEnvironmentFolderChange`. Without it the memo would keep
+  // returning the same `envs` array (proxy mutations are invisible to
+  // React's dep comparison), and the downstream `useMemo` that
+  // computes `envColor` inside `EnvironmentProvider` would never pick
+  // up a freshly-chosen color. Shallow-cloning each env below also
+  // gives the provider a new array reference on every bump so its
+  // own `envColor` memo re-runs.
+  const activeRequestEnvironments = useMemo(() => {
+    // Read `updateCount` so the memo re-runs when the reactive tree
+    // mutates in place — see the JSDoc above for the rationale. The
+    // value itself is unused; only its identity change matters.
+    void updateCount
+    if (!activeRequest) return []
+    const found = findItemWithBreadcrumbs(rootItems, activeRequest.id)
+    return getNearestEnvironmentsForBreadcrumbs(rootItems, found.breadcrumbs).map((env) => ({ ...env }))
+  }, [activeRequest, rootItems, updateCount])
 
   // Keep the ref in sync so __restormTestHelpers.setEnvFolderTagColor can
   // delegate to the live handler without re-listing hook deps below.
@@ -1279,30 +1313,22 @@ const App: React.FC = () => {
       <Statusbar data-testid="app-statusbar">
         {filePath && <StatusbarElement data-testid="app-statusbar-element" title={filePath} />}
         <DesktopIndicator />
+        {activeRequest && activeRequestEnvironments.length > 0 && (
+          <EnvironmentProvider
+            environments={activeRequestEnvironments}
+            persistenceKey={activeEnvPersistenceKey}
+          >
+            <StatusbarEnvironmentSelector />
+          </EnvironmentProvider>
+        )}
         {activeRequest && (
           <StatusbarElement
             data-testid="statusbar-request-history"
-            className="right-aligned"
-            {...(activeRequestHasHistory ? { onClick: handleOpenActiveRequestHistory } : {})}
-            title={(
-              <span
-                aria-label={t('statusbar.requestHistory')}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  opacity: activeRequestHasHistory ? 1 : 0.5
-                }}
-              >
-                {/* The global statusbar-codicon rule applies `translateY(2px)`
-                    to optically center symmetric glyphs (e.g. the bell)
-                    in the 22 px bar. `codicon-history` has its visual
-                    weight at the bottom (pendulum + frame) so that same
-                    nudge drops it below the sibling text's baseline —
-                    override it locally back to zero. */}
-                <i className="codicon codicon-history" style={{ transform: 'none' }}></i>
-                <span>{t('statusbar.requestHistory')}</span>
-              </span>
-            )}
+            className={activeRequestEnvironments.length > 0 ? '' : 'right-aligned'}
+            disabled={!activeRequestHasHistory}
+            onClick={handleOpenActiveRequestHistory}
+            icon={{ type: 'codicon', value: 'history' }}
+            title={t('statusbar.requestHistory')}
           />
         )}
         <StatusBarBellButton toasterId="app" />

@@ -56,7 +56,21 @@ export const DocumentEvents = {
    * Emitted by the status-bar history button; subscribed by each
    * mounted request tab so the matching one opens its own modal.
    */
-  REQUEST_HISTORY_OPEN: 'request:history:open'
+  REQUEST_HISTORY_OPEN: 'request:history:open',
+  /**
+   * Emitted by any `EnvironmentProvider` when its selected environment
+   * changes. Lets sibling providers for the same request (e.g. the
+   * status-bar env selector ↔ the tab view's provider) stay in lockstep
+   * without funnelling through a shared React context — each provider
+   * owns its own state and reconciles via this channel.
+   */
+  REQUEST_ENV_CHANGED: 'request:env:changed',
+  /**
+   * Request to set the active environment for a specific request.
+   * Every mounted provider matching the request id picks it up and
+   * applies the change locally.
+   */
+  REQUEST_ENV_SET: 'request:env:set'
 } as const
 
 export type DocumentEventName = (typeof DocumentEvents)[keyof typeof DocumentEvents]
@@ -65,4 +79,10 @@ export type DocumentEventName = (typeof DocumentEvents)[keyof typeof DocumentEve
 export interface RequestHistoryEventPayload {
   /** Request id the history entry belongs to (or is requested for). */
   requestId: string
+}
+
+/** Payload for `REQUEST_ENV_CHANGED` and `REQUEST_ENV_SET`. */
+export interface RequestEnvEventPayload {
+  requestId: string
+  envId: string | null
 }

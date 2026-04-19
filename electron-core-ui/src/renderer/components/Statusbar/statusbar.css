@@ -20,6 +20,7 @@
 .statusbar-item {
 	display: flex;
 	align-items: center;
+	gap: 4px;
 	padding: 0 8px;
 	height: 100%;
 	white-space: nowrap;
@@ -27,6 +28,58 @@
 	text-overflow: ellipsis;
 	cursor: default;
 	position: relative;
+}
+
+/* Uniform 16 px square for every icon the cell renders, whatever the
+   underlying icon family (codicon, emoji, library). `IconView` draws
+   the glyph inside this wrapper with `align-items: center`, so the
+   bar gets the same vertical rhythm regardless of how the icon was
+   sized by its font — consumers just pass `icon={...}` and forget it.
+   The selector is scoped to `.statusbar-item .statusbar-item-icon` so
+   the specificity (0,2,0) beats `.codicon[class*='codicon-']` from
+   the `@vscode/codicons` library (also 0,2,0 but loaded earlier), and
+   our `display: inline-flex` / `width` / `height` win the cascade. */
+.statusbar-item .statusbar-item-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 16px;
+	height: 16px;
+	font-size: 16px;
+	line-height: 1;
+
+	/* Cancel any baseline offset that codicon / library fonts apply via
+	   their own rules — the flex parent already centers this box. */
+	vertical-align: middle;
+  transform: translateY(-2px);
+}
+
+.statusbar-item .statusbar-item-icon img,
+.statusbar-item .statusbar-item-icon svg {
+	width: 16px;
+	height: 16px;
+}
+
+.statusbar-item-label {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+
+	/* Collapse the label's own line box so `align-items: center` on the
+	   cell lines it up against the font-size (~12 px) rather than the
+	   inherited 22 px bar line-height. Without this, the label's tall
+	   line box fills the bar and the text glyphs sit near the baseline
+	   (~1-2 px below optical center), while icons centered in 16 px
+	   boxes sit higher — the mismatch is what made the right-hand
+	   cluster look off-kilter versus the left-side text-only cells. */
+	line-height: 1;
+  transform: translateY(-1px);
+}
+
+.statusbar-item.statusbar-item--disabled {
+	opacity: 0.5;
+	cursor: default;
 }
 
 /* Separator between items. The `--statusBar-border` token isn't set
@@ -84,24 +137,4 @@
 /* Right-aligned items */
 .statusbar-item.right-aligned {
 	margin-left: auto;
-}
-
-/* Codicon support in statusbar items. The codicon font renders its
-   glyphs in the upper portion of the em box, so icons look vertically
-   off-centered in the 22 px bar. Nudge them down by 2 px visually to
-   compensate — the transform keeps the hit area put. Consumers that
-   pair an icon with text should set `line-height: 1` on their wrapper
-   so the text box uses its own natural height instead of the inherited
-   22 px bar line-height; `align-items: center` then lines the icon
-   and the text glyphs up correctly (see `StatusBarBellButton` and the
-   restorm statusbar-request-history cell for examples). */
-.statusbar-item .codicon {
-	font-size: 16px;
-	width: 16px;
-	height: 16px;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	margin-right: 4px;
-	transform: translateY(2px);
 }

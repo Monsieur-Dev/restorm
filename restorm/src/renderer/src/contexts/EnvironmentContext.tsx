@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { eventBus } from 'electron-core-ui/renderer'
 import type { Environment } from '../../../shared/types/collections'
 import { EnvironmentContext, type EnvironmentContextValue } from './useEnvironmentContext'
+import { DocumentEvents, type RequestEnvEventPayload } from '../services/DocumentEvents'
 import {
   findEnvironmentById,
   getStoredEnvForRequest,
@@ -91,13 +93,63 @@ export const EnvironmentProvider: React.FC<EnvironmentProviderProps> = ({ enviro
 
   // Wrap the setter to mirror the new selection into user config. Only
   // persists after the initial restore has run — otherwise the default
-  // "first env" selection would clobber the persisted choice.
+  // "first env" selection would clobber the persisted choice. Also
+  // broadcasts the change so sibling providers for the same request
+  // (e.g. the status-bar env selector mounted at App level) update
+  // their own state in lockstep.
   const setSelectedEnvId = useCallback((id: string | null) => {
     setSelectedEnvIdRaw(id)
     if (!restoreLoadedRef.current || !persistenceKey || !environments || !id) return
     if (findEnvironmentById(environments, id)) {
       setSessionEnvSelection(persistenceKey.filePath, persistenceKey.requestId, id)
       void setStoredEnvForRequest(persistenceKey.filePath, persistenceKey.requestId, id)
+      eventBus.emitLocalSync(DocumentEvents.REQUEST_ENV_CHANGED, {
+        requestId: persistenceKey.requestId,
+        envId: id
+      } as RequestEnvEventPayload)
+    }
+  }, [environments, persistenceKey])
+
+  // Keep sibling providers in sync: when another provider for the same
+  // request reports a changed env (or an imperative setter emits
+  // REQUEST_ENV_SET), mirror the change locally. We intentionally call
+  // `setSelectedEnvIdRaw` (not `setSelectedEnvId`) to avoid an
+  // emit/persist loop — the emitter already did that work.
+  useEffect(() => {
+    if (!persistenceKey) return
+    const requestId = persistenceKey.requestId
+    const applyExternal = (payload: RequestEnvEventPayload): void => {
+      if (payload.requestId !== requestId) return
+      if (!environments) return
+      if (payload.envId && !findEnvironmentById(environments, payload.envId)) return
+      setSelectedEnvIdRaw((current) => (current === payload.envId ? current : payload.envId))
+    }
+    const changedSub = eventBus.subscribe<RequestEnvEventPayload>(
+      DocumentEvents.REQUEST_ENV_CHANGED,
+      applyExternal
+    )
+    const setSub = eventBus.subscribe<RequestEnvEventPayload>(
+      DocumentEvents.REQUEST_ENV_SET,
+      (payload) => {
+        // Imperative setter: apply + persist + rebroadcast as a
+        // `CHANGED` event so other providers follow.
+        if (payload.requestId !== requestId) return
+        if (!environments) return
+        if (payload.envId && !findEnvironmentById(environments, payload.envId)) return
+        setSelectedEnvIdRaw(payload.envId)
+        if (payload.envId) {
+          setSessionEnvSelection(persistenceKey.filePath, requestId, payload.envId)
+          void setStoredEnvForRequest(persistenceKey.filePath, requestId, payload.envId)
+        }
+        eventBus.emitLocalSync(DocumentEvents.REQUEST_ENV_CHANGED, {
+          requestId,
+          envId: payload.envId
+        } as RequestEnvEventPayload)
+      }
+    )
+    return () => {
+      changedSub.unsubscribe()
+      setSub.unsubscribe()
     }
   }, [environments, persistenceKey])
 
