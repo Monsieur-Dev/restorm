@@ -1,6 +1,8 @@
 export { useTheme } from './useTheme'
 export { usePlatform, isMacintosh } from './usePlatform'
 export { useStorage, saveToStorage, loadFromStorage, getStorageAPI } from './useStorage'
+export { usePersistedState } from './usePersistedState'
+export type { UsePersistedStateOptions } from './usePersistedState'
 export { useFeature, usePlatformFeature, useIsDesktop, checkFeature, getPlatform } from './useFeature'
 export { useFileService, useFileDirty, useFileEvents, getFileName, getFilePath, getContentChecksum, setContentChecksum, hasContentChanged, finishLoading, useUnitDirtyState, useDirtyUnitsSet, useDraftsRestored, getSaveUnitsSnapshot, hydrateSaveUnit, upsertSaveUnit, markSaveUnitDeleted, commitSaveUnit, revertSaveUnit, saveUnitToDisk, saveUnitsToDiskBatch } from './useFileService'
 export type { SaveUnitDirtyReason } from './useFileService'

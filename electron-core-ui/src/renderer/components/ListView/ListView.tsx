@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ScrollableElement } from '../ScrollableElement'
 import { ContextMenu, type ContextMenuItem } from '../ContextMenu/ContextMenu'
+import { usePersistedState } from '../../hooks/usePersistedState'
 import type {
   ListViewDropEventPayload,
   ListViewDropPosition,
@@ -11,6 +12,18 @@ import type {
   ListViewProps
 } from './types'
 import './listView.css'
+
+function collectAllItemIds(items: readonly ListViewItemData[]): Set<string> {
+  const out = new Set<string>()
+  const walk = (nodes: readonly ListViewItemData[]): void => {
+    for (const node of nodes) {
+      out.add(node.id)
+      if (node.children && node.children.length > 0) walk(node.children)
+    }
+  }
+  walk(items)
+  return out
+}
 
 interface FlatItem {
   item: ListViewItemData
@@ -160,6 +173,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
   selectedIds: selectedIdsProp,
   activeId: activeIdProp,
   expandedIds: expandedIdsProp,
+  persistenceKey,
   editingItemId: editingItemIdProp,
   onEditingStart,
   onEditingEnd,
@@ -191,8 +205,58 @@ const ListViewInner: React.FC<ListViewProps> = ({
     return buildItemsFromChildren(children)
   }, [items, children])
 
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(() => computeInitialExpandedIds(initialItems))
+  // Optional auto-persistence for uncontrolled expansion. Only active when
+  // `persistenceKey` is set AND the parent isn't driving `expandedIdsProp`;
+  // in controlled mode the parent is the source of truth and is expected to
+  // pair with `usePersistedState` itself.
+  const persistenceActive = expandedIdsProp === undefined && !!persistenceKey
+  const effectivePersistenceKey = persistenceActive ? persistenceKey : null
+
+  // Latest closure for the onRestore filter — stored in a ref so changes to
+  // `initialItems` don't re-trigger the storage read.
+  const knownItemIdsRef = useRef<Set<string>>(new Set())
+  useEffect(() => {
+    knownItemIdsRef.current = collectAllItemIds(initialItems)
+  }, [initialItems])
+
+  const [persistedExpandedIds, setPersistedExpandedIds] = usePersistedState<string[]>(
+    effectivePersistenceKey,
+    [],
+    {
+      onRestore: (stored) => stored.filter((id) => knownItemIdsRef.current.has(id))
+    }
+  )
+
+  // When `persistenceKey` is set the persisted array is the source of truth;
+  // otherwise we fall back to a local Set. Two backing stores, one exposed
+  // setter — keeping the rest of the component unaware of which one is live.
+  const [internalExpandedIds, setInternalExpandedIds] = useState<Set<string>>(
+    () => computeInitialExpandedIds(initialItems)
+  )
   const [hasCustomExpansion, setHasCustomExpansion] = useState(false)
+
+  const persistedExpandedSet = useMemo(
+    () => new Set(persistedExpandedIds),
+    [persistedExpandedIds]
+  )
+  const expandedIds = persistenceActive ? persistedExpandedSet : internalExpandedIds
+
+  const setExpandedIds = useCallback<React.Dispatch<React.SetStateAction<Set<string>>>>(
+    (valueOrUpdater) => {
+      if (persistenceActive) {
+        setPersistedExpandedIds((prevArr) => {
+          const prevSet = new Set(prevArr)
+          const next = typeof valueOrUpdater === 'function'
+            ? (valueOrUpdater as (p: Set<string>) => Set<string>)(prevSet)
+            : valueOrUpdater
+          return Array.from(next)
+        })
+        return
+      }
+      setInternalExpandedIds(valueOrUpdater)
+    },
+    [persistenceActive, setPersistedExpandedIds]
+  )
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -244,7 +308,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
   React.useEffect(() => {
     if (expandedIdsProp === undefined) return
     setExpandedIds(new Set(expandedIdsProp))
-  }, [expandedIdsProp])
+  }, [expandedIdsProp, setExpandedIds])
 
   // Track previous activeIdProp to detect real changes
   const prevActiveIdPropRef = useRef<string | null | undefined>(undefined)
@@ -288,7 +352,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
       ancestorIds.forEach((id) => next.add(id))
       return next
     })
-  }, [activeIdProp, initialItems])
+  }, [activeIdProp, initialItems, setExpandedIds])
 
   const flatItems = useMemo<FlatItem[]>(() => {
     return flattenItems(initialItems, expandedIds)
@@ -380,7 +444,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
         onItemToggle(payload, !flat.isExpanded, event)
       }
     },
-    [expandedIdsProp, onItemToggle]
+    [expandedIdsProp, onItemToggle, setExpandedIds]
   )
 
   // Recompute initial expansion when the item tree changes,
@@ -394,7 +458,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
       return
     }
     setExpandedIds(computeInitialExpandedIds(initialItems))
-  }, [initialItems, hasCustomExpansion, expandedIdsProp])
+  }, [initialItems, hasCustomExpansion, expandedIdsProp, setExpandedIds])
 
   const handleSelect = useCallback(
     (flat: FlatItem, event: React.MouseEvent<HTMLDivElement>): void => {

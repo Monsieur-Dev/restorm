@@ -8,6 +8,7 @@ import {
   VerticalSashContainer,
   useFileService,
   useFeature,
+  usePersistedState,
   eventBus,
   logger,
   computeChecksum,
@@ -82,7 +83,6 @@ import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
 import { useWorkbenchTabs } from './hooks/useWorkbenchTabs'
 import { useSidebarState } from './hooks/useSidebarState'
-import { useSidebarExpansionPersistence } from './hooks/useSidebarExpansionPersistence'
 import { isFavorite as favoritesStoreIsFavorite, toggleFavorite as favoritesStoreToggle } from './services/favoritesStore'
 import { useFileManagement } from './hooks/useFileManagement'
 import { useImport } from './hooks/useImport'
@@ -196,10 +196,36 @@ const App: React.FC = () => {
   // Can contain EnvironmentFolders, Folders, or standalone Requests
   const [rootItems, setRootItems] = useState<(EnvironmentFolder | Folder | Request)[]>(initialRootItems)
 
-  // Initialize with all folders expanded
-  const [expandedIds, setExpandedIds] = useState<string[]>(allFolderIds)
-
-  useSidebarExpansionPersistence({ filePath, rootItems, expandedIds, setExpandedIds })
+  // Sidebar expansion is persisted per-file under `restorm-main-sidebar:<filePath>`.
+  // The key stays `null` until BOTH filePath and rootItems are populated, so
+  // the restore's `onRestore` filter has a fully-hydrated tree to validate
+  // stored ids against (otherwise the file read can race ahead of rootItems
+  // and drop every id as "unknown").
+  const sidebarStorageKey = useMemo(
+    () => (filePath && rootItems.length > 0 ? `restorm-main-sidebar:${filePath}` : null),
+    [filePath, rootItems.length]
+  )
+  const allFolderIdsRef = useRef<string[]>(allFolderIds)
+  useEffect(() => {
+    const ids: string[] = []
+    for (const item of rootItems) {
+      if ('items' in item) {
+        ids.push(...collectAllFolderIds(item))
+      }
+    }
+    allFolderIdsRef.current = ids
+  }, [rootItems])
+  const [expandedIds, setExpandedIds] = usePersistedState<string[]>(
+    sidebarStorageKey,
+    allFolderIds,
+    {
+      onRestore: (stored) => {
+        const known = new Set(allFolderIdsRef.current)
+        return stored.filter((id) => known.has(id))
+      },
+      onMissing: () => allFolderIdsRef.current.slice()
+    }
+  )
 
   // Selected item in the sidebar
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)

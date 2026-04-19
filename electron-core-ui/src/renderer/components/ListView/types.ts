@@ -166,6 +166,20 @@ export interface ListViewProps {
   expandedIds?: string[]
 
   /**
+   * Optional storage key used to persist expansion state across sessions.
+   *
+   * Only applies when `expandedIds` is **not** provided (uncontrolled mode):
+   * in controlled mode the parent is already the source of truth and is
+   * expected to handle persistence itself via `usePersistedState`.
+   *
+   * When set, the component reads the stored ids on mount / key change,
+   * filters them against the current tree (unknown ids are dropped silently),
+   * and debounces writes on every toggle. `null` / `undefined` disables
+   * persistence — useful for dormant states like "no file open".
+   */
+  persistenceKey?: string | null | undefined
+
+  /**
    * Controlled editing item ID. When provided, the item with this ID will be
    * in rename/edit mode. Set to null to exit edit mode.
    */
