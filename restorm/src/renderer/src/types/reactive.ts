@@ -272,15 +272,43 @@ function createDocumentProxyHandler(
     },
 
     set(target, prop, value, receiver) {
+      const prev = Reflect.get(target, prop, receiver) as unknown
       const result = Reflect.set(target, prop, value, receiver)
 
-      // Emit event if an indexable property changed
-      if (indexableKeys.has(prop as string)) {
+      // Only fire the event when an indexable property actually changed.
+      // Components like MarkdownEditor invoke their `onChange` on mount
+      // with the already-stored value; treating that as a real mutation
+      // would spuriously flip the document dirty right after import.
+      if (indexableKeys.has(prop as string) && !sameProxyValue(prev, value)) {
         emitUpdate(docType, target.id, target, parentFolderId)
       }
 
       return result
     }
+  }
+}
+
+/**
+ * Equality check for reactive proxy change detection. Goals:
+ *   1. Primitive identity fast-path (`a === b`).
+ *   2. Treat `null`, `undefined` and empty string as equivalent so
+ *      `MarkdownEditor` → `onChange('')` right after mount doesn't
+ *      spuriously flip an otherwise-clean document dirty when its
+ *      `notes`/`documentation` were previously `undefined`.
+ *   3. Structural deep-equal for objects/arrays via JSON.
+ */
+function sameProxyValue(a: unknown, b: unknown): boolean {
+  if (a === b) return true
+  const isEmpty = (v: unknown): boolean =>
+    v === undefined || v === null || v === ''
+  if (isEmpty(a) && isEmpty(b)) return true
+  if (a === null || b === null) return false
+  if (typeof a !== typeof b) return false
+  if (typeof a !== 'object') return false
+  try {
+    return JSON.stringify(a) === JSON.stringify(b)
+  } catch {
+    return false
   }
 }
 
@@ -316,10 +344,15 @@ function createEnvironmentProxyHandler(
     },
 
     set(target, prop, value, receiver) {
+      const prev = Reflect.get(target, prop, receiver) as unknown
       const result = Reflect.set(target, prop, value, receiver)
 
-      // Emit event if an indexable property changed
-      if (ENVIRONMENT_INDEXABLE_KEYS.has(prop as string)) {
+      // Skip emit for no-op assignments — see folder proxy handler for
+      // the rationale (MarkdownEditor `onChange` on mount, etc.).
+      if (
+        ENVIRONMENT_INDEXABLE_KEYS.has(prop as string)
+        && !sameProxyValue(prev, value)
+      ) {
         emitUpdate('environment', target.id, target, parentFolderId, parentEnvironmentId)
       }
 

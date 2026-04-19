@@ -35,57 +35,22 @@ Feature: Full workflow end-to-end scenario
     When I cancel the import modal
 
     When I import the URL "http://localhost:8080/api/swagger.json"
-    Then the file's dirty-state should be: dirty
-    When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
     When I import the sample file "swagger-petstore.json"
-    Then the file's dirty-state should be: dirty
-    When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
     When I import the sample file "asyncapi-docker.yaml"
-    Then the file's dirty-state should be: dirty
-    When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
     When I import the sample file "asyncapi-petstore.yaml"
-    Then the file's dirty-state should be: dirty
-    When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
     When I import the sample file "bruno-petstore.json"
-    Then the file's dirty-state should be: dirty
-    When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
     When I import the sample file "graphql-docker.graphql"
-    Then the file's dirty-state should be: dirty
-    When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
     When I import the sample file "graphql-petstore.graphql"
-    Then the file's dirty-state should be: dirty
-    When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
     When I import the sample file "grpc-docker.proto"
-    Then the file's dirty-state should be: dirty
-    When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
     When I import the sample file "grpc-petstore.proto"
-    Then the file's dirty-state should be: dirty
-    When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
     When I import the sample file "insomnia-petstore.json"
-    Then the file's dirty-state should be: dirty
-    When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
     When I import the sample file "postman-petstore.json"
-    Then the file's dirty-state should be: dirty
-    When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
     When I import the sample file "soap-docker.wsdl"
-    Then the file's dirty-state should be: dirty
-    When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
     When I import the sample file "soap-petstore.wsdl"
-    Then the file's dirty-state should be: dirty
-    When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
+    # Save everything once, after the full batch: per-unit Ctrl+S would
+    # only commit the active tab's subtree, so a run of imports needs a
+    # single Ctrl+Shift+S to flush the whole tree to disk.
+    When I save all with Ctrl+Shift+S
     Then the sidebar should contain the folder "Swagger Petstore"
     And the sidebar should show a child of "Swagger Petstore"
 
@@ -98,16 +63,11 @@ Feature: Full workflow end-to-end scenario
     When I click the sidebar request "Find pet by ID"
     Then a request tab for "Find pet by ID" should be open
     When I select the "localhost" environment on the active request tab
-    Then the file's dirty-state should be: clean
     When I fill the first path-param value with "1"
-    Then the file's dirty-state should be: dirty
-    And the active tab should have a dirty dot
-    # The "*" in the document title mirrors the file-level dirty flag
-    # — shown when dirty, cleared after save.
-    And the app title should contain "*"
+    # Per-unit dirty-state / title behaviour lives in the dedicated
+    # `dirty-state.feature` — this scenario only cares that the URL
+    # resolver + handlebars pipeline sees the new path param.
     When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
-    And the app title should not contain "*"
     Then the active request URL tooltip should be "http://localhost:8080/api/pet/1"
     # Changing the path-param value must update the URL tooltip
     # reactively through the URLResolver + handlebars pipeline.
@@ -116,7 +76,6 @@ Feature: Full workflow end-to-end scenario
     When I fill the first path-param value with "1"
     Then the active request URL tooltip should be "http://localhost:8080/api/pet/1"
     When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
     When I open the search bar
     And I search for "pet"
     Then I should see search results
@@ -147,10 +106,8 @@ Feature: Full workflow end-to-end scenario
     Then the request Docs tab should be visible
     When I focus the URL field at the start
     And I type "x" character by character with delay 0 ms
-    Then the file's dirty-state should be: dirty
     And the request Docs tab should not be visible
     When I press Backspace in the URL field
-    Then the file's dirty-state should be: clean
     And the request Docs tab should be visible
     When I open the search bar
     And I search for "pet"
@@ -160,34 +117,21 @@ Feature: Full workflow end-to-end scenario
     When I focus the "Swagger Petstore" folder tab
     And I set the folder tab icon to codicon "heart"
     Then the folder tab breadcrumb icon should be "heart"
-    And the file's dirty-state should be: dirty
     When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
 
     When I switch to the "Configuration" inner tab
     When I add a variable "themeColor" of type color to the env folder
     Then the environment-folder variables table color picker should be visible
     When I add a variable "launchDate" of type dateTime to the env folder
     Then the env folder variables should have a dateTime cell
-    And the file's dirty-state should be: dirty
     When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
-    # ── Tab dirty state: modify + revert after save ──
-    # After saving, modify a variable → tab dirty dot should appear.
-    # Revert to original → both tab and file dirty should clear.
-    When I edit and revert the first env folder variable
-    Then the active tab should not have a dirty dot
-    And the file's dirty-state should be: clean
-    # ── Tab dirty state: modify + revert after close/reopen ──
-    # Close and reopen the file, open the env folder tab from the
-    # sidebar, modify + revert → dirty state must clear.
+    # Edit + revert + close/reopen scenarios for dirty-state live in
+    # `dirty-state.feature`; full-workflow just needs the reopen flow to
+    # work for the env-switch / variable-type checks below.
     When I close the current file
     When I open the welcome recent file "workflow-collection.restorm"
     When I click the sidebar env folder "Swagger Petstore"
     When I switch to the "Configuration" inner tab
-    When I edit and revert the first env folder variable
-    Then the active tab should not have a dirty dot
-    And the file's dirty-state should be: clean
     # Variable types must be preserved across env switches: `themeColor`
     # lives on the `localhost` env. Switch to the `https` sub-env and
     # back — the color picker cell should re-appear on the parent env
@@ -216,33 +160,19 @@ Feature: Full workflow end-to-end scenario
     When I delete the env variable "apiKey"
     Then the context variables table should not contain "apiKey"
 
-    # ── Notes dirty state: edit + revert ──
-    # After saving, modify notes → dirty. Revert → clean.
-    When I switch to the "Notes" inner tab
-    And I type "test note content" in the notes editor
-    Then the file's dirty-state should be: dirty
-    And the active tab should have a dirty dot
-    When I undo all changes in the notes editor
-    Then the file's dirty-state should be: clean
-    And the active tab should not have a dirty dot
-    When I switch to the "Configuration" inner tab
+    # Notes edit + revert dirty-state cycle is covered in
+    # `dirty-state.feature` — not re-exercised here.
 
     When I add tag "pet" to the active folder tab
     Then the active folder tab should have tag "pet"
-    And the file's dirty-state should be: dirty
     When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
     When I set the color of the folder tab's "pet" tag to yellow
     Then the folder tab's "pet" tag should be colored yellow
     And the request tab's "pet" tag should be colored yellow
-    And the file's dirty-state should be: dirty
     When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
     When I remove tag "pet" from the active folder tab
     Then the active folder tab should not have tag "pet"
-    And the file's dirty-state should be: dirty
     When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
 
     # ── Favorites: sidebar context menu ──
     When I focus the "Swagger Petstore" folder tab
@@ -320,7 +250,6 @@ Feature: Full workflow end-to-end scenario
     When I snapshot the current window as the final screenshot
 
     When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
     When I close the current file
     # Opening a file through the mocked system open-file dialog via
     # the Ctrl+O shortcut must restore the previously-persisted
@@ -344,7 +273,6 @@ Feature: Full workflow end-to-end scenario
     Then a request tab for "Add a new pet to the store" should be open
     When I open the request Notes tab and type "uniqueNoteKeyword"
     And I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
     When I open the search bar
     And I search for "uniqueNoteKeyword"
     Then I should see search results
@@ -356,7 +284,6 @@ Feature: Full workflow end-to-end scenario
     # the new name reachable through the titlebar search index.
     When I rename "Swagger Petstore" to "SwaggerRenamedFolder" in the sidebar
     When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
     When I open the search bar
     And I search for "SwaggerRenamedFolder"
     Then the title-bar search results should contain a hit mentioning "SwaggerRenamedFolder"
@@ -382,7 +309,6 @@ Feature: Full workflow end-to-end scenario
     # the search is non-empty and that switching query updates the
     # results.
     When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
     When I open the search bar
     And I search for "debouncedebounce"
     Then I should see search results
@@ -395,7 +321,6 @@ Feature: Full workflow end-to-end scenario
     # and the search index refresh together.
     When I rename "Find pet by ID" to "SearchableRenamed" in the sidebar
     When I save the file with Ctrl+S
-    Then the file's dirty-state should be: clean
     When I open the search bar
     And I search for "SearchableRenamed"
     Then the title-bar search results should contain a hit mentioning "SearchableRenamed"

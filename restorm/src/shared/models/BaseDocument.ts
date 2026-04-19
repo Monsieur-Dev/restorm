@@ -7,8 +7,9 @@
 import {
   trackable,
   searchable,
-  NonSerialised
-} from 'electron-core-ui/main'
+  NonSerialised,
+  TreatEmptyAsUndefined
+} from 'electron-core-ui/decorators'
 import type { RuntimeId, Icon } from './types'
 
 /**
@@ -31,10 +32,12 @@ export abstract class BaseDocument {
 
   /** Documentation describing the document purpose and usage */
   @searchable.property({ weight: 1 })
+  @TreatEmptyAsUndefined()
   documentation = ''
 
   /** Optional user notes */
   @searchable.property({ weight: 0.5 })
+  @TreatEmptyAsUndefined()
   notes?: string
 
   /** Tags for categorization and filtering */

@@ -1,4 +1,14 @@
-import { logger, getPersistenceService } from 'electron-core-ui'
+import { app } from 'electron'
+import {
+  logger,
+  getPersistenceService,
+  getFileService,
+  isFileServiceInitialized,
+  ensureProjectUuid,
+  ensureFileProjectUuid,
+  serialize as coreSerialize,
+  deserialize as coreDeserialize
+} from 'electron-core-ui'
 import { join, basename } from 'path'
 import { promises as fs, existsSync, mkdirSync, readFileSync, writeFileSync, renameSync, rmSync } from 'fs'
 import { randomUUID } from 'crypto'
@@ -741,5 +751,101 @@ async function loadSubFolder(
   } catch (error) {
     logger.error('Failed to load subfolder', { path: folderPath, error: String(error) })
     return null
+  }
+}
+
+// ==========================================================================
+// Draft Store Wiring
+// ==========================================================================
+
+/** `userData/drafts` — the root every project's draft dir lives under. */
+export function getDraftsRootDir(): string {
+  return join(app.getPath('userData'), 'drafts')
+}
+
+/**
+ * Ensure the currently-loaded folder has a project UUID, attach a
+ * `DraftStore` to FileService so per-unit writes land in
+ * `userData/drafts/<uuid>`, and restore any drafts that survived a
+ * crash. Safe to call on every folder open — previous draft store (if
+ * any) is detached first.
+ */
+export async function attachDraftStoreForFolder(
+  folderPath: string,
+  format: PersistenceFormat
+): Promise<void> {
+  if (!isFileServiceInitialized()) {
+    logger.warn('attachDraftStoreForFolder: FileService not initialized')
+    return
+  }
+  const ext = format === 'json5' ? 'json5' : format
+  try {
+    const { uuid, generated } = await ensureProjectUuid({
+      projectPath: folderPath,
+      format,
+      extension: ext,
+      indexFileName: 'index'
+    })
+    if (generated) {
+      logger.info('Generated project UUID', { path: folderPath, uuid })
+    }
+
+    const fileService = getFileService()
+    fileService.detachDraftStore()
+    const restored = await fileService.attachDraftStore({
+      rootDir: getDraftsRootDir(),
+      projectUuid: uuid,
+      projectPath: folderPath,
+      extension: ext,
+      serialize: (value) => coreSerialize(value, format),
+      deserialize: (raw) => coreDeserialize(raw, format)
+    })
+    if (restored > 0) {
+      logger.info('Drafts restored for folder', { path: folderPath, count: restored })
+    }
+  } catch (error) {
+    logger.error('Failed to attach draft store', { path: folderPath, error: String(error) })
+  }
+}
+
+/**
+ * File-mode equivalent of `attachDraftStoreForFolder`. Stamps a stable
+ * `_projectUuid` into the single-file project and attaches a DraftStore
+ * so per-unit drafts survive a crash in file mode too — the recovery
+ * UX must match folder mode; only the on-disk layout of the user's
+ * saved content differs.
+ */
+export async function attachDraftStoreForFile(
+  filePath: string,
+  format: PersistenceFormat
+): Promise<void> {
+  if (!isFileServiceInitialized()) {
+    logger.warn('attachDraftStoreForFile: FileService not initialized')
+    return
+  }
+  // Map the project file's extension to a persistence format string
+  // the draft store can use. `.restorm` files are YAML under the hood.
+  const ext = format === 'json5' ? 'json5' : format
+  try {
+    const { uuid, generated } = await ensureFileProjectUuid({ filePath, format })
+    if (generated) {
+      logger.info('Generated project UUID for file', { path: filePath, uuid })
+    }
+
+    const fileService = getFileService()
+    fileService.detachDraftStore()
+    const restored = await fileService.attachDraftStore({
+      rootDir: getDraftsRootDir(),
+      projectUuid: uuid,
+      projectPath: filePath,
+      extension: ext,
+      serialize: (value) => coreSerialize(value, format),
+      deserialize: (raw) => coreDeserialize(raw, format)
+    })
+    if (restored > 0) {
+      logger.info('Drafts restored for file', { path: filePath, count: restored })
+    }
+  } catch (error) {
+    logger.error('Failed to attach draft store (file mode)', { path: filePath, error: String(error) })
   }
 }

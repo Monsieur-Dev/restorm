@@ -194,15 +194,6 @@ export const createCoreUIAPI = (): CoreUiApi => ({
       const result: unknown = await ipcRenderer.invoke('file:is-dirty')
       return result as boolean
     },
-    markDirty: async (): Promise<void> => {
-      await ipcRenderer.invoke('file:mark-dirty')
-    },
-    clearDirty: async (): Promise<void> => {
-      await ipcRenderer.invoke('file:clear-dirty')
-    },
-    checkAndUpdateDirty: async (currentChecksum: string): Promise<void> => {
-      await ipcRenderer.invoke('file:check-and-update-dirty', currentChecksum)
-    },
     finishLoading: async (): Promise<void> => {
       await ipcRenderer.invoke('file:finish-loading')
     },
@@ -243,27 +234,81 @@ export const createCoreUIAPI = (): CoreUiApi => ({
       const result: unknown = await ipcRenderer.invoke('file:has-content-changed', currentChecksum)
       return result as boolean
     },
-    // Object checksum tracking
-    registerInitialChecksums: async (objects: Map<string, unknown>): Promise<void> => {
-      await ipcRenderer.invoke('file:register-initial-checksums', Array.from(objects.entries()))
+    // Save unit v2 API
+    hydrateSaveUnit: async (params: {
+      runtimeId: string
+      kind: 'file' | 'folder'
+      reference: unknown
+      parentId?: string
+    }): Promise<void> => {
+      await ipcRenderer.invoke('file:hydrate-save-unit', params)
     },
-    updateObjectChecksum: async (runtimeId: string, data: unknown): Promise<void> => {
-      await ipcRenderer.invoke('file:update-object-checksum', runtimeId, data)
+    upsertSaveUnit: async (params: {
+      runtimeId: string
+      kind: 'file' | 'folder'
+      draft: unknown
+      reason?: 'modify' | 'create' | 'delete' | 'rename' | 'move' | 'reorder'
+      parentId?: string
+    }): Promise<void> => {
+      await ipcRenderer.invoke('file:upsert-save-unit', params)
     },
-    removeObjectChecksum: async (runtimeId: string): Promise<void> => {
-      await ipcRenderer.invoke('file:remove-object-checksum', runtimeId)
+    markSaveUnitDeleted: async (runtimeId: string): Promise<void> => {
+      await ipcRenderer.invoke('file:mark-save-unit-deleted', runtimeId)
     },
-    commitChecksums: async (): Promise<void> => {
-      await ipcRenderer.invoke('file:commit-checksums')
+    commitSaveUnit: async (runtimeId: string): Promise<void> => {
+      await ipcRenderer.invoke('file:commit-save-unit', runtimeId)
     },
-    getDirtyStateDetails: async (): Promise<{
+    revertSaveUnit: async (runtimeId: string): Promise<void> => {
+      await ipcRenderer.invoke('file:revert-save-unit', runtimeId)
+    },
+    getSaveUnitsSnapshot: async (): Promise<{
       isDirty: boolean
-      changedIds: string[]
-      newIds: string[]
-      deletedIds: string[]
+      dirtyCount: number
+      dirtyUnits: { runtimeId: string; reason?: string }[]
     }> => {
-      const result: unknown = await ipcRenderer.invoke('file:get-dirty-state-details')
-      return result as { isDirty: boolean; changedIds: string[]; newIds: string[]; deletedIds: string[] }
+      const result: unknown = await ipcRenderer.invoke('file:get-save-units-snapshot')
+      return result as {
+        isDirty: boolean
+        dirtyCount: number
+        dirtyUnits: { runtimeId: string; reason?: string }[]
+      }
+    },
+    onUnitDirtyChanged: (
+      callback: (payload: { runtimeId: string; isDirty: boolean; reason?: string }) => void
+    ): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, payload: { runtimeId: string; isDirty: boolean; reason?: string }): void => {
+        callback(payload)
+      }
+      ipcRenderer.on('file:unit-dirty-changed', handler)
+      return () => {
+        ipcRenderer.removeListener('file:unit-dirty-changed', handler)
+      }
+    },
+    onDraftsRestored: (
+      callback: (payload: { count: number }) => void
+    ): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, payload: { count: number }): void => {
+        callback(payload)
+      }
+      ipcRenderer.on('file:drafts-restored', handler)
+      return () => {
+        ipcRenderer.removeListener('file:drafts-restored', handler)
+      }
+    },
+    saveUnit: async (entry: {
+      runtimeId: string
+      content: unknown
+      absolutePath: string
+      format: 'json' | 'json5' | 'yaml'
+    }): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('file:save-unit', entry)
+      return result as boolean
+    },
+    saveUnitsBatch: async (
+      entries: { runtimeId: string; content: unknown; absolutePath: string; format: 'json' | 'json5' | 'yaml' }[]
+    ): Promise<{ runtimeId: string; success: boolean }[]> => {
+      const result: unknown = await ipcRenderer.invoke('file:save-units-batch', entries)
+      return result as { runtimeId: string; success: boolean }[]
     },
     onStateChanged: (callback: (state: FileServiceState) => void): (() => void) => {
       const handler = (_event: Electron.IpcRendererEvent, state: FileServiceState): void => {

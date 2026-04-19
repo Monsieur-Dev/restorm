@@ -188,9 +188,7 @@ await fileService.closeFile()
 fileService.getState()       // FileServiceState
 fileService.getFileName()    // string | null
 fileService.getFilePath()    // string | null
-fileService.isDirty()        // boolean
-fileService.markDirty()
-fileService.clearDirty()
+fileService.isDirty()        // boolean — derived from the save-unit registry
 
 // Unsaved changes dialog
 const result = await fileService.showUnsavedChangesDialog({
@@ -208,15 +206,17 @@ fileService.getFavorites()    // FileMetadata[]
 await fileService.toggleFavorite('/path')
 await fileService.removeFromRecent('/path')
 
-// Checksum-based dirty tracking
-await fileService.registerInitialChecksums(objectsMap)
-await fileService.commitChecksums()
-fileService.getDirtyStateDetails()
-// Returns: { isDirty, changedIds, newIds, deletedIds }
+// Per-unit dirty state lives in the save-unit registry — mutate via
+// the registry (hydrate/mutate/commit/revert/markDeleted) and the
+// bridge recomputes `isDirty()` automatically.
+const registry = fileService.getSaveUnitRegistry()
+registry.hydrate({ runtimeId, kind, reference })
+registry.mutate(runtimeId, draft)
+registry.commit(runtimeId)
 
 // Events
-fileService.onStateChange(callback)
-fileService.onDirtyChange(callback)
+fileService.onStateChanged(callback)
+fileService.onDirtyChanged(callback)
 ```
 
 ---

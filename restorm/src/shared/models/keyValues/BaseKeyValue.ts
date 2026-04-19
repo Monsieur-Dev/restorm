@@ -1,4 +1,4 @@
-import { searchable, NonSerialised, graphqlField } from 'electron-core-ui/main'
+import { searchable, NonSerialised, graphqlField } from 'electron-core-ui/decorators'
 import type { RuntimeId } from '../types'
 import type { ValueType } from '../../types/collections'
 

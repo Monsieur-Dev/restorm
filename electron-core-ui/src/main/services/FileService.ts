@@ -1,7 +1,14 @@
 import { dialog, BrowserWindow } from 'electron'
-import { readFileSync, writeFileSync, existsSync, statSync } from 'fs'
-import { createHash } from 'crypto'
+import { readFileSync, existsSync, statSync } from 'fs'
 import { basename, extname } from 'path'
+import { atomicWriteFile, serialize as serializePersisted, type PersistenceFormat } from './PersistenceService'
+import {
+  SaveUnitRegistry,
+  DraftStore,
+  sweepOrphanedDrafts,
+  isTombstone,
+  type DirtyReason
+} from './saveUnit'
 import yaml from 'js-yaml'
 import type {
   SerializationFormat,
@@ -12,12 +19,11 @@ import type {
   OpenDialogResult,
   FileServiceState
 } from '../../types/file'
-import type { RuntimeId, ChecksumMap, DirtyStateResult } from '../../types/runtime'
+import type { RuntimeId } from '../../types/runtime'
 import { logger } from './LoggerService'
 import { FileSystemError, errorMeta } from '../../errors'
 import { getStorageService } from './StorageService'
 import { i18nService } from './I18nService'
-import { eventBusService } from './EventBusService'
 
 /**
  * FileService manages file operations with serialization support
@@ -40,11 +46,21 @@ export class FileService {
   private readonly RECENT_FILES_KEY: string
   private readonly FAVORITES_KEY: string
 
-  // Checksum tracking for granular dirty state management
-  /** Checksums of objects at the time of last save */
-  private savedChecksums: ChecksumMap = new Map()
-  /** Current checksums of objects (updated on each modification) */
-  private currentChecksums: ChecksumMap = new Map()
+  /**
+   * Save-unit registry — single source of truth for dirty state.
+   * Per-unit events bridge to IPC so renderer hooks can scope to a
+   * single unit, and the global `currentFile.isDirty` cache is kept
+   * in sync with "any unit dirty" by the same bridge.
+   */
+  private readonly saveUnitRegistry: SaveUnitRegistry = new SaveUnitRegistry()
+
+  /**
+   * Active draft store for the currently-open project, or null when
+   * no project is open. Wired into the registry so every dirty
+   * transition persists a draft file (debounced), and commits /
+   * reverts remove it.
+   */
+  private draftStore: DraftStore | null = null
 
   constructor(config: Partial<FileServiceConfig> = {}) {
     this.config = {
@@ -67,240 +83,204 @@ export class FileService {
     }
 
     this.loadPersistedData()
-    this.subscribeToObjectChanges()
+    this.bridgeSaveUnitEvents()
   }
 
-  // ==========================================================================
-  // Checksum-based Dirty State Management
-  // ==========================================================================
-
   /**
-   * Subscribe to DocumentEvents from the event bus.
-   * When an object is modified, we update its checksum and recalculate dirty state.
-   * Events are emitted by the renderer via IPC and relayed through EventBusService.
+   * Bridge the SaveUnitRegistry's `onUnitChange` notifications to:
+   *   1. Per-unit IPC broadcasts (renderer hooks scope dirty dots
+   *      via `useUnitDirtyState(id)` / `useDirtyUnitsSet()`).
+   *   2. The cached `currentFile.isDirty` flag (source of truth for
+   *      close-dialog guards and `file:dirty-changed` listeners).
+   *   3. The active draft store, so dirty transitions land as a
+   *      debounced atomic write under `userData/drafts/…` and clean
+   *      transitions remove the draft.
    */
-  private subscribeToObjectChanges(): void {
-    // Document event types
-    const DOCUMENT_EVENTS = {
-      FOLDER_CREATED: 'document:folder:created',
-      FOLDER_UPDATED: 'document:folder:updated',
-      FOLDER_DELETED: 'document:folder:deleted',
-      REQUEST_CREATED: 'document:request:created',
-      REQUEST_UPDATED: 'document:request:updated',
-      REQUEST_DELETED: 'document:request:deleted',
-      ENVIRONMENT_CREATED: 'document:environment:created',
-      ENVIRONMENT_UPDATED: 'document:environment:updated',
-      ENVIRONMENT_DELETED: 'document:environment:deleted'
-    }
-
-    // Handler for create/update events
-    const handleDocumentChanged = (payload: { id: string; type: string; document: unknown }): void => {
-      if (!payload.id || !payload.document) return
-      const checksum = this.calculateChecksum(payload.document)
-      const previousChecksum = this.currentChecksums.get(payload.id)
-      
-      logger.debug('[FileService] Document changed', { 
-        id: payload.id, 
-        type: payload.type,
-        newChecksum: checksum.slice(0, 8),
-        prevChecksum: previousChecksum?.slice(0, 8) ?? 'none',
-        savedChecksum: this.savedChecksums.get(payload.id)?.slice(0, 8) ?? 'none'
-      })
-
-      if (previousChecksum !== checksum) {
-        this.currentChecksums.set(payload.id, checksum)
-        this.recalculateDirtyState()
+  private bridgeSaveUnitEvents(): void {
+    this.saveUnitRegistry.onUnitChange((snapshot) => {
+      this.broadcastEvent('file:unit-dirty-changed', snapshot)
+      this.refreshGlobalDirtyFromRegistry()
+      // Persist / delete the draft file for crash recovery.
+      if (this.draftStore) {
+        if (snapshot.isDirty) {
+          const unit = this.saveUnitRegistry.get(snapshot.runtimeId)
+          if (unit?.draft !== undefined) {
+            void this.draftStore.writeDraft(snapshot.runtimeId, unit.draft).catch((err: unknown) => {
+              logger.warn('[FileService] Draft write failed', { runtimeId: snapshot.runtimeId, error: String(err) })
+            })
+          }
+        } else {
+          void this.draftStore.deleteDraft(snapshot.runtimeId).catch((err: unknown) => {
+            logger.warn('[FileService] Draft delete failed', { runtimeId: snapshot.runtimeId, error: String(err) })
+          })
+        }
       }
-    }
-
-    // Handler for delete events
-    const handleDocumentDeleted = (payload: { id: string }): void => {
-      if (!payload.id) return
-      logger.debug('[FileService] Document deleted', { id: payload.id })
-      this.currentChecksums.delete(payload.id)
-      this.recalculateDirtyState()
-    }
-
-    // Subscribe to CREATE events too so post-load additions (imports, new
-    // requests/folders created by the user) register in `currentChecksums`
-    // without a matching `savedChecksums` entry — that's what flags the
-    // file as dirty. During the initial file load, `registerInitialChecksums`
-    // clears both maps and repopulates them in lockstep, so any CREATE
-    // events emitted before baseline is set are overwritten cleanly.
-    eventBusService.subscribe(DOCUMENT_EVENTS.FOLDER_CREATED, handleDocumentChanged)
-    eventBusService.subscribe(DOCUMENT_EVENTS.REQUEST_CREATED, handleDocumentChanged)
-    eventBusService.subscribe(DOCUMENT_EVENTS.ENVIRONMENT_CREATED, handleDocumentChanged)
-
-    // Subscribe to UPDATE events
-    eventBusService.subscribe(DOCUMENT_EVENTS.FOLDER_UPDATED, handleDocumentChanged)
-    eventBusService.subscribe(DOCUMENT_EVENTS.REQUEST_UPDATED, handleDocumentChanged)
-    eventBusService.subscribe(DOCUMENT_EVENTS.ENVIRONMENT_UPDATED, handleDocumentChanged)
-
-    // Subscribe to DELETE events
-    eventBusService.subscribe(DOCUMENT_EVENTS.FOLDER_DELETED, handleDocumentDeleted)
-    eventBusService.subscribe(DOCUMENT_EVENTS.REQUEST_DELETED, handleDocumentDeleted)
-    eventBusService.subscribe(DOCUMENT_EVENTS.ENVIRONMENT_DELETED, handleDocumentDeleted)
-
-    logger.info('[FileService] Subscribed to DocumentEvents (CREATE/UPDATE/DELETE) for dirty state tracking')
-  }
-
-  /**
-   * Calculate SHA-256 checksum of an object with deterministic serialization
-   * Keys are sorted to ensure consistent checksums regardless of property order
-   */
-  private calculateChecksum(data: unknown): string {
-    const json = JSON.stringify(this.sortObjectKeys(data))
-    return createHash('sha256').update(json).digest('hex')
-  }
-
-  /**
-   * Recursively sort object keys to ensure deterministic JSON serialization
-   */
-  private sortObjectKeys(obj: unknown): unknown {
-    if (obj === null || obj === undefined) return obj
-    if (Array.isArray(obj)) {
-      return obj.map(item => this.sortObjectKeys(item))
-    }
-    if (typeof obj === 'object') {
-      const raw = obj as Record<string, unknown>
-      const isKeyValue = 'key' in raw && 'value' in raw
-      const sorted: Record<string, unknown> = {}
-      const keys = Object.keys(raw).sort()
-      for (const key of keys) {
-        if (key === 'id' && isKeyValue) continue
-        sorted[key] = this.sortObjectKeys(raw[key])
-      }
-      return sorted
-    }
-    return obj
-  }
-
-  /**
-   * Update the checksum for a specific object and recalculate dirty state
-   */
-  public updateObjectChecksum(runtimeId: RuntimeId, data: unknown): void {
-    const checksum = this.calculateChecksum(data)
-    const previousChecksum = this.currentChecksums.get(runtimeId)
-
-    // Only update if checksum actually changed
-    if (previousChecksum !== checksum) {
-      this.currentChecksums.set(runtimeId, checksum)
-      logger.debug('[FileService] Object checksum updated', { runtimeId, checksum: checksum.slice(0, 8) })
-      this.recalculateDirtyState()
-    }
-  }
-
-  /**
-   * Register initial checksums for all objects when a file is loaded.
-   * This establishes the "clean" state baseline.
-   * @param objects Map of runtimeId → object data
-   */
-  public registerInitialChecksums(objects: Map<RuntimeId, unknown>): void {
-    this.savedChecksums.clear()
-    this.currentChecksums.clear()
-
-    for (const [runtimeId, data] of objects) {
-      const checksum = this.calculateChecksum(data)
-      this.savedChecksums.set(runtimeId, checksum)
-      this.currentChecksums.set(runtimeId, checksum)
-      logger.debug('[FileService] Registered checksum', { 
-        runtimeId, 
-        checksum: checksum.slice(0, 8),
-        dataPreview: JSON.stringify(data).slice(0, 100)
-      })
-    }
-
-    logger.info('[FileService] Registered initial checksums', { 
-      count: objects.size,
-      ids: Array.from(objects.keys())
     })
-    this.recalculateDirtyState()
   }
 
   /**
-   * Commit current checksums as the new "saved" state.
-   * Called after a successful save operation.
+   * Recompute `currentFile.isDirty` from the registry and fire the
+   * `dirty-changed` / `state-changed` notifications if the flag
+   * flipped. The registry is the only writer of this field — direct
+   * mutations elsewhere in the class are deliberately absent so the
+   * two views never diverge.
    */
-  public commitChecksums(): void {
-    this.savedChecksums.clear()
-    for (const [runtimeId, checksum] of this.currentChecksums) {
-      this.savedChecksums.set(runtimeId, checksum)
-    }
-    logger.debug('[FileService] Checksums committed')
-    this.recalculateDirtyState()
-  }
-
-  /**
-   * Clear all checksum tracking (called when closing a file)
-   */
-  public clearChecksums(): void {
-    this.savedChecksums.clear()
-    this.currentChecksums.clear()
-    logger.debug('[FileService] Checksums cleared')
-  }
-
-  /**
-   * Recalculate dirty state by comparing current checksums with saved checksums.
-   * Dirty if any object has changed, been added, or been removed.
-   */
-  private recalculateDirtyState(): void {
-    const result = this.getDirtyStateDetails()
-    const newIsDirty = result.isDirty
-
-    logger.debug('[FileService] recalculateDirtyState', {
-      savedCount: this.savedChecksums.size,
-      currentCount: this.currentChecksums.size,
-      changedIds: result.changedIds,
-      newIds: result.newIds,
-      deletedIds: result.deletedIds,
-      isDirty: newIsDirty
-    })
-
-    if (this.currentFile.isDirty !== newIsDirty) {
-      this.currentFile.isDirty = newIsDirty
-      logger.debug('[FileService] Dirty state changed', { isDirty: newIsDirty })
+  private refreshGlobalDirtyFromRegistry(): void {
+    const nowDirty = this.saveUnitRegistry.listDirty().length > 0
+    if (this.currentFile.isDirty !== nowDirty) {
+      this.currentFile.isDirty = nowDirty
       this.notifyDirtyChange()
-      this.notifyStateChange()
+    }
+    this.notifyStateChange()
+  }
+
+  // ==========================================================================
+  // Crash Recovery (draft store)
+  // ==========================================================================
+
+  /**
+   * Attach a draft store to the currently-open project. Should be
+   * called right after a project is loaded and the registry has been
+   * hydrated with its on-disk state. Existing drafts are read back
+   * and re-applied to the registry — each restored unit transitions
+   * to `dirty` and emits the usual per-unit event. Returns the number
+   * of drafts restored so callers can surface a toast.
+   */
+  public async attachDraftStore(params: {
+    rootDir: string
+    projectUuid: string
+    projectPath: string
+    extension: string
+    serialize: (value: unknown) => string
+    deserialize: (raw: string) => unknown
+    debounceMs?: number
+  }): Promise<number> {
+    this.draftStore = new DraftStore(params)
+    const drafts = await this.draftStore.loadAllDrafts()
+    let restored = 0
+    for (const draft of drafts) {
+      const unit = this.saveUnitRegistry.get(draft.runtimeId)
+      if (isTombstone(draft.payload)) {
+        if (unit) {
+          this.saveUnitRegistry.markDeleted(draft.runtimeId)
+          restored += 1
+        }
+        continue
+      }
+      if (unit) {
+        this.saveUnitRegistry.mutate(draft.runtimeId, draft.payload, 'modify')
+      } else {
+        // The reference file was lost but the draft survived — treat
+        // it as a pending-create so the user can still recover the
+        // work, then save it.
+        this.saveUnitRegistry.create({
+          runtimeId: draft.runtimeId,
+          kind: 'file',
+          draft: draft.payload
+        })
+      }
+      restored += 1
+    }
+    if (restored > 0) {
+      this.broadcastEvent('file:drafts-restored', { count: restored })
+      logger.info('[FileService] Drafts restored', { count: restored })
+    }
+    return restored
+  }
+
+  /** Detach the active draft store. Called when closing a project. */
+  public detachDraftStore(): void {
+    this.draftStore = null
+  }
+
+  /**
+   * Remove draft directories belonging to projects that no longer
+   * exist on disk. Meant to be called once at app boot from the
+   * host app's main process.
+   */
+  public static async cleanupOrphanedDrafts(rootDir: string): Promise<number> {
+    return sweepOrphanedDrafts(rootDir)
+  }
+
+  // ==========================================================================
+  // Save Unit API (v2 dirty-state model)
+  // ==========================================================================
+
+  /**
+   * The save-unit registry. Main-process callers (IPC handlers, file
+   * service internals) mutate it directly — no wrapper methods on the
+   * service. The registry is still read-only to the outside world in
+   * the sense that `FileService` owns its lifetime.
+   */
+  public getSaveUnitRegistry(): SaveUnitRegistry {
+    return this.saveUnitRegistry
+  }
+
+  /**
+   * Persist a single save unit to disk:
+   *   1. Serialize the caller-supplied content (current in-memory tree
+   *      slice for the unit) to `absolutePath` atomically (temp+rename).
+   *   2. Commit the unit **only if the registry's draft still matches**
+   *      the content we just wrote. A mutation that arrived between the
+   *      caller's snapshot and this method call leaves the unit dirty
+   *      and the (newer) draft intact — the next save picks it up.
+   *   3. Delete the unit's draft file only when the commit proceeded.
+   *      The bridge's `clean → deleteDraft` transition handles it.
+   *
+   * Called from a `file:save-unit` IPC. The renderer owns the tree and
+   * therefore owns the path resolution for the unit.
+   */
+  public async saveUnit(params: {
+    runtimeId: RuntimeId
+    content: unknown
+    absolutePath: string
+    format: PersistenceFormat
+  }): Promise<boolean> {
+    try {
+      const serialized = serializePersisted(params.content, params.format)
+      await atomicWriteFile(params.absolutePath, serialized)
+      const committed = this.saveUnitRegistry.commitIfDraftMatches(params.runtimeId, params.content)
+      if (!committed) {
+        logger.info('[FileService] Save completed but draft advanced — unit remains dirty', {
+          runtimeId: params.runtimeId
+        })
+      }
+      return true
+    } catch (err: unknown) {
+      logger.error('[FileService] Failed to save unit', { runtimeId: params.runtimeId, error: String(err) })
+      return false
     }
   }
 
   /**
-   * Get detailed dirty state information including which objects changed
+   * Persist a batch of save units in one pass. Each unit is saved
+   * independently — a single failure doesn't short-circuit the rest.
+   * Returns per-unit outcomes so the caller can surface partial
+   * failures to the user.
    */
-  public getDirtyStateDetails(): DirtyStateResult {
-    const changedIds: RuntimeId[] = []
-    const newIds: RuntimeId[] = []
-    const deletedIds: RuntimeId[] = []
-
-    // Check for changed and new objects
-    for (const [runtimeId, currentChecksum] of this.currentChecksums) {
-      const savedChecksum = this.savedChecksums.get(runtimeId)
-      if (savedChecksum === undefined) {
-        newIds.push(runtimeId)
-      } else if (savedChecksum !== currentChecksum) {
-        changedIds.push(runtimeId)
-      }
+  public async saveUnitsBatch(
+    units: { runtimeId: RuntimeId; content: unknown; absolutePath: string; format: PersistenceFormat }[]
+  ): Promise<{ runtimeId: RuntimeId; success: boolean }[]> {
+    const results: { runtimeId: RuntimeId; success: boolean }[] = []
+    for (const unit of units) {
+      const success = await this.saveUnit(unit)
+      results.push({ runtimeId: unit.runtimeId, success })
     }
-
-    // Check for deleted objects
-    for (const runtimeId of this.savedChecksums.keys()) {
-      if (!this.currentChecksums.has(runtimeId)) {
-        deletedIds.push(runtimeId)
-      }
-    }
-
-    const isDirty = changedIds.length > 0 || newIds.length > 0 || deletedIds.length > 0
-
-    return { isDirty, changedIds, newIds, deletedIds }
+    return results
   }
 
-  /**
-   * Remove an object from checksum tracking (when object is deleted)
-   */
-  public removeObjectChecksum(runtimeId: RuntimeId): void {
-    this.currentChecksums.delete(runtimeId)
-    logger.debug('[FileService] Object checksum removed', { runtimeId })
-    this.recalculateDirtyState()
+  /** Whole-registry dirty snapshot (global + per-unit). */
+  public getSaveUnitsSnapshot(): {
+    isDirty: boolean
+    dirtyCount: number
+    dirtyUnits: { runtimeId: RuntimeId; reason: DirtyReason | undefined }[]
+  } {
+    const dirty = this.saveUnitRegistry.listDirty()
+    return {
+      isDirty: dirty.length > 0,
+      dirtyCount: dirty.length,
+      dirtyUnits: dirty.map((u) => ({ runtimeId: u.runtimeId, reason: u.lastDirtyReason }))
+    }
   }
 
   // ==========================================================================
@@ -518,7 +498,7 @@ export class FileService {
     try {
       const emptyContent = {}
       const data = this.serialize(emptyContent, this.config.defaultFormat)
-      writeFileSync(filePath, data, 'utf-8')
+      await atomicWriteFile(filePath, data)
 
       this.currentFile = {
         path: filePath,
@@ -654,13 +634,14 @@ export class FileService {
 
     try {
       const data = this.serialize(content, this.currentFile.format)
-      writeFileSync(this.currentFile.path, data, 'utf-8')
+      await atomicWriteFile(this.currentFile.path, data)
 
       this.currentFile.content = content
-      this.currentFile.isDirty = false
       this.currentFile.contentChecksum = JSON.stringify(content)
+      // `currentFile.isDirty` is owned by the save-unit registry: the
+      // caller re-hydrates (or commits) units post-save and the bridge
+      // flips the cached flag. We don't touch it here.
       this.notifyStateChange()
-      this.notifyDirtyChange()
 
       logger.info('FileService: File saved', { path: this.currentFile.path })
       return true
@@ -699,7 +680,7 @@ export class FileService {
 
     try {
       const data = this.serialize(content, fileFormat)
-      writeFileSync(filePath, data, 'utf-8')
+      await atomicWriteFile(filePath, data)
 
       const name = this.getDisplayName(filePath)
       this.currentFile = {
@@ -728,8 +709,10 @@ export class FileService {
    * Close current file
    */
   public close(): boolean {
-    // Clear checksum tracking
-    this.clearChecksums()
+    // Drop registry state — clearing the registry emits no per-unit
+    // events (by design), so we reset the cached dirty flag manually.
+    this.saveUnitRegistry.clear()
+    this.detachDraftStore()
 
     this.currentFile = {
       path: null,
@@ -741,7 +724,7 @@ export class FileService {
     }
     this.notifyStateChange()
     this.notifyDirtyChange()
-    
+
     // Broadcast file closed event so apps can clean up (e.g., clear workbench)
     this.broadcastEvent('file:closed')
     
@@ -902,7 +885,10 @@ export class FileService {
   }
 
   /**
-   * Check if file is dirty
+   * True when any save-unit in the registry is dirty. The cached
+   * value on `currentFile.isDirty` is refreshed by
+   * `refreshGlobalDirtyFromRegistry` whenever the registry emits a
+   * change — no direct setter.
    */
   public isDirty(): boolean {
     return this.currentFile.isDirty
@@ -921,28 +907,6 @@ export class FileService {
   public finishLoading(): void {
     this._isLoading = false
     logger.debug('FileService: Loading finished')
-  }
-
-  /**
-   * Mark file as dirty
-   */
-  public markDirty(): void {
-    if (!this.currentFile.isDirty) {
-      this.currentFile.isDirty = true
-      this.notifyStateChange()
-      this.notifyDirtyChange()
-    }
-  }
-
-  /**
-   * Clear dirty flag
-   */
-  public clearDirty(): void {
-    if (this.currentFile.isDirty) {
-      this.currentFile.isDirty = false
-      this.notifyStateChange()
-      this.notifyDirtyChange()
-    }
   }
 
   /**

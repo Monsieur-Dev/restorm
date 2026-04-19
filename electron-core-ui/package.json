@@ -13,6 +13,10 @@
       "types": "./dist/src/main/index.d.ts",
       "default": "./dist/src/main/index.js"
     },
+    "./decorators": {
+      "types": "./dist/src/main/decorators/index.d.ts",
+      "default": "./dist/src/main/decorators/index.js"
+    },
     "./testing": {
       "types": "./dist/src/main/testing/index.d.ts",
       "default": "./dist/src/main/testing/index.js"

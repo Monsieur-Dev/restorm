@@ -60,11 +60,36 @@ export const fileShowUnsavedDialogArgs = z.tuple([
     cancel: z.string().optional()
   }).optional()
 ])
-export const fileRegisterChecksumsArgs = z.tuple([
-  z.array(z.tuple([z.string(), z.unknown()]))
+// Save unit v2 API
+const saveUnitKindSchema = z.enum(['file', 'folder'])
+const saveUnitReasonSchema = z.enum(['modify', 'create', 'delete', 'rename', 'move', 'reorder']).optional()
+export const fileHydrateSaveUnitArgs = z.tuple([
+  z.object({
+    runtimeId: z.string(),
+    kind: saveUnitKindSchema,
+    reference: z.unknown(),
+    parentId: z.string().optional()
+  })
 ])
-export const fileUpdateObjectChecksumArgs = z.tuple([z.string(), z.unknown()])
-export const fileRemoveObjectChecksumArgs = z.tuple([z.string()])
+export const fileUpsertSaveUnitArgs = z.tuple([
+  z.object({
+    runtimeId: z.string(),
+    kind: saveUnitKindSchema,
+    draft: z.unknown(),
+    reason: saveUnitReasonSchema,
+    parentId: z.string().optional()
+  })
+])
+export const fileSaveUnitIdArgs = z.tuple([z.string()])
+const persistenceFormatSchema = z.enum(['json', 'json5', 'yaml'])
+const saveUnitEntrySchema = z.object({
+  runtimeId: z.string(),
+  content: z.unknown(),
+  absolutePath: z.string(),
+  format: persistenceFormatSchema
+})
+export const fileSaveUnitToDiskArgs = z.tuple([saveUnitEntrySchema])
+export const fileSaveUnitsBatchArgs = z.tuple([z.array(saveUnitEntrySchema)])
 
 // ==========================================================================
 // EventBus

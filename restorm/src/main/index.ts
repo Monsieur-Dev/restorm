@@ -1,13 +1,14 @@
 import { app, BrowserWindow } from 'electron'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized } from 'electron-core-ui'
+import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService } from 'electron-core-ui'
+import type { PersistenceFormat } from 'electron-core-ui'
 import { join } from 'path'
 import { existsSync, statSync } from 'fs'
 import { searchIndexService, contextService, responseHistoryService } from './services'
 import { clearUserSettings, parseCliArgs } from './cli/args'
 import { setupGraphQL } from './GraphQLSetup'
 import { registerRestormIPC } from './IPCHandlers'
-import { loadFolderStructure } from './FileOperations'
+import { loadFolderStructure, attachDraftStoreForFolder, attachDraftStoreForFile, getDraftsRootDir } from './FileOperations'
 import { DEFAULT_UI_DELAY_MS } from '../shared/config/constants'
 // DocumentEvents are handled by FileService internally for dirty state tracking
 
@@ -86,7 +87,7 @@ function createWindow(): void {
                 logger.warn('PersistenceService not initialized, cannot load folder')
                 return
               }
-              void loadFolderStructure(fileToOpenOnStart).then((result) => {
+              void loadFolderStructure(fileToOpenOnStart).then(async (result) => {
                 if (result && mainWindow && isFileServiceInitialized()) {
                   logger.info('Folder loaded, sending to renderer', {
                     collectionsCount: (result.data as { collections?: unknown[] }).collections?.length,
@@ -95,6 +96,7 @@ function createWindow(): void {
                   // Set the file state in FileService so the UI knows a file is open
                   const fileService = getFileService() as { setOpenedFolder: (path: string, content: unknown, format?: string) => void }
                   fileService.setOpenedFolder(fileToOpenOnStart, result.data, result.format)
+                  await attachDraftStoreForFolder(fileToOpenOnStart, result.format)
                 } else {
                   logger.error('Failed to load folder from command line', { result })
                 }
@@ -102,9 +104,11 @@ function createWindow(): void {
             } else if (isFileServiceInitialized()) {
               // Open as file
               logger.info('Opening file...', { path: fileToOpenOnStart })
-              void getFileService().open(fileToOpenOnStart).then((result) => {
+              void getFileService().open(fileToOpenOnStart).then(async (result) => {
                 if (result.success) {
                   logger.info('File opened successfully from command line')
+                  const format = (result as { format?: string }).format ?? 'yaml'
+                  await attachDraftStoreForFile(fileToOpenOnStart, format as PersistenceFormat)
                 } else {
                   logger.error('Failed to open file from command line:', { path: fileToOpenOnStart })
                 }
@@ -200,6 +204,33 @@ initFileService({
 })
 logger.info('File Service initialized')
 
+// Attach a crash-recovery draft store whenever a `.restorm` file is
+// opened in file mode. File mode and folder mode must behave identically
+// with respect to dirty-state tracking and draft recovery — the only
+// difference between them is the on-disk layout of the user's saved
+// content. Folder mode wires the draft store through the dedicated
+// `restorm:open-path` / command-line paths above; this listener covers
+// the regular `file:open` IPC which goes straight to FileService.
+{
+  let lastFilePath: string | null = null
+  getFileService().onStateChanged((state) => {
+    const path = state.currentFile.path
+    if (!path || path === lastFilePath) {
+      lastFilePath = path
+      return
+    }
+    lastFilePath = path
+    // Folder-mode paths point to a directory; file-mode paths end in the
+    // `.restorm` extension. Use the extension as the discriminator so we
+    // don't have to hit the filesystem on every state change.
+    if (!path.endsWith('.restorm')) return
+    const format = (state.currentFile.format as PersistenceFormat | undefined) ?? 'yaml'
+    void attachDraftStoreForFile(path, format).catch((err: unknown) => {
+      logger.warn('attachDraftStoreForFile failed', { path, error: String(err) })
+    })
+  })
+}
+
 // Initialize Persistence Service for folder mode support
 initPersistenceService({
   extension: 'restorm',
@@ -208,6 +239,19 @@ initPersistenceService({
   indexFileName: 'index'
 })
 logger.info('Persistence Service initialized')
+
+// Sweep drafts from projects that no longer exist on disk.
+// `whenReady` ensures `app.getPath('userData')` is resolvable.
+void app.whenReady().then(async () => {
+  try {
+    const removed = await FileService.cleanupOrphanedDrafts(getDraftsRootDir())
+    if (removed > 0) {
+      logger.info('Cleaned up orphaned draft directories', { removed })
+    }
+  } catch (error) {
+    logger.warn('Orphaned drafts cleanup failed', { error: String(error) })
+  }
+})
 
 // Dirty state is now handled by FileService via checksum comparison
 // FileService subscribes to DocumentEvents internally and tracks per-object checksums

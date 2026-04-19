@@ -8,12 +8,6 @@ const openFolderTestDir = defineBddConfig({
   outputDir: '.features-gen/open-folder'
 })
 
-const saveOperationsTestDir = defineBddConfig({
-  features: 'tests/e2e/bdd/save-operations/features/**/*.feature',
-  steps: ['tests/e2e/bdd/save-operations/steps/**/*.ts', 'tests/e2e/bdd/fixtures/save-operations.fixture.ts'],
-  outputDir: '.features-gen/save-operations'
-})
-
 const fullWorkflowTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/full-workflow/features/**/*.feature',
   steps: ['tests/e2e/bdd/full-workflow/steps/**/*.ts', 'tests/e2e/bdd/fixtures/full-workflow.fixture.ts'],
@@ -24,6 +18,12 @@ const swaggerImportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/swagger-import/features/**/*.feature',
   steps: ['tests/e2e/bdd/swagger-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/swagger-import.fixture.ts'],
   outputDir: '.features-gen/swagger-import'
+})
+
+const dirtyStateTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/dirty-state/features/**/*.feature',
+  steps: ['tests/e2e/bdd/dirty-state/steps/**/*.ts', 'tests/e2e/bdd/fixtures/dirty-state.fixture.ts'],
+  outputDir: '.features-gen/dirty-state'
 })
 
 /**
@@ -63,16 +63,16 @@ export default defineConfig({
       testDir: openFolderTestDir
     },
     {
-      name: 'save-operations',
-      testDir: saveOperationsTestDir
-    },
-    {
       name: 'full-workflow',
       testDir: fullWorkflowTestDir
     },
     {
       name: 'swagger-import',
       testDir: swaggerImportTestDir
+    },
+    {
+      name: 'dirty-state',
+      testDir: dirtyStateTestDir
     }
   ]
 })

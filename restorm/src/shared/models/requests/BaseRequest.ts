@@ -6,7 +6,7 @@ import {
   trackable,
   searchable,
   graphqlField
-} from 'electron-core-ui/main'
+} from 'electron-core-ui/decorators'
 import type { RuntimeId, Icon, RequestType } from '../types'
 
 /**

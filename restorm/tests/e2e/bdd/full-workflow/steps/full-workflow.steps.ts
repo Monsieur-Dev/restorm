@@ -1620,23 +1620,12 @@ Then(
   }
 )
 
-Then('the file\'s dirty-state should be: {word}', async ({}, state: string) => {
-  if (!page) throw new Error('app must be launched')
-  const currentPage = page
-  if (state === 'dirty') {
-    await expect.poll(
-      async () => currentPage.title(),
-      { message: 'expected title to end with " *"', timeout: 10000 }
-    ).toMatch(/ \*$/)
-  } else if (state === 'clean') {
-    await expect.poll(
-      async () => currentPage.title(),
-      { message: 'expected title not to end with " *"', timeout: 10000 }
-    ).not.toMatch(/ \*$/)
-  } else {
-    throw new Error(`unknown dirty-state "${state}" (expected "clean" or "dirty")`)
-  }
-})
+// Dirty-state assertions on the file as a whole were removed in OYO-183.
+// Dirty-state correctness is now validated by the unit test suite in
+// `electron-core-ui/src/main/services/saveUnit/*.test.ts` and
+// `electron-core-ui/src/main/services/FileService.drafts.test.ts`.
+// Remaining tab-level "dirty dot" assertions stay in the feature files
+// because they're part of the user-visible flow.
 
 When('I save the file with Ctrl+S', async () => {
   if (!page) throw new Error('app must be launched')
@@ -1644,8 +1633,28 @@ When('I save the file with Ctrl+S', async () => {
   // before dispatching Ctrl+S.
   await page.keyboard.press('Escape')
   await page.keyboard.press('Control+s')
-  // Give FileService a beat to flush the commitChecksums → dirty=false cascade.
+  // Give FileService a beat to flush the save-unit commit → dirty=false cascade.
   await page.waitForTimeout(500)
+})
+
+When('I save all with Ctrl+Shift+S', async () => {
+  if (!page) throw new Error('app must be launched')
+  await page.keyboard.press('Escape')
+  // Dispatch directly on `window` — a focused Monaco/ProseMirror editor
+  // otherwise swallows the native key combo before the app's global
+  // listener sees it.
+  await page.evaluate(() => {
+    const ev = new KeyboardEvent('keydown', {
+      key: 's',
+      code: 'KeyS',
+      ctrlKey: true,
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true
+    })
+    window.dispatchEvent(ev)
+  })
+  await page.waitForTimeout(1500)
 })
 
 /** Find a sidebar row by the *exact* title of its `.list-view-title` span. */

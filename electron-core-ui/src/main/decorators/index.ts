@@ -25,6 +25,14 @@ export type { SearchableConfig } from './searchable'
 // @NonSerialised
 export { NonSerialised, isNonSerialised, getNonSerialisedProperties } from './nonSerialised'
 
+// @TreatEmptyAsUndefined
+export {
+  TreatEmptyAsUndefined,
+  isTreatedEmptyAsUndefined,
+  getTreatEmptyAsUndefinedProperties,
+  normalizeTreatEmptyAsUndefined
+} from './treatEmptyAsUndefined'
+
 // @separateFiles
 export { separateFiles, hasSeparateFiles, getSeparateFilesConfig, getSeparateFilesProperties } from './separateFiles'
 export type { SeparateFilesConfig } from './separateFiles'

@@ -5,8 +5,9 @@
 import {
   searchable,
   fileNaming,
-  graphqlField
-} from 'electron-core-ui/main'
+  graphqlField,
+  TreatEmptyAsUndefined
+} from 'electron-core-ui/decorators'
 import { BaseRequest } from './BaseRequest'
 import { KeyValue } from '../KeyValue'
 import type { RequestType, RuntimeId, Icon } from '../types'
@@ -14,7 +15,7 @@ import type { RequestType, RuntimeId, Icon } from '../types'
 /**
  * SOAP request definition with service, operation, and body.
  */
-@fileNaming({ pattern: '{index} - SOAP - {name}', nameProperty: 'name', idProperty: 'id' })
+@fileNaming({ pattern: '{index} - {name}', nameProperty: 'name', idProperty: 'id' })
 export class SoapRequest extends BaseRequest {
   /** Request type discriminator */
   readonly type: RequestType = 'soap'
@@ -40,6 +41,7 @@ export class SoapRequest extends BaseRequest {
 
   /** SOAP envelope body as XML string */
   @graphqlField({ type: 'String', nullable: true })
+  @TreatEmptyAsUndefined()
   body = ''
 
   /** HTTP headers */
@@ -76,18 +78,18 @@ export class SoapRequest extends BaseRequest {
     headers?: Parameters<typeof KeyValue.fromPlain>[0][]
   }): SoapRequest {
     return new SoapRequest({
-      id: obj.id,
+      ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
-      icon: obj.icon,
+      ...(obj.icon !== undefined && { icon: obj.icon }),
       documentation: obj.documentation ?? '',
-      notes: obj.notes,
+      ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
       url: obj.url ?? '',
       soapAction: obj.soapAction ?? '',
       service: obj.service ?? '',
       operation: obj.operation ?? '',
       body: obj.body ?? '',
-      headers: obj.headers as KeyValue[] | undefined
+      headers: (obj.headers ?? []) as KeyValue[]
     })
   }
 

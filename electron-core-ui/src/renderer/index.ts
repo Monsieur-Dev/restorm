@@ -54,3 +54,12 @@ export type {
 export type { PersistenceFormat } from '../main/services/PersistenceService'
 export type { SettingRendererProps } from './components/Settings/renderers/types'
 export { registerSettingRenderer, unregisterSettingRenderer } from './components/Settings/renderers/registry'
+
+// Save-unit pure helpers — safe to import from renderer code (no FS access).
+export { decomposeForPersistence, cleanseForPersistence } from '../main/services/saveUnit/decomposer'
+export type {
+  DecomposedUnit,
+  DecomposedProject,
+  DecomposeOptions
+} from '../main/services/saveUnit/decomposer'
+export type { SaveUnitKind, DirtyReason } from '../main/services/saveUnit/types'

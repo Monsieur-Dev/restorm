@@ -5,8 +5,9 @@
 import {
   searchable,
   fileNaming,
-  graphqlField
-} from 'electron-core-ui/main'
+  graphqlField,
+  TreatEmptyAsUndefined
+} from 'electron-core-ui/decorators'
 import { BaseRequest } from './BaseRequest'
 import { KeyValue } from '../KeyValue'
 import type { GraphQLOperationType, RequestType, RuntimeId, Icon } from '../types'
@@ -14,7 +15,7 @@ import type { GraphQLOperationType, RequestType, RuntimeId, Icon } from '../type
 /**
  * GraphQL request definition with operation type, query, and variables.
  */
-@fileNaming({ pattern: '{index} - GRAPHQL - {name}', nameProperty: 'name', idProperty: 'id' })
+@fileNaming({ pattern: '{index} - {name}', nameProperty: 'name', idProperty: 'id' })
 export class GraphQLRequest extends BaseRequest {
   /** Request type discriminator */
   readonly type: RequestType = 'graphql'
@@ -32,10 +33,12 @@ export class GraphQLRequest extends BaseRequest {
   /** GraphQL query/mutation/subscription string */
   @graphqlField({ type: 'String' })
   @searchable.property({ weight: 1 })
+  @TreatEmptyAsUndefined()
   query = ''
 
   /** GraphQL variables as JSON string */
   @graphqlField({ type: 'String', nullable: true })
+  @TreatEmptyAsUndefined()
   variables?: string
 
   /** HTTP headers */
@@ -71,17 +74,17 @@ export class GraphQLRequest extends BaseRequest {
     headers?: Parameters<typeof KeyValue.fromPlain>[0][]
   }): GraphQLRequest {
     return new GraphQLRequest({
-      id: obj.id,
+      ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
-      icon: obj.icon,
+      ...(obj.icon !== undefined && { icon: obj.icon }),
       documentation: obj.documentation ?? '',
-      notes: obj.notes,
+      ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
       url: obj.url ?? '',
       operationType: obj.operationType ?? 'query',
       query: obj.query ?? '',
-      variables: obj.variables,
-      headers: obj.headers as KeyValue[] | undefined
+      ...(obj.variables !== undefined && { variables: obj.variables }),
+      headers: (obj.headers ?? []) as KeyValue[]
     })
   }
 

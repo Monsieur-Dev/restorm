@@ -1,7 +1,10 @@
 {
   "app": {
     "title": "restorm",
-    "openSettings": "Open settings"
+    "openSettings": "Open settings",
+    "draftsRestoredTitle": "Unsaved work restored",
+    "draftsRestoredBody_one": "{{count}} draft was restored from your previous session.",
+    "draftsRestoredBody_other": "{{count}} drafts were restored from your previous session."
   },
   "menuBar": {
     "file": "File",
@@ -13,6 +16,7 @@
     "favorites": "Favorites",
     "close": "Close",
     "save": "Save",
+    "saveAll": "Save All",
     "saveAs": "Save As...",
     "exit": "Exit",
     "noRecentFiles": "No recent files",

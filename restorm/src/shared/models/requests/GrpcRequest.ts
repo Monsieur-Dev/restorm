@@ -5,8 +5,9 @@
 import {
   searchable,
   fileNaming,
-  graphqlField
-} from 'electron-core-ui/main'
+  graphqlField,
+  TreatEmptyAsUndefined
+} from 'electron-core-ui/decorators'
 import { BaseRequest } from './BaseRequest'
 import { KeyValue } from '../KeyValue'
 import type { GrpcCallType, RequestType, RuntimeId, Icon } from '../types'
@@ -14,7 +15,7 @@ import type { GrpcCallType, RequestType, RuntimeId, Icon } from '../types'
 /**
  * gRPC request definition with service, method, and message.
  */
-@fileNaming({ pattern: '{index} - GRPC - {name}', nameProperty: 'name', idProperty: 'id' })
+@fileNaming({ pattern: '{index} - {name}', nameProperty: 'name', idProperty: 'id' })
 export class GrpcRequest extends BaseRequest {
   /** Request type discriminator */
   readonly type: RequestType = 'grpc'
@@ -41,6 +42,7 @@ export class GrpcRequest extends BaseRequest {
 
   /** Request message as JSON string */
   @graphqlField({ type: 'String', nullable: true })
+  @TreatEmptyAsUndefined()
   requestMessage = ''
 
   /** Metadata (headers) */
@@ -77,18 +79,18 @@ export class GrpcRequest extends BaseRequest {
     metadata?: Parameters<typeof KeyValue.fromPlain>[0][]
   }): GrpcRequest {
     return new GrpcRequest({
-      id: obj.id,
+      ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
-      icon: obj.icon,
+      ...(obj.icon !== undefined && { icon: obj.icon }),
       documentation: obj.documentation ?? '',
-      notes: obj.notes,
+      ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
       url: obj.url ?? '',
       service: obj.service ?? '',
       method: obj.method ?? '',
       callType: obj.callType ?? 'unary',
       requestMessage: obj.requestMessage ?? '',
-      metadata: obj.metadata as KeyValue[] | undefined
+      metadata: (obj.metadata ?? []) as KeyValue[]
     })
   }
 
