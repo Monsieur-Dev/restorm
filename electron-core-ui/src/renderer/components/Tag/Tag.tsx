@@ -16,6 +16,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { getContrastColor } from '../../utils/colorContrast'
+import { getColorFromString } from '../../utils/colorFromString'
 import './tag.css'
 
 export interface TagProps {
@@ -64,8 +65,8 @@ export const Tag: React.FC<TagProps> = ({
   const [isEditing, setIsEditing] = useState(startEditing)
   const spanRef = useRef<HTMLSpanElement>(null)
 
-  const hasCustomColor = !!color
-  const textColor = hasCustomColor ? getContrastColor(color) : undefined
+  const effectiveColor = color ?? getColorFromString(label)
+  const textColor = getContrastColor(effectiveColor)
 
   // Enter editing mode: focus + select all
   useEffect(() => {
@@ -108,14 +109,11 @@ export const Tag: React.FC<TagProps> = ({
 
   const className = [
     'ecui-tag',
-    hasCustomColor ? '' : 'ecui-tag--default',
     compact ? 'ecui-tag--compact' : '',
     isEditing ? 'ecui-tag--editing' : ''
   ].filter(Boolean).join(' ')
 
-  const style: React.CSSProperties | undefined = hasCustomColor
-    ? { backgroundColor: color, color: textColor }
-    : undefined
+  const style: React.CSSProperties = { backgroundColor: effectiveColor, color: textColor }
 
   return (
     <span

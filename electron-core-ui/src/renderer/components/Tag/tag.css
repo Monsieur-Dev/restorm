@@ -24,16 +24,6 @@
   );
 }
 
-/* Default colors (no custom color set) */
-.ecui-tag--default {
-  background-color: var(--tag-background);
-  color: var(--tag-foreground);
-}
-
-.ecui-tag--default:hover {
-  background-color: var(--tag-background-hover);
-}
-
 /* Decorative hole punch */
 .ecui-tag::after {
   content: "";

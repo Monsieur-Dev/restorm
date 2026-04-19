@@ -16,6 +16,7 @@ export * from './services'
 export { initializeI18n, default as i18n } from './i18n'
 // Utilities
 export { getContrastColor } from './utils/colorContrast'
+export { getColorFromString } from './utils/colorFromString'
 
 // Error classes and helpers
 export {

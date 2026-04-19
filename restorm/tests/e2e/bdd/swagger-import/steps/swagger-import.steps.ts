@@ -1,8 +1,12 @@
 import { createBdd } from 'playwright-bdd'
 import { readFileSync, readdirSync, existsSync } from 'fs'
 import { join, resolve } from 'path'
-import type { ElectronApplication, Page } from '@playwright/test'
+import type { ElectronApplication, Locator, Page } from '@playwright/test'
 import { test, expect, SWAGGER_IMPORT_TEMP_DIR, configureNextSaveFileDialogForE2E, configureNextOpenDialogForE2E } from '../../fixtures/swagger-import.fixture'
+
+function activeEnvFolderTagsRoot(currentPage: Page): Locator {
+  return currentPage.locator('[data-testid^="tab-env-folder-idx:"][data-testid$="-tags"]').first()
+}
 
 const SAMPLES_DIR = resolve(__dirname, '../../../../unit')
 const SINGLE_FILE = join(SWAGGER_IMPORT_TEMP_DIR, 'petstore-test.restorm')
@@ -49,8 +53,11 @@ When('I import the Petstore swagger', async () => {
   await expect(importButton).toBeVisible({ timeout: 2000 })
   await importButton.click()
   await expect(importModal).not.toBeVisible({ timeout: 2000 })
+})
 
-  // Close the auto-opened env folder tab
+When('I close the active workbench tab', async () => {
+  if (!page) throw new Error('app must be launched')
+
   const activeTab = page.locator('.tab[role="tab"][aria-selected="true"]').first()
   await expect(activeTab).toBeVisible({ timeout: 2000 })
   await activeTab.locator('button[aria-label="Close"]').first().click()
@@ -88,6 +95,57 @@ Then(
     expect(content).toContain(`key: ${paramName}`)
     expect(content).toContain('type: enumList')
     expect(content).toContain('enumDefinitionId:')
+  }
+)
+
+When('I add tag {string} to the active environment folder tab', async ({}, tagName: string) => {
+  if (!page) throw new Error('app must be launched')
+  const tagsRoot = activeEnvFolderTagsRoot(page)
+  await expect(tagsRoot).toBeVisible({ timeout: 5000 })
+  const addButton = tagsRoot.locator('[data-testid$="-tags-add"]').first()
+  await addButton.click()
+
+  const editing = tagsRoot.locator('.ecui-tag.ecui-tag--editing [contenteditable="true"]').first()
+  await expect(editing).toBeVisible({ timeout: 5000 })
+  await editing.click()
+  await page.keyboard.press('Control+A')
+  await page.keyboard.type(tagName)
+  await page.keyboard.press('Enter')
+  await expect(
+    tagsRoot.locator('.ecui-tag', { hasText: tagName }).first()
+  ).toBeVisible({ timeout: 5000 })
+})
+
+Then(
+  'the active environment folder tab renders tags {string} with distinct backgrounds',
+  async ({}, expectedTags: string) => {
+    if (!page) throw new Error('app must be launched')
+    const names = expectedTags.split(',').map((s) => s.trim())
+
+    const tagsRoot = activeEnvFolderTagsRoot(page)
+    const tagLocator = tagsRoot.locator('.ecui-tag:not(.ecui-tag--editing)')
+    await expect(tagLocator).toHaveCount(names.length, { timeout: 5000 })
+
+    const elements = await tagLocator.elementHandles()
+    const renders = await Promise.all(
+      elements.map(async (el) => {
+        const label = (await el.innerText()).trim()
+        const bg = await el.evaluate((node) => getComputedStyle(node).backgroundColor)
+        return { label, bg }
+      })
+    )
+
+    for (const name of names) {
+      const match = renders.find((r) => r.label === name)
+      expect(match, `tag "${name}" not rendered in the active tab`).toBeTruthy()
+    }
+
+    const backgrounds = renders.map((r) => r.bg)
+    expect(new Set(backgrounds).size).toBe(backgrounds.length)
+
+    for (const bg of backgrounds) {
+      expect(bg, 'tag background should resolve to a concrete color').not.toMatch(/transparent|rgba\(0, 0, 0, 0\)/)
+    }
   }
 )
 
