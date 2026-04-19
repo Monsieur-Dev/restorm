@@ -651,6 +651,40 @@ const App: React.FC = () => {
     return getNearestEnvironmentsForBreadcrumbs(rootItems, found.breadcrumbs).map((env) => ({ ...env }))
   }, [activeRequest, rootItems, updateCount])
 
+  // All request ids that sit under the same env folder as the active
+  // request (including the active one). Passed to the statusbar env
+  // selector so the "Apply to all" toggle can propagate a selection
+  // across siblings without each tab needing to be mounted.
+  const activeEnvFolderRequestIds = useMemo<string[]>(() => {
+    if (!activeRequest) return []
+    const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, activeRequest.id)
+    // Walk breadcrumbs backwards to find the nearest ancestor that is
+    // an EnvironmentFolder — the ticket scopes selection to that
+    // folder's requests only.
+    let envFolderId: string | undefined
+    for (let i = breadcrumbs.length - 2; i >= 0; i -= 1) {
+      const id = breadcrumbs[i]?.id
+      if (!id) continue
+      const folder = findFolderById(rootItems, id)
+      if (folder && isEnvironmentFolder(folder as FolderItem)) {
+        envFolderId = folder.id
+        break
+      }
+    }
+    if (!envFolderId) return [activeRequest.id]
+    const envFolder = findEnvironmentFolderById(rootItems, envFolderId)
+    if (!envFolder) return [activeRequest.id]
+    const ids: string[] = []
+    const walk = (items: FolderItem[]): void => {
+      for (const item of items) {
+        if ('items' in item) walk(item.items)
+        else if (isRequest(item)) ids.push(item.id)
+      }
+    }
+    walk(envFolder.items)
+    return ids
+  }, [activeRequest, rootItems])
+
   // Keep the ref in sync so __restormTestHelpers.setEnvFolderTagColor can
   // delegate to the live handler without re-listing hook deps below.
   useEffect(() => {
@@ -1318,7 +1352,10 @@ const App: React.FC = () => {
             environments={activeRequestEnvironments}
             persistenceKey={activeEnvPersistenceKey}
           >
-            <StatusbarEnvironmentSelector />
+            <StatusbarEnvironmentSelector
+              folderRequestIds={activeEnvFolderRequestIds}
+              {...(filePath ? { filePath } : {})}
+            />
           </EnvironmentProvider>
         )}
         {activeRequest && (

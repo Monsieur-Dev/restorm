@@ -1,12 +1,15 @@
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   IconView,
   StatusbarElement,
+  eventBus,
   getContrastColor
 } from 'electron-core-ui/renderer'
 import type { Environment } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
+import { setSessionEnvSelection, setStoredEnvForRequest } from '../../services/environmentSelectionStore'
+import { DocumentEvents, type RequestEnvEventPayload } from '../../services/DocumentEvents'
 
 /** Default "orange" used as a fallback for envs without a configured
  * `color` — matches the in-tab Send button + the color swatch in
@@ -71,6 +74,8 @@ function flattenEnvironments(environments: Environment[], depth = 0, out: FlatEn
 interface EnvPopoverProps {
   rows: FlatEnvRow[]
   selectedEnvId: string | null
+  applyToAll: boolean
+  onApplyToAllChange: (next: boolean) => void
   onSelect: (envId: string) => void
 }
 
@@ -78,15 +83,16 @@ interface EnvPopoverProps {
  * Each row is tinted with the env's color (fallback orange) and
  * auto-contrasted, so the user eyeballs the active env from the
  * same colour chip visible in the statusbar cell. */
-const EnvPopoverList: React.FC<EnvPopoverProps> = ({ rows, selectedEnvId, onSelect }) => {
+const EnvPopoverList: React.FC<EnvPopoverProps> = ({ rows, selectedEnvId, applyToAll, onApplyToAllChange, onSelect }) => {
+  const { t } = useTranslation()
   return (
     <div
       role="listbox"
       aria-label="environments"
       data-testid="statusbar-env-selector-listview"
       style={{
-        minWidth: 220,
-        maxHeight: 320,
+        minWidth: 240,
+        maxHeight: 360,
         overflow: 'auto',
         padding: 4,
         display: 'flex',
@@ -145,8 +151,48 @@ const EnvPopoverList: React.FC<EnvPopoverProps> = ({ rows, selectedEnvId, onSele
           </button>
         )
       })}
+      {/* "Apply to all" toggle — per OYO-196 ticket. Checked by
+          default: selecting an env propagates to every sibling
+          request in the same env folder. Unchecked keeps the
+          legacy per-request selection for users who need one. */}
+      <label
+        data-testid="statusbar-env-selector-apply-to-all"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          marginTop: 4,
+          padding: '4px 8px',
+          fontSize: 12,
+          color: 'var(--foreground)',
+          borderTop: '1px solid var(--dropdown-border)',
+          cursor: 'pointer'
+        }}
+      >
+        <input
+          type="checkbox"
+          checked={applyToAll}
+          onChange={(e): void => { onApplyToAllChange(e.target.checked) }}
+          data-testid="statusbar-env-selector-apply-to-all-input"
+        />
+        <span>{t('statusbar.envSelector.applyToAll', 'Apply to all requests')}</span>
+      </label>
     </div>
   )
+}
+
+export interface StatusbarEnvironmentSelectorProps {
+  /**
+   * All request ids that live under the same env folder as the
+   * active request (including the active one). When the user
+   * selects an env with "Apply to all" checked, the selection
+   * propagates to every id in this list.
+   */
+  folderRequestIds: string[]
+  /** Current file path — needed to persist env picks for siblings
+   * that aren't currently mounted. Passed directly rather than read
+   * from a context because the component is tree-agnostic. */
+  filePath?: string
 }
 
 /**
@@ -157,9 +203,13 @@ const EnvPopoverList: React.FC<EnvPopoverProps> = ({ rows, selectedEnvId, onSele
  * to the active request — `useEnvironmentContext` supplies the env
  * list + current selection + color.
  */
-export const StatusbarEnvironmentSelector: React.FC = () => {
+export const StatusbarEnvironmentSelector: React.FC<StatusbarEnvironmentSelectorProps> = ({
+  folderRequestIds,
+  filePath
+}) => {
   const { t } = useTranslation()
   const { environments, selectedEnvId, setSelectedEnvId, envColor } = useEnvironmentContext()
+  const [applyToAll, setApplyToAll] = useState(true)
 
   const selectedEnvironment = useMemo<Environment | null>(() => {
     if (!environments || !selectedEnvId) return null
@@ -173,8 +223,29 @@ export const StatusbarEnvironmentSelector: React.FC = () => {
   ), [environments])
 
   const handleSelect = useCallback((envId: string): void => {
+    // Always update the active request via the provider — this also
+    // emits `REQUEST_ENV_CHANGED` so sibling providers mounted for
+    // the same request (the tab view) stay in lockstep.
     setSelectedEnvId(envId)
-  }, [setSelectedEnvId])
+
+    if (!applyToAll || !filePath || folderRequestIds.length === 0) return
+
+    // Propagate to every other request in the same env folder:
+    //   1. Persist to session cache + disk so unmounted tabs pick up
+    //      the new selection the next time they mount.
+    //   2. Fire `REQUEST_ENV_SET` so any currently-mounted providers
+    //      (e.g. the focused request's tab view) update their own
+    //      state without waiting for a tab switch.
+    for (const requestId of folderRequestIds) {
+      if (requestId === selectedEnvId) continue // skip the provider already handled
+      setSessionEnvSelection(filePath, requestId, envId)
+      void setStoredEnvForRequest(filePath, requestId, envId)
+      eventBus.emitLocalSync(DocumentEvents.REQUEST_ENV_SET, {
+        requestId,
+        envId
+      } as RequestEnvEventPayload)
+    }
+  }, [applyToAll, filePath, folderRequestIds, selectedEnvId, setSelectedEnvId])
 
   if (!environments || environments.length === 0) return null
 
@@ -190,7 +261,13 @@ export const StatusbarEnvironmentSelector: React.FC = () => {
       tooltipTrigger="click"
       tooltipPlacement="above"
     >
-      <EnvPopoverList rows={flatRows} selectedEnvId={selectedEnvId} onSelect={handleSelect} />
+      <EnvPopoverList
+        rows={flatRows}
+        selectedEnvId={selectedEnvId}
+        applyToAll={applyToAll}
+        onApplyToAllChange={setApplyToAll}
+        onSelect={handleSelect}
+      />
     </StatusbarElement>
   )
 }
