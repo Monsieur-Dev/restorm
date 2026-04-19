@@ -30,4 +30,11 @@ export type {
 } from './KeyboardShortcutService'
 
 export { graphQLClient } from './GraphQLClient'
-export type { GraphQLResult, GraphQLClientConfig } from './GraphQLClient'
+export type { GraphQLResult, GraphQLClientConfig, GraphQLLinkStatus } from './GraphQLClient'
+export {
+  computeBackoffDelay,
+  INITIAL_RETRY_DELAY_MS,
+  MAX_RETRY_DELAY_MS,
+  JITTER_FACTOR,
+  FAILED_AFTER_RECONNECTING_MS
+} from './graphqlLinkStatus'

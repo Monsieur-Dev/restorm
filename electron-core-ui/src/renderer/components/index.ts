@@ -149,6 +149,11 @@ export type { SearchBarProps } from './SearchBar/index'
 export { Statusbar, StatusbarElement } from './Statusbar/index'
 export type { StatusbarProps, StatusbarElementProps } from './Statusbar/index'
 
+// GraphQL link-status indicator (status bar cell that lights up when the
+// renderer's GraphQL subscription link is reconnecting or down).
+export { GraphQLLinkStatusIndicator } from './GraphQLLinkStatus'
+export type { GraphQLLinkStatusIndicatorProps } from './GraphQLLinkStatus'
+
 // Tooltip exports
 export { Tooltip } from './Tooltip/index'
 export type { TooltipProps } from './Tooltip/index'
