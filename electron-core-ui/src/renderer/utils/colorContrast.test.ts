@@ -39,4 +39,14 @@ describe('getContrastColor', () => {
   it('returns white for pure blue', () => {
     expect(getContrastColor('#0000ff')).toBe('#ffffff')
   })
+
+  it('accepts hsl() strings', () => {
+    // Yellow at hsl(60,65%,50%) is luminous enough that black reads best.
+    expect(getContrastColor('hsl(60, 65%, 50%)')).toBe('#000000')
+    // Blue at hsl(240,65%,50%) is dark enough that white reads best.
+    expect(getContrastColor('hsl(240, 65%, 50%)')).toBe('#ffffff')
+    // Pure black / white as HSL.
+    expect(getContrastColor('hsl(0, 0%, 0%)')).toBe('#ffffff')
+    expect(getContrastColor('hsl(0, 0%, 100%)')).toBe('#000000')
+  })
 })
