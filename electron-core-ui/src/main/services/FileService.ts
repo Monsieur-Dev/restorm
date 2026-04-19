@@ -238,6 +238,12 @@ export class FileService {
    *
    * Called from a `file:save-unit` IPC. The renderer owns the tree and
    * therefore owns the path resolution for the unit.
+   *
+   * Note: unit writes deliberately bypass `preserveUuidMetadata` — a
+   * save-unit targets a caller-supplied absolute path (a child document,
+   * not the project root), so there's no "previous root content" to
+   * merge the UUID from. If a future refactor ever lets `saveUnit` land
+   * on the root index, add the merge back in at that site.
    */
   public async saveUnit(params: {
     runtimeId: RuntimeId
@@ -505,17 +511,42 @@ export class FileService {
 
     // Create empty file
     try {
-      const emptyContent = {}
-      const data = this.serialize(emptyContent, this.config.defaultFormat)
-      await atomicWriteFile(filePath, data)
-
-      this.currentFile = {
-        path: filePath,
-        name,
-        isDirty: false,
-        content: emptyContent,
-        format: this.config.defaultFormat,
-        contentChecksum: JSON.stringify(emptyContent)
+      // Seed the file with just the UUID (when configured) so "File → New"
+      // behaves symmetrically to "File → Open": the very first
+      // `file:opened` broadcast the renderer receives carries the UUID
+      // that host-app preferences (sidebar expansion, env selections, …)
+      // will key off. Without this seed, within-session preferences would
+      // never persist until the user reopened the freshly-created file.
+      const uuidKey = this.config.uuidKey
+      const emptyContent: Record<string, unknown> = {}
+      if (uuidKey) {
+        const data = this.serialize(emptyContent, this.config.defaultFormat)
+        await atomicWriteFile(filePath, data)
+        await ensureFileUuid({
+          filePath,
+          format: this.config.defaultFormat,
+          uuidKey
+        })
+        const stamped = this.deserialize(readFileSync(filePath, 'utf-8'), this.config.defaultFormat)
+        this.currentFile = {
+          path: filePath,
+          name,
+          isDirty: false,
+          content: stamped,
+          format: this.config.defaultFormat,
+          contentChecksum: JSON.stringify(stamped)
+        }
+      } else {
+        const data = this.serialize(emptyContent, this.config.defaultFormat)
+        await atomicWriteFile(filePath, data)
+        this.currentFile = {
+          path: filePath,
+          name,
+          isDirty: false,
+          content: emptyContent,
+          format: this.config.defaultFormat,
+          contentChecksum: JSON.stringify(emptyContent)
+        }
       }
 
       this.addToRecentFiles(filePath, name)

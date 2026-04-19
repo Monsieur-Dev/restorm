@@ -331,6 +331,15 @@ export async function saveFolderStructure(
     // Start save session to track what's being saved
     folderMappingService.startSaveSession()
 
+    // UUID invariant for folder mode: `ensureFolderUuid` (called from
+    // `loadFolderStructure` and `attachDraftStoreForFolder` at open
+    // time) stamps `_projectUuid` into `folderPath/index.<ext>`. This
+    // function never rewrites that root index on the `collections` path
+    // below, so the stamp survives save cycles transparently. If a future
+    // refactor adds a root-index write, re-stamp `data[PROJECT_UUID_KEY]`
+    // before serializing or the UUID will vanish and every consumer
+    // keyed by it (sidebar expansion, env selections, …) will reset.
+
     // Ensure folder exists
     if (!existsSync(folderPath)) {
       mkdirSync(folderPath, { recursive: true })

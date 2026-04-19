@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ScrollableElement } from '../ScrollableElement'
 import { ContextMenu, type ContextMenuItem } from '../ContextMenu/ContextMenu'
-import { usePersistedState } from '../../hooks/usePersistedState'
 import type {
   ListViewDropEventPayload,
   ListViewDropPosition,
@@ -12,29 +11,6 @@ import type {
   ListViewProps
 } from './types'
 import './listView.css'
-
-interface PersistenceMap {
-  idToKey: Map<string, string>
-  keyToId: Map<string, string>
-}
-
-function buildPersistenceMap(items: readonly ListViewItemData[]): PersistenceMap {
-  const idToKey = new Map<string, string>()
-  const keyToId = new Map<string, string>()
-  const walk = (nodes: readonly ListViewItemData[]): void => {
-    for (const node of nodes) {
-      if (node.persistenceKey !== undefined && node.persistenceKey.length > 0) {
-        idToKey.set(node.id, node.persistenceKey)
-        // Last writer wins on duplicate persistenceKeys — that's a consumer
-        // bug; refusing to load is worse than applying the last occurrence.
-        keyToId.set(node.persistenceKey, node.id)
-      }
-      if (node.children && node.children.length > 0) walk(node.children)
-    }
-  }
-  walk(items)
-  return { idToKey, keyToId }
-}
 
 interface FlatItem {
   item: ListViewItemData
@@ -184,7 +160,6 @@ const ListViewInner: React.FC<ListViewProps> = ({
   selectedIds: selectedIdsProp,
   activeId: activeIdProp,
   expandedIds: expandedIdsProp,
-  persistenceKey,
   editingItemId: editingItemIdProp,
   onEditingStart,
   onEditingEnd,
@@ -216,126 +191,8 @@ const ListViewInner: React.FC<ListViewProps> = ({
     return buildItemsFromChildren(children)
   }, [items, children])
 
-  // Optional auto-persistence for uncontrolled expansion. Only active when
-  // `persistenceKey` is set AND the parent isn't driving `expandedIdsProp`;
-  // in controlled mode the parent is the source of truth and is expected to
-  // pair with `usePersistedState` itself.
-  //
-  // Binding model: the stored record is `{ persistenceKey: [item.persistenceKey, …] }`.
-  // Only items that carry an explicit `persistenceKey` contribute — items
-  // without one are in-memory only. The internal Set continues to key by
-  // `item.id` so the rest of the component (selection, toggles, events)
-  // stays unchanged; translation id ↔ persistenceKey happens at the
-  // persistence boundary.
-  const persistenceActive = expandedIdsProp === undefined && !!persistenceKey
-  const effectivePersistenceKey = persistenceActive ? persistenceKey : null
-
-  // Persistence map rebuilt from the tree on every items change. Paired
-  // with a mirror ref so async callbacks (e.g. `usePersistedState.onRestore`)
-  // can read the latest map without React treating it as a dependency.
-  const persistenceMap = useMemo<PersistenceMap>(
-    () => buildPersistenceMap(initialItems),
-    [initialItems]
-  )
-  const persistenceMapRef = useRef<PersistenceMap>(persistenceMap)
-  useEffect(() => {
-    persistenceMapRef.current = persistenceMap
-  }, [persistenceMap])
-
-  const [persistedExpandedKeys, setPersistedExpandedKeys] = usePersistedState<string[]>(
-    effectivePersistenceKey,
-    [],
-    {
-      // Drop any stored persistence key that no longer maps to an item in
-      // the current tree (deleted / renamed / not present in this branch).
-      onRestore: (stored) => stored.filter((key) => persistenceMapRef.current.keyToId.has(key))
-    }
-  )
-
-  // Session-only expansion. Holds the ids of items with NO persistenceKey —
-  // they're never written to storage but remain toggleable during the
-  // session. Also used as the single source of truth when persistence is
-  // disabled.
-  const [internalExpandedIds, setInternalExpandedIds] = useState<Set<string>>(
-    () => computeInitialExpandedIds(initialItems)
-  )
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(() => computeInitialExpandedIds(initialItems))
   const [hasCustomExpansion, setHasCustomExpansion] = useState(false)
-
-  const persistedExpandedSet = useMemo(() => {
-    const map = persistenceMap.keyToId
-    const out = new Set<string>()
-    for (const key of persistedExpandedKeys) {
-      const id = map.get(key)
-      if (id !== undefined) out.add(id)
-    }
-    return out
-  }, [persistedExpandedKeys, persistenceMap])
-
-  // When persistence is active: union of persisted-item ids and volatile
-  // (no-persistenceKey) ids. Otherwise the plain internal Set.
-  const expandedIds = useMemo<Set<string>>(() => {
-    if (!persistenceActive) return internalExpandedIds
-    const union = new Set(persistedExpandedSet)
-    const idToKey = persistenceMap.idToKey
-    for (const id of internalExpandedIds) {
-      if (!idToKey.has(id)) union.add(id)
-    }
-    return union
-  }, [persistenceActive, persistedExpandedSet, internalExpandedIds, persistenceMap])
-
-  const setExpandedIds = useCallback<React.Dispatch<React.SetStateAction<Set<string>>>>(
-    (valueOrUpdater) => {
-      if (!persistenceActive) {
-        setInternalExpandedIds(valueOrUpdater)
-        return
-      }
-      // Compute the next full Set (persistable + volatile combined).
-      const computeNext = (prev: Set<string>): Set<string> =>
-        typeof valueOrUpdater === 'function'
-          ? (valueOrUpdater as (p: Set<string>) => Set<string>)(prev)
-          : valueOrUpdater
-
-      // Fan the result out into the two backing stores based on whether
-      // each id has a persistenceKey. Both updates happen in functional form
-      // so React's batching keeps them in lockstep.
-      setPersistedExpandedKeys((prevKeys) => {
-        const map = persistenceMapRef.current
-        const prevPersistedSet = new Set<string>()
-        for (const key of prevKeys) {
-          const id = map.keyToId.get(key)
-          if (id !== undefined) prevPersistedSet.add(id)
-        }
-        const prevFull = new Set(prevPersistedSet)
-        for (const id of internalExpandedIds) prevFull.add(id)
-
-        const next = computeNext(prevFull)
-        const keys: string[] = []
-        for (const id of next) {
-          const key = map.idToKey.get(id)
-          if (key !== undefined) keys.push(key)
-        }
-        return keys
-      })
-      setInternalExpandedIds((prevVolatile) => {
-        const map = persistenceMapRef.current
-        const prevPersistedSet = new Set<string>()
-        for (const key of persistedExpandedKeys) {
-          const id = map.keyToId.get(key)
-          if (id !== undefined) prevPersistedSet.add(id)
-        }
-        const prevFull = new Set(prevPersistedSet)
-        for (const id of prevVolatile) prevFull.add(id)
-
-        const next = computeNext(prevFull)
-        const volatile = new Set<string>()
-        for (const id of next) {
-          if (!map.idToKey.has(id)) volatile.add(id)
-        }
-        return volatile
-      })
-    },
-    [persistenceActive, internalExpandedIds, persistedExpandedKeys, setPersistedExpandedKeys]
-  )
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [activeId, setActiveId] = useState<string | null>(null)
