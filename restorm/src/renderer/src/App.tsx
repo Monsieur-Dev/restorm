@@ -4,7 +4,6 @@ import {
   Statusbar,
   StatusbarElement,
   StatusBarBellButton,
-  GraphQLLinkStatusIndicator,
   Toaster,
   VerticalSashContainer,
   useFileService,
@@ -1194,7 +1193,6 @@ const App: React.FC = () => {
       <Statusbar data-testid="app-statusbar">
         {filePath && <StatusbarElement data-testid="app-statusbar-element" title={filePath} />}
         <DesktopIndicator />
-        <GraphQLLinkStatusIndicator className="right-aligned" />
         <StatusBarBellButton toasterId="app" className="right-aligned" />
       </Statusbar>
 
