@@ -1804,6 +1804,13 @@ Then('the sidebar folder {string} should be expanded', async ({}, folderName: st
   await expect(row).toHaveAttribute('aria-expanded', 'true', { timeout: 5000 })
 })
 
+// `useSidebarExpansionPersistence` debounces disk writes by 300 ms; wait
+// long enough for the last toggle to flush before we tear the app down.
+When('I wait for sidebar expansion to persist', async () => {
+  if (!page) throw new Error('app must be launched')
+  await page.waitForTimeout(500)
+})
+
 // ---------------------------------------------------------------------------
 // File open via Ctrl+O (with mocked system open dialog)
 // ---------------------------------------------------------------------------

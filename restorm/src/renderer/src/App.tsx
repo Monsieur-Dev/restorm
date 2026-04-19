@@ -82,6 +82,7 @@ import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
 import { useWorkbenchTabs } from './hooks/useWorkbenchTabs'
 import { useSidebarState } from './hooks/useSidebarState'
+import { useSidebarExpansionPersistence } from './hooks/useSidebarExpansionPersistence'
 import { isFavorite as favoritesStoreIsFavorite, toggleFavorite as favoritesStoreToggle } from './services/favoritesStore'
 import { useFileManagement } from './hooks/useFileManagement'
 import { useImport } from './hooks/useImport'
@@ -197,6 +198,8 @@ const App: React.FC = () => {
 
   // Initialize with all folders expanded
   const [expandedIds, setExpandedIds] = useState<string[]>(allFolderIds)
+
+  useSidebarExpansionPersistence({ filePath, rootItems, expandedIds, setExpandedIds })
 
   // Selected item in the sidebar
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
