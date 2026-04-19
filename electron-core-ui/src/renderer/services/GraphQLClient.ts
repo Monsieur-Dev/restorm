@@ -51,9 +51,8 @@ export interface GraphQLClientConfig {
  * - Transient disconnects (main-process restart in dev, sleep/wake,
  *   Wi-Fi swap, kernel hiccup on localhost) recover in <1 s without
  *   any UI intervention.
- * - The renderer UI can surface a small "reconnecting" indicator via
- *   `onLinkStatusChange` / `useGraphQLLinkStatus`, instead of silently
- *   going stale.
+ * - Consumers can observe transitions via `onLinkStatusChange` /
+ *   `getLinkStatus` instead of silently going stale.
  * - Persistent failures are escalated from `reconnecting` to `failed`
  *   after {@link FAILED_AFTER_CONSECUTIVE_ATTEMPTS} consecutive
  *   attempts without a successful (re)connection — the retry keeps
@@ -287,8 +286,7 @@ class GraphQLClient {
 
   /**
    * Subscribe to link-status transitions. Returns an unsubscribe
-   * function. Use via {@link useGraphQLLinkStatus} for a React-hook
-   * version.
+   * function.
    */
   onLinkStatusChange(listener: (status: GraphQLLinkStatus) => void): () => void {
     this.linkStatusListeners.add(listener)
