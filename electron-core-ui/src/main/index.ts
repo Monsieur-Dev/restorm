@@ -1,5 +1,101 @@
-// Main process exports - with proper TypeScript types
-export { getThemeService, getStorageService, logger, initFeatureService, getFeatureService, isFeatureServiceInitialized, resetFeatureService, initFileService, getFileService, isFileServiceInitialized, eventBusService, searchService, i18nService, graphQLService, createSchema, createPubSub, initPersistenceService, getPersistenceService, isPersistenceServiceInitialized, PersistenceService, serialize, deserialize, detectFormat, filterNonSerialised, generateIndexedFileName, sanitizeFileName, calculateIndexPadding, PERSISTENCE_FORMATS, graphQLSchemaGenerator, inferGraphQLType, createFieldDefinitions, initSettingsService, getSettingsService, isSettingsServiceInitialized } from './services'
+// Main process exports — grouped by concern so Rollup's static analyzer
+// keeps tracing each one reliably even when the dist/ CJS emit is split
+// into multiple `exports.X = void 0` declarator lines.
+
+// Core services
+export {
+  getThemeService,
+  getStorageService,
+  logger,
+  eventBusService,
+  searchService,
+  i18nService
+} from './services'
+
+// Feature flags
+export {
+  initFeatureService,
+  getFeatureService,
+  isFeatureServiceInitialized,
+  resetFeatureService
+} from './services'
+
+// File service
+export {
+  initFileService,
+  getFileService,
+  isFileServiceInitialized,
+  FileService
+} from './services'
+
+// GraphQL runtime
+export {
+  graphQLService,
+  createSchema,
+  createPubSub,
+  graphQLSchemaGenerator,
+  inferGraphQLType,
+  createFieldDefinitions
+} from './services'
+
+// Persistence service + helpers
+export {
+  initPersistenceService,
+  getPersistenceService,
+  isPersistenceServiceInitialized,
+  PersistenceService,
+  serialize,
+  deserialize,
+  detectFormat,
+  filterNonSerialised,
+  generateIndexedFileName,
+  sanitizeFileName,
+  calculateIndexPadding,
+  PERSISTENCE_FORMATS,
+  atomicWriteFile
+} from './services'
+
+// Settings
+export {
+  initSettingsService,
+  getSettingsService,
+  isSettingsServiceInitialized
+} from './services'
+
+// Save-unit / draft-store (file service v2)
+export {
+  SaveUnitRegistry,
+  DraftStore,
+  sweepOrphanedDrafts,
+  DEFAULT_DRAFT_DEBOUNCE_MS,
+  isTombstone,
+  makeTombstone,
+  isUnitDirty,
+  isUnitPendingDelete,
+  isUnitNew,
+  decomposeForPersistence,
+  cleanseForPersistence,
+  ensureProjectUuid,
+  ensureFileProjectUuid,
+  readProjectUuid,
+  PROJECT_UUID_KEY
+} from './services'
+
+export type {
+  SaveUnit,
+  SaveUnitKind,
+  Tombstone,
+  DirtyReason,
+  UnitChangeSnapshot,
+  UnitChangeListener,
+  DraftStoreOptions,
+  LoadedDraft,
+  DecomposedUnit,
+  DecomposedProject,
+  DecomposeOptions,
+  EnsureProjectUuidOptions,
+  EnsureFileProjectUuidOptions
+} from './services'
 
 // Decorators
 export {
@@ -55,7 +151,6 @@ export type { ThemeService } from './services/ThemeService'
 export type { StorageService } from './services/StorageService'
 export type { LoggerInterface } from './services/LoggerService'
 export type { FeatureFlippingService } from './services/FeatureFlippingService'
-export type { FileService } from './services/FileService'
 export type { EventHandler, Subscription } from './services/EventBusService'
 export type { SearchDocument, SearchResult, SearchNavigation, GroupedResults, CategoryMeta } from './services/SearchService'
 export type { GraphQLServiceConfig, PubSub } from './services/GraphQLService'

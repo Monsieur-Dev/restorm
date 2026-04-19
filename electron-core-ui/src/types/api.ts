@@ -49,9 +49,6 @@ export interface CoreUiFileApi {
   getFileName: () => Promise<string | null>
   getFilePath: () => Promise<string | null>
   isDirty: () => Promise<boolean>
-  markDirty: () => Promise<void>
-  clearDirty: () => Promise<void>
-  checkAndUpdateDirty: (currentChecksum: string) => Promise<void>
   finishLoading: () => Promise<void>
   showUnsavedChangesDialog: (labels?: {
     title?: string
@@ -68,20 +65,47 @@ export interface CoreUiFileApi {
   getContentChecksum: () => Promise<string | null>
   setContentChecksum: (checksum: string) => Promise<void>
   hasContentChanged: (currentChecksum: string) => Promise<boolean>
-  registerInitialChecksums: (objects: Map<string, unknown>) => Promise<void>
-  updateObjectChecksum: (runtimeId: string, data: unknown) => Promise<void>
-  removeObjectChecksum: (runtimeId: string) => Promise<void>
-  commitChecksums: () => Promise<void>
-  getDirtyStateDetails: () => Promise<{
-    isDirty: boolean
-    changedIds: string[]
-    newIds: string[]
-    deletedIds: string[]
-  }>
   onStateChanged: (callback: (state: FileServiceState) => void) => () => void
   onDirtyChanged: (callback: (isDirty: boolean) => void) => () => void
   onFileOpened: (callback: (state: FileServiceState) => void) => () => void
   onFileClosed: (callback: () => void) => () => void
+  // Save unit v2 API
+  hydrateSaveUnit: (params: {
+    runtimeId: string
+    kind: 'file' | 'folder'
+    reference: unknown
+    parentId?: string
+  }) => Promise<void>
+  upsertSaveUnit: (params: {
+    runtimeId: string
+    kind: 'file' | 'folder'
+    draft: unknown
+    reason?: 'modify' | 'create' | 'delete' | 'rename' | 'move' | 'reorder'
+    parentId?: string
+  }) => Promise<void>
+  markSaveUnitDeleted: (runtimeId: string) => Promise<void>
+  commitSaveUnit: (runtimeId: string) => Promise<void>
+  revertSaveUnit: (runtimeId: string) => Promise<void>
+  getSaveUnitsSnapshot: () => Promise<{
+    isDirty: boolean
+    dirtyCount: number
+    dirtyUnits: { runtimeId: string; reason?: string }[]
+  }>
+  onUnitDirtyChanged: (
+    callback: (payload: { runtimeId: string; isDirty: boolean; reason?: string }) => void
+  ) => () => void
+  onDraftsRestored: (
+    callback: (payload: { count: number }) => void
+  ) => () => void
+  saveUnit: (entry: {
+    runtimeId: string
+    content: unknown
+    absolutePath: string
+    format: 'json' | 'json5' | 'yaml'
+  }) => Promise<boolean>
+  saveUnitsBatch: (
+    entries: { runtimeId: string; content: unknown; absolutePath: string; format: 'json' | 'json5' | 'yaml' }[]
+  ) => Promise<{ runtimeId: string; success: boolean }[]>
 }
 
 export interface CoreUiEventBusApi {

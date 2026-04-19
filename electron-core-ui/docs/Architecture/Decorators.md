@@ -41,6 +41,27 @@ class Document {
 }
 ```
 
+### @TreatEmptyAsUndefined()
+
+Marks a string property so that `null`, `undefined`, and `""` are
+treated as equivalent — normalized to `undefined` before both checksum
+calculation and serialization. Whitespace-only strings (`"   "`) are
+**not** normalized (no implicit trim).
+
+```typescript
+class Note {
+  name: string
+
+  @TreatEmptyAsUndefined()
+  body: string | null | undefined
+}
+```
+
+Use case: rich-text editors like Milkdown leave an empty `""` when the
+user backspaces all content. Without this decorator, the checksum
+registers a change relative to a never-filled field and trips the
+dirty flag falsely.
+
 ### @separateFolders()
 
 In folder mode, creates a subfolder for each item in an array.
@@ -65,12 +86,13 @@ class Folder {
 
 ### @fileNaming(config)
 
-Defines file naming pattern for folder mode.
+Defines file naming pattern for folder mode. Since OYO-183, the
+recommended pattern is `{index} - {name}` — no `{type}` prefix. The
+counter alone differentiates siblings with duplicate names.
 
 ```typescript
 @fileNaming({
-  pattern: '{index} - {type} - {name}',
-  typeProperty: 'method',
+  pattern: '{index} - {name}',
   nameProperty: 'name',
   idProperty: 'id'
 })
@@ -79,7 +101,7 @@ class Request { }
 
 **Config options:**
 - `pattern` - Template string with placeholders
-- `typeProperty` - Property for `{type}` placeholder
+- `typeProperty` - Property for `{type}` placeholder (legacy; avoid)
 - `nameProperty` - Property for `{name}` placeholder  
 - `idProperty` - Property used for tracking renames/deletes
 

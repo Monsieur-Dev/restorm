@@ -132,7 +132,7 @@ function getTabTitleString(tab: EditorTab & { titleString?: string }, fallback =
 
 export interface RestormWorkbenchProps {
   tree: WorkbenchTree
-  dirtyItemIdsSet?: Set<string> | undefined
+  dirtyItemIdsSet?: ReadonlySet<string> | undefined
   initialTabContentMap?: Record<string, string>
   onTreeChange?: (tree: WorkbenchTree) => void
   className?: string

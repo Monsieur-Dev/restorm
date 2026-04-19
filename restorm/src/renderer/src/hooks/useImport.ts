@@ -12,6 +12,14 @@ export interface UseImportOptions {
   rootItems: (EnvironmentFolder | Folder | Request)[]
   setRootItems: React.Dispatch<React.SetStateAction<(EnvironmentFolder | Folder | Request)[]>>
   setExpandedIds: React.Dispatch<React.SetStateAction<string[]>>
+  /**
+   * Fired once after every successful import, after the new tree has
+   * been committed via `setRootItems`. Hosts typically trigger a
+   * whole-tree save here so the imported content lands on disk before
+   * the user has a chance to edit it — keeping the registry's initial
+   * reference aligned with the persisted state.
+   */
+  onImportComplete?: () => void
 }
 
 export interface UseImportReturn {
@@ -37,7 +45,7 @@ function collectFolderIds(items: FolderItem[]): string[] {
 }
 
 export function useImport(options: UseImportOptions): UseImportReturn {
-  const { rootItems, setRootItems, setExpandedIds } = options
+  const { rootItems, setRootItems, setExpandedIds, onImportComplete } = options
 
   const [pendingEnvFolderIds, setPendingEnvFolderIds] = useState<string[]>([])
   const clearPendingEnvFolderIds = useCallback(() => { setPendingEnvFolderIds([]) }, [])
@@ -203,6 +211,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         })
 
         setPendingEnvFolderIds(collectEnvFolderIds(filteredItems))
+        if (onImportComplete) onImportComplete()
         return
       }
 
@@ -336,8 +345,14 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         const parentId = actualTargetFolderId || '__root__'
         emitCreationEvents(item, parentId)
       })
+
+      // Signal the host that the import has landed. The callback fires
+      // synchronously here, but hosts that want to trigger a save should
+      // defer via state + effect (see App.tsx wiring) because `setRootItems`
+      // above hasn't committed yet.
+      if (onImportComplete) onImportComplete()
     },
-    [rootItems, setRootItems, setExpandedIds]
+    [rootItems, setRootItems, setExpandedIds, onImportComplete]
   )
 
   return {

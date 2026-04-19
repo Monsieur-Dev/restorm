@@ -12,10 +12,51 @@ import {
   logger,
   computeChecksum,
   useDirtyState,
-  commitChecksums,
-  navigationService
+  navigationService,
+  upsertSaveUnit,
+  markSaveUnitDeleted,
+  useDraftsRestored,
+  useDirtyUnitsSet,
+  cleanseForPersistence,
+  toasterService
 } from 'electron-core-ui/renderer'
-import { DocumentEvents, type DocumentChangedPayload } from './services/DocumentEvents'
+import { HTTPRequest } from '../../shared/models/requests/HTTPRequest'
+import { SoapRequest } from '../../shared/models/requests/SoapRequest'
+import { GrpcRequest } from '../../shared/models/requests/GrpcRequest'
+import { GraphQLRequest } from '../../shared/models/requests/GraphQLRequest'
+import { WebSocketRequest } from '../../shared/models/requests/WebSocketRequest'
+import { Folder as FolderClass } from '../../shared/models/Folder'
+import { EnvironmentFolder as EnvironmentFolderClass } from '../../shared/models/EnvironmentFolder'
+import { Environment as EnvironmentClass } from '../../shared/models/Environment'
+
+/**
+ * Resolve the concrete class of a document node by its `type`
+ * discriminator. Mirrors the resolver used in `useFileManagement` so
+ * `cleanseForPersistence` produces the same shape the decomposer
+ * produces on save — that's the invariant `commitIfDraftMatches`
+ * relies on.
+ */
+const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Record<string, unknown>): object => {
+  if (type === 'request') {
+    const t = doc['type']
+    if (t === 'soap') return SoapRequest
+    if (t === 'grpc') return GrpcRequest
+    if (t === 'graphql') return GraphQLRequest
+    if (t === 'websocket') return WebSocketRequest
+    return HTTPRequest
+  }
+  if (type === 'environment') return EnvironmentClass
+  // Distinguish env folders from regular folders — the decomposer
+  // lifts different child arrays depending on which of the two we're
+  // looking at (`environments` + `items` vs `items` only). The bridge
+  // must pick the same class so `commitIfDraftMatches` sees the same
+  // cleansed shape the decomposer produces at save time.
+  if (doc['folderType'] === 'environment' || Array.isArray(doc['environments'])) {
+    return EnvironmentFolderClass
+  }
+  return FolderClass
+}
+import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from './services/DocumentEvents'
 import type { WorkbenchTree } from 'electron-core-ui/renderer'
 import { Welcome } from './components/Welcome/Welcome'
 import { EmptyBench } from './components/MainView/Workbench/EmptyBench'
@@ -116,6 +157,17 @@ const App: React.FC = () => {
     document.title = title
   }, [fileName, isDirty])
 
+  // Surface a toast whenever the main process restores crash-recovery
+  // drafts at project open. The handler comes from the lib — we just
+  // bind it to the app-level toaster.
+  useDraftsRestored((payload) => {
+    if (payload.count <= 0) return
+    toasterService.push('app', {
+      title: t('app.draftsRestoredTitle'),
+      body: t('app.draftsRestoredBody', { count: payload.count })
+    })
+  })
+
   const handleMenuExit = useCallback(() => {
     void window.api.closeWindow()
   }, [])
@@ -158,24 +210,76 @@ const App: React.FC = () => {
     groups: []
   })
 
-  // Per-tab dirty state tracking (works in both file and folder modes)
+  // Per-tab dirty state tracking — the legacy checksum store is still
+  // wired through `useFileManagement` for backward compat on the
+  // file-mode global isDirty flag; tab dirty dots now read from the
+  // save-unit registry via `useDirtyUnitsSet` which is the single
+  // source of truth for per-document dirty state.
   const {
-    dirtyItemIds: dirtyTabIds,
     registerItem: registerTabDirtyState,
     updateItemChecksum: updateTabDirtyChecksum,
     markAllSaved: markAllTabsSaved,
     clear: clearTabDirtyState
   } = useDirtyState()
 
-  // Create a Set for fast lookup of dirty item IDs
-  const dirtyItemIdsSet = useMemo(() => new Set(dirtyTabIds), [dirtyTabIds])
+  const rawDirtyIds = useDirtyUnitsSet()
+  // Scoped cascade: only lift dirty "leaf" units (requests, environments)
+  // onto their immediate parent tab. Folders don't cascade further — a
+  // dirty request inside `pet` makes `pet` show a dot, but that doesn't
+  // reach the env folder above; a dirty variable inside an env makes the
+  // env folder dirty (variables render on the env folder tab), but a
+  // dirty request three levels down doesn't. This matches what the user
+  // sees and expects to save: the tab that is dirty is the tab whose
+  // content actually changed.
+  const dirtyItemIdsSet = useMemo((): ReadonlySet<string> => {
+    if (rawDirtyIds.size === 0) return rawDirtyIds
+    // Cascade is scoped to units that have no tab of their own — i.e.
+    // environments and sub-environments, which render inside the env
+    // folder tab. Everything else (requests, sub-folders) owns a tab
+    // and is shown with its own per-unit dirty dot, independent of its
+    // siblings. That way a request being unsaved doesn't flag the
+    // enclosing folder tab as dirty: the folder's dirty dot means "I
+    // have unsaved work on this folder document", not "something
+    // somewhere below me is dirty".
+    const cascadeParentById = new Map<string, string>()
+    const visit = (item: EnvironmentFolder | Folder | Request): void => {
+      if (!('items' in item)) return
+      for (const child of item.items) visit(child as EnvironmentFolder | Folder | Request)
+      const itemIsEnvFolder = 'environments' in item && Array.isArray(item.environments)
+      if (itemIsEnvFolder) {
+        const envFolder = item
+        for (const env of envFolder.environments) {
+          cascadeParentById.set(env.id, envFolder.id)
+          if (env.subEnvironments) {
+            for (const sub of env.subEnvironments) {
+              // Sub-envs resolve transitively to the env folder's tab
+              // via `env.id → env folder id`.
+              cascadeParentById.set(sub.id, env.id)
+            }
+          }
+        }
+      }
+    }
+    for (const root of rootItems) visit(root)
+
+    const merged = new Set<string>(rawDirtyIds)
+    for (const id of rawDirtyIds) {
+      let parent = cascadeParentById.get(id)
+      while (parent !== undefined) {
+        merged.add(parent)
+        parent = cascadeParentById.get(parent)
+      }
+    }
+    return merged
+  }, [rawDirtyIds, rootItems])
 
   // Use file management hook
   const {
     handleMenuNew,
     handleMenuOpen,
     handleMenuOpenFolder,
-    handleMenuSave,
+    handleMenuSaveAll,
+    handleMenuSaveUnit,
     handleMenuSaveAs,
     handleMenuClose,
     handleOpenRecentFile,
@@ -221,12 +325,107 @@ const App: React.FC = () => {
     registerTabDirtyState
   })
 
+  // After an import lands, increment `pendingImportSave` so the effect
+  // below triggers a whole-tree save once React has committed the new
+  // `rootItems` — without the indirection, `handleMenuSaveAll` would
+  // close over the pre-import tree and save nothing useful.
+  const [pendingImportSave, setPendingImportSave] = useState(0)
+  const handleImportComplete = useCallback(() => {
+    setPendingImportSave((c) => c + 1)
+  }, [])
+
   // Use import hook — pendingEnvFolderIds triggers tab-opening below.
   const { handleImport, pendingEnvFolderIds, clearPendingEnvFolderIds } = useImport({
     rootItems,
     setRootItems,
-    setExpandedIds
+    setExpandedIds,
+    onImportComplete: handleImportComplete
   })
+
+  // Resolve a workbench tab id (e.g. `request-idx:0.1`, `request-id:uuid`,
+  // or the legacy `request-<id>` form) to its item id.
+  const resolveTabItemId = useCallback((tabId: string): string | null => {
+    const idxMatch = /^(folder|env-folder|request)-idx:([0-9]+(?:\.[0-9]+)*)$/.exec(tabId)
+    if (idxMatch?.[2]) {
+      const indexPath = idxMatch[2].split('.').map((n) => Number(n))
+      let cursor: unknown = rootItems[indexPath[0] ?? 0]
+      for (let i = 1; i < indexPath.length; i += 1) {
+        if (!cursor || typeof cursor !== 'object' || !('items' in cursor)) return null
+        const items = (cursor as { items?: unknown[] }).items
+        if (!Array.isArray(items)) return null
+        cursor = items[indexPath[i] ?? 0]
+      }
+      if (cursor && typeof cursor === 'object' && 'id' in cursor) {
+        const id = (cursor as { id?: unknown }).id
+        return typeof id === 'string' ? id : null
+      }
+      return null
+    }
+    const legacyMatch = /^(folder|env-folder|request)-(?:id:)?(.+)$/.exec(tabId)
+    return legacyMatch?.[2] ?? null
+  }, [rootItems])
+
+  // Resolve the active tab's unit id and delegate to `handleMenuSaveUnit`,
+  // or fall back to save-all when nothing is active / resolvable. Used for
+  // both the menu-bar Ctrl+S shortcut (registered by the library) and the
+  // window-level handler below — without this, the menu-bar's global
+  // shortcut registration would fire save-all first (capture phase) and
+  // prevent the window handler from ever seeing the key. Both paths must
+  // therefore run the same "smart save" logic.
+  const smartSaveActive = useCallback(async (): Promise<boolean> => {
+    const groups = workbenchTree.groups as { tabs?: unknown; activeTabId?: string; id?: string }[]
+    let activeTabId: string | undefined
+    const focused = groups.find((g) => g.id === focusedGroupId && typeof g.activeTabId === 'string')
+    if (focused) activeTabId = focused.activeTabId
+    if (!activeTabId) {
+      const first = groups.find((g) => typeof g.activeTabId === 'string')
+      activeTabId = first?.activeTabId
+    }
+    if (!activeTabId) return await handleMenuSaveAll()
+    const itemId = resolveTabItemId(activeTabId)
+    if (!itemId) return await handleMenuSaveAll()
+    return await handleMenuSaveUnit(itemId)
+  }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, handleMenuSaveAll, handleMenuSaveUnit])
+
+  // Window-level Ctrl+S / Ctrl+Shift+S fallback — only fires if the
+  // menu-bar's KeyboardShortcutService didn't intercept (e.g. when the
+  // menu isn't mounted). Same routing as the menu bar: Ctrl+S → smart
+  // per-unit save, Ctrl+Shift+S → full save-all.
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent): void => {
+      const cmdOrCtrl = e.ctrlKey || e.metaKey
+      if (!cmdOrCtrl || e.key.toLowerCase() !== 's') return
+      e.preventDefault()
+      const logFailure = (label: string) => (err: unknown) => {
+        logger.error('[App] Save shortcut failed', { shortcut: label, error: String(err) })
+      }
+      if (e.shiftKey) {
+        void handleMenuSaveAll().catch(logFailure('Ctrl+Shift+S'))
+        return
+      }
+      void smartSaveActive().catch(logFailure('Ctrl+S'))
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => { window.removeEventListener('keydown', handleKeyDown) }
+  }, [handleMenuSaveAll, smartSaveActive])
+
+  // After an import, persist the fresh tree to disk so the registry's
+  // initial hydration reference matches what's on disk. Without this,
+  // the imported content stays dirty until the user explicitly saves,
+  // which disagrees with the user's mental model ("I imported, it's
+  // saved"). Runs once per import — the counter is latched in a ref so
+  // unrelated `handleMenuSaveAll` identity changes (every `rootItems`
+  // mutation rebuilds it) don't re-fire the auto-save and clobber the
+  // user's later edits.
+  const lastImportSaveRef = useRef(0)
+  useEffect(() => {
+    if (pendingImportSave === 0) return
+    if (lastImportSaveRef.current === pendingImportSave) return
+    lastImportSaveRef.current = pendingImportSave
+    void handleMenuSaveAll().catch((err: unknown) => {
+      logger.error('[App] Auto-save after import failed', { error: String(err) })
+    })
+  }, [pendingImportSave, handleMenuSaveAll])
 
   // After an import, open a workbench tab for each newly-created env folder.
   // This runs in a useEffect so rootItems has already committed — the
@@ -582,8 +781,6 @@ const App: React.FC = () => {
     }
   }, []) // Empty deps - set up once on mount
 
-  // Commit checksums when file is saved (isDirty becomes false)
-  const wasDirtyRef = useRef(isDirty)
   const requestPathCacheRef = useRef(new Map<string, string>())
 
   useEffect(() => {
@@ -613,14 +810,6 @@ const App: React.FC = () => {
       }
     }
   }, [fileName, rootItems, environmentFolderCollections])
-  useEffect(() => {
-    if (wasDirtyRef.current && !isDirty && fileName) {
-      void commitChecksums().catch((err: unknown) => {
-        logger.error('[App] Failed to commit checksums', { error: String(err) })
-      })
-    }
-    wasDirtyRef.current = isDirty
-  }, [isDirty, fileName])
 
   // Listen to document changes and update per-tab dirty state (works in all modes).
   // The checksum update triggers a setState in useDirtyState, which re-renders App and
@@ -698,10 +887,61 @@ const App: React.FC = () => {
       }
     }
 
+    // Bridge DocumentEvents → save-unit registry. Every user edit on a
+    // folder / request / environment mirrors into `upsertSaveUnit`, and
+    // deletes mirror into `markSaveUnitDeleted`. The draft is the
+    // *cleansed* POJO (same shape the decomposer produces on save), so
+    // `commitIfDraftMatches` actually matches when the node hasn't
+    // changed between mutate and save. `PasswordValue.toJSON` strips
+    // plaintext on the preceding JSON round trip.
+    const kindForType = (type: 'folder' | 'request' | 'environment'): 'folder' | 'file' =>
+      type === 'folder' ? 'folder' : 'file'
+
+    const handleUpsert = (payload: DocumentChangedPayload): void => {
+      if (!payload.id) return
+      let draft: Record<string, unknown>
+      try {
+        const raw = JSON.parse(JSON.stringify(payload.document)) as Record<string, unknown>
+        const cls = classForDocument(payload.type, raw)
+        draft = cleanseForPersistence(raw, cls)
+      } catch (err) {
+        logger.warn('[App] upsertSaveUnit: failed to cleanse document', {
+          id: payload.id,
+          error: String(err)
+        })
+        return
+      }
+      void upsertSaveUnit({
+        runtimeId: payload.id,
+        kind: kindForType(payload.type),
+        draft,
+        reason: 'modify',
+        ...(payload.parentFolderId !== undefined && { parentId: payload.parentFolderId })
+      }).catch((err: unknown) => {
+        logger.warn('[App] upsertSaveUnit failed', { id: payload.id, error: String(err) })
+      })
+    }
+
+    const handleDelete = (payload: DocumentDeletedPayload): void => {
+      if (!payload.id) return
+      void markSaveUnitDeleted(payload.id).catch((err: unknown) => {
+        logger.warn('[App] markSaveUnitDeleted failed', { id: payload.id, error: String(err) })
+      })
+    }
+
     const subscriptions = [
       eventBus.subscribe(DocumentEvents.FOLDER_UPDATED, handleFolderOrRequestUpdated),
       eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, handleFolderOrRequestUpdated),
-      eventBus.subscribe(DocumentEvents.ENVIRONMENT_UPDATED, handleEnvironmentUpdated)
+      eventBus.subscribe(DocumentEvents.ENVIRONMENT_UPDATED, handleEnvironmentUpdated),
+      eventBus.subscribe(DocumentEvents.FOLDER_UPDATED, handleUpsert),
+      eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, handleUpsert),
+      eventBus.subscribe(DocumentEvents.ENVIRONMENT_UPDATED, handleUpsert),
+      eventBus.subscribe(DocumentEvents.FOLDER_CREATED, handleUpsert),
+      eventBus.subscribe(DocumentEvents.REQUEST_CREATED, handleUpsert),
+      eventBus.subscribe(DocumentEvents.ENVIRONMENT_CREATED, handleUpsert),
+      eventBus.subscribe(DocumentEvents.FOLDER_DELETED, handleDelete),
+      eventBus.subscribe(DocumentEvents.REQUEST_DELETED, handleDelete),
+      eventBus.subscribe(DocumentEvents.ENVIRONMENT_DELETED, handleDelete)
     ]
 
     const timersMap = dirtyChecksumTimersRef.current
@@ -783,7 +1023,8 @@ const App: React.FC = () => {
         onNew={() => { navigationService.clearHistory(); void handleMenuNew() }}
         onOpen={() => { void handleMenuOpen() }}
         onOpenFolder={() => { void handleMenuOpenFolder() }}
-        onSave={handleMenuSave}
+        onSave={smartSaveActive}
+        onSaveAll={handleMenuSaveAll}
         onSaveAs={handleMenuSaveAs}
         onClose={() => { navigationService.clearHistory(); void handleMenuClose() }}
         onExit={handleMenuExit}

@@ -66,7 +66,11 @@ export default defineConfig({
     plugins: [externalizeDepsPlugin({ exclude: ['electron-core-ui'] }), copyTemplatesPlugin()],
     resolve: {
       alias: {
-        // In dev & build, use core-ui main sources directly
+        // In dev & build, use core-ui main sources directly.
+        // Exact-match paths (longest first) so `electron-core-ui/decorators`
+        // resolves to its dedicated entry instead of being caught by the
+        // bare `electron-core-ui` prefix alias.
+        'electron-core-ui/decorators': resolve(__dirname, '../electron-core-ui/src/main/decorators/index.ts'),
         'electron-core-ui/main': resolve(__dirname, '../electron-core-ui/src/main/index.ts'),
         'electron-core-ui': resolve(__dirname, '../electron-core-ui/src/main/index.ts')
       }
@@ -107,7 +111,12 @@ export default defineConfig({
     resolve: {
       alias: {
         '@renderer': resolve(__dirname, 'src/renderer/src'),
-        // Pointer vers les sources de core-ui pour le HMR
+        // Pointer vers les sources de core-ui pour le HMR. On alias
+        // explicitement `electron-core-ui/decorators` pour que les modèles
+        // partagés tirent uniquement les décorateurs (sans dépendre du
+        // grand barrel `electron-core-ui/main` qui contient des services
+        // node-only).
+        'electron-core-ui/decorators': resolve(__dirname, '../electron-core-ui/src/main/decorators/index.ts'),
         'electron-core-ui/renderer': resolve(__dirname, '../electron-core-ui/src/renderer/index.ts')
       }
     },

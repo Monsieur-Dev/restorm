@@ -8,7 +8,7 @@ import {
   separateFolders,
   fileNaming,
   graphqlField
-} from 'electron-core-ui/main'
+} from 'electron-core-ui/decorators'
 import { Environment } from './Environment'
 import type { RuntimeId, Icon, FolderConfiguration, FolderType, BaseFolderItem } from './types'
 import type { ApiDocumentation } from '../types/apiDocumentation'
@@ -108,11 +108,11 @@ export class EnvironmentFolder {
     apiDocumentation?: ApiDocumentation
   }): EnvironmentFolder {
     const folder = new EnvironmentFolder({
-      id: obj.id,
+      ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
-      icon: obj.icon,
+      ...(obj.icon !== undefined && { icon: obj.icon }),
       documentation: obj.documentation ?? '',
-      notes: obj.notes,
+      ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
       tagColors: obj.tagColors ?? {},
       folderType: 'environment',
@@ -148,7 +148,7 @@ export class EnvironmentFolder {
       environments: this.environments.map(e => e.toPlainObject()),
       items: this.items.map(item => item.toPlainObject())
     }
-    if (this.apiDocumentation) plain.apiDocumentation = this.apiDocumentation
+    if (this.apiDocumentation) plain['apiDocumentation'] = this.apiDocumentation
     return plain
   }
 }

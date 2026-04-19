@@ -139,10 +139,8 @@ export interface FileServiceApi {
   getFileName: () => Promise<string | null>
   /** Get current file path */
   getFilePath: () => Promise<string | null>
-  /** Check if file is dirty */
+  /** Check if file is dirty (derived from the save-unit registry) */
   isDirty: () => Promise<boolean>
-  /** Mark file as dirty */
-  markDirty: () => Promise<void>
   /** Get recent files */
   getRecentFiles: () => Promise<FileMetadata[]>
   /** Get favorite files */

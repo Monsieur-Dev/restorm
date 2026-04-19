@@ -1,7 +1,10 @@
 {
   "app": {
     "title": "restorm",
-    "openSettings": "Ouvrir les paramètres"
+    "openSettings": "Ouvrir les paramètres",
+    "draftsRestoredTitle": "Travail non sauvegardé restauré",
+    "draftsRestoredBody_one": "{{count}} brouillon restauré depuis la session précédente.",
+    "draftsRestoredBody_other": "{{count}} brouillons restaurés depuis la session précédente."
   },
   "menuBar": {
     "file": "Fichier",
@@ -13,6 +16,7 @@
     "favorites": "Favoris",
     "close": "Fermer",
     "save": "Enregistrer",
+    "saveAll": "Tout enregistrer",
     "saveAs": "Enregistrer sous...",
     "exit": "Quitter",
     "noRecentFiles": "Aucun fichier récent",

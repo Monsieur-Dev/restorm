@@ -6,7 +6,7 @@ import {
   searchable,
   fileNaming,
   graphqlField
-} from 'electron-core-ui/main'
+} from 'electron-core-ui/decorators'
 import { BaseRequest } from './BaseRequest'
 import { KeyValue } from '../KeyValue'
 import type { HTTPMethod, RequestType, HTTPBodyType, RuntimeId, Icon } from '../types'
@@ -22,7 +22,7 @@ export interface HTTPRequestBody {
 /**
  * HTTP request definition with method, URL, headers, params, and body.
  */
-@fileNaming({ pattern: '{index} - {type} - {name}', typeProperty: 'method', nameProperty: 'name', idProperty: 'id' })
+@fileNaming({ pattern: '{index} - {name}', nameProperty: 'name', idProperty: 'id' })
 export class HTTPRequest extends BaseRequest {
   /** Request type discriminator */
   readonly type: RequestType = 'http'
@@ -94,18 +94,18 @@ export class HTTPRequest extends BaseRequest {
     deprecated?: boolean
   }): HTTPRequest {
     return new HTTPRequest({
-      id: obj.id,
+      ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
-      icon: obj.icon,
+      ...(obj.icon !== undefined && { icon: obj.icon }),
       documentation: obj.documentation ?? '',
-      notes: obj.notes,
+      ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
       method: obj.method ?? 'GET',
       url: obj.url ?? '',
-      headers: obj.headers as KeyValue[] | undefined,
-      params: obj.params as KeyValue[] | undefined,
-      pathParams: obj.pathParams as KeyValue[] | undefined,
-      body: obj.body,
+      headers: (obj.headers ?? []) as KeyValue[],
+      params: (obj.params ?? []) as KeyValue[],
+      pathParams: (obj.pathParams ?? []) as KeyValue[],
+      ...(obj.body !== undefined && { body: obj.body }),
       deprecated: obj.deprecated ?? false
     })
   }

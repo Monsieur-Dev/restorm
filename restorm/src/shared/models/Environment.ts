@@ -5,10 +5,9 @@
 import {
   trackable,
   searchable,
-  separateFiles,
   fileNaming,
   graphqlField
-} from 'electron-core-ui/main'
+} from 'electron-core-ui/decorators'
 import { KeyValue } from './KeyValue'
 import type { RuntimeId, Icon } from './types'
 
@@ -35,9 +34,12 @@ export class Environment {
   /** Optional custom color (hex string, e.g. "#ff6600") */
   color?: string
 
-  /** Key-value pairs for this environment */
+  /**
+   * Key-value pairs for this environment. Kept inline with the
+   * environment document (no `@separateFiles`) so an env save is
+   * atomic: `Environment` is the save unit, not each KeyValue.
+   */
   @graphqlField({ type: 'KeyValue', isArray: true })
-  @separateFiles()
   variables: KeyValue[] = []
 
   /** Optional nested sub-environments */
@@ -74,10 +76,10 @@ export class Environment {
     subEnvironments?: Parameters<typeof Environment.fromPlain>[0][]
   }): Environment {
     const env = new Environment({
-      id: obj.id,
+      ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
-      icon: obj.icon,
-      color: obj.color
+      ...(obj.icon !== undefined && { icon: obj.icon }),
+      ...(obj.color !== undefined && { color: obj.color })
     })
     if (Array.isArray(obj.variables)) {
       env.variables = obj.variables.map(v => KeyValue.fromPlain(v))

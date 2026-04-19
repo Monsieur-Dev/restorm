@@ -40,9 +40,6 @@ interface WindowApiFile {
   getFileName: () => Promise<string | null>
   getFilePath: () => Promise<string | null>
   isDirty: () => Promise<boolean>
-  markDirty: () => Promise<void>
-  clearDirty: () => Promise<void>
-  checkAndUpdateDirty: (currentChecksum: string) => Promise<void>
   finishLoading: () => Promise<void>
   showUnsavedChangesDialog: (labels?: {
     title?: string
@@ -59,17 +56,6 @@ interface WindowApiFile {
   getContentChecksum: () => Promise<string | null>
   setContentChecksum: (checksum: string) => Promise<void>
   hasContentChanged: (currentChecksum: string) => Promise<boolean>
-  // Object checksum tracking
-  registerInitialChecksums: (objects: Map<string, unknown>) => Promise<void>
-  updateObjectChecksum: (runtimeId: string, data: unknown) => Promise<void>
-  removeObjectChecksum: (runtimeId: string) => Promise<void>
-  commitChecksums: () => Promise<void>
-  getDirtyStateDetails: () => Promise<{
-    isDirty: boolean
-    changedIds: string[]
-    newIds: string[]
-    deletedIds: string[]
-  }>
   onStateChanged: (callback: (state: FileServiceState) => void) => () => void
   onDirtyChanged: (callback: (isDirty: boolean) => void) => () => void
   onFileOpened: (callback: (state: FileServiceState) => void) => () => void

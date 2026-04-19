@@ -50,7 +50,8 @@ export {
   generateIndexedFileName,
   sanitizeFileName,
   calculateIndexPadding,
-  PERSISTENCE_FORMATS
+  PERSISTENCE_FORMATS,
+  atomicWriteFile
 } from './PersistenceService'
 export type {
   PersistenceFormat,
@@ -74,3 +75,37 @@ export {
   isSettingsServiceInitialized,
   SettingsService
 } from './SettingsService'
+
+// Save unit registry + draft store (file service v2 building blocks)
+export {
+  SaveUnitRegistry,
+  DraftStore,
+  sweepOrphanedDrafts,
+  DEFAULT_DRAFT_DEBOUNCE_MS,
+  isTombstone,
+  makeTombstone,
+  isUnitDirty,
+  isUnitPendingDelete,
+  isUnitNew,
+  decomposeForPersistence,
+  cleanseForPersistence,
+  ensureProjectUuid,
+  ensureFileProjectUuid,
+  readProjectUuid,
+  PROJECT_UUID_KEY
+} from './saveUnit'
+export type {
+  SaveUnit,
+  SaveUnitKind,
+  Tombstone,
+  DirtyReason,
+  UnitChangeSnapshot,
+  UnitChangeListener,
+  DraftStoreOptions,
+  LoadedDraft,
+  DecomposedUnit,
+  DecomposedProject,
+  DecomposeOptions,
+  EnsureProjectUuidOptions,
+  EnsureFileProjectUuidOptions
+} from './saveUnit'

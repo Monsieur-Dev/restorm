@@ -9,7 +9,7 @@ import type { Request, Folder, EnvironmentFolder } from '../../../../../shared/t
 export interface RestormWorkbenchContainerProps {
   workbenchRef?: React.Ref<RestormWorkbenchHandle>
   tree: WorkbenchTree
-  dirtyItemIdsSet?: Set<string> | undefined
+  dirtyItemIdsSet?: ReadonlySet<string> | undefined
   onTreeChange: (tree: WorkbenchTree) => void
   focusedGroupId: string | null
   onFocusedGroupChange: (groupId: string | null) => void

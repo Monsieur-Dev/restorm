@@ -5,8 +5,9 @@
 import {
   searchable,
   fileNaming,
-  graphqlField
-} from 'electron-core-ui/main'
+  graphqlField,
+  TreatEmptyAsUndefined
+} from 'electron-core-ui/decorators'
 import { BaseRequest } from './BaseRequest'
 import { KeyValue } from '../KeyValue'
 import type { WebSocketProtocol, RequestType, RuntimeId, Icon } from '../types'
@@ -31,10 +32,12 @@ export class WebSocketRequest extends BaseRequest {
 
   /** Event/channel name (for Socket.IO/MQTT) */
   @graphqlField({ type: 'String', nullable: true })
+  @TreatEmptyAsUndefined()
   event?: string
 
   /** Message payload as JSON string */
   @graphqlField({ type: 'String', nullable: true })
+  @TreatEmptyAsUndefined()
   message = ''
 
   /** Connection headers/options */
@@ -70,17 +73,17 @@ export class WebSocketRequest extends BaseRequest {
     headers?: Parameters<typeof KeyValue.fromPlain>[0][]
   }): WebSocketRequest {
     return new WebSocketRequest({
-      id: obj.id,
+      ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
-      icon: obj.icon,
+      ...(obj.icon !== undefined && { icon: obj.icon }),
       documentation: obj.documentation ?? '',
-      notes: obj.notes,
+      ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
       url: obj.url ?? '',
       protocol: obj.protocol ?? 'websocket',
-      event: obj.event,
+      ...(obj.event !== undefined && { event: obj.event }),
       message: obj.message ?? '',
-      headers: obj.headers as KeyValue[] | undefined
+      headers: (obj.headers ?? []) as KeyValue[]
     })
   }
 

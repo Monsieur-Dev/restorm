@@ -4,7 +4,8 @@ import {
   fileOpenArgs, fileSaveArgs, fileSaveAsArgs,
   fileToggleFavoriteArgs, fileRemoveFromRecentArgs,
   fileChecksumArgs, fileShowUnsavedDialogArgs,
-  fileRegisterChecksumsArgs, fileUpdateObjectChecksumArgs, fileRemoveObjectChecksumArgs
+  fileHydrateSaveUnitArgs, fileUpsertSaveUnitArgs, fileSaveUnitIdArgs,
+  fileSaveUnitToDiskArgs, fileSaveUnitsBatchArgs
 } from '../../ipc/schemas'
 import { logger, isFileServiceInitialized, getFileService } from '../../services'
 
@@ -72,34 +73,9 @@ export function registerFileHandlers(): void {
     return getFileService().isDirty()
   })
 
-  ipcMain.handle('file:mark-dirty', () => {
-    if (!isFileServiceInitialized()) { return }
-    getFileService().markDirty()
-  })
-
-  ipcMain.handle('file:clear-dirty', () => {
-    if (!isFileServiceInitialized()) { return }
-    getFileService().clearDirty()
-  })
-
   ipcMain.handle('file:finish-loading', () => {
     if (!isFileServiceInitialized()) { return }
     getFileService().finishLoading()
-  })
-
-  validatedHandle('file:check-and-update-dirty', fileChecksumArgs, (_event, [currentChecksum]) => {
-    if (!isFileServiceInitialized()) { return }
-    const fileService = getFileService()
-    const hasChanges = fileService.hasContentChanged(currentChecksum)
-    const isDirty = fileService.isDirty()
-
-    if (hasChanges && !isDirty) {
-      logger.debug('[FileService] Content changed, marking dirty')
-      fileService.markDirty()
-    } else if (!hasChanges && isDirty) {
-      logger.debug('[FileService] Content returned to saved state, clearing dirty')
-      fileService.clearDirty()
-    }
   })
 
   validatedHandle('file:show-unsaved-dialog', fileShowUnsavedDialogArgs, async (_event, [labels]) => {
@@ -144,34 +120,63 @@ export function registerFileHandlers(): void {
     return getFileService().hasContentChanged(currentChecksum)
   })
 
-  validatedHandle('file:register-initial-checksums', fileRegisterChecksumsArgs, (_event, [objects]) => {
-    logger.debug('[IPCManager] file:register-initial-checksums called', { count: objects.length })
-    if (!isFileServiceInitialized()) {
-      logger.warn('[IPCManager] FileService not initialized')
+  // ── Save unit v2 API — registry dispatched directly via IPC. ───────
+  validatedHandle('file:hydrate-save-unit', fileHydrateSaveUnitArgs, (_event, [params]) => {
+    if (!isFileServiceInitialized()) return
+    getFileService().getSaveUnitRegistry().hydrate({
+      runtimeId: params.runtimeId,
+      kind: params.kind,
+      reference: params.reference,
+      ...(params.parentId !== undefined && { parentId: params.parentId })
+    })
+  })
+
+  validatedHandle('file:upsert-save-unit', fileUpsertSaveUnitArgs, (_event, [params]) => {
+    if (!isFileServiceInitialized()) return
+    const registry = getFileService().getSaveUnitRegistry()
+    if (!registry.has(params.runtimeId)) {
+      registry.create({
+        runtimeId: params.runtimeId,
+        kind: params.kind,
+        draft: params.draft,
+        ...(params.parentId !== undefined && { parentId: params.parentId })
+      })
       return
     }
-    getFileService().registerInitialChecksums(new Map(objects))
+    registry.mutate(params.runtimeId, params.draft, params.reason ?? 'modify')
   })
 
-  validatedHandle('file:update-object-checksum', fileUpdateObjectChecksumArgs, (_event, [runtimeId, data]) => {
-    if (!isFileServiceInitialized()) { return }
-    getFileService().updateObjectChecksum(runtimeId, data)
+  validatedHandle('file:mark-save-unit-deleted', fileSaveUnitIdArgs, (_event, [runtimeId]) => {
+    if (!isFileServiceInitialized()) return
+    const registry = getFileService().getSaveUnitRegistry()
+    if (!registry.has(runtimeId)) return
+    registry.markDeleted(runtimeId)
   })
 
-  validatedHandle('file:remove-object-checksum', fileRemoveObjectChecksumArgs, (_event, [runtimeId]) => {
-    if (!isFileServiceInitialized()) { return }
-    getFileService().removeObjectChecksum(runtimeId)
+  validatedHandle('file:commit-save-unit', fileSaveUnitIdArgs, (_event, [runtimeId]) => {
+    if (!isFileServiceInitialized()) return
+    getFileService().getSaveUnitRegistry().commit(runtimeId)
   })
 
-  ipcMain.handle('file:commit-checksums', () => {
-    if (!isFileServiceInitialized()) { return }
-    getFileService().commitChecksums()
+  validatedHandle('file:revert-save-unit', fileSaveUnitIdArgs, (_event, [runtimeId]) => {
+    if (!isFileServiceInitialized()) return
+    getFileService().getSaveUnitRegistry().revert(runtimeId)
   })
 
-  ipcMain.handle('file:get-dirty-state-details', () => {
+  ipcMain.handle('file:get-save-units-snapshot', () => {
     if (!isFileServiceInitialized()) {
-      return { isDirty: false, changedIds: [], newIds: [], deletedIds: [] }
+      return { isDirty: false, dirtyCount: 0, dirtyUnits: [] }
     }
-    return getFileService().getDirtyStateDetails()
+    return getFileService().getSaveUnitsSnapshot()
+  })
+
+  validatedHandle('file:save-unit', fileSaveUnitToDiskArgs, async (_event, [entry]) => {
+    if (!isFileServiceInitialized()) return false
+    return getFileService().saveUnit(entry)
+  })
+
+  validatedHandle('file:save-units-batch', fileSaveUnitsBatchArgs, async (_event, [entries]) => {
+    if (!isFileServiceInitialized()) return []
+    return getFileService().saveUnitsBatch(entries)
   })
 }

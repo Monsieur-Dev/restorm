@@ -2,7 +2,7 @@
  * KeyValue - A key-value pair used for headers, params, variables, etc.
  */
 
-import { trackable } from 'electron-core-ui/main'
+import { trackable } from 'electron-core-ui/decorators'
 import type { RuntimeId } from '../types'
 import type { ValueType } from '../../types/collections'
 import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue } from '../../types/collections'
@@ -96,10 +96,10 @@ export class KeyValue extends BaseKeyValue {
     }
 
     return new KeyValue({
-      id: obj.id,
+      ...(obj.id !== undefined && { id: obj.id }),
       key: obj.key ?? '',
       value,
-      description: obj.description,
+      ...(obj.description !== undefined && { description: obj.description }),
       enabled: obj.enabled ?? true
     })
   }

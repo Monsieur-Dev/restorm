@@ -23,7 +23,8 @@ export interface RestormTitlebarProps {
   onNew: () => void
   onOpen: () => void
   onOpenFolder: () => void
-  onSave: () => void
+  onSave: () => unknown
+  onSaveAll: () => unknown
   onSaveAs: () => void
   onClose: () => void
   onExit: () => void
@@ -44,6 +45,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   onOpen,
   onOpenFolder,
   onSave,
+  onSaveAll,
   onSaveAs,
   onClose,
   onExit,
@@ -70,6 +72,10 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   const handleMenuSave = useCallback(() => {
     onSave()
   }, [onSave])
+
+  const handleMenuSaveAll = useCallback(() => {
+    onSaveAll()
+  }, [onSaveAll])
 
   const handleMenuSaveAs = useCallback(() => {
     onSaveAs()
@@ -109,7 +115,8 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
               <>
                 <MenuItemSeparator data-testid="titlebar-menu-separator-3" />
                 <MenuItem data-testid="titlebar-menu-item-save" title={t('menuBar.save')} shortcut="Ctrl+S" onClick={handleMenuSave} />
-                <MenuItem data-testid="titlebar-menu-item-save-as" title={t('menuBar.saveAs')} shortcut="Ctrl+Shift+S" onClick={handleMenuSaveAs} />
+                <MenuItem data-testid="titlebar-menu-item-save-all" title={t('menuBar.saveAll')} shortcut="Ctrl+Shift+S" onClick={handleMenuSaveAll} />
+                <MenuItem data-testid="titlebar-menu-item-save-as" title={t('menuBar.saveAs')} onClick={handleMenuSaveAs} />
               </>
             )}
             {recentFiles.length > 0 && (

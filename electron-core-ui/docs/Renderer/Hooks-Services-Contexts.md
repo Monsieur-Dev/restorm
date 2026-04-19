@@ -74,7 +74,10 @@ const platform = await getPlatform()
 
 ### useFileService
 
-Manages file operations (new, open, save, close) with dirty state tracking.
+Manages file operations (new, open, save, close). Dirty state is a
+read-only projection of the save-unit registry — to flip it, mutate
+units via `upsertSaveUnit` / `markSaveUnitDeleted` / the registry API,
+and the global `isDirty` follows automatically.
 
 ```typescript
 import { useFileService, useFileDirty, useFileEvents } from 'electron-core-ui/renderer'
@@ -85,7 +88,7 @@ const {
   isLoading,      // boolean
   fileName,       // string | null
   filePath,       // string | null
-  isDirty,        // boolean
+  isDirty,        // boolean (derived)
   recentFiles,    // FileMetadata[]
   favorites,      // FileMetadata[]
   newFile,        // () => Promise<boolean>
@@ -93,16 +96,20 @@ const {
   save,           // (content: unknown) => Promise<boolean>
   saveAs,         // (content, filename?, format?) => Promise<boolean>
   close,          // () => Promise<boolean>
-  markDirty,      // () => Promise<void>
-  clearDirty,     // () => Promise<void>
   showUnsavedChangesDialog, // (labels?) => Promise<'save'|'discard'|'cancel'>
   toggleFavorite, // (path: string) => Promise<boolean>
   removeFromRecent, // (path: string) => Promise<void>
   refresh         // () => Promise<void>
 } = useFileService()
 
-// Simplified dirty state hook
-const { isDirty, markDirty, clearDirty } = useFileDirty()
+// Read-only global dirty state
+const { isDirty } = useFileDirty()
+
+// Per-unit dirty dot (single document)
+const { isDirty, reason } = useUnitDirtyState(runtimeId)
+
+// Aggregate view of every dirty unit — ReadonlySet<runtimeId>
+const dirtyIds = useDirtyUnitsSet()
 
 // File events hook
 useFileEvents(
@@ -118,12 +125,17 @@ import {
   getContentChecksum,
   setContentChecksum,
   hasContentChanged,
-  registerInitialChecksums,
-  updateObjectChecksum,
-  removeObjectChecksum,
-  commitChecksums,
-  getDirtyStateDetails,
-  finishLoading
+  finishLoading,
+  // save-unit registry (main-process IPC)
+  hydrateSaveUnit,
+  upsertSaveUnit,
+  markSaveUnitDeleted,
+  commitSaveUnit,
+  revertSaveUnit,
+  saveUnitToDisk,
+  saveUnitsToDiskBatch,
+  getSaveUnitsSnapshot,
+  useDraftsRestored
 } from 'electron-core-ui/renderer'
 ```
 

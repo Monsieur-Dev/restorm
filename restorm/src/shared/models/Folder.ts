@@ -8,7 +8,7 @@ import {
   separateFolders,
   fileNaming,
   graphqlField
-} from 'electron-core-ui/main'
+} from 'electron-core-ui/decorators'
 import type { RuntimeId, Icon, FolderConfiguration, BaseFolderItem } from './types'
 
 /**

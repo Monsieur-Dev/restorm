@@ -446,35 +446,6 @@ export function ensureCoreUiWebApiShim(): void {
     getFileName: (): Promise<string | null> => Promise.resolve(webCurrentFile.name),
     getFilePath: (): Promise<string | null> => Promise.resolve(webCurrentFile.path),
     isDirty: (): Promise<boolean> => Promise.resolve(webCurrentFile.isDirty),
-    markDirty: (): Promise<void> => {
-      if (!webCurrentFile.isDirty) {
-        webCurrentFile.isDirty = true
-        notifyWebStateChange()
-        notifyWebDirtyChange()
-      }
-      return Promise.resolve()
-    },
-    clearDirty: (): Promise<void> => {
-      if (webCurrentFile.isDirty) {
-        webCurrentFile.isDirty = false
-        notifyWebStateChange()
-        notifyWebDirtyChange()
-      }
-      return Promise.resolve()
-    },
-    checkAndUpdateDirty: (currentChecksum: string): Promise<void> => {
-      const hasChanges = webCurrentFile.contentChecksum !== null && webCurrentFile.contentChecksum !== currentChecksum
-      if (hasChanges && !webCurrentFile.isDirty) {
-        webCurrentFile.isDirty = true
-        notifyWebStateChange()
-        notifyWebDirtyChange()
-      } else if (!hasChanges && webCurrentFile.isDirty) {
-        webCurrentFile.isDirty = false
-        notifyWebStateChange()
-        notifyWebDirtyChange()
-      }
-      return Promise.resolve()
-    },
     finishLoading: (): Promise<void> => {
       // No-op for web builds
       return Promise.resolve()
@@ -537,36 +508,6 @@ export function ensureCoreUiWebApiShim(): void {
       }
       return Promise.resolve(webCurrentFile.contentChecksum !== currentChecksum)
     },
-    // Object checksum tracking (simplified for web - uses in-memory maps)
-    registerInitialChecksums: (_objects: Map<string, unknown>): Promise<void> => {
-      // Web shim: no-op, dirty state handled by content checksum
-      return Promise.resolve()
-    },
-    updateObjectChecksum: (_runtimeId: string, _data: unknown): Promise<void> => {
-      // Web shim: no-op
-      return Promise.resolve()
-    },
-    removeObjectChecksum: (_runtimeId: string): Promise<void> => {
-      // Web shim: no-op
-      return Promise.resolve()
-    },
-    commitChecksums: (): Promise<void> => {
-      // Web shim: no-op
-      return Promise.resolve()
-    },
-    getDirtyStateDetails: (): Promise<{
-      isDirty: boolean
-      changedIds: string[]
-      newIds: string[]
-      deletedIds: string[]
-    }> => {
-      return Promise.resolve({
-        isDirty: webCurrentFile.isDirty,
-        changedIds: [],
-        newIds: [],
-        deletedIds: []
-      })
-    },
     onStateChanged: (callback: (state: FileServiceState) => void): (() => void) => {
       webStateChangeCallbacks.add(callback)
       return () => { webStateChangeCallbacks.delete(callback) }
@@ -582,7 +523,22 @@ export function ensureCoreUiWebApiShim(): void {
     onFileClosed: (callback: () => void): (() => void) => {
       webFileClosedCallbacks.add(callback)
       return () => { webFileClosedCallbacks.delete(callback) }
-    }
+    },
+    // Save unit v2 API — noop stubs in the web shim (no main process to bridge to).
+    hydrateSaveUnit: (): Promise<void> => Promise.resolve(),
+    upsertSaveUnit: (): Promise<void> => Promise.resolve(),
+    markSaveUnitDeleted: (): Promise<void> => Promise.resolve(),
+    commitSaveUnit: (): Promise<void> => Promise.resolve(),
+    revertSaveUnit: (): Promise<void> => Promise.resolve(),
+    getSaveUnitsSnapshot: (): Promise<{
+      isDirty: boolean
+      dirtyCount: number
+      dirtyUnits: { runtimeId: string; reason?: string }[]
+    }> => Promise.resolve({ isDirty: false, dirtyCount: 0, dirtyUnits: [] }),
+    onUnitDirtyChanged: (): (() => void) => () => { /* no-op */ },
+    onDraftsRestored: (): (() => void) => () => { /* no-op — web build has no draft persistence. */ },
+    saveUnit: (): Promise<boolean> => Promise.resolve(false),
+    saveUnitsBatch: (): Promise<{ runtimeId: string; success: boolean }[]> => Promise.resolve([])
   }
 
   // EventBus shim for web builds (in-memory, same process)

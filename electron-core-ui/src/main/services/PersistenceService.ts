@@ -13,6 +13,7 @@
 import { promises as fs } from 'fs'
 import { existsSync, mkdirSync, readdirSync, rmSync } from 'fs'
 import { join, basename, extname, dirname } from 'path'
+import crypto from 'crypto'
 import JSON5 from 'json5'
 import yaml from 'js-yaml'
 import { logger } from './LoggerService'
@@ -20,6 +21,7 @@ import {
   getNonSerialisedProperties,
   getSeparateFilesProperties,
   getSeparateFoldersProperties,
+  getTreatEmptyAsUndefinedProperties,
   generateFileName,
   type FileNamingConfig
 } from '../decorators'
@@ -108,6 +110,27 @@ export function deserialize(content: string, format: PersistenceFormat): unknown
 }
 
 /**
+ * Write a file atomically: serialize to a sibling `<target>.<uuid>.tmp`,
+ * then `fs.rename` into place. A mid-write crash leaves the previous
+ * target (if any) untouched — callers get a clean "before" state instead
+ * of a truncated file. The rename is atomic on the same filesystem, which
+ * is always the case when the temp file sits next to the target.
+ */
+export async function atomicWriteFile(targetPath: string, contents: string): Promise<void> {
+  const tmpPath = `${targetPath}.${crypto.randomUUID()}.tmp`
+  await fs.mkdir(dirname(targetPath), { recursive: true })
+  try {
+    await fs.writeFile(tmpPath, contents, 'utf-8')
+    await fs.rename(tmpPath, targetPath)
+  } catch (err) {
+    // Best-effort cleanup of the half-written temp file — ignore its own
+    // failures since the original error is what matters.
+    try { await fs.unlink(tmpPath) } catch { /* ignore */ }
+    throw err
+  }
+}
+
+/**
  * Detect format from file extension
  */
 export function detectFormat(filePath: string): PersistenceFormat {
@@ -118,7 +141,9 @@ export function detectFormat(filePath: string): PersistenceFormat {
 }
 
 /**
- * Filter out non-serialized properties based on decorators
+ * Filter out non-serialized properties based on decorators, and apply
+ * `@TreatEmptyAsUndefined` normalization (null / "" / undefined → undefined
+ * on marked string props) so empty fields collapse before disk write.
  */
 export function filterNonSerialised(
   data: Record<string, unknown>,
@@ -127,13 +152,20 @@ export function filterNonSerialised(
   if (!classConstructor) return data
 
   const nonSerialised = getNonSerialisedProperties(classConstructor)
-  if (nonSerialised.size === 0) return data
+  const normalizedStringProps = getTreatEmptyAsUndefinedProperties(classConstructor)
+
+  if (nonSerialised.size === 0 && normalizedStringProps.size === 0) return data
 
   const result: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(data)) {
-    if (!nonSerialised.has(key)) {
-      result[key] = value
+    if (nonSerialised.has(key)) continue
+    if (normalizedStringProps.has(key) && (value === null || value === '' || value === undefined)) {
+      // Marked as "empty → undefined" — drop the key entirely from the
+      // serialized form so a never-filled field and a cleared field
+      // produce identical files.
+      continue
     }
+    result[key] = value
   }
   return result
 }
@@ -256,7 +288,7 @@ export class PersistenceService {
       extension: config?.extension ?? 'json',
       format: config?.format ?? 'json5',
       mode: config?.mode ?? 'single-file',
-      indexFileName: config?.indexFileName ?? '_index'
+      indexFileName: config?.indexFileName ?? 'index'
     }
   }
 
@@ -280,13 +312,7 @@ export class PersistenceService {
       const filteredData = filterNonSerialised(data, options?.classConstructor)
       const content = serialize(filteredData, format)
 
-      // Ensure directory exists
-      const dir = dirname(filePath)
-      if (!existsSync(dir)) {
-        mkdirSync(dir, { recursive: true })
-      }
-
-      await fs.writeFile(filePath, content, 'utf-8')
+      await atomicWriteFile(filePath, content)
       logger.debug('[PersistenceService] Saved single file', { path: filePath })
       return { success: true, path: filePath }
     } catch (error) {
@@ -373,11 +399,11 @@ export class PersistenceService {
         }
       }
 
-      // Filter non-serialized and save index file
+      // Filter non-serialized and save index file (atomic temp+rename)
       const filteredIndex = filterNonSerialised(indexData, options?.classConstructor)
       const indexPath = join(folderPath, `${this.config.indexFileName}${ext}`)
       const indexContent = serialize(filteredIndex, format)
-      await fs.writeFile(indexPath, indexContent, 'utf-8')
+      await atomicWriteFile(indexPath, indexContent)
 
       // Handle @separateFiles properties (array items as individual files)
       for (const [propKey] of separateFilesProps) {
@@ -439,7 +465,7 @@ export class PersistenceService {
       existingFiles.add(basename(filePath))
 
       const content = serialize(item, options.format)
-      await fs.writeFile(filePath, content, 'utf-8')
+      await atomicWriteFile(filePath, content)
     }
 
     // Clean up orphaned files (items that were deleted or renamed)
@@ -697,7 +723,13 @@ export class PersistenceService {
   }
 
   /**
-   * Re-index all files in a folder (after reordering)
+   * Re-index all files in a folder (after reordering).
+   *
+   * The rename pass is O(N): each existing file is renamed to a
+   * unique temp name once, and its `id` is captured during the same
+   * read so the subsequent matching lookup is O(1). Previously this
+   * method re-parsed every remaining temp on every iteration, making
+   * it O(N²) in disk reads for large folders.
    */
   async reindexFiles(
     folderPath: string,
@@ -709,24 +741,42 @@ export class PersistenceService {
       const format = this.config.format
       const totalCount = items.length
 
-      // First, rename all existing files to temporary names to avoid conflicts
-      const tempNames = new Map<string, string>()
+      // Step 1 — move every non-index file to a temp name and capture
+      // its `id` in a lookup map. Each temp is read exactly once.
+      const tempNameById = new Map<string, string>()
+      const unmatchedTemps = new Set<string>()
       const entries = readdirSync(folderPath, { withFileTypes: true })
 
       for (const entry of entries) {
-        if (entry.isFile() && entry.name.endsWith(ext)) {
-          if (entry.name.startsWith(this.config.indexFileName)) continue
+        if (!entry.isFile() || !entry.name.endsWith(ext)) continue
+        if (entry.name.startsWith(this.config.indexFileName)) continue
 
-          const tempName = `__temp_${crypto.randomUUID()}${ext}`
-          const oldPath = join(folderPath, entry.name)
-          const tempPath = join(folderPath, tempName)
-          await fs.rename(oldPath, tempPath)
-          tempNames.set(tempName, entry.name)
+        const tempName = `__temp_${crypto.randomUUID()}${ext}`
+        const oldPath = join(folderPath, entry.name)
+        const tempPath = join(folderPath, tempName)
+
+        const content = await fs.readFile(oldPath, 'utf-8')
+        await fs.rename(oldPath, tempPath)
+
+        let id: string | undefined
+        try {
+          const parsed = deserialize(content, format) as Record<string, unknown>
+          id = safeToString(parsed['id'])
+        } catch {
+          id = undefined
+        }
+
+        if (id !== undefined && id !== '') {
+          tempNameById.set(id, tempName)
+        } else {
+          unmatchedTemps.add(tempName)
         }
       }
 
-      // Now save with new indexes
-      for (let i = 0; i < items.length; i++) {
+      // Step 2 — write each item at its new index, preferring a rename
+      // of its matching temp (O(1) lookup) and falling back to a fresh
+      // atomic write when no temp matches (new item, or id was missing).
+      for (let i = 0; i < items.length; i += 1) {
         const item = items[i]
         if (!item) continue
 
@@ -735,32 +785,21 @@ export class PersistenceService {
           fileNamingConfig
         )
         const filePath = join(folderPath, `${fileName}${ext}`)
-
-        // Find matching temp file by ID
         const itemId = safeToString(item['id'])
-        let matchingTempPath: string | null = null
+        const matchingTempName = itemId ? tempNameById.get(itemId) : undefined
 
-        for (const [tempName] of tempNames) {
-          const tempPath = join(folderPath, tempName)
-          const content = await fs.readFile(tempPath, 'utf-8')
-          const tempData = deserialize(content, format) as Record<string, unknown>
-          if (safeToString(tempData['id']) === itemId) {
-            matchingTempPath = tempPath
-            break
-          }
-        }
-
-        // Write the file (either rename temp or create new)
-        if (matchingTempPath) {
-          await fs.rename(matchingTempPath, filePath)
+        if (matchingTempName) {
+          await fs.rename(join(folderPath, matchingTempName), filePath)
+          tempNameById.delete(itemId)
         } else {
-          const content = serialize(item, format)
-          await fs.writeFile(filePath, content, 'utf-8')
+          await atomicWriteFile(filePath, serialize(item, format))
         }
       }
 
-      // Clean up any remaining temp files
-      for (const tempName of tempNames.keys()) {
+      // Step 3 — drop orphaned temps (items that were removed, or
+      // files that had no recoverable id).
+      for (const tempName of tempNameById.values()) unmatchedTemps.add(tempName)
+      for (const tempName of unmatchedTemps) {
         const tempPath = join(folderPath, tempName)
         if (existsSync(tempPath)) {
           await fs.unlink(tempPath)

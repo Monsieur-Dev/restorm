@@ -5,7 +5,8 @@ import { promises as fs, existsSync, statSync, rmSync } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
 import { contextService, responseHistoryService } from './services'
 import { assertPathWithinParent } from './utils/pathSecurity'
-import { saveFolderStructure, loadFolderStructure } from './FileOperations'
+import { saveFolderStructure, loadFolderStructure, attachDraftStoreForFolder, attachDraftStoreForFile } from './FileOperations'
+import type { PersistenceFormat } from 'electron-core-ui'
 import { resolveRequestURL, type URLResolutionInput } from './services/request/HTTPRequestService'
 import { httpExecutionService, type HTTPExecutionInput } from './services/HTTPExecutionService'
 import { graphqlExecutionService, type GraphQLExecutionInput } from './services/GraphQLExecutionService'
@@ -278,6 +279,7 @@ export function registerRestormIPC(deps: {
         // Update FileService so the UI knows a file is open
         const fileService = getFileService() as { setOpenedFolder: (path: string, content: unknown, format?: string) => void }
         fileService.setOpenedFolder(folderPath, loadResult.data, loadResult.format)
+        await attachDraftStoreForFolder(folderPath, loadResult.format)
         return { success: true, content: loadResult.data, path: folderPath, format: loadResult.format }
       }
 
@@ -387,6 +389,7 @@ export function registerRestormIPC(deps: {
         if (loadResult && isFileServiceInitialized()) {
           const fileService = getFileService() as { setOpenedFolder: (path: string, content: unknown, format?: string) => void }
           fileService.setOpenedFolder(path, loadResult.data, loadResult.format)
+          await attachDraftStoreForFolder(path, loadResult.format)
           return { success: true, isDirectory: true, content: loadResult.data, path, format: loadResult.format }
         }
         return { success: false, error: 'Failed to load folder' }
@@ -395,7 +398,16 @@ export function registerRestormIPC(deps: {
         if (!isFileServiceInitialized()) {
           return { success: false, error: 'FileService not initialized' }
         }
-        return await getFileService().open(path)
+        const fileResult = await getFileService().open(path)
+        if (fileResult.success) {
+          // Attach the crash-recovery draft store for file mode — the
+          // per-unit dirty state / draft writes must behave the same as
+          // in folder mode (only the on-disk layout of saved content
+          // differs).
+          const format = (fileResult as { format?: string }).format ?? 'yaml'
+          await attachDraftStoreForFile(path, format as PersistenceFormat)
+        }
+        return fileResult
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error)

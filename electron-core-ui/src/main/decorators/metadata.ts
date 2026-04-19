@@ -9,7 +9,8 @@ export const METADATA_KEYS = {
   NON_SERIALISED: Symbol('nonSerialised'),
   SEPARATE_FILES: Symbol('separateFiles'),
   SEPARATE_FOLDERS: Symbol('separateFolders'),
-  FILE_NAMING: Symbol('fileNaming')
+  FILE_NAMING: Symbol('fileNaming'),
+  TREAT_EMPTY_AS_UNDEFINED: Symbol('treatEmptyAsUndefined')
 } as const
 
 /** Metadata storage - class/property -> key -> value */
@@ -40,14 +41,24 @@ export function setClassMetadata(target: unknown, key: symbol, value: unknown): 
 }
 
 /**
- * Get metadata for a property
+ * Get metadata for a property, walking the class's prototype chain so
+ * decorators applied to a base class are inherited by subclasses.
  */
 export function getPropertyMetadata(target: unknown, propertyKey: string | symbol, key: symbol): unknown {
-  const classMap = propertyMetadataStorage.get(target)
-  if (!classMap) return undefined
-  const propMap = classMap.get(propertyKey)
-  if (!propMap) return undefined
-  return propMap.get(key)
+  let current: unknown = target
+  while (current) {
+    const classMap = propertyMetadataStorage.get(current)
+    if (classMap) {
+      const propMap = classMap.get(propertyKey)
+      if (propMap) {
+        const value = propMap.get(key)
+        if (value !== undefined) return value
+      }
+    }
+    current = (current as { prototype?: { constructor?: unknown } } | null)?.prototype && Object.getPrototypeOf(current as object)
+    if (current === Object.prototype || current === null) break
+  }
+  return undefined
 }
 
 /**
@@ -68,17 +79,28 @@ export function setPropertyMetadata(target: unknown, propertyKey: string | symbo
 }
 
 /**
- * Get all property metadata for a class
+ * Get all property metadata for a class, walking the prototype chain so
+ * base-class decorators (e.g. `@TreatEmptyAsUndefined` on `BaseDocument`)
+ * merge into the subclass view. A subclass entry wins over its parent for
+ * the same property key.
  */
 export function getAllPropertyMetadata(target: unknown, key: symbol): Map<string | symbol, unknown> {
   const result = new Map<string | symbol, unknown>()
-  const classMap = propertyMetadataStorage.get(target)
-  if (!classMap) return result
-
-  for (const [propKey, propMap] of classMap) {
-    const value = propMap.get(key)
-    if (value !== undefined) {
-      result.set(propKey, value)
+  const chain: unknown[] = []
+  let current: unknown = target
+  while (current && current !== Object.prototype) {
+    chain.push(current)
+    current = Object.getPrototypeOf(current as object)
+  }
+  // Walk base → subclass so subclass entries overwrite parent ones.
+  for (let i = chain.length - 1; i >= 0; i -= 1) {
+    const classMap = propertyMetadataStorage.get(chain[i])
+    if (!classMap) continue
+    for (const [propKey, propMap] of classMap) {
+      const value = propMap.get(key)
+      if (value !== undefined) {
+        result.set(propKey, value)
+      }
     }
   }
   return result
