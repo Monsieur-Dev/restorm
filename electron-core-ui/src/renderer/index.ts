@@ -58,6 +58,15 @@ export { registerSettingRenderer, unregisterSettingRenderer } from './components
 
 // Save-unit pure helpers — safe to import from renderer code (no FS access).
 export { decomposeForPersistence, cleanseForPersistence } from '../main/services/saveUnit/decomposer'
+
+/**
+ * Property name under which the stable project UUID is stored in the root
+ * project file. Duplicated here (and kept in lockstep with
+ * `main/services/saveUnit/projectUuid.ts`) so the renderer can read the
+ * UUID without dragging the fs-backed projectUuid module into the browser
+ * bundle. Must change in both places together — never drift.
+ */
+export const PROJECT_UUID_KEY = '_projectUuid'
 export type {
   DecomposedUnit,
   DecomposedProject,

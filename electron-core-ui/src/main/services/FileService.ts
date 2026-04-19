@@ -7,6 +7,7 @@ import {
   DraftStore,
   sweepOrphanedDrafts,
   isTombstone,
+  PROJECT_UUID_KEY,
   type DirtyReason
 } from './saveUnit'
 import yaml from 'js-yaml'
@@ -624,6 +625,33 @@ export class FileService {
   }
 
   /**
+   * Preserve the stable project UUID across saves. The UUID is stamped on
+   * disk by `ensureFileProjectUuid` before a file is opened; once the
+   * renderer starts sending us `{ collections: [...] }` snapshots that
+   * drop top-level metadata, we must merge the UUID back in so subsequent
+   * reopens see the same identity (otherwise each save would regenerate
+   * a fresh UUID on next open and invalidate every per-project preference
+   * keyed by it — sidebar expansion, env selections, etc.).
+   *
+   * Intentionally generic: any top-level `_projectUuid` present in the
+   * previously-opened content is re-stamped. Renderers that already
+   * include `_projectUuid` in their payload are a no-op (same value).
+   */
+  private preserveProjectUuid(content: unknown): unknown {
+    if (content === null || typeof content !== 'object' || Array.isArray(content)) return content
+    const prev = this.currentFile.content
+    if (prev === null || typeof prev !== 'object' || Array.isArray(prev)) return content
+    const prevUuid = (prev as Record<string, unknown>)[PROJECT_UUID_KEY]
+    if (typeof prevUuid !== 'string' || prevUuid.length === 0) return content
+    const next = content as Record<string, unknown>
+    const incoming = next[PROJECT_UUID_KEY]
+    if (typeof incoming === 'string' && incoming.length > 0) {
+      return content
+    }
+    return { ...next, [PROJECT_UUID_KEY]: prevUuid }
+  }
+
+  /**
    * Save current file
    */
   public async save(content: unknown): Promise<boolean> {
@@ -633,11 +661,12 @@ export class FileService {
     }
 
     try {
-      const data = this.serialize(content, this.currentFile.format)
+      const preserved = this.preserveProjectUuid(content)
+      const data = this.serialize(preserved, this.currentFile.format)
       await atomicWriteFile(this.currentFile.path, data)
 
-      this.currentFile.content = content
-      this.currentFile.contentChecksum = JSON.stringify(content)
+      this.currentFile.content = preserved
+      this.currentFile.contentChecksum = JSON.stringify(preserved)
       // `currentFile.isDirty` is owned by the save-unit registry: the
       // caller re-hydrates (or commits) units post-save and the bridge
       // flips the cached flag. We don't touch it here.
@@ -679,7 +708,8 @@ export class FileService {
     const fileFormat = format ?? this.detectFormat(filePath)
 
     try {
-      const data = this.serialize(content, fileFormat)
+      const preserved = this.preserveProjectUuid(content)
+      const data = this.serialize(preserved, fileFormat)
       await atomicWriteFile(filePath, data)
 
       const name = this.getDisplayName(filePath)
@@ -687,9 +717,9 @@ export class FileService {
         path: filePath,
         name,
         isDirty: false,
-        content,
+        content: preserved,
         format: fileFormat,
-        contentChecksum: JSON.stringify(content)
+        contentChecksum: JSON.stringify(preserved)
       }
 
       this.addToRecentFiles(filePath, name)

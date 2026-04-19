@@ -513,6 +513,19 @@ export async function loadFolderStructure(
     // Read configuration to get format
     const config = readRestormConfig(folderPath)
     const format = config.format
+    const ext = format === 'json5' ? 'json5' : format
+
+    // Stamp / read the stable project UUID FIRST, before we parse anything,
+    // so it's available on the content that the renderer sees via the
+    // `file:opened` event. This is the identity the renderer uses to key
+    // per-project preferences (sidebar expansion, etc) that must survive
+    // folder moves and renames — filePath is not stable enough.
+    const { uuid: projectUuid } = await ensureProjectUuid({
+      projectPath: folderPath,
+      format,
+      extension: ext,
+      indexFileName: 'index'
+    })
 
     // Look for index file
     const indexFiles = ['index.yaml', 'index.yml', 'index.json', 'index.json5']
@@ -550,6 +563,12 @@ export async function loadFolderStructure(
         data = result.data as Record<string, unknown>
       }
     }
+
+    // Ensure the top-level `_projectUuid` is always present on the data the
+    // renderer receives. `reconstructFromFolders` builds a fresh
+    // `{ collections }` object that drops root-index metadata, so we
+    // re-stamp it here regardless of which branch populated `data`.
+    data._projectUuid = projectUuid
 
     // Apply PasswordValue secrets from restorm.env (if present)
     await applyFolderSecretsEnvFile(folderPath, data)

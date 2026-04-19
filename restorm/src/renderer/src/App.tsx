@@ -9,6 +9,7 @@ import {
   useFileService,
   useFeature,
   usePersistedState,
+  PROJECT_UUID_KEY,
   eventBus,
   logger,
   computeChecksum,
@@ -196,14 +197,27 @@ const App: React.FC = () => {
   // Can contain EnvironmentFolders, Folders, or standalone Requests
   const [rootItems, setRootItems] = useState<(EnvironmentFolder | Folder | Request)[]>(initialRootItems)
 
-  // Sidebar expansion is persisted per-file under `restorm-main-sidebar:<filePath>`.
-  // The key stays `null` until BOTH filePath and rootItems are populated, so
-  // the restore's `onRestore` filter has a fully-hydrated tree to validate
-  // stored ids against (otherwise the file read can race ahead of rootItems
-  // and drop every id as "unknown").
+  // Sidebar expansion is persisted per-project under
+  // `restorm-main-sidebar:<projectUuid>`. `projectUuid` is stamped into
+  // the project file (top-level `_projectUuid`) by `ensureProjectUuid` /
+  // `ensureFileProjectUuid` in the main process — unlike `filePath` it
+  // survives folder moves and renames, so the preference follows the
+  // project across filesystem reshuffles.
+  //
+  // The key stays `null` until both the UUID is readable from content and
+  // `rootItems` is hydrated, so the restore's `onRestore` filter has a
+  // complete tree to validate stored ids against (otherwise the read can
+  // race ahead of rootItems and drop every id as "unknown").
+  const projectUuid = useMemo<string | null>(() => {
+    const content = fileState?.currentFile.content
+    if (!content || typeof content !== 'object') return null
+    const raw = (content as Record<string, unknown>)[PROJECT_UUID_KEY]
+    return typeof raw === 'string' && raw.length > 0 ? raw : null
+  }, [fileState])
+
   const sidebarStorageKey = useMemo(
-    () => (filePath && rootItems.length > 0 ? `restorm-main-sidebar:${filePath}` : null),
-    [filePath, rootItems.length]
+    () => (projectUuid && rootItems.length > 0 ? `restorm-main-sidebar:${projectUuid}` : null),
+    [projectUuid, rootItems.length]
   )
   const allFolderIdsRef = useRef<string[]>(allFolderIds)
   useEffect(() => {

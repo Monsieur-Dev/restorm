@@ -1,6 +1,6 @@
 import { app, BrowserWindow } from 'electron'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService } from 'electron-core-ui'
+import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, ensureFileProjectUuid } from 'electron-core-ui'
 import type { PersistenceFormat } from 'electron-core-ui'
 import { join } from 'path'
 import { existsSync, statSync } from 'fs'
@@ -104,7 +104,19 @@ function createWindow(): void {
             } else if (isFileServiceInitialized()) {
               // Open as file
               logger.info('Opening file...', { path: fileToOpenOnStart })
-              void getFileService().open(fileToOpenOnStart).then(async (result) => {
+              // Stamp the stable `_projectUuid` BEFORE opening so the
+              // `file:opened` event the renderer consumes carries it —
+              // see `IPCHandlers.ts` for the matching welcome/recent path.
+              const cliFormat: PersistenceFormat = /\.json5$/i.test(fileToOpenOnStart)
+                ? 'json5'
+                : /\.json$/i.test(fileToOpenOnStart) ? 'json' : 'yaml'
+              void (async (): Promise<void> => {
+                try {
+                  await ensureFileProjectUuid({ filePath: fileToOpenOnStart, format: cliFormat })
+                } catch (err: unknown) {
+                  logger.warn('ensureFileProjectUuid (CLI) failed', { path: fileToOpenOnStart, error: String(err) })
+                }
+                const result = await getFileService().open(fileToOpenOnStart)
                 if (result.success) {
                   logger.info('File opened successfully from command line')
                   const format = (result as { format?: string }).format ?? 'yaml'
@@ -112,7 +124,7 @@ function createWindow(): void {
                 } else {
                   logger.error('Failed to open file from command line:', { path: fileToOpenOnStart })
                 }
-              })
+              })()
             } else {
               logger.warn('FileService not initialized, cannot open file')
             }
