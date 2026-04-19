@@ -59,6 +59,7 @@ import { DocumentEvents, type DocumentChangedPayload } from '../services/Documen
 import { searchIndexService } from '../services/SearchIndexService'
 import { makeReactiveFolder } from '../types/reactive'
 import { prepareForSerialization, processAfterDeserialization } from '../utils/serialization'
+import { normalizeFileFormatVersion } from '../../../shared/config/fileFormatVersion'
 import type { Folder, EnvironmentFolder, Request, FolderItem, Environment } from '../../../shared/types/collections'
 import { isEnvironmentFolder, isAnyFolder } from '../../../shared/types/collections'
 import type { PersistenceFormat, WorkbenchTree } from 'electron-core-ui/renderer'
@@ -669,6 +670,14 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         clearTabDirtyState()
 
         const collectionsWithIds = processAfterDeserialization(collections)
+        // Default `fileFormatVersion` to the current value on legacy files
+        // (pre-OYO-200) BEFORE the reactive wrap so the mutation doesn't
+        // fire a FOLDER_UPDATED event, and BEFORE the content-checksum
+        // baseline (set below) so "default-on-load" doesn't look like a
+        // user edit on the next save.
+        for (const root of collectionsWithIds) {
+          normalizeFileFormatVersion(root, logger)
+        }
         const reactiveItems = collectionsWithIds.map((folder) => makeReactiveFolder(folder)) as EnvironmentFolder[]
         setRootItems(reactiveItems)
 

@@ -12,6 +12,7 @@ import {
 import type { EnumDefinition } from '../../../shared/types/collections'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 import { grpcToApiDocumentation } from './transformers/grpcToApiDocumentation'
+import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 
 // ============================================================================
 // Proto Types
@@ -360,6 +361,7 @@ export function importGrpc(protoContent: string, options: GrpcImportOptions = {}
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
+    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     importSource: 'grpc',
     id: generateId(`${name}:folder:grpc:root`),
     name,

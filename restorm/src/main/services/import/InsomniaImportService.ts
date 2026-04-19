@@ -25,6 +25,7 @@ import {
 import { toHTTPMethod } from './httpMethodValidator'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 import { insomniaToApiDocumentation } from './transformers/insomniaToApiDocumentation'
+import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 
 // ============================================================================
 // Insomnia Export v4 Types
@@ -535,6 +536,7 @@ export function importInsomnia(
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
+    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     importSource: 'insomnia',
     id: generateId(`insomnia:root:${workspaceName}`),
     name: workspaceName,

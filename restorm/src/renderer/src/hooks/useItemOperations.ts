@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import type { ListViewDropEventPayload, ListViewItemEventPayload } from 'electron-core-ui/renderer'
 import { isTabGroupNode } from 'electron-core-ui/renderer'
 import type { Folder, EnvironmentFolder, Request } from '../../../shared/types/collections'
+import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 import { isAnyFolder } from '../../../shared/types/collections'
 import { findItemById, findItemWithBreadcrumbs, getFolderIcon } from '../utils/treeSearch'
 import { generateUniqueId, cloneItemInTree, removeItemFromTree, insertItemIntoTree } from '../utils/treeManipulation'
@@ -361,6 +362,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       id: generateUniqueId(),
       name: t('sidebar.newEnvironmentFolder'),
       folderType: 'environment',
+      fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
       documentation: '',
       tags: [],
       configuration: {},

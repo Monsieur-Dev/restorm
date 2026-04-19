@@ -11,6 +11,7 @@ import {
 import type { EnumDefinition } from '../../../shared/types/collections'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 import { wsdlToApiDocumentation } from './transformers/wsdlToApiDocumentation'
+import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 
 // ============================================================================
 // WSDL Types
@@ -346,6 +347,7 @@ export function importSoap(wsdlContent: string, options: SoapImportOptions = {})
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
+    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     importSource: 'wsdl',
     id: generateId(`${name}:folder:soap:root`),
     name,

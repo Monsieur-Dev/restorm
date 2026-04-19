@@ -14,6 +14,12 @@ export interface Folder {
 
 export interface EnvironmentFolder extends Folder {
   folderType: 'environment'
+  /**
+   * On-disk file-format version, present on the root env folder only.
+   * See `restorm/src/shared/config/fileFormatVersion.ts` for the current
+   * value and load-time defaulting rules. `1` from OYO-200 onward.
+   */
+  fileFormatVersion: number
   environments: Environment[]
   tagColors?: Record<string, string>
   enumDefinitions?: EnumDefinition[]
