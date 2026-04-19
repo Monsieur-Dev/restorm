@@ -75,10 +75,10 @@ export {
   isUnitNew,
   decomposeForPersistence,
   cleanseForPersistence,
-  ensureProjectUuid,
-  ensureFileProjectUuid,
-  readProjectUuid,
-  PROJECT_UUID_KEY
+  ensureFolderUuid,
+  ensureFileUuid,
+  readFolderUuid,
+  DEFAULT_UUID_KEY
 } from './services'
 
 export type {
@@ -93,8 +93,9 @@ export type {
   DecomposedUnit,
   DecomposedProject,
   DecomposeOptions,
-  EnsureProjectUuidOptions,
-  EnsureFileProjectUuidOptions
+  EnsureFolderUuidOptions,
+  EnsureFileUuidOptions,
+  EnsureUuidResult
 } from './services'
 
 // Decorators

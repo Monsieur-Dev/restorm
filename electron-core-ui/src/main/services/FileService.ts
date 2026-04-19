@@ -7,7 +7,7 @@ import {
   DraftStore,
   sweepOrphanedDrafts,
   isTombstone,
-  PROJECT_UUID_KEY,
+  ensureFileUuid,
   type DirtyReason
 } from './saveUnit'
 import yaml from 'js-yaml'
@@ -68,7 +68,14 @@ export class FileService {
       extension: config.extension ?? '.json',
       defaultFormat: config.defaultFormat ?? 'json',
       maxRecentFiles: config.maxRecentFiles ?? 10,
-      storagePrefix: config.storagePrefix ?? 'file_'
+      storagePrefix: config.storagePrefix ?? 'file_',
+      // `uuidKey` stays undefined unless the host app opts in. When set,
+      // `open()` stamps the UUID before broadcasting `file:opened`, and
+      // `save()`/`saveAs()` preserve it across writes. When unset the
+      // whole feature is a no-op — FileService stays non-opinionated
+      // about file metadata for apps that don't use the save-unit /
+      // draft-store system.
+      ...(config.uuidKey !== undefined && { uuidKey: config.uuidKey })
     }
 
     this.RECENT_FILES_KEY = `${this.config.storagePrefix}recent`
@@ -149,7 +156,8 @@ export class FileService {
    */
   public async attachDraftStore(params: {
     rootDir: string
-    projectUuid: string
+    /** Stable UUID used as the per-project sub-directory under `rootDir`. */
+    uuid: string
     projectPath: string
     extension: string
     serialize: (value: unknown) => string
@@ -565,8 +573,26 @@ export class FileService {
         return { success: false, isDirectory: true }
       }
 
-      const data = readFileSync(filePath, 'utf-8')
       const format = this.detectFormat(filePath)
+
+      // Opt-in stamp of the stable UUID BEFORE we read content. Doing it
+      // here — rather than at every call site that reaches us (`file:open`
+      // IPC, host-app CLI wrappers, welcome flows, etc.) — means the
+      // `file:opened` event the renderer consumes always carries the UUID
+      // on the very first open, without the host having to remember to
+      // stamp it. No-op when `uuidKey` isn't configured.
+      if (this.config.uuidKey) {
+        try {
+          await ensureFileUuid({ filePath, format, uuidKey: this.config.uuidKey })
+        } catch (uuidError) {
+          logger.warn('FileService: ensureFileUuid failed on open', {
+            path: filePath,
+            error: uuidError instanceof Error ? uuidError.message : String(uuidError)
+          })
+        }
+      }
+
+      const data = readFileSync(filePath, 'utf-8')
       const content = this.deserialize(data, format)
       const name = this.getDisplayName(filePath)
 
@@ -625,30 +651,32 @@ export class FileService {
   }
 
   /**
-   * Preserve the stable project UUID across saves. The UUID is stamped on
-   * disk by `ensureFileProjectUuid` before a file is opened; once the
-   * renderer starts sending us `{ collections: [...] }` snapshots that
-   * drop top-level metadata, we must merge the UUID back in so subsequent
+   * Preserve the stable UUID across saves. When `uuidKey` is configured,
+   * `open()` stamps the UUID on disk before broadcasting `file:opened`;
+   * once the renderer starts sending us `{ ...payload }` snapshots that
+   * drop top-level metadata, we merge the UUID back in so subsequent
    * reopens see the same identity (otherwise each save would regenerate
-   * a fresh UUID on next open and invalidate every per-project preference
-   * keyed by it — sidebar expansion, env selections, etc.).
+   * a fresh UUID on next open and invalidate every per-project
+   * preference keyed by it — sidebar expansion, env selections, etc.).
    *
-   * Intentionally generic: any top-level `_projectUuid` present in the
-   * previously-opened content is re-stamped. Renderers that already
-   * include `_projectUuid` in their payload are a no-op (same value).
+   * A no-op when the host app didn't configure `uuidKey`. Renderers
+   * that already include the UUID in their payload are a no-op too
+   * (same value, same write).
    */
-  private preserveProjectUuid(content: unknown): unknown {
+  private preserveUuidMetadata(content: unknown): unknown {
+    const uuidKey = this.config.uuidKey
+    if (!uuidKey) return content
     if (content === null || typeof content !== 'object' || Array.isArray(content)) return content
     const prev = this.currentFile.content
     if (prev === null || typeof prev !== 'object' || Array.isArray(prev)) return content
-    const prevUuid = (prev as Record<string, unknown>)[PROJECT_UUID_KEY]
+    const prevUuid = (prev as Record<string, unknown>)[uuidKey]
     if (typeof prevUuid !== 'string' || prevUuid.length === 0) return content
     const next = content as Record<string, unknown>
-    const incoming = next[PROJECT_UUID_KEY]
+    const incoming = next[uuidKey]
     if (typeof incoming === 'string' && incoming.length > 0) {
       return content
     }
-    return { ...next, [PROJECT_UUID_KEY]: prevUuid }
+    return { ...next, [uuidKey]: prevUuid }
   }
 
   /**
@@ -661,7 +689,7 @@ export class FileService {
     }
 
     try {
-      const preserved = this.preserveProjectUuid(content)
+      const preserved = this.preserveUuidMetadata(content)
       const data = this.serialize(preserved, this.currentFile.format)
       await atomicWriteFile(this.currentFile.path, data)
 
@@ -708,7 +736,7 @@ export class FileService {
     const fileFormat = format ?? this.detectFormat(filePath)
 
     try {
-      const preserved = this.preserveProjectUuid(content)
+      const preserved = this.preserveUuidMetadata(content)
       const data = this.serialize(preserved, fileFormat)
       await atomicWriteFile(filePath, data)
 

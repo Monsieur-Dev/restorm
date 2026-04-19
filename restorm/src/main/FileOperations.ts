@@ -4,11 +4,12 @@ import {
   getPersistenceService,
   getFileService,
   isFileServiceInitialized,
-  ensureProjectUuid,
-  ensureFileProjectUuid,
+  ensureFolderUuid,
+  ensureFileUuid,
   serialize as coreSerialize,
   deserialize as coreDeserialize
 } from 'electron-core-ui'
+import { PROJECT_UUID_KEY } from '../shared/config/projectUuid'
 import { join, basename } from 'path'
 import { promises as fs, existsSync, mkdirSync, readFileSync, writeFileSync, renameSync, rmSync } from 'fs'
 import { randomUUID } from 'crypto'
@@ -519,12 +520,15 @@ export async function loadFolderStructure(
     // so it's available on the content that the renderer sees via the
     // `file:opened` event. This is the identity the renderer uses to key
     // per-project preferences (sidebar expansion, etc) that must survive
-    // folder moves and renames — filePath is not stable enough.
-    const { uuid: projectUuid } = await ensureProjectUuid({
+    // folder moves and renames — filePath is not stable enough. We pass
+    // our own `uuidKey` so existing `_projectUuid`-stamped files keep
+    // resolving to the same UUID.
+    const { uuid: projectUuid } = await ensureFolderUuid({
       projectPath: folderPath,
       format,
       extension: ext,
-      indexFileName: 'index'
+      indexFileName: 'index',
+      uuidKey: PROJECT_UUID_KEY
     })
 
     // Look for index file
@@ -564,11 +568,11 @@ export async function loadFolderStructure(
       }
     }
 
-    // Ensure the top-level `_projectUuid` is always present on the data the
-    // renderer receives. `reconstructFromFolders` builds a fresh
+    // Ensure the top-level project UUID is always present on the data
+    // the renderer receives. `reconstructFromFolders` builds a fresh
     // `{ collections }` object that drops root-index metadata, so we
     // re-stamp it here regardless of which branch populated `data`.
-    data._projectUuid = projectUuid
+    data[PROJECT_UUID_KEY] = projectUuid
 
     // Apply PasswordValue secrets from restorm.env (if present)
     await applyFolderSecretsEnvFile(folderPath, data)
@@ -799,11 +803,12 @@ export async function attachDraftStoreForFolder(
   }
   const ext = format === 'json5' ? 'json5' : format
   try {
-    const { uuid, generated } = await ensureProjectUuid({
+    const { uuid, generated } = await ensureFolderUuid({
       projectPath: folderPath,
       format,
       extension: ext,
-      indexFileName: 'index'
+      indexFileName: 'index',
+      uuidKey: PROJECT_UUID_KEY
     })
     if (generated) {
       logger.info('Generated project UUID', { path: folderPath, uuid })
@@ -813,7 +818,7 @@ export async function attachDraftStoreForFolder(
     fileService.detachDraftStore()
     const restored = await fileService.attachDraftStore({
       rootDir: getDraftsRootDir(),
-      projectUuid: uuid,
+      uuid,
       projectPath: folderPath,
       extension: ext,
       serialize: (value) => coreSerialize(value, format),
@@ -846,7 +851,7 @@ export async function attachDraftStoreForFile(
   // the draft store can use. `.restorm` files are YAML under the hood.
   const ext = format === 'json5' ? 'json5' : format
   try {
-    const { uuid, generated } = await ensureFileProjectUuid({ filePath, format })
+    const { uuid, generated } = await ensureFileUuid({ filePath, format, uuidKey: PROJECT_UUID_KEY })
     if (generated) {
       logger.info('Generated project UUID for file', { path: filePath, uuid })
     }
@@ -855,7 +860,7 @@ export async function attachDraftStoreForFile(
     fileService.detachDraftStore()
     const restored = await fileService.attachDraftStore({
       rootDir: getDraftsRootDir(),
-      projectUuid: uuid,
+      uuid,
       projectPath: filePath,
       extension: ext,
       serialize: (value) => coreSerialize(value, format),

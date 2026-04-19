@@ -9,7 +9,6 @@ import {
   useFileService,
   useFeature,
   usePersistedState,
-  PROJECT_UUID_KEY,
   eventBus,
   logger,
   computeChecksum,
@@ -22,6 +21,7 @@ import {
   cleanseForPersistence,
   toasterService
 } from 'electron-core-ui/renderer'
+import { PROJECT_UUID_KEY } from '../../shared/config/projectUuid'
 import { HTTPRequest } from '../../shared/models/requests/HTTPRequest'
 import { SoapRequest } from '../../shared/models/requests/SoapRequest'
 import { GrpcRequest } from '../../shared/models/requests/GrpcRequest'
@@ -198,11 +198,11 @@ const App: React.FC = () => {
   const [rootItems, setRootItems] = useState<(EnvironmentFolder | Folder | Request)[]>(initialRootItems)
 
   // Sidebar expansion is persisted per-project under
-  // `restorm-main-sidebar:<projectUuid>`. `projectUuid` is stamped into
-  // the project file (top-level `_projectUuid`) by `ensureProjectUuid` /
-  // `ensureFileProjectUuid` in the main process — unlike `filePath` it
-  // survives folder moves and renames, so the preference follows the
-  // project across filesystem reshuffles.
+  // `restorm-main-sidebar:<projectUuid>`. The UUID is stamped into the
+  // project file (top-level `PROJECT_UUID_KEY` → `_projectUuid`) by
+  // `ensureFolderUuid` / `ensureFileUuid` in the main process — unlike
+  // `filePath` it survives folder moves and renames, so the preference
+  // follows the project across filesystem reshuffles.
   //
   // The key stays `null` until both the UUID is readable from content and
   // `rootItems` is hydrated, so the restore's `onRestore` filter has a

@@ -1,12 +1,12 @@
 /**
  * Draft persistence store.
  *
- * Writes per-unit drafts into a project-scoped directory under the
- * user's data directory (`userData/drafts/<projectUuid>/…`). Each
- * draft is one file; writes are debounced (default 300 ms) and
- * atomic (temp + rename). A sidecar `.project-path` file records
- * the absolute path of the project directory so an orphan sweep at
- * app boot can remove drafts for projects that no longer exist.
+ * Writes per-unit drafts into a UUID-scoped directory under the user's
+ * data directory (`userData/drafts/<uuid>/…`). Each draft is one file;
+ * writes are debounced (default 300 ms) and atomic (temp + rename). A
+ * sidecar `.project-path` file records the absolute path of the
+ * project directory so an orphan sweep at app boot can remove drafts
+ * for projects that no longer exist.
  *
  * The store does NOT observe a SaveUnitRegistry on its own — the
  * file service is responsible for calling `writeDraft` / `deleteDraft`
@@ -27,8 +27,11 @@ export const DEFAULT_DRAFT_DEBOUNCE_MS = 300
 export interface DraftStoreOptions {
   /** `app.getPath('userData')/drafts` — or a test override. */
   readonly rootDir: string
-  /** Unique project id, stored in the project's root index file. */
-  readonly projectUuid: string
+  /**
+   * Stable UUID used as the sub-directory under `rootDir`. Host apps
+   * typically get this from {@link ensureFolderUuid} / {@link ensureFileUuid}.
+   */
+  readonly uuid: string
   /** Absolute path of the project on disk — used by the orphan sweep. */
   readonly projectPath: string
   /** File extension for serialized drafts (`yaml`, `json`, `json5`, …). */
@@ -73,7 +76,7 @@ export class DraftStore {
   private ensuredDir = false
 
   constructor(private readonly options: DraftStoreOptions) {
-    this.projectDir = join(options.rootDir, options.projectUuid)
+    this.projectDir = join(options.rootDir, options.uuid)
     this.debounceMs = options.debounceMs ?? DEFAULT_DRAFT_DEBOUNCE_MS
   }
 

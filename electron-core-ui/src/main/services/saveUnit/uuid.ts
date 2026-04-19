@@ -1,16 +1,22 @@
 /**
- * Project UUID lifecycle for folder-mode projects.
+ * Stable UUID lifecycle for files and folders persisted by `FileService`.
  *
- * The project UUID is the stable identity of a project across renames
- * and moves of its directory — the draft store uses it to namespace
- * recovery files under `userData/drafts/<projectUuid>/`. It's stored
- * inside the root `index.<ext>` file next to the project's other
- * metadata so it survives when the user moves the folder.
+ * A UUID is the durable identity of a saved document across renames and
+ * moves of its path — the draft store uses it to namespace recovery
+ * files under `userData/drafts/<uuid>/`, and consumers of the library
+ * use it as the key for per-document preferences that must survive a
+ * filesystem reshuffle (e.g. tree-expansion state, chosen environment,
+ * favorites).
+ *
+ * The library intentionally does **not** hardcode a domain name into
+ * the key it writes to disk — the caller passes `uuidKey` (defaulted to
+ * `_uuid`) so each host app can own its on-disk vocabulary (restorm
+ * uses `_projectUuid`, another app could use `_documentUuid`, etc.)
+ * without pulling library terminology into its file format.
  *
  * This module owns reading + generating + writing the UUID. Host apps
- * call `ensureProjectUuid(projectPath, format, extension)` right after
- * opening a folder project and hand the returned UUID to
- * `FileService.attachDraftStore`.
+ * call `ensureFolderUuid` / `ensureFileUuid` right after opening a
+ * project and hand the returned UUID to `FileService.attachDraftStore`.
  */
 
 import { promises as fs, existsSync } from 'fs'
@@ -19,12 +25,13 @@ import { join } from 'path'
 import { atomicWriteFile, deserialize, serialize, type PersistenceFormat } from '../PersistenceService'
 
 /**
- * Property name under which the UUID is stored in the root index
- * file. Chosen for stability — do not change without a migration.
+ * Default property name under which the UUID is stored in the root
+ * index / project file. Callers can override via `uuidKey` to match
+ * their host-app naming convention.
  */
-export const PROJECT_UUID_KEY = '_projectUuid'
+export const DEFAULT_UUID_KEY = '_uuid'
 
-export interface EnsureProjectUuidOptions {
+export interface EnsureFolderUuidOptions {
   /** Absolute path of the project directory. */
   projectPath: string
   /** Serialization format of the index file. */
@@ -33,9 +40,11 @@ export interface EnsureProjectUuidOptions {
   extension: string
   /** Filename of the root index without extension. Defaults to `'index'`. */
   indexFileName?: string
+  /** Property name under which the UUID is stored. Defaults to `_uuid`. */
+  uuidKey?: string
 }
 
-interface EnsureProjectUuidResult {
+export interface EnsureUuidResult {
   /** The UUID — existing or freshly generated. */
   uuid: string
   /** True when the UUID was just generated and written to disk. */
@@ -53,17 +62,17 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /**
- * Read the project UUID from the root index file, generating + writing
- * one if it's missing. Safe to call at every project open — it's a
- * no-op on subsequent runs once the UUID has been persisted.
+ * Read the UUID from the root index file, generating + writing one if
+ * it's missing. Safe to call at every project open — it's a no-op on
+ * subsequent runs once the UUID has been persisted.
  *
- * If the root index file doesn't exist yet (brand-new project), one
- * is created with just `{ [PROJECT_UUID_KEY]: <uuid> }`. The host
- * app's normal save flow will add the rest of the fields on first
- * save.
+ * If the root index file doesn't exist yet (brand-new project), one is
+ * created with just `{ [uuidKey]: <uuid> }`. The host app's normal save
+ * flow will add the rest of the fields on first save.
  */
-export async function ensureProjectUuid(options: EnsureProjectUuidOptions): Promise<EnsureProjectUuidResult> {
+export async function ensureFolderUuid(options: EnsureFolderUuidOptions): Promise<EnsureUuidResult> {
   const indexFileName = options.indexFileName ?? 'index'
+  const uuidKey = options.uuidKey ?? DEFAULT_UUID_KEY
   const indexPath = join(options.projectPath, `${indexFileName}.${options.extension}`)
 
   let existing: Record<string, unknown> = {}
@@ -73,13 +82,13 @@ export async function ensureProjectUuid(options: EnsureProjectUuidOptions): Prom
     if (isRecord(parsed)) existing = parsed
   }
 
-  const currentValue = existing[PROJECT_UUID_KEY]
+  const currentValue = existing[uuidKey]
   if (typeof currentValue === 'string' && currentValue.length > 0) {
     return { uuid: currentValue, generated: false }
   }
 
   const fresh = uuid()
-  const next = { ...existing, [PROJECT_UUID_KEY]: fresh }
+  const next = { ...existing, [uuidKey]: fresh }
   await atomicWriteFile(indexPath, serialize(next, options.format))
   return { uuid: fresh, generated: true }
 }
@@ -89,37 +98,41 @@ export async function ensureProjectUuid(options: EnsureProjectUuidOptions): Prom
  * Returns `undefined` when the file is missing, unreadable, or has
  * no UUID field. Useful for tooling that shouldn't mutate the project.
  */
-export async function readProjectUuid(options: EnsureProjectUuidOptions): Promise<string | undefined> {
+export async function readFolderUuid(options: EnsureFolderUuidOptions): Promise<string | undefined> {
   const indexFileName = options.indexFileName ?? 'index'
+  const uuidKey = options.uuidKey ?? DEFAULT_UUID_KEY
   const indexPath = join(options.projectPath, `${indexFileName}.${options.extension}`)
   if (!existsSync(indexPath)) return undefined
   try {
     const raw = await fs.readFile(indexPath, 'utf-8')
     const parsed: unknown = deserialize(raw, options.format)
     if (!isRecord(parsed)) return undefined
-    const value = parsed[PROJECT_UUID_KEY]
+    const value = parsed[uuidKey]
     return typeof value === 'string' && value.length > 0 ? value : undefined
   } catch {
     return undefined
   }
 }
 
-export interface EnsureFileProjectUuidOptions {
+export interface EnsureFileUuidOptions {
   /** Absolute path of the project file. */
   filePath: string
   /** Serialization format of the file. */
   format: PersistenceFormat
+  /** Property name under which the UUID is stored. Defaults to `_uuid`. */
+  uuidKey?: string
 }
 
 /**
- * File-mode equivalent of {@link ensureProjectUuid}: reads the single
- * project file, stamps a stable `_projectUuid` at its top level if
+ * File-mode equivalent of {@link ensureFolderUuid}: reads the single
+ * project file, stamps the UUID at its top level under `uuidKey` if
  * missing, and writes the result back atomically. The UUID is what
  * namespaces crash-recovery drafts under `userData/drafts/<uuid>/`,
  * giving file-mode and folder-mode the same recovery semantics even
  * though on-disk layouts differ.
  */
-export async function ensureFileProjectUuid(options: EnsureFileProjectUuidOptions): Promise<EnsureProjectUuidResult> {
+export async function ensureFileUuid(options: EnsureFileUuidOptions): Promise<EnsureUuidResult> {
+  const uuidKey = options.uuidKey ?? DEFAULT_UUID_KEY
   let existing: Record<string, unknown> = {}
   if (existsSync(options.filePath)) {
     const raw = await fs.readFile(options.filePath, 'utf-8')
@@ -127,13 +140,13 @@ export async function ensureFileProjectUuid(options: EnsureFileProjectUuidOption
     if (isRecord(parsed)) existing = parsed
   }
 
-  const currentValue = existing[PROJECT_UUID_KEY]
+  const currentValue = existing[uuidKey]
   if (typeof currentValue === 'string' && currentValue.length > 0) {
     return { uuid: currentValue, generated: false }
   }
 
   const fresh = uuid()
-  const next = { ...existing, [PROJECT_UUID_KEY]: fresh }
+  const next = { ...existing, [uuidKey]: fresh }
   await atomicWriteFile(options.filePath, serialize(next, options.format))
   return { uuid: fresh, generated: true }
 }

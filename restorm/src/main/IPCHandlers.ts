@@ -5,7 +5,6 @@ import { promises as fs, existsSync, statSync, rmSync } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
 import { contextService, responseHistoryService } from './services'
 import { assertPathWithinParent } from './utils/pathSecurity'
-import { ensureFileProjectUuid } from 'electron-core-ui'
 import { saveFolderStructure, loadFolderStructure, attachDraftStoreForFolder, attachDraftStoreForFile } from './FileOperations'
 import type { PersistenceFormat } from 'electron-core-ui'
 import { resolveRequestURL, type URLResolutionInput } from './services/request/HTTPRequestService'
@@ -395,28 +394,19 @@ export function registerRestormIPC(deps: {
         }
         return { success: false, error: 'Failed to load folder' }
       } else {
-        // It's a file - use normal file open
+        // It's a file - use normal file open. FileService stamps
+        // `_projectUuid` before broadcasting `file:opened` (configured
+        // via `uuidKey` on init), so the renderer sees the UUID on the
+        // very first open without extra wiring here.
         if (!isFileServiceInitialized()) {
           return { success: false, error: 'FileService not initialized' }
-        }
-        // Stamp the stable project UUID BEFORE reading content, so the
-        // `file:opened` event the renderer receives carries `_projectUuid`.
-        // The renderer uses it to key per-project preferences (sidebar
-        // expansion, etc.) in a move/rename-safe way. Format detection
-        // mirrors `FileService.detectFormat`: `.json`/`.json5` → those,
-        // everything else → YAML (`.restorm` is YAML under the hood).
-        const lowerExt: PersistenceFormat = /\.(json5)$/i.test(path) ? 'json5' : /\.json$/i.test(path) ? 'json' : 'yaml'
-        try {
-          await ensureFileProjectUuid({ filePath: path, format: lowerExt })
-        } catch (uuidError) {
-          logger.warn('Failed to ensure project UUID before open', { path, error: String(uuidError) })
         }
         const fileResult = await getFileService().open(path)
         if (fileResult.success) {
           // Attach the crash-recovery draft store for file mode — the
           // per-unit dirty state / draft writes must behave the same as
           // in folder mode (only the on-disk layout of saved content
-          // differs). `ensureFileProjectUuid` above + this one are idempotent.
+          // differs).
           const format = (fileResult as { format?: string }).format ?? 'yaml'
           await attachDraftStoreForFile(path, format as PersistenceFormat)
         }
