@@ -146,13 +146,14 @@ work survives a hard crash.
 ### Location
 
 ```
-<userData>/drafts/<projectUuid>/<runtimeId>.draft.<ext>
-<userData>/drafts/<projectUuid>/.project-path        # marker for orphan sweep
+<userData>/drafts/<uuid>/<runtimeId>.draft.<ext>
+<userData>/drafts/<uuid>/.project-path        # marker for orphan sweep
 ```
 
-- `<projectUuid>` is generated on first open and stored in the project's
-  root `index.<ext>` so renames / moves of the project directory don't
-  lose the link.
+- `<uuid>` is generated on first open by `ensureFolderUuid` /
+  `ensureFileUuid` and stored at the top level of the project's root
+  file (under `FileServiceConfig.uuidKey`, default `_uuid`) so renames /
+  moves of the project directory don't lose the link.
 - One draft file per dirty unit.
 - Tombstones serialize as `{ __tombstone: true, snapshot: … }`.
 
@@ -181,7 +182,7 @@ work survives a hard crash.
 // Main process, at project open
 const restored = await getFileService().attachDraftStore({
   rootDir: join(app.getPath('userData'), 'drafts'),
-  projectUuid,
+  uuid,
   projectPath,
   extension: persistenceConfig.extension,
   serialize: (v) => serialize(v, persistenceConfig.format),

@@ -128,8 +128,24 @@ Feature: Full workflow end-to-end scenario
     # Edit + revert + close/reopen scenarios for dirty-state live in
     # `dirty-state.feature`; full-workflow just needs the reopen flow to
     # work for the env-switch / variable-type checks below.
+    # Sidebar expansion state must survive close/reopen (OYO-190) —
+    # set a distinguishable pattern (root + pet expanded, user collapsed)
+    # so we can't mistake the default "expand everything" fallback for
+    # a successful restore.
+    When I expand the sidebar folder "Swagger Petstore"
+    And I expand the sidebar folder "pet"
+    And I collapse the sidebar folder "user"
+    Then the sidebar folder "Swagger Petstore" should be expanded
+    And the sidebar folder "pet" should be expanded
+    And the sidebar folder "user" should be collapsed
+    # Give the debounced storage write (300ms) a chance to land before
+    # the app closes; without this sleep the close race can drop the write.
+    When I wait for sidebar expansion to persist
     When I close the current file
     When I open the welcome recent file "workflow-collection.restorm"
+    Then the sidebar folder "Swagger Petstore" should be expanded
+    And the sidebar folder "pet" should be expanded
+    And the sidebar folder "user" should be collapsed
     When I click the sidebar env folder "Swagger Petstore"
     When I switch to the "Configuration" inner tab
     # Variable types must be preserved across env switches: `themeColor`

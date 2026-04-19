@@ -59,6 +59,16 @@ export interface FileServiceConfig {
   maxRecentFiles: number
   /** Storage key prefix for web localStorage */
   storagePrefix: string
+  /**
+   * Top-level property name that stores the file's stable UUID (see
+   * `ensureFileUuid` / `ensureFolderUuid`). `FileService.save` /
+   * `saveAs` use this key to preserve the UUID across writes so the
+   * renderer doesn't need to round-trip it on every payload.
+   *
+   * Defaults to `_uuid`. Host apps that already ship a bespoke key on
+   * disk (e.g. restorm's `_projectUuid`) should set this explicitly.
+   */
+  uuidKey?: string
 }
 
 /**

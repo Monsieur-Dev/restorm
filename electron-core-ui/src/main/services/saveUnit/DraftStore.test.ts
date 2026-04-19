@@ -19,7 +19,7 @@ function makeStore(overrides?: Partial<{ debounceMs: number }>): {
   const projectPath = mkdtempSync(join(tmpdir(), 'draftstore-project-'))
   const store = new DraftStore({
     rootDir,
-    projectUuid: 'project-uuid-a',
+    uuid: 'project-uuid-a',
     projectPath,
     extension: 'json',
     serialize: noopSerialize,

@@ -68,7 +68,7 @@ function newHarness(): {
 async function attach(ctx: ReturnType<typeof newHarness>, debounceMs = 20): Promise<number> {
   return ctx.service.attachDraftStore({
     rootDir: ctx.rootDir,
-    projectUuid: 'test-proj',
+    uuid: 'test-proj',
     projectPath: ctx.projectPath,
     extension: 'json',
     serialize,

@@ -244,7 +244,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
   React.useEffect(() => {
     if (expandedIdsProp === undefined) return
     setExpandedIds(new Set(expandedIdsProp))
-  }, [expandedIdsProp])
+  }, [expandedIdsProp, setExpandedIds])
 
   // Track previous activeIdProp to detect real changes
   const prevActiveIdPropRef = useRef<string | null | undefined>(undefined)
@@ -288,7 +288,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
       ancestorIds.forEach((id) => next.add(id))
       return next
     })
-  }, [activeIdProp, initialItems])
+  }, [activeIdProp, initialItems, setExpandedIds])
 
   const flatItems = useMemo<FlatItem[]>(() => {
     return flattenItems(initialItems, expandedIds)
@@ -380,7 +380,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
         onItemToggle(payload, !flat.isExpanded, event)
       }
     },
-    [expandedIdsProp, onItemToggle]
+    [expandedIdsProp, onItemToggle, setExpandedIds]
   )
 
   // Recompute initial expansion when the item tree changes,
@@ -394,7 +394,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
       return
     }
     setExpandedIds(computeInitialExpandedIds(initialItems))
-  }, [initialItems, hasCustomExpansion, expandedIdsProp])
+  }, [initialItems, hasCustomExpansion, expandedIdsProp, setExpandedIds])
 
   const handleSelect = useCallback(
     (flat: FlatItem, event: React.MouseEvent<HTMLDivElement>): void => {

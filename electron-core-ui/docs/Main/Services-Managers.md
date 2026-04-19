@@ -172,7 +172,13 @@ initFileService({
   extension: '.myapp',
   defaultFormat: 'yaml',
   maxRecentFiles: 10,
-  storagePrefix: 'myapp_'
+  storagePrefix: 'myapp_',
+  // Opt-in: stamp a stable UUID into the project root on every open and
+  // preserve it across renderer-driven saves. Required when the host app
+  // uses the DraftStore / save-unit system, or keys per-project user
+  // preferences (sidebar expansion, env selections, …) off the UUID.
+  // Host-owned string so consumers can keep their legacy on-disk name.
+  uuidKey: '_myAppUuid'
 })
 
 const fileService = getFileService()

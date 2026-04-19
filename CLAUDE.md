@@ -18,6 +18,10 @@
 
 Pre-commit hooks run the full test suite, which takes a long time. **NEVER** interrupt or cancel a commit in progress — wait for it to finish, even if it seems slow.
 
+## Self-review before push
+
+Before pushing a branch or asking for a merge, **always** run an independent code review of the diff. Use the `superpowers:code-reviewer` agent (or equivalent fresh-context agent) on the full PR scope and act on its findings — bugs, design smells, coverage gaps, stale comments, missed docs — before telling the user the PR is ready. Document agent findings that you're deliberately not addressing, don't silently skip them. Self-review applies even when the user hasn't explicitly asked for it; it's the last gate before human attention.
+
 ## Documentation
 
 Do not create documentation files (`/docs/`, README, etc.) unless explicitly requested.

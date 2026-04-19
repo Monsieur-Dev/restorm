@@ -394,7 +394,10 @@ export function registerRestormIPC(deps: {
         }
         return { success: false, error: 'Failed to load folder' }
       } else {
-        // It's a file - use normal file open
+        // It's a file - use normal file open. FileService stamps
+        // `_projectUuid` before broadcasting `file:opened` (configured
+        // via `uuidKey` on init), so the renderer sees the UUID on the
+        // very first open without extra wiring here.
         if (!isFileServiceInitialized()) {
           return { success: false, error: 'FileService not initialized' }
         }

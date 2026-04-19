@@ -1,6 +1,7 @@
 import { app, BrowserWindow } from 'electron'
 import { MainWindow } from './windows/MainWindow'
 import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService } from 'electron-core-ui'
+import { PROJECT_UUID_KEY } from '../shared/config/projectUuid'
 import type { PersistenceFormat } from 'electron-core-ui'
 import { join } from 'path'
 import { existsSync, statSync } from 'fs'
@@ -102,7 +103,10 @@ function createWindow(): void {
                 }
               })
             } else if (isFileServiceInitialized()) {
-              // Open as file
+              // Open as file — FileService itself stamps `_projectUuid`
+              // before broadcasting `file:opened` (configured via
+              // `uuidKey` on init), so this path stays a simple
+              // open + draft-store attach.
               logger.info('Opening file...', { path: fileToOpenOnStart })
               void getFileService().open(fileToOpenOnStart).then(async (result) => {
                 if (result.success) {
@@ -195,12 +199,16 @@ const defaultLocale = supportedLocales.includes(systemLocale) ? systemLocale : '
 i18nService.initialize('', defaultLocale)
 logger.info('I18n Service initialized', { locale: defaultLocale })
 
-// Initialize File Service for .restorm files with YAML serialization
+// Initialize File Service for .restorm files with YAML serialization.
+// `uuidKey` tells FileService which top-level field to preserve across
+// saves — without this the renderer's `{ collections }` snapshots would
+// strip the stamped UUID and each reopen would regenerate a fresh one.
 initFileService({
   extension: '.restorm',
   defaultFormat: 'yaml',
   maxRecentFiles: 10,
-  storagePrefix: 'restorm_'
+  storagePrefix: 'restorm_',
+  uuidKey: PROJECT_UUID_KEY
 })
 logger.info('File Service initialized')
 

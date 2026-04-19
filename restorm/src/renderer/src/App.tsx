@@ -8,6 +8,7 @@ import {
   VerticalSashContainer,
   useFileService,
   useFeature,
+  usePersistedState,
   eventBus,
   logger,
   computeChecksum,
@@ -20,6 +21,7 @@ import {
   cleanseForPersistence,
   toasterService
 } from 'electron-core-ui/renderer'
+import { PROJECT_UUID_KEY } from '../../shared/config/projectUuid'
 import { HTTPRequest } from '../../shared/models/requests/HTTPRequest'
 import { SoapRequest } from '../../shared/models/requests/SoapRequest'
 import { GrpcRequest } from '../../shared/models/requests/GrpcRequest'
@@ -195,8 +197,49 @@ const App: React.FC = () => {
   // Can contain EnvironmentFolders, Folders, or standalone Requests
   const [rootItems, setRootItems] = useState<(EnvironmentFolder | Folder | Request)[]>(initialRootItems)
 
-  // Initialize with all folders expanded
-  const [expandedIds, setExpandedIds] = useState<string[]>(allFolderIds)
+  // Sidebar expansion is persisted per-project under
+  // `restorm-main-sidebar:<projectUuid>`. The UUID is stamped into the
+  // project file (top-level `PROJECT_UUID_KEY` → `_projectUuid`) by
+  // `ensureFolderUuid` / `ensureFileUuid` in the main process — unlike
+  // `filePath` it survives folder moves and renames, so the preference
+  // follows the project across filesystem reshuffles.
+  //
+  // The key stays `null` until both the UUID is readable from content and
+  // `rootItems` is hydrated, so the restore's `onRestore` filter has a
+  // complete tree to validate stored ids against (otherwise the read can
+  // race ahead of rootItems and drop every id as "unknown").
+  const projectUuid = useMemo<string | null>(() => {
+    const content = fileState?.currentFile.content
+    if (!content || typeof content !== 'object') return null
+    const raw = (content as Record<string, unknown>)[PROJECT_UUID_KEY]
+    return typeof raw === 'string' && raw.length > 0 ? raw : null
+  }, [fileState])
+
+  const sidebarStorageKey = useMemo(
+    () => (projectUuid && rootItems.length > 0 ? `restorm-main-sidebar:${projectUuid}` : null),
+    [projectUuid, rootItems.length]
+  )
+  const allFolderIdsRef = useRef<string[]>(allFolderIds)
+  useEffect(() => {
+    const ids: string[] = []
+    for (const item of rootItems) {
+      if ('items' in item) {
+        ids.push(...collectAllFolderIds(item))
+      }
+    }
+    allFolderIdsRef.current = ids
+  }, [rootItems])
+  const [expandedIds, setExpandedIds] = usePersistedState<string[]>(
+    sidebarStorageKey,
+    allFolderIds,
+    {
+      onRestore: (stored) => {
+        const known = new Set(allFolderIdsRef.current)
+        return stored.filter((id) => known.has(id))
+      },
+      onMissing: () => allFolderIdsRef.current.slice()
+    }
+  )
 
   // Selected item in the sidebar
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)

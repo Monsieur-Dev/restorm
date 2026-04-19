@@ -9,6 +9,7 @@ This document describes the React hooks, services, and contexts available in `el
   - [useFeature](#usefeature)
   - [useFileService](#usefileservice)
   - [useStorage](#usestorage)
+  - [usePersistedState](#usepersistedstate)
   - [usePlatform](#useplatform)
   - [useKeyboardShortcut](#usekeyboardshortcut)
   - [useDirtyState](#usedirtystate)
@@ -155,6 +156,51 @@ const [value, setValue, isLoading] = useStorage<MyType>('storage-key', defaultVa
 await saveToStorage('key', value)
 const stored = await loadFromStorage('key')
 ```
+
+---
+
+### usePersistedState
+
+`useState`-shaped hook that persists its value under `key` in
+`window.api.storage`. Reads asynchronously on mount / key change,
+debounces writes (default 300 ms), and exposes hooks for restore-time
+transforms and runtime-derived defaults.
+
+Use this over `useStorage` when you need any of:
+- a dormant mode (key is `null` before a file / project is open)
+- a filter over stored values (drop stale ids, migrate schemas)
+- a runtime-derived fallback when nothing is stored yet
+- coalescing of rapid updates into a single write
+
+```typescript
+import { usePersistedState } from 'electron-core-ui/renderer'
+
+const [expandedIds, setExpandedIds] = usePersistedState<string[]>(
+  projectUuid ? `sidebar-expansion:${projectUuid}` : null, // dormant until the project is loaded
+  [], // initial value (used before the first read resolves)
+  {
+    debounceMs: 300,
+    onRestore: (stored) => stored.filter(id => knownIdsRef.current.has(id)),
+    onMissing: () => allIdsRef.current.slice(), // "expand all" when nothing is stored yet
+  }
+)
+```
+
+**Options**
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `debounceMs` | `number` | Debounce window between a `setState` and the disk write. Default `300`. |
+| `onRestore` | `(stored: T) => T \| undefined` | Transform the value read from storage before applying. Return `undefined` to ignore it and keep current state. Closure refreshes every render so it can read external refs. |
+| `onMissing` | `() => T \| undefined` | Called once per key when nothing is stored. Produce a runtime-derived default that can't be expressed as the static `initial` value (e.g. "all ids in the current tree"). |
+| `logger` | `{ warn: (msg, meta?) => void }` | Override the library logger used for IO failures. Mainly for tests. |
+
+**Semantics**
+
+- `key = null \| undefined` → hook is dormant: no IO, behaves like `useState(initial)`.
+- `key = "foo"` → reads storage asynchronously; on success the value is passed through `onRestore` (if any) and applied via `setState`. If nothing is stored, `onMissing` fires instead.
+- Every subsequent state change schedules a debounced write. The restore's own `setState` is recognized as a no-op and does not round-trip back to disk.
+- Changing `key` cancels any pending write, resets the restore guard, and re-reads for the new key.
 
 ---
 

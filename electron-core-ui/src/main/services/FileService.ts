@@ -7,6 +7,7 @@ import {
   DraftStore,
   sweepOrphanedDrafts,
   isTombstone,
+  ensureFileUuid,
   type DirtyReason
 } from './saveUnit'
 import yaml from 'js-yaml'
@@ -67,7 +68,14 @@ export class FileService {
       extension: config.extension ?? '.json',
       defaultFormat: config.defaultFormat ?? 'json',
       maxRecentFiles: config.maxRecentFiles ?? 10,
-      storagePrefix: config.storagePrefix ?? 'file_'
+      storagePrefix: config.storagePrefix ?? 'file_',
+      // `uuidKey` stays undefined unless the host app opts in. When set,
+      // `open()` stamps the UUID before broadcasting `file:opened`, and
+      // `save()`/`saveAs()` preserve it across writes. When unset the
+      // whole feature is a no-op — FileService stays non-opinionated
+      // about file metadata for apps that don't use the save-unit /
+      // draft-store system.
+      ...(config.uuidKey !== undefined && { uuidKey: config.uuidKey })
     }
 
     this.RECENT_FILES_KEY = `${this.config.storagePrefix}recent`
@@ -148,7 +156,8 @@ export class FileService {
    */
   public async attachDraftStore(params: {
     rootDir: string
-    projectUuid: string
+    /** Stable UUID used as the per-project sub-directory under `rootDir`. */
+    uuid: string
     projectPath: string
     extension: string
     serialize: (value: unknown) => string
@@ -229,6 +238,12 @@ export class FileService {
    *
    * Called from a `file:save-unit` IPC. The renderer owns the tree and
    * therefore owns the path resolution for the unit.
+   *
+   * Note: unit writes deliberately bypass `preserveUuidMetadata` — a
+   * save-unit targets a caller-supplied absolute path (a child document,
+   * not the project root), so there's no "previous root content" to
+   * merge the UUID from. If a future refactor ever lets `saveUnit` land
+   * on the root index, add the merge back in at that site.
    */
   public async saveUnit(params: {
     runtimeId: RuntimeId
@@ -496,17 +511,42 @@ export class FileService {
 
     // Create empty file
     try {
-      const emptyContent = {}
-      const data = this.serialize(emptyContent, this.config.defaultFormat)
-      await atomicWriteFile(filePath, data)
-
-      this.currentFile = {
-        path: filePath,
-        name,
-        isDirty: false,
-        content: emptyContent,
-        format: this.config.defaultFormat,
-        contentChecksum: JSON.stringify(emptyContent)
+      // Seed the file with just the UUID (when configured) so "File → New"
+      // behaves symmetrically to "File → Open": the very first
+      // `file:opened` broadcast the renderer receives carries the UUID
+      // that host-app preferences (sidebar expansion, env selections, …)
+      // will key off. Without this seed, within-session preferences would
+      // never persist until the user reopened the freshly-created file.
+      const uuidKey = this.config.uuidKey
+      const emptyContent: Record<string, unknown> = {}
+      if (uuidKey) {
+        const data = this.serialize(emptyContent, this.config.defaultFormat)
+        await atomicWriteFile(filePath, data)
+        await ensureFileUuid({
+          filePath,
+          format: this.config.defaultFormat,
+          uuidKey
+        })
+        const stamped = this.deserialize(readFileSync(filePath, 'utf-8'), this.config.defaultFormat)
+        this.currentFile = {
+          path: filePath,
+          name,
+          isDirty: false,
+          content: stamped,
+          format: this.config.defaultFormat,
+          contentChecksum: JSON.stringify(stamped)
+        }
+      } else {
+        const data = this.serialize(emptyContent, this.config.defaultFormat)
+        await atomicWriteFile(filePath, data)
+        this.currentFile = {
+          path: filePath,
+          name,
+          isDirty: false,
+          content: emptyContent,
+          format: this.config.defaultFormat,
+          contentChecksum: JSON.stringify(emptyContent)
+        }
       }
 
       this.addToRecentFiles(filePath, name)
@@ -564,8 +604,26 @@ export class FileService {
         return { success: false, isDirectory: true }
       }
 
-      const data = readFileSync(filePath, 'utf-8')
       const format = this.detectFormat(filePath)
+
+      // Opt-in stamp of the stable UUID BEFORE we read content. Doing it
+      // here — rather than at every call site that reaches us (`file:open`
+      // IPC, host-app CLI wrappers, welcome flows, etc.) — means the
+      // `file:opened` event the renderer consumes always carries the UUID
+      // on the very first open, without the host having to remember to
+      // stamp it. No-op when `uuidKey` isn't configured.
+      if (this.config.uuidKey) {
+        try {
+          await ensureFileUuid({ filePath, format, uuidKey: this.config.uuidKey })
+        } catch (uuidError) {
+          logger.warn('FileService: ensureFileUuid failed on open', {
+            path: filePath,
+            error: uuidError instanceof Error ? uuidError.message : String(uuidError)
+          })
+        }
+      }
+
+      const data = readFileSync(filePath, 'utf-8')
       const content = this.deserialize(data, format)
       const name = this.getDisplayName(filePath)
 
@@ -624,6 +682,35 @@ export class FileService {
   }
 
   /**
+   * Preserve the stable UUID across saves. When `uuidKey` is configured,
+   * `open()` stamps the UUID on disk before broadcasting `file:opened`;
+   * once the renderer starts sending us `{ ...payload }` snapshots that
+   * drop top-level metadata, we merge the UUID back in so subsequent
+   * reopens see the same identity (otherwise each save would regenerate
+   * a fresh UUID on next open and invalidate every per-project
+   * preference keyed by it — sidebar expansion, env selections, etc.).
+   *
+   * A no-op when the host app didn't configure `uuidKey`. Renderers
+   * that already include the UUID in their payload are a no-op too
+   * (same value, same write).
+   */
+  private preserveUuidMetadata(content: unknown): unknown {
+    const uuidKey = this.config.uuidKey
+    if (!uuidKey) return content
+    if (content === null || typeof content !== 'object' || Array.isArray(content)) return content
+    const prev = this.currentFile.content
+    if (prev === null || typeof prev !== 'object' || Array.isArray(prev)) return content
+    const prevUuid = (prev as Record<string, unknown>)[uuidKey]
+    if (typeof prevUuid !== 'string' || prevUuid.length === 0) return content
+    const next = content as Record<string, unknown>
+    const incoming = next[uuidKey]
+    if (typeof incoming === 'string' && incoming.length > 0) {
+      return content
+    }
+    return { ...next, [uuidKey]: prevUuid }
+  }
+
+  /**
    * Save current file
    */
   public async save(content: unknown): Promise<boolean> {
@@ -633,11 +720,12 @@ export class FileService {
     }
 
     try {
-      const data = this.serialize(content, this.currentFile.format)
+      const preserved = this.preserveUuidMetadata(content)
+      const data = this.serialize(preserved, this.currentFile.format)
       await atomicWriteFile(this.currentFile.path, data)
 
-      this.currentFile.content = content
-      this.currentFile.contentChecksum = JSON.stringify(content)
+      this.currentFile.content = preserved
+      this.currentFile.contentChecksum = JSON.stringify(preserved)
       // `currentFile.isDirty` is owned by the save-unit registry: the
       // caller re-hydrates (or commits) units post-save and the bridge
       // flips the cached flag. We don't touch it here.
@@ -679,7 +767,8 @@ export class FileService {
     const fileFormat = format ?? this.detectFormat(filePath)
 
     try {
-      const data = this.serialize(content, fileFormat)
+      const preserved = this.preserveUuidMetadata(content)
+      const data = this.serialize(preserved, fileFormat)
       await atomicWriteFile(filePath, data)
 
       const name = this.getDisplayName(filePath)
@@ -687,9 +776,9 @@ export class FileService {
         path: filePath,
         name,
         isDirty: false,
-        content,
+        content: preserved,
         format: fileFormat,
-        contentChecksum: JSON.stringify(content)
+        contentChecksum: JSON.stringify(preserved)
       }
 
       this.addToRecentFiles(filePath, name)

@@ -4,8 +4,8 @@ export { DraftStore, sweepOrphanedDrafts, DEFAULT_DRAFT_DEBOUNCE_MS } from './Dr
 export type { DraftStoreOptions, LoadedDraft } from './DraftStore'
 export { decomposeForPersistence, cleanseForPersistence } from './decomposer'
 export type { DecomposedUnit, DecomposedProject, DecomposeOptions } from './decomposer'
-export { ensureProjectUuid, ensureFileProjectUuid, readProjectUuid, PROJECT_UUID_KEY } from './projectUuid'
-export type { EnsureProjectUuidOptions, EnsureFileProjectUuidOptions } from './projectUuid'
+export { ensureFolderUuid, ensureFileUuid, readFolderUuid, DEFAULT_UUID_KEY } from './uuid'
+export type { EnsureFolderUuidOptions, EnsureFileUuidOptions, EnsureUuidResult } from './uuid'
 export {
   isTombstone,
   makeTombstone,
