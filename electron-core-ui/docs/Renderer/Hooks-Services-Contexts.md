@@ -10,6 +10,7 @@ This document describes the React hooks, services, and contexts available in `el
   - [useFileService](#usefileservice)
   - [useStorage](#usestorage)
   - [usePersistedState](#usepersistedstate)
+  - [useGraphQLLinkStatus](#usegraphqllinkstatus)
   - [usePlatform](#useplatform)
   - [useKeyboardShortcut](#usekeyboardshortcut)
   - [useDirtyState](#usedirtystate)
@@ -201,6 +202,30 @@ const [expandedIds, setExpandedIds] = usePersistedState<string[]>(
 - `key = "foo"` → reads storage asynchronously; on success the value is passed through `onRestore` (if any) and applied via `setState`. If nothing is stored, `onMissing` fires instead.
 - Every subsequent state change schedules a debounced write. The restore's own `setState` is recognized as a no-op and does not round-trip back to disk.
 - Changing `key` cancels any pending write, resets the restore guard, and re-reads for the new key.
+
+---
+
+### useGraphQLLinkStatus
+
+Reactive view of the renderer's GraphQL subscription link status
+(`graphQLClient.getLinkStatus()`). Returns `'ok' | 'reconnecting' | 'failed'`.
+Re-renders on every distinct transition. Pairs with the ready-made
+`<GraphQLLinkStatusIndicator>` for a status-bar cell that lights up
+only when the link is unhealthy, or can drive any custom UI.
+
+See `docs/GraphQLLinkStatus/README.md` for the full contract — backoff
+tuning, escalation threshold, and imperative API for non-React
+consumers.
+
+```tsx
+import { useGraphQLLinkStatus } from 'electron-core-ui/renderer'
+
+function Banner(): JSX.Element | null {
+  const status = useGraphQLLinkStatus()
+  if (status === 'ok') return null
+  return <div role="alert">Live data temporarily unavailable.</div>
+}
+```
 
 ---
 
