@@ -3,13 +3,15 @@ import { useTranslation } from 'react-i18next'
 import {
   IconView,
   StatusbarElement,
-  eventBus,
   getContrastColor
 } from 'electron-core-ui/renderer'
 import type { Environment } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
-import { setSessionEnvSelection, setStoredEnvForRequest } from '../../services/environmentSelectionStore'
-import { DocumentEvents, type RequestEnvEventPayload } from '../../services/DocumentEvents'
+import {
+  clearSessionRequestOverridesForRequests,
+  clearStoredRequestOverridesForRequests,
+  findEnvironmentById
+} from '../../services/environmentSelectionStore'
 
 /** Default "orange" used as a fallback for envs without a configured
  * `color` — matches the in-tab Send button + the color swatch in
@@ -42,17 +44,6 @@ function envGradient(color: string): string {
   return `linear-gradient(to right, rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1) 0%, rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0) 100%)`
 }
 
-function findEnvironmentById(environments: Environment[], id: string): Environment | null {
-  for (const env of environments) {
-    if (env.id === id) return env
-    if (env.subEnvironments) {
-      const found = findEnvironmentById(env.subEnvironments, id)
-      if (found) return found
-    }
-  }
-  return null
-}
-
 interface FlatEnvRow {
   env: Environment
   depth: number
@@ -79,10 +70,6 @@ interface EnvPopoverProps {
   onSelect: (envId: string) => void
 }
 
-/** Popover content rendered inside `StatusbarElement`'s tooltip slot.
- * Each row is tinted with the env's color (fallback orange) and
- * auto-contrasted, so the user eyeballs the active env from the
- * same colour chip visible in the statusbar cell. */
 const EnvPopoverList: React.FC<EnvPopoverProps> = ({ rows, selectedEnvId, applyToAll, onApplyToAllChange, onSelect }) => {
   const { t } = useTranslation()
   return (
@@ -116,11 +103,6 @@ const EnvPopoverList: React.FC<EnvPopoverProps> = ({ rows, selectedEnvId, applyT
               display: 'flex',
               alignItems: 'center',
               gap: 6,
-              // Indent the whole row (incl. background) via `margin-left`,
-              // not `padding-left` — otherwise the tint extends all the
-              // way to the popover edge and the hierarchy reads as a
-              // shifted label inside a full-width stripe instead of a
-              // narrower nested chip.
               marginLeft: depth * 16,
               padding: '4px 8px',
               border: 'none',
@@ -131,11 +113,6 @@ const EnvPopoverList: React.FC<EnvPopoverProps> = ({ rows, selectedEnvId, applyT
               textAlign: 'left',
               fontSize: 12,
               lineHeight: 1.3,
-              // Use the theme's `--focusBorder` token for the selected
-              // row's outline. It's the same accent VSCode paints
-              // around focused list rows and input fields, so the
-              // picker sits consistently with the rest of the UI
-              // regardless of the env's colour.
               outline: isSelected ? '1px solid var(--focusBorder)' : 'none',
               outlineOffset: isSelected ? -2 : 0
             }}
@@ -151,10 +128,10 @@ const EnvPopoverList: React.FC<EnvPopoverProps> = ({ rows, selectedEnvId, applyT
           </button>
         )
       })}
-      {/* "Apply to all" toggle — per OYO-196 ticket. Checked by
-          default: selecting an env propagates to every sibling
-          request in the same env folder. Unchecked keeps the
-          legacy per-request selection for users who need one. */}
+      {/* "Apply to all" toggle — OYO-196. Checked by default: writes
+          the env as the *folder default* so every request in that env
+          folder adopts it. Unchecked writes a per-request override
+          (legacy flow) — the folder default is untouched. */}
       <label
         data-testid="statusbar-env-selector-apply-to-all"
         style={{
@@ -183,16 +160,17 @@ const EnvPopoverList: React.FC<EnvPopoverProps> = ({ rows, selectedEnvId, applyT
 
 export interface StatusbarEnvironmentSelectorProps {
   /**
-   * All request ids that live under the same env folder as the
-   * active request (including the active one). When the user
-   * selects an env with "Apply to all" checked, the selection
-   * propagates to every id in this list.
+   * All request ids under the same env folder as the active request
+   * (incl. the active one). Passed in so that when the user picks
+   * an env with "Apply to all" checked, we can wipe every sibling's
+   * stale per-request override in one pass — the folder default is
+   * now the source of truth for those requests.
    */
   folderRequestIds: string[]
-  /** Current file path — needed to persist env picks for siblings
-   * that aren't currently mounted. Passed directly rather than read
-   * from a context because the component is tree-agnostic. */
-  filePath?: string
+  /** Project UUID of the currently-open file — used to scope the
+   * override cleanup above. Optional because the store itself
+   * no-ops when it's missing (in-memory-only mode). */
+  projectUuid?: string | null
 }
 
 /**
@@ -201,14 +179,20 @@ export interface StatusbarEnvironmentSelectorProps {
  * `StatusbarElement`'s built-in tooltip system, `tooltipTrigger="click"`)
  * to switch envs. Must be wrapped in an `EnvironmentProvider` scoped
  * to the active request — `useEnvironmentContext` supplies the env
- * list + current selection + color.
+ * list + current selection + color + setters.
  */
 export const StatusbarEnvironmentSelector: React.FC<StatusbarEnvironmentSelectorProps> = ({
   folderRequestIds,
-  filePath
+  projectUuid
 }) => {
   const { t } = useTranslation()
-  const { environments, selectedEnvId, setSelectedEnvId, envColor } = useEnvironmentContext()
+  const {
+    environments,
+    selectedEnvId,
+    envColor,
+    setFolderEnv,
+    setRequestOverride
+  } = useEnvironmentContext()
   const [applyToAll, setApplyToAll] = useState(true)
 
   const selectedEnvironment = useMemo<Environment | null>(() => {
@@ -223,29 +207,24 @@ export const StatusbarEnvironmentSelector: React.FC<StatusbarEnvironmentSelector
   ), [environments])
 
   const handleSelect = useCallback((envId: string): void => {
-    // Always update the active request via the provider — this also
-    // emits `REQUEST_ENV_CHANGED` so sibling providers mounted for
-    // the same request (the tab view) stay in lockstep.
-    setSelectedEnvId(envId)
-
-    if (!applyToAll || !filePath || folderRequestIds.length === 0) return
-
-    // Propagate to every other request in the same env folder:
-    //   1. Persist to session cache + disk so unmounted tabs pick up
-    //      the new selection the next time they mount.
-    //   2. Fire `REQUEST_ENV_SET` so any currently-mounted providers
-    //      (e.g. the focused request's tab view) update their own
-    //      state without waiting for a tab switch.
-    for (const requestId of folderRequestIds) {
-      if (requestId === selectedEnvId) continue // skip the provider already handled
-      setSessionEnvSelection(filePath, requestId, envId)
-      void setStoredEnvForRequest(filePath, requestId, envId)
-      eventBus.emitLocalSync(DocumentEvents.REQUEST_ENV_SET, {
-        requestId,
-        envId
-      } as RequestEnvEventPayload)
+    if (applyToAll) {
+      // Wipe every sibling's *session* override synchronously BEFORE
+      // `setFolderEnv` fires `ENV_FOLDER_ENV_CHANGED`. Otherwise a
+      // sibling provider re-resolving on that event would still read
+      // its stale override from the session cache and ignore the
+      // fresh folder default. The disk cleanup can fall through to
+      // its own async path since it only matters on next mount.
+      if (projectUuid && folderRequestIds.length > 0) {
+        clearSessionRequestOverridesForRequests(projectUuid, folderRequestIds)
+      }
+      setFolderEnv(envId)
+      if (projectUuid && folderRequestIds.length > 0) {
+        void clearStoredRequestOverridesForRequests(projectUuid, folderRequestIds)
+      }
+    } else {
+      setRequestOverride(envId)
     }
-  }, [applyToAll, filePath, folderRequestIds, selectedEnvId, setSelectedEnvId])
+  }, [applyToAll, projectUuid, folderRequestIds, setFolderEnv, setRequestOverride])
 
   if (!environments || environments.length === 0) return null
 

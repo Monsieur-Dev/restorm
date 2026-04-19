@@ -98,11 +98,11 @@ export interface RestormWorkbenchProps {
   /** CSS selector for the element to anchor the tab switcher overlay to */
   tabSwitcherAnchorSelector?: string | undefined
   /**
-   * Absolute path of the currently open file — plumbed down to
-   * EnvironmentProvider so per-request environment selections persist
-   * across sessions in the user config.
+   * Project UUID stamped into the collection file. Used to scope the
+   * env-selection persistence so selections survive file moves or
+   * renames the user does outside the app.
    */
-  filePath?: string | undefined
+  projectUuid?: string | null | undefined
 }
 
 /** Imperative handle for Workbench component */
@@ -142,7 +142,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   getEnvironmentFolderById,
   navigationEnabled,
   tabSwitcherAnchorSelector,
-  filePath,
+  projectUuid,
   isItemFavorite,
   onToggleFavorite
 }, ref) => {
@@ -523,12 +523,14 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       ? (tag: string, color: string | null): void => { onTagColorChange(envFolderId, tag, color) }
       : undefined
 
-    // Build the per-request persistence key for the environment dropdown.
-    // Falls back to `undefined` when we don't have a file path — the id
-    // itself is always stable since document ids are persisted now.
-    const envPersistenceKey = (requestId: string): { filePath: string; requestId: string } | undefined => {
-      if (!filePath) return undefined
-      return { filePath, requestId }
+    // Build the persistence key for the environment provider scoped
+    // to this tab. Requires both the project UUID (workspace identity)
+    // and the request's ancestor env folder id (primary storage grain).
+    // Falls back to `undefined` when either is missing — the provider
+    // then runs in in-memory-only mode.
+    const envPersistenceKey = (requestId: string): { projectUuid: string; envFolderId: string; requestId: string } | undefined => {
+      if (!projectUuid || !envFolderId) return undefined
+      return { projectUuid, envFolderId, requestId }
     }
 
     // HTTP request tab
@@ -656,7 +658,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [onBreadcrumbClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, t, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, filePath])
+  }, [onBreadcrumbClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, t, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(

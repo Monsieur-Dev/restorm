@@ -456,13 +456,31 @@ const App: React.FC = () => {
     return { id: request.id, path: buildRequestPath(rootItems as EnvironmentFolder[], request.id) }
   }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, rootItems])
 
-  // `EnvironmentProvider` expects `{ filePath, requestId }` to wire up
-  // persistence. Fall back to `undefined` when the file isn't saved
-  // yet — the provider then runs in in-memory-only mode.
+  // The nearest ancestor env folder of the active request — the
+  // primary storage grain for OYO-196's env model. Walked from
+  // breadcrumbs so it stays in sync with the workbench's active
+  // selection. `null` when no env-folder ancestor exists (the
+  // selector then runs without persistence).
+  const activeEnvFolderId = useMemo<string | null>(() => {
+    if (!activeRequest) return null
+    const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, activeRequest.id)
+    for (let i = breadcrumbs.length - 2; i >= 0; i -= 1) {
+      const id = breadcrumbs[i]?.id
+      if (!id) continue
+      const folder = findFolderById(rootItems, id)
+      if (folder && isEnvironmentFolder(folder as FolderItem)) return folder.id
+    }
+    return null
+  }, [activeRequest, rootItems])
+
+  // `EnvironmentProvider` expects `{ projectUuid, envFolderId, requestId }`
+  // to wire up persistence (workspace-scoped, survives file renames).
+  // Falls back to `undefined` when any field is missing — the provider
+  // then runs in in-memory-only mode.
   const activeEnvPersistenceKey = useMemo(() => {
-    if (!activeRequest || !filePath) return undefined
-    return { filePath, requestId: activeRequest.id }
-  }, [activeRequest, filePath])
+    if (!activeRequest || !projectUuid || !activeEnvFolderId) return undefined
+    return { projectUuid, envFolderId: activeEnvFolderId, requestId: activeRequest.id }
+  }, [activeRequest, projectUuid, activeEnvFolderId])
 
   // Reactive "does the active request have any history yet?" used to
   // drive the statusbar button's disabled state. The probe is tagged
@@ -1299,7 +1317,7 @@ const App: React.FC = () => {
               getEnvironmentFolderById={getEnvironmentFolderByIdCb}
               navigationEnabled={navigationEnabled}
               tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
-              filePath={filePath ?? undefined}
+              projectUuid={projectUuid}
               isItemFavorite={isItemFavorite}
               onToggleFavorite={handleToggleFavorite}
             />
@@ -1337,7 +1355,7 @@ const App: React.FC = () => {
             getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootItems, id)}
             navigationEnabled={navigationEnabled}
             tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
-            filePath={filePath ?? undefined}
+            projectUuid={projectUuid}
             isItemFavorite={isItemFavorite}
             onToggleFavorite={handleToggleFavorite}
           />
@@ -1354,7 +1372,7 @@ const App: React.FC = () => {
           >
             <StatusbarEnvironmentSelector
               folderRequestIds={activeEnvFolderRequestIds}
-              {...(filePath ? { filePath } : {})}
+              projectUuid={projectUuid}
             />
           </EnvironmentProvider>
         )}

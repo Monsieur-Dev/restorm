@@ -1,20 +1,31 @@
 /**
- * Per-file, per-request environment-selection persistence.
+ * Environment selection persistence — workspace-scoped.
  *
- * Request and environment document ids are now persisted in the collection
- * file, so this store keys by `requestId` and saves the selected env by
- * `envId` directly — no more name-path walking, and duplicates at any
- * level of the tree no longer collide.
+ * Two tiers, both keyed by the project's UUID so they survive file
+ * moves / renames outside the app (the UUID is stamped into the
+ * collection file itself — see `PROJECT_UUID_KEY`):
+ *
+ *   1. **Folder default** — the env applied to every request of an
+ *      env folder. This is the primary model OYO-196 introduced and
+ *      is what the "Apply to all" checkbox writes.
+ *   2. **Per-request override** — the legacy "pick a different env
+ *      for this one request only" flow. Written when the user
+ *      un-ticks the checkbox before picking; wins over the folder
+ *      default during resolution.
  *
  * Storage layout (`window.api.storage`):
  *
- *   key:   `request_env_selections:${filePath}`
+ *   key:   `env_folder_selections:${projectUuid}`
+ *   value: `Record<envFolderId, envId>`
+ *
+ *   key:   `request_env_overrides:${projectUuid}`
  *   value: `Record<requestId, envId>`
  */
 
 import type { Environment } from '../../../shared/types/collections'
 
-const STORAGE_KEY_PREFIX = 'request_env_selections:'
+const FOLDER_KEY_PREFIX = 'env_folder_selections:'
+const OVERRIDE_KEY_PREFIX = 'request_env_overrides:'
 
 type Selections = Record<string, string>
 
@@ -28,26 +39,30 @@ function getStorageApi(): StorageApi | undefined {
   return (window as unknown as { api?: { storage?: StorageApi } }).api?.storage
 }
 
-function storageKey(filePath: string): string {
-  return `${STORAGE_KEY_PREFIX}${filePath}`
+function folderStorageKey(projectUuid: string): string {
+  return `${FOLDER_KEY_PREFIX}${projectUuid}`
 }
 
-async function readAll(filePath: string): Promise<Selections> {
+function overrideStorageKey(projectUuid: string): string {
+  return `${OVERRIDE_KEY_PREFIX}${projectUuid}`
+}
+
+async function readAll(key: string): Promise<Selections> {
   const api = getStorageApi()
-  if (!api || !filePath) return {}
-  const value = await api.get(storageKey(filePath))
+  if (!api) return {}
+  const value = await api.get(key)
   if (value && typeof value === 'object') return value as Selections
   return {}
 }
 
-async function writeAll(filePath: string, selections: Selections): Promise<void> {
+async function writeAll(key: string, selections: Selections): Promise<void> {
   const api = getStorageApi()
-  if (!api || !filePath) return
+  if (!api) return
   if (Object.keys(selections).length === 0) {
-    await api.delete(storageKey(filePath))
+    await api.delete(key)
     return
   }
-  await api.set(storageKey(filePath), selections)
+  await api.set(key, selections)
 }
 
 // ---------- Environment tree lookup ----------
@@ -63,49 +78,118 @@ export function findEnvironmentById(environments: Environment[] | undefined, env
   return null
 }
 
-// ---------- Session in-memory cache ----------
+// ---------- Session in-memory caches ----------
 
-/**
- * In-memory session cache mapping `${filePath}::${requestId}` to the most
- * recently chosen env id during the session. Survives EnvironmentProvider
- * remounts so reactive re-renders of the workbench don't revert to the
- * default environment.
- */
-const sessionSelectionCache = new Map<string, string>()
+/** Session cache: `${projectUuid}::${envFolderId}` → envId. Survives
+ * provider remounts so React tree churn doesn't revert the picked env. */
+const folderEnvSession = new Map<string, string>()
+/** Session cache: `${projectUuid}::${requestId}` → envId (override). */
+const requestOverrideSession = new Map<string, string>()
 
-function sessionCacheKey(filePath: string, requestId: string): string {
-  return `${filePath}::${requestId}`
+function sessionKey(projectUuid: string, id: string): string {
+  return `${projectUuid}::${id}`
 }
 
-export function getSessionEnvSelection(filePath: string, requestId: string): string | undefined {
-  return sessionSelectionCache.get(sessionCacheKey(filePath, requestId))
+// ---------- Folder-level API ----------
+
+export function getSessionFolderEnv(projectUuid: string, envFolderId: string): string | undefined {
+  if (!projectUuid || !envFolderId) return undefined
+  return folderEnvSession.get(sessionKey(projectUuid, envFolderId))
 }
 
-export function setSessionEnvSelection(filePath: string, requestId: string, envId: string): void {
-  sessionSelectionCache.set(sessionCacheKey(filePath, requestId), envId)
+export function setSessionFolderEnv(projectUuid: string, envFolderId: string, envId: string): void {
+  if (!projectUuid || !envFolderId) return
+  folderEnvSession.set(sessionKey(projectUuid, envFolderId), envId)
 }
 
-export function hasSessionEnvSelection(filePath: string, requestId: string): boolean {
-  return sessionSelectionCache.has(sessionCacheKey(filePath, requestId))
+export async function getStoredFolderEnv(projectUuid: string, envFolderId: string): Promise<string | undefined> {
+  if (!projectUuid || !envFolderId) return undefined
+  const selections = await readAll(folderStorageKey(projectUuid))
+  return selections[envFolderId]
 }
 
-// ---------- Public API ----------
+export async function setStoredFolderEnv(projectUuid: string, envFolderId: string, envId: string): Promise<void> {
+  if (!projectUuid || !envFolderId) return
+  const selections = await readAll(folderStorageKey(projectUuid))
+  if (selections[envFolderId] === envId) return
+  selections[envFolderId] = envId
+  await writeAll(folderStorageKey(projectUuid), selections)
+}
 
-export async function getStoredEnvForRequest(
-  filePath: string,
-  requestId: string
-): Promise<string | undefined> {
-  const selections = await readAll(filePath)
+// ---------- Per-request override API ----------
+
+export function getSessionRequestOverride(projectUuid: string, requestId: string): string | undefined {
+  if (!projectUuid || !requestId) return undefined
+  return requestOverrideSession.get(sessionKey(projectUuid, requestId))
+}
+
+export function setSessionRequestOverride(projectUuid: string, requestId: string, envId: string | null): void {
+  if (!projectUuid || !requestId) return
+  const key = sessionKey(projectUuid, requestId)
+  if (envId === null) requestOverrideSession.delete(key)
+  else requestOverrideSession.set(key, envId)
+}
+
+export async function getStoredRequestOverride(projectUuid: string, requestId: string): Promise<string | undefined> {
+  if (!projectUuid || !requestId) return undefined
+  const selections = await readAll(overrideStorageKey(projectUuid))
   return selections[requestId]
 }
 
-export async function setStoredEnvForRequest(
-  filePath: string,
+export async function setStoredRequestOverride(
+  projectUuid: string,
   requestId: string,
-  envId: string
+  envId: string | null
 ): Promise<void> {
-  const selections = await readAll(filePath)
+  if (!projectUuid || !requestId) return
+  const selections = await readAll(overrideStorageKey(projectUuid))
+  if (envId === null) {
+    if (!(requestId in selections)) return
+    const { [requestId]: _removed, ...rest } = selections
+    void _removed
+    await writeAll(overrideStorageKey(projectUuid), rest)
+    return
+  }
   if (selections[requestId] === envId) return
   selections[requestId] = envId
-  await writeAll(filePath, selections)
+  await writeAll(overrideStorageKey(projectUuid), selections)
+}
+
+/** Synchronously wipe per-request override *session* entries for a
+ * set of request ids. Split out from the disk-clear variant below so
+ * callers can drop session state *before* emitting events that trigger
+ * sibling providers to re-resolve — otherwise a sibling might still
+ * find its stale override in the session cache and use it instead of
+ * the fresh folder default. */
+export function clearSessionRequestOverridesForRequests(
+  projectUuid: string,
+  requestIds: string[]
+): void {
+  if (!projectUuid || requestIds.length === 0) return
+  for (const id of requestIds) {
+    requestOverrideSession.delete(sessionKey(projectUuid, id))
+  }
+}
+
+/** Wipe per-request overrides on disk for a set of request ids in one
+ * pass. The session cache is *not* touched here — call
+ * `clearSessionRequestOverridesForRequests` synchronously before any
+ * event emission that could race with the async disk work. */
+export async function clearStoredRequestOverridesForRequests(
+  projectUuid: string,
+  requestIds: string[]
+): Promise<void> {
+  if (!projectUuid || requestIds.length === 0) return
+  const selections = await readAll(overrideStorageKey(projectUuid))
+  const clear = new Set(requestIds)
+  let changed = false
+  const next: Selections = {}
+  for (const [id, envId] of Object.entries(selections)) {
+    if (clear.has(id)) {
+      changed = true
+      continue
+    }
+    next[id] = envId
+  }
+  if (changed) await writeAll(overrideStorageKey(projectUuid), next)
 }
