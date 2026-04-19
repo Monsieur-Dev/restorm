@@ -11,6 +11,7 @@ import {
 } from '../../../shared/models'
 import type { EnumDefinition } from '../../../shared/types/collections'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
+import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 import { graphqlToApiDocumentation } from './transformers/graphqlToApiDocumentation'
 
 // ============================================================================
@@ -350,6 +351,7 @@ export function importGraphQL(schemaString: string, options: GraphQLImportOption
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
+    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     importSource: 'graphql',
     id: generateId(`${name}:folder:graphql:root`),
     name,

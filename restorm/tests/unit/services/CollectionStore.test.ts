@@ -48,7 +48,7 @@ describe('CollectionStore', () => {
     })
 
     it('should clear collections', () => {
-      collectionStore.setCollections([{ id: 'col-1', name: 'Test', items: [] }])
+      collectionStore.setCollections([{ id: 'col-1', name: 'Test', items: [], fileFormatVersion: 1 }])
       collectionStore.clear()
       expect(collectionStore.getCollections()).toHaveLength(0)
     })

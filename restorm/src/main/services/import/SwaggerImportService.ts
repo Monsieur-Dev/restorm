@@ -28,6 +28,7 @@ import {
 } from '../../../shared/types/collections'
 import { toHTTPMethod } from './httpMethodValidator'
 import { swaggerToApiDocumentation } from './transformers/swaggerToApiDocumentation'
+import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 
 // ============================================================================
 // Swagger Types
@@ -865,6 +866,7 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
   // Case: No options - create new EnvironmentFolder as root
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
+    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     id: generateId(`folder:root:${spec.info.title}`),
     name: spec.info.title,
     documentation: '',

@@ -62,6 +62,7 @@ function makeEnvFolder(
     id,
     name,
     folderType: 'environment',
+    fileFormatVersion: 1,
     documentation: '',
     tags: [],
     configuration: {},

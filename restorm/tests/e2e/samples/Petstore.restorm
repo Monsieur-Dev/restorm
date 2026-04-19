@@ -1,5 +1,6 @@
 collections:
   - folderType: environment
+    fileFormatVersion: 1
     name: Swagger Petstore
     documentation: |-
       # Swagger Petstore
@@ -3635,3 +3636,4 @@ collections:
                 "timestamp": 0
               }
             headers: []
+_projectUuid: b2079eaf-db95-4128-97e5-b84286360220
