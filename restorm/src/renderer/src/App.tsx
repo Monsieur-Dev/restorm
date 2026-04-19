@@ -1293,7 +1293,13 @@ const App: React.FC = () => {
                   opacity: activeRequestHasHistory ? 1 : 0.5
                 }}
               >
-                <i className="codicon codicon-history"></i>
+                {/* The global statusbar-codicon rule applies `translateY(2px)`
+                    to optically center symmetric glyphs (e.g. the bell)
+                    in the 22 px bar. `codicon-history` has its visual
+                    weight at the bottom (pendulum + frame) so that same
+                    nudge drops it below the sibling text's baseline —
+                    override it locally back to zero. */}
+                <i className="codicon codicon-history" style={{ transform: 'none' }}></i>
                 <span>{t('statusbar.requestHistory')}</span>
               </span>
             )}

@@ -29,7 +29,9 @@
 	position: relative;
 }
 
-/* Separator between items */
+/* Separator between items. The `--statusBar-border` token isn't set
+   by most bundled themes; the rgba fallback keeps the 1 px hairline
+   visible regardless. */
 .statusbar-item:not(:last-child)::after {
 	content: '';
 	position: absolute;
@@ -37,7 +39,7 @@
 	top: 0;
 	bottom: 0;
 	width: 1px;
-	background-color: var(--statusBar-border);
+	background-color: var(--statusBar-border, rgb(127, 127, 127, 0.3));
 }
 
 /* Clickable items */
@@ -86,8 +88,13 @@
 
 /* Codicon support in statusbar items. The codicon font renders its
    glyphs in the upper portion of the em box, so icons look vertically
-   off-centered in the 22px bar. Nudge them down by 2px visually to
-   compensate — transform keeps the hit area put. */
+   off-centered in the 22 px bar. Nudge them down by 2 px visually to
+   compensate — the transform keeps the hit area put. Consumers that
+   pair an icon with text should set `line-height: 1` on their wrapper
+   so the text box uses its own natural height instead of the inherited
+   22 px bar line-height; `align-items: center` then lines the icon
+   and the text glyphs up correctly (see `StatusBarBellButton` and the
+   restorm statusbar-request-history cell for examples). */
 .statusbar-item .codicon {
 	font-size: 16px;
 	width: 16px;
