@@ -6,6 +6,9 @@
     "draftsRestoredBody_one": "{{count}} draft was restored from your previous session.",
     "draftsRestoredBody_other": "{{count}} drafts were restored from your previous session."
   },
+  "statusbar": {
+    "requestHistory": "Requests history"
+  },
   "menuBar": {
     "file": "File",
     "new": "New...",

@@ -8,12 +8,14 @@ import {
   SplitView,
   Pane,
   ControlGroup,
+  eventBus,
   logger,
   getContrastColor,
   type VariableDefinition,
   type ISelectOptionItem,
   type ISelectData
 } from 'electron-core-ui/renderer'
+import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue, ResponseHistoryDetail, EnvironmentFolder } from '../../../../shared/types/collections'
@@ -27,7 +29,6 @@ import { mapToBadgeType } from '../../utils/badgeUtils'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
-import { getResponseHistoryList } from '../../services/GraphQLIntegration'
 import { normalizeValueType } from '../../utils/normalizeValueType'
 import { buildHttpResponseViewData } from './HTTPResponsePanel'
 import { HTTPRequestBodySection } from './HTTPRequestBodySection'
@@ -40,9 +41,6 @@ const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
 
 export interface HTTPRequestTabViewProps {
   request: HTTPRequest
-  historyModalOpen?: boolean
-  onCloseHistoryModal?: () => void
-  onHistoryAvailabilityChange?: (hasHistory: boolean) => void
 }
 
 function buildRequestBodyFromHistory(body: { type: string; content?: string; path?: string; fields?: { key: string; value: string; enabled?: boolean }[] } | undefined): HTTPResponse['requestBody'] {
@@ -93,11 +91,9 @@ function getBodyFilePath(request: HTTPRequest): string {
 }
 
 export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
-  request,
-  historyModalOpen = false,
-  onCloseHistoryModal,
-  onHistoryAvailabilityChange
+  request
 }) => {
+  const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
   const { selectedEnvId, environments, envColor } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
@@ -488,6 +484,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           }
           setHttpResponse(response)
           setHistoryRefreshKey(prev => prev + 1)
+          eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId: request.id } as RequestHistoryEventPayload)
           logger.info('HTTP request completed', {
             url: result.requestUrl,
             status: result.statusCode,
@@ -514,6 +511,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           }
           setHttpResponse(errorResponse)
           setHistoryRefreshKey(prev => prev + 1)
+          eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId: request.id } as RequestHistoryEventPayload)
           logger.error('HTTP request failed', { error: result.error })
         }
       })
@@ -744,22 +742,22 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   )
 
   const handleCloseHistoryModal = useCallback(() => {
-    onCloseHistoryModal?.()
-  }, [onCloseHistoryModal])
+    setHistoryModalOpen(false)
+  }, [])
 
+  // Open this tab's history modal when the status-bar button requests
+  // the history for THIS specific request. Other tabs' listeners no-op
+  // because their request.id doesn't match the event's payload.
   useEffect(() => {
-    if (!onHistoryAvailabilityChange) return
-    const state = { active: true }
-    void (async (): Promise<void> => {
-      const entries = await getResponseHistoryList(request.id, requestPath ?? undefined)
-      if (state.active) {
-        onHistoryAvailabilityChange(entries.length > 0)
+    const requestId = request.id
+    const subscription = eventBus.subscribe<RequestHistoryEventPayload>(
+      DocumentEvents.REQUEST_HISTORY_OPEN,
+      (payload) => {
+        if (payload.requestId === requestId) setHistoryModalOpen(true)
       }
-    })()
-    return () => {
-      state.active = false
-    }
-  }, [onHistoryAvailabilityChange, request.id, requestPath, historyRefreshKey])
+    )
+    return () => { subscription.unsubscribe() }
+  }, [request.id])
 
   return (
     <>

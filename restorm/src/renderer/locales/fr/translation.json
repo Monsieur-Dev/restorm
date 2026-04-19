@@ -6,6 +6,9 @@
     "draftsRestoredBody_one": "{{count}} brouillon restauré depuis la session précédente.",
     "draftsRestoredBody_other": "{{count}} brouillons restaurés depuis la session précédente."
   },
+  "statusbar": {
+    "requestHistory": "Historique des requêtes"
+  },
   "menuBar": {
     "file": "Fichier",
     "new": "Nouveau...",

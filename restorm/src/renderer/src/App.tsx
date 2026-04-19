@@ -58,7 +58,8 @@ const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Recor
   }
   return FolderClass
 }
-import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from './services/DocumentEvents'
+import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload, type RequestHistoryEventPayload } from './services/DocumentEvents'
+import { getResponseHistoryList } from './services/GraphQLIntegration'
 import type { WorkbenchTree } from 'electron-core-ui/renderer'
 import { Welcome } from './components/Welcome/Welcome'
 import { EmptyBench } from './components/MainView/Workbench/EmptyBench'
@@ -429,6 +430,91 @@ const App: React.FC = () => {
     if (!itemId) return await handleMenuSaveAll()
     return await handleMenuSaveUnit(itemId)
   }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, handleMenuSaveAll, handleMenuSaveUnit])
+
+  // Currently-active request resolution for the status-bar history
+  // button. Uses the same focused-group → first-active-group fallback
+  // as `smartSaveActive`, then narrows to the item id and looks up the
+  // Request object. Returns null when no tab is active or the active
+  // tab isn't a request (folder / env-folder tabs hide the button).
+  const activeRequest = useMemo((): { id: string; path: string | null } | null => {
+    const groups = workbenchTree.groups as { activeTabId?: string; id?: string }[]
+    let activeTabId: string | undefined
+    const focused = groups.find((g) => g.id === focusedGroupId && typeof g.activeTabId === 'string')
+    if (focused) activeTabId = focused.activeTabId
+    if (!activeTabId) {
+      const first = groups.find((g) => typeof g.activeTabId === 'string')
+      activeTabId = first?.activeTabId
+    }
+    if (!activeTabId) return null
+    const itemId = resolveTabItemId(activeTabId)
+    if (!itemId) return null
+    const request = findRequestById(rootItems, itemId)
+    if (!request) return null
+    return { id: request.id, path: buildRequestPath(rootItems as EnvironmentFolder[], request.id) }
+  }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, rootItems])
+
+  // Reactive "does the active request have any history yet?" used to
+  // drive the statusbar button's disabled state. The probe is tagged
+  // with the `requestId` it was fetched for so the button only trusts
+  // a `hasHistory: true` that matches the currently-active request —
+  // otherwise a stale `true` from a previous request could briefly
+  // re-enable the button after switching to a fresh request whose
+  // fetch hasn't landed yet.
+  const [activeHistoryProbe, setActiveHistoryProbe] = useState<{ requestId: string; hasHistory: boolean } | null>(null)
+
+  // Re-fetch count whenever the active request changes or a tab
+  // records a new history entry for that request. The tab views emit
+  // `REQUEST_HISTORY_RECORDED` right after `setHistoryRefreshKey` so a
+  // freshly-sent request flips the button from disabled to enabled
+  // without a window reload.
+  const activeRequestId = activeRequest?.id ?? null
+  const activeRequestPath = activeRequest?.path ?? null
+  useEffect(() => {
+    // When no request tab is active, the button is unmounted anyway
+    // (see `{activeRequest && ...}` in the statusbar render), so the
+    // probe value is unread and left stale on purpose — avoids a
+    // setState-in-effect for a value nobody reads. The probe is tagged
+    // with the fetched request id so callers ignore it when stale.
+    if (!activeRequestId) return
+    const requestId = activeRequestId
+    const requestPath = activeRequestPath
+    let cancelled = false
+    const refresh = async (): Promise<void> => {
+      try {
+        const entries = await getResponseHistoryList(requestId, requestPath ?? undefined)
+        if (!cancelled) setActiveHistoryProbe({ requestId, hasHistory: entries.length > 0 })
+      } catch (error) {
+        if (!cancelled) {
+          logger.warn('[App] getResponseHistoryList failed', { error: String(error), requestId })
+          setActiveHistoryProbe({ requestId, hasHistory: false })
+        }
+      }
+    }
+    void refresh()
+    const subscription = eventBus.subscribe<RequestHistoryEventPayload>(
+      DocumentEvents.REQUEST_HISTORY_RECORDED,
+      (payload) => { if (payload.requestId === requestId) void refresh() }
+    )
+    return () => {
+      cancelled = true
+      subscription.unsubscribe()
+    }
+  }, [activeRequestId, activeRequestPath])
+
+  // The probe is only meaningful when it matches the request we're
+  // currently looking at — otherwise it's stale data from a previous
+  // active request and must be treated as "unknown → keep disabled".
+  const activeRequestHasHistory = Boolean(
+    activeRequest &&
+    activeHistoryProbe?.requestId === activeRequest.id &&
+    activeHistoryProbe.hasHistory
+  )
+
+  const handleOpenActiveRequestHistory = useCallback((): void => {
+    if (!activeRequest) return
+    if (!activeRequestHasHistory) return
+    eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_OPEN, { requestId: activeRequest.id } as RequestHistoryEventPayload)
+  }, [activeRequest, activeRequestHasHistory])
 
   // Window-level Ctrl+S / Ctrl+Shift+S fallback — only fires if the
   // menu-bar's KeyboardShortcutService didn't intercept (e.g. when the
@@ -1193,7 +1279,27 @@ const App: React.FC = () => {
       <Statusbar data-testid="app-statusbar">
         {filePath && <StatusbarElement data-testid="app-statusbar-element" title={filePath} />}
         <DesktopIndicator />
-        <StatusBarBellButton toasterId="app" className="right-aligned" />
+        {activeRequest && (
+          <StatusbarElement
+            data-testid="statusbar-request-history"
+            className="right-aligned"
+            {...(activeRequestHasHistory ? { onClick: handleOpenActiveRequestHistory } : {})}
+            title={(
+              <span
+                aria-label={t('statusbar.requestHistory')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  opacity: activeRequestHasHistory ? 1 : 0.5
+                }}
+              >
+                <i className="codicon codicon-history"></i>
+                <span>{t('statusbar.requestHistory')}</span>
+              </span>
+            )}
+          />
+        )}
+        <StatusBarBellButton toasterId="app" />
       </Statusbar>
 
       {/* Global toaster anchored to the bottom-right, toggled by the statusbar bell. */}
