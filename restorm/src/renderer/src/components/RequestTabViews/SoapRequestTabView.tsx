@@ -8,10 +8,12 @@ import {
   SplitView,
   Pane,
   ControlGroup,
+  eventBus,
   logger,
   getContrastColor,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
+import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { SoapRequest, SoapResponse, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
@@ -22,23 +24,17 @@ import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { Badge } from '../common/Badge'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
-import { getResponseHistoryList } from '../../services/GraphQLIntegration'
 import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabViewUtils'
 import { useCompiledDocumentation } from '../../hooks/useCompiledDocumentation'
 
 export interface SoapRequestTabViewProps {
   request: SoapRequest
-  historyModalOpen?: boolean
-  onCloseHistoryModal?: () => void
-  onHistoryAvailabilityChange?: (hasHistory: boolean) => void
 }
 
 export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
-  request,
-  historyModalOpen = false,
-  onCloseHistoryModal,
-  onHistoryAvailabilityChange
+  request
 }) => {
+  const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
   const { selectedEnvId, environments, envColor } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
@@ -211,6 +207,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
         }
         setResponse(soapResponse)
         setHistoryRefreshKey(prev => prev + 1)
+        eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId: request.id } as RequestHistoryEventPayload)
         logger.info('SOAP request completed', { url: res.requestUrl, status: res.statusCode })
       })
       .catch((err: unknown) => {
@@ -391,22 +388,19 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
   )
   
   const handleCloseHistoryModal = useCallback(() => {
-    onCloseHistoryModal?.()
-  }, [onCloseHistoryModal])
+    setHistoryModalOpen(false)
+  }, [])
 
   useEffect(() => {
-    if (!onHistoryAvailabilityChange) return
-    const state = { active: true }
-    void (async (): Promise<void> => {
-      const entries = await getResponseHistoryList(request.id, requestPath ?? undefined)
-      if (state.active) {
-        onHistoryAvailabilityChange(entries.length > 0)
+    const requestId = request.id
+    const subscription = eventBus.subscribe<RequestHistoryEventPayload>(
+      DocumentEvents.REQUEST_HISTORY_OPEN,
+      (payload) => {
+        if (payload.requestId === requestId) setHistoryModalOpen(true)
       }
-    })()
-    return () => {
-      state.active = false
-    }
-  }, [onHistoryAvailabilityChange, request.id, requestPath, historyRefreshKey])
+    )
+    return () => { subscription.unsubscribe() }
+  }, [request.id])
 
   return (
     <>

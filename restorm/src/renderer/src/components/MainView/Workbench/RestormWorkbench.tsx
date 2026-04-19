@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
-import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, Button, ControlGroup, IconView, TabSwitcherOverlay, navigationService, type ContextMenuItem } from 'electron-core-ui/renderer'
+import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, IconView, TabSwitcherOverlay, navigationService, type ContextMenuItem } from 'electron-core-ui/renderer'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback, TabSwitcherItem } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
 import type { RestormEditorTab, BreadcrumbItem } from '../../../../../shared/types/editor'
@@ -28,93 +28,8 @@ import { getFolderIcon } from '../../../utils/treeSearch'
 import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useTranslation } from 'react-i18next'
-import { RestormWorkbenchTab, type RestormWorkbenchTabCallout } from './RestormWorkbenchTab'
+import { RestormWorkbenchTab } from './RestormWorkbenchTab'
 import { useTabSwitcher } from '../../../hooks/useTabSwitcher'
-
-interface RequestHistoryControls {
-  historyModalOpen: boolean
-  onCloseHistoryModal: () => void
-  onHistoryAvailabilityChange: (hasHistory: boolean) => void
-}
-
-interface RequestTabWithHistoryProps {
-  breadcrumbs: BreadcrumbItem[]
-  onBreadcrumbClick?: ((item: BreadcrumbItem, index: number, isLast: boolean) => void) | undefined
-  onBreadcrumbRename?: ((item: BreadcrumbItem, newValue: string) => void) | undefined
-  onBreadcrumbIconChange?: ((item: BreadcrumbItem, newIcon: Icon | null) => void) | undefined
-  tags: string[]
-  onTagsChange?: ((nextTags: string[]) => void) | undefined
-  tagColors?: Record<string, string> | undefined
-  onTagColorChange?: ((tag: string, color: string | null) => void) | undefined
-  headerRight?: React.ReactNode
-  callout?: RestormWorkbenchTabCallout | undefined
-  historyLabel: string
-  renderContent: (controls: RequestHistoryControls) => React.ReactNode
-  tabId: string
-}
-
-const RequestTabWithHistory: React.FC<RequestTabWithHistoryProps> = ({
-  breadcrumbs,
-  onBreadcrumbClick,
-  onBreadcrumbRename,
-  onBreadcrumbIconChange,
-  tags,
-  onTagsChange,
-  tagColors,
-  onTagColorChange,
-  headerRight,
-  callout,
-  historyLabel,
-  renderContent,
-  tabId
-}) => {
-  const [historyModalOpen, setHistoryModalOpen] = useState(false)
-  const [hasHistory, setHasHistory] = useState(false)
-  const handleOpenHistory = useCallback(() => {
-    setHistoryModalOpen(true)
-  }, [])
-  const handleCloseHistory = useCallback(() => {
-    setHistoryModalOpen(false)
-  }, [])
-  const handleHistoryAvailabilityChange = useCallback((next: boolean) => {
-    setHasHistory(next)
-  }, [])
-
-  return (
-    <RestormWorkbenchTab
-      breadcrumbs={breadcrumbs}
-      onBreadcrumbClick={onBreadcrumbClick}
-      onBreadcrumbRename={onBreadcrumbRename}
-      onBreadcrumbIconChange={onBreadcrumbIconChange}
-      tags={tags}
-      onTagsChange={onTagsChange}
-      tagColors={tagColors}
-      onTagColorChange={onTagColorChange}
-      headerRight={(
-        <ControlGroup>
-          {headerRight}
-          <Button
-            icon="history"
-            onClick={handleOpenHistory}
-            disabled={!hasHistory}
-            options={{ title: historyLabel, ariaLabel: historyLabel }}
-            data-testid={`tab-${tabId}-history-button`}
-          />
-        </ControlGroup>
-      )}
-      callout={callout}
-      tabId={tabId}
-    >
-      <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
-        {renderContent({
-          historyModalOpen,
-          onCloseHistoryModal: handleCloseHistory,
-          onHistoryAvailabilityChange: handleHistoryAvailabilityChange
-        })}
-      </div>
-    </RestormWorkbenchTab>
-  )
-}
 
 /** Extract title string from EditorTab */
 function getTabTitleString(tab: EditorTab & { titleString?: string }, fallback = ''): string {
@@ -624,33 +539,23 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       const request = (reactiveRequest?.type === 'http') ? reactiveRequest : effectiveTab.request
       return (
         <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
-          <RequestTabWithHistory
+          <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
             onBreadcrumbRename={onItemRename}
-          onBreadcrumbIconChange={onItemIconChange}
+            onBreadcrumbIconChange={onItemIconChange}
             tags={request.tags}
-            onTagsChange={(nextTags) => {
-              onTagsChange?.(request.id, nextTags)
-            }}
+            onTagsChange={(nextTags) => { onTagsChange?.(request.id, nextTags) }}
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
             headerRight={<EnvironmentDropdown />}
-            callout={request.deprecated ? {
-              variant: 'warning',
-              message: t('requestTab.deprecated')
-            } : undefined}
-            historyLabel={t('requestTab.tabs.responsesHistory')}
+            callout={request.deprecated ? { variant: 'warning', message: t('requestTab.deprecated') } : undefined}
             tabId={effectiveTab.id}
-            renderContent={({ historyModalOpen, onCloseHistoryModal, onHistoryAvailabilityChange }) => (
-              <HTTPRequestTabView
-                request={request}
-                historyModalOpen={historyModalOpen}
-                onCloseHistoryModal={onCloseHistoryModal}
-                onHistoryAvailabilityChange={onHistoryAvailabilityChange}
-              />
-            )}
-          />
+          >
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
+              <HTTPRequestTabView request={request} />
+            </div>
+          </RestormWorkbenchTab>
         </EnvironmentProvider>
       )
     }
@@ -660,29 +565,22 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       const request = effectiveTab.request
       return (
         <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
-          <RequestTabWithHistory
+          <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
             onBreadcrumbRename={onItemRename}
-          onBreadcrumbIconChange={onItemIconChange}
+            onBreadcrumbIconChange={onItemIconChange}
             tags={request.tags}
-            onTagsChange={(nextTags) => {
-              onTagsChange?.(request.id, nextTags)
-            }}
+            onTagsChange={(nextTags) => { onTagsChange?.(request.id, nextTags) }}
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
             headerRight={<EnvironmentDropdown />}
-            historyLabel={t('requestTab.tabs.responsesHistory')}
             tabId={effectiveTab.id}
-            renderContent={({ historyModalOpen, onCloseHistoryModal, onHistoryAvailabilityChange }) => (
-              <GraphQLRequestTabView
-                request={request}
-                historyModalOpen={historyModalOpen}
-                onCloseHistoryModal={onCloseHistoryModal}
-                onHistoryAvailabilityChange={onHistoryAvailabilityChange}
-              />
-            )}
-          />
+          >
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
+              <GraphQLRequestTabView request={request} />
+            </div>
+          </RestormWorkbenchTab>
         </EnvironmentProvider>
       )
     }
@@ -692,29 +590,22 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       const request = effectiveTab.request
       return (
         <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
-          <RequestTabWithHistory
+          <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
             onBreadcrumbRename={onItemRename}
-          onBreadcrumbIconChange={onItemIconChange}
+            onBreadcrumbIconChange={onItemIconChange}
             tags={request.tags}
-            onTagsChange={(nextTags) => {
-              onTagsChange?.(request.id, nextTags)
-            }}
+            onTagsChange={(nextTags) => { onTagsChange?.(request.id, nextTags) }}
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
             headerRight={<EnvironmentDropdown />}
-            historyLabel={t('requestTab.tabs.responsesHistory')}
             tabId={effectiveTab.id}
-            renderContent={({ historyModalOpen, onCloseHistoryModal, onHistoryAvailabilityChange }) => (
-              <GrpcRequestTabView
-                request={request}
-                historyModalOpen={historyModalOpen}
-                onCloseHistoryModal={onCloseHistoryModal}
-                onHistoryAvailabilityChange={onHistoryAvailabilityChange}
-              />
-            )}
-          />
+          >
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
+              <GrpcRequestTabView request={request} />
+            </div>
+          </RestormWorkbenchTab>
         </EnvironmentProvider>
       )
     }
@@ -724,29 +615,22 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       const request = effectiveTab.request
       return (
         <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
-          <RequestTabWithHistory
+          <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
             onBreadcrumbRename={onItemRename}
-          onBreadcrumbIconChange={onItemIconChange}
+            onBreadcrumbIconChange={onItemIconChange}
             tags={request.tags}
-            onTagsChange={(nextTags) => {
-              onTagsChange?.(request.id, nextTags)
-            }}
+            onTagsChange={(nextTags) => { onTagsChange?.(request.id, nextTags) }}
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
             headerRight={<EnvironmentDropdown />}
-            historyLabel={t('requestTab.tabs.responsesHistory')}
             tabId={effectiveTab.id}
-            renderContent={({ historyModalOpen, onCloseHistoryModal, onHistoryAvailabilityChange }) => (
-              <SoapRequestTabView
-                request={request}
-                historyModalOpen={historyModalOpen}
-                onCloseHistoryModal={onCloseHistoryModal}
-                onHistoryAvailabilityChange={onHistoryAvailabilityChange}
-              />
-            )}
-          />
+          >
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
+              <SoapRequestTabView request={request} />
+            </div>
+          </RestormWorkbenchTab>
         </EnvironmentProvider>
       )
     }
@@ -756,29 +640,22 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       const request = effectiveTab.request
       return (
         <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
-          <RequestTabWithHistory
+          <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
             onBreadcrumbRename={onItemRename}
-          onBreadcrumbIconChange={onItemIconChange}
+            onBreadcrumbIconChange={onItemIconChange}
             tags={request.tags}
-            onTagsChange={(nextTags) => {
-              onTagsChange?.(request.id, nextTags)
-            }}
+            onTagsChange={(nextTags) => { onTagsChange?.(request.id, nextTags) }}
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
             headerRight={<EnvironmentDropdown />}
-            historyLabel={t('requestTab.tabs.responsesHistory')}
             tabId={effectiveTab.id}
-            renderContent={({ historyModalOpen, onCloseHistoryModal, onHistoryAvailabilityChange }) => (
-              <WebSocketRequestTabView
-                request={request}
-                historyModalOpen={historyModalOpen}
-                onCloseHistoryModal={onCloseHistoryModal}
-                onHistoryAvailabilityChange={onHistoryAvailabilityChange}
-              />
-            )}
-          />
+          >
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
+              <WebSocketRequestTabView request={request} />
+            </div>
+          </RestormWorkbenchTab>
         </EnvironmentProvider>
       )
     }
