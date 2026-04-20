@@ -199,6 +199,12 @@ export interface ODataExecutionInput {
   requestId: string
   timeout?: number
   requestPath?: string
+  /** HTTP method override — defaults to GET. POST is used for OData
+   * action invocations. */
+  method?: string
+  /** JSON body sent alongside an action invocation. Env-templated
+   * before dispatch by the engine. */
+  body?: string
 }
 
 export interface HTTPExecutionInput {

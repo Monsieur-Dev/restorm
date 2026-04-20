@@ -568,10 +568,17 @@ export function registerRestormIPC(deps: {
   // ==========================================================================
 
   validatedHandle('odata:execute', odataExecuteArgs, async (_event, [input]) => {
+    const method = typeof input.method === 'string' && input.method.length > 0
+      ? input.method.toUpperCase()
+      : 'GET'
+    const rawBody = typeof input.body === 'string' && input.body.length > 0
+      ? input.body
+      : undefined
     const result = await httpExecutionService.execute({
       requestId: input.requestId,
-      method: 'GET',
-      ...(typeof input.timeout === 'number' ? { timeout: input.timeout } : {})
+      method,
+      ...(typeof input.timeout === 'number' ? { timeout: input.timeout } : {}),
+      ...(rawBody !== undefined ? { rawBody, rawBodyContentType: 'application/json' } : {})
     })
     setImmediate(() => {
       const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'

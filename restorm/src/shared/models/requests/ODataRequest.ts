@@ -92,6 +92,11 @@ export class ODataRequest extends BaseRequest {
   @graphqlField({ type: 'JSON' })
   queryOptions: ODataQueryOptions = {}
 
+  /** Raw JSON body used as the POST payload when operationKind === 'action'.
+   * Env-templated before dispatch. */
+  @graphqlField({ type: 'String', nullable: true })
+  actionBody?: string
+
   /** Whether this endpoint is deprecated. */
   @graphqlField({ type: 'Boolean', nullable: true })
   deprecated = false
@@ -124,6 +129,7 @@ export class ODataRequest extends BaseRequest {
     headers?: Parameters<typeof KeyValue.fromPlain>[0][]
     params?: Parameters<typeof KeyValue.fromPlain>[0][]
     queryOptions?: ODataQueryOptions
+    actionBody?: string
     deprecated?: boolean
   }): ODataRequest {
     return new ODataRequest({
@@ -139,6 +145,7 @@ export class ODataRequest extends BaseRequest {
       headers: (obj.headers ?? []) as KeyValue[],
       params: (obj.params ?? []) as KeyValue[],
       queryOptions: obj.queryOptions ?? {},
+      ...(obj.actionBody !== undefined && { actionBody: obj.actionBody }),
       deprecated: obj.deprecated ?? false
     })
   }
@@ -158,6 +165,7 @@ export class ODataRequest extends BaseRequest {
       headers: this.headers.map(h => h.toPlainObject()),
       params: this.params.map(p => p.toPlainObject()),
       queryOptions: this.queryOptions,
+      ...(this.actionBody !== undefined && { actionBody: this.actionBody }),
       deprecated: this.deprecated
     }
   }
