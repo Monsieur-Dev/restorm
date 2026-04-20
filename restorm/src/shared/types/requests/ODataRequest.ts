@@ -46,8 +46,7 @@ export interface ODataRequest extends BaseRequest {
    * field is persisted so the importer can pre-fill it and the v2/v3
    * engine PR doesn't break existing files. */
   odataVersion: ODataVersion
-  /** Operation kind — entity-set navigation (Phase 1), function, or
-   * action. Phase 1 only persists `'entity-set'`. */
+  /** Operation kind — entity-set navigation, function, or action. */
   operationKind: ODataOperationKind
   /** Extra request headers forwarded to the underlying HTTP call. */
   headers: KeyValue[]
@@ -56,6 +55,10 @@ export interface ODataRequest extends BaseRequest {
   params: KeyValue[]
   /** System query options ($filter / $select / $top / $skip / $count). */
   queryOptions: ODataQueryOptions
+  /** Raw JSON body sent as the POST payload when `operationKind === 'action'`.
+   * Env-templated before dispatch. Ignored for entity-set and function
+   * calls (functions inline their parameters into the URL). */
+  actionBody?: string
   /** Whether this endpoint is deprecated. */
   deprecated?: boolean
 }

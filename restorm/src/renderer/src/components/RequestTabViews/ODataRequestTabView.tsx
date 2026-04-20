@@ -32,7 +32,7 @@ import {
   type ISelectOptionItem,
   type ISelectData
 } from 'electron-core-ui/renderer'
-import type { ODataRequest, ODataVersion, KeyValue } from '../../../../shared/types/collections'
+import type { ODataRequest, ODataVersion, ODataOperationKind, KeyValue } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
@@ -84,6 +84,7 @@ const responseStatusStyle: CSSProperties = {
 }
 
 const ODATA_VERSION_BY_INDEX: ODataVersion[] = ['v4', 'v3', 'v2']
+const ODATA_OPERATION_KIND_BY_INDEX: ODataOperationKind[] = ['entity-set', 'function', 'action']
 
 /**
  * Shows `@odata.count` and `@odata.nextLink` next to the response
@@ -159,6 +160,12 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     { text: t('odataRequestTab.version.v2NotYet', 'v2 (execution not yet supported)') }
   ], [t])
 
+  const operationKindOptions = useMemo<ISelectOptionItem[]>(() => [
+    { text: t('odataRequestTab.operationKind.entitySet', 'Entity set (GET)') },
+    { text: t('odataRequestTab.operationKind.function', 'Function (GET with inlined parameters)') },
+    { text: t('odataRequestTab.operationKind.action', 'Action (POST with JSON body)') }
+  ], [t])
+
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<ODataResponseViewData | null>(null)
 
@@ -182,6 +189,14 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
 
   const setVersion = useCallback((next: string) => {
     updateReactiveProperty(request, 'odataVersion', next as ODataVersion)
+  }, [request])
+
+  const setOperationKind = useCallback((next: ODataOperationKind) => {
+    updateReactiveProperty(request, 'operationKind', next)
+  }, [request])
+
+  const setActionBody = useCallback((next: string) => {
+    updateReactiveProperty(request, 'actionBody', next)
   }, [request])
 
   const setFilter = useCallback((next: string) => {
@@ -311,9 +326,15 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       return
     }
 
+    const method = request.operationKind === 'action' ? 'POST' : 'GET'
+    const body = request.operationKind === 'action' && request.actionBody
+      ? request.actionBody
+      : undefined
     api.execute({
       requestId,
       timeout: DEFAULT_REQUEST_TIMEOUT_MS,
+      method,
+      ...(body !== undefined ? { body } : {}),
       ...(requestPath ? { requestPath } : {})
     })
       .then((result) => {
@@ -342,7 +363,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         })
       })
       .finally(() => { setIsSending(false) })
-  }, [isSending, request.id, requestPath])
+  }, [isSending, request.id, request.operationKind, request.actionBody, requestPath])
 
   const urlSection = (
     <div style={urlRowStyle} data-testid="odata-request-url-section">
@@ -373,22 +394,77 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
 
   const requestContent = (
     <div style={formStyle} data-testid="odata-request-form">
-      <div style={rowStyle}>
-        <label style={labelStyle} htmlFor="odata-request-version">
-          {t('odataRequestTab.version', 'OData version')}
-        </label>
-        <SelectBox
-          id="odata-request-version"
-          className="odata-request-version"
-          options={odataVersionOptions}
-          selected={Math.max(0, ODATA_VERSION_BY_INDEX.indexOf(request.odataVersion))}
-          onDidSelect={(data: ISelectData) => {
-            const next = ODATA_VERSION_BY_INDEX[data.index]
-            if (next) setVersion(next)
-          }}
-          data-testid="odata-request-version"
-        />
+      <div style={numericRowStyle}>
+        <div style={{ ...rowStyle, ...numericItemStyle }}>
+          <label style={labelStyle} htmlFor="odata-request-version">
+            {t('odataRequestTab.version', 'OData version')}
+          </label>
+          <SelectBox
+            id="odata-request-version"
+            className="odata-request-version"
+            options={odataVersionOptions}
+            selected={Math.max(0, ODATA_VERSION_BY_INDEX.indexOf(request.odataVersion))}
+            onDidSelect={(data: ISelectData) => {
+              const next = ODATA_VERSION_BY_INDEX[data.index]
+              if (next) setVersion(next)
+            }}
+            data-testid="odata-request-version"
+          />
+        </div>
+        <div style={{ ...rowStyle, ...numericItemStyle, flex: 2 }}>
+          <label style={labelStyle} htmlFor="odata-request-operation-kind">
+            {t('odataRequestTab.operationKind', 'Operation kind')}
+          </label>
+          <SelectBox
+            id="odata-request-operation-kind"
+            className="odata-request-operation-kind"
+            options={operationKindOptions}
+            selected={Math.max(0, ODATA_OPERATION_KIND_BY_INDEX.indexOf(request.operationKind))}
+            onDidSelect={(data: ISelectData) => {
+              const next = ODATA_OPERATION_KIND_BY_INDEX[data.index]
+              if (next) setOperationKind(next)
+            }}
+            data-testid="odata-request-operation-kind"
+          />
+        </div>
       </div>
+
+      {request.operationKind === 'action' ? (
+        <div style={rowStyle}>
+          <label style={labelStyle} htmlFor="odata-request-action-body">
+            {t('odataRequestTab.actionBody', 'Action body (JSON)')}
+          </label>
+          <textarea
+            id="odata-request-action-body"
+            value={request.actionBody ?? ''}
+            onChange={(e) => { setActionBody(e.target.value) }}
+            placeholder='{"OwnerId": 2}'
+            style={{
+              fontFamily: 'var(--font-family-mono)',
+              fontSize: 12,
+              padding: 8,
+              minHeight: 80,
+              background: 'var(--input-background)',
+              color: 'var(--input-foreground)',
+              border: '1px solid var(--input-border)',
+              borderRadius: 4,
+              resize: 'vertical'
+            }}
+            data-testid="odata-request-action-body"
+          />
+        </div>
+      ) : null}
+
+      {request.operationKind === 'function' ? (
+        <div style={{ ...rowStyle, padding: '4px 0' }}>
+          <span style={{ ...labelStyle, fontStyle: 'italic' }}>
+            {t(
+              'odataRequestTab.functionHint',
+              'Inline function parameters directly in the URL, e.g. /GetAvailablePets(category=\'Dogs\'). Use {{env.var}} for env-driven values.'
+            )}
+          </span>
+        </div>
+      ) : null}
 
       <div style={rowStyle}>
         <label style={labelStyle} htmlFor="odata-filter">$filter</label>

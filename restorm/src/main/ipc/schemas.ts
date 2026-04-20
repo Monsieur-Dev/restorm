@@ -129,7 +129,13 @@ export const httpIsActiveArgs = z.tuple([requestIdArg])
 export const odataExecuteArgs = z.tuple([
   z.object({
     requestId: z.string(),
-    timeout: z.number().optional()
+    timeout: z.number().optional(),
+    /** Optional HTTP method — defaults to GET. `POST` is used for
+     * OData action invocations. */
+    method: z.string().optional(),
+    /** Optional request body (JSON string) — set when invoking an
+     * OData action. Env-templated before dispatch. */
+    body: z.string().optional()
   }).loose()
 ])
 
