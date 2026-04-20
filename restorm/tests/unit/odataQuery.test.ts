@@ -83,6 +83,59 @@ describe('serializeODataQueryOptions', () => {
       ['$top', '{{pageSize}}']
     ])
   })
+
+  describe('advanced options ($expand / $orderby / $search / $format / $apply)', () => {
+    it('emits $expand verbatim', () => {
+      expect(serializeODataQueryOptions({ expand: 'Category,Tags($select=Name;$top=5)' })).toEqual([
+        ['$expand', 'Category,Tags($select=Name;$top=5)']
+      ])
+    })
+
+    it('emits $orderby verbatim', () => {
+      expect(serializeODataQueryOptions({ orderby: 'Name asc,Id desc' })).toEqual([
+        ['$orderby', 'Name asc,Id desc']
+      ])
+    })
+
+    it('emits $search / $format / $apply verbatim', () => {
+      expect(serializeODataQueryOptions({ search: 'puppy', format: 'json', apply: 'groupby((Status))' })).toEqual([
+        ['$search', 'puppy'],
+        ['$format', 'json'],
+        ['$apply', 'groupby((Status))']
+      ])
+    })
+
+    it('omits whitespace-only advanced options', () => {
+      expect(serializeODataQueryOptions({ expand: '   ', orderby: '', search: '\t', format: '', apply: '' })).toEqual([])
+    })
+
+    it('emits all options in the canonical v4 order', () => {
+      const options: ODataQueryOptions = {
+        apply: 'groupby((Status))',
+        format: 'json',
+        search: 'puppy',
+        orderby: 'Id desc',
+        expand: 'Category',
+        count: true,
+        skip: '10',
+        top: '25',
+        select: ['Id', 'Name'],
+        filter: 'IsActive eq true'
+      }
+      expect(serializeODataQueryOptions(options)).toEqual([
+        ['$filter', 'IsActive eq true'],
+        ['$select', 'Id,Name'],
+        ['$expand', 'Category'],
+        ['$orderby', 'Id desc'],
+        ['$top', '25'],
+        ['$skip', '10'],
+        ['$count', 'true'],
+        ['$search', 'puppy'],
+        ['$format', 'json'],
+        ['$apply', 'groupby((Status))']
+      ])
+    })
+  })
 })
 
 describe('buildODataUrl', () => {

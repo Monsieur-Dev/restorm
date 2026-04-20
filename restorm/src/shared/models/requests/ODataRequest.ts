@@ -18,9 +18,11 @@ import { KeyValue } from '../KeyValue'
 import type { RequestType, RuntimeId, Icon, ODataVersion } from '../types'
 
 /**
- * System query options persisted alongside an OData request. Phase 1
- * models the canonical v4 subset; `$expand`, `$orderby`, `$search`,
- * `$format`, and `$apply` land in Phase 2.
+ * System query options persisted alongside an OData request. Phase 2
+ * adds the advanced v4 options (`$expand`, `$orderby`, `$search`,
+ * `$format`, `$apply`) as env-templated strings. Structured nested
+ * editors for `$expand` (per-level `$select`/`$filter`/`$top`) and
+ * `$orderby` (prop + direction builder) are a follow-up polish pass.
  */
 export interface ODataQueryOptions {
   /** `$filter` — raw OData filter expression. Env-templated. */
@@ -34,6 +36,17 @@ export interface ODataQueryOptions {
   /** `$count` — when true the URL carries `$count=true`. v2/v3 will
    * emit `$inlinecount=allpages` once the version engine PR lands. */
   count?: boolean
+  /** `$expand` — raw expand clause, e.g.
+   * `Category,Tags($select=Name;$top=5)`. */
+  expand?: string
+  /** `$orderby` — raw clause, e.g. `Name asc,Id desc`. */
+  orderby?: string
+  /** `$search` — free-text search expression. */
+  search?: string
+  /** `$format` — response format override (`json`, `xml`, `atom`). */
+  format?: string
+  /** `$apply` — v4.01 aggregation expression. */
+  apply?: string
 }
 
 /**

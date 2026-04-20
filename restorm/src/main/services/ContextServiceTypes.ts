@@ -105,6 +105,11 @@ export interface FullRequestData {
     top?: string
     skip?: string
     count?: boolean
+    expand?: string
+    orderby?: string
+    search?: string
+    format?: string
+    apply?: string
   }
 }
 
