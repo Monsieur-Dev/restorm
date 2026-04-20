@@ -26,6 +26,7 @@ import {
   Button,
   InputBox,
   JsonViewer,
+  ScrollableElement,
   SelectBox,
   Toggle,
   logger,
@@ -54,14 +55,16 @@ import { buildRequestPath } from '../../utils/requestPath'
 const urlRowStyle: CSSProperties = { display: 'flex', gap: 8, alignItems: 'center' }
 const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
 const sendButtonWrapperStyle: CSSProperties = { flexShrink: 0 }
+const formOuterStyle: CSSProperties = {
+  height: '100%',
+  width: '100%'
+}
 const formStyle: CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   gap: 12,
   padding: 12,
-  height: '100%',
-  boxSizing: 'border-box',
-  overflow: 'auto'
+  boxSizing: 'border-box'
 }
 const rowStyle: CSSProperties = { display: 'flex', flexDirection: 'column', gap: 4 }
 const labelStyle: CSSProperties = { fontSize: 12, color: 'var(--descriptionForeground)' }
@@ -428,6 +431,10 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   )
 
   const requestContent = (
+    <ScrollableElement
+      style={formOuterStyle}
+      options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
+    >
     <div style={formStyle} data-testid="odata-request-form">
       <div style={numericRowStyle}>
         <div style={{ ...rowStyle, ...numericItemStyle }}>
@@ -618,6 +625,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         <div style={previewValueStyle}>{urlPreview}</div>
       </div>
     </div>
+    </ScrollableElement>
   )
 
   const responseContent = response ? (
