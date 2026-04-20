@@ -200,11 +200,14 @@ export interface ODataExecutionInput {
   timeout?: number
   requestPath?: string
   /** HTTP method override — defaults to GET. POST is used for OData
-   * action invocations. */
+   * action and $batch invocations. */
   method?: string
-  /** JSON body sent alongside an action invocation. Env-templated
-   * before dispatch by the engine. */
+  /** Request body — raw string. JSON for actions, multipart/mixed
+   * envelope for $batch. Env-templated by the engine. */
   body?: string
+  /** Content-Type override — required for $batch to carry the
+   * multipart boundary. Defaults to `application/json`. */
+  bodyContentType?: string
 }
 
 export interface HTTPExecutionInput {

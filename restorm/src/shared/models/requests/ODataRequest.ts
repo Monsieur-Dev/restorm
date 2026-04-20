@@ -51,10 +51,11 @@ export interface ODataQueryOptions {
 
 /**
  * Discriminates entity-set navigation from bound/unbound function /
- * action invocations. Phase 1 always persists `'entity-set'`; the
- * field is reserved so Phase 4 doesn't need a storage migration.
+ * action invocations, and from batch requests (Phase 5). Phase 1
+ * always persists `'entity-set'`; the field is reserved so later
+ * phases don't need a storage migration.
  */
-export type ODataOperationKind = 'entity-set' | 'function' | 'action'
+export type ODataOperationKind = 'entity-set' | 'function' | 'action' | 'batch'
 
 @fileNaming({ pattern: '{index} - {name}', nameProperty: 'name', idProperty: 'id' })
 export class ODataRequest extends BaseRequest {

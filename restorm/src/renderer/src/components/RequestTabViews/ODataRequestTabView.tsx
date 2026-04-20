@@ -43,6 +43,10 @@ import {
   keyValuesToPairs
 } from '../../../../shared/utils/odataQuery'
 import { normalizeODataResponse, type NormalizedODataPayload } from '../../../../shared/utils/odataResponse'
+import {
+  serializeODataBatch,
+  type ODataBatchSubRequest
+} from '../../../../shared/utils/odataBatch'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
@@ -84,7 +88,7 @@ const responseStatusStyle: CSSProperties = {
 }
 
 const ODATA_VERSION_BY_INDEX: ODataVersion[] = ['v4', 'v3', 'v2']
-const ODATA_OPERATION_KIND_BY_INDEX: ODataOperationKind[] = ['entity-set', 'function', 'action']
+const ODATA_OPERATION_KIND_BY_INDEX: ODataOperationKind[] = ['entity-set', 'function', 'action', 'batch']
 
 /**
  * Shows `@odata.count` and `@odata.nextLink` next to the response
@@ -163,7 +167,8 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   const operationKindOptions = useMemo<ISelectOptionItem[]>(() => [
     { text: t('odataRequestTab.operationKind.entitySet', 'Entity set (GET)') },
     { text: t('odataRequestTab.operationKind.function', 'Function (GET with inlined parameters)') },
-    { text: t('odataRequestTab.operationKind.action', 'Action (POST with JSON body)') }
+    { text: t('odataRequestTab.operationKind.action', 'Action (POST with JSON body)') },
+    { text: t('odataRequestTab.operationKind.batch', 'Batch ($batch — multipart/mixed)') }
   ], [t])
 
   const [isSending, setIsSending] = useState(false)
@@ -326,15 +331,45 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       return
     }
 
-    const method = request.operationKind === 'action' ? 'POST' : 'GET'
-    const body = request.operationKind === 'action' && request.actionBody
-      ? request.actionBody
-      : undefined
+    let method = 'GET'
+    let body: string | undefined
+    let contentTypeOverride: string | undefined
+    if (request.operationKind === 'action') {
+      method = 'POST'
+      body = request.actionBody ?? undefined
+    } else if (request.operationKind === 'batch') {
+      // The `actionBody` field carries a JSON array of sub-requests
+      // in batch mode. We assemble the multipart/mixed envelope
+      // locally so the engine only sees a plain POST. If parsing
+      // fails, surface the error up through the response panel.
+      try {
+        const parsed = JSON.parse(request.actionBody ?? '[]') as unknown
+        if (!Array.isArray(parsed)) {
+          throw new Error('Batch body must be a JSON array of sub-requests')
+        }
+        const serialized = serializeODataBatch(parsed as ODataBatchSubRequest[])
+        method = 'POST'
+        body = serialized.body
+        contentTypeOverride = serialized.contentType
+      } catch (err) {
+        setIsSending(false)
+        setResponse({
+          statusCode: 0,
+          statusText: '',
+          requestUrl: '',
+          durationMs: 0,
+          body: '',
+          error: `Invalid batch body: ${err instanceof Error ? err.message : String(err)}`
+        })
+        return
+      }
+    }
     api.execute({
       requestId,
       timeout: DEFAULT_REQUEST_TIMEOUT_MS,
       method,
       ...(body !== undefined ? { body } : {}),
+      ...(contentTypeOverride !== undefined ? { bodyContentType: contentTypeOverride } : {}),
       ...(requestPath ? { requestPath } : {})
     })
       .then((result) => {
@@ -429,21 +464,25 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         </div>
       </div>
 
-      {request.operationKind === 'action' ? (
+      {request.operationKind === 'action' || request.operationKind === 'batch' ? (
         <div style={rowStyle}>
           <label style={labelStyle} htmlFor="odata-request-action-body">
-            {t('odataRequestTab.actionBody', 'Action body (JSON)')}
+            {request.operationKind === 'batch'
+              ? t('odataRequestTab.batchBody', 'Batch sub-requests (JSON array)')
+              : t('odataRequestTab.actionBody', 'Action body (JSON)')}
           </label>
           <textarea
             id="odata-request-action-body"
             value={request.actionBody ?? ''}
             onChange={(e) => { setActionBody(e.target.value) }}
-            placeholder='{"OwnerId": 2}'
+            placeholder={request.operationKind === 'batch'
+              ? '[\n  {"method":"GET","url":"Pets(1)"},\n  {"method":"POST","url":"Pets","body":"{\\"Name\\":\\"Rex\\"}"}\n]'
+              : '{"OwnerId": 2}'}
             style={{
               fontFamily: 'var(--font-family-mono)',
               fontSize: 12,
               padding: 8,
-              minHeight: 80,
+              minHeight: 120,
               background: 'var(--input-background)',
               color: 'var(--input-foreground)',
               border: '1px solid var(--input-border)',
@@ -452,6 +491,14 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
             }}
             data-testid="odata-request-action-body"
           />
+          {request.operationKind === 'batch' ? (
+            <span style={{ ...labelStyle, fontStyle: 'italic' }}>
+              {t(
+                'odataRequestTab.batchHint',
+                'Each sub-request: {method, url, headers?, body?}. URLs are relative to the service root. The engine assembles the multipart/mixed envelope before dispatch.'
+              )}
+            </span>
+          ) : null}
         </div>
       ) : null}
 
