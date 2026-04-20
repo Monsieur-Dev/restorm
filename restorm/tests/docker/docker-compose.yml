@@ -71,8 +71,12 @@ services:
     ports:
       - "5100:5100"
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--spider", "http://localhost:5100/health"]
+      # `wget` / `curl` aren't in the dotnet/aspnet:9.0-alpine runtime
+      # image, so use the `dotnet` binary that ships with it to perform
+      # a tiny HTTP probe. `pnpm docker:wait` also polls /health
+      # externally, so the compose healthcheck is mostly informational.
+      test: ["CMD", "sh", "-c", "exec 3<>/dev/tcp/localhost/5100 && echo -e 'GET /health HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && grep -q 200 <&3"]
       interval: 5s
-      timeout: 2s
+      timeout: 3s
       retries: 10
       start_period: 15s
