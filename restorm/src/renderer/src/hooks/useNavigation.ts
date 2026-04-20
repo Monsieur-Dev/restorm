@@ -10,11 +10,18 @@ import { isFolder, isRequest, isEnvironmentFolder, isHTTPRequest, isGraphQLReque
 import { findFolderById, findItemWithBreadcrumbs } from '../utils/treeSearch'
 import type { BreadcrumbItem } from '../../../shared/types/editor'
 
+/** Control whether opening a tab moves focus to it. Mirrors
+ * `OpenTabOptions` from `useWorkbenchTabs` — kept in this hook's own
+ * surface so we don't couple the two modules at the signature level. */
+export interface OpenNavTabOptions {
+  focus?: boolean
+}
+
 export interface UseNavigationOptions {
   rootItems: (EnvironmentFolder | Folder | Request)[]
-  openFolderTab: (folder: Folder, breadcrumbs: BreadcrumbItem[]) => void
-  openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[]) => void
-  openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[]) => void
+  openFolderTab: (folder: Folder, breadcrumbs: BreadcrumbItem[], options?: OpenNavTabOptions) => void
+  openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[], options?: OpenNavTabOptions) => void
+  openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[], options?: OpenNavTabOptions) => void
   setSelectedItemId: React.Dispatch<React.SetStateAction<string | null>>
   setExpandedIds: React.Dispatch<React.SetStateAction<string[]>>
   setFocusedGroupId: React.Dispatch<React.SetStateAction<string | null>>
@@ -24,6 +31,14 @@ export interface UseNavigationOptions {
 export interface UseNavigationReturn {
   handleItemClick: (itemId: string) => void
   handleBreadcrumbClick: (item: BreadcrumbItem, index: number, isLast: boolean) => void
+  /**
+   * Middle-click handler for a breadcrumb folder / env-folder segment.
+   * Opens the matching workbench tab without focusing it and without
+   * touching the sidebar selection — the "open in background" gesture.
+   * Requests are out of scope (clicking a request segment via middle
+   * mouse would be rare; left-click already covers the request flow).
+   */
+  handleBreadcrumbAuxClick: (item: BreadcrumbItem, index: number, isLast: boolean) => void
   handleTabActivate: (tabId: string) => void
   handleSearchResultClick: (result: SearchResult) => void
 }
@@ -117,31 +132,83 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     }
   }, [rootItems, setSelectedItemId, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
 
-  // Handle breadcrumb item click - navigate to the clicked item
+  // Handle breadcrumb item click — open a workbench tab for the
+  // clicked segment, not just update history. The old implementation
+  // only called `navigationService.navigateTo(...)`, but the navigation
+  // subscription above ignores non-history events for tab opening
+  // (direct clicks are expected to open tabs themselves, see the
+  // `handleItemClick` pattern). That left breadcrumb clicks as
+  // sidebar-select-only — the sidebar highlighted the target but the
+  // workbench never surfaced a tab for it.
   const handleBreadcrumbClick = useCallback(
     (item: BreadcrumbItem, _index: number, isLast: boolean) => {
-      // Skip navigation for last item (current page)
+      // Last item is the current page — no navigation.
       if (isLast) return
 
-      // Determine item type by looking up in the root folders
-      const foundItem = findFolderById(rootItems, item.id)
-      if (foundItem) {
-        const itemId = item.id
-        if (isEnvironmentFolder(foundItem)) {
-          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'environment-folder' })
-        } else {
-          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'folder' })
-        }
-      } else {
-        // It might be a request
-        const { item: requestItem } = findItemWithBreadcrumbs(rootItems, item.id)
-        const itemId = item.id
-        if (requestItem && isRequest(requestItem) && isHTTPRequest(requestItem)) {
+      const itemId = item.id
+      const { item: foundItem, breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
+      if (!foundItem) return
+
+      setSelectedItemId(itemId)
+
+      if (isEnvironmentFolder(foundItem)) {
+        openEnvironmentFolderTab(foundItem, breadcrumbs)
+        navigationService.navigateTo(itemId, 'breadcrumb', { type: 'environment-folder' })
+        return
+      }
+
+      if (isFolder(foundItem)) {
+        openFolderTab(foundItem, breadcrumbs)
+        navigationService.navigateTo(itemId, 'breadcrumb', { type: 'folder' })
+        return
+      }
+
+      if (isRequest(foundItem)) {
+        const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
+        openAnyRequestTab(foundItem, breadcrumbs, environments)
+        if (isHTTPRequest(foundItem)) {
           navigationService.navigateTo(itemId, 'breadcrumb', { type: 'http-request' })
+        } else if (isGraphQLRequest(foundItem)) {
+          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'graphql-request' })
+        } else if (isGrpcRequest(foundItem)) {
+          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'grpc-request' })
+        } else if (isSoapRequest(foundItem)) {
+          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'soap-request' })
+        } else if (isWebSocketRequest(foundItem)) {
+          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'websocket-request' })
         }
       }
     },
-    [rootItems]
+    [rootItems, setSelectedItemId, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs]
+  )
+
+  // Middle-click ("open in background") variant of the breadcrumb
+  // handler. Open the matching tab if it isn't already in the
+  // workbench, but don't focus it, don't touch the sidebar selection,
+  // and don't push a navigation-service event — this is the opposite
+  // of `handleBreadcrumbClick`, which moves focus in every direction.
+  //
+  // Scope: folders + env-folders only. Requests are excluded because
+  // middle-click on a leaf segment (the current page) never happens
+  // — EditableLabel replaces that segment and swallows clicks for
+  // its own edit affordance. Only ancestor (folder-ish) segments ever
+  // receive `onItemAuxClick`.
+  const handleBreadcrumbAuxClick = useCallback(
+    (item: BreadcrumbItem, _index: number, isLast: boolean) => {
+      if (isLast) return
+      const { item: foundItem, breadcrumbs } = findItemWithBreadcrumbs(rootItems, item.id)
+      if (!foundItem) return
+      if (isEnvironmentFolder(foundItem)) {
+        openEnvironmentFolderTab(foundItem, breadcrumbs, { focus: false })
+        return
+      }
+      if (isFolder(foundItem)) {
+        openFolderTab(foundItem, breadcrumbs, { focus: false })
+      }
+      // Requests are intentionally a no-op — see the comment on the
+      // return type for rationale.
+    },
+    [rootItems, openFolderTab, openEnvironmentFolderTab]
   )
 
   // Resolve an index path (e.g. "0.0.1") to an actual item ID by walking rootItems
@@ -237,6 +304,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
   return {
     handleItemClick,
     handleBreadcrumbClick,
+    handleBreadcrumbAuxClick,
     handleTabActivate,
     handleSearchResultClick
   }

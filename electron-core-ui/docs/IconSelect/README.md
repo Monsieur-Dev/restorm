@@ -43,6 +43,8 @@ const Example: React.FC = () => {
 | `placeholder`| `string`                          | `'🔲'`  | Placeholder shown when no icon is selected |
 | `disabled`   | `boolean`                         | `false` | Whether the picker is disabled             |
 | `readonly`   | `boolean`                         | `false` | Readonly mode (no interaction)             |
+| `size`       | `number`                          | `16`    | Pixel size of the displayed icon. Bump for e.g. H1 adornments so the glyph matches the heading without cascading into other IconSelect instances |
+| `small`      | `boolean`                         | `true`  | Use the `small` button variant for the trigger. Set to `false` when rendering at a larger `size` (≥ 20 px) so the button isn't squashed; pair with a CSS override on the button's horizontal padding if you need a tighter layout |
 | `className`  | `string`                          | –       | Additional CSS class                       |
 | `style`      | `React.CSSProperties`             | –       | Inline styles                              |
 | `data-testid`| `string`                          | –       | Stable E2E hooks base id                   |

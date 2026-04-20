@@ -1346,11 +1346,55 @@ When('I focus the {string} folder tab', async ({}, folderName: string) => {
   await expect(tab).toHaveAttribute('aria-selected', 'true', { timeout: 5000 })
 })
 
+When('I click the breadcrumb folder {string} in the active tab', async ({}, label: string) => {
+  if (!page) throw new Error('app must be launched')
+  // Non-last breadcrumb items render as `<button class="ecui-breadcrumb-link">`.
+  // Match the label with `getByText(exact)` — `hasText` alone does
+  // substring matching, which would pick "Swagger Petstore" (contains
+  // "pet") before the actual "pet" segment.
+  const p = page
+  const segment = p
+    .locator('li.ecui-breadcrumb-item:not(.ecui-breadcrumb-item--last) button.ecui-breadcrumb-link:visible')
+    .filter({ has: p.getByText(label, { exact: true }) })
+    .first()
+  await expect(segment).toBeVisible({ timeout: 5000 })
+  await segment.click()
+  // Give the workbench a beat to open the matching tab + refocus.
+  await p.waitForTimeout(500)
+})
+
+When('I middle-click the breadcrumb folder {string} in the active tab', async ({}, label: string) => {
+  if (!page) throw new Error('app must be launched')
+  // Same selector as the regular-click step; the aux-click gesture
+  // uses Playwright's `click({ button: 'middle' })` so browsers route
+  // it through `onAuxClick` rather than `onClick`.
+  const p = page
+  const segment = p
+    .locator('li.ecui-breadcrumb-item:not(.ecui-breadcrumb-item--last) button.ecui-breadcrumb-link:visible')
+    .filter({ has: p.getByText(label, { exact: true }) })
+    .first()
+  await expect(segment).toBeVisible({ timeout: 5000 })
+  await segment.click({ button: 'middle' })
+  await p.waitForTimeout(500)
+})
+
+Then('the active tab should be {string}', async ({}, label: string) => {
+  if (!page) throw new Error('app must be launched')
+  // Active tab is the one with `aria-selected="true"`. Match by text
+  // to be resilient to other selected-siblings across split groups.
+  const activeTab = page
+    .locator('[role="tab"][aria-selected="true"]')
+    .filter({ has: page.getByText(label, { exact: true }) })
+    .first()
+  await expect(activeTab).toBeVisible({ timeout: 5000 })
+})
+
 When('I set the folder tab icon to codicon {string}', async ({}, iconName: string) => {
   if (!page) throw new Error('app must be launched')
-  // Active folder tab's pane: role="tabpanel" is what wraps the tab content.
-  // The breadcrumb IconSelect trigger sits at the top of the pane.
-  const iconTrigger = page.locator('.ecui-breadcrumb-icon-select [role="button"]').first()
+  // The folder tab's title-row IconSelect is the visible trigger on
+  // the active pane. Post-refactor it lives next to the H1 name, not
+  // in the breadcrumb; the new wrapper class pins the selector.
+  const iconTrigger = page.locator('.restorm-workbench-tab-title-icon-select [role="button"]:visible').first()
   await expect(iconTrigger).toBeVisible({ timeout: 5000 })
   await iconTrigger.click()
   await page.waitForSelector('.ecui-icon-select-picker', { timeout: 5000 })
@@ -1368,8 +1412,17 @@ When('I set the folder tab icon to codicon {string}', async ({}, iconName: strin
 
 Then('the folder tab breadcrumb icon should be {string}', async ({}, iconName: string) => {
   if (!page) throw new Error('app must be launched')
-  const icon = page.locator(`.ecui-breadcrumb .codicon-${iconName}`).first()
+  // The icon lives in the tab's title-row IconSelect post-refactor —
+  // keep the step name (`breadcrumb icon`) for backwards compatibility
+  // with existing scenarios but target the new location.
+  const icon = page.locator(`.restorm-workbench-tab-title-icon-select .codicon-${iconName}:visible`).first()
   await expect(icon).toBeVisible({ timeout: 5000 })
+  // The title IconSelect is configured at `size={22}`. Assert the
+  // computed font-size matches so a regression to 16 (e.g. the vendor
+  // `.codicon[class*='codicon-'] { font: 16px/1 }` shorthand silently
+  // outmanoeuvres an inline size again) fails loudly.
+  const computedSize = await icon.evaluate((el) => window.getComputedStyle(el).fontSize)
+  expect(computedSize).toBe('22px')
 })
 
 Then('the environment-folder variables table color picker should be visible', async () => {

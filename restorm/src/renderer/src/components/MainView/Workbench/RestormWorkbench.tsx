@@ -59,6 +59,10 @@ export interface RestormWorkbenchProps {
   onTabActivate?: (tabId: string) => void
   /** Callback fired when a breadcrumb item is clicked (for navigation) */
   onBreadcrumbClick?: (item: BreadcrumbItem, index: number, isLast: boolean) => void
+  /** Callback fired on middle-click of a non-last breadcrumb item — the
+   * "open tab in background" gesture. Consumers typically open the
+   * matching workbench tab without focusing it or touching the sidebar. */
+  onBreadcrumbAuxClick?: (item: BreadcrumbItem, index: number, isLast: boolean) => void
   /** Callback fired when the last breadcrumb item is renamed */
   onItemRename?: (item: BreadcrumbItem, newName: string) => void
   /** Callback fired when the last breadcrumb item's icon changes */
@@ -125,6 +129,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   onFocusedGroupChange,
   onTabActivate,
   onBreadcrumbClick,
+  onBreadcrumbAuxClick,
   onItemRename,
   onItemIconChange,
   onTagsChange,
@@ -461,6 +466,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         <RestormWorkbenchTab
           breadcrumbs={breadcrumbs}
           onBreadcrumbClick={onBreadcrumbClick}
+          onBreadcrumbAuxClick={onBreadcrumbAuxClick}
           onBreadcrumbRename={onItemRename}
           onBreadcrumbIconChange={onItemIconChange}
           tags={folder.tags}
@@ -494,6 +500,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         <RestormWorkbenchTab
           breadcrumbs={breadcrumbs}
           onBreadcrumbClick={onBreadcrumbClick}
+          onBreadcrumbAuxClick={onBreadcrumbAuxClick}
           onBreadcrumbRename={onItemRename}
           onBreadcrumbIconChange={onItemIconChange}
           tags={effectiveTab.folder.tags}
@@ -543,6 +550,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
+          onBreadcrumbAuxClick={onBreadcrumbAuxClick}
             onBreadcrumbRename={onItemRename}
             onBreadcrumbIconChange={onItemIconChange}
             tags={request.tags}
@@ -568,6 +576,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
+          onBreadcrumbAuxClick={onBreadcrumbAuxClick}
             onBreadcrumbRename={onItemRename}
             onBreadcrumbIconChange={onItemIconChange}
             tags={request.tags}
@@ -592,6 +601,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
+          onBreadcrumbAuxClick={onBreadcrumbAuxClick}
             onBreadcrumbRename={onItemRename}
             onBreadcrumbIconChange={onItemIconChange}
             tags={request.tags}
@@ -616,6 +626,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
+          onBreadcrumbAuxClick={onBreadcrumbAuxClick}
             onBreadcrumbRename={onItemRename}
             onBreadcrumbIconChange={onItemIconChange}
             tags={request.tags}
@@ -640,6 +651,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
+          onBreadcrumbAuxClick={onBreadcrumbAuxClick}
             onBreadcrumbRename={onItemRename}
             onBreadcrumbIconChange={onItemIconChange}
             tags={request.tags}
@@ -658,7 +670,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [onBreadcrumbClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, t, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid])
+  }, [onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, t, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(

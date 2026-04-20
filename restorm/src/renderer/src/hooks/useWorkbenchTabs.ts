@@ -58,14 +58,21 @@ export interface UseWorkbenchTabsOptions {
   registerTabDirtyState: (id: string, checksum: string) => void
 }
 
+/** Control whether opening a tab moves focus to it. Middle-click ("open in
+ * background") flows pass `focus: false` so the current tab + sidebar
+ * selection stay put. */
+export interface OpenTabOptions {
+  focus?: boolean
+}
+
 export interface UseWorkbenchTabsReturn {
   workbenchRef: React.RefObject<RestormWorkbenchHandle | null>
   hasRestoredWorkbenchRef: React.RefObject<boolean>
   findIndexPathById: (items: FolderItem[], targetId: string) => number[] | null
   buildTabId: (prefix: 'folder' | 'env-folder' | 'request', id: string) => string
-  openFolderTab: (folder: Folder, breadcrumbs: BreadcrumbItem[]) => void
-  openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[]) => void
-  openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[]) => void
+  openFolderTab: (folder: Folder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
+  openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
+  openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[], options?: OpenTabOptions) => void
   handleRebuildTab: (tabId: string) => EditorTab | null
   handleStateRestored: (restoredTree: WorkbenchTree | null) => void
   handleSizesChange: (nodeId: string, sizes: number[]) => void
@@ -111,13 +118,23 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     return `${prefix}-idx:${indexPath.join('.')}`
   }, [findIndexPathById, rootItems])
 
-  // Helper to add a tab to the workbench tree, reusing the focused or first group
+  // Helper to add a tab to the workbench tree, reusing the focused or
+  // first group. When `focus` is false (middle-click "open in
+  // background" flow), the tab is added without altering the
+  // destination group's `activeTabId`, and an already-open tab
+  // becomes a no-op instead of re-activating.
   const addTabToTree = useCallback((
     prev: WorkbenchTree,
     tabId: string,
-    newTab: EditorTab
+    newTab: EditorTab,
+    options?: OpenTabOptions
   ): WorkbenchTree => {
-    // No groups yet: create the main group with this tab
+    const focus = options?.focus ?? true
+    // No groups yet: create the main group with this tab. We always
+    // activate it here — even in background mode, an empty workbench
+    // has nothing to preserve, so the new tab becomes the only visible
+    // content (the alternative is a blank workbench with a hidden tab
+    // in an unreachable group).
     if (prev.groups.length === 0) {
       return {
         ...prev,
@@ -131,9 +148,11 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
       }
     }
 
-    // If tab already exists anywhere, just activate it in its group
+    // If tab already exists anywhere: re-activate it (focus mode) or
+    // leave the tree untouched (background mode).
     const existingGroupId = findGroupIdForTab(prev.groups, tabId)
     if (existingGroupId) {
+      if (!focus) return prev
       return {
         ...prev,
         groups: updateGroupById(prev.groups, existingGroupId, (group) => ({
@@ -156,13 +175,19 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
       ? updateGroupById(prev.groups, targetGroupId, (group) => ({
           ...group,
           tabs: [...group.tabs, newTab],
-          activeTabId: tabId
+          // Background mode: preserve the group's current active tab
+          // if it has one, fall back to the just-added tab otherwise
+          // (an empty-activeTabId group would render as blank).
+          activeTabId: focus ? tabId : (group.activeTabId ?? tabId)
         }))
       : [
           ...prev.groups,
           {
             id: targetGroupId,
             tabs: [newTab],
+            // A brand-new group must have SOME activeTabId — background
+            // mode still uses the just-added tab here, because the
+            // alternative is an empty selection.
             activeTabId: tabId
           }
         ]
@@ -174,7 +199,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
   }, [focusedGroupId])
 
   // Open a folder tab in the workbench
-  const openFolderTab = useCallback((folder: Folder, breadcrumbs: BreadcrumbItem[]) => {
+  const openFolderTab = useCallback((folder: Folder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => {
     const tabId = buildTabId('folder', folder.id)
 
     setTimeout(() => {
@@ -192,12 +217,12 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
         breadcrumbs,
         allowFullscreen: true
       }
-      return addTabToTree(prev, tabId, newTab)
+      return addTabToTree(prev, tabId, newTab, options)
     })
   }, [buildTabId, registerTabDirtyState, setWorkbenchTree, addTabToTree])
 
   // Open an environment folder tab in the workbench
-  const openEnvironmentFolderTab = useCallback((folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[]) => {
+  const openEnvironmentFolderTab = useCallback((folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => {
     const tabId = buildTabId('env-folder', folder.id)
 
     // Defer checksum registration: the KV table mutates the folder's
@@ -220,13 +245,13 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
         breadcrumbs,
         allowFullscreen: true
       }
-      return addTabToTree(prev, tabId, newTab)
+      return addTabToTree(prev, tabId, newTab, options)
     })
   }, [buildTabId, registerTabDirtyState, setWorkbenchTree, addTabToTree])
 
   // Open any request type tab in the workbench
   const openAnyRequestTab = useCallback(
-    (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[]) => {
+    (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[], options?: OpenTabOptions) => {
     const tabId = buildTabId('request', request.id)
 
     // Register initial checksum for dirty state tracking
@@ -267,7 +292,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
         environments,
         allowFullscreen: true
       }
-      return addTabToTree(prev, tabId, newTab)
+      return addTabToTree(prev, tabId, newTab, options)
     })
   },
     [buildTabId, registerTabDirtyState, setWorkbenchTree, addTabToTree]

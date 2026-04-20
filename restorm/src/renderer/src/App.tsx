@@ -1183,6 +1183,7 @@ const App: React.FC = () => {
   const {
     handleItemClick,
     handleBreadcrumbClick,
+    handleBreadcrumbAuxClick,
     handleTabActivate,
     handleSearchResultClick
   } = useNavigation({
@@ -1306,6 +1307,7 @@ const App: React.FC = () => {
               onFocusedGroupChange={setFocusedGroupId}
               onTabActivate={handleTabActivate}
               onBreadcrumbClick={handleBreadcrumbClick}
+              onBreadcrumbAuxClick={handleBreadcrumbAuxClick}
               onItemRename={handleItemRename}
               onItemIconChange={handleItemIconChange}
               onTagsChange={handleTagsChange}
@@ -1345,6 +1347,7 @@ const App: React.FC = () => {
             onFocusedGroupChange={setFocusedGroupId}
             onTabActivate={handleTabActivate}
             onBreadcrumbClick={handleBreadcrumbClick}
+            onBreadcrumbAuxClick={handleBreadcrumbAuxClick}
             onItemRename={handleItemRename}
             onItemIconChange={handleItemIconChange}
             onTagsChange={handleTagsChange}

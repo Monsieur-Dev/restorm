@@ -1,7 +1,8 @@
-import React, { useCallback, useState, useRef, useEffect } from 'react'
+import React, { useCallback } from 'react'
 import type { Icon } from '../../../types/icon'
 import { IconView } from '../IconView'
 import { IconSelect } from '../IconSelect/IconSelect'
+import { EditableLabel } from '../EditableLabel'
 
 import './breadcrumb.css'
 
@@ -27,6 +28,14 @@ export interface BreadcrumbProps {
    */
   onItemClick?: (item: BreadcrumbItem, index: number, event: React.MouseEvent<HTMLButtonElement>) => void
   /**
+   * Called on a non-last item's auxiliary click (middle mouse button,
+   * i.e. `event.button === 1`). Mirrors the classic browser
+   * "open link in background tab" gesture so the consumer can open
+   * the target without stealing focus. Only fires on non-last items
+   * since the last item is the current page / editable label.
+   */
+  onItemAuxClick?: (item: BreadcrumbItem, index: number, event: React.MouseEvent<HTMLButtonElement>) => void
+  /**
    * Called when the editable last item is renamed (Enter or blur).
    */
   onLastItemChange?: (item: BreadcrumbItem, newValue: string, index: number) => void
@@ -44,6 +53,16 @@ export interface BreadcrumbProps {
    * @default false
    */
   canEditName?: boolean
+  /**
+   * When `true`, every item (including the last) is rendered as a
+   * clickable navigation button — no "current page" styling, no
+   * editable label, no `aria-current`. Use this when the breadcrumb
+   * shows only the ancestor path and the current page is displayed
+   * elsewhere (e.g. as an H1 title row below the breadcrumb). Mutually
+   * exclusive with `canEditName` / `canEditIcon`.
+   * @default false
+   */
+  allNavigable?: boolean
   /**
    * Show the root item even when it's the only item (normally hidden).
    * @default false
@@ -64,84 +83,24 @@ const BreadcrumbInner: React.FC<BreadcrumbProps> = ({
   items,
   'data-testid': dataTestId,
   onItemClick,
+  onItemAuxClick,
   onLastItemChange,
   onLastItemIconChange,
   canEditIcon = false,
   canEditName = false,
+  allNavigable = false,
   showRoot: _showRoot = false,
   className,
   style,
   ariaLabel
 }) => {
-  const [isEditingLast, setIsEditingLast] = useState(false)
-  const [editingValue, setEditingValue] = useState('')
-  const [editingItem, setEditingItem] = useState<BreadcrumbItem | null>(null)
-  const [committedValue, setCommittedValue] = useState<string | null>(null)
-  const [isHoveringLast, setIsHoveringLast] = useState(false)
-  const inputRef = useRef<HTMLInputElement | null>(null)
-  const shouldSelectOnMount = useRef(false)
-  const ignoreNextBlurCommit = useRef(false)
-
   const lastItem = items[items.length - 1]
   const lastIndex = items.length - 1
-  const displayedLastLabel = (committedValue !== null && committedValue !== lastItem?.label)
-    ? committedValue
-    : lastItem?.label
 
-  const handleStartEditingLast = useCallback((): void => {
-    if (!canEditName || !lastItem) return
-    setIsEditingLast(true)
-    setEditingValue(displayedLastLabel ?? lastItem.label)
-    setEditingItem(lastItem)
-    shouldSelectOnMount.current = true
-  }, [canEditName, lastItem, displayedLastLabel])
-
-  useEffect(() => {
-    if (isEditingLast && inputRef.current && shouldSelectOnMount.current) {
-      inputRef.current.focus()
-      inputRef.current.select()
-      shouldSelectOnMount.current = false
-    }
-  }, [isEditingLast])
-
-  const handleCommitLast = useCallback(
-    (index: number): void => {
-      if (!isEditingLast || !editingItem) return
-      setIsEditingLast(false)
-      if (onLastItemChange && editingValue !== editingItem.label) {
-        setCommittedValue(editingValue)
-        onLastItemChange(editingItem, editingValue, index)
-      }
-      setEditingItem(null)
-    },
-    [editingValue, isEditingLast, editingItem, onLastItemChange]
-  )
-
-  const handleCancelEditingLast = useCallback((): void => {
-    setIsEditingLast(false)
-    setEditingItem(null)
-  }, [])
-
-  const handleInputKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>, index: number): void => {
-      if (event.key === 'Enter') {
-        event.preventDefault()
-        ignoreNextBlurCommit.current = true
-        handleCommitLast(index)
-        if (inputRef.current) {
-          inputRef.current.blur()
-        }
-      } else if (event.key === 'Escape') {
-        event.preventDefault()
-        ignoreNextBlurCommit.current = true
-        handleCancelEditingLast()
-        if (inputRef.current) {
-          inputRef.current.blur()
-        }
-      }
-    },
-    [handleCommitLast, handleCancelEditingLast]
-  )
+  const handleEditableCommit = useCallback((nextValue: string): void => {
+    if (!lastItem || !onLastItemChange) return
+    onLastItemChange(lastItem, nextValue, lastIndex)
+  }, [lastItem, lastIndex, onLastItemChange])
 
   const handleIconChange = useCallback((newIcon: Icon | null): void => {
     if (!lastItem || !onLastItemIconChange) return
@@ -158,10 +117,23 @@ const BreadcrumbInner: React.FC<BreadcrumbProps> = ({
     <nav className={rootClasses} style={style} aria-label={ariaLabel ?? 'Breadcrumb'} data-testid={dataTestId}>
       <ol className="ecui-breadcrumb-list">
         {items.map((item, index) => {
-          const isLast = index === items.length - 1
+          // In `allNavigable` mode every item — even the last — is
+          // treated as an ancestor-style clickable link. Use this when
+          // the current page is rendered separately (e.g. as an H1
+          // next to the breadcrumb row).
+          const isLast = !allNavigable && index === items.length - 1
 
           if (!isLast) {
-            // Non-last items: navigate only, icon is static
+            // Non-last items: navigate only, icon is static. Middle-click
+            // routes through `onItemAuxClick` (when provided) so
+            // consumers can implement "open in background" without
+            // receiving the plain `onItemClick` too — on platforms that
+            // fire both `click` and `auxclick` for the middle button,
+            // the consumer can tell them apart by event.button.
+            // Suppress the trailing chevron on the final item when we
+            // were told to display the entire path as ancestors (the
+            // row visually ends with the last navigable item).
+            const isFinalListItem = index === items.length - 1
             return (
               <li key={item.id} className="ecui-breadcrumb-item">
                 <button
@@ -172,18 +144,36 @@ const BreadcrumbInner: React.FC<BreadcrumbProps> = ({
                       onItemClick(item, index, event)
                     }
                   }}
+                  onAuxClick={(event): void => {
+                    if (event.button !== 1) return
+                    // Prevent the browser's default middle-click behaviour
+                    // (autoscroll / pointer-lock cursor on Chromium) —
+                    // we're hijacking it for navigation.
+                    event.preventDefault()
+                    if (onItemAuxClick) {
+                      onItemAuxClick(item, index, event)
+                    }
+                  }}
                 >
                   {renderIcon(item.icon)}
                   {item.label}
                 </button>
-                <span className="ecui-breadcrumb-separator" aria-hidden="true">
-                  <i className="codicon codicon-chevron-right" />
-                </span>
+                {!isFinalListItem ? (
+                  <span className="ecui-breadcrumb-separator" aria-hidden="true">
+                    <i className="codicon codicon-chevron-right" />
+                  </span>
+                ) : null}
               </li>
             )
           }
 
-          // Last item: current location, editable icon + name
+          // Last item: current location, editable icon + name.
+          // Name editing is delegated to `<EditableLabel>` — it owns
+          // the hover pencil, input swap, Enter / Escape / blur handling
+          // + the "commit only on actual change" guard. Breadcrumb just
+          // maps the component's onChange to its existing public
+          // `onLastItemChange` callback, and keeps the WAI-ARIA
+          // breadcrumb semantics (`aria-current="page"`) on a wrapper.
           return (
             <li
               key={item.id}
@@ -199,46 +189,16 @@ const BreadcrumbInner: React.FC<BreadcrumbProps> = ({
               ) : (
                 renderIcon(item.icon)
               )}
-              {isEditingLast ? (
-                <input
-                  ref={inputRef}
-                  className="ecui-breadcrumb-input"
-                  type="text"
-                  value={editingValue}
-                  onChange={(event): void => {
-                    setEditingValue(event.target.value)
-                  }}
-                  onBlur={(): void => {
-                    if (ignoreNextBlurCommit.current) {
-                      ignoreNextBlurCommit.current = false
-                      return
-                    }
-                    handleCommitLast(index)
-                  }}
-                  onKeyDown={(event): void => {
-                    handleInputKeyDown(event, index)
-                  }}
+              <span aria-current="page">
+                <EditableLabel
+                  as="span"
+                  value={item.label}
+                  onChange={handleEditableCommit}
+                  editable={canEditName}
+                  className="ecui-breadcrumb-link ecui-breadcrumb-link--current"
+                  {...(dataTestId ? { 'data-testid': `${dataTestId}-editable-last` } : {})}
                 />
-              ) : (
-                <button
-                  type="button"
-                  className="ecui-breadcrumb-link ecui-breadcrumb-link--current ecui-breadcrumb-link--editable"
-                  aria-current="page"
-                  onMouseEnter={() => { setIsHoveringLast(true) }}
-                  onMouseLeave={() => { setIsHoveringLast(false) }}
-                  onClick={(event): void => {
-                    if (onItemClick) {
-                      onItemClick(item, index, event)
-                    }
-                    handleStartEditingLast()
-                  }}
-                >
-                  {displayedLastLabel}
-                  {isHoveringLast && canEditName ? (
-                    <i className="codicon codicon-edit ecui-breadcrumb-edit-hint" />
-                  ) : null}
-                </button>
-              )}
+              </span>
             </li>
           )
         })}
