@@ -15,6 +15,8 @@ export interface RestormWorkbenchContainerProps {
   onFocusedGroupChange: (groupId: string | null) => void
   onTabActivate: (tabId: string) => void
   onBreadcrumbClick: (item: BreadcrumbItem, index: number, isLast: boolean) => void
+  /** Middle-click on a non-last breadcrumb segment — "open tab in background". */
+  onBreadcrumbAuxClick?: (item: BreadcrumbItem, index: number, isLast: boolean) => void
   onItemRename: (item: BreadcrumbItem, newName: string) => void
   onItemIconChange?: (item: BreadcrumbItem, newIcon: Icon | null) => void
   onTagsChange: (targetId: string, tags: string[]) => void
@@ -48,6 +50,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
   onFocusedGroupChange,
   onTabActivate,
   onBreadcrumbClick,
+  onBreadcrumbAuxClick,
   onItemRename,
   onItemIconChange,
   onTagsChange,
@@ -87,6 +90,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
           onFocusedGroupChange={onFocusedGroupChange}
           onTabActivate={onTabActivate}
           onBreadcrumbClick={onBreadcrumbClick}
+          {...(onBreadcrumbAuxClick ? { onBreadcrumbAuxClick } : {})}
           onItemRename={onItemRename}
           onItemIconChange={onItemIconChange}
           onTagsChange={onTagsChange}

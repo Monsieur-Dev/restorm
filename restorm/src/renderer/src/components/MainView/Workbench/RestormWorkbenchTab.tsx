@@ -9,6 +9,7 @@ const { Breadcrumb } = CoreUIRenderer as unknown as {
   Breadcrumb: React.ComponentType<{
     items: BreadcrumbItem[]
     onItemClick?: (item: BreadcrumbItem, index: number, event: React.MouseEvent<HTMLButtonElement>) => void
+    onItemAuxClick?: (item: BreadcrumbItem, index: number, event: React.MouseEvent<HTMLButtonElement>) => void
     onLastItemChange?: (item: BreadcrumbItem, newValue: string, index: number) => void
     onLastItemIconChange?: (item: BreadcrumbItem, newIcon: Icon | null, index: number) => void
     canEditIcon?: boolean
@@ -29,6 +30,10 @@ export interface RestormWorkbenchTabCallout {
 export interface RestormWorkbenchTabProps {
   breadcrumbs: BreadcrumbItem[]
   onBreadcrumbClick?: ((item: BreadcrumbItem, index: number, isLast: boolean) => void) | undefined
+  /** Middle-click on a non-last breadcrumb item. Used for the
+   * "open tab in background" gesture — consumers typically open the
+   * matching workbench tab without focusing it. */
+  onBreadcrumbAuxClick?: ((item: BreadcrumbItem, index: number, isLast: boolean) => void) | undefined
   onBreadcrumbRename?: ((item: BreadcrumbItem, newValue: string) => void) | undefined
   onBreadcrumbIconChange?: ((item: BreadcrumbItem, newIcon: Icon | null) => void) | undefined
   tags: string[]
@@ -48,6 +53,7 @@ export interface RestormWorkbenchTabProps {
 export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
   breadcrumbs,
   onBreadcrumbClick,
+  onBreadcrumbAuxClick,
   onBreadcrumbRename,
   onBreadcrumbIconChange,
   tags,
@@ -198,6 +204,10 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
             onItemClick={(item, index) => {
               const isLast = index === breadcrumbs.length - 1
               onBreadcrumbClick?.(item, index, isLast)
+            }}
+            onItemAuxClick={(item, index) => {
+              const isLast = index === breadcrumbs.length - 1
+              onBreadcrumbAuxClick?.(item, index, isLast)
             }}
             onLastItemChange={(item, newValue) => {
               onBreadcrumbRename?.(item, newValue)

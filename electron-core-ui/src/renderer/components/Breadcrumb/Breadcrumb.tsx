@@ -28,6 +28,14 @@ export interface BreadcrumbProps {
    */
   onItemClick?: (item: BreadcrumbItem, index: number, event: React.MouseEvent<HTMLButtonElement>) => void
   /**
+   * Called on a non-last item's auxiliary click (middle mouse button,
+   * i.e. `event.button === 1`). Mirrors the classic browser
+   * "open link in background tab" gesture so the consumer can open
+   * the target without stealing focus. Only fires on non-last items
+   * since the last item is the current page / editable label.
+   */
+  onItemAuxClick?: (item: BreadcrumbItem, index: number, event: React.MouseEvent<HTMLButtonElement>) => void
+  /**
    * Called when the editable last item is renamed (Enter or blur).
    */
   onLastItemChange?: (item: BreadcrumbItem, newValue: string, index: number) => void
@@ -65,6 +73,7 @@ const BreadcrumbInner: React.FC<BreadcrumbProps> = ({
   items,
   'data-testid': dataTestId,
   onItemClick,
+  onItemAuxClick,
   onLastItemChange,
   onLastItemIconChange,
   canEditIcon = false,
@@ -100,7 +109,12 @@ const BreadcrumbInner: React.FC<BreadcrumbProps> = ({
           const isLast = index === items.length - 1
 
           if (!isLast) {
-            // Non-last items: navigate only, icon is static
+            // Non-last items: navigate only, icon is static. Middle-click
+            // routes through `onItemAuxClick` (when provided) so
+            // consumers can implement "open in background" without
+            // receiving the plain `onItemClick` too — on platforms that
+            // fire both `click` and `auxclick` for the middle button,
+            // the consumer can tell them apart by event.button.
             return (
               <li key={item.id} className="ecui-breadcrumb-item">
                 <button
@@ -109,6 +123,16 @@ const BreadcrumbInner: React.FC<BreadcrumbProps> = ({
                   onClick={(event): void => {
                     if (onItemClick) {
                       onItemClick(item, index, event)
+                    }
+                  }}
+                  onAuxClick={(event): void => {
+                    if (event.button !== 1) return
+                    // Prevent the browser's default middle-click behaviour
+                    // (autoscroll / pointer-lock cursor on Chromium) —
+                    // we're hijacking it for navigation.
+                    event.preventDefault()
+                    if (onItemAuxClick) {
+                      onItemAuxClick(item, index, event)
                     }
                   }}
                 >

@@ -69,6 +69,12 @@ Feature: Full workflow end-to-end scenario
     When I click the breadcrumb folder "pet" in the active tab
     Then a folder tab for "pet" should be open
     When I focus the "Find pet by ID" tab
+    # Middle-click opens the tab in the background: the segment's tab
+    # appears in the workbench but the currently-focused tab stays
+    # focused, and the sidebar selection doesn't move.
+    When I middle-click the breadcrumb folder "Swagger Petstore" in the active tab
+    Then a folder tab for "Swagger Petstore" should be open
+    And the active tab should be "Find pet by ID"
     When I select the "localhost" environment on the active request tab
     When I fill the first path-param value with "1"
     # Per-unit dirty-state / title behaviour lives in the dedicated

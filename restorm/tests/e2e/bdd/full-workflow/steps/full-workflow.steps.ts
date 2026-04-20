@@ -1363,6 +1363,32 @@ When('I click the breadcrumb folder {string} in the active tab', async ({}, labe
   await p.waitForTimeout(500)
 })
 
+When('I middle-click the breadcrumb folder {string} in the active tab', async ({}, label: string) => {
+  if (!page) throw new Error('app must be launched')
+  // Same selector as the regular-click step; the aux-click gesture
+  // uses Playwright's `click({ button: 'middle' })` so browsers route
+  // it through `onAuxClick` rather than `onClick`.
+  const p = page
+  const segment = p
+    .locator('li.ecui-breadcrumb-item:not(.ecui-breadcrumb-item--last) button.ecui-breadcrumb-link:visible')
+    .filter({ has: p.getByText(label, { exact: true }) })
+    .first()
+  await expect(segment).toBeVisible({ timeout: 5000 })
+  await segment.click({ button: 'middle' })
+  await p.waitForTimeout(500)
+})
+
+Then('the active tab should be {string}', async ({}, label: string) => {
+  if (!page) throw new Error('app must be launched')
+  // Active tab is the one with `aria-selected="true"`. Match by text
+  // to be resilient to other selected-siblings across split groups.
+  const activeTab = page
+    .locator('[role="tab"][aria-selected="true"]')
+    .filter({ has: page.getByText(label, { exact: true }) })
+    .first()
+  await expect(activeTab).toBeVisible({ timeout: 5000 })
+})
+
 When('I set the folder tab icon to codicon {string}', async ({}, iconName: string) => {
   if (!page) throw new Error('app must be launched')
   // Active folder tab's pane: role="tabpanel" is what wraps the tab content.

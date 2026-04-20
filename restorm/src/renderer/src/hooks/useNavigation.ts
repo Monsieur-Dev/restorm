@@ -10,11 +10,18 @@ import { isFolder, isRequest, isEnvironmentFolder, isHTTPRequest, isGraphQLReque
 import { findFolderById, findItemWithBreadcrumbs } from '../utils/treeSearch'
 import type { BreadcrumbItem } from '../../../shared/types/editor'
 
+/** Control whether opening a tab moves focus to it. Mirrors
+ * `OpenTabOptions` from `useWorkbenchTabs` — kept in this hook's own
+ * surface so we don't couple the two modules at the signature level. */
+export interface OpenNavTabOptions {
+  focus?: boolean
+}
+
 export interface UseNavigationOptions {
   rootItems: (EnvironmentFolder | Folder | Request)[]
-  openFolderTab: (folder: Folder, breadcrumbs: BreadcrumbItem[]) => void
-  openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[]) => void
-  openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[]) => void
+  openFolderTab: (folder: Folder, breadcrumbs: BreadcrumbItem[], options?: OpenNavTabOptions) => void
+  openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[], options?: OpenNavTabOptions) => void
+  openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[], options?: OpenNavTabOptions) => void
   setSelectedItemId: React.Dispatch<React.SetStateAction<string | null>>
   setExpandedIds: React.Dispatch<React.SetStateAction<string[]>>
   setFocusedGroupId: React.Dispatch<React.SetStateAction<string | null>>
@@ -24,6 +31,14 @@ export interface UseNavigationOptions {
 export interface UseNavigationReturn {
   handleItemClick: (itemId: string) => void
   handleBreadcrumbClick: (item: BreadcrumbItem, index: number, isLast: boolean) => void
+  /**
+   * Middle-click handler for a breadcrumb folder / env-folder segment.
+   * Opens the matching workbench tab without focusing it and without
+   * touching the sidebar selection — the "open in background" gesture.
+   * Requests are out of scope (clicking a request segment via middle
+   * mouse would be rare; left-click already covers the request flow).
+   */
+  handleBreadcrumbAuxClick: (item: BreadcrumbItem, index: number, isLast: boolean) => void
   handleTabActivate: (tabId: string) => void
   handleSearchResultClick: (result: SearchResult) => void
 }
@@ -167,6 +182,35 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     [rootItems, setSelectedItemId, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs]
   )
 
+  // Middle-click ("open in background") variant of the breadcrumb
+  // handler. Open the matching tab if it isn't already in the
+  // workbench, but don't focus it, don't touch the sidebar selection,
+  // and don't push a navigation-service event — this is the opposite
+  // of `handleBreadcrumbClick`, which moves focus in every direction.
+  //
+  // Scope: folders + env-folders only. Requests are excluded because
+  // middle-click on a leaf segment (the current page) never happens
+  // — EditableLabel replaces that segment and swallows clicks for
+  // its own edit affordance. Only ancestor (folder-ish) segments ever
+  // receive `onItemAuxClick`.
+  const handleBreadcrumbAuxClick = useCallback(
+    (item: BreadcrumbItem, _index: number, isLast: boolean) => {
+      if (isLast) return
+      const { item: foundItem, breadcrumbs } = findItemWithBreadcrumbs(rootItems, item.id)
+      if (!foundItem) return
+      if (isEnvironmentFolder(foundItem)) {
+        openEnvironmentFolderTab(foundItem, breadcrumbs, { focus: false })
+        return
+      }
+      if (isFolder(foundItem)) {
+        openFolderTab(foundItem, breadcrumbs, { focus: false })
+      }
+      // Requests are intentionally a no-op — see the comment on the
+      // return type for rationale.
+    },
+    [rootItems, openFolderTab, openEnvironmentFolderTab]
+  )
+
   // Resolve an index path (e.g. "0.0.1") to an actual item ID by walking rootItems
   const resolveIndexPath = useCallback((indexPath: string): string | null => {
     const indices = indexPath.split('.').map(Number)
@@ -260,6 +304,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
   return {
     handleItemClick,
     handleBreadcrumbClick,
+    handleBreadcrumbAuxClick,
     handleTabActivate,
     handleSearchResultClick
   }
