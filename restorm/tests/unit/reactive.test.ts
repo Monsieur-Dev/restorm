@@ -41,7 +41,10 @@ vi.mock('electron-core-ui/renderer', () => {
       FOLDER_DELETED: 'document:folder:deleted',
       REQUEST_CREATED: 'document:request:created',
       REQUEST_UPDATED: 'document:request:updated',
-      REQUEST_DELETED: 'document:request:deleted'
+      REQUEST_DELETED: 'document:request:deleted',
+      ENVIRONMENT_CREATED: 'document:environment:created',
+      ENVIRONMENT_UPDATED: 'document:environment:updated',
+      ENVIRONMENT_DELETED: 'document:environment:deleted'
     },
     searchService: {
       indexDocument: vi.fn(),
@@ -75,16 +78,19 @@ const mockedDocumentEvents = DocumentEvents as {
   REQUEST_CREATED: string
   REQUEST_UPDATED: string
   REQUEST_DELETED: string
+  ENVIRONMENT_UPDATED: string
 }
 import {
   makeReactiveFolder,
   makeReactiveRequest,
+  makeReactiveEnvironment,
   emitFolderCreated,
   emitFolderDeleted,
   emitRequestCreated,
   emitRequestDeleted
 } from '../../src/renderer/src/types/reactive'
-import type { Folder, HTTPRequest } from '../../src/shared/types/collections'
+import type { Folder, HTTPRequest, EnvironmentFolder, Environment } from '../../src/shared/types/collections'
+import { StringValue } from '../../src/shared/types/valueTypes'
 
 describe('Reactive Document System', () => {
   beforeEach(() => {
@@ -316,6 +322,214 @@ describe('Reactive Document System', () => {
           id: 'request-1',
           type: 'request'
         })
+      )
+    })
+  })
+
+  describe('EnvironmentFolder reactivity (OYO-204)', () => {
+    const createTestEnvironmentFolder = (): EnvironmentFolder => ({
+      id: 'envfolder-1',
+      folderType: 'environment',
+      fileFormatVersion: 1,
+      name: 'Envs',
+      documentation: '',
+      tags: [],
+      configuration: { environments: [] },
+      items: [],
+      environments: [
+        { id: 'env-1', name: 'dev', variables: [] }
+      ]
+    })
+
+    // `environments` and `items` are BOTH deliberately out of
+    // FOLDER_INDEXABLE_KEYS: treating them as indexable flooded
+    // `upsertSaveUnit` during Swagger import (one IPC per env folder
+    // / folder items rewrite) and turned a 96 s e2e into 110 s+.
+    // Env CRUD dirty-tracking instead rides on explicit emits
+    // (`emitEnvironmentCreated` / `emitEnvironmentDeleted` /
+    // `emitEnvironmentUpdated`) from the env-folder view, and on the
+    // env proxy's own ENVIRONMENT_UPDATED emission for name / variables /
+    // subEnvironments mutations. The three assertions below pin that
+    // contract — any refactor that silently re-indexes these keys
+    // would re-introduce the perf regression.
+    it('does NOT emit FOLDER_UPDATED when the environments array is replaced', () => {
+      const folder = createTestEnvironmentFolder()
+      const reactiveFolder = makeReactiveFolder(folder) as EnvironmentFolder
+
+      reactiveFolder.environments = [
+        ...reactiveFolder.environments,
+        { id: 'env-2', name: 'staging', variables: [] }
+      ]
+
+      vi.advanceTimersByTime(100)
+
+      expect(mockedEventBus.emitSync).not.toHaveBeenCalledWith(
+        mockedDocumentEvents.FOLDER_UPDATED,
+        expect.objectContaining({ id: 'envfolder-1', type: 'folder' })
+      )
+    })
+
+    it('does NOT emit FOLDER_UPDATED when the items array is replaced', () => {
+      const folder = createTestEnvironmentFolder()
+      const reactiveFolder = makeReactiveFolder(folder)
+
+      reactiveFolder.items = [createTestRequest()]
+
+      vi.advanceTimersByTime(100)
+
+      expect(mockedEventBus.emitSync).not.toHaveBeenCalledWith(
+        mockedDocumentEvents.FOLDER_UPDATED,
+        expect.objectContaining({ id: 'envfolder-1', type: 'folder' })
+      )
+    })
+
+    it('does NOT emit FOLDER_UPDATED when an environment is pushed onto environments', () => {
+      const folder = createTestEnvironmentFolder()
+      const reactiveFolder = makeReactiveFolder(folder) as EnvironmentFolder
+
+      reactiveFolder.environments.push({ id: 'env-3', name: 'prod', variables: [] })
+
+      vi.advanceTimersByTime(100)
+
+      expect(mockedEventBus.emitSync).not.toHaveBeenCalledWith(
+        mockedDocumentEvents.FOLDER_UPDATED,
+        expect.objectContaining({ id: 'envfolder-1', type: 'folder' })
+      )
+    })
+  })
+
+  describe('makeReactiveEnvironment (OYO-204)', () => {
+    it('emits ENVIRONMENT_UPDATED when the name is changed', () => {
+      const env: Environment = { id: 'env-1', name: 'dev', variables: [] }
+      const reactive = makeReactiveEnvironment(env, 'envfolder-1')
+
+      reactive.name = 'development'
+
+      vi.advanceTimersByTime(100)
+
+      expect(mockedEventBus.emitSync).toHaveBeenCalledWith(
+        mockedDocumentEvents.ENVIRONMENT_UPDATED,
+        expect.objectContaining({ id: 'env-1', type: 'environment', parentFolderId: 'envfolder-1' })
+      )
+    })
+
+    // `color` / `icon` are deliberately NOT in ENVIRONMENT_INDEXABLE_KEYS —
+    // the dirty flip for them travels through `folder.environments` being
+    // re-assigned with a new POJO in `handleEnvColorChange` /
+    // `handleIconChange`, which the folder-level proxy catches. Making
+    // them indexable would emit one ENVIRONMENT_UPDATED per tweak and
+    // tank the full-workflow import step (OYO-203 perf regression).
+    it('does NOT emit ENVIRONMENT_UPDATED when color changes in place', () => {
+      const env: Environment = { id: 'env-1', name: 'dev', variables: [] }
+      const reactive = makeReactiveEnvironment(env, 'envfolder-1')
+
+      reactive.color = '#ff8800'
+      vi.advanceTimersByTime(100)
+
+      expect(mockedEventBus.emitSync).not.toHaveBeenCalledWith(
+        mockedDocumentEvents.ENVIRONMENT_UPDATED,
+        expect.objectContaining({ id: 'env-1', type: 'environment' })
+      )
+    })
+
+    it('does NOT emit ENVIRONMENT_UPDATED when icon changes in place', () => {
+      const env: Environment = { id: 'env-1', name: 'dev', variables: [] }
+      const reactive = makeReactiveEnvironment(env, 'envfolder-1')
+
+      reactive.icon = { type: 'codicon', value: 'globe' }
+      vi.advanceTimersByTime(100)
+
+      expect(mockedEventBus.emitSync).not.toHaveBeenCalledWith(
+        mockedDocumentEvents.ENVIRONMENT_UPDATED,
+        expect.objectContaining({ id: 'env-1', type: 'environment' })
+      )
+    })
+
+    it('emits ENVIRONMENT_UPDATED when a variable is pushed', () => {
+      const env: Environment = { id: 'env-1', name: 'dev', variables: [] }
+      const reactive = makeReactiveEnvironment(env, 'envfolder-1')
+
+      reactive.variables.push({ key: 'API_URL', value: new StringValue('https://example.com') })
+
+      vi.advanceTimersByTime(100)
+
+      expect(mockedEventBus.emitSync).toHaveBeenCalledWith(
+        mockedDocumentEvents.ENVIRONMENT_UPDATED,
+        expect.objectContaining({ id: 'env-1', type: 'environment' })
+      )
+    })
+
+    it('tags a sub-environment with its parent environment id', () => {
+      const env: Environment = {
+        id: 'env-1',
+        name: 'dev',
+        variables: [],
+        subEnvironments: [{ id: 'env-1-sub', name: 'sub', variables: [] }]
+      }
+      const reactive = makeReactiveEnvironment(env, 'envfolder-1')
+
+      const subs = reactive.subEnvironments
+      if (!subs) throw new Error('expected sub-environments on reactive env')
+      subs[0].name = 'sub-renamed'
+
+      vi.advanceTimersByTime(100)
+
+      expect(mockedEventBus.emitSync).toHaveBeenCalledWith(
+        mockedDocumentEvents.ENVIRONMENT_UPDATED,
+        expect.objectContaining({
+          id: 'env-1-sub',
+          type: 'environment',
+          parentFolderId: 'envfolder-1',
+          parentEnvironmentId: 'env-1'
+        })
+      )
+    })
+
+    // EnvironmentFolderView's tree rewriters (`addSubEnvironment`,
+    // `deleteEnvironmentById`, etc.) spread `{...env}` on the path to
+    // the changed node, which strips the proxy from ancestors. The
+    // view's `updateEnvironments` helper re-wraps via
+    // `makeReactiveEnvironment` before persisting — that call must
+    // remain idempotent on an already-reactive subtree and still
+    // proxify a plain ancestor while leaving reactive descendants
+    // alone. This test locks both invariants.
+    it('re-wraps a spread-stripped parent while preserving reactive children', () => {
+      const original: Environment = {
+        id: 'env-parent',
+        name: 'parent',
+        variables: [],
+        subEnvironments: [{ id: 'env-child', name: 'child', variables: [] }]
+      }
+      const reactive = makeReactiveEnvironment(original, 'envfolder-1')
+      const reactiveChild = reactive.subEnvironments?.[0]
+      if (!reactiveChild) throw new Error('expected reactive child')
+
+      // Simulate the spread-leak: build a fresh plain parent that
+      // references the still-reactive child.
+      const spreadParent: Environment = { ...reactive, subEnvironments: [reactiveChild] }
+      const rewrapped = makeReactiveEnvironment(spreadParent, 'envfolder-1')
+
+      // Mutating the re-wrapped parent must fire on the parent id.
+      rewrapped.name = 'parent-renamed'
+      vi.advanceTimersByTime(100)
+
+      expect(mockedEventBus.emitSync).toHaveBeenCalledWith(
+        mockedDocumentEvents.ENVIRONMENT_UPDATED,
+        expect.objectContaining({ id: 'env-parent', type: 'environment' })
+      )
+
+      // And mutations on the already-reactive child must still fire
+      // on the child id (proving the re-wrap did not double-wrap and
+      // shadow the inner proxy).
+      mockedEventBus.emitSync.mockClear()
+      const rewrappedChild = rewrapped.subEnvironments?.[0]
+      if (!rewrappedChild) throw new Error('expected rewrapped child')
+      rewrappedChild.name = 'child-renamed'
+      vi.advanceTimersByTime(100)
+
+      expect(mockedEventBus.emitSync).toHaveBeenCalledWith(
+        mockedDocumentEvents.ENVIRONMENT_UPDATED,
+        expect.objectContaining({ id: 'env-child', type: 'environment' })
       )
     })
   })

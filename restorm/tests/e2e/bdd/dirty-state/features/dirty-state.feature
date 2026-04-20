@@ -144,6 +144,13 @@ Feature: Dirty-state propagation across nested units
     And the tab "pet-renamed" should be clean
     And the tab "Find pet by ID" should be clean
 
+  # Note: a scenario exercising "add env / add variable on new env →
+  # window dirty" (the OYO-204 fix) was drafted here but is deferred
+  # until OYO-203 lands — the useSyncExternalStore perf regression
+  # makes dirty-state propagation timing flaky enough that the e2e
+  # can't reliably assert the transition. Reactive-proxy coverage
+  # for OYO-204 lives in `tests/unit/reactive.test.ts`.
+
   Scenario: Dirty-state in folder mode
     Given a new folder YAML collection named "dirty-collection"
     Then the window should be clean

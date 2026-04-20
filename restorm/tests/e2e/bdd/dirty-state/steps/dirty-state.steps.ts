@@ -302,6 +302,60 @@ When(
   }
 )
 
+/**
+ * Env folder view defaults to the "Home" landing sub-tab, not the
+ * "Configuration" sub-tab where the envs list + add button live. Switch
+ * before reaching for the inner controls.
+ */
+async function activateEnvFolderConfigSubTab(p: Page): Promise<void> {
+  const configSubTab = p.locator('[role="tab"][data-tab-id="configuration"]:visible').first()
+  if ((await configSubTab.count()) === 0) return
+  const alreadyActive = await configSubTab.getAttribute('aria-selected')
+  if (alreadyActive === 'true') return
+  await configSubTab.click()
+  await p.waitForTimeout(200)
+}
+
+When('I add a new environment in the env folder', async () => {
+  const p = requirePage()
+  await activateEnvFolderConfigSubTab(p)
+  // `openEnvironmentFolderTab` schedules the dirty-baseline registration
+  // on a 500 ms `setTimeout` (KV table normalization). If we click the
+  // add button before that fires, the deferred `registerItem` lands
+  // AFTER the add mutation and resets the baseline — the window
+  // reappears clean even though the mutation went through. Wait past
+  // the timeout so the baseline is stamped before we mutate.
+  await p.waitForTimeout(700)
+  const addBtn = p
+    .locator('[data-testid="environment-folder-add-environment-button"]:visible')
+    .first()
+  await expect(addBtn).toBeVisible({ timeout: 5000 })
+  // SplitView hides pane header actions (`opacity: 0; pointer-events:
+  // none`) until the pane is hovered — force past the CSS gate so
+  // the click doesn't time-out in a retry loop.
+  await addBtn.click({ force: true })
+  // handleAddEnvironment selects the new env synchronously, then the
+  // reactive proxy's 50 ms debounce fires FOLDER_UPDATED, which the
+  // dirty tracker turns into a title update over two IPC hops.
+  await p.waitForTimeout(800)
+})
+
+When('I add a variable to the current environment', async () => {
+  const p = requirePage()
+  await activateEnvFolderConfigSubTab(p)
+  const addBtn = p
+    .locator('[data-testid="environment-folder-add-variable-button"]:visible')
+    .first()
+  await expect(addBtn).toBeVisible({ timeout: 5000 })
+  // Same hover-gated SplitView header actions as the env add button —
+  // force the click past the opacity-0 / pointer-events: none state.
+  await addBtn.click({ force: true })
+  // RestormKeyValueTable.addRow → onRowsChange →
+  // handleEnvironmentVariablesChange → reactive env proxy set →
+  // ENVIRONMENT_UPDATED (debounced). Give it a beat to propagate.
+  await p.waitForTimeout(900)
+})
+
 When(
   'I set the HTTP request URL to {string}',
   async ({}, url: string) => {
