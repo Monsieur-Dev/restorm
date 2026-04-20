@@ -147,7 +147,7 @@ work survives a hard crash.
 
 ```
 <userData>/drafts/<uuid>/<runtimeId>.draft.<ext>
-<userData>/drafts/<uuid>/.project-path        # marker for orphan sweep
+<userData>/drafts/<uuid>/.last-opened         # epoch-ms marker for the age-based sweep
 ```
 
 - `<uuid>` is generated on first open by `ensureFolderUuid` /
@@ -156,6 +156,14 @@ work survives a hard crash.
   moves of the project directory don't lose the link.
 - One draft file per dirty unit.
 - Tombstones serialize as `{ __tombstone: true, snapshot: … }`.
+- `.last-opened` holds a numeric epoch-ms; `DraftStore.markOpened()` is
+  called from `FileService.attachDraftStore()` every time a project is
+  opened, so the marker stays fresh as long as the user keeps returning
+  to the project. There is no on-disk `filePath` sidecar anywhere in
+  the draft tree — the store is fully path-agnostic, which means the
+  user can rename or move the project file outside the app and the
+  drafts still resolve correctly on next open (the UUID in the project
+  content is the only identity we need).
 
 ### Write cadence
 
@@ -172,7 +180,7 @@ work survives a hard crash.
 | Unit un-dirtied via undo | Draft file deleted. |
 | App crash | Draft files survive. |
 | Project reopened | Drafts auto-restored — each unit is marked dirty via `registry.mutate` (or `markDeleted` for tombstones); `file:drafts-restored { count }` broadcasts so the host app can push a toast via `<Toaster>`. |
-| Project directory deleted on disk | At next app boot, `sweepOrphanedDrafts` removes drafts whose `.project-path` points nowhere. |
+| Project abandoned for >30 days | At next app boot, `sweepOrphanedDrafts` reaps any draft directory whose `.last-opened` stamp is older than `DEFAULT_DRAFT_MAX_AGE_DAYS` (30). Age-based reaping is path-agnostic — it won't nuke drafts for a project the user simply renamed or moved outside the app. |
 | Tab closed without saving | Drafts kept silently; next open re-restores them. |
 | Explicit "Discard all changes" | Drafts deleted. |
 
@@ -183,7 +191,6 @@ work survives a hard crash.
 const restored = await getFileService().attachDraftStore({
   rootDir: join(app.getPath('userData'), 'drafts'),
   uuid,
-  projectPath,
   extension: persistenceConfig.extension,
   serialize: (v) => serialize(v, persistenceConfig.format),
   deserialize: (raw) => deserialize(raw, persistenceConfig.format)

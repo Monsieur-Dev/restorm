@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { InputBox, Button, ControlGroup, useFileService, ContextMenu, Table, type ContextMenuItem, type TableColumn } from 'electron-core-ui/renderer'
 import { getFavorites, removeFavorite, reorderFavorites } from '../../services/favoritesStore'
+import { PROJECT_UUID_KEY } from '../../../../shared/config/projectUuid'
 import type { EnvironmentFolder, FolderItem } from '../../../../shared/types/collections'
 import type { ApiDocumentation } from '../../../../shared/types/apiDocumentation'
 import { Badge, type BadgeType } from '../common/Badge'
@@ -49,26 +50,33 @@ function collectRequests(items: FolderItem[], parentPath: string[] = []): Favori
 
 const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequestClick }) => {
   const { t } = useTranslation()
-  const { filePath } = useFileService()
+  const { state: fileState } = useFileService()
   const [favVersion, setFavVersion] = useState(0)
   const apiDoc = (folder as unknown as { apiDocumentation?: ApiDocumentation }).apiDocumentation
 
+  const projectUuid = useMemo<string | null>(() => {
+    const content = fileState?.currentFile.content
+    if (!content || typeof content !== 'object') return null
+    const raw = (content as Record<string, unknown>)[PROJECT_UUID_KEY]
+    return typeof raw === 'string' && raw.length > 0 ? raw : null
+  }, [fileState])
+
   const favoriteRequests = useMemo(() => {
     void favVersion // reactivity dep
-    if (!filePath) return []
-    const ids = getFavorites(filePath)
+    if (!projectUuid) return []
+    const ids = getFavorites(projectUuid)
     if (ids.length === 0) return []
     const allRequests = collectRequests(folder.items)
     const requestMap = new Map(allRequests.map((r) => [r.id, r]))
     // Preserve favorites insertion order (not tree order)
     return ids.map((id) => requestMap.get(id)).filter((r): r is FavoriteRequest => r !== undefined)
-  }, [filePath, folder.items, favVersion])
+  }, [projectUuid, folder.items, favVersion])
 
   const [favContextMenu, setFavContextMenu] = useState<{ visible: boolean; x: number; y: number; requestId: string }>({ visible: false, x: 0, y: 0, requestId: '' })
 
   const handleRowsReorder = useCallback((orderedIds: string[]): void => {
-    if (filePath) reorderFavorites(filePath, orderedIds)
-  }, [filePath])
+    if (projectUuid) reorderFavorites(projectUuid, orderedIds)
+  }, [projectUuid])
 
   const handleFavContextMenu = (e: React.MouseEvent, requestId: string): void => {
     e.preventDefault()
@@ -76,8 +84,8 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
   }
 
   const handleRemoveFavorite = (): void => {
-    if (filePath && favContextMenu.requestId) {
-      removeFavorite(filePath, favContextMenu.requestId)
+    if (projectUuid && favContextMenu.requestId) {
+      removeFavorite(projectUuid, favContextMenu.requestId)
     }
     setFavContextMenu((prev) => ({ ...prev, visible: false }))
   }
@@ -152,8 +160,8 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
             className="home-favorite-delete"
             onClick={(e) => {
               e.stopPropagation()
-              if (filePath) {
-                removeFavorite(filePath, req.id)
+              if (projectUuid) {
+                removeFavorite(projectUuid, req.id)
                 setFavVersion((v) => v + 1)
               }
             }}
@@ -164,7 +172,7 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
         </div>
       )
     }
-  ], [onRequestClick, filePath])
+  ], [onRequestClick, projectUuid])
 
   return (
     <div className="home-container">

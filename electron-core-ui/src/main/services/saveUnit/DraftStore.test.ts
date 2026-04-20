@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { promises as fs, existsSync, mkdtempSync, rmSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
-import { DraftStore, sweepOrphanedDrafts, DEFAULT_DRAFT_DEBOUNCE_MS } from './DraftStore'
+import { DraftStore, sweepOrphanedDrafts, DEFAULT_DRAFT_DEBOUNCE_MS, DEFAULT_DRAFT_MAX_AGE_DAYS } from './DraftStore'
 import { makeTombstone } from './types'
 
 const noopSerialize = (value: unknown): string => JSON.stringify(value)
@@ -12,15 +12,12 @@ function makeStore(overrides?: Partial<{ debounceMs: number }>): {
   store: DraftStore
   rootDir: string
   projectDir: string
-  projectPath: string
   cleanup: () => void
 } {
   const rootDir = mkdtempSync(join(tmpdir(), 'draftstore-'))
-  const projectPath = mkdtempSync(join(tmpdir(), 'draftstore-project-'))
   const store = new DraftStore({
     rootDir,
     uuid: 'project-uuid-a',
-    projectPath,
     extension: 'json',
     serialize: noopSerialize,
     deserialize: noopDeserialize,
@@ -30,10 +27,8 @@ function makeStore(overrides?: Partial<{ debounceMs: number }>): {
     store,
     rootDir,
     projectDir: join(rootDir, 'project-uuid-a'),
-    projectPath,
     cleanup: () => {
       rmSync(rootDir, { recursive: true, force: true })
-      rmSync(projectPath, { recursive: true, force: true })
     }
   }
 }
@@ -63,12 +58,6 @@ describe('DraftStore.writeDraft', () => {
     expect(content.v).toBe(3)
   })
 
-  it('writes the project path marker alongside the first flushed draft', async () => {
-    await ctx.store.writeDraft('r1', { ok: true })
-    const marker = await fs.readFile(join(ctx.projectDir, '.project-path'), 'utf-8')
-    expect(marker).toBe(ctx.projectPath)
-  })
-
   it('writes atomically — no *.tmp files remain after a successful flush', async () => {
     await ctx.store.writeDraft('r1', { v: 1 })
     const entries = await fs.readdir(ctx.projectDir)
@@ -88,6 +77,32 @@ describe('DraftStore.writeDraft', () => {
     }
     expect(content.__tombstone).toBe(true)
     expect(content.snapshot).toEqual({ name: 'removed' })
+  })
+})
+
+describe('DraftStore.markOpened', () => {
+  let ctx: ReturnType<typeof makeStore>
+  beforeEach(() => { ctx = makeStore() })
+  afterEach(() => { ctx.cleanup() })
+
+  it('creates the project dir and stamps a numeric `.last-opened` timestamp', async () => {
+    const before = Date.now()
+    await ctx.store.markOpened()
+    const after = Date.now()
+    const marker = (await fs.readFile(join(ctx.projectDir, '.last-opened'), 'utf-8')).trim()
+    const stamped = Number.parseInt(marker, 10)
+    expect(stamped).toBeGreaterThanOrEqual(before)
+    expect(stamped).toBeLessThanOrEqual(after)
+  })
+
+  it('refreshes the timestamp on repeated calls', async () => {
+    await ctx.store.markOpened()
+    const first = Number.parseInt((await fs.readFile(join(ctx.projectDir, '.last-opened'), 'utf-8')).trim(), 10)
+    // Sleep to guarantee a new timestamp even on coarse clocks.
+    await new Promise<void>((resolve) => { setTimeout(resolve, 5) })
+    await ctx.store.markOpened()
+    const second = Number.parseInt((await fs.readFile(join(ctx.projectDir, '.last-opened'), 'utf-8')).trim(), 10)
+    expect(second).toBeGreaterThanOrEqual(first)
   })
 })
 
@@ -146,30 +161,28 @@ describe('DraftStore.loadAllDrafts', () => {
   })
 })
 
-describe('sweepOrphanedDrafts', () => {
+describe('sweepOrphanedDrafts (age-based)', () => {
   let rootDir: string
   beforeEach(() => {
     rootDir = mkdtempSync(join(tmpdir(), 'draftsweep-'))
   })
   afterEach(() => { rmSync(rootDir, { recursive: true, force: true }) })
 
-  it('removes directories whose .project-path target no longer exists', async () => {
-    const deadPath = mkdtempSync(join(tmpdir(), 'draftsweep-dead-'))
-    const deadDir = join(rootDir, 'uuid-dead')
-    await fs.mkdir(deadDir, { recursive: true })
-    await fs.writeFile(join(deadDir, '.project-path'), deadPath, 'utf-8')
-    rmSync(deadPath, { recursive: true, force: true }) // path no longer exists
+  it('removes directories whose `.last-opened` marker is older than maxAgeDays', async () => {
+    const staleDir = join(rootDir, 'uuid-stale')
+    await fs.mkdir(staleDir, { recursive: true })
+    // 60 days ago — beyond the default 30-day threshold.
+    const staleTs = Date.now() - 60 * 24 * 60 * 60 * 1000
+    await fs.writeFile(join(staleDir, '.last-opened'), String(staleTs), 'utf-8')
 
-    const livePath = mkdtempSync(join(tmpdir(), 'draftsweep-live-'))
-    const liveDir = join(rootDir, 'uuid-live')
-    await fs.mkdir(liveDir, { recursive: true })
-    await fs.writeFile(join(liveDir, '.project-path'), livePath, 'utf-8')
+    const freshDir = join(rootDir, 'uuid-fresh')
+    await fs.mkdir(freshDir, { recursive: true })
+    await fs.writeFile(join(freshDir, '.last-opened'), String(Date.now()), 'utf-8')
 
     const removed = await sweepOrphanedDrafts(rootDir)
     expect(removed).toBe(1)
-    expect(existsSync(deadDir)).toBe(false)
-    expect(existsSync(liveDir)).toBe(true)
-    rmSync(livePath, { recursive: true, force: true })
+    expect(existsSync(staleDir)).toBe(false)
+    expect(existsSync(freshDir)).toBe(true)
   })
 
   it('removes directories that have no marker (abandoned from older builds)', async () => {
@@ -181,6 +194,47 @@ describe('sweepOrphanedDrafts', () => {
     expect(existsSync(ancient)).toBe(false)
   })
 
+  it('respects a custom maxAgeDays override', async () => {
+    const dir = join(rootDir, 'uuid-one-day-old')
+    await fs.mkdir(dir, { recursive: true })
+    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000
+    await fs.writeFile(join(dir, '.last-opened'), String(oneDayAgo), 'utf-8')
+
+    // Default 30-day threshold → keep.
+    expect(await sweepOrphanedDrafts(rootDir)).toBe(0)
+    expect(existsSync(dir)).toBe(true)
+
+    // Tighter threshold → reap.
+    expect(await sweepOrphanedDrafts(rootDir, 0)).toBe(1)
+    expect(existsSync(dir)).toBe(false)
+  })
+
+  it('keeps directories whose `.last-opened` marker was refreshed recently by `markOpened`', async () => {
+    // Simulate an "opened long ago, then reopened today" flow: seed
+    // an old timestamp, then instantiate a store pointing at the same
+    // UUID and call `markOpened`. The refreshed marker must survive
+    // the default sweep.
+    const uuid = 'uuid-refreshed'
+    const dir = join(rootDir, uuid)
+    await fs.mkdir(dir, { recursive: true })
+    const ancient = Date.now() - 90 * 24 * 60 * 60 * 1000
+    await fs.writeFile(join(dir, '.last-opened'), String(ancient), 'utf-8')
+
+    const store = new DraftStore({
+      rootDir,
+      uuid,
+      extension: 'json',
+      serialize: noopSerialize,
+      deserialize: noopDeserialize,
+      debounceMs: 5
+    })
+    await store.markOpened()
+
+    const removed = await sweepOrphanedDrafts(rootDir)
+    expect(removed).toBe(0)
+    expect(existsSync(dir)).toBe(true)
+  })
+
   it('returns 0 when the root dir does not exist', async () => {
     const missing = join(rootDir, 'not-there-at-all')
     expect(await sweepOrphanedDrafts(missing)).toBe(0)
@@ -190,5 +244,11 @@ describe('sweepOrphanedDrafts', () => {
 describe('DEFAULT_DRAFT_DEBOUNCE_MS', () => {
   it('is 300 ms per the OYO-183 spec', () => {
     expect(DEFAULT_DRAFT_DEBOUNCE_MS).toBe(300)
+  })
+})
+
+describe('DEFAULT_DRAFT_MAX_AGE_DAYS', () => {
+  it('defaults to 30 days', () => {
+    expect(DEFAULT_DRAFT_MAX_AGE_DAYS).toBe(30)
   })
 })

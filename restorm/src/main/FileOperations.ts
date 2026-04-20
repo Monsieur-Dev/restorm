@@ -828,7 +828,6 @@ export async function attachDraftStoreForFolder(
     const restored = await fileService.attachDraftStore({
       rootDir: getDraftsRootDir(),
       uuid,
-      projectPath: folderPath,
       extension: ext,
       serialize: (value) => coreSerialize(value, format),
       deserialize: (raw) => coreDeserialize(raw, format)
@@ -870,7 +869,6 @@ export async function attachDraftStoreForFile(
     const restored = await fileService.attachDraftStore({
       rootDir: getDraftsRootDir(),
       uuid,
-      projectPath: filePath,
       extension: ext,
       serialize: (value) => coreSerialize(value, format),
       deserialize: (raw) => coreDeserialize(raw, format)
