@@ -79,6 +79,15 @@ export interface IconSelectProps {
    * the change into every other IconSelect on the page.
    */
   size?: number
+  /**
+   * When `true` (default) the trigger uses the `small` button variant
+   * — the right sizing for toolbar / statusbar / inline-flow usage.
+   * Set to `false` when the icon is rendered at a larger `size`
+   * (e.g. 20 px+) so the button's min-height doesn't squash the
+   * glyph; pair with a CSS override on the button's horizontal
+   * padding if you need a tighter layout.
+   */
+  small?: boolean
   className?: string
   style?: React.CSSProperties
   /** Optional test id applied to the root element. */
@@ -175,6 +184,7 @@ const IconSelectInner: React.FC<IconSelectProps> = ({
   disabled = false,
   readonly = false,
   size = 16,
+  small = true,
   className,
   style,
   'data-testid': dataTestId
@@ -367,7 +377,7 @@ const IconSelectInner: React.FC<IconSelectProps> = ({
     >
       <div ref={buttonRef}>
         <Button
-          small
+          {...(small ? { small: true } : {})}
           secondary
           disabled={disabled}
           onClick={handleButtonClick}

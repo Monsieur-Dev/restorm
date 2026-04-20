@@ -230,6 +230,7 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
             onChange={handleTitleIconChange}
             className="restorm-workbench-tab-title-icon-select"
             size={22}
+            small={false}
             data-testid={`${testIdPrefix}-title-icon`}
           />
         ) : null}

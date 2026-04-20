@@ -21,13 +21,16 @@
   cursor: pointer;
 }
 
-.ecui-editable-label-trigger:focus {
-  outline: none;
-}
-
+/* No focus outline on the trigger. After a commit / cancel we
+ * programmatically restore focus to this button, which under
+ * `:focus-visible` renders a ring even though the user didn't tab
+ * here — it reads as a glitch lingering after the edit. Likewise the
+ * mouse-click path leaves focus on the trigger; surfacing a ring
+ * would highlight something the user just clicked past. Covering
+ * both pseudos keeps the post-interaction state visually clean. */
+.ecui-editable-label-trigger:focus,
 .ecui-editable-label-trigger:focus-visible {
-  outline: 1px solid var(--focusBorder);
-  outline-offset: 2px;
+  outline: none;
 }
 
 /* Pencil hint: absolutely-positioned so it doesn't nudge layout in/out

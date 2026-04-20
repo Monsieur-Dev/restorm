@@ -1417,6 +1417,12 @@ Then('the folder tab breadcrumb icon should be {string}', async ({}, iconName: s
   // with existing scenarios but target the new location.
   const icon = page.locator(`.restorm-workbench-tab-title-icon-select .codicon-${iconName}:visible`).first()
   await expect(icon).toBeVisible({ timeout: 5000 })
+  // The title IconSelect is configured at `size={22}`. Assert the
+  // computed font-size matches so a regression to 16 (e.g. the vendor
+  // `.codicon[class*='codicon-'] { font: 16px/1 }` shorthand silently
+  // outmanoeuvres an inline size again) fails loudly.
+  const computedSize = await icon.evaluate((el) => window.getComputedStyle(el).fontSize)
+  expect(computedSize).toBe('22px')
 })
 
 Then('the environment-folder variables table color picker should be visible', async () => {

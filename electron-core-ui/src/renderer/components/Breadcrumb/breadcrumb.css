@@ -37,7 +37,12 @@
   outline: none;
 }
 
-.ecui-breadcrumb-link:focus {
+/* Covers `:focus-visible` too — middle-click moves native focus to the
+ * button, and some browsers surface a `:focus-visible` ring after a
+ * pointer-gesture focus transfer, which looks like a stuck
+ * highlight after the user-initiated background-open action. */
+.ecui-breadcrumb-link:focus,
+.ecui-breadcrumb-link:focus-visible {
   outline: none;
 }
 
