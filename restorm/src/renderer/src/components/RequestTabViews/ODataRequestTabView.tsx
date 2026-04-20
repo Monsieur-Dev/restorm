@@ -1,30 +1,40 @@
 /**
- * ODataRequestTabView — Phase 1 scaffolding.
+ * ODataRequestTabView — Phase 1 (UI + engine wiring).
  *
  * Renders the URL, version selector and the v4 subset of system query
  * options ($filter / $select / $top / $skip / $count) that Phase 1
  * commits. The URL preview is computed live from the serializer so
  * the user can see the canonical OData URL as they type.
  *
- * Phase 1 deliberately ships WITHOUT the execution engine: the Send
- * button is disabled with a tooltip pointing at OYO-180 Phase 1b,
- * where `ODataExecutionService` + the ContextService / URLResolver
- * OData branch land. Builders for `$expand` / `$orderby` / `$search`
- * / `$format` / `$apply`, v2/v3 support, actions/functions and
- * `$batch` follow in later phases per the ticket's acceptance list.
+ * Send dispatches through the `odata:execute` IPC bridge, which
+ * reuses `httpExecutionService` under the hood — the URL resolver
+ * has already appended the system options, so the dispatcher sees a
+ * plain HTTP GET. Response history records the result as an `http`
+ * entry in Phase 1b; the dedicated OData response chrome
+ * (`@odata.nextLink` pagination, `@odata.count` hint, navigation
+ * links) lands alongside Phase 2.
+ *
+ * Still deferred: `$expand` / `$orderby` / `$search` / `$format` /
+ * `$apply` builders (Phase 2), v2 / v3 engine differences (Phase 3),
+ * actions / functions (Phase 4), and `$batch` (Phase 5).
  */
 
-import React, { useCallback, useMemo, type CSSProperties } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { useRequestReset } from '../../hooks/useRequestReset'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
   InputBox,
+  JsonViewer,
   SelectBox,
   Toggle,
+  logger,
   type ISelectOptionItem,
   type ISelectData
 } from 'electron-core-ui/renderer'
-import type { ODataRequest, ODataVersion } from '../../../../shared/types/collections'
+import type { ODataRequest, ODataVersion, KeyValue } from '../../../../shared/types/collections'
+import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
+import type { KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { updateReactiveProperty } from './requestTabViewUtils'
 import {
@@ -32,6 +42,9 @@ import {
   buildODataUrl,
   keyValuesToPairs
 } from '../../../../shared/utils/odataQuery'
+import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
+import { useRestormStore } from '../../store/restormStore'
+import { buildRequestPath } from '../../utils/requestPath'
 
 const urlRowStyle: CSSProperties = { display: 'flex', gap: 8, alignItems: 'center' }
 const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
@@ -60,8 +73,43 @@ const previewValueStyle: CSSProperties = {
   wordBreak: 'break-all',
   userSelect: 'text'
 }
+const responseStatusStyle: CSSProperties = {
+  display: 'flex',
+  gap: 12,
+  alignItems: 'center',
+  padding: '6px 12px',
+  fontSize: 12,
+  color: 'var(--descriptionForeground)'
+}
 
 const ODATA_VERSION_BY_INDEX: ODataVersion[] = ['v4', 'v3', 'v2']
+
+function toKeyValueData(kvs: readonly KeyValue[]): KeyValueData[] {
+  return kvs.map((kv) => ({
+    id: kv.id,
+    key: kv.key,
+    value: kv.value.toString(),
+    enabled: kv.enabled
+  }))
+}
+
+function tryParseJson(raw: string): unknown {
+  if (!raw) return null
+  try {
+    return JSON.parse(raw) as unknown
+  } catch {
+    return null
+  }
+}
+
+interface ODataResponseViewData {
+  statusCode: number
+  statusText: string
+  requestUrl: string
+  durationMs: number
+  body: string
+  error?: string
+}
 
 export interface ODataRequestTabViewProps {
   request: ODataRequest
@@ -69,6 +117,8 @@ export interface ODataRequestTabViewProps {
 
 export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ request }) => {
   const { t } = useTranslation()
+  const { selectedEnvId, environments } = useEnvironmentContext()
+  const collections = useRestormStore((state) => state.collections)
 
   const odataVersionOptions = useMemo<ISelectOptionItem[]>(() => [
     { text: 'v4' },
@@ -76,9 +126,23 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     { text: t('odataRequestTab.version.v2NotYet', 'v2 (execution not yet supported)') }
   ], [t])
 
+  const [isSending, setIsSending] = useState(false)
+  const [response, setResponse] = useState<ODataResponseViewData | null>(null)
+
+  const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
+  const sourceIdRef = useRef<string>(crypto.randomUUID())
+  const selectedEnvIdRef = useRef(selectedEnvId)
+  const environmentsRef = useRef(environments)
+  useEffect(() => { selectedEnvIdRef.current = selectedEnvId }, [selectedEnvId])
+  useEffect(() => { environmentsRef.current = environments }, [environments])
+
+  const handleReset = useCallback(() => {
+    setResponse(null)
+  }, [])
+  useRequestReset(request, handleReset)
+
   // `updateReactiveProperty` mutates the proxied `request` object
   // directly — consistent with the pattern used in HTTPRequestTabView.
-
   const setUrl = useCallback((next: string) => {
     updateReactiveProperty(request, 'url', next)
   }, [request])
@@ -112,12 +176,120 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
 
   // Live URL preview composed from the current (unresolved) values.
   // Handlebars templates stay literal in the preview — resolution
-  // happens server-side at send time (Phase 1b).
+  // happens in the main process at send time.
   const urlPreview = useMemo(() => {
     const systemPairs = serializeODataQueryOptions(request.queryOptions, request.odataVersion)
     const extraPairs = keyValuesToPairs(request.params)
     return buildODataUrl(request.url, systemPairs, extraPairs)
   }, [request.url, request.odataVersion, request.queryOptions, request.params])
+
+  // Register request with ContextService on mount, unregister on unmount.
+  useEffect(() => {
+    const requestId = request.id
+    if (!requestId) return
+    const currentEnvId = selectedEnvIdRef.current ?? environmentsRef.current?.[0]?.id ?? null
+
+    void window.restorm?.context.registerRequest(requestId, currentEnvId, {
+      headers: toKeyValueData(request.headers),
+      params: toKeyValueData(request.params)
+    })
+
+    return () => {
+      void window.restorm?.context.unregisterRequest(requestId)
+    }
+  }, [request.id, request.headers, request.params])
+
+  // Keep ContextService in sync with env selection.
+  useEffect(() => {
+    const requestId = request.id
+    if (!requestId) return
+    const currentEnvId = selectedEnvId ?? environments?.[0]?.id ?? null
+    void window.restorm?.context.setRequestEnvironment(requestId, currentEnvId)
+  }, [selectedEnvId, environments, request.id])
+
+  // Push the latest OData request shape to ContextService so
+  // URLResolver can compose the resolved URL (with $filter / $select
+  // / $top / $skip / $count appended). Keeps refiring when any of the
+  // captured fields changes.
+  useEffect(() => {
+    const requestId = request.id
+    if (!requestId) return
+    void window.restorm?.context.updateFullRequestData(requestId, {
+      id: requestId,
+      requestType: 'odata',
+      url: request.url,
+      headers: toKeyValueData(request.headers),
+      params: toKeyValueData(request.params),
+      odataVersion: request.odataVersion,
+      odataOperationKind: request.operationKind,
+      odataQueryOptions: { ...request.queryOptions }
+    } as unknown as Parameters<typeof window.restorm.context.updateFullRequestData>[1], sourceIdRef.current)
+  }, [
+    request.id,
+    request.url,
+    request.headers,
+    request.params,
+    request.odataVersion,
+    request.operationKind,
+    request.queryOptions
+  ])
+
+  const handleSend = useCallback((): void => {
+    if (isSending) return
+    const requestId = request.id
+    if (!requestId) {
+      logger.error('Cannot send OData request without ID')
+      return
+    }
+    setIsSending(true)
+    setResponse(null)
+
+    const api = window.restorm?.odata
+    if (!api) {
+      setIsSending(false)
+      setResponse({
+        statusCode: 0,
+        statusText: '',
+        requestUrl: '',
+        durationMs: 0,
+        body: '',
+        error: 'OData IPC bridge unavailable (restorm context missing)'
+      })
+      return
+    }
+
+    api.execute({
+      requestId,
+      timeout: DEFAULT_REQUEST_TIMEOUT_MS,
+      ...(requestPath ? { requestPath } : {})
+    })
+      .then((result) => {
+        setResponse({
+          statusCode: result.statusCode ?? 0,
+          statusText: result.statusText ?? '',
+          requestUrl: result.requestUrl ?? '',
+          durationMs: result.timings.durationMs,
+          body: result.body ?? '',
+          ...(result.error !== undefined && { error: result.error })
+        })
+        logger.info('OData request completed', {
+          url: result.requestUrl,
+          status: result.statusCode,
+          duration: result.timings.durationMs
+        })
+      })
+      .catch((err: unknown) => {
+        setResponse({
+          statusCode: 0,
+          statusText: '',
+          requestUrl: '',
+          durationMs: 0,
+          body: '',
+          error: err instanceof Error ? err.message : String(err)
+        })
+      })
+      .finally(() => { setIsSending(false) })
+  }, [isSending, request.id, requestPath])
 
   const urlSection = (
     <div style={urlRowStyle} data-testid="odata-request-url-section">
@@ -131,11 +303,12 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       </div>
       <div style={sendButtonWrapperStyle}>
         <Button
-          disabled
+          disabled={isSending}
           icon="play"
+          onClick={handleSend}
           options={{
-            ariaLabel: t('odataRequestTab.sendDisabled', 'Send: OData execution is not yet enabled'),
-            title: t('odataRequestTab.sendDisabled', 'Send: OData execution is not yet enabled')
+            ariaLabel: t('odataRequestTab.send', 'Send'),
+            title: t('odataRequestTab.send', 'Send')
           }}
           data-testid="odata-request-send"
         >
@@ -220,6 +393,35 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     </div>
   )
 
+  const responseContent = response ? (
+    <div data-testid="odata-response">
+      <div style={responseStatusStyle}>
+        {response.error ? (
+          <span>{t('odataRequestTab.responseError', 'Error')}: {response.error}</span>
+        ) : (
+          <>
+            <span>{response.statusCode} {response.statusText}</span>
+            <span>{response.durationMs} ms</span>
+            {response.requestUrl ? <span style={{ opacity: 0.7 }}>{response.requestUrl}</span> : null}
+          </>
+        )}
+      </div>
+      {(() => {
+        const parsed = tryParseJson(response.body)
+        if (parsed !== null && typeof parsed === 'object') {
+          return (
+            <JsonViewer json={response.body} data-testid="odata-response-json" />
+          )
+        }
+        return (
+          <pre style={{ ...previewValueStyle, whiteSpace: 'pre-wrap' }} data-testid="odata-response-raw">
+            {response.body}
+          </pre>
+        )
+      })()}
+    </div>
+  ) : undefined
+
   return (
     <BaseRequestTabView
       requestId={request.id}
@@ -232,8 +434,9 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       documentation={request.documentation}
       notes={request.notes}
       onNotesChange={(notes: string) => { updateReactiveProperty(request, 'notes', notes) }}
-      isLoading={false}
-      showResponse={false}
+      isLoading={isSending}
+      showResponse={response !== null}
+      {...(responseContent !== undefined ? { responseContent } : {})}
     />
   )
 }

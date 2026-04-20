@@ -59,7 +59,7 @@ export type HTTPRequestBody =
 /** Full request data for URL resolution and code snippet generation */
 export interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata'
 
   // Common fields
   url: string
@@ -93,6 +93,19 @@ export interface FullRequestData {
   protocol?: string
   event?: string
   message?: string
+
+  // OData specific — carried verbatim through URLResolver, which
+  // appends the system query options ($filter / $select / $top /
+  // $skip / $count) to the resolved URL as a final step.
+  odataVersion?: 'v2' | 'v3' | 'v4'
+  odataOperationKind?: 'entity-set' | 'function' | 'action'
+  odataQueryOptions?: {
+    filter?: string
+    select?: string[]
+    top?: string
+    skip?: string
+    count?: boolean
+  }
 }
 
 /** Request context tracking with full data */

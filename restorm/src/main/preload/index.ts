@@ -463,6 +463,49 @@ contextBridge.exposeInMainWorld('restorm', {
       }
     }
   },
+  odata: {
+    /**
+     * Execute an OData request. Reuses the HTTP dispatcher: the URL
+     * (with system query options already appended by URLResolver) is
+     * dispatched as a plain GET. The Phase 1b payload is identical to
+     * the HTTP one — a dedicated shape lands when `@odata.nextLink` /
+     * `@odata.count` chrome ships.
+     */
+    execute: async (input: { requestId: string; timeout?: number; requestPath?: string }): Promise<{
+      requestId: string
+      success: boolean
+      statusCode?: number
+      statusText?: string
+      headers?: Record<string, string | string[]>
+      body?: string
+      error?: string
+      timings: { startedAt: string; durationMs: number }
+      requestUrl?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('odata:execute', input)
+      return result as {
+        requestId: string
+        success: boolean
+        statusCode?: number
+        statusText?: string
+        headers?: Record<string, string | string[]>
+        body?: string
+        error?: string
+        timings: { startedAt: string; durationMs: number }
+        requestUrl?: string
+      }
+    },
+    /** Cancel an in-flight OData request. */
+    cancel: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('odata:cancel', requestId)
+      return result as boolean
+    },
+    /** Check whether an OData request is currently in flight. */
+    isActive: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('odata:is-active', requestId)
+      return result as boolean
+    }
+  },
   websocket: {
     /** Connect to a WebSocket endpoint */
     connect: async (input: { requestId: string; timeout?: number }): Promise<{

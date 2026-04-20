@@ -6,6 +6,7 @@
 
 import type { FullRequestData, ResolvedUrlResult, TransformedContext, TransformValueFn } from './ContextServiceTypes'
 import { isExpressionValue, isEnumListValue, isEnumValue } from '../../shared/utils/valueHelpers'
+import { serializeODataQueryOptions } from '../../shared/utils/odataQuery'
 
 /**
  * Calculate the resolved URL for a request.
@@ -96,6 +97,36 @@ export function resolveUrl(
         : raw
       queryParts.push(`${encodeURIComponent(resolvedKey)}=${encodeURIComponent(resolvedValue)}`)
       cumulativeParamsContext[resolvedKey] = resolvedValue
+    }
+  }
+
+  // OData system query options — resolve each value through
+  // Handlebars before handing it to the serializer, then append the
+  // resulting pairs after the user's regular query params. Keys
+  // start with `$` and we intentionally keep them literal (OData
+  // servers accept both `$filter=...` and `%24filter=...` but the
+  // literal form is canonical and human-readable).
+  if (data.requestType === 'odata' && data.odataQueryOptions) {
+    const resolvedOptions = {
+      ...(data.odataQueryOptions.filter !== undefined && {
+        filter: transformValue(data.odataQueryOptions.filter, cumulativeParamsContext)
+      }),
+      ...(data.odataQueryOptions.select !== undefined && {
+        select: data.odataQueryOptions.select.map((s) => transformValue(s, cumulativeParamsContext))
+      }),
+      ...(data.odataQueryOptions.top !== undefined && {
+        top: transformValue(data.odataQueryOptions.top, cumulativeParamsContext)
+      }),
+      ...(data.odataQueryOptions.skip !== undefined && {
+        skip: transformValue(data.odataQueryOptions.skip, cumulativeParamsContext)
+      }),
+      ...(data.odataQueryOptions.count !== undefined && {
+        count: data.odataQueryOptions.count
+      })
+    }
+    const systemPairs = serializeODataQueryOptions(resolvedOptions, data.odataVersion ?? 'v4')
+    for (const [key, value] of systemPairs) {
+      queryParts.push(`${key}=${encodeURIComponent(value)}`)
     }
   }
 

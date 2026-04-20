@@ -120,6 +120,11 @@ declare global {
         onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
         onMessage: (callback: (data: WebSocketMessageData) => void) => (() => void)
       }
+      odata: {
+        execute: (input: ODataExecutionInput) => Promise<HTTPExecutionResult>
+        cancel: (requestId: string) => Promise<boolean>
+        isActive: (requestId: string) => Promise<boolean>
+      }
       import: {
         preview: (input: string) => Promise<{
           success: boolean
@@ -190,6 +195,12 @@ export interface AvailableVariablesResult {
 }
 
 /** HTTP execution input for backend */
+export interface ODataExecutionInput {
+  requestId: string
+  timeout?: number
+  requestPath?: string
+}
+
 export interface HTTPExecutionInput {
   requestId: string
   method: string
