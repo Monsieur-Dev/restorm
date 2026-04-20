@@ -26,6 +26,15 @@ type Listener = (toasterId: string, payload: EventPayload) => void
 
 const DEFAULT_MAX_TOASTS = 50
 
+/**
+ * Stable fallback array for `getToasts` when the requested toasterId
+ * has no registered state yet. Must stay module-level so every call
+ * returns the SAME reference — `useSyncExternalStore`'s `getSnapshot`
+ * is called on every render and a fresh `[]` each time would be read
+ * as "store changed", triggering an infinite re-render loop (OYO-203).
+ */
+const EMPTY_TOASTS_SNAPSHOT: readonly Toast[] = Object.freeze([])
+
 function genId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID()
@@ -208,7 +217,12 @@ class ToasterServiceImpl {
   // ── Flags (showFrame, doNotDisturb) ───────────────────────────────
 
   getToasts(toasterId: string): Toast[] {
-    return this.states.get(toasterId)?.toasts ?? []
+    // Return `EMPTY_TOASTS_SNAPSHOT` rather than a fresh `[]` on the
+    // "unregistered toasterId" path so `useSyncExternalStore` sees a
+    // stable reference between calls and doesn't loop. The readonly
+    // cast is safe: `getToasts` is a read-only observer and consumers
+    // treat the returned array as frozen.
+    return this.states.get(toasterId)?.toasts ?? (EMPTY_TOASTS_SNAPSHOT as Toast[])
   }
 
   getShowFrame(toasterId: string): boolean {

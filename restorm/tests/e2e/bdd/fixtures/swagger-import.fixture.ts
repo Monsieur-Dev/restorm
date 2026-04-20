@@ -5,6 +5,7 @@ import { join, resolve } from 'path'
 import electronPath from 'electron'
 import { installSystemModalsMockingForE2E, configureNextSaveFileDialogForE2E, configureNextOpenDialogForE2E } from 'electron-core-ui/testing'
 import { withE2ECoverageEnv } from '../../helpers/coverage'
+import { collectBlockingRendererMessages, summariseBlockingMessages } from '../../helpers/renderer-log-guard'
 
 export const SWAGGER_IMPORT_TEMP_DIR = resolve(__dirname, '../../.tmp/swagger-import')
 const RESTORM_ROOT = resolve(__dirname, '../../../..')
@@ -60,7 +61,9 @@ export const test = base.extend<SwaggerImportFixtures>({
     // Teardown
     const { writeFileSync } = await import('fs')
     mkdirSync(testInfo.outputDir, { recursive: true })
+    const blockingErrors: string[] = []
     for (const { app, logs } of apps) {
+      blockingErrors.push(...collectBlockingRendererMessages(logs))
       if (testInfo.status !== 'passed') {
         try {
           const p = await app.firstWindow().catch(() => null)
@@ -79,6 +82,16 @@ export const test = base.extend<SwaggerImportFixtures>({
         }
       } catch { /* ignore */ }
       try { app.process().kill('SIGKILL') } catch { /* ignore */ }
+    }
+
+    // Critical renderer signals (getSnapshot / Maximum update depth /
+    // any pageerror) fail an otherwise-passing scenario — see
+    // `helpers/renderer-log-guard.ts`.
+    if (blockingErrors.length > 0 && testInfo.status === 'passed') {
+      const logFile = join(testInfo.outputDir, 'renderer-errors.txt')
+      writeFileSync(logFile, blockingErrors.join('\n\n'), 'utf-8')
+      await testInfo.attach('renderer-errors', { path: logFile, contentType: 'text/plain' })
+      throw new Error(summariseBlockingMessages(blockingErrors))
     }
   }
 })

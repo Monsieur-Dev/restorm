@@ -5,6 +5,7 @@ import { join, resolve } from 'path'
 import electronPath from 'electron'
 import { installSystemModalsMockingForE2E } from 'electron-core-ui/testing'
 import { withE2ECoverageEnv } from '../../helpers/coverage'
+import { collectBlockingRendererMessages, summariseBlockingMessages } from '../../helpers/renderer-log-guard'
 
 /**
  * Scratch root for files the dirty-state scenarios create (single-file
@@ -117,7 +118,13 @@ export const test = base.extend<DirtyStateFixtures>({
       }
     }
 
+    // Scan the captured renderer output for critical signals
+    // (`Maximum update depth exceeded`, `getSnapshot should be cached`,
+    // any `[renderer:error]`/`[renderer:pageerror]`). See
+    // `helpers/renderer-log-guard.ts`.
+    const blockingErrors: string[] = []
     for (const { app, logs } of launched) {
+      blockingErrors.push(...collectBlockingRendererMessages(logs))
       try {
         if (logs.length > 0) {
           const logFile = join(testInfo.outputDir, 'electron-logs.txt')
@@ -126,6 +133,13 @@ export const test = base.extend<DirtyStateFixtures>({
         }
       } catch { /* ignore */ }
       try { app.process().kill('SIGKILL') } catch { /* ignore */ }
+    }
+
+    if (blockingErrors.length > 0 && testInfo.status === 'passed') {
+      const logFile = join(testInfo.outputDir, 'renderer-errors.txt')
+      writeFileSync(logFile, blockingErrors.join('\n\n'), 'utf-8')
+      await testInfo.attach('renderer-errors', { path: logFile, contentType: 'text/plain' })
+      throw new Error(summariseBlockingMessages(blockingErrors))
     }
   }
 })
