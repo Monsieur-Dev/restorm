@@ -13,7 +13,7 @@ import userEvent from '@testing-library/user-event'
 import { BookmarkRibbon } from '../../../electron-core-ui/src/renderer/components/BookmarkRibbon/BookmarkRibbon'
 import {
   BookmarkRibbonStack,
-  type BookmarkRibbonTag
+  type Bookmark
 } from '../../../electron-core-ui/src/renderer/components/BookmarkRibbon/BookmarkRibbonStack'
 import { getColorFromString } from '../../../electron-core-ui/src/renderer/utils/colorFromString'
 import '@testing-library/jest-dom/vitest'
@@ -26,11 +26,11 @@ describe('BookmarkRibbon', () => {
   })
 
   describe('rendering', () => {
-    it('renders a button with the label and the "Tag: <label>" aria-label', () => {
+    it('renders a button with the label and the "Bookmark: <label>" aria-label', () => {
       render(<BookmarkRibbon label="api" data-testid="rib" />)
       const btn = screen.getByTestId('rib')
       expect(btn.tagName).toBe('BUTTON')
-      expect(btn).toHaveAttribute('aria-label', 'Tag: api')
+      expect(btn).toHaveAttribute('aria-label', 'Bookmark: api')
       expect(btn).toHaveTextContent('api')
     })
 
@@ -187,13 +187,13 @@ describe('BookmarkRibbonStack', () => {
     vi.restoreAllMocks()
   })
 
-  const tags: BookmarkRibbonTag[] = [
+  const bookmarks: Bookmark[] = [
     { label: 'api' },
     { label: 'beta', color: '#00aaff' }
   ]
 
   it('renders an [+] add ribbon followed by one ribbon per tag', () => {
-    render(<BookmarkRibbonStack tags={tags} data-testid="stk" />)
+    render(<BookmarkRibbonStack bookmarks={bookmarks} data-testid="stk" />)
     expect(screen.getByTestId('stk-add')).toBeInTheDocument()
     expect(screen.getByTestId('stk-ribbon-0')).toHaveTextContent('api')
     expect(screen.getByTestId('stk-ribbon-1')).toHaveTextContent('beta')
@@ -206,7 +206,7 @@ describe('BookmarkRibbonStack', () => {
     const onRemove = vi.fn()
     render(
       <BookmarkRibbonStack
-        tags={tags}
+        bookmarks={bookmarks}
         onRename={onRename}
         onColorChange={onColorChange}
         onRemove={onRemove}
@@ -229,7 +229,7 @@ describe('BookmarkRibbonStack', () => {
     it('opens the add tooltip on [+] click and creates a tag on Enter', async () => {
       const user = userEvent.setup()
       const onAdd = vi.fn()
-      render(<BookmarkRibbonStack tags={[]} onAdd={onAdd} data-testid="stk" />)
+      render(<BookmarkRibbonStack bookmarks={[]} onAdd={onAdd} data-testid="stk" />)
       await user.click(screen.getByTestId('stk-add'))
       const input = screen.getByTestId('stk-add-input-input')
       await user.click(input)
@@ -240,7 +240,7 @@ describe('BookmarkRibbonStack', () => {
     it('commits the typed name when the explicit Add button is clicked', async () => {
       const user = userEvent.setup()
       const onAdd = vi.fn()
-      render(<BookmarkRibbonStack tags={[]} onAdd={onAdd} data-testid="stk" />)
+      render(<BookmarkRibbonStack bookmarks={[]} onAdd={onAdd} data-testid="stk" />)
       await user.click(screen.getByTestId('stk-add'))
       const input = screen.getByTestId('stk-add-input-input')
       await user.click(input)
@@ -252,7 +252,7 @@ describe('BookmarkRibbonStack', () => {
     it('closes the tooltip on Escape without calling onAdd', async () => {
       const user = userEvent.setup()
       const onAdd = vi.fn()
-      render(<BookmarkRibbonStack tags={[]} onAdd={onAdd} data-testid="stk" />)
+      render(<BookmarkRibbonStack bookmarks={[]} onAdd={onAdd} data-testid="stk" />)
       await user.click(screen.getByTestId('stk-add'))
       const input = screen.getByTestId('stk-add-input-input')
       await user.click(input)
@@ -264,7 +264,7 @@ describe('BookmarkRibbonStack', () => {
     it('trims the typed name and ignores a whitespace-only input', async () => {
       const user = userEvent.setup()
       const onAdd = vi.fn()
-      render(<BookmarkRibbonStack tags={[]} onAdd={onAdd} data-testid="stk" />)
+      render(<BookmarkRibbonStack bookmarks={[]} onAdd={onAdd} data-testid="stk" />)
       await user.click(screen.getByTestId('stk-add'))
       const input = screen.getByTestId('stk-add-input-input')
       await user.click(input)
@@ -276,7 +276,7 @@ describe('BookmarkRibbonStack', () => {
       const user = userEvent.setup()
       render(
         <>
-          <BookmarkRibbonStack tags={[]} onAdd={noop} data-testid="stk" />
+          <BookmarkRibbonStack bookmarks={[]} onAdd={noop} data-testid="stk" />
           <button data-testid="outside">outside</button>
         </>
       )
@@ -290,7 +290,7 @@ describe('BookmarkRibbonStack', () => {
   describe('readonly mode', () => {
     it('hides the [+] add ribbon when editable={false}', () => {
       render(
-        <BookmarkRibbonStack tags={tags} editable={false} data-testid="stk" />
+        <BookmarkRibbonStack bookmarks={bookmarks} editable={false} data-testid="stk" />
       )
       expect(screen.queryByTestId('stk-add')).not.toBeInTheDocument()
       expect(screen.queryByTestId('stk-add-tooltip')).not.toBeInTheDocument()
@@ -301,7 +301,7 @@ describe('BookmarkRibbonStack', () => {
       const onRename = vi.fn()
       render(
         <BookmarkRibbonStack
-          tags={tags}
+          bookmarks={bookmarks}
           editable={false}
           onRename={onRename}
           data-testid="stk"

@@ -5,7 +5,7 @@
 import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import Handlebars from 'handlebars'
-import { MarkdownViewer, Tabs, type Tab, type SearchResult, BookmarkRibbonStack, type BookmarkRibbonTag } from 'electron-core-ui/renderer'
+import { MarkdownViewer, Tabs, type Tab, type SearchResult, BookmarkRibbonStack, type Bookmark } from 'electron-core-ui/renderer'
 import type { RestormSearchMetadata } from '../../../services/SearchIndexService'
 import requestDetailsTemplate from '../../../resources/templates/search/request-details.hbs?raw'
 import { Badge } from '../../common/Badge'
@@ -77,17 +77,17 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
       })
     }
 
-    const ribbonTags: BookmarkRibbonTag[] = tags.map((t) => ({ label: t }))
+    const ribbonBookmarks: Bookmark[] = tags.map((t) => ({ label: t }))
 
     return (
       <div style={{ position: 'relative', maxHeight: 'calc(100vh - 90px)', display: 'flex', flexDirection: 'column' }}>
-        {/* Bookmark-ribbon tags (readonly) hang from the top-right of
-         * the tooltip, matching the workbench tab header treatment. */}
-        {ribbonTags.length > 0 && (
+        {/* Readonly bookmark ribbons hang from the top-right of the
+         * tooltip, matching the workbench tab header treatment. */}
+        {ribbonBookmarks.length > 0 && (
           <BookmarkRibbonStack
-            tags={ribbonTags}
+            bookmarks={ribbonBookmarks}
             editable={false}
-            data-testid="search-tag-ribbons"
+            data-testid="search-bookmarks"
           />
         )}
         {/* Breadcrumb */}
@@ -139,15 +139,15 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
     })
   }
 
-  const folderRibbonTags: BookmarkRibbonTag[] = folderTags.map((t) => ({ label: t }))
+  const folderRibbonBookmarks: Bookmark[] = folderTags.map((t) => ({ label: t }))
 
   return (
     <div style={{ position: 'relative', maxHeight: 'calc(100vh - 90px)', display: 'flex', flexDirection: 'column' }}>
-      {folderRibbonTags.length > 0 && (
+      {folderRibbonBookmarks.length > 0 && (
         <BookmarkRibbonStack
-          tags={folderRibbonTags}
+          bookmarks={folderRibbonBookmarks}
           editable={false}
-          data-testid="search-tag-ribbons"
+          data-testid="search-bookmarks"
         />
       )}
       {/* Breadcrumb */}

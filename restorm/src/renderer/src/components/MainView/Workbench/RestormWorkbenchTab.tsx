@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 import * as CoreUIRenderer from 'electron-core-ui/renderer'
-import { Callout, EditableLabel, IconSelect, BookmarkRibbonStack, type BookmarkRibbonTag, type CalloutVariant } from 'electron-core-ui/renderer'
+import { Callout, EditableLabel, IconSelect, BookmarkRibbonStack, type Bookmark, type CalloutVariant } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
 import type { BreadcrumbItem } from '../../../../../shared/types/editor'
 import './restormWorkbenchTab.css'
@@ -85,7 +85,7 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
     onBreadcrumbIconChange?.(lastItem, next)
   }, [lastItem, onBreadcrumbIconChange])
 
-  const ribbonTags: BookmarkRibbonTag[] = tags.map((t) => {
+  const ribbonBookmarks: Bookmark[] = tags.map((t) => {
     const col = tagColors?.[t]
     return col !== undefined ? { label: t, color: col } : { label: t }
   })
@@ -113,15 +113,15 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
 
   return (
     <div className="restorm-workbench-tab">
-      {/* Bookmark-ribbon tags anchored to the top-right of the tab's
+      {/* Bookmark ribbons anchored to the top-right of the tab's
        * positioned root. Replaces the old inline `TagsView` cluster. */}
       <BookmarkRibbonStack
-        tags={ribbonTags}
+        bookmarks={ribbonBookmarks}
         onRename={handleRibbonRename}
         {...(onTagColorChange ? { onColorChange: handleRibbonColorChange } : {})}
         onRemove={handleRibbonRemove}
         onAdd={handleRibbonAdd}
-        data-testid={`${testIdPrefix}-tag-ribbons`}
+        data-testid={`${testIdPrefix}-bookmarks`}
       />
       {callout && (
         <div className="restorm-workbench-tab-callout">

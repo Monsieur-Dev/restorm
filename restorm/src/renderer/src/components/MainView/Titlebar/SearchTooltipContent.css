@@ -2,7 +2,7 @@
  * padding so the signet's top edge sits just above the title row,
  * matching the tab-header treatment proportionally for the smaller
  * tooltip chrome. */
-.ecui-bookmark-ribbon-stack[data-testid="search-tag-ribbons"] {
+.ecui-bookmark-ribbon-stack[data-testid="search-bookmarks"] {
   top: -5px;
 }
 

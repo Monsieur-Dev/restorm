@@ -6,16 +6,16 @@ import { InputBox } from '../InputBox'
 
 import './bookmarkRibbon.css'
 
-export interface BookmarkRibbonTag {
+export interface Bookmark {
   label: string
   color?: string
 }
 
 export interface BookmarkRibbonStackProps {
-  tags: BookmarkRibbonTag[]
+  bookmarks: Bookmark[]
   /** When false, the stack renders as a pure display: the leading
    * `[+]` add ribbon is hidden, no add tooltip is ever mounted, and
-   * each tag ribbon is delegated to in readonly mode (no click, no
+   * each ribbon is delegated to in readonly mode (no click, no
    * editor tooltip). Defaults to true. */
   editable?: boolean
   onRename?: (index: number, next: string) => void
@@ -29,11 +29,11 @@ export interface BookmarkRibbonStackProps {
 /**
  * Row of bookmark ribbons anchored to the top-right of the positioned
  * ancestor. The `[+]` ribbon sits on the LEFT of the stack; existing
- * tags spill to its right in order. The stack itself positions each
- * ribbon absolutely so the hover-grow doesn't reflow siblings.
+ * bookmarks spill to its right in order. The stack itself positions
+ * each ribbon absolutely so the hover-grow doesn't reflow siblings.
  */
 export const BookmarkRibbonStack: React.FC<BookmarkRibbonStackProps> = ({
-  tags,
+  bookmarks,
   editable = true,
   onRename,
   onColorChange,
@@ -83,7 +83,7 @@ export const BookmarkRibbonStack: React.FC<BookmarkRibbonStackProps> = ({
             ref={addBtnRef}
             type="button"
             className="ecui-bookmark-ribbon ecui-bookmark-ribbon--add"
-            aria-label="Add tag"
+            aria-label="Add bookmark"
             aria-expanded={isAddOpen}
             onClick={() => {
               setAddDraft('')
@@ -108,7 +108,7 @@ export const BookmarkRibbonStack: React.FC<BookmarkRibbonStackProps> = ({
                 onMouseDown={(e) => { e.stopPropagation() }}
               >
                 <InputBox
-                  options={{ placeholder: 'Tag name' }}
+                  options={{ placeholder: 'Bookmark name' }}
                   value={addDraft}
                   onChange={(next) => { setAddDraft(next) }}
                   onKeyDown={(event) => {
@@ -125,7 +125,7 @@ export const BookmarkRibbonStack: React.FC<BookmarkRibbonStackProps> = ({
                 <Button
                   secondary
                   onClick={handleAddCommit}
-                  options={{ ariaLabel: 'Create tag', title: 'Create tag' }}
+                  options={{ ariaLabel: 'Create bookmark', title: 'Create bookmark' }}
                   {...(dataTestId ? { 'data-testid': `${dataTestId}-add-confirm` } : {})}
                 >
                   Add
@@ -135,16 +135,16 @@ export const BookmarkRibbonStack: React.FC<BookmarkRibbonStackProps> = ({
           />
         </>
       ) : null}
-      {tags.map((tag, index) => {
+      {bookmarks.map((bookmark, index) => {
         const rename = onRename
         const colorChange = onColorChange
         const remove = onRemove
         return (
           <BookmarkRibbon
-            key={`${tag.label}-${index}`}
-            label={tag.label}
+            key={`${bookmark.label}-${index}`}
+            label={bookmark.label}
             editable={editable}
-            {...(tag.color !== undefined ? { color: tag.color } : {})}
+            {...(bookmark.color !== undefined ? { color: bookmark.color } : {})}
             {...(editable && rename ? { onRename: (next) => { rename(index, next) } } : {})}
             {...(editable && colorChange ? { onColorChange: (hex) => { colorChange(index, hex) } } : {})}
             {...(editable && remove ? { onRemove: () => { remove(index) } } : {})}

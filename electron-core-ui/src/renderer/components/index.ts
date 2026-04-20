@@ -103,7 +103,7 @@ export type { EditableLabelAs, EditableLabelProps } from './EditableLabel'
 
 // BookmarkRibbon exports
 export { BookmarkRibbon, BookmarkRibbonStack } from './BookmarkRibbon'
-export type { BookmarkRibbonProps, BookmarkRibbonStackProps, BookmarkRibbonTag } from './BookmarkRibbon'
+export type { BookmarkRibbonProps, BookmarkRibbonStackProps, Bookmark } from './BookmarkRibbon'
 
 // Tag exports
 export { Tag } from './Tag'

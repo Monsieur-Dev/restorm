@@ -109,7 +109,7 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
         type="button"
         className={rootClasses}
         style={{ '--bookmark-color': effectiveColor, '--bookmark-text-color': textColor } as React.CSSProperties}
-        aria-label={`Tag: ${label}`}
+        aria-label={`Bookmark: ${label}`}
         {...(editable ? { 'aria-expanded': isOpen } : {})}
         {...(editable ? { onClick: handleToggle } : {})}
         {...(dataTestId !== undefined ? { 'data-testid': dataTestId } : {})}
@@ -130,7 +130,7 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
             onMouseDown={(e) => { e.stopPropagation() }}
           >
             <InputBox
-              options={{ placeholder: 'Tag name' }}
+              options={{ placeholder: 'Bookmark name' }}
               value={draftLabel}
               onChange={(next) => { setDraftLabel(next) }}
               onBlur={handleCommitRename}
@@ -159,7 +159,7 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
                 secondary
                 icon="trash"
                 onClick={handleRemove}
-                options={{ ariaLabel: 'Remove tag', title: 'Remove tag' }}
+                options={{ ariaLabel: 'Remove bookmark', title: 'Remove bookmark' }}
                 {...(dataTestId ? { 'data-testid': `${dataTestId}-remove` } : {})}
               />
             ) : null}

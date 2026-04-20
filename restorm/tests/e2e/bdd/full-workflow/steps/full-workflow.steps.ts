@@ -1190,7 +1190,7 @@ Then('the folder tab\'s {string} tag should be colored yellow', async ({}, tagNa
     .poll(
       async () => {
         const rgb = await currentPage
-          .locator('[data-testid^="tab-env-folder-idx:"][data-testid$="-tag-ribbons"] .ecui-bookmark-ribbon', { hasText: tagName })
+          .locator('[data-testid^="tab-env-folder-idx:"][data-testid$="-bookmarks"] .ecui-bookmark-ribbon', { hasText: tagName })
           .first()
           .evaluate((el) => getComputedStyle(el, '::before').backgroundColor)
           .catch(() => null)
@@ -1208,7 +1208,7 @@ Then('the request tab\'s {string} tag should be colored yellow', async ({}, tagN
     .poll(
       async () => {
         const rgb = await currentPage
-          .locator('[data-testid^="tab-request-idx:"][data-testid$="-tag-ribbons"] .ecui-bookmark-ribbon', { hasText: tagName })
+          .locator('[data-testid^="tab-request-idx:"][data-testid$="-bookmarks"] .ecui-bookmark-ribbon', { hasText: tagName })
           .first()
           .evaluate((el) => getComputedStyle(el, '::before').backgroundColor)
           .catch(() => null)
@@ -1443,8 +1443,8 @@ Then('the environment-folder variables table color picker should be visible', as
  * folder tab's header. Only one folder tab is ever active at a time in
  * this scenario.
  */
-function activeFolderTagRibbons(currentPage: Page): Locator {
-  return currentPage.locator('[data-testid^="tab-env-folder-idx:"][data-testid$="-tag-ribbons"]').first()
+function activeFolderBookmarks(currentPage: Page): Locator {
+  return currentPage.locator('[data-testid^="tab-env-folder-idx:"][data-testid$="-bookmarks"]').first()
 }
 
 // ---------------------------------------------------------------------------
@@ -1629,14 +1629,14 @@ When('I snapshot the current window as the final screenshot', async () => {
 
 When('I add tag {string} to the active folder tab', async ({}, tagName: string) => {
   if (!page) throw new Error('app must be launched')
-  const tagsRoot = activeFolderTagRibbons(page)
+  const tagsRoot = activeFolderBookmarks(page)
   await expect(tagsRoot).toBeVisible({ timeout: 5000 })
-  const addButton = tagsRoot.locator('[data-testid$="-tag-ribbons-add"]').first()
+  const addButton = tagsRoot.locator('[data-testid$="-bookmarks-add"]').first()
   await addButton.click()
 
   // The add tooltip is portalled to the document body, so locate its
   // input globally rather than under the stack.
-  const input = page.locator('[data-testid$="-tag-ribbons-add-input-input"]').first()
+  const input = page.locator('[data-testid$="-bookmarks-add-input-input"]').first()
   await expect(input).toBeVisible({ timeout: 5000 })
   await input.click()
   await input.fill(tagName)
@@ -1648,7 +1648,7 @@ When('I add tag {string} to the active folder tab', async ({}, tagName: string) 
 
 Then('the active folder tab should have tag {string}', async ({}, tagName: string) => {
   if (!page) throw new Error('app must be launched')
-  const tagsRoot = activeFolderTagRibbons(page)
+  const tagsRoot = activeFolderBookmarks(page)
   await expect(
     tagsRoot.locator('.ecui-bookmark-ribbon', { hasText: tagName }).first()
   ).toBeVisible({ timeout: 5000 })
@@ -1656,7 +1656,7 @@ Then('the active folder tab should have tag {string}', async ({}, tagName: strin
 
 Then('the active folder tab should not have tag {string}', async ({}, tagName: string) => {
   if (!page) throw new Error('app must be launched')
-  const tagsRoot = activeFolderTagRibbons(page)
+  const tagsRoot = activeFolderBookmarks(page)
   await expect(
     tagsRoot.locator('.ecui-bookmark-ribbon', { hasText: tagName })
   ).toHaveCount(0, { timeout: 5000 })
@@ -1664,15 +1664,15 @@ Then('the active folder tab should not have tag {string}', async ({}, tagName: s
 
 When('I remove tag {string} from the active folder tab', async ({}, tagName: string) => {
   if (!page) throw new Error('app must be launched')
-  const tagsRoot = activeFolderTagRibbons(page)
+  const tagsRoot = activeFolderBookmarks(page)
   const tag = tagsRoot.locator('.ecui-bookmark-ribbon', { hasText: tagName }).first()
   await expect(tag).toBeVisible({ timeout: 5000 })
   // Opening the ribbon's editor tooltip surfaces the Remove button.
   // The tooltip is portalled out of the stack, so scope the remove-button
-  // locator to ribbon-tooltip testids (`*-tag-ribbons-ribbon-N-remove`).
+  // locator to ribbon-tooltip testids (`*-bookmarks-ribbon-N-remove`).
   await tag.click()
   const removeButton = page
-    .locator('[data-testid*="-tag-ribbons-ribbon-"][data-testid$="-remove"]')
+    .locator('[data-testid*="-bookmarks-ribbon-"][data-testid$="-remove"]')
     .first()
   await expect(removeButton).toBeVisible({ timeout: 5000 })
   await removeButton.click()

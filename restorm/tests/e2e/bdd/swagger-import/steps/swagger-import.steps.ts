@@ -4,8 +4,8 @@ import { join, resolve } from 'path'
 import type { ElectronApplication, Locator, Page } from '@playwright/test'
 import { test, expect, SWAGGER_IMPORT_TEMP_DIR, configureNextSaveFileDialogForE2E, configureNextOpenDialogForE2E } from '../../fixtures/swagger-import.fixture'
 
-function activeEnvFolderTagRibbons(currentPage: Page): Locator {
-  return currentPage.locator('[data-testid^="tab-env-folder-idx:"][data-testid$="-tag-ribbons"]').first()
+function activeEnvFolderBookmarks(currentPage: Page): Locator {
+  return currentPage.locator('[data-testid^="tab-env-folder-idx:"][data-testid$="-bookmarks"]').first()
 }
 
 const SAMPLES_DIR = resolve(__dirname, '../../../../unit')
@@ -100,12 +100,12 @@ Then(
 
 When('I add tag {string} to the active environment folder tab', async ({}, tagName: string) => {
   if (!page) throw new Error('app must be launched')
-  const tagsRoot = activeEnvFolderTagRibbons(page)
+  const tagsRoot = activeEnvFolderBookmarks(page)
   await expect(tagsRoot).toBeVisible({ timeout: 5000 })
-  const addButton = tagsRoot.locator('[data-testid$="-tag-ribbons-add"]').first()
+  const addButton = tagsRoot.locator('[data-testid$="-bookmarks-add"]').first()
   await addButton.click()
 
-  const input = page.locator('[data-testid$="-tag-ribbons-add-input-input"]').first()
+  const input = page.locator('[data-testid$="-bookmarks-add-input-input"]').first()
   await expect(input).toBeVisible({ timeout: 5000 })
   await input.click()
   await input.fill(tagName)
@@ -121,7 +121,7 @@ Then(
     if (!page) throw new Error('app must be launched')
     const names = expectedTags.split(',').map((s) => s.trim())
 
-    const tagsRoot = activeEnvFolderTagRibbons(page)
+    const tagsRoot = activeEnvFolderBookmarks(page)
     // Each tag renders one `.ecui-bookmark-ribbon` inside the stack;
     // exclude the leading `[+]` add ribbon by filtering it out via the
     // `--add` modifier class.
