@@ -35,6 +35,11 @@ Feature: Full workflow end-to-end scenario
     When I cancel the import modal
 
     When I import the URL "http://localhost:8080/api/swagger.json"
+    # OData — the AspNetCoreOData petstore exposes its CSDL/EDMX at
+    # /odata/$metadata. Exercises the Phase-1 EDMX v4 parser + the
+    # format detector added in OYO-181. The generated folder name is
+    # the schema namespace (`OData.PetStore.Models`).
+    When I import the URL "http://localhost:5100/odata/$metadata"
     When I import the sample file "swagger-petstore.json"
     When I import the sample file "asyncapi-docker.yaml"
     When I import the sample file "asyncapi-petstore.yaml"
@@ -53,6 +58,7 @@ Feature: Full workflow end-to-end scenario
     When I save all with Ctrl+Shift+S
     Then the sidebar should contain the folder "Swagger Petstore"
     And the sidebar should show a child of "Swagger Petstore"
+    And the sidebar should contain the folder "OData.PetStore.Models"
 
     When I click the sidebar collapse-all button
     Then every sidebar folder should be collapsed
