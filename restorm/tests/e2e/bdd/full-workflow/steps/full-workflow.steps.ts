@@ -1668,10 +1668,11 @@ When('I remove tag {string} from the active folder tab', async ({}, tagName: str
   const tag = tagsRoot.locator('.ecui-bookmark-ribbon', { hasText: tagName }).first()
   await expect(tag).toBeVisible({ timeout: 5000 })
   // Opening the ribbon's editor tooltip surfaces the Remove button.
+  // The tooltip is portalled out of the stack, so scope the remove-button
+  // locator to ribbon-tooltip testids (`*-tag-ribbons-ribbon-N-remove`).
   await tag.click()
   const removeButton = page
-    .locator('[data-testid$="-remove"]')
-    .filter({ hasNot: page.locator('[data-testid$="-add-remove"]') })
+    .locator('[data-testid*="-tag-ribbons-ribbon-"][data-testid$="-remove"]')
     .first()
   await expect(removeButton).toBeVisible({ timeout: 5000 })
   await removeButton.click()

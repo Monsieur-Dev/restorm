@@ -38,10 +38,10 @@ Single tag. Renders one `<button>` with a clipped `::before` coloured body.
 | `label` | `string` | required | Visible text. Shown rotated 90° clockwise on hover / open. |
 | `color` | `string` | — | Explicit colour (any CSS colour — hex, rgb, hsl). Falls back to `getColorFromString(label)` — a deterministic HSL derived from the label — when omitted. |
 | `onRename` | `(next: string) => void` | — | Fired when the rename input commits a *changed* trimmed value. Without this, the rename input still renders but caller doesn't get notified. |
-| `onColorChange` | `(hex: string \| null) => void` | — | Fired by the ColorPicker. `null` clears any explicit colour (falling back to the deterministic one). |
+| `onColorChange` | `(hex: string) => void` | — | Fired by the ColorPicker with the newly-picked hex. When omitted, the picker is hidden from the editor tooltip. |
 | `onRemove` | `() => void` | — | When provided, the editor tooltip shows a trash button; when omitted, the remove affordance is hidden. |
 | `className` | `string` | — | Extra class appended to the root button. |
-| `data-testid` | `string` | — | Root gets the id; tooltip sub-elements get `${id}-tooltip`, `${id}-rename-input`, `${id}-color-picker`, `${id}-remove`. |
+| `data-testid` | `string` | — | Root gets the id; tooltip sub-elements get `${id}-tooltip`, `${id}-rename-input` (the inner `<input>` is `${id}-rename-input-input` — InputBox's passthrough), `${id}-color-picker`, `${id}-remove`. |
 
 ### `<BookmarkRibbonStack>`
 
@@ -51,7 +51,7 @@ Row of ribbons anchored top-right of the positioned ancestor, starting with a mu
 | --- | --- | --- | --- |
 | `tags` | `BookmarkRibbonTag[]` | required | One entry per ribbon. `{ label: string; color?: string }`. |
 | `onRename` | `(index: number, next: string) => void` | — | Forwarded from the per-ribbon `onRename`, partial-applied with the tag's position in `tags`. |
-| `onColorChange` | `(index: number, hex: string \| null) => void` | — | Same, forwarded from the per-ribbon ColorPicker. Passing this prop is also what decides whether the stack forwards an `onColorChange` down to each ribbon, so omit it if recolouring isn't supported. |
+| `onColorChange` | `(index: number, hex: string) => void` | — | Same, forwarded from the per-ribbon ColorPicker. Passing this prop is also what decides whether the stack forwards an `onColorChange` down to each ribbon, so omit it if recolouring isn't supported (which in turn hides the ColorPicker from each ribbon's editor tooltip). |
 | `onRemove` | `(index: number) => void` | — | Same, forwarded from the per-ribbon trash button. |
 | `onAdd` | `(label: string) => void` | — | Fired when the `[+]` editor commits a non-empty trimmed name. |
 | `className` | `string` | — | Extra class on the stack root. |

@@ -116,6 +116,37 @@ describe('BookmarkRibbon', () => {
       expect(onRemove).toHaveBeenCalledOnce()
       expect(screen.queryByTestId('rib-remove')).not.toBeInTheDocument()
     })
+
+    it('renders the color picker only when onColorChange is provided', async () => {
+      const user = userEvent.setup()
+      const { rerender } = render(
+        <BookmarkRibbon label="api" onRename={noop} data-testid="rib" />
+      )
+      await user.click(screen.getByTestId('rib'))
+      expect(screen.queryByTestId('rib-color-picker')).not.toBeInTheDocument()
+
+      const onColorChange = vi.fn()
+      rerender(
+        <BookmarkRibbon label="api" onRename={noop} onColorChange={onColorChange} data-testid="rib" />
+      )
+      expect(screen.getByTestId('rib-color-picker')).toBeInTheDocument()
+    })
+
+    it('toggles aria-expanded on the ribbon button when the tooltip opens and closes', async () => {
+      const user = userEvent.setup()
+      render(<BookmarkRibbon label="api" onRename={noop} data-testid="rib" />)
+      const btn = screen.getByTestId('rib')
+      expect(btn).toHaveAttribute('aria-expanded', 'false')
+      await user.click(btn)
+      expect(btn).toHaveAttribute('aria-expanded', 'true')
+      // Closing via the rename input's Escape handler — that's the path
+      // keyboard users take; clicking outside would need a document-level
+      // click handler (not exercised by the component).
+      const input = screen.getByTestId('rib-rename-input-input')
+      await user.click(input)
+      await user.keyboard('{Escape}')
+      expect(btn).toHaveAttribute('aria-expanded', 'false')
+    })
   })
 })
 

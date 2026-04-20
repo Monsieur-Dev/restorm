@@ -48,14 +48,6 @@
   clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 7px), 0 100%);
 }
 
-/* `.ecui-bookmark-ribbon-tip` span is reserved for legacy callers —
- * the silhouette is now produced by the `::before` clip-path so no
- * separate tip element is needed. Keep the rule to avoid an empty
- * visible box if callers still emit the span. */
-.ecui-bookmark-ribbon-tip {
-  display: none;
-}
-
 /* Label — rendered with `writing-mode: vertical-rl` so the glyphs sit
  * on their side and read top-to-bottom (visually a 90° clockwise
  * rotation of the normal horizontal flow). It lives in normal flow
@@ -125,10 +117,6 @@
 }
 
 .ecui-bookmark-ribbon--add::before {
-  opacity: 0.4;
-}
-
-.ecui-bookmark-ribbon--add .ecui-bookmark-ribbon-tip {
   opacity: 0.4;
 }
 

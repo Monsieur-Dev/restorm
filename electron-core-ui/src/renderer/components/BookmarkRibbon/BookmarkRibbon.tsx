@@ -15,8 +15,9 @@ export interface BookmarkRibbonProps {
   color?: string
   /** Rename handler — called on tooltip-editor commit. */
   onRename?: (next: string) => void
-  /** Colour change handler — called from the tooltip colour picker. */
-  onColorChange?: (hex: string | null) => void
+  /** Colour change handler — called from the tooltip colour picker.
+   * When omitted, the picker is hidden from the editor tooltip. */
+  onColorChange?: (hex: string) => void
   /** Remove handler — optional; when omitted the trash button is hidden. */
   onRemove?: () => void
   /** Extra class forwarded to the ribbon root. */
@@ -87,10 +88,9 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
         {...(dataTestId !== undefined ? { 'data-testid': dataTestId } : {})}
       >
         <span className="ecui-bookmark-ribbon-label">{label}</span>
-        <span className="ecui-bookmark-ribbon-tip" aria-hidden="true" />
       </button>
       <Tooltip
-        targetRef={rootRef as unknown as React.RefObject<HTMLElement | null>}
+        targetRef={rootRef as React.RefObject<HTMLElement | null>}
         show={isOpen}
         placement="below"
         className="ecui-bookmark-ribbon-tooltip"
@@ -117,12 +117,14 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
               }}
               {...(dataTestId ? { 'data-testid': `${dataTestId}-rename-input` } : {})}
             />
-            <ColorPicker
-              value={effectiveColor}
-              onChange={(hex) => { onColorChange?.(hex) }}
-              disableAlpha
-              {...(dataTestId ? { 'data-testid': `${dataTestId}-color-picker` } : {})}
-            />
+            {onColorChange ? (
+              <ColorPicker
+                value={effectiveColor}
+                onChange={onColorChange}
+                disableAlpha
+                {...(dataTestId ? { 'data-testid': `${dataTestId}-color-picker` } : {})}
+              />
+            ) : null}
             {onRemove ? (
               <Button
                 secondary

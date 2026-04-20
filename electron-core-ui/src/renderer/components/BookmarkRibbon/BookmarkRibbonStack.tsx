@@ -1,9 +1,8 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { BookmarkRibbon } from './BookmarkRibbon'
 import { Tooltip } from '../Tooltip'
 import { Button } from '../Button'
 import { InputBox } from '../InputBox'
-import { useRef } from 'react'
 
 import './bookmarkRibbon.css'
 
@@ -15,7 +14,7 @@ export interface BookmarkRibbonTag {
 export interface BookmarkRibbonStackProps {
   tags: BookmarkRibbonTag[]
   onRename?: (index: number, next: string) => void
-  onColorChange?: (index: number, hex: string | null) => void
+  onColorChange?: (index: number, hex: string) => void
   onRemove?: (index: number) => void
   onAdd?: (label: string) => void
   className?: string
@@ -70,10 +69,9 @@ export const BookmarkRibbonStack: React.FC<BookmarkRibbonStackProps> = ({
         <span className="ecui-bookmark-ribbon-plus" aria-hidden="true">
           <i className="codicon codicon-add" />
         </span>
-        <span className="ecui-bookmark-ribbon-tip" aria-hidden="true" />
       </button>
       <Tooltip
-        targetRef={addBtnRef as unknown as React.RefObject<HTMLElement | null>}
+        targetRef={addBtnRef as React.RefObject<HTMLElement | null>}
         show={isAddOpen}
         placement="below"
         className="ecui-bookmark-ribbon-tooltip"

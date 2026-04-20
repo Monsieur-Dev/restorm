@@ -1,11 +1,10 @@
 /* Workbench tab header layout — two stacked rows:
  *  1. Breadcrumb (ancestor path only, non-editable)
- *  2. Current-item icon + H1 title (editable) + tags pushed right
+ *  2. Current-item icon + H1 title (editable)
  *
- * The last breadcrumb segment used to live inline with tags on a single
- * line and doubled as the editable name. Moving it into its own H1 row
- * makes the current page + its identity (icon, name) the visual focus
- * of the tab without losing the ancestor path.
+ * Tags moved out of these rows entirely — they're now rendered by
+ * `<BookmarkRibbonStack>` absolutely positioned top-right of the
+ * workbench tab (anchored by the `position: relative` on the root).
  */
 
 .restorm-workbench-tab {
@@ -79,14 +78,3 @@
   padding-right: 4px;
 }
 
-.restorm-workbench-tab-tags {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 0 0 auto;
-}
-
-.restorm-workbench-tab-tags-label {
-  color: var(--descriptionForeground);
-}

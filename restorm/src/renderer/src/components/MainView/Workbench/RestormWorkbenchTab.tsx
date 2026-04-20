@@ -96,7 +96,7 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
     onTagsChange?.(nextTags)
   }, [tags, onTagsChange])
 
-  const handleRibbonColorChange = useCallback((index: number, hex: string | null) => {
+  const handleRibbonColorChange = useCallback((index: number, hex: string) => {
     const tag = tags[index]
     if (!tag) return
     onTagColorChange?.(tag, hex)
