@@ -158,13 +158,19 @@ export class FileService {
     rootDir: string
     /** Stable UUID used as the per-project sub-directory under `rootDir`. */
     uuid: string
-    projectPath: string
     extension: string
     serialize: (value: unknown) => string
     deserialize: (raw: string) => unknown
     debounceMs?: number
   }): Promise<number> {
     this.draftStore = new DraftStore(params)
+    // Refresh the per-project `.last-opened` timestamp so the
+    // age-based orphan sweep at next boot doesn't reap this project's
+    // drafts. `markOpened` creates the directory if it doesn't exist
+    // yet, so opening a project without mutating anything still keeps
+    // the UUID alive (important for the "I opened it, crashed, reopen
+    // next week" recovery story).
+    await this.draftStore.markOpened()
     const drafts = await this.draftStore.loadAllDrafts()
     let restored = 0
     for (const draft of drafts) {

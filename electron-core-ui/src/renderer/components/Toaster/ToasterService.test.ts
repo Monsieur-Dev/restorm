@@ -477,3 +477,43 @@ describe('subscription', () => {
     expect(frames).toHaveLength(1)
   })
 })
+
+describe('getToasts snapshot stability (OYO-203)', () => {
+  // `useSyncExternalStore` calls `getSnapshot` on every render and
+  // compares the returned reference against the last one. Returning a
+  // fresh `[]` each time ("getSnapshot should be cached …") caused a
+  // Maximum-update-depth infinite loop on boot whenever a Toaster was
+  // mounted for a toasterId the service hadn't registered yet
+  // (renderer boot-order race). These tests pin the stable-reference
+  // invariant.
+
+  it('returns the same empty-array reference on successive calls for an unknown toasterId', () => {
+    const first = toasterService.getToasts('never-registered')
+    const second = toasterService.getToasts('never-registered')
+    expect(first).toBe(second)
+    expect(first).toHaveLength(0)
+  })
+
+  it('returns a stable reference when the state has not changed', () => {
+    toasterService.register('stable', { showFrame: false, doNotDisturb: false, maxToasts: 10 })
+    const first = toasterService.getToasts('stable')
+    const second = toasterService.getToasts('stable')
+    expect(first).toBe(second)
+  })
+
+  it('returns a NEW reference after a mutation', () => {
+    toasterService.register('stable', { showFrame: false, doNotDisturb: false, maxToasts: 10 })
+    const before = toasterService.getToasts('stable')
+    toasterService.push('stable', { title: 'A', body: 'a' })
+    const after = toasterService.getToasts('stable')
+    expect(after).not.toBe(before)
+    expect(after).toHaveLength(1)
+  })
+
+  it('is immutable from the consumer side when empty', () => {
+    const empty = toasterService.getToasts('never-registered')
+    expect(() => {
+      (empty as unknown as { push: (v: unknown) => void }).push({ fake: true })
+    }).toThrow()
+  })
+})

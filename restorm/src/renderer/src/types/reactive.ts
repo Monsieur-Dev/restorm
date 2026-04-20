@@ -22,10 +22,19 @@ const FOLDER_INDEXABLE_KEYS = new Set([
   'notes',
   'tags',
   // `tagColors` isn't a searchable field, but it *is* part of the folder
-  // document we serialise: treating it as indexable ensures a FOLDER_UPDATED
-  // event fires when its map changes, so tag renderers repaint and the
-  // dirty-state tracker can detect the diff.
+  // document we serialise: treating it as indexable ensures a
+  // FOLDER_UPDATED event fires when its map changes, so tag renderers
+  // repaint and the dirty-state tracker can detect the diff.
   'tagColors'
+  // `environments` and `items` are *deliberately* not in this set.
+  // Both fire huge event volumes during Swagger import (one FOLDER_UPDATED
+  // per env folder / per folder-items rewrite, each paying an
+  // `upsertSaveUnit` IPC round-trip), dragging the full-workflow e2e
+  // from 96 s to 110 s+. Env CRUD instead travels through the env
+  // proxy's ENVIRONMENT_UPDATED emission (variables / name /
+  // subEnvironments are indexable on the env itself); folder item CRUD
+  // travels through REQUEST_CREATED / FOLDER_CREATED / *_DELETED
+  // which the dirty tracker already subscribes to.
 ])
 
 /** Properties that trigger re-indexing when modified (HTTP requests) */
@@ -101,6 +110,15 @@ const ENVIRONMENT_INDEXABLE_KEYS = new Set([
   'name',
   'variables',
   'subEnvironments'
+  // `color` / `icon` are deliberately NOT indexable. Making them so
+  // would fire one ENVIRONMENT_UPDATED (+ `upsertSaveUnit` IPC) per
+  // colour/icon tweak, and full-workflow drops ~16 s when the picker
+  // steps pay that tax. The dirty flip is instead achieved by
+  // `handleEnvColorChange` / `handleIconChange` rebuilding the env
+  // via `{ ...env, color }` and pushing it through `updateEnvironments`
+  // — the follow-up `folder.environments = reactiveNext` assignment
+  // fires FOLDER_UPDATED via the folder proxy's indexable set, which
+  // the dirty tracker already consumes.
 ])
 
 // ============================================================================

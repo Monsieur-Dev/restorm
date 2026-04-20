@@ -4,9 +4,15 @@
  * Writes per-unit drafts into a UUID-scoped directory under the user's
  * data directory (`userData/drafts/<uuid>/…`). Each draft is one file;
  * writes are debounced (default 300 ms) and atomic (temp + rename). A
- * sidecar `.project-path` file records the absolute path of the
- * project directory so an orphan sweep at app boot can remove drafts
- * for projects that no longer exist.
+ * sidecar `.last-opened` file records the last-open timestamp of the
+ * project; the orphan sweep uses that timestamp to reap directories
+ * for projects the user hasn't opened in a long time.
+ *
+ * Orphan detection used to key on the project's absolute file path,
+ * but that breaks the moment the user renames or moves the project
+ * outside the app (the drafts would be nuked at next boot even though
+ * the project UUID is still valid). An age-based sweep is filesystem-
+ * path-agnostic.
  *
  * The store does NOT observe a SaveUnitRegistry on its own — the
  * file service is responsible for calling `writeDraft` / `deleteDraft`
@@ -24,6 +30,14 @@ import { isTombstone, type Tombstone } from './types'
 /** Default debounce window between a draft mutation and its on-disk flush. */
 export const DEFAULT_DRAFT_DEBOUNCE_MS = 300
 
+/**
+ * Reap draft directories whose `.last-opened` marker is older than
+ * this many days. Covers the "user uninstalled a project a month ago
+ * and never came back" case without nuking drafts for a project the
+ * user just renamed yesterday.
+ */
+export const DEFAULT_DRAFT_MAX_AGE_DAYS = 30
+
 export interface DraftStoreOptions {
   /** `app.getPath('userData')/drafts` — or a test override. */
   readonly rootDir: string
@@ -32,8 +46,6 @@ export interface DraftStoreOptions {
    * typically get this from {@link ensureFolderUuid} / {@link ensureFileUuid}.
    */
   readonly uuid: string
-  /** Absolute path of the project on disk — used by the orphan sweep. */
-  readonly projectPath: string
   /** File extension for serialized drafts (`yaml`, `json`, `json5`, …). */
   readonly extension: string
   /**
@@ -67,7 +79,7 @@ interface PendingWrite {
   promise: Promise<void>
 }
 
-const PROJECT_PATH_FILE = '.project-path'
+const LAST_OPENED_FILE = '.last-opened'
 
 export class DraftStore {
   private readonly projectDir: string
@@ -88,6 +100,16 @@ export class DraftStore {
   /** Absolute path of a draft file for a given runtime id. */
   getDraftPath(runtimeId: RuntimeId): string {
     return join(this.projectDir, `${runtimeId}.draft.${this.options.extension}`)
+  }
+
+  /**
+   * Refresh the `.last-opened` timestamp. Callers should invoke this
+   * each time the project is opened so the age-based orphan sweep
+   * keeps the drafts alive.
+   */
+  async markOpened(): Promise<void> {
+    await this.ensureProjectDir()
+    await writeLastOpened(this.projectDir, Date.now())
   }
 
   /**
@@ -188,15 +210,10 @@ export class DraftStore {
     return out
   }
 
-  /**
-   * Ensure the project draft directory exists and remember the
-   * project's absolute path inside it (used by the orphan sweep).
-   */
+  /** Ensure the project draft directory exists on disk. */
   private async ensureProjectDir(): Promise<void> {
     if (this.ensuredDir) return
     await fs.mkdir(this.projectDir, { recursive: true })
-    const marker = join(this.projectDir, PROJECT_PATH_FILE)
-    await fs.writeFile(marker, this.options.projectPath, 'utf-8')
     this.ensuredDir = true
   }
 
@@ -218,29 +235,54 @@ async function atomicWrite(targetPath: string, contents: string): Promise<void> 
   await fs.rename(tmp, targetPath)
 }
 
+async function writeLastOpened(projectDir: string, epochMs: number): Promise<void> {
+  const marker = join(projectDir, LAST_OPENED_FILE)
+  await fs.writeFile(marker, String(epochMs), 'utf-8')
+}
+
+async function readLastOpened(projectDir: string): Promise<number | null> {
+  const marker = join(projectDir, LAST_OPENED_FILE)
+  try {
+    const raw = (await fs.readFile(marker, 'utf-8')).trim()
+    const parsed = Number.parseInt(raw, 10)
+    return Number.isFinite(parsed) ? parsed : null
+  } catch {
+    return null
+  }
+}
+
 /**
- * Remove `userData/drafts/<uuid>` subdirectories whose recorded
- * `project-path` marker points at a path that no longer exists. Safe
- * to call at app boot.
+ * Remove `userData/drafts/<uuid>` subdirectories whose `.last-opened`
+ * marker is older than `maxAgeDays` (default 30). Directories with no
+ * marker are also reaped (abandoned from an older build, or the
+ * project was never actually attached). Safe to call at app boot.
+ *
+ * The previous version of this sweep keyed on `.project-path` and
+ * checked `existsSync(projectPath)`; that nuked drafts for projects
+ * the user had renamed or moved outside the app. Age-based reaping is
+ * path-agnostic and relies only on the UUID identity of the project.
  */
-export async function sweepOrphanedDrafts(rootDir: string): Promise<number> {
+export async function sweepOrphanedDrafts(
+  rootDir: string,
+  maxAgeDays: number = DEFAULT_DRAFT_MAX_AGE_DAYS
+): Promise<number> {
   if (!existsSync(rootDir)) return 0
   const entries = await fs.readdir(rootDir, { withFileTypes: true })
+  const nowMs = Date.now()
+  const maxAgeMs = maxAgeDays * 24 * 60 * 60 * 1000
   let removed = 0
   for (const entry of entries) {
     if (!entry.isDirectory()) continue
     const projectDir = join(rootDir, entry.name)
-    const marker = join(projectDir, PROJECT_PATH_FILE)
-    let projectPath: string | null = null
-    try {
-      projectPath = (await fs.readFile(marker, 'utf-8')).trim()
-    } catch {
-      // No marker → abandoned draft directory (from an older build). Reap.
+    const lastOpened = await readLastOpened(projectDir)
+    if (lastOpened === null) {
+      // No marker → abandoned draft directory (legacy build or the
+      // project was never fully opened). Reap.
       await fs.rm(projectDir, { recursive: true, force: true })
       removed += 1
       continue
     }
-    if (projectPath && !existsSync(projectPath)) {
+    if (nowMs - lastOpened > maxAgeMs) {
       await fs.rm(projectDir, { recursive: true, force: true })
       removed += 1
     }

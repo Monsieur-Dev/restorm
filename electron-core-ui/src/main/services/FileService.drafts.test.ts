@@ -53,6 +53,9 @@ function newHarness(): {
 } {
   const service = new FileService()
   const rootDir = mkdtempSync(join(tmpdir(), 'fs-drafts-root-'))
+  // The project directory is only used as a target location for
+  // FileService.saveUnit(...) writes in the later tests — the draft
+  // store itself no longer needs to know the project's path.
   const projectPath = mkdtempSync(join(tmpdir(), 'fs-drafts-project-'))
   return {
     service,
@@ -69,7 +72,6 @@ async function attach(ctx: ReturnType<typeof newHarness>, debounceMs = 20): Prom
   return ctx.service.attachDraftStore({
     rootDir: ctx.rootDir,
     uuid: 'test-proj',
-    projectPath: ctx.projectPath,
     extension: 'json',
     serialize,
     deserialize,
@@ -124,9 +126,9 @@ describe('FileService — draft store integration', () => {
 
   it('restores a regular draft on attach and marks the unit dirty', async () => {
     // Write a draft file directly without going through the service.
+    // `attach` will stamp `.last-opened` itself via `markOpened`.
     await fs.mkdir(join(ctx.rootDir, 'test-proj'), { recursive: true })
     await fs.writeFile(join(ctx.rootDir, 'test-proj', 'a.draft.json'), serialize({ n: 99 }), 'utf-8')
-    await fs.writeFile(join(ctx.rootDir, 'test-proj', '.project-path'), ctx.projectPath, 'utf-8')
 
     ctx.service.getSaveUnitRegistry().hydrate({ runtimeId: 'a', kind: 'file', reference: { n: 1 } })
     const restored = await attach(ctx)
@@ -143,7 +145,6 @@ describe('FileService — draft store integration', () => {
       serialize(makeTombstone({ n: 1 })),
       'utf-8'
     )
-    await fs.writeFile(join(ctx.rootDir, 'test-proj', '.project-path'), ctx.projectPath, 'utf-8')
 
     ctx.service.getSaveUnitRegistry().hydrate({ runtimeId: 'a', kind: 'file', reference: { n: 1 } })
     const restored = await attach(ctx)
@@ -161,7 +162,6 @@ describe('FileService — draft store integration', () => {
       serialize({ n: 42 }),
       'utf-8'
     )
-    await fs.writeFile(join(ctx.rootDir, 'test-proj', '.project-path'), ctx.projectPath, 'utf-8')
 
     const restored = await attach(ctx)
     expect(restored).toBe(1)
@@ -378,25 +378,23 @@ describe('FileService — full crash-and-recover loop', () => {
     expect(ctx.service.getSaveUnitRegistry().isDirty('req-1')).toBe(false)
   })
 
-  it('orphaned drafts from a deleted project are swept at boot', async () => {
-    // Stage a project directory with a draft + sidecar, then blow away
-    // the pointed-to project on disk.
-    const deletedProjectPath = mkdtempSync(join(tmpdir(), 'fs-gone-'))
-    const draftDir = join(ctx.rootDir, 'uuid-of-deleted')
-    await fs.mkdir(draftDir, { recursive: true })
-    await fs.writeFile(join(draftDir, 'x.draft.json'), serialize({ n: 1 }), 'utf-8')
-    await fs.writeFile(join(draftDir, '.project-path'), deletedProjectPath, 'utf-8')
-    rmSync(deletedProjectPath, { recursive: true, force: true })
+  it('sweeps draft directories whose `.last-opened` marker is older than 30 days', async () => {
+    // Stale project: last opened 60 days ago → beyond the default threshold.
+    const staleDir = join(ctx.rootDir, 'uuid-of-stale')
+    await fs.mkdir(staleDir, { recursive: true })
+    await fs.writeFile(join(staleDir, 'x.draft.json'), serialize({ n: 1 }), 'utf-8')
+    const staleTs = Date.now() - 60 * 24 * 60 * 60 * 1000
+    await fs.writeFile(join(staleDir, '.last-opened'), String(staleTs), 'utf-8')
 
-    // A second, live project is untouched.
-    const liveDir = join(ctx.rootDir, 'uuid-of-live')
-    await fs.mkdir(liveDir, { recursive: true })
-    await fs.writeFile(join(liveDir, 'y.draft.json'), serialize({ n: 2 }), 'utf-8')
-    await fs.writeFile(join(liveDir, '.project-path'), ctx.projectPath, 'utf-8')
+    // Fresh project: stamped today → kept regardless of where it lives on disk.
+    const freshDir = join(ctx.rootDir, 'uuid-of-fresh')
+    await fs.mkdir(freshDir, { recursive: true })
+    await fs.writeFile(join(freshDir, 'y.draft.json'), serialize({ n: 2 }), 'utf-8')
+    await fs.writeFile(join(freshDir, '.last-opened'), String(Date.now()), 'utf-8')
 
     const removed = await FileService.cleanupOrphanedDrafts(ctx.rootDir)
     expect(removed).toBe(1)
-    expect(existsSync(draftDir)).toBe(false)
-    expect(existsSync(liveDir)).toBe(true)
+    expect(existsSync(staleDir)).toBe(false)
+    expect(existsSync(freshDir)).toBe(true)
   })
 })

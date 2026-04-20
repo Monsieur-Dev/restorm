@@ -5,6 +5,7 @@ import { join, resolve } from 'path'
 import electronPath from 'electron'
 import { installSystemModalsMockingForE2E } from 'electron-core-ui/testing'
 import { withE2ECoverageEnv } from '../../helpers/coverage'
+import { collectBlockingRendererMessages, summariseBlockingMessages } from '../../helpers/renderer-log-guard'
 
 /**
  * Project-local scratch directory for files the scenario creates
@@ -190,7 +191,13 @@ export const test = base.extend<FullWorkflowFixtures>({
       }
     }
 
+    // Collect blocking renderer errors across every app instance so a
+    // scenario that secretly emits `Maximum update depth exceeded` /
+    // `getSnapshot should be cached` no longer slips past green. See
+    // `helpers/renderer-log-guard.ts` for allow-list rationale.
+    const blockingErrors: string[] = []
     for (const { app, logs } of launched) {
+      blockingErrors.push(...collectBlockingRendererMessages(logs))
       try {
         if (logs.length > 0) {
           const logFile = join(testInfo.outputDir, 'electron-logs.txt')
@@ -205,6 +212,16 @@ export const test = base.extend<FullWorkflowFixtures>({
       } catch {
         // ignore
       }
+    }
+
+    // Only fail for renderer errors if the test would otherwise have
+    // passed — a test that already failed surfaces its own error, and
+    // re-raising here would just bury the real cause in noise.
+    if (blockingErrors.length > 0 && testInfo.status === 'passed') {
+      const logFile = join(testInfo.outputDir, 'renderer-errors.txt')
+      writeFileSync(logFile, blockingErrors.join('\n\n'), 'utf-8')
+      await testInfo.attach('renderer-errors', { path: logFile, contentType: 'text/plain' })
+      throw new Error(summariseBlockingMessages(blockingErrors))
     }
   },
 

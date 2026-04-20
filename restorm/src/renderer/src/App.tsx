@@ -152,11 +152,6 @@ const App: React.FC = () => {
     close: closeFileDirect
   } = useFileService()
 
-  const workbenchId = useMemo((): string | undefined => {
-    if (!filePath) return undefined
-    return `${WORKBENCH_ID}:${filePath}`
-  }, [filePath])
-
   // Sync document.title with window title for taskbar
   useEffect(() => {
     const title = fileName ? `Restorm - ${fileName}${isDirty ? ' *' : ''}` : 'Restorm'
@@ -222,6 +217,15 @@ const App: React.FC = () => {
   const sidebarStorageKey = useMemo(
     () => (projectUuid && rootItems.length > 0 ? `restorm-main-sidebar:${projectUuid}` : null),
     [projectUuid, rootItems.length]
+  )
+
+  // Workbench layout (tabs, splits) is persisted under
+  // `${WORKBENCH_ID}:<projectUuid>`. Keyed by UUID for the same reason
+  // as the sidebar expansion state — the layout follows the project
+  // even if the user renames/moves the file outside the app.
+  const workbenchId = useMemo<string | undefined>(
+    () => (projectUuid ? `${WORKBENCH_ID}:${projectUuid}` : undefined),
+    [projectUuid]
   )
   const allFolderIdsRef = useRef<string[]>(allFolderIds)
   useEffect(() => {
@@ -291,7 +295,7 @@ const App: React.FC = () => {
     const cascadeParentById = new Map<string, string>()
     const visit = (item: EnvironmentFolder | Folder | Request): void => {
       if (!('items' in item)) return
-      for (const child of item.items) visit(child as EnvironmentFolder | Folder | Request)
+      for (const child of item.items) visit(child)
       const itemIsEnvFolder = 'environments' in item && Array.isArray(item.environments)
       if (itemIsEnvFolder) {
         const envFolder = item
@@ -717,19 +721,20 @@ const App: React.FC = () => {
     setSidebarEditingItemId(itemId)
   }, [])
 
-  // Favorites management
+  // Favorites management — keyed by projectUuid so the list follows
+  // the project across external renames/moves.
   const [favoritesVersion, setFavoritesVersion] = useState(0)
   const isItemFavorite = useCallback((itemId: string): boolean => {
     void favoritesVersion // React dep
-    if (!filePath) return false
-    return favoritesStoreIsFavorite(filePath, itemId)
-  }, [filePath, favoritesVersion])
+    if (!projectUuid) return false
+    return favoritesStoreIsFavorite(projectUuid, itemId)
+  }, [projectUuid, favoritesVersion])
 
   const handleToggleFavorite = useCallback((itemId: string): void => {
-    if (!filePath) return
-    favoritesStoreToggle(filePath, itemId)
+    if (!projectUuid) return
+    favoritesStoreToggle(projectUuid, itemId)
     setFavoritesVersion((v) => v + 1)
-  }, [filePath])
+  }, [projectUuid])
 
   // Sync favoritesVersion when favorites change from other sources (e.g. home page trash button)
   React.useEffect(() => {

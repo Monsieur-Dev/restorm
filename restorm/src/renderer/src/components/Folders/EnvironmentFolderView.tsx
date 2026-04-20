@@ -19,6 +19,7 @@ import {
 import { RestormKeyValueTable } from '../RestormKeyValueTable'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import type { EnvironmentFolder, Environment, KeyValue, Icon } from '../../../../shared/types/collections'
+import { makeReactiveEnvironment, emitEnvironmentCreated, emitEnvironmentDeleted, emitEnvironmentUpdated } from '../../types/reactive'
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
 // Uses direct property assignment to trigger proxy setter
@@ -170,15 +171,22 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
     return (): void => { cancelAnimationFrame(rafId) }
   }, [folder.environments])
 
-  // Helper to update environments and notify parent
+  // Helper to update environments and notify parent. Re-wraps every env
+  // in `makeReactiveEnvironment` before persisting — the helpers above
+  // (`addSubEnvironment`, `deleteEnvironmentById`, the icon/color
+  // updaters) spread `{...env}` during tree rewrites, which strips the
+  // proxy from ancestors. Re-wrapping here is idempotent (already-reactive
+  // envs are returned as-is) and guarantees variable edits on any env
+  // still fire ENVIRONMENT_UPDATED → marks the window dirty.
   const updateEnvironments = useCallback((newEnvironments: Environment[]) => {
-    setLocalEnvironments(newEnvironments)
+    const reactiveNext = newEnvironments.map((env) => makeReactiveEnvironment(env, folder.id))
+    setLocalEnvironments(reactiveNext)
     // Update reactive object directly for search indexing
-    updateReactiveProperty(folder, 'environments', newEnvironments)
+    updateReactiveProperty(folder, 'environments', reactiveNext)
     if (onFolderChange) {
       onFolderChange({
         ...folder,
-        environments: newEnvironments
+        environments: reactiveNext
       })
     }
   }, [folder, onFolderChange])
@@ -247,41 +255,61 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
     [folder.environments, selectedEnvId]
   )
 
-  // Handler for adding a new environment
+  // Handler for adding a new environment. Emits ENVIRONMENT_CREATED
+  // explicitly — `folder.environments` is not in `FOLDER_INDEXABLE_KEYS`
+  // (it would flood upsertSaveUnit during Swagger import), so the
+  // folder-proxy set trap no longer fires when we assign the new list.
+  // The explicit emit travels through the same `handleUpsert` wiring
+  // in App.tsx and marks the window dirty.
   const handleAddEnvironment = useCallback(() => {
-    const newEnv: Environment = {
-      id: generateEnvironmentId(),
-      name: t('environment.newName'),
-      variables: []
-    }
+    const newEnv = makeReactiveEnvironment(
+      {
+        id: generateEnvironmentId(),
+        name: t('environment.newName'),
+        variables: []
+      },
+      folder.id
+    )
     const newEnvironments = addEnvironmentToList(localEnvironments, newEnv)
     updateEnvironments(newEnvironments)
+    emitEnvironmentCreated(newEnv, folder.id)
     // Select the new environment
     setSelectedEnvId(newEnv.id)
-  }, [t, localEnvironments, updateEnvironments])
+  }, [t, folder.id, localEnvironments, updateEnvironments])
 
-  // Handler for adding a sub-environment
+  // Handler for adding a sub-environment. See `handleAddEnvironment`
+  // for why we emit ENVIRONMENT_CREATED explicitly rather than relying
+  // on the folder-proxy set trap.
   const handleAddSubEnvironment = useCallback((parentId: string) => {
-    const newEnv: Environment = {
-      id: generateEnvironmentId(),
-      name: t('environment.newName'),
-      variables: []
-    }
+    const newEnv = makeReactiveEnvironment(
+      {
+        id: generateEnvironmentId(),
+        name: t('environment.newName'),
+        variables: []
+      },
+      folder.id,
+      parentId
+    )
     const newEnvironments = addSubEnvironment(localEnvironments, parentId, newEnv)
     updateEnvironments(newEnvironments)
+    emitEnvironmentCreated(newEnv, folder.id, parentId)
     // Ensure parent is expanded and select the new environment
     setExpandedIds(prev => Array.from(new Set([...prev, parentId])))
     setSelectedEnvId(newEnv.id)
-  }, [t, localEnvironments, updateEnvironments])
+  }, [t, folder.id, localEnvironments, updateEnvironments])
 
-  // Handler for deleting an environment
+  // Handler for deleting an environment. Emits ENVIRONMENT_DELETED so
+  // the save-unit registry records a pending delete — without the
+  // explicit emit, nothing on the folder-proxy would fire (environments
+  // is intentionally non-indexable for perf, see reactive.ts).
   const handleDeleteEnvironment = useCallback((envId: string) => {
     const newEnvironments = deleteEnvironmentById(localEnvironments, envId)
     updateEnvironments(newEnvironments)
+    emitEnvironmentDeleted(envId, folder.id)
     if (selectedEnvId === envId) {
       setSelectedEnvId(newEnvironments[0]?.id ?? null)
     }
-  }, [localEnvironments, selectedEnvId, updateEnvironments])
+  }, [folder.id, localEnvironments, selectedEnvId, updateEnvironments])
 
   // Handler for renaming an environment
   const handleRenameEnvironment = useCallback((envId: string, newName: string) => {
@@ -289,17 +317,27 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
     updateEnvironments(newEnvironments)
   }, [localEnvironments, updateEnvironments])
 
-  // Handler for changing an environment's icon
+  // Handler for changing an environment's icon. Emits
+  // ENVIRONMENT_UPDATED explicitly for the same reason as the other
+  // env CRUD handlers: `folder.environments` is not indexable, so the
+  // folder-proxy set trap can't carry the dirty signal. The env proxy
+  // won't emit either — `icon` isn't in ENVIRONMENT_INDEXABLE_KEYS
+  // because we build a new env POJO here rather than mutating, so
+  // none of the proxy traps fire.
   const handleIconChange = useCallback((envId: string, icon: Icon | null) => {
     const updateIcon = (envs: Environment[]): Environment[] =>
       envs.map(env => {
         if (env.id === envId) {
-          if (icon) {
-            return { ...env, icon }
-          }
-          // Remove icon property if null
-          const { icon: _removed, ...rest } = env
-          return rest
+          const next = icon
+            ? { ...env, icon }
+            // Remove icon property if null
+            : (() => {
+              const { icon: _removed, ...rest } = env
+              void _removed
+              return rest
+            })()
+          emitEnvironmentUpdated(next, folder.id)
+          return next
         }
         if (env.subEnvironments) {
           return { ...env, subEnvironments: updateIcon(env.subEnvironments) }
@@ -307,15 +345,20 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
         return env
       })
     updateEnvironments(updateIcon(localEnvironments))
-  }, [localEnvironments, updateEnvironments])
+  }, [folder.id, localEnvironments, updateEnvironments])
 
-  // Handler for changing an environment's color
+  // Handler for changing an environment's color. Builds a NEW env
+  // object with the updated colour (mirroring `handleIconChange`)
+  // and emits ENVIRONMENT_UPDATED explicitly — see the matching
+  // comment on `handleIconChange` for why the reactive proxies alone
+  // can't catch this.
   const handleEnvColorChange = useCallback((envId: string, color: string) => {
     const updateColor = (envs: Environment[]): Environment[] =>
       envs.map(env => {
         if (env.id === envId) {
-          updateReactiveProperty(env, 'color', color)
-          return env
+          const next = { ...env, color }
+          emitEnvironmentUpdated(next, folder.id)
+          return next
         }
         if (env.subEnvironments) {
           return { ...env, subEnvironments: updateColor(env.subEnvironments) }
@@ -323,7 +366,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
         return env
       })
     updateEnvironments(updateColor(localEnvironments))
-  }, [localEnvironments, updateEnvironments])
+  }, [folder.id, localEnvironments, updateEnvironments])
 
   // Find the current color for an environment by ID
   const findEnvColor = useCallback((envId: string): string | undefined => {

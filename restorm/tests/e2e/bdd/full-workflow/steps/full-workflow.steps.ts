@@ -1,5 +1,5 @@
 import { createBdd } from 'playwright-bdd'
-import { existsSync, mkdirSync } from 'fs'
+import { existsSync, mkdirSync, readFileSync } from 'fs'
 import { join, resolve } from 'path'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
 import { configureNextOpenDialogForE2E, configureNextSaveFileDialogForE2E } from 'electron-core-ui/testing'
@@ -1263,7 +1263,18 @@ When(
       throw new Error('recorded tab ids missing — run the "record the tab ids" step first')
     }
     const filePath = join(FULL_WORKFLOW_TEMP_DIR, 'workflow-collection.restorm')
-    const storageKey = `workbench_state_restorm-main-workbench:${filePath}`
+    // Workbench state is keyed by `_projectUuid` since the filePath →
+    // UUID migration. We grep the UUID directly out of the YAML (a
+    // top-level `_projectUuid: <uuid>` line stamped by `ensureFileUuid`)
+    // rather than pulling in a YAML parser just for the test harness —
+    // the project format guarantees that shape at the top level.
+    const raw = readFileSync(filePath, 'utf-8')
+    const match = /^_projectUuid:\s*([0-9a-f-]{36})\s*$/m.exec(raw)
+    const projectUuid = match?.[1]
+    if (!projectUuid) {
+      throw new Error(`expected _projectUuid stamped into ${filePath}; file starts with: ${raw.slice(0, 200)}`)
+    }
+    const storageKey = `workbench_state_restorm-main-workbench:${projectUuid}`
     const state = {
       // 'vertical' = vertical splitter → panes rendered side-by-side
       // (matches the "tabs côte à côte" layout the scenario documents).
