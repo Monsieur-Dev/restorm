@@ -62,6 +62,13 @@ Feature: Full workflow end-to-end scenario
     Then the folder "pet" should be expanded
     When I click the sidebar request "Find pet by ID"
     Then a request tab for "Find pet by ID" should be open
+    # Breadcrumb navigation must open a workbench tab for the clicked
+    # segment, not just select it in the sidebar. Clicking "pet" while
+    # on the "Find pet by ID" breadcrumb should open a folder tab for
+    # pet alongside the request tab.
+    When I click the breadcrumb folder "pet" in the active tab
+    Then a folder tab for "pet" should be open
+    When I focus the "Find pet by ID" tab
     When I select the "localhost" environment on the active request tab
     When I fill the first path-param value with "1"
     # Per-unit dirty-state / title behaviour lives in the dedicated

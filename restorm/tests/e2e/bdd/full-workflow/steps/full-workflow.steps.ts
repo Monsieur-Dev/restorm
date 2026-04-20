@@ -1346,6 +1346,23 @@ When('I focus the {string} folder tab', async ({}, folderName: string) => {
   await expect(tab).toHaveAttribute('aria-selected', 'true', { timeout: 5000 })
 })
 
+When('I click the breadcrumb folder {string} in the active tab', async ({}, label: string) => {
+  if (!page) throw new Error('app must be launched')
+  // Non-last breadcrumb items render as `<button class="ecui-breadcrumb-link">`.
+  // Match the label with `getByText(exact)` — `hasText` alone does
+  // substring matching, which would pick "Swagger Petstore" (contains
+  // "pet") before the actual "pet" segment.
+  const p = page
+  const segment = p
+    .locator('li.ecui-breadcrumb-item:not(.ecui-breadcrumb-item--last) button.ecui-breadcrumb-link:visible')
+    .filter({ has: p.getByText(label, { exact: true }) })
+    .first()
+  await expect(segment).toBeVisible({ timeout: 5000 })
+  await segment.click()
+  // Give the workbench a beat to open the matching tab + refocus.
+  await p.waitForTimeout(500)
+})
+
 When('I set the folder tab icon to codicon {string}', async ({}, iconName: string) => {
   if (!page) throw new Error('app must be launched')
   // Active folder tab's pane: role="tabpanel" is what wraps the tab content.

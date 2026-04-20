@@ -117,31 +117,54 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     }
   }, [rootItems, setSelectedItemId, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
 
-  // Handle breadcrumb item click - navigate to the clicked item
+  // Handle breadcrumb item click — open a workbench tab for the
+  // clicked segment, not just update history. The old implementation
+  // only called `navigationService.navigateTo(...)`, but the navigation
+  // subscription above ignores non-history events for tab opening
+  // (direct clicks are expected to open tabs themselves, see the
+  // `handleItemClick` pattern). That left breadcrumb clicks as
+  // sidebar-select-only — the sidebar highlighted the target but the
+  // workbench never surfaced a tab for it.
   const handleBreadcrumbClick = useCallback(
     (item: BreadcrumbItem, _index: number, isLast: boolean) => {
-      // Skip navigation for last item (current page)
+      // Last item is the current page — no navigation.
       if (isLast) return
 
-      // Determine item type by looking up in the root folders
-      const foundItem = findFolderById(rootItems, item.id)
-      if (foundItem) {
-        const itemId = item.id
-        if (isEnvironmentFolder(foundItem)) {
-          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'environment-folder' })
-        } else {
-          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'folder' })
-        }
-      } else {
-        // It might be a request
-        const { item: requestItem } = findItemWithBreadcrumbs(rootItems, item.id)
-        const itemId = item.id
-        if (requestItem && isRequest(requestItem) && isHTTPRequest(requestItem)) {
+      const itemId = item.id
+      const { item: foundItem, breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
+      if (!foundItem) return
+
+      setSelectedItemId(itemId)
+
+      if (isEnvironmentFolder(foundItem)) {
+        openEnvironmentFolderTab(foundItem, breadcrumbs)
+        navigationService.navigateTo(itemId, 'breadcrumb', { type: 'environment-folder' })
+        return
+      }
+
+      if (isFolder(foundItem)) {
+        openFolderTab(foundItem, breadcrumbs)
+        navigationService.navigateTo(itemId, 'breadcrumb', { type: 'folder' })
+        return
+      }
+
+      if (isRequest(foundItem)) {
+        const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
+        openAnyRequestTab(foundItem, breadcrumbs, environments)
+        if (isHTTPRequest(foundItem)) {
           navigationService.navigateTo(itemId, 'breadcrumb', { type: 'http-request' })
+        } else if (isGraphQLRequest(foundItem)) {
+          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'graphql-request' })
+        } else if (isGrpcRequest(foundItem)) {
+          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'grpc-request' })
+        } else if (isSoapRequest(foundItem)) {
+          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'soap-request' })
+        } else if (isWebSocketRequest(foundItem)) {
+          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'websocket-request' })
         }
       }
     },
-    [rootItems]
+    [rootItems, setSelectedItemId, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs]
   )
 
   // Resolve an index path (e.g. "0.0.1") to an actual item ID by walking rootItems
