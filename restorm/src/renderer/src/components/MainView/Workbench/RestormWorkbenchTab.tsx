@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback } from 'react'
 import * as CoreUIRenderer from 'electron-core-ui/renderer'
-import { TagsView, Tag, Callout, ColorPicker, Tooltip, EditableLabel, IconSelect, type CalloutVariant, type ContextMenuItem } from 'electron-core-ui/renderer'
+import { Callout, EditableLabel, IconSelect, BookmarkRibbonStack, type Bookmark, type CalloutVariant } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
 import type { BreadcrumbItem } from '../../../../../shared/types/editor'
-import { useTranslation } from 'react-i18next'
 import './restormWorkbenchTab.css'
 
 const { Breadcrumb } = CoreUIRenderer as unknown as {
@@ -68,7 +67,6 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
   children
 }) => {
   const testIdPrefix = tabId ? `tab-${tabId}` : 'workbench-tab'
-  const { t } = useTranslation()
 
   // Split the breadcrumb path: ancestors stay in the navigation row,
   // the last (current) item gets promoted to its own H1 title row
@@ -76,105 +74,6 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
   // editors and keeps the title visually prominent.
   const lastItem = breadcrumbs[breadcrumbs.length - 1]
   const ancestorBreadcrumbs = breadcrumbs.slice(0, -1)
-
-  // Color picker state
-  const [colorPickerTag, setColorPickerTag] = useState<string | null>(null)
-  const colorPickerTargetRef = useRef<HTMLElement | null>(null)
-  const tooltipClassName = 'restorm-tag-color-picker-tooltip'
-
-  // Close color picker on outside mousedown
-  useEffect(() => {
-    if (!colorPickerTag) return
-
-    const handleMouseDown = (event: MouseEvent): void => {
-      const target = event.target as Node | null
-      if (!target) return
-
-      // Ignore clicks on the tag target element
-      if (colorPickerTargetRef.current?.contains(target)) return
-
-      // Ignore clicks inside the tooltip
-      const tooltipEl = document.querySelector(`.${tooltipClassName}`)
-      if (tooltipEl?.contains(target)) return
-
-      setColorPickerTag(null)
-    }
-
-    document.addEventListener('mousedown', handleMouseDown)
-    return () => {
-      document.removeEventListener('mousedown', handleMouseDown)
-    }
-  }, [colorPickerTag])
-
-  const newTagLabel = t('tagsView.newTag', 'New tag')
-
-  const handleRenderTag = useCallback(
-    (tag: string, index: number, handlers: { onClick: () => void; onContextMenu: (e: React.MouseEvent) => void }) => {
-      const color = tagColors?.[tag]
-      const isNew = tag === newTagLabel
-      return (
-        <Tag
-          label={tag}
-          color={color}
-          editable
-          startEditing={isNew}
-          onLabelChange={(newLabel) => {
-            const nextTags = [...tags]
-            nextTags[index] = newLabel
-            onTagsChange?.(nextTags)
-          }}
-          onRemove={() => {
-            const nextTags = tags.filter((_t, i) => i !== index)
-            onTagsChange?.(nextTags)
-          }}
-          onContextMenu={(e) => {
-            colorPickerTargetRef.current = e.currentTarget as HTMLElement
-            handlers.onContextMenu(e)
-          }}
-          data-testid={`${testIdPrefix}-tag-${index}`}
-        />
-      )
-    },
-    [tagColors, testIdPrefix, tags, onTagsChange, newTagLabel]
-  )
-
-  const handleAdditionalContextMenuItems = useCallback(
-    (tag: string, _index: number): ContextMenuItem[] => {
-      if (!onTagColorChange) return []
-      const hasColor = !!tagColors?.[tag]
-      const items: ContextMenuItem[] = [
-        {
-          id: 'change-tag-color',
-          label: t('tagsView.changeColor', 'Change tag color...'),
-          icon: 'symbol-color',
-          onClick: () => {
-            setColorPickerTag(tag)
-          }
-        }
-      ]
-      if (hasColor) {
-        items.push({
-          id: 'remove-tag-color',
-          label: t('tagsView.removeColor', 'Remove tag color'),
-          icon: 'close',
-          onClick: () => {
-            onTagColorChange(tag, null)
-          }
-        })
-      }
-      return items
-    },
-    [onTagColorChange, tagColors, t]
-  )
-
-  const handleColorPickerChange = useCallback(
-    (hex: string) => {
-      if (colorPickerTag) {
-        onTagColorChange?.(colorPickerTag, hex)
-      }
-    },
-    [colorPickerTag, onTagColorChange]
-  )
 
   const handleTitleRename = useCallback((next: string) => {
     if (!lastItem) return
@@ -186,8 +85,44 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
     onBreadcrumbIconChange?.(lastItem, next)
   }, [lastItem, onBreadcrumbIconChange])
 
+  const ribbonBookmarks: Bookmark[] = tags.map((t) => {
+    const col = tagColors?.[t]
+    return col !== undefined ? { label: t, color: col } : { label: t }
+  })
+
+  const handleRibbonRename = useCallback((index: number, next: string) => {
+    const nextTags = [...tags]
+    nextTags[index] = next
+    onTagsChange?.(nextTags)
+  }, [tags, onTagsChange])
+
+  const handleRibbonColorChange = useCallback((index: number, hex: string) => {
+    const tag = tags[index]
+    if (!tag) return
+    onTagColorChange?.(tag, hex)
+  }, [tags, onTagColorChange])
+
+  const handleRibbonRemove = useCallback((index: number) => {
+    const nextTags = tags.filter((_t, i) => i !== index)
+    onTagsChange?.(nextTags)
+  }, [tags, onTagsChange])
+
+  const handleRibbonAdd = useCallback((label: string) => {
+    onTagsChange?.([...tags, label])
+  }, [tags, onTagsChange])
+
   return (
     <div className="restorm-workbench-tab">
+      {/* Bookmark ribbons anchored to the top-right of the tab's
+       * positioned root. Replaces the old inline `TagsView` cluster. */}
+      <BookmarkRibbonStack
+        bookmarks={ribbonBookmarks}
+        onRename={handleRibbonRename}
+        {...(onTagColorChange ? { onColorChange: handleRibbonColorChange } : {})}
+        onRemove={handleRibbonRemove}
+        onAdd={handleRibbonAdd}
+        data-testid={`${testIdPrefix}-bookmarks`}
+      />
       {callout && (
         <div className="restorm-workbench-tab-callout">
           <Callout
@@ -209,10 +144,6 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
             canEditName={false}
             allNavigable
             onItemClick={(item, index) => {
-              // Treat every ancestor click as a non-terminal
-              // navigation — the current page is rendered as an H1
-              // below, so no ancestor is ever "the last item" from
-              // the consumer's point of view.
               onBreadcrumbClick?.(item, index, false)
             }}
             onItemAuxClick={(item, index) => {
@@ -222,7 +153,8 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
           />
         ) : null}
       </div>
-      {/* Row 2: current-item icon + H1 name + tags pushed right. */}
+      {/* Row 2: current-item icon + H1 name. Tags moved to the
+       * top-right bookmark-ribbon stack. */}
       <div className="restorm-workbench-tab-title-row">
         {lastItem?.icon != null ? (
           <IconSelect
@@ -243,42 +175,9 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
             data-testid={`${testIdPrefix}-title`}
           />
         ) : null}
-        <div className="restorm-workbench-tab-tags">
-          <span className="restorm-workbench-tab-tags-label">
-            {t('workbench.tagsLabel')}
-          </span>
-          <TagsView
-            tags={tags}
-            onChange={(nextTags) => {
-              onTagsChange?.(nextTags)
-            }}
-            renderTag={handleRenderTag}
-            additionalContextMenuItems={onTagColorChange ? handleAdditionalContextMenuItems : undefined}
-            data-testid={`${testIdPrefix}-tags`}
-          />
-          {headerRight}
-        </div>
+        {headerRight}
       </div>
       {children}
-
-      {/* Color picker tooltip */}
-      <Tooltip
-        targetRef={colorPickerTargetRef as unknown as React.RefObject<HTMLElement | null>}
-        show={colorPickerTag !== null}
-        placement="below"
-        className={tooltipClassName}
-        data-testid={`${testIdPrefix}-color-picker-tooltip`}
-        content={
-          <div onMouseDown={(e) => { e.stopPropagation() }}>
-            <ColorPicker
-              value={colorPickerTag ? (tagColors?.[colorPickerTag] ?? '#3498db') : '#3498db'}
-              onChange={handleColorPickerChange}
-              disableAlpha
-              data-testid={`${testIdPrefix}-color-picker`}
-            />
-          </div>
-        }
-      />
     </div>
   )
 }

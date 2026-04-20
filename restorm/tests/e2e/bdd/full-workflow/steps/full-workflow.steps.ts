@@ -1190,9 +1190,9 @@ Then('the folder tab\'s {string} tag should be colored yellow', async ({}, tagNa
     .poll(
       async () => {
         const rgb = await currentPage
-          .locator('[data-testid^="tab-env-folder-idx:"][data-testid$="-tags"] .ecui-tag', { hasText: tagName })
+          .locator('[data-testid^="tab-env-folder-idx:"][data-testid$="-bookmarks"] .ecui-bookmark-ribbon', { hasText: tagName })
           .first()
-          .evaluate((el) => getComputedStyle(el).backgroundColor)
+          .evaluate((el) => getComputedStyle(el, '::before').backgroundColor)
           .catch(() => null)
         return isYellowBackground(rgb)
       },
@@ -1208,9 +1208,9 @@ Then('the request tab\'s {string} tag should be colored yellow', async ({}, tagN
     .poll(
       async () => {
         const rgb = await currentPage
-          .locator('[data-testid^="tab-request-idx:"][data-testid$="-tags"] .ecui-tag', { hasText: tagName })
+          .locator('[data-testid^="tab-request-idx:"][data-testid$="-bookmarks"] .ecui-bookmark-ribbon', { hasText: tagName })
           .first()
-          .evaluate((el) => getComputedStyle(el).backgroundColor)
+          .evaluate((el) => getComputedStyle(el, '::before').backgroundColor)
           .catch(() => null)
         return isYellowBackground(rgb)
       },
@@ -1439,11 +1439,12 @@ Then('the environment-folder variables table color picker should be visible', as
 
 /**
  * Playwright can't select cross-pane CSS with `:has` reliably on Electron,
- * so target the TagsView via the "add" button in the active folder tab's
- * header. Only one folder tab is ever active at a time in this scenario.
+ * so target the bookmark-ribbon stack via the "add" button in the active
+ * folder tab's header. Only one folder tab is ever active at a time in
+ * this scenario.
  */
-function activeFolderTagsRoot(currentPage: Page): Locator {
-  return currentPage.locator('[data-testid^="tab-env-folder-idx:"][data-testid$="-tags"]').first()
+function activeFolderBookmarks(currentPage: Page): Locator {
+  return currentPage.locator('[data-testid^="tab-env-folder-idx:"][data-testid$="-bookmarks"]').first()
 }
 
 // ---------------------------------------------------------------------------
@@ -1628,53 +1629,53 @@ When('I snapshot the current window as the final screenshot', async () => {
 
 When('I add tag {string} to the active folder tab', async ({}, tagName: string) => {
   if (!page) throw new Error('app must be launched')
-  const tagsRoot = activeFolderTagsRoot(page)
+  const tagsRoot = activeFolderBookmarks(page)
   await expect(tagsRoot).toBeVisible({ timeout: 5000 })
-  const addButton = tagsRoot.locator('[data-testid$="-tags-add"]').first()
+  const addButton = tagsRoot.locator('[data-testid$="-bookmarks-add"]').first()
   await addButton.click()
 
-  // The new tag enters edit mode via a contentEditable span.
-  const editing = tagsRoot.locator('.ecui-tag.ecui-tag--editing [contenteditable="true"]').first()
-  await expect(editing).toBeVisible({ timeout: 5000 })
-  await editing.click()
-  await page.keyboard.press('Control+A')
-  await page.keyboard.type(tagName)
+  // The add tooltip is portalled to the document body, so locate its
+  // input globally rather than under the stack.
+  const input = page.locator('[data-testid$="-bookmarks-add-input-input"]').first()
+  await expect(input).toBeVisible({ timeout: 5000 })
+  await input.click()
+  await input.fill(tagName)
   await page.keyboard.press('Enter')
   await expect(
-    tagsRoot.locator('.ecui-tag', { hasText: tagName }).first()
+    tagsRoot.locator('.ecui-bookmark-ribbon', { hasText: tagName }).first()
   ).toBeVisible({ timeout: 5000 })
 })
 
 Then('the active folder tab should have tag {string}', async ({}, tagName: string) => {
   if (!page) throw new Error('app must be launched')
-  const tagsRoot = activeFolderTagsRoot(page)
+  const tagsRoot = activeFolderBookmarks(page)
   await expect(
-    tagsRoot.locator('.ecui-tag', { hasText: tagName }).first()
+    tagsRoot.locator('.ecui-bookmark-ribbon', { hasText: tagName }).first()
   ).toBeVisible({ timeout: 5000 })
 })
 
 Then('the active folder tab should not have tag {string}', async ({}, tagName: string) => {
   if (!page) throw new Error('app must be launched')
-  const tagsRoot = activeFolderTagsRoot(page)
+  const tagsRoot = activeFolderBookmarks(page)
   await expect(
-    tagsRoot.locator('.ecui-tag', { hasText: tagName })
+    tagsRoot.locator('.ecui-bookmark-ribbon', { hasText: tagName })
   ).toHaveCount(0, { timeout: 5000 })
 })
 
 When('I remove tag {string} from the active folder tab', async ({}, tagName: string) => {
   if (!page) throw new Error('app must be launched')
-  const tagsRoot = activeFolderTagsRoot(page)
-  const tag = tagsRoot.locator('.ecui-tag', { hasText: tagName }).first()
+  const tagsRoot = activeFolderBookmarks(page)
+  const tag = tagsRoot.locator('.ecui-bookmark-ribbon', { hasText: tagName }).first()
   await expect(tag).toBeVisible({ timeout: 5000 })
-  await tag.click({ button: 'right' })
-  // The context menu may also surface "Remove tag color" (when the tag
-  // carries a color). Match "Remove tag" *without* a trailing "color"
-  // so the wrong item isn't clicked.
-  const removeItem = page
-    .getByRole('menuitem', { name: /^(Remove tag|Supprimer le tag)$/ })
+  // Opening the ribbon's editor tooltip surfaces the Remove button.
+  // The tooltip is portalled out of the stack, so scope the remove-button
+  // locator to ribbon-tooltip testids (`*-bookmarks-ribbon-N-remove`).
+  await tag.click()
+  const removeButton = page
+    .locator('[data-testid*="-bookmarks-ribbon-"][data-testid$="-remove"]')
     .first()
-  await expect(removeItem).toBeVisible({ timeout: 5000 })
-  await removeItem.click()
+  await expect(removeButton).toBeVisible({ timeout: 5000 })
+  await removeButton.click()
 })
 
 Then(

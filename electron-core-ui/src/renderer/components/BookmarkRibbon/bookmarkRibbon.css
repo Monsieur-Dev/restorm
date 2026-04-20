@@ -1,0 +1,211 @@
+/* Bookmark-ribbon tag — a vertical colour strip anchored at the top of
+ * its positioned ancestor, extending downward on hover to reveal the
+ * label rotated 90° clockwise.
+ *
+ * Typography is inherited from the host page so the rotated label
+ * matches surrounding text weight / family. Final width / height
+ * tuned for comfortable reading (~24 px wide, extending from 12 px
+ * idle to ~96 px hovered). */
+
+.ecui-bookmark-ribbon {
+  --bookmark-color: var(--focusBorder);
+  --bookmark-text-color: var(--foreground);
+
+  position: relative;
+  display: inline-flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 20px;
+
+  /* Idle ribbon hangs from the very top of its positioned ancestor
+   * like a signet hanging from the tab's bottom edge. 30 px gives
+   * enough silhouette presence (rectangle + 7 px V-notch tails)
+   * without crowding the title row below. `min-height` serves as a
+   * floor so short labels on hover don't make the ribbon visibly
+   * shrink — it can only grow. */
+  height: 30px;
+  min-height: 30px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  overflow: hidden;
+
+  /* `interpolate-size: allow-keywords` (Chromium 129+) lets CSS
+   * animate between a fixed length and `auto` — without it, the
+   * entry/exit between `height: 30px` and `height: auto` would snap
+   * and only the `opacity` fade of the label would be visible. */
+  interpolate-size: allow-keywords;
+
+  /* Exit choreography: when the mouse leaves, wait 3 s, then fade
+   * the label out (0.3 s), then animate the ribbon's height down
+   * (0.4 s). The height delay here is the total time before the
+   * collapse animation starts (3 s pause + 0.3 s label fade = 3.3 s).
+   * The fade is set on the label rule below. */
+  transition: height 0.4s ease-out 3.3s;
+}
+
+/* Coloured body of the ribbon — clipped into the classic "signet"
+ * bookmark silhouette: rectangle with a V-notch cut up from the
+ * bottom centre, leaving two pointed tails at the bottom corners.
+ * The notch depth stays a constant 7 px regardless of ribbon height,
+ * so the tails keep their size when the ribbon extends on hover. */
+.ecui-bookmark-ribbon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--bookmark-color);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 7px), 0 100%);
+}
+
+/* Label — rendered with `writing-mode: vertical-rl` so the glyphs sit
+ * on their side and read top-to-bottom (visually a 90° clockwise
+ * rotation of the normal horizontal flow). It lives in normal flow
+ * (not absolute) so its intrinsic height drives the ribbon's own
+ * height on hover — shorter labels get shorter ribbons.
+ *
+ * Hidden in idle state via opacity 0 + the container's `overflow:
+ * hidden` + fixed 28 px height: the label is there but clipped,
+ * ready to drive the height the moment we flip to `height: auto`. */
+.ecui-bookmark-ribbon-label {
+  position: relative;
+  z-index: 1;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  white-space: nowrap;
+  padding: 8px 0 14px;
+  color: var(--bookmark-text-color);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.5px;
+  opacity: 0;
+
+  /* Exit choreography: after the 3 s grace period the label fades
+   * (0.3 s), then the ribbon collapses. */
+  transition: opacity 0.3s ease-out 3s;
+}
+
+.ecui-bookmark-ribbon:hover,
+.ecui-bookmark-ribbon--open,
+.ecui-bookmark-ribbon:focus-visible {
+  /* `height: auto` + `overflow: visible` lets the label drive the
+   * ribbon's height. Shorter tags get shorter ribbons; the clip-path
+   * keeps the bottom 7 px as the notched tail regardless of total
+   * height. CSS can't animate `auto` heights smoothly, so we accept
+   * the snap — the effect reads as an unfurling signet rather than a
+   * generic slide.
+   *
+   * Entry choreography: the ribbon expands first (0.4 s), then after
+   * that completes the label fades in (0.3 s) — see label rule below.
+   * The height transition runs with no delay on entry so the expand
+   * happens immediately; the exit delay of 3.3 s lives on the base
+   * rule so it only kicks in when we leave the hover / open state. */
+  height: auto;
+  overflow: visible;
+  transition: height 0.4s ease-out 0s;
+}
+
+.ecui-bookmark-ribbon:hover .ecui-bookmark-ribbon-label,
+.ecui-bookmark-ribbon--open .ecui-bookmark-ribbon-label,
+.ecui-bookmark-ribbon:focus-visible .ecui-bookmark-ribbon-label {
+  opacity: 1;
+
+  /* Entry: wait for the ribbon-expand (0.4 s) to finish before the
+   * label fades in (0.3 s). */
+  transition: opacity 0.3s ease-out 0.4s;
+}
+
+.ecui-bookmark-ribbon:focus {
+  outline: none;
+}
+
+.ecui-bookmark-ribbon:focus-visible {
+  outline: 1px solid var(--focusBorder);
+  outline-offset: 2px;
+}
+
+/* Readonly variant — no editor tooltip, no click handler. Hover still
+ * unfurls the label so the rotated text stays readable. */
+.ecui-bookmark-ribbon--readonly {
+  cursor: default;
+}
+
+/* Add-tag variant — same footprint, muted greyscale chrome + a `+`
+ * glyph. Used by `<BookmarkRibbonStack>` as its first ribbon. It
+ * has no label content, so we pin its height even on hover rather
+ * than collapse it via the `height: auto` rule above. */
+.ecui-bookmark-ribbon--add {
+  --bookmark-color: var(--descriptionForeground, #888);
+}
+
+.ecui-bookmark-ribbon--add:hover,
+.ecui-bookmark-ribbon--add.ecui-bookmark-ribbon--open,
+.ecui-bookmark-ribbon--add:focus-visible {
+  height: 30px;
+  overflow: hidden;
+}
+
+.ecui-bookmark-ribbon--add::before {
+  opacity: 0.4;
+}
+
+.ecui-bookmark-ribbon--add .ecui-bookmark-ribbon-plus {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 3px;
+  color: var(--bookmark-text-color);
+  z-index: 1;
+  opacity: 0.9;
+}
+
+/* `@vscode/codicons` ships a `font: 16px/1 codicon` shorthand on the
+ * `.codicon` class which beats plain `font-size` declarations from
+ * the cascade. Use `!important` to shrink the glyph for the tiny
+ * bookmark tab. */
+.ecui-bookmark-ribbon--add .ecui-bookmark-ribbon-plus .codicon {
+  font-size: 9px !important;
+  line-height: 1 !important;
+}
+
+/* Stack — anchors a row of ribbons to the top-right of its positioned
+ * ancestor. Ribbons flow left → right starting with the `[+]` add slot.
+ * Each ribbon keeps its own hover / open footprint so expanding one
+ * doesn't reflow its neighbours — that's handled by the ribbon's
+ * overflow: visible + absolute-positioned coloured body. */
+.ecui-bookmark-ribbon-stack {
+  position: absolute;
+
+  /* Default: the stack hangs from the exact top of its positioned
+   * ancestor. Callers that need to flush the ribbons' top edge with
+   * a border rendered *above* the ancestor (e.g. a tab-bar bottom
+   * border) can override `top` to a small negative value from their
+   * own CSS — see `restormWorkbenchTab.css`. */
+  top: 0;
+  right: 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 4px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.ecui-bookmark-ribbon-stack > .ecui-bookmark-ribbon {
+  pointer-events: auto;
+}
+
+/* Editor tooltip layout — stacked inputs with a little breathing
+ * room around the color picker. */
+.ecui-bookmark-ribbon-tooltip .ecui-bookmark-ribbon-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 220px;
+  padding: 4px 0;
+}
