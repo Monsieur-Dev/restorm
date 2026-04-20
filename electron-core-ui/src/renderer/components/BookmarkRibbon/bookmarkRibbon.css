@@ -32,7 +32,19 @@
   background: transparent;
   cursor: pointer;
   overflow: hidden;
-  transition: height 0.2s ease-out;
+
+  /* `interpolate-size: allow-keywords` (Chromium 129+) lets CSS
+   * animate between a fixed length and `auto` — without it, the
+   * entry/exit between `height: 30px` and `height: auto` would snap
+   * and only the `opacity` fade of the label would be visible. */
+  interpolate-size: allow-keywords;
+
+  /* Exit choreography: when the mouse leaves, wait 3 s, then fade
+   * the label out (0.3 s), then animate the ribbon's height down
+   * (0.4 s). The height delay here is the total time before the
+   * collapse animation starts (3 s pause + 0.3 s label fade = 3.3 s).
+   * The fade is set on the label rule below. */
+  transition: height 0.4s ease-out 3.3s;
 }
 
 /* Coloured body of the ribbon — clipped into the classic "signet"
@@ -70,7 +82,10 @@
   line-height: 1;
   letter-spacing: 0.5px;
   opacity: 0;
-  transition: opacity 0.15s ease-out 0.05s;
+
+  /* Exit choreography: after the 3 s grace period the label fades
+   * (0.3 s), then the ribbon collapses. */
+  transition: opacity 0.3s ease-out 3s;
 }
 
 .ecui-bookmark-ribbon:hover,
@@ -81,15 +96,26 @@
    * keeps the bottom 7 px as the notched tail regardless of total
    * height. CSS can't animate `auto` heights smoothly, so we accept
    * the snap — the effect reads as an unfurling signet rather than a
-   * generic slide. */
+   * generic slide.
+   *
+   * Entry choreography: the ribbon expands first (0.4 s), then after
+   * that completes the label fades in (0.3 s) — see label rule below.
+   * The height transition runs with no delay on entry so the expand
+   * happens immediately; the exit delay of 3.3 s lives on the base
+   * rule so it only kicks in when we leave the hover / open state. */
   height: auto;
   overflow: visible;
+  transition: height 0.4s ease-out 0s;
 }
 
 .ecui-bookmark-ribbon:hover .ecui-bookmark-ribbon-label,
 .ecui-bookmark-ribbon--open .ecui-bookmark-ribbon-label,
 .ecui-bookmark-ribbon:focus-visible .ecui-bookmark-ribbon-label {
   opacity: 1;
+
+  /* Entry: wait for the ribbon-expand (0.4 s) to finish before the
+   * label fades in (0.3 s). */
+  transition: opacity 0.3s ease-out 0.4s;
 }
 
 .ecui-bookmark-ribbon:focus {

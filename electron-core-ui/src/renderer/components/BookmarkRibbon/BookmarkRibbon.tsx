@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { getContrastColor } from '../../utils/colorContrast'
 import { getColorFromString } from '../../utils/colorFromString'
 import { Tooltip } from '../Tooltip'
@@ -46,6 +46,25 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
   const [isOpen, setIsOpen] = useState(false)
   const [draftLabel, setDraftLabel] = useState(label)
   const rootRef = useRef<HTMLButtonElement | null>(null)
+  const editorRef = useRef<HTMLDivElement | null>(null)
+
+  // Close the editor tooltip when the user clicks outside of the
+  // ribbon button + the tooltip content. `mousedown` runs before
+  // `click`, so any intent to interact with the current tooltip is
+  // already handled by the editor's own `stopPropagation` before we
+  // reach here.
+  useEffect(() => {
+    if (!isOpen) return undefined
+    const handler = (ev: MouseEvent): void => {
+      const target = ev.target
+      if (!(target instanceof Node)) return
+      if (rootRef.current?.contains(target)) return
+      if (editorRef.current?.contains(target)) return
+      setIsOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => { document.removeEventListener('mousedown', handler) }
+  }, [isOpen])
 
   const effectiveColor = color ?? getColorFromString(label)
   const textColor = getContrastColor(effectiveColor)
@@ -97,6 +116,7 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
         {...(dataTestId ? { 'data-testid': `${dataTestId}-tooltip` } : {})}
         content={
           <div
+            ref={editorRef}
             className="ecui-bookmark-ribbon-editor"
             onMouseDown={(e) => { e.stopPropagation() }}
           >

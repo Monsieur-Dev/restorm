@@ -139,13 +139,25 @@ describe('BookmarkRibbon', () => {
       expect(btn).toHaveAttribute('aria-expanded', 'false')
       await user.click(btn)
       expect(btn).toHaveAttribute('aria-expanded', 'true')
-      // Closing via the rename input's Escape handler — that's the path
-      // keyboard users take; clicking outside would need a document-level
-      // click handler (not exercised by the component).
+      // Closing via the rename input's Escape handler.
       const input = screen.getByTestId('rib-rename-input-input')
       await user.click(input)
       await user.keyboard('{Escape}')
       expect(btn).toHaveAttribute('aria-expanded', 'false')
+    })
+
+    it('closes when the user clicks outside the ribbon and the tooltip', async () => {
+      const user = userEvent.setup()
+      render(
+        <>
+          <BookmarkRibbon label="api" onRename={noop} data-testid="rib" />
+          <button data-testid="outside">outside</button>
+        </>
+      )
+      await user.click(screen.getByTestId('rib'))
+      expect(screen.getByTestId('rib-rename-input-input')).toBeInTheDocument()
+      await user.click(screen.getByTestId('outside'))
+      expect(screen.queryByTestId('rib-rename-input-input')).not.toBeInTheDocument()
     })
   })
 })
@@ -238,6 +250,20 @@ describe('BookmarkRibbonStack', () => {
       await user.click(input)
       await user.type(input, '   {Enter}')
       expect(onAdd).not.toHaveBeenCalled()
+    })
+
+    it('closes the add tooltip when the user clicks outside of it', async () => {
+      const user = userEvent.setup()
+      render(
+        <>
+          <BookmarkRibbonStack tags={[]} onAdd={noop} data-testid="stk" />
+          <button data-testid="outside">outside</button>
+        </>
+      )
+      await user.click(screen.getByTestId('stk-add'))
+      expect(screen.getByTestId('stk-add-input-input')).toBeInTheDocument()
+      await user.click(screen.getByTestId('outside'))
+      expect(screen.queryByTestId('stk-add-input-input')).not.toBeInTheDocument()
     })
   })
 })

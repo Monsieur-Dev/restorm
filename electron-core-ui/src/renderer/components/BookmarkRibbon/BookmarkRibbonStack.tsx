@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { BookmarkRibbon } from './BookmarkRibbon'
 import { Tooltip } from '../Tooltip'
 import { Button } from '../Button'
@@ -39,6 +39,23 @@ export const BookmarkRibbonStack: React.FC<BookmarkRibbonStackProps> = ({
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [addDraft, setAddDraft] = useState('')
   const addBtnRef = useRef<HTMLButtonElement | null>(null)
+  const addEditorRef = useRef<HTMLDivElement | null>(null)
+
+  // Close the add-tag tooltip on any click outside of the `[+]`
+  // button or the tooltip content. Individual ribbon tooltips handle
+  // their own click-outside logic in BookmarkRibbon.
+  useEffect(() => {
+    if (!isAddOpen) return undefined
+    const handler = (ev: MouseEvent): void => {
+      const target = ev.target
+      if (!(target instanceof Node)) return
+      if (addBtnRef.current?.contains(target)) return
+      if (addEditorRef.current?.contains(target)) return
+      setIsAddOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => { document.removeEventListener('mousedown', handler) }
+  }, [isAddOpen])
 
   const handleAddCommit = useCallback(() => {
     const trimmed = addDraft.trim()
@@ -78,6 +95,7 @@ export const BookmarkRibbonStack: React.FC<BookmarkRibbonStackProps> = ({
         {...(dataTestId ? { 'data-testid': `${dataTestId}-add-tooltip` } : {})}
         content={
           <div
+            ref={addEditorRef}
             className="ecui-bookmark-ribbon-editor"
             onMouseDown={(e) => { e.stopPropagation() }}
           >
