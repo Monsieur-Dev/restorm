@@ -47,17 +47,11 @@
   line-height: 1.2;
 }
 
-/* Icon next to the H1 — scale the IconView up to match the title size.
- * IconSelect's internal IconView is hardcoded to size=16, so we override
- * via CSS (same pattern as the existing breadcrumb icon-select tweak). */
-.restorm-workbench-tab-title-icon-select .ecui-icon-view {
-  font-size: 22px;
-}
-
-.restorm-workbench-tab-title-icon-select .ecui-icon-view svg {
-  width: 22px;
-  height: 22px;
-}
+/* The H1-adjacent IconSelect is sized via its `size` prop (see the
+ * component usage in `RestormWorkbenchTab.tsx`). We keep the wrapper
+ * class here only as a stable test-selector hook — styling the icon
+ * itself lives on the component, not in CSS, so other IconSelect
+ * instances on the page (statusbar, toolbar, …) aren't affected. */
 
 .restorm-workbench-tab-tags {
   margin-left: auto;
