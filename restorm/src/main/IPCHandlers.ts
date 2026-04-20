@@ -574,11 +574,14 @@ export function registerRestormIPC(deps: {
     const rawBody = typeof input.body === 'string' && input.body.length > 0
       ? input.body
       : undefined
+    const bodyContentType = typeof input.bodyContentType === 'string' && input.bodyContentType.length > 0
+      ? input.bodyContentType
+      : 'application/json'
     const result = await httpExecutionService.execute({
       requestId: input.requestId,
       method,
       ...(typeof input.timeout === 'number' ? { timeout: input.timeout } : {}),
-      ...(rawBody !== undefined ? { rawBody, rawBodyContentType: 'application/json' } : {})
+      ...(rawBody !== undefined ? { rawBody, rawBodyContentType: bodyContentType } : {})
     })
     setImmediate(() => {
       const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'

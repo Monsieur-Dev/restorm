@@ -32,11 +32,13 @@ export interface ODataQueryOptions {
 }
 
 /** Discriminates entity-set navigation from bound/unbound function /
- * action invocations. Phase 1 persists `'entity-set'` for every
- * request; actions & functions wire their own UI + URL rules in Phase 4
- * (`Function(param=@p1)` inlining, POST body for actions, etc.). The
- * field is reserved here so the storage shape is stable. */
-export type ODataOperationKind = 'entity-set' | 'function' | 'action'
+ * action invocations, and from batch requests. Phase 1 persists
+ * `'entity-set'` for every request; Phase 4 wires `'function'` /
+ * `'action'`; Phase 5 adds `'batch'` — a batch is really just an
+ * action whose body is a multipart/mixed envelope assembled from a
+ * JSON array of sub-requests, so we model it as another operation
+ * kind rather than a separate request type. */
+export type ODataOperationKind = 'entity-set' | 'function' | 'action' | 'batch'
 
 export interface ODataRequest extends BaseRequest {
   type: 'odata'

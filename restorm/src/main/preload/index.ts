@@ -471,7 +471,7 @@ contextBridge.exposeInMainWorld('restorm', {
      * the HTTP one — a dedicated shape lands when `@odata.nextLink` /
      * `@odata.count` chrome ships.
      */
-    execute: async (input: { requestId: string; timeout?: number; requestPath?: string; method?: string; body?: string }): Promise<{
+    execute: async (input: { requestId: string; timeout?: number; requestPath?: string; method?: string; body?: string; bodyContentType?: string }): Promise<{
       requestId: string
       success: boolean
       statusCode?: number
