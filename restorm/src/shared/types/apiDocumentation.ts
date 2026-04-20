@@ -144,6 +144,7 @@ export type ApiDocumentationSourceType =
   | 'postman'
   | 'insomnia'
   | 'bruno'
+  | 'odata'
 
 /** Root documentation structure stored on the EnvironmentFolder that owns the API. */
 export interface ApiDocumentation {
