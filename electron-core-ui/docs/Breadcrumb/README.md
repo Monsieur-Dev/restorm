@@ -92,8 +92,8 @@ If you pass a `data-testid` to the component, you can target the whole breadcrum
 
 The component also exposes stable internal hooks for tests:
 
-- Last item label (view mode): `button[aria-current="page"]`
-- Edit input (edit mode): `input.ecui-breadcrumb-input`
+- Last item label (view mode): `li.ecui-breadcrumb-item--last .ecui-editable-label:not(.ecui-editable-label--editing)` (rendered by the shared [`EditableLabel`](../EditableLabel/README.md))
+- Edit input (edit mode): `input.ecui-editable-label-input`
 - Non-last items (navigation): `li.ecui-breadcrumb-item:not(.ecui-breadcrumb-item--last) button.ecui-breadcrumb-link`
 
 ### E2E helpers
@@ -142,7 +142,7 @@ The component uses standard theme CSS variables for theming:
 - `.ecui-breadcrumb-item--last`: applied to the last item
 - `.ecui-breadcrumb-link`: button used for clickable labels
 - `.ecui-breadcrumb-link--current`: applied to the last item in label mode (rendered in bold)
-- `.ecui-breadcrumb-input`: input used when editing the last item
+- Last-item edit input: rendered by [`EditableLabel`](../EditableLabel/README.md) as `input.ecui-editable-label-input`
 - `.ecui-breadcrumb-separator`: wrapper for the chevron separator icon
 
 ## Notes for AI Usage

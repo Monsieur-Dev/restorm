@@ -1,0 +1,83 @@
+/* Root wrapper — polymorphic tag (span / h1-h6 / p / div). Keeps its
+ * native typographic defaults; the component only layers layout glue. */
+.ecui-editable-label {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Interactive trigger: a bare <button> that inherits the typographic
+ * context (font / colour / size) from its ancestor Tag. `position:
+ * relative` anchors the absolutely-positioned pencil hint. */
+.ecui-editable-label-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.ecui-editable-label-trigger:focus {
+  outline: none;
+}
+
+.ecui-editable-label-trigger:focus-visible {
+  outline: 1px solid var(--focusBorder);
+  outline-offset: 2px;
+}
+
+/* Pencil hint: absolutely-positioned so it doesn't nudge layout in/out
+ * on hover. Fades in on hover of the trigger, or when the trigger has
+ * keyboard focus. */
+.ecui-editable-label-pencil {
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.ecui-editable-label-trigger:hover .ecui-editable-label-pencil,
+.ecui-editable-label-trigger:focus-visible .ecui-editable-label-pencil {
+  opacity: 0.6;
+}
+
+/* Text span — isolated from the pencil so future typography tweaks on
+ * the trigger don't bleed into the icon. */
+.ecui-editable-label-text {
+  display: inline;
+}
+
+/* Edit-mode input — matches the text sizing of its parent so the
+ * layout doesn't shift when toggling modes. */
+.ecui-editable-label-input {
+  min-width: 80px;
+  max-width: 240px;
+  padding: 2px 4px;
+  border-radius: 2px;
+  border: 1px solid var(--input-border);
+  background-color: var(--input-background);
+  color: var(--input-foreground);
+  font: inherit;
+}
+
+.ecui-editable-label-input:focus {
+  outline: 1px solid var(--focusBorder);
+}
+
+.ecui-editable-label-input[aria-invalid='true'] {
+  border-color: var(--errorForeground, #e53935);
+}
+
+.ecui-editable-label-error {
+  margin-left: 6px;
+  font-size: 11px;
+  color: var(--errorForeground, #e53935);
+}

@@ -1,7 +1,8 @@
-import React, { useCallback, useState, useRef, useEffect } from 'react'
+import React, { useCallback } from 'react'
 import type { Icon } from '../../../types/icon'
 import { IconView } from '../IconView'
 import { IconSelect } from '../IconSelect/IconSelect'
+import { EditableLabel } from '../EditableLabel'
 
 import './breadcrumb.css'
 
@@ -73,75 +74,13 @@ const BreadcrumbInner: React.FC<BreadcrumbProps> = ({
   style,
   ariaLabel
 }) => {
-  const [isEditingLast, setIsEditingLast] = useState(false)
-  const [editingValue, setEditingValue] = useState('')
-  const [editingItem, setEditingItem] = useState<BreadcrumbItem | null>(null)
-  const [committedValue, setCommittedValue] = useState<string | null>(null)
-  const [isHoveringLast, setIsHoveringLast] = useState(false)
-  const inputRef = useRef<HTMLInputElement | null>(null)
-  const shouldSelectOnMount = useRef(false)
-  const ignoreNextBlurCommit = useRef(false)
-
   const lastItem = items[items.length - 1]
   const lastIndex = items.length - 1
-  const displayedLastLabel = (committedValue !== null && committedValue !== lastItem?.label)
-    ? committedValue
-    : lastItem?.label
 
-  const handleStartEditingLast = useCallback((): void => {
-    if (!canEditName || !lastItem) return
-    setIsEditingLast(true)
-    setEditingValue(displayedLastLabel ?? lastItem.label)
-    setEditingItem(lastItem)
-    shouldSelectOnMount.current = true
-  }, [canEditName, lastItem, displayedLastLabel])
-
-  useEffect(() => {
-    if (isEditingLast && inputRef.current && shouldSelectOnMount.current) {
-      inputRef.current.focus()
-      inputRef.current.select()
-      shouldSelectOnMount.current = false
-    }
-  }, [isEditingLast])
-
-  const handleCommitLast = useCallback(
-    (index: number): void => {
-      if (!isEditingLast || !editingItem) return
-      setIsEditingLast(false)
-      if (onLastItemChange && editingValue !== editingItem.label) {
-        setCommittedValue(editingValue)
-        onLastItemChange(editingItem, editingValue, index)
-      }
-      setEditingItem(null)
-    },
-    [editingValue, isEditingLast, editingItem, onLastItemChange]
-  )
-
-  const handleCancelEditingLast = useCallback((): void => {
-    setIsEditingLast(false)
-    setEditingItem(null)
-  }, [])
-
-  const handleInputKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>, index: number): void => {
-      if (event.key === 'Enter') {
-        event.preventDefault()
-        ignoreNextBlurCommit.current = true
-        handleCommitLast(index)
-        if (inputRef.current) {
-          inputRef.current.blur()
-        }
-      } else if (event.key === 'Escape') {
-        event.preventDefault()
-        ignoreNextBlurCommit.current = true
-        handleCancelEditingLast()
-        if (inputRef.current) {
-          inputRef.current.blur()
-        }
-      }
-    },
-    [handleCommitLast, handleCancelEditingLast]
-  )
+  const handleEditableCommit = useCallback((nextValue: string): void => {
+    if (!lastItem || !onLastItemChange) return
+    onLastItemChange(lastItem, nextValue, lastIndex)
+  }, [lastItem, lastIndex, onLastItemChange])
 
   const handleIconChange = useCallback((newIcon: Icon | null): void => {
     if (!lastItem || !onLastItemIconChange) return
@@ -183,7 +122,13 @@ const BreadcrumbInner: React.FC<BreadcrumbProps> = ({
             )
           }
 
-          // Last item: current location, editable icon + name
+          // Last item: current location, editable icon + name.
+          // Name editing is delegated to `<EditableLabel>` — it owns
+          // the hover pencil, input swap, Enter / Escape / blur handling
+          // + the "commit only on actual change" guard. Breadcrumb just
+          // maps the component's onChange to its existing public
+          // `onLastItemChange` callback, and keeps the WAI-ARIA
+          // breadcrumb semantics (`aria-current="page"`) on a wrapper.
           return (
             <li
               key={item.id}
@@ -199,46 +144,16 @@ const BreadcrumbInner: React.FC<BreadcrumbProps> = ({
               ) : (
                 renderIcon(item.icon)
               )}
-              {isEditingLast ? (
-                <input
-                  ref={inputRef}
-                  className="ecui-breadcrumb-input"
-                  type="text"
-                  value={editingValue}
-                  onChange={(event): void => {
-                    setEditingValue(event.target.value)
-                  }}
-                  onBlur={(): void => {
-                    if (ignoreNextBlurCommit.current) {
-                      ignoreNextBlurCommit.current = false
-                      return
-                    }
-                    handleCommitLast(index)
-                  }}
-                  onKeyDown={(event): void => {
-                    handleInputKeyDown(event, index)
-                  }}
+              <span aria-current="page">
+                <EditableLabel
+                  as="span"
+                  value={item.label}
+                  onChange={handleEditableCommit}
+                  editable={canEditName}
+                  className="ecui-breadcrumb-link ecui-breadcrumb-link--current"
+                  {...(dataTestId ? { 'data-testid': `${dataTestId}-editable-last` } : {})}
                 />
-              ) : (
-                <button
-                  type="button"
-                  className="ecui-breadcrumb-link ecui-breadcrumb-link--current ecui-breadcrumb-link--editable"
-                  aria-current="page"
-                  onMouseEnter={() => { setIsHoveringLast(true) }}
-                  onMouseLeave={() => { setIsHoveringLast(false) }}
-                  onClick={(event): void => {
-                    if (onItemClick) {
-                      onItemClick(item, index, event)
-                    }
-                    handleStartEditingLast()
-                  }}
-                >
-                  {displayedLastLabel}
-                  {isHoveringLast && canEditName ? (
-                    <i className="codicon codicon-edit ecui-breadcrumb-edit-hint" />
-                  ) : null}
-                </button>
-              )}
+              </span>
             </li>
           )
         })}

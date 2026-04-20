@@ -49,21 +49,6 @@
   font-weight: 600;
 }
 
-.ecui-breadcrumb-input {
-  min-width: 80px;
-  max-width: 240px;
-  padding: 2px 4px;
-  border-radius: 2px;
-  border: 1px solid var(--input-border);
-  background-color: var(--input-background);
-  color: var(--input-foreground);
-  font: inherit;
-}
-
-.ecui-breadcrumb-input:focus {
-  outline: 1px solid var(--focusBorder);
-}
-
 .ecui-breadcrumb-separator {
   display: flex;
   align-items: center;
@@ -93,28 +78,6 @@
 .ecui-breadcrumb-icon.codicon {
   font-size: 12px;
   line-height: 1;
-}
-
-/* Editable button needs relative positioning for the pencil hint */
-.ecui-breadcrumb-link--editable {
-  position: relative;
-}
-
-/* Edit hint (pencil icon on hover) — absolutely positioned to avoid layout shift */
-.ecui-breadcrumb-edit-hint {
-  position: absolute;
-  right: -25px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 9px;
-  opacity: 0;
-  animation: ecui-breadcrumb-fade-in 0.15s ease forwards;
-  pointer-events: none;
-}
-
-@keyframes ecui-breadcrumb-fade-in {
-  from { opacity: 0; }
-  to { opacity: 0.5; }
 }
 
 /* IconSelect inline in breadcrumb */
