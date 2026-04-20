@@ -2,9 +2,7 @@ import type { BaseRequest } from './BaseRequest'
 import type { ODataVersion } from '../requestPrimitives'
 import type { KeyValue } from '../baseTypes'
 
-/** v4 system query options persisted on an OData request. Only the
- * subset shipped in Phase 1 is modelled here — `$expand`, `$orderby`,
- * `$search`, `$format`, `$apply` land in Phase 2. */
+/** v4 system query options persisted on an OData request. */
 export interface ODataQueryOptions {
   /** `$filter` — raw OData filter expression, env-templated. */
   filter?: string
@@ -18,6 +16,19 @@ export interface ODataQueryOptions {
    * `$count=true`, v2/v3 become `$inlinecount=allpages` once those
    * versions are wired. */
   count?: boolean
+  /** `$expand` — raw expand clause, e.g.
+   * `Category,Tags($select=Name;$top=5)`. Phase 2 persists this as a
+   * single string; structured nested editors land later. */
+  expand?: string
+  /** `$orderby` — raw clause, e.g. `Name asc,Id desc`. */
+  orderby?: string
+  /** `$search` — free-text search expression. */
+  search?: string
+  /** `$format` — response format override (`json`, `xml`, `atom`). */
+  format?: string
+  /** `$apply` — v4.01 aggregation expression (e.g.
+   * `groupby((Status),aggregate($count as Total))`). */
+  apply?: string
 }
 
 /** Discriminates entity-set navigation from bound/unbound function /

@@ -172,6 +172,26 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, count: next })
   }, [request])
 
+  const setExpand = useCallback((next: string) => {
+    updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, expand: next })
+  }, [request])
+
+  const setOrderby = useCallback((next: string) => {
+    updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, orderby: next })
+  }, [request])
+
+  const setSearch = useCallback((next: string) => {
+    updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, search: next })
+  }, [request])
+
+  const setFormat = useCallback((next: string) => {
+    updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, format: next })
+  }, [request])
+
+  const setApply = useCallback((next: string) => {
+    updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, apply: next })
+  }, [request])
+
   const selectJoined = (request.queryOptions.select ?? []).join(', ')
 
   // Live URL preview composed from the current (unresolved) values.
@@ -384,6 +404,57 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
             data-testid="odata-request-count"
           />
         </div>
+      </div>
+
+      <div style={rowStyle}>
+        <label style={labelStyle} htmlFor="odata-expand">$expand</label>
+        <InputBox
+          value={request.queryOptions.expand ?? ''}
+          onChange={setExpand}
+          options={{ placeholder: t('odataRequestTab.expandPlaceholder', 'Category,Tags($select=Name;$top=5)') }}
+          data-testid="odata-request-expand"
+        />
+      </div>
+
+      <div style={rowStyle}>
+        <label style={labelStyle} htmlFor="odata-orderby">$orderby</label>
+        <InputBox
+          value={request.queryOptions.orderby ?? ''}
+          onChange={setOrderby}
+          options={{ placeholder: t('odataRequestTab.orderbyPlaceholder', 'Name asc, Id desc') }}
+          data-testid="odata-request-orderby"
+        />
+      </div>
+
+      <div style={numericRowStyle}>
+        <div style={{ ...rowStyle, ...numericItemStyle }}>
+          <label style={labelStyle} htmlFor="odata-search">$search</label>
+          <InputBox
+            value={request.queryOptions.search ?? ''}
+            onChange={setSearch}
+            options={{ placeholder: t('odataRequestTab.searchPlaceholder', 'puppy') }}
+            data-testid="odata-request-search"
+          />
+        </div>
+        <div style={{ ...rowStyle, ...numericItemStyle }}>
+          <label style={labelStyle} htmlFor="odata-format">$format</label>
+          <InputBox
+            value={request.queryOptions.format ?? ''}
+            onChange={setFormat}
+            options={{ placeholder: t('odataRequestTab.formatPlaceholder', 'json') }}
+            data-testid="odata-request-format"
+          />
+        </div>
+      </div>
+
+      <div style={rowStyle}>
+        <label style={labelStyle} htmlFor="odata-apply">$apply</label>
+        <InputBox
+          value={request.queryOptions.apply ?? ''}
+          onChange={setApply}
+          options={{ placeholder: t('odataRequestTab.applyPlaceholder', 'groupby((Status),aggregate($count as Total))') }}
+          data-testid="odata-request-apply"
+        />
       </div>
 
       <div style={previewRowStyle} data-testid="odata-request-url-preview">

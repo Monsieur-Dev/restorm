@@ -107,22 +107,18 @@ export function resolveUrl(
   // servers accept both `$filter=...` and `%24filter=...` but the
   // literal form is canonical and human-readable).
   if (data.requestType === 'odata' && data.odataQueryOptions) {
+    const qo = data.odataQueryOptions
     const resolvedOptions = {
-      ...(data.odataQueryOptions.filter !== undefined && {
-        filter: transformValue(data.odataQueryOptions.filter, cumulativeParamsContext)
-      }),
-      ...(data.odataQueryOptions.select !== undefined && {
-        select: data.odataQueryOptions.select.map((s) => transformValue(s, cumulativeParamsContext))
-      }),
-      ...(data.odataQueryOptions.top !== undefined && {
-        top: transformValue(data.odataQueryOptions.top, cumulativeParamsContext)
-      }),
-      ...(data.odataQueryOptions.skip !== undefined && {
-        skip: transformValue(data.odataQueryOptions.skip, cumulativeParamsContext)
-      }),
-      ...(data.odataQueryOptions.count !== undefined && {
-        count: data.odataQueryOptions.count
-      })
+      ...(qo.filter !== undefined && { filter: transformValue(qo.filter, cumulativeParamsContext) }),
+      ...(qo.select !== undefined && { select: qo.select.map((s) => transformValue(s, cumulativeParamsContext)) }),
+      ...(qo.top !== undefined && { top: transformValue(qo.top, cumulativeParamsContext) }),
+      ...(qo.skip !== undefined && { skip: transformValue(qo.skip, cumulativeParamsContext) }),
+      ...(qo.count !== undefined && { count: qo.count }),
+      ...(qo.expand !== undefined && { expand: transformValue(qo.expand, cumulativeParamsContext) }),
+      ...(qo.orderby !== undefined && { orderby: transformValue(qo.orderby, cumulativeParamsContext) }),
+      ...(qo.search !== undefined && { search: transformValue(qo.search, cumulativeParamsContext) }),
+      ...(qo.format !== undefined && { format: transformValue(qo.format, cumulativeParamsContext) }),
+      ...(qo.apply !== undefined && { apply: transformValue(qo.apply, cumulativeParamsContext) })
     }
     const systemPairs = serializeODataQueryOptions(resolvedOptions, data.odataVersion ?? 'v4')
     for (const [key, value] of systemPairs) {

@@ -19,7 +19,7 @@ import type { KeyValue } from '../types/baseTypes'
 /** Canonical ordering we emit system options in. Purely cosmetic — OData
  * servers don't require a specific order — but stable output makes URLs
  * deterministic and copy-pasteable across runs. */
-const V4_KEY_ORDER = ['$filter', '$select', '$top', '$skip', '$count'] as const
+const V4_KEY_ORDER = ['$filter', '$select', '$expand', '$orderby', '$top', '$skip', '$count', '$search', '$format', '$apply'] as const
 
 /**
  * Serialize the OData system query options of an `ODataRequest` into
@@ -56,6 +56,24 @@ export function serializeODataQueryOptions(
     } else {
       out.push(['$inlinecount', 'allpages'])
     }
+  }
+  // Phase 2 advanced options — caller-provided raw syntax. Values go
+  // through Handlebars *before* landing here, so `{{searchTerm}}` in
+  // `$search` works. Whitespace-only strings drop out entirely.
+  if (options.expand !== undefined && options.expand.trim() !== '') {
+    out.push(['$expand', options.expand])
+  }
+  if (options.orderby !== undefined && options.orderby.trim() !== '') {
+    out.push(['$orderby', options.orderby])
+  }
+  if (options.search !== undefined && options.search.trim() !== '') {
+    out.push(['$search', options.search])
+  }
+  if (options.format !== undefined && options.format.trim() !== '') {
+    out.push(['$format', options.format])
+  }
+  if (options.apply !== undefined && options.apply.trim() !== '') {
+    out.push(['$apply', options.apply])
   }
 
   // Sort by canonical order for v4 (known keys first, unknown keys
