@@ -4,9 +4,13 @@ import type { Environment } from '../../../shared/types/collections'
 export interface EnvironmentContextValue {
   environments?: Environment[] | undefined
   selectedEnvId: string | null
-  setSelectedEnvId: (id: string | null) => void
   tagColors?: Record<string, string> | undefined
   envColor?: string | undefined
+  /** Write the env-folder default. Callers should also clear any
+   * per-request overrides for sibling requests they know about. */
+  setFolderEnv: (envId: string) => void
+  /** Write a per-request override. Pass `null` to clear. */
+  setRequestOverride: (envId: string | null) => void
 }
 
 export const EnvironmentContext = createContext<EnvironmentContextValue | undefined>(undefined)

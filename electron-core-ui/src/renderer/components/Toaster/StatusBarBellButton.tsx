@@ -38,40 +38,36 @@ export const StatusBarBellButton: React.FC<StatusBarBellButtonProps> = ({
   const badgeTestId = `${dataTestId}-badge`
 
   const elementProps: {
-    title: React.ReactNode
+    icon: { type: 'codicon'; value: string }
     onClick: () => void
     'data-testid': string
     className?: string
+    overlay?: React.ReactNode
   } = {
-    title: (
-      <span
-        aria-label={ariaLabel}
-        style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}
-      >
-        <i className="codicon codicon-bell"></i>
-        {hasUnseen && (
-          <span
-            data-testid={badgeTestId}
-            aria-label="Unseen notifications"
-            style={{
-              position: 'absolute',
-              right: 1,
-              bottom: -1,
-              width: 9,
-              height: 9,
-              borderRadius: '50%',
-              background: 'var(--notificationsErrorIcon-foreground, #e74c3c)',
-              boxShadow: '0 0 0 1px var(--statusBar-background, transparent)',
-              pointerEvents: 'none'
-            }}
-          />
-        )}
-      </span>
-    ),
+    icon: { type: 'codicon', value: 'bell' },
     onClick: handleClick,
     'data-testid': dataTestId
   }
   if (className !== undefined) elementProps.className = className
+  if (hasUnseen) {
+    elementProps.overlay = (
+      <span
+        data-testid={badgeTestId}
+        aria-label={`${ariaLabel} — unseen notifications`}
+        style={{
+          position: 'absolute',
+          right: 4,
+          bottom: 2,
+          width: 9,
+          height: 9,
+          borderRadius: '50%',
+          background: 'var(--notificationsErrorIcon-foreground, #e74c3c)',
+          boxShadow: '0 0 0 1px var(--statusBar-background, transparent)',
+          pointerEvents: 'none'
+        }}
+      />
+    )
+  }
 
   return <StatusbarElement {...elementProps} />
 }

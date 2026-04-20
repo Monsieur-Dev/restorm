@@ -389,13 +389,19 @@ When(
   'I select the {string} environment on the active request tab',
   async ({}, envName: string) => {
     if (!page) throw new Error('app must be launched')
-    const dropdown = page.locator('[data-testid="environment-dropdown-button"]').first()
+    // Post-OYO-196 the dropdown lives in the status bar, not in the
+    // tab header. Click opens a `<Tooltip>`-backed popover above the
+    // cell; the env list inside is a ListView so we filter on the
+    // listview root to keep the click scoped to the popover content.
+    const dropdown = page.locator('[data-testid="statusbar-env-selector"]').first()
     await expect(dropdown).toBeVisible({ timeout: 5000 })
     await dropdown.click()
-    const item = page.locator(`text="${envName}"`).first()
+    const popoverList = page.locator('[data-testid="statusbar-env-selector-listview"]').first()
+    await expect(popoverList).toBeVisible({ timeout: 5000 })
+    const item = popoverList.locator(`text="${envName}"`).first()
     await expect(item).toBeVisible({ timeout: 5000 })
     await item.click()
-    // Wait for the dropdown to close and the selection to settle.
+    // Wait for the popover to close and the selection to settle.
     await page.waitForTimeout(200)
     await expect(dropdown).toContainText(envName, { timeout: 5000 })
   }
@@ -1306,12 +1312,10 @@ Then(
   'the active request tab should show the {string} environment',
   async ({}, envName: string) => {
     if (!page) throw new Error('app must be launched')
-    // The workbench keeps every tab's content panel mounted (hidden
-    // panels stay in the DOM with display:none), so a plain `.first()`
-    // selector on the env dropdown picks the leftmost mounted panel
-    // instead of the visible one. Filter for visibility so we only
-    // assert the dropdown the user can actually see.
-    const dropdown = page.locator('[data-testid="environment-dropdown-button"]:visible').first()
+    // Post-OYO-196 there's a single env selector in the status bar
+    // (not one per tab), so no `:visible` filter needed — the cell
+    // rerenders to reflect whichever request is the active tab.
+    const dropdown = page.locator('[data-testid="statusbar-env-selector"]').first()
     await expect(dropdown).toContainText(envName, { timeout: 10000 })
   }
 )

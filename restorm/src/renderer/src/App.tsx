@@ -76,10 +76,13 @@ import {
   findFolderById,
   findEnvironmentFolderById,
   findRequestById,
+  findItemWithBreadcrumbs,
   getNearestEnvironmentsForBreadcrumbs
 } from './utils/treeSearch'
 import { DesktopIndicator } from './components/MainView/DesktopIndicator'
 import { findItemById } from './utils/treeSearch'
+import { EnvironmentProvider } from './contexts/EnvironmentContext'
+import { StatusbarEnvironmentSelector } from './components/MainView/StatusbarEnvironmentSelector'
 import { useItemOperations } from './hooks/useItemOperations'
 import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
@@ -453,6 +456,32 @@ const App: React.FC = () => {
     return { id: request.id, path: buildRequestPath(rootItems as EnvironmentFolder[], request.id) }
   }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, rootItems])
 
+  // The nearest ancestor env folder of the active request — the
+  // primary storage grain for OYO-196's env model. Walked from
+  // breadcrumbs so it stays in sync with the workbench's active
+  // selection. `null` when no env-folder ancestor exists (the
+  // selector then runs without persistence).
+  const activeEnvFolderId = useMemo<string | null>(() => {
+    if (!activeRequest) return null
+    const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, activeRequest.id)
+    for (let i = breadcrumbs.length - 2; i >= 0; i -= 1) {
+      const id = breadcrumbs[i]?.id
+      if (!id) continue
+      const folder = findFolderById(rootItems, id)
+      if (folder && isEnvironmentFolder(folder as FolderItem)) return folder.id
+    }
+    return null
+  }, [activeRequest, rootItems])
+
+  // `EnvironmentProvider` expects `{ projectUuid, envFolderId, requestId }`
+  // to wire up persistence (workspace-scoped, survives file renames).
+  // Falls back to `undefined` when any field is missing — the provider
+  // then runs in in-memory-only mode.
+  const activeEnvPersistenceKey = useMemo(() => {
+    if (!activeRequest || !projectUuid || !activeEnvFolderId) return undefined
+    return { projectUuid, envFolderId: activeEnvFolderId, requestId: activeRequest.id }
+  }, [activeRequest, projectUuid, activeEnvFolderId])
+
   // Reactive "does the active request have any history yet?" used to
   // drive the statusbar button's disabled state. The probe is tagged
   // with the `requestId` it was fetched for so the button only trusts
@@ -616,6 +645,63 @@ const App: React.FC = () => {
     rootItems,
     setWorkbenchTree
   })
+
+  // Environments of the active request's nearest ancestor env-folder,
+  // used to feed the status-bar env selector. Empty when the active
+  // request has no env-folder ancestor (the selector then hides).
+  //
+  // `updateCount` ticks every time the reactive tree mutates in place
+  // (env color, icon, rename, etc.) — env-folder edits bump it via
+  // `handleEnvironmentFolderChange`. Without it the memo would keep
+  // returning the same `envs` array (proxy mutations are invisible to
+  // React's dep comparison), and the downstream `useMemo` that
+  // computes `envColor` inside `EnvironmentProvider` would never pick
+  // up a freshly-chosen color. Shallow-cloning each env below also
+  // gives the provider a new array reference on every bump so its
+  // own `envColor` memo re-runs.
+  const activeRequestEnvironments = useMemo(() => {
+    // Read `updateCount` so the memo re-runs when the reactive tree
+    // mutates in place — see the JSDoc above for the rationale. The
+    // value itself is unused; only its identity change matters.
+    void updateCount
+    if (!activeRequest) return []
+    const found = findItemWithBreadcrumbs(rootItems, activeRequest.id)
+    return getNearestEnvironmentsForBreadcrumbs(rootItems, found.breadcrumbs).map((env) => ({ ...env }))
+  }, [activeRequest, rootItems, updateCount])
+
+  // All request ids that sit under the same env folder as the active
+  // request (including the active one). Passed to the statusbar env
+  // selector so the "Apply to all" toggle can propagate a selection
+  // across siblings without each tab needing to be mounted.
+  const activeEnvFolderRequestIds = useMemo<string[]>(() => {
+    if (!activeRequest) return []
+    const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, activeRequest.id)
+    // Walk breadcrumbs backwards to find the nearest ancestor that is
+    // an EnvironmentFolder — the ticket scopes selection to that
+    // folder's requests only.
+    let envFolderId: string | undefined
+    for (let i = breadcrumbs.length - 2; i >= 0; i -= 1) {
+      const id = breadcrumbs[i]?.id
+      if (!id) continue
+      const folder = findFolderById(rootItems, id)
+      if (folder && isEnvironmentFolder(folder as FolderItem)) {
+        envFolderId = folder.id
+        break
+      }
+    }
+    if (!envFolderId) return [activeRequest.id]
+    const envFolder = findEnvironmentFolderById(rootItems, envFolderId)
+    if (!envFolder) return [activeRequest.id]
+    const ids: string[] = []
+    const walk = (items: FolderItem[]): void => {
+      for (const item of items) {
+        if ('items' in item) walk(item.items)
+        else if (isRequest(item)) ids.push(item.id)
+      }
+    }
+    walk(envFolder.items)
+    return ids
+  }, [activeRequest, rootItems])
 
   // Keep the ref in sync so __restormTestHelpers.setEnvFolderTagColor can
   // delegate to the live handler without re-listing hook deps below.
@@ -1231,7 +1317,7 @@ const App: React.FC = () => {
               getEnvironmentFolderById={getEnvironmentFolderByIdCb}
               navigationEnabled={navigationEnabled}
               tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
-              filePath={filePath ?? undefined}
+              projectUuid={projectUuid}
               isItemFavorite={isItemFavorite}
               onToggleFavorite={handleToggleFavorite}
             />
@@ -1269,7 +1355,7 @@ const App: React.FC = () => {
             getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootItems, id)}
             navigationEnabled={navigationEnabled}
             tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
-            filePath={filePath ?? undefined}
+            projectUuid={projectUuid}
             isItemFavorite={isItemFavorite}
             onToggleFavorite={handleToggleFavorite}
           />
@@ -1279,24 +1365,25 @@ const App: React.FC = () => {
       <Statusbar data-testid="app-statusbar">
         {filePath && <StatusbarElement data-testid="app-statusbar-element" title={filePath} />}
         <DesktopIndicator />
+        {activeRequest && activeRequestEnvironments.length > 0 && (
+          <EnvironmentProvider
+            environments={activeRequestEnvironments}
+            persistenceKey={activeEnvPersistenceKey}
+          >
+            <StatusbarEnvironmentSelector
+              folderRequestIds={activeEnvFolderRequestIds}
+              projectUuid={projectUuid}
+            />
+          </EnvironmentProvider>
+        )}
         {activeRequest && (
           <StatusbarElement
             data-testid="statusbar-request-history"
-            className="right-aligned"
-            {...(activeRequestHasHistory ? { onClick: handleOpenActiveRequestHistory } : {})}
-            title={(
-              <span
-                aria-label={t('statusbar.requestHistory')}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  opacity: activeRequestHasHistory ? 1 : 0.5
-                }}
-              >
-                <i className="codicon codicon-history"></i>
-                <span>{t('statusbar.requestHistory')}</span>
-              </span>
-            )}
+            className={activeRequestEnvironments.length > 0 ? '' : 'right-aligned'}
+            disabled={!activeRequestHasHistory}
+            onClick={handleOpenActiveRequestHistory}
+            icon={{ type: 'codicon', value: 'history' }}
+            title={t('statusbar.requestHistory')}
           />
         )}
         <StatusBarBellButton toasterId="app" />

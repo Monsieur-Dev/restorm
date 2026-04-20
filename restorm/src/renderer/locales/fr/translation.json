@@ -7,7 +7,10 @@
     "draftsRestoredBody_other": "{{count}} brouillons restaurés depuis la session précédente."
   },
   "statusbar": {
-    "requestHistory": "Historique des requêtes"
+    "requestHistory": "Historique des requêtes",
+    "envSelector": {
+      "applyToAll": "Appliquer à toutes les requêtes"
+    }
   },
   "menuBar": {
     "file": "Fichier",

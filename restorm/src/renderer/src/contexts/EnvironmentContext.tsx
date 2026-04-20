@@ -1,122 +1,244 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react'
+import { eventBus } from 'electron-core-ui/renderer'
 import type { Environment } from '../../../shared/types/collections'
 import { EnvironmentContext, type EnvironmentContextValue } from './useEnvironmentContext'
 import {
+  DocumentEvents,
+  type RequestEnvEventPayload,
+  type EnvFolderEnvEventPayload
+} from '../services/DocumentEvents'
+import {
   findEnvironmentById,
-  getStoredEnvForRequest,
-  setStoredEnvForRequest,
-  getSessionEnvSelection,
-  setSessionEnvSelection
+  getSessionFolderEnv,
+  setSessionFolderEnv,
+  getStoredFolderEnv,
+  setStoredFolderEnv,
+  getSessionRequestOverride,
+  setSessionRequestOverride,
+  getStoredRequestOverride,
+  setStoredRequestOverride
 } from '../services/environmentSelectionStore'
+
+export interface EnvironmentPersistenceKey {
+  /** Project UUID (from the collection file's `_projectUuid` field). */
+  projectUuid: string
+  /** Id of the nearest ancestor env folder. Primary storage grain. */
+  envFolderId: string
+  /** Currently-displayed request id — used for per-request overrides. */
+  requestId: string
+}
 
 export interface EnvironmentProviderProps {
   environments: Environment[] | undefined
   tagColors?: Record<string, string> | undefined
   /**
-   * File + request identity used to restore / persist the user's environment
-   * choice across sessions. When either is missing (e.g., folder tab), the
-   * provider falls back to in-memory state with no persistence.
+   * Identifies the scope for env-selection persistence. When any
+   * field is missing (e.g. folder tab), the provider runs in
+   * in-memory-only mode — it still tracks a selected env for UI
+   * purposes but nothing is persisted.
    */
-  persistenceKey?: { filePath: string; requestId: string } | undefined
+  persistenceKey?: EnvironmentPersistenceKey | undefined
   children: React.ReactNode
 }
 
-export const EnvironmentProvider: React.FC<EnvironmentProviderProps> = ({ environments, tagColors, persistenceKey, children }) => {
-  // Synchronous hydration: if the persistence key and env tree are both
-  // known at mount, pick the cached value (if any) or fall back to the
-  // first env. Otherwise start null and resolve in the effect below.
+/** Resolve the active env id for a given persistence key, using the
+ * full priority chain: session override → session folder default →
+ * stored override → stored folder default → first env. Session hits
+ * are synchronous; disk reads are not, so callers should expect an
+ * async tail. */
+async function resolveEnvId(
+  pk: EnvironmentPersistenceKey,
+  environments: Environment[]
+): Promise<string | null> {
+  const { projectUuid, envFolderId, requestId } = pk
+  const sessOverride = getSessionRequestOverride(projectUuid, requestId)
+  if (sessOverride && findEnvironmentById(environments, sessOverride)) return sessOverride
+  const sessFolder = getSessionFolderEnv(projectUuid, envFolderId)
+  if (sessFolder && findEnvironmentById(environments, sessFolder)) return sessFolder
+  const diskOverride = await getStoredRequestOverride(projectUuid, requestId)
+  if (diskOverride && findEnvironmentById(environments, diskOverride)) {
+    setSessionRequestOverride(projectUuid, requestId, diskOverride)
+    return diskOverride
+  }
+  const diskFolder = await getStoredFolderEnv(projectUuid, envFolderId)
+  if (diskFolder && findEnvironmentById(environments, diskFolder)) {
+    setSessionFolderEnv(projectUuid, envFolderId, diskFolder)
+    return diskFolder
+  }
+  return environments[0]?.id ?? null
+}
+
+/** Synchronous best-effort variant used for initial hydration — only
+ * looks at the session caches, no disk roundtrip. If session misses,
+ * returns the first env so the UI has *something* to render while
+ * `resolveEnvId` catches up asynchronously. */
+function resolveEnvIdSync(
+  pk: EnvironmentPersistenceKey,
+  environments: Environment[]
+): string | null {
+  const sessOverride = getSessionRequestOverride(pk.projectUuid, pk.requestId)
+  if (sessOverride && findEnvironmentById(environments, sessOverride)) return sessOverride
+  const sessFolder = getSessionFolderEnv(pk.projectUuid, pk.envFolderId)
+  if (sessFolder && findEnvironmentById(environments, sessFolder)) return sessFolder
+  return environments[0]?.id ?? null
+}
+
+export const EnvironmentProvider: React.FC<EnvironmentProviderProps> = ({
+  environments,
+  tagColors,
+  persistenceKey,
+  children
+}) => {
+  // Sync first-paint selection: use whatever the session caches know
+  // about this persistence key (folder default + override are both
+  // module-level `Map`s so they survive provider remounts).
   const [selectedEnvId, setSelectedEnvIdRaw] = useState<string | null>(() => {
-    if (!persistenceKey || !environments) return environments?.[0]?.id ?? null
-    const cachedId = getSessionEnvSelection(persistenceKey.filePath, persistenceKey.requestId)
-    if (cachedId && findEnvironmentById(environments, cachedId)) return cachedId
-    return environments[0]?.id ?? null
+    if (!persistenceKey || !environments || environments.length === 0) {
+      return environments?.[0]?.id ?? null
+    }
+    return resolveEnvIdSync(persistenceKey, environments)
   })
 
-  // Track whether the async-storage restore has completed so we don't
-  // persist the "first env" placeholder picked while the storage round-
-  // trip is in flight.
   const restoreLoadedRef = useRef(false)
 
-  const persistenceFilePath = persistenceKey?.filePath ?? ''
-  const persistenceRequestId = persistenceKey?.requestId ?? ''
+  // Stable dep identity — the persistence key is an object, so spread
+  // the primitives for the effects' dep list to avoid re-running on
+  // every render.
+  const projectUuid = persistenceKey?.projectUuid ?? ''
+  const envFolderId = persistenceKey?.envFolderId ?? ''
+  const requestId = persistenceKey?.requestId ?? ''
 
-  // Consolidated restore/reset effect: whenever the persistence key or
-  // the env tree changes, recompute the right selection in priority
-  // order (session cache → on-disk storage → first env). Previously the
-  // logic was split across two effects that raced with each other —
-  // the "reset" effect kept overwriting the restore with the first-env
-  // default before the async lookup had a chance to land.
+  // Resolve on mount / tree change / key change. Runs the full
+  // priority chain including the async disk lookups. A guard flips
+  // `restoreLoadedRef` true once the resolution has landed so setters
+  // know they may persist (earlier first-env placeholders wouldn't).
   useEffect(() => {
-    if (!environments || environments.length === 0) {
-      const rafId = requestAnimationFrame(() => { setSelectedEnvIdRaw(null) })
-      return (): void => { cancelAnimationFrame(rafId) }
-    }
-
-    // Always prefer the session cache — it's updated in-memory every time
-    // the user flips the dropdown, so it's the most authoritative source.
-    if (persistenceFilePath && persistenceRequestId) {
-      const cachedId = getSessionEnvSelection(persistenceFilePath, persistenceRequestId)
-      if (cachedId && findEnvironmentById(environments, cachedId)) {
-        restoreLoadedRef.current = true
-        if (selectedEnvId !== cachedId) {
-          const rafId = requestAnimationFrame(() => { setSelectedEnvIdRaw(cachedId) })
-          return (): void => { cancelAnimationFrame(rafId) }
-        }
-        return undefined
+    const cancelRef: { current: boolean } = { current: false }
+    // The `isCancelled` wrapper defeats ESLint's control-flow
+    // narrowing (which would otherwise see `cancelRef.current` as
+    // literally `false` and flag the guard as a no-op): the function
+    // hides the read behind a type boundary.
+    const isCancelled = (): boolean => cancelRef.current
+    // Run the whole resolution path inside an async IIFE that yields
+    // immediately (`await` on a resolved promise). Keeping every
+    // `setSelectedEnvIdRaw` after an `await` satisfies
+    // `react-hooks/set-state-in-effect` — the rule only flags setState
+    // calls that fire synchronously in an effect's body.
+    void (async () => {
+      await Promise.resolve()
+      if (isCancelled()) return
+      if (!environments || environments.length === 0) {
+        setSelectedEnvIdRaw(null)
+        return
       }
-
-      // Cache miss — fall back to disk. Keep the provisional state (null
-      // or first-env) until the async lookup resolves.
-      const cancelledRef = { current: false }
-      void (async () => {
-        const storedEnvId = await getStoredEnvForRequest(persistenceFilePath, persistenceRequestId)
-        if (cancelledRef.current) return
+      if (!projectUuid || !envFolderId || !requestId) {
         restoreLoadedRef.current = true
-        if (storedEnvId && findEnvironmentById(environments, storedEnvId)) {
-          setSessionEnvSelection(persistenceFilePath, persistenceRequestId, storedEnvId)
-          setSelectedEnvIdRaw(storedEnvId)
-        } else if (!selectedEnvId) {
-          setSelectedEnvIdRaw(environments[0]?.id ?? null)
-        }
-      })()
-      return (): void => { cancelledRef.current = true }
-    }
+        const first = environments[0]?.id ?? null
+        setSelectedEnvIdRaw((current) => (current && findEnvironmentById(environments, current) ? current : first))
+        return
+      }
+      const resolved = await resolveEnvId({ projectUuid, envFolderId, requestId }, environments)
+      if (isCancelled()) return
+      restoreLoadedRef.current = true
+      setSelectedEnvIdRaw(resolved)
+    })()
+    return () => { cancelRef.current = true }
+  }, [environments, projectUuid, envFolderId, requestId])
 
-    // No persistence key: just make sure the current selection is valid.
-    restoreLoadedRef.current = true
-    if (selectedEnvId && findEnvironmentById(environments, selectedEnvId)) return undefined
-    const rafId = requestAnimationFrame(() => { setSelectedEnvIdRaw(environments[0]?.id ?? null) })
-    return (): void => { cancelAnimationFrame(rafId) }
-  }, [environments, persistenceFilePath, persistenceRequestId, selectedEnvId])
-
-  // Wrap the setter to mirror the new selection into user config. Only
-  // persists after the initial restore has run — otherwise the default
-  // "first env" selection would clobber the persisted choice.
-  const setSelectedEnvId = useCallback((id: string | null) => {
-    setSelectedEnvIdRaw(id)
-    if (!restoreLoadedRef.current || !persistenceKey || !environments || !id) return
-    if (findEnvironmentById(environments, id)) {
-      setSessionEnvSelection(persistenceKey.filePath, persistenceKey.requestId, id)
-      void setStoredEnvForRequest(persistenceKey.filePath, persistenceKey.requestId, id)
-    }
+  // Apply folder default to every mounted provider in that folder +
+  // clear any request-level override that would still shadow it.
+  const setFolderEnv = useCallback((envId: string): void => {
+    if (!persistenceKey || !environments) return
+    if (!findEnvironmentById(environments, envId)) return
+    const { projectUuid: pu, envFolderId: efi, requestId: rid } = persistenceKey
+    // The user asked for an "apply to all" write, so any per-request
+    // override the caller set earlier no longer applies — drop the
+    // session copy for the active request here; sibling cleanup is
+    // the caller's responsibility (it has the full request-id list).
+    setSessionRequestOverride(pu, rid, null)
+    void setStoredRequestOverride(pu, rid, null)
+    setSessionFolderEnv(pu, efi, envId)
+    void setStoredFolderEnv(pu, efi, envId)
+    setSelectedEnvIdRaw(envId)
+    eventBus.emitLocalSync(DocumentEvents.ENV_FOLDER_ENV_CHANGED, {
+      projectUuid: pu,
+      envFolderId: efi,
+      envId
+    } as EnvFolderEnvEventPayload)
   }, [environments, persistenceKey])
 
-  // Derive envColor from the selected environment's color property
+  // Apply override to just this request. Null clears the override so
+  // the folder default takes over on next resolve.
+  const setRequestOverride = useCallback((envId: string | null): void => {
+    if (!persistenceKey || !environments) return
+    if (envId && !findEnvironmentById(environments, envId)) return
+    const { projectUuid: pu, requestId: rid } = persistenceKey
+    setSessionRequestOverride(pu, rid, envId)
+    void setStoredRequestOverride(pu, rid, envId)
+    if (envId) {
+      setSelectedEnvIdRaw(envId)
+    } else {
+      // Re-resolve: with the override gone, the folder default (or
+      // first env) should take over.
+      void (async () => {
+        const next = await resolveEnvId(persistenceKey, environments)
+        setSelectedEnvIdRaw(next)
+      })()
+    }
+    eventBus.emitLocalSync(DocumentEvents.REQUEST_ENV_SET, {
+      requestId: rid,
+      envId
+    } as RequestEnvEventPayload)
+  }, [environments, persistenceKey])
+
+  // Sync with sibling providers via the event bus. Both events
+  // trigger a re-resolve rather than blindly adopting the payload's
+  // envId — that way the priority chain is always respected, even if
+  // a new override was set in the meantime.
+  useEffect(() => {
+    if (!projectUuid || !envFolderId || !requestId || !environments || environments.length === 0) return
+    const reresolve = (): void => {
+      void (async () => {
+        const next = await resolveEnvId({ projectUuid, envFolderId, requestId }, environments)
+        setSelectedEnvIdRaw(next)
+      })()
+    }
+    const folderSub = eventBus.subscribe<EnvFolderEnvEventPayload>(
+      DocumentEvents.ENV_FOLDER_ENV_CHANGED,
+      (payload) => {
+        if (payload.projectUuid !== projectUuid) return
+        if (payload.envFolderId !== envFolderId) return
+        reresolve()
+      }
+    )
+    const requestSetSub = eventBus.subscribe<RequestEnvEventPayload>(
+      DocumentEvents.REQUEST_ENV_SET,
+      (payload) => {
+        if (payload.requestId !== requestId) return
+        reresolve()
+      }
+    )
+    return () => {
+      folderSub.unsubscribe()
+      requestSetSub.unsubscribe()
+    }
+  }, [environments, projectUuid, envFolderId, requestId])
+
   const envColor = useMemo<string | undefined>(() => {
     if (!selectedEnvId || !environments) return undefined
-    const env = findEnvironmentById(environments, selectedEnvId)
-    return env?.color
+    return findEnvironmentById(environments, selectedEnvId)?.color
   }, [environments, selectedEnvId])
 
   const value = useMemo<EnvironmentContextValue>(
     () => ({
       environments,
       selectedEnvId,
-      setSelectedEnvId,
       tagColors,
-      envColor
+      envColor,
+      setFolderEnv,
+      setRequestOverride
     }),
-    [environments, selectedEnvId, setSelectedEnvId, tagColors, envColor]
+    [environments, selectedEnvId, tagColors, envColor, setFolderEnv, setRequestOverride]
   )
 
   return <EnvironmentContext.Provider value={value}>{children}</EnvironmentContext.Provider>

@@ -56,7 +56,21 @@ export const DocumentEvents = {
    * Emitted by the status-bar history button; subscribed by each
    * mounted request tab so the matching one opens its own modal.
    */
-  REQUEST_HISTORY_OPEN: 'request:history:open'
+  REQUEST_HISTORY_OPEN: 'request:history:open',
+  /**
+   * Request to set the active environment for a specific request.
+   * Every mounted provider matching the request id picks it up and
+   * applies the change locally.
+   */
+  REQUEST_ENV_SET: 'request:env:set',
+  /**
+   * Broadcast that an env folder's default environment has changed.
+   * Every mounted `EnvironmentProvider` whose `envFolderId` matches
+   * re-resolves its active env (override → folder default → first
+   * env). Emitted by the status-bar picker when the "Apply to all"
+   * checkbox is ticked.
+   */
+  ENV_FOLDER_ENV_CHANGED: 'env-folder:env:changed'
 } as const
 
 export type DocumentEventName = (typeof DocumentEvents)[keyof typeof DocumentEvents]
@@ -65,4 +79,17 @@ export type DocumentEventName = (typeof DocumentEvents)[keyof typeof DocumentEve
 export interface RequestHistoryEventPayload {
   /** Request id the history entry belongs to (or is requested for). */
   requestId: string
+}
+
+/** Payload for `REQUEST_ENV_SET`. */
+export interface RequestEnvEventPayload {
+  requestId: string
+  envId: string | null
+}
+
+/** Payload for `ENV_FOLDER_ENV_CHANGED`. */
+export interface EnvFolderEnvEventPayload {
+  projectUuid: string
+  envFolderId: string
+  envId: string
 }
