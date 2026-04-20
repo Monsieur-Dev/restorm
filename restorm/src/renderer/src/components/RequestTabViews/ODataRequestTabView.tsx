@@ -42,6 +42,7 @@ import {
   buildODataUrl,
   keyValuesToPairs
 } from '../../../../shared/utils/odataQuery'
+import { normalizeODataResponse, type NormalizedODataPayload } from '../../../../shared/utils/odataResponse'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
@@ -83,6 +84,38 @@ const responseStatusStyle: CSSProperties = {
 }
 
 const ODATA_VERSION_BY_INDEX: ODataVersion[] = ['v4', 'v3', 'v2']
+
+/**
+ * Shows `@odata.count` and `@odata.nextLink` next to the response
+ * body so users don't have to hunt through the JSON tree. v2/v3
+ * responses surface the same annotations after normalization.
+ */
+const ODataAnnotationBar: React.FC<{ normalized: NormalizedODataPayload }> = ({ normalized }) => {
+  if (normalized.count === undefined && !normalized.nextLink) return null
+  return (
+    <div
+      style={{
+        display: 'flex',
+        gap: 12,
+        alignItems: 'center',
+        padding: '4px 12px',
+        fontSize: 12,
+        color: 'var(--descriptionForeground)',
+        flexWrap: 'wrap'
+      }}
+      data-testid="odata-response-annotations"
+    >
+      {normalized.count !== undefined ? (
+        <span data-testid="odata-response-count">@odata.count: {normalized.count}</span>
+      ) : null}
+      {normalized.nextLink ? (
+        <span data-testid="odata-response-nextlink" style={{ wordBreak: 'break-all' }}>
+          @odata.nextLink: {normalized.nextLink}
+        </span>
+      ) : null}
+    </div>
+  )
+}
 
 function toKeyValueData(kvs: readonly KeyValue[]): KeyValueData[] {
   return kvs.map((kv) => ({
@@ -480,8 +513,15 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       {(() => {
         const parsed = tryParseJson(response.body)
         if (parsed !== null && typeof parsed === 'object') {
+          const normalized = normalizeODataResponse(parsed, request.odataVersion)
           return (
-            <JsonViewer json={response.body} data-testid="odata-response-json" />
+            <>
+              {normalized ? <ODataAnnotationBar normalized={normalized} /> : null}
+              <JsonViewer
+                json={normalized ? JSON.stringify(normalized.body, null, 2) : response.body}
+                data-testid="odata-response-json"
+              />
+            </>
           )
         }
         return (
