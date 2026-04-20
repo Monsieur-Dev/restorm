@@ -168,17 +168,6 @@ jobs:
           cd restorm/tests/docker/socketio-server && npm install && node server.js &
           sleep 10
 
-      - name: Start OData Pet Store
-        # AspNetCoreOData service isn't on a public registry so we
-        # build it from tests/docker/odata-petstore/ on the fly and
-        # run it as a detached container alongside the services
-        # above. Port 5100 is what wait-for-services + the restorm
-        # tests expect.
-        run: |
-          cd restorm/tests/docker/odata-petstore
-          docker build -t restorm-odata-petstore .
-          docker run -d --name restorm-odata-petstore -p 5100:5100 restorm-odata-petstore
-
       - name: Wait for services
         run: |
           cd restorm

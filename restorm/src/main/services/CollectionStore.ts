@@ -17,7 +17,6 @@ import {
   GrpcRequest,
   SoapRequest,
   WebSocketRequest,
-  ODataRequest,
   isEnvironmentFolder,
   isAnyFolder,
   type FolderItem,
@@ -524,8 +523,6 @@ class CollectionStore {
         return SoapRequest.fromPlain(data as Parameters<typeof SoapRequest.fromPlain>[0])
       case 'websocket':
         return WebSocketRequest.fromPlain(data as Parameters<typeof WebSocketRequest.fromPlain>[0])
-      case 'odata':
-        return ODataRequest.fromPlain(data as Parameters<typeof ODataRequest.fromPlain>[0])
       default:
         // Default to HTTPRequest
         return HTTPRequest.fromPlain(data as Parameters<typeof HTTPRequest.fromPlain>[0])
@@ -539,7 +536,6 @@ class CollectionStore {
       case 'grpc': return GrpcRequest as new (...args: unknown[]) => Request
       case 'soap': return SoapRequest as new (...args: unknown[]) => Request
       case 'websocket': return WebSocketRequest as new (...args: unknown[]) => Request
-      case 'odata': return ODataRequest as new (...args: unknown[]) => Request
       default: return HTTPRequest as new (...args: unknown[]) => Request
     }
   }

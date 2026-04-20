@@ -16,12 +16,11 @@ export type {
   HTTPRequestBodyXWwwFormUrlEncoded,
   GraphQLOperationType,
   GrpcCallType,
-  WebSocketProtocol,
-  ODataVersion
+  WebSocketProtocol
 } from './requestPrimitives'
 
-export type { BaseRequest, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, Request } from './requests/index'
-export { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from './requests/index'
+export type { BaseRequest, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, Request } from './requests/index'
+export { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest } from './requests/index'
 
 export type {
   BaseResponse,

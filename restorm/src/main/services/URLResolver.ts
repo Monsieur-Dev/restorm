@@ -6,7 +6,6 @@
 
 import type { FullRequestData, ResolvedUrlResult, TransformedContext, TransformValueFn } from './ContextServiceTypes'
 import { isExpressionValue, isEnumListValue, isEnumValue } from '../../shared/utils/valueHelpers'
-import { serializeODataQueryOptions } from '../../shared/utils/odataQuery'
 
 /**
  * Calculate the resolved URL for a request.
@@ -97,32 +96,6 @@ export function resolveUrl(
         : raw
       queryParts.push(`${encodeURIComponent(resolvedKey)}=${encodeURIComponent(resolvedValue)}`)
       cumulativeParamsContext[resolvedKey] = resolvedValue
-    }
-  }
-
-  // OData system query options — resolve each value through
-  // Handlebars before handing it to the serializer, then append the
-  // resulting pairs after the user's regular query params. Keys
-  // start with `$` and we intentionally keep them literal (OData
-  // servers accept both `$filter=...` and `%24filter=...` but the
-  // literal form is canonical and human-readable).
-  if (data.requestType === 'odata' && data.odataQueryOptions) {
-    const qo = data.odataQueryOptions
-    const resolvedOptions = {
-      ...(qo.filter !== undefined && { filter: transformValue(qo.filter, cumulativeParamsContext) }),
-      ...(qo.select !== undefined && { select: qo.select.map((s) => transformValue(s, cumulativeParamsContext)) }),
-      ...(qo.top !== undefined && { top: transformValue(qo.top, cumulativeParamsContext) }),
-      ...(qo.skip !== undefined && { skip: transformValue(qo.skip, cumulativeParamsContext) }),
-      ...(qo.count !== undefined && { count: qo.count }),
-      ...(qo.expand !== undefined && { expand: transformValue(qo.expand, cumulativeParamsContext) }),
-      ...(qo.orderby !== undefined && { orderby: transformValue(qo.orderby, cumulativeParamsContext) }),
-      ...(qo.search !== undefined && { search: transformValue(qo.search, cumulativeParamsContext) }),
-      ...(qo.format !== undefined && { format: transformValue(qo.format, cumulativeParamsContext) }),
-      ...(qo.apply !== undefined && { apply: transformValue(qo.apply, cumulativeParamsContext) })
-    }
-    const systemPairs = serializeODataQueryOptions(resolvedOptions, data.odataVersion ?? 'v4')
-    for (const [key, value] of systemPairs) {
-      queryParts.push(`${key}=${encodeURIComponent(value)}`)
     }
   }
 

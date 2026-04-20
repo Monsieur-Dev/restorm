@@ -16,7 +16,7 @@ import type { ApiDocumentation } from '../../../shared/types/apiDocumentation'
 // ---------- Route discriminants per request type ----------
 
 interface CompilableRoute {
-  type: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata'
+  type: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket'
   url?: string
   method?: string
   operationType?: string
@@ -69,14 +69,6 @@ function routeFromRequest(request: Request): CompilableRoute {
       if (request.event !== undefined) route.event = request.event
       return route
     }
-    case 'odata':
-      // The main-process `DocumentationCompiler.matchOperation()`
-      // currently returns `null` for `type: 'odata'` — the
-      // `ApiDocumentation` schema has no OData discriminant yet.
-      // Returning a minimal route keeps this switch exhaustive so TS
-      // doesn't complain, but no compiled docs will ever match until
-      // the compiler gains an OData branch (tracked outside Phase 1).
-      return { type: 'odata', url: request.url, tags: request.tags }
   }
 }
 

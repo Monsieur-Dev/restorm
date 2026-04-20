@@ -47,10 +47,7 @@ export function mapToBadgeType(value: string): BadgeType {
     case 'sio': return 'SIO'
     case 'mqtt': return 'MQTT'
   }
-
-  // OData
-  if (normalized === 'odata') return 'ODATA'
-
+  
   // Fallback: try to use value as-is if it's a valid BadgeType
   return value.toUpperCase() as BadgeType
 }

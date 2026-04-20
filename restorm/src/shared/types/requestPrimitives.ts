@@ -33,5 +33,3 @@ export type GraphQLOperationType = 'query' | 'mutation' | 'subscription'
 export type GrpcCallType = 'unary' | 'server-stream' | 'client-stream' | 'bidirectional-stream'
 
 export type WebSocketProtocol = 'websocket' | 'socketio' | 'mqtt'
-
-export type ODataVersion = 'v2' | 'v3' | 'v4'

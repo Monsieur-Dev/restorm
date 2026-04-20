@@ -15,8 +15,6 @@ export type BadgeType =
   | 'SOAP'
   // WebSocket protocols
   | 'WS' | 'MQTT' | 'SIO'
-  // OData
-  | 'ODATA'
 
 export interface BadgeProps {
   /** The type of badge - determines styling */

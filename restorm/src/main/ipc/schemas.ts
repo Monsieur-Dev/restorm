@@ -123,31 +123,6 @@ export const httpCancelArgs = z.tuple([requestIdArg])
 export const httpIsActiveArgs = z.tuple([requestIdArg])
 
 // ==========================================================================
-// OData Execution (Phase 1b — reuses httpExecutionService under the hood)
-// ==========================================================================
-
-export const odataExecuteArgs = z.tuple([
-  z.object({
-    requestId: z.string(),
-    timeout: z.number().optional(),
-    /** Optional HTTP method — defaults to GET. `POST` is used for
-     * OData action and $batch invocations. */
-    method: z.string().optional(),
-    /** Optional request body — raw string. For actions this is the
-     * JSON payload; for $batch this is the pre-assembled
-     * multipart/mixed envelope. Env-templated before dispatch. */
-    body: z.string().optional(),
-    /** Optional Content-Type override for the body — required for
-     * $batch to carry the multipart boundary. Defaults to
-     * `application/json`. */
-    bodyContentType: z.string().optional()
-  }).loose()
-])
-
-export const odataCancelArgs = z.tuple([requestIdArg])
-export const odataIsActiveArgs = z.tuple([requestIdArg])
-
-// ==========================================================================
 // GraphQL Execution
 // ==========================================================================
 

@@ -120,11 +120,6 @@ declare global {
         onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
         onMessage: (callback: (data: WebSocketMessageData) => void) => (() => void)
       }
-      odata: {
-        execute: (input: ODataExecutionInput) => Promise<HTTPExecutionResult>
-        cancel: (requestId: string) => Promise<boolean>
-        isActive: (requestId: string) => Promise<boolean>
-      }
       import: {
         preview: (input: string) => Promise<{
           success: boolean
@@ -195,21 +190,6 @@ export interface AvailableVariablesResult {
 }
 
 /** HTTP execution input for backend */
-export interface ODataExecutionInput {
-  requestId: string
-  timeout?: number
-  requestPath?: string
-  /** HTTP method override — defaults to GET. POST is used for OData
-   * action and $batch invocations. */
-  method?: string
-  /** Request body — raw string. JSON for actions, multipart/mixed
-   * envelope for $batch. Env-templated by the engine. */
-  body?: string
-  /** Content-Type override — required for $batch to carry the
-   * multipart boundary. Defaults to `application/json`. */
-  bodyContentType?: string
-}
-
 export interface HTTPExecutionInput {
   requestId: string
   method: string

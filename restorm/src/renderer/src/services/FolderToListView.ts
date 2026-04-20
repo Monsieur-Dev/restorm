@@ -5,8 +5,8 @@
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 import { IconView } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
-import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest } from '../../../shared/types/collections'
-import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from '../../../shared/types/collections'
+import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest } from '../../../shared/types/collections'
+import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest } from '../../../shared/types/collections'
 import React, { type ReactNode } from 'react'
 
 /** Convert an Icon to a ListView-compatible icon (string for codicons, ReactNode for others) */
@@ -107,24 +107,6 @@ function websocketRequestToListViewItem(
 }
 
 /**
- * Convert an ODataRequest to a ListViewItemData. Phase 1 shows a
- * dedicated `odata` badge so entries don't masquerade as plain HTTP
- * GETs in the sidebar. The badge label changes across phases when
- * actions ('ACT') and functions ('FN') land (OYO-180 phase 4).
- */
-function odataRequestToListViewItem(
-  request: ODataRequest,
-  options: FolderToListViewOptions
-): ListViewItemData {
-  const badge = options.renderProtocolBadge?.('odata', 'ODATA')
-  return {
-    id: request.id,
-    title: request.name,
-    icon: badge
-  }
-}
-
-/**
  * Convert a FolderItem (Folder, EnvironmentFolder, or Request) to ListViewItemData
  */
 function folderItemToListViewItem(
@@ -146,9 +128,6 @@ function folderItemToListViewItem(
     }
     if (isWebSocketRequest(item)) {
       return websocketRequestToListViewItem(item, options)
-    }
-    if (isODataRequest(item)) {
-      return odataRequestToListViewItem(item, options)
     }
   }
 
