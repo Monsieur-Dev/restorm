@@ -4,10 +4,11 @@ import type { GraphQLRequest } from './GraphQLRequest'
 import type { GrpcRequest } from './GrpcRequest'
 import type { SoapRequest } from './SoapRequest'
 import type { WebSocketRequest } from './WebSocketRequest'
+import type { ODataRequest, ODataQueryOptions, ODataOperationKind } from './ODataRequest'
 
-export type { BaseRequest, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest }
+export type { BaseRequest, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, ODataQueryOptions, ODataOperationKind }
 
-export type Request = HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest
+export type Request = HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest | ODataRequest
 
 export function isHTTPRequest(request: Request): request is HTTPRequest {
   return request.type === 'http'
@@ -27,4 +28,8 @@ export function isSoapRequest(request: Request): request is SoapRequest {
 
 export function isWebSocketRequest(request: Request): request is WebSocketRequest {
   return request.type === 'websocket'
+}
+
+export function isODataRequest(request: Request): request is ODataRequest {
+  return request.type === 'odata'
 }

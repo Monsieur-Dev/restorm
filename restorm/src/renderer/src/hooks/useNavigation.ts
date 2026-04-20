@@ -6,7 +6,7 @@ import { useEffect, useCallback } from 'react'
 import { navigationService } from 'electron-core-ui/renderer'
 import type { NavigationEvent, SearchResult } from 'electron-core-ui/renderer'
 import type { Folder, EnvironmentFolder, Request, Environment } from '../../../shared/types/collections'
-import { isFolder, isRequest, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest } from '../../../shared/types/collections'
+import { isFolder, isRequest, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from '../../../shared/types/collections'
 import { findFolderById, findItemWithBreadcrumbs } from '../utils/treeSearch'
 import type { BreadcrumbItem } from '../../../shared/types/editor'
 
@@ -128,6 +128,8 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
         navigationService.navigateTo(itemId, 'sidebar', { type: 'soap-request' })
       } else if (isWebSocketRequest(item)) {
         navigationService.navigateTo(itemId, 'sidebar', { type: 'websocket-request' })
+      } else if (isODataRequest(item)) {
+        navigationService.navigateTo(itemId, 'sidebar', { type: 'odata-request' })
       }
     }
   }, [rootItems, setSelectedItemId, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
@@ -176,6 +178,8 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
           navigationService.navigateTo(itemId, 'breadcrumb', { type: 'soap-request' })
         } else if (isWebSocketRequest(foundItem)) {
           navigationService.navigateTo(itemId, 'breadcrumb', { type: 'websocket-request' })
+        } else if (isODataRequest(foundItem)) {
+          navigationService.navigateTo(itemId, 'breadcrumb', { type: 'odata-request' })
         }
       }
     },
