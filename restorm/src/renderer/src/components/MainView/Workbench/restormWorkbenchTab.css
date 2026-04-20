@@ -9,6 +9,7 @@
  */
 
 .restorm-workbench-tab {
+  position: relative; /* anchors the BookmarkRibbonStack to top-right */
   display: flex;
   flex-direction: column;
   flex: 1;

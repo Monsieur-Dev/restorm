@@ -4,8 +4,8 @@ import { join, resolve } from 'path'
 import type { ElectronApplication, Locator, Page } from '@playwright/test'
 import { test, expect, SWAGGER_IMPORT_TEMP_DIR, configureNextSaveFileDialogForE2E, configureNextOpenDialogForE2E } from '../../fixtures/swagger-import.fixture'
 
-function activeEnvFolderTagsRoot(currentPage: Page): Locator {
-  return currentPage.locator('[data-testid^="tab-env-folder-idx:"][data-testid$="-tags"]').first()
+function activeEnvFolderTagRibbons(currentPage: Page): Locator {
+  return currentPage.locator('[data-testid^="tab-env-folder-idx:"][data-testid$="-tag-ribbons"]').first()
 }
 
 const SAMPLES_DIR = resolve(__dirname, '../../../../unit')
@@ -100,19 +100,18 @@ Then(
 
 When('I add tag {string} to the active environment folder tab', async ({}, tagName: string) => {
   if (!page) throw new Error('app must be launched')
-  const tagsRoot = activeEnvFolderTagsRoot(page)
+  const tagsRoot = activeEnvFolderTagRibbons(page)
   await expect(tagsRoot).toBeVisible({ timeout: 5000 })
-  const addButton = tagsRoot.locator('[data-testid$="-tags-add"]').first()
+  const addButton = tagsRoot.locator('[data-testid$="-tag-ribbons-add"]').first()
   await addButton.click()
 
-  const editing = tagsRoot.locator('.ecui-tag.ecui-tag--editing [contenteditable="true"]').first()
-  await expect(editing).toBeVisible({ timeout: 5000 })
-  await editing.click()
-  await page.keyboard.press('Control+A')
-  await page.keyboard.type(tagName)
+  const input = page.locator('[data-testid$="-tag-ribbons-add-input-input"]').first()
+  await expect(input).toBeVisible({ timeout: 5000 })
+  await input.click()
+  await input.fill(tagName)
   await page.keyboard.press('Enter')
   await expect(
-    tagsRoot.locator('.ecui-tag', { hasText: tagName }).first()
+    tagsRoot.locator('.ecui-bookmark-ribbon', { hasText: tagName }).first()
   ).toBeVisible({ timeout: 5000 })
 })
 
@@ -122,15 +121,20 @@ Then(
     if (!page) throw new Error('app must be launched')
     const names = expectedTags.split(',').map((s) => s.trim())
 
-    const tagsRoot = activeEnvFolderTagsRoot(page)
-    const tagLocator = tagsRoot.locator('.ecui-tag:not(.ecui-tag--editing)')
+    const tagsRoot = activeEnvFolderTagRibbons(page)
+    // Each tag renders one `.ecui-bookmark-ribbon` inside the stack;
+    // exclude the leading `[+]` add ribbon by filtering it out via the
+    // `--add` modifier class.
+    const tagLocator = tagsRoot.locator('.ecui-bookmark-ribbon:not(.ecui-bookmark-ribbon--add)')
     await expect(tagLocator).toHaveCount(names.length, { timeout: 5000 })
 
     const elements = await tagLocator.elementHandles()
     const renders = await Promise.all(
       elements.map(async (el) => {
         const label = (await el.innerText()).trim()
-        const bg = await el.evaluate((node) => getComputedStyle(node).backgroundColor)
+        // Color lives on the `::before` pseudo (clip-path silhouette
+        // draws the signet body), so read its computed background.
+        const bg = await el.evaluate((node) => getComputedStyle(node, '::before').backgroundColor)
         return { label, bg }
       })
     )

@@ -101,6 +101,10 @@ export type { BreadcrumbProps, BreadcrumbItem } from './Breadcrumb'
 export { EditableLabel } from './EditableLabel'
 export type { EditableLabelAs, EditableLabelProps } from './EditableLabel'
 
+// BookmarkRibbon exports
+export { BookmarkRibbon, BookmarkRibbonStack } from './BookmarkRibbon'
+export type { BookmarkRibbonProps, BookmarkRibbonStackProps, BookmarkRibbonTag } from './BookmarkRibbon'
+
 // Tag exports
 export { Tag } from './Tag'
 export type { TagProps } from './Tag'
