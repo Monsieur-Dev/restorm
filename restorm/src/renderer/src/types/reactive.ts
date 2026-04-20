@@ -7,8 +7,8 @@
 
 import { eventBus, logger } from 'electron-core-ui/renderer'
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
-import type { Folder, HTTPRequest, FolderItem, Request, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, Environment } from '../../../shared/types/collections'
-import { isAnyFolder, isHTTPRequest, isRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isEnvironmentFolder } from '../../../shared/types/collections'
+import type { Folder, HTTPRequest, FolderItem, Request, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, Environment } from '../../../shared/types/collections'
+import { isAnyFolder, isHTTPRequest, isRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isEnvironmentFolder } from '../../../shared/types/collections'
 
 // ============================================================================
 // Indexable Properties Configuration
@@ -103,6 +103,22 @@ const WEBSOCKET_REQUEST_INDEXABLE_KEYS = new Set([
   'protocol',
   'event',
   'message'
+])
+
+/** Properties that trigger re-indexing when modified (OData requests) */
+const ODATA_REQUEST_INDEXABLE_KEYS = new Set([
+  'name',
+  'documentation',
+  'notes',
+  'tags',
+  'url',
+  'odataVersion',
+  'operationKind',
+  'headers',
+  'params',
+  'queryOptions',
+  'actionBody',
+  'deprecated'
 ])
 
 /** Properties that trigger re-indexing when modified (Environments) */
@@ -479,6 +495,16 @@ export function makeReactiveWebSocketRequest(request: WebSocketRequest, parentFo
 }
 
 /**
+ * Make an ODataRequest reactive - it will emit events when indexable properties change
+ */
+export function makeReactiveODataRequest(request: ODataRequest, parentFolderId: string): ODataRequest {
+  if (isReactive(request)) {
+    return request
+  }
+  return new Proxy(request, createDocumentProxyHandler('request', ODATA_REQUEST_INDEXABLE_KEYS, parentFolderId) as ProxyHandler<ODataRequest>)
+}
+
+/**
  * Make any Request type reactive - it will emit events when indexable properties change
  */
 export function makeReactiveRequest(request: Request, parentFolderId: string): Request {
@@ -499,6 +525,9 @@ export function makeReactiveRequest(request: Request, parentFolderId: string): R
   }
   if (isWebSocketRequest(request)) {
     return makeReactiveWebSocketRequest(request, parentFolderId)
+  }
+  if (isODataRequest(request)) {
+    return makeReactiveODataRequest(request, parentFolderId)
   }
   return request
 }

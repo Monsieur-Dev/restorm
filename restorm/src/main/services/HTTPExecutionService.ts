@@ -16,6 +16,12 @@ export interface HTTPExecutionInput {
   requestId: string
   method: string
   timeout?: number
+  /** Optional raw request body override. When provided, bypasses the
+   * ContextService-built body entirely — used by the OData engine to
+   * dispatch action invocations with a caller-supplied JSON payload. */
+  rawBody?: string
+  /** Optional Content-Type to set alongside `rawBody`. */
+  rawBodyContentType?: string
 }
 
 /** HTTP response result */
@@ -51,7 +57,7 @@ class HTTPExecutionService {
    * Execute an HTTP request using the resolved URL and data from ContextService
    */
   async execute(input: HTTPExecutionInput): Promise<HTTPExecutionResult> {
-    const { requestId, method, timeout = DEFAULT_REQUEST_TIMEOUT_MS } = input
+    const { requestId, method, timeout = DEFAULT_REQUEST_TIMEOUT_MS, rawBody, rawBodyContentType } = input
     const startTime = Date.now()
     const startedAt = new Date().toISOString()
 
@@ -112,9 +118,17 @@ class HTTPExecutionService {
         }
       }
 
-      // Build body from context
+      // Build body — a caller-supplied `rawBody` (e.g. an OData action
+      // POST payload) takes precedence over anything the
+      // ContextService would compose from the request's structured
+      // body fields.
       let body: string | undefined
-      if (requestContext?.fullData?.body) {
+      if (rawBody !== undefined) {
+        body = contextService.resolveValue(rawBody, requestId)
+        if (rawBodyContentType) {
+          headers['Content-Type'] ??= rawBodyContentType
+        }
+      } else if (requestContext?.fullData?.body) {
         const bodyData = requestContext.fullData.body
         if (bodyData.type === 'text') {
           body = contextService.resolveValue(bodyData.content, requestId)

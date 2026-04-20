@@ -26,6 +26,7 @@ import {
   contextGetCodeSnippetsArgs,
   requestResolveUrlArgs,
   httpExecuteArgs, httpCancelArgs, httpIsActiveArgs,
+  odataExecuteArgs, odataCancelArgs, odataIsActiveArgs,
   graphqlExecuteArgs, graphqlCancelArgs, graphqlIsActiveArgs,
   soapExecuteArgs, soapCancelArgs, soapIsActiveArgs,
   grpcExecuteArgs, grpcCancelArgs, grpcIsActiveArgs,
@@ -552,6 +553,50 @@ export function registerRestormIPC(deps: {
   })
 
   validatedHandle('http:is-active', httpIsActiveArgs, (_event, [requestId]) => {
+    return httpExecutionService.isActive(requestId)
+  })
+
+  // ==========================================================================
+  // OData Execution IPC Handlers
+  // --------------------------------------------------------------------------
+  // OData requests reuse `httpExecutionService` under the hood — the
+  // URL is already composed by URLResolver (with $filter / $select /
+  // $top / $skip / $count appended) so the dispatcher just sees a
+  // plain HTTP GET. Phase 1b records the result as an `http` history
+  // entry; a future phase swaps to a dedicated `odata` entry when we
+  // add `@odata.nextLink` / `@odata.count` pagination chrome.
+  // ==========================================================================
+
+  validatedHandle('odata:execute', odataExecuteArgs, async (_event, [input]) => {
+    const method = typeof input.method === 'string' && input.method.length > 0
+      ? input.method.toUpperCase()
+      : 'GET'
+    const rawBody = typeof input.body === 'string' && input.body.length > 0
+      ? input.body
+      : undefined
+    const bodyContentType = typeof input.bodyContentType === 'string' && input.bodyContentType.length > 0
+      ? input.bodyContentType
+      : 'application/json'
+    const result = await httpExecutionService.execute({
+      requestId: input.requestId,
+      method,
+      ...(typeof input.timeout === 'number' ? { timeout: input.timeout } : {}),
+      ...(rawBody !== undefined ? { rawBody, rawBodyContentType: bodyContentType } : {})
+    })
+    setImmediate(() => {
+      const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'
+        ? (input as { requestPath?: unknown }).requestPath
+        : undefined
+      void responseHistoryService.storeExecutionResult(input.requestId, 'http', result, requestPath)
+    })
+    return result
+  })
+
+  validatedHandle('odata:cancel', odataCancelArgs, (_event, [requestId]) => {
+    return httpExecutionService.cancel(requestId)
+  })
+
+  validatedHandle('odata:is-active', odataIsActiveArgs, (_event, [requestId]) => {
     return httpExecutionService.isActive(requestId)
   })
 
