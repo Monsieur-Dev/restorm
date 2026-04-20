@@ -57,3 +57,22 @@ services:
     command: sh -c "npm install && node server.js"
     ports:
       - "3001:3001"
+
+  # OData v4 - Custom Pet Store (AspNetCoreOData)
+  # Multi-stage Dockerfile builds the .NET 9 service and serves it on :5100.
+  # Provides Pets/Categories/Tags/Owners entity sets, a bound `AdoptPet`
+  # action, an unbound `GetAvailablePets(category=…)` function, and full
+  # $batch support — enough to exercise every acceptance item of OYO-180.
+  odata-petstore:
+    build:
+      context: ./odata-petstore
+      dockerfile: Dockerfile
+    container_name: restorm-odata-petstore
+    ports:
+      - "5100:5100"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--spider", "http://localhost:5100/health"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+      start_period: 15s
