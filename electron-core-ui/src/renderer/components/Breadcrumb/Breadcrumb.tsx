@@ -54,6 +54,16 @@ export interface BreadcrumbProps {
    */
   canEditName?: boolean
   /**
+   * When `true`, every item (including the last) is rendered as a
+   * clickable navigation button — no "current page" styling, no
+   * editable label, no `aria-current`. Use this when the breadcrumb
+   * shows only the ancestor path and the current page is displayed
+   * elsewhere (e.g. as an H1 title row below the breadcrumb). Mutually
+   * exclusive with `canEditName` / `canEditIcon`.
+   * @default false
+   */
+  allNavigable?: boolean
+  /**
    * Show the root item even when it's the only item (normally hidden).
    * @default false
    */
@@ -78,6 +88,7 @@ const BreadcrumbInner: React.FC<BreadcrumbProps> = ({
   onLastItemIconChange,
   canEditIcon = false,
   canEditName = false,
+  allNavigable = false,
   showRoot: _showRoot = false,
   className,
   style,
@@ -106,7 +117,11 @@ const BreadcrumbInner: React.FC<BreadcrumbProps> = ({
     <nav className={rootClasses} style={style} aria-label={ariaLabel ?? 'Breadcrumb'} data-testid={dataTestId}>
       <ol className="ecui-breadcrumb-list">
         {items.map((item, index) => {
-          const isLast = index === items.length - 1
+          // In `allNavigable` mode every item — even the last — is
+          // treated as an ancestor-style clickable link. Use this when
+          // the current page is rendered separately (e.g. as an H1
+          // next to the breadcrumb row).
+          const isLast = !allNavigable && index === items.length - 1
 
           if (!isLast) {
             // Non-last items: navigate only, icon is static. Middle-click
@@ -115,6 +130,10 @@ const BreadcrumbInner: React.FC<BreadcrumbProps> = ({
             // receiving the plain `onItemClick` too — on platforms that
             // fire both `click` and `auxclick` for the middle button,
             // the consumer can tell them apart by event.button.
+            // Suppress the trailing chevron on the final item when we
+            // were told to display the entire path as ancestors (the
+            // row visually ends with the last navigable item).
+            const isFinalListItem = index === items.length - 1
             return (
               <li key={item.id} className="ecui-breadcrumb-item">
                 <button
@@ -139,9 +158,11 @@ const BreadcrumbInner: React.FC<BreadcrumbProps> = ({
                   {renderIcon(item.icon)}
                   {item.label}
                 </button>
-                <span className="ecui-breadcrumb-separator" aria-hidden="true">
-                  <i className="codicon codicon-chevron-right" />
-                </span>
+                {!isFinalListItem ? (
+                  <span className="ecui-breadcrumb-separator" aria-hidden="true">
+                    <i className="codicon codicon-chevron-right" />
+                  </span>
+                ) : null}
               </li>
             )
           }

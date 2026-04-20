@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import * as CoreUIRenderer from 'electron-core-ui/renderer'
-import { TagsView, Tag, Callout, ColorPicker, Tooltip, type CalloutVariant, type ContextMenuItem } from 'electron-core-ui/renderer'
+import { TagsView, Tag, Callout, ColorPicker, Tooltip, EditableLabel, IconSelect, type CalloutVariant, type ContextMenuItem } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
 import type { BreadcrumbItem } from '../../../../../shared/types/editor'
 import { useTranslation } from 'react-i18next'
+import './restormWorkbenchTab.css'
 
 const { Breadcrumb } = CoreUIRenderer as unknown as {
   Breadcrumb: React.ComponentType<{
@@ -14,6 +15,7 @@ const { Breadcrumb } = CoreUIRenderer as unknown as {
     onLastItemIconChange?: (item: BreadcrumbItem, newIcon: Icon | null, index: number) => void
     canEditIcon?: boolean
     canEditName?: boolean
+    allNavigable?: boolean
     'data-testid'?: string
   }>
 }
@@ -67,6 +69,13 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
 }) => {
   const testIdPrefix = tabId ? `tab-${tabId}` : 'workbench-tab'
   const { t } = useTranslation()
+
+  // Split the breadcrumb path: ancestors stay in the navigation row,
+  // the last (current) item gets promoted to its own H1 title row
+  // below. This matches the common "path > heading" layout in modern
+  // editors and keeps the title visually prominent.
+  const lastItem = breadcrumbs[breadcrumbs.length - 1]
+  const ancestorBreadcrumbs = breadcrumbs.slice(0, -1)
 
   // Color picker state
   const [colorPickerTag, setColorPickerTag] = useState<string | null>(null)
@@ -167,19 +176,20 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
     [colorPickerTag, onTagColorChange]
   )
 
+  const handleTitleRename = useCallback((next: string) => {
+    if (!lastItem) return
+    onBreadcrumbRename?.(lastItem, next)
+  }, [lastItem, onBreadcrumbRename])
+
+  const handleTitleIconChange = useCallback((next: Icon | null) => {
+    if (!lastItem) return
+    onBreadcrumbIconChange?.(lastItem, next)
+  }, [lastItem, onBreadcrumbIconChange])
+
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        flex: 1,
-        minHeight: 0,
-        minWidth: 0,
-        backgroundColor: 'var(--editor-background)'
-      }}
-    >
+    <div className="restorm-workbench-tab">
       {callout && (
-        <div style={{ padding: '8px 16px 0 16px' }}>
+        <div className="restorm-workbench-tab-callout">
           <Callout
             variant={callout.variant}
             message={callout.message}
@@ -188,49 +198,64 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
           />
         </div>
       )}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          padding: '8px 16px 0 16px'
-        }}
-      >
-        <div style={{ flex: 1, minWidth: 0 }}>
+      {/* Row 1: ancestor breadcrumb — navigation only. The last segment
+       * moved into the title row below, so edit / icon affordances are
+       * disabled here (they live on the H1 + IconSelect). */}
+      <div className="restorm-workbench-tab-breadcrumb-row">
+        {ancestorBreadcrumbs.length > 0 ? (
           <Breadcrumb
-            items={breadcrumbs}
-            canEditIcon
-            canEditName
+            items={ancestorBreadcrumbs}
+            canEditIcon={false}
+            canEditName={false}
+            allNavigable
             onItemClick={(item, index) => {
-              const isLast = index === breadcrumbs.length - 1
-              onBreadcrumbClick?.(item, index, isLast)
+              // Treat every ancestor click as a non-terminal
+              // navigation — the current page is rendered as an H1
+              // below, so no ancestor is ever "the last item" from
+              // the consumer's point of view.
+              onBreadcrumbClick?.(item, index, false)
             }}
             onItemAuxClick={(item, index) => {
-              const isLast = index === breadcrumbs.length - 1
-              onBreadcrumbAuxClick?.(item, index, isLast)
-            }}
-            onLastItemChange={(item, newValue) => {
-              onBreadcrumbRename?.(item, newValue)
-            }}
-            onLastItemIconChange={(item, newIcon) => {
-              onBreadcrumbIconChange?.(item, newIcon)
+              onBreadcrumbAuxClick?.(item, index, false)
             }}
             data-testid={`${testIdPrefix}-breadcrumb`}
           />
+        ) : null}
+      </div>
+      {/* Row 2: current-item icon + H1 name + tags pushed right. */}
+      <div className="restorm-workbench-tab-title-row">
+        {lastItem?.icon != null ? (
+          <IconSelect
+            value={lastItem.icon}
+            onChange={handleTitleIconChange}
+            className="restorm-workbench-tab-title-icon-select"
+            data-testid={`${testIdPrefix}-title-icon`}
+          />
+        ) : null}
+        {lastItem ? (
+          <EditableLabel
+            as="h1"
+            value={lastItem.label}
+            onChange={handleTitleRename}
+            className="restorm-workbench-tab-title"
+            data-testid={`${testIdPrefix}-title`}
+          />
+        ) : null}
+        <div className="restorm-workbench-tab-tags">
+          <span className="restorm-workbench-tab-tags-label">
+            {t('workbench.tagsLabel')}
+          </span>
+          <TagsView
+            tags={tags}
+            onChange={(nextTags) => {
+              onTagsChange?.(nextTags)
+            }}
+            renderTag={handleRenderTag}
+            additionalContextMenuItems={onTagColorChange ? handleAdditionalContextMenuItems : undefined}
+            data-testid={`${testIdPrefix}-tags`}
+          />
+          {headerRight}
         </div>
-        <span style={{ color: 'var(--descriptionForeground)' }}>
-          {t('workbench.tagsLabel')}
-        </span>
-        <TagsView
-          tags={tags}
-          onChange={(nextTags) => {
-            onTagsChange?.(nextTags)
-          }}
-          renderTag={handleRenderTag}
-          additionalContextMenuItems={onTagColorChange ? handleAdditionalContextMenuItems : undefined}
-          data-testid={`${testIdPrefix}-tags`}
-        />
-        {headerRight}
       </div>
       {children}
 

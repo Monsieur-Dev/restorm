@@ -1391,9 +1391,10 @@ Then('the active tab should be {string}', async ({}, label: string) => {
 
 When('I set the folder tab icon to codicon {string}', async ({}, iconName: string) => {
   if (!page) throw new Error('app must be launched')
-  // Active folder tab's pane: role="tabpanel" is what wraps the tab content.
-  // The breadcrumb IconSelect trigger sits at the top of the pane.
-  const iconTrigger = page.locator('.ecui-breadcrumb-icon-select [role="button"]').first()
+  // The folder tab's title-row IconSelect is the visible trigger on
+  // the active pane. Post-refactor it lives next to the H1 name, not
+  // in the breadcrumb; the new wrapper class pins the selector.
+  const iconTrigger = page.locator('.restorm-workbench-tab-title-icon-select [role="button"]:visible').first()
   await expect(iconTrigger).toBeVisible({ timeout: 5000 })
   await iconTrigger.click()
   await page.waitForSelector('.ecui-icon-select-picker', { timeout: 5000 })
@@ -1411,7 +1412,10 @@ When('I set the folder tab icon to codicon {string}', async ({}, iconName: strin
 
 Then('the folder tab breadcrumb icon should be {string}', async ({}, iconName: string) => {
   if (!page) throw new Error('app must be launched')
-  const icon = page.locator(`.ecui-breadcrumb .codicon-${iconName}`).first()
+  // The icon lives in the tab's title-row IconSelect post-refactor —
+  // keep the step name (`breadcrumb icon`) for backwards compatibility
+  // with existing scenarios but target the new location.
+  const icon = page.locator(`.restorm-workbench-tab-title-icon-select .codicon-${iconName}:visible`).first()
   await expect(icon).toBeVisible({ timeout: 5000 })
 })
 

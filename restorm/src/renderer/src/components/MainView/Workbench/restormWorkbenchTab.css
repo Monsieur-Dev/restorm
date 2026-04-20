@@ -1,0 +1,72 @@
+/* Workbench tab header layout — two stacked rows:
+ *  1. Breadcrumb (ancestor path only, non-editable)
+ *  2. Current-item icon + H1 title (editable) + tags pushed right
+ *
+ * The last breadcrumb segment used to live inline with tags on a single
+ * line and doubled as the editable name. Moving it into its own H1 row
+ * makes the current page + its identity (icon, name) the visual focus
+ * of the tab without losing the ancestor path.
+ */
+
+.restorm-workbench-tab {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  background-color: var(--editor-background);
+}
+
+.restorm-workbench-tab-callout {
+  padding: 8px 16px 0 16px;
+}
+
+.restorm-workbench-tab-breadcrumb-row {
+  padding: 8px 16px 0 16px;
+  min-height: 20px;
+}
+
+.restorm-workbench-tab-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 16px 4px 16px;
+  min-width: 0;
+}
+
+.restorm-workbench-tab-title {
+  /* EditableLabel renders as <h1>; override its native margin so the
+   * row stays visually tight and aligned with the icon + tags. */
+  min-width: 0;
+}
+
+.restorm-workbench-tab-title h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* Icon next to the H1 — scale the IconView up to match the title size.
+ * IconSelect's internal IconView is hardcoded to size=16, so we override
+ * via CSS (same pattern as the existing breadcrumb icon-select tweak). */
+.restorm-workbench-tab-title-icon-select .ecui-icon-view {
+  font-size: 22px;
+}
+
+.restorm-workbench-tab-title-icon-select .ecui-icon-view svg {
+  width: 22px;
+  height: 22px;
+}
+
+.restorm-workbench-tab-tags {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.restorm-workbench-tab-tags-label {
+  color: var(--descriptionForeground);
+}
