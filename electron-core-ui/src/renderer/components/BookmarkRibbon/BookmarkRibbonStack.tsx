@@ -13,6 +13,11 @@ export interface BookmarkRibbonTag {
 
 export interface BookmarkRibbonStackProps {
   tags: BookmarkRibbonTag[]
+  /** When false, the stack renders as a pure display: the leading
+   * `[+]` add ribbon is hidden, no add tooltip is ever mounted, and
+   * each tag ribbon is delegated to in readonly mode (no click, no
+   * editor tooltip). Defaults to true. */
+  editable?: boolean
   onRename?: (index: number, next: string) => void
   onColorChange?: (index: number, hex: string) => void
   onRemove?: (index: number) => void
@@ -29,6 +34,7 @@ export interface BookmarkRibbonStackProps {
  */
 export const BookmarkRibbonStack: React.FC<BookmarkRibbonStackProps> = ({
   tags,
+  editable = true,
   onRename,
   onColorChange,
   onRemove,
@@ -71,60 +77,64 @@ export const BookmarkRibbonStack: React.FC<BookmarkRibbonStackProps> = ({
 
   return (
     <div className={rootClasses} {...(dataTestId !== undefined ? { 'data-testid': dataTestId } : {})}>
-      <button
-        ref={addBtnRef}
-        type="button"
-        className="ecui-bookmark-ribbon ecui-bookmark-ribbon--add"
-        aria-label="Add tag"
-        aria-expanded={isAddOpen}
-        onClick={() => {
-          setAddDraft('')
-          setIsAddOpen((prev) => !prev)
-        }}
-        {...(dataTestId ? { 'data-testid': `${dataTestId}-add` } : {})}
-      >
-        <span className="ecui-bookmark-ribbon-plus" aria-hidden="true">
-          <i className="codicon codicon-add" />
-        </span>
-      </button>
-      <Tooltip
-        targetRef={addBtnRef as React.RefObject<HTMLElement | null>}
-        show={isAddOpen}
-        placement="below"
-        className="ecui-bookmark-ribbon-tooltip"
-        {...(dataTestId ? { 'data-testid': `${dataTestId}-add-tooltip` } : {})}
-        content={
-          <div
-            ref={addEditorRef}
-            className="ecui-bookmark-ribbon-editor"
-            onMouseDown={(e) => { e.stopPropagation() }}
+      {editable ? (
+        <>
+          <button
+            ref={addBtnRef}
+            type="button"
+            className="ecui-bookmark-ribbon ecui-bookmark-ribbon--add"
+            aria-label="Add tag"
+            aria-expanded={isAddOpen}
+            onClick={() => {
+              setAddDraft('')
+              setIsAddOpen((prev) => !prev)
+            }}
+            {...(dataTestId ? { 'data-testid': `${dataTestId}-add` } : {})}
           >
-            <InputBox
-              options={{ placeholder: 'Tag name' }}
-              value={addDraft}
-              onChange={(next) => { setAddDraft(next) }}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  event.preventDefault()
-                  handleAddCommit()
-                } else if (event.key === 'Escape') {
-                  event.preventDefault()
-                  setIsAddOpen(false)
-                }
-              }}
-              {...(dataTestId ? { 'data-testid': `${dataTestId}-add-input` } : {})}
-            />
-            <Button
-              secondary
-              onClick={handleAddCommit}
-              options={{ ariaLabel: 'Create tag', title: 'Create tag' }}
-              {...(dataTestId ? { 'data-testid': `${dataTestId}-add-confirm` } : {})}
-            >
-              Add
-            </Button>
-          </div>
-        }
-      />
+            <span className="ecui-bookmark-ribbon-plus" aria-hidden="true">
+              <i className="codicon codicon-add" />
+            </span>
+          </button>
+          <Tooltip
+            targetRef={addBtnRef as React.RefObject<HTMLElement | null>}
+            show={isAddOpen}
+            placement="below"
+            className="ecui-bookmark-ribbon-tooltip"
+            {...(dataTestId ? { 'data-testid': `${dataTestId}-add-tooltip` } : {})}
+            content={
+              <div
+                ref={addEditorRef}
+                className="ecui-bookmark-ribbon-editor"
+                onMouseDown={(e) => { e.stopPropagation() }}
+              >
+                <InputBox
+                  options={{ placeholder: 'Tag name' }}
+                  value={addDraft}
+                  onChange={(next) => { setAddDraft(next) }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault()
+                      handleAddCommit()
+                    } else if (event.key === 'Escape') {
+                      event.preventDefault()
+                      setIsAddOpen(false)
+                    }
+                  }}
+                  {...(dataTestId ? { 'data-testid': `${dataTestId}-add-input` } : {})}
+                />
+                <Button
+                  secondary
+                  onClick={handleAddCommit}
+                  options={{ ariaLabel: 'Create tag', title: 'Create tag' }}
+                  {...(dataTestId ? { 'data-testid': `${dataTestId}-add-confirm` } : {})}
+                >
+                  Add
+                </Button>
+              </div>
+            }
+          />
+        </>
+      ) : null}
       {tags.map((tag, index) => {
         const rename = onRename
         const colorChange = onColorChange
@@ -133,10 +143,11 @@ export const BookmarkRibbonStack: React.FC<BookmarkRibbonStackProps> = ({
           <BookmarkRibbon
             key={`${tag.label}-${index}`}
             label={tag.label}
+            editable={editable}
             {...(tag.color !== undefined ? { color: tag.color } : {})}
-            {...(rename ? { onRename: (next) => { rename(index, next) } } : {})}
-            {...(colorChange ? { onColorChange: (hex) => { colorChange(index, hex) } } : {})}
-            {...(remove ? { onRemove: () => { remove(index) } } : {})}
+            {...(editable && rename ? { onRename: (next) => { rename(index, next) } } : {})}
+            {...(editable && colorChange ? { onColorChange: (hex) => { colorChange(index, hex) } } : {})}
+            {...(editable && remove ? { onRemove: () => { remove(index) } } : {})}
             {...(dataTestId ? { 'data-testid': `${dataTestId}-ribbon-${index}` } : {})}
           />
         )

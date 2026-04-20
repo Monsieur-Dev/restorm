@@ -5,11 +5,10 @@
 import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import Handlebars from 'handlebars'
-import { MarkdownViewer, Tabs, type Tab, type SearchResult } from 'electron-core-ui/renderer'
+import { MarkdownViewer, Tabs, type Tab, type SearchResult, BookmarkRibbonStack, type BookmarkRibbonTag } from 'electron-core-ui/renderer'
 import type { RestormSearchMetadata } from '../../../services/SearchIndexService'
 import requestDetailsTemplate from '../../../resources/templates/search/request-details.hbs?raw'
 import { Badge } from '../../common/Badge'
-import { Tag } from 'electron-core-ui/renderer'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import './SearchTooltipContent.css'
 
@@ -78,8 +77,19 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
       })
     }
 
+    const ribbonTags: BookmarkRibbonTag[] = tags.map((t) => ({ label: t }))
+
     return (
-      <div style={{ maxHeight: 'calc(100vh - 90px)', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ position: 'relative', maxHeight: 'calc(100vh - 90px)', display: 'flex', flexDirection: 'column' }}>
+        {/* Bookmark-ribbon tags (readonly) hang from the top-right of
+         * the tooltip, matching the workbench tab header treatment. */}
+        {ribbonTags.length > 0 && (
+          <BookmarkRibbonStack
+            tags={ribbonTags}
+            editable={false}
+            data-testid="search-tag-ribbons"
+          />
+        )}
         {/* Breadcrumb */}
         {breadcrumb.length > 0 && (
           <div className="search-tooltip-breadcrumb">
@@ -91,17 +101,10 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
             ))}
           </div>
         )}
-        {/* Method, title and tags on same line */}
+        {/* Method + title row (tags moved to the top-right ribbon stack). */}
         <div style={{ marginBottom: 8, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
           <Badge type={mapToBadgeType(method)} />
           <strong style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{resultTitle}</strong>
-          {tags.length > 0 && (
-            <div className="search-tooltip-tags">
-              {tags.map((tag, index) => (
-                <Tag key={index} label={tag} compact data-testid={`search-tag-${index}`} />
-              ))}
-            </div>
-          )}
         </div>
         {/* Tabs - first tab in array is selected by default */}
         <Tabs tabs={tabs} data-testid="tabs-request-tooltip" />
@@ -136,8 +139,17 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
     })
   }
 
+  const folderRibbonTags: BookmarkRibbonTag[] = folderTags.map((t) => ({ label: t }))
+
   return (
-    <div style={{ maxHeight: 'calc(100vh - 90px)', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ position: 'relative', maxHeight: 'calc(100vh - 90px)', display: 'flex', flexDirection: 'column' }}>
+      {folderRibbonTags.length > 0 && (
+        <BookmarkRibbonStack
+          tags={folderRibbonTags}
+          editable={false}
+          data-testid="search-tag-ribbons"
+        />
+      )}
       {/* Breadcrumb */}
       {folderBreadcrumb.length > 0 && (
         <div className="search-tooltip-breadcrumb">
@@ -149,16 +161,9 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
           ))}
         </div>
       )}
-      {/* Title and tags on same line */}
+      {/* Title (tags moved to the top-right ribbon stack). */}
       <div style={{ marginBottom: 8, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
         <strong style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{resultTitle}</strong>
-        {folderTags.length > 0 && (
-          <div className="search-tooltip-tags">
-            {folderTags.map((tag, index) => (
-              <Tag key={index} label={tag} compact data-testid={`search-tag-${index}`} />
-            ))}
-          </div>
-        )}
       </div>
       {/* Content with tabs or direct display */}
       {folderTabs.length > 0 ? (

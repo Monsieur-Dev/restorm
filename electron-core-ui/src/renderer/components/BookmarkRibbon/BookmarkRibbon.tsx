@@ -13,6 +13,11 @@ export interface BookmarkRibbonProps {
   /** Explicit colour override. Falls back to a deterministic colour
    * derived from the label when omitted. */
   color?: string
+  /** When false, the ribbon is a pure display element: clicking does
+   * nothing, no editor tooltip is ever mounted, and `aria-expanded`
+   * is dropped. Hover still unfurls the label so the rotated text
+   * stays discoverable. Defaults to true. */
+  editable?: boolean
   /** Rename handler — called on tooltip-editor commit. */
   onRename?: (next: string) => void
   /** Colour change handler — called from the tooltip colour picker.
@@ -37,6 +42,7 @@ export interface BookmarkRibbonProps {
 export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
   label,
   color,
+  editable = true,
   onRename,
   onColorChange,
   onRemove,
@@ -70,11 +76,12 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
   const textColor = getContrastColor(effectiveColor)
 
   const handleToggle = useCallback(() => {
+    if (!editable) return
     setIsOpen((prev) => {
       if (!prev) setDraftLabel(label)
       return !prev
     })
-  }, [label])
+  }, [editable, label])
 
   const handleCommitRename = useCallback(() => {
     const trimmed = draftLabel.trim()
@@ -91,6 +98,7 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
   const rootClasses = [
     'ecui-bookmark-ribbon',
     isOpen ? 'ecui-bookmark-ribbon--open' : '',
+    editable ? '' : 'ecui-bookmark-ribbon--readonly',
     className ?? ''
   ].filter(Boolean).join(' ')
 
@@ -102,12 +110,13 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
         className={rootClasses}
         style={{ '--bookmark-color': effectiveColor, '--bookmark-text-color': textColor } as React.CSSProperties}
         aria-label={`Tag: ${label}`}
-        aria-expanded={isOpen}
-        onClick={handleToggle}
+        {...(editable ? { 'aria-expanded': isOpen } : {})}
+        {...(editable ? { onClick: handleToggle } : {})}
         {...(dataTestId !== undefined ? { 'data-testid': dataTestId } : {})}
       >
         <span className="ecui-bookmark-ribbon-label">{label}</span>
       </button>
+      {editable ? (
       <Tooltip
         targetRef={rootRef as React.RefObject<HTMLElement | null>}
         show={isOpen}
@@ -157,6 +166,7 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
           </div>
         }
       />
+      ) : null}
     </>
   )
 }

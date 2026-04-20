@@ -37,7 +37,8 @@ Single tag. Renders one `<button>` with a clipped `::before` coloured body.
 | --- | --- | --- | --- |
 | `label` | `string` | required | Visible text. Shown rotated 90° clockwise on hover / open. |
 | `color` | `string` | — | Explicit colour (any CSS colour — hex, rgb, hsl). Falls back to `getColorFromString(label)` — a deterministic HSL derived from the label — when omitted. |
-| `onRename` | `(next: string) => void` | — | Fired when the rename input commits a *changed* trimmed value. Without this, the rename input still renders but caller doesn't get notified. |
+| `editable` | `boolean` | `true` | When `false`, the ribbon is a pure display element: clicking does nothing, no editor tooltip is ever mounted, `aria-expanded` is dropped, and the cursor is `default` instead of `pointer`. Hover still unfurls the label. |
+| `onRename` | `(next: string) => void` | — | Fired when the rename input commits a *changed* trimmed value. Without this, the rename input still renders but caller doesn't get notified. Ignored when `editable={false}` (no tooltip). |
 | `onColorChange` | `(hex: string) => void` | — | Fired by the ColorPicker with the newly-picked hex. When omitted, the picker is hidden from the editor tooltip. |
 | `onRemove` | `() => void` | — | When provided, the editor tooltip shows a trash button; when omitted, the remove affordance is hidden. |
 | `className` | `string` | — | Extra class appended to the root button. |
@@ -50,6 +51,7 @@ Row of ribbons anchored top-right of the positioned ancestor, starting with a mu
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `tags` | `BookmarkRibbonTag[]` | required | One entry per ribbon. `{ label: string; color?: string }`. |
+| `editable` | `boolean` | `true` | When `false`, the stack renders as pure display: the leading `[+]` add ribbon is hidden, no add tooltip is mounted, and each tag ribbon is delegated to in readonly mode (no click, no editor tooltip). Rename / colour / remove handlers passed alongside are ignored. |
 | `onRename` | `(index: number, next: string) => void` | — | Forwarded from the per-ribbon `onRename`, partial-applied with the tag's position in `tags`. |
 | `onColorChange` | `(index: number, hex: string) => void` | — | Same, forwarded from the per-ribbon ColorPicker. Passing this prop is also what decides whether the stack forwards an `onColorChange` down to each ribbon, so omit it if recolouring isn't supported (which in turn hides the ColorPicker from each ribbon's editor tooltip). |
 | `onRemove` | `(index: number) => void` | — | Same, forwarded from the per-ribbon trash button. |
@@ -98,7 +100,10 @@ Omitting `onColorChange` hides the colour picker from each ribbon's editor toolt
 ### Read-only display
 
 ```tsx
-<BookmarkRibbonStack tags={[{ label: 'readonly', color: '#888' }]} />
+<BookmarkRibbonStack
+  tags={[{ label: 'pet' }, { label: 'beta' }]}
+  editable={false}
+/>
 ```
 
-With no `onRename`, `onColorChange`, `onRemove`, or `onAdd`, ribbons still open their editor tooltip on click (so users can inspect the current colour), but none of the controls fire callbacks.
+Use `editable={false}` when the tags are purely informational — e.g. in a search-result popover or any preview surface where the user shouldn't be renaming or recolouring them. Hover still unfurls the rotated label so the text is discoverable; the `[+]` slot and all editor tooltips are omitted.

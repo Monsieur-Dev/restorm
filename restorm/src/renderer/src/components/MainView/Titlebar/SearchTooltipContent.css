@@ -1,9 +1,9 @@
-/* Tooltip tags */
-.search-tooltip-tags {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 4px;
-  flex-shrink: 0;
+/* Pull the readonly ribbon stack 5 px above the tooltip's inner
+ * padding so the signet's top edge sits just above the title row,
+ * matching the tab-header treatment proportionally for the smaller
+ * tooltip chrome. */
+.ecui-bookmark-ribbon-stack[data-testid="search-tag-ribbons"] {
+  top: -5px;
 }
 
 /* Tooltip breadcrumb */

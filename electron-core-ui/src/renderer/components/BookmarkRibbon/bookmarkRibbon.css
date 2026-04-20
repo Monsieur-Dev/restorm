@@ -127,6 +127,12 @@
   outline-offset: 2px;
 }
 
+/* Readonly variant — no editor tooltip, no click handler. Hover still
+ * unfurls the label so the rotated text stays readable. */
+.ecui-bookmark-ribbon--readonly {
+  cursor: default;
+}
+
 /* Add-tag variant — same footprint, muted greyscale chrome + a `+`
  * glyph. Used by `<BookmarkRibbonStack>` as its first ribbon. It
  * has no label content, so we pin its height even on hover rather
@@ -175,13 +181,12 @@
 .ecui-bookmark-ribbon-stack {
   position: absolute;
 
-  /* Negative top pulls the top edge of the signet silhouette flush
-   * with the tab-bar bottom border that sits just above the
-   * positioned ancestor. Without this offset, the default flex
-   * `align-items: flex-start` inside the row leaves a visible 6-8 px
-   * gap between the border line and the ribbon's top, spoiling the
-   * "hanging from the tab" effect. */
-  top: -8px;
+  /* Default: the stack hangs from the exact top of its positioned
+   * ancestor. Callers that need to flush the ribbons' top edge with
+   * a border rendered *above* the ancestor (e.g. a tab-bar bottom
+   * border) can override `top` to a small negative value from their
+   * own CSS — see `restormWorkbenchTab.css`. */
+  top: 0;
   right: 20px;
   display: flex;
   flex-direction: row;

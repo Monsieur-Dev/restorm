@@ -17,6 +17,14 @@
   background-color: var(--editor-background);
 }
 
+/* Pull the ribbon stack 8 px above the top of the workbench tab so
+ * the signet's top edge sits flush with the tab-bar bottom border
+ * rendered just above. Without this, the default flex alignment
+ * leaves a visible gap between the border line and the ribbon. */
+.restorm-workbench-tab > .ecui-bookmark-ribbon-stack {
+  top: -8px;
+}
+
 .restorm-workbench-tab-callout {
   padding: 8px 16px 0 16px;
 }

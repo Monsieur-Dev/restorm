@@ -160,6 +160,26 @@ describe('BookmarkRibbon', () => {
       expect(screen.queryByTestId('rib-rename-input-input')).not.toBeInTheDocument()
     })
   })
+
+  describe('readonly mode', () => {
+    it('does not open the editor tooltip when the ribbon is clicked with editable={false}', async () => {
+      const user = userEvent.setup()
+      const onRename = vi.fn()
+      render(
+        <BookmarkRibbon label="api" editable={false} onRename={onRename} data-testid="rib" />
+      )
+      await user.click(screen.getByTestId('rib'))
+      expect(screen.queryByTestId('rib-rename-input-input')).not.toBeInTheDocument()
+      expect(onRename).not.toHaveBeenCalled()
+    })
+
+    it('omits aria-expanded in readonly mode', () => {
+      render(
+        <BookmarkRibbon label="api" editable={false} data-testid="rib" />
+      )
+      expect(screen.getByTestId('rib')).not.toHaveAttribute('aria-expanded')
+    })
+  })
 })
 
 describe('BookmarkRibbonStack', () => {
@@ -264,6 +284,34 @@ describe('BookmarkRibbonStack', () => {
       expect(screen.getByTestId('stk-add-input-input')).toBeInTheDocument()
       await user.click(screen.getByTestId('outside'))
       expect(screen.queryByTestId('stk-add-input-input')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('readonly mode', () => {
+    it('hides the [+] add ribbon when editable={false}', () => {
+      render(
+        <BookmarkRibbonStack tags={tags} editable={false} data-testid="stk" />
+      )
+      expect(screen.queryByTestId('stk-add')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('stk-add-tooltip')).not.toBeInTheDocument()
+    })
+
+    it('still renders a ribbon per tag in readonly mode, with no click handler', async () => {
+      const user = userEvent.setup()
+      const onRename = vi.fn()
+      render(
+        <BookmarkRibbonStack
+          tags={tags}
+          editable={false}
+          onRename={onRename}
+          data-testid="stk"
+        />
+      )
+      expect(screen.getByTestId('stk-ribbon-0')).toHaveTextContent('api')
+      expect(screen.getByTestId('stk-ribbon-1')).toHaveTextContent('beta')
+      await user.click(screen.getByTestId('stk-ribbon-0'))
+      expect(screen.queryByTestId('stk-ribbon-0-rename-input-input')).not.toBeInTheDocument()
+      expect(onRename).not.toHaveBeenCalled()
     })
   })
 })
