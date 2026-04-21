@@ -46,12 +46,15 @@ export interface HTTPRequestTabViewProps {
    * every HTTP field but adds a Configuration tab surfaced via
    * `additionalRequestTabs`. */
   request: HTTPRequest | AuthenticationRequest
-  /** When true, skip the main-process ContextService wiring:
-   * registerRequest / updateFullRequestData / onAvailableVariables
-   * subscription. The caller is responsible for dispatching the
-   * request some other way (auth prefetch, etc.). Used by the import
-   * wizard so every keystroke in the embedded form doesn't trigger a
-   * round-trip through the context engine. */
+  /** When true, skip the per-keystroke ContextService traffic
+   * (updateFullRequestData, updateRequestKeyValues, onUrlResolved /
+   * onCodeSnippetsUpdated / onAvailableVariables subscriptions). The
+   * one-time registerRequest / setRequestEnvironment still fire so
+   * the Send button inside an embedded view can still dispatch
+   * through the context engine — we flush the latest state once via
+   * updateFullRequestData right before executing. Used by the import
+   * wizard's auth setup modal to eliminate the typing lag caused by
+   * a full context round-trip on every character. */
   disableContextSync?: boolean
 }
 
@@ -258,9 +261,11 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   useEffect(() => { requestRef.current = request }, [request])
   useEffect(() => { environmentsRef.current = environments }, [environments])
 
-  // Register request with ContextService on mount, unregister on unmount
+  // Register request with ContextService on mount, unregister on unmount.
+  // This runs even when disableContextSync is true so the Send button
+  // can still dispatch through the execution service — we just skip
+  // the per-keystroke updates.
   useEffect(() => {
-    if (disableContextSync) return
     const requestId = request.id
     if (!requestId) return
 
@@ -283,11 +288,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     // Only re-register when the request ID changes (mount/unmount).
     // Environment changes are handled by the separate setRequestEnvironment effect below.
     // toKeyValueData is a stable useCallback with [] deps, so it never changes.
-  }, [request.id, toKeyValueData, disableContextSync])
+  }, [request.id, toKeyValueData])
 
   // Notify ContextService when selected environment changes
   useEffect(() => {
-    if (disableContextSync) return
     const requestId = request.id
     if (!requestId) return
 
@@ -301,7 +305,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       void window.restorm?.context.setRequestEnvironment(requestId, currentEnvId)
       previousEnvIdRef.current = currentEnvId
     }
-  }, [selectedEnvId, environments, request.id, disableContextSync])
+  }, [selectedEnvId, environments, request.id])
 
   // Sync method changes to reactive object
   useEffect(() => {
@@ -333,13 +337,11 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     }
   }, [body, bodyMode, bodyFilePath, request])
 
-  // Send full request data to backend for URL resolution and code snippets
-  useEffect(() => {
-    if (disableContextSync) return
-    const requestId = request.id
-    if (!requestId || requestIdRef.current !== request.id) return
-
-    // Build body data
+  // Build the full-request payload that ContextService uses for URL
+  // resolution + code snippets. Extracted so handleSend can flush the
+  // latest state once when `disableContextSync` is on, instead of
+  // firing it on every keystroke.
+  const buildFullRequestPayload = useCallback(() => {
     let bodyData: { type: string; content?: string; path?: string; fields?: KeyValueData[] } | undefined
     if (bodyMode === 'text' && body) {
       bodyData = { type: 'text', content: body }
@@ -348,18 +350,25 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     } else if ((bodyMode === 'form-data' || bodyMode === 'x-www-form-urlencoded') && request.body?.type === bodyMode) {
       bodyData = { type: bodyMode, fields: toKeyValueData(request.body.fields) }
     }
-
-    void window.restorm?.context.updateFullRequestData(requestId, {
-      id: requestId,
-      requestType: 'http',
+    return {
+      id: request.id,
+      requestType: 'http' as const,
       url,
       method,
       headers: toKeyValueData(request.headers),
       params: toKeyValueData(request.params),
       pathParams: request.pathParams ? toKeyValueData(request.pathParams) : [],
       body: bodyData
-    }, sourceIdRef.current)
-  }, [request.id, url, method, request.headers, request.params, request.pathParams, body, bodyMode, bodyFilePath, request.body, toKeyValueData, disableContextSync])
+    }
+  }, [request.id, url, method, request.headers, request.params, request.pathParams, body, bodyMode, bodyFilePath, request.body, toKeyValueData])
+
+  // Send full request data to backend for URL resolution and code snippets
+  useEffect(() => {
+    if (disableContextSync) return
+    const requestId = request.id
+    if (!requestId || requestIdRef.current !== request.id) return
+    void window.restorm?.context.updateFullRequestData(requestId, buildFullRequestPayload(), sourceIdRef.current)
+  }, [buildFullRequestPayload, request.id, disableContextSync])
   
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
@@ -459,13 +468,19 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     setIsSending(true)
     setHttpResponse(null)
 
-    // Execute via backend
-    window.restorm?.http.execute({
-      requestId,
-      method,
-      timeout: DEFAULT_REQUEST_TIMEOUT_MS,
-      ...(requestPath ? { requestPath } : {})
-    })
+    // When disableContextSync is on we've skipped the per-keystroke
+    // updateFullRequestData calls, so the backend has stale state
+    // (only the mount-time register snapshot). Flush the latest
+    // payload once, then wait for the main-process URL resolver to
+    // catch up before dispatching — otherwise http:execute would
+    // fail with "No resolved URL found for this request".
+    const dispatch = (): void => {
+      window.restorm?.http.execute({
+        requestId,
+        method,
+        timeout: DEFAULT_REQUEST_TIMEOUT_MS,
+        ...(requestPath ? { requestPath } : {})
+      })
       .then((result) => {
         if (result.success) {
           // Convert backend result to HTTPResponse format
@@ -542,7 +557,20 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       .finally(() => {
         setIsSending(false)
       })
-  }, [isSending, request, method, url, requestPath])
+    }
+
+    if (disableContextSync) {
+      void window.restorm?.context
+        .updateFullRequestData(requestId, buildFullRequestPayload(), sourceIdRef.current)
+        .then(() => { dispatch() })
+        .catch((err: unknown) => {
+          logger.error('Failed to flush context before send', { error: String(err) })
+          setIsSending(false)
+        })
+    } else {
+      dispatch()
+    }
+  }, [isSending, request, method, url, requestPath, disableContextSync, buildFullRequestPayload])
 
   const handleCancel = useCallback((): void => {
     const requestId = request.id
