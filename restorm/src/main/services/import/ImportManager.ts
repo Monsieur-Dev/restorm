@@ -80,6 +80,12 @@ function detectFormat(content: string, filePath?: string): string | null {
     if (typeof json === 'object' && json !== null && 'asyncapi' in json) {
       return 'asyncapi'
     }
+
+    // Detect OData JSON-CSDL (v4). Every JSON-CSDL document starts
+    // with a top-level `$Version` discriminator ("4.0" or "4.01").
+    if (typeof json === 'object' && json !== null && '$Version' in json) {
+      return 'odata'
+    }
   } catch {
     // Not JSON, try other formats
   }
@@ -105,6 +111,16 @@ function detectFormat(content: string, filePath?: string): string | null {
   if (trimmed.includes('<wsdl:definitions') || trimmed.includes('<definitions') && trimmed.includes('wsdl') ||
       filePath?.endsWith('.wsdl')) {
     return 'soap'
+  }
+
+  // Detect OData EDMX CSDL (v2/v3/v4). All versions wrap the schema
+  // in an `edmx:Edmx` root element. A filename or URL ending with
+  // `$metadata` or `.edmx` is also a strong hint.
+  if (trimmed.includes('<edmx:Edmx') || trimmed.includes('<Edmx ')) {
+    return 'odata'
+  }
+  if (filePath?.endsWith('.edmx') || filePath?.endsWith('$metadata')) {
+    return 'odata'
   }
   
   // Detect Bruno .bru files
@@ -194,7 +210,13 @@ async function importFromContent(
         folder = importSoap(content, urlOpt)
         break
       }
-        
+
+      case 'odata': {
+        const { importOData } = await import('./ODataImportService')
+        folder = importOData(content, urlOpt)
+        break
+      }
+
       default:
         return {
           success: false,
