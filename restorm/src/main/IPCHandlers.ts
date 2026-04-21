@@ -621,13 +621,60 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('auth:prefetch', authPrefetchArgs, async (_event, [spec]) => {
     try {
-      const rawBody = spec.body?.content
+      // Serialize body: text → raw string; x-www-form-urlencoded →
+      // URLSearchParams; form-data/file → not yet supported here (the
+      // auth route is nearly always OAuth token, which is text or
+      // urlencoded). We also ensure Content-Type is set for urlencoded
+      // bodies so providers like login.microsoftonline.com accept the
+      // payload.
+      const outHeaders: { key: string; value: string; enabled?: boolean }[] =
+        (spec.headers ?? []).map((h) => ({ key: h.key, value: h.value, ...(h.enabled !== undefined ? { enabled: h.enabled } : {}) }))
+      let serializedBody: string | undefined
+      if (spec.body?.type === 'text' && spec.body.content) {
+        serializedBody = spec.body.content
+      } else if (spec.body?.type === 'x-www-form-urlencoded' && spec.body.fields) {
+        const params = new URLSearchParams()
+        for (const f of spec.body.fields) {
+          if (f.enabled === false) continue
+          if (!f.key) continue
+          params.append(f.key, f.value)
+        }
+        serializedBody = params.toString()
+        const hasContentType = outHeaders.some((h) => h.enabled !== false && h.key.toLowerCase() === 'content-type')
+        if (!hasContentType) {
+          outHeaders.push({ key: 'Content-Type', value: 'application/x-www-form-urlencoded' })
+        }
+      }
+
+      const redactedHeaders = outHeaders.map((h) => ({
+        ...h,
+        value: /authorization|cookie|secret|token/i.test(h.key) ? '***' : h.value
+      }))
+      const redactedBody = serializedBody
+        ? serializedBody.replace(/(client_secret|password|refresh_token|assertion)=[^&]+/gi, '$1=***')
+        : undefined
+      logger.info('[auth:prefetch] dispatching', {
+        method: spec.method,
+        url: spec.url,
+        headers: redactedHeaders,
+        bodyType: spec.body?.type,
+        bodyPreview: redactedBody?.slice(0, 500) ?? ''
+      })
+
       const result = await authPrefetchOneShot({
         method: spec.method,
         url: spec.url,
-        headers: spec.headers ?? [],
-        ...(rawBody ? { body: rawBody } : {})
+        headers: outHeaders,
+        ...(serializedBody !== undefined ? { body: serializedBody } : {})
       })
+
+      logger.info('[auth:prefetch] response', {
+        success: result.success,
+        statusCode: result.statusCode,
+        bodyPreview: (result.body ?? '').slice(0, 500),
+        error: result.error
+      })
+
       if (!result.success) {
         return {
           success: false,
@@ -636,7 +683,23 @@ export function registerRestormIPC(deps: {
           headers: {} as Record<string, string>
         }
       }
+      // Treat non-2xx as a failure so the renderer surfaces the server
+      // error (e.g. 400 invalid_client) instead of happily sending a
+      // Bearer-undefined to the target.
+      if (result.statusCode !== undefined && (result.statusCode < 200 || result.statusCode >= 300)) {
+        return {
+          success: false,
+          statusCode: result.statusCode,
+          error: `Auth route returned HTTP ${result.statusCode}: ${(result.body ?? '').slice(0, 500)}`,
+          headers: {} as Record<string, string>
+        }
+      }
       const resolved = resolveProducedHeaders(spec.producedHeaders, result.body ?? '')
+      const redactedResolved: Record<string, string> = {}
+      for (const [k, v] of Object.entries(resolved)) {
+        redactedResolved[k] = /authorization|cookie/i.test(k) ? `${v.slice(0, 12)}…(redacted)` : v
+      }
+      logger.info('[auth:prefetch] resolved producedHeaders', { headers: redactedResolved })
       return {
         success: true,
         statusCode: result.statusCode ?? 200,

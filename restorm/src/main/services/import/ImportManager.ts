@@ -271,14 +271,34 @@ export async function importFrom(
     const isUrl = input.startsWith('http://') || input.startsWith('https://')
     // Check if input is a URL
     if (isUrl) {
-      logger.info(`[ImportManager] Fetching from URL: ${input}`)
       source = input
 
       try {
         const fetchInit: RequestInit = options.extraHeaders && Object.keys(options.extraHeaders).length > 0
           ? { headers: options.extraHeaders }
           : {}
+        // Log the full dispatched request (headers redacted for
+        // Authorization / Cookie) so auth flows can be diagnosed end
+        // to end — which headers reached the target vs. were lost
+        // along the way.
+        const redactedHeaders: Record<string, string> = {}
+        if (options.extraHeaders) {
+          for (const [k, v] of Object.entries(options.extraHeaders)) {
+            redactedHeaders[k] = /authorization|cookie/i.test(k) ? `${v.slice(0, 12)}…(redacted)` : v
+          }
+        }
+        logger.info('[ImportManager] dispatching fetch', {
+          url: input,
+          method: 'GET',
+          headers: redactedHeaders,
+          headerCount: Object.keys(options.extraHeaders ?? {}).length
+        })
         const response = await fetch(input, fetchInit)
+        logger.info('[ImportManager] fetch response', {
+          url: input,
+          status: response.status,
+          statusText: response.statusText
+        })
         lastStatusCode = response.status
         if (!response.ok) {
           const isAuthError = response.status === 401 || response.status === 403

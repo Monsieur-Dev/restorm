@@ -174,7 +174,12 @@ export const authPrefetchArgs = z.tuple([
     })).optional(),
     body: z.object({
       type: z.string(),
-      content: z.string().optional()
+      content: z.string().optional(),
+      fields: z.array(z.object({
+        key: z.string(),
+        value: z.string(),
+        enabled: z.boolean().optional()
+      })).optional()
     }).optional(),
     producedHeaders: z.array(z.object({
       key: z.string(),

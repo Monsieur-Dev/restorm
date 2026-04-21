@@ -47,6 +47,14 @@ export async function authPrefetchOneShot(input: AuthPrefetchInput): Promise<Aut
     headers['Content-Type'] = 'application/json'
   }
 
+  logger.info('[AuthPrefetch] wire-level request', {
+    method: input.method,
+    host: parsed.host,
+    path: `${parsed.pathname}${parsed.search}`,
+    headerKeys: Object.keys(headers),
+    bodyLength: input.body?.length ?? 0
+  })
+
   return new Promise((resolve) => {
     const req = client.request(
       {

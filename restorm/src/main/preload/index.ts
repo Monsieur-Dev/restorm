@@ -515,7 +515,11 @@ contextBridge.exposeInMainWorld('restorm', {
       method: string
       url: string
       headers: { key: string; value: string; enabled?: boolean }[]
-      body?: { type: string; content?: string }
+      body?: {
+        type: string
+        content?: string
+        fields?: { key: string; value: string; enabled?: boolean }[]
+      }
       producedHeaders: { key: string; value: string; enabled?: boolean }[]
       expirationExpression?: string
     }): Promise<{

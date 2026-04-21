@@ -86,6 +86,24 @@ export const AuthenticationSetupModal: React.FC<AuthenticationSetupModalProps> =
     setPrefetchError(null)
     setIsRunning(true)
     try {
+      // The class-level body type uses camelCase (`formData` /
+       // `xWwwFormUrlEncoded`); the IPC schema and wire protocol use
+       // the HTTP kebab-case names so the main-side serializer can
+       // forward them verbatim as Content-Type.
+      let bodyPayload: { type: string; content?: string; fields?: { key: string; value: string; enabled?: boolean }[] } | undefined
+      const bodyType = req.body?.type
+      if (bodyType === 'text' && req.body?.content) {
+        bodyPayload = { type: 'text', content: req.body.content }
+      } else if ((bodyType === 'xWwwFormUrlEncoded' || bodyType === 'formData') && req.body?.fields) {
+        bodyPayload = {
+          type: bodyType === 'xWwwFormUrlEncoded' ? 'x-www-form-urlencoded' : 'form-data',
+          fields: req.body.fields.map((f) => ({
+            key: f.key,
+            value: f.value.toString(),
+            enabled: f.enabled
+          }))
+        }
+      }
       const payload: Parameters<typeof api.prefetch>[0] = {
         method: req.method,
         url: req.url,
@@ -100,9 +118,7 @@ export const AuthenticationSetupModal: React.FC<AuthenticationSetupModalProps> =
           enabled: h.enabled
         })),
         ...(req.expirationExpression ? { expirationExpression: req.expirationExpression } : {}),
-        ...(req.body?.type === 'text' && req.body.content
-          ? { body: { type: 'text', content: req.body.content } }
-          : {})
+        ...(bodyPayload ? { body: bodyPayload } : {})
       }
       const result = await api.prefetch(payload)
       if (!result.success) {
