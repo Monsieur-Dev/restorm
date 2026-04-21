@@ -47,7 +47,6 @@ export function ImportModal({
   const [isLoading, setIsLoading] = useState(false)
   const [previewItems, setPreviewItems] = useState<FolderItem[]>([])
   const [error, setError] = useState<string | null>(null)
-  const [isAuthError, setIsAuthError] = useState(false)
   const [attachedAuth, setAttachedAuth] = useState<AuthenticationRequest | null>(null)
   const [attachedAuthHeaders, setAttachedAuthHeaders] = useState<Record<string, string> | null>(null)
   const [showAuthSetupModal, setShowAuthSetupModal] = useState(false)
@@ -234,16 +233,13 @@ export function ImportModal({
           if (result?.success) {
             setPreviewItems(result.items as FolderItem[])
             setError(null)
-            setIsAuthError(false)
           } else {
             setPreviewItems([])
             setError(result?.error ?? t('import.error.unknown'))
-            setIsAuthError(Boolean(result?.isAuthError))
           }
         } catch (err) {
           setPreviewItems([])
           setError(err instanceof Error ? err.message : String(err))
-          setIsAuthError(false)
         } finally {
           setIsLoading(false)
         }
@@ -491,21 +487,26 @@ export function ImportModal({
             <div className="import-error" role="alert">
               <i className="codicon codicon-error" aria-hidden="true" />
               <span style={{ flex: 1 }}>{error}</span>
-              {isAuthError && !attachedAuth ? (
-                <Button
-                  icon="key"
-                  onClick={() => { setShowAuthSetupModal(true) }}
-                  options={{
-                    ariaLabel: t('import.addAuth', 'Add an authentication route'),
-                    title: t('import.addAuth', 'Add an authentication route')
-                  }}
-                  data-testid="import-add-auth-button"
-                >
-                  {t('import.addAuth', 'Add an authentication route')}
-                </Button>
-              ) : null}
             </div>
           )}
+          {/* Auth-route attach is always available — not just on 401/403 —
+              so users can pre-wire APIs that need a token even when the
+              first request otherwise succeeds (or on file-based imports). */}
+          {!attachedAuth ? (
+            <div style={{ alignSelf: 'flex-start' }}>
+              <Button
+                icon="key"
+                onClick={() => { setShowAuthSetupModal(true) }}
+                options={{
+                  ariaLabel: t('import.addAuth', 'Add an authentication route'),
+                  title: t('import.addAuth', 'Add an authentication route')
+                }}
+                data-testid="import-add-auth-button"
+              >
+                {t('import.addAuth', 'Add an authentication route')}
+              </Button>
+            </div>
+          ) : null}
           {attachedAuth ? (
             <div
               className="import-auth-pill"
