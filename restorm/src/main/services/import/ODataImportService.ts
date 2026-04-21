@@ -355,6 +355,8 @@ function sampleValueForType(type: string, collection: boolean): unknown {
 }
 
 function buildActionRequest(op: EdmOperation, version: ODataVersion): ODataRequest {
+  // The parser already stripped the binding parameter from
+  // `op.parameters`, so everything here is user-supplied.
   const url = op.isBound
     ? `{{baseUrl}}/<BoundEntity>({{key}})/${op.qualifiedName}`
     : `{{baseUrl}}/${op.name}`
@@ -362,6 +364,11 @@ function buildActionRequest(op: EdmOperation, version: ODataVersion): ODataReque
   for (const p of op.parameters) {
     bodyObj[p.name] = sampleValueForType(p.type, p.collection)
   }
+  const operationParameters = op.parameters.map((p) => ({
+    name: p.name,
+    type: p.type,
+    nullable: p.nullable
+  }))
   return new ODataRequest({
     id: generateId(`odata:action:${op.qualifiedName}`),
     name: `Action ${op.name}${op.isBound ? ' (bound)' : ''}`,
@@ -372,13 +379,15 @@ function buildActionRequest(op: EdmOperation, version: ODataVersion): ODataReque
     params: [],
     queryOptions: {},
     actionBody: JSON.stringify(bodyObj, null, 2),
+    operationParameters,
     tags: ['odata', 'action']
   })
 }
 
 function buildFunctionRequest(op: EdmOperation, version: ODataVersion): ODataRequest {
   // Inline parameters into the URL using Handlebars placeholders so
-  // the user can fill them via the env: `/Function(name='{{name}}')`
+  // the user can fill them via the env: `/Function(name='{{name}}')`.
+  // The parser already stripped the binding parameter.
   const inlined = op.parameters
     .map((p) => {
       const placeholder = isStringType(p.type, p.collection) ? `'{{${p.name}}}'` : `{{${p.name}}}`
@@ -388,6 +397,11 @@ function buildFunctionRequest(op: EdmOperation, version: ODataVersion): ODataReq
   const url = op.isBound
     ? `{{baseUrl}}/<BoundEntity>({{key}})/${op.qualifiedName}(${inlined})`
     : `{{baseUrl}}/${op.name}(${inlined})`
+  const operationParameters = op.parameters.map((p) => ({
+    name: p.name,
+    type: p.type,
+    nullable: p.nullable
+  }))
   return new ODataRequest({
     id: generateId(`odata:function:${op.qualifiedName}`),
     name: `Function ${op.name}${op.isBound ? ' (bound)' : ''}`,
@@ -397,6 +411,7 @@ function buildFunctionRequest(op: EdmOperation, version: ODataVersion): ODataReq
     headers: [kvHeader('Accept', 'application/json')],
     params: [],
     queryOptions: {},
+    operationParameters,
     tags: ['odata', 'function']
   })
 }

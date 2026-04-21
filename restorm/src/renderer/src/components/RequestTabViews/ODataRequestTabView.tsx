@@ -41,11 +41,16 @@ import {
   type ISelectData,
   type ListViewItemData
 } from 'electron-core-ui/renderer'
-import type { ODataRequest, ODataVersion, ODataOperationKind, ODataBatchSubRequestSpec, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
+import type { ODataRequest, ODataVersion, ODataOperationKind, ODataBatchSubRequestSpec, ODataOperationParameterSpec, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { ODataBatchEditor } from './ODataBatchEditor'
 import { ODataOrderbyEditor } from './ODataOrderbyEditor'
 import { ODataExpandEditor } from './ODataExpandEditor'
 import { ODataPropertyChips } from './ODataPropertyChips'
+import { ODataOperationParameterEditor } from './ODataOperationParameterEditor'
+import {
+  buildActionBodyObject,
+  buildFunctionInlinedArgs
+} from '../../../../shared/utils/odataOperationParams'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
@@ -225,6 +230,32 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
 
   const setBatchSubRequests = useCallback((next: ODataBatchSubRequestSpec[]) => {
     updateReactiveProperty(request, 'batchSubRequests', next)
+  }, [request])
+
+  const setOperationParameters = useCallback((next: ODataOperationParameterSpec[]) => {
+    updateReactiveProperty(request, 'operationParameters', next)
+  }, [request])
+
+  // Action: regenerate `actionBody` JSON from the typed parameter
+  // form so the user sees what the server will receive. Values
+  // missing from the form are dropped so the server defaults apply.
+  const applyActionParameters = useCallback(() => {
+    const body = buildActionBodyObject(request.operationParameters ?? [])
+    updateReactiveProperty(request, 'actionBody', JSON.stringify(body, null, 2))
+  }, [request])
+
+  // Function: rewrite the last `(...)` segment of the URL with the
+  // inlined args built from the typed form. Anything before the
+  // opening paren (service root, bound-entity prefix) is preserved
+  // verbatim — the user's own `{{baseUrl}}/…/Function` is safe.
+  const applyFunctionParameters = useCallback(() => {
+    const currentUrl = request.url
+    const inlined = buildFunctionInlinedArgs(request.operationParameters ?? [])
+    const openIdx = currentUrl.lastIndexOf('(')
+    const closeIdx = currentUrl.lastIndexOf(')')
+    const hasExistingArgs = openIdx >= 0 && closeIdx > openIdx
+    const base = hasExistingArgs ? currentUrl.slice(0, openIdx) : currentUrl
+    updateReactiveProperty(request, 'url', `${base}${inlined}`)
   }, [request])
 
   // Metadata-driven chip pickers: appending a property to $select,
@@ -537,6 +568,20 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
 
       {request.operationKind === 'action' ? (
         <div style={rowStyle}>
+          {request.operationParameters && request.operationParameters.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={labelStyle}>
+                {t('odataRequestTab.actionParameters', 'Action parameters (from metadata)')}
+              </label>
+              <ODataOperationParameterEditor
+                value={request.operationParameters}
+                onChange={setOperationParameters}
+                onApply={applyActionParameters}
+                applyLabel={t('odataRequestTab.paramsApplyToBody', 'Apply to body')}
+                testIdPrefix="odata-action-param"
+              />
+            </div>
+          ) : null}
           <label style={labelStyle} htmlFor="odata-request-action-body">
             {t('odataRequestTab.actionBody', 'Action body (JSON)')}
           </label>
@@ -571,7 +616,21 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       ) : null}
 
       {request.operationKind === 'function' ? (
-        <div style={{ ...rowStyle, padding: '4px 0' }}>
+        <div style={{ ...rowStyle, padding: '4px 0', flexDirection: 'column', alignItems: 'stretch' }}>
+          {request.operationParameters && request.operationParameters.length > 0 ? (
+            <>
+              <label style={labelStyle}>
+                {t('odataRequestTab.functionParameters', 'Function parameters (from metadata)')}
+              </label>
+              <ODataOperationParameterEditor
+                value={request.operationParameters}
+                onChange={setOperationParameters}
+                onApply={applyFunctionParameters}
+                applyLabel={t('odataRequestTab.paramsApplyToUrl', 'Apply to URL')}
+                testIdPrefix="odata-function-param"
+              />
+            </>
+          ) : null}
           <span style={{ ...labelStyle, fontStyle: 'italic' }}>
             {t(
               'odataRequestTab.functionHint',

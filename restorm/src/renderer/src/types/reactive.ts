@@ -121,6 +121,7 @@ const ODATA_REQUEST_INDEXABLE_KEYS = new Set([
   'batchSubRequests',
   'entitySetProperties',
   'navigationProperties',
+  'operationParameters',
   'deprecated'
 ])
 

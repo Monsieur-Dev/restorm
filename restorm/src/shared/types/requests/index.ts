@@ -4,9 +4,9 @@ import type { GraphQLRequest } from './GraphQLRequest'
 import type { GrpcRequest } from './GrpcRequest'
 import type { SoapRequest } from './SoapRequest'
 import type { WebSocketRequest } from './WebSocketRequest'
-import type { ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchSubRequestSpec } from './ODataRequest'
+import type { ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchSubRequestSpec, ODataOperationParameterSpec } from './ODataRequest'
 
-export type { BaseRequest, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchSubRequestSpec }
+export type { BaseRequest, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchSubRequestSpec, ODataOperationParameterSpec }
 
 export type Request = HTTPRequest | GraphQLRequest | GrpcRequest | SoapRequest | WebSocketRequest | ODataRequest
 

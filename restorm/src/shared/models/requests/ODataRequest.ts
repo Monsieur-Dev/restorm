@@ -57,6 +57,15 @@ export interface ODataQueryOptions {
  */
 export type ODataOperationKind = 'entity-set' | 'function' | 'action' | 'batch'
 
+/** Parameter descriptor for action/function invocations. */
+export interface ODataOperationParameterSpec {
+  name: string
+  type: string
+  nullable?: boolean
+  isBinding?: boolean
+  value?: string
+}
+
 /** Structured sub-request inside a `$batch`. An atomicityGroup label
  * ties consecutive entries into one change-set so the server commits
  * them as a single transaction. */
@@ -128,6 +137,12 @@ export class ODataRequest extends BaseRequest {
   @graphqlField({ type: 'String', isArray: true, nullable: true })
   navigationProperties?: string[]
 
+  /** Parameter schema for action / function invocations. The UI
+   * renders a typed form; the serializer builds the request body
+   * (actions) or URL-inlined arguments (functions) from the values. */
+  @graphqlField({ type: 'JSON', nullable: true })
+  operationParameters?: ODataOperationParameterSpec[]
+
   /** Whether this endpoint is deprecated. */
   @graphqlField({ type: 'Boolean', nullable: true })
   deprecated = false
@@ -164,6 +179,7 @@ export class ODataRequest extends BaseRequest {
     batchSubRequests?: ODataBatchSubRequestSpec[]
     entitySetProperties?: string[]
     navigationProperties?: string[]
+    operationParameters?: ODataOperationParameterSpec[]
     deprecated?: boolean
   }): ODataRequest {
     return new ODataRequest({
@@ -183,6 +199,7 @@ export class ODataRequest extends BaseRequest {
       ...(obj.batchSubRequests !== undefined && { batchSubRequests: obj.batchSubRequests }),
       ...(obj.entitySetProperties !== undefined && { entitySetProperties: obj.entitySetProperties }),
       ...(obj.navigationProperties !== undefined && { navigationProperties: obj.navigationProperties }),
+      ...(obj.operationParameters !== undefined && { operationParameters: obj.operationParameters }),
       deprecated: obj.deprecated ?? false
     })
   }
@@ -206,6 +223,7 @@ export class ODataRequest extends BaseRequest {
       ...(this.batchSubRequests !== undefined && { batchSubRequests: this.batchSubRequests }),
       ...(this.entitySetProperties !== undefined && { entitySetProperties: this.entitySetProperties }),
       ...(this.navigationProperties !== undefined && { navigationProperties: this.navigationProperties }),
+      ...(this.operationParameters !== undefined && { operationParameters: this.operationParameters }),
       deprecated: this.deprecated
     }
   }

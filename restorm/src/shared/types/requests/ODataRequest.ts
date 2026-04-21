@@ -40,6 +40,27 @@ export interface ODataQueryOptions {
  * kind rather than a separate request type. */
 export type ODataOperationKind = 'entity-set' | 'function' | 'action' | 'batch'
 
+/** Parameter descriptor for an action / function, pre-filled by the
+ * importer from the EDMX `<Parameter>` elements. The UI surfaces a
+ * typed input per entry; the user-supplied values drive the body
+ * (actions) or URL-inlined arguments (functions). */
+export interface ODataOperationParameterSpec {
+  /** Parameter name — e.g. `OwnerId`, `category`. */
+  name: string
+  /** Qualified CSDL type — e.g. `Edm.Int32`, `Edm.String`,
+   * `Collection(Edm.String)`, `OData.PetStore.Models.PetStatus`. */
+  type: string
+  /** Whether the parameter accepts null. */
+  nullable?: boolean
+  /** True for the binding parameter on a bound operation — the UI
+   * hides these since they're driven by the invocation URL, not the
+   * payload. */
+  isBinding?: boolean
+  /** Current user-supplied value. Stored as a string and parsed by
+   * the serializer before dispatch. */
+  value?: string
+}
+
 /** A single sub-request inside a `$batch`. Atomicity groups collect
  * sub-requests that must succeed or fail together (change-sets per
  * the OData v4 spec). A sub-request with no `atomicityGroup` is a
@@ -98,6 +119,11 @@ export interface ODataRequest extends BaseRequest {
   /** Names of navigation properties on the bound entity type (also
    * from OYO-181). Surfaced as chips beneath $expand. */
   navigationProperties?: string[]
+  /** Parameter schema for action / function invocations (pre-filled
+   * by the importer). The UI renders a typed form and the
+   * serializer builds the request body (actions) or URL-inlined
+   * arguments (functions) from the values. */
+  operationParameters?: ODataOperationParameterSpec[]
   /** Whether this endpoint is deprecated. */
   deprecated?: boolean
 }
