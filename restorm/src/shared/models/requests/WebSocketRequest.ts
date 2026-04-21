@@ -66,6 +66,7 @@ export class WebSocketRequest extends BaseRequest {
     documentation?: string
     notes?: string
     tags?: string[]
+    authenticationRequestId?: RuntimeId
     url?: string
     protocol?: WebSocketProtocol
     event?: string
@@ -79,6 +80,7 @@ export class WebSocketRequest extends BaseRequest {
       documentation: obj.documentation ?? '',
       ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
+      ...(obj.authenticationRequestId !== undefined && { authenticationRequestId: obj.authenticationRequestId }),
       url: obj.url ?? '',
       protocol: obj.protocol ?? 'websocket',
       ...(obj.event !== undefined && { event: obj.event }),
@@ -99,6 +101,7 @@ export class WebSocketRequest extends BaseRequest {
       documentation: this.documentation,
       notes: this.notes,
       tags: this.tags,
+      ...(this.authenticationRequestId !== undefined && { authenticationRequestId: this.authenticationRequestId }),
       url: this.url,
       protocol: this.protocol,
       event: this.event,

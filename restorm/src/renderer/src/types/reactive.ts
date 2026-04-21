@@ -7,8 +7,8 @@
 
 import { eventBus, logger } from 'electron-core-ui/renderer'
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
-import type { Folder, HTTPRequest, FolderItem, Request, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, Environment } from '../../../shared/types/collections'
-import { isAnyFolder, isHTTPRequest, isRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isEnvironmentFolder } from '../../../shared/types/collections'
+import type { Folder, HTTPRequest, FolderItem, Request, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest, Environment } from '../../../shared/types/collections'
+import { isAnyFolder, isHTTPRequest, isRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isEnvironmentFolder } from '../../../shared/types/collections'
 
 // ============================================================================
 // Indexable Properties Configuration
@@ -43,6 +43,7 @@ const HTTP_REQUEST_INDEXABLE_KEYS = new Set([
   'documentation',
   'notes',
   'tags',
+  'authenticationRequestId',
   'method',
   'url',
   'headers',
@@ -57,6 +58,7 @@ const GRAPHQL_REQUEST_INDEXABLE_KEYS = new Set([
   'documentation',
   'notes',
   'tags',
+  'authenticationRequestId',
   'url',
   'headers',
   'operationType',
@@ -70,6 +72,7 @@ const GRPC_REQUEST_INDEXABLE_KEYS = new Set([
   'documentation',
   'notes',
   'tags',
+  'authenticationRequestId',
   'url',
   'metadata',
   'service',
@@ -84,6 +87,7 @@ const SOAP_REQUEST_INDEXABLE_KEYS = new Set([
   'documentation',
   'notes',
   'tags',
+  'authenticationRequestId',
   'url',
   'headers',
   'service',
@@ -98,6 +102,7 @@ const WEBSOCKET_REQUEST_INDEXABLE_KEYS = new Set([
   'documentation',
   'notes',
   'tags',
+  'authenticationRequestId',
   'url',
   'headers',
   'protocol',
@@ -111,6 +116,7 @@ const ODATA_REQUEST_INDEXABLE_KEYS = new Set([
   'documentation',
   'notes',
   'tags',
+  'authenticationRequestId',
   'url',
   'odataVersion',
   'operationKind',
@@ -122,6 +128,26 @@ const ODATA_REQUEST_INDEXABLE_KEYS = new Set([
   'entitySetProperties',
   'navigationProperties',
   'operationParameters',
+  'deprecated'
+])
+
+/** Properties that trigger re-indexing when modified (Auth requests).
+ * Auth requests mirror HTTP requests and add auth-specific fields. */
+const AUTH_REQUEST_INDEXABLE_KEYS = new Set([
+  'name',
+  'documentation',
+  'notes',
+  'tags',
+  'authenticationRequestId',
+  'method',
+  'url',
+  'headers',
+  'params',
+  'pathParams',
+  'body',
+  'producedHeaders',
+  'expirationExpression',
+  'authErrorCodes',
   'deprecated'
 ])
 
@@ -509,6 +535,16 @@ export function makeReactiveODataRequest(request: ODataRequest, parentFolderId: 
 }
 
 /**
+ * Make an AuthenticationRequest reactive - it will emit events when indexable properties change
+ */
+export function makeReactiveAuthenticationRequest(request: AuthenticationRequest, parentFolderId: string): AuthenticationRequest {
+  if (isReactive(request)) {
+    return request
+  }
+  return new Proxy(request, createDocumentProxyHandler('request', AUTH_REQUEST_INDEXABLE_KEYS, parentFolderId) as ProxyHandler<AuthenticationRequest>)
+}
+
+/**
  * Make any Request type reactive - it will emit events when indexable properties change
  */
 export function makeReactiveRequest(request: Request, parentFolderId: string): Request {
@@ -532,6 +568,9 @@ export function makeReactiveRequest(request: Request, parentFolderId: string): R
   }
   if (isODataRequest(request)) {
     return makeReactiveODataRequest(request, parentFolderId)
+  }
+  if (isAuthenticationRequest(request)) {
+    return makeReactiveAuthenticationRequest(request, parentFolderId)
   }
   return request
 }
