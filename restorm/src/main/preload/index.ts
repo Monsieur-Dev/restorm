@@ -533,6 +533,26 @@ contextBridge.exposeInMainWorld('restorm', {
         headers: Record<string, string>
         responseBody?: string
       }
+    },
+    /** Subscribe to `auth:running` broadcasts. Fires each time the
+     * engine begins refreshing an auth request's cached headers and
+     * on the subsequent success / failure transition. */
+    onRunning: (callback: (payload: { authRequestId: string; phase: 'started' | 'succeeded' | 'failed'; reason?: string }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { authRequestId: string; phase: 'started' | 'succeeded' | 'failed'; reason?: string }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('auth:running', handler)
+      return () => { ipcRenderer.removeListener('auth:running', handler) }
+    },
+    /** Subscribe to `auth:failed` broadcasts — fired in addition to
+     * the `auth:running` `phase: 'failed'` transition so listeners
+     * that only care about errors can subscribe once. */
+    onFailed: (callback: (payload: { authRequestId: string; reason?: string }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { authRequestId: string; reason?: string }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('auth:failed', handler)
+      return () => { ipcRenderer.removeListener('auth:failed', handler) }
     }
   },
   websocket: {

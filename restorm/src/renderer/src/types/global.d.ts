@@ -140,6 +140,8 @@ declare global {
           headers: Record<string, string>
           responseBody?: string
         }>
+        onRunning: (callback: (payload: { authRequestId: string; phase: 'started' | 'succeeded' | 'failed'; reason?: string }) => void) => (() => void)
+        onFailed: (callback: (payload: { authRequestId: string; reason?: string }) => void) => (() => void)
       }
       import: {
         preview: (input: string, options?: { extraHeaders?: Record<string, string> }) => Promise<{

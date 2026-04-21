@@ -83,6 +83,7 @@ import { DesktopIndicator } from './components/MainView/DesktopIndicator'
 import { findItemById } from './utils/treeSearch'
 import { EnvironmentProvider } from './contexts/EnvironmentContext'
 import { StatusbarEnvironmentSelector } from './components/MainView/StatusbarEnvironmentSelector'
+import { StatusbarAuthSelector } from './components/MainView/StatusbarAuthSelector'
 import { useItemOperations } from './hooks/useItemOperations'
 import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
@@ -1373,6 +1374,18 @@ const App: React.FC = () => {
       <Statusbar data-testid="app-statusbar">
         {filePath && <StatusbarElement data-testid="app-statusbar-element" title={filePath} />}
         <DesktopIndicator />
+        {(() => {
+          if (!activeRequest || !activeEnvFolderId) return null
+          const reactiveRequest = findRequestById(rootItems, activeRequest.id)
+          const envFolder = findFolderById(rootItems, activeEnvFolderId)
+          if (!reactiveRequest || !envFolder) return null
+          return (
+            <StatusbarAuthSelector
+              activeRequest={reactiveRequest}
+              envFolderItems={envFolder.items}
+            />
+          )
+        })()}
         {activeRequest && activeRequestEnvironments.length > 0 && (
           <EnvironmentProvider
             environments={activeRequestEnvironments}
