@@ -499,26 +499,21 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
               ? t('odataRequestTab.batchBody', 'Batch sub-requests (JSON array)')
               : t('odataRequestTab.actionBody', 'Action body (JSON)')}
           </label>
-          <textarea
-            id="odata-request-action-body"
-            value={request.actionBody ?? ''}
-            onChange={(e) => { setActionBody(e.target.value) }}
-            placeholder={request.operationKind === 'batch'
-              ? '[\n  {"method":"GET","url":"Pets(1)"},\n  {"method":"POST","url":"Pets","body":"{\\"Name\\":\\"Rex\\"}"}\n]'
-              : '{"OwnerId": 2}'}
-            style={{
-              fontFamily: 'var(--font-family-mono)',
-              fontSize: 12,
-              padding: 8,
-              minHeight: 120,
-              background: 'var(--input-background)',
-              color: 'var(--input-foreground)',
-              border: '1px solid var(--input-border)',
-              borderRadius: 4,
-              resize: 'vertical'
-            }}
-            data-testid="odata-request-action-body"
-          />
+          <div style={{ height: 180, border: '1px solid var(--input-border)', borderRadius: 4, boxSizing: 'border-box' }}>
+            <CodeEditor
+              height="100%"
+              language="json"
+              value={request.actionBody ?? ''}
+              onChange={(next) => { setActionBody(next ?? '') }}
+              options={{
+                minimap: { enabled: false },
+                wordWrap: 'on',
+                scrollBeyondLastLine: false,
+                automaticLayout: true
+              }}
+              data-testid="odata-request-action-body"
+            />
+          </div>
           {request.operationKind === 'batch' ? (
             <span style={{ ...labelStyle, fontStyle: 'italic' }}>
               {t(
@@ -567,7 +562,12 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
           <InputBox
             value={request.queryOptions.top ?? ''}
             onChange={setTop}
-            options={{ placeholder: t('odataRequestTab.topPlaceholder', '50') }}
+            options={{
+              type: 'number',
+              min: 0,
+              step: 1,
+              placeholder: t('odataRequestTab.topPlaceholder', '50')
+            }}
             data-testid="odata-request-top"
           />
         </div>
@@ -576,7 +576,12 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
           <InputBox
             value={request.queryOptions.skip ?? ''}
             onChange={setSkip}
-            options={{ placeholder: t('odataRequestTab.skipPlaceholder', '0') }}
+            options={{
+              type: 'number',
+              min: 0,
+              step: 1,
+              placeholder: t('odataRequestTab.skipPlaceholder', '0')
+            }}
             data-testid="odata-request-skip"
           />
         </div>
