@@ -89,6 +89,15 @@ export interface ODataRequest extends BaseRequest {
    * array; the engine serializes it into multipart/mixed (with
    * nested change-set envelopes when `atomicityGroup` is set). */
   batchSubRequests?: ODataBatchSubRequestSpec[]
+  /** Names of structural properties on the bound entity type (pre-
+   * filled by the OYO-181 importer from the EDMX `EntityType`). The
+   * UI surfaces these as clickable chips beneath $select / $orderby
+   * to give metadata-driven hints without a full autocomplete
+   * pop-over. Empty / absent ⇒ no hints (hand-authored request). */
+  entitySetProperties?: string[]
+  /** Names of navigation properties on the bound entity type (also
+   * from OYO-181). Surfaced as chips beneath $expand. */
+  navigationProperties?: string[]
   /** Whether this endpoint is deprecated. */
   deprecated?: boolean
 }

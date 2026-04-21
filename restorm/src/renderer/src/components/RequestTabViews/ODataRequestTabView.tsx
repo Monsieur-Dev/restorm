@@ -45,6 +45,7 @@ import type { ODataRequest, ODataVersion, ODataOperationKind, ODataBatchSubReque
 import { ODataBatchEditor } from './ODataBatchEditor'
 import { ODataOrderbyEditor } from './ODataOrderbyEditor'
 import { ODataExpandEditor } from './ODataExpandEditor'
+import { ODataPropertyChips } from './ODataPropertyChips'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
@@ -224,6 +225,30 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
 
   const setBatchSubRequests = useCallback((next: ODataBatchSubRequestSpec[]) => {
     updateReactiveProperty(request, 'batchSubRequests', next)
+  }, [request])
+
+  // Metadata-driven chip pickers: appending a property to $select,
+  // $orderby, or $expand is a one-click convenience. Each picker
+  // respects the current clause shape: $select is a name list,
+  // $orderby is a `prop dir` clause (picked names default to `asc`),
+  // $expand is a property name (no nested options yet — the user can
+  // open the row and tune from there).
+  const appendSelectProperty = useCallback((name: string) => {
+    const current = new Set(request.queryOptions.select ?? [])
+    current.add(name)
+    updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, select: Array.from(current) })
+  }, [request])
+
+  const appendOrderbyProperty = useCallback((name: string) => {
+    const existing = request.queryOptions.orderby?.trim() ?? ''
+    const next = existing ? `${existing},${name} asc` : `${name} asc`
+    updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, orderby: next })
+  }, [request])
+
+  const appendExpandProperty = useCallback((name: string) => {
+    const existing = request.queryOptions.expand?.trim() ?? ''
+    const next = existing ? `${existing},${name}` : name
+    updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, expand: next })
   }, [request])
 
   const setFilter = useCallback((next: string) => {
@@ -574,6 +599,11 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
           options={{ placeholder: t('odataRequestTab.selectPlaceholder', 'Id, Name, Email (comma-separated)') }}
           data-testid="odata-request-select"
         />
+        <ODataPropertyChips
+          properties={request.entitySetProperties ?? []}
+          onPick={appendSelectProperty}
+          testIdPrefix="odata-select-chip"
+        />
       </div>
 
       <div style={numericRowStyle}>
@@ -621,6 +651,12 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
           value={request.queryOptions.expand}
           onChange={setExpand}
         />
+        <ODataPropertyChips
+          properties={request.navigationProperties ?? []}
+          onPick={appendExpandProperty}
+          label={t('odataRequestTab.navigationPropertiesHint', 'Navigation properties:')}
+          testIdPrefix="odata-expand-chip"
+        />
       </div>
 
       <div style={rowStyle}>
@@ -628,6 +664,11 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         <ODataOrderbyEditor
           value={request.queryOptions.orderby}
           onChange={setOrderby}
+        />
+        <ODataPropertyChips
+          properties={request.entitySetProperties ?? []}
+          onPick={appendOrderbyProperty}
+          testIdPrefix="odata-orderby-chip"
         />
       </div>
 

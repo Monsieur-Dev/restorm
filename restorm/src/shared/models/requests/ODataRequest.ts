@@ -117,6 +117,17 @@ export class ODataRequest extends BaseRequest {
   @graphqlField({ type: 'JSON', nullable: true })
   batchSubRequests?: ODataBatchSubRequestSpec[]
 
+  /** Structural-property names pre-filled by the importer from the
+   * bound entity type. Surfaces in the UI as $select / $orderby
+   * chip hints. */
+  @graphqlField({ type: 'String', isArray: true, nullable: true })
+  entitySetProperties?: string[]
+
+  /** Navigation-property names pre-filled by the importer. Surfaces
+   * in the UI as $expand chip hints. */
+  @graphqlField({ type: 'String', isArray: true, nullable: true })
+  navigationProperties?: string[]
+
   /** Whether this endpoint is deprecated. */
   @graphqlField({ type: 'Boolean', nullable: true })
   deprecated = false
@@ -151,6 +162,8 @@ export class ODataRequest extends BaseRequest {
     queryOptions?: ODataQueryOptions
     actionBody?: string
     batchSubRequests?: ODataBatchSubRequestSpec[]
+    entitySetProperties?: string[]
+    navigationProperties?: string[]
     deprecated?: boolean
   }): ODataRequest {
     return new ODataRequest({
@@ -168,6 +181,8 @@ export class ODataRequest extends BaseRequest {
       queryOptions: obj.queryOptions ?? {},
       ...(obj.actionBody !== undefined && { actionBody: obj.actionBody }),
       ...(obj.batchSubRequests !== undefined && { batchSubRequests: obj.batchSubRequests }),
+      ...(obj.entitySetProperties !== undefined && { entitySetProperties: obj.entitySetProperties }),
+      ...(obj.navigationProperties !== undefined && { navigationProperties: obj.navigationProperties }),
       deprecated: obj.deprecated ?? false
     })
   }
@@ -189,6 +204,8 @@ export class ODataRequest extends BaseRequest {
       queryOptions: this.queryOptions,
       ...(this.actionBody !== undefined && { actionBody: this.actionBody }),
       ...(this.batchSubRequests !== undefined && { batchSubRequests: this.batchSubRequests }),
+      ...(this.entitySetProperties !== undefined && { entitySetProperties: this.entitySetProperties }),
+      ...(this.navigationProperties !== undefined && { navigationProperties: this.navigationProperties }),
       deprecated: this.deprecated
     }
   }

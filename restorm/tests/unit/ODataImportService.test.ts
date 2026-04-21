@@ -76,6 +76,21 @@ describe('importOData (v4 EDMX)', () => {
     expect(list.name).toBe('List Pets')
   })
 
+  it('fills entitySetProperties and navigationProperties from the bound entity type', () => {
+    const root = importOData(fixture)
+    const pets = findSubFolder(root, 'Pets')
+    const list = expectPresent(pets.items[0] as ODataRequest | undefined, 'pets.items[0]')
+    // Pet entity carries at least Id + Name as structural properties
+    // and Category + Tags + Owner as navigation properties in the
+    // fixture — the exact list is frozen to the fixture's EDMX.
+    expect(list.entitySetProperties).toBeDefined()
+    expect(list.entitySetProperties).toContain('Id')
+    expect(list.entitySetProperties).toContain('Name')
+    expect(list.navigationProperties).toBeDefined()
+    expect(list.navigationProperties).toContain('Category')
+    expect(list.navigationProperties).toContain('Tags')
+  })
+
   it('builds key-scoped URLs for GET-by-key / PATCH / DELETE', () => {
     const root = importOData(fixture)
     const pets = findSubFolder(root, 'Pets')

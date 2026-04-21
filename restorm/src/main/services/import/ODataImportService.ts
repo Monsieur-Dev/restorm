@@ -302,6 +302,9 @@ function buildEntitySetRequest(
     ? JSON.stringify(defaultBodyForEntity(entity), null, 2)
     : undefined
 
+  const entitySetProperties = entity?.properties.map((p) => p.name) ?? []
+  const navigationProperties = entity?.navigationProperties.map((p) => p.name) ?? []
+
   return new ODataRequest({
     id: generateId(`odata:req:${set.name}:${method}`),
     name: displayName[method],
@@ -312,6 +315,8 @@ function buildEntitySetRequest(
     params: [],
     queryOptions: {},
     ...(actionBody !== undefined ? { actionBody } : {}),
+    ...(entitySetProperties.length > 0 ? { entitySetProperties } : {}),
+    ...(navigationProperties.length > 0 ? { navigationProperties } : {}),
     tags: ['odata', set.name]
   })
 }
