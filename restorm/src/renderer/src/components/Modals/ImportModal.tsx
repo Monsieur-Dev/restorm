@@ -48,7 +48,11 @@ export function ImportModal({
   const [previewItems, setPreviewItems] = useState<FolderItem[]>([])
   const [error, setError] = useState<string | null>(null)
   const [attachedAuth, setAttachedAuth] = useState<AuthenticationRequest | null>(null)
-  const [attachedAuthHeaders, setAttachedAuthHeaders] = useState<Record<string, string> | null>(null)
+  // Resolved auth headers live in a ref rather than state — the only
+  // consumer is the debounced preview closure, and we need the value
+  // to be readable synchronously after `handleAuthAttach` fires
+  // (React state updates batch, so a closure would see `null`).
+  const attachedAuthHeadersRef = useRef<Record<string, string> | null>(null)
   const [showAuthSetupModal, setShowAuthSetupModal] = useState(false)
   const [targetFolderId, setTargetFolderId] = useState<string | undefined>(undefined)
   const [expandedFolderIds, setExpandedFolderIds] = useState<string[]>(['__root__'])
@@ -225,8 +229,12 @@ export function ImportModal({
     debounceTimerRef.current = setTimeout(() => {
       void (async () => {
         try {
-          const previewOptions = attachedAuthHeaders !== null
-            ? { extraHeaders: attachedAuthHeaders }
+          // Read through the ref so the current value lands in the
+          // fetch options even when state updates haven't propagated
+          // through the closure yet (auth-attach re-preview path).
+          const currentHeaders = attachedAuthHeadersRef.current
+          const previewOptions = currentHeaders !== null
+            ? { extraHeaders: currentHeaders }
             : undefined
           const result = await window.restorm?.import.preview(value.trim(), previewOptions)
 
@@ -245,7 +253,7 @@ export function ImportModal({
         }
       })()
     }, 200)
-  }, [t, attachedAuthHeaders])
+  }, [t])
 
   // Handle drag and drop
   const handleDrop = useCallback((event: React.DragEvent) => {
@@ -321,7 +329,7 @@ export function ImportModal({
 
   const handleAuthAttach = useCallback((authRequest: AuthenticationRequest, resolvedHeaders: Record<string, string>) => {
     setAttachedAuth(authRequest)
-    setAttachedAuthHeaders(resolvedHeaders)
+    attachedAuthHeadersRef.current = resolvedHeaders
     setShowAuthSetupModal(false)
     // Re-run the preview with the resolved auth headers.
     if (input.trim()) {
@@ -331,7 +339,7 @@ export function ImportModal({
 
   const handleDetachAuth = useCallback(() => {
     setAttachedAuth(null)
-    setAttachedAuthHeaders(null)
+    attachedAuthHeadersRef.current = null
     if (input.trim()) {
       handleInputChange(input)
     }
