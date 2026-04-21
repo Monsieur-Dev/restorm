@@ -140,7 +140,12 @@ export const odataExecuteArgs = z.tuple([
     /** Optional Content-Type override for the body — required for
      * $batch to carry the multipart boundary. Defaults to
      * `application/json`. */
-    bodyContentType: z.string().optional()
+    bodyContentType: z.string().optional(),
+    /** Optional absolute URL override. When provided the engine
+     * dispatches to that URL verbatim instead of composing one from
+     * the registered request. Used for `@odata.nextLink` pagination
+     * and clickable navigation links. */
+    urlOverride: z.string().optional()
   }).loose()
 ])
 

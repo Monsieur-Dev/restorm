@@ -681,6 +681,81 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     updateReactiveProperty(request, 'queryOptions', {})
   }, [request])
 
+  // One-click pagination: fetch `@odata.nextLink` verbatim via the
+  // OData IPC bridge (with `urlOverride` so URLResolver stays out of
+  // the way) and merge the new `value[]` into the response body. The
+  // new `@odata.nextLink` replaces the old so the button keeps working
+  // until the server stops sending one.
+  const handleLoadNextPage = useCallback(async (): Promise<void> => {
+    if (!response) return
+    const parsed = tryParseJson(response.body)
+    const normalized = parsed !== null && typeof parsed === 'object'
+      ? normalizeODataResponse(parsed, request.odataVersion)
+      : null
+    const nextLink = normalized?.nextLink
+    if (!nextLink) return
+    const api = window.restorm?.odata
+    if (!api) return
+    setIsSending(true)
+    try {
+      const result = await api.execute({
+        requestId: request.id,
+        timeout: DEFAULT_REQUEST_TIMEOUT_MS,
+        method: 'GET',
+        urlOverride: nextLink
+      })
+      const nextParsed = tryParseJson(result.body ?? '')
+      const nextNormalized = nextParsed !== null && typeof nextParsed === 'object'
+        ? normalizeODataResponse(nextParsed, request.odataVersion)
+        : null
+      const normalizedBody = normalized.body
+      const nextNormalizedBody = nextNormalized?.body
+      if (
+        nextNormalizedBody &&
+        Array.isArray(normalizedBody['value']) && Array.isArray(nextNormalizedBody['value'])
+      ) {
+        // Merge: copy all prior fields, overwrite `value` with the
+        // concatenated arrays, drop the stale `@odata.nextLink`
+        // (since the new page either supplies its own, which we add
+        // below, or is the final page and should carry no nextLink).
+        const { ['@odata.nextLink']: _stale, ...rest } = normalizedBody
+        const priorValue = normalizedBody['value'] as unknown[]
+        const nextValue = nextNormalizedBody['value'] as unknown[]
+        const merged: Record<string, unknown> = {
+          ...rest,
+          value: [...priorValue, ...nextValue],
+          ...(nextNormalized.nextLink ? { '@odata.nextLink': nextNormalized.nextLink } : {}),
+          ...(nextNormalized.count !== undefined ? { '@odata.count': nextNormalized.count } : {})
+        }
+        setResponse({
+          ...response,
+          statusCode: result.statusCode ?? response.statusCode,
+          statusText: result.statusText ?? response.statusText,
+          requestUrl: result.requestUrl ?? response.requestUrl,
+          durationMs: result.timings.durationMs,
+          body: JSON.stringify(merged, null, 2),
+          ...(result.headers !== undefined && { headers: result.headers })
+        })
+      } else if (result.body) {
+        setResponse({
+          ...response,
+          statusCode: result.statusCode ?? response.statusCode,
+          statusText: result.statusText ?? response.statusText,
+          requestUrl: result.requestUrl ?? response.requestUrl,
+          durationMs: result.timings.durationMs,
+          body: result.body,
+          ...(result.headers !== undefined && { headers: result.headers })
+        })
+      }
+      setHistoryRefreshKey((prev) => prev + 1)
+      eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId: request.id } as RequestHistoryEventPayload)
+    } catch (err) {
+      logger.error('OData load-next-page failed', { error: String(err) })
+    } finally {
+      setIsSending(false)
+    }
+  }, [response, request.id, request.odataVersion])
+
   const buildResponseView = useCallback((input: {
     statusCode: number
     statusText: string
@@ -715,21 +790,44 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         ? JSON.stringify(parsed, null, 2)
         : input.body
 
+    const nextLinkForPagination = input.odataNextLink ?? normalized?.nextLink
+    const showLoadMore = !input.disableNavigate && typeof nextLinkForPagination === 'string' && nextLinkForPagination.length > 0
+
     const renderedContent: React.ReactNode = input.body ? (
-      <div style={editorContainerStyle}>
-        <CodeEditor
-          height="100%"
-          language="json"
-          value={formattedBody}
-          options={{
-            minimap: { enabled: false },
-            wordWrap: 'on',
-            scrollBeyondLastLine: false,
-            automaticLayout: true,
-            readOnly: true
-          }}
-          data-testid="odata-response-body-editor"
-        />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, height: '100%' }}>
+        {showLoadMore ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            <Button
+              icon="arrow-circle-down"
+              onClick={() => { void handleLoadNextPage() }}
+              options={{
+                ariaLabel: t('odataRequestTab.loadNextPage', 'Load next page'),
+                title: t('odataRequestTab.loadNextPage', 'Load next page')
+              }}
+              data-testid="odata-response-load-next-page"
+            >
+              {t('odataRequestTab.loadNextPage', 'Load next page')}
+            </Button>
+            <span style={{ fontSize: 12, color: 'var(--descriptionForeground)' }}>
+              {t('odataRequestTab.paginatedHint', '@odata.nextLink available — click to append the next page to this response.')}
+            </span>
+          </div>
+        ) : null}
+        <div style={{ ...editorContainerStyle, flex: 1, minHeight: 0 }}>
+          <CodeEditor
+            height="100%"
+            language="json"
+            value={formattedBody}
+            options={{
+              minimap: { enabled: false },
+              wordWrap: 'on',
+              scrollBeyondLastLine: false,
+              automaticLayout: true,
+              readOnly: true
+            }}
+            data-testid="odata-response-body-editor"
+          />
+        </div>
       </div>
     ) : (
       <div style={{
@@ -974,7 +1072,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       infosContent: renderedInfos,
       jsonData: json
     }
-  }, [t, handleNavigateToLink])
+  }, [t, handleNavigateToLink, handleLoadNextPage])
 
   const { responseContent, infosContent, jsonData } = useMemo(() => {
     if (!response) {

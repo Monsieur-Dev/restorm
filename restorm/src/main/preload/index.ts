@@ -472,7 +472,7 @@ contextBridge.exposeInMainWorld('restorm', {
      * send a GET. Response shape mirrors the HTTP envelope; OData
      * annotations are extracted downstream.
      */
-    execute: async (input: { requestId: string; timeout?: number; requestPath?: string; method?: string; body?: string; bodyContentType?: string }): Promise<{
+    execute: async (input: { requestId: string; timeout?: number; requestPath?: string; method?: string; body?: string; bodyContentType?: string; urlOverride?: string }): Promise<{
       requestId: string
       success: boolean
       statusCode?: number

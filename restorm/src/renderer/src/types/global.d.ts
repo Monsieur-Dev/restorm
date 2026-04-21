@@ -208,6 +208,11 @@ export interface ODataExecutionInput {
   /** Content-Type override — required for $batch to carry the
    * multipart boundary. Defaults to `application/json`. */
   bodyContentType?: string
+  /** Absolute URL override. When set, the engine dispatches to this
+   * URL as-is instead of composing one from the registered request.
+   * Used by `@odata.nextLink` pagination and clickable navigation
+   * links. */
+  urlOverride?: string
 }
 
 export interface HTTPExecutionInput {

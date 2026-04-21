@@ -22,6 +22,13 @@ export interface HTTPExecutionInput {
   rawBody?: string
   /** Optional Content-Type to set alongside `rawBody`. */
   rawBodyContentType?: string
+  /** Optional URL override. When provided, the URL is used as-is and
+   * the ContextService's resolved URL + query-option composition is
+   * skipped entirely. Headers + body still come from the registered
+   * request context. Used for "follow link" operations like
+   * `@odata.nextLink` pagination where the server already composed
+   * the full URL. */
+  urlOverride?: string
 }
 
 /** HTTP response result */
@@ -57,22 +64,28 @@ class HTTPExecutionService {
    * Execute an HTTP request using the resolved URL and data from ContextService
    */
   async execute(input: HTTPExecutionInput): Promise<HTTPExecutionResult> {
-    const { requestId, method, timeout = DEFAULT_REQUEST_TIMEOUT_MS, rawBody, rawBodyContentType } = input
+    const { requestId, method, timeout = DEFAULT_REQUEST_TIMEOUT_MS, rawBody, rawBodyContentType, urlOverride } = input
     const startTime = Date.now()
     const startedAt = new Date().toISOString()
 
-    // Get resolved URL from ContextService
-    const urlResult = contextService.getResolvedUrl(requestId)
-    if (!urlResult) {
-      return {
-        requestId,
-        success: false,
-        error: 'No resolved URL found for this request. Make sure the request is registered.',
-        timings: { startedAt, durationMs: Date.now() - startTime }
+    let resolvedUrl: string
+    if (urlOverride !== undefined && urlOverride !== '') {
+      // Skip the ContextService URL composition: the caller already
+      // has a fully-formed URL (server-returned nextLink, navigation
+      // link, etc.) and we must dispatch it verbatim.
+      resolvedUrl = urlOverride
+    } else {
+      const urlResult = contextService.getResolvedUrl(requestId)
+      if (!urlResult) {
+        return {
+          requestId,
+          success: false,
+          error: 'No resolved URL found for this request. Make sure the request is registered.',
+          timings: { startedAt, durationMs: Date.now() - startTime }
+        }
       }
+      resolvedUrl = urlResult.resolvedUrl
     }
-
-    const resolvedUrl = urlResult.resolvedUrl
     logger.info('[HTTPExecutionService] Executing request', { requestId, method, url: resolvedUrl })
 
     // Get request context for headers and body
