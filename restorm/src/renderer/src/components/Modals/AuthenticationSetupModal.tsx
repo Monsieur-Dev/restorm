@@ -19,6 +19,7 @@ import { Modal, Button } from 'electron-core-ui/renderer'
 import { HTTPRequestTabView } from '../RequestTabViews/HTTPRequestTabView'
 import { AuthenticationRequest } from '../../../../shared/models'
 import { makeReactiveAuthenticationRequest } from '../../types/reactive'
+import { EnvironmentProvider } from '../../contexts/EnvironmentContext'
 
 export interface AuthenticationSetupModalProps {
   isOpen: boolean
@@ -134,9 +135,11 @@ export const AuthenticationSetupModal: React.FC<AuthenticationSetupModalProps> =
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1, minHeight: 0 }}>
         {currentRequest ? (
-          <div style={{ flex: 1, minHeight: 400, minWidth: 800, display: 'flex', flexDirection: 'column' }}>
-            <HTTPRequestTabView request={currentRequest as unknown as Parameters<typeof HTTPRequestTabView>[0]['request']} />
-          </div>
+          <EnvironmentProvider environments={undefined}>
+            <div style={{ flex: 1, minHeight: 400, minWidth: 800, display: 'flex', flexDirection: 'column' }}>
+              <HTTPRequestTabView request={currentRequest as unknown as Parameters<typeof HTTPRequestTabView>[0]['request']} />
+            </div>
+          </EnvironmentProvider>
         ) : null}
         {prefetchError ? (
           <div role="alert" style={{ color: 'var(--testing-iconFailed)', fontSize: 12, padding: '4px 8px' }}>
