@@ -13,11 +13,11 @@
  *   downstream requests. Defaults to `401, 403`.
  */
 
-import React, { useCallback, type CSSProperties } from 'react'
+import React, { useCallback, useRef, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { InputBox } from 'electron-core-ui/renderer'
+import { Button, InputBox } from 'electron-core-ui/renderer'
 import type { AuthenticationRequest, KeyValue } from '../../../../shared/types/collections'
-import { RestormKeyValueTable } from '../RestormKeyValueTable'
+import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import { updateReactiveProperty } from './requestTabViewUtils'
 
 const containerStyle: CSSProperties = {
@@ -63,6 +63,7 @@ function formatCodes(codes: readonly number[]): string {
 
 export const AuthenticationConfigurationTab: React.FC<AuthenticationConfigurationTabProps> = ({ request }) => {
   const { t } = useTranslation()
+  const producedHeadersRef = useRef<KeyValueTableHandle | null>(null)
 
   const handleProducedHeadersChange = useCallback((rows: KeyValue[]) => {
     updateReactiveProperty(request, 'producedHeaders', rows)
@@ -91,7 +92,22 @@ export const AuthenticationConfigurationTab: React.FC<AuthenticationConfiguratio
             'Each value is a handlebars expression evaluated against the auth response (e.g. Bearer {{access_token}}).'
           )}
         </span>
+        <div style={{ display: 'flex' }}>
+          <Button
+            small
+            icon="add"
+            options={{
+              ariaLabel: t('authRequestTab.addProducedHeader', 'Add produced header'),
+              title: t('authRequestTab.addProducedHeader', 'Add produced header')
+            }}
+            onClick={() => { producedHeadersRef.current?.addRow() }}
+            data-testid="auth-request-add-produced-header-button"
+          >
+            {t('authRequestTab.addProducedHeader', 'Add produced header')}
+          </Button>
+        </div>
         <RestormKeyValueTable
+          ref={producedHeadersRef}
           variables={[]}
           initialRows={request.producedHeaders}
           onRowsChange={handleProducedHeadersChange}
