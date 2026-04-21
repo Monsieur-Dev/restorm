@@ -507,6 +507,34 @@ contextBridge.exposeInMainWorld('restorm', {
       return result as boolean
     }
   },
+  auth: {
+    /** One-shot auth prefetch for the import wizard — runs the
+     * ephemeral auth request, resolves producedHeaders against the
+     * response body, and returns the resolved header map. */
+    prefetch: async (input: {
+      method: string
+      url: string
+      headers: { key: string; value: string; enabled?: boolean }[]
+      body?: { type: string; content?: string }
+      producedHeaders: { key: string; value: string; enabled?: boolean }[]
+      expirationExpression?: string
+    }): Promise<{
+      success: boolean
+      statusCode: number
+      error?: string
+      headers: Record<string, string>
+      responseBody?: string
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('auth:prefetch', input)
+      return result as {
+        success: boolean
+        statusCode: number
+        error?: string
+        headers: Record<string, string>
+        responseBody?: string
+      }
+    }
+  },
   websocket: {
     /** Connect to a WebSocket endpoint */
     connect: async (input: { requestId: string; timeout?: number }): Promise<{
@@ -585,20 +613,27 @@ contextBridge.exposeInMainWorld('restorm', {
   },
   import: {
     /** Preview import from file path or URL (dry-run) */
-    preview: async (input: string): Promise<{
+    preview: async (
+      input: string,
+      options?: { extraHeaders?: Record<string, string> }
+    ): Promise<{
       success: boolean
       items: unknown[]
       source: string
       format?: string
       error?: string
+      statusCode?: number
+      isAuthError?: boolean
     }> => {
-      const result: unknown = await ipcRenderer.invoke('import:preview', input)
+      const result: unknown = await ipcRenderer.invoke('import:preview', input, options)
       return result as {
         success: boolean
         items: unknown[]
         source: string
         format?: string
         error?: string
+        statusCode?: number
+        isAuthError?: boolean
       }
     },
     /** Actually import from file path or URL */

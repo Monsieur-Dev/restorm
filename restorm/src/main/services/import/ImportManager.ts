@@ -22,10 +22,22 @@ export interface ImportResult {
   source: string
   format?: string
   error?: string
+  /** HTTP status code when the import source is a URL. Surfaced so
+   * the UI can detect 401 / 403 and prompt for authentication. */
+  statusCode?: number
+  /** `true` when the fetch failed with a status listed in the
+   * active auth-error-code set (defaults to [401, 403]). The UI
+   * uses this to decide whether to show the "Add authentication"
+   * button. */
+  isAuthError?: boolean
 }
 
 export interface ImportOptions {
   dryRun?: boolean
+  /** Optional extra headers to inject into the import fetch (for
+   * URL-based imports). Callers plug resolved auth headers here
+   * after running an AuthenticationRequest via the cache service. */
+  extraHeaders?: Record<string, string>
 }
 
 // ============================================================================
@@ -248,13 +260,14 @@ async function importFromContent(
 /** Import from file path or URL */
 export async function importFrom(
   input: string,
-  _options: ImportOptions = {}
+  options: ImportOptions = {}
 ): Promise<ImportResult> {
   try {
     let content: string
     let source: string
     let detectedFormat: string | null = null
-    
+    let lastStatusCode: number | undefined
+
     const isUrl = input.startsWith('http://') || input.startsWith('https://')
     // Check if input is a URL
     if (isUrl) {
@@ -262,9 +275,21 @@ export async function importFrom(
       source = input
 
       try {
-        const response = await fetch(input)
+        const fetchInit: RequestInit = options.extraHeaders && Object.keys(options.extraHeaders).length > 0
+          ? { headers: options.extraHeaders }
+          : {}
+        const response = await fetch(input, fetchInit)
+        lastStatusCode = response.status
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+          const isAuthError = response.status === 401 || response.status === 403
+          return {
+            success: false,
+            items: [],
+            source,
+            statusCode: response.status,
+            ...(isAuthError ? { isAuthError: true } : {}),
+            error: `HTTP ${response.status}: ${response.statusText}`
+          }
         }
         content = await response.text()
       } catch (error) {
@@ -273,6 +298,7 @@ export async function importFrom(
           success: false,
           items: [],
           source,
+          ...(lastStatusCode !== undefined ? { statusCode: lastStatusCode } : {}),
           error: error instanceof Error ? error.message : String(error)
         }
       }

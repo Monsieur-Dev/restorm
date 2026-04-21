@@ -13,9 +13,11 @@ import {
 } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
 import type { FolderItem, EnvironmentFolder, Folder } from '../../../../shared/types/collections'
-import { isEnvironmentFolder } from '../../../../shared/types/collections'
+import { isEnvironmentFolder, isRequest } from '../../../../shared/types/collections'
+import type { AuthenticationRequest } from '../../../../shared/models'
 import { mapToBadgeType } from '../../utils/badgeUtils'
 import { logger } from 'electron-core-ui/renderer'
+import { AuthenticationSetupModal } from './AuthenticationSetupModal'
 import './ImportModal.css'
 
 interface PendingFolder {
@@ -45,6 +47,10 @@ export function ImportModal({
   const [isLoading, setIsLoading] = useState(false)
   const [previewItems, setPreviewItems] = useState<FolderItem[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [isAuthError, setIsAuthError] = useState(false)
+  const [attachedAuth, setAttachedAuth] = useState<AuthenticationRequest | null>(null)
+  const [attachedAuthHeaders, setAttachedAuthHeaders] = useState<Record<string, string> | null>(null)
+  const [showAuthSetupModal, setShowAuthSetupModal] = useState(false)
   const [targetFolderId, setTargetFolderId] = useState<string | undefined>(undefined)
   const [expandedFolderIds, setExpandedFolderIds] = useState<string[]>(['__root__'])
   const [pendingFolders, setPendingFolders] = useState<PendingFolder[]>([])
@@ -220,24 +226,30 @@ export function ImportModal({
     debounceTimerRef.current = setTimeout(() => {
       void (async () => {
         try {
-          const result = await window.restorm?.import.preview(value.trim())
-          
+          const previewOptions = attachedAuthHeaders !== null
+            ? { extraHeaders: attachedAuthHeaders }
+            : undefined
+          const result = await window.restorm?.import.preview(value.trim(), previewOptions)
+
           if (result?.success) {
             setPreviewItems(result.items as FolderItem[])
             setError(null)
+            setIsAuthError(false)
           } else {
             setPreviewItems([])
             setError(result?.error ?? t('import.error.unknown'))
+            setIsAuthError(Boolean(result?.isAuthError))
           }
         } catch (err) {
           setPreviewItems([])
           setError(err instanceof Error ? err.message : String(err))
+          setIsAuthError(false)
         } finally {
           setIsLoading(false)
         }
       })()
     }, 200)
-  }, [t])
+  }, [t, attachedAuthHeaders])
 
   // Handle drag and drop
   const handleDrop = useCallback((event: React.DragEvent) => {
@@ -283,13 +295,51 @@ export function ImportModal({
   // Handle import click
   const handleImportClick = useCallback(() => {
     if (previewItems.length === 0) return
-    
+
+    // If the user attached an auth request, prepend it to the items and
+    // wire every other imported request to reference it. This keeps the
+    // whole folder pre-authenticated after the import persists.
+    let finalItems: FolderItem[] = previewItems
+    if (attachedAuth) {
+      const authId = attachedAuth.id
+      const attach = (items: FolderItem[]): FolderItem[] => items.map((item) => {
+        if ('items' in item) {
+          return { ...item, items: attach(item.items) }
+        }
+        if (isRequest(item)) {
+          return Object.assign(Object.create(Object.getPrototypeOf(item) as object), item, {
+            authenticationRequestId: authId
+          }) as FolderItem
+        }
+        return item
+      })
+      finalItems = [attachedAuth as unknown as FolderItem, ...attach(previewItems)]
+    }
+
     // Call import with current pending folders
-    onImport(previewItems, targetFolderId, pendingFolders)
-    
+    onImport(finalItems, targetFolderId, pendingFolders)
+
     // Close modal (useEffect will clear state when modal closes)
     onClose()
-  }, [previewItems, targetFolderId, pendingFolders, onImport, onClose])
+  }, [previewItems, targetFolderId, pendingFolders, onImport, onClose, attachedAuth])
+
+  const handleAuthAttach = useCallback((authRequest: AuthenticationRequest, resolvedHeaders: Record<string, string>) => {
+    setAttachedAuth(authRequest)
+    setAttachedAuthHeaders(resolvedHeaders)
+    setShowAuthSetupModal(false)
+    // Re-run the preview with the resolved auth headers.
+    if (input.trim()) {
+      handleInputChange(input)
+    }
+  }, [input, handleInputChange])
+
+  const handleDetachAuth = useCallback(() => {
+    setAttachedAuth(null)
+    setAttachedAuthHeaders(null)
+    if (input.trim()) {
+      handleInputChange(input)
+    }
+  }, [input, handleInputChange])
 
   // Build preview ListView items
   const previewListItems: ListViewItemData[] = useMemo(() => {
@@ -440,9 +490,52 @@ export function ImportModal({
           {error && (
             <div className="import-error" role="alert">
               <i className="codicon codicon-error" aria-hidden="true" />
-              {error}
+              <span style={{ flex: 1 }}>{error}</span>
+              {isAuthError && !attachedAuth ? (
+                <Button
+                  icon="key"
+                  onClick={() => { setShowAuthSetupModal(true) }}
+                  options={{
+                    ariaLabel: t('import.addAuth', 'Add an authentication route'),
+                    title: t('import.addAuth', 'Add an authentication route')
+                  }}
+                  data-testid="import-add-auth-button"
+                >
+                  {t('import.addAuth', 'Add an authentication route')}
+                </Button>
+              ) : null}
             </div>
           )}
+          {attachedAuth ? (
+            <div
+              className="import-auth-pill"
+              data-testid="import-auth-pill"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '4px 8px',
+                borderRadius: 12,
+                background: '#f97316',
+                color: '#ffffff',
+                fontSize: 12,
+                alignSelf: 'flex-start'
+              }}
+            >
+              <i className="codicon codicon-key" aria-hidden="true" />
+              <span>{t('import.authenticatedVia', 'Authenticated via {{name}}', { name: attachedAuth.name || 'auth route' })}</span>
+              <Button
+                small
+                icon="close"
+                onClick={handleDetachAuth}
+                options={{
+                  ariaLabel: t('import.detachAuth', 'Detach authentication route'),
+                  title: t('import.detachAuth', 'Detach authentication route')
+                }}
+                data-testid="import-detach-auth-button"
+              />
+            </div>
+          ) : null}
         </div>
 
         {/* Section 3: Preview */}
@@ -527,6 +620,13 @@ export function ImportModal({
           </div>
         </Modal>
       )}
+
+      <AuthenticationSetupModal
+        isOpen={showAuthSetupModal}
+        onClose={() => { setShowAuthSetupModal(false) }}
+        onAttach={handleAuthAttach}
+        {...(attachedAuth ? { initialRequest: attachedAuth } : {})}
+      />
     </Modal>
   )
 }

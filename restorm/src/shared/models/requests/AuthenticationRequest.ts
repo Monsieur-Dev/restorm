@@ -13,13 +13,13 @@ import {
 import { BaseRequest } from './BaseRequest'
 import { KeyValue } from '../KeyValue'
 import type { HTTPRequestBody } from './HTTPRequest'
-import type { HTTPMethod, RequestType, RuntimeId, Icon } from '../types'
+import type { HTTPMethod, RuntimeId, Icon } from '../types'
 
 const DEFAULT_AUTH_ERROR_CODES = [401, 403]
 
 @fileNaming({ pattern: '{index} - {name}', nameProperty: 'name', idProperty: 'id' })
 export class AuthenticationRequest extends BaseRequest {
-  readonly type: RequestType = 'auth'
+  readonly type = 'auth' as const
 
   @graphqlField({ type: 'HTTPMethod' })
   @searchable.property({ filterable: true })

@@ -153,6 +153,39 @@ export const odataCancelArgs = z.tuple([requestIdArg])
 export const odataIsActiveArgs = z.tuple([requestIdArg])
 
 // ==========================================================================
+// Authentication routes
+// --------------------------------------------------------------------------
+// `auth:prefetch` runs an ephemeral AuthenticationRequest (typically
+// the one being edited in the import wizard modal), evaluates its
+// producedHeaders against the response body, and returns the
+// resolved header map. Used so the import screen can drive a retry
+// with the auth headers attached without the auth request having to
+// be persisted first.
+// ==========================================================================
+
+export const authPrefetchArgs = z.tuple([
+  z.object({
+    method: z.string(),
+    url: z.string(),
+    headers: z.array(z.object({
+      key: z.string(),
+      value: z.string(),
+      enabled: z.boolean().optional()
+    })).optional(),
+    body: z.object({
+      type: z.string(),
+      content: z.string().optional()
+    }).optional(),
+    producedHeaders: z.array(z.object({
+      key: z.string(),
+      value: z.string(),
+      enabled: z.boolean().optional()
+    })),
+    expirationExpression: z.string().optional()
+  }).loose()
+])
+
+// ==========================================================================
 // GraphQL Execution
 // ==========================================================================
 
@@ -229,7 +262,14 @@ export const responsesHistoryUpdatePathArgs = z.tuple([
 // Import
 // ==========================================================================
 
-export const importPreviewArgs = z.tuple([z.string()])
+export const importPreviewArgs = z.tuple([
+  z.string(),
+  z.object({
+    /** Optional extra headers merged into the URL-based import fetch
+     * (resolved auth headers after running an AuthenticationRequest). */
+    extraHeaders: z.record(z.string(), z.string()).optional()
+  }).optional()
+])
 export const importImportArgs = z.tuple([z.string()])
 
 // ==========================================================================

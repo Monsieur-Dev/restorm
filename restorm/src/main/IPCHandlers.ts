@@ -9,6 +9,7 @@ import { saveFolderStructure, loadFolderStructure, attachDraftStoreForFolder, at
 import type { PersistenceFormat } from 'electron-core-ui'
 import { resolveRequestURL, type URLResolutionInput } from './services/request/HTTPRequestService'
 import { httpExecutionService, type HTTPExecutionInput } from './services/HTTPExecutionService'
+import { authPrefetchOneShot, resolveProducedHeaders } from './services/AuthenticationPrefetch'
 import { graphqlExecutionService, type GraphQLExecutionInput } from './services/GraphQLExecutionService'
 import { soapExecutionService, type SOAPExecutionInput } from './services/SOAPExecutionService'
 import { grpcExecutionService, type GRPCExecutionInput } from './services/GRPCExecutionService'
@@ -27,6 +28,7 @@ import {
   requestResolveUrlArgs,
   httpExecuteArgs, httpCancelArgs, httpIsActiveArgs,
   odataExecuteArgs, odataCancelArgs, odataIsActiveArgs,
+  authPrefetchArgs,
   graphqlExecuteArgs, graphqlCancelArgs, graphqlIsActiveArgs,
   soapExecuteArgs, soapCancelArgs, soapIsActiveArgs,
   grpcExecuteArgs, grpcCancelArgs, grpcIsActiveArgs,
@@ -606,6 +608,53 @@ export function registerRestormIPC(deps: {
   })
 
   // ==========================================================================
+  // Authentication — one-shot prefetch for the import wizard
+  // --------------------------------------------------------------------------
+  // Fires the caller-supplied HTTP request verbatim, evaluates
+  // handlebars producedHeaders against the JSON response body, and
+  // returns the resolved header map. No ContextService registration:
+  // the request is ephemeral (user-typed in the modal, not yet
+  // persisted). The cache service isn't involved either — the
+  // resulting headers are returned straight to the renderer so the
+  // import modal can drive a retry.
+  // ==========================================================================
+
+  validatedHandle('auth:prefetch', authPrefetchArgs, async (_event, [spec]) => {
+    try {
+      const rawBody = spec.body?.content
+      const result = await authPrefetchOneShot({
+        method: spec.method,
+        url: spec.url,
+        headers: spec.headers ?? [],
+        ...(rawBody ? { body: rawBody } : {})
+      })
+      if (!result.success) {
+        return {
+          success: false,
+          statusCode: result.statusCode ?? 0,
+          error: result.error ?? `HTTP ${result.statusCode ?? 0}`,
+          headers: {} as Record<string, string>
+        }
+      }
+      const resolved = resolveProducedHeaders(spec.producedHeaders, result.body ?? '')
+      return {
+        success: true,
+        statusCode: result.statusCode ?? 200,
+        headers: resolved,
+        responseBody: result.body ?? ''
+      }
+    } catch (err) {
+      logger.error('[IPC] auth:prefetch error', err)
+      return {
+        success: false,
+        statusCode: 0,
+        error: err instanceof Error ? err.message : String(err),
+        headers: {} as Record<string, string>
+      }
+    }
+  })
+
+  // ==========================================================================
   // GraphQL Execution IPC Handlers
   // ==========================================================================
 
@@ -725,10 +774,13 @@ export function registerRestormIPC(deps: {
   // Import IPC Handlers
   // ==========================================================================
 
-  validatedHandle('import:preview', importPreviewArgs, async (_event, [input]) => {
+  validatedHandle('import:preview', importPreviewArgs, async (_event, [input, options]) => {
     logger.info('[IPC] Import preview requested:', { input })
     try {
-      const result = await importFrom(input, { dryRun: true })
+      const result = await importFrom(input, {
+        dryRun: true,
+        ...(options?.extraHeaders !== undefined ? { extraHeaders: options.extraHeaders } : {})
+      })
       logger.info('[IPC] Import preview result:', { success: result.success, itemsCount: result.items.length })
       return result
     } catch (error) {
