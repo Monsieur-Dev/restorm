@@ -86,17 +86,28 @@ export const AuthenticationSetupModal: React.FC<AuthenticationSetupModalProps> =
     setPrefetchError(null)
     setIsRunning(true)
     try {
-      // The class-level body type uses camelCase (`formData` /
-       // `xWwwFormUrlEncoded`); the IPC schema and wire protocol use
-       // the HTTP kebab-case names so the main-side serializer can
-       // forward them verbatim as Content-Type.
+      // Body type at the type level is the camelCase class union
+       // (`formData` / `xWwwFormUrlEncoded`) but the UI actually
+       // stores the kebab-case HTTP names (`form-data` /
+       // `x-www-form-urlencoded`) — HTTPRequestBodySection writes
+       // them verbatim via `bodyMode as 'form-data' | ...`. Compare
+       // against both forms so we handle whatever ends up on disk,
+       // then normalize to kebab-case for the wire protocol.
       let bodyPayload: { type: string; content?: string; fields?: { key: string; value: string; enabled?: boolean }[] } | undefined
-      const bodyType = req.body?.type
-      if (bodyType === 'text' && req.body?.content) {
+      const rawBodyType = req.body?.type as unknown as string | undefined
+      if (rawBodyType === 'text' && req.body?.content) {
         bodyPayload = { type: 'text', content: req.body.content }
-      } else if ((bodyType === 'xWwwFormUrlEncoded' || bodyType === 'formData') && req.body?.fields) {
+      } else if (
+        (rawBodyType === 'x-www-form-urlencoded' || rawBodyType === 'xWwwFormUrlEncoded' ||
+          rawBodyType === 'form-data' || rawBodyType === 'formData') &&
+        req.body?.fields
+      ) {
+        const normalizedType =
+          rawBodyType === 'x-www-form-urlencoded' || rawBodyType === 'xWwwFormUrlEncoded'
+            ? 'x-www-form-urlencoded'
+            : 'form-data'
         bodyPayload = {
-          type: bodyType === 'xWwwFormUrlEncoded' ? 'x-www-form-urlencoded' : 'form-data',
+          type: normalizedType,
           fields: req.body.fields.map((f) => ({
             key: f.key,
             value: f.value.toString(),
