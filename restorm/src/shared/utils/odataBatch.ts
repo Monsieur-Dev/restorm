@@ -28,6 +28,11 @@ export interface ODataBatchSubRequest {
   /** Optional request body — raw string, serialized as JSON upstream
    * when applicable. */
   body?: string
+  /** Optional atomicity group label. Sub-requests sharing the same
+   * label are serialized inside one nested `multipart/mixed;
+   * boundary=changeset_<id>` envelope so the server commits them as
+   * a single transaction. */
+  atomicityGroup?: string
 }
 
 export interface ODataBatchSubResponse {
@@ -66,25 +71,40 @@ export function serializeODataBatch(
   const boundary = boundaryOverride ?? `batch_${generateBoundaryToken()}`
   const parts: string[] = []
 
+  // Group consecutive sub-requests by `atomicityGroup`. Same label
+  // ⇒ one nested changeset; empty / undefined ⇒ standalone. Non-
+  // consecutive entries with the same label open separate changesets
+  // so the UI's visible order wins over label-grouping.
+  interface Group { label: string | undefined; items: ODataBatchSubRequest[] }
+  const groups: Group[] = []
   for (const sub of subRequests) {
+    const label = sub.atomicityGroup && sub.atomicityGroup.length > 0 ? sub.atomicityGroup : undefined
+    const last = groups[groups.length - 1]
+    if (last?.label !== undefined && last.label === label) {
+      last.items.push(sub)
+    } else {
+      groups.push({ label, items: [sub] })
+    }
+  }
+
+  for (const group of groups) {
+    if (group.label === undefined) {
+      // Standalone sub-request — inline directly.
+      for (const sub of group.items) {
+        appendSubRequestPart(parts, boundary, sub)
+      }
+      continue
+    }
+
+    // Nested changeset envelope.
+    const changesetBoundary = `changeset_${generateBoundaryToken()}`
     parts.push(`--${boundary}`)
-    parts.push('Content-Type: application/http')
-    parts.push('Content-Transfer-Encoding: binary')
-    parts.push('') // blank line between envelope headers and the inner request
-
-    const methodUpper = sub.method.toUpperCase()
-    parts.push(`${methodUpper} ${sub.url} HTTP/1.1`)
-
-    const mergedHeaders: Record<string, string> = { ...(sub.headers ?? {}) }
-    if (sub.body !== undefined && sub.body !== '' && !hasHeader(mergedHeaders, 'content-type')) {
-      mergedHeaders['Content-Type'] = 'application/json'
+    parts.push(`Content-Type: multipart/mixed; boundary=${changesetBoundary}`)
+    parts.push('')
+    for (const sub of group.items) {
+      appendSubRequestPart(parts, changesetBoundary, sub)
     }
-    for (const [k, v] of Object.entries(mergedHeaders)) {
-      parts.push(`${k}: ${v}`)
-    }
-
-    parts.push('') // blank line between inner headers and inner body
-    parts.push(sub.body ?? '')
+    parts.push(`--${changesetBoundary}--`)
   }
 
   parts.push(`--${boundary}--`)
@@ -95,6 +115,27 @@ export function serializeODataBatch(
     body: parts.join('\r\n'),
     boundary
   }
+}
+
+function appendSubRequestPart(parts: string[], boundary: string, sub: ODataBatchSubRequest): void {
+  parts.push(`--${boundary}`)
+  parts.push('Content-Type: application/http')
+  parts.push('Content-Transfer-Encoding: binary')
+  parts.push('')
+
+  const methodUpper = sub.method.toUpperCase()
+  parts.push(`${methodUpper} ${sub.url} HTTP/1.1`)
+
+  const mergedHeaders: Record<string, string> = { ...(sub.headers ?? {}) }
+  if (sub.body !== undefined && sub.body !== '' && !hasHeader(mergedHeaders, 'content-type')) {
+    mergedHeaders['Content-Type'] = 'application/json'
+  }
+  for (const [k, v] of Object.entries(mergedHeaders)) {
+    parts.push(`${k}: ${v}`)
+  }
+
+  parts.push('')
+  parts.push(sub.body ?? '')
 }
 
 /**

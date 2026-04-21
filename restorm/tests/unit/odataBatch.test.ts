@@ -61,6 +61,36 @@ describe('serializeODataBatch', () => {
     expect(out.body).toContain('--b--')
     expect(out.body).not.toMatch(/HTTP\/1\.1/)
   })
+
+  it('wraps consecutive sub-requests with the same atomicityGroup in a nested changeset', () => {
+    const out = serializeODataBatch(
+      [
+        { method: 'POST', url: 'Pets', body: '{"Name":"A"}', atomicityGroup: 'g1' },
+        { method: 'POST', url: 'Pets', body: '{"Name":"B"}', atomicityGroup: 'g1' },
+        { method: 'GET', url: 'Pets(1)' }
+      ],
+      'batch_t'
+    )
+    // Nested changeset header appears on the outer batch boundary.
+    expect(out.body).toMatch(/--batch_t\r\nContent-Type: multipart\/mixed; boundary=changeset_[^\r\n]+/)
+    // Inner changeset wraps the two POSTs, and its terminator `--changeset_…--` is present.
+    expect(out.body).toMatch(/--changeset_[^\r\n]+--/)
+    // The standalone GET is outside the changeset.
+    expect(out.body).toContain('GET Pets(1) HTTP/1.1')
+  })
+
+  it('opens separate changesets when same-label sub-requests are non-consecutive', () => {
+    const out = serializeODataBatch(
+      [
+        { method: 'POST', url: 'A', atomicityGroup: 'g' },
+        { method: 'GET', url: 'B' },
+        { method: 'POST', url: 'C', atomicityGroup: 'g' }
+      ],
+      'b'
+    )
+    const changesetCount = (out.body.match(/boundary=changeset_/g) ?? []).length
+    expect(changesetCount).toBe(2)
+  })
 })
 
 describe('parseODataBatchResponse', () => {

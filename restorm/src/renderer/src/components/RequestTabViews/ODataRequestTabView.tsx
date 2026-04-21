@@ -41,7 +41,8 @@ import {
   type ISelectData,
   type ListViewItemData
 } from 'electron-core-ui/renderer'
-import type { ODataRequest, ODataVersion, ODataOperationKind, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
+import type { ODataRequest, ODataVersion, ODataOperationKind, ODataBatchSubRequestSpec, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
+import { ODataBatchEditor } from './ODataBatchEditor'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
@@ -218,6 +219,10 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     updateReactiveProperty(request, 'actionBody', next)
   }, [request])
 
+  const setBatchSubRequests = useCallback((next: ODataBatchSubRequestSpec[]) => {
+    updateReactiveProperty(request, 'batchSubRequests', next)
+  }, [request])
+
   const setFilter = useCallback((next: string) => {
     updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, filter: next })
   }, [request])
@@ -353,20 +358,13 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       method = 'POST'
       body = request.actionBody ?? undefined
     } else if (request.operationKind === 'batch') {
-      // The `actionBody` field carries a JSON array of sub-requests
-      // in batch mode. We assemble the multipart/mixed envelope
-      // locally so the engine only sees a plain POST. If parsing
-      // fails, surface the error up through the response panel.
-      try {
-        const parsed = JSON.parse(request.actionBody ?? '[]') as unknown
-        if (!Array.isArray(parsed)) {
-          throw new Error('Batch body must be a JSON array of sub-requests')
-        }
-        const serialized = serializeODataBatch(parsed as ODataBatchSubRequest[])
-        method = 'POST'
-        body = serialized.body
-        contentTypeOverride = serialized.contentType
-      } catch (err) {
+      // The structured `batchSubRequests` array drives serialization
+      // directly — no JSON parse required. We flatten the editor's
+      // header list into a Record, coalesce the (flat + change-set)
+      // sequence into the multipart/mixed envelope, and let the
+      // engine see a plain POST.
+      const specs = request.batchSubRequests ?? []
+      if (specs.length === 0) {
         setIsSending(false)
         setResponse({
           statusCode: 0,
@@ -375,10 +373,27 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
           durationMs: 0,
           body: '',
           method,
-          error: `Invalid batch body: ${err instanceof Error ? err.message : String(err)}`
+          error: 'Batch has no sub-requests — add at least one before sending.'
         })
         return
       }
+      const subRequests: ODataBatchSubRequest[] = specs.map((spec) => {
+        const headers: Record<string, string> = {}
+        for (const kv of spec.headers ?? []) {
+          if (kv.key) headers[kv.key] = kv.value
+        }
+        return {
+          method: spec.method,
+          url: spec.url,
+          ...(Object.keys(headers).length > 0 ? { headers } : {}),
+          ...(spec.body !== undefined ? { body: spec.body } : {}),
+          ...(spec.atomicityGroup ? { atomicityGroup: spec.atomicityGroup } : {})
+        }
+      })
+      const serialized = serializeODataBatch(subRequests)
+      method = 'POST'
+      body = serialized.body
+      contentTypeOverride = serialized.contentType
     }
     const dispatchedMethod = method
     api.execute({
@@ -422,7 +437,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId } as RequestHistoryEventPayload)
       })
       .finally(() => { setIsSending(false) })
-  }, [isSending, request.id, request.operationKind, request.actionBody, requestPath])
+  }, [isSending, request.id, request.operationKind, request.actionBody, request.batchSubRequests, requestPath])
 
   const urlSection = (
     <div style={urlRowStyle} data-testid="odata-request-url-section">
@@ -492,12 +507,10 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         </div>
       </div>
 
-      {request.operationKind === 'action' || request.operationKind === 'batch' ? (
+      {request.operationKind === 'action' ? (
         <div style={rowStyle}>
           <label style={labelStyle} htmlFor="odata-request-action-body">
-            {request.operationKind === 'batch'
-              ? t('odataRequestTab.batchBody', 'Batch sub-requests (JSON array)')
-              : t('odataRequestTab.actionBody', 'Action body (JSON)')}
+            {t('odataRequestTab.actionBody', 'Action body (JSON)')}
           </label>
           <div style={{ height: 180, border: '1px solid var(--input-border)', borderRadius: 4, boxSizing: 'border-box' }}>
             <CodeEditor
@@ -514,14 +527,18 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
               data-testid="odata-request-action-body"
             />
           </div>
-          {request.operationKind === 'batch' ? (
-            <span style={{ ...labelStyle, fontStyle: 'italic' }}>
-              {t(
-                'odataRequestTab.batchHint',
-                'Each sub-request: {method, url, headers?, body?}. URLs are relative to the service root. The engine assembles the multipart/mixed envelope before dispatch.'
-              )}
-            </span>
-          ) : null}
+        </div>
+      ) : null}
+
+      {request.operationKind === 'batch' ? (
+        <div style={rowStyle}>
+          <label style={labelStyle}>
+            {t('odataRequestTab.batchBody', 'Batch sub-requests')}
+          </label>
+          <ODataBatchEditor
+            value={request.batchSubRequests ?? []}
+            onChange={setBatchSubRequests}
+          />
         </div>
       ) : null}
 

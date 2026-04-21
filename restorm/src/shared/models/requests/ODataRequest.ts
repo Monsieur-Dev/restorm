@@ -57,6 +57,19 @@ export interface ODataQueryOptions {
  */
 export type ODataOperationKind = 'entity-set' | 'function' | 'action' | 'batch'
 
+/** Structured sub-request inside a `$batch`. An atomicityGroup label
+ * ties consecutive entries into one change-set so the server commits
+ * them as a single transaction. */
+export interface ODataBatchSubRequestSpec {
+  id: string
+  method: string
+  url: string
+  headers?: { key: string; value: string }[]
+  body?: string
+  atomicityGroup?: string
+  label?: string
+}
+
 @fileNaming({ pattern: '{index} - {name}', nameProperty: 'name', idProperty: 'id' })
 export class ODataRequest extends BaseRequest {
   readonly type: RequestType = 'odata'
@@ -98,6 +111,12 @@ export class ODataRequest extends BaseRequest {
   @graphqlField({ type: 'String', nullable: true })
   actionBody?: string
 
+  /** Structured sub-requests edited in the batch UI. Serialized to
+   * multipart/mixed (with nested change-set envelopes when
+   * `atomicityGroup` is set) before dispatch. */
+  @graphqlField({ type: 'JSON', nullable: true })
+  batchSubRequests?: ODataBatchSubRequestSpec[]
+
   /** Whether this endpoint is deprecated. */
   @graphqlField({ type: 'Boolean', nullable: true })
   deprecated = false
@@ -131,6 +150,7 @@ export class ODataRequest extends BaseRequest {
     params?: Parameters<typeof KeyValue.fromPlain>[0][]
     queryOptions?: ODataQueryOptions
     actionBody?: string
+    batchSubRequests?: ODataBatchSubRequestSpec[]
     deprecated?: boolean
   }): ODataRequest {
     return new ODataRequest({
@@ -147,6 +167,7 @@ export class ODataRequest extends BaseRequest {
       params: (obj.params ?? []) as KeyValue[],
       queryOptions: obj.queryOptions ?? {},
       ...(obj.actionBody !== undefined && { actionBody: obj.actionBody }),
+      ...(obj.batchSubRequests !== undefined && { batchSubRequests: obj.batchSubRequests }),
       deprecated: obj.deprecated ?? false
     })
   }
@@ -167,6 +188,7 @@ export class ODataRequest extends BaseRequest {
       params: this.params.map(p => p.toPlainObject()),
       queryOptions: this.queryOptions,
       ...(this.actionBody !== undefined && { actionBody: this.actionBody }),
+      ...(this.batchSubRequests !== undefined && { batchSubRequests: this.batchSubRequests }),
       deprecated: this.deprecated
     }
   }

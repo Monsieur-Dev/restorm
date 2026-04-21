@@ -40,6 +40,30 @@ export interface ODataQueryOptions {
  * kind rather than a separate request type. */
 export type ODataOperationKind = 'entity-set' | 'function' | 'action' | 'batch'
 
+/** A single sub-request inside a `$batch`. Atomicity groups collect
+ * sub-requests that must succeed or fail together (change-sets per
+ * the OData v4 spec). A sub-request with no `atomicityGroup` is a
+ * standalone operation outside any change-set. */
+export interface ODataBatchSubRequestSpec {
+  /** Stable ID used by the UI for keys / reordering. */
+  id: string
+  /** HTTP method. GET inside a change-set is spec-illegal but we let
+   * the user build it so they see the error the server returns. */
+  method: string
+  /** URL relative to the service root (resolved at send time). */
+  url: string
+  /** Optional extra request headers. */
+  headers?: { key: string; value: string }[]
+  /** Optional JSON body — required for POST/PATCH/PUT. */
+  body?: string
+  /** Atomicity group label. Sub-requests sharing the same label are
+   * serialized as a nested `multipart/mixed; boundary=changeset_<id>`
+   * envelope. Empty / undefined means "no change-set". */
+  atomicityGroup?: string
+  /** User-visible label shown in the sidebar list. */
+  label?: string
+}
+
 export interface ODataRequest extends BaseRequest {
   type: 'odata'
   /** Base service URL including entity set (e.g. `{{base}}/People`). */
@@ -61,6 +85,10 @@ export interface ODataRequest extends BaseRequest {
    * Env-templated before dispatch. Ignored for entity-set and function
    * calls (functions inline their parameters into the URL). */
   actionBody?: string
+  /** Structured sub-requests for `$batch` kind. The UI edits this
+   * array; the engine serializes it into multipart/mixed (with
+   * nested change-set envelopes when `atomicityGroup` is set). */
+  batchSubRequests?: ODataBatchSubRequestSpec[]
   /** Whether this endpoint is deprecated. */
   deprecated?: boolean
 }

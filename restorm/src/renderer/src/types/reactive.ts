@@ -118,6 +118,7 @@ const ODATA_REQUEST_INDEXABLE_KEYS = new Set([
   'params',
   'queryOptions',
   'actionBody',
+  'batchSubRequests',
   'deprecated'
 ])
 
