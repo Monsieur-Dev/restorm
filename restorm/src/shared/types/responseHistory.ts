@@ -1,4 +1,4 @@
-export type ResponseHistoryRequestType = 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket'
+export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket'
 
 export interface ResponseHistoryEntry {
   guid: string
@@ -52,6 +52,31 @@ export interface ResponseHistoryHttpResponse {
   responseBody: string
   contentType?: string
   contentLength?: number
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  error?: string
+}
+
+export interface ResponseHistoryODataResponse {
+  type: 'odata'
+  requestUrl: string
+  requestMethod: string
+  requestHeaders: ResponseHistoryKeyValue[]
+  requestParams: ResponseHistoryKeyValue[]
+  requestBody?: ResponseHistoryHttpBody
+  odataVersion: 'v2' | 'v3' | 'v4'
+  operationKind: 'entity-set' | 'function' | 'action' | 'batch'
+  queryOptions?: Record<string, string | boolean | string[]>
+  statusCode: number
+  statusText: string
+  responseHeaders: ResponseHistoryKeyValue[]
+  responseBody: string
+  contentType?: string
+  contentLength?: number
+  odataCount?: number
+  odataNextLink?: string
   timings: {
     startedAt: string
     durationMs: number
@@ -130,6 +155,7 @@ export interface ResponseHistoryWebSocketResponse {
 
 export type ResponseHistoryResponse =
   | ResponseHistoryHttpResponse
+  | ResponseHistoryODataResponse
   | ResponseHistoryGraphQLResponse
   | ResponseHistoryGrpcResponse
   | ResponseHistorySoapResponse

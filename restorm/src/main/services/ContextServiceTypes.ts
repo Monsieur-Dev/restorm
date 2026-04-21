@@ -98,7 +98,7 @@ export interface FullRequestData {
   // appends the system query options ($filter / $select / $top /
   // $skip / $count) to the resolved URL as a final step.
   odataVersion?: 'v2' | 'v3' | 'v4'
-  odataOperationKind?: 'entity-set' | 'function' | 'action'
+  odataOperationKind?: 'entity-set' | 'function' | 'action' | 'batch'
   odataQueryOptions?: {
     filter?: string
     select?: string[]

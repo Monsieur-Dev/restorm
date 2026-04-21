@@ -123,7 +123,7 @@ export const httpCancelArgs = z.tuple([requestIdArg])
 export const httpIsActiveArgs = z.tuple([requestIdArg])
 
 // ==========================================================================
-// OData Execution (Phase 1b — reuses httpExecutionService under the hood)
+// OData Execution (reuses httpExecutionService under the hood)
 // ==========================================================================
 
 export const odataExecuteArgs = z.tuple([

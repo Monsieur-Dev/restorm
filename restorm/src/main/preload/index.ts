@@ -467,9 +467,10 @@ contextBridge.exposeInMainWorld('restorm', {
     /**
      * Execute an OData request. Reuses the HTTP dispatcher: the URL
      * (with system query options already appended by URLResolver) is
-     * dispatched as a plain GET. The Phase 1b payload is identical to
-     * the HTTP one — a dedicated shape lands when `@odata.nextLink` /
-     * `@odata.count` chrome ships.
+     * dispatched as a plain HTTP call. Action / batch kinds send a
+     * POST with a caller-supplied body; entity-set and function kinds
+     * send a GET. Response shape mirrors the HTTP envelope; OData
+     * annotations are extracted downstream.
      */
     execute: async (input: { requestId: string; timeout?: number; requestPath?: string; method?: string; body?: string; bodyContentType?: string }): Promise<{
       requestId: string

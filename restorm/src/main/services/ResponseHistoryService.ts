@@ -44,6 +44,7 @@ import type { GraphQLExecutionResult } from './GraphQLExecutionService'
 import type { GRPCExecutionResult } from './GRPCExecutionService'
 import type { SOAPExecutionResult } from './SOAPExecutionService'
 import type { WebSocketExecutionResult } from './WebSocketExecutionService'
+import { normalizeODataResponse } from '../../shared/utils/odataResponse'
 
 const DEFAULT_MAX_PER_REQUEST = 10
 const INDEX_FILE_NAME = 'index.json'
@@ -418,6 +419,22 @@ class ResponseHistoryService {
           response
         }
       }
+      case 'odata': {
+        const httpResult = result as HTTPExecutionResult
+        const response = this.buildOdataResponse(requestId, httpResult)
+        if (!response) return null
+        return {
+          guid,
+          requestId,
+          requestPath,
+          type,
+          success: httpResult.success,
+          timestamp: now,
+          pinned: false,
+          requestMeta,
+          response
+        }
+      }
       case 'graphql': {
         const gqlResult = result as GraphQLExecutionResult
         const response = this.buildGraphqlResponse(requestId, gqlResult)
@@ -521,6 +538,97 @@ class ResponseHistoryService {
       timings: result.timings,
       ...(result.error ? { error: result.error } : {})
     }
+  }
+
+  private buildOdataResponse(requestId: string, result: HTTPExecutionResult): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+    const requestHeaders = this.getResolvedKeyValues(requestId, 'headers')
+    const requestParams = this.getResolvedKeyValues(requestId, 'params')
+
+    const requestContext = contextService.getRequestContext(requestId)
+    const fullData = requestContext?.fullData
+    const odataVersion: 'v2' | 'v3' | 'v4' = fullData?.odataVersion ?? 'v4'
+    const operationKind: 'entity-set' | 'function' | 'action' | 'batch' =
+      fullData?.odataOperationKind ?? 'entity-set'
+    // `getRequestMeta` has no 'odata' branch, and OData requests carry
+    // no explicit `method` on `fullData`. Derive the dispatched method
+    // from the operation kind so history replay shows GET / POST
+    // correctly per kind.
+    const requestMethod = operationKind === 'action' || operationKind === 'batch' ? 'POST' : 'GET'
+    const queryOptions = fullData?.odataQueryOptions
+      ? this.normalizeODataQueryOptions(fullData.odataQueryOptions)
+      : undefined
+
+    const responseHeaders = this.headersRecordToKeyValues(result.headers)
+    const contentTypeHeader = result.headers?.['content-type']
+    const contentType = Array.isArray(contentTypeHeader) ? contentTypeHeader[0] : contentTypeHeader
+    const contentLengthHeader = result.headers?.['content-length']
+    const contentLengthStr = Array.isArray(contentLengthHeader) ? contentLengthHeader[0] : contentLengthHeader
+    const contentLength = contentLengthStr ? parseInt(contentLengthStr, 10) : undefined
+
+    let odataCount: number | undefined
+    let odataNextLink: string | undefined
+    if (result.body) {
+      try {
+        const parsed: unknown = JSON.parse(result.body)
+        if (parsed !== null && typeof parsed === 'object') {
+          const normalized = normalizeODataResponse(parsed, odataVersion)
+          if (normalized) {
+            if (normalized.count !== undefined) odataCount = normalized.count
+            if (normalized.nextLink) odataNextLink = normalized.nextLink
+          }
+        }
+      } catch {
+        // Non-JSON body — nothing to extract.
+      }
+    }
+
+    return {
+      type: 'odata',
+      requestUrl: resolvedUrl,
+      requestMethod,
+      requestHeaders,
+      requestParams,
+      odataVersion,
+      operationKind,
+      ...(queryOptions ? { queryOptions } : {}),
+      statusCode: result.statusCode ?? 0,
+      statusText: result.statusText ?? '',
+      responseHeaders,
+      responseBody: result.body ?? '',
+      ...(contentType ? { contentType } : {}),
+      ...(contentLength !== undefined && !isNaN(contentLength) ? { contentLength } : {}),
+      ...(odataCount !== undefined ? { odataCount } : {}),
+      ...(odataNextLink ? { odataNextLink } : {}),
+      timings: result.timings,
+      ...(result.error ? { error: result.error } : {})
+    }
+  }
+
+  private normalizeODataQueryOptions(options: {
+    filter?: string
+    select?: string[]
+    top?: string
+    skip?: string
+    count?: boolean
+    expand?: string
+    orderby?: string
+    search?: string
+    format?: string
+    apply?: string
+  }): Record<string, string | boolean | string[]> {
+    const normalized: Record<string, string | boolean | string[]> = {}
+    if (options.filter) normalized.filter = options.filter
+    if (options.select && options.select.length > 0) normalized.select = options.select
+    if (options.top) normalized.top = options.top
+    if (options.skip) normalized.skip = options.skip
+    if (options.count === true) normalized.count = true
+    if (options.expand) normalized.expand = options.expand
+    if (options.orderby) normalized.orderby = options.orderby
+    if (options.search) normalized.search = options.search
+    if (options.format) normalized.format = options.format
+    if (options.apply) normalized.apply = options.apply
+    return normalized
   }
 
   private buildGraphqlResponse(requestId: string, result: GraphQLExecutionResult): ResponseHistoryResponse | null {

@@ -1,22 +1,27 @@
 /**
- * ODataRequestTabView — Phase 1 (UI + engine wiring).
+ * ODataRequestTabView — v4 query + action/function/batch support.
  *
- * Renders the URL, version selector and the v4 subset of system query
- * options ($filter / $select / $top / $skip / $count) that Phase 1
- * commits. The URL preview is computed live from the serializer so
- * the user can see the canonical OData URL as they type.
+ * Renders the URL, version selector, operation-kind picker, and the
+ * full v4 system query option set ($filter / $select / $top / $skip
+ * / $count / $expand / $orderby / $search / $format / $apply). The
+ * live URL preview is composed from the serializer so the canonical
+ * OData URL is visible while the user edits each option.
  *
  * Send dispatches through the `odata:execute` IPC bridge, which
- * reuses `httpExecutionService` under the hood — the URL resolver
- * has already appended the system options, so the dispatcher sees a
- * plain HTTP GET. Response history records the result as an `http`
- * entry in Phase 1b; the dedicated OData response chrome
- * (`@odata.nextLink` pagination, `@odata.count` hint, navigation
- * links) lands alongside Phase 2.
+ * reuses `httpExecutionService` under the hood. URLResolver appends
+ * the resolved system options to the base URL, so the dispatcher
+ * sees a plain HTTP call. Actions invoke POST with a caller-supplied
+ * JSON body; `$batch` assembles a multipart/mixed envelope from the
+ * sub-request array before dispatch.
  *
- * Still deferred: `$expand` / `$orderby` / `$search` / `$format` /
- * `$apply` builders (Phase 2), v2 / v3 engine differences (Phase 3),
- * actions / functions (Phase 4), and `$batch` (Phase 5).
+ * Response chrome surfaces `@odata.count` / `@odata.nextLink` in the
+ * Infos tab (alongside status, duration, headers, and operation
+ * kind), renders the JSON body in a full-height Monaco editor on the
+ * Response tab, and feeds the parsed value into the JsonCrack tab.
+ *
+ * History is recorded via `ResponseHistoryService` as a dedicated
+ * `'odata'` entry; the same builder drives live rendering and
+ * replay so the chrome stays consistent.
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
@@ -24,26 +29,31 @@ import { useRequestReset } from '../../hooks/useRequestReset'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
+  CodeEditor,
   InputBox,
-  JsonViewer,
+  ListView,
   ScrollableElement,
   SelectBox,
   Toggle,
+  eventBus,
   logger,
   type ISelectOptionItem,
-  type ISelectData
+  type ISelectData,
+  type ListViewItemData
 } from 'electron-core-ui/renderer'
-import type { ODataRequest, ODataVersion, ODataOperationKind, KeyValue } from '../../../../shared/types/collections'
+import type { ODataRequest, ODataVersion, ODataOperationKind, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
+import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
+import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { updateReactiveProperty } from './requestTabViewUtils'
 import {
   serializeODataQueryOptions,
   buildODataUrl,
   keyValuesToPairs
 } from '../../../../shared/utils/odataQuery'
-import { normalizeODataResponse, type NormalizedODataPayload } from '../../../../shared/utils/odataResponse'
+import { normalizeODataResponse } from '../../../../shared/utils/odataResponse'
 import {
   serializeODataBatch,
   type ODataBatchSubRequest
@@ -81,49 +91,46 @@ const previewValueStyle: CSSProperties = {
   wordBreak: 'break-all',
   userSelect: 'text'
 }
-const responseStatusStyle: CSSProperties = {
-  display: 'flex',
-  gap: 12,
-  alignItems: 'center',
-  padding: '6px 12px',
-  fontSize: 12,
-  color: 'var(--descriptionForeground)'
+const fullHeightBoxStyle: CSSProperties = { height: '100%', boxSizing: 'border-box' }
+const editorContainerStyle: CSSProperties = {
+  height: '100%',
+  border: '1px solid var(--panel-border)',
+  borderRadius: 3,
+  boxSizing: 'border-box'
+}
+const kvRowStyle: CSSProperties = { display: 'flex', gap: 8 }
+const kvKeyStyle: CSSProperties = { fontWeight: 600, color: 'var(--symbolIcon-propertyForeground)' }
+const kvValueStyle: CSSProperties = { color: 'var(--descriptionForeground)' }
+const infoLabelStyle: CSSProperties = { fontWeight: 600 }
+const errorTextStyle: CSSProperties = { color: 'var(--testing-iconFailed)' }
+
+function getStatusColor(statusCode: number): string {
+  if (statusCode >= 200 && statusCode < 300) return 'var(--testing-iconPassed)'
+  if (statusCode >= 300 && statusCode < 400) return 'var(--editorWarning-foreground)'
+  return 'var(--testing-iconFailed)'
+}
+
+function formatDuration(ms: number): string {
+  if (ms < 1000) return `${ms}ms`
+  return `${(ms / 1000).toFixed(2)}s`
+}
+
+function headersToListItems(headers: Record<string, string | string[]> | undefined, prefix: string): ListViewItemData[] {
+  if (!headers) return []
+  return Object.entries(headers).map(([key, value], index) => ({
+    id: `${prefix}-${index}`,
+    icon: 'blank',
+    title: (
+      <span style={kvRowStyle}>
+        <span style={kvKeyStyle}>{key}</span>
+        <span style={kvValueStyle}>{Array.isArray(value) ? value.join(', ') : value}</span>
+      </span>
+    )
+  }))
 }
 
 const ODATA_VERSION_BY_INDEX: ODataVersion[] = ['v4', 'v3', 'v2']
 const ODATA_OPERATION_KIND_BY_INDEX: ODataOperationKind[] = ['entity-set', 'function', 'action', 'batch']
-
-/**
- * Shows `@odata.count` and `@odata.nextLink` next to the response
- * body so users don't have to hunt through the JSON tree. v2/v3
- * responses surface the same annotations after normalization.
- */
-const ODataAnnotationBar: React.FC<{ normalized: NormalizedODataPayload }> = ({ normalized }) => {
-  if (normalized.count === undefined && !normalized.nextLink) return null
-  return (
-    <div
-      style={{
-        display: 'flex',
-        gap: 12,
-        alignItems: 'center',
-        padding: '4px 12px',
-        fontSize: 12,
-        color: 'var(--descriptionForeground)',
-        flexWrap: 'wrap'
-      }}
-      data-testid="odata-response-annotations"
-    >
-      {normalized.count !== undefined ? (
-        <span data-testid="odata-response-count">@odata.count: {normalized.count}</span>
-      ) : null}
-      {normalized.nextLink ? (
-        <span data-testid="odata-response-nextlink" style={{ wordBreak: 'break-all' }}>
-          @odata.nextLink: {normalized.nextLink}
-        </span>
-      ) : null}
-    </div>
-  )
-}
 
 function toKeyValueData(kvs: readonly KeyValue[]): KeyValueData[] {
   return kvs.map((kv) => ({
@@ -149,6 +156,8 @@ interface ODataResponseViewData {
   requestUrl: string
   durationMs: number
   body: string
+  headers?: Record<string, string | string[]>
+  method: string
   error?: string
 }
 
@@ -176,6 +185,8 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
 
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<ODataResponseViewData | null>(null)
+  const [historyModalOpen, setHistoryModalOpen] = useState(false)
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
 
   const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   const sourceIdRef = useRef<string>(crypto.randomUUID())
@@ -329,6 +340,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         requestUrl: '',
         durationMs: 0,
         body: '',
+        method: 'GET',
         error: 'OData IPC bridge unavailable (restorm context missing)'
       })
       return
@@ -362,11 +374,13 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
           requestUrl: '',
           durationMs: 0,
           body: '',
+          method,
           error: `Invalid batch body: ${err instanceof Error ? err.message : String(err)}`
         })
         return
       }
     }
+    const dispatchedMethod = method
     api.execute({
       requestId,
       timeout: DEFAULT_REQUEST_TIMEOUT_MS,
@@ -382,8 +396,12 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
           requestUrl: result.requestUrl ?? '',
           durationMs: result.timings.durationMs,
           body: result.body ?? '',
+          method: dispatchedMethod,
+          ...(result.headers !== undefined && { headers: result.headers }),
           ...(result.error !== undefined && { error: result.error })
         })
+        setHistoryRefreshKey((prev) => prev + 1)
+        eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId } as RequestHistoryEventPayload)
         logger.info('OData request completed', {
           url: result.requestUrl,
           status: result.statusCode,
@@ -397,8 +415,11 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
           requestUrl: '',
           durationMs: 0,
           body: '',
+          method: dispatchedMethod,
           error: err instanceof Error ? err.message : String(err)
         })
+        setHistoryRefreshKey((prev) => prev + 1)
+        eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId } as RequestHistoryEventPayload)
       })
       .finally(() => { setIsSending(false) })
   }, [isSending, request.id, request.operationKind, request.actionBody, requestPath])
@@ -628,57 +649,380 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     </ScrollableElement>
   )
 
-  const responseContent = response ? (
-    <div data-testid="odata-response">
-      <div style={responseStatusStyle}>
-        {response.error ? (
-          <span>{t('odataRequestTab.responseError', 'Error')}: {response.error}</span>
-        ) : (
-          <>
-            <span>{response.statusCode} {response.statusText}</span>
-            <span>{response.durationMs} ms</span>
-            {response.requestUrl ? <span style={{ opacity: 0.7 }}>{response.requestUrl}</span> : null}
-          </>
-        )}
+  const buildResponseView = useCallback((input: {
+    statusCode: number
+    statusText: string
+    durationMs: number
+    method: string
+    requestUrl: string
+    body: string
+    headers?: Record<string, string | string[]> | undefined
+    headersFromHistory?: { key: string; value: string }[]
+    requestHeadersFromHistory?: { key: string; value: string }[]
+    odataVersion: ODataVersion
+    operationKind?: ODataOperationKind
+    odataCount?: number | undefined
+    odataNextLink?: string | undefined
+    contentType?: string | undefined
+    contentLength?: number | undefined
+    error?: string | undefined
+  }): {
+    responseContent: React.ReactNode
+    infosContent: React.ReactNode
+    jsonData: unknown
+  } => {
+    const parsed = tryParseJson(input.body)
+    const normalized = parsed !== null && typeof parsed === 'object'
+      ? normalizeODataResponse(parsed, input.odataVersion)
+      : null
+
+    const formattedBody = normalized
+      ? JSON.stringify(normalized.body, null, 2)
+      : parsed !== null && typeof parsed === 'object'
+        ? JSON.stringify(parsed, null, 2)
+        : input.body
+
+    const renderedContent: React.ReactNode = input.body ? (
+      <div style={editorContainerStyle}>
+        <CodeEditor
+          height="100%"
+          language="json"
+          value={formattedBody}
+          options={{
+            minimap: { enabled: false },
+            wordWrap: 'on',
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+            readOnly: true
+          }}
+          data-testid="odata-response-body-editor"
+        />
       </div>
-      {(() => {
-        const parsed = tryParseJson(response.body)
-        if (parsed !== null && typeof parsed === 'object') {
-          const normalized = normalizeODataResponse(parsed, request.odataVersion)
-          return (
-            <>
-              {normalized ? <ODataAnnotationBar normalized={normalized} /> : null}
-              <JsonViewer
-                json={normalized ? JSON.stringify(normalized.body, null, 2) : response.body}
-                data-testid="odata-response-json"
-              />
-            </>
-          )
-        }
-        return (
-          <pre style={{ ...previewValueStyle, whiteSpace: 'pre-wrap' }} data-testid="odata-response-raw">
-            {response.body}
-          </pre>
+    ) : (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100%',
+        color: 'var(--descriptionForeground)'
+      }}>
+        {input.error ?? t('odataRequestTab.responseEmpty', 'No response body')}
+      </div>
+    )
+
+    const count = input.odataCount ?? normalized?.count
+    const nextLink = input.odataNextLink ?? normalized?.nextLink
+
+    const generalItems: ListViewItemData[] = []
+    if (input.requestUrl) {
+      generalItems.push({
+        id: 'general-request-url',
+        icon: 'blank',
+        title: (
+          <span style={kvRowStyle}>
+            <span style={infoLabelStyle}>Request URL</span>
+            <span>{input.requestUrl}</span>
+          </span>
         )
-      })()}
-    </div>
-  ) : undefined
+      })
+    }
+    generalItems.push({
+      id: 'general-request-method',
+      icon: 'blank',
+      title: (
+        <span style={kvRowStyle}>
+          <span style={infoLabelStyle}>Request Method</span>
+          <span>{input.method}</span>
+        </span>
+      )
+    })
+    generalItems.push({
+      id: 'general-status-code',
+      icon: 'blank',
+      title: (
+        <span style={kvRowStyle}>
+          <span style={infoLabelStyle}>Status Code</span>
+          <span style={{ color: getStatusColor(input.statusCode) }}>
+            {input.statusCode} {input.statusText}
+          </span>
+        </span>
+      )
+    })
+    generalItems.push({
+      id: 'general-duration',
+      icon: 'blank',
+      title: (
+        <span style={kvRowStyle}>
+          <span style={infoLabelStyle}>Duration</span>
+          <span>{formatDuration(input.durationMs)}</span>
+        </span>
+      )
+    })
+    generalItems.push({
+      id: 'general-odata-version',
+      icon: 'blank',
+      title: (
+        <span style={kvRowStyle}>
+          <span style={infoLabelStyle}>OData version</span>
+          <span>{input.odataVersion}</span>
+        </span>
+      )
+    })
+    if (input.operationKind) {
+      generalItems.push({
+        id: 'general-odata-operation',
+        icon: 'blank',
+        title: (
+          <span style={kvRowStyle}>
+            <span style={infoLabelStyle}>Operation kind</span>
+            <span>{input.operationKind}</span>
+          </span>
+        )
+      })
+    }
+    const resolvedContentType = input.contentType ?? (() => {
+      const raw = input.headers?.['content-type']
+      return Array.isArray(raw) ? raw[0] : raw
+    })()
+    const resolvedContentLength = input.contentLength ?? (() => {
+      const raw = input.headers?.['content-length']
+      const str = Array.isArray(raw) ? raw[0] : raw
+      const parsed = str ? parseInt(str, 10) : NaN
+      return Number.isNaN(parsed) ? undefined : parsed
+    })()
+    if (resolvedContentType) {
+      generalItems.push({
+        id: 'general-content-type',
+        icon: 'blank',
+        title: (
+          <span style={kvRowStyle}>
+            <span style={infoLabelStyle}>Content-Type</span>
+            <span>{resolvedContentType}</span>
+          </span>
+        )
+      })
+    }
+    if (resolvedContentLength !== undefined) {
+      generalItems.push({
+        id: 'general-content-length',
+        icon: 'blank',
+        title: (
+          <span style={kvRowStyle}>
+            <span style={infoLabelStyle}>Content-Length</span>
+            <span>{resolvedContentLength < 1024 ? `${resolvedContentLength} B` : resolvedContentLength < 1024 * 1024 ? `${(resolvedContentLength / 1024).toFixed(2)} KB` : `${(resolvedContentLength / (1024 * 1024)).toFixed(2)} MB`}</span>
+          </span>
+        )
+      })
+    }
+    if (count !== undefined) {
+      generalItems.push({
+        id: 'general-odata-count',
+        icon: 'blank',
+        title: (
+          <span style={kvRowStyle}>
+            <span style={infoLabelStyle}>@odata.count</span>
+            <span>{count}</span>
+          </span>
+        )
+      })
+    }
+    if (nextLink) {
+      generalItems.push({
+        id: 'general-odata-nextlink',
+        icon: 'blank',
+        title: (
+          <span style={kvRowStyle}>
+            <span style={infoLabelStyle}>@odata.nextLink</span>
+            <span style={{ wordBreak: 'break-all' }}>{nextLink}</span>
+          </span>
+        )
+      })
+    }
+    if (input.error) {
+      generalItems.push({
+        id: 'general-error',
+        icon: 'blank',
+        title: (
+          <span style={kvRowStyle}>
+            <span style={infoLabelStyle}>Error</span>
+            <span style={errorTextStyle}>{input.error}</span>
+          </span>
+        )
+      })
+    }
+
+    const responseHeaderItems: ListViewItemData[] = input.headers
+      ? headersToListItems(input.headers, 'resp-header')
+      : (input.headersFromHistory ?? []).map((kv, index) => ({
+        id: `resp-header-${index}`,
+        icon: 'blank',
+        title: (
+          <span style={kvRowStyle}>
+            <span style={kvKeyStyle}>{kv.key}</span>
+            <span style={kvValueStyle}>{kv.value}</span>
+          </span>
+        )
+      }))
+
+    const requestHeaderItems: ListViewItemData[] = (input.requestHeadersFromHistory ?? []).map((kv, index) => ({
+      id: `req-header-${index}`,
+      icon: 'blank',
+      title: (
+        <span style={kvRowStyle}>
+          <span style={kvKeyStyle}>{kv.key}</span>
+          <span style={kvValueStyle}>{kv.value}</span>
+        </span>
+      )
+    }))
+
+    const headersTreeItems: ListViewItemData[] = [
+      { id: 'group-general', title: 'General', icon: 'info', isExpandable: true, isExpanded: true, children: generalItems },
+      { id: 'group-response-headers', title: `Response headers (${responseHeaderItems.length})`, icon: 'call-incoming', isExpandable: true, isExpanded: true, children: responseHeaderItems },
+      { id: 'group-request-headers', title: `Request headers (${requestHeaderItems.length})`, icon: 'call-outgoing', isExpandable: true, isExpanded: true, children: requestHeaderItems }
+    ]
+
+    const renderedInfos: React.ReactNode = (
+      <div style={fullHeightBoxStyle}>
+        <ListView
+          items={headersTreeItems}
+          rootRole="tree"
+          ariaLabel="OData request and response info"
+          data-testid="odata-response-headers-list"
+        />
+      </div>
+    )
+
+    const json = normalized ? normalized.body : parsed
+    return {
+      responseContent: renderedContent,
+      infosContent: renderedInfos,
+      jsonData: json
+    }
+  }, [t])
+
+  const { responseContent, infosContent, jsonData } = useMemo(() => {
+    if (!response) {
+      return {
+        responseContent: undefined as React.ReactNode | undefined,
+        infosContent: undefined as React.ReactNode | undefined,
+        jsonData: undefined as unknown
+      }
+    }
+    return buildResponseView({
+      statusCode: response.statusCode,
+      statusText: response.statusText,
+      durationMs: response.durationMs,
+      method: response.method,
+      requestUrl: response.requestUrl,
+      body: response.body,
+      headers: response.headers,
+      odataVersion: request.odataVersion,
+      operationKind: request.operationKind,
+      ...(response.error !== undefined ? { error: response.error } : {})
+    })
+  }, [response, request.odataVersion, request.operationKind, buildResponseView])
+
+  const buildHistoryView = useCallback((detail: ResponseHistoryDetail): {
+    infosContent?: React.ReactNode | undefined
+    responseContent?: React.ReactNode | undefined
+    jsonData?: unknown
+  } => {
+    if (detail.response.type === 'odata') {
+      const r = detail.response
+      const view = buildResponseView({
+        statusCode: r.statusCode,
+        statusText: r.statusText,
+        durationMs: r.timings.durationMs,
+        method: r.requestMethod,
+        requestUrl: r.requestUrl,
+        body: r.responseBody,
+        headersFromHistory: r.responseHeaders,
+        requestHeadersFromHistory: r.requestHeaders,
+        odataVersion: r.odataVersion,
+        operationKind: r.operationKind,
+        ...(r.odataCount !== undefined ? { odataCount: r.odataCount } : {}),
+        ...(r.odataNextLink !== undefined ? { odataNextLink: r.odataNextLink } : {}),
+        ...(r.contentType !== undefined ? { contentType: r.contentType } : {}),
+        ...(r.contentLength !== undefined ? { contentLength: r.contentLength } : {}),
+        ...(r.error !== undefined ? { error: r.error } : {})
+      })
+      return {
+        responseContent: view.responseContent,
+        infosContent: view.infosContent,
+        jsonData: view.jsonData
+      }
+    }
+    // Legacy: OData executions recorded before the dedicated `odata`
+    // history type landed are stored as `'http'`. Render them in the
+    // same chrome so users can still browse pre-existing entries.
+    if (detail.response.type === 'http') {
+      const r = detail.response
+      const view = buildResponseView({
+        statusCode: r.statusCode,
+        statusText: r.statusText,
+        durationMs: r.timings.durationMs,
+        method: r.requestMethod,
+        requestUrl: r.requestUrl,
+        body: r.responseBody,
+        headersFromHistory: r.responseHeaders,
+        requestHeadersFromHistory: r.requestHeaders,
+        odataVersion: request.odataVersion,
+        operationKind: request.operationKind,
+        ...(r.contentType !== undefined ? { contentType: r.contentType } : {}),
+        ...(r.contentLength !== undefined ? { contentLength: r.contentLength } : {}),
+        ...(r.error !== undefined ? { error: r.error } : {})
+      })
+      return {
+        responseContent: view.responseContent,
+        infosContent: view.infosContent,
+        jsonData: view.jsonData
+      }
+    }
+    return { infosContent: undefined, responseContent: undefined, jsonData: undefined }
+  }, [buildResponseView, request.odataVersion, request.operationKind])
+
+  const handleCloseHistoryModal = useCallback(() => {
+    setHistoryModalOpen(false)
+  }, [])
+
+  useEffect(() => {
+    const requestId = request.id
+    const subscription = eventBus.subscribe<RequestHistoryEventPayload>(
+      DocumentEvents.REQUEST_HISTORY_OPEN,
+      (payload) => {
+        if (payload.requestId === requestId) setHistoryModalOpen(true)
+      }
+    )
+    return () => { subscription.unsubscribe() }
+  }, [request.id])
 
   return (
-    <BaseRequestTabView
-      requestId={request.id}
-      urlSection={urlSection}
-      requestContent={requestContent}
-      codeSnippetsContent={t(
-        'odataRequestTab.codeSnippetsPlaceholder',
-        '// Code snippet generation will ship alongside OData execution.'
-      )}
-      documentation={request.documentation}
-      notes={request.notes}
-      onNotesChange={(notes: string) => { updateReactiveProperty(request, 'notes', notes) }}
-      isLoading={isSending}
-      showResponse={response !== null}
-      {...(responseContent !== undefined ? { responseContent } : {})}
-    />
+    <>
+      <BaseRequestTabView
+        requestId={request.id}
+        urlSection={urlSection}
+        requestContent={requestContent}
+        codeSnippetsContent={t(
+          'odataRequestTab.codeSnippetsPlaceholder',
+          '// Code snippet generation will ship alongside OData execution.'
+        )}
+        documentation={request.documentation}
+        notes={request.notes}
+        onNotesChange={(notes: string) => { updateReactiveProperty(request, 'notes', notes) }}
+        isLoading={isSending}
+        showResponse={response !== null}
+        {...(responseContent !== undefined ? { responseContent } : {})}
+        {...(infosContent !== undefined ? { infosContent } : {})}
+        {...(jsonData !== undefined ? { jsonData } : {})}
+      />
+      <ResponseHistoryModal
+        isOpen={historyModalOpen}
+        onClose={handleCloseHistoryModal}
+        requestId={request.id}
+        {...(requestPath ? { requestPath } : {})}
+        refreshKey={historyRefreshKey}
+        buildResponseView={buildHistoryView}
+      />
+    </>
   )
 }

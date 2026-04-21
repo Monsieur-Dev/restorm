@@ -562,9 +562,10 @@ export function registerRestormIPC(deps: {
   // OData requests reuse `httpExecutionService` under the hood — the
   // URL is already composed by URLResolver (with $filter / $select /
   // $top / $skip / $count appended) so the dispatcher just sees a
-  // plain HTTP GET. Phase 1b records the result as an `http` history
-  // entry; a future phase swaps to a dedicated `odata` entry when we
-  // add `@odata.nextLink` / `@odata.count` pagination chrome.
+  // plain HTTP GET. History is recorded as a dedicated `odata` entry
+  // so the modal can surface `@odata.count` / `@odata.nextLink` and
+  // the originating operation kind (entity-set / function / action /
+  // batch) alongside the regular HTTP metadata.
   // ==========================================================================
 
   validatedHandle('odata:execute', odataExecuteArgs, async (_event, [input]) => {
@@ -587,7 +588,7 @@ export function registerRestormIPC(deps: {
       const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'
         ? (input as { requestPath?: unknown }).requestPath
         : undefined
-      void responseHistoryService.storeExecutionResult(input.requestId, 'http', result, requestPath)
+      void responseHistoryService.storeExecutionResult(input.requestId, 'odata', result, requestPath)
     })
     return result
   })

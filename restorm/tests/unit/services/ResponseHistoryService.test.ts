@@ -232,4 +232,34 @@ describe('ResponseHistoryService', () => {
     expect(store.size).toBe(0)
   })
 
+  it('storeExecutionResult captures OData annotations from response body', async () => {
+    setupCols()
+    const odataBody = JSON.stringify({
+      '@odata.context': 'https://api.test.com/$metadata#Pets',
+      '@odata.count': 42,
+      '@odata.nextLink': 'https://api.test.com/Pets?$skip=10',
+      value: [{ Id: 1, Name: 'Rex' }]
+    })
+    const result = {
+      requestId: 'req-1', success: true, statusCode: 200, statusText: 'OK',
+      headers: { 'content-type': 'application/json; odata.metadata=minimal' } as Record<string, string | string[]>,
+      body: odataBody,
+      timings: { startedAt: '2026-01-15T10:00:00.000Z', durationMs: 50 },
+      requestUrl: 'https://api.test.com/Pets?$count=true'
+    }
+    await responseHistoryService.storeExecutionResult('req-1', 'odata', result)
+    const idx = getIdx(AP)
+    const guid = idx?.requests[0]?.entries[0]?.guid
+    expect(guid).toBeDefined()
+    const detailText = store.get(AP)?.get(`responses/${String(guid)}.json`)
+    expect(detailText).toBeDefined()
+    const parsed = JSON.parse(detailText ?? '{}') as ResponseHistoryDetail
+    expect(parsed.type).toBe('odata')
+    if (parsed.response.type !== 'odata') throw new Error('expected odata response')
+    expect(parsed.response.odataCount).toBe(42)
+    expect(parsed.response.odataNextLink).toBe('https://api.test.com/Pets?$skip=10')
+    expect(parsed.response.odataVersion).toBe('v4')
+    expect(parsed.response.operationKind).toBe('entity-set')
+  })
+
 })
