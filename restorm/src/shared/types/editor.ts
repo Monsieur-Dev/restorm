@@ -9,6 +9,7 @@ import type {
   SoapRequest,
   WebSocketRequest,
   ODataRequest,
+  AuthenticationRequest,
   Environment
 } from './collections'
 
@@ -95,6 +96,15 @@ export interface ODataRequestTab extends BaseRestormTab {
   environments?: Environment[] | undefined
 }
 
+/** Tab displaying an Authentication request (HTTP + auth config tab) */
+export interface AuthenticationRequestTab extends BaseRestormTab {
+  tabType: 'auth-request'
+  /** The authentication request data to display */
+  request: AuthenticationRequest
+  /** Environments available for this request */
+  environments?: Environment[] | undefined
+}
+
 /** Legacy tab type for backward compatibility */
 export interface LegacyTab extends BaseRestormTab {
   tabType?: undefined
@@ -111,6 +121,7 @@ export type RestormEditorTab =
   | SoapRequestTab
   | WebSocketRequestTab
   | ODataRequestTab
+  | AuthenticationRequestTab
   | LegacyTab
 
 /** @deprecated Use RestormEditorTab instead */
@@ -154,4 +165,9 @@ export function isWebSocketRequestTab(tab: RestormEditorTab): tab is WebSocketRe
 /** Type guard for ODataRequestTab */
 export function isODataRequestTab(tab: RestormEditorTab): tab is ODataRequestTab {
   return tab.tabType === 'odata-request'
+}
+
+/** Type guard for AuthenticationRequestTab */
+export function isAuthenticationRequestTab(tab: RestormEditorTab): tab is AuthenticationRequestTab {
+  return tab.tabType === 'auth-request'
 }

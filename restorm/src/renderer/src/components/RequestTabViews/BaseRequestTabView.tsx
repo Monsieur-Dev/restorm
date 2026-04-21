@@ -39,6 +39,10 @@ export interface BaseRequestTabViewProps {
   responseContent?: ReactNode | undefined
   /** JSON data for JsonCrack tab (if any) */
   jsonData?: unknown
+  /** Extra request-side tabs inserted after the "Request" tab and
+   * before Docs. Each tab is rendered verbatim. Used by the auth
+   * request tab view to expose a "Configuration" tab. */
+  additionalRequestTabs?: Tab[] | undefined
 }
 
 const COMPACT_BREAKPOINT = 750
@@ -59,7 +63,8 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
   showResponse,
   infosContent,
   responseContent,
-  jsonData
+  jsonData,
+  additionalRequestTabs
 }) => {
   const { t } = useTranslation()
   const [activeTabId, setActiveTabId] = useState('request')
@@ -163,6 +168,10 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
       }
     ]
 
+    if (additionalRequestTabs && additionalRequestTabs.length > 0) {
+      for (const extra of additionalRequestTabs) tabs.push(extra)
+    }
+
     if (hasDocs) {
       tabs.push({
         id: 'docs',
@@ -194,7 +203,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
     })
 
     return tabs
-  }, [requestId, notes, requestContent, documentation, hasDocs, handleNotesChange, codeSnippetsContent, t])
+  }, [requestId, notes, requestContent, documentation, hasDocs, handleNotesChange, codeSnippetsContent, additionalRequestTabs, t])
 
   // If the active tab vanishes (e.g., user was on Docs and the request's URL
   // changed so no operation matches anymore), fall back to the Request tab

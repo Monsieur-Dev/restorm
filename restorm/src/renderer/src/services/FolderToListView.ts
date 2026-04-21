@@ -5,8 +5,8 @@
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 import { IconView } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
-import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest } from '../../../shared/types/collections'
-import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from '../../../shared/types/collections'
+import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest } from '../../../shared/types/collections'
+import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest } from '../../../shared/types/collections'
 import React, { type ReactNode } from 'react'
 
 /** Convert an Icon to a ListView-compatible icon (string for codicons, ReactNode for others) */
@@ -125,6 +125,23 @@ function odataRequestToListViewItem(
 }
 
 /**
+ * Convert an AuthenticationRequest to a ListViewItemData. Auth
+ * requests render a key-icon badge instead of the HTTP method
+ * (so they stand out in the tree when the importer creates them).
+ */
+function authenticationRequestToListViewItem(
+  request: AuthenticationRequest,
+  options: FolderToListViewOptions
+): ListViewItemData {
+  const badge = options.renderProtocolBadge?.('auth', 'AUTH')
+  return {
+    id: request.id,
+    title: request.name,
+    icon: badge
+  }
+}
+
+/**
  * Convert a FolderItem (Folder, EnvironmentFolder, or Request) to ListViewItemData
  */
 function folderItemToListViewItem(
@@ -149,6 +166,9 @@ function folderItemToListViewItem(
     }
     if (isODataRequest(item)) {
       return odataRequestToListViewItem(item, options)
+    }
+    if (isAuthenticationRequest(item)) {
+      return authenticationRequestToListViewItem(item, options)
     }
   }
 

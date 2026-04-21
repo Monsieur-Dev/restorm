@@ -11,7 +11,8 @@ import {
   isGrpcRequestTab,
   isSoapRequestTab,
   isWebSocketRequestTab,
-  isODataRequestTab
+  isODataRequestTab,
+  isAuthenticationRequestTab
 } from '../../../../../shared/types/editor'
 import {
   HTTPRequestTabView,
@@ -212,7 +213,8 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       isGrpcRequestTab(tab) ||
       isSoapRequestTab(tab) ||
       isWebSocketRequestTab(tab) ||
-      isODataRequestTab(tab)
+      isODataRequestTab(tab) ||
+      isAuthenticationRequestTab(tab)
     ) {
       return tab.request.id
     }
@@ -323,6 +325,16 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Badge type="ODATA" />
+          <span>{restormTab.request.name}</span>
+          {renderDirtyIndicator(restormTab)}
+        </span>
+      )
+    }
+
+    if (isAuthenticationRequestTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Badge type="AUTH" />
           <span>{restormTab.request.name}</span>
           {renderDirtyIndicator(restormTab)}
         </span>
@@ -705,6 +717,32 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
               <ODataRequestTabView request={request} />
+            </div>
+          </RestormWorkbenchTab>
+        </EnvironmentProvider>
+      )
+    }
+
+    // Authentication request tab — reuses HTTPRequestTabView, which
+    // injects an extra "Configuration" tab when it sees type === 'auth'.
+    if (isAuthenticationRequestTab(effectiveTab)) {
+      const request = effectiveTab.request
+      return (
+        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
+          <RestormWorkbenchTab
+            breadcrumbs={breadcrumbs}
+            onBreadcrumbClick={onBreadcrumbClick}
+            onBreadcrumbAuxClick={onBreadcrumbAuxClick}
+            onBreadcrumbRename={onItemRename}
+            onBreadcrumbIconChange={onItemIconChange}
+            tags={request.tags}
+            onTagsChange={(nextTags) => { onTagsChange?.(request.id, nextTags) }}
+            tagColors={requestTagColors}
+            onTagColorChange={handleRequestTagColorChange}
+            tabId={effectiveTab.id}
+          >
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
+              <HTTPRequestTabView request={request} />
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>

@@ -8,7 +8,7 @@ import {
   type VariableDefinition
 } from 'electron-core-ui/renderer'
 import { RestormKeyValueTable } from '../RestormKeyValueTable'
-import type { HTTPRequest, KeyValue } from '../../../../shared/types/collections'
+import type { HTTPRequest, AuthenticationRequest, KeyValue } from '../../../../shared/types/collections'
 import type { TranslatedHelperDefinition } from '../../utils/handlebarsHelpersDefinitions'
 
 export type BodyMode = 'text' | 'form-data' | 'x-www-form-urlencoded' | 'file'
@@ -28,7 +28,7 @@ export interface HTTPRequestBodySectionProps {
   onBodyChange: (value: string) => void
   bodyFilePath: string
   onBodyFilePathChange: (value: string) => void
-  request: HTTPRequest
+  request: HTTPRequest | AuthenticationRequest
   onBodyFieldsChange: (rows: KeyValue[]) => void
   variables: VariableDefinition[]
   helpers: TranslatedHelperDefinition[]

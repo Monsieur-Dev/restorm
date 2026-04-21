@@ -18,12 +18,14 @@ import {
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
-import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue, ResponseHistoryDetail, EnvironmentFolder } from '../../../../shared/types/collections'
+import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue, ResponseHistoryDetail, EnvironmentFolder, AuthenticationRequest } from '../../../../shared/types/collections'
+import { isAuthenticationRequest } from '../../../../shared/types/collections'
 import { StringValue } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
+import { AuthenticationConfigurationTab } from './AuthenticationConfigurationTab'
 import { Badge } from '../common/Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
 import { useRestormStore } from '../../store/restormStore'
@@ -40,7 +42,10 @@ const methodSelectWrapperStyle: CSSProperties = { width: 90, flexShrink: 0 }
 const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
 
 export interface HTTPRequestTabViewProps {
-  request: HTTPRequest
+  /** An HTTPRequest or an AuthenticationRequest. The latter inherits
+   * every HTTP field but adds a Configuration tab surfaced via
+   * `additionalRequestTabs`. */
+  request: HTTPRequest | AuthenticationRequest
 }
 
 function buildRequestBodyFromHistory(body: { type: string; content?: string; path?: string; fields?: { key: string; value: string; enabled?: boolean }[] } | undefined): HTTPResponse['requestBody'] {
@@ -63,7 +68,7 @@ function buildRequestBodyFromHistory(body: { type: string; content?: string; pat
 }
 
 /** Determine body mode from request body type */
-function getBodyMode(request: HTTPRequest): 'text' | 'form-data' | 'x-www-form-urlencoded' | 'file' {
+function getBodyMode(request: HTTPRequest | AuthenticationRequest): 'text' | 'form-data' | 'x-www-form-urlencoded' | 'file' {
   if (!request.body) return 'text'
   switch (request.body.type) {
     case 'text': return 'text'
@@ -75,7 +80,7 @@ function getBodyMode(request: HTTPRequest): 'text' | 'form-data' | 'x-www-form-u
 }
 
 /** Get body content for text mode */
-function getBodyContent(request: HTTPRequest): string {
+function getBodyContent(request: HTTPRequest | AuthenticationRequest): string {
   if (request.body?.type === 'text') {
     return request.body.content
   }
@@ -83,7 +88,7 @@ function getBodyContent(request: HTTPRequest): string {
 }
 
 /** Get body file path for file mode */
-function getBodyFilePath(request: HTTPRequest): string {
+function getBodyFilePath(request: HTTPRequest | AuthenticationRequest): string {
   if (request.body?.type === 'file') {
     return request.body.path
   }
@@ -759,6 +764,16 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     return () => { subscription.unsubscribe() }
   }, [request.id])
 
+  const isAuthRequest = isAuthenticationRequest(request)
+  const additionalRequestTabs = isAuthRequest
+    ? [{
+        id: 'configuration',
+        label: t('authRequestTab.tabs.configuration', 'Configuration'),
+        useScrollableElement: false,
+        content: <AuthenticationConfigurationTab request={request} />
+      }]
+    : undefined
+
   return (
     <>
       <BaseRequestTabView
@@ -774,6 +789,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         infosContent={infosContent}
         responseContent={responseContent}
         jsonData={jsonData}
+        {...(additionalRequestTabs ? { additionalRequestTabs } : {})}
       />
       <ResponseHistoryModal
         isOpen={historyModalOpen}
