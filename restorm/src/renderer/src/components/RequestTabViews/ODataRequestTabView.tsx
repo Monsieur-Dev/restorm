@@ -26,6 +26,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { useRequestReset } from '../../hooks/useRequestReset'
+import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
@@ -39,8 +40,10 @@ import {
   logger,
   type ISelectOptionItem,
   type ISelectData,
-  type ListViewItemData
+  type ListViewItemData,
+  type VariableDefinition
 } from 'electron-core-ui/renderer'
+import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import type { ODataRequest, ODataVersion, ODataOperationKind, ODataBatchSubRequestSpec, ODataOperationParameterSpec, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { ODataBatchEditor } from './ODataBatchEditor'
 import { ODataOrderbyEditor } from './ODataOrderbyEditor'
@@ -197,6 +200,9 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   const [response, setResponse] = useState<ODataResponseViewData | null>(null)
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+  const [urlVariables, setUrlVariables] = useState<VariableDefinition[]>([])
+  const handlebarsHelpers = useHandlebarsHelpers()
+  const urlVariablesBootstrappedRef = useRef<boolean>(false)
 
   const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   const sourceIdRef = useRef<string>(crypto.randomUUID())
@@ -358,6 +364,30 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     void window.restorm?.context.setRequestEnvironment(requestId, currentEnvId)
   }, [selectedEnvId, environments, request.id])
 
+  // Subscribe to ContextService's URL-field available-variables
+  // broadcast so the URL input can offer handlebars autocomplete +
+  // hover resolution. Mirrors the HTTP tab's wiring.
+  const urlVariableId = useMemo(() => `${request.id}:url`, [request.id])
+  useEffect(() => {
+    const varId = urlVariableId
+    if (!varId || varId === 'undefined:url') return
+    const unsubscribe = window.restorm?.context.onAvailableVariables((result) => {
+      if (result.variableId !== varId) return
+      if (result.sourceId === sourceIdRef.current && urlVariablesBootstrappedRef.current) return
+      urlVariablesBootstrappedRef.current = true
+      const next = result.variables
+      setUrlVariables((prev) => {
+        if (prev.length !== next.length) return next
+        const changed = next.some((v, i) => {
+          const p = prev[i]
+          return p && (p.name !== v.name || p.value !== v.value)
+        })
+        return changed ? next : prev
+      })
+    })
+    return () => { unsubscribe?.() }
+  }, [urlVariableId])
+
   // Push the latest OData request shape to ContextService so
   // URLResolver can compose the resolved URL (with $filter / $select
   // / $top / $skip / $count appended). Keeps refiring when any of the
@@ -501,10 +531,12 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   const urlSection = (
     <div style={urlRowStyle} data-testid="odata-request-url-section">
       <div style={urlInputWrapperStyle}>
-        <InputBox
+        <RestormVariableInputBox
           value={request.url}
           onChange={setUrl}
-          options={{ placeholder: t('odataRequestTab.urlPlaceholder', 'https://service/odata/EntitySet') }}
+          variables={urlVariables}
+          helpers={handlebarsHelpers}
+          placeholder={t('odataRequestTab.urlPlaceholder', 'https://service/odata/EntitySet')}
           data-testid="odata-request-url"
         />
       </div>
