@@ -137,7 +137,10 @@ export const AuthenticationSetupModal: React.FC<AuthenticationSetupModalProps> =
         {currentRequest ? (
           <EnvironmentProvider environments={undefined}>
             <div style={{ flex: 1, minHeight: 400, minWidth: 800, display: 'flex', flexDirection: 'column' }}>
-              <HTTPRequestTabView request={currentRequest as unknown as Parameters<typeof HTTPRequestTabView>[0]['request']} />
+              <HTTPRequestTabView
+                request={currentRequest as unknown as Parameters<typeof HTTPRequestTabView>[0]['request']}
+                disableContextSync
+              />
             </div>
           </EnvironmentProvider>
         ) : null}

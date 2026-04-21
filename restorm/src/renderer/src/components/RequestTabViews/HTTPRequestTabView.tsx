@@ -46,6 +46,13 @@ export interface HTTPRequestTabViewProps {
    * every HTTP field but adds a Configuration tab surfaced via
    * `additionalRequestTabs`. */
   request: HTTPRequest | AuthenticationRequest
+  /** When true, skip the main-process ContextService wiring:
+   * registerRequest / updateFullRequestData / onAvailableVariables
+   * subscription. The caller is responsible for dispatching the
+   * request some other way (auth prefetch, etc.). Used by the import
+   * wizard so every keystroke in the embedded form doesn't trigger a
+   * round-trip through the context engine. */
+  disableContextSync?: boolean
 }
 
 function buildRequestBodyFromHistory(body: { type: string; content?: string; path?: string; fields?: { key: string; value: string; enabled?: boolean }[] } | undefined): HTTPResponse['requestBody'] {
@@ -96,7 +103,8 @@ function getBodyFilePath(request: HTTPRequest | AuthenticationRequest): string {
 }
 
 export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
-  request
+  request,
+  disableContextSync = false
 }) => {
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
@@ -200,6 +208,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   // Subscribe to backend URL and code snippets updates. Own-echoes are buffered + flushed
   // after idle (see scheduleSettleFlush) to avoid disturbing Monaco during active typing.
   useEffect(() => {
+    if (disableContextSync) return
     const requestId = request.id
     if (!requestId) return
 
@@ -239,7 +248,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         settleTimerRef.current = null
       }
     }
-  }, [request.id, scheduleSettleFlush])
+  }, [request.id, scheduleSettleFlush, disableContextSync])
 
   // Refs to capture initial values for registration (avoid re-running effect when these change)
   const selectedEnvIdRef = useRef(selectedEnvId)
@@ -251,6 +260,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
 
   // Register request with ContextService on mount, unregister on unmount
   useEffect(() => {
+    if (disableContextSync) return
     const requestId = request.id
     if (!requestId) return
 
@@ -273,10 +283,11 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     // Only re-register when the request ID changes (mount/unmount).
     // Environment changes are handled by the separate setRequestEnvironment effect below.
     // toKeyValueData is a stable useCallback with [] deps, so it never changes.
-  }, [request.id, toKeyValueData])
+  }, [request.id, toKeyValueData, disableContextSync])
 
   // Notify ContextService when selected environment changes
   useEffect(() => {
+    if (disableContextSync) return
     const requestId = request.id
     if (!requestId) return
 
@@ -290,7 +301,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       void window.restorm?.context.setRequestEnvironment(requestId, currentEnvId)
       previousEnvIdRef.current = currentEnvId
     }
-  }, [selectedEnvId, environments, request.id])
+  }, [selectedEnvId, environments, request.id, disableContextSync])
 
   // Sync method changes to reactive object
   useEffect(() => {
@@ -324,6 +335,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
 
   // Send full request data to backend for URL resolution and code snippets
   useEffect(() => {
+    if (disableContextSync) return
     const requestId = request.id
     if (!requestId || requestIdRef.current !== request.id) return
 
@@ -347,7 +359,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       pathParams: request.pathParams ? toKeyValueData(request.pathParams) : [],
       body: bodyData
     }, sourceIdRef.current)
-  }, [request.id, url, method, request.headers, request.params, request.pathParams, body, bodyMode, bodyFilePath, request.body, toKeyValueData])
+  }, [request.id, url, method, request.headers, request.params, request.pathParams, body, bodyMode, bodyFilePath, request.body, toKeyValueData, disableContextSync])
   
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
@@ -360,9 +372,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   
   // Listen for URL field available variables from backend
   useEffect(() => {
+    if (disableContextSync) return
     const varId = urlVariableId
     if (!varId || varId === 'undefined:url') return
-    
+
     const unsubscribe = window.restorm?.context.onAvailableVariables((result) => {
       if (result.variableId !== varId) return
       // First own-echo bootstraps the variables list (needed for Monaco hover + autocomplete
@@ -383,11 +396,12 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     })
 
     return () => { unsubscribe?.() }
-  }, [urlVariableId])
+  }, [urlVariableId, disableContextSync])
 
   // Callbacks for KeyValue changes - notify both reactive object and ContextService
   const handleHeadersChange = useCallback((rows: KeyValue[]): void => {
     updateReactiveProperty(request, 'headers', rows)
+    if (disableContextSync) return
     const requestId = request.id
     if (requestId) {
       void window.restorm?.context.updateRequestKeyValues(
@@ -397,10 +411,11 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         sourceIdRef.current
       )
     }
-  }, [request])
+  }, [request, disableContextSync])
 
   const handleParamsChange = useCallback((rows: KeyValue[]): void => {
     updateReactiveProperty(request, 'params', rows)
+    if (disableContextSync) return
     const requestId = request.id
     if (requestId) {
       void window.restorm?.context.updateRequestKeyValues(
@@ -410,10 +425,11 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         sourceIdRef.current
       )
     }
-  }, [request])
+  }, [request, disableContextSync])
 
   const handlePathParamsChange = useCallback((rows: KeyValue[]): void => {
     updateReactiveProperty(request, 'pathParams', rows)
+    if (disableContextSync) return
     const requestId = request.id
     if (requestId) {
       void window.restorm?.context.updateRequestKeyValues(
@@ -423,7 +439,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         sourceIdRef.current
       )
     }
-  }, [request])
+  }, [request, disableContextSync])
 
   const methodOptions = useMemo<ISelectOptionItem[]>(
     () => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'].map((verb) => ({

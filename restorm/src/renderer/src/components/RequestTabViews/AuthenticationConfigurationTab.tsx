@@ -18,6 +18,8 @@ import { useTranslation } from 'react-i18next'
 import { Button, InputBox } from 'electron-core-ui/renderer'
 import type { AuthenticationRequest, KeyValue } from '../../../../shared/types/collections'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
+import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import { updateReactiveProperty } from './requestTabViewUtils'
 
 const containerStyle: CSSProperties = {
@@ -63,6 +65,7 @@ function formatCodes(codes: readonly number[]): string {
 
 export const AuthenticationConfigurationTab: React.FC<AuthenticationConfigurationTabProps> = ({ request }) => {
   const { t } = useTranslation()
+  const handlebarsHelpers = useHandlebarsHelpers()
   const producedHeadersRef = useRef<KeyValueTableHandle | null>(null)
 
   const handleProducedHeadersChange = useCallback((rows: KeyValue[]) => {
@@ -109,6 +112,7 @@ export const AuthenticationConfigurationTab: React.FC<AuthenticationConfiguratio
         <RestormKeyValueTable
           ref={producedHeadersRef}
           variables={[]}
+          helpers={handlebarsHelpers}
           initialRows={request.producedHeaders}
           onRowsChange={handleProducedHeadersChange}
           data-testid="auth-request-produced-headers"
@@ -126,10 +130,12 @@ export const AuthenticationConfigurationTab: React.FC<AuthenticationConfiguratio
           )}
         </span>
         <div style={inputWrapperStyle}>
-          <InputBox
+          <RestormVariableInputBox
             value={request.expirationExpression ?? ''}
             onChange={handleExpirationChange}
-            options={{ placeholder: '{{expires_in}}' }}
+            variables={[]}
+            helpers={handlebarsHelpers}
+            placeholder="{{expires_in}}"
             data-testid="auth-request-expiration"
           />
         </div>
