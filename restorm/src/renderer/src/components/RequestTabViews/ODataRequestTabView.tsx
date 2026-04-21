@@ -43,6 +43,7 @@ import {
 } from 'electron-core-ui/renderer'
 import type { ODataRequest, ODataVersion, ODataOperationKind, ODataBatchSubRequestSpec, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { ODataBatchEditor } from './ODataBatchEditor'
+import { ODataOrderbyEditor } from './ODataOrderbyEditor'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
@@ -623,12 +624,10 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       </div>
 
       <div style={rowStyle}>
-        <label style={labelStyle} htmlFor="odata-orderby">$orderby</label>
-        <InputBox
-          value={request.queryOptions.orderby ?? ''}
+        <label style={labelStyle}>$orderby</label>
+        <ODataOrderbyEditor
+          value={request.queryOptions.orderby}
           onChange={setOrderby}
-          options={{ placeholder: t('odataRequestTab.orderbyPlaceholder', 'Name asc, Id desc') }}
-          data-testid="odata-request-orderby"
         />
       </div>
 
