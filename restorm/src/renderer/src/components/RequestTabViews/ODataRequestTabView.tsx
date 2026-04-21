@@ -57,6 +57,7 @@ import {
   keyValuesToPairs
 } from '../../../../shared/utils/odataQuery'
 import { normalizeODataResponse } from '../../../../shared/utils/odataResponse'
+import { extractNavigationLinks } from '../../../../shared/utils/odataNavigationLinks'
 import {
   serializeODataBatch,
   type ODataBatchSubRequest
@@ -669,6 +670,17 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     </ScrollableElement>
   )
 
+  const handleNavigateToLink = useCallback((nextUrl: string) => {
+    // Clicking a nav link loads its URL as the new request URL. The
+    // URL typically already carries any query options the server
+    // assembled for us, so we also clear the builder's $options
+    // state — otherwise URLResolver would append them again and
+    // produce a bogus composite URL. We stop short of auto-sending
+    // so the user sees the change before the network call.
+    updateReactiveProperty(request, 'url', nextUrl)
+    updateReactiveProperty(request, 'queryOptions', {})
+  }, [request])
+
   const buildResponseView = useCallback((input: {
     statusCode: number
     statusText: string
@@ -686,6 +698,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     contentType?: string | undefined
     contentLength?: number | undefined
     error?: string | undefined
+    disableNavigate?: boolean
   }): {
     responseContent: React.ReactNode
     infosContent: React.ReactNode
@@ -895,8 +908,51 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       )
     }))
 
+    // Extract OData annotation URLs from the response body so the
+    // user can jump to @odata.id / @odata.editLink / nextLink / any
+    // navigation-link on an expanded entity without hunting through
+    // the raw JSON.
+    const navigationLinks = normalized ? extractNavigationLinks(normalized.body) : []
+    const navLinkItems: ListViewItemData[] = navigationLinks.map((link, index) => ({
+      id: `nav-link-${index}`,
+      icon: 'link',
+      title: (
+        <span style={kvRowStyle}>
+          <span style={kvKeyStyle}>{link.path ? `${link.path} / ${link.key}` : link.key}</span>
+          {input.disableNavigate ? (
+            <span style={{ ...kvValueStyle, wordBreak: 'break-all' }}>{link.url}</span>
+          ) : (
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault()
+                handleNavigateToLink(link.url)
+              }}
+              style={{
+                color: 'var(--textLink-foreground)',
+                cursor: 'pointer',
+                wordBreak: 'break-all',
+                textDecoration: 'underline'
+              }}
+              data-testid={`odata-nav-link-${index}`}
+            >
+              {link.url}
+            </a>
+          )}
+        </span>
+      )
+    }))
+
     const headersTreeItems: ListViewItemData[] = [
       { id: 'group-general', title: 'General', icon: 'info', isExpandable: true, isExpanded: true, children: generalItems },
+      ...(navLinkItems.length > 0 ? [{
+        id: 'group-nav-links',
+        title: `Navigation links (${navLinkItems.length})`,
+        icon: 'link',
+        isExpandable: true,
+        isExpanded: true,
+        children: navLinkItems
+      }] : []),
       { id: 'group-response-headers', title: `Response headers (${responseHeaderItems.length})`, icon: 'call-incoming', isExpandable: true, isExpanded: true, children: responseHeaderItems },
       { id: 'group-request-headers', title: `Request headers (${requestHeaderItems.length})`, icon: 'call-outgoing', isExpandable: true, isExpanded: true, children: requestHeaderItems }
     ]
@@ -918,7 +974,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       infosContent: renderedInfos,
       jsonData: json
     }
-  }, [t])
+  }, [t, handleNavigateToLink])
 
   const { responseContent, infosContent, jsonData } = useMemo(() => {
     if (!response) {
@@ -960,6 +1016,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         requestHeadersFromHistory: r.requestHeaders,
         odataVersion: r.odataVersion,
         operationKind: r.operationKind,
+        disableNavigate: true,
         ...(r.odataCount !== undefined ? { odataCount: r.odataCount } : {}),
         ...(r.odataNextLink !== undefined ? { odataNextLink: r.odataNextLink } : {}),
         ...(r.contentType !== undefined ? { contentType: r.contentType } : {}),
@@ -988,6 +1045,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         requestHeadersFromHistory: r.requestHeaders,
         odataVersion: request.odataVersion,
         operationKind: request.operationKind,
+        disableNavigate: true,
         ...(r.contentType !== undefined ? { contentType: r.contentType } : {}),
         ...(r.contentLength !== undefined ? { contentLength: r.contentLength } : {}),
         ...(r.error !== undefined ? { error: r.error } : {})
