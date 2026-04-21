@@ -515,7 +515,7 @@ export function ImportModal({
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 8,
-                padding: '4px 8px',
+                padding: '4px 4px 4px 8px',
                 borderRadius: 12,
                 background: '#f97316',
                 color: '#ffffff',
@@ -523,8 +523,27 @@ export function ImportModal({
                 alignSelf: 'flex-start'
               }}
             >
-              <i className="codicon codicon-key" aria-hidden="true" />
-              <span>{t('import.authenticatedVia', 'Authenticated via {{name}}', { name: attachedAuth.name || 'auth route' })}</span>
+              <button
+                type="button"
+                onClick={() => { setShowAuthSetupModal(true) }}
+                title={t('import.editAuth', 'Edit authentication route')}
+                aria-label={t('import.editAuth', 'Edit authentication route')}
+                data-testid="import-edit-auth-button"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  border: 'none',
+                  background: 'transparent',
+                  color: 'inherit',
+                  padding: 0,
+                  cursor: 'pointer',
+                  font: 'inherit'
+                }}
+              >
+                <i className="codicon codicon-key" aria-hidden="true" />
+                <span>{t('import.authenticatedVia', 'Authenticated via {{name}}', { name: attachedAuth.name || 'auth route' })}</span>
+              </button>
               <Button
                 small
                 icon="close"
