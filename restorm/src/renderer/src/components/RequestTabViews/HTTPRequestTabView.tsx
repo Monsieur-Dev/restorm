@@ -447,12 +447,23 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
 
     // Look the auth request up (if any) so the main-process executor
     // can run its cache-or-fetch + header-inject flow before firing
-    // this request. We ship a plain POJO — the main side rebuilds the
-    // class via `AuthenticationRequest.fromPlain`.
+    // this request. The auth coming out of `rootItems` is a reactive
+    // Proxy wrapping an `AuthenticationRequest` class instance with
+    // `KeyValue` / `StringValue` / `PasswordValue` fields — structured
+    // clone (which Electron IPC uses) rejects those. We run
+    // `toPlainObject()` to flatten the class graph into persisted
+    // form, then a JSON round-trip to strip any stray class instances
+    // the graph still references (reactive Proxies carry class-type
+    // leaves like `StringValue` for `KeyValue.value` that
+    // `serializeValueForPersistence` already knows how to handle on
+    // the main side via `fromPlain`).
     const authAttachedId = (request as { authenticationRequestId?: string }).authenticationRequestId
     const attachedAuth = authAttachedId ? resolveAuthRequest(authAttachedId) : null
-    const authRequestPayload = attachedAuth
+    const authPlain = attachedAuth
       ? (attachedAuth as unknown as { toPlainObject?: () => unknown }).toPlainObject?.() ?? attachedAuth
+      : undefined
+    const authRequestPayload = authPlain !== undefined
+      ? JSON.parse(JSON.stringify(authPlain)) as unknown
       : undefined
 
     // Execute via backend

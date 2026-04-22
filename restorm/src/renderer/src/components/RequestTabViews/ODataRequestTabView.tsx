@@ -489,8 +489,14 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     const dispatchedMethod = method
     const authAttachedId = (request as { authenticationRequestId?: string }).authenticationRequestId
     const attachedAuth = authAttachedId ? resolveAuthRequest(authAttachedId) : null
-    const authRequestPayload = attachedAuth
+    const authPlain = attachedAuth
       ? (attachedAuth as unknown as { toPlainObject?: () => unknown }).toPlainObject?.() ?? attachedAuth
+      : undefined
+    // JSON round-trip flattens any residual class instances
+    // (`StringValue`, `PasswordValue`, reactive Proxy wrappers) —
+    // structured clone over IPC rejects those directly.
+    const authRequestPayload = authPlain !== undefined
+      ? JSON.parse(JSON.stringify(authPlain)) as unknown
       : undefined
     api.execute({
       requestId,
@@ -840,8 +846,11 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     try {
       const nextLinkAuthId = (request as { authenticationRequestId?: string }).authenticationRequestId
       const nextLinkAuth = nextLinkAuthId ? resolveAuthRequest(nextLinkAuthId) : null
-      const nextLinkAuthPayload = nextLinkAuth
+      const nextLinkPlain = nextLinkAuth
         ? (nextLinkAuth as unknown as { toPlainObject?: () => unknown }).toPlainObject?.() ?? nextLinkAuth
+        : undefined
+      const nextLinkAuthPayload = nextLinkPlain !== undefined
+        ? JSON.parse(JSON.stringify(nextLinkPlain)) as unknown
         : undefined
       const result = await api.execute({
         requestId: request.id,
