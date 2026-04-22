@@ -180,11 +180,19 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         })
       }
 
+      // Defer the expansion so React first paints the new `rootItems`
+      // with folders collapsed (a small tree: just the top-level
+      // folders) before turning around and re-rendering the whole
+      // expanded 10k-leaf sidebar. Without the microtask the two state
+      // updates batch into a single commit whose render has to lay
+      // out every descendant up front, blocking the first paint.
       const expandAfterImport = (): void => {
         const pendingFolderIds = Array.from(createdFoldersMap.values()).map((f) => f.id)
         const newlyExpanded = [...pendingFolderIds, ...importedFolderIds]
         if (newlyExpanded.length === 0) return
-        setExpandedIds((prev) => Array.from(new Set([...prev, ...newlyExpanded])))
+        queueMicrotask(() => {
+          setExpandedIds((prev) => Array.from(new Set([...prev, ...newlyExpanded])))
+        })
       }
 
       // Collect env-folder IDs from the top-level imported items for
