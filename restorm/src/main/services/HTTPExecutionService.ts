@@ -439,10 +439,28 @@ class HTTPExecutionService {
     const headers: Record<string, string> = {}
     const authCtx = contextService.getRequestContext(authRequest.id)
     const headerSource = authCtx?.keyValueGroups.get('headers') ?? authRequest.headers
+    // After IPC marshal the fallback path sees `{ type, value }`
+    // objects instead of `StringValue` / `PasswordValue` instances;
+    // `.toString()` on those returns `[object Object]`.
+    const extractString = (v: unknown): string => {
+      if (typeof v === 'string') return v
+      if (typeof v === 'number' || typeof v === 'boolean') return String(v)
+      if (v && typeof v === 'object') {
+        const obj = v as { toString?: () => string; value?: unknown }
+        if (typeof obj.toString === 'function' && obj.toString !== Object.prototype.toString) {
+          // Class instances (`StringValue`, `PasswordValue`, …) still
+          // round-trip through here in the ContextService path.
+          return obj.toString()
+        }
+        if (typeof obj.value === 'string') return obj.value
+        if (typeof obj.value === 'number' || typeof obj.value === 'boolean') return String(obj.value)
+      }
+      return ''
+    }
     for (const h of headerSource) {
       if (h.enabled === false) continue
       if (!h.key) continue
-      const rawValue = h.value.toString()
+      const rawValue = extractString(h.value)
       const resolved = authCtx
         ? contextService.resolveValue(rawValue, authRequest.id)
         : rawValue
@@ -466,8 +484,30 @@ class HTTPExecutionService {
         body = params.toString()
         headers['Content-Type'] ??= 'application/x-www-form-urlencoded'
       }
-    } else if (authRequest.body?.type === 'text' && authRequest.body.content) {
-      body = authRequest.body.content
+    } else if (authRequest.body) {
+      // Fallback path — ContextService hasn't seen this auth request
+      // (the auth-tab was never mounted in this session). Serialize
+      // directly off the `AuthenticationRequest`. `x-www-form-urlencoded`
+      // is the only shape OAuth token endpoints care about, and it's
+      // also the one the request's own Send flow uses, so a request
+      // that works in its own tab must work from the cache layer too.
+      const authBody = authRequest.body
+      if (authBody.type === 'text' && typeof authBody.content === 'string') {
+        body = authBody.content
+      } else if (authBody.type === 'x-www-form-urlencoded') {
+        const params = new URLSearchParams()
+        // IPC marshal turns every `StringValue` / `PasswordValue` /
+        // etc. into the persisted `{ type, value }` shape — the
+        // class-instance `.toString()` path is gone by the time we
+        // run here. Extract the string payload manually.
+        const extractValue = extractString
+        for (const field of authBody.fields) {
+          if (!field.key) continue
+          params.append(field.key, extractValue(field.value))
+        }
+        body = params.toString()
+        headers['Content-Type'] ??= 'application/x-www-form-urlencoded'
+      }
     }
 
     const result = await this.makeRequest({
