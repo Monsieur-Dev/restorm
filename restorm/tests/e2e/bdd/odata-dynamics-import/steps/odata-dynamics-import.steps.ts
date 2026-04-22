@@ -172,10 +172,10 @@ When('I click Import and wait for the sidebar to be populated', async () => {
   await expect(page.locator('[data-testid="import-modal"]')).not.toBeVisible({ timeout: 60000 })
 
   // Wait for the sidebar ListView row count to stabilize as a proxy
-  // for "sidebar populated". `.ecui-list-view-item` is the row class
+  // for "sidebar populated". `.list-view-row` is the row class
   // the ListView component renders — a count that stops growing for
   // STABLE_THRESHOLD_MS means React has committed the final tree.
-  const treeRows = page.locator('[data-testid="sidebar-listview"] .ecui-list-view-item')
+  const treeRows = page.locator('[data-testid="sidebar-listview"] .list-view-row')
   let lastCount = -1
   let stableFor = 0
   const STABLE_THRESHOLD_MS = 1500
@@ -204,7 +204,7 @@ Then('the collection contains the dynamics authentication route', async () => {
   // dropped by useImport's empty-file path, so we nest it). Search
   // by label within the sidebar.
   const authNode = page.locator(
-    '[data-testid="sidebar-listview"] .ecui-list-view-item',
+    '[data-testid="sidebar-listview"] .list-view-row',
     { hasText: 'Authentication route' }
   ).first()
   await expect(authNode).toBeVisible({ timeout: 10000 })
@@ -216,7 +216,7 @@ Then('a non-auth request shows the dynamics auth selected in the status bar', as
   // Click the first ListView row whose label isn't the auth route
   // nor a folder. ODATA requests are the numerous leaves.
   const candidates = page
-    .locator('[data-testid="sidebar-listview"] .ecui-list-view-item')
+    .locator('[data-testid="sidebar-listview"] .list-view-row')
     .filter({ hasNotText: 'Authentication route' })
   const first = candidates.first()
   await expect(first).toBeVisible({ timeout: 10000 })
