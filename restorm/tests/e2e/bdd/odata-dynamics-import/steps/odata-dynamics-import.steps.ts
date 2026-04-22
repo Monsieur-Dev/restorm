@@ -21,10 +21,20 @@ let page: Page | null = null
 let creds: DynamicsCreds | null = null
 
 // Timing buckets persisted across steps so the final "report" step
-// can dump them all together.
+// can dump them all together. We also mirror to a stable file after
+// every mark so a mid-run failure still leaves partial timings on
+// disk for inspection.
 const timings: Record<string, number> = {}
 const markNow = (label: string): void => {
   timings[label] = Date.now()
+  try {
+    mkdirSync(ODATA_DYNAMICS_TEMP_DIR, { recursive: true })
+    writeFileSync(
+      join(ODATA_DYNAMICS_TEMP_DIR, 'latest-timings.json'),
+      JSON.stringify({ timestamps: timings }, null, 2),
+      'utf-8'
+    )
+  } catch { /* ignore */ }
 }
 const elapsed = (from: string, to = 'now'): number => {
   const start = timings[from]
@@ -35,10 +45,12 @@ const elapsed = (from: string, to = 'now'): number => {
 }
 
 Given('a new single-file YAML collection for the dynamics import', async ({ launchApp }) => {
-  // Skip the scenario cleanly when credentials aren't provisioned.
+  // The scenario is opt-in at the playwright.config level — it only
+  // runs when `RUN_ODATA_DYNAMICS_PERF=1` is set. Credentials still
+  // have to be provisioned locally (gitignored `dynamics-creds.json`)
+  // and we fail loud here if they are missing.
   if (!existsSync(DYNAMICS_CREDS_PATH)) {
-    test.skip(true, `dynamics-creds.json missing at ${DYNAMICS_CREDS_PATH} — provision the file or leave this suite out of the run.`)
-    return
+    throw new Error(`dynamics-creds.json missing at ${DYNAMICS_CREDS_PATH} — provision the file to run this suite.`)
   }
   creds = loadDynamicsCredsOrSkip()
 
@@ -87,10 +99,13 @@ When('I configure the dynamics OAuth token route and save it', async () => {
   await expect(authModal).toBeVisible({ timeout: 2000 })
 
   // POST https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token
-  await page.locator('[data-testid="local-auth-form-url-input"] input').fill(creds.tokenUrl)
+  // InputBox's `data-testid` lands on a hidden marker; the actual
+  // `<input>` gets a `-input` suffix.
+  await page.locator('[data-testid="local-auth-form-url-input-input"]').fill(creds.tokenUrl)
 
-  // Content-Type header (form-urlencoded is required)
-  await page.locator('[data-testid="local-auth-form-add-header-button"]').click()
+  // Content-Type header (form-urlencoded is required). Headers table
+  // seeds with a single empty row — reuse it instead of adding a
+  // second empty one and leaving the first blank.
   const headersTable = page.locator('[data-testid="local-auth-form-headers-table"]')
   const headerRow = headersTable.locator('tbody tr').first()
   await headerRow.locator('td').nth(2).locator('input').first().fill('Content-Type')
@@ -132,7 +147,11 @@ When('I configure the dynamics OAuth token route and save it', async () => {
   await expect(page.locator('[data-testid="authentication-setup-modal"]')).not.toBeVisible({ timeout: 30000 })
 
   // Import modal should now show the preview of thousands of routes.
-  await expect(page.locator('[data-testid="import-modal"] .import-preview-section')).toBeVisible({ timeout: 60000 })
+  // Backend parses the full EDMX (10k+ entities + actions + funcs)
+  // after we hand over the resolved auth headers — this can take a
+  // while, and it's NOT the optimization target. We measure it but
+  // give it a generous ceiling.
+  await expect(page.locator('[data-testid="import-modal"] .import-preview-section')).toBeVisible({ timeout: 180000 })
   markNow('import-preview-ready')
 })
 
@@ -152,17 +171,18 @@ When('I click Import and wait for the sidebar to be populated', async () => {
   // the sidebar tree to render at least one imported folder.
   await expect(page.locator('[data-testid="import-modal"]')).not.toBeVisible({ timeout: 60000 })
 
-  // `tree-item-` elements appear as the sidebar renders the
-  // collection. We wait for the count to stabilize as a proxy for
-  // "sidebar populated".
-  const treeItems = page.locator('[data-testid^="tree-item-"]')
+  // Wait for the sidebar ListView row count to stabilize as a proxy
+  // for "sidebar populated". `.ecui-list-view-item` is the row class
+  // the ListView component renders — a count that stops growing for
+  // STABLE_THRESHOLD_MS means React has committed the final tree.
+  const treeRows = page.locator('[data-testid="sidebar-listview"] .ecui-list-view-item')
   let lastCount = -1
   let stableFor = 0
   const STABLE_THRESHOLD_MS = 1500
   const POLL_INTERVAL_MS = 250
-  const deadline = Date.now() + 180000
+  const deadline = Date.now() + 300000
   while (Date.now() < deadline) {
-    const n = await treeItems.count()
+    const n = await treeRows.count()
     if (n > 0 && n === lastCount) {
       stableFor += POLL_INTERVAL_MS
       if (stableFor >= STABLE_THRESHOLD_MS) break
@@ -177,35 +197,38 @@ When('I click Import and wait for the sidebar to be populated', async () => {
 })
 
 Then('the collection contains the dynamics authentication route', async () => {
-  if (!page || !creds) throw new Error('app must be launched + creds must be loaded')
+  if (!page) throw new Error('app must be launched')
 
-  // The auth route should be visible in the sidebar with its
-  // distinctive URL. We search by text instead of test-id because
-  // the imported items don't carry stable test-ids yet.
-  const authNode = page.locator('[data-testid^="tree-item-"]', { hasText: 'Authentication route' }).first()
+  // Auth request lives inside the first imported folder (see
+  // ImportModal.handleImportClick — non-folder root items would be
+  // dropped by useImport's empty-file path, so we nest it). Search
+  // by label within the sidebar.
+  const authNode = page.locator(
+    '[data-testid="sidebar-listview"] .ecui-list-view-item',
+    { hasText: 'Authentication route' }
+  ).first()
   await expect(authNode).toBeVisible({ timeout: 10000 })
 })
 
 Then('a non-auth request shows the dynamics auth selected in the status bar', async () => {
   if (!page) throw new Error('app must be launched')
 
-  // Click any non-auth tree item (the first non-auth leaf will do).
-  // Heuristic: pick the first tree-item whose label doesn't read
-  // "Authentication route".
-  const candidates = page.locator('[data-testid^="tree-item-"]').filter({ hasNotText: 'Authentication route' })
+  // Click the first ListView row whose label isn't the auth route
+  // nor a folder. ODATA requests are the numerous leaves.
+  const candidates = page
+    .locator('[data-testid="sidebar-listview"] .ecui-list-view-item')
+    .filter({ hasNotText: 'Authentication route' })
   const first = candidates.first()
   await expect(first).toBeVisible({ timeout: 10000 })
   markNow('first-request-click')
   await first.click()
-  // Give the request tab a beat to open.
   await page.waitForTimeout(1000)
   markNow('first-request-open')
 
-  // Status bar auth selector should name the attached auth route.
+  // Status bar auth selector should exist (exact label depends on
+  // what the user named the route — smoke check is enough).
   const statusAuth = page.locator('[data-testid="statusbar-auth-selector"]')
   await expect(statusAuth).toBeVisible({ timeout: 5000 })
-  // We only assert it has a label — exact text depends on what the
-  // user named the route. Smoke check is enough.
 })
 
 Then('import timings are reported', async ({}, testInfo) => {

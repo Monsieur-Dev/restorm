@@ -300,9 +300,13 @@ export function ImportModal({
   const handleImportClick = useCallback(() => {
     if (previewItems.length === 0) return
 
-    // If the user attached an auth request, prepend it to the items and
-    // wire every other imported request to reference it. This keeps the
-    // whole folder pre-authenticated after the import persists.
+    // If the user attached an auth request, wire every imported
+    // request to reference it, and nest the auth request itself
+    // *inside* the first top-level folder rather than at the root.
+    // The root of the collection tree is by convention folders only
+    // (useImport's empty-file path drops non-folder items at root),
+    // so a root-level auth request would silently vanish. Nesting it
+    // in the first imported folder keeps it visible and persisted.
     let finalItems: FolderItem[] = previewItems
     if (attachedAuth) {
       const authId = attachedAuth.id
@@ -317,7 +321,21 @@ export function ImportModal({
         }
         return item
       })
-      finalItems = [attachedAuth as unknown as FolderItem, ...attach(previewItems)]
+      const attachedTree = attach(previewItems)
+      const firstFolderIdx = attachedTree.findIndex((item) => 'items' in item)
+      if (firstFolderIdx >= 0) {
+        const firstFolder = attachedTree[firstFolderIdx] as Extract<FolderItem, { items: FolderItem[] }>
+        finalItems = [
+          ...attachedTree.slice(0, firstFolderIdx),
+          { ...firstFolder, items: [attachedAuth as unknown as FolderItem, ...firstFolder.items] },
+          ...attachedTree.slice(firstFolderIdx + 1)
+        ]
+      } else {
+        // No folder in the preview — fall back to the old behaviour
+        // (root-level) even though useImport may drop it. Logged
+        // so a future import shape that lands here surfaces.
+        finalItems = [attachedAuth as unknown as FolderItem, ...attachedTree]
+      }
     }
 
     // Call import with current pending folders

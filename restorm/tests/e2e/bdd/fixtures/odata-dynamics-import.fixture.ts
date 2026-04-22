@@ -8,8 +8,10 @@ import { withE2ECoverageEnv } from '../../helpers/coverage'
 
 // Credentials for this test live in a gitignored file so the secret
 // never hits the repo. Test is skipped gracefully when the file is
-// absent (e.g. on CI without the creds).
-export const DYNAMICS_CREDS_PATH = resolve(__dirname, '../fixtures/dynamics-creds.json')
+// absent (e.g. on CI without the creds). Creds sit in
+// `tests/e2e/fixtures/dynamics-creds.json` — two directories up
+// from this file (`tests/e2e/bdd/fixtures/`).
+export const DYNAMICS_CREDS_PATH = resolve(__dirname, '../../fixtures/dynamics-creds.json')
 
 export interface DynamicsCreds {
   tenantId: string
