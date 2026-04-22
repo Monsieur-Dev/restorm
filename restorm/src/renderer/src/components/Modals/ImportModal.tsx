@@ -301,10 +301,14 @@ export function ImportModal({
     if (previewItems.length === 0) return
 
     // If the user attached an auth request, wire every imported
-    // request to reference it and prepend the auth request itself at
-    // the root of the imported tree — `useImport` keeps root-level
-    // requests intact on empty collections now, so no nesting hack
-    // is needed.
+    // request to reference it and nest the auth route itself as the
+    // FIRST child of the top-level imported folder (usually the
+    // env-folder the importer produced). The auth route belongs to
+    // the imported collection, not to whatever sits next to it at
+    // the true root — folder-mode save then lays it out as
+    // `Microsoft.Dynamics.CRM/0001 - Authentication route.yaml`
+    // instead of writing a stray auth folder alongside the env
+    // folder.
     let finalItems: FolderItem[] = previewItems
     if (attachedAuth) {
       const authId = attachedAuth.id
@@ -319,7 +323,21 @@ export function ImportModal({
         }
         return item
       })
-      finalItems = [attachedAuth as unknown as FolderItem, ...attach(previewItems)]
+      const attachedTree = attach(previewItems)
+      const firstFolderIdx = attachedTree.findIndex((item) => 'items' in item)
+      if (firstFolderIdx >= 0) {
+        const firstFolder = attachedTree[firstFolderIdx] as Extract<FolderItem, { items: FolderItem[] }>
+        finalItems = [
+          ...attachedTree.slice(0, firstFolderIdx),
+          { ...firstFolder, items: [attachedAuth as unknown as FolderItem, ...firstFolder.items] },
+          ...attachedTree.slice(firstFolderIdx + 1)
+        ]
+      } else {
+        // Shouldn't happen in practice — every importer produces at
+        // least one top-level folder — but fall back to prepending
+        // at the true root rather than dropping the attached auth.
+        finalItems = [attachedAuth as unknown as FolderItem, ...attachedTree]
+      }
     }
 
     // Call import with current pending folders

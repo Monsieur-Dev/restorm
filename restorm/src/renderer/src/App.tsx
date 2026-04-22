@@ -1382,19 +1382,14 @@ const App: React.FC = () => {
         {filePath && <StatusbarElement data-testid="app-statusbar-element" title={filePath} />}
         <DesktopIndicator />
         {(() => {
-          if (!activeRequest) return null
+          if (!activeRequest || !activeEnvFolderId) return null
           const reactiveRequest = findRequestById(rootItems, activeRequest.id)
-          if (!reactiveRequest) return null
-          // Auth routes live anywhere in the tree — inside the
-          // nearest env folder, or at the root of the collection.
-          // Walk the whole `rootItems` set so both shapes feed the
-          // picker; the env-folder scoping that used to gate this was
-          // too narrow for imports that put the auth route at the
-          // root.
+          const envFolder = findFolderById(rootItems, activeEnvFolderId)
+          if (!reactiveRequest || !envFolder) return null
           return (
             <StatusbarAuthSelector
               activeRequest={reactiveRequest}
-              envFolderItems={rootItems}
+              envFolderItems={envFolder.items}
             />
           )
         })()}
