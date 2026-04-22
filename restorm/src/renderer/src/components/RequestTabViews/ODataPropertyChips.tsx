@@ -31,7 +31,7 @@ export interface ODataPropertyChipsProps {
   testIdPrefix?: string
 }
 
-export const ODataPropertyChips: React.FC<ODataPropertyChipsProps> = ({ properties, onPick, label, testIdPrefix = 'odata-property-chip' }) => {
+const ODataPropertyChipsBase: React.FC<ODataPropertyChipsProps> = ({ properties, onPick, label, testIdPrefix = 'odata-property-chip' }) => {
   const { t } = useTranslation()
   if (properties.length === 0) return null
   return (
@@ -56,3 +56,12 @@ export const ODataPropertyChips: React.FC<ODataPropertyChipsProps> = ({ properti
     </div>
   )
 }
+
+// Dynamics entities can carry 1000+ columns, one `<Button>` per chip —
+// the row becomes the dominant cost of every parent re-render (each
+// keystroke on `$filter` / `$select` ran the entire diff through
+// thousands of Buttons). `React.memo` with a shallow props comparison
+// is enough: `properties` is the reactive array-proxy on the
+// `ODataRequest` (stable reference across renders), and the parent
+// already `useCallback`-memoizes `onPick`.
+export const ODataPropertyChips = React.memo(ODataPropertyChipsBase)
