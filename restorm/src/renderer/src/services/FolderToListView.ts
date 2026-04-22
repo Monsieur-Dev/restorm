@@ -144,7 +144,7 @@ function authenticationRequestToListViewItem(
 /**
  * Convert a FolderItem (Folder, EnvironmentFolder, or Request) to ListViewItemData
  */
-function folderItemToListViewItem(
+export function folderItemToListViewItem(
   item: FolderItem,
   options: FolderToListViewOptions
 ): ListViewItemData {

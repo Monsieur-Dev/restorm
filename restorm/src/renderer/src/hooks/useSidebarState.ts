@@ -6,7 +6,7 @@ import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 import type { Folder, EnvironmentFolder, Request } from '../../../shared/types/collections'
-import { folderAsRootListViewItem } from '../services/FolderToListView'
+import { folderAsRootListViewItem, folderItemToListViewItem } from '../services/FolderToListView'
 import { attachContextMenus } from '../components/MainView/Sidebar/contextMenuBuilder'
 import { Badge } from '../components/common/Badge'
 import { mapToBadgeType } from '../utils/badgeUtils'
@@ -43,11 +43,17 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
       renderProtocolBadge: (protocol: string, label?: string) => React.createElement(Badge, { type: mapToBadgeType(protocol), label }),
       renderDeprecatedTitle: (name: string) => React.createElement('span', { style: { textDecoration: 'line-through', opacity: 0.7 } }, name)
     }
-    // Each root folder becomes a top-level item in the sidebar
-    // Filter out Requests at root level (they need special handling)
-    return rootItems
-      .filter((item): item is Folder | EnvironmentFolder => 'items' in item)
-      .map((folder) => folderAsRootListViewItem(folder, renderOptions))
+    // Each root item becomes a top-level row in the sidebar. Folders
+    // go through `folderAsRootListViewItem` (which renders them as a
+    // folder node whose children hang off it); root-level requests
+    // (e.g. an attached auth route) render as their own row via
+    // `folderItemToListViewItem`, which already dispatches to the
+    // right request-type adapter.
+    return rootItems.map((item) =>
+      'items' in item
+        ? folderAsRootListViewItem(item, renderOptions)
+        : folderItemToListViewItem(item, renderOptions)
+    )
   }, [expandedIds, rootItems, updateCount])
 
   // Attach context menus to sidebar items
