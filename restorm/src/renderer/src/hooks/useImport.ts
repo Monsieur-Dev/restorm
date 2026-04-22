@@ -104,29 +104,43 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         }
       }
 
-      // Emit creation events for all imported items recursively
-      const emitCreationEvents = (item: FolderItem, parentFolderId: string): void => {
+      // Walk a folder subtree and emit ENVIRONMENT_CREATED for every
+      // env / sub-env on every EnvironmentFolder reachable from it.
+      // Called in addition to the top-level FOLDER_CREATED below so
+      // ContextService (which subscribes to ENVIRONMENT_CREATED) can
+      // register every env the tree brings in, regardless of depth.
+      const emitNestedEnvironments = (folder: Folder | EnvironmentFolder): void => {
+        if ('environments' in folder) {
+          for (const env of folder.environments) {
+            emitEnvironmentTree(env, folder.id, null)
+          }
+        }
+        for (const child of folder.items) {
+          if ('items' in child) emitNestedEnvironments(child)
+        }
+      }
+
+      // Emit exactly one CREATED event per top-level imported item.
+      // For folders we emit FOLDER_CREATED only for the root of the
+      // imported subtree — SearchIndexService.indexFolderRecursively
+      // walks the document and indexes every descendant on its own.
+      // This is the hot path for bulk imports (10k+ OData routes): the
+      // old recursive emission fired one IPC per descendant plus one
+      // draft write per descendant via App.tsx's save-unit bridge,
+      // which dominated the import cost. We accept losing per-
+      // descendant drafts during import — `onImportComplete` triggers
+      // a full-tree save right after, so crash recovery kicks in off
+      // the persisted file, not off per-node drafts.
+      const emitTopLevelCreated = (item: FolderItem, parentFolderId: string): void => {
         if ('items' in item) {
-          // It's a folder
           const folder = item
           eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
             id: folder.id,
             type: 'folder',
             document: JSON.parse(JSON.stringify(folder)) as Folder | EnvironmentFolder
           })
-          // Emit environment creations for EnvironmentFolders so their
-          // handlebars variables are registered with ContextService.
-          if ('environments' in folder) {
-            for (const env of folder.environments) {
-              emitEnvironmentTree(env, folder.id, null)
-            }
-          }
-          // Recursively emit for children
-          folder.items.forEach((child) => {
-            emitCreationEvents(child, folder.id)
-          })
+          emitNestedEnvironments(folder)
         } else {
-          // It's a request
           const request = item
           eventBus.emitSync(DocumentEvents.REQUEST_CREATED, {
             id: request.id,
@@ -205,9 +219,11 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         setRootItems(reactiveRootItems)
         expandAfterImport()
 
-        // Emit creation events for indexing
+        // Emit one CREATED per top-level imported item — descendants
+        // land in the search index via SearchIndexService's recursive
+        // walk (see `emitTopLevelCreated` comment).
         filteredItems.forEach((folder) => {
-          emitCreationEvents(folder, folder.id)
+          emitTopLevelCreated(folder, folder.id)
         })
 
         setPendingEnvFolderIds(collectEnvFolderIds(filteredItems))
@@ -273,9 +289,9 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         setRootItems(reactiveRootItems)
         expandAfterImport()
 
-        // Emit creation events for ALL imported items (folders + requests)
+        // One CREATED per top-level item — see `emitTopLevelCreated`.
         itemsWithNewIds.forEach((item) => {
-          emitCreationEvents(item, item.id)
+          emitTopLevelCreated(item, item.id)
         })
 
         setPendingEnvFolderIds(collectEnvFolderIds(itemsWithNewIds))
@@ -334,16 +350,14 @@ export function useImport(options: UseImportOptions): UseImportReturn {
       setRootItems(reactiveRootItems)
       expandAfterImport()
 
-      // Emit creation events for indexing
-      // Emit for pending folders first
+      // One CREATED per top-level item — see `emitTopLevelCreated`.
+      // Emit for pending folders first (they become new parents),
+      // then for the imported items that nest into them.
       createdFoldersMap.forEach((folder) => {
-        const parentId = actualTargetFolderId || '__root__'
-        emitCreationEvents(folder, parentId)
+        emitTopLevelCreated(folder, actualTargetFolderId || folder.id)
       })
-      // Then emit for imported items
       itemsWithNewIds.forEach((item) => {
-        const parentId = actualTargetFolderId || '__root__'
-        emitCreationEvents(item, parentId)
+        emitTopLevelCreated(item, actualTargetFolderId || item.id)
       })
 
       // Signal the host that the import has landed. The callback fires
