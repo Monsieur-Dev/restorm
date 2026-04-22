@@ -39,7 +39,7 @@ export const WEBSOCKET_PROTOCOLS = ['websocket', 'socketio', 'mqtt'] as const
 export type WebSocketProtocol = (typeof WEBSOCKET_PROTOCOLS)[number]
 
 /** Request type discriminator */
-export const REQUEST_TYPES = ['http', 'graphql', 'grpc', 'soap', 'websocket', 'odata'] as const
+export const REQUEST_TYPES = ['http', 'graphql', 'grpc', 'soap', 'websocket', 'odata', 'auth'] as const
 export type RequestType = (typeof REQUEST_TYPES)[number]
 
 /** OData protocol version. The type keeps all three versions so the

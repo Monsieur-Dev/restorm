@@ -137,8 +137,18 @@ export interface VerticalSashContainerProps {
 	LeftWhenResizing?: React.ReactNode;
 	/** Content to display on the right side when resizing (for performance optimization) */
 	RightWhenResizing?: React.ReactNode;
-	/** Initial width of the left panel */
+	/** Initial width of the left panel (absolute pixels). Ignored
+	 * when `initialLeftRatio` is provided AND `storageKey` is
+	 * absent — in that case the initial width is derived from the
+	 * measured container width × ratio instead. */
 	initialWidth?: number;
+	/** Initial share of the container given to the left panel,
+	 * expressed as a number between 0 and 1. When set, the sash
+	 * starts at `containerWidth * initialLeftRatio` once the
+	 * container is first measured (useful when the absolute pixel
+	 * width depends on the modal / viewport size, e.g. a 50/50 split).
+	 * A persisted `storageKey` value overrides this. */
+	initialLeftRatio?: number;
 	/** Minimum width for the left panel */
 	minLeftWidth?: number;
 	/** Minimum width for the right panel */

@@ -39,6 +39,34 @@ export interface BaseRequestTabViewProps {
   responseContent?: ReactNode | undefined
   /** JSON data for JsonCrack tab (if any) */
   jsonData?: unknown
+  /** Extra request-side tabs inserted after the "Request" tab and
+   * before Docs. Each tab is rendered verbatim. Used by the auth
+   * request tab view to expose a "Configuration" tab. */
+  additionalRequestTabs?: Tab[] | undefined
+  /** Hide the Notes tab. Defaults to `true` (visible). Set to `false`
+   * for ephemeral views — e.g. the import wizard's auth setup modal —
+   * where per-request markdown notes aren't persisted and an empty
+   * editor would just clutter the tab bar. */
+  showNotes?: boolean
+  /** Hide the Code Snippets tab. Defaults to `true` (visible). Set
+   * to `false` for views where snippet generation isn't wired (the
+   * auth modal doesn't hit ContextService, so snippets would always
+   * be empty). */
+  showCodeSnippets?: boolean
+  /** Controlled active request-side tab id. When set, the caller
+   * owns the selection (useful to programmatically jump to a tab on
+   * an external event — e.g. switching to Configuration after a
+   * successful Send). Paired with `onRequestTabChange`; if only one
+   * is provided the component falls back to internal state. */
+  activeRequestTabId?: string
+  /** Fires when the user clicks a request-side tab. Paired with
+   * `activeRequestTabId` for controlled mode. */
+  onRequestTabChange?: (tabId: string) => void
+  /** Override the default left-panel initial width ratio (0–1) used
+   * when the response panel is visible. Defaults to an absolute
+   * `initialWidth={500}` that suits the main tab view; the auth
+   * modal (narrower container) overrides to `0.5` for a 50/50 split. */
+  initialLeftRatio?: number
 }
 
 const COMPACT_BREAKPOINT = 750
@@ -59,10 +87,21 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
   showResponse,
   infosContent,
   responseContent,
-  jsonData
+  jsonData,
+  additionalRequestTabs,
+  showNotes = true,
+  showCodeSnippets = true,
+  activeRequestTabId,
+  onRequestTabChange,
+  initialLeftRatio
 }) => {
   const { t } = useTranslation()
-  const [activeTabId, setActiveTabId] = useState('request')
+  const [internalActiveTabId, setInternalActiveTabId] = useState('request')
+  const activeTabId = activeRequestTabId ?? internalActiveTabId
+  const setActiveTabId = useCallback((tabId: string) => {
+    if (onRequestTabChange) onRequestTabChange(tabId)
+    if (activeRequestTabId === undefined) setInternalActiveTabId(tabId)
+  }, [onRequestTabChange, activeRequestTabId])
   const [responseTabId, setResponseTabId] = useState('response')
   const [isCompact, setIsCompact] = useState(false)
   const [hadResponseOnce, setHadResponseOnce] = useState(!!responseContent)
@@ -163,6 +202,10 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
       }
     ]
 
+    if (additionalRequestTabs && additionalRequestTabs.length > 0) {
+      for (const extra of additionalRequestTabs) tabs.push(extra)
+    }
+
     if (hasDocs) {
       tabs.push({
         id: 'docs',
@@ -172,34 +215,43 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
       })
     }
 
-    tabs.push({
-      id: 'notes',
-      label: t('requestTab.tabs.notes'),
-      useScrollableElement: false,
-      content: (
-        <MarkdownEditor
-          key={requestId}
-          initialValue={notes ?? ''}
-          onChange={handleNotesChange}
-          data-testid="base-request-markdown-editor-notes"
-        />
-      )
-    })
+    if (showNotes) {
+      tabs.push({
+        id: 'notes',
+        label: t('requestTab.tabs.notes'),
+        useScrollableElement: false,
+        content: (
+          <MarkdownEditor
+            key={requestId}
+            initialValue={notes ?? ''}
+            onChange={handleNotesChange}
+            data-testid="base-request-markdown-editor-notes"
+          />
+        )
+      })
+    }
 
-    tabs.push({
-      id: 'codeSnippets',
-      label: t('requestTab.tabs.codeSnippets'),
-      useScrollableElement: false,
-      content: <MarkdownViewer value={codeSnippetsContent} data-testid="base-request-markdown-viewer-code-snippets" />
-    })
+    if (showCodeSnippets) {
+      tabs.push({
+        id: 'codeSnippets',
+        label: t('requestTab.tabs.codeSnippets'),
+        useScrollableElement: false,
+        content: <MarkdownViewer value={codeSnippetsContent} data-testid="base-request-markdown-viewer-code-snippets" />
+      })
+    }
 
     return tabs
-  }, [requestId, notes, requestContent, documentation, hasDocs, handleNotesChange, codeSnippetsContent, t])
+  }, [requestId, notes, requestContent, documentation, hasDocs, handleNotesChange, codeSnippetsContent, additionalRequestTabs, showNotes, showCodeSnippets, t])
 
   // If the active tab vanishes (e.g., user was on Docs and the request's URL
   // changed so no operation matches anymore), fall back to the Request tab
   // during render — avoids a sync setState inside an effect.
   const effectiveActiveTabId = activeTabId === 'docs' && !hasDocs ? 'request' : activeTabId
+
+  // Same guard for the response-side tabs: the default `responseTabId`
+  // state is `'response'`, but on an error (no body → no Response tab)
+  // only `infos` is pushed. Without this fallback `Tabs` receives an
+  // activeTabId that matches no tab and renders an empty panel.
 
   // Format JSON for display
   const formattedJson = useMemo(() => {
@@ -259,7 +311,12 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
         label: 'Response',
         useScrollableElement: false,
         content: (
-          <div style={{ height: '100%', boxSizing: 'border-box', padding: '8px 0px 0px 8px' }}>
+          // Flex column with minHeight: 0 so the CodeEditor (height: 100%)
+          // inside `responseContent` can actually shrink below its
+          // intrinsic content size when the modal is compressed — a
+          // plain `height: 100%` wrapper leaks the flex child's natural
+          // minimum, which is what was pushing Monaco below the frame.
+          <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', boxSizing: 'border-box', padding: '8px 0px 0px 8px' }}>
             {responseContent ?? loadingPlaceholder}
           </div>
         )
@@ -269,9 +326,12 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
     tabs.push({
       id: 'infos',
       label: 'Infos',
-      useScrollableElement: false,
+      // Scroll via the shared ecu container so a tall tree of
+      // response/request headers can be read inside a constrained
+      // modal without leaking past the frame.
+      useScrollableElement: true,
       content: (
-        <div style={{ height: '100%', boxSizing: 'border-box', padding: '8px 0px 0px 8px' }}>
+        <div style={{ boxSizing: 'border-box', padding: '8px 0px 0px 8px' }}>
           {infosContent ?? (
             <div style={{
               display: 'flex',
@@ -305,6 +365,13 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
 
     return tabs
   }, [showResponse, isLoading, infosContent, responseContent, formattedJson, isDarkTheme, hadResponseOnce, hadJsonOnce, t])
+
+  // Fall back to the first available response tab when the current
+  // `responseTabId` points to one that doesn't exist (e.g. we default
+  // to `'response'` but an error path only produces `'infos'`).
+  const effectiveResponseTabId = responseTabs.some((tab) => tab.id === responseTabId)
+    ? responseTabId
+    : responseTabs[0]?.id ?? responseTabId
 
   // Compact mode: merge request + response tabs into a single group
   const showResponsePanel = showResponse || isLoading
@@ -360,7 +427,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
     } else {
       setActiveTabId(tabId)
     }
-  }, [responseTabs])
+  }, [responseTabs, setActiveTabId])
 
   return (
     <div
@@ -399,6 +466,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
           data-testid="base-request-sash-container"
           Left={
             <div style={{
+              flex: 1,
               minHeight: 0,
               display: 'flex',
               flexDirection: 'column',
@@ -416,6 +484,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
           }
           Right={
             <div style={{
+              flex: 1,
               minHeight: 0,
               display: 'flex',
               flexDirection: 'column',
@@ -424,13 +493,14 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
               <Tabs
                 data-testid="base-request-tabs-response"
                 tabs={responseTabs}
-                activeTabId={responseTabId}
+                activeTabId={effectiveResponseTabId}
                 onTabChange={handleResponseTabChange}
                 keepMounted
               />
             </div>
           }
           initialWidth={500}
+          {...(initialLeftRatio !== undefined ? { initialLeftRatio } : {})}
           minLeftWidth={320}
           minRightWidth={260}
           sashConfig={{ size: 4 }}

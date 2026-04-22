@@ -9,7 +9,9 @@ import { URL } from 'url'
 import { BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
+import { authenticationCacheService } from './AuthenticationCacheService'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../shared/config/constants'
+import type { AuthenticationRequest } from '../../shared/models/requests/AuthenticationRequest'
 
 /** HTTP request execution input */
 export interface HTTPExecutionInput {
@@ -29,6 +31,12 @@ export interface HTTPExecutionInput {
    * `@odata.nextLink` pagination where the server already composed
    * the full URL. */
   urlOverride?: string
+  /** Optional authentication request whose produced headers are
+   * fetched (via the main-process cache) and merged into this
+   * request's headers before dispatch. When the downstream call
+   * completes with a status listed in `authRequest.authErrorCodes`,
+   * the cache is invalidated and the call is retried once. */
+  authRequest?: AuthenticationRequest
 }
 
 /** HTTP response result */
@@ -64,7 +72,7 @@ class HTTPExecutionService {
    * Execute an HTTP request using the resolved URL and data from ContextService
    */
   async execute(input: HTTPExecutionInput): Promise<HTTPExecutionResult> {
-    const { requestId, method, timeout = DEFAULT_REQUEST_TIMEOUT_MS, rawBody, rawBodyContentType, urlOverride } = input
+    const { requestId, method, timeout = DEFAULT_REQUEST_TIMEOUT_MS, rawBody, rawBodyContentType, urlOverride, authRequest } = input
     const startTime = Date.now()
     const startedAt = new Date().toISOString()
 
@@ -160,8 +168,31 @@ class HTTPExecutionService {
         // Note: form-data and file modes require special handling
       }
 
+      // Inject auth headers (fresh or cached) before dispatching.
+      if (authRequest) {
+        try {
+          const authHeaders = await authenticationCacheService.getHeaders(
+            authRequest,
+            (r) => this.executeAuthInner(r, abortController.signal)
+          )
+          for (const [k, v] of Object.entries(authHeaders)) {
+            headers[k] = v
+          }
+        } catch (authErr) {
+          const durationMs = Date.now() - startTime
+          this.broadcastProgress(requestId, 'error')
+          return {
+            requestId,
+            success: false,
+            error: authErr instanceof Error ? authErr.message : String(authErr),
+            requestUrl: resolvedUrl,
+            timings: { startedAt, durationMs }
+          }
+        }
+      }
+
       // Execute request
-      const result = await this.makeRequest({
+      let result = await this.makeRequest({
         url: parsedUrl,
         method: method.toUpperCase(),
         headers,
@@ -170,8 +201,36 @@ class HTTPExecutionService {
         signal: abortController.signal
       })
 
+      // Auth-error-code retry: if the downstream status is one the
+      // auth request declared as "your token expired", invalidate
+      // the cache, force a refresh, re-inject, retry exactly once.
+      if (authRequest?.authErrorCodes.includes(result.statusCode)) {
+        authenticationCacheService.invalidate(authRequest.id)
+        try {
+          const refreshed = await authenticationCacheService.refresh(
+            authRequest,
+            (r) => this.executeAuthInner(r, abortController.signal)
+          )
+          for (const [k, v] of Object.entries(refreshed)) {
+            headers[k] = v
+          }
+          result = await this.makeRequest({
+            url: parsedUrl,
+            method: method.toUpperCase(),
+            headers,
+            body,
+            timeout,
+            signal: abortController.signal
+          })
+        } catch (authErr) {
+          logger.warn('[HTTPExecutionService] auth refresh during retry failed', {
+            error: String(authErr)
+          })
+        }
+      }
+
       const durationMs = Date.now() - startTime
-      
+
       // Broadcast completion
       this.broadcastProgress(requestId, 'completed')
 
@@ -328,6 +387,100 @@ class HTTPExecutionService {
     const windows = BrowserWindow.getAllWindows()
     for (const win of windows) {
       win.webContents.send('http:request-progress', { requestId, status })
+    }
+  }
+
+  /**
+   * Execute an auth request so the cache layer can populate itself.
+   * Uses ContextService when the request is registered (normal
+   * production path), falls back to the auth request's own URL /
+   * method / headers / body otherwise (import-wizard path, where
+   * the auth request is ephemeral and not yet in the collection).
+   */
+  private async executeAuthInner(
+    authRequest: AuthenticationRequest,
+    parentSignal: AbortSignal
+  ): Promise<HTTPExecutionResult> {
+    const startTime = Date.now()
+    const startedAt = new Date().toISOString()
+    // Prefer the ContextService-resolved URL if the request has been
+    // registered (its id was seen by `contextService.registerRequest`).
+    // Otherwise fall back to the URL on the auth request itself.
+    const resolvedUrl = contextService.getResolvedUrl(authRequest.id)?.resolvedUrl ?? authRequest.url
+    if (!resolvedUrl) {
+      return {
+        requestId: authRequest.id,
+        success: false,
+        error: 'Auth request has no URL',
+        timings: { startedAt, durationMs: Date.now() - startTime }
+      }
+    }
+    let parsedUrl: URL
+    try {
+      parsedUrl = new URL(resolvedUrl)
+    } catch {
+      return {
+        requestId: authRequest.id,
+        success: false,
+        error: `Invalid auth URL: ${resolvedUrl}`,
+        timings: { startedAt, durationMs: Date.now() - startTime }
+      }
+    }
+
+    // Build headers — ContextService for the registered path,
+    // raw auth-request headers otherwise.
+    const headers: Record<string, string> = {}
+    const authCtx = contextService.getRequestContext(authRequest.id)
+    const headerSource = authCtx?.keyValueGroups.get('headers') ?? authRequest.headers
+    for (const h of headerSource) {
+      if (h.enabled === false) continue
+      if (!h.key) continue
+      const rawValue = h.value.toString()
+      const resolved = authCtx
+        ? contextService.resolveValue(rawValue, authRequest.id)
+        : rawValue
+      headers[h.key] = resolved
+    }
+
+    // Build body.
+    let body: string | undefined
+    if (authCtx?.fullData?.body) {
+      const bodyData = authCtx.fullData.body
+      if (bodyData.type === 'text') {
+        body = contextService.resolveValue(bodyData.content, authRequest.id)
+      } else if (bodyData.type === 'x-www-form-urlencoded') {
+        const params = new URLSearchParams()
+        for (const field of bodyData.fields) {
+          if (!field.key) continue
+          const k = contextService.resolveValue(field.key, authRequest.id)
+          const v = contextService.resolveValue(field.value, authRequest.id)
+          params.append(k, v)
+        }
+        body = params.toString()
+        headers['Content-Type'] ??= 'application/x-www-form-urlencoded'
+      }
+    } else if (authRequest.body?.type === 'text' && authRequest.body.content) {
+      body = authRequest.body.content
+    }
+
+    const result = await this.makeRequest({
+      url: parsedUrl,
+      method: authRequest.method,
+      headers,
+      body,
+      timeout: DEFAULT_REQUEST_TIMEOUT_MS,
+      signal: parentSignal
+    })
+    const durationMs = Date.now() - startTime
+    return {
+      requestId: authRequest.id,
+      success: true,
+      statusCode: result.statusCode,
+      statusText: result.statusText,
+      headers: result.headers,
+      body: result.body,
+      requestUrl: resolvedUrl,
+      timings: { startedAt, durationMs }
     }
   }
 }

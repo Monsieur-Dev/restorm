@@ -71,6 +71,7 @@ export class GrpcRequest extends BaseRequest {
     documentation?: string
     notes?: string
     tags?: string[]
+    authenticationRequestId?: RuntimeId
     url?: string
     service?: string
     method?: string
@@ -85,6 +86,7 @@ export class GrpcRequest extends BaseRequest {
       documentation: obj.documentation ?? '',
       ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
+      ...(obj.authenticationRequestId !== undefined && { authenticationRequestId: obj.authenticationRequestId }),
       url: obj.url ?? '',
       service: obj.service ?? '',
       method: obj.method ?? '',
@@ -106,6 +108,7 @@ export class GrpcRequest extends BaseRequest {
       documentation: this.documentation,
       notes: this.notes,
       tags: this.tags,
+      ...(this.authenticationRequestId !== undefined && { authenticationRequestId: this.authenticationRequestId }),
       url: this.url,
       service: this.service,
       method: this.method,

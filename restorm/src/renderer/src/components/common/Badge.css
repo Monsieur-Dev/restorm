@@ -140,3 +140,18 @@
   background-color: #ff6a00;
   color: #ffffff;
 }
+
+/* ============================================================================
+ * Authentication
+ * ============================================================================ */
+
+.badge-auth {
+  background-color: #f97316;
+  color: #ffffff;
+  padding: 2px 4px;
+}
+
+.badge-auth .codicon-key {
+  font-size: 12px;
+  line-height: 1;
+}

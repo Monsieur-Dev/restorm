@@ -45,6 +45,8 @@ import type { GRPCExecutionResult } from './GRPCExecutionService'
 import type { SOAPExecutionResult } from './SOAPExecutionService'
 import type { WebSocketExecutionResult } from './WebSocketExecutionService'
 import { normalizeODataResponse } from '../../shared/utils/odataResponse'
+import { redactTokensFromBody } from './AuthenticationRedaction'
+import { isAuthenticationRequest } from '../../shared/types/collections'
 
 const DEFAULT_MAX_PER_REQUEST = 10
 const INDEX_FILE_NAME = 'index.json'
@@ -521,6 +523,23 @@ class ResponseHistoryService {
     const contentLengthStr = Array.isArray(contentLengthHeader) ? contentLengthHeader[0] : contentLengthHeader
     const contentLength = contentLengthStr ? parseInt(contentLengthStr, 10) : undefined
 
+    // Redact token-bearing fields before they land in the on-disk
+    // history archive. The lookup is best-effort: if the request
+    // isn't in the collection (e.g. an ephemeral auth run), there's
+    // no producedHeaders list to consult and we leave the body as-is.
+    let responseBody = result.body ?? ''
+    const collectionItem = collectionStore.findById(requestId)
+    if (collectionItem && isRequest(collectionItem) && isAuthenticationRequest(collectionItem)) {
+      responseBody = redactTokensFromBody(
+        responseBody,
+        collectionItem.producedHeaders.map((h) => ({
+          key: h.key,
+          value: h.value.toString(),
+          enabled: h.enabled
+        }))
+      )
+    }
+
     return {
       type: 'http',
       requestUrl: resolvedUrl,
@@ -532,7 +551,7 @@ class ResponseHistoryService {
       statusCode: result.statusCode ?? 0,
       statusText: result.statusText ?? '',
       responseHeaders,
-      responseBody: result.body ?? '',
+      responseBody,
       ...(contentType ? { contentType } : {}),
       ...(contentLength !== undefined && !isNaN(contentLength) ? { contentLength } : {}),
       timings: result.timings,

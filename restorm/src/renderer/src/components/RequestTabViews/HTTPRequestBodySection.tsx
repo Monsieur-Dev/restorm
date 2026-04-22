@@ -1,4 +1,4 @@
-import React, { type CSSProperties, useCallback, useMemo } from 'react'
+import React, { type CSSProperties, useCallback, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
@@ -7,8 +7,8 @@ import {
   CodeEditor,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
-import { RestormKeyValueTable } from '../RestormKeyValueTable'
-import type { HTTPRequest, KeyValue } from '../../../../shared/types/collections'
+import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
+import type { HTTPRequest, AuthenticationRequest, KeyValue } from '../../../../shared/types/collections'
 import type { TranslatedHelperDefinition } from '../../utils/handlebarsHelpersDefinitions'
 
 export type BodyMode = 'text' | 'form-data' | 'x-www-form-urlencoded' | 'file'
@@ -28,10 +28,62 @@ export interface HTTPRequestBodySectionProps {
   onBodyChange: (value: string) => void
   bodyFilePath: string
   onBodyFilePathChange: (value: string) => void
-  request: HTTPRequest
+  request: HTTPRequest | AuthenticationRequest
   onBodyFieldsChange: (rows: KeyValue[]) => void
   variables: VariableDefinition[]
   helpers: TranslatedHelperDefinition[]
+}
+
+interface BodyFieldsTableProps {
+  variables: VariableDefinition[]
+  helpers: TranslatedHelperDefinition[]
+  initialRows: KeyValue[] | undefined
+  onRowsChange: (rows: KeyValue[]) => void
+  persistenceId: string
+}
+
+/** Small wrapper around RestormKeyValueTable that adds an "Add row"
+ * button above the table — form-data and x-www-form-urlencoded modes
+ * need an explicit affordance to create the first row since the table
+ * itself doesn't expose one. */
+const BodyFieldsTable: React.FC<BodyFieldsTableProps> = ({
+  variables,
+  helpers,
+  initialRows,
+  onRowsChange,
+  persistenceId
+}) => {
+  const { t } = useTranslation()
+  const tableRef = useRef<KeyValueTableHandle | null>(null)
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, height: '100%', minHeight: 0 }}>
+      <div style={{ display: 'flex' }}>
+        <Button
+          small
+          icon="add"
+          options={{
+            ariaLabel: t('requestTab.body.addField', 'Add field'),
+            title: t('requestTab.body.addField', 'Add field')
+          }}
+          onClick={() => { tableRef.current?.addRow() }}
+          data-testid="http-request-body-add-field-button"
+        >
+          {t('requestTab.body.addField', 'Add field')}
+        </Button>
+      </div>
+      <div style={{ flex: 1, minHeight: 0 }}>
+        <RestormKeyValueTable
+          ref={tableRef}
+          variables={variables}
+          helpers={helpers}
+          initialRows={initialRows ?? []}
+          onRowsChange={onRowsChange}
+          persistenceId={persistenceId}
+          data-testid="http-request-body-fields-table"
+        />
+      </div>
+    </div>
+  )
 }
 
 export const HTTPRequestBodySection: React.FC<HTTPRequestBodySectionProps> = ({
@@ -77,13 +129,12 @@ export const HTTPRequestBodySection: React.FC<HTTPRequestBodySectionProps> = ({
           </div>
         )}
         {(bodyMode === 'form-data' || bodyMode === 'x-www-form-urlencoded') && (
-          <RestormKeyValueTable
+          <BodyFieldsTable
             variables={variables}
             helpers={helpers}
             initialRows={request.body?.type === 'form-data' || request.body?.type === 'x-www-form-urlencoded' ? request.body.fields : []}
             onRowsChange={onBodyFieldsChange}
             persistenceId={`http-body-fields:${request.id}`}
-            data-testid="http-request-body-fields-table"
           />
         )}
         {bodyMode === 'file' && (

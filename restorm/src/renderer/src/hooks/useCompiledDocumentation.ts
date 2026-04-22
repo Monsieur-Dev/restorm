@@ -77,6 +77,10 @@ function routeFromRequest(request: Request): CompilableRoute {
       // doesn't complain, but no compiled docs will ever match until
       // the compiler gains an OData branch (tracked outside Phase 1).
       return { type: 'odata', url: request.url, tags: request.tags }
+    case 'auth':
+      // Auth requests mirror HTTP requests for documentation-matching
+      // purposes — they have a URL + method like any HTTP call.
+      return { type: 'http', url: request.url, method: request.method, tags: request.tags }
   }
 }
 

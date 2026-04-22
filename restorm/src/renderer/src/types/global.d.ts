@@ -125,13 +125,37 @@ declare global {
         cancel: (requestId: string) => Promise<boolean>
         isActive: (requestId: string) => Promise<boolean>
       }
+      auth: {
+        prefetch: (input: {
+          method: string
+          url: string
+          headers: { key: string; value: string; enabled?: boolean }[]
+          body?: {
+            type: string
+            content?: string
+            fields?: { key: string; value: string; enabled?: boolean }[]
+          }
+          producedHeaders: { key: string; value: string; enabled?: boolean }[]
+          expirationExpression?: string
+        }) => Promise<{
+          success: boolean
+          statusCode: number
+          error?: string
+          headers: Record<string, string>
+          responseBody?: string
+        }>
+        onRunning: (callback: (payload: { authRequestId: string; phase: 'started' | 'succeeded' | 'failed'; reason?: string }) => void) => (() => void)
+        onFailed: (callback: (payload: { authRequestId: string; reason?: string }) => void) => (() => void)
+      }
       import: {
-        preview: (input: string) => Promise<{
+        preview: (input: string, options?: { extraHeaders?: Record<string, string> }) => Promise<{
           success: boolean
           items: unknown[]
           source: string
           format?: string
           error?: string
+          statusCode?: number
+          isAuthError?: boolean
         }>
         import: (input: string) => Promise<{
           success: boolean

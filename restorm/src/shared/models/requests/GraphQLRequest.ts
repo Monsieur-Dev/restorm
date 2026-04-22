@@ -67,6 +67,7 @@ export class GraphQLRequest extends BaseRequest {
     documentation?: string
     notes?: string
     tags?: string[]
+    authenticationRequestId?: RuntimeId
     url?: string
     operationType?: GraphQLOperationType
     query?: string
@@ -80,6 +81,7 @@ export class GraphQLRequest extends BaseRequest {
       documentation: obj.documentation ?? '',
       ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
+      ...(obj.authenticationRequestId !== undefined && { authenticationRequestId: obj.authenticationRequestId }),
       url: obj.url ?? '',
       operationType: obj.operationType ?? 'query',
       query: obj.query ?? '',
@@ -100,6 +102,7 @@ export class GraphQLRequest extends BaseRequest {
       documentation: this.documentation,
       notes: this.notes,
       tags: this.tags,
+      ...(this.authenticationRequestId !== undefined && { authenticationRequestId: this.authenticationRequestId }),
       url: this.url,
       operationType: this.operationType,
       query: this.query,

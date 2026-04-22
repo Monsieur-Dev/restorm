@@ -14,6 +14,7 @@ export const VerticalSashContainer: React.FC<VerticalSashContainerProps> = ({
   LeftWhenResizing,
   RightWhenResizing,
   initialWidth = 200,
+  initialLeftRatio,
   minLeftWidth = 50,
   minRightWidth = 240,
   storageKey,
@@ -40,6 +41,7 @@ export const VerticalSashContainer: React.FC<VerticalSashContainerProps> = ({
   const {
     containerRef,
     width,
+    setWidth,
     layoutProvider,
     handleSashStart,
     handleSashChange
@@ -59,6 +61,26 @@ export const VerticalSashContainer: React.FC<VerticalSashContainerProps> = ({
       observer.disconnect()
     }
   }, [containerRef])
+
+  // Seed the left width from a ratio once the container has been
+  // measured. Only runs once — subsequent container resizes keep the
+  // absolute width the user has since dragged to. Skipped when a
+  // storageKey is present (persisted value wins) or when the hook
+  // already loaded a non-default starting width.
+  const didInitFromRatioRef = useRef(false)
+  useEffect(() => {
+    if (didInitFromRatioRef.current) return
+    if (initialLeftRatio === undefined) return
+    if (storageKey !== undefined) return
+    if (containerWidth <= 0) return
+    didInitFromRatioRef.current = true
+    const clampedRatio = Math.min(1, Math.max(0, initialLeftRatio))
+    const target = Math.max(
+      minLeftWidth,
+      Math.min(containerWidth - minRightWidth, Math.round(containerWidth * clampedRatio))
+    )
+    setWidth(target)
+  }, [containerWidth, initialLeftRatio, storageKey, minLeftWidth, minRightWidth, setWidth])
 
   const [actualMinLeftWidth, setActualMinLeftWidth] = useState(minLeftWidth)
   const [actualMinRightWidth, setActualMinRightWidth] = useState(minRightWidth)

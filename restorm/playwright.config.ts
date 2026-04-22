@@ -26,6 +26,22 @@ const dirtyStateTestDir = defineBddConfig({
   outputDir: '.features-gen/dirty-state'
 })
 
+// Temporary diagnostic — remove after the auth-modal layout is stable.
+const authModalDebugTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/auth-modal-debug/features/**/*.feature',
+  steps: ['tests/e2e/bdd/auth-modal-debug/steps/**/*.ts', 'tests/e2e/bdd/fixtures/auth-modal-debug.fixture.ts'],
+  outputDir: '.features-gen/auth-modal-debug'
+})
+
+// Perf-measurement scenario for the OData / Dynamics import. Requires
+// `tests/e2e/fixtures/dynamics-creds.json` (gitignored) — the test
+// skips cleanly when the file isn't provisioned.
+const odataDynamicsImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/odata-dynamics-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/odata-dynamics-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/odata-dynamics-import.fixture.ts'],
+  outputDir: '.features-gen/odata-dynamics-import'
+})
+
 /**
  * Playwright configuration for Electron E2E tests using playwright-bdd.
  * Each test group has its own project with a dedicated fixture.
@@ -73,6 +89,15 @@ export default defineConfig({
     {
       name: 'dirty-state',
       testDir: dirtyStateTestDir
+    },
+    {
+      name: 'auth-modal-debug',
+      testDir: authModalDebugTestDir
+    },
+    {
+      name: 'odata-dynamics-import',
+      testDir: odataDynamicsImportTestDir,
+      timeout: 10 * 60 * 1000 // 10 min — 10k-route import is slow (baseline)
     }
   ]
 })

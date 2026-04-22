@@ -1,0 +1,48 @@
+/* `StaticPane` — standalone pane header + body that mirrors the
+   look of SplitView's `Pane` but renders in natural document flow
+   (no sash, no collapse). */
+
+.static-pane {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.static-pane-header {
+	flex: 0 0 auto;
+	padding: 2px 8px;
+	color: var(--foreground);
+	background-color: var(--sideBarSectionHeader-background);
+	font-size: 11px;
+	text-transform: uppercase;
+	font-weight: bold;
+	letter-spacing: 0.05em;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	user-select: none;
+	box-sizing: border-box;
+}
+
+.static-pane-header-title {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.static-pane-header-actions {
+	flex: 0 0 auto;
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.static-pane-body {
+	padding: 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}

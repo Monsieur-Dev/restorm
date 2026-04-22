@@ -169,6 +169,7 @@ export class ODataRequest extends BaseRequest {
     documentation?: string
     notes?: string
     tags?: string[]
+    authenticationRequestId?: RuntimeId
     url?: string
     odataVersion?: ODataVersion
     operationKind?: ODataOperationKind
@@ -189,6 +190,7 @@ export class ODataRequest extends BaseRequest {
       documentation: obj.documentation ?? '',
       ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
+      ...(obj.authenticationRequestId !== undefined && { authenticationRequestId: obj.authenticationRequestId }),
       url: obj.url ?? '',
       odataVersion: obj.odataVersion ?? 'v4',
       operationKind: obj.operationKind ?? 'entity-set',
@@ -213,6 +215,7 @@ export class ODataRequest extends BaseRequest {
       documentation: this.documentation,
       notes: this.notes,
       tags: this.tags,
+      ...(this.authenticationRequestId !== undefined && { authenticationRequestId: this.authenticationRequestId }),
       url: this.url,
       odataVersion: this.odataVersion,
       operationKind: this.operationKind,
