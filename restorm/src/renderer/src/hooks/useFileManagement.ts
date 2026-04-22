@@ -678,7 +678,12 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         for (const root of collectionsWithIds) {
           normalizeFileFormatVersion(root, logger)
         }
-        const reactiveItems = collectionsWithIds.map((folder) => makeReactiveFolder(folder)) as EnvironmentFolder[]
+        // Requests can legally live at the root (see `useImport`'s
+        // empty-file branch). Only wrap folders through
+        // `makeReactiveFolder`; leave requests as-is.
+        const reactiveItems = collectionsWithIds.map((item) =>
+          'items' in item ? makeReactiveFolder(item) : item
+        )
         setRootItems(reactiveItems)
 
         // Hydrate the save-unit registry so per-unit dirty dots start
@@ -702,10 +707,13 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
             }
           }
 
-          for (const folder of reactiveItems) {
-            const folderChecksum = computeChecksum(JSON.parse(JSON.stringify(folder)))
-            registerTabDirtyState(folder.id, folderChecksum)
-            registerAllItems(folder.items)
+          for (const rootItem of reactiveItems) {
+            const rootChecksum = computeChecksum(JSON.parse(JSON.stringify(rootItem)))
+            registerTabDirtyState(rootItem.id, rootChecksum)
+            // Requests at root are leaves with no children to register.
+            if ('items' in rootItem) {
+              registerAllItems(rootItem.items)
+            }
           }
         }
 
@@ -739,18 +747,21 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
           }
         }
 
-        for (const folder of reactiveItems) {
-          if (isEnvironmentFolder(folder as FolderItem)) {
-            const envFolder = folder
-            for (const env of envFolder.environments) {
-              emitEnvironmentCreated(env, envFolder.id)
+        for (const rootItem of reactiveItems) {
+          if (isEnvironmentFolder(rootItem)) {
+            for (const env of rootItem.environments) {
+              emitEnvironmentCreated(env, rootItem.id)
             }
           }
         }
 
         await searchIndexService.initialize()
-        for (const folder of reactiveItems) {
-          await searchIndexService.indexFolderTree(folder)
+        for (const rootItem of reactiveItems) {
+          // `indexFolderTree` walks folders recursively; requests at
+          // the root only need a single document indexed.
+          if ('items' in rootItem) {
+            await searchIndexService.indexFolderTree(rootItem)
+          }
         }
 
         await finishLoading()

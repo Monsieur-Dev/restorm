@@ -10,6 +10,7 @@
  * we avoid pulling in a new XML dependency.
  */
 
+import { createHash } from 'node:crypto'
 import {
   Folder,
   EnvironmentFolder,
@@ -257,14 +258,24 @@ function parseEdmxV4(xml: string): EdmSchema {
 
 function generateId(seed?: string): string {
   if (!seed) return crypto.randomUUID()
-  let hash = 0
-  for (let i = 0; i < seed.length; i++) {
-    const char = seed.charCodeAt(i)
-    hash = ((hash << 5) - hash) + char
-    hash = hash & hash
-  }
-  const hex = Math.abs(hash).toString(16).padStart(8, '0')
-  return `${hex}-${seed.length.toString(16).padStart(4, '0')}-4000-8000-${hex}${hex.slice(0, 4)}`
+  // The earlier djb2-style hash squeezed every seed into 32 bits,
+  // which collides routinely past a few thousand items — a 10k-route
+  // Dynamics schema actually produced duplicate ids and crashed the
+  // preview render with a React "two children with the same key"
+  // warning. SHA-256 has enough entropy for any realistic import
+  // size, and keeping the generation deterministic preserves the
+  // property that re-importing the same schema yields stable ids.
+  const digest = createHash('sha256').update(seed).digest('hex')
+  // Shape the digest as a valid v4 UUID: version nibble = 4,
+  // variant bits = 10xx (hex `8..b`).
+  const variantNibble = ((parseInt(digest.slice(16, 17), 16) & 0x3) | 0x8).toString(16)
+  return (
+    digest.slice(0, 8) +
+    '-' + digest.slice(8, 12) +
+    '-4' + digest.slice(13, 16) +
+    '-' + variantNibble + digest.slice(17, 20) +
+    '-' + digest.slice(20, 32)
+  )
 }
 
 function kvHeader(key: string, value: string): KeyValue {
