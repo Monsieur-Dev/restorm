@@ -199,10 +199,10 @@ When('I click Import and wait for the sidebar to be populated', async () => {
 Then('the collection contains the dynamics authentication route', async () => {
   if (!page) throw new Error('app must be launched')
 
-  // Auth request lives inside the first imported folder (see
-  // ImportModal.handleImportClick — non-folder root items would be
-  // dropped by useImport's empty-file path, so we nest it). Search
-  // by label within the sidebar.
+  // Auth request lives at the root of the imported tree —
+  // `useImport`'s empty-file path now keeps non-folder root items
+  // and `ImportModal.handleImportClick` prepends the attached auth
+  // there instead of nesting it in the first folder.
   const authNode = page.locator(
     '[data-testid="sidebar-listview"] .list-view-row',
     { hasText: 'Authentication route' }

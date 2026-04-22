@@ -145,3 +145,75 @@ describe('useImport.handleImport — empty-file root requests', () => {
     }
   })
 })
+
+describe('useImport.handleImport — nested target folder', () => {
+  beforeEach(() => {
+    captured.length = 0
+  })
+
+  it('places items inside the target folder and emits with the resolved parentFolderId', async () => {
+    const setRootItems = vi.fn()
+    const setExpandedIds = vi.fn()
+
+    // Start from a tree that already has a target folder. `useImport`
+    // deep-clones rootItems so mutating the input isn't observable;
+    // we locate the cloned folder via its stable id after the import.
+    const targetFolder = makeFolder('target-id', 'Existing target')
+    const initialTree: FolderItem[] = [targetFolder]
+
+    const { result } = renderHook(() =>
+      useImport({
+        rootItems: initialTree as (EnvironmentFolder | Folder | Request)[],
+        setRootItems,
+        setExpandedIds
+      })
+    )
+
+    const incomingRequest = makeRequest('incoming-req-id', 'Incoming request')
+    const incomingFolder = makeFolder('incoming-folder-id', 'Incoming folder', [
+      makeRequest('leaf-id', 'Leaf request')
+    ])
+
+    await act(async () => {
+      result.current.handleImport(
+        [incomingRequest, incomingFolder] as FolderItem[],
+        'target-id'
+      )
+      await Promise.resolve()
+    })
+
+    // (1) The target folder now holds both incoming items.
+    expect(setRootItems).toHaveBeenCalledTimes(1)
+    const committed = setRootItems.mock.calls[0]?.[0] as FolderItem[]
+    expect(committed).toHaveLength(1)
+    const committedTarget = committed[0] as Folder
+    expect(committedTarget.name).toBe('Existing target')
+    expect(committedTarget.items).toHaveLength(2)
+    expect(committedTarget.items.some((i) => !('items' in i) && i.name === 'Incoming request')).toBe(true)
+    expect(committedTarget.items.some((i) => 'items' in i && i.name === 'Incoming folder')).toBe(true)
+
+    // (2) The request CREATED event carries the target folder id
+    // (*not* the request's own id) — this is exactly the regression
+    // that the `parentFolderId: string | undefined` refactor fixed.
+    const requestEvents = captured.filter((c) => c.event === 'document:request:created')
+    expect(requestEvents).toHaveLength(1)
+    const requestDoc = requestEvents[0]?.payload['document'] as { name?: string }
+    expect(requestDoc.name).toBe('Incoming request')
+    expect(requestEvents[0]?.payload['parentFolderId']).toBe('target-id')
+
+    // (3) Exactly one FOLDER_CREATED — the top-level `Incoming folder`.
+    // SearchIndexService.indexFolderRecursively picks up `Leaf request`
+    // from that folder's own document on indexing.
+    const folderEvents = captured.filter((c) => c.event === 'document:folder:created')
+    expect(folderEvents).toHaveLength(1)
+    const folderDoc = folderEvents[0]?.payload['document'] as { name?: string }
+    expect(folderDoc.name).toBe('Incoming folder')
+
+    // (4) No stray CREATED event for the descendant leaf request.
+    const leafPayload = captured.find((c) => {
+      const doc = c.payload['document'] as { name?: string } | undefined
+      return doc?.name === 'Leaf request'
+    })
+    expect(leafPayload).toBeUndefined()
+  })
+})

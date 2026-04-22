@@ -379,9 +379,12 @@ export function useImport(options: UseImportOptions): UseImportReturn {
       // then for the imported items that nest into them.
       // `actualTargetFolderId` is the resolved parent id (including
       // when the target is itself a pending folder); `undefined` means
-      // the item lives at the root of the tree.
+      // the item lives at the root of the tree. `parentFolderId` is
+      // only read for the request branch of `emitTopLevelCreated`, so
+      // we pass `undefined` for pending folders — their own parentage
+      // travels in a different code path.
       createdFoldersMap.forEach((folder) => {
-        emitTopLevelCreated(folder, actualTargetFolderId)
+        emitTopLevelCreated(folder, undefined)
       })
       itemsWithNewIds.forEach((item) => {
         emitTopLevelCreated(item, actualTargetFolderId)
