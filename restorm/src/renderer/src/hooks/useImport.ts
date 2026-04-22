@@ -215,26 +215,31 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         }
       }
 
-      // If file is empty (no root folders), create the imported items as first root folders
+      // If file is empty (no root folders), the imported items land
+      // at the root as-is. The root tree carries `Folder`,
+      // `EnvironmentFolder` and `Request` alike — folders get wrapped
+      // in the reactive proxy, requests pass through untouched. The
+      // old code filtered requests out here, which is what forced the
+      // ImportModal workaround that nested the attached auth request
+      // inside the first folder instead of placing it at the root.
       if (rootItems.length === 0 && !actualTargetFolderId) {
-        const filteredItems = itemsWithNewIds.filter((item) => 'items' in item)
-        logger.info('[useImport] Empty file - creating first root folders', {
-          count: filteredItems.length
+        logger.info('[useImport] Empty file - creating first root items', {
+          count: itemsWithNewIds.length
         })
-        const reactiveRootItems = filteredItems.map((folder) =>
-          makeReactiveFolder(folder)
-        ) as EnvironmentFolder[]
+        const reactiveRootItems = itemsWithNewIds.map((item) =>
+          'items' in item ? makeReactiveFolder(item) : item
+        )
         setRootItems(reactiveRootItems)
         expandAfterImport()
 
         // Emit one CREATED per top-level imported item — descendants
         // land in the search index via SearchIndexService's recursive
         // walk (see `emitTopLevelCreated` comment).
-        filteredItems.forEach((folder) => {
-          emitTopLevelCreated(folder, folder.id)
+        itemsWithNewIds.forEach((item) => {
+          emitTopLevelCreated(item, item.id)
         })
 
-        setPendingEnvFolderIds(collectEnvFolderIds(filteredItems))
+        setPendingEnvFolderIds(collectEnvFolderIds(itemsWithNewIds))
         if (onImportComplete) onImportComplete()
         return
       }
