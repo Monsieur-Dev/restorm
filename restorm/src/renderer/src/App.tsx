@@ -458,7 +458,7 @@ const App: React.FC = () => {
     if (!itemId) return null
     const request = findRequestById(rootItems, itemId)
     if (!request) return null
-    return { id: request.id, path: buildRequestPath(rootItems as EnvironmentFolder[], request.id) }
+    return { id: request.id, path: buildRequestPath(rootItems, request.id) }
   }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, rootItems])
 
   // The nearest ancestor env folder of the active request — the

@@ -1,4 +1,4 @@
-import type { EnvironmentFolder, FolderItem, Request } from '../../../shared/types/collections'
+import type { EnvironmentFolder, Folder, FolderItem, Request } from '../../../shared/types/collections'
 import { isAnyFolder, isRequest } from '../../../shared/types/collections'
 
 function getPaddingWidth(count: number): number {
@@ -43,12 +43,23 @@ function findRequestPathInItems(items: FolderItem[], prefix: string, requestId: 
   return null
 }
 
-export function buildRequestPath(collections: EnvironmentFolder[], requestId: string): string | null {
+export function buildRequestPath(
+  collections: (EnvironmentFolder | Folder | Request)[],
+  requestId: string
+): string | null {
   for (let i = 0; i < collections.length; i++) {
-    const collection = collections[i]
-    if (!collection) continue
-    const base = folderSegment(collection.name, i, collections.length)
-    const path = findRequestPathInItems(collection.items, base, requestId)
+    const item = collections[i]
+    if (!item) continue
+    // Requests can now live at the root of the tree (auth route,
+    // for instance). A root-level match returns its own segment.
+    if (isRequest(item)) {
+      if (item.id === requestId) {
+        return requestSegment(item, i, collections.length)
+      }
+      continue
+    }
+    const base = folderSegment(item.name, i, collections.length)
+    const path = findRequestPathInItems(item.items, base, requestId)
     if (path) return path
   }
   return null
