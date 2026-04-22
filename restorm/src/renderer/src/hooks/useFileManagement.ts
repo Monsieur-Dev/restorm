@@ -758,9 +758,12 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         await searchIndexService.initialize()
         for (const rootItem of reactiveItems) {
           // `indexFolderTree` walks folders recursively; requests at
-          // the root only need a single document indexed.
+          // the root need their own indexing path (no parent folder
+          // to hand off to).
           if ('items' in rootItem) {
             await searchIndexService.indexFolderTree(rootItem)
+          } else {
+            await searchIndexService.indexRootRequest(rootItem)
           }
         }
 

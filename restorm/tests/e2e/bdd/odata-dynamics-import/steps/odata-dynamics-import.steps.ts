@@ -199,15 +199,20 @@ When('I click Import and wait for the sidebar to be populated', async () => {
 Then('the collection contains the dynamics authentication route', async () => {
   if (!page) throw new Error('app must be launched')
 
-  // Auth request lives at the root of the imported tree —
-  // `useImport`'s empty-file path now keeps non-folder root items
+  // Auth request lives AT THE ROOT of the imported tree (depth 0)
+  // — `useImport`'s empty-file path now keeps non-folder root items
   // and `ImportModal.handleImportClick` prepends the attached auth
-  // there instead of nesting it in the first folder.
+  // there instead of nesting it in the first folder. `data-depth="0"`
+  // is set by `ListView` on root-level rows; a nested match (which
+  // would mean we silently regressed to the old workaround) would
+  // not satisfy this selector.
   const authNode = page.locator(
-    '[data-testid="sidebar-listview"] .list-view-row',
+    '[data-testid="sidebar-listview"] .list-view-row[data-depth="0"]',
     { hasText: 'Authentication route' }
   ).first()
   await expect(authNode).toBeVisible({ timeout: 10000 })
+  const depthAttr = await authNode.getAttribute('data-depth')
+  expect(depthAttr, 'auth route must be at root (data-depth="0")').toBe('0')
 })
 
 Then('a non-auth request shows the dynamics auth selected in the status bar', async () => {

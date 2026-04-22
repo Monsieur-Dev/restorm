@@ -935,16 +935,23 @@ const App: React.FC = () => {
         // Use ref to ensure we call the latest version
         handleFileOpenedRef.current(fileState)
       },
-      setRootItems: (folders: EnvironmentFolder[]) => {
-        // Make folders reactive before setting
-        const reactiveItems = folders.map(folder => makeReactiveFolder(folder) as EnvironmentFolder)
+      setRootItems: (items: (EnvironmentFolder | Folder | Request)[]) => {
+        // Make folders reactive before setting — leave root-level
+        // requests as-is (they have no `items` array to wrap).
+        const reactiveItems = items.map((item) =>
+          'items' in item ? makeReactiveFolder(item) : item
+        )
         setRootItems(reactiveItems)
         // Also trigger indexing
         void (async (): Promise<void> => {
           await searchIndexService.clearIndex()
           await searchIndexService.initialize()
-          for (const folder of reactiveItems) {
-            await searchIndexService.indexFolderTree(folder)
+          for (const rootItem of reactiveItems) {
+            if ('items' in rootItem) {
+              await searchIndexService.indexFolderTree(rootItem)
+            } else {
+              await searchIndexService.indexRootRequest(rootItem)
+            }
           }
         })()
       },

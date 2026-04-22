@@ -593,6 +593,27 @@ class SearchIndexService {
   }
 
   /**
+   * Index a single request that lives at the root of the collection
+   * (e.g. an attached auth route). Regular requests reach the index
+   * through their parent folder's recursive walk; root-level requests
+   * don't have a parent to ride along with.
+   */
+  async indexRootRequest(request: Request): Promise<void> {
+    logger.debug('[SearchIndexService] Indexing root request', { requestId: request.id, requestName: request.name })
+    try {
+      // Use the request's own id as `parentFolderId` — there is no
+      // folder above it; the search document's navigation only uses
+      // this to drive "jump to parent", which a root-level request
+      // simply short-circuits to itself.
+      const doc = requestToSearchDocument(request, request.id)
+      const plainDoc = JSON.parse(JSON.stringify(doc)) as typeof doc
+      await searchService.indexDocuments([plainDoc])
+    } catch (error) {
+      logger.error('[SearchIndexService] Error indexing root request', { error: String(error), requestId: request.id })
+    }
+  }
+
+  /**
    * Clear the entire search index
    */
   async clearIndex(): Promise<void> {
