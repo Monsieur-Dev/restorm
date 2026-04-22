@@ -64,7 +64,7 @@ function makeFolder(id: string, name: string, items: FolderItem[] = []): Folder 
   return { id, name, documentation: '', tags: [], configuration: {}, items }
 }
 
-function makeRequest(id: string, name: string): Request {
+function makeRequest(id: string, name: string, extra: Partial<Request> = {}): Request {
   return {
     id,
     name,
@@ -74,7 +74,8 @@ function makeRequest(id: string, name: string): Request {
     headers: [],
     params: [],
     documentation: '',
-    tags: []
+    tags: [],
+    ...extra
   } as Request
 }
 
@@ -215,5 +216,59 @@ describe('useImport.handleImport — nested target folder', () => {
       return doc?.name === 'Leaf request'
     })
     expect(leafPayload).toBeUndefined()
+  })
+})
+
+describe('useImport.handleImport — authenticationRequestId remap', () => {
+  beforeEach(() => {
+    captured.length = 0
+  })
+
+  it('rewrites pre-regeneration authenticationRequestId references to the new auth id', async () => {
+    const setRootItems = vi.fn()
+    const setExpandedIds = vi.fn()
+
+    const { result } = renderHook(() =>
+      useImport({
+        rootItems: [] as (EnvironmentFolder | Folder | Request)[],
+        setRootItems,
+        setExpandedIds
+      })
+    )
+
+    // The importer wires `authenticationRequestId` on every
+    // downstream request to the attached auth's *pre-regeneration*
+    // id. After `regenerateIds` gives the auth a new id, those
+    // references have to be remapped or they point at nothing.
+    const authOriginalId = 'auth-original-id'
+    const auth = makeRequest(authOriginalId, 'Authentication route')
+    const folder = makeFolder('folder-id', 'Imported', [
+      makeRequest('child-1-id', 'Child 1', { authenticationRequestId: authOriginalId }),
+      makeRequest('child-2-id', 'Child 2', { authenticationRequestId: authOriginalId })
+    ])
+
+    await act(async () => {
+      result.current.handleImport([auth, folder] as FolderItem[])
+      await Promise.resolve()
+    })
+
+    const committed = setRootItems.mock.calls[0]?.[0] as FolderItem[]
+    const committedAuth = committed.find((i) => !('items' in i) && i.name === 'Authentication route') as Request
+    const committedFolder = committed.find((i) => 'items' in i && i.name === 'Imported') as Folder
+    expect(committedAuth).toBeDefined()
+    expect(committedFolder).toBeDefined()
+
+    // Auth got a new id…
+    expect(committedAuth.id).not.toBe(authOriginalId)
+
+    // …and every child now references *that* new id, not the stale
+    // pre-regeneration one.
+    for (const child of committedFolder.items) {
+      if ('items' in child) continue
+      expect(
+        (child as { authenticationRequestId?: string }).authenticationRequestId,
+        `child "${child.name}" must reference the regenerated auth id`
+      ).toBe(committedAuth.id)
+    }
   })
 })

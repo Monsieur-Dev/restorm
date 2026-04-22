@@ -63,24 +63,48 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         pendingFoldersCount: pendingFolders?.length ?? 0
       })
 
-      // Regenerate all IDs to avoid conflicts with existing items
+      // Regenerate all IDs to avoid conflicts with existing items.
+      // Keeps an `old → new` map so we can remap cross-item
+      // references (`authenticationRequestId`) in a second pass —
+      // otherwise requests wired up upstream with
+      // `authenticationRequestId: <old auth id>` point at a node
+      // that no longer exists after regeneration.
+      const idMap = new Map<string, string>()
       const regenerateIds = (item: FolderItem): FolderItem => {
+        const newId = crypto.randomUUID()
+        idMap.set(item.id, newId)
         if ('items' in item) {
-          // It's a folder (Folder or EnvironmentFolder)
           const folder = item
           return {
             ...folder,
-            id: crypto.randomUUID(),
+            id: newId,
             items: folder.items.map((child) => regenerateIds(child))
           }
         } else {
-          // It's a request
           const request = item
           return {
             ...request,
-            id: crypto.randomUUID()
+            id: newId
           }
         }
+      }
+
+      // Walk a regenerated tree and fix any `authenticationRequestId`
+      // that still points at a pre-regeneration id. Runs top-down;
+      // cheap even on a 10k-route tree because it only touches
+      // already-shallow-cloned nodes.
+      const remapAuthRefs = (item: FolderItem): FolderItem => {
+        if ('items' in item) {
+          return { ...item, items: item.items.map(remapAuthRefs) }
+        }
+        const current = (item as { authenticationRequestId?: string }).authenticationRequestId
+        if (current !== undefined) {
+          const remapped = idMap.get(current)
+          if (remapped !== undefined && remapped !== current) {
+            return { ...item, authenticationRequestId: remapped }
+          }
+        }
+        return item
       }
 
       // Emit ENVIRONMENT_CREATED for every env (and nested sub-envs) on an
@@ -156,7 +180,8 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         }
       }
 
-      const itemsWithNewIds = items.map((item) => regenerateIds(item))
+      const regenerated = items.map((item) => regenerateIds(item))
+      const itemsWithNewIds = regenerated.map((item) => remapAuthRefs(item))
 
       logger.info('[useImport] Items with new IDs', { count: itemsWithNewIds.length })
 
