@@ -269,7 +269,7 @@ contextBridge.exposeInMainWorld('restorm', {
   },
   http: {
     /** Execute an HTTP request */
-    execute: async (input: { requestId: string; method: string; timeout?: number }): Promise<{
+    execute: async (input: { requestId: string; method: string; timeout?: number; authRequest?: unknown; requestPath?: string }): Promise<{
       requestId: string
       success: boolean
       statusCode?: number
@@ -279,6 +279,7 @@ contextBridge.exposeInMainWorld('restorm', {
       error?: string
       timings: { startedAt: string; durationMs: number }
       requestUrl?: string
+      requestHeaders?: Record<string, string>
     }> => {
       const result: unknown = await ipcRenderer.invoke('http:execute', input)
       return result as {
@@ -291,6 +292,7 @@ contextBridge.exposeInMainWorld('restorm', {
         error?: string
         timings: { startedAt: string; durationMs: number }
         requestUrl?: string
+        requestHeaders?: Record<string, string>
       }
     },
     /** Cancel an HTTP request */
@@ -472,7 +474,7 @@ contextBridge.exposeInMainWorld('restorm', {
      * send a GET. Response shape mirrors the HTTP envelope; OData
      * annotations are extracted downstream.
      */
-    execute: async (input: { requestId: string; timeout?: number; requestPath?: string; method?: string; body?: string; bodyContentType?: string; urlOverride?: string }): Promise<{
+    execute: async (input: { requestId: string; timeout?: number; requestPath?: string; method?: string; body?: string; bodyContentType?: string; urlOverride?: string; authRequest?: unknown }): Promise<{
       requestId: string
       success: boolean
       statusCode?: number

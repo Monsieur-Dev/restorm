@@ -53,6 +53,10 @@ export interface HTTPExecutionResult {
     durationMs: number
   }
   requestUrl?: string
+  /** Headers actually sent with the request, after auth injection.
+   * Surfaced so the renderer's response panel can show the auth
+   * headers that were merged in at dispatch time. */
+  requestHeaders?: Record<string, string>
 }
 
 /** Active request info */
@@ -242,6 +246,9 @@ class HTTPExecutionService {
         headers: result.headers,
         body: result.body,
         requestUrl: resolvedUrl,
+        // Clone `headers` so downstream mutations on the request
+        // path don't retroactively edit the result we're returning.
+        requestHeaders: { ...headers },
         timings: { startedAt, durationMs }
       }
     } catch (err) {

@@ -71,6 +71,7 @@ import { DeleteConfirmationModal } from './components/Modals/DeleteConfirmationM
 import { ImportModal } from './components/Modals/ImportModal'
 import { AvailableVariablesProvider } from './contexts/AvailableVariablesContext'
 import { VariableTransformProvider } from './contexts/VariableTransformContext'
+import { AuthRequestResolverContext, type AuthRequestResolver } from './contexts/authRequestResolverContext'
 import { collectAllFolderIds } from './services/FolderToListView'
 import {
   findFolderById,
@@ -105,7 +106,8 @@ import type {
 import {
   isRequest,
   isEnvironmentFolder,
-  isAnyFolder
+  isAnyFolder,
+  isAuthenticationRequest
 } from '../../shared/types/collections'
 import { buildRequestPath } from './utils/requestPath'
 
@@ -876,6 +878,15 @@ const App: React.FC = () => {
   const getFolderByIdCb = useCallback((id: string) => findFolderById(rootItems, id), [rootItems])
   const getEnvironmentFolderByIdCb = useCallback((id: string) => findEnvironmentFolderById(rootItems, id), [rootItems])
 
+  // Send-time hook: request tab views call this to resolve their
+  // `authenticationRequestId` back to the AuthenticationRequest
+  // sitting in `rootItems`, so the IPC call carries the full auth
+  // document the main-process executor needs.
+  const resolveAuthRequestCb = useCallback<AuthRequestResolver>((id) => {
+    const found = findRequestById(rootItems, id)
+    return found && isAuthenticationRequest(found) ? found : null
+  }, [rootItems])
+
   const environmentFolderCollectionsRef = useRef(environmentFolderCollections)
   useEffect(() => {
     environmentFolderCollectionsRef.current = environmentFolderCollections
@@ -1235,6 +1246,7 @@ const App: React.FC = () => {
   return (
     <AvailableVariablesProvider>
       <VariableTransformProvider>
+        <AuthRequestResolverContext.Provider value={resolveAuthRequestCb}>
         <div
           style={{
           display: 'flex',
@@ -1450,6 +1462,7 @@ const App: React.FC = () => {
             selectedFolderId={selectedItemId ?? undefined}
           />
         </div>
+        </AuthRequestResolverContext.Provider>
       </VariableTransformProvider>
     </AvailableVariablesProvider>
   )

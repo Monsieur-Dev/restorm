@@ -55,6 +55,7 @@ import {
   buildFunctionInlinedArgs
 } from '../../../../shared/utils/odataOperationParams'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
+import { useAuthRequestResolver } from '../../contexts/authRequestResolverContext'
 import type { KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
@@ -182,6 +183,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   const { t } = useTranslation()
   const { selectedEnvId, environments } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
+  const resolveAuthRequest = useAuthRequestResolver()
 
   const odataVersionOptions = useMemo<ISelectOptionItem[]>(() => [
     { text: 'v4' },
@@ -485,13 +487,19 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       contentTypeOverride = serialized.contentType
     }
     const dispatchedMethod = method
+    const authAttachedId = (request as { authenticationRequestId?: string }).authenticationRequestId
+    const attachedAuth = authAttachedId ? resolveAuthRequest(authAttachedId) : null
+    const authRequestPayload = attachedAuth
+      ? (attachedAuth as unknown as { toPlainObject?: () => unknown }).toPlainObject?.() ?? attachedAuth
+      : undefined
     api.execute({
       requestId,
       timeout: DEFAULT_REQUEST_TIMEOUT_MS,
       method,
       ...(body !== undefined ? { body } : {}),
       ...(contentTypeOverride !== undefined ? { bodyContentType: contentTypeOverride } : {}),
-      ...(requestPath ? { requestPath } : {})
+      ...(requestPath ? { requestPath } : {}),
+      ...(authRequestPayload ? { authRequest: authRequestPayload } : {})
     })
       .then((result) => {
         setResponse({
@@ -526,7 +534,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId } as RequestHistoryEventPayload)
       })
       .finally(() => { setIsSending(false) })
-  }, [isSending, request.id, request.operationKind, request.actionBody, request.batchSubRequests, requestPath])
+  }, [isSending, request, requestPath, resolveAuthRequest])
 
   const urlSection = (
     <div style={urlRowStyle} data-testid="odata-request-url-section">
@@ -830,11 +838,17 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     if (!api) return
     setIsSending(true)
     try {
+      const nextLinkAuthId = (request as { authenticationRequestId?: string }).authenticationRequestId
+      const nextLinkAuth = nextLinkAuthId ? resolveAuthRequest(nextLinkAuthId) : null
+      const nextLinkAuthPayload = nextLinkAuth
+        ? (nextLinkAuth as unknown as { toPlainObject?: () => unknown }).toPlainObject?.() ?? nextLinkAuth
+        : undefined
       const result = await api.execute({
         requestId: request.id,
         timeout: DEFAULT_REQUEST_TIMEOUT_MS,
         method: 'GET',
-        urlOverride: nextLink
+        urlOverride: nextLink,
+        ...(nextLinkAuthPayload ? { authRequest: nextLinkAuthPayload } : {})
       })
       const nextParsed = tryParseJson(result.body ?? '')
       const nextNormalized = nextParsed !== null && typeof nextParsed === 'object'
@@ -886,7 +900,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     } finally {
       setIsSending(false)
     }
-  }, [response, request.id, request.odataVersion])
+  }, [response, request, resolveAuthRequest])
 
   const buildResponseView = useCallback((input: {
     statusCode: number

@@ -259,6 +259,8 @@ export interface HTTPExecutionResult {
     durationMs: number
   }
   requestUrl?: string
+  /** Headers actually sent (includes any auth injection). */
+  requestHeaders?: Record<string, string>
 }
 
 /** HTTP progress data */

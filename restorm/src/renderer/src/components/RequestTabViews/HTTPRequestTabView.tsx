@@ -22,6 +22,7 @@ import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue, ResponseHistoryDe
 import { isAuthenticationRequest } from '../../../../shared/types/collections'
 import { StringValue } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
+import { useAuthRequestResolver } from '../../contexts/authRequestResolverContext'
 import type { KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
@@ -101,6 +102,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
   const { selectedEnvId, environments, envColor } = useEnvironmentContext()
+  const resolveAuthRequest = useAuthRequestResolver()
   const collections = useRestormStore((state) => state.collections)
   const findParentFolder = useRestormStore((state) => state.findParentFolder)
   const handlebarsHelpers = useHandlebarsHelpers()
@@ -443,12 +445,23 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     setIsSending(true)
     setHttpResponse(null)
 
+    // Look the auth request up (if any) so the main-process executor
+    // can run its cache-or-fetch + header-inject flow before firing
+    // this request. We ship a plain POJO — the main side rebuilds the
+    // class via `AuthenticationRequest.fromPlain`.
+    const authAttachedId = (request as { authenticationRequestId?: string }).authenticationRequestId
+    const attachedAuth = authAttachedId ? resolveAuthRequest(authAttachedId) : null
+    const authRequestPayload = attachedAuth
+      ? (attachedAuth as unknown as { toPlainObject?: () => unknown }).toPlainObject?.() ?? attachedAuth
+      : undefined
+
     // Execute via backend
     window.restorm?.http.execute({
       requestId,
       method,
       timeout: DEFAULT_REQUEST_TIMEOUT_MS,
-      ...(requestPath ? { requestPath } : {})
+      ...(requestPath ? { requestPath } : {}),
+      ...(authRequestPayload ? { authRequest: authRequestPayload } : {})
     })
       .then((result) => {
         if (result.success) {
@@ -469,13 +482,24 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           const contentLengthStr = Array.isArray(contentLengthHeader) ? contentLengthHeader[0] : contentLengthHeader
           const contentLength = contentLengthStr ? parseInt(contentLengthStr, 10) : undefined
 
+          // Prefer the actually-dispatched headers from the executor
+          // (they include auth injections). Fall back to the user-
+          // configured list for envelopes where the main side didn't
+          // surface them (older server builds, error branches).
+          const dispatchedHeaders: KeyValue[] = result.requestHeaders
+            ? Object.entries(result.requestHeaders).map(([k, v]) => ({
+                key: k,
+                value: new StringValue(v)
+              } as KeyValue))
+            : request.headers
+
           const response: HTTPResponse = {
             id: `resp_${Date.now()}`,
             type: 'http',
             requestId,
             requestUrl: result.requestUrl ?? '',
             requestMethod: method as HTTPMethod,
-            requestHeaders: request.headers,
+            requestHeaders: dispatchedHeaders,
             requestParams: request.params,
             requestPathParams: request.pathParams,
             statusCode: result.statusCode ?? 0,
@@ -526,7 +550,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       .finally(() => {
         setIsSending(false)
       })
-  }, [isSending, request, method, url, requestPath])
+  }, [isSending, request, method, url, requestPath, resolveAuthRequest])
 
   const handleCancel = useCallback((): void => {
     const requestId = request.id

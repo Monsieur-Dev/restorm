@@ -10,6 +10,8 @@ import type { PersistenceFormat } from 'electron-core-ui'
 import { resolveRequestURL, type URLResolutionInput } from './services/request/HTTPRequestService'
 import { httpExecutionService, type HTTPExecutionInput } from './services/HTTPExecutionService'
 import { authPrefetchOneShot, resolveProducedHeaders } from './services/AuthenticationPrefetch'
+import { AuthenticationRequest } from '../shared/models/requests/AuthenticationRequest'
+import { authenticationCacheService } from './services/AuthenticationCacheService'
 import { graphqlExecutionService, type GraphQLExecutionInput } from './services/GraphQLExecutionService'
 import { soapExecutionService, type SOAPExecutionInput } from './services/SOAPExecutionService'
 import { grpcExecutionService, type GRPCExecutionInput } from './services/GRPCExecutionService'
@@ -49,6 +51,16 @@ import type { ApiDocumentation } from '../shared/types/apiDocumentation'
  * Get mocked folder path for E2E tests, if E2E_MOCK_SAVE_FOLDER env var is set.
  * Returns null if not in E2E mode.
  */
+/**
+ * Narrow an `unknown` payload to the plain-object shape
+ * `AuthenticationRequest.fromPlain` accepts. The renderer sends a
+ * shallow dump of the reactive proxy over IPC; we only forward
+ * objects that carry at least an `id` to the class constructor.
+ */
+function isPlainAuthPayload(value: unknown): value is Parameters<typeof AuthenticationRequest.fromPlain>[0] {
+  return typeof value === 'object' && value !== null && 'id' in (value as Record<string, unknown>)
+}
+
 function getE2EMockedFolderPath(): string | null {
   return process.env['E2E_MOCK_SAVE_FOLDER'] ?? null
 }
@@ -525,6 +537,10 @@ export function registerRestormIPC(deps: {
 
   ipcMain.handle('context:clear-all', () => {
     contextService.clearAll()
+    // File close — the auth token cache is scoped to the open
+    // collection, so flush it here. Opening a different file (or the
+    // same one again) must force a fresh round of token fetches.
+    authenticationCacheService.clear()
   })
 
   // ==========================================================================
@@ -540,7 +556,20 @@ export function registerRestormIPC(deps: {
   // ==========================================================================
 
   validatedHandle('http:execute', httpExecuteArgs, async (_event, [input]) => {
-    const result = await httpExecutionService.execute(input as HTTPExecutionInput)
+    // Rehydrate the `authRequest` POJO the renderer hands over into
+    // a real `AuthenticationRequest` instance so the executor can
+    // call its prototype methods (Handlebars renders headers off
+    // `request.producedHeaders`, the cache invalidation path checks
+    // `request.authErrorCodes`, etc.).
+    const authRequestPayload = (input as { authRequest?: unknown }).authRequest
+    const authRequest = isPlainAuthPayload(authRequestPayload)
+      ? AuthenticationRequest.fromPlain(authRequestPayload)
+      : undefined
+    const executionInput: HTTPExecutionInput = {
+      ...(input as HTTPExecutionInput),
+      ...(authRequest ? { authRequest } : {})
+    }
+    const result = await httpExecutionService.execute(executionInput)
     setImmediate(() => {
       const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'
         ? (input as { requestPath?: unknown }).requestPath
@@ -583,12 +612,17 @@ export function registerRestormIPC(deps: {
     const urlOverride = typeof input.urlOverride === 'string' && input.urlOverride.length > 0
       ? input.urlOverride
       : undefined
+    const authRequestPayload = (input as { authRequest?: unknown }).authRequest
+    const authRequest = isPlainAuthPayload(authRequestPayload)
+      ? AuthenticationRequest.fromPlain(authRequestPayload)
+      : undefined
     const result = await httpExecutionService.execute({
       requestId: input.requestId,
       method,
       ...(typeof input.timeout === 'number' ? { timeout: input.timeout } : {}),
       ...(rawBody !== undefined ? { rawBody, rawBodyContentType: bodyContentType } : {}),
-      ...(urlOverride !== undefined ? { urlOverride } : {})
+      ...(urlOverride !== undefined ? { urlOverride } : {}),
+      ...(authRequest ? { authRequest } : {})
     })
     setImmediate(() => {
       const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'
