@@ -26,6 +26,13 @@ const dirtyStateTestDir = defineBddConfig({
   outputDir: '.features-gen/dirty-state'
 })
 
+// Temporary diagnostic — remove after the auth-modal layout is stable.
+const authModalDebugTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/auth-modal-debug/features/**/*.feature',
+  steps: ['tests/e2e/bdd/auth-modal-debug/steps/**/*.ts', 'tests/e2e/bdd/fixtures/auth-modal-debug.fixture.ts'],
+  outputDir: '.features-gen/auth-modal-debug'
+})
+
 /**
  * Playwright configuration for Electron E2E tests using playwright-bdd.
  * Each test group has its own project with a dedicated fixture.
@@ -73,6 +80,10 @@ export default defineConfig({
     {
       name: 'dirty-state',
       testDir: dirtyStateTestDir
+    },
+    {
+      name: 'auth-modal-debug',
+      testDir: authModalDebugTestDir
     }
   ]
 })

@@ -1,25 +1,31 @@
 /**
- * AuthenticationSetupModal — modal wrapper around HTTPRequestTabView
- * that hosts an ephemeral AuthenticationRequest for the import flow.
+ * AuthenticationSetupModal — modal wrapper around
+ * LocalAuthenticationRequestForm that hosts an ephemeral
+ * AuthenticationRequest for the import flow.
  *
- * The user edits the auth request (URL / headers / body / produced
- * headers / expiration) using the standard HTTP tab view, then clicks
- * "Save & retry import". The modal fires `window.restorm.auth.prefetch`
- * — a one-shot main-process call that:
- *   1. Runs the HTTP request verbatim.
- *   2. Evaluates handlebars `producedHeaders` against the JSON body.
- *   3. Returns the resolved header map.
- * The caller (ImportModal) receives the edited request + resolved
- * headers and re-drives the import preview.
+ * The request is a plain class instance (not a reactive proxy) —
+ * it has no collection yet, no variables to resolve, and no need
+ * for ContextService wiring, so every keystroke stays entirely
+ * local (zero IPC traffic, zero renderer-side broadcasts). The
+ * form mutates the instance in place; this modal reads the final
+ * state when the user clicks "Save & retry import".
+ *
+ * Save & retry import:
+ *   1. Serialize the current request to the one-shot prefetch
+ *      payload (shared with the form's inline Send button).
+ *   2. Fire `window.restorm.auth.prefetch` — runs the HTTP call,
+ *      evaluates handlebars `producedHeaders` against the response
+ *      body, and returns the resolved header map.
+ *   3. Forward the request + resolved headers to the caller so
+ *      ImportModal can re-drive the import preview.
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Modal, Button } from 'electron-core-ui/renderer'
-import { HTTPRequestTabView } from '../RequestTabViews/HTTPRequestTabView'
+import { LocalAuthenticationRequestForm } from '../RequestTabViews/LocalAuthenticationRequestForm'
 import { AuthenticationRequest } from '../../../../shared/models'
-import { makeReactiveAuthenticationRequest } from '../../types/reactive'
-import { EnvironmentProvider } from '../../contexts/EnvironmentContext'
+import { buildAuthPrefetchPayload } from './authPrefetchPayload'
 
 export interface AuthenticationSetupModalProps {
   isOpen: boolean
@@ -53,24 +59,16 @@ export const AuthenticationSetupModal: React.FC<AuthenticationSetupModalProps> =
   const authRequestRef = useRef<AuthenticationRequest | null>(null)
   const [, forceRerender] = useState(0)
   const [isRunning, setIsRunning] = useState(false)
-  const [prefetchError, setPrefetchError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!isOpen) {
       authRequestRef.current = null
-      setPrefetchError(null)
       return
     }
     if (authRequestRef.current === null) {
-      const base = initialRequest ?? makeEphemeralAuthRequest()
-      // `makeReactiveAuthenticationRequest` signature expects the
-      // shared-types `AuthenticationRequest` (without the class-only
-      // `toPlainObject`). The class instance is structurally a
-      // superset, so the cast is safe at runtime.
-      authRequestRef.current = makeReactiveAuthenticationRequest(
-        base as unknown as Parameters<typeof makeReactiveAuthenticationRequest>[0],
-        '__import-wizard__'
-      ) as AuthenticationRequest
+      // Plain class instance, no reactive proxy. The form mutates
+      // this in place; we read the final state on Save & retry.
+      authRequestRef.current = initialRequest ?? makeEphemeralAuthRequest()
       forceRerender((n) => n + 1)
     }
   }, [isOpen, initialRequest])
@@ -79,75 +77,26 @@ export const AuthenticationSetupModal: React.FC<AuthenticationSetupModalProps> =
     const req = authRequestRef.current
     if (!req) return
     const api = window.restorm?.auth
-    if (!api) {
-      setPrefetchError(t('authSetupModal.ipcUnavailable', 'Authentication IPC bridge unavailable'))
-      return
-    }
-    setPrefetchError(null)
+    if (!api) return
     setIsRunning(true)
     try {
-      // Body type at the type level is the camelCase class union
-       // (`formData` / `xWwwFormUrlEncoded`) but the UI actually
-       // stores the kebab-case HTTP names (`form-data` /
-       // `x-www-form-urlencoded`) — HTTPRequestBodySection writes
-       // them verbatim via `bodyMode as 'form-data' | ...`. Compare
-       // against both forms so we handle whatever ends up on disk,
-       // then normalize to kebab-case for the wire protocol.
-      let bodyPayload: { type: string; content?: string; fields?: { key: string; value: string; enabled?: boolean }[] } | undefined
-      const rawBodyType = req.body?.type as unknown as string | undefined
-      if (rawBodyType === 'text' && req.body?.content) {
-        bodyPayload = { type: 'text', content: req.body.content }
-      } else if (
-        (rawBodyType === 'x-www-form-urlencoded' || rawBodyType === 'xWwwFormUrlEncoded' ||
-          rawBodyType === 'form-data' || rawBodyType === 'formData') &&
-        req.body?.fields
-      ) {
-        const normalizedType =
-          rawBodyType === 'x-www-form-urlencoded' || rawBodyType === 'xWwwFormUrlEncoded'
-            ? 'x-www-form-urlencoded'
-            : 'form-data'
-        bodyPayload = {
-          type: normalizedType,
-          fields: req.body.fields.map((f) => ({
-            key: f.key,
-            value: f.value.toString(),
-            enabled: f.enabled
-          }))
-        }
-      }
-      const payload: Parameters<typeof api.prefetch>[0] = {
-        method: req.method,
-        url: req.url,
-        headers: req.headers.map((h) => ({
-          key: h.key,
-          value: h.value.toString(),
-          enabled: h.enabled
-        })),
-        producedHeaders: req.producedHeaders.map((h) => ({
-          key: h.key,
-          value: h.value.toString(),
-          enabled: h.enabled
-        })),
-        ...(req.expirationExpression ? { expirationExpression: req.expirationExpression } : {}),
-        ...(bodyPayload ? { body: bodyPayload } : {})
-      }
-      const result = await api.prefetch(payload)
-      if (!result.success) {
-        setPrefetchError(result.error ?? `HTTP ${result.statusCode}`)
-        return
-      }
+      const result = await api.prefetch(
+        buildAuthPrefetchPayload(req as unknown as Parameters<typeof buildAuthPrefetchPayload>[0])
+      )
+      if (!result.success) return
       onAttach(req, result.headers)
-    } catch (err) {
-      setPrefetchError(err instanceof Error ? err.message : String(err))
+    } catch {
+      // Failures are surfaced in the embedded form's Response tab
+      // via its own Send call; the Save & retry path stays silent.
     } finally {
       setIsRunning(false)
     }
-  }, [onAttach, t])
+  }, [onAttach])
 
   const attachLabel = useMemo(
     () => isRunning
       ? t('authSetupModal.running', 'Running…')
-      : t('authSetupModal.attachAndRetry', 'Save & retry import'),
+      : t('authSetupModal.attachAndRetry', 'OK'),
     [isRunning, t]
   )
 
@@ -162,18 +111,14 @@ export const AuthenticationSetupModal: React.FC<AuthenticationSetupModalProps> =
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1, minHeight: 0 }}>
         {currentRequest ? (
-          <EnvironmentProvider environments={undefined}>
-            <div style={{ flex: 1, minHeight: 400, minWidth: 800, display: 'flex', flexDirection: 'column' }}>
-              <HTTPRequestTabView
-                request={currentRequest as unknown as Parameters<typeof HTTPRequestTabView>[0]['request']}
-                disableContextSync
-              />
-            </div>
-          </EnvironmentProvider>
-        ) : null}
-        {prefetchError ? (
-          <div role="alert" style={{ color: 'var(--testing-iconFailed)', fontSize: 12, padding: '4px 8px' }}>
-            {prefetchError}
+          // `minHeight` was pushing the footer below the modal frame
+          // when the window was shorter than 400px of content area.
+          // The form handles its own overflow via internal
+          // ScrollableElements, so let it shrink freely.
+          <div style={{ flex: 1, minWidth: 800, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+            <LocalAuthenticationRequestForm
+              request={currentRequest as unknown as Parameters<typeof LocalAuthenticationRequestForm>[0]['request']}
+            />
           </div>
         ) : null}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 8, borderTop: '1px solid var(--panel-border)' }}>

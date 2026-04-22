@@ -345,6 +345,18 @@ export function ImportModal({
     }
   }, [input, handleInputChange])
 
+  // Count the actual leaf requests the import would create — what the
+  // user ultimately cares about (folders are just scaffolding). Walks
+  // the preview tree recursively; skips folder nodes in the tally.
+  const previewRequestCount = useMemo(() => {
+    const walk = (items: FolderItem[]): number => items.reduce((acc, item) => {
+      if ('items' in item) return acc + walk(item.items)
+      if (isRequest(item)) return acc + 1
+      return acc
+    }, 0)
+    return walk(previewItems)
+  }, [previewItems])
+
   // Build preview ListView items
   const previewListItems: ListViewItemData[] = useMemo(() => {
     if (previewItems.length === 0) return []
@@ -596,12 +608,15 @@ export function ImportModal({
           <Button secondary onClick={onClose} data-testid="cancel-button">
             {t('import.cancel')}
           </Button>
-          <Button 
+          <Button
+            emphasis={1}
             onClick={handleImportClick}
             disabled={previewItems.length === 0}
             data-testid="import-button"
           >
-            {t('import.ok')}
+            {previewRequestCount > 0
+              ? `${t('import.ok')} (${previewRequestCount})`
+              : t('import.ok')}
           </Button>
         </div>
       </div>

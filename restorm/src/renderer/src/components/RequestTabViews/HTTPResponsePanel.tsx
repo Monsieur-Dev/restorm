@@ -11,7 +11,7 @@ const boldLabelStyle: CSSProperties = { fontWeight: 600 }
 const kvKeyStyle: CSSProperties = { fontWeight: 600, color: 'var(--symbolIcon-propertyForeground)' }
 const kvValueStyle: CSSProperties = { color: 'var(--descriptionForeground)' }
 const fullHeightBoxStyle: CSSProperties = { height: '100%', boxSizing: 'border-box' }
-const editorContainerStyle: CSSProperties = { height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3, boxSizing: 'border-box' }
+const editorContainerStyle: CSSProperties = { flex: 1, minHeight: 0, border: '1px solid var(--panel-border)', borderRadius: 3, boxSizing: 'border-box' }
 const errorTextStyle: CSSProperties = { color: 'var(--testing-iconFailed)' }
 
 /** Format duration in a human-readable way */

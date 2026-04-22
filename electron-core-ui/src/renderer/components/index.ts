@@ -235,6 +235,12 @@ export type {
 	SplitViewProps,
 	SplitViewPaneProps
 } from './SplitView'
+
+// StaticPane — non-collapsible / auto-height panel mirroring the
+// visual style of SplitView's Pane, rendered in natural document
+// flow (stack children freely, each sizes to content).
+export { StaticPane } from './StaticPane'
+export type { StaticPaneProps } from './StaticPane'
 export type {
 	WorkbenchState, // legacy flat types (kept for external imports)
 	EditorGroup,

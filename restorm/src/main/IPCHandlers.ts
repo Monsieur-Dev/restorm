@@ -683,15 +683,17 @@ export function registerRestormIPC(deps: {
           headers: {} as Record<string, string>
         }
       }
-      // Treat non-2xx as a failure so the renderer surfaces the server
-      // error (e.g. 400 invalid_client) instead of happily sending a
-      // Bearer-undefined to the target.
+      // Treat non-2xx as a failure so Save & retry doesn't happily
+      // attach headers from a failed auth exchange. We still return
+      // the raw response body — the inline Send path in the modal
+      // uses it to show the server's actual payload in the Response
+      // tab, which tells the user what to fix.
       if (result.statusCode !== undefined && (result.statusCode < 200 || result.statusCode >= 300)) {
         return {
           success: false,
           statusCode: result.statusCode,
-          error: `Auth route returned HTTP ${result.statusCode}: ${(result.body ?? '').slice(0, 500)}`,
-          headers: {} as Record<string, string>
+          headers: {} as Record<string, string>,
+          responseBody: result.body ?? ''
         }
       }
       const resolved = resolveProducedHeaders(spec.producedHeaders, result.body ?? '')

@@ -30,6 +30,10 @@ export interface UseVerticalSashReturn {
   containerRef: React.RefObject<HTMLDivElement | null>
   /** Current width of the panel */
   width: number
+  /** Imperatively set the width — used by the container when it
+   * derives an initial width from a ratio once the real layout
+   * settles. Honors `minWidth` / `minRightWidth` clamping. */
+  setWidth: (next: number) => void
   /** Height of the container (from ResizeObserver) */
   containerHeight: number
   /** Layout provider for the Sash component */
@@ -126,6 +130,7 @@ export function useVerticalSash(options: UseVerticalSashOptions): UseVerticalSas
   return {
     containerRef,
     width,
+    setWidth,
     containerHeight,
     layoutProvider,
     handleSashStart,
