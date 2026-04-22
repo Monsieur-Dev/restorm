@@ -131,7 +131,12 @@ export function useImport(options: UseImportOptions): UseImportReturn {
       // descendant drafts during import — `onImportComplete` triggers
       // a full-tree save right after, so crash recovery kicks in off
       // the persisted file, not off per-node drafts.
-      const emitTopLevelCreated = (item: FolderItem, parentFolderId: string): void => {
+      // `parentFolderId` is only meaningful for requests that are
+      // actually being nested into a folder — when a request lands at
+      // the root of the collection we pass `undefined` so consumers
+      // (SearchIndexService, the save-unit registry) don't record a
+      // self-parent by mistake.
+      const emitTopLevelCreated = (item: FolderItem, parentFolderId: string | undefined): void => {
         if ('items' in item) {
           const folder = item
           eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
@@ -234,9 +239,10 @@ export function useImport(options: UseImportOptions): UseImportReturn {
 
         // Emit one CREATED per top-level imported item — descendants
         // land in the search index via SearchIndexService's recursive
-        // walk (see `emitTopLevelCreated` comment).
+        // walk (see `emitTopLevelCreated` comment). Root-level items
+        // have no parent folder, hence `undefined`.
         itemsWithNewIds.forEach((item) => {
-          emitTopLevelCreated(item, item.id)
+          emitTopLevelCreated(item, undefined)
         })
 
         setPendingEnvFolderIds(collectEnvFolderIds(itemsWithNewIds))
@@ -303,8 +309,13 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         expandAfterImport()
 
         // One CREATED per top-level item — see `emitTopLevelCreated`.
+        // When a pending target folder was created, the items are now
+        // children of that folder; otherwise they sit at the root and
+        // have no parent.
+        const rootPendingTarget =
+          targetFolderId && createdFoldersMap.has(targetFolderId) ? actualTargetFolderId : undefined
         itemsWithNewIds.forEach((item) => {
-          emitTopLevelCreated(item, item.id)
+          emitTopLevelCreated(item, rootPendingTarget)
         })
 
         setPendingEnvFolderIds(collectEnvFolderIds(itemsWithNewIds))
@@ -366,11 +377,14 @@ export function useImport(options: UseImportOptions): UseImportReturn {
       // One CREATED per top-level item — see `emitTopLevelCreated`.
       // Emit for pending folders first (they become new parents),
       // then for the imported items that nest into them.
+      // `actualTargetFolderId` is the resolved parent id (including
+      // when the target is itself a pending folder); `undefined` means
+      // the item lives at the root of the tree.
       createdFoldersMap.forEach((folder) => {
-        emitTopLevelCreated(folder, actualTargetFolderId || folder.id)
+        emitTopLevelCreated(folder, actualTargetFolderId)
       })
       itemsWithNewIds.forEach((item) => {
-        emitTopLevelCreated(item, actualTargetFolderId || item.id)
+        emitTopLevelCreated(item, actualTargetFolderId)
       })
 
       // Signal the host that the import has landed. The callback fires
