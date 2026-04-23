@@ -257,6 +257,31 @@ function processNode(params: {
       if (raw === null || typeof raw !== 'object') continue
       const item = raw as Record<string, unknown>
       const itemClass = classResolver(item, nodeClass, propKey)
+      // `@separateFolders` on a mixed array (folders AND requests,
+      // typical of `Folder.items`) treats every entry as a folder by
+      // default. Inspect each entry's own class — if it exposes its
+      // own `@separateFolders` / `@separateFiles` decorators (i.e. it
+      // has children to decompose further), it's a folder; otherwise
+      // it's a leaf and should land as a `.{ext}` file in the parent
+      // directory, matching what a host-side folder-tree writer like
+      // restorm's `saveFolderStructure` produces.
+      const itemIsFolder = itemClass
+        ? getSeparateFilesProperties(itemClass).size > 0
+          || getSeparateFoldersProperties(itemClass).size > 0
+        : true
+      if (!itemIsFolder) {
+        const fileName = nameItem(item, i, totalCount, itemClass, indexPaddingMin)
+        const absPath = joinPath(nodePath, `${fileName}.${extension}`)
+        accumulator.push({
+          runtimeId: getId(item, idProperty),
+          absolutePath: absPath,
+          content: cleanse(item, itemClass),
+          format,
+          kind: 'file',
+          parentId: nodeId
+        })
+        continue
+      }
       const folderName = nameItem(item, i, totalCount, itemClass, indexPaddingMin)
       const subFolderPath = joinPath(nodePath, folderName)
       const subIndexPath = joinPath(subFolderPath, `${indexFileName}.${extension}`)
