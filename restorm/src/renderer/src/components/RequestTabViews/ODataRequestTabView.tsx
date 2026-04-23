@@ -189,11 +189,16 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   // whether the $filter input stays empty because React never
   // re-renders, or re-renders with a stale target. Remove once
   // diagnosed.
+  const renderTs = performance.now()
   window.console.info('[TYPING-DEBUG] render', {
+    ts: renderTs,
     requestId: request.id,
     filterAsRead: request.queryOptions.filter,
-    selectJoined: (request.queryOptions.select ?? []).join(','),
-    top: request.queryOptions.top
+    // Proxy-target identity — if the `request` prop points at a new
+    // proxy (wrapping a different underlying target) between renders,
+    // the value reader is desynced from where `setFilter` writes.
+    requestRefSig: (request as { constructor?: { name?: string } }).constructor?.name ?? 'plain',
+    queryOptionsFilterKeyCount: Object.keys(request.queryOptions).length
   })
 
   const odataVersionOptions = useMemo<ISelectOptionItem[]>(() => [
@@ -714,6 +719,15 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
 
       <div style={rowStyle}>
         <label style={labelStyle} htmlFor="odata-filter">$filter</label>
+        {(() => {
+          const filterValue = request.queryOptions.filter ?? ''
+          window.console.info('[TYPING-DEBUG] InputBox value', {
+            requestId: request.id,
+            value: filterValue,
+            valueLen: filterValue.length
+          })
+          return null
+        })()}
         <InputBox
           value={request.queryOptions.filter ?? ''}
           onChange={setFilter}
