@@ -1070,8 +1070,18 @@ const App: React.FC = () => {
     }
 
     const handleFolderOrRequestUpdated = (payload: DocumentChangedPayload): void => {
+      // [DEBUG OYO-253] Trace whether the local event bus actually
+      // reaches the App.tsx subscriber after a proxy mutation. If this
+      // never fires, the re-render never happens and the input stays
+      // stale. Remove once diagnosed.
+      window.console.info('[TYPING-DEBUG] App handleFolderOrRequestUpdated', {
+        ts: performance.now(),
+        type: payload.type,
+        id: payload.id
+      })
       const doc = payload.document
       scheduleChecksumUpdate(payload.id, () => {
+        window.console.info('[TYPING-DEBUG] scheduleChecksumUpdate fire', { id: payload.id })
         const serialized = JSON.parse(JSON.stringify(doc)) as FolderItem
         return computeChecksum(serialized)
       })

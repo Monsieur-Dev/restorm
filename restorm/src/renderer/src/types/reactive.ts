@@ -241,6 +241,14 @@ function emitUpdate(
       payload.parentEnvironmentId = parentEnvironmentId
     }
 
+    // [DEBUG OYO-253] Confirm the debounced emit actually fires and
+    // reaches the local event bus. Remove once diagnosed.
+    window.console.info('[TYPING-DEBUG] emitUpdate fires', {
+      ts: performance.now(),
+      event,
+      docType,
+      docId
+    })
     logger.debug(`[Reactive] Emitting ${event} for ${docType} ${docId}`)
     // Emit to main process (for FileService dirty state tracking)
     eventBus.emitSync(event, payload)
