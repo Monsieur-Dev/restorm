@@ -24,7 +24,7 @@
  * replay so the chrome stays consistent.
  */
 
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { useRequestReset } from '../../hooks/useRequestReset'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import { useTranslation } from 'react-i18next'
@@ -44,7 +44,7 @@ import {
   type VariableDefinition
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
-import type { ODataRequest, ODataVersion, ODataOperationKind, ODataBatchSubRequestSpec, ODataOperationParameterSpec, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
+import type { ODataRequest, ODataQueryOptions, ODataVersion, ODataOperationKind, ODataBatchSubRequestSpec, ODataOperationParameterSpec, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { ODataBatchEditor } from './ODataBatchEditor'
 import { ODataOrderbyEditor } from './ODataOrderbyEditor'
 import { ODataExpandEditor } from './ODataExpandEditor'
@@ -180,8 +180,6 @@ export interface ODataRequestTabViewProps {
 }
 
 export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ request }) => {
-  // [PERF-DEBUG OYO-253] Remove once bottleneck is isolated.
-  const perfRenderStart = performance.now()
   const { t } = useTranslation()
   const { selectedEnvId, environments } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
@@ -221,6 +219,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   const [searchText, setSearchText] = useState<string>(request.queryOptions.search ?? '')
   const [formatText, setFormatText] = useState<string>(request.queryOptions.format ?? '')
   const [applyText, setApplyText] = useState<string>(request.queryOptions.apply ?? '')
+
   const handlebarsHelpers = useHandlebarsHelpers()
   const urlVariablesBootstrappedRef = useRef<boolean>(false)
 
@@ -273,16 +272,6 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   // [PERF-DEBUG OYO-253] Measure render duration. Fires once per commit
   // via useLayoutEffect so we capture the synchronous render cost.
   // Remove once bottleneck isolated.
-  useLayoutEffect(() => {
-    const renderMs = performance.now() - perfRenderStart
-    logger.info('[PERF-DEBUG] render', {
-      requestId: request.id,
-      renderMs: renderMs.toFixed(2),
-      filterLen: filterText.length,
-      entitySetProps: (request.entitySetProperties ?? []).length,
-      navProps: (request.navigationProperties ?? []).length
-    })
-  })
 
   // `updateReactiveProperty` mutates the proxied `request` object
   // directly — consistent with the pattern used in HTTPRequestTabView.
@@ -361,19 +350,8 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   }, [request])
 
   const setFilter = useCallback((next: string) => {
-    // [PERF-DEBUG OYO-253] Remove once bottleneck isolated.
-    const t0 = performance.now()
     setFilterText(next)
-    const t1 = performance.now()
     updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, filter: next })
-    const t2 = performance.now()
-    logger.info('[PERF-DEBUG] setFilter', {
-      char: next.slice(-1),
-      len: next.length,
-      setStateMs: (t1 - t0).toFixed(2),
-      proxySetMs: (t2 - t1).toFixed(2),
-      totalMs: (t2 - t0).toFixed(2)
-    })
   }, [request])
 
   const setSelect = useCallback((next: string) => {
@@ -421,14 +399,41 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, apply: next })
   }, [request])
 
-  // Live URL preview composed from the current (unresolved) values.
-  // Handlebars templates stay literal in the preview — resolution
-  // happens in the main process at send time.
+  // Live URL preview composed from the CURRENTLY-TYPED local state so
+  // it tracks every keystroke without waiting for the proxy write to
+  // settle (see `scheduleProxyWrite`). Handlebars templates stay
+  // literal — resolution happens in the main process at send time.
   const urlPreview = useMemo(() => {
-    const systemPairs = serializeODataQueryOptions(request.queryOptions, request.odataVersion)
+    const liveOptions: ODataQueryOptions = {
+      ...request.queryOptions,
+      ...(filterText !== '' && { filter: filterText }),
+      ...(selectText !== '' && { select: selectText.split(',').map((s) => s.trim()).filter((s) => s !== '') }),
+      ...(topText !== '' && { top: topText }),
+      ...(skipText !== '' && { skip: skipText }),
+      ...(expandText !== '' && { expand: expandText }),
+      ...(orderbyText !== '' && { orderby: orderbyText }),
+      ...(searchText !== '' && { search: searchText }),
+      ...(formatText !== '' && { format: formatText }),
+      ...(applyText !== '' && { apply: applyText })
+    }
+    const systemPairs = serializeODataQueryOptions(liveOptions, request.odataVersion)
     const extraPairs = keyValuesToPairs(request.params)
     return buildODataUrl(request.url, systemPairs, extraPairs)
-  }, [request.url, request.odataVersion, request.queryOptions, request.params])
+  }, [
+    request.url,
+    request.odataVersion,
+    request.queryOptions,
+    request.params,
+    filterText,
+    selectText,
+    topText,
+    skipText,
+    expandText,
+    orderbyText,
+    searchText,
+    formatText,
+    applyText
+  ])
 
   // Register request with ContextService on mount, unregister on unmount.
   useEffect(() => {
