@@ -24,7 +24,7 @@
  * replay so the chrome stays consistent.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { useRequestReset } from '../../hooks/useRequestReset'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import { useTranslation } from 'react-i18next'
@@ -180,6 +180,8 @@ export interface ODataRequestTabViewProps {
 }
 
 export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ request }) => {
+  // [PERF-DEBUG OYO-253] Remove once bottleneck is isolated.
+  const perfRenderStart = performance.now()
   const { t } = useTranslation()
   const { selectedEnvId, environments } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
@@ -268,6 +270,20 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   useEffect(() => { setFormatText((cur) => cur === formatProxy ? cur : formatProxy) }, [formatProxy])
   useEffect(() => { setApplyText((cur) => cur === applyProxy ? cur : applyProxy) }, [applyProxy])
 
+  // [PERF-DEBUG OYO-253] Measure render duration. Fires once per commit
+  // via useLayoutEffect so we capture the synchronous render cost.
+  // Remove once bottleneck isolated.
+  useLayoutEffect(() => {
+    const renderMs = performance.now() - perfRenderStart
+    window.console.info('[PERF-DEBUG] render', {
+      requestId: request.id,
+      renderMs: renderMs.toFixed(2),
+      filterLen: filterText.length,
+      entitySetProps: (request.entitySetProperties ?? []).length,
+      navProps: (request.navigationProperties ?? []).length
+    })
+  })
+
   // `updateReactiveProperty` mutates the proxied `request` object
   // directly — consistent with the pattern used in HTTPRequestTabView.
   const setUrl = useCallback((next: string) => {
@@ -345,8 +361,19 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   }, [request])
 
   const setFilter = useCallback((next: string) => {
+    // [PERF-DEBUG OYO-253] Remove once bottleneck isolated.
+    const t0 = performance.now()
     setFilterText(next)
+    const t1 = performance.now()
     updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, filter: next })
+    const t2 = performance.now()
+    window.console.info('[PERF-DEBUG] setFilter', {
+      char: next.slice(-1),
+      len: next.length,
+      setStateMs: (t1 - t0).toFixed(2),
+      proxySetMs: (t2 - t1).toFixed(2),
+      totalMs: (t2 - t0).toFixed(2)
+    })
   }, [request])
 
   const setSelect = useCallback((next: string) => {
