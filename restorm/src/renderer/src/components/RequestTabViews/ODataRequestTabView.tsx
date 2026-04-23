@@ -275,7 +275,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   // Remove once bottleneck isolated.
   useLayoutEffect(() => {
     const renderMs = performance.now() - perfRenderStart
-    window.console.info('[PERF-DEBUG] render', {
+    logger.info('[PERF-DEBUG] render', {
       requestId: request.id,
       renderMs: renderMs.toFixed(2),
       filterLen: filterText.length,
@@ -367,7 +367,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     const t1 = performance.now()
     updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, filter: next })
     const t2 = performance.now()
-    window.console.info('[PERF-DEBUG] setFilter', {
+    logger.info('[PERF-DEBUG] setFilter', {
       char: next.slice(-1),
       len: next.length,
       setStateMs: (t1 - t0).toFixed(2),
