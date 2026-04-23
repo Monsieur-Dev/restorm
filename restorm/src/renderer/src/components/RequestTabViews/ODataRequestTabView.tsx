@@ -189,7 +189,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   // whether the $filter input stays empty because React never
   // re-renders, or re-renders with a stale target. Remove once
   // diagnosed.
-  logger.info('[TYPING-DEBUG] render', {
+  window.console.info('[TYPING-DEBUG] render', {
     requestId: request.id,
     filterAsRead: request.queryOptions.filter,
     selectJoined: (request.queryOptions.select ?? []).join(','),
@@ -306,7 +306,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     // showing in input but landing on disk" report. Remove once fixed.
     const prevFilter = request.queryOptions.filter
     const requestId = request.id
-    logger.info('[TYPING-DEBUG] setFilter before', {
+    window.console.info('[TYPING-DEBUG] setFilter before', {
       requestId,
       prevFilter,
       nextFilter: next,
@@ -314,7 +314,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       requestType: request.type
     })
     updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, filter: next })
-    logger.info('[TYPING-DEBUG] setFilter after', {
+    window.console.info('[TYPING-DEBUG] setFilter after', {
       requestId,
       filterAfter: request.queryOptions.filter
     })

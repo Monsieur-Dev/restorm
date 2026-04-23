@@ -344,7 +344,7 @@ function createDocumentProxyHandler(
       // instance the render reads from. Remove once diagnosed.
       if (prop === 'queryOptions') {
         const newFilter = (value as { filter?: unknown } | null | undefined)?.filter
-        logger.info('[TYPING-DEBUG] proxy.set queryOptions', {
+        window.console.info('[TYPING-DEBUG] proxy.set queryOptions', {
           docType,
           docId: (target as { id?: unknown }).id,
           newFilter,
