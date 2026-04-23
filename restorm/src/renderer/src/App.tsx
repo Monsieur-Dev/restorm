@@ -138,6 +138,8 @@ const initialRootItems: EnvironmentFolder[] = []
 const allFolderIds = initialRootItems.flatMap((folder) => collectAllFolderIds(folder))
 
 const App: React.FC = () => {
+  // [TYPING-DEBUG OYO-253] Remove after typing issue diagnosed.
+  window.console.info('[TYPING-DEBUG] App render')
   const { t } = useTranslation()
   const { isEnabled: navigationEnabled } = useFeature('navigation')
   const setCollections = useRestormStore((state) => state.setCollections)
