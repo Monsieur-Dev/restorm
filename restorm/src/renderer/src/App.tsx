@@ -1056,6 +1056,7 @@ const App: React.FC = () => {
   // debounce the checksum update per document id so a typing burst produces a single
   // update after the user settles.
   const dirtyChecksumTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
+  const upsertTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
   const DIRTY_CHECKSUM_DEBOUNCE_MS = 300
   useEffect(() => {
     const scheduleChecksumUpdate = (id: string, compute: () => string): void => {
@@ -1136,7 +1137,16 @@ const App: React.FC = () => {
     const kindForType = (type: 'folder' | 'request' | 'environment'): 'folder' | 'file' =>
       type === 'folder' ? 'folder' : 'file'
 
-    const handleUpsert = (payload: DocumentChangedPayload): void => {
+    // Per-id debounce for the save-unit draft IPC. Typing in a
+    // metadata-heavy OData request (1000+ entitySetProperties /
+    // navigationProperties) means each keystroke emits REQUEST_UPDATED
+    // and the JSON.stringify + cleanse + IPC round-trip dominates the
+    // frame budget. Buffering keystrokes into a single upsert once the
+    // user pauses keeps crash-recovery drafts fresh (worst case a
+    // 300ms window lost if the app dies mid-typing) without killing
+    // the input's responsiveness.
+    const UPSERT_DEBOUNCE_MS = 300
+    const doUpsert = (payload: DocumentChangedPayload): void => {
       if (!payload.id) return
       let draft: Record<string, unknown>
       try {
@@ -1161,6 +1171,23 @@ const App: React.FC = () => {
       })
     }
 
+    const handleUpsert = (payload: DocumentChangedPayload): void => {
+      if (!payload.id) return
+      const existing = upsertTimersRef.current.get(payload.id)
+      if (existing) clearTimeout(existing)
+      const timer = setTimeout(() => {
+        upsertTimersRef.current.delete(payload.id)
+        doUpsert(payload)
+      }, UPSERT_DEBOUNCE_MS)
+      upsertTimersRef.current.set(payload.id, timer)
+    }
+
+    // CREATED events bypass the debounce — the save-unit registry must
+    // know about a new unit before any subsequent modify events land.
+    const handleUpsertImmediate = (payload: DocumentChangedPayload): void => {
+      doUpsert(payload)
+    }
+
     const handleDelete = (payload: DocumentDeletedPayload): void => {
       if (!payload.id) return
       void markSaveUnitDeleted(payload.id).catch((err: unknown) => {
@@ -1175,15 +1202,16 @@ const App: React.FC = () => {
       eventBus.subscribe(DocumentEvents.FOLDER_UPDATED, handleUpsert),
       eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, handleUpsert),
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_UPDATED, handleUpsert),
-      eventBus.subscribe(DocumentEvents.FOLDER_CREATED, handleUpsert),
-      eventBus.subscribe(DocumentEvents.REQUEST_CREATED, handleUpsert),
-      eventBus.subscribe(DocumentEvents.ENVIRONMENT_CREATED, handleUpsert),
+      eventBus.subscribe(DocumentEvents.FOLDER_CREATED, handleUpsertImmediate),
+      eventBus.subscribe(DocumentEvents.REQUEST_CREATED, handleUpsertImmediate),
+      eventBus.subscribe(DocumentEvents.ENVIRONMENT_CREATED, handleUpsertImmediate),
       eventBus.subscribe(DocumentEvents.FOLDER_DELETED, handleDelete),
       eventBus.subscribe(DocumentEvents.REQUEST_DELETED, handleDelete),
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_DELETED, handleDelete)
     ]
 
     const timersMap = dirtyChecksumTimersRef.current
+    const upsertTimers = upsertTimersRef.current
     return () => {
       for (const sub of subscriptions) {
         sub.unsubscribe()
@@ -1192,6 +1220,10 @@ const App: React.FC = () => {
         clearTimeout(timer)
       }
       timersMap.clear()
+      for (const timer of upsertTimers.values()) {
+        clearTimeout(timer)
+      }
+      upsertTimers.clear()
     }
   }, [updateTabDirtyChecksum, rootItems, environmentFolderCollections, filePath])
 
