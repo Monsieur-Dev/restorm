@@ -435,21 +435,35 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     applyText
   ])
 
-  // Register request with ContextService on mount, unregister on unmount.
+  // Register request with ContextService on mount, unregister on
+  // unmount. `headers` and `params` feed through refs so the effect
+  // only depends on `request.id`; using them as direct deps caused the
+  // unregister/register cycle to fire on every keystroke in a
+  // metadata-heavy OData request (the proxy mutation on `queryOptions`
+  // re-rendered the parent, which in turn fed fresh header/param refs
+  // to the effect). That dragged each render from ~8 ms to 200 ms+
+  // and eventually wedged the UI. Header/param edits still reach
+  // ContextService through the `updateFullRequestData` effect below,
+  // which *does* depend on them — this one just owns the
+  // lifecycle-scoped registration.
+  const registerHeadersRef = useRef(request.headers)
+  const registerParamsRef = useRef(request.params)
+  useEffect(() => { registerHeadersRef.current = request.headers }, [request.headers])
+  useEffect(() => { registerParamsRef.current = request.params }, [request.params])
   useEffect(() => {
     const requestId = request.id
     if (!requestId) return
     const currentEnvId = selectedEnvIdRef.current ?? environmentsRef.current?.[0]?.id ?? null
 
     void window.restorm?.context.registerRequest(requestId, currentEnvId, {
-      headers: toKeyValueData(request.headers),
-      params: toKeyValueData(request.params)
+      headers: toKeyValueData(registerHeadersRef.current),
+      params: toKeyValueData(registerParamsRef.current)
     })
 
     return () => {
       void window.restorm?.context.unregisterRequest(requestId)
     }
-  }, [request.id, request.headers, request.params])
+  }, [request.id])
 
   // Keep ContextService in sync with env selection.
   useEffect(() => {
@@ -876,7 +890,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
           <InputBox
             value={searchText}
             onChange={setSearch}
-            options={{ placeholder: t('odataRequestTab.searchPlaceholder', 'puppy') }}
+              options={{ placeholder: t('odataRequestTab.searchPlaceholder', 'puppy') }}
             data-testid="odata-request-search"
           />
         </div>
@@ -885,7 +899,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
           <InputBox
             value={formatText}
             onChange={setFormat}
-            options={{ placeholder: t('odataRequestTab.formatPlaceholder', 'json') }}
+              options={{ placeholder: t('odataRequestTab.formatPlaceholder', 'json') }}
             data-testid="odata-request-format"
           />
         </div>
