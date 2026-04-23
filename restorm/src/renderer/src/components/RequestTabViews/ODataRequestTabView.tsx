@@ -185,6 +185,17 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   const collections = useRestormStore((state) => state.collections)
   const resolveAuthRequest = useAuthRequestResolver()
 
+  // [DEBUG OYO-253] One render-time log per commit so we can tell
+  // whether the $filter input stays empty because React never
+  // re-renders, or re-renders with a stale target. Remove once
+  // diagnosed.
+  logger.info('[TYPING-DEBUG] render', {
+    requestId: request.id,
+    filterAsRead: request.queryOptions.filter,
+    selectJoined: (request.queryOptions.select ?? []).join(','),
+    top: request.queryOptions.top
+  })
+
   const odataVersionOptions = useMemo<ISelectOptionItem[]>(() => [
     { text: 'v4' },
     { text: t('odataRequestTab.version.v3NotYet', 'v3 (execution not yet supported)') },
@@ -291,7 +302,22 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   }, [request])
 
   const setFilter = useCallback((next: string) => {
+    // [DEBUG OYO-253] Temporary tracing to untangle the "typed char not
+    // showing in input but landing on disk" report. Remove once fixed.
+    const prevFilter = request.queryOptions.filter
+    const requestId = request.id
+    logger.info('[TYPING-DEBUG] setFilter before', {
+      requestId,
+      prevFilter,
+      nextFilter: next,
+      queryOptionsKeys: Object.keys(request.queryOptions).length,
+      requestType: request.type
+    })
     updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, filter: next })
+    logger.info('[TYPING-DEBUG] setFilter after', {
+      requestId,
+      filterAfter: request.queryOptions.filter
+    })
   }, [request])
 
   const setSelect = useCallback((next: string) => {
