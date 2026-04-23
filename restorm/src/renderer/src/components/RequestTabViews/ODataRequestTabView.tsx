@@ -185,22 +185,6 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   const collections = useRestormStore((state) => state.collections)
   const resolveAuthRequest = useAuthRequestResolver()
 
-  // [DEBUG OYO-253] One render-time log per commit so we can tell
-  // whether the $filter input stays empty because React never
-  // re-renders, or re-renders with a stale target. Remove once
-  // diagnosed.
-  const renderTs = performance.now()
-  window.console.info('[TYPING-DEBUG] render', {
-    ts: renderTs,
-    requestId: request.id,
-    filterAsRead: request.queryOptions.filter,
-    // Proxy-target identity — if the `request` prop points at a new
-    // proxy (wrapping a different underlying target) between renders,
-    // the value reader is desynced from where `setFilter` writes.
-    requestRefSig: (request as { constructor?: { name?: string } }).constructor?.name ?? 'plain',
-    queryOptionsFilterKeyCount: Object.keys(request.queryOptions).length
-  })
-
   const odataVersionOptions = useMemo<ISelectOptionItem[]>(() => [
     { text: 'v4' },
     { text: t('odataRequestTab.version.v3NotYet', 'v3 (execution not yet supported)') },
@@ -219,6 +203,22 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
   const [urlVariables, setUrlVariables] = useState<VariableDefinition[]>([])
+
+  // Locally-owned input state for every query option. The InputBox /
+  // editor binds to this React state (not the proxy), so a keystroke
+  // produces a real re-render. Each setter mirrors the new value into
+  // the reactive proxy on the same tick so downstream listeners
+  // (save-unit registry, URL preview, etc.) see the change. Mirrors
+  // the `url` / `method` / `body` pattern used by `HTTPRequestTabView`.
+  const [filterText, setFilterText] = useState<string>(request.queryOptions.filter ?? '')
+  const [selectText, setSelectText] = useState<string>((request.queryOptions.select ?? []).join(', '))
+  const [topText, setTopText] = useState<string>(request.queryOptions.top ?? '')
+  const [skipText, setSkipText] = useState<string>(request.queryOptions.skip ?? '')
+  const [expandText, setExpandText] = useState<string>(request.queryOptions.expand ?? '')
+  const [orderbyText, setOrderbyText] = useState<string>(request.queryOptions.orderby ?? '')
+  const [searchText, setSearchText] = useState<string>(request.queryOptions.search ?? '')
+  const [formatText, setFormatText] = useState<string>(request.queryOptions.format ?? '')
+  const [applyText, setApplyText] = useState<string>(request.queryOptions.apply ?? '')
   const handlebarsHelpers = useHandlebarsHelpers()
   const urlVariablesBootstrappedRef = useRef<boolean>(false)
 
@@ -231,8 +231,42 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
 
   const handleReset = useCallback(() => {
     setResponse(null)
-  }, [])
+    setFilterText(request.queryOptions.filter ?? '')
+    setSelectText((request.queryOptions.select ?? []).join(', '))
+    setTopText(request.queryOptions.top ?? '')
+    setSkipText(request.queryOptions.skip ?? '')
+    setExpandText(request.queryOptions.expand ?? '')
+    setOrderbyText(request.queryOptions.orderby ?? '')
+    setSearchText(request.queryOptions.search ?? '')
+    setFormatText(request.queryOptions.format ?? '')
+    setApplyText(request.queryOptions.apply ?? '')
+  }, [request])
   useRequestReset(request, handleReset)
+
+  // Defensive proxy→local sync for same-id external mutations (e.g.
+  // crash-recovery drafts restored into the existing proxy, undo/redo,
+  // programmatic seeding). `useRequestReset` only fires on id change
+  // so we'd otherwise leave local state stale until the next tab
+  // switch. Setters are no-ops when the local value already matches,
+  // so this doesn't fight an active typing burst.
+  const filterProxy = request.queryOptions.filter ?? ''
+  const selectProxy = (request.queryOptions.select ?? []).join(', ')
+  const topProxy = request.queryOptions.top ?? ''
+  const skipProxy = request.queryOptions.skip ?? ''
+  const expandProxy = request.queryOptions.expand ?? ''
+  const orderbyProxy = request.queryOptions.orderby ?? ''
+  const searchProxy = request.queryOptions.search ?? ''
+  const formatProxy = request.queryOptions.format ?? ''
+  const applyProxy = request.queryOptions.apply ?? ''
+  useEffect(() => { setFilterText((cur) => cur === filterProxy ? cur : filterProxy) }, [filterProxy])
+  useEffect(() => { setSelectText((cur) => cur === selectProxy ? cur : selectProxy) }, [selectProxy])
+  useEffect(() => { setTopText((cur) => cur === topProxy ? cur : topProxy) }, [topProxy])
+  useEffect(() => { setSkipText((cur) => cur === skipProxy ? cur : skipProxy) }, [skipProxy])
+  useEffect(() => { setExpandText((cur) => cur === expandProxy ? cur : expandProxy) }, [expandProxy])
+  useEffect(() => { setOrderbyText((cur) => cur === orderbyProxy ? cur : orderbyProxy) }, [orderbyProxy])
+  useEffect(() => { setSearchText((cur) => cur === searchProxy ? cur : searchProxy) }, [searchProxy])
+  useEffect(() => { setFormatText((cur) => cur === formatProxy ? cur : formatProxy) }, [formatProxy])
+  useEffect(() => { setApplyText((cur) => cur === applyProxy ? cur : applyProxy) }, [applyProxy])
 
   // `updateReactiveProperty` mutates the proxied `request` object
   // directly — consistent with the pattern used in HTTPRequestTabView.
@@ -291,50 +325,43 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   const appendSelectProperty = useCallback((name: string) => {
     const current = new Set(request.queryOptions.select ?? [])
     current.add(name)
-    updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, select: Array.from(current) })
+    const nextList = Array.from(current)
+    setSelectText(nextList.join(', '))
+    updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, select: nextList })
   }, [request])
 
   const appendOrderbyProperty = useCallback((name: string) => {
     const existing = request.queryOptions.orderby?.trim() ?? ''
     const next = existing ? `${existing},${name} asc` : `${name} asc`
+    setOrderbyText(next)
     updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, orderby: next })
   }, [request])
 
   const appendExpandProperty = useCallback((name: string) => {
     const existing = request.queryOptions.expand?.trim() ?? ''
     const next = existing ? `${existing},${name}` : name
+    setExpandText(next)
     updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, expand: next })
   }, [request])
 
   const setFilter = useCallback((next: string) => {
-    // [DEBUG OYO-253] Temporary tracing to untangle the "typed char not
-    // showing in input but landing on disk" report. Remove once fixed.
-    const prevFilter = request.queryOptions.filter
-    const requestId = request.id
-    window.console.info('[TYPING-DEBUG] setFilter before', {
-      requestId,
-      prevFilter,
-      nextFilter: next,
-      queryOptionsKeys: Object.keys(request.queryOptions).length,
-      requestType: request.type
-    })
+    setFilterText(next)
     updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, filter: next })
-    window.console.info('[TYPING-DEBUG] setFilter after', {
-      requestId,
-      filterAfter: request.queryOptions.filter
-    })
   }, [request])
 
   const setSelect = useCallback((next: string) => {
+    setSelectText(next)
     const list = next.split(',').map((s) => s.trim()).filter((s) => s !== '')
     updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, select: list })
   }, [request])
 
   const setTop = useCallback((next: string) => {
+    setTopText(next)
     updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, top: next })
   }, [request])
 
   const setSkip = useCallback((next: string) => {
+    setSkipText(next)
     updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, skip: next })
   }, [request])
 
@@ -343,26 +370,29 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   }, [request])
 
   const setExpand = useCallback((next: string) => {
+    setExpandText(next)
     updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, expand: next })
   }, [request])
 
   const setOrderby = useCallback((next: string) => {
+    setOrderbyText(next)
     updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, orderby: next })
   }, [request])
 
   const setSearch = useCallback((next: string) => {
+    setSearchText(next)
     updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, search: next })
   }, [request])
 
   const setFormat = useCallback((next: string) => {
+    setFormatText(next)
     updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, format: next })
   }, [request])
 
   const setApply = useCallback((next: string) => {
+    setApplyText(next)
     updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, apply: next })
   }, [request])
-
-  const selectJoined = (request.queryOptions.select ?? []).join(', ')
 
   // Live URL preview composed from the current (unresolved) values.
   // Handlebars templates stay literal in the preview — resolution
@@ -719,17 +749,8 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
 
       <div style={rowStyle}>
         <label style={labelStyle} htmlFor="odata-filter">$filter</label>
-        {(() => {
-          const filterValue = request.queryOptions.filter ?? ''
-          window.console.info('[TYPING-DEBUG] InputBox value', {
-            requestId: request.id,
-            value: filterValue,
-            valueLen: filterValue.length
-          })
-          return null
-        })()}
         <InputBox
-          value={request.queryOptions.filter ?? ''}
+          value={filterText}
           onChange={setFilter}
           options={{ placeholder: t('odataRequestTab.filterPlaceholder', "Name eq 'Alice' and Age gt 21") }}
           data-testid="odata-request-filter"
@@ -739,7 +760,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       <div style={rowStyle}>
         <label style={labelStyle} htmlFor="odata-select">$select</label>
         <InputBox
-          value={selectJoined}
+          value={selectText}
           onChange={setSelect}
           options={{ placeholder: t('odataRequestTab.selectPlaceholder', 'Id, Name, Email (comma-separated)') }}
           data-testid="odata-request-select"
@@ -755,7 +776,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         <div style={{ ...rowStyle, ...numericItemStyle }}>
           <label style={labelStyle} htmlFor="odata-top">$top</label>
           <InputBox
-            value={request.queryOptions.top ?? ''}
+            value={topText}
             onChange={setTop}
             options={{
               type: 'number',
@@ -769,7 +790,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         <div style={{ ...rowStyle, ...numericItemStyle }}>
           <label style={labelStyle} htmlFor="odata-skip">$skip</label>
           <InputBox
-            value={request.queryOptions.skip ?? ''}
+            value={skipText}
             onChange={setSkip}
             options={{
               type: 'number',
@@ -793,7 +814,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       <div style={rowStyle}>
         <label style={labelStyle}>$expand</label>
         <ODataExpandEditor
-          value={request.queryOptions.expand}
+          value={expandText}
           onChange={setExpand}
         />
         <ODataPropertyChips
@@ -807,7 +828,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       <div style={rowStyle}>
         <label style={labelStyle}>$orderby</label>
         <ODataOrderbyEditor
-          value={request.queryOptions.orderby}
+          value={orderbyText}
           onChange={setOrderby}
         />
         <ODataPropertyChips
@@ -821,7 +842,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         <div style={{ ...rowStyle, ...numericItemStyle }}>
           <label style={labelStyle} htmlFor="odata-search">$search</label>
           <InputBox
-            value={request.queryOptions.search ?? ''}
+            value={searchText}
             onChange={setSearch}
             options={{ placeholder: t('odataRequestTab.searchPlaceholder', 'puppy') }}
             data-testid="odata-request-search"
@@ -830,7 +851,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         <div style={{ ...rowStyle, ...numericItemStyle }}>
           <label style={labelStyle} htmlFor="odata-format">$format</label>
           <InputBox
-            value={request.queryOptions.format ?? ''}
+            value={formatText}
             onChange={setFormat}
             options={{ placeholder: t('odataRequestTab.formatPlaceholder', 'json') }}
             data-testid="odata-request-format"
@@ -841,7 +862,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       <div style={rowStyle}>
         <label style={labelStyle} htmlFor="odata-apply">$apply</label>
         <InputBox
-          value={request.queryOptions.apply ?? ''}
+          value={applyText}
           onChange={setApply}
           options={{ placeholder: t('odataRequestTab.applyPlaceholder', 'groupby((Status),aggregate($count as Total))') }}
           data-testid="odata-request-apply"
@@ -865,6 +886,15 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     // so the user sees the change before the network call.
     updateReactiveProperty(request, 'url', nextUrl)
     updateReactiveProperty(request, 'queryOptions', {})
+    setFilterText('')
+    setSelectText('')
+    setTopText('')
+    setSkipText('')
+    setExpandText('')
+    setOrderbyText('')
+    setSearchText('')
+    setFormatText('')
+    setApplyText('')
   }, [request])
 
   // One-click pagination: fetch `@odata.nextLink` verbatim via the

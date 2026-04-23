@@ -110,24 +110,13 @@ export function useDirtyState(): DirtyStateHook {
   const updateItemChecksum = useCallback((id: string, checksum: string) => {
     setItems(prev => {
       const item = prev.get(id)
-      // [TYPING-DEBUG] OYO-253 — will revert.
-      ;(globalThis as { window?: { console: Console } }).window?.console.info(
-        '[TYPING-DEBUG] updateItemChecksum',
-        { id, hasItem: !!item, prevChecksum: item?.checksum, newChecksum: checksum }
-      )
       if (!item) return prev
 
       const isDirty = checksum !== item.originalChecksum
       if (item.checksum === checksum && item.isDirty === isDirty) {
-        ;(globalThis as { window?: { console: Console } }).window?.console.info(
-          '[TYPING-DEBUG] updateItemChecksum bail (no diff)', { id }
-        )
         return prev
       }
 
-      ;(globalThis as { window?: { console: Console } }).window?.console.info(
-        '[TYPING-DEBUG] updateItemChecksum setItems fires', { id }
-      )
       const next = new Map(prev)
       next.set(id, {
         ...item,

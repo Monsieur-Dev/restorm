@@ -241,14 +241,6 @@ function emitUpdate(
       payload.parentEnvironmentId = parentEnvironmentId
     }
 
-    // [DEBUG OYO-253] Confirm the debounced emit actually fires and
-    // reaches the local event bus. Remove once diagnosed.
-    window.console.info('[TYPING-DEBUG] emitUpdate fires', {
-      ts: performance.now(),
-      event,
-      docType,
-      docId
-    })
     logger.debug(`[Reactive] Emitting ${event} for ${docType} ${docId}`)
     // Emit to main process (for FileService dirty state tracking)
     eventBus.emitSync(event, payload)
@@ -346,21 +338,6 @@ function createDocumentProxyHandler(
     set(target, prop, value, receiver) {
       const prev = Reflect.get(target, prop, receiver) as unknown
       const result = Reflect.set(target, prop, value, receiver)
-
-      // [DEBUG OYO-253] Temporary tracing on queryOptions writes so we
-      // can see whether the target mutation actually reaches the same
-      // instance the render reads from. Remove once diagnosed.
-      if (prop === 'queryOptions') {
-        const newFilter = (value as { filter?: unknown } | null | undefined)?.filter
-        window.console.info('[TYPING-DEBUG] proxy.set queryOptions', {
-          docType,
-          docId: (target as { id?: unknown }).id,
-          newFilter,
-          storedFilter: (Reflect.get(target, 'queryOptions', receiver) as { filter?: unknown } | undefined)?.filter,
-          sameAsValue: (Reflect.get(target, 'queryOptions', receiver) as unknown) === value,
-          emitting: indexableKeys.has(prop as string) && !sameProxyValue(prev, value)
-        })
-      }
 
       // Only fire the event when an indexable property actually changed.
       // Components like MarkdownEditor invoke their `onChange` on mount
