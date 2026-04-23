@@ -217,7 +217,8 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
           basePath: rootBasePath,
           format: fmt,
           extension: fmt,
-          classResolver: restormClassResolver
+          classResolver: restormClassResolver,
+          indexPaddingMin: 1
         })
         const all: DecomposedUnit[] = [decomposed.rootIndex, ...decomposed.children]
         for (const unit of all) {
@@ -330,7 +331,8 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         basePath: rootBasePath,
         format: folderFormat,
         extension: folderFormat,
-        classResolver: restormClassResolver
+        classResolver: restormClassResolver,
+        indexPaddingMin: 1
       })
       units.set(decomposed.rootIndex.runtimeId, decomposed.rootIndex)
       for (const child of decomposed.children) units.set(child.runtimeId, child)
@@ -373,7 +375,8 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
           basePath: rootBasePath,
           format: folderFormat,
           extension: folderFormat,
-          classResolver: restormClassResolver
+          classResolver: restormClassResolver,
+          indexPaddingMin: 1
         })
         units.set(decomposed.rootIndex.runtimeId, decomposed.rootIndex)
         for (const child of decomposed.children) units.set(child.runtimeId, child)
