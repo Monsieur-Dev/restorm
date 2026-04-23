@@ -138,6 +138,40 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   const isLoadingRef = useRef(false)
 
   /**
+   * Compose the on-disk folder name for a root collection the exact
+   * same way `saveFolderStructure` does in the main process — that's
+   * the function that physically lays out the workspace at save-all
+   * time, so per-unit saves (`handleMenuSaveUnit`) must stay aligned
+   * with its naming scheme or they end up writing to a parallel,
+   * orphan hierarchy. `getPaddingWidth` matches the main-side helper
+   * (`max(1, digits)`) — different from the generic decomposer default
+   * (`max(2, digits)`) which would produce "01 - …" where
+   * `saveFolderStructure` produces "1 - …".
+   */
+  const rootFolderName = useCallback(
+    (root: Record<string, unknown>, rootIdx: number, rootCount: number): string => {
+      const paddingWidth = rootCount <= 0 ? 1 : String(rootCount).length
+      const paddedIndex = String(rootIdx + 1).padStart(paddingWidth, '0')
+      const rawName = typeof root['name'] === 'string' ? root['name'] : `Collection_${rootIdx + 1}`
+      const safeName = rawName
+        .replace(/[<>:"/\\|?*]/g, '_')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 100)
+      return `${paddedIndex} - ${safeName}`
+    },
+    []
+  )
+
+  const joinFolderPath = useCallback((a: string, b: string): string => {
+    if (!a) return b
+    if (!b) return a
+    const sep = a.includes('\\') && !a.includes('/') ? '\\' : '/'
+    const endsWithSep = a.endsWith('/') || a.endsWith('\\')
+    return endsWithSep ? `${a}${b}` : `${a}${sep}${b}`
+  }, [])
+
+  /**
    * Walk `rootItems` with the decomposer and seed the save-unit registry
    * with one entry per `@separateFiles` / `@separateFolders` descendant.
    *
@@ -163,17 +197,24 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       // occurrence). Keep only the first unit per id so the reference
       // matches the tree the user actually edits.
       const seen = new Set<string>()
-      for (const root of items) {
+      const rootCount = items.length
+      for (let rootIdx = 0; rootIdx < rootCount; rootIdx += 1) {
+        const root = items[rootIdx]
+        if (!root) continue
         const rootPojo = JSON.parse(JSON.stringify(root)) as Record<string, unknown>
         const rootClass: object = root instanceof EnvironmentFolderClass
           ? EnvironmentFolderClass
           : root instanceof FolderClass
             ? FolderClass
             : EnvironmentFolderClass
+        // Same root-folder wrapping as `getOrBuildUnitMap` /
+        // `buildFileModeDecomposition` so the hydrated `reference`
+        // content matches what per-unit save would produce.
+        const rootBasePath = joinFolderPath(basePath, rootFolderName(rootPojo, rootIdx, rootCount))
         const decomposed = decomposeForPersistence({
           root: rootPojo,
           rootClass,
-          basePath,
+          basePath: rootBasePath,
           format: fmt,
           extension: fmt,
           classResolver: restormClassResolver
@@ -194,7 +235,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     } catch (err) {
       logger.warn('[useFileManagement] Save-unit hydration failed', { error: String(err) })
     }
-  }, [currentFolderPath, filePath, folderFormat])
+  }, [currentFolderPath, filePath, folderFormat, rootFolderName, joinFolderPath])
 
   // Save handlers
   const handleMenuSave = useCallback(async (): Promise<boolean> => {
@@ -271,26 +312,31 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
    */
   const buildFileModeDecomposition = useCallback((): Map<string, DecomposedUnit> => {
     const units = new Map<string, DecomposedUnit>()
-    for (const root of rootItems) {
+    const rootCount = rootItems.length
+    rootItems.forEach((root, rootIdx) => {
       const rootPojo = JSON.parse(JSON.stringify(root)) as Record<string, unknown>
       const rootClass: object = root instanceof EnvironmentFolderClass
         ? EnvironmentFolderClass
         : root instanceof FolderClass
           ? FolderClass
           : EnvironmentFolderClass
+      // In file mode `absolutePath` is meaningless but we still wrap
+      // each root in its own pseudo-folder so child `parentId` chains
+      // and `runtimeId → unit` lookups are consistent across roots.
+      const rootBasePath = joinFolderPath(filePath ?? '', rootFolderName(rootPojo, rootIdx, rootCount))
       const decomposed = decomposeForPersistence({
         root: rootPojo,
         rootClass,
-        basePath: filePath ?? '',
+        basePath: rootBasePath,
         format: folderFormat,
         extension: folderFormat,
         classResolver: restormClassResolver
       })
       units.set(decomposed.rootIndex.runtimeId, decomposed.rootIndex)
       for (const child of decomposed.children) units.set(child.runtimeId, child)
-    }
+    })
     return units
-  }, [rootItems, filePath, folderFormat])
+  }, [rootItems, filePath, folderFormat, rootFolderName, joinFolderPath])
 
   const getOrBuildUnitMap = useCallback((): Map<string, DecomposedUnit> => {
     const cache = decomposeCacheRef.current
@@ -304,28 +350,38 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     }
     const units = new Map<string, DecomposedUnit>()
     if (currentFolderPath) {
-      for (const root of rootItems) {
+      const rootCount = rootItems.length
+      rootItems.forEach((root, rootIdx) => {
         const rootPojo = JSON.parse(JSON.stringify(root)) as Record<string, unknown>
         const rootClass: object = root instanceof EnvironmentFolderClass
           ? EnvironmentFolderClass
           : root instanceof FolderClass
             ? FolderClass
             : EnvironmentFolderClass
+        // Wrap each root in its own `{idx} - {name}` folder to match
+        // `saveFolderStructure` (main-process save-all). The earlier
+        // version passed `currentFolderPath` directly which meant
+        // `decomposeForPersistence` treated each root's *children* as
+        // immediate descendants of the workspace root — typing + Ctrl+S
+        // on a nested request produced an orphan sibling folder at the
+        // workspace root (e.g. `04 - accounts/` alongside
+        // `1 - Microsoft.Dynamics.CRM/` instead of inside it).
+        const rootBasePath = joinFolderPath(currentFolderPath, rootFolderName(rootPojo, rootIdx, rootCount))
         const decomposed = decomposeForPersistence({
           root: rootPojo,
           rootClass,
-          basePath: currentFolderPath,
+          basePath: rootBasePath,
           format: folderFormat,
           extension: folderFormat,
           classResolver: restormClassResolver
         })
         units.set(decomposed.rootIndex.runtimeId, decomposed.rootIndex)
         for (const child of decomposed.children) units.set(child.runtimeId, child)
-      }
+      })
     }
     decomposeCacheRef.current = { rootItems, basePath: currentFolderPath, format: folderFormat, units }
     return units
-  }, [rootItems, currentFolderPath, folderFormat])
+  }, [rootItems, currentFolderPath, folderFormat, rootFolderName, joinFolderPath])
 
   /**
    * Collect the set of save-unit ids to commit for a given Ctrl+S target.
