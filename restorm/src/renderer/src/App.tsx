@@ -621,9 +621,9 @@ const App: React.FC = () => {
   const {
     handleItemDrop,
     handleCloneItem,
-    handleCreateSubfolder,
     handleCreateRootFolder,
     handleCreateRootEnvironmentFolder,
+    handleAddChildItem,
     handleDeleteItem,
     confirmDelete: confirmDeleteWithId,
     cancelDelete,
@@ -637,7 +637,8 @@ const App: React.FC = () => {
     setWorkbenchTree,
     setDeleteConfirmation,
     openFolderTab,
-    openEnvironmentFolderTab
+    openEnvironmentFolderTab,
+    openAnyRequestTab
   })
 
   const {
@@ -751,7 +752,7 @@ const App: React.FC = () => {
     expandedIds,
     updateCount,
     onCloneItem: handleCloneItem,
-    onCreateSubfolder: handleCreateSubfolder,
+    onAddChildItem: handleAddChildItem,
     onDeleteItem: handleDeleteItem,
     onRenameItem: handleSidebarRenameItem,
     isItemFavorite,

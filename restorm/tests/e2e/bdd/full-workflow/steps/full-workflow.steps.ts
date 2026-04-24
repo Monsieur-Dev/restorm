@@ -1925,3 +1925,90 @@ Then('no errors should have been logged', async ({ getLogs }) => {
     `Expected no error-level log lines, got:\n${offending.join('\n')}`
   ).toEqual([])
 })
+
+// ---------------------------------------------------------------------------
+// Sidebar "Ajouter" submenu — create folder / requests of every type under
+// a parent folder or environment folder.
+// ---------------------------------------------------------------------------
+
+/**
+ * Regex for each AddChildKind's submenu label (English + French). The
+ * submenu entries are translated, so accept either locale to keep the
+ * test portable across the default-language resolution.
+ */
+const ADD_CHILD_LABEL_REGEX: Record<string, RegExp> = {
+  folder: /^(Folder|Dossier)$/,
+  'http-get': /HTTP\s*[–-]\s*GET/,
+  'http-post': /HTTP\s*[–-]\s*POST/,
+  'http-put': /HTTP\s*[–-]\s*PUT/,
+  'http-patch': /HTTP\s*[–-]\s*PATCH/,
+  'http-delete': /HTTP\s*[–-]\s*DELETE/,
+  graphql: /GraphQL/,
+  grpc: /gRPC/,
+  soap: /SOAP/,
+  websocket: /WebSocket/,
+  odata: /OData/,
+  auth: /authentication|authentification/i
+}
+
+When(
+  'I add a {string} under the folder {string} via the sidebar Ajouter submenu',
+  async ({}, kind: string, parentName: string) => {
+    if (!page) throw new Error('app must be launched')
+    const childLabel = ADD_CHILD_LABEL_REGEX[kind]
+    if (!childLabel) throw new Error(`unknown AddChildKind: ${kind}`)
+
+    const row = page
+      .locator('[data-testid="sidebar-listview"] .list-view-row')
+      .filter({ has: page.getByText(parentName, { exact: true }) })
+      .first()
+    await expect(row).toBeVisible({ timeout: 10000 })
+    await row.click({ button: 'right' })
+    await page.waitForTimeout(200)
+
+    // Hover the "Ajouter" / "Add" entry to reveal the nested submenu
+    // (MenuItem opens its submenu on hover after a ~300 ms delay;
+    // click doesn't open it because `hasSubmenu` short-circuits the
+    // handler). Role-based targeting gives us the accessible name
+    // directly and avoids picking up `action-label` spans further
+    // down the tree.
+    const addEntry = page
+      .getByRole('menuitem', { name: /^(Add|Ajouter)$/ })
+      .first()
+    await expect(addEntry).toBeVisible({ timeout: 5000 })
+    await addEntry.hover()
+    await page.waitForTimeout(350)
+
+    // The submenu is rendered in a separate `<ul role="menu">` nested
+    // under the "Add" item once `showSubmenu` flips, so scope by the
+    // visible submenu holder — otherwise a plain `/Folder/` match can
+    // walk into the sidebar row behind the menu.
+    const submenu = page.locator('.menubar-menu-items-holder:visible').last()
+    const target = submenu
+      .getByRole('menuitem', { name: childLabel })
+      .first()
+    await expect(target).toBeVisible({ timeout: 5000 })
+    // Dispatch the click via the DOM `click()` method. Playwright's
+    // own `.click()` sometimes no-ops here because the Badge rendered
+    // in the MenuItem's icon slot ships absolute layout that eats the
+    // hit-test at the anchor's centre, and the ContextMenu's global
+    // `mousedown` outside-listener can race Playwright's synthetic
+    // mousedown/mouseup pair. Native `click()` goes straight to the
+    // React synthetic handler.
+    await target.evaluate((el) => { (el as HTMLElement).click() })
+    // Short settle window — the reactive proxy / React commit loop
+    // needs a beat before the Then assertion polls the sidebar.
+    await page.waitForTimeout(150)
+  }
+)
+
+Then(
+  'the sidebar should contain the request {string}',
+  async ({}, requestName: string) => {
+    if (!page) throw new Error('app must be launched')
+    const row = page
+      .locator('[data-testid="sidebar-listview"] .list-view-title', { hasText: requestName })
+      .first()
+    await expect(row).toBeVisible({ timeout: 10000 })
+  }
+)

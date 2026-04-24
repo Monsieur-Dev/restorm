@@ -6,13 +6,27 @@ import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ListViewDropEventPayload, ListViewItemEventPayload } from 'electron-core-ui/renderer'
 import { isTabGroupNode } from 'electron-core-ui/renderer'
-import type { Folder, EnvironmentFolder, Request } from '../../../shared/types/collections'
+import type { Environment, Folder, EnvironmentFolder, Request } from '../../../shared/types/collections'
 import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 import { isAnyFolder } from '../../../shared/types/collections'
-import { findItemById, findItemWithBreadcrumbs, getFolderIcon } from '../utils/treeSearch'
+import {
+  HTTPRequest,
+  GraphQLRequest,
+  GrpcRequest,
+  SoapRequest,
+  WebSocketRequest,
+  ODataRequest,
+  AuthenticationRequest
+} from '../../../shared/models/requests'
+import type { HTTPMethod } from '../../../shared/models/types'
+import { findItemById, findItemWithBreadcrumbs, getFolderIcon, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
 import { generateUniqueId, cloneItemInTree, removeItemFromTree, insertItemIntoTree } from '../utils/treeManipulation'
 import type { WorkbenchTree } from 'electron-core-ui/renderer'
-import type { FolderTab, EnvironmentFolderTab, HTTPRequestTab } from '../../../shared/types/editor'
+import type { BreadcrumbItem, FolderTab, EnvironmentFolderTab, HTTPRequestTab } from '../../../shared/types/editor'
+import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
+import { DocumentEvents } from '../services/DocumentEvents'
+import { eventBus } from 'electron-core-ui/renderer'
+import type { AddChildKind } from '../components/MainView/Sidebar/contextMenuBuilder'
 
 export interface UseItemOperationsOptions {
   rootItems: (EnvironmentFolder | Folder | Request)[]
@@ -29,14 +43,20 @@ export interface UseItemOperationsOptions {
   }>>
   openFolderTab: (folder: Folder, breadcrumbs: import('../../../shared/types/editor').BreadcrumbItem[]) => void
   openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: import('../../../shared/types/editor').BreadcrumbItem[]) => void
+  openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[]) => void
 }
 
 export interface UseItemOperationsReturn {
   handleItemDrop: (payload: ListViewDropEventPayload) => void
   handleCloneItem: (itemId: string) => void
-  handleCreateSubfolder: (parentFolderId: string) => void
   handleCreateRootFolder: () => void
   handleCreateRootEnvironmentFolder: () => void
+  /** Kind-agnostic add-child dispatcher bound to the sidebar's
+   * "Ajouter" submenu. Creates a well-typed empty request (or a
+   * folder), wraps it reactive, pushes it into the parent's `items[]`,
+   * fires the matching `*_CREATED` event so the save-unit registry
+   * picks it up, and opens the new item in a workbench tab. */
+  handleAddChildItem: (parentId: string, kind: AddChildKind) => void
   handleDeleteItem: (itemId: string) => void
   confirmDelete: (itemId: string) => void
   cancelDelete: () => void
@@ -53,7 +73,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     setWorkbenchTree,
     setDeleteConfirmation
   } = options
-  const { openFolderTab, openEnvironmentFolderTab } = options
+  const { openFolderTab, openEnvironmentFolderTab, openAnyRequestTab } = options
   const { t } = useTranslation()
 
   // Handle drag & drop in the sidebar to reorder items
@@ -156,40 +176,6 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     // Force React re-render by creating new reference
     setRootItems((prevItems) => [...prevItems])
   }, [rootItems, setRootItems])
-
-  // Handle "Create subfolder" context menu action
-  const handleCreateSubfolder = useCallback((parentFolderId: string) => {
-    // Find the parent folder
-    const parentFolder = findItemById(rootItems, parentFolderId)
-    if (!parentFolder || !isAnyFolder(parentFolder)) return
-
-    // Create a new folder
-    const newFolder: Folder = {
-      id: generateUniqueId(),
-      name: 'New Folder',
-      documentation: '',
-      tags: [],
-      configuration: {},
-      items: []
-    }
-
-    // Add to parent folder
-    parentFolder.items.push(newFolder)
-
-    // Expand the parent folder to show the new subfolder
-    setExpandedIds((prev) => Array.from(new Set([...prev, parentFolderId])))
-
-    // Select the new folder
-    setSelectedItemId(newFolder.id)
-
-    // Force React re-render by creating new reference
-    setRootItems((prevItems) => [...prevItems])
-
-    // Put the new folder in edit mode (after render)
-    setTimeout(() => {
-      setSidebarEditingItemId(newFolder.id)
-    }, 0)
-  }, [rootItems, setRootItems, setExpandedIds, setSelectedItemId, setSidebarEditingItemId])
 
   // Handle "Delete" context menu action - show confirmation
   const handleDeleteItem = useCallback((itemId: string) => {
@@ -339,6 +325,129 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     })
   }, [rootItems, setRootItems, setWorkbenchTree])
 
+  // Default names for each kind the sidebar's Ajouter submenu can
+  // create. Matches the submenu label order, intentionally untranslated
+  // so the user can rename in place via F2 without the default drifting
+  // with locale.
+  const defaultNameFor = useCallback((kind: AddChildKind): string => {
+    switch (kind) {
+      case 'folder': return t('sidebar.newFolder')
+      case 'http-get': return 'New GET request'
+      case 'http-post': return 'New POST request'
+      case 'http-put': return 'New PUT request'
+      case 'http-patch': return 'New PATCH request'
+      case 'http-delete': return 'New DELETE request'
+      case 'graphql': return 'New GraphQL request'
+      case 'grpc': return 'New gRPC request'
+      case 'soap': return 'New SOAP request'
+      case 'websocket': return 'New WebSocket request'
+      case 'odata': return 'New OData request'
+      case 'auth': return 'New auth request'
+    }
+  }, [t])
+
+  const handleAddChildItem = useCallback((parentId: string, kind: AddChildKind) => {
+    // Resolve the parent + its ancestor chain once, up front, so we can
+    // append the new child's breadcrumb locally instead of re-walking
+    // the tree after `setRootItems` (the closure-captured `rootItems`
+    // is pre-update at that point and any concurrent tree mutation
+    // would make a post-push lookup unsound).
+    const parentLookup = findItemWithBreadcrumbs(rootItems, parentId)
+    const parent = parentLookup.item
+    if (!parent || !isAnyFolder(parent)) return
+    const parentBreadcrumbs = parentLookup.breadcrumbs
+    const name = defaultNameFor(kind)
+    const id = generateUniqueId()
+
+    // Build a plain item then wrap it reactive; mirrors the shapes
+    // `useImport` produces on import so the save-unit registry /
+    // serializer / executors all pick them up without special casing.
+    if (kind === 'folder') {
+      const folder: Folder = {
+        id,
+        name,
+        documentation: '',
+        tags: [],
+        configuration: {},
+        items: []
+      }
+      const reactive = makeReactiveFolder(folder)
+      parent.items.push(reactive)
+      // Strip the proxy before sending over IPC — `eventBus.emitSync`
+      // goes through `structuredClone` which can't ferry Proxy
+      // wrappers, and `useImport` follows the same JSON-round-trip
+      // pattern to stay safe here.
+      eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
+        id: reactive.id,
+        type: 'folder',
+        document: JSON.parse(JSON.stringify(reactive)) as Folder
+      })
+    } else {
+      // The class instances structurally satisfy the structural
+      // `Request` union in `shared/types/requests`, but TS's
+      // `exactOptionalPropertyTypes: true` can't prove the match because
+      // the class-side `type` field is typed as the full union on
+      // `BaseRequest`. Cast through `unknown` once at the boundary
+      // rather than threading class unions everywhere downstream.
+      const httpMethod: HTTPMethod | undefined =
+        kind === 'http-get' ? 'GET' :
+          kind === 'http-post' ? 'POST' :
+            kind === 'http-put' ? 'PUT' :
+              kind === 'http-patch' ? 'PATCH' :
+                kind === 'http-delete' ? 'DELETE' :
+                  undefined
+      let built: unknown
+      if (httpMethod !== undefined) {
+        built = new HTTPRequest({ id, name, method: httpMethod })
+      } else if (kind === 'graphql') {
+        built = new GraphQLRequest({ id, name })
+      } else if (kind === 'grpc') {
+        built = new GrpcRequest({ id, name })
+      } else if (kind === 'soap') {
+        built = new SoapRequest({ id, name })
+      } else if (kind === 'websocket') {
+        built = new WebSocketRequest({ id, name })
+      } else if (kind === 'odata') {
+        built = new ODataRequest({ id, name })
+      } else {
+        built = new AuthenticationRequest({ id, name })
+      }
+      const request = built as Request
+      const reactive = makeReactiveRequest(request, parent.id)
+      parent.items.push(reactive)
+      eventBus.emitSync(DocumentEvents.REQUEST_CREATED, {
+        id: reactive.id,
+        type: 'request',
+        document: JSON.parse(JSON.stringify(reactive)) as Request,
+        parentFolderId: parent.id
+      })
+    }
+
+    // Mount the new item: expand the parent, select the child, force
+    // a sidebar re-render, and open the new item in the workbench.
+    setExpandedIds((prev) => Array.from(new Set([...prev, parentId])))
+    setSelectedItemId(id)
+    setRootItems((prevItems) => [...prevItems])
+
+    // Build the new item's breadcrumb chain from the parent chain we
+    // captured before the push. The last entry in `parent.items` is
+    // always the just-pushed child (single-threaded React update).
+    const pushedItem = parent.items[parent.items.length - 1]
+    if (pushedItem === undefined) return
+    const newBreadcrumb: BreadcrumbItem = {
+      id,
+      label: name,
+      icon: isAnyFolder(pushedItem) ? getFolderIcon(pushedItem) : null
+    }
+    const breadcrumbs = [...parentBreadcrumbs, newBreadcrumb]
+    const envs = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
+    if (kind === 'folder' && isAnyFolder(pushedItem)) {
+      openFolderTab(pushedItem as Folder, breadcrumbs)
+    } else if (!isAnyFolder(pushedItem)) {
+      openAnyRequestTab(pushedItem as Request, breadcrumbs, envs)
+    }
+  }, [rootItems, setRootItems, setExpandedIds, setSelectedItemId, openFolderTab, openAnyRequestTab, defaultNameFor])
+
   const handleCreateRootFolder = useCallback(() => {
     const newFolder: Folder = {
       id: generateUniqueId(),
@@ -381,9 +490,9 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
   return {
     handleItemDrop,
     handleCloneItem,
-    handleCreateSubfolder,
     handleCreateRootFolder,
     handleCreateRootEnvironmentFolder,
+    handleAddChildItem,
     handleDeleteItem,
     confirmDelete,
     cancelDelete,

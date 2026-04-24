@@ -4,6 +4,10 @@
 
 /* Base badge styles */
 .badge {
+  /* Cap the pill height so codicon glyphs inside (e.g. the key in
+   * the Auth badge) can't stretch the container past the baseline
+   * the text badges ("GET", "POST", …) render at. */
+  max-height: 14px !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -152,6 +156,8 @@
 }
 
 .badge-auth .codicon-key {
-  font-size: 12px;
-  line-height: 1;
+  /* Scaled down from the codicon default so the key glyph matches
+   * the visual weight of the 10 px text badges ("GET", "POST", …)
+   * sitting next to it — 12 px made the key dominate the pill. */
+  font-size: 14px !important;
 }

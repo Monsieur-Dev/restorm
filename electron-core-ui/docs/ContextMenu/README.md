@@ -19,8 +19,15 @@ It is designed to be used by higher-level components (such as `ListView`) that d
 export interface ContextMenuItem {
   id: string
   label: string
-  /** Optional Codicon name without the `codicon-` prefix. */
-  icon?: string
+  /**
+   * Codicon name (without the `codicon-` prefix) when a string, or any
+   * React node for custom glyphs (colored method badges, protocol
+   * pills, SVGs, etc.). Strings get wrapped in a `codicon codicon-…`
+   * `<i>`; nodes are rendered as-is. The icon slot reserves a 16 px
+   * minimum but grows to fit wider glyphs and push the label right —
+   * a wide Badge stays in its lane without overlapping the text.
+   */
+  icon?: string | React.ReactNode
   shortcut?: string
   /** When true, this entry is rendered as a visual separator line. */
   isSeparator?: boolean
@@ -30,6 +37,19 @@ export interface ContextMenuItem {
   /** Optional submenu items */
   items?: ContextMenuItem[]
 }
+```
+
+The `icon` slot accepts either a codicon name (string) or any React
+node. Use a node when you need a glyph that doesn't exist in the
+codicon set — for example a colored HTTP-method badge. The slot
+pushes the label right when the glyph is wider than the default
+16 px codicon width:
+
+```tsx
+items: [
+  { id: 'add-get', label: 'HTTP – GET', icon: <MethodBadge method="GET" /> },
+  { id: 'add-post', label: 'HTTP – POST', icon: <MethodBadge method="POST" /> }
+]
 ```
 
 ### `ContextMenu`

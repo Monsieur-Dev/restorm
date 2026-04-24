@@ -376,6 +376,40 @@ Feature: Full workflow end-to-end scenario
     When I focus the "SearchableRenamed" tab
     Then the active request tab should show the "localhost" environment
 
+    # Sidebar "Ajouter" submenu: every entry builds a properly-typed
+    # empty item under the right-clicked parent, registers it with the
+    # reactive store, and opens a workbench tab. We create a folder
+    # first, then drop one of every request type into it so the badge
+    # + tab-open contract is exercised end-to-end. The created names
+    # are the untranslated defaults `handleAddChildItem` emits.
+    When I close every open tab in the workbench
+    And I add a "folder" under the folder "SwaggerRenamedFolder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the folder "New Folder"
+    And a folder tab for "New Folder" should be open
+    When I add a "http-get" under the folder "New Folder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the request "New GET request"
+    And a request tab for "New GET request" should be open
+    When I add a "http-post" under the folder "New Folder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the request "New POST request"
+    When I add a "http-put" under the folder "New Folder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the request "New PUT request"
+    When I add a "http-patch" under the folder "New Folder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the request "New PATCH request"
+    When I add a "http-delete" under the folder "New Folder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the request "New DELETE request"
+    When I add a "graphql" under the folder "New Folder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the request "New GraphQL request"
+    When I add a "grpc" under the folder "New Folder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the request "New gRPC request"
+    When I add a "soap" under the folder "New Folder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the request "New SOAP request"
+    When I add a "websocket" under the folder "New Folder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the request "New WebSocket request"
+    When I add a "odata" under the folder "New Folder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the request "New OData request"
+    When I add a "auth" under the folder "New Folder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the request "New auth request"
+
     # Ctrl+Alt+Left/Right: send the focused tab to the adjacent group
     # (create a new one on demand). Exercises the 6 canonical layout
     # transitions the shortcut supports. A = "Add a new pet to the store",
