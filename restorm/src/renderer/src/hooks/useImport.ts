@@ -5,7 +5,7 @@
 import React, { useCallback, useState } from 'react'
 import { eventBus, logger } from 'electron-core-ui/renderer'
 import { DocumentEvents } from '../services/DocumentEvents'
-import { makeReactiveFolder } from '../types/reactive'
+import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
 import type { Folder, EnvironmentFolder, Environment, Request, FolderItem } from '../../../shared/types/collections'
 
 export interface UseImportOptions {
@@ -56,7 +56,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
       targetFolderId?: string,
       pendingFolders?: { id: string; name: string; parentId: string }[]
     ) => {
-      logger.info('[useImport] Importing items', {
+      logger.debug('[useImport] Importing items', {
         count: items.length,
         targetFolderId,
         rootItemsCount: rootItems.length,
@@ -183,7 +183,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
       const regenerated = items.map((item) => regenerateIds(item))
       const itemsWithNewIds = regenerated.map((item) => remapAuthRefs(item))
 
-      logger.info('[useImport] Items with new IDs', { count: itemsWithNewIds.length })
+      logger.debug('[useImport] Items with new IDs', { count: itemsWithNewIds.length })
 
       // Expand every folder we just imported (and every sub-folder inside
       // them) so the user sees the full imported structure in the sidebar.
@@ -202,7 +202,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
             configuration: {}
           }
           createdFoldersMap.set(pf.id, newFolder)
-          logger.info('[useImport] Created pending folder', {
+          logger.debug('[useImport] Created pending folder', {
             name: pf.name,
             id: newFolder.id,
             parentId: pf.parentId
@@ -238,7 +238,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         const createdFolder = createdFoldersMap.get(targetFolderId)
         if (createdFolder) {
           actualTargetFolderId = createdFolder.id
-          logger.info('[useImport] Target is a pending folder, using created folder ID', {
+          logger.debug('[useImport] Target is a pending folder, using created folder ID', {
             pendingId: targetFolderId,
             actualId: actualTargetFolderId
           })
@@ -253,11 +253,11 @@ export function useImport(options: UseImportOptions): UseImportReturn {
       // ImportModal workaround that nested the attached auth request
       // inside the first folder instead of placing it at the root.
       if (rootItems.length === 0 && !actualTargetFolderId) {
-        logger.info('[useImport] Empty file - creating first root items', {
+        logger.debug('[useImport] Empty file - creating first root items', {
           count: itemsWithNewIds.length
         })
         const reactiveRootItems = itemsWithNewIds.map((item) =>
-          'items' in item ? makeReactiveFolder(item) : item
+          'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
         )
         setRootItems(reactiveRootItems)
         expandAfterImport()
@@ -313,7 +313,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
           const targetPendingFolder = createdFoldersMap.get(targetFolderId)
           if (targetPendingFolder) {
             targetPendingFolder.items = itemsWithNewIds
-            logger.info('[useImport] Put items inside root pending folder', {
+            logger.debug('[useImport] Put items inside root pending folder', {
               folderName: targetPendingFolder.name,
               itemsCount: itemsWithNewIds.length
             })
@@ -326,9 +326,12 @@ export function useImport(options: UseImportOptions): UseImportReturn {
           targetFolderId && createdFoldersMap.has(targetFolderId) ? [] : itemsWithNewIds
         const allRootItems = [...clonedRootItems, ...createdForRoot, ...directImports]
 
-        // Make reactive - makeReactiveFolder handles Folders/EnvironmentFolders, Requests stay as-is
+        // Make reactive — folders/env-folders go through `makeReactiveFolder`,
+        // root-level requests go through `makeReactiveRequest` (no parent id)
+        // so their edits emit `REQUEST_UPDATED` and flow into the dirty tracker
+        // and search index like any nested request.
         const reactiveRootItems = allRootItems.map((item) =>
-          'items' in item ? makeReactiveFolder(item) : item
+          'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
         )
         setRootItems(reactiveRootItems)
         expandAfterImport()
@@ -359,7 +362,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
             if (createdFolder) {
               createdFolder.items = itemsWithNewIds
               folder.items = [...folder.items, createdFolder]
-              logger.info('[useImport] Put items inside nested pending folder', {
+              logger.debug('[useImport] Put items inside nested pending folder', {
                 folderName: createdFolder.name,
                 itemsCount: itemsWithNewIds.length
               })
@@ -392,9 +395,11 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         }
       }
 
-      // Make all root items reactive (folders become reactive, requests stay as-is)
+      // Make all root items reactive — root-level requests go through
+      // `makeReactiveRequest` so edits land in REQUEST_UPDATED like any
+      // other request.
       const reactiveRootItems = clonedRootItems.map((item) =>
-        'items' in item ? makeReactiveFolder(item) : item
+        'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
       )
       setRootItems(reactiveRootItems)
       expandAfterImport()

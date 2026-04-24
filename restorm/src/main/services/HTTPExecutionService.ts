@@ -177,7 +177,7 @@ class HTTPExecutionService {
         try {
           const authHeaders = await authenticationCacheService.getHeaders(
             authRequest,
-            (r) => this.executeAuthInner(r, abortController.signal)
+            (r) => this.executeAuthInner(r, abortController.signal, requestId)
           )
           for (const [k, v] of Object.entries(authHeaders)) {
             headers[k] = v
@@ -213,7 +213,7 @@ class HTTPExecutionService {
         try {
           const refreshed = await authenticationCacheService.refresh(
             authRequest,
-            (r) => this.executeAuthInner(r, abortController.signal)
+            (r) => this.executeAuthInner(r, abortController.signal, requestId)
           )
           for (const [k, v] of Object.entries(refreshed)) {
             headers[k] = v
@@ -406,14 +406,30 @@ class HTTPExecutionService {
    */
   private async executeAuthInner(
     authRequest: AuthenticationRequest,
-    parentSignal: AbortSignal
+    parentSignal: AbortSignal,
+    parentRequestId?: string
   ): Promise<HTTPExecutionResult> {
     const startTime = Date.now()
     const startedAt = new Date().toISOString()
-    // Prefer the ContextService-resolved URL if the request has been
-    // registered (its id was seen by `contextService.registerRequest`).
-    // Otherwise fall back to the URL on the auth request itself.
-    const resolvedUrl = contextService.getResolvedUrl(authRequest.id)?.resolvedUrl ?? authRequest.url
+    // Prefer the ContextService-resolved URL when the auth request
+    // has been registered (its config tab was mounted at some point
+    // this session). Otherwise we have to resolve handlebars against
+    // *something* or `new URL('{{baseUrl}}/oauth/token')` crashes:
+    // first try the auth's own context (works if registered but the
+    // resolved URL isn't cached yet), then fall back to the parent
+    // request's context — we know it has an environment because it
+    // reached this code path from a registered outer dispatch.
+    const authUrlResult = contextService.getResolvedUrl(authRequest.id)
+    let resolvedUrl: string
+    if (authUrlResult) {
+      resolvedUrl = authUrlResult.resolvedUrl
+    } else if (contextService.getRequestContext(authRequest.id)) {
+      resolvedUrl = contextService.resolveValue(authRequest.url, authRequest.id)
+    } else if (parentRequestId && contextService.getRequestContext(parentRequestId)) {
+      resolvedUrl = contextService.resolveValue(authRequest.url, parentRequestId)
+    } else {
+      resolvedUrl = authRequest.url
+    }
     if (!resolvedUrl) {
       return {
         requestId: authRequest.id,
@@ -438,6 +454,17 @@ class HTTPExecutionService {
     // raw auth-request headers otherwise.
     const headers: Record<string, string> = {}
     const authCtx = contextService.getRequestContext(authRequest.id)
+    // When the auth tab was never mounted this session the auth
+    // request isn't registered; resolve handlebars against the
+    // parent request's environment instead of returning the raw
+    // template text — same rationale as the URL branch above.
+    const resolveForAuth = (value: string): string => {
+      if (authCtx) return contextService.resolveValue(value, authRequest.id)
+      if (parentRequestId && contextService.getRequestContext(parentRequestId)) {
+        return contextService.resolveValue(value, parentRequestId)
+      }
+      return value
+    }
     const headerSource = authCtx?.keyValueGroups.get('headers') ?? authRequest.headers
     // After IPC marshal the fallback path sees `{ type, value }`
     // objects instead of `StringValue` / `PasswordValue` instances;
@@ -460,11 +487,7 @@ class HTTPExecutionService {
     for (const h of headerSource) {
       if (h.enabled === false) continue
       if (!h.key) continue
-      const rawValue = extractString(h.value)
-      const resolved = authCtx
-        ? contextService.resolveValue(rawValue, authRequest.id)
-        : rawValue
-      headers[h.key] = resolved
+      headers[h.key] = resolveForAuth(extractString(h.value))
     }
 
     // Build body.
@@ -487,23 +510,25 @@ class HTTPExecutionService {
     } else if (authRequest.body) {
       // Fallback path — ContextService hasn't seen this auth request
       // (the auth-tab was never mounted in this session). Serialize
-      // directly off the `AuthenticationRequest`. `x-www-form-urlencoded`
-      // is the only shape OAuth token endpoints care about, and it's
-      // also the one the request's own Send flow uses, so a request
-      // that works in its own tab must work from the cache layer too.
+      // directly off the `AuthenticationRequest`. Handlebars still get
+      // resolved via `resolveForAuth`, which falls back to the parent
+      // request's environment when the auth itself isn't registered.
+      // `x-www-form-urlencoded` is the only shape OAuth token
+      // endpoints care about, and it's also the one the request's own
+      // Send flow uses, so a request that works in its own tab must
+      // work from the cache layer too.
       const authBody = authRequest.body
       if (authBody.type === 'text' && typeof authBody.content === 'string') {
-        body = authBody.content
+        body = resolveForAuth(authBody.content)
       } else if (authBody.type === 'x-www-form-urlencoded') {
         const params = new URLSearchParams()
         // IPC marshal turns every `StringValue` / `PasswordValue` /
         // etc. into the persisted `{ type, value }` shape — the
         // class-instance `.toString()` path is gone by the time we
         // run here. Extract the string payload manually.
-        const extractValue = extractString
         for (const field of authBody.fields) {
           if (!field.key) continue
-          params.append(field.key, extractValue(field.value))
+          params.append(field.key, resolveForAuth(extractString(field.value)))
         }
         body = params.toString()
         headers['Content-Type'] ??= 'application/x-www-form-urlencoded'

@@ -292,14 +292,14 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     timers.clear()
   }, [])
   useEffect(() => {
-    // Flush any pending writes on unmount so drafts survive a tab
-    // switch mid-typing.
+    // Flush any pending writes on unmount AND when `request.id` flips
+    // (tab switch to a different OData request while the 250 ms
+    // debounce is still in flight). Each scheduled flush closure
+    // captures the `request` prop that was current when the setter
+    // fired; firing them before the new request takes over keeps the
+    // typed state landing on the right document.
     return flushAllPendingProxyWrites
-  }, [flushAllPendingProxyWrites])
-
-  // [PERF-DEBUG OYO-253] Measure render duration. Fires once per commit
-  // via useLayoutEffect so we capture the synchronous render cost.
-  // Remove once bottleneck isolated.
+  }, [request.id, flushAllPendingProxyWrites])
 
   // `updateReactiveProperty` mutates the proxied `request` object
   // directly — consistent with the pattern used in HTTPRequestTabView.

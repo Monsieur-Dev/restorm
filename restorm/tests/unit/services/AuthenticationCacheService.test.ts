@@ -10,8 +10,21 @@ vi.mock('electron', () => ({
     getAllWindows: vi.fn(() => [])
   }
 }))
+// Event-bus mock that actually delivers `emit` to subscribers — the
+// service's `initialize()` subscribes to REQUEST_DELETED and we want
+// to exercise that handler in tests.
+const eventHandlers = new Map<string, (payload: unknown) => void>()
 vi.mock('electron-core-ui/main', () => ({
-  logger: { info: vi.fn(), debug: vi.fn(), warn: vi.fn(), error: vi.fn() }
+  logger: { info: vi.fn(), debug: vi.fn(), warn: vi.fn(), error: vi.fn() },
+  eventBusService: {
+    subscribe: vi.fn((event: string, handler: (payload: unknown) => void) => {
+      eventHandlers.set(event, handler)
+      return { unsubscribe: () => eventHandlers.delete(event) }
+    }),
+    emit: vi.fn((event: string, payload: unknown) => {
+      eventHandlers.get(event)?.(payload)
+    })
+  }
 }))
 
 import { authenticationCacheService } from '../../../src/main/services/AuthenticationCacheService'
@@ -153,5 +166,90 @@ describe('AuthenticationCacheService', () => {
     const executor = vi.fn().mockResolvedValue(makeResult('raw-token'))
     const headers = await authenticationCacheService.getHeaders(req, executor)
     expect(headers).toEqual({ Authorization: 'Bearer raw-token' })
+  })
+
+  it('coalesces concurrent getHeaders into a single executor call', async () => {
+    const req = makeAuth()
+    // Hold the executor open until we've queued several concurrent
+    // callers — each one must observe cache-miss and would normally
+    // fire its own refresh. The coalesce lets the first run stand
+    // for all of them.
+    let release: (value: ReturnType<typeof makeResult>) => void = () => undefined
+    const gate = new Promise<ReturnType<typeof makeResult>>((resolve) => { release = resolve })
+    const executor = vi.fn().mockImplementation(() => gate)
+
+    const pending = [0, 1, 2, 3, 4].map(() => authenticationCacheService.getHeaders(req, executor))
+    // Small tick so the first caller has registered the inflight promise.
+    await new Promise((r) => setTimeout(r, 0))
+    release(makeResult(JSON.stringify({ access_token: 'abc', expires_in: 3600 })))
+
+    const results = await Promise.all(pending)
+    expect(executor).toHaveBeenCalledTimes(1)
+    for (const headers of results) {
+      expect(headers).toEqual({ Authorization: 'Bearer abc' })
+    }
+  })
+
+  it('coalesces concurrent refresh calls hit by the auth-error retry path', async () => {
+    const req = makeAuth()
+    // Seed a cache entry so `getHeaders` would normally short-circuit;
+    // the retry path calls `invalidate` then `refresh` explicitly and
+    // must coalesce just like the cache-miss path.
+    await authenticationCacheService.getHeaders(
+      makeAuth(),
+      vi.fn().mockResolvedValue(makeResult(JSON.stringify({ access_token: 'old', expires_in: 3600 })))
+    )
+    authenticationCacheService.invalidate(req.id)
+
+    let release: (value: ReturnType<typeof makeResult>) => void = () => undefined
+    const gate = new Promise<ReturnType<typeof makeResult>>((resolve) => { release = resolve })
+    const executor = vi.fn().mockImplementation(() => gate)
+
+    const pending = [0, 1, 2].map(() => authenticationCacheService.refresh(req, executor))
+    await new Promise((r) => setTimeout(r, 0))
+    release(makeResult(JSON.stringify({ access_token: 'new', expires_in: 3600 })))
+
+    const results = await Promise.all(pending)
+    expect(executor).toHaveBeenCalledTimes(1)
+    for (const headers of results) {
+      expect(headers).toEqual({ Authorization: 'Bearer new' })
+    }
+  })
+
+  it('clears the inflight slot after a failure so later refreshes can run', async () => {
+    const req = makeAuth()
+    const failing = vi.fn().mockRejectedValue(new Error('network down'))
+    await expect(authenticationCacheService.getHeaders(req, failing)).rejects.toThrow('network down')
+    // Slot should be released — not leaked into the next caller.
+    const recovering = vi.fn().mockResolvedValue(
+      makeResult(JSON.stringify({ access_token: 'ok', expires_in: 3600 }))
+    )
+    const headers = await authenticationCacheService.getHeaders(req, recovering)
+    expect(recovering).toHaveBeenCalledTimes(1)
+    expect(headers).toEqual({ Authorization: 'Bearer ok' })
+  })
+
+  it('evicts the cache entry when the auth request is deleted', async () => {
+    authenticationCacheService.initialize()
+    const req = makeAuth({ id: 'auth-del-1' })
+    const executor = vi.fn().mockResolvedValue(
+      makeResult(JSON.stringify({ access_token: 'abc', expires_in: 3600 }))
+    )
+    await authenticationCacheService.getHeaders(req, executor)
+    expect(authenticationCacheService.hasEntry(req.id)).toBe(true)
+
+    // Simulate the collection fire-and-forget `REQUEST_DELETED` for this id.
+    const handler = eventHandlers.get('document:request:deleted')
+    expect(handler).toBeDefined()
+    handler?.({ id: req.id, type: 'request' })
+    expect(authenticationCacheService.hasEntry(req.id)).toBe(false)
+
+    // The next call must refetch — proving the in-flight slot was also cleared.
+    const executor2 = vi.fn().mockResolvedValue(
+      makeResult(JSON.stringify({ access_token: 'zzz', expires_in: 3600 }))
+    )
+    const headers = await authenticationCacheService.getHeaders(req, executor2)
+    expect(executor2).toHaveBeenCalledTimes(1)
+    expect(headers).toEqual({ Authorization: 'Bearer zzz' })
   })
 })

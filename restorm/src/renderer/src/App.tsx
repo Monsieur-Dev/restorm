@@ -94,7 +94,7 @@ import { isFavorite as favoritesStoreIsFavorite, toggleFavorite as favoritesStor
 import { useFileManagement } from './hooks/useFileManagement'
 import { useImport } from './hooks/useImport'
 import { prepareForSerialization } from './utils/serialization'
-import { makeReactiveFolder } from './types/reactive'
+import { makeReactiveFolder, makeReactiveRequest } from './types/reactive'
 import { searchIndexService } from './services/SearchIndexService'
 import { useRestormStore } from './store/restormStore'
 import type {
@@ -948,10 +948,11 @@ const App: React.FC = () => {
         handleFileOpenedRef.current(fileState)
       },
       setRootItems: (items: (EnvironmentFolder | Folder | Request)[]) => {
-        // Make folders reactive before setting — leave root-level
-        // requests as-is (they have no `items` array to wrap).
+        // Folders/env-folders go through `makeReactiveFolder`; root-level
+        // requests go through `makeReactiveRequest` (no parent id) so
+        // edits emit `REQUEST_UPDATED` like nested requests.
         const reactiveItems = items.map((item) =>
-          'items' in item ? makeReactiveFolder(item) : item
+          'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
         )
         setRootItems(reactiveItems)
         // Also trigger indexing

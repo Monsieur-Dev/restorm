@@ -496,9 +496,11 @@ export function makeReactiveFolder(folder: Folder): Folder {
 }
 
 /**
- * Make an HTTPRequest reactive - it will emit events when indexable properties change
+ * Make an HTTPRequest reactive - it will emit events when indexable properties change.
+ * `parentFolderId` is optional: root-level requests (no enclosing folder) pass nothing,
+ * and the `REQUEST_UPDATED` payload then carries no `parentFolderId`.
  */
-export function makeReactiveHTTPRequest(request: HTTPRequest, parentFolderId: string): HTTPRequest {
+export function makeReactiveHTTPRequest(request: HTTPRequest, parentFolderId?: string): HTTPRequest {
   if (isReactive(request)) {
     return request
   }
@@ -508,7 +510,7 @@ export function makeReactiveHTTPRequest(request: HTTPRequest, parentFolderId: st
 /**
  * Make a GraphQLRequest reactive - it will emit events when indexable properties change
  */
-export function makeReactiveGraphQLRequest(request: GraphQLRequest, parentFolderId: string): GraphQLRequest {
+export function makeReactiveGraphQLRequest(request: GraphQLRequest, parentFolderId?: string): GraphQLRequest {
   if (isReactive(request)) {
     return request
   }
@@ -518,7 +520,7 @@ export function makeReactiveGraphQLRequest(request: GraphQLRequest, parentFolder
 /**
  * Make a GrpcRequest reactive - it will emit events when indexable properties change
  */
-export function makeReactiveGrpcRequest(request: GrpcRequest, parentFolderId: string): GrpcRequest {
+export function makeReactiveGrpcRequest(request: GrpcRequest, parentFolderId?: string): GrpcRequest {
   if (isReactive(request)) {
     return request
   }
@@ -528,7 +530,7 @@ export function makeReactiveGrpcRequest(request: GrpcRequest, parentFolderId: st
 /**
  * Make a SoapRequest reactive - it will emit events when indexable properties change
  */
-export function makeReactiveSoapRequest(request: SoapRequest, parentFolderId: string): SoapRequest {
+export function makeReactiveSoapRequest(request: SoapRequest, parentFolderId?: string): SoapRequest {
   if (isReactive(request)) {
     return request
   }
@@ -538,7 +540,7 @@ export function makeReactiveSoapRequest(request: SoapRequest, parentFolderId: st
 /**
  * Make a WebSocketRequest reactive - it will emit events when indexable properties change
  */
-export function makeReactiveWebSocketRequest(request: WebSocketRequest, parentFolderId: string): WebSocketRequest {
+export function makeReactiveWebSocketRequest(request: WebSocketRequest, parentFolderId?: string): WebSocketRequest {
   if (isReactive(request)) {
     return request
   }
@@ -548,7 +550,7 @@ export function makeReactiveWebSocketRequest(request: WebSocketRequest, parentFo
 /**
  * Make an ODataRequest reactive - it will emit events when indexable properties change
  */
-export function makeReactiveODataRequest(request: ODataRequest, parentFolderId: string): ODataRequest {
+export function makeReactiveODataRequest(request: ODataRequest, parentFolderId?: string): ODataRequest {
   if (isReactive(request)) {
     return request
   }
@@ -558,7 +560,7 @@ export function makeReactiveODataRequest(request: ODataRequest, parentFolderId: 
 /**
  * Make an AuthenticationRequest reactive - it will emit events when indexable properties change
  */
-export function makeReactiveAuthenticationRequest(request: AuthenticationRequest, parentFolderId: string): AuthenticationRequest {
+export function makeReactiveAuthenticationRequest(request: AuthenticationRequest, parentFolderId?: string): AuthenticationRequest {
   if (isReactive(request)) {
     return request
   }
@@ -566,9 +568,12 @@ export function makeReactiveAuthenticationRequest(request: AuthenticationRequest
 }
 
 /**
- * Make any Request type reactive - it will emit events when indexable properties change
+ * Make any Request type reactive - it will emit events when indexable properties change.
+ * `parentFolderId` may be omitted for root-level requests (e.g. an attached auth route
+ * sitting at the top of a collection) — the resulting `REQUEST_UPDATED` payload simply
+ * carries no `parentFolderId`.
  */
-export function makeReactiveRequest(request: Request, parentFolderId: string): Request {
+export function makeReactiveRequest(request: Request, parentFolderId?: string): Request {
   if (isReactive(request)) {
     return request
   }
@@ -597,9 +602,10 @@ export function makeReactiveRequest(request: Request, parentFolderId: string): R
 }
 
 /**
- * Make a FolderItem (Folder or Request) reactive
+ * Make a FolderItem (Folder or Request) reactive.
+ * `parentFolderId` may be omitted for root-level items.
  */
-export function makeReactiveFolderItem(item: FolderItem, parentFolderId: string): FolderItem {
+export function makeReactiveFolderItem(item: FolderItem, parentFolderId?: string): FolderItem {
   if (isAnyFolder(item)) {
     return makeReactiveFolder(item)
   } else if (isRequest(item)) {

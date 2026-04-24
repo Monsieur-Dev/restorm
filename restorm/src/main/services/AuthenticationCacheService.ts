@@ -11,8 +11,9 @@
 
 import { BrowserWindow } from 'electron'
 import Handlebars from 'handlebars'
-import { logger } from 'electron-core-ui/main'
+import { eventBusService, logger, type Subscription } from 'electron-core-ui/main'
 import type { AuthenticationRequest } from '../../shared/models/requests/AuthenticationRequest'
+import { DocumentEvents, type DocumentDeletedPayload } from './DocumentEvents'
 import type { HTTPExecutionResult } from './HTTPExecutionService'
 
 /** Phase values emitted on `auth:running`. */
@@ -40,6 +41,47 @@ export type AuthRequestExecutor = (
 
 class AuthenticationCacheService {
   private entries = new Map<string, CacheEntry>()
+  /** In-flight refresh promises keyed by auth-request id.
+   *
+   * Coalesces concurrent `getHeaders` / `refresh` calls for the same
+   * auth so the token endpoint is hit exactly once per burst. Without
+   * this, a batch OData `$batch`, a mass sidebar send, or N parallel
+   * requests catching a shared 401 each fire their own refresh,
+   * overwrite each other in `entries`, and emit N `started` events.
+   *
+   * The promise is cleared in a `finally` on both success and failure
+   * so subsequent callers get a clean slot — including after a
+   * credential error that'll be retried later. */
+  private inflight = new Map<string, Promise<Record<string, string>>>()
+  private subscriptions: Subscription[] = []
+  private initialized = false
+
+  /**
+   * Wire up event subscriptions. Idempotent — safe to call repeatedly;
+   * the main process invokes it once during service bootstrap.
+   *
+   * We drop the cached entry + any in-flight refresh for a deleted
+   * auth request so a recreated id (or an id reused after an import)
+   * starts from a clean slate, and so long-running sessions don't
+   * accumulate dead entries for auth routes the user removed.
+   */
+  initialize(): void {
+    if (this.initialized) return
+    this.subscriptions.push(
+      eventBusService.subscribe<DocumentDeletedPayload>(DocumentEvents.REQUEST_DELETED, (payload) => {
+        this.invalidate(payload.id)
+        this.inflight.delete(payload.id)
+      })
+    )
+    this.initialized = true
+  }
+
+  /** Tear down subscriptions. Test-only. */
+  destroy(): void {
+    for (const sub of this.subscriptions) sub.unsubscribe()
+    this.subscriptions = []
+    this.initialized = false
+  }
 
   /**
    * Public entry point: return cached headers if fresh, otherwise run
@@ -60,8 +102,26 @@ class AuthenticationCacheService {
   /**
    * Force a refresh (used by the auth-error-code retry-once path).
    * Always runs the auth request, regardless of cache freshness.
+   *
+   * Concurrent callers with the same `request.id` share one in-flight
+   * run — see `inflight` field docs for the rationale.
    */
   async refresh(
+    request: AuthenticationRequest,
+    executor: AuthRequestExecutor
+  ): Promise<Record<string, string>> {
+    const pending = this.inflight.get(request.id)
+    if (pending) return pending
+    const run = this.refreshInner(request, executor)
+      .finally(() => {
+        this.inflight.delete(request.id)
+      })
+    this.inflight.set(request.id, run)
+    return run
+  }
+
+  /** Actual refresh body — kept separate so `refresh` can coalesce. */
+  private async refreshInner(
     request: AuthenticationRequest,
     executor: AuthRequestExecutor
   ): Promise<Record<string, string>> {
@@ -125,6 +185,7 @@ class AuthenticationCacheService {
   /** Drop everything — used on workspace close / app restart. */
   clear(): void {
     this.entries.clear()
+    this.inflight.clear()
   }
 
   /** Test-only inspection hook. */

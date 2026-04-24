@@ -61,7 +61,7 @@ const restormClassResolver = (item: Record<string, unknown>, parentClass: object
 }
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
 import { searchIndexService } from '../services/SearchIndexService'
-import { makeReactiveFolder } from '../types/reactive'
+import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
 import { prepareForSerialization, processAfterDeserialization } from '../utils/serialization'
 import { normalizeFileFormatVersion } from '../../../shared/config/fileFormatVersion'
 import type { Folder, EnvironmentFolder, Request, FolderItem, Environment } from '../../../shared/types/collections'
@@ -742,10 +742,12 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
           normalizeFileFormatVersion(root, logger)
         }
         // Requests can legally live at the root (see `useImport`'s
-        // empty-file branch). Only wrap folders through
-        // `makeReactiveFolder`; leave requests as-is.
+        // empty-file branch). Folders and env-folders go through
+        // `makeReactiveFolder`; root-level requests go through
+        // `makeReactiveRequest` with no parent id so edits still emit
+        // `REQUEST_UPDATED` into the dirty tracker / search index.
         const reactiveItems = collectionsWithIds.map((item) =>
-          'items' in item ? makeReactiveFolder(item) : item
+          'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
         )
         setRootItems(reactiveItems)
 
