@@ -1,0 +1,81 @@
+collections:
+  - folderType: environment
+    fileFormatVersion: 1
+    name: Auth Service
+    documentation: ''
+    tags:
+      - auth
+    id: a0000000-0000-0000-0000-00000000auth
+    environments:
+      - name: localhost
+        variables:
+          - key: baseUrl
+            value:
+              type: string
+              value: http://localhost:5110
+            enabled: true
+          - key: clientId
+            value:
+              type: string
+              value: VALID_CLIENT_ID
+            enabled: true
+    items:
+      - type: auth
+        name: Login
+        documentation: ''
+        tags:
+          - auth
+        id: a1000000-0000-0000-0000-00000000auth
+        url: '{{baseUrl}}/login'
+        method: POST
+        headers:
+          - key: Content-Type
+            value: application/json
+            enabled: true
+        params: []
+        body:
+          type: text
+          contentType: application/json
+          text: |
+            {
+              "client_id": "{{clientId}}"
+            }
+        producedHeaders:
+          - key: Authorization
+            value:
+              type: expression
+              value: '{{auth_type}} {{auth_token}}'
+            enabled: true
+        authErrorCodes:
+          - 401
+          - 403
+      - name: Pet API
+        documentation: ''
+        tags: []
+        configuration: {}
+        id: f1000000-0000-0000-0000-00000000auth
+        items:
+          - type: http
+            name: Health
+            documentation: 'Liveness probe — no auth required.'
+            tags: []
+            id: d1000000-0000-0000-0000-00000000auth
+            url: '{{baseUrl}}/health'
+            method: GET
+            headers: []
+            params: []
+            pathParams: []
+          - type: http
+            name: Get Pet by Id
+            documentation: 'Requires the Login auth route.'
+            tags: []
+            id: d2000000-0000-0000-0000-00000000auth
+            authenticationRequestId: a1000000-0000-0000-0000-00000000auth
+            url: '{{baseUrl}}/pet/1'
+            method: GET
+            headers:
+              - key: Accept
+                value: application/json
+                enabled: true
+            params: []
+            pathParams: []

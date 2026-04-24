@@ -58,6 +58,26 @@ services:
     ports:
       - "3001:3001"
 
+  # Auth - Custom .NET 9 minimal-API service used by the `auth-login`
+  # e2e suite. Publishes `/login` (POST), `/pet/{id}` (GET, Bearer-gated)
+  # and a pet-only `/swagger.json`. Same multi-stage Dockerfile pattern
+  # as odata-petstore — listens on :5110.
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: restorm-auth-service
+    ports:
+      - "5110:5110"
+    healthcheck:
+      # `wget` / `curl` aren't in the dotnet/aspnet:9.0-alpine runtime
+      # image, so poll `/health` via /dev/tcp as we do for odata-petstore.
+      test: ["CMD", "sh", "-c", "exec 3<>/dev/tcp/localhost/5110 && echo -e 'GET /health HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && grep -q 200 <&3"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
+
   # OData v4 - Custom Pet Store (AspNetCoreOData)
   # Multi-stage Dockerfile builds the .NET 9 service and serves it on :5100.
   # Provides Pets/Categories/Tags/Owners entity sets, a bound `AdoptPet`

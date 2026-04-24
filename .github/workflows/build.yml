@@ -179,6 +179,15 @@ jobs:
           docker build -t restorm-odata-petstore .
           docker run -d --name restorm-odata-petstore -p 5100:5100 restorm-odata-petstore
 
+      - name: Start Auth Service
+        # Same pattern as odata-petstore — .NET 9 minimal-API container
+        # built on the fly, exposing :5110. Drives the `auth-login` e2e
+        # suite (POST /login, GET /pet/{id}, GET /swagger.json).
+        run: |
+          cd restorm/tests/docker/auth-service
+          docker build -t restorm-auth-service .
+          docker run -d --name restorm-auth-service -p 5110:5110 restorm-auth-service
+
       - name: Wait for services
         run: |
           cd restorm

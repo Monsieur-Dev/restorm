@@ -12,6 +12,11 @@
       "applyToAll": "Apply to all requests"
     }
   },
+  "authFailureToast": {
+    "title": "Authentication failed",
+    "fallbackReason": "The authentication request did not succeed.",
+    "openAuthRoute": "Open authentication route"
+  },
   "menuBar": {
     "file": "File",
     "new": "New...",

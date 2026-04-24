@@ -396,6 +396,78 @@ const App: React.FC = () => {
     onImportComplete: handleImportComplete
   })
 
+  // Authentication failure → toast bridge.
+  //
+  // Subscribes to the main-side `auth:failed` IPC and surfaces a toast
+  // in the global toaster. The toast body carries a clickable link
+  // that opens the offending auth request in the workbench so the user
+  // can fix credentials / URL / etc. without hunting through the tree.
+  // We track the latest tree + tab opener through refs so the
+  // subscription handler doesn't have to re-bind on every keystroke
+  // (rootItems is reactive — its identity churns frequently).
+  const authFailureRootItemsRef = useRef(rootItems)
+  useEffect(() => { authFailureRootItemsRef.current = rootItems }, [rootItems])
+  const authFailureOpenTabRef = useRef(openAnyRequestTab)
+  useEffect(() => { authFailureOpenTabRef.current = openAnyRequestTab }, [openAnyRequestTab])
+  useEffect(() => {
+    const api = window.restorm?.auth
+    if (!api) return undefined
+    return api.onFailed((payload) => {
+      const items = authFailureRootItemsRef.current
+      const request = findRequestById(items, payload.authRequestId)
+      if (!request) return
+      const { breadcrumbs } = findItemWithBreadcrumbs(items, payload.authRequestId)
+      const reason = payload.reason && payload.reason.trim() !== ''
+        ? payload.reason
+        : t('authFailureToast.fallbackReason', 'The authentication request did not succeed.')
+      // Dedupe id used both for `push` (so a burst collapses to one
+      // toast) and for the explicit dismiss when the user clicks the
+      // navigation link. Dismiss before opening the tab so the toast
+      // disappears in the same event tick — feels snappier and
+      // sidesteps a brief flash where the toast still hovers over the
+      // freshly-opened auth tab.
+      const toastId = `auth-failure-${payload.authRequestId}`
+      const handleOpen = (): void => {
+        toasterService.dismiss('app', toastId)
+        authFailureOpenTabRef.current(request, breadcrumbs)
+      }
+      toasterService.push('app', {
+        // De-duplicate per auth-request id: a burst of failures (e.g.
+        // OData $batch) collapses to one visible toast that updates
+        // its `reason` in place rather than stacking N copies. The
+        // same id is what `handleOpen` dismisses on click.
+        id: toastId,
+        title: t('authFailureToast.title', 'Authentication failed'),
+        body: (
+          <div data-testid="auth-failure-toast">
+            <div style={{ marginBottom: 6 }}>{reason}</div>
+            <a
+              role="button"
+              tabIndex={0}
+              data-testid="auth-failure-toast-open-link"
+              onClick={(e) => { e.preventDefault(); handleOpen() }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  handleOpen()
+                }
+              }}
+              style={{
+                cursor: 'pointer',
+                color: 'var(--linkForeground, #3794ff)',
+                textDecoration: 'underline'
+              }}
+            >
+              {t('authFailureToast.openAuthRoute', 'Open authentication route')}
+            </a>
+          </div>
+        ),
+        durationMs: 8000,
+        ariaLive: 'assertive'
+      })
+    })
+  }, [t])
+
   // Resolve a workbench tab id (e.g. `request-idx:0.1`, `request-id:uuid`,
   // or the legacy `request-<id>` form) to its item id.
   const resolveTabItemId = useCallback((tabId: string): string | null => {

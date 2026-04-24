@@ -32,6 +32,12 @@ const odataTypingTestDir = defineBddConfig({
   outputDir: '.features-gen/odata-typing'
 })
 
+const authLoginTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/auth-login/features/**/*.feature',
+  steps: ['tests/e2e/bdd/auth-login/steps/**/*.ts', 'tests/e2e/bdd/fixtures/auth-login.fixture.ts'],
+  outputDir: '.features-gen/auth-login'
+})
+
 // Temporary diagnostic — remove after the auth-modal layout is stable.
 const authModalDebugTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/auth-modal-debug/features/**/*.feature',
@@ -105,6 +111,10 @@ export default defineConfig({
     {
       name: 'odata-typing',
       testDir: odataTypingTestDir
+    },
+    {
+      name: 'auth-login',
+      testDir: authLoginTestDir
     },
     {
       name: 'auth-modal-debug',

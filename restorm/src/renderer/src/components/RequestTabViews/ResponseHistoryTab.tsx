@@ -16,6 +16,19 @@ import { logger } from 'electron-core-ui/renderer'
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../../shared/types/collections'
 import { getResponseHistoryDetail, getResponseHistoryList } from '../../services/GraphQLIntegration'
 
+/**
+ * Resolve the dot color for a history entry. New entries carry a 3-way
+ * `outcome`; older entries (pre-`outcome`) only have the boolean
+ * `success`, in which case we can't distinguish 3xx-warning from
+ * 2xx-ok and fall back to a binary green/red mapping.
+ */
+function outcomeDotColor(entry: ResponseHistoryEntry): string {
+  if (entry.outcome === 'ok') return 'var(--testing-iconPassed)'
+  if (entry.outcome === 'warning') return 'var(--editorWarning-foreground)'
+  if (entry.outcome === 'failure') return 'var(--testing-iconFailed)'
+  return entry.success ? 'var(--testing-iconPassed)' : 'var(--testing-iconFailed)'
+}
+
 function formatRequestBodyValue(text: string): { text: string; language: string } {
   const trimmed = text.trim()
   if (!trimmed) return { text, language: 'plaintext' }
@@ -256,7 +269,7 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
             height: 8,
             borderRadius: '50%',
             flexShrink: 0,
-            backgroundColor: entry.success ? 'var(--testing-iconPassed)' : 'var(--testing-iconFailed)'
+            backgroundColor: outcomeDotColor(entry)
           }}
         />
       )
@@ -364,8 +377,13 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
         id: 'response',
         label: t('requestTab.responses.tabs.response'),
         useScrollableElement: false,
+        // The wrapper must be a flex column so the inner CodeEditor's
+        // `flex: 1, minHeight: 0` (set by `buildHttpResponseViewData`)
+        // grows to fill the modal panel. Without `display: flex`, the
+        // editor collapses to its content height and the modal shows
+        // a single-line strip with empty space below.
         content: (
-          <div style={{ height: '100%', boxSizing: 'border-box', padding: '8px 0px 0px 8px' }}>
+          <div style={{ height: '100%', boxSizing: 'border-box', padding: '8px 0px 0px 8px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
             {responseContent}
           </div>
         )
@@ -378,8 +396,8 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
         label: t('requestTab.responses.tabs.requestBody'),
         useScrollableElement: false,
         content: (
-          <div style={{ height: '100%', boxSizing: 'border-box', padding: '8px 0px 0px 8px' }}>
-            <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3, boxSizing: 'border-box' }}>
+          <div style={{ height: '100%', boxSizing: 'border-box', padding: '8px 0px 0px 8px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+            <div style={{ flex: 1, minHeight: 0, border: '1px solid var(--panel-border)', borderRadius: 3, boxSizing: 'border-box' }}>
               <CodeEditor
                 height="100%"
                 language={requestBodyPayload.language}
@@ -457,7 +475,7 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
   const selectOptions: ISelectOptionItem[] = useMemo(() => {
     return entries.map((entry) => {
       const dateLabel = formatDate(new Date(entry.timestamp))
-      const statusColor = entry.success ? 'var(--testing-iconPassed)' : 'var(--testing-iconFailed)'
+      const statusColor = outcomeDotColor(entry)
       return {
         text: entry.guid,
         label: (

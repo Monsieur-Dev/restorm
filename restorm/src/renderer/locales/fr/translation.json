@@ -12,6 +12,11 @@
       "applyToAll": "Appliquer à toutes les requêtes"
     }
   },
+  "authFailureToast": {
+    "title": "Échec de l'authentification",
+    "fallbackReason": "La requête d'authentification n'a pas abouti.",
+    "openAuthRoute": "Ouvrir la route d'authentification"
+  },
   "menuBar": {
     "file": "Fichier",
     "new": "Nouveau...",

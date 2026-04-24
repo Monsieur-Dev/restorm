@@ -50,7 +50,8 @@ export type {
   ResponseHistoryWebSocketResponse,
   ResponseHistoryResponse,
   ResponseHistoryDetail,
-  ResponseHistoryRequestType
+  ResponseHistoryRequestType,
+  ResponseHistoryOutcome
 } from './responseHistory'
 
 export type { Folder, EnvironmentFolder, FolderItem } from './folderTypes'

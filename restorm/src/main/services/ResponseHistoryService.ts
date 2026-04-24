@@ -35,6 +35,7 @@ import type {
   ResponseHistoryHttpBody,
   ResponseHistoryIndex,
   ResponseHistoryKeyValue,
+  ResponseHistoryOutcome,
   ResponseHistoryRequestMeta,
   ResponseHistoryRequestType,
   ResponseHistoryResponse
@@ -63,6 +64,45 @@ type ExecutionResult =
   | GRPCExecutionResult
   | SOAPExecutionResult
   | WebSocketExecutionResult
+
+/**
+ * Compute the 3-way visual outcome (`ok` / `warning` / `failure`) for
+ * a result that exposes an HTTP status code. The history-list dot
+ * uses this directly: green for 2xx, orange for 3xx (a redirect that
+ * the client surfaced as the final response — debatable but
+ * consistent with `HTTPResponsePanel.getStatusColor`), red for any
+ * other code or a network-level failure.
+ */
+function httpOutcome(result: { success: boolean; statusCode?: number }): ResponseHistoryOutcome {
+  if (!result.success) return 'failure'
+  const status = result.statusCode ?? 0
+  if (status >= 200 && status < 300) return 'ok'
+  if (status >= 300 && status < 400) return 'warning'
+  return 'failure'
+}
+
+/**
+ * gRPC has no warning state — its status code is `0` for OK and any
+ * non-zero value indicates an error (UNAVAILABLE, UNAUTHENTICATED,
+ * etc.). We collapse to a binary outcome.
+ */
+function grpcOutcome(result: GRPCExecutionResult): ResponseHistoryOutcome {
+  if (!result.success) return 'failure'
+  return (result.statusCode ?? -1) === 0 ? 'ok' : 'failure'
+}
+
+/**
+ * WebSocket carries no per-message status — the connection itself is
+ * either established or not. The execution result reflects that with
+ * `connected` + `success`; we treat both as required for `ok`.
+ */
+function webSocketOutcome(result: WebSocketExecutionResult): ResponseHistoryOutcome {
+  return result.success && result.connected ? 'ok' : 'failure'
+}
+
+function outcomeToSuccess(outcome: ResponseHistoryOutcome): boolean {
+  return outcome !== 'failure'
+}
 
 class ResponseHistoryService {
   private subscriptions: Subscription[] = []
@@ -359,7 +399,8 @@ class ResponseHistoryService {
       guid: detail.guid,
       timestamp: detail.timestamp,
       pinned: detail.pinned,
-      success: detail.success
+      success: detail.success,
+      ...(detail.outcome !== undefined ? { outcome: detail.outcome } : {})
     }
 
     const requests = index.requests.map((req) => ({ ...req, entries: [...req.entries] }))
@@ -409,12 +450,14 @@ class ResponseHistoryService {
         const httpResult = result as HTTPExecutionResult
         const response = this.buildHttpResponse(requestId, httpResult)
         if (!response) return null
+        const outcome = httpOutcome(httpResult)
         return {
           guid,
           requestId,
           requestPath,
           type,
-          success: httpResult.success,
+          success: outcomeToSuccess(outcome),
+          outcome,
           timestamp: now,
           pinned: false,
           requestMeta,
@@ -425,12 +468,14 @@ class ResponseHistoryService {
         const httpResult = result as HTTPExecutionResult
         const response = this.buildOdataResponse(requestId, httpResult)
         if (!response) return null
+        const outcome = httpOutcome(httpResult)
         return {
           guid,
           requestId,
           requestPath,
           type,
-          success: httpResult.success,
+          success: outcomeToSuccess(outcome),
+          outcome,
           timestamp: now,
           pinned: false,
           requestMeta,
@@ -441,12 +486,14 @@ class ResponseHistoryService {
         const gqlResult = result as GraphQLExecutionResult
         const response = this.buildGraphqlResponse(requestId, gqlResult)
         if (!response) return null
+        const outcome = httpOutcome(gqlResult)
         return {
           guid,
           requestId,
           requestPath,
           type,
-          success: gqlResult.success,
+          success: outcomeToSuccess(outcome),
+          outcome,
           timestamp: now,
           pinned: false,
           requestMeta,
@@ -457,12 +504,14 @@ class ResponseHistoryService {
         const grpcResult = result as GRPCExecutionResult
         const response = this.buildGrpcResponse(requestId, grpcResult)
         if (!response) return null
+        const outcome = grpcOutcome(grpcResult)
         return {
           guid,
           requestId,
           requestPath,
           type,
-          success: grpcResult.success,
+          success: outcomeToSuccess(outcome),
+          outcome,
           timestamp: now,
           pinned: false,
           requestMeta,
@@ -473,12 +522,14 @@ class ResponseHistoryService {
         const soapResult = result as SOAPExecutionResult
         const response = this.buildSoapResponse(requestId, soapResult)
         if (!response) return null
+        const outcome = httpOutcome(soapResult)
         return {
           guid,
           requestId,
           requestPath,
           type,
-          success: soapResult.success,
+          success: outcomeToSuccess(outcome),
+          outcome,
           timestamp: now,
           pinned: false,
           requestMeta,
@@ -489,12 +540,14 @@ class ResponseHistoryService {
         const wsResult = result as WebSocketExecutionResult
         const response = this.buildWebSocketResponse(requestId, wsResult)
         if (!response) return null
+        const outcome = webSocketOutcome(wsResult)
         return {
           guid,
           requestId,
           requestPath,
           type,
-          success: wsResult.success,
+          success: outcomeToSuccess(outcome),
+          outcome,
           timestamp: now,
           pinned: false,
           requestMeta,
@@ -817,7 +870,14 @@ class ResponseHistoryService {
     const pinned = typeof raw['pinned'] === 'boolean' ? raw['pinned'] : false
     const success = typeof raw['success'] === 'boolean' ? raw['success'] : false
     if (!guid || !timestamp) return null
-    return { guid, timestamp, pinned, success }
+    const rawOutcome = raw['outcome']
+    const outcome: ResponseHistoryOutcome | undefined =
+      rawOutcome === 'ok' || rawOutcome === 'warning' || rawOutcome === 'failure'
+        ? rawOutcome
+        : undefined
+    return outcome
+      ? { guid, timestamp, pinned, success, outcome }
+      : { guid, timestamp, pinned, success }
   }
 
   private getRequestFullData(requestId: string): Record<string, unknown> | null {
