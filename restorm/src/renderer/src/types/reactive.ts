@@ -183,9 +183,30 @@ const DOC_ID_SYMBOL = Symbol('docId')
 /** Symbol to store the parent folder ID (for requests) */
 const PARENT_ID_SYMBOL = Symbol('parentId')
 
-/** Check if an object is already reactive */
+/** Check if an object is already reactive.
+ *
+ * Uses property access (goes through the proxy's `get` trap) rather
+ * than the `in` operator. The array/document proxy handlers only
+ * intercept `get`, not `has`, so `REACTIVE_SYMBOL in proxy` delegates
+ * to the underlying target — which never carries the symbol — and
+ * reports false for every proxy we already created.
+ *
+ * With the bug, every render of a tab view calls `request.headers`
+ * (and similar reactive arrays), the proxy handler sees the stored
+ * wrapper as "not reactive", and re-wraps it in a new Proxy on every
+ * get. Consumer components that accept the wrapped array as a prop
+ * (e.g. `ODataPropertyChips` with `properties={request.entitySetProperties}`)
+ * see a new reference every render, which breaks `React.memo` and
+ * re-renders their descendants. For a 362-option MultiSelectCombo,
+ * this turns into ~500 ms of commit work per keystroke at the
+ * fully-typed filter length. */
 function isReactive(obj: unknown): boolean {
-  return typeof obj === 'object' && obj !== null && REACTIVE_SYMBOL in obj
+  if (typeof obj !== 'object' || obj === null) return false
+  try {
+    return (obj as Record<symbol, unknown>)[REACTIVE_SYMBOL] === true
+  } catch {
+    return false
+  }
 }
 
 // ============================================================================

@@ -112,10 +112,9 @@ async function typeInto(p: Page, testId: string, text: string): Promise<void> {
   await p.keyboard.press('Control+A')
   await p.keyboard.press('Delete')
   await p.keyboard.type(text)
-  // Wait long enough for the per-field proxy-write debounce (250ms)
-  // plus the reactive proxy's 50ms emit debounce plus a React commit
-  // beat. The URL preview and dirty-state assertions all read the
-  // resulting state.
+  // Cover the per-field proxy-write debounce (250 ms) plus the
+  // reactive proxy's 50 ms emit + React commit before the
+  // URL preview / dirty-state assertions read the resulting state.
   await p.waitForTimeout(500)
 }
 
