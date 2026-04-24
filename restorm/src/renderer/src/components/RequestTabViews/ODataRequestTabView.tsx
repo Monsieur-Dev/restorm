@@ -244,30 +244,58 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   }, [request])
   useRequestReset(request, handleReset)
 
-  // Defensive proxy→local sync for same-id external mutations (e.g.
-  // crash-recovery drafts restored into the existing proxy, undo/redo,
-  // programmatic seeding). `useRequestReset` only fires on id change
-  // so we'd otherwise leave local state stale until the next tab
-  // switch. Setters are no-ops when the local value already matches,
-  // so this doesn't fight an active typing burst.
-  const filterProxy = request.queryOptions.filter ?? ''
-  const selectProxy = (request.queryOptions.select ?? []).join(', ')
-  const topProxy = request.queryOptions.top ?? ''
-  const skipProxy = request.queryOptions.skip ?? ''
-  const expandProxy = request.queryOptions.expand ?? ''
-  const orderbyProxy = request.queryOptions.orderby ?? ''
-  const searchProxy = request.queryOptions.search ?? ''
-  const formatProxy = request.queryOptions.format ?? ''
-  const applyProxy = request.queryOptions.apply ?? ''
-  useEffect(() => { setFilterText((cur) => cur === filterProxy ? cur : filterProxy) }, [filterProxy])
-  useEffect(() => { setSelectText((cur) => cur === selectProxy ? cur : selectProxy) }, [selectProxy])
-  useEffect(() => { setTopText((cur) => cur === topProxy ? cur : topProxy) }, [topProxy])
-  useEffect(() => { setSkipText((cur) => cur === skipProxy ? cur : skipProxy) }, [skipProxy])
-  useEffect(() => { setExpandText((cur) => cur === expandProxy ? cur : expandProxy) }, [expandProxy])
-  useEffect(() => { setOrderbyText((cur) => cur === orderbyProxy ? cur : orderbyProxy) }, [orderbyProxy])
-  useEffect(() => { setSearchText((cur) => cur === searchProxy ? cur : searchProxy) }, [searchProxy])
-  useEffect(() => { setFormatText((cur) => cur === formatProxy ? cur : formatProxy) }, [formatProxy])
-  useEffect(() => { setApplyText((cur) => cur === applyProxy ? cur : applyProxy) }, [applyProxy])
+  // Per-field debounced proxy write. Each setter updates the local
+  // `XText` state synchronously (so the InputBox stays visually
+  // responsive per keystroke) and schedules the heavy proxy mutation
+  // to fire once the typing burst settles. Without this, every
+  // keystroke in a metadata-heavy OData request paid the full reactive
+  // cascade (REQUEST_UPDATED → URL preview recompute + save-unit IPC
+  // + checksum tracking + ContextService IPC), pushing per-keystroke
+  // render cost into the 100s of ms.
+  //
+  // Each slot keeps its own timer. Switching fields flushes any
+  // pending write for another slot synchronously first, so the proxy
+  // always observes writes in the order they were typed.
+  //
+  // Note: the earlier proxy→local `useEffect` mirror fought with
+  // in-flight debounced writes (proxy lags local → effect reset
+  // local back to the stale proxy value → char drops). The trade-off
+  // is that programmatic external mutations of `queryOptions` on the
+  // same request id (crash-recovery drafts, undo/redo) won't re-sync
+  // into the visible inputs until the user switches tabs and back,
+  // which is `useRequestReset`'s contract. Live typing wins.
+  const PROXY_WRITE_DEBOUNCE_MS = 250
+  const proxyWriteTimersRef = useRef<Map<string, { timer: ReturnType<typeof setTimeout>; flush: () => void }>>(new Map())
+  const scheduleProxyWrite = useCallback((slot: string, flush: () => void) => {
+    const timers = proxyWriteTimersRef.current
+    for (const [key, entry] of timers) {
+      if (key !== slot) {
+        clearTimeout(entry.timer)
+        timers.delete(key)
+        entry.flush()
+      }
+    }
+    const existing = timers.get(slot)
+    if (existing) clearTimeout(existing.timer)
+    const timer = setTimeout(() => {
+      timers.delete(slot)
+      flush()
+    }, PROXY_WRITE_DEBOUNCE_MS)
+    timers.set(slot, { timer, flush })
+  }, [])
+  const flushAllPendingProxyWrites = useCallback(() => {
+    const timers = proxyWriteTimersRef.current
+    for (const [, entry] of timers) {
+      clearTimeout(entry.timer)
+      entry.flush()
+    }
+    timers.clear()
+  }, [])
+  useEffect(() => {
+    // Flush any pending writes on unmount so drafts survive a tab
+    // switch mid-typing.
+    return flushAllPendingProxyWrites
+  }, [flushAllPendingProxyWrites])
 
   // [PERF-DEBUG OYO-253] Measure render duration. Fires once per commit
   // via useLayoutEffect so we capture the synchronous render cost.
@@ -332,72 +360,99 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     current.add(name)
     const nextList = Array.from(current)
     setSelectText(nextList.join(', '))
-    updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, select: nextList })
-  }, [request])
+    scheduleProxyWrite('select', () => {
+      updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, select: nextList })
+    })
+  }, [request, scheduleProxyWrite])
 
   const appendOrderbyProperty = useCallback((name: string) => {
     const existing = request.queryOptions.orderby?.trim() ?? ''
     const next = existing ? `${existing},${name} asc` : `${name} asc`
     setOrderbyText(next)
-    updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, orderby: next })
-  }, [request])
+    scheduleProxyWrite('orderby', () => {
+      updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, orderby: next })
+    })
+  }, [request, scheduleProxyWrite])
 
   const appendExpandProperty = useCallback((name: string) => {
     const existing = request.queryOptions.expand?.trim() ?? ''
     const next = existing ? `${existing},${name}` : name
     setExpandText(next)
-    updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, expand: next })
-  }, [request])
+    scheduleProxyWrite('expand', () => {
+      updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, expand: next })
+    })
+  }, [request, scheduleProxyWrite])
 
   const setFilter = useCallback((next: string) => {
     setFilterText(next)
-    updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, filter: next })
-  }, [request])
+    scheduleProxyWrite('filter', () => {
+      updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, filter: next })
+    })
+  }, [request, scheduleProxyWrite])
 
   const setSelect = useCallback((next: string) => {
     setSelectText(next)
-    const list = next.split(',').map((s) => s.trim()).filter((s) => s !== '')
-    updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, select: list })
-  }, [request])
+    scheduleProxyWrite('select', () => {
+      const list = next.split(',').map((s) => s.trim()).filter((s) => s !== '')
+      updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, select: list })
+    })
+  }, [request, scheduleProxyWrite])
 
   const setTop = useCallback((next: string) => {
     setTopText(next)
-    updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, top: next })
-  }, [request])
+    scheduleProxyWrite('top', () => {
+      updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, top: next })
+    })
+  }, [request, scheduleProxyWrite])
 
   const setSkip = useCallback((next: string) => {
     setSkipText(next)
-    updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, skip: next })
-  }, [request])
+    scheduleProxyWrite('skip', () => {
+      updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, skip: next })
+    })
+  }, [request, scheduleProxyWrite])
 
+  // `$count` is a toggle — flush any pending text-field writes first
+  // so the boolean mutation layers on top of the latest typed state.
   const setCount = useCallback((next: boolean) => {
+    flushAllPendingProxyWrites()
     updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, count: next })
-  }, [request])
+  }, [request, flushAllPendingProxyWrites])
 
   const setExpand = useCallback((next: string) => {
     setExpandText(next)
-    updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, expand: next })
-  }, [request])
+    scheduleProxyWrite('expand', () => {
+      updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, expand: next })
+    })
+  }, [request, scheduleProxyWrite])
 
   const setOrderby = useCallback((next: string) => {
     setOrderbyText(next)
-    updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, orderby: next })
-  }, [request])
+    scheduleProxyWrite('orderby', () => {
+      updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, orderby: next })
+    })
+  }, [request, scheduleProxyWrite])
 
   const setSearch = useCallback((next: string) => {
     setSearchText(next)
-    updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, search: next })
-  }, [request])
+    scheduleProxyWrite('search', () => {
+      updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, search: next })
+    })
+  }, [request, scheduleProxyWrite])
 
   const setFormat = useCallback((next: string) => {
     setFormatText(next)
-    updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, format: next })
-  }, [request])
+    scheduleProxyWrite('format', () => {
+      updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, format: next })
+    })
+  }, [request, scheduleProxyWrite])
 
   const setApply = useCallback((next: string) => {
     setApplyText(next)
-    updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, apply: next })
-  }, [request])
+    scheduleProxyWrite('apply', () => {
+      updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, apply: next })
+    })
+  }, [request, scheduleProxyWrite])
 
   // Live URL preview composed from the CURRENTLY-TYPED local state so
   // it tracks every keystroke without waiting for the proxy write to
@@ -531,6 +586,10 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       logger.error('Cannot send OData request without ID')
       return
     }
+    // Flush any debounced typing writes so the outgoing request sees
+    // the latest-typed values (we debounce per-field to keep typing
+    // responsive; Send must not ship the pre-debounce proxy snapshot).
+    flushAllPendingProxyWrites()
     setIsSending(true)
     setResponse(null)
 
@@ -647,7 +706,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId } as RequestHistoryEventPayload)
       })
       .finally(() => { setIsSending(false) })
-  }, [isSending, request, requestPath, resolveAuthRequest])
+  }, [isSending, request, requestPath, resolveAuthRequest, flushAllPendingProxyWrites])
 
   const urlSection = (
     <div style={urlRowStyle} data-testid="odata-request-url-section">
@@ -930,6 +989,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     // state — otherwise URLResolver would append them again and
     // produce a bogus composite URL. We stop short of auto-sending
     // so the user sees the change before the network call.
+    flushAllPendingProxyWrites()
     updateReactiveProperty(request, 'url', nextUrl)
     updateReactiveProperty(request, 'queryOptions', {})
     setFilterText('')
@@ -941,7 +1001,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     setSearchText('')
     setFormatText('')
     setApplyText('')
-  }, [request])
+  }, [request, flushAllPendingProxyWrites])
 
   // One-click pagination: fetch `@odata.nextLink` verbatim via the
   // OData IPC bridge (with `urlOverride` so URLResolver stays out of
