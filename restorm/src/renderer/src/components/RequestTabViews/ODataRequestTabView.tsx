@@ -266,6 +266,19 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   // which is `useRequestReset`'s contract. Live typing wins.
   const PROXY_WRITE_DEBOUNCE_MS = 250
   const proxyWriteTimersRef = useRef<Map<string, { timer: ReturnType<typeof setTimeout>; flush: () => void }>>(new Map())
+  // After a debounced proxy write fires, nothing in React-land observes
+  // the mutation — `request` is a reactive proxy, not a state value.
+  // The `useEffect` below that pushes `request.queryOptions` to
+  // ContextService (so the main-side URLResolver can compose
+  // `?$filter=…&$select=…`) only re-evaluates when the parent
+  // re-renders. Without an explicit nudge, a "type into $select →
+  // immediately click Send" flow ships the pre-debounce snapshot:
+  // ContextService still sees the OLD queryOptions when the executor
+  // reads `getResolvedUrl`, and the wire request misses the latest
+  // typed query option. Bumping a dummy state inside the timer
+  // callback forces a re-render after every proxy commit, which lets
+  // the dependent effect publish the fresh snapshot.
+  const [, forceProxyRender] = useState(0)
   const scheduleProxyWrite = useCallback((slot: string, flush: () => void) => {
     const timers = proxyWriteTimersRef.current
     for (const [key, entry] of timers) {
@@ -280,16 +293,19 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     const timer = setTimeout(() => {
       timers.delete(slot)
       flush()
+      forceProxyRender((n) => n + 1)
     }, PROXY_WRITE_DEBOUNCE_MS)
     timers.set(slot, { timer, flush })
   }, [])
   const flushAllPendingProxyWrites = useCallback(() => {
     const timers = proxyWriteTimersRef.current
+    if (timers.size === 0) return
     for (const [, entry] of timers) {
       clearTimeout(entry.timer)
       entry.flush()
     }
     timers.clear()
+    forceProxyRender((n) => n + 1)
   }, [])
   useEffect(() => {
     // Flush any pending writes on unmount AND when `request.id` flips
@@ -554,12 +570,22 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
 
   // Push the latest OData request shape to ContextService so
   // URLResolver can compose the resolved URL (with $filter / $select
-  // / $top / $skip / $count appended). Keeps refiring when any of the
-  // captured fields changes.
-  useEffect(() => {
+  // / $top / $skip / $count appended).
+  //
+  // Called from two places:
+  //   1) The reactive `useEffect` below — fires whenever React
+  //      observes a change in one of the dependencies (typing into
+  //      a field, switching tab, env change).
+  //   2) Directly inside `handleSend` immediately after
+  //      `flushAllPendingProxyWrites` — the debounced proxy writes
+  //      mutate the reactive object without scheduling a React
+  //      re-render, so a "type → click Send" sequence would
+  //      otherwise ship the pre-debounce queryOptions snapshot. The
+  //      explicit pre-Send call closes that race deterministically.
+  const pushFullRequestDataToContextService = useCallback((): Promise<void> | undefined => {
     const requestId = request.id
-    if (!requestId) return
-    void window.restorm?.context.updateFullRequestData(requestId, {
+    if (!requestId) return undefined
+    return window.restorm?.context.updateFullRequestData(requestId, {
       id: requestId,
       requestType: 'odata',
       url: request.url,
@@ -569,6 +595,10 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       odataOperationKind: request.operationKind,
       odataQueryOptions: { ...request.queryOptions }
     } as unknown as Parameters<typeof window.restorm.context.updateFullRequestData>[1], sourceIdRef.current)
+  }, [request])
+
+  useEffect(() => {
+    void pushFullRequestDataToContextService()
   }, [
     request.id,
     request.url,
@@ -576,7 +606,8 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     request.params,
     request.odataVersion,
     request.operationKind,
-    request.queryOptions
+    request.queryOptions,
+    pushFullRequestDataToContextService
   ])
 
   const handleSend = useCallback((): void => {
@@ -590,6 +621,12 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
     // the latest-typed values (we debounce per-field to keep typing
     // responsive; Send must not ship the pre-debounce proxy snapshot).
     flushAllPendingProxyWrites()
+    // The flush mutates the reactive proxy but doesn't reschedule
+    // React renders, so the `useEffect` that propagates queryOptions
+    // to ContextService wouldn't have a chance to run before the
+    // executor reads `getResolvedUrl`. Push directly here so the
+    // wire request always sees the freshly-typed query options.
+    void pushFullRequestDataToContextService()
     setIsSending(true)
     setResponse(null)
 
@@ -706,7 +743,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId } as RequestHistoryEventPayload)
       })
       .finally(() => { setIsSending(false) })
-  }, [isSending, request, requestPath, resolveAuthRequest, flushAllPendingProxyWrites])
+  }, [isSending, request, requestPath, resolveAuthRequest, flushAllPendingProxyWrites, pushFullRequestDataToContextService])
 
   const urlSection = (
     <div style={urlRowStyle} data-testid="odata-request-url-section">

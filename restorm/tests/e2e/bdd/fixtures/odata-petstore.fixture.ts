@@ -3,11 +3,11 @@ import { _electron as electron, type ElectronApplication, type Page, expect } fr
 import { mkdirSync, writeFileSync, rmSync } from 'fs'
 import { join, resolve } from 'path'
 import electronPath from 'electron'
-import { installSystemModalsMockingForE2E } from 'electron-core-ui/testing'
+import { installSystemModalsMockingForE2E, configureNextSaveFileDialogForE2E } from 'electron-core-ui/testing'
 import { withE2ECoverageEnv } from '../../helpers/coverage'
 import { collectBlockingRendererMessages, summariseBlockingMessages } from '../../helpers/renderer-log-guard'
 
-export const ODATA_TYPING_TEMP_DIR = resolve(__dirname, '../../.tmp/odata-typing')
+export const ODATA_PETSTORE_TEMP_DIR = resolve(__dirname, '../../.tmp/odata-petstore')
 const RESTORM_ROOT = resolve(__dirname, '../../../..')
 
 export interface LaunchedApp {
@@ -15,19 +15,19 @@ export interface LaunchedApp {
   page: Page
 }
 
-export interface OdataTypingFixtures {
+export interface OdataPetstoreFixtures {
   restormRoot: string
   launchApp: () => Promise<LaunchedApp>
 }
 
-export const test = base.extend<OdataTypingFixtures>({
+export const test = base.extend<OdataPetstoreFixtures>({
   restormRoot: [RESTORM_ROOT, { option: true }],
 
   launchApp: async ({ restormRoot }, use, testInfo) => {
     const launched: { app: ElectronApplication; logs: string[] }[] = []
 
-    rmSync(ODATA_TYPING_TEMP_DIR, { recursive: true, force: true })
-    mkdirSync(ODATA_TYPING_TEMP_DIR, { recursive: true })
+    rmSync(ODATA_PETSTORE_TEMP_DIR, { recursive: true, force: true })
+    mkdirSync(ODATA_PETSTORE_TEMP_DIR, { recursive: true })
 
     const electronExePath = electronPath as unknown as string
     const mainJsPath = join(restormRoot, 'dist/main/index.js')
@@ -81,7 +81,7 @@ export const test = base.extend<OdataTypingFixtures>({
       return { app, page }
     }
 
-    ;(globalThis as unknown as { __odataTypingLaunched?: typeof launched }).__odataTypingLaunched = launched
+    ;(globalThis as unknown as { __odataPetstoreLaunched?: typeof launched }).__odataPetstoreLaunched = launched
 
     await use(launcher)
 
@@ -122,10 +122,4 @@ export const test = base.extend<OdataTypingFixtures>({
   }
 })
 
-export function currentElectronApp(): ElectronApplication | null {
-  const launched = (globalThis as unknown as { __odataTypingLaunched?: { app: ElectronApplication }[] }).__odataTypingLaunched ?? []
-  const current = launched[launched.length - 1]
-  return current?.app ?? null
-}
-
-export { expect }
+export { expect, configureNextSaveFileDialogForE2E }

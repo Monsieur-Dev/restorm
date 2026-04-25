@@ -26,10 +26,10 @@ const dirtyStateTestDir = defineBddConfig({
   outputDir: '.features-gen/dirty-state'
 })
 
-const odataTypingTestDir = defineBddConfig({
-  features: 'tests/e2e/bdd/odata-typing/features/**/*.feature',
-  steps: ['tests/e2e/bdd/odata-typing/steps/**/*.ts', 'tests/e2e/bdd/fixtures/odata-typing.fixture.ts'],
-  outputDir: '.features-gen/odata-typing'
+const odataPetstoreTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/odata-petstore/features/**/*.feature',
+  steps: ['tests/e2e/bdd/odata-petstore/steps/**/*.ts', 'tests/e2e/bdd/fixtures/odata-petstore.fixture.ts'],
+  outputDir: '.features-gen/odata-petstore'
 })
 
 const authLoginTestDir = defineBddConfig({
@@ -44,20 +44,6 @@ const authModalDebugTestDir = defineBddConfig({
   steps: ['tests/e2e/bdd/auth-modal-debug/steps/**/*.ts', 'tests/e2e/bdd/fixtures/auth-modal-debug.fixture.ts'],
   outputDir: '.features-gen/auth-modal-debug'
 })
-
-// Perf-measurement scenario for the OData / Dynamics import.
-// Opt-in: only registered when `RUN_ODATA_DYNAMICS_PERF=1` is set,
-// since the scenario hits a real Entra + Dynamics endpoint, takes
-// minutes at baseline, and needs a gitignored credentials file
-// (`tests/e2e/fixtures/dynamics-creds.json`).
-const runOdataDynamicsPerf = process.env['RUN_ODATA_DYNAMICS_PERF'] === '1'
-const odataDynamicsImportTestDir = runOdataDynamicsPerf
-  ? defineBddConfig({
-      features: 'tests/e2e/bdd/odata-dynamics-import/features/**/*.feature',
-      steps: ['tests/e2e/bdd/odata-dynamics-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/odata-dynamics-import.fixture.ts'],
-      outputDir: '.features-gen/odata-dynamics-import'
-    })
-  : null
 
 /**
  * Playwright configuration for Electron E2E tests using playwright-bdd.
@@ -109,8 +95,8 @@ export default defineConfig({
       testDir: dirtyStateTestDir
     },
     {
-      name: 'odata-typing',
-      testDir: odataTypingTestDir
+      name: 'odata-petstore',
+      testDir: odataPetstoreTestDir
     },
     {
       name: 'auth-login',
@@ -119,15 +105,6 @@ export default defineConfig({
     {
       name: 'auth-modal-debug',
       testDir: authModalDebugTestDir
-    },
-    ...(odataDynamicsImportTestDir
-      ? [
-          {
-            name: 'odata-dynamics-import',
-            testDir: odataDynamicsImportTestDir,
-            timeout: 10 * 60 * 1000 // 10 min — 10k-route import is slow (baseline)
-          }
-        ]
-      : [])
+    }
   ]
 })
