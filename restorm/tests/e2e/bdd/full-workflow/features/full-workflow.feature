@@ -410,6 +410,25 @@ Feature: Full workflow end-to-end scenario
     When I add a "auth" under the folder "New Folder" via the sidebar Ajouter submenu
     Then the sidebar should contain the request "New auth request"
 
+    # Empty-area sidebar Ajouter submenu — root-level HTTP request,
+    # then verify it shows up in the global search results (regression
+    # for the SearchIndexService bail-out on missing parentFolderId).
+    # The earlier "New Folder" step already created a "New GET request"
+    # nested under it, so we rename the freshly-added root copy to a
+    # unique probe string. Then searching for that probe proves the
+    # ROOT request was indexed (not just the nested one).
+    When I add a root-level "http-get" via the sidebar empty-area Ajouter submenu
+    And I rename the last sidebar request "New GET request" to "RootSearchProbe"
+    Then the sidebar should contain the request "RootSearchProbe"
+    # Persist before searching — the rename above marks the file dirty,
+    # and the close-app step at the very end can't tolerate the unsaved-
+    # changes confirmation dialog (it's intentionally not mocked).
+    When I save the file with Ctrl+S
+    When I open the global search bar
+    And I type "RootSearchProbe" in the global search bar
+    Then a global search result should match "RootSearchProbe"
+    When I close the global search bar
+
     # Ctrl+Alt+Left/Right: send the focused tab to the adjacent group
     # (create a new one on demand). Exercises the 6 canonical layout
     # transitions the shortcut supports. A = "Add a new pet to the store",

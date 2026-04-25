@@ -24,7 +24,7 @@ import { generateUniqueId, cloneItemInTree, removeItemFromTree, insertItemIntoTr
 import type { WorkbenchTree } from 'electron-core-ui/renderer'
 import type { BreadcrumbItem, FolderTab, EnvironmentFolderTab, HTTPRequestTab } from '../../../shared/types/editor'
 import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
-import { DocumentEvents } from '../services/DocumentEvents'
+import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
 import { eventBus } from 'electron-core-ui/renderer'
 import type { AddChildKind } from '../components/MainView/Sidebar/contextMenuBuilder'
 
@@ -347,21 +347,43 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
   }, [t])
 
   const handleAddChildItem = useCallback((parentId: string, kind: AddChildKind) => {
-    // Resolve the parent + its ancestor chain once, up front, so we can
-    // append the new child's breadcrumb locally instead of re-walking
-    // the tree after `setRootItems` (the closure-captured `rootItems`
-    // is pre-update at that point and any concurrent tree mutation
-    // would make a post-push lookup unsound).
-    const parentLookup = findItemWithBreadcrumbs(rootItems, parentId)
-    const parent = parentLookup.item
-    if (!parent || !isAnyFolder(parent)) return
-    const parentBreadcrumbs = parentLookup.breadcrumbs
+    // `parentId === ''` is the ROOT sentinel — used by the empty-area
+    // sidebar context menu so users can add a top-level folder /
+    // request without first creating a parent. For non-root cases we
+    // resolve the parent + its ancestor chain up front and append the
+    // child's breadcrumb locally (the closure-captured `rootItems`
+    // would be pre-update after `setRootItems`).
+    const isRoot = parentId === ''
+    const parentLookup = isRoot
+      ? null
+      : findItemWithBreadcrumbs(rootItems, parentId)
+    const parent = parentLookup?.item ?? null
+    if (!isRoot && (!parent || !isAnyFolder(parent))) return
+    const parentBreadcrumbs = parentLookup?.breadcrumbs ?? []
     const name = defaultNameFor(kind)
     const id = generateUniqueId()
+
+    // Append the reactive item under the right parent. The two arms
+    // are intentionally distinct because they hit different React
+    // signals: a root append goes through `setRootItems` (state set ->
+    // React re-render), a folder append mutates a Proxy-wrapped array
+    // in place, which in turn emits REQUEST/FOLDER_UPDATED via the
+    // array proxy handler — but since `rootItems` itself didn't change
+    // identity, we still need to nudge React with `setRootItems((prev)
+    // => [...prev])` so the sidebar's `.map(rootItems)` re-runs and
+    // picks the new descendant up.
+    const mountChild = (reactive: Folder | Request): void => {
+      if (isRoot) {
+        setRootItems((prev) => [...prev, reactive])
+      } else if (parent && isAnyFolder(parent)) {
+        parent.items.push(reactive)
+      }
+    }
 
     // Build a plain item then wrap it reactive; mirrors the shapes
     // `useImport` produces on import so the save-unit registry /
     // serializer / executors all pick them up without special casing.
+    let pushedItem: Folder | Request
     if (kind === 'folder') {
       const folder: Folder = {
         id,
@@ -372,16 +394,18 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         items: []
       }
       const reactive = makeReactiveFolder(folder)
-      parent.items.push(reactive)
+      mountChild(reactive)
+      pushedItem = reactive
       // Strip the proxy before sending over IPC — `eventBus.emitSync`
       // goes through `structuredClone` which can't ferry Proxy
       // wrappers, and `useImport` follows the same JSON-round-trip
       // pattern to stay safe here.
-      eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
+      const folderPayload: DocumentChangedPayload = {
         id: reactive.id,
         type: 'folder',
         document: JSON.parse(JSON.stringify(reactive)) as Folder
-      })
+      }
+      eventBus.emitSync(DocumentEvents.FOLDER_CREATED, folderPayload)
     } else {
       // The class instances structurally satisfy the structural
       // `Request` union in `shared/types/requests`, but TS's
@@ -413,27 +437,32 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         built = new AuthenticationRequest({ id, name })
       }
       const request = built as Request
-      const reactive = makeReactiveRequest(request, parent.id)
-      parent.items.push(reactive)
-      eventBus.emitSync(DocumentEvents.REQUEST_CREATED, {
+      const resolvedParentId = isRoot
+        ? undefined
+        : (parent && isAnyFolder(parent) ? parent.id : undefined)
+      const reactive = resolvedParentId !== undefined
+        ? makeReactiveRequest(request, resolvedParentId)
+        : makeReactiveRequest(request)
+      mountChild(reactive)
+      pushedItem = reactive
+      const createdPayload: DocumentChangedPayload = {
         id: reactive.id,
         type: 'request',
         document: JSON.parse(JSON.stringify(reactive)) as Request,
-        parentFolderId: parent.id
-      })
+        ...(resolvedParentId !== undefined ? { parentFolderId: resolvedParentId } : {})
+      }
+      eventBus.emitSync(DocumentEvents.REQUEST_CREATED, createdPayload)
     }
 
-    // Mount the new item: expand the parent, select the child, force
-    // a sidebar re-render, and open the new item in the workbench.
-    setExpandedIds((prev) => Array.from(new Set([...prev, parentId])))
+    // Expand the parent (no-op for root), then nudge React with a
+    // `[...prevItems]` snapshot — see the `mountChild` comment above
+    // for why this is needed for the folder path.
+    if (!isRoot) {
+      setExpandedIds((prev) => Array.from(new Set([...prev, parentId])))
+      setRootItems((prevItems) => [...prevItems])
+    }
     setSelectedItemId(id)
-    setRootItems((prevItems) => [...prevItems])
 
-    // Build the new item's breadcrumb chain from the parent chain we
-    // captured before the push. The last entry in `parent.items` is
-    // always the just-pushed child (single-threaded React update).
-    const pushedItem = parent.items[parent.items.length - 1]
-    if (pushedItem === undefined) return
     const newBreadcrumb: BreadcrumbItem = {
       id,
       label: name,
@@ -442,9 +471,9 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     const breadcrumbs = [...parentBreadcrumbs, newBreadcrumb]
     const envs = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
     if (kind === 'folder' && isAnyFolder(pushedItem)) {
-      openFolderTab(pushedItem as Folder, breadcrumbs)
+      openFolderTab(pushedItem, breadcrumbs)
     } else if (!isAnyFolder(pushedItem)) {
-      openAnyRequestTab(pushedItem as Request, breadcrumbs, envs)
+      openAnyRequestTab(pushedItem, breadcrumbs, envs)
     }
   }, [rootItems, setRootItems, setExpandedIds, setSelectedItemId, openFolderTab, openAnyRequestTab, defaultNameFor])
 

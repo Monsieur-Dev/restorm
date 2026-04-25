@@ -598,10 +598,19 @@ class CollectionStore {
   }
 
   private emitRequestUpdated(request: Request): void {
+    // Look up the parent folder so the SearchIndexService can re-key the
+    // search document under the same `navigation.folderId` it used at
+    // CREATE time. Without this, a nested request edited via the GraphQL
+    // mutation path would land in `parentFolderId === undefined`, and
+    // the subscriber's fallback (`payload.parentFolderId ?? payload.id`)
+    // would point search-result navigation at the request itself.
+    // Root-level requests legitimately have no parent — pass undefined.
+    const parent = this.findParentFolder(request.id)
     const payload: DocumentChangedPayload = {
       id: request.id,
       type: 'request',
-      document: request.toPlainObject()
+      document: request.toPlainObject(),
+      ...(parent ? { parentFolderId: parent.id } : {})
     }
     void eventBusService.emit(DocumentEvents.REQUEST_UPDATED, payload)
     pubsub.publish(PUBSUB_TOPICS.REQUEST_UPDATED, request)

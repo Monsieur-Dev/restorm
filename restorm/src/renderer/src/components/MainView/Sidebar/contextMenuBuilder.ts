@@ -57,8 +57,9 @@ export interface BuildContextMenuOptions {
 
 /** Build the "Ajouter" submenu that folders and environment folders
  * expose. Identical contents for both — the caller decides whether to
- * attach it. */
-const buildAddSubmenu = (
+ * attach it. Exported so the sidebar's empty-area context menu can
+ * reuse the same submenu with `parentId === ''` (root sentinel). */
+export const buildAddSubmenu = (
   parentId: string,
   t: TranslateFunction,
   onAddChildItem: AddChildHandler

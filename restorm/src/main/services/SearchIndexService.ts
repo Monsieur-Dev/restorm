@@ -303,9 +303,17 @@ class SearchIndexService {
     this.subscriptions.push(
       eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.REQUEST_CREATED, (payload) => {
         logger.debug('[SearchIndexService] REQUEST_CREATED', { id: payload.id })
-        if (isRequest(payload.document) && payload.parentFolderId) {
+        if (isRequest(payload.document)) {
+          // Root-level requests (created via the empty-area sidebar
+          // context menu, attached auth routes at the top of a
+          // collection, etc.) carry no `parentFolderId`. Mirror the
+          // renderer's `indexRootRequest` shim and key the search
+          // document on the request's own id so the entry still lands
+          // in the index. Without this, search would silently lose
+          // root-level requests on every CREATE / UPDATE.
+          const parentId = payload.parentFolderId ?? payload.id
           searchService.indexDocument(
-            requestToSearchDocument(payload.document, payload.parentFolderId)
+            requestToSearchDocument(payload.document, parentId)
           )
           publishIndexUpdate('indexed', payload.id, 'request')
         }
@@ -315,9 +323,10 @@ class SearchIndexService {
     this.subscriptions.push(
       eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.REQUEST_UPDATED, (payload) => {
         logger.debug('[SearchIndexService] REQUEST_UPDATED', { id: payload.id })
-        if (isRequest(payload.document) && payload.parentFolderId) {
+        if (isRequest(payload.document)) {
+          const parentId = payload.parentFolderId ?? payload.id
           searchService.indexDocument(
-            requestToSearchDocument(payload.document, payload.parentFolderId)
+            requestToSearchDocument(payload.document, parentId)
           )
           publishIndexUpdate('indexed', payload.id, 'request')
         }

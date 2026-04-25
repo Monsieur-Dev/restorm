@@ -1419,6 +1419,7 @@ const App: React.FC = () => {
                 onCollapseAll={() => { setExpandedIds([]) }}
                 onCreateRootFolder={handleCreateRootFolder}
                 onCreateRootEnvironmentFolder={handleCreateRootEnvironmentFolder}
+                onAddChildItem={handleAddChildItem}
                 onDeselectAll={() => { setSelectedItemId(null) }}
               />
             </div>

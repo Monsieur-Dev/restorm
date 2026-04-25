@@ -548,6 +548,26 @@ Then('the home favorites section should not be visible', async () => {
   await expect(section).not.toBeVisible({ timeout: 2000 })
 })
 
+// Same as `rename the sidebar request` but targets the LAST DOM-order
+// row matching the name. Used after `add a root-level …` because the
+// root-level request lands at the bottom of the sidebar tree — picking
+// `.first()` would rename a same-named entry that already lives inside
+// a folder higher up.
+When('I rename the last sidebar request {string} to {string}', async ({}, oldName: string, newName: string) => {
+  if (!page) throw new Error('app must be launched')
+  const row = page.locator('[data-testid="sidebar-listview"] .list-view-row')
+    .filter({ has: page.getByText(oldName, { exact: true }) }).last()
+  await expect(row).toBeVisible({ timeout: 2000 })
+  await row.click()
+  await page.keyboard.press('F2')
+  await page.waitForTimeout(200)
+  const input = page.locator('[data-testid="sidebar-listview"] input[type="text"]').first()
+  await expect(input).toBeVisible({ timeout: 2000 })
+  await clearAndType(page, input, newName)
+  await page.keyboard.press('Enter')
+  await page.waitForTimeout(500)
+})
+
 When('I rename the sidebar request {string} to {string}', async ({}, oldName: string, newName: string) => {
   if (!page) throw new Error('app must be launched')
   const row = page.locator('[data-testid="sidebar-listview"] .list-view-row')
@@ -2012,3 +2032,75 @@ Then(
     await expect(row).toBeVisible({ timeout: 10000 })
   }
 )
+
+When(
+  'I add a root-level {string} via the sidebar empty-area Ajouter submenu',
+  async ({}, kind: string) => {
+    if (!page) throw new Error('app must be launched')
+    const childLabel = ADD_CHILD_LABEL_REGEX[kind]
+    if (!childLabel) throw new Error(`unknown AddChildKind: ${kind}`)
+
+    // Right-click the dedicated filler region below the workspace
+    // tree. `RestormSidebar` mounts a `flex: 1` div tagged with
+    // `sidebar-empty-area-filler` whose only purpose is to absorb
+    // right-clicks for the empty-area context menu — the wrapping
+    // `<div>` listens to `onContextMenu` and bypasses it when the
+    // target sits inside a `.list-view-row`. Targeting the filler
+    // testid avoids any geometry math.
+    const filler = page.locator('[data-testid="sidebar-empty-area-filler"]')
+    await expect(filler).toBeVisible({ timeout: 5000 })
+    await filler.click({ button: 'right', force: true })
+    await page.waitForTimeout(200)
+
+    const addEntry = page
+      .getByRole('menuitem', { name: /^(Add|Ajouter)$/ })
+      .first()
+    await expect(addEntry).toBeVisible({ timeout: 5000 })
+    await addEntry.hover()
+    await page.waitForTimeout(350)
+
+    const submenu = page.locator('.menubar-menu-items-holder:visible').last()
+    const target = submenu
+      .getByRole('menuitem', { name: childLabel })
+      .first()
+    await expect(target).toBeVisible({ timeout: 5000 })
+    await target.evaluate((el) => { (el as HTMLElement).click() })
+    await page.waitForTimeout(150)
+  }
+)
+
+When('I open the global search bar', async () => {
+  if (!page) throw new Error('app must be launched')
+  await page.locator('[data-testid="main-titlebar-searchbar-closed"]').click()
+  await expect(page.locator('[data-testid="main-titlebar-searchbar-inputbox-input"]')).toBeVisible({ timeout: 5000 })
+})
+
+When('I type {string} in the global search bar', async ({}, text: string) => {
+  if (!page) throw new Error('app must be launched')
+  const input = page.locator('[data-testid="main-titlebar-searchbar-inputbox-input"]')
+  await input.fill(text)
+})
+
+Then('a global search result should match {string}', async ({}, needle: string) => {
+  if (!page) throw new Error('app must be launched')
+  const result = page
+    .locator('[data-testid="main-titlebar-searchbar-results"] [data-testid^="main-titlebar-searchbar-result-"]')
+    .filter({ hasText: needle })
+    .first()
+  await expect(result).toBeVisible({ timeout: 10000 })
+})
+
+When('I close the global search bar', async () => {
+  if (!page) throw new Error('app must be launched')
+  // The SearchBar listens for Escape on its open input and animates back
+  // to the closed state. Wait for the closed pill to be visible again so
+  // subsequent clicks (e.g. workbench tabs) aren't intercepted by the
+  // results overlay.
+  const input = page.locator('[data-testid="main-titlebar-searchbar-inputbox-input"]')
+  if (await input.isVisible().catch(() => false)) {
+    await input.press('Escape')
+  }
+  await expect(page.locator('[data-testid="main-titlebar-searchbar-closed"]')).toBeVisible({
+    timeout: 5000
+  })
+})
