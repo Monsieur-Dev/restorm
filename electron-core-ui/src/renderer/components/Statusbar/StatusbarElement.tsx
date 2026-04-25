@@ -27,17 +27,24 @@ const StatusbarElement: React.FC<StatusbarElementProps> = ({
   const elementRef = useRef<HTMLDivElement>(null)
   const tooltipContentRef = useRef<HTMLDivElement | null>(null)
 
+  const hasTooltip = children !== undefined && children !== null
+  const clickMode = tooltipTrigger === 'click'
+
+  // A cell is "clickable" — and therefore renders the pointer cursor —
+  // either because it has a real `onClick`, or because it owns a
+  // click-triggered popover (`children` + `tooltipTrigger="click"`).
+  // The latter mirrors how the env / auth selectors behave: no
+  // `onClick`, but a click on the cell opens their popover.
+  const isInteractive = !disabled && (Boolean(onClick) || (hasTooltip && clickMode))
+
   const elementClasses = [
     'statusbar-item',
     warning && 'warning-kind',
     error && 'error-kind',
     disabled && 'statusbar-item--disabled',
-    onClick && !disabled && 'clickable',
+    isInteractive && 'clickable',
     className
   ].filter(Boolean).join(' ')
-
-  const hasTooltip = children !== undefined && children !== null
-  const clickMode = tooltipTrigger === 'click'
 
   const handleMouseEnter = (): void => {
     if (!hasTooltip || clickMode) return
