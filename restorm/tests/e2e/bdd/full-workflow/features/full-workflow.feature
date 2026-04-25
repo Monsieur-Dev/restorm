@@ -282,7 +282,6 @@ Feature: Full workflow end-to-end scenario
     # depends on which group the reopened tab landed in.
     When I right-click the tab "Find pet by ID" and choose close-others
     Then exactly 3 workbench tabs should be open
-    When I snapshot the current window as the final screenshot
 
     When I save the file with Ctrl+S
     When I close the current file

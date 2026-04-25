@@ -59,12 +59,8 @@ Then('the auth setup modal content fits inside the modal frame', async () => {
   const authModal = page.locator('[data-testid="authentication-setup-modal"]')
   await expect(authModal).toBeVisible({ timeout: 2000 })
 
-  // Persist artefacts at a stable path so they're easy to open from
-  // Claude's side for iteration. Full-page viewport screenshot +
-  // per-element bounding boxes, compared against the modal bottom.
+  // Per-element bounding boxes, compared against the modal bottom.
   mkdirSync(AUTH_DEBUG_TEMP_DIR, { recursive: true })
-  const shotPath = join(AUTH_DEBUG_TEMP_DIR, 'auth-modal-small.png')
-  await page.screenshot({ path: shotPath, fullPage: false })
 
   const diagnostics = await page.evaluate(() => {
     const byTestId = (id: string): DOMRect | null => {

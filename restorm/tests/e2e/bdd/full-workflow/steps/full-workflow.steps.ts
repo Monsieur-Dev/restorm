@@ -1,5 +1,5 @@
 import { createBdd } from 'playwright-bdd'
-import { existsSync, mkdirSync, readFileSync } from 'fs'
+import { existsSync, readFileSync } from 'fs'
 import { join, resolve } from 'path'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
 import { configureNextOpenDialogForE2E, configureNextSaveFileDialogForE2E } from 'electron-core-ui/testing'
@@ -89,23 +89,6 @@ When(
 
 When('I close the app', async () => {
   if (!app) throw new Error('app must be launched before closing')
-
-  // Snapshot the app's final state before we tear down the window, unless
-  // a previous step (e.g. the yellow-tag verification) already recorded
-  // the scenario's "final screenshot" — we don't want to overwrite it.
-  if (page) {
-    try {
-      const testInfo = test.info()
-      mkdirSync(testInfo.outputDir, { recursive: true })
-      const shotPath = join(testInfo.outputDir, 'end-state.png')
-      if (!existsSync(shotPath)) {
-        await page.screenshot({ path: shotPath, fullPage: true })
-        await testInfo.attach('end-state-screenshot', { path: shotPath, contentType: 'image/png' })
-      }
-    } catch {
-      // Best-effort — never fail the scenario on screenshot issues.
-    }
-  }
 
   await app.evaluate(({ BrowserWindow }) => {
     const win = BrowserWindow.getAllWindows()[0]
@@ -1636,15 +1619,6 @@ When('I close every open tab in the workbench', async () => {
     await expect(tabLocator).toHaveCount(count - 1, { timeout: 5000 })
   }
   throw new Error('Failed to close all tabs after 50 attempts')
-})
-
-When('I snapshot the current window as the final screenshot', async () => {
-  if (!page) throw new Error('app must be launched')
-  const testInfo = test.info()
-  mkdirSync(testInfo.outputDir, { recursive: true })
-  const shotPath = join(testInfo.outputDir, 'end-state.png')
-  await page.screenshot({ path: shotPath, fullPage: true })
-  await testInfo.attach('end-state-screenshot', { path: shotPath, contentType: 'image/png' })
 })
 
 When('I add tag {string} to the active folder tab', async ({}, tagName: string) => {

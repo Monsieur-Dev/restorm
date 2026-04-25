@@ -172,24 +172,7 @@ export const test = base.extend<FullWorkflowFixtures>({
     await use(launcher)
 
     // Teardown: attach logs for each launched app and kill the process.
-    // If the test failed, also snapshot the current window — useful when
-    // a `Then` step times out before reaching the next explicit screenshot.
     mkdirSync(testInfo.outputDir, { recursive: true })
-    if (testInfo.status !== 'passed') {
-      const last = launched[launched.length - 1]
-      if (last) {
-        try {
-          const p = await last.app.firstWindow().catch(() => null)
-          if (p) {
-            const shotPath = join(testInfo.outputDir, 'failure-state.png')
-            await p.screenshot({ path: shotPath, fullPage: true })
-            await testInfo.attach('failure-state-screenshot', { path: shotPath, contentType: 'image/png' })
-          }
-        } catch {
-          // ignore — best effort
-        }
-      }
-    }
 
     // Collect blocking renderer errors across every app instance so a
     // scenario that secretly emits `Maximum update depth exceeded` /
