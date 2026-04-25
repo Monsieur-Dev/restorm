@@ -265,6 +265,11 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       params: toKeyValueData(currentRequest.params),
       pathParams: currentRequest.pathParams ? toKeyValueData(currentRequest.pathParams) : []
     })
+    // Tell main which envs are visible to this request — used by the
+    // auth-resolver so a child auth can inherit the calling request's
+    // env when it's also valid for the auth route.
+    const initialAvailable = environmentsRef.current?.map((e) => e.id) ?? []
+    void window.restorm?.context.setAvailableEnvironments(requestId, initialAvailable)
 
     previousEnvIdRef.current = currentEnvId ?? null
 
@@ -293,6 +298,16 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       previousEnvIdRef.current = currentEnvId
     }
   }, [selectedEnvId, environments, request.id])
+
+  // Push the in-scope env IDs whenever the env tree changes. The
+  // auth-resolver consults this set to decide whether to inherit the
+  // calling request's env.
+  useEffect(() => {
+    const requestId = request.id
+    if (!requestId) return
+    const ids = environments?.map((e) => e.id) ?? []
+    void window.restorm?.context.setAvailableEnvironments(requestId, ids)
+  }, [environments, request.id])
 
   // Sync method changes to reactive object
   useEffect(() => {

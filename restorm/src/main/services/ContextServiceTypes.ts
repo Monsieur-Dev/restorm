@@ -117,6 +117,13 @@ export interface FullRequestData {
 export interface RequestContext {
   /** Selected environment ID (null if no environment) */
   environmentId: string | null
+  /**
+   * Environment IDs that are visible to this request through its
+   * env-folder ancestor chain. Used by the auth-resolver so it can
+   * inherit the calling request's env when that env is also valid
+   * for the auth route. Empty when the request hasn't been told yet.
+   */
+  availableEnvironmentIds: string[]
   /** Request KeyValues to transform (headers, params, pathParams, etc.) */
   keyValueGroups: Map<string, KeyValue[]>
   /** Full request data for URL and code snippet generation */

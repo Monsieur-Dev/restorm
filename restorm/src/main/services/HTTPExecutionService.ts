@@ -411,20 +411,50 @@ class HTTPExecutionService {
   ): Promise<HTTPExecutionResult> {
     const startTime = Date.now()
     const startedAt = new Date().toISOString()
-    // Prefer the ContextService-resolved URL when the auth request
-    // has been registered (its config tab was mounted at some point
-    // this session). Otherwise we have to resolve handlebars against
-    // *something* or `new URL('{{baseUrl}}/oauth/token')` crashes:
-    // first try the auth's own context (works if registered but the
-    // resolved URL isn't cached yet), then fall back to the parent
-    // request's context — we know it has an environment because it
-    // reached this code path from a registered outer dispatch.
-    const authUrlResult = contextService.getResolvedUrl(authRequest.id)
+    // Choose which env-context resolves auth handlebars / URL / body.
+    //
+    // Default: the auth route's own context (its tab's selected env).
+    // Override: when the *parent* request's selected env is ALSO in
+    // the auth route's `availableEnvironmentIds` — i.e. visible to
+    // the auth route through its env-folder hierarchy — we use the
+    // parent's env instead. This lets a request with env "Valid"
+    // drive an auth route pinned to "Invalid" (sibling env in the
+    // same tree) and have the auth pick up "Valid" because it's
+    // available to both. Without this, the auth route's pinned env
+    // would always win and you'd authenticate against the wrong
+    // credentials whenever the calling request used a different env.
+    //
+    // The fall-through to `parentRequestId` (when the auth request
+    // was never registered — import-wizard path) stays as before:
+    // `inheritParentEnv` becomes the only path that resolves the
+    // auth values in that case.
+    const authCtxForEnv = contextService.getRequestContext(authRequest.id)
+    const parentCtxForEnv = parentRequestId
+      ? contextService.getRequestContext(parentRequestId)
+      : undefined
+    const parentEnvIdForAuth = parentCtxForEnv?.environmentId ?? null
+    const inheritParentEnv =
+      parentEnvIdForAuth !== null &&
+      !!authCtxForEnv &&
+      authCtxForEnv.availableEnvironmentIds.includes(parentEnvIdForAuth)
+    const resolutionRequestId = inheritParentEnv && parentRequestId
+      ? parentRequestId
+      : authRequest.id
+
+    // Prefer the ContextService-resolved URL when it matches the env
+    // we're going to resolve against — i.e. only when the auth route
+    // owns the resolution. When inheriting the parent's env we have
+    // to re-resolve the raw `authRequest.url` against the parent's
+    // context; the cached resolved URL was minted with a different
+    // env and would point at the wrong host / path / params.
+    const authUrlResult = inheritParentEnv
+      ? undefined
+      : contextService.getResolvedUrl(authRequest.id)
     let resolvedUrl: string
     if (authUrlResult) {
       resolvedUrl = authUrlResult.resolvedUrl
-    } else if (contextService.getRequestContext(authRequest.id)) {
-      resolvedUrl = contextService.resolveValue(authRequest.url, authRequest.id)
+    } else if (contextService.getRequestContext(resolutionRequestId)) {
+      resolvedUrl = contextService.resolveValue(authRequest.url, resolutionRequestId)
     } else if (parentRequestId && contextService.getRequestContext(parentRequestId)) {
       resolvedUrl = contextService.resolveValue(authRequest.url, parentRequestId)
     } else {
@@ -453,13 +483,15 @@ class HTTPExecutionService {
     // Build headers — ContextService for the registered path,
     // raw auth-request headers otherwise.
     const headers: Record<string, string> = {}
-    const authCtx = contextService.getRequestContext(authRequest.id)
-    // When the auth tab was never mounted this session the auth
-    // request isn't registered; resolve handlebars against the
-    // parent request's environment instead of returning the raw
-    // template text — same rationale as the URL branch above.
+    const authCtx = authCtxForEnv
+    // Resolve against `resolutionRequestId` (auth's own env normally,
+    // parent's env when inheritance is on). Fall back to parent's
+    // context when neither auth nor the resolution request is
+    // registered (import-wizard path).
     const resolveForAuth = (value: string): string => {
-      if (authCtx) return contextService.resolveValue(value, authRequest.id)
+      if (contextService.getRequestContext(resolutionRequestId)) {
+        return contextService.resolveValue(value, resolutionRequestId)
+      }
       if (parentRequestId && contextService.getRequestContext(parentRequestId)) {
         return contextService.resolveValue(value, parentRequestId)
       }
@@ -495,13 +527,13 @@ class HTTPExecutionService {
     if (authCtx?.fullData?.body) {
       const bodyData = authCtx.fullData.body
       if (bodyData.type === 'text') {
-        body = contextService.resolveValue(bodyData.content, authRequest.id)
+        body = contextService.resolveValue(bodyData.content, resolutionRequestId)
       } else if (bodyData.type === 'x-www-form-urlencoded') {
         const params = new URLSearchParams()
         for (const field of bodyData.fields) {
           if (!field.key) continue
-          const k = contextService.resolveValue(field.key, authRequest.id)
-          const v = contextService.resolveValue(field.value, authRequest.id)
+          const k = contextService.resolveValue(field.key, resolutionRequestId)
+          const v = contextService.resolveValue(field.value, resolutionRequestId)
           params.append(k, v)
         }
         body = params.toString()

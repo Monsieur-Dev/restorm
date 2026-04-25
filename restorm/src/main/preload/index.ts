@@ -209,6 +209,11 @@ contextBridge.exposeInMainWorld('restorm', {
     setRequestEnvironment: async (requestId: string, environmentId: string | null): Promise<void> => {
       await ipcRenderer.invoke('context:set-request-environment', requestId, environmentId)
     },
+    /** Tell the main side which env IDs are visible to a request through
+     * its env-folder ancestor chain — used by the auth-resolver. */
+    setAvailableEnvironments: async (requestId: string, environmentIds: string[]): Promise<void> => {
+      await ipcRenderer.invoke('context:set-available-environments', requestId, environmentIds)
+    },
     /** Update KeyValues for a request (headers, params, etc.) */
     updateRequestKeyValues: async (
       requestId: string,

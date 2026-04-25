@@ -147,6 +147,7 @@ function ensureRestormWebShim(): void {
       registerRequest: () => Promise.resolve(),
       unregisterRequest: () => Promise.resolve(),
       setRequestEnvironment: () => Promise.resolve(),
+      setAvailableEnvironments: () => Promise.resolve(),
       updateRequestKeyValues: () => Promise.resolve(),
       updateFullRequestData: () => Promise.resolve(),
       getResolvedUrl: () => Promise.resolve(undefined),

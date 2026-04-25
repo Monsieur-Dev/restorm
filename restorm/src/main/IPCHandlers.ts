@@ -24,7 +24,8 @@ import {
   openPathArgs,
   projectReadFileArgs,
   contextRegisterRequestArgs, contextUnregisterRequestArgs,
-  contextSetRequestEnvironmentArgs, contextUpdateRequestKeyValuesArgs,
+  contextSetRequestEnvironmentArgs, contextSetAvailableEnvironmentsArgs,
+  contextUpdateRequestKeyValuesArgs,
   contextUpdateFullRequestDataArgs, contextGetResolvedUrlArgs,
   contextGetCodeSnippetsArgs,
   requestResolveUrlArgs,
@@ -513,6 +514,10 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('context:unregister-request', contextUnregisterRequestArgs, (_event, [requestId]) => {
     contextService.unregisterRequest(requestId)
+  })
+
+  validatedHandle('context:set-available-environments', contextSetAvailableEnvironmentsArgs, (_event, [requestId, environmentIds]) => {
+    contextService.setAvailableEnvironments(requestId, environmentIds)
   })
 
   validatedHandle('context:set-request-environment', contextSetRequestEnvironmentArgs, (_event, [requestId, environmentId]) => {

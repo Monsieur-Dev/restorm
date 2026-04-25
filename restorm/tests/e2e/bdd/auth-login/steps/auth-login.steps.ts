@@ -469,6 +469,41 @@ Then('the pet response body should still contain {string}', async ({}, expected:
   await expect(p.locator('[data-testid="http-response-body-editor"]:visible')).toContainText(expected, { timeout: 15000 })
 })
 
+When('I focus the {string} request tab', async ({}, tabName: string) => {
+  const p = requirePage()
+  const tab = p
+    .locator('[role="tab"]')
+    .filter({ has: p.getByText(tabName, { exact: true }) })
+    .first()
+  await expect(tab).toBeVisible({ timeout: 5000 })
+  await tab.click()
+  // Give the workbench a moment to flip the active-tab modifier so
+  // the statusbar env selector reflects the newly-focused tab's env.
+  await p.waitForTimeout(150)
+})
+
+When(
+  'I select the {string} environment for the active tab without apply-to-all',
+  async ({}, envName: string) => {
+    const p = requirePage()
+    await p.locator('[data-testid="statusbar-env-selector"]').click()
+    const popover = p.locator('[data-testid="statusbar-env-selector-listview"]')
+    await expect(popover).toBeVisible({ timeout: 5000 })
+    // Uncheck apply-to-all if checked — we want the env to land only
+    // on the focused tab. The checkbox is checked by default.
+    const applyToAll = popover.locator('[data-testid="statusbar-env-selector-apply-to-all-input"]')
+    if (await applyToAll.isChecked()) {
+      await applyToAll.click()
+    }
+    await popover
+      .locator('[role="option"]')
+      .filter({ has: p.getByText(envName, { exact: true }) })
+      .first()
+      .click()
+    await p.waitForTimeout(200)
+  }
+)
+
 When(
   'I switch the active environment to the {string} sub-env with apply-to-all',
   async ({}, subEnvName: string) => {
@@ -477,9 +512,13 @@ When(
     await p.locator('[data-testid="statusbar-env-selector"]').click()
     const popover = p.locator('[data-testid="statusbar-env-selector-listview"]')
     await expect(popover).toBeVisible({ timeout: 5000 })
-    // The "Apply to all" checkbox is checked by default — assert that
-    // and leave it alone (clicking would un-check it).
+    // Make sure "Apply to all" is checked — earlier steps in the
+    // scenario may have toggled it off to set per-tab envs. Re-checking
+    // is a no-op when it was already on.
     const applyToAll = popover.locator('[data-testid="statusbar-env-selector-apply-to-all-input"]')
+    if (!(await applyToAll.isChecked())) {
+      await applyToAll.click()
+    }
     await expect(applyToAll).toBeChecked()
     // Click the env item by visible name. `[role="option"]` filters to
     // the env rows (skipping the apply-to-all label).
