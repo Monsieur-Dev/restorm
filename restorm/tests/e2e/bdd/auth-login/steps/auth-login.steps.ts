@@ -508,15 +508,16 @@ Then('an authentication-failure toast should appear with a link to the auth rout
   const p = requirePage()
   // Toast renders inside the global `app` toaster. Wait for our
   // dedicated body wrapper to mount, then verify the open-link is
-  // present, then snapshot the visible state to a stable path so the
+  // present, then attach a snapshot to the Playwright report so the
   // operator can inspect it after the run.
   const toast = p.locator('[data-testid="auth-failure-toast"]:visible').first()
   await expect(toast).toBeVisible({ timeout: 15000 })
   await expect(p.locator('[data-testid="auth-failure-toast-open-link"]:visible').first()).toBeVisible()
 
-  await p.screenshot({
-    path: '/tmp/auth-failure-toast.png',
-    fullPage: false
+  const buffer = await p.screenshot({ fullPage: false })
+  await test.info().attach('auth-failure-toast', {
+    body: buffer,
+    contentType: 'image/png'
   })
 })
 
