@@ -58,6 +58,33 @@ export interface SplitViewPaneProps {
   id?: string;
   title?: React.ReactNode;
   /**
+   * Optional actions area rendered on the right side of the header.
+   * Either a ReactNode or a render function receiving `{ collapsed, toggle }`.
+   * Hidden by default, revealed on pane hover — see `alwaysShowHeaderActions`
+   * to opt out of that behavior.
+   */
+  headerActions?: React.ReactNode | ((ctx: { collapsed: boolean; toggle: () => void }) => React.ReactNode);
+  /**
+   * Force the header actions to stay visible instead of the default
+   * hover-reveal. Useful when the only way to add a row to a pane is
+   * that action button and the user would never hover to discover it.
+   * Defaults to false.
+   */
+  alwaysShowHeaderActions?: boolean;
+  /**
+   * Whether this pane can be collapsed from its header. Defaults to true.
+   */
+  collapsible?: boolean;
+  /**
+   * Initial collapsed state when the SplitView mounts.
+   */
+  defaultCollapsed?: boolean;
+  /**
+   * Optional controlled collapsed state. When provided, it will be used
+   * as the initial collapsed value for this pane (for now). Defaults to false.
+   */
+  collapsed?: boolean;
+  /**
    * Minimum size in pixels for this pane.
    */
   minSize?: number;
@@ -75,6 +102,8 @@ export interface SplitViewPaneProps {
 ```
 
 > `Pane` is declarative only: it does not render DOM itself, `SplitView` inspects its children and builds the layout.
+
+**Header actions visibility** — by default, the `headerActions` area fades in only while the user hovers the pane. Set `alwaysShowHeaderActions` to `true` when the action is the sole affordance for a common task (e.g. a "+" that adds a row to the body) and hover-reveal would hide it from discovery.
 
 ## Behavior
 

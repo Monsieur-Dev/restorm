@@ -8,6 +8,8 @@ import type {
   GrpcRequest,
   SoapRequest,
   WebSocketRequest,
+  ODataRequest,
+  AuthenticationRequest,
   Environment
 } from './collections'
 
@@ -85,6 +87,24 @@ export interface WebSocketRequestTab extends BaseRestormTab {
   environments?: Environment[] | undefined
 }
 
+/** Tab displaying an OData request */
+export interface ODataRequestTab extends BaseRestormTab {
+  tabType: 'odata-request'
+  /** The OData request data to display */
+  request: ODataRequest
+  /** Environments available for this request */
+  environments?: Environment[] | undefined
+}
+
+/** Tab displaying an Authentication request (HTTP + auth config tab) */
+export interface AuthenticationRequestTab extends BaseRestormTab {
+  tabType: 'auth-request'
+  /** The authentication request data to display */
+  request: AuthenticationRequest
+  /** Environments available for this request */
+  environments?: Environment[] | undefined
+}
+
 /** Legacy tab type for backward compatibility */
 export interface LegacyTab extends BaseRestormTab {
   tabType?: undefined
@@ -92,14 +112,16 @@ export interface LegacyTab extends BaseRestormTab {
 }
 
 /** Union of all restorm tab types */
-export type RestormEditorTab = 
-  | FolderTab 
-  | EnvironmentFolderTab 
-  | HTTPRequestTab 
-  | GraphQLRequestTab 
-  | GrpcRequestTab 
-  | SoapRequestTab 
-  | WebSocketRequestTab 
+export type RestormEditorTab =
+  | FolderTab
+  | EnvironmentFolderTab
+  | HTTPRequestTab
+  | GraphQLRequestTab
+  | GrpcRequestTab
+  | SoapRequestTab
+  | WebSocketRequestTab
+  | ODataRequestTab
+  | AuthenticationRequestTab
   | LegacyTab
 
 /** @deprecated Use RestormEditorTab instead */
@@ -138,4 +160,14 @@ export function isSoapRequestTab(tab: RestormEditorTab): tab is SoapRequestTab {
 /** Type guard for WebSocketRequestTab */
 export function isWebSocketRequestTab(tab: RestormEditorTab): tab is WebSocketRequestTab {
   return tab.tabType === 'websocket-request'
+}
+
+/** Type guard for ODataRequestTab */
+export function isODataRequestTab(tab: RestormEditorTab): tab is ODataRequestTab {
+  return tab.tabType === 'odata-request'
+}
+
+/** Type guard for AuthenticationRequestTab */
+export function isAuthenticationRequestTab(tab: RestormEditorTab): tab is AuthenticationRequestTab {
+  return tab.tabType === 'auth-request'
 }

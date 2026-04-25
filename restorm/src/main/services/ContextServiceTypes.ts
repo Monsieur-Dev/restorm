@@ -59,7 +59,7 @@ export type HTTPRequestBody =
 /** Full request data for URL resolution and code snippet generation */
 export interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth'
 
   // Common fields
   url: string
@@ -93,12 +93,37 @@ export interface FullRequestData {
   protocol?: string
   event?: string
   message?: string
+
+  // OData specific — carried verbatim through URLResolver, which
+  // appends the system query options ($filter / $select / $top /
+  // $skip / $count) to the resolved URL as a final step.
+  odataVersion?: 'v2' | 'v3' | 'v4'
+  odataOperationKind?: 'entity-set' | 'function' | 'action' | 'batch'
+  odataQueryOptions?: {
+    filter?: string
+    select?: string[]
+    top?: string
+    skip?: string
+    count?: boolean
+    expand?: string
+    orderby?: string
+    search?: string
+    format?: string
+    apply?: string
+  }
 }
 
 /** Request context tracking with full data */
 export interface RequestContext {
   /** Selected environment ID (null if no environment) */
   environmentId: string | null
+  /**
+   * Environment IDs that are visible to this request through its
+   * env-folder ancestor chain. Used by the auth-resolver so it can
+   * inherit the calling request's env when that env is also valid
+   * for the auth route. Empty when the request hasn't been told yet.
+   */
+  availableEnvironmentIds: string[]
   /** Request KeyValues to transform (headers, params, pathParams, etc.) */
   keyValueGroups: Map<string, KeyValue[]>
   /** Full request data for URL and code snippet generation */

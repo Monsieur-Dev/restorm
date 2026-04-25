@@ -64,16 +64,6 @@ export const test = base.extend<SwaggerImportFixtures>({
     const blockingErrors: string[] = []
     for (const { app, logs } of apps) {
       blockingErrors.push(...collectBlockingRendererMessages(logs))
-      if (testInfo.status !== 'passed') {
-        try {
-          const p = await app.firstWindow().catch(() => null)
-          if (p) {
-            const shot = join(testInfo.outputDir, 'failure-state.png')
-            await p.screenshot({ path: shot, fullPage: true })
-            await testInfo.attach('failure-state-screenshot', { path: shot, contentType: 'image/png' })
-          }
-        } catch { /* ignore */ }
-      }
       try {
         if (logs.length > 0) {
           const logFile = join(testInfo.outputDir, 'electron-logs.txt')

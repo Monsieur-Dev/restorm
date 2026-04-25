@@ -54,6 +54,33 @@ export interface KeyValueTableProps {
   renderValueCell?: React.ComponentType<CellRendererProps>
   /** Custom renderer for description cells. Defaults to InputBox. */
   renderDescriptionCell?: React.ComponentType<CellRendererProps>
+  /**
+   * Whether the Description column is rendered. Defaults to `true`.
+   * Hide it when descriptions aren't meaningful for the use-case
+   * (e.g. a short auth-config table where the rows are obvious).
+   */
+  showDescription?: boolean
+  /**
+   * Whether to render an extra read-only "Resolved value" column
+   * between Value and Description. Useful when the raw value is a
+   * template (handlebars, variable expressions) and the caller wants
+   * to show its evaluated form side-by-side. Defaults to `false`.
+   */
+  showResolvedValue?: boolean
+  /**
+   * Custom renderer for the resolved-value cell. Receives the raw
+   * `value` plus a no-op `onChange` — the cell is read-only. When
+   * omitted, the raw value is echoed verbatim. Only used when
+   * `showResolvedValue` is `true`.
+   */
+  renderResolvedValueCell?: React.ComponentType<CellRendererProps>
+  /**
+   * Whether the leading enabled-toggle column is rendered. Defaults
+   * to `true`. Set to `false` when every row is unconditionally
+   * active and the toggle would be misleading (e.g. an auth route's
+   * produced-headers table).
+   */
+  showEnabledToggle?: boolean
 }
 
 export interface KeyValueTableHandle {
@@ -115,7 +142,8 @@ If you pass `data-testid` (e.g. `headers-table`), the component exposes stable h
 - Cell InputBox ids (so you can reuse `InputBox` selectors/steps):
   - key: `{tableId}-row-{rowId}-key`
   - value: `{tableId}-row-{rowId}-value`
-  - description: `{tableId}-row-{rowId}-description`
+  - resolved value (when `showResolvedValue`): `{tableId}-row-{rowId}-resolved-value`
+  - description (when `showDescription !== false`): `{tableId}-row-{rowId}-description`
 
 ### Selectors (`electron-core-ui/testing`)
 

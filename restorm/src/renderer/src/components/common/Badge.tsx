@@ -15,6 +15,10 @@ export type BadgeType =
   | 'SOAP'
   // WebSocket protocols
   | 'WS' | 'MQTT' | 'SIO'
+  // OData
+  | 'ODATA'
+  // Authentication
+  | 'AUTH'
 
 export interface BadgeProps {
   /** The type of badge - determines styling */
@@ -29,9 +33,19 @@ export interface BadgeProps {
  * A unified badge component for displaying protocol/method indicators
  */
 export const Badge: React.FC<BadgeProps> = ({ type, label, className }) => {
-  const displayText = label ?? type
   const typeClass = `badge-${type.toLowerCase().replace('-', '')}`
-  
+
+  // Auth badges display an icon instead of text: the codicon-key
+  // glyph is more recognisable than a three-letter acronym.
+  if (type === 'AUTH') {
+    return (
+      <span className={`badge ${typeClass} ${className ?? ''}`} aria-label={label ?? 'Authentication request'}>
+        <i className="codicon codicon-key" aria-hidden="true" />
+      </span>
+    )
+  }
+
+  const displayText = label ?? type
   return (
     <span className={`badge ${typeClass} ${className ?? ''}`}>
       {displayText}

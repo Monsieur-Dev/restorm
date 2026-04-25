@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  IconView,
+  Button,
   StatusbarElement,
   getContrastColor
 } from 'electron-core-ui/renderer'
@@ -87,45 +87,49 @@ const EnvPopoverList: React.FC<EnvPopoverProps> = ({ rows, selectedEnvId, applyT
         gap: 2
       }}
     >
+      {/* Each row is an ECUI Button stretched full-width via the
+          `fullWidth` prop, with the env's tinted gradient applied
+          directly to the button surface via `backgroundColor` so the
+          color belongs to the button (not a wrapper halo). The
+          `<div role="option">` wrapper only carries the listbox a11y
+          pattern — Button doesn't propagate arbitrary `role` attrs. */}
       {rows.map(({ env, depth }) => {
         const bg = env.color ?? DEFAULT_ENV_COLOR
         const fg = getContrastColor(bg)
         const isSelected = env.id === selectedEnvId
         return (
-          <button
+          <div
             key={env.id}
-            type="button"
             role="option"
             aria-selected={isSelected}
             data-testid={`statusbar-env-selector-item-${env.id}`}
-            onClick={(): void => { onSelect(env.id) }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              marginLeft: depth * 16,
-              padding: '4px 8px',
-              border: 'none',
-              borderRadius: 3,
-              background: envGradient(bg),
-              color: fg,
-              cursor: 'pointer',
-              textAlign: 'left',
-              fontSize: 12,
-              lineHeight: 1.3,
-              outline: isSelected ? '1px solid var(--focusBorder)' : 'none',
-              outlineOffset: isSelected ? -2 : 0
-            }}
+            style={{ marginLeft: depth * 16 }}
           >
-            {env.icon && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', width: 14, height: 14, flexShrink: 0 }}>
-                <IconView icon={env.icon} size={14} />
+            <Button
+              fullWidth
+              secondary
+              small
+              line
+              align="left"
+              backgroundColor={envGradient(bg)}
+              {...(env.icon ? { icon: env.icon } : {})}
+              onClick={(): void => { onSelect(env.id) }}
+              style={{
+                color: fg,
+                // The `small line` variants set `padding: 0` so the text
+                // would butt up against the button's left edge — pad
+                // 8px in by hand for a comfortable read.
+                paddingLeft: 8,
+                paddingRight: 8,
+                outline: isSelected ? '1px solid var(--focusBorder)' : 'none',
+                outlineOffset: isSelected ? -2 : 0
+              }}
+            >
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {env.name}
               </span>
-            )}
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {env.name}
-            </span>
-          </button>
+            </Button>
+          </div>
         )
       })}
       {/* "Apply to all" toggle — OYO-196. Checked by default: writes
@@ -171,6 +175,12 @@ export interface StatusbarEnvironmentSelectorProps {
    * override cleanup above. Optional because the store itself
    * no-ops when it's missing (in-memory-only mode). */
   projectUuid?: string | null
+  /** When true (default), the StatusbarElement carries the
+   * `right-aligned` class. App.tsx flips this off when an upstream
+   * status-bar entry (e.g. the auth selector) already takes that
+   * role — only the leftmost-of-the-right group needs the auto
+   * margin, the rest follow naturally. */
+  rightAligned?: boolean
 }
 
 /**
@@ -183,7 +193,8 @@ export interface StatusbarEnvironmentSelectorProps {
  */
 export const StatusbarEnvironmentSelector: React.FC<StatusbarEnvironmentSelectorProps> = ({
   folderRequestIds,
-  projectUuid
+  projectUuid,
+  rightAligned = true
 }) => {
   const { t } = useTranslation()
   const {
@@ -233,7 +244,7 @@ export const StatusbarEnvironmentSelector: React.FC<StatusbarEnvironmentSelector
   return (
     <StatusbarElement
       data-testid="statusbar-env-selector"
-      className="right-aligned"
+      className={rightAligned ? 'right-aligned' : ''}
       {...(selectedEnvironment?.icon ? { icon: selectedEnvironment.icon } : {})}
       backgroundColor={effectiveColor}
       title={selectedName}

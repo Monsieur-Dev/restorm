@@ -9,13 +9,34 @@ import { URL } from 'url'
 import { BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
+import { authenticationCacheService } from './AuthenticationCacheService'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../shared/config/constants'
+import type { AuthenticationRequest } from '../../shared/models/requests/AuthenticationRequest'
 
 /** HTTP request execution input */
 export interface HTTPExecutionInput {
   requestId: string
   method: string
   timeout?: number
+  /** Optional raw request body override. When provided, bypasses the
+   * ContextService-built body entirely — used by the OData engine to
+   * dispatch action invocations with a caller-supplied JSON payload. */
+  rawBody?: string
+  /** Optional Content-Type to set alongside `rawBody`. */
+  rawBodyContentType?: string
+  /** Optional URL override. When provided, the URL is used as-is and
+   * the ContextService's resolved URL + query-option composition is
+   * skipped entirely. Headers + body still come from the registered
+   * request context. Used for "follow link" operations like
+   * `@odata.nextLink` pagination where the server already composed
+   * the full URL. */
+  urlOverride?: string
+  /** Optional authentication request whose produced headers are
+   * fetched (via the main-process cache) and merged into this
+   * request's headers before dispatch. When the downstream call
+   * completes with a status listed in `authRequest.authErrorCodes`,
+   * the cache is invalidated and the call is retried once. */
+  authRequest?: AuthenticationRequest
 }
 
 /** HTTP response result */
@@ -32,6 +53,10 @@ export interface HTTPExecutionResult {
     durationMs: number
   }
   requestUrl?: string
+  /** Headers actually sent with the request, after auth injection.
+   * Surfaced so the renderer's response panel can show the auth
+   * headers that were merged in at dispatch time. */
+  requestHeaders?: Record<string, string>
 }
 
 /** Active request info */
@@ -51,22 +76,28 @@ class HTTPExecutionService {
    * Execute an HTTP request using the resolved URL and data from ContextService
    */
   async execute(input: HTTPExecutionInput): Promise<HTTPExecutionResult> {
-    const { requestId, method, timeout = DEFAULT_REQUEST_TIMEOUT_MS } = input
+    const { requestId, method, timeout = DEFAULT_REQUEST_TIMEOUT_MS, rawBody, rawBodyContentType, urlOverride, authRequest } = input
     const startTime = Date.now()
     const startedAt = new Date().toISOString()
 
-    // Get resolved URL from ContextService
-    const urlResult = contextService.getResolvedUrl(requestId)
-    if (!urlResult) {
-      return {
-        requestId,
-        success: false,
-        error: 'No resolved URL found for this request. Make sure the request is registered.',
-        timings: { startedAt, durationMs: Date.now() - startTime }
+    let resolvedUrl: string
+    if (urlOverride !== undefined && urlOverride !== '') {
+      // Skip the ContextService URL composition: the caller already
+      // has a fully-formed URL (server-returned nextLink, navigation
+      // link, etc.) and we must dispatch it verbatim.
+      resolvedUrl = urlOverride
+    } else {
+      const urlResult = contextService.getResolvedUrl(requestId)
+      if (!urlResult) {
+        return {
+          requestId,
+          success: false,
+          error: 'No resolved URL found for this request. Make sure the request is registered.',
+          timings: { startedAt, durationMs: Date.now() - startTime }
+        }
       }
+      resolvedUrl = urlResult.resolvedUrl
     }
-
-    const resolvedUrl = urlResult.resolvedUrl
     logger.info('[HTTPExecutionService] Executing request', { requestId, method, url: resolvedUrl })
 
     // Get request context for headers and body
@@ -112,9 +143,17 @@ class HTTPExecutionService {
         }
       }
 
-      // Build body from context
+      // Build body — a caller-supplied `rawBody` (e.g. an OData action
+      // POST payload) takes precedence over anything the
+      // ContextService would compose from the request's structured
+      // body fields.
       let body: string | undefined
-      if (requestContext?.fullData?.body) {
+      if (rawBody !== undefined) {
+        body = contextService.resolveValue(rawBody, requestId)
+        if (rawBodyContentType) {
+          headers['Content-Type'] ??= rawBodyContentType
+        }
+      } else if (requestContext?.fullData?.body) {
         const bodyData = requestContext.fullData.body
         if (bodyData.type === 'text') {
           body = contextService.resolveValue(bodyData.content, requestId)
@@ -133,8 +172,31 @@ class HTTPExecutionService {
         // Note: form-data and file modes require special handling
       }
 
+      // Inject auth headers (fresh or cached) before dispatching.
+      if (authRequest) {
+        try {
+          const authHeaders = await authenticationCacheService.getHeaders(
+            authRequest,
+            (r) => this.executeAuthInner(r, abortController.signal, requestId)
+          )
+          for (const [k, v] of Object.entries(authHeaders)) {
+            headers[k] = v
+          }
+        } catch (authErr) {
+          const durationMs = Date.now() - startTime
+          this.broadcastProgress(requestId, 'error')
+          return {
+            requestId,
+            success: false,
+            error: authErr instanceof Error ? authErr.message : String(authErr),
+            requestUrl: resolvedUrl,
+            timings: { startedAt, durationMs }
+          }
+        }
+      }
+
       // Execute request
-      const result = await this.makeRequest({
+      let result = await this.makeRequest({
         url: parsedUrl,
         method: method.toUpperCase(),
         headers,
@@ -143,8 +205,36 @@ class HTTPExecutionService {
         signal: abortController.signal
       })
 
+      // Auth-error-code retry: if the downstream status is one the
+      // auth request declared as "your token expired", invalidate
+      // the cache, force a refresh, re-inject, retry exactly once.
+      if (authRequest?.authErrorCodes.includes(result.statusCode)) {
+        authenticationCacheService.invalidate(authRequest.id)
+        try {
+          const refreshed = await authenticationCacheService.refresh(
+            authRequest,
+            (r) => this.executeAuthInner(r, abortController.signal, requestId)
+          )
+          for (const [k, v] of Object.entries(refreshed)) {
+            headers[k] = v
+          }
+          result = await this.makeRequest({
+            url: parsedUrl,
+            method: method.toUpperCase(),
+            headers,
+            body,
+            timeout,
+            signal: abortController.signal
+          })
+        } catch (authErr) {
+          logger.warn('[HTTPExecutionService] auth refresh during retry failed', {
+            error: String(authErr)
+          })
+        }
+      }
+
       const durationMs = Date.now() - startTime
-      
+
       // Broadcast completion
       this.broadcastProgress(requestId, 'completed')
 
@@ -156,6 +246,9 @@ class HTTPExecutionService {
         headers: result.headers,
         body: result.body,
         requestUrl: resolvedUrl,
+        // Clone `headers` so downstream mutations on the request
+        // path don't retroactively edit the result we're returning.
+        requestHeaders: { ...headers },
         timings: { startedAt, durationMs }
       }
     } catch (err) {
@@ -301,6 +394,197 @@ class HTTPExecutionService {
     const windows = BrowserWindow.getAllWindows()
     for (const win of windows) {
       win.webContents.send('http:request-progress', { requestId, status })
+    }
+  }
+
+  /**
+   * Execute an auth request so the cache layer can populate itself.
+   * Uses ContextService when the request is registered (normal
+   * production path), falls back to the auth request's own URL /
+   * method / headers / body otherwise (import-wizard path, where
+   * the auth request is ephemeral and not yet in the collection).
+   */
+  private async executeAuthInner(
+    authRequest: AuthenticationRequest,
+    parentSignal: AbortSignal,
+    parentRequestId?: string
+  ): Promise<HTTPExecutionResult> {
+    const startTime = Date.now()
+    const startedAt = new Date().toISOString()
+    // Choose which env-context resolves auth handlebars / URL / body.
+    //
+    // Default: the auth route's own context (its tab's selected env).
+    // Override: when the *parent* request's selected env is ALSO in
+    // the auth route's `availableEnvironmentIds` — i.e. visible to
+    // the auth route through its env-folder hierarchy — we use the
+    // parent's env instead. This lets a request with env "Valid"
+    // drive an auth route pinned to "Invalid" (sibling env in the
+    // same tree) and have the auth pick up "Valid" because it's
+    // available to both. Without this, the auth route's pinned env
+    // would always win and you'd authenticate against the wrong
+    // credentials whenever the calling request used a different env.
+    //
+    // The fall-through to `parentRequestId` (when the auth request
+    // was never registered — import-wizard path) stays as before:
+    // `inheritParentEnv` becomes the only path that resolves the
+    // auth values in that case.
+    const authCtxForEnv = contextService.getRequestContext(authRequest.id)
+    const parentCtxForEnv = parentRequestId
+      ? contextService.getRequestContext(parentRequestId)
+      : undefined
+    const parentEnvIdForAuth = parentCtxForEnv?.environmentId ?? null
+    const inheritParentEnv =
+      parentEnvIdForAuth !== null &&
+      !!authCtxForEnv &&
+      authCtxForEnv.availableEnvironmentIds.includes(parentEnvIdForAuth)
+    const resolutionRequestId = inheritParentEnv && parentRequestId
+      ? parentRequestId
+      : authRequest.id
+
+    // Prefer the ContextService-resolved URL when it matches the env
+    // we're going to resolve against — i.e. only when the auth route
+    // owns the resolution. When inheriting the parent's env we have
+    // to re-resolve the raw `authRequest.url` against the parent's
+    // context; the cached resolved URL was minted with a different
+    // env and would point at the wrong host / path / params.
+    const authUrlResult = inheritParentEnv
+      ? undefined
+      : contextService.getResolvedUrl(authRequest.id)
+    let resolvedUrl: string
+    if (authUrlResult) {
+      resolvedUrl = authUrlResult.resolvedUrl
+    } else if (contextService.getRequestContext(resolutionRequestId)) {
+      resolvedUrl = contextService.resolveValue(authRequest.url, resolutionRequestId)
+    } else if (parentRequestId && contextService.getRequestContext(parentRequestId)) {
+      resolvedUrl = contextService.resolveValue(authRequest.url, parentRequestId)
+    } else {
+      resolvedUrl = authRequest.url
+    }
+    if (!resolvedUrl) {
+      return {
+        requestId: authRequest.id,
+        success: false,
+        error: 'Auth request has no URL',
+        timings: { startedAt, durationMs: Date.now() - startTime }
+      }
+    }
+    let parsedUrl: URL
+    try {
+      parsedUrl = new URL(resolvedUrl)
+    } catch {
+      return {
+        requestId: authRequest.id,
+        success: false,
+        error: `Invalid auth URL: ${resolvedUrl}`,
+        timings: { startedAt, durationMs: Date.now() - startTime }
+      }
+    }
+
+    // Build headers — ContextService for the registered path,
+    // raw auth-request headers otherwise.
+    const headers: Record<string, string> = {}
+    const authCtx = authCtxForEnv
+    // Resolve against `resolutionRequestId` (auth's own env normally,
+    // parent's env when inheritance is on). Fall back to parent's
+    // context when neither auth nor the resolution request is
+    // registered (import-wizard path).
+    const resolveForAuth = (value: string): string => {
+      if (contextService.getRequestContext(resolutionRequestId)) {
+        return contextService.resolveValue(value, resolutionRequestId)
+      }
+      if (parentRequestId && contextService.getRequestContext(parentRequestId)) {
+        return contextService.resolveValue(value, parentRequestId)
+      }
+      return value
+    }
+    const headerSource = authCtx?.keyValueGroups.get('headers') ?? authRequest.headers
+    // After IPC marshal the fallback path sees `{ type, value }`
+    // objects instead of `StringValue` / `PasswordValue` instances;
+    // `.toString()` on those returns `[object Object]`.
+    const extractString = (v: unknown): string => {
+      if (typeof v === 'string') return v
+      if (typeof v === 'number' || typeof v === 'boolean') return String(v)
+      if (v && typeof v === 'object') {
+        const obj = v as { toString?: () => string; value?: unknown }
+        if (typeof obj.toString === 'function' && obj.toString !== Object.prototype.toString) {
+          // Class instances (`StringValue`, `PasswordValue`, …) still
+          // round-trip through here in the ContextService path.
+          return obj.toString()
+        }
+        if (typeof obj.value === 'string') return obj.value
+        if (typeof obj.value === 'number' || typeof obj.value === 'boolean') return String(obj.value)
+      }
+      return ''
+    }
+    for (const h of headerSource) {
+      if (h.enabled === false) continue
+      if (!h.key) continue
+      headers[h.key] = resolveForAuth(extractString(h.value))
+    }
+
+    // Build body.
+    let body: string | undefined
+    if (authCtx?.fullData?.body) {
+      const bodyData = authCtx.fullData.body
+      if (bodyData.type === 'text') {
+        body = contextService.resolveValue(bodyData.content, resolutionRequestId)
+      } else if (bodyData.type === 'x-www-form-urlencoded') {
+        const params = new URLSearchParams()
+        for (const field of bodyData.fields) {
+          if (!field.key) continue
+          const k = contextService.resolveValue(field.key, resolutionRequestId)
+          const v = contextService.resolveValue(field.value, resolutionRequestId)
+          params.append(k, v)
+        }
+        body = params.toString()
+        headers['Content-Type'] ??= 'application/x-www-form-urlencoded'
+      }
+    } else if (authRequest.body) {
+      // Fallback path — ContextService hasn't seen this auth request
+      // (the auth-tab was never mounted in this session). Serialize
+      // directly off the `AuthenticationRequest`. Handlebars still get
+      // resolved via `resolveForAuth`, which falls back to the parent
+      // request's environment when the auth itself isn't registered.
+      // `x-www-form-urlencoded` is the only shape OAuth token
+      // endpoints care about, and it's also the one the request's own
+      // Send flow uses, so a request that works in its own tab must
+      // work from the cache layer too.
+      const authBody = authRequest.body
+      if (authBody.type === 'text' && typeof authBody.content === 'string') {
+        body = resolveForAuth(authBody.content)
+      } else if (authBody.type === 'x-www-form-urlencoded') {
+        const params = new URLSearchParams()
+        // IPC marshal turns every `StringValue` / `PasswordValue` /
+        // etc. into the persisted `{ type, value }` shape — the
+        // class-instance `.toString()` path is gone by the time we
+        // run here. Extract the string payload manually.
+        for (const field of authBody.fields) {
+          if (!field.key) continue
+          params.append(field.key, resolveForAuth(extractString(field.value)))
+        }
+        body = params.toString()
+        headers['Content-Type'] ??= 'application/x-www-form-urlencoded'
+      }
+    }
+
+    const result = await this.makeRequest({
+      url: parsedUrl,
+      method: authRequest.method,
+      headers,
+      body,
+      timeout: DEFAULT_REQUEST_TIMEOUT_MS,
+      signal: parentSignal
+    })
+    const durationMs = Date.now() - startTime
+    return {
+      requestId: authRequest.id,
+      success: true,
+      statusCode: result.statusCode,
+      statusText: result.statusText,
+      headers: result.headers,
+      body: result.body,
+      requestUrl: resolvedUrl,
+      timings: { startedAt, durationMs }
     }
   }
 }

@@ -5,7 +5,7 @@ import { PROJECT_UUID_KEY } from '../shared/config/projectUuid'
 import type { PersistenceFormat } from 'electron-core-ui'
 import { join } from 'path'
 import { existsSync, statSync } from 'fs'
-import { searchIndexService, contextService, responseHistoryService } from './services'
+import { searchIndexService, contextService, responseHistoryService, authenticationCacheService } from './services'
 import { clearUserSettings, parseCliArgs } from './cli/args'
 import { setupGraphQL } from './GraphQLSetup'
 import { registerRestormIPC } from './IPCHandlers'
@@ -276,6 +276,12 @@ logger.info('Context Service initialized')
 // Initialize Response History Service (stores executed responses)
 responseHistoryService.initialize()
 logger.info('Response History Service initialized')
+
+// Initialize Authentication Cache Service. We only need the subscription
+// wiring (REQUEST_DELETED → invalidate) here — the cache itself is ready
+// as soon as the module is imported.
+authenticationCacheService.initialize()
+logger.info('Authentication Cache Service initialized')
 
 // Initialize GraphQL Service and register graphql:query IPC handler
 setupGraphQL()

@@ -22,10 +22,22 @@ export interface ImportResult {
   source: string
   format?: string
   error?: string
+  /** HTTP status code when the import source is a URL. Surfaced so
+   * the UI can detect 401 / 403 and prompt for authentication. */
+  statusCode?: number
+  /** `true` when the fetch failed with a status listed in the
+   * active auth-error-code set (defaults to [401, 403]). The UI
+   * uses this to decide whether to show the "Add authentication"
+   * button. */
+  isAuthError?: boolean
 }
 
 export interface ImportOptions {
   dryRun?: boolean
+  /** Optional extra headers to inject into the import fetch (for
+   * URL-based imports). Callers plug resolved auth headers here
+   * after running an AuthenticationRequest via the cache service. */
+  extraHeaders?: Record<string, string>
 }
 
 // ============================================================================
@@ -80,6 +92,12 @@ function detectFormat(content: string, filePath?: string): string | null {
     if (typeof json === 'object' && json !== null && 'asyncapi' in json) {
       return 'asyncapi'
     }
+
+    // Detect OData JSON-CSDL (v4). Every JSON-CSDL document starts
+    // with a top-level `$Version` discriminator ("4.0" or "4.01").
+    if (typeof json === 'object' && json !== null && '$Version' in json) {
+      return 'odata'
+    }
   } catch {
     // Not JSON, try other formats
   }
@@ -105,6 +123,16 @@ function detectFormat(content: string, filePath?: string): string | null {
   if (trimmed.includes('<wsdl:definitions') || trimmed.includes('<definitions') && trimmed.includes('wsdl') ||
       filePath?.endsWith('.wsdl')) {
     return 'soap'
+  }
+
+  // Detect OData EDMX CSDL (v2/v3/v4). All versions wrap the schema
+  // in an `edmx:Edmx` root element. A filename or URL ending with
+  // `$metadata` or `.edmx` is also a strong hint.
+  if (trimmed.includes('<edmx:Edmx') || trimmed.includes('<Edmx ')) {
+    return 'odata'
+  }
+  if (filePath?.endsWith('.edmx') || filePath?.endsWith('$metadata')) {
+    return 'odata'
   }
   
   // Detect Bruno .bru files
@@ -194,7 +222,13 @@ async function importFromContent(
         folder = importSoap(content, urlOpt)
         break
       }
-        
+
+      case 'odata': {
+        const { importOData } = await import('./ODataImportService')
+        folder = importOData(content, urlOpt)
+        break
+      }
+
       default:
         return {
           success: false,
@@ -226,23 +260,56 @@ async function importFromContent(
 /** Import from file path or URL */
 export async function importFrom(
   input: string,
-  _options: ImportOptions = {}
+  options: ImportOptions = {}
 ): Promise<ImportResult> {
   try {
     let content: string
     let source: string
     let detectedFormat: string | null = null
-    
+    let lastStatusCode: number | undefined
+
     const isUrl = input.startsWith('http://') || input.startsWith('https://')
     // Check if input is a URL
     if (isUrl) {
-      logger.info(`[ImportManager] Fetching from URL: ${input}`)
       source = input
 
       try {
-        const response = await fetch(input)
+        const fetchInit: RequestInit = options.extraHeaders && Object.keys(options.extraHeaders).length > 0
+          ? { headers: options.extraHeaders }
+          : {}
+        // Log the full dispatched request (headers redacted for
+        // Authorization / Cookie) so auth flows can be diagnosed end
+        // to end — which headers reached the target vs. were lost
+        // along the way.
+        const redactedHeaders: Record<string, string> = {}
+        if (options.extraHeaders) {
+          for (const [k, v] of Object.entries(options.extraHeaders)) {
+            redactedHeaders[k] = /authorization|cookie/i.test(k) ? `${v.slice(0, 12)}…(redacted)` : v
+          }
+        }
+        logger.info('[ImportManager] dispatching fetch', {
+          url: input,
+          method: 'GET',
+          headers: redactedHeaders,
+          headerCount: Object.keys(options.extraHeaders ?? {}).length
+        })
+        const response = await fetch(input, fetchInit)
+        logger.info('[ImportManager] fetch response', {
+          url: input,
+          status: response.status,
+          statusText: response.statusText
+        })
+        lastStatusCode = response.status
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+          const isAuthError = response.status === 401 || response.status === 403
+          return {
+            success: false,
+            items: [],
+            source,
+            statusCode: response.status,
+            ...(isAuthError ? { isAuthError: true } : {}),
+            error: `HTTP ${response.status}: ${response.statusText}`
+          }
         }
         content = await response.text()
       } catch (error) {
@@ -251,6 +318,7 @@ export async function importFrom(
           success: false,
           items: [],
           source,
+          ...(lastStatusCode !== undefined ? { statusCode: lastStatusCode } : {}),
           error: error instanceof Error ? error.message : String(error)
         }
       }

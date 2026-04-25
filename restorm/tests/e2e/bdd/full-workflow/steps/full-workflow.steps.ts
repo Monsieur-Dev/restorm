@@ -1,5 +1,5 @@
 import { createBdd } from 'playwright-bdd'
-import { existsSync, mkdirSync, readFileSync } from 'fs'
+import { existsSync, readFileSync } from 'fs'
 import { join, resolve } from 'path'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
 import { configureNextOpenDialogForE2E, configureNextSaveFileDialogForE2E } from 'electron-core-ui/testing'
@@ -89,23 +89,6 @@ When(
 
 When('I close the app', async () => {
   if (!app) throw new Error('app must be launched before closing')
-
-  // Snapshot the app's final state before we tear down the window, unless
-  // a previous step (e.g. the yellow-tag verification) already recorded
-  // the scenario's "final screenshot" — we don't want to overwrite it.
-  if (page) {
-    try {
-      const testInfo = test.info()
-      mkdirSync(testInfo.outputDir, { recursive: true })
-      const shotPath = join(testInfo.outputDir, 'end-state.png')
-      if (!existsSync(shotPath)) {
-        await page.screenshot({ path: shotPath, fullPage: true })
-        await testInfo.attach('end-state-screenshot', { path: shotPath, contentType: 'image/png' })
-      }
-    } catch {
-      // Best-effort — never fail the scenario on screenshot issues.
-    }
-  }
 
   await app.evaluate(({ BrowserWindow }) => {
     const win = BrowserWindow.getAllWindows()[0]
@@ -546,6 +529,26 @@ Then('the home favorites section should not be visible', async () => {
   if (!page) throw new Error('app must be launched')
   const section = page.locator('[data-testid="home-favorites-section"]')
   await expect(section).not.toBeVisible({ timeout: 2000 })
+})
+
+// Same as `rename the sidebar request` but targets the LAST DOM-order
+// row matching the name. Used after `add a root-level …` because the
+// root-level request lands at the bottom of the sidebar tree — picking
+// `.first()` would rename a same-named entry that already lives inside
+// a folder higher up.
+When('I rename the last sidebar request {string} to {string}', async ({}, oldName: string, newName: string) => {
+  if (!page) throw new Error('app must be launched')
+  const row = page.locator('[data-testid="sidebar-listview"] .list-view-row')
+    .filter({ has: page.getByText(oldName, { exact: true }) }).last()
+  await expect(row).toBeVisible({ timeout: 2000 })
+  await row.click()
+  await page.keyboard.press('F2')
+  await page.waitForTimeout(200)
+  const input = page.locator('[data-testid="sidebar-listview"] input[type="text"]').first()
+  await expect(input).toBeVisible({ timeout: 2000 })
+  await clearAndType(page, input, newName)
+  await page.keyboard.press('Enter')
+  await page.waitForTimeout(500)
 })
 
 When('I rename the sidebar request {string} to {string}', async ({}, oldName: string, newName: string) => {
@@ -1618,15 +1621,6 @@ When('I close every open tab in the workbench', async () => {
   throw new Error('Failed to close all tabs after 50 attempts')
 })
 
-When('I snapshot the current window as the final screenshot', async () => {
-  if (!page) throw new Error('app must be launched')
-  const testInfo = test.info()
-  mkdirSync(testInfo.outputDir, { recursive: true })
-  const shotPath = join(testInfo.outputDir, 'end-state.png')
-  await page.screenshot({ path: shotPath, fullPage: true })
-  await testInfo.attach('end-state-screenshot', { path: shotPath, contentType: 'image/png' })
-})
-
 When('I add tag {string} to the active folder tab', async ({}, tagName: string) => {
   if (!page) throw new Error('app must be launched')
   const tagsRoot = activeFolderBookmarks(page)
@@ -1924,4 +1918,163 @@ Then('no errors should have been logged', async ({ getLogs }) => {
     offending,
     `Expected no error-level log lines, got:\n${offending.join('\n')}`
   ).toEqual([])
+})
+
+// ---------------------------------------------------------------------------
+// Sidebar "Ajouter" submenu — create folder / requests of every type under
+// a parent folder or environment folder.
+// ---------------------------------------------------------------------------
+
+/**
+ * Regex for each AddChildKind's submenu label (English + French). The
+ * submenu entries are translated, so accept either locale to keep the
+ * test portable across the default-language resolution.
+ */
+const ADD_CHILD_LABEL_REGEX: Record<string, RegExp> = {
+  folder: /^(Folder|Dossier)$/,
+  'http-get': /HTTP\s*[–-]\s*GET/,
+  'http-post': /HTTP\s*[–-]\s*POST/,
+  'http-put': /HTTP\s*[–-]\s*PUT/,
+  'http-patch': /HTTP\s*[–-]\s*PATCH/,
+  'http-delete': /HTTP\s*[–-]\s*DELETE/,
+  graphql: /GraphQL/,
+  grpc: /gRPC/,
+  soap: /SOAP/,
+  websocket: /WebSocket/,
+  odata: /OData/,
+  auth: /authentication|authentification/i
+}
+
+When(
+  'I add a {string} under the folder {string} via the sidebar Ajouter submenu',
+  async ({}, kind: string, parentName: string) => {
+    if (!page) throw new Error('app must be launched')
+    const childLabel = ADD_CHILD_LABEL_REGEX[kind]
+    if (!childLabel) throw new Error(`unknown AddChildKind: ${kind}`)
+
+    const row = page
+      .locator('[data-testid="sidebar-listview"] .list-view-row')
+      .filter({ has: page.getByText(parentName, { exact: true }) })
+      .first()
+    await expect(row).toBeVisible({ timeout: 10000 })
+    await row.click({ button: 'right' })
+    await page.waitForTimeout(200)
+
+    // Hover the "Ajouter" / "Add" entry to reveal the nested submenu
+    // (MenuItem opens its submenu on hover after a ~300 ms delay;
+    // click doesn't open it because `hasSubmenu` short-circuits the
+    // handler). Role-based targeting gives us the accessible name
+    // directly and avoids picking up `action-label` spans further
+    // down the tree.
+    const addEntry = page
+      .getByRole('menuitem', { name: /^(Add|Ajouter)$/ })
+      .first()
+    await expect(addEntry).toBeVisible({ timeout: 5000 })
+    await addEntry.hover()
+    await page.waitForTimeout(350)
+
+    // The submenu is rendered in a separate `<ul role="menu">` nested
+    // under the "Add" item once `showSubmenu` flips, so scope by the
+    // visible submenu holder — otherwise a plain `/Folder/` match can
+    // walk into the sidebar row behind the menu.
+    const submenu = page.locator('.menubar-menu-items-holder:visible').last()
+    const target = submenu
+      .getByRole('menuitem', { name: childLabel })
+      .first()
+    await expect(target).toBeVisible({ timeout: 5000 })
+    // Dispatch the click via the DOM `click()` method. Playwright's
+    // own `.click()` sometimes no-ops here because the Badge rendered
+    // in the MenuItem's icon slot ships absolute layout that eats the
+    // hit-test at the anchor's centre, and the ContextMenu's global
+    // `mousedown` outside-listener can race Playwright's synthetic
+    // mousedown/mouseup pair. Native `click()` goes straight to the
+    // React synthetic handler.
+    await target.evaluate((el) => { (el as HTMLElement).click() })
+    // Short settle window — the reactive proxy / React commit loop
+    // needs a beat before the Then assertion polls the sidebar.
+    await page.waitForTimeout(150)
+  }
+)
+
+Then(
+  'the sidebar should contain the request {string}',
+  async ({}, requestName: string) => {
+    if (!page) throw new Error('app must be launched')
+    const row = page
+      .locator('[data-testid="sidebar-listview"] .list-view-title', { hasText: requestName })
+      .first()
+    await expect(row).toBeVisible({ timeout: 10000 })
+  }
+)
+
+When(
+  'I add a root-level {string} via the sidebar empty-area Ajouter submenu',
+  async ({}, kind: string) => {
+    if (!page) throw new Error('app must be launched')
+    const childLabel = ADD_CHILD_LABEL_REGEX[kind]
+    if (!childLabel) throw new Error(`unknown AddChildKind: ${kind}`)
+
+    // Right-click the dedicated filler region below the workspace
+    // tree. `RestormSidebar` mounts a `flex: 1` div tagged with
+    // `sidebar-empty-area-filler` whose only purpose is to absorb
+    // right-clicks for the empty-area context menu — the wrapping
+    // `<div>` listens to `onContextMenu` and bypasses it when the
+    // target sits inside a `.list-view-row`. Targeting the filler
+    // testid avoids any geometry math.
+    const filler = page.locator('[data-testid="sidebar-empty-area-filler"]')
+    await expect(filler).toBeVisible({ timeout: 5000 })
+    await filler.click({ button: 'right', force: true })
+    await page.waitForTimeout(200)
+
+    const addEntry = page
+      .getByRole('menuitem', { name: /^(Add|Ajouter)$/ })
+      .first()
+    await expect(addEntry).toBeVisible({ timeout: 5000 })
+    await addEntry.hover()
+    await page.waitForTimeout(350)
+
+    const submenu = page.locator('.menubar-menu-items-holder:visible').last()
+    const target = submenu
+      .getByRole('menuitem', { name: childLabel })
+      .first()
+    await expect(target).toBeVisible({ timeout: 5000 })
+    await target.evaluate((el) => { (el as HTMLElement).click() })
+    await page.waitForTimeout(150)
+  }
+)
+
+When('I open the global search bar', async () => {
+  if (!page) throw new Error('app must be launched')
+  await page.locator('[data-testid="main-titlebar-searchbar-closed"]').click()
+  await expect(page.locator('[data-testid="main-titlebar-searchbar-inputbox-input"]')).toBeVisible({ timeout: 5000 })
+})
+
+When('I type {string} in the global search bar', async ({}, text: string) => {
+  if (!page) throw new Error('app must be launched')
+  const input = page.locator('[data-testid="main-titlebar-searchbar-inputbox-input"]')
+  await input.fill(text)
+})
+
+Then('a global search result should match {string}', async ({}, needle: string) => {
+  if (!page) throw new Error('app must be launched')
+  const result = page
+    .locator('[data-testid="main-titlebar-searchbar-results"] [data-testid^="main-titlebar-searchbar-result-"]')
+    .filter({ hasText: needle })
+    .first()
+  await expect(result).toBeVisible({ timeout: 10000 })
+})
+
+When('I close the global search bar', async () => {
+  if (!page) throw new Error('app must be launched')
+  // The SearchBar listens for Escape on its open input and animates back
+  // to the closed state. Wait for the closed pill to be visible again so
+  // subsequent clicks (e.g. workbench tabs) aren't intercepted by the
+  // results overlay.
+  const input = page.locator('[data-testid="main-titlebar-searchbar-inputbox-input"]')
+  if (await input.isVisible().catch(() => false)) {
+    await input.press('Escape')
+  }
+  await expect(page.locator('[data-testid="main-titlebar-searchbar-closed"]')).toBeVisible({
+    timeout: 5000
+  })
 })

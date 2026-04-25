@@ -1,3 +1,5 @@
+import type { Icon } from '../../../types/icon';
+
 export interface IButtonOptions extends Partial<IButtonStyles> {
   readonly title?: boolean | string;
   readonly ariaLabel?: string;
@@ -25,7 +27,13 @@ export interface IButtonWithDropdownOptions extends IButtonOptions {
 
 export interface ButtonProps {
   options?: IButtonOptions;
-  icon?: string | undefined;
+  /**
+   * Leading icon. Pass a string for the codicon shorthand
+   * (`icon="save"`) or a full `Icon` object for any library
+   * supported by `IconView` (codicon, emoji, iconoir, phosphor,
+   * material, simpleicons, feather, fontawesome).
+   */
+  icon?: string | Icon | undefined;
   disabled?: boolean;
   secondary?: boolean;
   /**
@@ -39,6 +47,26 @@ export interface ButtonProps {
    * --button-hoverBackground-emphasis-N for styling.
    */
   emphasis?: number;
+  /**
+   * When true, the button container expands to its parent's full
+   * width and the inner anchor's `max-width: 200px` cap is removed.
+   * Use for list rows / popover entries that should stretch.
+   */
+  fullWidth?: boolean;
+  /**
+   * Inline background applied to the button surface. Takes priority
+   * over the variant's CSS background. Use for swatches / tinted
+   * list rows where the row's color is part of the data (env color,
+   * tag color, status pill, …) rather than a theme variant.
+   */
+  backgroundColor?: string;
+  /**
+   * Horizontal alignment of the button label.
+   * Defaults to `'center'` (the historical CTA-style behavior).
+   * `'left'` is the natural pick for list rows / popover entries
+   * where the label should hug the leading edge.
+   */
+  align?: 'left' | 'center' | 'right';
   onClick?: ((event: React.MouseEvent<HTMLAnchorElement>) => void) | undefined;
   onMouseEnter?: ((event: React.MouseEvent<HTMLAnchorElement>) => void) | undefined;
   onMouseLeave?: ((event: React.MouseEvent<HTMLAnchorElement>) => void) | undefined;

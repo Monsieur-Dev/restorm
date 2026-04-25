@@ -70,6 +70,7 @@ export class SoapRequest extends BaseRequest {
     documentation?: string
     notes?: string
     tags?: string[]
+    authenticationRequestId?: RuntimeId
     url?: string
     soapAction?: string
     service?: string
@@ -84,6 +85,7 @@ export class SoapRequest extends BaseRequest {
       documentation: obj.documentation ?? '',
       ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
+      ...(obj.authenticationRequestId !== undefined && { authenticationRequestId: obj.authenticationRequestId }),
       url: obj.url ?? '',
       soapAction: obj.soapAction ?? '',
       service: obj.service ?? '',
@@ -105,6 +107,7 @@ export class SoapRequest extends BaseRequest {
       documentation: this.documentation,
       notes: this.notes,
       tags: this.tags,
+      ...(this.authenticationRequestId !== undefined && { authenticationRequestId: this.authenticationRequestId }),
       url: this.url,
       soapAction: this.soapAction,
       service: this.service,

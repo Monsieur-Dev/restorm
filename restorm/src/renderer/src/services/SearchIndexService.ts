@@ -14,8 +14,8 @@ import {
   type CategoryMeta,
   logger
 } from 'electron-core-ui/renderer'
-import type { Folder, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, Request } from '../../../shared/types/collections'
-import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isRequest } from '../../../shared/types/collections'
+import type { Folder, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, Request } from '../../../shared/types/collections'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isRequest } from '../../../shared/types/collections'
 
 /** Search categories configuration for Restorm */
 const RESTORM_SEARCH_CATEGORIES: Record<string, CategoryMeta> = {
@@ -406,6 +406,61 @@ function websocketRequestToSearchDocument(
   }
 }
 
+function odataRequestToSearchDocument(
+  request: ODataRequest,
+  parentFolderId: string,
+  parentPath: string[] = [],
+  parentNames: string[] = []
+): {
+  id: string
+  title: string
+  description?: string
+  category: string
+  icon: string
+  keywords: string
+  navigation: Record<string, unknown>
+  metadata: Record<string, unknown>
+} {
+  const filter = request.queryOptions.filter ?? ''
+  const select = (request.queryOptions.select ?? []).join(' ')
+  const keywords = [
+    'odata',
+    request.odataVersion,
+    request.operationKind,
+    request.url,
+    filter,
+    select,
+    ...request.tags,
+    ...request.headers.map((h) => `${h.key} ${h.value.toString()}`),
+    request.notes ?? ''
+  ].join(' ')
+
+  return {
+    id: request.id,
+    title: request.name,
+    ...(request.documentation ? { description: request.documentation } : {}),
+    category: 'request',
+    icon: 'odata',
+    keywords,
+    navigation: {
+      type: 'request',
+      folderId: parentFolderId,
+      requestId: request.id,
+      path: [...parentPath, request.id]
+    },
+    metadata: {
+      requestType: 'odata',
+      url: request.url,
+      odataVersion: request.odataVersion,
+      operationKind: request.operationKind,
+      headers: request.headers.map((h) => ({ key: h.key, value: h.value })),
+      tags: request.tags,
+      ...(request.notes ? { notes: request.notes } : {}),
+      ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
+    }
+  }
+}
+
 function requestToSearchDocument(
   request: Request,
   parentFolderId: string,
@@ -431,6 +486,8 @@ function requestToSearchDocument(
     return soapRequestToSearchDocument(request, parentFolderId, parentPath, parentNames)
   } else if (isWebSocketRequest(request)) {
     return websocketRequestToSearchDocument(request, parentFolderId, parentPath, parentNames)
+  } else if (isODataRequest(request)) {
+    return odataRequestToSearchDocument(request, parentFolderId, parentPath, parentNames)
   }
   // Fallback for unknown types
   const unknownRequest = request as { id: string; name: string; tags: string[] }
@@ -532,6 +589,27 @@ class SearchIndexService {
       logger.debug('[SearchIndexService] Indexed folder tree', { documentCount: documents.length })
     } catch (error) {
       logger.error('[SearchIndexService] Error indexing folder tree', { error: String(error), folderId: folder.id })
+    }
+  }
+
+  /**
+   * Index a single request that lives at the root of the collection
+   * (e.g. an attached auth route). Regular requests reach the index
+   * through their parent folder's recursive walk; root-level requests
+   * don't have a parent to ride along with.
+   */
+  async indexRootRequest(request: Request): Promise<void> {
+    logger.debug('[SearchIndexService] Indexing root request', { requestId: request.id, requestName: request.name })
+    try {
+      // Use the request's own id as `parentFolderId` — there is no
+      // folder above it; the search document's navigation only uses
+      // this to drive "jump to parent", which a root-level request
+      // simply short-circuits to itself.
+      const doc = requestToSearchDocument(request, request.id)
+      const plainDoc = JSON.parse(JSON.stringify(doc)) as typeof doc
+      await searchService.indexDocuments([plainDoc])
+    } catch (error) {
+      logger.error('[SearchIndexService] Error indexing root request', { error: String(error), requestId: request.id })
     }
   }
 

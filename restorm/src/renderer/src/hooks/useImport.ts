@@ -5,7 +5,7 @@
 import React, { useCallback, useState } from 'react'
 import { eventBus, logger } from 'electron-core-ui/renderer'
 import { DocumentEvents } from '../services/DocumentEvents'
-import { makeReactiveFolder } from '../types/reactive'
+import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
 import type { Folder, EnvironmentFolder, Environment, Request, FolderItem } from '../../../shared/types/collections'
 
 export interface UseImportOptions {
@@ -56,31 +56,55 @@ export function useImport(options: UseImportOptions): UseImportReturn {
       targetFolderId?: string,
       pendingFolders?: { id: string; name: string; parentId: string }[]
     ) => {
-      logger.info('[useImport] Importing items', {
+      logger.debug('[useImport] Importing items', {
         count: items.length,
         targetFolderId,
         rootItemsCount: rootItems.length,
         pendingFoldersCount: pendingFolders?.length ?? 0
       })
 
-      // Regenerate all IDs to avoid conflicts with existing items
+      // Regenerate all IDs to avoid conflicts with existing items.
+      // Keeps an `old → new` map so we can remap cross-item
+      // references (`authenticationRequestId`) in a second pass —
+      // otherwise requests wired up upstream with
+      // `authenticationRequestId: <old auth id>` point at a node
+      // that no longer exists after regeneration.
+      const idMap = new Map<string, string>()
       const regenerateIds = (item: FolderItem): FolderItem => {
+        const newId = crypto.randomUUID()
+        idMap.set(item.id, newId)
         if ('items' in item) {
-          // It's a folder (Folder or EnvironmentFolder)
           const folder = item
           return {
             ...folder,
-            id: crypto.randomUUID(),
+            id: newId,
             items: folder.items.map((child) => regenerateIds(child))
           }
         } else {
-          // It's a request
           const request = item
           return {
             ...request,
-            id: crypto.randomUUID()
+            id: newId
           }
         }
+      }
+
+      // Walk a regenerated tree and fix any `authenticationRequestId`
+      // that still points at a pre-regeneration id. Runs top-down;
+      // cheap even on a 10k-route tree because it only touches
+      // already-shallow-cloned nodes.
+      const remapAuthRefs = (item: FolderItem): FolderItem => {
+        if ('items' in item) {
+          return { ...item, items: item.items.map(remapAuthRefs) }
+        }
+        const current = (item as { authenticationRequestId?: string }).authenticationRequestId
+        if (current !== undefined) {
+          const remapped = idMap.get(current)
+          if (remapped !== undefined && remapped !== current) {
+            return { ...item, authenticationRequestId: remapped }
+          }
+        }
+        return item
       }
 
       // Emit ENVIRONMENT_CREATED for every env (and nested sub-envs) on an
@@ -104,29 +128,48 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         }
       }
 
-      // Emit creation events for all imported items recursively
-      const emitCreationEvents = (item: FolderItem, parentFolderId: string): void => {
+      // Walk a folder subtree and emit ENVIRONMENT_CREATED for every
+      // env / sub-env on every EnvironmentFolder reachable from it.
+      // Called in addition to the top-level FOLDER_CREATED below so
+      // ContextService (which subscribes to ENVIRONMENT_CREATED) can
+      // register every env the tree brings in, regardless of depth.
+      const emitNestedEnvironments = (folder: Folder | EnvironmentFolder): void => {
+        if ('environments' in folder) {
+          for (const env of folder.environments) {
+            emitEnvironmentTree(env, folder.id, null)
+          }
+        }
+        for (const child of folder.items) {
+          if ('items' in child) emitNestedEnvironments(child)
+        }
+      }
+
+      // Emit exactly one CREATED event per top-level imported item.
+      // For folders we emit FOLDER_CREATED only for the root of the
+      // imported subtree — SearchIndexService.indexFolderRecursively
+      // walks the document and indexes every descendant on its own.
+      // This is the hot path for bulk imports (10k+ OData routes): the
+      // old recursive emission fired one IPC per descendant plus one
+      // draft write per descendant via App.tsx's save-unit bridge,
+      // which dominated the import cost. We accept losing per-
+      // descendant drafts during import — `onImportComplete` triggers
+      // a full-tree save right after, so crash recovery kicks in off
+      // the persisted file, not off per-node drafts.
+      // `parentFolderId` is only meaningful for requests that are
+      // actually being nested into a folder — when a request lands at
+      // the root of the collection we pass `undefined` so consumers
+      // (SearchIndexService, the save-unit registry) don't record a
+      // self-parent by mistake.
+      const emitTopLevelCreated = (item: FolderItem, parentFolderId: string | undefined): void => {
         if ('items' in item) {
-          // It's a folder
           const folder = item
           eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
             id: folder.id,
             type: 'folder',
             document: JSON.parse(JSON.stringify(folder)) as Folder | EnvironmentFolder
           })
-          // Emit environment creations for EnvironmentFolders so their
-          // handlebars variables are registered with ContextService.
-          if ('environments' in folder) {
-            for (const env of folder.environments) {
-              emitEnvironmentTree(env, folder.id, null)
-            }
-          }
-          // Recursively emit for children
-          folder.items.forEach((child) => {
-            emitCreationEvents(child, folder.id)
-          })
+          emitNestedEnvironments(folder)
         } else {
-          // It's a request
           const request = item
           eventBus.emitSync(DocumentEvents.REQUEST_CREATED, {
             id: request.id,
@@ -137,9 +180,10 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         }
       }
 
-      const itemsWithNewIds = items.map((item) => regenerateIds(item))
+      const regenerated = items.map((item) => regenerateIds(item))
+      const itemsWithNewIds = regenerated.map((item) => remapAuthRefs(item))
 
-      logger.info('[useImport] Items with new IDs', { count: itemsWithNewIds.length })
+      logger.debug('[useImport] Items with new IDs', { count: itemsWithNewIds.length })
 
       // Expand every folder we just imported (and every sub-folder inside
       // them) so the user sees the full imported structure in the sidebar.
@@ -158,7 +202,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
             configuration: {}
           }
           createdFoldersMap.set(pf.id, newFolder)
-          logger.info('[useImport] Created pending folder', {
+          logger.debug('[useImport] Created pending folder', {
             name: pf.name,
             id: newFolder.id,
             parentId: pf.parentId
@@ -166,11 +210,19 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         })
       }
 
+      // Defer the expansion so React first paints the new `rootItems`
+      // with folders collapsed (a small tree: just the top-level
+      // folders) before turning around and re-rendering the whole
+      // expanded 10k-leaf sidebar. Without the microtask the two state
+      // updates batch into a single commit whose render has to lay
+      // out every descendant up front, blocking the first paint.
       const expandAfterImport = (): void => {
         const pendingFolderIds = Array.from(createdFoldersMap.values()).map((f) => f.id)
         const newlyExpanded = [...pendingFolderIds, ...importedFolderIds]
         if (newlyExpanded.length === 0) return
-        setExpandedIds((prev) => Array.from(new Set([...prev, ...newlyExpanded])))
+        queueMicrotask(() => {
+          setExpandedIds((prev) => Array.from(new Set([...prev, ...newlyExpanded])))
+        })
       }
 
       // Collect env-folder IDs from the top-level imported items for
@@ -186,31 +238,39 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         const createdFolder = createdFoldersMap.get(targetFolderId)
         if (createdFolder) {
           actualTargetFolderId = createdFolder.id
-          logger.info('[useImport] Target is a pending folder, using created folder ID', {
+          logger.debug('[useImport] Target is a pending folder, using created folder ID', {
             pendingId: targetFolderId,
             actualId: actualTargetFolderId
           })
         }
       }
 
-      // If file is empty (no root folders), create the imported items as first root folders
+      // If file is empty (no root folders), the imported items land
+      // at the root as-is. The root tree carries `Folder`,
+      // `EnvironmentFolder` and `Request` alike — folders get wrapped
+      // in the reactive proxy, requests pass through untouched. The
+      // old code filtered requests out here, which is what forced the
+      // ImportModal workaround that nested the attached auth request
+      // inside the first folder instead of placing it at the root.
       if (rootItems.length === 0 && !actualTargetFolderId) {
-        const filteredItems = itemsWithNewIds.filter((item) => 'items' in item)
-        logger.info('[useImport] Empty file - creating first root folders', {
-          count: filteredItems.length
+        logger.debug('[useImport] Empty file - creating first root items', {
+          count: itemsWithNewIds.length
         })
-        const reactiveRootItems = filteredItems.map((folder) =>
-          makeReactiveFolder(folder)
-        ) as EnvironmentFolder[]
+        const reactiveRootItems = itemsWithNewIds.map((item) =>
+          'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
+        )
         setRootItems(reactiveRootItems)
         expandAfterImport()
 
-        // Emit creation events for indexing
-        filteredItems.forEach((folder) => {
-          emitCreationEvents(folder, folder.id)
+        // Emit one CREATED per top-level imported item — descendants
+        // land in the search index via SearchIndexService's recursive
+        // walk (see `emitTopLevelCreated` comment). Root-level items
+        // have no parent folder, hence `undefined`.
+        itemsWithNewIds.forEach((item) => {
+          emitTopLevelCreated(item, undefined)
         })
 
-        setPendingEnvFolderIds(collectEnvFolderIds(filteredItems))
+        setPendingEnvFolderIds(collectEnvFolderIds(itemsWithNewIds))
         if (onImportComplete) onImportComplete()
         return
       }
@@ -253,7 +313,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
           const targetPendingFolder = createdFoldersMap.get(targetFolderId)
           if (targetPendingFolder) {
             targetPendingFolder.items = itemsWithNewIds
-            logger.info('[useImport] Put items inside root pending folder', {
+            logger.debug('[useImport] Put items inside root pending folder', {
               folderName: targetPendingFolder.name,
               itemsCount: itemsWithNewIds.length
             })
@@ -266,16 +326,24 @@ export function useImport(options: UseImportOptions): UseImportReturn {
           targetFolderId && createdFoldersMap.has(targetFolderId) ? [] : itemsWithNewIds
         const allRootItems = [...clonedRootItems, ...createdForRoot, ...directImports]
 
-        // Make reactive - makeReactiveFolder handles Folders/EnvironmentFolders, Requests stay as-is
+        // Make reactive — folders/env-folders go through `makeReactiveFolder`,
+        // root-level requests go through `makeReactiveRequest` (no parent id)
+        // so their edits emit `REQUEST_UPDATED` and flow into the dirty tracker
+        // and search index like any nested request.
         const reactiveRootItems = allRootItems.map((item) =>
-          'items' in item ? makeReactiveFolder(item) : item
+          'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
         )
         setRootItems(reactiveRootItems)
         expandAfterImport()
 
-        // Emit creation events for ALL imported items (folders + requests)
+        // One CREATED per top-level item — see `emitTopLevelCreated`.
+        // When a pending target folder was created, the items are now
+        // children of that folder; otherwise they sit at the root and
+        // have no parent.
+        const rootPendingTarget =
+          targetFolderId && createdFoldersMap.has(targetFolderId) ? actualTargetFolderId : undefined
         itemsWithNewIds.forEach((item) => {
-          emitCreationEvents(item, item.id)
+          emitTopLevelCreated(item, rootPendingTarget)
         })
 
         setPendingEnvFolderIds(collectEnvFolderIds(itemsWithNewIds))
@@ -294,7 +362,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
             if (createdFolder) {
               createdFolder.items = itemsWithNewIds
               folder.items = [...folder.items, createdFolder]
-              logger.info('[useImport] Put items inside nested pending folder', {
+              logger.debug('[useImport] Put items inside nested pending folder', {
                 folderName: createdFolder.name,
                 itemsCount: itemsWithNewIds.length
               })
@@ -327,23 +395,29 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         }
       }
 
-      // Make all root items reactive (folders become reactive, requests stay as-is)
+      // Make all root items reactive — root-level requests go through
+      // `makeReactiveRequest` so edits land in REQUEST_UPDATED like any
+      // other request.
       const reactiveRootItems = clonedRootItems.map((item) =>
-        'items' in item ? makeReactiveFolder(item) : item
+        'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
       )
       setRootItems(reactiveRootItems)
       expandAfterImport()
 
-      // Emit creation events for indexing
-      // Emit for pending folders first
+      // One CREATED per top-level item — see `emitTopLevelCreated`.
+      // Emit for pending folders first (they become new parents),
+      // then for the imported items that nest into them.
+      // `actualTargetFolderId` is the resolved parent id (including
+      // when the target is itself a pending folder); `undefined` means
+      // the item lives at the root of the tree. `parentFolderId` is
+      // only read for the request branch of `emitTopLevelCreated`, so
+      // we pass `undefined` for pending folders — their own parentage
+      // travels in a different code path.
       createdFoldersMap.forEach((folder) => {
-        const parentId = actualTargetFolderId || '__root__'
-        emitCreationEvents(folder, parentId)
+        emitTopLevelCreated(folder, undefined)
       })
-      // Then emit for imported items
       itemsWithNewIds.forEach((item) => {
-        const parentId = actualTargetFolderId || '__root__'
-        emitCreationEvents(item, parentId)
+        emitTopLevelCreated(item, actualTargetFolderId)
       })
 
       // Signal the host that the import has landed. The callback fires

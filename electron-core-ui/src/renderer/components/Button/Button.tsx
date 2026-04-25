@@ -1,6 +1,7 @@
 import React, { useCallback, useRef } from 'react'
 import './button.css'
 import { IButtonOptions, IButtonStyles, ButtonProps, defaultButtonStyles } from './types'
+import { IconView } from '../IconView'
 
 const Button: React.FC<ButtonProps> = ({
   options = {},
@@ -10,6 +11,9 @@ const Button: React.FC<ButtonProps> = ({
   small = false,
   line = false,
   emphasis = 0,
+  fullWidth = false,
+  backgroundColor,
+  align,
   onClick,
   onMouseEnter,
   onMouseLeave,
@@ -51,10 +55,18 @@ const Button: React.FC<ButtonProps> = ({
 
   // No need for hover/focus state management - CSS handles it
 
-  // Render icon if provided
+  // Render icon if provided. String form is the codicon shorthand
+  // (kept for backwards compat); the object form delegates to
+  // `IconView` so any library supported by ECUI's icon system
+  // (emoji, iconoir, phosphor, material, simpleicons, feather,
+  // fontawesome) renders without the call site needing to wrap
+  // its own `<IconView>`.
   const renderIcon = (): React.JSX.Element | null => {
     if (!icon) return null
-    return <span className={`codicon codicon-${icon}`} />
+    if (typeof icon === 'string') {
+      return <span className={`codicon codicon-${icon}`} />
+    }
+    return <IconView icon={icon} size={14} />
   }
 
   // Render children with icon support
@@ -89,16 +101,32 @@ const Button: React.FC<ButtonProps> = ({
     line ? 'line-button' : '',
     secondary ? 'secondary' : '',
     disabled ? 'disabled' : '',
+    fullWidth ? 'full-width' : '',
     emphasis > 0 ? `emphasis-${String(emphasis)}` : '',
     'default-colors',
     className
   ].filter(Boolean).join(' ')
 
-  // Merge any caller-provided style overrides
-  const inlineStyles: React.CSSProperties = { ...style }
+  // Merge any caller-provided style overrides. Explicit
+  // `backgroundColor` wins over `style.background*` so the prop is
+  // the authoritative way to tint the button surface. `align`
+  // mirrors CSS `text-align` + flex `justify-content` so the label
+  // hugs the chosen edge regardless of layout mode.
+  const alignToJustify: Record<NonNullable<ButtonProps['align']>, React.CSSProperties['justifyContent']> = {
+    left: 'flex-start',
+    center: 'center',
+    right: 'flex-end'
+  }
+  const inlineStyles: React.CSSProperties = {
+    ...style,
+    ...(backgroundColor !== undefined ? { background: backgroundColor } : {}),
+    ...(align !== undefined ? { textAlign: align, justifyContent: alignToJustify[align] } : {})
+  }
+
+  const containerClassName = fullWidth ? 'button-container full-width' : 'button-container'
 
   return (
-    <div className="button-container">
+    <div className={containerClassName}>
       <a
         ref={buttonRef}
         id={id}

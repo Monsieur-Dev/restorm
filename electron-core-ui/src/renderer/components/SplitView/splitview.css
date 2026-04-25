@@ -91,6 +91,14 @@
 	pointer-events: auto;
 }
 
+/* Opt-out of the hover-reveal: panes with `alwaysShowHeaderActions`
+   keep their actions visible at rest. */
+.split-view2 .split-view-view-header-actions[data-always-visible='true'] {
+	opacity: 1;
+	transform: translateY(0);
+	pointer-events: auto;
+}
+
 .split-view2 .split-view-view-header-title {
 	overflow: hidden;
 	text-overflow: ellipsis;

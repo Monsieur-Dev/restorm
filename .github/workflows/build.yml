@@ -168,6 +168,26 @@ jobs:
           cd restorm/tests/docker/socketio-server && npm install && node server.js &
           sleep 10
 
+      - name: Start OData Pet Store
+        # AspNetCoreOData service isn't on a public registry so we
+        # build it from tests/docker/odata-petstore/ on the fly and
+        # run it as a detached container alongside the services
+        # above. Port 5100 is what wait-for-services + the restorm
+        # tests expect.
+        run: |
+          cd restorm/tests/docker/odata-petstore
+          docker build -t restorm-odata-petstore .
+          docker run -d --name restorm-odata-petstore -p 5100:5100 restorm-odata-petstore
+
+      - name: Start Auth Service
+        # Same pattern as odata-petstore — .NET 9 minimal-API container
+        # built on the fly, exposing :5110. Drives the `auth-login` e2e
+        # suite (POST /login, GET /pet/{id}, GET /swagger.json).
+        run: |
+          cd restorm/tests/docker/auth-service
+          docker build -t restorm-auth-service .
+          docker run -d --name restorm-auth-service -p 5110:5110 restorm-auth-service
+
       - name: Wait for services
         run: |
           cd restorm

@@ -18,6 +18,13 @@ export interface SplitViewPaneProps {
 	 */
 	headerActions?: React.ReactNode | SplitViewHeaderActionsRender;
 	/**
+	 * Force the header actions to stay visible instead of the default
+	 * hover-reveal. Useful when the only way to add a row to a pane is
+	 * that "+" button and the user would never hover to discover it.
+	 * Defaults to false.
+	 */
+	alwaysShowHeaderActions?: boolean;
+	/**
 	 * Whether this pane can be collapsed from its header.
 	 * Defaults to true.
 	 */

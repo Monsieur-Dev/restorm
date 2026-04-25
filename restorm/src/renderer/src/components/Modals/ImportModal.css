@@ -1,5 +1,7 @@
 .import-modal {
   width: 100%;
+  height: 100%;
+  min-height: 0;
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -11,6 +13,9 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  /* Header sections (destination, input, auth attach) keep their
+     intrinsic height — only the preview section stretches. */
+  flex-shrink: 0;
 }
 
 .import-label {
@@ -67,18 +72,30 @@
 }
 
 .import-preview-section {
-  max-height: 300px;
+  /* Swallows the remaining vertical space in the modal so the
+     preview list grows / shrinks with the window instead of being
+     floored at 300px. */
+  flex: 1;
+  min-height: 0;
+  /* `.import-section` (display: flex, flex-direction: column) is
+     already inherited via the shared class; `.import-preview` below
+     becomes the flex-1 scroll area. */
 }
 
 .import-preview {
   border: 1px solid var(--vscode-editorWidget-border);
   border-radius: 4px;
   overflow: auto;
-  max-height: 250px;
+  flex: 1;
+  min-height: 0;
   background: var(--vscode-editor-background);
 }
 
 .import-actions {
+  /* Anchor the Cancel / Import row at the bottom of the modal even
+     when the preview section hasn't rendered yet (empty input). */
+  margin-top: auto;
+  flex-shrink: 0;
   display: flex;
   justify-content: flex-end;
   gap: 8px;

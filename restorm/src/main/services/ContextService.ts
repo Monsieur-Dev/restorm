@@ -515,12 +515,25 @@ class ContextService {
 
     this.requestContexts.set(requestId, {
       environmentId,
+      availableEnvironmentIds: [],
       keyValueGroups,
       fullData: null
     })
 
     // Calculate transformations for all KeyValue groups
     this.recalculateRequestContext(requestId)
+  }
+
+  /**
+   * Set the env IDs visible to a request through its env-folder
+   * ancestor chain. The renderer recomputes this whenever the request
+   * tab's `environments` prop changes. Only used for auth-resolver
+   * env inheritance — see `HTTPExecutionService.executeAuthInner`.
+   */
+  setAvailableEnvironments(requestId: string, environmentIds: string[]): void {
+    const ctx = this.requestContexts.get(requestId)
+    if (!ctx) return
+    ctx.availableEnvironmentIds = environmentIds
   }
 
   /**

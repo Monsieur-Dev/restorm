@@ -79,6 +79,7 @@ declare global {
         ) => Promise<void>
         unregisterRequest: (requestId: string) => Promise<void>
         setRequestEnvironment: (requestId: string, environmentId: string | null) => Promise<void>
+        setAvailableEnvironments: (requestId: string, environmentIds: string[]) => Promise<void>
         updateRequestKeyValues: (requestId: string, groupName: string, keyValues: KeyValueData[], sourceId?: string) => Promise<void>
         updateFullRequestData: (requestId: string, data: Partial<FullRequestData>, sourceId?: string) => Promise<void>
         getResolvedUrl: (requestId: string) => Promise<ResolvedUrlResult | undefined>
@@ -120,13 +121,42 @@ declare global {
         onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
         onMessage: (callback: (data: WebSocketMessageData) => void) => (() => void)
       }
+      odata: {
+        execute: (input: ODataExecutionInput) => Promise<HTTPExecutionResult>
+        cancel: (requestId: string) => Promise<boolean>
+        isActive: (requestId: string) => Promise<boolean>
+      }
+      auth: {
+        prefetch: (input: {
+          method: string
+          url: string
+          headers: { key: string; value: string; enabled?: boolean }[]
+          body?: {
+            type: string
+            content?: string
+            fields?: { key: string; value: string; enabled?: boolean }[]
+          }
+          producedHeaders: { key: string; value: string; enabled?: boolean }[]
+          expirationExpression?: string
+        }) => Promise<{
+          success: boolean
+          statusCode: number
+          error?: string
+          headers: Record<string, string>
+          responseBody?: string
+        }>
+        onRunning: (callback: (payload: { authRequestId: string; phase: 'started' | 'succeeded' | 'failed'; reason?: string }) => void) => (() => void)
+        onFailed: (callback: (payload: { authRequestId: string; reason?: string }) => void) => (() => void)
+      }
       import: {
-        preview: (input: string) => Promise<{
+        preview: (input: string, options?: { extraHeaders?: Record<string, string> }) => Promise<{
           success: boolean
           items: unknown[]
           source: string
           format?: string
           error?: string
+          statusCode?: number
+          isAuthError?: boolean
         }>
         import: (input: string) => Promise<{
           success: boolean
@@ -190,6 +220,26 @@ export interface AvailableVariablesResult {
 }
 
 /** HTTP execution input for backend */
+export interface ODataExecutionInput {
+  requestId: string
+  timeout?: number
+  requestPath?: string
+  /** HTTP method override — defaults to GET. POST is used for OData
+   * action and $batch invocations. */
+  method?: string
+  /** Request body — raw string. JSON for actions, multipart/mixed
+   * envelope for $batch. Env-templated by the engine. */
+  body?: string
+  /** Content-Type override — required for $batch to carry the
+   * multipart boundary. Defaults to `application/json`. */
+  bodyContentType?: string
+  /** Absolute URL override. When set, the engine dispatches to this
+   * URL as-is instead of composing one from the registered request.
+   * Used by `@odata.nextLink` pagination and clickable navigation
+   * links. */
+  urlOverride?: string
+}
+
 export interface HTTPExecutionInput {
   requestId: string
   method: string
@@ -210,6 +260,8 @@ export interface HTTPExecutionResult {
     durationMs: number
   }
   requestUrl?: string
+  /** Headers actually sent (includes any auth injection). */
+  requestHeaders?: Record<string, string>
 }
 
 /** HTTP progress data */
@@ -328,7 +380,7 @@ export interface WebSocketMessageData {
 /** Full request data for backend processing */
 export interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth'
   url: string
   headers: KeyValueData[]
   method?: string | undefined

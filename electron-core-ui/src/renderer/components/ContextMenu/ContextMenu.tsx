@@ -4,7 +4,16 @@ import { MenuItem, MenuItemSeparator } from '../MenuBar'
 export interface ContextMenuItem {
   id: string
   label: string
-  icon?: string
+  /**
+   * Codicon name (without the `codicon-` prefix) when a string, or any
+   * React node for custom glyphs (colored method badges, protocol
+   * pills, SVGs, etc.). Strings get wrapped in a `codicon codicon-…`
+   * `<i>`; nodes are rendered as-is. The icon slot reserves a 16 px
+   * minimum but grows to accommodate wider glyphs and push the label
+   * right — a Badge larger than a codicon stays in its lane without
+   * overlapping the label text.
+   */
+  icon?: string | React.ReactNode
   shortcut?: string
   isSeparator?: boolean
   disabled?: boolean
@@ -51,12 +60,16 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           disabled={!!item.disabled}
           checked={!!item.checked}
           icon={
-            item.icon ? (
-              <i
-                className={`codicon codicon-${item.icon}`}
-                aria-hidden="true"
-              />
-            ) : undefined
+            item.icon === undefined || item.icon === null
+              ? undefined
+              : typeof item.icon === 'string'
+                ? (
+                    <i
+                      className={`codicon codicon-${item.icon}`}
+                      aria-hidden="true"
+                    />
+                  )
+                : item.icon
           }
           {...(!hasSubmenu && {
             onClick: () => {

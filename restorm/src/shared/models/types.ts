@@ -39,8 +39,16 @@ export const WEBSOCKET_PROTOCOLS = ['websocket', 'socketio', 'mqtt'] as const
 export type WebSocketProtocol = (typeof WEBSOCKET_PROTOCOLS)[number]
 
 /** Request type discriminator */
-export const REQUEST_TYPES = ['http', 'graphql', 'grpc', 'soap', 'websocket'] as const
+export const REQUEST_TYPES = ['http', 'graphql', 'grpc', 'soap', 'websocket', 'odata', 'auth'] as const
 export type RequestType = (typeof REQUEST_TYPES)[number]
+
+/** OData protocol version. The type keeps all three versions so the
+ * persisted shape is stable across phases; the execution engine only
+ * branches on them when a subsequent PR wires the v2/v3 differences
+ * (`d.results` wrapper, `$inlinecount` query option, etc.). Phase 1
+ * treats every `odataVersion` as v4. */
+export const ODATA_VERSIONS = ['v2', 'v3', 'v4'] as const
+export type ODataVersion = (typeof ODATA_VERSIONS)[number]
 
 /** HTTP request body type discriminator */
 export const HTTP_BODY_TYPES = ['text', 'file', 'formData', 'xWwwFormUrlEncoded'] as const

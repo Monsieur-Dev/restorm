@@ -33,12 +33,18 @@ Basic button component with full theme styling and behavior.
 ```typescript
 interface ButtonProps {
   options?: IButtonOptions
-  icon?: string
+  icon?: string | Icon  // string = codicon shorthand; Icon object = any IconView-supported library
   disabled?: boolean
   secondary?: boolean
   small?: boolean
+  line?: boolean
+  emphasis?: number
+  fullWidth?: boolean
+  backgroundColor?: string
+  align?: 'left' | 'center' | 'right'
   onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void
   className?: string
+  style?: React.CSSProperties
   id?: string
   'data-testid'?: string
   children?: React.ReactNode
@@ -47,9 +53,59 @@ interface ButtonProps {
 
 #### Usage
 
+Codicon shorthand:
+
 ```typescript
 <Button icon="save" data-testid="save-button" onClick={() => doSave()}>
   Save
+</Button>
+```
+
+Full `Icon` object (delegates rendering to `<IconView>` for any supported library):
+
+```typescript
+<Button icon={{ type: 'phosphor', value: 'rocket' }} onClick={launch}>
+  Launch
+</Button>
+
+<Button icon={env.icon} onClick={pickEnv}>
+  {env.name}
+</Button>
+```
+
+##### `fullWidth`
+
+Drops the default `max-width: 200px` cap on the button surface and stretches the wrapper to 100% of its parent. Use for popover rows, list entries, or any layout where the button **is** the row (not a chip inside it).
+
+```typescript
+<Button fullWidth secondary line onClick={pickEnv}>
+  {env.name}
+</Button>
+```
+
+##### `backgroundColor`
+
+Inline background applied to the button surface. Wins over the variant's CSS `--button-*` tokens. Use for swatches / tinted list rows where the row's color is part of the data — env color, tag color, status pill, etc. — rather than a theme variant.
+
+```typescript
+<Button
+  fullWidth
+  secondary
+  line
+  backgroundColor={envGradient(env.color)}
+  onClick={pickEnv}
+>
+  {env.name}
+</Button>
+```
+
+##### `align`
+
+Horizontal alignment of the label. Defaults to `'center'` (CTA-style). `'left'` makes the label hug the leading edge — the natural pick for `fullWidth` list rows or popover entries.
+
+```typescript
+<Button fullWidth secondary line align="left" onClick={pickEnv}>
+  {env.name}
 </Button>
 ```
 

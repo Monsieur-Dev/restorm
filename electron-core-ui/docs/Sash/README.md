@@ -138,6 +138,12 @@ When `data-testid` is provided, the components expose stable hooks for E2E tests
 - `data-is-active`: `true | false`
 - `data-left`, `data-top`, `data-width`, `data-height`: numbers (rounded)
 
+### `VerticalSashContainer` sizing
+
+- `initialWidth` — absolute pixel width for the left panel at first mount. Defaults to `200`.
+- `initialLeftRatio` — optional share of the container (0–1) given to the left panel at first mount. When set, it overrides `initialWidth` once the container has been measured (one-shot; the user's drags still take effect afterwards). Ignored when `storageKey` is present so a persisted value wins. Useful when the absolute pixel width depends on the modal / viewport — e.g. a 50/50 split inside a resizable modal.
+- `minLeftWidth` / `minRightWidth` — floors enforced during drag and during ratio initialization.
+
 ### `VerticalSashContainer` data-testid conventions
 
 - Root: `{id}`

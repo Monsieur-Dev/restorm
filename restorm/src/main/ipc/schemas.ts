@@ -78,6 +78,11 @@ export const contextSetRequestEnvironmentArgs = z.tuple([
   z.string().nullable()
 ])
 
+export const contextSetAvailableEnvironmentsArgs = z.tuple([
+  requestIdArg,
+  z.array(z.string())
+])
+
 export const contextUpdateRequestKeyValuesArgs = z.tuple([
   requestIdArg,
   z.string(),
@@ -121,6 +126,74 @@ export const httpExecuteArgs = z.tuple([
 
 export const httpCancelArgs = z.tuple([requestIdArg])
 export const httpIsActiveArgs = z.tuple([requestIdArg])
+
+// ==========================================================================
+// OData Execution (reuses httpExecutionService under the hood)
+// ==========================================================================
+
+export const odataExecuteArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional(),
+    /** Optional HTTP method — defaults to GET. `POST` is used for
+     * OData action and $batch invocations. */
+    method: z.string().optional(),
+    /** Optional request body — raw string. For actions this is the
+     * JSON payload; for $batch this is the pre-assembled
+     * multipart/mixed envelope. Env-templated before dispatch. */
+    body: z.string().optional(),
+    /** Optional Content-Type override for the body — required for
+     * $batch to carry the multipart boundary. Defaults to
+     * `application/json`. */
+    bodyContentType: z.string().optional(),
+    /** Optional absolute URL override. When provided the engine
+     * dispatches to that URL verbatim instead of composing one from
+     * the registered request. Used for `@odata.nextLink` pagination
+     * and clickable navigation links. */
+    urlOverride: z.string().optional()
+  }).loose()
+])
+
+export const odataCancelArgs = z.tuple([requestIdArg])
+export const odataIsActiveArgs = z.tuple([requestIdArg])
+
+// ==========================================================================
+// Authentication routes
+// --------------------------------------------------------------------------
+// `auth:prefetch` runs an ephemeral AuthenticationRequest (typically
+// the one being edited in the import wizard modal), evaluates its
+// producedHeaders against the response body, and returns the
+// resolved header map. Used so the import screen can drive a retry
+// with the auth headers attached without the auth request having to
+// be persisted first.
+// ==========================================================================
+
+export const authPrefetchArgs = z.tuple([
+  z.object({
+    method: z.string(),
+    url: z.string(),
+    headers: z.array(z.object({
+      key: z.string(),
+      value: z.string(),
+      enabled: z.boolean().optional()
+    })).optional(),
+    body: z.object({
+      type: z.string(),
+      content: z.string().optional(),
+      fields: z.array(z.object({
+        key: z.string(),
+        value: z.string(),
+        enabled: z.boolean().optional()
+      })).optional()
+    }).optional(),
+    producedHeaders: z.array(z.object({
+      key: z.string(),
+      value: z.string(),
+      enabled: z.boolean().optional()
+    })),
+    expirationExpression: z.string().optional()
+  }).loose()
+])
 
 // ==========================================================================
 // GraphQL Execution
@@ -199,7 +272,14 @@ export const responsesHistoryUpdatePathArgs = z.tuple([
 // Import
 // ==========================================================================
 
-export const importPreviewArgs = z.tuple([z.string()])
+export const importPreviewArgs = z.tuple([
+  z.string(),
+  z.object({
+    /** Optional extra headers merged into the URL-based import fetch
+     * (resolved auth headers after running an AuthenticationRequest). */
+    extraHeaders: z.record(z.string(), z.string()).optional()
+  }).optional()
+])
 export const importImportArgs = z.tuple([z.string()])
 
 // ==========================================================================

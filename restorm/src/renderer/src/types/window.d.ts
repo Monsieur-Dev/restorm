@@ -33,6 +33,7 @@ declare global {
         registerRequest: (requestId: string, environmentId: string | null, requestData: unknown) => Promise<void>
         unregisterRequest: (requestId: string) => Promise<void>
         setRequestEnvironment: (requestId: string, environmentId: string | null) => Promise<void>
+        setAvailableEnvironments: (requestId: string, environmentIds: string[]) => Promise<void>
         updateRequestKeyValues: (requestId: string, groupName: string, keyValues: unknown[], sourceId?: string) => Promise<void>
         updateFullRequestData: (requestId: string, data: unknown, sourceId?: string) => Promise<void>
         getResolvedUrl: (requestId: string) => Promise<unknown>

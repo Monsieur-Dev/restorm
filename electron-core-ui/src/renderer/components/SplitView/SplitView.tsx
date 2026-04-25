@@ -93,6 +93,7 @@ const SplitViewPaneItem: React.FC<SplitViewPaneItemProps> = ({
 						{pane.headerActions ? (
 							<div
 								className="split-view-view-header-actions"
+								data-always-visible={pane.alwaysShowHeaderActions ? 'true' : undefined}
 								onClick={(event): void => {
 									event.stopPropagation();
 								}}

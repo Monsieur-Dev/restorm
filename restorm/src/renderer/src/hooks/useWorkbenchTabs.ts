@@ -37,6 +37,8 @@ import {
   isGrpcRequest,
   isSoapRequest,
   isWebSocketRequest,
+  isODataRequest,
+  isAuthenticationRequest,
   isEnvironmentFolder,
   isAnyFolder
 } from '../../../shared/types/collections'
@@ -48,6 +50,8 @@ import type {
   GrpcRequestTab,
   SoapRequestTab,
   WebSocketRequestTab,
+  ODataRequestTab,
+  AuthenticationRequestTab,
   BreadcrumbItem
 } from '../../../shared/types/editor'
 
@@ -277,6 +281,12 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     } else if (isWebSocketRequest(request)) {
       tabType = 'websocket-request'
       title = `WS ${request.name}`
+    } else if (isODataRequest(request)) {
+      tabType = 'odata-request'
+      title = request.name
+    } else if (isAuthenticationRequest(request)) {
+      tabType = 'auth-request'
+      title = request.name
     } else {
       return // Unknown request type
     }
@@ -479,6 +489,30 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
           environments,
           allowFullscreen: true
         } as WebSocketRequestTab
+      }
+      if (isODataRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'odata-request',
+          title: requestItem.name,
+          titleString: requestItem.name,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as ODataRequestTab
+      }
+      if (isAuthenticationRequest(requestItem)) {
+        return {
+          id: tabId,
+          tabType: 'auth-request',
+          title: requestItem.name,
+          titleString: requestItem.name,
+          request: requestItem,
+          breadcrumbs,
+          environments,
+          allowFullscreen: true
+        } as AuthenticationRequestTab
       }
     }
     return null

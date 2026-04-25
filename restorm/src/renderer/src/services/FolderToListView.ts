@@ -5,8 +5,8 @@
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 import { IconView } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
-import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest } from '../../../shared/types/collections'
-import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest } from '../../../shared/types/collections'
+import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest } from '../../../shared/types/collections'
+import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest } from '../../../shared/types/collections'
 import React, { type ReactNode } from 'react'
 
 /** Convert an Icon to a ListView-compatible icon (string for codicons, ReactNode for others) */
@@ -107,9 +107,44 @@ function websocketRequestToListViewItem(
 }
 
 /**
+ * Convert an ODataRequest to a ListViewItemData. Phase 1 shows a
+ * dedicated `odata` badge so entries don't masquerade as plain HTTP
+ * GETs in the sidebar. The badge label changes across phases when
+ * actions ('ACT') and functions ('FN') land (OYO-180 phase 4).
+ */
+function odataRequestToListViewItem(
+  request: ODataRequest,
+  options: FolderToListViewOptions
+): ListViewItemData {
+  const badge = options.renderProtocolBadge?.('odata', 'ODATA')
+  return {
+    id: request.id,
+    title: request.name,
+    icon: badge
+  }
+}
+
+/**
+ * Convert an AuthenticationRequest to a ListViewItemData. Auth
+ * requests render a key-icon badge instead of the HTTP method
+ * (so they stand out in the tree when the importer creates them).
+ */
+function authenticationRequestToListViewItem(
+  request: AuthenticationRequest,
+  options: FolderToListViewOptions
+): ListViewItemData {
+  const badge = options.renderProtocolBadge?.('auth', 'AUTH')
+  return {
+    id: request.id,
+    title: request.name,
+    icon: badge
+  }
+}
+
+/**
  * Convert a FolderItem (Folder, EnvironmentFolder, or Request) to ListViewItemData
  */
-function folderItemToListViewItem(
+export function folderItemToListViewItem(
   item: FolderItem,
   options: FolderToListViewOptions
 ): ListViewItemData {
@@ -128,6 +163,12 @@ function folderItemToListViewItem(
     }
     if (isWebSocketRequest(item)) {
       return websocketRequestToListViewItem(item, options)
+    }
+    if (isODataRequest(item)) {
+      return odataRequestToListViewItem(item, options)
+    }
+    if (isAuthenticationRequest(item)) {
+      return authenticationRequestToListViewItem(item, options)
     }
   }
 

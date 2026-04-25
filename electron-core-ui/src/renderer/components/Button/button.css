@@ -3,6 +3,17 @@
 	display: inline-block;
 }
 
+/* `fullWidth` — let the button stretch its parent. Used by list rows
+   / popover entries (env selector, auth selector, …) where the button
+   IS the row, not a chip inside it. The `.text-button.full-width`
+   rule lives at the END of this file so it wins source-order against
+   `.text-button.small-button` (`width: 20px`) and `.text-button.line-button`
+   (`width: 28px`) — which have equal specificity. */
+.button-container.full-width {
+	display: block;
+	width: 100%;
+}
+
 .text-button {
 	box-sizing: border-box;
 	display: flex;
@@ -314,4 +325,11 @@
 
 .text-button.small-button:hover {
 	background-color: var(--toolbar-hoverBackground);
+}
+
+/* Last in file so source order wins against the small-button / line-button width overrides above. */
+.text-button.full-width {
+	width: 100%;
+	min-width: 0;
+	max-width: none;
 }

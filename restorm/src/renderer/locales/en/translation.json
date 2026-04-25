@@ -12,6 +12,11 @@
       "applyToAll": "Apply to all requests"
     }
   },
+  "authFailureToast": {
+    "title": "Authentication failed",
+    "fallbackReason": "The authentication request did not succeed.",
+    "openAuthRoute": "Open authentication route"
+  },
   "menuBar": {
     "file": "File",
     "new": "New...",
@@ -43,7 +48,22 @@
       "clone": "Clone",
       "rename": "Rename",
       "addToFavorites": "Add to favorites",
-      "removeFromFavorites": "Remove from favorites"
+      "removeFromFavorites": "Remove from favorites",
+      "add": {
+        "title": "Add",
+        "folder": "Folder",
+        "httpGet": "HTTP – GET request",
+        "httpPost": "HTTP – POST request",
+        "httpPut": "HTTP – PUT request",
+        "httpPatch": "HTTP – PATCH request",
+        "httpDelete": "HTTP – DELETE request",
+        "graphql": "GraphQL request",
+        "grpc": "gRPC request",
+        "soap": "SOAP request",
+        "websocket": "WebSocket request",
+        "odata": "OData request",
+        "auth": "HTTP authentication request"
+      }
     },
     "deleteConfirm": {
       "title": "Confirm deletion",

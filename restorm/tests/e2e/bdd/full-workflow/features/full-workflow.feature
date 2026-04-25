@@ -35,6 +35,11 @@ Feature: Full workflow end-to-end scenario
     When I cancel the import modal
 
     When I import the URL "http://localhost:8080/api/swagger.json"
+    # OData — the AspNetCoreOData petstore exposes its CSDL/EDMX at
+    # /odata/$metadata. Exercises the Phase-1 EDMX v4 parser + the
+    # format detector added in OYO-181. The generated folder name is
+    # the schema namespace (`OData.PetStore.Models`).
+    When I import the URL "http://localhost:5100/odata/$metadata"
     When I import the sample file "swagger-petstore.json"
     When I import the sample file "asyncapi-docker.yaml"
     When I import the sample file "asyncapi-petstore.yaml"
@@ -53,6 +58,7 @@ Feature: Full workflow end-to-end scenario
     When I save all with Ctrl+Shift+S
     Then the sidebar should contain the folder "Swagger Petstore"
     And the sidebar should show a child of "Swagger Petstore"
+    And the sidebar should contain the folder "OData.PetStore.Models"
 
     When I click the sidebar collapse-all button
     Then every sidebar folder should be collapsed
@@ -276,7 +282,6 @@ Feature: Full workflow end-to-end scenario
     # depends on which group the reopened tab landed in.
     When I right-click the tab "Find pet by ID" and choose close-others
     Then exactly 3 workbench tabs should be open
-    When I snapshot the current window as the final screenshot
 
     When I save the file with Ctrl+S
     When I close the current file
@@ -369,6 +374,59 @@ Feature: Full workflow end-to-end scenario
     Then a request tab for "SearchableRenamed" should be open
     When I focus the "SearchableRenamed" tab
     Then the active request tab should show the "localhost" environment
+
+    # Sidebar "Ajouter" submenu: every entry builds a properly-typed
+    # empty item under the right-clicked parent, registers it with the
+    # reactive store, and opens a workbench tab. We create a folder
+    # first, then drop one of every request type into it so the badge
+    # + tab-open contract is exercised end-to-end. The created names
+    # are the untranslated defaults `handleAddChildItem` emits.
+    When I close every open tab in the workbench
+    And I add a "folder" under the folder "SwaggerRenamedFolder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the folder "New Folder"
+    And a folder tab for "New Folder" should be open
+    When I add a "http-get" under the folder "New Folder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the request "New GET request"
+    And a request tab for "New GET request" should be open
+    When I add a "http-post" under the folder "New Folder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the request "New POST request"
+    When I add a "http-put" under the folder "New Folder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the request "New PUT request"
+    When I add a "http-patch" under the folder "New Folder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the request "New PATCH request"
+    When I add a "http-delete" under the folder "New Folder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the request "New DELETE request"
+    When I add a "graphql" under the folder "New Folder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the request "New GraphQL request"
+    When I add a "grpc" under the folder "New Folder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the request "New gRPC request"
+    When I add a "soap" under the folder "New Folder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the request "New SOAP request"
+    When I add a "websocket" under the folder "New Folder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the request "New WebSocket request"
+    When I add a "odata" under the folder "New Folder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the request "New OData request"
+    When I add a "auth" under the folder "New Folder" via the sidebar Ajouter submenu
+    Then the sidebar should contain the request "New auth request"
+
+    # Empty-area sidebar Ajouter submenu — root-level HTTP request,
+    # then verify it shows up in the global search results (regression
+    # for the SearchIndexService bail-out on missing parentFolderId).
+    # The earlier "New Folder" step already created a "New GET request"
+    # nested under it, so we rename the freshly-added root copy to a
+    # unique probe string. Then searching for that probe proves the
+    # ROOT request was indexed (not just the nested one).
+    When I add a root-level "http-get" via the sidebar empty-area Ajouter submenu
+    And I rename the last sidebar request "New GET request" to "RootSearchProbe"
+    Then the sidebar should contain the request "RootSearchProbe"
+    # Persist before searching — the rename above marks the file dirty,
+    # and the close-app step at the very end can't tolerate the unsaved-
+    # changes confirmation dialog (it's intentionally not mocked).
+    When I save the file with Ctrl+S
+    When I open the global search bar
+    And I type "RootSearchProbe" in the global search bar
+    Then a global search result should match "RootSearchProbe"
+    When I close the global search bar
 
     # Ctrl+Alt+Left/Right: send the focused tab to the adjacent group
     # (create a new one on demand). Exercises the 6 canonical layout

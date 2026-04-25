@@ -85,6 +85,7 @@ export class HTTPRequest extends BaseRequest {
     documentation?: string
     notes?: string
     tags?: string[]
+    authenticationRequestId?: RuntimeId
     method?: HTTPMethod
     url?: string
     headers?: Parameters<typeof KeyValue.fromPlain>[0][]
@@ -100,6 +101,7 @@ export class HTTPRequest extends BaseRequest {
       documentation: obj.documentation ?? '',
       ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
+      ...(obj.authenticationRequestId !== undefined && { authenticationRequestId: obj.authenticationRequestId }),
       method: obj.method ?? 'GET',
       url: obj.url ?? '',
       headers: (obj.headers ?? []) as KeyValue[],
@@ -122,6 +124,7 @@ export class HTTPRequest extends BaseRequest {
       documentation: this.documentation,
       notes: this.notes,
       tags: this.tags,
+      ...(this.authenticationRequestId !== undefined && { authenticationRequestId: this.authenticationRequestId }),
       method: this.method,
       url: this.url,
       headers: this.headers.map(h => h.toPlainObject()),

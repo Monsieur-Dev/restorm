@@ -25,6 +25,8 @@ import { SoapRequest } from '../../../shared/models/requests/SoapRequest'
 import { GrpcRequest } from '../../../shared/models/requests/GrpcRequest'
 import { GraphQLRequest } from '../../../shared/models/requests/GraphQLRequest'
 import { WebSocketRequest } from '../../../shared/models/requests/WebSocketRequest'
+import { ODataRequest } from '../../../shared/models/requests/ODataRequest'
+import { AuthenticationRequest } from '../../../shared/models/requests/AuthenticationRequest'
 
 /**
  * Class resolver for `decomposeForPersistence` — maps each walked item
@@ -49,6 +51,8 @@ const restormClassResolver = (item: Record<string, unknown>, parentClass: object
   if (type === 'grpc') return GrpcRequest
   if (type === 'graphql') return GraphQLRequest
   if (type === 'websocket') return WebSocketRequest
+  if (type === 'odata') return ODataRequest
+  if (type === 'auth') return AuthenticationRequest
   // Everything without a `type` discriminator is a folder-like node.
   // Descendants of an EnvironmentFolder are regular Folders; everything
   // under a Folder stays a Folder.
@@ -57,7 +61,7 @@ const restormClassResolver = (item: Record<string, unknown>, parentClass: object
 }
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
 import { searchIndexService } from '../services/SearchIndexService'
-import { makeReactiveFolder } from '../types/reactive'
+import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
 import { prepareForSerialization, processAfterDeserialization } from '../utils/serialization'
 import { normalizeFileFormatVersion } from '../../../shared/config/fileFormatVersion'
 import type { Folder, EnvironmentFolder, Request, FolderItem, Environment } from '../../../shared/types/collections'
@@ -138,6 +142,40 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   const isLoadingRef = useRef(false)
 
   /**
+   * Compose the on-disk folder name for a root collection the exact
+   * same way `saveFolderStructure` does in the main process — that's
+   * the function that physically lays out the workspace at save-all
+   * time, so per-unit saves (`handleMenuSaveUnit`) must stay aligned
+   * with its naming scheme or they end up writing to a parallel,
+   * orphan hierarchy. `getPaddingWidth` matches the main-side helper
+   * (`max(1, digits)`) — different from the generic decomposer default
+   * (`max(2, digits)`) which would produce "01 - …" where
+   * `saveFolderStructure` produces "1 - …".
+   */
+  const rootFolderName = useCallback(
+    (root: Record<string, unknown>, rootIdx: number, rootCount: number): string => {
+      const paddingWidth = rootCount <= 0 ? 1 : String(rootCount).length
+      const paddedIndex = String(rootIdx + 1).padStart(paddingWidth, '0')
+      const rawName = typeof root['name'] === 'string' ? root['name'] : `Collection_${rootIdx + 1}`
+      const safeName = rawName
+        .replace(/[<>:"/\\|?*]/g, '_')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 100)
+      return `${paddedIndex} - ${safeName}`
+    },
+    []
+  )
+
+  const joinFolderPath = useCallback((a: string, b: string): string => {
+    if (!a) return b
+    if (!b) return a
+    const sep = a.includes('\\') && !a.includes('/') ? '\\' : '/'
+    const endsWithSep = a.endsWith('/') || a.endsWith('\\')
+    return endsWithSep ? `${a}${b}` : `${a}${sep}${b}`
+  }, [])
+
+  /**
    * Walk `rootItems` with the decomposer and seed the save-unit registry
    * with one entry per `@separateFiles` / `@separateFolders` descendant.
    *
@@ -163,20 +201,28 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       // occurrence). Keep only the first unit per id so the reference
       // matches the tree the user actually edits.
       const seen = new Set<string>()
-      for (const root of items) {
+      const rootCount = items.length
+      for (let rootIdx = 0; rootIdx < rootCount; rootIdx += 1) {
+        const root = items[rootIdx]
+        if (!root) continue
         const rootPojo = JSON.parse(JSON.stringify(root)) as Record<string, unknown>
         const rootClass: object = root instanceof EnvironmentFolderClass
           ? EnvironmentFolderClass
           : root instanceof FolderClass
             ? FolderClass
             : EnvironmentFolderClass
+        // Same root-folder wrapping as `getOrBuildUnitMap` /
+        // `buildFileModeDecomposition` so the hydrated `reference`
+        // content matches what per-unit save would produce.
+        const rootBasePath = joinFolderPath(basePath, rootFolderName(rootPojo, rootIdx, rootCount))
         const decomposed = decomposeForPersistence({
           root: rootPojo,
           rootClass,
-          basePath,
+          basePath: rootBasePath,
           format: fmt,
           extension: fmt,
-          classResolver: restormClassResolver
+          classResolver: restormClassResolver,
+          indexPaddingMin: 1
         })
         const all: DecomposedUnit[] = [decomposed.rootIndex, ...decomposed.children]
         for (const unit of all) {
@@ -194,7 +240,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     } catch (err) {
       logger.warn('[useFileManagement] Save-unit hydration failed', { error: String(err) })
     }
-  }, [currentFolderPath, filePath, folderFormat])
+  }, [currentFolderPath, filePath, folderFormat, rootFolderName, joinFolderPath])
 
   // Save handlers
   const handleMenuSave = useCallback(async (): Promise<boolean> => {
@@ -271,26 +317,32 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
    */
   const buildFileModeDecomposition = useCallback((): Map<string, DecomposedUnit> => {
     const units = new Map<string, DecomposedUnit>()
-    for (const root of rootItems) {
+    const rootCount = rootItems.length
+    rootItems.forEach((root, rootIdx) => {
       const rootPojo = JSON.parse(JSON.stringify(root)) as Record<string, unknown>
       const rootClass: object = root instanceof EnvironmentFolderClass
         ? EnvironmentFolderClass
         : root instanceof FolderClass
           ? FolderClass
           : EnvironmentFolderClass
+      // In file mode `absolutePath` is meaningless but we still wrap
+      // each root in its own pseudo-folder so child `parentId` chains
+      // and `runtimeId → unit` lookups are consistent across roots.
+      const rootBasePath = joinFolderPath(filePath ?? '', rootFolderName(rootPojo, rootIdx, rootCount))
       const decomposed = decomposeForPersistence({
         root: rootPojo,
         rootClass,
-        basePath: filePath ?? '',
+        basePath: rootBasePath,
         format: folderFormat,
         extension: folderFormat,
-        classResolver: restormClassResolver
+        classResolver: restormClassResolver,
+        indexPaddingMin: 1
       })
       units.set(decomposed.rootIndex.runtimeId, decomposed.rootIndex)
       for (const child of decomposed.children) units.set(child.runtimeId, child)
-    }
+    })
     return units
-  }, [rootItems, filePath, folderFormat])
+  }, [rootItems, filePath, folderFormat, rootFolderName, joinFolderPath])
 
   const getOrBuildUnitMap = useCallback((): Map<string, DecomposedUnit> => {
     const cache = decomposeCacheRef.current
@@ -304,28 +356,39 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     }
     const units = new Map<string, DecomposedUnit>()
     if (currentFolderPath) {
-      for (const root of rootItems) {
+      const rootCount = rootItems.length
+      rootItems.forEach((root, rootIdx) => {
         const rootPojo = JSON.parse(JSON.stringify(root)) as Record<string, unknown>
         const rootClass: object = root instanceof EnvironmentFolderClass
           ? EnvironmentFolderClass
           : root instanceof FolderClass
             ? FolderClass
             : EnvironmentFolderClass
+        // Wrap each root in its own `{idx} - {name}` folder to match
+        // `saveFolderStructure` (main-process save-all). The earlier
+        // version passed `currentFolderPath` directly which meant
+        // `decomposeForPersistence` treated each root's *children* as
+        // immediate descendants of the workspace root — typing + Ctrl+S
+        // on a nested request produced an orphan sibling folder at the
+        // workspace root (e.g. `04 - accounts/` alongside
+        // `1 - Microsoft.Dynamics.CRM/` instead of inside it).
+        const rootBasePath = joinFolderPath(currentFolderPath, rootFolderName(rootPojo, rootIdx, rootCount))
         const decomposed = decomposeForPersistence({
           root: rootPojo,
           rootClass,
-          basePath: currentFolderPath,
+          basePath: rootBasePath,
           format: folderFormat,
           extension: folderFormat,
-          classResolver: restormClassResolver
+          classResolver: restormClassResolver,
+          indexPaddingMin: 1
         })
         units.set(decomposed.rootIndex.runtimeId, decomposed.rootIndex)
         for (const child of decomposed.children) units.set(child.runtimeId, child)
-      }
+      })
     }
     decomposeCacheRef.current = { rootItems, basePath: currentFolderPath, format: folderFormat, units }
     return units
-  }, [rootItems, currentFolderPath, folderFormat])
+  }, [rootItems, currentFolderPath, folderFormat, rootFolderName, joinFolderPath])
 
   /**
    * Collect the set of save-unit ids to commit for a given Ctrl+S target.
@@ -678,7 +741,14 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         for (const root of collectionsWithIds) {
           normalizeFileFormatVersion(root, logger)
         }
-        const reactiveItems = collectionsWithIds.map((folder) => makeReactiveFolder(folder)) as EnvironmentFolder[]
+        // Requests can legally live at the root (see `useImport`'s
+        // empty-file branch). Folders and env-folders go through
+        // `makeReactiveFolder`; root-level requests go through
+        // `makeReactiveRequest` with no parent id so edits still emit
+        // `REQUEST_UPDATED` into the dirty tracker / search index.
+        const reactiveItems = collectionsWithIds.map((item) =>
+          'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
+        )
         setRootItems(reactiveItems)
 
         // Hydrate the save-unit registry so per-unit dirty dots start
@@ -702,10 +772,13 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
             }
           }
 
-          for (const folder of reactiveItems) {
-            const folderChecksum = computeChecksum(JSON.parse(JSON.stringify(folder)))
-            registerTabDirtyState(folder.id, folderChecksum)
-            registerAllItems(folder.items)
+          for (const rootItem of reactiveItems) {
+            const rootChecksum = computeChecksum(JSON.parse(JSON.stringify(rootItem)))
+            registerTabDirtyState(rootItem.id, rootChecksum)
+            // Requests at root are leaves with no children to register.
+            if ('items' in rootItem) {
+              registerAllItems(rootItem.items)
+            }
           }
         }
 
@@ -739,18 +812,24 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
           }
         }
 
-        for (const folder of reactiveItems) {
-          if (isEnvironmentFolder(folder as FolderItem)) {
-            const envFolder = folder
-            for (const env of envFolder.environments) {
-              emitEnvironmentCreated(env, envFolder.id)
+        for (const rootItem of reactiveItems) {
+          if (isEnvironmentFolder(rootItem)) {
+            for (const env of rootItem.environments) {
+              emitEnvironmentCreated(env, rootItem.id)
             }
           }
         }
 
         await searchIndexService.initialize()
-        for (const folder of reactiveItems) {
-          await searchIndexService.indexFolderTree(folder)
+        for (const rootItem of reactiveItems) {
+          // `indexFolderTree` walks folders recursively; requests at
+          // the root need their own indexing path (no parent folder
+          // to hand off to).
+          if ('items' in rootItem) {
+            await searchIndexService.indexFolderTree(rootItem)
+          } else {
+            await searchIndexService.indexRootRequest(rootItem)
+          }
         }
 
         await finishLoading()

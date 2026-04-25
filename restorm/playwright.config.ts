@@ -26,6 +26,18 @@ const dirtyStateTestDir = defineBddConfig({
   outputDir: '.features-gen/dirty-state'
 })
 
+const odataPetstoreTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/odata-petstore/features/**/*.feature',
+  steps: ['tests/e2e/bdd/odata-petstore/steps/**/*.ts', 'tests/e2e/bdd/fixtures/odata-petstore.fixture.ts'],
+  outputDir: '.features-gen/odata-petstore'
+})
+
+const authLoginTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/auth-login/features/**/*.feature',
+  steps: ['tests/e2e/bdd/auth-login/steps/**/*.ts', 'tests/e2e/bdd/fixtures/auth-login.fixture.ts'],
+  outputDir: '.features-gen/auth-login'
+})
+
 /**
  * Playwright configuration for Electron E2E tests using playwright-bdd.
  * Each test group has its own project with a dedicated fixture.
@@ -64,7 +76,8 @@ export default defineConfig({
     },
     {
       name: 'full-workflow',
-      testDir: fullWorkflowTestDir
+      testDir: fullWorkflowTestDir,
+      timeout: 180 * 1000 // 3 min — cumulative scenario grew with OYO-209 Ajouter submenu coverage
     },
     {
       name: 'swagger-import',
@@ -73,6 +86,14 @@ export default defineConfig({
     {
       name: 'dirty-state',
       testDir: dirtyStateTestDir
+    },
+    {
+      name: 'odata-petstore',
+      testDir: odataPetstoreTestDir
+    },
+    {
+      name: 'auth-login',
+      testDir: authLoginTestDir
     }
   ]
 })

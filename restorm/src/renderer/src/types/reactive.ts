@@ -7,8 +7,8 @@
 
 import { eventBus, logger } from 'electron-core-ui/renderer'
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
-import type { Folder, HTTPRequest, FolderItem, Request, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, Environment } from '../../../shared/types/collections'
-import { isAnyFolder, isHTTPRequest, isRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isEnvironmentFolder } from '../../../shared/types/collections'
+import type { Folder, HTTPRequest, FolderItem, Request, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest, Environment } from '../../../shared/types/collections'
+import { isAnyFolder, isHTTPRequest, isRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isEnvironmentFolder } from '../../../shared/types/collections'
 
 // ============================================================================
 // Indexable Properties Configuration
@@ -43,6 +43,7 @@ const HTTP_REQUEST_INDEXABLE_KEYS = new Set([
   'documentation',
   'notes',
   'tags',
+  'authenticationRequestId',
   'method',
   'url',
   'headers',
@@ -57,6 +58,7 @@ const GRAPHQL_REQUEST_INDEXABLE_KEYS = new Set([
   'documentation',
   'notes',
   'tags',
+  'authenticationRequestId',
   'url',
   'headers',
   'operationType',
@@ -70,6 +72,7 @@ const GRPC_REQUEST_INDEXABLE_KEYS = new Set([
   'documentation',
   'notes',
   'tags',
+  'authenticationRequestId',
   'url',
   'metadata',
   'service',
@@ -84,6 +87,7 @@ const SOAP_REQUEST_INDEXABLE_KEYS = new Set([
   'documentation',
   'notes',
   'tags',
+  'authenticationRequestId',
   'url',
   'headers',
   'service',
@@ -98,11 +102,53 @@ const WEBSOCKET_REQUEST_INDEXABLE_KEYS = new Set([
   'documentation',
   'notes',
   'tags',
+  'authenticationRequestId',
   'url',
   'headers',
   'protocol',
   'event',
   'message'
+])
+
+/** Properties that trigger re-indexing when modified (OData requests) */
+const ODATA_REQUEST_INDEXABLE_KEYS = new Set([
+  'name',
+  'documentation',
+  'notes',
+  'tags',
+  'authenticationRequestId',
+  'url',
+  'odataVersion',
+  'operationKind',
+  'headers',
+  'params',
+  'queryOptions',
+  'actionBody',
+  'batchSubRequests',
+  'entitySetProperties',
+  'navigationProperties',
+  'operationParameters',
+  'deprecated'
+])
+
+/** Properties that trigger re-indexing when modified (Auth requests).
+ * Auth requests mirror HTTP requests and add auth-specific fields. */
+const AUTH_REQUEST_INDEXABLE_KEYS = new Set([
+  'name',
+  'documentation',
+  'notes',
+  'tags',
+  'authenticationRequestId',
+  'method',
+  'url',
+  'headers',
+  'params',
+  'pathParams',
+  'body',
+  'producedHeaders',
+  'expirationExpression',
+  'authErrorCodes',
+  'deprecated'
 ])
 
 /** Properties that trigger re-indexing when modified (Environments) */
@@ -137,9 +183,30 @@ const DOC_ID_SYMBOL = Symbol('docId')
 /** Symbol to store the parent folder ID (for requests) */
 const PARENT_ID_SYMBOL = Symbol('parentId')
 
-/** Check if an object is already reactive */
+/** Check if an object is already reactive.
+ *
+ * Uses property access (goes through the proxy's `get` trap) rather
+ * than the `in` operator. The array/document proxy handlers only
+ * intercept `get`, not `has`, so `REACTIVE_SYMBOL in proxy` delegates
+ * to the underlying target — which never carries the symbol — and
+ * reports false for every proxy we already created.
+ *
+ * With the bug, every render of a tab view calls `request.headers`
+ * (and similar reactive arrays), the proxy handler sees the stored
+ * wrapper as "not reactive", and re-wraps it in a new Proxy on every
+ * get. Consumer components that accept the wrapped array as a prop
+ * (e.g. `ODataPropertyChips` with `properties={request.entitySetProperties}`)
+ * see a new reference every render, which breaks `React.memo` and
+ * re-renders their descendants. For a 362-option MultiSelectCombo,
+ * this turns into ~500 ms of commit work per keystroke at the
+ * fully-typed filter length. */
 function isReactive(obj: unknown): boolean {
-  return typeof obj === 'object' && obj !== null && REACTIVE_SYMBOL in obj
+  if (typeof obj !== 'object' || obj === null) return false
+  try {
+    return (obj as Record<symbol, unknown>)[REACTIVE_SYMBOL] === true
+  } catch {
+    return false
+  }
 }
 
 // ============================================================================
@@ -429,9 +496,11 @@ export function makeReactiveFolder(folder: Folder): Folder {
 }
 
 /**
- * Make an HTTPRequest reactive - it will emit events when indexable properties change
+ * Make an HTTPRequest reactive - it will emit events when indexable properties change.
+ * `parentFolderId` is optional: root-level requests (no enclosing folder) pass nothing,
+ * and the `REQUEST_UPDATED` payload then carries no `parentFolderId`.
  */
-export function makeReactiveHTTPRequest(request: HTTPRequest, parentFolderId: string): HTTPRequest {
+export function makeReactiveHTTPRequest(request: HTTPRequest, parentFolderId?: string): HTTPRequest {
   if (isReactive(request)) {
     return request
   }
@@ -441,7 +510,7 @@ export function makeReactiveHTTPRequest(request: HTTPRequest, parentFolderId: st
 /**
  * Make a GraphQLRequest reactive - it will emit events when indexable properties change
  */
-export function makeReactiveGraphQLRequest(request: GraphQLRequest, parentFolderId: string): GraphQLRequest {
+export function makeReactiveGraphQLRequest(request: GraphQLRequest, parentFolderId?: string): GraphQLRequest {
   if (isReactive(request)) {
     return request
   }
@@ -451,7 +520,7 @@ export function makeReactiveGraphQLRequest(request: GraphQLRequest, parentFolder
 /**
  * Make a GrpcRequest reactive - it will emit events when indexable properties change
  */
-export function makeReactiveGrpcRequest(request: GrpcRequest, parentFolderId: string): GrpcRequest {
+export function makeReactiveGrpcRequest(request: GrpcRequest, parentFolderId?: string): GrpcRequest {
   if (isReactive(request)) {
     return request
   }
@@ -461,7 +530,7 @@ export function makeReactiveGrpcRequest(request: GrpcRequest, parentFolderId: st
 /**
  * Make a SoapRequest reactive - it will emit events when indexable properties change
  */
-export function makeReactiveSoapRequest(request: SoapRequest, parentFolderId: string): SoapRequest {
+export function makeReactiveSoapRequest(request: SoapRequest, parentFolderId?: string): SoapRequest {
   if (isReactive(request)) {
     return request
   }
@@ -471,7 +540,7 @@ export function makeReactiveSoapRequest(request: SoapRequest, parentFolderId: st
 /**
  * Make a WebSocketRequest reactive - it will emit events when indexable properties change
  */
-export function makeReactiveWebSocketRequest(request: WebSocketRequest, parentFolderId: string): WebSocketRequest {
+export function makeReactiveWebSocketRequest(request: WebSocketRequest, parentFolderId?: string): WebSocketRequest {
   if (isReactive(request)) {
     return request
   }
@@ -479,9 +548,32 @@ export function makeReactiveWebSocketRequest(request: WebSocketRequest, parentFo
 }
 
 /**
- * Make any Request type reactive - it will emit events when indexable properties change
+ * Make an ODataRequest reactive - it will emit events when indexable properties change
  */
-export function makeReactiveRequest(request: Request, parentFolderId: string): Request {
+export function makeReactiveODataRequest(request: ODataRequest, parentFolderId?: string): ODataRequest {
+  if (isReactive(request)) {
+    return request
+  }
+  return new Proxy(request, createDocumentProxyHandler('request', ODATA_REQUEST_INDEXABLE_KEYS, parentFolderId) as ProxyHandler<ODataRequest>)
+}
+
+/**
+ * Make an AuthenticationRequest reactive - it will emit events when indexable properties change
+ */
+export function makeReactiveAuthenticationRequest(request: AuthenticationRequest, parentFolderId?: string): AuthenticationRequest {
+  if (isReactive(request)) {
+    return request
+  }
+  return new Proxy(request, createDocumentProxyHandler('request', AUTH_REQUEST_INDEXABLE_KEYS, parentFolderId) as ProxyHandler<AuthenticationRequest>)
+}
+
+/**
+ * Make any Request type reactive - it will emit events when indexable properties change.
+ * `parentFolderId` may be omitted for root-level requests (e.g. an attached auth route
+ * sitting at the top of a collection) — the resulting `REQUEST_UPDATED` payload simply
+ * carries no `parentFolderId`.
+ */
+export function makeReactiveRequest(request: Request, parentFolderId?: string): Request {
   if (isReactive(request)) {
     return request
   }
@@ -500,13 +592,20 @@ export function makeReactiveRequest(request: Request, parentFolderId: string): R
   if (isWebSocketRequest(request)) {
     return makeReactiveWebSocketRequest(request, parentFolderId)
   }
+  if (isODataRequest(request)) {
+    return makeReactiveODataRequest(request, parentFolderId)
+  }
+  if (isAuthenticationRequest(request)) {
+    return makeReactiveAuthenticationRequest(request, parentFolderId)
+  }
   return request
 }
 
 /**
- * Make a FolderItem (Folder or Request) reactive
+ * Make a FolderItem (Folder or Request) reactive.
+ * `parentFolderId` may be omitted for root-level items.
  */
-export function makeReactiveFolderItem(item: FolderItem, parentFolderId: string): FolderItem {
+export function makeReactiveFolderItem(item: FolderItem, parentFolderId?: string): FolderItem {
   if (isAnyFolder(item)) {
     return makeReactiveFolder(item)
   } else if (isRequest(item)) {

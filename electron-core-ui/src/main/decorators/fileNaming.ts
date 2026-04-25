@@ -61,7 +61,8 @@ export function generateFileName(
   target: unknown,
   document: Record<string, unknown>,
   index: number,
-  totalCount: number
+  totalCount: number,
+  indexPaddingMin = 2
 ): string {
   const config = getFileNamingConfig(target)
   if (!config) {
@@ -69,8 +70,10 @@ export function generateFileName(
     return nameOrId
   }
 
-  // Calculate padding for index
-  const digits = Math.max(2, String(totalCount).length)
+  // Calculate padding for index — host can widen (min 2, historical)
+  // or tighten (min 1, aligning with file-system writers that don't
+  // pre-pad single-digit counts).
+  const digits = Math.max(indexPaddingMin, String(totalCount).length)
   const paddedIndex = String(index + 1).padStart(digits, '0')
 
   // Get type value

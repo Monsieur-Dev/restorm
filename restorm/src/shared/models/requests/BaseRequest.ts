@@ -47,6 +47,13 @@ export abstract class BaseRequest {
   @searchable.property({ weight: 1.5, filterable: true })
   tags: string[] = []
 
+  /** Optional id of an {@link AuthenticationRequest} whose produced
+   * headers must be injected before this request is dispatched. The
+   * execution engine resolves the id against the containing env
+   * folder at run time; the id itself is the only field persisted. */
+  @graphqlField({ type: 'String', nullable: true })
+  authenticationRequestId?: RuntimeId
+
   constructor(init?: Partial<BaseRequest>) {
     if (init) {
       Object.assign(this, init)

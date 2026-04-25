@@ -13,9 +13,11 @@ import {
 } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
 import type { FolderItem, EnvironmentFolder, Folder } from '../../../../shared/types/collections'
-import { isEnvironmentFolder } from '../../../../shared/types/collections'
+import { isEnvironmentFolder, isRequest } from '../../../../shared/types/collections'
+import type { AuthenticationRequest } from '../../../../shared/models'
 import { mapToBadgeType } from '../../utils/badgeUtils'
 import { logger } from 'electron-core-ui/renderer'
+import { AuthenticationSetupModal } from './AuthenticationSetupModal'
 import './ImportModal.css'
 
 interface PendingFolder {
@@ -45,6 +47,13 @@ export function ImportModal({
   const [isLoading, setIsLoading] = useState(false)
   const [previewItems, setPreviewItems] = useState<FolderItem[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [attachedAuth, setAttachedAuth] = useState<AuthenticationRequest | null>(null)
+  // Resolved auth headers live in a ref rather than state — the only
+  // consumer is the debounced preview closure, and we need the value
+  // to be readable synchronously after `handleAuthAttach` fires
+  // (React state updates batch, so a closure would see `null`).
+  const attachedAuthHeadersRef = useRef<Record<string, string> | null>(null)
+  const [showAuthSetupModal, setShowAuthSetupModal] = useState(false)
   const [targetFolderId, setTargetFolderId] = useState<string | undefined>(undefined)
   const [expandedFolderIds, setExpandedFolderIds] = useState<string[]>(['__root__'])
   const [pendingFolders, setPendingFolders] = useState<PendingFolder[]>([])
@@ -220,8 +229,15 @@ export function ImportModal({
     debounceTimerRef.current = setTimeout(() => {
       void (async () => {
         try {
-          const result = await window.restorm?.import.preview(value.trim())
-          
+          // Read through the ref so the current value lands in the
+          // fetch options even when state updates haven't propagated
+          // through the closure yet (auth-attach re-preview path).
+          const currentHeaders = attachedAuthHeadersRef.current
+          const previewOptions = currentHeaders !== null
+            ? { extraHeaders: currentHeaders }
+            : undefined
+          const result = await window.restorm?.import.preview(value.trim(), previewOptions)
+
           if (result?.success) {
             setPreviewItems(result.items as FolderItem[])
             setError(null)
@@ -283,13 +299,83 @@ export function ImportModal({
   // Handle import click
   const handleImportClick = useCallback(() => {
     if (previewItems.length === 0) return
-    
+
+    // If the user attached an auth request, wire every imported
+    // request to reference it and nest the auth route itself as the
+    // FIRST child of the top-level imported folder (usually the
+    // env-folder the importer produced). The auth route belongs to
+    // the imported collection, not to whatever sits next to it at
+    // the true root — folder-mode save then lays it out as
+    // `Microsoft.Dynamics.CRM/0001 - Authentication route.yaml`
+    // instead of writing a stray auth folder alongside the env
+    // folder.
+    let finalItems: FolderItem[] = previewItems
+    if (attachedAuth) {
+      const authId = attachedAuth.id
+      const attach = (items: FolderItem[]): FolderItem[] => items.map((item) => {
+        if ('items' in item) {
+          return { ...item, items: attach(item.items) }
+        }
+        if (isRequest(item)) {
+          return Object.assign(Object.create(Object.getPrototypeOf(item) as object), item, {
+            authenticationRequestId: authId
+          }) as FolderItem
+        }
+        return item
+      })
+      const attachedTree = attach(previewItems)
+      const firstFolderIdx = attachedTree.findIndex((item) => 'items' in item)
+      if (firstFolderIdx >= 0) {
+        const firstFolder = attachedTree[firstFolderIdx] as Extract<FolderItem, { items: FolderItem[] }>
+        finalItems = [
+          ...attachedTree.slice(0, firstFolderIdx),
+          { ...firstFolder, items: [attachedAuth as unknown as FolderItem, ...firstFolder.items] },
+          ...attachedTree.slice(firstFolderIdx + 1)
+        ]
+      } else {
+        // Shouldn't happen in practice — every importer produces at
+        // least one top-level folder — but fall back to prepending
+        // at the true root rather than dropping the attached auth.
+        finalItems = [attachedAuth as unknown as FolderItem, ...attachedTree]
+      }
+    }
+
     // Call import with current pending folders
-    onImport(previewItems, targetFolderId, pendingFolders)
-    
+    onImport(finalItems, targetFolderId, pendingFolders)
+
     // Close modal (useEffect will clear state when modal closes)
     onClose()
-  }, [previewItems, targetFolderId, pendingFolders, onImport, onClose])
+  }, [previewItems, targetFolderId, pendingFolders, onImport, onClose, attachedAuth])
+
+  const handleAuthAttach = useCallback((authRequest: AuthenticationRequest, resolvedHeaders: Record<string, string>) => {
+    setAttachedAuth(authRequest)
+    attachedAuthHeadersRef.current = resolvedHeaders
+    setShowAuthSetupModal(false)
+    // Re-run the preview with the resolved auth headers.
+    if (input.trim()) {
+      handleInputChange(input)
+    }
+  }, [input, handleInputChange])
+
+  const handleDetachAuth = useCallback(() => {
+    setAttachedAuth(null)
+    attachedAuthHeadersRef.current = null
+    if (input.trim()) {
+      handleInputChange(input)
+    }
+  }, [input, handleInputChange])
+
+  // Count the actual leaf requests the import would create — what the
+  // user ultimately cares about (folders are just scaffolding). Walks
+  // the preview tree recursively; skips folder nodes in the tally.
+  const previewRequestCount = useMemo(() => {
+    const walk = (items: FolderItem[]): number => items.reduce((acc, item) => {
+      if ('items' in item) return acc + walk(item.items)
+      if (isRequest(item)) return acc + 1
+      return acc
+    }, 0)
+    return walk(previewItems)
+  }, [previewItems])
 
   // Build preview ListView items
   const previewListItems: ListViewItemData[] = useMemo(() => {
@@ -440,9 +526,76 @@ export function ImportModal({
           {error && (
             <div className="import-error" role="alert">
               <i className="codicon codicon-error" aria-hidden="true" />
-              {error}
+              <span style={{ flex: 1 }}>{error}</span>
             </div>
           )}
+          {/* Auth-route attach is always available — not just on 401/403 —
+              so users can pre-wire APIs that need a token even when the
+              first request otherwise succeeds (or on file-based imports). */}
+          {!attachedAuth ? (
+            <div style={{ alignSelf: 'flex-start' }}>
+              <Button
+                icon="key"
+                onClick={() => { setShowAuthSetupModal(true) }}
+                options={{
+                  ariaLabel: t('import.addAuth', 'Add an authentication route'),
+                  title: t('import.addAuth', 'Add an authentication route')
+                }}
+                data-testid="import-add-auth-button"
+              >
+                {t('import.addAuth', 'Add an authentication route')}
+              </Button>
+            </div>
+          ) : null}
+          {attachedAuth ? (
+            <div
+              className="import-auth-pill"
+              data-testid="import-auth-pill"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '4px 4px 4px 8px',
+                borderRadius: 12,
+                background: '#f97316',
+                color: '#ffffff',
+                fontSize: 12,
+                alignSelf: 'flex-start'
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => { setShowAuthSetupModal(true) }}
+                title={t('import.editAuth', 'Edit authentication route')}
+                aria-label={t('import.editAuth', 'Edit authentication route')}
+                data-testid="import-edit-auth-button"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  border: 'none',
+                  background: 'transparent',
+                  color: 'inherit',
+                  padding: 0,
+                  cursor: 'pointer',
+                  font: 'inherit'
+                }}
+              >
+                <i className="codicon codicon-key" aria-hidden="true" />
+                <span>{t('import.authenticatedVia', 'Authenticated via {{name}}', { name: attachedAuth.name || 'auth route' })}</span>
+              </button>
+              <Button
+                small
+                icon="close"
+                onClick={handleDetachAuth}
+                options={{
+                  ariaLabel: t('import.detachAuth', 'Detach authentication route'),
+                  title: t('import.detachAuth', 'Detach authentication route')
+                }}
+                data-testid="import-detach-auth-button"
+              />
+            </div>
+          ) : null}
         </div>
 
         {/* Section 3: Preview */}
@@ -475,12 +628,15 @@ export function ImportModal({
           <Button secondary onClick={onClose} data-testid="cancel-button">
             {t('import.cancel')}
           </Button>
-          <Button 
+          <Button
+            emphasis={1}
             onClick={handleImportClick}
             disabled={previewItems.length === 0}
             data-testid="import-button"
           >
-            {t('import.ok')}
+            {previewRequestCount > 0
+              ? `${t('import.ok')} (${previewRequestCount})`
+              : t('import.ok')}
           </Button>
         </div>
       </div>
@@ -527,6 +683,13 @@ export function ImportModal({
           </div>
         </Modal>
       )}
+
+      <AuthenticationSetupModal
+        isOpen={showAuthSetupModal}
+        onClose={() => { setShowAuthSetupModal(false) }}
+        onAttach={handleAuthAttach}
+        {...(attachedAuth ? { initialRequest: attachedAuth } : {})}
+      />
     </Modal>
   )
 }

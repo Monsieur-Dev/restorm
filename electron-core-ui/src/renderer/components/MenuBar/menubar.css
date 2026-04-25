@@ -203,9 +203,14 @@
 }
 
 .codicon-placeholder {
-	width: 16px !important;
+	/* Minimum reservation for a 16px codicon slot, but grows to fit
+	 * wider glyphs (colored method badges, protocol pills) rendered
+	 * in the icon slot so they don't overlap the label. */
+	min-width: 16px !important;
 	height: 16px !important;
-	display: inline-block !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	flex-shrink: 0 !important;
 }
 
 /* Reset all list styles to prevent bullet points */

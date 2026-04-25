@@ -12,6 +12,11 @@
       "applyToAll": "Appliquer à toutes les requêtes"
     }
   },
+  "authFailureToast": {
+    "title": "Échec de l'authentification",
+    "fallbackReason": "La requête d'authentification n'a pas abouti.",
+    "openAuthRoute": "Ouvrir la route d'authentification"
+  },
   "menuBar": {
     "file": "Fichier",
     "new": "Nouveau...",
@@ -43,7 +48,22 @@
       "clone": "Cloner",
       "rename": "Renommer",
       "addToFavorites": "Ajouter aux favoris",
-      "removeFromFavorites": "Retirer des favoris"
+      "removeFromFavorites": "Retirer des favoris",
+      "add": {
+        "title": "Ajouter",
+        "folder": "Dossier",
+        "httpGet": "Requête HTTP – GET",
+        "httpPost": "Requête HTTP – POST",
+        "httpPut": "Requête HTTP – PUT",
+        "httpPatch": "Requête HTTP – PATCH",
+        "httpDelete": "Requête HTTP – DELETE",
+        "graphql": "Requête GraphQL",
+        "grpc": "Requête gRPC",
+        "soap": "Requête SOAP",
+        "websocket": "Requête WebSocket",
+        "odata": "Requête OData",
+        "auth": "Requête HTTP d'authentification"
+      }
     },
     "deleteConfirm": {
       "title": "Confirmer la suppression",

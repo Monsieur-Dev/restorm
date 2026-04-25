@@ -98,6 +98,33 @@ export interface KeyValueTableProps {
    */
   renderDescriptionCell?: React.ComponentType<CellRendererProps> | undefined
   /**
+   * Whether the Description column is rendered. Defaults to `true`.
+   * Set to `false` in use-cases where descriptions aren't meaningful
+   * (e.g. a short auth-config table where the rows are obvious).
+   */
+  showDescription?: boolean | undefined
+  /**
+   * Whether the leading enabled-toggle column is rendered. Defaults
+   * to `true`. Set to `false` when every row of the table is
+   * unconditionally active and showing a checkbox would be
+   * misleading (e.g. the produced-headers table of an auth route).
+   */
+  showEnabledToggle?: boolean | undefined
+  /**
+   * Whether to render an extra read-only "Resolved value" column
+   * between Value and Description. Useful when the raw value is a
+   * template (handlebars, variable expressions, etc.) and the caller
+   * wants to show its evaluated form side-by-side. Defaults to `false`.
+   */
+  showResolvedValue?: boolean | undefined
+  /**
+   * Custom renderer for the resolved-value cell. Receives the raw
+   * `value` (the cell's template text) plus a no-op `onChange` — the
+   * cell is read-only by convention. When omitted, the raw value is
+   * echoed verbatim. Pair with `showResolvedValue: true`.
+   */
+  renderResolvedValueCell?: React.ComponentType<CellRendererProps> | undefined
+  /**
    * Optional persistence key for column widths. Widths are saved to
    * localStorage under `ecu:table:<persistenceId>:column-widths`. When
    * omitted, widths live in memory for the component lifetime only.
@@ -116,6 +143,10 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
     renderKeyCell: KeyCellRenderer = DefaultCellRenderer,
     renderValueCell: ValueCellRenderer = DefaultCellRenderer,
     renderDescriptionCell: DescriptionCellRenderer = DefaultCellRenderer,
+    showDescription = true,
+    showEnabledToggle = true,
+    showResolvedValue = false,
+    renderResolvedValueCell: ResolvedValueCellRenderer = DefaultCellRenderer,
     persistenceId,
     'data-testid': dataTestId
   },
@@ -206,8 +237,11 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
     const KeyRenderer = KeyCellRenderer as ComponentType<CellRendererProps>
     const ValueRenderer = ValueCellRenderer as ComponentType<CellRendererProps>
     const DescRenderer = DescriptionCellRenderer as ComponentType<CellRendererProps>
-    return [
-      {
+    const ResolvedRenderer = ResolvedValueCellRenderer as ComponentType<CellRendererProps>
+    const cols: TableColumn<ParamRow>[] = []
+
+    if (showEnabledToggle) {
+      cols.push({
         id: 'enabled',
         header: '',
         autoWidth: true,
@@ -223,7 +257,10 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
             </div>
           )
         }
-      },
+      })
+    }
+
+    cols.push(
       {
         id: 'key',
         header: 'Key',
@@ -245,7 +282,11 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
         id: 'value',
         header: 'Value',
         resizable: true,
-        minWidth: 80,
+        // Room for an input + a trailing value-type indicator (~34px)
+        // + some slack. A value column squeezed below this width makes
+        // the click target of the input disappear behind the indicator
+        // — Playwright click-interception in practice.
+        minWidth: 140,
         renderCell: (row) => {
           const idx = rows.findIndex((r) => r.id === row.id)
           return (
@@ -257,8 +298,32 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
             />
           )
         }
-      },
-      {
+      }
+    )
+
+    if (showResolvedValue) {
+      cols.push({
+        id: 'resolvedValue',
+        header: 'Resolved value',
+        resizable: true,
+        minWidth: 80,
+        renderCell: (row) => (
+          <ResolvedRenderer
+            value={row.value}
+            // The resolved column is read-only — the renderer
+            // receives the raw template value and displays its
+            // evaluated form; edits flow through the regular Value
+            // column. A no-op onChange keeps the contract uniform.
+            onChange={() => { /* read-only */ }}
+            {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-resolved-value` })}
+            rowId={row.id}
+          />
+        )
+      })
+    }
+
+    if (showDescription) {
+      cols.push({
         id: 'description',
         header: 'Description',
         resizable: true,
@@ -287,9 +352,30 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
             </div>
           )
         }
-      }
-    ]
-  }, [KeyCellRenderer, ValueCellRenderer, DescriptionCellRenderer, rows, updateData, dataTestId, handleRemoveRow])
+      })
+    } else {
+      // When the description column is hidden we still need the
+      // delete affordance somewhere — promote it to its own
+      // autoWidth column at the end.
+      cols.push({
+        id: 'delete',
+        header: '',
+        autoWidth: true,
+        renderCell: (row) => (
+          <Button
+            line
+            secondary
+            {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-delete` })}
+            options={{ ariaLabel: 'Delete row', title: 'Delete row' }}
+            onClick={() => { handleRemoveRow(row.id) }}
+            icon="trash"
+          />
+        )
+      })
+    }
+
+    return cols
+  }, [KeyCellRenderer, ValueCellRenderer, DescriptionCellRenderer, ResolvedValueCellRenderer, showDescription, showResolvedValue, showEnabledToggle, rows, updateData, dataTestId, handleRemoveRow])
 
   return (
     <div

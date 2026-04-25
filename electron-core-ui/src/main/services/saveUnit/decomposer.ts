@@ -38,8 +38,8 @@ function joinPath(a: string, b: string): string {
 }
 
 /** Inline copy of `PersistenceService.calculateIndexPadding` (pure helper). */
-function calculateIndexPadding(totalCount: number): number {
-  return Math.max(2, String(totalCount).length)
+function calculateIndexPadding(totalCount: number, minDigits = 2): number {
+  return Math.max(minDigits, String(totalCount).length)
 }
 
 export interface DecomposedUnit {
@@ -86,6 +86,15 @@ export interface DecomposeOptions {
    * ```
    */
   classResolver?: (item: Record<string, unknown>, parentClass: object | undefined, propKey: string) => object | undefined
+  /**
+   * Minimum number of digits to pad the numeric `{index}` token in
+   * `@fileNaming` patterns and in the fallback naming helper. Defaults
+   * to `2` to preserve historical layouts. Set to `1` if the host's
+   * save-all writer uses a `max(1, digits)` padding scheme — keeping
+   * per-unit save paths aligned avoids producing `01 - foo/` next to
+   * an existing `1 - foo/`.
+   */
+  indexPaddingMin?: number
 }
 
 /**
@@ -154,17 +163,18 @@ function nameItem(
   item: Record<string, unknown>,
   index: number,
   totalCount: number,
-  classConstructor: object | undefined
+  classConstructor: object | undefined,
+  indexPaddingMin: number
 ): string {
   if (classConstructor) {
-    return generateFileName(classConstructor, item, index, totalCount)
+    return generateFileName(classConstructor, item, index, totalCount, indexPaddingMin)
   }
   const pattern: FileNamingConfig = {
     pattern: '{index} - {name}',
     nameProperty: 'name',
     idProperty: 'id'
   }
-  const padding = calculateIndexPadding(totalCount)
+  const padding = calculateIndexPadding(totalCount, indexPaddingMin)
   const paddedIndex = String(index + 1).padStart(padding, '0')
   const rawName = item['name']
   const name = typeof rawName === 'string' ? rawName : ''
@@ -192,8 +202,9 @@ function processNode(params: {
   idProperty: string
   classResolver: (item: Record<string, unknown>, parentClass: object | undefined, propKey: string) => object | undefined
   accumulator: DecomposedUnit[]
+  indexPaddingMin: number
 }): Record<string, unknown> {
-  const { node, nodeClass, nodePath, nodeKind, parentId, format, extension, indexFileName, idProperty, classResolver, accumulator } = params
+  const { node, nodeClass, nodePath, nodeKind, parentId, format, extension, indexFileName, idProperty, classResolver, accumulator, indexPaddingMin } = params
 
   // Collect the two decorator maps (empty when no class is known).
   const separateFilesProps = nodeClass ? getSeparateFilesProperties(nodeClass) : new Map<string | symbol, unknown>()
@@ -222,7 +233,7 @@ function processNode(params: {
       if (raw === null || typeof raw !== 'object') continue
       const item = raw as Record<string, unknown>
       const itemClass = classResolver(item, nodeClass, propKey)
-      const fileName = nameItem(item, i, totalCount, itemClass)
+      const fileName = nameItem(item, i, totalCount, itemClass, indexPaddingMin)
       const absPath = joinPath(nodePath, `${fileName}.${extension}`)
       accumulator.push({
         runtimeId: getId(item, idProperty),
@@ -246,7 +257,32 @@ function processNode(params: {
       if (raw === null || typeof raw !== 'object') continue
       const item = raw as Record<string, unknown>
       const itemClass = classResolver(item, nodeClass, propKey)
-      const folderName = nameItem(item, i, totalCount, itemClass)
+      // `@separateFolders` on a mixed array (folders AND requests,
+      // typical of `Folder.items`) treats every entry as a folder by
+      // default. Inspect each entry's own class — if it exposes its
+      // own `@separateFolders` / `@separateFiles` decorators (i.e. it
+      // has children to decompose further), it's a folder; otherwise
+      // it's a leaf and should land as a `.{ext}` file in the parent
+      // directory, matching what a host-side folder-tree writer like
+      // restorm's `saveFolderStructure` produces.
+      const itemIsFolder = itemClass
+        ? getSeparateFilesProperties(itemClass).size > 0
+          || getSeparateFoldersProperties(itemClass).size > 0
+        : true
+      if (!itemIsFolder) {
+        const fileName = nameItem(item, i, totalCount, itemClass, indexPaddingMin)
+        const absPath = joinPath(nodePath, `${fileName}.${extension}`)
+        accumulator.push({
+          runtimeId: getId(item, idProperty),
+          absolutePath: absPath,
+          content: cleanse(item, itemClass),
+          format,
+          kind: 'file',
+          parentId: nodeId
+        })
+        continue
+      }
+      const folderName = nameItem(item, i, totalCount, itemClass, indexPaddingMin)
       const subFolderPath = joinPath(nodePath, folderName)
       const subIndexPath = joinPath(subFolderPath, `${indexFileName}.${extension}`)
       const itemId = getId(item, idProperty)
@@ -263,7 +299,8 @@ function processNode(params: {
         indexFileName,
         idProperty,
         classResolver,
-        accumulator
+        accumulator,
+        indexPaddingMin
       })
       accumulator.push({
         runtimeId: itemId,
@@ -284,6 +321,7 @@ export function decomposeForPersistence(options: DecomposeOptions): DecomposedPr
   const indexFileName = options.indexFileName ?? 'index'
   const idProperty = options.idProperty ?? 'id'
   const classResolver = options.classResolver ?? ((item) => resolveItemClass(item))
+  const indexPaddingMin = options.indexPaddingMin ?? 2
 
   const children: DecomposedUnit[] = []
   const rootIndexContent = processNode({
@@ -297,7 +335,8 @@ export function decomposeForPersistence(options: DecomposeOptions): DecomposedPr
     indexFileName,
     idProperty,
     classResolver,
-    accumulator: children
+    accumulator: children,
+    indexPaddingMin
   })
 
   const rootIndex: DecomposedUnit = {

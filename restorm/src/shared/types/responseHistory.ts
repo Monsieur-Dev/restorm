@@ -1,10 +1,26 @@
-export type ResponseHistoryRequestType = 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket'
+export type ResponseHistoryRequestType = 'http' | 'odata' | 'graphql' | 'grpc' | 'soap' | 'websocket'
+
+/**
+ * 3-way visual signal for the per-entry status dot in the history
+ * list — green for `ok`, orange for `warning` (3xx redirect that the
+ * client surfaces as the final response), red for `failure` (any
+ * non-2xx response, network error, or protocol-specific error). gRPC
+ * and WebSocket have no native warning state and only emit `ok` /
+ * `failure`.
+ */
+export type ResponseHistoryOutcome = 'ok' | 'warning' | 'failure'
 
 export interface ResponseHistoryEntry {
   guid: string
   timestamp: string
   pinned: boolean
+  /**
+   * Boolean form retained for storage backward-compat — older history
+   * archives carry only this field. New entries also set `outcome`
+   * which the renderer prefers when present.
+   */
   success: boolean
+  outcome?: ResponseHistoryOutcome
 }
 
 export interface ResponseHistoryIndex {
@@ -52,6 +68,31 @@ export interface ResponseHistoryHttpResponse {
   responseBody: string
   contentType?: string
   contentLength?: number
+  timings: {
+    startedAt: string
+    durationMs: number
+  }
+  error?: string
+}
+
+export interface ResponseHistoryODataResponse {
+  type: 'odata'
+  requestUrl: string
+  requestMethod: string
+  requestHeaders: ResponseHistoryKeyValue[]
+  requestParams: ResponseHistoryKeyValue[]
+  requestBody?: ResponseHistoryHttpBody
+  odataVersion: 'v2' | 'v3' | 'v4'
+  operationKind: 'entity-set' | 'function' | 'action' | 'batch'
+  queryOptions?: Record<string, string | boolean | string[]>
+  statusCode: number
+  statusText: string
+  responseHeaders: ResponseHistoryKeyValue[]
+  responseBody: string
+  contentType?: string
+  contentLength?: number
+  odataCount?: number
+  odataNextLink?: string
   timings: {
     startedAt: string
     durationMs: number
@@ -130,6 +171,7 @@ export interface ResponseHistoryWebSocketResponse {
 
 export type ResponseHistoryResponse =
   | ResponseHistoryHttpResponse
+  | ResponseHistoryODataResponse
   | ResponseHistoryGraphQLResponse
   | ResponseHistoryGrpcResponse
   | ResponseHistorySoapResponse
@@ -141,6 +183,7 @@ export interface ResponseHistoryDetail {
   requestPath: string
   type: ResponseHistoryRequestType
   success: boolean
+  outcome?: ResponseHistoryOutcome
   timestamp: string
   pinned: boolean
   requestMeta?: ResponseHistoryRequestMeta

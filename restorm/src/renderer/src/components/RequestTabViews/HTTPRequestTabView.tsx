@@ -18,12 +18,15 @@ import {
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
-import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue, ResponseHistoryDetail, EnvironmentFolder } from '../../../../shared/types/collections'
+import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue, ResponseHistoryDetail, EnvironmentFolder, AuthenticationRequest } from '../../../../shared/types/collections'
+import { isAuthenticationRequest } from '../../../../shared/types/collections'
 import { StringValue } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
+import { useAuthRequestResolver } from '../../contexts/authRequestResolverContext'
 import type { KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
+import { AuthenticationConfigurationTab } from './AuthenticationConfigurationTab'
 import { Badge } from '../common/Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
 import { useRestormStore } from '../../store/restormStore'
@@ -40,7 +43,10 @@ const methodSelectWrapperStyle: CSSProperties = { width: 90, flexShrink: 0 }
 const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
 
 export interface HTTPRequestTabViewProps {
-  request: HTTPRequest
+  /** An HTTPRequest or an AuthenticationRequest. The latter inherits
+   * every HTTP field but adds a Configuration tab surfaced via
+   * `additionalRequestTabs`. */
+  request: HTTPRequest | AuthenticationRequest
 }
 
 function buildRequestBodyFromHistory(body: { type: string; content?: string; path?: string; fields?: { key: string; value: string; enabled?: boolean }[] } | undefined): HTTPResponse['requestBody'] {
@@ -63,7 +69,7 @@ function buildRequestBodyFromHistory(body: { type: string; content?: string; pat
 }
 
 /** Determine body mode from request body type */
-function getBodyMode(request: HTTPRequest): 'text' | 'form-data' | 'x-www-form-urlencoded' | 'file' {
+function getBodyMode(request: HTTPRequest | AuthenticationRequest): 'text' | 'form-data' | 'x-www-form-urlencoded' | 'file' {
   if (!request.body) return 'text'
   switch (request.body.type) {
     case 'text': return 'text'
@@ -75,7 +81,7 @@ function getBodyMode(request: HTTPRequest): 'text' | 'form-data' | 'x-www-form-u
 }
 
 /** Get body content for text mode */
-function getBodyContent(request: HTTPRequest): string {
+function getBodyContent(request: HTTPRequest | AuthenticationRequest): string {
   if (request.body?.type === 'text') {
     return request.body.content
   }
@@ -83,7 +89,7 @@ function getBodyContent(request: HTTPRequest): string {
 }
 
 /** Get body file path for file mode */
-function getBodyFilePath(request: HTTPRequest): string {
+function getBodyFilePath(request: HTTPRequest | AuthenticationRequest): string {
   if (request.body?.type === 'file') {
     return request.body.path
   }
@@ -96,6 +102,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
   const { selectedEnvId, environments, envColor } = useEnvironmentContext()
+  const resolveAuthRequest = useAuthRequestResolver()
   const collections = useRestormStore((state) => state.collections)
   const findParentFolder = useRestormStore((state) => state.findParentFolder)
   const handlebarsHelpers = useHandlebarsHelpers()
@@ -258,6 +265,11 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       params: toKeyValueData(currentRequest.params),
       pathParams: currentRequest.pathParams ? toKeyValueData(currentRequest.pathParams) : []
     })
+    // Tell main which envs are visible to this request — used by the
+    // auth-resolver so a child auth can inherit the calling request's
+    // env when it's also valid for the auth route.
+    const initialAvailable = environmentsRef.current?.map((e) => e.id) ?? []
+    void window.restorm?.context.setAvailableEnvironments(requestId, initialAvailable)
 
     previousEnvIdRef.current = currentEnvId ?? null
 
@@ -286,6 +298,16 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       previousEnvIdRef.current = currentEnvId
     }
   }, [selectedEnvId, environments, request.id])
+
+  // Push the in-scope env IDs whenever the env tree changes. The
+  // auth-resolver consults this set to decide whether to inherit the
+  // calling request's env.
+  useEffect(() => {
+    const requestId = request.id
+    if (!requestId) return
+    const ids = environments?.map((e) => e.id) ?? []
+    void window.restorm?.context.setAvailableEnvironments(requestId, ids)
+  }, [environments, request.id])
 
   // Sync method changes to reactive object
   useEffect(() => {
@@ -334,7 +356,11 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
 
     void window.restorm?.context.updateFullRequestData(requestId, {
       id: requestId,
-      requestType: 'http',
+      // HTTPRequestTabView is reused for both `http` and `auth` tabs
+      // (auth requests share the HTTP form layout). Preserve the real
+      // discriminator so consumers — search index, code-snippet
+      // generator, downstream branches — can tell them apart.
+      requestType: request.type === 'auth' ? 'auth' : 'http',
       url,
       method,
       headers: toKeyValueData(request.headers),
@@ -342,7 +368,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       pathParams: request.pathParams ? toKeyValueData(request.pathParams) : [],
       body: bodyData
     }, sourceIdRef.current)
-  }, [request.id, url, method, request.headers, request.params, request.pathParams, body, bodyMode, bodyFilePath, request.body, toKeyValueData])
+  }, [request.id, request.type, url, method, request.headers, request.params, request.pathParams, body, bodyMode, bodyFilePath, request.body, toKeyValueData])
   
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
@@ -357,7 +383,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   useEffect(() => {
     const varId = urlVariableId
     if (!varId || varId === 'undefined:url') return
-    
+
     const unsubscribe = window.restorm?.context.onAvailableVariables((result) => {
       if (result.variableId !== varId) return
       // First own-echo bootstraps the variables list (needed for Monaco hover + autocomplete
@@ -438,12 +464,34 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     setIsSending(true)
     setHttpResponse(null)
 
+    // Look the auth request up (if any) so the main-process executor
+    // can run its cache-or-fetch + header-inject flow before firing
+    // this request. The auth coming out of `rootItems` is a reactive
+    // Proxy wrapping an `AuthenticationRequest` class instance with
+    // `KeyValue` / `StringValue` / `PasswordValue` fields — structured
+    // clone (which Electron IPC uses) rejects those. We run
+    // `toPlainObject()` to flatten the class graph into persisted
+    // form, then a JSON round-trip to strip any stray class instances
+    // the graph still references (reactive Proxies carry class-type
+    // leaves like `StringValue` for `KeyValue.value` that
+    // `serializeValueForPersistence` already knows how to handle on
+    // the main side via `fromPlain`).
+    const authAttachedId = (request as { authenticationRequestId?: string }).authenticationRequestId
+    const attachedAuth = authAttachedId ? resolveAuthRequest(authAttachedId) : null
+    const authPlain = attachedAuth
+      ? (attachedAuth as unknown as { toPlainObject?: () => unknown }).toPlainObject?.() ?? attachedAuth
+      : undefined
+    const authRequestPayload = authPlain !== undefined
+      ? JSON.parse(JSON.stringify(authPlain)) as unknown
+      : undefined
+
     // Execute via backend
     window.restorm?.http.execute({
       requestId,
       method,
       timeout: DEFAULT_REQUEST_TIMEOUT_MS,
-      ...(requestPath ? { requestPath } : {})
+      ...(requestPath ? { requestPath } : {}),
+      ...(authRequestPayload ? { authRequest: authRequestPayload } : {})
     })
       .then((result) => {
         if (result.success) {
@@ -464,13 +512,24 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           const contentLengthStr = Array.isArray(contentLengthHeader) ? contentLengthHeader[0] : contentLengthHeader
           const contentLength = contentLengthStr ? parseInt(contentLengthStr, 10) : undefined
 
+          // Prefer the actually-dispatched headers from the executor
+          // (they include auth injections). Fall back to the user-
+          // configured list for envelopes where the main side didn't
+          // surface them (older server builds, error branches).
+          const dispatchedHeaders: KeyValue[] = result.requestHeaders
+            ? Object.entries(result.requestHeaders).map(([k, v]) => ({
+                key: k,
+                value: new StringValue(v)
+              } as KeyValue))
+            : request.headers
+
           const response: HTTPResponse = {
             id: `resp_${Date.now()}`,
             type: 'http',
             requestId,
             requestUrl: result.requestUrl ?? '',
             requestMethod: method as HTTPMethod,
-            requestHeaders: request.headers,
+            requestHeaders: dispatchedHeaders,
             requestParams: request.params,
             requestPathParams: request.pathParams,
             statusCode: result.statusCode ?? 0,
@@ -521,7 +580,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       .finally(() => {
         setIsSending(false)
       })
-  }, [isSending, request, method, url, requestPath])
+  }, [isSending, request, method, url, requestPath, resolveAuthRequest])
 
   const handleCancel = useCallback((): void => {
     const requestId = request.id
@@ -759,6 +818,16 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     return () => { subscription.unsubscribe() }
   }, [request.id])
 
+  const isAuthRequest = isAuthenticationRequest(request)
+  const additionalRequestTabs = isAuthRequest
+    ? [{
+        id: 'configuration',
+        label: t('authRequestTab.tabs.configuration', 'Configuration'),
+        useScrollableElement: false,
+        content: <AuthenticationConfigurationTab request={request} />
+      }]
+    : undefined
+
   return (
     <>
       <BaseRequestTabView
@@ -774,6 +843,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         infosContent={infosContent}
         responseContent={responseContent}
         jsonData={jsonData}
+        {...(additionalRequestTabs ? { additionalRequestTabs } : {})}
       />
       <ResponseHistoryModal
         isOpen={historyModalOpen}

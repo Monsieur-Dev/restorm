@@ -17,6 +17,8 @@ import {
   GrpcRequest,
   SoapRequest,
   WebSocketRequest,
+  ODataRequest,
+  AuthenticationRequest,
   isEnvironmentFolder,
   isAnyFolder,
   type FolderItem,
@@ -523,6 +525,10 @@ class CollectionStore {
         return SoapRequest.fromPlain(data as Parameters<typeof SoapRequest.fromPlain>[0])
       case 'websocket':
         return WebSocketRequest.fromPlain(data as Parameters<typeof WebSocketRequest.fromPlain>[0])
+      case 'odata':
+        return ODataRequest.fromPlain(data as Parameters<typeof ODataRequest.fromPlain>[0])
+      case 'auth':
+        return AuthenticationRequest.fromPlain(data as Parameters<typeof AuthenticationRequest.fromPlain>[0])
       default:
         // Default to HTTPRequest
         return HTTPRequest.fromPlain(data as Parameters<typeof HTTPRequest.fromPlain>[0])
@@ -536,6 +542,8 @@ class CollectionStore {
       case 'grpc': return GrpcRequest as new (...args: unknown[]) => Request
       case 'soap': return SoapRequest as new (...args: unknown[]) => Request
       case 'websocket': return WebSocketRequest as new (...args: unknown[]) => Request
+      case 'odata': return ODataRequest as new (...args: unknown[]) => Request
+      case 'auth': return AuthenticationRequest as new (...args: unknown[]) => Request
       default: return HTTPRequest as new (...args: unknown[]) => Request
     }
   }
@@ -590,10 +598,19 @@ class CollectionStore {
   }
 
   private emitRequestUpdated(request: Request): void {
+    // Look up the parent folder so the SearchIndexService can re-key the
+    // search document under the same `navigation.folderId` it used at
+    // CREATE time. Without this, a nested request edited via the GraphQL
+    // mutation path would land in `parentFolderId === undefined`, and
+    // the subscriber's fallback (`payload.parentFolderId ?? payload.id`)
+    // would point search-result navigation at the request itself.
+    // Root-level requests legitimately have no parent — pass undefined.
+    const parent = this.findParentFolder(request.id)
     const payload: DocumentChangedPayload = {
       id: request.id,
       type: 'request',
-      document: request.toPlainObject()
+      document: request.toPlainObject(),
+      ...(parent ? { parentFolderId: parent.id } : {})
     }
     void eventBusService.emit(DocumentEvents.REQUEST_UPDATED, payload)
     pubsub.publish(PUBSUB_TOPICS.REQUEST_UPDATED, request)

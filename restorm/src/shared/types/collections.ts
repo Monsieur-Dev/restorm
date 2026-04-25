@@ -16,11 +16,12 @@ export type {
   HTTPRequestBodyXWwwFormUrlEncoded,
   GraphQLOperationType,
   GrpcCallType,
-  WebSocketProtocol
+  WebSocketProtocol,
+  ODataVersion
 } from './requestPrimitives'
 
-export type { BaseRequest, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, Request } from './requests/index'
-export { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest } from './requests/index'
+export type { BaseRequest, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, ODataQueryOptions, ODataOperationKind, ODataBatchSubRequestSpec, ODataOperationParameterSpec, AuthenticationRequest, Request } from './requests/index'
+export { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest } from './requests/index'
 
 export type {
   BaseResponse,
@@ -49,7 +50,8 @@ export type {
   ResponseHistoryWebSocketResponse,
   ResponseHistoryResponse,
   ResponseHistoryDetail,
-  ResponseHistoryRequestType
+  ResponseHistoryRequestType,
+  ResponseHistoryOutcome
 } from './responseHistory'
 
 export type { Folder, EnvironmentFolder, FolderItem } from './folderTypes'

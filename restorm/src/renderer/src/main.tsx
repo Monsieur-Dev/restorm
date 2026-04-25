@@ -147,6 +147,7 @@ function ensureRestormWebShim(): void {
       registerRequest: () => Promise.resolve(),
       unregisterRequest: () => Promise.resolve(),
       setRequestEnvironment: () => Promise.resolve(),
+      setAvailableEnvironments: () => Promise.resolve(),
       updateRequestKeyValues: () => Promise.resolve(),
       updateFullRequestData: () => Promise.resolve(),
       getResolvedUrl: () => Promise.resolve(undefined),
@@ -230,10 +231,15 @@ if (typeof window !== 'undefined') {
           // Process collections to generate runtime IDs
           const collectionsWithIds = serializationModule.processAfterDeserialization(data.collections)
           
-          // Make folders reactive
-          const reactiveFolders = collectionsWithIds.map(
-            (folder) => reactiveModule.makeReactiveFolder(folder as import('../../shared/types/collections').Folder)
-          )
+          // Make folders reactive — leave requests at the root as-is
+          // since `makeReactiveFolder` expects an `items` array.
+          type FolderLike = import('../../shared/types/collections').Folder
+          const reactiveFolders = collectionsWithIds.map((item) => {
+            if (typeof item === 'object' && item !== null && 'items' in item) {
+              return reactiveModule.makeReactiveFolder(item as FolderLike)
+            }
+            return item
+          })
           
           // Create file state to simulate file opened event
           const fileState = {
@@ -302,7 +308,9 @@ if (typeof window !== 'undefined') {
           
           // Index folders for search (will be done again by App, but do it here too for safety)
           for (const folder of reactiveFolders) {
-            await searchModule.searchIndexService.indexFolderTree(folder)
+            if (typeof folder === 'object' && folder !== null && 'items' in folder) {
+              await searchModule.searchIndexService.indexFolderTree(folder as import('../../shared/types/collections').Folder)
+            }
           }
           
           // Wait longer for App to process the event and render

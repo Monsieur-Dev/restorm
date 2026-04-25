@@ -71,6 +71,7 @@ import { DeleteConfirmationModal } from './components/Modals/DeleteConfirmationM
 import { ImportModal } from './components/Modals/ImportModal'
 import { AvailableVariablesProvider } from './contexts/AvailableVariablesContext'
 import { VariableTransformProvider } from './contexts/VariableTransformContext'
+import { AuthRequestResolverContext, type AuthRequestResolver } from './contexts/authRequestResolverContext'
 import { collectAllFolderIds } from './services/FolderToListView'
 import {
   findFolderById,
@@ -83,6 +84,8 @@ import { DesktopIndicator } from './components/MainView/DesktopIndicator'
 import { findItemById } from './utils/treeSearch'
 import { EnvironmentProvider } from './contexts/EnvironmentContext'
 import { StatusbarEnvironmentSelector } from './components/MainView/StatusbarEnvironmentSelector'
+import { StatusbarAuthSelector } from './components/MainView/StatusbarAuthSelector'
+import { shouldShowAuthSelector } from './components/MainView/statusbarAuthHelpers'
 import { useItemOperations } from './hooks/useItemOperations'
 import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
@@ -92,7 +95,7 @@ import { isFavorite as favoritesStoreIsFavorite, toggleFavorite as favoritesStor
 import { useFileManagement } from './hooks/useFileManagement'
 import { useImport } from './hooks/useImport'
 import { prepareForSerialization } from './utils/serialization'
-import { makeReactiveFolder } from './types/reactive'
+import { makeReactiveFolder, makeReactiveRequest } from './types/reactive'
 import { searchIndexService } from './services/SearchIndexService'
 import { useRestormStore } from './store/restormStore'
 import type {
@@ -104,7 +107,8 @@ import type {
 import {
   isRequest,
   isEnvironmentFolder,
-  isAnyFolder
+  isAnyFolder,
+  isAuthenticationRequest
 } from '../../shared/types/collections'
 import { buildRequestPath } from './utils/requestPath'
 
@@ -393,6 +397,78 @@ const App: React.FC = () => {
     onImportComplete: handleImportComplete
   })
 
+  // Authentication failure → toast bridge.
+  //
+  // Subscribes to the main-side `auth:failed` IPC and surfaces a toast
+  // in the global toaster. The toast body carries a clickable link
+  // that opens the offending auth request in the workbench so the user
+  // can fix credentials / URL / etc. without hunting through the tree.
+  // We track the latest tree + tab opener through refs so the
+  // subscription handler doesn't have to re-bind on every keystroke
+  // (rootItems is reactive — its identity churns frequently).
+  const authFailureRootItemsRef = useRef(rootItems)
+  useEffect(() => { authFailureRootItemsRef.current = rootItems }, [rootItems])
+  const authFailureOpenTabRef = useRef(openAnyRequestTab)
+  useEffect(() => { authFailureOpenTabRef.current = openAnyRequestTab }, [openAnyRequestTab])
+  useEffect(() => {
+    const api = window.restorm?.auth
+    if (!api) return undefined
+    return api.onFailed((payload) => {
+      const items = authFailureRootItemsRef.current
+      const request = findRequestById(items, payload.authRequestId)
+      if (!request) return
+      const { breadcrumbs } = findItemWithBreadcrumbs(items, payload.authRequestId)
+      const reason = payload.reason && payload.reason.trim() !== ''
+        ? payload.reason
+        : t('authFailureToast.fallbackReason', 'The authentication request did not succeed.')
+      // Dedupe id used both for `push` (so a burst collapses to one
+      // toast) and for the explicit dismiss when the user clicks the
+      // navigation link. Dismiss before opening the tab so the toast
+      // disappears in the same event tick — feels snappier and
+      // sidesteps a brief flash where the toast still hovers over the
+      // freshly-opened auth tab.
+      const toastId = `auth-failure-${payload.authRequestId}`
+      const handleOpen = (): void => {
+        toasterService.dismiss('app', toastId)
+        authFailureOpenTabRef.current(request, breadcrumbs)
+      }
+      toasterService.push('app', {
+        // De-duplicate per auth-request id: a burst of failures (e.g.
+        // OData $batch) collapses to one visible toast that updates
+        // its `reason` in place rather than stacking N copies. The
+        // same id is what `handleOpen` dismisses on click.
+        id: toastId,
+        title: t('authFailureToast.title', 'Authentication failed'),
+        body: (
+          <div data-testid="auth-failure-toast">
+            <div style={{ marginBottom: 6 }}>{reason}</div>
+            <a
+              role="button"
+              tabIndex={0}
+              data-testid="auth-failure-toast-open-link"
+              onClick={(e) => { e.preventDefault(); handleOpen() }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  handleOpen()
+                }
+              }}
+              style={{
+                cursor: 'pointer',
+                color: 'var(--linkForeground, #3794ff)',
+                textDecoration: 'underline'
+              }}
+            >
+              {t('authFailureToast.openAuthRoute', 'Open authentication route')}
+            </a>
+          </div>
+        ),
+        durationMs: 8000,
+        ariaLive: 'assertive'
+      })
+    })
+  }, [t])
+
   // Resolve a workbench tab id (e.g. `request-idx:0.1`, `request-id:uuid`,
   // or the legacy `request-<id>` form) to its item id.
   const resolveTabItemId = useCallback((tabId: string): string | null => {
@@ -457,7 +533,7 @@ const App: React.FC = () => {
     if (!itemId) return null
     const request = findRequestById(rootItems, itemId)
     if (!request) return null
-    return { id: request.id, path: buildRequestPath(rootItems as EnvironmentFolder[], request.id) }
+    return { id: request.id, path: buildRequestPath(rootItems, request.id) }
   }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, rootItems])
 
   // The nearest ancestor env folder of the active request — the
@@ -618,9 +694,9 @@ const App: React.FC = () => {
   const {
     handleItemDrop,
     handleCloneItem,
-    handleCreateSubfolder,
     handleCreateRootFolder,
     handleCreateRootEnvironmentFolder,
+    handleAddChildItem,
     handleDeleteItem,
     confirmDelete: confirmDeleteWithId,
     cancelDelete,
@@ -634,7 +710,8 @@ const App: React.FC = () => {
     setWorkbenchTree,
     setDeleteConfirmation,
     openFolderTab,
-    openEnvironmentFolderTab
+    openEnvironmentFolderTab,
+    openAnyRequestTab
   })
 
   const {
@@ -748,7 +825,7 @@ const App: React.FC = () => {
     expandedIds,
     updateCount,
     onCloneItem: handleCloneItem,
-    onCreateSubfolder: handleCreateSubfolder,
+    onAddChildItem: handleAddChildItem,
     onDeleteItem: handleDeleteItem,
     onRenameItem: handleSidebarRenameItem,
     isItemFavorite,
@@ -875,6 +952,15 @@ const App: React.FC = () => {
   const getFolderByIdCb = useCallback((id: string) => findFolderById(rootItems, id), [rootItems])
   const getEnvironmentFolderByIdCb = useCallback((id: string) => findEnvironmentFolderById(rootItems, id), [rootItems])
 
+  // Send-time hook: request tab views call this to resolve their
+  // `authenticationRequestId` back to the AuthenticationRequest
+  // sitting in `rootItems`, so the IPC call carries the full auth
+  // document the main-process executor needs.
+  const resolveAuthRequestCb = useCallback<AuthRequestResolver>((id) => {
+    const found = findRequestById(rootItems, id)
+    return found && isAuthenticationRequest(found) ? found : null
+  }, [rootItems])
+
   const environmentFolderCollectionsRef = useRef(environmentFolderCollections)
   useEffect(() => {
     environmentFolderCollectionsRef.current = environmentFolderCollections
@@ -934,16 +1020,24 @@ const App: React.FC = () => {
         // Use ref to ensure we call the latest version
         handleFileOpenedRef.current(fileState)
       },
-      setRootItems: (folders: EnvironmentFolder[]) => {
-        // Make folders reactive before setting
-        const reactiveItems = folders.map(folder => makeReactiveFolder(folder) as EnvironmentFolder)
+      setRootItems: (items: (EnvironmentFolder | Folder | Request)[]) => {
+        // Folders/env-folders go through `makeReactiveFolder`; root-level
+        // requests go through `makeReactiveRequest` (no parent id) so
+        // edits emit `REQUEST_UPDATED` like nested requests.
+        const reactiveItems = items.map((item) =>
+          'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
+        )
         setRootItems(reactiveItems)
         // Also trigger indexing
         void (async (): Promise<void> => {
           await searchIndexService.clearIndex()
           await searchIndexService.initialize()
-          for (const folder of reactiveItems) {
-            await searchIndexService.indexFolderTree(folder)
+          for (const rootItem of reactiveItems) {
+            if ('items' in rootItem) {
+              await searchIndexService.indexFolderTree(rootItem)
+            } else {
+              await searchIndexService.indexRootRequest(rootItem)
+            }
           }
         })()
       },
@@ -1037,6 +1131,7 @@ const App: React.FC = () => {
   // debounce the checksum update per document id so a typing burst produces a single
   // update after the user settles.
   const dirtyChecksumTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
+  const upsertTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
   const DIRTY_CHECKSUM_DEBOUNCE_MS = 300
   useEffect(() => {
     const scheduleChecksumUpdate = (id: string, compute: () => string): void => {
@@ -1117,7 +1212,16 @@ const App: React.FC = () => {
     const kindForType = (type: 'folder' | 'request' | 'environment'): 'folder' | 'file' =>
       type === 'folder' ? 'folder' : 'file'
 
-    const handleUpsert = (payload: DocumentChangedPayload): void => {
+    // Per-id debounce for the save-unit draft IPC. Typing in a
+    // metadata-heavy OData request (1000+ entitySetProperties /
+    // navigationProperties) means each keystroke emits REQUEST_UPDATED
+    // and the JSON.stringify + cleanse + IPC round-trip dominates the
+    // frame budget. Buffering keystrokes into a single upsert once the
+    // user pauses keeps crash-recovery drafts fresh (worst case a
+    // 300ms window lost if the app dies mid-typing) without killing
+    // the input's responsiveness.
+    const UPSERT_DEBOUNCE_MS = 300
+    const doUpsert = (payload: DocumentChangedPayload): void => {
       if (!payload.id) return
       let draft: Record<string, unknown>
       try {
@@ -1142,6 +1246,23 @@ const App: React.FC = () => {
       })
     }
 
+    const handleUpsert = (payload: DocumentChangedPayload): void => {
+      if (!payload.id) return
+      const existing = upsertTimersRef.current.get(payload.id)
+      if (existing) clearTimeout(existing)
+      const timer = setTimeout(() => {
+        upsertTimersRef.current.delete(payload.id)
+        doUpsert(payload)
+      }, UPSERT_DEBOUNCE_MS)
+      upsertTimersRef.current.set(payload.id, timer)
+    }
+
+    // CREATED events bypass the debounce — the save-unit registry must
+    // know about a new unit before any subsequent modify events land.
+    const handleUpsertImmediate = (payload: DocumentChangedPayload): void => {
+      doUpsert(payload)
+    }
+
     const handleDelete = (payload: DocumentDeletedPayload): void => {
       if (!payload.id) return
       void markSaveUnitDeleted(payload.id).catch((err: unknown) => {
@@ -1156,15 +1277,16 @@ const App: React.FC = () => {
       eventBus.subscribe(DocumentEvents.FOLDER_UPDATED, handleUpsert),
       eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, handleUpsert),
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_UPDATED, handleUpsert),
-      eventBus.subscribe(DocumentEvents.FOLDER_CREATED, handleUpsert),
-      eventBus.subscribe(DocumentEvents.REQUEST_CREATED, handleUpsert),
-      eventBus.subscribe(DocumentEvents.ENVIRONMENT_CREATED, handleUpsert),
+      eventBus.subscribe(DocumentEvents.FOLDER_CREATED, handleUpsertImmediate),
+      eventBus.subscribe(DocumentEvents.REQUEST_CREATED, handleUpsertImmediate),
+      eventBus.subscribe(DocumentEvents.ENVIRONMENT_CREATED, handleUpsertImmediate),
       eventBus.subscribe(DocumentEvents.FOLDER_DELETED, handleDelete),
       eventBus.subscribe(DocumentEvents.REQUEST_DELETED, handleDelete),
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_DELETED, handleDelete)
     ]
 
     const timersMap = dirtyChecksumTimersRef.current
+    const upsertTimers = upsertTimersRef.current
     return () => {
       for (const sub of subscriptions) {
         sub.unsubscribe()
@@ -1173,6 +1295,10 @@ const App: React.FC = () => {
         clearTimeout(timer)
       }
       timersMap.clear()
+      for (const timer of upsertTimers.values()) {
+        clearTimeout(timer)
+      }
+      upsertTimers.clear()
     }
   }, [updateTabDirtyChecksum, rootItems, environmentFolderCollections, filePath])
 
@@ -1227,6 +1353,7 @@ const App: React.FC = () => {
   return (
     <AvailableVariablesProvider>
       <VariableTransformProvider>
+        <AuthRequestResolverContext.Provider value={resolveAuthRequestCb}>
         <div
           style={{
           display: 'flex',
@@ -1293,6 +1420,7 @@ const App: React.FC = () => {
                 onCollapseAll={() => { setExpandedIds([]) }}
                 onCreateRootFolder={handleCreateRootFolder}
                 onCreateRootEnvironmentFolder={handleCreateRootEnvironmentFolder}
+                onAddChildItem={handleAddChildItem}
                 onDeselectAll={() => { setSelectedItemId(null) }}
               />
             </div>
@@ -1370,20 +1498,48 @@ const App: React.FC = () => {
         </div>
       )}
 
+      {/* Pre-compute which status-bar entries actually mount so the
+          FIRST visible right-side cell carries `right-aligned`
+          (margin-left: auto). Only the leftmost-of-the-right needs
+          the auto margin; the rest follow naturally to its right. */}
       <Statusbar data-testid="app-statusbar">
         {filePath && <StatusbarElement data-testid="app-statusbar-element" title={filePath} />}
         <DesktopIndicator />
-        {activeRequest && activeRequestEnvironments.length > 0 && (
-          <EnvironmentProvider
-            environments={activeRequestEnvironments}
-            persistenceKey={activeEnvPersistenceKey}
-          >
-            <StatusbarEnvironmentSelector
-              folderRequestIds={activeEnvFolderRequestIds}
-              projectUuid={projectUuid}
+        {(() => {
+          if (!activeRequest || !activeEnvFolderId) return null
+          const reactiveActiveRequest = findRequestById(rootItems, activeRequest.id)
+          const activeEnvFolder = findFolderById(rootItems, activeEnvFolderId)
+          if (!reactiveActiveRequest || !activeEnvFolder) return null
+          if (!shouldShowAuthSelector(reactiveActiveRequest, activeEnvFolder.items)) return null
+          return (
+            <StatusbarAuthSelector
+              activeRequest={reactiveActiveRequest}
+              envFolderItems={activeEnvFolder.items}
+              rightAligned
             />
-          </EnvironmentProvider>
-        )}
+          )
+        })()}
+        {(() => {
+          if (!activeRequest || activeRequestEnvironments.length === 0) return null
+          // Only push env right when no auth selector to its left.
+          const authActive = !!activeEnvFolderId && (() => {
+            const folder = findFolderById(rootItems, activeEnvFolderId)
+            const req = findRequestById(rootItems, activeRequest.id)
+            return !!(folder && req && shouldShowAuthSelector(req, folder.items))
+          })()
+          return (
+            <EnvironmentProvider
+              environments={activeRequestEnvironments}
+              persistenceKey={activeEnvPersistenceKey}
+            >
+              <StatusbarEnvironmentSelector
+                folderRequestIds={activeEnvFolderRequestIds}
+                projectUuid={projectUuid}
+                rightAligned={!authActive}
+              />
+            </EnvironmentProvider>
+          )
+        })()}
         {activeRequest && (
           <StatusbarElement
             data-testid="statusbar-request-history"
@@ -1430,6 +1586,7 @@ const App: React.FC = () => {
             selectedFolderId={selectedItemId ?? undefined}
           />
         </div>
+        </AuthRequestResolverContext.Provider>
       </VariableTransformProvider>
     </AvailableVariablesProvider>
   )

@@ -104,19 +104,6 @@ export const test = base.extend<DirtyStateFixtures>({
     await use(launcher)
 
     mkdirSync(testInfo.outputDir, { recursive: true })
-    if (testInfo.status !== 'passed') {
-      const last = launched[launched.length - 1]
-      if (last) {
-        try {
-          const p = await last.app.firstWindow().catch(() => null)
-          if (p) {
-            const shotPath = join(testInfo.outputDir, 'failure-state.png')
-            await p.screenshot({ path: shotPath, fullPage: true })
-            await testInfo.attach('failure-state-screenshot', { path: shotPath, contentType: 'image/png' })
-          }
-        } catch { /* ignore */ }
-      }
-    }
 
     // Scan the captured renderer output for critical signals
     // (`Maximum update depth exceeded`, `getSnapshot should be cached`,

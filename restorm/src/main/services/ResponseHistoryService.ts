@@ -35,6 +35,7 @@ import type {
   ResponseHistoryHttpBody,
   ResponseHistoryIndex,
   ResponseHistoryKeyValue,
+  ResponseHistoryOutcome,
   ResponseHistoryRequestMeta,
   ResponseHistoryRequestType,
   ResponseHistoryResponse
@@ -44,6 +45,9 @@ import type { GraphQLExecutionResult } from './GraphQLExecutionService'
 import type { GRPCExecutionResult } from './GRPCExecutionService'
 import type { SOAPExecutionResult } from './SOAPExecutionService'
 import type { WebSocketExecutionResult } from './WebSocketExecutionService'
+import { normalizeODataResponse } from '../../shared/utils/odataResponse'
+import { redactTokensFromBody } from './AuthenticationRedaction'
+import { isAuthenticationRequest } from '../../shared/types/collections'
 
 const DEFAULT_MAX_PER_REQUEST = 10
 const INDEX_FILE_NAME = 'index.json'
@@ -60,6 +64,45 @@ type ExecutionResult =
   | GRPCExecutionResult
   | SOAPExecutionResult
   | WebSocketExecutionResult
+
+/**
+ * Compute the 3-way visual outcome (`ok` / `warning` / `failure`) for
+ * a result that exposes an HTTP status code. The history-list dot
+ * uses this directly: green for 2xx, orange for 3xx (a redirect that
+ * the client surfaced as the final response — debatable but
+ * consistent with `HTTPResponsePanel.getStatusColor`), red for any
+ * other code or a network-level failure.
+ */
+function httpOutcome(result: { success: boolean; statusCode?: number }): ResponseHistoryOutcome {
+  if (!result.success) return 'failure'
+  const status = result.statusCode ?? 0
+  if (status >= 200 && status < 300) return 'ok'
+  if (status >= 300 && status < 400) return 'warning'
+  return 'failure'
+}
+
+/**
+ * gRPC has no warning state — its status code is `0` for OK and any
+ * non-zero value indicates an error (UNAVAILABLE, UNAUTHENTICATED,
+ * etc.). We collapse to a binary outcome.
+ */
+function grpcOutcome(result: GRPCExecutionResult): ResponseHistoryOutcome {
+  if (!result.success) return 'failure'
+  return (result.statusCode ?? -1) === 0 ? 'ok' : 'failure'
+}
+
+/**
+ * WebSocket carries no per-message status — the connection itself is
+ * either established or not. The execution result reflects that with
+ * `connected` + `success`; we treat both as required for `ok`.
+ */
+function webSocketOutcome(result: WebSocketExecutionResult): ResponseHistoryOutcome {
+  return result.success && result.connected ? 'ok' : 'failure'
+}
+
+function outcomeToSuccess(outcome: ResponseHistoryOutcome): boolean {
+  return outcome !== 'failure'
+}
 
 class ResponseHistoryService {
   private subscriptions: Subscription[] = []
@@ -356,7 +399,8 @@ class ResponseHistoryService {
       guid: detail.guid,
       timestamp: detail.timestamp,
       pinned: detail.pinned,
-      success: detail.success
+      success: detail.success,
+      ...(detail.outcome !== undefined ? { outcome: detail.outcome } : {})
     }
 
     const requests = index.requests.map((req) => ({ ...req, entries: [...req.entries] }))
@@ -406,12 +450,32 @@ class ResponseHistoryService {
         const httpResult = result as HTTPExecutionResult
         const response = this.buildHttpResponse(requestId, httpResult)
         if (!response) return null
+        const outcome = httpOutcome(httpResult)
         return {
           guid,
           requestId,
           requestPath,
           type,
-          success: httpResult.success,
+          success: outcomeToSuccess(outcome),
+          outcome,
+          timestamp: now,
+          pinned: false,
+          requestMeta,
+          response
+        }
+      }
+      case 'odata': {
+        const httpResult = result as HTTPExecutionResult
+        const response = this.buildOdataResponse(requestId, httpResult)
+        if (!response) return null
+        const outcome = httpOutcome(httpResult)
+        return {
+          guid,
+          requestId,
+          requestPath,
+          type,
+          success: outcomeToSuccess(outcome),
+          outcome,
           timestamp: now,
           pinned: false,
           requestMeta,
@@ -422,12 +486,14 @@ class ResponseHistoryService {
         const gqlResult = result as GraphQLExecutionResult
         const response = this.buildGraphqlResponse(requestId, gqlResult)
         if (!response) return null
+        const outcome = httpOutcome(gqlResult)
         return {
           guid,
           requestId,
           requestPath,
           type,
-          success: gqlResult.success,
+          success: outcomeToSuccess(outcome),
+          outcome,
           timestamp: now,
           pinned: false,
           requestMeta,
@@ -438,12 +504,14 @@ class ResponseHistoryService {
         const grpcResult = result as GRPCExecutionResult
         const response = this.buildGrpcResponse(requestId, grpcResult)
         if (!response) return null
+        const outcome = grpcOutcome(grpcResult)
         return {
           guid,
           requestId,
           requestPath,
           type,
-          success: grpcResult.success,
+          success: outcomeToSuccess(outcome),
+          outcome,
           timestamp: now,
           pinned: false,
           requestMeta,
@@ -454,12 +522,14 @@ class ResponseHistoryService {
         const soapResult = result as SOAPExecutionResult
         const response = this.buildSoapResponse(requestId, soapResult)
         if (!response) return null
+        const outcome = httpOutcome(soapResult)
         return {
           guid,
           requestId,
           requestPath,
           type,
-          success: soapResult.success,
+          success: outcomeToSuccess(outcome),
+          outcome,
           timestamp: now,
           pinned: false,
           requestMeta,
@@ -470,12 +540,14 @@ class ResponseHistoryService {
         const wsResult = result as WebSocketExecutionResult
         const response = this.buildWebSocketResponse(requestId, wsResult)
         if (!response) return null
+        const outcome = webSocketOutcome(wsResult)
         return {
           guid,
           requestId,
           requestPath,
           type,
-          success: wsResult.success,
+          success: outcomeToSuccess(outcome),
+          outcome,
           timestamp: now,
           pinned: false,
           requestMeta,
@@ -504,6 +576,23 @@ class ResponseHistoryService {
     const contentLengthStr = Array.isArray(contentLengthHeader) ? contentLengthHeader[0] : contentLengthHeader
     const contentLength = contentLengthStr ? parseInt(contentLengthStr, 10) : undefined
 
+    // Redact token-bearing fields before they land in the on-disk
+    // history archive. The lookup is best-effort: if the request
+    // isn't in the collection (e.g. an ephemeral auth run), there's
+    // no producedHeaders list to consult and we leave the body as-is.
+    let responseBody = result.body ?? ''
+    const collectionItem = collectionStore.findById(requestId)
+    if (collectionItem && isRequest(collectionItem) && isAuthenticationRequest(collectionItem)) {
+      responseBody = redactTokensFromBody(
+        responseBody,
+        collectionItem.producedHeaders.map((h) => ({
+          key: h.key,
+          value: h.value.toString(),
+          enabled: h.enabled
+        }))
+      )
+    }
+
     return {
       type: 'http',
       requestUrl: resolvedUrl,
@@ -515,12 +604,103 @@ class ResponseHistoryService {
       statusCode: result.statusCode ?? 0,
       statusText: result.statusText ?? '',
       responseHeaders,
-      responseBody: result.body ?? '',
+      responseBody,
       ...(contentType ? { contentType } : {}),
       ...(contentLength !== undefined && !isNaN(contentLength) ? { contentLength } : {}),
       timings: result.timings,
       ...(result.error ? { error: result.error } : {})
     }
+  }
+
+  private buildOdataResponse(requestId: string, result: HTTPExecutionResult): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+    const requestHeaders = this.getResolvedKeyValues(requestId, 'headers')
+    const requestParams = this.getResolvedKeyValues(requestId, 'params')
+
+    const requestContext = contextService.getRequestContext(requestId)
+    const fullData = requestContext?.fullData
+    const odataVersion: 'v2' | 'v3' | 'v4' = fullData?.odataVersion ?? 'v4'
+    const operationKind: 'entity-set' | 'function' | 'action' | 'batch' =
+      fullData?.odataOperationKind ?? 'entity-set'
+    // `getRequestMeta` has no 'odata' branch, and OData requests carry
+    // no explicit `method` on `fullData`. Derive the dispatched method
+    // from the operation kind so history replay shows GET / POST
+    // correctly per kind.
+    const requestMethod = operationKind === 'action' || operationKind === 'batch' ? 'POST' : 'GET'
+    const queryOptions = fullData?.odataQueryOptions
+      ? this.normalizeODataQueryOptions(fullData.odataQueryOptions)
+      : undefined
+
+    const responseHeaders = this.headersRecordToKeyValues(result.headers)
+    const contentTypeHeader = result.headers?.['content-type']
+    const contentType = Array.isArray(contentTypeHeader) ? contentTypeHeader[0] : contentTypeHeader
+    const contentLengthHeader = result.headers?.['content-length']
+    const contentLengthStr = Array.isArray(contentLengthHeader) ? contentLengthHeader[0] : contentLengthHeader
+    const contentLength = contentLengthStr ? parseInt(contentLengthStr, 10) : undefined
+
+    let odataCount: number | undefined
+    let odataNextLink: string | undefined
+    if (result.body) {
+      try {
+        const parsed: unknown = JSON.parse(result.body)
+        if (parsed !== null && typeof parsed === 'object') {
+          const normalized = normalizeODataResponse(parsed, odataVersion)
+          if (normalized) {
+            if (normalized.count !== undefined) odataCount = normalized.count
+            if (normalized.nextLink) odataNextLink = normalized.nextLink
+          }
+        }
+      } catch {
+        // Non-JSON body — nothing to extract.
+      }
+    }
+
+    return {
+      type: 'odata',
+      requestUrl: resolvedUrl,
+      requestMethod,
+      requestHeaders,
+      requestParams,
+      odataVersion,
+      operationKind,
+      ...(queryOptions ? { queryOptions } : {}),
+      statusCode: result.statusCode ?? 0,
+      statusText: result.statusText ?? '',
+      responseHeaders,
+      responseBody: result.body ?? '',
+      ...(contentType ? { contentType } : {}),
+      ...(contentLength !== undefined && !isNaN(contentLength) ? { contentLength } : {}),
+      ...(odataCount !== undefined ? { odataCount } : {}),
+      ...(odataNextLink ? { odataNextLink } : {}),
+      timings: result.timings,
+      ...(result.error ? { error: result.error } : {})
+    }
+  }
+
+  private normalizeODataQueryOptions(options: {
+    filter?: string
+    select?: string[]
+    top?: string
+    skip?: string
+    count?: boolean
+    expand?: string
+    orderby?: string
+    search?: string
+    format?: string
+    apply?: string
+  }): Record<string, string | boolean | string[]> {
+    const normalized: Record<string, string | boolean | string[]> = {}
+    if (options.filter) normalized.filter = options.filter
+    if (options.select && options.select.length > 0) normalized.select = options.select
+    if (options.top) normalized.top = options.top
+    if (options.skip) normalized.skip = options.skip
+    if (options.count === true) normalized.count = true
+    if (options.expand) normalized.expand = options.expand
+    if (options.orderby) normalized.orderby = options.orderby
+    if (options.search) normalized.search = options.search
+    if (options.format) normalized.format = options.format
+    if (options.apply) normalized.apply = options.apply
+    return normalized
   }
 
   private buildGraphqlResponse(requestId: string, result: GraphQLExecutionResult): ResponseHistoryResponse | null {
@@ -690,7 +870,14 @@ class ResponseHistoryService {
     const pinned = typeof raw['pinned'] === 'boolean' ? raw['pinned'] : false
     const success = typeof raw['success'] === 'boolean' ? raw['success'] : false
     if (!guid || !timestamp) return null
-    return { guid, timestamp, pinned, success }
+    const rawOutcome = raw['outcome']
+    const outcome: ResponseHistoryOutcome | undefined =
+      rawOutcome === 'ok' || rawOutcome === 'warning' || rawOutcome === 'failure'
+        ? rawOutcome
+        : undefined
+    return outcome
+      ? { guid, timestamp, pinned, success, outcome }
+      : { guid, timestamp, pinned, success }
   }
 
   private getRequestFullData(requestId: string): Record<string, unknown> | null {

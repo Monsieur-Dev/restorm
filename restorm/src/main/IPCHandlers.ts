@@ -9,6 +9,9 @@ import { saveFolderStructure, loadFolderStructure, attachDraftStoreForFolder, at
 import type { PersistenceFormat } from 'electron-core-ui'
 import { resolveRequestURL, type URLResolutionInput } from './services/request/HTTPRequestService'
 import { httpExecutionService, type HTTPExecutionInput } from './services/HTTPExecutionService'
+import { authPrefetchOneShot, resolveProducedHeaders } from './services/AuthenticationPrefetch'
+import { AuthenticationRequest } from '../shared/models/requests/AuthenticationRequest'
+import { authenticationCacheService } from './services/AuthenticationCacheService'
 import { graphqlExecutionService, type GraphQLExecutionInput } from './services/GraphQLExecutionService'
 import { soapExecutionService, type SOAPExecutionInput } from './services/SOAPExecutionService'
 import { grpcExecutionService, type GRPCExecutionInput } from './services/GRPCExecutionService'
@@ -21,11 +24,14 @@ import {
   openPathArgs,
   projectReadFileArgs,
   contextRegisterRequestArgs, contextUnregisterRequestArgs,
-  contextSetRequestEnvironmentArgs, contextUpdateRequestKeyValuesArgs,
+  contextSetRequestEnvironmentArgs, contextSetAvailableEnvironmentsArgs,
+  contextUpdateRequestKeyValuesArgs,
   contextUpdateFullRequestDataArgs, contextGetResolvedUrlArgs,
   contextGetCodeSnippetsArgs,
   requestResolveUrlArgs,
   httpExecuteArgs, httpCancelArgs, httpIsActiveArgs,
+  odataExecuteArgs, odataCancelArgs, odataIsActiveArgs,
+  authPrefetchArgs,
   graphqlExecuteArgs, graphqlCancelArgs, graphqlIsActiveArgs,
   soapExecuteArgs, soapCancelArgs, soapIsActiveArgs,
   grpcExecuteArgs, grpcCancelArgs, grpcIsActiveArgs,
@@ -46,6 +52,16 @@ import type { ApiDocumentation } from '../shared/types/apiDocumentation'
  * Get mocked folder path for E2E tests, if E2E_MOCK_SAVE_FOLDER env var is set.
  * Returns null if not in E2E mode.
  */
+/**
+ * Narrow an `unknown` payload to the plain-object shape
+ * `AuthenticationRequest.fromPlain` accepts. The renderer sends a
+ * shallow dump of the reactive proxy over IPC; we only forward
+ * objects that carry at least an `id` to the class constructor.
+ */
+function isPlainAuthPayload(value: unknown): value is Parameters<typeof AuthenticationRequest.fromPlain>[0] {
+  return typeof value === 'object' && value !== null && 'id' in (value as Record<string, unknown>)
+}
+
 function getE2EMockedFolderPath(): string | null {
   return process.env['E2E_MOCK_SAVE_FOLDER'] ?? null
 }
@@ -500,6 +516,10 @@ export function registerRestormIPC(deps: {
     contextService.unregisterRequest(requestId)
   })
 
+  validatedHandle('context:set-available-environments', contextSetAvailableEnvironmentsArgs, (_event, [requestId, environmentIds]) => {
+    contextService.setAvailableEnvironments(requestId, environmentIds)
+  })
+
   validatedHandle('context:set-request-environment', contextSetRequestEnvironmentArgs, (_event, [requestId, environmentId]) => {
     contextService.setRequestEnvironment(requestId, environmentId)
   })
@@ -522,6 +542,10 @@ export function registerRestormIPC(deps: {
 
   ipcMain.handle('context:clear-all', () => {
     contextService.clearAll()
+    // File close — the auth token cache is scoped to the open
+    // collection, so flush it here. Opening a different file (or the
+    // same one again) must force a fresh round of token fetches.
+    authenticationCacheService.clear()
   })
 
   // ==========================================================================
@@ -537,7 +561,20 @@ export function registerRestormIPC(deps: {
   // ==========================================================================
 
   validatedHandle('http:execute', httpExecuteArgs, async (_event, [input]) => {
-    const result = await httpExecutionService.execute(input as HTTPExecutionInput)
+    // Rehydrate the `authRequest` POJO the renderer hands over into
+    // a real `AuthenticationRequest` instance so the executor can
+    // call its prototype methods (Handlebars renders headers off
+    // `request.producedHeaders`, the cache invalidation path checks
+    // `request.authErrorCodes`, etc.).
+    const authRequestPayload = (input as { authRequest?: unknown }).authRequest
+    const authRequest = isPlainAuthPayload(authRequestPayload)
+      ? AuthenticationRequest.fromPlain(authRequestPayload)
+      : undefined
+    const executionInput: HTTPExecutionInput = {
+      ...(input as HTTPExecutionInput),
+      ...(authRequest ? { authRequest } : {})
+    }
+    const result = await httpExecutionService.execute(executionInput)
     setImmediate(() => {
       const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'
         ? (input as { requestPath?: unknown }).requestPath
@@ -553,6 +590,172 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('http:is-active', httpIsActiveArgs, (_event, [requestId]) => {
     return httpExecutionService.isActive(requestId)
+  })
+
+  // ==========================================================================
+  // OData Execution IPC Handlers
+  // --------------------------------------------------------------------------
+  // OData requests reuse `httpExecutionService` under the hood — the
+  // URL is already composed by URLResolver (with $filter / $select /
+  // $top / $skip / $count appended) so the dispatcher just sees a
+  // plain HTTP GET. History is recorded as a dedicated `odata` entry
+  // so the modal can surface `@odata.count` / `@odata.nextLink` and
+  // the originating operation kind (entity-set / function / action /
+  // batch) alongside the regular HTTP metadata.
+  // ==========================================================================
+
+  validatedHandle('odata:execute', odataExecuteArgs, async (_event, [input]) => {
+    const method = typeof input.method === 'string' && input.method.length > 0
+      ? input.method.toUpperCase()
+      : 'GET'
+    const rawBody = typeof input.body === 'string' && input.body.length > 0
+      ? input.body
+      : undefined
+    const bodyContentType = typeof input.bodyContentType === 'string' && input.bodyContentType.length > 0
+      ? input.bodyContentType
+      : 'application/json'
+    const urlOverride = typeof input.urlOverride === 'string' && input.urlOverride.length > 0
+      ? input.urlOverride
+      : undefined
+    const authRequestPayload = (input as { authRequest?: unknown }).authRequest
+    const authRequest = isPlainAuthPayload(authRequestPayload)
+      ? AuthenticationRequest.fromPlain(authRequestPayload)
+      : undefined
+    const result = await httpExecutionService.execute({
+      requestId: input.requestId,
+      method,
+      ...(typeof input.timeout === 'number' ? { timeout: input.timeout } : {}),
+      ...(rawBody !== undefined ? { rawBody, rawBodyContentType: bodyContentType } : {}),
+      ...(urlOverride !== undefined ? { urlOverride } : {}),
+      ...(authRequest ? { authRequest } : {})
+    })
+    setImmediate(() => {
+      const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'
+        ? (input as { requestPath?: unknown }).requestPath
+        : undefined
+      void responseHistoryService.storeExecutionResult(input.requestId, 'odata', result, requestPath)
+    })
+    return result
+  })
+
+  validatedHandle('odata:cancel', odataCancelArgs, (_event, [requestId]) => {
+    return httpExecutionService.cancel(requestId)
+  })
+
+  validatedHandle('odata:is-active', odataIsActiveArgs, (_event, [requestId]) => {
+    return httpExecutionService.isActive(requestId)
+  })
+
+  // ==========================================================================
+  // Authentication — one-shot prefetch for the import wizard
+  // --------------------------------------------------------------------------
+  // Fires the caller-supplied HTTP request verbatim, evaluates
+  // handlebars producedHeaders against the JSON response body, and
+  // returns the resolved header map. No ContextService registration:
+  // the request is ephemeral (user-typed in the modal, not yet
+  // persisted). The cache service isn't involved either — the
+  // resulting headers are returned straight to the renderer so the
+  // import modal can drive a retry.
+  // ==========================================================================
+
+  validatedHandle('auth:prefetch', authPrefetchArgs, async (_event, [spec]) => {
+    try {
+      // Serialize body: text → raw string; x-www-form-urlencoded →
+      // URLSearchParams; form-data/file → not yet supported here (the
+      // auth route is nearly always OAuth token, which is text or
+      // urlencoded). We also ensure Content-Type is set for urlencoded
+      // bodies so providers like login.microsoftonline.com accept the
+      // payload.
+      const outHeaders: { key: string; value: string; enabled?: boolean }[] =
+        (spec.headers ?? []).map((h) => ({ key: h.key, value: h.value, ...(h.enabled !== undefined ? { enabled: h.enabled } : {}) }))
+      let serializedBody: string | undefined
+      if (spec.body?.type === 'text' && spec.body.content) {
+        serializedBody = spec.body.content
+      } else if (spec.body?.type === 'x-www-form-urlencoded' && spec.body.fields) {
+        const params = new URLSearchParams()
+        for (const f of spec.body.fields) {
+          if (f.enabled === false) continue
+          if (!f.key) continue
+          params.append(f.key, f.value)
+        }
+        serializedBody = params.toString()
+        const hasContentType = outHeaders.some((h) => h.enabled !== false && h.key.toLowerCase() === 'content-type')
+        if (!hasContentType) {
+          outHeaders.push({ key: 'Content-Type', value: 'application/x-www-form-urlencoded' })
+        }
+      }
+
+      const redactedHeaders = outHeaders.map((h) => ({
+        ...h,
+        value: /authorization|cookie|secret|token/i.test(h.key) ? '***' : h.value
+      }))
+      const redactedBody = serializedBody
+        ? serializedBody.replace(/(client_secret|password|refresh_token|assertion)=[^&]+/gi, '$1=***')
+        : undefined
+      logger.info('[auth:prefetch] dispatching', {
+        method: spec.method,
+        url: spec.url,
+        headers: redactedHeaders,
+        bodyType: spec.body?.type,
+        bodyPreview: redactedBody?.slice(0, 500) ?? ''
+      })
+
+      const result = await authPrefetchOneShot({
+        method: spec.method,
+        url: spec.url,
+        headers: outHeaders,
+        ...(serializedBody !== undefined ? { body: serializedBody } : {})
+      })
+
+      logger.info('[auth:prefetch] response', {
+        success: result.success,
+        statusCode: result.statusCode,
+        bodyPreview: (result.body ?? '').slice(0, 500),
+        error: result.error
+      })
+
+      if (!result.success) {
+        return {
+          success: false,
+          statusCode: result.statusCode ?? 0,
+          error: result.error ?? `HTTP ${result.statusCode ?? 0}`,
+          headers: {} as Record<string, string>
+        }
+      }
+      // Treat non-2xx as a failure so Save & retry doesn't happily
+      // attach headers from a failed auth exchange. We still return
+      // the raw response body — the inline Send path in the modal
+      // uses it to show the server's actual payload in the Response
+      // tab, which tells the user what to fix.
+      if (result.statusCode !== undefined && (result.statusCode < 200 || result.statusCode >= 300)) {
+        return {
+          success: false,
+          statusCode: result.statusCode,
+          headers: {} as Record<string, string>,
+          responseBody: result.body ?? ''
+        }
+      }
+      const resolved = resolveProducedHeaders(spec.producedHeaders, result.body ?? '')
+      const redactedResolved: Record<string, string> = {}
+      for (const [k, v] of Object.entries(resolved)) {
+        redactedResolved[k] = /authorization|cookie/i.test(k) ? `${v.slice(0, 12)}…(redacted)` : v
+      }
+      logger.info('[auth:prefetch] resolved producedHeaders', { headers: redactedResolved })
+      return {
+        success: true,
+        statusCode: result.statusCode ?? 200,
+        headers: resolved,
+        responseBody: result.body ?? ''
+      }
+    } catch (err) {
+      logger.error('[IPC] auth:prefetch error', err)
+      return {
+        success: false,
+        statusCode: 0,
+        error: err instanceof Error ? err.message : String(err),
+        headers: {} as Record<string, string>
+      }
+    }
   })
 
   // ==========================================================================
@@ -675,10 +878,13 @@ export function registerRestormIPC(deps: {
   // Import IPC Handlers
   // ==========================================================================
 
-  validatedHandle('import:preview', importPreviewArgs, async (_event, [input]) => {
+  validatedHandle('import:preview', importPreviewArgs, async (_event, [input, options]) => {
     logger.info('[IPC] Import preview requested:', { input })
     try {
-      const result = await importFrom(input, { dryRun: true })
+      const result = await importFrom(input, {
+        dryRun: true,
+        ...(options?.extraHeaders !== undefined ? { extraHeaders: options.extraHeaders } : {})
+      })
       logger.info('[IPC] Import preview result:', { success: result.success, itemsCount: result.items.length })
       return result
     } catch (error) {
