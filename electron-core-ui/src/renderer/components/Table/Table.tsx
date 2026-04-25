@@ -311,9 +311,13 @@ function TableInner<TRow>(
     }
   })
 
-  // ── FLIP animation: smoothly slide rows when their position changes ──
-  // Records each row's top position after every render, compares with the
-  // previous render, and animates the delta away with a transform.
+  // ── FLIP animation: smoothly slide rows when their order changes ──
+  // Records each row's top position + the row-id sequence after every
+  // render and animates the delta only when the SEQUENCE changed
+  // (drag-to-reorder, sort). A position-only delta — e.g. a user typing
+  // in an autoWidth column resizes the column, which subtly changes
+  // row top by a fraction of a pixel — used to trigger a 180ms slide
+  // on every keystroke; that's UI noise, not a reorder.
   //
   // `flipReadyRef` is flipped to true after the initial layout has had
   // time to stabilize (two animation frames, long enough for autoWidth
@@ -321,6 +325,7 @@ function TableInner<TRow>(
   // the setState from autoWidth triggers a re-render whose small layout
   // shifts get animated on mount — looks like rows are "flying in".
   const rowPositionsRef = useRef<Map<string, number>>(new Map())
+  const rowOrderRef = useRef<string[]>([])
   const flipReadyRef = useRef(false)
   useEffect(() => {
     const raf1 = requestAnimationFrame(() => {
@@ -335,27 +340,44 @@ function TableInner<TRow>(
     const body = bodyRef.current
     if (!body) return
     const prev = rowPositionsRef.current
+    const prevOrder = rowOrderRef.current
     const next = new Map<string, number>()
+    const nextOrder: string[] = []
     const rowEls = body.querySelectorAll<HTMLElement>('[data-row-id]')
     rowEls.forEach((el) => {
       const rowId = el.dataset['rowId']
       if (!rowId) return
       const top = el.getBoundingClientRect().top
       next.set(rowId, top)
-      if (!flipReadyRef.current) return
-      const prevTop = prev.get(rowId)
-      if (prevTop !== undefined && prevTop !== top) {
-        const delta = prevTop - top
-        el.style.transform = `translateY(${delta}px)`
-        el.style.transition = 'none'
-        // Next frame: transition transform to 0
-        requestAnimationFrame(() => {
-          el.style.transform = ''
-          el.style.transition = 'transform 180ms ease'
-        })
-      }
+      nextOrder.push(rowId)
     })
+    // Same set of ids, different sequence → reorder. Different lengths
+    // (insert/delete) skip the animation: a removed row's `<tr>` is
+    // already gone, a new row has no prev top to interpolate from.
+    const orderChanged =
+      flipReadyRef.current &&
+      prevOrder.length === nextOrder.length &&
+      prevOrder.length > 0 &&
+      prevOrder.some((id, i) => id !== nextOrder[i])
+    if (orderChanged) {
+      rowEls.forEach((el) => {
+        const rowId = el.dataset['rowId']
+        if (!rowId) return
+        const top = next.get(rowId)
+        const prevTop = prev.get(rowId)
+        if (top !== undefined && prevTop !== undefined && prevTop !== top) {
+          const delta = prevTop - top
+          el.style.transform = `translateY(${delta}px)`
+          el.style.transition = 'none'
+          requestAnimationFrame(() => {
+            el.style.transform = ''
+            el.style.transition = 'transform 180ms ease'
+          })
+        }
+      })
+    }
     rowPositionsRef.current = next
+    rowOrderRef.current = nextOrder
   })
 
   useImperativeHandle(ref, () => ({
