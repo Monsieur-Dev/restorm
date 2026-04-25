@@ -356,7 +356,11 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
 
     void window.restorm?.context.updateFullRequestData(requestId, {
       id: requestId,
-      requestType: 'http',
+      // HTTPRequestTabView is reused for both `http` and `auth` tabs
+      // (auth requests share the HTTP form layout). Preserve the real
+      // discriminator so consumers — search index, code-snippet
+      // generator, downstream branches — can tell them apart.
+      requestType: request.type === 'auth' ? 'auth' : 'http',
       url,
       method,
       headers: toKeyValueData(request.headers),
@@ -364,7 +368,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       pathParams: request.pathParams ? toKeyValueData(request.pathParams) : [],
       body: bodyData
     }, sourceIdRef.current)
-  }, [request.id, url, method, request.headers, request.params, request.pathParams, body, bodyMode, bodyFilePath, request.body, toKeyValueData])
+  }, [request.id, request.type, url, method, request.headers, request.params, request.pathParams, body, bodyMode, bodyFilePath, request.body, toKeyValueData])
   
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])

@@ -59,7 +59,7 @@ export type HTTPRequestBody =
 /** Full request data for URL resolution and code snippet generation */
 export interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth'
 
   // Common fields
   url: string

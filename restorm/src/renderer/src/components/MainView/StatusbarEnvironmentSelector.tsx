@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
+  Button,
   IconView,
   StatusbarElement,
   getContrastColor
@@ -87,45 +88,51 @@ const EnvPopoverList: React.FC<EnvPopoverProps> = ({ rows, selectedEnvId, applyT
         gap: 2
       }}
     >
+      {/* Each row is an ECUI Button (consistent app-wide styling)
+          wrapped in a `<div role="option">` so the listbox a11y
+          pattern from the parent stays intact — Button doesn't
+          propagate arbitrary `role` attrs. The env's `color` keeps
+          its tint via the wrapper background; the Button itself is
+          rendered as a transparent line variant that floats on top. */}
       {rows.map(({ env, depth }) => {
         const bg = env.color ?? DEFAULT_ENV_COLOR
         const fg = getContrastColor(bg)
         const isSelected = env.id === selectedEnvId
         return (
-          <button
+          <div
             key={env.id}
-            type="button"
             role="option"
             aria-selected={isSelected}
             data-testid={`statusbar-env-selector-item-${env.id}`}
-            onClick={(): void => { onSelect(env.id) }}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
               marginLeft: depth * 16,
-              padding: '4px 8px',
-              border: 'none',
               borderRadius: 3,
               background: envGradient(bg),
-              color: fg,
-              cursor: 'pointer',
-              textAlign: 'left',
-              fontSize: 12,
-              lineHeight: 1.3,
               outline: isSelected ? '1px solid var(--focusBorder)' : 'none',
               outlineOffset: isSelected ? -2 : 0
             }}
           >
-            {env.icon && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', width: 14, height: 14, flexShrink: 0 }}>
-                <IconView icon={env.icon} size={14} />
+            <Button
+              secondary
+              small
+              line
+              onClick={(): void => { onSelect(env.id) }}
+              style={{
+                width: '100%',
+                justifyContent: 'flex-start',
+                color: fg
+              }}
+            >
+              {env.icon && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', width: 14, height: 14, flexShrink: 0, marginRight: 6 }}>
+                  <IconView icon={env.icon} size={14} />
+                </span>
+              )}
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {env.name}
               </span>
-            )}
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {env.name}
-            </span>
-          </button>
+            </Button>
+          </div>
         )
       })}
       {/* "Apply to all" toggle — OYO-196. Checked by default: writes

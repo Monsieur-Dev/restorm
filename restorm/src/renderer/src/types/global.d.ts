@@ -380,7 +380,7 @@ export interface WebSocketMessageData {
 /** Full request data for backend processing */
 export interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth'
   url: string
   headers: KeyValueData[]
   method?: string | undefined

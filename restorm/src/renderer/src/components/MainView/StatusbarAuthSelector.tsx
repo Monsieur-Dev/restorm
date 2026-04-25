@@ -14,7 +14,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { StatusbarElement } from 'electron-core-ui/renderer'
+import { Button, StatusbarElement } from 'electron-core-ui/renderer'
 import type {
   AuthenticationRequest,
   FolderItem,
@@ -124,48 +124,59 @@ export const StatusbarAuthSelector: React.FC<StatusbarAuthSelectorProps> = ({
         style={{ minWidth: 240, maxWidth: 400, padding: 4, display: 'flex', flexDirection: 'column', gap: 2 }}
         data-testid="statusbar-auth-popover"
       >
-        <button
-          type="button"
+        {/* Each option is an ECUI Button (consistent app-wide styling)
+            wrapped in a `<div role="option">` to keep the listbox a11y
+            pattern from the parent. The ECUI Button doesn't propagate
+            arbitrary `role` attributes, so the wrapper carries it. */}
+        <div
           role="option"
           aria-selected={attachedId === null}
-          onClick={() => { handlePick(NO_AUTH) }}
           style={{
-            textAlign: 'left',
-            padding: '4px 8px',
-            border: '1px solid transparent',
             background: attachedId === null ? 'var(--list-activeSelectionBackground)' : 'transparent',
-            color: attachedId === null ? 'var(--list-activeSelectionForeground)' : 'inherit',
-            cursor: 'pointer',
-            fontSize: 12
+            borderRadius: 3
           }}
-          data-testid="statusbar-auth-option-none"
         >
-          {t('statusbar.auth.noAuth', 'No auth')}
-        </button>
+          <Button
+            secondary
+            small
+            line
+            data-testid="statusbar-auth-option-none"
+            onClick={() => { handlePick(NO_AUTH) }}
+            style={{
+              width: '100%',
+              justifyContent: 'flex-start',
+              color: attachedId === null ? 'var(--list-activeSelectionForeground)' : undefined
+            }}
+          >
+            {t('statusbar.auth.noAuth', 'No auth')}
+          </Button>
+        </div>
         {authRequests.map((req) => (
-          <button
+          <div
             key={req.id}
-            type="button"
             role="option"
             aria-selected={attachedId === req.id}
-            onClick={() => { handlePick(req.id) }}
             style={{
-              textAlign: 'left',
-              padding: '4px 8px',
-              border: '1px solid transparent',
               background: attachedId === req.id ? 'var(--list-activeSelectionBackground)' : 'transparent',
-              color: attachedId === req.id ? 'var(--list-activeSelectionForeground)' : 'inherit',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              fontSize: 12
+              borderRadius: 3
             }}
-            data-testid={`statusbar-auth-option-${req.id}`}
           >
-            <i className="codicon codicon-key" aria-hidden="true" />
-            <span>{req.name || t('statusbar.auth.unnamed', 'Unnamed')}</span>
-          </button>
+            <Button
+              secondary
+              small
+              line
+              icon="key"
+              data-testid={`statusbar-auth-option-${req.id}`}
+              onClick={() => { handlePick(req.id) }}
+              style={{
+                width: '100%',
+                justifyContent: 'flex-start',
+                color: attachedId === req.id ? 'var(--list-activeSelectionForeground)' : undefined
+              }}
+            >
+              {req.name || t('statusbar.auth.unnamed', 'Unnamed')}
+            </Button>
+          </div>
         ))}
       </div>
     </StatusbarElement>

@@ -61,7 +61,7 @@ interface AvailableVariablesResult {
 /** Full request data for backend processing */
 interface FullRequestData {
   id: string
-  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket'
+  requestType: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket' | 'odata' | 'auth'
   url: string
   headers: { id?: string; key: string; value: string }[]
   method?: string
