@@ -85,6 +85,7 @@ import { findItemById } from './utils/treeSearch'
 import { EnvironmentProvider } from './contexts/EnvironmentContext'
 import { StatusbarEnvironmentSelector } from './components/MainView/StatusbarEnvironmentSelector'
 import { StatusbarAuthSelector } from './components/MainView/StatusbarAuthSelector'
+import { shouldShowAuthSelector } from './components/MainView/statusbarAuthHelpers'
 import { useItemOperations } from './hooks/useItemOperations'
 import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
@@ -1497,32 +1498,48 @@ const App: React.FC = () => {
         </div>
       )}
 
+      {/* Pre-compute which status-bar entries actually mount so the
+          FIRST visible right-side cell carries `right-aligned`
+          (margin-left: auto). Only the leftmost-of-the-right needs
+          the auto margin; the rest follow naturally to its right. */}
       <Statusbar data-testid="app-statusbar">
         {filePath && <StatusbarElement data-testid="app-statusbar-element" title={filePath} />}
         <DesktopIndicator />
         {(() => {
           if (!activeRequest || !activeEnvFolderId) return null
-          const reactiveRequest = findRequestById(rootItems, activeRequest.id)
-          const envFolder = findFolderById(rootItems, activeEnvFolderId)
-          if (!reactiveRequest || !envFolder) return null
+          const reactiveActiveRequest = findRequestById(rootItems, activeRequest.id)
+          const activeEnvFolder = findFolderById(rootItems, activeEnvFolderId)
+          if (!reactiveActiveRequest || !activeEnvFolder) return null
+          if (!shouldShowAuthSelector(reactiveActiveRequest, activeEnvFolder.items)) return null
           return (
             <StatusbarAuthSelector
-              activeRequest={reactiveRequest}
-              envFolderItems={envFolder.items}
+              activeRequest={reactiveActiveRequest}
+              envFolderItems={activeEnvFolder.items}
+              rightAligned
             />
           )
         })()}
-        {activeRequest && activeRequestEnvironments.length > 0 && (
-          <EnvironmentProvider
-            environments={activeRequestEnvironments}
-            persistenceKey={activeEnvPersistenceKey}
-          >
-            <StatusbarEnvironmentSelector
-              folderRequestIds={activeEnvFolderRequestIds}
-              projectUuid={projectUuid}
-            />
-          </EnvironmentProvider>
-        )}
+        {(() => {
+          if (!activeRequest || activeRequestEnvironments.length === 0) return null
+          // Only push env right when no auth selector to its left.
+          const authActive = !!activeEnvFolderId && (() => {
+            const folder = findFolderById(rootItems, activeEnvFolderId)
+            const req = findRequestById(rootItems, activeRequest.id)
+            return !!(folder && req && shouldShowAuthSelector(req, folder.items))
+          })()
+          return (
+            <EnvironmentProvider
+              environments={activeRequestEnvironments}
+              persistenceKey={activeEnvPersistenceKey}
+            >
+              <StatusbarEnvironmentSelector
+                folderRequestIds={activeEnvFolderRequestIds}
+                projectUuid={projectUuid}
+                rightAligned={!authActive}
+              />
+            </EnvironmentProvider>
+          )
+        })()}
         {activeRequest && (
           <StatusbarElement
             data-testid="statusbar-request-history"

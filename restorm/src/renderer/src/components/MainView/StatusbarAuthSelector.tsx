@@ -16,16 +16,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, StatusbarElement } from 'electron-core-ui/renderer'
 import type {
-  AuthenticationRequest,
   FolderItem,
   Request
 } from '../../../../shared/types/collections'
-import {
-  isAnyFolder,
-  isAuthenticationRequest,
-  isRequest
-} from '../../../../shared/types/collections'
 import { updateReactiveProperty } from '../RequestTabViews/requestTabViewUtils'
+import { collectAuthRequests } from './statusbarAuthHelpers'
 
 export interface StatusbarAuthSelectorProps {
   /** The active request — the one the status bar is contextual to.
@@ -35,25 +30,19 @@ export interface StatusbarAuthSelectorProps {
   /** The nearest ancestor env folder's items tree. Walked to find
    * every AuthenticationRequest available as a pick. */
   envFolderItems: readonly FolderItem[]
+  /** When true, the StatusbarElement carries the `right-aligned`
+   * class — pushing this entry (and every later entry) to the right
+   * side of the status bar. Should be set to true on the leftmost
+   * of the right-side group. */
+  rightAligned?: boolean
 }
 
 const NO_AUTH = '__none__'
 
-function collectAuthRequests(items: readonly FolderItem[]): AuthenticationRequest[] {
-  const out: AuthenticationRequest[] = []
-  const walk = (nodes: readonly FolderItem[]): void => {
-    for (const n of nodes) {
-      if (isRequest(n) && isAuthenticationRequest(n)) out.push(n)
-      if (isAnyFolder(n)) walk(n.items)
-    }
-  }
-  walk(items)
-  return out
-}
-
 export const StatusbarAuthSelector: React.FC<StatusbarAuthSelectorProps> = ({
   activeRequest,
-  envFolderItems
+  envFolderItems,
+  rightAligned = false
 }) => {
   const { t } = useTranslation()
   const [flash, setFlash] = useState<'idle' | 'running' | 'failed'>('idle')
@@ -116,6 +105,7 @@ export const StatusbarAuthSelector: React.FC<StatusbarAuthSelectorProps> = ({
       icon={{ type: 'codicon', value: 'key' }}
       title={label}
       tooltipTrigger="click"
+      className={rightAligned ? 'right-aligned' : ''}
       {...(backgroundColor !== undefined ? { backgroundColor } : {})}
     >
       <div
@@ -125,53 +115,49 @@ export const StatusbarAuthSelector: React.FC<StatusbarAuthSelectorProps> = ({
         data-testid="statusbar-auth-popover"
       >
         {/* Each option is an ECUI Button (consistent app-wide styling)
-            wrapped in a `<div role="option">` to keep the listbox a11y
-            pattern from the parent. The ECUI Button doesn't propagate
-            arbitrary `role` attributes, so the wrapper carries it. */}
-        <div
-          role="option"
-          aria-selected={attachedId === null}
-          style={{
-            background: attachedId === null ? 'var(--list-activeSelectionBackground)' : 'transparent',
-            borderRadius: 3
-          }}
-        >
+            wrapped in a `<div role="option">` so the listbox a11y
+            pattern survives — Button doesn't propagate arbitrary
+            `role` attributes. Selection tint goes through the Button's
+            `backgroundColor` prop so the active row reads as one solid
+            shape rather than a wrapper-tinted halo around a flat
+            button. */}
+        <div role="option" aria-selected={attachedId === null}>
           <Button
+            fullWidth
             secondary
             small
             line
+            align="left"
             data-testid="statusbar-auth-option-none"
             onClick={() => { handlePick(NO_AUTH) }}
+            {...(attachedId === null ? { backgroundColor: 'var(--list-activeSelectionBackground)' } : {})}
             style={{
-              width: '100%',
-              justifyContent: 'flex-start',
-              color: attachedId === null ? 'var(--list-activeSelectionForeground)' : undefined
+              // `small line` zero out padding; pad the text inwards so
+              // it doesn't butt up against the leading edge.
+              paddingLeft: 8,
+              paddingRight: 8,
+              ...(attachedId === null ? { color: 'var(--list-activeSelectionForeground)' } : {})
             }}
           >
             {t('statusbar.auth.noAuth', 'No auth')}
           </Button>
         </div>
         {authRequests.map((req) => (
-          <div
-            key={req.id}
-            role="option"
-            aria-selected={attachedId === req.id}
-            style={{
-              background: attachedId === req.id ? 'var(--list-activeSelectionBackground)' : 'transparent',
-              borderRadius: 3
-            }}
-          >
+          <div key={req.id} role="option" aria-selected={attachedId === req.id}>
             <Button
+              fullWidth
               secondary
               small
               line
               icon="key"
+              align="left"
               data-testid={`statusbar-auth-option-${req.id}`}
               onClick={() => { handlePick(req.id) }}
+              {...(attachedId === req.id ? { backgroundColor: 'var(--list-activeSelectionBackground)' } : {})}
               style={{
-                width: '100%',
-                justifyContent: 'flex-start',
-                color: attachedId === req.id ? 'var(--list-activeSelectionForeground)' : undefined
+                paddingLeft: 8,
+                paddingRight: 8,
+                ...(attachedId === req.id ? { color: 'var(--list-activeSelectionForeground)' } : {})
               }}
             >
               {req.name || t('statusbar.auth.unnamed', 'Unnamed')}
