@@ -52,8 +52,16 @@ const ODataPropertyChipsBase: React.FC<ODataPropertyChipsProps> = ({ properties,
   const { t } = useTranslation()
   const [pickedValues, setPickedValues] = useState<string[]>([])
 
+  // Sort alphabetically (case-insensitive, locale-aware) so the dropdown
+  // surfaces properties in a predictable order regardless of the order
+  // the importer happened to emit them. `slice()` keeps the parent's
+  // array intact — sorting in place would mutate the request's
+  // `entitySetProperties` / `navigationProperties` arrays.
   const options = useMemo(
-    () => properties.map((name) => ({ value: name, label: name })),
+    () => properties
+      .slice()
+      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+      .map((name) => ({ value: name, label: name })),
     [properties]
   )
 
