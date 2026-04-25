@@ -77,5 +77,3 @@ test-results/
 
 # Playwright BDD generated files
 .features-gen/
-# Credentials for local-only e2e fixtures (Dynamics / OData import perf test)
-tests/e2e/fixtures/dynamics-creds.json
