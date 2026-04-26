@@ -65,7 +65,7 @@ describe('applyDropdownFilter', () => {
 })
 
 describe('DEFAULT_FILTER_THRESHOLD', () => {
-  it('matches the documented default in the ticket (15)', () => {
+  it('exposes 15 as the default filter threshold', () => {
     expect(DEFAULT_FILTER_THRESHOLD).toBe(15)
   })
 })

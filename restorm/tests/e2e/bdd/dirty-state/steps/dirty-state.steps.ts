@@ -243,17 +243,14 @@ async function focusBodyAtEnd(p: Page): Promise<void> {
   }
   const editor = p.locator('[data-testid="http-request-body-editor"]:visible').first()
   await expect(editor).toBeVisible({ timeout: 5000 })
-  // Wait for Monaco to finish mounting — the textarea data-testid is
-  // attached in `onMount`, once the editor settles.
-  const textarea = p.locator('[data-testid="http-request-body-editor-textarea"]')
-  await expect(textarea).toBeAttached({ timeout: 5000 })
-  // Monaco delegates focus on `mousedown` over its content widget. A
-  // bare `textarea.focus()` lands the DOM focus on the hidden mirror
-  // but skips Monaco's input setup, so subsequent keystrokes are
-  // dropped before they reach the model. Click the visible Monaco
-  // viewport (`.monaco-editor`) inside the editor wrapper to wire
-  // input properly, then position the caret at the end.
+  // Monaco delegates focus on `mousedown` over its rendered viewport,
+  // not on the hidden screen-reader textarea. A bare wrapper click
+  // (or `textarea.focus()`) lands the DOM focus but skips Monaco's
+  // input wiring, so subsequent keystrokes are dropped before
+  // reaching the model. Click the `.monaco-editor` viewport so
+  // Monaco arms input the same way a real user click would.
   const viewport = editor.locator('.monaco-editor').first()
+  await expect(viewport).toBeVisible({ timeout: 10000 })
   await viewport.click({ force: true })
   await p.keyboard.press('End')
 }

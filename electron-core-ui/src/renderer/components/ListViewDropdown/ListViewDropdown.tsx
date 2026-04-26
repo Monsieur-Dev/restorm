@@ -148,6 +148,7 @@ const ListViewDropdownInner: React.FC<ListViewDropdownProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const panelRef = useRef<HTMLDivElement | null>(null)
 
   // Flat node list drives the count check (so a tree of 20 nested
   // nodes crosses the 15-node threshold even though there are only
@@ -186,33 +187,68 @@ const ListViewDropdownInner: React.FC<ListViewDropdownProps> = ({
 
   const pathIndex = useMemo(() => indexNodePaths(items), [items])
 
+  // Bulk-select fires `onItemClick` on every visible *leaf*. The host's
+  // `onItemClick` is also invoked for direct row clicks on parent rows
+  // (where its meaning is host-defined — usually "toggle expand"); to
+  // keep "Select all visible" unambiguous across hosts we synthesise
+  // the call only for nodes without children.
+  const isLeaf = useCallback(
+    (node: ListViewItemData): boolean =>
+      !Array.isArray(node.children) || node.children.length === 0,
+    []
+  )
+
   const selectAllVisible = useCallback((): void => {
     if (selectionMode !== 'multiple' || flatFilteredItems.length === 0 || !onItemClick) return
     const alreadySelected = new Set(selectedIds ?? [])
     for (const node of flatFilteredItems) {
+      if (!isLeaf(node)) continue
       if (!alreadySelected.has(node.id)) {
         const path = pathIndex.get(node.id) ?? { ids: [node.id], indices: [0] }
         onItemClick({ item: node, path })
       }
     }
-  }, [selectionMode, onItemClick, selectedIds, flatFilteredItems, pathIndex])
+  }, [selectionMode, onItemClick, selectedIds, flatFilteredItems, pathIndex, isLeaf])
 
   const deselectAllVisible = useCallback((): void => {
     if (selectionMode !== 'multiple' || flatFilteredItems.length === 0 || !onItemClick) return
     const alreadySelected = new Set(selectedIds ?? [])
     for (const node of flatFilteredItems) {
+      if (!isLeaf(node)) continue
       if (alreadySelected.has(node.id)) {
         const path = pathIndex.get(node.id) ?? { ids: [node.id], indices: [0] }
         onItemClick({ item: node, path })
       }
     }
-  }, [selectionMode, onItemClick, selectedIds, flatFilteredItems, pathIndex])
+  }, [selectionMode, onItemClick, selectedIds, flatFilteredItems, pathIndex, isLeaf])
 
   const rootTestId = dataTestId ?? 'listviewdropdown'
   const buttonTestId = `${rootTestId}-button`
   const panelTestId = `${rootTestId}-panel`
   const scrollableTestId = `${rootTestId}-scrollable`
   const listViewTestId = `${rootTestId}-listview`
+
+  // Bridge filter-input keyboard to the listbox. Esc handling stays in
+  // the hook (clear-then-fall-through). ArrowDown moves focus into the
+  // ListView root so the user can navigate without leaving the
+  // keyboard. The ListView itself owns the rest of the navigation
+  // (Up/Down/Enter) once focus lands on its `tabIndex=0` element.
+  const handleFilterInputKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+      handleFilterKeyDown(event)
+      if (event.defaultPrevented) return
+      if (event.key === 'ArrowDown' && panelRef.current) {
+        const listViewRoot = panelRef.current.querySelector<HTMLElement>(
+          `[data-testid="${listViewTestId}"]`
+        )
+        if (listViewRoot) {
+          event.preventDefault()
+          listViewRoot.focus()
+        }
+      }
+    },
+    [handleFilterKeyDown, listViewTestId]
+  )
 
   const selectedIdsAttr = (selectedIds ?? []).join('|')
   const expandedIdsAttr = (expandedIds ?? []).join('|')
@@ -270,6 +306,7 @@ const ListViewDropdownInner: React.FC<ListViewDropdownProps> = ({
 
       {isOpen && (
         <div
+          ref={panelRef}
           data-testid={panelTestId}
           style={{
             position: 'absolute',
@@ -290,7 +327,7 @@ const ListViewDropdownInner: React.FC<ListViewDropdownProps> = ({
             <DropdownFilterRow
               value={filterValue}
               onChange={setFilterValue}
-              onKeyDown={handleFilterKeyDown}
+              onKeyDown={handleFilterInputKeyDown}
               {...(filterPlaceholder !== undefined && { placeholder: filterPlaceholder })}
               {...(selectionMode === 'multiple' && { onSelectAllVisible: selectAllVisible })}
               {...(selectionMode === 'multiple' && { onDeselectAllVisible: deselectAllVisible })}
