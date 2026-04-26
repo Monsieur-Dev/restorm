@@ -270,7 +270,8 @@ but isn't part of the filename.
 
 ## Migration Note
 
-OYO-183 is a **breaking change** for on-disk layouts:
+The current on-disk layout is the result of one historical breaking
+change applied before any production distribution:
 
 - `_index.json5` → `index.<ext>`.
 - `{index} - {TYPE} - {name}.{ext}` → `{index} - {name}.{ext}`.

@@ -5,10 +5,10 @@
  * renderer message and page error into a shared log buffer. Historically
  * those were only attached to the test output for post-mortem reading —
  * a scenario that silently emitted `Maximum update depth exceeded` or
- * `The result of getSnapshot should be cached` still "passed". The
- * OYO-203 perf regression (infinite re-render loop from a non-memoised
- * `getSnapshot`) is exactly the class of bug that would have been
- * caught long ago if the fixtures had failed on console errors.
+ * `The result of getSnapshot should be cached` still "passed". An
+ * infinite re-render loop from a non-memoised `getSnapshot` is exactly
+ * the class of bug that would have been caught long ago if the
+ * fixtures had failed on console errors.
  *
  * This module centralises the gate: given a concatenated log buffer
  * (lines prefixed with `[renderer:error]`, `[renderer:warning]`,

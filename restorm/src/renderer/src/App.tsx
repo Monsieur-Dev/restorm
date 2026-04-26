@@ -537,10 +537,10 @@ const App: React.FC = () => {
   }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, rootItems])
 
   // The nearest ancestor env folder of the active request — the
-  // primary storage grain for OYO-196's env model. Walked from
-  // breadcrumbs so it stays in sync with the workbench's active
-  // selection. `null` when no env-folder ancestor exists (the
-  // selector then runs without persistence).
+  // primary storage grain for the env model. Walked from breadcrumbs
+  // so it stays in sync with the workbench's active selection. `null`
+  // when no env-folder ancestor exists (the selector then runs
+  // without persistence).
   const activeEnvFolderId = useMemo<string | null>(() => {
     if (!activeRequest) return null
     const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, activeRequest.id)

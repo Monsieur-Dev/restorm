@@ -1,7 +1,7 @@
 # Playbook — Adding a New Execution Protocol to Restorm
 
-> **Status:** authoritative reference (OYO-246).
-> Every ticket under OYO-219 (and OYO-169 in retrospect) must follow this playbook
+> **Status:** authoritative reference for protocol work.
+> Any ticket that adds a new execution protocol must follow this playbook
 > to keep the protocol surface consistent. Do this *first*, not last — the doc
 > exists so each author does not reinvent the same four artifacts (mock service,
 > CI hook, E2E feature, user docs) with a slightly different shape.
@@ -91,7 +91,7 @@ restorm/
 │   ├── main/services/
 │   │   ├── <Protocol>ExecutionService.ts                # execution
 │   │   ├── ResponseHistoryService.ts                    # add build<Protocol>Response
-│   │   └── import/<Format>ImportService.ts              # import adapter (OYO-168)
+│   │   └── import/<Format>ImportService.ts              # import adapter
 │   └── renderer/src/components/RequestTabViews/
 │       └── <Protocol>RequestTabView.tsx                 # tab UI
 ├── tests/
@@ -138,8 +138,8 @@ Components available today (non-exhaustive):
 | Dialogs / overlays | `Modal`, `Tooltip`, `ContextMenu`, `TabSwitcherOverlay` |
 | Navigation | `Breadcrumb`, `ListView`, `Tag`, `MenuBar`, `Tabs`, `BookmarkRibbon` |
 | Code / text | `CodeEditor` (Monaco-backed, with Handlebars contribution), `MarkdownEditor`, `MarkdownViewer` |
-| Feedback | `Callout`, toasts via `toasterService` (OYO-164), `ProgressBar`, `Statusbar` |
-| Utilities | `getContrastColor`, `getColorFromString` (OYO-191) |
+| Feedback | `Callout`, toasts via `toasterService`, `ProgressBar`, `Statusbar` |
+| Utilities | `getContrastColor`, `getColorFromString` |
 
 The list is not exhaustive — always grep first.
 
@@ -252,9 +252,9 @@ must be **debounced** before it reaches the side-effect path.
 Per-keystroke firing is the React default but not what we want. Flooding the
 registry / IPC / persistence layer on every character produces real bugs:
 autosave loops, `KeyValueTable` jitter, draft thrashing, dirty-state
-misclassification, search-index recompute storms. Multiple incident reports
-trace back to this anti-pattern (see OYO-253 commit history for the OData
-typing path that motivated codifying this rule).
+misclassification, search-index recompute storms. The OData typing path
+historically hit several of these and is the canonical motivating
+example for the rule.
 
 ### 4.1 — Canonical hooks
 
@@ -391,10 +391,11 @@ up` step indirectly via the restorm e2e job. Confirm:
 ### 6.2 — Optional opt-out flag
 
 Provide an env var `SKIP_<PROTOCOL>_E2E=1` for machines that can't run the
-container (precedent: `SKIP_GITEA_E2E` from OYO-218). Wire it in the
-relevant `before` hook of your feature file, and document the flag in the
-protocol doc. This is a courtesy for contributors on constrained
-environments — it does not change CI behavior, where the flag is never set.
+container (precedent: the existing `SKIP_GITEA_E2E` flag). Wire it in
+the relevant `before` hook of your feature file, and document the
+flag in the protocol doc. This is a courtesy for contributors on
+constrained environments — it does not change CI behavior, where the
+flag is never set.
 
 ---
 
@@ -501,16 +502,16 @@ protocol), the import side has its own contract. See
 [`adding-an-import.md`](./adding-an-import.md) for the full version. Quick
 reminder:
 
-* Implement `ImportAdapter.extractNormalizedSpec` (OYO-168). If OYO-168
-  hasn't landed yet, fall back to the inline pattern used by
-  `SwaggerImportService`.
+* Implement `ImportAdapter.extractNormalizedSpec`. If a
+  `NormalizedSpec` shape isn't available in the codebase yet, fall
+  back to the inline pattern used by `SwaggerImportService`.
 * Auto-detection lives in the adapter, not in `ImportManager`. Sniff
   leading bytes, root field, extension — whatever is unambiguous for your
   format.
-* Plug into the idempotent re-import pipeline (OYO-168) so re-importing
-  the same spec is a no-op, not a duplicate insert.
-* If the format carries enums, wire into OYO-184's
-  custom-vs-imported reconciliation so user edits survive re-import.
+* Plug into the idempotent re-import pipeline so re-importing the same
+  spec is a no-op, not a duplicate insert.
+* If the format carries enums, wire into the custom-vs-imported
+  reconciliation so user edits survive re-import.
 * Commit a fixture under `restorm/tests/unit/fixtures/<format>/` and a
   unit test under `restorm/tests/unit/<Format>ImportService.test.ts`.
 
@@ -530,8 +531,8 @@ Three doc surfaces, all mandatory:
 3. **Index update** in `restorm/docs/protocols/index.md` so the new
    protocol shows up in the rendered docs sidebar.
 
-If the welcome screen redesign (OYO-205) is live when your ticket lands,
-add a one-liner there too.
+If a welcome-screen redesign is live when your ticket lands, add a
+one-liner there too.
 
 ---
 
@@ -559,19 +560,19 @@ review.
 
 ## Section 12 — Reference implementations
 
-When in doubt, follow the most recent precedent. Tickets and the files
-they shipped:
+When in doubt, follow the closest existing precedent. Read the
+reference files alongside this playbook:
 
-| Protocol | Ticket | Reference files |
-| --- | --- | --- |
-| REST / HTTP | OYO-173 | `HTTPExecutionService.ts`, `HTTPRequestTabView.tsx` |
-| GraphQL | OYO-174 | `GraphQLExecutionService.ts`, `GraphQLRequestTabView.tsx`, `GraphQLImportService.ts` |
-| raw WebSocket | OYO-175 | `WebSocketExecutionService.ts` |
-| Socket.IO | OYO-176 | (planned — pattern from raw WebSocket) |
-| MQTT | OYO-177 | (planned — uses `eclipse-mosquitto:2` mock) |
-| SOAP | OYO-178 | `SOAPExecutionService.ts`, `SoapImportService.ts` |
-| gRPC | OYO-179 | `GRPCExecutionService.ts`, `GrpcImportService.ts` |
-| OData | OYO-180 / 181 / 182 (+ cleanup OYO-252) | `HTTPExecutionService.ts` (OData mode), `ODataImportService.ts`, `restorm/tests/docker/odata-petstore/` |
+| Protocol | Reference files |
+| --- | --- |
+| REST / HTTP | `restorm/src/main/services/HTTPExecutionService.ts`, `restorm/src/renderer/src/components/RequestTabViews/HTTPRequestTabView.tsx` |
+| GraphQL | `restorm/src/main/services/GraphQLExecutionService.ts`, `restorm/src/renderer/src/components/RequestTabViews/GraphQLRequestTabView.tsx`, `restorm/src/main/services/import/GraphQLImportService.ts` |
+| raw WebSocket | `restorm/src/main/services/WebSocketExecutionService.ts`, `restorm/src/renderer/src/components/RequestTabViews/WebSocketRequestTabView.tsx` |
+| Socket.IO | _planned_ — follow the raw WebSocket pattern when implementing. |
+| MQTT | _planned_ — uses the `eclipse-mosquitto:2` mock in `restorm/tests/docker/docker-compose.yml`. |
+| SOAP | `restorm/src/main/services/SOAPExecutionService.ts`, `restorm/src/main/services/import/SoapImportService.ts`, `restorm/src/renderer/src/components/RequestTabViews/SoapRequestTabView.tsx` |
+| gRPC | `restorm/src/main/services/GRPCExecutionService.ts`, `restorm/src/main/services/import/GrpcImportService.ts`, `restorm/src/renderer/src/components/RequestTabViews/GrpcRequestTabView.tsx` |
+| OData | `restorm/src/main/services/HTTPExecutionService.ts` (OData mode), `restorm/src/main/services/import/ODataImportService.ts`, `restorm/src/renderer/src/components/RequestTabViews/ODataRequestTabView.tsx`, `restorm/tests/docker/odata-petstore/` |
 
 Pick the closest semantic match (HTTP-shaped → OData; streaming →
 WebSocket; binary → gRPC) and use it as a structural guide, not a

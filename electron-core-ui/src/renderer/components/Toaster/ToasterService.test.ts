@@ -478,7 +478,7 @@ describe('subscription', () => {
   })
 })
 
-describe('getToasts snapshot stability (OYO-203)', () => {
+describe('getToasts snapshot stability', () => {
   // `useSyncExternalStore` calls `getSnapshot` on every render and
   // compares the returned reference against the last one. Returning a
   // fresh `[]` each time ("getSnapshot should be cached …") caused a

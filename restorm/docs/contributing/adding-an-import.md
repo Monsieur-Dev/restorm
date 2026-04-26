@@ -1,6 +1,6 @@
 # Playbook — Adding a New Import Format to Restorm
 
-> **Status:** authoritative reference (OYO-246).
+> **Status:** authoritative reference for import-format work.
 > Companion to [`adding-a-protocol.md`](./adding-a-protocol.md). Follow this
 > doc when the new ticket adds a **spec parser** (Postman, Insomnia,
 > AsyncAPI, OData CSDL, ...) without introducing a new wire-level
@@ -36,7 +36,7 @@ a one-click way to try it.
 
 ---
 
-## Section 1 — `ImportAdapter.extractNormalizedSpec` contract (OYO-168)
+## Section 1 — `ImportAdapter.extractNormalizedSpec` contract
 
 Every import service implements `ImportAdapter` from
 `restorm/src/main/services/import/ImportManager.ts`:
@@ -59,11 +59,11 @@ interface ImportAdapter {
   attempt; an O(n) parse here would tank the dispatch.
 * **`extractNormalizedSpec`** does the real work. It must be **idempotent**:
   re-importing the same input twice produces the same normalized spec
-  (same ids, same order). This is what makes the OYO-168 idempotent
+  (same ids, same order). This is what makes the idempotent re-import
   pipeline safe to re-run.
-* If OYO-168's `NormalizedSpec` shape isn't merged yet when you start,
-  fall back to the inline pattern used by `SwaggerImportService` and
-  open a follow-up issue to migrate once OYO-168 lands.
+* If a `NormalizedSpec` shape isn't available in the codebase when you
+  start, fall back to the inline pattern used by `SwaggerImportService`
+  and open a follow-up issue to migrate once it lands.
 
 ---
 
@@ -101,17 +101,17 @@ generic `ImportManager` handles dedup using stable ids derived from
   `sha1(method + path)` for OpenAPI operations) so the same input
   produces the same hash.
 * If a request has user-edited fields (notes, tags, custom env vars,
-  custom enums from OYO-184), the merge layer keeps the user's edits
-  and only overwrites parser-owned fields. Don't fight the merge layer —
-  emit clean parser-owned values and trust the reconciliation.
+  custom enums), the merge layer keeps the user's edits and only
+  overwrites parser-owned fields. Don't fight the merge layer — emit
+  clean parser-owned values and trust the reconciliation.
 
 ---
 
-## Section 4 — Custom-vs-imported reconciliation (OYO-184)
+## Section 4 — Custom-vs-imported reconciliation
 
 If the format carries enums (Swagger enums, AsyncAPI message kinds,
-gRPC enum types), wire into OYO-184's reconciliation so user-defined
-enum values added in Restorm survive a re-import:
+gRPC enum types), wire into the custom-vs-imported reconciliation so
+user-defined enum values added in Restorm survive a re-import:
 
 * Emit enum metadata as `EnumDefinition` in the normalized spec so the
   importer recognizes it as parser-owned.
@@ -199,10 +199,10 @@ is geared toward execution-protocol tickets. For an import-only PR, fill
 out a stripped-down version inline in the PR description:
 
 ```
-- [ ] `extractNormalizedSpec` implemented and idempotent (OYO-168).
+- [ ] `extractNormalizedSpec` implemented and idempotent.
 - [ ] `canImport` does cheap content-sniffing — no full parse.
 - [ ] Auto-detection works for paste / file / URL paths.
-- [ ] Enum reconciliation wired to OYO-184 (if format has enums).
+- [ ] Enum reconciliation wired (if format has enums).
 - [ ] Fixture committed under `restorm/tests/unit/fixtures/<format>/`.
 - [ ] Unit tests cover sniff + parse + idempotency.
 - [ ] E2E feature file covers import + re-import + auto-detect.
@@ -224,7 +224,7 @@ out a stripped-down version inline in the PR description:
 | GraphQL SDL | `GraphQLImportService.ts` | Reference for IDL-style specs. |
 | gRPC `.proto` | `GrpcImportService.ts` | Reference for IDL with codecs. |
 | SOAP WSDL | `SoapImportService.ts` | Reference for XML-shaped specs. |
-| OData EDMX | `ODataImportService.ts` | Reference for the Phase-1 EDMX v4 parser (OYO-181). |
+| OData EDMX | `ODataImportService.ts` | Reference for the Phase-1 EDMX v4 parser. |
 | cURL | `CurlImportService.ts` | Reference for single-request paste imports. |
 | PowerShell `Invoke-WebRequest` | `PowerShellImportService.ts` | Reference for shell-snippet paste imports. |
 

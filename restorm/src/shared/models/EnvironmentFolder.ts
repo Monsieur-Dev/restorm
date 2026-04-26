@@ -129,10 +129,11 @@ export class EnvironmentFolder {
       tags: obj.tags ?? [],
       tagColors: obj.tagColors ?? {},
       folderType: 'environment',
-      // Legacy files (pre-OYO-200) omit the field — default on load.
-      // `normalizeFileFormatVersion` handles the same case for plain
-      // objects that never reach this factory (e.g. the renderer's
-      // `processAfterDeserialization` → `makeReactiveFolder` path).
+      // Legacy files predating the version field omit it — default on
+      // load. `normalizeFileFormatVersion` handles the same case for
+      // plain objects that never reach this factory (e.g. the
+      // renderer's `processAfterDeserialization` → `makeReactiveFolder`
+      // path).
       fileFormatVersion:
         typeof obj.fileFormatVersion === 'number' && Number.isFinite(obj.fileFormatVersion)
           ? obj.fileFormatVersion

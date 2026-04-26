@@ -357,7 +357,7 @@ describe('sweepOrphanedDrafts (age-based)', () => {
 })
 
 describe('DEFAULT_DRAFT_DEBOUNCE_MS', () => {
-  it('is 300 ms per the OYO-183 spec', () => {
+  it('is 300 ms', () => {
     expect(DEFAULT_DRAFT_DEBOUNCE_MS).toBe(300)
   })
 })

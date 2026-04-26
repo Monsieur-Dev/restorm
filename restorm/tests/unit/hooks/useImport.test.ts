@@ -2,7 +2,7 @@
  * Unit tests for `useImport.handleImport` — focused on the empty-file
  * root-request path that the nesting workaround used to mask.
  *
- * Covers the contract shipped with OYO-253:
+ * Covers the contract:
  *   - requests at the root of the imported tree are kept (no filter)
  *   - exactly one FOLDER_CREATED per top-level imported folder (no
  *     per-descendant emission)
