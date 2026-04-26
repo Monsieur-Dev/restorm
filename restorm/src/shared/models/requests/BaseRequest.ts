@@ -5,7 +5,8 @@
 import {
   trackable,
   searchable,
-  graphqlField
+  graphqlField,
+  TreatEmptyAsUndefined
 } from 'electron-core-ui/decorators'
 import type { RuntimeId, Icon, RequestType } from '../types'
 
@@ -35,11 +36,13 @@ export abstract class BaseRequest {
   /** Documentation describing the request purpose and usage */
   @graphqlField({ type: 'String', nullable: true })
   @searchable.property({ weight: 1 })
+  @TreatEmptyAsUndefined()
   documentation = ''
 
   /** Optional user notes */
   @graphqlField({ type: 'String', nullable: true })
   @searchable.property({ weight: 0.5 })
+  @TreatEmptyAsUndefined()
   notes?: string
 
   /** Tags for categorization and filtering */

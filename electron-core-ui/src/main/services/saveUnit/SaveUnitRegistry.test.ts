@@ -109,7 +109,7 @@ describe('SaveUnitRegistry', () => {
       expect(reg.isDirty('u')).toBe(false)
     })
 
-    it('detects a revert when the upsert pipeline added an empty-string field absent from the reference (OYO-267 first-cycle bug)', () => {
+    it('detects a revert when the upsert pipeline added an empty-string field absent from the reference (first-cycle dirty bug)', () => {
       // When a fresh file has no `notes` key on a request, the hydrate
       // path's reference shape is `{name, ...}`. As soon as the user
       // types into the notes editor and clears it, the reactive proxy

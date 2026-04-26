@@ -35,6 +35,7 @@ import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
 import { normalizeValueType } from '../../utils/normalizeValueType'
 import { buildHttpResponseViewData } from './HTTPResponsePanel'
 import { HTTPRequestBodySection } from './HTTPRequestBodySection'
+import type { HTTPRequestBody } from '../../../../shared/types/requestPrimitives'
 import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabViewUtils'
 import { useCompiledDocumentation } from '../../hooks/useCompiledDocumentation'
 
@@ -328,12 +329,25 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     if (bodyMode === 'text') {
       const currentContent = request.body?.type === 'text' ? request.body.content : ''
       if (body !== currentContent) {
-        updateReactiveProperty(request, 'body', { type: 'text', content: body })
+        // An empty text body persists the same shape as "no body at
+        // all" — both round-trip to a request without a `body` key.
+        // Storing the wrapping object `{type:'text',content:''}` here
+        // would diverge from a request imported without a body
+        // (`request.body === undefined`), so the dirty-state diff
+        // would lock dirty after a type-then-clear cycle even though
+        // the in-memory tree matches the on-disk reference.
+        const next: HTTPRequestBody | undefined = body === ''
+          ? undefined
+          : { type: 'text' as const, content: body }
+        updateReactiveProperty(request, 'body', next)
       }
     } else if (bodyMode === 'file') {
       const currentPath = request.body?.type === 'file' ? request.body.path : ''
       if (bodyFilePath !== currentPath) {
-        updateReactiveProperty(request, 'body', { type: 'file', path: bodyFilePath })
+        const next: HTTPRequestBody | undefined = bodyFilePath === ''
+          ? undefined
+          : { type: 'file' as const, path: bodyFilePath }
+        updateReactiveProperty(request, 'body', next)
       }
     }
   }, [body, bodyMode, bodyFilePath, request])

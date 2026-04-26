@@ -7,7 +7,8 @@ import {
   searchable,
   separateFolders,
   fileNaming,
-  graphqlField
+  graphqlField,
+  TreatEmptyAsUndefined
 } from 'electron-core-ui/decorators'
 import type { RuntimeId, Icon, FolderConfiguration, BaseFolderItem } from './types'
 
@@ -37,11 +38,13 @@ export class Folder {
   /** Documentation describing the folder contents */
   @graphqlField({ type: 'String', nullable: true })
   @searchable.property({ weight: 1 })
+  @TreatEmptyAsUndefined()
   documentation = ''
 
   /** Optional user notes */
   @graphqlField({ type: 'String', nullable: true })
   @searchable.property({ weight: 0.5 })
+  @TreatEmptyAsUndefined()
   notes?: string
 
   /** Tags for categorization and filtering */
