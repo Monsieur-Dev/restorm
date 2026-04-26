@@ -21,7 +21,6 @@ import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { GraphQLExecutionResult, KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
-import { Badge } from '../common/Badge'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
 import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabViewUtils'
@@ -373,7 +372,6 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   // URL section
   const urlSection = (
     <ControlGroup data-testid="graphql-url-section">
-      <Badge type="GQL" />
       <div style={{ flex: 1, minWidth: 0 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
         <RestormVariableInputBox
           value={url}

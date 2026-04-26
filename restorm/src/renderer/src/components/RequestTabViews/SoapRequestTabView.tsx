@@ -21,7 +21,6 @@ import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { SOAPExecutionResult, KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
-import { Badge } from '../common/Badge'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
 import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabViewUtils'
@@ -359,7 +358,6 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
   const urlSection = (
     <>
       <ControlGroup data-testid="soap-url-section">
-        <Badge type="SOAP" />
         <div style={{ flex: 1, minWidth: 0 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
           <RestormVariableInputBox
             value={url}

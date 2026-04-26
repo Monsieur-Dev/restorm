@@ -21,8 +21,6 @@ import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { GRPCExecutionResult, KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
-import { Badge } from '../common/Badge'
-import { mapToBadgeType } from '../../utils/badgeUtils'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
 import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabViewUtils'
@@ -369,7 +367,6 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
   const urlSection = (
     <>
       <ControlGroup data-testid="grpc-url-section">
-        <Badge type={mapToBadgeType(request.callType)} />
         <div style={{ flex: 1, minWidth: 0 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
           <RestormVariableInputBox
             value={url}
