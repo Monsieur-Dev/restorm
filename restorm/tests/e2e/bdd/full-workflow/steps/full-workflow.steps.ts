@@ -405,10 +405,10 @@ When(
   'I select the {string} environment on the active request tab',
   async ({}, envName: string) => {
     if (!page) throw new Error('app must be launched')
-    // Post-OYO-196 the dropdown lives in the status bar, not in the
-    // tab header. Click opens a `<Tooltip>`-backed popover above the
-    // cell; the env list inside is a ListView so we filter on the
-    // listview root to keep the click scoped to the popover content.
+    // The dropdown lives in the status bar, not in the tab header.
+    // Click opens a `<Tooltip>`-backed popover above the cell; the
+    // env list inside is a ListView so we filter on the listview
+    // root to keep the click scoped to the popover content.
     const dropdown = page.locator('[data-testid="statusbar-env-selector"]').first()
     await expect(dropdown).toBeVisible({ timeout: 5000 })
     await dropdown.click()
@@ -1359,9 +1359,9 @@ Then(
   'the active request tab should show the {string} environment',
   async ({}, envName: string) => {
     if (!page) throw new Error('app must be launched')
-    // Post-OYO-196 there's a single env selector in the status bar
-    // (not one per tab), so no `:visible` filter needed — the cell
-    // rerenders to reflect whichever request is the active tab.
+    // There's a single env selector in the status bar (not one per
+    // tab), so no `:visible` filter needed — the cell rerenders to
+    // reflect whichever request is the active tab.
     const dropdown = page.locator('[data-testid="statusbar-env-selector"]').first()
     await expect(dropdown).toContainText(envName, { timeout: 10000 })
   }
@@ -1716,12 +1716,11 @@ Then(
   }
 )
 
-// Dirty-state assertions on the file as a whole were removed in OYO-183.
-// Dirty-state correctness is now validated by the unit test suite in
+// Dirty-state correctness is validated by the unit test suite in
 // `electron-core-ui/src/main/services/saveUnit/*.test.ts` and
 // `electron-core-ui/src/main/services/FileService.drafts.test.ts`.
-// Remaining tab-level "dirty dot" assertions stay in the feature files
-// because they're part of the user-visible flow.
+// Tab-level "dirty dot" assertions live in the feature files because
+// they're part of the user-visible flow.
 
 When('I save the file with Ctrl+S', async () => {
   if (!page) throw new Error('app must be launched')

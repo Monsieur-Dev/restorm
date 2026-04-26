@@ -5,7 +5,7 @@
  * pulse when the engine emits `auth:running` IPC events so the user
  * knows a token refresh is in flight.
  *
- * Placed to the LEFT of the env selector (per OYO-253 spec).
+ * Placed to the LEFT of the env selector.
  * Visible only when:
  *   * The active tab is a non-auth request tab.
  *   * The active env folder contains at least one AuthenticationRequest.

@@ -4,8 +4,8 @@
  * system query options ($filter / $select / $top / $skip / $count).
  *
  * The persisted shape also carries an `odataVersion` field so the
- * importer (OYO-181) can pre-fill v2/v3 and a follow-up PR wires the
- * engine differences without a storage migration.
+ * importer can pre-fill v2/v3 and a follow-up PR wires the engine
+ * differences without a storage migration.
  */
 
 import {

@@ -13,6 +13,7 @@
 - **NEVER** use `test.skip()`, `it.skip()`, `describe.skip()`, or `xtest()` — fix flaky tests
 - **NEVER** use `test.todo()` without implementing the test
 - **NEVER** use `git push --no-verify` or `git commit --no-verify`
+- **NEVER** reference a ticket ID (`OYO-X`, `JIRA-X`, `#123`, etc.) in a source comment, `describe`/`it` title, TODO marker, or committed Markdown doc. Ticket IDs belong in the commit message, in the PR description, and in `git log` — they rot in tracked files. If a comment or doc needs to explain *why* something looks this way, describe the constraint or invariant in the present tense, without referring to the ticket that introduced it. If you need to point readers at related work, link a **file path** or a **stable doc anchor**, not a ticket URL.
 
 ## Commits
 
@@ -21,6 +22,8 @@ Pre-commit hooks run the full test suite, which takes a long time. **NEVER** int
 ## Self-review before push
 
 Before pushing a branch or asking for a merge, **always** run an independent code review of the diff. Use the `superpowers:code-reviewer` agent (or equivalent fresh-context agent) on the full PR scope and act on its findings — bugs, design smells, coverage gaps, stale comments, missed docs — before telling the user the PR is ready. Document agent findings that you're deliberately not addressing, don't silently skip them. Self-review applies even when the user hasn't explicitly asked for it; it's the last gate before human attention.
+
+As the final step of self-review, run `grep -rEn "OYO-[0-9]+" --include="*.ts" --include="*.tsx" --include="*.css" --include="*.md"` over the diff and reject any new occurrences — the no-ticket-refs rule from Code quality restrictions applies to every PR.
 
 ## Branch up-to-date check (before push and before merge)
 

@@ -77,7 +77,7 @@ export default defineConfig({
     {
       name: 'full-workflow',
       testDir: fullWorkflowTestDir,
-      timeout: 180 * 1000 // 3 min — cumulative scenario grew with OYO-209 Ajouter submenu coverage
+      timeout: 180 * 1000 // 3 min — cumulative scenario covers the full Ajouter submenu
     },
     {
       name: 'swagger-import',

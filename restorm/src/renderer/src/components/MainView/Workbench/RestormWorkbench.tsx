@@ -317,10 +317,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     }
 
     // OData request tab
-    // TODO(OYO-180 phase 4): branch on `operationKind` ('entity-set' |
-    // 'function' | 'action') once the discriminator is introduced, so
-    // functions / actions get their own badges instead of the shared
-    // 'ODATA' one.
+    // TODO: branch on `operationKind` ('entity-set' | 'function' |
+    // 'action') once the discriminator is introduced, so functions /
+    // actions get their own badges instead of the shared 'ODATA' one.
     if (isODataRequestTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>

@@ -326,7 +326,7 @@ describe('Reactive Document System', () => {
     })
   })
 
-  describe('EnvironmentFolder reactivity (OYO-204)', () => {
+  describe('EnvironmentFolder reactivity', () => {
     const createTestEnvironmentFolder = (): EnvironmentFolder => ({
       id: 'envfolder-1',
       folderType: 'environment',
@@ -398,7 +398,7 @@ describe('Reactive Document System', () => {
     })
   })
 
-  describe('makeReactiveEnvironment (OYO-204)', () => {
+  describe('makeReactiveEnvironment', () => {
     it('emits ENVIRONMENT_UPDATED when the name is changed', () => {
       const env: Environment = { id: 'env-1', name: 'dev', variables: [] }
       const reactive = makeReactiveEnvironment(env, 'envfolder-1')
@@ -418,7 +418,7 @@ describe('Reactive Document System', () => {
     // re-assigned with a new POJO in `handleEnvColorChange` /
     // `handleIconChange`, which the folder-level proxy catches. Making
     // them indexable would emit one ENVIRONMENT_UPDATED per tweak and
-    // tank the full-workflow import step (OYO-203 perf regression).
+    // tank the full-workflow import step (perf regression).
     it('does NOT emit ENVIRONMENT_UPDATED when color changes in place', () => {
       const env: Environment = { id: 'env-1', name: 'dev', variables: [] }
       const reactive = makeReactiveEnvironment(env, 'envfolder-1')

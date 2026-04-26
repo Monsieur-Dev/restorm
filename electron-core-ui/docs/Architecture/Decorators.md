@@ -86,9 +86,9 @@ class Folder {
 
 ### @fileNaming(config)
 
-Defines file naming pattern for folder mode. Since OYO-183, the
-recommended pattern is `{index} - {name}` — no `{type}` prefix. The
-counter alone differentiates siblings with duplicate names.
+Defines file naming pattern for folder mode. The recommended pattern
+is `{index} - {name}` — no `{type}` prefix. The counter alone
+differentiates siblings with duplicate names.
 
 ```typescript
 @fileNaming({

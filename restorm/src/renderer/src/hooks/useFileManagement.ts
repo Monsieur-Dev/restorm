@@ -805,11 +805,12 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         clearTabDirtyState()
 
         const collectionsWithIds = processAfterDeserialization(collections)
-        // Default `fileFormatVersion` to the current value on legacy files
-        // (pre-OYO-200) BEFORE the reactive wrap so the mutation doesn't
-        // fire a FOLDER_UPDATED event, and BEFORE the content-checksum
-        // baseline (set below) so "default-on-load" doesn't look like a
-        // user edit on the next save.
+        // Default `fileFormatVersion` to the current value on legacy
+        // files (those predating the version field) BEFORE the
+        // reactive wrap so the mutation doesn't fire a FOLDER_UPDATED
+        // event, and BEFORE the content-checksum baseline (set below)
+        // so "default-on-load" doesn't look like a user edit on the
+        // next save.
         for (const root of collectionsWithIds) {
           normalizeFileFormatVersion(root, logger)
         }

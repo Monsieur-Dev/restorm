@@ -132,10 +132,10 @@ const EnvPopoverList: React.FC<EnvPopoverProps> = ({ rows, selectedEnvId, applyT
           </div>
         )
       })}
-      {/* "Apply to all" toggle — OYO-196. Checked by default: writes
-          the env as the *folder default* so every request in that env
-          folder adopts it. Unchecked writes a per-request override
-          (legacy flow) — the folder default is untouched. */}
+      {/* "Apply to all" toggle. Checked by default: writes the env as
+          the *folder default* so every request in that env folder
+          adopts it. Unchecked writes a per-request override (legacy
+          flow) — the folder default is untouched. */}
       <label
         data-testid="statusbar-env-selector-apply-to-all"
         style={{

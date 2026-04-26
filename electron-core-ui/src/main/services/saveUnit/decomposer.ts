@@ -70,7 +70,7 @@ export interface DecomposeOptions {
   basePath: string
   format: PersistenceFormat
   extension: string
-  /** Defaults to `'index'` — matches the OYO-183 layout. */
+  /** Defaults to `'index'`. */
   indexFileName?: string
   /** Property name used as the runtime identity. Default `'id'`. */
   idProperty?: string
@@ -156,7 +156,7 @@ function resolveItemClass(item: unknown): object | undefined {
 
 /**
  * Project-wide file naming convention for this release. The fallback
- * intentionally ignores `{type}` (removed in OYO-183) and always uses
+ * intentionally ignores `{type}` and always uses
  * `{counter} - {name}.<ext>`.
  */
 function nameItem(

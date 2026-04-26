@@ -4,8 +4,8 @@
  *
  * The version exists so that — once Restorm ships to production users —
  * a future breaking change to the on-disk model can migrate forward from
- * the right starting point. This ticket (OYO-200) just establishes the
- * field; no migration framework is introduced yet.
+ * the right starting point. The current implementation only establishes
+ * the field; no migration framework is wired up yet.
  *
  * Semantics on load:
  * - Field absent (legacy file): treat as {@link CURRENT_FILE_FORMAT_VERSION},

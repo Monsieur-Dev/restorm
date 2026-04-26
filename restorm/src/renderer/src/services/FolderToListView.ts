@@ -110,7 +110,7 @@ function websocketRequestToListViewItem(
  * Convert an ODataRequest to a ListViewItemData. Phase 1 shows a
  * dedicated `odata` badge so entries don't masquerade as plain HTTP
  * GETs in the sidebar. The badge label changes across phases when
- * actions ('ACT') and functions ('FN') land (OYO-180 phase 4).
+ * actions ('ACT') and functions ('FN') land.
  */
 function odataRequestToListViewItem(
   request: ODataRequest,

@@ -1,5 +1,5 @@
 /**
- * Reusable BDD-step scaffold for new execution protocols (OYO-246).
+ * Reusable BDD-step scaffold for new execution protocols.
  *
  * Wires the generic scenarios from `Section 7` of
  * `restorm/docs/contributing/adding-a-protocol.md`:

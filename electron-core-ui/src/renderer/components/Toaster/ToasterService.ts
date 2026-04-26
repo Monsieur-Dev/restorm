@@ -31,7 +31,7 @@ const DEFAULT_MAX_TOASTS = 50
  * has no registered state yet. Must stay module-level so every call
  * returns the SAME reference — `useSyncExternalStore`'s `getSnapshot`
  * is called on every render and a fresh `[]` each time would be read
- * as "store changed", triggering an infinite re-render loop (OYO-203).
+ * as "store changed", triggering an infinite re-render loop.
  */
 const EMPTY_TOASTS_SNAPSHOT: readonly Toast[] = Object.freeze([])
 

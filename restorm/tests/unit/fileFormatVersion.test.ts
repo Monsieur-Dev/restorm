@@ -6,7 +6,7 @@ import {
 import { EnvironmentFolder } from '../../src/shared/models/EnvironmentFolder'
 
 describe('CURRENT_FILE_FORMAT_VERSION', () => {
-  it('is 1 (OYO-200 baseline)', () => {
+  it('is 1', () => {
     expect(CURRENT_FILE_FORMAT_VERSION).toBe(1)
   })
 })

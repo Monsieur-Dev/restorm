@@ -6,8 +6,8 @@
  * collection file itself — see `PROJECT_UUID_KEY`):
  *
  *   1. **Folder default** — the env applied to every request of an
- *      env folder. This is the primary model OYO-196 introduced and
- *      is what the "Apply to all" checkbox writes.
+ *      env folder. This is the primary model and is what the
+ *      "Apply to all" checkbox writes.
  *   2. **Per-request override** — the legacy "pick a different env
  *      for this one request only" flow. Written when the user
  *      un-ticks the checkbox before picking; wins over the folder
