@@ -22,8 +22,6 @@ import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { WebSocketExecutionResult, WebSocketMessageItem, KeyValueData } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
-import { Badge } from '../common/Badge'
-import { mapToBadgeType } from '../../utils/badgeUtils'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
 import { updateReactiveProperty } from './requestTabViewUtils'
@@ -406,7 +404,6 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   // URL section
   const urlSection = (
     <ControlGroup data-testid="websocket-url-section">
-      <Badge type={mapToBadgeType(request.protocol)} />
       <div style={{ flex: 1, minWidth: 0 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
         <RestormVariableInputBox
           value={url}
