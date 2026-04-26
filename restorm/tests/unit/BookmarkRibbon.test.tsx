@@ -8,7 +8,7 @@
 
 import React from 'react'
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { BookmarkRibbon } from '../../../electron-core-ui/src/renderer/components/BookmarkRibbon/BookmarkRibbon'
 import {
@@ -158,6 +158,140 @@ describe('BookmarkRibbon', () => {
       expect(screen.getByTestId('rib-rename-input-input')).toBeInTheDocument()
       await user.click(screen.getByTestId('outside'))
       expect(screen.queryByTestId('rib-rename-input-input')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('hover/focus animation gating', () => {
+    /** jsdom doesn't run real CSS transitions, so the state-machine
+     * advance hooks (`transitionend` on the LABEL's opacity for entry,
+     * on the ROOT's height for exit) need to be fired by hand. These
+     * helpers mirror the propertyName / target the production
+     * `onTransitionEnd` filters on. */
+    function fireEntryDone(root: HTMLElement): void {
+      const label = root.querySelector('.ecui-bookmark-ribbon-label')
+      if (!label) throw new Error('expected label child of ribbon')
+      fireEvent.transitionEnd(label, { propertyName: 'opacity' })
+    }
+    function fireExitDone(root: HTMLElement): void {
+      fireEvent.transitionEnd(root, { propertyName: 'height' })
+    }
+
+    it('hover for 1 s then leave: entry plays through to fully open before the exit starts', () => {
+      render(<BookmarkRibbon label="api" data-testid="rib" />)
+      const btn = screen.getByTestId('rib')
+
+      expect(btn.className).not.toMatch(/--opening|--open|--closing/)
+
+      act(() => { fireEvent.mouseEnter(btn) })
+      expect(btn.className).toContain('ecui-bookmark-ribbon--opening')
+
+      // Entry choreography completes (height + label fade-in done).
+      act(() => { fireEntryDone(btn) })
+      expect(btn.className).toContain('ecui-bookmark-ribbon--open')
+      expect(btn.className).not.toContain('--opening')
+
+      // User leaves AFTER the entry has settled — exit can start
+      // immediately, no deferral.
+      act(() => { fireEvent.mouseLeave(btn) })
+      expect(btn.className).toContain('ecui-bookmark-ribbon--closing')
+      expect(btn.className).not.toContain('--open')
+    })
+
+    it('hover for 0.1 s then leave: entry plays through, then the exit runs (no half-extended freeze)', () => {
+      render(<BookmarkRibbon label="api" data-testid="rib" />)
+      const btn = screen.getByTestId('rib')
+
+      act(() => { fireEvent.mouseEnter(btn) })
+      expect(btn.className).toContain('--opening')
+
+      // User leaves WHILE entry still in flight — close is deferred,
+      // ribbon stays in `--opening` until the entry's transitionend.
+      // (`--open` would be a substring of `--opening`, so check the
+      // exact phase classes via word boundary.)
+      act(() => { fireEvent.mouseLeave(btn) })
+      expect(btn.classList.contains('ecui-bookmark-ribbon--opening')).toBe(true)
+      expect(btn.classList.contains('ecui-bookmark-ribbon--closing')).toBe(false)
+      expect(btn.classList.contains('ecui-bookmark-ribbon--open')).toBe(false)
+
+      // Entry finishes → reducer reads the deferred-leave flag and
+      // jumps straight to closing. The user sees a full
+      // open-then-close instead of a jagged half-entry.
+      act(() => { fireEntryDone(btn) })
+      expect(btn.className).toContain('ecui-bookmark-ribbon--closing')
+      expect(btn.className).not.toContain('--opening')
+    })
+
+    it('re-enter while closing: cancels the exit and returns to opening cleanly (no double-trigger)', () => {
+      render(<BookmarkRibbon label="api" data-testid="rib" />)
+      const btn = screen.getByTestId('rib')
+
+      // Open then settle, then start the exit.
+      act(() => { fireEvent.mouseEnter(btn) })
+      act(() => { fireEntryDone(btn) })
+      act(() => { fireEvent.mouseLeave(btn) })
+      expect(btn.className).toContain('--closing')
+
+      // Cursor re-enters mid-exit — exit cancelled, ribbon goes back
+      // to `--opening` to play a fresh entry from wherever the
+      // collapse happened to be.
+      act(() => { fireEvent.mouseEnter(btn) })
+      expect(btn.className).toContain('ecui-bookmark-ribbon--opening')
+      expect(btn.className).not.toContain('--closing')
+
+      // A single entry transitionend completes the entry — proving
+      // there's no stale prior entry queued.
+      act(() => { fireEntryDone(btn) })
+      expect(btn.className).toContain('ecui-bookmark-ribbon--open')
+    })
+
+    it('keyboard focus / blur path mirrors hover: entry locks until completion on focus, exit gating on blur', () => {
+      render(<BookmarkRibbon label="api" data-testid="rib" />)
+      const btn = screen.getByTestId('rib')
+
+      // Focus instead of hover — the JS state machine treats them
+      // symmetrically (any "wants-open" signal triggers ENTER).
+      act(() => { fireEvent.focus(btn) })
+      expect(btn.className).toContain('--opening')
+
+      // Blur during opening — same defer behaviour as mouseLeave.
+      act(() => { fireEvent.blur(btn) })
+      expect(btn.className).toContain('--opening')
+      expect(btn.className).not.toContain('--closing')
+
+      act(() => { fireEntryDone(btn) })
+      expect(btn.className).toContain('--closing')
+
+      // Exit choreography completes → returns to idle.
+      act(() => { fireExitDone(btn) })
+      expect(btn.className).not.toMatch(/--opening|--open|--closing/)
+    })
+
+    it('locks the ribbon open while the editor tooltip is open, then resumes the exit on outside click', async () => {
+      const user = userEvent.setup()
+      render(
+        <>
+          <BookmarkRibbon label="api" onRename={noop} data-testid="rib" />
+          <button data-testid="outside">outside</button>
+        </>
+      )
+      const btn = screen.getByTestId('rib')
+
+      // Click opens the editor tooltip and the editor-open flag pins
+      // the state machine to a "wants-open" state. `userEvent.click`
+      // fires the mouseenter / focus sequence synthetically.
+      await user.click(btn)
+      expect(btn.classList.contains('ecui-bookmark-ribbon--opening')).toBe(true)
+
+      // Settle the entry choreography so the ribbon reaches `--open`.
+      act(() => { fireEntryDone(btn) })
+      expect(btn.classList.contains('ecui-bookmark-ribbon--open')).toBe(true)
+
+      // Closing the tooltip via outside-click should let the cursor /
+      // focus tracker take over — there is no longer any wants-open
+      // signal (mouse moved off, focus moved away, editor closed), so
+      // the exit choreography starts.
+      await user.click(screen.getByTestId('outside'))
+      expect(btn.classList.contains('ecui-bookmark-ribbon--closing')).toBe(true)
     })
   })
 

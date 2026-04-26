@@ -1,10 +1,17 @@
 /* Bookmark-ribbon tag — a vertical colour strip anchored at the top of
- * its positioned ancestor, extending downward on hover to reveal the
- * label rotated 90° clockwise.
+ * its positioned ancestor, extending downward on hover/focus to reveal
+ * the label rotated 90° clockwise.
+ *
+ * The unfurl/refurl choreography is JS-gated rather than `:hover`-
+ * driven (see `BookmarkRibbon.tsx` state machine): the
+ * component toggles `--opening` / `--open` / `--closing` classes so
+ * the entry animation can always play through to completion before
+ * any exit can start. The CSS rules below transition based on those
+ * classes, not on `:hover`.
  *
  * Typography is inherited from the host page so the rotated label
  * matches surrounding text weight / family. Final width / height
- * tuned for comfortable reading (~24 px wide, extending from 12 px
+ * tuned for comfortable reading (~20 px wide, extending from 30 px
  * idle to ~96 px hovered). */
 
 .ecui-bookmark-ribbon {
@@ -38,13 +45,6 @@
    * entry/exit between `height: 30px` and `height: auto` would snap
    * and only the `opacity` fade of the label would be visible. */
   interpolate-size: allow-keywords;
-
-  /* Exit choreography: when the mouse leaves, wait 3 s, then fade
-   * the label out (0.3 s), then animate the ribbon's height down
-   * (0.4 s). The height delay here is the total time before the
-   * collapse animation starts (3 s pause + 0.3 s label fade = 3.3 s).
-   * The fade is set on the label rule below. */
-  transition: height 0.4s ease-out 3.3s;
 }
 
 /* Coloured body of the ribbon — clipped into the classic "signet"
@@ -67,7 +67,7 @@
  * height on hover — shorter labels get shorter ribbons.
  *
  * Hidden in idle state via opacity 0 + the container's `overflow:
- * hidden` + fixed 28 px height: the label is there but clipped,
+ * hidden` + fixed 30 px height: the label is there but clipped,
  * ready to drive the height the moment we flip to `height: auto`. */
 .ecui-bookmark-ribbon-label {
   position: relative;
@@ -82,49 +82,67 @@
   line-height: 1;
   letter-spacing: 0.5px;
   opacity: 0;
-
-  /* Exit choreography: after the 3 s grace period the label fades
-   * (0.3 s), then the ribbon collapses. */
-  transition: opacity 0.3s ease-out 3s;
 }
 
-.ecui-bookmark-ribbon:hover,
-.ecui-bookmark-ribbon--open,
-.ecui-bookmark-ribbon:focus-visible {
-  /* `height: auto` + `overflow: visible` lets the label drive the
-   * ribbon's height. Shorter tags get shorter ribbons; the clip-path
-   * keeps the bottom 7 px as the notched tail regardless of total
-   * height. CSS can't animate `auto` heights smoothly, so we accept
-   * the snap — the effect reads as an unfurling signet rather than a
-   * generic slide.
-   *
-   * Entry choreography: the ribbon expands first (0.4 s), then after
-   * that completes the label fades in (0.3 s) — see label rule below.
-   * The height transition runs with no delay on entry so the expand
-   * happens immediately; the exit delay of 3.3 s lives on the base
-   * rule so it only kicks in when we leave the hover / open state. */
+/* Opening / open: ribbon extended so the label can drive the height.
+ * `--closing` keeps `height: auto` until the height transition kicks
+ * in (see below) so the collapse animates from the open state, not
+ * from a snapped-back 30 px. */
+.ecui-bookmark-ribbon--opening,
+.ecui-bookmark-ribbon--open {
   height: auto;
   overflow: visible;
+}
+
+/* Entry: the ribbon expands first (0.4 s), then after that completes
+ * the label fades in (0.3 s). `transitionend` on the label's opacity
+ * is what advances the JS state machine from `opening` to `open`. */
+.ecui-bookmark-ribbon--opening {
   transition: height 0.4s ease-out 0s;
 }
 
-.ecui-bookmark-ribbon:hover .ecui-bookmark-ribbon-label,
-.ecui-bookmark-ribbon--open .ecui-bookmark-ribbon-label,
-.ecui-bookmark-ribbon:focus-visible .ecui-bookmark-ribbon-label {
+.ecui-bookmark-ribbon--opening .ecui-bookmark-ribbon-label {
   opacity: 1;
-
-  /* Entry: wait for the ribbon-expand (0.4 s) to finish before the
-   * label fades in (0.3 s). */
   transition: opacity 0.3s ease-out 0.4s;
 }
 
-.ecui-bookmark-ribbon:focus {
-  outline: none;
+/* Open / settled: label visible, no transitions running. */
+.ecui-bookmark-ribbon--open .ecui-bookmark-ribbon-label {
+  opacity: 1;
 }
 
-.ecui-bookmark-ribbon:focus-visible {
-  outline: 1px solid var(--focusBorder);
-  outline-offset: 2px;
+/* Exit: when the mouse leaves (or focus moves away), wait 3 s, then
+ * fade the label out (0.3 s), then animate the ribbon's height down
+ * (0.4 s). The total time before the collapse starts is 3.3 s
+ * (3 s pause + 0.3 s label fade), and the collapse itself takes 0.4 s
+ * — its `transitionend` advances the state machine to `idle`.
+ *
+ * The `--closing` selector keeps the visual height extended until the
+ * height transition itself runs, by sharing the `height: auto`
+ * geometry of `--open` for the duration of the grace period. */
+.ecui-bookmark-ribbon--closing {
+  height: 30px;
+  overflow: hidden;
+  transition: height 0.4s ease-out 3.3s;
+}
+
+.ecui-bookmark-ribbon--closing .ecui-bookmark-ribbon-label {
+  opacity: 0;
+  transition: opacity 0.3s ease-out 3s;
+}
+
+/* No focus outline. Click feedback is the unfurl choreography itself
+ * (driven by the JS state machine on focus / hover); a separate
+ * outline square would compete visually and the unfurl is enough of
+ * a focus indicator.
+ *
+ * The selector is doubled (`.ecui-bookmark-ribbon.ecui-bookmark-ribbon`)
+ * to bump specificity past the workbench-wide `.workbench button:focus`
+ * rule in `assets/workbench.css`, which would otherwise win the
+ * specificity tie and re-apply the global focus ring. */
+.ecui-bookmark-ribbon.ecui-bookmark-ribbon:focus,
+.ecui-bookmark-ribbon.ecui-bookmark-ribbon:focus-visible {
+  outline: none;
 }
 
 /* Readonly variant — no editor tooltip, no click handler. Hover still
@@ -135,15 +153,16 @@
 
 /* Add-tag variant — same footprint, muted greyscale chrome + a `+`
  * glyph. Used by `<BookmarkRibbonStack>` as its first ribbon. It
- * has no label content, so we pin its height even on hover rather
- * than collapse it via the `height: auto` rule above. */
+ * has no label content, so we pin its height to 30 px even in the
+ * `--opening` / `--open` / `--closing` states — overriding the
+ * `height: auto` rule above. */
 .ecui-bookmark-ribbon--add {
   --bookmark-color: var(--descriptionForeground, #888);
 }
 
-.ecui-bookmark-ribbon--add:hover,
+.ecui-bookmark-ribbon--add.ecui-bookmark-ribbon--opening,
 .ecui-bookmark-ribbon--add.ecui-bookmark-ribbon--open,
-.ecui-bookmark-ribbon--add:focus-visible {
+.ecui-bookmark-ribbon--add.ecui-bookmark-ribbon--closing {
   height: 30px;
   overflow: hidden;
 }
