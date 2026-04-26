@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { getContrastColor } from '../../utils/colorContrast'
 import { getColorFromString } from '../../utils/colorFromString'
 import { Tooltip } from '../Tooltip'
@@ -30,14 +30,77 @@ export interface BookmarkRibbonProps {
   'data-testid'?: string
 }
 
+/** Animation phase of the unfurl/refurl choreography.
+ *
+ * `idle` → ribbon collapsed, label hidden.
+ * `opening` → entry in flight (height grow, then label fade-in).
+ * `open` → fully extended, label visible.
+ * `closing` → exit in flight (3 s grace, label fade, height collapse).
+ */
+type AnimationState = 'idle' | 'opening' | 'open' | 'closing'
+
+interface AnimState {
+  phase: AnimationState
+  /** Set when the user mouses out (or focus moves away) before the
+   * entry animation finishes. The reducer defers the close until the
+   * entry's `transitionend` fires, so a short hover still completes
+   * the entry choreography before any exit can start. */
+  leaveRequested: boolean
+}
+
+type AnimAction =
+  | { type: 'ENTER' }
+  | { type: 'LEAVE' }
+  | { type: 'ENTRY_DONE' }
+  | { type: 'EXIT_DONE' }
+
+const initialAnimState: AnimState = { phase: 'idle', leaveRequested: false }
+
+function animReducer(state: AnimState, action: AnimAction): AnimState {
+  switch (action.type) {
+    case 'ENTER':
+      // Any "wants-open" signal restarts the entry from idle/closing,
+      // and on opening/open just clears a previously-queued leave.
+      if (state.phase === 'idle' || state.phase === 'closing') {
+        return { phase: 'opening', leaveRequested: false }
+      }
+      return state.leaveRequested ? { ...state, leaveRequested: false } : state
+    case 'LEAVE':
+      // From `open` we can start the exit immediately. From `opening`
+      // we defer — the exit must not interrupt the entry mid-flight
+      // (a CSS-only `:hover` switch would freeze the ribbon at its
+      // half-extended interpolated height). From `idle` / `closing`
+      // there's nothing to do.
+      if (state.phase === 'open') return { phase: 'closing', leaveRequested: false }
+      if (state.phase === 'opening') return { ...state, leaveRequested: true }
+      return state
+    case 'ENTRY_DONE':
+      // Entry choreography finished. Honor a deferred leave by going
+      // straight to closing; otherwise settle in `open`.
+      if (state.phase !== 'opening') return state
+      if (state.leaveRequested) return { phase: 'closing', leaveRequested: false }
+      return { phase: 'open', leaveRequested: false }
+    case 'EXIT_DONE':
+      if (state.phase !== 'closing') return state
+      return { phase: 'idle', leaveRequested: false }
+  }
+}
+
 /**
  * Bookmark-style ribbon. Idle: a thin vertical colour strip stuck to
- * the top edge of its positioned ancestor. Hover: the strip extends
- * downward and the label rotates 90° clockwise, reading top-to-bottom.
- * Click: opens a small editor tooltip (rename / recolour / remove).
+ * the top edge of its positioned ancestor. Hover/focus: the strip
+ * extends downward and the label rotates 90° clockwise, reading
+ * top-to-bottom. Click: opens a small editor tooltip (rename /
+ * recolour / remove).
  *
  * Layout is position-agnostic — use `<BookmarkRibbonStack>` to anchor
  * a row of ribbons to the top-right of a pane.
+ *
+ * The unfurl/refurl choreography is JS-gated (state machine + class
+ * toggling) rather than pure-CSS `:hover`. This guarantees the entry
+ * animation always plays through to completion before any exit can
+ * start — leaving the ribbon mid-entry no longer freezes it in a
+ * half-extended intermediate state.
  */
 export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
   label,
@@ -49,10 +112,25 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
   className,
   'data-testid': dataTestId
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [editorOpen, setEditorOpen] = useState(false)
   const [draftLabel, setDraftLabel] = useState(label)
+  const [hovered, setHovered] = useState(false)
+  const [focused, setFocused] = useState(false)
+  const [animState, dispatch] = useReducer(animReducer, initialAnimState)
   const rootRef = useRef<HTMLButtonElement | null>(null)
   const editorRef = useRef<HTMLDivElement | null>(null)
+
+  // Drive the animation reducer from the union of "wants-open" signals
+  // (mouse, keyboard focus, editor-tooltip locked open). When any is
+  // true we want the ribbon extended; when none remain we want it
+  // collapsed. Doing this in an effect rather than at the event
+  // callsites keeps the three sources composable — e.g. closing the
+  // editor tooltip while the cursor is still inside the ribbon must
+  // NOT trigger the exit.
+  const wantsOpen = hovered || focused || editorOpen
+  useEffect(() => {
+    dispatch({ type: wantsOpen ? 'ENTER' : 'LEAVE' })
+  }, [wantsOpen])
 
   // Close the editor tooltip when the user clicks outside of the
   // ribbon button + the tooltip content. `mousedown` runs before
@@ -60,24 +138,24 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
   // already handled by the editor's own `stopPropagation` before we
   // reach here.
   useEffect(() => {
-    if (!isOpen) return undefined
+    if (!editorOpen) return undefined
     const handler = (ev: MouseEvent): void => {
       const target = ev.target
       if (!(target instanceof Node)) return
       if (rootRef.current?.contains(target)) return
       if (editorRef.current?.contains(target)) return
-      setIsOpen(false)
+      setEditorOpen(false)
     }
     document.addEventListener('mousedown', handler)
     return () => { document.removeEventListener('mousedown', handler) }
-  }, [isOpen])
+  }, [editorOpen])
 
   const effectiveColor = color ?? getColorFromString(label)
   const textColor = getContrastColor(effectiveColor)
 
   const handleToggle = useCallback(() => {
     if (!editable) return
-    setIsOpen((prev) => {
+    setEditorOpen((prev) => {
       if (!prev) setDraftLabel(label)
       return !prev
     })
@@ -91,13 +169,31 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
   }, [draftLabel, label, onRename])
 
   const handleRemove = useCallback(() => {
-    setIsOpen(false)
+    setEditorOpen(false)
     onRemove?.()
   }, [onRemove])
 
+  // Listen for the choreography's terminal transitions on the root.
+  // - Entry: the LABEL's opacity transition is the last one to finish
+  //   (height 0 → 0.4 s, then opacity 0.4 → 0.7 s). Bubbles up via
+  //   `transitionend`.
+  // - Exit: the ROOT's height transition is the last one (label fade
+  //   0 → 3.3 s, height 3.3 → 3.7 s).
+  const handleTransitionEnd = useCallback((ev: React.TransitionEvent<HTMLButtonElement>): void => {
+    if (animState.phase === 'opening' && ev.propertyName === 'opacity') {
+      dispatch({ type: 'ENTRY_DONE' })
+      return
+    }
+    if (animState.phase === 'closing' && ev.propertyName === 'height' && ev.target === ev.currentTarget) {
+      dispatch({ type: 'EXIT_DONE' })
+    }
+  }, [animState.phase])
+
+  const phaseClass = animState.phase === 'idle' ? '' : `ecui-bookmark-ribbon--${animState.phase}`
+
   const rootClasses = [
     'ecui-bookmark-ribbon',
-    isOpen ? 'ecui-bookmark-ribbon--open' : '',
+    phaseClass,
     editable ? '' : 'ecui-bookmark-ribbon--readonly',
     className ?? ''
   ].filter(Boolean).join(' ')
@@ -110,8 +206,13 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
         className={rootClasses}
         style={{ '--bookmark-color': effectiveColor, '--bookmark-text-color': textColor } as React.CSSProperties}
         aria-label={`Bookmark: ${label}`}
-        {...(editable ? { 'aria-expanded': isOpen } : {})}
+        {...(editable ? { 'aria-expanded': editorOpen } : {})}
         {...(editable ? { onClick: handleToggle } : {})}
+        onMouseEnter={() => { setHovered(true) }}
+        onMouseLeave={() => { setHovered(false) }}
+        onFocus={() => { setFocused(true) }}
+        onBlur={() => { setFocused(false) }}
+        onTransitionEnd={handleTransitionEnd}
         {...(dataTestId !== undefined ? { 'data-testid': dataTestId } : {})}
       >
         <span className="ecui-bookmark-ribbon-label">{label}</span>
@@ -119,7 +220,7 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
       {editable ? (
       <Tooltip
         targetRef={rootRef as React.RefObject<HTMLElement | null>}
-        show={isOpen}
+        show={editorOpen}
         placement="below"
         className="ecui-bookmark-ribbon-tooltip"
         {...(dataTestId ? { 'data-testid': `${dataTestId}-tooltip` } : {})}
@@ -138,10 +239,10 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
                 if (event.key === 'Enter') {
                   event.preventDefault()
                   handleCommitRename()
-                  setIsOpen(false)
+                  setEditorOpen(false)
                 } else if (event.key === 'Escape') {
                   event.preventDefault()
-                  setIsOpen(false)
+                  setEditorOpen(false)
                 }
               }}
               {...(dataTestId ? { 'data-testid': `${dataTestId}-rename-input` } : {})}

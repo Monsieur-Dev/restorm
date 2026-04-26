@@ -71,7 +71,8 @@ interface Bookmark {
 ## Behaviour
 
 - **Idle height** is `30px`. A `min-height: 30px` floor keeps the hover state from visibly shrinking for short labels.
-- **Hover / open** (`:hover`, `.ecui-bookmark-ribbon--open`, `:focus-visible`) switches to `height: auto` with `overflow: visible`. The label lives in normal flow with `writing-mode: vertical-rl`, so its rotated glyph height drives the ribbon's total height: `"pet"` → short ribbon; `"user-management"` → much taller.
+- **Hover / focus / open** is JS-gated rather than `:hover`-driven. The component runs a small state machine — `idle` → `opening` → `open` → `closing` → `idle` — and toggles matching `--opening` / `--open` / `--closing` classes. The CSS rules transition based on those classes, so the entry choreography always plays through to completion before any exit can start; mousing out mid-entry queues a deferred close that fires on the entry's `transitionend`. Once extended, `height: auto` + `overflow: visible` lets the label drive the ribbon's height (label uses `writing-mode: vertical-rl`, so its rotated glyph height drives the total): `"pet"` → short ribbon; `"user-management"` → much taller.
+- **Choreography timings** — Entry: height grows over 0.4 s, then label fades in over 0.3 s (0.4 s delay) → total 0.7 s. Exit: 3 s grace period, then label fades out over 0.3 s, then height collapses over 0.4 s → total 3.7 s.
 - **Shape** is a rectangle with a 7 px V-notch cut upward from the bottom centre, producing two pointed tails — the classic signet silhouette. The notch depth is constant regardless of total height, so the tails stay the same size as the body extends.
 - **Colour** is applied via a CSS custom property (`--bookmark-color`) read by the `::before` pseudo that renders the silhouette. The label colour is the result of `getContrastColor(effectiveColor)` so it stays readable on any bookmark colour.
 - **`[+]` add slot** keeps its `30px` footprint on hover (no label to drive height) and renders a small `codicon-add` glyph centred in the rectangle.
@@ -80,7 +81,7 @@ interface Bookmark {
 
 - Each ribbon is a `<button>` with `aria-label="Bookmark: <label>"` and `aria-expanded` reflecting whether its editor tooltip is open.
 - The `[+]` button is labelled `Add bookmark`.
-- `:focus-visible` renders a 1 px outline offset by 2 px — visible for keyboard users, suppressed after mouse interactions.
+- No focus outline is rendered — the unfurl choreography itself is the focus indicator (driven by `onFocus` / `onBlur` going through the same state machine as `mouseenter` / `mouseleave`). A keyboard user tabbing through the stack sees each ribbon unfurl as it gains focus.
 
 ## Examples
 
