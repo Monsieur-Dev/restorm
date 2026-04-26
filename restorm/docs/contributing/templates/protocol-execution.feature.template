@@ -1,0 +1,61 @@
+# Feature-file template — copy into
+# restorm/tests/e2e/bdd/<protocol>/features/<protocol>-execution.feature
+# and replace every <Protocol> / <protocol> / <mock-host> placeholder.
+#
+# Wire the matching steps from
+# restorm/tests/e2e/bdd/_scaffold/protocol-e2e-scaffold.ts
+# in your test bootstrap (call `defineProtocolE2EScaffoldSteps()` once).
+
+Feature: <Protocol> end-to-end
+
+  Background:
+    Given the <protocol> mock service is running
+
+  Scenario: Import a spec / connect to a server
+    When I import the <protocol> spec (or create a manual request)
+    Then the sidebar tree shows the expected folders + requests
+
+  Scenario: Navigate the imported tree
+    When I click a folder and then a request
+    Then the request tab opens with the expected shape
+
+  Scenario: Run a request and see the response panel
+    When I run the request
+    Then the response panel shows status, headers (where applicable), body, duration
+    And the response body is rendered in the default formatter
+    And the JSONcrack visualization is available when the body is JSON
+
+  Scenario: Run multiple requests and inspect history
+    When I run the request three times
+    Then the status bar history button surfaces 3 entries for this scope
+    When I open the history panel
+    Then the three entries are listed with timestamps + statuses
+    When I click an entry
+    Then the response panel shows that entry's response
+    And I can see request-time metadata (headers, timing)
+
+  # MANDATORY — see Playbook Section 3.
+  Scenario: Env variable / Handlebars substitution
+    Given I have an env variable "host" with value "<mock-host>"
+    When I use "{{host}}" in the request URL / body / headers
+    And I run the request
+    Then the mock service receives the substituted value
+
+  Scenario: Cancellation
+    When I trigger a long-running call
+    And I cancel it mid-flight
+    Then the request is aborted cleanly
+    And the response panel reflects the cancellation state
+
+  # MANDATORY — see Playbook Section 4.
+  # Counts `document:request:updated` events while typing 10 characters
+  # in the URL field within 100 ms. Must be ≤ 2 (default debounce 250 ms).
+  Scenario: Inputs are debounced
+    When I type 10 characters into the URL field within 100 ms
+    Then at most 2 document-update events are emitted for the request
+
+  # Protocol-specific scenarios go below — streaming, batch, subscriptions,
+  # auth, schema reflection, etc. Drop the placeholder when you don't need
+  # any.
+  Scenario: <protocol-specific>
+    ...
