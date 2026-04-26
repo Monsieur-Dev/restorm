@@ -1,4 +1,5 @@
 import { _electron as electron, type ElectronApplication } from '@playwright/test'
+import { randomUUID } from 'crypto'
 import { join } from 'path'
 import { mkdirSync, writeFileSync } from 'fs'
 import electronPath from 'electron'
@@ -53,12 +54,24 @@ export async function launchRestormElectronApp({
 
   const extraArgs = args.filter((a): a is string => typeof a === 'string' && a.length > 0)
 
+  // Test-isolation hook. Each app launch gets its own
+  // `userData` dir under the repo-local, gitignored
+  // `tests/e2e/.tmp/userdata/<uuid>/`. Restorm's main entrypoint
+  // reads `RESTORM_USER_DATA_OVERRIDE` and redirects via
+  // `app.setPath('userData', …)` before any storage consumer runs.
+  // Caller-supplied `extraEnv` wins, so a test that needs to share a
+  // userData dir across launches (e.g. close-and-relaunch flows) can
+  // pass its own value.
+  const defaultUserDataDir = join(restormRoot, 'tests/e2e/.tmp/userdata', randomUUID())
+  mkdirSync(defaultUserDataDir, { recursive: true })
+
   const app = await electron.launch({
     executablePath: electronExePath,
     args: ['--no-sandbox', '--ozone-platform=x11', mainJsPath, ...extraArgs],
     env: {
       ...withE2ECoverageEnv(restormRoot, process.env),
       NODE_ENV: 'development',
+      RESTORM_USER_DATA_OVERRIDE: defaultUserDataDir,
       ...extraEnv
     }
   })

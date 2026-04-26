@@ -5,6 +5,7 @@ import { join, resolve } from 'path'
 import electronPath from 'electron'
 import { installSystemModalsMockingForE2E } from 'electron-core-ui/testing'
 import { withE2ECoverageEnv } from '../../helpers/coverage'
+import { createIsolatedUserDataDir } from '../../helpers/userdata-isolation'
 import { collectBlockingRendererMessages, summariseBlockingMessages } from '../../helpers/renderer-log-guard'
 
 /**
@@ -44,13 +45,22 @@ export const test = base.extend<DirtyStateFixtures>({
     const electronExePath = electronPath as unknown as string
     const mainJsPath = join(restormRoot, 'dist/main/index.js')
 
+    // Per-scenario userData isolation. See full-workflow.fixture.ts
+    // for the full rationale; bootstrap + real launch share the same dir.
+    const isolatedUserDataDir = createIsolatedUserDataDir(restormRoot)
+    const baseEnv = {
+      ...withE2ECoverageEnv(restormRoot, process.env),
+      NODE_ENV: 'development',
+      RESTORM_USER_DATA_OVERRIDE: isolatedUserDataDir
+    }
+
     const launcher = async (): Promise<LaunchedApp> => {
       // Bootstrap pass with --clear-settings: isolates this scenario's
       // userData from anything the previous run may have left behind.
       const bootstrap = await electron.launch({
         executablePath: electronExePath,
         args: ['--no-sandbox', '--ozone-platform=x11', mainJsPath, '--clear-settings'],
-        env: { ...withE2ECoverageEnv(restormRoot, process.env), NODE_ENV: 'development' }
+        env: baseEnv
       })
       const userDataPath = await bootstrap.evaluate(({ app }) => app.getPath('userData'))
       configPath = join(userDataPath, 'config.json')
@@ -60,7 +70,7 @@ export const test = base.extend<DirtyStateFixtures>({
       const app = await electron.launch({
         executablePath: electronExePath,
         args: ['--no-sandbox', '--ozone-platform=x11', mainJsPath],
-        env: { ...withE2ECoverageEnv(restormRoot, process.env), NODE_ENV: 'development' }
+        env: baseEnv
       })
 
       const logs: string[] = []

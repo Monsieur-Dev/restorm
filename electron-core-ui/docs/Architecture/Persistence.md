@@ -150,6 +150,27 @@ work survives a hard crash.
 <userData>/drafts/<uuid>/.last-opened         # epoch-ms marker for the age-based sweep
 ```
 
+> **Test isolation.** `<userData>` resolves via Electron's
+> `app.getPath('userData')` — `~/.config/<appName>/` on Linux,
+> `~/Library/Application Support/<appName>/` on macOS,
+> `%APPDATA%/<appName>/` on Windows. Restorm's main entrypoint reads
+> the **`RESTORM_USER_DATA_OVERRIDE`** environment variable very early
+> (before any storage consumer initialises) and, if non-blank, calls
+> `app.setPath('userData', <override>)`. After that call every
+> downstream consumer of `app.getPath('userData')` — `StorageService`,
+> `DraftStore`, `FileService`, the CLI's `clearUserSettings`, etc. —
+> follows automatically.
+>
+> The e2e launcher sets the override to a unique
+> `tests/e2e/.tmp/userdata/<uuid>/` per app launch so parallel agents
+> running `pnpm test:e2e` from different worktrees don't share drafts
+> / config / recent files, and a failing teardown can't leak state
+> into the developer's real account. Production / dev runs leave the
+> var unset and the OS default applies. Other apps embedding
+> `electron-core-ui` can opt into the same convention by reading their
+> own `<APPNAME>_USER_DATA_OVERRIDE` and forwarding to `app.setPath`
+> at the same boot location.
+
 - `<uuid>` is generated on first open by `ensureFolderUuid` /
   `ensureFileUuid` and stored at the top level of the project's root
   file (under `FileServiceConfig.uuidKey`, default `_uuid`) so renames /

@@ -11,7 +11,17 @@ import { setupGraphQL } from './GraphQLSetup'
 import { registerRestormIPC } from './IPCHandlers'
 import { loadFolderStructure, attachDraftStoreForFolder, attachDraftStoreForFile, getDraftsRootDir } from './FileOperations'
 import { DEFAULT_UI_DELAY_MS } from '../shared/config/constants'
+import { applyUserDataOverride } from './userDataOverride'
 // DocumentEvents are handled by FileService internally for dirty state tracking
+
+// Test-isolation hook. When `RESTORM_USER_DATA_OVERRIDE` is set,
+// redirect Electron's `userData` to a per-run repo-local dir so
+// parallel agents / tests don't share drafts, config.json, recent
+// files, etc. Must run before any code path that touches userData
+// (parseCliArgs's storage-aware `clearUserSettings`, FileService
+// construction, draft boot — all run later down this file). Unset →
+// production / dev behaviour is unchanged.
+applyUserDataOverride(app)
 
 // Set the app name for proper taskbar icon on Linux
 // Without this, Electron 38+ may use the default "Electron" identity
