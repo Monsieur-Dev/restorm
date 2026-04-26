@@ -138,6 +138,152 @@ When('I import the Petstore sample', async () => {
   }).toBe(false)
 })
 
+// ── Close + reopen (round-trip a saved file with no in-session save) ──
+
+When('I close the current file', async () => {
+  const p = requirePage()
+  await p.keyboard.press('Escape')
+  await p.keyboard.press('Escape')
+  await p.waitForTimeout(200)
+  await p.evaluate(async () => {
+    const helpers = (window as unknown as {
+      __restormTestHelpers?: { closeFile?: () => Promise<void> | void }
+    }).__restormTestHelpers
+    if (!helpers?.closeFile) throw new Error('__restormTestHelpers.closeFile not exposed')
+    await helpers.closeFile()
+  })
+  await expect(p.locator('.welcome-container')).toBeVisible({ timeout: 10000 })
+})
+
+When('I reopen the welcome recent file {string}', async ({}, fileName: string) => {
+  const p = requirePage()
+  // The Recent section needs a tick to render after the file:closed
+  // event lands; poll the row instead of failing the first try.
+  const recentRow = p.locator('.welcome-section', { hasText: 'Recent' })
+    .locator('.welcome-file-item', { hasText: fileName })
+    .first()
+  await expect(recentRow).toBeVisible({ timeout: 15000 })
+  await recentRow.click()
+  await expect(p.locator('.welcome-container')).not.toBeVisible({ timeout: 10000 })
+  // Wait for the registry to re-hydrate after file:opened so the next
+  // edit's mutate sees the freshly-stamped reference.
+  await p.waitForTimeout(800)
+})
+
+// ── URL field char-level edits (first-edit-cycle regression target) ──
+
+/**
+ * Place the caret at the end of the URL input. The reactive proxy fires
+ * its set event on every value change, so we drive the keyboard directly
+ * — no `fill()` shortcut, no `press('Tab')` blur — to land each
+ * `Reflect.set` exactly as the user would.
+ */
+async function focusUrlAtEnd(p: Page): Promise<void> {
+  const urlInput = p.locator('[data-testid="http-request-url-input"]:visible').first()
+  await expect(urlInput).toBeVisible({ timeout: 5000 })
+  await urlInput.click()
+  await p.keyboard.press('End')
+}
+
+When('I append a space to the URL', async () => {
+  const p = requirePage()
+  await focusUrlAtEnd(p)
+  await p.keyboard.press('Space')
+  // Wait past the 300 ms upsert debounce + IPC round-trip + state
+  // propagation before any subsequent dirty assertion. The poll on
+  // `expectDocumentTitleDirty` retries for up to 10 s so we don't have
+  // to be exact, but a leading wait keeps the failure mode obvious
+  // when the bug is "stays dirty" vs "race".
+  await p.waitForTimeout(600)
+})
+
+When('I press backspace in the URL', async () => {
+  const p = requirePage()
+  // Don't re-focus / click — the URL field is a Monaco editor, and a
+  // mid-edit click can blur+remount and swallow the next keystroke.
+  // We just appended a space with the caret at the end, so Backspace
+  // applies to that exact position.
+  await p.keyboard.press('Backspace')
+  await p.waitForTimeout(600)
+})
+
+/**
+ * Open the Body sub-tab (request views default to Headers / Params /
+ * Auth depending on what has content) and place the caret at the end
+ * of the Monaco body editor. Same rationale as `focusUrlAtEnd`.
+ */
+async function focusBodyAtEnd(p: Page): Promise<void> {
+  const bodySubTab = p.locator('[role="tab"][data-tab-id="body"]:visible').first()
+  if ((await bodySubTab.count()) > 0) {
+    const active = await bodySubTab.getAttribute('aria-selected')
+    if (active !== 'true') {
+      await bodySubTab.click()
+      await p.waitForTimeout(300)
+    }
+  }
+  const editor = p.locator('[data-testid="http-request-body-editor"]:visible').first()
+  await expect(editor).toBeVisible({ timeout: 5000 })
+  await editor.click()
+  await p.keyboard.press('End')
+}
+
+When('I append a space to the body', async () => {
+  const p = requirePage()
+  await focusBodyAtEnd(p)
+  await p.keyboard.press('Space')
+  await p.waitForTimeout(600)
+})
+
+When('I press backspace in the body', async () => {
+  const p = requirePage()
+  await p.keyboard.press('Backspace')
+  await p.waitForTimeout(600)
+})
+
+/**
+ * Locate the value cell of the first env folder variable row,
+ * focusing the inner `<input>` (text values render as a plain
+ * `<input>`; numeric/handlebars render as Monaco). Mirrors the
+ * helper in `full-workflow.steps.ts` but scoped to the env-folder
+ * Configuration sub-tab.
+ */
+async function focusFirstEnvVarValueAtEnd(p: Page): Promise<void> {
+  const configSubTab = p.locator('[role="tab"][data-tab-id="configuration"]:visible').first()
+  if ((await configSubTab.count()) > 0) {
+    const active = await configSubTab.getAttribute('aria-selected')
+    if (active !== 'true') {
+      await configSubTab.click()
+      await p.waitForTimeout(300)
+    }
+  }
+  const row = p.locator('[data-testid="environment-folder-variables-table"] tbody tr').first()
+  await expect(row).toBeVisible({ timeout: 5000 })
+  const valueCell = row.locator('td').nth(2)
+  const plainInput = valueCell.locator('input').first()
+  if (await plainInput.count() > 0 && await plainInput.isVisible()) {
+    await plainInput.click()
+    await p.keyboard.press('End')
+    return
+  }
+  const monaco = valueCell.locator('.monaco-editor').first()
+  await expect(monaco).toBeVisible({ timeout: 5000 })
+  await monaco.click()
+  await p.keyboard.press('End')
+}
+
+When('I append a space to the first env folder variable value', async () => {
+  const p = requirePage()
+  await focusFirstEnvVarValueAtEnd(p)
+  await p.keyboard.press('Space')
+  await p.waitForTimeout(600)
+})
+
+When('I press backspace in the first env folder variable value', async () => {
+  const p = requirePage()
+  await p.keyboard.press('Backspace')
+  await p.waitForTimeout(600)
+})
+
 // ── Tab opening ───────────────────────────────────────────────────────
 
 When('I open the env folder {string} in a tab', async ({}, folderName: string) => {

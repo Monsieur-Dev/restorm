@@ -201,10 +201,25 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
    * so we use the file path itself (or an empty string if unknown) as
    * the walk's `basePath`.
    */
-  const hydrateSaveUnitsFromTree = useCallback(async (items: (EnvironmentFolder | Folder | Request)[]): Promise<void> => {
-    const basePath = currentFolderPath ?? filePath ?? ''
+  const hydrateSaveUnitsFromTree = useCallback(async (
+    items: (EnvironmentFolder | Folder | Request)[],
+    /**
+     * Optional basePath / format overrides. Pass these from
+     * `handleFileOpened` where the freshly-known path is in scope but
+     * the closure's `currentFolderPath` / `filePath` haven't yet
+     * propagated through React's render cycle — without them, the
+     * walker computes `basePath = ''`, the early-out fires, and leaf
+     * units stay unhydrated. The first upsert from a user edit then
+     * takes the `create` path (no reference), making subsequent
+     * reverts undetectable until a Ctrl+S re-runs hydration with
+     * settled state. Post-save callers omit the overrides and
+     * continue to read from the closure.
+     */
+    overrides?: { basePath?: string; format?: PersistenceFormat }
+  ): Promise<void> => {
+    const basePath = overrides?.basePath ?? currentFolderPath ?? filePath ?? ''
     if (!basePath) return
-    const fmt = folderFormat
+    const fmt = overrides?.format ?? folderFormat
     try {
       // Duplicate-import guard: two imports of the same spec produce root
       // folders with identical descendant ids (envs, requests, …). A naïve
@@ -238,17 +253,27 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
           indexPaddingMin: 1
         })
         const all: DecomposedUnit[] = [decomposed.rootIndex, ...decomposed.children]
+        // Batch the IPC round-trips: `hydrateSaveUnit` is independent
+        // per-unit (no inter-unit ordering), so running them in
+        // parallel keeps file-open under a single render frame even
+        // for a tree with dozens of leaves. Sequential awaits would
+        // pile up enough latency to race with the env-context
+        // initialisation that follows in `handleFileOpened` (the
+        // URL resolver reads from the context that
+        // `clearAll` + `ENVIRONMENT_CREATED` sets up after this hook).
+        const pending: Promise<void>[] = []
         for (const unit of all) {
           if (!unit.runtimeId) continue
           if (seen.has(unit.runtimeId)) continue
           seen.add(unit.runtimeId)
-          await hydrateSaveUnit({
+          pending.push(hydrateSaveUnit({
             runtimeId: unit.runtimeId,
             kind: unit.kind,
             reference: unit.content,
             ...(unit.parentId !== undefined && { parentId: unit.parentId })
-          })
+          }))
         }
+        await Promise.all(pending)
       }
     } catch (err) {
       logger.warn('[useFileManagement] Save-unit hydration failed', { error: String(err) })
@@ -798,14 +823,11 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         )
         setRootItems(reactiveItems)
 
-        // Hydrate the save-unit registry so per-unit dirty dots start
-        // clean and `commitIfDraftMatches` has a reference to diff
-        // against. Runs in both file and folder mode (dot is useful
-        // everywhere; crash-recovery drafts only write in folder mode
-        // because that's where the DraftStore is attached).
-        if (path) {
-          await hydrateSaveUnitsFromTree(reactiveItems)
-        }
+        // Save-unit hydration is deferred to the end of this hook so
+        // env-context registration (`clearAll` → `ENVIRONMENT_CREATED`
+        // → request register) gets the IPC channel first. Without
+        // that, the URL resolver can race the bridge and serve a tab
+        // before its env's variables have been published.
 
         if (openedAsFolder) {
           const registerAllItems = (items: FolderItem[]): void => {
@@ -881,12 +903,22 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
           }
         }
 
+        // Hydrate the save-unit registry now that the env-context
+        // pipeline has finished publishing its data. The `path` here
+        // is the freshly-known one — the closure's
+        // `currentFolderPath` / `filePath` still hold their previous
+        // render's values until React re-renders.
+        if (path) {
+          const fmt = (state.currentFile.format as PersistenceFormat | undefined) ?? folderFormat
+          await hydrateSaveUnitsFromTree(reactiveItems, { basePath: path, format: fmt })
+        }
+
         await finishLoading()
 
         isLoadingRef.current = false
       })()
     },
-    [clearTabDirtyState, registerTabDirtyState, setRootItems, hydrateSaveUnitsFromTree]
+    [clearTabDirtyState, registerTabDirtyState, setRootItems, hydrateSaveUnitsFromTree, folderFormat]
   )
 
   // Handle file closed event
