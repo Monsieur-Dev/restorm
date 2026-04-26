@@ -651,3 +651,15 @@ const [selectedIndex, setSelectedIndex] = useState(0)
   onDidSelect={(data) => store.setSelectedIndex(data.index)}
 />
 ```
+
+## Filtering long lists
+
+When the popup contains at least `filterThreshold` items (default **15**, exposed as `DEFAULT_FILTER_THRESHOLD`), a sticky filter row appears at the top of the popup body:
+
+- **Filter input** — auto-focused on open, case-insensitive substring match on the item label. `Esc` clears a non-empty filter; a second `Esc` (with the filter empty) closes the popup.
+- **Select all / Deselect all** — only on multi-select dropdowns. They act on the *currently visible* slice, so combined with the filter the user can pick "filter + select all matching".
+- **No matches** — when the filter eliminates every row, an italic placeholder is rendered in place of the list.
+
+Per-instance opt-out: pass a `filterThreshold` larger than the item count (e.g. `Number.POSITIVE_INFINITY`).
+
+The shared logic lives in `useFilterableDropdown` (see `hooks/useFilterableDropdown.ts`) and the row UI in `components/DropdownFilterRow`.

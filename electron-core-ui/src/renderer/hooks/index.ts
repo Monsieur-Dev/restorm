@@ -17,3 +17,5 @@ export type { UseVerticalSashOptions, UseVerticalSashReturn } from './useVertica
 export { useModalState } from './useModalState'
 export type { ModalState, UseModalStateReturn } from './useModalState'
 export { useSettings, useSetting } from './useSettings'
+export { useFilterableDropdown, applyDropdownFilter, DEFAULT_FILTER_THRESHOLD } from './useFilterableDropdown'
+export type { UseFilterableDropdownOptions, UseFilterableDropdownResult } from './useFilterableDropdown'

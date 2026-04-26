@@ -1,0 +1,23 @@
+.dropdown-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background-color: var(--editor-background);
+  border-bottom: 1px solid var(--dropdown-border);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.dropdown-filter-row__input {
+  flex: 1;
+  min-width: 0;
+}
+
+.dropdown-filter-row__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}

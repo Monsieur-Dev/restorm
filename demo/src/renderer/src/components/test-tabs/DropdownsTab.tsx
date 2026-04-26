@@ -1,9 +1,18 @@
 import React, { useState } from 'react'
-import { CustomDropdown } from 'electron-core-ui/renderer'
+import { CustomDropdown, MultiSelectCombo } from 'electron-core-ui/renderer'
+
+const FRUITS = [
+  'Apple', 'Apricot', 'Avocado', 'Banana', 'Blackberry', 'Blueberry',
+  'Cantaloupe', 'Cherry', 'Coconut', 'Cranberry', 'Date', 'Dragonfruit',
+  'Elderberry', 'Fig', 'Gooseberry', 'Grape', 'Grapefruit', 'Guava',
+  'Honeydew', 'Kiwi', 'Lemon', 'Lime', 'Lychee', 'Mango'
+]
 
 const DropdownsTab: React.FC = () => {
   // Internal state management
   const [selectValue, setSelectValue] = useState('option1')
+  const [longValue, setLongValue] = useState('Banana')
+  const [multiSelected, setMultiSelected] = useState<string[]>(['Apple', 'Banana'])
   return (
     <div style={{ display: 'grid', gap: '15px', padding: '20px' }}>
         <div>
@@ -21,6 +30,30 @@ const DropdownsTab: React.FC = () => {
               setSelectValue(value)
             }}
             placeholder="Select an option"
+          />
+        </div>
+
+        <div>
+          <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>Long list (filter row appears)</h3>
+          <CustomDropdown
+            id="test-dropdown-long"
+            value={longValue}
+            options={FRUITS.map((name) => ({ value: name, label: name }))}
+            onChange={(value) => { setLongValue(value) }}
+            placeholder="Pick a fruit"
+          />
+        </div>
+
+        <div>
+          <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>
+            MultiSelectCombo — long list with select-all / deselect-all
+          </h3>
+          <MultiSelectCombo
+            data-testid="test-multi-select-long"
+            options={FRUITS.map((name) => ({ value: name, label: name }))}
+            selected={multiSelected}
+            onChange={setMultiSelected}
+            placeholder="Pick fruits…"
           />
         </div>
 

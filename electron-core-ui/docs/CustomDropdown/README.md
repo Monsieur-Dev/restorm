@@ -12,7 +12,9 @@ It provides keyboard-navigation, full-width styling, and integrates with the the
 ```typescript
 interface CustomDropdownOption {
   value: string
-  label: string
+  label: React.ReactNode
+  /** Plain-text override for the substring filter when `label` is JSX. */
+  searchText?: string
 }
 
 interface CustomDropdownProps {
@@ -22,6 +24,12 @@ interface CustomDropdownProps {
   onChange: (value: string) => void
   disabled?: boolean
   placeholder?: string
+  /** Item count at or above which a sticky filter row appears. Default: 15. */
+  filterThreshold?: number
+  /** Localised placeholder for the filter input. Default: `Filter…`. */
+  filterPlaceholder?: string
+  /** Optional test id forwarded to the filter row. */
+  filterTestId?: string
 }
 ```
 
@@ -29,10 +37,15 @@ interface CustomDropdownProps {
 
 - **id** (`string`, optional): DOM id used for ARIA attributes.
 - **value** (`string`, required): Currently selected option value.
-- **options** (`CustomDropdownOption[]`, required): List of options (`value` + `label`).
+- **options** (`CustomDropdownOption[]`, required): List of options (`value` + `label`, plus an optional `searchText` if the `label` is JSX and the substring filter would otherwise have nothing meaningful to match).
 - **onChange** (`(value: string) => void`, required): Called when the user selects a new value.
 - **disabled** (`boolean`, optional): Disables interaction and focus when `true`.
 - **placeholder** (`string`, optional): Text displayed when no option is selected. Defaults to `"Select..."`.
+- **filterThreshold** (`number`, optional): Item count at or above which a sticky filter row appears at the top of the popup. Defaults to `15` (the shared `DEFAULT_FILTER_THRESHOLD`). Pass a large value (e.g. `Number.POSITIVE_INFINITY`) to opt out per-instance.
+- **filterPlaceholder** (`string`, optional): Localised placeholder for the filter input. Defaults to `"Filter…"`.
+- **filterTestId** (`string`, optional): Test id forwarded to the filter row's container. The inner input gets `${filterTestId}-input`.
+
+When the filter is shown, typing narrows the list to options whose `searchText` (or stringified `label`) contain the query, case-insensitive. `Esc` clears a non-empty filter; a second `Esc` (with the filter empty) closes the popup. ArrowUp / ArrowDown / Home / End navigate the visible slice.
 
 ## Usage
 

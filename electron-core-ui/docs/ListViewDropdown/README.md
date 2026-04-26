@@ -232,3 +232,15 @@ const ThemeDropdown: React.FC = () => {
 - Prefer stable `items` references (e.g. memoize the tree with `useMemo`) so that expansion and selection logic in `ListView` do not re-initialize unnecessarily on each render.
 - Use `rootRole="tree"` for hierarchical structures (projects, environments, folders) and `rootRole="list"` for flat menus; this helps AI agents and accessibility tooling infer the correct semantics.
 - When designing higher-level abstractions (e.g. an environment selector service), keep the mapping `domain model -> ListViewItemData[]` in a small pure function that is easy to reuse and test, instead of scattering `ListViewItemData` construction across components.
+
+## Filtering long lists
+
+When the popup contains at least `filterThreshold` items (default **15**, exposed as `DEFAULT_FILTER_THRESHOLD`), a sticky filter row appears at the top of the popup body:
+
+- **Filter input** — auto-focused on open, case-insensitive substring match on the item label. `Esc` clears a non-empty filter; a second `Esc` (with the filter empty) closes the popup.
+- **Select all / Deselect all** — only on multi-select dropdowns. They act on the *currently visible* slice, so combined with the filter the user can pick "filter + select all matching".
+- **No matches** — when the filter eliminates every row, an italic placeholder is rendered in place of the list.
+
+Per-instance opt-out: pass a `filterThreshold` larger than the item count (e.g. `Number.POSITIVE_INFINITY`).
+
+The shared logic lives in `useFilterableDropdown` (see `hooks/useFilterableDropdown.ts`) and the row UI in `components/DropdownFilterRow`.
