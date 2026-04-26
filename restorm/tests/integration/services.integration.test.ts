@@ -378,29 +378,41 @@ describe('Integration Tests with Docker Services', () => {
 
     it('executes a request from the imported 3.0 collection against the live 3.0 mock (api_key auth)', async () => {
       if (!dockerAvailable || !containersStarted) return
-      // Fetch the spec live, import with the live server's runtime base
-      // (`http://localhost:8081/v3`), then exercise an endpoint that only
-      // requires `api_key` auth — `/store/inventory`. That proves the
-      // 3.0 importer's output runs end-to-end against the openapi-petstore
-      // service. (`/pet/*` paths require `petstore_auth` OAuth which the
-      // image enforces strictly; `/store/inventory` accepts the documented
-      // `api_key: special-key` header on its own.)
+      // Fetch the spec live, import via `importOpenAPIFromJson` *with the
+      // sourceUrl set* — no `baseUrl` override. The spec's `servers: [{
+      // url: "/v3" }]` is root-relative, so the importer resolves it
+      // against the source URL to build the runtime base
+      // `http://localhost:8081/v3`. That proves the importer's
+      // relative-server-URL resolution works end-to-end and the imported
+      // request URL (`{{baseUrl}}/store/inventory`) resolves correctly
+      // through the variable context. (`/pet/*` paths require
+      // `petstore_auth` OAuth which the image enforces strictly;
+      // `/store/inventory` accepts the documented `api_key: special-key`
+      // header on its own.)
       const response = await fetch(SERVICES.petstoreOpenApi3.openapiUrl)
       const json = await response.text()
       const folder = importOpenAPIFromJson(json, {
-        baseUrl: `${SERVICES.petstoreOpenApi3.baseUrl}/v3`
+        sourceUrl: SERVICES.petstoreOpenApi3.openapiUrl
       })
+
+      // Sanity-check that the relative `/v3` server URL was resolved
+      // against the sourceUrl.
+      const baseUrlVar = folder.environments[0]?.variables.find((v) => v.key === 'baseUrl')
+      expect(JSON.stringify(baseUrlVar)).toContain('http://localhost:8081/v3')
 
       const requests = findAllRequests(folder, isHTTPRequest)
       const inventory = requests.find((r) => r.url.endsWith('/store/inventory'))
       expect(inventory, 'expected an imported request for /store/inventory').toBeDefined()
       if (!inventory) return
 
+      // Build the variable context out of the imported environment so the
+      // imported `{{baseUrl}}/store/inventory` URL resolves correctly.
       const variableContext = createVariableContext(folder)
+      const resolvedUrl = `${SERVICES.petstoreOpenApi3.baseUrl}/v3/store/inventory`
       const input: HTTPRequestInput = {
         request: inventory,
         method: 'GET',
-        url: `${SERVICES.petstoreOpenApi3.baseUrl}/v3/store/inventory`,
+        url: resolvedUrl,
         headers: [
           { key: 'Accept', value: 'application/json' },
           { key: 'api_key', value: 'special-key' }

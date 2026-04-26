@@ -551,6 +551,32 @@ function extractDomainName(urlOrHost: string): string {
 }
 
 /**
+ * Resolve a server URL against the spec's source URL. Server URLs in OpenAPI
+ * are commonly relative (`/v3`, `./api`) and meant to be resolved against the
+ * server hosting the spec — when the user imports `https://example.com/openapi.json`
+ * with a `servers: [{ url: "/v3" }]` block, the runtime base is
+ * `https://example.com/v3`, not the literal `/v3`.
+ *
+ * Returns the original URL unchanged when:
+ * - It's already absolute (`http(s)://...`).
+ * - No `sourceUrl` is provided (user imported from a file or paste — there's
+ *   nothing to resolve against, so we keep the relative URL as-is so the
+ *   user sees what the spec said and can edit `baseUrl` manually).
+ *
+ * Templates with placeholders that haven't been substituted yet (`{var}`)
+ * are passed through unchanged for the same reason.
+ */
+export function resolveServerUrl(rawUrl: string, sourceUrl: string | undefined): string {
+  if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) return rawUrl
+  if (!sourceUrl) return rawUrl
+  try {
+    return new URL(rawUrl, sourceUrl).toString()
+  } catch {
+    return rawUrl
+  }
+}
+
+/**
  * Build the import's environment from the spec's `servers[]`. The first
  * entry becomes the root environment; every additional entry becomes a sub
  * environment that overrides the resolved `baseUrl`. Variable substitution
@@ -559,10 +585,13 @@ function extractDomainName(urlOrHost: string): string {
  * When `overrideBaseUrl` is provided (caller passed it explicitly), it
  * bypasses the structured layout and seeds a single `baseUrl` ExpressionValue.
  */
-function createOpenApi3Environment(spec: OAS3Spec, overrideBaseUrl?: string): Environment {
+function createOpenApi3Environment(spec: OAS3Spec, overrideBaseUrl?: string, sourceUrl?: string): Environment {
   const servers = spec.servers ?? []
   const primary = servers[0]
-  const primaryUrl = primary ? expandServerVariables(primary) : ''
+  // Resolve the primary server URL once — this drives both the env name
+  // and the resolved `baseUrl` template that requests will reference.
+  const resolvedPrimary = primary ? resolveServerUrl(primary.url, sourceUrl) : ''
+  const primaryUrl = primary ? expandServerVariables({ ...primary, url: resolvedPrimary }) : ''
   let domainName: string
   if (overrideBaseUrl !== undefined) {
     domainName = extractDomainName(overrideBaseUrl)
@@ -592,10 +621,11 @@ function createOpenApi3Environment(spec: OAS3Spec, overrideBaseUrl?: string): En
     }
   }
 
-  const baseUrlTemplate = primary ? rewriteUrlTemplate(primary.url) : ''
+  const baseUrlTemplate = primary ? rewriteUrlTemplate(resolvedPrimary) : ''
   rootVariables.push(kvOfType('baseUrl', new ExpressionValue(baseUrlTemplate)))
 
   const subEnvironments: Environment['subEnvironments'] = servers.slice(1).map((server, idx) => {
+    const resolvedSubUrl = resolveServerUrl(server.url, sourceUrl)
     const subVariables: KeyValue[] = []
     if (server.variables) {
       for (const [name, def] of Object.entries(server.variables)) {
@@ -603,10 +633,10 @@ function createOpenApi3Environment(spec: OAS3Spec, overrideBaseUrl?: string): En
         subVariables.push(kvOfType(name, new StringValue(initial), def.description))
       }
     }
-    subVariables.push(kvOfType('baseUrl', new ExpressionValue(rewriteUrlTemplate(server.url))))
+    subVariables.push(kvOfType('baseUrl', new ExpressionValue(rewriteUrlTemplate(resolvedSubUrl))))
     // `extractDomainName` is best-effort and never returns `null`/`undefined`,
     // so the fallback is purely a safety net for future signature changes.
-    const derived = extractDomainName(expandServerVariables(server))
+    const derived = extractDomainName(expandServerVariables({ ...server, url: resolvedSubUrl }))
     return {
       id: generateId(`env:root:${domainName}:${idx + 1}`),
       name: server.description ?? (derived !== '' ? derived : `server-${idx + 1}`),
@@ -656,7 +686,7 @@ export function importOpenAPI(
   spec: OAS3Spec | OAS31Spec,
   options: OpenAPIImportOptions = {}
 ): EnvironmentFolder {
-  const newEnvironment = createOpenApi3Environment(spec as OAS3Spec, options.baseUrl)
+  const newEnvironment = createOpenApi3Environment(spec as OAS3Spec, options.baseUrl, options.sourceUrl)
   const { definitions: enumDefs, lookup: enumLookup } = extractEnumDefinitions(spec as OAS3Spec)
   const importedItems = buildFolderItems(spec as OAS3Spec, enumLookup)
 
@@ -698,7 +728,9 @@ export function importOpenAPI(
   return rootFolder
 }
 
-/** Fetch and import an OpenAPI 3.x specification from a URL. */
+/** Fetch and import an OpenAPI 3.x specification from a URL. The fetched
+ * URL is recorded as `options.sourceUrl` (unless the caller already supplied
+ * one) so relative `servers[].url` entries resolve against it. */
 export async function importOpenAPIFromUrl(
   url: string,
   options: OpenAPIImportOptions = {}
@@ -706,7 +738,7 @@ export async function importOpenAPIFromUrl(
   const response = await fetch(url)
   if (!response.ok) throw new Error(`Failed to fetch OpenAPI spec: ${response.status} ${response.statusText}`)
   const spec = (await response.json()) as OAS3Spec | OAS31Spec
-  return importOpenAPI(spec, options)
+  return importOpenAPI(spec, { ...options, sourceUrl: options.sourceUrl ?? url })
 }
 
 /** Import an OpenAPI 3.x specification from a JSON string. */

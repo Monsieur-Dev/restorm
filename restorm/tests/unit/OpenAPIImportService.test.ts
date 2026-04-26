@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { importOpenAPI, importOpenAPIFromJson } from '../../src/main/services/import/OpenAPIImportService'
+import { importOpenAPI, importOpenAPIFromJson, resolveServerUrl } from '../../src/main/services/import/OpenAPIImportService'
 import type { OAS3Spec } from '../../src/main/services/import/transformers/openapi3ToApiDocumentation'
 import type { OAS31Spec } from '../../src/main/services/import/transformers/openapi31ToApiDocumentation'
 import type { Folder, HTTPRequest } from '../../src/shared/models'
@@ -144,6 +144,63 @@ describe('OpenAPIImportService — JSON entry point', () => {
     const json = loadJson('petstore-3.0.json')
     const folder = importOpenAPIFromJson(json, { sourceUrl: 'https://example.com/openapi.json' })
     expect(folder.apiDocumentation?.sourceUrl).toBe('https://example.com/openapi.json')
+  })
+})
+
+describe('resolveServerUrl', () => {
+  it('passes absolute URLs through unchanged', () => {
+    expect(resolveServerUrl('https://api.example.com/v1', 'https://example.com/openapi.json'))
+      .toBe('https://api.example.com/v1')
+    expect(resolveServerUrl('http://localhost:8080', undefined))
+      .toBe('http://localhost:8080')
+  })
+
+  it('resolves a root-relative server URL against the spec source URL', () => {
+    expect(resolveServerUrl('/v3', 'http://localhost:8081/openapi.json'))
+      .toBe('http://localhost:8081/v3')
+  })
+
+  it('resolves a path-relative server URL against the spec source URL', () => {
+    expect(resolveServerUrl('./api', 'https://example.com/specs/openapi.json'))
+      .toBe('https://example.com/specs/api')
+  })
+
+  it('returns the raw URL when no sourceUrl is provided (file / paste import)', () => {
+    expect(resolveServerUrl('/v3', undefined)).toBe('/v3')
+  })
+
+  it('passes server templates with placeholders through unchanged', () => {
+    // `new URL("/{var}", base)` URL-encodes the braces — keep the
+    // template intact so the env-variable layer can substitute.
+    const template = 'https://{env}.api.example.com/v1'
+    expect(resolveServerUrl(template, 'https://example.com/spec.json')).toBe(template)
+  })
+})
+
+describe('OpenAPIImportService — relative servers[] resolution', () => {
+  it('builds an absolute baseUrl when the spec has a root-relative server URL + sourceUrl is set', () => {
+    const spec: OAS3Spec = {
+      openapi: '3.0.0',
+      info: { title: 'Local', version: '1.0' },
+      servers: [{ url: '/v3' }],
+      paths: {}
+    }
+    const folder = importOpenAPI(spec, { sourceUrl: 'http://localhost:8081/openapi.json' })
+    const baseUrl = folder.environments[0]?.variables.find((v) => v.key === 'baseUrl')
+    expect(JSON.stringify(baseUrl)).toContain('http://localhost:8081/v3')
+  })
+
+  it('keeps the relative server URL when no sourceUrl is provided', () => {
+    const spec: OAS3Spec = {
+      openapi: '3.0.0',
+      info: { title: 'Local', version: '1.0' },
+      servers: [{ url: '/v3' }],
+      paths: {}
+    }
+    const folder = importOpenAPI(spec)
+    const baseUrl = folder.environments[0]?.variables.find((v) => v.key === 'baseUrl')
+    expect(JSON.stringify(baseUrl)).toContain('/v3')
+    expect(JSON.stringify(baseUrl)).not.toContain('http://')
   })
 })
 
