@@ -20,6 +20,12 @@ const swaggerImportTestDir = defineBddConfig({
   outputDir: '.features-gen/swagger-import'
 })
 
+const openapiImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/openapi-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/openapi-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/openapi-import.fixture.ts'],
+  outputDir: '.features-gen/openapi-import'
+})
+
 const dirtyStateTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/dirty-state/features/**/*.feature',
   steps: ['tests/e2e/bdd/dirty-state/steps/**/*.ts', 'tests/e2e/bdd/fixtures/dirty-state.fixture.ts'],
@@ -82,6 +88,10 @@ export default defineConfig({
     {
       name: 'swagger-import',
       testDir: swaggerImportTestDir
+    },
+    {
+      name: 'openapi-import',
+      testDir: openapiImportTestDir
     },
     {
       name: 'dirty-state',

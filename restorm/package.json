@@ -47,6 +47,7 @@
     "depcheck": "depcheck"
   },
   "dependencies": {
+    "@apidevtools/swagger-parser": "^12.1.0",
     "@milkdown/crepe": "^7.20.0",
     "@milkdown/kit": "^7.20.0",
     "@milkdown/react": "^7.20.0",
