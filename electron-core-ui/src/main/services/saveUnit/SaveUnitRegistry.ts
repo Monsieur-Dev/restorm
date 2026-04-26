@@ -50,11 +50,20 @@ function canonicalJson(value: unknown): string {
     const obj = v as Record<string, unknown>
     const sorted: Record<string, unknown> = {}
     for (const k of Object.keys(obj).sort()) {
-      // Strip undefined-valued keys — JSON.stringify already drops
-      // them, but the decomposer sometimes preserves them via cleanse,
-      // so normalizing here keeps the shape comparison stable across
-      // the hydrate / upsert paths.
+      // Strip undefined / empty-string keys — both round-trip to "no
+      // key" through the persistence layer (YAML elides empty values,
+      // the decomposer's cleanse path doesn't preserve them, and a
+      // class field declared as `notes?: string` (with
+      // `useDefineForClassFields: true`) emits a `notes: undefined`
+      // own property that JSON.stringify drops, leaving the reference
+      // shape devoid of `notes`. The first time the user types into
+      // the notes editor and clears it, the reactive proxy assigns
+      // `notes = ''` and JSON.stringify keeps it — diverging from the
+      // reference. Treating empty-string and undefined as equivalent
+      // to "absent" closes that asymmetry and unblocks the first
+      // edit-then-undo cycle on a freshly-opened file.
       if (obj[k] === undefined) continue
+      if (obj[k] === '') continue
       sorted[k] = obj[k]
     }
     return sorted

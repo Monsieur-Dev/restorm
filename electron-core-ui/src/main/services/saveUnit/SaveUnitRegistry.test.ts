@@ -109,6 +109,27 @@ describe('SaveUnitRegistry', () => {
       expect(reg.isDirty('u')).toBe(false)
     })
 
+    it('detects a revert when the upsert pipeline added an empty-string field absent from the reference (OYO-267 first-cycle bug)', () => {
+      // When a fresh file has no `notes` key on a request, the hydrate
+      // path's reference shape is `{name, ...}`. As soon as the user
+      // types into the notes editor and clears it, the reactive proxy
+      // sets `notes = ''` on the live object, so the upsert path's
+      // draft shape is `{name, ..., notes: ''}`. The two shapes only
+      // differ in the empty-string key — semantically identical at the
+      // persistence layer (YAML drops empty strings, JSON would keep
+      // them but the file-level checksum is the same after a save).
+      // Without the empty-string strip in canonicalJson, the registry
+      // gets stuck dirty until a Ctrl+S re-hydrates the reference
+      // with the empty-string included.
+      reg.hydrate({ runtimeId: 'fresh', kind: 'file', reference: { name: 'r' } satisfies Doc })
+      reg.mutate('fresh', { name: 'r', body: 'x' } satisfies Doc)
+      expect(reg.isDirty('fresh')).toBe(true)
+      // User clears the editor → reactive proxy assigns '' → upsert
+      // emits a draft with the empty key.
+      reg.mutate('fresh', { name: 'r', body: '' } satisfies Doc)
+      expect(reg.isDirty('fresh')).toBe(false)
+    })
+
     it('throws on unknown runtimeId', () => {
       expect(() => { reg.mutate('missing', { name: 'x' } satisfies Doc) }).toThrow()
     })
