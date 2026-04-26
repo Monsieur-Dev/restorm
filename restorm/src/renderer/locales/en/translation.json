@@ -134,7 +134,6 @@
     "tabs": {
       "docs": "Docs",
       "requestLayout": "Request",
-      "authorization": "Authorization",
       "headers": "Headers",
       "body": "Body",
       "params": "Params",
