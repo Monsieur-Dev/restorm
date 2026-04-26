@@ -23,6 +23,45 @@ import {
 export type UnitChangeListener = (snapshot: UnitChangeSnapshot) => void
 
 /**
+ * Compare two values by their canonical persisted form (sorted-key
+ * `JSON.stringify`). Slower than `sameShape` but sees through field-
+ * order differences and ignores `undefined`-valued keys — the same
+ * normalization the persistence layer applies before writing to disk.
+ * Used as a fall-back from `sameShape` so a logical revert that
+ * round-trips through the upsert pipeline (which may permute key
+ * order or add a transient `undefined`) still discards its draft.
+ */
+function sameSerialized(a: unknown, b: unknown): boolean {
+  return canonicalJson(a) === canonicalJson(b)
+}
+
+/**
+ * Input contract: callers pass plain-JSON values (already cleansed
+ * by `cleanseForPersistence` / `decomposeForPersistence` upstream).
+ * Class instances such as `Date`, `Map`, `Set` would collapse to `{}`
+ * here because they have no own enumerable string keys — that would
+ * falsely compare equal to other empty objects. Inputs that have
+ * already round-tripped through serialization don't carry such
+ * instances, so this is safe in practice.
+ */
+function canonicalJson(value: unknown): string {
+  return JSON.stringify(value, (_key, v: unknown) => {
+    if (v === null || typeof v !== 'object' || Array.isArray(v)) return v
+    const obj = v as Record<string, unknown>
+    const sorted: Record<string, unknown> = {}
+    for (const k of Object.keys(obj).sort()) {
+      // Strip undefined-valued keys — JSON.stringify already drops
+      // them, but the decomposer sometimes preserves them via cleanse,
+      // so normalizing here keeps the shape comparison stable across
+      // the hydrate / upsert paths.
+      if (obj[k] === undefined) continue
+      sorted[k] = obj[k]
+    }
+    return sorted
+  })
+}
+
+/**
  * Deep-equal for plain JSON-shaped values. Used to decide whether a
  * `mutate()` actually changed anything — if the candidate draft is
  * structurally identical to the reference, the draft is discarded.
@@ -173,9 +212,41 @@ export class SaveUnitRegistry {
       if (wasDirty) this.emit(runtimeId, false, 'modify')
       return
     }
+    // sameShape miss is the typical case for live edits, but it can
+    // also fire on a logical revert when the upsert pipeline added a
+    // transient field (e.g. a UI-only flag) the hydrate path didn't
+    // see. The serialized JSON is the canonical persistence shape —
+    // if both sides serialize identically, the user is back at the
+    // saved baseline and the draft must be discarded.
+    if (unit.reference !== undefined && sameSerialized(draft, unit.reference)) {
+      unit.draft = undefined
+      unit.lastDirtyReason = undefined
+      if (wasDirty) this.emit(runtimeId, false, 'modify')
+      return
+    }
     unit.draft = draft
     unit.lastDirtyReason = reason
     this.emit(runtimeId, true, reason)
+  }
+
+  /**
+   * Force every unit to its clean state. Drops every `draft` (and
+   * any tombstone) and emits an `onUnitChange(clean)` for each unit
+   * that was previously dirty. Use when the in-memory tree is known
+   * to match the on-disk reference but the registry hasn't caught
+   * up — typical case is an edit-then-revert cycle whose `mutate`
+   * couldn't `sameShape`-match because of a serialization round-trip
+   * asymmetry. The bridge picks the per-unit `clean` events up and
+   * deletes any draft files that linger.
+   */
+  markAllClean(): void {
+    for (const [runtimeId, unit] of this.units) {
+      const wasDirty = isUnitDirty(unit)
+      if (!wasDirty) continue
+      unit.draft = undefined
+      unit.lastDirtyReason = undefined
+      this.emit(runtimeId, false, undefined)
+    }
   }
 
   /** Mark a unit as pending-delete. Idempotent: calling twice is a no-op. */

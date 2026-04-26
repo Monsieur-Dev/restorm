@@ -82,6 +82,33 @@ describe('SaveUnitRegistry', () => {
       expect(reg.isDirty('b')).toBe(false)
     })
 
+    it('detects a revert across reordered keys via canonical JSON', () => {
+      // hydrate path produces { name, body }, upsert path produces { body, name } —
+      // sameShape's order-insensitive deep-equal catches this, but if a
+      // future asymmetry (transient undefined fields, etc.) breaks
+      // sameShape, the canonical-JSON fallback still recognises the
+      // revert. Belt-and-braces: drive the comparison via a sibling
+      // unit whose shape differs only in key order.
+      reg.hydrate({ runtimeId: 'reorder', kind: 'file', reference: { name: 'r', body: 'B' } })
+      // First mark dirty with a real change.
+      reg.mutate('reorder', { name: 'r', body: 'B!' })
+      expect(reg.isDirty('reorder')).toBe(true)
+      // Revert with reversed key order — must still discard the draft.
+      reg.mutate('reorder', { body: 'B', name: 'r' })
+      expect(reg.isDirty('reorder')).toBe(false)
+    })
+
+    it('detects a revert when the upsert pipeline added a transient undefined field', () => {
+      reg.hydrate({ runtimeId: 'u', kind: 'file', reference: { name: 'x' } satisfies Doc })
+      reg.mutate('u', { name: 'x-edited' } satisfies Doc)
+      expect(reg.isDirty('u')).toBe(true)
+      // Revert payload carries an extra undefined-valued field — the
+      // canonical-JSON fallback strips undefineds before comparing,
+      // so this is recognised as identical to the reference.
+      reg.mutate('u', { name: 'x', body: undefined } as unknown as Doc)
+      expect(reg.isDirty('u')).toBe(false)
+    })
+
     it('throws on unknown runtimeId', () => {
       expect(() => { reg.mutate('missing', { name: 'x' } satisfies Doc) }).toThrow()
     })
@@ -314,6 +341,60 @@ describe('SaveUnitRegistry', () => {
       const unit2 = reg.get('a')
       if (!unit2) return
       expect(isUnitDirty(unit2)).toBe(true)
+    })
+  })
+
+  describe('markAllClean', () => {
+    it('drops drafts and emits clean events for previously-dirty units only', () => {
+      reg.hydrate({ runtimeId: 'a', kind: 'file', reference: { name: 'a' } satisfies Doc })
+      reg.hydrate({ runtimeId: 'b', kind: 'file', reference: { name: 'b' } satisfies Doc })
+      reg.hydrate({ runtimeId: 'c', kind: 'file', reference: { name: 'c' } satisfies Doc })
+
+      reg.mutate('a', { name: 'a-edited' } satisfies Doc)
+      reg.mutate('b', { name: 'b-edited' } satisfies Doc, 'rename')
+      // c stays clean.
+
+      const events: { id: string; isDirty: boolean }[] = []
+      reg.onUnitChange((s) => { events.push({ id: s.runtimeId, isDirty: s.isDirty }) })
+
+      reg.markAllClean()
+
+      expect(reg.isDirty('a')).toBe(false)
+      expect(reg.isDirty('b')).toBe(false)
+      expect(reg.isDirty('c')).toBe(false)
+      expect(draftOf(reg, 'a')).toBeUndefined()
+      expect(draftOf(reg, 'b')).toBeUndefined()
+      expect(reg.isGlobalDirty()).toBe(false)
+
+      // Two clean transitions, no spurious event for c.
+      expect(events).toEqual([
+        { id: 'a', isDirty: false },
+        { id: 'b', isDirty: false }
+      ])
+    })
+
+    it('clears tombstones too (pending-delete becomes clean)', () => {
+      reg.hydrate({ runtimeId: 'a', kind: 'file', reference: { name: 'a' } satisfies Doc })
+      reg.markDeleted('a')
+      expect(reg.isDirty('a')).toBe(true)
+
+      reg.markAllClean()
+
+      const unit = reg.get('a')
+      expect(unit).toBeDefined()
+      expect(unit?.draft).toBeUndefined()
+      expect(reg.isDirty('a')).toBe(false)
+    })
+
+    it('is a no-op when nothing is dirty', () => {
+      reg.hydrate({ runtimeId: 'a', kind: 'file', reference: { name: 'a' } satisfies Doc })
+      const events: unknown[] = []
+      reg.onUnitChange((s) => { events.push(s) })
+
+      reg.markAllClean()
+
+      expect(events).toEqual([])
+      expect(reg.isDirty('a')).toBe(false)
     })
   })
 })

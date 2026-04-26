@@ -58,6 +58,7 @@ declare global {
         openFolder: () => Promise<{ success: boolean; content?: unknown; path?: string; format?: PersistenceFormat }>
         showFolderDialog: () => Promise<{ canceled: boolean; filePath?: string }>
         openPath: (path: string) => Promise<{ success: boolean; isDirectory?: boolean; content?: unknown; path?: string; format?: PersistenceFormat }>
+        clearDrafts: () => Promise<{ success: boolean; error?: string }>
       }
       secrets: {
         read: (filePath: string) => Promise<string | null>

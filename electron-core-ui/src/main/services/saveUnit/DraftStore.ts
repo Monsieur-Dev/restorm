@@ -85,6 +85,27 @@ export class DraftStore {
   private readonly projectDir: string
   private readonly debounceMs: number
   private readonly pending = new Map<RuntimeId, PendingWrite>()
+  /**
+   * Promises for flushes whose `setTimeout` has fired and whose
+   * `flush()` body is parked on async I/O (`ensureProjectDir`,
+   * `atomicWrite`). Tracking them lets `clearAllDrafts` await each
+   * one before walking the project directory, so a flush in
+   * progress can't land a `.draft.*` file *after* the bulk-clear
+   * already read the dir. Without this, the bulk-clear invariant
+   * "post-save => zero drafts on disk" is racy: an in-flight
+   * `atomicWrite` would resolve and recreate the file the
+   * bulk-clear was supposed to delete.
+   */
+  private readonly inFlightFlushes = new Set<Promise<void>>()
+  /**
+   * Set during `clearAllDrafts`. In-flight flushes check this flag
+   * before calling `atomicWrite` and bail out — the data is
+   * considered logically discarded by the bulk-clear, even if the
+   * registry hasn't yet processed the corresponding `clean`
+   * transition. Pairs with `inFlightFlushes` to close the race
+   * window completely.
+   */
+  private discardingDrafts = false
   private ensuredDir = false
 
   constructor(private readonly options: DraftStoreOptions) {
@@ -164,13 +185,109 @@ export class DraftStore {
     const entry = this.pending.get(runtimeId)
     if (!entry) return
     this.pending.delete(runtimeId)
+    const work = this.runFlush(runtimeId, entry)
+    this.inFlightFlushes.add(work)
+    try {
+      await work
+    } finally {
+      this.inFlightFlushes.delete(work)
+    }
+  }
+
+  /**
+   * Body of a flush, separated so it can be parked in
+   * `inFlightFlushes` while it awaits I/O. Bails (resolves the
+   * entry without writing) when `discardingDrafts` is set — that
+   * flag is owned by `clearAllDrafts`, which awaits the in-flight
+   * set after toggling it on, so the bulk-clear can guarantee no
+   * `.draft.*` file lands after the directory walk.
+   */
+  private async runFlush(runtimeId: RuntimeId, entry: PendingWrite): Promise<void> {
     try {
       await this.ensureProjectDir()
+      if (this.discardingDrafts) {
+        // The bulk-clear logically discards this write — resolve so
+        // any caller awaiting `writeDraft(...)` moves on, but skip
+        // `atomicWrite` so we don't recreate a file the bulk-clear
+        // is about to / just did unlink.
+        entry.resolve()
+        return
+      }
       const serialized = this.options.serialize(entry.data)
       await atomicWrite(this.getDraftPath(runtimeId), serialized)
       entry.resolve()
     } catch (err) {
       entry.reject(err)
+    }
+  }
+
+  /**
+   * Bulk-clear every draft for this project. The sequence:
+   *
+   *   1. Set `discardingDrafts = true` so any flush *that hasn't
+   *      called `atomicWrite` yet* takes the bail-out branch in
+   *      `runFlush` instead of recreating a file we're about to
+   *      unlink.
+   *   2. Cancel every pending timer (writes whose `setTimeout`
+   *      hasn't fired yet) and resolve their promises so callers
+   *      awaiting `writeDraft(...)` move on.
+   *   3. Wait for every in-flight flush to settle. Some of them may
+   *      have already passed the `discardingDrafts` check and be
+   *      mid-`atomicWrite` — settling them first lets us walk the
+   *      directory in step 4 without racing.
+   *   4. Walk the project directory and unlink `.draft.<ext>`
+   *      files plus `*.tmp` atomic-write sidecars. The
+   *      `.last-opened` marker is preserved so the age-based orphan
+   *      sweep recognizes this project as still alive at next boot.
+   *
+   * Defense-in-depth for save-all and discard-on-quit: per-unit
+   * `deleteDraft` already covers the registry's clean transitions,
+   * but it can miss orphans (drafts whose runtime id is no longer
+   * in the in-memory tree, or pending writes that flushed after the
+   * registry was hydrated). With the in-flight tracking + discard
+   * flag, this method guarantees the invariant
+   * "after save-all returns, zero `.draft.*` files exist on disk"
+   * the host promises its users.
+   */
+  async clearAllDrafts(): Promise<void> {
+    this.discardingDrafts = true
+    try {
+      // Cancel scheduled writes (timers still on the wheel).
+      for (const [, entry] of this.pending) {
+        clearTimeout(entry.timer)
+        entry.resolve()
+      }
+      this.pending.clear()
+
+      // Drain in-flight flushes whose timer has already fired and
+      // are parked on async I/O. `runFlush` either bails on the
+      // `discardingDrafts` check (no file lands) or completes the
+      // `atomicWrite` (file lands, then we unlink it below).
+      // `allSettled` because we don't care if a flush rejected —
+      // its caller already saw the error.
+      if (this.inFlightFlushes.size > 0) {
+        await Promise.allSettled([...this.inFlightFlushes])
+      }
+
+      if (!existsSync(this.projectDir)) return
+      const suffix = `.draft.${this.options.extension}`
+      const entries = await fs.readdir(this.projectDir, { withFileTypes: true })
+      await Promise.all(entries.map(async (entry) => {
+        if (!entry.isFile()) return
+        // Match `.draft.<ext>` plus any `<...>.tmp` sidecar an
+        // interrupted atomic-write may have left behind. Anything
+        // else (e.g. the `.last-opened` marker) stays.
+        const isDraft = entry.name.endsWith(suffix)
+        const isTempSidecar = entry.name.endsWith('.tmp')
+        if (!isDraft && !isTempSidecar) return
+        try {
+          await fs.unlink(join(this.projectDir, entry.name))
+        } catch (err: unknown) {
+          if ((err as NodeJS.ErrnoException).code !== 'ENOENT') throw err
+        }
+      }))
+    } finally {
+      this.discardingDrafts = false
     }
   }
 

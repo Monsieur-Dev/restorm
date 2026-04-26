@@ -209,6 +209,39 @@ export class FileService {
   }
 
   /**
+   * Bulk-clear every draft on disk + in memory for the active
+   * project. Host apps call this at the end of a successful save-all
+   * (and from the quit-without-save path) so orphan drafts —
+   * runtime ids that no longer correspond to a unit in the in-memory
+   * tree, or pending writes that flushed after the registry was
+   * already hydrated — can't trigger a spurious "Save changes?"
+   * prompt on close or a bogus "drafts restored" toast on relaunch.
+   * Per-unit `deleteDraft` covers the registry's clean transitions
+   * but can miss orphans; this is the defense-in-depth invariant.
+   *
+   * Also force-cleans the registry: any unit whose draft survived a
+   * `mutate()` revert because of serialization asymmetry (the in-memory
+   * tree got a clone whose key order or numeric encoding doesn't match
+   * the original reference) is reset to its reference state. The bridge
+   * picks the per-unit clean events up and would normally trigger a
+   * `deleteDraft`, but the bulk clear runs first so the disk side is
+   * already consistent.
+   */
+  public async clearAllDrafts(): Promise<void> {
+    // Order matters: bulk-clear the disk side first, then mark every
+    // unit clean. The opposite order would synchronously emit N clean
+    // events, each triggering a fire-and-forget `deleteDraft` from the
+    // bridge that races with the bulk directory walk. Both writers
+    // are ENOENT-tolerant `fs.unlink`s so the race is currently safe,
+    // but doing the disk-side first means the bridge's per-unit
+    // deletes hit `.draft.*` paths the bulk-clear has already removed
+    // — trivial no-ops, and the invariant doesn't hinge on unlink
+    // idempotency in either implementation.
+    if (this.draftStore) await this.draftStore.clearAllDrafts()
+    this.saveUnitRegistry.markAllClean()
+  }
+
+  /**
    * Remove draft directories belonging to projects that no longer
    * exist on disk. Meant to be called once at app boot from the
    * host app's main process.
@@ -737,6 +770,23 @@ export class FileService {
       // flips the cached flag. We don't touch it here.
       this.notifyStateChange()
 
+      // A successful whole-file save committed the in-memory tree
+      // to disk. Bulk-clear the drafts directory so any draft files
+      // that survived the per-unit clean-transition path — orphans
+      // whose runtime id is no longer in the tree, pending writes
+      // that flushed after registry hydration — can't trick the
+      // close-file dialog into popping the "Save changes?" prompt
+      // or trigger a bogus "drafts restored" toast on next launch.
+      // `clearAllDrafts` awaits in-flight flushes so this is safe
+      // against the debounced-write race.
+      if (this.draftStore) {
+        try {
+          await this.draftStore.clearAllDrafts()
+        } catch (err: unknown) {
+          logger.warn('FileService: Failed to clear drafts after save', { error: String(err) })
+        }
+      }
+
       logger.info('FileService: File saved', { path: this.currentFile.path })
       return true
     } catch (error) {
@@ -790,6 +840,17 @@ export class FileService {
       this.addToRecentFiles(filePath, name)
       this.notifyStateChange()
       this.notifyDirtyChange()
+
+      // Same invariant as `save` — bulk-clear drafts so orphans
+      // can't trick the close-file dialog or the next launch's
+      // recovery scan. See `save` above for the full rationale.
+      if (this.draftStore) {
+        try {
+          await this.draftStore.clearAllDrafts()
+        } catch (err: unknown) {
+          logger.warn('FileService: Failed to clear drafts after save-as', { error: String(err) })
+        }
+      }
 
       logger.info('FileService: File saved as', { path: filePath, format: fileFormat })
       return true

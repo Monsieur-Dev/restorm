@@ -124,6 +124,16 @@ contextBridge.exposeInMainWorld('restorm', {
     openPath: async (path: string): Promise<{ success: boolean; isDirectory?: boolean; content?: unknown; path?: string; format?: PersistenceFormat }> => {
       const result: unknown = await ipcRenderer.invoke('restorm:open-path', path)
       return result as { success: boolean; isDirectory?: boolean; content?: unknown; path?: string; format?: PersistenceFormat }
+    },
+    /**
+     * Bulk-clear `.draft.*` files in the project's drafts
+     * directory. Call this after a save-all path that may have
+     * skipped the disk write (no whole-file delta) so the
+     * post-save invariant "zero drafts on disk" holds regardless.
+     */
+    clearDrafts: async (): Promise<{ success: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('restorm:clear-drafts')
+      return result as { success: boolean; error?: string }
     }
   },
   secrets: {
