@@ -184,6 +184,18 @@ export function registerRestormIPC(deps: {
 
       if (saveResult.success) {
         logger.info('File saved successfully', { path: saveResult.path })
+        // A successful single-file save committed the in-memory
+        // tree to disk. Bulk-clear the drafts directory so the
+        // close-file dialog can't be tricked by orphans — drafts
+        // whose runtime id is no longer in the tree, or pending
+        // writes that flushed after registry hydration — and the
+        // next launch doesn't show a bogus "drafts restored" toast.
+        // `clearAllDrafts` drains in-flight flushes before
+        // unlinking, so the bulk-clear is race-safe against
+        // debounced writes.
+        if (isFileServiceInitialized()) {
+          await getFileService().clearAllDrafts()
+        }
       }
 
       return saveResult
@@ -254,7 +266,12 @@ export function registerRestormIPC(deps: {
 
       if (saveResult.success && saveResult.path) {
         logger.info('Folder saved successfully', { path: saveResult.path })
-        // Update FileService to track the new folder path - state will be broadcast via file:opened event
+        // Same invariant as save-as-file — bulk-clear drafts after
+        // a successful folder save. See `save-as-file` above for
+        // the full rationale.
+        if (isFileServiceInitialized()) {
+          await getFileService().clearAllDrafts()
+        }
       }
 
       return saveResult
@@ -262,6 +279,25 @@ export function registerRestormIPC(deps: {
       const errorMsg = error instanceof Error ? error.message : String(error)
       logger.error('Failed to save folder', { error: errorMsg })
       return { success: false, error: errorMsg }
+    }
+  })
+
+  // Dedicated drafts-clear IPC. Used by the renderer's save-all
+  // flow when the in-memory checksum already matches the on-disk
+  // file (`hasRealChanges === false`), so the IPC save handlers
+  // above don't run — but orphan drafts may still exist from
+  // earlier sessions or from runtime ids no longer in the tree.
+  // Calling this guarantees the post-save invariant
+  // "zero `.draft.*` files on disk" regardless of which save path
+  // ran.
+  ipcMain.handle('restorm:clear-drafts', async () => {
+    if (!isFileServiceInitialized()) return { success: false }
+    try {
+      await getFileService().clearAllDrafts()
+      return { success: true }
+    } catch (error) {
+      logger.warn('Failed to clear drafts', { error: String(error) })
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
     }
   })
 

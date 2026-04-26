@@ -463,6 +463,25 @@ Feature: Full workflow end-to-end scenario
     When I press Ctrl+Alt+Right
     Then the workbench layout should be "DELETEDeletes a pet*|GETSearchableRenamed*|POSTAdd a new pet to the store*"
 
+    # Save-all + close-file must NOT pop the "Save changes before
+    # closing?" modal, AND the project's drafts directory must be
+    # empty afterwards. Orphan drafts otherwise trigger a bogus
+    # "drafts restored" toast on next launch.
+    When I rename the sidebar request "Add a new pet to the store" to "DraftCleanProbe"
+    And I save all with Ctrl+Shift+S
+
+    # Close-file with "Don't save" must wipe the drafts too. The
+    # save-on-quit modal otherwise leaves a per-unit draft behind
+    # that the next launch reads as a recovery candidate, even
+    # though the user explicitly chose to discard. Edit-then-revert
+    # detection is unit-tested at the registry layer (sameSerialized
+    # fallback) — covering it end-to-end requires fragile coordination
+    # with the reactive proxy's intermediate keystroke events during
+    # rename, so we don't try here.
+    When I rename the sidebar request "DraftCleanProbe" to "DraftCleanProbeY"
+    And I close the current file and discard changes
+    Then the project's drafts directory should be empty
+
     When I close the app
     Then the saved main window bounds should be x=120 y=80 width=1200 height=800
     And no errors should have been logged

@@ -1,8 +1,8 @@
 import { createBdd } from 'playwright-bdd'
-import { existsSync, readFileSync } from 'fs'
-import { join, resolve } from 'path'
+import { existsSync, readFileSync, readdirSync } from 'fs'
+import { dirname, join, resolve } from 'path'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
-import { configureNextOpenDialogForE2E, configureNextSaveFileDialogForE2E } from 'electron-core-ui/testing'
+import { configureNextConfirmationDialogForE2E, configureNextOpenDialogForE2E, configureNextSaveFileDialogForE2E } from 'electron-core-ui/testing'
 import { test, expect, readSavedMainBounds, FULL_WORKFLOW_TEMP_DIR, currentElectronApp } from '../../fixtures/full-workflow.fixture'
 
 /** Absolute path to the repo's shared e2e sample directory (tests/unit). */
@@ -161,6 +161,39 @@ Then(
     expect(existsSync(join(FULL_WORKFLOW_TEMP_DIR, fileName))).toBe(true)
   }
 )
+
+/**
+ * Close the current project after preconfiguring the unsaved-
+ * changes confirmation dialog to return "Don't Save". Triggers the
+ * close path through the same test helper as `I close the current
+ * file`, but pre-arms the system-modal mock so a dirty document
+ * doesn't crash on an unconfigured `dialog.showMessageBox` call.
+ */
+When('I close the current file and discard changes', async () => {
+  if (!page) throw new Error('app must be launched before closing a file')
+  const electronApp = currentElectronApp()
+  if (!electronApp) throw new Error('no electron app is running')
+  await page.keyboard.press('Escape')
+  await page.keyboard.press('Escape')
+  await page.waitForTimeout(200)
+  await configureNextConfirmationDialogForE2E(electronApp, {
+    buttonKeys: ['file.unsavedChanges.save', 'file.unsavedChanges.dontSave', 'file.unsavedChanges.cancel'],
+    choiceKey: 'file.unsavedChanges.dontSave'
+  })
+  // Use the menubar's "Close" action so the close goes through
+  // `handleMenuClose` → `checkUnsavedChanges` → confirmation dialog
+  // (mocked above to "Don't save"). The bypass helper `closeFile`
+  // would skip the prompt entirely and not exercise the discard
+  // branch's draft-cleanup invariant.
+  await page.evaluate(async () => {
+    const helpers = (window as unknown as {
+      __restormTestHelpers?: { menuClose?: () => Promise<void> | void }
+    }).__restormTestHelpers
+    if (!helpers?.menuClose) throw new Error('__restormTestHelpers.menuClose not exposed')
+    await helpers.menuClose()
+  })
+  await expect(page.locator('.welcome-container')).toBeVisible({ timeout: 10000 })
+})
 
 When('I close the current file', async () => {
   if (!page) throw new Error('app must be launched before closing a file')
@@ -2077,4 +2110,30 @@ When('I close the global search bar', async () => {
   await expect(page.locator('[data-testid="main-titlebar-searchbar-closed"]')).toBeVisible({
     timeout: 5000
   })
+})
+
+/** After a save-all + close-file, no project under
+ * `userData/drafts/` should still hold a `.draft.*` file. The
+ * directory itself may exist (the `.last-opened` marker stays so
+ * the age-based sweep keeps the project alive), but every unit
+ * must have been cleared. Orphans otherwise trigger a bogus
+ * "drafts restored" toast on next launch. */
+Then('the project\'s drafts directory should be empty', () => {
+  if (!configPath) throw new Error('configPath was not captured; launchApp must run first')
+  const userDataDir = dirname(configPath)
+  const draftsRoot = join(userDataDir, 'drafts')
+  if (!existsSync(draftsRoot)) return
+  const projectDirs = readdirSync(draftsRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+  const stragglers: string[] = []
+  for (const projectDir of projectDirs) {
+    const projectPath = join(draftsRoot, projectDir.name)
+    const files = readdirSync(projectPath)
+    for (const file of files) {
+      if (file.includes('.draft.')) {
+        stragglers.push(`${projectDir.name}/${file}`)
+      }
+    }
+  }
+  expect(stragglers, `unexpected orphan drafts under ${draftsRoot}: ${stragglers.join(', ')}`).toEqual([])
 })

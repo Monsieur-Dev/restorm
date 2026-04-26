@@ -133,6 +133,121 @@ describe('DraftStore.deleteDraft', () => {
   })
 })
 
+describe('DraftStore.clearAllDrafts', () => {
+  let ctx: ReturnType<typeof makeStore>
+  beforeEach(() => { ctx = makeStore() })
+  afterEach(() => { ctx.cleanup() })
+
+  it('removes every `.draft.<ext>` file in the project directory', async () => {
+    await ctx.store.writeDraft('r1', { v: 1 })
+    await ctx.store.writeDraft('r2', { v: 2 })
+    await ctx.store.writeDraft('r3', { v: 3 })
+    expect(existsSync(ctx.store.getDraftPath('r1'))).toBe(true)
+    expect(existsSync(ctx.store.getDraftPath('r2'))).toBe(true)
+    expect(existsSync(ctx.store.getDraftPath('r3'))).toBe(true)
+
+    await ctx.store.clearAllDrafts()
+
+    expect(existsSync(ctx.store.getDraftPath('r1'))).toBe(false)
+    expect(existsSync(ctx.store.getDraftPath('r2'))).toBe(false)
+    expect(existsSync(ctx.store.getDraftPath('r3'))).toBe(false)
+    const drafts = await ctx.store.loadAllDrafts()
+    expect(drafts).toEqual([])
+  })
+
+  it('preserves the `.last-opened` marker so the age-based sweep keeps the project alive', async () => {
+    await ctx.store.markOpened()
+    await ctx.store.writeDraft('r1', { v: 1 })
+    const markerBefore = join(ctx.projectDir, '.last-opened')
+    expect(existsSync(markerBefore)).toBe(true)
+
+    await ctx.store.clearAllDrafts()
+
+    expect(existsSync(markerBefore)).toBe(true)
+  })
+
+  it('cancels every pending debounced write so a flush cannot recreate a cleared file', async () => {
+    ctx.cleanup()
+    ctx = makeStore({ debounceMs: 200 })
+    const p1 = ctx.store.writeDraft('r1', { v: 1 })
+    const p2 = ctx.store.writeDraft('r2', { v: 2 })
+
+    await ctx.store.clearAllDrafts()
+    await Promise.all([p1, p2])
+    // Wait past the debounce window — if the cancel didn't take, a
+    // pending timer would re-create the file here.
+    await new Promise((r) => setTimeout(r, 250))
+
+    expect(existsSync(ctx.store.getDraftPath('r1'))).toBe(false)
+    expect(existsSync(ctx.store.getDraftPath('r2'))).toBe(false)
+  })
+
+  it('removes orphan drafts whose runtime id no longer corresponds to any tracked unit', async () => {
+    // Stale-orphan scenario: a previous session left a draft on
+    // disk for a unit that has since been deleted from the
+    // in-memory tree. The current session has no record of it, so
+    // per-unit `deleteDraft` would never fire — but
+    // `clearAllDrafts` reaps it.
+    await ctx.store.writeDraft('orphan', { stale: true })
+    expect(existsSync(ctx.store.getDraftPath('orphan'))).toBe(true)
+
+    await ctx.store.clearAllDrafts()
+
+    expect(existsSync(ctx.store.getDraftPath('orphan'))).toBe(false)
+  })
+
+  it('is a no-op when the project directory does not exist', async () => {
+    await expect(ctx.store.clearAllDrafts()).resolves.toBeUndefined()
+  })
+
+  it('drains in-flight flushes mid-write so a parallel flush cannot recreate a cleared file', async () => {
+    // Repro of the in-flight flush race: many writes with a tiny
+    // debounce → some `setTimeout` callbacks have already fired and
+    // their `runFlush` bodies are parked on async I/O when the host
+    // calls `clearAllDrafts`. The bulk-clear must (a) toggle
+    // `discardingDrafts` so flushes that haven't reached
+    // `atomicWrite` bail, and (b) await every in-flight promise
+    // before walking the directory so a flush that's mid-write
+    // settles before the unlink pass. End-state must be: zero
+    // `.draft.*` files on disk, regardless of timing.
+    ctx.cleanup()
+    const rootDir = mkdtempSync(join(tmpdir(), 'draftstore-race-'))
+    const store = new DraftStore({
+      rootDir,
+      uuid: 'project-uuid-race',
+      extension: 'json',
+      serialize: noopSerialize,
+      deserialize: noopDeserialize,
+      debounceMs: 1
+    })
+
+    // Schedule 50 writes with a 1ms debounce, immediately race
+    // `clearAllDrafts` against them. Without the in-flight drain,
+    // flushes that fire AFTER `readdir` would land orphan files.
+    const writes = Array.from({ length: 50 }, (_, i) => store.writeDraft(`r${String(i)}`, { v: i }))
+    await store.clearAllDrafts()
+    await Promise.all(writes)
+
+    const projectDir = join(rootDir, 'project-uuid-race')
+    if (existsSync(projectDir)) {
+      const left = (await fs.readdir(projectDir)).filter((name) => name.endsWith('.draft.json'))
+      expect(left).toEqual([])
+    }
+    rmSync(rootDir, { recursive: true, force: true })
+  })
+
+  it('also unlinks `*.tmp` sidecars from interrupted atomic writes', async () => {
+    await fs.mkdir(ctx.projectDir, { recursive: true })
+    const tmpPath = join(ctx.projectDir, 'r1.draft.json.abc-tmp.tmp')
+    await fs.writeFile(tmpPath, 'partial', 'utf-8')
+    expect(existsSync(tmpPath)).toBe(true)
+
+    await ctx.store.clearAllDrafts()
+
+    expect(existsSync(tmpPath)).toBe(false)
+  })
+})
+
 describe('DraftStore.loadAllDrafts', () => {
   let ctx: ReturnType<typeof makeStore>
   beforeEach(() => { ctx = makeStore() })

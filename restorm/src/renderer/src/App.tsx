@@ -998,6 +998,12 @@ const App: React.FC = () => {
   useEffect(() => {
     closeFileDirectRef.current = closeFileDirect
   }, [closeFileDirect])
+  const handleMenuCloseRef = useRef<() => Promise<void>>(async () => {
+    // Stub until useFileManagement populates the real handler below.
+  })
+  useEffect(() => {
+    handleMenuCloseRef.current = handleMenuClose
+  }, [handleMenuClose])
   
   useEffect(() => {
     // Test helpers used to be gated behind Vite's DEV flag, but that
@@ -1014,6 +1020,7 @@ const App: React.FC = () => {
         findItemIndexPath: (nameChain: string[]) => number[] | null
         setEnvFolderTagColor: (folderName: string, tag: string, color: string | null) => boolean
         closeFile: () => Promise<void>
+        menuClose: () => Promise<void>
       }
     }).__restormTestHelpers = {
       loadFile: (fileState: { currentFile: { content: unknown } }) => {
@@ -1049,6 +1056,14 @@ const App: React.FC = () => {
         // so bypassing the prompt is safe.
         navigationService.clearHistory()
         await closeFileDirectRef.current()
+      },
+      menuClose: async (): Promise<void> => {
+        // Trigger the same code path as File → Close in the menu bar
+        // (`handleMenuClose` → `checkUnsavedChanges`), so the E2E can
+        // exercise discard-branch invariants the bypass `closeFile`
+        // helper above intentionally skips.
+        navigationService.clearHistory()
+        await handleMenuCloseRef.current()
       },
       setEnvFolderTagColor: (folderName: string, tag: string, color: string | null): boolean => {
         // Locate the first env folder whose name matches, then delegate to

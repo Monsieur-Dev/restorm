@@ -124,7 +124,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     state: _fileState,
     fileName,
     filePath,
-    isDirty: _isDirty,
+    isDirty,
     open: openFile,
     save: saveFile,
     close: closeFile,
@@ -140,6 +140,19 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   // Track loading state
   const lastLoadedPathRef = useRef<string | null>(null)
   const isLoadingRef = useRef(false)
+
+  /**
+   * Renderer-owned snapshot of the in-memory tree at the last
+   * successful save / file-open. Used by the edit-then-revert
+   * self-heal to detect "the tree is back to its saved baseline"
+   * without going through the main-process `hasContentChanged`
+   * (which mixes shapes — `FileService.save` stamps the stored
+   * checksum with `preserveUuidMetadata`'s output, but the renderer
+   * compares against a plain `{collections}` shape, so the
+   * round-trip never matches). Comparing here, with the same shape
+   * on both sides, gives the clean revert signal we need.
+   */
+  const savedBaselineRef = useRef<string | null>(null)
 
   /**
    * Compose the on-disk folder name for a root collection the exact
@@ -260,7 +273,24 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
           currentFolderPath
         )
         if (!result?.success) return false
+      } else {
+        // No whole-file delta, but orphan `.draft.*` files may
+        // still live under `userData/drafts/<uuid>/` from earlier
+        // sessions or from runtime ids no longer in the tree. The
+        // save-IPC paths bulk-clear drafts on success; mirror that
+        // here so the post-save invariant "zero drafts on disk"
+        // holds even when nothing on disk needed rewriting.
+        await window.restorm?.file.clearDrafts()
       }
+      // Re-baseline `hasContentChanged` to the just-saved tree
+      // using the renderer's serialization shape. FileService.save
+      // would otherwise stamp the checksum with `preserveUuidMetadata`'s
+      // output (which appends projectUuid) — diverging from the
+      // shape the renderer uses for every subsequent comparison and
+      // making `hasContentChanged` permanently report `true`. That
+      // breaks the edit-then-revert self-heal in `useEffect`s below.
+      void setContentChecksum(currentChecksum)
+      savedBaselineRef.current = currentChecksum
       markAllTabsSaved()
       // Re-hydrate the registry from the just-saved tree — every
       // unit's `reference` picks up the new value, every draft is
@@ -280,7 +310,13 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       if (filePath) {
         await window.restorm?.secrets.write(`${filePath}.env`, envContent)
       }
+    } else {
+      // Same rationale as the folder branch above — bulk-clear
+      // orphan drafts even when there's no whole-file delta.
+      await window.restorm?.file.clearDrafts()
     }
+    void setContentChecksum(currentChecksum)
+    savedBaselineRef.current = currentChecksum
     markAllTabsSaved()
     await hydrateSaveUnitsFromTree(rootItems)
     return true
@@ -492,6 +528,11 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
         await window.restorm?.secrets.write(`${filePath}.env`, envContent)
       }
+      // Re-baseline `hasContentChanged` to the renderer's shape so
+      // post-save comparisons match (see `handleMenuSave` for the
+      // full rationale).
+      void setContentChecksum(currentChecksum)
+      savedBaselineRef.current = currentChecksum
       // Hydrate only the subtree we just "committed". Other dirty units
       // keep their drafts so their tabs keep showing dirty dots even
       // though the on-disk file has their content too.
@@ -639,6 +680,12 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       }
       return saved
     }
+    // Discard branch: the user explicitly chose to throw away their
+    // changes. Wipe the project's drafts directory before letting the
+    // close proceed — otherwise per-unit drafts that the registry
+    // failed to delete (sameShape misses, races, …) survive on disk
+    // and the next launch reads them as a recovery candidate.
+    await window.restorm?.file.clearDrafts()
     return true
   }, [showUnsavedChangesDialog, rootItems, saveFile, t, fileName, filePath])
 
@@ -787,7 +834,9 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         // dirty state lives in the save-unit registry now, so we no longer
         // feed a parallel checksum map.
         const dataForChecksum = prepareForSerialization({ collections: reactiveItems })
-        void setContentChecksum(JSON.stringify(dataForChecksum))
+        const baselineChecksum = JSON.stringify(dataForChecksum)
+        void setContentChecksum(baselineChecksum)
+        savedBaselineRef.current = baselineChecksum
 
         await searchIndexService.clearIndex()
         await window.restorm?.context.clearAll()
@@ -855,6 +904,34 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     void window.restorm?.context.clearAll()
     clearTabDirtyState()
   }, [clearTabDirtyState, setWorkbenchTree, setRootItems])
+
+  // Self-heal stuck dirty state on whole-file revert. When the user
+  // edits then undoes a change, the per-unit `mutate()` should detect
+  // the revert via its `sameShape` deep-equal check and drop the draft
+  // — but a serialization asymmetry between the hydrate path
+  // (`decomposeForPersistence`) and the upsert path
+  // (`cleanseForPersistence` + `classForDocument`) can make the two
+  // shapes disagree on edge cases (key ordering across nested
+  // structures, numeric encodings, … any divergence the deep-equal
+  // can't paper over). The whole-file checksum is the ground truth:
+  // if the in-memory tree matches the saved baseline, by definition
+  // no unit can legitimately be dirty. Bulk-clear when registry says
+  // dirty but the baseline matches.
+  useEffect(() => {
+    if (!isDirty) return
+    if (rootItems.length === 0) return
+    const baseline = savedBaselineRef.current
+    if (baseline === null) return
+    const timer = setTimeout(() => {
+      void (async () => {
+        const dataForChecksum = prepareForSerialization({ collections: rootItems })
+        const currentChecksum = JSON.stringify(dataForChecksum)
+        if (currentChecksum !== baseline) return
+        await window.restorm?.file.clearDrafts()
+      })()
+    }, 200)
+    return () => { clearTimeout(timer) }
+  }, [rootItems, isDirty])
 
   // Save-and-close handler
   useEffect(() => {

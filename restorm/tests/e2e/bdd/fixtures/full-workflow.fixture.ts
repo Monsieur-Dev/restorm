@@ -159,6 +159,15 @@ export const test = base.extend<FullWorkflowFixtures>({
       // Give the OS a beat to release locks before we overwrite the config.
       await new Promise((r) => setTimeout(r, 300))
 
+      // `--clear-settings` only resets `config.json`; the drafts
+      // directory accumulates orphans across runs. Wipe it here so
+      // the "drafts directory should be empty" assertion can
+      // compare against an empty baseline — otherwise stragglers
+      // from previous sessions look like legitimate orphans even
+      // after the fix lands.
+      const draftsRoot = join(userDataPath, 'drafts')
+      rmSync(draftsRoot, { recursive: true, force: true })
+
       if (options?.seed) {
         mkdirSync(userDataPath, { recursive: true })
         writeFileSync(state.configPath, JSON.stringify(options.seed, null, 2), 'utf-8')
