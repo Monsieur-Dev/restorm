@@ -375,6 +375,46 @@ describe('Integration Tests with Docker Services', () => {
       const getById = requests.find((r) => r.url.includes('{{petId}}'))
       expect(getById).toBeDefined()
     }, TEST_TIMEOUT)
+
+    it('executes a request from the imported 3.0 collection against the live 3.0 mock (api_key auth)', async () => {
+      if (!dockerAvailable || !containersStarted) return
+      // Fetch the spec live, import with the live server's runtime base
+      // (`http://localhost:8081/v3`), then exercise an endpoint that only
+      // requires `api_key` auth — `/store/inventory`. That proves the
+      // 3.0 importer's output runs end-to-end against the openapi-petstore
+      // service. (`/pet/*` paths require `petstore_auth` OAuth which the
+      // image enforces strictly; `/store/inventory` accepts the documented
+      // `api_key: special-key` header on its own.)
+      const response = await fetch(SERVICES.petstoreOpenApi3.openapiUrl)
+      const json = await response.text()
+      const folder = importOpenAPIFromJson(json, {
+        baseUrl: `${SERVICES.petstoreOpenApi3.baseUrl}/v3`
+      })
+
+      const requests = findAllRequests(folder, isHTTPRequest)
+      const inventory = requests.find((r) => r.url.endsWith('/store/inventory'))
+      expect(inventory, 'expected an imported request for /store/inventory').toBeDefined()
+      if (!inventory) return
+
+      const variableContext = createVariableContext(folder)
+      const input: HTTPRequestInput = {
+        request: inventory,
+        method: 'GET',
+        url: `${SERVICES.petstoreOpenApi3.baseUrl}/v3/store/inventory`,
+        headers: [
+          { key: 'Accept', value: 'application/json' },
+          { key: 'api_key', value: 'special-key' }
+        ],
+        params: [],
+        pathParams: [],
+        bodyMode: 'text',
+        variableContext
+      }
+
+      const result = await executeHTTPRequest(input)
+      expect(result.statusCode).toBe(200)
+      expect(result.responseBody).toBeDefined()
+    }, TEST_TIMEOUT)
   })
 
   describe('HTTP/REST - Petstore via OpenAPI 3.1 spec', () => {
