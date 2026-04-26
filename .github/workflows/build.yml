@@ -119,6 +119,15 @@ jobs:
         image: swaggerapi/petstore
         ports:
           - 8080:8080
+      petstore-openapi3:
+        # Real OpenAPI 3.0 server. Used by the OpenAPI 3.x importer
+        # integration tests to validate URL-based spec fetch +
+        # content-sniff routing. Runtime endpoints under `/v3/*`
+        # require auth and are not exercised in CI; runtime execution
+        # stays on the swaggerapi/petstore mock above.
+        image: openapitools/openapi-petstore
+        ports:
+          - 8081:8080
       graphql:
         image: node:20-alpine
         ports:

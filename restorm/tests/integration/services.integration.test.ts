@@ -19,6 +19,7 @@ import {
 
 // Import services
 import { importSwaggerFromJson } from '../../src/main/services/import/SwaggerImportService'
+import { importOpenAPIFromJson } from '../../src/main/services/import/OpenAPIImportService'
 import { importGraphQLFromString } from '../../src/main/services/import/GraphQLImportService'
 import { importGrpcFromString } from '../../src/main/services/import/GrpcImportService'
 import { importSoapFromString } from '../../src/main/services/import/SoapImportService'
@@ -46,6 +47,11 @@ const TEST_TIMEOUT = 30000
 // Helper to load test files
 const loadTestFile = (filename: string): string => {
   return readFileSync(join(__dirname, '../unit', filename), 'utf-8')
+}
+
+// Helper to load OpenAPI fixtures (under tests/unit/fixtures/openapi)
+const loadOpenAPIFixture = (filename: string): string => {
+  return readFileSync(join(__dirname, '../unit/fixtures/openapi', filename), 'utf-8')
 }
 
 // Type guards
@@ -287,6 +293,110 @@ describe('Integration Tests with Docker Services', () => {
       // Pet may or may not exist
       expect([200, 404]).toContain(response.statusCode)
     }, TEST_TIMEOUT)
+  })
+
+  // =============================================================================
+  // HTTP/REST Tests (OpenAPI 3.0 / 3.1) — same Docker mock, different spec version
+  // =============================================================================
+
+  describe('HTTP/REST - Petstore via OpenAPI 3.0 spec', () => {
+    let importedCollection: EnvironmentFolder
+    let httpRequests: HTTPRequest[]
+    let variableContext: VariableContext
+
+    beforeAll(() => {
+      if (!dockerAvailable || !containersStarted) return
+      // The runtime API of the swaggerapi/petstore mock is shared between
+      // the 2.0 and 3.x spec versions. Override the spec's `servers[0]`
+      // (which points at petstore3.swagger.io) with the local Docker mock
+      // so the imported requests target the running service.
+      const json = loadOpenAPIFixture('petstore-3.0.json')
+      importedCollection = importOpenAPIFromJson(json, {
+        baseUrl: SERVICES.petstore.baseUrl
+      })
+      httpRequests = findAllRequests(importedCollection, isHTTPRequest)
+      variableContext = createVariableContext(importedCollection)
+    })
+
+    it('imports the 3.0 spec into a tagged folder structure', () => {
+      if (!dockerAvailable || !containersStarted) return
+      expect(importedCollection.name).toBe('Petstore')
+      expect(importedCollection.apiDocumentation?.sourceType).toBe('openapi')
+      expect(httpRequests.length).toBeGreaterThan(0)
+    })
+
+    it('executes a GET findPetsByStatus against the Docker mock', async () => {
+      if (!dockerAvailable || !containersStarted) return
+      const input: HTTPRequestInput = {
+        request: {
+          id: 'oas3-find-by-status',
+          type: 'http',
+          name: 'Finds Pets by status',
+          method: 'GET',
+          url: `${SERVICES.petstore.baseUrl}/api/pet/findByStatus`,
+          headers: [{ key: 'Accept', value: 'application/json' }],
+          params: [{ key: 'status', value: 'available' }],
+          pathParams: []
+        },
+        method: 'GET',
+        url: `${SERVICES.petstore.baseUrl}/api/pet/findByStatus`,
+        headers: [{ key: 'Accept', value: 'application/json' }],
+        params: [{ key: 'status', value: 'available' }],
+        pathParams: [],
+        bodyMode: 'text',
+        variableContext
+      }
+      const response = await executeHTTPRequest(input)
+      expect(response.statusCode).toBe(200)
+      expect(response.responseBody).toBeDefined()
+    }, TEST_TIMEOUT)
+  })
+
+  describe('HTTP/REST - Live OpenAPI 3.0 spec via URL', () => {
+    it('fetches /openapi.json from the OpenAPI 3.0 Petstore mock and routes to the OpenAPI importer', async () => {
+      if (!dockerAvailable || !containersStarted) return
+      const response = await fetch(SERVICES.petstoreOpenApi3.openapiUrl)
+      expect(response.status).toBe(200)
+      const json = await response.text()
+      // Sanity-check the served spec advertises an OAS 3.x version so a
+      // future image bump that flips it to 2.0 fails this test loudly.
+      expect(json).toMatch(/"openapi"\s*:\s*"3\.\d/)
+
+      const folder = importOpenAPIFromJson(json, {
+        baseUrl: SERVICES.petstore.baseUrl,
+        sourceUrl: SERVICES.petstoreOpenApi3.openapiUrl
+      })
+      expect(folder.apiDocumentation?.sourceType).toBe('openapi')
+      expect(folder.apiDocumentation?.sourceUrl).toBe(SERVICES.petstoreOpenApi3.openapiUrl)
+      const requests = findAllRequests(folder, isHTTPRequest)
+      expect(requests.length).toBeGreaterThan(0)
+      // Path templates rewritten as Handlebars — sanity-check on a known
+      // endpoint (`/pet/{petId}`).
+      const getById = requests.find((r) => r.url.includes('{{petId}}'))
+      expect(getById).toBeDefined()
+    }, TEST_TIMEOUT)
+  })
+
+  describe('HTTP/REST - Petstore via OpenAPI 3.1 spec', () => {
+    let importedCollection: EnvironmentFolder
+
+    beforeAll(() => {
+      if (!dockerAvailable || !containersStarted) return
+      const json = loadOpenAPIFixture('petstore-3.1.json')
+      importedCollection = importOpenAPIFromJson(json, {
+        baseUrl: SERVICES.petstore.baseUrl
+      })
+    })
+
+    it('routes a 3.1 spec through the openapi service and produces a Webhooks folder', () => {
+      if (!dockerAvailable || !containersStarted) return
+      expect(importedCollection.apiDocumentation?.sourceType).toBe('openapi')
+      const webhooksFolder = importedCollection.items.find(
+        (it) => 'items' in it && (it as Folder).name === 'Webhooks'
+      ) as Folder | undefined
+      expect(webhooksFolder).toBeDefined()
+      expect(webhooksFolder?.tags).toContain('webhook')
+    })
   })
 
   // =============================================================================

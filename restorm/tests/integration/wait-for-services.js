@@ -9,6 +9,7 @@ const http = require('http')
 
 const SERVICES = [
   { name: 'Petstore', url: 'http://localhost:8080/api/pet/findByStatus?status=available' },
+  { name: 'Petstore OpenAPI 3.0', url: 'http://localhost:8081/openapi.json' },
   { name: 'GraphQL', url: 'http://localhost:4000', method: 'POST', body: '{"query":"{ __typename }"}', headers: { 'Content-Type': 'application/json' } },
   { name: 'SOAP', url: 'http://localhost:8090/castlemock/web' },
   { name: 'Socket.IO', url: 'http://localhost:3001' },
