@@ -38,7 +38,6 @@ import { HTTPRequestBodySection } from './HTTPRequestBodySection'
 import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabViewUtils'
 import { useCompiledDocumentation } from '../../hooks/useCompiledDocumentation'
 
-const authPaneContentStyle: CSSProperties = { height: '100%', boxSizing: 'border-box', padding: 8 }
 const methodSelectWrapperStyle: CSSProperties = { width: 90, flexShrink: 0 }
 const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
 
@@ -599,17 +598,6 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   // Request content (SplitView with Panes)
   const requestContent = (
     <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }} data-testid="http-request-split-view">
-      <Pane
-        title={t('requestTab.tabs.authorization').toUpperCase()}
-        initialSize={0.15}
-        collapsed
-        minSize={120}
-        data-testid="http-request-authorization-pane"
-      >
-        <div style={authPaneContentStyle}>
-          {/* Authorization configuration UI will be added here */}
-        </div>
-      </Pane>
       <Pane
         title={t('requestTab.tabs.headers')}
         initialSize={0.2}
