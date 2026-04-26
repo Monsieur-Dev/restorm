@@ -12,7 +12,10 @@ const SelectBox: React.FC<SelectBoxProps> = ({
   styles = defaultSelectBoxStyles,
   className,
   id,
-  'data-testid': dataTestId
+  'data-testid': dataTestId,
+  filterThreshold,
+  filterPlaceholder,
+  filterTestId
 }) => {
   const testId = dataTestId ?? 'selectbox'
   // Use native select on macOS unless explicitly overridden
@@ -44,6 +47,9 @@ const SelectBox: React.FC<SelectBoxProps> = ({
       className={className}
       id={id}
       data-testid={testId}
+      {...(filterThreshold !== undefined && { filterThreshold })}
+      {...(filterPlaceholder !== undefined && { filterPlaceholder })}
+      {...(filterTestId !== undefined && { filterTestId })}
     />
   )
 }

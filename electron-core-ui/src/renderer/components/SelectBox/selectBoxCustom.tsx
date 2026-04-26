@@ -1,7 +1,9 @@
-import React, { useState, useRef, useEffect, useCallback, useLayoutEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback, useLayoutEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { isMacintosh } from '../../hooks/usePlatform'
-import { SelectBoxListProps } from './types'
+import { useFilterableDropdown } from '../../hooks/useFilterableDropdown'
+import { DropdownFilterRow } from '../DropdownFilterRow'
+import { SelectBoxListProps, ISelectOptionItem } from './types'
 import { ScrollableElement } from '../ScrollableElement'
 import './selectBox.css'
 import './selectBoxCustom.css'
@@ -22,9 +24,33 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   styles,
   className,
   id,
-  'data-testid': dataTestId
+  'data-testid': dataTestId,
+  filterThreshold,
+  filterPlaceholder,
+  filterTestId
 }) => {
   const testId = dataTestId ?? id
+
+  // Map an option to its searchable display text. The custom `label`
+  // ReactNode is collapsed to '' (rare) — `text` is always the
+  // canonical fallback for both native serialisation and search.
+  const getOptionLabel = useMemo(() => (option: ISelectOptionItem): string => {
+    if (typeof option.label === 'string') return option.label
+    if (typeof option.label === 'number' || typeof option.label === 'boolean') return String(option.label)
+    return option.text
+  }, [])
+
+  const filterArgs = filterThreshold === undefined
+    ? { items: options, getLabel: getOptionLabel }
+    : { items: options, threshold: filterThreshold, getLabel: getOptionLabel }
+  const {
+    shouldRenderFilter,
+    filterValue,
+    setFilterValue,
+    clearFilter,
+    filteredItems,
+    handleFilterKeyDown
+  } = useFilterableDropdown<ISelectOptionItem>(filterArgs)
   const [isVisible, setIsVisible] = useState(false)
   // Track internal selection override with the 'selected' value it was set for
   const [internalState, setInternalState] = useState<{
@@ -75,6 +101,41 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
     setIsVisible(true)
     setInternalFocus(currentSelection)
   }, [isVisible, currentSelection, setInternalFocus])
+
+  // Reset the filter every time the popup closes — the user opens
+  // a fresh dropdown, not a session-leftover view.
+  useEffect(() => {
+    if (!isVisible) clearFilter()
+  }, [isVisible, clearFilter])
+
+  // Map an original-array index to its position inside `filteredItems`.
+  // Returns -1 when the option is currently filtered out.
+  const filteredIndexFor = useCallback((origIndex: number): number => {
+    const target = options[origIndex]
+    if (!target) return -1
+    return filteredItems.indexOf(target)
+  }, [filteredItems, options])
+
+  // Map a filtered-array index back to the original-options index.
+  const originalIndexFor = useCallback((filteredIdx: number): number => {
+    const item = filteredItems[filteredIdx]
+    if (!item) return -1
+    return options.indexOf(item)
+  }, [filteredItems, options])
+
+  // When the visible slice shrinks past the focused row, snap focus
+  // back to the first visible row so arrow keys / Enter don't act
+  // on a hidden option.
+  useEffect(() => {
+    if (!isVisible) return
+    const visibleIdx = filteredIndexFor(focusedIndex)
+    if (visibleIdx >= 0) return
+    const firstFocusable = filteredItems.findIndex((opt) => !opt.isDisabled)
+    if (firstFocusable >= 0) {
+      const orig = originalIndexFor(firstFocusable)
+      if (orig >= 0) setInternalFocus(orig)
+    }
+  }, [filteredItems, isVisible, focusedIndex, filteredIndexFor, originalIndexFor, setInternalFocus])
 
   // Hide dropdown
   const hideDropdown = useCallback((focusSelect: boolean): void => {
@@ -143,61 +204,78 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   // Handle dropdown keyboard navigation
   const handleDropdownKeyDown = useCallback((event: React.KeyboardEvent): void => {
     if (!isVisible) return
+    const visibleIdx = filteredIndexFor(focusedIndex)
 
     switch (event.key) {
       case 'Enter':
-      case 'Tab':
+      case 'Tab': {
         event.preventDefault()
         if (focusedIndex >= 0 && options[focusedIndex] && !options[focusedIndex].isDisabled) {
           handleSelectChange(focusedIndex)
           hideDropdown(true)
         }
         break
+      }
 
       case 'Escape':
         event.preventDefault()
         hideDropdown(true)
         break
 
-      case 'ArrowDown':
+      case 'ArrowDown': {
         event.preventDefault()
-        if (focusedIndex < options.length - 1) {
-          let nextIndex = focusedIndex + 1
-          // Skip disabled options
-          while (nextIndex < options.length && options[nextIndex]?.isDisabled) {
-            nextIndex++
-          }
-          if (nextIndex < options.length) {
-            setInternalFocus(nextIndex)
-          }
+        if (filteredItems.length === 0) break
+        let nextVisible = visibleIdx < 0 ? 0 : visibleIdx + 1
+        while (nextVisible < filteredItems.length && filteredItems[nextVisible]?.isDisabled) {
+          nextVisible++
+        }
+        if (nextVisible < filteredItems.length) {
+          const orig = originalIndexFor(nextVisible)
+          if (orig >= 0) setInternalFocus(orig)
         }
         break
+      }
 
-      case 'ArrowUp':
+      case 'ArrowUp': {
         event.preventDefault()
-        if (focusedIndex > 0) {
-          let prevIndex = focusedIndex - 1
-          // Skip disabled options
-          while (prevIndex >= 0 && options[prevIndex]?.isDisabled) {
-            prevIndex--
-          }
-          if (prevIndex >= 0) {
-            setInternalFocus(prevIndex)
-          }
+        if (filteredItems.length === 0) break
+        let prevVisible = visibleIdx <= 0 ? -1 : visibleIdx - 1
+        while (prevVisible >= 0 && filteredItems[prevVisible]?.isDisabled) {
+          prevVisible--
+        }
+        if (prevVisible >= 0) {
+          const orig = originalIndexFor(prevVisible)
+          if (orig >= 0) setInternalFocus(orig)
         }
         break
+      }
 
-      case 'Home':
+      case 'Home': {
         event.preventDefault()
-        setInternalFocus(0)
+        if (filteredItems.length === 0) break
+        const orig = originalIndexFor(0)
+        if (orig >= 0) setInternalFocus(orig)
         break
+      }
 
-      case 'End':
+      case 'End': {
         event.preventDefault()
-        setInternalFocus(options.length - 1)
+        if (filteredItems.length === 0) break
+        const orig = originalIndexFor(filteredItems.length - 1)
+        if (orig >= 0) setInternalFocus(orig)
         break
+      }
     }
-  }, [isVisible, focusedIndex, options, handleSelectChange, hideDropdown, setInternalFocus])
+  }, [isVisible, focusedIndex, options, filteredItems, filteredIndexFor, originalIndexFor, handleSelectChange, hideDropdown, setInternalFocus])
+
+  // Filter input keyboard: Esc clear-then-close (delegated to hook),
+  // ArrowDown/ArrowUp/Home/End/Enter mirror the listbox handler so
+  // the user can navigate without leaving the input.
+  const handleFilterInputKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+    handleFilterKeyDown(event)
+    if (event.defaultPrevented) return
+    handleDropdownKeyDown(event as unknown as React.KeyboardEvent)
+  }, [handleFilterKeyDown, handleDropdownKeyDown])
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -332,6 +410,15 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
             minWidth: dropdownPos.width
           }}
         >
+            {shouldRenderFilter && (
+              <DropdownFilterRow
+                value={filterValue}
+                onChange={setFilterValue}
+                onKeyDown={handleFilterInputKeyDown}
+                {...(filterPlaceholder !== undefined && { placeholder: filterPlaceholder })}
+                {...(filterTestId !== undefined ? { 'data-testid': filterTestId } : { 'data-testid': `${testId}-filter` })}
+              />
+            )}
             <ScrollableElement
               options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false, handleMouseWheel: true, fitContent: true }}
               className="select-scrollable-wrapper"
@@ -347,7 +434,16 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
                 tabIndex={0}
                 data-testid={`${testId}-listbox`}
               >
-              {options.map((option, index) => {
+              {filteredItems.length === 0 ? (
+                <div
+                  className="select-option"
+                  data-testid={`${testId}-no-matches`}
+                  style={{ opacity: 0.7, fontStyle: 'italic', cursor: 'default' }}
+                >
+                  No matches
+                </div>
+              ) : filteredItems.map((option) => {
+                const index = options.indexOf(option)
                 const isSelected = index === currentSelection
                 const isFocused = index === focusedIndex
                 return (

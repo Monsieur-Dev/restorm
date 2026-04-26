@@ -38,6 +38,18 @@ export interface ListViewDropdownProps {
   onItemToggle?: (payload: ListViewItemEventPayload, expanded: boolean) => void
   /** Optional test id applied to the root element. Defaults to `listviewdropdown`. */
   'data-testid'?: string
+  /**
+   * Threshold (inclusive) at or above which the filter row appears. Default: 15.
+   * The count is taken over the *flattened* tree (all nested descendants),
+   * not just the top-level items.
+   */
+  filterThreshold?: number
+  /** Localised placeholder for the filter input. Default: `Filter…`. */
+  filterPlaceholder?: string
+  /** Localised label for the `Select all` button (multi-select only). */
+  selectAllLabel?: string
+  /** Localised label for the `Deselect all` button (multi-select only). */
+  deselectAllLabel?: string
 }
 ```
 
@@ -232,3 +244,31 @@ const ThemeDropdown: React.FC = () => {
 - Prefer stable `items` references (e.g. memoize the tree with `useMemo`) so that expansion and selection logic in `ListView` do not re-initialize unnecessarily on each render.
 - Use `rootRole="tree"` for hierarchical structures (projects, environments, folders) and `rootRole="list"` for flat menus; this helps AI agents and accessibility tooling infer the correct semantics.
 - When designing higher-level abstractions (e.g. an environment selector service), keep the mapping `domain model -> ListViewItemData[]` in a small pure function that is easy to reuse and test, instead of scattering `ListViewItemData` construction across components.
+
+## Filtering long lists
+
+When the popup contains at least `filterThreshold` items (default **15**, exposed as `DEFAULT_FILTER_THRESHOLD`), a sticky filter row appears at the top of the popup body:
+
+- **Filter input** — auto-focused on open, case-insensitive substring match on the item label. `Esc` clears a non-empty filter; a second `Esc` (with the filter empty) closes the popup.
+- **Select all / Deselect all** — only on multi-select dropdowns. They act on the *currently visible* slice, so combined with the filter the user can pick "filter + select all matching". The bulk-select callback synthesises `onItemClick` for every visible node, so the host's `onItemClick` handler must implement *toggle selection* (not "toggle expand") to keep semantics consistent across keyboard, mouse, and bulk paths.
+- **No matches** — when the filter eliminates every row, an italic placeholder is rendered in place of the list.
+- The threshold is checked against the **flattened tree** — a 3-level structure with 20 leaves crosses `filterThreshold = 15` even if there are only 4 top-level rows.
+
+Per-instance opt-out: pass a `filterThreshold` larger than the flattened item count (e.g. `Number.POSITIVE_INFINITY`).
+
+```tsx
+<ListViewDropdown
+  items={largeTree}
+  rootRole="tree"
+  menuAriaLabel="Pick endpoint"
+  selectionMode="multiple"
+  buttonContent={<span>Endpoints</span>}
+  filterThreshold={20}
+  filterPlaceholder="Filter endpoints…"
+  selectAllLabel="Select all visible"
+  deselectAllLabel="Clear visible"
+  onItemClick={(payload) => toggleSelected(payload.item.id)}
+/>
+```
+
+The shared logic lives in `useFilterableDropdown` (see `hooks/useFilterableDropdown.ts`) and the row UI in `components/DropdownFilterRow`.

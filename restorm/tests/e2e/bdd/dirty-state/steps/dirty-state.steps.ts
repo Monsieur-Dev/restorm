@@ -177,11 +177,19 @@ When('I reopen the welcome recent file {string}', async ({}, fileName: string) =
  * its set event on every value change, so we drive the keyboard directly
  * — no `fill()` shortcut, no `press('Tab')` blur — to land each
  * `Reflect.set` exactly as the user would.
+ *
+ * The URL input wraps a Monaco-backed CodeEditor (via VariableInputBox).
+ * Monaco wires its keystroke pipeline on `mousedown` over the rendered
+ * viewport, not on focus. Clicking the outer wrapper (or focusing the
+ * hidden textarea) drops every subsequent keystroke. Click the
+ * `.monaco-editor` viewport so Monaco actually arms input.
  */
 async function focusUrlAtEnd(p: Page): Promise<void> {
   const urlInput = p.locator('[data-testid="http-request-url-input"]:visible').first()
   await expect(urlInput).toBeVisible({ timeout: 5000 })
-  await urlInput.click()
+  const viewport = urlInput.locator('.monaco-editor').first()
+  await expect(viewport).toBeVisible({ timeout: 5000 })
+  await viewport.click({ force: true })
   await p.keyboard.press('End')
 }
 
@@ -211,6 +219,18 @@ When('I press backspace in the URL', async () => {
  * Open the Body sub-tab (request views default to Headers / Params /
  * Auth depending on what has content) and place the caret at the end
  * of the Monaco body editor. Same rationale as `focusUrlAtEnd`.
+ *
+ * The body lives in a SplitView Pane (HTTP requests) or as a sub-tab
+ * (other request types). For HTTP the pane is always rendered, so the
+ * `data-tab-id="body"` lookup short-circuits to the editor click.
+ *
+ * Clicking the wrapper `[data-testid="http-request-body-editor"]` is
+ * enough to *show* Monaco but not always enough to focus its inner
+ * `<textarea>` — Monaco delegates focus on mousedown, and on an empty
+ * editor there's no rendered glyph to land on, so the click can fall
+ * through to the wrapper. CodeEditor stamps the inner textarea with
+ * `${dataTestId}-textarea` once Monaco mounts; focus that directly so
+ * the subsequent `keyboard.press` lands on Monaco's input target.
  */
 async function focusBodyAtEnd(p: Page): Promise<void> {
   const bodySubTab = p.locator('[role="tab"][data-tab-id="body"]:visible').first()
@@ -223,7 +243,15 @@ async function focusBodyAtEnd(p: Page): Promise<void> {
   }
   const editor = p.locator('[data-testid="http-request-body-editor"]:visible').first()
   await expect(editor).toBeVisible({ timeout: 5000 })
-  await editor.click()
+  // Monaco delegates focus on `mousedown` over its rendered viewport,
+  // not on the hidden screen-reader textarea. A bare wrapper click
+  // (or `textarea.focus()`) lands the DOM focus but skips Monaco's
+  // input wiring, so subsequent keystrokes are dropped before
+  // reaching the model. Click the `.monaco-editor` viewport so
+  // Monaco arms input the same way a real user click would.
+  const viewport = editor.locator('.monaco-editor').first()
+  await expect(viewport).toBeVisible({ timeout: 10000 })
+  await viewport.click({ force: true })
   await p.keyboard.press('End')
 }
 

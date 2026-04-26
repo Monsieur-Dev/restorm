@@ -15,6 +15,9 @@ export type { ControlGroupProps, ControlGroupOrientation } from './ControlGroup'
 export { Callout } from './Callout'
 export type { CalloutProps, CalloutVariant } from './Callout'
 
+export { DropdownFilterRow } from './DropdownFilterRow'
+export type { DropdownFilterRowProps } from './DropdownFilterRow'
+
 // InputBox exports
 export { InputBox, MessageType } from './InputBox'
 export type {

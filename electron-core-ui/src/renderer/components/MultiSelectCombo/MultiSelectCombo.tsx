@@ -1,6 +1,8 @@
 import React, { useState, useRef, useCallback, useLayoutEffect, useEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { ScrollableElement } from '../ScrollableElement'
+import { useFilterableDropdown } from '../../hooks/useFilterableDropdown'
+import { DropdownFilterRow } from '../DropdownFilterRow'
 import './multiSelectCombo.css'
 
 /**
@@ -27,6 +29,20 @@ export interface MultiSelectComboProps {
   placeholder?: string
   /** Optional test id. Each option gets `${dataTestId}-option-${value}`. */
   'data-testid'?: string
+  /**
+   * Item count at or above which a sticky filter row appears at the
+   * top of the popup. Default: `15` (`DEFAULT_FILTER_THRESHOLD`).
+   * Pass a large value to opt out per-instance.
+   */
+  filterThreshold?: number
+  /** Localised placeholder for the filter input. */
+  filterPlaceholder?: string
+  /** Localised label for the Select-all action. */
+  selectAllLabel?: string
+  /** Localised label for the Deselect-all action. */
+  deselectAllLabel?: string
+  /** Optional test id forwarded to the filter row. */
+  filterTestId?: string
 }
 
 /**
@@ -62,7 +78,12 @@ const MultiSelectCombo: React.FC<MultiSelectComboProps> = ({
   selected,
   onChange,
   placeholder = 'Select...',
-  'data-testid': dataTestId
+  'data-testid': dataTestId,
+  filterThreshold,
+  filterPlaceholder,
+  selectAllLabel,
+  deselectAllLabel,
+  filterTestId
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [focusedIndex, setFocusedIndex] = useState(0)
@@ -72,6 +93,22 @@ const MultiSelectCombo: React.FC<MultiSelectComboProps> = ({
   const [pos, setPos] = useState({ top: 0, left: 0, width: 0 })
 
   const selectedSet = useMemo(() => new Set(selected), [selected])
+
+  const getOptionLabel = useMemo(() => (option: MultiSelectComboOption): string => {
+    return option.label ?? option.value
+  }, [])
+
+  const filterArgs = filterThreshold === undefined
+    ? { items: options, getLabel: getOptionLabel }
+    : { items: options, threshold: filterThreshold, getLabel: getOptionLabel }
+  const {
+    shouldRenderFilter,
+    filterValue,
+    setFilterValue,
+    clearFilter,
+    filteredItems,
+    handleFilterKeyDown
+  } = useFilterableDropdown<MultiSelectComboOption>(filterArgs)
 
   // Compute display label
   const displayLabel = selected.length === 0
@@ -109,6 +146,32 @@ const MultiSelectCombo: React.FC<MultiSelectComboProps> = ({
     onChange(next)
   }, [selected, selectedSet, onChange])
 
+  const selectAllVisible = useCallback((): void => {
+    if (filteredItems.length === 0) return
+    const next = new Set(selected)
+    for (const item of filteredItems) next.add(item.value)
+    onChange([...next])
+  }, [filteredItems, selected, onChange])
+
+  const deselectAllVisible = useCallback((): void => {
+    if (filteredItems.length === 0) return
+    const visible = new Set(filteredItems.map((opt) => opt.value))
+    onChange(selected.filter((v) => !visible.has(v)))
+  }, [filteredItems, selected, onChange])
+
+  // Reset filter every time the popup closes.
+  useEffect(() => {
+    if (!isOpen) clearFilter()
+  }, [isOpen, clearFilter])
+
+  // Keep the focused index inside the visible slice.
+  useEffect(() => {
+    if (!isOpen) return
+    if (focusedIndex >= filteredItems.length) {
+      setFocusedIndex(filteredItems.length === 0 ? 0 : filteredItems.length - 1)
+    }
+  }, [filteredItems.length, focusedIndex, isOpen])
+
   // Keyboard navigation
   const handleKeyDown = useCallback((e: React.KeyboardEvent): void => {
     if (!isOpen) {
@@ -123,7 +186,7 @@ const MultiSelectCombo: React.FC<MultiSelectComboProps> = ({
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault()
-        setFocusedIndex((prev) => Math.min(prev + 1, options.length - 1))
+        setFocusedIndex((prev) => Math.min(prev + 1, Math.max(filteredItems.length - 1, 0)))
         break
       case 'ArrowUp':
         e.preventDefault()
@@ -132,8 +195,8 @@ const MultiSelectCombo: React.FC<MultiSelectComboProps> = ({
       case 'Enter':
       case ' ':
         e.preventDefault()
-        if (options[focusedIndex]) {
-          toggle(options[focusedIndex].value)
+        if (filteredItems[focusedIndex]) {
+          toggle(filteredItems[focusedIndex].value)
         }
         break
       case 'Escape':
@@ -141,7 +204,13 @@ const MultiSelectCombo: React.FC<MultiSelectComboProps> = ({
         setIsOpen(false)
         break
     }
-  }, [isOpen, focusedIndex, options, toggle])
+  }, [isOpen, focusedIndex, filteredItems, toggle])
+
+  const handleFilterInputKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+    handleFilterKeyDown(e)
+    if (e.defaultPrevented) return
+    handleKeyDown(e as unknown as React.KeyboardEvent)
+  }, [handleFilterKeyDown, handleKeyDown])
 
   // Scroll focused option into view
   useEffect(() => {
@@ -184,11 +253,32 @@ const MultiSelectCombo: React.FC<MultiSelectComboProps> = ({
           aria-multiselectable="true"
           {...(dataTestId && { 'data-testid': `${dataTestId}-dropdown` })}
         >
+          {shouldRenderFilter && (
+            <DropdownFilterRow
+              value={filterValue}
+              onChange={setFilterValue}
+              onKeyDown={handleFilterInputKeyDown}
+              {...(filterPlaceholder !== undefined && { placeholder: filterPlaceholder })}
+              {...(selectAllLabel !== undefined && { selectAllLabel })}
+              {...(deselectAllLabel !== undefined && { deselectAllLabel })}
+              onSelectAllVisible={selectAllVisible}
+              onDeselectAllVisible={deselectAllVisible}
+              {...(filterTestId !== undefined ? { 'data-testid': filterTestId } : (dataTestId ? { 'data-testid': `${dataTestId}-filter` } : {}))}
+            />
+          )}
           <ScrollableElement
             options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false, handleMouseWheel: true, fitContent: true }}
             style={{ maxHeight: 240, width: '100%' }}
           >
-            {options.map((opt, i) => {
+            {filteredItems.length === 0 ? (
+              <div
+                className="ecu-multi-select-combo-option"
+                style={{ opacity: 0.7, fontStyle: 'italic', cursor: 'default' }}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-no-matches` })}
+              >
+                No matches
+              </div>
+            ) : filteredItems.map((opt, i) => {
               const checked = selectedSet.has(opt.value)
               return (
                 <div

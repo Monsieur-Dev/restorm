@@ -109,6 +109,16 @@ export interface SelectBoxProps {
   id: string
   /** Optional test id applied to the root element. */
   'data-testid'?: string
+  /**
+   * Item count at or above which a sticky filter row appears at the
+   * top of the popup. Default: `15` (`DEFAULT_FILTER_THRESHOLD`).
+   * Pass a large value to opt out per-instance.
+   */
+  filterThreshold?: number
+  /** Localised placeholder for the filter input. */
+  filterPlaceholder?: string
+  /** Optional test id forwarded to the filter row. */
+  filterTestId?: string
 }
 
 // React props interface for SelectBoxList component
@@ -121,6 +131,9 @@ export interface SelectBoxListProps {
   className: string
   id: string
   'data-testid'?: string
+  filterThreshold?: number
+  filterPlaceholder?: string
+  filterTestId?: string
 }
 
 // React props interface for SelectBoxNative component

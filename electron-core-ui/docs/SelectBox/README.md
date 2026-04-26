@@ -18,6 +18,12 @@ export interface SelectBoxProps {
   styles?: ISelectBoxStyles
   className?: string
   id?: string
+  /** Threshold (inclusive) at or above which the filter row appears. Default: 15. */
+  filterThreshold?: number
+  /** Localised placeholder for the filter input. Default: `Filter…`. */
+  filterPlaceholder?: string
+  /** Test id forwarded to the filter row (suffix `-input` for the field). */
+  filterTestId?: string
 }
 
 // Select option item interface
@@ -87,6 +93,9 @@ export interface ISelectData {
 - **styles** (`ISelectBoxStyles`) : Custom styling overrides
 - **className** (`string`) : Additional CSS classes
 - **id** (`string`) : HTML ID of the select element
+- **filterThreshold** (`number`) : Item count (inclusive) at or above which a sticky filter input appears at the top of the popup. Default `15`. See [Filtering long lists](#filtering-long-lists).
+- **filterPlaceholder** (`string`) : Localised placeholder for the filter input. Default `Filter…`.
+- **filterTestId** (`string`) : Test id forwarded to the filter row (suffixed with `-input` for the field).
 
 ## Usage Examples
 
@@ -170,10 +179,15 @@ import { SelectBox } from 'electron-core-ui/renderer'
   }))}
   selected={0}
   onDidSelect={(data) => console.log('Selected:', data.selected)}
-  selectBoxOptions={{ 
+  selectBoxOptions={{
     useCustomDrawn: true,
     ariaLabel: 'Long list selector'
   }}
+  // Filter row is on by default for ≥ 15 options. Override the
+  // threshold or the placeholder per-instance:
+  filterThreshold={20}
+  filterPlaceholder="Type to filter…"
+  filterTestId="long-list-filter"
 />
 ```
 
@@ -651,3 +665,15 @@ const [selectedIndex, setSelectedIndex] = useState(0)
   onDidSelect={(data) => store.setSelectedIndex(data.index)}
 />
 ```
+
+## Filtering long lists
+
+When the popup contains at least `filterThreshold` items (default **15**, exposed as `DEFAULT_FILTER_THRESHOLD`), a sticky filter row appears at the top of the popup body:
+
+- **Filter input** — auto-focused on open, case-insensitive substring match on the item label. `Esc` clears a non-empty filter; a second `Esc` (with the filter empty) closes the popup.
+- **Select all / Deselect all** — only on multi-select dropdowns. They act on the *currently visible* slice, so combined with the filter the user can pick "filter + select all matching".
+- **No matches** — when the filter eliminates every row, an italic placeholder is rendered in place of the list.
+
+Per-instance opt-out: pass a `filterThreshold` larger than the item count (e.g. `Number.POSITIVE_INFINITY`).
+
+The shared logic lives in `useFilterableDropdown` (see `hooks/useFilterableDropdown.ts`) and the row UI in `components/DropdownFilterRow`.
