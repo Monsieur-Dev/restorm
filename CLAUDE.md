@@ -22,6 +22,39 @@ Pre-commit hooks run the full test suite, which takes a long time. **NEVER** int
 
 Before pushing a branch or asking for a merge, **always** run an independent code review of the diff. Use the `superpowers:code-reviewer` agent (or equivalent fresh-context agent) on the full PR scope and act on its findings — bugs, design smells, coverage gaps, stale comments, missed docs — before telling the user the PR is ready. Document agent findings that you're deliberately not addressing, don't silently skip them. Self-review applies even when the user hasn't explicitly asked for it; it's the last gate before human attention.
 
+## Branch up-to-date check (before push and before merge)
+
+GitHub branch protection ("require branches to be up to date") is **not available** on this repo's plan. Enforce the same invariant manually, every time.
+
+**Before every `git push` of a feature branch**:
+
+1. `git fetch origin` to refresh the remote refs.
+2. Check whether the current branch is behind its target (defaults to `main` unless the user said otherwise):
+   ```bash
+   BEHIND=$(git rev-list --count HEAD..origin/main)
+   ```
+3. If `BEHIND` is non-zero: rebase onto `origin/main` first (`git rebase origin/main`), resolve any conflicts, then push. Do NOT push a branch that is behind. The user has a feedback memory `Rebase before merge` (no merge commits) — honor it: rebase, never merge `main` into the feature branch.
+4. If `BEHIND` is zero, push as usual.
+
+**Before merging a PR** (i.e. before running `gh pr merge` or asking the user for the green light):
+
+1. Same fetch + behind-count check, except now compare against the PR's base branch (read it from `gh pr view --json baseRefName`).
+2. If the branch is behind: rebase locally, force-push (`git push --force-with-lease`), wait for CI to re-run green, then proceed to merge. Never merge a PR whose head is behind the base.
+3. Mention in the PR description / final message that the up-to-date check passed (one line is enough, e.g. `branch up to date with origin/main`).
+
+This applies to every push and every merge, even for tiny one-line fixes. Skipping the check is the same class of mistake as skipping `npm run lint` — don't.
+
+## Adding a new execution protocol or import format
+
+When a ticket asks you to add a new execution protocol (REST, GraphQL, gRPC, MQTT, WebSocket, ...) or a new import format (OpenAPI, AsyncAPI, Postman, Bruno, OData CSDL, ...), **read the playbook first** and follow it end-to-end:
+
+- Execution protocols → [`restorm/docs/contributing/adding-a-protocol.md`](restorm/docs/contributing/adding-a-protocol.md)
+- Import-only formats → [`restorm/docs/contributing/adding-an-import.md`](restorm/docs/contributing/adding-an-import.md)
+
+The playbook is authoritative for: file layout, the three hard rules (UI reuse, Handlebars resolution, input debouncing), Docker mock conventions, the E2E scenario matrix, the response-panel UI checks, the documentation checklist, and the per-PR review checklist. Diverging from it without explicit ticket-level approval is a review-blocker.
+
+The matching PR template at [`.github/PULL_REQUEST_TEMPLATE/protocol.md`](.github/PULL_REQUEST_TEMPLATE/protocol.md) bundles the checklist — append `?template=protocol.md` to the PR URL when opening the PR.
+
 ## Documentation
 
 Do not create documentation files (`/docs/`, README, etc.) unless explicitly requested.

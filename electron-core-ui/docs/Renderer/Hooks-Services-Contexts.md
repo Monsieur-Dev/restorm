@@ -10,6 +10,8 @@ This document describes the React hooks, services, and contexts available in `el
   - [useFileService](#usefileservice)
   - [useStorage](#usestorage)
   - [usePersistedState](#usepersistedstate)
+  - [useDebouncedValue](#usedebouncedvalue)
+  - [useDebouncedCallback](#usedebouncedcallback)
   - [usePlatform](#useplatform)
   - [useKeyboardShortcut](#usekeyboardshortcut)
   - [useDirtyState](#usedirtystate)
@@ -201,6 +203,65 @@ const [expandedIds, setExpandedIds] = usePersistedState<string[]>(
 - `key = "foo"` → reads storage asynchronously; on success the value is passed through `onRestore` (if any) and applied via `setState`. If nothing is stored, `onMissing` fires instead.
 - Every subsequent state change schedules a debounced write. The restore's own `setState` is recognized as a no-op and does not round-trip back to disk.
 - Changing `key` cancels any pending write, resets the restore guard, and re-reads for the new key.
+
+---
+
+### useDebouncedValue
+
+Returns a value that follows `value` after a `delayMs` quiet period. Use
+this to feed rapidly-changing controlled inputs into a side-effecting
+consumer (event bus, IPC, search index, autosave, persistence) without
+firing on every keystroke.
+
+```typescript
+import { useDebouncedValue } from 'electron-core-ui/renderer'
+
+const [query, setQuery] = useState('')
+const debouncedQuery = useDebouncedValue(query, 250)
+
+useEffect(() => {
+  // Runs at most once per 250 ms quiet window, no matter how fast the user types.
+  runSearch(debouncedQuery)
+}, [debouncedQuery])
+```
+
+**Semantics**
+
+- The first render returns `value` synchronously (no delay before the initial paint).
+- Each subsequent change to `value` schedules a `delayMs` timer; if the value changes again before it fires, the timer resets.
+- On unmount the pending timer is cleared, so a stale write never lands after the consumer has gone away.
+- `delayMs` changes are honored on the next value change.
+
+Default delay across the codebase is **250 ms**. Override only with a justifying comment at the call site.
+
+---
+
+### useDebouncedCallback
+
+Returns a stable callback that invokes `fn` once `delayMs` has elapsed
+since the last invocation. Use this when you can't reshape a side effect
+through a debounced value — e.g. a `KeyValueTable` row change handler that
+batches updates per keystroke and forwards them to the persistence layer.
+
+```typescript
+import { useDebouncedCallback } from 'electron-core-ui/renderer'
+
+const onUrlChange = useDebouncedCallback((next: string) => {
+  documentEvents.emit('request:updated', { id: requestId, url: next })
+}, 250)
+
+return <VariableInputBox value={url} onChange={(v) => { setUrl(v); onUrlChange(v) }} />
+```
+
+**Returned callable**
+
+- Referentially stable across renders — safe for memoized children and as a `useEffect` dependency.
+- Always invokes the latest `fn` closure (no stale-closure bug if `fn` reads React state).
+- `.cancel()` drops a pending invocation.
+- `.flush()` fires the pending invocation immediately with its captured args.
+- Pending timer is cleared on unmount.
+
+Default delay across the codebase is **250 ms**.
 
 ---
 
