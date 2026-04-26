@@ -5,6 +5,7 @@ import { join, resolve } from 'path'
 import electronPath from 'electron'
 import { installSystemModalsMockingForE2E, configureNextSaveFileDialogForE2E } from 'electron-core-ui/testing'
 import { withE2ECoverageEnv } from '../../helpers/coverage'
+import { createIsolatedUserDataDir } from '../../helpers/userdata-isolation'
 import { collectBlockingRendererMessages, summariseBlockingMessages } from '../../helpers/renderer-log-guard'
 
 export const ODATA_PETSTORE_TEMP_DIR = resolve(__dirname, '../../.tmp/odata-petstore')
@@ -32,11 +33,20 @@ export const test = base.extend<OdataPetstoreFixtures>({
     const electronExePath = electronPath as unknown as string
     const mainJsPath = join(restormRoot, 'dist/main/index.js')
 
+    // Per-scenario userData isolation. See full-workflow.fixture.ts
+    // for the full rationale; bootstrap + real launch share the same dir.
+    const isolatedUserDataDir = createIsolatedUserDataDir(restormRoot)
+    const baseEnv = {
+      ...withE2ECoverageEnv(restormRoot, process.env),
+      NODE_ENV: 'development',
+      RESTORM_USER_DATA_OVERRIDE: isolatedUserDataDir
+    }
+
     const launcher = async (): Promise<LaunchedApp> => {
       const bootstrap = await electron.launch({
         executablePath: electronExePath,
         args: ['--no-sandbox', '--ozone-platform=x11', mainJsPath, '--clear-settings'],
-        env: { ...withE2ECoverageEnv(restormRoot, process.env), NODE_ENV: 'development' }
+        env: baseEnv
       })
       bootstrap.process().kill('SIGKILL')
       await new Promise((r) => setTimeout(r, 300))
@@ -44,7 +54,7 @@ export const test = base.extend<OdataPetstoreFixtures>({
       const app = await electron.launch({
         executablePath: electronExePath,
         args: ['--no-sandbox', '--ozone-platform=x11', mainJsPath],
-        env: { ...withE2ECoverageEnv(restormRoot, process.env), NODE_ENV: 'development' }
+        env: baseEnv
       })
 
       const logs: string[] = []

@@ -5,6 +5,7 @@ import { join, resolve } from 'path'
 import electronPath from 'electron'
 import { installSystemModalsMockingForE2E } from 'electron-core-ui/testing'
 import { withE2ECoverageEnv } from '../../helpers/coverage'
+import { createIsolatedUserDataDir } from '../../helpers/userdata-isolation'
 import { collectBlockingRendererMessages, summariseBlockingMessages } from '../../helpers/renderer-log-guard'
 
 /**
@@ -72,6 +73,19 @@ export const test = base.extend<FullWorkflowFixtures>({
     const electronExePath = electronPath as unknown as string
     const mainJsPath = join(restormRoot, 'dist/main/index.js')
 
+    // Per-scenario userData isolation. The same dir is
+    // shared by the bootstrap launch, the real launch, and any
+    // `relaunch: true` follow-ups — that's exactly what we want for
+    // close-then-reopen flows. Different scenarios get different dirs
+    // (and parallel agents get different dirs too) so nothing leaks
+    // across runs and the developer's real userData is never touched.
+    const isolatedUserDataDir = createIsolatedUserDataDir(restormRoot)
+    const baseEnv = {
+      ...withE2ECoverageEnv(restormRoot, process.env),
+      NODE_ENV: 'development',
+      RESTORM_USER_DATA_OVERRIDE: isolatedUserDataDir
+    }
+
     const startApp = async (): Promise<LaunchedApp> => {
       if (!state.configPath) {
         throw new Error('startApp requires the userData path to have been discovered first')
@@ -79,10 +93,7 @@ export const test = base.extend<FullWorkflowFixtures>({
       const app = await electron.launch({
         executablePath: electronExePath,
         args: ['--no-sandbox', '--ozone-platform=x11', mainJsPath],
-        env: {
-          ...withE2ECoverageEnv(restormRoot, process.env),
-          NODE_ENV: 'development'
-        }
+        env: baseEnv
       })
 
       // Capture everything visible in DevTools: main process stdout/stderr,
@@ -148,10 +159,7 @@ export const test = base.extend<FullWorkflowFixtures>({
       const bootstrap = await electron.launch({
         executablePath: electronExePath,
         args: ['--no-sandbox', '--ozone-platform=x11', mainJsPath, '--clear-settings'],
-        env: {
-          ...withE2ECoverageEnv(restormRoot, process.env),
-          NODE_ENV: 'development'
-        }
+        env: baseEnv
       })
       const userDataPath = await bootstrap.evaluate(({ app }) => app.getPath('userData'))
       state.configPath = join(userDataPath, 'config.json')
