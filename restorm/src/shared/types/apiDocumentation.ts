@@ -137,6 +137,7 @@ export interface OperationDocumentation {
 /** Source type discriminator — matches the import format. */
 export type ApiDocumentationSourceType =
   | 'swagger'
+  | 'openapi'
   | 'wsdl'
   | 'grpc'
   | 'graphql'

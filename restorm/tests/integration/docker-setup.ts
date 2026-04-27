@@ -26,6 +26,15 @@ export const SERVICES = {
     apiPath: '/api',
     swaggerUrl: 'http://localhost:8080/api/openapi.json'
   },
+  petstoreOpenApi3: {
+    name: 'Petstore (OpenAPI 3.0)',
+    baseUrl: 'http://localhost:8081',
+    /** OpenAPI 3.0 spec URL — used by integration tests to validate
+     * URL-based spec fetch + content-sniff routing. Runtime endpoints
+     * under `/v3/*` require auth and are NOT exercised here; runtime
+     * tests stay on the swaggerapi/petstore mock above. */
+    openapiUrl: 'http://localhost:8081/openapi.json'
+  },
   graphql: {
     name: 'GraphQL Server',
     baseUrl: 'http://localhost:4000'

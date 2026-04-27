@@ -1,38 +1,42 @@
 /**
  * Swagger / OpenAPI 2.0 → ApiDocumentation transformer.
  *
- * Reads a parsed SwaggerSpec and produces the common ApiDocumentation structure stored
- * on the root EnvironmentFolder after import. Markdown compilation happens later, on the
- * fly, via the generic Handlebars templates in DocumentationCompiler.
+ * Reads a parsed SwaggerSpec and produces the common ApiDocumentation
+ * structure stored on the root EnvironmentFolder after import. Markdown
+ * compilation happens later, on the fly, via the generic Handlebars
+ * templates in DocumentationCompiler.
+ *
+ * Refactored on top of `_shared.ts`: the version-agnostic mapping helpers
+ * (parameter/response/group/property mapping, ref-name extraction, schema
+ * label rendering, schema-graph traversal, operation row building) live
+ * there now, so the 3.0 / 3.1 transformers reuse them. The 2.0-specific
+ * shapes (path-item, parameter `in`-discriminated body, top-level `host` /
+ * `basePath` / `schemes`) stay here.
  */
 
 import type {
   ApiDocumentation,
-  GroupDocumentation,
+  ExternalDocs,
   ModelDocumentation,
-  OperationDocumentation,
-  ParameterDocumentation,
-  PropertyDocumentation,
-  ResponseDocumentation
+  OperationDocumentation
 } from '../../../../shared/types/apiDocumentation'
+import {
+  HTTP_METHODS,
+  buildApiInfo,
+  buildOperationDocumentation,
+  mapSchemaProperties,
+  mapTagsToGroups,
+  walkSchemaRefs,
+  type CommonInfo,
+  type CommonParameter,
+  type CommonResponse,
+  type CommonSchema,
+  type CommonTag,
+  type HttpMethod,
+  type OperationDocumentationInput
+} from './_shared'
 
 // ---------- Swagger source-spec types (minimal subset we consume) ----------
-
-interface SwaggerContact { name?: string; email?: string; url?: string }
-interface SwaggerLicense { name?: string; url?: string }
-interface SwaggerExternalDocs { description?: string; url: string }
-
-interface SwaggerSchema {
-  $ref?: string
-  type?: string
-  format?: string
-  description?: string
-  items?: SwaggerSchema
-  additionalProperties?: SwaggerSchema
-  properties?: Record<string, SwaggerSchema>
-  required?: string[]
-  enum?: string[]
-}
 
 interface SwaggerParameter {
   name: string
@@ -42,12 +46,12 @@ interface SwaggerParameter {
   type?: string
   format?: string
   default?: string | number | boolean
-  schema?: SwaggerSchema
+  schema?: CommonSchema
 }
 
 interface SwaggerResponse {
   description: string
-  schema?: SwaggerSchema
+  schema?: CommonSchema
   headers?: Record<string, { type: string; description?: string }>
 }
 
@@ -62,130 +66,72 @@ interface SwaggerOperation {
   responses?: Record<string, SwaggerResponse>
   security?: Record<string, string[]>[]
   deprecated?: boolean
-  externalDocs?: SwaggerExternalDocs
+  externalDocs?: ExternalDocs
 }
 
-type SwaggerPathItem = Partial<Record<'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options', SwaggerOperation>>
+type SwaggerPathItem = Partial<Record<HttpMethod, SwaggerOperation>>
 
 export interface SwaggerSpec {
   swagger?: string
-  info: {
-    title: string
-    description?: string
-    version?: string
-    termsOfService?: string
-    contact?: SwaggerContact
-    license?: SwaggerLicense
-  }
+  info: CommonInfo
   host?: string
   basePath?: string
   schemes?: string[]
-  tags?: { name: string; description?: string; externalDocs?: SwaggerExternalDocs }[]
+  tags?: CommonTag[]
   paths: Record<string, SwaggerPathItem>
-  definitions?: Record<string, SwaggerSchema>
-  externalDocs?: SwaggerExternalDocs
+  definitions?: Record<string, CommonSchema>
+  externalDocs?: ExternalDocs
 }
 
-// ---------- Helpers ----------
+// ---------- 2.0-specific helpers ----------
 
-const HTTP_METHODS = ['get', 'post', 'put', 'delete', 'patch', 'head', 'options'] as const
+/** Lift a Swagger 2.0 parameter (with inline `type`/`format`) onto the
+ * common parameter shape. The flat `type` is folded into a synthetic
+ * schema so downstream renderers see the same shape across versions. */
+function toCommonParameter(p: SwaggerParameter): CommonParameter {
+  let schema: CommonSchema | undefined
+  if (p.schema) schema = p.schema
+  else if (p.type !== undefined) schema = { type: p.type, ...(p.format !== undefined ? { format: p.format } : {}) }
 
-function refName(ref: string): string {
-  const parts = ref.split('/')
-  return parts[parts.length - 1] ?? ref
+  const out: CommonParameter = { name: p.name, in: p.in }
+  if (p.description !== undefined) out.description = p.description
+  if (p.required !== undefined) out.required = p.required
+  if (schema) out.schema = schema
+  if (p.default !== undefined) out.default = p.default
+  return out
 }
 
-function schemaTypeLabel(schema: SwaggerSchema, depth = 0): string {
-  if (depth > 5) return '...'
-  if (schema.$ref) return refName(schema.$ref)
-  if (schema.type === 'array' && schema.items) return `array<${schemaTypeLabel(schema.items, depth + 1)}>`
-  if (schema.type) return schema.type
-  if (schema.properties) return 'object'
-  return 'any'
-}
-
-function collectReferencedModels(op: SwaggerOperation): string[] {
-  const refs = new Set<string>()
-  const walk = (schema: SwaggerSchema | undefined): void => {
-    if (!schema) return
-    if (schema.$ref) refs.add(refName(schema.$ref))
-    if (schema.items) walk(schema.items)
-    if (schema.additionalProperties) walk(schema.additionalProperties)
-    if (schema.properties) {
-      for (const child of Object.values(schema.properties)) walk(child)
-    }
-  }
-  for (const p of op.parameters ?? []) walk(p.schema)
-  for (const r of Object.values(op.responses ?? {})) walk(r.schema)
-  return Array.from(refs)
-}
-
-function parameterType(param: SwaggerParameter): string {
-  if (param.schema?.$ref) return refName(param.schema.$ref)
-  if (param.schema) return schemaTypeLabel(param.schema)
-  if (param.type === 'array') return 'array'
-  return param.type ?? 'any'
-}
-
-function mapParameters(params: SwaggerParameter[] | undefined): ParameterDocumentation[] | undefined {
-  if (!params || params.length === 0) return undefined
-  return params.map((p) => {
-    const entry: ParameterDocumentation = {
-      name: p.name,
-      location: p.in,
-      type: parameterType(p),
-      required: p.required ?? false
-    }
-    if (p.description !== undefined) entry.description = p.description
-    if (p.default !== undefined) entry.defaultValue = String(p.default)
-    return entry
-  })
-}
-
-function mapResponses(responses: Record<string, SwaggerResponse> | undefined): Record<string, ResponseDocumentation> | undefined {
+/** Map 2.0 responses onto the common response shape. */
+function toCommonResponses(responses: Record<string, SwaggerResponse> | undefined): Record<string, CommonResponse> | undefined {
   if (!responses) return undefined
-  const out: Record<string, ResponseDocumentation> = {}
+  const out: Record<string, CommonResponse> = {}
   for (const [code, resp] of Object.entries(responses)) {
-    const entry: ResponseDocumentation = {}
+    const entry: CommonResponse = {}
     if (resp.description) entry.description = resp.description
-    if (resp.schema?.$ref) entry.schema = refName(resp.schema.$ref)
-    else if (resp.schema) entry.schema = schemaTypeLabel(resp.schema)
+    if (resp.schema) entry.schema = resp.schema
     if (resp.headers) entry.headers = resp.headers
     out[code] = entry
   }
   return out
 }
 
-function mapModels(definitions: Record<string, SwaggerSchema> | undefined): Record<string, ModelDocumentation> {
+/** Walk every schema reachable from a 2.0 operation and return referenced model names. */
+function collectReferencedModels(op: SwaggerOperation): string[] {
+  const refs = new Set<string>()
+  const visit = (name: string): void => { refs.add(name) }
+  for (const p of op.parameters ?? []) walkSchemaRefs(p.schema, visit)
+  for (const r of Object.values(op.responses ?? {})) walkSchemaRefs(r.schema, visit)
+  return Array.from(refs)
+}
+
+/** Map `definitions` onto `ModelDocumentation`. */
+function mapModels(definitions: Record<string, CommonSchema> | undefined): Record<string, ModelDocumentation> {
   if (!definitions) return {}
   const out: Record<string, ModelDocumentation> = {}
   for (const [name, schema] of Object.entries(definitions)) {
-    const required = new Set(schema.required ?? [])
-    const properties: PropertyDocumentation[] = []
-    for (const [propName, propSchema] of Object.entries(schema.properties ?? {})) {
-      const prop: PropertyDocumentation = {
-        name: propName,
-        type: schemaTypeLabel(propSchema),
-        required: required.has(propName)
-      }
-      if (propSchema.description !== undefined) prop.description = propSchema.description
-      properties.push(prop)
-    }
-    const entry: ModelDocumentation = { name, properties }
+    const entry: ModelDocumentation = { name, properties: mapSchemaProperties(schema) }
     if (schema.description !== undefined) entry.description = schema.description
     out[name] = entry
-  }
-  return out
-}
-
-function mapGroups(tags: SwaggerSpec['tags']): Record<string, GroupDocumentation> {
-  if (!tags) return {}
-  const out: Record<string, GroupDocumentation> = {}
-  for (const tag of tags) {
-    const entry: GroupDocumentation = { name: tag.name }
-    if (tag.description !== undefined) entry.description = tag.description
-    if (tag.externalDocs !== undefined) entry.externalDocs = tag.externalDocs
-    out[tag.name] = entry
   }
   return out
 }
@@ -193,7 +139,7 @@ function mapGroups(tags: SwaggerSpec['tags']): Record<string, GroupDocumentation
 // ---------- Entry point ----------
 
 export interface SwaggerTransformOptions {
-  /** URL the spec was fetched from (if any) — becomes ApiDocumentation.sourceUrl. */
+  /** URL the spec was fetched from (if any) — becomes `ApiDocumentation.sourceUrl`. */
   sourceUrl?: string
 }
 
@@ -208,49 +154,36 @@ export function swaggerToApiDocumentation(
       const op = pathItem[method]
       if (!op) continue
 
-      const doc: OperationDocumentation = {
-        match: {
-          urlPattern: path,
-          method: method.toUpperCase()
-        }
+      const input: OperationDocumentationInput = {
+        path,
+        method,
+        parameters: op.parameters ? op.parameters.map(toCommonParameter) : undefined,
+        responses: toCommonResponses(op.responses),
+        referencedModels: collectReferencedModels(op)
       }
-      if (op.tags?.[0] !== undefined) doc.group = op.tags[0]
-      if (op.summary !== undefined) doc.summary = op.summary
-      if (op.description !== undefined) doc.description = op.description
-      if (op.operationId !== undefined) doc.operationId = op.operationId
-      if (op.deprecated) doc.deprecated = true
-      if (op.externalDocs !== undefined) doc.externalDocs = op.externalDocs
-      if (op.consumes !== undefined) doc.consumes = op.consumes
-      if (op.produces !== undefined) doc.produces = op.produces
-      const params = mapParameters(op.parameters)
-      if (params !== undefined) doc.parameters = params
-      const responses = mapResponses(op.responses)
-      if (responses !== undefined) doc.responses = responses
-      if (op.security !== undefined) doc.security = op.security
-      const refs = collectReferencedModels(op)
-      if (refs.length > 0) doc.referencedModels = refs
+      if (op.tags !== undefined) input.tags = op.tags
+      if (op.summary !== undefined) input.summary = op.summary
+      if (op.description !== undefined) input.description = op.description
+      if (op.operationId !== undefined) input.operationId = op.operationId
+      if (op.deprecated) input.deprecated = true
+      if (op.externalDocs !== undefined) input.externalDocs = op.externalDocs
+      if (op.consumes !== undefined) input.consumes = op.consumes
+      if (op.produces !== undefined) input.produces = op.produces
+      if (op.security !== undefined) input.security = op.security
 
-      operations.push(doc)
+      operations.push(buildOperationDocumentation(input))
     }
   }
 
   const result: ApiDocumentation = {
     sourceType: 'swagger',
-    api: {
-      title: spec.info.title
-    },
+    api: buildApiInfo(spec.info, spec.externalDocs),
     models: mapModels(spec.definitions),
-    groups: mapGroups(spec.tags),
+    groups: mapTagsToGroups(spec.tags),
     operations
   }
 
   if (options.sourceUrl !== undefined) result.sourceUrl = options.sourceUrl
-  if (spec.info.description !== undefined) result.api.description = spec.info.description
-  if (spec.info.version !== undefined) result.api.version = spec.info.version
-  if (spec.info.contact !== undefined) result.api.contact = spec.info.contact
-  if (spec.info.license !== undefined) result.api.license = spec.info.license
-  if (spec.info.termsOfService !== undefined) result.api.termsOfService = spec.info.termsOfService
-  if (spec.externalDocs !== undefined) result.api.externalDocs = spec.externalDocs
 
   if (spec.host !== undefined || spec.basePath !== undefined || spec.schemes !== undefined) {
     result.server = {}

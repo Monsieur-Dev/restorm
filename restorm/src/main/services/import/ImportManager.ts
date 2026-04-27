@@ -44,8 +44,9 @@ export interface ImportOptions {
 // Format Detection
 // ============================================================================
 
-/** Detect format from content */
-function detectFormat(content: string, filePath?: string): string | null {
+/** Detect format from content. Exported for unit-test coverage; production
+ * call sites stay inside this module (`importFrom`, `tryAllImports`). */
+export function detectFormat(content: string, filePath?: string): string | null {
   const trimmed = content.trim()
   
   // Detect curl commands
@@ -62,9 +63,21 @@ function detectFormat(content: string, filePath?: string): string | null {
   try {
     const json: unknown = JSON.parse(trimmed)
     
-    // Detect Swagger/OpenAPI
-    if (typeof json === 'object' && json !== null && ('swagger' in json || 'openapi' in json)) {
-      return 'swagger'
+    // Detect Swagger 2.0 vs OpenAPI 3.0 / 3.1. Each ships its own
+    // version-specific transformer and folder builder; sniffing here means
+    // a 3.x spec never falls through to the 2.0 importer (which would
+    // silently produce broken folders, missing bodies, empty schemas).
+    if (typeof json === 'object' && json !== null) {
+      const obj = json as Record<string, unknown>
+      if ('swagger' in obj && typeof obj.swagger === 'string' && obj.swagger.startsWith('2.')) {
+        return 'swagger'
+      }
+      if ('openapi' in obj && typeof obj.openapi === 'string') {
+        if (obj.openapi.startsWith('3.0')) return 'openapi-3.0'
+        if (obj.openapi.startsWith('3.1')) return 'openapi-3.1'
+        // Future major versions fall through to no-detection so we surface
+        // a clean error instead of mis-importing.
+      }
     }
     
     // Detect Postman Collection
@@ -164,6 +177,13 @@ async function importFromContent(
       case 'swagger': {
         const { importSwaggerFromJson } = await import('./SwaggerImportService')
         folder = importSwaggerFromJson(content, urlOpt)
+        break
+      }
+
+      case 'openapi-3.0':
+      case 'openapi-3.1': {
+        const { importOpenAPIFromJson } = await import('./OpenAPIImportService')
+        folder = importOpenAPIFromJson(content, urlOpt)
         break
       }
 
@@ -402,6 +422,8 @@ export async function tryAllImports(
   // Try all formats in parallel
   const formats = [
     'swagger',
+    'openapi-3.0',
+    'openapi-3.1',
     'postman',
     'insomnia',
     'bruno',

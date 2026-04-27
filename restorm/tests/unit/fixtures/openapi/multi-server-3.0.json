@@ -1,0 +1,25 @@
+{
+  "openapi": "3.0.3",
+  "info": { "title": "Multi-server", "version": "1.0.0" },
+  "servers": [
+    {
+      "url": "https://{environment}.api.example.com:{port}/{basePath}",
+      "description": "Configurable",
+      "variables": {
+        "environment": { "default": "prod", "enum": ["prod", "staging", "dev"] },
+        "port": { "default": "443" },
+        "basePath": { "default": "v2" }
+      }
+    },
+    { "url": "https://staging.api.example.com/v2", "description": "Staging" },
+    { "url": "http://localhost:3000/v2", "description": "Local" }
+  ],
+  "paths": {
+    "/ping": {
+      "get": {
+        "operationId": "ping",
+        "responses": { "200": { "description": "pong" } }
+      }
+    }
+  }
+}

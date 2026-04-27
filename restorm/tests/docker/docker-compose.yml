@@ -11,6 +11,17 @@ services:
     ports:
       - "8080:8080"
 
+  # REST/HTTP - OpenAPI 3.0 Petstore. Same endpoints as the 2.0 image
+  # above but advertises a true 3.0 spec at `/openapi.json`. Used by
+  # the OpenAPI 3.x importer integration tests to exercise URL-based
+  # spec fetch + content-sniff routing. Listens on :8081 so it
+  # coexists with the 2.0 mock on :8080.
+  petstore-openapi3:
+    image: openapitools/openapi-petstore
+    container_name: restorm-petstore-openapi3
+    ports:
+      - "8081:8080"
+
   # GraphQL - Custom test server
   graphql:
     image: node:20-alpine
