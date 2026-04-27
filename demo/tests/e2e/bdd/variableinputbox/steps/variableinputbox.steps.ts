@@ -40,3 +40,15 @@ bdd.When('I click variable input box context menu item {string}', async ({ page 
   // ContextMenu is rendered in a portal; selecting by role is the most stable here.
   await page.getByRole('menuitem', { name: label }).click()
 })
+
+bdd.Then('no Monaco find widget should be visible', async ({ page }) => {
+  // Monaco's find widget renders as `.monaco-findwidget` (visible) when
+  // the find controller fires. Asserting a count of 0 visible instances
+  // pins the no-op F3 / Shift+F3 wiring inside `VariableInputBox`.
+  // Give Monaco a beat to react to the keypress before checking.
+  await page.waitForTimeout(150)
+  const count = await page.locator('.monaco-findwidget:visible').count()
+  if (count !== 0) {
+    throw new Error(`Expected no visible Monaco find widget; found ${count}`)
+  }
+})

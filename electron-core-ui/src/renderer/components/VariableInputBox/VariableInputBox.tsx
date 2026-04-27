@@ -318,6 +318,13 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
       // Do nothing - prevent Shift+Enter from inserting a line
     })
 
+    // Disable Monaco's find-next / find-previous shortcuts inside this
+    // single-line editor. The default F3 / Shift+F3 wiring opens
+    // Monaco's find widget, which leaks into the compact input host —
+    // there is no meaningful navigation target inside a one-line field.
+    editor.addCommand(monacoInstance.KeyCode.F3, () => { /* no-op */ })
+    editor.addCommand(monacoInstance.KeyMod.Shift | monacoInstance.KeyCode.F3, () => { /* no-op */ })
+
     // Strip newlines from pasted content so multi-line pastes collapse to a single line
     editor.onDidPaste(() => {
       const model = editor.getModel()
