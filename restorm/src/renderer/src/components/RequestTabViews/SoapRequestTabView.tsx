@@ -25,6 +25,9 @@ import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
 import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabViewUtils'
 import { useCompiledDocumentation } from '../../hooks/useCompiledDocumentation'
+import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
+import { CurlPasteCallout } from '../CurlPasteCallout'
+import { toasterService } from 'electron-core-ui/renderer'
 
 export interface SoapRequestTabViewProps {
   request: SoapRequest
@@ -59,6 +62,8 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
   const sourceIdRef = useRef<string>(crypto.randomUUID())
 
   const headersRef = useRef<KeyValueTableHandle | null>(null)
+  const [transportEpoch, setTransportEpoch] = useState(0)
+  const urlSectionHostRef = useRef<HTMLDivElement | null>(null)
 
   const handleRequestReset = useCallback(() => {
     setUrlState(request.url)
@@ -257,6 +262,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
         )}
       >
         <RestormKeyValueTable
+          key={`headers-${transportEpoch}`}
           ref={headersRef}
           variables={emptyVariables}
           helpers={handlebarsHelpers}
@@ -354,9 +360,39 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
     return buildSoapResponseView(historyResponse, detail.requestMeta)
   }, [buildSoapResponseView, request.id])
   
+  // Smart-paste: SOAP carries its own envelope on `request.body`,
+  // but a cURL with raw XML in `-d` is a reasonable migration path.
+  // For v1 we only fill URL + headers; the body stays a SOAP envelope.
+  const applyParsedCurl = useCallback((parsed: ParsedCurl): void => {
+    setUrl(parsed.url)
+    updateReactiveProperty(request, 'headers', parsed.headers)
+    setTransportEpoch((n) => n + 1)
+    toasterService.push('app', {
+      title: 'Replaced from cURL',
+      body: 'SOAP endpoint URL and headers populated from the pasted curl command.',
+      durationMs: 10000
+    })
+  }, [request, setUrl])
+
+  const { pendingPaste } = useCurlPaste({
+    hostRef: urlSectionHostRef,
+    apply: applyParsedCurl
+  })
+
   // URL section
   const urlSection = (
-    <>
+    <div
+      ref={urlSectionHostRef}
+      data-testid="soap-url-section-host"
+      style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
+    >
+      {pendingPaste && (
+        <CurlPasteCallout
+          onConfirm={pendingPaste.confirm}
+          onCancel={pendingPaste.cancel}
+          data-testid="soap-curl-paste-callout"
+        />
+      )}
       <ControlGroup data-testid="soap-url-section">
         <div style={{ flex: 1, minWidth: 0 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
           <RestormVariableInputBox
@@ -382,7 +418,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
       <div style={{ fontSize: 12, color: 'var(--descriptionForeground)' }}>
         {request.service}/{request.operation} • SOAPAction: {request.soapAction}
       </div>
-    </>
+    </div>
   )
   
   const handleCloseHistoryModal = useCallback(() => {

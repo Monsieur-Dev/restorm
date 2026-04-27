@@ -61,6 +61,9 @@ import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { updateReactiveProperty } from './requestTabViewUtils'
+import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
+import { CurlPasteCallout } from '../CurlPasteCallout'
+import { toasterService } from 'electron-core-ui/renderer'
 import {
   serializeODataQueryOptions,
   buildODataUrl,
@@ -745,7 +748,32 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       .finally(() => { setIsSending(false) })
   }, [isSending, request, requestPath, resolveAuthRequest, flushAllPendingProxyWrites, pushFullRequestDataToContextService])
 
+  const urlSectionHostRef = useRef<HTMLDivElement | null>(null)
+  // Smart-paste: OData has its own query options pipeline keyed off the
+  // URL, so we only fill the URL from a pasted cURL. Headers / body
+  // would conflict with OData's protocol-specific shape.
+  const applyParsedCurl = useCallback((parsed: ParsedCurl): void => {
+    setUrl(parsed.url)
+    toasterService.push('app', {
+      title: 'Replaced from cURL',
+      body: 'OData endpoint URL populated from the pasted curl command.',
+      durationMs: 10000
+    })
+  }, [setUrl])
+  const { pendingPaste } = useCurlPaste({
+    hostRef: urlSectionHostRef,
+    apply: applyParsedCurl
+  })
+
   const urlSection = (
+    <div ref={urlSectionHostRef} data-testid="odata-request-url-section-host">
+      {pendingPaste && (
+        <CurlPasteCallout
+          onConfirm={pendingPaste.confirm}
+          onCancel={pendingPaste.cancel}
+          data-testid="odata-curl-paste-callout"
+        />
+      )}
     <div style={urlRowStyle} data-testid="odata-request-url-section">
       <div style={urlInputWrapperStyle}>
         <RestormVariableInputBox
@@ -771,6 +799,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
           {t('odataRequestTab.send', 'Send')}
         </Button>
       </div>
+    </div>
     </div>
   )
 

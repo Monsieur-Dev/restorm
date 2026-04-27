@@ -14,6 +14,13 @@ export interface CalloutProps {
   icon?: string
   /** Optional className for additional styling */
   className?: string
+  /**
+   * Optional inline actions (typically `<Button>`s) rendered after the
+   * message. Use for non-modal "confirm / dismiss" callouts where a
+   * full modal would be overkill. The callout stays a flex row, the
+   * actions sit on the trailing edge.
+   */
+  actions?: React.ReactNode
 }
 
 const defaultIcons: Record<CalloutVariant, string> = {
@@ -32,7 +39,8 @@ export const Callout: React.FC<CalloutProps> = ({
   message,
   'data-testid': dataTestId,
   icon,
-  className
+  className,
+  actions
 }) => {
   const iconName = icon ?? defaultIcons[variant]
 
@@ -45,6 +53,7 @@ export const Callout: React.FC<CalloutProps> = ({
     >
       <i className={`codicon codicon-${iconName}`} />
       <span className="ecu-callout-message">{message}</span>
+      {actions && <span className="ecu-callout-actions">{actions}</span>}
     </div>
   )
 }
