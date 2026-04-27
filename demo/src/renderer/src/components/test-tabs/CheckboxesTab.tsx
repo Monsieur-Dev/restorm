@@ -7,6 +7,8 @@ const CheckboxesTab: React.FC = () => {
   const [toggleUnchecked, setToggleUnchecked] = useState(false)
   const [toggleDisabled, setToggleDisabled] = useState(false)
   const [radioValue, setRadioValue] = useState('option1')
+  const [disabledRadioIdx, setDisabledRadioIdx] = useState(0)
+  const [tooltipsRadioIdx, setTooltipsRadioIdx] = useState(1)
   
   return (
     <div style={{ display: 'grid', gap: '30px', padding: '20px' }}>
@@ -61,14 +63,12 @@ const CheckboxesTab: React.FC = () => {
               <RadioGroup
                 options={{
                   items: [
-                    { text: 'Enabled Option', isActive: true },
-                    { text: 'Disabled Option', disabled: true },
-                    { text: 'Another Option' }
+                    { text: 'Enabled Option', isActive: disabledRadioIdx === 0 },
+                    { text: 'Disabled Option', disabled: true, isActive: disabledRadioIdx === 1 },
+                    { text: 'Another Option', isActive: disabledRadioIdx === 2 }
                   ]
                 }}
-                onSelect={(_index: number) => {
-                  // Handle selection for disabled options example
-                }}
+                onSelect={(index: number) => { setDisabledRadioIdx(index) }}
               />
             </div>
 
@@ -77,14 +77,12 @@ const CheckboxesTab: React.FC = () => {
               <RadioGroup
                 options={{
                   items: [
-                    { text: 'Option A', tooltip: 'This is option A' },
-                    { text: 'Option B', tooltip: 'This is option B', isActive: true },
-                    { text: 'Option C', tooltip: 'This is option C' }
+                    { text: 'Option A', tooltip: 'This is option A', isActive: tooltipsRadioIdx === 0 },
+                    { text: 'Option B', tooltip: 'This is option B', isActive: tooltipsRadioIdx === 1 },
+                    { text: 'Option C', tooltip: 'This is option C', isActive: tooltipsRadioIdx === 2 }
                   ]
                 }}
-                onSelect={(_index: number) => {
-                  // Handle selection for tooltips example
-                }}
+                onSelect={(index: number) => { setTooltipsRadioIdx(index) }}
               />
             </div>
           </div>
