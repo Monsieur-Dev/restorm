@@ -32,16 +32,18 @@ export const CurlPasteCallout: React.FC<CurlPasteCalloutProps> = ({
       message="Detected a curl command on the clipboard. Replace the current request with its parsed values?"
       {...(dataTestId !== undefined && { 'data-testid': dataTestId })}
       actions={
+        // Default-sized buttons with text. The `small` modifier on
+        // `<Button>` is reserved for icon-only toolbar squares (20×20)
+        // and clips text labels — leave it off here so the labels
+        // render in full.
         <>
           <Button
-            small
             onClick={onConfirm}
             {...(dataTestId !== undefined && { 'data-testid': `${dataTestId}-confirm` })}
           >
             Replace request
           </Button>
           <Button
-            small
             secondary
             onClick={onCancel}
             {...(dataTestId !== undefined && { 'data-testid': `${dataTestId}-cancel` })}

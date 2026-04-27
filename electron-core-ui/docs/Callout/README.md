@@ -68,8 +68,8 @@ export const InlineConfirm: React.FC<{ onApply: () => void; onCancel: () => void
       data-testid="curl-paste-callout"
       actions={
         <>
-          <Button small onClick={onApply}>Replace request</Button>
-          <Button small secondary onClick={onCancel}>Cancel</Button>
+          <Button onClick={onApply}>Replace request</Button>
+          <Button secondary onClick={onCancel}>Cancel</Button>
         </>
       }
     />
