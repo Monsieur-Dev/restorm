@@ -7,7 +7,6 @@ import {
   Modal,
   Button,
   InputBox,
-  ListView,
   type ListViewItemData,
   ListViewDropdown
 } from 'electron-core-ui/renderer'
@@ -15,9 +14,11 @@ import { useTranslation } from 'react-i18next'
 import type { FolderItem, EnvironmentFolder, Folder } from '../../../../shared/types/collections'
 import { isEnvironmentFolder, isRequest } from '../../../../shared/types/collections'
 import type { AuthenticationRequest } from '../../../../shared/models'
-import { mapToBadgeType } from '../../utils/badgeUtils'
 import { logger } from 'electron-core-ui/renderer'
 import { AuthenticationSetupModal } from './AuthenticationSetupModal'
+import { ImportSelectionTree } from './ImportSelectionTree'
+import { allLeafKeys } from './importSelectionHelpers'
+import { filterImportTreeBySelection } from '../../../../shared/utils/importNaturalKey'
 import './ImportModal.css'
 
 interface PendingFolder {
@@ -46,6 +47,14 @@ export function ImportModal({
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [previewItems, setPreviewItems] = useState<FolderItem[]>([])
+  /**
+   * Set of leaf natural keys the user wants to import. Initialised
+   * to the full leaf set whenever a fresh preview lands so the
+   * default behaviour matches the legacy "import everything" UX,
+   * then narrowed as the user un-checks rows in the selection tree.
+   */
+  const [selection, setSelection] = useState<Set<string>>(() => new Set())
+  const [searchFilter, setSearchFilter] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
   const [attachedAuth, setAttachedAuth] = useState<AuthenticationRequest | null>(null)
   // Resolved auth headers live in a ref rather than state — the only
@@ -217,6 +226,8 @@ export function ImportModal({
     if (!value.trim()) {
       logger.warn('[ImportModal] Clearing preview items - input is empty', { value })
       setPreviewItems([])
+      setSelection(new Set())
+      setSearchFilter('')
       setIsLoading(false)
       debounceTimerRef.current = null
       return
@@ -299,6 +310,14 @@ export function ImportModal({
   // Handle import click
   const handleImportClick = useCallback(() => {
     if (previewItems.length === 0) return
+    if (selection.size === 0) return
+
+    // Apply the user's selective-import choice before any further
+    // transformation: leaves not in `selection` are dropped, and
+    // folders that lose all of their selected descendants are
+    // pruned. The auth-attach pass and the upstream import pipeline
+    // only see the kept subset, so skipped items never materialise.
+    const selectedItems = filterImportTreeBySelection(previewItems, selection)
 
     // If the user attached an auth request, wire every imported
     // request to reference it and nest the auth route itself as the
@@ -309,7 +328,7 @@ export function ImportModal({
     // `Microsoft.Dynamics.CRM/0001 - Authentication route.yaml`
     // instead of writing a stray auth folder alongside the env
     // folder.
-    let finalItems: FolderItem[] = previewItems
+    let finalItems: FolderItem[] = selectedItems
     if (attachedAuth) {
       const authId = attachedAuth.id
       const attach = (items: FolderItem[]): FolderItem[] => items.map((item) => {
@@ -323,7 +342,7 @@ export function ImportModal({
         }
         return item
       })
-      const attachedTree = attach(previewItems)
+      const attachedTree = attach(selectedItems)
       const firstFolderIdx = attachedTree.findIndex((item) => 'items' in item)
       if (firstFolderIdx >= 0) {
         const firstFolder = attachedTree[firstFolderIdx] as Extract<FolderItem, { items: FolderItem[] }>
@@ -345,7 +364,7 @@ export function ImportModal({
 
     // Close modal (useEffect will clear state when modal closes)
     onClose()
-  }, [previewItems, targetFolderId, pendingFolders, onImport, onClose, attachedAuth])
+  }, [previewItems, selection, targetFolderId, pendingFolders, onImport, onClose, attachedAuth])
 
   const handleAuthAttach = useCallback((authRequest: AuthenticationRequest, resolvedHeaders: Record<string, string>) => {
     setAttachedAuth(authRequest)
@@ -365,54 +384,6 @@ export function ImportModal({
     }
   }, [input, handleInputChange])
 
-  // Count the actual leaf requests the import would create — what the
-  // user ultimately cares about (folders are just scaffolding). Walks
-  // the preview tree recursively; skips folder nodes in the tally.
-  const previewRequestCount = useMemo(() => {
-    const walk = (items: FolderItem[]): number => items.reduce((acc, item) => {
-      if ('items' in item) return acc + walk(item.items)
-      if (isRequest(item)) return acc + 1
-      return acc
-    }, 0)
-    return walk(previewItems)
-  }, [previewItems])
-
-  // Build preview ListView items
-  const previewListItems: ListViewItemData[] = useMemo(() => {
-    if (previewItems.length === 0) return []
-
-    const buildItems = (items: FolderItem[]): ListViewItemData[] => {
-      return items.map(item => {
-        const isFolder = 'items' in item
-        
-        if (isFolder) {
-          const folder = item
-          return {
-            id: folder.id,
-            title: folder.name,
-            icon: 'folder',
-            badge: mapToBadgeType('folder'),
-            children: folder.items.length > 0 ? buildItems(folder.items) : [],
-            expanded: true
-          }
-        } else {
-          const request = item
-          const requestType = ('type' in request ? request.type : null) ?? 'http'
-          const requestId = 'id' in request ? request.id : crypto.randomUUID()
-          const requestName = 'name' in request ? request.name : 'Request'
-          return {
-            id: requestId,
-            title: requestName,
-            icon: 'file',
-            badge: mapToBadgeType(requestType as string)
-          }
-        }
-      })
-    }
-
-    return buildItems(previewItems)
-  }, [previewItems])
-
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -422,11 +393,22 @@ export function ImportModal({
     }
   }, [])
 
+  // Whenever a fresh preview lands, default the selection to "every
+  // leaf checked" so the modal mirrors the legacy "import everything"
+  // UX. The user can then opt items out via the tri-state tree.
+  useEffect(() => {
+    setSelection(allLeafKeys(previewItems))
+  }, [previewItems])
+
+  const selectedLeafCount = selection.size
+
   // Reset state when modal closes
   useEffect(() => {
     if (!isOpen) {
       setInput('')
       setPreviewItems([])
+      setSelection(new Set())
+      setSearchFilter('')
       setError(null)
       setIsLoading(false)
       setPendingFolders([])
@@ -598,19 +580,47 @@ export function ImportModal({
           ) : null}
         </div>
 
-        {/* Section 3: Preview */}
+        {/* Section 3: Selection tree (preview + tri-state checkboxes) */}
         {previewItems.length > 0 && (
           <div className="import-section import-preview-section">
-            <label className="import-label">
-              {t('import.preview.label')}
-            </label>
+            <div className="import-preview-header">
+              <label className="import-label">
+                {t('import.preview.label')}
+              </label>
+              <div className="import-preview-actions">
+                <Button
+                  secondary
+                  small
+                  onClick={() => { setSelection(allLeafKeys(previewItems)) }}
+                  data-testid="import-select-all-button"
+                >
+                  {t('import.selectAll', 'Select all')}
+                </Button>
+                <Button
+                  secondary
+                  small
+                  onClick={() => { setSelection(new Set()) }}
+                  data-testid="import-select-none-button"
+                >
+                  {t('import.selectNone', 'Select none')}
+                </Button>
+              </div>
+            </div>
+            <div className="import-preview-search">
+              <InputBox
+                value={searchFilter}
+                onChange={setSearchFilter}
+                options={{ placeholder: t('import.searchPlaceholder', 'Filter routes / folders…') }}
+                data-testid="import-selection-search"
+              />
+            </div>
             <div className="import-preview">
-              <ListView
-                items={previewListItems}
-                ariaLabel={t('import.preview.label')}
-                onItemClick={() => { /* Preview only */ }}
-                onItemContextMenu={() => { /* Preview only */ }}
-                data-testid="preview-list"
+              <ImportSelectionTree
+                items={previewItems}
+                selection={selection}
+                onSelectionChange={setSelection}
+                searchFilter={searchFilter}
+                data-testid="import-selection-tree"
               />
             </div>
           </div>
@@ -631,11 +641,11 @@ export function ImportModal({
           <Button
             emphasis={1}
             onClick={handleImportClick}
-            disabled={previewItems.length === 0}
+            disabled={previewItems.length === 0 || selectedLeafCount === 0}
             data-testid="import-button"
           >
-            {previewRequestCount > 0
-              ? `${t('import.ok')} (${previewRequestCount})`
+            {selectedLeafCount > 0
+              ? t('import.okN', '{{action}} ({{count}})', { action: t('import.ok'), count: selectedLeafCount })
               : t('import.ok')}
           </Button>
         </div>

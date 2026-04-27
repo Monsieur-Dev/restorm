@@ -102,6 +102,39 @@ export interface ImportTreeWalkEntry {
   path: string[]
 }
 
+/**
+ * Prune the parsed-spec tree down to only the items the user opted
+ * into. Folders survive iff at least one of their leaf descendants is
+ * in `selection` — otherwise they'd render as empty placeholders in
+ * the imported folder. The env-folder root passes through verbatim
+ * regardless of selection (the user is importing *into* it, not
+ * *of* it).
+ *
+ * Operates on a structural copy: each surviving folder gets a fresh
+ * `items` array, but the leaf request references pass through
+ * unchanged so any reactive proxies / runtime payloads attached
+ * upstream survive the filter.
+ */
+export function filterImportTreeBySelection(
+  items: readonly FolderItem[],
+  selection: ReadonlySet<string>
+): FolderItem[] {
+  const out: FolderItem[] = []
+  for (const item of items) {
+    if (isAnyFolder(item)) {
+      const folder: Folder | EnvironmentFolder = item
+      const filteredChildren = filterImportTreeBySelection(folder.items, selection)
+      if (filteredChildren.length > 0) {
+        out.push({ ...folder, items: filteredChildren })
+      }
+    } else {
+      const key = importNaturalKeyForRequest(item)
+      if (selection.has(key)) out.push(item)
+    }
+  }
+  return out
+}
+
 export function walkImportTreeWithKeys(
   items: readonly FolderItem[],
   parentPath: readonly string[] = []

@@ -250,7 +250,7 @@ Then('the import modal should show the pet swagger preview without error', async
   // the URL fetch with the resolved Bearer token. /swagger.json is
   // not gated, so no further release is needed — just wait for the
   // preview list to mount.
-  await expect(p.locator('[data-testid="preview-list"]')).toBeVisible({ timeout: 15000 })
+  await expect(p.locator('[data-testid="import-selection-tree"]')).toBeVisible({ timeout: 15000 })
   await expect(p.locator('[data-testid="import-modal"] .import-error')).not.toBeVisible()
 })
 

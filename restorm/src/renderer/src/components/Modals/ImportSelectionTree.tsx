@@ -1,0 +1,235 @@
+import React, { useCallback, useMemo } from 'react'
+import {
+  ListView,
+  Toggle,
+  type ListViewItemData
+} from 'electron-core-ui/renderer'
+import {
+  importNaturalKeyForFolder,
+  importNaturalKeyForRequest
+} from '../../../../shared/utils/importNaturalKey'
+import type { FolderItem } from '../../../../shared/types/folderTypes'
+import { isAnyFolder, isRequest } from '../../../../shared/types/collections'
+import { mapToBadgeType } from '../../utils/badgeUtils'
+import { Badge } from '../common/Badge'
+
+export interface ImportSelectionTreeProps {
+  /**
+   * Parsed-spec preview tree from `window.restorm.import.preview`.
+   * The root entries are typically a single env folder containing
+   * the actual content; the env folder root is rendered without a
+   * Toggle (you can't opt out of the folder you're importing into).
+   */
+  items: FolderItem[]
+  /**
+   * Set of leaf natural keys the user wants to keep. Default
+   * initialisation should pass every leaf so the tree starts fully
+   * checked, matching the legacy "import everything" behaviour.
+   */
+  selection: ReadonlySet<string>
+  /** Called whenever the selection changes — pass-through to React state. */
+  onSelectionChange: (next: Set<string>) => void
+  /** Filter rows by case-insensitive name substring. Empty = no filter. */
+  searchFilter?: string
+  /** Test id stem (e.g. `import-selection-tree`). */
+  'data-testid'?: string
+}
+
+/**
+ * Decide the tri-state value for a folder row based on which of its
+ * leaf descendants are in the selection. Pure function so the leaf /
+ * folder UI stays consistent: a folder shows `'checked'` only when
+ * every descendant is selected, `'unchecked'` only when none is, and
+ * `'indeterminate'` otherwise.
+ */
+function folderStateFromSelection(
+  leafKeys: readonly string[],
+  selection: ReadonlySet<string>
+): 'checked' | 'unchecked' | 'indeterminate' {
+  if (leafKeys.length === 0) return 'unchecked'
+  let anySelected = false
+  let anyUnselected = false
+  for (const k of leafKeys) {
+    if (selection.has(k)) anySelected = true
+    else anyUnselected = true
+    if (anySelected && anyUnselected) return 'indeterminate'
+  }
+  return anySelected ? 'checked' : 'unchecked'
+}
+
+/**
+ * Collect the natural keys of every LEAF descendant of a folder
+ * subtree (in iteration order). Folder keys are skipped — the
+ * selection set tracks leaves only.
+ */
+function collectLeafKeys(items: readonly FolderItem[]): string[] {
+  const out: string[] = []
+  for (const item of items) {
+    if (isAnyFolder(item)) {
+      out.push(...collectLeafKeys(item.items))
+    } else if (isRequest(item)) {
+      out.push(importNaturalKeyForRequest(item))
+    }
+  }
+  return out
+}
+
+/**
+ * Toggle every leaf descendant in a folder subtree to a target value.
+ * Mutates a copy of the input set and returns it; the caller is
+ * expected to feed the result back through React state.
+ */
+function setFolderSelection(
+  leafKeys: readonly string[],
+  selection: ReadonlySet<string>,
+  next: boolean
+): Set<string> {
+  const out = new Set(selection)
+  for (const k of leafKeys) {
+    if (next) out.add(k)
+    else out.delete(k)
+  }
+  return out
+}
+
+/**
+ * Filter a tree by a case-insensitive name match. A folder is kept if
+ * any of its descendants match (so the user can drill down to a hit
+ * without losing the breadcrumb context). A leaf is kept only when
+ * its own display name matches. The selection set is preserved
+ * verbatim — filtering is purely a visibility concern, never edits
+ * what's checked.
+ */
+function filterTree(items: readonly FolderItem[], q: string): FolderItem[] {
+  if (!q) return [...items]
+  const needle = q.toLowerCase()
+  const out: FolderItem[] = []
+  for (const item of items) {
+    if (isAnyFolder(item)) {
+      const childMatches = filterTree(item.items, q)
+      const selfMatches = item.name.toLowerCase().includes(needle)
+      if (selfMatches || childMatches.length > 0) {
+        out.push({ ...item, items: childMatches.length > 0 ? childMatches : item.items })
+      }
+    } else if (isRequest(item)) {
+      const name = item.name.toLowerCase()
+      if (name.includes(needle)) out.push(item)
+    }
+  }
+  return out
+}
+
+export const ImportSelectionTree: React.FC<ImportSelectionTreeProps> = ({
+  items,
+  selection,
+  onSelectionChange,
+  searchFilter = '',
+  'data-testid': dataTestId
+}) => {
+  // Filter for display only — selection state stays scoped to the
+  // unfiltered tree, so toggling rows under a search keeps the
+  // checks for everything else intact.
+  const visibleItems = useMemo(() => filterTree(items, searchFilter), [items, searchFilter])
+
+  // Map each visible folder to its leaf-descendant keys once per
+  // render so the tri-state derivation in the row renderer stays
+  // O(1). Computed against the *original* tree so a folder's state
+  // reflects its full subtree, not the filtered one — otherwise a
+  // search hit on one route would make its parent folder appear
+  // fully checked even when other unfiltered descendants are not.
+  const leafKeysByFolderKey = useMemo(() => {
+    const map = new Map<string, string[]>()
+    const walk = (subtree: readonly FolderItem[], path: readonly string[]): void => {
+      for (const item of subtree) {
+        if (isAnyFolder(item)) {
+          const childPath = [...path, item.name]
+          map.set(importNaturalKeyForFolder(childPath), collectLeafKeys(item.items))
+          walk(item.items, childPath)
+        }
+      }
+    }
+    walk(items, [])
+    return map
+  }, [items])
+
+  const handleLeafToggle = useCallback(
+    (leafKey: string, nextChecked: boolean) => {
+      const next = new Set(selection)
+      if (nextChecked) next.add(leafKey)
+      else next.delete(leafKey)
+      onSelectionChange(next)
+    },
+    [selection, onSelectionChange]
+  )
+
+  const handleFolderToggle = useCallback(
+    (folderKey: string, nextChecked: boolean) => {
+      const leafKeys = leafKeysByFolderKey.get(folderKey) ?? []
+      onSelectionChange(setFolderSelection(leafKeys, selection, nextChecked))
+    },
+    [leafKeysByFolderKey, selection, onSelectionChange]
+  )
+
+  const listItems = useMemo(() => {
+    // Inline recursion lets us avoid a `useCallback` that references
+    // itself (which the linter rightly flags as a use-before-declare
+    // hazard). The renderer is purely derived from `visibleItems +
+    // selection`, so it's safe to rebuild on each dependency change.
+    const build = (subtree: readonly FolderItem[], path: readonly string[]): ListViewItemData[] => {
+      return subtree.map((item) => {
+        if (isAnyFolder(item)) {
+          const childPath = [...path, item.name]
+          const folderKey = importNaturalKeyForFolder(childPath)
+          const leafKeys = leafKeysByFolderKey.get(folderKey) ?? []
+          const state = folderStateFromSelection(leafKeys, selection)
+          const baseTestId = dataTestId ? `${dataTestId}-row-${folderKey.replace(/[^a-zA-Z0-9]/g, '_')}` : undefined
+          return {
+            id: folderKey,
+            title: item.name,
+            icon: 'folder',
+            isExpanded: true,
+            leftActions: (
+              <Toggle
+                checked={state === 'indeterminate' ? 'indeterminate' : state === 'checked'}
+                notFocusable
+                onChange={(nextChecked) => { handleFolderToggle(folderKey, nextChecked) }}
+                {...(baseTestId && { 'data-testid': `${baseTestId}-toggle` })}
+              />
+            ),
+            children: build(item.items, childPath)
+          }
+        }
+        const leafKey = importNaturalKeyForRequest(item)
+        const checked = selection.has(leafKey)
+        const requestType = item.type
+        const requestMethod = requestType === 'http' || requestType === 'auth' ? item.method : requestType
+        const badgeType = mapToBadgeType(requestMethod)
+        const baseTestId = dataTestId ? `${dataTestId}-row-${leafKey.replace(/[^a-zA-Z0-9]/g, '_')}` : undefined
+        return {
+          id: leafKey,
+          title: item.name,
+          icon: <Badge type={badgeType} />,
+          leftActions: (
+            <Toggle
+              checked={checked}
+              notFocusable
+              onChange={(nextChecked) => { handleLeafToggle(leafKey, nextChecked) }}
+              {...(baseTestId && { 'data-testid': `${baseTestId}-toggle` })}
+            />
+          )
+        }
+      })
+    }
+    return build(visibleItems, [])
+  }, [dataTestId, handleFolderToggle, handleLeafToggle, leafKeysByFolderKey, selection, visibleItems])
+
+  return (
+    <ListView
+      items={listItems}
+      ariaLabel="Import selection"
+      onItemClick={() => { /* handled by Toggle */ }}
+      onItemContextMenu={() => { /* selection tree is read-only here */ }}
+      {...(dataTestId && { 'data-testid': dataTestId })}
+    />
+  )
+}

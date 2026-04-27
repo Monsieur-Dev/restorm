@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
+  filterImportTreeBySelection,
   importNaturalKeyForFolder,
   importNaturalKeyForRequest,
   walkImportTreeWithKeys
@@ -149,6 +150,46 @@ describe('walkImportTreeWithKeys', () => {
     const first = walkImportTreeWithKeys(buildTree()).map(e => e.key)
     const second = walkImportTreeWithKeys(buildTree()).map(e => e.key)
     expect(first).toEqual(second)
+  })
+
+  it('filterImportTreeBySelection drops leaves not in the set', () => {
+    const tree: FolderItem[] = [
+      folder('pet', [
+        http('GET', '/pet/{petId}'),
+        http('POST', '/pet')
+      ])
+    ]
+    const keep = new Set(['request:http:GET /pet/{petId}'])
+    const filtered = filterImportTreeBySelection(tree, keep)
+    expect(filtered).toHaveLength(1)
+    const [rootFolder] = filtered
+    if (!rootFolder || !('items' in rootFolder)) throw new Error('unexpected shape')
+    expect(rootFolder.items.map((i) => importNaturalKeyForRequest(i as Request)))
+      .toEqual(['request:http:GET /pet/{petId}'])
+  })
+
+  it('filterImportTreeBySelection prunes folders that become empty', () => {
+    const tree: FolderItem[] = [
+      folder('keep', [http('GET', '/a')]),
+      folder('drop', [http('POST', '/b')])
+    ]
+    const keep = new Set(['request:http:GET /a'])
+    const filtered = filterImportTreeBySelection(tree, keep)
+    expect(filtered.map((i) => (i as Folder).name)).toEqual(['keep'])
+  })
+
+  it('filterImportTreeBySelection passes leaf request references through unchanged', () => {
+    // Pin: a structural clone of the surrounding folder layout but
+    // *no* clone of leaf requests. Reactive proxies / runtime
+    // payloads attached upstream by the import services need to
+    // survive the filter pass intact.
+    const leaf = http('GET', '/x')
+    const tree: FolderItem[] = [folder('group', [leaf])]
+    const filtered = filterImportTreeBySelection(tree, new Set(['request:http:GET /x']))
+    const [group] = filtered
+    if (!group || !('items' in group)) throw new Error('unexpected shape')
+    const [leafOut] = group.items
+    expect(leafOut).toBe(leaf)
   })
 
   it('falls through to a stable shape for unknown request kinds', () => {
