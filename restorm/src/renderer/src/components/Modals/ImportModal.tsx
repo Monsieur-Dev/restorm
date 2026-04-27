@@ -11,7 +11,7 @@ import {
   ListViewDropdown
 } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
-import type { FolderItem, EnvironmentFolder, Folder } from '../../../../shared/types/collections'
+import type { FolderItem, EnvironmentFolder, Folder, ImportSelectionSnapshot } from '../../../../shared/types/collections'
 import { isEnvironmentFolder, isRequest } from '../../../../shared/types/collections'
 import type { AuthenticationRequest } from '../../../../shared/models'
 import { logger } from 'electron-core-ui/renderer'
@@ -359,12 +359,36 @@ export function ImportModal({
       }
     }
 
+    // Stamp every top-level env folder in the imported tree with the
+    // user's selective-import choice so a future refresh can classify
+    // the diff into added / removed / kept-skipped. The pair
+    // (`imported`, `skipped`) covers the spec at capture time:
+    // `imported` is the live selection, `skipped` is everything else
+    // that was offered in the preview. The two lists are always
+    // disjoint and exhaustive over the pre-filter leaf set.
+    const allKeysAtCapture = allLeafKeys(previewItems)
+    const imported = Array.from(selection).sort()
+    const skipped = Array.from(allKeysAtCapture).filter((k) => !selection.has(k)).sort()
+    const snapshot: ImportSelectionSnapshot = {
+      capturedAt: Date.now(),
+      source: input.trim(),
+      imported,
+      skipped
+    }
+    const stampSnapshot = (items: FolderItem[]): FolderItem[] => items.map((item) => {
+      if (isEnvironmentFolder(item)) {
+        return { ...item, importSelection: snapshot } as EnvironmentFolder
+      }
+      return item
+    })
+    finalItems = stampSnapshot(finalItems)
+
     // Call import with current pending folders
     onImport(finalItems, targetFolderId, pendingFolders)
 
     // Close modal (useEffect will clear state when modal closes)
     onClose()
-  }, [previewItems, selection, targetFolderId, pendingFolders, onImport, onClose, attachedAuth])
+  }, [previewItems, selection, input, targetFolderId, pendingFolders, onImport, onClose, attachedAuth])
 
   const handleAuthAttach = useCallback((authRequest: AuthenticationRequest, resolvedHeaders: Record<string, string>) => {
     setAttachedAuth(authRequest)
