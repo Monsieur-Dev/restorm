@@ -256,3 +256,71 @@ describe('moveTabToAdjacentGroup — Ctrl+Alt+Left/Right', () => {
     expect(destGroupId).toBeNull()
   })
 })
+
+describe('cloneTree preserves tab references (Monaco-stability invariant)', () => {
+  // The same-group reorder path runs through `cloneTree`. Tabs hold
+  // ReactNode payloads (Monaco editors, Milkdown views, etc.) — those
+  // were getting dropped when the clone went through `JSON.stringify`.
+  // The reconciler then re-mounted the (newly identified) tab subtree
+  // and disposed any embedded editor mid-render. Pin the invariant.
+  it('keeps each EditorTab object identical across cloneTree', () => {
+    const tabA = { id: 'A', title: 'A', content: { __opaque: Symbol('A') } } as unknown as EditorTab
+    const tabB = { id: 'B', title: 'B', content: { __opaque: Symbol('B') } } as unknown as EditorTab
+    const tree: WorkbenchTree = {
+      orientation: 'horizontal',
+      groups: [{ id: 'g1', tabs: [tabA, tabB], activeTabId: 'A' }]
+    }
+    const cloned = cloneTree(tree)
+    expect(cloned).not.toBe(tree)
+    expect(cloned.groups).not.toBe(tree.groups)
+    const clonedGroup = cloned.groups[0] as TabGroupNode
+    expect(clonedGroup).not.toBe(tree.groups[0])
+    expect(clonedGroup.tabs).not.toBe((tree.groups[0] as TabGroupNode).tabs)
+    // The leaf tab references must NOT have been replaced — that's the
+    // whole point of the structural clone.
+    expect(clonedGroup.tabs[0]).toBe(tabA)
+    expect(clonedGroup.tabs[1]).toBe(tabB)
+  })
+
+  it('moveToOtherGroup keeps every tab reference identical across the move', () => {
+    // Inter-group drag was previously cloning via JSON, which stripped
+    // each EditorTab's ReactNode content and forced React to remount the
+    // moved subtree on the destination side — the same Monaco-disposal
+    // class of bug as the same-group case.
+    const tabA = { id: 'A', title: 'A', content: { editor: 'monaco-A' } } as unknown as EditorTab
+    const tabB = { id: 'B', title: 'B', content: { editor: 'monaco-B' } } as unknown as EditorTab
+    const tabC = { id: 'C', title: 'C', content: { editor: 'monaco-C' } } as unknown as EditorTab
+    const tree: WorkbenchTree = {
+      orientation: 'vertical',
+      groups: [
+        { id: 'g1', tabs: [tabA, tabB], activeTabId: 'A' },
+        { id: 'g2', tabs: [tabC], activeTabId: 'C' }
+      ]
+    }
+    const next = moveToOtherGroup(tree, 'g1', 'A', 'g2', 0)
+    // After move, g1 still has B and g2 has [A, C].
+    const g1 = next.groups[0] as TabGroupNode
+    const g2 = next.groups[1] as TabGroupNode
+    expect(g1.tabs[0]).toBe(tabB)
+    expect(g2.tabs[0]).toBe(tabA)
+    expect(g2.tabs[1]).toBe(tabC)
+  })
+
+  it('reorderWithinGroup keeps the moved tab reference identical to the input', () => {
+    const tabA = { id: 'A', title: 'A', content: { editor: 'monaco-A' } } as unknown as EditorTab
+    const tabB = { id: 'B', title: 'B', content: { editor: 'monaco-B' } } as unknown as EditorTab
+    const tabC = { id: 'C', title: 'C', content: { editor: 'monaco-C' } } as unknown as EditorTab
+    const tree: WorkbenchTree = {
+      orientation: 'horizontal',
+      groups: [{ id: 'g1', tabs: [tabA, tabB, tabC], activeTabId: 'A' }]
+    }
+    // Move A to the end → [B, C, A]; B and C should be the same refs,
+    // and the moved A should also be the same ref.
+    const next = reorderWithinGroup(tree, 'g1', 'A', 2)
+    const nextGroup = next.groups[0] as TabGroupNode
+    expect(nextGroup.tabs.map(t => t.id)).toEqual(['B', 'C', 'A'])
+    expect(nextGroup.tabs[0]).toBe(tabB)
+    expect(nextGroup.tabs[1]).toBe(tabC)
+    expect(nextGroup.tabs[2]).toBe(tabA)
+  })
+})

@@ -1,5 +1,6 @@
 import { ipcMain, BrowserWindow, dialog } from 'electron'
-import { logger, getFileService, isFileServiceInitialized, isPersistenceServiceInitialized, getPersistenceService, validatedHandle } from 'electron-core-ui'
+import { logger, getFileService, isFileServiceInitialized, isPersistenceServiceInitialized, getPersistenceService, getFeatureService, isFeatureServiceInitialized, validatedHandle } from 'electron-core-ui'
+import { isTabDetachEnabled } from './featureFlags'
 import { join, relative, dirname } from 'path'
 import { promises as fs, existsSync, statSync, rmSync } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
@@ -87,6 +88,15 @@ export function registerRestormIPC(deps: {
 
   // IPC handler to open Editor window
   validatedHandle('restorm:open-editor', openEditorArgs, (_event, [file]) => {
+    // Defence-in-depth gate: even if a renderer somehow dispatches
+    // this IPC while the `workbench.tabDetach` flag is off (the
+    // renderer's drag handler is supposed to short-circuit before
+    // ever reaching here), refuse to spawn a detached window. The
+    // pathway is partially implemented and not ready for end users.
+    if (!isFeatureServiceInitialized() || !isTabDetachEnabled(getFeatureService())) {
+      logger.warn('restorm:open-editor refused: workbench.tabDetach feature flag is off')
+      return
+    }
     logger.info('Opening Restorm editor window...', { file })
     try {
       const editorWindow = new EditorWindow(file)

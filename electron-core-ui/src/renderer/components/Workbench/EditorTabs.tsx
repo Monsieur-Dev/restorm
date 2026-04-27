@@ -37,6 +37,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 	onDetachToNewWindow,
 	renderTabTitle,
 	getTabContextMenuItems,
+	disableTabDetach,
 	dimmed,
 	onTabDoubleClick,
 	'data-testid': dataTestId
@@ -137,6 +138,16 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 			// Check if window under cursor is different from current window
 			const isDifferentWindow = windowUnderCursor && windowUnderCursor.windowId !== currentWindow.windowId
 
+			// Host-app gate: when the consumer disables tab detach (typically
+			// behind a feature flag for a partially-implemented detach
+			// pathway), any drag that ended outside the current window is a
+			// no-op. The tab stays put and no new window is opened. Intra-
+			// workbench rearrange / split paths run unchanged because they
+			// only fire when `insideCurrentWindow` is true.
+			if (!insideCurrentWindow && disableTabDetach) {
+				return
+			}
+
 			// If cursor is outside current window and over another window, send tab to that window
 			if (!insideCurrentWindow && isDifferentWindow) {
 				const tab = group.tabs.find((t) => t.id === tabId)
@@ -215,7 +226,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 			setDraggingTabId(undefined)
 			clearEditorDragData()
 		}
-	}, [draggingTabId, group.id, group.tabs, onCloseTab, onMoveTab, onGetTabContent, onDetachToNewWindow])
+	}, [draggingTabId, group.id, group.tabs, onCloseTab, onMoveTab, onGetTabContent, onDetachToNewWindow, disableTabDetach])
 
 	const updateDragOver = useCallback((e: React.DragEvent) => {
 		if (!containerRef.current) return;
