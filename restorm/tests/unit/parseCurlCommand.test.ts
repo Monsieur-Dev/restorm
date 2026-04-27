@@ -112,6 +112,42 @@ describe('parseCurlCommand', () => {
     expect(keys).toEqual(['status', 'limit'])
   })
 
+  it('maps multiple --data-urlencode flags to an x-www-form-urlencoded body', () => {
+    // OAuth-token-flow shape (Microsoft / Auth0 / Stripe doc snippets).
+    const r = parseCurlCommand(`curl --location 'https://login.example.com/oauth2/v2.0/token' \\
+--header 'Content-Type: application/x-www-form-urlencoded' \\
+--data-urlencode 'grant_type=client_credentials' \\
+--data-urlencode 'client_id=abc-123' \\
+--data-urlencode 'client_secret=secret-value' \\
+--data-urlencode 'scope=https://api.example.com/.default'`)
+    expect(r).not.toBeNull()
+    expect(r?.method).toBe('POST')
+    expect(r?.body?.type).toBe('x-www-form-urlencoded')
+    if (r?.body?.type === 'x-www-form-urlencoded') {
+      const keys = r.body.fields.map((f) => f.key)
+      expect(keys).toEqual(['grant_type', 'client_id', 'client_secret', 'scope'])
+      const scope = r.body.fields.find((f) => f.key === 'scope')
+      expect(scope?.value.toString()).toBe('https://api.example.com/.default')
+    }
+  })
+
+  it('--data-urlencode wins over a stray -d when both are present', () => {
+    const r = parseCurlCommand(`curl https://api.example.com -d 'legacy=1' --data-urlencode 'grant_type=client_credentials'`)
+    expect(r?.body?.type).toBe('x-www-form-urlencoded')
+    if (r?.body?.type === 'x-www-form-urlencoded') {
+      expect(r.body.fields[0]?.key).toBe('grant_type')
+    }
+  })
+
+  it('--data-urlencode accepts unquoted key=value when there is no whitespace', () => {
+    const r = parseCurlCommand(`curl https://api.example.com --data-urlencode grant_type=client_credentials`)
+    expect(r?.body?.type).toBe('x-www-form-urlencoded')
+    if (r?.body?.type === 'x-www-form-urlencoded') {
+      expect(r.body.fields[0]?.key).toBe('grant_type')
+      expect(r.body.fields[0]?.value.toString()).toBe('client_credentials')
+    }
+  })
+
   it('lifts a multi-line JSON body inside a single-quoted -d arg', () => {
     // Reproduction of the user-reported snippet: curl with a Handlebars
     // URL and a JSON body that spans multiple lines (each shell-escape

@@ -105,14 +105,56 @@ export function parseCurlCommand(curlCommand: string): {
       }
     }
 
-    // Body: prefer `-F` form fields when present (curl's `-F` always
-    // means multipart/form-data); otherwise fall back to `-d` text.
+    // Body. Three precedence tiers, in order of "most structured wins":
+    //   1. `--data-urlencode 'key=value'` (one or more) → an
+    //      `x-www-form-urlencoded` body whose KeyValue rows are the
+    //      parsed pairs. This is the OAuth-token-flow shape that comes
+    //      out of Microsoft / Stripe / Auth0 doc snippets and matches
+    //      curl's own semantics (each flag contributes a `key=value`
+    //      to the body).
+    //   2. `-F` / `--form` (one or more) → multipart/form-data, KV
+    //      rows.
+    //   3. `-d` / `--data` / `--data-raw` / `--data-binary` (single
+    //      payload) → text body. The first one wins; curl actually
+    //      merges multiple but a multi-`-d` cURL is rare in docs and
+    //      ambiguous to translate.
     let body: HTTPRequestBody | undefined
-    const dataMatch = /(?:-d|--data|--data-raw|--data-binary)\s+(?:'((?:[^']|\\.)*)'|"((?:[^"]|\\.)*)")/.exec(normalized)
-    const dataValue = dataMatch?.[1] ?? dataMatch?.[2]
-    if (dataValue !== undefined) {
-      const content = dataValue.replace(/\\"/g, '"').replace(/\\'/g, "'")
-      body = { type: 'text', content }
+
+    const urlencodeFields: KeyValue[] = []
+    // `--data-urlencode` *can* appear unquoted (`--data-urlencode key=value`)
+    // when the value has no spaces. Match three shapes: single-quoted,
+    // double-quoted, and unquoted-up-to-whitespace.
+    const urlencodeRegex = /--data-urlencode\s+(?:'((?:[^']|\\.)*)'|"((?:[^"]|\\.)*)"|([^\s'"]+))/g
+    let urlencodeMatch
+    while ((urlencodeMatch = urlencodeRegex.exec(normalized)) !== null) {
+      const raw = urlencodeMatch[1] ?? urlencodeMatch[2] ?? urlencodeMatch[3] ?? ''
+      const equalsIndex = raw.indexOf('=')
+      if (equalsIndex >= 0) {
+        urlencodeFields.push(createTypedKeyValue({
+          key: raw.substring(0, equalsIndex).trim(),
+          value: raw.substring(equalsIndex + 1).trim(),
+          enabled: true
+        }))
+      } else if (raw !== '') {
+        // Bare `--data-urlencode 'token'` has no `=` — treat as a
+        // value-only field with an empty key (curl emits the value
+        // URL-encoded, no `=` prefix).
+        urlencodeFields.push(createTypedKeyValue({
+          key: '',
+          value: raw,
+          enabled: true
+        }))
+      }
+    }
+    if (urlencodeFields.length > 0) {
+      body = { type: 'x-www-form-urlencoded', fields: urlencodeFields }
+    } else {
+      const dataMatch = /(?:-d|--data|--data-raw|--data-binary)\s+(?:'((?:[^']|\\.)*)'|"((?:[^"]|\\.)*)")/.exec(normalized)
+      const dataValue = dataMatch?.[1] ?? dataMatch?.[2]
+      if (dataValue !== undefined) {
+        const content = dataValue.replace(/\\"/g, '"').replace(/\\'/g, "'")
+        body = { type: 'text', content }
+      }
     }
     const formRegex = /(?:-F|--form)\s+(?:'((?:[^']|\\.)*)'|"((?:[^"]|\\.)*)")/g
     const formFields: KeyValue[] = []

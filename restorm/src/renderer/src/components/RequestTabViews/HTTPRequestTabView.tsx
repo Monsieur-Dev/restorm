@@ -40,7 +40,6 @@ import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabView
 import { useCompiledDocumentation } from '../../hooks/useCompiledDocumentation'
 import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
-import { toasterService } from 'electron-core-ui/renderer'
 
 const methodSelectWrapperStyle: CSSProperties = { width: 90, flexShrink: 0 }
 const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
@@ -519,14 +518,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
 
   const { pendingPaste } = useCurlPaste({
     hostRef: urlSectionHostRef,
-    apply: applyParsedCurl,
-    onSilentApply: () => {
-      toasterService.push('app', {
-        title: 'Replaced from cURL',
-        body: 'Request transport fields populated from the pasted curl command.',
-        durationMs: 3000
-      })
-    }
+    apply: applyParsedCurl
   })
 
   const handleSend = useCallback((): void => {

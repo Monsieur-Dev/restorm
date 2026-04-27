@@ -4,9 +4,11 @@
  * The hook intercepts `paste` events on the wired DOM subtree, sniffs
  * for a `curl` command, parses it via the shared `parseCurlCommand`
  * helper, and exposes a `pendingPaste` state the host renders into a
- * non-modal "Replace request? / Cancel" callout. The first confirm per
- * tab is required; once the user has replaced once, subsequent pastes
- * apply silently with a toast.
+ * non-modal "Replace request? / Cancel" callout. Every detected cURL
+ * paste asks for confirmation — there's no "first time only" shortcut.
+ * The earlier opt-in-on-first-use mode would silently swallow
+ * subsequent pastes, which surprised users; the explicit prompt is
+ * cheap (one click) and unambiguous.
  *
  * The hook is shape-agnostic: each request-tab view passes a small
  * `apply` callback that maps the parsed cURL onto its own state setters
@@ -29,16 +31,11 @@ export interface UseCurlPasteOptions {
    */
   readonly hostRef: RefObject<HTMLElement | null>
   /**
-   * Called when the user confirms (or when silent-apply kicks in)
-   * with the parsed cURL. Implementers map onto their own state
-   * setters — the hook never writes to anything itself.
+   * Called when the user confirms with the parsed cURL. Implementers
+   * map onto their own state setters — the hook never writes to
+   * anything itself.
    */
   readonly apply: (parsed: ParsedCurl) => void
-  /**
-   * Optional silent-apply notifier. Returning `void` (or a no-op) is
-   * fine; restorm-aware callers wire this to the toaster service.
-   */
-  readonly onSilentApply?: (parsed: ParsedCurl) => void
   /**
    * Soft cap on the clipboard size we'll inspect. Anything above this
    * is treated as a non-cURL paste and falls through to the default
@@ -55,23 +52,17 @@ export interface PendingCurlPaste {
 export interface UseCurlPasteResult {
   /** Non-null while the host should render the "Replace?" callout. */
   readonly pendingPaste: PendingCurlPaste | null
-  /** True when the user has already accepted at least one cURL paste
-   * on this tab — subsequent pastes apply silently. */
-  readonly hasAcceptedOnce: boolean
 }
 
 const DEFAULT_MAX_CLIPBOARD_SIZE = 100_000
 
 export function useCurlPaste(options: UseCurlPasteOptions): UseCurlPasteResult {
-  const { hostRef, apply, onSilentApply, maxClipboardSize = DEFAULT_MAX_CLIPBOARD_SIZE } = options
+  const { hostRef, apply, maxClipboardSize = DEFAULT_MAX_CLIPBOARD_SIZE } = options
   const [pending, setPending] = useState<PendingCurlPaste | null>(null)
-  const [hasAcceptedOnce, setHasAcceptedOnce] = useState(false)
-  // Ref-mirror the latest callbacks so the listener captures stable
-  // references — avoids re-attaching on every parent render.
+  // Ref-mirror the latest `apply` callback so the listener captures a
+  // stable reference — avoids re-attaching on every parent render.
   const applyRef = useRef(apply)
-  const onSilentApplyRef = useRef(onSilentApply)
   useEffect(() => { applyRef.current = apply }, [apply])
-  useEffect(() => { onSilentApplyRef.current = onSilentApply }, [onSilentApply])
 
   const handlePaste = useCallback((event: ClipboardEvent): void => {
     const text = event.clipboardData?.getData('text') ?? ''
@@ -85,24 +76,17 @@ export function useCurlPaste(options: UseCurlPasteOptions): UseCurlPasteResult {
     event.preventDefault()
     event.stopPropagation()
 
-    if (hasAcceptedOnce) {
-      applyRef.current(parsed)
-      onSilentApplyRef.current?.(parsed)
-      return
-    }
-
     setPending({
       parsed,
       confirm: () => {
         applyRef.current(parsed)
-        setHasAcceptedOnce(true)
         setPending(null)
       },
       cancel: () => {
         setPending(null)
       }
     })
-  }, [maxClipboardSize, hasAcceptedOnce])
+  }, [maxClipboardSize])
 
   useEffect(() => {
     const node = hostRef.current
@@ -115,5 +99,5 @@ export function useCurlPaste(options: UseCurlPasteOptions): UseCurlPasteResult {
     return () => { node.removeEventListener('paste', handlePaste, true) }
   }, [hostRef, handlePaste])
 
-  return { pendingPaste: pending, hasAcceptedOnce }
+  return { pendingPaste: pending }
 }

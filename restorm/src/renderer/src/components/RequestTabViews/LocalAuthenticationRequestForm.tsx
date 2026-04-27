@@ -58,7 +58,6 @@ import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
-import { toasterService } from 'electron-core-ui/renderer'
 
 // Stable reference for the Configuration-tab Handlebars fields that
 // don't have any source of runtime variables (there's no
@@ -416,14 +415,7 @@ export const LocalAuthenticationRequestForm: React.FC<LocalAuthenticationRequest
 
   const { pendingPaste } = useCurlPaste({
     hostRef: urlSectionHostRef,
-    apply: applyParsedCurl,
-    onSilentApply: () => {
-      toasterService.push('app', {
-        title: 'Replaced from cURL',
-        body: 'Authentication route fields populated from the pasted curl command.',
-        durationMs: 3000
-      })
-    }
+    apply: applyParsedCurl
   })
 
   const handleExpirationChange = useCallback((next: string) => {
