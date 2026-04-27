@@ -614,7 +614,6 @@ export function ImportModal({
               <div className="import-preview-actions">
                 <Button
                   secondary
-                  small
                   onClick={() => { setSelection(allLeafKeys(previewItems)) }}
                   data-testid="import-select-all-button"
                 >
@@ -622,7 +621,6 @@ export function ImportModal({
                 </Button>
                 <Button
                   secondary
-                  small
                   onClick={() => { setSelection(new Set()) }}
                   data-testid="import-select-none-button"
                 >
