@@ -485,3 +485,19 @@ Feature: Full workflow end-to-end scenario
     When I close the app
     Then the saved main window bounds should be x=120 y=80 width=1200 height=800
     And no errors should have been logged
+
+  Scenario: Selective import drops the unchecked group and persists the snapshot
+    # Stand alone scenario — the long workflow above already imported
+    # the full Petstore, so this one starts with a fresh collection
+    # to keep the assertions about "what got imported" tight.
+    Given a fresh app seeded with the main window at x=10 y=10
+    When I create a new single-file YAML collection named "selective-import"
+    Then the file "selective-import.restorm" should exist in the temp dir
+
+    When I selectively import the Petstore swagger excluding the "store" folder
+    And I save all with Ctrl+Shift+S
+    Then the imported tree should not contain any "store" routes
+    And the env folder file should record skipped store routes in importSelection
+
+    When I close the app
+    Then no errors should have been logged
