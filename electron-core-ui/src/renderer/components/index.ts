@@ -47,7 +47,7 @@ export { SettingsPage, SettingsModalProvider, useSettingsModal } from './Setting
 
 // Toggle exports
 export { Toggle, defaultToggleStyles } from './Toggle/index'
-export type { IToggleStyles, ICheckboxStyles, ToggleProps } from './Toggle/index'
+export type { IToggleStyles, ICheckboxStyles, ToggleProps, ToggleState, ToggleValue } from './Toggle/index'
 
 // Radio exports
 export { RadioGroup, defaultRadioStyles } from './Radio/index'

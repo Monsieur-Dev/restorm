@@ -33,7 +33,7 @@ const ToggleTab: React.FC = () => {
       <div style={{ display: 'grid', gap: 10 }}>
         <Toggle
           data-testid="toggle-basic-checked"
-          isChecked={checkedA}
+          checked={checkedA}
           onChange={(checked, viaKeyboard) => {
             setCheckedA(checked)
             setLastChange({ id: 'toggle-basic-checked', checked, viaKeyboard })
@@ -45,7 +45,7 @@ const ToggleTab: React.FC = () => {
 
         <Toggle
           data-testid="toggle-basic-unchecked"
-          isChecked={checkedB}
+          checked={checkedB}
           onChange={(checked, viaKeyboard) => {
             setCheckedB(checked)
             setLastChange({ id: 'toggle-basic-unchecked', checked, viaKeyboard })
@@ -57,7 +57,7 @@ const ToggleTab: React.FC = () => {
 
         <Toggle
           data-testid="toggle-disabled"
-          isChecked={disabledChecked}
+          checked={disabledChecked}
           disabled={true}
           onChange={(checked, viaKeyboard) => {
             setDisabledChecked(checked)
@@ -70,7 +70,7 @@ const ToggleTab: React.FC = () => {
 
         <Toggle
           data-testid="toggle-no-focus"
-          isChecked={noFocusChecked}
+          checked={noFocusChecked}
           notFocusable={true}
           onChange={(checked, viaKeyboard) => {
             setNoFocusChecked(checked)

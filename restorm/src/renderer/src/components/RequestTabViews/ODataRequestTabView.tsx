@@ -975,7 +975,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         <div style={{ ...rowStyle, ...numericItemStyle }}>
           <label style={labelStyle}>$count</label>
           <Toggle
-            isChecked={request.queryOptions.count === true}
+            checked={request.queryOptions.count === true}
             onChange={setCount}
             data-testid="odata-request-count"
           />

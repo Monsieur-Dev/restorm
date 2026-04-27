@@ -44,6 +44,12 @@ export function defineToggleBddSteps({ When, Then }: BddFnsWithPage): void {
     if ((attr ?? '') !== 'false') throw new Error(`Expected toggle "${testId}" to be unchecked`)
   })
 
+  Then('toggle {string} should be indeterminate', async ({ page }, testId: unknown) => {
+    if (typeof testId !== 'string') throw new Error('Invalid toggle id')
+    const attr = await asPage(page).locator(toggleActionSelector(testId)).getAttribute('aria-checked')
+    if ((attr ?? '') !== 'mixed') throw new Error(`Expected toggle "${testId}" to be indeterminate (aria-checked="mixed")`)
+  })
+
   Then('toggle {string} should be disabled', async ({ page }, testId: unknown) => {
     if (typeof testId !== 'string') throw new Error('Invalid toggle id')
     const attr = await asPage(page).locator(toggleActionSelector(testId)).getAttribute('aria-disabled')

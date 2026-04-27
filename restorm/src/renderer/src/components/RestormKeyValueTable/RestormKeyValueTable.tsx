@@ -720,7 +720,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', height: '100%', minWidth: 0 }}>
             <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Toggle
-                isChecked={isTrue}
+                checked={isTrue}
                 onChange={(next) => {
                   if (id) valueTypeByRowIdRef.current.set(id, new BooleanValue(next))
                   onChange(next ? 'true' : 'false')

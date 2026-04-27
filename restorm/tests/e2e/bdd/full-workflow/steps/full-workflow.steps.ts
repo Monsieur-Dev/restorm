@@ -332,6 +332,99 @@ When(
 )
 
 When(
+  'I selectively import the Petstore swagger excluding the {string} folder',
+  async ({}, folderName: string) => {
+    if (!page) throw new Error('app must be launched before importing')
+    const samplePath = join(SAMPLES_DIR, 'swagger-petstore.json')
+    expect(existsSync(samplePath), `sample file ${samplePath} must exist`).toBe(true)
+
+    await page.keyboard.press('Control+I')
+    const modal = page.locator('[data-testid="import-modal"]')
+    await expect(modal).toBeVisible({ timeout: 10000 })
+
+    const input = modal.locator('textarea, input[type="text"]').first()
+    await input.fill(samplePath)
+
+    // The selection tree mounts after the spec is parsed.
+    await expect(modal.locator('[data-testid="import-selection-tree"]')).toBeVisible({ timeout: 15000 })
+
+    // Click the folder Toggle to uncheck the entire group (cascades
+    // to descendants). The selection-tree row test ids are
+    //   `import-selection-tree-row-folder_<sanitised-path>`
+    // where `_` replaces every non-alphanumeric character in the
+    // natural key (`folder:Swagger Petstore/store` →
+    // `folder_Swagger_Petstore_store`). Match on the `_<folderName>`
+    // suffix so the test stays robust to spec-title changes.
+    const folderToggle = modal.locator(
+      `[data-testid^="import-selection-tree-row-folder_"][data-testid$="_${folderName}-toggle-action"]`
+    ).first()
+    await expect(folderToggle).toBeVisible({ timeout: 5000 })
+    await folderToggle.click()
+    await expect(folderToggle).toHaveAttribute('aria-checked', 'false', { timeout: 5000 })
+
+    const importButton = modal.locator('[role="button"]:has-text("Import")[aria-disabled="false"]')
+    await expect(importButton).toBeVisible({ timeout: 5000 })
+    await importButton.click()
+    await expect(modal).not.toBeVisible({ timeout: 10000 })
+
+    // The auto-opened env-folder tab obscures later tab-based
+    // assertions; close it the same way `runImport` does.
+    const activeTab = page.locator('.tab[role="tab"][aria-selected="true"]').first()
+    await expect(activeTab).toBeVisible({ timeout: 10000 })
+    await activeTab.locator('button[aria-label="Close"]').first().click()
+    await expect(page.locator('.tab[role="tab"]')).toHaveCount(0, { timeout: 5000 })
+  }
+)
+
+Then(
+  'the imported tree should not contain any {string} routes',
+  async ({}, segment: string) => {
+    if (!page) throw new Error('app must be launched')
+    // After save-all, the single-file YAML collection at
+    // `FULL_WORKFLOW_TEMP_DIR/selective-import.restorm` carries every
+    // imported request inline. Read it and assert no `url:` line
+    // mentions the unchecked group's path segment. Folders may
+    // persist as empty arrays; we anchor on the request URL so the
+    // assertion stays insensitive to surrounding scaffolding.
+    const filePath = join(FULL_WORKFLOW_TEMP_DIR, 'selective-import.restorm')
+    expect(existsSync(filePath), `${filePath} must exist`).toBe(true)
+    const content = readFileSync(filePath, 'utf-8')
+    const re = new RegExp(`url:\\s*[^\\n]*\\b${segment}\\b`, 'g')
+    const matches = content.match(re) ?? []
+    expect(matches, `no url: line should reference "${segment}"`).toEqual([])
+  }
+)
+
+Then(
+  'the env folder file should record skipped store routes in importSelection',
+  async () => {
+    const filePath = join(FULL_WORKFLOW_TEMP_DIR, 'selective-import.restorm')
+    expect(existsSync(filePath), `${filePath} must exist`).toBe(true)
+    const content = readFileSync(filePath, 'utf-8')
+    expect(content, 'importSelection must be persisted on the env folder').toContain('importSelection:')
+    // Pin the four /store/* natural keys from the Petstore spec.
+    // The Swagger importer normalises hosts into a `{{baseUrl}}`
+    // handlebar so the keys carry that prefix verbatim, alongside
+    // path parameters left as `{{name}}` placeholders.
+    const expectedSkipped = [
+      'request:http:GET {{baseUrl}}/store/inventory',
+      'request:http:GET {{baseUrl}}/store/order/{{orderId}}',
+      'request:http:DELETE {{baseUrl}}/store/order/{{orderId}}',
+      'request:http:POST {{baseUrl}}/store/order'
+    ]
+    for (const key of expectedSkipped) {
+      expect(content, `importSelection.skipped should contain "${key}"`).toContain(key)
+    }
+    // None of the skipped keys should appear inside the `imported:`
+    // block. Capture the imported list specifically and check.
+    const importedBlockMatch = /imported:\s*((?:\n\s+- [^\n]+)+)/.exec(content)
+    const importedBlock = importedBlockMatch ? importedBlockMatch[1] : ''
+    const offending = expectedSkipped.filter((k) => importedBlock.includes(k))
+    expect(offending, 'importSelection.imported should not contain any skipped /store route').toEqual([])
+  }
+)
+
+When(
   'I import the URL {string}',
   async ({}, url: string) => {
     if (!page) throw new Error('app must be launched before importing')

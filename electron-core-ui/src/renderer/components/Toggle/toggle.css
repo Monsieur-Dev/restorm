@@ -62,3 +62,14 @@
 .action-bar .checkbox-action-item > .checkbox-label {
 	font-size: 12px;
 }
+
+/* Indeterminate state: identical active border to `.checked` but
+ * with a transparent fill so the dash glyph reads against the
+ * theme's normal surface, the same way the browser-native
+ * `<input type="checkbox" indeterminate>` is shown. The inline
+ * style on the toggle action element wires the colours via the
+ * existing CSS variables, so this rule only carries the shared
+ * structural concerns (cursor, hit-area). */
+.custom-toggle.indeterminate {
+	cursor: pointer;
+}

@@ -82,6 +82,30 @@
      becomes the flex-1 scroll area. */
 }
 
+.import-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.import-preview-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.import-preview-search {
+  /* The search input sits between the header and the tree; keep a
+     small gap and let the input fill the row. */
+  display: flex;
+}
+
+.import-preview-search > * {
+  flex: 1;
+  min-width: 0;
+}
+
 .import-preview {
   border: 1px solid var(--vscode-editorWidget-border);
   border-radius: 4px;

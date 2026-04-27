@@ -70,7 +70,7 @@ When('I open the import modal and paste the OData metadata URL', async () => {
   // Wait for the importer to fetch + parse the EDMX. The preview list
   // populating is the "ready" signal — without it, clicking Import
   // races the preview state and lands an empty tree.
-  await expect(p.locator('[data-testid="preview-list"]')).toBeVisible({ timeout: 30000 })
+  await expect(p.locator('[data-testid="import-selection-tree"]')).toBeVisible({ timeout: 30000 })
 })
 
 When('I import the previewed routes', async () => {
