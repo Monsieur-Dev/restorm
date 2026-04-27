@@ -81,6 +81,15 @@ export interface EditorWorkbenchCallbacks {
 		groupId: string,
 		actions: { close: () => void; closeOthersInGroup: () => void }
 	) => ContextMenuItem[] | undefined;
+	/**
+	 * When true, dragging a tab outside the current window's bounds is
+	 * a no-op: the tab stays in its original group and no new
+	 * BrowserWindow is created. Use this to gate the detach-to-new-
+	 * window pathway behind a host-app feature flag while leaving
+	 * intra-workbench drag/drop and split behaviour unchanged. Default
+	 * (omitted / false): the existing detach pathway runs.
+	 */
+	disableTabDetach?: boolean;
 }
 
 /**

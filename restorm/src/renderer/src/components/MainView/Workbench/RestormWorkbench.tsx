@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
-import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, IconView, TabSwitcherOverlay, navigationService, type ContextMenuItem } from 'electron-core-ui/renderer'
+import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, IconView, TabSwitcherOverlay, navigationService, useFeature, type ContextMenuItem } from 'electron-core-ui/renderer'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback, TabSwitcherItem } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
 import type { RestormEditorTab, BreadcrumbItem } from '../../../../../shared/types/editor'
@@ -864,6 +864,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     return undefined
   }, [tree])
 
+  // Tab-detach is gated behind the `workbench.tabDetach` feature flag
+  // (defaulted off in `restorm/resources/features.yaml`). When disabled,
+  // dragging a tab outside the window's bounds is a no-op: the tab
+  // stays put, no new BrowserWindow is opened, and the
+  // `restorm:open-editor` IPC channel rejects the request main-side
+  // for defence-in-depth. Engineers working on the underlying detach
+  // bug flip the flag on locally to reproduce the buggy state.
+  const { isEnabled: tabDetachEnabled } = useFeature('workbench.tabDetach')
+
   const callbacks = useMemo<Partial<EditorWorkbenchCallbacks>>(() => {
     return {
       onWorkbenchTabDropped: handleTabDropped,
@@ -872,6 +881,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       onDetachToNewWindow: handleDetachToNewWindow,
       getTabContextMenuItems,
       onGetTabContent: getTabContent,
+      disableTabDetach: !tabDetachEnabled,
       // Forward tab activation from any group (incl. non-main split
       // groups) so the sidebar can sync. Intentionally no dedup here:
       // clicking an already-active tab must still re-trigger ancestor
@@ -883,7 +893,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         onTabActivate?.(tabId)
       }
     }
-  }, [handleTabDropped, workbenchRenderTabContent, renderTabTitle, handleDetachToNewWindow, getTabContextMenuItems, getTabContent, onTabActivate])
+  }, [handleTabDropped, workbenchRenderTabContent, renderTabTitle, handleDetachToNewWindow, getTabContextMenuItems, getTabContent, onTabActivate, tabDetachEnabled])
 
   const handleTreeChange = useCallback(
     (newTree: WorkbenchTree) => {

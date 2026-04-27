@@ -940,6 +940,9 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		if (extCallbacks.getTabContextMenuItems) {
 			extras['getTabContextMenuItems'] = extCallbacks.getTabContextMenuItems;
 		}
+		if (extCallbacks.disableTabDetach) {
+			extras['disableTabDetach'] = extCallbacks.disableTabDetach;
+		}
 		// Determine if this group has focus
 		const hasFocus = effectiveFocusedGroupId === leaf.id;
 		return (
@@ -968,6 +971,7 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		extCallbacks.renderTabTitle,
 		extCallbacks.onGetTabContent,
 		extCallbacks.getTabContextMenuItems,
+		extCallbacks.disableTabDetach,
 		effectiveFocusedGroupId,
 		testId
 	]);

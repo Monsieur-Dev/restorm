@@ -761,9 +761,12 @@ export async function importOpenAPIValidated(
   // The library's types are loose around the bundled API root — work
   // with `unknown` and round-trip through the validator. Any validation
   // error surfaces as a thrown `Error` with the original message.
-  const SwaggerParser = (await import('@apidevtools/swagger-parser')).default as unknown as {
-    validate: (api: unknown) => Promise<unknown>
+  // Narrow the imported module first, then read `.default` from the
+  // narrowed shape so the property access has a concrete type.
+  const swaggerParserModule = (await import('@apidevtools/swagger-parser')) as unknown as {
+    default: { validate: (api: unknown) => Promise<unknown> }
   }
+  const SwaggerParser = swaggerParserModule.default
   try {
     const validated = await SwaggerParser.validate(spec)
     return importOpenAPI(validated as OAS3Spec | OAS31Spec, options)

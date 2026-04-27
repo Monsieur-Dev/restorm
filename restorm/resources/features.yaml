@@ -28,3 +28,14 @@ Features:
     Strategies:
       - Type: Basic
         Enabled: true
+
+  # Workbench tab-detach: drag a tab outside the window to spawn a
+  # new BrowserWindow holding that tab. The pathway is partially
+  # implemented and ships behaviour that's clearly not ready yet
+  # (a separate fix ticket tracks the remaining work). Default OFF —
+  # invisible to end users in production builds. Engineers working
+  # on the fix flip this on locally to reproduce the buggy state.
+  - Name: "workbench.tabDetach"
+    Strategies:
+      - Type: Basic
+        Enabled: false
