@@ -38,6 +38,9 @@ import { HTTPRequestBodySection } from './HTTPRequestBodySection'
 import type { HTTPRequestBody } from '../../../../shared/types/requestPrimitives'
 import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabViewUtils'
 import { useCompiledDocumentation } from '../../hooks/useCompiledDocumentation'
+import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
+import { CurlPasteCallout } from '../CurlPasteCallout'
+import { toasterService } from 'electron-core-ui/renderer'
 
 const methodSelectWrapperStyle: CSSProperties = { width: 90, flexShrink: 0 }
 const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
@@ -144,6 +147,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   const queryParamsRef = useRef<KeyValueTableHandle | null>(null)
   const pathParamsRef = useRef<KeyValueTableHandle | null>(null)
   const requestIdRef = useRef<string>(request.id)
+  // Bumped on smart-paste apply so the KV tables remount and re-read
+  // their `initialRows` from the now-mutated request object.
+  const [transportEpoch, setTransportEpoch] = useState(0)
+  const urlSectionHostRef = useRef<HTMLDivElement | null>(null)
   const sourceIdRef = useRef<string>('')
   sourceIdRef.current ||= crypto.randomUUID()
   const urlVariablesBootstrappedRef = useRef<boolean>(false)
@@ -467,6 +474,61 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     []
   )
 
+  /**
+   * Smart-paste: when the user pastes a `curl` command on the URL
+   * section, replace the request's transport fields with the parsed
+   * values. Mutates the reactive proxy directly (so anyone listening
+   * via the event bus sees the new values), refreshes local React
+   * state for fields that drive the UI, and bumps `transportEpoch`
+   * so the KV tables remount with `initialRows` reflecting the new
+   * arrays.
+   */
+  const applyParsedCurl = useCallback((parsed: ParsedCurl): void => {
+    updateReactiveProperty(request, 'method', parsed.method)
+    setMethod(parsed.method)
+    updateReactiveProperty(request, 'url', parsed.url)
+    setUrl(parsed.url)
+    updateReactiveProperty(request, 'headers', parsed.headers)
+    updateReactiveProperty(request, 'params', parsed.params)
+    // cURL has no notion of "path params" — clear them so a stale
+    // entry from before the paste doesn't survive the replace.
+    updateReactiveProperty(request, 'pathParams', [])
+    if (parsed.body) {
+      // Two parallel `HTTPRequestBody` shapes coexist in the codebase
+      // (`shared/types/requestPrimitives` uses kebab-case `'form-data'`,
+      // `shared/models` uses camelCase `formData`). The view + reactive
+      // pipeline standardise on the kebab-case union, so cast the
+      // assignment to bridge the model side.
+      updateReactiveProperty(request, 'body', parsed.body as unknown as HTTPRequestBody)
+      const next = parsed.body
+      if (next.type === 'text') {
+        setBody(next.content)
+        setBodyMode('text')
+      } else if (next.type === 'form-data') {
+        setBody('')
+        setBodyMode('form-data')
+      }
+    } else {
+      updateReactiveProperty(request, 'body', undefined)
+      setBody('')
+      setBodyMode('text')
+      setBodyFilePath('')
+    }
+    setTransportEpoch((n) => n + 1)
+  }, [request])
+
+  const { pendingPaste } = useCurlPaste({
+    hostRef: urlSectionHostRef,
+    apply: applyParsedCurl,
+    onSilentApply: () => {
+      toasterService.push('app', {
+        title: 'Replaced from cURL',
+        body: 'Request transport fields populated from the pasted curl command.',
+        durationMs: 3000
+      })
+    }
+  })
+
   const handleSend = useCallback((): void => {
     if (isSending) return
     const requestId = request.id
@@ -633,6 +695,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         )}
       >
         <RestormKeyValueTable
+          key={`headers-${transportEpoch}`}
           ref={headersParamsRef}
           variables={emptyVariables}
           helpers={handlebarsHelpers}
@@ -663,6 +726,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         )}
       >
         <RestormKeyValueTable
+          key={`pathParams-${transportEpoch}`}
           ref={pathParamsRef}
           variables={emptyVariables}
           helpers={handlebarsHelpers}
@@ -696,6 +760,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         )}
       >
         <RestormKeyValueTable
+          key={`params-${transportEpoch}`}
           ref={queryParamsRef}
           variables={emptyVariables}
           helpers={handlebarsHelpers}
@@ -761,6 +826,14 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
 
   // URL section
   const urlSection = (
+    <div ref={urlSectionHostRef} data-testid="http-request-url-section-host">
+      {pendingPaste && (
+        <CurlPasteCallout
+          onConfirm={pendingPaste.confirm}
+          onCancel={pendingPaste.cancel}
+          data-testid="http-request-curl-paste-callout"
+        />
+      )}
     <ControlGroup data-testid="http-request-url-section">
       <div style={methodSelectWrapperStyle}>
         <SelectBox
@@ -800,6 +873,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         />
       )}
     </ControlGroup>
+    </div>
   )
 
   const handleCloseHistoryModal = useCallback(() => {

@@ -25,6 +25,9 @@ import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
 import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabViewUtils'
 import { useCompiledDocumentation } from '../../hooks/useCompiledDocumentation'
+import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
+import { CurlPasteCallout } from '../CurlPasteCallout'
+import { toasterService } from 'electron-core-ui/renderer'
 
 export interface GraphQLRequestTabViewProps {
   request: GraphQLRequest
@@ -60,6 +63,9 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   const sourceIdRef = useRef<string>(crypto.randomUUID())
   
   const headersRef = useRef<KeyValueTableHandle | null>(null)
+  // Bumped on smart-paste apply so the headers KV table remounts.
+  const [transportEpoch, setTransportEpoch] = useState(0)
+  const urlSectionHostRef = useRef<HTMLDivElement | null>(null)
 
   const handleRequestReset = useCallback(() => {
     setUrlState(request.url)
@@ -282,6 +288,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         )}
       >
         <RestormKeyValueTable
+          key={`headers-${transportEpoch}`}
           ref={headersRef}
           variables={emptyVariables}
           helpers={handlebarsHelpers}
@@ -369,8 +376,38 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     return buildGraphqlResponseView(historyResponse)
   }, [buildGraphqlResponseView, request.id])
   
+  // Smart-paste: GraphQL has its own `query` / `variables` so the
+  // parsed cURL only contributes URL + headers. Body / params live
+  // in the GraphQL operation, not the HTTP transport, so they're
+  // intentionally dropped.
+  const applyParsedCurl = useCallback((parsed: ParsedCurl): void => {
+    setUrl(parsed.url)
+    updateReactiveProperty(request, 'headers', parsed.headers)
+    setTransportEpoch((n) => n + 1)
+  }, [request, setUrl])
+
+  const { pendingPaste } = useCurlPaste({
+    hostRef: urlSectionHostRef,
+    apply: applyParsedCurl,
+    onSilentApply: () => {
+      toasterService.push('app', {
+        title: 'Replaced from cURL',
+        body: 'GraphQL endpoint URL and headers populated from the pasted curl command.',
+        durationMs: 3000
+      })
+    }
+  })
+
   // URL section
   const urlSection = (
+    <div ref={urlSectionHostRef} data-testid="graphql-url-section-host">
+      {pendingPaste && (
+        <CurlPasteCallout
+          onConfirm={pendingPaste.confirm}
+          onCancel={pendingPaste.cancel}
+          data-testid="graphql-curl-paste-callout"
+        />
+      )}
     <ControlGroup data-testid="graphql-url-section">
       <div style={{ flex: 1, minWidth: 0 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
         <RestormVariableInputBox
@@ -393,6 +430,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         data-testid="graphql-action-button"
       />
     </ControlGroup>
+    </div>
   )
   
   const handleCloseHistoryModal = useCallback(() => {

@@ -32,6 +32,8 @@ export interface CalloutProps {
   icon?: string
   /** Optional className for additional styling */
   className?: string
+  /** Optional inline actions rendered after the message — typically one or two `<Button>`s. Use for non-modal "confirm / dismiss" callouts. */
+  actions?: React.ReactNode
 }
 ```
 
@@ -51,6 +53,31 @@ export const Example: React.FC = () => {
   )
 }
 ```
+
+#### With inline actions
+
+```tsx
+import React from 'react'
+import { Callout, Button } from 'electron-core-ui/renderer'
+
+export const InlineConfirm: React.FC<{ onApply: () => void; onCancel: () => void }> = ({ onApply, onCancel }) => {
+  return (
+    <Callout
+      variant="info"
+      message="Detected a curl command on the clipboard."
+      data-testid="curl-paste-callout"
+      actions={
+        <>
+          <Button small onClick={onApply}>Replace request</Button>
+          <Button small secondary onClick={onCancel}>Cancel</Button>
+        </>
+      }
+    />
+  )
+}
+```
+
+The `actions` slot sits flush against the message inside the same flex row — no extra wrapper needed by the caller.
 
 ## Testing
 

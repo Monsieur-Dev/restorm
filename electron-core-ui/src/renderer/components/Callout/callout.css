@@ -19,6 +19,13 @@
   flex: 1;
 }
 
+.ecu-callout-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
 /* Info variant */
 .ecu-callout-info {
   background-color: var(--alert-info-background);

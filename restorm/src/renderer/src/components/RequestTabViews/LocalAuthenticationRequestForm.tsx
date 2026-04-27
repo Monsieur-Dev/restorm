@@ -56,6 +56,9 @@ import { BaseRequestTabView } from './BaseRequestTabView'
 import { buildHttpResponseViewData } from './HTTPResponsePanel'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
+import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
+import { CurlPasteCallout } from '../CurlPasteCallout'
+import { toasterService } from 'electron-core-ui/renderer'
 
 // Stable reference for the Configuration-tab Handlebars fields that
 // don't have any source of runtime variables (there's no
@@ -189,6 +192,10 @@ export const LocalAuthenticationRequestForm: React.FC<LocalAuthenticationRequest
   // so it re-reads `initialProducedHeaders` — used when we auto-fill
   // an Authorization row from a detected OAuth response.
   const [producedHeadersRemountKey, setProducedHeadersRemountKey] = useState(0)
+  // Same trick for the inbound headers + form-data tables — bumped on
+  // smart-paste apply so they remount with the freshly-mutated request.
+  const [transportEpoch, setTransportEpoch] = useState(0)
+  const urlSectionHostRef = useRef<HTMLDivElement | null>(null)
 
   // Last auth response parsed as JSON, kept in a ref so the read-only
   // "Resolved value" cells of the producedHeaders table can compile
@@ -376,6 +383,49 @@ export const LocalAuthenticationRequestForm: React.FC<LocalAuthenticationRequest
     request.producedHeaders = keyValuesFromRows(rows)
   }, [request])
 
+  /**
+   * Smart-paste: when the user pastes a curl command on the URL row of
+   * this form, replace `request.url` / method / headers / body in place.
+   * The form mutates the instance directly (no reactive proxy here);
+   * `transportEpoch` forces the headers + body-fields tables to remount
+   * with `initialRows` re-read from the freshly-mutated request.
+   */
+  const applyParsedCurl = useCallback((parsed: ParsedCurl): void => {
+    request.method = parsed.method
+    setMethod(parsed.method)
+    request.url = parsed.url
+    setUrl(parsed.url)
+    request.headers = parsed.headers
+    if (parsed.body) {
+      const next = parsed.body
+      if (next.type === 'text') {
+        request.body = { type: 'text' as never, content: next.content }
+        setBodyMode('text')
+        setBodyText(next.content)
+      } else if (next.type === 'form-data') {
+        request.body = { type: 'form-data' as never, fields: next.fields }
+        setBodyMode('form-data')
+      }
+    } else {
+      request.body = { type: 'text' as never, content: '' }
+      setBodyMode('text')
+      setBodyText('')
+    }
+    setTransportEpoch((n) => n + 1)
+  }, [request])
+
+  const { pendingPaste } = useCurlPaste({
+    hostRef: urlSectionHostRef,
+    apply: applyParsedCurl,
+    onSilentApply: () => {
+      toasterService.push('app', {
+        title: 'Replaced from cURL',
+        body: 'Authentication route fields populated from the pasted curl command.',
+        durationMs: 3000
+      })
+    }
+  })
+
   const handleExpirationChange = useCallback((next: string) => {
     setExpirationExpression(next)
     if (next) {
@@ -558,6 +608,14 @@ export const LocalAuthenticationRequestForm: React.FC<LocalAuthenticationRequest
 
   // URL section (identical structure to HTTPRequestTabView's)
   const urlSection = (
+    <div ref={urlSectionHostRef} data-testid="local-auth-form-url-section-host">
+      {pendingPaste && (
+        <CurlPasteCallout
+          onConfirm={pendingPaste.confirm}
+          onCancel={pendingPaste.cancel}
+          data-testid="local-auth-form-curl-paste-callout"
+        />
+      )}
     <ControlGroup data-testid="local-auth-form-url-section">
       <div style={methodSelectWrapperStyle}>
         <SelectBox
@@ -595,6 +653,7 @@ export const LocalAuthenticationRequestForm: React.FC<LocalAuthenticationRequest
         />
       )}
     </ControlGroup>
+    </div>
   )
 
   // Request content: vertical stack of static panes, mirroring the
@@ -624,6 +683,7 @@ export const LocalAuthenticationRequestForm: React.FC<LocalAuthenticationRequest
           }
         >
           <KeyValueTable
+            key={`headers-${transportEpoch}`}
             ref={headersRef}
             initialRows={initialHeaders}
             onRowsChange={handleHeadersChange}
@@ -669,6 +729,7 @@ export const LocalAuthenticationRequestForm: React.FC<LocalAuthenticationRequest
           )}
           {(bodyMode === 'form-data' || bodyMode === 'x-www-form-urlencoded') && (
             <KeyValueTable
+              key={`body-fields-${transportEpoch}`}
               ref={bodyFieldsRef}
               initialRows={initialBodyFields}
               onRowsChange={handleBodyFieldsChange}
