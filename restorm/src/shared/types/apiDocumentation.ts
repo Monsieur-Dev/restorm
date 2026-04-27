@@ -56,6 +56,12 @@ export interface PropertyDocumentation {
   type: string
   required: boolean
   description?: string
+  /** Property is marked deprecated in the source spec, or carried
+   * forward as deprecated across re-imports. */
+  deprecated?: boolean
+  /** Property no longer appears in the most recently fetched spec.
+   * Cleared back to `false` (or removed) on reappearance. */
+  removed?: boolean
 }
 
 /** A global model / type definition referenced by operations. */
@@ -63,6 +69,10 @@ export interface ModelDocumentation {
   name: string
   description?: string
   properties: PropertyDocumentation[]
+  /** Model marked deprecated in the source spec or carried forward. */
+  deprecated?: boolean
+  /** Model no longer appears in the most recently fetched spec. */
+  removed?: boolean
 }
 
 /** A group of operations (Swagger tag, WSDL service, gRPC package, GraphQL root type...). */
