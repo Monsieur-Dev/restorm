@@ -76,7 +76,7 @@ export const ODataOperationParameterEditor: React.FC<ODataOperationParameterEdit
           <span style={typeStyle}>{param.type}{param.nullable ? '?' : ''}</span>
           {isBooleanCsdl(param.type) ? (
             <Toggle
-              isChecked={param.value === 'true'}
+              checked={param.value === 'true'}
               onChange={(checked: boolean) => { setValue(index, checked ? 'true' : 'false') }}
               data-testid={`${testIdPrefix}-${param.name}`}
             />

@@ -200,7 +200,7 @@ export const ThemeCarousel: React.FC<ThemeCarouselProps> = ({
 
                   <div className="theme-carousel-row">
                     <span className="theme-carousel-label">Toggle</span>
-                    <Toggle isChecked>
+                    <Toggle checked>
                       Enabled
                     </Toggle>
                   </div>

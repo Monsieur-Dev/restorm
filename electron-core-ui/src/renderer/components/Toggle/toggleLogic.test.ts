@@ -3,29 +3,17 @@ import {
   ariaCheckedForToggleState,
   iconForToggleState,
   nextToggleStateOnClick,
-  resolveToggleState
+  toToggleState
 } from './toggleLogic'
 
-describe('resolveToggleState', () => {
-  it('returns the explicit state when provided', () => {
-    expect(resolveToggleState('checked', undefined)).toBe('checked')
-    expect(resolveToggleState('unchecked', undefined)).toBe('unchecked')
-    expect(resolveToggleState('indeterminate', undefined)).toBe('indeterminate')
+describe('toToggleState', () => {
+  it('maps booleans to the binary tri-state values', () => {
+    expect(toToggleState(true)).toBe('checked')
+    expect(toToggleState(false)).toBe('unchecked')
   })
 
-  it('explicit state wins over legacy isChecked', () => {
-    expect(resolveToggleState('indeterminate', true)).toBe('indeterminate')
-    expect(resolveToggleState('unchecked', true)).toBe('unchecked')
-    expect(resolveToggleState('checked', false)).toBe('checked')
-  })
-
-  it('falls back to isChecked when state is omitted', () => {
-    expect(resolveToggleState(undefined, true)).toBe('checked')
-    expect(resolveToggleState(undefined, false)).toBe('unchecked')
-  })
-
-  it('defaults to unchecked when neither state nor isChecked is provided', () => {
-    expect(resolveToggleState(undefined, undefined)).toBe('unchecked')
+  it('passes the indeterminate literal through unchanged', () => {
+    expect(toToggleState('indeterminate')).toBe('indeterminate')
   })
 })
 

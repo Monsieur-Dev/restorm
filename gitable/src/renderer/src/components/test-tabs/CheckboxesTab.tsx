@@ -14,21 +14,21 @@ const CheckboxesTab: React.FC = () => {
           <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>Toggle Components</h3>
           <div style={{ display: 'grid', gap: '12px' }}>
         <Toggle
-          isChecked={toggleChecked}
+          checked={toggleChecked}
           onChange={(checked: boolean) => { setToggleChecked(checked) }}
         >
           Toggle (checked)
         </Toggle>
 
         <Toggle
-          isChecked={toggleUnchecked}
+          checked={toggleUnchecked}
           onChange={(checked: boolean) => { setToggleUnchecked(checked) }}
         >
           Toggle (unchecked)
         </Toggle>
 
         <Toggle
-          isChecked={toggleDisabled}
+          checked={toggleDisabled}
           disabled={true}
           onChange={(checked: boolean) => { setToggleDisabled(checked) }}
         >

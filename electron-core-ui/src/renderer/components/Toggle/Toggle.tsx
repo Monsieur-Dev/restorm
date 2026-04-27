@@ -6,12 +6,11 @@ import {
   ariaCheckedForToggleState,
   iconForToggleState,
   nextToggleStateOnClick,
-  resolveToggleState
+  toToggleState
 } from './toggleLogic'
 
 const ToggleInner: React.FC<ToggleProps> = ({
-  state: stateProp,
-  isChecked,
+  checked,
   onChange,
   onKeyDown,
   disabled = false,
@@ -26,13 +25,11 @@ const ToggleInner: React.FC<ToggleProps> = ({
   children
 }) => {
   // Fully prop-controlled: derive the effective state from props on
-  // every render. The previous implementation kept a `useState` mirror
-  // of `isChecked` and never re-synced from props, so external state
-  // changes were silently ignored — the same bug class as the older
-  // RadioGroup mirror. With the tri-state addition we cannot afford
-  // that drift (cascading parent updates from a tree wouldn't reach
-  // their leaf Toggles), so the state lives in the parent.
-  const effectiveState = resolveToggleState(stateProp, isChecked);
+  // every render. There is no internal state mirror, so cascading
+  // parent updates from a tri-state tree always reach the leaf Toggles
+  // (a useState(checked) mirror would silently swallow them, the same
+  // bug class as the older RadioGroup mirror).
+  const effectiveState = toToggleState(checked);
   const enabled = !disabled;
 
   const emit = useCallback(

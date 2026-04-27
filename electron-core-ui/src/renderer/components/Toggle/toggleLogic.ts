@@ -1,18 +1,15 @@
-import type { ToggleState } from './types'
+import type { ToggleState, ToggleValue } from './types'
 
 /**
- * Resolve the effective tri-state value from the (state, isChecked)
- * prop pair. `state` always wins when provided; otherwise the legacy
- * binary `isChecked` flag is mapped to `'checked'` / `'unchecked'`.
- * Defaults to `'unchecked'` so a Toggle with no value props at all
- * renders empty rather than throwing.
+ * Resolve the polymorphic `checked` prop into the internal tri-state
+ * representation. Booleans map to `'checked'` / `'unchecked'`; the
+ * literal `'indeterminate'` is passed through. Single source of truth
+ * for the "what state is this Toggle in" decision so the visual,
+ * the click handler and the ARIA attribute stay aligned.
  */
-export function resolveToggleState(
-  state: ToggleState | undefined,
-  isChecked: boolean | undefined
-): ToggleState {
-  if (state !== undefined) return state
-  return isChecked === true ? 'checked' : 'unchecked'
+export function toToggleState(value: ToggleValue): ToggleState {
+  if (value === 'indeterminate') return 'indeterminate'
+  return value ? 'checked' : 'unchecked'
 }
 
 /**

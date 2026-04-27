@@ -250,7 +250,7 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
           return (
             <div {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-enabled` })}>
               <Toggle
-                isChecked={row.enabled}
+                checked={row.enabled}
                 notFocusable
                 onChange={(newChecked) => { updateData(idx, 'enabled', newChecked) }}
               />
