@@ -40,6 +40,7 @@ import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabView
 import { useCompiledDocumentation } from '../../hooks/useCompiledDocumentation'
 import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
+import { toasterService } from 'electron-core-ui/renderer'
 
 const methodSelectWrapperStyle: CSSProperties = { width: 90, flexShrink: 0 }
 const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
@@ -506,6 +507,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       } else if (next.type === 'form-data') {
         setBody('')
         setBodyMode('form-data')
+      } else if (next.type === 'x-www-form-urlencoded') {
+        setBody('')
+        setBodyMode('x-www-form-urlencoded')
       }
     } else {
       updateReactiveProperty(request, 'body', undefined)
@@ -514,6 +518,11 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       setBodyFilePath('')
     }
     setTransportEpoch((n) => n + 1)
+    toasterService.push('app', {
+      title: 'Replaced from cURL',
+      body: 'Request transport fields populated from the pasted curl command.',
+      durationMs: 10000
+    })
   }, [request])
 
   const { pendingPaste } = useCurlPaste({

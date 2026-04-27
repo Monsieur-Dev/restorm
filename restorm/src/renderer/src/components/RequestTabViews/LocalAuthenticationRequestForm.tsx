@@ -58,6 +58,7 @@ import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
+import { toasterService } from 'electron-core-ui/renderer'
 
 // Stable reference for the Configuration-tab Handlebars fields that
 // don't have any source of runtime variables (there's no
@@ -404,6 +405,9 @@ export const LocalAuthenticationRequestForm: React.FC<LocalAuthenticationRequest
       } else if (next.type === 'form-data') {
         request.body = { type: 'form-data' as never, fields: next.fields }
         setBodyMode('form-data')
+      } else if (next.type === 'x-www-form-urlencoded') {
+        request.body = { type: 'x-www-form-urlencoded' as never, fields: next.fields }
+        setBodyMode('x-www-form-urlencoded')
       }
     } else {
       request.body = { type: 'text' as never, content: '' }
@@ -411,6 +415,11 @@ export const LocalAuthenticationRequestForm: React.FC<LocalAuthenticationRequest
       setBodyText('')
     }
     setTransportEpoch((n) => n + 1)
+    toasterService.push('app', {
+      title: 'Replaced from cURL',
+      body: 'Authentication route fields populated from the pasted curl command.',
+      durationMs: 10000
+    })
   }, [request])
 
   const { pendingPaste } = useCurlPaste({

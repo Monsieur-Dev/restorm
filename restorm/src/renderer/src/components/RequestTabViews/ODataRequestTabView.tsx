@@ -63,6 +63,7 @@ import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/
 import { updateReactiveProperty } from './requestTabViewUtils'
 import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
+import { toasterService } from 'electron-core-ui/renderer'
 import {
   serializeODataQueryOptions,
   buildODataUrl,
@@ -753,6 +754,11 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
   // would conflict with OData's protocol-specific shape.
   const applyParsedCurl = useCallback((parsed: ParsedCurl): void => {
     setUrl(parsed.url)
+    toasterService.push('app', {
+      title: 'Replaced from cURL',
+      body: 'OData endpoint URL populated from the pasted curl command.',
+      durationMs: 10000
+    })
   }, [setUrl])
   const { pendingPaste } = useCurlPaste({
     hostRef: urlSectionHostRef,

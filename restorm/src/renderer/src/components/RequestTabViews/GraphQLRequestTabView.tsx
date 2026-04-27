@@ -27,6 +27,7 @@ import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabView
 import { useCompiledDocumentation } from '../../hooks/useCompiledDocumentation'
 import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
+import { toasterService } from 'electron-core-ui/renderer'
 
 export interface GraphQLRequestTabViewProps {
   request: GraphQLRequest
@@ -383,6 +384,11 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     setUrl(parsed.url)
     updateReactiveProperty(request, 'headers', parsed.headers)
     setTransportEpoch((n) => n + 1)
+    toasterService.push('app', {
+      title: 'Replaced from cURL',
+      body: 'GraphQL endpoint URL and headers populated from the pasted curl command.',
+      durationMs: 10000
+    })
   }, [request, setUrl])
 
   const { pendingPaste } = useCurlPaste({
