@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useImperativeHandle, useLayoutEffect, us
 import type { ContainerGroupNode, EditorGroup, EditorTab, EditorWorkbenchCallbacks, GroupNode, SplitDirection, WorkbenchTree } from './types';
 import { isContainerNode, isTabGroupNode } from './types';
 import { EditorGroupView } from './EditorGroupView';
-import { insertTabAt, moveTabToAdjacentGroup, normalizeTree, removeTab } from './tree';
+import { cloneTree, insertTabAt, moveTabToAdjacentGroup, normalizeTree, removeTab } from './tree';
 import { computeDropIndex } from './dnd';
 import { getCurrentWindowBounds } from './ipc';
 import { onWorkbenchTabDropped } from './ipc';
@@ -213,7 +213,7 @@ const GroupContainer: React.FC<{
 }> = ({ node, callbacks, renderLeaf, onNodeSizesChange, dataTestIdBase }) => {
 	const isVertical = node.orientation === 'vertical';
 	const ref = useRef<HTMLDivElement | null>(null);
-	
+
 	const handleSizesChange = useCallback((newSizes: number[]) => {
 		onNodeSizesChange?.(node.id, newSizes);
 	}, [node.id, onNodeSizesChange]);
@@ -280,7 +280,7 @@ const GroupContainer: React.FC<{
 			style={{ display: 'flex', flex: 1, flexDirection: isVertical ? 'row' : 'column', minWidth: 0, minHeight: 0, position: 'relative' }}
 		>
 			{node.groups.map((child, i) => (
-				<React.Fragment key={i}>
+				<React.Fragment key={child.id}>
 					<div
 						{...(dataTestIdBase && {
 							'data-testid': isTabGroupNode(child)
@@ -521,7 +521,7 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 	const handleMoveWithinGroup = useCallback((from: { groupId: string; tabId: string }, to: { groupId: string; index: number }) => {
 		// Same-group reordering
 		if (from.groupId === to.groupId) {
-			const next: WorkbenchTree = JSON.parse(JSON.stringify(tree)) as WorkbenchTree;
+			const next: WorkbenchTree = cloneTree(tree);
 			const stack: GroupNode[] = next.groups;
 			const visit = (nodes: GroupNode[]): boolean => {
 				for (const n of nodes) {
@@ -548,7 +548,7 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		const removed = removeTab(tree, from.groupId, from.tabId);
 		const movingTab = removed.tab;
 		if (!movingTab) return;
-		const next: WorkbenchTree = JSON.parse(JSON.stringify(removed.tree)) as WorkbenchTree;
+		const next: WorkbenchTree = cloneTree(removed.tree);
 
 		const insertIntoTarget = (nodes: GroupNode[]): boolean => {
 			for (const n of nodes) {
@@ -570,7 +570,7 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 
 	const handleActivate = useCallback(
 		(tabId: string, groupId: string) => {
-		const next: WorkbenchTree = JSON.parse(JSON.stringify(tree)) as WorkbenchTree;
+		const next: WorkbenchTree = cloneTree(tree);
 		const rec = (nodes: GroupNode[]): void => {
 			for (const n of nodes) {
 				if (isTabGroupNode(n) && n.id === groupId) {
@@ -660,7 +660,7 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 	}, [tree, change]);
 
 	const handleCloseOthersInGroup = useCallback((tabId: string, groupId: string) => {
-		const next: WorkbenchTree = JSON.parse(JSON.stringify(tree)) as WorkbenchTree;
+		const next: WorkbenchTree = cloneTree(tree);
 
 		const rec = (nodes: GroupNode[]): void => {
 			for (const n of nodes) {
@@ -887,7 +887,7 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		// Use appropriate method based on drop target type
 		if (finalDropTarget.type === 'tabs-container') {
 			// Add tab to group at specific index (same logic as handleMoveWithinGroup)
-			const next: WorkbenchTree = JSON.parse(JSON.stringify(tree)) as WorkbenchTree;
+			const next: WorkbenchTree = cloneTree(tree);
 			const insertIntoTarget = (nodes: GroupNode[]): boolean => {
 				for (const n of nodes) {
 					if (isTabGroupNode(n) && n.id === finalTargetGroupId) {

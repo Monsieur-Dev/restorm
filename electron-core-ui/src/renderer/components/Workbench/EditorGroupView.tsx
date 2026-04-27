@@ -6,6 +6,21 @@ import type { EditorGroup, EditorWorkbenchCallbacks, SplitDirection } from './ty
 import { getEditorDragData, isEditorDragEvent } from './dnd';
 import { getTabTitleString } from './utils';
 
+/**
+ * Hard-memoised slot for cached tab content. `tabContentCache` already
+ * returns a stable React element ref per tab, and `<div key={tab.id}>`
+ * wrappers stay in a stable DOM order, but wrapping the cached element
+ * in a memoised passthrough pins the reconciler bailout: when
+ * `content` is referentially identical, React does not re-enter the
+ * inner subtree, and the embedded editors keep their fibers — and the
+ * underlying Monaco / Milkdown instances — mounted.
+ */
+const CachedTabContentSlot = React.memo<{ content: React.ReactNode }>(
+	({ content }) => <>{content}</>,
+	(prev, next) => prev.content === next.content
+);
+CachedTabContentSlot.displayName = 'CachedTabContentSlot';
+
 export interface EditorGroupViewProps extends EditorWorkbenchCallbacks {
 	group: EditorGroup;
 	/**
@@ -276,22 +291,46 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 				}}
 			>
 				<div className="editor-group-content-panel">
-				{group.tabs.map((tab) => {
-					const isActive = tab.id === group.activeTabId;
-					const content = tabContents.get(tab.id);
-					return (
-						<div
-							key={tab.id}
-							style={{
-								display: isActive ? 'flex' : 'none',
-								flex: 1,
-								minHeight: 0
-							}}
-						>
-							{content}
-						</div>
-					);
-				})}
+				{/*
+				 * Render the content panes in a STABLE order keyed by
+				 * `tab.id`, independent of the visual tab strip order
+				 * managed by EditorTabs. When the user drags a tab, the
+				 * tab strip reorders (via React's keyed reconciliation
+				 * inside EditorTabs) but here, in the content panel, the
+				 * `<div key={tab.id}>` host order does not change — only
+				 * the `display` style flips between flex and none.
+				 *
+				 * Why this matters: when keyed children swap positions,
+				 * React's reconciler marks the moved fiber for the
+				 * `Placement` effect, which the commit phase translates
+				 * into `parent.insertBefore(node, sibling)`. The DOM
+				 * spec requires that step to *remove* the node from its
+				 * current parent first and then re-insert at the new
+				 * position. That brief detach is enough to break Monaco
+				 * editors embedded inside (`InstantiationService has
+				 * been disposed`, `domNode` access on a torn-down view).
+				 * Sorting locally by tab id pins each pane's DOM
+				 * position so a same-group reorder never moves any
+				 * content-panel child.
+				 */}
+				{[...group.tabs]
+					.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
+					.map((tab) => {
+						const isActive = tab.id === group.activeTabId;
+						const content = tabContents.get(tab.id);
+						return (
+							<div
+								key={tab.id}
+								style={{
+									display: isActive ? 'flex' : 'none',
+									flex: 1,
+									minHeight: 0
+								}}
+							>
+								<CachedTabContentSlot content={content} />
+							</div>
+						);
+					})}
 				</div>
 				<div
 					style={overlayStyle}

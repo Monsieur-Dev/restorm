@@ -11,12 +11,53 @@ export interface FindResult {
 	indexInParent: number; // index of node in parent.groups, -1 if not found
 }
 
+/**
+ * Structural clone of a workbench group / tree.
+ *
+ * `JSON.parse(JSON.stringify(...))` looks tempting but it strips every
+ * `EditorTab.content` / `EditorTab.title` ReactNode down to a plain
+ * object — when the tab is then re-rendered, React sees a "new" content
+ * tree and remounts it, which disposes any embedded Monaco editor
+ * mid-render and surfaces the cascade of `InstantiationService has been
+ * disposed` / `Cannot read properties of undefined (reading 'domNode')`
+ * errors observed during a same-group tab reorder.
+ *
+ * We instead clone *structurally*: every container / tab-group / array
+ * gets a fresh allocation, but each `EditorTab` reference passes
+ * through unchanged. Mutations to the tree shape (insert / remove /
+ * reorder) are still safe because the arrays are new; the tab payload
+ * stays referentially stable, so React's reconciler keeps the same
+ * subtree mounted.
+ */
+function cloneGroupNode<T extends GroupNode>(node: T): T {
+	if (isTabGroupNode(node)) {
+		const clone: TabGroupNode = {
+			id: node.id,
+			tabs: [...node.tabs]
+		};
+		if (node.activeTabId !== undefined) clone.activeTabId = node.activeTabId;
+		return clone as T;
+	}
+	const container: ContainerGroupNode = {
+		id: node.id,
+		orientation: node.orientation,
+		groups: node.groups.map(cloneGroupNode)
+	};
+	if (node.sizes !== undefined) container.sizes = [...node.sizes];
+	return container as T;
+}
+
 export function cloneNode<T extends GroupNode>(node: T): T {
-	return JSON.parse(JSON.stringify(node)) as T;
+	return cloneGroupNode(node);
 }
 
 export function cloneTree(tree: WorkbenchTree): WorkbenchTree {
-	return JSON.parse(JSON.stringify(tree)) as WorkbenchTree;
+	const clone: WorkbenchTree = {
+		orientation: tree.orientation,
+		groups: tree.groups.map(cloneGroupNode)
+	};
+	if (tree.sizes !== undefined) clone.sizes = [...tree.sizes];
+	return clone;
 }
 
 export function findGroup(tree: WorkbenchTree, groupId: string): FindResult {
