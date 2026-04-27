@@ -51,16 +51,30 @@ export function parseCurlCommand(curlCommand: string): {
     const normalized = curlCommand.replace(/\\\s*\n\s*/g, ' ').trim()
     if (!normalized.startsWith('curl')) return null
 
-    // Extract URL — the first quoted/unquoted `http(s)://...` token.
+    // Extract URL — the first quoted/unquoted token that *looks* like a
+    // URL. Three accepted shapes:
+    //   1. literal `http(s)://...` (the canonical case)
+    //   2. `{{scheme}}://{{host}}/path` — one or more Handlebars
+    //      placeholders before `://` (templated scheme + host)
+    //   3. `{{baseUrl}}/path` — the entire URL prefix is a single
+    //      variable, no `://` literal in the source text
+    //
+    // The two-regex layering catches `curl <flags> URL` first
+    // (positional after curl + flags), then falls back to a free
+    // search if the first regex didn't fire (URL buried among
+    // options). The URL-token alternative `(?:https?://|\{\{)[^\s'"]+`
+    // greedily grabs everything up to whitespace / quotes once the
+    // prefix locks in.
+    const urlToken = `(?:https?://|\\{\\{)[^\\s'"]+`
     let url = ''
-    const urlPattern = /curl\s+(?:-[^\s]+\s+)*['"]?(https?:\/\/[^\s'"]+)['"]?/
-    const urlMatch = urlPattern.exec(normalized)
-    if (urlMatch?.[1] !== undefined) {
-      url = urlMatch[1]
+    const urlPatternHead = new RegExp(`curl\\s+(?:-[^\\s]+\\s+)*['"]?(${urlToken})['"]?`)
+    const urlMatchHead = urlPatternHead.exec(normalized)
+    if (urlMatchHead?.[1] !== undefined) {
+      url = urlMatchHead[1]
     } else {
-      const urlPattern2 = /(['"]?)(https?:\/\/[^\s'"]+)\1/
-      const urlMatch2 = urlPattern2.exec(normalized)
-      if (urlMatch2?.[2] !== undefined) url = urlMatch2[2]
+      const urlPatternAny = new RegExp(`(['"]?)(${urlToken})\\1`)
+      const urlMatchAny = urlPatternAny.exec(normalized)
+      if (urlMatchAny?.[2] !== undefined) url = urlMatchAny[2]
     }
     if (url === '') return null
 
@@ -116,22 +130,63 @@ export function parseCurlCommand(curlCommand: string): {
     }
     if (formFields.length > 0) body = { type: 'form-data', fields: formFields }
 
-    // Query params come from the URL itself.
-    const urlObj = new URL(url)
+    // Query params come from the URL itself. WHATWG `new URL()` rejects
+    // anything that isn't a real `http(s)://...` (or a registered
+    // scheme), which means a Handlebars-templated URL like
+    // `{{scheme}}://{{host}}/api/pet?status=available` would throw.
+    // For those cases we split manually on `?` and parse the
+    // query-string by hand — substring keys / values that themselves
+    // contain `{{var}}` come out as plain strings, ready for the env
+    // resolver to interpolate at send time.
+    let canonicalUrl = url
     const params: KeyValue[] = []
-    urlObj.searchParams.forEach((value, key) => {
-      params.push(createTypedKeyValue({ key, value, enabled: true }))
-    })
-
-    const pathname = urlObj.pathname || '/'
-    return {
-      id: generateId('curl'),
-      name: `${method} ${pathname}`,
-      type: 'http',
-      method,
+    let displayPathname = '/'
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      const urlObj = new URL(url)
+      urlObj.searchParams.forEach((value, key) => {
+        params.push(createTypedKeyValue({ key, value, enabled: true }))
+      })
       // Drop the query string from the URL — the params list owns it now,
       // matching how the rest of the app stores URL + params.
-      url: urlObj.origin + urlObj.pathname,
+      canonicalUrl = urlObj.origin + urlObj.pathname
+      displayPathname = urlObj.pathname || '/'
+    } else {
+      // Templated URL — split on the first `?` and parse the query.
+      const queryStart = url.indexOf('?')
+      if (queryStart >= 0) {
+        const rawQuery = url.slice(queryStart + 1)
+        canonicalUrl = url.slice(0, queryStart)
+        for (const pair of rawQuery.split('&')) {
+          if (pair === '') continue
+          const eqIdx = pair.indexOf('=')
+          const rawKey = eqIdx >= 0 ? pair.slice(0, eqIdx) : pair
+          const rawValue = eqIdx >= 0 ? pair.slice(eqIdx + 1) : ''
+          // Templates like `{{var}}` would round-trip through
+          // `decodeURIComponent` cleanly (no `%` chars), but stay
+          // defensive — fall back to the raw value if decoding throws.
+          let key = rawKey
+          let value = rawValue
+          try { key = decodeURIComponent(rawKey) } catch { /* keep raw */ }
+          try { value = decodeURIComponent(rawValue) } catch { /* keep raw */ }
+          params.push(createTypedKeyValue({ key, value, enabled: true }))
+        }
+      }
+      // Best-effort pathname for the request name: the segment after
+      // the `://`'s next `/`, falling back to '/'.
+      const schemeEnd = canonicalUrl.indexOf('://')
+      if (schemeEnd >= 0) {
+        const afterScheme = canonicalUrl.slice(schemeEnd + 3)
+        const slashIdx = afterScheme.indexOf('/')
+        displayPathname = slashIdx >= 0 ? afterScheme.slice(slashIdx) : '/'
+      }
+    }
+
+    return {
+      id: generateId('curl'),
+      name: `${method} ${displayPathname}`,
+      type: 'http',
+      method,
+      url: canonicalUrl,
       headers,
       params,
       ...(body ? { body } : {}),

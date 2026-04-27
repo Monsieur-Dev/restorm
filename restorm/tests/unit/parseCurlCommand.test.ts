@@ -95,4 +95,39 @@ describe('parseCurlCommand', () => {
     expect(r?.headers[0]?.value.toString()).toBe("it's fine")
     if (r?.body?.type === 'text') expect(r.body.content).toBe("name=O'Brien")
   })
+
+  it('accepts a Handlebars-templated scheme + host (e.g. {{scheme}}://{{host}})', () => {
+    const r = parseCurlCommand(`curl -X PUT '{{scheme}}://{{domain}}:{{port}}/api/pet' -d '{"id":1}'`)
+    expect(r).not.toBeNull()
+    expect(r?.method).toBe('PUT')
+    expect(r?.url).toBe('{{scheme}}://{{domain}}:{{port}}/api/pet')
+    expect(r?.params).toEqual([])
+    if (r?.body?.type === 'text') expect(r.body.content).toBe('{"id":1}')
+  })
+
+  it('extracts query params manually for templated URLs (no `new URL` round-trip)', () => {
+    const r = parseCurlCommand(`curl '{{baseUrl}}/api/pet/findByStatus?status=available&limit=10'`)
+    expect(r?.url).toBe('{{baseUrl}}/api/pet/findByStatus')
+    const keys = r?.params.map((p) => p.key)
+    expect(keys).toEqual(['status', 'limit'])
+  })
+
+  it('lifts a multi-line JSON body inside a single-quoted -d arg', () => {
+    // Reproduction of the user-reported snippet: curl with a Handlebars
+    // URL and a JSON body that spans multiple lines (each shell-escape
+    // continuation collapses through `normalize`).
+    const r = parseCurlCommand(`curl -X PUT '{{scheme}}://{{domain}}:{{port}}/api/pet' \\
+  -d '{
+  "id": 0,
+  "name": ""
+}'`)
+    expect(r).not.toBeNull()
+    expect(r?.method).toBe('PUT')
+    expect(r?.url).toBe('{{scheme}}://{{domain}}:{{port}}/api/pet')
+    expect(r?.body?.type).toBe('text')
+    if (r?.body?.type === 'text') {
+      expect(r.body.content).toContain('"id": 0')
+      expect(r.body.content).toContain('"name": ""')
+    }
+  })
 })
