@@ -53,6 +53,10 @@ export interface BuildContextMenuOptions {
   onAddChildItem: AddChildHandler
   isItemFavorite?: (itemId: string) => boolean
   onToggleFavorite?: ContextMenuActionHandler
+  /** `true` when the folder identified by id has an importable
+   * source attached. Drives the "Refresh from source" entry. */
+  canRefreshFromSource?: (itemId: string) => boolean
+  onRefreshFromSource?: ContextMenuActionHandler
 }
 
 /** Build the "Ajouter" submenu that folders and environment folders
@@ -144,11 +148,23 @@ export const buildAddSubmenu = (
 export const buildContextMenuForItem = (
   options: BuildContextMenuOptions
 ): SidebarContextMenuItem[] => {
-  const { item, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite } = options
+  const { item, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, canRefreshFromSource, onRefreshFromSource } = options
   const isItemFolder = Array.isArray(item.children)
   const itemId = item.id
 
   if (isItemFolder) {
+    const showRefresh = canRefreshFromSource?.(itemId) === true && onRefreshFromSource
+    const refreshEntry: SidebarContextMenuItem[] = showRefresh
+      ? [
+        { id: 'sep-refresh', isSeparator: true, label: '' },
+        {
+          id: 'refresh-from-source',
+          label: t('sidebar.contextMenu.refreshFromSource'),
+          icon: 'cloud-download',
+          onClick: () => { onRefreshFromSource(itemId) }
+        }
+      ]
+      : []
     return [
       {
         id: 'add-child',
@@ -166,6 +182,7 @@ export const buildContextMenuForItem = (
           onRenameItem(itemId)
         }
       },
+      ...refreshEntry,
       { id: 'sep-folder', isSeparator: true, label: '' },
       {
         id: 'delete-folder',
@@ -226,6 +243,8 @@ export interface AttachContextMenusOptions {
   onAddChildItem: AddChildHandler
   isItemFavorite?: (itemId: string) => boolean
   onToggleFavorite?: ContextMenuActionHandler
+  canRefreshFromSource?: (itemId: string) => boolean
+  onRefreshFromSource?: ContextMenuActionHandler
 }
 
 export const attachContextMenus = (

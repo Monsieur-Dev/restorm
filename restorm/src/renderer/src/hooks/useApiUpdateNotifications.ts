@@ -25,29 +25,47 @@ function getApiUpdateApi(): ApiUpdateApi | null {
 }
 
 export function useApiUpdateNotifications(t: TFunction): void {
-  const previousState = useRef(new Map<string, ApiUpdateState['kind']>())
+  const previousState = useRef(new Map<string, { kind: ApiUpdateState['kind']; version?: string }>())
 
   useEffect(() => {
     const api = getApiUpdateApi()
     if (!api) return
     const unsubscribe = api.onStateChanged(({ folderId, state }) => {
-      const prevKind = previousState.current.get(folderId)
-      previousState.current.set(folderId, state.kind)
-      if (state.kind !== 'available') return
-      // Only fire on transition INTO 'available'. A repeat 'available'
-      // (same folder, same state) is just an echo — we still update
-      // the existing toast in place via the dedupe id, but the
-      // transition guard keeps duplicates from being unhidden after
-      // the user dismissed.
-      if (prevKind === 'available') return
-      toasterService.push('app', {
-        id: `apiUpdate:${folderId}`,
-        title: t('folderView.home.apiUpdate.stateAvailable'),
-        body: state.availableVersion
-          ? `${state.currentVersion ?? '?'} → ${state.availableVersion}`
-          : t('folderView.home.apiUpdate.stateAvailable'),
-        durationMs: 8_000
-      })
+      const prev = previousState.current.get(folderId)
+      previousState.current.set(folderId, { kind: state.kind, ...(state.availableVersion !== undefined ? { version: state.availableVersion } : {}) })
+
+      if (state.kind === 'available') {
+        // Fire on transition into 'available' — but also re-fire if
+        // the same folder is already 'available' and a newer version
+        // arrives. Without the version check, a follow-up check that
+        // surfaces a third spec bump would stay silent until the
+        // user manually visited the folder home.
+        const isFreshTransition = prev?.kind !== 'available'
+        const isNewerVersion = prev?.kind === 'available' && state.availableVersion !== undefined && prev.version !== state.availableVersion
+        if (!isFreshTransition && !isNewerVersion) return
+        toasterService.push('app', {
+          id: `apiUpdate:${folderId}`,
+          title: t('folderView.home.apiUpdate.stateAvailable'),
+          body: state.availableVersion
+            ? `${state.currentVersion ?? '?'} → ${state.availableVersion}`
+            : t('folderView.home.apiUpdate.stateAvailable'),
+          durationMs: 8_000
+        })
+        return
+      }
+
+      if (state.kind === 'error' && typeof state.error === 'string' && !state.error.startsWith('Auto-check failed:')) {
+        // Auto-check errors stay silent (they prefix the message
+        // with "Auto-check failed:" so the renderer can tell the
+        // two apart). Manual checks surface a transient toast so
+        // the user sees the failure even off-screen.
+        toasterService.push('app', {
+          id: `apiUpdate-error:${folderId}`,
+          title: t('folderView.home.apiUpdate.stateError'),
+          body: state.error,
+          durationMs: 5_000
+        })
+      }
     })
     return unsubscribe
   }, [t])

@@ -327,3 +327,4 @@ export const apiUpdateSetSettingsArgs = z.tuple([folderIdArg, apiUpdateConfigSch
 export const apiUpdateCheckNowArgs = z.tuple([folderIdArg])
 export const apiUpdateApplyArgs = z.tuple([folderIdArg])
 export const apiUpdateDismissArgs = z.tuple([folderIdArg])
+export const apiUpdatePreviewArgs = z.tuple([folderIdArg])

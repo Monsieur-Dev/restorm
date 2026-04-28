@@ -25,6 +25,13 @@ export interface UseSidebarStateOptions {
   onAddChildItem: (parentId: string, kind: AddChildKind) => void
   isItemFavorite?: (itemId: string) => boolean
   onToggleFavorite?: (itemId: string) => void
+  /** `true` for an env folder that has an apiUpdate.sourceUrl
+   * configured. Drives the "Refresh from source" right-click entry. */
+  canRefreshFromSource?: (itemId: string) => boolean
+  onRefreshFromSource?: (itemId: string) => void
+  /** `true` for an env folder whose ApiUpdateState is currently
+   * `'available'`. Drives the "update available" badge in the tree. */
+  hasApiUpdateAvailable?: (folderId: string) => boolean
 }
 
 export interface UseSidebarStateReturn {
@@ -32,7 +39,7 @@ export interface UseSidebarStateReturn {
 }
 
 export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStateReturn {
-  const { rootItems, expandedIds, updateCount, onCloneItem, onAddChildItem, onDeleteItem, onRenameItem, isItemFavorite, onToggleFavorite } = options
+  const { rootItems, expandedIds, updateCount, onCloneItem, onAddChildItem, onDeleteItem, onRenameItem, isItemFavorite, onToggleFavorite, canRefreshFromSource, onRefreshFromSource, hasApiUpdateAvailable } = options
   const { t } = useTranslation()
 
   // Convert root folders to ListView items
@@ -44,7 +51,12 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
       expandedIds: expandedSet,
       renderMethodBadge: (method: string) => React.createElement(Badge, { type: mapToBadgeType(method) }),
       renderProtocolBadge: (protocol: string, label?: string) => React.createElement(Badge, { type: mapToBadgeType(protocol), label }),
-      renderDeprecatedTitle: (name: string) => React.createElement('span', { style: { textDecoration: 'line-through', opacity: 0.7 } }, name)
+      // Deprecated requests render in italic + muted; removed (vanished
+      // from the spec) renders strikethrough so the two states stay
+      // visually distinct in the tree.
+      renderDeprecatedTitle: (name: string) => React.createElement('span', { style: { fontStyle: 'italic', opacity: 0.7 }, title: 'Deprecated in source spec' }, name),
+      renderRemovedTitle: (name: string) => React.createElement('span', { style: { textDecoration: 'line-through', opacity: 0.6 }, title: 'Removed from source spec' }, name),
+      ...(hasApiUpdateAvailable !== undefined && { hasApiUpdateAvailable })
     }
     // Each root item becomes a top-level row in the sidebar. Folders
     // go through `folderAsRootListViewItem` (which renders them as a
@@ -57,7 +69,7 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
         ? folderAsRootListViewItem(item, renderOptions)
         : folderItemToListViewItem(item, renderOptions)
     )
-  }, [expandedIds, rootItems, updateCount])
+  }, [expandedIds, rootItems, updateCount, hasApiUpdateAvailable])
 
   // Attach context menus to sidebar items.
   // `isItemFavorite` / `onToggleFavorite` are optional: only spread
@@ -72,9 +84,11 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
       onRenameItem,
       onAddChildItem,
       ...(isItemFavorite !== undefined && { isItemFavorite }),
-      ...(onToggleFavorite !== undefined && { onToggleFavorite })
+      ...(onToggleFavorite !== undefined && { onToggleFavorite }),
+      ...(canRefreshFromSource !== undefined && { canRefreshFromSource }),
+      ...(onRefreshFromSource !== undefined && { onRefreshFromSource })
     }),
-    [sidebarItems, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite]
+    [sidebarItems, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, canRefreshFromSource, onRefreshFromSource]
   )
 
   return {

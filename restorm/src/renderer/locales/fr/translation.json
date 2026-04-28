@@ -49,6 +49,7 @@
       "rename": "Renommer",
       "addToFavorites": "Ajouter aux favoris",
       "removeFromFavorites": "Retirer des favoris",
+      "refreshFromSource": "Rafraîchir depuis la source",
       "add": {
         "title": "Ajouter",
         "folder": "Dossier",
@@ -71,6 +72,22 @@
       "itemMessage": "Êtes-vous sûr de vouloir supprimer \"{{name}}\" ?",
       "confirm": "Supprimer",
       "cancel": "Annuler"
+    },
+    "apiUpdate": {
+      "modalTitle": "Mettre à jour l'API : {{name}}",
+      "checking": "Vérification des mises à jour…",
+      "applying": "Application…",
+      "apply": "Appliquer la mise à jour",
+      "cancel": "Annuler",
+      "preserveNote": "Vos personnalisations seront préservées.",
+      "summary": {
+        "added": "{{count}} ajouté(s)",
+        "deprecated": "{{count}} obsolète(s)",
+        "removed": "{{count}} retiré(s)",
+        "modelsChanged": "{{count}} modèle(s) modifié(s)"
+      },
+      "successToastTitle": "API mise à jour",
+      "successToastBody": "{{added}} ajout(s), {{deprecated}} obsolète(s), {{removed}} retiré(s)."
     }
   },
   "environment": {

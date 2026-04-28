@@ -6,8 +6,10 @@ import {
   apiUpdateSetSettingsArgs,
   apiUpdateCheckNowArgs,
   apiUpdateApplyArgs,
-  apiUpdateDismissArgs
+  apiUpdateDismissArgs,
+  apiUpdatePreviewArgs
 } from '../../ipc/schemas'
+import { runApiUpdatePreview } from './orchestratePreview'
 import { apiUpdateStateStore } from './ApiUpdateStateStore'
 import { apiUpdateScheduler } from './ApiUpdateScheduler'
 import type { ApiUpdateConfig } from '../../../shared/types/baseTypes'
@@ -83,6 +85,10 @@ export function registerApiUpdateIPC(deps: ApiUpdateIPCDeps): void {
       apiUpdateStateStore.patch(folderId, { kind: 'error', error: message })
       throw err
     }
+  })
+
+  validatedHandle('apiUpdate:preview', apiUpdatePreviewArgs, async (_event, [folderId]) => {
+    return runApiUpdatePreview(folderId)
   })
 
   validatedHandle('apiUpdate:dismiss', apiUpdateDismissArgs, (_event, [folderId]) => {

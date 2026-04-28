@@ -16,6 +16,7 @@ import { grpcImportAdapter } from '../import/idempotent/GrpcAdapter'
 import { soapImportAdapter } from '../import/idempotent/SoapAdapter'
 import { odataImportAdapter } from '../import/idempotent/ODataAdapter'
 import { computeSpecHash } from './specHash'
+import { mergeHttpRequestShape } from './mergeRequestShape'
 
 /**
  * Apply an available API update onto an existing env folder.
@@ -114,10 +115,23 @@ export function applyApiUpdate(input: ApplyApiUpdateInput): ApplyApiUpdateResult
         throw new Error(`Fresh import missing operation ${op.naturalKey}`)
       }
       return fromFresh
-    }
+    },
+    mergeRequestShape: mergeHttpRequestShape
   }
 
   const diff = runIdempotentImport(options)
+
+  // Carry over the doc-side payload from the freshly-imported folder
+  // so the env-folder home page reflects the new title / description /
+  // model definitions, and so enum widening / narrowing reaches the
+  // KV editors. The pipeline above handles the request tree; these
+  // top-level fields aren't part of the request graph and would
+  // otherwise stay frozen at the original import.
+  const fresh = input.freshFolder as unknown as { apiDocumentation?: unknown; enumDefinitions?: unknown }
+  const target = input.target as unknown as { apiDocumentation?: unknown; enumDefinitions?: unknown }
+  if (fresh.apiDocumentation) target.apiDocumentation = fresh.apiDocumentation
+  if (fresh.enumDefinitions) target.enumDefinitions = fresh.enumDefinitions
+
   const appliedHash = input.fetchedHash ?? computeSpecHash(input.spec)
   const result: ApplyApiUpdateResult = { diff, appliedHash }
   if (input.fetchedVersion !== undefined) result.appliedVersion = input.fetchedVersion

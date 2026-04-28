@@ -63,4 +63,33 @@ describe('migrateApiUpdate', () => {
     expect((collections[0] as { apiUpdate?: { sourceUrl: string } }).apiUpdate?.sourceUrl).toBe('https://a')
     expect((collections[1] as { apiUpdate?: { sourceUrl: string } }).apiUpdate?.sourceUrl).toBe('https://b')
   })
+
+  it('backfills importOrigin on legacy HTTP requests of swagger/openapi folders', () => {
+    // Pin the legacy-folder upgrade path: without this, the first
+    // refresh on a folder imported before importOrigin existed would
+    // treat every existing request as user-created and re-import
+    // every operation as new.
+    const collections = [{
+      importSource: 'swagger' as const,
+      apiDocumentation: { sourceUrl: 'https://x' },
+      items: [{ type: 'http', method: 'get', url: '/pets' }]
+    }]
+    migrateApiUpdateForCollections(collections)
+    const items = collections[0]?.items ?? []
+    const req = items[0] as { importOrigin?: { format: string; naturalKey: string } }
+    expect(req.importOrigin).toEqual({ format: 'swagger', naturalKey: 'GET /pets' })
+  })
+
+  it('does not stamp importOrigin on non-HTTP legacy requests', () => {
+    // Without method+url-equivalent context the synthesis would lie;
+    // we leave the request user-created and let the user reimport.
+    const collections = [{
+      importSource: 'swagger' as const,
+      apiDocumentation: { sourceUrl: 'https://x' },
+      items: [{ type: 'graphql', name: 'getPet' }]
+    }]
+    migrateApiUpdateForCollections(collections)
+    const items = collections[0]?.items ?? []
+    expect((items[0] as { importOrigin?: unknown }).importOrigin).toBeUndefined()
+  })
 })

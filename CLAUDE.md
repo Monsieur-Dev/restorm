@@ -23,6 +23,16 @@ Pre-commit hooks run the full test suite, which takes a long time. **NEVER** int
 
 Before pushing a branch or asking for a merge, **always** run an independent code review of the diff. Use the `superpowers:code-reviewer` agent (or equivalent fresh-context agent) on the full PR scope and act on its findings — bugs, design smells, coverage gaps, stale comments, missed docs — before telling the user the PR is ready. Document agent findings that you're deliberately not addressing, don't silently skip them. Self-review applies even when the user hasn't explicitly asked for it; it's the last gate before human attention.
 
+**As the very first step of self-review, re-read the ticket against the diff.** Pull the ticket back up (Linear, GitHub issue, etc.) and walk every acceptance-criteria checkbox + every "Sub-tasks" item, asking out loud: "is this *actually* addressed in the diff, or did I skip it?" Don't trust your earlier judgment on whether something was in scope — the ticket text is authoritative, and it's easy to drift over the course of a long ticket. Common traps:
+
+- Acceptance items that map to UI surface you haven't touched yet (badges, tooltips, context-menu entries, errors-only paths).
+- Items phrased as "refactored X" that you satisfied with a parallel-implementation instead — those usually count as a gap.
+- Items phrased as "verified by tests" with no matching test file in the diff.
+- Tri-state behaviours where you shipped two of the three (e.g. `deprecated` + `removed` rendered identically, manual vs auto error handling collapsed).
+- Persistence / migration items — easy to forget when the new fields work fine in-memory but never round-trip through disk.
+
+For every item you're deliberately *not* shipping in this PR, say so explicitly in the PR description with a one-line justification (out-of-scope, follow-up ticket, depends on another issue, …). Silent omissions are worse than missing items — they make the PR look complete when it isn't.
+
 As the final step of self-review, run `grep -rEn "OYO-[0-9]+" --include="*.ts" --include="*.tsx" --include="*.css" --include="*.md"` over the diff and reject any new occurrences — the no-ticket-refs rule from Code quality restrictions applies to every PR.
 
 ## Branch up-to-date check (before push and before merge)

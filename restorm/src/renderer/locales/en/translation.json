@@ -49,6 +49,7 @@
       "rename": "Rename",
       "addToFavorites": "Add to favorites",
       "removeFromFavorites": "Remove from favorites",
+      "refreshFromSource": "Refresh from source",
       "add": {
         "title": "Add",
         "folder": "Folder",
@@ -71,6 +72,22 @@
       "itemMessage": "Are you sure you want to delete \"{{name}}\"?",
       "confirm": "Delete",
       "cancel": "Cancel"
+    },
+    "apiUpdate": {
+      "modalTitle": "Update API: {{name}}",
+      "checking": "Checking for updates…",
+      "applying": "Applying…",
+      "apply": "Apply update",
+      "cancel": "Cancel",
+      "preserveNote": "Your customizations will be preserved.",
+      "summary": {
+        "added": "{{count}} added",
+        "deprecated": "{{count}} deprecated",
+        "removed": "{{count}} removed",
+        "modelsChanged": "{{count}} model(s) changed"
+      },
+      "successToastTitle": "API updated",
+      "successToastBody": "{{added}} added, {{deprecated}} deprecated, {{removed}} removed."
     }
   },
   "environment": {

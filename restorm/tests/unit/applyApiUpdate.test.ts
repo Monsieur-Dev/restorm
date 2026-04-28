@@ -30,6 +30,9 @@ function httpRequest(naturalKey: string, name = naturalKey): Record<string, unkn
     type: 'http',
     method: 'GET',
     url: '/x',
+    headers: [],
+    params: [],
+    pathParams: [],
     importOrigin: { format: 'swagger', naturalKey }
   }
 }
@@ -120,5 +123,31 @@ describe('applyApiUpdate', () => {
     expect(result.diff.deprecated.map((op) => op.naturalKey)).toEqual(['GET /a'])
     const req = target.items[0] as { deprecated?: boolean }
     expect(req.deprecated).toBe(true)
+  })
+
+  it('carries over enumDefinitions and apiDocumentation from the fresh import', () => {
+    // Pin the cross-update-scope behaviour: refresh-from-source must
+    // reach the env folder's enum dropdowns and the docs tab — the
+    // pipeline only handles requests, but the user-visible diff
+    // includes "an enum gained a value" which would otherwise stay
+    // frozen at the original import.
+    const target = makeFolder({
+      items: [],
+      enumDefinitions: [{ id: 'old', name: 'Status', values: ['a'], matchingRules: [] }]
+    })
+    const freshFolder = makeFolder({
+      items: [],
+      enumDefinitions: [{ id: 'new', name: 'Status', values: ['a', 'b', 'c'], matchingRules: [] }],
+      apiDocumentation: { sourceUrl: 'https://x', api: { title: 'New', version: '2.0.0' } } as never
+    })
+    applyApiUpdate({
+      target,
+      freshFolder,
+      spec: spec([]),
+      importSource: 'swagger'
+    })
+    const got = target as unknown as { enumDefinitions?: { values: string[] }[]; apiDocumentation?: { api?: { version?: string } } }
+    expect(got.enumDefinitions?.[0]?.values).toEqual(['a', 'b', 'c'])
+    expect(got.apiDocumentation?.api?.version).toBe('2.0.0')
   })
 })

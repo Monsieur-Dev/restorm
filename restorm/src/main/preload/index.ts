@@ -757,6 +757,13 @@ contextBridge.exposeInMainWorld('restorm', {
     apply: async (folderId: string): Promise<void> => {
       await ipcRenderer.invoke('apiUpdate:apply', folderId)
     },
+    /** Compute the diff against the current folder content
+     * without mutating it. Used by the "Refresh from source"
+     * confirmation dialog to surface counters before commit. */
+    preview: async (folderId: string): Promise<unknown> => {
+      const result: unknown = await ipcRenderer.invoke('apiUpdate:preview', folderId)
+      return result
+    },
     /** Acknowledge an "available" notification for the rest of the
      * session. The badge stays; only the toast suppression flips. */
     dismiss: async (folderId: string): Promise<void> => {
