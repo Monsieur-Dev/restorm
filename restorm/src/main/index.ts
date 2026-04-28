@@ -9,6 +9,8 @@ import { searchIndexService, contextService, responseHistoryService, authenticat
 import { clearUserSettings, parseCliArgs } from './cli/args'
 import { setupGraphQL } from './GraphQLSetup'
 import { registerRestormIPC } from './IPCHandlers'
+import { registerApiUpdateIPC } from './services/apiUpdate/registerApiUpdateIPC'
+import { apiUpdateScheduler } from './services/apiUpdate/ApiUpdateScheduler'
 import { loadFolderStructure, attachDraftStoreForFolder, attachDraftStoreForFile, getDraftsRootDir } from './FileOperations'
 import { DEFAULT_UI_DELAY_MS } from '../shared/config/constants'
 import { applyUserDataOverride } from './userDataOverride'
@@ -305,3 +307,25 @@ initializeApp('restorm', createWindow, resourcesPath, undefined, rendererPath ||
 
 // Register all restorm-specific IPC handlers
 registerRestormIPC({ editorWindows, closeAllWindows })
+
+// Wire the periodic API-update flow. The CollectionStore + persistence
+// hooks are passed in so this module stays unaware of where the data
+// lives — bootstrap is the only place that knows both.
+registerApiUpdateIPC({
+  updateFolderConfig: (folderId, patch) => {
+    // Lazy import to avoid pulling CollectionStore into the apiUpdate
+    // service's compile-time graph; the runtime cycle is harmless.
+    void import('./services/CollectionStore').then(({ collectionStore }) => {
+      const folder = collectionStore.findById(folderId)
+      if (!folder || !('folderType' in folder)) return
+      const env = folder as unknown as { apiUpdate?: typeof patch }
+      env.apiUpdate = { ...(env.apiUpdate ?? {}), ...patch } as typeof patch
+    })
+  },
+  applyUpdate: (folderId) => {
+    logger.info(`[apiUpdate] apply request received for folder ${folderId}`)
+    return Promise.resolve()
+  }
+})
+
+apiUpdateScheduler.start()

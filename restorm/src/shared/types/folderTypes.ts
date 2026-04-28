@@ -1,4 +1,4 @@
-import type { RuntimeId, Icon, Environment, FolderConfiguration, EnumDefinition, ImportSourceType, ImportSelectionSnapshot } from './baseTypes'
+import type { RuntimeId, Icon, Environment, FolderConfiguration, EnumDefinition, ImportSourceType, ImportSelectionSnapshot, ApiUpdateConfig } from './baseTypes'
 import type { Request } from './requests/index'
 
 export interface Folder {
@@ -36,6 +36,14 @@ export interface EnvironmentFolder extends Folder {
    * against a re-fetched spec into added / removed / kept-skipped.
    */
   importSelection?: ImportSelectionSnapshot
+  /**
+   * Configuration for the periodic spec re-check + idempotent
+   * refresh. Absent for manually created folders, and also absent on
+   * legacy folders saved before the field existed — the load-time
+   * migration backfills it from `apiDocumentation.sourceUrl` when
+   * possible.
+   */
+  apiUpdate?: ApiUpdateConfig
 }
 
 export type FolderItem = Folder | EnvironmentFolder | Request
