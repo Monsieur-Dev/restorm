@@ -375,19 +375,37 @@ export function ImportModal({
       imported,
       skipped
     }
+    const sourceUrlAtImport = input.trim()
+    const isUrlImport = sourceUrlAtImport.startsWith('http://') || sourceUrlAtImport.startsWith('https://')
     const stampSnapshot = (items: FolderItem[]): FolderItem[] => items.map((item) => {
       if (isEnvironmentFolder(item)) {
         const stamped = { ...item, importSelection: snapshot } as EnvironmentFolder
-        // Tie the auth request that protected the import fetch to
-        // the env folder's apiUpdate so a future refresh can resolve
-        // its headers without the user re-attaching. Captures the
-        // user's intent at the moment of import; the auth request
-        // itself lives in the folder tree (line 351 above) so the
-        // reference stays valid across project reloads.
-        if (attachedAuth) {
-          const apiUpdate = (stamped as unknown as { apiUpdate?: { authenticationRequestId?: string } }).apiUpdate
+        // Stamp the apiUpdate config so a future refresh has every
+        // field the orchestrator needs: the URL we just fetched
+        // from, the static defaults from the migration, and the
+        // attached auth-route id when the user supplied one. Tying
+        // sourceUrl in here — instead of leaving it to the legacy
+        // migration step — means the "Refresh from source" entry
+        // shows up immediately after the import, without waiting
+        // for the next project reload.
+        if (isUrlImport) {
+          const existing = (stamped as unknown as { apiUpdate?: Record<string, unknown> }).apiUpdate ?? {}
+          const apiDoc = (stamped as unknown as { apiDocumentation?: { api?: { version?: string } } }).apiDocumentation
           ;(stamped as unknown as { apiUpdate?: Record<string, unknown> }).apiUpdate = {
-            ...(apiUpdate ?? {}),
+            sourceUrl: sourceUrlAtImport,
+            autoCheckEnabled: false,
+            interval: 'daily',
+            ...(apiDoc?.api?.version !== undefined ? { lastImportedSpecVersion: apiDoc.api.version } : {}),
+            ...existing,
+            ...(attachedAuth ? { authenticationRequestId: attachedAuth.id } : {})
+          }
+        } else if (attachedAuth) {
+          // File imports don't get a sourceUrl, but if the user
+          // attached an auth route we still capture it for any
+          // manual URL the user types into the env-folder home.
+          const apiUpdate = (stamped as unknown as { apiUpdate?: Record<string, unknown> }).apiUpdate ?? {}
+          ;(stamped as unknown as { apiUpdate?: Record<string, unknown> }).apiUpdate = {
+            ...apiUpdate,
             authenticationRequestId: attachedAuth.id
           }
         }

@@ -35,8 +35,30 @@ interface RequestLike {
  *   "version → version" comparison.
  */
 export function migrateApiUpdate<T extends FolderLike>(folder: T): T {
-  if (folder.apiUpdate) return walk(folder)
   const sourceUrl = folder.apiDocumentation?.sourceUrl
+  // Two paths converge here. (1) Legacy folder with no apiUpdate:
+  // create one from the apiDocumentation marker. (2) Partial
+  // apiUpdate (the import wizard stamps `authenticationRequestId`
+  // before the migration runs, leaving sourceUrl / autoCheckEnabled
+  // / interval to be filled): merge sane defaults under whatever
+  // the wizard set so the "Refresh from source" entry surfaces
+  // without waiting for a project reload.
+  if (folder.apiUpdate) {
+    // Cast through Partial because the import wizard stamps a
+    // partial config (just `authenticationRequestId`) before the
+    // migration runs — at that point the type's required fields
+    // genuinely are missing, even though TS's view of the value
+    // says otherwise.
+    const existing = folder.apiUpdate as Partial<ApiUpdateConfig>
+    const merged: ApiUpdateConfig = {
+      sourceUrl: existing.sourceUrl ?? sourceUrl ?? '',
+      autoCheckEnabled: existing.autoCheckEnabled ?? false,
+      interval: existing.interval ?? 'daily',
+      ...existing
+    } as ApiUpdateConfig
+    folder.apiUpdate = merged
+    return walk(folder)
+  }
   if (!sourceUrl) return walk(folder)
   const apiUpdate: ApiUpdateConfig = {
     sourceUrl,
