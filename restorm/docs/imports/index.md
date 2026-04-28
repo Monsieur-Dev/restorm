@@ -9,6 +9,14 @@ route incoming files / URLs / pasted content to the right adapter.
 | --- | --- |
 | OpenAPI 2.0 / 3.0 / 3.1 (Swagger) | [`openapi.md`](./openapi.md) |
 
+For periodic re-checks of an already-imported spec (Swagger,
+OpenAPI 3, GraphQL, Postman, Insomnia, Bruno, AsyncAPI, gRPC, SOAP,
+OData) and the operator-facing UX, see
+[`api-update-checks.md`](./api-update-checks.md). For the
+`ImportAdapter` interface every format implements to participate in
+the idempotent refresh pipeline, see
+[`adapter-interface.md`](./adapter-interface.md).
+
 For a tour of the overall import pipeline (sniffing, dispatch, idempotent
 re-import, enum reconciliation, fixtures, E2E coverage), see the playbook at
 [`../contributing/adding-an-import.md`](../contributing/adding-an-import.md).
