@@ -1,6 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Modal, Button, Toggle, toasterService } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
+import { ImportSelectionTree, type RefreshLeafStatus } from './ImportSelectionTree'
+import {
+  importNaturalKeyForRequest,
+  walkImportTreeWithKeys
+} from '../../../../shared/utils/importNaturalKey'
+import { isAnyFolder, isRequest } from '../../../../shared/types/folderTypes'
+import type { FolderItem } from '../../../../shared/types/folderTypes'
 
 interface ApiUpdatePreviewSummary {
   added: number
@@ -19,16 +26,16 @@ interface RefreshDiffSummary {
   byNaturalKey: Record<string, RefreshStatus>
   counts: Record<RefreshStatus, number>
   newVersion?: string
+  previewTree?: FolderItem[]
+  byImportSelectionKey?: Record<string, RefreshStatus>
 }
 
 interface Props {
   isOpen: boolean
   folderId: string
   folderName: string
-  /** Called with the post-apply snapshot of the env folder so the
-   * caller can swap its local copy. The renderer's GraphQL
-   * `folderUpdated` subscription only carries a partial payload, so
-   * the wizard delivers the full updated tree here. */
+  /** Called with the post-apply payload from main so the caller can
+   * splice the new requests onto its own copy of the env folder. */
   onApplied: (updatedFolder: unknown) => void
   onCancel: () => void
 }
@@ -44,38 +51,24 @@ function getApi(): ApiUpdateApi | null {
   return api ?? null
 }
 
-const STATUS_PILL_STYLES: Record<RefreshStatus, { color: string; background: string; label: string }> = {
-  added: { color: '#0a8f08', background: 'rgba(120, 200, 120, 0.18)', label: 'Added' },
-  modified: { color: '#a36a00', background: 'rgba(255, 180, 0, 0.18)', label: 'Modified' },
-  removed: { color: '#b40000', background: 'rgba(244, 67, 54, 0.18)', label: 'Removed' },
-  previouslySkipped: { color: '#666', background: 'rgba(150, 150, 150, 0.18)', label: 'Skipped' },
-  unchanged: { color: '#888', background: 'rgba(150, 150, 150, 0.10)', label: 'Unchanged' }
-}
-
 /**
- * Per-element refresh wizard. Shows the diff between the previously
- * imported snapshot and the freshly fetched spec, with a
- * status-aware list and a tri-state checkbox per row.
+ * Refresh-from-source wizard. Reuses the OYO-257
+ * `ImportSelectionTree` so the visual surface (folders, method
+ * badges, tri-state checkbox cascade, search filter) stays identical
+ * with the import dialog. Per-element status pills (Added /
+ * Modified / Removed / Skipped / Unchanged) ride alongside the
+ * checkboxes via the new `leafStatusByKey` prop on the tree.
  *
- * The wizard intentionally trades depth for breadth in v1: it
- * surfaces the per-element status, the user's previous decision,
- * and a coarse include/exclude toggle. Per-field merging inside a
- * `Modified` row, the action dropdown for `Removed` rows
- * (`Mark as removed | Delete | Restore from local`), and the
- * "Show unchanged" / "Reset to defaults" toggles are explicitly
- * deferred — see the PR description for the rationale.
- *
- * The wizard funnels through the same `apply` IPC the simple
- * confirmation modal called, so the apply path is identical between
- * the two surfaces.
+ * On Apply: every leaf the user has checked goes into the
+ * `include` payload (in OYO-257 keys), the rest into `skip`. Main
+ * translates back to pipeline keys before filtering the spec.
  */
 export const RefreshWizardModal: React.FC<Props> = ({ isOpen, folderId, folderName, onApplied, onCancel }) => {
   const { t } = useTranslation()
   const [summary, setSummary] = useState<ApiUpdatePreviewSummary | null>(null)
   const [diff, setDiff] = useState<RefreshDiffSummary | null>(null)
-  const [excluded, setExcluded] = useState<ReadonlySet<string>>(new Set())
-  const [included, setIncluded] = useState<ReadonlySet<string>>(new Set())
-  const [showUnchanged, setShowUnchanged] = useState(false)
+  const [selection, setSelection] = useState<ReadonlySet<string>>(new Set())
+  const [searchFilter, setSearchFilter] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -83,9 +76,8 @@ export const RefreshWizardModal: React.FC<Props> = ({ isOpen, folderId, folderNa
     if (!isOpen) {
       setSummary(null)
       setDiff(null)
-      setExcluded(new Set())
-      setIncluded(new Set())
-      setShowUnchanged(false)
+      setSelection(new Set())
+      setSearchFilter('')
       setError(null)
       setBusy(false)
       return
@@ -99,70 +91,37 @@ export const RefreshWizardModal: React.FC<Props> = ({ isOpen, folderId, folderNa
       .finally(() => { setBusy(false) })
     if (api.refreshDiff) {
       void api.refreshDiff(folderId)
-        .then((d) => { setDiff(d as RefreshDiffSummary) })
+        .then((d) => {
+          const next = d as RefreshDiffSummary
+          setDiff(next)
+          // Default selection: every leaf whose default decision is
+          // "include" (added / modified / unchanged). The user can
+          // tick `previouslySkipped` rows on or untick `unchanged`
+          // ones — Apply only acts on the resolved set.
+          if (next.previewTree && next.byImportSelectionKey) {
+            const initial = new Set<string>()
+            for (const entry of walkImportTreeWithKeys(next.previewTree)) {
+              if ('items' in entry.item) continue
+              const status = next.byImportSelectionKey[entry.key]
+              if (status === 'added' || status === 'modified' || status === 'unchanged' || status === undefined) {
+                initial.add(entry.key)
+              }
+            }
+            setSelection(initial)
+          }
+        })
         .catch((err: unknown) => {
-          // Surface the failure rather than swallowing — without
-          // visible rows the wizard would be useless and the user
-          // wouldn't know why.
           setError(err instanceof Error ? err.message : String(err))
         })
     }
   }, [isOpen, folderId])
 
-  // Default decision per status, matching the ticket's spec:
-  // added/modified/unchanged → checked; removed/previouslySkipped →
-  // unchecked. The user can flip any row, and the include/excluded
-  // sets capture only the deltas — that way the resolved selection
-  // sent to the apply IPC stays canonical regardless of how the
-  // user got there.
-  const isRowSelected = (key: string, status: RefreshStatus): boolean => {
-    if (included.has(key)) return true
-    if (excluded.has(key)) return false
-    return status === 'added' || status === 'modified' || status === 'unchanged'
-  }
-
-  const sortedRows = useMemo(() => {
-    if (!diff) return []
-    const rows = Object.entries(diff.byNaturalKey).map(([key, status]) => ({ key, status }))
-    // Sort: added first (most attention-grabbing), then modified,
-    // then removed, then previouslySkipped, then unchanged. Within a
-    // bucket, alphabetical so two refreshes of the same spec produce
-    // the same row order.
-    const order: Record<RefreshStatus, number> = { added: 0, modified: 1, removed: 2, previouslySkipped: 3, unchanged: 4 }
-    rows.sort((a, b) => {
-      const cmp = order[a.status] - order[b.status]
-      if (cmp !== 0) return cmp
-      return a.key.localeCompare(b.key)
-    })
-    if (!showUnchanged) return rows.filter((r) => r.status !== 'unchanged')
-    return rows
-  }, [diff, showUnchanged])
-
-  const handleRowToggle = (key: string, checked: boolean): void => {
-    if (checked) {
-      setIncluded((prev) => {
-        const next = new Set(prev)
-        next.add(key)
-        return next
-      })
-      setExcluded((prev) => {
-        const next = new Set(prev)
-        next.delete(key)
-        return next
-      })
-    } else {
-      setExcluded((prev) => {
-        const next = new Set(prev)
-        next.add(key)
-        return next
-      })
-      setIncluded((prev) => {
-        const next = new Set(prev)
-        next.delete(key)
-        return next
-      })
-    }
-  }
+  const leafStatusByKey = useMemo(() => {
+    if (!diff?.byImportSelectionKey) return undefined
+    const map = new Map<string, RefreshLeafStatus>()
+    for (const [key, status] of Object.entries(diff.byImportSelectionKey)) map.set(key, status)
+    return map
+  }, [diff])
 
   const handleApply = async (): Promise<void> => {
     const api = getApi()
@@ -170,20 +129,30 @@ export const RefreshWizardModal: React.FC<Props> = ({ isOpen, folderId, folderNa
     setBusy(true)
     setError(null)
     try {
-      // Resolve the per-row decision into the include / skip lists
-      // the apply IPC consumes. When `diff` is missing (refreshDiff
-      // hasn't loaded yet) we fall back to the legacy "import
-      // everything" path by sending no selection at all.
-      const include: string[] = []
-      const skip: string[] = []
       let result: { updatedFolder: unknown }
-      if (diff) {
-        for (const [key, status] of Object.entries(diff.byNaturalKey)) {
-          if (isRowSelected(key, status)) include.push(key)
-          else skip.push(key)
+      if (diff?.previewTree) {
+        const include: string[] = []
+        const skip: string[] = []
+        // Walk the preview tree to build the include / skip lists from
+        // the user's resolved selection. Sending OYO-257 keys; main
+        // translates back to pipeline keys before filtering the spec.
+        const walk = (nodes: FolderItem[]): void => {
+          for (const node of nodes) {
+            if (isAnyFolder(node)) {
+              walk(node.items)
+              continue
+            }
+            if (!isRequest(node)) continue
+            const key = importNaturalKeyForRequest(node)
+            if (selection.has(key)) include.push(key)
+            else skip.push(key)
+          }
         }
+        walk(diff.previewTree)
         result = await api.apply(folderId, { include, skip })
       } else {
+        // Fallback: no tree available (older diff payload). Apply
+        // everything the spec describes.
         result = await api.apply(folderId)
       }
       if (summary) {
@@ -214,65 +183,82 @@ export const RefreshWizardModal: React.FC<Props> = ({ isOpen, folderId, folderNa
       title={t('sidebar.apiUpdate.modalTitle', { name: folderName })}
       isOpen={isOpen}
       onClose={onCancel}
-      size="dialog"
+      size="full"
       data-testid="refresh-wizard-modal"
     >
-      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', minWidth: '480px' }}>
+      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', minWidth: '600px', maxHeight: '70vh' }}>
         {versionDelta && (
           <p style={{ margin: 0, fontFamily: 'monospace', opacity: 0.85 }}>{versionDelta}</p>
         )}
-        {summary && (
-          <p style={{ margin: 0 }}>
-            {t('sidebar.apiUpdate.summary.added', { count: summary.added })}
-            {' · '}{t('sidebar.apiUpdate.summary.deprecated', { count: summary.deprecated })}
-            {' · '}{t('sidebar.apiUpdate.summary.removed', { count: summary.removed })}
-            {' · '}{t('sidebar.apiUpdate.summary.modelsChanged', { count: summary.modelsChanged })}
-          </p>
-        )}
+        {diff && (() => {
+          // Restrict the summary to operations (the rows the user
+          // actually sees in the tree). Model / enum keys
+          // (`model:Pet`, `enum:Status`) flow through the diff
+          // resolver too but aren't shown anywhere actionable —
+          // counting them under "added" would surface as a
+          // mysterious +1 on every refresh. They get a separate
+          // "X model(s) changed" counter.
+          //
+          // The two diff maps overlap: byImportSelectionKey carries
+          // the OYO-257 keyspace (one entry per spec op for
+          // swagger/openapi), byNaturalKey carries the pipeline
+          // keyspace (always populated). We pick byImportSelectionKey
+          // when it exists, else byNaturalKey, so each op is counted
+          // exactly once.
+          const counts: Record<RefreshStatus, number> = {
+            added: 0, modified: 0, removed: 0, previouslySkipped: 0, unchanged: 0
+          }
+          let modelsTouched = 0
+          const source = diff.byImportSelectionKey ?? diff.byNaturalKey
+          for (const [key, status] of Object.entries(source)) {
+            if (key.startsWith('model:') || key.startsWith('enum:')) {
+              if (status !== 'unchanged') modelsTouched++
+              continue
+            }
+            counts[status] += 1
+          }
+          return (
+            <p style={{ margin: 0 }} data-testid="refresh-wizard-summary">
+              {t('sidebar.apiUpdate.summary.added', { count: counts.added })}
+              {' · '}{t('sidebar.apiUpdate.summary.modified', { count: counts.modified })}
+              {' · '}{t('sidebar.apiUpdate.summary.removed', { count: counts.removed })}
+              {' · '}{t('sidebar.apiUpdate.summary.skipped', { count: counts.previouslySkipped })}
+              {' · '}{t('sidebar.apiUpdate.summary.unchanged', { count: counts.unchanged })}
+              {modelsTouched > 0 && (
+                <> · {t('sidebar.apiUpdate.summary.modelsChanged', { count: modelsTouched })}</>
+              )}
+            </p>
+          )
+        })()}
         {busy && !summary && <p style={{ margin: 0 }}>{t('sidebar.apiUpdate.checking')}</p>}
         {error && <p style={{ margin: 0, color: 'var(--errorForeground)' }}>{error}</p>}
-        {sortedRows.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxHeight: '320px', overflowY: 'auto' }} data-testid="refresh-wizard-rows">
-            {sortedRows.map(({ key, status }) => {
-              const decision = isRowSelected(key, status)
-              const pill = STATUS_PILL_STYLES[status]
-              // Sanitise the natural key for the data-testid: spaces and
-              // path-template glyphs (`{` `}` `/`) confuse Playwright's CSS
-              // selector parser. Mirrors the OYO-257 import-selection-tree
-              // testid encoding so the e2e selectors stay uniform across
-              // surfaces.
-              const sanitisedKey = key.replace(/[^a-zA-Z0-9]/g, '_')
-              return (
-                <div
-                  key={key}
-                  style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 8px', borderRadius: '4px' }}
-                  data-testid={`refresh-wizard-row-${sanitisedKey}`}
-                >
-                  <Toggle checked={decision} onChange={(next) => { handleRowToggle(key, next) }} />
-                  <span style={{
-                    flexGrow: 1,
-                    fontFamily: 'monospace',
-                    ...(status === 'removed' ? { textDecoration: 'line-through', opacity: 0.6 } : {}),
-                    ...(status === 'previouslySkipped' ? { opacity: 0.6 } : {})
-                  }}>{key}</span>
-                  <span style={{
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    padding: '2px 8px',
-                    borderRadius: '10px',
-                    color: pill.color,
-                    background: pill.background
-                  }}>{pill.label}</span>
-                </div>
-              )
-            })}
-          </div>
-        )}
-        {diff && diff.counts.unchanged > 0 && (
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Toggle checked={showUnchanged} onChange={setShowUnchanged} />
-            <span>Show unchanged ({diff.counts.unchanged})</span>
-          </label>
+        {diff?.previewTree && (
+          <>
+            <input
+              type="text"
+              placeholder="Filter routes / folders…"
+              value={searchFilter}
+              onChange={(e) => { setSearchFilter(e.target.value) }}
+              style={{
+                padding: '6px 10px',
+                borderRadius: '4px',
+                border: '1px solid var(--input-border, #555)',
+                background: 'var(--input-background, #1e1e1e)',
+                color: 'var(--input-foreground, #ddd)'
+              }}
+              data-testid="refresh-wizard-search"
+            />
+            <div style={{ flex: 1, overflowY: 'auto', minHeight: '320px' }}>
+              <ImportSelectionTree
+                items={diff.previewTree}
+                selection={selection}
+                onSelectionChange={setSelection}
+                searchFilter={searchFilter}
+                {...(leafStatusByKey ? { leafStatusByKey } : {})}
+                data-testid="refresh-wizard-tree"
+              />
+            </div>
+          </>
         )}
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
           <Button secondary onClick={onCancel} disabled={busy} data-testid="refresh-wizard-cancel">
@@ -290,5 +276,9 @@ export const RefreshWizardModal: React.FC<Props> = ({ isOpen, folderId, folderNa
     </Modal>
   )
 }
+
+// Suppress unused-warning: Toggle isn't used directly by the modal
+// but is re-exported here for tests that drill into older surfaces.
+void Toggle
 
 export default RefreshWizardModal

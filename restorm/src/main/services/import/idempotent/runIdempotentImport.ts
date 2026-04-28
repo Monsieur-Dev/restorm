@@ -176,9 +176,13 @@ export function runIdempotentImport(options: RunIdempotentImportOptions): Import
 
   // Operations that vanished from the spec — flip removed=true on
   // any spec-imported request that wasn't seen in this run.
+  // Authentication routes prepended by the import wizard share the
+  // same env folder but carry no API operation; never mark them
+  // removed, regardless of `importOrigin.format`.
   for (const r of index.fromThisFormat) {
     if (seenInThisRun.has(r)) continue
     if (r.removed === true) continue
+    if ((r as { type?: string }).type === 'auth') continue
     r.removed = true
     diff.removed.push({
       operationId: r.importOrigin?.operationId,

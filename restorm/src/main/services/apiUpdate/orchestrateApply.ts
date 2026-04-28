@@ -152,18 +152,26 @@ export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateA
   // pipeline applied.
   const fullSpec = adapter.extractNormalizedSpec(JSON.parse(await fetchText(url, headers)), {})
 
-  // Filter the spec down to the resolved selection before the
-  // pipeline sees it. The naturalKey set the wizard sends is the
-  // single source of truth for what gets imported / refreshed —
-  // operations not in the set are invisible to the pipeline, so a
-  // previously-skipped route the user didn't tick stays skipped.
-  const include = selection ? new Set(selection.include) : new Set<string>()
+  // The wizard's `include` set carries OYO-257 keys
+  // (`request:http:METHOD {{baseUrl}}/path/{{id}}`); the pipeline
+  // filters by spec-side `naturalKey` (`METHOD /path/{id}`). Build
+  // an inclusion set in the spec key-space by walking the spec
+  // operations + translating each one through specKeyToImportSelectionKey
+  // and keeping the ones whose translated form is in `include`.
+  const includeSnapshotKeys = selection ? new Set(selection.include) : new Set<string>()
+  const includeSpecKeys = selection
+    ? new Set(
+      fullSpec.operations
+        .map((op) => op.naturalKey)
+        .filter((key) => includeSnapshotKeys.has(specKeyToImportSelectionKey(key, importSource, fullSpec)))
+    )
+    : new Set<string>()
   const spec = selection
     ? {
       ...fullSpec,
-      operations: filterSpecBySelection(fullSpec.operations, include),
-      models: filterModelsBySelection(fullSpec.models, include),
-      enums: filterEnumsBySelection(fullSpec.enums, include)
+      operations: filterSpecBySelection(fullSpec.operations, includeSpecKeys),
+      models: filterModelsBySelection(fullSpec.models, includeSpecKeys),
+      enums: filterEnumsBySelection(fullSpec.enums, includeSpecKeys)
     }
     : fullSpec
 

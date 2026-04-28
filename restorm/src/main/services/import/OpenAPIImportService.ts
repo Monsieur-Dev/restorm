@@ -430,7 +430,12 @@ function operationToRequest(
     url: buildUrl(path, parameters),
     headers,
     params,
-    pathParams
+    pathParams,
+    importOrigin: {
+      format: 'openapi',
+      naturalKey: `${method.toUpperCase()} ${path}`,
+      ...(operation.operationId !== undefined ? { operationId: operation.operationId } : {})
+    }
   }
   if (operation.deprecated) request.deprecated = true
   const body = extractBody(operation, spec)

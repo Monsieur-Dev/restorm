@@ -15,6 +15,7 @@ import { resolveRefreshDiff, type RefreshStatus } from './refreshDiff'
 import { expandHeaderTemplate, expandVariables } from './scheduling'
 import { resolveAuthHeadersForFolder } from './resolveAuthHeaders'
 import { specKeyToImportSelectionKey } from './specKeyTranslator'
+import { importFrom } from '../import/ImportManager'
 
 /**
  * Side-effect-free entry point the refresh wizard calls to populate
@@ -76,6 +77,22 @@ export interface RefreshDiffSummary {
   byNaturalKey: Record<string, RefreshStatus>
   counts: Record<RefreshStatus, number>
   newVersion?: string
+  /**
+   * Parsed-spec preview tree, the same shape `window.restorm.import.preview`
+   * returns. Lets the wizard render the diff using the OYO-257
+   * `ImportSelectionTree` component (folders + method badges +
+   * tri-state checkboxes) instead of a flat list. Carried alongside
+   * the per-key status map so a single IPC round-trip is enough
+   * to populate the modal.
+   */
+  previewTree?: unknown
+  /**
+   * Map from each leaf's OYO-257 natural key (the keys
+   * `ImportSelectionTree` produces) to its OYO-258 status. Lets the
+   * wizard show status pills on the tree rows without re-translating
+   * client-side.
+   */
+  byImportSelectionKey?: Record<string, RefreshStatus>
 }
 
 export async function runApiUpdateRefreshDiff(folderId: string): Promise<RefreshDiffSummary> {
@@ -108,8 +125,36 @@ export async function runApiUpdateRefreshDiff(folderId: string): Promise<Refresh
 
   const byNaturalKey: Record<string, RefreshStatus> = {}
   for (const [key, status] of diff.byNaturalKey) byNaturalKey[key] = status
+
+  // Run a parallel preview import to get the parsed-spec FolderItem
+  // tree the OYO-257 ImportSelectionTree component renders. Reuses
+  // the same `importFrom` path the import modal uses, including its
+  // auth-header machinery — the tree it produces carries leaf
+  // requests with the OYO-257 natural keys we map statuses against.
+  let previewTree: unknown
+  let byImportSelectionKey: Record<string, RefreshStatus> | undefined
+  try {
+    const previewResult = await importFrom(url, Object.keys(headers).length === 0 ? {} : { extraHeaders: headers })
+    if (previewResult.success && previewResult.items.length > 0) {
+      previewTree = previewResult.items
+      // Translate the spec-side per-key statuses to OYO-257 keys so
+      // the renderer can read them straight off the tree's leaves
+      // without re-running specKeyToImportSelectionKey itself.
+      byImportSelectionKey = {}
+      for (const [specKey, status] of diff.byNaturalKey) {
+        byImportSelectionKey[specKeyToImportSelectionKey(specKey, importSource, spec)] = status
+      }
+    }
+  } catch {
+    // Treat a preview failure as "no tree available" — the wizard
+    // falls back to its flat-list rendering, so missing this isn't
+    // fatal. The byNaturalKey map alone is enough to drive Apply.
+  }
+
   const result: RefreshDiffSummary = { byNaturalKey, counts: diff.counts }
   if (diff.newVersion !== undefined) result.newVersion = diff.newVersion
+  if (previewTree !== undefined) result.previewTree = previewTree
+  if (byImportSelectionKey !== undefined) result.byImportSelectionKey = byImportSelectionKey
   return result
 }
 

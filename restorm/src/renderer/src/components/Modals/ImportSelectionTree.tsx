@@ -33,7 +33,17 @@ export interface ImportSelectionTreeProps {
   searchFilter?: string
   /** Test id stem (e.g. `import-selection-tree`). */
   'data-testid'?: string
+  /**
+   * Optional status pill per leaf natural key. When present, the
+   * matching pill renders in the row's `rightActions` slot. Used by
+   * the OYO-258 refresh wizard to show per-element status (added /
+   * modified / removed / previously-skipped / unchanged) without
+   * forking the tree component.
+   */
+  leafStatusByKey?: ReadonlyMap<string, RefreshLeafStatus>
 }
+
+export type RefreshLeafStatus = 'added' | 'modified' | 'removed' | 'previouslySkipped' | 'unchanged'
 
 /**
  * Decide the tri-state value for a folder row based on which of its
@@ -119,12 +129,40 @@ function filterTree(items: readonly FolderItem[], q: string): FolderItem[] {
   return out
 }
 
+const LEAF_STATUS_PILL_STYLE: Record<RefreshLeafStatus, { label: string; color: string; background: string }> = {
+  added: { label: 'Added', color: '#0a8f08', background: 'rgba(120, 200, 120, 0.18)' },
+  modified: { label: 'Modified', color: '#a36a00', background: 'rgba(255, 180, 0, 0.18)' },
+  removed: { label: 'Removed', color: '#b40000', background: 'rgba(244, 67, 54, 0.18)' },
+  previouslySkipped: { label: 'Skipped', color: '#888', background: 'rgba(150, 150, 150, 0.18)' },
+  unchanged: { label: 'Unchanged', color: '#888', background: 'rgba(150, 150, 150, 0.10)' }
+}
+
+function leafStatusPill(status: RefreshLeafStatus, testId: string | undefined): React.ReactNode {
+  const style = LEAF_STATUS_PILL_STYLE[status]
+  return (
+    <span
+      style={{
+        fontSize: '11px',
+        fontWeight: 600,
+        padding: '2px 8px',
+        borderRadius: '10px',
+        color: style.color,
+        background: style.background
+      }}
+      {...(testId && { 'data-testid': testId })}
+    >
+      {style.label}
+    </span>
+  )
+}
+
 export const ImportSelectionTree: React.FC<ImportSelectionTreeProps> = ({
   items,
   selection,
   onSelectionChange,
   searchFilter = '',
-  'data-testid': dataTestId
+  'data-testid': dataTestId,
+  leafStatusByKey
 }) => {
   // Filter for display only — selection state stays scoped to the
   // unfiltered tree, so toggling rows under a search keeps the
@@ -205,6 +243,7 @@ export const ImportSelectionTree: React.FC<ImportSelectionTreeProps> = ({
         const requestMethod = requestType === 'http' || requestType === 'auth' ? item.method : requestType
         const badgeType = mapToBadgeType(requestMethod)
         const baseTestId = dataTestId ? `${dataTestId}-row-${leafKey.replace(/[^a-zA-Z0-9]/g, '_')}` : undefined
+        const status = leafStatusByKey?.get(leafKey)
         return {
           id: leafKey,
           title: item.name,
@@ -216,12 +255,13 @@ export const ImportSelectionTree: React.FC<ImportSelectionTreeProps> = ({
               onChange={(nextChecked) => { handleLeafToggle(leafKey, nextChecked) }}
               {...(baseTestId && { 'data-testid': `${baseTestId}-toggle` })}
             />
-          )
+          ),
+          ...(status !== undefined ? { rightActions: leafStatusPill(status, baseTestId ? `${baseTestId}-status` : undefined) } : {})
         }
       })
     }
     return build(visibleItems, [])
-  }, [dataTestId, handleFolderToggle, handleLeafToggle, leafKeysByFolderKey, selection, visibleItems])
+  }, [dataTestId, handleFolderToggle, handleLeafToggle, leafKeysByFolderKey, leafStatusByKey, selection, visibleItems])
 
   return (
     <ListView

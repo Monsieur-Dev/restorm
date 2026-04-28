@@ -551,60 +551,55 @@ When('I trigger a refresh from source on the imported folder', async () => {
   }
 })
 
-// Sanitised testid IDs — wizard rows expose their natural key with
-// every non-alphanumeric character replaced by `_`, so
-// `GET /pet/inventory` becomes `GET__pet_inventory`. This keeps the
-// CSS selector stable in Playwright (no spaces / braces / slashes).
-const INVENTORY_ROW_TESTID = 'refresh-wizard-row-GET__pet_inventory'
-const PET_BY_ID_ROW_TESTID = 'refresh-wizard-row-GET__pet__id_'
+// The wizard reuses ImportSelectionTree. ListView doesn't stamp a
+// testid on rows; it does on the leftActions Toggle and on the
+// status pill we added in rightActions. The base id encodes the
+// OYO-257 natural key with every non-alphanumeric character
+// replaced by `_`. For HTTP routes that key is
+// `request:http:METHOD <url>`; the auth-service Petstore imports
+// `/pet/{id}` and `/pet/inventory` as
+// `request:http:GET {{baseUrl}}/pet/{{id}}` and
+// `request:http:GET {{baseUrl}}/pet/inventory`.
+const INVENTORY_BASE_TESTID = 'refresh-wizard-tree-row-request_http_GET___baseUrl___pet_inventory'
+const PET_BY_ID_BASE_TESTID = 'refresh-wizard-tree-row-request_http_GET___baseUrl___pet___id__'
 
 Then('the refresh wizard should show the inventory route as previously skipped', async () => {
   const p = requirePage()
   const modal = p.locator('[data-testid="refresh-wizard-modal"]')
-  // Capture the wizard state up front (even on failure) so the
-  // screenshot lands regardless of whether the assertions below
-  // pass — useful when the diff resolver changes.
   await p.waitForTimeout(2000)
   await p.screenshot({ path: join(AUTH_LOGIN_TEMP_DIR, 'refresh-wizard-before-tick.png'), fullPage: true })
-  // Surface a refresh-diff failure (e.g. auth route unresolvable)
-  // with the error text rather than a generic "row not visible".
-  // The wizard's error <p> renders whatever message bubbled up.
   const errorParagraph = modal.locator('p[style*="errorForeground"]')
   if (await errorParagraph.count() > 0) {
     const text = await errorParagraph.textContent()
     throw new Error(`Refresh wizard surfaced an error: ${text ?? '(no body)'}`)
   }
-  const row = modal.locator(`[data-testid="${INVENTORY_ROW_TESTID}"]`)
-  await expect(row).toBeVisible({ timeout: 10000 })
-  await expect(row).toContainText('Skipped')
+  // ListView doesn't stamp testids on rows; the status pill we
+  // added in rightActions does carry one (`<base>-status`). Asserting
+  // it directly is more robust than walking the row.
+  const pill = modal.locator(`[data-testid="${INVENTORY_BASE_TESTID}-status"]`)
+  await expect(pill).toBeVisible({ timeout: 10000 })
+  await expect(pill).toContainText('Skipped')
 })
 
 Then('the refresh wizard should show the existing pet route as unchanged', async () => {
   const p = requirePage()
   const modal = p.locator('[data-testid="refresh-wizard-modal"]')
-  // The "unchanged" row hides by default; flip the toggle to surface it.
-  const showUnchangedToggle = modal
-    .locator('label')
-    .filter({ hasText: 'Show unchanged' })
-    .locator('[role="checkbox"]')
-    .first()
-  if (await showUnchangedToggle.count() > 0) {
-    await showUnchangedToggle.click()
-  }
-  const row = modal.locator(`[data-testid="${PET_BY_ID_ROW_TESTID}"]`)
-  await expect(row).toBeVisible({ timeout: 5000 })
+  const pill = modal.locator(`[data-testid="${PET_BY_ID_BASE_TESTID}-status"]`)
+  await expect(pill).toBeVisible({ timeout: 5000 })
+  await expect(pill).toContainText('Unchanged')
 })
 
 When('I tick the inventory route in the refresh wizard', async () => {
   const p = requirePage()
-  // Capture the wizard state JUST BEFORE the user toggles the new
-  // route — useful screenshot when the diff resolver changes; lands
-  // under the auth-login temp dir alongside the playwright artefacts.
   await p.screenshot({ path: join(AUTH_LOGIN_TEMP_DIR, 'refresh-wizard-before-tick.png'), fullPage: true })
-  const toggle = p.locator(`[data-testid="${INVENTORY_ROW_TESTID}"] [role="checkbox"]`).first()
-  await expect(toggle).toBeVisible({ timeout: 5000 })
-  await toggle.click()
-  await expect(toggle).toHaveAttribute('aria-checked', 'true', { timeout: 5000 })
+  // The Toggle's outer `toggle-container` div carries the testid we
+  // pass through, but the inner element is the one with the
+  // `role="checkbox"` + `aria-checked` we need to assert against.
+  const toggleContainer = p.locator(`[data-testid="${INVENTORY_BASE_TESTID}-toggle"]`).first()
+  await expect(toggleContainer).toBeVisible({ timeout: 5000 })
+  const checkbox = toggleContainer.locator('[role="checkbox"]').first()
+  await checkbox.click()
+  await expect(checkbox).toHaveAttribute('aria-checked', 'true', { timeout: 5000 })
 })
 
 When('I apply the refresh', async () => {
