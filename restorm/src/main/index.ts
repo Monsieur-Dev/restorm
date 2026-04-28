@@ -11,6 +11,7 @@ import { setupGraphQL } from './GraphQLSetup'
 import { registerRestormIPC } from './IPCHandlers'
 import { registerApiUpdateIPC } from './services/apiUpdate/registerApiUpdateIPC'
 import { apiUpdateScheduler } from './services/apiUpdate/ApiUpdateScheduler'
+import { runApiUpdateApply } from './services/apiUpdate/orchestrateApply'
 import { loadFolderStructure, attachDraftStoreForFolder, attachDraftStoreForFile, getDraftsRootDir } from './FileOperations'
 import { DEFAULT_UI_DELAY_MS } from '../shared/config/constants'
 import { applyUserDataOverride } from './userDataOverride'
@@ -322,10 +323,7 @@ registerApiUpdateIPC({
       env.apiUpdate = { ...(env.apiUpdate ?? {}), ...patch } as typeof patch
     })
   },
-  applyUpdate: (folderId) => {
-    logger.info(`[apiUpdate] apply request received for folder ${folderId}`)
-    return Promise.resolve()
-  }
+  applyUpdate: (folderId) => runApiUpdateApply(folderId)
 })
 
 apiUpdateScheduler.start()
