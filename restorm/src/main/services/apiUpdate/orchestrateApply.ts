@@ -17,6 +17,7 @@ import { odataImportAdapter } from '../import/idempotent/ODataAdapter'
 import { computeSpecHash } from './specHash'
 import { expandHeaderTemplate, expandVariables } from './scheduling'
 import { resolveAuthHeadersForFolder } from './resolveAuthHeaders'
+import { specKeyToImportSelectionKey } from './specKeyTranslator'
 
 /**
  * Wire the IPC `apply` handler to the live runtime — fetch a fresh
@@ -52,12 +53,32 @@ function isImportSource(value: string | undefined): value is ImportSourceType {
   return ['swagger', 'graphql', 'grpc', 'wsdl', 'asyncapi', 'postman', 'insomnia', 'bruno', 'curl', 'powershell', 'url'].includes(value)
 }
 
+function extractStringValue(v: unknown): string | undefined {
+  // Variables come through the IPC sync as `StringValue` /
+  // `ExpressionValue` instances flattened to `{ type, value }`. Plain
+  // strings still land as strings (the renderer's reactive proxy
+  // returns them transparently). Anything else collapses to undefined.
+  if (typeof v === 'string') return v
+  if (typeof v === 'number' || typeof v === 'boolean') return String(v)
+  if (v && typeof v === 'object') {
+    const obj = v as { value?: unknown; toString?: () => string }
+    if (typeof obj.value === 'string') return obj.value
+    if (typeof obj.value === 'number' || typeof obj.value === 'boolean') return String(obj.value)
+    if (typeof obj.toString === 'function' && obj.toString !== Object.prototype.toString) {
+      const out = obj.toString()
+      if (out !== '[object Object]') return out
+    }
+  }
+  return undefined
+}
+
 function defaultVariablesFor(folder: EnvironmentFolder): Record<string, string> {
   const env = folder.environments[0]
   if (!env) return {}
   const vars: Record<string, string> = {}
   for (const kv of env.variables) {
-    if (typeof kv.value === 'string') vars[kv.key] = kv.value
+    const v = extractStringValue(kv.value)
+    if (v !== undefined) vars[kv.key] = v
   }
   return vars
 }
@@ -96,7 +117,7 @@ function filterEnumsBySelection<T extends { name: string }>(enums: T[], include:
   return enums.filter((e) => include.has(`enum:${e.name}`))
 }
 
-export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateApplySelection): Promise<void> {
+export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateApplySelection): Promise<{ updatedFolder: unknown }> {
   const target = collectionStore.findById(folderId)
   if (!target || !('folderType' in target)) {
     throw new Error(`Folder ${folderId} not found`)
@@ -149,7 +170,7 @@ export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateA
   const fetchedHash = computeSpecHash(fullSpec)
   const fetchedVersion = fullSpec.version ?? extractVersionFromImported(freshFolder)
 
-  applyApiUpdate({
+  const applyResult = applyApiUpdate({
     target: env,
     freshFolder,
     spec,
@@ -167,24 +188,45 @@ export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateA
 
   // Update the OYO-257 importSelection snapshot so the next refresh
   // remembers the user's decision: imported = what they checked
-  // this round, skipped = what they ticked off explicitly.
+  // this round, skipped = what they ticked off explicitly. Translate
+  // pipeline naturalKeys into OYO-257's snapshot scheme so the
+  // refresh-diff classifier still finds them on the next pass.
   if (selection) {
     const envWithSelection = env as unknown as { importSelection?: import('../../../shared/types/baseTypes').ImportSelectionSnapshot }
+    const toSnapshotKey = (specKey: string): string => specKeyToImportSelectionKey(specKey, importSource, fullSpec)
     envWithSelection.importSelection = {
       capturedAt: Date.now(),
       source: url,
       ...(fetchedVersion !== undefined ? { specVersion: fetchedVersion } : {}),
       specHash: fetchedHash,
-      imported: selection.include.slice().sort(),
-      skipped: selection.skip.slice().sort()
+      imported: selection.include.map(toSnapshotKey).sort(),
+      skipped: selection.skip.map(toSnapshotKey).sort()
     }
   }
 
   pubsub.publish(PUBSUB_TOPICS.FOLDER_UPDATED, env)
   logger.info(`[apiUpdate.orchestrateApply] applied to folder ${folderId}`, {
     selectedOps: spec.operations.length,
-    totalOps: fullSpec.operations.length
+    totalOps: fullSpec.operations.length,
+    addedCount: applyResult.addedRequests.length
   })
+
+  // Return only the new requests + the post-apply apiUpdate /
+  // importSelection markers. The renderer splices the new rows
+  // into its own folder copy without overwriting unrelated state
+  // (sub-environments, per-tab pinning, …) it holds that hasn't
+  // synced back to main yet.
+  const addedRequests = applyResult.addedRequests.map((r) => JSON.parse(JSON.stringify(r)) as unknown)
+  return {
+    updatedFolder: {
+      id: env.id,
+      addedRequests,
+      apiUpdate: JSON.parse(JSON.stringify(env.apiUpdate)) as unknown,
+      importSelection: (env as unknown as { importSelection?: unknown }).importSelection
+        ? JSON.parse(JSON.stringify((env as unknown as { importSelection?: unknown }).importSelection)) as unknown
+        : null
+    }
+  }
 }
 
 async function fetchText(url: string, headers: Record<string, string>): Promise<string> {

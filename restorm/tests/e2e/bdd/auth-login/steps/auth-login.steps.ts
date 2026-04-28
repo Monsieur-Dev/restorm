@@ -244,7 +244,7 @@ When('I confirm the authentication setup', async () => {
   await expect(p.locator('[data-testid="authentication-setup-modal"]')).not.toBeVisible({ timeout: 15000 })
 })
 
-Then('the import modal should show the pet swagger preview without error', async () => {
+Then('the import modal preview should let me deselect the inventory route', async () => {
   const p = requirePage()
   // After the attach callback's prefetch returns, ImportModal re-runs
   // the URL fetch with the resolved Bearer token. /swagger.json is
@@ -252,6 +252,27 @@ Then('the import modal should show the pet swagger preview without error', async
   // preview list to mount.
   await expect(p.locator('[data-testid="import-selection-tree"]')).toBeVisible({ timeout: 15000 })
   await expect(p.locator('[data-testid="import-modal"] .import-error')).not.toBeVisible()
+
+  // Wait until the petstore preview is fully populated. Both rows
+  // are visible-by-name in the rendered tree before we touch toggles.
+  const tree = p.locator('[data-testid="import-selection-tree"]')
+  await expect(tree.getByText('Find pet by ID', { exact: true })).toBeVisible({ timeout: 10000 })
+  await expect(tree.getByText('Pet inventory', { exact: true })).toBeVisible({ timeout: 10000 })
+
+  // Selective import: untick `/pet/inventory` so it stays in the
+  // OYO-257 snapshot's `skipped` list. The refresh-from-source step
+  // later in the scenario re-imports it through the wizard, which
+  // is the path under test. The toggle sits next to the row label;
+  // grab the row by its name and click the Toggle inside.
+  const inventoryRow = tree
+    .locator('.list-view-row')
+    .filter({ has: p.getByText('Pet inventory', { exact: true }) })
+    .first()
+  await expect(inventoryRow).toBeVisible({ timeout: 5000 })
+  const inventoryToggle = inventoryRow.locator('[role="checkbox"]').first()
+  await expect(inventoryToggle).toHaveAttribute('aria-checked', 'true', { timeout: 5000 })
+  await inventoryToggle.click()
+  await expect(inventoryToggle).toHaveAttribute('aria-checked', 'false', { timeout: 5000 })
 })
 
 When('I import the previewed routes', async () => {
@@ -503,6 +524,111 @@ When(
     await p.waitForTimeout(200)
   }
 )
+
+When('I trigger a refresh from source on the imported folder', async () => {
+  const p = requirePage()
+  // Open the env folder's right-click menu and click "Refresh from
+  // source". The folder row title carries the spec's `info.title`
+  // — the auth-service spec is "Auth Test Service — Pet API".
+  const folderRow = sidebarRowByName(p, 'Auth Test Service — Pet API')
+  await expect(folderRow).toBeVisible({ timeout: 5000 })
+  await folderRow.click({ button: 'right' })
+  // The context menu mounts at the document root; pick the entry by
+  // its visible label (locale-stable here since the e2e runs against
+  // the en bundle).
+  const menuItem = p.locator('[role="menuitem"]').filter({ hasText: 'Refresh from source' }).first()
+  await expect(menuItem).toBeVisible({ timeout: 5000 })
+  await menuItem.click()
+  await expect(p.locator('[data-testid="refresh-wizard-modal"]')).toBeVisible({ timeout: 15000 })
+  // The wizard's preview + refresh-diff IPCs both fire a /login
+  // through the configured auth route, and /login is gated by the
+  // auth-service. Release any pending logins so the prefetches can
+  // complete. We poll for ~5s in case the wizard fired the prefetch
+  // slightly after it mounted.
+  for (let i = 0; i < 5; i++) {
+    await fetch(`${AUTH_SERVICE_BASE}/releaselogins`).catch(() => undefined)
+    await p.waitForTimeout(1000)
+  }
+})
+
+// Sanitised testid IDs — wizard rows expose their natural key with
+// every non-alphanumeric character replaced by `_`, so
+// `GET /pet/inventory` becomes `GET__pet_inventory`. This keeps the
+// CSS selector stable in Playwright (no spaces / braces / slashes).
+const INVENTORY_ROW_TESTID = 'refresh-wizard-row-GET__pet_inventory'
+const PET_BY_ID_ROW_TESTID = 'refresh-wizard-row-GET__pet__id_'
+
+Then('the refresh wizard should show the inventory route as previously skipped', async () => {
+  const p = requirePage()
+  const modal = p.locator('[data-testid="refresh-wizard-modal"]')
+  // Capture the wizard state up front (even on failure) so the
+  // screenshot lands regardless of whether the assertions below
+  // pass — useful when the diff resolver changes.
+  await p.waitForTimeout(2000)
+  await p.screenshot({ path: join(AUTH_LOGIN_TEMP_DIR, 'refresh-wizard-before-tick.png'), fullPage: true })
+  // Surface a refresh-diff failure (e.g. auth route unresolvable)
+  // with the error text rather than a generic "row not visible".
+  // The wizard's error <p> renders whatever message bubbled up.
+  const errorParagraph = modal.locator('p[style*="errorForeground"]')
+  if (await errorParagraph.count() > 0) {
+    const text = await errorParagraph.textContent()
+    throw new Error(`Refresh wizard surfaced an error: ${text ?? '(no body)'}`)
+  }
+  const row = modal.locator(`[data-testid="${INVENTORY_ROW_TESTID}"]`)
+  await expect(row).toBeVisible({ timeout: 10000 })
+  await expect(row).toContainText('Skipped')
+})
+
+Then('the refresh wizard should show the existing pet route as unchanged', async () => {
+  const p = requirePage()
+  const modal = p.locator('[data-testid="refresh-wizard-modal"]')
+  // The "unchanged" row hides by default; flip the toggle to surface it.
+  const showUnchangedToggle = modal
+    .locator('label')
+    .filter({ hasText: 'Show unchanged' })
+    .locator('[role="checkbox"]')
+    .first()
+  if (await showUnchangedToggle.count() > 0) {
+    await showUnchangedToggle.click()
+  }
+  const row = modal.locator(`[data-testid="${PET_BY_ID_ROW_TESTID}"]`)
+  await expect(row).toBeVisible({ timeout: 5000 })
+})
+
+When('I tick the inventory route in the refresh wizard', async () => {
+  const p = requirePage()
+  // Capture the wizard state JUST BEFORE the user toggles the new
+  // route — useful screenshot when the diff resolver changes; lands
+  // under the auth-login temp dir alongside the playwright artefacts.
+  await p.screenshot({ path: join(AUTH_LOGIN_TEMP_DIR, 'refresh-wizard-before-tick.png'), fullPage: true })
+  const toggle = p.locator(`[data-testid="${INVENTORY_ROW_TESTID}"] [role="checkbox"]`).first()
+  await expect(toggle).toBeVisible({ timeout: 5000 })
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-checked', 'true', { timeout: 5000 })
+})
+
+When('I apply the refresh', async () => {
+  const p = requirePage()
+  await p.locator('[data-testid="refresh-wizard-apply"]').click()
+  // The apply path issues another /login through the gated auth
+  // service. Poll /releaselogins so the prefetch can return — the
+  // wizard only closes once the apply IPC resolves.
+  for (let i = 0; i < 10; i++) {
+    await fetch(`${AUTH_SERVICE_BASE}/releaselogins`).catch(() => undefined)
+    if (await p.locator('[data-testid="refresh-wizard-modal"]').count() === 0) break
+    await p.waitForTimeout(1000)
+  }
+  await expect(p.locator('[data-testid="refresh-wizard-modal"]')).not.toBeVisible({ timeout: 30000 })
+})
+
+Then('the sidebar should show the {string} request', async ({}, requestName: string) => {
+  const p = requirePage()
+  // Make sure the env folder is expanded so the new request row is
+  // visible. The folder may collapse after the workbench reshuffles
+  // on apply.
+  await expandRowIfCollapsed(p, 'Auth Test Service — Pet API')
+  await expect(sidebarRowByName(p, requestName)).toBeVisible({ timeout: 10000 })
+})
 
 When(
   'I switch the active environment to the {string} sub-env with apply-to-all',

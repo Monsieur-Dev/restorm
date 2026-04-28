@@ -45,8 +45,11 @@ export interface ApiUpdateIPCDeps {
    * pipeline has run + persisted; rejects on error so the renderer
    * can surface a toast. The optional `selection` payload lets the
    * wizard restrict the apply to the user's resolved choice — only
-   * the listed natural keys make it into the pipeline. */
-  applyUpdate: (folderId: string, selection?: { include: string[]; skip: string[] }) => Promise<void>
+   * the listed natural keys make it into the pipeline. The renderer
+   * uses the returned `updatedFolder` snapshot to swap its own copy
+   * of the tree (the GraphQL folderUpdated subscription only carries
+   * a partial payload). */
+  applyUpdate: (folderId: string, selection?: { include: string[]; skip: string[] }) => Promise<{ updatedFolder: unknown }>
 }
 
 let dismissed = new Set<string>()
@@ -84,8 +87,9 @@ export function registerApiUpdateIPC(deps: ApiUpdateIPCDeps): void {
   validatedHandle('apiUpdate:apply', apiUpdateApplyArgs, async (_event, [folderId, selection]) => {
     apiUpdateStateStore.patch(folderId, { kind: 'applying' })
     try {
-      await deps.applyUpdate(folderId, selection)
+      const result = await deps.applyUpdate(folderId, selection)
       apiUpdateStateStore.patch(folderId, { kind: 'idle', error: undefined })
+      return result
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       apiUpdateStateStore.patch(folderId, { kind: 'error', error: message })

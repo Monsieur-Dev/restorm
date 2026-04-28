@@ -1617,7 +1617,40 @@ const App: React.FC = () => {
           isOpen
           folderId={refreshSourceTarget.id}
           folderName={refreshSourceTarget.name}
-          onApplied={() => { setRefreshSourceTarget(null) }}
+          onApplied={(updatedFolder) => {
+            // Splice the apply payload onto the existing env folder
+            // in rootItems: append the new request instances, swap
+            // the apiUpdate / importSelection markers. We DON'T
+            // replace the whole folder — sub-environments / per-tab
+            // pinning / other renderer-only state would be lost
+            // since they may not have round-tripped to main yet.
+            interface ApplyPayload {
+              id: string
+              addedRequests: unknown[]
+              apiUpdate: unknown
+              importSelection: unknown
+            }
+            const payload = updatedFolder as ApplyPayload | null
+            if (!payload?.id) {
+              setRefreshSourceTarget(null)
+              return
+            }
+            setRootItems((current) => current.map((item) => {
+              if (!('id' in item) || item.id !== payload.id) return item
+              if (!('items' in item)) return item
+              const next = item as Folder
+              const reactiveAdded = payload.addedRequests.map((r) =>
+                makeReactiveRequest(r as never)
+              )
+              return {
+                ...next,
+                items: [...next.items, ...reactiveAdded],
+                ...(payload.apiUpdate ? { apiUpdate: payload.apiUpdate } : {}),
+                ...(payload.importSelection ? { importSelection: payload.importSelection } : {})
+              } as typeof item
+            }))
+            setRefreshSourceTarget(null)
+          }}
           onCancel={() => { setRefreshSourceTarget(null) }}
         />
       )}

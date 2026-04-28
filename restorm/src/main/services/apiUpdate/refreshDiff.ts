@@ -58,6 +58,16 @@ export interface ResolveRefreshDiffInput {
   /** Optional per-natural-key fingerprint from the snapshot. Stored
    * by the apply step on the previous successful refresh. */
   fingerprintBySnapshotKey?: ReadonlyMap<string, string>
+  /**
+   * Translate a spec-side naturalKey ("GET /pet/{id}") to the
+   * snapshot-side key OYO-257 stored ("request:http:GET
+   * {{baseUrl}}/pet/{{id}}"). The pipeline + the wizard both use
+   * the spec-side key for everything else; this translation only
+   * scopes the snapshot membership lookup. Returns the same key
+   * unchanged when a translation isn't applicable (e.g. a model /
+   * enum, or a format that already aligns).
+   */
+  snapshotKeyFor?: (specKey: string) => string
 }
 
 function specNaturalKeys(spec: NormalizedSpec): Set<string> {
@@ -81,10 +91,21 @@ export function resolveRefreshDiff(input: ResolveRefreshDiffInput): RefreshDiff 
   const oldImported = new Set(input.oldSnapshot?.imported ?? [])
   const oldSkipped = new Set(input.oldSnapshot?.skipped ?? [])
   const inSpec = specNaturalKeys(input.newSpec)
+  const translate = input.snapshotKeyFor ?? ((k: string) => k)
+
+  // The output map keys ALWAYS use spec-side naturalKeys so the
+  // wizard's row toggles and the apply step's filter share a single
+  // identifier scheme. Only the snapshot membership check translates
+  // — that's the seam where the OYO-257 (`request:http:METHOD
+  // {{baseUrl}}<path>`) and OYO-168 (`METHOD <path>`) keyspaces
+  // meet.
+  const inSpecBySnapshotKey = new Map<string, string>()
+  for (const key of inSpec) inSpecBySnapshotKey.set(translate(key), key)
 
   for (const key of inSpec) {
-    if (oldImported.has(key)) {
-      const before = input.fingerprintBySnapshotKey?.get(key)
+    const snapshotKey = translate(key)
+    if (oldImported.has(snapshotKey)) {
+      const before = input.fingerprintBySnapshotKey?.get(snapshotKey)
       const after = input.fingerprintBySpecKey?.get(key)
       const status: RefreshStatus = before !== undefined && after !== undefined && before !== after
         ? 'modified'
@@ -93,7 +114,7 @@ export function resolveRefreshDiff(input: ResolveRefreshDiffInput): RefreshDiff 
       counts[status] += 1
       continue
     }
-    if (oldSkipped.has(key)) {
+    if (oldSkipped.has(snapshotKey)) {
       byNaturalKey.set(key, 'previouslySkipped')
       counts.previouslySkipped += 1
       continue
@@ -102,9 +123,15 @@ export function resolveRefreshDiff(input: ResolveRefreshDiffInput): RefreshDiff 
     counts.added += 1
   }
 
-  for (const key of oldImported) {
-    if (inSpec.has(key)) continue
-    byNaturalKey.set(key, 'removed')
+  for (const snapshotKey of oldImported) {
+    if (inSpecBySnapshotKey.has(snapshotKey)) continue
+    // No spec match → translate-back-impossible; fall back to the
+    // raw snapshot key as the row id. The apply path filters by
+    // spec-side keys, so this row's toggle has no effect on apply
+    // (rightly: a row that doesn't exist in the new spec can't be
+    // imported), but the user still sees it as "removed" in the
+    // wizard.
+    byNaturalKey.set(snapshotKey, 'removed')
     counts.removed += 1
   }
 

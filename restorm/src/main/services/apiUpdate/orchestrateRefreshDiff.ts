@@ -14,6 +14,7 @@ import { odataImportAdapter } from '../import/idempotent/ODataAdapter'
 import { resolveRefreshDiff, type RefreshStatus } from './refreshDiff'
 import { expandHeaderTemplate, expandVariables } from './scheduling'
 import { resolveAuthHeadersForFolder } from './resolveAuthHeaders'
+import { specKeyToImportSelectionKey } from './specKeyTranslator'
 
 /**
  * Side-effect-free entry point the refresh wizard calls to populate
@@ -45,12 +46,28 @@ function isImportSource(value: string | undefined): value is ImportSourceType {
   return ['swagger', 'openapi', 'graphql', 'grpc', 'wsdl', 'asyncapi', 'odata', 'postman', 'insomnia', 'bruno', 'curl', 'powershell', 'url'].includes(value)
 }
 
+function extractStringValue(v: unknown): string | undefined {
+  if (typeof v === 'string') return v
+  if (typeof v === 'number' || typeof v === 'boolean') return String(v)
+  if (v && typeof v === 'object') {
+    const obj = v as { value?: unknown; toString?: () => string }
+    if (typeof obj.value === 'string') return obj.value
+    if (typeof obj.value === 'number' || typeof obj.value === 'boolean') return String(obj.value)
+    if (typeof obj.toString === 'function' && obj.toString !== Object.prototype.toString) {
+      const out = obj.toString()
+      if (out !== '[object Object]') return out
+    }
+  }
+  return undefined
+}
+
 function defaultVariablesFor(folder: EnvironmentFolder): Record<string, string> {
   const env = folder.environments[0]
   if (!env) return {}
   const vars: Record<string, string> = {}
   for (const kv of env.variables) {
-    if (typeof kv.value === 'string') vars[kv.key] = kv.value
+    const v = extractStringValue(kv.value)
+    if (v !== undefined) vars[kv.key] = v
   }
   return vars
 }
@@ -85,7 +102,8 @@ export async function runApiUpdateRefreshDiff(folderId: string): Promise<Refresh
 
   const diff = resolveRefreshDiff({
     oldSnapshot: env.importSelection,
-    newSpec: spec
+    newSpec: spec,
+    snapshotKeyFor: (specKey) => specKeyToImportSelectionKey(specKey, importSource, spec)
   })
 
   const byNaturalKey: Record<string, RefreshStatus> = {}

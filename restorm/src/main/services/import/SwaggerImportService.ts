@@ -554,7 +554,17 @@ function operationToRequest(
     url: buildUrl(path, parameters),
     headers: extractHeaders(parameters, ctx),
     params: extractParams(parameters, ctx),
-    pathParams: extractPathParams(parameters, ctx)
+    pathParams: extractPathParams(parameters, ctx),
+    // Anchor for the idempotent refresh pipeline. naturalKey
+    // matches `SwaggerAdapter.extractNormalizedSpec`'s
+    // `${METHOD} ${path}` so a refresh-from-source can re-pair the
+    // existing request with its source operation across runs;
+    // operationId is the spec author's preferred id when present.
+    importOrigin: {
+      format: 'swagger',
+      naturalKey: `${method.toUpperCase()} ${path}`,
+      ...(operation.operationId !== undefined ? { operationId: operation.operationId } : {})
+    }
   }
 
   if (operation.deprecated) {

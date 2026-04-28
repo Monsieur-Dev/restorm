@@ -100,7 +100,7 @@ function backfillImportOriginOnRequests(folder: FolderLike, format: ImportSource
     }
     const req = item as RequestLike
     if (req.importOrigin) continue
-    if (req.type !== 'http' && req.type !== 'authentication') continue
+    if (req.type !== 'http' && req.type !== 'auth') continue
     if (!req.method || !req.url) continue
     req.importOrigin = {
       format,

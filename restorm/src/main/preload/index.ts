@@ -753,12 +753,13 @@ contextBridge.exposeInMainWorld('restorm', {
     },
     /** Apply the available update against the folder. Resolves
      * once the pipeline has run; rejects on failure so the
-     * renderer can surface the toast. When the wizard supplies a
-     * resolved selection, the pipeline only sees the listed
-     * natural keys — anything else (including a previously-skipped
-     * route the user didn't tick on this round) stays untouched. */
-    apply: async (folderId: string, selection?: { include: string[]; skip: string[] }): Promise<void> => {
-      await ipcRenderer.invoke('apiUpdate:apply', folderId, selection)
+     * renderer can surface the toast. Returns a snapshot of the
+     * updated env folder so the renderer can swap its own copy
+     * (the GraphQL folderUpdated subscription only carries a
+     * partial payload — id/name/tags but not the items array). */
+    apply: async (folderId: string, selection?: { include: string[]; skip: string[] }): Promise<{ updatedFolder: unknown }> => {
+      const result: unknown = await ipcRenderer.invoke('apiUpdate:apply', folderId, selection)
+      return result as { updatedFolder: unknown }
     },
     /** Compute the diff against the current folder content
      * without mutating it. Used by the "Refresh from source"

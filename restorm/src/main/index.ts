@@ -323,7 +323,7 @@ registerApiUpdateIPC({
       env.apiUpdate = { ...(env.apiUpdate ?? {}), ...patch } as typeof patch
     })
   },
-  applyUpdate: (folderId, selection) => runApiUpdateApply(folderId, selection)
+  applyUpdate: async (folderId, selection) => runApiUpdateApply(folderId, selection)
 })
 
 apiUpdateScheduler.start()

@@ -58,6 +58,12 @@ export interface ApplyApiUpdateResult {
   diff: ImportDiff
   appliedHash: string
   appliedVersion?: string
+  /** The brand-new request instances the pipeline appended to
+   * `target.items` for each `added` operation. The renderer uses
+   * these to splice the new rows into its own copy of the folder
+   * without overwriting unrelated state (sub-environments,
+   * per-tab pinning) that hasn't synced back to main. */
+  addedRequests: Request[]
 }
 
 const ADAPTERS: Partial<Record<ImportSourceType, ImportAdapter>> = {
@@ -101,6 +107,7 @@ export function applyApiUpdate(input: ApplyApiUpdateInput): ApplyApiUpdateResult
 
   const freshIndex = indexFreshFolderByNaturalKey(input.freshFolder)
 
+  const addedRequests: Request[] = []
   const options: RunIdempotentImportOptions = {
     target: input.target,
     spec: input.spec,
@@ -114,6 +121,7 @@ export function applyApiUpdate(input: ApplyApiUpdateInput): ApplyApiUpdateResult
         // a half-merged folder.
         throw new Error(`Fresh import missing operation ${op.naturalKey}`)
       }
+      addedRequests.push(fromFresh)
       return fromFresh
     },
     mergeRequestShape: mergeHttpRequestShape
@@ -133,7 +141,7 @@ export function applyApiUpdate(input: ApplyApiUpdateInput): ApplyApiUpdateResult
   if (fresh.enumDefinitions) target.enumDefinitions = fresh.enumDefinitions
 
   const appliedHash = input.fetchedHash ?? computeSpecHash(input.spec)
-  const result: ApplyApiUpdateResult = { diff, appliedHash }
+  const result: ApplyApiUpdateResult = { diff, appliedHash, addedRequests }
   if (input.fetchedVersion !== undefined) result.appliedVersion = input.fetchedVersion
   logger.info(
     `[applyApiUpdate] applied to ${input.target.id}: +${diff.added.length} ⤓${diff.deprecated.length} ⌽${diff.removed.length} ↻${diff.merged.length}`

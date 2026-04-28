@@ -25,13 +25,17 @@ interface Props {
   isOpen: boolean
   folderId: string
   folderName: string
-  onApplied: () => void
+  /** Called with the post-apply snapshot of the env folder so the
+   * caller can swap its local copy. The renderer's GraphQL
+   * `folderUpdated` subscription only carries a partial payload, so
+   * the wizard delivers the full updated tree here. */
+  onApplied: (updatedFolder: unknown) => void
   onCancel: () => void
 }
 
 interface ApiUpdateApi {
   preview: (folderId: string) => Promise<unknown>
-  apply: (folderId: string, selection?: { include: string[]; skip: string[] }) => Promise<void>
+  apply: (folderId: string, selection?: { include: string[]; skip: string[] }) => Promise<{ updatedFolder: unknown }>
   refreshDiff?: (folderId: string) => Promise<unknown>
 }
 
@@ -94,7 +98,14 @@ export const RefreshWizardModal: React.FC<Props> = ({ isOpen, folderId, folderNa
       .catch((err: unknown) => { setError(err instanceof Error ? err.message : String(err)) })
       .finally(() => { setBusy(false) })
     if (api.refreshDiff) {
-      void api.refreshDiff(folderId).then((d) => { setDiff(d as RefreshDiffSummary) }).catch(() => { /* tolerated */ })
+      void api.refreshDiff(folderId)
+        .then((d) => { setDiff(d as RefreshDiffSummary) })
+        .catch((err: unknown) => {
+          // Surface the failure rather than swallowing — without
+          // visible rows the wizard would be useless and the user
+          // wouldn't know why.
+          setError(err instanceof Error ? err.message : String(err))
+        })
     }
   }, [isOpen, folderId])
 
@@ -165,14 +176,15 @@ export const RefreshWizardModal: React.FC<Props> = ({ isOpen, folderId, folderNa
       // everything" path by sending no selection at all.
       const include: string[] = []
       const skip: string[] = []
+      let result: { updatedFolder: unknown }
       if (diff) {
         for (const [key, status] of Object.entries(diff.byNaturalKey)) {
           if (isRowSelected(key, status)) include.push(key)
           else skip.push(key)
         }
-        await api.apply(folderId, { include, skip })
+        result = await api.apply(folderId, { include, skip })
       } else {
-        await api.apply(folderId)
+        result = await api.apply(folderId)
       }
       if (summary) {
         toasterService.push('app', {
@@ -185,7 +197,7 @@ export const RefreshWizardModal: React.FC<Props> = ({ isOpen, folderId, folderNa
           durationMs: 5_000
         })
       }
-      onApplied()
+      onApplied(result.updatedFolder)
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
     } finally {
@@ -224,11 +236,17 @@ export const RefreshWizardModal: React.FC<Props> = ({ isOpen, folderId, folderNa
             {sortedRows.map(({ key, status }) => {
               const decision = isRowSelected(key, status)
               const pill = STATUS_PILL_STYLES[status]
+              // Sanitise the natural key for the data-testid: spaces and
+              // path-template glyphs (`{` `}` `/`) confuse Playwright's CSS
+              // selector parser. Mirrors the OYO-257 import-selection-tree
+              // testid encoding so the e2e selectors stay uniform across
+              // surfaces.
+              const sanitisedKey = key.replace(/[^a-zA-Z0-9]/g, '_')
               return (
                 <div
                   key={key}
                   style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 8px', borderRadius: '4px' }}
-                  data-testid={`refresh-wizard-row-${key}`}
+                  data-testid={`refresh-wizard-row-${sanitisedKey}`}
                 >
                   <Toggle checked={decision} onChange={(next) => { handleRowToggle(key, next) }} />
                   <span style={{

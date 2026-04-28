@@ -35,7 +35,7 @@ Feature: Authentication routes end-to-end
     Then the authentication Configuration tab should show an expiration expression
     And the authentication Configuration tab should carry an Authorization produced header
     When I confirm the authentication setup
-    Then the import modal should show the pet swagger preview without error
+    Then the import modal preview should let me deselect the inventory route
 
     When I import the previewed routes
     And I rename the imported environment to "Valid environnement"
@@ -63,6 +63,13 @@ Feature: Authentication routes end-to-end
     Then the statusbar auth indicator should show the running feedback
     When I release the pending login
     Then the pet response body should still contain "Rex"
+
+    When I trigger a refresh from source on the imported folder
+    Then the refresh wizard should show the inventory route as previously skipped
+    And the refresh wizard should show the existing pet route as unchanged
+    When I tick the inventory route in the refresh wizard
+    And I apply the refresh
+    Then the sidebar should show the "Pet inventory" request
 
     When I switch the active environment to the "invalid environnement" sub-env with apply-to-all
     And I clear the issued tokens
