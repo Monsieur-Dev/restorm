@@ -41,10 +41,12 @@ export type FolderConfiguration = Record<string, never>
 /** Identifies how an EnvironmentFolder was created. */
 export type ImportSourceType =
   | 'swagger'
+  | 'openapi'
   | 'graphql'
   | 'grpc'
   | 'wsdl'
   | 'asyncapi'
+  | 'odata'
   | 'postman'
   | 'insomnia'
   | 'bruno'

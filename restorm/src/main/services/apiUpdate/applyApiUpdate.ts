@@ -7,6 +7,14 @@ import { runIdempotentImport, type RunIdempotentImportOptions } from '../import/
 import type { ImportAdapter, ImportDiff, NormalizedOperation, NormalizedSpec } from '../import/idempotent/types'
 import { swaggerImportAdapter } from '../import/idempotent/SwaggerAdapter'
 import { graphqlImportAdapter } from '../import/idempotent/GraphQLAdapter'
+import { openapi3ImportAdapter } from '../import/idempotent/OpenAPI3Adapter'
+import { postmanImportAdapter } from '../import/idempotent/PostmanAdapter'
+import { insomniaImportAdapter } from '../import/idempotent/InsomniaAdapter'
+import { brunoImportAdapter } from '../import/idempotent/BrunoAdapter'
+import { asyncapiImportAdapter } from '../import/idempotent/AsyncAPIAdapter'
+import { grpcImportAdapter } from '../import/idempotent/GrpcAdapter'
+import { soapImportAdapter } from '../import/idempotent/SoapAdapter'
+import { odataImportAdapter } from '../import/idempotent/ODataAdapter'
 import { computeSpecHash } from './specHash'
 
 /**
@@ -53,7 +61,15 @@ export interface ApplyApiUpdateResult {
 
 const ADAPTERS: Partial<Record<ImportSourceType, ImportAdapter>> = {
   swagger: swaggerImportAdapter,
-  graphql: graphqlImportAdapter
+  openapi: openapi3ImportAdapter,
+  graphql: graphqlImportAdapter,
+  postman: postmanImportAdapter,
+  insomnia: insomniaImportAdapter,
+  bruno: brunoImportAdapter,
+  asyncapi: asyncapiImportAdapter,
+  grpc: grpcImportAdapter,
+  wsdl: soapImportAdapter,
+  odata: odataImportAdapter
 }
 
 /**

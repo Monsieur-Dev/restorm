@@ -3,6 +3,14 @@ import type { ApiUpdateConfig, ApiUpdateState, ImportSourceType } from '../../..
 import type { NormalizedSpec, ImportAdapter } from '../import/idempotent/types'
 import { swaggerImportAdapter } from '../import/idempotent/SwaggerAdapter'
 import { graphqlImportAdapter } from '../import/idempotent/GraphQLAdapter'
+import { openapi3ImportAdapter } from '../import/idempotent/OpenAPI3Adapter'
+import { postmanImportAdapter } from '../import/idempotent/PostmanAdapter'
+import { insomniaImportAdapter } from '../import/idempotent/InsomniaAdapter'
+import { brunoImportAdapter } from '../import/idempotent/BrunoAdapter'
+import { asyncapiImportAdapter } from '../import/idempotent/AsyncAPIAdapter'
+import { grpcImportAdapter } from '../import/idempotent/GrpcAdapter'
+import { soapImportAdapter } from '../import/idempotent/SoapAdapter'
+import { odataImportAdapter } from '../import/idempotent/ODataAdapter'
 import { detectFormat } from '../import/ImportManager'
 import {
   compareSpecAgainstStored,
@@ -49,7 +57,15 @@ export interface ApiUpdateCheckResult {
 
 const ADAPTERS: Partial<Record<ImportSourceType, ImportAdapter>> = {
   swagger: swaggerImportAdapter,
-  graphql: graphqlImportAdapter
+  openapi: openapi3ImportAdapter,
+  graphql: graphqlImportAdapter,
+  postman: postmanImportAdapter,
+  insomnia: insomniaImportAdapter,
+  bruno: brunoImportAdapter,
+  asyncapi: asyncapiImportAdapter,
+  grpc: grpcImportAdapter,
+  wsdl: soapImportAdapter,
+  odata: odataImportAdapter
 }
 
 /**
@@ -61,12 +77,13 @@ const ADAPTERS: Partial<Record<ImportSourceType, ImportAdapter>> = {
  */
 function detectedFormatToImportSource(format: string | null): ImportSourceType | null {
   if (format === null) return null
-  if (format === 'openapi-3.0' || format === 'openapi-3.1') return 'swagger'
+  if (format === 'openapi-3.0' || format === 'openapi-3.1') return 'openapi'
   if (format === 'swagger') return 'swagger'
   if (format === 'graphql') return 'graphql'
   if (format === 'grpc') return 'grpc'
   if (format === 'soap') return 'wsdl'
   if (format === 'asyncapi') return 'asyncapi'
+  if (format === 'odata') return 'odata'
   if (format === 'postman') return 'postman'
   if (format === 'insomnia') return 'insomnia'
   if (format === 'bruno') return 'bruno'
