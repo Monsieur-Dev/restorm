@@ -61,7 +61,41 @@ function defaultVariablesFor(folder: EnvironmentFolder): Record<string, string> 
   return vars
 }
 
-export async function runApiUpdateApply(folderId: string): Promise<void> {
+/**
+ * Optional resolved-selection payload from the wizard. When present,
+ * the pipeline only sees the operations / models / enums whose
+ * natural keys are in `include` — everything else is filtered out
+ * before the diff is computed, so a previously-skipped route stays
+ * skipped unless the user explicitly opts it in. Without a payload,
+ * the apply imports the full spec (the legacy "no selection" path
+ * the badge / toast Apply button uses).
+ */
+export interface ApiUpdateApplySelection {
+  /** Set of natural keys to import / refresh. Anything else is
+   * dropped from the spec before the pipeline sees it. */
+  include: string[]
+  /** Set of natural keys the user explicitly chose to skip. Stored
+   * on the import-selection snapshot so a subsequent refresh remembers
+   * the decision. */
+  skip: string[]
+}
+
+function filterSpecBySelection<T extends { naturalKey: string }>(items: T[], include: ReadonlySet<string>): T[] {
+  if (include.size === 0) return items
+  return items.filter((item) => include.has(item.naturalKey))
+}
+
+function filterModelsBySelection<T extends { name: string }>(models: T[], include: ReadonlySet<string>): T[] {
+  if (include.size === 0) return models
+  return models.filter((m) => include.has(`model:${m.name}`))
+}
+
+function filterEnumsBySelection<T extends { name: string }>(enums: T[], include: ReadonlySet<string>): T[] {
+  if (include.size === 0) return enums
+  return enums.filter((e) => include.has(`enum:${e.name}`))
+}
+
+export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateApplySelection): Promise<void> {
   const target = collectionStore.findById(folderId)
   if (!target || !('folderType' in target)) {
     throw new Error(`Folder ${folderId} not found`)
@@ -87,9 +121,25 @@ export async function runApiUpdateApply(folderId: string): Promise<void> {
   // into the existing folder. Capture the parsed normalised spec
   // ahead of time so the hash stored on disk matches what the
   // pipeline applied.
-  const spec = adapter.extractNormalizedSpec(JSON.parse(await fetchText(url, headers)), {})
-  const fetchedHash = computeSpecHash(spec)
-  const fetchedVersion = spec.version ?? extractVersionFromImported(freshFolder)
+  const fullSpec = adapter.extractNormalizedSpec(JSON.parse(await fetchText(url, headers)), {})
+
+  // Filter the spec down to the resolved selection before the
+  // pipeline sees it. The naturalKey set the wizard sends is the
+  // single source of truth for what gets imported / refreshed —
+  // operations not in the set are invisible to the pipeline, so a
+  // previously-skipped route the user didn't tick stays skipped.
+  const include = selection ? new Set(selection.include) : new Set<string>()
+  const spec = selection
+    ? {
+      ...fullSpec,
+      operations: filterSpecBySelection(fullSpec.operations, include),
+      models: filterModelsBySelection(fullSpec.models, include),
+      enums: filterEnumsBySelection(fullSpec.enums, include)
+    }
+    : fullSpec
+
+  const fetchedHash = computeSpecHash(fullSpec)
+  const fetchedVersion = fullSpec.version ?? extractVersionFromImported(freshFolder)
 
   applyApiUpdate({
     target: env,
@@ -107,8 +157,26 @@ export async function runApiUpdateApply(folderId: string): Promise<void> {
     lastCheckedAt: Date.now()
   }
 
+  // Update the OYO-257 importSelection snapshot so the next refresh
+  // remembers the user's decision: imported = what they checked
+  // this round, skipped = what they ticked off explicitly.
+  if (selection) {
+    const envWithSelection = env as unknown as { importSelection?: import('../../../shared/types/baseTypes').ImportSelectionSnapshot }
+    envWithSelection.importSelection = {
+      capturedAt: Date.now(),
+      source: url,
+      ...(fetchedVersion !== undefined ? { specVersion: fetchedVersion } : {}),
+      specHash: fetchedHash,
+      imported: selection.include.slice().sort(),
+      skipped: selection.skip.slice().sort()
+    }
+  }
+
   pubsub.publish(PUBSUB_TOPICS.FOLDER_UPDATED, env)
-  logger.info(`[apiUpdate.orchestrateApply] applied to folder ${folderId}`)
+  logger.info(`[apiUpdate.orchestrateApply] applied to folder ${folderId}`, {
+    selectedOps: spec.operations.length,
+    totalOps: fullSpec.operations.length
+  })
 }
 
 async function fetchText(url: string, headers: Record<string, string>): Promise<string> {

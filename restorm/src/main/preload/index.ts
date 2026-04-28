@@ -753,9 +753,12 @@ contextBridge.exposeInMainWorld('restorm', {
     },
     /** Apply the available update against the folder. Resolves
      * once the pipeline has run; rejects on failure so the
-     * renderer can surface the toast. */
-    apply: async (folderId: string): Promise<void> => {
-      await ipcRenderer.invoke('apiUpdate:apply', folderId)
+     * renderer can surface the toast. When the wizard supplies a
+     * resolved selection, the pipeline only sees the listed
+     * natural keys — anything else (including a previously-skipped
+     * route the user didn't tick on this round) stays untouched. */
+    apply: async (folderId: string, selection?: { include: string[]; skip: string[] }): Promise<void> => {
+      await ipcRenderer.invoke('apiUpdate:apply', folderId, selection)
     },
     /** Compute the diff against the current folder content
      * without mutating it. Used by the "Refresh from source"
@@ -785,6 +788,14 @@ contextBridge.exposeInMainWorld('restorm', {
       return () => {
         ipcRenderer.removeListener('apiUpdate:state-changed', handler)
       }
+    },
+    /** Mirror the renderer's collection tree onto the main-side
+     * CollectionStore. The main-side apply / preview / refresh-diff
+     * orchestrators look up folders by id; without this sync they
+     * would always fail with "folder not found". Fire-and-forget;
+     * the handler doesn't return anything. */
+    syncCollections: async (collections: unknown[]): Promise<void> => {
+      await ipcRenderer.invoke('collections:sync', collections)
     }
   }
 })

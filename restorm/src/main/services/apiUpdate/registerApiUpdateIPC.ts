@@ -8,10 +8,12 @@ import {
   apiUpdateApplyArgs,
   apiUpdateDismissArgs,
   apiUpdatePreviewArgs,
-  apiUpdateRefreshDiffArgs
+  apiUpdateRefreshDiffArgs,
+  collectionsSyncArgs
 } from '../../ipc/schemas'
 import { runApiUpdatePreview } from './orchestratePreview'
 import { runApiUpdateRefreshDiff } from './orchestrateRefreshDiff'
+import { collectionStore } from '../CollectionStore'
 import { apiUpdateStateStore } from './ApiUpdateStateStore'
 import { apiUpdateScheduler } from './ApiUpdateScheduler'
 import type { ApiUpdateConfig } from '../../../shared/types/baseTypes'
@@ -41,8 +43,10 @@ export interface ApiUpdateIPCDeps {
   updateFolderConfig: (folderId: string, patch: Partial<ApiUpdateConfig>) => void
   /** Apply an available update against the folder. Resolves once the
    * pipeline has run + persisted; rejects on error so the renderer
-   * can surface a toast. */
-  applyUpdate: (folderId: string) => Promise<void>
+   * can surface a toast. The optional `selection` payload lets the
+   * wizard restrict the apply to the user's resolved choice — only
+   * the listed natural keys make it into the pipeline. */
+  applyUpdate: (folderId: string, selection?: { include: string[]; skip: string[] }) => Promise<void>
 }
 
 let dismissed = new Set<string>()
@@ -77,10 +81,10 @@ export function registerApiUpdateIPC(deps: ApiUpdateIPCDeps): void {
     await apiUpdateScheduler.checkNow(folderId)
   })
 
-  validatedHandle('apiUpdate:apply', apiUpdateApplyArgs, async (_event, [folderId]) => {
+  validatedHandle('apiUpdate:apply', apiUpdateApplyArgs, async (_event, [folderId, selection]) => {
     apiUpdateStateStore.patch(folderId, { kind: 'applying' })
     try {
-      await deps.applyUpdate(folderId)
+      await deps.applyUpdate(folderId, selection)
       apiUpdateStateStore.patch(folderId, { kind: 'idle', error: undefined })
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
@@ -108,6 +112,20 @@ export function registerApiUpdateIPC(deps: ApiUpdateIPCDeps): void {
   // Reset session-dismissals when the project file closes.
   ipcMain.on('apiUpdate:reset-dismissed', () => {
     dismissed = new Set()
+  })
+
+  // Renderer → main sync of the loaded project tree. The renderer is
+  // the source of truth for the collections; this mirror lets the
+  // main-side apply / preview / refresh-diff orchestrators look up a
+  // folder by id without reaching back through IPC. The validatedHandle
+  // returns nothing — the renderer just fires-and-forgets after every
+  // setCollections in its store.
+  validatedHandle('collections:sync', collectionsSyncArgs, (_event, [collections]) => {
+    collectionStore.setCollections(
+      collections as Parameters<typeof collectionStore.setCollections>[0],
+      'user'
+    )
+    logger.info('[apiUpdate.collections:sync] mirrored collections from renderer', { count: collections.length })
   })
 }
 

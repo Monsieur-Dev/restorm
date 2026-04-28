@@ -31,7 +31,7 @@ interface Props {
 
 interface ApiUpdateApi {
   preview: (folderId: string) => Promise<unknown>
-  apply: (folderId: string) => Promise<void>
+  apply: (folderId: string, selection?: { include: string[]; skip: string[] }) => Promise<void>
   refreshDiff?: (folderId: string) => Promise<unknown>
 }
 
@@ -70,6 +70,7 @@ export const RefreshWizardModal: React.FC<Props> = ({ isOpen, folderId, folderNa
   const [summary, setSummary] = useState<ApiUpdatePreviewSummary | null>(null)
   const [diff, setDiff] = useState<RefreshDiffSummary | null>(null)
   const [excluded, setExcluded] = useState<ReadonlySet<string>>(new Set())
+  const [included, setIncluded] = useState<ReadonlySet<string>>(new Set())
   const [showUnchanged, setShowUnchanged] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -79,6 +80,7 @@ export const RefreshWizardModal: React.FC<Props> = ({ isOpen, folderId, folderNa
       setSummary(null)
       setDiff(null)
       setExcluded(new Set())
+      setIncluded(new Set())
       setShowUnchanged(false)
       setError(null)
       setBusy(false)
@@ -95,6 +97,18 @@ export const RefreshWizardModal: React.FC<Props> = ({ isOpen, folderId, folderNa
       void api.refreshDiff(folderId).then((d) => { setDiff(d as RefreshDiffSummary) }).catch(() => { /* tolerated */ })
     }
   }, [isOpen, folderId])
+
+  // Default decision per status, matching the ticket's spec:
+  // added/modified/unchanged → checked; removed/previouslySkipped →
+  // unchecked. The user can flip any row, and the include/excluded
+  // sets capture only the deltas — that way the resolved selection
+  // sent to the apply IPC stays canonical regardless of how the
+  // user got there.
+  const isRowSelected = (key: string, status: RefreshStatus): boolean => {
+    if (included.has(key)) return true
+    if (excluded.has(key)) return false
+    return status === 'added' || status === 'modified' || status === 'unchanged'
+  }
 
   const sortedRows = useMemo(() => {
     if (!diff) return []
@@ -114,12 +128,29 @@ export const RefreshWizardModal: React.FC<Props> = ({ isOpen, folderId, folderNa
   }, [diff, showUnchanged])
 
   const handleRowToggle = (key: string, checked: boolean): void => {
-    setExcluded((prev) => {
-      const next = new Set(prev)
-      if (checked) next.delete(key)
-      else next.add(key)
-      return next
-    })
+    if (checked) {
+      setIncluded((prev) => {
+        const next = new Set(prev)
+        next.add(key)
+        return next
+      })
+      setExcluded((prev) => {
+        const next = new Set(prev)
+        next.delete(key)
+        return next
+      })
+    } else {
+      setExcluded((prev) => {
+        const next = new Set(prev)
+        next.add(key)
+        return next
+      })
+      setIncluded((prev) => {
+        const next = new Set(prev)
+        next.delete(key)
+        return next
+      })
+    }
   }
 
   const handleApply = async (): Promise<void> => {
@@ -128,7 +159,21 @@ export const RefreshWizardModal: React.FC<Props> = ({ isOpen, folderId, folderNa
     setBusy(true)
     setError(null)
     try {
-      await api.apply(folderId)
+      // Resolve the per-row decision into the include / skip lists
+      // the apply IPC consumes. When `diff` is missing (refreshDiff
+      // hasn't loaded yet) we fall back to the legacy "import
+      // everything" path by sending no selection at all.
+      const include: string[] = []
+      const skip: string[] = []
+      if (diff) {
+        for (const [key, status] of Object.entries(diff.byNaturalKey)) {
+          if (isRowSelected(key, status)) include.push(key)
+          else skip.push(key)
+        }
+        await api.apply(folderId, { include, skip })
+      } else {
+        await api.apply(folderId)
+      }
       if (summary) {
         toasterService.push('app', {
           title: t('sidebar.apiUpdate.successToastTitle'),
@@ -177,7 +222,7 @@ export const RefreshWizardModal: React.FC<Props> = ({ isOpen, folderId, folderNa
         {sortedRows.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxHeight: '320px', overflowY: 'auto' }} data-testid="refresh-wizard-rows">
             {sortedRows.map(({ key, status }) => {
-              const decision = !excluded.has(key)
+              const decision = isRowSelected(key, status)
               const pill = STATUS_PILL_STYLES[status]
               return (
                 <div
