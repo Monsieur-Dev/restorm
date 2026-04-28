@@ -19,6 +19,9 @@ import {
 } from './scheduling'
 import { computeSpecHash } from './specHash'
 import { apiUpdateStateStore } from './ApiUpdateStateStore'
+import { resolveAuthHeadersForFolder } from './resolveAuthHeaders'
+import { collectionStore } from '../CollectionStore'
+import type { EnvironmentFolder } from '../../../shared/types/folderTypes'
 
 /**
  * Single-folder API spec check. Wires together fetch → parse →
@@ -141,7 +144,17 @@ export async function runApiUpdateCheck(input: ApiUpdateCheckInput): Promise<Api
 
   try {
     const url = expandVariables(config.sourceUrl, variables)
-    const headers = expandHeaderTemplate(config.sourceHeaders, variables)
+    const staticHeaders = expandHeaderTemplate(config.sourceHeaders, variables)
+    // Run the env folder's attached auth route (if any) and merge
+    // the resolved headers with the static ${VAR}-expanded ones.
+    // Auto-check uses the same auth pathway as the manual flows so
+    // a Bearer-token-protected spec stays reachable on every tick.
+    const folder = collectionStore.findById(folderId)
+    const env = folder && 'folderType' in folder ? folder as EnvironmentFolder : null
+    const dynamicHeaders = env
+      ? await resolveAuthHeadersForFolder(env, config.authenticationRequestId, variables)
+      : {}
+    const headers = { ...dynamicHeaders, ...staticHeaders }
     const { content } = await fetchSpec(url, headers)
 
     const detected = detectFormat(content, url)

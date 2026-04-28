@@ -92,6 +92,13 @@ export interface ApiUpdateConfig {
   /** Structural content hash of that same spec. Used to detect
    * version-less changes (some specs don't bump `info.version`). */
   lastImportedSpecHash?: string
+  /** Reference to an `AuthenticationRequest` inside the same env
+   * folder. When set, the refresh flow runs a one-shot auth
+   * prefetch against this request before fetching the spec, and
+   * merges the resolved headers (e.g. `Authorization: Bearer ...`)
+   * into the fetch. Lets a refresh against a protected spec
+   * succeed without storing the resolved token statically on disk. */
+  authenticationRequestId?: string
 }
 
 /** Drives `ApiUpdateScheduler`'s tick decision and the home-page UI. */

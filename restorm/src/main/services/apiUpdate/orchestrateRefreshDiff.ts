@@ -13,6 +13,7 @@ import { soapImportAdapter } from '../import/idempotent/SoapAdapter'
 import { odataImportAdapter } from '../import/idempotent/ODataAdapter'
 import { resolveRefreshDiff, type RefreshStatus } from './refreshDiff'
 import { expandHeaderTemplate, expandVariables } from './scheduling'
+import { resolveAuthHeadersForFolder } from './resolveAuthHeaders'
 
 /**
  * Side-effect-free entry point the refresh wizard calls to populate
@@ -73,7 +74,9 @@ export async function runApiUpdateRefreshDiff(folderId: string): Promise<Refresh
 
   const variables = defaultVariablesFor(env)
   const url = expandVariables(config.sourceUrl, variables)
-  const headers = expandHeaderTemplate(config.sourceHeaders, variables)
+  const staticHeaders = expandHeaderTemplate(config.sourceHeaders, variables)
+  const dynamicHeaders = await resolveAuthHeadersForFolder(env, config.authenticationRequestId, variables)
+  const headers = { ...dynamicHeaders, ...staticHeaders }
   const response = await fetch(url, Object.keys(headers).length === 0 ? {} : { headers })
   if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`)
   const content = await response.text()

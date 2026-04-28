@@ -16,6 +16,7 @@ import { soapImportAdapter } from '../import/idempotent/SoapAdapter'
 import { odataImportAdapter } from '../import/idempotent/ODataAdapter'
 import { computeSpecHash } from './specHash'
 import { expandHeaderTemplate, expandVariables } from './scheduling'
+import { resolveAuthHeadersForFolder } from './resolveAuthHeaders'
 
 /**
  * Wire the IPC `apply` handler to the live runtime — fetch a fresh
@@ -110,7 +111,14 @@ export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateA
 
   const variables = defaultVariablesFor(env)
   const url = expandVariables(config.sourceUrl, variables)
-  const headers = expandHeaderTemplate(config.sourceHeaders, variables)
+  const staticHeaders = expandHeaderTemplate(config.sourceHeaders, variables)
+  // Resolve the env folder's attached auth route (if any) before
+  // dispatching the spec fetch. The dynamic headers (e.g. a freshly
+  // minted `Authorization: Bearer …`) are merged on top of the
+  // static `${VAR}`-expanded ones; the static set wins on a key
+  // collision so an explicit override stays explicit.
+  const dynamicHeaders = await resolveAuthHeadersForFolder(env, config.authenticationRequestId, variables)
+  const headers = { ...dynamicHeaders, ...staticHeaders }
   const result = await importFrom(url, Object.keys(headers).length === 0 ? {} : { extraHeaders: headers })
   if (!result.success || result.items.length === 0) {
     throw new Error(result.error ?? 'Import returned no folder')

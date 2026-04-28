@@ -377,7 +377,21 @@ export function ImportModal({
     }
     const stampSnapshot = (items: FolderItem[]): FolderItem[] => items.map((item) => {
       if (isEnvironmentFolder(item)) {
-        return { ...item, importSelection: snapshot } as EnvironmentFolder
+        const stamped = { ...item, importSelection: snapshot } as EnvironmentFolder
+        // Tie the auth request that protected the import fetch to
+        // the env folder's apiUpdate so a future refresh can resolve
+        // its headers without the user re-attaching. Captures the
+        // user's intent at the moment of import; the auth request
+        // itself lives in the folder tree (line 351 above) so the
+        // reference stays valid across project reloads.
+        if (attachedAuth) {
+          const apiUpdate = (stamped as unknown as { apiUpdate?: { authenticationRequestId?: string } }).apiUpdate
+          ;(stamped as unknown as { apiUpdate?: Record<string, unknown> }).apiUpdate = {
+            ...(apiUpdate ?? {}),
+            authenticationRequestId: attachedAuth.id
+          }
+        }
+        return stamped
       }
       return item
     })

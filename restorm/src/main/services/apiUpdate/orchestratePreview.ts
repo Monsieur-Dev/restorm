@@ -13,6 +13,7 @@ import { soapImportAdapter } from '../import/idempotent/SoapAdapter'
 import { odataImportAdapter } from '../import/idempotent/ODataAdapter'
 import { previewImportDiff } from '../import/idempotent/previewImportDiff'
 import { expandHeaderTemplate, expandVariables } from './scheduling'
+import { resolveAuthHeadersForFolder } from './resolveAuthHeaders'
 
 /**
  * Fetch the spec, normalise it, and compute the diff against the
@@ -73,7 +74,9 @@ export async function runApiUpdatePreview(folderId: string): Promise<ApiUpdatePr
 
   const variables = defaultVariablesFor(env)
   const url = expandVariables(config.sourceUrl, variables)
-  const headers = expandHeaderTemplate(config.sourceHeaders, variables)
+  const staticHeaders = expandHeaderTemplate(config.sourceHeaders, variables)
+  const dynamicHeaders = await resolveAuthHeadersForFolder(env, config.authenticationRequestId, variables)
+  const headers = { ...dynamicHeaders, ...staticHeaders }
   const response = await fetch(url, Object.keys(headers).length === 0 ? {} : { headers })
   if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`)
   const content = await response.text()
