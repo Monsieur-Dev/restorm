@@ -16,6 +16,8 @@ import { expandHeaderTemplate, expandVariables } from './scheduling'
 import { resolveAuthHeadersForFolder } from './resolveAuthHeaders'
 import { specKeyToImportSelectionKey } from './specKeyTranslator'
 import { importFrom } from '../import/ImportManager'
+import { compareApiDocumentations, type DocOperationStatus } from './compareApiDocumentations'
+import type { ApiDocumentation } from '../../../shared/types/apiDocumentation'
 
 /**
  * Side-effect-free entry point the refresh wizard calls to populate
@@ -93,6 +95,19 @@ export interface RefreshDiffSummary {
    * client-side.
    */
   byImportSelectionKey?: Record<string, RefreshStatus>
+  /**
+   * Format-agnostic doc-vs-doc diff: compares the env folder's
+   * existing `apiDocumentation` against the freshly fetched one and
+   * classifies every operation as `added | modified | removed |
+   * unchanged`. Same shape across all import formats — no
+   * naturalKey-scheme bridging needed because the diff lives at the
+   * `OperationDocumentation` level. Drives the user-facing summary
+   * counts on the wizard so they reflect actual spec changes
+   * regardless of what was previously imported.
+   */
+  byOperationKey?: Record<string, DocOperationStatus>
+  byOperationKeyCounts?: Record<DocOperationStatus, number>
+  modelsTouched?: number
 }
 
 export async function runApiUpdateRefreshDiff(folderId: string): Promise<RefreshDiffSummary> {
@@ -133,6 +148,9 @@ export async function runApiUpdateRefreshDiff(folderId: string): Promise<Refresh
   // requests with the OYO-257 natural keys we map statuses against.
   let previewTree: unknown
   let byImportSelectionKey: Record<string, RefreshStatus> | undefined
+  let byOperationKey: Record<string, DocOperationStatus> | undefined
+  let byOperationKeyCounts: Record<DocOperationStatus, number> | undefined
+  let modelsTouched: number | undefined
   try {
     const previewResult = await importFrom(url, Object.keys(headers).length === 0 ? {} : { extraHeaders: headers })
     if (previewResult.success && previewResult.items.length > 0) {
@@ -143,6 +161,20 @@ export async function runApiUpdateRefreshDiff(folderId: string): Promise<Refresh
       byImportSelectionKey = {}
       for (const [specKey, status] of diff.byNaturalKey) {
         byImportSelectionKey[specKeyToImportSelectionKey(specKey, importSource, spec)] = status
+      }
+      // Doc-vs-doc diff: format-agnostic comparison of the existing
+      // env-folder apiDocumentation against the one the fresh import
+      // just produced. Drives the wizard's summary counts; semantics
+      // are uniform across import formats.
+      const oldApiDoc = (env as unknown as { apiDocumentation?: ApiDocumentation }).apiDocumentation
+      const freshFolder = previewResult.items[0] as { apiDocumentation?: ApiDocumentation }
+      const newApiDoc = freshFolder.apiDocumentation
+      if (newApiDoc) {
+        const docDiff = compareApiDocumentations(oldApiDoc, newApiDoc)
+        byOperationKey = {}
+        for (const [key, status] of docDiff.byOperationKey) byOperationKey[key] = status
+        byOperationKeyCounts = docDiff.counts
+        modelsTouched = docDiff.modelsTouched
       }
     }
   } catch {
@@ -155,6 +187,9 @@ export async function runApiUpdateRefreshDiff(folderId: string): Promise<Refresh
   if (diff.newVersion !== undefined) result.newVersion = diff.newVersion
   if (previewTree !== undefined) result.previewTree = previewTree
   if (byImportSelectionKey !== undefined) result.byImportSelectionKey = byImportSelectionKey
+  if (byOperationKey !== undefined) result.byOperationKey = byOperationKey
+  if (byOperationKeyCounts !== undefined) result.byOperationKeyCounts = byOperationKeyCounts
+  if (modelsTouched !== undefined) result.modelsTouched = modelsTouched
   return result
 }
 

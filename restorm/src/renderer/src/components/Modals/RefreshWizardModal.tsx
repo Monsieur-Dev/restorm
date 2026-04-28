@@ -22,12 +22,22 @@ interface ApiUpdatePreviewSummary {
 
 type RefreshStatus = 'unchanged' | 'added' | 'modified' | 'removed' | 'previouslySkipped'
 
+type DocOperationStatus = 'unchanged' | 'added' | 'modified' | 'removed'
+
 interface RefreshDiffSummary {
   byNaturalKey: Record<string, RefreshStatus>
   counts: Record<RefreshStatus, number>
   newVersion?: string
   previewTree?: FolderItem[]
   byImportSelectionKey?: Record<string, RefreshStatus>
+  /** Format-agnostic doc-vs-doc diff: operation keys (HTTP:
+   * `METHOD url`, GraphQL: `op fieldName`, etc.) classified
+   * against the env folder's previously-imported apiDocumentation.
+   * Drives the user-facing summary counts so they reflect actual
+   * spec changes regardless of import history. */
+  byOperationKey?: Record<string, DocOperationStatus>
+  byOperationKeyCounts?: Record<DocOperationStatus, number>
+  modelsTouched?: number
 }
 
 interface Props {
@@ -190,46 +200,23 @@ export const RefreshWizardModal: React.FC<Props> = ({ isOpen, folderId, folderNa
         {versionDelta && (
           <p style={{ margin: 0, fontFamily: 'monospace', opacity: 0.85 }}>{versionDelta}</p>
         )}
-        {diff && (() => {
-          // Restrict the summary to operations (the rows the user
-          // actually sees in the tree). Model / enum keys
-          // (`model:Pet`, `enum:Status`) flow through the diff
-          // resolver too but aren't shown anywhere actionable —
-          // counting them under "added" would surface as a
-          // mysterious +1 on every refresh. They get a separate
-          // "X model(s) changed" counter.
-          //
-          // The two diff maps overlap: byImportSelectionKey carries
-          // the OYO-257 keyspace (one entry per spec op for
-          // swagger/openapi), byNaturalKey carries the pipeline
-          // keyspace (always populated). We pick byImportSelectionKey
-          // when it exists, else byNaturalKey, so each op is counted
-          // exactly once.
-          const counts: Record<RefreshStatus, number> = {
-            added: 0, modified: 0, removed: 0, previouslySkipped: 0, unchanged: 0
-          }
-          let modelsTouched = 0
-          const source = diff.byImportSelectionKey ?? diff.byNaturalKey
-          for (const [key, status] of Object.entries(source)) {
-            if (key.startsWith('model:') || key.startsWith('enum:')) {
-              if (status !== 'unchanged') modelsTouched++
-              continue
-            }
-            counts[status] += 1
-          }
-          return (
-            <p style={{ margin: 0 }} data-testid="refresh-wizard-summary">
-              {t('sidebar.apiUpdate.summary.added', { count: counts.added })}
-              {' · '}{t('sidebar.apiUpdate.summary.modified', { count: counts.modified })}
-              {' · '}{t('sidebar.apiUpdate.summary.removed', { count: counts.removed })}
-              {' · '}{t('sidebar.apiUpdate.summary.skipped', { count: counts.previouslySkipped })}
-              {' · '}{t('sidebar.apiUpdate.summary.unchanged', { count: counts.unchanged })}
-              {modelsTouched > 0 && (
-                <> · {t('sidebar.apiUpdate.summary.modelsChanged', { count: modelsTouched })}</>
-              )}
-            </p>
-          )
-        })()}
+        {diff?.byOperationKeyCounts && (
+          // Counts come from the format-agnostic doc-vs-doc diff
+          // (compareApiDocumentations) so they reflect actual spec
+          // changes between the previously-imported apiDocumentation
+          // and the freshly fetched one. Independent of the
+          // selective-import history — the user sees a real "what
+          // changed in the spec since last refresh" summary.
+          <p style={{ margin: 0 }} data-testid="refresh-wizard-summary">
+            {t('sidebar.apiUpdate.summary.added', { count: diff.byOperationKeyCounts.added })}
+            {' · '}{t('sidebar.apiUpdate.summary.modified', { count: diff.byOperationKeyCounts.modified })}
+            {' · '}{t('sidebar.apiUpdate.summary.removed', { count: diff.byOperationKeyCounts.removed })}
+            {' · '}{t('sidebar.apiUpdate.summary.unchanged', { count: diff.byOperationKeyCounts.unchanged })}
+            {(diff.modelsTouched ?? 0) > 0 && (
+              <> · {t('sidebar.apiUpdate.summary.modelsChanged', { count: diff.modelsTouched ?? 0 })}</>
+            )}
+          </p>
+        )}
         {busy && !summary && <p style={{ margin: 0 }}>{t('sidebar.apiUpdate.checking')}</p>}
         {error && <p style={{ margin: 0, color: 'var(--errorForeground)' }}>{error}</p>}
         {diff?.previewTree && (
