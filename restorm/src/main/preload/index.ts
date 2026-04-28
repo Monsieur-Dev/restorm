@@ -764,6 +764,13 @@ contextBridge.exposeInMainWorld('restorm', {
       const result: unknown = await ipcRenderer.invoke('apiUpdate:preview', folderId)
       return result
     },
+    /** Per-natural-key classification (added / modified / removed /
+     * previouslySkipped / unchanged) the refresh wizard renders as
+     * status pills. Side-effect-free. */
+    refreshDiff: async (folderId: string): Promise<unknown> => {
+      const result: unknown = await ipcRenderer.invoke('apiUpdate:refresh-diff', folderId)
+      return result
+    },
     /** Acknowledge an "available" notification for the rest of the
      * session. The badge stays; only the toast suppression flips. */
     dismiss: async (folderId: string): Promise<void> => {

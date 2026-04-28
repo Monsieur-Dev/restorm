@@ -68,7 +68,7 @@ import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
 import { RestormWorkbenchContainer } from './components/MainView/Workbench/RestormWorkbenchContainer'
 import { SaveOptionsModal } from './components/Modals/SaveOptionsModal'
 import { DeleteConfirmationModal } from './components/Modals/DeleteConfirmationModal'
-import { ApiUpdateConfirmModal } from './components/Modals/ApiUpdateConfirmModal'
+import { RefreshWizardModal } from './components/Modals/RefreshWizardModal'
 import { ImportModal } from './components/Modals/ImportModal'
 import { AvailableVariablesProvider } from './contexts/AvailableVariablesContext'
 import { VariableTransformProvider } from './contexts/VariableTransformContext'
@@ -1607,11 +1607,13 @@ const App: React.FC = () => {
         onCancel={cancelDelete}
       />
 
-      {/* "Refresh from source" confirmation modal — driven by the
-          sidebar context-menu entry on env folders that carry an
-          apiUpdate.sourceUrl. */}
+      {/* Refresh wizard — opens via the sidebar's "Refresh from
+          source" right-click. Replaces the simpler counter-only
+          modal so the user sees the per-element classification
+          (added / modified / removed / previously skipped /
+          unchanged) before committing. */}
       {refreshSourceTarget && (
-        <ApiUpdateConfirmModal
+        <RefreshWizardModal
           isOpen
           folderId={refreshSourceTarget.id}
           folderName={refreshSourceTarget.name}

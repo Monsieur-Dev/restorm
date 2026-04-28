@@ -7,9 +7,11 @@ import {
   apiUpdateCheckNowArgs,
   apiUpdateApplyArgs,
   apiUpdateDismissArgs,
-  apiUpdatePreviewArgs
+  apiUpdatePreviewArgs,
+  apiUpdateRefreshDiffArgs
 } from '../../ipc/schemas'
 import { runApiUpdatePreview } from './orchestratePreview'
+import { runApiUpdateRefreshDiff } from './orchestrateRefreshDiff'
 import { apiUpdateStateStore } from './ApiUpdateStateStore'
 import { apiUpdateScheduler } from './ApiUpdateScheduler'
 import type { ApiUpdateConfig } from '../../../shared/types/baseTypes'
@@ -89,6 +91,10 @@ export function registerApiUpdateIPC(deps: ApiUpdateIPCDeps): void {
 
   validatedHandle('apiUpdate:preview', apiUpdatePreviewArgs, async (_event, [folderId]) => {
     return runApiUpdatePreview(folderId)
+  })
+
+  validatedHandle('apiUpdate:refresh-diff', apiUpdateRefreshDiffArgs, async (_event, [folderId]) => {
+    return runApiUpdateRefreshDiff(folderId)
   })
 
   validatedHandle('apiUpdate:dismiss', apiUpdateDismissArgs, (_event, [folderId]) => {
