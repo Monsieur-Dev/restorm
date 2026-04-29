@@ -99,7 +99,27 @@
       "favoriteRequests": "Requêtes favorites",
       "removeFavorite": "Retirer des favoris",
       "refresh": "Rafraîchir",
-      "refreshing": "Actualisation..."
+      "refreshing": "Actualisation...",
+      "apiUpdate": {
+        "title": "Mises à jour de la spec",
+        "autoCheckLabel": "Vérifier automatiquement les mises à jour",
+        "intervalLabel": "Intervalle",
+        "intervalHourly": "Toutes les heures",
+        "intervalEvery6h": "Toutes les 6 heures",
+        "intervalDaily": "Quotidien",
+        "intervalWeekly": "Hebdomadaire",
+        "intervalNever": "Jamais",
+        "checkNow": "Vérifier maintenant",
+        "checkInProgress": "Vérification…",
+        "lastCheckedAt": "Dernière vérification : {{time}}",
+        "neverChecked": "Jamais vérifié",
+        "stateIdle": "À jour",
+        "stateAvailable": "Mise à jour disponible",
+        "stateError": "Échec de la dernière vérification",
+        "applyUpdate": "Appliquer la mise à jour",
+        "dismiss": "Ignorer",
+        "noConfig": "Ce dossier n'a pas été créé depuis une source importable."
+      }
     },
     "docs": {
       "source": "Source :",

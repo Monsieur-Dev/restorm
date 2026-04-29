@@ -5,6 +5,8 @@ import { getFavorites, removeFavorite, reorderFavorites } from '../../services/f
 import { PROJECT_UUID_KEY } from '../../../../shared/config/projectUuid'
 import type { EnvironmentFolder, FolderItem } from '../../../../shared/types/collections'
 import type { ApiDocumentation } from '../../../../shared/types/apiDocumentation'
+import type { ApiUpdateConfig } from '../../../../shared/types/baseTypes'
+import { ApiUpdateSettingsSection } from './ApiUpdateSettingsSection'
 import { Badge, type BadgeType } from '../common/Badge'
 import './environmentFolderHome.css'
 
@@ -141,6 +143,22 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
   const importSource = folder.importSource
   const sourceConfig = importSource ? SOURCE_CONFIG[importSource] : undefined
 
+  const applyApiUpdatePatch = useCallback((patch: Partial<ApiUpdateConfig>): void => {
+    const target = folder as unknown as { apiUpdate?: ApiUpdateConfig }
+    const next: ApiUpdateConfig = {
+      sourceUrl: patch.sourceUrl ?? target.apiUpdate?.sourceUrl ?? apiDoc?.sourceUrl ?? '',
+      autoCheckEnabled: patch.autoCheckEnabled ?? target.apiUpdate?.autoCheckEnabled ?? false,
+      interval: patch.interval ?? target.apiUpdate?.interval ?? 'daily',
+      ...(target.apiUpdate ?? {}),
+      ...patch
+    }
+    target.apiUpdate = next
+    const api = (window as unknown as {
+      restorm?: { apiUpdate?: { setSettings: (id: string, cfg: unknown) => Promise<void> } }
+    }).restorm?.apiUpdate
+    if (api) void api.setSettings(folder.id, next)
+  }, [folder, apiDoc?.sourceUrl])
+
   const favoriteColumns = useMemo<TableColumn<FavoriteRequest>[]>(() => [
     {
       id: 'favorite',
@@ -232,6 +250,14 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
           onClick={() => { onSwitchTab('docs') }}
         />
       </div>
+
+      {/* ── API spec updates ── */}
+      <ApiUpdateSettingsSection
+        folderId={folder.id}
+        config={(folder as unknown as { apiUpdate?: ApiUpdateConfig }).apiUpdate}
+        defaultSourceUrl={apiDoc?.sourceUrl}
+        onSettingsChange={applyApiUpdatePatch}
+      />
 
       {/* ── Source URL ── */}
       {apiDoc?.sourceUrl && (

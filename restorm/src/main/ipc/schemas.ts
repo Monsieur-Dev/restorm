@@ -304,3 +304,26 @@ const routeLikeSchema = z.object({
 /** ApiDocumentation arrives as an opaque JSON object; shape is validated by the consumer. */
 export const docsCompileRouteArgs = z.tuple([z.unknown(), routeLikeSchema])
 export const docsCompileRootArgs = z.tuple([z.unknown()])
+
+// ==========================================================================
+// API Update (per-folder periodic spec re-check)
+// ==========================================================================
+
+const apiUpdateConfigSchema = z.object({
+  sourceUrl: z.string(),
+  sourceHeaders: z.record(z.string(), z.string()).optional(),
+  autoCheckEnabled: z.boolean(),
+  interval: z.enum(['hourly', 'every6h', 'daily', 'weekly', 'never']),
+  lastCheckedAt: z.number().optional(),
+  lastImportedSpecVersion: z.string().optional(),
+  lastImportedSpecHash: z.string().optional()
+})
+
+const folderIdArg = z.string()
+
+export const apiUpdateGetStateArgs = z.tuple([folderIdArg])
+export const apiUpdateGetSnapshotArgs = z.tuple([])
+export const apiUpdateSetSettingsArgs = z.tuple([folderIdArg, apiUpdateConfigSchema])
+export const apiUpdateCheckNowArgs = z.tuple([folderIdArg])
+export const apiUpdateApplyArgs = z.tuple([folderIdArg])
+export const apiUpdateDismissArgs = z.tuple([folderIdArg])

@@ -725,5 +725,52 @@ contextBridge.exposeInMainWorld('restorm', {
       const result: unknown = await ipcRenderer.invoke('docs:compile-root', apiDoc)
       return result as { markdown: string; error?: string }
     }
+  },
+  apiUpdate: {
+    /** Read the current ApiUpdateState for a single folder. */
+    getState: async (folderId: string): Promise<unknown> => {
+      const result: unknown = await ipcRenderer.invoke('apiUpdate:get-state', folderId)
+      return result
+    },
+    /** One-shot read of every known folder's state. The renderer
+     * uses this on mount to populate badges before the first
+     * push event arrives. */
+    getSnapshot: async (): Promise<Record<string, unknown>> => {
+      const result: unknown = await ipcRenderer.invoke('apiUpdate:get-snapshot')
+      return result as Record<string, unknown>
+    },
+    /** Persist a new ApiUpdateConfig onto the folder. The main
+     * process writes through CollectionStore + the persistence
+     * layer, then re-registers the scheduler so cadence changes
+     * take effect immediately. */
+    setSettings: async (folderId: string, config: unknown): Promise<void> => {
+      await ipcRenderer.invoke('apiUpdate:set-settings', folderId, config)
+    },
+    /** Force a check ignoring schedule + autoCheckEnabled. Used by
+     * the explicit "Check now" button. */
+    checkNow: async (folderId: string): Promise<void> => {
+      await ipcRenderer.invoke('apiUpdate:check-now', folderId)
+    },
+    /** Apply the available update against the folder. Resolves
+     * once the pipeline has run; rejects on failure so the
+     * renderer can surface the toast. */
+    apply: async (folderId: string): Promise<void> => {
+      await ipcRenderer.invoke('apiUpdate:apply', folderId)
+    },
+    /** Acknowledge an "available" notification for the rest of the
+     * session. The badge stays; only the toast suppression flips. */
+    dismiss: async (folderId: string): Promise<void> => {
+      await ipcRenderer.invoke('apiUpdate:dismiss', folderId)
+    },
+    /** Subscribe to state transitions for every folder. */
+    onStateChanged: (callback: (data: { folderId: string; state: unknown }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { folderId: string; state: unknown }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('apiUpdate:state-changed', handler)
+      return () => {
+        ipcRenderer.removeListener('apiUpdate:state-changed', handler)
+      }
+    }
   }
 })

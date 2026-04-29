@@ -90,6 +90,7 @@ import { useItemOperations } from './hooks/useItemOperations'
 import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
 import { useWorkbenchTabs } from './hooks/useWorkbenchTabs'
+import { useApiUpdateNotifications } from './hooks/useApiUpdateNotifications'
 import { useSidebarState } from './hooks/useSidebarState'
 import { isFavorite as favoritesStoreIsFavorite, toggleFavorite as favoritesStoreToggle } from './services/favoritesStore'
 import { useFileManagement } from './hooks/useFileManagement'
@@ -172,6 +173,11 @@ const App: React.FC = () => {
       body: t('app.draftsRestoredBody', { count: payload.count })
     })
   })
+
+  // Toast on every transition into the "update available" state.
+  // The settings section already owns the inline state; this is the
+  // out-of-band notification for users not currently on the folder.
+  useApiUpdateNotifications(t)
 
   const handleMenuExit = useCallback(() => {
     void window.api.closeWindow()

@@ -13,6 +13,7 @@ import {
 import { Environment } from './Environment'
 import type { RuntimeId, Icon, FolderConfiguration, FolderType, BaseFolderItem } from './types'
 import type { ApiDocumentation } from '../types/apiDocumentation'
+import type { ApiUpdateConfig, ImportSourceType, ImportSelectionSnapshot } from '../types/baseTypes'
 import { CURRENT_FILE_FORMAT_VERSION } from '../config/fileFormatVersion'
 
 /**
@@ -90,6 +91,20 @@ export class EnvironmentFolder {
    */
   apiDocumentation?: ApiDocumentation
 
+  /** How this folder was created (swagger, graphql, …). Drives the
+   * "Refresh from source" flow and the home-page logo. */
+  importSource?: ImportSourceType
+
+  /** Snapshot of the user's last selective-import choice. Read on
+   * every refresh to classify the diff into added / removed /
+   * kept-skipped. */
+  importSelection?: ImportSelectionSnapshot
+
+  /** Per-folder periodic spec re-check + idempotent refresh
+   * configuration. Backfilled on load from the legacy
+   * `apiDocumentation.sourceUrl` when absent. */
+  apiUpdate?: ApiUpdateConfig
+
   constructor(init?: Partial<EnvironmentFolder>) {
     if (init) {
       Object.assign(this, init)
@@ -119,6 +134,9 @@ export class EnvironmentFolder {
     environments?: Parameters<typeof Environment.fromPlain>[0][]
     items?: BaseFolderItem[]
     apiDocumentation?: ApiDocumentation
+    importSource?: ImportSourceType
+    importSelection?: ImportSelectionSnapshot
+    apiUpdate?: ApiUpdateConfig
   }): EnvironmentFolder {
     const folder = new EnvironmentFolder({
       ...(obj.id !== undefined && { id: obj.id }),
@@ -150,6 +168,9 @@ export class EnvironmentFolder {
     if (obj.apiDocumentation) {
       folder.apiDocumentation = obj.apiDocumentation
     }
+    if (obj.importSource) folder.importSource = obj.importSource
+    if (obj.importSelection) folder.importSelection = obj.importSelection
+    if (obj.apiUpdate) folder.apiUpdate = obj.apiUpdate
     return folder
   }
 
@@ -176,6 +197,9 @@ export class EnvironmentFolder {
       items: this.items.map(item => item.toPlainObject())
     }
     if (this.apiDocumentation) plain['apiDocumentation'] = this.apiDocumentation
+    if (this.importSource) plain['importSource'] = this.importSource
+    if (this.importSelection) plain['importSelection'] = this.importSelection
+    if (this.apiUpdate) plain['apiUpdate'] = this.apiUpdate
     return plain
   }
 }

@@ -99,7 +99,27 @@
       "favoriteRequests": "Favorite requests",
       "removeFavorite": "Remove from favorites",
       "refresh": "Refresh",
-      "refreshing": "Refreshing..."
+      "refreshing": "Refreshing...",
+      "apiUpdate": {
+        "title": "API spec updates",
+        "autoCheckLabel": "Check for spec updates automatically",
+        "intervalLabel": "Interval",
+        "intervalHourly": "Hourly",
+        "intervalEvery6h": "Every 6 hours",
+        "intervalDaily": "Daily",
+        "intervalWeekly": "Weekly",
+        "intervalNever": "Never",
+        "checkNow": "Check now",
+        "checkInProgress": "Checking…",
+        "lastCheckedAt": "Last checked: {{time}}",
+        "neverChecked": "Never checked",
+        "stateIdle": "Up to date",
+        "stateAvailable": "Update available",
+        "stateError": "Last check failed",
+        "applyUpdate": "Apply update",
+        "dismiss": "Dismiss",
+        "noConfig": "This folder was not created from an importable source."
+      }
     },
     "docs": {
       "source": "Source:",

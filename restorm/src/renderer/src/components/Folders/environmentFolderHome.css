@@ -229,3 +229,85 @@
 .home-footer .codicon {
   margin-right: 4px;
 }
+
+/* ── API spec updates section ── */
+
+.api-update-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.api-update-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.api-update-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.api-update-label {
+  flex-shrink: 0;
+  width: 80px;
+  font-size: 12px;
+}
+
+.api-update-select {
+  flex: 1;
+  min-width: 160px;
+}
+
+.api-update-state-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.api-update-state {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.api-update-state-idle {
+  background: var(--badge-background, rgba(120, 200, 120, 0.18));
+  color: var(--badge-foreground, #4caf50);
+}
+
+.api-update-state-checking {
+  background: rgba(0, 122, 204, 0.18);
+  color: var(--progressBar-background, #007acc);
+}
+
+.api-update-state-available {
+  background: rgba(255, 165, 0, 0.18);
+  color: var(--gitDecoration-modifiedResourceForeground, #e2a03f);
+}
+
+.api-update-state-applying {
+  background: rgba(0, 122, 204, 0.18);
+  color: var(--progressBar-background, #007acc);
+}
+
+.api-update-state-error {
+  background: rgba(244, 67, 54, 0.18);
+  color: var(--errorForeground, #f44336);
+}
+
+.api-update-last-checked {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.api-update-error {
+  font-size: 12px;
+  color: var(--errorForeground, #f44336);
+  margin: 4px 0 0;
+}
