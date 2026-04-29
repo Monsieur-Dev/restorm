@@ -24,7 +24,6 @@ services:
       # copy, which also persists across rebuilds (faster `pnpm install`).
       - node-modules-root:/workspaces/gitable/node_modules
       - node-modules-core-ui:/workspaces/gitable/electron-core-ui/node_modules
-      - node-modules-gitable:/workspaces/gitable/gitable/node_modules
       - node-modules-demo:/workspaces/gitable/demo/node_modules
       - node-modules-restorm:/workspaces/gitable/restorm/node_modules
       # pnpm global store — keep the content-addressable cache out of the
@@ -64,7 +63,6 @@ volumes:
   webtop-config:
   node-modules-root:
   node-modules-core-ui:
-  node-modules-gitable:
   node-modules-demo:
   node-modules-restorm:
   pnpm-store:

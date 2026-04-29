@@ -1,8 +1,8 @@
-# Contributing to Gitable
+# Contributing
 
 This monorepo ships **electron-core-ui** (a generic Electron + React
 foundation library) and **restorm** (an HTTP / API client built on top
-of it), plus the legacy **gitable** Git GUI and **demo** scaffolding.
+of it), plus the **demo** scaffolding used to exercise the library.
 Different surfaces have different rules — start here, then jump to the
 right playbook.
 
@@ -60,7 +60,7 @@ surface is not considered shipped.
 
 ```bash
 pnpm install                 # workspace install (uses pnpm 10)
-pnpm run dev:restorm         # restorm dev server (or dev:gitable / dev:demo)
+pnpm run dev:restorm         # restorm dev server (or dev:demo)
 pnpm run lint:fix && pnpm run lint && pnpm run typecheck
 pnpm -F restorm run test     # restorm unit tests
 pnpm -F restorm run test:e2e # restorm Playwright + BDD e2e (needs Docker)

@@ -16,7 +16,6 @@ description: "Obligatoire après toute production de code : Vérifier le linter 
 
 ### ✅ Linter (ESLint)
 ```bash
-cd gitable
 npm run lint
 ```
 - **0 erreurs, 0 warnings** requis
@@ -25,7 +24,6 @@ npm run lint
 
 ### ✅ TypeCheck (TypeScript)
 ```bash
-cd gitable
 npm run typecheck
 ```
 - **0 erreurs TypeScript** requis

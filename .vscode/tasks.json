@@ -24,17 +24,6 @@
       }
     },
     {
-      "label": "dev:gitable",
-      "type": "shell",
-      "command": "pnpm run dev:gitable",
-      "problemMatcher": [],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "new"
-      }
-    },
-    {
       "label": "build",
       "type": "shell",
       "command": "pnpm run build",

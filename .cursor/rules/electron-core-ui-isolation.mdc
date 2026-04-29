@@ -16,7 +16,7 @@ The `electron-core-ui` project is a **generic, reusable library**. It must remai
 The following are **strictly forbidden** in `electron-core-ui`:
 
 ### 1. Project-Specific Imports
-- **NEVER** import from `restorm`, `gitable`, or `demo` projects
+- **NEVER** import from `restorm` or `demo` projects
 - **NEVER** reference project-specific types, interfaces, or models
 - **NEVER** use project-specific constants or configurations
 
@@ -40,7 +40,6 @@ The following are **strictly forbidden** in `electron-core-ui`:
 ## What Does NOT Belong in electron-core-ui
 
 ❌ Restorm-specific models (HTTPRequest, Folder, Environment)
-❌ Gitable-specific logic
 ❌ Demo-specific components or configurations
 ❌ Any reference to specific API endpoints or data structures
 

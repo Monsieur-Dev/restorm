@@ -15,7 +15,7 @@ Runs before each commit and performs:
    - Enforces the rule: **Fix the issue, don't suppress the warning**
 
 2. **📦 Package Checks**
-   For each package (electron-core-ui, gitable, demo, restorm):
+   For each package (electron-core-ui, demo, restorm):
    - `depcheck` - Verifies dependencies
    - `lint` - ESLint validation
    - `typecheck` - TypeScript type checking

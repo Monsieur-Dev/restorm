@@ -1,6 +1,5 @@
 packages:
   - 'electron-core-ui'
-  - 'gitable'
   - 'demo'
   - 'restorm'
 
