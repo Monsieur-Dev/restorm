@@ -1,6 +1,6 @@
 networks:
   default:
-    name: gitable-tests
+    name: restorm-tests
     external: true
 
 services:

@@ -30,7 +30,7 @@
       service, tab view, import service if applicable, response history
       builder).
 - [ ] Docker mock added to `restorm/tests/docker/docker-compose.yml`,
-      stable port, joins `gitable-tests` network. Section 5.
+      stable port, joins `restorm-tests` network. Section 5.
 - [ ] CI integration confirmed (mock starts via `global-setup.ts`, no
       workflow change needed). Section 6.
 - [ ] Optional `SKIP_<PROTOCOL>_E2E=1` opt-out flag, if applicable.
