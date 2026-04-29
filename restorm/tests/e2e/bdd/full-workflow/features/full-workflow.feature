@@ -481,6 +481,59 @@ Feature: Full workflow end-to-end scenario
     When I rename the sidebar request "Add a new pet to the store" to "DraftCleanProbe"
     And I save all with Ctrl+Shift+S
 
+    # ── AutoSave (`files:autoSave` + `files:autoSaveDelay`) ──
+    # Drives the in-process AutoSaveController end-to-end through the
+    # real settings UI: open the modal, click the dropdown, pick the
+    # option, set the delay, close. We target the "DraftCleanProbe"
+    # tab specifically (renamed from "Add a new pet to the store"
+    # above) — the multi-group workbench means the abstract "active
+    # tab" matches one tab per group, so checking the dirty dot on a
+    # specific tab is the only way to attribute dirty state correctly.
+    # Each scenario waits 700 ms after a state-changing action to
+    # give the controller's debounce timer (set to 500 ms) plus the
+    # IPC round-trip time enough room without flaking.
+
+    When I focus the "DraftCleanProbe" tab
+    Then the window title should be clean
+
+    # 1. With autosave OFF (default), an edit stays dirty indefinitely.
+    When I append "x" to the active request URL
+    Then the window title should be dirty
+    When I wait 700ms
+    Then the window title should be dirty
+
+    # 2. Enabling autosave (afterDelay, 500 ms) via the settings UI,
+    #    while a dirty doc is already open, arms the timer immediately
+    #    — the user's pending edit must be picked up without typing
+    #    one more character.
+    When I open the settings modal
+    And I set the autoSaveDelay setting to 500
+    And I select autoSave option 1 in the settings modal
+    And I close the settings modal
+    And I wait 700ms
+    Then the window title should be clean
+
+    # 3. With autosave ON, a fresh edit clears within the delay.
+    When I append "y" to the active request URL
+    Then the window title should be dirty
+    When I wait 700ms
+    Then the window title should be clean
+
+    # 4. Disabling autosave (option 0 = off) restores manual-only
+    #    behaviour: the dirty dot stays after the delay because nothing
+    #    fires a save.
+    When I open the settings modal
+    And I select autoSave option 0 in the settings modal
+    And I close the settings modal
+    And I append "z" to the active request URL
+    Then the window title should be dirty
+    When I wait 700ms
+    Then the window title should be dirty
+    # Bring the file back to a clean state so the rest of the
+    # scenario continues with the existing assumptions.
+    When I save all with Ctrl+Shift+S
+    Then the window title should be clean
+
     # Close-file with "Don't save" must wipe the drafts too. The
     # save-on-quit modal otherwise leaves a per-unit draft behind
     # that the next launch reads as a recovery candidate, even

@@ -59,6 +59,20 @@
           "description": "Controls whether line numbers are shown in the code editor"
         }
       }
+    },
+    "files": {
+      "title": "Files",
+      "autoSave": {
+        "title": "Auto Save",
+        "description": "Controls auto save of dirty editors. Read more about autosave in the documentation.",
+        "off": "Off",
+        "afterDelay": "After Delay",
+        "onWindowChange": "On Window Change"
+      },
+      "autoSaveDelay": {
+        "title": "Auto Save Delay",
+        "description": "Controls the delay in milliseconds after which a dirty editor is saved automatically. Only applies when Auto Save is set to After Delay."
+      }
     }
   },
   "codeEditor": {

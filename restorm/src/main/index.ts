@@ -1,6 +1,6 @@
 import { app, BrowserWindow } from 'electron'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService } from 'electron-core-ui'
+import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, initAutoSaveController } from 'electron-core-ui'
 import { PROJECT_UUID_KEY } from '../shared/config/projectUuid'
 import type { PersistenceFormat } from 'electron-core-ui'
 import { join } from 'path'
@@ -305,6 +305,21 @@ const rendererPath = getRendererPath()
 const settingsConfigPath = getSettingsConfigPath()
 const featuresConfigPath = getFeaturesConfigPath()
 initializeApp('restorm', createWindow, resourcesPath, undefined, rendererPath || undefined, settingsConfigPath, featuresConfigPath)
+
+// Wire the AutoSaveController once both SettingsService (initialized
+// inside `initializeApp` → `setupIPC` on `app.whenReady`) and
+// FileService are ready. The controller only decides *when* to fire
+// — the actual save runs in the renderer in response to the
+// `'file:autosave-trigger'` IPC, mapped to the existing
+// `handleMenuSaveAll` flow. The `whenReady` indirection is required
+// because `initializeApp` schedules `setupIPC` asynchronously.
+void app.whenReady().then(() => {
+  initAutoSaveController({
+    settings: getSettingsService(),
+    fileService: getFileService()
+  })
+  logger.info('AutoSave controller initialized')
+})
 
 // Register all restorm-specific IPC handlers
 registerRestormIPC({ editorWindows, closeAllWindows })

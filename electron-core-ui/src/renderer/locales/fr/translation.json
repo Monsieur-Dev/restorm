@@ -59,6 +59,20 @@
           "description": "Contrôle si les numéros de ligne sont affichés dans l'éditeur de code"
         }
       }
+    },
+    "files": {
+      "title": "Fichiers",
+      "autoSave": {
+        "title": "Sauvegarde automatique",
+        "description": "Contrôle la sauvegarde automatique des éditeurs modifiés.",
+        "off": "Désactivée",
+        "afterDelay": "Après un délai",
+        "onWindowChange": "Au changement de fenêtre"
+      },
+      "autoSaveDelay": {
+        "title": "Délai de sauvegarde automatique",
+        "description": "Contrôle le délai en millisecondes après lequel un éditeur modifié est sauvegardé automatiquement. Ne s'applique que lorsque la sauvegarde automatique est réglée sur « Après un délai »."
+      }
     }
   },
   "codeEditor": {

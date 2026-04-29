@@ -621,6 +621,101 @@ describe('SettingsService', () => {
   })
 
   // ---------------------------------------------------------------
+  // In-process onSettingChanged subscription
+  // ---------------------------------------------------------------
+  describe('onSettingChanged', () => {
+    it('fires on set() with the new value', () => {
+      const service = createService()
+      const listener = vi.fn()
+      service.onSettingChanged('general:fontSize', listener)
+
+      service.set('general:fontSize', 18)
+      expect(listener).toHaveBeenCalledTimes(1)
+      expect(listener).toHaveBeenCalledWith(18)
+    })
+
+    it('fires on resetSetting() with the default value', () => {
+      const service = createService()
+      const listener = vi.fn()
+      service.onSettingChanged('general:fontSize', listener)
+
+      service.resetSetting('general:fontSize')
+      expect(listener).toHaveBeenCalledTimes(1)
+      expect(listener).toHaveBeenCalledWith(14)
+    })
+
+    it('only fires for the subscribed key', () => {
+      const service = createService()
+      const fontListener = vi.fn()
+      const themeListener = vi.fn()
+      service.onSettingChanged('general:fontSize', fontListener)
+      service.onSettingChanged('appearance:theme', themeListener)
+
+      service.set('general:fontSize', 20)
+      expect(fontListener).toHaveBeenCalledTimes(1)
+      expect(themeListener).not.toHaveBeenCalled()
+    })
+
+    it('returns an unsubscribe fn that stops further notifications', () => {
+      const service = createService()
+      const listener = vi.fn()
+      const unsub = service.onSettingChanged('general:fontSize', listener)
+
+      service.set('general:fontSize', 16)
+      expect(listener).toHaveBeenCalledTimes(1)
+
+      unsub()
+      service.set('general:fontSize', 18)
+      expect(listener).toHaveBeenCalledTimes(1)
+    })
+
+    it('supports multiple listeners on the same key', () => {
+      const service = createService()
+      const a = vi.fn()
+      const b = vi.fn()
+      service.onSettingChanged('general:fontSize', a)
+      service.onSettingChanged('general:fontSize', b)
+
+      service.set('general:fontSize', 22)
+      expect(a).toHaveBeenCalledTimes(1)
+      expect(b).toHaveBeenCalledTimes(1)
+    })
+
+    it('survives a listener that synchronously unsubscribes itself', () => {
+      // The notify path snapshots the bucket, so a self-unsubscribe
+      // mid-iteration must not skip subsequent listeners.
+      const service = createService()
+      const a = vi.fn(() => {
+        unsubA()
+      })
+      const b = vi.fn()
+      const unsubA = service.onSettingChanged('general:fontSize', a)
+      service.onSettingChanged('general:fontSize', b)
+
+      expect(() => {
+        service.set('general:fontSize', 24)
+      }).not.toThrow()
+      expect(a).toHaveBeenCalledTimes(1)
+      expect(b).toHaveBeenCalledTimes(1)
+    })
+
+    it('catches listener exceptions and logs without breaking other listeners', () => {
+      const service = createService()
+      const throwing = vi.fn(() => {
+        throw new Error('listener boom')
+      })
+      const ok = vi.fn()
+      service.onSettingChanged('general:fontSize', throwing)
+      service.onSettingChanged('general:fontSize', ok)
+
+      service.set('general:fontSize', 30)
+      expect(throwing).toHaveBeenCalledTimes(1)
+      expect(ok).toHaveBeenCalledTimes(1)
+      expect(logger.warn).toHaveBeenCalled()
+    })
+  })
+
+  // ---------------------------------------------------------------
   // Feature-gating
   // ---------------------------------------------------------------
   describe('feature-gating', () => {

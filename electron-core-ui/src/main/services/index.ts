@@ -75,6 +75,15 @@ export {
   isSettingsServiceInitialized,
   SettingsService
 } from './SettingsService'
+export type { SettingChangedListener } from './SettingsService'
+
+// AutoSave controller (settings: autoSave, autoSaveDelay)
+export {
+  AutoSaveController,
+  initAutoSaveController,
+  getAutoSaveController
+} from './AutoSaveController'
+export type { AutoSaveMode, AutoSaveControllerOptions } from './AutoSaveController'
 
 // Save unit registry + draft store (file service v2 building blocks)
 export {

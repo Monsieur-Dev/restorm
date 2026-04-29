@@ -46,6 +46,9 @@ declare global {
         listFiles: () => Promise<{ path: string; isDirectory: boolean }[]>
         readFile: (filePath: string) => Promise<string>
       }
+      file: {
+        onAutoSaveTrigger: (callback: () => void) => () => void
+      }
     }
     restorm?: {
       openEditor: (file?: { title: string; content?: string; x?: number; y?: number }) => Promise<void>

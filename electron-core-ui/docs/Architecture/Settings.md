@@ -399,3 +399,57 @@ The `SettingsProvider` applies side effects when certain settings change:
 |-------------|-------------|
 | `appearance:language` | Calls `i18n.changeLanguage(value)` and `window.api.i18n.setLanguage(value)` |
 | `appearance:theme` | Calls `window.api.theme.set(value)` |
+| `files:autoSave` / `files:autoSaveDelay` | Drive the in-process `AutoSaveController` (see below) |
+
+## Subscribing from the main process
+
+Main-process services that need to react to setting changes can call `SettingsService.onSettingChanged(storageKey, listener)`. It returns an unsubscribe function and fires from the same code path as the renderer broadcast (both `set()` and `resetSetting()`):
+
+```typescript
+const unsub = settingsService.onSettingChanged('files:autoSave', (value) => {
+  logger.info('autoSave changed', { value })
+})
+// Later — typically from your service's stop() / dispose path:
+unsub()
+```
+
+The `AutoSaveController` is the canonical consumer; see `AutoSaveController.ts` for a full subscribe + dispose pattern.
+
+## AutoSave (`files:autoSave` + `files:autoSaveDelay`)
+
+The library ships an in-process `AutoSaveController` that reacts to the two `files:` settings and fires the host app's "Save all" flow on the right trigger:
+
+- `off` — disabled.
+- `afterDelay` — debounce on `FileService.onDirtyChanged`; save after `files:autoSaveDelay` ms of inactivity.
+- `onWindowChange` — save on `BrowserWindow` `'blur'`, provided anything is dirty.
+
+A trigger is a no-op when no file is open (`FileService.getFilePath()` returns `null`) — there is nothing to save. Any pending afterDelay timer that fires while no file is open is silently dropped; the next dirty event after a file opens re-arms it normally.
+
+Switching `autoSave` to `afterDelay` while a file is already open and dirty arms the timer immediately, so the user's unsaved work is picked up after the configured delay without needing to type one more character. Switching to `off` cancels any pending timer.
+
+The controller resyncs its cached dirty state from `FileService.getSaveUnitsSnapshot()` on every `onStateChanged` event, so a close→reopen round-trip can never leave it with a stale flag — a fresh edit on the reopened file always rearmed reliably.
+
+The controller does not know how a host app actually persists. It broadcasts `'file:autosave-trigger'` to every open window via `window.api.file.onAutoSaveTrigger(callback)`, and the renderer wires `callback` to its existing save-all flow.
+
+Wire from main:
+
+```typescript
+import { initFileService, getFileService, getSettingsService, initAutoSaveController } from 'electron-core-ui'
+
+initFileService({ /* … */ })
+initAutoSaveController({
+  settings: getSettingsService(),
+  fileService: getFileService()
+})
+```
+
+Wire from renderer:
+
+```typescript
+useEffect(() => {
+  const unsub = window.api.file.onAutoSaveTrigger(() => {
+    void handleMenuSaveAll()
+  })
+  return unsub
+}, [handleMenuSaveAll])
+```

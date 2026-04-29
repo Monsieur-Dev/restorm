@@ -69,3 +69,30 @@ groups:
                 descriptionKey: "settings.appearance.editor.lineNumbers.description"
                 type: "toggle"
                 default: true
+  - id: "files"
+    titleKey: "settings.files.title"
+    items:
+      - setting:
+          id: "autoSave"
+          titleKey: "settings.files.autoSave.title"
+          descriptionKey: "settings.files.autoSave.description"
+          type: "enum"
+          default: "off"
+          params:
+            values:
+              - value: "off"
+                labelKey: "settings.files.autoSave.off"
+              - value: "afterDelay"
+                labelKey: "settings.files.autoSave.afterDelay"
+              - value: "onWindowChange"
+                labelKey: "settings.files.autoSave.onWindowChange"
+      - setting:
+          id: "autoSaveDelay"
+          titleKey: "settings.files.autoSaveDelay.title"
+          descriptionKey: "settings.files.autoSaveDelay.description"
+          type: "number"
+          default: 1000
+          params:
+            min: 100
+            max: 60000
+            integer: true

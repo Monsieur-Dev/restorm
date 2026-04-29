@@ -97,6 +97,7 @@ export interface CoreUiFileApi {
   onDraftsRestored: (
     callback: (payload: { count: number }) => void
   ) => () => void
+  onAutoSaveTrigger: (callback: () => void) => () => void
   saveUnit: (entry: {
     runtimeId: string
     content: unknown
