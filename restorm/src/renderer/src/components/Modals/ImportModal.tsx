@@ -11,7 +11,7 @@ import {
   ListViewDropdown
 } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
-import type { FolderItem, EnvironmentFolder, Folder, ImportSelectionSnapshot } from '../../../../shared/types/collections'
+import type { FolderItem, EnvironmentFolder, Folder } from '../../../../shared/types/collections'
 import { isEnvironmentFolder, isRequest } from '../../../../shared/types/collections'
 import type { AuthenticationRequest } from '../../../../shared/models'
 import { logger } from 'electron-core-ui/renderer'
@@ -33,22 +33,23 @@ interface PendingFolder {
  *
  * - Pre-fills the source URL + the attached auth route from the
  *   already-imported env folder (the destination dropdown is hidden
- *   because the target is fixed).
- * - Pre-selects the leaves whose natural keys appear in
- *   `alreadyImportedKeys`. An empty / null list means "everything was
- *   imported (or this is a first-time import with no snapshot)" — in
- *   either case we want every leaf checked, matching the legacy
- *   import-everything default.
+ *   because the target is fixed). Both fields are display-only —
+ *   they're sourced from the env folder's stored apiUpdate config
+ *   and aren't editable in this flow.
+ * - Calls `apiUpdate.previewTree(targetFolderId)` to get the parsed
+ *   preview tree + the set of leaves whose operation already lives
+ *   in the target. Locked leaves arrive checked + disabled (the user
+ *   can't opt them out without losing a route the folder already
+ *   exposes); other leaves arrive unchecked and surface as opt-in
+ *   additions.
  * - Replaces the "Import" button with "Apply update" and routes the
- *   confirm action to `window.restorm.apiUpdate.apply` instead of the
- *   fresh-import handler. The callback receives the resulting
- *   payload so the host can splice the new requests onto its own
- *   copy of the env folder.
+ *   confirm action to `apiUpdate.apply` instead of the fresh-import
+ *   handler. The callback receives the resulting payload so the host
+ *   can splice the new requests onto its own copy of the env folder.
  */
 export interface RefreshContext {
   sourceUrl: string
   authenticationRequest?: AuthenticationRequest
-  alreadyImportedKeys?: string[]
   targetFolderId: string
   onApplied: (updatedFolder: unknown) => void
 }
@@ -96,6 +97,13 @@ export function ImportModal({
   const [pendingFolders, setPendingFolders] = useState<PendingFolder[]>([])
   const [showFolderNameInput, setShowFolderNameInput] = useState(false)
   const [newFolderName, setNewFolderName] = useState('')
+  /**
+   * Set of leaf natural keys whose checkbox is forced-on + disabled
+   * because their operation already exists in the target folder.
+   * Populated from `apiUpdate.previewTree`'s `lockedKeys` array on
+   * refresh-from-source, empty in fresh-import mode.
+   */
+  const [lockedKeys, setLockedKeys] = useState<ReadonlySet<string>>(() => new Set())
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Initialize targetFolderId from selectedFolderId or find parent folder
@@ -414,61 +422,43 @@ export function ImportModal({
       }
     }
 
-    // Stamp every top-level env folder in the imported tree with the
-    // user's selective-import choice so a future refresh can classify
-    // the diff into added / removed / kept-skipped. The pair
-    // (`imported`, `skipped`) covers the spec at capture time:
-    // `imported` is the live selection, `skipped` is everything else
-    // that was offered in the preview. The two lists are always
-    // disjoint and exhaustive over the pre-filter leaf set.
-    const allKeysAtCapture = allLeafKeys(previewItems)
-    const imported = Array.from(selection).sort()
-    const skipped = Array.from(allKeysAtCapture).filter((k) => !selection.has(k)).sort()
-    const snapshot: ImportSelectionSnapshot = {
-      capturedAt: Date.now(),
-      source: input.trim(),
-      imported,
-      skipped
-    }
+    // Stamp the apiUpdate config on every top-level env folder so a
+    // future refresh has every field the orchestrator needs: the URL
+    // we just fetched from, the static defaults from the migration,
+    // and the attached auth-route id when the user supplied one.
+    // Tying sourceUrl in here — instead of leaving it to the legacy
+    // migration step — means the "Refresh from source" entry shows
+    // up immediately after the import, without waiting for the next
+    // project reload.
     const sourceUrlAtImport = input.trim()
     const isUrlImport = sourceUrlAtImport.startsWith('http://') || sourceUrlAtImport.startsWith('https://')
-    const stampSnapshot = (items: FolderItem[]): FolderItem[] => items.map((item) => {
-      if (isEnvironmentFolder(item)) {
-        const stamped = { ...item, importSelection: snapshot } as EnvironmentFolder
-        // Stamp the apiUpdate config so a future refresh has every
-        // field the orchestrator needs: the URL we just fetched
-        // from, the static defaults from the migration, and the
-        // attached auth-route id when the user supplied one. Tying
-        // sourceUrl in here — instead of leaving it to the legacy
-        // migration step — means the "Refresh from source" entry
-        // shows up immediately after the import, without waiting
-        // for the next project reload.
-        if (isUrlImport) {
-          const existing = (stamped as unknown as { apiUpdate?: Record<string, unknown> }).apiUpdate ?? {}
-          const apiDoc = (stamped as unknown as { apiDocumentation?: { api?: { version?: string } } }).apiDocumentation
-          ;(stamped as unknown as { apiUpdate?: Record<string, unknown> }).apiUpdate = {
-            sourceUrl: sourceUrlAtImport,
-            autoCheckEnabled: false,
-            interval: 'daily',
-            ...(apiDoc?.api?.version !== undefined ? { lastImportedSpecVersion: apiDoc.api.version } : {}),
-            ...existing,
-            ...(attachedAuth ? { authenticationRequestId: attachedAuth.id } : {})
-          }
-        } else if (attachedAuth) {
-          // File imports don't get a sourceUrl, but if the user
-          // attached an auth route we still capture it for any
-          // manual URL the user types into the env-folder home.
-          const apiUpdate = (stamped as unknown as { apiUpdate?: Record<string, unknown> }).apiUpdate ?? {}
-          ;(stamped as unknown as { apiUpdate?: Record<string, unknown> }).apiUpdate = {
-            ...apiUpdate,
-            authenticationRequestId: attachedAuth.id
-          }
+    const stampApiUpdate = (items: FolderItem[]): FolderItem[] => items.map((item) => {
+      if (!isEnvironmentFolder(item)) return item
+      const stamped = { ...item } as EnvironmentFolder
+      if (isUrlImport) {
+        const existing = (stamped as unknown as { apiUpdate?: Record<string, unknown> }).apiUpdate ?? {}
+        const apiDoc = (stamped as unknown as { apiDocumentation?: { api?: { version?: string } } }).apiDocumentation
+        ;(stamped as unknown as { apiUpdate?: Record<string, unknown> }).apiUpdate = {
+          sourceUrl: sourceUrlAtImport,
+          autoCheckEnabled: false,
+          interval: 'daily',
+          ...(apiDoc?.api?.version !== undefined ? { lastImportedSpecVersion: apiDoc.api.version } : {}),
+          ...existing,
+          ...(attachedAuth ? { authenticationRequestId: attachedAuth.id } : {})
         }
-        return stamped
+      } else if (attachedAuth) {
+        // File imports don't get a sourceUrl, but if the user
+        // attached an auth route we still capture it for any manual
+        // URL the user types into the env-folder home.
+        const apiUpdate = (stamped as unknown as { apiUpdate?: Record<string, unknown> }).apiUpdate ?? {}
+        ;(stamped as unknown as { apiUpdate?: Record<string, unknown> }).apiUpdate = {
+          ...apiUpdate,
+          authenticationRequestId: attachedAuth.id
+        }
       }
-      return item
+      return stamped
     })
-    finalItems = stampSnapshot(finalItems)
+    finalItems = stampApiUpdate(finalItems)
 
     // Call import with current pending folders
     onImport(finalItems, targetFolderId, pendingFolders)
@@ -496,21 +486,24 @@ export function ImportModal({
     void (async () => {
       try {
         const api = (window as unknown as {
-          restorm?: { apiUpdate?: { previewTree?: (id: string) => Promise<{ success: boolean; items: unknown[]; error?: string }> } }
+          restorm?: { apiUpdate?: { previewTree?: (id: string) => Promise<{ success: boolean; items: unknown[]; lockedKeys?: string[]; error?: string }> } }
         }).restorm?.apiUpdate
         if (!api?.previewTree) throw new Error('apiUpdate.previewTree IPC unavailable')
         const result = await api.previewTree(refreshContext.targetFolderId)
         if (token.cancelled) return
         if (result.success) {
           setPreviewItems(result.items as FolderItem[])
+          setLockedKeys(new Set(result.lockedKeys ?? []))
           setError(null)
         } else {
           setPreviewItems([])
+          setLockedKeys(new Set())
           setError(result.error ?? t('import.error.unknown'))
         }
       } catch (err) {
         if (!token.cancelled) {
           setPreviewItems([])
+          setLockedKeys(new Set())
           setError(err instanceof Error ? err.message : String(err))
         }
       } finally {
@@ -547,34 +540,36 @@ export function ImportModal({
     }
   }, [])
 
-  // Whenever a fresh preview lands, default the selection. Two modes:
+  // Whenever a fresh preview lands, default the selection.
   //
   // - Fresh import: every leaf checked, matching the legacy
   //   "import everything" UX.
-  // - Refresh from source with a non-empty `alreadyImportedKeys`:
-  //   only the leaves the user previously opted into are pre-checked
-  //   (they appear as "kept"). New routes appear unchecked so they
-  //   look like opt-in additions; previously-skipped routes also
-  //   appear unchecked. An empty / missing list is treated as "all
-  //   imported" — every leaf checked — so a refresh against a
-  //   first-import-everything env folder still defaults to keeping
-  //   the full surface.
+  // - Refresh from source: only the locked leaves are pre-checked.
+  //   A locked leaf is one whose operation is already present in the
+  //   target folder (per the same `findOperationForRoute` matcher
+  //   that drives Docs-tab visibility). New operations arrive
+  //   unchecked so they show up as opt-in additions; locked leaves
+  //   are read-only (the user can't opt them out). An empty
+  //   `lockedKeys` set in refresh mode would surface every fresh
+  //   route as a brand-new addition — that's the right default since
+  //   it means the existing folder doesn't cover any of the spec's
+  //   current operations.
   useEffect(() => {
-    const allKeys = allLeafKeys(previewItems)
-    const previouslyImported = refreshContext?.alreadyImportedKeys
-    if (previouslyImported && previouslyImported.length > 0) {
-      const allow = new Set(previouslyImported)
-      const initial = new Set<string>()
-      for (const key of allKeys) {
-        if (allow.has(key)) initial.add(key)
-      }
-      setSelection(initial)
+    if (refreshContext) {
+      setSelection(new Set(lockedKeys))
       return
     }
-    setSelection(allKeys)
-  }, [previewItems, refreshContext])
+    setSelection(allLeafKeys(previewItems))
+  }, [previewItems, refreshContext, lockedKeys])
 
-  const selectedLeafCount = selection.size
+  // Counter shown on the confirm button — only checked **and**
+  // enabled leaves count. Locked leaves are forced-checked but the
+  // user has no choice over them, so surfacing them in "Apply update
+  // (N)" would mislead about how many routes the user is actually
+  // opting into. Subtracting `lockedKeys.size` from `selection.size`
+  // works because the modal always keeps every locked key in the
+  // selection (init + folder toggle + select-none all preserve them).
+  const selectedLeafCount = Math.max(0, selection.size - lockedKeys.size)
 
   // Reset state when modal closes
   useEffect(() => {
@@ -582,6 +577,7 @@ export function ImportModal({
       setInput('')
       setPreviewItems([])
       setSelection(new Set())
+      setLockedKeys(new Set())
       setSearchFilter('')
       setError(null)
       setIsLoading(false)
@@ -802,7 +798,12 @@ export function ImportModal({
                 </Button>
                 <Button
                   secondary
-                  onClick={() => { setSelection(new Set()) }}
+                  onClick={() => {
+                    // Locked leaves stay checked even on "Select none"
+                    // — opting them out would silently drop a route the
+                    // target folder already exposes.
+                    setSelection(new Set(lockedKeys))
+                  }}
                   data-testid="import-select-none-button"
                 >
                   {t('import.selectNone', 'Select none')}
@@ -823,6 +824,7 @@ export function ImportModal({
                 selection={selection}
                 onSelectionChange={setSelection}
                 searchFilter={searchFilter}
+                lockedKeys={lockedKeys}
                 data-testid="import-selection-tree"
               />
             </div>
@@ -844,7 +846,7 @@ export function ImportModal({
           <Button
             emphasis={1}
             onClick={handleImportClick}
-            disabled={previewItems.length === 0 || selectedLeafCount === 0}
+            disabled={previewItems.length === 0 || selection.size === 0}
             data-testid="import-button"
           >
             {(() => {

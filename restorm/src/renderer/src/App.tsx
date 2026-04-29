@@ -1617,9 +1617,9 @@ const App: React.FC = () => {
           {/* Import Modal — doubles as the "Refresh from source"
               wizard when `refreshContext` is provided. The host
               builds the context from the env folder's stored
-              apiUpdate config + importSelection snapshot so the
-              modal can pre-fill the URL, attach the saved auth
-              route, and pre-tick the previously-imported leaves. */}
+              apiUpdate config so the modal can pre-fill the URL,
+              attach the saved auth route, and let main compute the
+              locked-keys set from the existing folder content. */}
           <ImportModal
             isOpen={showImportModal || refreshSourceTarget !== null}
             onClose={() => {
@@ -1649,11 +1649,9 @@ const App: React.FC = () => {
               const authReq = (apiUpdate?.authenticationRequestId
                 ? resolveAuthRequestCb(apiUpdate.authenticationRequestId)
                 : null) as RefreshContext['authenticationRequest'] | null
-              const importSelection = (folder as unknown as { importSelection?: { imported?: string[] } } | undefined)?.importSelection
               const refreshContext: RefreshContext = {
                 sourceUrl,
                 ...(authReq ? { authenticationRequest: authReq } : {}),
-                ...(importSelection?.imported ? { alreadyImportedKeys: importSelection.imported } : {}),
                 targetFolderId: targetId,
                 onApplied: (updatedFolder) => {
                   // Splice the apply payload onto the existing env
@@ -1661,12 +1659,11 @@ const App: React.FC = () => {
                   // attached at the breadcrumb path main produced
                   // (so a Swagger op tagged "Other" lands inside the
                   // existing "Other" folder instead of at the env
-                  // root). The apiUpdate / importSelection markers
-                  // are swapped wholesale. We DON'T replace the
-                  // whole folder — sub-environments / per-tab
-                  // pinning / other renderer-only state would be
-                  // lost since they may not have round-tripped to
-                  // main yet.
+                  // root). The apiUpdate marker is swapped wholesale.
+                  // We DON'T replace the whole folder — sub-
+                  // environments / per-tab pinning / other renderer-
+                  // only state would be lost since they may not have
+                  // round-tripped to main yet.
                   interface AddedRequestPayload {
                     request: unknown
                     parentPath: string[]
@@ -1675,7 +1672,6 @@ const App: React.FC = () => {
                     id: string
                     addedRequests: AddedRequestPayload[]
                     apiUpdate: unknown
-                    importSelection: unknown
                   }
                   const payload = updatedFolder as ApplyPayload | null
                   if (!payload?.id) {
@@ -1728,8 +1724,7 @@ const App: React.FC = () => {
                     return {
                       ...next,
                       items: updated,
-                      ...(payload.apiUpdate ? { apiUpdate: payload.apiUpdate } : {}),
-                      ...(payload.importSelection ? { importSelection: payload.importSelection } : {})
+                      ...(payload.apiUpdate ? { apiUpdate: payload.apiUpdate } : {})
                     } as typeof item
                   }))
                   setRefreshSourceTarget(null)

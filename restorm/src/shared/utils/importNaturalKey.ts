@@ -12,16 +12,15 @@ import { isAnyFolder, type Folder, type EnvironmentFolder, type FolderItem } fro
 
 /**
  * Stable identifier for a single item in a parsed-spec import preview
- * tree. Used to record the user's selective-import choice on the env
- * folder (`imported` / `skipped` arrays in `ImportSelectionSnapshot`)
- * so a future refresh can decide which items the user has already
- * opted into or out of.
+ * tree. Used by the import modal as the selection-set key (which
+ * leaves are checked) and by the refresh modal to bridge between the
+ * pipeline's spec keys and the user-facing selection.
  *
  * The key is **stable across imports of the same source** (the spec
  * may have been re-fetched, regenerated, or pulled from a different
  * URL — the user's selection should still apply). It is **unique
- * within a single import** so the snapshot's `imported ∪ skipped`
- * lists don't collide. It does **not** carry runtime state (random
+ * within a single import** so a single set never collides on two
+ * different leaves. It does **not** carry runtime state (random
  * UUIDs, generated ids, request payloads) — only the natural identity
  * of the item as it appears in the source spec.
  *

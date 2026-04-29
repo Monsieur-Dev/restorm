@@ -395,35 +395,6 @@ Then(
   }
 )
 
-Then(
-  'the env folder file should record skipped store routes in importSelection',
-  async () => {
-    const filePath = join(FULL_WORKFLOW_TEMP_DIR, 'selective-import.restorm')
-    expect(existsSync(filePath), `${filePath} must exist`).toBe(true)
-    const content = readFileSync(filePath, 'utf-8')
-    expect(content, 'importSelection must be persisted on the env folder').toContain('importSelection:')
-    // Pin the four /store/* natural keys from the Petstore spec.
-    // The Swagger importer normalises hosts into a `{{baseUrl}}`
-    // handlebar so the keys carry that prefix verbatim, alongside
-    // path parameters left as `{{name}}` placeholders.
-    const expectedSkipped = [
-      'request:http:GET {{baseUrl}}/store/inventory',
-      'request:http:GET {{baseUrl}}/store/order/{{orderId}}',
-      'request:http:DELETE {{baseUrl}}/store/order/{{orderId}}',
-      'request:http:POST {{baseUrl}}/store/order'
-    ]
-    for (const key of expectedSkipped) {
-      expect(content, `importSelection.skipped should contain "${key}"`).toContain(key)
-    }
-    // None of the skipped keys should appear inside the `imported:`
-    // block. Capture the imported list specifically and check.
-    const importedBlockMatch = /imported:\s*((?:\n\s+- [^\n]+)+)/.exec(content)
-    const importedBlock = importedBlockMatch ? importedBlockMatch[1] : ''
-    const offending = expectedSkipped.filter((k) => importedBlock.includes(k))
-    expect(offending, 'importSelection.imported should not contain any skipped /store route').toEqual([])
-  }
-)
-
 When(
   'I import the URL {string}',
   async ({}, url: string) => {
@@ -922,6 +893,38 @@ When(
     }
     // Give the CodeEditor's internal debounce time to flush to state.
     await page.waitForTimeout(500)
+  }
+)
+
+When(
+  'I replace {string} with {string} in the URL field',
+  async ({}, find: string, replace: string) => {
+    if (!page) throw new Error('app must be launched')
+    const currentPage = page
+    const urlContainer = currentPage.locator('[data-testid="url-container"]').locator('visible=true').first()
+    const monacoEditor = urlContainer.locator('.monaco-editor').first()
+    await expect(monacoEditor).toBeVisible({ timeout: 5000 })
+    // Read the rendered URL straight from Monaco's view layer
+    // (handlebars tokens land as visible spans so the surrounding
+    // `{{baseUrl}}/pet/{{petId}}` round-trips verbatim). Compute the
+    // replacement, then drive the keyboard: select-all → delete →
+    // type. Going through the keyboard keeps React state + Monaco's
+    // edit history in sync — the URL-resolver listens for those
+    // signals to recompute documentation matching, so a direct API
+    // mutation would silently miss the apiDocumentation re-bind.
+    const currentText = await monacoEditor.evaluate((el) => (el as HTMLElement).innerText)
+    const cleaned = currentText.replace(/\u00A0/g, ' ').trim()
+    if (!cleaned.includes(find)) {
+      throw new Error(`URL field doesn't contain "${find}" (got "${cleaned}")`)
+    }
+    const newText = cleaned.replace(find, replace)
+    await monacoEditor.click()
+    await currentPage.keyboard.press('Control+A')
+    await currentPage.keyboard.press('Delete')
+    await currentPage.keyboard.type(newText, { delay: 5 })
+    // Allow Monaco's onDidChange + the URL-resolver IPC roundtrip to
+    // settle so the Docs-tab visibility reflects the new URL.
+    await currentPage.waitForTimeout(800)
   }
 )
 

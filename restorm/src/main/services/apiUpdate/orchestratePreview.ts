@@ -15,6 +15,12 @@ import { previewImportDiff } from '../import/idempotent/previewImportDiff'
 import { expandHeaderTemplate, expandVariables } from './scheduling'
 import { resolveAuthHeadersForFolder } from './resolveAuthHeaders'
 import { importFrom } from '../import/ImportManager'
+import { findOperationForRoute, type RouteLike } from '../DocumentationCompiler'
+import type { ApiDocumentation, OperationDocumentation } from '../../../shared/types/apiDocumentation'
+import type { Request } from '../../../shared/types/requests'
+import type { FolderItem } from '../../../shared/types/folderTypes'
+import { isAnyFolder, isRequest } from '../../../shared/types/folderTypes'
+import { importNaturalKeyForRequest } from '../../../shared/utils/importNaturalKey'
 
 /**
  * Fetch the spec, normalise it, and compute the diff against the
@@ -125,6 +131,156 @@ function parseFetched(content: string): unknown {
 }
 
 /**
+ * Adapter from a `Request` to the `RouteLike` shape the
+ * `DocumentationCompiler` matcher consumes. Same fields the
+ * renderer's `routeFromRequest` builds for the Docs-tab visibility
+ * decision — kept in sync so refresh's lock-out behaviour and the
+ * Docs tab agree on what counts as "this request matches an
+ * operation in the spec".
+ */
+function routeFromRequest(request: Request): RouteLike | null {
+  // Read fields through a loose record so TS doesn't narrow the
+  // optional intersection to "always defined" (the discriminated
+  // union's per-variant fields are required, but we want a single
+  // body that touches every variant). At runtime each variant only
+  // exposes the fields it cares about; missing ones are `undefined`.
+  const r = request as unknown as Record<string, unknown>
+  const tags = Array.isArray(r['tags']) ? (r['tags'] as string[]) : undefined
+  const str = (key: string): string | undefined => {
+    const v = r[key]
+    return typeof v === 'string' ? v : undefined
+  }
+  switch (r['type']) {
+    case 'http':
+    case 'auth': {
+      const route: RouteLike = { type: 'http' }
+      if (tags !== undefined) route.tags = tags
+      const url = str('url'); if (url !== undefined) route.url = url
+      const method = str('method'); if (method !== undefined) route.method = method
+      return route
+    }
+    case 'graphql': {
+      const route: RouteLike = { type: 'graphql' }
+      if (tags !== undefined) route.tags = tags
+      const url = str('url'); if (url !== undefined) route.url = url
+      const operationType = str('operationType'); if (operationType !== undefined) route.operationType = operationType
+      const query = str('query'); if (query !== undefined) route.query = query
+      return route
+    }
+    case 'grpc': {
+      const route: RouteLike = { type: 'grpc' }
+      if (tags !== undefined) route.tags = tags
+      const service = str('service'); if (service !== undefined) route.service = service
+      const method = str('method'); if (method !== undefined) route.rpcMethod = method
+      return route
+    }
+    case 'soap': {
+      const route: RouteLike = { type: 'soap' }
+      if (tags !== undefined) route.tags = tags
+      const url = str('url'); if (url !== undefined) route.url = url
+      const soapAction = str('soapAction'); if (soapAction !== undefined) route.soapAction = soapAction
+      const operation = str('operation'); if (operation !== undefined) route.operation = operation
+      const service = str('service'); if (service !== undefined) route.service = service
+      return route
+    }
+    case 'websocket': {
+      const route: RouteLike = { type: 'websocket' }
+      if (tags !== undefined) route.tags = tags
+      const url = str('url'); if (url !== undefined) route.url = url
+      const protocol = str('protocol'); if (protocol !== undefined) route.protocol = protocol
+      const event = str('event'); if (event !== undefined) route.event = event
+      return route
+    }
+    default:
+      return null
+  }
+}
+
+/**
+ * Walk a tree's requests (depth-first), invoking `visit` on each
+ * leaf. Folders without `items` are skipped; non-Request leaves are
+ * skipped.
+ */
+function visitRequests(items: readonly FolderItem[], visit: (req: Request) => void): void {
+  for (const item of items) {
+    if (isAnyFolder(item)) {
+      visitRequests(item.items, visit)
+      continue
+    }
+    if (isRequest(item)) visit(item)
+  }
+}
+
+/**
+ * Stable key for an operation in the apiDocumentation, in the same
+ * shape every importer's `importOrigin.naturalKey` carries on a
+ * fresh leaf. Lets us match an existing target request (resolved
+ * via the URL-based matcher) to a fresh leaf (resolved via its
+ * stamped origin) without round-tripping through the matcher's
+ * regex pass — which is order-dependent on placeholder operations
+ * and would falsely lock a literal-only route like `/pet/inventory`
+ * when an earlier `/pet/{petId}` operation also matches its path.
+ */
+function operationNaturalKey(op: OperationDocumentation): string {
+  const m = op.match
+  if (m.method && m.urlPattern) return `${m.method.toUpperCase()} ${m.urlPattern}`
+  if (m.operationType && m.operationName) return `${m.operationType} ${m.operationName}`
+  if (m.serviceName && m.operationName) return `${m.serviceName}/${m.operationName}`
+  if (m.soapAction) return `soap:${m.soapAction}`
+  if (m.direction && m.event) return `${m.direction} ${m.event}`
+  if (m.urlPattern) return m.urlPattern
+  return m.operationName ?? ''
+}
+
+/**
+ * Build the set of leaf keys in the freshly-imported tree whose
+ * underlying operation is already covered by an existing request in
+ * the target env folder.
+ *
+ * The decision uses two complementary identifiers:
+ *
+ * - **Existing target requests**: resolved through
+ *   `findOperationForRoute` — the same URL-based matcher that drives
+ *   Docs-tab visibility. The user may have edited the request URL,
+ *   so a regex match against the spec's operation patterns is the
+ *   only way to recover the source operation.
+ * - **Fresh leaves**: resolved through `importOrigin.naturalKey`
+ *   stamped at fresh-import time. The URL-based matcher would be
+ *   order-dependent here (a literal route like `/pet/inventory`
+ *   would falsely match an earlier `/pet/{petId}` regex), so we
+ *   anchor on the importer's recorded source op.
+ *
+ * Locking translates UI-side to "checkbox forced on + disabled" —
+ * the user can't opt that route out because doing so would silently
+ * drop a route the folder already exposes. New operations (no
+ * existing match) arrive unchecked so they show up as opt-in
+ * additions.
+ */
+function computeLockedKeys(
+  target: EnvironmentFolder,
+  freshApiDoc: ApiDocumentation,
+  freshTree: readonly FolderItem[]
+): string[] {
+  const matchedOpKeys = new Set<string>()
+  visitRequests(target.items, (req) => {
+    const route = routeFromRequest(req)
+    if (!route) return
+    const op = findOperationForRoute(freshApiDoc, route)
+    if (op) matchedOpKeys.add(operationNaturalKey(op))
+  })
+  if (matchedOpKeys.size === 0) return []
+  const lockedKeys: string[] = []
+  visitRequests(freshTree, (req) => {
+    const originKey = req.importOrigin?.naturalKey
+    if (!originKey) return
+    if (matchedOpKeys.has(originKey)) {
+      lockedKeys.push(importNaturalKeyForRequest(req))
+    }
+  })
+  return lockedKeys
+}
+
+/**
  * Same as the renderer-side `import.preview` IPC, except auth is
  * resolved against the env folder's stored `apiUpdate` config (so
  * `{{client_id}}`-style variables in the saved auth route get
@@ -132,10 +288,15 @@ function parseFetched(content: string): unknown {
  * URL is taken from the folder rather than user input. The refresh
  * variant of the import modal calls this so it doesn't have to
  * re-implement the auth-resolution dance the renderer can't see.
+ *
+ * The returned `lockedKeys` flag, in ImportSelectionTree key shape,
+ * marks each fresh-tree leaf whose operation is already present in
+ * the target folder (per the `findOperationForRoute` matcher). The
+ * modal pre-ticks those keys + disables their checkboxes.
  */
 export async function runApiUpdatePreviewTree(
   folderId: string
-): Promise<{ success: boolean; items: unknown[]; error?: string }> {
+): Promise<{ success: boolean; items: unknown[]; lockedKeys?: string[]; error?: string }> {
   const target = collectionStore.findById(folderId)
   if (!target || !('folderType' in target)) {
     return { success: false, items: [], error: `Folder ${folderId} not found` }
@@ -156,7 +317,11 @@ export async function runApiUpdatePreviewTree(
     if (!result.success) {
       return { success: false, items: [], error: result.error ?? 'preview failed' }
     }
-    return { success: true, items: result.items as unknown[] }
+    const items = result.items as FolderItem[]
+    const freshFolder = items[0] as { apiDocumentation?: ApiDocumentation } | undefined
+    const freshApiDoc = freshFolder?.apiDocumentation
+    const lockedKeys = freshApiDoc ? computeLockedKeys(env, freshApiDoc, items) : []
+    return { success: true, items: items as unknown[], lockedKeys }
   } catch (err) {
     return { success: false, items: [], error: err instanceof Error ? err.message : String(err) }
   }

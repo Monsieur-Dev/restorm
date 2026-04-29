@@ -66,9 +66,10 @@ Feature: Authentication routes end-to-end
 
     When I trigger a refresh from source on the imported folder
     Then the refresh import modal should show the inventory route as unchecked
-    And the refresh import modal should show the existing pet route as checked
+    And the refresh import modal should show the existing pet route as checked and disabled
     When I tick the inventory route in the refresh import modal
-    And I apply the refresh
+    Then the apply update button should display the count "1"
+    When I apply the refresh
     Then the sidebar should show the "Pet inventory" request
 
     When I switch the active environment to the "invalid environnement" sub-env with apply-to-all

@@ -9,16 +9,15 @@ import type { NormalizedSpec } from '../import/idempotent/types'
  *   `importOrigin.naturalKey` on existing requests.
  * - **Import-selection keys**: `request:http:METHOD url`, e.g.
  *   `request:http:GET {{baseUrl}}/pet/{{id}}`, produced by
- *   `importNaturalKeyForRequest`. Used for the
- *   `ImportSelectionSnapshot.imported` / `.skipped` arrays the
- *   selective-import flow persists.
+ *   `importNaturalKeyForRequest`. Used as the user-facing
+ *   selection-set key in the import / refresh modal's tree.
  *
  * The two schemes don't match: the pipeline operates on raw spec
- * paths, the snapshot operates on the post-import handlebars URL with
+ * paths, the modal operates on the post-import handlebars URL with
  * `{{baseUrl}}` prefix and `{{paramName}}` placeholders. The apply
- * pass needs both — pipeline keys for spec filtering, snapshot keys
- * for membership against the user's previous selection. This module
- * owns that translation so the orchestrator stays pure.
+ * pass needs to translate the user's modal-side selection into spec
+ * keys before filtering operations. This module owns that
+ * translation so the orchestrator stays pure.
  */
 
 function pipelinePathToImportPath(specPath: string): string {

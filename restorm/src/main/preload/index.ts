@@ -774,10 +774,13 @@ contextBridge.exposeInMainWorld('restorm', {
      * variant of the import modal calls this instead of running
      * `auth.prefetch` + `import.preview` itself, so `{{var}}`
      * placeholders inside the saved auth route can be resolved
-     * against the env folder's first environment. */
-    previewTree: async (folderId: string): Promise<{ success: boolean; items: unknown[]; error?: string }> => {
+     * against the env folder's first environment. The optional
+     * `lockedKeys` array marks leaves whose operation is already
+     * present in the target folder; the modal pre-ticks them and
+     * disables their checkbox so the user can't opt them out. */
+    previewTree: async (folderId: string): Promise<{ success: boolean; items: unknown[]; lockedKeys?: string[]; error?: string }> => {
       const result: unknown = await ipcRenderer.invoke('apiUpdate:preview-tree', folderId)
-      return result as { success: boolean; items: unknown[]; error?: string }
+      return result as { success: boolean; items: unknown[]; lockedKeys?: string[]; error?: string }
     },
     /** Acknowledge an "available" notification for the rest of the
      * session. The badge stays; only the toast suppression flips. */

@@ -36,11 +36,21 @@ export interface ImportSelectionTreeProps {
   /**
    * Optional status pill per leaf natural key. When present, the
    * matching pill renders in the row's `rightActions` slot. Used by
-   * the OYO-258 refresh wizard to show per-element status (added /
-   * modified / removed / previously-skipped / unchanged) without
-   * forking the tree component.
+   * the refresh modal to show per-element status (added / modified
+   * / removed / previously-skipped / unchanged) without forking the
+   * tree component.
    */
   leafStatusByKey?: ReadonlyMap<string, RefreshLeafStatus>
+  /**
+   * Optional set of leaf keys whose checkbox should appear forced-on
+   * and disabled. Locked leaves can't be unchecked individually, and
+   * a folder Toggle clicked to "uncheck all" preserves the locked
+   * leaves underneath. Used by the refresh modal: a leaf whose
+   * operation is already present in the target folder can't sensibly
+   * be opted out by the user, since opting out would silently drop a
+   * route the folder already exposes.
+   */
+  lockedKeys?: ReadonlySet<string>
 }
 
 export type RefreshLeafStatus = 'added' | 'modified' | 'removed' | 'previouslySkipped' | 'unchanged'
@@ -87,17 +97,20 @@ function collectLeafKeys(items: readonly FolderItem[]): string[] {
 /**
  * Toggle every leaf descendant in a folder subtree to a target value.
  * Mutates a copy of the input set and returns it; the caller is
- * expected to feed the result back through React state.
+ * expected to feed the result back through React state. Locked leaves
+ * are preserved on `next === false` so a folder-level "uncheck all"
+ * doesn't silently strip a route the modal forced on.
  */
 function setFolderSelection(
   leafKeys: readonly string[],
   selection: ReadonlySet<string>,
-  next: boolean
+  next: boolean,
+  lockedKeys: ReadonlySet<string> | undefined
 ): Set<string> {
   const out = new Set(selection)
   for (const k of leafKeys) {
     if (next) out.add(k)
-    else out.delete(k)
+    else if (!lockedKeys?.has(k)) out.delete(k)
   }
   return out
 }
@@ -162,7 +175,8 @@ export const ImportSelectionTree: React.FC<ImportSelectionTreeProps> = ({
   onSelectionChange,
   searchFilter = '',
   'data-testid': dataTestId,
-  leafStatusByKey
+  leafStatusByKey,
+  lockedKeys
 }) => {
   // Filter for display only — selection state stays scoped to the
   // unfiltered tree, so toggling rows under a search keeps the
@@ -192,20 +206,25 @@ export const ImportSelectionTree: React.FC<ImportSelectionTreeProps> = ({
 
   const handleLeafToggle = useCallback(
     (leafKey: string, nextChecked: boolean) => {
+      // Locked leaves are read-only; the Toggle's `disabled` prop
+      // already swallows the click, but guard here anyway in case the
+      // event bubbles through (older versions of the Toggle ignored
+      // `disabled` on programmatic onChange).
+      if (lockedKeys?.has(leafKey)) return
       const next = new Set(selection)
       if (nextChecked) next.add(leafKey)
       else next.delete(leafKey)
       onSelectionChange(next)
     },
-    [selection, onSelectionChange]
+    [selection, onSelectionChange, lockedKeys]
   )
 
   const handleFolderToggle = useCallback(
     (folderKey: string, nextChecked: boolean) => {
       const leafKeys = leafKeysByFolderKey.get(folderKey) ?? []
-      onSelectionChange(setFolderSelection(leafKeys, selection, nextChecked))
+      onSelectionChange(setFolderSelection(leafKeys, selection, nextChecked, lockedKeys))
     },
-    [leafKeysByFolderKey, selection, onSelectionChange]
+    [leafKeysByFolderKey, selection, onSelectionChange, lockedKeys]
   )
 
   const listItems = useMemo(() => {
@@ -238,7 +257,8 @@ export const ImportSelectionTree: React.FC<ImportSelectionTreeProps> = ({
           }
         }
         const leafKey = importNaturalKeyForRequest(item)
-        const checked = selection.has(leafKey)
+        const isLocked = lockedKeys?.has(leafKey) ?? false
+        const checked = isLocked || selection.has(leafKey)
         const requestType = item.type
         const requestMethod = requestType === 'http' || requestType === 'auth' ? item.method : requestType
         const badgeType = mapToBadgeType(requestMethod)
@@ -251,6 +271,7 @@ export const ImportSelectionTree: React.FC<ImportSelectionTreeProps> = ({
           leftActions: (
             <Toggle
               checked={checked}
+              disabled={isLocked}
               notFocusable
               onChange={(nextChecked) => { handleLeafToggle(leafKey, nextChecked) }}
               {...(baseTestId && { 'data-testid': `${baseTestId}-toggle` })}
@@ -261,7 +282,7 @@ export const ImportSelectionTree: React.FC<ImportSelectionTreeProps> = ({
       })
     }
     return build(visibleItems, [])
-  }, [dataTestId, handleFolderToggle, handleLeafToggle, leafKeysByFolderKey, leafStatusByKey, selection, visibleItems])
+  }, [dataTestId, handleFolderToggle, handleLeafToggle, leafKeysByFolderKey, leafStatusByKey, lockedKeys, selection, visibleItems])
 
   return (
     <ListView

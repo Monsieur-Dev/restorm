@@ -194,24 +194,6 @@ export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateA
     lastCheckedAt: Date.now()
   }
 
-  // Update the importSelection snapshot so the next refresh
-  // remembers the user's decision: imported = what they checked
-  // this round, skipped = what they ticked off explicitly. Translate
-  // pipeline naturalKeys into the snapshot's ImportSelectionTree key
-  // shape so the next refresh's pre-tick logic still finds them.
-  if (selection) {
-    const envWithSelection = env as unknown as { importSelection?: import('../../../shared/types/baseTypes').ImportSelectionSnapshot }
-    const toSnapshotKey = (specKey: string): string => specKeyToImportSelectionKey(specKey, importSource, fullSpec)
-    envWithSelection.importSelection = {
-      capturedAt: Date.now(),
-      source: url,
-      ...(fetchedVersion !== undefined ? { specVersion: fetchedVersion } : {}),
-      specHash: fetchedHash,
-      imported: selection.include.map(toSnapshotKey).sort(),
-      skipped: selection.skip.map(toSnapshotKey).sort()
-    }
-  }
-
   pubsub.publish(PUBSUB_TOPICS.FOLDER_UPDATED, env)
   logger.info(`[apiUpdate.orchestrateApply] applied to folder ${folderId}`, {
     selectedOps: spec.operations.length,
@@ -220,11 +202,11 @@ export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateA
   })
 
   // Return only the new requests + their target placement + the
-  // post-apply apiUpdate / importSelection markers. The renderer
-  // splices the new rows into its own folder copy at the same
-  // breadcrumb path the apply pipeline used, so additions land
-  // under the same tag / group folder a fresh import would have
-  // produced (instead of at the env-folder root).
+  // post-apply apiUpdate marker. The renderer splices the new rows
+  // into its own folder copy at the same breadcrumb path the apply
+  // pipeline used, so additions land under the same tag / group
+  // folder a fresh import would have produced (instead of at the
+  // env-folder root).
   const addedRequests = applyResult.addedRequests.map((entry) => ({
     request: JSON.parse(JSON.stringify(entry.request)) as unknown,
     parentPath: [...entry.parentPath]
@@ -233,10 +215,7 @@ export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateA
     updatedFolder: {
       id: env.id,
       addedRequests,
-      apiUpdate: JSON.parse(JSON.stringify(env.apiUpdate)) as unknown,
-      importSelection: (env as unknown as { importSelection?: unknown }).importSelection
-        ? JSON.parse(JSON.stringify((env as unknown as { importSelection?: unknown }).importSelection)) as unknown
-        : null
+      apiUpdate: JSON.parse(JSON.stringify(env.apiUpdate)) as unknown
     }
   }
 }

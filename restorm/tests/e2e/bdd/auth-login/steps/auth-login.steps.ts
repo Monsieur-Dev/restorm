@@ -570,31 +570,49 @@ Then('the refresh import modal should show the inventory route as unchecked', as
   }
   await expect(refreshTreeLocator(p)).toBeVisible({ timeout: 15000 })
   await expect(refreshTreeLocator(p).getByText('Pet inventory', { exact: true })).toBeVisible({ timeout: 10000 })
-  await p.screenshot({ path: join(AUTH_LOGIN_TEMP_DIR, 'refresh-import-modal-before-tick.png'), fullPage: true })
-  // /pet/inventory was unticked at first import → it landed in the
-  // env folder's `importSelection.skipped` array. The refresh
-  // modal pre-ticks only previously-imported leaves, so the
-  // inventory route should arrive unchecked.
+  // /pet/inventory was unticked at first import, so the existing
+  // env folder has no request that matches its operation. The
+  // refresh modal pre-ticks only the leaves whose operation already
+  // lives in the target folder, so the inventory route should
+  // arrive unchecked + enabled.
   const toggle = refreshRowToggle(p, 'Pet inventory')
   await expect(toggle).toHaveAttribute('aria-checked', 'false', { timeout: 5000 })
+  await expect(toggle).toHaveAttribute('aria-disabled', 'false', { timeout: 5000 })
 })
 
-Then('the refresh import modal should show the existing pet route as checked', async () => {
+Then('the refresh import modal should show the existing pet route as checked and disabled', async () => {
   const p = requirePage()
-  // /pet/{id} was kept at first import → it sits in `imported`.
-  // The refresh modal's pre-tick logic should leave it ticked.
+  // /pet/{id} was kept at first import, so the env folder already
+  // exposes a request matching that operation. The refresh modal
+  // locks (checked + disabled) every leaf whose operation is already
+  // present, so the user can't accidentally opt out a route the
+  // folder already covers.
   const toggle = refreshRowToggle(p, 'Find pet by ID')
   await expect(toggle).toHaveAttribute('aria-checked', 'true', { timeout: 5000 })
+  await expect(toggle).toHaveAttribute('aria-disabled', 'true', { timeout: 5000 })
 })
 
 When('I tick the inventory route in the refresh import modal', async () => {
   const p = requirePage()
-  await p.screenshot({ path: join(AUTH_LOGIN_TEMP_DIR, 'refresh-import-modal-before-tick.png'), fullPage: true })
   const toggle = refreshRowToggle(p, 'Pet inventory')
   await expect(toggle).toBeVisible({ timeout: 5000 })
   await toggle.click()
   await expect(toggle).toHaveAttribute('aria-checked', 'true', { timeout: 5000 })
 })
+
+Then(
+  'the apply update button should display the count {string}',
+  async ({}, count: string) => {
+    const p = requirePage()
+    // The Apply update button label is "Apply update (N)" where N
+    // counts only checked + ENABLED leaves — locked rows don't show
+    // up in the count even though they're forced-checked, since the
+    // counter advertises how many routes the user is opting into,
+    // not how many checkboxes are ticked.
+    const applyButton = p.locator('[data-testid="import-modal"][data-refresh-mode="true"] [data-testid="import-button"]')
+    await expect(applyButton).toContainText(`(${count})`, { timeout: 5000 })
+  }
+)
 
 When('I apply the refresh', async () => {
   const p = requirePage()
