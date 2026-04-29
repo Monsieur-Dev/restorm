@@ -8,11 +8,10 @@ import {
   apiUpdateApplyArgs,
   apiUpdateDismissArgs,
   apiUpdatePreviewArgs,
-  apiUpdateRefreshDiffArgs,
+  apiUpdatePreviewTreeArgs,
   collectionsSyncArgs
 } from '../../ipc/schemas'
-import { runApiUpdatePreview } from './orchestratePreview'
-import { runApiUpdateRefreshDiff } from './orchestrateRefreshDiff'
+import { runApiUpdatePreview, runApiUpdatePreviewTree } from './orchestratePreview'
 import { collectionStore } from '../CollectionStore'
 import { apiUpdateStateStore } from './ApiUpdateStateStore'
 import { apiUpdateScheduler } from './ApiUpdateScheduler'
@@ -101,8 +100,8 @@ export function registerApiUpdateIPC(deps: ApiUpdateIPCDeps): void {
     return runApiUpdatePreview(folderId)
   })
 
-  validatedHandle('apiUpdate:refresh-diff', apiUpdateRefreshDiffArgs, async (_event, [folderId]) => {
-    return runApiUpdateRefreshDiff(folderId)
+  validatedHandle('apiUpdate:preview-tree', apiUpdatePreviewTreeArgs, async (_event, [folderId]) => {
+    return runApiUpdatePreviewTree(folderId)
   })
 
   validatedHandle('apiUpdate:dismiss', apiUpdateDismissArgs, (_event, [folderId]) => {
@@ -120,9 +119,9 @@ export function registerApiUpdateIPC(deps: ApiUpdateIPCDeps): void {
 
   // Renderer → main sync of the loaded project tree. The renderer is
   // the source of truth for the collections; this mirror lets the
-  // main-side apply / preview / refresh-diff orchestrators look up a
-  // folder by id without reaching back through IPC. The validatedHandle
-  // returns nothing — the renderer just fires-and-forgets after every
+  // main-side apply / preview orchestrators look up a folder by id
+  // without reaching back through IPC. The validatedHandle returns
+  // nothing — the renderer just fires-and-forgets after every
   // setCollections in its store.
   validatedHandle('collections:sync', collectionsSyncArgs, (_event, [collections]) => {
     collectionStore.setCollections(

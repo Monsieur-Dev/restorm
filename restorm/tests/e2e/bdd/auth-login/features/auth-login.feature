@@ -65,9 +65,9 @@ Feature: Authentication routes end-to-end
     Then the pet response body should still contain "Rex"
 
     When I trigger a refresh from source on the imported folder
-    Then the refresh wizard should show the inventory route as previously skipped
-    And the refresh wizard should show the existing pet route as unchanged
-    When I tick the inventory route in the refresh wizard
+    Then the refresh import modal should show the inventory route as unchecked
+    And the refresh import modal should show the existing pet route as checked
+    When I tick the inventory route in the refresh import modal
     And I apply the refresh
     Then the sidebar should show the "Pet inventory" request
 

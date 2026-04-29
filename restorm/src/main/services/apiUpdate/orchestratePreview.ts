@@ -14,6 +14,7 @@ import { odataImportAdapter } from '../import/idempotent/ODataAdapter'
 import { previewImportDiff } from '../import/idempotent/previewImportDiff'
 import { expandHeaderTemplate, expandVariables } from './scheduling'
 import { resolveAuthHeadersForFolder } from './resolveAuthHeaders'
+import { importFrom } from '../import/ImportManager'
 
 /**
  * Fetch the spec, normalise it, and compute the diff against the
@@ -120,5 +121,43 @@ function parseFetched(content: string): unknown {
     return JSON.parse(content)
   } catch {
     return content
+  }
+}
+
+/**
+ * Same as the renderer-side `import.preview` IPC, except auth is
+ * resolved against the env folder's stored `apiUpdate` config (so
+ * `{{client_id}}`-style variables in the saved auth route get
+ * expanded against the folder's first environment), and the source
+ * URL is taken from the folder rather than user input. The refresh
+ * variant of the import modal calls this so it doesn't have to
+ * re-implement the auth-resolution dance the renderer can't see.
+ */
+export async function runApiUpdatePreviewTree(
+  folderId: string
+): Promise<{ success: boolean; items: unknown[]; error?: string }> {
+  const target = collectionStore.findById(folderId)
+  if (!target || !('folderType' in target)) {
+    return { success: false, items: [], error: `Folder ${folderId} not found` }
+  }
+  const env = target as EnvironmentFolder
+  const config: ApiUpdateConfig | undefined = env.apiUpdate
+  if (!config?.sourceUrl) {
+    return { success: false, items: [], error: `Folder ${folderId} has no apiUpdate.sourceUrl` }
+  }
+
+  const variables = defaultVariablesFor(env)
+  const url = expandVariables(config.sourceUrl, variables)
+  const staticHeaders = expandHeaderTemplate(config.sourceHeaders, variables)
+  const dynamicHeaders = await resolveAuthHeadersForFolder(env, config.authenticationRequestId, variables)
+  const headers = { ...dynamicHeaders, ...staticHeaders }
+  try {
+    const result = await importFrom(url, Object.keys(headers).length === 0 ? {} : { extraHeaders: headers })
+    if (!result.success) {
+      return { success: false, items: [], error: result.error ?? 'preview failed' }
+    }
+    return { success: true, items: result.items as unknown[] }
+  } catch (err) {
+    return { success: false, items: [], error: err instanceof Error ? err.message : String(err) }
   }
 }

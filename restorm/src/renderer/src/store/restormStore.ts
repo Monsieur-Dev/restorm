@@ -255,11 +255,11 @@ export const useRestormStore = create<RestormState>()(
       migrateApiUpdateForCollections(collections as unknown as Parameters<typeof migrateApiUpdateForCollections>[0])
       set({ collections, currentEventSource: source })
       // Mirror the tree onto the main-side CollectionStore so the
-      // apiUpdate apply / preview / refresh-diff orchestrators can
-      // look up folders by id. Without this sync the main-side
-      // store stays empty and every "Refresh from source" fails
-      // with "folder not found". Fire-and-forget — the handler is
-      // idempotent and the renderer doesn't gate on the round-trip.
+      // apiUpdate apply / preview orchestrators can look up folders
+      // by id. Without this sync the main-side store stays empty
+      // and every "Refresh from source" fails with "folder not
+      // found". Fire-and-forget — the handler is idempotent and the
+      // renderer doesn't gate on the round-trip.
       const api = (window as unknown as { restorm?: { apiUpdate?: { syncCollections?: (c: unknown[]) => Promise<void> } } }).restorm?.apiUpdate
       if (api?.syncCollections) {
         // Strip reactive proxies before sending over IPC — they

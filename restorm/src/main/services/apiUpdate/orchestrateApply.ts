@@ -152,7 +152,7 @@ export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateA
   // pipeline applied.
   const fullSpec = adapter.extractNormalizedSpec(JSON.parse(await fetchText(url, headers)), {})
 
-  // The wizard's `include` set carries OYO-257 keys
+  // The renderer's `include` set carries ImportSelectionTree keys
   // (`request:http:METHOD {{baseUrl}}/path/{{id}}`); the pipeline
   // filters by spec-side `naturalKey` (`METHOD /path/{id}`). Build
   // an inclusion set in the spec key-space by walking the spec
@@ -194,11 +194,11 @@ export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateA
     lastCheckedAt: Date.now()
   }
 
-  // Update the OYO-257 importSelection snapshot so the next refresh
+  // Update the importSelection snapshot so the next refresh
   // remembers the user's decision: imported = what they checked
   // this round, skipped = what they ticked off explicitly. Translate
-  // pipeline naturalKeys into OYO-257's snapshot scheme so the
-  // refresh-diff classifier still finds them on the next pass.
+  // pipeline naturalKeys into the snapshot's ImportSelectionTree key
+  // shape so the next refresh's pre-tick logic still finds them.
   if (selection) {
     const envWithSelection = env as unknown as { importSelection?: import('../../../shared/types/baseTypes').ImportSelectionSnapshot }
     const toSnapshotKey = (specKey: string): string => specKeyToImportSelectionKey(specKey, importSource, fullSpec)
@@ -219,12 +219,16 @@ export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateA
     addedCount: applyResult.addedRequests.length
   })
 
-  // Return only the new requests + the post-apply apiUpdate /
-  // importSelection markers. The renderer splices the new rows
-  // into its own folder copy without overwriting unrelated state
-  // (sub-environments, per-tab pinning, …) it holds that hasn't
-  // synced back to main yet.
-  const addedRequests = applyResult.addedRequests.map((r) => JSON.parse(JSON.stringify(r)) as unknown)
+  // Return only the new requests + their target placement + the
+  // post-apply apiUpdate / importSelection markers. The renderer
+  // splices the new rows into its own folder copy at the same
+  // breadcrumb path the apply pipeline used, so additions land
+  // under the same tag / group folder a fresh import would have
+  // produced (instead of at the env-folder root).
+  const addedRequests = applyResult.addedRequests.map((entry) => ({
+    request: JSON.parse(JSON.stringify(entry.request)) as unknown,
+    parentPath: [...entry.parentPath]
+  }))
   return {
     updatedFolder: {
       id: env.id,

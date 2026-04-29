@@ -68,8 +68,7 @@ import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
 import { RestormWorkbenchContainer } from './components/MainView/Workbench/RestormWorkbenchContainer'
 import { SaveOptionsModal } from './components/Modals/SaveOptionsModal'
 import { DeleteConfirmationModal } from './components/Modals/DeleteConfirmationModal'
-import { RefreshWizardModal } from './components/Modals/RefreshWizardModal'
-import { ImportModal } from './components/Modals/ImportModal'
+import { ImportModal, type RefreshContext } from './components/Modals/ImportModal'
 import { AvailableVariablesProvider } from './contexts/AvailableVariablesContext'
 import { VariableTransformProvider } from './contexts/VariableTransformContext'
 import { AuthRequestResolverContext, type AuthRequestResolver } from './contexts/authRequestResolverContext'
@@ -1607,54 +1606,6 @@ const App: React.FC = () => {
         onCancel={cancelDelete}
       />
 
-      {/* Refresh wizard — opens via the sidebar's "Refresh from
-          source" right-click. Replaces the simpler counter-only
-          modal so the user sees the per-element classification
-          (added / modified / removed / previously skipped /
-          unchanged) before committing. */}
-      {refreshSourceTarget && (
-        <RefreshWizardModal
-          isOpen
-          folderId={refreshSourceTarget.id}
-          folderName={refreshSourceTarget.name}
-          onApplied={(updatedFolder) => {
-            // Splice the apply payload onto the existing env folder
-            // in rootItems: append the new request instances, swap
-            // the apiUpdate / importSelection markers. We DON'T
-            // replace the whole folder — sub-environments / per-tab
-            // pinning / other renderer-only state would be lost
-            // since they may not have round-tripped to main yet.
-            interface ApplyPayload {
-              id: string
-              addedRequests: unknown[]
-              apiUpdate: unknown
-              importSelection: unknown
-            }
-            const payload = updatedFolder as ApplyPayload | null
-            if (!payload?.id) {
-              setRefreshSourceTarget(null)
-              return
-            }
-            setRootItems((current) => current.map((item) => {
-              if (!('id' in item) || item.id !== payload.id) return item
-              if (!('items' in item)) return item
-              const next = item as Folder
-              const reactiveAdded = payload.addedRequests.map((r) =>
-                makeReactiveRequest(r as never)
-              )
-              return {
-                ...next,
-                items: [...next.items, ...reactiveAdded],
-                ...(payload.apiUpdate ? { apiUpdate: payload.apiUpdate } : {}),
-                ...(payload.importSelection ? { importSelection: payload.importSelection } : {})
-              } as typeof item
-            }))
-            setRefreshSourceTarget(null)
-          }}
-          onCancel={() => { setRefreshSourceTarget(null) }}
-        />
-      )}
-
           {/* Save Options Modal */}
           <SaveOptionsModal
             isOpen={showSaveOptionsModal}
@@ -1663,10 +1614,18 @@ const App: React.FC = () => {
             rootFolder={rootItems[0]}
           />
 
-          {/* Import Modal */}
+          {/* Import Modal — doubles as the "Refresh from source"
+              wizard when `refreshContext` is provided. The host
+              builds the context from the env folder's stored
+              apiUpdate config + importSelection snapshot so the
+              modal can pre-fill the URL, attach the saved auth
+              route, and pre-tick the previously-imported leaves. */}
           <ImportModal
-            isOpen={showImportModal}
-            onClose={() => { setShowImportModal(false) }}
+            isOpen={showImportModal || refreshSourceTarget !== null}
+            onClose={() => {
+              setShowImportModal(false)
+              setRefreshSourceTarget(null)
+            }}
             onImport={handleImport}
             rootFolder={{
               id: '__virtual_root__',
@@ -1674,6 +1633,110 @@ const App: React.FC = () => {
               items: rootItems
             } as EnvironmentFolder}
             selectedFolderId={selectedItemId ?? undefined}
+            {...(refreshSourceTarget ? (() => {
+              const targetId = refreshSourceTarget.id
+              const folder = rootItems.find(
+                (c): c is EnvironmentFolder => isEnvironmentFolder(c) && c.id === targetId
+              )
+              const apiUpdate = (folder as unknown as { apiUpdate?: { sourceUrl?: string; authenticationRequestId?: string } } | undefined)?.apiUpdate
+              const sourceUrl = apiUpdate?.sourceUrl ?? ''
+              // The resolver returns the shared/types AuthenticationRequest
+              // (data shape, no class methods), while RefreshContext —
+              // matching the rest of ImportModal — types it as the
+              // shared/models class. The runtime payload is the same
+              // (the renderer carries reactive proxies whose getters
+              // return primitive values), so cast through `unknown`.
+              const authReq = (apiUpdate?.authenticationRequestId
+                ? resolveAuthRequestCb(apiUpdate.authenticationRequestId)
+                : null) as RefreshContext['authenticationRequest'] | null
+              const importSelection = (folder as unknown as { importSelection?: { imported?: string[] } } | undefined)?.importSelection
+              const refreshContext: RefreshContext = {
+                sourceUrl,
+                ...(authReq ? { authenticationRequest: authReq } : {}),
+                ...(importSelection?.imported ? { alreadyImportedKeys: importSelection.imported } : {}),
+                targetFolderId: targetId,
+                onApplied: (updatedFolder) => {
+                  // Splice the apply payload onto the existing env
+                  // folder in rootItems: each added request is
+                  // attached at the breadcrumb path main produced
+                  // (so a Swagger op tagged "Other" lands inside the
+                  // existing "Other" folder instead of at the env
+                  // root). The apiUpdate / importSelection markers
+                  // are swapped wholesale. We DON'T replace the
+                  // whole folder — sub-environments / per-tab
+                  // pinning / other renderer-only state would be
+                  // lost since they may not have round-tripped to
+                  // main yet.
+                  interface AddedRequestPayload {
+                    request: unknown
+                    parentPath: string[]
+                  }
+                  interface ApplyPayload {
+                    id: string
+                    addedRequests: AddedRequestPayload[]
+                    apiUpdate: unknown
+                    importSelection: unknown
+                  }
+                  const payload = updatedFolder as ApplyPayload | null
+                  if (!payload?.id) {
+                    setRefreshSourceTarget(null)
+                    return
+                  }
+                  setRootItems((current) => current.map((item) => {
+                    if (!('id' in item) || item.id !== payload.id) return item
+                    if (!('items' in item)) return item
+                    const next = item as Folder
+                    const placeAt = (
+                      items: FolderItem[],
+                      path: readonly string[],
+                      reactiveRequest: FolderItem
+                    ): FolderItem[] => {
+                      if (path.length === 0) return [...items, reactiveRequest]
+                      const [head, ...rest] = path
+                      const targetIdx = items.findIndex(
+                        (child) => 'items' in child
+                          && (child as Folder).name === head
+                          && (child as { folderType?: string }).folderType !== 'environment'
+                      )
+                      if (targetIdx === -1) {
+                        // Folder doesn't exist yet — fall back to root
+                        // append rather than fabricating one client-
+                        // side. Main has already created the folder
+                        // in its own copy; the next collections sync
+                        // reconciles the structure.
+                        return [...items, reactiveRequest]
+                      }
+                      const folder = items[targetIdx] as Folder
+                      const updatedFolder: Folder = {
+                        ...folder,
+                        items: placeAt(folder.items, rest, reactiveRequest)
+                      }
+                      return [
+                        ...items.slice(0, targetIdx),
+                        updatedFolder,
+                        ...items.slice(targetIdx + 1)
+                      ]
+                    }
+                    const updated = payload.addedRequests.reduce<FolderItem[]>(
+                      (items, entry) => placeAt(
+                        items,
+                        entry.parentPath,
+                        makeReactiveRequest(entry.request as never) as FolderItem
+                      ),
+                      next.items
+                    )
+                    return {
+                      ...next,
+                      items: updated,
+                      ...(payload.apiUpdate ? { apiUpdate: payload.apiUpdate } : {}),
+                      ...(payload.importSelection ? { importSelection: payload.importSelection } : {})
+                    } as typeof item
+                  }))
+                  setRefreshSourceTarget(null)
+                }
+              }
+              return { refreshContext }
+            })() : {})}
           />
         </div>
         </AuthRequestResolverContext.Provider>

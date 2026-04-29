@@ -334,11 +334,11 @@ export const apiUpdateApplyArgs = z.tuple([
 ])
 export const apiUpdateDismissArgs = z.tuple([folderIdArg])
 export const apiUpdatePreviewArgs = z.tuple([folderIdArg])
+export const apiUpdatePreviewTreeArgs = z.tuple([folderIdArg])
 
 /** Renderer → main sync of the loaded collections so main-side
- * services (apiUpdate apply / preview / refresh-diff) can resolve
- * folder ids without reaching back through IPC. The renderer is the
- * source of truth for the project tree; this handler just mirrors it
- * into the main-side CollectionStore. */
+ * services (apiUpdate apply / preview) can resolve folder ids
+ * without reaching back through IPC. The renderer is the source of
+ * truth for the project tree; this handler just mirrors it into the
+ * main-side CollectionStore. */
 export const collectionsSyncArgs = z.tuple([z.array(z.unknown())])
-export const apiUpdateRefreshDiffArgs = z.tuple([folderIdArg])

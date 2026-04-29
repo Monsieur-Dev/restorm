@@ -768,12 +768,16 @@ contextBridge.exposeInMainWorld('restorm', {
       const result: unknown = await ipcRenderer.invoke('apiUpdate:preview', folderId)
       return result
     },
-    /** Per-natural-key classification (added / modified / removed /
-     * previouslySkipped / unchanged) the refresh wizard renders as
-     * status pills. Side-effect-free. */
-    refreshDiff: async (folderId: string): Promise<unknown> => {
-      const result: unknown = await ipcRenderer.invoke('apiUpdate:refresh-diff', folderId)
-      return result
+    /** Resolve the env folder's auth route + fetch the source URL +
+     * run the format adapter, all main-side, and return the parsed
+     * preview tree (same shape as `import.preview`). The refresh
+     * variant of the import modal calls this instead of running
+     * `auth.prefetch` + `import.preview` itself, so `{{var}}`
+     * placeholders inside the saved auth route can be resolved
+     * against the env folder's first environment. */
+    previewTree: async (folderId: string): Promise<{ success: boolean; items: unknown[]; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('apiUpdate:preview-tree', folderId)
+      return result as { success: boolean; items: unknown[]; error?: string }
     },
     /** Acknowledge an "available" notification for the rest of the
      * session. The badge stays; only the toast suppression flips. */
@@ -791,10 +795,10 @@ contextBridge.exposeInMainWorld('restorm', {
       }
     },
     /** Mirror the renderer's collection tree onto the main-side
-     * CollectionStore. The main-side apply / preview / refresh-diff
-     * orchestrators look up folders by id; without this sync they
-     * would always fail with "folder not found". Fire-and-forget;
-     * the handler doesn't return anything. */
+     * CollectionStore. The main-side apply / preview orchestrators
+     * look up folders by id; without this sync they would always
+     * fail with "folder not found". Fire-and-forget; the handler
+     * doesn't return anything. */
     syncCollections: async (collections: unknown[]): Promise<void> => {
       await ipcRenderer.invoke('collections:sync', collections)
     }

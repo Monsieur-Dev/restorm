@@ -27,12 +27,39 @@ interface PendingFolder {
   parentId: string
 }
 
+/**
+ * Optional payload that flips the modal into "Refresh from source"
+ * mode. When set, the modal:
+ *
+ * - Pre-fills the source URL + the attached auth route from the
+ *   already-imported env folder (the destination dropdown is hidden
+ *   because the target is fixed).
+ * - Pre-selects the leaves whose natural keys appear in
+ *   `alreadyImportedKeys`. An empty / null list means "everything was
+ *   imported (or this is a first-time import with no snapshot)" — in
+ *   either case we want every leaf checked, matching the legacy
+ *   import-everything default.
+ * - Replaces the "Import" button with "Apply update" and routes the
+ *   confirm action to `window.restorm.apiUpdate.apply` instead of the
+ *   fresh-import handler. The callback receives the resulting
+ *   payload so the host can splice the new requests onto its own
+ *   copy of the env folder.
+ */
+export interface RefreshContext {
+  sourceUrl: string
+  authenticationRequest?: AuthenticationRequest
+  alreadyImportedKeys?: string[]
+  targetFolderId: string
+  onApplied: (updatedFolder: unknown) => void
+}
+
 export interface ImportModalProps {
   isOpen: boolean
   onClose: () => void
   onImport: (items: FolderItem[], targetFolderId?: string, pendingFolders?: PendingFolder[]) => void
   rootFolder?: EnvironmentFolder
   selectedFolderId?: string | undefined
+  refreshContext?: RefreshContext
 }
 
 export function ImportModal({
@@ -40,7 +67,8 @@ export function ImportModal({
   onClose,
   onImport,
   rootFolder,
-  selectedFolderId
+  selectedFolderId,
+  refreshContext
 }: ImportModalProps): React.JSX.Element {
   const { t } = useTranslation()
   
@@ -312,6 +340,33 @@ export function ImportModal({
     if (previewItems.length === 0) return
     if (selection.size === 0) return
 
+    // Refresh-from-source confirm path: route through the apiUpdate
+    // apply IPC instead of the fresh-import handler. Selection is
+    // already in ImportSelectionTree key shape (`request:http:METHOD
+    // …`, `request:graphql:…`, …); main translates back to pipeline
+    // naturalKeys before filtering the spec. We hand both `include`
+    // and `skip` so a previously-skipped route stays skipped on the
+    // next refresh unless the user explicitly opts it in here.
+    if (refreshContext) {
+      const allKeys = allLeafKeys(previewItems)
+      const include = Array.from(selection).sort()
+      const skip = Array.from(allKeys).filter((k) => !selection.has(k)).sort()
+      void (async () => {
+        try {
+          const api = (window as unknown as {
+            restorm?: { apiUpdate?: { apply: (id: string, sel: { include: string[]; skip: string[] }) => Promise<{ updatedFolder: unknown }> } }
+          }).restorm?.apiUpdate
+          const result = await api?.apply(refreshContext.targetFolderId, { include, skip })
+          refreshContext.onApplied(result?.updatedFolder)
+        } catch (err) {
+          logger.error('[ImportModal] apiUpdate.apply failed', { error: err instanceof Error ? err.message : String(err) })
+        } finally {
+          onClose()
+        }
+      })()
+      return
+    }
+
     // Apply the user's selective-import choice before any further
     // transformation: leaves not in `selection` are dropped, and
     // folders that lose all of their selected descendants are
@@ -420,7 +475,50 @@ export function ImportModal({
 
     // Close modal (useEffect will clear state when modal closes)
     onClose()
-  }, [previewItems, selection, input, targetFolderId, pendingFolders, onImport, onClose, attachedAuth])
+  }, [previewItems, selection, input, targetFolderId, pendingFolders, onImport, onClose, attachedAuth, refreshContext])
+
+  // Refresh-from-source bootstrap. When `refreshContext` is provided
+  // we pre-fill the URL display + the auth pill from the env folder's
+  // stored config, then ask main to do the preview. Main runs the
+  // saved auth route through the env's first environment (so any
+  // `{{var}}`-style placeholders get resolved before /login fires)
+  // and returns the parsed-spec tree. Skipping the renderer-side
+  // auth.prefetch path is what makes refresh handle Handlebars-style
+  // variables the same way the apply path does.
+  useEffect(() => {
+    if (!isOpen || !refreshContext) return
+    setInput(refreshContext.sourceUrl)
+    setAttachedAuth(refreshContext.authenticationRequest ?? null)
+    attachedAuthHeadersRef.current = null
+    setIsLoading(true)
+    setError(null)
+    const token = { cancelled: false }
+    void (async () => {
+      try {
+        const api = (window as unknown as {
+          restorm?: { apiUpdate?: { previewTree?: (id: string) => Promise<{ success: boolean; items: unknown[]; error?: string }> } }
+        }).restorm?.apiUpdate
+        if (!api?.previewTree) throw new Error('apiUpdate.previewTree IPC unavailable')
+        const result = await api.previewTree(refreshContext.targetFolderId)
+        if (token.cancelled) return
+        if (result.success) {
+          setPreviewItems(result.items as FolderItem[])
+          setError(null)
+        } else {
+          setPreviewItems([])
+          setError(result.error ?? t('import.error.unknown'))
+        }
+      } catch (err) {
+        if (!token.cancelled) {
+          setPreviewItems([])
+          setError(err instanceof Error ? err.message : String(err))
+        }
+      } finally {
+        if (!token.cancelled) setIsLoading(false)
+      }
+    })()
+    return () => { token.cancelled = true }
+  }, [isOpen, refreshContext, t])
 
   const handleAuthAttach = useCallback((authRequest: AuthenticationRequest, resolvedHeaders: Record<string, string>) => {
     setAttachedAuth(authRequest)
@@ -449,12 +547,32 @@ export function ImportModal({
     }
   }, [])
 
-  // Whenever a fresh preview lands, default the selection to "every
-  // leaf checked" so the modal mirrors the legacy "import everything"
-  // UX. The user can then opt items out via the tri-state tree.
+  // Whenever a fresh preview lands, default the selection. Two modes:
+  //
+  // - Fresh import: every leaf checked, matching the legacy
+  //   "import everything" UX.
+  // - Refresh from source with a non-empty `alreadyImportedKeys`:
+  //   only the leaves the user previously opted into are pre-checked
+  //   (they appear as "kept"). New routes appear unchecked so they
+  //   look like opt-in additions; previously-skipped routes also
+  //   appear unchecked. An empty / missing list is treated as "all
+  //   imported" — every leaf checked — so a refresh against a
+  //   first-import-everything env folder still defaults to keeping
+  //   the full surface.
   useEffect(() => {
-    setSelection(allLeafKeys(previewItems))
-  }, [previewItems])
+    const allKeys = allLeafKeys(previewItems)
+    const previouslyImported = refreshContext?.alreadyImportedKeys
+    if (previouslyImported && previouslyImported.length > 0) {
+      const allow = new Set(previouslyImported)
+      const initial = new Set<string>()
+      for (const key of allKeys) {
+        if (allow.has(key)) initial.add(key)
+      }
+      setSelection(initial)
+      return
+    }
+    setSelection(allKeys)
+  }, [previewItems, refreshContext])
 
   const selectedLeafCount = selection.size
 
@@ -477,12 +595,20 @@ export function ImportModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={t('import.title')}
+      title={refreshContext
+        ? t('import.refreshTitle', 'Refresh from source')
+        : t('import.title')}
       data-testid="import-modal-dialog"
     >
-      <div className="import-modal" data-testid="import-modal">
-        
-        {/* Section 1: Destination Selection */}
+      <div
+        className="import-modal"
+        data-testid="import-modal"
+        data-refresh-mode={refreshContext ? 'true' : undefined}
+      >
+
+        {/* Destination Selection — hidden in refresh mode because the
+            target env folder is already chosen and immutable. */}
+        {!refreshContext && (
         <div className="import-section">
           <label className="import-label">
             {t('import.destination.label')}
@@ -521,7 +647,7 @@ export function ImportModal({
                 }}
               />
             </div>
-            <Button 
+            <Button
               secondary
               icon="new-folder"
               data-testid="new-folder-button"
@@ -534,27 +660,50 @@ export function ImportModal({
             </Button>
           </div>
         </div>
+        )}
 
         {/* Section 2: Source Input */}
         <div className="import-section">
           <label className="import-label">
             {t('import.source.label')}
           </label>
-          <div
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-          >
-            <InputBox
-              value={input}
-              onChange={handleInputChange}
-              options={{
-                placeholder: t('import.source.placeholder'),
-                flexibleHeight: true,
-                flexibleMaxHeight: 200
+          {refreshContext ? (
+            // Refresh mode: the URL is bound to the env folder's
+            // stored apiUpdate config and isn't editable here. Render
+            // it read-only so the user still sees what's being
+            // refreshed.
+            <div
+              data-testid="source-input-readonly"
+              style={{
+                padding: '6px 10px',
+                borderRadius: 4,
+                border: '1px solid var(--input-border, #555)',
+                background: 'var(--input-background, #1e1e1e)',
+                color: 'var(--input-foreground, #ddd)',
+                fontFamily: 'monospace',
+                fontSize: 12,
+                wordBreak: 'break-all'
               }}
-              data-testid="source-input"
-            />
-          </div>
+            >
+              {refreshContext.sourceUrl}
+            </div>
+          ) : (
+            <div
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+            >
+              <InputBox
+                value={input}
+                onChange={handleInputChange}
+                options={{
+                  placeholder: t('import.source.placeholder'),
+                  flexibleHeight: true,
+                  flexibleMaxHeight: 200
+                }}
+                data-testid="source-input"
+              />
+            </div>
+          )}
           {isLoading && (
             <div className="import-loading" role="status">
               <i className="codicon codicon-loading codicon-modifier-spin" aria-hidden="true" />
@@ -698,9 +847,14 @@ export function ImportModal({
             disabled={previewItems.length === 0 || selectedLeafCount === 0}
             data-testid="import-button"
           >
-            {selectedLeafCount > 0
-              ? t('import.okN', '{{action}} ({{count}})', { action: t('import.ok'), count: selectedLeafCount })
-              : t('import.ok')}
+            {(() => {
+              const baseLabel = refreshContext
+                ? t('import.applyUpdate', 'Apply update')
+                : t('import.ok')
+              return selectedLeafCount > 0
+                ? t('import.okN', '{{action}} ({{count}})', { action: baseLabel, count: selectedLeafCount })
+                : baseLabel
+            })()}
           </Button>
         </div>
       </div>

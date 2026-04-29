@@ -539,90 +539,101 @@ When('I trigger a refresh from source on the imported folder', async () => {
   const menuItem = p.locator('[role="menuitem"]').filter({ hasText: 'Refresh from source' }).first()
   await expect(menuItem).toBeVisible({ timeout: 5000 })
   await menuItem.click()
-  await expect(p.locator('[data-testid="refresh-wizard-modal"]')).toBeVisible({ timeout: 15000 })
-  // The wizard's preview + refresh-diff IPCs both fire a /login
-  // through the configured auth route, and /login is gated by the
-  // auth-service. Release any pending logins so the prefetches can
-  // complete. We poll for ~5s in case the wizard fired the prefetch
-  // slightly after it mounted.
-  for (let i = 0; i < 5; i++) {
+  // Refresh-from-source reuses the ImportModal; the modal stamps
+  // `data-refresh-mode="true"` to distinguish the two flows.
+  await expect(p.locator('[data-testid="import-modal"][data-refresh-mode="true"]')).toBeVisible({ timeout: 15000 })
+})
+
+function refreshTreeLocator(p: Page): Locator {
+  return p.locator('[data-testid="import-modal"][data-refresh-mode="true"] [data-testid="import-selection-tree"]')
+}
+
+function refreshRowToggle(p: Page, name: string): Locator {
+  return refreshTreeLocator(p)
+    .locator('.list-view-row')
+    .filter({ has: p.getByText(name, { exact: true }) })
+    .first()
+    .locator('[role="checkbox"]')
+    .first()
+}
+
+Then('the refresh import modal should show the inventory route as unchecked', async () => {
+  const p = requirePage()
+  // The bootstrap fires a prefetch on the saved auth route — gated
+  // by /login on the auth-service. The preview that follows is
+  // gated as well. Poll /releaselogins while we wait for the tree
+  // to mount so neither one stays parked on the gate.
+  for (let i = 0; i < 20; i++) {
     await fetch(`${AUTH_SERVICE_BASE}/releaselogins`).catch(() => undefined)
-    await p.waitForTimeout(1000)
+    if (await refreshTreeLocator(p).count() > 0) break
+    await p.waitForTimeout(500)
   }
+  await expect(refreshTreeLocator(p)).toBeVisible({ timeout: 15000 })
+  await expect(refreshTreeLocator(p).getByText('Pet inventory', { exact: true })).toBeVisible({ timeout: 10000 })
+  await p.screenshot({ path: join(AUTH_LOGIN_TEMP_DIR, 'refresh-import-modal-before-tick.png'), fullPage: true })
+  // /pet/inventory was unticked at first import → it landed in the
+  // env folder's `importSelection.skipped` array. The refresh
+  // modal pre-ticks only previously-imported leaves, so the
+  // inventory route should arrive unchecked.
+  const toggle = refreshRowToggle(p, 'Pet inventory')
+  await expect(toggle).toHaveAttribute('aria-checked', 'false', { timeout: 5000 })
 })
 
-// The wizard reuses ImportSelectionTree. ListView doesn't stamp a
-// testid on rows; it does on the leftActions Toggle and on the
-// status pill we added in rightActions. The base id encodes the
-// OYO-257 natural key with every non-alphanumeric character
-// replaced by `_`. For HTTP routes that key is
-// `request:http:METHOD <url>`; the auth-service Petstore imports
-// `/pet/{id}` and `/pet/inventory` as
-// `request:http:GET {{baseUrl}}/pet/{{id}}` and
-// `request:http:GET {{baseUrl}}/pet/inventory`.
-const INVENTORY_BASE_TESTID = 'refresh-wizard-tree-row-request_http_GET___baseUrl___pet_inventory'
-const PET_BY_ID_BASE_TESTID = 'refresh-wizard-tree-row-request_http_GET___baseUrl___pet___id__'
-
-Then('the refresh wizard should show the inventory route as previously skipped', async () => {
+Then('the refresh import modal should show the existing pet route as checked', async () => {
   const p = requirePage()
-  const modal = p.locator('[data-testid="refresh-wizard-modal"]')
-  await p.waitForTimeout(2000)
-  await p.screenshot({ path: join(AUTH_LOGIN_TEMP_DIR, 'refresh-wizard-before-tick.png'), fullPage: true })
-  const errorParagraph = modal.locator('p[style*="errorForeground"]')
-  if (await errorParagraph.count() > 0) {
-    const text = await errorParagraph.textContent()
-    throw new Error(`Refresh wizard surfaced an error: ${text ?? '(no body)'}`)
-  }
-  // ListView doesn't stamp testids on rows; the status pill we
-  // added in rightActions does carry one (`<base>-status`). Asserting
-  // it directly is more robust than walking the row.
-  const pill = modal.locator(`[data-testid="${INVENTORY_BASE_TESTID}-status"]`)
-  await expect(pill).toBeVisible({ timeout: 10000 })
-  await expect(pill).toContainText('Skipped')
+  // /pet/{id} was kept at first import → it sits in `imported`.
+  // The refresh modal's pre-tick logic should leave it ticked.
+  const toggle = refreshRowToggle(p, 'Find pet by ID')
+  await expect(toggle).toHaveAttribute('aria-checked', 'true', { timeout: 5000 })
 })
 
-Then('the refresh wizard should show the existing pet route as unchanged', async () => {
+When('I tick the inventory route in the refresh import modal', async () => {
   const p = requirePage()
-  const modal = p.locator('[data-testid="refresh-wizard-modal"]')
-  const pill = modal.locator(`[data-testid="${PET_BY_ID_BASE_TESTID}-status"]`)
-  await expect(pill).toBeVisible({ timeout: 5000 })
-  await expect(pill).toContainText('Unchanged')
-})
-
-When('I tick the inventory route in the refresh wizard', async () => {
-  const p = requirePage()
-  await p.screenshot({ path: join(AUTH_LOGIN_TEMP_DIR, 'refresh-wizard-before-tick.png'), fullPage: true })
-  // The Toggle's outer `toggle-container` div carries the testid we
-  // pass through, but the inner element is the one with the
-  // `role="checkbox"` + `aria-checked` we need to assert against.
-  const toggleContainer = p.locator(`[data-testid="${INVENTORY_BASE_TESTID}-toggle"]`).first()
-  await expect(toggleContainer).toBeVisible({ timeout: 5000 })
-  const checkbox = toggleContainer.locator('[role="checkbox"]').first()
-  await checkbox.click()
-  await expect(checkbox).toHaveAttribute('aria-checked', 'true', { timeout: 5000 })
+  await p.screenshot({ path: join(AUTH_LOGIN_TEMP_DIR, 'refresh-import-modal-before-tick.png'), fullPage: true })
+  const toggle = refreshRowToggle(p, 'Pet inventory')
+  await expect(toggle).toBeVisible({ timeout: 5000 })
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-checked', 'true', { timeout: 5000 })
 })
 
 When('I apply the refresh', async () => {
   const p = requirePage()
-  await p.locator('[data-testid="refresh-wizard-apply"]').click()
+  // The Apply button reuses the regular import modal's button
+  // (label flips to "Apply update" when in refresh mode).
+  await p.locator('[data-testid="import-modal"][data-refresh-mode="true"] [data-testid="import-button"]').click()
   // The apply path issues another /login through the gated auth
   // service. Poll /releaselogins so the prefetch can return — the
-  // wizard only closes once the apply IPC resolves.
+  // modal only closes once the apply IPC resolves.
   for (let i = 0; i < 10; i++) {
     await fetch(`${AUTH_SERVICE_BASE}/releaselogins`).catch(() => undefined)
-    if (await p.locator('[data-testid="refresh-wizard-modal"]').count() === 0) break
+    if (await p.locator('[data-testid="import-modal"][data-refresh-mode="true"]').count() === 0) break
     await p.waitForTimeout(1000)
   }
-  await expect(p.locator('[data-testid="refresh-wizard-modal"]')).not.toBeVisible({ timeout: 30000 })
+  await expect(p.locator('[data-testid="import-modal"][data-refresh-mode="true"]')).not.toBeVisible({ timeout: 30000 })
 })
 
 Then('the sidebar should show the {string} request', async ({}, requestName: string) => {
   const p = requirePage()
-  // Make sure the env folder is expanded so the new request row is
-  // visible. The folder may collapse after the workbench reshuffles
-  // on apply.
+  // Make sure the env folder + the tag folder are expanded so the
+  // new request row is visible. The folder may collapse after the
+  // workbench reshuffles on apply.
   await expandRowIfCollapsed(p, 'Auth Test Service — Pet API')
-  await expect(sidebarRowByName(p, requestName)).toBeVisible({ timeout: 10000 })
+  await expandRowIfCollapsed(p, 'Other')
+  const requestRow = sidebarRowByName(p, requestName)
+  await expect(requestRow).toBeVisible({ timeout: 10000 })
+
+  // Verify the request landed as a child of the existing "Other"
+  // tag folder rather than at the env-folder root. The ListView
+  // stamps `aria-level` on every row (`depth + 1`); a child sits one
+  // level deeper than its parent. Asserting on aria-level is more
+  // robust than DOM-order or expanded/collapsed toggling, and leaves
+  // the sidebar untouched for follow-up steps.
+  const otherRow = sidebarRowByName(p, 'Other')
+  const otherLevel = await otherRow.getAttribute('aria-level')
+  const requestLevel = await requestRow.getAttribute('aria-level')
+  expect(otherLevel, 'Other folder should expose aria-level').not.toBeNull()
+  expect(requestLevel, `${requestName} should expose aria-level`).not.toBeNull()
+  expect(Number(requestLevel)).toBe(Number(otherLevel) + 1)
 })
 
 When(
