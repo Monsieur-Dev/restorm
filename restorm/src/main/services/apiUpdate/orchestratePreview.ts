@@ -21,6 +21,7 @@ import type { Request } from '../../../shared/types/requests'
 import type { FolderItem } from '../../../shared/types/folderTypes'
 import { isAnyFolder, isRequest } from '../../../shared/types/folderTypes'
 import { importNaturalKeyForRequest } from '../../../shared/utils/importNaturalKey'
+import { resolveUrlAgainstEnv, flattenEnvVars } from '../../../shared/utils/resolveUrlAgainstEnv'
 
 /**
  * Fetch the spec, normalise it, and compute the diff against the
@@ -259,12 +260,21 @@ function operationNaturalKey(op: OperationDocumentation): string {
 function computeLockedKeys(
   target: EnvironmentFolder,
   freshApiDoc: ApiDocumentation,
-  freshTree: readonly FolderItem[]
+  freshTree: readonly FolderItem[],
+  envVars: Record<string, string>
 ): string[] {
   const matchedOpKeys = new Set<string>()
   visitRequests(target.items, (req) => {
     const route = routeFromRequest(req)
     if (!route) return
+    // Resolve handlebars in the URL against the env's variables so
+    // a user-chosen variable name (`{{baseUrl}}`, `{{server}}`, …)
+    // expands to the real host before we run the matcher. Path-
+    // params not in the env (`{{petId}}`) stay literal — the
+    // matcher's regex treats them as `[^/]+` segments.
+    if (route.url !== undefined) {
+      route.url = resolveUrlAgainstEnv(route.url, envVars)
+    }
     const op = findOperationForRoute(freshApiDoc, route)
     if (op) matchedOpKeys.add(operationNaturalKey(op))
   })
@@ -320,7 +330,12 @@ export async function runApiUpdatePreviewTree(
     const items = result.items as FolderItem[]
     const freshFolder = items[0] as { apiDocumentation?: ApiDocumentation } | undefined
     const freshApiDoc = freshFolder?.apiDocumentation
-    const lockedKeys = freshApiDoc ? computeLockedKeys(env, freshApiDoc, items) : []
+    // Pre-resolve composed env-vars (Swagger's `baseUrl =
+    // {{scheme}}://{{host}}:{{port}}{{baseRoute}}` is the canonical
+    // case) so the URL substitution inside `computeLockedKeys` only
+    // needs a single pass to land on a real host.
+    const flatVars = freshApiDoc ? flattenEnvVars(variables) : variables
+    const lockedKeys = freshApiDoc ? computeLockedKeys(env, freshApiDoc, items, flatVars) : []
     return { success: true, items: items as unknown[], lockedKeys }
   } catch (err) {
     return { success: false, items: [], error: err instanceof Error ? err.message : String(err) }

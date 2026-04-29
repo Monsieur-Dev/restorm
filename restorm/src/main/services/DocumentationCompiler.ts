@@ -51,34 +51,108 @@ export interface RouteLike {
 }
 
 /**
- * Turn a URL pattern into a path-matching regex: each `{var}` or `{{var}}`
- * placeholder becomes `[^/]+`, literal segments are escaped. The result
- * matches a concrete path segment-by-segment (no wildcards across `/`).
+ * Turn a URL pattern into a path-matching regex. Each `{var}` or
+ * `{{var}}` placeholder becomes `[^/]+`, literal segments are
+ * escaped.
+ *
+ * Two anchor modes:
+ *
+ * - `strict` (the default — used when the request URL fails to parse
+ *   as an HTTP-like URL and we fall back to literal-path handling):
+ *   anchored `^...$`. The fallback path may carry leftover prefixes
+ *   like `/x{{baseUrl}}` if the user prepended a stray character;
+ *   anchoring at the start guarantees a typo invalidates the match.
+ * - `suffix` (used when `new URL()` succeeds — the parsed `pathname`
+ *   may include a `basePath` prefix from the spec like `/v2/pet/...`
+ *   that's NOT in the operation's `urlPattern`): anchored at the end
+ *   with a path-segment-boundary check at the start, `(?:^|/)...$`.
+ *   That distinguishes `/pet/123` from `/pets/123` while letting the
+ *   match start after any number of basePath segments.
  */
-function opPatternToRegex(pattern: string): RegExp {
+function opPatternToRegex(pattern: string, mode: 'strict' | 'suffix' = 'strict'): RegExp {
   // Use non-printable placeholder so we don't confuse escaping of regex specials.
   const WILDCARD = '\x01'
   let out = pattern.replace(/\{\{[^}]+\}\}/g, WILDCARD).replace(/\{[^}]+\}/g, WILDCARD)
   out = out.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   out = out.replace(new RegExp(WILDCARD, 'g'), '[^/]+')
+  // The op pattern always starts with `/`; for suffix-mode, drop
+  // that leading `/` and replace it with `(?:^|/)` so a basePath
+  // like `/v2` can prepend without breaking the segment boundary.
+  if (mode === 'suffix' && out.startsWith('/')) {
+    return new RegExp(`(?:^|/)${out.substring(1)}$`)
+  }
   return new RegExp(`^${out}$`)
 }
 
-/** Extract the path portion from an HTTP URL, stripping `{{baseUrl}}` / scheme / host and query. */
-function extractPath(url: string): string {
-  let out = url.trim()
-  // Drop `{{baseUrl}}` prefix entirely — it stands in for the server root.
-  out = out.replace(/^\{\{\s*baseUrl\s*\}\}/, '')
-  // Drop absolute URL scheme + host.
-  out = out.replace(/^[a-z][a-z0-9+.-]*:\/\/[^/]+/i, '')
-  // Drop query string.
+/**
+ * Schemes the matcher recognises as "real HTTP-like URLs" worth
+ * parsing through `new URL()`. Anything else (e.g. `xhttp:` after
+ * the user prepended a stray character to the URL field) is
+ * rejected so the path-extraction doesn't mask a no-longer-matching
+ * URL as still matching.
+ */
+const HTTP_LIKE_SCHEMES = new Set([
+  'http:', 'https:', 'ws:', 'wss:', 'file:'
+])
+
+/**
+ * Extract the path portion from a request URL, ready to be tested
+ * against an operation's `urlPattern` regex. Two strategies in order:
+ *
+ * 1. Try `new URL(url)`. When the URL parses AND its scheme is in
+ *    the HTTP-like allowlist, return the parsed `pathname` (already
+ *    stripped of query + fragment). The allowlist is what catches
+ *    "user typed `x` at the start" — `xhttp://...` parses as a URL
+ *    but its scheme is rejected, so the matcher falls through to a
+ *    no-match instead of returning a phantom path.
+ * 2. URL parsing fails (relative URL, unresolved `{{baseUrl}}`
+ *    template, …). Strip a leading `{{name}}` handlebar (any name —
+ *    the user may have called the variable `{{server}}`, `{{api}}`,
+ *    etc., and we don't want to hardcode `baseUrl`), then strip
+ *    query + fragment, then prepend `/` if missing. Returns null
+ *    when the strip leaves nothing usable so callers can short-
+ *    circuit the regex test.
+ *
+ * Callers are expected to pass an env-resolved URL — see
+ * `resolveUrlAgainstEnv`. Path-param handlebars like `{{petId}}` are
+ * left intact and matched as `[^/]+` segments by the regex builder.
+ */
+interface ExtractedPath {
+  path: string
+  /**
+   * `strict` when the URL didn't parse as an HTTP-like URL and we
+   * fell back to literal-path handling — caller anchors the regex
+   * with `^...$`. `suffix` when `URL` parsed successfully — caller
+   * uses `(?:^|/)...$` so an inherited `basePath` prefix doesn't
+   * break the match.
+   */
+  mode: 'strict' | 'suffix'
+}
+
+function extractPath(url: string): ExtractedPath | null {
+  const trimmed = url.trim()
+  if (!trimmed) return null
+  try {
+    const parsed = new URL(trimmed)
+    if (HTTP_LIKE_SCHEMES.has(parsed.protocol)) {
+      return { path: parsed.pathname, mode: 'suffix' }
+    }
+    return null
+  } catch {
+    // Fall through to the manual-strip path.
+  }
+  // Drop a single leading `{{name}}` placeholder — stands in for an
+  // unresolved baseUrl-like variable. We only strip ONE so a typo
+  // like `x{{baseUrl}}/path` (which doesn't begin with `{{`) doesn't
+  // match.
+  let out = trimmed.replace(/^\{\{\s*[^}\s]+\s*\}\}/, '')
+  // Drop query + fragment.
   const q = out.indexOf('?')
   if (q >= 0) out = out.substring(0, q)
-  // Drop fragment.
   const h = out.indexOf('#')
   if (h >= 0) out = out.substring(0, h)
   if (!out.startsWith('/')) out = `/${out}`
-  return out
+  return { path: out, mode: 'strict' }
 }
 
 /** Extract the first top-level field name from a GraphQL query. */
@@ -98,18 +172,20 @@ function extractGraphqlOperationName(query: string): string | undefined {
 function matchHttpOperation(apiDoc: ApiDocumentation, route: RouteLike): OperationDocumentation | undefined {
   if (!route.url) return undefined
   const method = (route.method ?? '').toUpperCase()
-  const requestPath = extractPath(route.url)
+  const extracted = extractPath(route.url)
+  if (extracted === null) return undefined
 
-  // The Swagger importer folds `basePath` into the resolved `baseUrl`
-  // environment variable, so the request URL template no longer carries
-  // that prefix — matching only the operation's own `urlPattern` (strict,
-  // full-path, anchored) is both sufficient and correct. No fuzzy
-  // suffix-matching: an edited URL that deviates from the pattern should
-  // drop the doc match on purpose.
+  // Callers feed an env-resolved URL (see `resolveUrlAgainstEnv`)
+  // so user-chosen variable names like `{{baseUrl}}` / `{{server}}`
+  // expand before we get here. The regex anchor mode depends on
+  // whether the URL parsed cleanly: `suffix` when we have a real
+  // `URL.pathname` (basePath may prefix), `strict` when we fell back
+  // to template-text handling (no extraneous prefixes allowed —
+  // protects against `x{{baseUrl}}/...`-style typos).
   for (const op of apiDoc.operations) {
     if (!op.match.urlPattern) continue
     if (op.match.method && method && op.match.method.toUpperCase() !== method) continue
-    if (opPatternToRegex(op.match.urlPattern).test(requestPath)) return op
+    if (opPatternToRegex(op.match.urlPattern, extracted.mode).test(extracted.path)) return op
   }
   return undefined
 }
