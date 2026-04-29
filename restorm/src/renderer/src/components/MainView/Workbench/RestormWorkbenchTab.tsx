@@ -123,16 +123,6 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
         onAdd={handleRibbonAdd}
         data-testid={`${testIdPrefix}-bookmarks`}
       />
-      {callout && (
-        <div className="restorm-workbench-tab-callout">
-          <Callout
-            variant={callout.variant}
-            message={callout.message}
-            {...(callout.icon ? { icon: callout.icon } : {})}
-            data-testid={`${testIdPrefix}-callout`}
-          />
-        </div>
-      )}
       {/* Row 1: ancestor breadcrumb — navigation only. The last segment
        * moved into the title row below, so edit / icon affordances are
        * disabled here (they live on the H1 + IconSelect). */}
@@ -153,6 +143,16 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
           />
         ) : null}
       </div>
+      {callout && (
+        <div className="restorm-workbench-tab-callout">
+          <Callout
+            variant={callout.variant}
+            message={callout.message}
+            {...(callout.icon ? { icon: callout.icon } : {})}
+            data-testid={`${testIdPrefix}-callout`}
+          />
+        </div>
+      )}
       {/* Row 2: current-item icon + H1 name. Tags moved to the
        * top-right bookmark-ribbon stack. */}
       <div className="restorm-workbench-tab-title-row">

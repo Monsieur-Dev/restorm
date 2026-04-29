@@ -132,6 +132,11 @@ export interface CompiledDocumentationResult {
   markdown: string
   /** `true` if an operation from the owning apiDocumentation matched. */
   matched: boolean
+  /** `true` when the matched operation is flagged `deprecated` in the
+   * spec. Drives the sidebar dimming + the request-tab callout — the
+   * decision is live (re-evaluates on URL change), so editing the URL
+   * to a non-deprecated path immediately clears the visual marker. */
+  deprecated: boolean
   /** `true` while an IPC compilation is in flight. */
   loading: boolean
 }
@@ -157,7 +162,7 @@ export function useCompiledDocumentation(request: Request | null): CompiledDocum
       })
     : ''
 
-  const [compiled, setCompiled] = useState<{ markdown: string; matched: boolean } | null>(null)
+  const [compiled, setCompiled] = useState<{ markdown: string; matched: boolean; deprecated: boolean } | null>(null)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -183,7 +188,7 @@ export function useCompiledDocumentation(request: Request | null): CompiledDocum
       compileForRoute?: (
         apiDoc: unknown,
         route: CompilableRoute
-      ) => Promise<{ matched: boolean; markdown: string; operationId?: string; error?: string }>
+      ) => Promise<{ matched: boolean; markdown: string; operationId?: string; deprecated?: boolean; error?: string }>
     } } }).restorm?.docs?.compileForRoute
     if (!api) return
 
@@ -203,7 +208,7 @@ export function useCompiledDocumentation(request: Request | null): CompiledDocum
     const plainRoute = JSON.parse(JSON.stringify(route)) as CompilableRoute
     api(plainApiDoc, plainRoute).then(res => {
       if (cancelled) return
-      setCompiled({ markdown: res.markdown, matched: res.matched })
+      setCompiled({ markdown: res.markdown, matched: res.matched, deprecated: res.deprecated === true })
       setLoading(false)
     }).catch(() => {
       if (cancelled) return
@@ -219,12 +224,13 @@ export function useCompiledDocumentation(request: Request | null): CompiledDocum
   // Synchronous fallback while the effect hasn't run (or when we have no
   // apiDoc at all): return empty, not-matched so callers hide the Docs tab.
   if (!hasApiDoc) {
-    return { markdown: '', matched: false, loading: false }
+    return { markdown: '', matched: false, deprecated: false, loading: false }
   }
 
   return {
     markdown: compiled?.markdown ?? '',
     matched: compiled?.matched ?? false,
+    deprecated: compiled?.deprecated ?? false,
     loading
   }
 }

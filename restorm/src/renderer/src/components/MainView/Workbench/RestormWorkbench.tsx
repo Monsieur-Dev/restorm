@@ -31,6 +31,7 @@ import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useTranslation } from 'react-i18next'
 import { RestormWorkbenchTab } from './RestormWorkbenchTab'
+import { DeprecationAwareRequestTab } from './DeprecationAwareRequestTab'
 import { useTabSwitcher } from '../../../hooks/useTabSwitcher'
 
 /** Extract title string from EditorTab */
@@ -576,7 +577,8 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       const request = (reactiveRequest?.type === 'http') ? reactiveRequest : effectiveTab.request
       return (
         <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
-          <RestormWorkbenchTab
+          <DeprecationAwareRequestTab
+            request={request}
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
           onBreadcrumbAuxClick={onBreadcrumbAuxClick}
@@ -586,13 +588,12 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagsChange={(nextTags) => { onTagsChange?.(request.id, nextTags) }}
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
-            callout={request.deprecated ? { variant: 'warning', message: t('requestTab.deprecated') } : undefined}
             tabId={effectiveTab.id}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
               <HTTPRequestTabView request={request} />
             </div>
-          </RestormWorkbenchTab>
+          </DeprecationAwareRequestTab>
         </EnvironmentProvider>
       )
     }
@@ -750,7 +751,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, t, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid])
+  }, [onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(

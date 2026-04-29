@@ -952,7 +952,12 @@ export function registerRestormIPC(deps: {
     try {
       const result = compileDocumentationForRoute(apiDoc as ApiDocumentation, route as RouteLike)
       if (!result) return { matched: false, markdown: '' }
-      return { matched: true, markdown: result.markdown, operationId: result.operation.operationId }
+      return {
+        matched: true,
+        markdown: result.markdown,
+        operationId: result.operation.operationId,
+        deprecated: result.operation.deprecated === true
+      }
     } catch (error) {
       logger.error('[IPC] docs:compile-for-route error', error)
       return { matched: false, markdown: '', error: error instanceof Error ? error.message : String(error) }

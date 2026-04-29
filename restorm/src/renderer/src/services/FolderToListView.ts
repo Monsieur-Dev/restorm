@@ -23,27 +23,56 @@ export interface FolderToListViewOptions {
   renderMethodBadge: (method: string) => ReactNode
   /** Function to render protocol badge as leftActions */
   renderProtocolBadge?: (protocol: string, label?: string) => ReactNode
-  /** Function to render deprecated request title — italic + muted. */
-  renderDeprecatedTitle?: (name: string) => ReactNode
-  /** Function to render removed-from-spec request title — strikethrough.
-   * Distinct from deprecated so the two states are visually separable. */
+  /** Function to render removed-from-spec request title — strikethrough. */
   renderRemovedTitle?: (name: string) => ReactNode
+  /** Set of request ids whose URL resolves to a deprecated operation
+   * in the owning env folder's apiDocumentation. Both the title and
+   * the method badge get wrapped in a `opacity: 0.5` span so the
+   * whole row reads as dimmed, while the row stays selectable +
+   * executable. The check rides on the live matcher (see
+   * `useDeprecatedRequestIds`); editing a URL re-evaluates the row
+   * instantly. */
+  deprecatedRequestIds?: ReadonlySet<string>
   /** When `true`, the env folder gets an "update available" badge
    * appended to its title. Drives the sidebar dot the user sees
    * before opening the folder home. */
   hasApiUpdateAvailable?: (folderId: string) => boolean
 }
 
+const DEPRECATED_DIM_STYLE: React.CSSProperties = { opacity: 0.5 }
+const DEPRECATED_DIM_TITLE = 'Deprecated in source spec'
+
+function dimNode(node: ReactNode): ReactNode {
+  return React.createElement('span', { style: DEPRECATED_DIM_STYLE, title: DEPRECATED_DIM_TITLE }, node)
+}
+
+/**
+ * Wrap title + icon in dimming spans when the request id is in the
+ * deprecated set. We dim BOTH so the method badge fades alongside
+ * the name — a row halfway dimmed reads as "something's wrong with
+ * the badge" rather than "this whole route is deprecated".
+ */
+function applyDeprecatedDimming(
+  request: { id: string; name: string },
+  options: FolderToListViewOptions,
+  baseTitle: ReactNode,
+  baseIcon: ReactNode
+): { title: ReactNode; icon: ReactNode } {
+  if (options.deprecatedRequestIds?.has(request.id) === true) {
+    return { title: dimNode(baseTitle), icon: dimNode(baseIcon) }
+  }
+  return { title: baseTitle, icon: baseIcon }
+}
+
 /**
  * Convert an HTTPRequest to a ListViewItemData
  */
 function decorateRequestTitle(name: string, request: HTTPRequest, options: FolderToListViewOptions): React.ReactNode | string {
-  // The two states render distinct cues so the user can tell whether
-  // a request is `removed` (strikethrough — the spec stopped
-  // describing it; still executable but flagged) or just `deprecated`
-  // (italic — still in the spec but the author asked us to migrate).
+  // Removed (vanished from the spec) gets the strikethrough treatment
+  // — distinct from the deprecation dim because the two states have
+  // different semantics: deprecated = "still in spec, author asks
+  // you to migrate"; removed = "spec dropped this entirely".
   if (request.removed === true) return options.renderRemovedTitle?.(name) ?? name
-  if (request.deprecated === true && options.renderDeprecatedTitle) return options.renderDeprecatedTitle(name)
   return name
 }
 
@@ -51,10 +80,16 @@ function httpRequestToListViewItem(
   request: HTTPRequest,
   options: FolderToListViewOptions
 ): ListViewItemData {
+  const decorated = applyDeprecatedDimming(
+    request,
+    options,
+    decorateRequestTitle(request.name, request, options),
+    options.renderMethodBadge(request.method)
+  )
   return {
     id: request.id,
-    title: decorateRequestTitle(request.name, request, options),
-    icon: options.renderMethodBadge(request.method)
+    title: decorated.title,
+    icon: decorated.icon
   }
 }
 
