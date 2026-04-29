@@ -344,7 +344,7 @@ tag (`:7-alpine`, not `:latest`) so CI is reproducible.
   `restorm-mqtt`, ...) so logs are unambiguous.
 * Stable, distinct host port. Pick the next free one — grep the existing
   `docker-compose.yml` for `ports:` to confirm.
-* Join the `gitable-tests` external network (already declared at the top
+* Join the `restorm-tests` external network (already declared at the top
   of the compose file). No extra wiring required.
 * Add a `healthcheck` when the image supports it. The integration suite's
   `pnpm docker:wait` polls for readiness; an explicit healthcheck cuts

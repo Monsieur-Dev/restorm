@@ -17,15 +17,15 @@ services:
       # Mount the repo root (parent of this compose file) at a fixed container
       # path so nothing inside the container depends on the host layout
       # (Windows vs Linux, user home, clone location, etc.).
-      - ..:/workspaces/gitable:cached
+      - ..:/workspaces/restorm:cached
       # Shadow every node_modules path with a named volume. Docker applies
       # the more-specific mount, so the host's (potentially Windows-built)
       # node_modules is hidden and the container gets its own Linux-native
       # copy, which also persists across rebuilds (faster `pnpm install`).
-      - node-modules-root:/workspaces/gitable/node_modules
-      - node-modules-core-ui:/workspaces/gitable/electron-core-ui/node_modules
-      - node-modules-demo:/workspaces/gitable/demo/node_modules
-      - node-modules-restorm:/workspaces/gitable/restorm/node_modules
+      - node-modules-root:/workspaces/restorm/node_modules
+      - node-modules-core-ui:/workspaces/restorm/electron-core-ui/node_modules
+      - node-modules-demo:/workspaces/restorm/demo/node_modules
+      - node-modules-restorm:/workspaces/restorm/restorm/node_modules
       # pnpm global store — keep the content-addressable cache out of the
       # bind mount too, so resolving packages stays fast.
       - pnpm-store:/root/.local/share/pnpm/store
@@ -34,29 +34,29 @@ services:
       # Host Docker socket — lets the container's `docker` CLI talk to the
       # host daemon. Note: sibling containers spawned via this socket (e.g.
       # restorm's testcontainers-based E2E) bind-mount against the HOST
-      # filesystem, not /workspaces/gitable — run those flows on the host
+      # filesystem, not /workspaces/restorm — run those flows on the host
       # or in CI, not from inside this devcontainer.
       - /var/run/docker.sock:/var/run/docker.sock
-    working_dir: /workspaces/gitable
-    # Join the external `gitable-tests` network so we can reach the sibling
+    working_dir: /workspaces/restorm
+    # Join the external `restorm-tests` network so we can reach the sibling
     # test containers (restorm-petstore, restorm-graphql, …) by their service
     # name — `localhost` doesn't reach sibling containers, and on Docker
     # Desktop / WSL2 `host.docker.internal` routing to host-published ports is
-    # unreliable. Create once on the host: `docker network create gitable-tests`.
+    # unreliable. Create once on the host: `docker network create restorm-tests`.
     networks:
       - default
-      - gitable-tests
+      - restorm-tests
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Etc/UTC
-      - TITLE=gitable E2E
+      - TITLE=restorm E2E
       # No CUSTOM_USER / PASSWORD → desktop is reachable without auth on
       # port 3000 for local development. Set them for CI or shared envs.
 
 networks:
   default:
-  gitable-tests:
+  restorm-tests:
     external: true
 
 volumes:

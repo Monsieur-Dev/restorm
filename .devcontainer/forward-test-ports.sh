@@ -7,7 +7,7 @@
 #
 # Requires:
 #  - `socat` (installed by postinstall.sh)
-#  - the devcontainer to be attached to the external `gitable-tests` network
+#  - the devcontainer to be attached to the external `restorm-tests` network
 #    (see .devcontainer/docker-compose.yml). Target containers don't need to
 #    be running yet — socat will connect lazily on each incoming connection.
 #

@@ -1,9 +1,9 @@
 {
-  "name": "gitable-monorepo",
+  "name": "restorm-monorepo",
   "version": "1.0.0",
   "private": true,
-  "description": "Gitable monorepo with electron-core-ui",
-  "homepage": "https://github.com/oYo-fr/gitable",
+  "description": "Restorm monorepo with electron-core-ui",
+  "homepage": "https://github.com/oYo-fr/restorm",
   "author": {
     "name": "Yoann Diguet",
     "email": "contact@oyo-fr.com"
@@ -28,7 +28,7 @@
     "typecheck": "pnpm -r run typecheck",
     "depcheck": "pnpm -r run depcheck",
     "test": "pnpm --filter electron-core-ui run test && pnpm --filter restorm run test",
-    "backup": "tar --exclude='node_modules' --exclude='*/node_modules/*' --exclude='bin' --exclude='*/bin/*' --exclude='out' --exclude='*/out/*' --exclude='dist' --exclude='*/dist/*' -czf ../gitable-backup-$(date +%Y%m%d-%H%M%S).tar.gz .",
+    "backup": "tar --exclude='node_modules' --exclude='*/node_modules/*' --exclude='bin' --exclude='*/bin/*' --exclude='out' --exclude='*/out/*' --exclude='dist' --exclude='*/dist/*' -czf ../restorm-backup-$(date +%Y%m%d-%H%M%S).tar.gz .",
     "restorm:docker:up": "pnpm --filter restorm run docker:up",
     "restorm:docker:down": "pnpm --filter restorm run docker:down"
   },

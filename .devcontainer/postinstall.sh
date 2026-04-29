@@ -65,7 +65,7 @@ npm install -g @anthropic-ai/claude-code
 log "claude: $(claude --version 2>/dev/null || echo 'installed')"
 
 log 'Installing workspace dependencies (pnpm install)…'
-cd /workspaces/gitable
+cd /workspaces/restorm
 pnpm install --frozen-lockfile=false
 
 log 'Done.'
