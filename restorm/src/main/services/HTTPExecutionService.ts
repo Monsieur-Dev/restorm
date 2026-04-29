@@ -9,7 +9,7 @@ import { URL } from 'url'
 import { BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
-import { authenticationCacheService } from './AuthenticationCacheService'
+import { authenticationCacheService, type ResolvedAuthShape } from './AuthenticationCacheService'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../shared/config/constants'
 import type { AuthenticationRequest } from '../../shared/models/requests/AuthenticationRequest'
 
@@ -173,11 +173,30 @@ class HTTPExecutionService {
       }
 
       // Inject auth headers (fresh or cached) before dispatching.
+      // The resolved shape doubles as (a) the cache key (so an env-A
+      // → env-B → env-A round-trip reuses A's entry on the third
+      // call), and (b) the on-the-wire payload the executor closure
+      // hands to `dispatchAuthShape` — same bytes both sides.
+      let authShape: ResolvedAuthShape | null = null
       if (authRequest) {
+        const resolved = this.resolveAuthShape(authRequest, requestId)
+        if (!resolved.ok) {
+          const durationMs = Date.now() - startTime
+          this.broadcastProgress(requestId, 'error')
+          return {
+            requestId,
+            success: false,
+            error: resolved.error,
+            requestUrl: resolvedUrl,
+            timings: { startedAt, durationMs }
+          }
+        }
+        authShape = resolved.shape
         try {
           const authHeaders = await authenticationCacheService.getHeaders(
             authRequest,
-            (r) => this.executeAuthInner(r, abortController.signal, requestId)
+            authShape,
+            (s) => this.dispatchAuthShape(authRequest, s, abortController.signal)
           )
           for (const [k, v] of Object.entries(authHeaders)) {
             headers[k] = v
@@ -208,12 +227,13 @@ class HTTPExecutionService {
       // Auth-error-code retry: if the downstream status is one the
       // auth request declared as "your token expired", invalidate
       // the cache, force a refresh, re-inject, retry exactly once.
-      if (authRequest?.authErrorCodes.includes(result.statusCode)) {
-        authenticationCacheService.invalidate(authRequest.id)
+      if (authRequest && authShape && authRequest.authErrorCodes.includes(result.statusCode)) {
+        authenticationCacheService.invalidate(authRequest, authShape)
         try {
           const refreshed = await authenticationCacheService.refresh(
             authRequest,
-            (r) => this.executeAuthInner(r, abortController.signal, requestId)
+            authShape,
+            (s) => this.dispatchAuthShape(authRequest, s, abortController.signal)
           )
           for (const [k, v] of Object.entries(refreshed)) {
             headers[k] = v
@@ -404,13 +424,24 @@ class HTTPExecutionService {
    * method / headers / body otherwise (import-wizard path, where
    * the auth request is ephemeral and not yet in the collection).
    */
-  private async executeAuthInner(
+  /**
+   * Resolve the env-dependent surface of an auth request — URL,
+   * headers, body — into a `ResolvedAuthShape` ready to (a) feed the
+   * authentication cache as the lookup key and (b) drive the actual
+   * HTTP dispatch. Returns an error variant when resolution can't
+   * produce a valid wire request (no URL, malformed URL); the
+   * caller surfaces those via a failed HTTPExecutionResult, the
+   * cache never sees them.
+   *
+   * `parentRequestId` carries the original calling request so we
+   * can inherit its env when the auth route's own pinned env is a
+   * sibling of the parent's env (the per-tab pinning regression
+   * the e2e pins).
+   */
+  private resolveAuthShape(
     authRequest: AuthenticationRequest,
-    parentSignal: AbortSignal,
     parentRequestId?: string
-  ): Promise<HTTPExecutionResult> {
-    const startTime = Date.now()
-    const startedAt = new Date().toISOString()
+  ): { ok: true; shape: ResolvedAuthShape; resolvedUrl: string; parsedUrl: URL } | { ok: false; error: string } {
     // Choose which env-context resolves auth handlebars / URL / body.
     //
     // Default: the auth route's own context (its tab's selected env).
@@ -461,23 +492,13 @@ class HTTPExecutionService {
       resolvedUrl = authRequest.url
     }
     if (!resolvedUrl) {
-      return {
-        requestId: authRequest.id,
-        success: false,
-        error: 'Auth request has no URL',
-        timings: { startedAt, durationMs: Date.now() - startTime }
-      }
+      return { ok: false, error: 'Auth request has no URL' }
     }
     let parsedUrl: URL
     try {
       parsedUrl = new URL(resolvedUrl)
     } catch {
-      return {
-        requestId: authRequest.id,
-        success: false,
-        error: `Invalid auth URL: ${resolvedUrl}`,
-        timings: { startedAt, durationMs: Date.now() - startTime }
-      }
+      return { ok: false, error: `Invalid auth URL: ${resolvedUrl}` }
     }
 
     // Build headers — ContextService for the registered path,
@@ -567,11 +588,48 @@ class HTTPExecutionService {
       }
     }
 
+    return {
+      ok: true,
+      shape: {
+        method: authRequest.method,
+        url: resolvedUrl,
+        headers,
+        ...(body !== undefined ? { body } : {})
+      },
+      resolvedUrl,
+      parsedUrl
+    }
+  }
+
+  /**
+   * Fire the resolved auth shape on the wire and surface the raw
+   * HTTP outcome. The cache hands us the same `shape` it derived
+   * its key from, so the bytes that end up on the network match
+   * the bytes the cache will associate with the resulting headers.
+   */
+  private async dispatchAuthShape(
+    authRequest: AuthenticationRequest,
+    shape: ResolvedAuthShape,
+    parentSignal: AbortSignal
+  ): Promise<HTTPExecutionResult> {
+    const startTime = Date.now()
+    const startedAt = new Date().toISOString()
+    let parsedUrl: URL
+    try {
+      parsedUrl = new URL(shape.url)
+    } catch {
+      return {
+        requestId: authRequest.id,
+        success: false,
+        error: `Invalid auth URL: ${shape.url}`,
+        timings: { startedAt, durationMs: Date.now() - startTime }
+      }
+    }
     const result = await this.makeRequest({
       url: parsedUrl,
-      method: authRequest.method,
-      headers,
-      body,
+      method: shape.method,
+      headers: shape.headers,
+      ...(shape.body !== undefined ? { body: shape.body } : {}),
       timeout: DEFAULT_REQUEST_TIMEOUT_MS,
       signal: parentSignal
     })
@@ -583,7 +641,7 @@ class HTTPExecutionService {
       statusText: result.statusText,
       headers: result.headers,
       body: result.body,
-      requestUrl: resolvedUrl,
+      requestUrl: shape.url,
       timings: { startedAt, durationMs }
     }
   }
