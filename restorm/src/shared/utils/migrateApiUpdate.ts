@@ -1,10 +1,17 @@
-import type { ApiUpdateConfig } from '../types/baseTypes'
+import type { ApiUpdateConfig, ImportSourceType } from '../types/baseTypes'
 
 interface FolderLike {
   apiUpdate?: ApiUpdateConfig
   apiDocumentation?: { sourceUrl?: string; sourceHeaders?: Record<string, string>; api?: { version?: string } }
   items?: unknown[]
   importSource?: string
+}
+
+interface RequestLike {
+  type?: string
+  method?: string
+  url?: string
+  importOrigin?: { format: ImportSourceType; naturalKey: string; operationId?: string }
 }
 
 /**
@@ -47,6 +54,39 @@ export function migrateApiUpdate<T extends FolderLike>(folder: T): T {
   return walk(folder)
 }
 
+/**
+ * Best-effort backfill of `importOrigin` on legacy requests that
+ * predate the field. Without this, the very first refresh on a
+ * legacy folder would treat every existing request as user-created
+ * (no `importOrigin.format` match) and the new spec would add every
+ * operation a second time.
+ *
+ * Only HTTP-shaped requests get a synthesised `importOrigin` —
+ * GraphQL / gRPC / SOAP / OData need more context (operationType +
+ * fieldName, service.method, etc.) than method + url, and stamping
+ * the wrong origin would be worse than leaving them unmatched. Those
+ * fall back to the pipeline's existing user-created behaviour
+ * (untouched on refresh).
+ */
+function backfillImportOriginOnRequests(folder: FolderLike, format: ImportSourceType): void {
+  if (!Array.isArray(folder.items)) return
+  for (const item of folder.items) {
+    if (!item || typeof item !== 'object') continue
+    if ('items' in item) {
+      backfillImportOriginOnRequests(item as FolderLike, format)
+      continue
+    }
+    const req = item as RequestLike
+    if (req.importOrigin) continue
+    if (req.type !== 'http' && req.type !== 'authentication') continue
+    if (!req.method || !req.url) continue
+    req.importOrigin = {
+      format,
+      naturalKey: `${req.method.toUpperCase()} ${req.url}`
+    }
+  }
+}
+
 function walk<T extends FolderLike>(folder: T): T {
   if (Array.isArray(folder.items)) {
     for (const child of folder.items) {
@@ -59,6 +99,11 @@ function walk<T extends FolderLike>(folder: T): T {
 }
 
 export function migrateApiUpdateForCollections<T extends FolderLike>(collections: T[]): T[] {
-  for (const c of collections) migrateApiUpdate(c)
+  for (const c of collections) {
+    migrateApiUpdate(c)
+    if (c.importSource === 'swagger' || c.importSource === 'openapi') {
+      backfillImportOriginOnRequests(c, c.importSource)
+    }
+  }
   return collections
 }

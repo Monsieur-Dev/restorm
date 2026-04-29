@@ -68,6 +68,7 @@ import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
 import { RestormWorkbenchContainer } from './components/MainView/Workbench/RestormWorkbenchContainer'
 import { SaveOptionsModal } from './components/Modals/SaveOptionsModal'
 import { DeleteConfirmationModal } from './components/Modals/DeleteConfirmationModal'
+import { ApiUpdateConfirmModal } from './components/Modals/ApiUpdateConfirmModal'
 import { ImportModal } from './components/Modals/ImportModal'
 import { AvailableVariablesProvider } from './contexts/AvailableVariablesContext'
 import { VariableTransformProvider } from './contexts/VariableTransformContext'
@@ -91,6 +92,7 @@ import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
 import { useWorkbenchTabs } from './hooks/useWorkbenchTabs'
 import { useApiUpdateNotifications } from './hooks/useApiUpdateNotifications'
+import { useApiUpdateStateMap } from './hooks/useApiUpdateStateMap'
 import { useSidebarState } from './hooks/useSidebarState'
 import { isFavorite as favoritesStoreIsFavorite, toggleFavorite as favoritesStoreToggle } from './services/favoritesStore'
 import { useFileManagement } from './hooks/useFileManagement'
@@ -826,6 +828,22 @@ const App: React.FC = () => {
     return () => { window.removeEventListener('restorm:favorites-changed', handler) }
   }, [])
 
+  const apiUpdateStateMap = useApiUpdateStateMap()
+  const hasApiUpdateAvailable = useCallback((id: string): boolean => apiUpdateStateMap[id]?.kind === 'available', [apiUpdateStateMap])
+
+  const [refreshSourceTarget, setRefreshSourceTarget] = useState<{ id: string; name: string } | null>(null)
+  const canRefreshFromSource = useCallback((id: string): boolean => {
+    const folder = rootItems.find((c) => isEnvironmentFolder(c) && c.id === id)
+    if (!folder) return false
+    const apiUpdate = (folder as unknown as { apiUpdate?: { sourceUrl?: string } }).apiUpdate
+    return Boolean(apiUpdate?.sourceUrl)
+  }, [rootItems])
+  const onRefreshFromSource = useCallback((id: string): void => {
+    const folder = rootItems.find((c) => isEnvironmentFolder(c) && c.id === id)
+    if (!folder || !('name' in folder)) return
+    setRefreshSourceTarget({ id, name: folder.name })
+  }, [rootItems])
+
   const { sidebarItems: sidebarItemsWithContextMenu } = useSidebarState({
     rootItems,
     expandedIds,
@@ -835,7 +853,10 @@ const App: React.FC = () => {
     onDeleteItem: handleDeleteItem,
     onRenameItem: handleSidebarRenameItem,
     isItemFavorite,
-    onToggleFavorite: handleToggleFavorite
+    onToggleFavorite: handleToggleFavorite,
+    canRefreshFromSource,
+    onRefreshFromSource,
+    hasApiUpdateAvailable
   })
 
   // Wrapper for confirmDelete that uses deleteConfirmation.itemId
@@ -1585,6 +1606,19 @@ const App: React.FC = () => {
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
       />
+
+      {/* "Refresh from source" confirmation modal — driven by the
+          sidebar context-menu entry on env folders that carry an
+          apiUpdate.sourceUrl. */}
+      {refreshSourceTarget && (
+        <ApiUpdateConfirmModal
+          isOpen
+          folderId={refreshSourceTarget.id}
+          folderName={refreshSourceTarget.name}
+          onApplied={() => { setRefreshSourceTarget(null) }}
+          onCancel={() => { setRefreshSourceTarget(null) }}
+        />
+      )}
 
           {/* Save Options Modal */}
           <SaveOptionsModal

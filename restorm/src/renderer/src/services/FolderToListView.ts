@@ -23,25 +23,37 @@ export interface FolderToListViewOptions {
   renderMethodBadge: (method: string) => ReactNode
   /** Function to render protocol badge as leftActions */
   renderProtocolBadge?: (protocol: string, label?: string) => ReactNode
-  /** Function to render deprecated request title (with strikethrough) */
+  /** Function to render deprecated request title — italic + muted. */
   renderDeprecatedTitle?: (name: string) => ReactNode
+  /** Function to render removed-from-spec request title — strikethrough.
+   * Distinct from deprecated so the two states are visually separable. */
+  renderRemovedTitle?: (name: string) => ReactNode
+  /** When `true`, the env folder gets an "update available" badge
+   * appended to its title. Drives the sidebar dot the user sees
+   * before opening the folder home. */
+  hasApiUpdateAvailable?: (folderId: string) => boolean
 }
 
 /**
  * Convert an HTTPRequest to a ListViewItemData
  */
+function decorateRequestTitle(name: string, request: HTTPRequest, options: FolderToListViewOptions): React.ReactNode | string {
+  // The two states render distinct cues so the user can tell whether
+  // a request is `removed` (strikethrough — the spec stopped
+  // describing it; still executable but flagged) or just `deprecated`
+  // (italic — still in the spec but the author asked us to migrate).
+  if (request.removed === true) return options.renderRemovedTitle?.(name) ?? name
+  if (request.deprecated === true && options.renderDeprecatedTitle) return options.renderDeprecatedTitle(name)
+  return name
+}
+
 function httpRequestToListViewItem(
   request: HTTPRequest,
   options: FolderToListViewOptions
 ): ListViewItemData {
-  // Render title with strikethrough if deprecated
-  const title = request.deprecated && options.renderDeprecatedTitle
-    ? options.renderDeprecatedTitle(request.name)
-    : request.name
-
   return {
     id: request.id,
-    title,
+    title: decorateRequestTitle(request.name, request, options),
     icon: options.renderMethodBadge(request.method)
   }
 }
@@ -198,9 +210,29 @@ function environmentFolderToListViewItem(
   const isExpanded = options.expandedIds.has(folder.id)
 
   const children = folder.items.map((item) => folderItemToListViewItem(item, options))
+  const showBadge = options.hasApiUpdateAvailable?.(folder.id) === true
+  const title = showBadge
+    ? React.createElement(
+      React.Fragment,
+      null,
+      folder.name,
+      React.createElement('span', {
+        'data-testid': `sidebar-api-update-badge-${folder.id}`,
+        title: 'Update available',
+        style: {
+          display: 'inline-block',
+          width: '8px',
+          height: '8px',
+          marginLeft: '8px',
+          borderRadius: '50%',
+          background: 'var(--gitDecoration-modifiedResourceForeground, #e2a03f)'
+        }
+      })
+    )
+    : folder.name
   return {
     id: folder.id,
-    title: folder.name,
+    title,
     isExpandable: children.length > 0,
     isExpanded,
     icon: toListViewIcon(folder.icon, 'folder-library'),

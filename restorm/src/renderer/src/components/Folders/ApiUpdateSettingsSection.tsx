@@ -91,6 +91,27 @@ export const ApiUpdateSettingsSection: React.FC<Props> = ({ folderId, config, de
     }
   }, [pendingSourceUrl, config?.sourceUrl, onSettingsChange])
 
+  const headerEntries = Object.entries(config?.sourceHeaders ?? {})
+  const handleHeaderChange = useCallback((index: number, key: string, value: string): void => {
+    const next: Record<string, string> = {}
+    headerEntries.forEach(([k, v], i) => {
+      if (i === index) {
+        if (key) next[key] = value
+      } else {
+        next[k] = v
+      }
+    })
+    if (index === headerEntries.length && key) next[key] = value
+    onSettingsChange({ sourceHeaders: next })
+  }, [headerEntries, onSettingsChange])
+  const handleHeaderRemove = useCallback((index: number): void => {
+    const next: Record<string, string> = {}
+    headerEntries.forEach(([k, v], i) => {
+      if (i !== index) next[k] = v
+    })
+    onSettingsChange({ sourceHeaders: next })
+  }, [headerEntries, onSettingsChange])
+
   const handleCheckNow = useCallback(async () => {
     if (!api) return
     await api.checkNow(folderId)
@@ -167,6 +188,36 @@ export const ApiUpdateSettingsSection: React.FC<Props> = ({ folderId, config, de
             options={{ type: 'text', ariaLabel: 'Source URL' }}
           />
         </label>
+
+        <div className="api-update-headers" data-testid="home-api-update-headers">
+          <span className="api-update-label">Headers</span>
+          <div className="api-update-headers-list">
+            {headerEntries.map(([key, value], idx) => (
+              <div className="api-update-header-row" key={`${key}-${idx}`}>
+                <InputBox
+                  value={key}
+                  onChange={(next) => { handleHeaderChange(idx, next, value) }}
+                  options={{ type: 'text', ariaLabel: 'Header name' }}
+                />
+                <InputBox
+                  value={value}
+                  onChange={(next) => { handleHeaderChange(idx, key, next) }}
+                  options={{ type: 'text', ariaLabel: 'Header value' }}
+                />
+                <Button
+                  icon="trash"
+                  options={{ ariaLabel: 'Remove header' }}
+                  onClick={() => { handleHeaderRemove(idx) }}
+                >Remove</Button>
+              </div>
+            ))}
+            <Button
+              icon="add"
+              onClick={() => { handleHeaderChange(headerEntries.length, '', '') }}
+              data-testid="home-api-update-add-header"
+            >Add header</Button>
+          </div>
+        </div>
 
         <div className="api-update-state-row" data-testid="home-api-update-state">
           <span className={`api-update-state api-update-state-${state.kind}`}>{stateLabel}</span>
