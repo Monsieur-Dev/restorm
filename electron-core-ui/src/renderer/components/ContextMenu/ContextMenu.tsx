@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { MenuItem, MenuItemSeparator } from '../MenuBar'
+import { registerOpenContextMenu } from './openContextMenuRegistry'
 
 export interface ContextMenuItem {
   id: string
@@ -87,6 +88,8 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   useEffect(() => {
     if (!visible) return
 
+    const deregister = registerOpenContextMenu(onRequestClose)
+
     const handleMouseDown = (event: MouseEvent): void => {
       if (!containerRef.current) return
       if (!containerRef.current.contains(event.target as Node)) {
@@ -97,6 +100,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     document.addEventListener('mousedown', handleMouseDown)
     return () => {
       document.removeEventListener('mousedown', handleMouseDown)
+      deregister()
     }
   }, [visible, onRequestClose])
 
@@ -116,7 +120,14 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
       {...(dataTestId && { 'data-testid': dataTestId })}
       ref={containerRef}
       onContextMenu={(e) => {
+        // Prevent the platform menu and stop the bubble — without
+        // stopPropagation, a right-click on top of an open menu reaches
+        // the surrounding container's contextmenu handler (e.g. the
+        // sidebar's empty-area handler) which then opens a *different*
+        // menu on top, because the click target is the menu overlay,
+        // not whatever was underneath it.
         e.preventDefault()
+        e.stopPropagation()
       }}
     >
       <div className="menu menubar-menu-items-holder menu-container">

@@ -69,6 +69,14 @@ export interface ContextMenuProps {
 }
 ```
 
+## Single-instance behaviour
+
+Only one `ContextMenu` is visible at a time. When a menu becomes visible it asks every other currently-visible `ContextMenu` to close itself via the shared open-menu registry (`openContextMenuRegistry.ts`). This holds even when the new menu opens in response to a `contextmenu` event that bubbled up *through* an already-open menu's overlay — the registry catches sequences the document-level `mousedown` outside-click dismissal misses.
+
+The component also stops `contextmenu` event propagation from its own root, so a right-click on top of an open menu does not reach surrounding `onContextMenu` handlers (e.g. an outer empty-area dispatcher).
+
+This coordination is scoped to in-page `ContextMenu` instances; native Electron menus and other popover primitives (`CustomDropdown`, `MenuBar`) manage their own dismissal independently.
+
 ## Basic Usage
 
 ```tsx
