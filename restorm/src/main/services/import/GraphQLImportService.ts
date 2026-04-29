@@ -256,7 +256,11 @@ function fieldToRequest(
     query,
     headers: [
       createTypedKeyValue({ key: 'Content-Type', value: 'application/json', enabled: true })
-    ]
+    ],
+    importOrigin: {
+      format: 'graphql',
+      naturalKey: `${operationType} ${field.name}`
+    }
   }
   
   if (field.args.length > 0) {

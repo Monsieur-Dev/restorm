@@ -4,6 +4,13 @@ vi.mock('electron-core-ui', () => ({
   logger: { info: vi.fn(), debug: vi.fn(), warn: vi.fn(), error: vi.fn() }
 }))
 
+vi.mock('electron-core-ui/main', () => ({
+  logger: { info: vi.fn(), debug: vi.fn(), warn: vi.fn(), error: vi.fn() },
+  eventBusService: { subscribe: vi.fn().mockReturnValue({ unsubscribe: vi.fn() }), emit: vi.fn() },
+  createPubSub: () => ({ publish: vi.fn(), subscribe: vi.fn() }),
+  serializeWithDecorators: (_target: unknown, obj: Record<string, unknown>) => obj
+}))
+
 import { ApiUpdateScheduler, type ApiUpdateSchedulerFolder } from '../../src/main/services/apiUpdate/ApiUpdateScheduler'
 import { apiUpdateStateStore } from '../../src/main/services/apiUpdate/ApiUpdateStateStore'
 

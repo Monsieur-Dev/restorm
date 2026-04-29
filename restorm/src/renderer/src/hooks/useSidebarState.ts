@@ -11,6 +11,7 @@ import { attachContextMenus } from '../components/MainView/Sidebar/contextMenuBu
 import type { AddChildKind } from '../components/MainView/Sidebar/contextMenuBuilder'
 import { Badge } from '../components/common/Badge'
 import { mapToBadgeType } from '../utils/badgeUtils'
+import { useDeprecatedRequestIds } from './useDeprecatedRequestIds'
 
 export interface UseSidebarStateOptions {
   rootItems: (EnvironmentFolder | Folder | Request)[]
@@ -42,6 +43,13 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
   const { rootItems, expandedIds, updateCount, onCloneItem, onAddChildItem, onDeleteItem, onRenameItem, isItemFavorite, onToggleFavorite, canRefreshFromSource, onRefreshFromSource, hasApiUpdateAvailable } = options
   const { t } = useTranslation()
 
+  // Set of request ids whose URL currently resolves to a deprecated
+  // operation in their owning env folder's apiDocumentation. Lives
+  // outside the listview-item memo so its dependency on the matcher
+  // is explicit, and the dim re-evaluates as soon as the user edits
+  // a URL — no persisted `request.deprecated` flag involved.
+  const deprecatedRequestIds = useDeprecatedRequestIds(rootItems, updateCount)
+
   // Convert root folders to ListView items
   // updateCount is used as a dependency to force re-computation when items are mutated in-place
   const sidebarItems: ListViewItemData[] = useMemo(() => {
@@ -51,11 +59,13 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
       expandedIds: expandedSet,
       renderMethodBadge: (method: string) => React.createElement(Badge, { type: mapToBadgeType(method) }),
       renderProtocolBadge: (protocol: string, label?: string) => React.createElement(Badge, { type: mapToBadgeType(protocol), label }),
-      // Deprecated requests render in italic + muted; removed (vanished
-      // from the spec) renders strikethrough so the two states stay
-      // visually distinct in the tree.
-      renderDeprecatedTitle: (name: string) => React.createElement('span', { style: { fontStyle: 'italic', opacity: 0.7 }, title: 'Deprecated in source spec' }, name),
+      // Removed (vanished from the spec) renders strikethrough.
+      // Deprecated rows are dimmed via the per-id set passed alongside
+      // — the wrapper applies opacity to the whole row visual rather
+      // than the title alone, and the decision rides on the live
+      // matcher (so editing the URL re-evaluates instantly).
       renderRemovedTitle: (name: string) => React.createElement('span', { style: { textDecoration: 'line-through', opacity: 0.6 }, title: 'Removed from source spec' }, name),
+      deprecatedRequestIds,
       ...(hasApiUpdateAvailable !== undefined && { hasApiUpdateAvailable })
     }
     // Each root item becomes a top-level row in the sidebar. Folders
@@ -69,7 +79,7 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
         ? folderAsRootListViewItem(item, renderOptions)
         : folderItemToListViewItem(item, renderOptions)
     )
-  }, [expandedIds, rootItems, updateCount, hasApiUpdateAvailable])
+  }, [expandedIds, rootItems, updateCount, hasApiUpdateAvailable, deprecatedRequestIds])
 
   // Attach context menus to sidebar items.
   // `isItemFavorite` / `onToggleFavorite` are optional: only spread

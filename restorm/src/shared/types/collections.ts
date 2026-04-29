@@ -5,7 +5,7 @@
 
 export * from './valueTypes'
 
-export type { RuntimeId, IconType, Icon, KeyValue, Environment, FolderConfiguration, EnumDefinition, EnumMatchingRule, ImportSourceType, ImportSelectionSnapshot } from './baseTypes'
+export type { RuntimeId, IconType, Icon, KeyValue, Environment, FolderConfiguration, EnumDefinition, EnumMatchingRule, ImportSourceType } from './baseTypes'
 
 export type {
   HTTPMethod,

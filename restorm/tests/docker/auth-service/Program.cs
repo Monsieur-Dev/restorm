@@ -150,6 +150,28 @@ app.MapGet("/pet/{id:int}", (int id, HttpRequest req) =>
     });
 });
 
+// Second pet-API route. Exists for the refresh-from-source e2e, which
+// imports only `/pet/{id}` on first pass, then re-runs the wizard and
+// ticks `/pet/inventory` to confirm the wizard's selective re-import
+// path actually reaches new operations through the existing
+// authentication route.
+app.MapGet("/pet/inventory", (HttpRequest req) =>
+{
+    if (!TryGetBearerToken(req, out var token) || !TokenStore.Contains(token))
+    {
+        LogStore.Append("GET /pet/inventory -> 401");
+        return Results.Json(new { error = "missing_or_invalid_authorization" }, statusCode: 401);
+    }
+
+    LogStore.Append("GET /pet/inventory -> 200");
+    return Results.Ok(new
+    {
+        available = 5,
+        pending = 2,
+        sold = 1
+    });
+});
+
 app.MapGet("/swagger.json", (HttpRequest req) =>
 {
     if (!TryGetBearerToken(req, out var token) || !TokenStore.Contains(token))
@@ -239,6 +261,28 @@ static string PetOnlyOpenApiSpec() => """
           "200": {
             "description": "Pet",
             "schema": { "$ref": "#/definitions/Pet" }
+          },
+          "401": { "description": "Missing or invalid authorization" }
+        }
+      }
+    },
+    "/pet/inventory": {
+      "get": {
+        "operationId": "getPetInventory",
+        "summary": "Pet inventory",
+        "produces": ["application/json"],
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": {
+            "description": "Inventory counts",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "available": { "type": "integer" },
+                "pending": { "type": "integer" },
+                "sold": { "type": "integer" }
+              }
+            }
           },
           "401": { "description": "Missing or invalid authorization" }
         }

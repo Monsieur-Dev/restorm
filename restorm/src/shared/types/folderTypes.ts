@@ -1,4 +1,4 @@
-import type { RuntimeId, Icon, Environment, FolderConfiguration, EnumDefinition, ImportSourceType, ImportSelectionSnapshot, ApiUpdateConfig } from './baseTypes'
+import type { RuntimeId, Icon, Environment, FolderConfiguration, EnumDefinition, ImportSourceType, ApiUpdateConfig } from './baseTypes'
 import type { Request } from './requests/index'
 
 export interface Folder {
@@ -25,17 +25,6 @@ export interface EnvironmentFolder extends Folder {
   enumDefinitions?: EnumDefinition[]
   /** How this folder was created (swagger, grpc, graphql, etc.). Absent for manually created folders. */
   importSource?: ImportSourceType
-  /**
-   * Snapshot of the user's last selective-import choice — which natural
-   * keys (routes, models, enums) from the source spec were imported
-   * into this folder and which were explicitly skipped. Absent for
-   * manually created folders, and also absent on legacy folders saved
-   * before this field existed (the import pipeline writes it on every
-   * successful import / refresh-apply going forward). The granular
-   * refresh experience reads from this snapshot to classify the diff
-   * against a re-fetched spec into added / removed / kept-skipped.
-   */
-  importSelection?: ImportSelectionSnapshot
   /**
    * Configuration for the periodic spec re-check + idempotent
    * refresh. Absent for manually created folders, and also absent on

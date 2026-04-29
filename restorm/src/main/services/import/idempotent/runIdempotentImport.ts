@@ -55,6 +55,16 @@ export interface RunIdempotentImportOptions {
    * operation changed and supplies the existing request to mutate.
    */
   mergeRequestShape?: (existing: Request, op: NormalizedOperation) => void
+  /**
+   * Hook invoked when the pipeline needs to attach a freshly created
+   * request to the target tree. Defaults to appending to
+   * `target.items` (env-folder root). The apply path supplies an
+   * implementation that mirrors the request's position in the
+   * freshly-imported folder, so additions land inside the same tag /
+   * group folder a fresh import would have produced rather than at
+   * the env-folder root.
+   */
+  placeRequest?: (target: EnvironmentFolder, request: Request, op: NormalizedOperation) => void
 }
 
 /**
@@ -109,20 +119,20 @@ function matchExistingRequest(
 }
 
 /**
- * Append a freshly-materialised request directly under the env
- * folder's `items`. Group placement (creating intermediate folders
- * for each tag, etc.) is the materialiser's responsibility — the
- * pipeline only ensures the request lands on the tree.
+ * Default placement: append directly under the env-folder root.
+ * Callers that want grouping (tag folders, GraphQL operation-type
+ * folders, …) supply their own `placeRequest` hook.
  */
-function appendRequest(target: EnvironmentFolder, req: Request): void {
+function defaultPlaceRequest(target: EnvironmentFolder, req: Request): void {
   target.items.push(req)
 }
 
 export function runIdempotentImport(options: RunIdempotentImportOptions): ImportDiff {
-  const { target, spec, adapter, createRequest, mergeRequestShape } = options
+  const { target, spec, adapter, createRequest, mergeRequestShape, placeRequest } = options
   const diff = emptyImportDiff()
   const index = indexRequestsByOrigin(target, adapter.format)
   const seenInThisRun = new Set<Request>()
+  const place = placeRequest ?? defaultPlaceRequest
 
   for (const op of spec.operations) {
     const existing = matchExistingRequest(op, index)
@@ -131,7 +141,7 @@ export function runIdempotentImport(options: RunIdempotentImportOptions): Import
         ? { format: adapter.format, operationId: op.operationId, naturalKey: op.naturalKey }
         : { format: adapter.format, naturalKey: op.naturalKey }
       const created = createRequest(op, origin)
-      appendRequest(target, created)
+      place(target, created, op)
       diff.added.push(op)
       continue
     }
@@ -176,9 +186,13 @@ export function runIdempotentImport(options: RunIdempotentImportOptions): Import
 
   // Operations that vanished from the spec — flip removed=true on
   // any spec-imported request that wasn't seen in this run.
+  // Authentication routes prepended by the import wizard share the
+  // same env folder but carry no API operation; never mark them
+  // removed, regardless of `importOrigin.format`.
   for (const r of index.fromThisFormat) {
     if (seenInThisRun.has(r)) continue
     if (r.removed === true) continue
+    if ((r as { type?: string }).type === 'auth') continue
     r.removed = true
     diff.removed.push({
       operationId: r.importOrigin?.operationId,

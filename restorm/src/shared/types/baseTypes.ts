@@ -92,6 +92,13 @@ export interface ApiUpdateConfig {
   /** Structural content hash of that same spec. Used to detect
    * version-less changes (some specs don't bump `info.version`). */
   lastImportedSpecHash?: string
+  /** Reference to an `AuthenticationRequest` inside the same env
+   * folder. When set, the refresh flow runs a one-shot auth
+   * prefetch against this request before fetching the spec, and
+   * merges the resolved headers (e.g. `Authorization: Bearer ...`)
+   * into the fetch. Lets a refresh against a protected spec
+   * succeed without storing the resolved token statically on disk. */
+  authenticationRequestId?: string
 }
 
 /** Drives `ApiUpdateScheduler`'s tick decision and the home-page UI. */
@@ -137,33 +144,6 @@ export interface ApiUpdateState {
   /** Human-readable error from the most recent check. Cleared on
    * the next successful check. */
   error?: string
-}
-
-/**
- * Persisted snapshot of the user's last selective-import choice for an
- * `EnvironmentFolder`. The set `imported ∪ skipped` covers the spec
- * at the time of capture. On a future refresh, keys present in the
- * new spec but absent from both lists are "added", keys in `imported`
- * no longer present are "removed", and keys in `skipped` still
- * present remain skipped (unchecked) by default — that's the
- * primitive that makes the refresh experience tractable.
- *
- * Lives at the env-folder level (one snapshot per folder). Updated
- * on every successful import or refresh-apply.
- */
-export interface ImportSelectionSnapshot {
-  /** Epoch milliseconds when the snapshot was last refreshed. */
-  capturedAt: number
-  /** Source of truth — URL or absolute / repo-relative file path. */
-  source: string
-  /** Spec version captured (`info.version` when available). */
-  specVersion?: string
-  /** Spec content hash captured at the same time. */
-  specHash?: string
-  /** Natural keys (routes, models, enums) the user CHOSE to import. */
-  imported: string[]
-  /** Natural keys present in the spec but the user CHOSE to skip. */
-  skipped: string[]
 }
 
 /**

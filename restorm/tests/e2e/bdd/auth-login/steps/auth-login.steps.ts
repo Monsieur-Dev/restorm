@@ -244,7 +244,7 @@ When('I confirm the authentication setup', async () => {
   await expect(p.locator('[data-testid="authentication-setup-modal"]')).not.toBeVisible({ timeout: 15000 })
 })
 
-Then('the import modal should show the pet swagger preview without error', async () => {
+Then('the import modal preview should let me deselect the inventory route', async () => {
   const p = requirePage()
   // After the attach callback's prefetch returns, ImportModal re-runs
   // the URL fetch with the resolved Bearer token. /swagger.json is
@@ -252,6 +252,27 @@ Then('the import modal should show the pet swagger preview without error', async
   // preview list to mount.
   await expect(p.locator('[data-testid="import-selection-tree"]')).toBeVisible({ timeout: 15000 })
   await expect(p.locator('[data-testid="import-modal"] .import-error')).not.toBeVisible()
+
+  // Wait until the petstore preview is fully populated. Both rows
+  // are visible-by-name in the rendered tree before we touch toggles.
+  const tree = p.locator('[data-testid="import-selection-tree"]')
+  await expect(tree.getByText('Find pet by ID', { exact: true })).toBeVisible({ timeout: 10000 })
+  await expect(tree.getByText('Pet inventory', { exact: true })).toBeVisible({ timeout: 10000 })
+
+  // Selective import: untick `/pet/inventory` so it stays in the
+  // OYO-257 snapshot's `skipped` list. The refresh-from-source step
+  // later in the scenario re-imports it through the wizard, which
+  // is the path under test. The toggle sits next to the row label;
+  // grab the row by its name and click the Toggle inside.
+  const inventoryRow = tree
+    .locator('.list-view-row')
+    .filter({ has: p.getByText('Pet inventory', { exact: true }) })
+    .first()
+  await expect(inventoryRow).toBeVisible({ timeout: 5000 })
+  const inventoryToggle = inventoryRow.locator('[role="checkbox"]').first()
+  await expect(inventoryToggle).toHaveAttribute('aria-checked', 'true', { timeout: 5000 })
+  await inventoryToggle.click()
+  await expect(inventoryToggle).toHaveAttribute('aria-checked', 'false', { timeout: 5000 })
 })
 
 When('I import the previewed routes', async () => {
@@ -503,6 +524,135 @@ When(
     await p.waitForTimeout(200)
   }
 )
+
+When('I trigger a refresh from source on the imported folder', async () => {
+  const p = requirePage()
+  // Open the env folder's right-click menu and click "Refresh from
+  // source". The folder row title carries the spec's `info.title`
+  // — the auth-service spec is "Auth Test Service — Pet API".
+  const folderRow = sidebarRowByName(p, 'Auth Test Service — Pet API')
+  await expect(folderRow).toBeVisible({ timeout: 5000 })
+  await folderRow.click({ button: 'right' })
+  // The context menu mounts at the document root; pick the entry by
+  // its visible label (locale-stable here since the e2e runs against
+  // the en bundle).
+  const menuItem = p.locator('[role="menuitem"]').filter({ hasText: 'Refresh from source' }).first()
+  await expect(menuItem).toBeVisible({ timeout: 5000 })
+  await menuItem.click()
+  // Refresh-from-source reuses the ImportModal; the modal stamps
+  // `data-refresh-mode="true"` to distinguish the two flows.
+  await expect(p.locator('[data-testid="import-modal"][data-refresh-mode="true"]')).toBeVisible({ timeout: 15000 })
+})
+
+function refreshTreeLocator(p: Page): Locator {
+  return p.locator('[data-testid="import-modal"][data-refresh-mode="true"] [data-testid="import-selection-tree"]')
+}
+
+function refreshRowToggle(p: Page, name: string): Locator {
+  return refreshTreeLocator(p)
+    .locator('.list-view-row')
+    .filter({ has: p.getByText(name, { exact: true }) })
+    .first()
+    .locator('[role="checkbox"]')
+    .first()
+}
+
+Then('the refresh import modal should show the inventory route as unchecked', async () => {
+  const p = requirePage()
+  // The bootstrap fires a prefetch on the saved auth route — gated
+  // by /login on the auth-service. The preview that follows is
+  // gated as well. Poll /releaselogins while we wait for the tree
+  // to mount so neither one stays parked on the gate.
+  for (let i = 0; i < 20; i++) {
+    await fetch(`${AUTH_SERVICE_BASE}/releaselogins`).catch(() => undefined)
+    if (await refreshTreeLocator(p).count() > 0) break
+    await p.waitForTimeout(500)
+  }
+  await expect(refreshTreeLocator(p)).toBeVisible({ timeout: 15000 })
+  await expect(refreshTreeLocator(p).getByText('Pet inventory', { exact: true })).toBeVisible({ timeout: 10000 })
+  // /pet/inventory was unticked at first import, so the existing
+  // env folder has no request that matches its operation. The
+  // refresh modal pre-ticks only the leaves whose operation already
+  // lives in the target folder, so the inventory route should
+  // arrive unchecked + enabled.
+  const toggle = refreshRowToggle(p, 'Pet inventory')
+  await expect(toggle).toHaveAttribute('aria-checked', 'false', { timeout: 5000 })
+  await expect(toggle).toHaveAttribute('aria-disabled', 'false', { timeout: 5000 })
+})
+
+Then('the refresh import modal should show the existing pet route as checked and disabled', async () => {
+  const p = requirePage()
+  // /pet/{id} was kept at first import, so the env folder already
+  // exposes a request matching that operation. The refresh modal
+  // locks (checked + disabled) every leaf whose operation is already
+  // present, so the user can't accidentally opt out a route the
+  // folder already covers.
+  const toggle = refreshRowToggle(p, 'Find pet by ID')
+  await expect(toggle).toHaveAttribute('aria-checked', 'true', { timeout: 5000 })
+  await expect(toggle).toHaveAttribute('aria-disabled', 'true', { timeout: 5000 })
+})
+
+When('I tick the inventory route in the refresh import modal', async () => {
+  const p = requirePage()
+  const toggle = refreshRowToggle(p, 'Pet inventory')
+  await expect(toggle).toBeVisible({ timeout: 5000 })
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-checked', 'true', { timeout: 5000 })
+})
+
+Then(
+  'the apply update button should display the count {string}',
+  async ({}, count: string) => {
+    const p = requirePage()
+    // The Apply update button label is "Apply update (N)" where N
+    // counts only checked + ENABLED leaves — locked rows don't show
+    // up in the count even though they're forced-checked, since the
+    // counter advertises how many routes the user is opting into,
+    // not how many checkboxes are ticked.
+    const applyButton = p.locator('[data-testid="import-modal"][data-refresh-mode="true"] [data-testid="import-button"]')
+    await expect(applyButton).toContainText(`(${count})`, { timeout: 5000 })
+  }
+)
+
+When('I apply the refresh', async () => {
+  const p = requirePage()
+  // The Apply button reuses the regular import modal's button
+  // (label flips to "Apply update" when in refresh mode).
+  await p.locator('[data-testid="import-modal"][data-refresh-mode="true"] [data-testid="import-button"]').click()
+  // The apply path issues another /login through the gated auth
+  // service. Poll /releaselogins so the prefetch can return — the
+  // modal only closes once the apply IPC resolves.
+  for (let i = 0; i < 10; i++) {
+    await fetch(`${AUTH_SERVICE_BASE}/releaselogins`).catch(() => undefined)
+    if (await p.locator('[data-testid="import-modal"][data-refresh-mode="true"]').count() === 0) break
+    await p.waitForTimeout(1000)
+  }
+  await expect(p.locator('[data-testid="import-modal"][data-refresh-mode="true"]')).not.toBeVisible({ timeout: 30000 })
+})
+
+Then('the sidebar should show the {string} request', async ({}, requestName: string) => {
+  const p = requirePage()
+  // Make sure the env folder + the tag folder are expanded so the
+  // new request row is visible. The folder may collapse after the
+  // workbench reshuffles on apply.
+  await expandRowIfCollapsed(p, 'Auth Test Service — Pet API')
+  await expandRowIfCollapsed(p, 'Other')
+  const requestRow = sidebarRowByName(p, requestName)
+  await expect(requestRow).toBeVisible({ timeout: 10000 })
+
+  // Verify the request landed as a child of the existing "Other"
+  // tag folder rather than at the env-folder root. The ListView
+  // stamps `aria-level` on every row (`depth + 1`); a child sits one
+  // level deeper than its parent. Asserting on aria-level is more
+  // robust than DOM-order or expanded/collapsed toggling, and leaves
+  // the sidebar untouched for follow-up steps.
+  const otherRow = sidebarRowByName(p, 'Other')
+  const otherLevel = await otherRow.getAttribute('aria-level')
+  const requestLevel = await requestRow.getAttribute('aria-level')
+  expect(otherLevel, 'Other folder should expose aria-level').not.toBeNull()
+  expect(requestLevel, `${requestName} should expose aria-level`).not.toBeNull()
+  expect(Number(requestLevel)).toBe(Number(otherLevel) + 1)
+})
 
 When(
   'I switch the active environment to the {string} sub-env with apply-to-all',

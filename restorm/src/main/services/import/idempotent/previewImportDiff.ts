@@ -97,6 +97,12 @@ export function previewImportDiff(
   for (const r of fromThisFormat) {
     if (seen.has(r)) continue
     if (r.removed === true) continue
+    // Skip authentication routes the import wizard attached even
+    // when they accidentally end up under the same `format` slot
+    // — they're never part of the API surface the spec describes,
+    // so their absence from the spec must NOT count as "removed".
+    const reqType = (r as { type?: string }).type
+    if (reqType === 'auth') continue
     diff.removed.push({
       operationId: r.importOrigin?.operationId,
       naturalKey: r.importOrigin?.naturalKey ?? r.name,

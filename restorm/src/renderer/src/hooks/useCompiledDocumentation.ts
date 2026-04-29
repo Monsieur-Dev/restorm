@@ -12,6 +12,8 @@ import { useEffect, useState } from 'react'
 import { useRestormStore } from '../store/restormStore'
 import type { Request } from '../../../shared/types/collections'
 import type { ApiDocumentation } from '../../../shared/types/apiDocumentation'
+import type { EnvironmentFolder } from '../../../shared/types/folderTypes'
+import { resolveUrlAgainstEnv, flattenEnvVars } from '../../../shared/utils/resolveUrlAgainstEnv'
 
 // ---------- Route discriminants per request type ----------
 
@@ -92,6 +94,37 @@ function apiDocFromItem(item: unknown): ApiDocumentation | undefined {
   return undefined
 }
 
+/**
+ * Build a flat `name → string` map of the env folder's first
+ * environment variables. Keeps the surface tiny — the matcher only
+ * needs primitives. Typed values (StringValue, ExpressionValue, …)
+ * fall through `toString()`; anything that doesn't yield a string
+ * is dropped. Mirrors the main-side helper used by the
+ * apiUpdate orchestrators so renderer + main agree on what counts
+ * as "the env's variables".
+ */
+function envVarsFromFolder(folder: EnvironmentFolder | null): Record<string, string> {
+  if (!folder) return {}
+  const env = folder.environments[0]
+  if (!env) return {}
+  const out: Record<string, string> = {}
+  for (const kv of env.variables) {
+    const v: unknown = kv.value
+    if (typeof v === 'string') out[kv.key] = v
+    else if (typeof v === 'number' || typeof v === 'boolean') out[kv.key] = String(v)
+    else if (v && typeof v === 'object') {
+      const obj = v as { value?: unknown; toString?: () => string }
+      if (typeof obj.value === 'string') out[kv.key] = obj.value
+      else if (typeof obj.value === 'number' || typeof obj.value === 'boolean') out[kv.key] = String(obj.value)
+      else if (typeof obj.toString === 'function' && obj.toString !== Object.prototype.toString) {
+        const s = obj.toString()
+        if (s !== '[object Object]') out[kv.key] = s
+      }
+    }
+  }
+  return out
+}
+
 // ---------- Hook ----------
 
 export interface CompiledDocumentationResult {
@@ -99,6 +132,11 @@ export interface CompiledDocumentationResult {
   markdown: string
   /** `true` if an operation from the owning apiDocumentation matched. */
   matched: boolean
+  /** `true` when the matched operation is flagged `deprecated` in the
+   * spec. Drives the sidebar dimming + the request-tab callout — the
+   * decision is live (re-evaluates on URL change), so editing the URL
+   * to a non-deprecated path immediately clears the visual marker. */
+  deprecated: boolean
   /** `true` while an IPC compilation is in flight. */
   loading: boolean
 }
@@ -115,10 +153,16 @@ export function useCompiledDocumentation(request: Request | null): CompiledDocum
 
   // Primitive discriminant — stable across identity flips of the (reactive-
   // proxy) request object, so this is what actually triggers a re-compile
-  // when any routing-relevant field changes.
-  const routeKey = request ? JSON.stringify(routeFromRequest(request)) : ''
+  // when any routing-relevant field changes. Includes the env-resolved
+  // URL so a base-URL variable change still rolls the cache.
+  const routeKey = request
+    ? JSON.stringify({
+        ...routeFromRequest(request),
+        _envVars: envVarsFromFolder(owningFolder)
+      })
+    : ''
 
-  const [compiled, setCompiled] = useState<{ markdown: string; matched: boolean } | null>(null)
+  const [compiled, setCompiled] = useState<{ markdown: string; matched: boolean; deprecated: boolean } | null>(null)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -129,12 +173,22 @@ export function useCompiledDocumentation(request: Request | null): CompiledDocum
     if (!apiDoc) return
 
     const route = routeFromRequest(request)
+    // Resolve handlebars in the URL against the env's variables so
+    // user-chosen variable names (`{{baseUrl}}`, `{{server}}`, …)
+    // expand to the real host before the matcher's regex test runs
+    // main-side. Path-params not in the env (`{{petId}}`) stay
+    // literal — the matcher's regex builder treats them as `[^/]+`
+    // segments.
+    if (route.url !== undefined) {
+      const envVars = flattenEnvVars(envVarsFromFolder(folder))
+      route.url = resolveUrlAgainstEnv(route.url, envVars)
+    }
 
     const api = (window as unknown as { restorm?: { docs?: {
       compileForRoute?: (
         apiDoc: unknown,
         route: CompilableRoute
-      ) => Promise<{ matched: boolean; markdown: string; operationId?: string; error?: string }>
+      ) => Promise<{ matched: boolean; markdown: string; operationId?: string; deprecated?: boolean; error?: string }>
     } } }).restorm?.docs?.compileForRoute
     if (!api) return
 
@@ -154,7 +208,7 @@ export function useCompiledDocumentation(request: Request | null): CompiledDocum
     const plainRoute = JSON.parse(JSON.stringify(route)) as CompilableRoute
     api(plainApiDoc, plainRoute).then(res => {
       if (cancelled) return
-      setCompiled({ markdown: res.markdown, matched: res.matched })
+      setCompiled({ markdown: res.markdown, matched: res.matched, deprecated: res.deprecated === true })
       setLoading(false)
     }).catch(() => {
       if (cancelled) return
@@ -170,12 +224,13 @@ export function useCompiledDocumentation(request: Request | null): CompiledDocum
   // Synchronous fallback while the effect hasn't run (or when we have no
   // apiDoc at all): return empty, not-matched so callers hide the Docs tab.
   if (!hasApiDoc) {
-    return { markdown: '', matched: false, loading: false }
+    return { markdown: '', matched: false, deprecated: false, loading: false }
   }
 
   return {
     markdown: compiled?.markdown ?? '',
     matched: compiled?.matched ?? false,
+    deprecated: compiled?.deprecated ?? false,
     loading
   }
 }

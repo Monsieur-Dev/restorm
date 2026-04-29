@@ -16,6 +16,8 @@ import { soapImportAdapter } from '../import/idempotent/SoapAdapter'
 import { odataImportAdapter } from '../import/idempotent/ODataAdapter'
 import { computeSpecHash } from './specHash'
 import { expandHeaderTemplate, expandVariables } from './scheduling'
+import { resolveAuthHeadersForFolder } from './resolveAuthHeaders'
+import { specKeyToImportSelectionKey } from './specKeyTranslator'
 
 /**
  * Wire the IPC `apply` handler to the live runtime — fetch a fresh
@@ -51,17 +53,71 @@ function isImportSource(value: string | undefined): value is ImportSourceType {
   return ['swagger', 'graphql', 'grpc', 'wsdl', 'asyncapi', 'postman', 'insomnia', 'bruno', 'curl', 'powershell', 'url'].includes(value)
 }
 
+function extractStringValue(v: unknown): string | undefined {
+  // Variables come through the IPC sync as `StringValue` /
+  // `ExpressionValue` instances flattened to `{ type, value }`. Plain
+  // strings still land as strings (the renderer's reactive proxy
+  // returns them transparently). Anything else collapses to undefined.
+  if (typeof v === 'string') return v
+  if (typeof v === 'number' || typeof v === 'boolean') return String(v)
+  if (v && typeof v === 'object') {
+    const obj = v as { value?: unknown; toString?: () => string }
+    if (typeof obj.value === 'string') return obj.value
+    if (typeof obj.value === 'number' || typeof obj.value === 'boolean') return String(obj.value)
+    if (typeof obj.toString === 'function' && obj.toString !== Object.prototype.toString) {
+      const out = obj.toString()
+      if (out !== '[object Object]') return out
+    }
+  }
+  return undefined
+}
+
 function defaultVariablesFor(folder: EnvironmentFolder): Record<string, string> {
   const env = folder.environments[0]
   if (!env) return {}
   const vars: Record<string, string> = {}
   for (const kv of env.variables) {
-    if (typeof kv.value === 'string') vars[kv.key] = kv.value
+    const v = extractStringValue(kv.value)
+    if (v !== undefined) vars[kv.key] = v
   }
   return vars
 }
 
-export async function runApiUpdateApply(folderId: string): Promise<void> {
+/**
+ * Optional resolved-selection payload from the wizard. When present,
+ * the pipeline only sees the operations / models / enums whose
+ * natural keys are in `include` — everything else is filtered out
+ * before the diff is computed, so a previously-skipped route stays
+ * skipped unless the user explicitly opts it in. Without a payload,
+ * the apply imports the full spec (the legacy "no selection" path
+ * the badge / toast Apply button uses).
+ */
+export interface ApiUpdateApplySelection {
+  /** Set of natural keys to import / refresh. Anything else is
+   * dropped from the spec before the pipeline sees it. */
+  include: string[]
+  /** Set of natural keys the user explicitly chose to skip. Stored
+   * on the import-selection snapshot so a subsequent refresh remembers
+   * the decision. */
+  skip: string[]
+}
+
+function filterSpecBySelection<T extends { naturalKey: string }>(items: T[], include: ReadonlySet<string>): T[] {
+  if (include.size === 0) return items
+  return items.filter((item) => include.has(item.naturalKey))
+}
+
+function filterModelsBySelection<T extends { name: string }>(models: T[], include: ReadonlySet<string>): T[] {
+  if (include.size === 0) return models
+  return models.filter((m) => include.has(`model:${m.name}`))
+}
+
+function filterEnumsBySelection<T extends { name: string }>(enums: T[], include: ReadonlySet<string>): T[] {
+  if (include.size === 0) return enums
+  return enums.filter((e) => include.has(`enum:${e.name}`))
+}
+
+export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateApplySelection): Promise<{ updatedFolder: unknown }> {
   const target = collectionStore.findById(folderId)
   if (!target || !('folderType' in target)) {
     throw new Error(`Folder ${folderId} not found`)
@@ -76,7 +132,14 @@ export async function runApiUpdateApply(folderId: string): Promise<void> {
 
   const variables = defaultVariablesFor(env)
   const url = expandVariables(config.sourceUrl, variables)
-  const headers = expandHeaderTemplate(config.sourceHeaders, variables)
+  const staticHeaders = expandHeaderTemplate(config.sourceHeaders, variables)
+  // Resolve the env folder's attached auth route (if any) before
+  // dispatching the spec fetch. The dynamic headers (e.g. a freshly
+  // minted `Authorization: Bearer …`) are merged on top of the
+  // static `${VAR}`-expanded ones; the static set wins on a key
+  // collision so an explicit override stays explicit.
+  const dynamicHeaders = await resolveAuthHeadersForFolder(env, config.authenticationRequestId, variables)
+  const headers = { ...dynamicHeaders, ...staticHeaders }
   const result = await importFrom(url, Object.keys(headers).length === 0 ? {} : { extraHeaders: headers })
   if (!result.success || result.items.length === 0) {
     throw new Error(result.error ?? 'Import returned no folder')
@@ -87,11 +150,35 @@ export async function runApiUpdateApply(folderId: string): Promise<void> {
   // into the existing folder. Capture the parsed normalised spec
   // ahead of time so the hash stored on disk matches what the
   // pipeline applied.
-  const spec = adapter.extractNormalizedSpec(JSON.parse(await fetchText(url, headers)), {})
-  const fetchedHash = computeSpecHash(spec)
-  const fetchedVersion = spec.version ?? extractVersionFromImported(freshFolder)
+  const fullSpec = adapter.extractNormalizedSpec(JSON.parse(await fetchText(url, headers)), {})
 
-  applyApiUpdate({
+  // The renderer's `include` set carries ImportSelectionTree keys
+  // (`request:http:METHOD {{baseUrl}}/path/{{id}}`); the pipeline
+  // filters by spec-side `naturalKey` (`METHOD /path/{id}`). Build
+  // an inclusion set in the spec key-space by walking the spec
+  // operations + translating each one through specKeyToImportSelectionKey
+  // and keeping the ones whose translated form is in `include`.
+  const includeSnapshotKeys = selection ? new Set(selection.include) : new Set<string>()
+  const includeSpecKeys = selection
+    ? new Set(
+      fullSpec.operations
+        .map((op) => op.naturalKey)
+        .filter((key) => includeSnapshotKeys.has(specKeyToImportSelectionKey(key, importSource, fullSpec)))
+    )
+    : new Set<string>()
+  const spec = selection
+    ? {
+      ...fullSpec,
+      operations: filterSpecBySelection(fullSpec.operations, includeSpecKeys),
+      models: filterModelsBySelection(fullSpec.models, includeSpecKeys),
+      enums: filterEnumsBySelection(fullSpec.enums, includeSpecKeys)
+    }
+    : fullSpec
+
+  const fetchedHash = computeSpecHash(fullSpec)
+  const fetchedVersion = fullSpec.version ?? extractVersionFromImported(freshFolder)
+
+  const applyResult = applyApiUpdate({
     target: env,
     freshFolder,
     spec,
@@ -108,7 +195,29 @@ export async function runApiUpdateApply(folderId: string): Promise<void> {
   }
 
   pubsub.publish(PUBSUB_TOPICS.FOLDER_UPDATED, env)
-  logger.info(`[apiUpdate.orchestrateApply] applied to folder ${folderId}`)
+  logger.info(`[apiUpdate.orchestrateApply] applied to folder ${folderId}`, {
+    selectedOps: spec.operations.length,
+    totalOps: fullSpec.operations.length,
+    addedCount: applyResult.addedRequests.length
+  })
+
+  // Return only the new requests + their target placement + the
+  // post-apply apiUpdate marker. The renderer splices the new rows
+  // into its own folder copy at the same breadcrumb path the apply
+  // pipeline used, so additions land under the same tag / group
+  // folder a fresh import would have produced (instead of at the
+  // env-folder root).
+  const addedRequests = applyResult.addedRequests.map((entry) => ({
+    request: JSON.parse(JSON.stringify(entry.request)) as unknown,
+    parentPath: [...entry.parentPath]
+  }))
+  return {
+    updatedFolder: {
+      id: env.id,
+      addedRequests,
+      apiUpdate: JSON.parse(JSON.stringify(env.apiUpdate)) as unknown
+    }
+  }
 }
 
 async function fetchText(url: string, headers: Record<string, string>): Promise<string> {

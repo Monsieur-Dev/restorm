@@ -209,6 +209,17 @@ Feature: Full workflow end-to-end scenario
     Then the active folder tab should not have tag "pet"
     When I save the file with Ctrl+S
 
+    # ── Docs tab visibility tracks URL ↔ apiDocumentation match ──
+    # Open "Find pet by ID" and confirm the request Docs tab (sat
+    # between Request and Notes) is mounted because the URL matches
+    # an operation in the imported apiDocumentation. Rewriting the
+    # URL to a path the spec doesn't describe (`/pet/` → `/animal/`)
+    # severs that match and the Docs tab should disappear.
+    When I open the sidebar request "Find pet by ID"
+    Then the request Docs tab should be visible
+    When I replace "/pet/" with "/animal/" in the URL field
+    Then the request Docs tab should not be visible
+
     # ── Favorites: sidebar context menu ──
     When I focus the "Swagger Petstore" folder tab
     When I switch to the "home" inner tab
@@ -486,7 +497,7 @@ Feature: Full workflow end-to-end scenario
     Then the saved main window bounds should be x=120 y=80 width=1200 height=800
     And no errors should have been logged
 
-  Scenario: Selective import drops the unchecked group and persists the snapshot
+  Scenario: Selective import drops the unchecked group
     # Stand alone scenario — the long workflow above already imported
     # the full Petstore, so this one starts with a fresh collection
     # to keep the assertions about "what got imported" tight.
@@ -497,7 +508,6 @@ Feature: Full workflow end-to-end scenario
     When I selectively import the Petstore swagger excluding the "store" folder
     And I save all with Ctrl+Shift+S
     Then the imported tree should not contain any "store" routes
-    And the env folder file should record skipped store routes in importSelection
 
     When I close the app
     Then no errors should have been logged

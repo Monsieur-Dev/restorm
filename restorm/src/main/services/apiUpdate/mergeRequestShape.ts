@@ -37,7 +37,7 @@ function bucketFor(location: string): 'headers' | 'params' | 'pathParams' | null
 
 export function mergeHttpRequestShape(existing: Request, op: NormalizedOperation): void {
   const r = existing as unknown as HttpRequestLike
-  if (r.type !== 'http' && r.type !== 'authentication') return
+  if (r.type !== 'http' && r.type !== 'auth') return
   if (!('parameters' in op.shape)) return
   const params = (op.shape as { parameters: NormalizedParameter[] }).parameters
 

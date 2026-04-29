@@ -1,5 +1,5 @@
 import { logger } from 'electron-core-ui'
-import type { EnvironmentFolder } from '../../../shared/types/folderTypes'
+import type { EnvironmentFolder, Folder, FolderItem } from '../../../shared/types/folderTypes'
 import type { Request, ImportOrigin } from '../../../shared/types/requests'
 import { isAnyFolder, isRequest } from '../../../shared/types/folderTypes'
 import type { ImportSourceType } from '../../../shared/types/baseTypes'
@@ -54,10 +54,29 @@ export interface ApplyApiUpdateInput {
   fetchedVersion?: string
 }
 
+export interface AddedRequest {
+  request: Request
+  /** Folder breadcrumb (names from env-folder root down to the
+   * immediate parent) where this request was placed. Empty array
+   * means the request lives directly under the env folder. The
+   * renderer uses the breadcrumb to splice the new row into the
+   * matching folder of its own copy of the tree, instead of
+   * appending at the env-folder root. */
+  parentPath: string[]
+}
+
 export interface ApplyApiUpdateResult {
   diff: ImportDiff
   appliedHash: string
   appliedVersion?: string
+  /** The brand-new request instances the pipeline appended for each
+   * `added` operation, paired with the folder breadcrumb that places
+   * them under the same tag / group folder a fresh import would have
+   * produced. The renderer uses these to splice the new rows into
+   * its own copy of the folder without overwriting unrelated state
+   * (sub-environments, per-tab pinning) that hasn't synced back to
+   * main. */
+  addedRequests: AddedRequest[]
 }
 
 const ADAPTERS: Partial<Record<ImportSourceType, ImportAdapter>> = {
@@ -74,25 +93,69 @@ const ADAPTERS: Partial<Record<ImportSourceType, ImportAdapter>> = {
 }
 
 /**
- * Walk a folder and produce a `naturalKey → Request` map. Requests
- * without an `importOrigin` are skipped — those are user-created and
- * can't participate in the merge.
+ * Walk a folder and produce a `naturalKey → { request, parentPath }`
+ * map. The `parentPath` is the chain of folder objects from the env
+ * folder down to the request's immediate parent; the apply pass
+ * uses it to mirror the freshly-imported placement (tag folders,
+ * GraphQL group folders, …) when materialising new operations into
+ * the target tree. Requests without an `importOrigin` are skipped —
+ * those are user-created and can't participate in the merge.
  */
-function indexFreshFolderByNaturalKey(folder: EnvironmentFolder): Map<string, Request> {
-  const result = new Map<string, Request>()
-  function visit(item: unknown): void {
-    if (isAnyFolder(item as never)) {
-      for (const child of (item as EnvironmentFolder).items) visit(child)
+interface FreshIndexEntry {
+  request: Request
+  parentPath: Folder[]
+}
+
+function indexFreshFolderByNaturalKey(folder: EnvironmentFolder): Map<string, FreshIndexEntry> {
+  const result = new Map<string, FreshIndexEntry>()
+  function visitChild(item: FolderItem, parentPath: Folder[]): void {
+    if (isAnyFolder(item)) {
+      // Only env-folder roots carry `folderType: 'environment'`;
+      // anything reachable through `items[]` is a regular Folder, so
+      // append it to the breadcrumb. Nested env folders aren't a
+      // shape the importers produce — guarding against them would
+      // be dead code.
+      const folder = item as Folder
+      const nextPath = [...parentPath, folder]
+      for (const child of folder.items) visitChild(child, nextPath)
       return
     }
-    if (isRequest(item as never)) {
-      const req = item as Request
-      const key = req.importOrigin?.naturalKey
-      if (key) result.set(key, req)
+    if (isRequest(item)) {
+      const key = item.importOrigin?.naturalKey
+      if (key) result.set(key, { request: item, parentPath })
     }
   }
-  visit(folder)
+  for (const child of folder.items) visitChild(child, [])
   return result
+}
+
+/**
+ * Resolve or create the chain of folders described by `parentPath`
+ * inside `target.items`. Match by folder name (the user-facing
+ * identity that survives across re-imports — runtime ids are
+ * regenerated each run). When a level is missing, clone the fresh
+ * folder's shape with empty `items` so any folder-level metadata
+ * (description, tags, configuration) carries over from the freshly
+ * imported tree. Returns the leaf folder's `items` array — what the
+ * caller should push the new request into.
+ */
+function ensureParentItems(target: EnvironmentFolder, parentPath: Folder[]): FolderItem[] {
+  let items: FolderItem[] = target.items
+  for (const fresh of parentPath) {
+    let existing = items.find(
+      (item): item is Folder => isAnyFolder(item) && (item as Folder).name === fresh.name
+        && (item as { folderType?: string }).folderType !== 'environment'
+    )
+    if (!existing) {
+      existing = {
+        ...fresh,
+        items: []
+      } as Folder
+      items.push(existing)
+    }
+    items = existing.items
+  }
+  return items
 }
 
 export function applyApiUpdate(input: ApplyApiUpdateInput): ApplyApiUpdateResult {
@@ -101,6 +164,7 @@ export function applyApiUpdate(input: ApplyApiUpdateInput): ApplyApiUpdateResult
 
   const freshIndex = indexFreshFolderByNaturalKey(input.freshFolder)
 
+  const addedRequests: AddedRequest[] = []
   const options: RunIdempotentImportOptions = {
     target: input.target,
     spec: input.spec,
@@ -114,9 +178,28 @@ export function applyApiUpdate(input: ApplyApiUpdateInput): ApplyApiUpdateResult
         // a half-merged folder.
         throw new Error(`Fresh import missing operation ${op.naturalKey}`)
       }
-      return fromFresh
+      addedRequests.push({
+        request: fromFresh.request,
+        parentPath: fromFresh.parentPath.map((f) => f.name)
+      })
+      return fromFresh.request
     },
-    mergeRequestShape: mergeHttpRequestShape
+    mergeRequestShape: mergeHttpRequestShape,
+    placeRequest: (target: EnvironmentFolder, request: Request, op: NormalizedOperation): void => {
+      // Mirror the placement the per-format materialiser chose for
+      // this operation in the freshly-imported folder. Without this
+      // every newly added route would land at the env-folder root,
+      // even when a fresh import would have grouped it under a tag
+      // folder ("Other" for untagged Swagger ops, the operation type
+      // for GraphQL, etc.).
+      const fromFresh = freshIndex.get(op.naturalKey)
+      if (!fromFresh) {
+        target.items.push(request)
+        return
+      }
+      const parentItems = ensureParentItems(target, fromFresh.parentPath)
+      parentItems.push(request)
+    }
   }
 
   const diff = runIdempotentImport(options)
@@ -133,7 +216,7 @@ export function applyApiUpdate(input: ApplyApiUpdateInput): ApplyApiUpdateResult
   if (fresh.enumDefinitions) target.enumDefinitions = fresh.enumDefinitions
 
   const appliedHash = input.fetchedHash ?? computeSpecHash(input.spec)
-  const result: ApplyApiUpdateResult = { diff, appliedHash }
+  const result: ApplyApiUpdateResult = { diff, appliedHash, addedRequests }
   if (input.fetchedVersion !== undefined) result.appliedVersion = input.fetchedVersion
   logger.info(
     `[applyApiUpdate] applied to ${input.target.id}: +${diff.added.length} ⤓${diff.deprecated.length} ⌽${diff.removed.length} ↻${diff.merged.length}`

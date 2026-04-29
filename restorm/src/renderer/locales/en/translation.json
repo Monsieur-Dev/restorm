@@ -82,8 +82,11 @@
       "preserveNote": "Your customizations will be preserved.",
       "summary": {
         "added": "{{count}} added",
+        "modified": "{{count}} modified",
         "deprecated": "{{count}} deprecated",
         "removed": "{{count}} removed",
+        "skipped": "{{count}} skipped",
+        "unchanged": "{{count}} unchanged",
         "modelsChanged": "{{count}} model(s) changed"
       },
       "successToastTitle": "API updated",

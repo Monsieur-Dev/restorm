@@ -95,7 +95,25 @@ export function useImport(options: UseImportOptions): UseImportReturn {
       // already-shallow-cloned nodes.
       const remapAuthRefs = (item: FolderItem): FolderItem => {
         if ('items' in item) {
-          return { ...item, items: item.items.map(remapAuthRefs) }
+          let next: FolderItem = { ...item, items: item.items.map(remapAuthRefs) }
+          // Env folders may carry an `apiUpdate.authenticationRequestId`
+          // that points at the auth request the import flow attached.
+          // The regenerateIds pass above stamped a fresh id on the
+          // attached auth, so remap the env-folder reference here too —
+          // otherwise the refresh-from-source path looks up the auth
+          // route by the stale pre-regen id, falls back to "no auth",
+          // and the spec fetch 401's.
+          const apiUpdate = (next as unknown as { apiUpdate?: { authenticationRequestId?: string } }).apiUpdate
+          if (apiUpdate?.authenticationRequestId) {
+            const remapped = idMap.get(apiUpdate.authenticationRequestId)
+            if (remapped !== undefined && remapped !== apiUpdate.authenticationRequestId) {
+              next = {
+                ...next,
+                apiUpdate: { ...apiUpdate, authenticationRequestId: remapped }
+              } as FolderItem
+            }
+          }
+          return next
         }
         const current = (item as { authenticationRequestId?: string }).authenticationRequestId
         if (current !== undefined) {
