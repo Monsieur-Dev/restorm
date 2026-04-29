@@ -53,31 +53,6 @@ jobs:
         run: |
           cd electron-core-ui
           pnpm run build
-      
-      - name: Install gitable dependencies
-        run: |
-          cd gitable
-          pnpm install --frozen-lockfile
-      
-      - name: Check gitable unused dependencies
-        run: |
-          cd gitable
-          npx depcheck
-      
-      - name: Run linter
-        run: |
-          cd gitable
-          pnpm run lint
-      
-      - name: Run type check
-        run: |
-          cd gitable
-          pnpm run typecheck
-      
-      - name: Build gitable application
-        run: |
-          cd gitable
-          NODE_OPTIONS="--max-old-space-size=4096" pnpm run build
 
       - name: Install restorm dependencies
         run: |

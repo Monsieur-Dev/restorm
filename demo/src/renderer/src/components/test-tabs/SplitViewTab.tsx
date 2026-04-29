@@ -12,7 +12,7 @@ const SplitViewTab: React.FC = () => {
         height: '100%'
       }}
     >
-      {/* Left sidebar with vertical stack of panes (like GITABLE / OUTLINE / TIMELINE) */}
+      {/* Left sidebar with vertical stack of panes (like PROJECT / OUTLINE / TIMELINE) */}
       <div
         style={{
           width: 260,
