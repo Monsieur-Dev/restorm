@@ -294,11 +294,19 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
     globalInitPromise.catch((err: unknown) => {
       logger.error('🎨 ThemeProvider: Init promise rejected', { error: String(err) })
     })
-    
-    // Listen for theme changes from other windows
+  }, [setWindowBorderColorForTheme, updateWCOColors])
+
+  // Subscribe to `theme:changed` broadcasts in a SEPARATE effect from
+  // the gated init above. Under React.StrictMode the parent effect
+  // runs twice (first call registers + cleans up, second call hits
+  // the `globalInitStarted` early-return and would skip the
+  // subscription entirely). Splitting it ensures every mount of the
+  // provider has a live listener so theme picks routed through the
+  // settings → IPC → broadcast pipeline actually re-render the page.
+  useEffect(() => {
     const cleanup = getThemeApi()?.onThemeChanged((themeId: string) => {
       if (currentThemeIdRef.current === themeId) return
-      
+
       void (async () => {
         try {
           setIsLoading(true)
@@ -308,7 +316,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
             const existingVars = Array.from(root.style).filter(prop => prop.startsWith('--') && prop !== '--window-border-color')
             existingVars.forEach(prop => { root.style.removeProperty(prop) })
             Object.entries(themeData.variables).forEach(([key, value]) => { root.style.setProperty(key, value) })
-            
+
             const themeList = await window.api.theme.list()
             const themeInfo = themeList.find(t => t.id === themeId)
             if (themeInfo) {
@@ -321,7 +329,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
             setCurrentTheme(themeData.theme)
             setCurrentVariables(themeData.variables)
             setThemes(themeList)
-            
+
             setTimeout(() => void updateWCOColors(), 50)
           }
         } catch (err) {
@@ -331,7 +339,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
         }
       })()
     })
-    
+
     return () => { cleanup?.() }
   }, [setWindowBorderColorForTheme, updateWCOColors])
 
