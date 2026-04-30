@@ -41,3 +41,13 @@ export function menuBarItemSubmenuSelector(itemId: string): string {
 export function menuBarItemSubmenuScrollableSelector(itemId: string): string {
   return `[data-testid="${escapeAttributeValue(itemId)}-submenu-scrollable"]`
 }
+
+/** Trailing "..." button when the responsive `MenuBar` is in `overflow` mode. */
+export function menuBarOverflowButtonSelector(testId: string): string {
+  return `[data-testid="${escapeAttributeValue(testId)}-overflow-button"]`
+}
+
+/** Single hamburger "☰" button when the responsive `MenuBar` is in `hamburger` mode. */
+export function menuBarHamburgerButtonSelector(testId: string): string {
+  return `[data-testid="${escapeAttributeValue(testId)}-hamburger-button"]`
+}

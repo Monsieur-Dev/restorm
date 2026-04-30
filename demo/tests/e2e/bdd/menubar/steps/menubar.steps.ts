@@ -6,7 +6,7 @@ import {
 import { openMenuBarE2ETab } from '../fixtures/menubar.fixture'
 
 const bdd = createBdd()
-const { Given, Then } = bdd
+const { Given, When, Then } = bdd
 
 defineMenuBarBddSteps(bdd)
 defineScrollableElementBddSteps(bdd)
@@ -35,6 +35,13 @@ Then('menubar autosave enabled should be {string}', async ({ page }, expected: s
   if (text.trim() !== expected) {
     throw new Error(`Expected menubar autosave enabled="${expected}", got "${text}"`)
   }
+})
+
+When('I set the responsive menubar width to {string}', async ({ page }, label: string) => {
+  // The width buttons live in the demo MenuBarTab harness; clicking
+  // one mutates the wrapper's `width` style, which kicks the MenuBar's
+  // ResizeObserver and flips its `data-mode` attribute.
+  await page.getByTestId(`responsive-width-${label}`).click()
 })
 
 export {}

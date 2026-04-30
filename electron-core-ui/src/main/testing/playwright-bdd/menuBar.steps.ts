@@ -1,8 +1,10 @@
 import {
+  menuBarHamburgerButtonSelector,
   menuBarItemSelector,
   menuBarItemSubmenuSelector,
   menuBarMenuButtonSelector,
   menuBarMenuDropdownSelector,
+  menuBarOverflowButtonSelector,
   menuBarRootSelector
 } from '../menuBarSelectors'
 
@@ -178,5 +180,44 @@ export function defineMenuBarBddSteps({ When, Then }: BddFnsWithPage): void {
   When('I trigger menu shortcut {string}', async ({ page }, shortcut: unknown) => {
     if (typeof shortcut !== 'string') throw new Error('Invalid shortcut')
     await asPage(page).keyboard.press(toPlaywrightShortcut(shortcut))
+  })
+
+  // ── Responsive layout (overflow + hamburger) ─────────────────────
+  Then('menu bar {string} should be in {string} mode', async ({ page }, testId: unknown, mode: unknown) => {
+    if (typeof testId !== 'string' || typeof mode !== 'string') throw new Error('Invalid menu bar mode params')
+    if (mode !== 'full' && mode !== 'overflow' && mode !== 'hamburger') {
+      throw new Error(`Invalid layout mode "${mode}" — expected full | overflow | hamburger`)
+    }
+    await waitForAttribute(asPage(page).locator(menuBarRootSelector(testId)), 'data-mode', mode, 5000)
+  })
+
+  Then('menu bar {string} should have {int} visible items', async ({ page }, testId: unknown, expected: unknown) => {
+    if (typeof testId !== 'string' || typeof expected !== 'number') throw new Error('Invalid menu bar visible-count params')
+    await waitForAttribute(
+      asPage(page).locator(menuBarRootSelector(testId)),
+      'data-visible-count',
+      String(expected),
+      5000
+    )
+  })
+
+  When('I open the overflow menu of menu bar {string}', async ({ page }, testId: unknown) => {
+    if (typeof testId !== 'string') throw new Error('Invalid menu bar id')
+    await asPage(page).locator(menuBarOverflowButtonSelector(testId)).click({ force: true })
+  })
+
+  When('I open the hamburger menu of menu bar {string}', async ({ page }, testId: unknown) => {
+    if (typeof testId !== 'string') throw new Error('Invalid menu bar id')
+    await asPage(page).locator(menuBarHamburgerButtonSelector(testId)).click({ force: true })
+  })
+
+  Then('menu bar {string} overflow button should be visible', async ({ page }, testId: unknown) => {
+    if (typeof testId !== 'string') throw new Error('Invalid menu bar id')
+    await asPage(page).locator(menuBarOverflowButtonSelector(testId)).waitFor({ state: 'attached', timeout: 5000 })
+  })
+
+  Then('menu bar {string} hamburger button should be visible', async ({ page }, testId: unknown) => {
+    if (typeof testId !== 'string') throw new Error('Invalid menu bar id')
+    await asPage(page).locator(menuBarHamburgerButtonSelector(testId)).waitFor({ state: 'attached', timeout: 5000 })
   })
 }

@@ -13,6 +13,21 @@ export interface MenuBarProps {
   children: React.ReactNode
   className?: string
   id?: string
+  /** Below this container width the bar collapses into a single hamburger button. Default 200. */
+  hamburgerBelowPx?: number
+  'data-testid'?: string
+}
+
+export type MenuBarLayoutMode = 'full' | 'overflow' | 'hamburger'
+
+export interface MenuBarItemProps {
+  /** Display text or any React node — the responsive bar passes a codicon for the icon-only `...` / `☰` buttons. */
+  title: React.ReactNode
+  children?: React.ReactNode
+  className?: string
+  id?: string
+  'aria-label'?: string
+  'data-testid'?: string
 }
 
 export interface MenuItemProps {
@@ -21,25 +36,17 @@ export interface MenuItemProps {
   onClick?: () => void
   checked?: boolean
   disabled?: boolean
+  icon?: string | React.ReactNode
   children?: React.ReactNode
   className?: string
   id?: string
+  'data-testid'?: string
 }
 
 export interface MenuItemSeparatorProps {
   className?: string
   id?: string
-}
-
-export interface MenuBarState {
-  focusedMenuIndex: number | null
-  isOpen: boolean
-  activeMenuIndex: number | null
-}
-
-export interface MenuItemState {
-  isHovered: boolean
-  isFocused: boolean
+  'data-testid'?: string
 }
 ```
 
@@ -49,9 +56,10 @@ export interface MenuItemState {
 - **children** (`React.ReactNode`) : MenuBarItem components
 - **className** (`string`) : Additional CSS classes
 - **id** (`string`) : HTML ID of the menu bar
+- **hamburgerBelowPx** (`number`, default `200`) : Below this container width, the bar collapses every menu into a single hamburger (`☰`) button. Above it, items that don't fit get rolled into a trailing overflow (`...`) button instead. See "Responsive layout" below.
 
 #### MenuBarItem
-- **title** (`string`) : Display text for the menu item
+- **title** (`React.ReactNode`) : Display text or React node for the menu item. Strings work as before; passing a node is what lets the responsive bar render the icon-only `...` / `☰` buttons.
 - **children** (`React.ReactNode`) : MenuItem components for dropdown
 - **isFocused** (`boolean`) : Internal focus state (managed by MenuBar)
 - **isActive** (`boolean`) : Internal active state (managed by MenuBar)
@@ -234,6 +242,30 @@ const MyComponent = () => {
     <MenuItem title="Zoom Out" shortcut="Ctrl+-" onClick={zoomOut} />
     <MenuItem title="Reset Zoom" shortcut="Ctrl+0" onClick={resetZoom} />
   </MenuBarItem>
+</MenuBar>
+```
+
+## Responsive layout
+
+The MenuBar measures its own container width via a `ResizeObserver` and switches between three modes:
+
+| Mode | Trigger | Render |
+|------|---------|--------|
+| `full` | Container ≥ sum of item widths | Every `MenuBarItem` inline. |
+| `overflow` | Container < sum but ≥ `hamburgerBelowPx` | Items that fit render inline, the rest collapse into a trailing `...` button (`codicon-more`). |
+| `hamburger` | Container < `hamburgerBelowPx` | All items live inside a single `☰` button (`codicon-menu`). |
+
+The current mode is exposed on the root via `data-mode="full|overflow|hamburger"` plus `data-visible-count="N"` (the number of inline items). The collapsed buttons carry `data-testid="<menubar-id>-overflow-button"` and `data-testid="<menubar-id>-hamburger-button"`.
+
+When an item is in the overflow / hamburger bucket, the original `<MenuBarItem>` becomes a `<MenuItem>` with the same children — its dropdown is rendered as a submenu of the collapsed button. Mnemonic shortcuts (`Alt-letter`) still work: when the matching item is hidden, the bar opens the collapsed button and focuses the matching submenu entry so a follow-up `Enter` / `ArrowRight` drills in.
+
+Container layout note: hosting layouts must let the MenuBar's slot shrink. The bar's CSS uses `width: 100%; min-width: 0` so a flex parent must be `flex: 0 1 auto; min-width: 0; overflow: hidden` (or equivalent). The library's own `Titlebar` already does this for its `titlebar-left` zone.
+
+```tsx
+<MenuBar data-testid="app-menubar" hamburgerBelowPx={220}>
+  <MenuBarItem title="File">…</MenuBarItem>
+  <MenuBarItem title="Edit">…</MenuBarItem>
+  <MenuBarItem title="View">…</MenuBarItem>
 </MenuBar>
 ```
 

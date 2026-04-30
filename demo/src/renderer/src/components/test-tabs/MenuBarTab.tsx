@@ -8,6 +8,9 @@ const MenuBarTab: React.FC = () => {
   const [actionCount, setActionCount] = useState(0)
   const [lastAction, setLastAction] = useState('')
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true)
+  // Width of the responsive MenuBar harness — the e2e suite flips
+  // this between three breakpoints to exercise the three modes.
+  const [responsiveWidth, setResponsiveWidth] = useState(700)
 
   const longItems = useMemo(() => {
     const items: number[] = []
@@ -114,6 +117,46 @@ const MenuBarTab: React.FC = () => {
         <div data-testid="menubar-action-count">{String(actionCount)}</div>
         <div data-testid="menubar-last-action">{lastAction}</div>
         <div data-testid="menubar-autosave-enabled">{autoSaveEnabled ? 'true' : 'false'}</div>
+      </div>
+
+      {/* Responsive harness — a six-menu MenuBar wrapped in a
+          width-controllable container so the e2e suite can drive
+          the three layout modes (`full` / `overflow` / `hamburger`)
+          without resizing the actual window. The buttons set CSS
+          width on the wrapper; the MenuBar's own ResizeObserver
+          flips its `data-mode` attribute accordingly. */}
+      <div style={{ display: 'grid', gap: 8, marginTop: 24 }}>
+        <h3 style={{ fontSize: 16, marginBottom: 0 }}>Responsive layout</h3>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button data-testid="responsive-width-wide" onClick={() => { setResponsiveWidth(700) }}>700 (full)</button>
+          <button data-testid="responsive-width-medium" onClick={() => { setResponsiveWidth(280) }}>280 (overflow)</button>
+          <button data-testid="responsive-width-narrow" onClick={() => { setResponsiveWidth(150) }}>150 (hamburger)</button>
+        </div>
+        <div
+          data-testid="menubar-responsive-wrapper"
+          style={{ width: responsiveWidth, border: '1px solid var(--panel-border, #444)', padding: 4 }}
+        >
+          <MenuBar data-testid="menubar-responsive" hamburgerBelowPx={200}>
+            <MenuBarItem data-testid="menubar-responsive-file" title="File">
+              <MenuItem data-testid="menubar-responsive-file-new" title="New" onClick={() => { onAction('r-new') }} />
+            </MenuBarItem>
+            <MenuBarItem data-testid="menubar-responsive-edit" title="Edit">
+              <MenuItem data-testid="menubar-responsive-edit-undo" title="Undo" onClick={() => { onAction('r-undo') }} />
+            </MenuBarItem>
+            <MenuBarItem data-testid="menubar-responsive-selection" title="Selection">
+              <MenuItem data-testid="menubar-responsive-selection-all" title="Select All" onClick={() => { onAction('r-select-all') }} />
+            </MenuBarItem>
+            <MenuBarItem data-testid="menubar-responsive-view" title="View">
+              <MenuItem data-testid="menubar-responsive-view-zoom-in" title="Zoom In" onClick={() => { onAction('r-zoom-in') }} />
+            </MenuBarItem>
+            <MenuBarItem data-testid="menubar-responsive-tools" title="Tools">
+              <MenuItem data-testid="menubar-responsive-tools-options" title="Options" onClick={() => { onAction('r-options') }} />
+            </MenuBarItem>
+            <MenuBarItem data-testid="menubar-responsive-help" title="Help">
+              <MenuItem data-testid="menubar-responsive-help-about" title="About" onClick={() => { onAction('r-about') }} />
+            </MenuBarItem>
+          </MenuBar>
+        </div>
       </div>
     </div>
   )

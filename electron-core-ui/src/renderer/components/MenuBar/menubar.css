@@ -7,9 +7,17 @@
 	height: 30px;
 	overflow: hidden;
 	background-color: transparent !important;
-	width: fit-content !important;
-	min-width: auto !important;
-	max-width: none !important;
+
+	/* The MenuBar's own ResizeObserver drives the responsive overflow
+	 * + hamburger logic. Letting the bar grow to fit its parent's
+	 * available width (instead of fit-content) is what makes the
+	 * observer see a meaningful varying width. `min-width: 0` lets a
+	 * flex parent shrink the bar below its natural content width — the
+	 * responsive logic then collapses items into the overflow /
+	 * hamburger button. */
+	width: 100%;
+	min-width: 0;
+	max-width: 100%;
 }
 
 .menubar.overflow-menu-only {

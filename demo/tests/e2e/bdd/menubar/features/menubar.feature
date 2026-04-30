@@ -63,3 +63,35 @@ Feature: MenuBar
     Then scrollable element "menubar-basic-file-scrollable" scroll top should be >= 50
     Then scrollable element "menubar-basic-file-scrollable" vertical scrollbar should be visible
 
+  # Responsive layout: the harness wraps a six-menu MenuBar
+  # in a width-controllable container. Clicking the width buttons
+  # forces the bar through the three modes — `full`, `overflow` (with
+  # a trailing "..." button), and `hamburger` (everything inside a
+  # single ☰ button) — and asserts both the `data-mode` flag and the
+  # presence of the right collapsed-button.
+  Scenario: Responsive layout — wide container shows every item inline
+    Given I open the menubar e2e tab
+    When I set the responsive menubar width to "wide"
+    Then menu bar "menubar-responsive" should be in "full" mode
+    Then menu bar "menubar-responsive" should have 6 visible items
+
+  Scenario: Responsive layout — medium container collapses overflow into "..."
+    Given I open the menubar e2e tab
+    When I set the responsive menubar width to "medium"
+    Then menu bar "menubar-responsive" should be in "overflow" mode
+    Then menu bar "menubar-responsive" overflow button should be visible
+
+  Scenario: Responsive layout — narrow container collapses to hamburger
+    Given I open the menubar e2e tab
+    When I set the responsive menubar width to "narrow"
+    Then menu bar "menubar-responsive" should be in "hamburger" mode
+    Then menu bar "menubar-responsive" hamburger button should be visible
+
+  Scenario: Responsive layout — opening the hamburger surfaces every item as a submenu entry
+    Given I open the menubar e2e tab
+    When I set the responsive menubar width to "narrow"
+    Then menu bar "menubar-responsive" should be in "hamburger" mode
+    When I open the hamburger menu of menu bar "menubar-responsive"
+    When I hover menu bar item "menubar-responsive-help-overflow"
+    Then menu bar submenu "menubar-responsive-help-overflow" should be visible
+

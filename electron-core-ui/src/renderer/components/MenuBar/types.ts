@@ -4,8 +4,18 @@ export interface MenuBarProps {
   children: React.ReactNode
   className?: string
   id?: string
+  /**
+   * Below this container width (in CSS pixels), the menubar collapses
+   * every top-level menu into a single hamburger (`☰`) button. Above
+   * it, items that don't fit collapse into a trailing overflow
+   * (`...`) button instead. Defaults to 200 px.
+   */
+  hamburgerBelowPx?: number
   'data-testid'?: string
 }
+
+/** Layout mode the responsive MenuBar can be in. */
+export type MenuBarLayoutMode = 'full' | 'overflow' | 'hamburger'
 
 export interface MenuItemProps {
   title: string

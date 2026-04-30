@@ -154,8 +154,8 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
           </MenuBarItem>
           {/* Édition / Sélection / Affichage / Outils / Aide — items
               are intentionally disabled until each gets wired up. The
-              skeleton lands here so the responsive overflow logic
-              (OYO-185) has the full menu surface to test against. */}
+              skeleton lands here so the responsive overflow logic in
+              ECUI's MenuBar has the full menu surface to test against. */}
           <MenuBarItem title={t('menuBar.edit')} data-testid="titlebar-menubar-item-edit">
             <MenuItem data-testid="titlebar-menu-item-undo" title={t('menuBar.undo')} shortcut="Ctrl+Z" disabled />
             <MenuItem data-testid="titlebar-menu-item-redo" title={t('menuBar.redo')} shortcut="Ctrl+Shift+Z" disabled />
