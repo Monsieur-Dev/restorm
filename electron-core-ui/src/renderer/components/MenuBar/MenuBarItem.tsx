@@ -3,7 +3,13 @@ import { ScrollableElement } from '../ScrollableElement'
 import { keyboardShortcutService } from '../../services/KeyboardShortcutService'
 
 interface MenuBarItemProps {
-  title: string
+  /**
+   * Top-level menu label. Accepts a ReactNode so the responsive
+   * MenuBar can pass a codicon glyph for the overflow / hamburger
+   * buttons. The Alt-mnemonic logic in `MenuBar` reads the rendered
+   * `textContent`, so passing a string still works exactly as before.
+   */
+  title: React.ReactNode
   children?: React.ReactNode
   isFocused?: boolean
   isActive?: boolean
@@ -11,6 +17,7 @@ interface MenuBarItemProps {
   onMouseEnter?: () => void
   className?: string
   id?: string
+  'aria-label'?: string
   'data-testid'?: string
 }
 
@@ -60,6 +67,7 @@ const MenuBarItem = forwardRef<HTMLDivElement, MenuBarItemProps>(({
   onMouseEnter,
   className = '',
   id,
+  'aria-label': ariaLabel,
   'data-testid': dataTestId
 }, ref) => {
   const testId = dataTestId
@@ -185,6 +193,7 @@ const MenuBarItem = forwardRef<HTMLDivElement, MenuBarItemProps>(({
       tabIndex={isFocused ? 0 : -1}
       aria-haspopup={!!children}
       aria-expanded={isActive}
+      {...(ariaLabel ? { 'aria-label': ariaLabel } : {})}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

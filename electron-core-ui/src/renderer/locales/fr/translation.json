@@ -10,6 +10,31 @@
       "cancel": "Annuler"
     }
   },
+  "menuBar": {
+    "edit": "Édition",
+    "view": "Affichage",
+    "help": "Aide",
+    "undo": "Annuler",
+    "redo": "Rétablir",
+    "cut": "Couper",
+    "copy": "Copier",
+    "paste": "Coller",
+    "find": "Rechercher",
+    "replace": "Remplacer",
+    "toggleSidebar": "Afficher/masquer la barre latérale",
+    "toggleResponsePanel": "Afficher/masquer le panneau de réponse",
+    "zoomIn": "Zoom avant",
+    "zoomOut": "Zoom arrière",
+    "resetZoom": "Réinitialiser le zoom",
+    "settings": "Paramètres",
+    "toggleDevTools": "Outils de développement",
+    "toggleFullscreen": "Plein écran",
+    "about": "À propos",
+    "documentation": "Documentation",
+    "keyboardShortcuts": "Raccourcis clavier",
+    "releaseNotes": "Notes de version",
+    "reportIssue": "Signaler un bug"
+  },
   "settings": {
     "title": "Paramètres",
     "theme": "Thème",

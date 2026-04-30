@@ -39,7 +39,19 @@
 	align-items: center;
 	height: 100%;
 	-webkit-app-region: no-drag;
-	flex-shrink: 0;
+
+	/* Both grow and shrink so a hosted MenuBar's responsive overflow /
+	 * hamburger logic actually receives a varying container width.
+	 * `flex-grow: 1` matters because once the MenuBar collapses to the
+	 * single hamburger button its rendered children are tiny, which
+	 * would otherwise pin the left zone at button-only width even
+	 * after the window widens again. `min-width: 0` lets flex shrink
+	 * below the content's intrinsic size; `overflow: hidden` prevents
+	 * content from spilling out. The icon child stays non-shrinkable
+	 * (see `.titlebar-left > .titlebar-icon` below). */
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
 }
 
 .titlebar-left > .titlebar-icon {
@@ -47,7 +59,13 @@
 }
 
 .titlebar-center {
-	flex: 1;
+	/* `flex: 1 1 auto` makes the center zone compete with the left zone
+	 * on its content width when the window narrows — without it,
+	 * `flex: 1 1 0%` would leave the left zone with all its content
+	 * width and shrink only the center, which prevents the left
+	 * zone's MenuBar from ever exercising its responsive overflow
+	 * logic. */
+	flex: 1 1 auto;
 	display: flex;
 	align-items: center;
 	justify-content: center;
