@@ -1,6 +1,14 @@
 .ecu-modal-overlay {
 	position: fixed;
-	inset: 0;
+
+	/* Leave the titlebar uncovered so the OS window controls
+	   (WCO / traffic-lights) stay clickable and the window stays
+	   draggable while a modal is open. `--titlebar-height` is exposed
+	   on `document.body` by the Titlebar component (default 32px); the
+	   var fallback covers consumers that don't render a Titlebar.
+	   The 1 px gap on left / right / bottom keeps the OS-level
+	   resize-edge regions clickable while the modal is open. */
+	inset: var(--titlebar-height, 32px) 1px 1px;
 	z-index: 10000;
 	display: flex;
 	align-items: stretch;
