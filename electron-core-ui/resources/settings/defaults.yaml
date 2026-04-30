@@ -10,13 +10,18 @@ groups:
           titleKey: "settings.appearance.theme.title"
           descriptionKey: "settings.appearance.theme.description"
           type: "theme"
-          default: "theme-defaults/dark_plus"
+          default: "dark/dark-plus"
       - setting:
           id: "language"
           titleKey: "settings.appearance.language.title"
           descriptionKey: "settings.appearance.language.description"
           type: "enum"
           default: "en"
+          # Locale is a per-machine / per-user preference, not a
+          # project decision — keep it out of the workspace overlay so
+          # a checked-in `.restorm/settings.json` never forces another
+          # contributor's UI into a language they didn't choose.
+          userOnly: true
           params:
             values:
               - value: "en"

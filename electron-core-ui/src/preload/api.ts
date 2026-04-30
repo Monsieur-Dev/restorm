@@ -495,6 +495,50 @@ export const createCoreUIAPI = (): CoreUiApi => ({
       return () => {
         ipcRenderer.removeListener('settings:config-loaded', handler)
       }
+    },
+    // ── Workspace overlay ─────────────────────────────────────────
+    getWorkspacePath: async (): Promise<string | null> => {
+      const result: unknown = await ipcRenderer.invoke('settings:get-workspace-path')
+      return result as string | null
+    },
+    getWorkspaceValues: async (): Promise<Record<string, SettingValue>> => {
+      const result: unknown = await ipcRenderer.invoke('settings:get-workspace-values')
+      return (result ?? {}) as Record<string, SettingValue>
+    },
+    getWorkspaceValue: async (storageKey: string): Promise<SettingValue | null> => {
+      const result: unknown = await ipcRenderer.invoke('settings:get-workspace-value', storageKey)
+      return result === null || result === undefined ? null : (result as SettingValue)
+    },
+    setWorkspaceValue: async (storageKey: string, value: SettingValue): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('settings:set-workspace-value', storageKey, value)
+      return result as boolean
+    },
+    resetWorkspaceValue: async (storageKey: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('settings:reset-workspace-value', storageKey)
+      return result as boolean
+    },
+    getResolvedValue: async (storageKey: string): Promise<{
+      storageKey: string
+      effective: SettingValue
+      source: 'workspace' | 'user' | 'default'
+      overriddenBy?: 'workspace'
+    } | null> => {
+      const result: unknown = await ipcRenderer.invoke('settings:get-resolved-value', storageKey)
+      return result as {
+        storageKey: string
+        effective: SettingValue
+        source: 'workspace' | 'user' | 'default'
+        overriddenBy?: 'workspace'
+      } | null
+    },
+    onWorkspaceChanged: (callback: (path: string | null) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, path: string | null): void => {
+        callback(path)
+      }
+      ipcRenderer.on('settings:workspace-changed', handler)
+      return () => {
+        ipcRenderer.removeListener('settings:workspace-changed', handler)
+      }
     }
   }
 })

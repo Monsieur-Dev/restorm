@@ -1,9 +1,9 @@
 import { app, BrowserWindow } from 'electron'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, initAutoSaveController } from 'electron-core-ui'
+import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, initAutoSaveController } from 'electron-core-ui'
 import { PROJECT_UUID_KEY } from '../shared/config/projectUuid'
 import type { PersistenceFormat } from 'electron-core-ui'
-import { join } from 'path'
+import { dirname, join } from 'path'
 import { existsSync, statSync } from 'fs'
 import { searchIndexService, contextService, responseHistoryService, authenticationCacheService } from './services'
 import { clearUserSettings, parseCliArgs } from './cli/args'
@@ -236,11 +236,24 @@ logger.info('File Service initialized')
   let lastFilePath: string | null = null
   getFileService().onStateChanged((state) => {
     const path = state.currentFile.path
-    if (!path || path === lastFilePath) {
-      lastFilePath = path
-      return
-    }
+    if (path === lastFilePath) return
     lastFilePath = path
+
+    // Workspace overlay path: a `.restorm` file lives alongside its
+    // workspace dir, a folder mode opens its own dir. Both flows
+    // converge here. SettingsService may not be ready yet on the
+    // very first event; gate accordingly.
+    if (isSettingsServiceInitialized()) {
+      if (!path) {
+        getSettingsService().unsetWorkspacePath()
+      } else if (path.endsWith('.restorm')) {
+        getSettingsService().setWorkspacePath(dirname(path))
+      } else {
+        getSettingsService().setWorkspacePath(path)
+      }
+    }
+
+    if (!path) return
     // Folder-mode paths point to a directory; file-mode paths end in the
     // `.restorm` extension. Use the extension as the discriminator so we
     // don't have to hit the filesystem on every state change.

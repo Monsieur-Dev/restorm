@@ -36,6 +36,23 @@ export interface CustomWCOProps {
   - `window.electronAPI.sendAction('minimize' | 'maximize' | 'close')`.
 - Visuals are provided by `custom-wco.css` and use Codicons (`codicon-chrome-*`).
 
+### DOM topology (Linux)
+
+The root `.custom-wco` element stays mounted in the host title-bar layout and only acts as a placeholder reserving the controls' grid width. The actual `.window-controls-container` holding the three buttons is **portalled to `document.body`** and pinned via `position: fixed; top: 0; right: 0` with `z-index: 100001`. This is the only way to keep the buttons clickable above a `Modal` overlay — a high `z-index` alone wouldn't escape the host app's stacking context. Test selectors that walk from the root down to the buttons must therefore query `body`-scoped (the `${testId}-{minimize|maximize|close}` testids work either way).
+
+### CSS custom property `--wco-width`
+
+`CustomWCO` writes the rendered controls' width onto `document.body` as `--wco-width` (in pixels):
+
+| Platform   | `--wco-width` value             |
+|------------|---------------------------------|
+| `linux`    | `92px` (3 × 30px buttons + 2px) |
+| `win32`    | OS-reserved width (default `138px`, refined by `navigator.windowControlsOverlay`) |
+| `darwin`   | same as `win32`                 |
+| other      | `0px`                           |
+
+Downstream consumers (e.g. `Modal`'s `.ecu-modal-drag-strip` `right` offset) read this var so they can leave a matching gap and never swallow WCO clicks. The body-level location guarantees the value is reachable from anywhere in the renderer, including portals. The var is removed on unmount.
+
 ## Usage
 
 ```tsx

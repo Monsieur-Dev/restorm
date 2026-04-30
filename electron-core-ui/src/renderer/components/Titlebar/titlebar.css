@@ -1,7 +1,48 @@
 /* Titlebar styles */
 
 .titlebar {
-	display: flex;
+	/* `grid-template-columns: 1fr auto 1fr auto` matches the four
+	 * rendered children (`.titlebar-left`, `.titlebar-center`,
+	 * `.titlebar-right`, `<CustomWCO>`):
+	 *   - col 1 (1fr): left zone (icon + MenuBar). The 1fr track
+	 *     gives the MenuBar's `ResizeObserver` a real, varying
+	 *     container width to drive its overflow / hamburger collapse
+	 *     when the window narrows. With the previous absolute-centre
+	 *     approach the left zone kept full flex space "behind" the
+	 *     centre zone and the MenuBar never observed enough shrinkage
+	 *     to collapse — items just got clipped.
+	 *   - col 2 (auto): centre zone, sized to its content (search
+	 *     bar / title). Sits between two 1fr columns so it lands
+	 *     near the geometric centre of the title bar — slightly off
+	 *     by half the WCO width, which is acceptable.
+	 *   - col 3 (1fr): right zone (action buttons). Mirrors the left
+	 *     1fr so leftover space is split symmetrically.
+	 *   - col 4 (auto): the CustomWCO spacer / Linux window controls.
+	 *     Explicit column so it stays on row 1 instead of falling to
+	 *     an implicit row 2 (clipped by `overflow: hidden`). */
+	display: grid;
+
+	/* Track sizing rationale:
+	 *   - `minmax(80px, 1fr)` for the left column: 1fr so the column
+	 *     grows on wide windows and the MenuBar's `ResizeObserver`
+	 *     drives its overflow / hamburger collapse; the 80px floor
+	 *     reserves room for the app icon + hamburger so they never
+	 *     get pushed off the left edge — without it a fixed centre
+	 *     track plus a narrow window would clip them at x < 0.
+	 *   - `minmax(0, 600px)` for the centre column: caps the search
+	 *     bar at the SearchBar's own `max-width: 600px;` on wide
+	 *     windows, but lets the column shrink (down to 0 if needed)
+	 *     when the rest of the title bar fights for room — the
+	 *     SearchBar prefers losing width rather than knocking the
+	 *     left zone off-screen.
+	 *   - `minmax(0, 1fr)` for the right column: mirrors the left so
+	 *     leftover space is split symmetrically; centre lands near
+	 *     the geometric midpoint (off only by half the WCO width).
+	 *   - `auto` for the WCO: explicit fourth column so the WCO
+	 *     stays on row 1 instead of falling onto an implicit row 2
+	 *     (which would be clipped by the title bar's `overflow:
+	 *     hidden`). */
+	grid-template-columns: minmax(80px, 1fr) minmax(0, 600px) minmax(40px, 1fr) auto;
 	align-items: center;
 	width: 100%;
 	height: 32px;
@@ -38,18 +79,19 @@
 	display: flex;
 	align-items: center;
 	height: 100%;
-	-webkit-app-region: no-drag;
 
-	/* Both grow and shrink so a hosted MenuBar's responsive overflow /
-	 * hamburger logic actually receives a varying container width.
-	 * `flex-grow: 1` matters because once the MenuBar collapses to the
-	 * single hamburger button its rendered children are tiny, which
-	 * would otherwise pin the left zone at button-only width even
-	 * after the window widens again. `min-width: 0` lets flex shrink
-	 * below the content's intrinsic size; `overflow: hidden` prevents
-	 * content from spilling out. The icon child stays non-shrinkable
-	 * (see `.titlebar-left > .titlebar-icon` below). */
-	flex: 1 1 auto;
+	/* Drag-by-default so the empty space inside the left zone (e.g.
+	 * the part of the MenuBar element after its last menu button —
+	 * the bar fills its parent at `width: 100%` for ResizeObserver
+	 * sizing) keeps the window draggable. Interactive children
+	 * (.menubar-menu-button) declare `no-drag` themselves so they
+	 * stay clickable. */
+	-webkit-app-region: drag;
+
+	/* Grid item in column 1 (1fr). `min-width: 0` lets the column
+	 * shrink below the MenuBar's intrinsic content width — that's
+	 * what triggers the bar's responsive overflow / hamburger logic.
+	 * `overflow: hidden` prevents content from spilling out. */
 	min-width: 0;
 	overflow: hidden;
 }
@@ -59,19 +101,15 @@
 }
 
 .titlebar-center {
-	/* `flex: 1 1 auto` makes the center zone compete with the left zone
-	 * on its content width when the window narrows — without it,
-	 * `flex: 1 1 0%` would leave the left zone with all its content
-	 * width and shrink only the center, which prevents the left
-	 * zone's MenuBar from ever exercising its responsive overflow
-	 * logic. */
-	flex: 1 1 auto;
+	/* Grid item in column 2. The track width is set on the parent
+	 * via `grid-template-columns`, so the SearchBar's `width: 100%;
+	 * max-width: 600px;` resolves against that definite size instead
+	 * of collapsing to its intrinsic content width. */
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	height: 100%;
 	-webkit-app-region: drag;
-	overflow: hidden;
 	min-width: 0;
 }
 
@@ -80,9 +118,20 @@
 	align-items: center;
 	justify-content: flex-end;
 	height: 100%;
-	-webkit-app-region: no-drag;
+
+	/* Drag-by-default so the empty space inside the right zone (the
+	 * grid track is `1fr`-sized and `rightContent` is right-aligned,
+	 * leaving leftover space on the left of the rendered buttons)
+	 * keeps the window draggable. Direct children get `no-drag`
+	 * forced via the rule below so hosted action buttons stay
+	 * clickable without each consumer having to opt back in. */
+	-webkit-app-region: drag;
 	flex-shrink: 0;
 	padding-right: 5px;
+}
+
+.titlebar-right > * {
+	-webkit-app-region: no-drag;
 }
 
 /* Title text */

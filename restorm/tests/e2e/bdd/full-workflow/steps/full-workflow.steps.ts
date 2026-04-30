@@ -10,7 +10,7 @@ const SAMPLES_DIR = resolve(__dirname, '../../../../unit')
 
 const { Given, When, Then } = createBdd(test)
 
-const SEED_WIDTH = 1000
+const SEED_WIDTH = 1500
 const SEED_HEIGHT = 700
 
 // Module-level handles — populated by the Given step and reassigned on
@@ -24,6 +24,12 @@ let configPath: string | null = null
 // index-path identity (the same format `buildTabId` uses internally).
 let recordedFolderTabId: string | null = null
 let recordedRequestTabId: string | null = null
+
+// Window background-color snapshots taken via `I capture the window
+// background color as <name>` for cross-step comparisons (used by the
+// workspace-settings theme e2e). Keyed by the human-readable name the
+// scenario passes in (`initial`, `after-theme-swap`, …).
+const capturedColors = new Map<string, string>()
 
 Given(
   'a fresh app seeded with the main window at x={int} y={int}',
@@ -2336,3 +2342,98 @@ When('I wait {int}ms', async ({}, ms: number) => {
   if (!page) throw new Error('app must be launched')
   await page.waitForTimeout(ms)
 })
+
+// ── Workspace settings overlay (.restorm/settings.json) ──────────────
+//
+// End-to-end coverage for the workspace settings flow: a `.restorm`
+// file is open, the user goes into Settings → Workspace tab, picks a
+// different theme, and the chosen theme is (a) reflected in the
+// window's rendered background, (b) persisted to
+// `<dir>/.restorm/settings.json`. Closing the file reverts the
+// effective theme to the user-level default and the original
+// background returns.
+
+When('I capture the window background color as {string}', async ({}, name: string) => {
+  if (!page) throw new Error('app must be launched')
+  const color = await page.evaluate(() => getComputedStyle(document.body).backgroundColor)
+  capturedColors.set(name, color)
+})
+
+Then('the window background color should differ from {string}', async ({}, name: string) => {
+  if (!page) throw new Error('app must be launched')
+  const baseline = capturedColors.get(name)
+  if (!baseline) throw new Error(`No captured color for "${name}"`)
+  const p = page
+  await expect.poll(
+    async () => p.evaluate(() => getComputedStyle(document.body).backgroundColor),
+    { timeout: 5000, message: `expected window background color to differ from captured "${name}" (${baseline})` }
+  ).not.toBe(baseline)
+})
+
+Then('the window background color should equal {string}', async ({}, name: string) => {
+  if (!page) throw new Error('app must be launched')
+  const baseline = capturedColors.get(name)
+  if (!baseline) throw new Error(`No captured color for "${name}"`)
+  const p = page
+  await expect.poll(
+    async () => p.evaluate(() => getComputedStyle(document.body).backgroundColor),
+    { timeout: 5000, message: `expected window background color to match captured "${name}" (${baseline})` }
+  ).toBe(baseline)
+})
+
+When('I switch to the workspace settings tab', async () => {
+  if (!page) throw new Error('app must be launched')
+  const tab = page.locator('[data-testid="settings-page-tab-workspace"]')
+  await expect(tab).toBeVisible({ timeout: 5000 })
+  await expect(tab).not.toHaveAttribute('aria-disabled', 'true', { timeout: 5000 })
+  await tab.click()
+  // Verify the active scope flipped before downstream steps look at
+  // the theme carousel.
+  await expect(page.locator('[data-testid="settings-page"]')).toHaveAttribute('data-scope', 'workspace', { timeout: 5000 })
+})
+
+When('I pick a non-current theme in the settings page', async () => {
+  if (!page) throw new Error('app must be launched')
+  // The carousel exposes the currently-applied theme via
+  // `data-selected-theme-id`. Pick any tile whose theme name differs
+  // from that and click it. The tile body has `pointer-events: none`
+  // on its preview controls (decorative Button / Toggle / InputBox /
+  // Dropdown), so any click on the tile bubbles to the parent button.
+  const carousel = page.locator('[data-testid="theme-carousel"]')
+  await expect(carousel).toBeVisible({ timeout: 5000 })
+  await carousel.scrollIntoViewIfNeeded()
+  const currentId = await carousel.getAttribute('data-selected-theme-id')
+  const otherTile = carousel
+    .locator('button.theme-carousel-item:not(.theme-carousel-item--selected)')
+    .first()
+  await expect(otherTile).toBeVisible({ timeout: 5000 })
+  await otherTile.click()
+  await expect.poll(
+    () => carousel.getAttribute('data-selected-theme-id'),
+    { timeout: 5000, message: `expected selected theme to change from ${currentId ?? 'unknown'}` }
+  ).not.toBe(currentId)
+})
+
+Then(
+  'the workspace settings file for {string} should contain key {string}',
+  async ({}, fileBaseName: string, key: string) => {
+    const filePath = join(FULL_WORKFLOW_TEMP_DIR, `${fileBaseName}.restorm`)
+    const workspaceFile = join(dirname(filePath), '.restorm', 'settings.json')
+    // The workspace write is debounced ~200 ms in SettingsService.
+    // Poll instead of asserting once so a slow disk doesn't race
+    // ahead of the post-click assertions on rendered colour.
+    await expect.poll(
+      () => {
+        if (!existsSync(workspaceFile)) return null
+        try {
+          const raw = readFileSync(workspaceFile, 'utf-8')
+          const parsed = JSON.parse(raw) as Record<string, unknown>
+          return key in parsed ? 'present' : `missing-key:${Object.keys(parsed).join(',')}`
+        } catch (err) {
+          return `read-error:${String(err)}`
+        }
+      },
+      { timeout: 5000, message: `expected workspace settings file ${workspaceFile} to contain key "${key}"` }
+    ).toBe('present')
+  }
+)

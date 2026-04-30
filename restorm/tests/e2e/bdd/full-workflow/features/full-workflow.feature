@@ -564,3 +564,27 @@ Feature: Full workflow end-to-end scenario
 
     When I close the app
     Then no errors should have been logged
+
+  # Workspace settings overlay — picking a non-default theme on the
+  # Workspace tab must (a) update the rendered window background,
+  # (b) write `<dir>/.restorm/settings.json` with the chosen theme,
+  # (c) revert the background once the file is closed (the workspace
+  # overlay is dropped, the user-level theme reasserts).
+  Scenario: Workspace settings overlay applies a theme persistently and reverts on close
+    Given a fresh app seeded with the main window at x=10 y=10
+    When I create a new single-file YAML collection named "workspace-theme-test"
+    Then the file "workspace-theme-test.restorm" should exist in the temp dir
+
+    When I capture the window background color as "initial"
+    And I open the settings modal
+    And I switch to the workspace settings tab
+    And I pick a non-current theme in the settings page
+    And I close the settings modal
+    Then the window background color should differ from "initial"
+    And the workspace settings file for "workspace-theme-test" should contain key "appearance:theme"
+
+    When I close the current file and discard changes
+    Then the window background color should equal "initial"
+
+    When I close the app
+    Then no errors should have been logged

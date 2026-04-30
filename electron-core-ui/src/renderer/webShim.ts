@@ -678,6 +678,31 @@ export function ensureCoreUiWebApiShim(): void {
     },
     onConfigLoaded: (): (() => void) => {
       return () => { /* noop in web shim */ }
+    },
+    // Workspace overlay isn't meaningful in a stateless web build —
+    // the host process owns project paths. Surface a flat shim so
+    // shared UI code that calls these methods doesn't crash.
+    getWorkspacePath: (): Promise<string | null> => Promise.resolve(null),
+    getWorkspaceValues: (): Promise<Record<string, SettingValue>> => Promise.resolve({}),
+    getWorkspaceValue: (): Promise<SettingValue | null> => Promise.resolve(null),
+    setWorkspaceValue: (): Promise<boolean> => Promise.resolve(false),
+    resetWorkspaceValue: (): Promise<boolean> => Promise.resolve(false),
+    getResolvedValue: (storageKey: string): Promise<{
+      storageKey: string
+      effective: SettingValue
+      source: 'workspace' | 'user' | 'default'
+      overriddenBy?: 'workspace'
+    } | null> => {
+      try {
+        const item = localStorage.getItem(`${WEB_SETTINGS_PREFIX}${storageKey}`)
+        if (item === null) return Promise.resolve({ storageKey, effective: '' as SettingValue, source: 'default' })
+        return Promise.resolve({ storageKey, effective: JSON.parse(item) as SettingValue, source: 'user' })
+      } catch {
+        return Promise.resolve(null)
+      }
+    },
+    onWorkspaceChanged: (): (() => void) => {
+      return () => { /* noop in web shim */ }
     }
   }
 

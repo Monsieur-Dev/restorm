@@ -5,12 +5,47 @@
   align-items: center;
   height: 100%;
   -webkit-app-region: no-drag;
+
+  /* Reserve grid space matching the rendered WCO width: the
+   * `.window-controls-container` child is portalled to `body` and
+   * `position: fixed` (so it can stack above modal overlays), which
+   * removes it from flow. Without this explicit width the placeholder
+   * collapses to 0 and the right zone slides under the WCO row.
+   * `--wco-width` is set on `document.body` by `CustomWCO.tsx` to
+   * the actual rendered width per platform (92px on Linux = 3 × 30
+   * buttons + 2px padding, the OS reserve on Win/macOS, 0 elsewhere).
+   * The 92px fallback covers the first paint before the effect runs
+   * on Linux — keeps the layout stable without a flash. */
+  width: var(--wco-width, 92px);
+  flex-shrink: 0;
 }
 
+/* The actual button row is portalled to `document.body` (see
+ * `CustomWCO.tsx`) and pinned to the top-right of the viewport via
+ * `position: fixed`. Two reasons for fixed + portal:
+ *   1. Escape any parent stacking context the host app might create
+ *      through flex/grid roots — without escaping, the WCO would
+ *      stay trapped under a Modal overlay even with a high `z-index`,
+ *      because the overlay's own stacking context (created by its
+ *      `backdrop-filter`) wins inside the host's constrained tree.
+ *   2. Stay aligned with the `.custom-wco` placeholder in the title
+ *      bar grid so visually nothing changes when no modal is open.
+ *
+ * `z-index: 100001` only needs to clear `.ecu-modal-overlay`'s
+ * `z-index: 10000` and the modal drag strip on top of it (which
+ * sits inside the overlay's stacking context). Bumping by 90,001
+ * leaves headroom for any future dialog layer the host might
+ * stack above modal without touching this rule. */
 .window-controls-container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: var(--titlebar-height, 32px);
+  z-index: 100001;
   display: flex;
   align-items: center;
   padding-right: 2px;
+  -webkit-app-region: no-drag;
 }
 
 /* Window control buttons */

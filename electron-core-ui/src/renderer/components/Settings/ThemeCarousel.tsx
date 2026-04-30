@@ -15,6 +15,16 @@ interface ThemeCarouselProps {
   'data-testid'?: string
   /** Optional test id applied to the ScrollableElement. Defaults to `{data-testid}-scrollable`. */
   scrollableTestId?: string
+  /**
+   * Override what happens when a theme tile is clicked. By default
+   * the carousel calls `window.api.theme.set` directly through the
+   * theme context. The Settings UI passes a callback so the choice
+   * routes through the scope-aware `setSetting` /
+   * `setWorkspaceSetting` flow instead — without that override, a
+   * theme picked from the Workspace tab never lands in
+   * `<dir>/.restorm/settings.json`.
+   */
+  onSelect?: (themeId: string) => void
 }
 
 type ThemeTypeOrder = 'dark' | 'hcDark' | 'light' | 'hcLight'
@@ -38,7 +48,8 @@ const BEATLES_OPTIONS = [
 export const ThemeCarousel: React.FC<ThemeCarouselProps> = ({
   className,
   'data-testid': dataTestId,
-  scrollableTestId
+  scrollableTestId,
+  onSelect
 }) => {
   const { themes, currentThemeId, setTheme, isLoading } = useThemeContext()
   const rootTestId = dataTestId ?? 'theme-carousel'
@@ -133,7 +144,11 @@ export const ThemeCarousel: React.FC<ThemeCarouselProps> = ({
   }, [currentThemeId, isLoading, sortedThemes.length])
 
   const handleSelectTheme = (themeId: string): void => {
-    void setTheme(themeId)
+    if (onSelect) {
+      onSelect(themeId)
+    } else {
+      void setTheme(themeId)
+    }
   }
 
   if (sortedThemes.length === 0) {

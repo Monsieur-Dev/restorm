@@ -37,6 +37,13 @@
   },
   "settings": {
     "title": "Paramètres",
+    "scopeTabsLabel": "Niveau de paramètres",
+    "userOnlyHidden": "{{count}} paramètre(s) utilisateur masqué(s) sur cet onglet.",
+    "scope": {
+      "user": "Utilisateur",
+      "workspace": "Espace de travail",
+      "workspaceDisabledTooltip": "Ouvrez un projet pour modifier les paramètres de l'espace de travail"
+    },
     "theme": "Thème",
     "language": "Langue",
     "searchPlaceholder": "Rechercher dans les paramètres...",
