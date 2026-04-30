@@ -139,6 +139,11 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+
+  /* Preview controls are decorative — let clicks pass through to the
+     parent <button> so the user can pick the theme by clicking
+     anywhere on the tile, not just the title strip. */
+  pointer-events: none;
 }
 
 .theme-carousel-row {

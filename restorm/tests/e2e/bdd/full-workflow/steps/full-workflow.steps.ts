@@ -2396,10 +2396,9 @@ When('I pick a non-current theme in the settings page', async () => {
   if (!page) throw new Error('app must be launched')
   // The carousel exposes the currently-applied theme via
   // `data-selected-theme-id`. Pick any tile whose theme name differs
-  // from that and click it. The tile's body contains nested interactive
-  // preview controls (Buttons, InputBox, Dropdown) that swallow clicks
-  // landing in the middle of the bounding box, so we target the title
-  // header which is non-interactive and propagates to the parent button.
+  // from that and click it. The tile body has `pointer-events: none`
+  // on its preview controls (decorative Button / Toggle / InputBox /
+  // Dropdown), so any click on the tile bubbles to the parent button.
   const carousel = page.locator('[data-testid="theme-carousel"]')
   await expect(carousel).toBeVisible({ timeout: 5000 })
   await carousel.scrollIntoViewIfNeeded()
@@ -2408,10 +2407,7 @@ When('I pick a non-current theme in the settings page', async () => {
     .locator('button.theme-carousel-item:not(.theme-carousel-item--selected)')
     .first()
   await expect(otherTile).toBeVisible({ timeout: 5000 })
-  // Click the title span (non-interactive) rather than the tile body,
-  // which contains preview Buttons / InputBox / Dropdown that would
-  // swallow a centred click. The click bubbles to the tile <button>.
-  await otherTile.locator('.theme-carousel-item-name').click()
+  await otherTile.click()
   await expect.poll(
     () => carousel.getAttribute('data-selected-theme-id'),
     { timeout: 5000, message: `expected selected theme to change from ${currentId ?? 'unknown'}` }
