@@ -654,6 +654,18 @@ const App: React.FC = () => {
     return () => { window.removeEventListener('keydown', handleKeyDown) }
   }, [handleMenuSaveAll, smartSaveActive])
 
+  // Bridge the AutoSaveController's `'file:autosave-trigger'` IPC to
+  // the existing save-all flow. The controller (in main) owns the
+  // when; the renderer owns the how.
+  useEffect(() => {
+    const unsub = window.api.file.onAutoSaveTrigger(() => {
+      void handleMenuSaveAll().catch((err: unknown) => {
+        logger.error('[App] Autosave failed', { error: String(err) })
+      })
+    })
+    return () => { unsub() }
+  }, [handleMenuSaveAll])
+
   // After an import, persist the fresh tree to disk so the registry's
   // initial hydration reference matches what's on disk. Without this,
   // the imported content stays dirty until the user explicitly saves,

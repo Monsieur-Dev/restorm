@@ -62,6 +62,14 @@ export {
   isSettingsServiceInitialized
 } from './services'
 
+// AutoSave controller
+export {
+  AutoSaveController,
+  initAutoSaveController,
+  getAutoSaveController
+} from './services'
+export type { AutoSaveMode, AutoSaveControllerOptions } from './services'
+
 // Save-unit / draft-store (file service v2)
 export {
   SaveUnitRegistry,

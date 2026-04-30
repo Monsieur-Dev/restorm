@@ -295,6 +295,15 @@ export const createCoreUIAPI = (): CoreUiApi => ({
         ipcRenderer.removeListener('file:drafts-restored', handler)
       }
     },
+    onAutoSaveTrigger: (callback: () => void): (() => void) => {
+      const handler = (): void => {
+        callback()
+      }
+      ipcRenderer.on('file:autosave-trigger', handler)
+      return () => {
+        ipcRenderer.removeListener('file:autosave-trigger', handler)
+      }
+    },
     saveUnit: async (entry: {
       runtimeId: string
       content: unknown

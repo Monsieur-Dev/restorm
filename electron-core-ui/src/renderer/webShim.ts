@@ -537,6 +537,7 @@ export function ensureCoreUiWebApiShim(): void {
     }> => Promise.resolve({ isDirty: false, dirtyCount: 0, dirtyUnits: [] }),
     onUnitDirtyChanged: (): (() => void) => () => { /* no-op */ },
     onDraftsRestored: (): (() => void) => () => { /* no-op — web build has no draft persistence. */ },
+    onAutoSaveTrigger: (): (() => void) => () => { /* no-op — web build has no autosave controller. */ },
     saveUnit: (): Promise<boolean> => Promise.resolve(false),
     saveUnitsBatch: (): Promise<{ runtimeId: string; success: boolean }[]> => Promise.resolve([])
   }

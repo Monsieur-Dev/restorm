@@ -2232,3 +2232,107 @@ Then('the project\'s drafts directory should be empty', () => {
   }
   expect(stragglers, `unexpected orphan drafts under ${draftsRoot}: ${stragglers.join(', ')}`).toEqual([])
 })
+
+// ── AutoSave (files:autoSave / files:autoSaveDelay) ───────────────────
+//
+// Drives the in-process `AutoSaveController` end-to-end via the real
+// settings IPC. We don't click through the settings modal — the
+// integration we care about is "settings flip → controller reacts →
+// renderer's save-all flow runs → dirty registry clears", and the
+// modal is just a dispatch surface that calls `window.api.settings.set`
+// under the hood.
+
+// Workspace-level dirty assertions polling `document.title`. Restorm
+// mirrors the `isDirty` flag into the title via a top-level effect,
+// so the title is the canonical user-facing signal — every other
+// dirty marker (tab dot, sidebar dot, badges) is downstream of this.
+// Same pattern as `expectDocumentTitleDirty` in the dirty-state suite.
+Then('the window title should be dirty', async () => {
+  if (!page) throw new Error('app must be launched')
+  const p = page
+  await expect.poll(async () => (await p.title()).endsWith(' *'), {
+    timeout: 10000,
+    message: 'expected window title to end with " *"'
+  }).toBe(true)
+})
+
+Then('the window title should be clean', async () => {
+  if (!page) throw new Error('app must be launched')
+  const p = page
+  await expect.poll(async () => (await p.title()).endsWith(' *'), {
+    timeout: 10000,
+    message: 'expected window title not to end with " *"'
+  }).toBe(false)
+})
+
+When('I append {string} to the active request URL', async ({}, suffix: string) => {
+  if (!page) throw new Error('app must be launched')
+  const urlInput = page.locator('[data-testid="http-request-url-input"]:visible').first()
+  await expect(urlInput).toBeVisible({ timeout: 5000 })
+  await urlInput.click()
+  // Move caret to end so the suffix lands as additional text and the
+  // controlled input registers a real value change (a noop edit at
+  // a position equal to the existing value would not flip dirty).
+  await page.keyboard.press('End')
+  await page.keyboard.type(suffix)
+  // Blur so the field commits its value to the upstream save unit.
+  await page.keyboard.press('Tab')
+  // Give the URL → save-unit upsert IPC + dirty-recompute round-trip
+  // a beat to land before downstream assertions look at the indicator.
+  await page.waitForTimeout(500)
+})
+
+When('I open the settings modal', async () => {
+  if (!page) throw new Error('app must be launched')
+  await page.locator('[data-testid="titlebar-settings-button"]').click()
+  await expect(page.locator('[data-testid="settings-modal"]')).toBeVisible({ timeout: 5000 })
+})
+
+When('I close the settings modal', async () => {
+  if (!page) throw new Error('app must be launched')
+  await page.keyboard.press('Escape')
+  await expect(page.locator('[data-testid="settings-modal"]')).toHaveCount(0, { timeout: 5000 })
+})
+
+/**
+ * Drive the enum dropdown in the settings page for the autoSave row.
+ * `optionIndex` follows the order in `defaults.yaml`:
+ *   0 → "off", 1 → "After Delay", 2 → "On Window Change".
+ *
+ * The SelectBox wrapper falls back to data-testid "selectbox" when
+ * the consumer doesn't pass one (EnumRenderer passes only `id`),
+ * so we scope the lookup to the setting row's container.
+ */
+When('I select autoSave option {int} in the settings modal', async ({}, optionIndex: number) => {
+  if (!page) throw new Error('app must be launched')
+  const row = page.locator('[data-testid="setting-item-files:autoSave"]')
+  await row.scrollIntoViewIfNeeded()
+  await row.locator('[data-testid="selectbox-trigger"]').click()
+  // The dropdown portal is rendered to <body>, but each option carries
+  // a `selectbox-option-N` testid we can target globally — there's
+  // only one open dropdown at a time.
+  await page.locator(`[data-testid="selectbox-option-${optionIndex}"]`).click()
+  // Give the SettingsService → window.api.settings.set IPC + the
+  // controller's onSettingChanged hook a beat to land before the
+  // next step assumes the new mode is in effect.
+  await page.waitForTimeout(200)
+})
+
+When('I set the autoSaveDelay setting to {int}', async ({}, value: number) => {
+  if (!page) throw new Error('app must be launched')
+  const row = page.locator('[data-testid="setting-item-files:autoSaveDelay"]')
+  await row.scrollIntoViewIfNeeded()
+  const input = row.locator('input[type="number"]').first()
+  await expect(input).toBeVisible({ timeout: 5000 })
+  await input.click()
+  await page.keyboard.press('Control+A')
+  await page.keyboard.press('Delete')
+  await page.keyboard.type(String(value))
+  await page.keyboard.press('Tab')
+  await page.waitForTimeout(200)
+})
+
+When('I wait {int}ms', async ({}, ms: number) => {
+  if (!page) throw new Error('app must be launched')
+  await page.waitForTimeout(ms)
+})

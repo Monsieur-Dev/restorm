@@ -21,8 +21,18 @@ import { i18nService } from './I18nService'
 // SettingsService
 // ==========================================================================
 
+/**
+ * Callback shape for in-process listeners on a single setting key.
+ * The IPC `'settings:changed'` broadcast goes to renderer windows;
+ * main-process services that need to react to live changes (e.g. the
+ * autosave controller) use the in-process subscription below to avoid
+ * a round-trip through `ipcMain`.
+ */
+export type SettingChangedListener = (value: SettingValue) => void
+
 export class SettingsService {
   private groups: SettingsGroup[] = []
+  private listeners = new Map<string, Set<SettingChangedListener>>()
   private searchIndex = new MiniSearch<{ id: string; title: string; description: string }>({
     fields: ['title', 'description', 'id'],
     storeFields: ['id', 'title', 'description'],
@@ -131,7 +141,8 @@ export class SettingsService {
 
   /**
    * Set a setting value and persist it.
-   * Broadcasts 'settings:changed' to all renderer windows.
+   * Broadcasts 'settings:changed' to all renderer windows and notifies
+   * in-process listeners registered via `onSettingChanged`.
    */
   public set(storageKey: string, value: SettingValue): void {
     const storage = getStorageService()
@@ -145,6 +156,7 @@ export class SettingsService {
       }
     }
 
+    this.notifyListeners(storageKey, value)
     logger.debug('[SettingsService] Setting changed', { storageKey, value: String(value) })
   }
 
@@ -166,7 +178,42 @@ export class SettingsService {
       }
     }
 
+    this.notifyListeners(storageKey, defaultValue)
     logger.debug('[SettingsService] Setting reset', { storageKey })
+  }
+
+  /**
+   * Subscribe to in-process changes for a single setting key. The
+   * listener fires from `set()` and `resetSetting()` on the main
+   * process — same source of truth as the IPC `'settings:changed'`
+   * broadcast that renderers receive. Returns an unsubscribe function.
+   */
+  public onSettingChanged(storageKey: string, listener: SettingChangedListener): () => void {
+    let bucket = this.listeners.get(storageKey)
+    if (!bucket) {
+      bucket = new Set()
+      this.listeners.set(storageKey, bucket)
+    }
+    bucket.add(listener)
+    return () => {
+      const set = this.listeners.get(storageKey)
+      if (!set) return
+      set.delete(listener)
+      if (set.size === 0) this.listeners.delete(storageKey)
+    }
+  }
+
+  private notifyListeners(storageKey: string, value: SettingValue): void {
+    const bucket = this.listeners.get(storageKey)
+    if (!bucket) return
+    // Snapshot to defend against listeners that unsubscribe themselves.
+    for (const listener of Array.from(bucket)) {
+      try {
+        listener(value)
+      } catch (error) {
+        logger.warn('[SettingsService] Listener threw', { storageKey, error: String(error) })
+      }
+    }
   }
 
   // ==========================================================================
