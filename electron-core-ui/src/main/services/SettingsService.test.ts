@@ -912,6 +912,23 @@ describe('SettingsService', () => {
       expect(s.get('general:fontSize')).toBe(16)
     })
 
+    it('unsetWorkspacePath flushes a pending debounced write', async () => {
+      const s = createWithWorkspaceFile(null)
+      s.setWorkspacePath('/proj')
+      s.setWorkspaceValue('general:fontSize', 22)
+      // Timer hasn't fired yet — closing the project must not lose the
+      // value. Without the flush, the write would be silently dropped.
+      expect(mockAtomicWriteFile).not.toHaveBeenCalled()
+      s.unsetWorkspacePath()
+      await vi.waitFor(() => {
+        expect(mockAtomicWriteFile).toHaveBeenCalledTimes(1)
+      })
+      const firstCall = mockAtomicWriteFile.mock.calls[0]
+      if (!firstCall) throw new Error('expected at least one atomic write')
+      expect(firstCall[0]).toBe('/proj/.restorm/settings.json')
+      expect(JSON.parse(firstCall[1])).toEqual({ 'general:fontSize': 22 })
+    })
+
     it('re-setting the same workspace path is idempotent (no duplicate load)', () => {
       const s = createWithWorkspaceFile(JSON.stringify({ 'general:fontSize': 18 }))
       s.setWorkspacePath('/proj')

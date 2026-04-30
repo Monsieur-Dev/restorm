@@ -10,7 +10,7 @@ groups:
           titleKey: "settings.appearance.theme.title"
           descriptionKey: "settings.appearance.theme.description"
           type: "theme"
-          default: "theme-defaults/dark_plus"
+          default: "dark/dark-plus"
       - setting:
           id: "language"
           titleKey: "settings.appearance.language.title"

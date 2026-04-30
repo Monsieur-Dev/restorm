@@ -345,17 +345,28 @@ export class SettingsService {
     })
   }
 
-  /** Drop the workspace overlay. Renderers re-resolve to user / default. */
+  /**
+   * Drop the workspace overlay. Renderers re-resolve to user / default.
+   * Any debounced write that hasn't landed yet is forced through first
+   * — without this, picking a workspace value and immediately closing
+   * the project loses the change (the timer would just be cancelled).
+   */
   public unsetWorkspacePath(): void {
     if (this.workspacePath === null) return
     const previousKeys = new Set(this.workspaceValues.keys())
-    this.workspacePath = null
-    this.workspaceValues = new Map()
-    this.workspaceLoadGeneration += 1
     if (this.workspaceWriteTimer) {
       clearTimeout(this.workspaceWriteTimer)
       this.workspaceWriteTimer = null
+      // Capture file + values before clearing so the flush has data to
+      // write. Fire-and-forget — callers can't easily await a sync
+      // method, and the broadcast still fires synchronously below.
+      const file = this.workspaceFilePath()
+      const snapshot = new Map(this.workspaceValues)
+      void this.writeWorkspaceFile(file, snapshot)
     }
+    this.workspacePath = null
+    this.workspaceValues = new Map()
+    this.workspaceLoadGeneration += 1
     this.broadcastWorkspaceChanged()
     this.notifyEffectiveValueChanges(previousKeys)
     logger.info('[SettingsService] Workspace path cleared')
@@ -384,13 +395,15 @@ export class SettingsService {
       logger.warn('[SettingsService] Cannot set userOnly setting at workspace scope', { storageKey })
       return
     }
-    const previousEffective = this.getResolvedValue(storageKey).effective
     this.workspaceValues.set(storageKey, value)
     this.scheduleWorkspaceFlush()
-    const nextEffective = this.getResolvedValue(storageKey).effective
-    if (previousEffective !== nextEffective) {
-      this.broadcastEffectiveValueChange(storageKey, nextEffective)
-    }
+    // Always broadcast on workspace writes — listeners (theme swap,
+    // locale swap, …) may have drifted away from the settings layer's
+    // computed effective value (e.g. ThemeService falling back to a
+    // different theme on init). Skipping the broadcast when previous
+    // and next effective values happen to coincide leaves the UI
+    // wedged in those cases. Downstream IPCs are idempotent.
+    this.broadcastEffectiveValueChange(storageKey, this.getResolvedValue(storageKey).effective)
     this.broadcastWorkspaceChanged()
   }
 
@@ -398,13 +411,9 @@ export class SettingsService {
   public resetWorkspaceValue(storageKey: string): void {
     if (this.workspacePath === null) return
     if (!this.workspaceValues.has(storageKey)) return
-    const previousEffective = this.getResolvedValue(storageKey).effective
     this.workspaceValues.delete(storageKey)
     this.scheduleWorkspaceFlush()
-    const nextEffective = this.getResolvedValue(storageKey).effective
-    if (previousEffective !== nextEffective) {
-      this.broadcastEffectiveValueChange(storageKey, nextEffective)
-    }
+    this.broadcastEffectiveValueChange(storageKey, this.getResolvedValue(storageKey).effective)
     this.broadcastWorkspaceChanged()
   }
 
@@ -430,13 +439,22 @@ export class SettingsService {
   }
 
   private async flushWorkspaceFile(): Promise<void> {
-    const file = this.workspaceFilePath()
+    await this.writeWorkspaceFile(this.workspaceFilePath(), this.workspaceValues)
+  }
+
+  /**
+   * Write a snapshot of the workspace overlay to disk. Parametrised so
+   * `unsetWorkspacePath` can flush a captured snapshot AFTER it has
+   * cleared `this.workspacePath` / `this.workspaceValues` — the path
+   * and values must be preserved by the caller in that case.
+   */
+  private async writeWorkspaceFile(file: string | null, values: ReadonlyMap<string, SettingValue>): Promise<void> {
     if (!file) return
     try {
-      if (this.workspaceValues.size === 0) {
-        // Empty overlay → keep the directory clean (the ticket calls
-        // out auto-deleting an empty file). `unlink` is the right
-        // primitive; ignore "no such file" to stay idempotent.
+      if (values.size === 0) {
+        // Empty overlay → keep the directory clean (auto-delete an
+        // empty file). `unlink` is the right primitive; ignore "no
+        // such file" to stay idempotent.
         try {
           await fsp.unlink(file)
         } catch (error) {
@@ -444,7 +462,7 @@ export class SettingsService {
         }
         return
       }
-      const json = JSON.stringify(Object.fromEntries(this.workspaceValues), null, 2)
+      const json = JSON.stringify(Object.fromEntries(values), null, 2)
       await atomicWriteFile(file, json)
     } catch (error) {
       const wrapped = new FileSystemError('Failed to write workspace settings', 'FS_WRITE_FAILED', { cause: error })

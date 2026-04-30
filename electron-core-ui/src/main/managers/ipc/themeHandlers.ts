@@ -16,7 +16,7 @@ export function registerThemeHandlers(themeService: ThemeService, storageService
 
   ipcMain.handle('theme:get-current', () => {
     const currentTheme = storageService.get('currentTheme') as string | undefined
-    return currentTheme ?? 'theme-defaults/dark_plus'
+    return currentTheme ?? 'dark/dark-plus'
   })
 
   validatedHandle('theme:set', themeSetArgs, (_event, [themeId]) => {

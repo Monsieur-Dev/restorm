@@ -103,6 +103,15 @@ Props:
 
 A scrollable theme preview component used by `ThemeRenderer` (in `SettingsView`) and the fallback `SettingsPage`.
 
+### Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `className` | `string` | Optional class merged with `theme-carousel`. |
+| `data-testid` | `string` | Root test id (defaults to `theme-carousel`). |
+| `scrollableTestId` | `string` | Inner `ScrollableElement` test id (defaults to `{data-testid}-scrollable`). |
+| `onSelect` | `(themeId: string) => void` | Override the click handler. Without it, clicking a tile calls `setTheme` directly. The Settings UI passes a callback that routes the choice through `setSetting` / `setWorkspaceSetting`, so a tile picked on the Workspace tab lands in `<dir>/.restorm/settings.json` instead of bypassing the overlay. |
+
 ## Feature-Gated Settings
 
 Settings can be conditionally shown based on feature flags. This allows settings to be hidden when their associated feature is disabled.

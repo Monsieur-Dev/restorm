@@ -51,7 +51,10 @@ export function SettingsProvider({ children }: SettingsProviderProps): React.Rea
     void loadData()
   }, [loadData])
 
-  // Listen for setting changes
+  // Listen for setting changes. Side effects for "applying" a setting
+  // (theme swap, locale swap) live here so they fire from EITHER the
+  // user layer or the workspace layer — `settings:changed` is fired
+  // for the effective value in both cases.
   useEffect(() => {
     const cleanup = window.api.settings.onSettingChanged((storageKey: string, value: SettingValue) => {
       setSettingsList(prev =>
@@ -61,9 +64,16 @@ export function SettingsProvider({ children }: SettingsProviderProps): React.Rea
             : s
         )
       )
+      if (storageKey === 'appearance:theme' && typeof value === 'string') {
+        void window.api.theme.set(value)
+      }
+      if (storageKey === 'appearance:language' && typeof value === 'string') {
+        void i18n.changeLanguage(value)
+        void window.api.i18n.setLanguage(value)
+      }
     })
     return cleanup
-  }, [])
+  }, [i18n])
 
   // Reload all data when a new config is loaded (e.g., app-specific settings loaded after init)
   useEffect(() => {
@@ -105,7 +115,11 @@ export function SettingsProvider({ children }: SettingsProviderProps): React.Rea
 
   const setSetting = useCallback(async (storageKey: string, value: SettingValue): Promise<void> => {
     await window.api.settings.set(storageKey, value)
-    // Optimistic update
+    // Optimistic update — `settings:changed` IPC fires next anyway,
+    // but this avoids a one-frame delay for the SettingItem control.
+    // Side effects (theme / locale) live in the onSettingChanged
+    // listener so they apply uniformly across user + workspace
+    // scopes.
     setSettingsList(prev =>
       prev.map(s =>
         s.storageKey === storageKey
@@ -113,15 +127,7 @@ export function SettingsProvider({ children }: SettingsProviderProps): React.Rea
           : s
       )
     )
-    // Apply side effects for special settings
-    if (storageKey === 'appearance:language' && typeof value === 'string') {
-      void i18n.changeLanguage(value)
-      void window.api.i18n.setLanguage(value)
-    }
-    if (storageKey === 'appearance:theme' && typeof value === 'string') {
-      void window.api.theme.set(value)
-    }
-  }, [i18n])
+  }, [])
 
   const resetSetting = useCallback(async (storageKey: string): Promise<void> => {
     await window.api.settings.reset(storageKey)
