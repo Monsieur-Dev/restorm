@@ -152,6 +152,74 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
             <MenuItemSeparator data-testid="titlebar-menu-separator-5" />
             <MenuItem data-testid="titlebar-menu-item-exit" title={t('menuBar.exit')} shortcut="Ctrl+Q" onClick={handleMenuExit} />
           </MenuBarItem>
+          {/* Édition / Sélection / Affichage / Outils / Aide — items
+              are intentionally disabled until each gets wired up. The
+              skeleton lands here so the responsive overflow logic
+              (OYO-185) has the full menu surface to test against. */}
+          <MenuBarItem title={t('menuBar.edit')} data-testid="titlebar-menubar-item-edit">
+            <MenuItem data-testid="titlebar-menu-item-undo" title={t('menuBar.undo')} shortcut="Ctrl+Z" disabled />
+            <MenuItem data-testid="titlebar-menu-item-redo" title={t('menuBar.redo')} shortcut="Ctrl+Shift+Z" disabled />
+            <MenuItemSeparator data-testid="titlebar-menu-separator-edit-1" />
+            <MenuItem data-testid="titlebar-menu-item-cut" title={t('menuBar.cut')} shortcut="Ctrl+X" disabled />
+            <MenuItem data-testid="titlebar-menu-item-copy" title={t('menuBar.copy')} shortcut="Ctrl+C" disabled />
+            <MenuItem data-testid="titlebar-menu-item-paste" title={t('menuBar.paste')} shortcut="Ctrl+V" disabled />
+            <MenuItemSeparator data-testid="titlebar-menu-separator-edit-2" />
+            <MenuItem data-testid="titlebar-menu-item-find" title={t('menuBar.find')} shortcut="Ctrl+F" disabled />
+            <MenuItem data-testid="titlebar-menu-item-replace" title={t('menuBar.replace')} shortcut="Ctrl+H" disabled />
+            <MenuItem data-testid="titlebar-menu-item-find-in-collection" title={t('menuBar.findInCollection')} shortcut="Ctrl+Shift+F" disabled />
+          </MenuBarItem>
+          <MenuBarItem title={t('menuBar.selection')} data-testid="titlebar-menubar-item-selection">
+            <MenuItem data-testid="titlebar-menu-item-add-request" title={t('menuBar.addRequest')}>
+              <MenuItem data-testid="titlebar-menu-item-add-request-http" title={t('menuBar.addRequestHttp')} disabled />
+              <MenuItem data-testid="titlebar-menu-item-add-request-graphql" title={t('menuBar.addRequestGraphql')} disabled />
+              <MenuItem data-testid="titlebar-menu-item-add-request-grpc" title={t('menuBar.addRequestGrpc')} disabled />
+              <MenuItem data-testid="titlebar-menu-item-add-request-soap" title={t('menuBar.addRequestSoap')} disabled />
+              <MenuItem data-testid="titlebar-menu-item-add-request-odata" title={t('menuBar.addRequestOdata')} disabled />
+              <MenuItem data-testid="titlebar-menu-item-add-request-websocket" title={t('menuBar.addRequestWebsocket')} disabled />
+            </MenuItem>
+            <MenuItem data-testid="titlebar-menu-item-add-folder" title={t('menuBar.addFolder')} disabled />
+            <MenuItem data-testid="titlebar-menu-item-add-env-folder" title={t('menuBar.addEnvironmentFolder')} disabled />
+            <MenuItem data-testid="titlebar-menu-item-add-variable" title={t('menuBar.addVariable')} disabled />
+            <MenuItem data-testid="titlebar-menu-item-add-tag" title={t('menuBar.addTag')} disabled />
+            <MenuItemSeparator data-testid="titlebar-menu-separator-selection-1" />
+            <MenuItem data-testid="titlebar-menu-item-expand-all" title={t('menuBar.expandAllFolders')} disabled />
+            <MenuItem data-testid="titlebar-menu-item-collapse-all" title={t('menuBar.collapseAllFolders')} disabled />
+            <MenuItemSeparator data-testid="titlebar-menu-separator-selection-2" />
+            <MenuItem data-testid="titlebar-menu-item-send-request" title={t('menuBar.sendActiveRequest')} disabled />
+            <MenuItem data-testid="titlebar-menu-item-cancel-request" title={t('menuBar.cancelActiveRequest')} disabled />
+          </MenuBarItem>
+          <MenuBarItem title={t('menuBar.view')} data-testid="titlebar-menubar-item-view">
+            <MenuItem data-testid="titlebar-menu-item-toggle-sidebar" title={t('menuBar.toggleSidebar')} disabled />
+            <MenuItem data-testid="titlebar-menu-item-toggle-response-panel" title={t('menuBar.toggleResponsePanel')} disabled />
+            <MenuItemSeparator data-testid="titlebar-menu-separator-view-1" />
+            <MenuItem data-testid="titlebar-menu-item-zoom-in" title={t('menuBar.zoomIn')} shortcut="Ctrl++" disabled />
+            <MenuItem data-testid="titlebar-menu-item-zoom-out" title={t('menuBar.zoomOut')} shortcut="Ctrl+-" disabled />
+            <MenuItem data-testid="titlebar-menu-item-reset-zoom" title={t('menuBar.resetZoom')} shortcut="Ctrl+0" disabled />
+            <MenuItemSeparator data-testid="titlebar-menu-separator-view-2" />
+            <MenuItem
+              data-testid="titlebar-menu-item-settings"
+              title={t('menuBar.settings')}
+              onClick={() => { showSettingsModal() }}
+            />
+            <MenuItemSeparator data-testid="titlebar-menu-separator-view-3" />
+            <MenuItem data-testid="titlebar-menu-item-toggle-devtools" title={t('menuBar.toggleDevTools')} disabled />
+            <MenuItem data-testid="titlebar-menu-item-toggle-fullscreen" title={t('menuBar.toggleFullscreen')} disabled />
+          </MenuBarItem>
+          <MenuBarItem title={t('menuBar.tools')} data-testid="titlebar-menubar-item-tools">
+            <MenuItem data-testid="titlebar-menu-item-generate-snippet" title={t('menuBar.generateCodeSnippet')} disabled />
+            <MenuItem data-testid="titlebar-menu-item-copy-as-curl" title={t('menuBar.copyAsCurl')} disabled />
+            <MenuItem data-testid="titlebar-menu-item-export-openapi" title={t('menuBar.exportOpenApi')} disabled />
+            <MenuItem data-testid="titlebar-menu-item-clear-auth-cache" title={t('menuBar.clearAuthCache')} disabled />
+            <MenuItemSeparator data-testid="titlebar-menu-separator-tools-1" />
+            <MenuItem data-testid="titlebar-menu-item-open-logs" title={t('menuBar.openLogsFolder')} disabled />
+          </MenuBarItem>
+          <MenuBarItem title={t('menuBar.help')} data-testid="titlebar-menubar-item-help">
+            <MenuItem data-testid="titlebar-menu-item-about" title={t('menuBar.about')} disabled />
+            <MenuItem data-testid="titlebar-menu-item-documentation" title={t('menuBar.documentation')} disabled />
+            <MenuItem data-testid="titlebar-menu-item-keyboard-shortcuts" title={t('menuBar.keyboardShortcuts')} disabled />
+            <MenuItem data-testid="titlebar-menu-item-release-notes" title={t('menuBar.releaseNotes')} disabled />
+            <MenuItem data-testid="titlebar-menu-item-report-issue" title={t('menuBar.reportIssue')} disabled />
+          </MenuBarItem>
         </MenuBar>
       }
       rightContent={
