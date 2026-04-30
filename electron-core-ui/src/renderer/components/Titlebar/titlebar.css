@@ -1,7 +1,16 @@
 /* Titlebar styles */
 
 .titlebar {
-	display: flex;
+	/* Grid `1fr auto 1fr` parks the centre zone at the geometric
+	 * midpoint of the window: column 2 takes its content width, the
+	 * two `1fr` columns share remaining space symmetrically on either
+	 * side. A flex layout with `flex: 1 1 auto` on left + centre would
+	 * instead anchor the centre to the right of the left zone, so a
+	 * wide MenuBar would push the search bar off-centre. The 1fr left
+	 * column still gives the responsive MenuBar a varying container
+	 * width to drive its overflow / hamburger logic. */
+	display: grid;
+	grid-template-columns: 1fr auto 1fr;
 	align-items: center;
 	width: 100%;
 	height: 32px;
@@ -38,18 +47,19 @@
 	display: flex;
 	align-items: center;
 	height: 100%;
-	-webkit-app-region: no-drag;
 
-	/* Both grow and shrink so a hosted MenuBar's responsive overflow /
-	 * hamburger logic actually receives a varying container width.
-	 * `flex-grow: 1` matters because once the MenuBar collapses to the
-	 * single hamburger button its rendered children are tiny, which
-	 * would otherwise pin the left zone at button-only width even
-	 * after the window widens again. `min-width: 0` lets flex shrink
-	 * below the content's intrinsic size; `overflow: hidden` prevents
-	 * content from spilling out. The icon child stays non-shrinkable
-	 * (see `.titlebar-left > .titlebar-icon` below). */
-	flex: 1 1 auto;
+	/* Drag-by-default so the empty space inside the left zone (e.g.
+	 * the part of the MenuBar element after its last menu button —
+	 * the bar fills its parent at `width: 100%` for ResizeObserver
+	 * sizing) keeps the window draggable. Interactive children
+	 * (.menubar-menu-button) declare `no-drag` themselves so they
+	 * stay clickable. */
+	-webkit-app-region: drag;
+
+	/* Grid item: stretches to fill column 1's `1fr` width. `min-width: 0`
+	 * lets flex content (the MenuBar) shrink below its intrinsic size,
+	 * which is what triggers the bar's responsive overflow / hamburger
+	 * logic. `overflow: hidden` prevents content from spilling out. */
 	min-width: 0;
 	overflow: hidden;
 }
@@ -59,13 +69,10 @@
 }
 
 .titlebar-center {
-	/* `flex: 1 1 auto` makes the center zone compete with the left zone
-	 * on its content width when the window narrows — without it,
-	 * `flex: 1 1 0%` would leave the left zone with all its content
-	 * width and shrink only the center, which prevents the left
-	 * zone's MenuBar from ever exercising its responsive overflow
-	 * logic. */
-	flex: 1 1 auto;
+	/* Grid item in column 2 (auto-sized to content). Centred via
+	 * the parent grid layout — no `flex: 1` needed here because the
+	 * column's `auto` width matches the centre content's natural
+	 * size and the surrounding `1fr` columns absorb leftover space. */
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -81,7 +88,13 @@
 	justify-content: flex-end;
 	height: 100%;
 	-webkit-app-region: no-drag;
-	flex-shrink: 0;
+
+	/* Shrink to content so the unused part of column 3 (between the
+	 * centre zone and the rightmost rendered control) is plain grid
+	 * empty space, which inherits `-webkit-app-region: drag` from
+	 * `.titlebar` and stays draggable. Hosted `rightContent` (e.g.
+	 * action buttons) doesn't have to opt back into `no-drag`. */
+	justify-self: end;
 	padding-right: 5px;
 }
 
