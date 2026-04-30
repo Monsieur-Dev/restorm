@@ -10,6 +10,31 @@
 	transition: opacity 300ms ease-out;
 }
 
+/* Transparent strip at the title-bar position that carries
+ * `-webkit-app-region: drag` so the user can still move the
+ * window while a modal is open. The strip sits inside the
+ * overlay (so it shares the open / closing fade), is fully
+ * transparent, and is sized to the host app's title-bar
+ * height (exposed as `--titlebar-height` on `document.body`
+ * by the Titlebar component; falls back to 32px). The host
+ * app's WCO buttons opt out of this strip with their own
+ * elevated z-index + `-webkit-app-region: no-drag`. */
+.ecu-modal-drag-strip {
+	position: absolute;
+	top: 0;
+	left: 0;
+
+	/* Stop before the WCO area so its clicks aren't swallowed by the
+	 * drag region. `--wco-width` is set on `document.body` by the
+	 * `CustomWCO` component (matches the rendered controls' actual
+	 * width — 92px on Linux, the native reserve on Windows/macOS).
+	 * Falls back to 0 in apps without a WCO. */
+	right: var(--wco-width, 0);
+	height: var(--titlebar-height, 32px);
+	-webkit-app-region: drag;
+	z-index: 1;
+}
+
 .ecu-modal-overlay[data-state="open"] {
 	opacity: 1;
 }

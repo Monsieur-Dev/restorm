@@ -130,14 +130,20 @@ const CustomIcon = () => (
 ## CSS Classes Used
 
 ### Titlebar Classes
-- **titlebar** : Main container for the title bar
+- **titlebar** : Main container for the title bar (CSS Grid `1fr 600px 1fr auto`-style track sizing — see `titlebar.css` for the exact `minmax()` template; the centre track caps the search bar at 600px, the 1fr left / right tracks let the menubar's responsive overflow react to a varying container width, and the auto tail reserves the WCO grid cell.)
 - **titlebar-icon** : Container for the icon (32px width, draggable)
-- **titlebar-content** : Container for the central content (flex: 1, non-draggable)
+- **titlebar-left / titlebar-center / titlebar-right** : Layout zones (grid items)
 - **titlebar-title** : Text element for the title (displayed when no children)
 
 ### Drag Region Behavior
-- **-webkit-app-region: drag** : Applied to `.titlebar` for window dragging
-- **-webkit-app-region: no-drag** : Applied to interactive elements (icon, content area, children)
+
+The whole title bar opts in to OS-level window dragging by default; only interactive children opt back out. Concretely:
+
+- **`.titlebar`** carries `-webkit-app-region: drag`.
+- **`.titlebar-left`** is `drag` (so empty space inside the MenuBar element — which fills its parent at `width: 100%` for ResizeObserver sizing — stays draggable). The MenuBar's `.menubar-menu-button` children declare `no-drag` so menu clicks still fire.
+- **`.titlebar-center`** is `drag`. The `SearchBar` component declares `no-drag` on its own root.
+- **`.titlebar-right`** is `drag`, with a wildcard `.titlebar-right > * { -webkit-app-region: no-drag }` rule that flips every direct child back to `no-drag` automatically. **Hosted `rightContent` doesn't need to opt in** — pass any `Button` / `Popover` trigger / similar primitive as `rightContent` and it will remain clickable while the empty grid track around it stays draggable. (Caveat: a non-interactive direct child wrapper, e.g. a `<span>` for spacing, will also be `no-drag` — keep `rightContent` flat or wrap with a class you can re-`drag` if the trade-off matters.)
+- **`.custom-wco`** (the WCO placeholder; sized to `var(--wco-width, 92px)`) is `no-drag` so clicks reach the controls. The actual button row is portalled to `document.body` — see [`CustomWCO`](../CustomWCO/README.md).
 
 ## Testing
 

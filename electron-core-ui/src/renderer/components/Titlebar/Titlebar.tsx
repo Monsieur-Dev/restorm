@@ -79,7 +79,7 @@ const Titlebar: React.FC<TitlebarProps> = ({
   const renderIcon = (): React.JSX.Element | null => {
     const actualIcon = icon ?? appIconPath
     if (!actualIcon) return null
-    
+
     if (typeof actualIcon === 'string') {
       if (actualIcon.trim() === '') return null
       return (
@@ -88,7 +88,7 @@ const Titlebar: React.FC<TitlebarProps> = ({
         </div>
       )
     }
-    
+
     return (
       <div className="titlebar-icon" data-testid={iconTestId}>
         {actualIcon}
@@ -109,20 +109,13 @@ const Titlebar: React.FC<TitlebarProps> = ({
       data-has-left={actualLeftContent ? 'true' : 'false'}
       data-has-center={(centerContent ?? title) ? 'true' : 'false'}
       data-has-right={rightContent ? 'true' : 'false'}
-      style={{
-        width: '100%',
-        height: '32px',
-        display: 'flex',
-        alignItems: 'center',
-        boxSizing: 'border-box'
-      }}
     >
       {/* Left zone */}
       <div className="titlebar-left" data-testid={leftZoneTestId}>
         {renderIcon()}
         {actualLeftContent}
       </div>
-      
+
       {/* Center zone */}
       <div className="titlebar-center" data-testid={centerZoneTestId}>
         {showNavigation && (
@@ -141,7 +134,7 @@ const Titlebar: React.FC<TitlebarProps> = ({
           centerContent ?? <span className="titlebar-title" data-testid={titleTestId}>{title}</span>
         )}
       </div>
-      
+
       {/* Right zone */}
       <div className="titlebar-right" data-testid={rightZoneTestId}>
         {rightContent}

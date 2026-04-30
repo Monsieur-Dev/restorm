@@ -10,7 +10,7 @@ const SAMPLES_DIR = resolve(__dirname, '../../../../unit')
 
 const { Given, When, Then } = createBdd(test)
 
-const SEED_WIDTH = 1000
+const SEED_WIDTH = 1500
 const SEED_HEIGHT = 700
 
 // Module-level handles — populated by the Given step and reassigned on

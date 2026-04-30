@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import './custom-wco.css'
 
 export interface CustomWCOProps {
@@ -17,6 +18,17 @@ interface WindowControlsOverlay {
 interface NavigatorWithWCO extends Navigator {
   windowControlsOverlay?: WindowControlsOverlay
 }
+
+/**
+ * Rendered width of the Linux WCO button row: 3 × 30px buttons +
+ * 2px right padding from `.window-controls-container`. Kept as a
+ * single source of truth so the on-page `.custom-wco` placeholder
+ * (sized via `width: var(--wco-width, 92px)` in `custom-wco.css`)
+ * stays in sync with the value this component pushes onto
+ * `document.body` for downstream consumers (e.g. the Modal drag
+ * strip's right offset).
+ */
+const LINUX_WCO_WIDTH_PX = 92
 
 const CustomWCO: React.FC<CustomWCOProps> = ({ 
   className = '', 
@@ -66,11 +78,28 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
         }
       }
     }
-    
+
     updateWcoWidth()
     window.addEventListener('resize', updateWcoWidth)
     return () => { window.removeEventListener('resize', updateWcoWidth) }
   }, [currentPlatform])
+
+  // Expose the rendered WCO width on `document.body` as `--wco-width`
+  // so other components (the Modal drag strip, the on-page `.custom-wco`
+  // placeholder) can leave a matching gap for the controls. The effect
+  // is declared above the platform-branched returns below; React still
+  // commits all hooks for the renders that exit through those returns,
+  // so the var is set on every platform.
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    let width = 0
+    if (currentPlatform === 'linux') width = LINUX_WCO_WIDTH_PX
+    else if (currentPlatform === 'win32' || currentPlatform === 'darwin') width = wcoWidth
+    document.body.style.setProperty('--wco-width', `${width}px`)
+    return () => {
+      document.body.style.removeProperty('--wco-width')
+    }
+  }, [currentPlatform, wcoWidth])
 
   const handleMinimize = (): void => {
     if (window.electronAPI?.sendAction) {
@@ -110,34 +139,46 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
     return null
   }
 
+  // The button row is portalled to `document.body` so it escapes any
+  // ancestor stacking context the host app might have on its main
+  // layout (commonly created by `position: relative + z-index` on a
+  // workbench root). Without the portal, the buttons stay trapped
+  // under a Modal overlay even with a high `z-index` because the
+  // overlay's stacking context wins against the constrained host
+  // ancestor. The on-page `.custom-wco` placeholder still occupies
+  // the title bar's grid cell so layout doesn't shift.
+  const buttonRow = (
+    <div className="window-controls-container">
+      <div
+        className="window-button minimize"
+        onClick={handleMinimize}
+        title="Minimize"
+        {...(dataTestId && { 'data-testid': `${dataTestId}-minimize` })}
+      >
+        <span className="codicon codicon-chrome-minimize"></span>
+      </div>
+      <div
+        className="window-button maximize"
+        onClick={handleMaximize}
+        title={isMaximized ? "Restore" : "Maximize"}
+        {...(dataTestId && { 'data-testid': `${dataTestId}-maximize` })}
+      >
+        <span className={`codicon ${isMaximized ? 'codicon-chrome-restore' : 'codicon-chrome-maximize'}`}></span>
+      </div>
+      <div
+        className="window-button close"
+        onClick={handleClose}
+        title="Close"
+        {...(dataTestId && { 'data-testid': `${dataTestId}-close` })}
+      >
+        <span className="codicon codicon-chrome-close"></span>
+      </div>
+    </div>
+  )
+
   return (
     <div className={`custom-wco ${className}`} {...(dataTestId && { 'data-testid': dataTestId })}>
-      <div className="window-controls-container">
-        <div 
-          className="window-button minimize" 
-          onClick={handleMinimize}
-          title="Minimize"
-          {...(dataTestId && { 'data-testid': `${dataTestId}-minimize` })}
-        >
-          <span className="codicon codicon-chrome-minimize"></span>
-        </div>
-        <div 
-          className="window-button maximize" 
-          onClick={handleMaximize}
-          title={isMaximized ? "Restore" : "Maximize"}
-          {...(dataTestId && { 'data-testid': `${dataTestId}-maximize` })}
-        >
-          <span className={`codicon ${isMaximized ? 'codicon-chrome-restore' : 'codicon-chrome-maximize'}`}></span>
-        </div>
-        <div 
-          className="window-button close" 
-          onClick={handleClose}
-          title="Close"
-          {...(dataTestId && { 'data-testid': `${dataTestId}-close` })}
-        >
-          <span className="codicon codicon-chrome-close"></span>
-        </div>
-      </div>
+      {typeof document !== 'undefined' ? createPortal(buttonRow, document.body) : buttonRow}
     </div>
   )
 }

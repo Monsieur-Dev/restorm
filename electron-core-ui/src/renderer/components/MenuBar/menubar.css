@@ -210,6 +210,18 @@
 	justify-content: center !important;
 }
 
+/* The overflow `…` and hamburger `☰` glyphs sit inside the title-bar
+ * MenuBar buttons (not in a dropdown), so their color must match the
+ * surrounding menu labels (File / Edit / …) — those inherit the
+ * title bar's `--titleBar-activeForeground`. The base `.codicon`
+ * rule above forces `--menu-foreground` (correct for dropdown
+ * items), which makes the title-bar codicons invisible against the
+ * title bar background in most themes. Scope the override to top-level
+ * MenuBar buttons. */
+.menubar > .menubar-menu-button .codicon {
+	color: inherit !important;
+}
+
 .codicon-placeholder {
 	/* Minimum reservation for a 16px codicon slot, but grows to fit
 	 * wider glyphs (colored method badges, protocol pills) rendered

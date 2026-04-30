@@ -88,6 +88,12 @@ const Example: React.FC = () => {
 - Fonts, codicon sizes and focus outlines come from `Workbench` / `workbench.css`, so the modal feels
   visually integrated with the rest of the UI.
 
+### Title-bar drag passthrough while a modal is open
+
+The first child of `.ecu-modal-overlay` is `.ecu-modal-drag-strip`: a transparent absolutely-positioned div sized to `var(--titlebar-height, 32px)` and carrying `-webkit-app-region: drag`. It lets the user **move the window from the title-bar area even with a modal open** — without it the overlay would swallow OS-level drag events on the title-bar region. The strip exposes a stable test id derived from the modal's overlay testid: `${overlayTestId}-drag-strip`.
+
+The strip's `right` is set to `var(--wco-width, 0)` so it leaves a gap for the host app's window-controls overlay (see [`CustomWCO`](../CustomWCO/README.md) for the source of `--wco-width`). Combined with `CustomWCO`'s body-level portal + elevated `z-index`, this keeps minimize / maximize / close clickable while a modal is open.
+
 ## Testing
 
 ### `data-testid` API

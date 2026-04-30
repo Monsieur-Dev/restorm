@@ -133,6 +133,17 @@ const ModalInner: React.FC<ModalProps> = ({
         }
       }}
     >
+      {/* Transparent drag strip at the title-bar position. Lets the
+       * user move the window even with a modal open — without it the
+       * overlay swallows mouse events on the title bar region. The
+       * strip is non-visual, only carries `-webkit-app-region: drag`.
+       * Clickable WCO buttons sit above this strip via their own
+       * elevated z-index. */}
+      <div
+        className="ecu-modal-drag-strip"
+        data-testid={`${overlayTestId}-drag-strip`}
+        aria-hidden="true"
+      />
       <Workbench className="ecu-modal-workbench" border={false} fullscreen>
         <div
           className={containerClassName}
