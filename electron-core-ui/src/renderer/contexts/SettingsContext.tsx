@@ -14,6 +14,8 @@ export function SettingsProvider({ children }: SettingsProviderProps): React.Rea
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [filteredSettings, setFilteredSettings] = useState<ResolvedSetting[]>([])
+  const [workspacePath, setWorkspacePathState] = useState<string | null>(null)
+  const [workspaceValues, setWorkspaceValues] = useState<Record<string, SettingValue>>({})
   const prevLanguageRef = useRef(i18n.language)
 
   const settingsMap = useMemo(() => {
@@ -28,12 +30,16 @@ export function SettingsProvider({ children }: SettingsProviderProps): React.Rea
   const loadData = useCallback(async () => {
     try {
       setIsLoading(true)
-      const [fetchedGroups, fetchedSettings] = await Promise.all([
+      const [fetchedGroups, fetchedSettings, wsPath, wsValues] = await Promise.all([
         window.api.settings.getGroups(),
-        window.api.settings.getAll()
+        window.api.settings.getAll(),
+        window.api.settings.getWorkspacePath(),
+        window.api.settings.getWorkspaceValues()
       ])
       setGroups(fetchedGroups)
       setSettingsList(fetchedSettings)
+      setWorkspacePathState(wsPath)
+      setWorkspaceValues(wsValues)
     } catch {
       // Settings API may not be available
     } finally {
@@ -129,6 +135,36 @@ export function SettingsProvider({ children }: SettingsProviderProps): React.Rea
     )
   }, [])
 
+  // ── Workspace overlay sync ──────────────────────────────────────
+  // The provider mirrors the main-process workspace path + values
+  // so the UI can pick which layer to read/write per active tab.
+  // `settings:workspace-changed` fires on path swaps; the existing
+  // `settings:changed` already covers value updates.
+  useEffect(() => {
+    const cleanup = window.api.settings.onWorkspaceChanged((path: string | null) => {
+      setWorkspacePathState(path)
+      void window.api.settings.getWorkspaceValues().then((values: Record<string, SettingValue>) => {
+        setWorkspaceValues(values)
+      })
+    })
+    return cleanup
+  }, [])
+
+  const setWorkspaceSetting = useCallback(async (storageKey: string, value: SettingValue): Promise<void> => {
+    await window.api.settings.setWorkspaceValue(storageKey, value)
+    setWorkspaceValues(prev => ({ ...prev, [storageKey]: value }))
+  }, [])
+
+  const resetWorkspaceSetting = useCallback(async (storageKey: string): Promise<void> => {
+    await window.api.settings.resetWorkspaceValue(storageKey)
+    setWorkspaceValues(prev => {
+      // Object spread + filter avoids the `no-dynamic-delete` rule —
+      // `Object.fromEntries` on the kept entries is the project's
+      // preferred shape for omitting one key from a record.
+      return Object.fromEntries(Object.entries(prev).filter(([k]) => k !== storageKey))
+    })
+  }, [])
+
   const value = useMemo(() => ({
     groups,
     settings: settingsMap,
@@ -138,8 +174,12 @@ export function SettingsProvider({ children }: SettingsProviderProps): React.Rea
     resetSetting,
     searchQuery,
     setSearchQuery,
-    filteredSettings
-  }), [groups, settingsMap, isLoading, getSetting, setSetting, resetSetting, searchQuery, filteredSettings])
+    filteredSettings,
+    workspacePath,
+    workspaceValues,
+    setWorkspaceSetting,
+    resetWorkspaceSetting
+  }), [groups, settingsMap, isLoading, getSetting, setSetting, resetSetting, searchQuery, filteredSettings, workspacePath, workspaceValues, setWorkspaceSetting, resetWorkspaceSetting])
 
   return (
     <SettingsContext.Provider value={value}>

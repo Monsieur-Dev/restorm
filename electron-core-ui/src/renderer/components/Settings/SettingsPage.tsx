@@ -1,10 +1,11 @@
-import React, { useContext, useMemo } from 'react'
+import React, { useContext, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SelectBox } from '../SelectBox'
 import type { ISelectData } from '../SelectBox/types'
 import { ThemeCarousel } from './ThemeCarousel'
 import { SettingsView } from './SettingsView'
 import { SettingsContext } from '../../contexts/settingsContextDef'
+import type { SettingsScope } from '../../contexts/settingsContextDef'
 import './settings.css'
 
 export interface SettingsPageProps {
@@ -44,10 +45,13 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   // If SettingsProvider is present and has groups, use SettingsView
   if (settingsCtx && settingsCtx.groups.length > 0) {
     return (
-      <div className="settings-page" data-testid={rootTestId} data-language={i18n.language}>
-        <SettingsView data-testid={`${rootTestId}-settings-view`} />
+      <SettingsPageBody
+        rootTestId={rootTestId}
+        language={i18n.language}
+        workspacePath={settingsCtx.workspacePath}
+      >
         {children}
-      </div>
+      </SettingsPageBody>
     )
   }
 
@@ -64,6 +68,73 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
     >
       {children}
     </SettingsPageFallback>
+  )
+}
+
+/**
+ * Two-tab body when a SettingsProvider is active — User on the left
+ * (default), Workspace on the right (disabled when no project is
+ * open). Tabs share the same SettingsView but with a `scope` prop so
+ * reads / writes route to the right layer.
+ */
+interface SettingsPageBodyProps {
+  rootTestId: string
+  language: string
+  workspacePath: string | null
+  children?: React.ReactNode
+}
+
+const SettingsPageBody: React.FC<SettingsPageBodyProps> = ({
+  rootTestId,
+  language,
+  workspacePath,
+  children
+}) => {
+  const { t } = useTranslation()
+  const [scope, setScope] = useState<SettingsScope>('user')
+  const workspaceDisabled = workspacePath === null
+  // If the workspace closes while the Workspace tab is active, fall
+  // back to User so the user isn't stuck on a disabled tab.
+  React.useEffect(() => {
+    if (workspaceDisabled && scope === 'workspace') setScope('user')
+  }, [workspaceDisabled, scope])
+
+  const tabClass = (s: SettingsScope, disabled: boolean): string => [
+    'settings-page-tab',
+    s === scope ? 'settings-page-tab--active' : '',
+    disabled ? 'settings-page-tab--disabled' : ''
+  ].filter(Boolean).join(' ')
+
+  return (
+    <div className="settings-page" data-testid={rootTestId} data-language={language} data-scope={scope}>
+      <div className="settings-page-tabs" role="tablist" aria-label={t('settings.scopeTabsLabel', 'Settings scope')}>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={scope === 'user'}
+          className={tabClass('user', false)}
+          data-testid={`${rootTestId}-tab-user`}
+          onClick={() => { setScope('user') }}
+        >
+          {t('settings.scope.user', 'User')}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={scope === 'workspace'}
+          aria-disabled={workspaceDisabled}
+          disabled={workspaceDisabled}
+          className={tabClass('workspace', workspaceDisabled)}
+          data-testid={`${rootTestId}-tab-workspace`}
+          title={workspacePath ?? t('settings.scope.workspaceDisabledTooltip', 'Open a project to edit workspace settings')}
+          onClick={() => { if (!workspaceDisabled) setScope('workspace') }}
+        >
+          {t('settings.scope.workspace', 'Workspace')}
+        </button>
+      </div>
+      <SettingsView data-testid={`${rootTestId}-settings-view`} scope={scope} />
+      {children}
+    </div>
   )
 }
 

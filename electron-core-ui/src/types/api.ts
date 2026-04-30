@@ -172,6 +172,19 @@ export interface CoreUiSettingsApi {
   reindex: () => Promise<void>
   onSettingChanged: (callback: (storageKey: string, value: SettingValue) => void) => () => void
   onConfigLoaded: (callback: () => void) => () => void
+  // ── Workspace overlay ──────────────────────────────────────────
+  getWorkspacePath: () => Promise<string | null>
+  getWorkspaceValues: () => Promise<Record<string, SettingValue>>
+  getWorkspaceValue: (storageKey: string) => Promise<SettingValue | null>
+  setWorkspaceValue: (storageKey: string, value: SettingValue) => Promise<boolean>
+  resetWorkspaceValue: (storageKey: string) => Promise<boolean>
+  getResolvedValue: (storageKey: string) => Promise<{
+    storageKey: string
+    effective: SettingValue
+    source: 'workspace' | 'user' | 'default'
+    overriddenBy?: 'workspace'
+  } | null>
+  onWorkspaceChanged: (callback: (path: string | null) => void) => () => void
 }
 
 export interface CoreUiApi {

@@ -46,6 +46,14 @@ export interface SettingDefinition {
   feature?: string | undefined
   /** Default value to use when the associated feature is disabled. Required when `feature` is set. */
   featureDisabledDefault?: SettingValue | undefined
+  /**
+   * When `true`, the setting can only be edited at the user level — a
+   * workspace `.restorm/settings.json` (or whatever the host wires) is
+   * not allowed to override it. Useful for machine-identity values
+   * like locale or, eventually, account credentials. Defaults to
+   * `false`: every setting is workspace-overridable unless flagged.
+   */
+  userOnly?: boolean | undefined
 }
 
 // ==========================================================================
@@ -85,6 +93,19 @@ export interface ResolvedSetting extends SettingDefinition {
   currentValue: SettingValue
   /** True if currentValue differs from default */
   isModified: boolean
+}
+
+/** Where a setting's effective value came from. Workspace beats user; user beats default. */
+export type SettingValueSource = 'workspace' | 'user' | 'default'
+
+export interface ResolvedSettingValue {
+  storageKey: string
+  /** The value the host should actually use. */
+  effective: SettingValue
+  /** Layer the effective value comes from. */
+  source: SettingValueSource
+  /** Set to `'workspace'` when both layers carry a value and workspace wins. */
+  overriddenBy?: 'workspace'
 }
 
 // ==========================================================================

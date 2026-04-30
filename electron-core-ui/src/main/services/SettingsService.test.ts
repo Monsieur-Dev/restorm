@@ -14,9 +14,19 @@ vi.mock('electron', () => ({
 }))
 
 // Mock fs
+const mockFsUnlink = vi.fn<(path: string) => Promise<void>>()
 vi.mock('fs', () => ({
   existsSync: vi.fn(),
-  readFileSync: vi.fn()
+  readFileSync: vi.fn(),
+  promises: {
+    unlink: (path: string): Promise<void> => mockFsUnlink(path)
+  }
+}))
+
+// Mock the atomic-write helper used for the workspace overlay flush
+const mockAtomicWriteFile = vi.fn<(path: string, contents: string) => Promise<void>>()
+vi.mock('./PersistenceService', () => ({
+  atomicWriteFile: (path: string, contents: string): Promise<void> => mockAtomicWriteFile(path, contents)
 }))
 
 // Mock js-yaml
@@ -718,6 +728,222 @@ describe('SettingsService', () => {
   // ---------------------------------------------------------------
   // Feature-gating
   // ---------------------------------------------------------------
+  // ---------------------------------------------------------------
+  // Workspace overlay
+  // ---------------------------------------------------------------
+  describe('workspace overlay', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+      mockAtomicWriteFile.mockResolvedValue(undefined)
+      mockFsUnlink.mockResolvedValue(undefined)
+    })
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    function makeWorkspaceConfig(): SettingsYamlConfig {
+      return {
+        groups: [{
+          id: 'general',
+          titleKey: 'g',
+          items: [
+            { setting: { id: 'fontSize', titleKey: 't', type: 'number', default: 14 } },
+            { setting: { id: 'language', titleKey: 't', type: 'enum', default: 'en', userOnly: true } as SettingDefinition }
+          ]
+        }]
+      }
+    }
+
+    function createWithWorkspaceFile(fileContents: string | null): SettingsService {
+      const cfg = makeWorkspaceConfig()
+      const settingsPath = '/fake/settings.yaml'
+      const workspaceFile = '/proj/.restorm/settings.json'
+      vi.mocked(existsSync).mockImplementation((p: Parameters<typeof existsSync>[0]) => {
+        const s = String(p)
+        if (s === settingsPath) return true
+        if (s === workspaceFile) return fileContents !== null
+        return false
+      })
+      vi.mocked(readFileSync).mockImplementation((p: Parameters<typeof readFileSync>[0]) => {
+        const s = String(p)
+        if (s === settingsPath) return 'yaml-placeholder'
+        if (s === workspaceFile) return fileContents ?? ''
+        return ''
+      })
+      vi.mocked(yaml.load).mockReturnValue(cfg)
+      return new SettingsService(settingsPath)
+    }
+
+    it('returns null workspace path before any project is opened', () => {
+      const s = createService()
+      expect(s.getWorkspacePath()).toBeNull()
+      expect(s.getWorkspaceValues()).toEqual({})
+    })
+
+    it('loads keys from .restorm/settings.json on setWorkspacePath', () => {
+      const s = createWithWorkspaceFile(JSON.stringify({ 'general:fontSize': 16 }))
+      s.setWorkspacePath('/proj')
+      expect(s.getWorkspacePath()).toBe('/proj')
+      expect(s.getWorkspaceValue('general:fontSize')).toBe(16)
+    })
+
+    it('drops userOnly keys from a workspace file with a warning', () => {
+      const s = createWithWorkspaceFile(JSON.stringify({
+        'general:fontSize': 16,
+        'general:language': 'fr'
+      }))
+      s.setWorkspacePath('/proj')
+      expect(s.getWorkspaceValue('general:fontSize')).toBe(16)
+      expect(s.getWorkspaceValue('general:language')).toBeUndefined()
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('userOnly'),
+        expect.objectContaining({ key: 'general:language' })
+      )
+    })
+
+    it('effective value priority: workspace > user > default', () => {
+      const s = createWithWorkspaceFile(JSON.stringify({ 'general:fontSize': 18 }))
+      s.setWorkspacePath('/proj')
+      mockStorageGet.mockImplementation((k: string) => k === 'settings:general:fontSize' ? 16 : undefined)
+      expect(s.get('general:fontSize')).toBe(18)
+      expect(s.getResolvedValue('general:fontSize')).toEqual({
+        storageKey: 'general:fontSize',
+        effective: 18,
+        source: 'workspace',
+        overriddenBy: 'workspace'
+      })
+    })
+
+    it('falls back to user when no workspace value, then to default', () => {
+      const s = createWithWorkspaceFile(null)
+      s.setWorkspacePath('/proj')
+      mockStorageGet.mockImplementation((k: string) => k === 'settings:general:fontSize' ? 16 : undefined)
+      expect(s.getResolvedValue('general:fontSize')).toEqual({
+        storageKey: 'general:fontSize',
+        effective: 16,
+        source: 'user'
+      })
+      mockStorageGet.mockReturnValue(undefined)
+      expect(s.getResolvedValue('general:fontSize')).toEqual({
+        storageKey: 'general:fontSize',
+        effective: 14,
+        source: 'default'
+      })
+    })
+
+    it('userOnly settings always read from user / default, never workspace', () => {
+      const s = createWithWorkspaceFile(JSON.stringify({ 'general:language': 'fr' }))
+      s.setWorkspacePath('/proj')
+      // The load step already filtered userOnly keys, but `get` is also defensive.
+      expect(s.get('general:language')).toBe('en')
+    })
+
+    it('setWorkspaceValue writes a sparse file after the debounce window', async () => {
+      const s = createWithWorkspaceFile(null)
+      s.setWorkspacePath('/proj')
+      s.setWorkspaceValue('general:fontSize', 18)
+      expect(mockAtomicWriteFile).not.toHaveBeenCalled()
+      vi.advanceTimersByTime(199)
+      expect(mockAtomicWriteFile).not.toHaveBeenCalled()
+      vi.advanceTimersByTime(1)
+      await vi.waitFor(() => {
+        expect(mockAtomicWriteFile).toHaveBeenCalledTimes(1)
+      })
+      const firstCall = mockAtomicWriteFile.mock.calls[0]
+      if (!firstCall) throw new Error('expected at least one atomic write')
+      expect(JSON.parse(firstCall[1])).toEqual({ 'general:fontSize': 18 })
+    })
+
+    it('rapid setWorkspaceValue calls collapse into one write', async () => {
+      const s = createWithWorkspaceFile(null)
+      s.setWorkspacePath('/proj')
+      s.setWorkspaceValue('general:fontSize', 16)
+      s.setWorkspaceValue('general:fontSize', 18)
+      s.setWorkspaceValue('general:fontSize', 20)
+      vi.advanceTimersByTime(200)
+      await vi.waitFor(() => {
+        expect(mockAtomicWriteFile).toHaveBeenCalledTimes(1)
+      })
+      const firstCall = mockAtomicWriteFile.mock.calls[0]
+      if (!firstCall) throw new Error('expected at least one atomic write')
+      expect(JSON.parse(firstCall[1])).toEqual({ 'general:fontSize': 20 })
+    })
+
+    it('setWorkspaceValue rejects userOnly keys', () => {
+      const s = createWithWorkspaceFile(null)
+      s.setWorkspacePath('/proj')
+      s.setWorkspaceValue('general:language', 'fr')
+      expect(s.getWorkspaceValue('general:language')).toBeUndefined()
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Cannot set userOnly setting'),
+        expect.objectContaining({ storageKey: 'general:language' })
+      )
+    })
+
+    it('resetWorkspaceValue removes the key and re-broadcasts the effective value', async () => {
+      const s = createWithWorkspaceFile(JSON.stringify({ 'general:fontSize': 18 }))
+      s.setWorkspacePath('/proj')
+      s.resetWorkspaceValue('general:fontSize')
+      expect(s.getWorkspaceValue('general:fontSize')).toBeUndefined()
+      vi.advanceTimersByTime(200)
+      await vi.waitFor(() => {
+        expect(mockFsUnlink).toHaveBeenCalled()
+      })
+    })
+
+    it('flush deletes the workspace file when the overlay becomes empty', async () => {
+      const s = createWithWorkspaceFile(JSON.stringify({ 'general:fontSize': 18 }))
+      s.setWorkspacePath('/proj')
+      s.resetWorkspaceValue('general:fontSize')
+      vi.advanceTimersByTime(200)
+      await vi.waitFor(() => {
+        expect(mockFsUnlink).toHaveBeenCalledWith('/proj/.restorm/settings.json')
+      })
+      expect(mockAtomicWriteFile).not.toHaveBeenCalled()
+    })
+
+    it('unsetWorkspacePath drops the overlay and re-emits effective values', () => {
+      const s = createWithWorkspaceFile(JSON.stringify({ 'general:fontSize': 18 }))
+      s.setWorkspacePath('/proj')
+      mockStorageGet.mockImplementation((k: string) => k === 'settings:general:fontSize' ? 16 : undefined)
+      s.unsetWorkspacePath()
+      expect(s.getWorkspacePath()).toBeNull()
+      expect(s.getWorkspaceValues()).toEqual({})
+      expect(s.get('general:fontSize')).toBe(16)
+    })
+
+    it('re-setting the same workspace path is idempotent (no duplicate load)', () => {
+      const s = createWithWorkspaceFile(JSON.stringify({ 'general:fontSize': 18 }))
+      s.setWorkspacePath('/proj')
+      vi.mocked(readFileSync).mockClear()
+      s.setWorkspacePath('/proj')
+      // Second call should not have re-read the workspace file.
+      const calls = vi.mocked(readFileSync).mock.calls.map((c) => String(c[0]))
+      expect(calls).not.toContain('/proj/.restorm/settings.json')
+    })
+
+    it('switching workspace path replaces the overlay', () => {
+      const cfg = makeWorkspaceConfig()
+      vi.mocked(existsSync).mockImplementation((p: Parameters<typeof existsSync>[0]) => {
+        const s = String(p)
+        return s === '/fake/settings.yaml' || s === '/p1/.restorm/settings.json' || s === '/p2/.restorm/settings.json'
+      })
+      vi.mocked(readFileSync).mockImplementation((p: Parameters<typeof readFileSync>[0]) => {
+        const s = String(p)
+        if (s === '/fake/settings.yaml') return 'yaml'
+        if (s === '/p1/.restorm/settings.json') return JSON.stringify({ 'general:fontSize': 11 })
+        if (s === '/p2/.restorm/settings.json') return JSON.stringify({ 'general:fontSize': 22 })
+        return ''
+      })
+      vi.mocked(yaml.load).mockReturnValue(cfg)
+      const s = new SettingsService('/fake/settings.yaml')
+      s.setWorkspacePath('/p1')
+      expect(s.getWorkspaceValue('general:fontSize')).toBe(11)
+      s.setWorkspacePath('/p2')
+      expect(s.getWorkspaceValue('general:fontSize')).toBe(22)
+    })
+  })
+
   describe('feature-gating', () => {
     function makeFeatureGatedConfig(): SettingsYamlConfig {
       return {

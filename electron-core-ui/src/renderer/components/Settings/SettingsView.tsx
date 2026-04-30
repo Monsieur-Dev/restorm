@@ -4,11 +4,20 @@ import { InputBox } from '../InputBox'
 import { ScrollableElement } from '../ScrollableElement'
 import { SettingItem } from './SettingItem'
 import { useSettings } from '../../hooks/useSettings'
+import type { SettingsScope } from '../../contexts/settingsContextDef'
 import type { SettingsGroup, SettingsGroupItem, SettingValue } from '../../../types/settings'
 import { isSettingItem, isGroupItem } from '../../../types/settings'
 
 export interface SettingsViewProps {
   'data-testid'?: string
+  /**
+   * Which layer the view is editing. The component reads / writes
+   * values via the matching provider-level methods (user-level via
+   * `setSetting` / `resetSetting`, workspace-level via the workspace
+   * variants). Defaults to `'user'`. The Workspace tab also hides
+   * settings flagged `userOnly: true`.
+   */
+  scope?: SettingsScope
 }
 
 // ---------- TOC helpers ----------
@@ -104,7 +113,8 @@ const TocItemRenderer: React.FC<TocItemRendererProps> = ({
 // ---------- SettingsView ----------
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
-  'data-testid': dataTestId
+  'data-testid': dataTestId,
+  scope = 'user'
 }) => {
   const { t } = useTranslation()
   const {
@@ -115,7 +125,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     resetSetting,
     searchQuery,
     setSearchQuery,
-    filteredSettings
+    filteredSettings,
+    workspaceValues,
+    setWorkspaceSetting,
+    resetWorkspaceSetting
   } = useSettings()
 
   const rootTestId = dataTestId ?? 'settings-view'
@@ -144,12 +157,20 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   // ---------- Setting handlers ----------
 
   const handleChange = useCallback((storageKey: string, value: SettingValue) => {
-    void setSetting(storageKey, value)
-  }, [setSetting])
+    if (scope === 'workspace') {
+      void setWorkspaceSetting(storageKey, value)
+    } else {
+      void setSetting(storageKey, value)
+    }
+  }, [scope, setSetting, setWorkspaceSetting])
 
   const handleReset = useCallback((storageKey: string) => {
-    void resetSetting(storageKey)
-  }, [resetSetting])
+    if (scope === 'workspace') {
+      void resetWorkspaceSetting(storageKey)
+    } else {
+      void resetSetting(storageKey)
+    }
+  }, [scope, resetSetting, resetWorkspaceSetting])
 
   const handleSearchChange = useCallback((value: string) => {
     setSearchQuery(value)
@@ -262,11 +283,23 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       if (!resolvedSetting) return null
       if (searchQuery && !filteredStorageKeys.has(resolvedSetting.storageKey)) return null
 
+      // Workspace tab hides userOnly settings entirely (counted in
+      // the footer below). User tab shows everything as before.
+      if (scope === 'workspace' && resolvedSetting.userOnly === true) return null
+
+      // Pick the value to display. Workspace tab shows the workspace
+      // override when present; otherwise it shows the user-level value
+      // as a "fallback" that's still editable at the workspace scope.
+      const wsValue = workspaceValues[resolvedSetting.storageKey]
+      const valueToShow = scope === 'workspace' && wsValue !== undefined
+        ? wsValue
+        : resolvedSetting.currentValue
+
       return (
         <SettingItem
           key={resolvedSetting.storageKey}
           setting={resolvedSetting}
-          value={resolvedSetting.currentValue}
+          value={valueToShow}
           onChange={handleChange}
           onReset={handleReset}
         />
@@ -323,6 +356,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
   const hasNoResults = !!searchQuery && filteredSettings.length === 0
 
+  // Count how many settings the workspace tab is hiding so the user
+  // understands why the list is shorter than the user tab. Counted
+  // off the full settingsList (not the filtered set) so the number
+  // is stable when the search bar is active.
+  const userOnlyHiddenCount = scope === 'workspace'
+    ? Array.from(settings.values()).filter(s => s.userOnly === true).length
+    : 0
+
   return (
     <div className="settings-view" data-testid={rootTestId}>
       <div className="settings-view-search">
@@ -336,6 +377,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           data-testid={`${rootTestId}-search`}
         />
       </div>
+      {userOnlyHiddenCount > 0 && (
+        <div
+          className="settings-view-hidden-note"
+          data-testid={`${rootTestId}-userOnly-hidden`}
+          style={{ padding: '4px 12px', fontSize: 12, color: 'var(--descriptionForeground, #888)' }}
+        >
+          {t('settings.userOnlyHidden', { count: userOnlyHiddenCount, defaultValue: '{{count}} user-only setting(s) are hidden on this tab.' })}
+        </div>
+      )}
       {hasNoResults ? (
         <div className="settings-view-no-results">
           {t('settings.noResults', 'No settings found.')}

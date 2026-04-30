@@ -95,7 +95,8 @@ export const settingDefinitionSchema = z.object({
   default: z.union([z.string(), z.number(), z.boolean()]),
   params: z.record(z.string(), z.unknown()).optional(),
   feature: z.string().optional(),
-  featureDisabledDefault: z.union([z.string(), z.number(), z.boolean()]).optional()
+  featureDisabledDefault: z.union([z.string(), z.number(), z.boolean()]).optional(),
+  userOnly: z.boolean().optional()
 })
 
 // Recursive schema for group items (setting or nested group)

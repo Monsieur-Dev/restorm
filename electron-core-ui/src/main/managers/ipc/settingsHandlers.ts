@@ -40,4 +40,37 @@ export function registerSettingsHandlers(): void {
     if (!isSettingsServiceInitialized()) return
     getSettingsService().reindexSearch()
   })
+
+  // ── Workspace overlay ──────────────────────────────────────────────
+  ipcMain.handle('settings:get-workspace-path', () => {
+    if (!isSettingsServiceInitialized()) return null
+    return getSettingsService().getWorkspacePath()
+  })
+
+  ipcMain.handle('settings:get-workspace-values', () => {
+    if (!isSettingsServiceInitialized()) return {}
+    return getSettingsService().getWorkspaceValues()
+  })
+
+  validatedHandle('settings:get-workspace-value', settingsGetArgs, (_event, [storageKey]) => {
+    if (!isSettingsServiceInitialized()) return null
+    return getSettingsService().getWorkspaceValue(storageKey) ?? null
+  })
+
+  validatedHandle('settings:set-workspace-value', settingsSetArgs, (_event, [storageKey, value]) => {
+    if (!isSettingsServiceInitialized()) return false
+    getSettingsService().setWorkspaceValue(storageKey, value)
+    return true
+  })
+
+  validatedHandle('settings:reset-workspace-value', settingsResetArgs, (_event, [storageKey]) => {
+    if (!isSettingsServiceInitialized()) return false
+    getSettingsService().resetWorkspaceValue(storageKey)
+    return true
+  })
+
+  validatedHandle('settings:get-resolved-value', settingsGetArgs, (_event, [storageKey]) => {
+    if (!isSettingsServiceInitialized()) return null
+    return getSettingsService().getResolvedValue(storageKey)
+  })
 }

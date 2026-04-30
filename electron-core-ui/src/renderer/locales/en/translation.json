@@ -45,6 +45,13 @@
     "resetSetting": "Reset Setting",
     "copySettingId": "Copy Setting ID",
     "settingOptions": "Setting options",
+    "scopeTabsLabel": "Settings scope",
+    "userOnlyHidden": "{{count}} user-only setting(s) are hidden on this tab.",
+    "scope": {
+      "user": "User",
+      "workspace": "Workspace",
+      "workspaceDisabledTooltip": "Open a project to edit workspace settings"
+    },
     "appearance": {
       "title": "Appearance",
       "theme": {
