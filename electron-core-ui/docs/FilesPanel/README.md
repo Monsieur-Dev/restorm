@@ -135,4 +135,4 @@ The panel exposes stable test ids:
 - Star toggle on a recent — `[data-testid="files-panel-toggle-favorite-button"]`.
 - Star toggle on a favorite — `[data-testid="files-panel-remove-favorite-button"]`.
 
-Class hooks: `.ecu-files-panel` (root), `.ecu-files-panel-section`, `.ecu-files-panel-list`, `.ecu-files-panel-item`, `.ecu-files-panel-favorite-btn` (`--active` modifier when starred).
+Class hooks: `.ecu-files-panel` (root), `.ecu-files-panel-section`, `.ecu-files-panel-list`, `.ecu-files-panel-item`. Each row's favorite star is rendered by `Toggle` with `appearance="star"` (Lottie-backed, see the Toggle doc) wrapped in `.ecu-files-panel-toggle-wrap` to swallow the row click. Modifier classes pinned via `actionClassName`: `.ecu-files-panel-star--active` (always visible, full-color) and `.ecu-files-panel-star--reveal-on-hover` (hidden by default, grey star fades in when the row is hovered).

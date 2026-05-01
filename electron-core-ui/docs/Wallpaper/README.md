@@ -33,6 +33,9 @@ export type WallpaperPatternId =
   | 'sparkles'
   | 'vortex'
   | 'neuro-noise'
+  | 'warp'
+  | 'grain-gradient'
+  | 'mesh-gradient'
 
 export type WallpaperPattern = WallpaperPatternId | 'random'
 
@@ -62,11 +65,18 @@ export interface WallpaperProps {
 | `globe` | Aceternity UI (MIT, ported, depends on `cobe`) | WebGL auto-rotating globe with markers; falls back gracefully if WebGL isn't available (the `random` pool excludes it on systems without WebGL). |
 | `sparkles` | Aceternity UI (MIT, port wraps `@tsparticles/react`) | Twinkling particles via tsparticles, theme-derived color. |
 | `vortex` | Aceternity UI (MIT, ported, depends on `simplex-noise`) | Curl-noise particle vortex on canvas with neon strokes. |
-| `neuro-noise` | Paper Design (MIT, wraps `@paper-design/shaders-react`) | WebGL fragment shader that paints a fluid web of glowing intersections; theme-derived back color, vivid mid + front, randomized speed / scale / rotation. Excluded from `random` when WebGL isn't available. |
+| `neuro-noise` | Paper Design (MIT, wraps `@paper-design/shaders-react`) | WebGL fragment shader that paints a fluid web of glowing intersections; theme-derived back / mid / front colors, randomized speed / scale / rotation. Excluded from `random` when WebGL isn't available. |
+| `warp` | Paper Design (MIT, wraps `@paper-design/shaders-react`) | WebGL "fluid marbled" gradient warped by noise + swirl over a base shape (checks / stripes / edge); 5-7 stops derived from the editor background's hue family. Excluded from `random` without WebGL. |
+| `grain-gradient` | Paper Design (MIT, wraps `@paper-design/shaders-react`) | WebGL multi-color gradient with grain-textured distortion in one of 7 forms (wave / dots / truchet / corners / ripple / blob / sphere); `colorBack` = editor background, gradient stops jittered around its hue. Excluded from `random` without WebGL. |
+| `mesh-gradient` | Paper Design (MIT, wraps `@paper-design/shaders-react`) | WebGL smooth multi-color mesh (hero-banner style) with optional swirl + grain; 4-6 stops derived from the editor background. Excluded from `random` without WebGL. |
 
 The selected pattern id is exposed on the root as `data-pattern="..."` for testing or theming. When `pattern="random"`, a pattern is picked once at mount and stays stable for the wallpaper's lifetime.
 
-The full list of available pattern ids is exported as `wallpaperPatternIds` for consumers that want to build their own pickers. `pickRandomWallpaperPattern()` is also exported and respects the runtime support filter (e.g. drops `globe` and `neuro-noise` when WebGL is missing).
+The full list of available pattern ids is exported as `wallpaperPatternIds` for consumers that want to build their own pickers. `pickRandomWallpaperPattern()` is also exported and respects the runtime support filter — patterns that need WebGL (`globe`, `neuro-noise`, `warp`, `grain-gradient`, `mesh-gradient`) are dropped from the random pool when WebGL isn't available.
+
+### Live theme tracking
+
+When the active theme changes — either through `data-theme` attribute swaps on `<html>` (the standard ECUI flow) or through inline `style` mutations on `<html>` (which is how `--editor-background` updates land) — the rendered pattern element is rebuilt with a fresh palette that reads the new background. The pattern id and the random mask wrapper stay fixed for the wallpaper's lifetime; only colour-bearing props re-roll. Patterns that don't read theme tokens (e.g. `globe` markers, `interactive-grid-pattern`) just remount with the same configuration.
 
 #### Per-pattern theming
 

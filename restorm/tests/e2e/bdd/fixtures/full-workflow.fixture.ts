@@ -83,7 +83,8 @@ export const test = base.extend<FullWorkflowFixtures>({
     const baseEnv = {
       ...withE2ECoverageEnv(restormRoot, process.env),
       NODE_ENV: 'development',
-      RESTORM_USER_DATA_OVERRIDE: isolatedUserDataDir
+      RESTORM_USER_DATA_OVERRIDE: isolatedUserDataDir,
+      ECUI_DISABLE_GPU: '1'
     }
 
     const startApp = async (): Promise<LaunchedApp> => {
@@ -125,6 +126,11 @@ export const test = base.extend<FullWorkflowFixtures>({
 
       const page = await app.firstWindow()
       await page.waitForLoadState('load')
+      // Reduce motion in tests: snaps the FilesPanel star toggle to its
+      // target frame instead of playing the 1.3s lottie burst, which
+      // otherwise nudges this long workflow scenario over the 180s
+      // Playwright timeout. Real users still see the burst.
+      await page.emulateMedia({ reducedMotion: 'reduce' })
       // Install the electron-core-ui system modals mock in strict mode —
       // any unconfigured native dialog (showOpenDialog / showSaveDialog /
       // showMessageBox) now throws loudly so the test author can't miss

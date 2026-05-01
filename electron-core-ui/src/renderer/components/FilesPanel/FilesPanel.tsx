@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from '../Button'
+import { Toggle } from '../Toggle'
 import { Vignette, type VignetteDecoration } from '../Vignette'
 import { useFileService } from '../../hooks/useFileService'
 import './filesPanel.css'
@@ -150,8 +150,7 @@ export const FilesPanel: React.FC<FilesPanelProps> = ({
   }, [confirmRemoveFavorite, t])
 
   const handleToggleFavorite = useCallback(
-    (path: string, fileName: string, isCurrentlyFavorite: boolean, event: React.MouseEvent) => {
-      event.stopPropagation()
+    (path: string, fileName: string, isCurrentlyFavorite: boolean) => {
       if (isCurrentlyFavorite) {
         void (async () => {
           const confirmed = await askConfirm(fileName)
@@ -165,8 +164,7 @@ export const FilesPanel: React.FC<FilesPanelProps> = ({
   )
 
   const handleRemoveFavorite = useCallback(
-    (path: string, fileName: string, event: React.MouseEvent) => {
-      event.stopPropagation()
+    (path: string, fileName: string) => {
       void (async () => {
         const confirmed = await askConfirm(fileName)
         if (confirmed) await toggleFavorite(path)
@@ -230,18 +228,20 @@ export const FilesPanel: React.FC<FilesPanelProps> = ({
                   >
                     <span className="ecu-files-panel-item-name">{splitPath(file.path).basename}</span>
                     <span className="ecu-files-panel-item-path">{splitPath(file.path).directory}</span>
-                    <Button
-                      icon="star-full"
-                      small
-                      secondary
-                      className="ecu-files-panel-favorite-btn ecu-files-panel-favorite-btn--active"
-                      onClick={(e) => { handleRemoveFavorite(file.path, file.name, e) }}
-                      options={{
-                        title: t('filesPanel.removeFromFavorites'),
-                        ariaLabel: t('filesPanel.removeFromFavorites')
-                      }}
-                      data-testid="files-panel-remove-favorite-button"
-                    />
+                    <div
+                      className="ecu-files-panel-toggle-wrap"
+                      onClick={(e) => { e.stopPropagation() }}
+                      onKeyDown={(e) => { e.stopPropagation() }}
+                    >
+                      <Toggle
+                        appearance="star"
+                        checked
+                        onChange={() => { handleRemoveFavorite(file.path, file.name) }}
+                        actionClassName="ecu-files-panel-star--active"
+                        aria-label={t('filesPanel.removeFromFavorites')}
+                        data-testid="files-panel-remove-favorite-button"
+                      />
+                    </div>
                   </div>
                 </li>
               ))}
@@ -282,18 +282,20 @@ export const FilesPanel: React.FC<FilesPanelProps> = ({
                   >
                     <span className="ecu-files-panel-item-name">{splitPath(file.path).basename}</span>
                     <span className="ecu-files-panel-item-path">{splitPath(file.path).directory}</span>
-                    <Button
-                      icon={isFavorite(file.path) ? 'star-full' : 'star-empty'}
-                      small
-                      secondary
-                      className={`ecu-files-panel-favorite-btn${isFavorite(file.path) ? ' ecu-files-panel-favorite-btn--active' : ''}`}
-                      onClick={(e) => { handleToggleFavorite(file.path, file.name, isFavorite(file.path), e) }}
-                      options={{
-                        title: isFavorite(file.path) ? t('filesPanel.removeFromFavorites') : t('filesPanel.addToFavorites'),
-                        ariaLabel: isFavorite(file.path) ? t('filesPanel.removeFromFavorites') : t('filesPanel.addToFavorites')
-                      }}
-                      data-testid="files-panel-toggle-favorite-button"
-                    />
+                    <div
+                      className="ecu-files-panel-toggle-wrap"
+                      onClick={(e) => { e.stopPropagation() }}
+                      onKeyDown={(e) => { e.stopPropagation() }}
+                    >
+                      <Toggle
+                        appearance="star"
+                        checked={isFavorite(file.path)}
+                        onChange={() => { handleToggleFavorite(file.path, file.name, isFavorite(file.path)) }}
+                        actionClassName={isFavorite(file.path) ? 'ecu-files-panel-star--active' : 'ecu-files-panel-star--reveal-on-hover'}
+                        aria-label={isFavorite(file.path) ? t('filesPanel.removeFromFavorites') : t('filesPanel.addToFavorites')}
+                        data-testid="files-panel-toggle-favorite-button"
+                      />
+                    </div>
                   </div>
                 </li>
               ))}

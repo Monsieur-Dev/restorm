@@ -8,6 +8,9 @@ export type WallpaperPatternId =
   | 'sparkles'
   | 'vortex'
   | 'neuro-noise'
+  | 'warp'
+  | 'grain-gradient'
+  | 'mesh-gradient'
 
 export const wallpaperPatternIds: readonly WallpaperPatternId[] = [
   'flickering-grid',
@@ -18,7 +21,10 @@ export const wallpaperPatternIds: readonly WallpaperPatternId[] = [
   'globe',
   'sparkles',
   'vortex',
-  'neuro-noise'
+  'neuro-noise',
+  'warp',
+  'grain-gradient',
+  'mesh-gradient'
 ]
 
 export function pickRandomWallpaperPattern(): WallpaperPatternId {
@@ -33,7 +39,7 @@ export function pickRandomWallpaperPattern(): WallpaperPatternId {
  * from the random pool so the fallback path never renders an empty canvas.
  */
 function isPatternSupported(id: WallpaperPatternId): boolean {
-  if (id === 'globe' || id === 'neuro-noise') return hasWebGL()
+  if (id === 'globe' || id === 'neuro-noise' || id === 'warp' || id === 'grain-gradient' || id === 'mesh-gradient') return hasWebGL()
   return true
 }
 
@@ -69,6 +75,12 @@ export { Vortex } from './Vortex'
 export type { VortexProps } from './Vortex'
 export { NeuroNoise } from './NeuroNoise'
 export type { NeuroNoiseProps } from './NeuroNoise'
+export { Warp } from './Warp'
+export type { WarpProps } from './Warp'
+export { GrainGradient } from './GrainGradient'
+export type { GrainGradientProps, GrainGradientShape } from './GrainGradient'
+export { MeshGradient } from './MeshGradient'
+export type { MeshGradientProps } from './MeshGradient'
 export {
   pickRandomFlickeringGridProps,
   pickRandomAnimatedGridPatternProps,
@@ -79,5 +91,8 @@ export {
   pickRandomSparklesProps,
   pickRandomVortexProps,
   pickRandomNeuroNoiseProps,
+  pickRandomWarpProps,
+  pickRandomGrainGradientProps,
+  pickRandomMeshGradientProps,
   pickRandomMaskStyle
 } from './random'

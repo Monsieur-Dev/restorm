@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { Suspense, useCallback } from 'react'
 import './toggle.css'
 import type { ToggleProps } from './types'
 import { defaultToggleStyles } from './types'
@@ -9,6 +9,14 @@ import {
   toToggleState
 } from './toggleLogic'
 
+// Lazy import keeps the lottie runtime + star asset out of every
+// Toggle consumer's bundle. Only callers that pass `appearance="star"`
+// pay the ~80KB lottie-web cost — Vite / Rollup split the chunk on
+// first dynamic resolution.
+const StarAppearance = React.lazy(() =>
+  import('./StarAppearance').then((m) => ({ default: m.StarAppearance }))
+)
+
 const ToggleInner: React.FC<ToggleProps> = ({
   checked,
   onChange,
@@ -17,12 +25,14 @@ const ToggleInner: React.FC<ToggleProps> = ({
   className = '',
   id,
   'data-testid': dataTestId,
+  'aria-label': ariaLabelProp,
   styles,
   icon,
   indeterminateIcon = 'dash',
   actionClassName,
   notFocusable,
-  children
+  children,
+  appearance = 'switch'
 }) => {
   // Fully prop-controlled: derive the effective state from props on
   // every render. There is no internal state mirror, so cascading
@@ -104,6 +114,52 @@ const ToggleInner: React.FC<ToggleProps> = ({
   const codiconName = iconForToggleState(effectiveState, icon, indeterminateIcon);
   const showIcon = codiconName !== null;
 
+  // The `'star'` appearance is a single Lottie-rendered favorite
+  // star with no codicon, no indeterminate state, and its own
+  // animation lifecycle. We still wrap it in `toggle-container` so
+  // any consumer-supplied `children` label sits next to the action
+  // exactly the same way as for the default `'switch'` appearance.
+  if (appearance === 'star') {
+    const starActive = effectiveState === 'checked';
+    const ariaLabel = ariaLabelProp ?? (typeof children === 'string' ? children : 'Toggle');
+    return (
+      <div
+        className="toggle-container"
+        {...(dataTestId && { 'data-testid': dataTestId })}
+        style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+      >
+        <Suspense fallback={<div className="custom-toggle-star" aria-hidden="true" />}>
+          <StarAppearance
+            active={starActive}
+            disabled={!enabled}
+            onActivate={() => { emit(false); }}
+            ariaLabel={ariaLabel}
+            focusable={!notFocusable}
+            {...(onKeyDown ? { onKeyDown } : {})}
+            {...(() => {
+              const merged = [actionClassName, className].filter(Boolean).join(' ');
+              return merged ? { className: merged } : {};
+            })()}
+            {...(dataTestId ? { dataTestId: `${dataTestId}-action` } : {})}
+          />
+        </Suspense>
+        {children && (
+          <span
+            onClick={handleClick}
+            {...(dataTestId && { 'data-testid': `${dataTestId}-label` })}
+            style={{
+              cursor: enabled ? 'pointer' : 'default',
+              color: enabled ? 'var(--foreground)' : 'var(--disabledForeground)',
+              userSelect: 'none'
+            }}
+          >
+            {children}
+          </span>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div
       className="toggle-container"
@@ -123,7 +179,7 @@ const ToggleInner: React.FC<ToggleProps> = ({
         tabIndex={notFocusable ? -1 : 0}
         role="checkbox"
         aria-checked={ariaChecked}
-        aria-label={typeof children === 'string' ? children : 'Toggle'}
+        aria-label={ariaLabelProp ?? (typeof children === 'string' ? children : 'Toggle')}
         aria-disabled={!enabled}
         onClick={handleClick}
         onKeyDown={handleKeyDown}

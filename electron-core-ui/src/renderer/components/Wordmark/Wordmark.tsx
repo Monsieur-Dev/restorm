@@ -39,6 +39,13 @@ export interface WordmarkProps {
   /** When true, the wordmark cycles enter → display → exit → enter forever.
    *  A new random variant is picked at every iteration. */
   loop?: boolean
+  /**
+   * Optional delay in milliseconds before the first effect plays. The
+   * wordmark renders empty during the delay so the surrounding layout
+   * stays stable; when the timer fires, the regular enter animation
+   * starts. Subsequent loop cycles aren't affected. Default: `0`.
+   */
+  startDelay?: number
   /** Optional className appended to the root for custom styling. */
   className?: string
   /** Optional inline style overrides on the root. */
@@ -51,12 +58,22 @@ export const Wordmark: React.FC<WordmarkProps> = ({
   children,
   effect,
   loop = false,
+  startDelay = 0,
   className,
   style,
   'data-testid': dataTestId
 }) => {
   const [iteration, setIteration] = useState(0)
   const [phase, setPhase] = useState<Phase>('enter')
+  // Holds back rendering until `startDelay` ms have elapsed. When the
+  // timer fires the wordmark mounts its effect normally; subsequent
+  // loop cycles aren't gated on this.
+  const [armed, setArmed] = useState(startDelay <= 0)
+  useEffect(() => {
+    if (armed) return undefined
+    const t = window.setTimeout(() => { setArmed(true) }, startDelay)
+    return () => { window.clearTimeout(t) }
+  }, [armed, startDelay])
 
   // The rendered effect carries random per-iteration props — keep it in
   // useState (lazy init) and re-roll during render whenever effect / children
@@ -103,12 +120,23 @@ export const Wordmark: React.FC<WordmarkProps> = ({
   const dataAttrs: Record<string, string> = {}
   if (renderedEffect) dataAttrs['data-effect'] = renderedEffect.id
   if (loop) dataAttrs['data-phase'] = phase
+  if (!armed) dataAttrs['data-armed'] = 'false'
 
   return (
     <span className={classes} style={style} data-testid={dataTestId} {...dataAttrs}>
-      <span key={iteration} className="ecu-wordmark-iteration">
-        {renderedEffect?.element ?? children}
-      </span>
+      {armed ? (
+        <span key={iteration} className="ecu-wordmark-iteration">
+          {renderedEffect?.element ?? children}
+        </span>
+      ) : (
+        // Reserve the wordmark's intrinsic layout box during
+        // `startDelay` so adjacent rules / siblings don't shift
+        // position when the text fades in. `visibility: hidden`
+        // keeps the box without painting any glyphs.
+        <span className="ecu-wordmark-iteration" style={{ visibility: 'hidden' }} aria-hidden="true">
+          {children}
+        </span>
+      )}
     </span>
   )
 }

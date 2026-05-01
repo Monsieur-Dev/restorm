@@ -193,6 +193,9 @@ importers:
       jsoncrack-react:
         specifier: 0.0.1-beta.4
         version: 0.0.1-beta.4(@emotion/is-prop-valid@1.4.0)(@types/react@19.2.14)(prop-types@15.8.1)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(styled-components@6.4.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5))
+      lottie-react:
+        specifier: ^2.4.1
+        version: 2.4.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       luxon:
         specifier: ^3.7.2
         version: 3.7.2
@@ -4762,6 +4765,15 @@ packages:
   loose-envify@1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
     hasBin: true
+
+  lottie-react@2.4.1:
+    resolution: {integrity: sha512-LQrH7jlkigIIv++wIyrOYFLHSKQpEY4zehPicL9bQsrt1rnoKRYCYgpCUe5maqylNtacy58/sQDZTkwMcTRxZw==}
+    peerDependencies:
+      react: ^19.0.5
+      react-dom: ^19.0.5
+
+  lottie-web@5.13.0:
+    resolution: {integrity: sha512-+gfBXl6sxXMPe8tKQm7qzLnUy5DUPJPKIyRHwtpCpyUEYjHYRJC/5gjUvdkuO2c3JllrPtHXH5UJJK8LRYl5yQ==}
 
   lowercase-keys@2.0.0:
     resolution: {integrity: sha512-tqNXrS78oMOE73NMxK4EMLQsQowWf8jKooH9g7xPavRT706R6bkQJ6DY2Te7QukaZsulxa30wQ7bk0pm4XiHmA==}
@@ -12274,6 +12286,14 @@ snapshots:
   loose-envify@1.4.0:
     dependencies:
       js-tokens: 4.0.0
+
+  lottie-react@2.4.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
+    dependencies:
+      lottie-web: 5.13.0
+      react: 19.2.5
+      react-dom: 19.2.5(react@19.2.5)
+
+  lottie-web@5.13.0: {}
 
   lowercase-keys@2.0.0: {}
 

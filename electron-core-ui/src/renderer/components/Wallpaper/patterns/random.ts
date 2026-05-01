@@ -8,6 +8,9 @@ import type { MeteorsProps } from './Meteors'
 import type { NeuroNoiseProps } from './NeuroNoise'
 import type { SparklesProps } from './Sparkles'
 import type { VortexProps } from './Vortex'
+import type { WarpProps } from './Warp'
+import type { GrainGradientProps, GrainGradientShape } from './GrainGradient'
+import type { MeshGradientProps } from './MeshGradient'
 
 interface Rgb {
   r: number
@@ -205,12 +208,6 @@ export function pickRandomGlobeProps(): GlobeProps {
     : [0.35, 0.35, 0.5]
   const markerColor = pickVividMarkerColor()
 
-  const markerCount = randInt(8, 18)
-  const markers = Array.from({ length: markerCount }, () => ({
-    location: [randFloat(-60, 70), randFloat(-180, 180)] as [number, number],
-    size: randFloat(0.03, 0.12)
-  }))
-
   return {
     config: {
       dark: bgIsDark ? 0 : 1,
@@ -220,7 +217,7 @@ export function pickRandomGlobeProps(): GlobeProps {
       baseColor,
       glowColor,
       markerColor,
-      markers
+      markers: []
     }
   }
 }
@@ -325,22 +322,32 @@ export function pickRandomHexagonPatternProps(): HexagonPatternProps {
 
 /**
  * Returns a coherent set of randomized props for the NeuroNoise shader.
- * Background derives from the editor theme so the wallpaper integrates with
- * the surrounding UI; mid + front colors are picked from a vivid palette so
- * the fluid web stays clearly visible. Speed, scale and rotation pull from
- * cinematic ranges that keep the motion calm but never static.
+ *
+ * All three colour stops (back / mid / front) derive from the editor
+ * background — back is the bg itself, mid + front jitter the bg's hue
+ * by ±45° and shift luminance toward the contrast end (lighter on dark
+ * themes, darker on light themes). Result: the fluid web reads as a
+ * sibling of the UI palette rather than a foreign neon overlay.
  */
 export function pickRandomNeuroNoiseProps(): NeuroNoiseProps {
   const bg = readEditorBackground()
-  const colorBack = `rgb(${bg.r}, ${bg.g}, ${bg.b})`
+  const bgHsl = rgbToHsl(bg)
   const bgIsDark = isBackgroundDark()
-  const baseHue = randFloat(0, 360)
-  const midL = bgIsDark ? randFloat(0.45, 0.6) : randFloat(0.35, 0.5)
-  const frontL = bgIsDark ? randFloat(0.75, 0.95) : randFloat(0.2, 0.35)
-  const colorMid = hslToRgbString({ h: baseHue, s: randFloat(0.55, 0.85), l: midL })
+  const colorBack = `rgb(${bg.r}, ${bg.g}, ${bg.b})`
+
+  // Mid sits halfway toward the contrast end of the luminance range
+  // (visible against the bg without being neon); front goes further so
+  // the bright crossing points pop.
+  const midL = clamp(bgHsl.l + (bgIsDark ? randFloat(0.25, 0.4) : -randFloat(0.2, 0.35)), 0.05, 0.95)
+  const frontL = clamp(bgHsl.l + (bgIsDark ? randFloat(0.55, 0.75) : -randFloat(0.45, 0.65)), 0.05, 0.95)
+  const colorMid = hslToRgbString({
+    h: (bgHsl.h + randFloat(-45, 45) + 360) % 360,
+    s: clamp(bgHsl.s + randFloat(-0.1, 0.3), 0, 1),
+    l: midL
+  })
   const colorFront = hslToRgbString({
-    h: (baseHue + randFloat(-30, 30) + 360) % 360,
-    s: randFloat(0.4, 0.8),
+    h: (bgHsl.h + randFloat(-30, 30) + 360) % 360,
+    s: clamp(bgHsl.s + randFloat(-0.2, 0.2), 0, 1),
     l: frontL
   })
   return {
@@ -358,6 +365,143 @@ export function pickRandomNeuroNoiseProps(): NeuroNoiseProps {
 function hslToRgbString(hsl: Hsl): string {
   const rgb = hslToRgb(hsl)
   return `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`
+}
+
+/**
+ * Returns a coherent set of randomized props for the MeshGradient
+ * shader. Picks 4-6 sibling colours from the editor background's
+ * hue family, jitters distortion + swirl + grain in soft ranges so
+ * the result looks like a smooth marketing-page hero rather than a
+ * harsh psychedelic.
+ */
+export function pickRandomMeshGradientProps(): MeshGradientProps {
+  const bg = readEditorBackground()
+  const bgHsl = rgbToHsl(bg)
+  const bgIsDark = isBackgroundDark()
+
+  // MeshGradient blends colours smoothly without a separate "back"
+  // anchor — fold the bg into the colour list so the mesh has a
+  // visual seam with the surrounding UI.
+  const stopCount = randInt(4, 6)
+  const colors: string[] = [`rgb(${bg.r}, ${bg.g}, ${bg.b})`]
+  for (let i = 0; i < stopCount; i++) {
+    const hueShift = randFloat(-60, 60)
+    const lDirection = i % 2 === 0 ? 1 : -1
+    const lShift = lDirection * randFloat(0.1, 0.3) * (bgIsDark ? 1 : -1)
+    const sShift = randFloat(-0.1, 0.3)
+    colors.push(hslToRgbString({
+      h: (bgHsl.h + hueShift + 360) % 360,
+      s: clamp(bgHsl.s + sShift, 0, 1),
+      l: clamp(bgHsl.l + lShift, 0.05, 0.95)
+    }))
+  }
+
+  return {
+    colors,
+    distortion: randFloat(0.5, 0.95),
+    swirl: randFloat(0.1, 0.5),
+    grainMixer: randFloat(0, 0.25),
+    grainOverlay: randFloat(0, 0.2),
+    speed: randFloat(0.2, 0.6),
+    scale: randFloat(0.7, 1.3),
+    rotation: randFloat(0, 360)
+  }
+}
+
+/**
+ * Returns a coherent set of randomized props for the GrainGradient
+ * shader. Picks one of 7 animated forms (wave / dots / truchet /
+ * corners / ripple / blob / sphere). The colour palette and back
+ * colour are derived from the editor background — back is the bg
+ * itself, the gradient stops are 4-6 sibling shades produced by
+ * jittering hue ±50°, saturation ±0.3, luminance toward the
+ * contrast end. Result: every theme gets a grain gradient painted
+ * in its own family.
+ */
+export function pickRandomGrainGradientProps(): GrainGradientProps {
+  const bg = readEditorBackground()
+  const bgHsl = rgbToHsl(bg)
+  const bgIsDark = isBackgroundDark()
+  const colorBack = `rgb(${bg.r}, ${bg.g}, ${bg.b})`
+
+  const stopCount = randInt(4, 6)
+  const colors: string[] = []
+  for (let i = 0; i < stopCount; i++) {
+    const hueShift = randFloat(-50, 50)
+    const lDirection = i % 2 === 0 ? 1 : -1
+    const lShift = lDirection * randFloat(0.1, 0.3) * (bgIsDark ? 1 : -1)
+    const sShift = randFloat(-0.1, 0.3)
+    colors.push(hslToRgbString({
+      h: (bgHsl.h + hueShift + 360) % 360,
+      s: clamp(bgHsl.s + sShift, 0, 1),
+      l: clamp(bgHsl.l + lShift, 0.05, 0.95)
+    }))
+  }
+
+  const shapes: readonly GrainGradientShape[] = ['wave', 'dots', 'truchet', 'corners', 'ripple', 'blob', 'sphere']
+  const shape = shapes[randInt(0, shapes.length - 1)] ?? 'wave'
+  return {
+    colorBack,
+    colors,
+    shape,
+    softness: randFloat(0.55, 0.95),
+    intensity: randFloat(0.35, 0.7),
+    noise: randFloat(0.15, 0.45),
+    speed: randFloat(0.3, 0.9),
+    scale: randFloat(0.6, 1.4),
+    rotation: randFloat(0, 360)
+  }
+}
+
+/**
+ * Returns a coherent set of randomized props for the Warp shader.
+ *
+ * The colour palette is derived from the editor background — the
+ * background itself is always included as one of the gradient stops,
+ * and the rest are 5-7 sibling colours produced by jittering hue,
+ * saturation and luminance from that anchor. Result: every theme
+ * gets a warp painted in its own family rather than a generic vivid
+ * palette.
+ */
+export function pickRandomWarpProps(): WarpProps {
+  const bg = readEditorBackground()
+  const bgHsl = rgbToHsl(bg)
+  const bgIsDark = isBackgroundDark()
+
+  // 5-7 colours, plus the bg itself folded into the palette so the
+  // warp has a smooth seam with the surrounding UI surface.
+  const variantCount = randInt(5, 7)
+  const variants: string[] = [`rgb(${bg.r}, ${bg.g}, ${bg.b})`]
+  for (let i = 0; i < variantCount; i++) {
+    const hueShift = randFloat(-50, 50)
+    // Pull half the variants towards a brighter shade and half towards
+    // a darker one (relative to bg), so the palette spans a useful
+    // contrast range instead of clumping at one luminance.
+    const lDirection = i % 2 === 0 ? 1 : -1
+    const lShift = lDirection * randFloat(0.08, 0.28) * (bgIsDark ? 1 : -1)
+    const sShift = randFloat(-0.15, 0.35)
+    variants.push(hslToRgbString({
+      h: (bgHsl.h + hueShift + 360) % 360,
+      s: clamp(bgHsl.s + sShift, 0, 1),
+      l: clamp(bgHsl.l + lShift, 0.05, 0.95)
+    }))
+  }
+
+  const shapes: readonly ('checks' | 'stripes' | 'edge')[] = ['checks', 'stripes', 'edge']
+  const shape = shapes[randInt(0, shapes.length - 1)] ?? 'checks'
+  return {
+    colors: variants,
+    shape,
+    proportion: randFloat(0.35, 0.65),
+    softness: randFloat(0.6, 1.0),
+    shapeScale: randFloat(0.3, 0.7),
+    distortion: randFloat(0.25, 0.55),
+    swirl: randFloat(0.5, 0.9),
+    swirlIterations: randInt(6, 14),
+    speed: randFloat(0.3, 0.8),
+    scale: randFloat(0.6, 1.4),
+    rotation: randFloat(0, 360)
+  }
 }
 
 export function pickRandomAnimatedGridPatternProps(): AnimatedGridPatternProps {

@@ -33,6 +33,20 @@ export type ToggleState = 'checked' | 'unchecked' | 'indeterminate';
  */
 export type ToggleValue = boolean | 'indeterminate';
 
+/**
+ * Visual appearance of a Toggle. The behavior (binary on / off,
+ * keyboard activation, `onChange` contract) is identical across
+ * appearances — only the rendered glyph + animation change.
+ *
+ * - `'switch'` (default): the existing checkbox-like square with a
+ *   centered codicon. Supports indeterminate / icons / styles tokens.
+ * - `'star'`: a Lottie-driven favorite star that bursts on off→on
+ *   and reverses on on→off (Twitter-style). The `icon`,
+ *   `indeterminateIcon` and `styles` props have no effect — the
+ *   `'indeterminate'` value is treated as `'unchecked'`.
+ */
+export type ToggleAppearance = 'switch' | 'star';
+
 export interface ToggleProps {
   /**
    * Current value. Pass a boolean for the standard checked /
@@ -53,6 +67,14 @@ export interface ToggleProps {
   id?: string;
   /** Optional test id applied to the Toggle root element. */
   'data-testid'?: string;
+  /**
+   * Optional accessible name for the action element. When omitted,
+   * Toggle falls back to the string children if any (or a generic
+   * `'Toggle'` label). Pass this when the Toggle has no visible label
+   * but still needs a meaningful screen-reader announcement — e.g.
+   * a star toggle in a list where the row already shows the name.
+   */
+  'aria-label'?: string;
   styles?: IToggleStyles;
   /** Codicon name for the checked state. Defaults to `'check'`. */
   icon?: string;
@@ -65,6 +87,13 @@ export interface ToggleProps {
   actionClassName?: string;
   notFocusable?: boolean;
   children?: React.ReactNode;
+  /**
+   * Optional visual appearance override. Defaults to `'switch'`
+   * (the standard codicon-driven checkbox look). Pass `'star'` to
+   * render a Lottie-driven favorite star that animates on toggle.
+   * See `ToggleAppearance` for the contract per appearance.
+   */
+  appearance?: ToggleAppearance;
 }
 
 export const defaultToggleStyles: IToggleStyles = {

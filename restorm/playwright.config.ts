@@ -83,7 +83,7 @@ export default defineConfig({
     {
       name: 'full-workflow',
       testDir: fullWorkflowTestDir,
-      timeout: 180 * 1000 // 3 min — cumulative scenario covers the full Ajouter submenu
+      timeout: 300 * 1000 // 5 min — cumulative scenario covers the full Ajouter submenu and runs near 3 min on slower hosts
     },
     {
       name: 'swagger-import',

@@ -51,7 +51,8 @@ export const test = base.extend<DirtyStateFixtures>({
     const baseEnv = {
       ...withE2ECoverageEnv(restormRoot, process.env),
       NODE_ENV: 'development',
-      RESTORM_USER_DATA_OVERRIDE: isolatedUserDataDir
+      RESTORM_USER_DATA_OVERRIDE: isolatedUserDataDir,
+      ECUI_DISABLE_GPU: '1'
     }
 
     const launcher = async (): Promise<LaunchedApp> => {
@@ -96,6 +97,10 @@ export const test = base.extend<DirtyStateFixtures>({
 
       const page = await app.firstWindow()
       await page.waitForLoadState('load')
+      // Reduce motion: snaps the FilesPanel star toggle to its target
+      // frame instead of playing the lottie burst, keeping
+      // close-then-reopen round-trip tests fast.
+      await page.emulateMedia({ reducedMotion: 'reduce' })
       // Strict system-modals mock — any unconfigured native dialog throws.
       await installSystemModalsMockingForE2E(app)
       await page.evaluate(() => {

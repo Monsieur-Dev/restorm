@@ -39,7 +39,8 @@ export const test = base.extend<AuthLoginFixtures>({
     const baseEnv = {
       ...withE2ECoverageEnv(restormRoot, process.env),
       NODE_ENV: 'development',
-      RESTORM_USER_DATA_OVERRIDE: isolatedUserDataDir
+      RESTORM_USER_DATA_OVERRIDE: isolatedUserDataDir,
+      ECUI_DISABLE_GPU: '1'
     }
 
     const launcher = async (): Promise<LaunchedApp> => {

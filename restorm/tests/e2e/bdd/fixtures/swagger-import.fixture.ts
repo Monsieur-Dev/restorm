@@ -34,7 +34,8 @@ export const test = base.extend<SwaggerImportFixtures>({
     const baseEnv = {
       ...withE2ECoverageEnv(restormRoot, process.env),
       NODE_ENV: 'development',
-      RESTORM_USER_DATA_OVERRIDE: isolatedUserDataDir
+      RESTORM_USER_DATA_OVERRIDE: isolatedUserDataDir,
+      ECUI_DISABLE_GPU: '1'
     }
 
     const launcher = async (): Promise<{ app: ElectronApplication; page: Page }> => {

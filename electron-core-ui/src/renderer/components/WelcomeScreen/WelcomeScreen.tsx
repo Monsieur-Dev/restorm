@@ -41,6 +41,13 @@ export interface WelcomeScreenProps {
   wallpaperPattern?: WallpaperPattern
   /** Wordmark animation effect. Defaults to `'random'`. */
   wordmarkEffect?: WordmarkEffect
+  /**
+   * Delay in ms before the wordmark plays its first animation. The
+   * welcome surface renders empty during the delay so the entrance
+   * lands a moment after the user notices the page. Defaults to
+   * `2000` (2 s) — pass `0` to disable.
+   */
+  wordmarkStartDelay?: number
   /** FilesPanel decoration. Defaults to `'random'`. */
   filesPanelDecoration?: VignetteDecoration
   /**
@@ -70,6 +77,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   confirmRemoveFavorite,
   wallpaperPattern = 'random',
   wordmarkEffect = 'random',
+  wordmarkStartDelay = 2000,
   filesPanelDecoration = 'random',
   ariaLabel,
   className,
@@ -96,6 +104,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           <Wordmark
             effect={wordmarkEffect}
             loop
+            startDelay={wordmarkStartDelay}
             className="ecu-welcome-screen-wordmark"
             aria-hidden="true"
           >

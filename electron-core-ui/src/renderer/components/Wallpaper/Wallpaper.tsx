@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   AnimatedGridPattern,
   FlickeringGrid,
@@ -9,17 +9,23 @@ import {
   NeuroNoise,
   Sparkles,
   Vortex,
+  Warp,
+  GrainGradient,
+  MeshGradient,
   pickRandomAnimatedGridPatternProps,
   pickRandomFlickeringGridProps,
   pickRandomGlobeProps,
+  pickRandomGrainGradientProps,
   pickRandomHexagonPatternProps,
   pickRandomInteractiveGridPatternProps,
   pickRandomMaskStyle,
+  pickRandomMeshGradientProps,
   pickRandomMeteorsProps,
   pickRandomNeuroNoiseProps,
   pickRandomSparklesProps,
   pickRandomVortexProps,
   pickRandomWallpaperPattern,
+  pickRandomWarpProps,
   type WallpaperPatternId
 } from './patterns'
 import './wallpaper.css'
@@ -46,19 +52,37 @@ export const Wallpaper: React.FC<WallpaperProps> = ({
   style,
   'data-testid': dataTestId
 }) => {
-  const [resolved] = useState<{
-    id: WallpaperPatternId
-    element: React.ReactElement
-    maskStyle: React.CSSProperties | null
-  } | null>(() => {
+  // The pattern id and mask are picked once at mount — switching pattern
+  // mid-life would be jarring. Only the rendered element is rebuilt on
+  // theme changes so the colours follow the active palette.
+  const [identity] = useState<{ id: WallpaperPatternId; maskStyle: React.CSSProperties | null } | null>(() => {
     if (!pattern) return null
     const id: WallpaperPatternId = pattern === 'random' ? pickRandomWallpaperPattern() : pattern
     const maskStyle = PATTERNS_WITHOUT_MASK.has(id) ? null : pickRandomMaskStyle()
-    return { id, element: buildPatternElement(id), maskStyle }
+    return { id, maskStyle }
   })
 
+  // Bump on every theme switch so the pattern element re-rolls its
+  // colour palette (each pattern's `pickRandom*Props` reads
+  // `--editor-background` at call time).
+  const themeRevision = useThemeRevision()
+  // `themeRevision` is the trigger — `identity` is stable for the
+  // mount (settled in lazy-init useState), so once it's frozen this
+  // only ever re-fires on theme change. Stamping the revision onto
+  // the element's `key` keeps it in the deps array honestly *and*
+  // forces React to remount the pattern subtree (clean canvas /
+  // lottie state) instead of patching props.
+  const element = useMemo(
+    () => identity
+      ? React.cloneElement(buildPatternElement(identity.id), {
+          key: `${identity.id}-${themeRevision}`
+        })
+      : null,
+    [identity, themeRevision]
+  )
+
   const classes = ['ecu-wallpaper', className].filter(Boolean).join(' ')
-  const dataAttrs = resolved ? { 'data-pattern': resolved.id } : {}
+  const dataAttrs = identity ? { 'data-pattern': identity.id } : {}
 
   return (
     <div
@@ -68,18 +92,47 @@ export const Wallpaper: React.FC<WallpaperProps> = ({
       aria-hidden="true"
       {...dataAttrs}
     >
-      {resolved ? (
-        resolved.maskStyle ? (
-          <div className="ecu-wallpaper-mask" style={resolved.maskStyle}>
-            {resolved.element}
+      {identity && element ? (
+        identity.maskStyle ? (
+          <div className="ecu-wallpaper-mask" style={identity.maskStyle}>
+            {element}
           </div>
         ) : (
-          resolved.element
+          element
         )
       ) : null}
       {children}
     </div>
   )
+}
+
+/**
+ * Returns a counter that increments whenever the active theme changes.
+ *
+ * Two signals feed into this: the `data-theme` attribute on
+ * `<html>` (toggles between `'dark' | 'light' | …` when the user
+ * picks a new theme) and the computed value of `--editor-background`
+ * (catches edits within the same theme type, e.g. user theme tweaks).
+ */
+function useThemeRevision(): number {
+  const [revision, setRevision] = useState(0)
+  useEffect(() => {
+    if (typeof document === 'undefined') return undefined
+    const root = document.documentElement
+    let lastBackground = window.getComputedStyle(root).getPropertyValue('--editor-background').trim()
+
+    const bump = (): void => {
+      const next = window.getComputedStyle(root).getPropertyValue('--editor-background').trim()
+      if (next === lastBackground) return
+      lastBackground = next
+      setRevision((r) => r + 1)
+    }
+
+    const observer = new MutationObserver(bump)
+    observer.observe(root, { attributes: true, attributeFilter: ['data-theme', 'style'] })
+    return () => { observer.disconnect() }
+  }, [])
+  return revision
 }
 
 // Patterns that skip the random mask + skew wrapper. Interactive patterns
@@ -92,7 +145,10 @@ const PATTERNS_WITHOUT_MASK: ReadonlySet<WallpaperPatternId> = new Set([
   'meteors',
   'globe',
   'vortex',
-  'neuro-noise'
+  'neuro-noise',
+  'warp',
+  'grain-gradient',
+  'mesh-gradient'
 ])
 
 const PATTERN_BUILDERS: Record<WallpaperPatternId, () => React.ReactElement> = {
@@ -106,7 +162,10 @@ const PATTERN_BUILDERS: Record<WallpaperPatternId, () => React.ReactElement> = {
   globe: () => <Globe {...pickRandomGlobeProps()} />,
   sparkles: () => <Sparkles {...pickRandomSparklesProps()} />,
   vortex: () => <Vortex {...pickRandomVortexProps()} />,
-  'neuro-noise': () => <NeuroNoise {...pickRandomNeuroNoiseProps()} />
+  'neuro-noise': () => <NeuroNoise {...pickRandomNeuroNoiseProps()} />,
+  warp: () => <Warp {...pickRandomWarpProps()} />,
+  'grain-gradient': () => <GrainGradient {...pickRandomGrainGradientProps()} />,
+  'mesh-gradient': () => <MeshGradient {...pickRandomMeshGradientProps()} />
 }
 
 function buildPatternElement(id: WallpaperPatternId): React.ReactElement {

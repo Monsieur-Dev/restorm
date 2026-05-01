@@ -22,16 +22,26 @@ if (process.type === 'browser') {
 }
 
 /**
- * Configure Electron command line switches
- * Disables sandbox and GPU acceleration for restricted environments (WSL, containers, etc.)
+ * Configure Electron command line switches needed for restricted
+ * runtime environments (WSL, headless containers, …) where the
+ * default sandbox / shared-memory / GPU pipeline is unreliable.
+ *
+ * GPU acceleration is left ON by default so hosts with working
+ * drivers (like a regular Linux desktop with NVIDIA / Mesa /
+ * AMDGPU) get hardware compositing + WebGL. Set
+ * `ECUI_DISABLE_GPU=1` in restricted environments where the GPU
+ * pipeline crashes during init — that re-applies the legacy
+ * disable-* trio.
  */
 export function configureCommandLineSwitches(): void {
-  // Disable sandbox and GPU acceleration for restricted environments (WSL, containers, etc.)
   app.commandLine.appendSwitch('no-sandbox')
   app.commandLine.appendSwitch('disable-dev-shm-usage')
-  app.commandLine.appendSwitch('disable-gpu')
-  app.commandLine.appendSwitch('disable-software-rasterizer')
-  app.commandLine.appendSwitch('disable-gpu-compositing')
+
+  if (process.env['ECUI_DISABLE_GPU'] === '1') {
+    app.commandLine.appendSwitch('disable-gpu')
+    app.commandLine.appendSwitch('disable-software-rasterizer')
+    app.commandLine.appendSwitch('disable-gpu-compositing')
+  }
 
   logger.info('✅ Command line switches configured')
 }

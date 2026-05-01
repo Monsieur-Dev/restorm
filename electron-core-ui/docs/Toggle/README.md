@@ -13,6 +13,7 @@ The single `checked` prop accepts either a boolean (binary checked / unchecked) 
 ```typescript
 export type ToggleState = 'checked' | 'unchecked' | 'indeterminate';
 export type ToggleValue = boolean | 'indeterminate';
+export type ToggleAppearance = 'switch' | 'star';
 
 export interface IToggleStyles {
   readonly inputActiveOptionBorder: string | undefined;
@@ -28,12 +29,14 @@ export interface ToggleProps {
   className?: string;
   id?: string;
   'data-testid'?: string;
+  'aria-label'?: string;
   styles?: IToggleStyles;
   icon?: string;
   indeterminateIcon?: string;
   actionClassName?: string;
   notFocusable?: boolean;
   children?: React.ReactNode;
+  appearance?: ToggleAppearance;
 }
 ```
 
@@ -207,3 +210,24 @@ Reusable steps from `electron-core-ui/testing/playwright-bdd`:
 - `When I click toggle {string}`
 - `When I click toggle {string} label`
 - `When I press {string} on toggle {string}`
+
+## Appearance variants
+
+By default the Toggle renders the existing checkbox-like square with a centered codicon (`appearance="switch"`, the default). Pass `appearance="star"` to swap the entire visual for a Lottie-driven favorite star — same `checked` / `onChange` contract, same keyboard handling, different paint.
+
+```tsx
+<Toggle
+  appearance="star"
+  checked={isFavorite}
+  onChange={(next) => { setIsFavorite(next) }}
+  aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+/>
+```
+
+### `'star'` specifics
+
+- The lottie plays forward (empty → filled with sparkle burst) when `checked` flips `false → true`, reverse when it flips `true → false` — Twitter-style on/off.
+- The first paint snaps to the matching frame (no replay on mount for already-`checked` rows).
+- The `'indeterminate'` value is treated as `'unchecked'`; `icon` / `indeterminateIcon` / `styles` props have no effect.
+- `aria-label` (or string children, falling back to `'Toggle'`) is the accessible name. Children are still rendered as a label `<span>` next to the star — pass `aria-label` and skip children if you want a label-less star (e.g. inside a list row that already names the item).
+- The lottie runtime is **lazy-loaded**: consumers that never use `appearance="star"` don't bundle it. First mount of a star Toggle resolves the dynamic import (Suspense fallback is a blank 32×32 box).
