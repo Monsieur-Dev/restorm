@@ -123,6 +123,15 @@ if (fs.existsSync(componentsDir)) {
   copyCssFilesRecursive(componentsDir, destComponentsDir)
 }
 
+// Some renderer utilities ship CSS alongside their .ts (e.g. themeReveal),
+// imported from inside the .ts via `import './foo.css'`. Mirror them so
+// consumers resolving through `dist/.../utils/*` find the matching file.
+const utilsDir = path.join(__dirname, '..', 'src', 'renderer', 'utils')
+const destUtilsDir = path.join(distSrcDir, 'renderer', 'utils')
+if (fs.existsSync(utilsDir)) {
+  copyCssFilesRecursive(utilsDir, destUtilsDir)
+}
+
 // Copy resources directory (themes, etc.)
 copyIfExists(
   path.join(__dirname, '..', 'resources'),

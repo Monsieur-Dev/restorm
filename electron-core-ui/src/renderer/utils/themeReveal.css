@@ -1,0 +1,32 @@
+/*
+ * Circular reveal animation paired with `runThemeRevealTransition`. The
+ * helper sets `--ecu-theme-reveal-x` / `--ecu-theme-reveal-y` on the root
+ * element right before starting a view transition; the new-root pseudo's
+ * `clip-path` then expands from a 0-radius circle at that anchor to a
+ * corner-covering circle, painting the new theme over the old one.
+ *
+ * The old-root pseudo is held still (no animation) so the underlying
+ * "previous theme" stays painted while the new-root mask grows over it.
+ *
+ * Reduced-motion is handled in JS (the helper skips the transition
+ * entirely), so we don't need a media-query here.
+ */
+
+::view-transition-old(root) {
+  animation: none;
+}
+
+::view-transition-new(root) {
+  animation: ecu-theme-reveal 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  mix-blend-mode: normal;
+}
+
+@keyframes ecu-theme-reveal {
+  from {
+    clip-path: circle(0 at var(--ecu-theme-reveal-x, 50%) var(--ecu-theme-reveal-y, 50%));
+  }
+
+  to {
+    clip-path: circle(150% at var(--ecu-theme-reveal-x, 50%) var(--ecu-theme-reveal-y, 50%));
+  }
+}

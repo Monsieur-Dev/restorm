@@ -71,7 +71,7 @@ The same primitive used to animate the file-list rows inside a Vignette is expos
 </Vignette>
 ```
 
-On enter, the row mounts at full height immediately (so visibility checks succeed) and the inner content fades in via `@starting-style` (`opacity: 0 → 1` over 0.55s). Toggling `data-phase="exit"` triggers a sequenced exit (content fades out 0–0.55s, then row collapses 0.55–1.25s). Newly added rows therefore "pop in" at full size with a soft fade rather than expanding from 0-height — this is intentional so the rows are immediately laid out and don't fail e2e visibility assertions.
+On enter, the row expands its grid track from `0fr` to `1fr` over 0.7s (so the surrounding layout reflows smoothly) and the inner content then fades `opacity: 0 → 1` over the following 0.55s. Toggling `data-phase="exit"` plays the inverse — content fades out first (0–0.55s), then the row collapses back to `0fr` (0.55–1.25s). Both transitions use `@starting-style` to declare the "before" state, so a fresh mount runs the enter pattern automatically.
 
 #### Usage
 

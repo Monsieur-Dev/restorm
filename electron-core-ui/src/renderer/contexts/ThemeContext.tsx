@@ -1,6 +1,11 @@
 import React, { createContext, useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../types/theme'
 import { logger } from '../services/logger'
+import {
+  consumePendingThemeRevealOrigin,
+  runThemeRevealTransition,
+  type ThemeRevealOrigin
+} from '../utils/themeReveal'
 
 export interface ThemeContextValue {
   themes: ThemeInfo[]
@@ -9,7 +14,14 @@ export interface ThemeContextValue {
   currentVariables: ThemeVariables | null
   isLoading: boolean
   error: string | null
-  setTheme: (themeId: string) => Promise<void>
+  /**
+   * Switches to the theme identified by `themeId`. When `origin` is
+   * supplied, the change plays a circular reveal animation expanding from
+   * that viewport-space anchor (typically the user's click coordinates).
+   * Falls back to a plain swap when the platform has no view-transitions
+   * support or the user prefers reduced motion.
+   */
+  setTheme: (themeId: string, origin?: ThemeRevealOrigin) => Promise<void>
   refreshThemes: () => Promise<void>
 }
 
@@ -145,7 +157,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
     }
   }, [])
 
-  const setTheme = useCallback(async (themeId: string): Promise<void> => {
+  const setTheme = useCallback(async (themeId: string, origin?: ThemeRevealOrigin): Promise<void> => {
     const themeApi = getThemeApi()
     if (!themeApi) {
       setError('Theme API is not available')
@@ -158,14 +170,21 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
       const themeData: { theme: ThemeDefinition; variables: ThemeVariables } | null =
         await themeApi.load(themeId)
       if (!themeData) throw new Error(`Theme not found: ${themeId}`)
-      applyCSSVariables(themeData.variables)
       const themeInfo = themes.find(t => t.id === themeId)
-      if (themeInfo) {
-        document.documentElement.setAttribute('data-theme', themeInfo.type)
-        setWindowBorderColorForTheme(themeInfo.type)
-      } else {
-        setWindowBorderColorForTheme(undefined)
-      }
+      // Wrap the visible part of the theme swap (CSS vars + data-theme +
+      // titlebar color) inside a view-transition so the circular reveal
+      // expands from `origin`. The IPC `themeApi.set` runs after the
+      // transition snapshot is taken so the persisted choice and the
+      // animation stay in lock-step.
+      await runThemeRevealTransition(() => {
+        applyCSSVariables(themeData.variables)
+        if (themeInfo) {
+          document.documentElement.setAttribute('data-theme', themeInfo.type)
+          setWindowBorderColorForTheme(themeInfo.type)
+        } else {
+          setWindowBorderColorForTheme(undefined)
+        }
+      }, origin)
       await themeApi.set(themeId)
       setCurrentThemeId(themeId)
       currentThemeIdRef.current = themeId
@@ -312,17 +331,23 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.ReactElem
           setIsLoading(true)
           const themeData = await window.api.theme.load(themeId)
           if (themeData) {
-            const root = document.documentElement
-            const existingVars = Array.from(root.style).filter(prop => prop.startsWith('--') && prop !== '--window-border-color')
-            existingVars.forEach(prop => { root.style.removeProperty(prop) })
-            Object.entries(themeData.variables).forEach(([key, value]) => { root.style.setProperty(key, value) })
-
             const themeList = await window.api.theme.list()
             const themeInfo = themeList.find(t => t.id === themeId)
-            if (themeInfo) {
-              document.documentElement.setAttribute('data-theme', themeInfo.type)
-              setWindowBorderColorForTheme(themeInfo.type)
-            }
+            // Wrap the DOM mutation inside the circular reveal so the
+            // broadcast-driven path (Settings → IPC → theme:changed)
+            // animates from the cursor too. The carousel's click handler
+            // stashes the origin on a module-level pending slot; consume
+            // it here.
+            await runThemeRevealTransition(() => {
+              const root = document.documentElement
+              const existingVars = Array.from(root.style).filter(prop => prop.startsWith('--') && prop !== '--window-border-color')
+              existingVars.forEach(prop => { root.style.removeProperty(prop) })
+              Object.entries(themeData.variables).forEach(([key, value]) => { root.style.setProperty(key, value) })
+              if (themeInfo) {
+                document.documentElement.setAttribute('data-theme', themeInfo.type)
+                setWindowBorderColorForTheme(themeInfo.type)
+              }
+            }, consumePendingThemeRevealOrigin())
 
             setCurrentThemeId(themeId)
             currentThemeIdRef.current = themeId

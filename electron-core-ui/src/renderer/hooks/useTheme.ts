@@ -2,6 +2,11 @@ import { useState, useEffect, useCallback, useRef, useContext } from 'react'
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../types/theme'
 import { logger } from '../services/logger'
 import ThemeContext, { themeProviderActive } from '../contexts/ThemeContext'
+import {
+  consumePendingThemeRevealOrigin,
+  runThemeRevealTransition,
+  type ThemeRevealOrigin
+} from '../utils/themeReveal'
 
 export interface UseThemeReturn {
   themes: ThemeInfo[]
@@ -10,7 +15,8 @@ export interface UseThemeReturn {
   currentVariables: ThemeVariables | null
   isLoading: boolean
   error: string | null
-  setTheme: (themeId: string) => Promise<void>
+  /** See `ThemeContextValue.setTheme` for the `origin` semantics. */
+  setTheme: (themeId: string, origin?: ThemeRevealOrigin) => Promise<void>
   refreshThemes: () => Promise<void>
 }
 
@@ -165,30 +171,32 @@ function useThemeLegacy(): UseThemeReturn {
   /**
    * Set and apply a theme
    */
-  const setTheme = useCallback(async (themeId: string): Promise<void> => {
+  const setTheme = useCallback(async (themeId: string, origin?: ThemeRevealOrigin): Promise<void> => {
     try {
       setIsLoading(true)
       setError(null)
 
       // Load theme data
-      const themeData: { theme: ThemeDefinition; variables: ThemeVariables } | null = 
+      const themeData: { theme: ThemeDefinition; variables: ThemeVariables } | null =
         await window.api.theme.load(themeId)
-      
+
       if (!themeData) {
         throw new Error(`Theme not found: ${themeId}`)
       }
 
-      // Apply CSS variables
-      applyCSSVariables(themeData.variables)
-
-      // Update data-theme attribute for compatibility and derive window border color
       const themeInfo = themes.find(t => t.id === themeId)
-      if (themeInfo) {
-        document.documentElement.setAttribute('data-theme', themeInfo.type)
-        setWindowBorderColorForTheme(themeInfo.type)
-      } else {
-        setWindowBorderColorForTheme(undefined)
-      }
+      // Wrap the visible CSS-vars + data-theme + WCO swap inside the
+      // circular reveal so the new palette paints over the old one
+      // expanding from `origin`.
+      await runThemeRevealTransition(() => {
+        applyCSSVariables(themeData.variables)
+        if (themeInfo) {
+          document.documentElement.setAttribute('data-theme', themeInfo.type)
+          setWindowBorderColorForTheme(themeInfo.type)
+        } else {
+          setWindowBorderColorForTheme(undefined)
+        }
+      }, origin)
 
       // Save current theme
       await window.api.theme.set(themeId)
@@ -379,35 +387,30 @@ function useThemeLegacy(): UseThemeReturn {
       const applyTheme = async (): Promise<void> => {
         try {
           setIsLoading(true)
-          
-          // Load theme data
-          const themeData: { theme: ThemeDefinition; variables: ThemeVariables } | null = 
-            await window.api.theme.load(themeId)
-          
-          if (themeData) {
-            
-            // Apply CSS variables directly
-            const root = document.documentElement
-            
-            // Clear existing theme variables
-            const existingVars = Array.from(root.style)
-              .filter(prop => prop.startsWith('--') && prop !== '--window-border-color')
-            
-            existingVars.forEach(prop => {
-              root.style.removeProperty(prop)
-            })
 
-            // Apply new variables
-            Object.entries(themeData.variables).forEach(([key, value]) => {
-              root.style.setProperty(key, value)
-            })
-            
-            // Update data-theme attribute
+          // Load theme data
+          const themeData: { theme: ThemeDefinition; variables: ThemeVariables } | null =
+            await window.api.theme.load(themeId)
+
+          if (themeData) {
             const themeList = await window.api.theme.list()
             const themeInfo = themeList.find(t => t.id === themeId)
-            if (themeInfo) {
-              document.documentElement.setAttribute('data-theme', themeInfo.type)
-            }
+            // Wrap the DOM mutation in the circular reveal so the
+            // broadcast-driven path animates from the cursor too. The
+            // carousel's click handler stashes the origin on a
+            // module-level pending slot; consume it here.
+            await runThemeRevealTransition(() => {
+              const root = document.documentElement
+              const existingVars = Array.from(root.style)
+                .filter(prop => prop.startsWith('--') && prop !== '--window-border-color')
+              existingVars.forEach(prop => { root.style.removeProperty(prop) })
+              Object.entries(themeData.variables).forEach(([key, value]) => {
+                root.style.setProperty(key, value)
+              })
+              if (themeInfo) {
+                document.documentElement.setAttribute('data-theme', themeInfo.type)
+              }
+            }, consumePendingThemeRevealOrigin())
 
             // Update state and ref
             setCurrentThemeId(themeId)

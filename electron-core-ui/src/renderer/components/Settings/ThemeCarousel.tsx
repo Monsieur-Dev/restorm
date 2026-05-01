@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useThemeContext } from '../../contexts/useThemeContext'
 import type { ThemeInfo, ThemeVariables } from '../../../types/theme'
+import { setPendingThemeRevealOrigin } from '../../utils/themeReveal'
 import { Button } from '../Button'
 import { Toggle } from '../Toggle'
 import { InputBox } from '../InputBox'
@@ -143,12 +144,30 @@ export const ThemeCarousel: React.FC<ThemeCarouselProps> = ({
     }
   }, [currentThemeId, isLoading, sortedThemes.length])
 
-  const handleSelectTheme = (themeId: string): void => {
+  const handleSelectTheme = (themeId: string, event: React.MouseEvent<HTMLButtonElement>): void => {
+    // Anchor the circular reveal at the click point. Pointer-driven clicks
+    // expose `clientX`/`clientY`; keyboard activations land at (0, 0) with
+    // the synthetic event, in which case we fall back to the tile center
+    // so the reveal still feels grounded in the picked tile.
+    const fromCursor = event.clientX !== 0 || event.clientY !== 0
+    const origin: { x: number; y: number } = fromCursor
+      ? { x: event.clientX, y: event.clientY }
+      : (() => {
+          const rect = event.currentTarget.getBoundingClientRect()
+          return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+        })()
+    // Two paths reach the visible apply: the carousel's default `setTheme`
+    // (direct), and the Settings renderer's `onSelect` override which
+    // round-trips through the settings IPC and lands back as a
+    // `theme:changed` broadcast inside ThemeContext. Pass the origin to
+    // the direct path AND stash it on the module-level pending slot so
+    // the broadcast listener can pick it up too.
+    setPendingThemeRevealOrigin(origin)
     if (onSelect) {
       onSelect(themeId)
-    } else {
-      void setTheme(themeId)
+      return
     }
+    void setTheme(themeId, origin)
   }
 
   if (sortedThemes.length === 0) {
@@ -186,7 +205,7 @@ export const ThemeCarousel: React.FC<ThemeCarouselProps> = ({
                 ref={isSelected ? selectedTileRef : null}
                 className={`theme-carousel-item${isSelected ? ' theme-carousel-item--selected' : ''}`}
                 style={style}
-                onClick={() => { handleSelectTheme(theme.id) }}
+                onClick={(event) => { handleSelectTheme(theme.id, event) }}
               >
                 <div className="theme-carousel-item-header">
                   <div className="theme-carousel-item-title">

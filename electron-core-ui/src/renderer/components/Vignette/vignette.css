@@ -31,14 +31,20 @@
  * content. Toggle `data-phase="exit"` on the row right before unmount and
  * keep it mounted long enough for the exit animation to play.
  *
- * Enter timeline: row keeps full height from t0 (so visibility checks pass),
- *                 inner fades opacity 0 → 1 over 0.55s.
+ * Enter timeline: 0-0.7s row expands (grid-template-rows 0fr → 1fr),
+ *                 0.7-1.25s inner fades opacity 0 → 1.
  * Exit  timeline: 0-0.55s inner fades out, 0.55-1.25s row collapses.
  */
 .ecu-vignette-row {
   display: grid;
   grid-template-rows: 1fr;
   transition: grid-template-rows 0.7s cubic-bezier(0.2, 0, 0, 1);
+}
+
+@starting-style {
+  .ecu-vignette-row {
+    grid-template-rows: 0fr;
+  }
 }
 
 .ecu-vignette-row[data-phase="exit"] {
@@ -50,7 +56,7 @@
   min-height: 0;
   overflow: hidden;
   opacity: 1;
-  transition: opacity 0.55s ease;
+  transition: opacity 0.55s ease 0.7s;
 }
 
 @starting-style {
@@ -61,6 +67,7 @@
 
 .ecu-vignette-row[data-phase="exit"] .ecu-vignette-row-inner {
   opacity: 0;
+  transition: opacity 0.55s ease;
 }
 
 .ecu-vignette-decoration-border-beam {
