@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
+  RainbowButton,
   Statusbar,
   StatusbarElement,
   StatusBarBellButton,
   Toaster,
   VerticalSashContainer,
+  WelcomeScreen,
   useFileService,
   useFeature,
   usePersistedState,
@@ -61,7 +63,6 @@ const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Recor
 import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload, type RequestHistoryEventPayload } from './services/DocumentEvents'
 import { getResponseHistoryList } from './services/GraphQLIntegration'
 import type { WorkbenchTree } from 'electron-core-ui/renderer'
-import { Welcome } from './components/Welcome/Welcome'
 import { EmptyBench } from './components/MainView/Workbench/EmptyBench'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
 import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
@@ -1536,10 +1537,30 @@ const App: React.FC = () => {
             onEnvironmentFolderChange={handleEnvironmentFolderChange}
             onSizesChange={handleSizesChange}
             emptyFallback={
-              <Welcome
-                onNew={() => { navigationService.clearHistory(); void handleMenuNew() }}
-                onOpen={() => { void handleMenuOpen() }}
-              />
+              <WelcomeScreen
+                name="Restorm"
+                ariaLabel={t('welcome.landmarkLabel')}
+                onOpenFile={(path) => { void window.restorm?.file.openPath(path) }}
+                confirmRemoveFavorite={(fileName) => window.confirm(t('welcome.confirmRemoveFavorite', { fileName }))}
+                emptyStateHint={t('welcome.noFilesHint')}
+              >
+                <RainbowButton
+                  size="xl"
+                  onClick={() => { navigationService.clearHistory(); void handleMenuNew() }}
+                  aria-label={t('welcome.newAriaLabel')}
+                  data-testid="welcome-new-button"
+                >
+                  {t('welcome.new')}
+                </RainbowButton>
+                <RainbowButton
+                  size="xl"
+                  onClick={() => { void handleMenuOpen() }}
+                  aria-label={t('welcome.openAriaLabel')}
+                  data-testid="welcome-open-button"
+                >
+                  {t('welcome.open')}
+                </RainbowButton>
+              </WelcomeScreen>
             }
             workbenchId={workbenchId}
             onRebuildTab={handleRebuildTab}
