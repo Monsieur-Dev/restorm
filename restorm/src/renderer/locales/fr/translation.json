@@ -421,19 +421,13 @@
     }
   },
   "welcome": {
-    "favorites": "Favoris",
-    "recentFiles": "Fichiers récents",
-    "addToFavorites": "Ajouter aux favoris",
-    "removeFromFavorites": "Retirer des favoris",
     "confirmRemoveFavorite": "Voulez-vous vraiment retirer \"{{fileName}}\" des favoris ?",
     "noFilesHint": "Ouvrez un fichier ou créez-en un nouveau pour commencer",
     "new": "Nouveau",
     "open": "Ouvrir",
     "newAriaLabel": "Créer une nouvelle collection",
     "openAriaLabel": "Ouvrir une collection depuis le disque",
-    "landmarkLabel": "Accueil",
-    "favoritesLandmarkLabel": "Liste des favoris",
-    "recentsLandmarkLabel": "Liste des fichiers récents"
+    "landmarkLabel": "Accueil"
   },
   "save": {
     "title": "Options d'enregistrement",

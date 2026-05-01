@@ -10,6 +10,15 @@
       "cancel": "Cancel"
     }
   },
+  "filesPanel": {
+    "favorites": "Favorites",
+    "recentFiles": "Recent Files",
+    "addToFavorites": "Add to favorites",
+    "removeFromFavorites": "Remove from favorites",
+    "confirmRemoveFavorite": "Are you sure you want to remove \"{{fileName}}\" from favorites?",
+    "favoritesLandmarkLabel": "Favorites list",
+    "recentsLandmarkLabel": "Recent files list"
+  },
   "menuBar": {
     "edit": "Edit",
     "view": "View",

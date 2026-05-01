@@ -31,6 +31,10 @@ export type { WordmarkProps, WordmarkEffect, WordmarkEffectId } from './Wordmark
 export { RainbowButton } from './RainbowButton'
 export type { RainbowButtonProps, RainbowButtonSize } from './RainbowButton'
 
+// FilesPanel exports
+export { FilesPanel } from './FilesPanel'
+export type { FilesPanelProps } from './FilesPanel'
+
 export { DropdownFilterRow } from './DropdownFilterRow'
 export type { DropdownFilterRowProps } from './DropdownFilterRow'
 

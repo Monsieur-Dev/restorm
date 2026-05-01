@@ -237,9 +237,9 @@ function welcomeItemByName(
   fileName: string
 ): Locator {
   const sectionHeading = section === 'recent'
-    ? currentPage.locator('.welcome-section', { hasText: 'Recent' })
-    : currentPage.locator('.welcome-section', { hasText: 'Favorites' })
-  return sectionHeading.locator('.welcome-file-item', { hasText: fileName }).first()
+    ? currentPage.locator('.ecu-files-panel-section', { hasText: 'Recent' })
+    : currentPage.locator('.ecu-files-panel-section', { hasText: 'Favorites' })
+  return sectionHeading.locator('.ecu-files-panel-item', { hasText: fileName }).first()
 }
 
 Then(
@@ -272,7 +272,7 @@ When(
     if (!page) throw new Error('app must be launched')
     const row = welcomeItemByName(page, 'recent', fileName)
     await expect(row).toBeVisible({ timeout: 5000 })
-    await row.locator('[data-testid="toggle-favorite-button"]').click()
+    await row.locator('[data-testid="files-panel-toggle-favorite-button"]').click()
   }
 )
 
@@ -282,7 +282,7 @@ When(
     if (!page) throw new Error('app must be launched')
     const row = welcomeItemByName(page, 'favorites', fileName)
     await expect(row).toBeVisible({ timeout: 5000 })
-    await row.locator('[data-testid="remove-favorite-button"]').click()
+    await row.locator('[data-testid="files-panel-remove-favorite-button"]').click()
   }
 )
 

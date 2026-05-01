@@ -1,0 +1,117 @@
+/*
+ * FilesPanel — frosted-glass surface listing favorites + recents.
+ * The frame is rendered by `Vignette`; these rules only style the
+ * inner sections, lists, and rows. Class hooks are namespaced
+ * `ecu-files-panel-*` for stable testing/theming targets.
+ */
+
+.ecu-files-panel {
+  padding: 16px 18px;
+  max-width: 480px;
+}
+
+.ecu-files-panel .ecu-vignette-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ecu-files-panel-section {
+  width: 100%;
+}
+
+.ecu-files-panel-section-inner {
+  display: flex;
+  flex-direction: column;
+}
+
+.ecu-files-panel-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--foreground);
+  padding: 0 0 8px;
+  border-bottom: 1px solid var(--panel-border);
+  margin: 0;
+}
+
+.ecu-files-panel-section-icon {
+  font-size: 14px;
+  color: var(--descriptionForeground);
+}
+
+.ecu-files-panel-section-icon--favorite {
+  color: #f5c518;
+}
+
+.ecu-files-panel-list {
+  list-style: none;
+  margin: 0;
+  padding: 12px 0 0;
+}
+
+.ecu-files-panel-item-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.ecu-files-panel-item-inner:hover {
+  background-color: var(--list-hoverBackground);
+}
+
+.ecu-files-panel-item-name {
+  flex-shrink: 0;
+  font-size: 14px;
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+.ecu-files-panel-item-path {
+  flex: 1;
+  font-size: 11px;
+  color: var(--descriptionForeground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-left: 10px;
+}
+
+.ecu-files-panel-favorite-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 4px;
+  color: var(--descriptionForeground);
+  opacity: 0.5;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.ecu-files-panel-item-inner:hover .ecu-files-panel-favorite-btn {
+  opacity: 1;
+}
+
+.ecu-files-panel-favorite-btn:hover {
+  background-color: var(--toolbar-hoverBackground);
+}
+
+.ecu-files-panel-favorite-btn--active {
+  color: #f5c518;
+  opacity: 1;
+}
+
+.ecu-files-panel-favorite-btn--active:hover {
+  opacity: 0.8;
+}

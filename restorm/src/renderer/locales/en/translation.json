@@ -421,19 +421,13 @@
     }
   },
   "welcome": {
-    "favorites": "Favorites",
-    "recentFiles": "Recent Files",
-    "addToFavorites": "Add to favorites",
-    "removeFromFavorites": "Remove from favorites",
     "confirmRemoveFavorite": "Are you sure you want to remove \"{{fileName}}\" from favorites?",
     "noFilesHint": "Open a file or create a new one to get started",
     "new": "New",
     "open": "Open",
     "newAriaLabel": "Create a new collection",
     "openAriaLabel": "Open a collection from disk",
-    "landmarkLabel": "Welcome",
-    "favoritesLandmarkLabel": "Favorites list",
-    "recentsLandmarkLabel": "Recent files list"
+    "landmarkLabel": "Welcome"
   },
   "save": {
     "title": "Save Options",
