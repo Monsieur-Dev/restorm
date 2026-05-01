@@ -15,6 +15,22 @@ export type { ControlGroupProps, ControlGroupOrientation } from './ControlGroup'
 export { Callout } from './Callout'
 export type { CalloutProps, CalloutVariant } from './Callout'
 
+// Wallpaper exports
+export { Wallpaper, wallpaperPatternIds } from './Wallpaper'
+export type { WallpaperProps, WallpaperPattern, WallpaperPatternId } from './Wallpaper'
+
+// Vignette exports
+export { Vignette, vignetteDecorationIds } from './Vignette'
+export type { VignetteProps, VignetteDecoration, VignetteDecorationId } from './Vignette'
+
+// Wordmark exports
+export { Wordmark, wordmarkEffectIds } from './Wordmark'
+export type { WordmarkProps, WordmarkEffect, WordmarkEffectId } from './Wordmark'
+
+// RainbowButton exports
+export { RainbowButton } from './RainbowButton'
+export type { RainbowButtonProps, RainbowButtonSize } from './RainbowButton'
+
 export { DropdownFilterRow } from './DropdownFilterRow'
 export type { DropdownFilterRowProps } from './DropdownFilterRow'
 

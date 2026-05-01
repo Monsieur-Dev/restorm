@@ -1,13 +1,28 @@
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useFileService, Button } from 'electron-core-ui/renderer'
+import { useFileService, Button, RainbowButton, Wallpaper, Vignette, Wordmark } from 'electron-core-ui/renderer'
 import './Welcome.css'
 
+const splitPath = (fullPath: string): { directory: string; basename: string } => {
+  const lastSep = Math.max(fullPath.lastIndexOf('/'), fullPath.lastIndexOf('\\'))
+  if (lastSep < 0) return { directory: '', basename: fullPath }
+  return {
+    directory: fullPath.slice(0, lastSep),
+    basename: fullPath.slice(lastSep + 1)
+  }
+}
+
+interface WelcomeProps {
+  onNew?: () => void
+  onOpen?: () => void
+}
+
 /**
- * Welcome component displayed when no tabs are open in the workbench
- * Shows favorites and recent files lists
+ * Empty-state landing of the workbench: a hero with the brand wordmark,
+ * the two primary actions (New / Open), and a frosted panel surfacing
+ * favorites and recent files.
  */
-export const Welcome: React.FC = () => {
+export const Welcome: React.FC<WelcomeProps> = ({ onNew, onOpen }) => {
   const { t } = useTranslation()
   const {
     recentFiles,
@@ -22,7 +37,6 @@ export const Welcome: React.FC = () => {
 
   const handleToggleFavorite = useCallback((path: string, fileName: string, isCurrentlyFavorite: boolean, event: React.MouseEvent) => {
     event.stopPropagation() // Prevent opening the file
-    // Ask for confirmation when removing from favorites
     if (isCurrentlyFavorite) {
       const confirmed = window.confirm(t('welcome.confirmRemoveFavorite', { fileName }))
       if (!confirmed) return
@@ -31,112 +45,147 @@ export const Welcome: React.FC = () => {
   }, [toggleFavorite, t])
 
   const handleRemoveFavorite = useCallback((path: string, fileName: string, event: React.MouseEvent) => {
-    event.stopPropagation() // Prevent opening the file
-    // Ask for confirmation before removing from favorites
+    event.stopPropagation()
     const confirmed = window.confirm(t('welcome.confirmRemoveFavorite', { fileName }))
     if (confirmed) {
       void toggleFavorite(path)
     }
   }, [toggleFavorite, t])
 
-  // Check if a file is in favorites
   const isFavorite = useCallback((path: string): boolean => {
     return favorites.some(f => f.path === path)
   }, [favorites])
 
-  const hasContent = favorites.length > 0 || recentFiles.length > 0
+  const hasFavorites = favorites.length > 0
+  const hasRecents = recentFiles.length > 0
+  const hasContent = hasFavorites || hasRecents
 
   return (
-    <div className="welcome-container">
+    <main
+      className="welcome-container"
+      role="main"
+      aria-label={t('welcome.landmarkLabel')}
+    >
+      <Wallpaper pattern="random" />
+      <header className="welcome-header">
+        <h1 className="welcome-wordmark-heading">
+          <span className="welcome-wordmark-visually-hidden">Restorm</span>
+          <Wordmark
+            effect="random"
+            loop
+            className="welcome-wordmark"
+            aria-hidden="true"
+          >
+            Restorm
+          </Wordmark>
+        </h1>
+        <div className="welcome-wordmark-rule" aria-hidden="true" />
+      </header>
       <div className="welcome-content">
-        <img
-          src="/imgs/logo_400.png"
-          alt="Restorm"
-          className="welcome-logo"
-        />
-        
-        {hasContent ? (
-          <div className="welcome-lists">
-            {/* Favorites section */}
-            {favorites.length > 0 && (
-              <div className="welcome-section">
-                <h3 className="welcome-section-title">
-                  <i className="codicon codicon-star-full welcome-section-icon favorite" aria-hidden="true" />
-                  {t('welcome.favorites')}
-                </h3>
-                <ul className="welcome-file-list">
-                  {favorites.map((file) => (
-                    <li
-                      key={file.path}
-                      className="welcome-file-item"
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => { handleOpenFile(file.path) }}
-                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenFile(file.path) } }}
-                    >
-                      <i className="codicon codicon-file welcome-file-icon" aria-hidden="true" />
-                      <span className="welcome-file-name">{file.name}</span>
-                      <span className="welcome-file-path">{file.path}</span>
-                      <Button
-                        icon="star-full"
-                        small
-                        secondary
-                        className="welcome-favorite-btn is-favorite"
-                        onClick={(e) => { handleRemoveFavorite(file.path, file.name, e) }}
-                        options={{ title: t('welcome.removeFromFavorites'), ariaLabel: t('welcome.removeFromFavorites') }}
-                        data-testid="remove-favorite-button"
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* Recent files section */}
-            {recentFiles.length > 0 && (
-              <div className="welcome-section">
-                <h3 className="welcome-section-title">
-                  <i className="codicon codicon-history welcome-section-icon" aria-hidden="true" />
-                  {t('welcome.recentFiles')}
-                </h3>
-                <ul className="welcome-file-list">
-                  {recentFiles.map((file) => (
-                    <li
-                      key={file.path}
-                      className="welcome-file-item"
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => { handleOpenFile(file.path) }}
-                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenFile(file.path) } }}
-                    >
-                      <i className="codicon codicon-file welcome-file-icon" aria-hidden="true" />
-                      <span className="welcome-file-name">{file.name}</span>
-                      <span className="welcome-file-path">{file.path}</span>
-                      <Button
-                        icon={isFavorite(file.path) ? 'star-full' : 'star-empty'}
-                        small
-                        secondary
-                        className={`welcome-favorite-btn ${isFavorite(file.path) ? 'is-favorite' : ''}`}
-                        onClick={(e) => { handleToggleFavorite(file.path, file.name, isFavorite(file.path), e) }}
-                        options={{
-                          title: isFavorite(file.path) ? t('welcome.removeFromFavorites') : t('welcome.addToFavorites'),
-                          ariaLabel: isFavorite(file.path) ? t('welcome.removeFromFavorites') : t('welcome.addToFavorites')
-                        }}
-                        data-testid="toggle-favorite-button"
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        ) : (
+        <div className="welcome-actions">
+          <RainbowButton
+            size="xl"
+            onClick={onNew}
+            aria-label={t('welcome.newAriaLabel')}
+            data-testid="welcome-new-button"
+          >
+            {t('welcome.new')}
+          </RainbowButton>
+          <RainbowButton
+            size="xl"
+            onClick={onOpen}
+            aria-label={t('welcome.openAriaLabel')}
+            data-testid="welcome-open-button"
+          >
+            {t('welcome.open')}
+          </RainbowButton>
+        </div>
+        {!hasContent && (
           <p className="welcome-hint">
             {t('welcome.noFilesHint')}
           </p>
         )}
       </div>
-    </div>
+
+      {hasContent && (
+        <Vignette decoration="random" className="welcome-files-panel">
+          {hasFavorites && (
+            <section
+              className="welcome-section"
+              aria-label={t('welcome.favoritesLandmarkLabel')}
+            >
+              <h3 className="welcome-section-title">
+                <i className="codicon codicon-star-full welcome-section-icon favorite" aria-hidden="true" />
+                {t('welcome.favorites')}
+              </h3>
+              <ul className="welcome-file-list">
+                {favorites.map((file) => (
+                  <li
+                    key={file.path}
+                    className="welcome-file-item"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => { handleOpenFile(file.path) }}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenFile(file.path) } }}
+                  >
+                    <span className="welcome-file-name">{splitPath(file.path).basename}</span>
+                    <span className="welcome-file-path">{splitPath(file.path).directory}</span>
+                    <Button
+                      icon="star-full"
+                      small
+                      secondary
+                      className="welcome-favorite-btn is-favorite"
+                      onClick={(e) => { handleRemoveFavorite(file.path, file.name, e) }}
+                      options={{ title: t('welcome.removeFromFavorites'), ariaLabel: t('welcome.removeFromFavorites') }}
+                      data-testid="remove-favorite-button"
+                    />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {hasRecents && (
+            <section
+              className="welcome-section"
+              aria-label={t('welcome.recentsLandmarkLabel')}
+            >
+              <h3 className="welcome-section-title">
+                <i className="codicon codicon-history welcome-section-icon" aria-hidden="true" />
+                {t('welcome.recentFiles')}
+              </h3>
+              <ul className="welcome-file-list">
+                {recentFiles.map((file) => (
+                  <li
+                    key={file.path}
+                    className="welcome-file-item"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => { handleOpenFile(file.path) }}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenFile(file.path) } }}
+                  >
+                    <span className="welcome-file-name">{splitPath(file.path).basename}</span>
+                    <span className="welcome-file-path">{splitPath(file.path).directory}</span>
+                    <Button
+                      icon={isFavorite(file.path) ? 'star-full' : 'star-empty'}
+                      small
+                      secondary
+                      className={`welcome-favorite-btn ${isFavorite(file.path) ? 'is-favorite' : ''}`}
+                      onClick={(e) => { handleToggleFavorite(file.path, file.name, isFavorite(file.path), e) }}
+                      options={{
+                        title: isFavorite(file.path) ? t('welcome.removeFromFavorites') : t('welcome.addToFavorites'),
+                        ariaLabel: isFavorite(file.path) ? t('welcome.removeFromFavorites') : t('welcome.addToFavorites')
+                      }}
+                      data-testid="toggle-favorite-button"
+                    />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </Vignette>
+      )}
+    </main>
   )
 }
 

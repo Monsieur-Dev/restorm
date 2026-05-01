@@ -1,0 +1,189 @@
+.ecu-wallpaper {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.ecu-wallpaper-pattern-flickering-grid {
+  width: 100%;
+  height: 100%;
+}
+
+.ecu-wallpaper-pattern-animated-grid {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.ecu-wallpaper-pattern-animated-grid-overflow {
+  overflow: visible;
+}
+
+.ecu-wallpaper-pattern-animated-grid-square {
+  opacity: 0;
+  animation-name: ecu-wallpaper-grid-flicker;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: both;
+}
+
+@keyframes ecu-wallpaper-grid-flicker {
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: var(--ecu-grid-square-max-opacity, 0.5);
+  }
+}
+
+.ecu-wallpaper-pattern-hexagon {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.ecu-wallpaper-pattern-interactive-grid {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.ecu-wallpaper-pattern-interactive-grid-cell {
+  fill: transparent;
+  stroke: currentcolor;
+  stroke-opacity: var(--ecu-igrid-stroke-opacity, 0.3);
+  transition: fill 1000ms ease-in-out, fill-opacity 1000ms ease-in-out;
+}
+
+.ecu-wallpaper-pattern-interactive-grid-cell[data-hovered="true"] {
+  fill: currentcolor;
+  fill-opacity: var(--ecu-igrid-hover-opacity, 0.3);
+  transition-duration: 100ms;
+}
+
+.ecu-wallpaper-pattern-meteors {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.ecu-wallpaper-pattern-meteors-meteor {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 9999px;
+  transform: rotate(var(--ecu-meteor-angle, -45deg)) translateX(0);
+  animation-name: ecu-wallpaper-meteor-fall;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+.ecu-wallpaper-pattern-meteors-trail {
+  position: absolute;
+  top: 50%;
+  height: 1px;
+  transform: translateY(-50%);
+  z-index: -1;
+}
+
+@keyframes ecu-wallpaper-meteor-fall {
+  0% {
+    transform: rotate(var(--ecu-meteor-angle, -45deg)) translateX(0);
+    opacity: 1;
+  }
+
+  70% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: rotate(var(--ecu-meteor-angle, -45deg))
+      translateX(calc(-1 * var(--ecu-meteor-distance, 800px)));
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ecu-wallpaper-pattern-meteors-meteor {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+.ecu-wallpaper-pattern-globe {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.ecu-wallpaper-pattern-globe-canvas {
+  width: min(80vmin, 900px);
+  height: min(80vmin, 900px);
+  aspect-ratio: 1;
+  pointer-events: auto;
+  cursor: grab;
+}
+
+.ecu-wallpaper-pattern-sparkles {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.ecu-wallpaper-pattern-sparkles-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.ecu-wallpaper-pattern-vortex {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  animation: ecu-vortex-fade-in 600ms ease forwards;
+}
+
+.ecu-wallpaper-pattern-vortex-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes ecu-vortex-fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
+.ecu-wallpaper-pattern-neuro-noise {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  display: block;
+}
+

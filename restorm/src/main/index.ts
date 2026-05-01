@@ -26,6 +26,15 @@ import { applyUserDataOverride } from './userDataOverride'
 // production / dev behaviour is unchanged.
 applyUserDataOverride(app)
 
+// Allow WebGL via SwiftShader when the host GPU is blocked / unavailable.
+// Without this, Chromium silently disables WebGL on machines where VA-API
+// or hardware compositing fails to initialise, breaking decorative
+// canvas-based effects (Globe / NeuroNoise wallpaper, etc.). With
+// `enable-unsafe-swiftshader` Chromium falls back to software rendering
+// only when hardware acceleration cannot start — hosts with working GPUs
+// keep their accelerated path.
+app.commandLine.appendSwitch('enable-unsafe-swiftshader')
+
 // Set the app name for proper taskbar icon on Linux
 // Without this, Electron 38+ may use the default "Electron" identity
 app.name = 'restorm'

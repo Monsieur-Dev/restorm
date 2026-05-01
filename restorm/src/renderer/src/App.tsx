@@ -1518,7 +1518,7 @@ const App: React.FC = () => {
           className="restorm-main-container"
         />
       ) : (
-        <div style={{ flex: 1, minHeight: 0 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
           <RestormWorkbenchContainer
             workbenchRef={workbenchRef}
             tree={workbenchTree}
@@ -1535,7 +1535,12 @@ const App: React.FC = () => {
             onFolderChange={handleFolderChange}
             onEnvironmentFolderChange={handleEnvironmentFolderChange}
             onSizesChange={handleSizesChange}
-            emptyFallback={<Welcome />}
+            emptyFallback={
+              <Welcome
+                onNew={() => { navigationService.clearHistory(); void handleMenuNew() }}
+                onOpen={() => { void handleMenuOpen() }}
+              />
+            }
             workbenchId={workbenchId}
             onRebuildTab={handleRebuildTab}
             onStateRestored={handleStateRestored}
@@ -1603,7 +1608,10 @@ const App: React.FC = () => {
             title={t('statusbar.requestHistory')}
           />
         )}
-        <StatusBarBellButton toasterId="app" />
+        <StatusBarBellButton
+          toasterId="app"
+          {...(activeRequest ? {} : { className: 'right-aligned' })}
+        />
       </Statusbar>
 
       {/* Global toaster anchored to the bottom-right, toggled by the statusbar bell. */}

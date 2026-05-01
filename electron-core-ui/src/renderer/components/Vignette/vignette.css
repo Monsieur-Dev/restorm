@@ -1,0 +1,145 @@
+.ecu-vignette {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: color-mix(in srgb, var(--foreground, #fff) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--foreground, #fff) 16%, transparent);
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  box-shadow:
+    0 1px 0 0 color-mix(in srgb, var(--foreground, #fff) 18%, transparent) inset,
+    0 16px 40px rgb(0, 0, 0, 0.35),
+    0 4px 10px rgb(0, 0, 0, 0.22);
+}
+
+.ecu-vignette-content {
+  position: relative;
+  z-index: 0;
+}
+
+.ecu-vignette-decoration {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+/*
+ * Reusable enter/exit animation primitive for any element rendered inside a
+ * Vignette. Apply `.ecu-vignette-row` to the wrapping element and
+ * `.ecu-vignette-row-inner` to the immediate child holding the visible
+ * content. Toggle `data-phase="exit"` on the row right before unmount and
+ * keep it mounted long enough for the exit animation to play.
+ *
+ * Enter timeline: row keeps full height from t0 (so visibility checks pass),
+ *                 inner fades opacity 0 → 1 over 0.55s.
+ * Exit  timeline: 0-0.55s inner fades out, 0.55-1.25s row collapses.
+ */
+.ecu-vignette-row {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.7s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.ecu-vignette-row[data-phase="exit"] {
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.7s cubic-bezier(0.2, 0, 0, 1) 0.55s;
+}
+
+.ecu-vignette-row-inner {
+  min-height: 0;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 0.55s ease;
+}
+
+@starting-style {
+  .ecu-vignette-row-inner {
+    opacity: 0;
+  }
+}
+
+.ecu-vignette-row[data-phase="exit"] .ecu-vignette-row-inner {
+  opacity: 0;
+}
+
+.ecu-vignette-decoration-border-beam {
+  border: var(--ecu-border-beam-width, 1px) solid transparent;
+  mask:
+    linear-gradient(transparent, transparent) padding-box,
+    linear-gradient(#000, #000) border-box;
+  mask-composite: intersect;
+}
+
+.ecu-vignette-decoration-border-beam-trail {
+  position: absolute;
+  aspect-ratio: 1;
+  animation-name: ecu-vignette-border-beam-travel;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+@keyframes ecu-vignette-border-beam-travel {
+  from {
+    offset-distance: 0%;
+  }
+
+  to {
+    offset-distance: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ecu-vignette-decoration-border-beam-trail {
+    animation: none;
+  }
+}
+
+.ecu-vignette-decoration-shine-border {
+  background-size: 300% 300%;
+  padding: var(--ecu-shine-border-width, 1px);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  animation: ecu-vignette-shine var(--ecu-shine-duration, 14s) linear infinite;
+  will-change: background-position;
+}
+
+@keyframes ecu-vignette-shine {
+  0% {
+    background-position: 0% 0%;
+  }
+
+  50% {
+    background-position: 100% 100%;
+  }
+
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ecu-vignette-decoration-shine-border {
+    animation: none;
+  }
+}
+
+.ecu-vignette-decoration-magic-card {
+  background: radial-gradient(
+    var(--ecu-magic-size, 280px) circle at var(--ecu-magic-x, -280px) var(--ecu-magic-y, -280px),
+    var(--ecu-magic-from, #9e7aff),
+    var(--ecu-magic-to, #fe8bbb) 45%,
+    transparent 70%
+  );
+  filter: blur(var(--ecu-magic-blur, 32px));
+  mix-blend-mode: overlay;
+  opacity: var(--ecu-magic-opacity, 0);
+  transition: opacity 300ms ease;
+  will-change: opacity;
+}

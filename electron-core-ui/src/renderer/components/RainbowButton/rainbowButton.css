@@ -1,0 +1,138 @@
+.ecu-rainbow-button {
+  --ecu-rainbow-c1: #ff0080;
+  --ecu-rainbow-c2: #7928ca;
+  --ecu-rainbow-c3: #0070f3;
+  --ecu-rainbow-c4: #38bdf8;
+  --ecu-rainbow-c5: #f59e0b;
+  --ecu-rainbow-bg: #121213;
+  --ecu-rainbow-text: #fff;
+
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  outline: none;
+  font-weight: 600;
+  white-space: nowrap;
+  background-image:
+    linear-gradient(var(--ecu-rainbow-bg), var(--ecu-rainbow-bg)),
+    linear-gradient(
+      var(--ecu-rainbow-bg) 50%,
+      color-mix(in srgb, var(--ecu-rainbow-bg) 60%, transparent) 80%,
+      transparent 100%
+    ),
+    linear-gradient(
+      90deg,
+      var(--ecu-rainbow-c1),
+      var(--ecu-rainbow-c5),
+      var(--ecu-rainbow-c3),
+      var(--ecu-rainbow-c4),
+      var(--ecu-rainbow-c2)
+    );
+  background-clip: padding-box, border-box, border-box;
+  background-origin: border-box;
+  background-size: 200%;
+  border: 2px solid transparent;
+  color: var(--ecu-rainbow-text);
+  animation: ecu-rainbow 2.5s linear infinite;
+  animation-play-state: paused;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.ecu-rainbow-button::before {
+  content: '';
+  position: absolute;
+  bottom: -22%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 30%;
+  z-index: -1;
+  background: linear-gradient(
+    90deg,
+    var(--ecu-rainbow-c1),
+    var(--ecu-rainbow-c5),
+    var(--ecu-rainbow-c3),
+    var(--ecu-rainbow-c4),
+    var(--ecu-rainbow-c2)
+  );
+  background-size: 200%;
+  filter: blur(14px);
+  pointer-events: none;
+  opacity: 0;
+  animation: ecu-rainbow 2.5s linear infinite;
+  animation-play-state: paused;
+  transition: opacity 0.25s ease;
+}
+
+.ecu-rainbow-button:hover,
+.ecu-rainbow-button:focus-visible {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  animation-play-state: running;
+}
+
+.ecu-rainbow-button:hover::before,
+.ecu-rainbow-button:focus-visible::before {
+  animation-play-state: running;
+  opacity: 1;
+}
+
+.ecu-rainbow-button:focus-visible {
+  outline: 2px solid var(--focusBorder, #0a84ff);
+  outline-offset: 3px;
+}
+
+.ecu-rainbow-button:active {
+  transform: translateY(0);
+  filter: brightness(0.95);
+}
+
+.ecu-rainbow-button:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.ecu-rainbow-button--sm {
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: 8px;
+}
+
+.ecu-rainbow-button--default {
+  font-size: 14px;
+  padding: 10px 20px;
+  border-radius: 8px;
+}
+
+.ecu-rainbow-button--lg {
+  font-size: 16px;
+  padding: 14px 28px;
+  border-radius: 12px;
+}
+
+.ecu-rainbow-button--xl {
+  font-size: 20px;
+  padding: 20px 40px;
+  border-radius: 16px;
+}
+
+@keyframes ecu-rainbow {
+  0% {
+    background-position: 0%;
+  }
+
+  100% {
+    background-position: 200%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ecu-rainbow-button,
+  .ecu-rainbow-button::before {
+    animation: none;
+  }
+}
