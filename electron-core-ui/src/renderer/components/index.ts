@@ -35,6 +35,10 @@ export type { RainbowButtonProps, RainbowButtonSize } from './RainbowButton'
 export { FilesPanel } from './FilesPanel'
 export type { FilesPanelProps } from './FilesPanel'
 
+// WelcomeScreen exports
+export { WelcomeScreen } from './WelcomeScreen'
+export type { WelcomeScreenProps } from './WelcomeScreen'
+
 export { DropdownFilterRow } from './DropdownFilterRow'
 export type { DropdownFilterRowProps } from './DropdownFilterRow'
 

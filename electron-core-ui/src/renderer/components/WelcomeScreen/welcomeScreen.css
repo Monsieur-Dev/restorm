@@ -1,0 +1,153 @@
+/*
+ * WelcomeScreen — empty-state landing surface for an Electron
+ * workbench. Layered:
+ *   - Wallpaper (decorative bg)
+ *   - Header pinned to the top with the animated wordmark
+ *   - Centered actions column (children) with optional hint
+ *   - FilesPanel pinned to the bottom-left corner
+ *
+ * Below ~720px the layout reflows top-to-bottom and switches every
+ * absolutely-positioned section back to static so nothing overlaps.
+ */
+
+.ecu-welcome-screen {
+  position: relative;
+  display: flex;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  color: var(--descriptionForeground);
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+.ecu-welcome-screen-header {
+  position: absolute;
+  top: 40px;
+  left: 48px;
+  right: 48px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.ecu-welcome-screen-wordmark-heading {
+  margin: 0;
+  padding: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: 1;
+}
+
+.ecu-welcome-screen-wordmark-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.ecu-welcome-screen-wordmark {
+  font-size: 120px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--foreground);
+}
+
+.ecu-welcome-screen-rule {
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--foreground));
+  margin-top: 12px;
+}
+
+.ecu-welcome-screen-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  max-width: 600px;
+  width: 100%;
+}
+
+.ecu-welcome-screen-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: stretch;
+  justify-content: center;
+  width: 280px;
+}
+
+.ecu-welcome-screen-hint {
+  font-size: 14px;
+  color: var(--descriptionForeground);
+  text-align: center;
+  padding: 0;
+}
+
+.ecu-welcome-screen-files-panel {
+  position: absolute;
+  bottom: 32px;
+  left: 32px;
+  z-index: 1;
+}
+
+@media (width <= 720px) {
+  .ecu-welcome-screen {
+    padding: 24px;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 24px;
+    overflow: auto;
+  }
+
+  .ecu-welcome-screen-header {
+    position: static;
+    order: 1;
+    align-items: flex-start;
+  }
+
+  .ecu-welcome-screen-wordmark {
+    font-size: 64px;
+  }
+
+  .ecu-welcome-screen-content {
+    order: 2;
+    align-self: center;
+    max-width: 100%;
+  }
+
+  .ecu-welcome-screen-actions {
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .ecu-welcome-screen-files-panel {
+    position: static;
+    order: 3;
+    align-self: center;
+    width: 100%;
+  }
+}
+
+@media (width <= 480px) {
+  .ecu-welcome-screen-wordmark {
+    font-size: 48px;
+  }
+
+  .ecu-welcome-screen-actions {
+    width: 100%;
+  }
+}

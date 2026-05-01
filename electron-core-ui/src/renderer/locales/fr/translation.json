@@ -19,6 +19,9 @@
     "favoritesLandmarkLabel": "Liste des favoris",
     "recentsLandmarkLabel": "Liste des fichiers récents"
   },
+  "welcomeScreen": {
+    "landmarkLabel": "Accueil"
+  },
   "menuBar": {
     "edit": "Édition",
     "view": "Affichage",

@@ -198,7 +198,7 @@ When('I close the current file and discard changes', async () => {
     if (!helpers?.menuClose) throw new Error('__restormTestHelpers.menuClose not exposed')
     await helpers.menuClose()
   })
-  await expect(page.locator('.welcome-container')).toBeVisible({ timeout: 10000 })
+  await expect(page.locator('.ecu-welcome-screen')).toBeVisible({ timeout: 10000 })
 })
 
 When('I close the current file', async () => {
@@ -218,17 +218,17 @@ When('I close the current file', async () => {
     if (!helpers?.closeFile) throw new Error('__restormTestHelpers.closeFile not exposed')
     await helpers.closeFile()
   })
-  await expect(page.locator('.welcome-container')).toBeVisible({ timeout: 10000 })
+  await expect(page.locator('.ecu-welcome-screen')).toBeVisible({ timeout: 10000 })
 })
 
 Then('the welcome screen should be visible', async () => {
   if (!page) throw new Error('app must be launched')
-  await expect(page.locator('.welcome-container')).toBeVisible({ timeout: 5000 })
+  await expect(page.locator('.ecu-welcome-screen')).toBeVisible({ timeout: 5000 })
 })
 
 Then('the welcome screen should not be visible', async () => {
   if (!page) throw new Error('app must be launched')
-  await expect(page.locator('.welcome-container')).not.toBeVisible({ timeout: 10000 })
+  await expect(page.locator('.ecu-welcome-screen')).not.toBeVisible({ timeout: 10000 })
 })
 
 function welcomeItemByName(

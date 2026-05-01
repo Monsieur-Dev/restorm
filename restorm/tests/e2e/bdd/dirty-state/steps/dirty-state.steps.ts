@@ -152,7 +152,7 @@ When('I close the current file', async () => {
     if (!helpers?.closeFile) throw new Error('__restormTestHelpers.closeFile not exposed')
     await helpers.closeFile()
   })
-  await expect(p.locator('.welcome-container')).toBeVisible({ timeout: 10000 })
+  await expect(p.locator('.ecu-welcome-screen')).toBeVisible({ timeout: 10000 })
 })
 
 When('I reopen the welcome recent file {string}', async ({}, fileName: string) => {
@@ -164,7 +164,7 @@ When('I reopen the welcome recent file {string}', async ({}, fileName: string) =
     .first()
   await expect(recentRow).toBeVisible({ timeout: 15000 })
   await recentRow.click()
-  await expect(p.locator('.welcome-container')).not.toBeVisible({ timeout: 10000 })
+  await expect(p.locator('.ecu-welcome-screen')).not.toBeVisible({ timeout: 10000 })
   // Wait for the registry to re-hydrate after file:opened so the next
   // edit's mutate sees the freshly-stamped reference.
   await p.waitForTimeout(800)

@@ -1,7 +1,6 @@
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useFileService, FilesPanel, RainbowButton, Wallpaper, Wordmark } from 'electron-core-ui/renderer'
-import './Welcome.css'
+import { RainbowButton, WelcomeScreen } from 'electron-core-ui/renderer'
 
 interface WelcomeProps {
   onNew?: () => void
@@ -9,17 +8,15 @@ interface WelcomeProps {
 }
 
 /**
- * Empty-state landing of the workbench: a hero with the brand wordmark,
- * the two primary actions (New / Open), and a frosted FilesPanel
- * surfacing favorites and recent files.
+ * Restorm-flavoured wrapper around ECUI's `WelcomeScreen`. The shared
+ * empty-state surface (wallpaper / wordmark / files panel) lives in
+ * the ECUI component; this file only injects the brand name, the New
+ * and Open CTAs, and the localized confirm / hint copy.
  */
 export const Welcome: React.FC<WelcomeProps> = ({ onNew, onOpen }) => {
   const { t } = useTranslation()
-  const { recentFiles, favorites } = useFileService()
-  const hasContent = recentFiles.length > 0 || favorites.length > 0
 
   const handleOpenFile = useCallback((path: string) => {
-    // Use restorm:open-path which handles both files and folders
     void window.restorm?.file.openPath(path)
   }, [])
 
@@ -28,58 +25,30 @@ export const Welcome: React.FC<WelcomeProps> = ({ onNew, onOpen }) => {
   }, [t])
 
   return (
-    <main
-      className="welcome-container"
-      role="main"
-      aria-label={t('welcome.landmarkLabel')}
+    <WelcomeScreen
+      name="Restorm"
+      ariaLabel={t('welcome.landmarkLabel')}
+      onOpenFile={handleOpenFile}
+      confirmRemoveFavorite={handleConfirmRemoveFavorite}
+      emptyStateHint={t('welcome.noFilesHint')}
     >
-      <Wallpaper pattern="random" />
-      <header className="welcome-header">
-        <h1 className="welcome-wordmark-heading">
-          <span className="welcome-wordmark-visually-hidden">Restorm</span>
-          <Wordmark
-            effect="random"
-            loop
-            className="welcome-wordmark"
-            aria-hidden="true"
-          >
-            Restorm
-          </Wordmark>
-        </h1>
-        <div className="welcome-wordmark-rule" aria-hidden="true" />
-      </header>
-      <div className="welcome-content">
-        <div className="welcome-actions">
-          <RainbowButton
-            size="xl"
-            onClick={onNew}
-            aria-label={t('welcome.newAriaLabel')}
-            data-testid="welcome-new-button"
-          >
-            {t('welcome.new')}
-          </RainbowButton>
-          <RainbowButton
-            size="xl"
-            onClick={onOpen}
-            aria-label={t('welcome.openAriaLabel')}
-            data-testid="welcome-open-button"
-          >
-            {t('welcome.open')}
-          </RainbowButton>
-        </div>
-        {!hasContent && (
-          <p className="welcome-hint">
-            {t('welcome.noFilesHint')}
-          </p>
-        )}
-      </div>
-
-      <FilesPanel
-        onOpenFile={handleOpenFile}
-        confirmRemoveFavorite={handleConfirmRemoveFavorite}
-        className="welcome-files-panel"
-      />
-    </main>
+      <RainbowButton
+        size="xl"
+        onClick={onNew}
+        aria-label={t('welcome.newAriaLabel')}
+        data-testid="welcome-new-button"
+      >
+        {t('welcome.new')}
+      </RainbowButton>
+      <RainbowButton
+        size="xl"
+        onClick={onOpen}
+        aria-label={t('welcome.openAriaLabel')}
+        data-testid="welcome-open-button"
+      >
+        {t('welcome.open')}
+      </RainbowButton>
+    </WelcomeScreen>
   )
 }
 
