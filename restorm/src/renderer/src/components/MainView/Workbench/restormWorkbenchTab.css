@@ -19,10 +19,12 @@
 
 /* Pull the ribbon stack 8 px above the top of the workbench tab so
  * the signet's top edge sits flush with the tab-bar bottom border
- * rendered just above. Without this, the default flex alignment
- * leaves a visible gap between the border line and the ribbon. */
+ * rendered just above. Shift `right` from the default 20px to 44px
+ * so the favorite-star toggle anchored at right:4px (32×32 + small
+ * gap) fits beside the bookmarks. */
 .restorm-workbench-tab > .ecui-bookmark-ribbon-stack {
   top: -8px;
+  right: 44px;
 }
 
 .restorm-workbench-tab-callout {
@@ -40,6 +42,16 @@
   gap: 8px;
   padding: 4px 16px 4px 16px;
   min-width: 0;
+}
+
+/* Star toggle anchored top-right of the workbench tab, immediately to
+ * the right of the bookmark ribbon stack. Keeps the H1 title flush-left
+ * with the breadcrumb row above and the URL bar below. */
+.restorm-workbench-tab-favorite-star {
+  position: absolute;
+  top: -8px;
+  right: 4px;
+  z-index: 3;
 }
 
 .restorm-workbench-tab-title {

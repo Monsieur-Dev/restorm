@@ -60,6 +60,7 @@
     "addRequest": "Ajouter une requête",
     "collapseAll": "Tout réduire",
     "workspace": "Espace de travail",
+    "favorites": "Favoris",
     "newFolder": "Nouveau dossier",
     "newEnvironmentFolder": "Nouveau dossier de variables",
     "contextMenu": {
@@ -73,6 +74,10 @@
       "addToFavorites": "Ajouter aux favoris",
       "removeFromFavorites": "Retirer des favoris",
       "refreshFromSource": "Rafraîchir depuis la source",
+      "closeTab": "Fermer",
+      "closeOtherTabs": "Fermer les autres",
+      "closeTabsToTheRight": "Fermer à droite",
+      "closeAllTabs": "Tout fermer",
       "add": {
         "title": "Ajouter",
         "folder": "Dossier",

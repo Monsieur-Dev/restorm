@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import * as CoreUIRenderer from 'electron-core-ui/renderer'
-import { Callout, EditableLabel, IconSelect, BookmarkRibbonStack, type Bookmark, type CalloutVariant } from 'electron-core-ui/renderer'
+import { Callout, EditableLabel, IconSelect, BookmarkRibbonStack, Toggle, type Bookmark, type CalloutVariant } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
 import type { BreadcrumbItem } from '../../../../../shared/types/editor'
 import './restormWorkbenchTab.css'
@@ -48,6 +49,11 @@ export interface RestormWorkbenchTabProps {
   callout?: RestormWorkbenchTabCallout | undefined
   /** Optional tab ID for stable test IDs */
   tabId?: string
+  /** When defined, render a star toggle to the left of the H1 title.
+   * The toggle's `checked` state mirrors `isFavorite`. Click flips
+   * via `onToggleFavorite`. Both must be set for the toggle to appear. */
+  isFavorite?: boolean
+  onToggleFavorite?: () => void
   children: React.ReactNode
 }
 
@@ -64,8 +70,11 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
   headerRight,
   callout,
   tabId,
+  isFavorite,
+  onToggleFavorite,
   children
 }) => {
+  const { t } = useTranslation()
   const testIdPrefix = tabId ? `tab-${tabId}` : 'workbench-tab'
 
   // Split the breadcrumb path: ancestors stay in the navigation row,
@@ -155,6 +164,21 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
       )}
       {/* Row 2: current-item icon + H1 name. Tags moved to the
        * top-right bookmark-ribbon stack. */}
+      {onToggleFavorite ? (
+        <span
+          className="restorm-workbench-tab-favorite-star"
+          onClick={(e) => { e.stopPropagation() }}
+          onMouseDown={(e) => { e.stopPropagation() }}
+        >
+          <Toggle
+            appearance="star"
+            checked={Boolean(isFavorite)}
+            aria-label={isFavorite ? t('sidebar.contextMenu.removeFromFavorites') : t('sidebar.contextMenu.addToFavorites')}
+            data-testid={`${testIdPrefix}-favorite-toggle`}
+            onChange={() => { onToggleFavorite() }}
+          />
+        </span>
+      ) : null}
       <div className="restorm-workbench-tab-title-row">
         {lastItem?.icon != null ? (
           <IconSelect

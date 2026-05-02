@@ -1,4 +1,7 @@
 {
+  "common": {
+    "opened": "Ouverts"
+  },
   "file": {
     "untitled": "Sans titre",
     "unsavedChanges": {

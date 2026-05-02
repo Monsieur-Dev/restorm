@@ -60,6 +60,7 @@
     "addRequest": "Add request",
     "collapseAll": "Collapse all requests",
     "workspace": "Workspace",
+    "favorites": "Favorites",
     "newFolder": "New Folder",
     "newEnvironmentFolder": "New Environment Folder",
     "contextMenu": {
@@ -73,6 +74,10 @@
       "addToFavorites": "Add to favorites",
       "removeFromFavorites": "Remove from favorites",
       "refreshFromSource": "Refresh from source",
+      "closeTab": "Close",
+      "closeOtherTabs": "Close others",
+      "closeTabsToTheRight": "Close to the right",
+      "closeAllTabs": "Close all",
       "add": {
         "title": "Add",
         "folder": "Folder",

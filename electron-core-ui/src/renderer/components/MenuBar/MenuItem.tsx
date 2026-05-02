@@ -76,7 +76,12 @@ const MenuItem: React.FC<MenuItemProps> = ({
       return
     }
 
-    if (hasSubmenu) {
+    // Submenu parents that don't supply onClick stay submenu-only —
+    // their click only opens the submenu (which already happens on
+    // hover / ArrowRight). Submenu parents WITH an onClick fire the
+    // action on click; the submenu still serves the secondary
+    // entries via hover.
+    if (hasSubmenu && !onClick) {
       event.preventDefault()
       event.stopPropagation()
       return
@@ -90,10 +95,10 @@ const MenuItem: React.FC<MenuItemProps> = ({
 
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
-      if (hasSubmenu) {
+      if (onClick) {
+        onClick()
+      } else if (hasSubmenu) {
         setShowSubmenu(true)
-      } else {
-        onClick?.()
       }
     } else if (event.key === 'ArrowRight' && hasSubmenu) {
       event.preventDefault()

@@ -27,6 +27,7 @@ import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
 import { eventBus } from 'electron-core-ui/renderer'
 import type { AddChildKind } from '../components/MainView/Sidebar/contextMenuBuilder'
+import { removeFavorite as favoritesStoreRemove } from '../services/favoritesStore'
 
 export interface UseItemOperationsOptions {
   rootItems: (EnvironmentFolder | Folder | Request)[]
@@ -44,6 +45,9 @@ export interface UseItemOperationsOptions {
   openFolderTab: (folder: Folder, breadcrumbs: import('../../../shared/types/editor').BreadcrumbItem[]) => void
   openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: import('../../../shared/types/editor').BreadcrumbItem[]) => void
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[]) => void
+  /** Project UUID. When the deleted subtree contains favorited items,
+   * each id is removed from the favorites store under this key. */
+  projectUuid: string | null
 }
 
 export interface UseItemOperationsReturn {
@@ -71,7 +75,8 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     setSelectedItemId,
     setSidebarEditingItemId,
     setWorkbenchTree,
-    setDeleteConfirmation
+    setDeleteConfirmation,
+    projectUuid
   } = options
   const { openFolderTab, openEnvironmentFolderTab, openAnyRequestTab } = options
   const { t } = useTranslation()
@@ -194,6 +199,21 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
 
   // Confirm deletion
   const confirmDelete = useCallback((itemId: string) => {
+    // Collect every id reachable from the about-to-delete subtree —
+    // including the root id itself — so we can sweep favorites in one
+    // pass once the tree mutation has happened. Walking BEFORE removal
+    // lets us see the descendants; the favorites cleanup runs after so
+    // listeners on `restorm:favorites-changed` don't race the tree.
+    const subtreeIds = new Set<string>()
+    const collect = (id: string): void => {
+      subtreeIds.add(id)
+      const node = findItemById(rootItems, id)
+      if (node && isAnyFolder(node)) {
+        for (const child of node.items) collect(child.id)
+      }
+    }
+    collect(itemId)
+
     // Remove the item from the tree (handles nested items)
     const removed = removeItemFromTree(rootItems, itemId)
     if (!removed) {
@@ -233,9 +253,17 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     // Force React re-render
     setRootItems((prevItems) => [...prevItems])
 
+    // Cascade: drop every deleted id from the favorites store. The
+    // favorites pane in the sidebar listens to `restorm:favorites-changed`
+    // (dispatched from `removeFavorite`) so it re-renders without a
+    // ghost row. Folder deletions sweep every favorited descendant.
+    if (projectUuid) {
+      for (const id of subtreeIds) favoritesStoreRemove(projectUuid, id)
+    }
+
     // Close the confirmation modal
     setDeleteConfirmation((prev) => ({ ...prev, isOpen: false }))
-  }, [rootItems, setRootItems, setWorkbenchTree, setDeleteConfirmation])
+  }, [rootItems, setRootItems, setWorkbenchTree, setDeleteConfirmation, projectUuid])
 
   // Cancel deletion
   const cancelDelete = useCallback(() => {
@@ -323,6 +351,13 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
 
       return { ...prevTree, groups: updatedGroups }
     })
+
+    // Notify external listeners (sidebar Favorites + Open documents
+    // panes) that an item's `name` mutated in-place. Cheap signal that
+    // doesn't require those panes to depend on a reference flip in
+    // `rootItems` — which doesn't happen because the rename is an
+    // in-place mutation.
+    window.dispatchEvent(new CustomEvent('restorm:item-renamed', { detail: { id: itemId } }))
   }, [rootItems, setRootItems, setWorkbenchTree])
 
   // Default names for each kind the sidebar's Ajouter submenu can

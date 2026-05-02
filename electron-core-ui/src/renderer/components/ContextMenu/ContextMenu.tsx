@@ -79,7 +79,10 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                   )
                 : item.icon
           }
-          {...(!hasSubmenu && {
+          {...(item.onClick && {
+            // Wire onClick whether or not the item also has a submenu.
+            // Submenu parents that supply onClick fire the action on
+            // click; their submenu still opens on hover/keyboard.
             onClick: () => {
               if (item.disabled) return
               item.onClick?.()

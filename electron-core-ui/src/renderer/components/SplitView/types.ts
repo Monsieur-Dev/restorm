@@ -75,5 +75,11 @@ export interface SplitViewProps {
 	 * Sizes are normalized and always sum to 1.
 	 */
 	onSizesChange?: (sizes: number[]) => void;
+	/**
+	 * Called whenever a pane is collapsed or expanded from its header.
+	 * The argument is the full per-pane mask in the same order as the
+	 * Pane children. Use to persist collapse state across sessions.
+	 */
+	onCollapsedChange?: (collapsed: boolean[]) => void;
 	children?: React.ReactNode;
 }

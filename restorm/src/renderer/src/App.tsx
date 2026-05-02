@@ -62,7 +62,22 @@ const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Recor
 }
 import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload, type RequestHistoryEventPayload } from './services/DocumentEvents'
 import { getResponseHistoryList } from './services/GraphQLIntegration'
-import type { WorkbenchTree } from 'electron-core-ui/renderer'
+import type { EditorTab, WorkbenchTree, GroupNode } from 'electron-core-ui/renderer'
+import { isContainerNode, isTabGroupNode } from 'electron-core-ui/renderer'
+
+/**
+ * Match a workbench tab by the underlying item id (request / folder /
+ * env-folder id stored in `rootItems`). The tab's own `.id` is a
+ * synthetic key (e.g. `request-idx:0.1.5`) and never appears in
+ * `rootItems`. The Open documents + Favorites panes address rows by
+ * the underlying id, so close handlers triggered from those panes
+ * must look through to `tab.request?.id` / `tab.folder?.id`.
+ */
+type ItemBackedTab = EditorTab & { request?: { id?: string }; folder?: { id?: string } }
+const tabMatchesItem = (tab: EditorTab, itemId: string): boolean => {
+  const t = tab as ItemBackedTab
+  return t.request?.id === itemId || t.folder?.id === itemId
+}
 import { EmptyBench } from './components/MainView/Workbench/EmptyBench'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
 import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
@@ -94,7 +109,13 @@ import { useWorkbenchTabs } from './hooks/useWorkbenchTabs'
 import { useApiUpdateNotifications } from './hooks/useApiUpdateNotifications'
 import { useApiUpdateStateMap } from './hooks/useApiUpdateStateMap'
 import { useSidebarState } from './hooks/useSidebarState'
-import { isFavorite as favoritesStoreIsFavorite, toggleFavorite as favoritesStoreToggle } from './services/favoritesStore'
+import {
+  isFavorite as favoritesStoreIsFavorite,
+  toggleFavorite as favoritesStoreToggle,
+  removeFavorite as favoritesStoreRemove,
+  reorderFavorites as favoritesStoreReorder
+} from './services/favoritesStore'
+import { useFavoritesAndOpenItems } from './hooks/useFavoritesAndOpenItems'
 import { useFileManagement } from './hooks/useFileManagement'
 import { useImport } from './hooks/useImport'
 import { prepareForSerialization } from './utils/serialization'
@@ -259,6 +280,18 @@ const App: React.FC = () => {
       },
       onMissing: () => allFolderIdsRef.current.slice()
     }
+  )
+
+  // Persisted collapsed state for the Favorites + Opened sidebar panes,
+  // keyed by project UUID like the workbench layout. Workspace stays
+  // expanded — collapsible:false on its Pane.
+  const sidebarPanesStorageKey = useMemo(
+    () => (projectUuid ? `restorm-main-sidebar-panes:${projectUuid}` : null),
+    [projectUuid]
+  )
+  const [panesCollapsed, setPanesCollapsed] = usePersistedState<{ favorites: boolean; opened: boolean }>(
+    sidebarPanesStorageKey,
+    { favorites: false, opened: false }
   )
 
   // Selected item in the sidebar
@@ -731,7 +764,8 @@ const App: React.FC = () => {
     setDeleteConfirmation,
     openFolderTab,
     openEnvironmentFolderTab,
-    openAnyRequestTab
+    openAnyRequestTab,
+    projectUuid
   })
 
   const {
@@ -818,6 +852,23 @@ const App: React.FC = () => {
     setSidebarEditingItemId(itemId)
   }, [])
 
+  // Per-pane inline-edit targets so a rename triggered from Favorites
+  // or Opened opens the input in that pane (not the Workspace tree row).
+  const [favoritesEditingItemId, setFavoritesEditingItemId] = useState<string | null>(null)
+  const [openedEditingItemId, setOpenedEditingItemId] = useState<string | null>(null)
+  const handleStartRenameInFavorites = useCallback((itemId: string) => {
+    setFavoritesEditingItemId(itemId)
+  }, [])
+  const handleStartRenameInOpened = useCallback((itemId: string) => {
+    setOpenedEditingItemId(itemId)
+  }, [])
+  const handleFavoritesEditingEnd = useCallback(() => {
+    setFavoritesEditingItemId(null)
+  }, [])
+  const handleOpenedEditingEnd = useCallback(() => {
+    setOpenedEditingItemId(null)
+  }, [])
+
   // Favorites management — keyed by projectUuid so the list follows
   // the project across external renames/moves.
   const [favoritesVersion, setFavoritesVersion] = useState(0)
@@ -827,11 +878,95 @@ const App: React.FC = () => {
     return favoritesStoreIsFavorite(projectUuid, itemId)
   }, [projectUuid, favoritesVersion])
 
+  // Bump `contentVersion` on every workbench tab whose underlying
+  // request matches `itemId`. EditorGroupView caches each tab's
+  // rendered React tree until contentVersion flips — without this, a
+  // favorite toggle wouldn't propagate to the H1 star toggle (the
+  // cached node still holds the old `isFavorite` prop).
+  const bumpTabContentVersionFor = useCallback((itemId: string): void => {
+    setWorkbenchTree((prev) => {
+      const walk = (nodes: GroupNode[]): GroupNode[] => nodes.map((n) => {
+        if (isContainerNode(n)) return { ...n, groups: walk(n.groups) }
+        if (!isTabGroupNode(n)) return n
+        const tabs = n.tabs.map((tab) =>
+          tabMatchesItem(tab, itemId)
+            ? { ...tab, contentVersion: (tab.contentVersion ?? 0) + 1 }
+            : tab
+        )
+        return { ...n, tabs }
+      })
+      return { ...prev, groups: walk(prev.groups) }
+    })
+  }, [])
+
   const handleToggleFavorite = useCallback((itemId: string): void => {
     if (!projectUuid) return
     favoritesStoreToggle(projectUuid, itemId)
     setFavoritesVersion((v) => v + 1)
+    bumpTabContentVersionFor(itemId)
+  }, [projectUuid, bumpTabContentVersionFor])
+
+  const handleUnfavorite = useCallback((itemId: string): void => {
+    if (!projectUuid) return
+    favoritesStoreRemove(projectUuid, itemId)
+    bumpTabContentVersionFor(itemId)
+  }, [projectUuid, bumpTabContentVersionFor])
+
+  const handleFavoritesReorder = useCallback((orderedIds: string[]): void => {
+    if (!projectUuid) return
+    favoritesStoreReorder(projectUuid, orderedIds)
   }, [projectUuid])
+
+  const handleCloseTabById = useCallback((itemId: string): void => {
+    setWorkbenchTree((prev) => {
+      const filterGroup = (g: GroupNode): GroupNode => {
+        if (isContainerNode(g)) {
+          return { ...g, groups: g.groups.map(filterGroup).filter((c) => !isTabGroupNode(c) || c.tabs.length > 0) }
+        }
+        const match = g.tabs.find((t) => tabMatchesItem(t, itemId))
+        if (!match) return g
+        const tabs = g.tabs.filter((t) => t.id !== match.id)
+        const activeTabId = g.activeTabId === match.id ? tabs[0]?.id ?? '' : g.activeTabId ?? ''
+        return { ...g, tabs, activeTabId }
+      }
+      const groups = prev.groups.map(filterGroup).filter((g) => !isTabGroupNode(g) || g.tabs.length > 0)
+      return { ...prev, groups }
+    })
+  }, [])
+
+  // Close-others / close-to-the-right are scoped to the group containing
+  // the targeted tab — VSCode-style semantics. The Workspace stays
+  // intact across other split groups; if the user wants a global wipe
+  // they call Close all.
+  const handleCloseOtherTabsById = useCallback((itemId: string): void => {
+    setWorkbenchTree((prev) => {
+      const trim = (g: GroupNode): GroupNode => {
+        if (isContainerNode(g)) return { ...g, groups: g.groups.map(trim) }
+        const keep = g.tabs.find((t) => tabMatchesItem(t, itemId))
+        if (!keep) return g
+        return { ...g, tabs: [keep], activeTabId: keep.id }
+      }
+      return { ...prev, groups: prev.groups.map(trim) }
+    })
+  }, [])
+
+  const handleCloseTabsToTheRightById = useCallback((itemId: string): void => {
+    setWorkbenchTree((prev) => {
+      const trim = (g: GroupNode): GroupNode => {
+        if (isContainerNode(g)) return { ...g, groups: g.groups.map(trim) }
+        const idx = g.tabs.findIndex((t) => tabMatchesItem(t, itemId))
+        if (idx < 0) return g
+        const tabs = g.tabs.slice(0, idx + 1)
+        const activeTabId = tabs.some((t) => t.id === g.activeTabId) ? g.activeTabId ?? '' : (tabs[idx]?.id ?? '')
+        return { ...g, tabs, activeTabId }
+      }
+      return { ...prev, groups: prev.groups.map(trim) }
+    })
+  }, [])
+
+  const handleCloseAllTabs = useCallback((): void => {
+    setWorkbenchTree({ orientation: 'vertical', groups: [] })
+  }, [])
 
   // Sync favoritesVersion when favorites change from other sources (e.g. home page trash button)
   React.useEffect(() => {
@@ -855,6 +990,24 @@ const App: React.FC = () => {
     if (!folder || !('name' in folder)) return
     setRefreshSourceTarget({ id, name: folder.name })
   }, [rootItems])
+
+  const { favoriteItems, openDocumentItems } = useFavoritesAndOpenItems({
+    rootItems,
+    workbenchTree,
+    projectUuid,
+    updateCount,
+    isItemFavorite,
+    onRenameFavoriteItem: handleStartRenameInFavorites,
+    onRenameOpenedItem: handleStartRenameInOpened,
+    onCloneItem: handleCloneItem,
+    onDeleteItem: handleDeleteItem,
+    onToggleFavorite: handleToggleFavorite,
+    onUnfavorite: handleUnfavorite,
+    onCloseTab: handleCloseTabById,
+    onCloseOtherTabs: handleCloseOtherTabsById,
+    onCloseTabsToTheRight: handleCloseTabsToTheRightById,
+    onCloseAllTabs: handleCloseAllTabs
+  })
 
   const { sidebarItems: sidebarItemsWithContextMenu } = useSidebarState({
     rootItems,
@@ -1476,6 +1629,15 @@ const App: React.FC = () => {
                 onCreateRootEnvironmentFolder={handleCreateRootEnvironmentFolder}
                 onAddChildItem={handleAddChildItem}
                 onDeselectAll={() => { setSelectedItemId(null) }}
+                favoriteItems={favoriteItems}
+                openDocumentItems={openDocumentItems}
+                onFavoritesReorder={handleFavoritesReorder}
+                panesCollapsed={panesCollapsed}
+                onPanesCollapsedChange={setPanesCollapsed}
+                favoritesEditingItemId={favoritesEditingItemId}
+                openedEditingItemId={openedEditingItemId}
+                onFavoritesEditingEnd={handleFavoritesEditingEnd}
+                onOpenedEditingEnd={handleOpenedEditingEnd}
               />
             </div>
           }

@@ -316,6 +316,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
 	className,
 	style,
 	onSizesChange,
+	onCollapsedChange,
 	children,
 	'data-testid': dataTestId
 }) => {
@@ -467,6 +468,15 @@ export const SplitView: React.FC<SplitViewProps> = ({
 			onSizesChange(ratios);
 		}
 	}, [ratios, panes.length, onSizesChange]);
+
+	// Notify external listener when the collapsed mask changes (header
+	// click). Only fires after the first user-driven toggle — initial
+	// values come from the parent via `defaultCollapsed` / `collapsed`.
+	useEffect(() => {
+		if (!onCollapsedChange) return
+		if (collapsedState.forCount !== panes.length) return
+		onCollapsedChange(collapsed)
+	}, [collapsed, collapsedState.forCount, panes.length, onCollapsedChange]);
 
 	// Ensure initial ratios respect the current collapsed mask so that
 	// expanded panes consume all remaining height and collapsed panes only
