@@ -553,6 +553,14 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       )
     }
 
+    // Shared favorite-toggle props for request tabs. The H1 title gets
+    // a star to its left; clicking flips via `onToggleFavorite`. Folder
+    // tabs skip this — they aren't favoritable.
+    const favoritePropsFor = (id: string): { isFavorite: boolean; onToggleFavorite: () => void } | object =>
+      onToggleFavorite
+        ? { isFavorite: isItemFavorite?.(id) ?? false, onToggleFavorite: () => { onToggleFavorite(id) } }
+        : {}
+
     // Shared tag color props for request tabs
     const requestTagColors = getTagColorsFromBreadcrumbs(breadcrumbs)
     const envFolderId = getEnvFolderIdFromBreadcrumbs(breadcrumbs)
@@ -589,6 +597,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
+            {...favoritePropsFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
               <HTTPRequestTabView request={request} />
@@ -614,6 +623,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
+            {...favoritePropsFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
               <GraphQLRequestTabView request={request} />
@@ -639,6 +649,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
+            {...favoritePropsFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
               <GrpcRequestTabView request={request} />
@@ -664,6 +675,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
+            {...favoritePropsFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
               <SoapRequestTabView request={request} />
@@ -689,6 +701,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
+            {...favoritePropsFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
               <WebSocketRequestTabView request={request} />
@@ -714,6 +727,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
+            {...favoritePropsFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
               <ODataRequestTabView request={request} />
@@ -740,6 +754,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             tagColors={requestTagColors}
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
+            {...favoritePropsFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
               <HTTPRequestTabView request={request} />
@@ -751,7 +766,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid])
+  }, [onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(

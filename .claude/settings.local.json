@@ -15,7 +15,8 @@
       "WebFetch(domain:*)",
       "mcp__restorm__*",
       "Skill(update-config)",
-      "Read(/tmp/**)"
+      "Read(/tmp/**)",
+      "Read(~/.claude/**)"
     ]
   },
   "enableAllProjectMcpServers": true,

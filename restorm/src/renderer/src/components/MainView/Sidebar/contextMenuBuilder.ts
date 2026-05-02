@@ -234,6 +234,139 @@ export const buildContextMenuForItem = (
   ]
 }
 
+export interface BuildFavoritesContextMenuOptions {
+  item: ListViewItemData
+  t: TranslateFunction
+  onCloneItem: ContextMenuActionHandler
+  onDeleteItem: ContextMenuActionHandler
+  onRenameItem: ContextMenuActionHandler
+  onUnfavorite: ContextMenuActionHandler
+}
+
+export const buildFavoritesContextMenuForItem = (
+  options: BuildFavoritesContextMenuOptions
+): SidebarContextMenuItem[] => {
+  const { item, t, onCloneItem, onDeleteItem, onRenameItem, onUnfavorite } = options
+  const itemId = item.id
+  return [
+    {
+      id: 'rename-item',
+      label: t('sidebar.contextMenu.rename'),
+      icon: 'edit',
+      shortcut: 'F2',
+      onClick: () => { onRenameItem(itemId) }
+    },
+    {
+      id: 'clone-item',
+      label: t('sidebar.contextMenu.clone'),
+      icon: 'copy',
+      shortcut: 'Ctrl+D',
+      onClick: () => { onCloneItem(itemId) }
+    },
+    {
+      id: 'delete-item',
+      label: t('sidebar.contextMenu.delete'),
+      icon: 'trash',
+      shortcut: 'Suppr',
+      onClick: () => { onDeleteItem(itemId) }
+    },
+    { id: 'sep-fav', isSeparator: true, label: '' },
+    {
+      id: 'remove-from-favorites',
+      label: t('sidebar.contextMenu.removeFromFavorites'),
+      icon: 'star-empty',
+      onClick: () => { onUnfavorite(itemId) }
+    }
+  ]
+}
+
+export interface BuildOpenDocumentsContextMenuOptions {
+  item: ListViewItemData
+  t: TranslateFunction
+  onCloneItem: ContextMenuActionHandler
+  onDeleteItem: ContextMenuActionHandler
+  onRenameItem: ContextMenuActionHandler
+  isItemFavorite: (itemId: string) => boolean
+  onToggleFavorite: ContextMenuActionHandler
+  onCloseTab: ContextMenuActionHandler
+  onCloseOtherTabs: ContextMenuActionHandler
+  onCloseTabsToTheRight: ContextMenuActionHandler
+  onCloseAllTabs: () => void
+}
+
+export const buildOpenDocumentsContextMenuForItem = (
+  options: BuildOpenDocumentsContextMenuOptions
+): SidebarContextMenuItem[] => {
+  const {
+    item, t,
+    onCloneItem, onDeleteItem, onRenameItem,
+    isItemFavorite, onToggleFavorite,
+    onCloseTab, onCloseOtherTabs, onCloseTabsToTheRight, onCloseAllTabs
+  } = options
+  const itemId = item.id
+  const isFav = isItemFavorite(itemId)
+  return [
+    {
+      id: 'rename-item',
+      label: t('sidebar.contextMenu.rename'),
+      icon: 'edit',
+      shortcut: 'F2',
+      onClick: () => { onRenameItem(itemId) }
+    },
+    {
+      id: 'clone-item',
+      label: t('sidebar.contextMenu.clone'),
+      icon: 'copy',
+      shortcut: 'Ctrl+D',
+      onClick: () => { onCloneItem(itemId) }
+    },
+    {
+      id: 'delete-item',
+      label: t('sidebar.contextMenu.delete'),
+      icon: 'trash',
+      shortcut: 'Suppr',
+      onClick: () => { onDeleteItem(itemId) }
+    },
+    { id: 'sep-fav', isSeparator: true, label: '' },
+    {
+      id: 'toggle-favorite',
+      label: isFav
+        ? t('sidebar.contextMenu.removeFromFavorites')
+        : t('sidebar.contextMenu.addToFavorites'),
+      icon: isFav ? 'star-full' : 'star-empty',
+      onClick: () => { onToggleFavorite(itemId) }
+    },
+    {
+      // Clicking the parent closes just this tab; the submenu still
+      // opens on hover for the other three close actions.
+      id: 'close-submenu',
+      label: t('sidebar.contextMenu.closeTab'),
+      icon: 'close',
+      onClick: () => { onCloseTab(itemId) },
+      items: [
+        {
+          id: 'close-other-tabs',
+          label: t('sidebar.contextMenu.closeOtherTabs'),
+          icon: 'close-all',
+          onClick: () => { onCloseOtherTabs(itemId) }
+        },
+        {
+          id: 'close-tabs-to-the-right',
+          label: t('sidebar.contextMenu.closeTabsToTheRight'),
+          icon: 'chevron-right',
+          onClick: () => { onCloseTabsToTheRight(itemId) }
+        },
+        {
+          id: 'close-all-tabs',
+          label: t('sidebar.contextMenu.closeAllTabs'),
+          icon: 'close-all',
+          onClick: onCloseAllTabs
+        }
+      ]
+    }
+  ]
+}
+
 export interface AttachContextMenusOptions {
   items: ListViewItemData[]
   t: TranslateFunction

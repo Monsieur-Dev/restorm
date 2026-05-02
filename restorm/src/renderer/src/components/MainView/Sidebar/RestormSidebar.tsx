@@ -14,6 +14,8 @@ import { buildAddSubmenu, type AddChildHandler } from './contextMenuBuilder'
 
 export interface RestormSidebarProps {
   items: ListViewItemData[]
+  favoriteItems: ListViewItemData[]
+  openDocumentItems: ListViewItemData[]
   selectedItemId: string | null
   activeId?: string | null
   expandedIds: string[]
@@ -37,6 +39,19 @@ export interface RestormSidebarProps {
    */
   onAddChildItem: AddChildHandler
   onDeselectAll: () => void
+  /** Reorder the project's favorites — receives the full ordered id list. */
+  onFavoritesReorder: (orderedIds: string[]) => void
+  /** Initial collapsed state for the Favorites + Opened panes (in that
+   * order). Workspace is always expanded. */
+  panesCollapsed?: { favorites: boolean; opened: boolean }
+  /** Fired whenever the user collapses or expands one of the two
+   * collapsible panes. Receives the new state. */
+  onPanesCollapsedChange?: (state: { favorites: boolean; opened: boolean }) => void
+  /** Per-pane inline-rename target. */
+  favoritesEditingItemId?: string | null
+  openedEditingItemId?: string | null
+  onFavoritesEditingEnd?: () => void
+  onOpenedEditingEnd?: () => void
 }
 
 /**
@@ -44,6 +59,8 @@ export interface RestormSidebarProps {
  */
 export const RestormSidebar: React.FC<RestormSidebarProps> = ({
   items,
+  favoriteItems,
+  openDocumentItems,
   selectedItemId,
   activeId,
   expandedIds,
@@ -60,7 +77,14 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
   onCreateRootFolder,
   onCreateRootEnvironmentFolder,
   onAddChildItem,
-  onDeselectAll
+  onDeselectAll,
+  onFavoritesReorder,
+  panesCollapsed,
+  onPanesCollapsedChange,
+  favoritesEditingItemId = null,
+  openedEditingItemId = null,
+  onFavoritesEditingEnd,
+  onOpenedEditingEnd
 }) => {
   const { t } = useTranslation()
   const [emptyAreaMenu, setEmptyAreaMenu] = useState<{ visible: boolean; x: number; y: number }>({ visible: false, x: 0, y: 0 })
@@ -71,6 +95,32 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
       onItemClick(id)
     }
   }, [onItemClick])
+
+  const handleSplitViewCollapsedChange = useCallback((collapsed: boolean[]) => {
+    // [favorites, opened, workspace] — workspace is collapsible:false
+    // so its slot stays expanded; we only forward the two we care about.
+    onPanesCollapsedChange?.({
+      favorites: collapsed[0] ?? false,
+      opened: collapsed[1] ?? false
+    })
+  }, [onPanesCollapsedChange])
+
+  const handleFavoritesDrop = useCallback((payload: ListViewDropEventPayload) => {
+    // Reorder inside the Favorites pane only. Cross-pane drops are
+    // ignored: we only act when both source and target ids belong to
+    // the current favorites list.
+    const sourceId = payload.source.id
+    const targetId = payload.item.id
+    if (!sourceId || !targetId) return
+    const ids = favoriteItems.map((f) => f.id)
+    if (!ids.includes(sourceId) || !ids.includes(targetId)) return
+    const without = ids.filter((id) => id !== sourceId)
+    const targetIndex = without.indexOf(targetId)
+    if (targetIndex < 0) return
+    const insertIndex = payload.position === 'after' ? targetIndex + 1 : targetIndex
+    const next = [...without.slice(0, insertIndex), sourceId, ...without.slice(insertIndex)]
+    onFavoritesReorder(next)
+  }, [favoriteItems, onFavoritesReorder])
 
   const handleEmptyAreaClick = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLElement
@@ -143,7 +193,49 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
         data-testid="sidebar-splitview"
         orientation="vertical"
         style={{ width: '100%', height: '100%' }}
+        onCollapsedChange={handleSplitViewCollapsedChange}
       >
+        <Pane
+          title={t('sidebar.favorites')}
+          minSize={80}
+          initialSize={0.2}
+          defaultCollapsed={panesCollapsed?.favorites ?? false}
+        >
+          <ListView
+            items={favoriteItems}
+            rootRole="list"
+            ariaLabel={t('sidebar.favorites')}
+            selectedIds={selectedItemId ? [selectedItemId] : []}
+            activeId={activeId}
+            isRenameable
+            editingItemId={favoritesEditingItemId}
+            {...(onFavoritesEditingEnd && { onEditingEnd: onFavoritesEditingEnd })}
+            onItemRename={onItemRename}
+            onItemClick={handleItemClick}
+            onItemDrop={handleFavoritesDrop}
+            data-testid="sidebar-favorites-listview"
+          />
+        </Pane>
+        <Pane
+          title={t('common.opened')}
+          minSize={80}
+          initialSize={0.2}
+          defaultCollapsed={panesCollapsed?.opened ?? false}
+        >
+          <ListView
+            items={openDocumentItems}
+            rootRole="list"
+            ariaLabel={t('common.opened')}
+            selectedIds={selectedItemId ? [selectedItemId] : []}
+            activeId={activeId}
+            isRenameable
+            editingItemId={openedEditingItemId}
+            {...(onOpenedEditingEnd && { onEditingEnd: onOpenedEditingEnd })}
+            onItemRename={onItemRename}
+            onItemClick={handleItemClick}
+            data-testid="sidebar-open-documents-listview"
+          />
+        </Pane>
         <Pane
           title={t('sidebar.workspace')}
           collapsible={false}
