@@ -1,6 +1,6 @@
 import { app, BrowserWindow } from 'electron'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, initAutoSaveController } from 'electron-core-ui'
+import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, initAutoSaveController, McpService } from 'electron-core-ui'
 import { PROJECT_UUID_KEY } from '../shared/config/projectUuid'
 import type { PersistenceFormat } from 'electron-core-ui'
 import { dirname, join } from 'path'
@@ -342,6 +342,23 @@ void app.whenReady().then(() => {
   })
   logger.info('AutoSave controller initialized')
 })
+
+// Embedded MCP server. Off by default; the user opts in via
+// `--mcp-port=NNNN` on the CLI (or `ECUI_MCP_PORT` env var). When
+// enabled, AI tooling (Claude Code & friends) can drive the running
+// app — taking screenshots, listing collections, etc. — over the
+// loopback port. The service lives in ECUI; restorm just bootstraps
+// it once the app is ready so windows exist for the built-in
+// `screenshot` tool to capture.
+const mcpService = new McpService({ serverInfo: { name: 'restorm', version: app.getVersion() } })
+void app.whenReady().then(async () => {
+  try {
+    await mcpService.start(cliArgs.mcpPort)
+  } catch (error) {
+    logger.error('Failed to start MCP service', { error: String(error), port: cliArgs.mcpPort })
+  }
+})
+app.on('before-quit', () => { void mcpService.stop() })
 
 // Register all restorm-specific IPC handlers
 registerRestormIPC({ editorWindows, closeAllWindows })

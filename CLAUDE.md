@@ -46,7 +46,7 @@ GitHub branch protection ("require branches to be up to date") is **not availabl
    ```bash
    BEHIND=$(git rev-list --count HEAD..origin/main)
    ```
-3. If `BEHIND` is non-zero: rebase onto `origin/main` first (`git rebase origin/main`), resolve any conflicts, then push. Do NOT push a branch that is behind. The user has a feedback memory `Rebase before merge` (no merge commits) — honor it: rebase, never merge `main` into the feature branch.
+3. If `BEHIND` is non-zero: **rebase the feature branch** onto `origin/main` (`git rebase origin/main`), resolve conflicts, then `git push --force-with-lease`. Do NOT push a branch that is behind. Rebase only the *feature branch* — never merge `main` into the feature branch (would litter the feature branch with extra merge commits).
 4. If `BEHIND` is zero, push as usual.
 
 **Before merging a PR** (i.e. before running `gh pr merge` or asking the user for the green light):
@@ -54,6 +54,8 @@ GitHub branch protection ("require branches to be up to date") is **not availabl
 1. Same fetch + behind-count check, except now compare against the PR's base branch (read it from `gh pr view --json baseRefName`).
 2. If the branch is behind: rebase locally, force-push (`git push --force-with-lease`), wait for CI to re-run green, then proceed to merge. Never merge a PR whose head is behind the base.
 3. Mention in the PR description / final message that the up-to-date check passed (one line is enough, e.g. `branch up to date with origin/main`).
+
+**Always integrate via a real merge commit.** The repo settings deliberately allow only `allow_merge_commit: true` (rebase + squash both disabled) — the user wants the visual "this batch was a feature branch" boundary in `git log`. Use `gh pr merge <num> --merge --delete-branch` (NOT `--rebase`, NOT `--squash`, and never a manual fast-forward). The feature branch can be rebased onto main beforehand to stay linear inside the branch, but the integration into main itself must be a `--no-ff`-style merge so the branch's start + end show up as anchor commits in the log.
 
 This applies to every push and every merge, even for tiny one-line fixes. Skipping the check is the same class of mistake as skipping `npm run lint` — don't.
 

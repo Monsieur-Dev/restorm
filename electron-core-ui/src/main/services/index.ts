@@ -119,3 +119,9 @@ export type {
   EnsureFileUuidOptions,
   EnsureUuidResult
 } from './saveUnit'
+
+// MCP service — embeds an MCP server (Streamable HTTP) for AI-tooling
+// integrations. Off by default; the consuming app starts it explicitly
+// from a CLI flag. See docs/McpService/README.md for the full surface.
+export { McpService } from './McpService'
+export type { McpServiceOptions, McpToolConfig, McpToolHandler } from './McpService'
