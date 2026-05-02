@@ -50,6 +50,7 @@ const authLoginTestDir = defineBddConfig({
  */
 export default defineConfig({
   globalSetup: './tests/e2e/global-setup.ts',
+  globalTeardown: './tests/e2e/global-teardown.ts',
   /* Timeouts */
   timeout: 120 * 1000,
   expect: {

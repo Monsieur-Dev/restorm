@@ -10,7 +10,7 @@
       "cancel": "Annuler"
     }
   },
-  "filesPanel": {
+  "recentFilesVignette": {
     "favorites": "Favoris",
     "recentFiles": "Fichiers récents",
     "addToFavorites": "Ajouter aux favoris",
@@ -23,6 +23,8 @@
     "landmarkLabel": "Accueil"
   },
   "menuBar": {
+    "new": "Nouveau",
+    "open": "Ouvrir",
     "edit": "Édition",
     "view": "Affichage",
     "help": "Aide",
@@ -124,7 +126,7 @@
   },
   "tagsView": {
     "removeTag": "Supprimer le tag",
-    "changeColor": "Changer la couleur du tag...",
+    "changeColor": "Changer la couleur du tag",
     "removeColor": "Supprimer la couleur du tag",
     "newTag": "Nouveau tag"
   },

@@ -97,7 +97,7 @@ export const test = base.extend<DirtyStateFixtures>({
 
       const page = await app.firstWindow()
       await page.waitForLoadState('load')
-      // Reduce motion: snaps the FilesPanel star toggle to its target
+      // Reduce motion: snaps the RecentFilesVignette star toggle to its target
       // frame instead of playing the lottie burst, keeping
       // close-then-reopen round-trip tests fast.
       await page.emulateMedia({ reducedMotion: 'reduce' })

@@ -12,6 +12,9 @@ import {
   Warp,
   GrainGradient,
   MeshGradient,
+  SmokeRing,
+  GemSmoke,
+  LiquidMetal,
   pickRandomAnimatedGridPatternProps,
   pickRandomFlickeringGridProps,
   pickRandomGlobeProps,
@@ -22,6 +25,9 @@ import {
   pickRandomMeshGradientProps,
   pickRandomMeteorsProps,
   pickRandomNeuroNoiseProps,
+  pickRandomSmokeRingProps,
+  pickRandomGemSmokeProps,
+  pickRandomLiquidMetalProps,
   pickRandomSparklesProps,
   pickRandomVortexProps,
   pickRandomWallpaperPattern,
@@ -148,7 +154,10 @@ const PATTERNS_WITHOUT_MASK: ReadonlySet<WallpaperPatternId> = new Set([
   'neuro-noise',
   'warp',
   'grain-gradient',
-  'mesh-gradient'
+  'mesh-gradient',
+  'smoke-ring',
+  'gem-smoke',
+  'liquid-metal'
 ])
 
 const PATTERN_BUILDERS: Record<WallpaperPatternId, () => React.ReactElement> = {
@@ -165,7 +174,10 @@ const PATTERN_BUILDERS: Record<WallpaperPatternId, () => React.ReactElement> = {
   'neuro-noise': () => <NeuroNoise {...pickRandomNeuroNoiseProps()} />,
   warp: () => <Warp {...pickRandomWarpProps()} />,
   'grain-gradient': () => <GrainGradient {...pickRandomGrainGradientProps()} />,
-  'mesh-gradient': () => <MeshGradient {...pickRandomMeshGradientProps()} />
+  'mesh-gradient': () => <MeshGradient {...pickRandomMeshGradientProps()} />,
+  'smoke-ring': () => <SmokeRing {...pickRandomSmokeRingProps()} />,
+  'gem-smoke': () => <GemSmoke {...pickRandomGemSmokeProps()} />,
+  'liquid-metal': () => <LiquidMetal {...pickRandomLiquidMetalProps()} />
 }
 
 function buildPatternElement(id: WallpaperPatternId): React.ReactElement {

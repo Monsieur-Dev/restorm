@@ -28,6 +28,13 @@ export interface MenuItemProps {
    * When provided, it replaces the default checkmark placeholder.
    */
   icon?: React.ReactNode
+  /**
+   * When true, the rendered title gets a trailing horizontal ellipsis
+   * (`…`) appended — the standard UX convention for "this menu item
+   * opens a dialog / window". Translations stay clean (no embedded
+   * `...`); the ellipsis is a render-time concern. Defaults to `false`.
+   */
+  opensDialog?: boolean
   children?: React.ReactNode
   className?: string
   id?: string

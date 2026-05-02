@@ -159,8 +159,8 @@ When('I reopen the welcome recent file {string}', async ({}, fileName: string) =
   const p = requirePage()
   // The Recent section needs a tick to render after the file:closed
   // event lands; poll the row instead of failing the first try.
-  const recentRow = p.locator('.ecu-files-panel-section', { hasText: 'Recent' })
-    .locator('.ecu-files-panel-item', { hasText: fileName })
+  const recentRow = p.locator('.ecu-recent-files-vignette-section', { hasText: 'Recent' })
+    .locator('.ecu-recent-files-vignette-item', { hasText: fileName })
     .first()
   await expect(recentRow).toBeVisible({ timeout: 15000 })
   await recentRow.click()

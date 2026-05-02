@@ -1,4 +1,9 @@
 {
+  "ignore_patterns": [
+    "tests/e2e/.tmp/**",
+    "tests/e2e/.features-gen/**",
+    ".features-gen/**"
+  ],
   "ignores": [
     "@types/*",
     "typescript",

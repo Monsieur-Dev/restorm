@@ -13,11 +13,13 @@ const MenuItem: React.FC<MenuItemProps> = ({
   checked = false,
   disabled = false,
   icon,
+  opensDialog = false,
   children,
   className = '',
   id,
   'data-testid': dataTestId
 }) => {
+  const renderedTitle = opensDialog ? `${title}…` : title
   const testId = dataTestId
   // Note: Keyboard shortcuts are registered by MenuBarItem parent component
   // to keep them active even when the menu is closed
@@ -302,7 +304,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
       >
         <div className="menu-content">
           {renderIcon()}
-          <span className="action-label" {...(testId && { 'data-testid': `${testId}-label` })}>{title}</span>
+          <span className="action-label" {...(testId && { 'data-testid': `${testId}-label` })}>{renderedTitle}</span>
         </div>
         <div className="menu-right">
           {renderShortcut()}

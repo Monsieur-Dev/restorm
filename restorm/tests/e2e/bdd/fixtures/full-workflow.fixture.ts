@@ -126,7 +126,7 @@ export const test = base.extend<FullWorkflowFixtures>({
 
       const page = await app.firstWindow()
       await page.waitForLoadState('load')
-      // Reduce motion in tests: snaps the FilesPanel star toggle to its
+      // Reduce motion in tests: snaps the RecentFilesVignette star toggle to its
       // target frame instead of playing the 1.3s lottie burst, which
       // otherwise nudges this long workflow scenario over the 180s
       // Playwright timeout. Real users still see the burst.

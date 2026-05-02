@@ -11,6 +11,9 @@ import type { VortexProps } from './Vortex'
 import type { WarpProps } from './Warp'
 import type { GrainGradientProps, GrainGradientShape } from './GrainGradient'
 import type { MeshGradientProps } from './MeshGradient'
+import type { SmokeRingProps } from './SmokeRing'
+import type { GemSmokeProps, GemSmokeShape } from './GemSmoke'
+import type { LiquidMetalProps, LiquidMetalShape } from './LiquidMetal'
 
 interface Rgb {
   r: number
@@ -195,24 +198,28 @@ export function pickRandomInteractiveGridPatternProps(): InteractiveGridPatternP
  * marker dots so each mount feels different.
  */
 export function pickRandomGlobeProps(): GlobeProps {
-  // Cobe defaults are tuned for a dark backdrop (white globe). On a light
-  // app theme we flip: a dark globe with a slight tint stays visible. `dark`
-  // shades the dot-map; baseColor sets the sphere body; glowColor is the rim
-  // halo; markerColor lights up the marker pulses.
+  // Cobe defaults are tuned for a dark backdrop (white globe with dimly
+  // shaded continents). On a light app theme we flip the sphere body
+  // dark so it stands out against the page, but a *dark* sphere with the
+  // default `mapBrightness` ends up showing continents that are barely a
+  // shade darker than the body — invisible. So on light themes we crank
+  // `mapBrightness` and `diffuse` to give the dot-map enough contrast to
+  // read against the dark sphere, and tint `baseColor` slightly toward
+  // a muted indigo so the continents have a colour to push against.
   const bgIsDark = isBackgroundDark()
   const baseColor: [number, number, number] = bgIsDark
     ? [1, 1, 1]
-    : [0.12, 0.12, 0.18]
+    : [0.16, 0.18, 0.26]
   const glowColor: [number, number, number] = bgIsDark
     ? [1, 1, 1]
-    : [0.35, 0.35, 0.5]
+    : [0.55, 0.55, 0.7]
   const markerColor = pickVividMarkerColor()
 
   return {
     config: {
       dark: bgIsDark ? 0 : 1,
-      diffuse: randFloat(0.3, 0.7),
-      mapBrightness: randFloat(1.0, 1.6),
+      diffuse: bgIsDark ? randFloat(0.3, 0.7) : randFloat(1.1, 1.5),
+      mapBrightness: bgIsDark ? randFloat(1.0, 1.6) : randFloat(4.5, 6.5),
       mapSamples: 16000,
       baseColor,
       glowColor,
@@ -500,6 +507,150 @@ export function pickRandomWarpProps(): WarpProps {
     swirlIterations: randInt(6, 14),
     speed: randFloat(0.3, 0.8),
     scale: randFloat(0.6, 1.4),
+    rotation: randFloat(0, 360)
+  }
+}
+
+/**
+ * Returns a coherent set of randomized props for the SmokeRing shader.
+ *
+ * `colorBack` is pinned to the editor background so the ring sits on a
+ * surface that matches the surrounding UI; the smoke colours are 2-4
+ * sibling shades produced by jittering the bg's hue (±50°) and shifting
+ * luminance toward the contrast end (lighter on dark themes, darker on
+ * light themes). Result: every theme renders a smoke ring painted in
+ * its own family.
+ */
+export function pickRandomSmokeRingProps(): SmokeRingProps {
+  const bg = readEditorBackground()
+  const bgHsl = rgbToHsl(bg)
+  const bgIsDark = isBackgroundDark()
+
+  const stopCount = randInt(2, 4)
+  const colors: string[] = []
+  for (let i = 0; i < stopCount; i++) {
+    const hueShift = randFloat(-50, 50)
+    const lDirection = i % 2 === 0 ? 1 : -1
+    const lShift = lDirection * randFloat(0.15, 0.4) * (bgIsDark ? 1 : -1)
+    const sShift = randFloat(-0.1, 0.3)
+    colors.push(hslToRgbString({
+      h: (bgHsl.h + hueShift + 360) % 360,
+      s: clamp(bgHsl.s + sShift, 0, 1),
+      l: clamp(bgHsl.l + lShift, 0.05, 0.95)
+    }))
+  }
+
+  return {
+    colorBack: `rgb(${bg.r}, ${bg.g}, ${bg.b})`,
+    colors,
+    noiseScale: randFloat(2, 5),
+    noiseIterations: randInt(6, 10),
+    radius: randFloat(0.18, 0.35),
+    thickness: randFloat(0.5, 0.85),
+    innerShape: randFloat(0.5, 0.9),
+    speed: randFloat(0.3, 0.8),
+    scale: randFloat(0.7, 1.0),
+    rotation: randFloat(0, 360)
+  }
+}
+
+/**
+ * Returns a coherent set of randomized props for the GemSmoke shader.
+ *
+ * Picks one of four glassy shapes (circle / daisy / diamond / metaballs)
+ * and paints a smoky color field behind it. `colorBack` follows the
+ * editor background so the gem sits cleanly on the surrounding UI.
+ * `colorInner` is a slight luminance shift of the bg (the colour visible
+ * *inside* the gem) and the smoke `colors` are 2-4 sibling shades from
+ * the bg's hue family pushed toward the contrast end. Distortion / glow
+ * / size / angle stay in cinematic ranges so the result feels like a
+ * glass paperweight rather than a noisy psychedelic.
+ */
+export function pickRandomGemSmokeProps(): GemSmokeProps {
+  const bg = readEditorBackground()
+  const bgHsl = rgbToHsl(bg)
+  const bgIsDark = isBackgroundDark()
+
+  const colorBack = `rgb(${bg.r}, ${bg.g}, ${bg.b})`
+  const colorInner = hslToRgbString({
+    h: bgHsl.h,
+    s: clamp(bgHsl.s + randFloat(-0.05, 0.15), 0, 1),
+    l: clamp(bgHsl.l + (bgIsDark ? randFloat(0.05, 0.15) : -randFloat(0.05, 0.12)), 0.05, 0.95)
+  })
+
+  const stopCount = randInt(2, 4)
+  const colors: string[] = []
+  for (let i = 0; i < stopCount; i++) {
+    const hueShift = randFloat(-50, 50)
+    const lDirection = i % 2 === 0 ? 1 : -1
+    const lShift = lDirection * randFloat(0.2, 0.45) * (bgIsDark ? 1 : -1)
+    const sShift = randFloat(-0.1, 0.3)
+    colors.push(hslToRgbString({
+      h: (bgHsl.h + hueShift + 360) % 360,
+      s: clamp(bgHsl.s + sShift, 0, 1),
+      l: clamp(bgHsl.l + lShift, 0.05, 0.95)
+    }))
+  }
+
+  const shapes: readonly GemSmokeShape[] = ['circle', 'daisy', 'diamond', 'metaballs']
+  const shape = shapes[randInt(0, shapes.length - 1)] ?? 'diamond'
+
+  return {
+    colorBack,
+    colorInner,
+    colors,
+    shape,
+    innerDistortion: randFloat(0.5, 0.95),
+    outerDistortion: randFloat(0.4, 0.75),
+    innerGlow: randFloat(0.7, 1.0),
+    outerGlow: randFloat(0.35, 0.65),
+    offset: randFloat(-0.15, 0.15),
+    angle: randFloat(0, 360),
+    size: randFloat(0.6, 0.9),
+    speed: randFloat(0.4, 1.1),
+    scale: randFloat(0.5, 0.85),
+    rotation: randFloat(0, 360)
+  }
+}
+
+/**
+ * Returns a coherent set of randomized props for the LiquidMetal shader.
+ *
+ * Picks one of four shapes (circle / daisy / diamond / metaballs) and
+ * paints animated metallic stripes distorted along the shape edges.
+ * `colorBack` follows the editor background; `colorTint` is a near-bg
+ * sibling shade used as the highlight overlay (color-burn blend in the
+ * shader). Repetition / softness / contour / dispersion stay in subtle
+ * ranges so the result reads like brushed metal rather than a glitch.
+ */
+export function pickRandomLiquidMetalProps(): LiquidMetalProps {
+  const bg = readEditorBackground()
+  const bgHsl = rgbToHsl(bg)
+  const bgIsDark = isBackgroundDark()
+
+  const colorBack = `rgb(${bg.r}, ${bg.g}, ${bg.b})`
+  const colorTint = hslToRgbString({
+    h: (bgHsl.h + randFloat(-30, 30) + 360) % 360,
+    s: clamp(bgHsl.s + randFloat(0, 0.25), 0, 1),
+    l: clamp(bgHsl.l + (bgIsDark ? randFloat(0.35, 0.6) : -randFloat(0.25, 0.5)), 0.05, 0.95)
+  })
+
+  const shapes: readonly LiquidMetalShape[] = ['circle', 'daisy', 'diamond', 'metaballs']
+  const shape = shapes[randInt(0, shapes.length - 1)] ?? 'diamond'
+
+  return {
+    colorBack,
+    colorTint,
+    shape,
+    repetition: randFloat(2, 6),
+    shiftRed: randFloat(-0.5, 0.5),
+    shiftBlue: randFloat(-0.5, 0.5),
+    contour: randFloat(0.3, 0.7),
+    softness: randFloat(0.05, 0.35),
+    distortion: randFloat(0.05, 0.2),
+    angle: randFloat(0, 360),
+    speed: randFloat(0.5, 1.3),
+    scale: randFloat(0.5, 0.85),
     rotation: randFloat(0, 360)
   }
 }

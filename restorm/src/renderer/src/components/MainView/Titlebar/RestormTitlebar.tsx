@@ -105,18 +105,18 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
       leftContent={
         <MenuBar data-testid="titlebar-menubar">
           <MenuBarItem title={t('menuBar.file')} data-testid="titlebar-menubar-item-file">
-            <MenuItem data-testid="titlebar-menu-item-new" title={t('menuBar.new')} shortcut="Ctrl+N" onClick={handleMenuNew} />
+            <MenuItem data-testid="titlebar-menu-item-new" title={t('menuBar.new')} shortcut="Ctrl+N" opensDialog onClick={handleMenuNew} />
             <MenuItemSeparator data-testid="titlebar-menu-separator-1" />
-            <MenuItem data-testid="titlebar-menu-item-import" title={t('menuBar.import')} shortcut="Ctrl+I" onClick={handleImport} />
+            <MenuItem data-testid="titlebar-menu-item-import" title={t('menuBar.import')} shortcut="Ctrl+I" opensDialog onClick={handleImport} />
             <MenuItemSeparator data-testid="titlebar-menu-separator-2" />
-            <MenuItem data-testid="titlebar-menu-item-open" title={t('menuBar.open')} shortcut="Ctrl+O" onClick={handleMenuOpen} />
-            <MenuItem data-testid="titlebar-menu-item-open-folder" title={t('menuBar.openFolder')} onClick={handleMenuOpenFolder} />
+            <MenuItem data-testid="titlebar-menu-item-open" title={t('menuBar.open')} shortcut="Ctrl+O" opensDialog onClick={handleMenuOpen} />
+            <MenuItem data-testid="titlebar-menu-item-open-folder" title={t('menuBar.openFolder')} opensDialog onClick={handleMenuOpenFolder} />
             {fileName && (
               <>
                 <MenuItemSeparator data-testid="titlebar-menu-separator-3" />
                 <MenuItem data-testid="titlebar-menu-item-save" title={t('menuBar.save')} shortcut="Ctrl+S" onClick={handleMenuSave} />
                 <MenuItem data-testid="titlebar-menu-item-save-all" title={t('menuBar.saveAll')} shortcut="Ctrl+Shift+S" onClick={handleMenuSaveAll} />
-                <MenuItem data-testid="titlebar-menu-item-save-as" title={t('menuBar.saveAs')} onClick={handleMenuSaveAs} />
+                <MenuItem data-testid="titlebar-menu-item-save-as" title={t('menuBar.saveAs')} opensDialog onClick={handleMenuSaveAs} />
               </>
             )}
             {recentFiles.length > 0 && (

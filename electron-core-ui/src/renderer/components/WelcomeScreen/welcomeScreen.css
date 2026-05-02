@@ -4,7 +4,7 @@
  *   - Wallpaper (decorative bg)
  *   - Header pinned to the top with the animated wordmark
  *   - Centered actions column (children) with optional hint
- *   - FilesPanel pinned to the bottom-left corner
+ *   - RecentFilesVignette pinned to the bottom-left corner
  *
  * Below ~720px the layout reflows top-to-bottom and switches every
  * absolutely-positioned section back to static so nothing overlaps.
@@ -124,7 +124,7 @@
   padding: 0;
 }
 
-.ecu-welcome-screen-files-panel {
+.ecu-welcome-screen-recent-files-vignette {
   position: absolute;
   bottom: 32px;
   left: 32px;
@@ -162,7 +162,7 @@
     max-width: 320px;
   }
 
-  .ecu-welcome-screen-files-panel {
+  .ecu-welcome-screen-recent-files-vignette {
     position: static;
     order: 3;
     align-self: center;

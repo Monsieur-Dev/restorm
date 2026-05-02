@@ -1,31 +1,31 @@
 /*
- * FilesPanel — frosted-glass surface listing favorites + recents.
+ * RecentFilesVignette — frosted-glass surface listing favorites + recents.
  * The frame is rendered by `Vignette`; these rules only style the
  * inner sections, lists, and rows. Class hooks are namespaced
- * `ecu-files-panel-*` for stable testing/theming targets.
+ * `ecu-recent-files-vignette-*` for stable testing/theming targets.
  */
 
-.ecu-files-panel {
+.ecu-recent-files-vignette {
   padding: 16px 18px;
   max-width: 480px;
 }
 
-.ecu-files-panel .ecu-vignette-content {
+.ecu-recent-files-vignette .ecu-vignette-content {
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
-.ecu-files-panel-section {
+.ecu-recent-files-vignette-section {
   width: 100%;
 }
 
-.ecu-files-panel-section-inner {
+.ecu-recent-files-vignette-section-inner {
   display: flex;
   flex-direction: column;
 }
 
-.ecu-files-panel-section-title {
+.ecu-recent-files-vignette-section-title {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -37,22 +37,22 @@
   margin: 0;
 }
 
-.ecu-files-panel-section-icon {
+.ecu-recent-files-vignette-section-icon {
   font-size: 14px;
   color: var(--descriptionForeground);
 }
 
-.ecu-files-panel-section-icon--favorite {
+.ecu-recent-files-vignette-section-icon--favorite {
   color: #f5c518;
 }
 
-.ecu-files-panel-list {
+.ecu-recent-files-vignette-list {
   list-style: none;
   margin: 0;
   padding: 12px 0 0;
 }
 
-.ecu-files-panel-item-inner {
+.ecu-recent-files-vignette-item-inner {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -62,18 +62,18 @@
   transition: background-color 0.15s ease;
 }
 
-.ecu-files-panel-item-inner:hover {
+.ecu-recent-files-vignette-item-inner:hover {
   background-color: var(--list-hoverBackground);
 }
 
-.ecu-files-panel-item-name {
+.ecu-recent-files-vignette-item-name {
   flex-shrink: 0;
   font-size: 14px;
   color: var(--foreground);
   font-weight: 700;
 }
 
-.ecu-files-panel-item-path {
+.ecu-recent-files-vignette-item-path {
   flex: 1;
   font-size: 11px;
   color: var(--descriptionForeground);
@@ -94,20 +94,15 @@
  *      visible, full color, no greyscale.
  */
 
-.ecu-files-panel-star--reveal-on-hover {
+.ecu-recent-files-vignette-star--reveal-on-hover {
   opacity: 0;
   filter: grayscale(1) opacity(0.7);
 }
 
-.ecu-files-panel-item-inner:hover .ecu-files-panel-star--reveal-on-hover {
+.ecu-recent-files-vignette-item-inner:hover .ecu-recent-files-vignette-star--reveal-on-hover {
   opacity: 1;
 }
 
-.ecu-files-panel-star--active {
-  opacity: 1;
-}
-
-/* Active = favorited. Always visible, full color, no greyscale. */
-.ecu-files-panel-star-toggle--active {
+.ecu-recent-files-vignette-star--active {
   opacity: 1;
 }

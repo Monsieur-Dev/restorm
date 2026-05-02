@@ -8,6 +8,8 @@ const Button: React.FC<ButtonProps> = ({
   icon,
   disabled = false,
   secondary = false,
+  appearance = 'default',
+  size,
   small = false,
   line = false,
   emphasis = 0,
@@ -23,6 +25,9 @@ const Button: React.FC<ButtonProps> = ({
   'data-testid': dataTestId,
   children
 }) => {
+  // Resolve size — `size` prop wins; `small` is a shorthand alias for
+  // `size: 'sm'` kept for ergonomic call sites.
+  const effectiveSize = size ?? (small ? 'sm' : 'default')
   const buttonRef = useRef<HTMLAnchorElement>(null)
 
   // Merge options with default styles
@@ -93,11 +98,18 @@ const Button: React.FC<ButtonProps> = ({
     return children
   }
 
-  // Build CSS classes
+  // The `small-button` / `large-button` / `xl-button` class names are
+  // kept (rather than `size-sm` / `size-lg` / `size-xl`) because
+  // `small-button` is the historical CSS hook for the toolbar/icon
+  // 20×20 surface — renaming it would force a CSS rewrite for the
+  // many call sites that style around it.
   const buttonClasses = [
     'button',
     'text-button',
-    small ? 'small-button' : '',
+    effectiveSize === 'sm' ? 'small-button' : '',
+    effectiveSize === 'lg' ? 'large-button' : '',
+    effectiveSize === 'xl' ? 'xl-button' : '',
+    appearance !== 'default' ? `appearance-${appearance}` : '',
     line ? 'line-button' : '',
     secondary ? 'secondary' : '',
     disabled ? 'disabled' : '',

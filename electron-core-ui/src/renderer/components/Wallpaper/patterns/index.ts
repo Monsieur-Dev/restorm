@@ -11,6 +11,9 @@ export type WallpaperPatternId =
   | 'warp'
   | 'grain-gradient'
   | 'mesh-gradient'
+  | 'smoke-ring'
+  | 'gem-smoke'
+  | 'liquid-metal'
 
 export const wallpaperPatternIds: readonly WallpaperPatternId[] = [
   'flickering-grid',
@@ -24,7 +27,10 @@ export const wallpaperPatternIds: readonly WallpaperPatternId[] = [
   'neuro-noise',
   'warp',
   'grain-gradient',
-  'mesh-gradient'
+  'mesh-gradient',
+  'smoke-ring',
+  'gem-smoke',
+  'liquid-metal'
 ]
 
 export function pickRandomWallpaperPattern(): WallpaperPatternId {
@@ -39,7 +45,7 @@ export function pickRandomWallpaperPattern(): WallpaperPatternId {
  * from the random pool so the fallback path never renders an empty canvas.
  */
 function isPatternSupported(id: WallpaperPatternId): boolean {
-  if (id === 'globe' || id === 'neuro-noise' || id === 'warp' || id === 'grain-gradient' || id === 'mesh-gradient') return hasWebGL()
+  if (id === 'globe' || id === 'neuro-noise' || id === 'warp' || id === 'grain-gradient' || id === 'mesh-gradient' || id === 'smoke-ring' || id === 'gem-smoke' || id === 'liquid-metal') return hasWebGL()
   return true
 }
 
@@ -81,6 +87,12 @@ export { GrainGradient } from './GrainGradient'
 export type { GrainGradientProps, GrainGradientShape } from './GrainGradient'
 export { MeshGradient } from './MeshGradient'
 export type { MeshGradientProps } from './MeshGradient'
+export { SmokeRing } from './SmokeRing'
+export type { SmokeRingProps } from './SmokeRing'
+export { GemSmoke } from './GemSmoke'
+export type { GemSmokeProps, GemSmokeShape } from './GemSmoke'
+export { LiquidMetal } from './LiquidMetal'
+export type { LiquidMetalProps, LiquidMetalShape } from './LiquidMetal'
 export {
   pickRandomFlickeringGridProps,
   pickRandomAnimatedGridPatternProps,
@@ -94,5 +106,8 @@ export {
   pickRandomWarpProps,
   pickRandomGrainGradientProps,
   pickRandomMeshGradientProps,
+  pickRandomSmokeRingProps,
+  pickRandomGemSmokeProps,
+  pickRandomLiquidMetalProps,
   pickRandomMaskStyle
 } from './random'

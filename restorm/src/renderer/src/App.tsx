@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  RainbowButton,
+  Button,
   Statusbar,
   StatusbarElement,
   StatusBarBellButton,
@@ -1544,22 +1544,24 @@ const App: React.FC = () => {
                 confirmRemoveFavorite={(fileName) => window.confirm(t('welcome.confirmRemoveFavorite', { fileName }))}
                 emptyStateHint={t('welcome.noFilesHint')}
               >
-                <RainbowButton
+                <Button
+                  appearance="rainbow"
                   size="xl"
                   onClick={() => { navigationService.clearHistory(); void handleMenuNew() }}
-                  aria-label={t('welcome.newAriaLabel')}
+                  options={{ ariaLabel: t('welcome.newAriaLabel') }}
                   data-testid="welcome-new-button"
                 >
-                  {t('welcome.new')}
-                </RainbowButton>
-                <RainbowButton
+                  {t('menuBar.new')}
+                </Button>
+                <Button
+                  appearance="rainbow"
                   size="xl"
                   onClick={() => { void handleMenuOpen() }}
-                  aria-label={t('welcome.openAriaLabel')}
+                  options={{ ariaLabel: t('welcome.openAriaLabel') }}
                   data-testid="welcome-open-button"
                 >
-                  {t('welcome.open')}
-                </RainbowButton>
+                  {t('menuBar.open')}
+                </Button>
               </WelcomeScreen>
             }
             workbenchId={workbenchId}

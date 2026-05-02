@@ -2,7 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Wallpaper, type WallpaperPattern } from '../Wallpaper'
 import { Wordmark, type WordmarkEffect } from '../Wordmark'
-import { FilesPanel } from '../FilesPanel'
+import { RecentFilesVignette } from '../RecentFilesVignette'
 import { useFileService } from '../../hooks/useFileService'
 import type { VignetteDecoration } from '../Vignette'
 import './welcomeScreen.css'
@@ -16,14 +16,14 @@ export interface WelcomeScreenProps {
   name: string
   /**
    * Action buttons rendered as a centered, vertically-stacked column.
-   * Typically two or three `RainbowButton`s (New / Open / Import,
-   * etc.) — the screen doesn't impose a count or shape, just laid-out
-   * with consistent spacing.
+   * Typically two or three `<Button appearance="rainbow" size="xl">`
+   * (New / Open / Import, etc.) — the screen doesn't impose a count
+   * or shape, just laid-out with consistent spacing.
    */
   children?: React.ReactNode
   /**
    * Called when the user activates a file row inside the favorites /
-   * recents panel. Passed straight through to `FilesPanel`.
+   * recents panel. Passed straight through to `RecentFilesVignette`.
    */
   onOpenFile: (path: string) => void
   /**
@@ -34,7 +34,7 @@ export interface WelcomeScreenProps {
   emptyStateHint?: React.ReactNode
   /**
    * Optional confirm hook called before removing a favorite — passed
-   * straight through to `FilesPanel`.
+   * straight through to `RecentFilesVignette`.
    */
   confirmRemoveFavorite?: (fileName: string) => boolean | Promise<boolean>
   /** Wallpaper pattern. Defaults to `'random'`. */
@@ -48,8 +48,8 @@ export interface WelcomeScreenProps {
    * `2000` (2 s) — pass `0` to disable.
    */
   wordmarkStartDelay?: number
-  /** FilesPanel decoration. Defaults to `'random'`. */
-  filesPanelDecoration?: VignetteDecoration
+  /** RecentFilesVignette decoration. Defaults to `'random'`. */
+  recentFilesVignetteDecoration?: VignetteDecoration
   /**
    * Override the `<main>` aria-label. Defaults to the
    * `welcomeScreen.landmarkLabel` translation ("Welcome" / "Accueil").
@@ -78,7 +78,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   wallpaperPattern = 'random',
   wordmarkEffect = 'random',
   wordmarkStartDelay = 2000,
-  filesPanelDecoration = 'random',
+  recentFilesVignetteDecoration = 'random',
   ariaLabel,
   className,
   style,
@@ -120,10 +120,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
         )}
       </div>
 
-      <FilesPanel
+      <RecentFilesVignette
         onOpenFile={onOpenFile}
-        decoration={filesPanelDecoration}
-        className="ecu-welcome-screen-files-panel"
+        decoration={recentFilesVignetteDecoration}
+        className="ecu-welcome-screen-recent-files-vignette"
         {...(confirmRemoveFavorite ? { confirmRemoveFavorite } : {})}
       />
     </main>

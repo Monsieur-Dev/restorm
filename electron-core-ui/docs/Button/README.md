@@ -36,6 +36,9 @@ interface ButtonProps {
   icon?: string | Icon  // string = codicon shorthand; Icon object = any IconView-supported library
   disabled?: boolean
   secondary?: boolean
+  appearance?: 'default' | 'rainbow'
+  size?: 'sm' | 'default' | 'lg' | 'xl'
+  /** Shorthand for `size="sm"` — convenient for compact toolbar / icon buttons. */
   small?: boolean
   line?: boolean
   emphasis?: number
@@ -108,6 +111,41 @@ Horizontal alignment of the label. Defaults to `'center'` (CTA-style). `'left'` 
   {env.name}
 </Button>
 ```
+
+##### `appearance` and `size`
+
+`appearance` selects the rendered surface; `size` scales padding / typography. Click and keyboard contracts are identical across appearances.
+
+| Appearance  | What it looks like |
+| ----------- | ------------------ |
+| `'default'` | Standard codicon-friendly button (theme tokens, `secondary`/`emphasis`/`backgroundColor` apply). |
+| `'rainbow'` | Hero CTA — solid dark surface (`#121213`) with an animated rainbow gradient border pinned to the bottom edge and a soft glow underneath, revealed on hover/focus-visible. `secondary`/`emphasis`/codicon modifiers do **not** apply (rainbow paints its own surface). |
+
+| Size        | Typography / padding | Use for |
+| ----------- | -------------------- | ------- |
+| `'sm'`      | 13px / 8×16          | Inline secondary actions, popover rows. (Alias for legacy `small`.) |
+| `'default'` | 14px / 10×20         | Standard call-to-action. |
+| `'lg'`      | 16px / 14×28         | Section CTA. |
+| `'xl'`      | 20px / 20×40         | Hero CTA on welcome / landing surfaces. |
+
+```typescript
+// Hero CTA on a welcome screen
+<Button
+  appearance="rainbow"
+  size="xl"
+  onClick={onNew}
+  options={{ ariaLabel: 'Create a new collection' }}
+>
+  New
+</Button>
+
+// Section CTA — default appearance, large size
+<Button size="lg" emphasis={1} onClick={onSubmit}>
+  Submit
+</Button>
+```
+
+The animated rainbow gradient + glow are paused at rest and run only on hover / focus-visible, so the button is calm in idle and lights up when interacted with. The full animation honors `prefers-reduced-motion: reduce`.
 
 ### ButtonWithDescription
 

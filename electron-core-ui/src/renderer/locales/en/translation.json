@@ -10,7 +10,7 @@
       "cancel": "Cancel"
     }
   },
-  "filesPanel": {
+  "recentFilesVignette": {
     "favorites": "Favorites",
     "recentFiles": "Recent Files",
     "addToFavorites": "Add to favorites",
@@ -23,6 +23,8 @@
     "landmarkLabel": "Welcome"
   },
   "menuBar": {
+    "new": "New",
+    "open": "Open",
     "edit": "Edit",
     "view": "View",
     "help": "Help",
@@ -124,7 +126,7 @@
   },
   "tagsView": {
     "removeTag": "Remove tag",
-    "changeColor": "Change tag color...",
+    "changeColor": "Change tag color",
     "removeColor": "Remove tag color",
     "newTag": "New tag"
   },

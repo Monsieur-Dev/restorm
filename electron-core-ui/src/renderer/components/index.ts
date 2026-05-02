@@ -27,13 +27,9 @@ export type { VignetteProps, VignetteDecoration, VignetteDecorationId } from './
 export { Wordmark, wordmarkEffectIds } from './Wordmark'
 export type { WordmarkProps, WordmarkEffect, WordmarkEffectId } from './Wordmark'
 
-// RainbowButton exports
-export { RainbowButton } from './RainbowButton'
-export type { RainbowButtonProps, RainbowButtonSize } from './RainbowButton'
-
-// FilesPanel exports
-export { FilesPanel } from './FilesPanel'
-export type { FilesPanelProps } from './FilesPanel'
+// RecentFilesVignette exports
+export { RecentFilesVignette } from './RecentFilesVignette'
+export type { RecentFilesVignetteProps } from './RecentFilesVignette'
 
 // WelcomeScreen exports
 export { WelcomeScreen } from './WelcomeScreen'
@@ -158,7 +154,7 @@ export type { IconSelectProps, IconLibrary } from './IconSelect'
 
 // Button exports
 export { Button, ButtonWithDescription, ButtonWithDropdown, ButtonWithIcon, defaultButtonStyles } from './Button/index'
-export type { IButtonOptions, IButtonStyles, IButtonWithDropdownOptions, ButtonProps, ButtonWithDescriptionProps, ButtonWithDropdownProps, ButtonWithIconProps } from './Button/index'
+export type { IButtonOptions, IButtonStyles, IButtonWithDropdownOptions, ButtonProps, ButtonAppearance, ButtonSize, ButtonWithDescriptionProps, ButtonWithDropdownProps, ButtonWithIconProps } from './Button/index'
 
 // SelectBox exports
 export { SelectBox, SelectBoxNative, SelectBoxList, defaultSelectBoxStyles } from './SelectBox/index'

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Toggle } from '../Toggle'
 import { Vignette, type VignetteDecoration } from '../Vignette'
 import { useFileService } from '../../hooks/useFileService'
-import './filesPanel.css'
+import './recentFilesVignette.css'
 
 const EXIT_MS = 1300
 
@@ -95,7 +95,7 @@ function sameTransitionState<T>(
   return true
 }
 
-export interface FilesPanelProps {
+export interface RecentFilesVignetteProps {
   /**
    * Called when the user clicks (or activates with Enter / Space) a
    * file row. The component itself only knows the file's path —
@@ -118,7 +118,7 @@ export interface FilesPanelProps {
   className?: string
   /** Optional inline style overrides on the Vignette root. */
   style?: React.CSSProperties
-  /** Optional test id applied to the Vignette root. Defaults to `files-panel`. */
+  /** Optional test id applied to the Vignette root. Defaults to `recent-files-vignette`. */
   'data-testid'?: string
 }
 
@@ -133,20 +133,20 @@ export interface FilesPanelProps {
  * Returns `null` when both lists are empty so the consumer's empty
  * state (if any) shows through cleanly.
  */
-export const FilesPanel: React.FC<FilesPanelProps> = ({
+export const RecentFilesVignette: React.FC<RecentFilesVignetteProps> = ({
   onOpenFile,
   confirmRemoveFavorite,
   decoration = 'random',
   className,
   style,
-  'data-testid': dataTestId = 'files-panel'
+  'data-testid': dataTestId = 'recent-files-vignette'
 }) => {
   const { t } = useTranslation()
   const { recentFiles, favorites, toggleFavorite } = useFileService()
 
   const askConfirm = useCallback(async (fileName: string): Promise<boolean> => {
     if (confirmRemoveFavorite) return confirmRemoveFavorite(fileName)
-    return window.confirm(t('filesPanel.confirmRemoveFavorite', { fileName }))
+    return window.confirm(t('recentFilesVignette.confirmRemoveFavorite', { fileName }))
   }, [confirmRemoveFavorite, t])
 
   const handleToggleFavorite = useCallback(
@@ -187,7 +187,7 @@ export const FilesPanel: React.FC<FilesPanelProps> = ({
   const favoritesPhase: TransitionPhase = favoriteItems.some((e) => e.phase === 'present') ? 'present' : 'exit'
   const recentsPhase: TransitionPhase = recentItems.some((e) => e.phase === 'present') ? 'present' : 'exit'
 
-  const panelClassName = ['ecu-files-panel', className].filter(Boolean).join(' ')
+  const panelClassName = ['ecu-recent-files-vignette', className].filter(Boolean).join(' ')
 
   return (
     <Vignette
@@ -198,24 +198,24 @@ export const FilesPanel: React.FC<FilesPanelProps> = ({
     >
       {hasFavorites && (
         <section
-          className="ecu-files-panel-section ecu-vignette-row"
+          className="ecu-recent-files-vignette-section ecu-vignette-row"
           data-phase={favoritesPhase}
-          aria-label={t('filesPanel.favoritesLandmarkLabel')}
+          aria-label={t('recentFilesVignette.favoritesLandmarkLabel')}
         >
-          <div className="ecu-files-panel-section-inner ecu-vignette-row-inner">
-            <h3 className="ecu-files-panel-section-title">
-              <i className="codicon codicon-star-full ecu-files-panel-section-icon ecu-files-panel-section-icon--favorite" aria-hidden="true" />
-              {t('filesPanel.favorites')}
+          <div className="ecu-recent-files-vignette-section-inner ecu-vignette-row-inner">
+            <h3 className="ecu-recent-files-vignette-section-title">
+              <i className="codicon codicon-star-full ecu-recent-files-vignette-section-icon ecu-recent-files-vignette-section-icon--favorite" aria-hidden="true" />
+              {t('recentFilesVignette.favorites')}
             </h3>
-            <ul className="ecu-files-panel-list">
+            <ul className="ecu-recent-files-vignette-list">
               {favoriteItems.map(({ key, item: file, phase }) => (
                 <li
                   key={key}
-                  className="ecu-files-panel-item ecu-vignette-row"
+                  className="ecu-recent-files-vignette-item ecu-vignette-row"
                   data-phase={phase}
                 >
                   <div
-                    className="ecu-files-panel-item-inner ecu-vignette-row-inner"
+                    className="ecu-recent-files-vignette-item-inner ecu-vignette-row-inner"
                     role="button"
                     tabIndex={0}
                     onClick={() => { onOpenFile(file.path) }}
@@ -226,10 +226,10 @@ export const FilesPanel: React.FC<FilesPanelProps> = ({
                       }
                     }}
                   >
-                    <span className="ecu-files-panel-item-name">{splitPath(file.path).basename}</span>
-                    <span className="ecu-files-panel-item-path">{splitPath(file.path).directory}</span>
+                    <span className="ecu-recent-files-vignette-item-name">{splitPath(file.path).basename}</span>
+                    <span className="ecu-recent-files-vignette-item-path">{splitPath(file.path).directory}</span>
                     <div
-                      className="ecu-files-panel-toggle-wrap"
+                      className="ecu-recent-files-vignette-toggle-wrap"
                       onClick={(e) => { e.stopPropagation() }}
                       onKeyDown={(e) => { e.stopPropagation() }}
                     >
@@ -237,9 +237,9 @@ export const FilesPanel: React.FC<FilesPanelProps> = ({
                         appearance="star"
                         checked
                         onChange={() => { handleRemoveFavorite(file.path, file.name) }}
-                        actionClassName="ecu-files-panel-star--active"
-                        aria-label={t('filesPanel.removeFromFavorites')}
-                        data-testid="files-panel-remove-favorite-button"
+                        actionClassName="ecu-recent-files-vignette-star--active"
+                        aria-label={t('recentFilesVignette.removeFromFavorites')}
+                        data-testid="recent-files-vignette-remove-favorite-button"
                       />
                     </div>
                   </div>
@@ -252,24 +252,24 @@ export const FilesPanel: React.FC<FilesPanelProps> = ({
 
       {hasRecents && (
         <section
-          className="ecu-files-panel-section ecu-vignette-row"
+          className="ecu-recent-files-vignette-section ecu-vignette-row"
           data-phase={recentsPhase}
-          aria-label={t('filesPanel.recentsLandmarkLabel')}
+          aria-label={t('recentFilesVignette.recentsLandmarkLabel')}
         >
-          <div className="ecu-files-panel-section-inner ecu-vignette-row-inner">
-            <h3 className="ecu-files-panel-section-title">
-              <i className="codicon codicon-history ecu-files-panel-section-icon" aria-hidden="true" />
-              {t('filesPanel.recentFiles')}
+          <div className="ecu-recent-files-vignette-section-inner ecu-vignette-row-inner">
+            <h3 className="ecu-recent-files-vignette-section-title">
+              <i className="codicon codicon-history ecu-recent-files-vignette-section-icon" aria-hidden="true" />
+              {t('recentFilesVignette.recentFiles')}
             </h3>
-            <ul className="ecu-files-panel-list">
+            <ul className="ecu-recent-files-vignette-list">
               {recentItems.map(({ key, item: file, phase }) => (
                 <li
                   key={key}
-                  className="ecu-files-panel-item ecu-vignette-row"
+                  className="ecu-recent-files-vignette-item ecu-vignette-row"
                   data-phase={phase}
                 >
                   <div
-                    className="ecu-files-panel-item-inner ecu-vignette-row-inner"
+                    className="ecu-recent-files-vignette-item-inner ecu-vignette-row-inner"
                     role="button"
                     tabIndex={0}
                     onClick={() => { onOpenFile(file.path) }}
@@ -280,10 +280,10 @@ export const FilesPanel: React.FC<FilesPanelProps> = ({
                       }
                     }}
                   >
-                    <span className="ecu-files-panel-item-name">{splitPath(file.path).basename}</span>
-                    <span className="ecu-files-panel-item-path">{splitPath(file.path).directory}</span>
+                    <span className="ecu-recent-files-vignette-item-name">{splitPath(file.path).basename}</span>
+                    <span className="ecu-recent-files-vignette-item-path">{splitPath(file.path).directory}</span>
                     <div
-                      className="ecu-files-panel-toggle-wrap"
+                      className="ecu-recent-files-vignette-toggle-wrap"
                       onClick={(e) => { e.stopPropagation() }}
                       onKeyDown={(e) => { e.stopPropagation() }}
                     >
@@ -291,9 +291,9 @@ export const FilesPanel: React.FC<FilesPanelProps> = ({
                         appearance="star"
                         checked={isFavorite(file.path)}
                         onChange={() => { handleToggleFavorite(file.path, file.name, isFavorite(file.path)) }}
-                        actionClassName={isFavorite(file.path) ? 'ecu-files-panel-star--active' : 'ecu-files-panel-star--reveal-on-hover'}
-                        aria-label={isFavorite(file.path) ? t('filesPanel.removeFromFavorites') : t('filesPanel.addToFavorites')}
-                        data-testid="files-panel-toggle-favorite-button"
+                        actionClassName={isFavorite(file.path) ? 'ecu-recent-files-vignette-star--active' : 'ecu-recent-files-vignette-star--reveal-on-hover'}
+                        aria-label={isFavorite(file.path) ? t('recentFilesVignette.removeFromFavorites') : t('recentFilesVignette.addToFavorites')}
+                        data-testid="recent-files-vignette-toggle-favorite-button"
                       />
                     </div>
                   </div>
@@ -307,4 +307,4 @@ export const FilesPanel: React.FC<FilesPanelProps> = ({
   )
 }
 
-export default FilesPanel
+export default RecentFilesVignette

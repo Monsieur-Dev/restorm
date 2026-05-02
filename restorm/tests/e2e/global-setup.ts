@@ -1,5 +1,21 @@
 import { execSync } from 'child_process'
+import { rmSync } from 'fs'
+import { resolve } from 'path'
 import { isDockerAvailable, areContainersRunning, startDocker } from '../integration/docker-setup'
+
+/**
+ * Per-test workspace dir wiped at the start of every run so a previous
+ * failed/aborted run doesn't poison the next one. Resolved relative to
+ * the restorm package root (cwd when Playwright runs). `.features-gen`
+ * is owned by `bddgen` (which runs before Playwright in `npm run
+ * test:e2e`); wiping it here would delete the freshly-generated specs
+ * before Playwright discovers them.
+ */
+const TMP_DIR = resolve(process.cwd(), 'tests/e2e/.tmp')
+
+function wipeTmpDir(): void {
+  rmSync(TMP_DIR, { recursive: true, force: true })
+}
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => { setTimeout(resolve, ms) })
@@ -31,6 +47,8 @@ function tryStartDockerDaemon(): void {
 }
 
 export default async function globalSetup(): Promise<void> {
+  wipeTmpDir()
+
   if (!isDockerAvailable()) {
     throw new Error([
       'Docker is not available for restorm E2E tests.',

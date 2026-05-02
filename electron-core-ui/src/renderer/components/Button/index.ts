@@ -3,12 +3,14 @@ export { ButtonWithDescription, default as ButtonWithDescriptionComponent } from
 export { ButtonWithDropdown, default as ButtonWithDropdownComponent } from './ButtonWithDropdown'
 export { ButtonWithIcon, default as ButtonWithIconComponent } from './ButtonWithIcon'
 export { defaultButtonStyles } from './types'
-export type { 
-  IButtonOptions, 
-  IButtonStyles, 
-  IButtonWithDropdownOptions, 
-  ButtonProps, 
-  ButtonWithDescriptionProps, 
-  ButtonWithDropdownProps, 
-  ButtonWithIconProps 
+export type {
+  IButtonOptions,
+  IButtonStyles,
+  IButtonWithDropdownOptions,
+  ButtonProps,
+  ButtonAppearance,
+  ButtonSize,
+  ButtonWithDescriptionProps,
+  ButtonWithDropdownProps,
+  ButtonWithIconProps
 } from './types'

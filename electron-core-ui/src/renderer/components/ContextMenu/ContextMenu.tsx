@@ -19,6 +19,12 @@ export interface ContextMenuItem {
   isSeparator?: boolean
   disabled?: boolean
   checked?: boolean
+  /**
+   * When true, the rendered label gets a trailing `…` appended at
+   * render time — the standard UX convention for "this entry opens
+   * a dialog / window". Mirrors `MenuItem.opensDialog`.
+   */
+  opensDialog?: boolean
   onClick?: () => void
   /** Optional submenu items */
   items?: ContextMenuItem[]
@@ -60,6 +66,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           {...(item.shortcut ? { shortcut: item.shortcut } : {})}
           disabled={!!item.disabled}
           checked={!!item.checked}
+          opensDialog={!!item.opensDialog}
           icon={
             item.icon === undefined || item.icon === null
               ? undefined

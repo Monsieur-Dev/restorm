@@ -14,6 +14,18 @@
 	width: 100%;
 }
 
+/* Rainbow-appearance buttons always go full-block. The historical
+   `<RainbowButton>` was a `<button>` (no wrapper) that was directly the
+   flex item; under `align-items: stretch` (e.g. WelcomeScreen actions)
+   adjacent rainbow CTAs ended up the same width regardless of label
+   length. The new `Button` wraps in `<div.button-container>`, so we
+   replicate the same stretching here so multiple rainbow CTAs in a
+   stretch flex still match each other's width. */
+.button-container:has(> .appearance-rainbow) {
+	display: block;
+	width: 100%;
+}
+
 .text-button {
 	box-sizing: border-box;
 	display: flex;
@@ -325,6 +337,191 @@
 
 .text-button.small-button:hover {
 	background-color: var(--toolbar-hoverBackground);
+}
+
+/* Large text button — section CTA. */
+.text-button.large-button {
+	font-size: 16px;
+	padding: 14px 28px;
+	border-radius: 12px;
+	min-height: 48px;
+	max-width: none;
+	font-weight: 600;
+}
+
+/* Extra-large text button — hero CTA on welcome / landing surfaces. */
+.text-button.xl-button {
+	font-size: 20px;
+	padding: 20px 40px;
+	border-radius: 16px;
+	min-height: 64px;
+	max-width: none;
+	font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------------
+   Rainbow appearance — hero CTA with animated rainbow gradient border pinned
+   to the bottom edge and a soft glow underneath, revealed on hover / focus.
+   Solid dark surface (`#121213`) regardless of theme. The codicon /
+   `secondary` / `emphasis` modifiers do NOT apply here — rainbow paints its
+   own surface end-to-end. Adapted from Magic UI (MIT).
+   ----------------------------------------------------------------------- */
+.text-button.appearance-rainbow {
+	--ecu-rainbow-c1: #ff0080;
+	--ecu-rainbow-c2: #7928ca;
+	--ecu-rainbow-c3: #0070f3;
+	--ecu-rainbow-c4: #38bdf8;
+	--ecu-rainbow-c5: #f59e0b;
+	--ecu-rainbow-bg: #121213;
+	--ecu-rainbow-text: #fff;
+
+	position: relative;
+	isolation: isolate;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	cursor: pointer;
+	outline: none;
+	font-weight: 600;
+	white-space: nowrap;
+	background-image:
+		linear-gradient(var(--ecu-rainbow-bg), var(--ecu-rainbow-bg)),
+		linear-gradient(
+			var(--ecu-rainbow-bg) 50%,
+			color-mix(in srgb, var(--ecu-rainbow-bg) 60%, transparent) 80%,
+			transparent 100%
+		),
+		linear-gradient(
+			90deg,
+			var(--ecu-rainbow-c1),
+			var(--ecu-rainbow-c5),
+			var(--ecu-rainbow-c3),
+			var(--ecu-rainbow-c4),
+			var(--ecu-rainbow-c2)
+		);
+	background-clip: padding-box, border-box, border-box;
+	background-origin: border-box;
+	background-size: 200%;
+	border: 2px solid transparent;
+	color: var(--ecu-rainbow-text);
+	animation: ecu-rainbow 2.5s linear infinite;
+	animation-play-state: paused;
+	transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.text-button.appearance-rainbow::before {
+	content: '';
+	position: absolute;
+	bottom: -22%;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 70%;
+	height: 30%;
+	z-index: -1;
+	background: linear-gradient(
+		90deg,
+		var(--ecu-rainbow-c1),
+		var(--ecu-rainbow-c5),
+		var(--ecu-rainbow-c3),
+		var(--ecu-rainbow-c4),
+		var(--ecu-rainbow-c2)
+	);
+	background-size: 200%;
+	filter: blur(14px);
+	pointer-events: none;
+	opacity: 0;
+	animation: ecu-rainbow 2.5s linear infinite;
+	animation-play-state: paused;
+	transition: opacity 0.25s ease;
+}
+
+.text-button.appearance-rainbow:hover,
+.text-button.appearance-rainbow:focus-visible {
+	transform: translateY(-1px);
+	filter: brightness(1.05);
+	animation-play-state: running;
+	background-color: transparent;
+}
+
+.text-button.appearance-rainbow:hover::before,
+.text-button.appearance-rainbow:focus-visible::before {
+	animation-play-state: running;
+	opacity: 1;
+}
+
+.text-button.appearance-rainbow:focus-visible {
+	outline: 2px solid var(--focusBorder, #0a84ff);
+	outline-offset: 3px;
+}
+
+.text-button.appearance-rainbow:active {
+	transform: translateY(0);
+	filter: brightness(0.95);
+}
+
+.text-button.appearance-rainbow.disabled {
+	pointer-events: none;
+	opacity: 0.5;
+}
+
+/* Rainbow size variants — override the toolbar/legacy small-button rules
+   above (transparent bg, fixed 20x20) so size still maps to padding.
+   We keep `width: 100%` (rather than `auto`) so adjacent rainbow buttons
+   stacked under a flex parent with `align-items: stretch` end up the same
+   width regardless of their label length — matching the historical
+   `<RainbowButton>` behaviour. The wrapping `.button-container` stretches
+   to its flex parent and the inner `<a>` then fills that container. */
+.text-button.appearance-rainbow,
+.text-button.appearance-rainbow.small-button,
+.text-button.appearance-rainbow.large-button,
+.text-button.appearance-rainbow.xl-button {
+	width: 100%;
+	min-width: 0;
+	height: auto;
+	max-width: none;
+}
+
+.text-button.appearance-rainbow.small-button {
+	font-size: 13px;
+	padding: 8px 16px;
+	border-radius: 8px;
+	min-height: 0;
+}
+
+.text-button.appearance-rainbow {
+	font-size: 14px;
+	padding: 10px 20px;
+	border-radius: 8px;
+}
+
+.text-button.appearance-rainbow.large-button {
+	font-size: 16px;
+	padding: 14px 28px;
+	border-radius: 12px;
+}
+
+.text-button.appearance-rainbow.xl-button {
+	font-size: 20px;
+	padding: 20px 40px;
+	border-radius: 16px;
+}
+
+@keyframes ecu-rainbow {
+	0% {
+		background-position: 0%;
+	}
+
+	100% {
+		background-position: 200%;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.text-button.appearance-rainbow,
+	.text-button.appearance-rainbow::before {
+		animation: none;
+	}
 }
 
 /* Last in file so source order wins against the small-button / line-button width overrides above. */

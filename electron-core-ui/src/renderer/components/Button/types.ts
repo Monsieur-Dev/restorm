@@ -25,6 +25,41 @@ export interface IButtonWithDropdownOptions extends IButtonOptions {
   readonly addPrimaryActionToDropdown?: boolean;
 }
 
+/**
+ * Visual appearance of a Button. The behavior (click, keyboard
+ * activation, `onClick` contract) is identical across appearances —
+ * only the rendered surface + animation change.
+ *
+ * - `'default'`: the standard codicon-friendly button (theme tokens,
+ *   `secondary` / `emphasis` modifiers, codicon support, etc.).
+ *   Existing call sites that don't pass `appearance` keep this look.
+ * - `'rainbow'`: hero CTA with an animated rainbow gradient border
+ *   pinned to the bottom edge and a soft glow underneath, revealed on
+ *   hover / focus-visible. Solid dark surface (`#121213`) regardless
+ *   of theme. The codicon / `secondary` / `emphasis` modifiers have
+ *   no effect on this appearance.
+ */
+export type ButtonAppearance = 'default' | 'rainbow';
+
+/**
+ * Size variant.
+ *
+ * For the `'default'` appearance the `'sm'` variant renders as a
+ * compact 20×20 toolbar/icon button (transparent background, no
+ * border, codicon-friendly) — the historical `small` boolean
+ * behavior. `'lg'` and `'xl'` enlarge the standard text-button
+ * surface (16px / 14×28 and 20px / 20×40, respectively).
+ *
+ * For the `'rainbow'` appearance the size only affects padding /
+ * font-size / radius — the toolbar reset does not apply.
+ *
+ * - `'sm'` — small (toolbar icon for default appearance).
+ * - `'default'` — standard call-to-action.
+ * - `'lg'` — section CTA (16px / 14×28).
+ * - `'xl'` — hero CTA on welcome / landing surfaces (20px / 20×40).
+ */
+export type ButtonSize = 'sm' | 'default' | 'lg' | 'xl';
+
 export interface ButtonProps {
   options?: IButtonOptions;
   /**
@@ -37,7 +72,17 @@ export interface ButtonProps {
   disabled?: boolean;
   secondary?: boolean;
   /**
-   * When true, renders a compact 20x20 toolbar-style button.
+   * Visual appearance. Defaults to `'default'`.
+   */
+  appearance?: ButtonAppearance;
+  /**
+   * Size variant. Defaults to `'default'`.
+   */
+  size?: ButtonSize;
+  /**
+   * Shorthand for `size="sm"` — kept as a convenience boolean for the
+   * most common case (compact toolbar / icon buttons). When both are
+   * set, `size` wins.
    */
   small?: boolean;
   line?: boolean;
