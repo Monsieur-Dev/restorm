@@ -84,6 +84,7 @@ import { StatusbarMcpIndicator } from './components/MainView/StatusbarMcpIndicat
 import { useMcpEnabled } from './hooks/useMcpEnabled'
 import { useMcpActiveStateBridge } from './hooks/useMcpActiveStateBridge'
 import { useMcpNavigation } from './hooks/useMcpNavigation'
+import { useMcpTreeReplace } from './hooks/useMcpTreeReplace'
 import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
 import { RestormWorkbenchContainer } from './components/MainView/Workbench/RestormWorkbenchContainer'
 import { SaveOptionsModal } from './components/Modals/SaveOptionsModal'
@@ -865,6 +866,14 @@ const App: React.FC = () => {
     openEnvironmentFolderTab,
     openAnyRequestTab
   })
+  // Set to `true` by `useMcpTreeReplace` immediately before each MCP-
+  // driven `setRootItems` call; read by the `setCollections` effect
+  // below so the zustand store sees `source: 'mcp'` and skips the
+  // main-side mirror (main is already canonical for MCP-driven
+  // mutations — roundtripping would clobber its class instances).
+  // The hook flips the ref true; the effect reads + resets it.
+  const mcpDrivenRef = useRef(false)
+  useMcpTreeReplace({ enabled: mcpEnabled, setRootItems, mcpDrivenRef })
 
   // Per-pane inline-edit targets so a rename triggered from Favorites
   // or Opened opens the input in that pane (not the Workspace tree row).
@@ -1172,9 +1181,14 @@ const App: React.FC = () => {
     environmentFolderCollectionsRef.current = environmentFolderCollections
   }, [environmentFolderCollections])
 
-  // Keep collections store in sync for request path resolution
+  // Keep collections store in sync for request path resolution.
+  // When the change came from MCP (`mcpDrivenRef`), pass `'mcp'` so
+  // the zustand store skips the main-side mirror — main already has
+  // the up-to-date tree. Reset the ref on the same tick.
   useEffect(() => {
-    setCollections(environmentFolderCollections, 'user')
+    const source = mcpDrivenRef.current ? 'mcp' : 'user'
+    if (mcpDrivenRef.current) mcpDrivenRef.current = false
+    setCollections(environmentFolderCollections, source)
   }, [environmentFolderCollections, setCollections])
 
   // Listen to test events for E2E tests (only in dev/test mode)

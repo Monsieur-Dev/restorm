@@ -12,11 +12,17 @@ import { McpService } from 'electron-core-ui'
 import { registerActiveStateBridge } from './tools/activeState'
 import { registerReadTools } from './tools/read'
 import { registerNavigationTools } from './tools/navigation'
+import { registerProjectTools } from './tools/project'
+import { registerWriteTools } from './tools/write'
+import { registerImportTools } from './tools/import'
 import { registerResources } from './resources'
 
 export function registerRestormMcp(mcp: McpService): void {
   registerActiveStateBridge()
   registerReadTools(mcp)
   registerNavigationTools(mcp)
+  registerProjectTools(mcp)
+  registerWriteTools(mcp)
+  registerImportTools(mcp)
   registerResources(mcp)
 }

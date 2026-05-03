@@ -529,8 +529,43 @@ class CollectionStore {
   }
 
   private ensureEnvironmentFolderInstance(obj: unknown): EnvironmentFolder {
-    if (obj instanceof EnvironmentFolder) return obj
-    return EnvironmentFolder.fromPlain(obj as Parameters<typeof EnvironmentFolder.fromPlain>[0])
+    const folder = obj instanceof EnvironmentFolder
+      ? obj
+      : EnvironmentFolder.fromPlain(obj as Parameters<typeof EnvironmentFolder.fromPlain>[0])
+    // Children come back as plain objects from the IPC roundtrip
+    // (renderer's `setCollections` mirrors via JSON.stringify). Walk
+    // nested items so the in-memory store always exposes class
+    // instances — `toPlainObject()` / decorator serializers fail
+    // silently otherwise and the next mutation throws.
+    folder.items = folder.items.map((it: FolderItem) => this.reifyItem(it))
+    return folder
+  }
+
+  private reifyItem(item: FolderItem): FolderItem {
+    if (typeof item !== 'object') return item
+    if (item instanceof EnvironmentFolder || item instanceof Folder) {
+      item.items = item.items.map((c: FolderItem) => this.reifyItem(c))
+      return item
+    }
+    const rec = item as unknown as Record<string, unknown>
+    if (Array.isArray(rec['items'])) {
+      // Nested folder (plain object). EnvironmentFolders only ever sit
+      // at the root, so a nested `items` carrier is a plain Folder.
+      // No `fromPlain` on Folder — instantiate directly + carry over
+      // the fields we care about, then recurse.
+      const reified = new Folder({
+        id: typeof rec['id'] === 'string' ? rec['id'] : crypto.randomUUID(),
+        name: typeof rec['name'] === 'string' ? rec['name'] : '',
+        items: []
+      })
+      reified.items = (rec['items'] as FolderItem[]).map((c) => this.reifyItem(c))
+      return reified
+    }
+    if (typeof rec['type'] === 'string') {
+      // Request leaf. Reuse the same factory the create path uses.
+      return this.createRequestInstance(rec as Partial<Request> & { type: Request['type'] })
+    }
+    return item
   }
 
   private createRequestInstance(data: Partial<Request> & { type: Request['type'] }): Request {

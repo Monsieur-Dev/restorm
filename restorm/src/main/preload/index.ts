@@ -702,6 +702,16 @@ contextBridge.exposeInMainWorld('restorm', {
       const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) }
       ipcRenderer.on('mcp:reveal-in-tree', handler)
       return () => { ipcRenderer.off('mcp:reveal-in-tree', handler) }
+    },
+    /** Subscribe to MCP-driven tree mutations. Payload is the full
+     * project tree as plain JSON. The renderer replaces its rootItems
+     * after reifying via `makeReactive*`. Used by import / create /
+     * rename / delete tools so the user sees mutations immediately
+     * without waiting for a save+reload cycle. */
+    onMcpTreeReplace: (callback: (payload: unknown) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload) }
+      ipcRenderer.on('mcp:tree-replace', handler)
+      return () => { ipcRenderer.off('mcp:tree-replace', handler) }
     }
   },
   import: {

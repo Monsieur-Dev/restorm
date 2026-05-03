@@ -18,7 +18,7 @@ import { migrateApiUpdateForCollections } from '../../../shared/utils/migrateApi
 // ============================================================================
 
 /** Event source identifier for tracking where changes originate */
-export type EventSource = 'user' | 'remote' | 'file-load' | 'graphql'
+export type EventSource = 'user' | 'remote' | 'file-load' | 'graphql' | 'mcp'
 
 /** Editing state for an item */
 export interface EditingState {
@@ -254,6 +254,13 @@ export const useRestormStore = create<RestormState>()(
       // process applies to its CollectionStore.
       migrateApiUpdateForCollections(collections as unknown as Parameters<typeof migrateApiUpdateForCollections>[0])
       set({ collections, currentEventSource: source })
+      // Skip the main-side mirror when MCP drove the change — main IS
+      // the source in that case (the MCP write tool already mutated
+      // CollectionStore + broadcast `mcp:tree-replace`). Roundtripping
+      // the same tree back as plain JSON would clobber main's class
+      // instances and break the next mutation's `toPlainObject()`
+      // call — see CollectionStore.reifyItem for the symmetric guard.
+      if (source === 'mcp') return
       // Mirror the tree onto the main-side CollectionStore so the
       // apiUpdate apply / preview orchestrators can look up folders
       // by id. Without this sync the main-side store stays empty
