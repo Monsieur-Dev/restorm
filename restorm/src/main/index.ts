@@ -368,6 +368,17 @@ void app.whenReady().then(async () => {
       startedAt: new Date().toISOString()
     }, cliArgs.mcpDiscoveryFile)
 
+    // Forward every incoming MCP request as an IPC `mcp:request-received`
+    // ping to all renderer windows. Drives the ripple animation on the
+    // statusbar's MCP indicator. No payload — the event is just a
+    // tick-of-activity, the renderer instantiates one ripple per
+    // ping and lets each instance unmount on `onAnimationEnd`.
+    mcpService.onRequest(() => {
+      for (const win of BrowserWindow.getAllWindows()) {
+        if (!win.isDestroyed()) win.webContents.send('mcp:request-received')
+      }
+    })
+
     // Refresh the discovery file when the active project changes so
     // launchers that route by project path see the up-to-date value.
     // First-live-wins routing doesn't need this today, but it's cheap

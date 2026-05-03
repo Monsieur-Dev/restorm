@@ -45,7 +45,12 @@ export const StatusbarAuthSelector: React.FC<StatusbarAuthSelectorProps> = ({
   rightAligned = false
 }) => {
   const { t } = useTranslation()
-  const [flash, setFlash] = useState<'idle' | 'running' | 'failed'>('idle')
+  // Auth events drive a ripple via ECUI's `pulseSignal` API on the
+  // statusbar element. `pulseSignal` is incremented on every received
+  // event; `pulseColor` flips to the failure red when the latest event
+  // was a failure (and back to the default after one ripple cycle).
+  const [pulseSignal, setPulseSignal] = useState(0)
+  const [pulseColor, setPulseColor] = useState<string | undefined>(undefined)
 
   const authRequests = useMemo(() => collectAuthRequests(envFolderItems), [envFolderItems])
   const attachedId = activeRequest.authenticationRequestId ?? null
@@ -54,24 +59,22 @@ export const StatusbarAuthSelector: React.FC<StatusbarAuthSelectorProps> = ({
     [authRequests, attachedId]
   )
 
-  // Listen for auth:running / auth:failed broadcasts to drive the
-  // flash animation. Subscribe once; filter by the attached id.
   useEffect(() => {
     const api = window.restorm?.auth
     if (!api) return
+    const triggerPulse = (color: string | undefined): void => {
+      setPulseColor(color)
+      setPulseSignal((p) => p + 1)
+    }
     const unsubRunning = api.onRunning((payload) => {
       if (!attachedId || payload.authRequestId !== attachedId) return
-      if (payload.phase === 'started') setFlash('running')
-      else if (payload.phase === 'succeeded') setFlash('idle')
-      else {
-        setFlash('failed')
-        window.setTimeout(() => { setFlash('idle') }, 1200)
-      }
+      if (payload.phase === 'started') triggerPulse(undefined)
+      else if (payload.phase === 'succeeded') triggerPulse(undefined)
+      else triggerPulse('var(--testing-iconFailed)')
     })
     const unsubFailed = api.onFailed((payload) => {
       if (!attachedId || payload.authRequestId !== attachedId) return
-      setFlash('failed')
-      window.setTimeout(() => { setFlash('idle') }, 1200)
+      triggerPulse('var(--testing-iconFailed)')
     })
     return () => {
       unsubRunning()
@@ -93,11 +96,6 @@ export const StatusbarAuthSelector: React.FC<StatusbarAuthSelectorProps> = ({
   if (activeRequest.type === 'auth') return null
 
   const label = attached?.name ?? t('statusbar.auth.noAuth', 'No auth')
-  const backgroundColor = flash === 'running'
-    ? '#f97316'
-    : flash === 'failed'
-      ? 'var(--testing-iconFailed)'
-      : undefined
 
   return (
     <StatusbarElement
@@ -106,7 +104,8 @@ export const StatusbarAuthSelector: React.FC<StatusbarAuthSelectorProps> = ({
       title={label}
       tooltipTrigger="click"
       className={rightAligned ? 'right-aligned' : ''}
-      {...(backgroundColor !== undefined ? { backgroundColor } : {})}
+      pulseSignal={pulseSignal}
+      {...(pulseColor !== undefined ? { pulseColor } : {})}
     >
       <div
         role="listbox"

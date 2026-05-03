@@ -59,5 +59,25 @@ export interface StatusbarElementProps {
   tooltipTrigger?: 'hover' | 'click'
   /** Forwarded to the underlying `<Tooltip>` — see `TooltipProps.placement`. */
   tooltipPlacement?: 'auto' | 'above' | 'below'
+  /**
+   * Activity indicator: a counter the consumer increments to fire one
+   * ripple animation per increment. Each new value pushes a fresh
+   * ripple onto the queue; the cell renders concurrent ripples in a
+   * portal anchored on the codicon (so they overflow the bar) and
+   * paints a duplicate of the icon on top so it stays visually
+   * anchored. Each ripple destroys itself on `onAnimationEnd`.
+   *
+   * Pass `pulseColor` to override the wave's default theme color.
+   * No-op when the cell has no codicon (nothing to anchor on).
+   */
+  pulseSignal?: number
+  /**
+   * Optional override for the ripple's background color. Accepts any
+   * CSS color value or `var(...)`. Defaults to
+   * `var(--statusBar-prominentBackground, var(--focusBorder))` — the
+   * theme's accent — so the wave matches the surrounding chrome
+   * without explicit configuration.
+   */
+  pulseColor?: string
   'data-testid'?: string
 }

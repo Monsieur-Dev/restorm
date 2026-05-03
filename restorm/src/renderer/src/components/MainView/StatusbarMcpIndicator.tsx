@@ -18,11 +18,15 @@ export interface StatusbarMcpIndicatorProps {
  * Lives immediately to the left of the bell so the meta-info zone of
  * the statusbar (env, MCP, notifications) clusters together.
  *
- * Click → click-triggered popover with the live port.
+ * Click → click-triggered popover with the live port. Each incoming
+ * MCP request from the main process bumps `pulseSignal`, which fires
+ * one ripple animation on the statusbar element (handled by ECUI's
+ * `StatusbarElement` itself).
  */
 export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({ rightAligned = false }) => {
   const [port, setPort] = useState<number | null>(null)
   const [enabled, setEnabled] = useState(false)
+  const [pulseSignal, setPulseSignal] = useState(0)
 
   useEffect(() => {
     const root = window as {
@@ -39,6 +43,18 @@ export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({ ri
     return () => { cancelled = true }
   }, [])
 
+  useEffect(() => {
+    if (!enabled) return
+    const root = window as {
+      restorm?: { runtime?: { onMcpRequestReceived?: (cb: () => void) => () => void } }
+    }
+    const subscribe = root.restorm?.runtime?.onMcpRequestReceived
+    if (!subscribe) return
+    return subscribe(() => {
+      setPulseSignal((p) => p + 1)
+    })
+  }, [enabled])
+
   if (!enabled || port === null) return null
 
   return (
@@ -49,6 +65,7 @@ export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({ ri
       title="mcp"
       tooltipTrigger="click"
       tooltipPlacement="above"
+      pulseSignal={pulseSignal}
     >
       <div
         data-testid="statusbar-mcp-popover"

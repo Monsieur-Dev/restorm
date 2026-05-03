@@ -169,10 +169,35 @@ export class McpService {
   private readonly logBufferMax = 1000
   private readonly attachedWebContentsIds = new Set<number>()
   private windowCreatedHandler: ((event: Electron.Event, win: BrowserWindow) => void) | null = null
+  private readonly requestListeners = new Set<() => void>()
 
   constructor(options: McpServiceOptions = {}) {
     this.options = options
     this.registerBuiltinTools()
+  }
+
+  /**
+   * Subscribe to an opaque "ping" emitted on every incoming MCP HTTP
+   * request, just before the JSON-RPC handler runs. Used by consumers
+   * to drive activity indicators in the UI (e.g. a ripple animation
+   * on the MCP statusbar element). No payload — the event carries
+   * nothing about the request itself; consumers don't need it for
+   * activity-only purposes.
+   *
+   * Returns an unsubscribe function. Listener errors are caught + logged
+   * so a buggy consumer can't take the request handler down with it.
+   */
+  onRequest(listener: () => void): () => void {
+    this.requestListeners.add(listener)
+    return () => { this.requestListeners.delete(listener) }
+  }
+
+  private notifyRequestListeners(): void {
+    for (const fn of this.requestListeners) {
+      try { fn() } catch (err) {
+        logger.warn('McpService request listener threw', { error: String(err) })
+      }
+    }
   }
 
   /**
@@ -1224,6 +1249,11 @@ export class McpService {
       res.end('Forbidden')
       return
     }
+
+    // Notify subscribers (UI activity indicators, etc.) BEFORE the
+    // JSON-RPC handler so listeners see every request — including
+    // those that error out below. No payload; the event is opaque.
+    this.notifyRequestListeners()
 
     // Wrap the per-request server lifecycle in an
     // `AsyncLocalStorage.run` so any `dialog.show*` call made by a

@@ -1,8 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { StatusbarElementProps } from './types'
 import { Tooltip } from '../Tooltip'
 import { IconView } from '../IconView'
 import { getContrastColor } from '../../utils/colorContrast'
+
+interface PulseEntry {
+  id: number
+}
 
 const StatusbarElement: React.FC<StatusbarElementProps> = ({
   title,
@@ -18,6 +23,8 @@ const StatusbarElement: React.FC<StatusbarElementProps> = ({
   children,
   tooltipTrigger = 'hover',
   tooltipPlacement = 'auto',
+  pulseSignal,
+  pulseColor,
   'data-testid': dataTestId
 }) => {
   const testId = dataTestId
@@ -37,12 +44,69 @@ const StatusbarElement: React.FC<StatusbarElementProps> = ({
   // `onClick`, but a click on the cell opens their popover.
   const isInteractive = !disabled && (Boolean(onClick) || (hasTooltip && clickMode))
 
+  // Activity ripples (driven by `pulseSignal` increments). Each pulse
+  // pushes one entry; entries self-destruct on `onAnimationEnd`. Only
+  // works when the cell has a codicon (the ripple anchors on it).
+  const [pulses, setPulses] = useState<PulseEntry[]>([])
+  const [pulseAnchorRect, setPulseAnchorRect] = useState<DOMRect | null>(null)
+  const [pulseIconColor, setPulseIconColor] = useState<string | null>(null)
+  const lastPulseSignalRef = useRef<number | undefined>(pulseSignal)
+  const nextPulseIdRef = useRef(0)
+  const duplicateIconRef = useRef<HTMLElement | null>(null)
+  const pulseEnabled = icon?.type === 'codicon'
+
+  useEffect(() => {
+    if (!pulseEnabled) return
+    if (pulseSignal === undefined) return
+    if (lastPulseSignalRef.current === pulseSignal) return
+    lastPulseSignalRef.current = pulseSignal
+    const id = nextPulseIdRef.current++
+    setPulses((prev) => [...prev, { id }])
+  }, [pulseSignal, pulseEnabled])
+
+  // Snapshot the original codicon's bbox + computed color when at
+  // least one pulse is active. The portal escapes the statusbar's
+  // cascade so we can't inherit the color reliably; reading it here
+  // and pinning it inline (with `important` priority — see effect
+  // below) makes the duplicate match every theme.
+  useEffect(() => {
+    if (!pulseEnabled || pulses.length === 0) return
+    const updateRect = (): void => {
+      const cell = elementRef.current
+      const codicon = cell?.querySelector('.codicon') as HTMLElement | null
+      if (!codicon) return
+      setPulseAnchorRect(codicon.getBoundingClientRect())
+      setPulseIconColor(getComputedStyle(codicon).color)
+    }
+    updateRect()
+    window.addEventListener('resize', updateRect)
+    window.addEventListener('scroll', updateRect, true)
+    return () => {
+      window.removeEventListener('resize', updateRect)
+      window.removeEventListener('scroll', updateRect, true)
+    }
+  }, [pulseEnabled, pulses.length])
+
+  // The codicon library (or some theme stylesheet) pins codicon color
+  // with `!important`, so a plain `style={{ color }}` gets overridden.
+  // `setProperty(..., 'important')` punches through.
+  useEffect(() => {
+    const el = duplicateIconRef.current
+    if (!el || !pulseIconColor) return
+    el.style.setProperty('color', pulseIconColor, 'important')
+  }, [pulseIconColor, pulses.length])
+
+  const removePulse = useCallback((id: number) => {
+    setPulses((prev) => prev.filter((p) => p.id !== id))
+  }, [])
+
   const elementClasses = [
     'statusbar-item',
     warning && 'warning-kind',
     error && 'error-kind',
     disabled && 'statusbar-item--disabled',
     isInteractive && 'clickable',
+    pulseEnabled && pulses.length > 0 && 'statusbar-item--pulsing',
     className
   ].filter(Boolean).join(' ')
 
@@ -202,6 +266,44 @@ const StatusbarElement: React.FC<StatusbarElementProps> = ({
               }
             })}
         />
+      )}
+      {pulseEnabled && pulses.length > 0 && pulseAnchorRect !== null && createPortal(
+        <div
+          className="statusbar-pulse-portal"
+          {...(testId && { 'data-testid': `${testId}-pulse-portal` })}
+          style={{
+            top: pulseAnchorRect.top,
+            left: pulseAnchorRect.left,
+            width: pulseAnchorRect.width,
+            height: pulseAnchorRect.height
+          }}
+        >
+          {pulses.map((p) => (
+            <span
+              key={p.id}
+              className="statusbar-pulse-wave"
+              {...(testId && { 'data-testid': `${testId}-pulse-wave` })}
+              style={{
+                width: Math.min(pulseAnchorRect.width, pulseAnchorRect.height),
+                height: Math.min(pulseAnchorRect.width, pulseAnchorRect.height),
+                ...(pulseColor ? { backgroundColor: pulseColor } : {})
+              }}
+              onAnimationEnd={() => { removePulse(p.id) }}
+            />
+          ))}
+          {/* Duplicate codicon painted on top of the wave so the icon
+           * stays anchored. Color is pinned via setProperty in the
+           * effect above (a `!important` rule in the codicon library
+           * would otherwise win over a plain inline style). */}
+          {icon.type === 'codicon' && (
+            <i
+              ref={duplicateIconRef}
+              className={`codicon codicon-${icon.value}`}
+              aria-hidden="true"
+            />
+          )}
+        </div>,
+        document.body
       )}
     </>
   )

@@ -89,6 +89,7 @@ declare global {
           mcp: { enabled: boolean; port: number | null }
           graphql: { endpoint: string }
         }>
+        onMcpRequestReceived: (callback: () => void) => () => void
       }
       import: {
         preview: (input: string) => Promise<{
