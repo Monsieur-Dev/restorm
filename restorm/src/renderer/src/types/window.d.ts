@@ -84,6 +84,13 @@ declare global {
         get: (guid: string) => Promise<ResponseHistoryDetail | null>
         togglePin: (guid: string, pinned: boolean) => Promise<boolean>
       }
+      runtime: {
+        getConfig: () => Promise<{
+          mcp: { enabled: boolean; port: number | null }
+          graphql: { endpoint: string }
+        }>
+        onMcpRequestReceived: (callback: () => void) => () => void
+      }
       import: {
         preview: (input: string) => Promise<{
           success: boolean

@@ -9,18 +9,26 @@ export interface CliArgs {
   open?: string
   clearSettings: boolean
   /**
-   * Port for the embedded MCP server. `0` (or absent flag + absent
-   * env var) means "MCP off" — ECUI's `McpService.start()` treats
-   * that as a sentinel and never opens a listener. CLI flag wins
-   * over the `ECUI_MCP_PORT` env var.
+   * Whether to start the embedded MCP server. When true, restorm picks
+   * a free port at boot and announces it via the discovery file (see
+   * `mcpDiscoveryFile`) plus the per-pid lockfile in the central dir.
+   * Falsy → no MCP listener at all.
    */
-  mcpPort: number
+  mcpEnabled: boolean
+  /**
+   * Optional path the launcher requested restorm to write its chosen
+   * MCP port to (in addition to the per-pid lockfile). The launcher
+   * polls this exact file after spawning restorm so it can resolve
+   * the new instance's port without scanning the dir.
+   */
+  mcpDiscoveryFile?: string
 }
 
 interface ParsedArgs {
   open?: string
   clearSettings?: boolean
-  mcpPort?: number
+  mcp?: boolean
+  mcpDiscoveryFile?: string
 }
 
 function getRawArgs(): string[] {
@@ -41,9 +49,14 @@ export function parseCliArgs(): CliArgs {
       default: false,
       describe: 'Clear user preferences before starting'
     })
-    .option('mcp-port', {
-      type: 'number',
-      describe: 'Port for the embedded MCP server (loopback only). Omit / 0 to keep MCP off.'
+    .option('mcp', {
+      type: 'boolean',
+      default: false,
+      describe: 'Start the embedded MCP server (loopback only) on a free OS-picked port. Omit to keep MCP off.'
+    })
+    .option('mcp-discovery-file', {
+      type: 'string',
+      describe: 'Internal: written-to by restorm with `{port,projectPath,pid,startedAt}` once the MCP server is up. The MCP launcher passes this so it can poll a known file after spawning restorm.'
     })
     .help('help')
     .alias('help', 'h')
@@ -51,20 +64,19 @@ export function parseCliArgs(): CliArgs {
     .alias('version', 'v')
     .parseSync() as ArgumentsCamelCase<ParsedArgs>
 
-  // CLI flag wins; env var is the lower-priority fallback. Both
-  // resolve to a non-negative integer or 0 (off).
-  const envPort = parseInt(process.env['ECUI_MCP_PORT'] ?? '', 10)
-  const cliPort = typeof argv.mcpPort === 'number' && Number.isFinite(argv.mcpPort)
-    ? Math.trunc(argv.mcpPort)
-    : null
-  const resolvedPort = cliPort ?? (Number.isFinite(envPort) ? envPort : 0)
-  const mcpPort = resolvedPort > 0 ? resolvedPort : 0
+  // CLI flag wins; env var (`ECUI_MCP=1`) is the lower-priority
+  // fallback so consumers can flip MCP on without changing argv.
+  const envEnabled = process.env['ECUI_MCP'] === '1' || process.env['ECUI_MCP'] === 'true'
+  const mcpEnabled = Boolean(argv.mcp) || envEnabled
 
   const result: CliArgs = {
     clearSettings: Boolean(argv.clearSettings),
-    mcpPort
+    mcpEnabled
   }
   if (argv.open !== undefined) result.open = argv.open
+  if (typeof argv.mcpDiscoveryFile === 'string' && argv.mcpDiscoveryFile.length > 0) {
+    result.mcpDiscoveryFile = argv.mcpDiscoveryFile
+  }
   return result
 }
 

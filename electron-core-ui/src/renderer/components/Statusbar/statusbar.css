@@ -151,3 +151,57 @@
 .statusbar-item.right-aligned {
 	margin-left: auto;
 }
+
+/* Ripple animation portal (driven by `pulseSignal` on StatusbarElement).
+ * Lives in `document.body` so the wave can overflow the statusbar's
+ * clipping region. The cell's codicon is hidden under
+ * `.statusbar-item--pulsing` while ripples are active so the duplicate
+ * codicon painted on top of the wave doesn't double up with the
+ * original. `visibility: hidden` keeps the layout slot to avoid a
+ * width twitch when ripples toggle on/off. */
+.statusbar-item--pulsing .codicon {
+	visibility: hidden;
+}
+
+.statusbar-pulse-portal {
+	position: fixed;
+	pointer-events: none;
+	z-index: 9999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.statusbar-pulse-portal .codicon {
+	/* Color is set inline from JS (snapshot of the original's
+	 * computed color when the portal mounts) so the duplicate
+	 * matches whatever theme/cascade resolved for the statusbar
+	 * version. Don't add `!important` here — it would override the
+	 * JS-injected style. */
+	position: relative;
+	z-index: 1;
+}
+
+.statusbar-pulse-wave {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	border-radius: 50%;
+	background-color: var(--statusBar-prominentBackground, var(--focusBorder));
+	transform: translate(-50%, -50%) scale(0.3);
+	opacity: 0.75;
+	animation: statusbar-pulse-out 800ms ease-out forwards;
+	pointer-events: none;
+}
+
+@keyframes statusbar-pulse-out {
+	from {
+		transform: translate(-50%, -50%) scale(0.3);
+		opacity: 0.75;
+	}
+
+	to {
+		transform: translate(-50%, -50%) scale(3.5);
+		opacity: 0;
+	}
+}

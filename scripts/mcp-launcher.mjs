@@ -39,15 +39,25 @@
 import { spawn } from 'node:child_process'
 import { request as httpRequest } from 'node:http'
 import { connect as netConnect } from 'node:net'
-import { dirname, resolve } from 'node:path'
+import { promises as fs, readdirSync, readFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createInterface } from 'node:readline'
 
-const PORT = 39000
 const HOST = '127.0.0.1'
 const SPAWN_WAIT_MS = 90_000
 const PROBE_INTERVAL_MS = 250
 const PROTOCOL_VERSION = '2025-03-26'
+
+// Where running restorm instances drop their per-pid lockfile. Must
+// match `MCP_DISCOVERY_DIR` in `restorm/src/main/services/mcpDiscovery.ts`.
+const DISCOVERY_DIR = join(tmpdir(), 'restorm-mcp')
+
+// Resolved at runtime — restorm picks a free OS port at boot and
+// announces it via the lockfile. `null` means we haven't discovered
+// (or spawned) a live instance yet.
+let currentPort = null
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 
@@ -76,7 +86,7 @@ const BUILTIN_TOOLS = [
     description:
       'Capture the active Electron window as a PNG and return it base64-encoded. ' +
       'Use this to inspect the application UI state.',
-    inputSchema: { type: 'object', properties: {,
+    inputSchema: { type: 'object', properties: {
         windowId: { type: 'integer', description: "Target a specific BrowserWindow by `webContents.id` (see `get-windows`). Omit for focused / first-visible." }
       } }
   },
@@ -87,7 +97,7 @@ const BUILTIN_TOOLS = [
       "Reload the active Electron window's renderer. Equivalent to Ctrl+R / Cmd+R. " +
       'Useful to re-roll randomized UI (wallpapers, animations) or recover from a renderer-side ' +
       'error without restarting the app. Resolves once the page emits `did-finish-load`.',
-    inputSchema: { type: 'object', properties: {,
+    inputSchema: { type: 'object', properties: {
         windowId: { type: 'integer', description: "Target a specific BrowserWindow by `webContents.id` (see `get-windows`). Omit for focused / first-visible." }
       } }
   },
@@ -241,7 +251,7 @@ const BUILTIN_TOOLS = [
     title: 'Active window info',
     description:
       'Snapshot of the active BrowserWindow: bounds, content size, title, focus / minimize / maximize / fullscreen / visible flags.',
-    inputSchema: { type: 'object', properties: {,
+    inputSchema: { type: 'object', properties: {
         windowId: { type: 'integer', description: "Target a specific BrowserWindow by `webContents.id` (see `get-windows`). Omit for focused / first-visible." }
       } }
   },
@@ -360,9 +370,54 @@ const BUILTIN_TOOLS = [
  */
 let lastSeenUp = false
 
-async function isPortOpen() {
+function isPidAlive(pid) {
+  try {
+    process.kill(pid, 0)
+    return true
+  } catch (err) {
+    // ESRCH = no such process. EPERM = exists but we can't signal
+    // it (still alive, owned by another user — counts as live).
+    return err && err.code === 'EPERM'
+  }
+}
+
+/**
+ * Scan the per-pid discovery dir, return the most-recent live entry,
+ * or `null` if none. "Live" = the recorded pid still exists.
+ */
+function discoverRunningRestorm() {
+  let entries
+  try {
+    entries = readdirSync(DISCOVERY_DIR, { withFileTypes: true })
+  } catch {
+    return null
+  }
+  const live = []
+  for (const e of entries) {
+    if (!e.isFile() || !e.name.endsWith('.json')) continue
+    const path = join(DISCOVERY_DIR, e.name)
+    let parsed
+    try {
+      parsed = JSON.parse(readFileSync(path, 'utf8'))
+    } catch {
+      continue
+    }
+    const pid = Number(parsed.pid)
+    const port = Number(parsed.port)
+    if (!Number.isInteger(pid) || !Number.isInteger(port) || port <= 0) continue
+    if (!isPidAlive(pid)) continue
+    live.push({ pid, port, projectPath: parsed.projectPath ?? null, startedAt: parsed.startedAt ?? '' })
+  }
+  if (live.length === 0) return null
+  // Most-recent first. `startedAt` is ISO-8601 so lexical sort works.
+  live.sort((a, b) => (b.startedAt || '').localeCompare(a.startedAt || ''))
+  return live[0]
+}
+
+async function isPortOpen(port) {
+  if (port === null || port === undefined) return false
   return new Promise((resolveFn) => {
-    const sock = netConnect({ host: HOST, port: PORT })
+    const sock = netConnect({ host: HOST, port })
     sock.setTimeout(500)
     sock.once('connect', () => { sock.destroy(); resolveFn(true) })
     sock.once('error', () => { resolveFn(false) })
@@ -370,23 +425,37 @@ async function isPortOpen() {
   })
 }
 
-async function waitForPort(timeoutMs) {
+/**
+ * Poll a specific discovery file for up to `timeoutMs`. Restorm writes
+ * the file atomically once its MCP server is bound. Returns the parsed
+ * `{port,...}` entry or `null` on timeout.
+ */
+async function waitForDiscoveryFile(filePath, timeoutMs) {
   const deadline = Date.now() + timeoutMs
   while (Date.now() < deadline) {
-    if (await isPortOpen()) return true
+    try {
+      const text = await fs.readFile(filePath, 'utf8')
+      const parsed = JSON.parse(text)
+      if (Number.isInteger(parsed.port) && parsed.port > 0) {
+        return parsed
+      }
+    } catch {
+      // Not yet written — retry.
+    }
     await new Promise((r) => setTimeout(r, PROBE_INTERVAL_MS))
   }
-  return false
+  return null
 }
 
-function spawnRestormDetached() {
-  log('restorm not running, spawning detached', { cwd: repoRoot })
+function spawnRestormDetached(discoveryFile) {
+  log('restorm not running, spawning detached', { cwd: repoRoot, discoveryFile })
   // `pnpm dev:restorm` → `pnpm --filter restorm run dev` →
-  // `electron-vite dev`. The `--` separator passes the port flag
-  // through to the Electron main process.
+  // `electron-vite dev`. The `--` separator passes flags through to
+  // the Electron main process. Restorm writes its chosen port to
+  // `discoveryFile` once bound.
   const child = spawn(
     'pnpm',
-    ['dev:restorm', '--', `--mcp-port=${PORT}`],
+    ['dev:restorm', '--', '--mcp', `--mcp-discovery-file=${discoveryFile}`],
     {
       cwd: repoRoot,
       detached: true,
@@ -402,27 +471,45 @@ function spawnRestormDetached() {
  * unreachable → reachable during this call (either we spawned it
  * fresh, or the user restarted it externally and we noticed). Caller
  * uses that signal to emit `notifications/tools/list_changed`.
+ *
+ * Side effect: sets `currentPort` to the resolved live port.
  */
 async function ensureRestormRunning() {
-  if (lastSeenUp && (await isPortOpen())) return { becameUp: false }
+  // Fast path: we already saw a port up; verify it's still listening.
+  if (lastSeenUp && currentPort !== null && (await isPortOpen(currentPort))) {
+    return { becameUp: false }
+  }
 
   const wasDownBefore = !lastSeenUp
-  if (!(await isPortOpen())) {
-    spawnRestormDetached()
-    const ok = await waitForPort(SPAWN_WAIT_MS)
-    if (!ok) {
-      throw new Error(
-        `restorm did not start within ${SPAWN_WAIT_MS}ms — check that ` +
-        `\`pnpm dev:restorm -- --mcp-port=${PORT}\` works manually from ${repoRoot}`
-      )
-    }
-    log('restorm came up', { port: PORT })
-  } else {
-    log('restorm already listening on port', { port: PORT })
+
+  // Try to reuse a live restorm via the central discovery dir before
+  // spawning a fresh one. Useful when the user launched restorm from
+  // their dock / a separate terminal.
+  const existing = discoverRunningRestorm()
+  if (existing && (await isPortOpen(existing.port))) {
+    currentPort = existing.port
+    log('restorm already listening (discovered)', { port: existing.port, pid: existing.pid })
+    lastSeenUp = true
+    return { becameUp: wasDownBefore }
   }
+
+  // No live instance — spawn one and wait for its discovery file.
+  await fs.mkdir(DISCOVERY_DIR, { recursive: true })
+  const discoveryFile = join(DISCOVERY_DIR, `launcher-${String(process.pid)}-${String(Date.now())}.json`)
+  spawnRestormDetached(discoveryFile)
+  const entry = await waitForDiscoveryFile(discoveryFile, SPAWN_WAIT_MS)
+  if (!entry) {
+    throw new Error(
+      `restorm did not announce a port within ${SPAWN_WAIT_MS}ms — check that ` +
+      `\`pnpm dev:restorm -- --mcp\` works manually from ${repoRoot}`
+    )
+  }
+  currentPort = entry.port
+  log('restorm came up', { port: entry.port, pid: entry.pid })
+  // Cleanup the launcher-specific file (the per-pid lockfile stays
+  // for future launchers to discover).
+  try { await fs.unlink(discoveryFile) } catch { /* already gone */ }
   lastSeenUp = true
-  // becameUp covers both "first time we see it up" (initial spawn)
-  // and "saw it down on the previous request" (user restarted it).
   return { becameUp: wasDownBefore }
 }
 
@@ -457,10 +544,14 @@ async function forward(jsonRpcText) {
 
 function rawForward(jsonRpcText) {
   return new Promise((resolveFn, rejectFn) => {
+    if (currentPort === null) {
+      rejectFn(new Error('rawForward called before restorm port was discovered'))
+      return
+    }
     const req = httpRequest(
       {
         host: HOST,
-        port: PORT,
+        port: currentPort,
         path: '/',
         method: 'POST',
         headers: {

@@ -68,6 +68,22 @@ export interface StatusbarElementProps {
    *  falls back below; `'above'` / `'below'` pin the direction. */
   tooltipPlacement?: 'auto' | 'above' | 'below'
 
+  /** Activity indicator: increment to fire one ripple animation per
+   *  increment. Each new value pushes a fresh wave onto an internal
+   *  queue so concurrent pulses stack into a visible train; each
+   *  wave self-destructs on `onAnimationEnd`. The wave renders in a
+   *  portal anchored on the cell's codicon so it can overflow the
+   *  statusbar's clip; a duplicate codicon is painted on top of the
+   *  wave to keep the icon anchored. No-op when the cell has no
+   *  codicon. */
+  pulseSignal?: number
+
+  /** Optional override for the ripple's background color. Accepts any
+   *  CSS color value or `var(...)`. Defaults to
+   *  `var(--statusBar-prominentBackground, var(--focusBorder))` so
+   *  the wave naturally takes the theme's accent. */
+  pulseColor?: string
+
   'data-testid'?: string
 }
 ```
@@ -152,6 +168,47 @@ import { Statusbar, StatusbarElement } from 'electron-core-ui/renderer'
 />
 ```
 
+### Activity ripple (`pulseSignal`)
+
+Pulse the cell once per increment of `pulseSignal`. The wave renders
+in a portal so it overflows the bar; concurrent pulses stack into a
+visible train. Use for activity indicators (background work, incoming
+requests, auth events, …).
+
+```tsx
+const [pulse, setPulse] = useState(0)
+
+useEffect(() => {
+  return subscribeToBackendPings(() => { setPulse((p) => p + 1) })
+}, [])
+
+<StatusbarElement
+  icon={{ type: 'codicon', value: 'mcp' }}
+  title="mcp"
+  pulseSignal={pulse}
+/>
+```
+
+Override the wave color when the event has a semantic — e.g. red on
+failure regardless of theme accent:
+
+```tsx
+const [pulse, setPulse] = useState(0)
+const [color, setColor] = useState<string | undefined>(undefined)
+
+const onAuthEvent = (phase: 'started' | 'failed') => {
+  setColor(phase === 'failed' ? 'var(--testing-iconFailed)' : undefined)
+  setPulse((p) => p + 1)
+}
+
+<StatusbarElement
+  icon={{ type: 'codicon', value: 'key' }}
+  title="auth"
+  pulseSignal={pulse}
+  pulseColor={color}
+/>
+```
+
 ## Behavior
 
 - `Statusbar` lays out its children horizontally; a CSS `gap` + separator
@@ -175,6 +232,25 @@ import { Statusbar, StatusbarElement } from 'electron-core-ui/renderer'
       hover-into-tooltip keeping it alive.
     - `click` trigger: toggle on cell click, close on outside click or
       Escape, interactive content inside the tooltip is allowed.
+  - Pulse:
+    - Driven by `pulseSignal` increments; only fires when `icon.type ===
+      'codicon'` (the wave anchors on the codicon's bbox + duplicates
+      it on top so the icon stays sharp).
+    - Each pulse renders a `<span>` via a `react-dom` portal under
+      `document.body` so the wave overflows the statusbar's clip. The
+      portal pre-paints a duplicate `<i class="codicon">` on top of
+      the wave; its color is snapshotted from the original via
+      `getComputedStyle` and pinned with `setProperty(..., 'important')`
+      so it matches the statusbar's resolved color even when a theme's
+      cascade would otherwise win.
+    - The original codicon gains `.statusbar-item--pulsing` while
+      ripples are active and its `visibility` flips to `hidden` (kept
+      in layout to avoid a width twitch). The portal's duplicate stays
+      visible.
+    - Each ripple unmounts on its own `onAnimationEnd`, so no DOM is
+      left behind after the wave completes (~800 ms).
+    - Test ids: `${data-testid}-pulse-portal` on the portal root,
+      `${data-testid}-pulse-wave` on each wave span.
 
 ## Testing
 

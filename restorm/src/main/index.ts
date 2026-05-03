@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
 import { MainWindow } from './windows/MainWindow'
 import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, initAutoSaveController, McpService } from 'electron-core-ui'
 import { PROJECT_UUID_KEY } from '../shared/config/projectUuid'
@@ -6,6 +6,8 @@ import type { PersistenceFormat } from 'electron-core-ui'
 import { dirname, join } from 'path'
 import { existsSync, statSync } from 'fs'
 import { searchIndexService, contextService, responseHistoryService, authenticationCacheService } from './services'
+import { writeMcpDiscoveryFile, cleanupMcpDiscoveryFile } from './services/mcpDiscovery'
+import { graphQLService } from 'electron-core-ui/main'
 import { clearUserSettings, parseCliArgs } from './cli/args'
 import { setupGraphQL } from './GraphQLSetup'
 import { registerRestormIPC } from './IPCHandlers'
@@ -343,22 +345,77 @@ void app.whenReady().then(() => {
   logger.info('AutoSave controller initialized')
 })
 
-// Embedded MCP server. Off by default; the user opts in via
-// `--mcp-port=NNNN` on the CLI (or `ECUI_MCP_PORT` env var). When
-// enabled, AI tooling (Claude Code & friends) can drive the running
-// app — taking screenshots, listing collections, etc. — over the
-// loopback port. The service lives in ECUI; restorm just bootstraps
-// it once the app is ready so windows exist for the built-in
-// `screenshot` tool to capture.
+// Embedded MCP server. Off by default; the user opts in via `--mcp`
+// on the CLI (or `ECUI_MCP=1` env var). When enabled, AI tooling
+// (Claude Code & friends) can drive the running app — taking
+// screenshots, listing collections, etc. — over a loopback port the
+// OS picks for us. Restorm announces the chosen port via the
+// discovery lockfile so the MCP launcher can find us.
 const mcpService = new McpService({ serverInfo: { name: 'restorm', version: app.getVersion() } })
 void app.whenReady().then(async () => {
+  if (!cliArgs.mcpEnabled) return
   try {
-    await mcpService.start(cliArgs.mcpPort)
+    await mcpService.start(0)
+    const port = mcpService.getPort()
+    if (port === null) {
+      logger.error('MCP service started but reports no port')
+      return
+    }
+    await writeMcpDiscoveryFile({
+      port,
+      projectPath: null,
+      pid: process.pid,
+      startedAt: new Date().toISOString()
+    }, cliArgs.mcpDiscoveryFile)
+
+    // Forward every incoming MCP request as an IPC `mcp:request-received`
+    // ping to all renderer windows. Drives the ripple animation on the
+    // statusbar's MCP indicator. No payload — the event is just a
+    // tick-of-activity, the renderer instantiates one ripple per
+    // ping and lets each instance unmount on `onAnimationEnd`.
+    mcpService.onRequest(() => {
+      for (const win of BrowserWindow.getAllWindows()) {
+        if (!win.isDestroyed()) win.webContents.send('mcp:request-received')
+      }
+    })
+
+    // Refresh the discovery file when the active project changes so
+    // launchers that route by project path see the up-to-date value.
+    // First-live-wins routing doesn't need this today, but it's cheap
+    // to keep accurate.
+    getFileService().onStateChanged((state) => {
+      const livePort = mcpService.getPort()
+      if (livePort === null) return
+      void writeMcpDiscoveryFile({
+        port: livePort,
+        projectPath: state.currentFile.path,
+        pid: process.pid,
+        startedAt: new Date().toISOString()
+      }, cliArgs.mcpDiscoveryFile)
+    })
   } catch (error) {
-    logger.error('Failed to start MCP service', { error: String(error), port: cliArgs.mcpPort })
+    logger.error('Failed to start MCP service', { error: String(error) })
   }
 })
-app.on('before-quit', () => { void mcpService.stop() })
+app.on('before-quit', () => {
+  if (cliArgs.mcpEnabled) {
+    void cleanupMcpDiscoveryFile(process.pid, cliArgs.mcpDiscoveryFile)
+  }
+  void mcpService.stop()
+})
+
+// Renderer-facing read of runtime config — MCP state + GraphQL
+// endpoint. Both can change between restorm boots (free ports), so the
+// renderer fetches them once at startup instead of hardcoding.
+ipcMain.handle('runtime:get-config', () => ({
+  mcp: {
+    enabled: cliArgs.mcpEnabled,
+    port: mcpService.getPort()
+  },
+  graphql: {
+    endpoint: graphQLService.getEndpoint()
+  }
+}))
 
 // Register all restorm-specific IPC handlers
 registerRestormIPC({ editorWindows, closeAllWindows })

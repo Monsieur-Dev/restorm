@@ -11,7 +11,11 @@ export function setupGraphQL(): void {
     typeDefs,
     resolvers,
     pubsub,
-    port: 4123, // Use non-standard port to avoid conflicts
+    // `port: 0` asks the OS for a free ephemeral port. Two restorm
+    // instances on the same machine no longer collide on a fixed
+    // 4123. The renderer reads the live endpoint via the
+    // `runtime:get-config` IPC.
+    port: 0,
     context: () => ({
       pubsub
     })

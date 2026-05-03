@@ -648,6 +648,30 @@ contextBridge.exposeInMainWorld('restorm', {
       return result as boolean
     }
   },
+  runtime: {
+    /** Per-boot runtime config (MCP + GraphQL endpoint). Both ports
+     * are picked at startup — the renderer reads them once and caches
+     * them for the lifetime of the window. */
+    getConfig: async (): Promise<{
+      mcp: { enabled: boolean; port: number | null }
+      graphql: { endpoint: string }
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('runtime:get-config')
+      return result as {
+        mcp: { enabled: boolean; port: number | null }
+        graphql: { endpoint: string }
+      }
+    },
+    /** Subscribe to a "ping" emitted on every incoming MCP request
+     * (no payload — pure activity signal). Drives the ripple
+     * animation on the statusbar MCP indicator. Returns an
+     * unsubscribe function. */
+    onMcpRequestReceived: (callback: () => void): (() => void) => {
+      const handler = (): void => { callback() }
+      ipcRenderer.on('mcp:request-received', handler)
+      return () => { ipcRenderer.off('mcp:request-received', handler) }
+    }
+  },
   import: {
     /** Preview import from file path or URL (dry-run) */
     preview: async (

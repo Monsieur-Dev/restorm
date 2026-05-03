@@ -472,12 +472,14 @@ When('I re-send the pet request', async () => {
 
 Then('the statusbar auth indicator should show the running feedback', async () => {
   const p = requirePage()
-  // `StatusbarAuthSelector` paints its element with inline
-  // `background-color: #f97316` on the `auth:running` event's
-  // `started` phase. Wait for that computed style to match — the
-  // /login is gated, so the phase stays `started` until we release.
+  // `StatusbarAuthSelector` fires a ripple via ECUI's `pulseSignal`
+  // API on the `auth:running` event's `started` phase. The cell
+  // gains the `statusbar-item--pulsing` class while the ripple is
+  // animating (~800 ms). The pulse is short-lived, so wait for the
+  // class to appear with a tight inner timeout but generous outer
+  // wait — the auth event itself can take a moment to fire.
   const statusbar = p.locator('[data-testid="statusbar-auth-selector"]')
-  await expect(statusbar).toHaveCSS('background-color', 'rgb(249, 115, 22)', { timeout: 10000 })
+  await expect(statusbar).toHaveClass(/statusbar-item--pulsing/, { timeout: 10000 })
 })
 
 When('I release the pending login', async () => {
