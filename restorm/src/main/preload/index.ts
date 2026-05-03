@@ -670,6 +670,54 @@ contextBridge.exposeInMainWorld('restorm', {
       const handler = (): void => { callback() }
       ipcRenderer.on('mcp:request-received', handler)
       return () => { ipcRenderer.off('mcp:request-received', handler) }
+    },
+    /** Push the active workbench tab to main so MCP tools (`get_current_tab`,
+     * `restorm://active-tab`) can read it without a renderer round-trip.
+     * Renderer fires this on every active-tab change; main caches it. */
+    pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | null }): void => {
+      ipcRenderer.send('mcp:active-tab-changed', payload)
+    },
+    /** Push a per-env-folder selected-env id. `envId: null` clears the
+     * selection — the MCP `get_active_env` tool then falls back to the
+     * folder's first env. */
+    pushMcpActiveEnv: (payload: { envFolderId: string; envId: string | null }): void => {
+      ipcRenderer.send('mcp:active-env-changed', payload)
+    },
+    /** Full-snapshot push fired on renderer (re)load — useful after an
+     * HMR cycle so main's cache is always consistent with the renderer. */
+    pushMcpActiveStateBootstrap: (payload: {
+      tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | null }
+      envByFolder: Record<string, string | null>
+    }): void => {
+      ipcRenderer.send('mcp:active-state-bootstrap', payload)
+    },
+    /** Subscribe to MCP `open_tab` requests. Payload `{itemId, kind}`. */
+    onMcpOpenTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) }
+      ipcRenderer.on('mcp:open-tab', handler)
+      return () => { ipcRenderer.off('mcp:open-tab', handler) }
+    },
+    /** Subscribe to MCP `reveal_in_tree` requests. */
+    onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) }
+      ipcRenderer.on('mcp:reveal-in-tree', handler)
+      return () => { ipcRenderer.off('mcp:reveal-in-tree', handler) }
+    },
+    /** Subscribe to MCP-driven tree mutations. Payload is the full
+     * project tree as plain JSON. The renderer replaces its rootItems
+     * after reifying via `makeReactive*`. Used by import / create /
+     * rename / delete tools so the user sees mutations immediately
+     * without waiting for a save+reload cycle. */
+    onMcpTreeReplace: (callback: (payload: unknown) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload) }
+      ipcRenderer.on('mcp:tree-replace', handler)
+      return () => { ipcRenderer.off('mcp:tree-replace', handler) }
+    },
+    /** Subscribe to MCP `close_tab` requests. Payload `{itemId, kind}`. */
+    onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) }
+      ipcRenderer.on('mcp:close-tab', handler)
+      return () => { ipcRenderer.off('mcp:close-tab', handler) }
     }
   },
   import: {

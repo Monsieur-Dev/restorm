@@ -72,7 +72,7 @@ export type { AutoSaveMode, AutoSaveControllerOptions } from './services'
 
 // MCP service (Streamable HTTP, off by default)
 export { McpService } from './services'
-export type { McpServiceOptions, McpToolConfig, McpToolHandler } from './services'
+export type { McpServiceOptions, McpToolConfig, McpToolHandler, McpResourceConfig, McpResourceHandler } from './services'
 
 // Save-unit / draft-store (file service v2)
 export {

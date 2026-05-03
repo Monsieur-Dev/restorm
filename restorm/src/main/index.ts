@@ -8,6 +8,7 @@ import { dirname, join } from 'path'
 import { existsSync, statSync } from 'fs'
 import { searchIndexService, contextService, responseHistoryService, authenticationCacheService } from './services'
 import { writeMcpDiscoveryFile, cleanupMcpDiscoveryFile } from './services/mcpDiscovery'
+import { registerRestormMcp } from './mcp'
 import { graphQLService } from 'electron-core-ui/main'
 import { clearUserSettings, parseCliArgs } from './cli/args'
 import { setupGraphQL } from './GraphQLSetup'
@@ -365,6 +366,12 @@ const mcpService = new McpService({
 void app.whenReady().then(async () => {
   if (!cliArgs.mcpEnabled) return
   try {
+    // Register restorm-domain tools + resources before `start()` so the
+    // first incoming request sees the full registry. Order matters: the
+    // active-state IPC bridge is wired here too (idempotent), so the
+    // renderer's bootstrap push lands in a ready listener.
+    registerRestormMcp(mcpService)
+
     await mcpService.start(0)
     const port = mcpService.getPort()
     if (port === null) {

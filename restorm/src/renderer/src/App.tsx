@@ -82,6 +82,9 @@ import { EmptyBench } from './components/MainView/Workbench/EmptyBench'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
 import { StatusbarMcpIndicator } from './components/MainView/StatusbarMcpIndicator'
 import { useMcpEnabled } from './hooks/useMcpEnabled'
+import { useMcpActiveStateBridge } from './hooks/useMcpActiveStateBridge'
+import { useMcpNavigation } from './hooks/useMcpNavigation'
+import { useMcpTreeReplace } from './hooks/useMcpTreeReplace'
 import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
 import { RestormWorkbenchContainer } from './components/MainView/Workbench/RestormWorkbenchContainer'
 import { SaveOptionsModal } from './components/Modals/SaveOptionsModal'
@@ -843,6 +846,43 @@ const App: React.FC = () => {
   // the middle of the statusbar.
   const mcpEnabled = useMcpEnabled()
 
+  // Wire MCP active-state push (renderer → main, drives `get_current_tab`)
+  // + MCP nav listeners (main → renderer, drives `open_tab` / `reveal_in_tree`).
+  // Both no-op when MCP is disabled. `envByFolder` stays empty for now —
+  // populating it requires per-folder env-selector state we don't track
+  // centrally yet; `get_active_env` falls back to the folder's first env.
+  useMcpActiveStateBridge({
+    enabled: mcpEnabled,
+    tabId: null,
+    itemId: activeRequest?.id ?? null,
+    kind: activeRequest ? 'request' : null,
+    envByFolder: {}
+  })
+  // `handleCloseTabById` is declared further down (it depends on
+  // `setWorkbenchTree` which itself depends on hooks declared after
+  // this block). Indirect via a ref so we can hand a stable callback
+  // to `useMcpNavigation` without hitting the temporal dead zone.
+  // The ref is patched by an effect once `handleCloseTabById` exists.
+  const closeTabByItemIdRef = useRef<(itemId: string) => void>(() => { /* not yet wired */ })
+  const closeTabByItemIdStable = useCallback((itemId: string) => { closeTabByItemIdRef.current(itemId) }, [])
+  useMcpNavigation({
+    enabled: mcpEnabled,
+    rootItems,
+    setExpandedIds,
+    openFolderTab,
+    openEnvironmentFolderTab,
+    openAnyRequestTab,
+    closeTabByItemId: closeTabByItemIdStable
+  })
+  // Set to `true` by `useMcpTreeReplace` immediately before each MCP-
+  // driven `setRootItems` call; read by the `setCollections` effect
+  // below so the zustand store sees `source: 'mcp'` and skips the
+  // main-side mirror (main is already canonical for MCP-driven
+  // mutations — roundtripping would clobber its class instances).
+  // The hook flips the ref true; the effect reads + resets it.
+  const mcpDrivenRef = useRef(false)
+  useMcpTreeReplace({ enabled: mcpEnabled, setRootItems, mcpDrivenRef })
+
   // Per-pane inline-edit targets so a rename triggered from Favorites
   // or Opened opens the input in that pane (not the Workspace tree row).
   const [favoritesEditingItemId, setFavoritesEditingItemId] = useState<string | null>(null)
@@ -924,6 +964,8 @@ const App: React.FC = () => {
       return { ...prev, groups }
     })
   }, [])
+  // Patch the forward-reference ref consumed by `useMcpNavigation` (above).
+  useEffect(() => { closeTabByItemIdRef.current = handleCloseTabById }, [handleCloseTabById])
 
   // Close-others / close-to-the-right are scoped to the group containing
   // the targeted tab — VSCode-style semantics. The Workspace stays
@@ -1149,9 +1191,14 @@ const App: React.FC = () => {
     environmentFolderCollectionsRef.current = environmentFolderCollections
   }, [environmentFolderCollections])
 
-  // Keep collections store in sync for request path resolution
+  // Keep collections store in sync for request path resolution.
+  // When the change came from MCP (`mcpDrivenRef`), pass `'mcp'` so
+  // the zustand store skips the main-side mirror — main already has
+  // the up-to-date tree. Reset the ref on the same tick.
   useEffect(() => {
-    setCollections(environmentFolderCollections, 'user')
+    const source = mcpDrivenRef.current ? 'mcp' : 'user'
+    if (mcpDrivenRef.current) mcpDrivenRef.current = false
+    setCollections(environmentFolderCollections, source)
   }, [environmentFolderCollections, setCollections])
 
   // Listen to test events for E2E tests (only in dev/test mode)
