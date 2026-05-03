@@ -643,10 +643,6 @@ contextBridge.exposeInMainWorld('restorm', {
       const result: unknown = await ipcRenderer.invoke('responses:history:get', guid)
       return result
     },
-    updatePath: async (requestId: string, requestPath: string): Promise<boolean> => {
-      const result: unknown = await ipcRenderer.invoke('responses:history:update-path', requestId, requestPath)
-      return result as boolean
-    },
     togglePin: async (guid: string, pinned: boolean): Promise<boolean> => {
       const result: unknown = await ipcRenderer.invoke('responses:history:toggle-pin', guid, pinned)
       return result as boolean

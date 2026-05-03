@@ -1592,7 +1592,6 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         isOpen={historyModalOpen}
         onClose={handleCloseHistoryModal}
         requestId={request.id}
-        {...(requestPath ? { requestPath } : {})}
         refreshKey={historyRefreshKey}
         buildResponseView={buildHistoryView}
       />

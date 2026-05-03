@@ -926,7 +926,6 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         isOpen={historyModalOpen}
         onClose={handleCloseHistoryModal}
         requestId={request.id}
-        requestPath={requestPath ?? undefined}
         refreshKey={historyRefreshKey}
         buildResponseView={buildHistoryView}
       />

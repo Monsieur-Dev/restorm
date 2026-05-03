@@ -82,7 +82,6 @@ declare global {
       responsesHistory: {
         list: (requestId: string) => Promise<ResponseHistoryEntry[]>
         get: (guid: string) => Promise<ResponseHistoryDetail | null>
-        updatePath: (requestId: string, requestPath: string) => Promise<boolean>
         togglePin: (guid: string, pinned: boolean) => Promise<boolean>
       }
       import: {

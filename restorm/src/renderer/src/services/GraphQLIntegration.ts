@@ -386,8 +386,8 @@ const DELETE_ENVIRONMENT_MUTATION = `
 `
 
 const RESPONSE_HISTORY_LIST_QUERY = `
-  query ResponseHistoryList($requestId: String, $requestPath: String) {
-    responseHistoryList(requestId: $requestId, requestPath: $requestPath) {
+  query ResponseHistoryList($requestId: String) {
+    responseHistoryList(requestId: $requestId) {
       guid
       success
       timestamp
@@ -400,7 +400,7 @@ const RESPONSE_HISTORY_DETAIL_QUERY = `
   query ResponseHistoryDetail($guid: String!) {
     responseHistoryDetail(guid: $guid) {
       guid
-      requestPath
+      requestId
       type
       success
       timestamp
@@ -619,20 +619,20 @@ export async function deleteEnvironment(id: string): Promise<boolean> {
   return result.data?.deleteEnvironment ?? false
 }
 
-export async function getResponseHistoryList(requestId?: string, requestPath?: string): Promise<{
+export async function getResponseHistoryList(requestId: string): Promise<{
   guid: string
   success: boolean
   timestamp: string
   pinned: boolean
 }[]> {
-  logger.debug('[GraphQLIntegration] responseHistoryList query', { requestId, requestPath })
+  logger.debug('[GraphQLIntegration] responseHistoryList query', { requestId })
   try {
     const result = await executeGraphQL<{ responseHistoryList: {
       guid: string
       success: boolean
       timestamp: string
       pinned: boolean
-    }[] }>(RESPONSE_HISTORY_LIST_QUERY, { requestId, requestPath })
+    }[] }>(RESPONSE_HISTORY_LIST_QUERY, { requestId })
     if (result.errors?.length) {
       logger.warn('[GraphQLIntegration] responseHistoryList errors', { errors: result.errors })
     }
@@ -651,7 +651,7 @@ export async function getResponseHistoryList(requestId?: string, requestPath?: s
 
 export async function getResponseHistoryDetail(guid: string): Promise<{
   guid: string
-  requestPath: string
+  requestId: string
   type: string
   success: boolean
   timestamp: string
@@ -662,7 +662,7 @@ export async function getResponseHistoryDetail(guid: string): Promise<{
   try {
     const result = await executeGraphQL<{ responseHistoryDetail: {
       guid: string
-      requestPath: string
+      requestId: string
       type: string
       success: boolean
       timestamp: string

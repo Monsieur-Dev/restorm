@@ -100,7 +100,7 @@ function getIdx(path: string): ResponseHistoryIndex | null {
 function mkD(o: Partial<ResponseHistoryDetail> = {}): ResponseHistoryDetail {
   return {
     guid: o.guid ?? 'g', requestId: o.requestId ?? 'req-1',
-    requestPath: o.requestPath ?? '1 - Col/1 - Req', type: o.type ?? 'http',
+    type: o.type ?? 'http',
     success: o.success ?? true, timestamp: o.timestamp ?? '2026-01-15T10:00:00.000Z',
     pinned: o.pinned ?? false,
     response: o.response ?? {
@@ -111,10 +111,27 @@ function mkD(o: Partial<ResponseHistoryDetail> = {}): ResponseHistoryDetail {
     }
   }
 }
-function seed(rp: string, es: { guid: string; timestamp: string; pinned?: boolean; success?: boolean; requestId?: string }[]): void {
-  const idx: ResponseHistoryIndex = { version: 1, requests: [{ requestPath: rp, entries: es.map((e) => ({ guid: e.guid, timestamp: e.timestamp, pinned: e.pinned ?? false, success: e.success ?? true })) }] }
+// `_rp` retained as the first arg for call-site readability (a path-shaped
+// label e.g. "C/R") even though the v2 index is requestId-keyed.
+function seed(_rp: string, es: { guid: string; timestamp: string; pinned?: boolean; success?: boolean; requestId?: string }[]): void {
+  // Bucket entries by requestId — v2 schema. Tests that don't set
+  // requestId default to 'req-1' so the lookup keeps working.
+  const buckets = new Map<string, typeof es>()
+  for (const e of es) {
+    const id = e.requestId ?? 'req-1'
+    const list = buckets.get(id) ?? []
+    list.push(e)
+    buckets.set(id, list)
+  }
+  const idx: ResponseHistoryIndex = {
+    version: 2,
+    requests: [...buckets.entries()].map(([requestId, list]) => ({
+      requestId,
+      entries: list.map((e) => ({ guid: e.guid, timestamp: e.timestamp, pinned: e.pinned ?? false, success: e.success ?? true }))
+    }))
+  }
   const de = new Map<string, string>()
-  for (const e of es) de.set('responses/' + e.guid + '.json', JSON.stringify(mkD({ guid: e.guid, requestId: e.requestId ?? 'req-1', requestPath: rp, timestamp: e.timestamp, pinned: e.pinned ?? false, success: e.success ?? true })))
+  for (const e of es) de.set('responses/' + e.guid + '.json', JSON.stringify(mkD({ guid: e.guid, requestId: e.requestId ?? 'req-1', timestamp: e.timestamp, pinned: e.pinned ?? false, success: e.success ?? true })))
   setA(AP, idx, de)
 }
 function setupCols(): void {
@@ -129,9 +146,9 @@ function patch(): void {
   vi.mocked(existsSync).mockImplementation((p) => store.has(String(p)))
   svc.readArchive = vi.fn((p: string) => {
     const d = store.get(p)
-    if (!d) return { index: { version: 1 as const, requests: [] }, entriesData: new Map<string, string>() }
+    if (!d) return { index: { version: 2 as const, requests: [] }, entriesData: new Map<string, string>() }
     const it = d.get('index.json')
-    const idx: ResponseHistoryIndex = it ? (JSON.parse(it) as ResponseHistoryIndex) : { version: 1, requests: [] }
+    const idx: ResponseHistoryIndex = it ? (JSON.parse(it) as ResponseHistoryIndex) : { version: 2, requests: [] }
     const ed = new Map<string, string>()
     for (const [k, v] of d) ed.set(k, v)
     return { index: idx, entriesData: ed }
@@ -187,12 +204,6 @@ describe('ResponseHistoryService', () => {
       { guid: 'b', timestamp: '2026-01-15T11:00:00.000Z', requestId: 'req-2' }
     ])
     expect(await responseHistoryService.list('req-1')).toHaveLength(1)
-  })
-
-  it('listByRequestPath returns exact match', async () => {
-    seed('C/R', [{ guid: 'a', timestamp: '2026-01-15T10:00:00.000Z' }])
-    const r = await responseHistoryService.listByRequestPath('C/R')
-    expect(r).toHaveLength(1)
   })
 
   it('getDetail null for unknown', async () => {

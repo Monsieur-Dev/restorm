@@ -466,7 +466,6 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         isOpen={historyModalOpen}
         onClose={handleCloseHistoryModal}
         requestId={request.id}
-        requestPath={requestPath ?? undefined}
         refreshKey={historyRefreshKey}
         buildResponseView={buildHistoryView}
       />
