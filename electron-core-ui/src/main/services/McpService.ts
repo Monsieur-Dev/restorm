@@ -177,12 +177,14 @@ export class McpService {
 
   /**
    * Start listening on `127.0.0.1:port`. Throws if already running.
-   * The port is treated as a sentinel: when 0 / undefined / negative,
-   * the call is a no-op (caller's CLI flag was absent).
+   * `port = 0` (or omitted) tells the OS to pick a free ephemeral port
+   * — the consumer reads the actual bound value back via `getPort()`
+   * once `start` resolves. Negative values mean "off" (the caller's
+   * MCP toggle is disabled).
    */
-  async start(port: number | undefined): Promise<void> {
-    if (!port || port <= 0) {
-      logger.info('McpService: no port provided, server stays off')
+  async start(port = 0): Promise<void> {
+    if (port < 0) {
+      logger.info('McpService: negative port, server stays off')
       return
     }
     if (this.httpServer) {
@@ -217,7 +219,22 @@ export class McpService {
       httpServer.listen(port, '127.0.0.1')
     })
 
-    logger.info('McpService listening', { port, host: '127.0.0.1', tools: this.tools.length })
+    const bound = this.getPort()
+    logger.info('McpService listening', { port: bound, host: '127.0.0.1', tools: this.tools.length })
+  }
+
+  /**
+   * The port the HTTP server is currently bound to, or `null` when
+   * the service isn't running. Resolves the actual ephemeral port
+   * picked by the OS when `start(0)` was used.
+   */
+  getPort(): number | null {
+    if (!this.httpServer) return null
+    const addr = this.httpServer.address()
+    if (typeof addr === 'object' && addr !== null && 'port' in addr) {
+      return addr.port
+    }
+    return null
   }
 
   /** Stop the HTTP server. Safe to call when not started. */

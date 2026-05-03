@@ -103,18 +103,27 @@ class GraphQLService {
       try {
         // Create HTTP server with yoga as request handler
         // The yoga handler is async but http.createServer handles it correctly
-        this.server = createServer((req, res) => {
+        const server = createServer((req, res) => {
           logger.debug('[GraphQLService] Request', { method: req.method, url: req.url })
           void yoga(req, res)
         })
-        
-        this.server.listen(this.port, () => {
+        this.server = server
+
+        // `port = 0` asks the OS for a free ephemeral port — read the
+        // actual value back from `address()` after the listen settles
+        // and cache it so `getPort()` / `getEndpoint()` return the
+        // resolved value to consumers + the renderer.
+        server.listen(this.port, () => {
+          const addr = server.address()
+          if (typeof addr === 'object' && addr !== null && 'port' in addr) {
+            this.port = addr.port
+          }
           this.isRunning = true
           logger.info(`[GraphQLService] Server running at http://localhost:${this.port}/graphql`)
           resolve()
         })
 
-        this.server.on('error', (err) => {
+        server.on('error', (err) => {
           logger.error('[GraphQLService] Server error', { error: String(err) })
           reject(new Error(`Server error: ${String(err)}`))
         })

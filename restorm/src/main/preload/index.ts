@@ -648,6 +648,21 @@ contextBridge.exposeInMainWorld('restorm', {
       return result as boolean
     }
   },
+  runtime: {
+    /** Per-boot runtime config (MCP + GraphQL endpoint). Both ports
+     * are picked at startup — the renderer reads them once and caches
+     * them for the lifetime of the window. */
+    getConfig: async (): Promise<{
+      mcp: { enabled: boolean; port: number | null }
+      graphql: { endpoint: string }
+    }> => {
+      const result: unknown = await ipcRenderer.invoke('runtime:get-config')
+      return result as {
+        mcp: { enabled: boolean; port: number | null }
+        graphql: { endpoint: string }
+      }
+    }
+  },
   import: {
     /** Preview import from file path or URL (dry-run) */
     preview: async (

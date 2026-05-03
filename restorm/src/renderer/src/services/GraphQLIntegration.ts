@@ -9,8 +9,11 @@ import { graphQLClient, logger } from 'electron-core-ui/renderer'
 import { useRestormStore } from '../store/restormStore'
 import type { EnvironmentFolder, FolderItem, Environment, Request, Folder } from '../../../shared/types/collections'
 
-// GraphQL endpoint - must match the port in restorm/src/main/index.ts
-const GRAPHQL_ENDPOINT = 'http://localhost:4123/graphql'
+// Web-mode fallback: when restorm is opened in a plain browser (no
+// preload bridge), no GraphQL server exists. The string is unused but
+// passed to `graphQLClient.initialize` so the client doesn't blow up
+// on the synchronous code path.
+const WEB_FALLBACK_ENDPOINT = 'http://localhost:0/graphql'
 
 // Active subscription cleanup functions
 let subscriptionCleanups: (() => void)[] = []
@@ -23,16 +26,37 @@ function isElectronMode(): boolean {
 }
 
 /**
+ * Resolve the live GraphQL endpoint from the runtime config IPC. The
+ * main process picks a free port at boot, so the renderer can't
+ * hardcode it. Falls back to a placeholder URL in web mode (no
+ * preload bridge) — the subscriptions are then skipped anyway.
+ */
+async function resolveGraphqlEndpoint(): Promise<string> {
+  if (!isElectronMode()) return WEB_FALLBACK_ENDPOINT
+  const root = window as {
+    restorm?: { runtime?: { getConfig?: () => Promise<{ graphql: { endpoint: string } }> } }
+  }
+  const getConfig = root.restorm?.runtime?.getConfig
+  if (!getConfig) return WEB_FALLBACK_ENDPOINT
+  try {
+    const cfg = await getConfig()
+    return cfg.graphql.endpoint || WEB_FALLBACK_ENDPOINT
+  } catch (error) {
+    logger.warn('[GraphQLIntegration] runtime:get-config failed', { error: String(error) })
+    return WEB_FALLBACK_ENDPOINT
+  }
+}
+
+/**
  * Initialize the GraphQL client and set up subscriptions
  * Only sets up subscriptions in Electron mode where the GraphQL server exists
  */
-export function initializeGraphQL(): void {
-  // Initialize the client
-  graphQLClient.initialize({
-    endpoint: GRAPHQL_ENDPOINT
-  })
+export async function initializeGraphQL(): Promise<void> {
+  const endpoint = await resolveGraphqlEndpoint()
 
-  logger.info('[GraphQLIntegration] GraphQL client initialized')
+  graphQLClient.initialize({ endpoint })
+
+  logger.info('[GraphQLIntegration] GraphQL client initialized', { endpoint })
 
   // Only set up subscriptions in Electron mode where the GraphQL server exists
   // In web mode, there's no GraphQL server and subscriptions would fail

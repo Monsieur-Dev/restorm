@@ -80,6 +80,8 @@ const tabMatchesItem = (tab: EditorTab, itemId: string): boolean => {
 }
 import { EmptyBench } from './components/MainView/Workbench/EmptyBench'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
+import { StatusbarMcpIndicator } from './components/MainView/StatusbarMcpIndicator'
+import { useMcpEnabled } from './hooks/useMcpEnabled'
 import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
 import { RestormWorkbenchContainer } from './components/MainView/Workbench/RestormWorkbenchContainer'
 import { SaveOptionsModal } from './components/Modals/SaveOptionsModal'
@@ -834,6 +836,12 @@ const App: React.FC = () => {
   const handleSidebarRenameItem = useCallback((itemId: string) => {
     setSidebarEditingItemId(itemId)
   }, [])
+
+  // Drives the conditional `right-aligned` on the bell vs the MCP
+  // indicator: at most one of them should carry `margin-left: auto`,
+  // otherwise both push right and the second one ends up stranded in
+  // the middle of the statusbar.
+  const mcpEnabled = useMcpEnabled()
 
   // Per-pane inline-edit targets so a rename triggered from Favorites
   // or Opened opens the input in that pane (not the Workspace tree row).
@@ -1731,9 +1739,17 @@ const App: React.FC = () => {
             title={t('statusbar.requestHistory')}
           />
         )}
+        {/* MCP indicator (only when restorm runs in MCP mode). When
+         * mounted and there's nothing else right-aligned, MCP carries
+         * the auto margin and the bell flows naturally to its right.
+         * The bell takes the auto margin only when MCP isn't going
+         * to render (mcp disabled) — otherwise both would each
+         * consume their own margin slot and MCP would be stranded
+         * mid-bar. */}
+        <StatusbarMcpIndicator rightAligned={!activeRequest} />
         <StatusBarBellButton
           toasterId="app"
-          {...(activeRequest ? {} : { className: 'right-aligned' })}
+          {...(!activeRequest && !mcpEnabled ? { className: 'right-aligned' } : {})}
         />
       </Statusbar>
 

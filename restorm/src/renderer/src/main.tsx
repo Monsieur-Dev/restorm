@@ -14,13 +14,14 @@ const App = lazy(() => import('./App'))
 
 const { initializeI18n, logger, i18n } = ElectronCoreUi
 
-// Initialize GraphQL client (connects to main process GraphQL server)
-// This must happen before React renders to ensure subscriptions are ready
-try {
-  initializeGraphQL()
-} catch (error) {
+// Initialize GraphQL client (connects to main process GraphQL server).
+// Async because the endpoint URL is read from a runtime IPC — the
+// main process picks a free port at boot, so the renderer can't
+// hardcode it. We fire-and-await here; if it fails the client falls
+// back to a no-op endpoint and subscriptions are skipped.
+const graphqlReady = initializeGraphQL().catch((error: unknown) => {
   logger.warn('[main] Failed to initialize GraphQL client - will retry when server is ready', { error: String(error) })
-}
+})
 
 type ElectronCoreUiProviderComponent = React.ComponentType<{
   children: React.ReactNode
@@ -323,9 +324,9 @@ if (typeof window !== 'undefined') {
   }
 }
 
-void initI18n()
+void Promise.all([initI18n(), graphqlReady])
   .then(() => {
-    
+
     // Render app only after i18n is initialized
     const rootElement = document.getElementById('root')
 
