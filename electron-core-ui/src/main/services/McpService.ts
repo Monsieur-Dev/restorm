@@ -1,4 +1,5 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http'
+import { timingSafeEqual } from 'node:crypto'
 import { AsyncLocalStorage } from 'node:async_hooks'
 import { app, BrowserWindow, dialog as electronDialog } from 'electron'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
@@ -12,6 +13,18 @@ export interface McpServiceOptions {
    * `initialize` handshake. Defaults to a generic ECUI identity.
    */
   serverInfo?: { name: string; version: string }
+
+  /**
+   * Optional bearer token. When set, every incoming HTTP request must
+   * carry `Authorization: Bearer <token>`; mismatched / missing headers
+   * get a `401 Unauthorized`. When omitted, no auth is enforced — keeps
+   * existing callers (tests, ECUI consumers without auth needs) working.
+   *
+   * The token is opaque to the service: caller picks the entropy + the
+   * propagation channel (e.g. restorm writes it into its discovery file
+   * so the MCP launcher reads it back transparently).
+   */
+  authToken?: string
 }
 
 /**
@@ -1250,6 +1263,20 @@ export class McpService {
       return
     }
 
+    // Bearer-token gate. Loopback alone doesn't protect against other
+    // local processes or browser-tab CSRF — the token cuts both off.
+    // Constant-time compare avoids leaking info via response timing.
+    const expectedToken = this.options.authToken
+    if (expectedToken !== undefined && expectedToken.length > 0) {
+      const provided = extractBearerToken(req.headers.authorization)
+      if (provided === null || !timingSafeStringEq(provided, expectedToken)) {
+        res.statusCode = 401
+        res.setHeader('WWW-Authenticate', 'Bearer')
+        res.end('Unauthorized')
+        return
+      }
+    }
+
     // Notify subscribers (UI activity indicators, etc.) BEFORE the
     // JSON-RPC handler so listeners see every request — including
     // those that error out below. No payload; the event is opaque.
@@ -1411,4 +1438,32 @@ function isLoopbackAddress(addr: string | undefined): boolean {
   // Cover IPv4 loopback, IPv6 loopback, and the IPv4-mapped IPv6 form
   // Node hands out when listening on a dual-stack socket.
   return addr === '127.0.0.1' || addr === '::1' || addr === '::ffff:127.0.0.1'
+}
+
+/**
+ * Pull the bearer token out of an `Authorization` header value. Returns
+ * `null` for missing / malformed headers; the caller treats `null` as
+ * "no credentials" and rejects with 401. The header value is whatever
+ * Node parsed — for repeated `Authorization` headers it'd be an array,
+ * which we treat as malformed (single canonical credential expected).
+ */
+function extractBearerToken(header: string | string[] | undefined): string | null {
+  if (typeof header !== 'string') return null
+  const match = /^Bearer\s+(.+)$/i.exec(header.trim())
+  if (!match) return null
+  const captured = match[1]
+  return captured === undefined ? null : captured.trim()
+}
+
+/**
+ * Constant-time string equality. The length check short-circuits before
+ * `timingSafeEqual` (which throws on mismatched lengths) — that's safe
+ * because the token length is fixed by the caller, so length doesn't
+ * leak useful information.
+ */
+function timingSafeStringEq(a: string, b: string): boolean {
+  const ab = Buffer.from(a, 'utf8')
+  const bb = Buffer.from(b, 'utf8')
+  if (ab.length !== bb.length) return false
+  return timingSafeEqual(ab, bb)
 }

@@ -1,4 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
+import { randomBytes } from 'node:crypto'
 import { MainWindow } from './windows/MainWindow'
 import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, initAutoSaveController, McpService } from 'electron-core-ui'
 import { PROJECT_UUID_KEY } from '../shared/config/projectUuid'
@@ -351,7 +352,16 @@ void app.whenReady().then(() => {
 // screenshots, listing collections, etc. — over a loopback port the
 // OS picks for us. Restorm announces the chosen port via the
 // discovery lockfile so the MCP launcher can find us.
-const mcpService = new McpService({ serverInfo: { name: 'restorm', version: app.getVersion() } })
+// Per-process bearer token for the MCP HTTP endpoint. Generated once
+// at module load (microsecond cost, fine even when MCP stays off) and
+// regenerated on every restorm restart. The launcher reads it from the
+// discovery file and injects `Authorization: Bearer <token>` on every
+// forwarded request — totally transparent for Claude Code / Cursor.
+const mcpAuthToken = randomBytes(16).toString('hex')
+const mcpService = new McpService({
+  serverInfo: { name: 'restorm', version: app.getVersion() },
+  authToken: mcpAuthToken
+})
 void app.whenReady().then(async () => {
   if (!cliArgs.mcpEnabled) return
   try {
@@ -365,7 +375,8 @@ void app.whenReady().then(async () => {
       port,
       projectPath: null,
       pid: process.pid,
-      startedAt: new Date().toISOString()
+      startedAt: new Date().toISOString(),
+      token: mcpAuthToken
     }, cliArgs.mcpDiscoveryFile)
 
     // Forward every incoming MCP request as an IPC `mcp:request-received`
@@ -390,7 +401,8 @@ void app.whenReady().then(async () => {
         port: livePort,
         projectPath: state.currentFile.path,
         pid: process.pid,
-        startedAt: new Date().toISOString()
+        startedAt: new Date().toISOString(),
+        token: mcpAuthToken
       }, cliArgs.mcpDiscoveryFile)
     })
   } catch (error) {
