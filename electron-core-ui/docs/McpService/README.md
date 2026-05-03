@@ -37,6 +37,20 @@ app.on('before-quit', () => { void mcp.stop() })
 interface McpServiceOptions {
   /** Display name + version sent to MCP clients during the `initialize` handshake. */
   serverInfo?: { name: string; version: string }
+
+  /**
+   * Optional bearer token. When set, every incoming HTTP request must
+   * carry `Authorization: Bearer <token>`; mismatched / missing headers
+   * get a `401 Unauthorized`. When omitted, no auth is enforced —
+   * existing callers (tests, ECUI consumers without an auth need)
+   * keep working unchanged.
+   *
+   * The token is opaque to the service: caller picks the entropy and the
+   * propagation channel. The standard recipe is "32 hex chars from
+   * `crypto.randomBytes(16)`, written into a discovery file the launcher
+   * reads back" — see consuming app `restorm` for a worked example.
+   */
+  authToken?: string
 }
 ```
 
@@ -387,9 +401,14 @@ This solves the same problem an e2e Playwright fixture would otherwise need to h
 
 - Listens on `127.0.0.1` only (loopback). The HTTP server binds the IPv4 loopback explicitly; the OS will not accept connections from other interfaces.
 - Per-request defence in depth: the handler rejects any request whose `socket.remoteAddress` is not loopback (`127.0.0.1`, `::1`, `::ffff:127.0.0.1`).
-- No authentication tokens. Treat the MCP port like a Unix socket: trust that any process on the local machine can reach it.
+- Optional bearer-token gate via `McpServiceOptions.authToken`. When set, requests without `Authorization: Bearer <token>` (or with a mismatched token) get a `401 Unauthorized` and never reach the JSON-RPC layer. When unset, no auth is enforced. Comparison is constant-time (`crypto.timingSafeEqual`) to avoid leaking the prefix-match length via response timing.
 
-If your threat model includes hostile processes on the same machine, pick a hard-to-guess port at runtime and pair it with a bearer token via `headers` in the client's `.mcp.json`. The service does not implement that today.
+The token closes two attacks loopback alone leaves open:
+
+1. **Other local processes** — any process on the same machine can POST to `http://127.0.0.1:<port>/` and call tools. Without a token, a rogue script gets full control over the user's app.
+2. **CSRF from a browser tab** — a malicious site can issue `fetch('http://127.0.0.1:<port>/', { method: 'POST', mode: 'no-cors' })` and trigger mutations even though it can't read the response. The bearer header is blocked by CORS, so requiring it shuts the vector down.
+
+The recommended propagation channel is "consuming app generates a per-process random token, writes it into a discovery file, the launcher reads it back and injects the header." See restorm's `mcpDiscovery.ts` + `scripts/mcp-launcher.mjs` for a worked example. The token rotates on every app restart — no persistent secret on disk.
 
 ## Discovery from Claude Code
 

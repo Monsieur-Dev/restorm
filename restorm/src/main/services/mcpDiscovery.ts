@@ -22,6 +22,11 @@ export interface McpDiscoveryEntry {
   /** ISO-8601 timestamp of when the lockfile was written. Lets the
    * launcher pick the most-recent entry when several are live. */
   startedAt: string
+  /** Per-process bearer token. The launcher reads this and injects
+   * `Authorization: Bearer <token>` on every forwarded HTTP request, so
+   * the round-trip stays transparent for Claude Code / Cursor while the
+   * MCP endpoint stays gated against unauthenticated callers. */
+  token: string
 }
 
 function lockfilePath(pid: number): string {
@@ -54,6 +59,9 @@ export async function writeMcpDiscoveryFile(entry: McpDiscoveryEntry, extraPath?
       await fs.rename(extraTmp, extraPath)
     }
   } catch (error) {
+    // Do NOT log `entry.token` — it's the bearer secret for the MCP
+    // HTTP endpoint. Same reason we don't log auth headers. Restrict
+    // log payloads to identifying-but-not-sensitive fields.
     logger.warn('[mcpDiscovery] failed to write discovery file', {
       pid: entry.pid,
       port: entry.port,

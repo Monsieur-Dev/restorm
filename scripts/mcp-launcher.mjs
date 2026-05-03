@@ -58,6 +58,11 @@ const DISCOVERY_DIR = join(tmpdir(), 'restorm-mcp')
 // announces it via the lockfile. `null` means we haven't discovered
 // (or spawned) a live instance yet.
 let currentPort = null
+// Bearer token restorm generated for this boot; the launcher injects
+// `Authorization: Bearer <token>` on every forwarded HTTP request so
+// the round-trip stays transparent for Claude Code / Cursor while the
+// MCP endpoint stays gated against unauthenticated callers.
+let currentToken = null
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 
@@ -406,7 +411,8 @@ function discoverRunningRestorm() {
     const port = Number(parsed.port)
     if (!Number.isInteger(pid) || !Number.isInteger(port) || port <= 0) continue
     if (!isPidAlive(pid)) continue
-    live.push({ pid, port, projectPath: parsed.projectPath ?? null, startedAt: parsed.startedAt ?? '' })
+    const token = typeof parsed.token === 'string' ? parsed.token : null
+    live.push({ pid, port, token, projectPath: parsed.projectPath ?? null, startedAt: parsed.startedAt ?? '' })
   }
   if (live.length === 0) return null
   // Most-recent first. `startedAt` is ISO-8601 so lexical sort works.
@@ -488,7 +494,8 @@ async function ensureRestormRunning() {
   const existing = discoverRunningRestorm()
   if (existing && (await isPortOpen(existing.port))) {
     currentPort = existing.port
-    log('restorm already listening (discovered)', { port: existing.port, pid: existing.pid })
+    currentToken = existing.token
+    log('restorm already listening (discovered)', { port: existing.port, pid: existing.pid, hasToken: currentToken !== null })
     lastSeenUp = true
     return { becameUp: wasDownBefore }
   }
@@ -505,7 +512,8 @@ async function ensureRestormRunning() {
     )
   }
   currentPort = entry.port
-  log('restorm came up', { port: entry.port, pid: entry.pid })
+  currentToken = typeof entry.token === 'string' ? entry.token : null
+  log('restorm came up', { port: entry.port, pid: entry.pid, hasToken: currentToken !== null })
   // Cleanup the launcher-specific file (the per-pid lockfile stays
   // for future launchers to discover).
   try { await fs.unlink(discoveryFile) } catch { /* already gone */ }
@@ -537,6 +545,15 @@ async function forward(jsonRpcText) {
       // now (user killed it / dev rebuild / crash). Flag the next
       // request to reprobe + emit list_changed when it comes back.
       lastSeenUp = false
+    } else if (err && err.httpStatus === 401) {
+      // Token mismatch: usually means restorm restarted on the same
+      // ephemeral port between our two requests and minted a new
+      // token. Invalidate our cache + the live-flag so the next call
+      // re-runs discovery, picks up the new token from the lockfile,
+      // and emits a fresh `tools/list_changed` for Claude.
+      log('forward got 401 — invalidating cached token and forcing rediscovery')
+      currentToken = null
+      lastSeenUp = false
     }
     throw err
   }
@@ -548,17 +565,19 @@ function rawForward(jsonRpcText) {
       rejectFn(new Error('rawForward called before restorm port was discovered'))
       return
     }
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json, text/event-stream',
+      'Content-Length': Buffer.byteLength(jsonRpcText)
+    }
+    if (currentToken) headers['Authorization'] = `Bearer ${currentToken}`
     const req = httpRequest(
       {
         host: HOST,
         port: currentPort,
         path: '/',
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json, text/event-stream',
-          'Content-Length': Buffer.byteLength(jsonRpcText)
-        }
+        headers
       },
       (res) => {
         const chunks = []
@@ -570,7 +589,11 @@ function rawForward(jsonRpcText) {
             return
           }
           if (res.statusCode && res.statusCode >= 400) {
-            rejectFn(new Error(`MCP HTTP ${res.statusCode}: ${body.slice(0, 500)}`))
+            const httpErr = new Error(`MCP HTTP ${res.statusCode}: ${body.slice(0, 500)}`)
+            // Tag the status so `forward()` can distinguish auth failures
+            // (401 → invalidate cached token) from generic 4xx/5xx.
+            httpErr.httpStatus = res.statusCode
+            rejectFn(httpErr)
             return
           }
           const match = /^data: (.*)$/m.exec(body)
