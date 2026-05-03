@@ -545,6 +545,15 @@ async function forward(jsonRpcText) {
       // now (user killed it / dev rebuild / crash). Flag the next
       // request to reprobe + emit list_changed when it comes back.
       lastSeenUp = false
+    } else if (err && err.httpStatus === 401) {
+      // Token mismatch: usually means restorm restarted on the same
+      // ephemeral port between our two requests and minted a new
+      // token. Invalidate our cache + the live-flag so the next call
+      // re-runs discovery, picks up the new token from the lockfile,
+      // and emits a fresh `tools/list_changed` for Claude.
+      log('forward got 401 — invalidating cached token and forcing rediscovery')
+      currentToken = null
+      lastSeenUp = false
     }
     throw err
   }
@@ -580,7 +589,11 @@ function rawForward(jsonRpcText) {
             return
           }
           if (res.statusCode && res.statusCode >= 400) {
-            rejectFn(new Error(`MCP HTTP ${res.statusCode}: ${body.slice(0, 500)}`))
+            const httpErr = new Error(`MCP HTTP ${res.statusCode}: ${body.slice(0, 500)}`)
+            // Tag the status so `forward()` can distinguish auth failures
+            // (401 → invalidate cached token) from generic 4xx/5xx.
+            httpErr.httpStatus = res.statusCode
+            rejectFn(httpErr)
             return
           }
           const match = /^data: (.*)$/m.exec(body)

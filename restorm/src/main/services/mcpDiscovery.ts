@@ -59,6 +59,9 @@ export async function writeMcpDiscoveryFile(entry: McpDiscoveryEntry, extraPath?
       await fs.rename(extraTmp, extraPath)
     }
   } catch (error) {
+    // Do NOT log `entry.token` — it's the bearer secret for the MCP
+    // HTTP endpoint. Same reason we don't log auth headers. Restrict
+    // log payloads to identifying-but-not-sensitive fields.
     logger.warn('[mcpDiscovery] failed to write discovery file', {
       pid: entry.pid,
       port: entry.port,

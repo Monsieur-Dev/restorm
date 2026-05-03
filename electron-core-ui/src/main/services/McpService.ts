@@ -15,10 +15,14 @@ export interface McpServiceOptions {
   serverInfo?: { name: string; version: string }
 
   /**
-   * Optional bearer token. When set, every incoming HTTP request must
-   * carry `Authorization: Bearer <token>`; mismatched / missing headers
-   * get a `401 Unauthorized`. When omitted, no auth is enforced — keeps
+   * Optional bearer token. When set to a non-empty string, every
+   * incoming HTTP request must carry `Authorization: Bearer <token>`;
+   * mismatched / missing headers get a `401 Unauthorized`. When omitted
+   * — or set to the empty string — no auth is enforced, which keeps
    * existing callers (tests, ECUI consumers without auth needs) working.
+   * The empty-string short-circuit is deliberate: it lets a caller pass
+   * a runtime-resolved token without having to rebuild the options
+   * object when MCP runs in "no auth" mode.
    *
    * The token is opaque to the service: caller picks the entropy + the
    * propagation channel (e.g. restorm writes it into its discovery file

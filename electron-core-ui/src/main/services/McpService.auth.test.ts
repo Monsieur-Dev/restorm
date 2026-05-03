@@ -107,6 +107,38 @@ describe('McpService auth gate', () => {
       const r = await probe(port, { Authorization: `bearer ${TOKEN}` })
       expect(r.status).not.toBe(401)
     })
+
+    it('rejects a token with an embedded space (length mismatch)', async () => {
+      // The header parser would extract the whole capture, then
+      // `timingSafeStringEq` rejects on length mismatch. Pinned by a
+      // test so a future regex tweak doesn't silently accept it.
+      const r = await probe(port, { Authorization: `Bearer ${TOKEN.slice(0, 16)} ${TOKEN.slice(16)}` })
+      expect(r.status).toBe(401)
+    })
+  })
+
+  describe('with authToken set to empty string', () => {
+    const service = new McpService({ authToken: '' })
+    let port: number
+
+    beforeAll(async () => {
+      await service.start(0)
+      const bound = service.getPort()
+      if (bound === null) throw new Error('McpService failed to bind')
+      port = bound
+    })
+
+    afterAll(async () => {
+      await service.stop()
+    })
+
+    it('treats empty token as "auth disabled" and accepts unauthenticated requests', async () => {
+      // Documented short-circuit (see McpServiceOptions.authToken JSDoc).
+      // Lets callers wire a runtime-resolved token without having to
+      // rebuild the options object when MCP runs in "no auth" mode.
+      const r = await probe(port, {})
+      expect(r.status).not.toBe(401)
+    })
   })
 
   describe('without authToken', () => {

@@ -14,7 +14,12 @@ vi.mock('electron-core-ui', () => ({
 
 import { writeMcpDiscoveryFile, cleanupMcpDiscoveryFile, MCP_DISCOVERY_DIR, type McpDiscoveryEntry } from './mcpDiscovery'
 
-const FIXED_PID = 999_999
+// Synthetic test pid derived from this process's pid + a Linux-PID-out-of-range
+// offset so two parallel test runs (or a real restorm boot sharing the same
+// /tmp/restorm-mcp dir) never collide on the same lockfile name. The negative
+// number trick avoids any possible kernel pid overlap on Linux (max_pid is
+// 4_194_304 on 64-bit by default; we go below zero to stay clearly outside).
+const FIXED_PID = -Math.abs(process.pid) - 1_000_000
 
 async function readEntry(path: string): Promise<McpDiscoveryEntry> {
   return JSON.parse(await fs.readFile(path, 'utf8')) as McpDiscoveryEntry
