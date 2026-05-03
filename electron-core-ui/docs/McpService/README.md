@@ -82,6 +82,50 @@ mcp.registerTool(
 )
 ```
 
+### `registerResource(name, uri, config, handler)`
+
+Stores a resource in the in-memory registry; mirrors `registerTool` but wires into MCP's resource primitive. Resources are the read-once-at-the-top primitive of the protocol — clients can pull a snapshot of state without learning the tool surface.
+
+```typescript
+interface McpResourceConfig {
+  title?: string
+  description?: string
+  /** Defaults to `application/json` for text payloads. */
+  mimeType?: string
+}
+
+type McpResourceHandler = (uri: URL) =>
+  | { text?: string; blob?: string; mimeType?: string }
+  | Promise<{ text?: string; blob?: string; mimeType?: string }>
+```
+
+Pass an exact URI (`my-app://project`) for a static resource, or a URI template (`my-app://request/{id}`) for a templated one — the SDK matches the template and the handler receives the parsed `URL`, so it can pull the bound variables from `uri.pathname` itself. The wrapper finalizes the result into the SDK's `{contents: [...]}` shape; you only return text or blob plus an optional `mimeType`. Throws if a resource with the same `name` is already registered.
+
+```typescript
+// Static URI — single readout
+mcp.registerResource(
+  'project',
+  'my-app://project',
+  { title: 'Project summary', description: 'Open project metadata.' },
+  () => ({ text: JSON.stringify({ name: getProjectName(), path: getProjectPath() }) })
+)
+
+// Templated URI — variable in the path
+mcp.registerResource(
+  'request',
+  'my-app://request/{id}',
+  { title: 'Single request payload' },
+  (uri) => {
+    const id = uri.pathname.split('/').filter(Boolean).pop() ?? ''
+    const req = findRequestById(id)
+    if (!req) return { text: JSON.stringify({ error: `No request with id ${id}` }) }
+    return { text: JSON.stringify(serializeRequest(req)) }
+  }
+)
+```
+
+The handler can be sync or async; both branches are funneled through the same finalization. `mimeType` resolution order: handler return value → resource config → `application/json` default for text payloads (no default for blob payloads — set `mimeType` explicitly when you mean binary).
+
 ## Built-in tools
 
 ### `screenshot`
