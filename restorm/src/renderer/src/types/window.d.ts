@@ -99,6 +99,7 @@ declare global {
         onMcpOpenTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void) => () => void
         onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void) => () => void
         onMcpTreeReplace: (callback: (payload: unknown) => void) => () => void
+        onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void) => () => void
       }
       import: {
         preview: (input: string) => Promise<{

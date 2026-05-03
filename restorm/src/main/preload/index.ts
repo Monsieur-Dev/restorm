@@ -712,6 +712,12 @@ contextBridge.exposeInMainWorld('restorm', {
       const handler = (_e: unknown, payload: unknown): void => { callback(payload) }
       ipcRenderer.on('mcp:tree-replace', handler)
       return () => { ipcRenderer.off('mcp:tree-replace', handler) }
+    },
+    /** Subscribe to MCP `close_tab` requests. Payload `{itemId, kind}`. */
+    onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) }
+      ipcRenderer.on('mcp:close-tab', handler)
+      return () => { ipcRenderer.off('mcp:close-tab', handler) }
     }
   },
   import: {

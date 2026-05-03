@@ -26,6 +26,7 @@ type ActiveKind = 'request' | 'folder' | 'env-folder'
 interface RestormNavBridge {
   onMcpOpenTab: (cb: (payload: { itemId: string; kind: ActiveKind }) => void) => () => void
   onMcpRevealInTree: (cb: (payload: { itemId: string; kind: ActiveKind }) => void) => () => void
+  onMcpCloseTab: (cb: (payload: { itemId: string; kind: ActiveKind }) => void) => () => void
 }
 
 export interface UseMcpNavigationInput {
@@ -35,10 +36,11 @@ export interface UseMcpNavigationInput {
   openFolderTab: (folder: Folder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[], options?: OpenTabOptions) => void
+  closeTabByItemId: (itemId: string) => void
 }
 
 export function useMcpNavigation(input: UseMcpNavigationInput): void {
-  const { enabled, rootItems, setExpandedIds, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab } = input
+  const { enabled, rootItems, setExpandedIds, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, closeTabByItemId } = input
 
   useEffect(() => {
     if (!enabled) return
@@ -72,9 +74,14 @@ export function useMcpNavigation(input: UseMcpNavigationInput): void {
       setExpandedIds((prev) => Array.from(new Set([...prev, ...ancestorIds])))
     })
 
+    const offClose = api.onMcpCloseTab(({ itemId }) => {
+      closeTabByItemId(itemId)
+    })
+
     return () => {
       offOpen()
       offReveal()
+      offClose()
     }
-  }, [enabled, rootItems, setExpandedIds, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab])
+  }, [enabled, rootItems, setExpandedIds, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, closeTabByItemId])
 }

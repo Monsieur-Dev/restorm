@@ -69,6 +69,30 @@ export function registerNavigationTools(mcp: McpService): void {
   )
 
   mcp.registerTool(
+    'close_tab',
+    {
+      title: 'Close a workbench tab',
+      description:
+        'Close the workbench tab showing the given item. Validates the id against the open ' +
+        'project; returns a clean error when unknown so the AI knows it picked the wrong reference. ' +
+        'No-op when the item isn\'t currently open in any workbench tab — the renderer\'s close ' +
+        'handler is forgiving on misses.',
+      inputSchema: {
+        itemId: z.string().min(1).describe('Folder / env-folder / request id whose tab to close.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const argRecord = args
+      const itemId = typeof argRecord['itemId'] === 'string' ? argRecord['itemId'] : ''
+      if (!itemId) return errorReply('itemId is required')
+      const kind = describeKind(itemId)
+      if (!kind) return errorReply(`No item with id ${itemId}`)
+      broadcast('mcp:close-tab', { itemId, kind })
+      return jsonReply({ itemId, kind, queued: true })
+    }
+  )
+
+  mcp.registerTool(
     'reveal_in_tree',
     {
       title: 'Reveal item in sidebar tree',

@@ -858,13 +858,21 @@ const App: React.FC = () => {
     kind: activeRequest ? 'request' : null,
     envByFolder: {}
   })
+  // `handleCloseTabById` is declared further down (it depends on
+  // `setWorkbenchTree` which itself depends on hooks declared after
+  // this block). Indirect via a ref so we can hand a stable callback
+  // to `useMcpNavigation` without hitting the temporal dead zone.
+  // The ref is patched by an effect once `handleCloseTabById` exists.
+  const closeTabByItemIdRef = useRef<(itemId: string) => void>(() => { /* not yet wired */ })
+  const closeTabByItemIdStable = useCallback((itemId: string) => { closeTabByItemIdRef.current(itemId) }, [])
   useMcpNavigation({
     enabled: mcpEnabled,
     rootItems,
     setExpandedIds,
     openFolderTab,
     openEnvironmentFolderTab,
-    openAnyRequestTab
+    openAnyRequestTab,
+    closeTabByItemId: closeTabByItemIdStable
   })
   // Set to `true` by `useMcpTreeReplace` immediately before each MCP-
   // driven `setRootItems` call; read by the `setCollections` effect
@@ -956,6 +964,8 @@ const App: React.FC = () => {
       return { ...prev, groups }
     })
   }, [])
+  // Patch the forward-reference ref consumed by `useMcpNavigation` (above).
+  useEffect(() => { closeTabByItemIdRef.current = handleCloseTabById }, [handleCloseTabById])
 
   // Close-others / close-to-the-right are scoped to the group containing
   // the targeted tab — VSCode-style semantics. The Workspace stays
