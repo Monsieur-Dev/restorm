@@ -38,7 +38,7 @@ import {
   grpcExecuteArgs, grpcCancelArgs, grpcIsActiveArgs,
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
   responsesHistoryListArgs, responsesHistoryGetArgs,
-  responsesHistoryTogglePinArgs, responsesHistoryUpdatePathArgs,
+  responsesHistoryTogglePinArgs,
   importPreviewArgs, importImportArgs,
   docsCompileRouteArgs, docsCompileRootArgs
 } from './ipc/schemas'
@@ -622,10 +622,7 @@ export function registerRestormIPC(deps: {
     }
     const result = await httpExecutionService.execute(executionInput)
     setImmediate(() => {
-      const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'
-        ? (input as { requestPath?: unknown }).requestPath
-        : undefined
-      void responseHistoryService.storeExecutionResult(input.requestId, 'http', result, requestPath)
+      void responseHistoryService.storeExecutionResult(input.requestId, 'http', result)
     })
     return result
   })
@@ -676,10 +673,7 @@ export function registerRestormIPC(deps: {
       ...(authRequest ? { authRequest } : {})
     })
     setImmediate(() => {
-      const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'
-        ? (input as { requestPath?: unknown }).requestPath
-        : undefined
-      void responseHistoryService.storeExecutionResult(input.requestId, 'odata', result, requestPath)
+      void responseHistoryService.storeExecutionResult(input.requestId, 'odata', result)
     })
     return result
   })
@@ -811,10 +805,7 @@ export function registerRestormIPC(deps: {
   validatedHandle('graphql:execute', graphqlExecuteArgs, async (_event, [input]) => {
     const result = await graphqlExecutionService.execute(input as GraphQLExecutionInput)
     setImmediate(() => {
-      const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'
-        ? (input as { requestPath?: unknown }).requestPath
-        : undefined
-      void responseHistoryService.storeExecutionResult(input.requestId, 'graphql', result, requestPath)
+      void responseHistoryService.storeExecutionResult(input.requestId, 'graphql', result)
     })
     return result
   })
@@ -834,10 +825,7 @@ export function registerRestormIPC(deps: {
   validatedHandle('soap:execute', soapExecuteArgs, async (_event, [input]) => {
     const result = await soapExecutionService.execute(input as SOAPExecutionInput)
     setImmediate(() => {
-      const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'
-        ? (input as { requestPath?: unknown }).requestPath
-        : undefined
-      void responseHistoryService.storeExecutionResult(input.requestId, 'soap', result, requestPath)
+      void responseHistoryService.storeExecutionResult(input.requestId, 'soap', result)
     })
     return result
   })
@@ -857,10 +845,7 @@ export function registerRestormIPC(deps: {
   validatedHandle('grpc:execute', grpcExecuteArgs, (_event, [input]) => {
     const result = grpcExecutionService.execute(input as GRPCExecutionInput)
     setImmediate(() => {
-      const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'
-        ? (input as { requestPath?: unknown }).requestPath
-        : undefined
-      void responseHistoryService.storeExecutionResult(input.requestId, 'grpc', result, requestPath)
+      void responseHistoryService.storeExecutionResult(input.requestId, 'grpc', result)
     })
     return result
   })
@@ -880,10 +865,7 @@ export function registerRestormIPC(deps: {
   validatedHandle('websocket:connect', websocketConnectArgs, async (_event, [input]) => {
     const result = await websocketExecutionService.execute(input as WebSocketExecutionInput)
     setImmediate(() => {
-      const requestPath = typeof (input as { requestPath?: unknown }).requestPath === 'string'
-        ? (input as { requestPath?: unknown }).requestPath
-        : undefined
-      void responseHistoryService.storeExecutionResult(input.requestId, 'websocket', result, requestPath)
+      void responseHistoryService.storeExecutionResult(input.requestId, 'websocket', result)
     })
     return result
   })
@@ -914,10 +896,6 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('responses:history:toggle-pin', responsesHistoryTogglePinArgs, async (_event, [guid, pinned]) => {
     return responseHistoryService.togglePin(guid, pinned)
-  })
-
-  validatedHandle('responses:history:update-path', responsesHistoryUpdatePathArgs, async (_event, [requestId, requestPath]) => {
-    return responseHistoryService.updateRequestPath(requestId, requestPath)
   })
 
   // ==========================================================================

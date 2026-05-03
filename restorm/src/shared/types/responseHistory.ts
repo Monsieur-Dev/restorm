@@ -24,9 +24,9 @@ export interface ResponseHistoryEntry {
 }
 
 export interface ResponseHistoryIndex {
-  version: 1
+  version: 2
   requests: {
-    requestPath: string
+    requestId: string
     entries: ResponseHistoryEntry[]
   }[]
 }
@@ -179,8 +179,7 @@ export type ResponseHistoryResponse =
 
 export interface ResponseHistoryDetail {
   guid: string
-  requestId?: string
-  requestPath: string
+  requestId: string
   type: ResponseHistoryRequestType
   success: boolean
   outcome?: ResponseHistoryOutcome

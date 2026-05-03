@@ -455,7 +455,6 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
         isOpen={historyModalOpen}
         onClose={handleCloseHistoryModal}
         requestId={request.id}
-        requestPath={requestPath ?? undefined}
         refreshKey={historyRefreshKey}
         buildResponseView={buildHistoryView}
       />

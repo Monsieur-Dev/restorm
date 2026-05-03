@@ -429,7 +429,6 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
         isOpen={historyModalOpen}
         onClose={handleCloseHistoryModal}
         requestId={request.id}
-        requestPath={requestPath ?? undefined}
         refreshKey={historyRefreshKey}
         buildResponseView={buildHistoryView}
       />

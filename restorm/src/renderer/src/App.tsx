@@ -136,21 +136,6 @@ import {
 } from '../../shared/types/collections'
 import { buildRequestPath } from './utils/requestPath'
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
-}
-
-function getResponsesHistoryApi(): { updatePath: (requestId: string, requestPath: string) => Promise<boolean> } | null {
-  const root = window as { restorm?: unknown }
-  const restorm = root.restorm
-  if (!isRecord(restorm)) return null
-  const responsesHistory = (restorm as { responsesHistory?: unknown }).responsesHistory
-  if (!isRecord(responsesHistory)) return null
-  const updatePath = (responsesHistory as { updatePath?: unknown }).updatePath
-  if (typeof updatePath !== 'function') return null
-  return { updatePath: updatePath as (requestId: string, requestPath: string) => Promise<boolean> }
-}
-
 const MIN_LEFT_WIDTH = 180
 const RIGHT_MIN_WIDTH = 240
 
@@ -618,7 +603,6 @@ const App: React.FC = () => {
   // freshly-sent request flips the button from disabled to enabled
   // without a window reload.
   const activeRequestId = activeRequest?.id ?? null
-  const activeRequestPath = activeRequest?.path ?? null
   useEffect(() => {
     // When no request tab is active, the button is unmounted anyway
     // (see `{activeRequest && ...}` in the statusbar render), so the
@@ -627,11 +611,10 @@ const App: React.FC = () => {
     // with the fetched request id so callers ignore it when stale.
     if (!activeRequestId) return
     const requestId = activeRequestId
-    const requestPath = activeRequestPath
     let cancelled = false
     const refresh = async (): Promise<void> => {
       try {
-        const entries = await getResponseHistoryList(requestId, requestPath ?? undefined)
+        const entries = await getResponseHistoryList(requestId)
         if (!cancelled) setActiveHistoryProbe({ requestId, hasHistory: entries.length > 0 })
       } catch (error) {
         if (!cancelled) {
@@ -649,7 +632,7 @@ const App: React.FC = () => {
       cancelled = true
       subscription.unsubscribe()
     }
-  }, [activeRequestId, activeRequestPath])
+  }, [activeRequestId])
 
   // The probe is only meaningful when it matches the request we're
   // currently looking at — otherwise it's stale data from a previous
@@ -1302,36 +1285,6 @@ const App: React.FC = () => {
     }
   }, []) // Empty deps - set up once on mount
 
-  const requestPathCacheRef = useRef(new Map<string, string>())
-
-  useEffect(() => {
-    if (!fileName) {
-      requestPathCacheRef.current.clear()
-      return
-    }
-    if (requestPathCacheRef.current.size > 0) return
-    const collections = environmentFolderCollections
-    const requestIds: string[] = []
-    const collectRequestIds = (items: FolderItem[]): void => {
-      for (const item of items) {
-        if (isAnyFolder(item)) {
-          collectRequestIds(item.items)
-        } else if (isRequest(item)) {
-          requestIds.push(item.id)
-        }
-      }
-    }
-    for (const collection of collections) {
-      collectRequestIds(collection.items)
-    }
-    for (const requestId of requestIds) {
-      const requestPath = buildRequestPath(collections, requestId)
-      if (requestPath) {
-        requestPathCacheRef.current.set(requestId, requestPath)
-      }
-    }
-  }, [fileName, rootItems, environmentFolderCollections])
-
   // Listen to document changes and update per-tab dirty state (works in all modes).
   // The checksum update triggers a setState in useDirtyState, which re-renders App and
   // cascades to every tab view. To avoid disturbing actively-typed Monaco editors, we
@@ -1358,21 +1311,6 @@ const App: React.FC = () => {
         const serialized = JSON.parse(JSON.stringify(doc)) as FolderItem
         return computeChecksum(serialized)
       })
-
-      if (payload.type === 'request') {
-        const requestPath = buildRequestPath(environmentFolderCollections, payload.id)
-        if (requestPath) {
-          const cachedPath = requestPathCacheRef.current.get(payload.id)
-          if (cachedPath === requestPath) {
-            return
-          }
-          requestPathCacheRef.current.set(payload.id, requestPath)
-          const api = getResponsesHistoryApi()
-          if (api) {
-            void api.updatePath(payload.id, requestPath)
-          }
-        }
-      }
     }
 
     // For environments, we need to update the parent folder's dirty state

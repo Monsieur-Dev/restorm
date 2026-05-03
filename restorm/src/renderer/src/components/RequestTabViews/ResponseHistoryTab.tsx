@@ -89,7 +89,6 @@ interface ResponseHistoryStoreState {
 }
 
 class ResponseHistoryStore {
-  private requestPath: string | undefined
   private state: ResponseHistoryStoreState = {
     entries: [],
     selectedGuid: null,
@@ -112,13 +111,9 @@ class ResponseHistoryStore {
     }
   }
 
-  setRequestPath(requestPath?: string): void {
-    this.requestPath = requestPath
-  }
-
   async loadEntries(requestId: string): Promise<void> {
-    logger.debug('[ResponseHistoryTab] Loading history entries', { requestId, requestPath: this.requestPath })
-    const result = await getResponseHistoryList(requestId, this.requestPath)
+    logger.debug('[ResponseHistoryTab] Loading history entries', { requestId })
+    const result = await getResponseHistoryList(requestId)
     const entries = Array.isArray(result) ? result.filter((item) => this.isHistoryEntry(item)) : []
     const selectedGuid = entries.find((item) => item.guid === this.state.selectedGuid)?.guid ?? entries[0]?.guid ?? null
     const selectedDetail = selectedGuid ? await this.loadDetail(selectedGuid) : null
@@ -166,7 +161,7 @@ class ResponseHistoryStore {
   private isHistoryDetail(value: unknown): value is ResponseHistoryDetail {
     if (!this.isRecord(value)) return false
     return typeof value['guid'] === 'string'
-      && typeof value['requestPath'] === 'string'
+      && typeof value['requestId'] === 'string'
       && typeof value['type'] === 'string'
       && typeof value['timestamp'] === 'string'
       && typeof value['pinned'] === 'boolean'
@@ -180,7 +175,6 @@ class ResponseHistoryStore {
 
 export interface ResponseHistoryTabProps {
   requestId: string
-  requestPath?: string | undefined
   refreshKey?: number | undefined
   buildResponseView: (detail: ResponseHistoryDetail) => {
     infosContent?: React.ReactNode | undefined
@@ -191,7 +185,6 @@ export interface ResponseHistoryTabProps {
 
 export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
   requestId,
-  requestPath,
   refreshKey,
   buildResponseView
 }) => {
@@ -237,9 +230,8 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
   }, [dateFormat, i18n.language])
 
   useEffect(() => {
-    store.setRequestPath(requestPath)
     void store.loadEntries(requestId)
-  }, [requestId, requestPath, refreshKey, store])
+  }, [requestId, refreshKey, store])
 
   const handleTogglePin = useCallback(async (entry: ResponseHistoryEntry) => {
     const nextPinned = !entry.pinned

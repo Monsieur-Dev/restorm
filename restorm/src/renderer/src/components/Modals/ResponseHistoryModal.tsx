@@ -8,7 +8,6 @@ export interface ResponseHistoryModalProps {
   isOpen: boolean
   onClose: () => void
   requestId: string
-  requestPath?: string | undefined
   refreshKey?: number | undefined
   buildResponseView: (detail: ResponseHistoryDetail) => {
     infosContent?: React.ReactNode | undefined
@@ -21,7 +20,6 @@ export const ResponseHistoryModal: React.FC<ResponseHistoryModalProps> = ({
   isOpen,
   onClose,
   requestId,
-  requestPath,
   refreshKey,
   buildResponseView
 }) => {
@@ -37,7 +35,6 @@ export const ResponseHistoryModal: React.FC<ResponseHistoryModalProps> = ({
       <div style={{ flex: 1, minHeight: 0, minWidth: 0 }}>
         <ResponseHistoryTab
           requestId={requestId}
-          requestPath={requestPath}
           refreshKey={refreshKey}
           buildResponseView={buildResponseView}
         />

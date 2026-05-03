@@ -263,10 +263,6 @@ export const websocketIsActiveArgs = z.tuple([requestIdArg])
 export const responsesHistoryListArgs = z.tuple([requestIdArg])
 export const responsesHistoryGetArgs = z.tuple([z.string()])
 export const responsesHistoryTogglePinArgs = z.tuple([z.string(), z.boolean()])
-export const responsesHistoryUpdatePathArgs = z.tuple([
-  requestIdArg,
-  z.string()
-])
 
 // ==========================================================================
 // Import

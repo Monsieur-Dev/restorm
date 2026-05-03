@@ -461,7 +461,6 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         isOpen={historyModalOpen}
         onClose={handleCloseHistoryModal}
         requestId={request.id}
-        requestPath={requestPath ?? undefined}
         refreshKey={historyRefreshKey}
         buildResponseView={buildHistoryView}
       />
