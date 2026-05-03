@@ -82,6 +82,8 @@ import { EmptyBench } from './components/MainView/Workbench/EmptyBench'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
 import { StatusbarMcpIndicator } from './components/MainView/StatusbarMcpIndicator'
 import { useMcpEnabled } from './hooks/useMcpEnabled'
+import { useMcpActiveStateBridge } from './hooks/useMcpActiveStateBridge'
+import { useMcpNavigation } from './hooks/useMcpNavigation'
 import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
 import { RestormWorkbenchContainer } from './components/MainView/Workbench/RestormWorkbenchContainer'
 import { SaveOptionsModal } from './components/Modals/SaveOptionsModal'
@@ -842,6 +844,27 @@ const App: React.FC = () => {
   // otherwise both push right and the second one ends up stranded in
   // the middle of the statusbar.
   const mcpEnabled = useMcpEnabled()
+
+  // Wire MCP active-state push (renderer → main, drives `get_current_tab`)
+  // + MCP nav listeners (main → renderer, drives `open_tab` / `reveal_in_tree`).
+  // Both no-op when MCP is disabled. `envByFolder` stays empty for now —
+  // populating it requires per-folder env-selector state we don't track
+  // centrally yet; `get_active_env` falls back to the folder's first env.
+  useMcpActiveStateBridge({
+    enabled: mcpEnabled,
+    tabId: null,
+    itemId: activeRequest?.id ?? null,
+    kind: activeRequest ? 'request' : null,
+    envByFolder: {}
+  })
+  useMcpNavigation({
+    enabled: mcpEnabled,
+    rootItems,
+    setExpandedIds,
+    openFolderTab,
+    openEnvironmentFolderTab,
+    openAnyRequestTab
+  })
 
   // Per-pane inline-edit targets so a rename triggered from Favorites
   // or Opened opens the input in that pane (not the Workspace tree row).
