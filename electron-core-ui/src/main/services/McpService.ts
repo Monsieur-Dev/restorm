@@ -2,7 +2,7 @@ import { createServer, type IncomingMessage, type Server, type ServerResponse } 
 import { timingSafeEqual } from 'node:crypto'
 import { AsyncLocalStorage } from 'node:async_hooks'
 import { app, BrowserWindow, dialog as electronDialog } from 'electron'
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import { z } from 'zod'
 import { logger } from './LoggerService'
@@ -63,6 +63,41 @@ interface ToolRegistration {
   name: string
   config: McpToolConfig
   handler: McpToolHandler
+}
+
+/**
+ * Resource configuration. Mirrors the SDK's `ResourceMetadata` minus
+ * the fields the SDK fills itself. `mimeType` defaults to
+ * `application/json` for the `text` content path; pass it explicitly
+ * for plain-text or binary payloads.
+ */
+export interface McpResourceConfig {
+  title?: string
+  description?: string
+  mimeType?: string
+}
+
+/**
+ * Resource handler returns either an inline text payload (most common
+ * — JSON descriptions of project state) or a base64 blob for binary
+ * content. The handler receives the parsed `URL` so it can pull
+ * variables from a templated URI (e.g. `restorm://request/{id}`).
+ */
+export type McpResourceHandler = (uri: URL) => Promise<{
+  text?: string
+  blob?: string
+  mimeType?: string
+}> | {
+  text?: string
+  blob?: string
+  mimeType?: string
+}
+
+interface ResourceRegistration {
+  name: string
+  uri: string
+  config: McpResourceConfig
+  handler: McpResourceHandler
 }
 
 /**
@@ -182,6 +217,7 @@ export class McpService {
   private httpServer: Server | null = null
   private readonly options: McpServiceOptions
   private readonly tools: ToolRegistration[] = []
+  private readonly resources: ResourceRegistration[] = []
   private readonly logBuffer: ConsoleLogEntry[] = []
   private readonly logBufferMax = 1000
   private readonly attachedWebContentsIds = new Set<number>()
@@ -339,6 +375,27 @@ export class McpService {
       throw new Error(`McpService.registerTool: tool "${name}" already registered`)
     }
     this.tools.push({ name, config, handler })
+  }
+
+  /**
+   * Register a resource. Each request gets a fresh `McpServer` populated
+   * with the registry. Pass an exact URI (`restorm://project`) for a
+   * static resource or a URI template (`restorm://request/{id}`) — the
+   * SDK matches templates with `path-to-regexp` style placeholders, and
+   * the handler receives the parsed `URL` so it can pull the bound
+   * variables itself. The handler defaults `mimeType` to
+   * `application/json` for text payloads when none is set.
+   */
+  registerResource(
+    name: string,
+    uri: string,
+    config: McpResourceConfig,
+    handler: McpResourceHandler
+  ): void {
+    if (this.resources.some((r) => r.name === name)) {
+      throw new Error(`McpService.registerResource: resource "${name}" already registered`)
+    }
+    this.resources.push({ name, uri, config, handler })
   }
 
   private registerBuiltinTools(): void {
@@ -1308,6 +1365,42 @@ export class McpService {
             handler: unknown
           ) => unknown
           ;(server.registerTool.bind(server) as SdkRegisterTool)(tool.name, tool.config, tool.handler)
+        }
+        for (const resource of this.resources) {
+          // Static URI vs templated URI: the SDK has different overloads
+          // for each. Templated URIs contain `{var}` placeholders; we
+          // route them through `ResourceTemplate` so the SDK does the
+          // matching. The handler receives the parsed `URL` either way
+          // and can pull variables from `uri.pathname` itself.
+          type SdkRegisterResource = (
+            name: string,
+            uriOrTemplate: string | ResourceTemplate,
+            config: unknown,
+            handler: unknown
+          ) => unknown
+          const isTemplated = resource.uri.includes('{')
+          const target = isTemplated
+            ? new ResourceTemplate(resource.uri, { list: undefined })
+            : resource.uri
+          const wrapped = (uri: URL): unknown => {
+            const result = resource.handler(uri)
+            const finalize = (
+              r: { text?: string; blob?: string; mimeType?: string }
+            ): unknown => {
+              const mimeType = r.mimeType ?? resource.config.mimeType ?? (r.text !== undefined ? 'application/json' : undefined)
+              if (r.blob !== undefined) {
+                return { contents: [{ uri: uri.toString(), mimeType, blob: r.blob }] }
+              }
+              return { contents: [{ uri: uri.toString(), mimeType, text: r.text ?? '' }] }
+            }
+            return result instanceof Promise ? result.then(finalize) : finalize(result)
+          }
+          ;(server.registerResource.bind(server) as SdkRegisterResource)(
+            resource.name,
+            target,
+            { title: resource.config.title, description: resource.config.description, mimeType: resource.config.mimeType },
+            wrapped
+          )
         }
         transport = new StreamableHTTPServerTransport(
           // Stateless: omitting `sessionIdGenerator` makes each

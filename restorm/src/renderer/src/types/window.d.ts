@@ -90,6 +90,14 @@ declare global {
           graphql: { endpoint: string }
         }>
         onMcpRequestReceived: (callback: () => void) => () => void
+        pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | null }) => void
+        pushMcpActiveEnv: (payload: { envFolderId: string; envId: string | null }) => void
+        pushMcpActiveStateBootstrap: (payload: {
+          tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | null }
+          envByFolder: Record<string, string | null>
+        }) => void
+        onMcpOpenTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void) => () => void
+        onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void) => () => void
       }
       import: {
         preview: (input: string) => Promise<{
