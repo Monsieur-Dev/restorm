@@ -150,6 +150,35 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   // Bumped on smart-paste apply so the KV tables remount and re-read
   // their `initialRows` from the now-mutated request object.
   const [transportEpoch, setTransportEpoch] = useState(0)
+  // External transport-replaced bumps. Fired by MCP `update_request`
+  // so the KV tables (headers / params / pathParams) remount with fresh
+  // `initialRows` reflecting the new arrays — they'd otherwise keep
+  // displaying their captured-at-mount state because they're not
+  // controlled (see `initialRows={request.pathParams}` below).
+  //
+  // Why a ref instead of `request` in the dep array: the reactive
+  // proxy's reference is stable per request id, but adding `request`
+  // to the dep list still made React tear down + re-create the
+  // subscription on parent re-renders, which (under certain
+  // scheduling) starved the lazy Monaco mount in sibling URL +
+  // body editors. Reading `request` through a ref keeps the effect
+  // mount-once-per-tab while still seeing the latest field values
+  // when the MCP-driven event fires.
+  const transportReplacedRequestRef = useRef(request)
+  useEffect(() => { transportReplacedRequestRef.current = request }, [request])
+  useEffect(() => {
+    const subscription = eventBus.subscribe<{ requestId: string }>('request:transport-replaced', (payload) => {
+      const current = transportReplacedRequestRef.current
+      if (payload.requestId !== current.id) return
+      setMethod(current.method)
+      setUrl(current.url)
+      setBody(getBodyContent(current))
+      setBodyMode(getBodyMode(current))
+      setBodyFilePath(getBodyFilePath(current))
+      setTransportEpoch((n) => n + 1)
+    })
+    return () => { subscription.unsubscribe() }
+  }, [])
   const urlSectionHostRef = useRef<HTMLDivElement | null>(null)
   const sourceIdRef = useRef<string>('')
   sourceIdRef.current ||= crypto.randomUUID()

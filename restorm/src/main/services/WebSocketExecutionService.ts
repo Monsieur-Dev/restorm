@@ -250,6 +250,26 @@ class WebSocketExecutionService {
   }
 
   /**
+   * Snapshot the message buffer for an active connection. Returns a
+   * copy starting at `afterIndex` (default 0). Used by the MCP
+   * `read_stream` tool to pull subsequent frames without blocking the
+   * MCP channel for the full session lifetime.
+   *
+   * Returns `{ frames, total }`; `frames` is the slice from
+   * `afterIndex` onwards, `total` is the buffer's current length so a
+   * caller can detect cursor overshoot (e.g. after a buffer rebuild on
+   * reconnect). Returns `null` when the connection is no longer
+   * tracked at all (closed + dropped from the active map).
+   */
+  getMessages(requestId: string, afterIndex = 0): { frames: WebSocketMessage[]; total: number } | null {
+    const connection = this.activeConnections.get(requestId)
+    if (!connection) return null
+    const total = connection.messages.length
+    const start = Math.max(0, Math.min(afterIndex, total))
+    return { frames: connection.messages.slice(start), total }
+  }
+
+  /**
    * Broadcast progress to renderer
    */
   private broadcastProgress(requestId: string, status: 'started' | 'completed' | 'cancelled' | 'error'): void {

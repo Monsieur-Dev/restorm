@@ -100,6 +100,10 @@ declare global {
         onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void) => () => void
         onMcpTreeReplace: (callback: (payload: unknown) => void) => () => void
         onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void) => () => void
+        onMcpRunRequest: (callback: (payload: { itemId: string }) => void) => () => void
+        onMcpRequestUpdated: (callback: (payload: { itemId: string; patch: Record<string, unknown> }) => void) => () => void
+        onMcpFolderUpdated: (callback: (payload: { itemId: string; patch: Record<string, unknown> }) => void) => () => void
+        onMcpSetFavorite: (callback: (payload: { itemId: string; favorite: boolean | null }) => void) => () => void
       }
       import: {
         preview: (input: string) => Promise<{

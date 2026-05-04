@@ -213,6 +213,23 @@ export const test = base.extend<FullWorkflowFixtures>({
       } catch {
         // ignore
       }
+      // On failure, capture an end-state screenshot of the live window
+      // so the CLAUDE.md "open the end-state screenshot" debugging path
+      // actually has an artefact to read. Electron's `_electron.launch`
+      // doesn't honour the playwright `use.screenshot` config, so we
+      // do it manually here.
+      if (testInfo.status === 'failed' || testInfo.status === 'timedOut') {
+        try {
+          const win = app.windows()[0]
+          if (win !== undefined) {
+            const shotFile = join(testInfo.outputDir, `end-state-screenshot-${String(Date.now())}.png`)
+            await win.screenshot({ path: shotFile, fullPage: true })
+            await testInfo.attach('end-state-screenshot', { path: shotFile, contentType: 'image/png' })
+          }
+        } catch {
+          // ignore
+        }
+      }
       try {
         app.process().kill('SIGKILL')
       } catch {

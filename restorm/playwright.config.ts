@@ -44,6 +44,12 @@ const authLoginTestDir = defineBddConfig({
   outputDir: '.features-gen/auth-login'
 })
 
+const mcpServerTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/mcp-server/features/**/*.feature',
+  steps: ['tests/e2e/bdd/mcp-server/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/mcp-server'
+})
+
 /**
  * Playwright configuration for Electron E2E tests using playwright-bdd.
  * Each test group has its own project with a dedicated fixture.
@@ -75,6 +81,15 @@ export default defineConfig({
     ['json', { outputFile: 'test-results/results.json' }]
   ],
 
+  /* Capture trace + screenshot only on failure so the per-test
+   * artefacts dir holds enough context to debug a flake without
+   * re-running. Required for the `Read` tool to actually open the
+   * end-state screenshot the CLAUDE.md debugging note assumes. */
+  use: {
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure'
+  },
+
   /* Projects for each test group */
   projects: [
     {
@@ -105,6 +120,11 @@ export default defineConfig({
     {
       name: 'auth-login',
       testDir: authLoginTestDir
+    },
+    {
+      name: 'mcp-server',
+      testDir: mcpServerTestDir,
+      timeout: 180 * 1000
     }
   ]
 })

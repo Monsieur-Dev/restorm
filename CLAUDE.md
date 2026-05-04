@@ -17,7 +17,15 @@
 
 ## Commits
 
-Pre-commit hooks run the full test suite, which takes a long time. **NEVER** interrupt or cancel a commit in progress — wait for it to finish, even if it seems slow.
+Pre-commit hooks run the full test suite, which takes a long time (~5–6 min on a healthy host). **NEVER** interrupt or cancel a commit in progress — wait for it to finish, even if it seems slow.
+
+**Always commit through `scripts/git-commit-timeout.sh`** rather than calling `git commit` directly. The script wraps the commit with a hard 15-minute timeout so a flaky e2e + hung Monaco editor can't pin an automated agent for an hour. Pass through any `git commit` args you'd normally use, e.g.:
+
+```bash
+scripts/git-commit-timeout.sh -m "your message"
+```
+
+If the script exits 124 (timeout), investigate before retrying — it usually points at flakiness, X-server contention, or a genuine perf regression in a Monaco-heavy panel.
 
 ## Self-review before push
 

@@ -15,6 +15,7 @@ import { registerNavigationTools } from './tools/navigation'
 import { registerProjectTools } from './tools/project'
 import { registerWriteTools } from './tools/write'
 import { registerImportTools } from './tools/import'
+import { registerExecutionTools } from './tools/execute'
 import { registerResources } from './resources'
 
 export function registerRestormMcp(mcp: McpService): void {
@@ -24,5 +25,6 @@ export function registerRestormMcp(mcp: McpService): void {
   registerProjectTools(mcp)
   registerWriteTools(mcp)
   registerImportTools(mcp)
+  registerExecutionTools(mcp)
   registerResources(mcp)
 }

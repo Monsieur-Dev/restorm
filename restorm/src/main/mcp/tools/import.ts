@@ -18,9 +18,11 @@
 import { z } from 'zod'
 import { BrowserWindow } from 'electron'
 import { McpService } from 'electron-core-ui'
-import { collectionStore } from '../../services/CollectionStore'
+import { eventBusService } from 'electron-core-ui/main'
+import { collectionStore, pubsub, PUBSUB_TOPICS } from '../../services/CollectionStore'
+import { DocumentEvents, type DocumentChangedPayload } from '../../services/DocumentEvents'
 import { importFrom } from '../../services/import/ImportManager'
-import { isAnyFolder, isEnvironmentFolder, isRequest, type FolderItem, type EnvironmentFolder } from '../../../shared/models'
+import { isAnyFolder, isEnvironmentFolder, isRequest, type FolderItem, type EnvironmentFolder, type Environment } from '../../../shared/models'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
   return { content: [{ type: 'text', text: JSON.stringify(value, null, 2) }] }
@@ -52,6 +54,40 @@ export function broadcastTreeReplace(): void {
   for (const win of BrowserWindow.getAllWindows()) {
     if (!win.isDestroyed()) win.webContents.send('mcp:tree-replace', tree)
   }
+}
+
+/**
+ * Emit `ENVIRONMENT_CREATED` events for every environment in the
+ * imported tree. ContextService listens to these and loads the env's
+ * variables into its `transformedContexts` map; without this step,
+ * `run_request` (and any tool that depends on Handlebars-resolved
+ * URLs / headers / bodies) sees raw `{{baseUrl}}` template strings
+ * instead of expanded values, and the executor errors with
+ * "Invalid URL". Walks the tree post-push because the importers stamp
+ * envs onto the EnvironmentFolder roots, never on inner folders.
+ */
+function emitEnvironmentEvents(items: readonly FolderItem[]): void {
+  const visit = (item: FolderItem): void => {
+    if (isEnvironmentFolder(item)) {
+      for (const env of item.environments) {
+        const document = typeof (env as { toPlainObject?: () => Environment }).toPlainObject === 'function'
+          ? (env as { toPlainObject: () => Environment }).toPlainObject()
+          : env
+        const payload: DocumentChangedPayload = {
+          id: env.id,
+          type: 'environment',
+          document,
+          parentFolderId: item.id
+        }
+        void eventBusService.emit(DocumentEvents.ENVIRONMENT_CREATED, payload)
+        pubsub.publish(PUBSUB_TOPICS.ENVIRONMENT_CREATED, env)
+      }
+    }
+    if (isAnyFolder(item)) {
+      for (const child of item.items) visit(child)
+    }
+  }
+  for (const item of items) visit(item)
 }
 
 function countItems(items: readonly FolderItem[]): { folders: number; requests: number } {
@@ -143,6 +179,20 @@ export function registerImportTools(mcp: McpService): void {
         const kind: 'folder' | 'env-folder' | 'request' = isRequest(item) ? 'request' : isEnvironmentFolder(item) ? 'env-folder' : 'folder'
         summaries.push({ id: item.id, name: item.name, kind })
       }
+      // Reify the freshly-pushed plain JSON items into class instances
+      // (importer parsers DO produce class instances, but the broadcast
+      // round-trip + bonkers serialisation shapes mean some items can
+      // arrive as plain objects on certain code paths). Calling
+      // setCollections with the current tree triggers
+      // `ensureEnvironmentFolderInstance` + nested `reifyItem` so every
+      // request/folder ends up as a real class instance — without this,
+      // subsequent `serializeRequest` / `toPlainObject` calls (e.g.
+      // from `get_request`) throw "is not a function".
+      collectionStore.setCollections(collectionStore.getCollections(), 'user')
+      // Fire ENVIRONMENT_CREATED for every imported env so ContextService
+      // loads the variables into its transformedContexts map. Without
+      // this, `run_request` sees raw `{{baseUrl}}` strings.
+      emitEnvironmentEvents(result.items)
       broadcastTreeReplace()
       triggerSave()
       return jsonReply({
