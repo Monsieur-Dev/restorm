@@ -718,6 +718,44 @@ contextBridge.exposeInMainWorld('restorm', {
       const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) }
       ipcRenderer.on('mcp:close-tab', handler)
       return () => { ipcRenderer.off('mcp:close-tab', handler) }
+    },
+    /** Subscribe to MCP `run_request`. Payload `{itemId}`. The renderer
+     * is expected to ensure the request's tab is open + active, then
+     * dispatch the same code path the user's Send-button click would
+     * (so the response panel + URL bar update naturally + history is
+     * stored). Main waits for the history entry to land via polling. */
+    onMcpRunRequest: (callback: (payload: { itemId: string }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string }) }
+      ipcRenderer.on('mcp:run-request', handler)
+      return () => { ipcRenderer.off('mcp:run-request', handler) }
+    },
+    /** Subscribe to MCP `update_request`. Payload `{itemId, patch}`. The
+     * renderer applies the patch through the reactive request proxy so
+     * any open workbench tab repaints in place (caching the request
+     * reference at tab mount time means a wholesale tree replacement
+     * doesn't update the open editor — direct property assignment via
+     * the proxy fires the regular REQUEST_UPDATED chain). */
+    onMcpRequestUpdated: (callback: (payload: { itemId: string; patch: Record<string, unknown> }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; patch: Record<string, unknown> }) }
+      ipcRenderer.on('mcp:request-updated', handler)
+      return () => { ipcRenderer.off('mcp:request-updated', handler) }
+    },
+    /** Subscribe to MCP `update_folder`. Same shape as request-updated
+     * but for Folder / EnvironmentFolder. Renderer applies the patch
+     * via the reactive folder proxy + bumps the open folder tab's
+     * contentVersion so the panel re-derives every field. */
+    onMcpFolderUpdated: (callback: (payload: { itemId: string; patch: Record<string, unknown> }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; patch: Record<string, unknown> }) }
+      ipcRenderer.on('mcp:folder-updated', handler)
+      return () => { ipcRenderer.off('mcp:folder-updated', handler) }
+    },
+    /** Subscribe to MCP `set_favorite`. Payload `{itemId, favorite|null}`.
+     * Renderer toggles the per-project favorites store and bumps the
+     * tab content version so the H1 star repaints. */
+    onMcpSetFavorite: (callback: (payload: { itemId: string; favorite: boolean | null }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; favorite: boolean | null }) }
+      ipcRenderer.on('mcp:set-favorite', handler)
+      return () => { ipcRenderer.off('mcp:set-favorite', handler) }
     }
   },
   import: {

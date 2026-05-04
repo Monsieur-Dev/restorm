@@ -85,6 +85,9 @@ import { useMcpEnabled } from './hooks/useMcpEnabled'
 import { useMcpActiveStateBridge } from './hooks/useMcpActiveStateBridge'
 import { useMcpNavigation } from './hooks/useMcpNavigation'
 import { useMcpTreeReplace } from './hooks/useMcpTreeReplace'
+import { useMcpRunRequest } from './hooks/useMcpRunRequest'
+import { useMcpRequestPatch } from './hooks/useMcpRequestPatch'
+import { useMcpFolderPatch } from './hooks/useMcpFolderPatch'
 import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
 import { RestormWorkbenchContainer } from './components/MainView/Workbench/RestormWorkbenchContainer'
 import { SaveOptionsModal } from './components/Modals/SaveOptionsModal'
@@ -117,6 +120,7 @@ import { useSidebarState } from './hooks/useSidebarState'
 import {
   isFavorite as favoritesStoreIsFavorite,
   toggleFavorite as favoritesStoreToggle,
+  addFavorite as favoritesStoreAdd,
   removeFavorite as favoritesStoreRemove,
   reorderFavorites as favoritesStoreReorder
 } from './services/favoritesStore'
@@ -882,6 +886,29 @@ const App: React.FC = () => {
   // The hook flips the ref true; the effect reads + resets it.
   const mcpDrivenRef = useRef(false)
   useMcpTreeReplace({ enabled: mcpEnabled, setRootItems, mcpDrivenRef })
+  useMcpRunRequest({ enabled: mcpEnabled })
+  // Forward-ref dance: `bumpTabContentVersionFor` is declared further
+  // down (depends on `setWorkbenchTree`). Hand the patch hook a stable
+  // wrapper that reads the ref so we can wire it up without restructuring
+  // the file. The ref is patched by the effect right after the bump
+  // helper exists.
+  const bumpTabContentVersionRef = useRef<(itemId: string) => void>(() => { /* not yet wired */ })
+  const bumpTabContentVersionStable = useCallback((itemId: string) => { bumpTabContentVersionRef.current(itemId) }, [])
+  useMcpRequestPatch({ enabled: mcpEnabled, rootItems, bumpTabContentVersionFor: bumpTabContentVersionStable })
+  useMcpFolderPatch({ enabled: mcpEnabled, rootItems, bumpTabContentVersionFor: bumpTabContentVersionStable })
+  // MCP `set_favorite` listener — call the same toggle/remove path the
+  // sidebar buttons use, then bump the tab content version so the H1
+  // star repaints. `handleToggleFavorite` is declared further down so
+  // we route through a forward-ref (same trick as bumpTabContentRef).
+  const setFavoriteRefRef = useRef<(itemId: string, favorite: boolean | null) => void>(() => { /* not yet wired */ })
+  useEffect(() => {
+    if (!mcpEnabled) return
+    const root = window as { restorm?: { runtime?: { onMcpSetFavorite?: (cb: (payload: { itemId: string; favorite: boolean | null }) => void) => () => void } } }
+    const off = root.restorm?.runtime?.onMcpSetFavorite?.(({ itemId, favorite }) => {
+      setFavoriteRefRef.current(itemId, favorite)
+    })
+    return () => { off?.() }
+  }, [mcpEnabled])
 
   // Per-pane inline-edit targets so a rename triggered from Favorites
   // or Opened opens the input in that pane (not the Workspace tree row).
@@ -929,12 +956,31 @@ const App: React.FC = () => {
       return { ...prev, groups: walk(prev.groups) }
     })
   }, [])
+  // Patch the forward-ref consumed by `useMcpRequestPatch` (above).
+  useEffect(() => { bumpTabContentVersionRef.current = bumpTabContentVersionFor }, [bumpTabContentVersionFor])
 
   const handleToggleFavorite = useCallback((itemId: string): void => {
     if (!projectUuid) return
     favoritesStoreToggle(projectUuid, itemId)
     setFavoritesVersion((v) => v + 1)
     bumpTabContentVersionFor(itemId)
+  }, [projectUuid, bumpTabContentVersionFor])
+  // Patch the forward-ref consumed by the MCP `set_favorite` listener
+  // (above). Routes through `addFavorite` / `removeFavorite` when an
+  // explicit value is given, otherwise toggles.
+  useEffect(() => {
+    setFavoriteRefRef.current = (itemId: string, favorite: boolean | null): void => {
+      if (!projectUuid) return
+      if (favorite === true) {
+        favoritesStoreAdd(projectUuid, itemId)
+      } else if (favorite === false) {
+        favoritesStoreRemove(projectUuid, itemId)
+      } else {
+        favoritesStoreToggle(projectUuid, itemId)
+      }
+      setFavoritesVersion((v) => v + 1)
+      bumpTabContentVersionFor(itemId)
+    }
   }, [projectUuid, bumpTabContentVersionFor])
 
   const handleUnfavorite = useCallback((itemId: string): void => {
