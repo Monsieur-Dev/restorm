@@ -1,0 +1,151 @@
+# MCP tools reference
+
+This page lists every tool the Restorm MCP server exposes. Tools split across two layers:
+
+- **Restorm-domain tools** (`restorm/src/main/mcp/tools/`) — read / navigate / mutate / execute the open project.
+- **ECUI built-in tools** (`electron-core-ui/src/main/services/McpService.ts`) — generic dev tools that ship with every consumer of `McpService` (screenshot, evaluate, refresh, …). Useful for integration tests and ad-hoc debugging.
+
+For the authoritative input schema of any tool, see the linked source file — the zod schemas there are the source of truth. This page is intentionally a tour rather than a verbatim copy.
+
+## Read
+
+Read-only tools that give the AI awareness of the open project. None mutate state.
+
+| Tool | Summary |
+|---|---|
+| `list_folders` | List every folder, or the direct children of `parentId`. |
+| `list_requests` | List every request, or the direct request children of `folderId`. |
+| `get_request` | Full typed JSON of a request, with `PasswordValue` masked. |
+| `search` | Typed search across folders / requests / environments via the in-memory index. `kinds` filter + `maxResults` cap. |
+| `get_active_env` | Active env-folder selection + resolved Handlebars variables. |
+| `get_current_tab` | `{ tabId, itemId, kind }` for the active workbench tab. |
+
+Source: [`restorm/src/main/mcp/tools/read.ts`](../../src/main/mcp/tools/read.ts).
+
+## Navigation
+
+Tools that focus the UI on a specific item — useful when the AI wants the user's attention on a particular tree row or workbench tab.
+
+| Tool | Summary |
+|---|---|
+| `open_tab` | Open (or focus) the workbench tab for `{ itemId, kind }`. Same effect as the user double-clicking the sidebar row. |
+| `reveal_in_tree` | Expand the sidebar tree to make `itemId` visible + flash a highlight. |
+| `close_tab` | Close the workbench tab for `itemId`. No-op if the tab isn't open. |
+
+Source: [`restorm/src/main/mcp/tools/navigation.ts`](../../src/main/mcp/tools/navigation.ts).
+
+## Project
+
+Lifecycle tools for the .restorm file itself.
+
+| Tool | Summary |
+|---|---|
+| `create_project` | Create a new empty .restorm file at the given absolute path and open it. Format defaults to YAML. |
+| `open_project` | Open an existing .restorm file or folder. Triggers the same `file:opened` flow as the File menu. |
+| `save_project` | Trigger the autosave pipeline so any pending mutations land on disk. |
+
+Source: [`restorm/src/main/mcp/tools/project.ts`](../../src/main/mcp/tools/project.ts).
+
+## Write
+
+Mutate the open project. Every write goes through `CollectionStore`, fires the standard PubSub / EventBus events, and triggers the renderer's autosave path so the change persists.
+
+| Tool | Summary |
+|---|---|
+| `create_folder` | Create a folder under `parentId` (root env-folder when `parentId` is omitted). |
+| `create_request` | Create a bare request of a given protocol (HTTP / GraphQL / gRPC / SOAP / WebSocket / OData / auth). Fill it in with `update_request`. |
+| `rename_item` | Update the `name` of a folder, env-folder, or request. |
+| `delete_item` | Delete a folder / env-folder / request. Folder deletes cascade. |
+| `update_request` | Apply an arbitrary patch (URL / method / body / notes / headers / params / pathParams / metadata / tags / …). KV arrays are reified per-element so row identity is preserved in open tabs. |
+| `update_folder` | Same shape for folders + env-folders. |
+| `set_favorite` | Toggle (or set explicit `true` / `false`) the favourite flag on any item kind. |
+
+Source: [`restorm/src/main/mcp/tools/write.ts`](../../src/main/mcp/tools/write.ts).
+
+### `update_request` patch fields
+
+The full patch surface mirrors the request shape. Useful keys:
+
+- `url`, `method`, `notes`, `tags`, `metadata`
+- `headers`, `params`, `pathParams` — array of `{ key, value, description?, enabled? }`
+- `body` — `{ type: 'text'|'file'|'form-data'|'x-www-form-urlencoded', content?, path?, fields? }`
+- Protocol-specific fields (e.g. `query` / `variables` for GraphQL, `service` / `rpcMethod` for gRPC, `soapAction` for SOAP, `event` / `protocol` for WebSocket)
+
+The server strips `id` and `type` from the patch before applying it (those are immutable per request).
+
+## Import
+
+| Tool | Summary |
+|---|---|
+| `import_from_url` | Fetch a Swagger / OpenAPI / GraphQL SDL / Postman / Bruno / curl spec from a URL and commit it into the open project. With `parentFolderId`, nests the imports under that folder; without, appends as a root collection. |
+
+The tool fires `ENVIRONMENT_CREATED` for every imported environment so `ContextService` loads the variables before any subsequent `run_request` resolves Handlebars.
+
+Source: [`restorm/src/main/mcp/tools/import.ts`](../../src/main/mcp/tools/import.ts).
+
+## Execute
+
+I/O tools — the AI can ping endpoints and read responses.
+
+| Tool | Summary |
+|---|---|
+| `run_request` | Execute a request and return the structured response. Unary protocols (HTTP / OData / GraphQL / SOAP / gRPC) return `{ status, statusText, headers, body, durationMs, protocol, error? }` with JSON bodies parsed in-place. Streaming (WebSocket) returns the first frames + a `continuationToken`. |
+| `cancel_request` | Abort the in-flight execution. Routes to the matching execution service per protocol. Safe to call when nothing is in flight (returns `cancelled: false`). |
+| `run_batch` | Sequential `run_request` over an array of ids. Preserves input order, partial-on-unknown (returns the partial array + an error envelope). |
+| `read_stream` | Pull more frames from a streaming request started by `run_request`. Pass the `continuationToken`; returns the next slice + a fresh token. `done: true` when the connection closed. `cursorReset: true` if the buffer was rebuilt mid-session and the cursor overshot. |
+| `get_response_history` | Lightweight summary of stored responses for a request: `[{ guid, requestId, status, durationMs, executedAt, protocol, pinned }]`. |
+| `get_response` | Full payload of a stored response. Already redacted by `ResponseHistoryService` when the project's "redact secrets" setting is on (default on). |
+
+Source: [`restorm/src/main/mcp/tools/execute.ts`](../../src/main/mcp/tools/execute.ts).
+
+### How `run_request` actually runs
+
+For unary protocols, the tool delegates to the renderer's Send-button flow:
+
+1. Broadcasts `mcp:open-tab` so the request tab is open + active in the workbench.
+2. Broadcasts `mcp:run-request`. The renderer-side `useMcpRunRequest` hook clicks the protocol's Send/Connect button.
+3. The Send handler runs the same IPC + execution-service path as a real user click. The response panel + history panel populate naturally.
+4. Main polls `responseHistoryService.list(requestId)` until a new entry lands, reads its detail, returns the structured shape.
+
+For WebSocket, the tool returns immediately with the first frames buffered + a `continuationToken`. The MCP channel stays responsive; the AI pulls subsequent frames via `read_stream`.
+
+## ECUI built-in tools
+
+These ship with every `McpService` consumer (Restorm + the demo app). Documented in detail at [`electron-core-ui/docs/McpService/README.md`](../../../electron-core-ui/docs/McpService/README.md).
+
+| Tool | Summary |
+|---|---|
+| `screenshot` | Capture a PNG of the active window (or the named one). Returns base64 + a metadata block. |
+| `refresh` | Reload the renderer (`webContents.reload()`). |
+| `dom-query` | Run `document.querySelectorAll(selector)` and return shape info per match. |
+| `console-logs` | Snapshot the in-memory log buffer the service collects from every renderer. |
+| `dispatch-event` | Synthesise a real DOM event on a CSS-selected target. Picks the right Event constructor by event type. |
+| `type-text` | Drive `keydown` / `keypress` / `keyup` against the focused element with character timing. |
+| `evaluate` | Power-tool escape hatch: run a JS expression in the active renderer's main world. |
+| `keyboard-shortcut` | Synthesise a keyboard chord (`Ctrl+S` etc.) at the document level. |
+| `inject-css` | Mount a `<style>` tag in the active renderer with the given CSS text. |
+| `get-computed-style` | Return the resolved CSS for a queried element. |
+| `scroll-into-view` | Scroll an element into view, optionally aligned. |
+| `wait` | Sleep for N ms inside the renderer. |
+| `wait-for` | Poll a selector / predicate until it matches or times out. |
+| `storage` | Read / write `localStorage` / `sessionStorage`. |
+| `get-windows` | List all open BrowserWindows + their main bounds. |
+| `window-info` | Return geometry + dom-ready / load timing for a target window. |
+| `devtools` | Open the renderer's devtools panel. |
+| `drag-drop` | Synthesise a full drag-and-drop sequence between two CSS selectors. |
+| `exit` | Quit Restorm — useful for end-of-test cleanup. |
+
+These are intentionally generic. Restorm's domain tools layer above them, but the AI can drop down to these for ad-hoc work that the domain tools don't cover.
+
+## Error envelope
+
+Every tool returns the standard MCP `CallToolResult` shape:
+
+```jsonc
+{
+  "content": [{ "type": "text", "text": "<JSON or error message>" }],
+  "isError": true        // present only on failure
+}
+```
+
+Restorm-domain tools serialise their result as JSON inside the `text` field. On failure, `isError: true` is set and `text` carries a human-readable diagnostic — never a stack trace, never a secret. The full inventory of error paths per tool is in the unit-test files (`<tool>.test.ts` next to each implementation file).

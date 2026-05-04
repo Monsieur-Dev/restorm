@@ -19,6 +19,7 @@ Comprehensive documentation is available in the `/docs` folder:
 - **[Stack Setup](./docs/stack-setup/README.md)** - Complete technical stack overview and architecture
 - **[Getting Started](./docs/stack-setup/GETTING_STARTED.md)** - Step-by-step guide for development
 - **[Molecule Integration](./docs/stack-setup/MOLECULE_INTEGRATION.md)** - UI framework integration notes
+- **[MCP server](./docs/mcp/README.md)** - Drive Restorm from Claude Code / Cursor: tool reference, runbook, security model
 
 ## 🛠️ Technology Stack
 
