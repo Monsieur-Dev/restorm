@@ -303,7 +303,11 @@ const ShowcaseBubble: React.FC<ShowcaseBubbleProps> = ({ format, phase }) => {
     magic: ReturnType<typeof pickRandomMagicCardProps>
     electric: ElectricBorderProps
   }>(() => ({
-    id: pickRandomBorderEffect(),
+    // Excluded from the random pool: ElectricBorder is reserved for
+    // high-impact "feature moment" surfaces (e.g. an explicit upgrade
+    // CTA) rather than the routine import-bubble rotation. Keep the
+    // other three effects in the pool.
+    id: pickRandomBorderEffect({ exclude: ['electric-border'] }),
     beam: pickRandomBorderBeamProps(),
     shine: pickRandomShineBorderProps(),
     magic: pickRandomMagicCardProps(),

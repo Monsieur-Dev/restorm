@@ -35,7 +35,15 @@ export const Vignette = React.forwardRef<HTMLDivElement, VignetteProps>(function
   const [resolved] = useState<{ id: BorderEffectId; element: React.ReactElement } | null>(() => {
     if (!decoration) return null
     const id: BorderEffectId =
-      decoration === 'random' ? pickRandomBorderEffect() : decoration
+      decoration === 'random'
+        // Keep `electric-border` out of the routine-vignette pool —
+        // the turbulence-displaced wobble is a high-impact "feature
+        // moment" effect and would lose its punch if every casual
+        // `decoration="random"` rolled it. Consumers that want the
+        // electric look can still opt in explicitly via
+        // `decoration="electric-border"`.
+        ? pickRandomBorderEffect({ exclude: ['electric-border'] })
+        : decoration
     return { id, element: buildDecorationElement(id) }
   })
 
