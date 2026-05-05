@@ -78,13 +78,32 @@ const TAIL_DEPTH = 14
  *   right edge → bottom-right rounded corner → bottom edge to tail →
  *   tail right (down to tip) → tail tip → tail left (up to bubble) →
  *   bottom edge to bottom-left rounded corner → left edge → close.
+ *
+ * The whole path is inset by `inset` pixels on every side. The mask
+ * SVG draws the path stroked with `strokeWidth`, centred on the path
+ * — so half the stroke sits outside the path. Without an inset, that
+ * outer half would land beyond the SVG viewBox at the bubble edges
+ * (`x = 0`, `y = 0`, `x = width`, `y = height`) and get clipped → the
+ * trail's visible "comet" loses half its brightness whenever it
+ * crosses one of those edges. Insetting the path itself by
+ * `strokeWidth / 2` keeps the mask outline and the trail's
+ * `offset-path` in lockstep (they reuse the same path string) while
+ * keeping the full stroke inside the SVG viewBox.
  */
-function computeSilhouettePath(width: number, height: number): string {
+function computeSilhouettePath(width: number, height: number, inset = 1): string {
   const r = BUBBLE_BORDER_RADIUS
   const tx = TAIL_ATTACH_X
   const tw = TAIL_WIDTH
   const td = TAIL_DEPTH
-  return `M ${r} 0 H ${width - r} A ${r} ${r} 0 0 1 ${width} ${r} V ${height - r} A ${r} ${r} 0 0 1 ${width - r} ${height} H ${tx + tw} L ${tx} ${height + td} L ${tx} ${height} H ${r} A ${r} ${r} 0 0 1 0 ${height - r} V ${r} A ${r} ${r} 0 0 1 ${r} 0 Z`
+  // Apply the inset to every coordinate so both axes shift inward.
+  // The tail tip's y stays at `height + td - inset` so the inset is
+  // symmetric on the tail too.
+  const ix0 = inset
+  const iy0 = inset
+  const ix1 = width - inset
+  const iy1 = height - inset
+  const tipY = height + td - inset
+  return `M ${r + inset} ${iy0} H ${ix1 - r} A ${r} ${r} 0 0 1 ${ix1} ${r + inset} V ${iy1 - r} A ${r} ${r} 0 0 1 ${ix1 - r} ${iy1} H ${tx + tw} L ${tx + inset} ${tipY} L ${tx + inset} ${iy1} H ${r + inset} A ${r} ${r} 0 0 1 ${ix0} ${iy1 - r} V ${r + inset} A ${r} ${r} 0 0 1 ${r + inset} ${iy0} Z`
 }
 
 /**
@@ -94,6 +113,15 @@ function computeSilhouettePath(width: number, height: number): string {
  * thin band along the silhouette outline (the trail itself is a 60px
  * gradient div whose pixels would otherwise bleed inside the bubble
  * and outside the tail).
+ *
+ * Both the SVG viewBox and the SVG natural dimensions are equal to
+ * the bubble's bounding box (`width × (height + TAIL_DEPTH)`), so the
+ * mask's path coordinates render 1:1 with the element coordinates —
+ * which is what keeps the trail's `offset-path` aligned with the
+ * mask outline (they share the same path string). The path itself
+ * is inset by `strokeWidth / 2` (see `computeSilhouettePath`'s
+ * `inset` param) so the half of the stroke that sits outside the
+ * silhouette doesn't get clipped at the viewBox edges.
  */
 function computeSilhouetteMask(path: string, width: number, height: number, strokeWidth = 2): string {
   const svgHeight = height + TAIL_DEPTH
