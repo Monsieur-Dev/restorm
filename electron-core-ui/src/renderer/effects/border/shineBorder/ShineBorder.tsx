@@ -1,4 +1,5 @@
 import React from 'react'
+import './shineBorder.css'
 
 // Adapted from Magic UI (MIT) — https://magicui.design/docs/components/shine-border
 
@@ -19,10 +20,8 @@ export const ShineBorder: React.FC<ShineBorderProps> = ({
   const colors = Array.isArray(shineColor) ? shineColor.join(',') : shineColor
   const style: React.CSSProperties = {
     ['--ecu-shine-border-width' as string]: `${borderWidth}px`,
-    ['--ecu-shine-duration' as string]: `${duration}s`,
+    ['--ecu-shine-border-duration' as string]: `${duration}s`,
     backgroundImage: `radial-gradient(transparent, transparent, ${colors}, transparent, transparent)`
   }
-  return (
-    <div className="ecu-vignette-decoration ecu-vignette-decoration-shine-border" style={style} />
-  )
+  return <div className="ecu-border-effect ecu-shine-border" style={style} />
 }

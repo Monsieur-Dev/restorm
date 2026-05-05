@@ -224,6 +224,15 @@
   }
 }
 
+/* When the PRO bubble draws a MagicCard effect, extend the .ecu-magic-card
+ * canvas 14px below the bubble so the cursor-tracked spotlight can reach
+ * the comic-book tail when the user hovers near it. The MagicCard
+ * component's stock CSS uses `inset: 0` (via the shared .ecu-border-effect
+ * base); overriding `bottom` here is the smallest possible deviation. */
+.import-format-showcase-bubble--pro .ecu-magic-card {
+  bottom: -14px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .import-format-showcase-bubble--in,
   .import-format-showcase-bubble--out {

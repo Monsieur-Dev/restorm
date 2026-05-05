@@ -1,4 +1,5 @@
 import React from 'react'
+import './borderBeam.css'
 
 // Adapted from Magic UI (MIT) — https://magicui.design/docs/components/border-beam
 // Animation reimplemented with CSS keyframes (offset-path) to avoid a runtime dep on motion.
@@ -47,8 +48,8 @@ export const BorderBeam: React.FC<BorderBeamProps> = ({
   }
 
   return (
-    <div className="ecu-vignette-decoration ecu-vignette-decoration-border-beam" style={ringStyle}>
-      <div className="ecu-vignette-decoration-border-beam-trail" style={trailStyle} />
+    <div className="ecu-border-effect ecu-border-beam" style={ringStyle}>
+      <div className="ecu-border-beam-trail" style={trailStyle} />
     </div>
   )
 }

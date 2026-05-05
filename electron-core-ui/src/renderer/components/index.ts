@@ -20,8 +20,8 @@ export { Wallpaper, wallpaperPatternIds } from './Wallpaper'
 export type { WallpaperProps, WallpaperPattern, WallpaperPatternId } from './Wallpaper'
 
 // Vignette exports
-export { Vignette, vignetteDecorationIds } from './Vignette'
-export type { VignetteProps, VignetteDecoration, VignetteDecorationId } from './Vignette'
+export { Vignette } from './Vignette'
+export type { VignetteProps, VignetteDecoration } from './Vignette'
 
 // Wordmark exports
 export { Wordmark, wordmarkEffectIds } from './Wordmark'

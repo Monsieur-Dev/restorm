@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react'
+import './magicCard.css'
 
 // Adapted from Magic UI (MIT) — https://magicui.design/docs/components/magic-card
 // Simplified to a border-tracking spotlight that follows the pointer; CSS vars
@@ -67,11 +68,5 @@ export const MagicCard: React.FC<MagicCardProps> = ({
     ['--ecu-magic-blur' as string]: `${blur}px`
   }
 
-  return (
-    <div
-      ref={ref}
-      className="ecu-vignette-decoration ecu-vignette-decoration-magic-card"
-      style={style}
-    />
-  )
+  return <div ref={ref} className="ecu-border-effect ecu-magic-card" style={style} />
 }

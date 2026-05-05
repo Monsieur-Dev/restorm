@@ -1,0 +1,34 @@
+.ecu-shine-border {
+  background-size: 300% 300%;
+  padding: var(--ecu-shine-border-width, 1px);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  animation: ecu-shine-border-shine var(--ecu-shine-border-duration, 14s) linear infinite;
+  will-change: background-position;
+}
+
+@keyframes ecu-shine-border-shine {
+  0% {
+    background-position: 0% 0%;
+  }
+
+  50% {
+    background-position: 100% 100%;
+  }
+
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ecu-shine-border {
+    animation: none;
+  }
+}

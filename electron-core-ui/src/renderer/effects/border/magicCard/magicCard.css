@@ -1,0 +1,13 @@
+.ecu-magic-card {
+  background: radial-gradient(
+    var(--ecu-magic-size, 280px) circle at var(--ecu-magic-x, -280px) var(--ecu-magic-y, -280px),
+    var(--ecu-magic-from, #9e7aff),
+    var(--ecu-magic-to, #fe8bbb) 45%,
+    transparent 70%
+  );
+  filter: blur(var(--ecu-magic-blur, 32px));
+  mix-blend-mode: overlay;
+  opacity: var(--ecu-magic-opacity, 0);
+  transition: opacity 300ms ease;
+  will-change: opacity;
+}
