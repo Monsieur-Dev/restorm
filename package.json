@@ -19,6 +19,7 @@
     "dev:demo": "pnpm --filter demo run dev",
     "dev:restorm": "pnpm --filter restorm run dev",
     "dev:restorm:log": "pnpm run dev:restorm > restorm-dev.log 2>&1",
+    "dev:restorm:mcp": "node scripts/mcp-launcher.mjs",
     "build:core-ui": "pnpm --filter electron-core-ui run build",
     "build:demo": "pnpm --filter demo run build",
     "build:restorm": "pnpm --filter restorm run build",

@@ -67,6 +67,19 @@ const BUBBLE_BORDER_RADIUS = 12
 const TAIL_ATTACH_X = 28
 const TAIL_WIDTH = 14
 const TAIL_DEPTH = 14
+// The bubble has a 1 px border (see `.import-format-showcase-bubble`
+// CSS). `position: absolute; inset: 0;` on the border-effect div
+// positions it relative to the parent's PADDING box, so by default
+// the div sits 1 px inside the bubble's outer rectangle on every
+// side. The mask SVG, however, is sized to the bubble's offsetWidth /
+// offsetHeight (border-box) — so without compensation, the rightmost
+// 1-2 px of the silhouette stroke land *outside* the smaller div and
+// the beam visibly "vanishes" along the right edge. Overriding the
+// inset by this width on top / right / left (and TAIL_DEPTH +
+// BUBBLE_BORDER_WIDTH on the bottom) extends the div to the bubble's
+// full border-box, which is what the path coordinates actually
+// describe.
+const BUBBLE_BORDER_WIDTH = 1
 
 /**
  * Build the SVG path that traces the bubble's full silhouette
@@ -449,7 +462,18 @@ function renderProBorderEffect(
         className="ecu-border-effect ecu-border-beam"
         style={{
           ['--ecu-border-beam-width' as string]: `${beam.borderWidth ?? 1}px`,
-          bottom: `-${TAIL_DEPTH}px`,
+          // Stretch the container to the bubble's full border-box on
+          // every side. `inset: 0` (from .ecu-border-effect) anchors
+          // it to the padding-box, which is `BUBBLE_BORDER_WIDTH` px
+          // inside the silhouette path on every edge — the right
+          // stroke of the path then lands outside the div and the
+          // beam visibly disappears as it traverses the right edge.
+          // Bottom keeps the extra `TAIL_DEPTH` so the path's tail
+          // tip stays inside.
+          top: `-${BUBBLE_BORDER_WIDTH}px`,
+          right: `-${BUBBLE_BORDER_WIDTH}px`,
+          left: `-${BUBBLE_BORDER_WIDTH}px`,
+          bottom: `-${TAIL_DEPTH + BUBBLE_BORDER_WIDTH}px`,
           // Replace ECUI's rect-based `mask: linear-gradient(...) padding-box, ... border-box; mask-composite: intersect`
           // with a silhouette-outline mask (single layer → no compose).
           mask: silhouette.mask,
