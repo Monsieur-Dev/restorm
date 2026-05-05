@@ -89,6 +89,54 @@ export function ImportModal({
   const [lockedKeys, setLockedKeys] = useState<ReadonlySet<string>>(() => new Set())
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Cross-section fade machine. When the user enters a valid source,
+  // `previewItems` populates → we want the rotating-format-showcase to
+  // fade out and the route-preview tree to fade in. When the user
+  // overwrites the input with something that yields no preview, we go
+  // back: tree fades out, showcase fades back in. The state machine
+  // here mounts only one section at a time so they never both compete
+  // for the same layout slot.
+  //
+  //   `displayedSection` → which section is currently in the DOM
+  //   `transitionPhase`  → 'leaving' (fade-out) | 'entering' (fade-in) | null (idle)
+  //
+  // 300 ms feels right for both halves; total swap time is 600 ms.
+  type Section = 'showcase' | 'preview'
+  type Phase = 'leaving' | 'entering' | null
+  const FADE_MS = 300
+  const targetSection: Section = (refreshContext !== undefined || previewItems.length > 0) ? 'preview' : 'showcase'
+  const [displayedSection, setDisplayedSection] = useState<Section>(targetSection)
+  const [transitionPhase, setTransitionPhase] = useState<Phase>(null)
+  // Bumping this key when we re-enter the showcase forces
+  // `<ImportFormatShowcase>` to remount with a fresh rotation engine
+  // (the user explicitly asked for the bubble cycle to "restart" on
+  // every return to the showcase, not to resume mid-cycle).
+  const [showcaseMountSeq, setShowcaseMountSeq] = useState(0)
+  const prevDisplayedRef = useRef<Section>(displayedSection)
+
+  useEffect(() => {
+    if (targetSection === displayedSection) return
+    setTransitionPhase('leaving')
+    const leaveTimer = setTimeout(() => {
+      setDisplayedSection(targetSection)
+      setTransitionPhase('entering')
+    }, FADE_MS)
+    return () => { clearTimeout(leaveTimer) }
+  }, [targetSection, displayedSection])
+
+  useEffect(() => {
+    if (transitionPhase !== 'entering') return
+    const enterTimer = setTimeout(() => { setTransitionPhase(null) }, FADE_MS)
+    return () => { clearTimeout(enterTimer) }
+  }, [transitionPhase])
+
+  useEffect(() => {
+    if (prevDisplayedRef.current === 'preview' && displayedSection === 'showcase') {
+      setShowcaseMountSeq((seq) => seq + 1)
+    }
+    prevDisplayedRef.current = displayedSection
+  }, [displayedSection])
+
   // Handle input change with debounce
   const handleInputChange = useCallback((value: string) => {
     setInput(value)
@@ -547,14 +595,23 @@ export function ImportModal({
         {/* Format showcase — pitches one supported import format at a
             time when there's nothing to preview yet. Hidden in refresh
             mode (the user already chose a format the day they imported)
-            and once a preview tree is on screen. */}
-        {!refreshContext && previewItems.length === 0 && (
-          <ImportFormatShowcase />
+            and once a preview tree is on screen.
+
+            The wrapper carries the cross-section fade class
+            (`leaving` / `entering`) driven by the `transitionPhase`
+            state. `key={showcaseMountSeq}` forces a fresh `<ImportFormatShowcase>`
+            mount each time we come back from the preview tree so the
+            rotation engine restarts from index 0 instead of resuming
+            mid-cycle. */}
+        {displayedSection === 'showcase' && !refreshContext && (
+          <div className={`import-section-fade${transitionPhase !== null ? ` import-section-fade--${transitionPhase}` : ''}`}>
+            <ImportFormatShowcase key={showcaseMountSeq} />
+          </div>
         )}
 
         {/* Section 3: Selection tree (preview + tri-state checkboxes) */}
-        {previewItems.length > 0 && (
-          <div className="import-section import-preview-section">
+        {displayedSection === 'preview' && (
+          <div className={`import-section import-preview-section import-section-fade${transitionPhase !== null ? ` import-section-fade--${transitionPhase}` : ''}`}>
             <div className="import-preview-header">
               <label className="import-label">
                 {t('import.preview.label')}

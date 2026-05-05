@@ -116,3 +116,46 @@
   border-top: 1px solid var(--vscode-editorWidget-border);
 }
 
+/* Cross-section fade between the rotating-format showcase (empty input)
+ * and the route-preview tree (valid input). Driven by ImportModal's
+ * `transitionPhase` state — the wrapper gets `--leaving` while the
+ * outgoing section fades out, then `--entering` while the incoming one
+ * fades in. Both halves take FADE_MS (300 ms) — keep the keyframe
+ * duration in sync with `FADE_MS` in ImportModal.tsx. */
+.import-section-fade {
+  /* Keep the section taking up the same slot in the flex column —
+   * the showcase wrapper inherits flex: 1 1 auto from its host class
+   * (.import-format-showcase-host) but the preview-section already
+   * has its own flex sizing rules above. We don't repeat them here
+   * so the fade wrapper stays a no-op when no transition is active. */
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.import-section-fade--leaving {
+  animation: import-modal-section-fade-out 300ms ease-out both;
+}
+
+.import-section-fade--entering {
+  animation: import-modal-section-fade-in 300ms ease-out both;
+}
+
+@keyframes import-modal-section-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes import-modal-section-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .import-section-fade--leaving,
+  .import-section-fade--entering {
+    animation: none;
+  }
+}
+
