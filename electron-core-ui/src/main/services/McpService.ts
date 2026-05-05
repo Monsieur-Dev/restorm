@@ -1,6 +1,9 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http'
 import { timingSafeEqual } from 'node:crypto'
 import { AsyncLocalStorage } from 'node:async_hooks'
+import { writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join as pathJoin } from 'node:path'
 import { app, BrowserWindow, dialog as electronDialog } from 'electron'
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
@@ -417,6 +420,185 @@ export class McpService {
         const base64 = image.toPNG().toString('base64')
         return {
           content: [{ type: 'image', data: base64, mimeType: 'image/png' }]
+        }
+      }
+    )
+
+    this.registerTool(
+      'screencast-start',
+      {
+        title: 'Start screencast',
+        description:
+          'Begin recording the target Electron window as a WebM video. The clip is held in renderer memory ' +
+          '(MediaRecorder + Blob chunks) until `screencast-stop` is called, which flushes it to a temp file ' +
+          'and returns the path. No native dialog is shown — the source id is fetched from main via ' +
+          '`BrowserWindow.getMediaSourceId()` and passed straight into `getUserMedia({ chromeMediaSourceId })`. ' +
+          'Use as the animated counterpart to `screenshot`: call `screencast-start` → trigger the UI you want ' +
+          'to demo → call `screencast-stop` → upload / inspect the WebM. Errors out cleanly if a screencast ' +
+          'is already in progress on the target window.',
+        inputSchema: {
+          windowId: windowIdSchema,
+          bitrate: z.coerce.number().int().min(100_000).max(50_000_000).optional().describe(
+            'Target video bitrate in bits per second. Default 4_000_000 (4 Mbps) — a good trade-off between ' +
+            'WebM file size and visual fidelity for UI demos.'
+          ),
+          maxWidth: z.coerce.number().int().min(64).max(7680).optional().describe(
+            'Cap on the captured stream width in pixels. Default 1920. Smaller caps shrink the file ' +
+            'proportionally, useful for thumbnail-sized demos.'
+          ),
+          maxHeight: z.coerce.number().int().min(64).max(4320).optional().describe(
+            'Cap on the captured stream height in pixels. Default 1080.'
+          ),
+          maxFrameRate: z.coerce.number().int().min(1).max(60).optional().describe(
+            'Target frame rate. Default 30. Animations driven by `prefers-reduced-motion: reduce` are still ' +
+            'paused under that media query — drop the rate if you need a low-motion clip.'
+          )
+        } as Record<string, unknown>
+      },
+      async (args) => {
+        const argRecord = args
+        const windowId = typeof argRecord['windowId'] === 'number' ? argRecord['windowId'] : undefined
+        const bitrate = typeof argRecord['bitrate'] === 'number' ? argRecord['bitrate'] : 4_000_000
+        const maxWidth = typeof argRecord['maxWidth'] === 'number' ? argRecord['maxWidth'] : 1920
+        const maxHeight = typeof argRecord['maxHeight'] === 'number' ? argRecord['maxHeight'] : 1080
+        const maxFrameRate = typeof argRecord['maxFrameRate'] === 'number' ? argRecord['maxFrameRate'] : 30
+        const win = pickWindow(windowId)
+        if (!win) return noWindowError(windowId)
+
+        // `BrowserWindow.getMediaSourceId()` returns a string consumable by
+        // `getUserMedia({ video: { mandatory: { chromeMediaSourceId } } })`
+        // for THIS window only — Electron's main process bypasses the
+        // user-facing source picker that web `getDisplayMedia()` would
+        // otherwise show.
+        const mediaSourceId = win.getMediaSourceId()
+
+        const code =
+          `((mediaSourceId, bitrate, maxWidth, maxHeight, maxFrameRate) => new Promise((resolve, reject) => {
+            (async () => {
+              try {
+                if (window.__ecuScreencast__) {
+                  reject(new Error('A screencast is already in progress; call screencast-stop first'));
+                  return;
+                }
+                const stream = await navigator.mediaDevices.getUserMedia({
+                  audio: false,
+                  video: {
+                    mandatory: {
+                      chromeMediaSource: 'desktop',
+                      chromeMediaSourceId: mediaSourceId,
+                      maxWidth: maxWidth,
+                      maxHeight: maxHeight,
+                      maxFrameRate: maxFrameRate
+                    }
+                  }
+                });
+                const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+                  ? 'video/webm;codecs=vp9'
+                  : 'video/webm';
+                const recorder = new MediaRecorder(stream, { mimeType: mimeType, videoBitsPerSecond: bitrate });
+                const chunks = [];
+                recorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) { chunks.push(e.data); } };
+                window.__ecuScreencast__ = { recorder: recorder, chunks: chunks, stream: stream, mimeType: mimeType, startedAt: Date.now() };
+                recorder.start(250);
+                resolve('started');
+              } catch (err) {
+                reject(err && err.message ? err : new Error(String(err)));
+              }
+            })();
+          }))(${JSON.stringify(mediaSourceId)}, ${bitrate}, ${maxWidth}, ${maxHeight}, ${maxFrameRate})`
+
+        try {
+          await win.webContents.executeJavaScript(code, true)
+          return { content: [{ type: 'text', text: 'Screencast started.' }] }
+        } catch (err) {
+          return {
+            content: [
+              { type: 'text', text: `Failed to start screencast: ${err instanceof Error ? err.message : String(err)}` }
+            ],
+            isError: true
+          }
+        }
+      }
+    )
+
+    this.registerTool(
+      'screencast-stop',
+      {
+        title: 'Stop screencast',
+        description:
+          'Stop the active screencast on the target window, flush the accumulated WebM chunks to a temp ' +
+          'file and return the file path + clip metadata (byte length, duration, mime type). The recorder ' +
+          'and the underlying MediaStream are torn down before this returns. Errors out if no screencast ' +
+          'is currently running on the target window.',
+        inputSchema: { windowId: windowIdSchema } as Record<string, unknown>
+      },
+      async (args) => {
+        const argRecord = args
+        const windowId = typeof argRecord['windowId'] === 'number' ? argRecord['windowId'] : undefined
+        const win = pickWindow(windowId)
+        if (!win) return noWindowError(windowId)
+
+        // Renderer-side: stop the recorder, await the final `dataavailable`
+        // emission via the `stop` event, concat the chunks and base64-encode
+        // them so we can ship the bytes back through `executeJavaScript`'s
+        // JSON-only IPC channel. 0x8000 = 32 KiB chunks for `String.fromCharCode.apply`,
+        // which would blow the stack on larger spans.
+        const code =
+          `((maxChunkSize) => new Promise((resolve, reject) => {
+            (async () => {
+              try {
+                const cap = window.__ecuScreencast__;
+                if (!cap) { reject(new Error('No screencast in progress')); return; }
+                await new Promise((res) => {
+                  cap.recorder.addEventListener('stop', () => res(), { once: true });
+                  cap.recorder.stop();
+                });
+                cap.stream.getTracks().forEach((t) => t.stop());
+                const blob = new Blob(cap.chunks, { type: cap.mimeType });
+                const buffer = new Uint8Array(await blob.arrayBuffer());
+                let binary = '';
+                for (let i = 0; i < buffer.byteLength; i += maxChunkSize) {
+                  const slice = buffer.subarray(i, Math.min(i + maxChunkSize, buffer.byteLength));
+                  binary += String.fromCharCode.apply(null, slice);
+                }
+                const base64 = btoa(binary);
+                const result = { base64: base64, byteLength: buffer.byteLength, durationMs: Date.now() - cap.startedAt, mimeType: cap.mimeType };
+                delete window.__ecuScreencast__;
+                resolve(result);
+              } catch (err) {
+                reject(err && err.message ? err : new Error(String(err)));
+              }
+            })();
+          }))(0x8000)`
+
+        let result: { base64: string; byteLength: number; durationMs: number; mimeType: string }
+        try {
+          result = (await win.webContents.executeJavaScript(code, true)) as typeof result
+        } catch (err) {
+          return {
+            content: [
+              { type: 'text', text: `Failed to stop screencast: ${err instanceof Error ? err.message : String(err)}` }
+            ],
+            isError: true
+          }
+        }
+
+        const buffer = Buffer.from(result.base64, 'base64')
+        const tmpPath = pathJoin(tmpdir(), `ecu-screencast-${Date.now()}.webm`)
+        writeFileSync(tmpPath, buffer)
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({
+                path: tmpPath,
+                byteLength: result.byteLength,
+                durationMs: result.durationMs,
+                mimeType: result.mimeType
+              })
+            }
+          ]
         }
       }
     )
