@@ -7,6 +7,12 @@
   flex-direction: column;
   gap: 20px;
   box-sizing: border-box;
+  /* `position: relative` + isolated stacking context lets
+   * `ImportFormatShowcase`'s sibling glow div paint behind the modal
+   * content without leaking into the surrounding overlay or punching
+   * past the modal frame. */
+  position: relative;
+  isolation: isolate;
 }
 
 .import-section {
@@ -23,23 +29,6 @@
   font-weight: 500;
   font-size: 13px;
   color: var(--vscode-foreground);
-}
-
-.import-destination-row {
-  display: flex;
-  gap: 8px;
-  align-items: flex-start;
-  width: 100%;
-  min-width: 0;
-}
-
-.import-destination-row > div:first-child {
-  flex: 1;
-  min-width: 0;
-}
-
-.import-destination-row > button {
-  flex-shrink: 0;
 }
 
 .import-loading,

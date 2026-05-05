@@ -2,38 +2,30 @@
  * ImportModal - Modal for importing requests from various sources
  */
 
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react'
+import React, { useState, useCallback, useEffect, useRef } from 'react'
 import {
   Modal,
   Button,
-  InputBox,
-  type ListViewItemData,
-  ListViewDropdown
+  InputBox
 } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
-import type { FolderItem, EnvironmentFolder, Folder } from '../../../../shared/types/collections'
+import type { FolderItem, EnvironmentFolder } from '../../../../shared/types/collections'
 import { isEnvironmentFolder, isRequest } from '../../../../shared/types/collections'
 import type { AuthenticationRequest } from '../../../../shared/models'
 import { logger } from 'electron-core-ui/renderer'
 import { AuthenticationSetupModal } from './AuthenticationSetupModal'
+import { ImportFormatShowcase } from './ImportFormatShowcase'
 import { ImportSelectionTree } from './ImportSelectionTree'
 import { allLeafKeys } from './importSelectionHelpers'
 import { filterImportTreeBySelection } from '../../../../shared/utils/importNaturalKey'
 import './ImportModal.css'
-
-interface PendingFolder {
-  id: string
-  name: string
-  parentId: string
-}
 
 /**
  * Optional payload that flips the modal into "Refresh from source"
  * mode. When set, the modal:
  *
  * - Pre-fills the source URL + the attached auth route from the
- *   already-imported env folder (the destination dropdown is hidden
- *   because the target is fixed). Both fields are display-only —
+ *   already-imported env folder. Both fields are display-only —
  *   they're sourced from the env folder's stored apiUpdate config
  *   and aren't editable in this flow.
  * - Calls `apiUpdate.previewTree(targetFolderId)` to get the parsed
@@ -57,9 +49,7 @@ export interface RefreshContext {
 export interface ImportModalProps {
   isOpen: boolean
   onClose: () => void
-  onImport: (items: FolderItem[], targetFolderId?: string, pendingFolders?: PendingFolder[]) => void
-  rootFolder?: EnvironmentFolder
-  selectedFolderId?: string | undefined
+  onImport: (items: FolderItem[]) => void
   refreshContext?: RefreshContext
 }
 
@@ -67,8 +57,6 @@ export function ImportModal({
   isOpen,
   onClose,
   onImport,
-  rootFolder,
-  selectedFolderId,
   refreshContext
 }: ImportModalProps): React.JSX.Element {
   const { t } = useTranslation()
@@ -92,11 +80,6 @@ export function ImportModal({
   // (React state updates batch, so a closure would see `null`).
   const attachedAuthHeadersRef = useRef<Record<string, string> | null>(null)
   const [showAuthSetupModal, setShowAuthSetupModal] = useState(false)
-  const [targetFolderId, setTargetFolderId] = useState<string | undefined>(undefined)
-  const [expandedFolderIds, setExpandedFolderIds] = useState<string[]>(['__root__'])
-  const [pendingFolders, setPendingFolders] = useState<PendingFolder[]>([])
-  const [showFolderNameInput, setShowFolderNameInput] = useState(false)
-  const [newFolderName, setNewFolderName] = useState('')
   /**
    * Set of leaf natural keys whose checkbox is forced-on + disabled
    * because their operation already exists in the target folder.
@@ -105,148 +88,6 @@ export function ImportModal({
    */
   const [lockedKeys, setLockedKeys] = useState<ReadonlySet<string>>(() => new Set())
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  // Initialize targetFolderId from selectedFolderId or find parent folder
-  useEffect(() => {
-    if (!isOpen || !rootFolder) return
-
-    if (selectedFolderId) {
-      // Find if selectedFolderId is a folder or a request
-      const findItem = (items: FolderItem[], id: string): { item: FolderItem; parent?: Folder | EnvironmentFolder } | null => {
-        for (const item of items) {
-          if (item.id === id) {
-            return { item }
-          }
-          if ('items' in item) {
-            const found = findItem((item).items, id)
-            if (found) {
-              return { item: found.item, parent: item }
-            }
-          }
-        }
-        return null
-      }
-
-      const found = findItem(rootFolder.items, selectedFolderId)
-      if (found) {
-        // If it's a folder, use it; if it's a request, use its parent
-        if ('items' in found.item) {
-          setTargetFolderId(found.item.id)
-        } else if (found.parent) {
-          setTargetFolderId(found.parent.id)
-        } else {
-          setTargetFolderId(undefined) // Root
-        }
-      } else {
-        setTargetFolderId(undefined)
-      }
-    } else {
-      setTargetFolderId(undefined)
-    }
-  }, [isOpen, selectedFolderId, rootFolder])
-
-  // Build folder items for dropdown with root option
-  const folderItems: ListViewItemData[] = useMemo(() => {
-    if (!rootFolder) return []
-    
-    // Recursively build folder tree, including both Folders and EnvironmentFolders
-    const buildFolderTree = (items: FolderItem[], parentId: string): ListViewItemData[] => {
-      const folderListItems = items
-        .filter(item => 'items' in item) // Only folders (both Folder and EnvironmentFolder)
-        .map(item => {
-          const folder = item
-          const isEnvFolder = isEnvironmentFolder(item)
-          
-          const folderItem: ListViewItemData = {
-            id: folder.id,
-            title: folder.name,
-            icon: isEnvFolder ? 'folder-library' : 'folder',
-            isExpandable: false,
-            children: folder.items.length > 0 ? buildFolderTree(folder.items, folder.id) : []
-          }
-          return folderItem
-        })
-      
-      // Add pending folders for this parent
-      const pendingForThisParent = pendingFolders
-        .filter(pf => pf.parentId === parentId)
-        .map(pf => ({
-          id: pf.id,
-          title: pf.name,
-          icon: 'folder' as const,
-          isExpandable: false,
-          children: []
-        }))
-      
-      return [...folderListItems, ...pendingForThisParent]
-    }
-    
-    // Start by building from root's items (which includes all EnvironmentFolders)
-    const rootChildren = buildFolderTree(rootFolder.items, '__root__')
-    
-    // Add root option at the top level
-    const rootItem: ListViewItemData = {
-      id: '__root__',
-      title: t('import.destination.root'),
-      icon: 'folder-opened',
-      children: rootChildren
-    }
-    
-    return [rootItem]
-  }, [rootFolder, t, pendingFolders])
-  
-  // Initialize expanded folders when rootFolder changes
-  useEffect(() => {
-    if (!rootFolder) return
-    
-    const allFolderIds: string[] = []
-    const collectIds = (items: FolderItem[]): void => {
-      items.forEach(item => {
-        if ('items' in item) {
-          const folder = item
-          allFolderIds.push(folder.id)
-          if (folder.items.length > 0) {
-            collectIds(folder.items)
-          }
-        }
-      })
-    }
-    collectIds(rootFolder.items)
-    setExpandedFolderIds(['__root__', ...allFolderIds])
-  }, [rootFolder])
-  
-  // Get the display name for the selected folder
-  const selectedFolderName = useMemo(() => {
-    logger.info('[ImportModal] selectedFolderName recalc', { targetFolderId, pendingFoldersCount: pendingFolders.length })
-    if (!targetFolderId || targetFolderId === '__root__') {
-      return t('import.destination.root')
-    }
-    
-    // Check if it's a pending folder first
-    const pendingFolder = pendingFolders.find(pf => pf.id === targetFolderId)
-    if (pendingFolder) {
-      logger.info('[ImportModal] Found pending folder', { name: pendingFolder.name })
-      return pendingFolder.name
-    }
-    logger.info('[ImportModal] No pending folder found for', { targetFolderId })
-    
-    if (!rootFolder) return ''
-    
-    const findFolderName = (items: FolderItem[], id: string): string | null => {
-      for (const item of items) {
-        if (item.id === id && 'items' in item) {
-          return (item).name
-        }
-        if ('items' in item) {
-          const found = findFolderName((item).items, id)
-          if (found) return found
-        }
-      }
-      return null
-    }
-    
-    return findFolderName(rootFolder.items, targetFolderId) ?? t('import.destination.root')
-  }, [targetFolderId, rootFolder, t, pendingFolders])
 
   // Handle input change with debounce
   const handleInputChange = useCallback((value: string) => {
@@ -320,28 +161,6 @@ export function ImportModal({
     event.preventDefault()
     event.stopPropagation()
   }, [])
-
-  // Handle new folder creation
-  const handleCreateFolder = useCallback(() => {
-    if (!newFolderName.trim()) return
-    
-    const newFolder: PendingFolder = {
-      id: `pending-${crypto.randomUUID()}`,
-      name: newFolderName.trim(),
-      parentId: targetFolderId ?? '__root__'
-    }
-    logger.info('[ImportModal] handleCreateFolder', { newFolder, currentTargetId: targetFolderId, previewItemsCount: previewItems.length, inputLength: input.length })
-    
-    setPendingFolders(prev => {
-      logger.info('[ImportModal] setPendingFolders', { prevCount: prev.length, newCount: prev.length + 1 })
-      return [...prev, newFolder]
-    })
-    setTargetFolderId(newFolder.id)
-    logger.info('[ImportModal] setTargetFolderId to', { newFolderId: newFolder.id })
-    setExpandedFolderIds(prev => [...prev, newFolder.parentId, newFolder.id])
-    setShowFolderNameInput(false)
-    setNewFolderName('')
-  }, [newFolderName, targetFolderId, previewItems.length, input.length])
 
   // Handle import click
   const handleImportClick = useCallback(() => {
@@ -460,12 +279,15 @@ export function ImportModal({
     })
     finalItems = stampApiUpdate(finalItems)
 
-    // Call import with current pending folders
-    onImport(finalItems, targetFolderId, pendingFolders)
+    // Imports always land at the project root — the destination
+    // picker (and the per-import "new folder" creation that went with
+    // it) is gone until the import-screen redesign defines a path
+    // that's actually wired through the persistence layer.
+    onImport(finalItems)
 
     // Close modal (useEffect will clear state when modal closes)
     onClose()
-  }, [previewItems, selection, input, targetFolderId, pendingFolders, onImport, onClose, attachedAuth, refreshContext])
+  }, [previewItems, selection, input, onImport, onClose, attachedAuth, refreshContext])
 
   // Refresh-from-source bootstrap. When `refreshContext` is provided
   // we pre-fill the URL display + the auth pill from the env folder's
@@ -581,9 +403,6 @@ export function ImportModal({
       setSearchFilter('')
       setError(null)
       setIsLoading(false)
-      setPendingFolders([])
-      setShowFolderNameInput(false)
-      setNewFolderName('')
     }
   }, [isOpen])
 
@@ -602,63 +421,7 @@ export function ImportModal({
         data-refresh-mode={refreshContext ? 'true' : undefined}
       >
 
-        {/* Destination Selection — hidden in refresh mode because the
-            target env folder is already chosen and immutable. */}
-        {!refreshContext && (
-        <div className="import-section">
-          <label className="import-label">
-            {t('import.destination.label')}
-          </label>
-          <div className="import-destination-row">
-            <div data-testid="destination-dropdown-container">
-              <ListViewDropdown
-                items={folderItems}
-                selectedIds={targetFolderId ? [targetFolderId] : ['__root__']}
-                expandedIds={expandedFolderIds}
-                rootRole="tree"
-                menuAriaLabel={t('import.destination.label')}
-                align="left"
-                data-testid="destination-dropdown"
-                buttonContent={
-                  <>
-                    <i className="codicon codicon-folder" aria-hidden="true" style={{ marginRight: '6px' }} />
-                    <span>{selectedFolderName}</span>
-                    <i className="codicon codicon-chevron-down" aria-hidden="true" style={{ marginLeft: 'auto', opacity: 0.7 }} />
-                  </>
-                }
-                onItemClick={(payload) => { 
-                  setTargetFolderId(payload.item.id === '__root__' ? undefined : payload.item.id) 
-                }}
-                onItemToggle={(payload, expanded) => {
-                  const id = payload.item.id
-                  if (expanded) {
-                    setExpandedFolderIds(prev => [...prev, id])
-                  } else {
-                    setExpandedFolderIds(prev => prev.filter(existingId => existingId !== id))
-                  }
-                }}
-                buttonProps={{ 
-                  secondary: true,
-                  'data-testid': 'destination-dropdown-button'
-                }}
-              />
-            </div>
-            <Button
-              secondary
-              icon="new-folder"
-              data-testid="new-folder-button"
-              onClick={() => {
-                setNewFolderName('')
-                setShowFolderNameInput(true)
-              }}
-            >
-              {t('import.destination.newFolder')}
-            </Button>
-          </div>
-        </div>
-        )}
-
-        {/* Section 2: Source Input */}
+        {/* Source Input */}
         <div className="import-section">
           <label className="import-label">
             {t('import.source.label')}
@@ -781,6 +544,14 @@ export function ImportModal({
           ) : null}
         </div>
 
+        {/* Format showcase — pitches one supported import format at a
+            time when there's nothing to preview yet. Hidden in refresh
+            mode (the user already chose a format the day they imported)
+            and once a preview tree is on screen. */}
+        {!refreshContext && previewItems.length === 0 && (
+          <ImportFormatShowcase />
+        )}
+
         {/* Section 3: Selection tree (preview + tri-state checkboxes) */}
         {previewItems.length > 0 && (
           <div className="import-section import-preview-section">
@@ -860,49 +631,6 @@ export function ImportModal({
           </Button>
         </div>
       </div>
-
-      {/* Folder Name Input Modal */}
-      {showFolderNameInput && (
-        <Modal
-          isOpen={showFolderNameInput}
-          onClose={() => {
-            setShowFolderNameInput(false)
-            setNewFolderName('')
-          }}
-          title={t('import.destination.newFolderTitle')}
-          data-testid="new-folder-modal"
-        >
-          <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px', minWidth: '300px' }} data-testid="new-folder-dialog">
-            <InputBox
-              value={newFolderName}
-              onChange={setNewFolderName}
-              options={{
-                placeholder: t('import.destination.newFolderPlaceholder')
-              }}
-              data-testid="new-folder-input"
-            />
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-              <Button 
-                secondary 
-                onClick={() => {
-                  setShowFolderNameInput(false)
-                  setNewFolderName('')
-                }}
-                data-testid="new-folder-cancel-button"
-              >
-                {t('common.cancel')}
-              </Button>
-              <Button 
-                onClick={handleCreateFolder}
-                disabled={!newFolderName.trim()}
-                data-testid="new-folder-ok-button"
-              >
-                {t('common.ok')}
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
 
       <AuthenticationSetupModal
         isOpen={showAuthSetupModal}

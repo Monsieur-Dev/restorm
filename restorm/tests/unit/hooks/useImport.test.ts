@@ -1,9 +1,9 @@
 /**
- * Unit tests for `useImport.handleImport` — focused on the empty-file
- * root-request path that the nesting workaround used to mask.
+ * Unit tests for `useImport.handleImport`.
  *
  * Covers the contract:
- *   - requests at the root of the imported tree are kept (no filter)
+ *   - requests + folders at the root of the imported tree are appended
+ *     to the existing rootItems
  *   - exactly one FOLDER_CREATED per top-level imported folder (no
  *     per-descendant emission)
  *   - root-level requests report `parentFolderId: undefined` (no
@@ -11,6 +11,8 @@
  *   - nested requests + sub-folders rely on
  *     `SearchIndexService.indexFolderRecursively` for indexing rather
  *     than firing their own CREATED events
+ *   - cross-item `authenticationRequestId` references survive the id-
+ *     regeneration pass (remapped to the new auth id)
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -110,9 +112,11 @@ describe('useImport.handleImport — empty-file root requests', () => {
       await Promise.resolve()
     })
 
-    // (1) setRootItems receives BOTH the request and the folder at root.
+    // (1) setRootItems receives an updater that appends BOTH the
+    // request and the folder to whatever's already at the root.
     expect(setRootItems).toHaveBeenCalledTimes(1)
-    const committed = setRootItems.mock.calls[0]?.[0] as FolderItem[]
+    const updater = setRootItems.mock.calls[0]?.[0] as (prev: FolderItem[]) => FolderItem[]
+    const committed = updater([])
     expect(committed).toHaveLength(2)
     // IDs get regenerated on import so we check by name / structure.
     expect(committed.some((i) => !('items' in i) && i.name === 'Authentication route')).toBe(true)
@@ -144,78 +148,6 @@ describe('useImport.handleImport — empty-file root requests', () => {
       })
       expect(matchingPayload, `no CREATED event should fire for ${name}`).toBeUndefined()
     }
-  })
-})
-
-describe('useImport.handleImport — nested target folder', () => {
-  beforeEach(() => {
-    captured.length = 0
-  })
-
-  it('places items inside the target folder and emits with the resolved parentFolderId', async () => {
-    const setRootItems = vi.fn()
-    const setExpandedIds = vi.fn()
-
-    // Start from a tree that already has a target folder. `useImport`
-    // deep-clones rootItems so mutating the input isn't observable;
-    // we locate the cloned folder via its stable id after the import.
-    const targetFolder = makeFolder('target-id', 'Existing target')
-    const initialTree: FolderItem[] = [targetFolder]
-
-    const { result } = renderHook(() =>
-      useImport({
-        rootItems: initialTree as (EnvironmentFolder | Folder | Request)[],
-        setRootItems,
-        setExpandedIds
-      })
-    )
-
-    const incomingRequest = makeRequest('incoming-req-id', 'Incoming request')
-    const incomingFolder = makeFolder('incoming-folder-id', 'Incoming folder', [
-      makeRequest('leaf-id', 'Leaf request')
-    ])
-
-    await act(async () => {
-      result.current.handleImport(
-        [incomingRequest, incomingFolder] as FolderItem[],
-        'target-id'
-      )
-      await Promise.resolve()
-    })
-
-    // (1) The target folder now holds both incoming items.
-    expect(setRootItems).toHaveBeenCalledTimes(1)
-    const committed = setRootItems.mock.calls[0]?.[0] as FolderItem[]
-    expect(committed).toHaveLength(1)
-    const committedTarget = committed[0] as Folder
-    expect(committedTarget.name).toBe('Existing target')
-    expect(committedTarget.items).toHaveLength(2)
-    expect(committedTarget.items.some((i) => !('items' in i) && i.name === 'Incoming request')).toBe(true)
-    expect(committedTarget.items.some((i) => 'items' in i && i.name === 'Incoming folder')).toBe(true)
-
-    // (2) The request CREATED event carries the target folder id
-    // (*not* the request's own id) — this is exactly the regression
-    // that the `parentFolderId: string | undefined` refactor fixed.
-    const requestEvents = captured.filter((c) => c.event === 'document:request:created')
-    expect(requestEvents).toHaveLength(1)
-    const requestDoc = requestEvents[0]?.payload['document'] as { name?: string }
-    expect(requestDoc.name).toBe('Incoming request')
-    expect(requestEvents[0]?.payload['parentFolderId']).toBe('target-id')
-
-    // (3) Exactly one FOLDER_CREATED — the top-level `Incoming folder`.
-    // SearchIndexService.indexFolderRecursively picks up `Leaf request`
-    // from that folder's own document on indexing.
-    const folderEvents = captured.filter((c) => c.event === 'document:folder:created')
-    expect(folderEvents).toHaveLength(1)
-    const folderDoc = folderEvents[0]?.payload['document'] as { name?: string }
-    expect(folderDoc.name).toBe('Incoming folder')
-
-    // (4) No stray CREATED event for the descendant leaf request.
-    const leafPayload = captured.find((c) => {
-      const doc = c.payload['document'] as { name?: string } | undefined
-      return doc?.name === 'Leaf request'
-    })
-    expect(leafPayload).toBeUndefined()
   })
 })
 
@@ -252,7 +184,8 @@ describe('useImport.handleImport — authenticationRequestId remap', () => {
       await Promise.resolve()
     })
 
-    const committed = setRootItems.mock.calls[0]?.[0] as FolderItem[]
+    const updater = setRootItems.mock.calls[0]?.[0] as (prev: FolderItem[]) => FolderItem[]
+    const committed = updater([])
     const committedAuth = committed.find((i) => !('items' in i) && i.name === 'Authentication route') as Request
     const committedFolder = committed.find((i) => 'items' in i && i.name === 'Imported') as Folder
     expect(committedAuth).toBeDefined()

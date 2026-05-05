@@ -161,3 +161,17 @@
    * sitting next to it — 12 px made the key dominate the pill. */
   font-size: 14px !important;
 }
+
+/* ============================================================================
+ * Marketing tier
+ * ========================================================================= */
+
+.badge-pro {
+  /* Gold gradient + dark text reads "premium" without looking like a
+   * protocol acronym. Slight inner shadow gives the pill a subtle
+   * sticker feel. */
+  background: linear-gradient(135deg, #f6c560 0%, #c98a1a 100%);
+  color: #1a1306;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  letter-spacing: 0.5px;
+}

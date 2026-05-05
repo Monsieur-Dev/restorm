@@ -1879,12 +1879,6 @@ const App: React.FC = () => {
               setRefreshSourceTarget(null)
             }}
             onImport={handleImport}
-            rootFolder={{
-              id: '__virtual_root__',
-              name: 'Root',
-              items: rootItems
-            } as EnvironmentFolder}
-            selectedFolderId={selectedItemId ?? undefined}
             {...(refreshSourceTarget ? (() => {
               const targetId = refreshSourceTarget.id
               const folder = rootItems.find(
