@@ -108,6 +108,23 @@ class I18nService {
   }
 
   /**
+   * Merge an in-memory translation object into the loaded resources for
+   * a given language. Useful for consumers that ship their renderer
+   * locales as imported JSON modules (Vite bundles them at build time)
+   * and want them available to the main-process `t()` lookups too —
+   * `loadTranslationsFromPath` only works with on-disk files, which
+   * isn't a portable assumption in packaged builds.
+   *
+   * Subsequent calls deep-merge so consumers can layer multiple sources
+   * (e.g. ECUI built-ins + app overrides + plugin extensions) without
+   * clobbering each other.
+   */
+  public addTranslations(language: string, translations: Record<string, unknown>): void {
+    this.resources[language] = this.deepMerge(this.resources[language] ?? {}, translations)
+    logger.debug(`[I18nService] Added translations for ${language}`)
+  }
+
+  /**
    * Set the current language and persist it
    */
   public setLanguage(language: string): void {
