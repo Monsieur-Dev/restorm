@@ -233,16 +233,26 @@
   bottom: -14px;
 }
 
-/* The bubble's `::after` paints the comic-book tail's inner triangle
- * AFTER children by spec, so by default it sits ABOVE the wobbly
- * border line. Bump just the `.ecu-electric-border-main` element
- * (the actual displaced 2px ring) above the pseudos so the wobble
- * passes over the tail's straight edges where the displacement
- * reaches them. We deliberately don't bump the halo / overlays /
- * glow layers — they stay at the default z-index so they don't
- * tint the bubble's text content. */
+/* Lift the entire electric-border effect (halo + glow + overlays +
+ * main ring) above the bubble's `::before` / `::after` pseudos,
+ * which paint the comic-book tail. By default the tail pseudos
+ * paint after children, so they would land on top of the border
+ * line at the tail's anchor point — we want the wobble (and its
+ * surrounding glow) to pass over the tail's plain straight edges,
+ * not the other way around. */
+.import-format-showcase-bubble--pro .ecu-electric-border {
+  z-index: 1;
+}
+
+/* Nudge only the wobbly main ring (the `feDisplacementMap`-driven
+ * 2px line) up-and-left by 8px to re-centre it visually inside the
+ * halo / glow rings — the line is biased toward the bottom-right of
+ * the bubble's content box because of the way the displacement map
+ * samples its noise field, and we deliberately don't move the halo
+ * / glow / overlays so they stay anchored to the bubble. Scoped to
+ * the electric variant in the showcase only. */
 .import-format-showcase-bubble--pro .ecu-electric-border-main {
-  z-index: 2;
+  transform: translate(-8px, -8px);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -11,9 +11,9 @@ A wobbling, lightning-like border with a soft glow halo, two highlight overlays,
 3. two `mix-blend-mode: overlay` highlight gradients (one bright, one dim),
 4. a soft-glow blurred ring (1px blur),
 5. a bright-glow blurred ring (4px blur),
-6. and the main wobbly border, which carries `filter: url(#turbulent-displace-<id>)`.
+6. and the main wobbly border, which carries `filter: url(#ecu-electric-border-displace-<id>)`.
 
-The SVG filter is rendered inline as part of the component (in a `width: 0; height: 0` host) so each instance gets its own filter id (via React's `useId()`); that prevents the animated `<feOffset>`s from sharing state when several ElectricBorders coexist on the same page.
+The SVG filter is rendered inline as part of the component (in a `width: 0; height: 0` host) so each instance gets its own filter id (via React's `useId()`); that prevents the animated `<feOffset>`s from sharing state when several ElectricBorders coexist on the same page. The `<feOffset>` `dx` / `dy` are driven by a `requestAnimationFrame` loop (eight pairs tracing ellipses at constant angular speed) — not SMIL `<animate>`, which had a multi-second warm-up latency in Chromium that left the wobble visibly frozen at first paint.
 
 Adapted from Bálint Ferenczy's [Animated Electric Border CSS Card](https://codepen.io/BalintFerenczy/pen/KwdoyEN) (MIT-style demo). The original is a single static card; this port:
 
@@ -85,7 +85,7 @@ The component leans on:
 
 ## Reduced motion
 
-Honours `@media (prefers-reduced-motion: reduce)` — the SVG filter is dropped under that media query, leaving a static (non-wobbling) border with the glow rings + halo intact. The SVG `<animate>` elements are still present in the DOM but their output is no longer consumed.
+Honours `@media (prefers-reduced-motion: reduce)` — the SVG filter is dropped under that media query, leaving a static (non-wobbling) border with the glow rings + halo intact. The component's `requestAnimationFrame` loop continues running and writing `dx` / `dy` to the `<feOffset>` elements, but those values are no longer consumed because the filter is detached from the main ring.
 
 ## Performance
 

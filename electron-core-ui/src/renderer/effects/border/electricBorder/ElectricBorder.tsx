@@ -31,28 +31,36 @@ export interface ElectricBorderProps {
 }
 
 /**
- * Pairwise duration multipliers — irregular by design so the four
- * `<feOffset>` periods stay incommensurate. With a single shared
- * duration the four pairs would re-lock every cycle and their
- * dy/dx contributions would cancel each other's velocity at the
- * re-locks (visible "plateau" moments). Drift forever instead.
+ * Eight `<feTurbulence>` + `<feOffset>` pairs — extra layers dilute
+ * the "all contributions happen to cancel right now" moments that
+ * produced the flat-line artifact when fewer pairs were running.
+ *
+ * Each offset traces an ellipse at *constant angular speed*
+ * (`dx = rx·cos(angle)`, `dy = ry·sin(angle)`) — no slow-down at
+ * extremes, no direction flip, no perceptible "respiration".
+ *
+ * Three deliberately-chaotic parameter sets:
+ *
+ * 1. **Duration multipliers** — eight irrational-feeling ratios
+ *    spread across [0.5, 2.0] so the periods stay mutually
+ *    incommensurate and never re-lock.
+ * 2. **Phase offsets** — *not* evenly spaced (0, 1/8, 2/8, ...
+ *    would produce a regular star pattern at t=0); we use random-
+ *    looking values across [0, 1) so the eight ellipse positions
+ *    are genuinely scattered around their own circles.
+ * 3. **Radii** — different (rx, ry) per pair so the orbits trace
+ *    different ellipse shapes and sample different parts of the
+ *    underlying noise field.
+ *
+ * Per-pair direction alternates so the composite has no global
+ * rotation drift.
  */
-const PAIR_DURATION_MULTIPLIERS = [1.0, 1.317, 0.819, 1.143] as const
-
-/**
- * Pairwise phase offsets (fraction of the per-pair period) that
- * scatter the four offsets around the unit circle at t=0. Avoids
- * the four pairs all sitting at their `from` value simultaneously
- * on first paint, which would make the displacement field static
- * for ~half a cycle until the layers diverge.
- */
-const PAIR_PHASE_OFFSETS = [0.0, 0.125, 0.5, 0.625] as const
-
-/** dy amplitude in pixels for the first two `<feOffset>` pairs. */
-const DY_AMPLITUDE = 350
-
-/** dx amplitude in pixels for the last two `<feOffset>` pairs. */
-const DX_AMPLITUDE = 245
+const PAIR_DURATION_MULTIPLIERS = [1.0, 1.317, 0.819, 1.143, 0.703, 1.481, 0.591, 1.879] as const
+const PAIR_PHASE_OFFSETS = [0.0, 0.137, 0.421, 0.683, 0.812, 0.244, 0.567, 0.071] as const
+const PAIR_RADII_X = [350, 245, 280, 300, 220, 320, 270, 240] as const
+const PAIR_RADII_Y = [280, 350, 245, 220, 300, 260, 330, 290] as const
+const PAIR_DIRECTIONS = [1, -1, 1, -1, 1, -1, 1, -1] as const
+const PAIR_COUNT = 8
 
 export const ElectricBorder: React.FC<ElectricBorderProps> = ({
   color = '#dd8448',
@@ -66,7 +74,7 @@ export const ElectricBorder: React.FC<ElectricBorderProps> = ({
   const reactId = useId()
   const filterId = `ecu-electric-border-displace-${reactId.replace(/[^a-zA-Z0-9_-]/g, '')}`
 
-  const offsetRefs = useRef<(SVGFEOffsetElement | null)[]>([null, null, null, null])
+  const offsetRefs = useRef<(SVGFEOffsetElement | null)[]>(Array.from({ length: PAIR_COUNT }, () => null))
 
   useEffect(() => {
     let rafId = 0
@@ -81,30 +89,24 @@ export const ElectricBorder: React.FC<ElectricBorderProps> = ({
     const tick = (): void => {
       const t = (performance.now() - start) / 1000
 
-      for (let i = 0; i < 4; i += 1) {
+      for (let i = 0; i < PAIR_COUNT; i += 1) {
         const offsetEl = offsets[i]
         if (offsetEl === null || offsetEl === undefined) continue
         const durMultiplier = PAIR_DURATION_MULTIPLIERS[i] ?? 1
         const phaseOffset = PAIR_PHASE_OFFSETS[i] ?? 0
         const dur = duration * durMultiplier
         const phase = ((t / dur) + phaseOffset) % 1
-        const angle = phase * 2 * Math.PI
-        // Pairs 0/1 animate dy, pairs 2/3 animate dx. Pair 0 swings
-        // positive-first, pair 1 negative-first (so they fight each
-        // other across the y-axis); same for pairs 2/3 on the x-axis.
-        if (i === 0) {
-          offsetEl.setAttribute('dy', String(DY_AMPLITUDE * Math.sin(angle)))
-          offsetEl.setAttribute('dx', '0')
-        } else if (i === 1) {
-          offsetEl.setAttribute('dy', String(-DY_AMPLITUDE * Math.sin(angle)))
-          offsetEl.setAttribute('dx', '0')
-        } else if (i === 2) {
-          offsetEl.setAttribute('dx', String(DX_AMPLITUDE * Math.sin(angle)))
-          offsetEl.setAttribute('dy', '0')
-        } else {
-          offsetEl.setAttribute('dx', String(-DX_AMPLITUDE * Math.sin(angle)))
-          offsetEl.setAttribute('dy', '0')
-        }
+        // Per-pair direction: clockwise vs counter-clockwise so the
+        // composite displacement field doesn't drift in one direction.
+        const direction = PAIR_DIRECTIONS[i] ?? 1
+        const angle = phase * 2 * Math.PI * direction
+        const rx = PAIR_RADII_X[i] ?? 100
+        const ry = PAIR_RADII_Y[i] ?? 100
+        // Centred ellipse, constant angular speed — no slow-down at
+        // extremes. Six pairs (vs four) thin out the chance that all
+        // contributions cancel simultaneously into a flat composite.
+        offsetEl.setAttribute('dx', String(rx * Math.cos(angle)))
+        offsetEl.setAttribute('dy', String(ry * Math.sin(angle)))
       }
 
       rafId = requestAnimationFrame(tick)
@@ -135,52 +137,78 @@ export const ElectricBorder: React.FC<ElectricBorderProps> = ({
             width="200%"
             height="200%"
           >
-            {/* Four turbulence/offset pairs composited together to
-                produce the flowing "electric" wobble. The `dx` / `dy`
-                of each `<feOffset>` is driven from JS via the
-                `requestAnimationFrame` loop above — a true sine on
-                each pair with irregular per-pair durations and
-                staggered phase offsets so the displacement field
-                stays chaotic from frame 1 with no SMIL warm-up. */}
+            {/* Eight turbulence/offset pairs composited into a single
+                noise field. The `dx` / `dy` of each `<feOffset>` is
+                driven from JS via the `requestAnimationFrame` loop
+                above — every offset traces an ellipse at constant
+                angular speed (no SMIL, no warm-up). Eight pairs (vs
+                the codepen's four) keep the global magnitude of the
+                composite displacement vector well above zero at all
+                times: cancelling-to-zero requires an unlikely
+                alignment of *eight* incommensurate phases, so the
+                "flat-line" artifact that smaller pair counts
+                produced is gone in practice. */}
             <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise1" seed="1" />
-            <feOffset
-              ref={(el) => { offsetRefs.current[0] = el }}
-              in="noise1"
-              dx="0"
-              dy="0"
-              result="offsetNoise1"
-            />
+            <feOffset ref={(el) => { offsetRefs.current[0] = el }} in="noise1" dx="0" dy="0" result="offsetNoise1" />
 
             <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise2" seed="1" />
-            <feOffset
-              ref={(el) => { offsetRefs.current[1] = el }}
-              in="noise2"
-              dx="0"
-              dy="0"
-              result="offsetNoise2"
-            />
+            <feOffset ref={(el) => { offsetRefs.current[1] = el }} in="noise2" dx="0" dy="0" result="offsetNoise2" />
 
             <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise3" seed="2" />
-            <feOffset
-              ref={(el) => { offsetRefs.current[2] = el }}
-              in="noise3"
-              dx="0"
-              dy="0"
-              result="offsetNoise3"
-            />
+            <feOffset ref={(el) => { offsetRefs.current[2] = el }} in="noise3" dx="0" dy="0" result="offsetNoise3" />
 
             <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise4" seed="2" />
-            <feOffset
-              ref={(el) => { offsetRefs.current[3] = el }}
-              in="noise4"
-              dx="0"
-              dy="0"
-              result="offsetNoise4"
-            />
+            <feOffset ref={(el) => { offsetRefs.current[3] = el }} in="noise4" dx="0" dy="0" result="offsetNoise4" />
 
-            <feComposite in="offsetNoise1" in2="offsetNoise2" result="part1" />
-            <feComposite in="offsetNoise3" in2="offsetNoise4" result="part2" />
-            <feBlend in="part1" in2="part2" mode="color-dodge" result="combinedNoise" />
+            <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise5" seed="3" />
+            <feOffset ref={(el) => { offsetRefs.current[4] = el }} in="noise5" dx="0" dy="0" result="offsetNoise5" />
+
+            <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise6" seed="3" />
+            <feOffset ref={(el) => { offsetRefs.current[5] = el }} in="noise6" dx="0" dy="0" result="offsetNoise6" />
+
+            <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise7" seed="4" />
+            <feOffset ref={(el) => { offsetRefs.current[6] = el }} in="noise7" dx="0" dy="0" result="offsetNoise7" />
+
+            <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise8" seed="4" />
+            <feOffset ref={(el) => { offsetRefs.current[7] = el }} in="noise8" dx="0" dy="0" result="offsetNoise8" />
+
+            {/* Pair the offsets two-by-two then fold the four parts
+                together with `feBlend mode="hard-light"` at every
+                stage. Picking the blend mode here is non-obvious: a
+                brute-force search (see `/tmp/electric-search.mjs`)
+                evaluated minimum spatial std-dev over many frames
+                across all SVG blend modes for both 8-pair and 4-pair
+                chains. Anything that collapses the channels toward a
+                uniform value at any frame produces the visible
+                "flat-line" artifact (the displacement map degenerates
+                into a uniform translation).
+                Discarded options and why:
+                  • `feComposite` (default `operator="over"`) silently
+                    drops the second input when both are opaque (which
+                    `feTurbulence` always is) → half the pairs never
+                    reach the displacement map.
+                  • `screen`, `color-dodge`, `multiply`, `color-burn`,
+                    `exclusion` push both inputs toward 0 or 1 and
+                    saturate after a few stages of chaining → the
+                    composite collapses to a uniform translation.
+                  • `overlay`, `soft-light`, `difference`, `lighten`,
+                    `darken`, `normal` all dipped below the no-flat-
+                    line threshold (min spatial std-dev > 0.05) at
+                    8 pairs in the simulation.
+                Only `hard-light` (8 pairs, uniform `baseFrequency`)
+                and `overlay` (4 pairs, varied `baseFrequency`) cleared
+                the bar. We pick `hard-light` because it keeps all
+                eight noise sources contributing — `hard-light(a, b)`
+                pivots on whether `b > 0.5`, making it variance-
+                preserving in both directions instead of biased toward
+                one extreme. */}
+            <feBlend in="offsetNoise1" in2="offsetNoise2" mode="hard-light" result="part1" />
+            <feBlend in="offsetNoise3" in2="offsetNoise4" mode="hard-light" result="part2" />
+            <feBlend in="offsetNoise5" in2="offsetNoise6" mode="hard-light" result="part3" />
+            <feBlend in="offsetNoise7" in2="offsetNoise8" mode="hard-light" result="part4" />
+            <feBlend in="part1" in2="part2" mode="hard-light" result="combo12" />
+            <feBlend in="part3" in2="part4" mode="hard-light" result="combo34" />
+            <feBlend in="combo12" in2="combo34" mode="hard-light" result="combinedNoise" />
 
             <feDisplacementMap in="SourceGraphic" in2="combinedNoise" scale="30" xChannelSelector="R" yChannelSelector="B" />
           </filter>
