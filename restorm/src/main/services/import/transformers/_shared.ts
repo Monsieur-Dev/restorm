@@ -17,7 +17,8 @@ import type {
   OperationDocumentation,
   ParameterDocumentation,
   PropertyDocumentation,
-  ResponseDocumentation
+  ResponseDocumentation,
+  SchemaConstraints
 } from '../../../../shared/types/apiDocumentation'
 
 /** All HTTP verbs Restorm imports map onto operations. Order matters for the deterministic walk. */
@@ -45,12 +46,26 @@ export interface CommonSchema {
   required?: string[]
   enum?: unknown[]
   nullable?: boolean                  // 2.0 + 3.0 (gone in 3.1)
+  readOnly?: boolean
   oneOf?: CommonSchema[]
   anyOf?: CommonSchema[]
   allOf?: CommonSchema[]
   example?: unknown
   examples?: Record<string, unknown> | unknown[]
   default?: unknown
+  // Validation constraints — `boolean` and `number` overlap on
+  // `exclusiveMinimum` / `exclusiveMaximum` to accept both Swagger 2.0
+  // / OAS 3.0 (boolean flag) and OAS 3.1 (numeric threshold) without
+  // a per-version split.
+  minLength?: number
+  maxLength?: number
+  minimum?: number
+  maximum?: number
+  exclusiveMinimum?: boolean | number
+  exclusiveMaximum?: boolean | number
+  pattern?: string
+  multipleOf?: number
+  uniqueItems?: boolean
 }
 
 /** Last segment of a `#/foo/bar/Name` JSON Pointer. */
@@ -108,6 +123,13 @@ export interface CommonParameter {
   schema?: CommonSchema
   default?: unknown
   example?: unknown
+  /** Pluralised examples — `Record<string, unknown>` for OAS 3.x
+   * named example objects, `unknown[]` for ad-hoc arrays. */
+  examples?: Record<string, unknown> | unknown[]
+  /** Swagger 2.0 only: array-encoding hint. */
+  collectionFormat?: string
+  /** Swagger 2.0 only: parameter may be transmitted with empty value. */
+  allowEmptyValue?: boolean
 }
 
 /** Normalised response (the value part of the responses map). */
@@ -117,6 +139,10 @@ export interface CommonResponse {
    * multi-content-type responses to the most informative entry. */
   schema?: CommonSchema
   headers?: Record<string, { type: string; description?: string }>
+  /** Per-content-type examples carried as-is from the source spec.
+   * Swagger 2.0 keys these by media type (`application/json`, …);
+   * OAS 3.x bundles them per content-object. */
+  examples?: Record<string, unknown>
 }
 
 /** Tag from the `tags[]` array. Same shape across 2.0 and 3.x. */
@@ -124,6 +150,27 @@ export interface CommonTag {
   name: string
   description?: string
   externalDocs?: ExternalDocs
+}
+
+/** Pull validation constraints out of a schema node into a flat
+ * `SchemaConstraints` object. Only fields the source spec actually
+ * defined are copied — undefined entries stay omitted so the
+ * downstream `if (constraints)` check stays meaningful. Returns
+ * `undefined` when the source schema carries no constraints at all,
+ * so callers can avoid attaching an empty object. */
+export function extractSchemaConstraints(schema: CommonSchema | undefined): SchemaConstraints | undefined {
+  if (!schema) return undefined
+  const out: SchemaConstraints = {}
+  if (schema.minLength !== undefined) out.minLength = schema.minLength
+  if (schema.maxLength !== undefined) out.maxLength = schema.maxLength
+  if (schema.minimum !== undefined) out.minimum = schema.minimum
+  if (schema.maximum !== undefined) out.maximum = schema.maximum
+  if (schema.exclusiveMinimum !== undefined) out.exclusiveMinimum = schema.exclusiveMinimum
+  if (schema.exclusiveMaximum !== undefined) out.exclusiveMaximum = schema.exclusiveMaximum
+  if (schema.pattern !== undefined) out.pattern = schema.pattern
+  if (schema.multipleOf !== undefined) out.multipleOf = schema.multipleOf
+  if (schema.uniqueItems !== undefined) out.uniqueItems = schema.uniqueItems
+  return Object.keys(out).length > 0 ? out : undefined
 }
 
 /** A parameter signature the metadata transformer can render. */
@@ -143,6 +190,13 @@ export function mapParameterToDocumentation(p: CommonParameter): ParameterDocume
       try { entry.defaultValue = JSON.stringify(raw) } catch { /* circular ref — drop */ }
     }
   }
+  if (p.example !== undefined) entry.example = p.example
+  if (p.examples !== undefined) entry.examples = p.examples
+  if (p.collectionFormat !== undefined) entry.collectionFormat = p.collectionFormat
+  if (p.allowEmptyValue !== undefined) entry.allowEmptyValue = p.allowEmptyValue
+  if (p.schema?.enum !== undefined) entry.enumValues = p.schema.enum
+  const constraints = extractSchemaConstraints(p.schema)
+  if (constraints !== undefined) entry.constraints = constraints
   return entry
 }
 
@@ -164,6 +218,7 @@ export function mapResponses(
     if (resp.schema?.$ref) entry.schema = refName(resp.schema.$ref)
     else if (resp.schema) entry.schema = schemaTypeLabel(resp.schema)
     if (resp.headers) entry.headers = resp.headers
+    if (resp.examples && Object.keys(resp.examples).length > 0) entry.examples = resp.examples
     out[code] = entry
   }
   return out
@@ -182,6 +237,32 @@ export function mapTagsToGroups(tags: CommonTag[] | undefined): Record<string, G
   return out
 }
 
+/** Detect whether a schema is `type: ["X", "null"]` (OAS 3.1
+ * nullability). Safe no-op for Swagger 2.0 / OAS 3.0 where `type` is
+ * a single string and the function returns `false`. */
+function hasNullInTypeArray(schema: CommonSchema): boolean {
+  return Array.isArray(schema.type) && schema.type.some((t) => t === 'null')
+}
+
+/** Resolve `(targetModelRef, isArrayOfRef)` from a schema:
+ *
+ * - `{ $ref: "#/.../Pet" }` → `{ ref: "Pet", isArray: false }`
+ * - `{ type: "array", items: { $ref: "#/.../Pet" } }` → `{ ref: "Pet", isArray: true }`
+ * - anything else → `undefined`
+ *
+ * Used to surface relationship metadata on documented properties so
+ * the viewer can wire clickable cross-references and feed the Mermaid
+ * relationship diagram without having to re-parse the type label
+ * string.
+ */
+export function resolveModelRef(schema: CommonSchema): { ref: string; isArray: boolean } | undefined {
+  if (schema.$ref) return { ref: refName(schema.$ref), isArray: false }
+  if (schema.type === 'array' && schema.items?.$ref) {
+    return { ref: refName(schema.items.$ref), isArray: true }
+  }
+  return undefined
+}
+
 /** Build a `ModelDocumentation`-shaped property list from a schema's `properties` map. */
 export function mapSchemaProperties(schema: CommonSchema): PropertyDocumentation[] {
   const required = new Set(schema.required ?? [])
@@ -193,6 +274,17 @@ export function mapSchemaProperties(schema: CommonSchema): PropertyDocumentation
       required: required.has(propName)
     }
     if (propSchema.description !== undefined) prop.description = propSchema.description
+    const ref = resolveModelRef(propSchema)
+    if (ref !== undefined) {
+      prop.targetModelRef = ref.ref
+      if (ref.isArray) prop.isArrayOfRef = true
+    }
+    if (propSchema.nullable === true || hasNullInTypeArray(propSchema)) prop.nullable = true
+    if (propSchema.readOnly === true) prop.readOnly = true
+    if (propSchema.example !== undefined) prop.example = propSchema.example
+    if (propSchema.enum !== undefined && propSchema.enum.length > 0) prop.enumValues = propSchema.enum
+    const constraints = extractSchemaConstraints(propSchema)
+    if (constraints !== undefined) prop.constraints = constraints
     properties.push(prop)
   }
   return properties

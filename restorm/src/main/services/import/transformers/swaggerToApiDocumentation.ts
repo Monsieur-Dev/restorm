@@ -47,12 +47,38 @@ interface SwaggerParameter {
   format?: string
   default?: string | number | boolean
   schema?: CommonSchema
+  // Validation constraints — Swagger 2.0 inlines these on the
+  // parameter itself for non-body params (no separate schema). The
+  // body parameter carries them under `schema` instead, which the
+  // shared helpers already honour via `extractSchemaConstraints`.
+  minLength?: number
+  maxLength?: number
+  minimum?: number
+  maximum?: number
+  exclusiveMinimum?: boolean | number
+  exclusiveMaximum?: boolean | number
+  pattern?: string
+  multipleOf?: number
+  uniqueItems?: boolean
+  enum?: unknown[]
+  // Array-encoding hint + empty-value flag — Swagger 2.0 only.
+  collectionFormat?: string
+  allowEmptyValue?: boolean
+  // Inline example fallback — `x-example` is a vendor extension we
+  // already honour on the request side; mirror it here so the doc
+  // pipeline picks it up too.
+  example?: unknown
+  examples?: Record<string, unknown> | unknown[]
+  'x-example'?: unknown
 }
 
 interface SwaggerResponse {
   description: string
   schema?: CommonSchema
   headers?: Record<string, { type: string; description?: string }>
+  /** Per-content-type examples (`{"application/json": {...}}`).
+   * Carried as-is so the doc viewer can render any payload shape. */
+  examples?: Record<string, unknown>
 }
 
 interface SwaggerOperation {
@@ -87,17 +113,40 @@ export interface SwaggerSpec {
 
 /** Lift a Swagger 2.0 parameter (with inline `type`/`format`) onto the
  * common parameter shape. The flat `type` is folded into a synthetic
- * schema so downstream renderers see the same shape across versions. */
+ * schema so downstream renderers see the same shape across versions —
+ * including the inline validation constraints / enum, which Swagger
+ * 2.0 lays out directly on the parameter for non-body params. */
 function toCommonParameter(p: SwaggerParameter): CommonParameter {
   let schema: CommonSchema | undefined
-  if (p.schema) schema = p.schema
-  else if (p.type !== undefined) schema = { type: p.type, ...(p.format !== undefined ? { format: p.format } : {}) }
+  if (p.schema) {
+    schema = p.schema
+  } else if (p.type !== undefined) {
+    schema = { type: p.type }
+    if (p.format !== undefined) schema.format = p.format
+    if (p.enum !== undefined) schema.enum = p.enum
+    if (p.minLength !== undefined) schema.minLength = p.minLength
+    if (p.maxLength !== undefined) schema.maxLength = p.maxLength
+    if (p.minimum !== undefined) schema.minimum = p.minimum
+    if (p.maximum !== undefined) schema.maximum = p.maximum
+    if (p.exclusiveMinimum !== undefined) schema.exclusiveMinimum = p.exclusiveMinimum
+    if (p.exclusiveMaximum !== undefined) schema.exclusiveMaximum = p.exclusiveMaximum
+    if (p.pattern !== undefined) schema.pattern = p.pattern
+    if (p.multipleOf !== undefined) schema.multipleOf = p.multipleOf
+    if (p.uniqueItems !== undefined) schema.uniqueItems = p.uniqueItems
+  }
 
   const out: CommonParameter = { name: p.name, in: p.in }
   if (p.description !== undefined) out.description = p.description
   if (p.required !== undefined) out.required = p.required
   if (schema) out.schema = schema
   if (p.default !== undefined) out.default = p.default
+  // Prefer `example`, fall back to the `x-example` vendor extension so
+  // we don't drop it. Plural `examples` ride alongside.
+  if (p.example !== undefined) out.example = p.example
+  else if (p['x-example'] !== undefined) out.example = p['x-example']
+  if (p.examples !== undefined) out.examples = p.examples
+  if (p.collectionFormat !== undefined) out.collectionFormat = p.collectionFormat
+  if (p.allowEmptyValue !== undefined) out.allowEmptyValue = p.allowEmptyValue
   return out
 }
 
@@ -110,6 +159,7 @@ function toCommonResponses(responses: Record<string, SwaggerResponse> | undefine
     if (resp.description) entry.description = resp.description
     if (resp.schema) entry.schema = resp.schema
     if (resp.headers) entry.headers = resp.headers
+    if (resp.examples && Object.keys(resp.examples).length > 0) entry.examples = resp.examples
     out[code] = entry
   }
   return out

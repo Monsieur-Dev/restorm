@@ -50,6 +50,28 @@ export interface ApiServer {
   namespace?: string
 }
 
+/** Validation / shape constraints carried over from the source schema.
+ * Used for documentation only — the import pipeline does not enforce
+ * them at runtime.
+ *
+ * `exclusiveMinimum` / `exclusiveMaximum` accept both `boolean` and
+ * `number`: Swagger 2.0 + OAS 3.0 use a boolean flag *combined* with
+ * the sibling `minimum` / `maximum`, while OAS 3.1 inlines the
+ * threshold as a number. Both semantics are carried verbatim — the
+ * doc renderer is responsible for interpreting them per the source
+ * spec version (available on `ApiDocumentation.sourceType`). */
+export interface SchemaConstraints {
+  minLength?: number
+  maxLength?: number
+  minimum?: number
+  maximum?: number
+  exclusiveMinimum?: boolean | number
+  exclusiveMaximum?: boolean | number
+  pattern?: string
+  multipleOf?: number
+  uniqueItems?: boolean
+}
+
 /** A single property on a documented model (Swagger definition, gRPC message, GraphQL type...). */
 export interface PropertyDocumentation {
   name: string
@@ -62,6 +84,26 @@ export interface PropertyDocumentation {
   /** Property no longer appears in the most recently fetched spec.
    * Cleared back to `false` (or removed) on reappearance. */
   removed?: boolean
+  /** Name of the model referenced when the property's schema is a
+   * direct `$ref` (`Pet`) or an array of `$ref`s (`array<Pet>`).
+   * Drives the relationship diagram + clickable cross-references in
+   * the documentation viewer. Undefined for primitive properties. */
+  targetModelRef?: string
+  /** When true, `targetModelRef` describes the array's element type
+   * rather than the property itself — distinguishes `Pet` from
+   * `array<Pet>` without needing to re-parse the type label. */
+  isArrayOfRef?: boolean
+  /** Schema-level nullability (Swagger 2.0 `x-nullable`, OAS 3.0
+   * `nullable`, OAS 3.1 `type: ["X", "null"]`). */
+  nullable?: boolean
+  /** Read-only flag from the source schema. */
+  readOnly?: boolean
+  /** Single example value attached to the property's schema. */
+  example?: unknown
+  /** Enum values listed at the property's schema. */
+  enumValues?: unknown[]
+  /** Validation constraints from the source schema. */
+  constraints?: SchemaConstraints
 }
 
 /** A global model / type definition referenced by operations. */
@@ -115,6 +157,24 @@ export interface ParameterDocumentation {
   required: boolean
   description?: string
   defaultValue?: string
+  /** Single example value attached to the parameter's schema or
+   * carried via `x-example` (Swagger 2.0). */
+  example?: unknown
+  /** Pluralised examples — keyed by content-type / variant name when
+   * the source spec provides a map (`Record<string, unknown>`), or a
+   * raw array if the spec lists positional examples. */
+  examples?: Record<string, unknown> | unknown[]
+  /** Enum values listed at the parameter's schema. */
+  enumValues?: unknown[]
+  /** Pluralised array-encoding hint (Swagger 2.0 `collectionFormat`):
+   * csv / ssv / tsv / pipes / multi. Carried as-is for the doc
+   * viewer; OAS 3.x uses `style` + `explode` instead. */
+  collectionFormat?: string
+  /** Swagger 2.0: parameter may be transmitted with an empty value
+   * (typically only meaningful for `query` parameters). */
+  allowEmptyValue?: boolean
+  /** Validation constraints from the source schema. */
+  constraints?: SchemaConstraints
 }
 
 /** A single response shape (by status code or name). */
@@ -122,6 +182,11 @@ export interface ResponseDocumentation {
   description?: string
   schema?: string
   headers?: Record<string, { type: string; description?: string }>
+  /** Per-content-type examples (Swagger 2.0 `examples`), or any other
+   * keyed example payloads the source spec provides. Stored raw so the
+   * doc viewer can render JSON, YAML, plain text, etc. without
+   * additional shaping. */
+  examples?: Record<string, unknown>
 }
 
 /** A single operation (REST path+method, SOAP op, gRPC method, GraphQL field, etc.). */
