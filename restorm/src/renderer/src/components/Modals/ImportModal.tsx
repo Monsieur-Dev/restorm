@@ -219,17 +219,20 @@ export function ImportModal({
     }, 200)
   }, [t])
 
-  // Modal-wide drag tracking. Bound on the `.import-modal` div so
-  // any drag entering the dialog (regardless of which inner element
-  // it lands on first) hides the showcase + tints the drop-zone
-  // fill. Counter increments on every dragenter and decrements on
-  // every dragleave; when it returns to zero we know the cursor has
-  // truly left — including the case where the user drops outside or
-  // releases the drag mid-flight.
+  // Modal-wide drag tracking. Bound on the `.import-modal` div so any
+  // drag entering the dialog (regardless of which inner element the
+  // cursor lands on first) hides the showcase + tints the drop-zone
+  // fill. State is a single boolean: `dragenter` flips it on,
+  // `dragleave` filters out child-transition events via
+  // `relatedTarget` before flipping it off, and a window-level
+  // safety net (`drop` / `dragend` / `mouseleave`) catches cancelled
+  // or window-exit drags so we never stay stuck in drop-mode.
   const handleModalDragEnter = useCallback((event: React.DragEvent<HTMLDivElement>) => {
-    // Skip drags carrying nothing useful (e.g. an internal element
-    // dragstart that didn't set any data) — without this we'd flip
-    // the modal into drop-mode for a stray text-selection drag.
+    // Skip drags carrying nothing useful — assumes nothing inside
+    // the modal is `draggable`, which is true today; revisit this
+    // gate if any child becomes a drag source (e.g. reorderable
+    // tree node), since their `dragstart` would briefly produce an
+    // empty-types dragenter and get filtered.
     if (event.dataTransfer.types.length === 0) return
     event.preventDefault()
     setIsDraggingOver(true)
@@ -721,17 +724,21 @@ export function ImportModal({
             </span>
 
             {/* Big "drop here" cue. The codicon glyph is wrapped in
-                a Wordmark so it gets the same entrance flair as the
-                rest of the showcase typography — `text-3d-flip` is
-                the only built-in effect that animates a single glyph
-                cleanly (the others either scramble or stagger across
-                multiple characters). The actual icon is the
-                `arrow-circle-down` codicon (\\uebfc); font-family +
-                font-size are set on the wrapper so every span
-                Wordmark mints inherits them. */}
+                a Wordmark with `effect="random"` — same treatment as
+                the welcome-screen wordmark, so each new drag picks a
+                fresh enter animation (text-3d-flip / dia-text-reveal
+                / text-animate / hyper-text). The icon is the
+                `arrow-circle-down` codicon (U+EBFC); font-family +
+                font-size are set in CSS so every span Wordmark mints
+                inherits them. With the codicon font loaded, the
+                hyper-text variant scrambles the cue through other
+                codicon glyphs before settling — happy accident, no
+                special-casing needed. Mounted only while a drag is
+                over the modal so the enter animation plays once on
+                mount and that's the cue's flair. */}
             {isDraggingOver && (
               <div className="import-drop-zone-cue" aria-hidden="true">
-                <Wordmark effect="text-3d-flip">{''}</Wordmark>
+                <Wordmark effect="random">{"\uebfc"}</Wordmark>
               </div>
             )}
 

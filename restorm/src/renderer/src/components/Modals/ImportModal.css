@@ -191,7 +191,7 @@
   background: var(--editor-background);
   color: color-mix(in srgb, var(--import-drop-zone-color, currentColor) 30%, transparent);
   font-size: 15px;
-  font-weight: 6000;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   pointer-events: none;
