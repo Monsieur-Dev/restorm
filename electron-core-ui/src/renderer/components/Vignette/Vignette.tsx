@@ -1,20 +1,22 @@
 import React, { useState } from 'react'
 import {
   BorderBeam,
+  ElectricBorder,
   MagicCard,
   ShineBorder,
   pickRandomBorderBeamProps,
+  pickRandomElectricBorderProps,
   pickRandomMagicCardProps,
   pickRandomShineBorderProps,
-  pickRandomVignetteDecoration,
-  type VignetteDecorationId
-} from './decorations'
+  pickRandomBorderEffect,
+  type BorderEffectId
+} from '../../effects/border'
 import './vignette.css'
 
-export type VignetteDecoration = VignetteDecorationId | 'random'
+export type VignetteDecoration = BorderEffectId | 'random'
 
 export interface VignetteProps {
-  /** Built-in decoration applied to the frame. Pass `'random'` to pick at mount. */
+  /** Border effect applied to the frame. Pass `'random'` to pick at mount. */
   decoration?: VignetteDecoration
   /** Content rendered inside the frame. */
   children?: React.ReactNode
@@ -30,10 +32,18 @@ export const Vignette = React.forwardRef<HTMLDivElement, VignetteProps>(function
   { decoration, children, className, style, 'data-testid': dataTestId },
   ref
 ) {
-  const [resolved] = useState<{ id: VignetteDecorationId; element: React.ReactElement } | null>(() => {
+  const [resolved] = useState<{ id: BorderEffectId; element: React.ReactElement } | null>(() => {
     if (!decoration) return null
-    const id: VignetteDecorationId =
-      decoration === 'random' ? pickRandomVignetteDecoration() : decoration
+    const id: BorderEffectId =
+      decoration === 'random'
+        // Keep `electric-border` out of the routine-vignette pool —
+        // the turbulence-displaced wobble is a high-impact "feature
+        // moment" effect and would lose its punch if every casual
+        // `decoration="random"` rolled it. Consumers that want the
+        // electric look can still opt in explicitly via
+        // `decoration="electric-border"`.
+        ? pickRandomBorderEffect({ exclude: ['electric-border'] })
+        : decoration
     return { id, element: buildDecorationElement(id) }
   })
 
@@ -48,13 +58,14 @@ export const Vignette = React.forwardRef<HTMLDivElement, VignetteProps>(function
   )
 })
 
-const DECORATION_BUILDERS: Record<VignetteDecorationId, () => React.ReactElement> = {
+const DECORATION_BUILDERS: Record<BorderEffectId, () => React.ReactElement> = {
   'border-beam': () => <BorderBeam {...pickRandomBorderBeamProps()} />,
   'shine-border': () => <ShineBorder {...pickRandomShineBorderProps()} />,
-  'magic-card': () => <MagicCard {...pickRandomMagicCardProps()} />
+  'magic-card': () => <MagicCard {...pickRandomMagicCardProps()} />,
+  'electric-border': () => <ElectricBorder {...pickRandomElectricBorderProps()} />
 }
 
-function buildDecorationElement(id: VignetteDecorationId): React.ReactElement {
+function buildDecorationElement(id: BorderEffectId): React.ReactElement {
   return DECORATION_BUILDERS[id]()
 }
 

@@ -7,6 +7,12 @@
   flex-direction: column;
   gap: 20px;
   box-sizing: border-box;
+  /* `position: relative` + isolated stacking context lets
+   * `ImportFormatShowcase`'s sibling glow div paint behind the modal
+   * content without leaking into the surrounding overlay or punching
+   * past the modal frame. */
+  position: relative;
+  isolation: isolate;
 }
 
 .import-section {
@@ -23,23 +29,11 @@
   font-weight: 500;
   font-size: 13px;
   color: var(--vscode-foreground);
-}
-
-.import-destination-row {
-  display: flex;
-  gap: 8px;
-  align-items: flex-start;
-  width: 100%;
-  min-width: 0;
-}
-
-.import-destination-row > div:first-child {
-  flex: 1;
-  min-width: 0;
-}
-
-.import-destination-row > button {
-  flex-shrink: 0;
+  /* The label isn't `for=""`-bound to its input (the InputBox sits in
+   * a sibling wrapper), so the default `<label>` clickable behaviour
+   * doesn't actually focus anything — drop the pointer cursor that
+   * would otherwise hint at a nonexistent click target. */
+  cursor: default;
 }
 
 .import-loading,
@@ -115,6 +109,95 @@
   background: var(--vscode-editor-background);
 }
 
+/* Drop-zone marker. The wrapper takes the remaining vertical space
+ * between the source-input section and the action buttons, draws a
+ * thick dashed outline, and hosts the body sections (showcase /
+ * preview / no-results). The border colour comes from
+ * `--import-drop-zone-color`, set inline by ImportModal after running
+ * `getContrastColor` on the modal's `--editor-background`. */
+.import-drop-zone {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  /* Marker is intentionally low-key — 15% alpha on whichever of
+   * black / white reads on the modal background. Subtle enough not
+   * to compete with the showcase / preview content but still visible
+   * as a target. */
+  border: 10px dashed color-mix(in srgb, var(--import-drop-zone-color, currentColor) 15%, transparent);
+  border-radius: 8px;
+  padding: 16px;
+  box-sizing: border-box;
+  /* Background tint fades in / out via `transition` rather than
+   * keyframes so the enter / leave halves stay symmetric without
+   * extra animation state. The `--active` modifier (added by
+   * ImportModal while a drag is over the modal) supplies the
+   * non-transparent target colour. */
+  background-color: transparent;
+  transition: background-color 500ms ease-out;
+}
+
+.import-drop-zone--active {
+  /* Same tone as the dashed border, at 50% alpha — strong enough to
+   * read as a "ready to drop" hint but lets any underlying preview
+   * tree show through if the user is dragging in the middle of an
+   * existing import flow. */
+  background-color: color-mix(in srgb, var(--import-drop-zone-color, currentColor) 15%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .import-drop-zone {
+    transition: none;
+  }
+}
+
+/* Big "drop here" cue centred in the drop-zone rectangle. The
+ * inner `<Wordmark>` mints character spans we don't get to style
+ * directly, so the codicon font-family + the large size cascade in
+ * via these descendant rules — every mounted glyph inherits them.
+ * Mounted only while the modal is in the dragging-over state, so
+ * Wordmark's enter animation plays once on mount as the cue's
+ * appearance flair. */
+.import-drop-zone-cue {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: color-mix(in srgb, var(--import-drop-zone-color, currentColor) 60%, transparent);
+  pointer-events: none;
+  user-select: none;
+}
+
+.import-drop-zone-cue .ecu-wordmark,
+.import-drop-zone-cue .ecu-wordmark-iteration {
+  font-family: codicon;
+  font-size: 128px;
+  line-height: 1;
+}
+
+/* "Drop zone" sticker pinned to the top-right of the dashed
+ * rectangle. Sits centred on the top border line, with a slice of
+ * the modal background behind it so the dashes don't run through
+ * the text. The vertical offset accounts for the 10px border + the
+ * label's intrinsic height so the text lands roughly on the
+ * border's centreline. */
+.import-drop-zone-label {
+  position: absolute;
+  top: -15px;
+  right: 20px;
+  padding: 0 8px;
+  background: var(--editor-background);
+  color: color-mix(in srgb, var(--import-drop-zone-color, currentColor) 30%, transparent);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  pointer-events: none;
+  user-select: none;
+}
+
 .import-actions {
   /* Anchor the Cancel / Import row at the bottom of the modal even
      when the preview section hasn't rendered yet (empty input). */
@@ -127,3 +210,45 @@
   border-top: 1px solid var(--vscode-editorWidget-border);
 }
 
+/* Cross-section fade between the rotating-format showcase (empty input)
+ * and the route-preview tree (valid input). Driven by ImportModal's
+ * `transitionPhase` state — the wrapper gets `--leaving` while the
+ * outgoing section fades out, then `--entering` while the incoming one
+ * fades in. Both halves take FADE_MS (300 ms) — keep the keyframe
+ * duration in sync with `FADE_MS` in ImportModal.tsx. */
+.import-section-fade {
+  /* Keep the section taking up the same slot in the flex column —
+   * the showcase wrapper inherits flex: 1 1 auto from its host class
+   * (.import-format-showcase-host) but the preview-section already
+   * has its own flex sizing rules above. We don't repeat them here
+   * so the fade wrapper stays a no-op when no transition is active. */
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.import-section-fade--leaving {
+  animation: import-modal-section-fade-out 300ms ease-out both;
+}
+
+.import-section-fade--entering {
+  animation: import-modal-section-fade-in 300ms ease-out both;
+}
+
+@keyframes import-modal-section-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes import-modal-section-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .import-section-fade--leaving,
+  .import-section-fade--entering {
+    animation: none;
+  }
+}

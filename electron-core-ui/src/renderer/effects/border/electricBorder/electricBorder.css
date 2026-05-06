@@ -1,0 +1,134 @@
+/* ============================================================================
+ * ElectricBorder — a turbulence-displaced wobbling border with two glow rings,
+ * two highlight overlays and an outer halo. Adapted from
+ * https://codepen.io/BalintFerenczy/pen/KwdoyEN (MIT-style attribution in
+ * source comments). The filter (#ecu-electric-border-displace-<uid>) is
+ * injected at runtime by the React component so each instance has its own
+ * filter id and the animated <feOffset>s don't share state across cards.
+ *
+ * Layout: the root `.ecu-electric-border` is positioned by the shared
+ * `.ecu-border-effect` base (`position: absolute; inset: 0`). Internal
+ * children are stacked via `position: absolute; inset: 0` so they overlay
+ * the parent's border-box exactly.
+ * ========================================================================= */
+
+.ecu-electric-border {
+  /* Defaults that consumers can override per-instance via inline CSS vars
+   * (the React component sets them on the root). */
+  --ecu-electric-border-color: #dd8448;
+  --ecu-electric-border-light: oklch(from var(--ecu-electric-border-color) l c h);
+  --ecu-electric-border-gradient: oklch(
+    from var(--ecu-electric-border-color) 30% calc(c / 2) h / 0.4
+  );
+  --ecu-electric-border-width: 2px;
+  --ecu-electric-border-radius: inherit;
+}
+
+/* The "ambient" gradient ring that sits behind the main wobbly border —
+ * a subtle two-stop linear gradient across the parent. Painted on the
+ * root element via a background, so children don't need any extra DOM. */
+.ecu-electric-border {
+  background:
+    linear-gradient(
+      -30deg,
+      var(--ecu-electric-border-gradient),
+      transparent,
+      var(--ecu-electric-border-gradient)
+    );
+  border-radius: var(--ecu-electric-border-radius);
+}
+
+/* The wobbly border itself: a transparent box that gets a SVG turbulence
+ * filter applied. The `filter: url(...)` is set inline by the React
+ * component because the filter id is generated per-instance to avoid
+ * collisions when several ElectricBorders coexist on the same page. */
+.ecu-electric-border-main {
+  position: absolute;
+  inset: 0;
+  border: var(--ecu-electric-border-width) solid var(--ecu-electric-border-color);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Two blurred glow rings — solid color borders blurred to make a soft halo
+ * that hugs the main wobbly border. Sat slightly outside the main one so
+ * the wobble doesn't completely eat them. */
+.ecu-electric-border-glow-soft {
+  position: absolute;
+  inset: 0;
+  border: var(--ecu-electric-border-width) solid color-mix(in srgb, var(--ecu-electric-border-color) 60%, transparent);
+  border-radius: inherit;
+  filter: blur(1px);
+  pointer-events: none;
+}
+
+.ecu-electric-border-glow-bright {
+  position: absolute;
+  inset: 0;
+  border: var(--ecu-electric-border-width) solid var(--ecu-electric-border-light);
+  border-radius: inherit;
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+/* Two diagonal-gradient highlight overlays in `mix-blend-mode: overlay`
+ * so they read as bright streaks across the parent's content. Stacked
+ * over the entire effect with a 1.1× scale and a heavy blur to feel
+ * atmospheric rather than precise. */
+.ecu-electric-border-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  mix-blend-mode: overlay;
+  transform: scale(1.1);
+  filter: blur(16px);
+  background: linear-gradient(
+    -30deg,
+    white,
+    transparent 30%,
+    transparent 70%,
+    white
+  );
+  pointer-events: none;
+}
+
+.ecu-electric-border-overlay--bright { opacity: 1; }
+.ecu-electric-border-overlay--dim { opacity: 0.5; }
+
+/* Outermost halo — a heavily blurred linear gradient from light to dark
+ * that sits BEHIND everything else (z-index: -1) so it leaks out past the
+ * border without overpowering the content. */
+.ecu-electric-border-halo {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  filter: blur(32px);
+  transform: scale(1.1);
+  opacity: 0.3;
+  z-index: -1;
+  background: linear-gradient(
+    -30deg,
+    var(--ecu-electric-border-light),
+    transparent,
+    var(--ecu-electric-border-color)
+  );
+  pointer-events: none;
+}
+
+/* The component renders one inline `<svg>` with `width:0; height:0`
+ * holding the per-instance turbulence filter; tuck it out of layout. */
+.ecu-electric-border-filter-host {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Pause the SVG animations by removing the filter — the static border
+   * remains visible without the costly turbulence sample. */
+  .ecu-electric-border-main {
+    filter: none;
+  }
+}

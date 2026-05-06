@@ -28,11 +28,12 @@ import { Vignette } from 'electron-core-ui/renderer'
 #### Props
 
 ```typescript
-export type VignetteDecorationId = 'border-beam' | 'shine-border' | 'magic-card'
-export type VignetteDecoration = VignetteDecorationId | 'random'
+import type { BorderEffectId } from 'electron-core-ui/renderer'
+
+export type VignetteDecoration = BorderEffectId | 'random'
 
 export interface VignetteProps {
-  /** Built-in decoration applied to the frame. Pass `'random'` to pick at mount. */
+  /** Border effect applied to the frame. Pass `'random'` to pick at mount. */
   decoration?: VignetteDecoration
   /** Content rendered inside the frame. */
   children?: React.ReactNode
@@ -47,15 +48,14 @@ export interface VignetteProps {
 
 #### Built-in decorations
 
-| Decoration id | Source | What it does |
-|---|---|---|
-| `border-beam` | Magic UI (MIT, ported, motion replaced by CSS `offset-path` keyframes) | A short colored gradient trail loops along the border with random size, speed, direction, color pair and starting offset. |
-| `shine-border` | Magic UI (MIT, ported) | A radial gradient sweeps around the border via `mask-composite`; 2-3 random vibrant colors, slow cinematic pace. |
-| `magic-card` | Magic UI (MIT, ported, motion replaced by direct DOM CSS-var mutation) | Soft colored glow that follows the cursor on hover (mix-blend-mode: overlay so it adapts to dark/light themes); zero rerender, ref-based pointer tracking. |
+The decoration enum is the shared `BorderEffectId` exposed by [`Effects/Border`](../Effects/Border/README.md) — see those per-effect docs for visual reference and props:
 
-The chosen decoration id is exposed on the root as `data-decoration="..."`. With `decoration="random"` the choice is stable for the vignette's lifetime.
+- [`border-beam`](../Effects/Border/BorderBeam/README.md) — colored gradient trail looping along the border.
+- [`shine-border`](../Effects/Border/ShineBorder/README.md) — radial gradient sweeping around the border at a cinematic pace.
+- [`magic-card`](../Effects/Border/MagicCard/README.md) — cursor-tracked spotlight that fades in on hover.
+- [`electric-border`](../Effects/Border/ElectricBorder/README.md) — turbulence-displaced wobbling border with glow halo.
 
-`vignetteDecorationIds` exports the full list and `pickRandomVignetteDecoration()` mirrors the random selection logic if consumers want to build their own pickers.
+The chosen id is exposed on the Vignette root as `data-decoration="..."`. With `decoration="random"` the choice is stable for the vignette's lifetime; the random-pick lives in `pickRandomBorderEffect()` from `electron-core-ui/renderer`.
 
 #### Reusable row animation
 
@@ -104,4 +104,4 @@ The frame's tint and border are driven by the `--foreground` and `--editor-backg
 
 ## Testing
 
-If you pass a `data-testid`, target the root with `[data-testid="..."]`. The root also exposes `data-decoration="<resolved id>"` once a decoration has been picked. Class hooks: `.ecu-vignette` for the frame, `.ecu-vignette-content` for the content wrapper, `.ecu-vignette-decoration-<id>` for each decoration variant.
+If you pass a `data-testid`, target the root with `[data-testid="..."]`. The root also exposes `data-decoration="<resolved id>"` once a decoration has been picked. Class hooks: `.ecu-vignette` for the frame, `.ecu-vignette-content` for the content wrapper, plus one of the border-effect classes (`.ecu-border-beam`, `.ecu-shine-border`, `.ecu-magic-card`, `.ecu-electric-border`) on the overlay element — see [`Effects/Border`](../Effects/Border/README.md) for details.

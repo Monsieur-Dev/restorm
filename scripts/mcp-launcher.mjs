@@ -48,6 +48,10 @@ import { createInterface } from 'node:readline'
 const HOST = '127.0.0.1'
 const SPAWN_WAIT_MS = 90_000
 const PROBE_INTERVAL_MS = 250
+// Short HTTP timeout when validating a discovered endpoint or GC'ing
+// stale lockfiles. The endpoint is local, so a healthy restorm answers
+// well under this; anything slower is treated as a stale carcass.
+const HTTP_PROBE_TIMEOUT_MS = 800
 const PROTOCOL_VERSION = '2025-03-26'
 
 // Where running restorm instances drop their per-pid lockfile. Must
@@ -387,17 +391,17 @@ function isPidAlive(pid) {
 }
 
 /**
- * Scan the per-pid discovery dir, return the most-recent live entry,
- * or `null` if none. "Live" = the recorded pid still exists.
+ * Read every parseable lockfile in DISCOVERY_DIR. Returns the parsed
+ * entries plus their on-disk paths so callers can probe + GC.
  */
-function discoverRunningRestorm() {
+function readDiscoveryEntries() {
   let entries
   try {
     entries = readdirSync(DISCOVERY_DIR, { withFileTypes: true })
   } catch {
-    return null
+    return []
   }
-  const live = []
+  const out = []
   for (const e of entries) {
     if (!e.isFile() || !e.name.endsWith('.json')) continue
     const path = join(DISCOVERY_DIR, e.name)
@@ -405,19 +409,84 @@ function discoverRunningRestorm() {
     try {
       parsed = JSON.parse(readFileSync(path, 'utf8'))
     } catch {
+      out.push({ file: path, parseable: false })
       continue
     }
     const pid = Number(parsed.pid)
     const port = Number(parsed.port)
-    if (!Number.isInteger(pid) || !Number.isInteger(port) || port <= 0) continue
-    if (!isPidAlive(pid)) continue
     const token = typeof parsed.token === 'string' ? parsed.token : null
-    live.push({ pid, port, token, projectPath: parsed.projectPath ?? null, startedAt: parsed.startedAt ?? '' })
+    out.push({
+      file: path,
+      parseable: true,
+      pid: Number.isInteger(pid) ? pid : null,
+      port: Number.isInteger(port) && port > 0 ? port : null,
+      token,
+      projectPath: parsed.projectPath ?? null,
+      startedAt: typeof parsed.startedAt === 'string' ? parsed.startedAt : ''
+    })
   }
-  if (live.length === 0) return null
+  return out
+}
+
+/**
+ * Scan the per-pid discovery dir, validate each candidate with an HTTP
+ * probe, and return the most-recent reachable entry (`null` if none).
+ *
+ * "Reachable" means: the recorded pid is still alive AND the recorded
+ * port responds to a JSON-RPC `initialize` POST with the recorded
+ * bearer token within `HTTP_PROBE_TIMEOUT_MS`. The probe rules out
+ * three failure modes a TCP-only check would miss:
+ *
+ *   - PID reuse after a reboot (recorded pid number now belongs to an
+ *     unrelated process — port doesn't respond).
+ *   - Another process took the port after restorm crashed (responds,
+ *     but rejects our auth → not restorm anymore).
+ *   - Restorm restarted and minted a new token without rewriting the
+ *     lockfile we cached (token mismatch → 401 → probe fails).
+ */
+async function discoverRunningRestorm() {
+  const candidates = readDiscoveryEntries()
+    .filter((c) => c.parseable && c.pid !== null && c.port !== null && isPidAlive(c.pid))
+  if (candidates.length === 0) return null
   // Most-recent first. `startedAt` is ISO-8601 so lexical sort works.
-  live.sort((a, b) => (b.startedAt || '').localeCompare(a.startedAt || ''))
-  return live[0]
+  candidates.sort((a, b) => (b.startedAt || '').localeCompare(a.startedAt || ''))
+  for (const c of candidates) {
+    if (await probeMcpEndpoint(c.port, c.token)) {
+      return { pid: c.pid, port: c.port, token: c.token, projectPath: c.projectPath, startedAt: c.startedAt }
+    }
+  }
+  return null
+}
+
+/**
+ * Garbage-collect stale lockfiles in DISCOVERY_DIR. Deletes any entry
+ * that fails one of: parseable JSON, integer pid, alive pid, integer
+ * port, MCP endpoint responds to an `initialize` probe with the
+ * recorded token. Run once at startup to keep the dir bounded — when
+ * restorm crashes / is killed -9 / is interrupted by reboot, its
+ * lockfile is left behind and would otherwise accumulate forever.
+ *
+ * Best-effort: unlink failures are swallowed (file may have been
+ * removed by another launcher concurrently, or by tmpwatch).
+ */
+async function gcStaleDiscoveryFiles() {
+  const entries = readDiscoveryEntries()
+  let removed = 0
+  for (const c of entries) {
+    if (!c.parseable) {
+      try { await fs.unlink(c.file); removed++ } catch { /* gone */ }
+      continue
+    }
+    if (c.pid === null || !isPidAlive(c.pid)) {
+      try { await fs.unlink(c.file); removed++ } catch { /* gone */ }
+      continue
+    }
+    if (c.port === null || !(await probeMcpEndpoint(c.port, c.token))) {
+      try { await fs.unlink(c.file); removed++ } catch { /* gone */ }
+      continue
+    }
+  }
+  if (removed > 0) log('gc removed stale discovery lockfiles', { removed })
 }
 
 async function isPortOpen(port) {
@@ -428,6 +497,56 @@ async function isPortOpen(port) {
     sock.once('connect', () => { sock.destroy(); resolveFn(true) })
     sock.once('error', () => { resolveFn(false) })
     sock.once('timeout', () => { sock.destroy(); resolveFn(false) })
+  })
+}
+
+/**
+ * Confirm that a given (port, token) pair points at a live restorm MCP
+ * endpoint by sending a real JSON-RPC `initialize` POST. Returns true
+ * on a 2xx response, false on any other status / network error /
+ * timeout. Used both to validate discovered entries before adopting
+ * them and to GC stale lockfiles.
+ *
+ * Cheaper than a full forward: we don't parse the SSE body, just drain
+ * it so the socket can close cleanly. Capped at HTTP_PROBE_TIMEOUT_MS
+ * because the endpoint is local — anything slower is treated as dead.
+ */
+function probeMcpEndpoint(port, token) {
+  return new Promise((resolveFn) => {
+    if (!Number.isInteger(port) || port <= 0) { resolveFn(false); return }
+    const payload = JSON.stringify({
+      jsonrpc: '2.0',
+      id: 'launcher-probe',
+      method: 'initialize',
+      params: {
+        protocolVersion: PROTOCOL_VERSION,
+        capabilities: {},
+        clientInfo: { name: 'mcp-launcher-probe', version: '0.0.0' }
+      }
+    })
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json, text/event-stream',
+      'Content-Length': Buffer.byteLength(payload)
+    }
+    if (token) headers['Authorization'] = `Bearer ${token}`
+    let settled = false
+    const settle = (ok) => { if (!settled) { settled = true; resolveFn(ok) } }
+    const req = httpRequest(
+      { host: HOST, port, path: '/', method: 'POST', headers },
+      (res) => {
+        const ok = typeof res.statusCode === 'number' && res.statusCode >= 200 && res.statusCode < 300
+        // Drain the body so the socket can close; we don't care about
+        // the parsed payload — only the status code.
+        res.resume()
+        res.on('end', () => settle(ok))
+        res.on('error', () => settle(false))
+      }
+    )
+    req.setTimeout(HTTP_PROBE_TIMEOUT_MS, () => { req.destroy(); settle(false) })
+    req.on('error', () => settle(false))
+    req.write(payload)
+    req.end()
   })
 }
 
@@ -490,9 +609,11 @@ async function ensureRestormRunning() {
 
   // Try to reuse a live restorm via the central discovery dir before
   // spawning a fresh one. Useful when the user launched restorm from
-  // their dock / a separate terminal.
-  const existing = discoverRunningRestorm()
-  if (existing && (await isPortOpen(existing.port))) {
+  // their dock / a separate terminal. `discoverRunningRestorm` does
+  // its own HTTP probe with the recorded token, so a returned entry
+  // is already validated — no extra round-trip needed.
+  const existing = await discoverRunningRestorm()
+  if (existing) {
     currentPort = existing.port
     currentToken = existing.token
     log('restorm already listening (discovered)', { port: existing.port, pid: existing.pid, hasToken: currentToken !== null })
@@ -706,7 +827,51 @@ async function handleLine(text) {
   }
 }
 
+/**
+ * Manual mode: run when invoked from a TTY (typically via
+ * `pnpm dev:restorm:mcp`). Sweeps the discovery dir synchronously,
+ * then spawns `pnpm dev:restorm -- --mcp` in the foreground —
+ * stdio inherited so the user sees Vite + Electron logs — and waits
+ * for it to exit. No JSON-RPC handling: the launcher is just a
+ * cleanup-then-run wrapper here.
+ */
+async function runManualMode() {
+  log('manual mode (TTY) — running cleanup then spawning restorm in foreground')
+  await gcStaleDiscoveryFiles()
+  const child = spawn(
+    'pnpm',
+    ['dev:restorm', '--', '--mcp'],
+    { cwd: repoRoot, stdio: 'inherit', env: { ...process.env } }
+  )
+  // Forward Ctrl-C cleanly: kill the child, let it shut down restorm,
+  // then exit ourselves. SIGTERM follows the same path.
+  const forward = (signal) => () => {
+    if (!child.killed) child.kill(signal)
+  }
+  process.on('SIGINT', forward('SIGINT'))
+  process.on('SIGTERM', forward('SIGTERM'))
+  await new Promise((resolveFn) => {
+    child.on('exit', (code, signal) => {
+      if (signal) process.kill(process.pid, signal)
+      else process.exit(code ?? 0)
+      resolveFn()
+    })
+  })
+}
+
 async function main() {
+  if (process.stdin.isTTY) {
+    await runManualMode()
+    return
+  }
+  // JSON-RPC server mode (Claude Code spawned us via .mcp.json with
+  // a piped stdin). Sweep stale lockfiles before serving any request:
+  // restorm only cleans its own lockfile on graceful `before-quit`;
+  // crashes / -9 / reboots leave carcasses behind, and on a system
+  // whose /tmp survives reboots a recycled PID could even pass the
+  // liveness check. Fire-and-forget so a slow probe doesn't delay
+  // the first response.
+  void gcStaleDiscoveryFiles().catch((err) => log('gc failed', { error: String(err) }))
   const rl = createInterface({ input: process.stdin, crlfDelay: Infinity })
   for await (const line of rl) {
     const text = line.trim()
@@ -714,9 +879,6 @@ async function main() {
     await handleLine(text)
   }
 }
-
-process.on('SIGTERM', () => { process.exit(0) })
-process.on('SIGINT', () => { process.exit(0) })
 
 main().catch((err) => {
   log('fatal', { error: String(err) })

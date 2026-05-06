@@ -1,0 +1,263 @@
+/* ============================================================================
+ * ImportFormatShowcase — speech-bubble that pitches one supported
+ * import format at a time. Centered horizontally + vertically in the
+ * available space below the auth-route button.
+ * ========================================================================= */
+
+.import-format-showcase-host {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  /* Intentionally NOT `position: relative` — we want the glow div
+   * (sibling to the bubble) to anchor to `.import-modal` further
+   * up so the radial halo spans the whole modal surface, not just
+   * the host's available rect. */
+}
+
+/* Wide radial halo behind the bubble in the colour OPPOSITE to the
+ * modal background — pure white on dark themes, pure black on light
+ * themes. Flipped via the `[data-theme]` attribute the app sets on
+ * `documentElement` (see ECUI ThemeService). Rendered as a dedicated
+ * `<div className="...glow">` element so the bubble's `::before` /
+ * `::after` pseudos stay free for the comic-book tail. */
+.import-format-showcase-glow {
+  /* Sized as `inset: 0` (= fills the modal) and centred via a
+   * radial-gradient so the glow scales naturally with the modal —
+   * no fixed pixel sizes that would desync on resize. The gradient
+   * uses dense, evenly-spaced stops so the inter-stop banding stays
+   * below a JND, then `filter: blur(40px)` softens whatever residual
+   * stripes Electron's compositor would otherwise expose. */
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  --import-format-showcase-glow-color: 255, 255, 255;
+  background: radial-gradient(
+    ellipse 65% 55% at center,
+    rgba(var(--import-format-showcase-glow-color), 0.42) 0%,
+    rgba(var(--import-format-showcase-glow-color), 0.36) 10%,
+    rgba(var(--import-format-showcase-glow-color), 0.28) 20%,
+    rgba(var(--import-format-showcase-glow-color), 0.20) 30%,
+    rgba(var(--import-format-showcase-glow-color), 0.13) 42%,
+    rgba(var(--import-format-showcase-glow-color), 0.08) 55%,
+    rgba(var(--import-format-showcase-glow-color), 0.04) 70%,
+    rgba(var(--import-format-showcase-glow-color), 0.015) 82%,
+    transparent 95%
+  );
+  filter: blur(40px);
+}
+
+[data-theme='light'] .import-format-showcase-glow,
+[data-theme='hcLight'] .import-format-showcase-glow {
+  --import-format-showcase-glow-color: 0, 0, 0;
+}
+
+.import-format-showcase-bubble {
+  /* Sized to its content — the host owns the centering. */
+  position: relative;
+  max-width: 480px;
+  padding: 16px 20px;
+  background: var(--editorWidget-background);
+  color: var(--editorWidget-foreground);
+  border: 1px solid var(--editorWidget-border, var(--panel-border));
+  border-radius: 12px;
+  /* Drop-shadow in the colour OPPOSITE to the glow — pure black when
+   * the glow is white (dark theme), pure white when the glow is
+   * black (light theme). Flipped via the `[data-theme]` selector
+   * below. `filter: drop-shadow` (instead of `box-shadow`) so the
+   * comic-book tail also picks up the shadow. */
+  --import-format-showcase-shadow-color: 0, 0, 0;
+  filter: drop-shadow(0 8px 22px rgba(var(--import-format-showcase-shadow-color), 1));
+}
+
+[data-theme='light'] .import-format-showcase-bubble,
+[data-theme='hcLight'] .import-format-showcase-bubble {
+  --import-format-showcase-shadow-color: 255, 255, 255;
+}
+
+/* Phase-driven fade animations. The component cycles through
+ *   `--in` (mount, fade-in, stays at full opacity for STEADY_MS) →
+ *   `--out` (fade-out, then unmount during the gap) →
+ *   <not rendered> for GAP_MS →
+ *   `--in` again on the new format.
+ * `both` keeps the final keyframe applied so the bubble stays at
+ * opacity 1 / 0 outside the animation window. */
+.import-format-showcase-bubble--in {
+  animation: import-format-showcase-fade-in 500ms ease-out both;
+}
+
+.import-format-showcase-bubble--out {
+  animation: import-format-showcase-fade-out 500ms ease-in both;
+}
+
+/* Comic-book speech tail anchored to the bottom-left corner. The
+ * outer triangle traces the bubble's border; the inner triangle
+ * paints over it with the bubble's background, leaving only the two
+ * stroke edges visible. */
+.import-format-showcase-bubble::before,
+.import-format-showcase-bubble::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  pointer-events: none;
+}
+
+.import-format-showcase-bubble::before {
+  /* Outer triangle (border) */
+  bottom: -14px;
+  left: 28px;
+  border-width: 14px 14px 0 0;
+  border-color: var(--editorWidget-border, var(--panel-border)) transparent transparent transparent;
+}
+
+.import-format-showcase-bubble::after {
+  /* Inner triangle (fill) — 1 px in / up so the border line stays. */
+  bottom: -12px;
+  left: 29px;
+  border-width: 12px 12px 0 0;
+  border-color: var(--editorWidget-background) transparent transparent transparent;
+}
+
+.import-format-showcase-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.import-format-showcase-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--editorWidget-foreground);
+}
+
+.import-format-showcase-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.import-format-showcase-logo {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  user-select: none;
+}
+
+/* Monochrome glyph (Postman, Insomnia, Bruno — all from Simple Icons).
+ * The SVG is injected inline; `fill: currentColor` on the inner path
+ * picks up the surrounding text colour, so the same asset reads light
+ * on a dark theme and dark on a light theme without shipping a
+ * second per-theme asset. */
+.import-format-showcase-logo--monochrome {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--editorWidget-foreground);
+}
+
+.import-format-showcase-logo--monochrome > svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+.import-format-showcase-codicon {
+  /* Render the codicon glyph at the same visual footprint as the
+   * SVG logos so the bubble layout stays consistent across formats. */
+  flex-shrink: 0;
+  font-size: 36px !important;
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--editorWidget-foreground);
+}
+
+.import-format-showcase-description {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--descriptionForeground);
+}
+
+.import-format-showcase-trademark {
+  /* Nominative-fair-use mention required when we display third-party
+   * trademarks (Postman, Insomnia, etc.). Discreet on purpose. */
+  display: block;
+  margin-top: 10px;
+  font-size: 10px;
+  font-style: italic;
+  text-align: right;
+  color: var(--descriptionForeground);
+  opacity: 0.65;
+}
+
+@keyframes import-format-showcase-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes import-format-showcase-fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+/* When the PRO bubble draws a MagicCard effect, extend the .ecu-magic-card
+ * canvas 14px below the bubble so the cursor-tracked spotlight can reach
+ * the comic-book tail when the user hovers near it. The MagicCard
+ * component's stock CSS uses `inset: 0` (via the shared .ecu-border-effect
+ * base); overriding `bottom` here is the smallest possible deviation. */
+.import-format-showcase-bubble--pro .ecu-magic-card {
+  bottom: -14px;
+}
+
+/* Lift the entire electric-border effect (halo + glow + overlays +
+ * main ring) above the bubble's `::before` / `::after` pseudos,
+ * which paint the comic-book tail. By default the tail pseudos
+ * paint after children, so they would land on top of the border
+ * line at the tail's anchor point — we want the wobble (and its
+ * surrounding glow) to pass over the tail's plain straight edges,
+ * not the other way around. */
+.import-format-showcase-bubble--pro .ecu-electric-border {
+  z-index: 1;
+}
+
+/* Nudge only the wobbly main ring (the `feDisplacementMap`-driven
+ * 2px line) up-and-left by 8px to re-centre it visually inside the
+ * halo / glow rings — the line is biased toward the bottom-right of
+ * the bubble's content box because of the way the displacement map
+ * samples its noise field, and we deliberately don't move the halo
+ * / glow / overlays so they stay anchored to the bubble. Scoped to
+ * the electric variant in the showcase only. */
+.import-format-showcase-bubble--pro .ecu-electric-border-main {
+  transform: translate(-8px, -8px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .import-format-showcase-bubble--in,
+  .import-format-showcase-bubble--out {
+    animation: none;
+  }
+}

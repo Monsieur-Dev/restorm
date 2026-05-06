@@ -110,3 +110,33 @@ When writing E2E tests in `restorm/` or `demo/`:
 ### Debugging e2e failures
 
 When an e2e test fails, before guessing at a fix: open the end-of-test screenshot Playwright attached under `restorm/test-results/<test-dir>/attachments/end-state-screenshot-*.png` (or the step-scoped screenshot the step itself produced) with the `Read` tool. The UI state at the point of failure frequently tells you whether the production code actually broke or whether the selector / expectation is wrong. Also check `electron-logs.txt` in the same directory for main-process + renderer console messages + uncaught page errors.
+
+## Restorm in dev + MCP
+
+For interactive debugging when you also want Claude Code's MCP launcher to drive the same restorm instance, run:
+
+```bash
+pnpm dev:restorm:mcp
+```
+
+This sweeps stale MCP lockfiles (`pnpm mcp:cleanup` under the hood) and then runs `pnpm dev:restorm -- --mcp`. The `--mcp` flag turns on the embedded HTTP MCP server, which writes a per-pid lockfile to `/tmp/restorm-mcp/<pid>.json` (port + bearer token). `scripts/mcp-launcher.mjs` discovers that lockfile and forwards Claude's MCP traffic to the running instance instead of spawning a fresh, hidden one — so the renderer / DevTools you're looking at is the same renderer the launcher is talking to.
+
+The cleanup pass is shared in two paths:
+
+- `pnpm mcp:cleanup` (or the chained `dev:restorm:mcp` startup) runs `node scripts/mcp-launcher.mjs --gc-only` — useful before a manual launch.
+- The launcher itself runs the same sweep at startup when Claude Code spawns it.
+
+GC removes any lockfile whose recorded pid is dead, or whose endpoint no longer answers an authenticated `initialize` probe within ~800 ms. A previous restorm killed with `-9` or interrupted by a reboot won't poison discovery.
+
+## Sending screencasts over Telegram
+
+The restorm MCP `screencast-start` / `screencast-stop` tools return a `.webm` (vp9). Telegram retranscodes raw vp9 webm server-side, which adds visible compression artefacts (banding on smooth gradients, blocking on motion). Always pipe the webm through ffmpeg into a standards-compliant mp4 before attaching:
+
+```bash
+ffmpeg -y -i /tmp/ecu-screencast-<ts>.webm \
+  -c:v libx264 -preset medium -crf 23 -pix_fmt yuv420p \
+  -movflags +faststart \
+  /tmp/<descriptive-name>.mp4
+```
+
+Telegram leaves a standard h264/yuv420p mp4 alone (no re-encode), so the recipient sees the source-quality frames. Costs a few seconds of ffmpeg per clip; well worth it for any UI demo where the visual fidelity is the whole point of the message.

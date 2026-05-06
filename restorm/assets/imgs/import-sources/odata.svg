@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <defs>
+    <linearGradient id="odata-bg" x1="16" y1="0" x2="16" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F4A442"/>
+      <stop offset="1" stop-color="#DA6F1A"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="6" fill="url(#odata-bg)"/>
+  <rect x="5"  y="7"  width="10" height="3" rx="0.5" fill="#fff"/>
+  <rect x="17" y="7"  width="10" height="3" rx="0.5" fill="#fff"/>
+  <rect x="5"  y="12" width="10" height="3" rx="0.5" fill="#fff"/>
+  <rect x="17" y="12" width="10" height="3" rx="0.5" fill="#fff"/>
+  <rect x="5"  y="17" width="10" height="3" rx="0.5" fill="#fff"/>
+  <rect x="17" y="17" width="10" height="3" rx="0.5" fill="#fff"/>
+  <circle cx="9" cy="24.5" r="3.5" fill="#fff"/>
+  <rect x="17" y="23" width="10" height="3" rx="0.5" fill="#fff"/>
+</svg>

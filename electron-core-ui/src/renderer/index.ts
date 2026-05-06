@@ -5,6 +5,7 @@ ensureCoreUiWebApiShim()
 
 // Renderer process exports
 export * from './components'
+export * from './effects'
 export { MessageType, onWorkbenchTabDropped } from './components'
 export { ElectronCoreUiProvider } from './components/ElectronCoreUiProvider'
 export type { ElectronCoreUiProviderProps } from './components/ElectronCoreUiProvider'

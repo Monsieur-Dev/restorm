@@ -597,17 +597,71 @@
   },
   "import": {
     "title": "Import Requests",
-    "destination": {
-      "label": "Destination",
-      "placeholder": "Select destination folder",
-      "newFolder": "New Folder",
-      "newFolderTitle": "New Folder",
-      "newFolderPlaceholder": "Enter folder name...",
-      "root": "<Root>"
-    },
     "source": {
-      "label": "Source",
+      "label": "Paste something in there!",
       "placeholder": "Enter file path, URL, or paste curl/PowerShell command..."
+    },
+    "formats": {
+      "swagger": {
+        "description": "The OpenAPI 2.0 spec, born at SmartBear. Paste a Swagger JSON or YAML — Restorm parses every operation, pulls in security schemes, and turns the whole document into a navigable tree of requests.",
+        "trademark": "Swagger is a registered trademark of SmartBear Software."
+      },
+      "openapi": {
+        "description": "The current OpenAPI standard (3.0 and 3.1). Same paste-and-go ergonomics as Swagger: parameters, request bodies, security schemes, and webhooks land as a tree of typed requests with examples ready to send.",
+        "trademark": "OpenAPI is a project of the OpenAPI Initiative under the Linux Foundation."
+      },
+      "curl": {
+        "description": "Already have the request running in your terminal? Paste the full curl invocation — flags, headers, body, query string — and Restorm rebuilds it as a real request you can rerun, edit, and pin.",
+        "trademark": "curl is open source software © Daniel Stenberg, used here under its terms."
+      },
+      "powershell": {
+        "description": "Same idea, PowerShell flavor. Paste an Invoke-WebRequest or Invoke-RestMethod command and Restorm reads the URI, method, headers, and body to seed a request you can iterate on visually.",
+        "trademark": "PowerShell is a registered trademark of Microsoft Corporation."
+      },
+      "postman": {
+        "description": "Got a Postman collection saved at the office? Drop the JSON — Restorm reads every request, every example response, and every environment variable, then rebuilds the collection as a Restorm tree you can run side-by-side with the rest of your APIs.",
+        "trademark": "Postman is a registered trademark of Postman, Inc., used here for compatibility reference only."
+      },
+      "insomnia": {
+        "description": "Coming from Insomnia? Drop your export. Restorm understands its v4 / v5 collection format, brings every request, header, body, and environment along, and surfaces the lot as a Restorm tree.",
+        "trademark": "Insomnia is a registered trademark of Kong Inc., used here for compatibility reference only."
+      },
+      "bruno": {
+        "description": "Bruno-flavored .bru files or a folder export — Restorm reads the .bru text format, including its scripting blocks, and recreates each request as a first-class Restorm node ready to send.",
+        "trademark": "Bruno is open source software (MIT) by Anoop M. D., used here under its terms."
+      },
+      "graphql": {
+        "description": "Paste a GraphQL SDL (.graphql / .gql / a paste from your GraphQL client) and Restorm scaffolds one request per operation, wired to the right query / mutation / subscription type with variables already structured.",
+        "trademark": "GraphQL is a trademark of the GraphQL Foundation, a project of the Joint Development Foundation."
+      },
+      "grpc": {
+        "description": "Drop a .proto file (or a directory of them) and Restorm walks every service, every RPC, every message — turning each method into a typed request you can send through the gRPC executor without touching codegen.",
+        "trademark": "gRPC is a project of the Cloud Native Computing Foundation."
+      },
+      "soap": {
+        "description": "Got a WSDL? Paste it (or its URL) — Restorm parses every <port> and <operation> and produces ready-to-send SOAP envelopes with the right SOAPAction header, schema-typed body skeletons, and the auth scheme the WSDL declares.",
+        "trademark": "SOAP and WSDL are open standards published by the World Wide Web Consortium (W3C)."
+      },
+      "websocket": {
+        "description": "Paste a WebSocket endpoint (ws:// or wss://) — Restorm opens the connection, captures the server's hello frames, and scaffolds send / subscribe requests with replayable payload templates.",
+        "trademark": "WebSocket is a protocol standardized by the IETF (RFC 6455) and the W3C."
+      },
+      "kafka": {
+        "description": "Paste an Apache Kafka bootstrap-server URL (or a list of topics) — Restorm registers consumers + producers per topic, decodes Avro / Protobuf payloads via your Schema Registry, and lets you replay individual offsets in one click.",
+        "trademark": "Apache Kafka and the Kafka logo are trademarks of the Apache Software Foundation."
+      },
+      "socketio": {
+        "description": "Paste a Socket.IO server URL — Restorm negotiates the handshake, lists the namespaces and event names the server emits, and gives you one request per emit / on event with payload validation.",
+        "trademark": "Socket.IO is an open-source library released under the MIT license; the name and logo are used nominatively."
+      },
+      "odata": {
+        "description": "Paste an OData service-document URL or a $metadata file — Restorm reads the CSDL, rebuilds the entity sets, function imports, and actions, plus pre-fills the $filter / $select / $top / $skip query options on every operation.",
+        "trademark": "OData is an OASIS standard."
+      },
+      "mqtt": {
+        "description": "Paste an MQTT broker URL or a topic catalog — Restorm scaffolds publish / subscribe requests per topic, keeps the connection live for streaming previews, and remembers retained-message snapshots so you can replay them later.",
+        "trademark": "MQTT is an OASIS standard; the MQTT name and logo are trademarks of OASIS Open."
+      }
     },
     "preview": {
       "label": "Preview"
@@ -618,6 +672,7 @@
       "unknown": "An unknown error occurred"
     },
     "ok": "Import",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "dropZone": "Drop zone"
   }
 }

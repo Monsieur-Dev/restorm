@@ -2,6 +2,14 @@ import { app, BrowserWindow, ipcMain } from 'electron'
 import { randomBytes } from 'node:crypto'
 import { MainWindow } from './windows/MainWindow'
 import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, initAutoSaveController, McpService } from 'electron-core-ui'
+// Restorm-specific renderer translations (notably the `behavior.*`
+// keys referenced by `restorm/resources/settings.yaml`). The main
+// process needs them so `SettingsService.reindexSearch()` and any
+// other main-side `i18nService.t(...)` lookup resolves the right
+// label / description string. Vite bundles these JSONs at build
+// time so they ship with the main bundle.
+import restormEnTranslation from '../renderer/locales/en/translation.json'
+import restormFrTranslation from '../renderer/locales/fr/translation.json'
 import { PROJECT_UUID_KEY } from '../shared/config/projectUuid'
 import type { PersistenceFormat } from 'electron-core-ui'
 import { dirname, join } from 'path'
@@ -223,6 +231,13 @@ const systemLocale = app.getLocale().split('-')[0] ?? 'en'
 const supportedLocales = ['en', 'fr']
 const defaultLocale = supportedLocales.includes(systemLocale) ? systemLocale : 'en'
 i18nService.initialize('', defaultLocale)
+// Layer Restorm's renderer translations onto ECUI's built-ins so
+// settings-yaml `titleKey` / `descriptionKey` lookups (e.g.
+// `behavior.dateTimeFormat`, `behavior.syncSidebarWithTabs`) resolve
+// during the SettingsService search-index rebuild that runs
+// immediately after.
+i18nService.addTranslations('en', restormEnTranslation as Record<string, unknown>)
+i18nService.addTranslations('fr', restormFrTranslation as Record<string, unknown>)
 logger.info('I18n Service initialized', { locale: defaultLocale })
 
 // Initialize File Service for .restorm files with YAML serialization.

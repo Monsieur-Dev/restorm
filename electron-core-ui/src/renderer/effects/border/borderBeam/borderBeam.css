@@ -1,0 +1,43 @@
+/*
+ * Shared base for every border effect: positions the effect element so
+ * it overlays its parent's border-box, inherits the parent's
+ * border-radius, and never intercepts pointer events.
+ */
+.ecu-border-effect {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.ecu-border-beam {
+  border: var(--ecu-border-beam-width, 1px) solid transparent;
+  mask:
+    linear-gradient(transparent, transparent) padding-box,
+    linear-gradient(#000, #000) border-box;
+  mask-composite: intersect;
+}
+
+.ecu-border-beam-trail {
+  position: absolute;
+  aspect-ratio: 1;
+  animation-name: ecu-border-beam-travel;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+@keyframes ecu-border-beam-travel {
+  from {
+    offset-distance: 0%;
+  }
+
+  to {
+    offset-distance: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ecu-border-beam-trail {
+    animation: none;
+  }
+}

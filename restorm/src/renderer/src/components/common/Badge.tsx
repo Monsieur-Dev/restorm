@@ -19,6 +19,10 @@ export type BadgeType =
   | 'ODATA'
   // Authentication
   | 'AUTH'
+  // Marketing tier — shown next to import-format names that require a
+  // paid plan. Distinct gold gradient so it doesn't read as a
+  // protocol badge.
+  | 'PRO'
 
 export interface BadgeProps {
   /** The type of badge - determines styling */
