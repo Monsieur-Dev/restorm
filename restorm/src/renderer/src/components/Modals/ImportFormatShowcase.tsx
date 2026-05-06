@@ -519,6 +519,15 @@ function renderProBorderEffect(
           // border-only effect along the actual silhouette.
           mask: silhouette.mask,
           WebkitMask: silhouette.mask,
+          // Force the mask to scale to the element's box. Otherwise
+          // `mask-size: auto` uses the SVG's intrinsic dimensions
+          // (built from the parent bubble's border-box), which exceed
+          // the shine element's padding-box dimensions by the
+          // bubble's 1px border on each side — clipping the right /
+          // bottom strokes of the silhouette outline. Forcing 100%
+          // 100% keeps the ring uniform on all four sides + the tail.
+          maskSize: '100% 100%',
+          WebkitMaskSize: '100% 100%',
           maskComposite: 'add',
           WebkitMaskComposite: 'source-over',
           // Drop the inner padding the stock class uses — that padding

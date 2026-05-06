@@ -2,11 +2,13 @@
  * ImportModal - Modal for importing requests from various sources
  */
 
-import React, { useState, useCallback, useEffect, useRef } from 'react'
+import React, { useState, useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import {
   Modal,
   Button,
-  InputBox
+  InputBox,
+  Wordmark,
+  getContrastColor
 } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
 import type { FolderItem, EnvironmentFolder } from '../../../../shared/types/collections'
@@ -60,7 +62,24 @@ export function ImportModal({
   refreshContext
 }: ImportModalProps): React.JSX.Element {
   const { t } = useTranslation()
-  
+
+  // Drop-zone border contrast: read the modal's background variable
+  // (`--editor-background`, set by the active theme) and pick the
+  // higher-contrast of black / white so the dashed outline reads on
+  // every theme without hardcoding a colour. Recomputed when the
+  // modal opens — themes can flip between mounts.
+  const dropZoneRef = useRef<HTMLDivElement | null>(null)
+  const [dropZoneColor, setDropZoneColor] = useState<string>('#ffffff')
+
+  // Modal-wide drag tracking. Listens on the whole modal body (not
+  // just the visible drop-zone rectangle) so any drag entering the
+  // dialog hides the format showcase and tints the drop-zone fill.
+  // The dragleave handler filters out child-transition events via
+  // `relatedTarget` (see below), and a window-level safety net
+  // resets state on `drop` / `dragend` / `mouseleave` so we never
+  // stay stuck after a cancelled or window-exit drag.
+  const [isDraggingOver, setIsDraggingOver] = useState(false)
+
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [previewItems, setPreviewItems] = useState<FolderItem[]>([])
@@ -113,6 +132,15 @@ export function ImportModal({
   // every return to the showcase, not to resume mid-cycle).
   const [showcaseMountSeq, setShowcaseMountSeq] = useState(0)
   const prevDisplayedRef = useRef<Section>(displayedSection)
+
+  useLayoutEffect(() => {
+    if (!isOpen) return
+    const el = dropZoneRef.current
+    if (el === null) return
+    const bg = getComputedStyle(el).getPropertyValue('--editor-background').trim()
+    if (bg.length === 0) return
+    setDropZoneColor(getContrastColor(bg))
+  }, [isOpen])
 
   useEffect(() => {
     if (targetSection === displayedSection) return
@@ -191,24 +219,103 @@ export function ImportModal({
     }, 200)
   }, [t])
 
-  // Handle drag and drop
-  const handleDrop = useCallback((event: React.DragEvent) => {
+  // Modal-wide drag tracking. Bound on the `.import-modal` div so
+  // any drag entering the dialog (regardless of which inner element
+  // it lands on first) hides the showcase + tints the drop-zone
+  // fill. Counter increments on every dragenter and decrements on
+  // every dragleave; when it returns to zero we know the cursor has
+  // truly left — including the case where the user drops outside or
+  // releases the drag mid-flight.
+  const handleModalDragEnter = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+    // Skip drags carrying nothing useful (e.g. an internal element
+    // dragstart that didn't set any data) — without this we'd flip
+    // the modal into drop-mode for a stray text-selection drag.
+    if (event.dataTransfer.types.length === 0) return
+    event.preventDefault()
+    setIsDraggingOver(true)
+  }, [])
+
+  const handleModalDragLeave = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    // dragleave fires every time the cursor crosses into a child
+    // element too — `relatedTarget` is the element we're moving into
+    // (or null when the cursor leaves the window entirely). If it's
+    // still inside the modal, we haven't truly left; ignore.
+    const related = event.relatedTarget as Node | null
+    if (related !== null && event.currentTarget.contains(related)) return
+    setIsDraggingOver(false)
+  }, [])
+
+  const handleModalDragOver = useCallback((event: React.DragEvent) => {
+    // Required to keep the dropzone "valid" so the OS shows the
+    // copy / move cursor and dragenter fires on the next child the
+    // user crosses. Without preventDefault the spec disables the
+    // drop target and we lose downstream events.
+    event.preventDefault()
+  }, [])
+
+  const handleModalDrop = useCallback((event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault()
     event.stopPropagation()
+    setIsDraggingOver(false)
 
-    const files = event.dataTransfer.files
-    if (files.length > 0) {
-      const file = files[0]
+    // Pull the most useful payload the OS gave us, in order of
+    // specificity:
+    //   1. Files — Electron exposes the full absolute path on
+    //      `file.path`, which is exactly what the import pipeline
+    //      wants for local-file imports.
+    //   2. URI list — Firefox / Chrome use this when you drag a link
+    //      from another tab; first line is the URL.
+    //   3. Plain text — fallback for selections (cURL command, raw
+    //      JSON pasted from a sibling tool).
+    const dt = event.dataTransfer
+
+    if (dt.files.length > 0) {
+      const file = dt.files[0]
       if (file) {
-        handleInputChange((file as { path?: string }).path ?? file.name)
+        // Electron 32+ no longer populates `File.path`; the
+        // supported replacement is `webUtils.getPathForFile()`,
+        // exposed here via the preload bridge as
+        // `restorm.file.getPathForFile`. It returns the absolute
+        // path for a real on-disk file or an empty string for a
+        // Blob-backed File (clipboard image, etc.) — the latter
+        // would only happen for non-file drags, but we still
+        // fall back on `file.name` so the input never goes empty.
+        const path = window.restorm?.file.getPathForFile(file) ?? ''
+        handleInputChange(path.length > 0 ? path : file.name)
+        return
       }
+    }
+    const uri = dt.getData('text/uri-list').split('\n').find((line) => line.trim().length > 0 && !line.startsWith('#'))
+    if (uri) {
+      handleInputChange(uri.trim())
+      return
+    }
+    const text = dt.getData('text/plain').trim()
+    if (text) {
+      handleInputChange(text)
     }
   }, [handleInputChange])
 
-  const handleDragOver = useCallback((event: React.DragEvent) => {
-    event.preventDefault()
-    event.stopPropagation()
-  }, [])
+  // Safety net: window-level listeners that fire when a drag actually
+  // ends, regardless of whether the drop happened inside the modal,
+  // outside the window, or got cancelled with Escape. Without this
+  // we sometimes stay stuck in `isDraggingOver === true` because the
+  // synthetic React `dragleave` on `.import-modal` doesn't always
+  // fire when the cursor exits via a fast diagonal that crosses an
+  // overlay / iframe edge mid-flight.
+  useEffect(() => {
+    if (!isDraggingOver) return
+    const reset = (): void => { setIsDraggingOver(false) }
+    window.addEventListener('drop', reset)
+    window.addEventListener('dragend', reset)
+    window.addEventListener('mouseleave', reset)
+    return () => {
+      window.removeEventListener('drop', reset)
+      window.removeEventListener('dragend', reset)
+      window.removeEventListener('mouseleave', reset)
+    }
+  }, [isDraggingOver])
 
   // Handle import click
   const handleImportClick = useCallback(() => {
@@ -451,6 +558,7 @@ export function ImportModal({
       setSearchFilter('')
       setError(null)
       setIsLoading(false)
+      setIsDraggingOver(false)
     }
   }, [isOpen])
 
@@ -467,6 +575,11 @@ export function ImportModal({
         className="import-modal"
         data-testid="import-modal"
         data-refresh-mode={refreshContext ? 'true' : undefined}
+        data-dragging-over={isDraggingOver ? 'true' : undefined}
+        onDragEnter={handleModalDragEnter}
+        onDragLeave={handleModalDragLeave}
+        onDragOver={handleModalDragOver}
+        onDrop={handleModalDrop}
       >
 
         {/* Source Input */}
@@ -495,21 +608,16 @@ export function ImportModal({
               {refreshContext.sourceUrl}
             </div>
           ) : (
-            <div
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-            >
-              <InputBox
-                value={input}
-                onChange={handleInputChange}
-                options={{
-                  placeholder: t('import.source.placeholder'),
-                  flexibleHeight: true,
-                  flexibleMaxHeight: 200
-                }}
-                data-testid="source-input"
-              />
-            </div>
+            <InputBox
+              value={input}
+              onChange={handleInputChange}
+              options={{
+                placeholder: t('import.source.placeholder'),
+                flexibleHeight: true,
+                flexibleMaxHeight: 200
+              }}
+              data-testid="source-input"
+            />
           )}
           {isLoading && (
             <div className="import-loading" role="status">
@@ -592,25 +700,77 @@ export function ImportModal({
           ) : null}
         </div>
 
-        {/* Format showcase — pitches one supported import format at a
-            time when there's nothing to preview yet. Hidden in refresh
-            mode (the user already chose a format the day they imported)
-            and once a preview tree is on screen.
+        {/* Drop zone — visible target for file drops onto the modal.
+            Hidden when the route-preview tree is on screen UNLESS a
+            drag is currently happening over the modal: in that case
+            we want the user's intent (drop something) to flip the UI
+            back to the dashed-rectangle target without losing the
+            preview list (which re-mounts on dragleave). The dashed
+            border colour flips to whichever of black / white reads
+            on the modal's background; recomputed on each open via
+            the `useLayoutEffect` above. */}
+        {(displayedSection !== 'preview' || isDraggingOver) && (
+          <div
+            ref={dropZoneRef}
+            className={`import-drop-zone${isDraggingOver ? ' import-drop-zone--active' : ''}`}
+            style={{ '--import-drop-zone-color': dropZoneColor } as React.CSSProperties}
+            data-testid="import-drop-zone"
+          >
+            <span className="import-drop-zone-label" aria-hidden="true">
+              {t('import.dropZone', 'Drop zone')}
+            </span>
 
-            The wrapper carries the cross-section fade class
-            (`leaving` / `entering`) driven by the `transitionPhase`
-            state. `key={showcaseMountSeq}` forces a fresh `<ImportFormatShowcase>`
-            mount each time we come back from the preview tree so the
-            rotation engine restarts from index 0 instead of resuming
-            mid-cycle. */}
-        {displayedSection === 'showcase' && !refreshContext && (
-          <div className={`import-section-fade${transitionPhase !== null ? ` import-section-fade--${transitionPhase}` : ''}`}>
-            <ImportFormatShowcase key={showcaseMountSeq} />
+            {/* Big "drop here" cue. The codicon glyph is wrapped in
+                a Wordmark so it gets the same entrance flair as the
+                rest of the showcase typography — `text-3d-flip` is
+                the only built-in effect that animates a single glyph
+                cleanly (the others either scramble or stagger across
+                multiple characters). The actual icon is the
+                `arrow-circle-down` codicon (\\uebfc); font-family +
+                font-size are set on the wrapper so every span
+                Wordmark mints inherits them. */}
+            {isDraggingOver && (
+              <div className="import-drop-zone-cue" aria-hidden="true">
+                <Wordmark effect="text-3d-flip">{''}</Wordmark>
+              </div>
+            )}
+
+            {/* Format showcase — pitches one supported import format at
+                a time when there's nothing to preview yet. Hidden in
+                refresh mode (the user already chose a format the day
+                they imported) and while a drag is over the modal (the
+                drop-cue takes its place).
+
+                The wrapper carries the cross-section fade class
+                (`leaving` / `entering`) driven by the `transitionPhase`
+                state. `key={showcaseMountSeq}` forces a fresh
+                `<ImportFormatShowcase>` mount each time we come back
+                from the preview tree so the rotation engine restarts
+                from index 0 instead of resuming mid-cycle. */}
+            {displayedSection === 'showcase' && !refreshContext && !isDraggingOver && (
+              <div className={`import-section-fade${transitionPhase !== null ? ` import-section-fade--${transitionPhase}` : ''}`}>
+                <ImportFormatShowcase key={showcaseMountSeq} />
+              </div>
+            )}
+
+            {!isLoading && !error && previewItems.length === 0 && input.trim() !== '' && (
+              <div className="import-no-results" role="status">
+                <i className="codicon codicon-info" aria-hidden="true" />
+                {t('import.noResults')}
+              </div>
+            )}
           </div>
         )}
 
-        {/* Section 3: Selection tree (preview + tri-state checkboxes) */}
-        {displayedSection === 'preview' && (
+        {/* Section 3: Selection tree (preview + tri-state checkboxes).
+            Rendered as a sibling of the drop-zone wrapper rather than
+            a child, so the preview can occupy the same flex slot
+            without inheriting the dashed border / drop-cue treatment
+            — a busy import flow shouldn't compete with the drop-zone
+            decoration. Hidden during an active drag so the drop-zone
+            takes the slot back; `previewItems` stays in state, so the
+            list re-mounts identically on dragleave. */}
+        {displayedSection === 'preview' && !isDraggingOver && (
           <div className={`import-section import-preview-section import-section-fade${transitionPhase !== null ? ` import-section-fade--${transitionPhase}` : ''}`}>
             <div className="import-preview-header">
               <label className="import-label">
@@ -656,13 +816,6 @@ export function ImportModal({
                 data-testid="import-selection-tree"
               />
             </div>
-          </div>
-        )}
-
-        {!isLoading && !error && previewItems.length === 0 && input.trim() !== '' && (
-          <div className="import-no-results" role="status">
-            <i className="codicon codicon-info" aria-hidden="true" />
-            {t('import.noResults')}
           </div>
         )}
 

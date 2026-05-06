@@ -672,6 +672,7 @@
       "unknown": "Une erreur inconnue s'est produite"
     },
     "ok": "Importer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "dropZone": "Drop zone"
   }
 }

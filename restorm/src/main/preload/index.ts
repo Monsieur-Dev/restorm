@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, webUtils } from 'electron'
 // Import from core-ui preload modules using relative paths
 // This works in both dev and prod because:
 // - In dev: Vite resolves these imports via aliases in electron.vite.config.ts
@@ -134,7 +134,17 @@ contextBridge.exposeInMainWorld('restorm', {
     clearDrafts: async (): Promise<{ success: boolean; error?: string }> => {
       const result: unknown = await ipcRenderer.invoke('restorm:clear-drafts')
       return result as { success: boolean; error?: string }
-    }
+    },
+    /**
+     * Resolve the absolute path of a `File` produced by a drag-and-
+     * drop or file-input event. Electron 32 removed the legacy
+     * `File.path` property — `webUtils.getPathForFile` is the
+     * supported replacement and runs synchronously in the preload
+     * context (no IPC). Returns an empty string if the File came
+     * from a Blob with no on-disk backing (e.g. clipboard image),
+     * which the caller can detect and fall back on.
+     */
+    getPathForFile: (file: File): string => webUtils.getPathForFile(file)
   },
   secrets: {
     read: async (filePath: string): Promise<string | null> => {
