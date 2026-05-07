@@ -168,6 +168,14 @@ export const ParametersTable: React.FC<ParametersTableProps> = ({ operations, te
                   }
                   return <code>{p.type}</code>
                 })()}
+                {p.format !== undefined && p.format.length > 0 && (
+                  <span
+                    className="documentation-host-parameters-table__format"
+                    data-testid={`documentation-host-param-format-${p.name}`}
+                  >
+                    {p.format}
+                  </span>
+                )}
               </td>
               <td className="documentation-host-parameters-table__td documentation-host-parameters-table__td--required">
                 {p.required ? '✓' : ''}

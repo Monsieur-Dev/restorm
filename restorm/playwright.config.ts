@@ -59,6 +59,15 @@ const fullyDocumentedPetstoreTestDir = defineBddConfig({
   outputDir: '.features-gen/fully-documented-petstore'
 })
 
+const documentationViewerTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/documentation-viewer/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/documentation-viewer/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/documentation-viewer.fixture.ts'
+  ],
+  outputDir: '.features-gen/documentation-viewer'
+})
+
 /**
  * Playwright configuration for Electron E2E tests using playwright-bdd.
  * Each test group has its own project with a dedicated fixture.
@@ -138,6 +147,11 @@ export default defineConfig({
     {
       name: 'fully-documented-petstore',
       testDir: fullyDocumentedPetstoreTestDir
+    },
+    {
+      name: 'documentation-viewer',
+      testDir: documentationViewerTestDir,
+      timeout: 180 * 1000
     }
   ]
 })

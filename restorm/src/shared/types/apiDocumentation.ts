@@ -72,10 +72,31 @@ export interface SchemaConstraints {
   uniqueItems?: boolean
 }
 
+/** XML serialisation hints carried over from a Swagger 2.0 / OpenAPI
+ * 3.x `xml` block. Surfaced verbatim by the doc viewer so the reader
+ * can spot the difference between, e.g. `<photoUrls>` wrapping a
+ * `<photoUrl>` list and a flat list of `<photoUrls>` siblings.
+ *
+ * Same shape on both `PropertyDocumentation.xml` and
+ * `ModelDocumentation.xml` — the spec uses identical fields at both
+ * levels, just narrower semantics for models (root element name +
+ * namespace, no attribute / wrapped flag). */
+export interface XmlHints {
+  name?: string
+  attribute?: boolean
+  wrapped?: boolean
+  prefix?: string
+  namespace?: string
+}
+
 /** A single property on a documented model (Swagger definition, gRPC message, GraphQL type...). */
 export interface PropertyDocumentation {
   name: string
   type: string
+  /** Source-spec `format` hint (`int64`, `date-time`, `byte`,
+   * `binary`, …). Surfaced in the docs viewer as a small badge
+   * alongside the type. */
+  format?: string
   required: boolean
   description?: string
   /** Property is marked deprecated in the source spec, or carried
@@ -104,6 +125,23 @@ export interface PropertyDocumentation {
   enumValues?: unknown[]
   /** Validation constraints from the source schema. */
   constraints?: SchemaConstraints
+  /** XML serialisation hints (Swagger 2.0 + OpenAPI 3.x `xml`). */
+  xml?: XmlHints
+}
+
+/** Polymorphism / composition descriptor — captures `oneOf` /
+ * `anyOf` / `discriminator` from the source schema. The doc viewer
+ * surfaces these as a list of cross-linkable variants under the
+ * model card. `discriminator.propertyName` is the field whose value
+ * picks the variant; `discriminator.mapping` maps that value to a
+ * concrete model name. */
+export interface ModelComposition {
+  oneOf?: string[]
+  anyOf?: string[]
+  discriminator?: {
+    propertyName: string
+    mapping?: Record<string, string>
+  }
 }
 
 /** A global model / type definition referenced by operations. */
@@ -115,6 +153,12 @@ export interface ModelDocumentation {
   deprecated?: boolean
   /** Model no longer appears in the most recently fetched spec. */
   removed?: boolean
+  /** Polymorphism descriptor (`oneOf` / `anyOf` / `discriminator`).
+   * Undefined for plain object models. */
+  composition?: ModelComposition
+  /** XML serialisation hints (Swagger 2.0 + OpenAPI 3.x `xml`).
+   * Defines the root element's name + optional namespace. */
+  xml?: XmlHints
 }
 
 /** A group of operations (Swagger tag, WSDL service, gRPC package, GraphQL root type...). */
@@ -160,6 +204,11 @@ export interface ParameterDocumentation {
    * carries this on every parameter). Triggers strikethrough
    * rendering in the docs table. */
   deprecated?: boolean
+  /** Source-spec `format` hint — `int64`, `date-time`, `byte`,
+   * `binary`, … Carried verbatim so the doc viewer can display the
+   * encoding and the runtime layer can pick the right serialiser
+   * once we wire upload / binary-body support. */
+  format?: string
   defaultValue?: string
   /** Single example value attached to the parameter's schema or
    * carried via `x-example` (Swagger 2.0). */

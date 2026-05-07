@@ -26,7 +26,7 @@ export const OperationExtras: React.FC<OperationExtrasProps> = ({ operation }) =
   if (entries.length === 0) return null
   return (
     <details className="documentation-host-operation-extras" data-testid="documentation-host-operation-extras">
-      <summary>Vendor extensions ({String(entries.length)})</summary>
+      <summary>Operation extras ({String(entries.length)})</summary>
       <table className="documentation-host-operation-extras__table">
         <tbody>
           {entries.map(([key, value]) => (

@@ -24,8 +24,12 @@ import {
   HTTP_METHODS,
   buildApiInfo,
   buildOperationDocumentation,
+  extractCompositionRefs,
+  extractDiscriminator,
+  extractVendorExtensions,
   mapSchemaProperties,
   mapTagsToGroups,
+  mergeAllOfInto,
   refName,
   walkSchemaRefs,
   type CommonInfo,
@@ -337,8 +341,30 @@ function mapModels(components: OAS3Components | undefined): Record<string, Model
   if (!schemas) return {}
   const out: Record<string, ModelDocumentation> = {}
   for (const [name, schema] of Object.entries(schemas)) {
+    // `mapSchemaProperties` already runs `mergeAllOfInto` itself;
+    // the local `merged` is only used to read parent-level fields
+    // (description / xml / discriminator) that don't go through
+    // the property walker.
+    const merged = mergeAllOfInto({ ...schema })
     const entry: ModelDocumentation = { name, properties: mapSchemaProperties(schema) }
-    if (schema.description !== undefined) entry.description = schema.description
+    if (merged.description !== undefined) entry.description = merged.description
+    const oneOf = extractCompositionRefs(merged.oneOf)
+    const anyOf = extractCompositionRefs(merged.anyOf)
+    const discriminator = extractDiscriminator(merged)
+    if (oneOf !== undefined || anyOf !== undefined || discriminator !== undefined) {
+      const composition: ModelDocumentation['composition'] = {}
+      if (oneOf !== undefined) composition.oneOf = oneOf
+      if (anyOf !== undefined) composition.anyOf = anyOf
+      if (discriminator !== undefined) composition.discriminator = discriminator
+      entry.composition = composition
+    }
+    if (merged.xml !== undefined) {
+      const xml: ModelDocumentation['xml'] = {}
+      if (merged.xml.name !== undefined) xml.name = merged.xml.name
+      if (merged.xml.namespace !== undefined) xml.namespace = merged.xml.namespace
+      if (merged.xml.prefix !== undefined) xml.prefix = merged.xml.prefix
+      if (Object.keys(xml).length > 0) entry.xml = xml
+    }
     out[name] = entry
   }
   return out
@@ -406,6 +432,14 @@ function buildOperationsFromMap(
         if (resp?.content) for (const k of Object.keys(resp.content)) produces.add(k)
       }
       if (produces.size > 0) input.produces = Array.from(produces)
+      // Vendor extensions on the operation (codegen hints,
+      // OpenAPI UI metadata, …). `x-example` is excluded — it
+      // travels with the parameter shape. Merge into any existing
+      // `extra` so 3.1 webhook markers (`documentationOnly`,
+      // `source: 'webhook'`) aren't clobbered when the operation
+      // also declares an `x-*` extension.
+      const extensions = extractVendorExtensions(op)
+      if (extensions !== undefined) input.extra = { ...(input.extra ?? {}), ...extensions }
 
       out.push(buildOperationDocumentation(input))
     }

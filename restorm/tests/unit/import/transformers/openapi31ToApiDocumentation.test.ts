@@ -94,4 +94,20 @@ describe('openapi31ToApiDocumentation — webhooks-only spec', () => {
     expect(doc.operations[0]?.operationId).toBe('newPetWebhook')
     expect(doc.operations[0]?.extra?.documentationOnly).toBe(true)
   })
+
+  it('preserves the webhook marker when the operation also declares `x-*` extensions', () => {
+    // Patch a webhook operation in-memory with an x-* extension and
+    // re-run the transformer. Without the merge in operation `extra`
+    // the marker would be clobbered by the extensions write.
+    const patched: OAS31Spec = JSON.parse(JSON.stringify(spec)) as OAS31Spec
+    const webhookEntry = Object.values(patched.webhooks ?? {})[0]
+    const op = webhookEntry?.post ?? webhookEntry?.get
+    if (!op) throw new Error('webhook fixture has no operation')
+    ;(op as { 'x-codegen-request-body-name'?: string })['x-codegen-request-body-name'] = 'event'
+    const doc = openapi31ToApiDocumentation(patched)
+    const webhook = doc.operations[0]
+    expect(webhook?.extra?.documentationOnly).toBe(true)
+    expect(webhook?.extra?.source).toBe('webhook')
+    expect(webhook?.extra?.['x-codegen-request-body-name']).toBe('event')
+  })
 })

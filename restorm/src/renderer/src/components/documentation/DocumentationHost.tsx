@@ -2,11 +2,12 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { MarkdownViewer } from 'electron-core-ui/renderer'
 import type {
   ApiDocumentation,
-  ModelDocumentation,
   OperationDocumentation
 } from '../../../../shared/types/apiDocumentation'
-import { findOperationForRoute, type RouteLike } from '../../../../shared/utils/findOperationForRoute'
+import type { RouteLike } from '../../../../shared/utils/findOperationForRoute'
+import { selectDocSlice } from '../../../../shared/utils/selectDocSlice'
 import { ApiInfoSection } from './ApiInfoSection'
+import { CompositionSection } from './CompositionSection'
 import { DocumentationHostNativeFind, type DocumentationHostNativeFindHandle } from './DocumentationHostNativeFind'
 import { DocumentationHostSearch, type DocumentationHostSearchHandle } from './DocumentationHostSearch'
 import { DocumentationSidebar } from './DocumentationSidebar'
@@ -77,14 +78,11 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
   showApiInfo = false,
   testId
 }) => {
-  const operations = useMemo<OperationDocumentation[]>(
-    () => filterOperations(apiDocumentation, filters),
+  const slice = useMemo(
+    () => selectDocSlice(apiDocumentation, filters),
     [apiDocumentation, filters]
   )
-  const models = useMemo<ModelDocumentation[]>(
-    () => transitiveModelClosure(apiDocumentation, operations, filters),
-    [apiDocumentation, operations, filters]
-  )
+  const { operations, models } = slice
 
   const isSingleRoute = operations.length === 1
   const sectionHeadingLevel: 1 | 2 = isSingleRoute ? 1 : 2
@@ -267,6 +265,7 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
             </section>
           ) : null}
 
+          <CompositionSection models={models} />
           <EnumsSection models={models} />
         </div>
       </div>
@@ -333,60 +332,4 @@ const RouteBlock: React.FC<RouteBlockProps> = ({ operation, headingLevel, showGr
       <OperationExtras operation={operation} />
     </article>
   )
-}
-
-// ──────────────────────────────────────────────────────────────────
-// Filter helpers
-// ──────────────────────────────────────────────────────────────────
-
-function filterOperations(
-  apiDoc: ApiDocumentation,
-  filters: RouteLike[] | undefined
-): OperationDocumentation[] {
-  if (!filters || filters.length === 0) return apiDoc.operations
-  const matched = new Set<OperationDocumentation>()
-  for (const filter of filters) {
-    const op = findOperationForRoute(apiDoc, filter)
-    if (op) matched.add(op)
-  }
-  return Array.from(matched)
-}
-
-/**
- * Walk every filtered operation's `referencedModels` plus every
- * property's `targetModelRef` to produce the deduplicated transitive
- * closure of models the filtered routes consume. Without filters,
- * returns every model declared in the spec.
- */
-function transitiveModelClosure(
-  apiDoc: ApiDocumentation,
-  operations: OperationDocumentation[],
-  filters: RouteLike[] | undefined
-): ModelDocumentation[] {
-  if (!filters || filters.length === 0) return Object.values(apiDoc.models)
-  const visited = new Set<string>()
-  const queue: string[] = []
-  for (const op of operations) {
-    if (op.referencedModels) {
-      for (const name of op.referencedModels) queue.push(name)
-    }
-  }
-  while (queue.length > 0) {
-    const name = queue.shift()
-    if (name === undefined || visited.has(name)) continue
-    visited.add(name)
-    const model = apiDoc.models[name]
-    if (!model) continue
-    for (const prop of model.properties) {
-      if (prop.targetModelRef !== undefined && !visited.has(prop.targetModelRef)) {
-        queue.push(prop.targetModelRef)
-      }
-    }
-  }
-  const closure: ModelDocumentation[] = []
-  for (const name of visited) {
-    const m = apiDoc.models[name]
-    if (m) closure.push(m)
-  }
-  return closure
 }

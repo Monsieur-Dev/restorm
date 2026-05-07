@@ -637,6 +637,20 @@
   color: var(--description-foreground, rgba(127, 127, 127, 0.85));
 }
 
+.documentation-host-parameters-table__format {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: 8px;
+  background: var(--badge-background, rgba(127, 127, 127, 0.18));
+  color: var(--badge-foreground, var(--description-foreground, rgba(127, 127, 127, 0.95)));
+  font-family: var(--font-family, sans-serif);
+}
+
 .documentation-host-parameters-table__enum {
   margin-top: 2px;
   font-size: 11px;
@@ -1461,4 +1475,97 @@
   outline: 1px solid var(--focus-border, #007acc);
   outline-offset: 1px;
   border-radius: 2px;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Composition section (oneOf / anyOf / discriminator)
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host-composition {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.documentation-host-composition__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.documentation-host-composition__item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+  border-radius: 4px;
+  background: var(--editorWidget-background, var(--editor-background));
+}
+
+.documentation-host-composition__model-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.documentation-host-composition__line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+
+.documentation-host-composition__line-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+  min-width: 90px;
+}
+
+.documentation-host-composition__refs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.documentation-host-composition__discriminator {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.documentation-host-composition__discriminator-property {
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 12px;
+  color: var(--textLink-foreground, #4d9bf6);
+}
+
+.documentation-host-composition__mapping {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.documentation-host-composition__mapping-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.documentation-host-composition__mapping-arrow {
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
 }

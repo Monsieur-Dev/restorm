@@ -26,8 +26,12 @@ import {
   HTTP_METHODS,
   buildApiInfo,
   buildOperationDocumentation,
+  extractCompositionRefs,
+  extractDiscriminator,
+  extractVendorExtensions,
   mapSchemaProperties,
   mapTagsToGroups,
+  mergeAllOfInto,
   walkSchemaRefs,
   type CommonInfo,
   type CommonParameter,
@@ -241,8 +245,31 @@ function mapModels(definitions: Record<string, CommonSchema> | undefined): Recor
   if (!definitions) return {}
   const out: Record<string, ModelDocumentation> = {}
   for (const [name, schema] of Object.entries(definitions)) {
+    // `mapSchemaProperties` already runs `mergeAllOfInto` internally
+    // before walking the property map; we only need a separate
+    // merge here to surface description / xml / discriminator that
+    // sit at the parent level (they don't go through the property
+    // walker).
+    const merged = mergeAllOfInto({ ...schema })
     const entry: ModelDocumentation = { name, properties: mapSchemaProperties(schema) }
-    if (schema.description !== undefined) entry.description = schema.description
+    if (merged.description !== undefined) entry.description = merged.description
+    const oneOf = extractCompositionRefs(merged.oneOf)
+    const anyOf = extractCompositionRefs(merged.anyOf)
+    const discriminator = extractDiscriminator(merged)
+    if (oneOf !== undefined || anyOf !== undefined || discriminator !== undefined) {
+      const composition: ModelDocumentation['composition'] = {}
+      if (oneOf !== undefined) composition.oneOf = oneOf
+      if (anyOf !== undefined) composition.anyOf = anyOf
+      if (discriminator !== undefined) composition.discriminator = discriminator
+      entry.composition = composition
+    }
+    if (merged.xml !== undefined) {
+      const xml: ModelDocumentation['xml'] = {}
+      if (merged.xml.name !== undefined) xml.name = merged.xml.name
+      if (merged.xml.namespace !== undefined) xml.namespace = merged.xml.namespace
+      if (merged.xml.prefix !== undefined) xml.prefix = merged.xml.prefix
+      if (Object.keys(xml).length > 0) entry.xml = xml
+    }
     out[name] = entry
   }
   return out
@@ -282,6 +309,13 @@ export function swaggerToApiDocumentation(
       if (op.consumes !== undefined) input.consumes = op.consumes
       if (op.produces !== undefined) input.produces = op.produces
       if (op.security !== undefined) input.security = op.security
+      // Vendor extensions surfaced on the operation header (codegen
+      // hints, Swagger UI metadata, etc.). `x-example` is excluded —
+      // it's already mapped onto `example` via the parameter shape.
+      // Merge into any existing `extra` so we don't clobber markers
+      // a future transformer pass might have stamped.
+      const extensions = extractVendorExtensions(op)
+      if (extensions !== undefined) input.extra = { ...(input.extra ?? {}), ...extensions }
 
       operations.push(buildOperationDocumentation(input))
     }
