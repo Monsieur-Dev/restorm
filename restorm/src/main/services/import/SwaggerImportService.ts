@@ -130,6 +130,14 @@ interface SwaggerPathItem {
   options?: SwaggerOperation
 }
 
+interface SwaggerSecurityScheme {
+  type: 'apiKey' | 'basic' | 'oauth2'
+  name?: string
+  in?: 'header' | 'query'
+  flow?: 'implicit' | 'password' | 'application' | 'accessCode'
+  description?: string
+}
+
 interface SwaggerSpec {
   swagger: string
   info: SwaggerInfo
@@ -140,6 +148,10 @@ interface SwaggerSpec {
   paths: Record<string, SwaggerPathItem>
   definitions?: Record<string, SwaggerSchema>
   externalDocs?: SwaggerExternalDocs
+  /** Spec-level security requirement; per-operation `security`
+   * overrides this when set. */
+  security?: Record<string, string[]>[]
+  securityDefinitions?: Record<string, SwaggerSecurityScheme>
 }
 
 // ============================================================================
@@ -577,7 +589,51 @@ function operationToRequest(
     request.body = body
   }
 
+  // Pre-wire auth headers / query params from the matching
+  // securityDefinitions entry so imported requests don't all
+  // arrive unauthenticated. The placeholders use Restorm's
+  // handlebars syntax; the user fills them in via an env
+  // variable named after the scheme (`apiKey`, `petstore_auth_token`, …).
+  applySwagger20SecurityToRequest(request, operation.security ?? spec.security, spec.securityDefinitions)
+
   return request
+}
+
+/**
+ * Inject Authorization / X-API-Key / etc. into an HTTPRequest based
+ * on the effective security requirement (op-level overrides global).
+ * `requirements` is OpenAPI's "OR-of-AND" structure; we honour the
+ * first non-empty requirement and add one header / query entry per
+ * declared scheme. Schemes the spec doesn't define are skipped
+ * silently — a stray reference shouldn't fail the whole import.
+ */
+function applySwagger20SecurityToRequest(
+  request: HTTPRequest,
+  requirements: Record<string, string[]>[] | undefined,
+  defs: Record<string, { type: 'apiKey' | 'basic' | 'oauth2'; name?: string; in?: 'header' | 'query'; flow?: string }> | undefined
+): void {
+  if (!requirements || requirements.length === 0 || !defs) return
+  const requirement = requirements.find((r) => Object.keys(r).length > 0)
+  if (!requirement) return
+  for (const schemeName of Object.keys(requirement)) {
+    const scheme = defs[schemeName]
+    if (!scheme) continue
+    if (scheme.type === 'apiKey' && scheme.name !== undefined && scheme.in !== undefined) {
+      const placeholder = `{{${schemeName}}}`
+      const target = scheme.in === 'header' ? request.headers : request.params
+      if (!target.some((kv) => kv.key === scheme.name)) {
+        target.push({ key: scheme.name, value: new StringValue(placeholder) })
+      }
+    } else if (scheme.type === 'basic') {
+      if (!request.headers.some((kv) => kv.key.toLowerCase() === 'authorization')) {
+        request.headers.push({ key: 'Authorization', value: new StringValue(`Basic {{${schemeName}_credentials}}`) })
+      }
+    } else if (scheme.type === 'oauth2') {
+      if (!request.headers.some((kv) => kv.key.toLowerCase() === 'authorization')) {
+        request.headers.push({ key: 'Authorization', value: new StringValue(`Bearer {{${schemeName}_token}}`) })
+      }
+    }
+  }
 }
 
 // ============================================================================

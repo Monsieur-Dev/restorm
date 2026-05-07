@@ -1,8 +1,9 @@
 import React from 'react'
 import { MarkdownViewer } from 'electron-core-ui/renderer'
-import type { OperationDocumentation } from '../../../../shared/types/apiDocumentation'
+import type { OperationDocumentation, SecurityScheme } from '../../../../shared/types/apiDocumentation'
 import { Badge } from '../common/Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
+import { useDocumentedSecuritySchemes } from './documentationModels'
 
 export interface RouteHeaderProps {
   /** The operation surfaced. */
@@ -114,6 +115,69 @@ function describeNonHttpDiscriminators(operation: OperationDocumentation): { lab
  * data is laid out vertically with clear labels rather than a
  * dense table.
  */
+function renderSchemeKindLabel(scheme: SecurityScheme): string {
+  switch (scheme.type) {
+    case 'apiKey': {
+      const where = scheme.in !== undefined ? ` (${scheme.in})` : ''
+      const named = scheme.name !== undefined ? `: ${scheme.name}` : ''
+      return `apiKey${where}${named}`
+    }
+    case 'basic':
+      return 'HTTP Basic'
+    case 'http':
+      if (scheme.scheme === 'basic') return 'HTTP Basic'
+      if (scheme.scheme === 'bearer') return scheme.bearerFormat !== undefined
+        ? `HTTP Bearer (${scheme.bearerFormat})`
+        : 'HTTP Bearer'
+      return scheme.scheme !== undefined ? `HTTP ${scheme.scheme}` : 'HTTP'
+    case 'oauth2':
+      return 'OAuth 2.0'
+    case 'openIdConnect':
+      return 'OpenID Connect'
+  }
+}
+
+function renderSchemeDetail(scheme: SecurityScheme, requestedScopes: string[]): React.ReactNode {
+  const lines: React.ReactNode[] = []
+  if (scheme.type === 'oauth2' && scheme.flows && scheme.flows.length > 0) {
+    for (const flow of scheme.flows) {
+      const flowParts: string[] = [flow.type]
+      if (flow.authorizationUrl !== undefined) flowParts.push(`auth: ${flow.authorizationUrl}`)
+      if (flow.tokenUrl !== undefined) flowParts.push(`token: ${flow.tokenUrl}`)
+      if (flow.refreshUrl !== undefined) flowParts.push(`refresh: ${flow.refreshUrl}`)
+      lines.push(
+        <div key={`flow-${flow.type}`} className="documentation-host-route-header__security-flow">
+          {flowParts.map((p, i) => (
+            <span key={i}>
+              {i > 0 ? <span className="documentation-host-route-header__security-sep"> · </span> : null}
+              <code>{p}</code>
+            </span>
+          ))}
+          {requestedScopes.length > 0 && (
+            <span className="documentation-host-route-header__security-scopes">
+              {' '}scopes: {requestedScopes.join(', ')}
+            </span>
+          )}
+        </div>
+      )
+    }
+  } else if (scheme.type === 'openIdConnect' && scheme.openIdConnectUrl !== undefined) {
+    lines.push(
+      <div key="oidc" className="documentation-host-route-header__security-flow">
+        <code>{scheme.openIdConnectUrl}</code>
+      </div>
+    )
+  }
+  if (scheme.description !== undefined && scheme.description.length > 0) {
+    lines.push(
+      <div key="desc" className="documentation-host-route-header__security-description">
+        {scheme.description}
+      </div>
+    )
+  }
+  return lines.length > 0 ? <>{lines}</> : null
+}
+
 export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLevel = 1, showGroupChip = false, onAddRequest }) => {
   const requestBodyType = formatBodyParameter(operation)
   const responseSchema = formatResponseSchema(operation)
@@ -123,6 +187,7 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
   const SummaryHeading = headingLevel === 2 ? 'h2' : 'h1'
   const verb = operation.match.method ?? operation.match.operationType
   const altDiscriminators = describeNonHttpDiscriminators(operation)
+  const securitySchemes = useDocumentedSecuritySchemes()
 
   return (
     <div
@@ -227,16 +292,27 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
                       {entries.length === 0 ? (
                         <em>open (no auth)</em>
                       ) : (
-                        entries.map(([scheme, scopes]) => (
-                          <span key={scheme} className="documentation-host-route-header__security-scheme">
-                            <code>{scheme}</code>
-                            {scopes.length > 0 && (
-                              <span className="documentation-host-route-header__security-scopes">
-                                {' '}({scopes.join(', ')})
-                              </span>
-                            )}
-                          </span>
-                        ))
+                        entries.map(([schemeName, scopes]) => {
+                          const scheme = securitySchemes[schemeName]
+                          return (
+                            <div key={schemeName} className="documentation-host-route-header__security-scheme">
+                              <div className="documentation-host-route-header__security-scheme-head">
+                                <code className="documentation-host-route-header__security-scheme-name">{schemeName}</code>
+                                {scheme !== undefined && (
+                                  <span className="documentation-host-route-header__security-scheme-kind">
+                                    {renderSchemeKindLabel(scheme)}
+                                  </span>
+                                )}
+                                {scheme === undefined && scopes.length > 0 && (
+                                  <span className="documentation-host-route-header__security-scopes">
+                                    ({scopes.join(', ')})
+                                  </span>
+                                )}
+                              </div>
+                              {scheme !== undefined && renderSchemeDetail(scheme, scopes)}
+                            </div>
+                          )
+                        })
                       )}
                     </li>
                   )

@@ -319,4 +319,65 @@ describe('swaggerToApiDocumentation', () => {
     expect(doc.groups).toEqual({})
     expect(doc.operations).toEqual([])
   })
+
+  describe('security parsing', () => {
+    const securedSpec: SwaggerSpec = {
+      swagger: '2.0',
+      info: { title: 'Secured', version: '1.0.0' },
+      paths: {},
+      security: [{ apiKey: [] }],
+      securityDefinitions: {
+        apiKey: {
+          type: 'apiKey',
+          name: 'X-API-Key',
+          in: 'header',
+          description: 'project key'
+        },
+        basicAuth: { type: 'basic' },
+        petstore_auth: {
+          type: 'oauth2',
+          flow: 'implicit',
+          authorizationUrl: 'https://example.com/oauth/authorize',
+          scopes: { 'read:pets': 'read your pets', 'write:pets': 'modify your pets' }
+        }
+      }
+    }
+
+    it('exposes apiKey + basic + oauth2 schemes on the documentation', () => {
+      const doc = swaggerToApiDocumentation(securedSpec)
+      expect(doc.securitySchemes?.['apiKey']).toEqual({
+        type: 'apiKey',
+        name: 'X-API-Key',
+        in: 'header',
+        description: 'project key'
+      })
+      expect(doc.securitySchemes?.['basicAuth']).toEqual({ type: 'basic', scheme: 'basic' })
+    })
+
+    it('normalises Swagger 2.0 oauth2 flow into the unified flows array', () => {
+      const doc = swaggerToApiDocumentation(securedSpec)
+      const oauth = doc.securitySchemes?.['petstore_auth']
+      expect(oauth?.type).toBe('oauth2')
+      expect(oauth?.flows).toHaveLength(1)
+      expect(oauth?.flows?.[0]).toEqual({
+        type: 'implicit',
+        authorizationUrl: 'https://example.com/oauth/authorize',
+        scopes: { 'read:pets': 'read your pets', 'write:pets': 'modify your pets' }
+      })
+    })
+
+    it('captures the spec-level `security` requirement on `defaultSecurity`', () => {
+      const doc = swaggerToApiDocumentation(securedSpec)
+      expect(doc.defaultSecurity).toEqual([{ apiKey: [] }])
+    })
+
+    it('omits securitySchemes / defaultSecurity when the spec has none', () => {
+      const doc = swaggerToApiDocumentation({
+        info: { title: 'No security' },
+        paths: {}
+      })
+      expect(doc.securitySchemes).toBeUndefined()
+      expect(doc.defaultSecurity).toBeUndefined()
+    })
+  })
 })

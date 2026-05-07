@@ -16,7 +16,9 @@ import type {
   ApiDocumentation,
   ExternalDocs,
   ModelDocumentation,
-  OperationDocumentation
+  OAuth2Flow,
+  OperationDocumentation,
+  SecurityScheme
 } from '../../../../shared/types/apiDocumentation'
 import {
   HTTP_METHODS,
@@ -112,6 +114,38 @@ export type OAS3PathItem = Partial<Record<HttpMethod, OAS3Operation>> & {
   description?: string
 }
 
+/** OpenAPI 3.x security scheme entry. The `flows` block uses 3.x
+ * vocabulary (`clientCredentials` / `authorizationCode`); the
+ * normaliser maps those onto Swagger 2.0's flow keys
+ * (`application` / `accessCode`) so the doc viewer's rendering
+ * doesn't have to special-case the version. */
+interface OAS3SecurityScheme {
+  type: 'apiKey' | 'http' | 'oauth2' | 'openIdConnect'
+  description?: string
+  // apiKey
+  name?: string
+  in?: 'header' | 'query' | 'cookie'
+  // http
+  scheme?: string
+  bearerFormat?: string
+  // oauth2
+  flows?: {
+    implicit?: OAS3OAuthFlow
+    password?: OAS3OAuthFlow
+    clientCredentials?: OAS3OAuthFlow
+    authorizationCode?: OAS3OAuthFlow
+  }
+  // openIdConnect
+  openIdConnectUrl?: string
+}
+
+interface OAS3OAuthFlow {
+  authorizationUrl?: string
+  tokenUrl?: string
+  refreshUrl?: string
+  scopes?: Record<string, string>
+}
+
 export interface OAS3Components {
   schemas?: Record<string, CommonSchema>
   parameters?: Record<string, OAS3Parameter>
@@ -121,7 +155,7 @@ export interface OAS3Components {
   examples?: Record<string, unknown>
   links?: Record<string, unknown>
   callbacks?: Record<string, unknown>
-  securitySchemes?: Record<string, unknown>
+  securitySchemes?: Record<string, OAS3SecurityScheme>
 }
 
 export interface OAS3Spec {
@@ -389,6 +423,64 @@ export interface OpenAPI3TransformOptions {
 }
 
 /** Transform a parsed OpenAPI 3.0 spec into `ApiDocumentation`. */
+/**
+ * Translate OpenAPI 3.x `components.securitySchemes` to the
+ * version-neutral `SecurityScheme` shape stored on
+ * `ApiDocumentation`. The 3.x flow vocabulary
+ * (`clientCredentials` / `authorizationCode`) is mapped onto the
+ * Swagger 2.0 names (`application` / `accessCode`) so the doc
+ * viewer's rendering is uniform across spec versions.
+ */
+function mapSecuritySchemes(
+  defs: Record<string, OAS3SecurityScheme> | undefined
+): Record<string, SecurityScheme> | undefined {
+  if (!defs) return undefined
+  const out: Record<string, SecurityScheme> = {}
+  for (const [name, def] of Object.entries(defs)) {
+    if (def.type === 'apiKey') {
+      const entry: SecurityScheme = { type: 'apiKey' }
+      if (def.description !== undefined) entry.description = def.description
+      if (def.name !== undefined) entry.name = def.name
+      if (def.in !== undefined) entry.in = def.in
+      out[name] = entry
+    } else if (def.type === 'http') {
+      const entry: SecurityScheme = { type: 'http' }
+      if (def.description !== undefined) entry.description = def.description
+      if (def.scheme !== undefined) entry.scheme = def.scheme
+      if (def.bearerFormat !== undefined) entry.bearerFormat = def.bearerFormat
+      out[name] = entry
+    } else if (def.type === 'oauth2') {
+      const entry: SecurityScheme = { type: 'oauth2' }
+      if (def.description !== undefined) entry.description = def.description
+      const flows: OAuth2Flow[] = []
+      const flowMap: { key: keyof Required<OAS3SecurityScheme>['flows']; type: OAuth2Flow['type'] }[] = [
+        { key: 'implicit', type: 'implicit' },
+        { key: 'password', type: 'password' },
+        { key: 'clientCredentials', type: 'application' },
+        { key: 'authorizationCode', type: 'accessCode' }
+      ]
+      for (const { key, type } of flowMap) {
+        const f = def.flows?.[key]
+        if (!f) continue
+        const flow: OAuth2Flow = { type, scopes: f.scopes ?? {} }
+        if (f.authorizationUrl !== undefined) flow.authorizationUrl = f.authorizationUrl
+        if (f.tokenUrl !== undefined) flow.tokenUrl = f.tokenUrl
+        if (f.refreshUrl !== undefined) flow.refreshUrl = f.refreshUrl
+        flows.push(flow)
+      }
+      if (flows.length > 0) entry.flows = flows
+      out[name] = entry
+    } else {
+      // def.type === 'openIdConnect' (only remaining branch).
+      const entry: SecurityScheme = { type: 'openIdConnect' }
+      if (def.description !== undefined) entry.description = def.description
+      if (def.openIdConnectUrl !== undefined) entry.openIdConnectUrl = def.openIdConnectUrl
+      out[name] = entry
+    }
+  }
+  return Object.keys(out).length > 0 ? out : undefined
+}
+
 export function openapi3ToApiDocumentation(
   spec: OAS3Spec,
   options: OpenAPI3TransformOptions = {}
@@ -430,6 +522,10 @@ export function openapi3ToApiDocumentation(
       // skip gracefully rather than fail the whole import.
     }
   }
+
+  const securitySchemes = mapSecuritySchemes(spec.components?.securitySchemes)
+  if (securitySchemes !== undefined) result.securitySchemes = securitySchemes
+  if (spec.security !== undefined) result.defaultSecurity = spec.security
 
   return result
 }

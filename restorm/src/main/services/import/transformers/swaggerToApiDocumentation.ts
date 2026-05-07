@@ -18,7 +18,9 @@ import type {
   ApiDocumentation,
   ExternalDocs,
   ModelDocumentation,
-  OperationDocumentation
+  OAuth2Flow,
+  OperationDocumentation,
+  SecurityScheme
 } from '../../../../shared/types/apiDocumentation'
 import {
   HTTP_METHODS,
@@ -97,6 +99,20 @@ interface SwaggerOperation {
 
 type SwaggerPathItem = Partial<Record<HttpMethod, SwaggerOperation>>
 
+/** Swagger 2.0 security scheme entry, exactly as it appears under
+ * `securityDefinitions`. We narrow to the four spec-allowed `type`
+ * values; anything else is dropped during normalisation. */
+interface SwaggerSecurityScheme {
+  type: 'apiKey' | 'basic' | 'oauth2'
+  description?: string
+  name?: string
+  in?: 'header' | 'query'
+  flow?: 'implicit' | 'password' | 'application' | 'accessCode'
+  authorizationUrl?: string
+  tokenUrl?: string
+  scopes?: Record<string, string>
+}
+
 export interface SwaggerSpec {
   swagger?: string
   info: CommonInfo
@@ -107,6 +123,11 @@ export interface SwaggerSpec {
   paths: Record<string, SwaggerPathItem>
   definitions?: Record<string, CommonSchema>
   externalDocs?: ExternalDocs
+  /** Spec-level `security` requirement — applies to every
+   * operation that doesn't override it. Matches the OpenAPI
+   * 2.0 / 3.x semantics. */
+  security?: Record<string, string[]>[]
+  securityDefinitions?: Record<string, SwaggerSecurityScheme>
 }
 
 // ---------- 2.0-specific helpers ----------
@@ -172,6 +193,47 @@ function collectReferencedModels(op: SwaggerOperation): string[] {
   for (const p of op.parameters ?? []) walkSchemaRefs(p.schema, visit)
   for (const r of Object.values(op.responses ?? {})) walkSchemaRefs(r.schema, visit)
   return Array.from(refs)
+}
+
+/**
+ * Translate Swagger 2.0 `securityDefinitions` to the
+ * version-neutral `SecurityScheme` shape stored on
+ * `ApiDocumentation`. The 2.0 vocabulary keeps `basic` (where 3.x
+ * would use `http` with `scheme: "basic"`) so we map it to
+ * `type: 'basic'` here for fidelity; consumers gate on
+ * `scheme === 'basic'` to handle both dialects uniformly. */
+function mapSecuritySchemes(
+  defs: Record<string, SwaggerSecurityScheme> | undefined
+): Record<string, SecurityScheme> | undefined {
+  if (!defs) return undefined
+  const out: Record<string, SecurityScheme> = {}
+  for (const [name, def] of Object.entries(defs)) {
+    if (def.type === 'apiKey') {
+      const entry: SecurityScheme = { type: 'apiKey' }
+      if (def.description !== undefined) entry.description = def.description
+      if (def.name !== undefined) entry.name = def.name
+      if (def.in !== undefined) entry.in = def.in
+      out[name] = entry
+    } else if (def.type === 'basic') {
+      const entry: SecurityScheme = { type: 'basic', scheme: 'basic' }
+      if (def.description !== undefined) entry.description = def.description
+      out[name] = entry
+    } else {
+      // def.type === 'oauth2' (the only remaining branch — Swagger
+      // 2.0 limits `type` to apiKey/basic/oauth2).
+      const entry: SecurityScheme = { type: 'oauth2' }
+      if (def.description !== undefined) entry.description = def.description
+      const flow: OAuth2Flow = {
+        type: def.flow ?? 'implicit',
+        scopes: def.scopes ?? {}
+      }
+      if (def.authorizationUrl !== undefined) flow.authorizationUrl = def.authorizationUrl
+      if (def.tokenUrl !== undefined) flow.tokenUrl = def.tokenUrl
+      entry.flows = [flow]
+      out[name] = entry
+    }
+  }
+  return Object.keys(out).length > 0 ? out : undefined
 }
 
 /** Map `definitions` onto `ModelDocumentation`. */
@@ -241,6 +303,10 @@ export function swaggerToApiDocumentation(
     if (spec.basePath !== undefined) result.server.basePath = spec.basePath
     if (spec.schemes !== undefined) result.server.schemes = spec.schemes
   }
+
+  const securitySchemes = mapSecuritySchemes(spec.securityDefinitions)
+  if (securitySchemes !== undefined) result.securitySchemes = securitySchemes
+  if (spec.security !== undefined) result.defaultSecurity = spec.security
 
   return result
 }

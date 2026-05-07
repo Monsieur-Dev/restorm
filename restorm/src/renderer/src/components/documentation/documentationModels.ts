@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react'
+import type { SecurityScheme } from '../../../../shared/types/apiDocumentation'
 
 /**
  * Set of model names rendered by the surrounding `DocumentationHost`.
@@ -12,6 +13,18 @@ export const DocumentationModelsContext = createContext<Set<string>>(new Set())
 
 export function useDocumentedModels(): Set<string> {
   return useContext(DocumentationModelsContext)
+}
+
+/**
+ * Map of named security schemes for the surrounding
+ * `DocumentationHost`. The `RouteHeader` consults this so a
+ * scheme name on the operation can be rendered with the full
+ * scheme metadata (apiKey location, OAuth2 flows + scopes, …).
+ */
+export const DocumentationSecuritySchemesContext = createContext<Record<string, SecurityScheme>>({})
+
+export function useDocumentedSecuritySchemes(): Record<string, SecurityScheme> {
+  return useContext(DocumentationSecuritySchemesContext)
 }
 
 /**

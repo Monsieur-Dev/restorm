@@ -10,7 +10,7 @@ import { ApiInfoSection } from './ApiInfoSection'
 import { DocumentationHostNativeFind, type DocumentationHostNativeFindHandle } from './DocumentationHostNativeFind'
 import { DocumentationHostSearch, type DocumentationHostSearchHandle } from './DocumentationHostSearch'
 import { DocumentationSidebar } from './DocumentationSidebar'
-import { DocumentationModelsContext } from './documentationModels'
+import { DocumentationModelsContext, DocumentationSecuritySchemesContext } from './documentationModels'
 import { DocumentationNavigationContext, type DocumentationNavigationApi } from './documentationNavigation'
 import { EnumsSection } from './EnumsSection'
 import { ModelGraph, type ModelGraphHandle } from './ModelGraph'
@@ -106,6 +106,7 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
     () => new Set(models.map((m) => m.name)),
     [models]
   )
+  const securitySchemes = apiDocumentation.securitySchemes ?? {}
 
   const navigationApi = useMemo<DocumentationNavigationApi>(() => ({
     scrollToTop: (): void => {
@@ -208,6 +209,7 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
   return (
     <DocumentationNavigationContext.Provider value={navigationApi}>
     <DocumentationModelsContext.Provider value={modelNames}>
+    <DocumentationSecuritySchemesContext.Provider value={securitySchemes}>
       <div
         ref={rootRef}
         className={`documentation-host${showSidebar ? ' documentation-host--with-sidebar' : ''}`}
@@ -268,6 +270,7 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
           <EnumsSection models={models} />
         </div>
       </div>
+    </DocumentationSecuritySchemesContext.Provider>
     </DocumentationModelsContext.Provider>
     </DocumentationNavigationContext.Provider>
   )

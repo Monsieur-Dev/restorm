@@ -213,6 +213,55 @@ export interface OperationDocumentation {
   extra?: Record<string, unknown>
 }
 
+/** OAuth2 flow shape, normalised across Swagger 2.0 + OpenAPI 3.x.
+ *
+ * Swagger 2.0 uses `implicit` / `password` / `application` /
+ * `accessCode`. OpenAPI 3.x renames `application` →
+ * `clientCredentials` and `accessCode` → `authorizationCode`, but
+ * the underlying URLs + scope map are the same. We keep the
+ * Swagger-2.0 vocabulary as the canonical form and the OpenAPI
+ * importer maps its 3.x flow keys onto these. */
+export interface OAuth2Flow {
+  type: 'implicit' | 'password' | 'application' | 'accessCode'
+  authorizationUrl?: string
+  tokenUrl?: string
+  /** OpenAPI 3.x only — the URL clients can hit to refresh the
+   * access token. Swagger 2.0 has no equivalent so this is
+   * `undefined` for 2.0 imports. */
+  refreshUrl?: string
+  /** Map of scope name → human-readable description. Empty when
+   * the spec defines no scopes. */
+  scopes: Record<string, string>
+}
+
+/** Security scheme entry, version-agnostic. Populated by the
+ * Swagger / OpenAPI transformers from `securityDefinitions` (2.0)
+ * or `components.securitySchemes` (3.x). The `type` discriminator
+ * matches the source vocabulary so the doc viewer can render
+ * version-correct labels (`basic` is 2.0-only; `http` is 3.x-only,
+ * etc.). */
+export type SecuritySchemeType = 'apiKey' | 'basic' | 'http' | 'oauth2' | 'openIdConnect'
+
+export interface SecurityScheme {
+  type: SecuritySchemeType
+  description?: string
+  /** apiKey: header / query / cookie parameter name. */
+  name?: string
+  /** apiKey: where the key travels. Cookie is OpenAPI 3.x only. */
+  in?: 'header' | 'query' | 'cookie'
+  /** http (3.x): the HTTP auth scheme — `basic`, `bearer`, … For
+   * Swagger 2.0 `basic` we set this to `'basic'` so the viewer
+   * + auth pre-wiring don't have to special-case the version. */
+  scheme?: string
+  /** http (3.x): bearer-format hint (e.g. `JWT`). */
+  bearerFormat?: string
+  /** oauth2: one entry per declared flow. Swagger 2.0 has a single
+   * flow per scheme; 3.x supports multiple flows in one block. */
+  flows?: OAuth2Flow[]
+  /** openIdConnect (3.x): the OIDC discovery document URL. */
+  openIdConnectUrl?: string
+}
+
 /** Source type discriminator — matches the import format. */
 export type ApiDocumentationSourceType =
   | 'swagger'
@@ -236,4 +285,14 @@ export interface ApiDocumentation {
   models: Record<string, ModelDocumentation>
   groups: Record<string, GroupDocumentation>
   operations: OperationDocumentation[]
+  /** Named security schemes (Swagger 2.0 `securityDefinitions` /
+   * OpenAPI 3.x `components.securitySchemes`). Empty when the
+   * spec declares none. */
+  securitySchemes?: Record<string, SecurityScheme>
+  /** Spec-level `security` requirement — operations without their
+   * own `security` field inherit this. Top-level `[]` (empty
+   * array) means the spec explicitly opts every operation OUT of
+   * auth, so the viewer / pre-wirer must distinguish "absent"
+   * from "explicitly empty". */
+  defaultSecurity?: Record<string, string[]>[]
 }

@@ -440,7 +440,51 @@ function operationToRequest(
   if (operation.deprecated) request.deprecated = true
   const body = extractBody(operation, spec)
   if (body) request.body = body
+
+  // Pre-wire auth headers / params from the resolved security
+  // requirement (op-level overrides spec-level). Mirrors what the
+  // Swagger 2.0 importer does, but reads `components.securitySchemes`
+  // from the 3.x spec.
+  applyOpenApi3SecurityToRequest(request, operation.security ?? spec.security, spec.components?.securitySchemes)
   return request
+}
+
+interface MinimalSecurityScheme {
+  type: 'apiKey' | 'http' | 'oauth2' | 'openIdConnect'
+  name?: string
+  in?: 'header' | 'query' | 'cookie'
+  scheme?: string
+}
+
+/** Same role as `applySwagger20SecurityToRequest` but consumes the
+ * 3.x scheme shape (`type: http` with `scheme: bearer | basic`). */
+function applyOpenApi3SecurityToRequest(
+  request: HTTPRequest,
+  requirements: Record<string, string[]>[] | undefined,
+  defs: Record<string, MinimalSecurityScheme> | undefined
+): void {
+  if (!requirements || requirements.length === 0 || !defs) return
+  const requirement = requirements.find((r) => Object.keys(r).length > 0)
+  if (!requirement) return
+  for (const schemeName of Object.keys(requirement)) {
+    const scheme = defs[schemeName]
+    if (!scheme) continue
+    if (scheme.type === 'apiKey' && scheme.name !== undefined && scheme.in !== undefined) {
+      const placeholder = `{{${schemeName}}}`
+      const target = scheme.in === 'header' ? request.headers : scheme.in === 'query' ? request.params : null
+      if (target && !target.some((kv) => kv.key === scheme.name)) {
+        target.push({ key: scheme.name, value: new StringValue(placeholder) })
+      }
+    } else if (scheme.type === 'http' && scheme.scheme === 'basic') {
+      if (!request.headers.some((kv) => kv.key.toLowerCase() === 'authorization')) {
+        request.headers.push({ key: 'Authorization', value: new StringValue(`Basic {{${schemeName}_credentials}}`) })
+      }
+    } else if ((scheme.type === 'http' && scheme.scheme === 'bearer') || scheme.type === 'oauth2' || scheme.type === 'openIdConnect') {
+      if (!request.headers.some((kv) => kv.key.toLowerCase() === 'authorization')) {
+        request.headers.push({ key: 'Authorization', value: new StringValue(`Bearer {{${schemeName}_token}}`) })
+      }
+    }
+  }
 }
 
 function dedupeByName(params: OAS3Parameter[]): OAS3Parameter[] {

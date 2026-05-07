@@ -754,6 +754,61 @@
   color: var(--description-foreground, rgba(127, 127, 127, 0.85));
 }
 
+.documentation-host-route-header__security-scheme {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 6px;
+  border-radius: 3px;
+  background: var(--editorWidget-background, rgba(127, 127, 127, 0.06));
+  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+  margin-right: 4px;
+}
+
+.documentation-host-route-header__security-scheme-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+
+.documentation-host-route-header__security-scheme-name {
+  font-weight: 600;
+}
+
+.documentation-host-route-header__security-scheme-kind {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: var(--badge-background, rgba(127, 127, 127, 0.18));
+  color: var(--badge-foreground, var(--editor-foreground));
+  font-family: var(--font-family, sans-serif);
+}
+
+.documentation-host-route-header__security-flow {
+  font-family: var(--font-family, sans-serif);
+  font-size: 11px;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.95));
+}
+
+.documentation-host-route-header__security-flow code {
+  font-size: 10px;
+}
+
+.documentation-host-route-header__security-sep {
+  color: var(--description-foreground, rgba(127, 127, 127, 0.6));
+}
+
+.documentation-host-route-header__security-description {
+  font-size: 11px;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+  font-style: italic;
+}
+
 /* ──────────────────────────────────────────────────────────────────
  * Parameters table — additional examples
  * ────────────────────────────────────────────────────────────────── */
