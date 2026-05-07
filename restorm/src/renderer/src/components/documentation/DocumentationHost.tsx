@@ -96,6 +96,12 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
     : useGroupedLayout
       ? 3
       : 2
+  /** Top-level section titles (Models, Enums) sit as siblings of the
+   * scope title when present, so they drop to H2. Without a scope
+   * title (single-route view) they read as H1 — peers of the route
+   * summary. */
+  const hasScopeTitle = scopeTitle !== undefined && scopeTitle.length > 0
+  const topLevelSectionLevel: 1 | 2 = hasScopeTitle ? 2 : 1
 
   const rootRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<DocumentationHostSearchHandle>(null)
@@ -339,14 +345,16 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
               className="documentation-host__section documentation-host__models"
               data-testid="documentation-host-models-section"
             >
-              <h1 className="documentation-host__section-title">Models</h1>
+              {topLevelSectionLevel === 1
+                ? <h1 className="documentation-host__section-title">Models</h1>
+                : <h2 className="documentation-host__section-title">Models</h2>}
               <ModelGraph ref={modelGraphRef} models={models} />
               <ModelGraphLegend />
             </section>
           ) : null}
 
-          <CompositionSection models={models} />
-          <EnumsSection ref={enumsSectionRef} models={models} />
+          <CompositionSection models={models} headingLevel={topLevelSectionLevel} />
+          <EnumsSection ref={enumsSectionRef} models={models} headingLevel={topLevelSectionLevel} />
         </div>
       </div>
     </DocumentationSecuritySchemesContext.Provider>

@@ -1097,4 +1097,18 @@ Then('the H1, H2, H3 levels should render at 26, 22, 18 px respectively', async 
   expect(await sizeOf('h1.documentation-host__scope-title'), 'H1 scope title').toBeCloseTo(26, 0)
   expect(await sizeOf('h2.documentation-host__group-title'), 'H2 group title').toBeCloseTo(22, 0)
   expect(await sizeOf('h3.documentation-host-route-header__summary'), 'H3 route summary').toBeCloseTo(18, 0)
+  // Models + Enums titles should drop to H2 in folder / env-folder
+  // scope (sibling of the scope H1) — not regress to H1 with the new
+  // tag-scoped 26 px rule.
+  const modelsHeading = host.locator('[data-testid="documentation-host-models-section"] h2.documentation-host__section-title').first()
+  await expect(modelsHeading, 'Models title should be H2').toBeVisible({ timeout: 10000 })
+  expect(parseFloat(await modelsHeading.evaluate((el) => getComputedStyle(el).fontSize)))
+    .toBeCloseTo(22, 0)
+  const enumsHeading = host.locator('[data-testid="documentation-host-enums-section"] h2.documentation-host__section-title').first()
+  await expect(enumsHeading, 'Enums title should be H2').toBeVisible({ timeout: 10000 })
+  expect(parseFloat(await enumsHeading.evaluate((el) => getComputedStyle(el).fontSize)))
+    .toBeCloseTo(22, 0)
+  // Sanity check that there is exactly one H1 in the host — the scope title.
+  const h1Count = await host.locator('h1').count()
+  expect(h1Count, 'env-folder docs should have a single H1 (scope title)').toBe(1)
 })

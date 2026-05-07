@@ -6,6 +6,10 @@ export interface EnumsSectionProps {
   /** Models surfaced by the host. We walk their properties and
    * collect every property carrying `enumValues`. */
   models: ModelDocumentation[]
+  /** Heading level for the "Enums" title. H1 in single-route scope
+   * (peer of the route summary), H2 in folder / env-folder scope
+   * (sibling of the scope H1 + per-tag group H2). */
+  headingLevel?: 1 | 2
 }
 
 const SEE_MORE_THRESHOLD = 20
@@ -17,7 +21,7 @@ const SEE_MORE_THRESHOLD = 20
  * with a "see more" toggle to keep large generated enums (country
  * codes, currency lists, …) from blowing up the page.
  */
-export const EnumsSection = forwardRef<HTMLElement, EnumsSectionProps>(({ models }, ref) => {
+export const EnumsSection = forwardRef<HTMLElement, EnumsSectionProps>(({ models, headingLevel = 1 }, ref) => {
   const groups = collectEnumGroups(models)
 
   if (groups.length === 0) return null
@@ -28,7 +32,9 @@ export const EnumsSection = forwardRef<HTMLElement, EnumsSectionProps>(({ models
       className="documentation-host-enums"
       data-testid="documentation-host-enums-section"
     >
-      <h1 className="documentation-host__section-title">Enums</h1>
+      {headingLevel === 1
+        ? <h1 className="documentation-host__section-title">Enums</h1>
+        : <h2 className="documentation-host__section-title">Enums</h2>}
       <div className="documentation-host-enums__list">
         {groups.map((group) => (
           <div

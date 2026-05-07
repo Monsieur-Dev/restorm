@@ -1447,6 +1447,12 @@
   color: var(--editor-foreground);
 }
 
+.documentation-host-sidebar__section-title--button:focus-visible {
+  outline: 1px solid var(--focusBorder, #4d9bf6);
+  outline-offset: 1px;
+  border-radius: 3px;
+}
+
 .documentation-host-sidebar__group-list,
 .documentation-host-sidebar__op-list,
 .documentation-host-sidebar__model-list,
