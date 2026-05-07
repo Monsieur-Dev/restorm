@@ -1,0 +1,1571 @@
+.documentation-host {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 16px 20px;
+  /* No own scroll — the parent `<Tabs useScrollableElement>` wraps
+   * us in ECUI's `ScrollableElement`, which gives the Monaco-style
+   * scrollbar consistent with the rest of the workbench. Letting
+   * the host scroll itself would create a competing scroll context
+   * inside the wrapper. */
+  color: var(--editor-foreground);
+  background: var(--editor-background);
+  /* The Electron shell applies `user-select: none` on `<body>` to
+   * keep the chrome from accidentally selecting text on drag. The
+   * documentation host is a reading surface — re-enable selection
+   * for the whole subtree so titles, descriptions, table cells,
+   * model cards, etc. are all selectable as a continuous range. */
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  user-select: text;
+}
+
+/* Two-column layout when the sidebar is visible (multi-route or
+ * env-folder / folder scope). The sidebar sits sticky-left, the
+ * main column flows naturally — same column gap as the host's
+ * own vertical rhythm. */
+.documentation-host--with-sidebar {
+  display: grid;
+  grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
+  gap: 0 24px;
+  align-items: start;
+}
+
+.documentation-host--with-sidebar .documentation-host__main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+.documentation-host__section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.documentation-host__section-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--editor-foreground);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Model graph (React Flow)
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host__models {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.documentation-host-model-graph {
+  /* Fixed height — the host is wrapped in a ScrollableElement now,
+   * so `flex: 1` would not have a bounded parent to grow into. We
+   * pick a comfortable canvas size that still leaves the page
+   * scrolling behind it for the rest of the doc. */
+  height: 540px;
+  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+  border-radius: 4px;
+  background: var(--editor-background);
+  overflow: hidden;
+}
+
+/* React Flow's NodeWrapper writes `visibility: visible` as an inline
+ * style on every node once it has measured dimensions, and the edge-
+ * label wrapper writes the same as an SVG presentation attribute
+ * once the text is measured. Both escape the `visibility: hidden`
+ * cascade that the parent Tabs component applies to inactive tab
+ * panels — the nodes + edge labels would otherwise leak onto
+ * whatever sibling tab is active. Forcing `visibility: inherit`
+ * with `!important` re-anchors them to whatever the surrounding
+ * tab panel is doing. */
+.documentation-host-model-graph .react-flow__node,
+.documentation-host-model-graph .react-flow__edge-textwrapper,
+.documentation-host-model-graph .react-flow__edgelabel-renderer > * {
+  visibility: inherit !important;
+}
+
+/* React Flow theme tweaks — keep the canvas blending with the editor
+ * background and ensure handles stay invisible (we draw edges, not
+ * little blue dots). */
+.documentation-host-model-graph .react-flow__node {
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  font-size: 12px;
+  /* React Flow sets `user-select: none` on every node so nodes feel
+   * draggable. We override here so the user can select model names,
+   * property names, types — the documentation viewer is a reading
+   * surface, not a canvas tool. Drag still works because React Flow
+   * captures the pointer event before the browser's text selection
+   * kicks in (and the small handle dots remain non-selectable). */
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  user-select: text;
+}
+
+.documentation-host-model-graph .react-flow__edge-path {
+  stroke: var(--description-foreground, rgba(127, 127, 127, 0.7));
+  stroke-width: 1.4;
+}
+
+.documentation-host-model-graph .react-flow__edge.selected .react-flow__edge-path,
+.documentation-host-model-graph .react-flow__edge:focus .react-flow__edge-path {
+  stroke: var(--focus-border, #007acc);
+  stroke-width: 2;
+}
+
+.documentation-host-model-graph .react-flow__arrowhead {
+  fill: var(--description-foreground, rgba(127, 127, 127, 0.7));
+}
+
+.documentation-host-model-graph .react-flow__edge-textbg {
+  fill: var(--editor-background);
+}
+
+.documentation-host-model-graph .react-flow__edge-text {
+  fill: var(--editor-foreground);
+}
+
+.documentation-host-model-graph .react-flow__controls,
+.documentation-host-model-graph .react-flow__minimap {
+  background: var(--editorWidget-background, var(--editor-background));
+  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+  box-shadow: none;
+}
+
+.documentation-host-model-graph .react-flow__controls-button {
+  background: transparent;
+  color: var(--editor-foreground);
+  border-bottom: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+}
+
+.documentation-host-model-graph .react-flow__controls-button:hover {
+  background: var(--list-hover-background, rgba(127, 127, 127, 0.1));
+}
+
+.documentation-host-model-graph .react-flow__controls-button svg {
+  fill: var(--editor-foreground);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * UML class card (custom React Flow node)
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host-model-node {
+  /* No border — the box-shadow + ring serve as the visual edge so the
+   * DOM `offsetTop` of children matches `propertyHandleCenterY` in
+   * `modelNodeMetrics.ts` exactly. A 1px border would shift every
+   * child down by 1px and ELK ports would land just below the
+   * actual handle positions. */
+  border-radius: 5px;
+  background: var(--editorWidget-background, var(--editor-background));
+  color: var(--editor-foreground);
+  font-family: var(--monaco-monospace-font, monospace);
+  box-shadow:
+    0 0 0 1px var(--panel-border, rgba(127, 127, 127, 0.3)),
+    0 1px 2px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.documentation-host-model-node__handle {
+  width: 6px;
+  height: 6px;
+  background: var(--description-foreground, rgba(127, 127, 127, 0.6));
+  border: none;
+}
+
+/* Per-property source handles sit at the right edge of a property
+ * row. Slightly smaller than the node-level handles and positioned
+ * via React Flow's default placement (right edge, vertically
+ * centred on the row). */
+.documentation-host-model-node__handle--per-property {
+  width: 4px;
+  height: 4px;
+  background: var(--textLink-foreground, #4d9bf6);
+}
+
+.documentation-host-model-node__header {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  /* Height is set inline by `ModelNodeHeader` based on whether
+   * the model carries a description. ELK port Y values are
+   * computed against the same per-model height so the visual
+   * header and the layout engine stay in sync. */
+  box-sizing: border-box;
+  padding: 0 10px;
+  background: var(--titleBar-activeBackground, rgba(127, 127, 127, 0.12));
+  border-bottom: 1px solid var(--panel-border, rgba(127, 127, 127, 0.3));
+  font-family: var(--font-family, sans-serif);
+}
+
+.documentation-host-model-node__title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  min-width: 0;
+}
+
+.documentation-host-model-node__description-line {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--font-family, sans-serif);
+}
+
+.documentation-host-model-node__header-wrap {
+  display: block;
+}
+
+.documentation-host-model-node__name {
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.documentation-host-model-node__badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.documentation-host-model-node__badge--deprecated {
+  background: var(--editorWarning-foreground, #c9a227);
+  color: var(--editor-background, black);
+}
+
+.documentation-host-model-node__badge--removed {
+  background: var(--editorError-foreground, #c14545);
+  color: var(--editor-background, white);
+}
+
+.documentation-host-model-node__properties {
+  list-style: none;
+  margin: 0;
+  /* Same load-bearing constant story — keep in sync with
+   * MODEL_NODE_PROPERTY_LIST_PADDING_Y. */
+  padding: 6px 0;
+}
+
+.documentation-host-model-node__property {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  /* `height` is the load-bearing constant — `propertyHandleCenterY`
+   * in modelNodeMetrics.ts assumes each row is exactly 22px tall so
+   * ELK can place its source ports at the same Y as the React Flow
+   * `<Handle>` rendered inside the row. Don't change without
+   * updating MODEL_NODE_PROPERTY_HEIGHT. */
+  height: 22px;
+  box-sizing: border-box;
+  padding: 0 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.documentation-host-model-node__property:hover {
+  background: var(--list-hover-background, rgba(127, 127, 127, 0.08));
+}
+
+.documentation-host-model-node__property--required .documentation-host-model-node__property-name {
+  font-weight: 600;
+}
+
+.documentation-host-model-node__property--deprecated .documentation-host-model-node__property-name,
+.documentation-host-model-node__property--deprecated .documentation-host-model-node__property-type {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.documentation-host-model-node__visibility {
+  width: 10px;
+  text-align: center;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.7));
+}
+
+.documentation-host-model-node__property-name {
+  color: var(--editor-foreground);
+}
+
+.documentation-host-model-node__property-sep {
+  color: var(--description-foreground, rgba(127, 127, 127, 0.7));
+}
+
+.documentation-host-model-node__property-type {
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+}
+
+.documentation-host-model-node__property-type--ref {
+  color: var(--textLink-foreground, #4d9bf6);
+  font-weight: 500;
+}
+
+.documentation-host-model-node__property-modifier {
+  font-size: 10px;
+  padding: 0 3px;
+  border-radius: 2px;
+  background: var(--badge-background, rgba(127, 127, 127, 0.18));
+  color: var(--badge-foreground, var(--editor-foreground));
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Model graph legend
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host-model-graph-legend {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 8px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+  border-radius: 4px;
+  background: var(--editorWidget-background, var(--editor-background));
+  font-size: 12px;
+}
+
+.documentation-host-model-graph-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.documentation-host-model-graph-legend__sample {
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 12px;
+  color: var(--editor-foreground);
+}
+
+.documentation-host-model-graph-legend__label {
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Responses table
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host-responses-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--editorWidget-background, var(--editor-background));
+}
+
+.documentation-host-responses-table__th {
+  text-align: left;
+  padding: 8px 12px;
+  font-weight: 600;
+  background: var(--titleBar-activeBackground, rgba(127, 127, 127, 0.12));
+  border-bottom: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+}
+
+.documentation-host-responses-table__th--code {
+  width: 90px;
+}
+
+.documentation-host-responses-table__row + .documentation-host-responses-table__row .documentation-host-responses-table__td {
+  border-top: 1px solid var(--panel-border, rgba(127, 127, 127, 0.12));
+}
+
+.documentation-host-responses-table__td {
+  padding: 6px 12px;
+  vertical-align: middle;
+}
+
+.documentation-host-responses-table__td--code {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--monaco-monospace-font, monospace);
+  font-weight: 600;
+}
+
+.documentation-host-responses-table__td--op code {
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 11px;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+}
+
+.documentation-host-responses-table__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.documentation-host-responses-table__empty {
+  margin: 0;
+  font-style: italic;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Route header
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host-route-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  /* No surrounding card — the title carries the route on its own.
+   * The example payload + meta block keep their own subtle borders. */
+}
+
+.documentation-host-route-header__summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.documentation-host-route-header__title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.documentation-host-route-header__method {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: var(--badge-background, rgba(127, 127, 127, 0.2));
+  color: var(--badge-foreground, var(--editor-foreground));
+}
+
+.documentation-host-route-header__url {
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 13px;
+  color: var(--editor-foreground);
+}
+
+.documentation-host-route-header__badge--deprecated {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: var(--editorWarning-foreground, #c9a227);
+  color: var(--editor-background, black);
+}
+
+.documentation-host-route-header__summary {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--editor-foreground);
+}
+
+.documentation-host-route-header__description {
+  font-size: 13px;
+  color: var(--editor-foreground);
+}
+
+.documentation-host-route-header__meta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 12px;
+  margin: 0;
+  font-size: 12px;
+}
+
+.documentation-host-route-header__meta dt {
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  align-self: center;
+}
+
+.documentation-host-route-header__meta dd {
+  margin: 0;
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 12px;
+}
+
+.documentation-host-route-header__meta-extra {
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+  font-family: var(--font-family, sans-serif);
+}
+
+.documentation-host-route-header__payload {
+  margin: 0;
+  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+  border-radius: 4px;
+  background: var(--editor-background);
+}
+
+.documentation-host-route-header__payload summary {
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+  user-select: none;
+}
+
+.documentation-host-route-header__payload[open] summary {
+  border-bottom: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+}
+
+.documentation-host-route-header__payload-pre {
+  margin: 0;
+  padding: 10px 12px;
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 280px;
+  overflow: auto;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Parameters table
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host-parameters-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--editorWidget-background, var(--editor-background));
+}
+
+.documentation-host-parameters-table__th {
+  text-align: left;
+  padding: 8px 10px;
+  font-weight: 600;
+  background: var(--titleBar-activeBackground, rgba(127, 127, 127, 0.12));
+  border-bottom: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.95));
+}
+
+.documentation-host-parameters-table__th--location {
+  width: 80px;
+}
+
+.documentation-host-parameters-table__th--required {
+  width: 36px;
+  text-align: center;
+}
+
+.documentation-host-parameters-table__row + .documentation-host-parameters-table__row .documentation-host-parameters-table__td {
+  border-top: 1px solid var(--panel-border, rgba(127, 127, 127, 0.12));
+}
+
+.documentation-host-parameters-table__td {
+  padding: 6px 10px;
+  vertical-align: top;
+}
+
+.documentation-host-parameters-table__td--required {
+  text-align: center;
+  font-weight: 700;
+  color: var(--testing-iconPassed);
+}
+
+.documentation-host-parameters-table__location-chip {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-family: var(--font-family, sans-serif);
+  background: var(--badge-background, rgba(127, 127, 127, 0.2));
+  color: var(--badge-foreground, var(--editor-foreground));
+}
+
+.documentation-host-parameters-table__location-chip--path {
+  background: var(--testing-iconPassed);
+  color: var(--editor-background);
+}
+
+.documentation-host-parameters-table__location-chip--query {
+  background: rgba(77, 155, 246, 0.85);
+  color: var(--editor-background);
+}
+
+.documentation-host-parameters-table__location-chip--header {
+  background: var(--editorWarning-foreground, #c9a227);
+  color: var(--editor-background);
+}
+
+.documentation-host-parameters-table__location-chip--formData {
+  background: rgba(180, 120, 200, 0.85);
+  color: var(--editor-background);
+}
+
+.documentation-host-parameters-table__op-label,
+.documentation-host-parameters-table__constraints {
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 11px;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+}
+
+.documentation-host-parameters-table__format {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: 8px;
+  background: var(--badge-background, rgba(127, 127, 127, 0.18));
+  color: var(--badge-foreground, var(--description-foreground, rgba(127, 127, 127, 0.95)));
+  font-family: var(--font-family, sans-serif);
+}
+
+.documentation-host-parameters-table__enum {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+}
+
+.documentation-host-parameters-table__empty {
+  margin: 0;
+  font-style: italic;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Responses table — expand/collapse details
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host-responses-table__row--expandable {
+  cursor: pointer;
+}
+
+.documentation-host-responses-table__row--expandable:hover {
+  background: var(--list-hover-background, rgba(127, 127, 127, 0.06));
+}
+
+.documentation-host-responses-table__caret {
+  display: inline-block;
+  width: 12px;
+  text-align: center;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+}
+
+.documentation-host-responses-table__detail-row td {
+  padding: 0;
+  border-top: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+  background: var(--editor-background);
+}
+
+.documentation-host-responses-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  font-size: 12px;
+}
+
+.documentation-host-responses-detail__row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.documentation-host-responses-detail__label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+}
+
+.documentation-host-responses-detail__schema {
+  font-family: var(--monaco-monospace-font, monospace);
+  color: var(--textLink-foreground, #4d9bf6);
+  font-weight: 500;
+}
+
+.documentation-host-responses-detail__headers {
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.documentation-host-responses-detail__headers td {
+  padding: 4px 8px;
+  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+}
+
+.documentation-host-responses-detail__example {
+  margin: 0;
+  padding: 8px 10px;
+  background: var(--editorWidget-background, var(--editor-background));
+  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+  border-radius: 3px;
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 220px;
+  overflow: auto;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Route header — security + externalDocs
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host-route-header__security-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.documentation-host-route-header__security-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 1px 8px;
+  border-radius: 3px;
+  background: var(--badge-background, rgba(127, 127, 127, 0.18));
+  color: var(--badge-foreground, var(--editor-foreground));
+}
+
+.documentation-host-route-header__security-scopes {
+  font-family: var(--font-family, sans-serif);
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+}
+
+.documentation-host-route-header__security-scheme {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 6px;
+  border-radius: 3px;
+  background: var(--editorWidget-background, rgba(127, 127, 127, 0.06));
+  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+  margin-right: 4px;
+}
+
+.documentation-host-route-header__security-scheme-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+
+.documentation-host-route-header__security-scheme-name {
+  font-weight: 600;
+}
+
+.documentation-host-route-header__security-scheme-kind {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: var(--badge-background, rgba(127, 127, 127, 0.18));
+  color: var(--badge-foreground, var(--editor-foreground));
+  font-family: var(--font-family, sans-serif);
+}
+
+.documentation-host-route-header__security-flow {
+  font-family: var(--font-family, sans-serif);
+  font-size: 11px;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.95));
+}
+
+.documentation-host-route-header__security-flow code {
+  font-size: 10px;
+}
+
+.documentation-host-route-header__security-sep {
+  color: var(--description-foreground, rgba(127, 127, 127, 0.6));
+}
+
+.documentation-host-route-header__security-description {
+  font-size: 11px;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+  font-style: italic;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Parameters table — additional examples
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host-parameters-table__additional-examples {
+  margin: 4px 0 0;
+  padding: 0 0 0 14px;
+  font-size: 11px;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+}
+
+.documentation-host-parameters-table__example-name {
+  font-weight: 600;
+  color: var(--editor-foreground);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Scope header (env folder / folder docs)
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host__scope-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+}
+
+.documentation-host__scope-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Per-route block (multi-route docs)
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host__route-block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Route header — method + URL match line under the title
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host-route-header__match {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: -4px;
+}
+
+.documentation-host-route-header__match .documentation-host-route-header__url {
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 13px;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.95));
+}
+
+.documentation-host-route-header__add-button {
+  align-self: flex-start;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--button-foreground, var(--editor-foreground));
+  background: var(--button-secondaryBackground, rgba(127, 127, 127, 0.18));
+  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.3));
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: var(--font-family, sans-serif);
+}
+
+.documentation-host-route-header__add-button:hover {
+  background: var(--button-secondaryHoverBackground, rgba(127, 127, 127, 0.28));
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * API info block (env folder scope)
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host-api-info {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 12px;
+  margin: 12px 0 0;
+  font-size: 12px;
+}
+
+.documentation-host-api-info dt {
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  align-self: center;
+}
+
+.documentation-host-api-info dd {
+  margin: 0;
+  font-size: 12px;
+}
+
+.documentation-host-api-info__extra {
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Tag chip + non-HTTP discriminators on route header
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host-route-header__group-chip {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: lowercase;
+  letter-spacing: 0.04em;
+  background: var(--badge-background, rgba(127, 127, 127, 0.18));
+  color: var(--badge-foreground, var(--editor-foreground));
+  font-family: var(--font-family, sans-serif);
+}
+
+.documentation-host-route-header__alt-discriminators {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+}
+
+.documentation-host-route-header__alt-label {
+  font-weight: 600;
+  color: var(--editor-foreground);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Operation extras (vendor extensions)
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host-operation-extras {
+  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+  border-radius: 4px;
+  background: var(--editor-background);
+  font-size: 12px;
+}
+
+.documentation-host-operation-extras summary {
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+  user-select: none;
+}
+
+.documentation-host-operation-extras[open] summary {
+  border-bottom: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+}
+
+.documentation-host-operation-extras__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.documentation-host-operation-extras__key {
+  width: 30%;
+  padding: 6px 10px;
+  vertical-align: top;
+  font-family: var(--monaco-monospace-font, monospace);
+}
+
+.documentation-host-operation-extras__value pre {
+  margin: 0;
+  padding: 6px 10px;
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 180px;
+  overflow: auto;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Property tooltip + edge legend swatches
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host-model-node__tooltip {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--font-family, sans-serif);
+  font-size: 12px;
+  max-width: 360px;
+}
+
+.documentation-host-model-node__tooltip-line code {
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 11px;
+}
+
+.documentation-host-model-graph-legend__edge {
+  display: inline-block;
+  width: 22px;
+  height: 0;
+  border-top-width: 2px;
+  border-top-style: solid;
+  align-self: center;
+}
+
+.documentation-host-model-graph-legend__edge--single-required {
+  border-color: var(--documentation-edge-single, #4d9bf6);
+  border-top-style: solid;
+}
+
+.documentation-host-model-graph-legend__edge--single-optional {
+  border-color: var(--documentation-edge-single, #4d9bf6);
+  border-top-style: dashed;
+}
+
+.documentation-host-model-graph-legend__edge--array-required {
+  border-color: var(--documentation-edge-array, #f0a868);
+  border-top-style: solid;
+}
+
+.documentation-host-model-graph-legend__edge--array-optional {
+  border-color: var(--documentation-edge-array, #f0a868);
+  border-top-style: dashed;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Enums section
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host-enums {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.documentation-host-enums__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.documentation-host-enums__model {
+  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+  border-radius: 4px;
+  padding: 8px 12px;
+  background: var(--editorWidget-background, var(--editor-background));
+}
+
+.documentation-host-enums__model-name {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.documentation-host-enums__entries {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 12px;
+  margin: 0;
+  font-size: 12px;
+}
+
+.documentation-host-enums__property code {
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 12px;
+  color: var(--editor-foreground);
+}
+
+.documentation-host-enums__values {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  align-items: center;
+}
+
+.documentation-host-enums__value {
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: var(--badge-background, rgba(127, 127, 127, 0.18));
+  color: var(--badge-foreground, var(--editor-foreground));
+}
+
+.documentation-host-enums__see-more {
+  margin-left: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.3));
+  border-radius: 3px;
+  background: transparent;
+  color: var(--editor-foreground);
+  cursor: pointer;
+  font-family: var(--font-family, sans-serif);
+}
+
+.documentation-host-enums__see-more:hover {
+  background: var(--list-hover-background, rgba(127, 127, 127, 0.1));
+}
+
+/* Tag externalDocs list inside ApiInfoSection. */
+.documentation-host-api-info__tag-refs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.documentation-host-api-info__tag-refs li {
+  font-size: 12px;
+}
+
+/* Deprecated parameter row — strikethrough name + type so a reader
+ * skimming the table can spot deprecated args at a glance. */
+.documentation-host-parameters-table__row--deprecated code {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.documentation-host-parameters-table__row--deprecated .documentation-host-parameters-table__location-chip {
+  opacity: 0.7;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * In-doc search bar (Ctrl+F / F3)
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host-search-bar {
+  position: sticky;
+  top: 4px;
+  align-self: flex-end;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: var(--editorWidget-background, var(--editor-background));
+  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.3));
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  font-size: 12px;
+}
+
+.documentation-host-search-bar__input {
+  width: 220px;
+  padding: 3px 6px;
+  font-size: 12px;
+  color: var(--input-foreground, var(--editor-foreground));
+  background: var(--input-background, var(--editor-background));
+  border: 1px solid var(--input-border, var(--panel-border, rgba(127, 127, 127, 0.3)));
+  border-radius: 3px;
+  outline: none;
+}
+
+.documentation-host-search-bar__input:focus {
+  border-color: var(--focus-border, #007acc);
+}
+
+.documentation-host-search-bar__counter {
+  min-width: 56px;
+  text-align: center;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+  font-variant-numeric: tabular-nums;
+}
+
+.documentation-host-search-bar__button {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 12px;
+  color: var(--button-foreground, var(--editor-foreground));
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.documentation-host-search-bar__button:hover:not(:disabled) {
+  background: var(--list-hover-background, rgba(127, 127, 127, 0.12));
+  border-color: var(--panel-border, rgba(127, 127, 127, 0.3));
+}
+
+.documentation-host-search-bar__button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.documentation-host-search-bar__button--close {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* CSS Custom Highlight API — paint the in-doc matches without
+ * mutating the DOM the React tree owns. The "active" highlight is
+ * the current match (stronger background + outline); all others get
+ * a subtle yellow wash. The active rule must come second so its
+ * background overrides the non-active one when both registries have
+ * the same range (defensive — we do split them in JS). */
+::highlight(documentation-host-search) {
+  background-color: rgba(247, 215, 90, 0.45);
+  color: inherit;
+}
+
+::highlight(documentation-host-search-active) {
+  background-color: rgba(255, 152, 0, 0.85);
+  color: var(--editor-background);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Sidebar / outline (multi-route + env-folder / folder scopes)
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host-sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  font-size: 12px;
+  /* Bound the sidebar so its own list scrolls (via the inner
+   * `<ScrollableElement>`) when it overflows the viewport, instead
+   * of forcing the whole docs panel to grow sideways. The 60px
+   * subtraction leaves room for the workbench's top bar + the doc
+   * panel's own padding. */
+  max-height: calc(100vh - 60px);
+  /* The inner ScrollableElement owns the actual scrolling — keep
+   * the aside as a passive sticky container so the Monaco-style
+   * scrollbar matches the rest of the workbench. */
+  display: flex;
+  flex-direction: column;
+}
+
+.documentation-host-sidebar__scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.documentation-host-sidebar__scroll > .scrollable-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 4px 4px 16px;
+}
+
+.documentation-host-sidebar__section--top {
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+}
+
+.documentation-host-sidebar__overview-link {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  width: 100%;
+  padding: 6px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  color: var(--editor-foreground);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.documentation-host-sidebar__overview-link:hover {
+  background: var(--list-hover-background, rgba(127, 127, 127, 0.1));
+}
+
+.documentation-host-sidebar__overview-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.documentation-host-sidebar__overview-hint {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+}
+
+.documentation-host-sidebar__section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.documentation-host-sidebar__section-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+  padding: 4px 6px 2px;
+}
+
+.documentation-host-sidebar__group-list,
+.documentation-host-sidebar__op-list,
+.documentation-host-sidebar__model-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.documentation-host-sidebar__group-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 4px 6px;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  color: var(--editor-foreground);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.documentation-host-sidebar__group-header:hover {
+  background: var(--list-hover-background, rgba(127, 127, 127, 0.1));
+}
+
+.documentation-host-sidebar__caret {
+  width: 12px;
+  text-align: center;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+}
+
+.documentation-host-sidebar__group-name {
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.documentation-host-sidebar__group-count {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+  padding: 0 6px;
+  border-radius: 8px;
+  background: var(--badge-background, rgba(127, 127, 127, 0.18));
+}
+
+.documentation-host-sidebar__op-item {
+  margin: 0;
+}
+
+.documentation-host-sidebar__op-link,
+.documentation-host-sidebar__model-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 3px 6px 3px 22px;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  color: var(--editor-foreground);
+  font-family: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.documentation-host-sidebar__model-link {
+  padding-left: 10px;
+}
+
+.documentation-host-sidebar__op-link:hover,
+.documentation-host-sidebar__model-link:hover {
+  background: var(--list-hover-background, rgba(127, 127, 127, 0.1));
+}
+
+.documentation-host-sidebar__method {
+  flex: 0 0 auto;
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 1px 4px;
+  border-radius: 2px;
+  background: var(--badge-background, rgba(127, 127, 127, 0.2));
+  color: var(--badge-foreground, var(--editor-foreground));
+}
+
+.documentation-host-sidebar__method--get { background: rgba(73, 174, 86, 0.85); color: var(--editor-background); }
+.documentation-host-sidebar__method--post { background: rgba(77, 155, 246, 0.85); color: var(--editor-background); }
+.documentation-host-sidebar__method--put { background: rgba(244, 162, 70, 0.85); color: var(--editor-background); }
+.documentation-host-sidebar__method--patch { background: rgba(180, 120, 200, 0.85); color: var(--editor-background); }
+.documentation-host-sidebar__method--delete { background: rgba(220, 90, 90, 0.85); color: var(--editor-background); }
+.documentation-host-sidebar__method--head,
+.documentation-host-sidebar__method--options { background: rgba(127, 127, 127, 0.4); color: var(--editor-foreground); }
+
+.documentation-host-sidebar__op-summary {
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Cross-reference links (model names rendered as buttons)
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host-model-ref {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--textLink-foreground, #4d9bf6);
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.documentation-host-model-ref:hover {
+  text-decoration: underline;
+}
+
+.documentation-host-model-ref:focus-visible {
+  outline: 1px solid var(--focus-border, #007acc);
+  outline-offset: 1px;
+  border-radius: 2px;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Composition section (oneOf / anyOf / discriminator)
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host-composition {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.documentation-host-composition__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.documentation-host-composition__item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+  border-radius: 4px;
+  background: var(--editorWidget-background, var(--editor-background));
+}
+
+.documentation-host-composition__model-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.documentation-host-composition__line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+
+.documentation-host-composition__line-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+  min-width: 90px;
+}
+
+.documentation-host-composition__refs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.documentation-host-composition__discriminator {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.documentation-host-composition__discriminator-property {
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 12px;
+  color: var(--textLink-foreground, #4d9bf6);
+}
+
+.documentation-host-composition__mapping {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.documentation-host-composition__mapping-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.documentation-host-composition__mapping-arrow {
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+}

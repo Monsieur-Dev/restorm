@@ -100,7 +100,7 @@ The single scenario is long (~340 lines) and linear — every `When` /
 
 ### Docs tabs
 
-- **`Then the folder tab Docs tab should be populated with compiled markdown`** — scoped to `folder-view-…-markdown-viewer-docs`, asserts an H1 is present.
+- **`Then the folder tab Docs tab should be populated with compiled markdown`** — opens the active folder's Docs tab, locates the structured `<DocumentationHost>` (testid suffix `-documentation-host`) and asserts an H1 is present.
 - **`Then the request Docs tab should be visible`** / **`Then the request Docs tab should not be visible`**
 
 ### Titlebar search

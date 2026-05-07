@@ -811,35 +811,47 @@ contextBridge.exposeInMainWorld('restorm', {
       }
     }
   },
-  docs: {
+  find: {
     /**
-     * Compile Markdown documentation for a request route from an ApiDocumentation
-     * object. Returns `{ matched: false, markdown: '' }` when no operation matches.
+     * Trigger Chromium's native in-page find. The Chromium engine
+     * paints the yellow highlight directly on the rendered DOM,
+     * including any `visibility: hidden` panels — the renderer is
+     * responsible for only invoking this while the docs panel is
+     * actually visible.
      */
-    compileForRoute: async (
-      apiDoc: unknown,
-      route: {
-        type: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket'
-        url?: string
-        method?: string
-        operationType?: string
-        query?: string
-        service?: string
-        rpcMethod?: string
-        soapAction?: string
-        operation?: string
-        event?: string
-        protocol?: string
-        tags?: string[]
-      }
-    ): Promise<{ matched: boolean; markdown: string; operationId?: string; error?: string }> => {
-      const result: unknown = await ipcRenderer.invoke('docs:compile-for-route', apiDoc, route)
-      return result as { matched: boolean; markdown: string; operationId?: string; error?: string }
+    inPage: async (
+      text: string,
+      options?: { forward?: boolean; findNext?: boolean; matchCase?: boolean }
+    ): Promise<{ requestId: number }> => {
+      const result: unknown = await ipcRenderer.invoke('find:in-page', text, options)
+      return result as { requestId: number }
     },
-    /** Compile the API-level overview Markdown from an ApiDocumentation object. */
-    compileRoot: async (apiDoc: unknown): Promise<{ markdown: string; error?: string }> => {
-      const result: unknown = await ipcRenderer.invoke('docs:compile-root', apiDoc)
-      return result as { markdown: string; error?: string }
+    /** Stop the active find session. `clearSelection` removes both
+     * the search highlight and the selection; `keepSelection` keeps
+     * the active match selected; `activateSelection` clicks through
+     * (rarely useful in our use case). */
+    stop: async (
+      action: 'clearSelection' | 'keepSelection' | 'activateSelection'
+    ): Promise<{ ok: boolean }> => {
+      const result: unknown = await ipcRenderer.invoke('find:stop', action)
+      return result as { ok: boolean }
+    },
+    /** Subscribe to `'found-in-page'` updates forwarded from main.
+     * Returns an unsubscribe handle. */
+    onResult: (
+      callback: (result: {
+        requestId: number
+        activeMatchOrdinal: number
+        matches: number
+        finalUpdate: boolean
+      }) => void
+    ): (() => void) => {
+      const listener = (
+        _event: unknown,
+        result: { requestId: number; activeMatchOrdinal: number; matches: number; finalUpdate: boolean }
+      ): void => { callback(result) }
+      ipcRenderer.on('find:result', listener)
+      return (): void => { ipcRenderer.removeListener('find:result', listener) }
     }
   },
   apiUpdate: {

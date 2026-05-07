@@ -37,7 +37,9 @@ import { buildHttpResponseViewData } from './HTTPResponsePanel'
 import { HTTPRequestBodySection } from './HTTPRequestBodySection'
 import type { HTTPRequestBody } from '../../../../shared/types/requestPrimitives'
 import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabViewUtils'
-import { useCompiledDocumentation } from '../../hooks/useCompiledDocumentation'
+import { useApiDocumentationFromRequest } from '../../hooks/useApiDocumentationFromRequest'
+import { DocumentationHost } from '../documentation/DocumentationHost'
+import { findOperationForRoute } from '../../../../shared/utils/findOperationForRoute'
 import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
 import { toasterService } from 'electron-core-ui/renderer'
@@ -109,8 +111,23 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   const collections = useRestormStore((state) => state.collections)
   const findParentFolder = useRestormStore((state) => state.findParentFolder)
   const handlebarsHelpers = useHandlebarsHelpers()
-  const compiled = useCompiledDocumentation(request)
-  const compiledDocumentation = compiled.matched ? compiled.markdown : request.documentation
+  const { apiDocumentation, route } = useApiDocumentationFromRequest(request)
+  // Only mount the Docs tab when the request's URL actually maps to an
+  // operation in the spec — otherwise the tab would render an empty
+  // shell whenever the user is editing a URL that doesn't match
+  // anything (which is exactly when the spec viewer would be useless).
+  const docsContent = useMemo(() => {
+    if (!apiDocumentation || !route) return undefined
+    const matched = findOperationForRoute(apiDocumentation, route)
+    if (!matched) return undefined
+    return (
+      <DocumentationHost
+        apiDocumentation={apiDocumentation}
+        filters={[route]}
+        testId="http-request-documentation-host"
+      />
+    )
+  }, [apiDocumentation, route])
   const previousEnvIdRef = useRef<string | null>(null)
   const sendButtonStyle: React.CSSProperties | undefined = envColor
     ? { backgroundColor: envColor, color: getContrastColor(envColor), borderColor: envColor }
@@ -941,7 +958,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         urlSection={urlSection}
         requestContent={requestContent}
         codeSnippetsContent={codeSnippetsContent}
-        documentation={compiledDocumentation}
+        {...(docsContent !== undefined ? { docsContent } : {})}
         notes={request.notes}
         onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
         isLoading={isSending}

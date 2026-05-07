@@ -141,6 +141,75 @@ describe('helpers', () => {
   })
 })
 
+describe('openapi3ToApiDocumentation — security parsing', () => {
+  const securedSpec: OAS3Spec = {
+    openapi: '3.0.0',
+    info: { title: 'Secured', version: '1.0.0' },
+    paths: {},
+    security: [{ apiKey: [] }],
+    components: {
+      securitySchemes: {
+        apiKey: {
+          type: 'apiKey',
+          name: 'X-API-Key',
+          in: 'header',
+          description: 'project key'
+        },
+        basicAuth: { type: 'http', scheme: 'basic' },
+        bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+        petstoreOAuth: {
+          type: 'oauth2',
+          flows: {
+            implicit: {
+              authorizationUrl: 'https://example.com/oauth/authorize',
+              scopes: { 'read:pets': 'read your pets', 'write:pets': 'modify your pets' }
+            },
+            authorizationCode: {
+              authorizationUrl: 'https://example.com/oauth/authorize',
+              tokenUrl: 'https://example.com/oauth/token',
+              refreshUrl: 'https://example.com/oauth/refresh',
+              scopes: { 'read:pets': 'read your pets' }
+            }
+          }
+        },
+        oidc: { type: 'openIdConnect', openIdConnectUrl: 'https://example.com/.well-known/openid-configuration' }
+      }
+    } as OAS3Spec['components']
+  }
+
+  it('exposes apiKey, http (basic + bearer) and openIdConnect schemes', () => {
+    const doc = openapi3ToApiDocumentation(securedSpec)
+    expect(doc.securitySchemes?.['apiKey']).toEqual({
+      type: 'apiKey',
+      name: 'X-API-Key',
+      in: 'header',
+      description: 'project key'
+    })
+    expect(doc.securitySchemes?.['basicAuth']).toEqual({ type: 'http', scheme: 'basic' })
+    expect(doc.securitySchemes?.['bearerAuth']).toEqual({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' })
+    expect(doc.securitySchemes?.['oidc']).toEqual({
+      type: 'openIdConnect',
+      openIdConnectUrl: 'https://example.com/.well-known/openid-configuration'
+    })
+  })
+
+  it('renames OpenAPI 3.x flow keys onto the Swagger 2.0 vocabulary', () => {
+    const doc = openapi3ToApiDocumentation(securedSpec)
+    const oauth = doc.securitySchemes?.['petstoreOAuth']
+    expect(oauth?.type).toBe('oauth2')
+    const flowTypes = oauth?.flows?.map((f) => f.type)
+    expect(flowTypes).toEqual(['implicit', 'accessCode'])
+    const accessCode = oauth?.flows?.find((f) => f.type === 'accessCode')
+    expect(accessCode?.refreshUrl).toBe('https://example.com/oauth/refresh')
+    expect(accessCode?.tokenUrl).toBe('https://example.com/oauth/token')
+  })
+
+  it('captures the spec-level `security` requirement on `defaultSecurity`', () => {
+    const doc = openapi3ToApiDocumentation(securedSpec)
+    expect(doc.defaultSecurity).toEqual([{ apiKey: [] }])
+  })
+})
+
 describe('openapi3ToApiDocumentation — multi-content-type', () => {
   const spec = loadFixture('multi-content-type-3.0.json') as OAS3Spec
 

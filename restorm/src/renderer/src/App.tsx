@@ -111,6 +111,8 @@ import { StatusbarEnvironmentSelector } from './components/MainView/StatusbarEnv
 import { StatusbarAuthSelector } from './components/MainView/StatusbarAuthSelector'
 import { shouldShowAuthSelector } from './components/MainView/statusbarAuthHelpers'
 import { useItemOperations } from './hooks/useItemOperations'
+import { useRequestCreationApi } from './hooks/useRequestCreationApi'
+import { RequestCreationProvider } from './contexts/RequestCreationContext'
 import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
 import { useWorkbenchTabs } from './hooks/useWorkbenchTabs'
@@ -758,6 +760,14 @@ const App: React.FC = () => {
     openEnvironmentFolderTab,
     openAnyRequestTab,
     projectUuid
+  })
+
+  const requestCreationApi = useRequestCreationApi({
+    rootItems,
+    setRootItems,
+    setExpandedIds,
+    setSelectedItemId,
+    openAnyRequestTab
   })
 
   const {
@@ -1628,6 +1638,7 @@ const App: React.FC = () => {
       />
 
       {fileName ? (
+        <RequestCreationProvider value={requestCreationApi}>
         <VerticalSashContainer
           data-testid="app-vertical-sash-container"
           Left={
@@ -1719,6 +1730,7 @@ const App: React.FC = () => {
           sashConfig={{ size: 4, className: 'always-visible' }}
           className="restorm-main-container"
         />
+        </RequestCreationProvider>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
           <RestormWorkbenchContainer

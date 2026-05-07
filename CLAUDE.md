@@ -15,6 +15,20 @@
 - **NEVER** use `git push --no-verify` or `git commit --no-verify`
 - **NEVER** reference a ticket ID (`OYO-X`, `JIRA-X`, `#123`, etc.) in a source comment, `describe`/`it` title, TODO marker, or committed Markdown doc. Ticket IDs belong in the commit message, in the PR description, and in `git log` — they rot in tracked files. If a comment or doc needs to explain *why* something looks this way, describe the constraint or invariant in the present tense, without referring to the ticket that introduced it. If you need to point readers at related work, link a **file path** or a **stable doc anchor**, not a ticket URL.
 
+## Visual claims must be verified against the screenshot
+
+When reporting that a UI change is done — "labels removed", "edge no longer crosses the box", "spacing increased", "badge moved to the right of the name", or any other visible-state assertion — **you must look at the actual screenshot before stating it**. Don't assume the change took effect because the source diff says so: HMR may not have applied yet, the path you edited may not be the one that renders this view, or the framework may carry a hidden default that contradicts your diff.
+
+The verification loop:
+
+1. Make the change.
+2. Trigger / wait for HMR (or rebuild if main-process).
+3. Take a screenshot via the restorm MCP `screenshot` tool against the running instance.
+4. Read the screenshot back with the `Read` tool and explicitly confirm the asserted change is visible — name what you see in the image.
+5. Only then report "done" to the user.
+
+If step 4 contradicts step 1, **say so honestly and keep iterating** instead of declaring victory. False "it's fixed" claims waste the user's attention twice — once on the false claim, once on rediscovering the bug.
+
 ## Commits
 
 Pre-commit hooks run the full test suite, which takes a long time (~5–6 min on a healthy host). **NEVER** interrupt or cancel a commit in progress — wait for it to finish, even if it seems slow.

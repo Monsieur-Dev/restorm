@@ -830,17 +830,21 @@ async function handleLine(text) {
 /**
  * Manual mode: run when invoked from a TTY (typically via
  * `pnpm dev:restorm:mcp`). Sweeps the discovery dir synchronously,
- * then spawns `pnpm dev:restorm -- --mcp` in the foreground —
- * stdio inherited so the user sees Vite + Electron logs — and waits
- * for it to exit. No JSON-RPC handling: the launcher is just a
- * cleanup-then-run wrapper here.
+ * then spawns `pnpm dev:restorm -- --mcp [...extraArgs]` in the
+ * foreground — stdio inherited so the user sees Vite + Electron
+ * logs — and waits for it to exit. Extra args supplied after `--`
+ * (e.g. `pnpm dev:restorm:mcp -- -o /path/to.restorm`) are
+ * forwarded verbatim to restorm's CLI so the user can open a file
+ * straight from the launcher. No JSON-RPC handling: the launcher
+ * is just a cleanup-then-run wrapper here.
  */
 async function runManualMode() {
-  log('manual mode (TTY) — running cleanup then spawning restorm in foreground')
+  const extraArgs = process.argv.slice(2)
+  log('manual mode (TTY) — running cleanup then spawning restorm in foreground', extraArgs.length > 0 ? { extraArgs } : undefined)
   await gcStaleDiscoveryFiles()
   const child = spawn(
     'pnpm',
-    ['dev:restorm', '--', '--mcp'],
+    ['dev:restorm', '--', '--mcp', ...extraArgs],
     { cwd: repoRoot, stdio: 'inherit', env: { ...process.env } }
   )
   // Forward Ctrl-C cleanly: kill the child, let it shut down restorm,

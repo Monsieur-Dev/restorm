@@ -24,15 +24,11 @@ export interface BaseFolderViewProps {
   defaultActiveTabId?: string
   /** Callback receiving the setActiveTabId function when the component mounts. */
   onSwitchTabReady?: (switchTab: (tabId: string) => void) => void
-  /**
-   * Override for the Docs tab's Markdown content. When provided, this string
-   * is rendered instead of `folder.documentation`; an empty string hides the
-   * Docs tab entirely. Used by EnvironmentFolderView to inject the compiled
-   * root.hbs output.
-   */
-  documentationOverride?: string
-  /** Node rendered above the Docs tab markdown (e.g., a Refresh button). */
-  docsHeader?: React.ReactNode
+  /** Structured documentation content rendered as the Docs tab.
+   * When provided, it replaces the legacy markdown render of
+   * `folder.documentation`. EnvironmentFolderView and FolderView
+   * use this to surface a `<DocumentationHost />`. */
+  docsContent?: React.ReactNode
 }
 
 /**
@@ -43,33 +39,29 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
   folder,
   additionalTabs = [],
   defaultActiveTabId,
-  documentationOverride,
-  docsHeader,
+  docsContent,
   onSwitchTabReady
 }) => {
   const { t } = useTranslation()
   const testIdBase = `folder-view-${folder.id}`
 
-  const docs = documentationOverride ?? folder.documentation
-  const hasDocs = docs.trim().length > 0
+  const userDocs = folder.documentation
+  const hasStructuredDocs = docsContent !== undefined && docsContent !== null
+  const hasMarkdownDocs = userDocs.trim().length > 0
+  const hasDocs = hasStructuredDocs || hasMarkdownDocs
 
   const defaultTabId = defaultActiveTabId
     ?? additionalTabs[0]?.id
     ?? (hasDocs ? 'docs' : 'notes')
   const [activeTabId, setActiveTabId] = useState<string>(defaultTabId)
 
-  // Expose setActiveTabId to parent
   useEffect(() => {
     onSwitchTabReady?.(setActiveTabId)
   }, [onSwitchTabReady, setActiveTabId])
 
-  // Fall back to Notes at render time when the Docs tab disappears — avoids a
-  // sync setState in effect (banned by react-hooks/set-state-in-effect).
   const effectiveActiveTabId = activeTabId === 'docs' && !hasDocs ? 'notes' : activeTabId
 
   const handleNotesChange = useCallback((markdown: string): void => {
-    // Normalize blank content to undefined so the checksum matches the
-    // initial state (folder.notes starts as undefined before first edit).
     const normalized = markdown.trim() ? markdown : undefined
     updateReactiveProperty(folder, 'notes', normalized)
   }, [folder])
@@ -79,18 +71,19 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
     docsTabs.push({
       id: 'docs',
       label: t('folderView.tabs.docs'),
-      useScrollableElement: false,
-      content: (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
-          {docsHeader}
-          <div style={{ flex: 1, minHeight: 0 }}>
-            <MarkdownViewer
-              value={docs || `# ${folder.name}\n\nNo documentation available.`}
-              data-testid={`${testIdBase}-markdown-viewer-docs`}
-            />
-          </div>
-        </div>
-      )
+      // Structured docs render their own ScrollableElement via the
+      // DocumentationHost wrapper; legacy markdown stays unwrapped
+      // so the existing Markdown editor + viewer keep their
+      // self-contained scroll behaviour.
+      useScrollableElement: hasStructuredDocs,
+      content: hasStructuredDocs
+        ? docsContent
+        : (
+          <MarkdownViewer
+            value={userDocs || `# ${folder.name}\n\nNo documentation available.`}
+            data-testid={`${testIdBase}-markdown-viewer-docs`}
+          />
+        )
     })
   }
   docsTabs.push({

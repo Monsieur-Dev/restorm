@@ -279,27 +279,21 @@ export const importPreviewArgs = z.tuple([
 export const importImportArgs = z.tuple([z.string()])
 
 // ==========================================================================
-// Documentation Compiler
+// In-page Find (Chromium native via webContents.findInPage)
 // ==========================================================================
 
-const routeLikeSchema = z.object({
-  type: z.enum(['http', 'graphql', 'grpc', 'soap', 'websocket']),
-  url: z.string().optional(),
-  method: z.string().optional(),
-  operationType: z.string().optional(),
-  query: z.string().optional(),
-  service: z.string().optional(),
-  rpcMethod: z.string().optional(),
-  soapAction: z.string().optional(),
-  operation: z.string().optional(),
-  event: z.string().optional(),
-  protocol: z.string().optional(),
-  tags: z.array(z.string()).optional()
-})
+export const findInPageArgs = z.tuple([
+  z.string(),
+  z.object({
+    forward: z.boolean().optional(),
+    findNext: z.boolean().optional(),
+    matchCase: z.boolean().optional()
+  }).optional()
+])
 
-/** ApiDocumentation arrives as an opaque JSON object; shape is validated by the consumer. */
-export const docsCompileRouteArgs = z.tuple([z.unknown(), routeLikeSchema])
-export const docsCompileRootArgs = z.tuple([z.unknown()])
+export const findStopArgs = z.tuple([
+  z.enum(['clearSelection', 'keepSelection', 'activateSelection'])
+])
 
 // ==========================================================================
 // API Update (per-folder periodic spec re-check)

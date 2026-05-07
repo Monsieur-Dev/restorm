@@ -2,9 +2,9 @@
  * OpenAPI 3.0 → ApiDocumentation transformer.
  *
  * Reads a parsed OpenAPI 3.0 spec and produces the common ApiDocumentation
- * structure stored on the root EnvironmentFolder after import. Markdown
- * compilation happens later, on the fly, via Handlebars templates in
- * DocumentationCompiler.
+ * structure stored on the root EnvironmentFolder after import. The renderer's
+ * `DocumentationHost` consumes that tree directly — no markdown compilation
+ * step.
  *
  * Layered on top of `_shared.ts`: this file owns 3.0-specific normalisation
  * (servers, requestBody, multi-content-type responses, components/schemas,
@@ -16,14 +16,20 @@ import type {
   ApiDocumentation,
   ExternalDocs,
   ModelDocumentation,
-  OperationDocumentation
+  OAuth2Flow,
+  OperationDocumentation,
+  SecurityScheme
 } from '../../../../shared/types/apiDocumentation'
 import {
   HTTP_METHODS,
   buildApiInfo,
   buildOperationDocumentation,
+  extractCompositionRefs,
+  extractDiscriminator,
+  extractVendorExtensions,
   mapSchemaProperties,
   mapTagsToGroups,
+  mergeAllOfInto,
   refName,
   walkSchemaRefs,
   type CommonInfo,
@@ -112,6 +118,38 @@ export type OAS3PathItem = Partial<Record<HttpMethod, OAS3Operation>> & {
   description?: string
 }
 
+/** OpenAPI 3.x security scheme entry. The `flows` block uses 3.x
+ * vocabulary (`clientCredentials` / `authorizationCode`); the
+ * normaliser maps those onto Swagger 2.0's flow keys
+ * (`application` / `accessCode`) so the doc viewer's rendering
+ * doesn't have to special-case the version. */
+interface OAS3SecurityScheme {
+  type: 'apiKey' | 'http' | 'oauth2' | 'openIdConnect'
+  description?: string
+  // apiKey
+  name?: string
+  in?: 'header' | 'query' | 'cookie'
+  // http
+  scheme?: string
+  bearerFormat?: string
+  // oauth2
+  flows?: {
+    implicit?: OAS3OAuthFlow
+    password?: OAS3OAuthFlow
+    clientCredentials?: OAS3OAuthFlow
+    authorizationCode?: OAS3OAuthFlow
+  }
+  // openIdConnect
+  openIdConnectUrl?: string
+}
+
+interface OAS3OAuthFlow {
+  authorizationUrl?: string
+  tokenUrl?: string
+  refreshUrl?: string
+  scopes?: Record<string, string>
+}
+
 export interface OAS3Components {
   schemas?: Record<string, CommonSchema>
   parameters?: Record<string, OAS3Parameter>
@@ -121,7 +159,7 @@ export interface OAS3Components {
   examples?: Record<string, unknown>
   links?: Record<string, unknown>
   callbacks?: Record<string, unknown>
-  securitySchemes?: Record<string, unknown>
+  securitySchemes?: Record<string, OAS3SecurityScheme>
 }
 
 export interface OAS3Spec {
@@ -303,8 +341,30 @@ function mapModels(components: OAS3Components | undefined): Record<string, Model
   if (!schemas) return {}
   const out: Record<string, ModelDocumentation> = {}
   for (const [name, schema] of Object.entries(schemas)) {
+    // `mapSchemaProperties` already runs `mergeAllOfInto` itself;
+    // the local `merged` is only used to read parent-level fields
+    // (description / xml / discriminator) that don't go through
+    // the property walker.
+    const merged = mergeAllOfInto({ ...schema })
     const entry: ModelDocumentation = { name, properties: mapSchemaProperties(schema) }
-    if (schema.description !== undefined) entry.description = schema.description
+    if (merged.description !== undefined) entry.description = merged.description
+    const oneOf = extractCompositionRefs(merged.oneOf)
+    const anyOf = extractCompositionRefs(merged.anyOf)
+    const discriminator = extractDiscriminator(merged)
+    if (oneOf !== undefined || anyOf !== undefined || discriminator !== undefined) {
+      const composition: ModelDocumentation['composition'] = {}
+      if (oneOf !== undefined) composition.oneOf = oneOf
+      if (anyOf !== undefined) composition.anyOf = anyOf
+      if (discriminator !== undefined) composition.discriminator = discriminator
+      entry.composition = composition
+    }
+    if (merged.xml !== undefined) {
+      const xml: ModelDocumentation['xml'] = {}
+      if (merged.xml.name !== undefined) xml.name = merged.xml.name
+      if (merged.xml.namespace !== undefined) xml.namespace = merged.xml.namespace
+      if (merged.xml.prefix !== undefined) xml.prefix = merged.xml.prefix
+      if (Object.keys(xml).length > 0) entry.xml = xml
+    }
     out[name] = entry
   }
   return out
@@ -372,6 +432,14 @@ function buildOperationsFromMap(
         if (resp?.content) for (const k of Object.keys(resp.content)) produces.add(k)
       }
       if (produces.size > 0) input.produces = Array.from(produces)
+      // Vendor extensions on the operation (codegen hints,
+      // OpenAPI UI metadata, …). `x-example` is excluded — it
+      // travels with the parameter shape. Merge into any existing
+      // `extra` so 3.1 webhook markers (`documentationOnly`,
+      // `source: 'webhook'`) aren't clobbered when the operation
+      // also declares an `x-*` extension.
+      const extensions = extractVendorExtensions(op)
+      if (extensions !== undefined) input.extra = { ...(input.extra ?? {}), ...extensions }
 
       out.push(buildOperationDocumentation(input))
     }
@@ -389,6 +457,64 @@ export interface OpenAPI3TransformOptions {
 }
 
 /** Transform a parsed OpenAPI 3.0 spec into `ApiDocumentation`. */
+/**
+ * Translate OpenAPI 3.x `components.securitySchemes` to the
+ * version-neutral `SecurityScheme` shape stored on
+ * `ApiDocumentation`. The 3.x flow vocabulary
+ * (`clientCredentials` / `authorizationCode`) is mapped onto the
+ * Swagger 2.0 names (`application` / `accessCode`) so the doc
+ * viewer's rendering is uniform across spec versions.
+ */
+function mapSecuritySchemes(
+  defs: Record<string, OAS3SecurityScheme> | undefined
+): Record<string, SecurityScheme> | undefined {
+  if (!defs) return undefined
+  const out: Record<string, SecurityScheme> = {}
+  for (const [name, def] of Object.entries(defs)) {
+    if (def.type === 'apiKey') {
+      const entry: SecurityScheme = { type: 'apiKey' }
+      if (def.description !== undefined) entry.description = def.description
+      if (def.name !== undefined) entry.name = def.name
+      if (def.in !== undefined) entry.in = def.in
+      out[name] = entry
+    } else if (def.type === 'http') {
+      const entry: SecurityScheme = { type: 'http' }
+      if (def.description !== undefined) entry.description = def.description
+      if (def.scheme !== undefined) entry.scheme = def.scheme
+      if (def.bearerFormat !== undefined) entry.bearerFormat = def.bearerFormat
+      out[name] = entry
+    } else if (def.type === 'oauth2') {
+      const entry: SecurityScheme = { type: 'oauth2' }
+      if (def.description !== undefined) entry.description = def.description
+      const flows: OAuth2Flow[] = []
+      const flowMap: { key: keyof Required<OAS3SecurityScheme>['flows']; type: OAuth2Flow['type'] }[] = [
+        { key: 'implicit', type: 'implicit' },
+        { key: 'password', type: 'password' },
+        { key: 'clientCredentials', type: 'application' },
+        { key: 'authorizationCode', type: 'accessCode' }
+      ]
+      for (const { key, type } of flowMap) {
+        const f = def.flows?.[key]
+        if (!f) continue
+        const flow: OAuth2Flow = { type, scopes: f.scopes ?? {} }
+        if (f.authorizationUrl !== undefined) flow.authorizationUrl = f.authorizationUrl
+        if (f.tokenUrl !== undefined) flow.tokenUrl = f.tokenUrl
+        if (f.refreshUrl !== undefined) flow.refreshUrl = f.refreshUrl
+        flows.push(flow)
+      }
+      if (flows.length > 0) entry.flows = flows
+      out[name] = entry
+    } else {
+      // def.type === 'openIdConnect' (only remaining branch).
+      const entry: SecurityScheme = { type: 'openIdConnect' }
+      if (def.description !== undefined) entry.description = def.description
+      if (def.openIdConnectUrl !== undefined) entry.openIdConnectUrl = def.openIdConnectUrl
+      out[name] = entry
+    }
+  }
+  return Object.keys(out).length > 0 ? out : undefined
+}
+
 export function openapi3ToApiDocumentation(
   spec: OAS3Spec,
   options: OpenAPI3TransformOptions = {}
@@ -430,6 +556,10 @@ export function openapi3ToApiDocumentation(
       // skip gracefully rather than fail the whole import.
     }
   }
+
+  const securitySchemes = mapSecuritySchemes(spec.components?.securitySchemes)
+  if (securitySchemes !== undefined) result.securitySchemes = securitySchemes
+  if (spec.security !== undefined) result.defaultSecurity = spec.security
 
   return result
 }

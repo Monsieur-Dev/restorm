@@ -15,7 +15,7 @@ import { previewImportDiff } from '../import/idempotent/previewImportDiff'
 import { expandHeaderTemplate, expandVariables } from './scheduling'
 import { resolveAuthHeadersForFolder } from './resolveAuthHeaders'
 import { importFrom } from '../import/ImportManager'
-import { findOperationForRoute, type RouteLike } from '../DocumentationCompiler'
+import { findOperationForRoute, type RouteLike } from '../../../shared/utils/findOperationForRoute'
 import type { ApiDocumentation, OperationDocumentation } from '../../../shared/types/apiDocumentation'
 import type { Request } from '../../../shared/types/requests'
 import type { FolderItem } from '../../../shared/types/folderTypes'
@@ -132,8 +132,8 @@ function parseFetched(content: string): unknown {
 }
 
 /**
- * Adapter from a `Request` to the `RouteLike` shape the
- * `DocumentationCompiler` matcher consumes. Same fields the
+ * Adapter from a `Request` to the `RouteLike` shape the shared
+ * `findOperationForRoute` matcher consumes. Same fields the
  * renderer's `routeFromRequest` builds for the Docs-tab visibility
  * decision — kept in sync so refresh's lock-out behaviour and the
  * Docs tab agree on what counts as "this request matches an

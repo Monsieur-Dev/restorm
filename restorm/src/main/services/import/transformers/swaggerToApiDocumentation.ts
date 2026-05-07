@@ -2,9 +2,9 @@
  * Swagger / OpenAPI 2.0 → ApiDocumentation transformer.
  *
  * Reads a parsed SwaggerSpec and produces the common ApiDocumentation
- * structure stored on the root EnvironmentFolder after import. Markdown
- * compilation happens later, on the fly, via the generic Handlebars
- * templates in DocumentationCompiler.
+ * structure stored on the root EnvironmentFolder after import. The renderer's
+ * `DocumentationHost` consumes that tree directly — no markdown compilation
+ * step.
  *
  * Refactored on top of `_shared.ts`: the version-agnostic mapping helpers
  * (parameter/response/group/property mapping, ref-name extraction, schema
@@ -18,14 +18,20 @@ import type {
   ApiDocumentation,
   ExternalDocs,
   ModelDocumentation,
-  OperationDocumentation
+  OAuth2Flow,
+  OperationDocumentation,
+  SecurityScheme
 } from '../../../../shared/types/apiDocumentation'
 import {
   HTTP_METHODS,
   buildApiInfo,
   buildOperationDocumentation,
+  extractCompositionRefs,
+  extractDiscriminator,
+  extractVendorExtensions,
   mapSchemaProperties,
   mapTagsToGroups,
+  mergeAllOfInto,
   walkSchemaRefs,
   type CommonInfo,
   type CommonParameter,
@@ -47,12 +53,38 @@ interface SwaggerParameter {
   format?: string
   default?: string | number | boolean
   schema?: CommonSchema
+  // Validation constraints — Swagger 2.0 inlines these on the
+  // parameter itself for non-body params (no separate schema). The
+  // body parameter carries them under `schema` instead, which the
+  // shared helpers already honour via `extractSchemaConstraints`.
+  minLength?: number
+  maxLength?: number
+  minimum?: number
+  maximum?: number
+  exclusiveMinimum?: boolean | number
+  exclusiveMaximum?: boolean | number
+  pattern?: string
+  multipleOf?: number
+  uniqueItems?: boolean
+  enum?: unknown[]
+  // Array-encoding hint + empty-value flag — Swagger 2.0 only.
+  collectionFormat?: string
+  allowEmptyValue?: boolean
+  // Inline example fallback — `x-example` is a vendor extension we
+  // already honour on the request side; mirror it here so the doc
+  // pipeline picks it up too.
+  example?: unknown
+  examples?: Record<string, unknown> | unknown[]
+  'x-example'?: unknown
 }
 
 interface SwaggerResponse {
   description: string
   schema?: CommonSchema
   headers?: Record<string, { type: string; description?: string }>
+  /** Per-content-type examples (`{"application/json": {...}}`).
+   * Carried as-is so the doc viewer can render any payload shape. */
+  examples?: Record<string, unknown>
 }
 
 interface SwaggerOperation {
@@ -71,6 +103,20 @@ interface SwaggerOperation {
 
 type SwaggerPathItem = Partial<Record<HttpMethod, SwaggerOperation>>
 
+/** Swagger 2.0 security scheme entry, exactly as it appears under
+ * `securityDefinitions`. We narrow to the four spec-allowed `type`
+ * values; anything else is dropped during normalisation. */
+interface SwaggerSecurityScheme {
+  type: 'apiKey' | 'basic' | 'oauth2'
+  description?: string
+  name?: string
+  in?: 'header' | 'query'
+  flow?: 'implicit' | 'password' | 'application' | 'accessCode'
+  authorizationUrl?: string
+  tokenUrl?: string
+  scopes?: Record<string, string>
+}
+
 export interface SwaggerSpec {
   swagger?: string
   info: CommonInfo
@@ -81,23 +127,51 @@ export interface SwaggerSpec {
   paths: Record<string, SwaggerPathItem>
   definitions?: Record<string, CommonSchema>
   externalDocs?: ExternalDocs
+  /** Spec-level `security` requirement — applies to every
+   * operation that doesn't override it. Matches the OpenAPI
+   * 2.0 / 3.x semantics. */
+  security?: Record<string, string[]>[]
+  securityDefinitions?: Record<string, SwaggerSecurityScheme>
 }
 
 // ---------- 2.0-specific helpers ----------
 
 /** Lift a Swagger 2.0 parameter (with inline `type`/`format`) onto the
  * common parameter shape. The flat `type` is folded into a synthetic
- * schema so downstream renderers see the same shape across versions. */
+ * schema so downstream renderers see the same shape across versions —
+ * including the inline validation constraints / enum, which Swagger
+ * 2.0 lays out directly on the parameter for non-body params. */
 function toCommonParameter(p: SwaggerParameter): CommonParameter {
   let schema: CommonSchema | undefined
-  if (p.schema) schema = p.schema
-  else if (p.type !== undefined) schema = { type: p.type, ...(p.format !== undefined ? { format: p.format } : {}) }
+  if (p.schema) {
+    schema = p.schema
+  } else if (p.type !== undefined) {
+    schema = { type: p.type }
+    if (p.format !== undefined) schema.format = p.format
+    if (p.enum !== undefined) schema.enum = p.enum
+    if (p.minLength !== undefined) schema.minLength = p.minLength
+    if (p.maxLength !== undefined) schema.maxLength = p.maxLength
+    if (p.minimum !== undefined) schema.minimum = p.minimum
+    if (p.maximum !== undefined) schema.maximum = p.maximum
+    if (p.exclusiveMinimum !== undefined) schema.exclusiveMinimum = p.exclusiveMinimum
+    if (p.exclusiveMaximum !== undefined) schema.exclusiveMaximum = p.exclusiveMaximum
+    if (p.pattern !== undefined) schema.pattern = p.pattern
+    if (p.multipleOf !== undefined) schema.multipleOf = p.multipleOf
+    if (p.uniqueItems !== undefined) schema.uniqueItems = p.uniqueItems
+  }
 
   const out: CommonParameter = { name: p.name, in: p.in }
   if (p.description !== undefined) out.description = p.description
   if (p.required !== undefined) out.required = p.required
   if (schema) out.schema = schema
   if (p.default !== undefined) out.default = p.default
+  // Prefer `example`, fall back to the `x-example` vendor extension so
+  // we don't drop it. Plural `examples` ride alongside.
+  if (p.example !== undefined) out.example = p.example
+  else if (p['x-example'] !== undefined) out.example = p['x-example']
+  if (p.examples !== undefined) out.examples = p.examples
+  if (p.collectionFormat !== undefined) out.collectionFormat = p.collectionFormat
+  if (p.allowEmptyValue !== undefined) out.allowEmptyValue = p.allowEmptyValue
   return out
 }
 
@@ -110,6 +184,7 @@ function toCommonResponses(responses: Record<string, SwaggerResponse> | undefine
     if (resp.description) entry.description = resp.description
     if (resp.schema) entry.schema = resp.schema
     if (resp.headers) entry.headers = resp.headers
+    if (resp.examples && Object.keys(resp.examples).length > 0) entry.examples = resp.examples
     out[code] = entry
   }
   return out
@@ -124,13 +199,77 @@ function collectReferencedModels(op: SwaggerOperation): string[] {
   return Array.from(refs)
 }
 
+/**
+ * Translate Swagger 2.0 `securityDefinitions` to the
+ * version-neutral `SecurityScheme` shape stored on
+ * `ApiDocumentation`. The 2.0 vocabulary keeps `basic` (where 3.x
+ * would use `http` with `scheme: "basic"`) so we map it to
+ * `type: 'basic'` here for fidelity; consumers gate on
+ * `scheme === 'basic'` to handle both dialects uniformly. */
+function mapSecuritySchemes(
+  defs: Record<string, SwaggerSecurityScheme> | undefined
+): Record<string, SecurityScheme> | undefined {
+  if (!defs) return undefined
+  const out: Record<string, SecurityScheme> = {}
+  for (const [name, def] of Object.entries(defs)) {
+    if (def.type === 'apiKey') {
+      const entry: SecurityScheme = { type: 'apiKey' }
+      if (def.description !== undefined) entry.description = def.description
+      if (def.name !== undefined) entry.name = def.name
+      if (def.in !== undefined) entry.in = def.in
+      out[name] = entry
+    } else if (def.type === 'basic') {
+      const entry: SecurityScheme = { type: 'basic', scheme: 'basic' }
+      if (def.description !== undefined) entry.description = def.description
+      out[name] = entry
+    } else {
+      // def.type === 'oauth2' (the only remaining branch — Swagger
+      // 2.0 limits `type` to apiKey/basic/oauth2).
+      const entry: SecurityScheme = { type: 'oauth2' }
+      if (def.description !== undefined) entry.description = def.description
+      const flow: OAuth2Flow = {
+        type: def.flow ?? 'implicit',
+        scopes: def.scopes ?? {}
+      }
+      if (def.authorizationUrl !== undefined) flow.authorizationUrl = def.authorizationUrl
+      if (def.tokenUrl !== undefined) flow.tokenUrl = def.tokenUrl
+      entry.flows = [flow]
+      out[name] = entry
+    }
+  }
+  return Object.keys(out).length > 0 ? out : undefined
+}
+
 /** Map `definitions` onto `ModelDocumentation`. */
 function mapModels(definitions: Record<string, CommonSchema> | undefined): Record<string, ModelDocumentation> {
   if (!definitions) return {}
   const out: Record<string, ModelDocumentation> = {}
   for (const [name, schema] of Object.entries(definitions)) {
+    // `mapSchemaProperties` already runs `mergeAllOfInto` internally
+    // before walking the property map; we only need a separate
+    // merge here to surface description / xml / discriminator that
+    // sit at the parent level (they don't go through the property
+    // walker).
+    const merged = mergeAllOfInto({ ...schema })
     const entry: ModelDocumentation = { name, properties: mapSchemaProperties(schema) }
-    if (schema.description !== undefined) entry.description = schema.description
+    if (merged.description !== undefined) entry.description = merged.description
+    const oneOf = extractCompositionRefs(merged.oneOf)
+    const anyOf = extractCompositionRefs(merged.anyOf)
+    const discriminator = extractDiscriminator(merged)
+    if (oneOf !== undefined || anyOf !== undefined || discriminator !== undefined) {
+      const composition: ModelDocumentation['composition'] = {}
+      if (oneOf !== undefined) composition.oneOf = oneOf
+      if (anyOf !== undefined) composition.anyOf = anyOf
+      if (discriminator !== undefined) composition.discriminator = discriminator
+      entry.composition = composition
+    }
+    if (merged.xml !== undefined) {
+      const xml: ModelDocumentation['xml'] = {}
+      if (merged.xml.name !== undefined) xml.name = merged.xml.name
+      if (merged.xml.namespace !== undefined) xml.namespace = merged.xml.namespace
+      if (merged.xml.prefix !== undefined) xml.prefix = merged.xml.prefix
+      if (Object.keys(xml).length > 0) entry.xml = xml
+    }
     out[name] = entry
   }
   return out
@@ -170,6 +309,13 @@ export function swaggerToApiDocumentation(
       if (op.consumes !== undefined) input.consumes = op.consumes
       if (op.produces !== undefined) input.produces = op.produces
       if (op.security !== undefined) input.security = op.security
+      // Vendor extensions surfaced on the operation header (codegen
+      // hints, Swagger UI metadata, etc.). `x-example` is excluded —
+      // it's already mapped onto `example` via the parameter shape.
+      // Merge into any existing `extra` so we don't clobber markers
+      // a future transformer pass might have stamped.
+      const extensions = extractVendorExtensions(op)
+      if (extensions !== undefined) input.extra = { ...(input.extra ?? {}), ...extensions }
 
       operations.push(buildOperationDocumentation(input))
     }
@@ -191,6 +337,10 @@ export function swaggerToApiDocumentation(
     if (spec.basePath !== undefined) result.server.basePath = spec.basePath
     if (spec.schemes !== undefined) result.server.schemes = spec.schemes
   }
+
+  const securitySchemes = mapSecuritySchemes(spec.securityDefinitions)
+  if (securitySchemes !== undefined) result.securitySchemes = securitySchemes
+  if (spec.security !== undefined) result.defaultSecurity = spec.security
 
   return result
 }
