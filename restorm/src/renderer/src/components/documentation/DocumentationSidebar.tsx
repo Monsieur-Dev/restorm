@@ -4,6 +4,7 @@ import type {
   ModelDocumentation,
   OperationDocumentation
 } from '../../../../shared/types/apiDocumentation'
+import { collectEnumGroups } from './enumGroups'
 import { useDocumentationNavigation } from './documentationNavigation'
 
 export interface DocumentationSidebarProps {
@@ -56,6 +57,7 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
   scopeTitle
 }) => {
   const groups = useMemo(() => groupOperations(operations), [operations])
+  const enumGroups = useMemo(() => collectEnumGroups(models), [models])
   const nav = useDocumentationNavigation()
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
 
@@ -99,7 +101,14 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
           className="documentation-host-sidebar__section"
           aria-label="Operations"
         >
-          <div className="documentation-host-sidebar__section-title">Operations</div>
+          <button
+            type="button"
+            className="documentation-host-sidebar__section-title documentation-host-sidebar__section-title--button"
+            onClick={(): void => { nav?.scrollToOperations() }}
+            data-testid="documentation-host-sidebar-section-operations"
+          >
+            Operations
+          </button>
           <ul className="documentation-host-sidebar__group-list">
             {groups.map((group) => {
               const isCollapsed = collapsed.has(group.name)
@@ -112,13 +121,11 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
                     onClick={(): void => { toggle(group.name) }}
                     data-testid={`documentation-host-sidebar-group-${group.name}`}
                   >
-                    <span className="documentation-host-sidebar__caret" aria-hidden="true">
-                      {isCollapsed ? '▸' : '▾'}
-                    </span>
+                    <span
+                      className={`documentation-host-sidebar__caret codicon codicon-${isCollapsed ? 'chevron-right' : 'chevron-down'}`}
+                      aria-hidden="true"
+                    />
                     <span className="documentation-host-sidebar__group-name">{group.name}</span>
-                    <span className="documentation-host-sidebar__group-count">
-                      {String(group.operations.length)}
-                    </span>
                   </button>
                   {!isCollapsed && (
                     <ul className="documentation-host-sidebar__op-list">
@@ -161,7 +168,17 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
           className="documentation-host-sidebar__section"
           aria-label="Models"
         >
-          <div className="documentation-host-sidebar__section-title">Models</div>
+          <button
+            type="button"
+            className="documentation-host-sidebar__section-title documentation-host-sidebar__section-title--button"
+            onClick={(): void => {
+              const first = models[0]
+              if (first) nav?.scrollToModel(first.name)
+            }}
+            data-testid="documentation-host-sidebar-section-models"
+          >
+            Models
+          </button>
           <ul className="documentation-host-sidebar__model-list">
             {models.map((model) => (
               <li key={model.name} className="documentation-host-sidebar__model-item">
@@ -173,6 +190,57 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
                 >
                   {model.name}
                 </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+
+      {enumGroups.length > 0 && (
+        <nav
+          className="documentation-host-sidebar__section"
+          aria-label="Enums"
+        >
+          <button
+            type="button"
+            className="documentation-host-sidebar__section-title documentation-host-sidebar__section-title--button"
+            onClick={(): void => {
+              const first = enumGroups[0]
+              if (first) nav?.scrollToEnum(first.modelName)
+            }}
+            data-testid="documentation-host-sidebar-section-enums"
+          >
+            Enums
+          </button>
+          <ul className="documentation-host-sidebar__enum-list">
+            {enumGroups.map((group) => (
+              <li key={group.modelName} className="documentation-host-sidebar__enum-group">
+                <button
+                  type="button"
+                  className="documentation-host-sidebar__enum-model"
+                  onClick={(): void => { nav?.scrollToEnum(group.modelName) }}
+                  data-testid={`documentation-host-sidebar-enum-${group.modelName}`}
+                >
+                  {group.modelName}
+                </button>
+                <ul className="documentation-host-sidebar__enum-prop-list">
+                  {group.entries.map((entry) => (
+                    <li
+                      key={entry.propertyName}
+                      className="documentation-host-sidebar__enum-prop-item"
+                    >
+                      <button
+                        type="button"
+                        className="documentation-host-sidebar__enum-prop-link"
+                        onClick={(): void => { nav?.scrollToEnum(group.modelName, entry.propertyName) }}
+                        data-testid={`documentation-host-sidebar-enum-${group.modelName}-${entry.propertyName}`}
+                        title={`${group.modelName}.${entry.propertyName}`}
+                      >
+                        {entry.propertyName}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               </li>
             ))}
           </ul>

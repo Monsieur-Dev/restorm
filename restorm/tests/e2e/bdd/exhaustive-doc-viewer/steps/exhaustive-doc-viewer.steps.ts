@@ -296,6 +296,97 @@ Then('the React Flow node {string} should be on screen', async ({}, modelName: s
   expect(box.y, 'model node should be on screen').toBeGreaterThan(-200)
 })
 
+Then('the API info row should expose the source-format logo aligned right of the dl', async () => {
+  const p = requirePage()
+  const row = p.locator('[data-testid="documentation-host-api-info-row"]')
+  await expect(row).toBeVisible({ timeout: 10000 })
+  const logo = row.locator('[data-testid="documentation-host-api-info-logo"]')
+  await expect(logo, 'source-format logo should render').toBeVisible({ timeout: 10000 })
+  const dl = row.locator('[data-testid="documentation-host-api-info"]')
+  const [logoBox, dlBox] = await Promise.all([logo.boundingBox(), dl.boundingBox()])
+  if (!logoBox || !dlBox) throw new Error('api-info row geometry not available')
+  expect(logoBox.x, 'logo should sit to the right of the dl').toBeGreaterThan(dlBox.x + dlBox.width - 8)
+  // The logo's top edge should align (within a couple of pixels) with
+  // the top of the dl — i.e. with the VERSION row.
+  expect(Math.abs(logoBox.y - dlBox.y)).toBeLessThan(6)
+})
+
+Then('every sidebar group header should use a codicon-chevron caret', async () => {
+  const p = requirePage()
+  const headers = p.locator('[data-testid^="documentation-host-sidebar-group-"]')
+  const count = await headers.count()
+  expect(count, 'at least one group header should be rendered').toBeGreaterThan(0)
+  for (let i = 0; i < count; i++) {
+    const caret = headers.nth(i).locator('.documentation-host-sidebar__caret')
+    await expect(caret, `group ${String(i)} should expose a codicon caret`).toBeVisible({ timeout: 5000 })
+    const cls = await caret.getAttribute('class') ?? ''
+    expect(cls).toContain('codicon')
+    expect(cls).toMatch(/codicon-(chevron-right|chevron-down)/)
+  }
+})
+
+Then('no sidebar group should expose a route-count pastille', async () => {
+  const p = requirePage()
+  // Legacy `__group-count` span has been removed — assert it does not
+  // come back, anywhere in the sidebar tree.
+  await expect(p.locator('.documentation-host-sidebar__group-count')).toHaveCount(0)
+})
+
+Then('the sidebar method pill for the GET operation should render with white text', async () => {
+  const p = requirePage()
+  const pill = p.locator('.documentation-host-sidebar__method--get').first()
+  await expect(pill).toBeVisible({ timeout: 10000 })
+  const color = await pill.evaluate((el) => getComputedStyle(el).color)
+  // Accept any rgb whose components are all >= 240 — the value should
+  // be `rgb(255, 255, 255)`. We tolerate alpha multiplication / minor
+  // theme tweaks but not the inverted (dark text) colour we had
+  // before.
+  const match = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(color)
+  if (!match) throw new Error(`unexpected color value: ${color}`)
+  const [r, g, b] = [Number(match[1]), Number(match[2]), Number(match[3])]
+  expect(r, `GET pill text should be near-white (got ${color})`).toBeGreaterThanOrEqual(240)
+  expect(g).toBeGreaterThanOrEqual(240)
+  expect(b).toBeGreaterThanOrEqual(240)
+})
+
+Then(
+  'the sidebar Enums list should contain every enum-bearing model with its enum properties',
+  async () => {
+    const p = requirePage()
+    const doc = requireDoc()
+    let assertedAtLeastOne = false
+    for (const model of Object.values(doc.models)) {
+      const enumProps = model.properties.filter((prop) => (prop.enumValues ?? []).length > 0)
+      if (enumProps.length === 0) continue
+      assertedAtLeastOne = true
+      const modelLink = p.locator(`[data-testid="documentation-host-sidebar-enum-${model.name}"]`)
+      await expect(modelLink, `Enums sidebar should list ${model.name}`).toBeVisible({ timeout: 10000 })
+      for (const prop of enumProps) {
+        const propLink = p.locator(`[data-testid="documentation-host-sidebar-enum-${model.name}-${prop.name}"]`)
+        await expect(propLink, `Enums sidebar should list ${model.name}.${prop.name}`).toBeVisible({ timeout: 10000 })
+      }
+    }
+    expect(assertedAtLeastOne, 'fully-documented Petstore should expose at least one enum').toBe(true)
+  }
+)
+
+When('I click the sidebar Enum entry {string} property {string}', async ({}, modelName: string, propertyName: string) => {
+  const p = requirePage()
+  const link = p.locator(`[data-testid="documentation-host-sidebar-enum-${modelName}-${propertyName}"]`)
+  await expect(link).toBeVisible({ timeout: 10000 })
+  await link.click()
+  await p.waitForTimeout(500)
+})
+
+Then('the Enums entry {string} property {string} should be in view', async ({}, modelName: string, propertyName: string) => {
+  const p = requirePage()
+  const entry = p.locator(`[data-testid="documentation-host-enums-${modelName}-${propertyName}"]`)
+  await expect(entry).toBeVisible({ timeout: 10000 })
+  const box = await entry.boundingBox()
+  if (!box) throw new Error('Enums entry has no bounding box')
+  expect(box.y, 'Enums entry should land on screen').toBeGreaterThan(-200)
+})
+
 // ──────────────────────────────────────────────────────────────────────
 // Per-route block content
 // ──────────────────────────────────────────────────────────────────────
@@ -893,3 +984,117 @@ When(
     await p.waitForTimeout(800)
   }
 )
+
+// ──────────────────────────────────────────────────────────────────────
+// Tag-folder grouping in env-folder Docs
+// ──────────────────────────────────────────────────────────────────────
+
+Then('the env-folder docs body should expose an H2 group header for every tag in the spec', async () => {
+  const p = requirePage()
+  const doc = requireDoc()
+  for (const groupName of Object.keys(doc.groups)) {
+    const section = p.locator(`[data-testid="documentation-host-group-${groupName}"]`)
+    await expect(section, `body should expose group section for ${groupName}`).toBeVisible({ timeout: 10000 })
+    const heading = section.locator('h2.documentation-host__group-title').first()
+    await expect(heading, `group ${groupName} should render an H2`).toBeVisible({ timeout: 10000 })
+    const text = (await heading.textContent() ?? '').trim().toLowerCase()
+    expect(text, `H2 should match the group name`).toContain(groupName.toLowerCase())
+  }
+})
+
+Then('each group header should render its description below the title', async () => {
+  const p = requirePage()
+  const doc = requireDoc()
+  for (const [groupName, group] of Object.entries(doc.groups)) {
+    if (group.description === undefined || group.description.length === 0) continue
+    const desc = p.locator(`[data-testid="documentation-host-group-description-${groupName}"]`)
+    await expect(desc, `group ${groupName} should render its description`).toBeVisible({ timeout: 10000 })
+  }
+})
+
+Then('the sidebar Operations section title should scroll to the first group header', async () => {
+  const p = requirePage()
+  // Scroll to the bottom first so the click has somewhere to scroll back to.
+  await p.evaluate(() => {
+    const host = document.querySelector('[data-testid="env-folder-documentation-host"]')
+    if (!host) return
+    let parent: HTMLElement | null = host.parentElement
+    while (parent) {
+      if (parent.scrollHeight > parent.clientHeight + 8) { parent.scrollTop = parent.scrollHeight; return }
+      parent = parent.parentElement
+    }
+  })
+  await p.waitForTimeout(300)
+  const link = p.locator('[data-testid="documentation-host-sidebar-section-operations"]')
+  await expect(link).toBeVisible({ timeout: 10000 })
+  await link.click()
+  await p.waitForTimeout(800)
+  const firstGroup = p.locator('[data-testid^="documentation-host-group-"]').first()
+  await expect.poll(async () => {
+    const box = await firstGroup.boundingBox()
+    return box?.y ?? -Infinity
+  }, { timeout: 8000, message: 'first group header should land on screen' })
+    .toBeGreaterThan(-200)
+})
+
+Then('the sidebar Models section title should scroll to the Models section', async () => {
+  const p = requirePage()
+  await p.evaluate(() => {
+    const host = document.querySelector('[data-testid="env-folder-documentation-host"]')
+    if (!host) return
+    let parent: HTMLElement | null = host.parentElement
+    while (parent) {
+      if (parent.scrollHeight > parent.clientHeight + 8) { parent.scrollTop = 0; return }
+      parent = parent.parentElement
+    }
+  })
+  await p.waitForTimeout(300)
+  const link = p.locator('[data-testid="documentation-host-sidebar-section-models"]')
+  await expect(link).toBeVisible({ timeout: 10000 })
+  await link.click()
+  await p.waitForTimeout(800)
+  const models = p.locator('[data-testid="documentation-host-models-section"]')
+  await expect.poll(async () => {
+    const box = await models.boundingBox()
+    return box?.y ?? -Infinity
+  }, { timeout: 8000, message: 'Models section should land on screen' })
+    .toBeGreaterThan(-200)
+})
+
+Then('the sidebar Enums section title should scroll to the Enums section', async () => {
+  const p = requirePage()
+  await p.evaluate(() => {
+    const host = document.querySelector('[data-testid="env-folder-documentation-host"]')
+    if (!host) return
+    let parent: HTMLElement | null = host.parentElement
+    while (parent) {
+      if (parent.scrollHeight > parent.clientHeight + 8) { parent.scrollTop = 0; return }
+      parent = parent.parentElement
+    }
+  })
+  await p.waitForTimeout(300)
+  const link = p.locator('[data-testid="documentation-host-sidebar-section-enums"]')
+  await expect(link).toBeVisible({ timeout: 10000 })
+  await link.click()
+  await p.waitForTimeout(800)
+  const enums = p.locator('[data-testid="documentation-host-enums-section"]')
+  await expect.poll(async () => {
+    const box = await enums.boundingBox()
+    return box?.y ?? -Infinity
+  }, { timeout: 8000, message: 'Enums section should land on screen' })
+    .toBeGreaterThan(-200)
+})
+
+Then('the H1, H2, H3 levels should render at 26, 22, 18 px respectively', async () => {
+  const p = requirePage()
+  const host = p.locator('[data-testid="env-folder-documentation-host"]')
+  await expect(host).toBeVisible({ timeout: 10000 })
+  const sizeOf = async (selector: string): Promise<number> => {
+    const el = host.locator(selector).first()
+    await expect(el, `expected ${selector} to render`).toBeVisible({ timeout: 10000 })
+    return el.evaluate((node) => parseFloat(getComputedStyle(node).fontSize))
+  }
+  expect(await sizeOf('h1.documentation-host__scope-title'), 'H1 scope title').toBeCloseTo(26, 0)
+  expect(await sizeOf('h2.documentation-host__group-title'), 'H2 group title').toBeCloseTo(22, 0)
+  expect(await sizeOf('h3.documentation-host-route-header__summary'), 'H3 route summary').toBeCloseTo(18, 0)
+})

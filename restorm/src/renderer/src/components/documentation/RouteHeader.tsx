@@ -9,9 +9,10 @@ export interface RouteHeaderProps {
   /** The operation surfaced. */
   operation: OperationDocumentation
   /** Title heading level — H1 for single-route scope, H2 when this
-   * RouteHeader sits inside a multi-route document (env folder /
-   * folder docs) so the outer scope title stays the only H1. */
-  headingLevel?: 1 | 2
+   * RouteHeader sits inside a multi-route document (folder docs),
+   * H3 when nested under per-tag group H2 headers (env-folder Docs
+   * tab) so the outer hierarchy stays well-formed. */
+  headingLevel?: 1 | 2 | 3
   /** Show the operation's `group` (tag) as a chip next to the
    * method/URL line. Useful in multi-route docs where several
    * tags are interleaved; redundant in single-route since the
@@ -184,7 +185,7 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
   const requestPayload = formatRequestPayload(operation)
   const consumes = operation.consumes?.join(', ')
   const produces = operation.produces?.join(', ')
-  const SummaryHeading = headingLevel === 2 ? 'h2' : 'h1'
+  const SummaryHeading = headingLevel === 3 ? 'h3' : headingLevel === 2 ? 'h2' : 'h1'
   const verb = operation.match.method ?? operation.match.operationType
   const altDiscriminators = describeNonHttpDiscriminators(operation)
   const securitySchemes = useDocumentedSecuritySchemes()

@@ -16,9 +16,14 @@ Feature: Exhaustive documentation viewer behaviour
     Then the env-folder docs scope title should be "Swagger Petstore"
     And the env-folder docs scope description should be visible
     And the API info section should expose every patched field
+    And the API info row should expose the source-format logo aligned right of the dl
     And the sidebar should list every group from the spec
+    And every sidebar group header should use a codicon-chevron caret
+    And no sidebar group should expose a route-count pastille
     And every operation in the spec should appear under its tag group
+    And the sidebar method pill for the GET operation should render with white text
     And the sidebar Models list should contain every model name
+    And the sidebar Enums list should contain every enum-bearing model with its enum properties
     When I scroll the docs panel to the bottom
     And I click the sidebar Overview entry
     Then the env-folder docs scope header should be in view
@@ -26,6 +31,16 @@ Feature: Exhaustive documentation viewer behaviour
     Then the route block "getPetById" should be in view
     When I click the sidebar Model entry "Pet"
     Then the React Flow node "Pet" should be on screen
+    When I click the sidebar Enum entry "Pet" property "status"
+    Then the Enums entry "Pet" property "status" should be in view
+
+  Scenario: Tag-folder grouping in env-folder Docs (H2 + description per group)
+    Then the env-folder docs body should expose an H2 group header for every tag in the spec
+    And each group header should render its description below the title
+    And the H1, H2, H3 levels should render at 26, 22, 18 px respectively
+    And the sidebar Operations section title should scroll to the first group header
+    And the sidebar Models section title should scroll to the Models section
+    And the sidebar Enums section title should scroll to the Enums section
 
   Scenario: Per-route block content, security details, parameters, responses, extras
     Then every operation in the spec should render a route block

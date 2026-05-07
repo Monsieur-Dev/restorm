@@ -85,13 +85,24 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
   const { operations, models } = slice
 
   const isSingleRoute = operations.length === 1
-  const sectionHeadingLevel: 1 | 2 = isSingleRoute ? 1 : 2
+  /** When the host renders the env-folder Docs tab (`showApiInfo`)
+   * and there's more than one route, we group operations under per-
+   * tag H2 headers so pet/store/user (etc) read as distinct
+   * sections. The route-level summary then drops to H3 to keep the
+   * heading hierarchy well-formed under the H1 scope title. */
+  const useGroupedLayout = showApiInfo && !isSingleRoute && slice.groups.length > 0
+  const sectionHeadingLevel: 1 | 2 | 3 = isSingleRoute
+    ? 1
+    : useGroupedLayout
+      ? 3
+      : 2
 
   const rootRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<DocumentationHostSearchHandle>(null)
   const nativeFindRef = useRef<DocumentationHostNativeFindHandle>(null)
   const modelsSectionRef = useRef<HTMLElement>(null)
   const modelGraphRef = useRef<ModelGraphHandle>(null)
+  const enumsSectionRef = useRef<HTMLElement>(null)
 
   // Sidebar (operations + models outline) only earns its keep when
   // there is more than one route OR the host is currently rendering
@@ -104,6 +115,28 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
     () => new Set(models.map((m) => m.name)),
     [models]
   )
+  /** Bucket the in-scope operations by their `group` (tag) in the
+   * order the spec declares the groups. `(ungrouped)` collects
+   * orphan operations that have no `group` field — kept last so the
+   * named tags remain at the top. */
+  const groupedOperations = useMemo(() => {
+    const map = new Map<string, OperationDocumentation[]>()
+    for (const g of slice.groups) map.set(g.name, [])
+    for (const op of operations) {
+      const key = op.group ?? '(ungrouped)'
+      if (!map.has(key)) map.set(key, [])
+      map.get(key)?.push(op)
+    }
+    const groupByName = new Map(slice.groups.map((g) => [g.name, g]))
+    return Array.from(map.entries())
+      .filter(([, ops]) => ops.length > 0)
+      .map(([name, ops]) => ({
+        name,
+        description: groupByName.get(name)?.description,
+        externalDocs: groupByName.get(name)?.externalDocs,
+        operations: ops
+      }))
+  }, [slice.groups, operations])
   const securitySchemes = apiDocumentation.securitySchemes ?? {}
 
   const navigationApi = useMemo<DocumentationNavigationApi>(() => ({
@@ -135,6 +168,25 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
       requestAnimationFrame(() => {
         modelGraphRef.current?.focusModel(name)
       })
+    },
+    scrollToEnum: (modelName: string, propertyName?: string): void => {
+      const root = rootRef.current
+      if (!root) return
+      const target = propertyName !== undefined && propertyName.length > 0
+        ? root.querySelector<HTMLElement>(`[data-testid="documentation-host-enums-${cssEscape(modelName)}-${cssEscape(propertyName)}"]`)
+        : root.querySelector<HTMLElement>(`[data-testid="documentation-host-enums-model-${cssEscape(modelName)}"]`)
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        return
+      }
+      enumsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    },
+    scrollToOperations: (): void => {
+      const root = rootRef.current
+      if (!root) return
+      const firstGroup = root.querySelector<HTMLElement>('[data-doc-group]')
+        ?? root.querySelector<HTMLElement>('[data-doc-op]')
+      firstGroup?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }), [])
 
@@ -243,15 +295,43 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
             </header>
           )}
 
-          {operations.map((op, idx) => (
-            <RouteBlock
-              key={`${op.operationId ?? op.match.urlPattern}-${String(idx)}`}
-              operation={op}
-              headingLevel={sectionHeadingLevel}
-              showGroupChip={!isSingleRoute}
-              {...(onAddRequest && !isSingleRoute ? { onAddRequest } : {})}
-            />
-          ))}
+          {useGroupedLayout
+            ? groupedOperations.map((group) => (
+              <section
+                key={group.name}
+                className="documentation-host__group-section"
+                data-doc-group={group.name}
+                data-testid={`documentation-host-group-${group.name}`}
+              >
+                <header className="documentation-host__group-header">
+                  <h2 className="documentation-host__group-title">{group.name}</h2>
+                  {group.description !== undefined && group.description.length > 0 && (
+                    <MarkdownViewer
+                      value={group.description}
+                      data-testid={`documentation-host-group-description-${group.name}`}
+                    />
+                  )}
+                </header>
+                {group.operations.map((op, idx) => (
+                  <RouteBlock
+                    key={`${op.operationId ?? op.match.urlPattern}-${String(idx)}`}
+                    operation={op}
+                    headingLevel={sectionHeadingLevel}
+                    showGroupChip={false}
+                    {...(onAddRequest ? { onAddRequest } : {})}
+                  />
+                ))}
+              </section>
+            ))
+            : operations.map((op, idx) => (
+              <RouteBlock
+                key={`${op.operationId ?? op.match.urlPattern}-${String(idx)}`}
+                operation={op}
+                headingLevel={sectionHeadingLevel}
+                showGroupChip={!isSingleRoute}
+                {...(onAddRequest && !isSingleRoute ? { onAddRequest } : {})}
+              />
+            ))}
 
           {models.length > 0 ? (
             <section
@@ -266,7 +346,7 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
           ) : null}
 
           <CompositionSection models={models} />
-          <EnumsSection models={models} />
+          <EnumsSection ref={enumsSectionRef} models={models} />
         </div>
       </div>
     </DocumentationSecuritySchemesContext.Provider>
@@ -291,13 +371,13 @@ function cssEscape(value: string): string {
 
 interface RouteBlockProps {
   operation: OperationDocumentation
-  headingLevel: 1 | 2
+  headingLevel: 1 | 2 | 3
   showGroupChip: boolean
   onAddRequest?: (operation: OperationDocumentation) => void
 }
 
 const RouteBlock: React.FC<RouteBlockProps> = ({ operation, headingLevel, showGroupChip, onAddRequest }) => {
-  const SectionHeading = headingLevel === 1 ? 'h1' : 'h2'
+  const SectionHeading = headingLevel === 1 ? 'h1' : headingLevel === 2 ? 'h2' : 'h3'
   const opIdSlug = getOperationSlug(operation)
   return (
     <article
