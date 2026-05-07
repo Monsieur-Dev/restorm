@@ -8,6 +8,10 @@ export interface CompositionSectionProps {
   models: ModelDocumentation[]
   /** Optional test id stamped on the root container. */
   testId?: string
+  /** Heading level for the "Polymorphism" title. H1 in single-route
+   * scope (peer of the route summary), H2 in folder / env-folder
+   * scope (sibling of the scope H1 + per-tag group H2). */
+  headingLevel?: 1 | 2
 }
 
 /**
@@ -21,7 +25,7 @@ export interface CompositionSectionProps {
  * (no empty section). The whole component returns null when no
  * model in scope declares any composition.
  */
-export const CompositionSection: React.FC<CompositionSectionProps> = ({ models, testId }) => {
+export const CompositionSection: React.FC<CompositionSectionProps> = ({ models, testId, headingLevel = 1 }) => {
   const polymorphic = models.filter((m) => m.composition !== undefined)
   if (polymorphic.length === 0) return null
 
@@ -30,7 +34,9 @@ export const CompositionSection: React.FC<CompositionSectionProps> = ({ models, 
       className="documentation-host-composition"
       data-testid={testId ?? 'documentation-host-composition'}
     >
-      <h1 className="documentation-host__section-title">Polymorphism</h1>
+      {headingLevel === 1
+        ? <h1 className="documentation-host__section-title">Polymorphism</h1>
+        : <h2 className="documentation-host__section-title">Polymorphism</h2>}
       <ul className="documentation-host-composition__list">
         {polymorphic.map((model) => {
           const c = model.composition

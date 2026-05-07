@@ -21,6 +21,15 @@ export interface DocumentationNavigationApi {
   /** Scroll the Models section into view AND pan the React Flow
    * canvas to the named model. */
   scrollToModel: (name: string) => void
+  /** Scroll the Enums section into view, optionally highlighting
+   * the entry for `modelName` (or a specific property when
+   * `propertyName` is supplied). */
+  scrollToEnum: (modelName: string, propertyName?: string) => void
+  /** Scroll the Operations section into view — i.e. the first
+   * per-tag group header rendered under the scope title. Falls
+   * back to the first route block when the host is not running
+   * in grouped layout. */
+  scrollToOperations: () => void
 }
 
 export const DocumentationNavigationContext =

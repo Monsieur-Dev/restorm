@@ -1,5 +1,6 @@
 import React from 'react'
 import type { ApiDocumentation } from '../../../../shared/types/apiDocumentation'
+import { apiSourceFormatLogo } from './apiSourceFormat'
 
 export interface ApiInfoSectionProps {
   /** Full structured documentation. The section pulls from `api`,
@@ -16,8 +17,13 @@ export interface ApiInfoSectionProps {
  */
 export const ApiInfoSection: React.FC<ApiInfoSectionProps> = ({ apiDocumentation }) => {
   const { api, server, sourceType, sourceUrl } = apiDocumentation
+  const logo = apiSourceFormatLogo(sourceType)
 
   return (
+    <div
+      className="documentation-host-api-info-row"
+      data-testid="documentation-host-api-info-row"
+    >
     <dl
       className="documentation-host-api-info"
       data-testid="documentation-host-api-info"
@@ -138,5 +144,15 @@ export const ApiInfoSection: React.FC<ApiInfoSectionProps> = ({ apiDocumentation
         </>
       )}
     </dl>
+    {logo !== undefined && (
+      <img
+        className="documentation-host-api-info__logo"
+        src={logo.src}
+        alt={logo.alt}
+        data-testid="documentation-host-api-info-logo"
+        data-source-type={sourceType}
+      />
+    )}
+    </div>
   )
 }

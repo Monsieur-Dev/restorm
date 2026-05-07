@@ -68,6 +68,15 @@ const documentationViewerTestDir = defineBddConfig({
   outputDir: '.features-gen/documentation-viewer'
 })
 
+const exhaustiveDocViewerTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/exhaustive-doc-viewer/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/exhaustive-doc-viewer/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/exhaustive-doc-viewer.fixture.ts'
+  ],
+  outputDir: '.features-gen/exhaustive-doc-viewer'
+})
+
 /**
  * Playwright configuration for Electron E2E tests using playwright-bdd.
  * Each test group has its own project with a dedicated fixture.
@@ -152,6 +161,11 @@ export default defineConfig({
       name: 'documentation-viewer',
       testDir: documentationViewerTestDir,
       timeout: 180 * 1000
+    },
+    {
+      name: 'exhaustive-doc-viewer',
+      testDir: exhaustiveDocViewerTestDir,
+      timeout: 300 * 1000  // 5 min — many scenarios, each opens a fresh app
     }
   ]
 })

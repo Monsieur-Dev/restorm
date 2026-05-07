@@ -1,28 +1,18 @@
-import React, { useState } from 'react'
+import React, { forwardRef, useState } from 'react'
 import type { ModelDocumentation } from '../../../../shared/types/apiDocumentation'
+import { collectEnumGroups } from './enumGroups'
 
 export interface EnumsSectionProps {
   /** Models surfaced by the host. We walk their properties and
    * collect every property carrying `enumValues`. */
   models: ModelDocumentation[]
-}
-
-interface EnumGroup {
-  modelName: string
-  entries: { propertyName: string; values: string[] }[]
+  /** Heading level for the "Enums" title. H1 in single-route scope
+   * (peer of the route summary), H2 in folder / env-folder scope
+   * (sibling of the scope H1 + per-tag group H2). */
+  headingLevel?: 1 | 2
 }
 
 const SEE_MORE_THRESHOLD = 20
-
-function formatEnumValue(value: unknown): string {
-  if (typeof value === 'string') return value
-  if (typeof value === 'number' || typeof value === 'boolean') return String(value)
-  try {
-    return JSON.stringify(value)
-  } catch {
-    return ''
-  }
-}
 
 /**
  * Lists every enum declared inside the surfaced models, grouped by
@@ -31,29 +21,20 @@ function formatEnumValue(value: unknown): string {
  * with a "see more" toggle to keep large generated enums (country
  * codes, currency lists, …) from blowing up the page.
  */
-export const EnumsSection: React.FC<EnumsSectionProps> = ({ models }) => {
-  const groups: EnumGroup[] = []
-  for (const model of models) {
-    const entries: EnumGroup['entries'] = []
-    for (const prop of model.properties) {
-      if (prop.enumValues && prop.enumValues.length > 0) {
-        entries.push({
-          propertyName: prop.name,
-          values: prop.enumValues.map(formatEnumValue)
-        })
-      }
-    }
-    if (entries.length > 0) groups.push({ modelName: model.name, entries })
-  }
+export const EnumsSection = forwardRef<HTMLElement, EnumsSectionProps>(({ models, headingLevel = 1 }, ref) => {
+  const groups = collectEnumGroups(models)
 
   if (groups.length === 0) return null
 
   return (
     <section
+      ref={ref}
       className="documentation-host-enums"
       data-testid="documentation-host-enums-section"
     >
-      <h1 className="documentation-host__section-title">Enums</h1>
+      {headingLevel === 1
+        ? <h1 className="documentation-host__section-title">Enums</h1>
+        : <h2 className="documentation-host__section-title">Enums</h2>}
       <div className="documentation-host-enums__list">
         {groups.map((group) => (
           <div
@@ -77,7 +58,8 @@ export const EnumsSection: React.FC<EnumsSectionProps> = ({ models }) => {
       </div>
     </section>
   )
-}
+})
+EnumsSection.displayName = 'EnumsSection'
 
 interface EnumEntryProps {
   modelName: string

@@ -44,9 +44,45 @@
   gap: 8px;
 }
 
+/* Heading hierarchy in the documentation host — sized so the visual
+ * difference between levels is unambiguous (an old subtle 16/20/22
+ * px stack made H1 ≈ H2 ≈ H3 hard to tell apart at a glance):
+ *
+ *   H1 — 26 px (scope title, single-route route summary)
+ *   H2 — 22 px (per-tag group titles, folder route summaries, top-
+ *               level Models / Enums section titles in folder mode)
+ *   H3 — 18 px (env-folder grouped route summaries, parameters /
+ *               responses subsections inside a route block)
+ *
+ * Tag-scoped selectors so any class rule that doesn't set its own
+ * font-size inherits the correct level. The class rules below keep
+ * margin / weight tweaks but stay out of the size lane. */
+.documentation-host h1 {
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 0;
+  color: var(--editor-foreground);
+}
+
+.documentation-host h2 {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0;
+  color: var(--editor-foreground);
+}
+
+.documentation-host h3 {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.35;
+  margin: 0;
+  color: var(--editor-foreground);
+}
+
 .documentation-host__section-title {
   margin: 0;
-  font-size: 16px;
   font-weight: 600;
   color: var(--editor-foreground);
 }
@@ -475,9 +511,10 @@
 }
 
 .documentation-host-route-header__summary {
+  /* Size + weight come from the tag-scoped h1/h2/h3 rules at the top
+   * of the file so the route summary scales cleanly between single-
+   * route, folder, and env-folder grouped layouts. */
   margin: 0;
-  font-size: 20px;
-  font-weight: 600;
   color: var(--editor-foreground);
 }
 
@@ -852,9 +889,36 @@
 }
 
 .documentation-host__scope-title {
+  /* Sizing inherits from `.documentation-host h1`. */
   margin: 0;
-  font-size: 22px;
   font-weight: 600;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Per-tag group section (env-folder Docs tab — pet / store / user…)
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host__group-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.documentation-host__group-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--panel-border, rgba(127, 127, 127, 0.22));
+}
+
+.documentation-host__group-title {
+  /* Sizing inherits from `.documentation-host h2`. */
+  margin: 0;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: var(--editor-foreground);
 }
 
 /* ──────────────────────────────────────────────────────────────────
@@ -905,6 +969,34 @@
 /* ──────────────────────────────────────────────────────────────────
  * API info block (env folder scope)
  * ────────────────────────────────────────────────────────────────── */
+
+/* Two-column row: dl on the left, source-format logo aligned right.
+ * Logo top edge sits flush with the first dl row's top so VERSION
+ * and the logo read as a row pair. */
+.documentation-host-api-info-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 12px 0 0;
+}
+
+.documentation-host-api-info-row > .documentation-host-api-info {
+  flex: 1 1 auto;
+  margin: 0;
+}
+
+.documentation-host-api-info__logo {
+  flex: 0 0 auto;
+  width: 88px;
+  height: auto;
+  max-height: 96px;
+  object-fit: contain;
+  /* The dl's first row aligns its dt to the centre of the dt/dd box
+   * (`align-self: center` on the dt below). We want the logo's top
+   * edge to match the *top* of that first row, which the parent's
+   * `align-items: flex-start` already guarantees. */
+}
 
 .documentation-host-api-info {
   display: grid;
@@ -1338,9 +1430,34 @@
   padding: 4px 6px 2px;
 }
 
+/* The OPERATIONS / MODELS / ENUMS labels render as buttons so they
+ * can scroll-jump to the matching body section. Strip the button
+ * defaults so the visual is identical to the legacy <div> heading. */
+.documentation-host-sidebar__section-title--button {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.documentation-host-sidebar__section-title--button:hover {
+  color: var(--editor-foreground);
+}
+
+.documentation-host-sidebar__section-title--button:focus-visible {
+  outline: 1px solid var(--focusBorder, #4d9bf6);
+  outline-offset: 1px;
+  border-radius: 3px;
+}
+
 .documentation-host-sidebar__group-list,
 .documentation-host-sidebar__op-list,
-.documentation-host-sidebar__model-list {
+.documentation-host-sidebar__model-list,
+.documentation-host-sidebar__enum-list,
+.documentation-host-sidebar__enum-prop-list {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -1370,8 +1487,14 @@
 }
 
 .documentation-host-sidebar__caret {
-  width: 12px;
-  text-align: center;
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
   color: var(--description-foreground, rgba(127, 127, 127, 0.85));
 }
 
@@ -1380,15 +1503,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.documentation-host-sidebar__group-count {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
-  padding: 0 6px;
-  border-radius: 8px;
-  background: var(--badge-background, rgba(127, 127, 127, 0.18));
 }
 
 .documentation-host-sidebar__op-item {
@@ -1424,23 +1538,76 @@
   background: var(--list-hover-background, rgba(127, 127, 127, 0.1));
 }
 
+/* Enums outline — `<modelName>` row with collapsible `<propertyName>`
+ * children mirroring the rendered Enums section. Indentation matches
+ * the Models list so the eye reads the two as siblings. */
+.documentation-host-sidebar__enum-model {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 3px 6px 3px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  color: var(--editor-foreground);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.documentation-host-sidebar__enum-prop-link {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 2px 6px 2px 26px;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  color: var(--description-foreground, var(--editor-foreground));
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.documentation-host-sidebar__enum-model:hover,
+.documentation-host-sidebar__enum-prop-link:hover {
+  background: var(--list-hover-background, rgba(127, 127, 127, 0.1));
+}
+
 .documentation-host-sidebar__method {
   flex: 0 0 auto;
   font-family: var(--monaco-monospace-font, monospace);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.04em;
-  padding: 1px 4px;
+  /* Nudge the verb text down 1 px so it lines up visually with the
+   * cap-height of the operation summary text alongside it. The
+   * monospace pill sits a hair higher than the proportional summary
+   * font without this. */
+  padding: 2px 4px 0;
   border-radius: 2px;
   background: var(--badge-background, rgba(127, 127, 127, 0.2));
   color: var(--badge-foreground, var(--editor-foreground));
 }
 
-.documentation-host-sidebar__method--get { background: rgba(73, 174, 86, 0.85); color: var(--editor-background); }
-.documentation-host-sidebar__method--post { background: rgba(77, 155, 246, 0.85); color: var(--editor-background); }
-.documentation-host-sidebar__method--put { background: rgba(244, 162, 70, 0.85); color: var(--editor-background); }
-.documentation-host-sidebar__method--patch { background: rgba(180, 120, 200, 0.85); color: var(--editor-background); }
-.documentation-host-sidebar__method--delete { background: rgba(220, 90, 90, 0.85); color: var(--editor-background); }
+/* Method-pill text is fixed white on every coloured background so the
+ * sidebar reads the same on light + dark themes. The previous
+ * `var(--editor-background)` made the text the same colour as the
+ * editor background, which inverted contrast on light themes. */
+.documentation-host-sidebar__method--get { background: rgba(73, 174, 86, 0.85); color: #fff; }
+.documentation-host-sidebar__method--post { background: rgba(77, 155, 246, 0.85); color: #fff; }
+.documentation-host-sidebar__method--put { background: rgba(244, 162, 70, 0.85); color: #fff; }
+.documentation-host-sidebar__method--patch { background: rgba(180, 120, 200, 0.85); color: #fff; }
+.documentation-host-sidebar__method--delete { background: rgba(220, 90, 90, 0.85); color: #fff; }
 .documentation-host-sidebar__method--head,
 .documentation-host-sidebar__method--options { background: rgba(127, 127, 127, 0.4); color: var(--editor-foreground); }
 
