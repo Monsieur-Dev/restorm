@@ -11,6 +11,10 @@ import { createContext, useContext } from 'react'
  * or an operation slug that doesn't match any route block).
  */
 export interface DocumentationNavigationApi {
+  /** Scroll back to the top of the host — the scope header (env
+   * folder / folder docs) or the first route block when there is
+   * no header. Used by the sidebar's "Overview" link. */
+  scrollToTop: () => void
   /** Scroll the matching route block into view. `slug` matches the
    * `id="docop-${slug}"` attribute the host stamps on each block. */
   scrollToOperation: (slug: string) => void

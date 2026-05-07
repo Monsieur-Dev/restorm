@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react'
+import { ScrollableElement } from 'electron-core-ui/renderer'
 import type {
   ModelDocumentation,
   OperationDocumentation
@@ -13,6 +14,11 @@ export interface DocumentationSidebarProps {
   /** Stable slug fn for operation links, supplied by the host so
    * sidebar + route-block ids match exactly. */
   operationSlug: (op: OperationDocumentation) => string
+  /** Set when the host renders its own scope header (env folder /
+   * folder docs); the sidebar shows the matching "Overview" entry
+   * at the top so the user can jump back to it from anywhere in
+   * the document. */
+  scopeTitle?: string
 }
 
 interface OperationGroup {
@@ -46,7 +52,8 @@ function groupOperations(operations: OperationDocumentation[]): OperationGroup[]
 export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
   operations,
   models,
-  operationSlug
+  operationSlug,
+  scopeTitle
 }) => {
   const groups = useMemo(() => groupOperations(operations), [operations])
   const nav = useDocumentationNavigation()
@@ -67,6 +74,26 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
       data-testid="documentation-host-sidebar"
       aria-label="Documentation outline"
     >
+      <ScrollableElement
+        className="documentation-host-sidebar__scroll"
+        data-testid="documentation-host-sidebar-scroll"
+      >
+      {scopeTitle !== undefined && scopeTitle.length > 0 && (
+        <nav
+          className="documentation-host-sidebar__section documentation-host-sidebar__section--top"
+          aria-label="Overview"
+        >
+          <button
+            type="button"
+            className="documentation-host-sidebar__overview-link"
+            onClick={(): void => { nav?.scrollToTop() }}
+            data-testid="documentation-host-sidebar-overview"
+          >
+            <span className="documentation-host-sidebar__overview-name">{scopeTitle}</span>
+            <span className="documentation-host-sidebar__overview-hint">Overview</span>
+          </button>
+        </nav>
+      )}
       {groups.length > 0 && (
         <nav
           className="documentation-host-sidebar__section"
@@ -151,6 +178,7 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
           </ul>
         </nav>
       )}
+      </ScrollableElement>
     </aside>
   )
 }

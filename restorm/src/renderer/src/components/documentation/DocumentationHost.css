@@ -1187,17 +1187,71 @@
   position: sticky;
   top: 0;
   align-self: start;
+  font-size: 12px;
+  /* Bound the sidebar so its own list scrolls (via the inner
+   * `<ScrollableElement>`) when it overflows the viewport, instead
+   * of forcing the whole docs panel to grow sideways. The 60px
+   * subtraction leaves room for the workbench's top bar + the doc
+   * panel's own padding. */
+  max-height: calc(100vh - 60px);
+  /* The inner ScrollableElement owns the actual scrolling — keep
+   * the aside as a passive sticky container so the Monaco-style
+   * scrollbar matches the rest of the workbench. */
+  display: flex;
+  flex-direction: column;
+}
+
+.documentation-host-sidebar__scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.documentation-host-sidebar__scroll > .scrollable-content {
   display: flex;
   flex-direction: column;
   gap: 16px;
   padding: 4px 4px 16px;
+}
+
+.documentation-host-sidebar__section--top {
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+}
+
+.documentation-host-sidebar__overview-link {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  width: 100%;
+  padding: 6px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  color: var(--editor-foreground);
+  font-family: inherit;
   font-size: 12px;
-  /* Bound the sidebar so its own list scrolls when it overflows
-   * the viewport, instead of forcing the whole docs panel to grow
-   * sideways. The 60px subtraction leaves room for the workbench's
-   * top bar + the doc panel's own padding. */
-  max-height: calc(100vh - 60px);
-  overflow-y: auto;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.documentation-host-sidebar__overview-link:hover {
+  background: var(--list-hover-background, rgba(127, 127, 127, 0.1));
+}
+
+.documentation-host-sidebar__overview-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.documentation-host-sidebar__overview-hint {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
 }
 
 .documentation-host-sidebar__section {

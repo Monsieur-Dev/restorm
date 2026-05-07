@@ -106,6 +106,19 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
   )
 
   const navigationApi = useMemo<DocumentationNavigationApi>(() => ({
+    scrollToTop: (): void => {
+      const root = rootRef.current
+      if (!root) return
+      const header = root.querySelector<HTMLElement>('[data-testid="documentation-host-scope-header"]')
+      if (header) {
+        header.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        return
+      }
+      // No scope header (single route inside a request tab) — fall
+      // back to scrolling the host's root element into view, which
+      // climbs the surrounding ScrollableElement to its top.
+      root.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    },
     scrollToOperation: (slug: string): void => {
       const root = rootRef.current
       if (!root) return
@@ -190,6 +203,7 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
             operations={operations}
             models={models}
             operationSlug={getOperationSlug}
+            {...(scopeTitle !== undefined && scopeTitle.length > 0 ? { scopeTitle } : {})}
           />
         )}
         <div className="documentation-host__main">
