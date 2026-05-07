@@ -5,7 +5,7 @@ import ElectronCoreUiProvider from './ElectronCoreUiProvider'
 import { EditorWorkbench } from './Workbench/EditorWorkbench'
 import { MarkdownEditor } from './MarkdownEditor/MarkdownEditor'
 import { MarkdownViewer } from './MarkdownViewer/MarkdownViewer'
-import { SplitView, Pane } from './SplitView'
+import { SplitView, Pane } from './Panes'
 
 // ControlGroup exports
 export { ControlGroup } from './ControlGroup'
@@ -257,13 +257,13 @@ export type {
 	SplitViewOrientation,
 	SplitViewProps,
 	SplitViewPaneProps
-} from './SplitView'
+} from './Panes'
 
 // StaticPane — non-collapsible / auto-height panel mirroring the
 // visual style of SplitView's Pane, rendered in natural document
 // flow (stack children freely, each sizes to content).
-export { StaticPane } from './StaticPane'
-export type { StaticPaneProps } from './StaticPane'
+export { StaticPane } from './Panes'
+export type { StaticPaneProps } from './Panes'
 export type {
 	WorkbenchState, // legacy flat types (kept for external imports)
 	EditorGroup,
