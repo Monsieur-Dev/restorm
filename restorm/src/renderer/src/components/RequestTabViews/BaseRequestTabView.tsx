@@ -23,8 +23,10 @@ export interface BaseRequestTabViewProps {
   requestContent: ReactNode
   /** Code snippets markdown content */
   codeSnippetsContent: string
-  /** Request documentation (for Docs tab) */
-  documentation?: string | undefined
+  /** Structured documentation viewer rendered as the Docs tab. Set
+   * by the per-protocol RequestTabView using `<DocumentationHost />`
+   * with the request's resolved route as the filter. */
+  docsContent?: ReactNode | undefined
   /** Request notes (for Notes tab) */
   notes?: string | undefined
   /** Callback when notes change */
@@ -80,7 +82,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
   urlSection,
   requestContent,
   codeSnippetsContent,
-  documentation,
+  docsContent,
   notes,
   onNotesChange,
   isLoading,
@@ -185,11 +187,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
     setResponseTabId(tabId)
   }, [])
 
-  // The Docs tab is hidden when there is no documentation to show — both the
-  // compiled-from-apiDocumentation variant and the user-authored
-  // `request.documentation` funnel through the same prop, so an empty string
-  // means "nothing to render".
-  const hasDocs = (documentation ?? '').trim().length > 0
+  const hasDocs = docsContent !== undefined && docsContent !== null
 
   // Build request tabs (Request, Docs, Notes, Code Snippets)
   const requestTabs: Tab[] = useMemo(() => {
@@ -210,8 +208,12 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
       tabs.push({
         id: 'docs',
         label: t('requestTab.tabs.docs'),
-        useScrollableElement: false,
-        content: <MarkdownViewer value={documentation ?? ''} data-testid="base-request-markdown-viewer-docs" />
+        // Wrap in ECUI's `ScrollableElement` (Monaco-style scrollbars)
+        // so a long doc — model graph + responses + parameters table
+        // + payload examples — scrolls naturally inside the tab
+        // without inheriting the outer workbench scrollbar.
+        useScrollableElement: true,
+        content: docsContent
       })
     }
 
@@ -241,7 +243,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
     }
 
     return tabs
-  }, [requestId, notes, requestContent, documentation, hasDocs, handleNotesChange, codeSnippetsContent, additionalRequestTabs, showNotes, showCodeSnippets, t])
+  }, [requestId, notes, requestContent, docsContent, hasDocs, handleNotesChange, codeSnippetsContent, additionalRequestTabs, showNotes, showCodeSnippets, t])
 
   // If the active tab vanishes (e.g., user was on Docs and the request's URL
   // changed so no operation matches anymore), fall back to the Request tab

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { randomBytes } from 'node:crypto'
 import { MainWindow } from './windows/MainWindow'
 import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, initAutoSaveController, McpService } from 'electron-core-ui'
@@ -73,6 +73,20 @@ function createWindow(): void {
     mainWindow = mainWin.getWindow()
 
     if (mainWindow) {
+      // Route every `window.open()` from the renderer (and any
+      // `target="_blank"` anchor click that bubbles up to it) through
+      // the OS default browser instead of spawning a new Electron
+      // window. The documentation viewer surfaces links from API
+      // specs (externalDocs, contact URLs, content-license URLs, …)
+      // — opening them in a stray Electron BrowserWindow would
+      // confuse the user and lose history/bookmarks/extensions.
+      mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+        if (/^https?:\/\//i.test(url)) {
+          void shell.openExternal(url)
+        }
+        return { action: 'deny' }
+      })
+
       // Handle main window close event - check for unsaved changes
       mainWindow.on('close', (event) => {
         // Check if file is dirty and ask for confirmation

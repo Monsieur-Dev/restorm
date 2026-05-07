@@ -2,9 +2,9 @@
  * OpenAPI 3.0 → ApiDocumentation transformer.
  *
  * Reads a parsed OpenAPI 3.0 spec and produces the common ApiDocumentation
- * structure stored on the root EnvironmentFolder after import. Markdown
- * compilation happens later, on the fly, via Handlebars templates in
- * DocumentationCompiler.
+ * structure stored on the root EnvironmentFolder after import. The renderer's
+ * `DocumentationHost` consumes that tree directly — no markdown compilation
+ * step.
  *
  * Layered on top of `_shared.ts`: this file owns 3.0-specific normalisation
  * (servers, requestBody, multi-content-type responses, components/schemas,

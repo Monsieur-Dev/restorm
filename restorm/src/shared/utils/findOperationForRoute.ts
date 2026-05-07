@@ -1,11 +1,12 @@
 /**
  * URL → OperationDocumentation matcher. Used by:
  *
- * - The Docs tab visibility decision (renderer-side, via
- *   `useCompiledDocumentation`).
+ * - The Docs tab in `DocumentationHost.filters` to pick the matching
+ *   operation for a request.
  * - The refresh modal's lockedKeys logic (main-side, in
  *   `runApiUpdatePreviewTree`).
- * - The sidebar's deprecation dim (renderer-side).
+ * - The sidebar's deprecation dim and the request tab's deprecation
+ *   callout (renderer-side).
  *
  * Lives under `shared/utils` so renderer + main agree byte-for-byte
  * on what counts as a match. Pure: regex + iteration, no IO.

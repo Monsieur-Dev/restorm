@@ -807,8 +807,12 @@ Then('the folder tab Docs tab should be populated with compiled markdown', async
   if (await docsTab.count() > 0) {
     await docsTab.click()
   }
+  // The structured documentation viewer (`DocumentationHost`) replaces
+  // the previous MarkdownViewer here. Env-folder scope uses a fixed
+  // testid; folder scope embeds the folder id. Match either via the
+  // `-documentation-host` suffix the host stamps on its root.
   const docsViewer = page
-    .locator('[data-testid^="folder-view-"][data-testid$="-markdown-viewer-docs"]')
+    .locator('[data-testid$="-documentation-host"]:visible')
     .first()
   await expect(docsViewer).toBeVisible({ timeout: 10000 })
   const heading = docsViewer.locator('h1').first()

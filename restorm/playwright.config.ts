@@ -50,6 +50,15 @@ const mcpServerTestDir = defineBddConfig({
   outputDir: '.features-gen/mcp-server'
 })
 
+const fullyDocumentedPetstoreTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/fully-documented-petstore/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/fully-documented-petstore/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/fully-documented-petstore.fixture.ts'
+  ],
+  outputDir: '.features-gen/fully-documented-petstore'
+})
+
 /**
  * Playwright configuration for Electron E2E tests using playwright-bdd.
  * Each test group has its own project with a dedicated fixture.
@@ -125,6 +134,10 @@ export default defineConfig({
       name: 'mcp-server',
       testDir: mcpServerTestDir,
       timeout: 180 * 1000
+    },
+    {
+      name: 'fully-documented-petstore',
+      testDir: fullyDocumentedPetstoreTestDir
     }
   ]
 })

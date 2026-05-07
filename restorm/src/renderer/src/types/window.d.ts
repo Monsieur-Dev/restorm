@@ -121,26 +121,6 @@ declare global {
           error?: string
         }>
       }
-      docs: {
-        compileForRoute: (
-          apiDoc: unknown,
-          route: {
-            type: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket'
-            url?: string
-            method?: string
-            operationType?: string
-            query?: string
-            service?: string
-            rpcMethod?: string
-            soapAction?: string
-            operation?: string
-            event?: string
-            protocol?: string
-            tags?: string[]
-          }
-        ) => Promise<{ matched: boolean; markdown: string; operationId?: string; error?: string }>
-        compileRoot: (apiDoc: unknown) => Promise<{ markdown: string; error?: string }>
-      }
     }
   }
 }

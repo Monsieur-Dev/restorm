@@ -1579,7 +1579,6 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
           'odataRequestTab.codeSnippetsPlaceholder',
           '// Code snippet generation will ship alongside OData execution.'
         )}
-        documentation={request.documentation}
         notes={request.notes}
         onNotesChange={(notes: string) => { updateReactiveProperty(request, 'notes', notes) }}
         isLoading={isSending}

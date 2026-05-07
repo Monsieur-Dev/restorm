@@ -3,8 +3,8 @@
  *
  * All import formats (Swagger, WSDL, gRPC, GraphQL, AsyncAPI, Postman, Insomnia, Bruno,
  * etc.) are transformed into this shape by dedicated transformers. The result is stored
- * once on the root `EnvironmentFolder.apiDocumentation`; per-route markdown is compiled
- * on the fly from this structure via Handlebars templates (see DocumentationCompiler).
+ * once on the root `EnvironmentFolder.apiDocumentation`; the documentation viewer
+ * (see `components/documentation/DocumentationHost`) consumes this structure directly.
  *
  * The format is intentionally extensible: the `extra` map on operations accommodates
  * protocol-specific data (Postman auth, Bruno scripts, etc.) without polluting the
@@ -156,6 +156,10 @@ export interface ParameterDocumentation {
   type: string
   required: boolean
   description?: string
+  /** Parameter marked deprecated in the source spec (OpenAPI 3.x
+   * carries this on every parameter). Triggers strikethrough
+   * rendering in the docs table. */
+  deprecated?: boolean
   defaultValue?: string
   /** Single example value attached to the parameter's schema or
    * carried via `x-example` (Swagger 2.0). */

@@ -811,37 +811,6 @@ contextBridge.exposeInMainWorld('restorm', {
       }
     }
   },
-  docs: {
-    /**
-     * Compile Markdown documentation for a request route from an ApiDocumentation
-     * object. Returns `{ matched: false, markdown: '' }` when no operation matches.
-     */
-    compileForRoute: async (
-      apiDoc: unknown,
-      route: {
-        type: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket'
-        url?: string
-        method?: string
-        operationType?: string
-        query?: string
-        service?: string
-        rpcMethod?: string
-        soapAction?: string
-        operation?: string
-        event?: string
-        protocol?: string
-        tags?: string[]
-      }
-    ): Promise<{ matched: boolean; markdown: string; operationId?: string; error?: string }> => {
-      const result: unknown = await ipcRenderer.invoke('docs:compile-for-route', apiDoc, route)
-      return result as { matched: boolean; markdown: string; operationId?: string; error?: string }
-    },
-    /** Compile the API-level overview Markdown from an ApiDocumentation object. */
-    compileRoot: async (apiDoc: unknown): Promise<{ markdown: string; error?: string }> => {
-      const result: unknown = await ipcRenderer.invoke('docs:compile-root', apiDoc)
-      return result as { markdown: string; error?: string }
-    }
-  },
   apiUpdate: {
     /** Read the current ApiUpdateState for a single folder. */
     getState: async (folderId: string): Promise<unknown> => {

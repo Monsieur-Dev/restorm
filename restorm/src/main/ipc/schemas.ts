@@ -279,29 +279,6 @@ export const importPreviewArgs = z.tuple([
 export const importImportArgs = z.tuple([z.string()])
 
 // ==========================================================================
-// Documentation Compiler
-// ==========================================================================
-
-const routeLikeSchema = z.object({
-  type: z.enum(['http', 'graphql', 'grpc', 'soap', 'websocket']),
-  url: z.string().optional(),
-  method: z.string().optional(),
-  operationType: z.string().optional(),
-  query: z.string().optional(),
-  service: z.string().optional(),
-  rpcMethod: z.string().optional(),
-  soapAction: z.string().optional(),
-  operation: z.string().optional(),
-  event: z.string().optional(),
-  protocol: z.string().optional(),
-  tags: z.array(z.string()).optional()
-})
-
-/** ApiDocumentation arrives as an opaque JSON object; shape is validated by the consumer. */
-export const docsCompileRouteArgs = z.tuple([z.unknown(), routeLikeSchema])
-export const docsCompileRootArgs = z.tuple([z.unknown()])
-
-// ==========================================================================
 // API Update (per-folder periodic spec re-check)
 // ==========================================================================
 

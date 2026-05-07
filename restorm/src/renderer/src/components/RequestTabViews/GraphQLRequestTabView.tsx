@@ -24,7 +24,9 @@ import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
 import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabViewUtils'
-import { useCompiledDocumentation } from '../../hooks/useCompiledDocumentation'
+import { useApiDocumentationFromRequest } from '../../hooks/useApiDocumentationFromRequest'
+import { DocumentationHost } from '../documentation/DocumentationHost'
+import { findOperationForRoute } from '../../../../shared/utils/findOperationForRoute'
 import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
 import { toasterService } from 'electron-core-ui/renderer'
@@ -41,8 +43,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   const { selectedEnvId, environments, envColor } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
-  const compiled = useCompiledDocumentation(request)
-  const compiledDocumentation = compiled.matched ? compiled.markdown : request.documentation
+  const { apiDocumentation, route } = useApiDocumentationFromRequest(request)
   const previousEnvIdRef = useRef<string | null>(null)
   const sendButtonStyle: React.CSSProperties | undefined = envColor
     ? { backgroundColor: envColor, color: getContrastColor(envColor), borderColor: envColor }
@@ -453,7 +454,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         urlSection={urlSection}
         requestContent={requestContent}
         codeSnippetsContent={codeSnippetsContent}
-        documentation={compiledDocumentation}
+        {...(apiDocumentation && route && findOperationForRoute(apiDocumentation, route) ? { docsContent: <DocumentationHost apiDocumentation={apiDocumentation} filters={[route]} /> } : {})}
         notes={request.notes}
         onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
         isLoading={isSending}

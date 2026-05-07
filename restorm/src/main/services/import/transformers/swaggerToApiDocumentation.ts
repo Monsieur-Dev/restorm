@@ -2,9 +2,9 @@
  * Swagger / OpenAPI 2.0 → ApiDocumentation transformer.
  *
  * Reads a parsed SwaggerSpec and produces the common ApiDocumentation
- * structure stored on the root EnvironmentFolder after import. Markdown
- * compilation happens later, on the fly, via the generic Handlebars
- * templates in DocumentationCompiler.
+ * structure stored on the root EnvironmentFolder after import. The renderer's
+ * `DocumentationHost` consumes that tree directly — no markdown compilation
+ * step.
  *
  * Refactored on top of `_shared.ts`: the version-agnostic mapping helpers
  * (parameter/response/group/property mapping, ref-name extraction, schema
