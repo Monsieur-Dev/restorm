@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useImperativeHandle, useState } from 'react'
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -15,6 +15,11 @@ import type { ModelDocumentation } from '../../../../shared/types/apiDocumentati
 import { ModelNode } from './ModelNode'
 import { ModelEdge } from './ModelEdge'
 import { buildModelGraphElements } from './modelGraphLayout'
+
+export interface ModelGraphHandle {
+  /** Pan + zoom the canvas so the named model node is centred. */
+  focusModel: (name: string) => void
+}
 
 export interface ModelGraphProps {
   /** Deduplicated list of models to render, already filtered by the
@@ -36,24 +41,30 @@ const EDGE_TYPES: EdgeTypes = { modelEdge: ModelEdge }
  * edge routing (orthogonal bends, no edge-through-node violations,
  * cycle handling via feedback-edge selection).
  */
-export const ModelGraph: React.FC<ModelGraphProps> = ({ models, testId }) => {
-  return (
-    <div
-      className="documentation-host-model-graph"
-      data-testid={testId ?? 'documentation-host-model-graph'}
-    >
-      <ReactFlowProvider>
-        <ModelGraphCanvas models={models} />
-      </ReactFlowProvider>
-    </div>
-  )
-}
+export const ModelGraph = React.forwardRef<ModelGraphHandle, ModelGraphProps>(
+  ({ models, testId }, ref) => {
+    return (
+      <div
+        className="documentation-host-model-graph"
+        data-testid={testId ?? 'documentation-host-model-graph'}
+      >
+        <ReactFlowProvider>
+          <ModelGraphCanvas models={models} forwardedRef={ref} />
+        </ReactFlowProvider>
+      </div>
+    )
+  }
+)
+ModelGraph.displayName = 'ModelGraph'
 
-const ModelGraphCanvas: React.FC<{ models: ModelDocumentation[] }> = ({ models }) => {
+const ModelGraphCanvas: React.FC<{
+  models: ModelDocumentation[]
+  forwardedRef: React.ForwardedRef<ModelGraphHandle>
+}> = ({ models, forwardedRef }) => {
   const [nodes, setNodes] = useState<Node[]>([])
   const [edges, setEdges] = useState<Edge[]>([])
   const [layoutReady, setLayoutReady] = useState(false)
-  const { fitView } = useReactFlow()
+  const { fitView, setCenter, getNode } = useReactFlow()
 
   useEffect(() => {
     let cancelled = false
@@ -73,6 +84,22 @@ const ModelGraphCanvas: React.FC<{ models: ModelDocumentation[] }> = ({ models }
       cancelled = true
     }
   }, [models, fitView])
+
+  // Expose a `focusModel(name)` API so cross-references in the
+  // operation cards / sidebar can pan + zoom the canvas to the
+  // matching node. ELK has already placed each node, so we read
+  // its position straight from React Flow's state.
+  useImperativeHandle(forwardedRef, () => ({
+    focusModel: (name: string): void => {
+      const node = getNode(name)
+      if (!node) return
+      const width = node.measured?.width ?? node.width ?? 0
+      const height = node.measured?.height ?? node.height ?? 0
+      const cx = node.position.x + width / 2
+      const cy = node.position.y + height / 2
+      void setCenter(cx, cy, { zoom: 1, duration: 350 })
+    }
+  }), [getNode, setCenter])
 
   return (
     <ReactFlow

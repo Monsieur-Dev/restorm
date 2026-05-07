@@ -20,6 +20,24 @@
   user-select: text;
 }
 
+/* Two-column layout when the sidebar is visible (multi-route or
+ * env-folder / folder scope). The sidebar sits sticky-left, the
+ * main column flows naturally — same column gap as the host's
+ * own vertical rhythm. */
+.documentation-host--with-sidebar {
+  display: grid;
+  grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
+  gap: 0 24px;
+  align-items: start;
+}
+
+.documentation-host--with-sidebar .documentation-host__main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
 .documentation-host__section {
   display: flex;
   flex-direction: column;
@@ -1159,4 +1177,179 @@
 ::highlight(documentation-host-search-active) {
   background-color: rgba(255, 152, 0, 0.85);
   color: var(--editor-background);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Sidebar / outline (multi-route + env-folder / folder scopes)
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host-sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 4px 4px 16px;
+  font-size: 12px;
+  /* Bound the sidebar so its own list scrolls when it overflows
+   * the viewport, instead of forcing the whole docs panel to grow
+   * sideways. The 60px subtraction leaves room for the workbench's
+   * top bar + the doc panel's own padding. */
+  max-height: calc(100vh - 60px);
+  overflow-y: auto;
+}
+
+.documentation-host-sidebar__section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.documentation-host-sidebar__section-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+  padding: 4px 6px 2px;
+}
+
+.documentation-host-sidebar__group-list,
+.documentation-host-sidebar__op-list,
+.documentation-host-sidebar__model-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.documentation-host-sidebar__group-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 4px 6px;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  color: var(--editor-foreground);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.documentation-host-sidebar__group-header:hover {
+  background: var(--list-hover-background, rgba(127, 127, 127, 0.1));
+}
+
+.documentation-host-sidebar__caret {
+  width: 12px;
+  text-align: center;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+}
+
+.documentation-host-sidebar__group-name {
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.documentation-host-sidebar__group-count {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+  padding: 0 6px;
+  border-radius: 8px;
+  background: var(--badge-background, rgba(127, 127, 127, 0.18));
+}
+
+.documentation-host-sidebar__op-item {
+  margin: 0;
+}
+
+.documentation-host-sidebar__op-link,
+.documentation-host-sidebar__model-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 3px 6px 3px 22px;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  color: var(--editor-foreground);
+  font-family: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.documentation-host-sidebar__model-link {
+  padding-left: 10px;
+}
+
+.documentation-host-sidebar__op-link:hover,
+.documentation-host-sidebar__model-link:hover {
+  background: var(--list-hover-background, rgba(127, 127, 127, 0.1));
+}
+
+.documentation-host-sidebar__method {
+  flex: 0 0 auto;
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 1px 4px;
+  border-radius: 2px;
+  background: var(--badge-background, rgba(127, 127, 127, 0.2));
+  color: var(--badge-foreground, var(--editor-foreground));
+}
+
+.documentation-host-sidebar__method--get { background: rgba(73, 174, 86, 0.85); color: var(--editor-background); }
+.documentation-host-sidebar__method--post { background: rgba(77, 155, 246, 0.85); color: var(--editor-background); }
+.documentation-host-sidebar__method--put { background: rgba(244, 162, 70, 0.85); color: var(--editor-background); }
+.documentation-host-sidebar__method--patch { background: rgba(180, 120, 200, 0.85); color: var(--editor-background); }
+.documentation-host-sidebar__method--delete { background: rgba(220, 90, 90, 0.85); color: var(--editor-background); }
+.documentation-host-sidebar__method--head,
+.documentation-host-sidebar__method--options { background: rgba(127, 127, 127, 0.4); color: var(--editor-foreground); }
+
+.documentation-host-sidebar__op-summary {
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Cross-reference links (model names rendered as buttons)
+ * ────────────────────────────────────────────────────────────────── */
+
+.documentation-host-model-ref {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--textLink-foreground, #4d9bf6);
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.documentation-host-model-ref:hover {
+  text-decoration: underline;
+}
+
+.documentation-host-model-ref:focus-visible {
+  outline: 1px solid var(--focus-border, #007acc);
+  outline-offset: 1px;
+  border-radius: 2px;
 }

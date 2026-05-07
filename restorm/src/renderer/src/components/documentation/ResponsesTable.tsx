@@ -4,6 +4,8 @@ import type {
   ResponseDocumentation
 } from '../../../../shared/types/apiDocumentation'
 import { statusCodeColor } from './statusCodeColor'
+import { extractModelRef, useDocumentedModels } from './documentationModels'
+import { ModelRefLink } from './ModelRefLink'
 
 export interface ResponsesTableProps {
   /** Operations to surface responses for. Each operation's
@@ -171,12 +173,21 @@ interface ResponseDetailProps {
 const ResponseDetail: React.FC<ResponseDetailProps> = ({ response }) => {
   const headers = response.headers ? Object.entries(response.headers) : []
   const examples = response.examples ? Object.entries(response.examples) : []
+  const documentedModels = useDocumentedModels()
+  const schemaRef = response.schema !== undefined ? extractModelRef(response.schema) : { ref: undefined, isArray: false }
+  const linkable = schemaRef.ref !== undefined && documentedModels.has(schemaRef.ref)
   return (
     <div className="documentation-host-responses-detail">
       {response.schema !== undefined && response.schema.length > 0 && (
         <div className="documentation-host-responses-detail__row">
           <span className="documentation-host-responses-detail__label">Schema</span>
-          <code className="documentation-host-responses-detail__schema">{response.schema}</code>
+          {linkable && schemaRef.ref !== undefined ? (
+            <code className="documentation-host-responses-detail__schema">
+              <ModelRefLink modelName={schemaRef.ref}>{response.schema}</ModelRefLink>
+            </code>
+          ) : (
+            <code className="documentation-host-responses-detail__schema">{response.schema}</code>
+          )}
         </div>
       )}
       {headers.length > 0 && (

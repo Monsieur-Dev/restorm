@@ -4,6 +4,8 @@ import type {
   ParameterDocumentation,
   SchemaConstraints
 } from '../../../../shared/types/apiDocumentation'
+import { extractModelRef, useDocumentedModels } from './documentationModels'
+import { ModelRefLink } from './ModelRefLink'
 
 export interface ParametersTableProps {
   /** Operations to surface parameters for. With a single operation
@@ -96,6 +98,7 @@ export const ParametersTable: React.FC<ParametersTableProps> = ({ operations, te
   }, [operations])
 
   const showOperationColumn = operations.length > 1
+  const documentedModels = useDocumentedModels()
 
   if (rows.length === 0) {
     return (
@@ -154,7 +157,17 @@ export const ParametersTable: React.FC<ParametersTableProps> = ({ operations, te
                 <code>{p.name}</code>
               </td>
               <td className="documentation-host-parameters-table__td">
-                <code>{p.type}</code>
+                {(() => {
+                  const ref = extractModelRef(p.type)
+                  if (ref.ref !== undefined && documentedModels.has(ref.ref)) {
+                    return (
+                      <code>
+                        <ModelRefLink modelName={ref.ref}>{p.type}</ModelRefLink>
+                      </code>
+                    )
+                  }
+                  return <code>{p.type}</code>
+                })()}
               </td>
               <td className="documentation-host-parameters-table__td documentation-host-parameters-table__td--required">
                 {p.required ? '✓' : ''}

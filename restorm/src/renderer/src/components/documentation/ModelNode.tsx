@@ -9,6 +9,7 @@ import {
   targetHandleIdForIncomingEdge
 } from './modelNodeMetrics'
 import { DelayedTooltip } from './DelayedTooltip'
+import { ModelRefLink } from './ModelRefLink'
 
 export interface ModelNodeData extends Record<string, unknown> {
   model: ModelDocumentation
@@ -199,7 +200,11 @@ export const ModelNode: React.FC<NodeProps> = ({ data }) => {
                   (prop.targetModelRef !== undefined ? ' documentation-host-model-node__property-type--ref' : '')
                 }
               >
-                {propertyTypeLabel(prop)}
+                {prop.targetModelRef !== undefined ? (
+                  <ModelRefLink modelName={prop.targetModelRef}>
+                    {propertyTypeLabel(prop)}
+                  </ModelRefLink>
+                ) : propertyTypeLabel(prop)}
               </span>
               {prop.nullable === true && (
                 <span className="documentation-host-model-node__property-modifier">?</span>

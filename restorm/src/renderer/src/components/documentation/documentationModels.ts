@@ -1,0 +1,43 @@
+import { createContext, useContext } from 'react'
+
+/**
+ * Set of model names rendered by the surrounding `DocumentationHost`.
+ * Cross-reference helpers (`<ModelRefLink>`, schema-cell renderers
+ * inside the parameters / responses tables) use this to decide
+ * whether a type literal points at a documented model that should
+ * become a clickable link, or whether it should render as plain
+ * code (for primitives like `string` / `integer`).
+ */
+export const DocumentationModelsContext = createContext<Set<string>>(new Set())
+
+export function useDocumentedModels(): Set<string> {
+  return useContext(DocumentationModelsContext)
+}
+
+/**
+ * Pull the model name out of an API schema label.
+ *
+ * - `Pet`            → `{ ref: 'Pet', isArray: false }`
+ * - `array<Pet>`     → `{ ref: 'Pet', isArray: true }`
+ * - `Array<Pet>`     → same — case-insensitive
+ * - `Pet[]`          → same
+ * - `string`/`int`/… → `{ ref: undefined, isArray: false }`
+ *
+ * The labels returned by the import transformers stick to those
+ * shapes; consumers that pass anything else will simply get back
+ * `ref: undefined` and render the original string.
+ */
+export function extractModelRef(label: string): { ref: string | undefined; isArray: boolean } {
+  const trimmed = label.trim()
+  if (trimmed.length === 0) return { ref: undefined, isArray: false }
+  // `Foo[]` / `Foo []`
+  const bracket = /^([A-Za-z_$][\w$]*)\s*\[\]$/.exec(trimmed)
+  if (bracket) return { ref: bracket[1] ?? undefined, isArray: true }
+  // `array<Foo>` / `Array<Foo>`
+  const generic = /^[Aa]rray\s*<\s*([A-Za-z_$][\w$]*)\s*>$/.exec(trimmed)
+  if (generic) return { ref: generic[1] ?? undefined, isArray: true }
+  // Bare `Foo` — treat as a candidate model name (consumers gate on
+  // membership in the documented-models set before linking).
+  if (/^[A-Za-z_$][\w$]*$/.test(trimmed)) return { ref: trimmed, isArray: false }
+  return { ref: undefined, isArray: false }
+}
