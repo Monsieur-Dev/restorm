@@ -279,6 +279,23 @@ export const importPreviewArgs = z.tuple([
 export const importImportArgs = z.tuple([z.string()])
 
 // ==========================================================================
+// In-page Find (Chromium native via webContents.findInPage)
+// ==========================================================================
+
+export const findInPageArgs = z.tuple([
+  z.string(),
+  z.object({
+    forward: z.boolean().optional(),
+    findNext: z.boolean().optional(),
+    matchCase: z.boolean().optional()
+  }).optional()
+])
+
+export const findStopArgs = z.tuple([
+  z.enum(['clearSelection', 'keepSelection', 'activateSelection'])
+])
+
+// ==========================================================================
 // API Update (per-folder periodic spec re-check)
 // ==========================================================================
 

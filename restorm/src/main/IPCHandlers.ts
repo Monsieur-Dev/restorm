@@ -39,7 +39,8 @@ import {
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
   responsesHistoryListArgs, responsesHistoryGetArgs,
   responsesHistoryTogglePinArgs,
-  importPreviewArgs, importImportArgs
+  importPreviewArgs, importImportArgs,
+  findInPageArgs, findStopArgs
 } from './ipc/schemas'
 
 /**
@@ -913,6 +914,32 @@ export function registerRestormIPC(deps: {
         error: error instanceof Error ? error.message : String(error)
       }
     }
+  })
+
+  // ==========================================================================
+  // In-page find (Chromium native via webContents.findInPage)
+  //
+  // The renderer's documentation viewer drives the find through the
+  // `restorm.find` preload bridge. We dispatch to the calling
+  // window's webContents so multiple BrowserWindows can run their
+  // own concurrent find without colliding.
+  // ==========================================================================
+
+  validatedHandle('find:in-page', findInPageArgs, (event, [text, options]) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (!win) return { requestId: -1 }
+    if (text.length === 0) {
+      win.webContents.stopFindInPage('clearSelection')
+      return { requestId: -1 }
+    }
+    const requestId = win.webContents.findInPage(text, options ?? {})
+    return { requestId }
+  })
+
+  validatedHandle('find:stop', findStopArgs, (event, [action]) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    win?.webContents.stopFindInPage(action)
+    return { ok: true }
   })
 
   validatedHandle('import:import', importImportArgs, async (_event, [input]) => {

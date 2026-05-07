@@ -7,6 +7,7 @@ import type {
 } from '../../../../shared/types/apiDocumentation'
 import { findOperationForRoute, type RouteLike } from '../../../../shared/utils/findOperationForRoute'
 import { ApiInfoSection } from './ApiInfoSection'
+import { DocumentationHostNativeFind, type DocumentationHostNativeFindHandle } from './DocumentationHostNativeFind'
 import { DocumentationHostSearch, type DocumentationHostSearchHandle } from './DocumentationHostSearch'
 import { DocumentationSidebar } from './DocumentationSidebar'
 import { DocumentationModelsContext } from './documentationModels'
@@ -90,6 +91,7 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
 
   const rootRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<DocumentationHostSearchHandle>(null)
+  const nativeFindRef = useRef<DocumentationHostNativeFindHandle>(null)
   const modelsSectionRef = useRef<HTMLElement>(null)
   const modelGraphRef = useRef<ModelGraphHandle>(null)
 
@@ -137,33 +139,50 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
     }
   }), [])
 
-  // Ctrl+F (or Cmd+F on macOS) opens the in-doc search; F3 /
-  // Shift+F3 step through matches once the bar is open. We listen at
-  // the window level so the shortcut works without the host being
-  // focused, but gate on host visibility (`offsetParent !== null`)
-  // so the inactive tab panels (Tabs uses `visibility: hidden`)
-  // don't all hijack the keystroke at once. Monaco binds Ctrl+F at
-  // the editor level and stops propagation, so editors keep their
+  // Ctrl+F (or Cmd+F) opens Chromium's native `findInPage` bar;
+  // Ctrl+Shift+F opens the JS-side custom search bar (CSS Custom
+  // Highlight API, scoped to the host root). F3 / Shift+F3 step
+  // through whichever bar is currently open. We listen at the
+  // window level so the shortcut works without the host being
+  // focused, but gate on host visibility (`offsetParent`) so the
+  // inactive tab panels (Tabs uses `visibility: hidden`) don't all
+  // hijack the keystroke at once. Monaco binds Ctrl+F at the
+  // editor level and stops propagation, so editors keep their
   // native find-bar.
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
       const root = rootRef.current
       if (!root?.offsetParent) return
-      const isFind = (e.key === 'f' || e.key === 'F') && (e.ctrlKey || e.metaKey)
-      if (isFind) {
+      const isF = (e.key === 'f' || e.key === 'F') && (e.ctrlKey || e.metaKey)
+      if (isF && e.shiftKey) {
         e.preventDefault()
         searchRef.current?.open()
         return
       }
-      if (e.key === 'F3') {
+      if (isF) {
         e.preventDefault()
-        if (e.shiftKey) searchRef.current?.previous()
-        else searchRef.current?.next()
+        nativeFindRef.current?.open()
         return
       }
-      if (e.key === 'Escape' && searchRef.current?.isOpen() === true) {
+      if (e.key === 'F3') {
         e.preventDefault()
-        searchRef.current.close()
+        const handle = nativeFindRef.current?.isOpen() === true
+          ? nativeFindRef.current
+          : searchRef.current?.isOpen() === true
+            ? searchRef.current
+            : nativeFindRef.current  // default to native when neither is open
+        if (e.shiftKey) handle?.previous()
+        else handle?.next()
+        return
+      }
+      if (e.key === 'Escape') {
+        if (searchRef.current?.isOpen() === true) {
+          e.preventDefault()
+          searchRef.current.close()
+        } else if (nativeFindRef.current?.isOpen() === true) {
+          e.preventDefault()
+          nativeFindRef.current.close()
+        }
       }
     }
     window.addEventListener('keydown', onKey)
@@ -197,6 +216,7 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
         data-model-count={String(models.length)}
         onClick={handleClick}
       >
+        <DocumentationHostNativeFind ref={nativeFindRef} />
         <DocumentationHostSearch ref={searchRef} rootRef={rootRef} />
         {showSidebar && (
           <DocumentationSidebar
