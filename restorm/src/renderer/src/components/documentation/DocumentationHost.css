@@ -1414,10 +1414,6 @@
   font-size: 12px;
   display: flex;
   flex-direction: column;
-  /* Opaque fill so the floating hover-preview reads cleanly over
-   * the documentation main column. The Dock primitive only
-   * positions the overlay; the colour is the consumer's call. */
-  background: var(--sideBar-background, var(--editor-background));
   /* Override the host root's `user-select: text` — the sommaire
    * is a navigation surface, not a reading surface, and the
    * "select all" gesture should only sweep the body content. */

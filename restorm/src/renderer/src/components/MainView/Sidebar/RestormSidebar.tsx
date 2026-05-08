@@ -198,7 +198,11 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
         flexDirection: 'column',
         minHeight: 0,
         borderRight: '1px solid var(--sideBar-border)',
-        backgroundColor: 'var(--sideBar-background)',
+        // No backgroundColor here — the parent Dock paints
+        // `var(--dock-background)` on `.dock__panel-content`, and we
+        // want that fill to show through the entire panel (including
+        // the strip below the workspace tree). Without removing this
+        // inline override, the sidebar paints over the dock's background.
         width: '100%',
         height: '100%'
       }}
