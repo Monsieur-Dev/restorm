@@ -90,6 +90,20 @@
   background: var(--list-hover-background, rgba(127, 127, 127, 0.12));
 }
 
+/* Anchored variant — rendered in Dock's `panelOverlay` slot for the
+ * right-anchored doc-host dock. Pinned to the OUTER edge (top-right
+ * of the panel = top-right of the dock, since the panel is at the
+ * dock's trailing flex slot) so the button sits at the same on-screen
+ * position whether the sidebar is collapsed (38 px gutter), in
+ * hover-preview, or expanded — the right edge of the panel is the
+ * fixed reference point in all three states. */
+.documentation-host__sidebar-dock-toggle--anchored.documentation-host__sidebar-dock-toggle--anchored {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  margin: 0;
+}
+
 .documentation-host__section {
   display: flex;
   flex-direction: column;
@@ -1400,6 +1414,10 @@
   font-size: 12px;
   display: flex;
   flex-direction: column;
+  /* Opaque fill so the floating hover-preview reads cleanly over
+   * the documentation main column. The Dock primitive only
+   * positions the overlay; the colour is the consumer's call. */
+  background: var(--sideBar-background, var(--editor-background));
   /* Override the host root's `user-select: text` — the sommaire
    * is a navigation surface, not a reading surface, and the
    * "select all" gesture should only sweep the body content. */
@@ -1431,15 +1449,7 @@
   box-sizing: border-box;
 }
 
-/* Doubled-class selector so this beats the base
- * `.documentation-host-sidebar__section { flex-direction: column }`
- * rule that sits later in the file — without the bump the row
- * collapses to a column and the title + collapse trigger stack
- * instead of sitting on the same line. */
 .documentation-host-sidebar__section.documentation-host-sidebar__section--top {
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 4px;
   padding-bottom: 4px;
   border-bottom: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
 }
@@ -1451,7 +1461,10 @@
   align-items: stretch;
   gap: 2px;
   min-width: 0;
-  padding: 6px 8px;
+  /* Right padding reserves space for the dock toggle, which lives
+   * in `panelOverlay` pinned to the top-right of the panel. Without
+   * the reserve the scope title would slide under the chevron. */
+  padding: 6px 40px 6px 8px;
   background: transparent;
   border: none;
   border-radius: 3px;
@@ -1461,16 +1474,6 @@
   font-weight: 600;
   text-align: left;
   cursor: pointer;
-}
-
-/* Action slot on the right of the Overview row — the host injects
- * the collapse trigger here so it scrolls with the title rather
- * than floating as a fixed `panelOverlay`. */
-.documentation-host-sidebar__overview-action {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  margin-right: 6px;
 }
 
 .documentation-host-sidebar__overview-link:hover {

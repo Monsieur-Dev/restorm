@@ -20,12 +20,6 @@ export interface DocumentationSidebarProps {
    * at the top so the user can jump back to it from anywhere in
    * the document. */
   scopeTitle?: string
-  /** Optional action node rendered to the right of the Overview row
-   * (the first sidebar entry). The host uses this to inject a
-   * collapse trigger inline with the scope title — the button then
-   * scrolls with the rest of the sidebar content rather than
-   * floating as a fixed overlay. */
-  topRightAction?: React.ReactNode
 }
 
 interface OperationGroup {
@@ -60,8 +54,7 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
   operations,
   models,
   operationSlug,
-  scopeTitle,
-  topRightAction
+  scopeTitle
 }) => {
   const groups = useMemo(() => groupOperations(operations), [operations])
   const enumGroups = useMemo(() => collectEnumGroups(models), [models])
@@ -102,11 +95,6 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
             <span className="documentation-host-sidebar__overview-name">{scopeTitle}</span>
             <span className="documentation-host-sidebar__overview-hint">Overview</span>
           </button>
-          {topRightAction !== undefined && (
-            <div className="documentation-host-sidebar__overview-action">
-              {topRightAction}
-            </div>
-          )}
         </nav>
       )}
       {groups.length > 0 && (

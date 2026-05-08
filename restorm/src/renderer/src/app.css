@@ -18,6 +18,10 @@
   min-width: 0;
   min-height: 0;
   height: 100%;
+  /* Opaque fill so the floating hover-preview reads cleanly over the
+   * main column. The Dock primitive's overlay is positioned but
+   * doesn't pick a colour — that's a per-app decision. */
+  background: var(--sideBar-background, var(--editor-background));
 }
 
 .restorm-main-sidebar-panel__body {
@@ -25,6 +29,21 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
+  /* Clip any list-view row that overflows its pane — without
+   * `overflow: hidden` here a long workspace tree leaks rows into
+   * the footer area below, giving the impression the toggle is
+   * overlapping the panes. */
+  overflow: hidden;
+}
+
+/* Bottom-row spacer — reserves the same vertical strip the toggle
+ * button occupies (in the Dock's `panelOverlay` slot) so the
+ * workspace tree never bleeds under the toggle. The toggle is
+ * 30 px tall + 4 px bottom padding + 4 px breathing room above. */
+.restorm-main-sidebar-panel__footer-spacer {
+  flex: 0 0 auto;
+  height: 38px;
+  border-top: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
 }
 
 /* The toggle is the inner `<a>` that ECUI Button renders. We pin
@@ -50,4 +69,16 @@
 
 .restorm-main-sidebar-panel__toggle.restorm-main-sidebar-panel__toggle:hover {
   background: var(--list-hover-background, rgba(127, 127, 127, 0.12));
+}
+
+/* Gutter variant — rendered via Dock's `panelOverlay` slot when the
+ * sidebar is collapsed. The overlay is `position: absolute; inset: 0`
+ * with no inner flex layout, so the toggle pins itself to the bottom
+ * edge of the gutter (matching the position of the chevron-left in
+ * the expanded state's footer) for visual continuity. */
+.restorm-main-sidebar-panel__toggle--gutter.restorm-main-sidebar-panel__toggle--gutter {
+  position: absolute;
+  bottom: 4px;
+  left: 2px;
+  margin: 0;
 }

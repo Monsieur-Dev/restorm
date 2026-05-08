@@ -40,6 +40,8 @@ const OVERSHOOT_DURATION_MS = 240;
  * transitions, so all three finish together). */
 const SETTLE_DURATION_MS = 320;
 const TOTAL_DURATION_MS = OVERSHOOT_DURATION_MS + SETTLE_DURATION_MS;
+const DEFAULT_PREVIEW_EXPAND_MS = 1000;
+const DEFAULT_PREVIEW_COLLAPSE_MS = 1000;
 
 function isVertical(side: DockSide): boolean {
 	return side === 'left' || side === 'right';
@@ -99,6 +101,9 @@ export const Dock = forwardRef<DockHandle, DockProps>(function Dock(props, ref) 
 		minSize = DEFAULT_MIN_SIZE,
 		maxSize,
 		collapsedSize = DEFAULT_COLLAPSED_SIZE,
+		previewOnHover = false,
+		previewExpandDelayMs = DEFAULT_PREVIEW_EXPAND_MS,
+		previewCollapseDelayMs = DEFAULT_PREVIEW_COLLAPSE_MS,
 		storageKey,
 		className,
 		style,
@@ -156,7 +161,86 @@ export const Dock = forwardRef<DockHandle, DockProps>(function Dock(props, ref) 
 	const [renderSize, setRenderSize] = useState<number>(collapsed ? collapsedSize : size);
 	const [renderPanel, setRenderPanel] = useState<boolean>(!collapsed || collapsedSize > 0);
 	const [dragging, setDragging] = useState<boolean>(false);
+	// Three-phase preview state machine. `idle` = no overlay; `visible`
+	// = the floating content is fully expanded (mouse is over the
+	// gutter or panel); `closing` = mouse has left and the overlay is
+	// shrinking back. Keeping `closing` as its own phase is what lets
+	// us run the fold-in animation while `.dock--preview` is still on
+	// the dock root (so `.dock__panel-content` stays absolutely
+	// positioned the whole time). Without it, `dock--preview` would
+	// flip off the moment we leave `visible`, the content would drop
+	// back into the flex flow at `100%`-of-`collapsedSize` width, and
+	// the main column would jump by `collapsedSize` px at the start
+	// of the fold-back — the very bug this state machine fixes.
+	type PreviewMode = 'idle' | 'visible' | 'closing';
+	const [previewMode, setPreviewMode] = useState<PreviewMode>('idle');
+	const previewModeRef = useRef<PreviewMode>('idle');
+	const previewExpandTimerRef = useRef<number | null>(null);
+	const previewCollapseTimerRef = useRef<number | null>(null);
 	const prevCollapsedRef = useRef<boolean>(collapsed);
+
+	useEffect(() => { previewModeRef.current = previewMode; }, [previewMode]);
+
+	const clearPreviewTimers = useCallback(() => {
+		if (previewExpandTimerRef.current !== null) {
+			clearTimeout(previewExpandTimerRef.current);
+			previewExpandTimerRef.current = null;
+		}
+		if (previewCollapseTimerRef.current !== null) {
+			clearTimeout(previewCollapseTimerRef.current);
+			previewCollapseTimerRef.current = null;
+		}
+	}, []);
+
+	useEffect(() => () => { clearPreviewTimers(); }, [clearPreviewTimers]);
+
+	// While in the `closing` phase the content is shrinking back to
+	// `collapsedSize`. At the end of the animation window we drop the
+	// `.dock--preview` class (`previewMode === 'idle'`) — the content
+	// flips from absolute back to in-flow, but at the SAME width and
+	// position as the in-flow steady state, so the swap is visually
+	// invisible (no main column shift).
+	useEffect(() => {
+		if (previewMode !== 'closing') return;
+		const t = window.setTimeout(() => { setPreviewMode('idle'); }, TOTAL_DURATION_MS);
+		return () => { clearTimeout(t); };
+	}, [previewMode]);
+
+	// When the user really expands the dock (collapsed flips to
+	// false), any in-flight hover preview is moot — drop it and
+	// cancel the pending timers. Defer the setState through an RAF
+	// to keep `react-hooks/set-state-in-effect` happy without
+	// disabling the rule.
+	useEffect(() => {
+		if (collapsed || previewMode === 'idle') return;
+		clearPreviewTimers();
+		const raf = requestAnimationFrame(() => { setPreviewMode('idle'); });
+		return () => { cancelAnimationFrame(raf); };
+	}, [collapsed, previewMode, clearPreviewTimers]);
+
+	const handleMouseEnter = useCallback(() => {
+		if (!previewOnHover || !collapsed) return;
+		clearPreviewTimers();
+		previewExpandTimerRef.current = window.setTimeout(() => {
+			previewExpandTimerRef.current = null;
+			setPreviewMode('visible');
+		}, previewExpandDelayMs);
+	}, [previewOnHover, collapsed, previewExpandDelayMs, clearPreviewTimers]);
+
+	const handleMouseLeave = useCallback(() => {
+		if (!previewOnHover) return;
+		clearPreviewTimers();
+		previewCollapseTimerRef.current = window.setTimeout(() => {
+			previewCollapseTimerRef.current = null;
+			// If the user left before the expand timer ever fired, jump
+			// straight to `idle` (no fold-back to animate). Otherwise
+			// stage the closing animation: width / opacity / shadow on
+			// `.dock__panel-content` ride back to their collapsed values
+			// over `TOTAL_DURATION_MS`, and the closing→idle effect
+			// above drops `.dock--preview` once it's done.
+			setPreviewMode(previewModeRef.current === 'visible' ? 'closing' : 'idle');
+		}, previewCollapseDelayMs);
+	}, [previewOnHover, previewCollapseDelayMs, clearPreviewTimers]);
 
 	// Drive the staged size animation when `collapsed` flips.
 	// Split from the size-sync effect below so a sash drag (which
@@ -289,30 +373,58 @@ export const Dock = forwardRef<DockHandle, DockProps>(function Dock(props, ref) 
 	// sash drag are mirrored into `renderSize` by the animation
 	// effect above, so this single source of truth drives both the
 	// inline width / height AND the CSS transition target.
+	//
+	// The hover-preview overlay does NOT override the panel size:
+	// `.dock__panel` keeps its `collapsedSize` flex footprint so the
+	// main column stays put on expand AND on fold-back. The preview
+	// is rendered by floating `.dock__panel-content` absolutely
+	// outwards (see `dock.css`); we just feed the content's target
+	// width / height inline below.
+	const inPreview = collapsed && previewMode !== 'idle';
 	const panelStyle: React.CSSProperties = vertical ? { width: renderSize } : { height: renderSize };
+	// During preview we drive the content's size inline so the CSS
+	// `width` / `height` transition runs end-to-end: `visible` paints
+	// at full `size`, `closing` shrinks back to `collapsedSize`. When
+	// `previewMode === 'idle'` we leave the content at its CSS
+	// default (100 % of the panel) — the panel itself is at
+	// `collapsedSize`, so 100 % equals `collapsedSize` and the swap
+	// from absolute back to in-flow is visually invisible.
+	const previewContentSize = previewMode === 'visible' ? size
+		: previewMode === 'closing' ? collapsedSize
+			: null;
+	const panelContentStyle: React.CSSProperties | undefined = previewContentSize === null
+		? undefined
+		: vertical ? { width: previewContentSize } : { height: previewContentSize };
 
 	const containerStyle: React.CSSProperties = { flexDirection, ...style };
+
+	const previewClass = inPreview ? ` dock--preview dock--preview-${previewMode}` : '';
 
 	return (
 		<div
 			ref={containerRef}
-			className={`dock dock--${side}${collapsed ? ' dock--collapsed' : ''}${className ? ` ${className}` : ''}`}
+			className={`dock dock--${side}${collapsed ? ' dock--collapsed' : ''}${previewClass}${className ? ` ${className}` : ''}`}
 			data-side={side}
 			data-collapsed={collapsed ? 'true' : 'false'}
+			data-preview={inPreview ? previewMode : 'false'}
 			data-dragging={dragging ? 'true' : 'false'}
 			style={containerStyle}
 			{...(dataTestId !== undefined ? { 'data-testid': dataTestId } : {})}
 		>
-			{renderPanel && (
+			{(renderPanel || inPreview) && (
 				<div
 					className="dock__panel"
 					style={panelStyle}
 					data-testid={dataTestId !== undefined ? `${dataTestId}-panel` : undefined}
+					onMouseEnter={previewOnHover ? handleMouseEnter : undefined}
+					onMouseLeave={previewOnHover ? handleMouseLeave : undefined}
 				>
-					{/* The content wrapper carries the opacity transition;
-					 * the outer panel keeps the box-shadow so the drop
-					 * shadow stays visible during the fade. */}
-					<div className="dock__panel-content">
+					{/* The content wrapper is the layer that floats during
+					 * hover-preview (absolute positioning + bloom shadow
+					 * applied via `.dock--preview` rules in dock.css). It
+					 * also carries the collapse-time opacity fade so the
+					 * panel itself can stay opaque for `panelOverlay`. */}
+					<div className="dock__panel-content" style={panelContentStyle}>
 						{panel}
 					</div>
 					{panelOverlay !== undefined && (

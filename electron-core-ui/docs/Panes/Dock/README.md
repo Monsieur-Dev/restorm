@@ -31,6 +31,9 @@ For `side: 'right'` and `'bottom'` the flex direction is reversed so the panel l
 | `minSize` | `number` | `120` | Minimum panel size when expanded. |
 | `maxSize` | `number` | container − 80 px | Maximum panel size when expanded. The 80 px reserve guarantees the main area never disappears. |
 | `collapsedSize` | `number` | `0` | Panel size when `collapsed === true`. `0` unmounts the panel entirely; non-zero keeps the panel mounted at gutter width so the caller's re-expand UI stays visible. |
+| `previewOnHover` | `boolean` | `false` | When `true`, hovering the collapsed gutter for `previewExpandDelayMs` opens a transient floating preview of the panel — the visible content overlays the main column without changing the dock's flex flow, so the main never shifts. Mouse-out for `previewCollapseDelayMs` folds it back. The `collapsed` state is **not** mutated; preview is purely visual. See "Hover preview" below. |
+| `previewExpandDelayMs` | `number` | `1000` | Hover-to-preview delay in ms. |
+| `previewCollapseDelayMs` | `number` | `1000` | Mouse-out delay before the preview folds back, in ms. |
 | `storageKey` | `string` | — | When set, the live `size` and `collapsed` flag are mirrored to `localStorage` under `${storageKey}.size` / `${storageKey}.collapsed`. Reads from storage on mount; writes on every change. |
 | `className`, `style`, `data-testid` | — | — | Standard ECUI passthroughs. |
 
@@ -127,6 +130,38 @@ Collapse and expand transitions are owned by `Dock`:
 - **Reduced motion** — `@media (prefers-reduced-motion: reduce)` skips the transitions entirely; the size and opacity snap straight to their final values.
 
 The `panelOverlay` slot lives in the `.dock__panel-overlay` wrapper, which is a sibling of `.dock__panel-content` (not a descendant). That positioning keeps the overlay at full opacity throughout the animation — essential for the collapse / expand trigger button, which must stay readable while the surrounding panel content fades out.
+
+## Hover preview
+
+`previewOnHover` opens a transient peek of a collapsed dock when the cursor sits over the gutter. It is **purely visual**: the controlled `collapsed` flag is never flipped, no `onCollapsedChange` is fired, and no persisted state is touched. It is a 3-phase state machine on the dock root:
+
+| Phase | Class | Hover state | `.dock__panel-content` |
+| --- | --- | --- | --- |
+| `idle` | `.dock--collapsed` | mouse not over the gutter | in-flow, opacity 0, no shadow |
+| `visible` | `.dock--collapsed.dock--preview.dock--preview-visible` | mouse has been over for ≥ `previewExpandDelayMs` | absolutely positioned, expanded to `size`, opacity 1, bloom shadow on the visible edge |
+| `closing` | `.dock--collapsed.dock--preview.dock--preview-closing` | cursor left ≥ `previewCollapseDelayMs` ago, fold-back in flight | absolutely positioned, shrinking back from `size` → `collapsedSize`, opacity 1 → 0, shadow fading out |
+
+The fold-back phase keeps `.dock--preview` on the dock root for the full `560 ms` animation window (overshoot + settle), so the content stays absolutely positioned the whole way down. Only once the closing window ends does the dock drop `.dock--preview` and the content flips back to in-flow — at which point its width already matches `collapsedSize`, so the swap is visually invisible.
+
+**Critical layout invariant**: `.dock__panel` itself stays at `collapsedSize` in the flex flow throughout `idle` / `visible` / `closing`. Only `.dock__panel-content` floats. That's why the main column doesn't shift when the preview opens AND when it folds back. If the panel itself toggled between in-flow and out-of-flow during preview, the main column would jolt by `collapsedSize` px at every transition.
+
+```tsx
+<Dock
+  side="left"
+  collapsedSize={34}
+  previewOnHover
+  previewExpandDelayMs={1000}
+  previewCollapseDelayMs={800}
+  panelOverlay={
+    collapsed
+      ? <Button icon="chevron-right" onClick={() => dockRef.current?.expand()} />
+      : null
+  }
+  panel={<Sidebar />}
+>
+  <Workbench />
+</Dock>
+```
 
 ## Layout invariants
 

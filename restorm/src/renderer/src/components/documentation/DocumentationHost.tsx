@@ -370,39 +370,34 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
         {showSidebar ? (
           <Dock
             ref={sidebarDockRef}
-            side="left"
+            side="right"
             size={sidebarDockSize}
             onSizeChange={setSidebarDockSize}
             collapsed={sidebarDockCollapsed}
             onCollapsedChange={setSidebarDockCollapsed}
             minSize={160}
             collapsedSize={38}
+            previewOnHover
             data-testid="documentation-host-dock"
-            panelOverlay={sidebarDockCollapsed ? (
+            panelOverlay={(
               <Button
-                icon="chevron-right"
-                options={{ ariaLabel: 'Expand documentation sidebar' }}
-                data-testid="documentation-host-sidebar-expand"
+                icon={sidebarDockCollapsed ? 'pin' : 'pinned'}
+                options={{
+                  ariaLabel: sidebarDockCollapsed
+                    ? 'Expand documentation sidebar'
+                    : 'Collapse documentation sidebar'
+                }}
+                data-testid="documentation-host-sidebar-toggle"
                 onClick={(): void => { sidebarDockRef.current?.toggle() }}
-                className="documentation-host__sidebar-dock-toggle"
-                style={{ top: 6, right: 8, position: 'absolute' }}
+                className="documentation-host__sidebar-dock-toggle documentation-host__sidebar-dock-toggle--anchored"
               />
-            ) : null}
+            )}
             panel={(
               <DocumentationSidebar
                 operations={operations}
                 models={models}
                 operationSlug={getOperationSlug}
                 {...(scopeTitle !== undefined && scopeTitle.length > 0 ? { scopeTitle } : {})}
-                topRightAction={(
-                  <Button
-                    icon="chevron-left"
-                    options={{ ariaLabel: 'Collapse documentation sidebar' }}
-                    data-testid="documentation-host-sidebar-toggle"
-                    onClick={(): void => { sidebarDockRef.current?.toggle() }}
-                    className="documentation-host__sidebar-dock-toggle"
-                  />
-                )}
               />
             )}
           >

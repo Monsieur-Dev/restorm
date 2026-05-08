@@ -114,6 +114,23 @@ export interface DockProps {
 	collapsedSize?: number;
 
 	/**
+	 * When `true`, hovering the collapsed gutter for
+	 * `previewExpandDelayMs` opens a preview of the panel that
+	 * floats over the main content (no main resize, drop shadow
+	 * stays). Moving the cursor out of the dock for
+	 * `previewCollapseDelayMs` folds the preview back. The
+	 * `collapsed` state itself is not changed — preview is a
+	 * purely visual peek.
+	 */
+	previewOnHover?: boolean;
+
+	/** Hover-to-preview delay in ms. Defaults to 1000. */
+	previewExpandDelayMs?: number;
+
+	/** Mouse-out delay before the preview folds back in ms. Defaults to 1000. */
+	previewCollapseDelayMs?: number;
+
+	/**
 	 * Optional persistence key. When set, the current size +
 	 * collapsed flag are mirrored to `localStorage` under
 	 * `${storageKey}.size` and `${storageKey}.collapsed`. The

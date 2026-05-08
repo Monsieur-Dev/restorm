@@ -4,6 +4,17 @@
  * is set inline by `Dock.tsx` based on the `side` prop. Everything
  * else lives here so the visual chrome stays consistent across
  * call sites.
+ *
+ * NOTE on selectors: every rule that combines a state class on the
+ * dock root (`.dock--collapsed`, `.dock--preview`, `[data-dragging]`)
+ * with a target inside the panel uses the **direct-child combinator**
+ * (`>`) all the way down, *not* the descendant combinator. Docks can
+ * be nested (e.g. an inner doc-host dock living inside the main
+ * sidebar dock's `.dock__main`), and a descendant selector would
+ * make the outer dock's collapsed / preview state cascade onto the
+ * inner dock's panel — fading inner content while the inner dock is
+ * actually expanded. The `> .dock__panel > .dock__panel-content`
+ * walk keeps each dock's chrome scoped to its own panel.
  */
 
 .dock {
@@ -16,16 +27,20 @@
 	position: relative;
 }
 
-/* The panel itself doesn't grow / shrink — its size on the dock
- * axis is driven inline by `Dock.tsx` (with a 2-stage overshoot
- * during collapse / expand). The flex parent's default
- * `align-items: stretch` already gives the panel the full
- * container height (cross-axis), so the panel can stay a plain
- * block — no `display: flex` needed here. Callers that want a
- * column layout inside (collapse buttons + body etc.) wrap their
- * panel content in their own flex container. Avoiding flex here
- * keeps `position: sticky` working for descendants that rely on
- * a regular block context to stick against. */
+/* The panel is the structural footprint of the dockable surface in
+ * the flex flow — its size on the dock axis is driven inline by
+ * `Dock.tsx` (with a 2-stage overshoot during collapse / expand).
+ * The panel size NEVER changes for the hover-preview overlay: the
+ * preview floats `.dock__panel-content` absolutely outwards over
+ * the main column, and the panel itself stays at `collapsedSize`
+ * the whole time so the main column never shifts on expand or
+ * fold-back.
+ *
+ * The flex parent's default `align-items: stretch` already gives
+ * the panel the full container height (cross-axis), so the panel
+ * can stay a plain block — no `display: flex` needed here. Avoiding
+ * flex here keeps `position: sticky` working for descendants that
+ * rely on a regular block context to stick against. */
 .dock__panel {
 	flex: 0 0 auto;
 	min-width: 0;
@@ -49,33 +64,109 @@
 		box-shadow 560ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* The content wrapper inside the panel carries the opacity fade
- * during the collapse animation; the outer `.dock__panel` keeps
- * its full opacity so the drop shadow + the optional
- * `panelOverlay` (the caller's expand / collapse trigger UI)
- * stay visible across the transition. */
+/* The content wrapper is what the user actually sees: it carries
+ * the opacity fade during collapse, AND it's the element that
+ * floats absolutely outwards during hover-preview. The size /
+ * opacity / box-shadow transitions all share the same easing as
+ * `.dock__panel` so the gestures stay synchronised. */
 .dock__panel-content {
 	width: 100%;
 	height: 100%;
 	min-width: 0;
 	min-height: 0;
 	opacity: 1;
-	transition: opacity 560ms cubic-bezier(0.4, 0, 0.2, 1);
+	box-shadow: 0 0 0 0 transparent;
+	transition:
+		width 320ms cubic-bezier(0.4, 0, 0.2, 1),
+		height 320ms cubic-bezier(0.4, 0, 0.2, 1),
+		opacity 560ms cubic-bezier(0.4, 0, 0.2, 1),
+		box-shadow 560ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.dock--collapsed .dock__panel-content {
+.dock--collapsed > .dock__panel > .dock__panel-content {
 	opacity: 0;
 }
 
-/* When collapsed a soft drop shadow blooms from the dock edge —
- * the user reads "this surface just folded away" rather than
- * "this surface vanished". The shadow falls toward the main
- * column (away from the dock edge) so it never paints onto a
+/* When the dock is collapsed and NOT in hover-preview, the panel
+ * content is faded to 0 — but `opacity: 0` alone does not block
+ * pointer events. Without this rule the (visually invisible) panel
+ * content still receives clicks / hover, so the user sees the
+ * cursor change over invisible list rows in the gutter. The
+ * `panelOverlay` slot stays interactive (it's a sibling of
+ * `.dock__panel-content`) so the collapse-trigger button keeps
+ * working. The rule is suppressed during hover-preview because
+ * the content is brought back to opacity 1 there and must be
+ * fully interactive again. */
+.dock--collapsed:not(.dock--preview) > .dock__panel > .dock__panel-content {
+	pointer-events: none;
+}
+
+/* When collapsed (and NOT previewing) a soft drop shadow blooms
+ * from the dock edge — the user reads "this surface just folded
+ * away" rather than "this surface vanished". The shadow rides on
+ * `.dock__panel` because the content is faded to 0 (its own shadow
+ * would be invisible). The shadow falls toward the main column
+ * (away from the dock edge) so it never paints onto a
  * neighbouring chrome panel. */
-.dock--collapsed.dock--left .dock__panel   { box-shadow:  5px 0 5px -2px rgb(0, 0, 0, 0.4); }
-.dock--collapsed.dock--right .dock__panel  { box-shadow: -5px 0 5px -2px rgb(0, 0, 0, 0.4); }
-.dock--collapsed.dock--top .dock__panel    { box-shadow: 0  5px 5px -2px rgb(0, 0, 0, 0.4); }
-.dock--collapsed.dock--bottom .dock__panel { box-shadow: 0 -5px 5px -2px rgb(0, 0, 0, 0.4); }
+.dock--collapsed.dock--left   > .dock__panel { box-shadow:  5px 0 5px -2px rgb(0, 0, 0, 0.4); }
+.dock--collapsed.dock--right  > .dock__panel { box-shadow: -5px 0 5px -2px rgb(0, 0, 0, 0.4); }
+.dock--collapsed.dock--top    > .dock__panel { box-shadow: 0  5px 5px -2px rgb(0, 0, 0, 0.4); }
+.dock--collapsed.dock--bottom > .dock__panel { box-shadow: 0 -5px 5px -2px rgb(0, 0, 0, 0.4); }
+
+/* Hover-preview overlay (`previewOnHover`). When active, only the
+ * INNER content wrapper pops out as an absolutely-positioned
+ * floating layer at the dock edge — `.dock__panel` itself stays at
+ * `collapsedSize` in the flex flow so the main column NEVER shifts
+ * on expand or fold-back. The preview keeps a drop shadow on the
+ * VISIBLE edge of the floating content (the panel's own shadow is
+ * suppressed during preview because it would only paint behind the
+ * overlay). The opacity is fully restored so the preview reads as
+ * an expanded panel. The width / height transitions on
+ * `.dock__panel-content` (target sizes are written inline by
+ * `Dock.tsx`) drive the fold / unfold; the inset rules anchor the
+ * floating content to the correct edge per `side`. */
+.dock--preview > .dock__panel {
+	box-shadow: none;
+}
+
+.dock--preview > .dock__panel > .dock__panel-content {
+	position: absolute;
+	z-index: 3;
+	top: 0;
+	bottom: 0;
+}
+.dock--preview.dock--left   > .dock__panel > .dock__panel-content { left: 0; }
+.dock--preview.dock--right  > .dock__panel > .dock__panel-content { right: 0; }
+
+.dock--preview.dock--top > .dock__panel > .dock__panel-content {
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: auto;
+}
+
+.dock--preview.dock--bottom > .dock__panel > .dock__panel-content {
+	bottom: 0;
+	left: 0;
+	right: 0;
+	top: auto;
+}
+
+/* During the visible phase of a preview the content is fully
+ * expanded: opacity restored to 1 and a bloom shadow on the
+ * visible edge. The fold-back closing phase keeps `.dock--preview`
+ * but drops `.dock--preview-visible`, so the opacity + shadow fade
+ * to 0 in sync with the width/height shrinking back. By the time
+ * `.dock--preview` itself is removed at the end of the closing
+ * window, the content is already invisible — the panel's steady-
+ * state shadow blooms back in from `.dock--collapsed`. */
+.dock--preview-visible > .dock__panel > .dock__panel-content {
+	opacity: 1;
+}
+.dock--preview-visible.dock--left   > .dock__panel > .dock__panel-content { box-shadow:  5px 0 5px -2px rgb(0, 0, 0, 0.4); }
+.dock--preview-visible.dock--right  > .dock__panel > .dock__panel-content { box-shadow: -5px 0 5px -2px rgb(0, 0, 0, 0.4); }
+.dock--preview-visible.dock--top    > .dock__panel > .dock__panel-content { box-shadow:  0 5px 5px -2px rgb(0, 0, 0, 0.4); }
+.dock--preview-visible.dock--bottom > .dock__panel > .dock__panel-content { box-shadow:  0 -5px 5px -2px rgb(0, 0, 0, 0.4); }
 
 /* `panelOverlay` slot — fills the panel as a 0×0-collapse-proof
  * positioning context so caller-supplied trigger UI inside can
@@ -84,11 +175,16 @@
  * fall through to the panel content underneath; the overlay's
  * children opt back in. Stays at full opacity even when
  * `.dock__panel-content` fades, so trigger buttons remain
- * readable across the entire collapse / expand transition. */
+ * readable across the entire collapse / expand transition. The
+ * `z-index: 4` keeps the overlay's children ABOVE the floating
+ * `.dock__panel-content` during a hover-preview (which uses
+ * `z-index: 3`) — important for callers that put a permanent
+ * toggle in the slot and need it visible in steady-collapsed,
+ * preview-visible, AND steady-expanded states without moving. */
 .dock__panel-overlay {
 	position: absolute;
 	inset: 0;
-	z-index: 2;
+	z-index: 4;
 	pointer-events: none;
 }
 
@@ -100,8 +196,8 @@
  * the per-frame size updates don't compound into visible lag. The
  * drag is naturally smooth at 1:1 with the cursor; transitions
  * only get in the way. */
-.dock[data-dragging='true'] .dock__panel,
-.dock[data-dragging='true'] .dock__panel-content {
+.dock[data-dragging='true'] > .dock__panel,
+.dock[data-dragging='true'] > .dock__panel > .dock__panel-content {
 	transition: none;
 }
 
@@ -116,7 +212,10 @@
 
 /* Main content fills the remaining axis. Flex sizing is set inline
  * so apps that want to compose Dock inside another flex container
- * don't get fighting `flex: 1` declarations. */
+ * don't get fighting `flex: 1` declarations. The 2 px lateral
+ * padding gives the main column a small breathing-room gutter on
+ * each side — keeps the content from reading as cropped against
+ * either the panel sash or the dock's outer container edge. */
 .dock__main {
 	display: flex;
 	flex-direction: column;
@@ -124,13 +223,17 @@
 	min-height: 0;
 	overflow: hidden;
 	position: relative;
+	padding: 0 0 0 2px;
 }
 
 /* The sash is unmounted when the panel is collapsed (see Dock.tsx),
  * so the user can't drag a hidden surface. `overflow: hidden`
  * clips the fading content during the collapse animation so the
  * 50 px overshoot doesn't briefly bleed past the panel's resting
- * footprint into the main column. */
-.dock--collapsed .dock__panel {
+ * footprint into the main column. Crucially, the rule is suppressed
+ * while a hover-preview is active (`.dock--preview`) so the
+ * floating content can paint outside the panel's flex footprint
+ * without being clipped. */
+.dock--collapsed:not(.dock--preview) > .dock__panel {
 	overflow: hidden;
 }

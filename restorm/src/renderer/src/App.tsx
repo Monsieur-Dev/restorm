@@ -1661,10 +1661,11 @@ const App: React.FC = () => {
           onCollapsedChange={setSidebarDockCollapsed}
           minSize={MIN_LEFT_WIDTH}
           collapsedSize={34}
+          previewOnHover
           data-testid="app-dock-sidebar"
           panelOverlay={
             <Button
-              icon={sidebarDockCollapsed ? 'chevron-right' : 'chevron-left'}
+              icon={sidebarDockCollapsed ? 'pin' : 'pinned'}
               options={{
                 ariaLabel: sidebarDockCollapsed
                   ? t('sidebar.expand', 'Expand sidebar')
@@ -1672,8 +1673,7 @@ const App: React.FC = () => {
               }}
               data-testid="restorm-main-sidebar-toggle"
               onClick={(): void => { sidebarDockRef.current?.toggle() }}
-              className="restorm-main-sidebar-panel__toggle"
-              style={{ bottom: 0, right: 0, position: 'absolute' }}
+              className="restorm-main-sidebar-panel__toggle restorm-main-sidebar-panel__toggle--gutter"
             />
           }
           panel={
@@ -1717,6 +1717,12 @@ const App: React.FC = () => {
                   onOpenedEditingEnd={handleOpenedEditingEnd}
                 />
               </div>
+              {/* Bottom spacer so the workspace tree never bleeds
+               * under the toggle button (rendered above via
+               * `panelOverlay`, which is the only place the button
+               * stays visible across collapsed / expanded / preview
+               * with constant on-screen position). */}
+              <div className="restorm-main-sidebar-panel__footer-spacer" aria-hidden />
             </div>
           }
         >
