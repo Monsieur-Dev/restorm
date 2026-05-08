@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react'
-import { MarkdownViewer } from 'electron-core-ui/renderer'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Button, Dock, type DockHandle, MarkdownViewer, ScrollableElement } from 'electron-core-ui/renderer'
 import type {
   ApiDocumentation,
   OperationDocumentation
@@ -102,6 +102,15 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
    * summary. */
   const hasScopeTitle = scopeTitle !== undefined && scopeTitle.length > 0
   const topLevelSectionLevel: 1 | 2 = hasScopeTitle ? 2 : 1
+
+  /** Sidebar Dock state — local to this host instance. The toggle
+   * button rendered inside the panel drives `Dock` through the
+   * imperative `toggle()` ref so the visual chrome can swap
+   * (chevron-left / chevron-right) without each call site owning
+   * the collapsed flag. */
+  const [sidebarDockCollapsed, setSidebarDockCollapsed] = useState(false)
+  const [sidebarDockSize, setSidebarDockSize] = useState(220)
+  const sidebarDockRef = useRef<DockHandle>(null)
 
   const rootRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<DocumentationHostSearchHandle>(null)
@@ -262,13 +271,95 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
     window.open(href, '_blank', 'noopener,noreferrer')
   }, [])
 
+  /** Main column — scope header, route blocks (grouped or flat), Models,
+   * Composition, Enums. Rendered either inside the sidebar Dock as the
+   * `children` payload or directly when the host runs without a sidebar
+   * (single-route view). Kept as a closure rather than a sub-component
+   * so it captures every parent ref / state without prop drilling. */
+  const renderMain = (): React.ReactNode => (
+    <ScrollableElement className="documentation-host__main-scroll">
+    <div className="documentation-host__main">
+      {scopeTitle !== undefined && scopeTitle.length > 0 && (
+        <header
+          className="documentation-host__scope-header"
+          data-testid="documentation-host-scope-header"
+        >
+          <h1 className="documentation-host__scope-title">{scopeTitle}</h1>
+          {scopeDescription !== undefined && scopeDescription.length > 0 && (
+            <MarkdownViewer
+              value={scopeDescription}
+              data-testid="documentation-host-scope-description"
+            />
+          )}
+          {showApiInfo && <ApiInfoSection apiDocumentation={apiDocumentation} />}
+        </header>
+      )}
+
+      {useGroupedLayout
+        ? groupedOperations.map((group) => (
+          <section
+            key={group.name}
+            className="documentation-host__group-section"
+            data-doc-group={group.name}
+            data-testid={`documentation-host-group-${group.name}`}
+          >
+            <header className="documentation-host__group-header">
+              <h2 className="documentation-host__group-title">{group.name}</h2>
+              {group.description !== undefined && group.description.length > 0 && (
+                <MarkdownViewer
+                  value={group.description}
+                  data-testid={`documentation-host-group-description-${group.name}`}
+                />
+              )}
+            </header>
+            {group.operations.map((op, idx) => (
+              <RouteBlock
+                key={`${op.operationId ?? op.match.urlPattern}-${String(idx)}`}
+                operation={op}
+                headingLevel={sectionHeadingLevel}
+                showGroupChip={false}
+                {...(onAddRequest ? { onAddRequest } : {})}
+              />
+            ))}
+          </section>
+        ))
+        : operations.map((op, idx) => (
+          <RouteBlock
+            key={`${op.operationId ?? op.match.urlPattern}-${String(idx)}`}
+            operation={op}
+            headingLevel={sectionHeadingLevel}
+            showGroupChip={!isSingleRoute}
+            {...(onAddRequest && !isSingleRoute ? { onAddRequest } : {})}
+          />
+        ))}
+
+      {models.length > 0 ? (
+        <section
+          ref={modelsSectionRef}
+          className="documentation-host__section documentation-host__models"
+          data-testid="documentation-host-models-section"
+        >
+          {topLevelSectionLevel === 1
+            ? <h1 className="documentation-host__section-title">Models</h1>
+            : <h2 className="documentation-host__section-title">Models</h2>}
+          <ModelGraph ref={modelGraphRef} models={models} />
+          <ModelGraphLegend />
+        </section>
+      ) : null}
+
+      <CompositionSection models={models} headingLevel={topLevelSectionLevel} />
+      <EnumsSection ref={enumsSectionRef} models={models} headingLevel={topLevelSectionLevel} />
+    </div>
+    </ScrollableElement>
+  )
+
   return (
     <DocumentationNavigationContext.Provider value={navigationApi}>
     <DocumentationModelsContext.Provider value={modelNames}>
     <DocumentationSecuritySchemesContext.Provider value={securitySchemes}>
       <div
         ref={rootRef}
-        className={`documentation-host${showSidebar ? ' documentation-host--with-sidebar' : ''}`}
+        className={`documentation-host${showSidebar ? ' documentation-host--with-sidebar' : ''}${sidebarDockCollapsed ? ' documentation-host--sidebar-collapsed' : ''}`}
         data-testid={testId ?? 'documentation-host'}
         data-operation-count={String(operations.length)}
         data-model-count={String(models.length)}
@@ -276,86 +367,50 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
       >
         <DocumentationHostNativeFind ref={nativeFindRef} />
         <DocumentationHostSearch ref={searchRef} rootRef={rootRef} />
-        {showSidebar && (
-          <DocumentationSidebar
-            operations={operations}
-            models={models}
-            operationSlug={getOperationSlug}
-            {...(scopeTitle !== undefined && scopeTitle.length > 0 ? { scopeTitle } : {})}
-          />
-        )}
-        <div className="documentation-host__main">
-          {scopeTitle !== undefined && scopeTitle.length > 0 && (
-            <header
-              className="documentation-host__scope-header"
-              data-testid="documentation-host-scope-header"
-            >
-              <h1 className="documentation-host__scope-title">{scopeTitle}</h1>
-              {scopeDescription !== undefined && scopeDescription.length > 0 && (
-                <MarkdownViewer
-                  value={scopeDescription}
-                  data-testid="documentation-host-scope-description"
-                />
-              )}
-              {showApiInfo && <ApiInfoSection apiDocumentation={apiDocumentation} />}
-            </header>
-          )}
-
-          {useGroupedLayout
-            ? groupedOperations.map((group) => (
-              <section
-                key={group.name}
-                className="documentation-host__group-section"
-                data-doc-group={group.name}
-                data-testid={`documentation-host-group-${group.name}`}
-              >
-                <header className="documentation-host__group-header">
-                  <h2 className="documentation-host__group-title">{group.name}</h2>
-                  {group.description !== undefined && group.description.length > 0 && (
-                    <MarkdownViewer
-                      value={group.description}
-                      data-testid={`documentation-host-group-description-${group.name}`}
-                    />
-                  )}
-                </header>
-                {group.operations.map((op, idx) => (
-                  <RouteBlock
-                    key={`${op.operationId ?? op.match.urlPattern}-${String(idx)}`}
-                    operation={op}
-                    headingLevel={sectionHeadingLevel}
-                    showGroupChip={false}
-                    {...(onAddRequest ? { onAddRequest } : {})}
-                  />
-                ))}
-              </section>
-            ))
-            : operations.map((op, idx) => (
-              <RouteBlock
-                key={`${op.operationId ?? op.match.urlPattern}-${String(idx)}`}
-                operation={op}
-                headingLevel={sectionHeadingLevel}
-                showGroupChip={!isSingleRoute}
-                {...(onAddRequest && !isSingleRoute ? { onAddRequest } : {})}
+        {showSidebar ? (
+          <Dock
+            ref={sidebarDockRef}
+            side="left"
+            size={sidebarDockSize}
+            onSizeChange={setSidebarDockSize}
+            collapsed={sidebarDockCollapsed}
+            onCollapsedChange={setSidebarDockCollapsed}
+            minSize={160}
+            collapsedSize={38}
+            data-testid="documentation-host-dock"
+            panelOverlay={sidebarDockCollapsed ? (
+              <Button
+                icon="chevron-right"
+                options={{ ariaLabel: 'Expand documentation sidebar' }}
+                data-testid="documentation-host-sidebar-expand"
+                onClick={(): void => { sidebarDockRef.current?.toggle() }}
+                className="documentation-host__sidebar-dock-toggle"
+                style={{ top: 6, right: 8, position: 'absolute' }}
               />
-            ))}
-
-          {models.length > 0 ? (
-            <section
-              ref={modelsSectionRef}
-              className="documentation-host__section documentation-host__models"
-              data-testid="documentation-host-models-section"
-            >
-              {topLevelSectionLevel === 1
-                ? <h1 className="documentation-host__section-title">Models</h1>
-                : <h2 className="documentation-host__section-title">Models</h2>}
-              <ModelGraph ref={modelGraphRef} models={models} />
-              <ModelGraphLegend />
-            </section>
-          ) : null}
-
-          <CompositionSection models={models} headingLevel={topLevelSectionLevel} />
-          <EnumsSection ref={enumsSectionRef} models={models} headingLevel={topLevelSectionLevel} />
-        </div>
+            ) : null}
+            panel={(
+              <DocumentationSidebar
+                operations={operations}
+                models={models}
+                operationSlug={getOperationSlug}
+                {...(scopeTitle !== undefined && scopeTitle.length > 0 ? { scopeTitle } : {})}
+                topRightAction={(
+                  <Button
+                    icon="chevron-left"
+                    options={{ ariaLabel: 'Collapse documentation sidebar' }}
+                    data-testid="documentation-host-sidebar-toggle"
+                    onClick={(): void => { sidebarDockRef.current?.toggle() }}
+                    className="documentation-host__sidebar-dock-toggle"
+                  />
+                )}
+              />
+            )}
+          >
+            {renderMain()}
+          </Dock>
+        ) : (
+          renderMain()
+        )}
       </div>
     </DocumentationSecuritySchemesContext.Provider>
     </DocumentationModelsContext.Provider>

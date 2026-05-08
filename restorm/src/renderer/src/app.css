@@ -1,3 +1,53 @@
 /* ============================================================================
  * Application-wide styles
  * ============================================================================ */
+
+/* ----------------------------------------------------------------------------
+ * Main sidebar Dock panel
+ *
+ * The Dock primitive owns the panel's geometry (anchor / sash / collapsed
+ * flag) and the collapse animation. Trigger UI lives in `Dock`'s
+ * `panelOverlay` slot so it stays at full opacity through the animation;
+ * these rules style the inner panel + body and the overlay button.
+ * --------------------------------------------------------------------------*/
+
+.restorm-main-sidebar-panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+.restorm-main-sidebar-panel__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The toggle is the inner `<a>` that ECUI Button renders. We pin
+ * a 30×30 surface so it aligns with the collapsed-gutter width
+ * (32 px = 30 + 1 px margin each side); a transparent fill with
+ * a 1 px border in the theme's button-background hue keeps the
+ * affordance readable while the codicon glyph inherits the
+ * standard editor text colour. */
+.restorm-main-sidebar-panel__toggle.restorm-main-sidebar-panel__toggle {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  margin: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--button-background, #2c4156);
+  box-shadow: none;
+  color: var(--editor-foreground);
+  font-size: 14px;
+}
+
+.restorm-main-sidebar-panel__toggle.restorm-main-sidebar-panel__toggle:hover {
+  background: var(--list-hover-background, rgba(127, 127, 127, 0.12));
+}

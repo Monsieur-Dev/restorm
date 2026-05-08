@@ -2152,16 +2152,27 @@ When(
     const childLabel = ADD_CHILD_LABEL_REGEX[kind]
     if (!childLabel) throw new Error(`unknown AddChildKind: ${kind}`)
 
-    // Right-click the dedicated filler region below the workspace
-    // tree. `RestormSidebar` mounts a `flex: 1` div tagged with
-    // `sidebar-empty-area-filler` whose only purpose is to absorb
-    // right-clicks for the empty-area context menu — the wrapping
-    // `<div>` listens to `onContextMenu` and bypasses it when the
-    // target sits inside a `.list-view-row`. Targeting the filler
-    // testid avoids any geometry math.
-    const filler = page.locator('[data-testid="sidebar-empty-area-filler"]')
-    await expect(filler).toBeVisible({ timeout: 5000 })
-    await filler.click({ button: 'right', force: true })
+    // Right-click the empty area of the sidebar. `RestormSidebar`
+    // wraps the workspace tree in a flex-column div tagged with
+    // `sidebar-empty-area`; its `onContextMenu` handler bypasses
+    // the event when `event.target.closest('.list-view-row')` —
+    // so we dispatch the contextmenu event programmatically with
+    // the wrapper element itself as the target, guaranteeing the
+    // bypass check fails regardless of where the visible row stack
+    // happens to end. Plain `.click({ button: 'right', position })`
+    // can land inside a row when the workspace tree fills the pane.
+    const emptyArea = page.locator('[data-testid="sidebar-empty-area"]')
+    await expect(emptyArea).toBeVisible({ timeout: 5000 })
+    await emptyArea.evaluate((el) => {
+      const rect = el.getBoundingClientRect()
+      el.dispatchEvent(new MouseEvent('contextmenu', {
+        bubbles: true,
+        cancelable: true,
+        button: 2,
+        clientX: rect.left + Math.round(rect.width / 2),
+        clientY: rect.top + Math.max(0, rect.height - 8)
+      }))
+    })
     await page.waitForTimeout(200)
 
     const addEntry = page

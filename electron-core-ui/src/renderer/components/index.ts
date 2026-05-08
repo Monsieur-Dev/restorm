@@ -264,6 +264,13 @@ export type {
 // flow (stack children freely, each sizes to content).
 export { StaticPane } from './Panes'
 export type { StaticPaneProps } from './Panes'
+
+// Dock — edge-anchored, collapsible, resizable 2-pane primitive.
+// Layout-only: caller provides their own collapse trigger UI and
+// drives the panel either through controlled props or the
+// imperative ref API.
+export { Dock } from './Panes'
+export type { DockProps, DockSide, DockHandle } from './Panes'
 export type {
 	WorkbenchState, // legacy flat types (kept for external imports)
 	EditorGroup,

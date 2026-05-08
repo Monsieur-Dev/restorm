@@ -1,0 +1,136 @@
+/*
+ * Dock — edge-anchored, collapsible, resizable 2-pane primitive.
+ * The flex direction (row / row-reverse / column / column-reverse)
+ * is set inline by `Dock.tsx` based on the `side` prop. Everything
+ * else lives here so the visual chrome stays consistent across
+ * call sites.
+ */
+
+.dock {
+	display: flex;
+	flex: 1 1 auto;
+	min-width: 0;
+	min-height: 0;
+	width: 100%;
+	height: 100%;
+	position: relative;
+}
+
+/* The panel itself doesn't grow / shrink — its size on the dock
+ * axis is driven inline by `Dock.tsx` (with a 2-stage overshoot
+ * during collapse / expand). The flex parent's default
+ * `align-items: stretch` already gives the panel the full
+ * container height (cross-axis), so the panel can stay a plain
+ * block — no `display: flex` needed here. Callers that want a
+ * column layout inside (collapse buttons + body etc.) wrap their
+ * panel content in their own flex container. Avoiding flex here
+ * keeps `position: sticky` working for descendants that rely on
+ * a regular block context to stick against. */
+.dock__panel {
+	flex: 0 0 auto;
+	min-width: 0;
+	min-height: 0;
+	position: relative;
+	box-shadow: 0 0 0 0 transparent;
+
+	/* Animate the inline width / height (set on the element itself
+	 * by Dock.tsx — the size transitions through an overshoot stage
+	 * then settles on the target) + the box-shadow that blooms
+	 * during collapse. The opacity fade lives on `.dock__panel-content`
+	 * one level down so the panel itself stays opaque — that's how
+	 * the drop shadow + any caller-supplied `panelOverlay` (e.g. the
+	 * collapse trigger button) stay readable through the entire
+	 * transition. All animated properties finish together in
+	 * `OVERSHOOT_DURATION_MS + SETTLE_DURATION_MS = 560 ms` so the
+	 * gesture reads as one synchronised motion. */
+	transition:
+		width 320ms cubic-bezier(0.4, 0, 0.2, 1),
+		height 320ms cubic-bezier(0.4, 0, 0.2, 1),
+		box-shadow 560ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* The content wrapper inside the panel carries the opacity fade
+ * during the collapse animation; the outer `.dock__panel` keeps
+ * its full opacity so the drop shadow + the optional
+ * `panelOverlay` (the caller's expand / collapse trigger UI)
+ * stay visible across the transition. */
+.dock__panel-content {
+	width: 100%;
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+	opacity: 1;
+	transition: opacity 560ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dock--collapsed .dock__panel-content {
+	opacity: 0;
+}
+
+/* When collapsed a soft drop shadow blooms from the dock edge —
+ * the user reads "this surface just folded away" rather than
+ * "this surface vanished". The shadow falls toward the main
+ * column (away from the dock edge) so it never paints onto a
+ * neighbouring chrome panel. */
+.dock--collapsed.dock--left .dock__panel   { box-shadow:  5px 0 5px -2px rgb(0, 0, 0, 0.4); }
+.dock--collapsed.dock--right .dock__panel  { box-shadow: -5px 0 5px -2px rgb(0, 0, 0, 0.4); }
+.dock--collapsed.dock--top .dock__panel    { box-shadow: 0  5px 5px -2px rgb(0, 0, 0, 0.4); }
+.dock--collapsed.dock--bottom .dock__panel { box-shadow: 0 -5px 5px -2px rgb(0, 0, 0, 0.4); }
+
+/* `panelOverlay` slot — fills the panel as a 0×0-collapse-proof
+ * positioning context so caller-supplied trigger UI inside can
+ * use plain `top` / `right` / `bottom` / `left` (relative to the
+ * panel edges) for placement. `pointer-events: none` lets clicks
+ * fall through to the panel content underneath; the overlay's
+ * children opt back in. Stays at full opacity even when
+ * `.dock__panel-content` fades, so trigger buttons remain
+ * readable across the entire collapse / expand transition. */
+.dock__panel-overlay {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	pointer-events: none;
+}
+
+.dock__panel-overlay > * {
+	pointer-events: auto;
+}
+
+/* While the user is dragging the sash, kill every transition so
+ * the per-frame size updates don't compound into visible lag. The
+ * drag is naturally smooth at 1:1 with the cursor; transitions
+ * only get in the way. */
+.dock[data-dragging='true'] .dock__panel,
+.dock[data-dragging='true'] .dock__panel-content {
+	transition: none;
+}
+
+/* Respect the user's reduced-motion preference — collapse / expand
+ * snap straight to their final state with no animation. */
+@media (prefers-reduced-motion: reduce) {
+	.dock__panel,
+	.dock__panel-content {
+		transition: none;
+	}
+}
+
+/* Main content fills the remaining axis. Flex sizing is set inline
+ * so apps that want to compose Dock inside another flex container
+ * don't get fighting `flex: 1` declarations. */
+.dock__main {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	min-height: 0;
+	overflow: hidden;
+	position: relative;
+}
+
+/* The sash is unmounted when the panel is collapsed (see Dock.tsx),
+ * so the user can't drag a hidden surface. `overflow: hidden`
+ * clips the fading content during the collapse animation so the
+ * 50 px overshoot doesn't briefly bleed past the panel's resting
+ * footprint into the main column. */
+.dock--collapsed .dock__panel {
+	overflow: hidden;
+}

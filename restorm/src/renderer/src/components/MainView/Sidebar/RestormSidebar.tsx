@@ -265,6 +265,7 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
             style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
             onClick={handleEmptyAreaClick}
             onContextMenu={handleEmptyAreaContextMenu}
+            data-testid="sidebar-empty-area"
           >
             <ListView
               items={items}
@@ -284,10 +285,6 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
               onEditingEnd={onEditingEnd}
               onDeleteRequest={onDeleteRequest}
               data-testid="sidebar-listview"
-            />
-            <div
-              data-testid="sidebar-empty-area-filler"
-              style={{ flex: 1, minHeight: 20 }}
             />
           </div>
           <ContextMenu

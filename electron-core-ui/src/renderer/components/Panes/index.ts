@@ -12,3 +12,6 @@ export type {
 
 export { StaticPane } from './StaticPane';
 export type { StaticPaneProps } from './StaticPane';
+
+export { Dock } from './Dock';
+export type { DockProps, DockSide, DockHandle } from './Dock';

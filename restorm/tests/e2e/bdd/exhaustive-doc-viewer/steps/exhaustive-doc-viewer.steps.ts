@@ -458,7 +458,7 @@ Then(
     const securityList = block.locator('.documentation-host-route-header__security-list')
     await expect(securityList).toBeVisible({ timeout: 10000 })
     const scheme = securityList
-      .locator('.documentation-host-route-header__security-scheme')
+      .locator('.documentation-host-route-header__security-item')
       .filter({ hasText: schemeName })
       .first()
     await expect(scheme, `scheme ${schemeName} should appear`).toBeVisible({ timeout: 10000 })
@@ -473,7 +473,7 @@ Then(
     const p = requirePage()
     const block = p.locator(`[data-testid="documentation-host-route-${opSlug}"]`)
     const scheme = block
-      .locator('.documentation-host-route-header__security-scheme')
+      .locator('.documentation-host-route-header__security-item')
       .filter({ hasText: schemeName })
       .first()
     await expect(scheme).toBeVisible({ timeout: 10000 })

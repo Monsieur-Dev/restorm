@@ -2,12 +2,13 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  padding: 16px 20px;
-  /* No own scroll — the parent `<Tabs useScrollableElement>` wraps
-   * us in ECUI's `ScrollableElement`, which gives the Monaco-style
-   * scrollbar consistent with the rest of the workbench. Letting
-   * the host scroll itself would create a competing scroll context
-   * inside the wrapper. */
+  /* The host owns its scroll contexts (sidebar + main column each
+   * scroll independently), so Tabs renders us WITHOUT an outer
+   * ScrollableElement. To make that work the host must fill its
+   * tab panel exactly — `height: 100%` + `min-height: 0` lets the
+   * inner Dock + ScrollableElements bound their own overflow. */
+  height: 100%;
+  min-height: 0;
   color: var(--editor-foreground);
   background: var(--editor-background);
   /* The Electron shell applies `user-select: none` on `<body>` to
@@ -20,22 +21,73 @@
   user-select: text;
 }
 
-/* Two-column layout when the sidebar is visible (multi-route or
- * env-folder / folder scope). The sidebar sits sticky-left, the
- * main column flows naturally — same column gap as the host's
- * own vertical rhythm. */
+/* When the sidebar is visible the layout is owned by the inner
+ * `<Dock>` (flex row with the panel anchored left). The host root
+ * just stretches to fill its container so the Dock's main area
+ * inherits a sane width / height.
+ *
+ * `contain: size` is the load-bearing piece: without it the
+ * Dock's intrinsic content height (sidebar + main with its long
+ * scroll content) leaks up into the workbench layout and pushes
+ * `.editor-group-content-panel` 4 px taller than it is for the
+ * sibling Configuration / Notes sub-tabs (which use a plain
+ * scrollable panel). The contain isolates the doc-host's box
+ * from its descendants' size calculations so the workbench tab
+ * stays the same height regardless of which sub-tab is active. */
 .documentation-host--with-sidebar {
-  display: grid;
-  grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
-  gap: 0 24px;
-  align-items: start;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  contain: size;
 }
 
-.documentation-host--with-sidebar .documentation-host__main {
+/* The main column owns its own scroll — we wrap it in a
+ * `ScrollableElement` inside `renderMain()`. This rule pins the
+ * scroll wrapper at full Dock-children height so the inner column
+ * has somewhere to overflow into. */
+.documentation-host__main-scroll {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.documentation-host__main {
   display: flex;
   flex-direction: column;
   gap: 24px;
   min-width: 0;
+  padding: 0 24px 16px 24px;
+}
+
+.documentation-host:not(.documentation-host--with-sidebar) .documentation-host__main {
+  padding: 16px 20px;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Doc viewer sidebar Dock toggle — `DocumentationHost` renders this
+ * via the Dock's `panelOverlay` slot so it sits over the panel
+ * without inheriting the panel content's collapse-time opacity
+ * (the trigger must stay readable through the entire animation).
+ * The codicon glyph inherits `--editor-foreground`, the standard
+ * editor text colour.
+ * ────────────────────────────────────────────────────────────────── */
+.documentation-host__sidebar-dock-toggle.documentation-host__sidebar-dock-toggle {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  margin-top: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--button-background, #2c4156);
+  box-shadow: none;
+  color: var(--editor-foreground);
+  font-size: 14px;
+}
+
+.documentation-host__sidebar-dock-toggle.documentation-host__sidebar-dock-toggle:hover {
+  background: var(--list-hover-background, rgba(127, 127, 127, 0.12));
 }
 
 .documentation-host__section {
@@ -236,6 +288,12 @@
   box-sizing: border-box;
   padding: 0 10px;
   background: var(--titleBar-activeBackground, rgba(127, 127, 127, 0.12));
+  /* Pair the title-bar background with its matching foreground
+   * token — themes like Sunset Beach Day use the same deep teal
+   * for both `editor.foreground` and `titleBar.activeBackground`,
+   * so the inherited foreground would render text invisible
+   * against the header. */
+  color: var(--titleBar-activeForeground, var(--editor-foreground));
   border-bottom: 1px solid var(--panel-border, rgba(127, 127, 127, 0.3));
   font-family: var(--font-family, sans-serif);
 }
@@ -412,6 +470,11 @@
   padding: 8px 12px;
   font-weight: 600;
   background: var(--titleBar-activeBackground, rgba(127, 127, 127, 0.12));
+  /* Match the paired foreground (themes like Sunset Beach Day
+   * use the same colour for `editor.foreground` and
+   * `titleBar.activeBackground` — without this the th text
+   * would be invisible against its own background). */
+  color: var(--titleBar-activeForeground, var(--editor-foreground));
   border-bottom: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
 }
 
@@ -537,7 +600,12 @@
   text-transform: uppercase;
   font-size: 10px;
   letter-spacing: 0.05em;
-  align-self: center;
+  /* Top-align so multi-line values (Security with bullet list +
+   * flow detail) line up with the first line of their value
+   * instead of floating in the middle. The 2 px nudge brings the
+   * 10 px label baseline down to roughly match the 12 px dd text. */
+  align-self: start;
+  padding-top: 2px;
 }
 
 .documentation-host-route-header__meta dd {
@@ -607,7 +675,12 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--description-foreground, rgba(127, 127, 127, 0.95));
+  /* Pair the title-bar background with its matching foreground
+   * token. The `--description-foreground` fallback covers the
+   * common case where the theme defines a softer label colour;
+   * `--titleBar-activeForeground` wins when present so dark-bg
+   * themes (Sunset Beach Day) stay readable. */
+  color: var(--titleBar-activeForeground, var(--description-foreground, rgba(127, 127, 127, 0.95)));
 }
 
 .documentation-host-parameters-table__th--location {
@@ -781,47 +854,25 @@
  * Route header — security + externalDocs
  * ────────────────────────────────────────────────────────────────── */
 
+/* Plain bulleted list — no boxes, no badges, no background pills.
+ * The structured info (scheme name + kind + scopes) is rendered
+ * inline as text so the row stays scannable. */
 .documentation-host-route-header__security-list {
-  list-style: none;
+  list-style: disc;
   margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.documentation-host-route-header__security-item {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 4px;
-  padding: 1px 8px;
-  border-radius: 3px;
-  background: var(--badge-background, rgba(127, 127, 127, 0.18));
-  color: var(--badge-foreground, var(--editor-foreground));
-}
-
-.documentation-host-route-header__security-scopes {
-  font-family: var(--font-family, sans-serif);
-  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
-}
-
-.documentation-host-route-header__security-scheme {
+  padding: 0 0 0 18px;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 4px 6px;
-  border-radius: 3px;
-  background: var(--editorWidget-background, rgba(127, 127, 127, 0.06));
-  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
-  margin-right: 4px;
 }
 
-.documentation-host-route-header__security-scheme-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.documentation-host-route-header__security-item {
   font-size: 12px;
-  flex-wrap: wrap;
+  color: var(--editor-foreground);
+}
+
+.documentation-host-route-header__security-scopes {
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
 }
 
 .documentation-host-route-header__security-scheme-name {
@@ -829,15 +880,7 @@
 }
 
 .documentation-host-route-header__security-scheme-kind {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 1px 6px;
-  border-radius: 8px;
-  background: var(--badge-background, rgba(127, 127, 127, 0.18));
-  color: var(--badge-foreground, var(--editor-foreground));
-  font-family: var(--font-family, sans-serif);
+  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
 }
 
 .documentation-host-route-header__security-flow {
@@ -1345,21 +1388,24 @@
  * ────────────────────────────────────────────────────────────────── */
 
 .documentation-host-sidebar {
-  position: sticky;
-  top: 0;
-  align-self: start;
+  /* The Dock parent is height-bounded (the host fills its tab
+   * panel and Dock children stretch via flex), so the sidebar
+   * just needs to fill 100% of the panel. The inner
+   * `<ScrollableElement>` then has a bounded scroll context. No
+   * sticky / max-height legacy: Dock owns the box, sidebar fills
+   * it. */
+  width: 100%;
+  height: 100%;
+  min-height: 0;
   font-size: 12px;
-  /* Bound the sidebar so its own list scrolls (via the inner
-   * `<ScrollableElement>`) when it overflows the viewport, instead
-   * of forcing the whole docs panel to grow sideways. The 60px
-   * subtraction leaves room for the workbench's top bar + the doc
-   * panel's own padding. */
-  max-height: calc(100vh - 60px);
-  /* The inner ScrollableElement owns the actual scrolling — keep
-   * the aside as a passive sticky container so the Monaco-style
-   * scrollbar matches the rest of the workbench. */
   display: flex;
   flex-direction: column;
+  /* Override the host root's `user-select: text` — the sommaire
+   * is a navigation surface, not a reading surface, and the
+   * "select all" gesture should only sweep the body content. */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
 }
 
 .documentation-host-sidebar__scroll {
@@ -1371,20 +1417,40 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 4px 4px 16px;
+  /* The 32 px bottom padding makes sure the last row (`User /
+   * username` enum entry on the Petstore fixture) clears the
+   * sidebar's bottom edge — without it the descender of the last
+   * line gets trimmed by a few px when the inner ScrollableElement
+   * stops at exactly content height. */
+  padding: 4px 4px 32px;
+  /* `box-sizing: border-box` so the 4 px horizontal padding stays
+   * inside the parent's 100 % width — without it the content box
+   * is 8 px wider than the scroll viewport, which trips the
+   * ScrollableElement's auto-detect and renders a phantom
+   * horizontal scrollbar even when nothing actually overflows. */
+  box-sizing: border-box;
 }
 
-.documentation-host-sidebar__section--top {
+/* Doubled-class selector so this beats the base
+ * `.documentation-host-sidebar__section { flex-direction: column }`
+ * rule that sits later in the file — without the bump the row
+ * collapses to a column and the title + collapse trigger stack
+ * instead of sitting on the same line. */
+.documentation-host-sidebar__section.documentation-host-sidebar__section--top {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 4px;
   padding-bottom: 4px;
   border-bottom: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
 }
 
 .documentation-host-sidebar__overview-link {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
   align-items: stretch;
   gap: 2px;
-  width: 100%;
+  min-width: 0;
   padding: 6px 8px;
   background: transparent;
   border: none;
@@ -1395,6 +1461,16 @@
   font-weight: 600;
   text-align: left;
   cursor: pointer;
+}
+
+/* Action slot on the right of the Overview row — the host injects
+ * the collapse trigger here so it scrolls with the title rather
+ * than floating as a fixed `panelOverlay`. */
+.documentation-host-sidebar__overview-action {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  margin-right: 6px;
 }
 
 .documentation-host-sidebar__overview-link:hover {

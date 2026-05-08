@@ -2,11 +2,12 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
+  Dock,
+  type DockHandle,
   Statusbar,
   StatusbarElement,
   StatusBarBellButton,
   Toaster,
-  VerticalSashContainer,
   WelcomeScreen,
   useFileService,
   useFeature,
@@ -148,7 +149,6 @@ import {
 import { buildRequestPath } from './utils/requestPath'
 
 const MIN_LEFT_WIDTH = 180
-const RIGHT_MIN_WIDTH = 240
 
 /** Workbench ID for persistence */
 const WORKBENCH_ID = 'restorm-main-workbench'
@@ -289,6 +289,19 @@ const App: React.FC = () => {
     sidebarPanesStorageKey,
     { favorites: false, opened: false }
   )
+
+  // Outer sidebar Dock — width + collapsed flag persisted across
+  // sessions. The toggle button lives in the panel header (rendered
+  // below) and drives `Dock` through the imperative `toggle()` ref.
+  const [sidebarDockSize, setSidebarDockSize] = usePersistedState<number>(
+    'restorm-main-sidebar-width',
+    260
+  )
+  const [sidebarDockCollapsed, setSidebarDockCollapsed] = usePersistedState<boolean>(
+    'restorm-main-sidebar-collapsed',
+    false
+  )
+  const sidebarDockRef = useRef<DockHandle>(null)
 
   // Selected item in the sidebar
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
@@ -1132,25 +1145,25 @@ const App: React.FC = () => {
         await window.restorm?.forceClose()
       }
     }
-    
+
     const cleanup = window.restorm?.onSaveAndClose(() => {
       void handleSaveAndClose()
     })
-    
+
     return cleanup
   }, [rootItems, saveFile])
 
   // Helper to check for unsaved changes before proceeding
   // Restore file state on initial load (e.g., after page refresh)
   const hasRestoredFileRef = useRef(false)
-  
+
   useEffect(() => {
     // Wait for FileService to finish loading
     if (isFileServiceLoading) return
-    
+
     // Only restore once on initial mount
     if (hasRestoredFileRef.current) return
-    
+
     // Check if a file is already open
     const currentFile = fileState?.currentFile
     if (currentFile?.path && currentFile.content) {
@@ -1162,7 +1175,7 @@ const App: React.FC = () => {
           format: currentFile.format
         }
       })
-      
+
     } else {
       // No file open, mark as restored to avoid re-checking
       hasRestoredFileRef.current = true
@@ -1185,7 +1198,7 @@ const App: React.FC = () => {
       hasRestoredFileRef.current = false
       hasRestoredWorkbenchRef.current = false
       handleFileClosed()
-      
+
       // Close all open tabs for the currently opened file.
       requestAnimationFrame(() => {
         setWorkbenchTree({
@@ -1195,7 +1208,7 @@ const App: React.FC = () => {
       })
       setFocusedGroupId(null)
     })
-    
+
     return () => {
       unsubscribe1()
       unsubscribe2()
@@ -1290,14 +1303,14 @@ const App: React.FC = () => {
   useEffect(() => {
     handleMenuCloseRef.current = handleMenuClose
   }, [handleMenuClose])
-  
+
   useEffect(() => {
     // Test helpers used to be gated behind Vite's DEV flag, but that
     // excludes the production build that Playwright E2E launches (even
     // with NODE_ENV=development). The helpers are inert unless called,
     // so exposing them unconditionally is safe and unblocks E2E that
     // needs to introspect rootItems.
-    
+
     // Expose immediately (don't wait for handleFileOpened to be ready)
     ;(window as unknown as {
       __restormTestHelpers?: {
@@ -1384,12 +1397,12 @@ const App: React.FC = () => {
         return pathOut
       }
     }
-    
+
     // Also listen to eventBus for backward compatibility
     const subscription = eventBus.subscribe('restorm:test:file-opened', (fileState: { currentFile: { content: { collections?: unknown[] } } }) => {
       handleFileOpenedRef.current(fileState)
     })
-    
+
     return () => {
       subscription.unsubscribe()
       delete (window as unknown as { __restormTestHelpers?: unknown }).__restormTestHelpers
@@ -1639,59 +1652,74 @@ const App: React.FC = () => {
 
       {fileName ? (
         <RequestCreationProvider value={requestCreationApi}>
-        <VerticalSashContainer
-          data-testid="app-vertical-sash-container"
-          Left={
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                width: '100%',
-                minWidth: 0,
-                minHeight: 0,
-                height: '100%'
+        <Dock
+          ref={sidebarDockRef}
+          side="left"
+          size={sidebarDockSize}
+          onSizeChange={setSidebarDockSize}
+          collapsed={sidebarDockCollapsed}
+          onCollapsedChange={setSidebarDockCollapsed}
+          minSize={MIN_LEFT_WIDTH}
+          collapsedSize={34}
+          data-testid="app-dock-sidebar"
+          panelOverlay={
+            <Button
+              icon={sidebarDockCollapsed ? 'chevron-right' : 'chevron-left'}
+              options={{
+                ariaLabel: sidebarDockCollapsed
+                  ? t('sidebar.expand', 'Expand sidebar')
+                  : t('sidebar.collapse', 'Collapse sidebar')
               }}
-            >
-              <RestormSidebar
-                items={sidebarItemsWithContextMenu}
-                selectedItemId={selectedItemId}
-                activeId={selectedItemId}
-                expandedIds={expandedIds}
-                editingItemId={sidebarEditingItemId}
-                onItemClick={handleItemClick}
-                onItemToggle={(payload, expanded) => {
-                  const id = payload.item.id
-                  if (!id) return
-                  setExpandedIds((prev) =>
-                    expanded
-                      ? Array.from(new Set([...prev, id]))
-                      : prev.filter((existingId) => existingId !== id)
-                  )
-                }}
-                onItemDrop={handleItemDrop}
-                onItemRename={handleSidebarItemRename}
-                onDeleteRequest={(payload) => { handleDeleteItem(payload.item.id) }}
-                onEditingStart={(itemId) => { setSidebarEditingItemId(itemId) }}
-                onEditingEnd={() => { setSidebarEditingItemId(null) }}
-                onAddRequest={() => { setShowImportModal(true) }}
-                onCollapseAll={() => { setExpandedIds([]) }}
-                onCreateRootFolder={handleCreateRootFolder}
-                onCreateRootEnvironmentFolder={handleCreateRootEnvironmentFolder}
-                onAddChildItem={handleAddChildItem}
-                onDeselectAll={() => { setSelectedItemId(null) }}
-                favoriteItems={favoriteItems}
-                openDocumentItems={openDocumentItems}
-                onFavoritesReorder={handleFavoritesReorder}
-                panesCollapsed={panesCollapsed}
-                onPanesCollapsedChange={setPanesCollapsed}
-                favoritesEditingItemId={favoritesEditingItemId}
-                openedEditingItemId={openedEditingItemId}
-                onFavoritesEditingEnd={handleFavoritesEditingEnd}
-                onOpenedEditingEnd={handleOpenedEditingEnd}
-              />
+              data-testid="restorm-main-sidebar-toggle"
+              onClick={(): void => { sidebarDockRef.current?.toggle() }}
+              className="restorm-main-sidebar-panel__toggle"
+              style={{ bottom: 0, right: 0, position: 'absolute' }}
+            />
+          }
+          panel={
+            <div className="restorm-main-sidebar-panel">
+              <div className="restorm-main-sidebar-panel__body">
+                <RestormSidebar
+                  items={sidebarItemsWithContextMenu}
+                  selectedItemId={selectedItemId}
+                  activeId={selectedItemId}
+                  expandedIds={expandedIds}
+                  editingItemId={sidebarEditingItemId}
+                  onItemClick={handleItemClick}
+                  onItemToggle={(payload, expanded) => {
+                    const id = payload.item.id
+                    if (!id) return
+                    setExpandedIds((prev) =>
+                      expanded
+                        ? Array.from(new Set([...prev, id]))
+                        : prev.filter((existingId) => existingId !== id)
+                    )
+                  }}
+                  onItemDrop={handleItemDrop}
+                  onItemRename={handleSidebarItemRename}
+                  onDeleteRequest={(payload) => { handleDeleteItem(payload.item.id) }}
+                  onEditingStart={(itemId) => { setSidebarEditingItemId(itemId) }}
+                  onEditingEnd={() => { setSidebarEditingItemId(null) }}
+                  onAddRequest={() => { setShowImportModal(true) }}
+                  onCollapseAll={() => { setExpandedIds([]) }}
+                  onCreateRootFolder={handleCreateRootFolder}
+                  onCreateRootEnvironmentFolder={handleCreateRootEnvironmentFolder}
+                  onAddChildItem={handleAddChildItem}
+                  onDeselectAll={() => { setSelectedItemId(null) }}
+                  favoriteItems={favoriteItems}
+                  openDocumentItems={openDocumentItems}
+                  onFavoritesReorder={handleFavoritesReorder}
+                  panesCollapsed={panesCollapsed}
+                  onPanesCollapsedChange={setPanesCollapsed}
+                  favoritesEditingItemId={favoritesEditingItemId}
+                  openedEditingItemId={openedEditingItemId}
+                  onFavoritesEditingEnd={handleFavoritesEditingEnd}
+                  onOpenedEditingEnd={handleOpenedEditingEnd}
+                />
+              </div>
             </div>
           }
-          Right={
+        >
             <RestormWorkbenchContainer
               workbenchRef={workbenchRef}
               tree={workbenchTree}
@@ -1722,14 +1750,7 @@ const App: React.FC = () => {
               isItemFavorite={isItemFavorite}
               onToggleFavorite={handleToggleFavorite}
             />
-          }
-          initialWidth={260}
-          minLeftWidth={MIN_LEFT_WIDTH}
-          minRightWidth={RIGHT_MIN_WIDTH}
-          storageKey="restorm-sidebar-width"
-          sashConfig={{ size: 4, className: 'always-visible' }}
-          className="restorm-main-container"
-        />
+        </Dock>
         </RequestCreationProvider>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
