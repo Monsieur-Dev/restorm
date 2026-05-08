@@ -2288,6 +2288,14 @@ Then('the window title should be clean', async () => {
 
 When('I append {string} to the active request URL', async ({}, suffix: string) => {
   if (!page) throw new Error('app must be launched')
+  // The URL bar lives inside the Request sub-tab — switch to it
+  // before reaching for the input or `:visible` will time out
+  // when the active sub-tab is Notes / Docs / Code snippets.
+  const requestSubTab = page.locator('[role="tab"][data-testid="base-request-tabs-request-tab-request"]:visible').first()
+  if ((await requestSubTab.count()) > 0 && await requestSubTab.getAttribute('aria-selected') !== 'true') {
+    await requestSubTab.click()
+    await page.waitForTimeout(200)
+  }
   const urlInput = page.locator('[data-testid="http-request-url-input"]:visible').first()
   await expect(urlInput).toBeVisible({ timeout: 5000 })
   await urlInput.click()
