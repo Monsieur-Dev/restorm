@@ -3,6 +3,7 @@ import https from 'node:https'
 import { randomUUID } from 'node:crypto'
 import { logger } from 'electron-core-ui'
 import { firewallService } from './FirewallService'
+import { permissionService } from './PermissionService'
 import type {
 	RequestRecord,
 	RequestRecordProtocol,
@@ -223,9 +224,19 @@ function lowerKeys(input: Record<string, string>): Record<string, string> {
 }
 
 function safeEmit(record: RequestRecord): void {
-	try {
-		firewallService.emit(record)
-	} catch (err) {
-		logger.warn('FirewallService: emit failed', { url: record.url, error: String(err) })
-	}
+	// Resolve the verdict eagerly via the PermissionService, then
+	// emit. Phase 4A's check is sync-allow for everything except
+	// `lockdown` mode, so this doesn't add latency to the request
+	// path; Phase 4C's toast prompt will introduce a `pending`
+	// state + a follow-up emit once the user resolves.
+	permissionService
+		.check({ host: record.host, port: record.port, source: record.source })
+		.then((verdict) => {
+			record.verdict = verdict
+			firewallService.emit(record)
+		})
+		.catch((err: unknown) => {
+			logger.warn('FirewallService: permission check failed', { url: record.url, error: String(err) })
+			firewallService.emit(record)
+		})
 }

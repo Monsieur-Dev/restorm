@@ -1,2 +1,4 @@
 export { firewallService } from './FirewallService'
 export { installMainProcessInterceptor } from './MainProcessInterceptor'
+export { permissionService } from './PermissionService'
+export type { FirewallMode, Verdict, CheckInput } from './PermissionService'

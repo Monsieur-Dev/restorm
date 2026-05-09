@@ -6,6 +6,7 @@ import {
 	type RequestRecord,
 	type RequestRecordProtocol
 } from '../../../shared/types/firewall'
+import { permissionService } from './PermissionService'
 
 /**
  * `FirewallService` — Phase 1 of OYO-276.
@@ -43,18 +44,40 @@ class FirewallService {
 		this.listenerInstalled = true
 
 		session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
+			let record: RequestRecord | null = null
 			try {
-				const record = this.recordFromWebRequest(details)
-				this.broadcast(record)
+				record = this.recordFromWebRequest(details)
 			} catch (err) {
-				logger.warn('FirewallService: failed to emit RequestRecord', {
+				logger.warn('FirewallService: failed to build RequestRecord', {
 					url: details.url,
 					error: String(err)
 				})
 			}
-			// Phase 1: never block. PermissionService takes over in
-			// Phase 4 by setting `cancel: true` for denied verdicts.
-			callback({ cancel: false })
+			if (record === null) {
+				callback({ cancel: false })
+				return
+			}
+			// Route through PermissionService — Phase 4A skeleton
+			// resolves to `allow` for everything (localhost +
+			// allowlist + log-only default), but the wiring is in
+			// place so 4C's toast prompt plugs in without changing
+			// the listener.
+			const built = record
+			void permissionService
+				.check({ host: built.host, port: built.port, source: built.source })
+				.then((verdict) => {
+					built.verdict = verdict
+					this.broadcast(built)
+					callback({ cancel: verdict === 'deny' })
+				})
+				.catch((err: unknown) => {
+					logger.warn('FirewallService: permission check failed', {
+						url: details.url,
+						error: String(err)
+					})
+					this.broadcast(built)
+					callback({ cancel: false })
+				})
 		})
 
 		logger.info('FirewallService: webRequest listener installed (observability only)')
