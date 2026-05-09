@@ -40,7 +40,7 @@ const OVERSHOOT_DURATION_MS = 240;
  * transitions, so all three finish together). */
 const SETTLE_DURATION_MS = 320;
 const TOTAL_DURATION_MS = OVERSHOOT_DURATION_MS + SETTLE_DURATION_MS;
-const DEFAULT_PREVIEW_EXPAND_MS = 1000;
+const DEFAULT_PREVIEW_EXPAND_MS = 500;
 const DEFAULT_PREVIEW_COLLAPSE_MS = 1000;
 
 function isVertical(side: DockSide): boolean {
@@ -178,6 +178,19 @@ export const Dock = forwardRef<DockHandle, DockProps>(function Dock(props, ref) 
 	const previewExpandTimerRef = useRef<number | null>(null);
 	const previewCollapseTimerRef = useRef<number | null>(null);
 	const prevCollapsedRef = useRef<boolean>(collapsed);
+	// `dragging` is the React state used by CSS / render; `draggingRef`
+	// mirrors it for use inside callbacks that fire faster than React
+	// re-renders (sash drag → mouse-leave → hover-preview close
+	// timers), so the close path can detect "we're mid-drag, don't fold".
+	const draggingRef = useRef<boolean>(false);
+	// While the user is dragging the sash to widen / narrow the
+	// preview, the mouse mechanically leaves the panel; that mouseLeave
+	// would normally start the collapse timer and fold the preview
+	// out from under the user. We swallow it here and replay it on
+	// drag-end, so the preview stays open during the drag and folds
+	// back naturally once the sash is released (if the cursor really
+	// did end up outside the panel).
+	const mouseLeaveDuringDragRef = useRef<boolean>(false);
 
 	useEffect(() => { previewModeRef.current = previewMode; }, [previewMode]);
 
@@ -220,6 +233,12 @@ export const Dock = forwardRef<DockHandle, DockProps>(function Dock(props, ref) 
 
 	const handleMouseEnter = useCallback(() => {
 		if (!previewOnHover || !collapsed) return;
+		// Re-entering the panel during a drag (e.g. user dragged the
+		// sash leftward and the cursor is back inside the panel)
+		// cancels the "mouse left during drag" record so the post-
+		// drag handler doesn't fold the preview the user is still
+		// hovering.
+		mouseLeaveDuringDragRef.current = false;
 		clearPreviewTimers();
 		previewExpandTimerRef.current = window.setTimeout(() => {
 			previewExpandTimerRef.current = null;
@@ -229,6 +248,15 @@ export const Dock = forwardRef<DockHandle, DockProps>(function Dock(props, ref) 
 
 	const handleMouseLeave = useCallback(() => {
 		if (!previewOnHover) return;
+		// Mid-sash-drag mouseLeave: swallow it. The user is still
+		// actively interacting with the dock (the sash captures the
+		// pointer); folding the preview now would yank the surface
+		// out from under them. `handleSashEnd` replays this leave
+		// once the drag releases.
+		if (draggingRef.current) {
+			mouseLeaveDuringDragRef.current = true;
+			return;
+		}
 		clearPreviewTimers();
 		previewCollapseTimerRef.current = window.setTimeout(() => {
 			previewCollapseTimerRef.current = null;
@@ -329,12 +357,23 @@ export const Dock = forwardRef<DockHandle, DockProps>(function Dock(props, ref) 
 
 	const handleSashStart = useCallback((_event: SashEvent) => {
 		sashStartSizeRef.current = size;
+		draggingRef.current = true;
+		mouseLeaveDuringDragRef.current = false;
 		setDragging(true);
 	}, [size]);
 
 	const handleSashEnd = useCallback(() => {
+		draggingRef.current = false;
 		setDragging(false);
-	}, []);
+		// If the cursor wandered out of the panel during the drag,
+		// replay the leave so the preview folds back at the natural
+		// 1 s delay. If the user is still hovering the panel, stay
+		// open — they may immediately grab the sash again.
+		if (mouseLeaveDuringDragRef.current) {
+			mouseLeaveDuringDragRef.current = false;
+			handleMouseLeave();
+		}
+	}, [handleMouseLeave]);
 
 	const handleSashChange = useCallback((event: SashEvent) => {
 		const max = maxSize ?? Math.max(minSize, containerCrossAxis - MAIN_AREA_RESERVE);
@@ -437,7 +476,7 @@ export const Dock = forwardRef<DockHandle, DockProps>(function Dock(props, ref) 
 					)}
 				</div>
 			)}
-			{!collapsed && (
+			{(!collapsed || previewMode !== 'idle') && (
 				<Sash
 					orientation={vertical ? 'vertical' : 'horizontal'}
 					layoutProvider={vertical ? verticalProvider : horizontalProvider}
