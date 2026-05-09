@@ -6,7 +6,12 @@ import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import { createCoreUIAPI } from '../../../../electron-core-ui/src/preload/api'
 import { createElectronAPI } from '../../../../electron-core-ui/src/preload/electronAPI'
 import type { PersistenceFormat } from '../../../../electron-core-ui/src/main/services/PersistenceService'
-import { FIREWALL_REQUEST_RECORD_CHANNEL, type RequestRecord } from '../../shared/types/firewall'
+import {
+  FIREWALL_IPC,
+  FIREWALL_REQUEST_RECORD_CHANNEL,
+  type FirewallMode,
+  type RequestRecord
+} from '../../shared/types/firewall'
 
 // Expose core-ui APIs (imported from core-ui preload modules) and extend with restorm project API
 const coreUIAPI = createCoreUIAPI()
@@ -33,6 +38,27 @@ contextBridge.exposeInMainWorld('api', {
       const handler = (_event: unknown, record: RequestRecord): void => { cb(record) }
       ipcRenderer.on(FIREWALL_REQUEST_RECORD_CHANNEL, handler)
       return (): void => { ipcRenderer.off(FIREWALL_REQUEST_RECORD_CHANNEL, handler) }
+    },
+    // Control-plane — Settings → Firewall reads + mutates the
+    // PermissionService state through these calls. Persistence is
+    // handled main-side; the renderer never touches the on-disk
+    // file directly.
+    getMode: async (): Promise<FirewallMode> => {
+      const result: unknown = await ipcRenderer.invoke(FIREWALL_IPC.GET_MODE)
+      return result as FirewallMode
+    },
+    setMode: async (mode: FirewallMode): Promise<void> => {
+      await ipcRenderer.invoke(FIREWALL_IPC.SET_MODE, mode)
+    },
+    listAllowlist: async (): Promise<string[]> => {
+      const result: unknown = await ipcRenderer.invoke(FIREWALL_IPC.LIST_ALLOWLIST)
+      return Array.isArray(result) ? (result as string[]) : []
+    },
+    addToAllowlist: async (pattern: string): Promise<void> => {
+      await ipcRenderer.invoke(FIREWALL_IPC.ADD_ALLOWLIST, pattern)
+    },
+    removeFromAllowlist: async (pattern: string): Promise<void> => {
+      await ipcRenderer.invoke(FIREWALL_IPC.REMOVE_ALLOWLIST, pattern)
     }
   }
 })

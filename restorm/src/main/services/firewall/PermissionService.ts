@@ -1,9 +1,16 @@
+import { app } from 'electron'
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
+import { join, dirname } from 'node:path'
 import { logger } from 'electron-core-ui'
+import type { FirewallMode } from '../../../shared/types/firewall'
 
 /**
- * Firewall mode — drives `PermissionService.check`'s default
- * behaviour for unknown destinations.
+ * Firewall mode — re-exported from shared so existing local imports
+ * (`./PermissionService`) keep resolving. The canonical declaration
+ * lives in `shared/types/firewall.ts` so the renderer settings UI
+ * can name the same union without reaching into main.
  *
+ * Behaviour reminder:
  * - `strict`: unknown destination → emit a `pending` verdict +
  *   broadcast a toast-prompt IPC; resolve to `allow` / `deny`
  *   when the user picks. Default first-run experience after
@@ -11,12 +18,12 @@ import { logger } from 'electron-core-ui'
  * - `log-only`: unknown destination → resolve immediately to
  *   `allow`, but the audit log keeps the entry so the user can
  *   review what tried to call out. Default first-run while the
- *   toast UI is still in flight (Phase 4A → 4B → 4C).
+ *   toast UI is still in flight.
  * - `lockdown`: unknown destination → resolve immediately to
  *   `deny`, no prompt. The "I'm running an untrusted plugin and
  *   nothing else should be able to phone home" mode.
  */
-export type FirewallMode = 'strict' | 'log-only' | 'lockdown'
+export type { FirewallMode }
 
 /**
  * Verdict the `PermissionService` returns to the calling
@@ -60,24 +67,96 @@ const LOCALHOST_HOSTS = new Set<string>(['localhost', '127.0.0.1', '0.0.0.0', ':
  * BufferingClientRequest contract). The renderer interacts via
  * an IPC bridge added in Phase 4B.
  */
+interface PersistedState {
+	mode: FirewallMode
+	allowlist: string[]
+}
+
 class PermissionService {
 	private mode: FirewallMode = 'log-only'
 
 	/**
 	 * In-memory allowlist of host patterns. Each entry is either
 	 * a literal hostname (`api.example.com`) or a single-level
-	 * wildcard (`*.example.com`, matches one DNS label). Phase
-	 * 4B will persist this to the .restorm file.
+	 * wildcard (`*.example.com`, matches one DNS label). Persists
+	 * to disk on every mutation via `persist()`; loaded once on
+	 * `loadIfNeeded()` (called lazily on first access so the
+	 * service can be imported before `app.whenReady()`).
 	 */
 	private readonly allowlist = new Set<string>()
 
+	private loaded = false
+	private statePath: string | null = null
+
+	private resolvePath(): string {
+		if (this.statePath !== null) return this.statePath
+		// `app.getPath('userData')` is only safe to call after
+		// `app.ready` — in dev with electron-vite the firewall
+		// module loads BEFORE app-ready so we defer the path
+		// resolution to first use. The lazy path also keeps the
+		// service unit-testable: tests can stub `app` before any
+		// method runs.
+		const base = app.getPath('userData')
+		this.statePath = join(base, 'firewall', 'state.json')
+		return this.statePath
+	}
+
+	private loadIfNeeded(): void {
+		if (this.loaded) return
+		this.loaded = true
+		const path = this.resolvePath()
+		if (!existsSync(path)) return
+		try {
+			const raw = readFileSync(path, 'utf8')
+			const parsed = JSON.parse(raw) as Partial<PersistedState>
+			const mode = parsed.mode
+			if (mode === 'strict' || mode === 'log-only' || mode === 'lockdown') {
+				this.mode = mode
+			}
+			if (Array.isArray(parsed.allowlist)) {
+				this.allowlist.clear()
+				for (const entry of parsed.allowlist) {
+					if (typeof entry === 'string' && entry.length > 0) {
+						this.allowlist.add(entry.toLowerCase())
+					}
+				}
+			}
+			logger.info('PermissionService: loaded persisted state', {
+				mode: this.mode,
+				allowlistSize: this.allowlist.size
+			})
+		} catch (err) {
+			logger.warn('PermissionService: failed to load persisted state', {
+				path,
+				error: String(err)
+			})
+		}
+	}
+
+	private persist(): void {
+		try {
+			const path = this.resolvePath()
+			mkdirSync(dirname(path), { recursive: true })
+			const state: PersistedState = {
+				mode: this.mode,
+				allowlist: Array.from(this.allowlist).sort()
+			}
+			writeFileSync(path, JSON.stringify(state, null, 2), 'utf8')
+		} catch (err) {
+			logger.warn('PermissionService: failed to persist state', { error: String(err) })
+		}
+	}
+
 	getMode(): FirewallMode {
+		this.loadIfNeeded()
 		return this.mode
 	}
 
 	setMode(mode: FirewallMode): void {
+		this.loadIfNeeded()
 		if (this.mode === mode) return
 		this.mode = mode
+		this.persist()
 		logger.info('PermissionService: mode changed', { mode })
 	}
 
@@ -85,17 +164,27 @@ class PermissionService {
 	 * Add a host pattern to the allowlist. Pattern is the literal
 	 * hostname or a single-level wildcard (`*.example.com`). The
 	 * lookup is case-insensitive — entries are lower-cased on
-	 * insert.
+	 * insert. Persists to disk on every successful insert.
 	 */
 	addToAllowlist(pattern: string): void {
-		this.allowlist.add(pattern.toLowerCase())
+		this.loadIfNeeded()
+		const normalised = pattern.toLowerCase().trim()
+		if (normalised.length === 0) return
+		if (this.allowlist.has(normalised)) return
+		this.allowlist.add(normalised)
+		this.persist()
 	}
 
 	removeFromAllowlist(pattern: string): void {
-		this.allowlist.delete(pattern.toLowerCase())
+		this.loadIfNeeded()
+		const normalised = pattern.toLowerCase().trim()
+		if (this.allowlist.delete(normalised)) {
+			this.persist()
+		}
 	}
 
 	listAllowlist(): string[] {
+		this.loadIfNeeded()
 		return Array.from(this.allowlist).sort()
 	}
 
@@ -117,6 +206,7 @@ class PermissionService {
 	 * caller code.
 	 */
 	check(input: CheckInput): Promise<Verdict> {
+		this.loadIfNeeded()
 		const host = input.host.toLowerCase()
 		if (LOCALHOST_HOSTS.has(host)) return Promise.resolve('allow')
 		if (this.matchAllowlist(host)) return Promise.resolve('allow')

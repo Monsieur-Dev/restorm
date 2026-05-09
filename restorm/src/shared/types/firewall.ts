@@ -21,6 +21,25 @@
 export const FIREWALL_REQUEST_RECORD_CHANNEL = 'firewall:request-record'
 
 /**
+ * Mode of the firewall — duplicated here in shared so the renderer
+ * settings panel can reference it without reaching into main.
+ */
+export type FirewallMode = 'strict' | 'log-only' | 'lockdown'
+
+/**
+ * Renderer ↔ main control-plane channels. The renderer wraps these in
+ * `window.api.firewall.*` (see preload). Main installs the handlers
+ * via `registerFirewallIpc` at boot.
+ */
+export const FIREWALL_IPC = {
+	GET_MODE: 'firewall:get-mode',
+	SET_MODE: 'firewall:set-mode',
+	LIST_ALLOWLIST: 'firewall:list-allowlist',
+	ADD_ALLOWLIST: 'firewall:add-allowlist',
+	REMOVE_ALLOWLIST: 'firewall:remove-allowlist'
+} as const
+
+/**
  * Origin layer that captured the request. Used by the console UI to
  * tag the source ("from renderer fetch" vs "from main http") and by
  * the firewall's stack-trace capture to know whether to walk the

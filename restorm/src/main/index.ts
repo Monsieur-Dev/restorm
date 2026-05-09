@@ -25,7 +25,7 @@ import type { PersistenceFormat } from 'electron-core-ui'
 import { dirname, join } from 'path'
 import { existsSync, statSync } from 'fs'
 import { searchIndexService, contextService, responseHistoryService, authenticationCacheService } from './services'
-import { firewallService } from './services/firewall'
+import { firewallService, registerFirewallIpc } from './services/firewall'
 import { writeMcpDiscoveryFile, cleanupMcpDiscoveryFile } from './services/mcpDiscovery'
 import { registerRestormMcp } from './mcp'
 import { graphQLService } from 'electron-core-ui/main'
@@ -364,6 +364,9 @@ logger.info('Dirty state managed by FileService checksum system')
 // `session.defaultSession` is guaranteed available.
 void app.whenReady().then(() => {
   firewallService.registerWebRequestListener()
+  // Phase 4B: IPC bridge for the renderer (Settings → Firewall
+  // panel). Reads + mutates `permissionService` mode + allowlist.
+  registerFirewallIpc()
 })
 
 // Initialize Search Index Service (listens to document events from renderer)
