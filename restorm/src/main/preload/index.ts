@@ -6,6 +6,7 @@ import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import { createCoreUIAPI } from '../../../../electron-core-ui/src/preload/api'
 import { createElectronAPI } from '../../../../electron-core-ui/src/preload/electronAPI'
 import type { PersistenceFormat } from '../../../../electron-core-ui/src/main/services/PersistenceService'
+import { FIREWALL_REQUEST_RECORD_CHANNEL, type RequestRecord } from '../../shared/types/firewall'
 
 // Expose core-ui APIs (imported from core-ui preload modules) and extend with restorm project API
 const coreUIAPI = createCoreUIAPI()
@@ -20,6 +21,18 @@ contextBridge.exposeInMainWorld('api', {
     readFile: async (filePath: string): Promise<string> => {
       const result: unknown = await ipcRenderer.invoke('project:read-file', filePath)
       return typeof result === 'string' ? result : ''
+    }
+  },
+  // Firewall + console feed. Layer A (renderer webRequest) + Layer
+  // B (main-process http/https/fetch monkey-patches) both broadcast
+  // `RequestRecord` objects through this channel; the Console
+  // workbench tab subscribes via `useConsoleFeed`. Returns an
+  // unsubscribe fn so consumers can detach on unmount.
+  firewall: {
+    onRecord: (cb: (record: RequestRecord) => void): (() => void) => {
+      const handler = (_event: unknown, record: RequestRecord): void => { cb(record) }
+      ipcRenderer.on(FIREWALL_REQUEST_RECORD_CHANNEL, handler)
+      return (): void => { ipcRenderer.off(FIREWALL_REQUEST_RECORD_CHANNEL, handler) }
     }
   }
 })
