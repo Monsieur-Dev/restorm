@@ -63,8 +63,10 @@ const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Recor
 }
 import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload, type RequestHistoryEventPayload } from './services/DocumentEvents'
 import { getResponseHistoryList } from './services/GraphQLIntegration'
-import type { EditorTab, WorkbenchTree, GroupNode } from 'electron-core-ui/renderer'
+import type { EditorTab, WorkbenchTree, GroupNode, TabGroupNode, ContainerGroupNode } from 'electron-core-ui/renderer'
 import { isContainerNode, isTabGroupNode } from 'electron-core-ui/renderer'
+import { CONSOLE_TAB_ID, type ConsoleTab } from '../../shared/types/editor'
+import { findGroupIdForTab, updateGroupById } from './utils/workbenchHelpers'
 
 /**
  * Match a workbench tab by the underlying item id (request / folder /
@@ -314,6 +316,67 @@ const App: React.FC = () => {
     orientation: 'vertical',
     groups: []
   })
+
+  /**
+   * `View → Console` handler. Two cases:
+   *
+   * - **Tab already exists**: just activate it (set `activeTabId` on
+   *   the group it lives in). Layout doesn't reflow.
+   * - **Tab doesn't exist yet**: create a fresh `TabGroupNode`
+   *   holding a single Console tab and place it in a NEW bottom
+   *   group spanning the FULL workbench width. If the root tree is
+   *   already vertical, append the group to it. If the root is
+   *   horizontal (the user has a side-by-side split), wrap the
+   *   existing root inside a vertical container so the bottom
+   *   group sits below ALL existing groups, not just one of them.
+   *
+   * The Console tab is a singleton (id = `console:singleton`); the
+   * branching above guarantees we never end up with two.
+   */
+  const handleOpenConsole = useCallback(() => {
+    setWorkbenchTree(prev => {
+      const existingGroupId = findGroupIdForTab(prev.groups, CONSOLE_TAB_ID)
+      if (existingGroupId !== null) {
+        return {
+          ...prev,
+          groups: updateGroupById(prev.groups, existingGroupId, group => ({ ...group, activeTabId: CONSOLE_TAB_ID }))
+        }
+      }
+      // `renderTabTitle` in RestormWorkbench owns the visual title
+      // (codicon + label); `title` here is just the JSON-safe
+      // serialisation fallback used by tab-drop / IPC paths.
+      const consoleTab: ConsoleTab = {
+        id: CONSOLE_TAB_ID,
+        tabType: 'console',
+        title: 'Console',
+        titleString: 'Console'
+      }
+      const newGroup: TabGroupNode = {
+        id: `console-group-${String(Date.now())}-${crypto.randomUUID().slice(0, 8)}`,
+        tabs: [consoleTab],
+        activeTabId: CONSOLE_TAB_ID
+      }
+      // Workbench orientation convention (ECUI):
+      //   'vertical'   → flex-direction: row   → groups side-by-side
+      //   'horizontal' → flex-direction: column → groups stacked
+      // The Console must land BELOW everything → we want a horizontal
+      // root with the existing layout above and the console group
+      // below. If the root is already horizontal we just append; if
+      // it's vertical (side-by-side) we wrap the existing tree as a
+      // single child of a new horizontal root so the console sits
+      // under ALL existing groups, not next to one of them.
+      if (prev.orientation === 'horizontal') {
+        return { ...prev, groups: [...prev.groups, newGroup], sizes: undefined }
+      }
+      const wrapped: ContainerGroupNode = {
+        id: `container-wrap-${String(Date.now())}-${crypto.randomUUID().slice(0, 8)}`,
+        orientation: prev.orientation,
+        groups: prev.groups,
+        ...(prev.sizes !== undefined ? { sizes: prev.sizes } : {})
+      }
+      return { orientation: 'horizontal', groups: [wrapped, newGroup] }
+    })
+  }, [setWorkbenchTree])
 
   // Per-tab dirty state tracking — the legacy checksum store is still
   // wired through `useFileManagement` for backward compat on the
@@ -1648,6 +1711,7 @@ const App: React.FC = () => {
         onImport={() => { setShowImportModal(true) }}
         onOpenRecentFile={(path) => { void handleOpenRecentFile(path) }}
         onSearchResultClick={handleSearchResultClick}
+        onOpenConsole={handleOpenConsole}
       />
 
       {fileName ? (

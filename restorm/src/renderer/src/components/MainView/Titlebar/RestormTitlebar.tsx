@@ -31,6 +31,11 @@ export interface RestormTitlebarProps {
   onImport: () => void
   onOpenRecentFile: (path: string) => void
   onSearchResultClick: (result: SearchResult) => void
+  /** Open / focus the firewall + outgoing-request console workbench
+   * tab. Wired to the `View → Console` menu item; the host owns the
+   * focus-or-create logic so the singleton-tab + bottom-group
+   * placement decisions stay close to the workbench tree. */
+  onOpenConsole: () => void
 }
 
 /**
@@ -51,7 +56,8 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   onExit,
   onImport,
   onOpenRecentFile,
-  onSearchResultClick
+  onSearchResultClick,
+  onOpenConsole
 }) => {
   const { t } = useTranslation()
   const { showSettingsModal } = useSettingsModal()
@@ -191,6 +197,11 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
           <MenuBarItem title={t('menuBar.view')} data-testid="titlebar-menubar-item-view">
             <MenuItem data-testid="titlebar-menu-item-toggle-sidebar" title={t('menuBar.toggleSidebar')} disabled />
             <MenuItem data-testid="titlebar-menu-item-toggle-response-panel" title={t('menuBar.toggleResponsePanel')} disabled />
+            <MenuItem
+              data-testid="titlebar-menu-item-console"
+              title={t('menuBar.console', 'Console')}
+              onClick={onOpenConsole}
+            />
             <MenuItemSeparator data-testid="titlebar-menu-separator-view-1" />
             <MenuItem data-testid="titlebar-menu-item-zoom-in" title={t('menuBar.zoomIn')} shortcut="Ctrl++" disabled />
             <MenuItem data-testid="titlebar-menu-item-zoom-out" title={t('menuBar.zoomOut')} shortcut="Ctrl+-" disabled />

@@ -280,7 +280,8 @@ export type {
 	Orientation,
 	WorkbenchTree,
 	GroupNode,
-	TabGroupNode
+	TabGroupNode,
+	ContainerGroupNode
 } from './Workbench/types'
 
 // Lazy-loaded component exports (for code splitting)

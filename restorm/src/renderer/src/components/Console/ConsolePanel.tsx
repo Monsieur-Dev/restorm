@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { ScrollableElement } from 'electron-core-ui/renderer'
 import { Console } from './Console'
 import { ConsoleToolbar } from './ConsoleToolbar'
 import { useConsoleFeed } from './useConsoleFeed'
@@ -41,9 +42,13 @@ export const ConsolePanel: React.FC<ConsolePanelProps> = ({
 			}}
 		>
 			<ConsoleToolbar shell={shell} onShellChange={setShell} onClear={clear} />
-			<div style={{ flex: 1, minHeight: 0 }}>
+			<ScrollableElement
+				className="console-panel-scroll"
+				style={{ flex: 1, minHeight: 0 }}
+				options={{ vertical: 'auto', horizontal: 'auto', useShadows: true }}
+			>
 				<Console records={records} shell={shell} {...(onLineClick ? { onLineClick } : {})} />
-			</div>
+			</ScrollableElement>
 		</div>
 	)
 }

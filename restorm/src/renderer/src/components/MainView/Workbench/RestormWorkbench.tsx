@@ -12,8 +12,10 @@ import {
   isSoapRequestTab,
   isWebSocketRequestTab,
   isODataRequestTab,
-  isAuthenticationRequestTab
+  isAuthenticationRequestTab,
+  isConsoleTab
 } from '../../../../../shared/types/editor'
+import { ConsolePanel } from '../../Console'
 import {
   HTTPRequestTabView,
   GraphQLRequestTabView,
@@ -337,6 +339,18 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           <Badge type="AUTH" />
           <span>{restormTab.request.name}</span>
           {renderDirtyIndicator(restormTab)}
+        </span>
+      )
+    }
+
+    // Console tab — codicon `console` + plain "Console" label.
+    // Singleton tab, no dirty indicator (its content is a live log,
+    // not a persistable surface).
+    if (isConsoleTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <IconView icon={{ type: 'codicon', value: 'console' }} size={14} />
+          <span>Console</span>
         </span>
       )
     }
@@ -762,6 +776,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           </RestormWorkbenchTab>
         </EnvironmentProvider>
       )
+    }
+
+    // Console tab — singleton, identified by `tabType: 'console'`.
+    // Mounts the standalone `<ConsolePanel />` (xterm.js + firewall
+    // feed subscriber). The breadcrumb chrome is intentionally
+    // skipped: the Console isn't a request / folder, no project-tree
+    // ancestor path applies. The component manages its own lifecycle.
+    if (isConsoleTab(effectiveTab)) {
+      return <ConsolePanel />
     }
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
