@@ -1,3 +1,13 @@
+// LOAD-ORDER CRITICAL: install the main-process firewall interceptor
+// (Layer B of OYO-276) BEFORE any other module that might trigger an
+// outgoing HTTP / HTTPS / fetch call. The monkey-patches replace
+// `http.request` / `https.request` / `globalThis.fetch` in-place, so
+// every subsequent `import` / `require` inherits the patched versions.
+// Putting this at the very top means a malicious dependency that
+// phones home from its module-init code is captured too.
+import { installMainProcessInterceptor } from './services/firewall'
+installMainProcessInterceptor()
+
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { randomBytes } from 'node:crypto'
 import { MainWindow } from './windows/MainWindow'

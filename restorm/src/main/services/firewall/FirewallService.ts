@@ -96,6 +96,17 @@ class FirewallService {
 	}
 
 	/**
+	 * Public hook for emitters that aren't the webRequest listener
+	 * — Layer B's monkey-patched `http.request` / `https.request` /
+	 * `globalThis.fetch` build their own `RequestRecord` and call
+	 * this to push it through the same broadcast pipeline. Single
+	 * fan-out keeps the console / audit log feeds in sync.
+	 */
+	emit(record: RequestRecord): void {
+		this.broadcast(record)
+	}
+
+	/**
 	 * Send a record to every live BrowserWindow's renderer. The
 	 * console UI listens via the preload bridge (`window.api.firewall.onRecord`).
 	 */
