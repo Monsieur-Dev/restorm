@@ -124,7 +124,7 @@ export interface DockProps {
 	 */
 	previewOnHover?: boolean;
 
-	/** Hover-to-preview delay in ms. Defaults to 1000. */
+	/** Hover-to-preview delay in ms. Defaults to 500. */
 	previewExpandDelayMs?: number;
 
 	/** Mouse-out delay before the preview folds back in ms. Defaults to 1000. */

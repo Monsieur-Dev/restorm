@@ -32,7 +32,7 @@ For `side: 'right'` and `'bottom'` the flex direction is reversed so the panel l
 | `maxSize` | `number` | container − 80 px | Maximum panel size when expanded. The 80 px reserve guarantees the main area never disappears. |
 | `collapsedSize` | `number` | `0` | Panel size when `collapsed === true`. `0` unmounts the panel entirely; non-zero keeps the panel mounted at gutter width so the caller's re-expand UI stays visible. |
 | `previewOnHover` | `boolean` | `false` | When `true`, hovering the collapsed gutter for `previewExpandDelayMs` opens a transient floating preview of the panel — the visible content overlays the main column without changing the dock's flex flow, so the main never shifts. Mouse-out for `previewCollapseDelayMs` folds it back. The `collapsed` state is **not** mutated; preview is purely visual. See "Hover preview" below. |
-| `previewExpandDelayMs` | `number` | `1000` | Hover-to-preview delay in ms. |
+| `previewExpandDelayMs` | `number` | `500` | Hover-to-preview delay in ms. |
 | `previewCollapseDelayMs` | `number` | `1000` | Mouse-out delay before the preview folds back, in ms. |
 | `storageKey` | `string` | — | When set, the live `size` and `collapsed` flag are mirrored to `localStorage` under `${storageKey}.size` / `${storageKey}.collapsed`. Reads from storage on mount; writes on every change. |
 | `className`, `style`, `data-testid` | — | — | Standard ECUI passthroughs. |
@@ -145,12 +145,16 @@ The fold-back phase keeps `.dock--preview` on the dock root for the full `560 ms
 
 **Critical layout invariant**: `.dock__panel` itself stays at `collapsedSize` in the flex flow throughout `idle` / `visible` / `closing`. Only `.dock__panel-content` floats. That's why the main column doesn't shift when the preview opens AND when it folds back. If the panel itself toggled between in-flow and out-of-flow during preview, the main column would jolt by `collapsedSize` px at every transition.
 
+**Pointer-events lock**: while the dock is collapsed AND not previewing, `.dock__panel-content` carries `pointer-events: none` so the (visually invisible) panel content stops capturing clicks / hover in the gutter. The `panelOverlay` slot is a sibling, so any caller-supplied trigger UI inside it stays interactive. The lock is suppressed during preview so the panel is fully usable while the floating layer is visible.
+
+**Sash drag during preview**: the resize sash is mounted whenever the preview is `visible` or `closing`, not only when the dock is steady-expanded. The user can grab it from the floating preview's edge and resize the panel without committing to a permanent expand — the new `size` is persisted via `onSizeChange` and applied when the dock is later actually expanded. Mid-drag the cursor mechanically leaves the panel; the preview suppresses the resulting `mouseLeave` and replays it once the sash is released, only if the cursor finished outside the panel. Re-entering the panel mid-drag clears the sentinel, so a back-and-forth grab keeps the preview open for the next pull.
+
 ```tsx
 <Dock
   side="left"
   collapsedSize={34}
   previewOnHover
-  previewExpandDelayMs={1000}
+  previewExpandDelayMs={500}
   previewCollapseDelayMs={800}
   panelOverlay={
     collapsed
@@ -162,6 +166,10 @@ The fold-back phase keeps `.dock--preview` on the dock root for the full `560 ms
   <Workbench />
 </Dock>
 ```
+
+## Theme variable
+
+`Dock` paints the panel surface from the CSS variable `--dock-background`, defined in the base light + dark theme YAMLs (`resources/themes/{light,dark}/_base.yaml`). The default mirrors `editor.background` so the dock blends into the workbench out-of-the-box, and any individual theme can override `dock.background` to diverge. Consumers should NOT set their own background on the panel root — the primitive owns the fill so the floating hover-preview reads cleanly over the main column without per-call-site opt-in.
 
 ## Layout invariants
 

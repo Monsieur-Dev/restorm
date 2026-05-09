@@ -8,8 +8,7 @@ Reach for these in this order:
 | --- | --- |
 | [`SplitView`](./SplitView/README.md) | Two or more panes that share a horizontal or vertical axis and need to be resizable by the user (drag a sash between them). |
 | [`StaticPane`](./StaticPane/README.md) | A single pane with the same chrome as a `SplitView` pane, sized to its content. Stack several in a flex column when the panes don't need to share a fixed total — each grows / shrinks independently with its content. |
-
-A future addition under `Dock/` will provide an edge-anchored, collapsible primitive (left / right / top / bottom) for sidebars, response panels, and console drawers — see Linear OYO-277 for the contract.
+| [`Dock`](./Dock/README.md) | Edge-anchored (`left` / `right` / `top` / `bottom`) collapsible + resizable 2-pane primitive — for sidebars, response panels, console drawers. Owns the geometry, animation, and hover-preview affordance; trigger UI stays with the caller. |
 
 ## Why a shared parent
 

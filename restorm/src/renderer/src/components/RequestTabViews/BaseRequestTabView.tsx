@@ -17,7 +17,12 @@ import {
 export interface BaseRequestTabViewProps {
   /** Unique ID of the request (used to reset notes editor when switching requests) */
   requestId: string
-  /** URL input section (rendered above tabs) */
+  /** URL input section (verb select + URL input + send / run button).
+   * Rendered as the first row of the Request sub-tab content; the
+   * progress bar (if any) sits above the tab strip. Each protocol
+   * passes its own composed UI here so the host doesn't need to
+   * know about HTTP / GraphQL / gRPC / SOAP / OData / WebSocket
+   * specifics. */
   urlSection: ReactNode
   /** Content for the "Request" tab */
   requestContent: ReactNode
