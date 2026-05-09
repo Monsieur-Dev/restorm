@@ -15,6 +15,7 @@ import type { PersistenceFormat } from 'electron-core-ui'
 import { dirname, join } from 'path'
 import { existsSync, statSync } from 'fs'
 import { searchIndexService, contextService, responseHistoryService, authenticationCacheService } from './services'
+import { firewallService } from './services/firewall'
 import { writeMcpDiscoveryFile, cleanupMcpDiscoveryFile } from './services/mcpDiscovery'
 import { registerRestormMcp } from './mcp'
 import { graphQLService } from 'electron-core-ui/main'
@@ -344,6 +345,16 @@ void app.whenReady().then(async () => {
 // Dirty state is now handled by FileService via checksum comparison
 // FileService subscribes to DocumentEvents internally and tracks per-object checksums
 logger.info('Dirty state managed by FileService checksum system')
+
+// Layer A of the firewall — Chromium webRequest listener. Phase 1
+// is observability-only: every renderer-driven outbound call is
+// captured + broadcast as a `RequestRecord` to the console feed.
+// The actual block / prompt path lands in Phase 4 once
+// `PermissionService` is wired. Registered on `whenReady` so
+// `session.defaultSession` is guaranteed available.
+void app.whenReady().then(() => {
+  firewallService.registerWebRequestListener()
+})
 
 // Initialize Search Index Service (listens to document events from renderer)
 searchIndexService.initialize()
