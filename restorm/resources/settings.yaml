@@ -20,3 +20,24 @@ groups:
           descriptionKey: "behavior.syncSidebarWithTabsDescription"
           type: "toggle"
           default: true
+  - id: "console"
+    titleKey: "console.title"
+    items:
+      - setting:
+          id: "requestFormat"
+          titleKey: "console.requestFormat"
+          descriptionKey: "console.requestFormatDescription"
+          type: "enum"
+          default: "curl"
+          params:
+            values:
+              - value: "curl"
+                labelKey: "console.requestFormat.curl"
+              - value: "powershell"
+                labelKey: "console.requestFormat.powershell"
+      - setting:
+          id: "showInternalCalls"
+          titleKey: "console.showInternalCalls"
+          descriptionKey: "console.showInternalCallsDescription"
+          type: "toggle"
+          default: false

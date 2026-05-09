@@ -4,6 +4,7 @@ import { FitAddon } from '@xterm/addon-fit'
 import { SearchAddon } from '@xterm/addon-search'
 import { WebLinksAddon } from '@xterm/addon-web-links'
 import '@xterm/xterm/css/xterm.css'
+import './console.css'
 import type { RequestRecord } from '../../../../shared/types/firewall'
 import { renderRecord, type ConsoleShell } from './formatters'
 
