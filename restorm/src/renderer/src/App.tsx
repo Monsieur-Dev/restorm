@@ -84,6 +84,7 @@ const tabMatchesItem = (tab: EditorTab, itemId: string): boolean => {
 import { EmptyBench } from './components/MainView/Workbench/EmptyBench'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
 import { StatusbarMcpIndicator } from './components/MainView/StatusbarMcpIndicator'
+import { StatusbarFirewallIndicator } from './components/MainView/StatusbarFirewallIndicator'
 import { useMcpEnabled } from './hooks/useMcpEnabled'
 import { useMcpActiveStateBridge } from './hooks/useMcpActiveStateBridge'
 import { useMcpNavigation } from './hooks/useMcpNavigation'
@@ -120,6 +121,7 @@ import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
 import { useWorkbenchTabs } from './hooks/useWorkbenchTabs'
 import { useApiUpdateNotifications } from './hooks/useApiUpdateNotifications'
+import { useFirewallPromptToasts } from './hooks/useFirewallPromptToasts'
 import { useApiUpdateStateMap } from './hooks/useApiUpdateStateMap'
 import { useSidebarState } from './hooks/useSidebarState'
 import {
@@ -199,6 +201,13 @@ const App: React.FC = () => {
   // The settings section already owns the inline state; this is the
   // out-of-band notification for users not currently on the folder.
   useApiUpdateNotifications(t)
+
+  // Surface every firewall pending-permission prompt as a toast in
+  // the global app toaster. The four action buttons (Allow once /
+  // Allow always / Deny once / Deny always) dispatch the user's
+  // choice back to main, which fans the verdict out to every
+  // queued caller waiting on this destination.
+  useFirewallPromptToasts()
 
   const handleMenuExit = useCallback(() => {
     void window.api.closeWindow()
@@ -1942,6 +1951,10 @@ const App: React.FC = () => {
          * to render (mcp disabled) — otherwise both would each
          * consume their own margin slot and MCP would be stranded
          * mid-bar. */}
+        {/* Firewall mode indicator — always rendered, lives directly
+         * left of the MCP indicator. Click to cycle modes; pulses on
+         * each denied request. */}
+        <StatusbarFirewallIndicator />
         <StatusbarMcpIndicator rightAligned={!activeRequest} />
         <StatusBarBellButton
           toasterId="app"

@@ -36,8 +36,46 @@ export const FIREWALL_IPC = {
 	SET_MODE: 'firewall:set-mode',
 	LIST_ALLOWLIST: 'firewall:list-allowlist',
 	ADD_ALLOWLIST: 'firewall:add-allowlist',
-	REMOVE_ALLOWLIST: 'firewall:remove-allowlist'
+	REMOVE_ALLOWLIST: 'firewall:remove-allowlist',
+	PROMPT_SHOW: 'firewall:prompt-show',
+	PROMPT_RESOLVE: 'firewall:prompt-resolve'
 } as const
+
+/**
+ * Payload broadcast main → renderer when strict mode hits an unknown
+ * destination and needs the user's call. The renderer renders the
+ * prompt as a toast with four action buttons; clicking any one
+ * resolves the pending verdict via `FIREWALL_IPC.PROMPT_RESOLVE`.
+ */
+export interface FirewallPromptPayload {
+	/** Stable id used by the renderer to send the resolution back. */
+	promptId: string
+	/** Destination — same triple PermissionService used to make the
+	 * decision. The toast displays `host:port` so the user can tell
+	 * which call is being prompted. */
+	host: string
+	port: number
+	/** Layer that captured the call. Used by the toast to colour /
+	 * label the prompt ("renderer fetch" vs "main http"). */
+	source: RequestRecordSource
+	/** Capture time — ISO timestamp; the toast renders a relative-
+	 * time hint so stale prompts (renderer was hidden, user just
+	 * came back) are obvious. */
+	timestamp: string
+}
+
+/**
+ * Resolution payload sent renderer → main when the user picks one of
+ * the toast buttons. `persist: true` adds the host to the allowlist
+ * (for `verdict: 'allow'`) or to the denylist (for `verdict: 'deny'`,
+ * Phase 5+; today the deny side just suppresses repeated prompts for
+ * the rest of the session via the in-memory promptlist).
+ */
+export interface FirewallPromptResolution {
+	promptId: string
+	verdict: 'allow' | 'deny'
+	persist: boolean
+}
 
 /**
  * Origin layer that captured the request. Used by the console UI to

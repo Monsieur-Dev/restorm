@@ -44,6 +44,17 @@ class FirewallService {
 		this.listenerInstalled = true
 
 		session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
+			// Skip non-network URLs: chrome-extension://, devtools://,
+			// data:, blob:, file:, ws-related dev-tools traffic. These
+			// have no real "destination host" and shouldn't trip the
+			// firewall — gating them on a verdict promise would freeze
+			// devtools / loaded extensions / inline data URIs until the
+			// user clicks a prompt that doesn't even make sense for
+			// them.
+			if (!isNetworkScheme(details.url)) {
+				callback({ cancel: false })
+				return
+			}
 			let record: RequestRecord | null = null
 			try {
 				record = this.recordFromWebRequest(details)
@@ -145,6 +156,16 @@ class FirewallService {
 
 function safeParseUrl(raw: string): URL | null {
 	try { return new URL(raw) } catch { return null }
+}
+
+const NETWORK_SCHEMES = new Set<string>(['http:', 'https:', 'ws:', 'wss:'])
+function isNetworkScheme(rawUrl: string): boolean {
+	try {
+		const u = new URL(rawUrl)
+		return NETWORK_SCHEMES.has(u.protocol.toLowerCase())
+	} catch {
+		return false
+	}
 }
 
 function inferProtocol(parsed: URL | null): RequestRecordProtocol {

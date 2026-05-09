@@ -10,6 +10,7 @@ import {
   FIREWALL_IPC,
   FIREWALL_REQUEST_RECORD_CHANNEL,
   type FirewallMode,
+  type FirewallPromptPayload,
   type RequestRecord
 } from '../../shared/types/firewall'
 
@@ -59,6 +60,14 @@ contextBridge.exposeInMainWorld('api', {
     },
     removeFromAllowlist: async (pattern: string): Promise<void> => {
       await ipcRenderer.invoke(FIREWALL_IPC.REMOVE_ALLOWLIST, pattern)
+    },
+    onPromptShow: (cb: (payload: FirewallPromptPayload) => void): (() => void) => {
+      const handler = (_event: unknown, payload: FirewallPromptPayload): void => { cb(payload) }
+      ipcRenderer.on(FIREWALL_IPC.PROMPT_SHOW, handler)
+      return (): void => { ipcRenderer.off(FIREWALL_IPC.PROMPT_SHOW, handler) }
+    },
+    resolvePrompt: async (promptId: string, verdict: 'allow' | 'deny', persist: boolean): Promise<void> => {
+      await ipcRenderer.invoke(FIREWALL_IPC.PROMPT_RESOLVE, { promptId, verdict, persist })
     }
   }
 })

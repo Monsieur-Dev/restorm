@@ -1,8 +1,9 @@
-import { app } from 'electron'
+import { app, BrowserWindow } from 'electron'
+import { randomUUID } from 'node:crypto'
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { logger } from 'electron-core-ui'
-import type { FirewallMode } from '../../../shared/types/firewall'
+import { FIREWALL_IPC, type FirewallMode, type FirewallPromptPayload } from '../../../shared/types/firewall'
 
 /**
  * Firewall mode — re-exported from shared so existing local imports
@@ -72,8 +73,42 @@ interface PersistedState {
 	allowlist: string[]
 }
 
+interface PendingPrompt {
+	resolve: (verdict: Verdict) => void
+	host: string
+	port: number
+}
+
 class PermissionService {
+	// Default mode is `log-only`: every outbound call lands in the
+	// audit feed but nothing is blocked or prompted. `strict` is
+	// opt-in via the Settings panel — auto-enabling it would freeze
+	// any renderer that talks to a non-localhost host (subresource
+	// loads, third-party scripts, font CDNs) until the user clicks
+	// the toast. Because the toast resolves in the renderer, headless
+	// boots (e2e tests, CI) would deadlock the renderer's first
+	// outbound request. Lockdown stays an explicit opt-in too.
 	private mode: FirewallMode = 'log-only'
+
+	/**
+	 * Pending toast prompts keyed by promptId. The renderer
+	 * resolves each one via `resolvePrompt(promptId, verdict,
+	 * persist)`. We dedupe in-flight prompts by `host:port` via
+	 * `promptByHostPort` so a flurry of subresource loads to the
+	 * same destination only triggers one toast — the verdict is
+	 * fanned back out to every queued waiter on resolution.
+	 */
+	private readonly pendingPrompts = new Map<string, PendingPrompt>()
+	private readonly promptByHostPort = new Map<string, string>()
+	private readonly waitersByHostPort = new Map<string, ((v: Verdict) => void)[]>()
+
+	/**
+	 * Hosts the user has explicitly denied for the rest of the
+	 * session ("Deny once" → here). Persistent denylist would land
+	 * in Phase 5; today this only suppresses repeated prompts for
+	 * the same host:port within a single session.
+	 */
+	private readonly sessionDenylist = new Set<string>()
 
 	/**
 	 * In-memory allowlist of host patterns. Each entry is either
@@ -206,7 +241,98 @@ class PermissionService {
 	 * caller code.
 	 */
 	check(input: CheckInput): Promise<Verdict> {
-		return Promise.resolve(this.checkSync(input))
+		this.loadIfNeeded()
+		const host = input.host.toLowerCase()
+		// Defensive: empty host means the URL is non-network
+		// (data:, blob:, chrome-extension:, …). The upstream layer
+		// (FirewallService) already filters these, but we double-
+		// check so the prompt path can't ever fire on a phantom
+		// destination.
+		if (host === '') return Promise.resolve('allow')
+		if (LOCALHOST_HOSTS.has(host)) return Promise.resolve('allow')
+		if (this.matchAllowlist(host)) return Promise.resolve('allow')
+		const hostPortKey = `${host}:${String(input.port)}`
+		if (this.sessionDenylist.has(hostPortKey)) return Promise.resolve('deny')
+		switch (this.mode) {
+			case 'lockdown':
+				logger.warn('PermissionService: denied (lockdown)', { host, port: input.port, source: input.source })
+				return Promise.resolve('deny')
+			case 'strict':
+				return this.requestPrompt(host, input.port, input.source)
+			case 'log-only':
+			default:
+				return Promise.resolve('allow')
+		}
+	}
+
+	/**
+	 * Open a toast prompt for the given destination. Subsequent
+	 * `check()` calls for the same `host:port` while the prompt is
+	 * open are joined to the existing waiter list — the user's
+	 * choice fans out to every queued resolver. Returns a promise
+	 * that resolves once the renderer sends the resolution back via
+	 * `resolvePrompt`.
+	 */
+	private requestPrompt(host: string, port: number, source: string): Promise<Verdict> {
+		const hostPortKey = `${host}:${String(port)}`
+		const existingPromptId = this.promptByHostPort.get(hostPortKey)
+		if (existingPromptId !== undefined) {
+			return new Promise<Verdict>((resolve) => {
+				const queue = this.waitersByHostPort.get(hostPortKey) ?? []
+				queue.push(resolve)
+				this.waitersByHostPort.set(hostPortKey, queue)
+			})
+		}
+		const promptId = randomUUID()
+		const promise = new Promise<Verdict>((resolve) => {
+			this.pendingPrompts.set(promptId, { resolve, host, port })
+		})
+		this.promptByHostPort.set(hostPortKey, promptId)
+		const payload: FirewallPromptPayload = {
+			promptId,
+			host,
+			port,
+			source: source as FirewallPromptPayload['source'],
+			timestamp: new Date().toISOString()
+		}
+		for (const win of BrowserWindow.getAllWindows()) {
+			if (win.isDestroyed()) continue
+			win.webContents.send(FIREWALL_IPC.PROMPT_SHOW, payload)
+		}
+		return promise
+	}
+
+	/**
+	 * Resolve a pending prompt — invoked by the IPC handler when
+	 * the renderer dispatches the user's choice. Fans the verdict
+	 * out to every waiter joined to the same host:port.
+	 *
+	 * `persist: true` + `verdict: 'allow'` adds the host to the
+	 * persistent allowlist (so subsequent calls don't re-prompt).
+	 * `persist: true` + `verdict: 'deny'` adds it to the
+	 * session-only denylist (a real persistent denylist would land
+	 * in Phase 5).
+	 */
+	resolvePrompt(promptId: string, verdict: Verdict, persist: boolean): void {
+		this.loadIfNeeded()
+		const pending = this.pendingPrompts.get(promptId)
+		if (pending === undefined) {
+			logger.warn('PermissionService: resolvePrompt called for unknown id', { promptId })
+			return
+		}
+		const hostPortKey = `${pending.host}:${String(pending.port)}`
+		this.pendingPrompts.delete(promptId)
+		this.promptByHostPort.delete(hostPortKey)
+		if (persist) {
+			if (verdict === 'allow') this.addToAllowlist(pending.host)
+			else this.sessionDenylist.add(hostPortKey)
+		}
+		pending.resolve(verdict)
+		const waiters = this.waitersByHostPort.get(hostPortKey)
+		if (waiters !== undefined) {
+			this.waitersByHostPort.delete(hostPortKey)
+			for (const resolve of waiters) resolve(verdict)
+		}
 	}
 
 	/**
@@ -222,6 +348,7 @@ class PermissionService {
 	checkSync(input: CheckInput): Verdict {
 		this.loadIfNeeded()
 		const host = input.host.toLowerCase()
+		if (host === '') return 'allow'
 		if (LOCALHOST_HOSTS.has(host)) return 'allow'
 		if (this.matchAllowlist(host)) return 'allow'
 		switch (this.mode) {

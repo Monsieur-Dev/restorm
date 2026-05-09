@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron'
 import { permissionService } from './PermissionService'
-import { FIREWALL_IPC, type FirewallMode } from '../../../shared/types/firewall'
+import { FIREWALL_IPC, type FirewallMode, type FirewallPromptResolution } from '../../../shared/types/firewall'
 
 /**
  * Idempotent — calling twice silently rebinds, which is fine in
@@ -36,5 +36,17 @@ export function registerFirewallIpc(): void {
 			throw new Error('Allowlist entry must be a string')
 		}
 		permissionService.removeFromAllowlist(pattern)
+	})
+
+	ipcMain.handle(FIREWALL_IPC.PROMPT_RESOLVE, (_event, payload: unknown) => {
+		const r = payload as Partial<FirewallPromptResolution>
+		if (typeof r.promptId !== 'string') {
+			throw new Error('promptId must be a string')
+		}
+		if (r.verdict !== 'allow' && r.verdict !== 'deny') {
+			throw new Error(`verdict must be allow|deny, got ${String(r.verdict)}`)
+		}
+		const persist = typeof r.persist === 'boolean' ? r.persist : false
+		permissionService.resolvePrompt(r.promptId, r.verdict, persist)
 	})
 }
