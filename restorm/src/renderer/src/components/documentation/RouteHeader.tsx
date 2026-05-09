@@ -286,37 +286,40 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
             <dt>Security</dt>
             <dd>
               <ul className="documentation-host-route-header__security-list">
-                {operation.security.map((requirement, idx) => {
+                {operation.security.flatMap((requirement, idx) => {
                   const entries = Object.entries(requirement)
-                  return (
-                    <li key={idx} className="documentation-host-route-header__security-item">
-                      {entries.length === 0 ? (
+                  if (entries.length === 0) {
+                    return [
+                      <li key={`open-${idx}`} className="documentation-host-route-header__security-item">
                         <em>open (no auth)</em>
-                      ) : (
-                        entries.map(([schemeName, scopes]) => {
-                          const scheme = securitySchemes[schemeName]
-                          return (
-                            <div key={schemeName} className="documentation-host-route-header__security-scheme">
-                              <div className="documentation-host-route-header__security-scheme-head">
-                                <code className="documentation-host-route-header__security-scheme-name">{schemeName}</code>
-                                {scheme !== undefined && (
-                                  <span className="documentation-host-route-header__security-scheme-kind">
-                                    {renderSchemeKindLabel(scheme)}
-                                  </span>
-                                )}
-                                {scheme === undefined && scopes.length > 0 && (
-                                  <span className="documentation-host-route-header__security-scopes">
-                                    ({scopes.join(', ')})
-                                  </span>
-                                )}
-                              </div>
-                              {scheme !== undefined && renderSchemeDetail(scheme, scopes)}
-                            </div>
-                          )
-                        })
-                      )}
-                    </li>
-                  )
+                      </li>
+                    ]
+                  }
+                  return entries.map(([schemeName, scopes]) => {
+                    const scheme = securitySchemes[schemeName]
+                    return (
+                      <li
+                        key={`${idx}-${schemeName}`}
+                        className="documentation-host-route-header__security-item"
+                      >
+                        <code className="documentation-host-route-header__security-scheme-name">{schemeName}</code>
+                        {scheme !== undefined && (
+                          <span className="documentation-host-route-header__security-scheme-kind">
+                            {' — '}
+                            {renderSchemeKindLabel(scheme)}
+                          </span>
+                        )}
+                        {scopes.length > 0 && (
+                          <span className="documentation-host-route-header__security-scopes">
+                            {' ('}
+                            {scopes.join(', ')}
+                            {')'}
+                          </span>
+                        )}
+                        {scheme !== undefined && renderSchemeDetail(scheme, scopes)}
+                      </li>
+                    )
+                  })
                 })}
               </ul>
             </dd>

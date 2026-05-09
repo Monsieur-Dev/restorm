@@ -314,6 +314,16 @@ colors:
     value: "#ccc3"
     description: Side bar section header border
 
+  # Dock primitive — panel surface (the dockable side that fades on
+  # collapse + floats over the main column during hover-preview).
+  # Kept opaque by default so consumers don't have to opt in per
+  # call site for the preview overlay to read cleanly over content.
+  # Mirrors `editor.background` so the dock blends into the workbench
+  # by default; per-theme overrides are still free to diverge.
+  - id: dock.background
+    value: "#1e1e1e"
+    description: Dock panel background
+
   # Status bar
   - id: statusBarItem.remoteForeground
     value: "#FFF"

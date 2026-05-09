@@ -348,7 +348,8 @@ The following files in the project use CSS variables:
 - `src/renderer/components/Toggle/toggle.css`
 - `src/renderer/components/Titlebar/titlebar.css`
 - `src/renderer/components/Statusbar/statusbar.css`
-- `src/renderer/components/SplitView/splitview.css`
+- `src/renderer/components/Panes/SplitView/splitview.css`
+- `src/renderer/components/Panes/StaticPane/staticPane.css`
 - `src/renderer/components/SelectBox/selectBox.css`
 - `src/renderer/components/ScrollableElement/scrollbars.css`
 - `src/renderer/components/Radio/radio.css`

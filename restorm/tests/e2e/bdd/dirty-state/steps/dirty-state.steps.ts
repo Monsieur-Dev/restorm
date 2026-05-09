@@ -173,6 +173,24 @@ When('I reopen the welcome recent file {string}', async ({}, fileName: string) =
 // ── URL field char-level edits (first-edit-cycle regression target) ──
 
 /**
+ * The URL bar (verb select + URL input + send button) lives inside the
+ * Request sub-tab of the request view; switching to Notes / Docs / Code
+ * snippets hides the whole control row. Tests that interact with the
+ * URL input must activate the Request sub-tab first or Playwright's
+ * `:visible` filter will time out — sibling sub-tabs are kept mounted
+ * with `visibility: hidden`. This helper is a no-op when the Request
+ * sub-tab is already active.
+ */
+async function activateRequestSubTab(p: Page): Promise<void> {
+  const tab = p.locator('[role="tab"][data-testid="base-request-tabs-request-tab-request"]:visible').first()
+  if ((await tab.count()) === 0) return
+  const alreadyActive = await tab.getAttribute('aria-selected')
+  if (alreadyActive === 'true') return
+  await tab.click()
+  await p.waitForTimeout(200)
+}
+
+/**
  * Place the caret at the end of the URL input. The reactive proxy fires
  * its set event on every value change, so we drive the keyboard directly
  * — no `fill()` shortcut, no `press('Tab')` blur — to land each
@@ -185,6 +203,7 @@ When('I reopen the welcome recent file {string}', async ({}, fileName: string) =
  * `.monaco-editor` viewport so Monaco actually arms input.
  */
 async function focusUrlAtEnd(p: Page): Promise<void> {
+  await activateRequestSubTab(p)
   const urlInput = p.locator('[data-testid="http-request-url-input"]:visible').first()
   await expect(urlInput).toBeVisible({ timeout: 5000 })
   const viewport = urlInput.locator('.monaco-editor').first()
@@ -534,6 +553,7 @@ When(
   'I set the HTTP request URL to {string}',
   async ({}, url: string) => {
     const p = requirePage()
+    await activateRequestSubTab(p)
     const urlInput = p.locator('[data-testid="http-request-url-input"]:visible').first()
     await expect(urlInput).toBeVisible({ timeout: 5000 })
     await urlInput.click()

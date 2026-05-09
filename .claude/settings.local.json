@@ -16,8 +16,10 @@
       "mcp__restorm__*",
       "Skill(update-config)",
       "Read(/tmp/**)",
+      "Read(//tmp/**)",
       "Read(~/.claude/**)",
-      "mcp__plugin_telegram_telegram__download_attachment"
+      "mcp__plugin_telegram_telegram__download_attachment",
+      "mcp__plugin_telegram_telegram__react"
     ]
   },
   "enableAllProjectMcpServers": true,

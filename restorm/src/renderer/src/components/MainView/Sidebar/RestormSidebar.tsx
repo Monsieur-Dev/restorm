@@ -96,14 +96,28 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
     }
   }, [onItemClick])
 
+  // Each optional pane is only rendered when it has content, so the
+  // collapsed-array indices coming back from SplitView depend on the
+  // current composition. Tracking which panes are present here lets
+  // the handler map indices → pane names without index-shift bugs.
+  const showFavoritesPane = favoriteItems.length > 0
+  const showOpenedPane = openDocumentItems.length > 0
+  const presentPanes = useMemo<('favorites' | 'opened' | 'workspace')[]>(() => {
+    const list: ('favorites' | 'opened' | 'workspace')[] = []
+    if (showFavoritesPane) list.push('favorites')
+    if (showOpenedPane) list.push('opened')
+    list.push('workspace')
+    return list
+  }, [showFavoritesPane, showOpenedPane])
+
   const handleSplitViewCollapsedChange = useCallback((collapsed: boolean[]) => {
-    // [favorites, opened, workspace] — workspace is collapsible:false
-    // so its slot stays expanded; we only forward the two we care about.
-    onPanesCollapsedChange?.({
-      favorites: collapsed[0] ?? false,
-      opened: collapsed[1] ?? false
+    const next = { favorites: false, opened: false }
+    presentPanes.forEach((name, idx) => {
+      if (name === 'favorites') next.favorites = collapsed[idx] ?? false
+      else if (name === 'opened') next.opened = collapsed[idx] ?? false
     })
-  }, [onPanesCollapsedChange])
+    onPanesCollapsedChange?.(next)
+  }, [onPanesCollapsedChange, presentPanes])
 
   const handleFavoritesDrop = useCallback((payload: ListViewDropEventPayload) => {
     // Reorder inside the Favorites pane only. Cross-pane drops are
@@ -184,7 +198,11 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
         flexDirection: 'column',
         minHeight: 0,
         borderRight: '1px solid var(--sideBar-border)',
-        backgroundColor: 'var(--sideBar-background)',
+        // No backgroundColor here — the parent Dock paints
+        // `var(--dock-background)` on `.dock__panel-content`, and we
+        // want that fill to show through the entire panel (including
+        // the strip below the workspace tree). Without removing this
+        // inline override, the sidebar paints over the dock's background.
         width: '100%',
         height: '100%'
       }}
@@ -195,47 +213,51 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
         style={{ width: '100%', height: '100%' }}
         onCollapsedChange={handleSplitViewCollapsedChange}
       >
-        <Pane
-          title={t('sidebar.favorites')}
-          minSize={80}
-          initialSize={0.2}
-          defaultCollapsed={panesCollapsed?.favorites ?? false}
-        >
-          <ListView
-            items={favoriteItems}
-            rootRole="list"
-            ariaLabel={t('sidebar.favorites')}
-            selectedIds={selectedItemId ? [selectedItemId] : []}
-            activeId={activeId}
-            isRenameable
-            editingItemId={favoritesEditingItemId}
-            {...(onFavoritesEditingEnd && { onEditingEnd: onFavoritesEditingEnd })}
-            onItemRename={onItemRename}
-            onItemClick={handleItemClick}
-            onItemDrop={handleFavoritesDrop}
-            data-testid="sidebar-favorites-listview"
-          />
-        </Pane>
-        <Pane
-          title={t('common.opened')}
-          minSize={80}
-          initialSize={0.2}
-          defaultCollapsed={panesCollapsed?.opened ?? false}
-        >
-          <ListView
-            items={openDocumentItems}
-            rootRole="list"
-            ariaLabel={t('common.opened')}
-            selectedIds={selectedItemId ? [selectedItemId] : []}
-            activeId={activeId}
-            isRenameable
-            editingItemId={openedEditingItemId}
-            {...(onOpenedEditingEnd && { onEditingEnd: onOpenedEditingEnd })}
-            onItemRename={onItemRename}
-            onItemClick={handleItemClick}
-            data-testid="sidebar-open-documents-listview"
-          />
-        </Pane>
+        {showFavoritesPane && (
+          <Pane
+            title={t('sidebar.favorites')}
+            minSize={80}
+            initialSize={0.2}
+            defaultCollapsed={panesCollapsed?.favorites ?? false}
+          >
+            <ListView
+              items={favoriteItems}
+              rootRole="list"
+              ariaLabel={t('sidebar.favorites')}
+              selectedIds={selectedItemId ? [selectedItemId] : []}
+              activeId={activeId}
+              isRenameable
+              editingItemId={favoritesEditingItemId}
+              {...(onFavoritesEditingEnd && { onEditingEnd: onFavoritesEditingEnd })}
+              onItemRename={onItemRename}
+              onItemClick={handleItemClick}
+              onItemDrop={handleFavoritesDrop}
+              data-testid="sidebar-favorites-listview"
+            />
+          </Pane>
+        )}
+        {showOpenedPane && (
+          <Pane
+            title={t('common.opened')}
+            minSize={80}
+            initialSize={0.2}
+            defaultCollapsed={panesCollapsed?.opened ?? false}
+          >
+            <ListView
+              items={openDocumentItems}
+              rootRole="list"
+              ariaLabel={t('common.opened')}
+              selectedIds={selectedItemId ? [selectedItemId] : []}
+              activeId={activeId}
+              isRenameable
+              editingItemId={openedEditingItemId}
+              {...(onOpenedEditingEnd && { onEditingEnd: onOpenedEditingEnd })}
+              onItemRename={onItemRename}
+              onItemClick={handleItemClick}
+              data-testid="sidebar-open-documents-listview"
+            />
+          </Pane>
+        )}
         <Pane
           title={t('sidebar.workspace')}
           collapsible={false}
@@ -265,6 +287,7 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
             style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
             onClick={handleEmptyAreaClick}
             onContextMenu={handleEmptyAreaContextMenu}
+            data-testid="sidebar-empty-area"
           >
             <ListView
               items={items}
@@ -284,10 +307,6 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
               onEditingEnd={onEditingEnd}
               onDeleteRequest={onDeleteRequest}
               data-testid="sidebar-listview"
-            />
-            <div
-              data-testid="sidebar-empty-area-filler"
-              style={{ flex: 1, minHeight: 20 }}
             />
           </div>
           <ContextMenu

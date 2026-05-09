@@ -71,11 +71,14 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
     docsTabs.push({
       id: 'docs',
       label: t('folderView.tabs.docs'),
-      // Structured docs render their own ScrollableElement via the
-      // DocumentationHost wrapper; legacy markdown stays unwrapped
-      // so the existing Markdown editor + viewer keep their
-      // self-contained scroll behaviour.
-      useScrollableElement: hasStructuredDocs,
+      // Structured docs own their own scroll contexts (Dock-bounded
+      // sidebar + an inner ScrollableElement on the main column),
+      // so the Tabs wrapper must NOT wrap them in an outer
+      // ScrollableElement — that would unbound the Dock's height
+      // and starve the inner sidebar of overflow to scroll.
+      // Legacy markdown stays in the outer wrapper so the existing
+      // Markdown editor + viewer keep their natural scroll.
+      useScrollableElement: !hasStructuredDocs,
       content: hasStructuredDocs
         ? docsContent
         : (

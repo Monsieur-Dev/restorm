@@ -79,6 +79,7 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
       <ScrollableElement
         className="documentation-host-sidebar__scroll"
         data-testid="documentation-host-sidebar-scroll"
+        options={{ horizontal: 'hidden' }}
       >
       {scopeTitle !== undefined && scopeTitle.length > 0 && (
         <nav

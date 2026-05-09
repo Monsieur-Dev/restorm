@@ -17,7 +17,12 @@ import {
 export interface BaseRequestTabViewProps {
   /** Unique ID of the request (used to reset notes editor when switching requests) */
   requestId: string
-  /** URL input section (rendered above tabs) */
+  /** URL input section (verb select + URL input + send / run button).
+   * Rendered as the first row of the Request sub-tab content; the
+   * progress bar (if any) sits above the tab strip. Each protocol
+   * passes its own composed UI here so the host doesn't need to
+   * know about HTTP / GraphQL / gRPC / SOAP / OData / WebSocket
+   * specifics. */
   urlSection: ReactNode
   /** Content for the "Request" tab */
   requestContent: ReactNode
@@ -191,12 +196,30 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
 
   // Build request tabs (Request, Docs, Notes, Code Snippets)
   const requestTabs: Tab[] = useMemo(() => {
+    // The URL bar (verb select + URL input + send/run button) is
+    // rendered INSIDE the Request tab so the affordance only shows
+    // when the user is actually editing the request — not over the
+    // Docs / Notes / Code snippets tabs where it would be off-topic.
+    // The protocol-specific tab views still pass it via the
+    // `urlSection` prop; placement is the host's call.
+    const requestTabContent = (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, height: '100%', minHeight: 0 }}>
+        {/* `marginTop` reserves a small visual gap between the tab
+         * strip above and the URL controls — without it the verb
+         * select + URL input would butt up against the active-tab
+         * underline on the Request strip. */}
+        <div style={{ marginTop: 8 }}>{urlSection}</div>
+        <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+          {requestContent}
+        </div>
+      </div>
+    )
     const tabs: Tab[] = [
       {
         id: 'request',
         label: t('requestTab.tabs.requestLayout'),
         useScrollableElement: false,
-        content: requestContent
+        content: requestTabContent
       }
     ]
 
@@ -243,7 +266,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
     }
 
     return tabs
-  }, [requestId, notes, requestContent, docsContent, hasDocs, handleNotesChange, codeSnippetsContent, additionalRequestTabs, showNotes, showCodeSnippets, t])
+  }, [requestId, notes, requestContent, urlSection, docsContent, hasDocs, handleNotesChange, codeSnippetsContent, additionalRequestTabs, showNotes, showCodeSnippets, t])
 
   // If the active tab vanishes (e.g., user was on Docs and the request's URL
   // changed so no operation matches anymore), fall back to the Request tab
@@ -437,20 +460,23 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: 8,
+        gap: 4,
         width: '100%',
         height: '100%',
-        padding: '8px 0',
+        padding: '0 0 8px 0',
         boxSizing: 'border-box'
       }}
     >
-      {/* URL Section */}
-      {urlSection}
-
-      {/* Progress Bar */}
-      <div style={{ width: '100%', height: 4 }}>
-        {isLoading && <ProgressBar mode="infinite" data-testid="base-request-progress-bar" />}
-      </div>
+      {/* The URL section (verb select + URL input + send/run) is now
+       * rendered inside the Request tab itself — see `requestTabs`
+       * above. Progress bar only reserves vertical space while a
+       * request is in flight; otherwise the title row sits directly
+       * above the tab strip with just the container gap between. */}
+      {isLoading && (
+        <div style={{ width: '100%', height: 4 }}>
+          <ProgressBar mode="infinite" data-testid="base-request-progress-bar" />
+        </div>
+      )}
 
       {useCompactLayout ? (
         /* Compact: single tab group with all tabs merged */

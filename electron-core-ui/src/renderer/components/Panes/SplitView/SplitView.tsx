@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Sash } from '../Sash';
-import type { SashEvent, IHorizontalSashLayoutProvider } from '../Sash';
+import { Sash } from '../../Sash';
+import type { SashEvent, IHorizontalSashLayoutProvider } from '../../Sash';
 import { Pane } from './Pane';
 import type { InternalPaneConfig, SplitViewProps } from './types';
 import './splitview.css';

@@ -64,7 +64,11 @@ function collectOpenItemIds(tree: WorkbenchTree): { itemId: string; tabId: strin
       if (isTabGroupNode(node)) {
         for (const tab of node.tabs) {
           const t = tab as ItemBackedTab
-          const itemId = t.request?.id ?? t.folder?.id ?? null
+          // The Opened pane lists open *requests* only — folder /
+          // environment-folder tabs (Configuration / Docs / Notes
+          // surfaces) carry workbench state but aren't "documents"
+          // the user re-opens via this list.
+          const itemId = t.request?.id ?? null
           if (!itemId || seen.has(itemId)) continue
           seen.add(itemId)
           out.push({ itemId, tabId: tab.id })

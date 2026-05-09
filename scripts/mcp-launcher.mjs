@@ -839,7 +839,16 @@ async function handleLine(text) {
  * is just a cleanup-then-run wrapper here.
  */
 async function runManualMode() {
-  const extraArgs = process.argv.slice(2)
+  // pnpm keeps its `--` separator in the spawned script's argv, so
+  // `pnpm dev:restorm:mcp -- -o /path` reaches us as
+  // `['--', '-o', '/path']`. If we re-injected that leading `--` into
+  // the inner `pnpm dev:restorm -- --mcp ...` invocation, Electron
+  // would stop parsing flags at the second `--` and the `-o /path`
+  // pair would land as positional argv instead of opening the file.
+  // Strip the leading separator so forwarded flags reach Electron's
+  // CLI parser as actual flags.
+  const rawArgs = process.argv.slice(2)
+  const extraArgs = rawArgs[0] === '--' ? rawArgs.slice(1) : rawArgs
   log('manual mode (TTY) — running cleanup then spawning restorm in foreground', extraArgs.length > 0 ? { extraArgs } : undefined)
   await gcStaleDiscoveryFiles()
   const child = spawn(

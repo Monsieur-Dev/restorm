@@ -599,7 +599,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
           >
-            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <HTTPRequestTabView request={request} />
             </div>
           </DeprecationAwareRequestTab>
@@ -625,7 +625,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
           >
-            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <GraphQLRequestTabView request={request} />
             </div>
           </RestormWorkbenchTab>
@@ -651,7 +651,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
           >
-            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <GrpcRequestTabView request={request} />
             </div>
           </RestormWorkbenchTab>
@@ -677,7 +677,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
           >
-            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <SoapRequestTabView request={request} />
             </div>
           </RestormWorkbenchTab>
@@ -703,7 +703,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
           >
-            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <WebSocketRequestTabView request={request} />
             </div>
           </RestormWorkbenchTab>
@@ -729,7 +729,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
           >
-            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <ODataRequestTabView request={request} />
             </div>
           </RestormWorkbenchTab>
@@ -756,7 +756,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
           >
-            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '8px 16px' }}>
+            <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <HTTPRequestTabView request={request} />
             </div>
           </RestormWorkbenchTab>

@@ -182,7 +182,13 @@ const TabsInner: React.FC<TabsProps> = ({
                     zIndex: 0
                   }}
                 />
-                {/* Active indicator line */}
+                {/* Active indicator line — sits above the tab label
+                 * (at zIndex 1) but below any layout primitive's
+                 * floating overlay (Dock's hover-preview content sits
+                 * at zIndex 3). The bar is purely visual chrome at
+                 * the bottom edge of the tab; it doesn't need to
+                 * outrank panels that legitimately float over the
+                 * tab bar. */}
                 <div
                   style={{
                     position: 'absolute',
@@ -192,7 +198,7 @@ const TabsInner: React.FC<TabsProps> = ({
                     height: '2px',
                     backgroundColor: isActive ? 'var(--tab-activeBorder)' : 'transparent',
                     transition: 'background-color 0.2s ease',
-                    zIndex: 10
+                    zIndex: 2
                   }}
                 />
                 <span style={{ position: 'relative', zIndex: 1 }}>{tab.label}</span>

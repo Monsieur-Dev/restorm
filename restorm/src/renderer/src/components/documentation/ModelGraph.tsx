@@ -3,7 +3,6 @@ import {
   ReactFlow,
   ReactFlowProvider,
   Controls,
-  MiniMap,
   useReactFlow,
   type Edge,
   type EdgeTypes,
@@ -145,7 +144,6 @@ const ModelGraphCanvas: React.FC<{
       data-layout-ready={layoutReady ? 'true' : 'false'}
     >
       <Controls showInteractive={false} />
-      <MiniMap pannable zoomable />
     </ReactFlow>
   )
 }
