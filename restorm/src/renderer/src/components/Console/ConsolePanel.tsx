@@ -16,8 +16,8 @@ interface ConsolePanelProps {
 /**
  * Workbench-tab-ready Console surface: toolbar + xterm panel +
  * firewall-feed subscription. Lives at `restorm/src/renderer/src/
- * components/Console/`; consumed via the workbench tab kind that
- * Phase 2B introduces.
+ * components/Console/`; consumed via the `console` workbench tab
+ * kind defined in `shared/types/editor.ts`.
  *
  * Settings:
  * - `console:requestFormat` — controls the curl ↔ powershell

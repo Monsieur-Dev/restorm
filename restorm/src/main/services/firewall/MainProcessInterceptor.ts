@@ -24,10 +24,15 @@ import type {
  *     fetch), with the record emitted as `deny` so the audit
  *     log + console show the block.
  *
- * Strict mode's async toast prompt isn't wired here yet — Phase 4D
- * adds the `BufferingClientRequest` wrapper that queues writes
- * until the user resolves. Until then `strict` is treated like
- * `log-only` from this layer's perspective (allow + audit).
+ * Strict mode's async toast prompt is intentionally NOT awaited
+ * here: `http.request()` is sync, so a real prompt-respecting
+ * Layer B would need a `BufferingClientRequest` wrapper that
+ * queues `req.write()` until the verdict resolves. That's
+ * follow-up scope — until then `strict` is treated like
+ * `log-only` from this layer's perspective (allow + audit). The
+ * session-denylist gate still fires (so a user who picked "Deny
+ * always" against a Layer A prompt also blocks main-process
+ * traffic to the same destination).
  *
  * Patches `http.request`, `http.get`, `https.request`, `https.get`,
  * and `globalThis.fetch`. `dns.lookup` and `net.Socket.connect`
@@ -166,10 +171,11 @@ function recordFromHttpArgs(args: unknown[], source: RequestRecordSource): Reque
 		host,
 		port: Number.isFinite(port) ? port : 0,
 		headers,
-		// `http.request`'s body is written via `req.write` AFTER the
-		// call returns — we don't see it here. Phase 4's
-		// BufferingClientRequest wrapper will hook those writes so
-		// the body lands on the record before the actual flush.
+		// `http.request`'s body is written via `req.write()` AFTER
+		// the call returns — we don't see it here. A future
+		// `BufferingClientRequest` wrapper would hook those writes
+		// so the body lands on the record before the actual flush;
+		// for now Layer B records always show empty bodies for POSTs.
 		verdict: 'allow'
 	}
 }

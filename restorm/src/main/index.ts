@@ -1,5 +1,5 @@
 // LOAD-ORDER CRITICAL: install the main-process firewall interceptor
-// (Layer B of OYO-276) BEFORE any other module that might trigger an
+// (Layer B) BEFORE any other module that might trigger an
 // outgoing HTTP / HTTPS / fetch call. The monkey-patches replace
 // `http.request` / `https.request` / `globalThis.fetch` in-place, so
 // every subsequent `import` / `require` inherits the patched versions.
@@ -25,7 +25,7 @@ import type { PersistenceFormat } from 'electron-core-ui'
 import { dirname, join } from 'path'
 import { existsSync, statSync } from 'fs'
 import { searchIndexService, contextService, responseHistoryService, authenticationCacheService } from './services'
-import { firewallService, registerFirewallIpc } from './services/firewall'
+import { firewallService, permissionService, registerFirewallIpc } from './services/firewall'
 import { writeMcpDiscoveryFile, cleanupMcpDiscoveryFile } from './services/mcpDiscovery'
 import { registerRestormMcp } from './mcp'
 import { graphQLService } from 'electron-core-ui/main'
@@ -364,9 +364,16 @@ logger.info('Dirty state managed by FileService checksum system')
 // `session.defaultSession` is guaranteed available.
 void app.whenReady().then(() => {
   firewallService.registerWebRequestListener()
-  // Phase 4B: IPC bridge for the renderer (Settings → Firewall
-  // panel). Reads + mutates `permissionService` mode + allowlist.
+  // IPC bridge for the renderer — reads + mutates the
+  // permissionService mode + allowlist + prompt resolutions.
   registerFirewallIpc()
+})
+
+// Auto-deny every outstanding firewall prompt on shutdown so
+// Layer A's `onBeforeRequest` callbacks don't leave Chromium
+// requests hanging while the app is being torn down.
+app.on('before-quit', () => {
+  permissionService.denyAllPending()
 })
 
 // Initialize Search Index Service (listens to document events from renderer)

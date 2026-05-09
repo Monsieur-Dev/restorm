@@ -65,11 +65,12 @@ export interface FirewallPromptPayload {
 }
 
 /**
- * Resolution payload sent renderer → main when the user picks one of
- * the toast buttons. `persist: true` adds the host to the allowlist
- * (for `verdict: 'allow'`) or to the denylist (for `verdict: 'deny'`,
- * Phase 5+; today the deny side just suppresses repeated prompts for
- * the rest of the session via the in-memory promptlist).
+ * Resolution payload sent renderer → main when the user picks one
+ * of the toast buttons. `persist: true` adds the host to the
+ * persistent allowlist (for `verdict: 'allow'`) or to the
+ * in-memory session denylist (for `verdict: 'deny'`). A persistent
+ * denylist is follow-up scope — for now the deny side only
+ * suppresses repeated prompts for the rest of the session.
  */
 export interface FirewallPromptResolution {
 	promptId: string

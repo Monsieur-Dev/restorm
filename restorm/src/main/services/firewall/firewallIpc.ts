@@ -3,9 +3,10 @@ import { permissionService } from './PermissionService'
 import { FIREWALL_IPC, type FirewallMode, type FirewallPromptResolution } from '../../../shared/types/firewall'
 
 /**
- * Idempotent — calling twice silently rebinds, which is fine in
- * dev because electron-vite restarts the main process on edits
- * and clears the previous handlers.
+ * Idempotent guard. `ipcMain.handle` throws if a channel is
+ * registered twice — the boolean keeps repeated calls (electron-
+ * vite hot reloads, future call-sites that aren't sure) from
+ * crashing the main process.
  */
 let installed = false
 

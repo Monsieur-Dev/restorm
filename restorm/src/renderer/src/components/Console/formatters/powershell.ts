@@ -47,7 +47,7 @@ const renderHttpPowershell: RecordRenderer = (record: RequestRecord): string => 
  * copy-pasteable into WSL or Git Bash.
  */
 function renderUnixToolFallback(command: string): string {
-	const fallbackHint = '# Pas d\'équivalent PowerShell natif — commande Unix reproductible :'
+	const fallbackHint = '# No native PowerShell equivalent — reproducible Unix command:'
 	return `${fallbackHint}\n${command}`
 }
 

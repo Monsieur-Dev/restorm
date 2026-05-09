@@ -11,15 +11,16 @@ import { FIREWALL_IPC, type FirewallMode, type FirewallPromptPayload } from '../
  * lives in `shared/types/firewall.ts` so the renderer settings UI
  * can name the same union without reaching into main.
  *
- * Behaviour reminder:
- * - `strict`: unknown destination → emit a `pending` verdict +
- *   broadcast a toast-prompt IPC; resolve to `allow` / `deny`
- *   when the user picks. Default first-run experience after
- *   Phase 4C ships the toast UI.
+ * Behaviour:
+ * - `strict`: unknown destination → broadcast a toast-prompt IPC
+ *   (one toast per host:port; subsequent in-flight calls to the
+ *   same destination join the same waiter list). Resolves to
+ *   `allow` / `deny` when the user clicks one of the four buttons.
  * - `log-only`: unknown destination → resolve immediately to
- *   `allow`, but the audit log keeps the entry so the user can
- *   review what tried to call out. Default first-run while the
- *   toast UI is still in flight.
+ *   `allow`, but the audit log keeps the entry. Default mode —
+ *   `strict` requires explicit opt-in via the statusbar indicator
+ *   because defaulting to it would deadlock headless boots (e2e,
+ *   CI) on the first non-localhost asset load.
  * - `lockdown`: unknown destination → resolve immediately to
  *   `deny`, no prompt. The "I'm running an untrusted plugin and
  *   nothing else should be able to phone home" mode.
@@ -27,13 +28,10 @@ import { FIREWALL_IPC, type FirewallMode, type FirewallPromptPayload } from '../
 export type { FirewallMode }
 
 /**
- * Verdict the `PermissionService` returns to the calling
- * interception layer. `pending` is the only async case — it
- * means the toast prompt is in flight and the caller should
- * buffer its writes until a follow-up `allow` / `deny` lands.
- * Phase 4A: `pending` never returned (everything resolves to
- * `allow` synchronously); the wiring is in place for 4C when
- * the toast lands.
+ * Verdict the `PermissionService` returns. Strict mode + unknown
+ * destination is the only path that can take longer than a
+ * microtask — the returned promise stays unresolved until the
+ * renderer dispatches `firewall:prompt-resolve`.
  */
 export type Verdict = 'allow' | 'deny'
 
@@ -60,13 +58,13 @@ const LOCALHOST_HOSTS = new Set<string>(['localhost', '127.0.0.1', '0.0.0.0', ':
 
 /**
  * `PermissionService` — single source of truth for outbound-call
- * verdicts. Phase 4A is the **skeleton**: in-memory mode +
- * allowlist, localhost short-circuit, wildcard-glob matcher.
- * Phases 4B-4C will add per-project persistence + toast prompt.
+ * verdicts. Owns the in-memory mode + allowlist + session denylist,
+ * persists the first two to `userData/firewall/state.json`, and
+ * dispatches the toast-prompt round-trip for strict mode.
  *
- * Stays in the main process (it owns the allowlist file + the
- * BufferingClientRequest contract). The renderer interacts via
- * an IPC bridge added in Phase 4B.
+ * Stays in the main process. The renderer interacts via the IPC
+ * bridge in `firewallIpc.ts` (`window.api.firewall.*` after the
+ * preload binding).
  */
 interface PersistedState {
 	mode: FirewallMode
@@ -77,7 +75,19 @@ interface PendingPrompt {
 	resolve: (verdict: Verdict) => void
 	host: string
 	port: number
+	timeoutHandle: NodeJS.Timeout
 }
+
+/**
+ * Auto-deny age for unanswered prompts. Without this, any pending
+ * prompt holds Layer A's `onBeforeRequest` callback open forever,
+ * which Chromium translates to "the request hangs." A user who
+ * opens a request with the toaster collapsed never sees the toast
+ * and the page just spins. 60 seconds is enough for the user to
+ * look at the prompt + decide; if they don't, falling back to
+ * `deny` matches the conservative-default principle.
+ */
+const PROMPT_TIMEOUT_MS = 60_000
 
 class PermissionService {
 	// Default mode is `log-only`: every outbound call lands in the
@@ -104,9 +114,10 @@ class PermissionService {
 
 	/**
 	 * Hosts the user has explicitly denied for the rest of the
-	 * session ("Deny once" → here). Persistent denylist would land
-	 * in Phase 5; today this only suppresses repeated prompts for
-	 * the same host:port within a single session.
+	 * session ("Deny always" → here). Cleared on app restart by
+	 * design — a persistent denylist would need a separate
+	 * `state.json` slot + a settings UI to reverse a mistaken
+	 * deny, which is follow-up scope.
 	 */
 	private readonly sessionDenylist = new Set<string>()
 
@@ -226,19 +237,18 @@ class PermissionService {
 	/**
 	 * Verdict for a given destination. Order of checks:
 	 *
-	 * 1. Localhost aliases → always `allow` (still emitted to the
-	 *    audit log via the caller, just no firewall blocking).
-	 * 2. Allowlist hit (literal or wildcard) → `allow`.
-	 * 3. Mode-driven default for unknown:
+	 * 1. Empty host (non-network URL) → `allow` (defensive; the
+	 *    Layer A listener already filters non-network schemes).
+	 * 2. Localhost aliases → `allow` (still emitted to the audit
+	 *    log via the caller — just no firewall blocking).
+	 * 3. Allowlist hit (literal or wildcard `*.example.com`) → `allow`.
+	 * 4. Session denylist hit → `deny`.
+	 * 5. Mode-driven default for unknown:
 	 *    - `lockdown` → `deny`
 	 *    - `log-only` → `allow` (audit only, no enforcement)
-	 *    - `strict`   → `allow` for now (Phase 4C will queue a
-	 *      toast prompt and return the user's choice via Promise)
-	 *
-	 * Returns sync because Phase 4A doesn't yet block on a user
-	 * prompt; the signature is `Promise<Verdict>` so the toast-
-	 * resolving path in Phase 4C plugs in without changing
-	 * caller code.
+	 *    - `strict`   → broadcast a toast prompt and return its
+	 *      Promise; resolves when the user clicks one of the four
+	 *      buttons in the renderer.
 	 */
 	check(input: CheckInput): Promise<Verdict> {
 		this.loadIfNeeded()
@@ -285,7 +295,17 @@ class PermissionService {
 		}
 		const promptId = randomUUID()
 		const promise = new Promise<Verdict>((resolve) => {
-			this.pendingPrompts.set(promptId, { resolve, host, port })
+			const timeoutHandle = setTimeout(() => {
+				logger.warn('PermissionService: prompt timed out (auto-deny)', {
+					promptId, host, port, source, timeoutMs: PROMPT_TIMEOUT_MS
+				})
+				this.resolvePrompt(promptId, 'deny', false)
+			}, PROMPT_TIMEOUT_MS)
+			// Don't keep the event loop alive just for an unanswered
+			// firewall prompt — `unref()` lets `app.quit()` proceed
+			// normally without a 60 s hang on shutdown.
+			timeoutHandle.unref()
+			this.pendingPrompts.set(promptId, { resolve, host, port, timeoutHandle })
 		})
 		this.promptByHostPort.set(hostPortKey, promptId)
 		const payload: FirewallPromptPayload = {
@@ -295,11 +315,32 @@ class PermissionService {
 			source: source as FirewallPromptPayload['source'],
 			timestamp: new Date().toISOString()
 		}
-		for (const win of BrowserWindow.getAllWindows()) {
-			if (win.isDestroyed()) continue
+		const targets = BrowserWindow.getAllWindows().filter((w) => !w.isDestroyed())
+		if (targets.length === 0) {
+			// No window to show the toast in — auto-deny instead of
+			// hanging Layer A forever. Headless boots and tail-of-life
+			// shutdown ordering both hit this.
+			logger.warn('PermissionService: no renderer window for prompt — auto-denying', {
+				promptId, host, port, source
+			})
+			queueMicrotask(() => { this.resolvePrompt(promptId, 'deny', false) })
+			return promise
+		}
+		for (const win of targets) {
 			win.webContents.send(FIREWALL_IPC.PROMPT_SHOW, payload)
 		}
 		return promise
+	}
+
+	/**
+	 * Auto-deny every outstanding prompt — wired to the
+	 * `before-quit` lifecycle hook in main/index.ts so a shutdown
+	 * mid-prompt doesn't leave the IPC bridge with dangling
+	 * Promises that the renderer can never resolve. Idempotent.
+	 */
+	denyAllPending(): void {
+		const ids = Array.from(this.pendingPrompts.keys())
+		for (const promptId of ids) this.resolvePrompt(promptId, 'deny', false)
 	}
 
 	/**
@@ -317,9 +358,14 @@ class PermissionService {
 		this.loadIfNeeded()
 		const pending = this.pendingPrompts.get(promptId)
 		if (pending === undefined) {
-			logger.warn('PermissionService: resolvePrompt called for unknown id', { promptId })
+			// Already resolved — most often the auto-deny timeout
+			// fired or a renderer click crossed paths with another
+			// resolution. Silent: this is normal for a healthy
+			// system, only worth a debug-level breadcrumb.
+			logger.debug('PermissionService: resolvePrompt called for unknown id', { promptId })
 			return
 		}
+		clearTimeout(pending.timeoutHandle)
 		const hostPortKey = `${pending.host}:${String(pending.port)}`
 		this.pendingPrompts.delete(promptId)
 		this.promptByHostPort.delete(hostPortKey)
@@ -337,13 +383,14 @@ class PermissionService {
 
 	/**
 	 * Synchronous variant — used by Layer B's main-process patches
-	 * which can't suspend `http.request()`'s return. Phase 4C wires
-	 * lockdown to actually enforce; Phase 4D adds the async toast
-	 * pipeline (the wrapper queues writes until the user resolves).
-	 *
-	 * Until the toast UI exists, `strict` mode falls back to
-	 * `allow` here so the legacy "no firewall in dev" experience
-	 * is preserved for users who flip the mode early.
+	 * which can't suspend `http.request()`'s return value. Mirrors
+	 * the same allowlist + session-denylist + lockdown gates as
+	 * `check()`, with one omission by design: `strict` mode falls
+	 * back to `allow` here because there's no way for a sync caller
+	 * to await the toast prompt round-trip. A real toast-resolved
+	 * deferral on Layer B would need a `BufferingClientRequest`
+	 * wrapper that queues `req.write()` until the verdict resolves
+	 * — that's follow-up scope.
 	 */
 	checkSync(input: CheckInput): Verdict {
 		this.loadIfNeeded()
@@ -351,6 +398,14 @@ class PermissionService {
 		if (host === '') return 'allow'
 		if (LOCALHOST_HOSTS.has(host)) return 'allow'
 		if (this.matchAllowlist(host)) return 'allow'
+		// Honour the session denylist so a "Deny always" picked
+		// against a Layer A prompt doesn't get bypassed when the
+		// same host is next called from main-process http/fetch.
+		const hostPortKey = `${host}:${String(input.port)}`
+		if (this.sessionDenylist.has(hostPortKey)) {
+			logger.warn('PermissionService: denied (session denylist)', { host, port: input.port, source: input.source })
+			return 'deny'
+		}
 		switch (this.mode) {
 			case 'lockdown':
 				logger.warn('PermissionService: denied (lockdown)', { host, port: input.port, source: input.source })

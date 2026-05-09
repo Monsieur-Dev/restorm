@@ -9,25 +9,24 @@ import {
 import { permissionService } from './PermissionService'
 
 /**
- * `FirewallService` — Phase 1 of OYO-276.
+ * `FirewallService` — Layer A (renderer / Chromium webRequest).
  *
- * For now this is **observability only**: the Chromium webRequest
- * listener is installed at app boot, every outbound call from a
- * renderer context (fetch / XHR / WebSocket upgrade / subresource
- * load) is captured, materialised into a `RequestRecord`, and
- * broadcast to every BrowserWindow's renderer over IPC. No call is
- * blocked yet — that's wired up in Phase 4 when `PermissionService`
- * lands.
+ * Installs Chromium's `session.defaultSession.webRequest.onBeforeRequest`
+ * listener at app boot. Every outbound call from a renderer context
+ * (fetch / XHR / WebSocket upgrade / subresource load) is captured,
+ * routed through `PermissionService.check`, materialised into a
+ * `RequestRecord`, and either broadcast as `allow` + forwarded, or
+ * broadcast as `deny` + cancelled via `callback({ cancel: true })`.
  *
- * The main-process Layer B (monkey-patched `http` / `https` / `fetch`
- * / `dns` / `net`) is Phase 3. Both layers will route through this
- * service so the console feed stays single-sourced.
+ * Layer B (monkey-patched `http.request` / `https.request` /
+ * `globalThis.fetch` in the main process) lives in
+ * `MainProcessInterceptor.ts`. Both layers `emit()` records through
+ * this service so the console feed stays single-sourced.
  *
  * Records are broadcast unicast-style: every webContents subscribed
  * to the channel receives the same payload. The console workbench
- * tab in the renderer is the primary consumer; future surfaces
- * (audit log, status bar counter) can subscribe in parallel without
- * a fan-out service in between.
+ * tab in the renderer is the primary consumer; the statusbar
+ * indicator subscribes in parallel for the deny pulse + counter.
  */
 class FirewallService {
 	private listenerInstalled = false
@@ -68,13 +67,14 @@ class FirewallService {
 				callback({ cancel: false })
 				return
 			}
-			// Route through PermissionService. Lockdown mode +
-			// unknown destination → cancel via Chromium's
-			// `callback({ cancel: true })`. Strict + unknown still
-			// resolves to `allow` until Phase 4D's toast prompt
-			// plugs into the same Promise — the listener doesn't
-			// need to change for that, the verdict resolution moves
-			// from sync-fast to async-prompt.
+			// Route through PermissionService. The async `check()`
+			// resolves immediately for `localhost` / allowlist hits
+			// / `log-only` mode; resolves to `deny` for `lockdown`
+			// mode; and resolves later (when the user clicks one of
+			// the four toast buttons) for `strict` mode + unknown
+			// destination. Chromium HOLDS the request until the
+			// callback fires — this is what gives us a real block
+			// rather than a "we logged it, then served it" race.
 			const built = record
 			void permissionService
 				.check({ host: built.host, port: built.port, source: built.source })
@@ -99,9 +99,9 @@ class FirewallService {
 	/**
 	 * Build a `RequestRecord` from Electron's `OnBeforeRequestListenerDetails`.
 	 * The Chromium hook only exposes the URL + method + uploadData
-	 * — request headers come from `onSendHeaders` in a follow-up
-	 * pass we'll add when the toast prompt needs them; Phase 1
-	 * leaves the headers map empty.
+	 * — request headers would need a parallel `onSendHeaders` pass.
+	 * For now the `headers` map stays empty on Layer A records; the
+	 * console renders them as `(no headers captured)`.
 	 */
 	private recordFromWebRequest(details: OnBeforeRequestListenerDetails): RequestRecord {
 		const parsed = safeParseUrl(details.url)
