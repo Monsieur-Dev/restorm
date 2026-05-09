@@ -23,9 +23,6 @@ interface ConsolePanelProps {
  * - `console:requestFormat` — controls the curl ↔ powershell
  *   default at panel mount; the toolbar toggle persists changes
  *   back to the same key so the choice survives across restarts.
- * - `console:showInternalCalls` — un-hides the renderer ↔ main
- *   GraphQL bridge traffic (filtered out of the user-facing feed
- *   by default).
  */
 export const ConsolePanel: React.FC<ConsolePanelProps> = ({
 	onLineClick,
@@ -39,13 +36,7 @@ export const ConsolePanel: React.FC<ConsolePanelProps> = ({
 	const handleShellChange = useCallback((next: ConsoleShell): void => {
 		void setPersistedFormat(next)
 	}, [setPersistedFormat])
-	// Show-internal toggle — same persistence pattern.
-	const [showInternalSetting, setShowInternalSetting] = useSetting('console:showInternalCalls')
-	const showInternal = showInternalSetting === true
-	const handleShowInternalChange = useCallback((next: boolean): void => {
-		void setShowInternalSetting(next)
-	}, [setShowInternalSetting])
-	const { records, clear } = useConsoleFeed({ showInternal })
+	const { records, clear } = useConsoleFeed()
 	return (
 		<div
 			data-testid={dataTestId ?? 'console-panel'}
@@ -61,8 +52,6 @@ export const ConsolePanel: React.FC<ConsolePanelProps> = ({
 				shell={shell}
 				onShellChange={handleShellChange}
 				onClear={clear}
-				showInternal={showInternal}
-				onShowInternalChange={handleShowInternalChange}
 			/>
 			{/* xterm renders its own scrollback inside the terminal
 			 * canvas; wrapping it in a ScrollableElement creates a

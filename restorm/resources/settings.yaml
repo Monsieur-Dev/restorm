@@ -35,9 +35,3 @@ groups:
                 labelKey: "console.requestFormat.curl"
               - value: "powershell"
                 labelKey: "console.requestFormat.powershell"
-      - setting:
-          id: "showInternalCalls"
-          titleKey: "console.showInternalCalls"
-          descriptionKey: "console.showInternalCallsDescription"
-          type: "toggle"
-          default: false

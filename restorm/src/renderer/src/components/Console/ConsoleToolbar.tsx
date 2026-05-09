@@ -6,8 +6,6 @@ interface ConsoleToolbarProps {
 	shell: ConsoleShell
 	onShellChange: (next: ConsoleShell) => void
 	onClear: () => void
-	showInternal: boolean
-	onShowInternalChange: (next: boolean) => void
 	'data-testid'?: string
 }
 
@@ -21,8 +19,6 @@ export const ConsoleToolbar: React.FC<ConsoleToolbarProps> = ({
 	shell,
 	onShellChange,
 	onClear,
-	showInternal,
-	onShowInternalChange,
 	'data-testid': dataTestId
 }) => {
 	const isPS = shell === 'powershell'
@@ -74,17 +70,6 @@ export const ConsoleToolbar: React.FC<ConsoleToolbarProps> = ({
 				>powershell</button>
 			</div>
 			<div style={{ flex: 1 }} />
-			<Button
-				icon={showInternal ? 'eye' : 'eye-closed'}
-				options={{
-					ariaLabel: showInternal ? 'Hide internal calls' : 'Show internal calls',
-					title: showInternal ? 'Hide internal calls' : 'Show internal calls'
-				}}
-				data-testid="console-toolbar-show-internal"
-				onClick={() => { onShowInternalChange(!showInternal) }}
-				secondary
-				small
-			/>
 			<Button
 				icon="clear-all"
 				options={{ ariaLabel: 'Clear console', title: 'Clear console' }}

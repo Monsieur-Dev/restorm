@@ -600,9 +600,7 @@
     "requestFormat": "Request format",
     "requestFormatDescription": "Default shell flavor used to render outgoing requests in the Console tab. Each row is a copy-pasteable command line; the toggle in the Console toolbar overrides this default for the current tab.",
     "requestFormat.curl": "curl (Unix-style)",
-    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)",
-    "showInternalCalls": "Show internal calls",
-    "showInternalCallsDescription": "Surface Restorm's own renderer ↔ main GraphQL bridge traffic in the Console. Off by default — internal calls are noise for users auditing API requests."
+    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
   },
   "import": {
     "title": "Import Requests",
