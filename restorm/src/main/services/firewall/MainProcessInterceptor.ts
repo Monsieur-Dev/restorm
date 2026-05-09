@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto'
 import { logger } from 'electron-core-ui'
 import { firewallService } from './FirewallService'
 import { permissionService } from './PermissionService'
+import { DeniedClientRequest } from './DeniedClientRequest'
 import type {
 	RequestRecord,
 	RequestRecordProtocol,
@@ -11,21 +12,29 @@ import type {
 } from '../../../shared/types/firewall'
 
 /**
- * Layer B of OYO-276 firewall. Phase 3 is observability-only — every
- * outgoing call from the main process is captured, materialised into
- * a `RequestRecord`, broadcast to the console feed via
- * `FirewallService.emit`, and then forwarded UNCHANGED to the
- * underlying Node implementation. Phase 4 will add the
- * `PermissionService.check` gate + the `BufferingClientRequest`
- * wrapper that holds writes until the verdict resolves.
+ * Layer B of the firewall. Every outgoing call from the main
+ * process is captured, materialised into a `RequestRecord`,
+ * routed through the synchronous PermissionService verdict, and
+ * either:
+ *
+ *   - forwarded to the real `http.request` / `globalThis.fetch`
+ *     (verdict `allow`), with the record emitted as `allow`, OR
+ *   - replaced with a `DeniedClientRequest` stub (for http/https,
+ *     emits `error` on next tick) / a rejected Promise (for
+ *     fetch), with the record emitted as `deny` so the audit
+ *     log + console show the block.
+ *
+ * Strict mode's async toast prompt isn't wired here yet — Phase 4D
+ * adds the `BufferingClientRequest` wrapper that queues writes
+ * until the user resolves. Until then `strict` is treated like
+ * `log-only` from this layer's perspective (allow + audit).
  *
  * Patches `http.request`, `http.get`, `https.request`, `https.get`,
- * and `globalThis.fetch`. `dns.lookup` and `net.Socket.connect` are
- * deferred — they're caught transitively because every consumer
- * we care about (axios, node-fetch, undici, electron-vite, npm
- * deps) goes through `http.request` / `https.request` / `fetch`
- * before it ever touches DNS or raw sockets. If a future dep
- * bypasses both we'll plug those then.
+ * and `globalThis.fetch`. `dns.lookup` and `net.Socket.connect`
+ * are deferred — every consumer we care about (axios, node-fetch,
+ * undici, electron-vite, npm deps) goes through one of the patched
+ * entrypoints before reaching DNS or raw sockets. If a future dep
+ * bypasses all three we'll plug those then.
  *
  * Idempotent: a second install is a no-op so repeated bundler
  * reloads don't double-wrap.
@@ -41,7 +50,7 @@ export function installMainProcessInterceptor(): void {
 	patchHttpModule(https, 'main-https')
 	patchFetch()
 
-	logger.info('FirewallService: main-process interceptor installed (observability only)')
+	logger.info('FirewallService: main-process interceptor installed (lockdown enforced)')
 }
 
 type HttpRequestFn = typeof http.request
@@ -58,18 +67,40 @@ function patchHttpModule(mod: HttpLikeModule, source: RequestRecordSource): void
 
 	const patchedRequest = ((...args: Parameters<HttpRequestFn>): ClientRequest => {
 		const record = recordFromHttpArgs(args, source)
-		if (record !== null) safeEmit(record)
+		if (record !== null) {
+			const verdict = permissionService.checkSync({ host: record.host, port: record.port, source: record.source })
+			record.verdict = verdict
+			if (verdict === 'deny') {
+				record.errorMessage = `firewall: denied (${permissionService.getMode()})`
+				firewallService.emit(record)
+				return makeDenied(record) as unknown as ClientRequest
+			}
+			firewallService.emit(record)
+		}
 		return originalRequest(...args)
 	}) as HttpRequestFn
 
 	const patchedGet = ((...args: Parameters<HttpGetFn>): ClientRequest => {
 		const record = recordFromHttpArgs(args, source)
-		if (record !== null) safeEmit(record)
+		if (record !== null) {
+			const verdict = permissionService.checkSync({ host: record.host, port: record.port, source: record.source })
+			record.verdict = verdict
+			if (verdict === 'deny') {
+				record.errorMessage = `firewall: denied (${permissionService.getMode()})`
+				firewallService.emit(record)
+				return makeDenied(record) as unknown as ClientRequest
+			}
+			firewallService.emit(record)
+		}
 		return originalGet(...args)
 	}) as HttpGetFn
 
 	mod.request = patchedRequest
 	mod.get = patchedGet
+}
+
+function makeDenied(record: RequestRecord): DeniedClientRequest {
+	return new DeniedClientRequest(`Firewall blocked outbound request to ${record.host}:${String(record.port)}`)
 }
 
 /**
@@ -152,11 +183,23 @@ function patchFetch(): void {
 	if (typeof originalFetch !== 'function') return
 
 	const patched: typeof fetch = async (input, init) => {
+		let record: RequestRecord | null = null
 		try {
-			const record = recordFromFetchArgs(input, init)
-			if (record !== null) safeEmit(record)
+			record = recordFromFetchArgs(input, init)
 		} catch (err) {
-			logger.warn('FirewallService: failed to emit fetch record', { error: String(err) })
+			logger.warn('FirewallService: failed to build fetch record', { error: String(err) })
+		}
+		if (record !== null) {
+			const verdict = permissionService.checkSync({ host: record.host, port: record.port, source: record.source })
+			record.verdict = verdict
+			if (verdict === 'deny') {
+				record.errorMessage = `firewall: denied (${permissionService.getMode()})`
+				firewallService.emit(record)
+				const err = new Error(`Firewall blocked outbound fetch to ${record.host}:${String(record.port)}`)
+				;(err as Error & { code?: string }).code = 'EFIREWALLDENIED'
+				throw err
+			}
+			firewallService.emit(record)
 		}
 		return originalFetch(input, init)
 	}
@@ -221,22 +264,4 @@ function lowerKeys(input: Record<string, string>): Record<string, string> {
 	const out: Record<string, string> = {}
 	for (const [k, v] of Object.entries(input)) out[k.toLowerCase()] = v
 	return out
-}
-
-function safeEmit(record: RequestRecord): void {
-	// Resolve the verdict eagerly via the PermissionService, then
-	// emit. Phase 4A's check is sync-allow for everything except
-	// `lockdown` mode, so this doesn't add latency to the request
-	// path; Phase 4C's toast prompt will introduce a `pending`
-	// state + a follow-up emit once the user resolves.
-	permissionService
-		.check({ host: record.host, port: record.port, source: record.source })
-		.then((verdict) => {
-			record.verdict = verdict
-			firewallService.emit(record)
-		})
-		.catch((err: unknown) => {
-			logger.warn('FirewallService: permission check failed', { url: record.url, error: String(err) })
-			firewallService.emit(record)
-		})
 }

@@ -57,11 +57,13 @@ class FirewallService {
 				callback({ cancel: false })
 				return
 			}
-			// Route through PermissionService — Phase 4A skeleton
-			// resolves to `allow` for everything (localhost +
-			// allowlist + log-only default), but the wiring is in
-			// place so 4C's toast prompt plugs in without changing
-			// the listener.
+			// Route through PermissionService. Lockdown mode +
+			// unknown destination → cancel via Chromium's
+			// `callback({ cancel: true })`. Strict + unknown still
+			// resolves to `allow` until Phase 4D's toast prompt
+			// plugs into the same Promise — the listener doesn't
+			// need to change for that, the verdict resolution moves
+			// from sync-fast to async-prompt.
 			const built = record
 			void permissionService
 				.check({ host: built.host, port: built.port, source: built.source })

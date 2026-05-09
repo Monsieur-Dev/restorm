@@ -206,18 +206,32 @@ class PermissionService {
 	 * caller code.
 	 */
 	check(input: CheckInput): Promise<Verdict> {
+		return Promise.resolve(this.checkSync(input))
+	}
+
+	/**
+	 * Synchronous variant — used by Layer B's main-process patches
+	 * which can't suspend `http.request()`'s return. Phase 4C wires
+	 * lockdown to actually enforce; Phase 4D adds the async toast
+	 * pipeline (the wrapper queues writes until the user resolves).
+	 *
+	 * Until the toast UI exists, `strict` mode falls back to
+	 * `allow` here so the legacy "no firewall in dev" experience
+	 * is preserved for users who flip the mode early.
+	 */
+	checkSync(input: CheckInput): Verdict {
 		this.loadIfNeeded()
 		const host = input.host.toLowerCase()
-		if (LOCALHOST_HOSTS.has(host)) return Promise.resolve('allow')
-		if (this.matchAllowlist(host)) return Promise.resolve('allow')
+		if (LOCALHOST_HOSTS.has(host)) return 'allow'
+		if (this.matchAllowlist(host)) return 'allow'
 		switch (this.mode) {
 			case 'lockdown':
 				logger.warn('PermissionService: denied (lockdown)', { host, port: input.port, source: input.source })
-				return Promise.resolve('deny')
+				return 'deny'
 			case 'log-only':
 			case 'strict':
 			default:
-				return Promise.resolve('allow')
+				return 'allow'
 		}
 	}
 
