@@ -144,7 +144,14 @@ function defaultPortForProtocol(p: RequestRecordProtocol): number {
  */
 const BODY_INLINE_LIMIT_BYTES = 64 * 1024
 function uploadDataToString(uploadData: OnBeforeRequestListenerDetails['uploadData']): string | undefined {
-	if (uploadData.length === 0) return undefined
+	// Electron's TS type narrows `uploadData` to non-undefined, but
+	// at runtime it's frequently absent for GET / HEAD / cached
+	// subresource requests — Chromium only attaches it when the
+	// caller actually has body chunks to send. Guard explicitly via
+	// an `unknown` cast so the emit doesn't crash on every read-only
+	// request without lying to TS about the runtime type.
+	const data = uploadData as unknown as { length?: number } | null | undefined
+	if (!data?.length) return undefined
 	const buffers: Buffer[] = []
 	for (const chunk of uploadData) {
 		const bytes = (chunk as { bytes?: Buffer }).bytes
