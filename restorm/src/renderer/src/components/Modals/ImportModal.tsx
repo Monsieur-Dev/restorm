@@ -7,8 +7,11 @@ import {
   Modal,
   Button,
   InputBox,
+  KeyValueTable,
   Wordmark,
-  getContrastColor
+  getContrastColor,
+  type KeyValueTableHandle,
+  type KeyValueTableRow
 } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
 import type { FolderItem, EnvironmentFolder } from '../../../../shared/types/collections'
@@ -44,6 +47,13 @@ import './ImportModal.css'
 export interface RefreshContext {
   sourceUrl: string
   authenticationRequest?: AuthenticationRequest
+  /**
+   * Manual headers persisted on the env folder's
+   * `apiUpdate.sourceHeaders`. Pre-fills the modal's KV table so
+   * the user can see / edit them before the refresh fires. Order
+   * is preserved from the on-disk map.
+   */
+  sourceHeaders?: Record<string, string>
   targetFolderId: string
   onApplied: (updatedFolder: unknown) => void
 }
@@ -53,6 +63,32 @@ export interface ImportModalProps {
   onClose: () => void
   onImport: (items: FolderItem[]) => void
   refreshContext?: RefreshContext
+}
+
+/**
+ * Merge the auth-route resolved headers (left) with the manual KV
+ * table headers (right). Manual values overlay auth values so the
+ * user can override a specific header for testing without removing
+ * the auth attach. Rows with empty keys or disabled toggles are
+ * skipped. Returns `null` when nothing meaningful is configured so
+ * the caller can omit `extraHeaders` from the request init
+ * altogether.
+ */
+function composeExtraHeaders(
+  authHeaders: Record<string, string> | null,
+  manualRows: { key: string; value: string; enabled: boolean }[]
+): Record<string, string> | null {
+  const out: Record<string, string> = {}
+  if (authHeaders !== null) {
+    for (const [k, v] of Object.entries(authHeaders)) out[k] = v
+  }
+  for (const row of manualRows) {
+    if (!row.enabled) continue
+    const k = row.key.trim()
+    if (k.length === 0) continue
+    out[k] = row.value
+  }
+  return Object.keys(out).length > 0 ? out : null
 }
 
 export function ImportModal({
@@ -99,6 +135,23 @@ export function ImportModal({
   // (React state updates batch, so a closure would see `null`).
   const attachedAuthHeadersRef = useRef<Record<string, string> | null>(null)
   const [showAuthSetupModal, setShowAuthSetupModal] = useState(false)
+  /**
+   * One-shot manual headers attached to the spec fetch. Used when
+   * the user just wants to paste an `Authorization: Bearer …` token
+   * to import a gated swagger, without going through the full
+   * `AuthenticationRequest` flow. Persist on the imported env
+   * folder's `apiUpdate.sourceHeaders` so subsequent
+   * "Refresh from source" / `apiUpdate.apply` runs reuse them
+   * automatically.
+   *
+   * Stored as the same shape the ECUI `KeyValueTable` produces so
+   * the component round-trips without lossy normalisation.
+   */
+  const [manualHeaders, setManualHeaders] = useState<{ id: string; key: string; value: string; enabled: boolean }[]>([])
+  const manualHeadersRef = useRef<{ id: string; key: string; value: string; enabled: boolean }[]>([])
+  manualHeadersRef.current = manualHeaders
+  const [customHeadersOpen, setCustomHeadersOpen] = useState(false)
+  const customHeadersTableRef = useRef<KeyValueTableHandle | null>(null)
   /**
    * Set of leaf natural keys whose checkbox is forced-on + disabled
    * because their operation already exists in the target folder.
@@ -193,12 +246,21 @@ export function ImportModal({
     debounceTimerRef.current = setTimeout(() => {
       void (async () => {
         try {
-          // Read through the ref so the current value lands in the
-          // fetch options even when state updates haven't propagated
-          // through the closure yet (auth-attach re-preview path).
-          const currentHeaders = attachedAuthHeadersRef.current
-          const previewOptions = currentHeaders !== null
-            ? { extraHeaders: currentHeaders }
+          // Compose `extraHeaders` from the two surfaces the user
+          // can wire into a gated import: the auth-route attach
+          // (whose resolved headers live in
+          // `attachedAuthHeadersRef`) and the manual headers KV
+          // table just below. Manual values overlay auth values so
+          // a user can override a specific header for testing
+          // without detaching the route. Refs (rather than state)
+          // because the debounced closure can fire before the
+          // setState has propagated.
+          const composed = composeExtraHeaders(
+            attachedAuthHeadersRef.current,
+            manualHeadersRef.current
+          )
+          const previewOptions = composed !== null
+            ? { extraHeaders: composed }
             : undefined
           const result = await window.restorm?.import.preview(value.trim(), previewOptions)
 
@@ -218,6 +280,24 @@ export function ImportModal({
       })()
     }, 200)
   }, [t])
+
+  // Re-run the preview whenever the manual headers change (and the
+  // user has already typed a URL). The debounce inside
+  // `handleInputChange` collapses keystroke-bursts on the KV table
+  // the same way it collapses URL typing, so the preview only
+  // re-fires once the row sits still for 200 ms.
+  //
+  // Skip this entirely when the modal is in refresh-from-source
+  // mode — that path has its own preview bootstrap
+  // (`apiUpdate.previewTree`) and the URL-input handler would
+  // overwrite the tree the refresh bootstrap produced. The refresh
+  // flow already uses the persisted `sourceHeaders` server-side,
+  // so the in-modal headers don't need a re-preview round-trip.
+  useEffect(() => {
+    if (refreshContext !== undefined) return
+    if (input.trim().length === 0) return
+    handleInputChange(input)
+  }, [manualHeaders, input, handleInputChange, refreshContext])
 
   // Modal-wide drag tracking. Bound on the `.import-modal` div so any
   // drag entering the dialog (regardless of which inner element the
@@ -336,11 +416,29 @@ export function ImportModal({
       const allKeys = allLeafKeys(previewItems)
       const include = Array.from(selection).sort()
       const skip = Array.from(allKeys).filter((k) => !selection.has(k)).sort()
+      // Manual headers edited inside the refresh modal need to land
+      // on `apiUpdate.sourceHeaders` BEFORE the refresh fires so the
+      // next scheduled refresh sees them too. The apply IPC re-fetches
+      // the spec using the (now-updated) sourceHeaders.
+      const refreshHeadersRecord: Record<string, string> = {}
+      for (const row of manualHeaders) {
+        if (!row.enabled) continue
+        const k = row.key.trim()
+        if (k.length === 0) continue
+        refreshHeadersRecord[k] = row.value
+      }
       void (async () => {
         try {
           const api = (window as unknown as {
-            restorm?: { apiUpdate?: { apply: (id: string, sel: { include: string[]; skip: string[] }) => Promise<{ updatedFolder: unknown }> } }
+            restorm?: { apiUpdate?: {
+              apply: (id: string, sel: { include: string[]; skip: string[] }) => Promise<{ updatedFolder: unknown }>
+              setSettings: (id: string, cfg: { sourceHeaders?: Record<string, string> }) => Promise<void>
+            } }
           }).restorm?.apiUpdate
+          // Persist the latest header edits first so the apply
+          // sees them; without this the refresh would still use
+          // whatever was on disk when the modal opened.
+          await api?.setSettings(refreshContext.targetFolderId, { sourceHeaders: refreshHeadersRecord })
           const result = await api?.apply(refreshContext.targetFolderId, { include, skip })
           refreshContext.onApplied(result?.updatedFolder)
         } catch (err) {
@@ -409,6 +507,19 @@ export function ImportModal({
     // project reload.
     const sourceUrlAtImport = input.trim()
     const isUrlImport = sourceUrlAtImport.startsWith('http://') || sourceUrlAtImport.startsWith('https://')
+    // Manual headers persisted on the env folder so subsequent
+    // "Refresh from source" runs reuse them automatically without
+    // the user retyping the token. Only enabled rows with a
+    // non-empty key are saved; rows the user toggled off are
+    // dropped to avoid surprising the next refresh.
+    const manualHeadersAsRecord: Record<string, string> = {}
+    for (const row of manualHeaders) {
+      if (!row.enabled) continue
+      const k = row.key.trim()
+      if (k.length === 0) continue
+      manualHeadersAsRecord[k] = row.value
+    }
+    const hasManualHeaders = Object.keys(manualHeadersAsRecord).length > 0
     const stampApiUpdate = (items: FolderItem[]): FolderItem[] => items.map((item) => {
       if (!isEnvironmentFolder(item)) return item
       const stamped = { ...item } as EnvironmentFolder
@@ -421,16 +532,19 @@ export function ImportModal({
           interval: 'daily',
           ...(apiDoc?.api?.version !== undefined ? { lastImportedSpecVersion: apiDoc.api.version } : {}),
           ...existing,
-          ...(attachedAuth ? { authenticationRequestId: attachedAuth.id } : {})
+          ...(attachedAuth ? { authenticationRequestId: attachedAuth.id } : {}),
+          ...(hasManualHeaders ? { sourceHeaders: manualHeadersAsRecord } : {})
         }
-      } else if (attachedAuth) {
+      } else if (attachedAuth || hasManualHeaders) {
         // File imports don't get a sourceUrl, but if the user
-        // attached an auth route we still capture it for any manual
-        // URL the user types into the env-folder home.
+        // attached an auth route OR pasted manual headers we still
+        // capture them for any manual URL the user types into the
+        // env-folder home.
         const apiUpdate = (stamped as unknown as { apiUpdate?: Record<string, unknown> }).apiUpdate ?? {}
         ;(stamped as unknown as { apiUpdate?: Record<string, unknown> }).apiUpdate = {
           ...apiUpdate,
-          authenticationRequestId: attachedAuth.id
+          ...(attachedAuth ? { authenticationRequestId: attachedAuth.id } : {}),
+          ...(hasManualHeaders ? { sourceHeaders: manualHeadersAsRecord } : {})
         }
       }
       return stamped
@@ -445,7 +559,7 @@ export function ImportModal({
 
     // Close modal (useEffect will clear state when modal closes)
     onClose()
-  }, [previewItems, selection, input, onImport, onClose, attachedAuth, refreshContext])
+  }, [previewItems, selection, input, onImport, onClose, attachedAuth, manualHeaders, refreshContext])
 
   // Refresh-from-source bootstrap. When `refreshContext` is provided
   // we pre-fill the URL display + the auth pill from the env folder's
@@ -460,6 +574,19 @@ export function ImportModal({
     setInput(refreshContext.sourceUrl)
     setAttachedAuth(refreshContext.authenticationRequest ?? null)
     attachedAuthHeadersRef.current = null
+    // Pre-fill the manual-headers KV table from the stored
+    // `sourceHeaders` so the user can see / edit them before the
+    // refresh fires. Auto-expand the collapsible when there's at
+    // least one row to surface so it's discoverable.
+    const stored = refreshContext.sourceHeaders ?? {}
+    const storedRows = Object.entries(stored).map(([key, value]) => ({
+      id: crypto.randomUUID(),
+      key,
+      value,
+      enabled: true
+    }))
+    setManualHeaders(storedRows)
+    if (storedRows.length > 0) setCustomHeadersOpen(true)
     setIsLoading(true)
     setError(null)
     const token = { cancelled: false }
@@ -562,6 +689,8 @@ export function ImportModal({
       setError(null)
       setIsLoading(false)
       setIsDraggingOver(false)
+      setManualHeaders([])
+      setCustomHeadersOpen(false)
     }
   }, [isOpen])
 
@@ -634,11 +763,14 @@ export function ImportModal({
               <span style={{ flex: 1 }}>{error}</span>
             </div>
           )}
-          {/* Auth-route attach is always available — not just on 401/403 —
-              so users can pre-wire APIs that need a token even when the
-              first request otherwise succeeds (or on file-based imports). */}
-          {!attachedAuth ? (
-            <div style={{ alignSelf: 'flex-start' }}>
+          {/* Auth-route attach + manual headers are always available —
+              not just on 401/403 — so users can pre-wire APIs that
+              need a token even when the first request otherwise
+              succeeds (or on file-based imports). Both buttons sit
+              on the same row so the "auth-shaped vs one-shot
+              headers" choice is presented at the same visual level. */}
+          <div style={{ display: 'inline-flex', gap: 8, alignSelf: 'flex-start', flexWrap: 'wrap' }}>
+            {!attachedAuth && (
               <Button
                 icon="key"
                 onClick={() => { setShowAuthSetupModal(true) }}
@@ -650,8 +782,23 @@ export function ImportModal({
               >
                 {t('import.addAuth', 'Add an authentication route')}
               </Button>
-            </div>
-          ) : null}
+            )}
+            <Button
+              onClick={() => { setCustomHeadersOpen(true) }}
+              options={{
+                ariaLabel: t('import.customHeadersBtn', 'Add custom headers'),
+                title: t('import.customHeadersBtnTitle', 'Attach one-shot headers to the spec fetch (saved on the imported folder for re-imports)')
+              }}
+              data-testid="import-custom-headers-button"
+            >
+              {t('import.customHeadersBtn', 'Add custom headers')}
+              {manualHeaders.filter((row) => row.enabled && row.key.trim().length > 0).length > 0 && (
+                <span className="import-custom-headers__count" style={{ marginLeft: 6 }} aria-hidden="true">
+                  {manualHeaders.filter((row) => row.enabled && row.key.trim().length > 0).length}
+                </span>
+              )}
+            </Button>
+          </div>
           {attachedAuth ? (
             <div
               className="import-auth-pill"
@@ -855,6 +1002,54 @@ export function ImportModal({
         onAttach={handleAuthAttach}
         {...(attachedAuth ? { initialRequest: attachedAuth } : {})}
       />
+
+      {/* Manual headers sub-modal. Editing happens on the parent's
+          `manualHeaders` state in real time, so the preview
+          re-fetches as the user types just like with the inline
+          version. Done button closes; row dirty-state is the
+          parent's single source of truth. */}
+      <Modal
+        isOpen={customHeadersOpen}
+        onClose={() => { setCustomHeadersOpen(false) }}
+        title={t('import.customHeadersBtn', 'Custom headers')}
+        data-testid="import-custom-headers-modal"
+        size="dialog"
+      >
+        <div className="import-custom-headers__body" data-testid="import-custom-headers-body">
+          <p className="import-custom-headers__hint">
+            {t('import.customHeadersHint', 'Headers are stored on the imported folder so a future Refresh-from-source replays them. For login flows with token rotation, use the Auth-route attach above instead.')}
+          </p>
+          <KeyValueTable
+            ref={customHeadersTableRef}
+            data-testid="import-custom-headers-table"
+            showDescription={false}
+            initialRows={manualHeaders}
+            onRowsChange={(rows: KeyValueTableRow[]) => {
+              setManualHeaders(rows.map((r) => ({
+                id: r.id ?? crypto.randomUUID(),
+                key: r.key,
+                value: r.value,
+                enabled: r.enabled ?? true
+              })))
+            }}
+          />
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12, gap: 8 }}>
+            <Button
+              icon="add"
+              data-testid="import-custom-headers-add-row"
+              onClick={() => { customHeadersTableRef.current?.addRow() }}
+            >
+              {t('import.customHeadersAdd', 'Add header')}
+            </Button>
+            <Button
+              onClick={() => { setCustomHeadersOpen(false) }}
+              data-testid="import-custom-headers-done"
+            >
+              {t('import.customHeadersDone', 'Done')}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </Modal>
   )
 }

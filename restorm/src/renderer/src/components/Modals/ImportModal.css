@@ -252,3 +252,55 @@
     animation: none;
   }
 }
+
+/* ─── Custom headers collapsible (OYO-279) ────────────────────── */
+
+.import-custom-headers {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+  padding-top: 8px;
+}
+
+.import-custom-headers__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  font: inherit;
+  color: var(--editor-foreground);
+  align-self: flex-start;
+}
+
+.import-custom-headers__toggle:hover {
+  color: var(--button-background, #2c4156);
+}
+
+.import-custom-headers__count {
+  background: var(--button-background, #2c4156);
+  color: var(--button-foreground, #ffffff);
+  border-radius: 10px;
+  padding: 0 8px;
+  font-size: 11px;
+  line-height: 18px;
+  min-width: 22px;
+  text-align: center;
+}
+
+.import-custom-headers__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.import-custom-headers__hint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  opacity: 0.75;
+}
