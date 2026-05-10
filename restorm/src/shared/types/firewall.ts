@@ -82,6 +82,14 @@ export interface FirewallPromptPayload {
 	source: RequestRecordSource
 	/** Capture time — ISO timestamp. */
 	timestamp: string
+	/** Best-effort identification of the caller — for Layer A this is
+	 * the Chromium initiator URL; for Layer B it's a stack-trace walk
+	 * naming the originating npm package or first-party module. The
+	 * toast renders this on a secondary line ("from npm package
+	 * `axios`") so the user can answer the always-implicit question
+	 * "*who* is trying to talk to that destination". Optional —
+	 * absent when the layer couldn't attribute the call. */
+	originHint?: string
 }
 
 /**

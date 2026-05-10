@@ -19,17 +19,35 @@ import { FIREWALL_IPC, type FirewallOrigin, type FirewallPromptPayload } from '.
 export type Verdict = 'allow' | 'deny'
 
 /**
+ * Synchronous classification of an origin. `allow` and `deny` resolve
+ * without IPC; `prompt` means the caller has to either await the async
+ * `check()` (Layer A) or buffer the request until the user responds
+ * (Layer B's `BufferingClientRequest`). Splitting `classify()` from
+ * `check()` lets Layer B make a fast synchronous decision and only
+ * pay the cost of the async toast plumbing when the prompt is actually
+ * needed.
+ */
+export type Classification = Verdict | 'prompt'
+
+/**
  * Subset of `RequestRecord` the service needs to make a decision.
  * Keeps the call interface small + decouples from the full record
  * shape so we can decide without threading id / timestamp / etc.
  * through every code path that just wants "may I talk to this
  * scheme://host:port?".
+ *
+ * `originHint` is optional: when the caller has already walked the
+ * V8 stack to identify "from npm package axios" or similar, threading
+ * it here lets the toast prompt name the actual culprit instead of a
+ * generic "main-http". Layer A passes the Chromium initiator URL via
+ * the same field.
  */
 export interface CheckInput {
 	scheme: string
 	host: string
 	port: number
 	source: string
+	originHint?: string
 }
 
 /**
@@ -296,44 +314,15 @@ class PermissionService {
 		return origin.port === graphqlPort || origin.port === mcpPort || origin.port === viteDevPort
 	}
 
-	check(input: CheckInput): Promise<Verdict> {
-		if (E2E_BYPASS) return Promise.resolve('allow')
-		this.loadIfNeeded()
-		const origin: FirewallOrigin = {
-			scheme: input.scheme.toLowerCase(),
-			host: input.host.toLowerCase(),
-			port: input.port
-		}
-		// Defensive: empty-host URLs (data:, blob:, …) should never
-		// reach here (Layer A filters them upstream), but if they do
-		// we let them through.
-		if (origin.host === '') return Promise.resolve('allow')
-		// Restorm's own infrastructure ports: graphql bridge, vite-dev,
-		// mcp. Auto-allow without prompt or audit-side noise.
-		if (this.isInfraOrigin(origin)) return Promise.resolve('allow')
-		// Whitelist hit OR project-derived hit → allow silently.
-		if (this.contains(this.whitelist, origin)) return Promise.resolve('allow')
-		if (this.contains(this.projectOrigins, origin)) return Promise.resolve('allow')
-		// Blacklist hit → deny without prompting (the user already
-		// explicitly denied this origin).
-		if (this.contains(this.blacklist, origin)) {
-			logger.warn('PermissionService: denied (blacklist)', { origin, source: input.source })
-			return Promise.resolve('deny')
-		}
-		// Unknown destination → toast prompt.
-		return this.requestPrompt(origin, input.source)
-	}
-
 	/**
-	 * Synchronous variant for Layer B (main-process http/https/fetch
-	 * monkey-patches) which can't suspend the call's return. Mirrors
-	 * the same gates as `check()`, but the toast-prompt branch
-	 * collapses to `allow` — sync callers can't await the async
-	 * resolution. The async path on Layer A is the canonical block;
-	 * Layer B's contribution to the security model is the blacklist
-	 * + project-origins gates (which are still effective here).
+	 * Synchronous classification — same gates as `check()` but never
+	 * triggers the toast IPC. `prompt` means the destination is
+	 * unknown and the caller has to decide what to do: Layer A awaits
+	 * `check()` for the async resolution; Layer B parks the request
+	 * in a `BufferingClientRequest` until the matching `check()` call
+	 * resolves.
 	 */
-	checkSync(input: CheckInput): Verdict {
+	classify(input: CheckInput): Classification {
 		if (E2E_BYPASS) return 'allow'
 		this.loadIfNeeded()
 		const origin: FirewallOrigin = {
@@ -349,14 +338,25 @@ class PermissionService {
 			logger.warn('PermissionService: denied (blacklist)', { origin, source: input.source })
 			return 'deny'
 		}
-		return 'allow'
+		return 'prompt'
+	}
+
+	check(input: CheckInput): Promise<Verdict> {
+		const cls = this.classify(input)
+		if (cls === 'allow' || cls === 'deny') return Promise.resolve(cls)
+		const origin: FirewallOrigin = {
+			scheme: input.scheme.toLowerCase(),
+			host: input.host.toLowerCase(),
+			port: input.port
+		}
+		return this.requestPrompt(origin, input.source, input.originHint)
 	}
 
 	private originKey(origin: FirewallOrigin): string {
 		return `${origin.scheme}://${origin.host}:${String(origin.port)}`
 	}
 
-	private requestPrompt(origin: FirewallOrigin, source: string): Promise<Verdict> {
+	private requestPrompt(origin: FirewallOrigin, source: string, originHint?: string): Promise<Verdict> {
 		const key = this.originKey(origin)
 		const existing = this.promptByOrigin.get(key)
 		if (existing !== undefined) {
@@ -380,7 +380,8 @@ class PermissionService {
 			promptId,
 			origin,
 			source: source as FirewallPromptPayload['source'],
-			timestamp: new Date().toISOString()
+			timestamp: new Date().toISOString(),
+			...(originHint !== undefined && originHint !== '' ? { originHint } : {})
 		}
 		const targets = BrowserWindow.getAllWindows().filter((w) => !w.isDestroyed())
 		if (targets.length === 0) {

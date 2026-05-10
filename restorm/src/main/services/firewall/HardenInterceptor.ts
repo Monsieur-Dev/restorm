@@ -27,7 +27,7 @@ import type { RequestRecord } from '../../../shared/types/firewall'
  *   - `node:dgram` (UDP) — sockets, QUIC, custom protocols.
  *
  * This module monkey-patches all four chokepoints. Same shape as
- * the http patches: build a record, run `permissionService.checkSync`,
+ * the http patches: build a record, run `permissionService.classify`,
  * if `deny` → block the call and emit a denied record; if `allow`
  * → forward to the original implementation and emit an allowed
  * record.
@@ -114,7 +114,7 @@ function patchNetSocketConnect(): void {
 	const patched = function patchedConnect(this: NetSocket, ...args: RawConnectArgs): NetSocket {
 		const target = parseConnectArgs(args)
 		if (target !== null) {
-			const verdict = permissionService.checkSync({
+			const verdict = permissionService.classify({
 				scheme: target.protocol,
 				host: target.host,
 				port: target.port,
@@ -274,7 +274,7 @@ function patchDgramSend(): void {
 	const patched = function patchedSend(this: DgramSocket, ...args: DgramSendArgs): void {
 		const target = parseDgramSendArgs(args)
 		if (target !== null) {
-			const verdict = permissionService.checkSync({
+			const verdict = permissionService.classify({
 				scheme: 'udp',
 				host: target.host,
 				port: target.port,
@@ -326,7 +326,14 @@ function findCallback(args: DgramSendArgs): DgramSendCallback | null {
 
 // ─── Shared helpers ─────────────────────────────────────────────────────────
 
-function makeRecord(target: { host: string; port: number; protocol: 'http' | 'https' | 'internal' }, verdict: 'allow' | 'deny'): RequestRecord {
+function makeRecord(target: { host: string; port: number; protocol: 'http' | 'https' | 'internal' }, classification: 'allow' | 'deny' | 'prompt'): RequestRecord {
+	// `net.connect` / `dgram.send` are synchronous — there's no
+	// buffering wrapper here, so a `prompt` classification collapses
+	// to `allow` (the call goes through, but the destination still
+	// gets surfaced via Layer A / Layer B's http path if it's an
+	// HTTP-shaped call). Logged as `pending` so the audit trail
+	// shows a human couldn't have answered the prompt in time.
+	const verdict = classification === 'prompt' ? 'pending' : classification
 	return {
 		id: randomUUID(),
 		timestamp: new Date().toISOString(),

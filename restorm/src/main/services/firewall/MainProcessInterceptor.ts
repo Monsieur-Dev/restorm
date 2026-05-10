@@ -1,10 +1,13 @@
-import http, { type ClientRequest, type RequestOptions } from 'node:http'
+import http, { type ClientRequest, type RequestOptions, type OutgoingHttpHeaders } from 'node:http'
 import https from 'node:https'
 import { randomUUID } from 'node:crypto'
 import { logger, graphQLService } from 'electron-core-ui'
 import { firewallService } from './FirewallService'
 import { permissionService } from './PermissionService'
 import { DeniedClientRequest } from './DeniedClientRequest'
+import { BufferingClientRequest } from './BufferingClientRequest'
+import { captureOriginHint } from './stackOrigin'
+import { detectWireProtocol } from './protocolDetect'
 import type {
 	RequestRecord,
 	RequestRecordProtocol,
@@ -13,36 +16,30 @@ import type {
 
 /**
  * Layer B of the firewall. Every outgoing call from the main
- * process is captured, materialised into a `RequestRecord`,
- * routed through the synchronous PermissionService verdict, and
- * either:
+ * process is captured, materialised into a `RequestRecord`, routed
+ * through the firewall verdict, and either:
  *
- *   - forwarded to the real `http.request` / `globalThis.fetch`
- *     (verdict `allow`), with the record emitted as `allow`, OR
- *   - replaced with a `DeniedClientRequest` stub (for http/https,
- *     emits `error` on next tick) / a rejected Promise (for
- *     fetch), with the record emitted as `deny` so the audit
- *     log + console show the block.
- *
- * Strict mode's async toast prompt is intentionally NOT awaited
- * here: `http.request()` is sync, so a real prompt-respecting
- * Layer B would need a `BufferingClientRequest` wrapper that
- * queues `req.write()` until the verdict resolves. That's
- * follow-up scope — until then `strict` is treated like
- * `log-only` from this layer's perspective (allow + audit). The
- * session-denylist gate still fires (so a user who picked "Deny
- * always" against a Layer A prompt also blocks main-process
- * traffic to the same destination).
+ *   - forwarded to the real `http.request` / `globalThis.fetch` when
+ *     `classify()` returns `allow` (with the record emitted as
+ *     `allow`), OR
+ *   - replaced with a `DeniedClientRequest` stub (for http/https) /
+ *     a rejected Promise (for fetch) when `classify()` returns
+ *     `deny`, with the record emitted as `deny` so the audit log
+ *     + console show the block, OR
+ *   - parked in a `BufferingClientRequest` (http/https) or awaited
+ *     before delegating to the real `fetch` (fetch path) when
+ *     `classify()` returns `prompt`. The toast resolves to
+ *     `allow` → real request fires with replayed writes; `deny` →
+ *     `EFIREWALLDENIED` surfaces to the caller.
  *
  * Patches `http.request`, `http.get`, `https.request`, `https.get`,
- * and `globalThis.fetch`. `dns.lookup` and `net.Socket.connect`
- * are deferred — every consumer we care about (axios, node-fetch,
- * undici, electron-vite, npm deps) goes through one of the patched
- * entrypoints before reaching DNS or raw sockets. If a future dep
- * bypasses all three we'll plug those then.
+ * and `globalThis.fetch`. `dns.lookup` and `net.Socket.connect` are
+ * deferred — every consumer we care about (axios, node-fetch, undici,
+ * electron-vite, npm deps) goes through one of the patched
+ * entrypoints before reaching DNS or raw sockets.
  *
- * Idempotent: a second install is a no-op so repeated bundler
- * reloads don't double-wrap.
+ * Idempotent: a second install is a no-op so repeated bundler reloads
+ * don't double-wrap.
  */
 
 let installed = false
@@ -55,7 +52,7 @@ export function installMainProcessInterceptor(): void {
 	patchHttpModule(https, 'main-https')
 	patchFetch()
 
-	logger.info('FirewallService: main-process interceptor installed (lockdown enforced)')
+	logger.info('FirewallService: main-process interceptor installed')
 }
 
 type HttpRequestFn = typeof http.request
@@ -70,34 +67,64 @@ function patchHttpModule(mod: HttpLikeModule, source: RequestRecordSource): void
 	const originalRequest = mod.request.bind(mod)
 	const originalGet = mod.get.bind(mod)
 
-	const patchedRequest = ((...args: Parameters<HttpRequestFn>): ClientRequest => {
+	const dispatch = (
+		args: unknown[],
+		realFn: (a: unknown[]) => ClientRequest
+	): ClientRequest => {
 		const record = recordFromHttpArgs(args, source)
-		if (record !== null) {
-			const verdict = permissionService.checkSync({ scheme: record.protocol, host: record.host, port: record.port, source: record.source })
-			record.verdict = verdict
-			if (verdict === 'deny') {
-				record.errorMessage = 'firewall: denied (blacklist)'
-				firewallService.emit(record)
-				return makeDenied(record) as unknown as ClientRequest
-			}
+		if (record === null) return realFn(args)
+		const originHint = captureOriginHint(2)
+		if (originHint !== null) record.originHint = originHint
+		const cls = permissionService.classify({
+			scheme: record.protocol,
+			host: record.host,
+			port: record.port,
+			source: record.source,
+			...(originHint !== null ? { originHint } : {})
+		})
+		if (cls === 'deny') {
+			record.verdict = 'deny'
+			record.errorMessage = 'firewall: denied (blacklist)'
 			firewallService.emit(record)
+			return makeDenied(record) as unknown as ClientRequest
 		}
-		return originalRequest(...args)
+		if (cls === 'allow') {
+			record.verdict = 'allow'
+			firewallService.emit(record)
+			return realFn(args)
+		}
+		// `prompt` — buffer the request and start the async resolution.
+		record.verdict = 'pending'
+		firewallService.emit(record)
+		const verdictPromise = permissionService.check({
+			scheme: record.protocol,
+			host: record.host,
+			port: record.port,
+			source: record.source,
+			...(originHint !== null ? { originHint } : {})
+		})
+		const initialHeaders = extractHeadersFromArgs(args)
+		const buffering = new BufferingClientRequest(
+			args,
+			verdictPromise.then((v) => {
+				const completed: RequestRecord = { ...record, verdict: v }
+				if (v === 'deny') completed.errorMessage = 'firewall: denied'
+				firewallService.emit(completed)
+				return v
+			}),
+			(merged) => realFn(merged),
+			`Firewall blocked outbound request to ${record.host}:${String(record.port)}`,
+			initialHeaders
+		)
+		return buffering as unknown as ClientRequest
+	}
+
+	const patchedRequest = ((...args: Parameters<HttpRequestFn>): ClientRequest => {
+		return dispatch(args as unknown[], (a) => originalRequest(...(a as Parameters<HttpRequestFn>)))
 	}) as HttpRequestFn
 
 	const patchedGet = ((...args: Parameters<HttpGetFn>): ClientRequest => {
-		const record = recordFromHttpArgs(args, source)
-		if (record !== null) {
-			const verdict = permissionService.checkSync({ scheme: record.protocol, host: record.host, port: record.port, source: record.source })
-			record.verdict = verdict
-			if (verdict === 'deny') {
-				record.errorMessage = 'firewall: denied (blacklist)'
-				firewallService.emit(record)
-				return makeDenied(record) as unknown as ClientRequest
-			}
-			firewallService.emit(record)
-		}
-		return originalGet(...args)
+		return dispatch(args as unknown[], (a) => originalGet(...(a as Parameters<HttpGetFn>)))
 	}) as HttpGetFn
 
 	mod.request = patchedRequest
@@ -163,23 +190,35 @@ function recordFromHttpArgs(args: unknown[], source: RequestRecordSource): Reque
 
 	if (isInternalGraphqlEndpoint(fullUrl)) return null
 
+	const refinedProtocol = detectWireProtocol({ url: fullUrl, headers, baseProtocol: protocol })
 	return {
 		id: randomUUID(),
 		timestamp: new Date().toISOString(),
 		source,
-		protocol,
+		protocol: refinedProtocol,
 		method,
 		url: fullUrl,
 		host,
 		port: Number.isFinite(port) ? port : 0,
 		headers,
-		// `http.request`'s body is written via `req.write()` AFTER
-		// the call returns — we don't see it here. A future
-		// `BufferingClientRequest` wrapper would hook those writes
-		// so the body lands on the record before the actual flush;
-		// for now Layer B records always show empty bodies for POSTs.
+		// `http.request`'s body is written via `req.write()` AFTER the
+		// call returns — Layer B records always show empty bodies for
+		// streaming POSTs. The `BufferingClientRequest` *does* see
+		// every write but doesn't re-emit a completion record (the
+		// console renders the URL + method, not the body, for main-
+		// side captures). Layer A captures bodies for renderer-side
+		// fetch.
 		verdict: 'allow'
 	}
+}
+
+function extractHeadersFromArgs(args: unknown[]): OutgoingHttpHeaders | undefined {
+	for (const arg of args) {
+		if (typeof arg !== 'object' || arg === null || arg instanceof URL || isFunction(arg)) continue
+		const opts = arg as { headers?: OutgoingHttpHeaders }
+		if (opts.headers !== undefined) return opts.headers
+	}
+	return undefined
 }
 
 /**
@@ -214,22 +253,58 @@ function patchFetch(): void {
 		} catch (err) {
 			logger.warn('FirewallService: failed to build fetch record', { error: String(err) })
 		}
-		if (record !== null) {
-			const verdict = permissionService.checkSync({ scheme: record.protocol, host: record.host, port: record.port, source: record.source })
-			record.verdict = verdict
-			if (verdict === 'deny') {
-				record.errorMessage = 'firewall: denied (blacklist)'
-				firewallService.emit(record)
-				const err = new Error(`Firewall blocked outbound fetch to ${record.host}:${String(record.port)}`)
-				;(err as Error & { code?: string }).code = 'EFIREWALLDENIED'
-				throw err
-			}
+		if (record === null) return originalFetch(input, init)
+
+		const originHint = captureOriginHint(2)
+		if (originHint !== null) record.originHint = originHint
+		const cls = permissionService.classify({
+			scheme: record.protocol,
+			host: record.host,
+			port: record.port,
+			source: record.source,
+			...(originHint !== null ? { originHint } : {})
+		})
+		if (cls === 'deny') {
+			record.verdict = 'deny'
+			record.errorMessage = 'firewall: denied (blacklist)'
 			firewallService.emit(record)
+			throw makeFetchDenyError(record)
 		}
+		if (cls === 'allow') {
+			record.verdict = 'allow'
+			firewallService.emit(record)
+			return originalFetch(input, init)
+		}
+		// `prompt` — emit `pending`, await the async verdict, then
+		// finalise. The fetch path can suspend cleanly (it's async by
+		// nature) so no buffering wrapper is needed; we just hold the
+		// `originalFetch` call until the user picks.
+		record.verdict = 'pending'
+		firewallService.emit(record)
+		const v = await permissionService.check({
+			scheme: record.protocol,
+			host: record.host,
+			port: record.port,
+			source: record.source,
+			...(originHint !== null ? { originHint } : {})
+		})
+		const finalised: RequestRecord = { ...record, verdict: v }
+		if (v === 'deny') {
+			finalised.errorMessage = 'firewall: denied'
+			firewallService.emit(finalised)
+			throw makeFetchDenyError(record)
+		}
+		firewallService.emit(finalised)
 		return originalFetch(input, init)
 	}
 
 	globalThis.fetch = patched
+}
+
+function makeFetchDenyError(record: RequestRecord): Error {
+	const err = new Error(`Firewall blocked outbound fetch to ${record.host}:${String(record.port)}`)
+	;(err as Error & { code?: string }).code = 'EFIREWALLDENIED'
+	return err
 }
 
 function recordFromFetchArgs(input: RequestInfo | URL, init: RequestInit | undefined): RequestRecord | null {
@@ -271,11 +346,12 @@ function recordFromFetchArgs(input: RequestInfo | URL, init: RequestInit | undef
 	const protocol: RequestRecordProtocol = parsed.protocol === 'https:' ? 'https' : 'http'
 	const port = parsed.port !== '' ? Number(parsed.port) : (protocol === 'https' ? 443 : 80)
 
+	const refinedProtocol = detectWireProtocol({ url: raw, headers, body, baseProtocol: protocol })
 	return {
 		id: randomUUID(),
 		timestamp: new Date().toISOString(),
 		source: 'main-fetch',
-		protocol,
+		protocol: refinedProtocol,
 		method: (method ?? 'GET').toUpperCase(),
 		url: raw,
 		host,

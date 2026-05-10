@@ -36,7 +36,7 @@ import type { PersistenceFormat } from 'electron-core-ui'
 import { dirname, join } from 'path'
 import { existsSync, statSync } from 'fs'
 import { searchIndexService, contextService, responseHistoryService, authenticationCacheService } from './services'
-import { firewallService, permissionService, registerFirewallIpc } from './services/firewall'
+import { firewallService, permissionService, registerFirewallIpc, installWorkerPatcher } from './services/firewall'
 import { writeMcpDiscoveryFile, cleanupMcpDiscoveryFile } from './services/mcpDiscovery'
 import { registerRestormMcp } from './mcp'
 import { graphQLService } from 'electron-core-ui/main'
@@ -378,6 +378,11 @@ logger.info('Dirty state managed by FileService checksum system')
 void app.whenReady().then(() => {
   firewallService.registerWebRequestListener()
   registerFirewallIpc()
+  // Patch worker_threads.Worker + child_process.fork so spawned
+  // contexts inherit a "deny everything outbound" posture. Restorm
+  // doesn't currently use either, so this is a defensive measure
+  // against a future npm dep that does.
+  installWorkerPatcher()
   // GraphQL bridge port is always known by `whenReady`. Vite
   // dev port comes from electron-vite's env var (undefined in
   // prod). MCP port is registered later when `mcpService.start`

@@ -7,6 +7,7 @@ import {
 	type RequestRecordProtocol
 } from '../../../shared/types/firewall'
 import { permissionService } from './PermissionService'
+import { detectWireProtocol } from './protocolDetect'
 
 /**
  * `FirewallService` — Layer A (renderer / Chromium webRequest).
@@ -102,7 +103,13 @@ class FirewallService {
 			const built = record
 			const scheme = parseScheme(details.url)
 			void permissionService
-				.check({ scheme, host: built.host, port: built.port, source: built.source })
+				.check({
+					scheme,
+					host: built.host,
+					port: built.port,
+					source: built.source,
+					...(built.originHint !== undefined ? { originHint: built.originHint } : {})
+				})
 				.then((verdict) => {
 					built.verdict = verdict
 					this.broadcast(built)
@@ -140,11 +147,16 @@ class FirewallService {
 		// flag the body as `<binary 1234 bytes>` so the renderer
 		// doesn't try to print megabytes of garbage.
 		const body = uploadDataToString(details.uploadData)
+		// Layer A doesn't see request headers (`onBeforeRequest` fires
+		// before `onSendHeaders`), so the protocol detector can only
+		// rely on URL patterns + body shape here. Layer B's headers-
+		// rich path catches the remainder.
+		const refinedProtocol = detectWireProtocol({ url: details.url, headers: {}, body, baseProtocol: protocol })
 		return {
 			id: randomUUID(),
 			timestamp: new Date().toISOString(),
 			source: 'renderer-webrequest',
-			protocol,
+			protocol: refinedProtocol,
 			method: details.method.toUpperCase(),
 			url: details.url,
 			host,

@@ -21,6 +21,11 @@ export function FirewallPromptBody({ payload, resolve }: FirewallPromptBodyProps
 			</div>
 			<div className="firewall-prompt-toast__source">
 				{payload.source}
+				{payload.originHint !== undefined && payload.originHint !== '' && (
+					<>
+						{' '}— from <span className="firewall-prompt-toast__origin-hint">{payload.originHint}</span>
+					</>
+				)}
 			</div>
 			<div className="firewall-prompt-toast__actions">
 				<button
