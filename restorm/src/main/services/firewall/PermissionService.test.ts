@@ -112,6 +112,74 @@ describe('PermissionService.classify', () => {
 	})
 })
 
+describe('PermissionService.classify — wildcards', () => {
+	it('subdomain wildcard matches one level deep', () => {
+		permissionService.addToWhitelist({ scheme: 'https', host: '*.example.com', port: 443 })
+		expect(
+			permissionService.classify({ scheme: 'https', host: 'api.example.com', port: 443, source: 'main-https' })
+		).toBe('allow')
+	})
+
+	it('subdomain wildcard does NOT match the bare domain', () => {
+		permissionService.addToWhitelist({ scheme: 'https', host: '*.example.com', port: 443 })
+		expect(
+			permissionService.classify({ scheme: 'https', host: 'example.com', port: 443, source: 'main-https' })
+		).toBe('prompt')
+	})
+
+	it('subdomain wildcard does NOT match deeper subdomains', () => {
+		permissionService.addToWhitelist({ scheme: 'https', host: '*.example.com', port: 443 })
+		expect(
+			permissionService.classify({ scheme: 'https', host: 'a.b.example.com', port: 443, source: 'main-https' })
+		).toBe('prompt')
+	})
+
+	it('wildcard host still requires the same port unless port wildcard is used', () => {
+		permissionService.addToWhitelist({ scheme: 'https', host: '*.example.com', port: 443 })
+		expect(
+			permissionService.classify({ scheme: 'https', host: 'api.example.com', port: 8443, source: 'main-https' })
+		).toBe('prompt')
+	})
+
+	it('port wildcard (port: 0) matches any real port', () => {
+		permissionService.addToWhitelist({ scheme: 'https', host: 'api.example.com', port: 0 })
+		expect(
+			permissionService.classify({ scheme: 'https', host: 'api.example.com', port: 443, source: 'main-https' })
+		).toBe('allow')
+		expect(
+			permissionService.classify({ scheme: 'https', host: 'api.example.com', port: 8443, source: 'main-https' })
+		).toBe('allow')
+	})
+
+	it('host AND port wildcards combine', () => {
+		permissionService.addToWhitelist({ scheme: 'https', host: '*.example.com', port: 0 })
+		expect(
+			permissionService.classify({ scheme: 'https', host: 'api.example.com', port: 8443, source: 'main-https' })
+		).toBe('allow')
+	})
+
+	it('whitelist wildcard beats a more specific blacklist entry (ordering: whitelist → blacklist)', () => {
+		// Documents the current precedence: whitelist matches are checked
+		// FIRST, so a wildcard whitelist entry effectively shadows any
+		// explicit blacklist entry that would have matched the same host.
+		// Surprising but consistent — the user can always remove the
+		// wildcard whitelist if they want the blacklist to bite.
+		permissionService.addToWhitelist({ scheme: 'https', host: '*.example.com', port: 443 })
+		permissionService.addToBlacklist({ scheme: 'https', host: 'tracker.example.com', port: 443 })
+		expect(
+			permissionService.classify({ scheme: 'https', host: 'tracker.example.com', port: 443, source: 'main-https' })
+		).toBe('allow')
+	})
+
+	it('rejects malformed wildcard hosts on add (no entry persisted)', () => {
+		permissionService.addToWhitelist({ scheme: 'https', host: '*example.com', port: 443 })
+		permissionService.addToWhitelist({ scheme: 'https', host: '*.', port: 443 })
+		permissionService.addToWhitelist({ scheme: 'https', host: 'api.*.com', port: 443 })
+		permissionService.addToWhitelist({ scheme: 'https', host: '*.*.example.com', port: 443 })
+		expect(permissionService.listWhitelist()).toHaveLength(0)
+	})
+})
+
 describe('PermissionService.check', () => {
 	it('resolves allow synchronously when classify returns allow', async () => {
 		permissionService.addToWhitelist({ scheme: 'https', host: 'fast.example', port: 443 })

@@ -588,3 +588,49 @@ Feature: Full workflow end-to-end scenario
 
     When I close the app
     Then no errors should have been logged
+
+  Scenario: Firewall + Console workbench surfaces — singleton tabs, panel CRUD, format toggle
+    Given a fresh app seeded with the main window at x=20 y=20
+    When I create a new single-file YAML collection named "firewall-console-collection"
+
+    # ─── View → Firewall ────────────────────────────────────────────
+    When I open the firewall panel via the view menu
+    Then the firewall panel should be visible
+    And the firewall whitelist count should be 0
+    And the firewall blacklist count should be 0
+
+    When I add "https://api.example.com" to the firewall whitelist
+    Then the firewall whitelist count should be 1
+    And the firewall whitelist should contain "https://api.example.com"
+
+    # Subdomain wildcard — accepted shape.
+    When I add "https://*.trusted.example.com" to the firewall whitelist
+    Then the firewall whitelist count should be 2
+    And the firewall whitelist should contain "https://*.trusted.example.com"
+
+    # Malformed wildcard — rejected silently (Add button no-ops).
+    When I add "https://*notavaliddomain" to the firewall whitelist
+    Then the firewall whitelist count should be 2
+
+    When I switch to the firewall blacklist tab
+    Then the firewall blacklist count should be 0
+    When I add "https://tracker.evil.example" to the firewall blacklist
+    Then the firewall blacklist count should be 1
+
+    # Re-opening View → Firewall focuses the existing tab (singleton).
+    When I open the firewall panel via the view menu
+    Then exactly one firewall tab should be open
+
+    # ─── View → Console ─────────────────────────────────────────────
+    When I open the console via the view menu
+    Then the console panel should be visible
+    And the console toolbar should default to curl
+    When I toggle the console shell to powershell
+    Then the console shell setting should be persisted as powershell
+
+    # Re-opening View → Console focuses the existing tab (singleton).
+    When I open the console via the view menu
+    Then exactly one console tab should be open
+
+    When I close the app
+    Then no errors should have been logged

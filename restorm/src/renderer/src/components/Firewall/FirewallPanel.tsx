@@ -72,7 +72,9 @@ export const FirewallPanel: React.FC<FirewallPanelProps> = ({
 						<>
 							Hosts that pass silently regardless of project state.
 							Format: <code>scheme://host:port</code>. Default ports
-							can be omitted.
+							can be omitted. Subdomain wildcards (one level only):
+							<code>https://*.example.com</code>. Port wildcard:
+							<code>:*</code>.
 						</>
 					}
 					placeholder="https://api.example.com"
@@ -241,6 +243,20 @@ const OriginListSection: React.FC<OriginListSectionProps> = ({
  * Returns `null` for empty / malformed input so the Add button
  * stays disabled.
  */
+/**
+ * Parse a free-form origin string into a `FirewallOrigin`. Supports
+ * two glob forms in addition to plain origins:
+ *
+ *   - Subdomain wildcard: `https://*.example.com[:port]` matches
+ *     exactly one subdomain level (`api.example.com`, NOT
+ *     `example.com` and NOT `a.b.example.com`).
+ *   - Port wildcard: `:*` parses to the reserved sentinel `0`, which
+ *     `PermissionService.matches` interprets as "any port".
+ *
+ * Returns `null` for empty / malformed input so the Add button stays
+ * disabled. The native `URL` parser rejects `*` in the host, so we
+ * substitute a placeholder while parsing and restore it afterwards.
+ */
 function parseOriginInput(raw: string): FirewallOrigin | null {
 	const trimmed = raw.trim()
 	if (trimmed.length === 0) return null
@@ -248,18 +264,63 @@ function parseOriginInput(raw: string): FirewallOrigin | null {
 	if (!candidate.includes('://')) {
 		candidate = `http://${candidate}`
 	}
+	const wildcardPort = candidate.endsWith(':*')
+	if (wildcardPort) candidate = candidate.slice(0, -2)
+	const wildcardSubdomain = candidate.includes('://*.')
+	// Pre-validate raw input: Chromium's `URL` parser percent-encodes
+	// `*` as `%2A` instead of throwing (so a leftover `*` somewhere
+	// other than the leading `*.` form would be silently turned into
+	// a string-literal entry that survives `isValidHostPattern`'s
+	// post-parse check). Reject any `*` that's not the leading `*.`
+	// or the trailing `:*` form before handing the string to URL().
+	const hostPart = candidate.split('://')[1] ?? ''
+	const hostOnly = hostPart.split(/[/?#]/)[0] ?? ''
+	if (hostOnly.includes('*') && !wildcardSubdomain) return null
+	if (wildcardSubdomain) candidate = candidate.replace('://*.', '://__wildcard__.')
 	let parsed: URL
 	try { parsed = new URL(candidate) } catch { return null }
 	const scheme = parsed.protocol.replace(/:$/, '').toLowerCase()
-	if (parsed.hostname.length === 0) return null
+	let host = parsed.hostname.toLowerCase()
+	if (wildcardSubdomain) {
+		if (!host.startsWith('__wildcard__.')) return null
+		host = `*.${host.slice('__wildcard__.'.length)}`
+	}
+	if (host.length === 0) return null
+	if (!isValidHostPattern(host)) return null
 	const defaultPort = scheme === 'https' || scheme === 'wss' ? 443 : 80
-	const port = parsed.port !== '' ? Number(parsed.port) : defaultPort
-	if (!Number.isFinite(port) || port < 0 || port > 65535) return null
-	return { scheme, host: parsed.hostname.toLowerCase(), port }
+	const port = wildcardPort
+		? 0
+		: parsed.port !== '' ? Number(parsed.port) : defaultPort
+	if (!wildcardPort && (!Number.isFinite(port) || port < 0 || port > 65535)) return null
+	return { scheme, host, port }
+}
+
+/**
+ * Mirror of `PermissionService.isValidHostPattern` — kept inline here
+ * (rather than imported across the main/renderer boundary) so the
+ * disabled-state of the Add button reflects the same constraints the
+ * persistence layer enforces. Renderer-side validation also catches
+ * the case where Node's URL parser quietly accepts a `*` outside the
+ * leading `*.` form (`new URL("https://*foo")` yields hostname
+ * `"*foo"` rather than throwing).
+ */
+function isValidHostPattern(host: string): boolean {
+	if (host.length === 0) return false
+	if (host === '*') return false
+	if (host.startsWith('*.')) {
+		const rest = host.slice(2)
+		if (rest.length === 0) return false
+		if (rest.includes('*')) return false
+		if (rest.startsWith('.') || rest.endsWith('.')) return false
+		return true
+	}
+	return !host.includes('*')
 }
 
 function formatOrigin(origin: FirewallOrigin): string {
 	const defaultPort = origin.scheme === 'https' || origin.scheme === 'wss' ? 443 : 80
-	const portSuffix = origin.port === defaultPort ? '' : `:${String(origin.port)}`
+	const portSuffix = origin.port === 0
+		? ':*'
+		: origin.port === defaultPort ? '' : `:${String(origin.port)}`
 	return `${origin.scheme}://${origin.host}${portSuffix}`
 }

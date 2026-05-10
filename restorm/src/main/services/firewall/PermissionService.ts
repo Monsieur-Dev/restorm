@@ -95,6 +95,36 @@ const PROMPT_TIMEOUT_MS = 60_000
 const LOCALHOST_HOSTS = new Set<string>(['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'])
 
 /**
+ * Reserved sentinel for port wildcards. `0` is never a real service
+ * port (kernel allocates ephemeral ports starting at 32768+), so we
+ * use it as the "match any port" marker without inventing a separate
+ * field on `FirewallOrigin`. The renderer parses `:*` in the input
+ * to this value when adding a wildcard entry.
+ */
+const WILDCARD_PORT = 0
+
+/**
+ * Reject host patterns the user shouldn't be allowed to add: empty,
+ * leading dots, multiple stars, stars not at the leading position,
+ * or stars without the matching `*.` prefix. The matching logic in
+ * `matches()` is deliberately narrow — let users add only the forms
+ * the matcher actually understands.
+ */
+function isValidHostPattern(host: string): boolean {
+	if (host.length === 0) return false
+	if (host === '*') return false
+	if (host.startsWith('*.')) {
+		const rest = host.slice(2)
+		if (rest.length === 0) return false
+		if (rest.includes('*')) return false
+		if (rest.startsWith('.') || rest.endsWith('.')) return false
+		return true
+	}
+	if (host.includes('*')) return false
+	return true
+}
+
+/**
  * E2E test bypass — when restorm boots under Playwright with an
  * isolated user-data dir, the fixture sets `RESTORM_USER_DATA_OVERRIDE`
  * (see `tests/e2e/bdd/fixtures/*.fixture.ts`). Tests start mock
@@ -204,7 +234,8 @@ class PermissionService {
 		const scheme = raw.scheme.toLowerCase()
 		const host = raw.host.toLowerCase()
 		const port = Math.trunc(raw.port)
-		if (host.length === 0 || !Number.isFinite(port) || port < 0 || port > 65535) return null
+		if (!isValidHostPattern(host)) return null
+		if (port !== WILDCARD_PORT && (!Number.isFinite(port) || port < 0 || port > 65535)) return null
 		return { scheme, host, port }
 	}
 
@@ -212,8 +243,44 @@ class PermissionService {
 		return a.scheme === b.scheme && a.host === b.host && a.port === b.port
 	}
 
+	/**
+	 * Match a candidate origin against a list entry. Supports two glob
+	 * forms — both deliberately narrow:
+	 *
+	 *   - **Host**: `*.example.com` matches exactly ONE subdomain
+	 *     level. `api.example.com` matches; `example.com` does NOT
+	 *     (no zero-level match — the user has to add the bare domain
+	 *     separately if they want it); `a.b.example.com` does NOT
+	 *     match (no eager glob — explicit by design).
+	 *
+	 *   - **Port**: `0` is reserved as the wildcard port (no real
+	 *     service runs on port 0). An entry with `port: 0` matches
+	 *     any port.
+	 *
+	 *   - **Scheme**: always exact-match. Adding a scheme wildcard
+	 *     would let a `https`-only allowance silently grant `http`
+	 *     too, which is too easy to mis-use.
+	 */
+	private matches(entry: FirewallOrigin, origin: FirewallOrigin): boolean {
+		if (entry.scheme !== origin.scheme) return false
+		if (entry.port !== WILDCARD_PORT && entry.port !== origin.port) return false
+		if (entry.host === origin.host) return true
+		if (entry.host.startsWith('*.')) {
+			const suffix = entry.host.slice(2)
+			// `*.example.com` matches `api.example.com` but NOT
+			// `example.com` (no zero-subdomain match) and NOT
+			// `a.b.example.com` (no multi-subdomain match).
+			if (!origin.host.endsWith(`.${suffix}`)) return false
+			const head = origin.host.slice(0, origin.host.length - suffix.length - 1)
+			if (head.length === 0) return false
+			if (head.includes('.')) return false
+			return true
+		}
+		return false
+	}
+
 	private contains(list: FirewallOrigin[], origin: FirewallOrigin): boolean {
-		for (const entry of list) if (this.equals(entry, origin)) return true
+		for (const entry of list) if (this.matches(entry, origin)) return true
 		return false
 	}
 
