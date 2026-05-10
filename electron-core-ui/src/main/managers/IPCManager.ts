@@ -74,7 +74,13 @@ export function setupIPC(resourcesPath?: string, appSettingsConfigPath?: string,
 
   logger.info('🚩 Initializing feature service...')
   const featuresDefaultPath = join(finalResourcesPath, 'features', 'defaults.yaml')
-  initFeatureService(featuresDefaultPath, appFeaturesConfigPath)
+  // Environment is propagated to the FeatureFlippingService so YAML
+  // configs can gate features behind `Type: Environment` /
+  // `AvailableIn: [dev]`. Same `isDev` predicate the resources-path
+  // resolver uses above — packaged builds (`app.isPackaged`) get
+  // `prod`; everything else (`pnpm dev`, electron-vite dev, CI) gets
+  // `dev`.
+  initFeatureService(featuresDefaultPath, appFeaturesConfigPath, 'desktop', isDev ? 'dev' : 'prod')
 
   logger.info('✅ Services initialized successfully')
 

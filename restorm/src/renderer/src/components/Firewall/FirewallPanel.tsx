@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import { Tabs, ControlGroup, InputBox, Button, IconView, ScrollableElement, type Tab } from 'electron-core-ui/renderer'
+import { Tabs, ControlGroup, InputBox, Button, IconView, ScrollableElement, useFeature, type Tab } from 'electron-core-ui/renderer'
 import { useFirewallControl } from './useFirewallControl'
+import { FIREWALL_TEST_BUTTON_FEATURE } from '../../../../main/featureFlags'
 import './firewallPanel.css'
 import type { FirewallOrigin } from '../../../../shared/types/firewall'
 
@@ -39,6 +40,7 @@ export const FirewallPanel: React.FC<FirewallPanelProps> = ({
 	const [whitelistDraft, setWhitelistDraft] = useState('')
 	const [blacklistDraft, setBlacklistDraft] = useState('')
 	const [activeTabId, setActiveTabId] = useState<string>('whitelist')
+	const { isEnabled: testButtonEnabled } = useFeature(FIREWALL_TEST_BUTTON_FEATURE)
 
 	const handleAddWhitelist = useCallback((): void => {
 		const origin = parseOriginInput(whitelistDraft)
@@ -136,17 +138,19 @@ export const FirewallPanel: React.FC<FirewallPanelProps> = ({
 							toast prompt — your decision adds the origin to the
 							matching list below.
 						</p>
-						<div className="firewall-panel__header-test">
-							<Button
-								icon="globe"
-								options={{ ariaLabel: 'Test outbound to google.com', title: 'Fires a renderer-side fetch to google.com — should trigger the firewall toast.' }}
-								data-testid="firewall-test-outbound"
-								onClick={handleTestOutbound}
-								secondary
-							>
-								Test outbound to google.com
-							</Button>
-						</div>
+						{testButtonEnabled && (
+							<div className="firewall-panel__header-test">
+								<Button
+									icon="globe"
+									options={{ ariaLabel: 'Test outbound to google.com', title: 'Fires a renderer-side fetch to google.com — should trigger the firewall toast.' }}
+									data-testid="firewall-test-outbound"
+									onClick={handleTestOutbound}
+									secondary
+								>
+									Test outbound to google.com
+								</Button>
+							</div>
+						)}
 					</div>
 				</header>
 				<div className="firewall-panel__tabs">

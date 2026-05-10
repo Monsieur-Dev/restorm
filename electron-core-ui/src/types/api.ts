@@ -6,7 +6,7 @@
  * (in-memory fallback) implement these same interfaces.
  */
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from './theme'
-import type { FeaturePlatform } from './feature'
+import type { FeatureEnvironment, FeaturePlatform } from './feature'
 import type { FileServiceState, FileMetadata, SerializationFormat } from './file'
 import type { SettingValue, ResolvedSetting, SettingsGroup } from './settings'
 
@@ -37,6 +37,7 @@ export interface CoreUiStorageApi {
 export interface CoreUiFeatureApi {
   isEnabled: (featureName: string) => Promise<boolean>
   getPlatform: () => Promise<FeaturePlatform>
+  getEnvironment: () => Promise<FeatureEnvironment>
 }
 
 export interface CoreUiFileApi {

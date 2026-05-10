@@ -2,9 +2,11 @@ import { readFileSync, existsSync } from 'fs'
 import yaml from 'js-yaml'
 import type {
   FeatureConfig,
+  FeatureEnvironment,
   FeaturePlatform,
   FeatureStrategy,
   BasicStrategy,
+  EnvironmentStrategy,
   PlatformStrategy
 } from '../../types/feature'
 import { logger } from './LoggerService'
@@ -13,21 +15,24 @@ import { featuresYamlConfigSchema } from '../schemas/configSchemas'
 
 /**
  * FeatureFlippingService manages feature flags with configurable strategies
- * 
+ *
  * Supported strategies:
  * - Basic: Simple on/off toggle defined in config
  * - Platform: Enables feature based on runtime platform (desktop/web)
- * 
+ * - Environment: Enables feature based on build environment (dev/prod)
+ *
  * Multiple strategies can be combined - ALL must return true for feature to be enabled (AND logic)
- * 
+ *
  * Configuration is loaded from a YAML file provided by the consuming application
  */
 export class FeatureFlippingService {
   private features = new Map<string, FeatureConfig>()
   private platform: FeaturePlatform
+  private environment: FeatureEnvironment
 
-  constructor(featuresConfigPath: string, platform: FeaturePlatform = 'desktop') {
+  constructor(featuresConfigPath: string, platform: FeaturePlatform = 'desktop', environment: FeatureEnvironment = 'prod') {
     this.platform = platform
+    this.environment = environment
     this.loadFeatures(featuresConfigPath)
   }
 
@@ -124,6 +129,8 @@ export class FeatureFlippingService {
         return this.evaluateBasicStrategy(strategy)
       case 'Platform':
         return this.evaluatePlatformStrategy(strategy)
+      case 'Environment':
+        return this.evaluateEnvironmentStrategy(strategy)
       default:
         logger.warn(`Unknown strategy type for feature "${featureName}": ${(strategy as { Type: string }).Type}`)
         return false
@@ -145,10 +152,28 @@ export class FeatureFlippingService {
   }
 
   /**
+   * Environment strategy: check if the current build environment is
+   * in the allowed list. Used to ship dev-only debug surfaces (test
+   * buttons, internal panels, hidden CTAs) that disappear from
+   * packaged production builds without code-stripping.
+   */
+  private evaluateEnvironmentStrategy(strategy: EnvironmentStrategy): boolean {
+    return strategy.AvailableIn.includes(this.environment)
+  }
+
+  /**
    * Get the current runtime platform
    */
   public getPlatform(): FeaturePlatform {
     return this.platform
+  }
+
+  /**
+   * Get the current build environment (`dev` for unpackaged runs,
+   * `prod` for packaged binaries).
+   */
+  public getEnvironment(): FeatureEnvironment {
+    return this.environment
   }
 
   /**
@@ -167,16 +192,20 @@ let featureServiceInstance: FeatureFlippingService | null = null
  * Must be called before getFeatureService()
  *
  * Supports two signatures for backward compatibility:
- * - initFeatureService(configPath, platform?)               — legacy
- * - initFeatureService(defaultPath, appConfigPath, platform?) — new (with app overrides)
+ * - initFeatureService(configPath, platform?, environment?)               — legacy
+ * - initFeatureService(defaultPath, appConfigPath, platform?, environment?) — new (with app overrides)
  *
  * Disambiguation: if the second argument is a FeaturePlatform string ('desktop' | 'web'),
  * it is treated as the platform (legacy call). Otherwise it is treated as appConfigPath.
+ *
+ * `environment` defaults to `'prod'` when omitted — packaged builds get the conservative default.
+ * Host apps that want dev-only feature surfaces should pass `app.isPackaged ? 'prod' : 'dev'`.
  */
 export function initFeatureService(
   defaultConfigPath: string,
   appConfigPathOrPlatform?: string,
-  platform?: FeaturePlatform
+  platformOrEnvironment?: FeaturePlatform | FeatureEnvironment,
+  environment?: FeatureEnvironment
 ): FeatureFlippingService {
   if (featureServiceInstance) {
     logger.warn('FeatureFlippingService already initialized, returning existing instance')
@@ -186,18 +215,25 @@ export function initFeatureService(
   // Disambiguate legacy vs new signature
   let appConfigPath: string | undefined
   let resolvedPlatform: FeaturePlatform = 'desktop'
+  let resolvedEnvironment: FeatureEnvironment = 'prod'
 
   if (appConfigPathOrPlatform === 'desktop' || appConfigPathOrPlatform === 'web') {
-    // Legacy call: initFeatureService(path, platform)
+    // Legacy call: initFeatureService(path, platform, environment?)
     resolvedPlatform = appConfigPathOrPlatform
+    if (platformOrEnvironment === 'dev' || platformOrEnvironment === 'prod') {
+      resolvedEnvironment = platformOrEnvironment
+    }
   } else if (appConfigPathOrPlatform !== undefined) {
-    // New call: initFeatureService(defaultPath, appConfigPath, platform?)
+    // New call: initFeatureService(defaultPath, appConfigPath, platform?, environment?)
     appConfigPath = appConfigPathOrPlatform
-    resolvedPlatform = platform ?? 'desktop'
+    if (platformOrEnvironment === 'desktop' || platformOrEnvironment === 'web') {
+      resolvedPlatform = platformOrEnvironment
+    }
+    if (environment !== undefined) resolvedEnvironment = environment
   }
 
   logger.info('FeatureFlippingService: Creating singleton instance...')
-  featureServiceInstance = new FeatureFlippingService(defaultConfigPath, resolvedPlatform)
+  featureServiceInstance = new FeatureFlippingService(defaultConfigPath, resolvedPlatform, resolvedEnvironment)
 
   if (appConfigPath) {
     featureServiceInstance.loadAdditionalConfig(appConfigPath)

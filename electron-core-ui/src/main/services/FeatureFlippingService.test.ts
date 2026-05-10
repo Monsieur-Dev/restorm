@@ -103,6 +103,81 @@ describe('FeatureFlippingService', () => {
   })
 
   // ---------------------------------------------------------------
+  // Environment strategy
+  // ---------------------------------------------------------------
+  describe('environment strategy', () => {
+    it('returns true when current environment matches AvailableIn', () => {
+      const config: FeaturesYamlConfig = {
+        Features: [
+          { Name: 'dev-only', Strategies: [{ Type: 'Environment', AvailableIn: ['dev'] }] }
+        ]
+      }
+      vi.mocked(existsSync).mockReturnValue(true)
+      vi.mocked(readFileSync).mockReturnValue(makeYaml(config))
+
+      const service = new FeatureFlippingService('/fake/features.yml', 'desktop', 'dev')
+
+      expect(service.isEnabled('dev-only')).toBe(true)
+    })
+
+    it('returns false when current environment is not in AvailableIn', () => {
+      const config: FeaturesYamlConfig = {
+        Features: [
+          { Name: 'dev-only', Strategies: [{ Type: 'Environment', AvailableIn: ['dev'] }] }
+        ]
+      }
+      vi.mocked(existsSync).mockReturnValue(true)
+      vi.mocked(readFileSync).mockReturnValue(makeYaml(config))
+
+      const service = new FeatureFlippingService('/fake/features.yml', 'desktop', 'prod')
+
+      expect(service.isEnabled('dev-only')).toBe(false)
+    })
+
+    it('defaults environment to "prod" when not specified', () => {
+      const config: FeaturesYamlConfig = {
+        Features: [
+          { Name: 'dev-only', Strategies: [{ Type: 'Environment', AvailableIn: ['dev'] }] },
+          { Name: 'prod-only', Strategies: [{ Type: 'Environment', AvailableIn: ['prod'] }] }
+        ]
+      }
+      vi.mocked(existsSync).mockReturnValue(true)
+      vi.mocked(readFileSync).mockReturnValue(makeYaml(config))
+
+      const service = new FeatureFlippingService('/fake/features.yml', 'desktop')
+
+      expect(service.isEnabled('dev-only')).toBe(false)
+      expect(service.isEnabled('prod-only')).toBe(true)
+      expect(service.getEnvironment()).toBe('prod')
+    })
+
+    it('AND-combines with Platform: dev + desktop only', () => {
+      const config: FeaturesYamlConfig = {
+        Features: [
+          {
+            Name: 'dev-desktop-only',
+            Strategies: [
+              { Type: 'Environment', AvailableIn: ['dev'] },
+              { Type: 'Platform', AvailableOn: ['desktop'] }
+            ]
+          }
+        ]
+      }
+      vi.mocked(existsSync).mockReturnValue(true)
+      vi.mocked(readFileSync).mockReturnValue(makeYaml(config))
+
+      const devDesktop = new FeatureFlippingService('/fake/features.yml', 'desktop', 'dev')
+      expect(devDesktop.isEnabled('dev-desktop-only')).toBe(true)
+
+      const prodDesktop = new FeatureFlippingService('/fake/features.yml', 'desktop', 'prod')
+      expect(prodDesktop.isEnabled('dev-desktop-only')).toBe(false)
+
+      const devWeb = new FeatureFlippingService('/fake/features.yml', 'web', 'dev')
+      expect(devWeb.isEnabled('dev-desktop-only')).toBe(false)
+    })
+  })
+
+  // ---------------------------------------------------------------
   // Multiple strategies (AND logic)
   // ---------------------------------------------------------------
   describe('multiple strategies (AND logic)', () => {

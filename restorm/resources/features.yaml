@@ -39,3 +39,15 @@ Features:
     Strategies:
       - Type: Basic
         Enabled: false
+
+  # Firewall panel "Test outbound to google.com" button. The button
+  # is a developer aid for verifying the prompt-toast pathway end-to-
+  # end without having to import a swagger or write a manual fetch.
+  # It has no place in shipped binaries — packaged users would see a
+  # CTA that does nothing useful and could even raise concerns about
+  # the app phoning home. Gated to `dev` only.
+  - Name: "firewall.testButton"
+    Strategies:
+      - Type: Environment
+        AvailableIn:
+          - dev
