@@ -234,6 +234,17 @@ The component uses the following theme CSS variables for theming:
 - Proportional scrolling based on drag distance
 - Smooth position updates during drag
 
+### Track-click Autoscroll
+
+The rail gutter — the part of the track above and below the thumb — supports the same page-jump gesture as a native scrollbar:
+
+- **Single click above the thumb** → scroll up by one viewport (`containerHeight` for the vertical rail, `containerWidth` for the horizontal rail).
+- **Single click below the thumb** → scroll down by one viewport.
+- **Click and hold** → repeat the page-jump every ~60 ms after a 250 ms initial delay (so a quick click doesn't auto-fire). The loop stops as soon as the thumb crosses the cursor's recorded position, so a click halfway down the rail eventually parks the thumb at the cursor.
+- **Mouse release anywhere** → cancel the loop immediately.
+
+The thumb itself keeps its own drag handler — clicking on the thumb does NOT trigger track-click. Same for the optional arrow caps. Termination math lives in [`trackAutoScroll.ts`](../../src/renderer/components/ScrollableElement/trackAutoScroll.ts) and is unit-tested independently of the DOM event glue.
+
 ## Keyboard Navigation
 
 - **Arrow keys**: Scroll by line (20px)
