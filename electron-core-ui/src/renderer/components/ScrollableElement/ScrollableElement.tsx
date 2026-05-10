@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './scrollbars.css';
 import type { ScrollableElementProps } from './types';
 import { defaultScrollableElementStyles } from './types';
+import { nextPageScrollPosition, shouldStopTrackAutoScroll, trackClickDirection } from './trackAutoScroll';
 
 const HIDE_TIMEOUT = 500;
 
@@ -21,6 +22,12 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
   const contentRef = useRef<HTMLDivElement | null>(null);
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  // Burst-safe wheel-scroll target refs. See `handleWheel` for the
+  // full reasoning — accumulating into a synchronously-updated
+  // target prevents fast wheel events from coalescing onto the
+  // same starting position.
+  const targetScrollTopRef = useRef<number>(0);
+  const targetScrollLeftRef = useRef<number>(0);
 
   // State
   const [scrollTop, setScrollTop] = useState(0);
@@ -45,10 +52,10 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
     handleMouseWheel: true,
     mouseWheelSmoothScroll: true,
     mouseWheelHorizontal: false,
-    horizontal: 'auto' as const,
-    vertical: 'auto' as const,
-    horizontalScrollbarSize: 10,
-    verticalScrollbarSize: 10,
+    horizontal: 'visible' as const,
+    vertical: 'visible' as const,
+    horizontalScrollbarSize: 14,
+    verticalScrollbarSize: 14,
     horizontalHasArrows: false,
     verticalHasArrows: false,
     arrowSize: 11,
@@ -138,40 +145,72 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
     }, HIDE_TIMEOUT);
   }, [mergedOptions.vertical, mergedOptions.horizontal]);
 
-  // Smooth scroll to position
+  // Smooth scroll toward a target position via a continuous spring/
+  // lerp loop. Each call updates `targetScrollTopRef` /
+  // `targetScrollLeftRef` and ensures the rAF loop is running; the
+  // loop itself reads the target every frame and exponentially
+  // eases the live `scrollTop` toward it.
+  //
+  // Why not a fixed-duration animation? A burst of wheel events
+  // fires faster than the 150ms ease-out can complete, and each
+  // new event would cancel-and-restart the animation. The
+  // in-flight portion is discarded on every restart, so a 10-tick
+  // burst lands at ~30% of where the same 10 ticks delivered
+  // slowly would put it.
+  //
+  // The spring approach interpolates with a fixed *time constant*
+  // (TAU_MS): each frame moves a constant fraction of the
+  // remaining distance, regardless of how often the target moves.
+  // Burst writes only mutate `targetScrollTopRef`; the loop keeps
+  // running and converges to the latest target with no restart.
+  const lastFrameTimeRef = useRef<number>(0);
+  const TAU_MS = 80;
+  const SETTLE_PX = 0.5;
+
+  const ensureSpringRunning = useCallback((): void => {
+    if (animationFrameRef.current !== null) return;
+    lastFrameTimeRef.current = performance.now();
+    const tick = (): void => {
+      if (!contentRef.current) {
+        animationFrameRef.current = null;
+        return;
+      }
+      const now = performance.now();
+      // Clamp dt so a tab-focus change or a long pause doesn't
+      // produce a huge single-frame jump (`Math.exp(-dt/TAU)`
+      // would still saturate at 1 but staying defensive keeps
+      // future tweaks safe).
+      const dt = Math.min(64, now - lastFrameTimeRef.current);
+      lastFrameTimeRef.current = now;
+      const factor = 1 - Math.exp(-dt / TAU_MS);
+      const liveTop = contentRef.current.scrollTop;
+      const liveLeft = contentRef.current.scrollLeft;
+      const targetTop = targetScrollTopRef.current;
+      const targetLeft = targetScrollLeftRef.current;
+      const nextTop = liveTop + (targetTop - liveTop) * factor;
+      const nextLeft = liveLeft + (targetLeft - liveLeft) * factor;
+      // Snap to the exact target when within `SETTLE_PX` to avoid
+      // permanent sub-pixel jitter from the exponential approach.
+      contentRef.current.scrollTop = Math.abs(targetTop - nextTop) < SETTLE_PX ? targetTop : nextTop;
+      contentRef.current.scrollLeft = Math.abs(targetLeft - nextLeft) < SETTLE_PX ? targetLeft : nextLeft;
+      if (
+        Math.abs(targetTop - contentRef.current.scrollTop) < SETTLE_PX &&
+        Math.abs(targetLeft - contentRef.current.scrollLeft) < SETTLE_PX
+      ) {
+        animationFrameRef.current = null;
+        return;
+      }
+      animationFrameRef.current = requestAnimationFrame(tick);
+    };
+    animationFrameRef.current = requestAnimationFrame(tick);
+  }, []);
+
   const smoothScrollTo = useCallback((targetScrollTop: number, targetScrollLeft: number): void => {
     if (!contentRef.current) return;
-
-    const startScrollTop = scrollTop;
-    const startScrollLeft = scrollLeft;
-    const startTime = Date.now();
-    const duration = 150; // ms
-
-    const animate = (): void => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-
-      // Easing function (ease-out)
-      const easeOut = 1 - Math.pow(1 - progress, 3);
-
-      const currentScrollTop = startScrollTop + (targetScrollTop - startScrollTop) * easeOut;
-      const currentScrollLeft = startScrollLeft + (targetScrollLeft - startScrollLeft) * easeOut;
-
-      if (contentRef.current) {
-        contentRef.current.scrollTop = currentScrollTop;
-        contentRef.current.scrollLeft = currentScrollLeft;
-      }
-
-      if (progress < 1) {
-        animationFrameRef.current = requestAnimationFrame(animate);
-      }
-    };
-
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
-    animationFrameRef.current = requestAnimationFrame(animate);
-  }, [scrollTop, scrollLeft]);
+    targetScrollTopRef.current = targetScrollTop;
+    targetScrollLeftRef.current = targetScrollLeft;
+    ensureSpringRunning();
+  }, [ensureSpringRunning]);
 
   interface IElementsTopAndHeight {
     element: HTMLElement,
@@ -341,9 +380,27 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
     }
 
     if (mergedOptions.mouseWheelSmoothScroll) {
-      const newScrollTop = Math.max(0, Math.min(scrollTop + deltaY, contentHeight - containerHeight));
-      const newScrollLeft = Math.max(0, Math.min(scrollLeft + deltaX, contentWidth - containerWidth));
-      smoothScrollTo(newScrollTop, newScrollLeft);
+      // Burst-safe accumulation. The spring loop (`ensureSpringRunning`
+      // in `smoothScrollTo`) interpolates the live scrollTop toward
+      // `targetScrollTopRef.current` with a fixed time constant; we
+      // only need to keep that ref accurate.
+      //
+      // Re-sync to the live position when the spring is idle (no
+      // raf pending). That covers the cases where the scrollTop
+      // moved by a different mechanism — slider drag, track-click
+      // page-jump, programmatic scroll — and the next wheel event
+      // should accumulate from the new position rather than from
+      // an old wheel-driven target. While the spring is running
+      // we leave the target ref alone so the burst keeps
+      // accumulating against the in-flight target instead of
+      // collapsing back onto the partial-progress live position.
+      if (animationFrameRef.current === null) {
+        targetScrollTopRef.current = contentRef.current.scrollTop;
+        targetScrollLeftRef.current = contentRef.current.scrollLeft;
+      }
+      targetScrollTopRef.current = Math.max(0, Math.min(targetScrollTopRef.current + deltaY, contentHeight - containerHeight));
+      targetScrollLeftRef.current = Math.max(0, Math.min(targetScrollLeftRef.current + deltaX, contentWidth - containerWidth));
+      smoothScrollTo(targetScrollTopRef.current, targetScrollLeftRef.current);
     } else {
       contentRef.current.scrollTop += deltaY;
       contentRef.current.scrollLeft += deltaX;
@@ -351,7 +408,7 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
 
     // Hide scrollbars after wheel interaction
     hideScrollbars();
-  }, [mergedOptions.handleMouseWheel, mergedOptions.mouseWheelSmoothScroll, mergedOptions.mouseWheelHorizontal, scrollTop, scrollLeft, contentHeight, containerHeight, contentWidth, containerWidth, smoothScrollTo, showScrollbars, hideScrollbars]);
+  }, [mergedOptions.handleMouseWheel, mergedOptions.mouseWheelSmoothScroll, mergedOptions.mouseWheelHorizontal, contentHeight, containerHeight, contentWidth, containerWidth, smoothScrollTo, showScrollbars, hideScrollbars]);
 
   // Handle mouse enter
   const handleMouseEnter = useCallback((): void => {
@@ -425,6 +482,7 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
   // Drag handlers
   const handleVerticalSliderMouseDown = useCallback((event: React.MouseEvent): void => {
     event.preventDefault();
+    event.stopPropagation();
     setIsDraggingVertical(true);
     setDragStartY(event.clientY);
     setDragStartScrollTop(scrollTop);
@@ -433,11 +491,130 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
 
   const handleHorizontalSliderMouseDown = useCallback((event: React.MouseEvent): void => {
     event.preventDefault();
+    event.stopPropagation();
     setIsDraggingHorizontal(true);
     setDragStartX(event.clientX);
     setDragStartScrollLeft(scrollLeft);
     showScrollbars();
   }, [scrollLeft, showScrollbars]);
+
+  // Track-click autoscroll. Clicking the rail above / below the
+  // thumb scrolls one viewport in that direction; holding the
+  // mouse button repeats the page-jump every TRACK_REPEAT_INTERVAL_MS
+  // until either the thumb passes the cursor's position or the
+  // user releases the button. Mirrors Chromium's native scrollbar
+  // feel.
+  const trackIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const trackCursorYRef = useRef<number>(0);
+  const trackCursorXRef = useRef<number>(0);
+  const TRACK_REPEAT_INTERVAL_MS = 60;
+  const TRACK_INITIAL_DELAY_MS = 250;
+
+  const stopTrackAutoScroll = useCallback((): void => {
+    if (trackIntervalRef.current !== null) {
+      clearInterval(trackIntervalRef.current);
+      trackIntervalRef.current = null;
+    }
+  }, []);
+
+  const handleVerticalRailMouseDown = useCallback((event: React.MouseEvent): void => {
+    // Only react to clicks on the rail itself — not on the slider
+    // (its own handler calls stopPropagation) or the arrows
+    // (children that own the click).
+    if (event.target !== event.currentTarget) return;
+    event.preventDefault();
+    if (!contentRef.current) return;
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const cursorY = event.clientY - rect.top;
+    trackCursorYRef.current = cursorY;
+    const arrowOffset = mergedOptions.verticalHasArrows ? mergedOptions.arrowSize : 0;
+    const thumbStart = arrowOffset + verticalSliderPosition;
+    const thumbEnd = thumbStart + verticalSliderSize;
+    const dir = trackClickDirection(cursorY, thumbStart, thumbEnd);
+    // No-op when the cursor is already on the thumb (the slider's
+    // own handler caught the event in that case anyway, but be
+    // defensive).
+    if (dir === null) return;
+    const pageJump = (): void => {
+      if (!contentRef.current) return;
+      const liveSliderPos = (contentRef.current.scrollTop / (contentHeight - containerHeight)) *
+        (containerHeight - verticalSliderSize - arrowOffset * 2);
+      const liveThumbStart = arrowOffset + liveSliderPos;
+      const liveThumbEnd = liveThumbStart + verticalSliderSize;
+      if (shouldStopTrackAutoScroll(liveThumbStart, liveThumbEnd, trackCursorYRef.current, dir)) {
+        stopTrackAutoScroll();
+        return;
+      }
+      contentRef.current.scrollTop = nextPageScrollPosition(
+        contentRef.current.scrollTop,
+        containerHeight,
+        contentHeight,
+        dir
+      );
+    };
+    pageJump();
+    showScrollbars();
+    // Initial pause matches Chromium's native scrollbar (a single
+    // click shouldn't auto-repeat instantly — gives the user time
+    // to release before the loop kicks in).
+    const startTimeout = setTimeout(() => {
+      trackIntervalRef.current = setInterval(pageJump, TRACK_REPEAT_INTERVAL_MS);
+    }, TRACK_INITIAL_DELAY_MS);
+    const onPointerUp = (): void => {
+      clearTimeout(startTimeout);
+      stopTrackAutoScroll();
+      document.removeEventListener('pointerup', onPointerUp);
+    };
+    document.addEventListener('pointerup', onPointerUp);
+  }, [containerHeight, contentHeight, verticalSliderPosition, verticalSliderSize, mergedOptions.verticalHasArrows, mergedOptions.arrowSize, stopTrackAutoScroll, showScrollbars]);
+
+  const handleHorizontalRailMouseDown = useCallback((event: React.MouseEvent): void => {
+    if (event.target !== event.currentTarget) return;
+    event.preventDefault();
+    if (!contentRef.current) return;
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const cursorX = event.clientX - rect.left;
+    trackCursorXRef.current = cursorX;
+    const arrowOffset = mergedOptions.horizontalHasArrows ? mergedOptions.arrowSize : 0;
+    const thumbStart = arrowOffset + horizontalSliderPosition;
+    const thumbEnd = thumbStart + horizontalSliderSize;
+    const dir = trackClickDirection(cursorX, thumbStart, thumbEnd);
+    if (dir === null) return;
+    const pageJump = (): void => {
+      if (!contentRef.current) return;
+      const liveSliderPos = (contentRef.current.scrollLeft / (contentWidth - containerWidth)) *
+        (containerWidth - horizontalSliderSize - arrowOffset * 2);
+      const liveThumbStart = arrowOffset + liveSliderPos;
+      const liveThumbEnd = liveThumbStart + horizontalSliderSize;
+      if (shouldStopTrackAutoScroll(liveThumbStart, liveThumbEnd, trackCursorXRef.current, dir)) {
+        stopTrackAutoScroll();
+        return;
+      }
+      contentRef.current.scrollLeft = nextPageScrollPosition(
+        contentRef.current.scrollLeft,
+        containerWidth,
+        contentWidth,
+        dir
+      );
+    };
+    pageJump();
+    showScrollbars();
+    const startTimeout = setTimeout(() => {
+      trackIntervalRef.current = setInterval(pageJump, TRACK_REPEAT_INTERVAL_MS);
+    }, TRACK_INITIAL_DELAY_MS);
+    const onPointerUp = (): void => {
+      clearTimeout(startTimeout);
+      stopTrackAutoScroll();
+      document.removeEventListener('pointerup', onPointerUp);
+    };
+    document.addEventListener('pointerup', onPointerUp);
+  }, [containerWidth, contentWidth, horizontalSliderPosition, horizontalSliderSize, mergedOptions.horizontalHasArrows, mergedOptions.arrowSize, stopTrackAutoScroll, showScrollbars]);
+
+  // Cleanup on unmount: any pending interval / timeout would
+  // otherwise outlive the component and leak.
+  useEffect(() => {
+    return () => { stopTrackAutoScroll(); };
+  }, [stopTrackAutoScroll]);
 
   // Global mouse move handler
   useEffect(() => {
@@ -626,8 +803,10 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
             right: 0,
             width: mergedOptions.verticalScrollbarSize,
             height: '100%',
-            backgroundColor: 'transparent'
+            backgroundColor: 'transparent',
+            cursor: 'pointer'
           }}
+          onMouseDown={handleVerticalRailMouseDown}
         >
           {mergedOptions.verticalHasArrows && (
             <div
@@ -703,8 +882,10 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
             left: 0,
             width: '100%',
             height: mergedOptions.horizontalScrollbarSize,
-            backgroundColor: 'transparent'
+            backgroundColor: 'transparent',
+            cursor: 'pointer'
           }}
+          onMouseDown={handleHorizontalRailMouseDown}
         >
           {mergedOptions.horizontalHasArrows && (
             <div

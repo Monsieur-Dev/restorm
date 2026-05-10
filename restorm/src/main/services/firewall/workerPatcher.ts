@@ -119,15 +119,27 @@ export function installWorkerPatcher(): void {
 	const path = ensureBootstrapPath()
 	const requireFlag = ['--require', path]
 
-	// Patch `worker_threads.Worker` constructor.
-	patchWorkerConstructor(requireFlag)
-	// Patch `child_process.fork`.
-	patchChildProcessFork(requireFlag)
+	// Both patches are best-effort. The bundler (`electron-vite`)
+	// emits the `node:worker_threads` and `node:child_process`
+	// imports as ESM module namespace objects, whose properties
+	// are getter-only — direct assignment throws
+	// `TypeError: Cannot set property Worker of [object Module]
+	// which has only a getter`. We try `Object.defineProperty`
+	// with `configurable: true` first, then fall back to a logged
+	// warning. Restorm itself doesn't spawn workers / child
+	// processes, so the defensive patch silently degrading to a
+	// no-op is acceptable.
+	const workerOk = patchWorkerConstructor(requireFlag)
+	const forkOk = patchChildProcessFork(requireFlag)
 
-	logger.info('FirewallService: worker / child-process patcher installed', { bootstrap: path })
+	logger.info('FirewallService: worker / child-process patcher installed', {
+		bootstrap: path,
+		workerPatched: workerOk,
+		forkPatched: forkOk
+	})
 }
 
-function patchWorkerConstructor(requireFlag: string[]): void {
+function patchWorkerConstructor(requireFlag: string[]): boolean {
 	const OriginalWorker = nodeWorkerThreads.Worker
 	class PatchedWorker extends OriginalWorker {
 		constructor(filename: string | URL, options?: WorkerOptions) {
@@ -136,10 +148,20 @@ function patchWorkerConstructor(requireFlag: string[]): void {
 			super(filename, merged as ConstructorParameters<typeof OriginalWorker>[1])
 		}
 	}
-	;(nodeWorkerThreads as { Worker: typeof OriginalWorker }).Worker = PatchedWorker
+	try {
+		Object.defineProperty(nodeWorkerThreads, 'Worker', {
+			value: PatchedWorker,
+			writable: true,
+			configurable: true
+		})
+		return true
+	} catch (err) {
+		logger.warn('FirewallService: could not patch worker_threads.Worker; spawned workers will not inherit the firewall (Restorm does not spawn workers itself, so this is defensive-only)', { error: String(err) })
+		return false
+	}
 }
 
-function patchChildProcessFork(requireFlag: string[]): void {
+function patchChildProcessFork(requireFlag: string[]): boolean {
 	const original = nodeChildProcess.fork
 	const patched: typeof nodeChildProcess.fork = ((...args: unknown[]): ReturnType<typeof original> => {
 		const [modulePath, second, third] = args
@@ -160,5 +182,15 @@ function patchChildProcessFork(requireFlag: string[]): void {
 		}
 		return original(modulePath as string, merged as Parameters<typeof original>[2])
 	}) as typeof nodeChildProcess.fork
-	;(nodeChildProcess as { fork: typeof original }).fork = patched
+	try {
+		Object.defineProperty(nodeChildProcess, 'fork', {
+			value: patched,
+			writable: true,
+			configurable: true
+		})
+		return true
+	} catch (err) {
+		logger.warn('FirewallService: could not patch child_process.fork; forked children will not inherit the firewall (Restorm does not fork children itself, so this is defensive-only)', { error: String(err) })
+		return false
+	}
 }
