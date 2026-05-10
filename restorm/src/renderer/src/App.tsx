@@ -84,7 +84,6 @@ const tabMatchesItem = (tab: EditorTab, itemId: string): boolean => {
 import { EmptyBench } from './components/MainView/Workbench/EmptyBench'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
 import { StatusbarMcpIndicator } from './components/MainView/StatusbarMcpIndicator'
-import { StatusbarFirewallIndicator } from './components/MainView/StatusbarFirewallIndicator'
 import { useMcpEnabled } from './hooks/useMcpEnabled'
 import { useMcpActiveStateBridge } from './hooks/useMcpActiveStateBridge'
 import { useMcpNavigation } from './hooks/useMcpNavigation'
@@ -161,6 +160,40 @@ const WORKBENCH_ID = 'restorm-main-workbench'
 const initialRootItems: EnvironmentFolder[] = []
 
 const allFolderIds = initialRootItems.flatMap((folder) => collectAllFolderIds(folder))
+
+/**
+ * Resolve the workbench's currently-active tab id. Walks the tree
+ * recursively so split-views (where the root is a `ContainerGroupNode`
+ * wrapping multiple `TabGroupNode`s — happens when the Console tab
+ * sits in a bottom group below an existing horizontal split) are
+ * handled correctly. Falls back to the first `TabGroupNode` with an
+ * `activeTabId` if `focusedGroupId` doesn't match any node — same
+ * behaviour as the old flat-walk path, just container-aware.
+ *
+ * Without recursion `activeRequest` (and the statusbar selectors
+ * that gate on it: auth, env, request-history) would silently
+ * disappear whenever the user opened the Console because the root
+ * groups no longer contained a `TabGroupNode` directly.
+ */
+function resolveActiveTabId(groups: GroupNode[], focusedGroupId: string | null): string | undefined {
+  let focusedActive: string | undefined
+  let firstActive: string | undefined
+  const visit = (nodes: GroupNode[]): void => {
+    for (const node of nodes) {
+      if (isTabGroupNode(node)) {
+        if (typeof node.activeTabId !== 'string') continue
+        firstActive ??= node.activeTabId
+        if (focusedActive === undefined && node.id === focusedGroupId) {
+          focusedActive = node.activeTabId
+        }
+      } else if (isContainerNode(node)) {
+        visit(node.groups)
+      }
+    }
+  }
+  visit(groups)
+  return focusedActive ?? firstActive
+}
 
 const App: React.FC = () => {
   const { t } = useTranslation()
@@ -622,14 +655,7 @@ const App: React.FC = () => {
   // prevent the window handler from ever seeing the key. Both paths must
   // therefore run the same "smart save" logic.
   const smartSaveActive = useCallback(async (): Promise<boolean> => {
-    const groups = workbenchTree.groups as { tabs?: unknown; activeTabId?: string; id?: string }[]
-    let activeTabId: string | undefined
-    const focused = groups.find((g) => g.id === focusedGroupId && typeof g.activeTabId === 'string')
-    if (focused) activeTabId = focused.activeTabId
-    if (!activeTabId) {
-      const first = groups.find((g) => typeof g.activeTabId === 'string')
-      activeTabId = first?.activeTabId
-    }
+    const activeTabId = resolveActiveTabId(workbenchTree.groups, focusedGroupId)
     if (!activeTabId) return await handleMenuSaveAll()
     const itemId = resolveTabItemId(activeTabId)
     if (!itemId) return await handleMenuSaveAll()
@@ -642,14 +668,7 @@ const App: React.FC = () => {
   // Request object. Returns null when no tab is active or the active
   // tab isn't a request (folder / env-folder tabs hide the button).
   const activeRequest = useMemo((): { id: string; path: string | null } | null => {
-    const groups = workbenchTree.groups as { activeTabId?: string; id?: string }[]
-    let activeTabId: string | undefined
-    const focused = groups.find((g) => g.id === focusedGroupId && typeof g.activeTabId === 'string')
-    if (focused) activeTabId = focused.activeTabId
-    if (!activeTabId) {
-      const first = groups.find((g) => typeof g.activeTabId === 'string')
-      activeTabId = first?.activeTabId
-    }
+    const activeTabId = resolveActiveTabId(workbenchTree.groups, focusedGroupId)
     if (!activeTabId) return null
     const itemId = resolveTabItemId(activeTabId)
     if (!itemId) return null
@@ -1818,7 +1837,7 @@ const App: React.FC = () => {
               onSizesChange={handleSizesChange}
               emptyFallback={<EmptyBench />}
               workbenchId={workbenchId}
-              onRebuildTab={handleRebuildTab}
+              onRebuildTab={rootItems.length > 0 ? handleRebuildTab : undefined}
               onStateRestored={handleStateRestored}
               getRequestById={getRequestByIdCb}
               getFolderById={getFolderByIdCb}
@@ -1951,10 +1970,6 @@ const App: React.FC = () => {
          * to render (mcp disabled) — otherwise both would each
          * consume their own margin slot and MCP would be stranded
          * mid-bar. */}
-        {/* Firewall mode indicator — always rendered, lives directly
-         * left of the MCP indicator. Click to cycle modes; pulses on
-         * each denied request. */}
-        <StatusbarFirewallIndicator />
         <StatusbarMcpIndicator rightAligned={!activeRequest} />
         <StatusBarBellButton
           toasterId="app"

@@ -26,7 +26,15 @@ export interface RestormWorkbenchContainerProps {
   onSizesChange: (nodeId: string, sizes: number[]) => void
   emptyFallback: React.ReactNode
   workbenchId?: string | undefined
-  onRebuildTab: RebuildTabCallback
+  /** Pass `undefined` to delay ECUI's autosave restore until the
+   * caller has the data needed to reconstruct tabs (e.g., until
+   * `rootItems` is non-empty). When the prop later becomes a real
+   * callback, ECUI's restore-effect re-runs and rebuilds the
+   * persisted tabs successfully. Without this, restore would
+   * race with `rootItems` loading and drop every request tab —
+   * and the autosave that follows would corrupt the persisted
+   * state with the truncated tree. */
+  onRebuildTab: RebuildTabCallback | undefined
   onStateRestored: (tree: WorkbenchTree | null) => void
   getRequestById: (id: string) => Request | undefined
   getFolderById: (id: string) => Folder | undefined

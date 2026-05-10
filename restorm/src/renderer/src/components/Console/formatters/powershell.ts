@@ -3,6 +3,24 @@ import type { RecordRenderer } from './types'
 import { powershellSingleQuote } from './shellEscape'
 
 /**
+ * Pretty-print a JSON body so the console renders structure
+ * across multiple lines instead of one escaped wall. Mirror of
+ * `prettyBody` in `curl.ts` — kept inline rather than shared so
+ * each formatter can evolve its own quirks (PowerShell's here-
+ * string syntax for example) without coupling.
+ */
+function prettyBody(body: string): string {
+	const trimmed = body.trim()
+	if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) return body
+	try {
+		const parsed: unknown = JSON.parse(trimmed)
+		return JSON.stringify(parsed, null, 2)
+	} catch {
+		return body
+	}
+}
+
+/**
  * Build a PowerShell `$headers` hashtable literal for HTTP-family
  * records. PowerShell wants `@{ 'k' = 'v' }` syntax; the consumer
  * passes it via the `-Headers $headers` flag of `Invoke-RestMethod`.
@@ -27,7 +45,7 @@ const renderHttpPowershell: RecordRenderer = (record: RequestRecord): string => 
 	const headersTable = buildHeadersTable(record.headers)
 	if (headersTable !== null) lines.push(`$headers = ${headersTable}`)
 	if (record.body !== undefined && record.body.length > 0) {
-		lines.push(`$body = ${powershellSingleQuote(record.body)}`)
+		lines.push(`$body = ${powershellSingleQuote(prettyBody(record.body))}`)
 	}
 	const flags = [
 		`-Method ${record.method}`,

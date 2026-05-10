@@ -59,7 +59,7 @@ export { VariableInputBox } from './VariableInputBox'
 export type { VariableInputBoxProps, VariableDefinition } from './VariableInputBox'
 
 // CodeEditor exports
-export { CodeEditor } from './CodeEditor'
+export { CodeEditor, bootstrapMonaco } from './CodeEditor'
 export type { CodeEditorProps, CodeEditorRef } from './CodeEditor'
 
 // Settings exports

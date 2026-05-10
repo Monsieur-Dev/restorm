@@ -87,8 +87,11 @@ export interface RestormWorkbenchProps {
   workbenchId?: string | undefined
   /** Enable automatic save/load of workbench state */
   autosave?: boolean
-  /** Callback to rebuild a tab from its ID (required if autosave is enabled) */
-  onRebuildTab?: RebuildTabCallback
+  /** Callback to rebuild a tab from its ID (required if autosave
+   * is enabled). Pass `undefined` to delay ECUI's autosave restore
+   * until the caller has the data needed to reconstruct tabs
+   * (e.g., wait for `rootItems` to load). */
+  onRebuildTab?: RebuildTabCallback | undefined
   /** Called when state is restored from storage */
   onStateRestored?: (tree: WorkbenchTree | null) => void
   /** Get a reactive Request by ID (for reactivity support) */

@@ -1,7 +1,7 @@
 import http, { type ClientRequest, type RequestOptions } from 'node:http'
 import https from 'node:https'
 import { randomUUID } from 'node:crypto'
-import { logger } from 'electron-core-ui'
+import { logger, graphQLService } from 'electron-core-ui'
 import { firewallService } from './FirewallService'
 import { permissionService } from './PermissionService'
 import { DeniedClientRequest } from './DeniedClientRequest'
@@ -161,6 +161,8 @@ function recordFromHttpArgs(args: unknown[], source: RequestRecordSource): Reque
 		}
 	}
 
+	if (isInternalGraphqlEndpoint(fullUrl)) return null
+
 	return {
 		id: randomUUID(),
 		timestamp: new Date().toISOString(),
@@ -177,6 +179,23 @@ function recordFromHttpArgs(args: unknown[], source: RequestRecordSource): Reque
 		// so the body lands on the record before the actual flush;
 		// for now Layer B records always show empty bodies for POSTs.
 		verdict: 'allow'
+	}
+}
+
+/**
+ * Skip records whose destination is the in-process GraphQL bridge
+ * (`http://localhost:<port>/graphql`). Mirror of the same filter
+ * in `FirewallService` (Layer A) — the renderer ↔ main IPC traffic
+ * would drown the audit feed otherwise.
+ */
+function isInternalGraphqlEndpoint(rawUrl: string): boolean {
+	try {
+		const requested = new URL(rawUrl)
+		const internal = new URL(graphQLService.getEndpoint())
+		if (requested.host !== internal.host) return false
+		return requested.pathname === internal.pathname || requested.pathname.startsWith(`${internal.pathname}/`)
+	} catch {
+		return false
 	}
 }
 
@@ -247,6 +266,7 @@ function recordFromFetchArgs(input: RequestInfo | URL, init: RequestInit | undef
 
 	let parsed: URL | null = null
 	try { parsed = new URL(raw) } catch { return null }
+	if (isInternalGraphqlEndpoint(raw)) return null
 	const host = parsed.hostname.toLowerCase()
 	const protocol: RequestRecordProtocol = parsed.protocol === 'https:' ? 'https' : 'http'
 	const port = parsed.port !== '' ? Number(parsed.port) : (protocol === 'https' ? 443 : 80)

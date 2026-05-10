@@ -52,8 +52,10 @@ import type {
   WebSocketRequestTab,
   ODataRequestTab,
   AuthenticationRequestTab,
+  ConsoleTab,
   BreadcrumbItem
 } from '../../../shared/types/editor'
+import { CONSOLE_TAB_ID } from '../../../shared/types/editor'
 
 export interface UseWorkbenchTabsOptions {
   rootItems: (EnvironmentFolder | Folder | Request)[]
@@ -351,6 +353,18 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
 
   // Rebuild tab callback for workbench autosave
   const handleRebuildTab = useCallback((tabId: string): EditorTab | null => {
+    // Console singleton: not tied to any tree item, so it doesn't go
+    // through `parseTabId`. The tab content (xterm + toolbar) is
+    // owned by `RestormWorkbench` based on the `tabType: 'console'`
+    // discriminator — we just rebuild the metadata shell.
+    if (tabId === CONSOLE_TAB_ID) {
+      return {
+        id: CONSOLE_TAB_ID,
+        tabType: 'console',
+        title: 'Console',
+        titleString: 'Console'
+      } as ConsoleTab
+    }
     const parsed = parseTabId(tabId)
     if (!parsed) return null
 

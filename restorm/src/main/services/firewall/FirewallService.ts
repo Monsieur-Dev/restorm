@@ -1,6 +1,6 @@
 import { BrowserWindow, session, type OnBeforeRequestListenerDetails } from 'electron'
 import { randomUUID } from 'node:crypto'
-import { logger } from 'electron-core-ui'
+import { logger, graphQLService } from 'electron-core-ui'
 import {
 	FIREWALL_REQUEST_RECORD_CHANNEL,
 	type RequestRecord,
@@ -51,6 +51,27 @@ class FirewallService {
 			// user clicks a prompt that doesn't even make sense for
 			// them.
 			if (!isNetworkScheme(details.url)) {
+				callback({ cancel: false })
+				return
+			}
+			// Skip the in-process GraphQL bridge — every renderer ↔
+			// main IPC call rides over `http://localhost:<port>/graphql`,
+			// so the audit feed would be drowned in chatter the user
+			// can't act on. Pass the request through unchanged
+			// (allow-and-forget; not even broadcast as a record).
+			if (isInternalGraphqlEndpoint(details.url)) {
+				callback({ cancel: false })
+				return
+			}
+			// Skip the Vite dev-server origin — in dev mode the
+			// renderer + every imported module + every static asset
+			// (HMR pings, source maps, on-demand chunks, public
+			// images) ride `http://localhost:5173/...`. Production
+			// builds load from `app://` / `file://` so the filter
+			// is a no-op there. The origin comes from
+			// `ELECTRON_RENDERER_URL` which electron-vite sets at
+			// dev boot.
+			if (isViteDevOrigin(details.url)) {
 				callback({ cancel: false })
 				return
 			}
@@ -166,6 +187,45 @@ function isNetworkScheme(rawUrl: string): boolean {
 	} catch {
 		return false
 	}
+}
+
+/**
+ * True for the in-process GraphQL bridge endpoint. Compares against
+ * the live `graphQLService.getEndpoint()` so a port change between
+ * boots (free-port lottery) is picked up automatically. Only matches
+ * the `/graphql` path (and trailing variants like `/graphql/something`)
+ * so a future user-defined GraphQL request hosted on the same port
+ * wouldn't be silently swallowed.
+ */
+function isInternalGraphqlEndpoint(rawUrl: string): boolean {
+	try {
+		const requested = new URL(rawUrl)
+		const internal = new URL(graphQLService.getEndpoint())
+		if (requested.host !== internal.host) return false
+		return requested.pathname === internal.pathname || requested.pathname.startsWith(`${internal.pathname}/`)
+	} catch {
+		return false
+	}
+}
+
+/**
+ * True for any URL whose origin matches the electron-vite dev-server.
+ * `ELECTRON_RENDERER_URL` is set by electron-vite at dev boot
+ * (`http://localhost:5173`). In production builds it's undefined, so
+ * the predicate is a no-op and nothing gets filtered. We compare
+ * origin (scheme+host+port) rather than substring so a real user
+ * request to `localhost:5173/api/...` from inside a request tab
+ * (unlikely but possible) would still be captured — only assets +
+ * HMR traffic served at the dev origin are skipped.
+ */
+const VITE_DEV_ORIGIN = (() => {
+	const raw = process.env['ELECTRON_RENDERER_URL']
+	if (typeof raw !== 'string' || raw === '') return null
+	try { return new URL(raw).origin } catch { return null }
+})()
+function isViteDevOrigin(rawUrl: string): boolean {
+	if (VITE_DEV_ORIGIN === null) return false
+	try { return new URL(rawUrl).origin === VITE_DEV_ORIGIN } catch { return false }
 }
 
 function inferProtocol(parsed: URL | null): RequestRecordProtocol {

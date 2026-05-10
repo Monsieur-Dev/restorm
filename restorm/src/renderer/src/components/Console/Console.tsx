@@ -37,6 +37,18 @@ function colourForMethod(method: string): string {
 	}
 }
 
+/**
+ * Symbol used to attach last-written-record bookkeeping directly
+ * to the xterm `Terminal` instance. Stashing the state on the
+ * Terminal itself means it lives and dies with the terminal
+ * instance — a fresh terminal (after a tab move, StrictMode
+ * remount, or close-and-reopen) has no prior state and the
+ * records effect naturally takes the full-rewrite path. A React
+ * useRef would persist across the dispose cycle and short-
+ * circuit the rewrite for the empty new terminal.
+ */
+const TERM_LAST_WRITTEN_SYM = Symbol.for('restorm:console:lastWritten')
+
 function buildBlock(record: RequestRecord, shell: ConsoleShell): string {
 	const ts = record.timestamp.replace('T', ' ').replace(/\..+$/, '')
 	const verbColour = colourForMethod(record.method)
@@ -90,18 +102,38 @@ export const Console: React.FC<ConsoleProps> = ({ records, shell, onLineClick, '
 	useEffect(() => {
 		const node = containerRef.current
 		if (!node) return
+		// xterm.js reads `fontFamily` as a literal CSS string and
+		// computes glyph metrics from it directly — it doesn't
+		// expand `var(--…)`, so we have to resolve the workbench's
+		// `--monospace-font` against the actual DOM before the
+		// terminal mounts. Falls back to a per-platform stack
+		// matching ECUI's `workbench.css` defaults.
+		const resolved = getComputedStyle(node).getPropertyValue('--monospace-font').trim()
+		const fontFamily = resolved !== ''
+			? resolved
+			: '"SF Mono", Menlo, Consolas, "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace'
 		const term = new Terminal({
 			disableStdin: true,
-			fontFamily: 'var(--monospace-font, Consolas, "Courier New", monospace)',
+			fontFamily,
 			fontSize: 13,
 			lineHeight: 1.25,
 			scrollback: 50_000,
 			convertEol: true,
+			// Cursor is hidden in this readonly console: the firewall
+			// audit feed is a one-way stream, the user has no caret to
+			// position. Setting `cursorBlink: false` only stops the
+			// blink — the cursor still renders. Fully suppress it via
+			// transparent `theme.cursor` + `theme.cursorAccent`,
+			// belt-and-braces with `cursorInactiveStyle: 'none'` for
+			// cases where the terminal loses focus.
 			cursorBlink: false,
 			cursorStyle: 'bar',
+			cursorInactiveStyle: 'none',
 			theme: {
 				background: '#00000000',  // transparent — let the workbench bg show
-				foreground: '#dadada'
+				foreground: '#dadada',
+				cursor: '#00000000',
+				cursorAccent: '#00000000'
 			},
 			allowTransparency: true,
 		})
@@ -116,6 +148,63 @@ export const Console: React.FC<ConsoleProps> = ({ records, shell, onLineClick, '
 		termRef.current = term
 		fitRef.current = fit
 
+		// Ctrl+C / Cmd+C: copy the current xterm selection to the
+		// system clipboard. Without this, the readonly terminal
+		// captures the keystroke and nothing reaches the browser's
+		// default copy path. We also forward Ctrl+A / Cmd+A so the
+		// user can grab everything at once.
+		term.attachCustomKeyEventHandler((event) => {
+			if (event.type !== 'keydown') return true
+			const mod = event.ctrlKey || event.metaKey
+			if (mod && (event.key === 'c' || event.key === 'C')) {
+				const selection = term.getSelection()
+				if (selection.length > 0) {
+					void navigator.clipboard.writeText(selection)
+					event.preventDefault()
+					return false
+				}
+			}
+			if (mod && (event.key === 'a' || event.key === 'A')) {
+				term.selectAll()
+				event.preventDefault()
+				return false
+			}
+			return true
+		})
+
+		// Block every non-left-button mouse interaction inside the
+		// console. xterm's default handlers do two things we don't
+		// want in a readonly audit feed:
+		//   1. Right-click moves an internal "selection anchor" to
+		//      the click row; the next drag-select then renders a
+		//      stray pair of inverted cells where the right-click
+		//      landed (they mirror the first chars of the next
+		//      selection).
+		//   2. Middle-click on Linux pastes the X11 PRIMARY
+		//      selection into the buffer via `term.write()`, which
+		//      `disableStdin` does NOT gate (it only blocks
+		//      keyboard input, not programmatic writes).
+		// We swallow on every event in the click lifecycle (down /
+		// up / click / dblclick / auxclick / contextmenu) in
+		// capture-phase so xterm's listeners never see them.
+		const swallowMouse = (e: MouseEvent): void => {
+			if (e.button === 1 || e.button === 2) {
+				e.preventDefault()
+				e.stopPropagation()
+				e.stopImmediatePropagation()
+			}
+		}
+		const swallowContextMenu = (e: MouseEvent): void => {
+			e.preventDefault()
+			e.stopPropagation()
+		}
+		node.addEventListener('contextmenu', swallowContextMenu, true)
+		node.addEventListener('mousedown', swallowMouse, true)
+		node.addEventListener('mouseup', swallowMouse, true)
+		node.addEventListener('click', swallowMouse, true)
+		node.addEventListener('dblclick', swallowMouse, true)
+		node.addEventListener('auxclick', swallowMouse, true)
+
 		const handleResize = (): void => {
 			try { fit.fit() } catch { /* noop */ }
 		}
@@ -124,29 +213,72 @@ export const Console: React.FC<ConsoleProps> = ({ records, shell, onLineClick, '
 
 		return () => {
 			ro.disconnect()
+			node.removeEventListener('contextmenu', swallowContextMenu, true)
+			node.removeEventListener('mousedown', swallowMouse, true)
+			node.removeEventListener('mouseup', swallowMouse, true)
+			node.removeEventListener('click', swallowMouse, true)
+			node.removeEventListener('dblclick', swallowMouse, true)
+			node.removeEventListener('auxclick', swallowMouse, true)
 			term.dispose()
 			termRef.current = null
 			fitRef.current = null
 		}
 	}, [])
 
-	// Re-render scrollback on records / shell change. Full re-write
-	// is fine at our buffer cap (10k records ≈ ~140 KB of ANSI).
+	// Track the last-written record id + shell on the Terminal
+	// INSTANCE (via a side-channel symbol property) instead of a
+	// React useRef. Reason: when the Terminal is disposed (StrictMode
+	// double-mount, tab move, panel re-parent), the next Terminal
+	// instance is fresh and naturally has no per-term state — so the
+	// records-effect re-runs the full-rewrite path against the new
+	// terminal. A ref would persist across the dispose cycle and
+	// short-circuit the rewrite for the new (empty) terminal,
+	// leaving xterm visually empty under StrictMode.
+	const TERM_LAST_WRITTEN_KEY = TERM_LAST_WRITTEN_SYM
+
 	useEffect(() => {
 		const term = termRef.current
 		if (!term) return
-		term.clear()
-		rowToRecordId.current.clear()
-		let row = 0
-		for (const record of records) {
-			const block = buildBlock(record, shell)
-			const lineCount = block.split('\r\n').length - 1
-			rowToRecordId.current.set(row, record.id)
-			row += lineCount
-			term.write(block)
+		const termState = term as unknown as Record<symbol, { id: string | null; shell: ConsoleShell | null } | undefined>
+		const cached = termState[TERM_LAST_WRITTEN_KEY] ?? { id: null, shell: null }
+		const shellChanged = cached.shell !== shell
+		const lastId = cached.id
+		const lastIndexInNew = lastId !== null
+			? records.findIndex((r) => r.id === lastId)
+			: -1
+		const canAppend = !shellChanged && lastIndexInNew !== -1
+
+		if (!canAppend) {
+			// Full rewrite: shell flipped, scrollback was cleared, or
+			// the previously-emitted tail no longer lives in `records`
+			// (clear or trim). Re-emit everything from scratch.
+			term.clear()
+			rowToRecordId.current.clear()
+			let row = 0
+			for (const record of records) {
+				const block = buildBlock(record, shell)
+				const lineCount = block.split('\r\n').length - 1
+				rowToRecordId.current.set(row, record.id)
+				row += lineCount
+				term.write(block)
+			}
+		} else {
+			// Append-only path: only write records past the last-emitted id.
+			let row = term.buffer.active.length
+			for (let i = lastIndexInNew + 1; i < records.length; i += 1) {
+				const record = records[i]
+				if (!record) continue
+				const block = buildBlock(record, shell)
+				const lineCount = block.split('\r\n').length - 1
+				rowToRecordId.current.set(row, record.id)
+				row += lineCount
+				term.write(block)
+			}
 		}
+		const tail = records.length > 0 ? records[records.length - 1] : undefined
+		termState[TERM_LAST_WRITTEN_KEY] = { id: tail?.id ?? null, shell }
 		term.scrollToBottom()
-	}, [records, shell])
+	}, [records, shell, TERM_LAST_WRITTEN_KEY])
 
 	// Click handler: map xterm row → record id → notify parent.
 	const handleClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {

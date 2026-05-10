@@ -3,6 +3,31 @@ import type { RecordRenderer } from './types'
 import { shellSingleQuote } from './shellEscape'
 
 /**
+ * Pretty-print a body for display in the console. JSON bodies get
+ * indented (so `{"query":"…","variables":{…}}` reads as a multi-line
+ * structure instead of a single escaped wall); anything that doesn't
+ * parse as JSON is returned unchanged. Only the visual form changes
+ * — the resulting string is still valid JSON because shell single-
+ * quotes preserve every character literally, including the inserted
+ * newlines + spaces.
+ *
+ * `\n` escapes *inside* JSON string values (e.g. the GraphQL
+ * `query` field) are intentionally left as-is — unescaping them
+ * would produce a raw LF inside a JSON string, which the spec
+ * rejects and many servers refuse.
+ */
+function prettyBody(body: string): string {
+	const trimmed = body.trim()
+	if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) return body
+	try {
+		const parsed: unknown = JSON.parse(trimmed)
+		return JSON.stringify(parsed, null, 2)
+	} catch {
+		return body
+	}
+}
+
+/**
  * Render an HTTP-family record (HTTP / HTTPS / GraphQL / SOAP /
  * OData) as a `curl` command line. One header per `-H` flag, body
  * via `--data-raw` for safe verbatim quoting; binary placeholders
@@ -15,7 +40,7 @@ const renderHttpCurl: RecordRenderer = (record: RequestRecord): string => {
 		lines.push(`  -H ${shellSingleQuote(`${k}: ${v}`)} \\`)
 	}
 	if (record.body !== undefined && record.body.length > 0) {
-		lines.push(`  --data-raw ${shellSingleQuote(record.body)} \\`)
+		lines.push(`  --data-raw ${shellSingleQuote(prettyBody(record.body))} \\`)
 	}
 	// Drop the trailing backslash on the last line for a clean copy.
 	const last = lines[lines.length - 1]

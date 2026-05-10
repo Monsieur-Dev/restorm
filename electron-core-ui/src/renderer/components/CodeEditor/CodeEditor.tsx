@@ -3,6 +3,15 @@ import { useTranslation } from 'react-i18next'
 import Editor, { type EditorProps, type OnMount } from '@monaco-editor/react'
 import type * as monacoEditor from 'monaco-editor'
 import './codeEditor.css'
+import { bootstrapMonaco } from './monacoBootstrap'
+
+// Configure Monaco to use the locally-bundled package + locally-
+// bundled web workers. Without this, `@monaco-editor/react`'s
+// loader fetches Monaco from `cdn.jsdelivr.net` and asks it to
+// fetch its workers from the same CDN — neither belongs in an
+// Electron app that should run fully offline. Idempotent; module-
+// level call so it fires before the first `<Editor>` mount.
+bootstrapMonaco()
 
 /**
  * Extract a Handlebars variable name at the given position in text.
