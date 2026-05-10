@@ -36,6 +36,11 @@ export interface RestormTitlebarProps {
    * focus-or-create logic so the singleton-tab + bottom-group
    * placement decisions stay close to the workbench tree. */
   onOpenConsole: () => void
+  /** Open / focus the Firewall admin singleton tab. Wired to the
+   * `View → Firewall` menu item. Same singleton-or-focus pattern
+   * as Console, but no specific placement constraint — the host
+   * just appends to the focused group. */
+  onOpenFirewall: () => void
 }
 
 /**
@@ -57,7 +62,8 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   onImport,
   onOpenRecentFile,
   onSearchResultClick,
-  onOpenConsole
+  onOpenConsole,
+  onOpenFirewall
 }) => {
   const { t } = useTranslation()
   const { showSettingsModal } = useSettingsModal()
@@ -201,6 +207,11 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
               data-testid="titlebar-menu-item-console"
               title={t('menuBar.console', 'Console')}
               onClick={onOpenConsole}
+            />
+            <MenuItem
+              data-testid="titlebar-menu-item-firewall"
+              title={t('menuBar.firewall', 'Firewall')}
+              onClick={onOpenFirewall}
             />
             <MenuItemSeparator data-testid="titlebar-menu-separator-view-1" />
             <MenuItem data-testid="titlebar-menu-item-zoom-in" title={t('menuBar.zoomIn')} shortcut="Ctrl++" disabled />

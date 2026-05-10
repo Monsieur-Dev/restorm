@@ -21,10 +21,31 @@
 export const FIREWALL_REQUEST_RECORD_CHANNEL = 'firewall:request-record'
 
 /**
- * Mode of the firewall — duplicated here in shared so the renderer
- * settings panel can reference it without reaching into main.
+ * Origin triple the firewall checks every outbound call against.
+ * Three sources of truth for "is this destination known":
+ *
+ *   1. Explicit user whitelist (persisted, editable from the
+ *      Firewall panel).
+ *   2. Auto-derived from the open project — every URL in every
+ *      request, resolved through env vars / Handlebars, broken
+ *      down to its (scheme, host, port). The renderer pushes this
+ *      set to main on every project change.
+ *   3. Explicit user blacklist (persisted, editable).
+ *
+ * Plus a fourth narrow exemption for restorm's own infrastructure
+ * ports on localhost (graphql bridge, Vite dev server, MCP) — see
+ * `PermissionService` for the resolution.
+ *
+ * Origins are normalised on insert: scheme + host lower-cased, port
+ * numeric (defaulted from the scheme when absent — 80 / 443 / 80 /
+ * 443 / 80 for http / https / ws / wss / unknown). Pure JSON to
+ * survive structured-clone over IPC.
  */
-export type FirewallMode = 'strict' | 'log-only' | 'lockdown'
+export interface FirewallOrigin {
+	scheme: string
+	host: string
+	port: number
+}
 
 /**
  * Renderer ↔ main control-plane channels. The renderer wraps these in
@@ -32,50 +53,46 @@ export type FirewallMode = 'strict' | 'log-only' | 'lockdown'
  * via `registerFirewallIpc` at boot.
  */
 export const FIREWALL_IPC = {
-	GET_MODE: 'firewall:get-mode',
-	SET_MODE: 'firewall:set-mode',
-	LIST_ALLOWLIST: 'firewall:list-allowlist',
-	ADD_ALLOWLIST: 'firewall:add-allowlist',
-	REMOVE_ALLOWLIST: 'firewall:remove-allowlist',
+	LIST_WHITELIST: 'firewall:list-whitelist',
+	ADD_WHITELIST: 'firewall:add-whitelist',
+	REMOVE_WHITELIST: 'firewall:remove-whitelist',
+	LIST_BLACKLIST: 'firewall:list-blacklist',
+	ADD_BLACKLIST: 'firewall:add-blacklist',
+	REMOVE_BLACKLIST: 'firewall:remove-blacklist',
+	SET_PROJECT_ORIGINS: 'firewall:set-project-origins',
 	PROMPT_SHOW: 'firewall:prompt-show',
 	PROMPT_RESOLVE: 'firewall:prompt-resolve'
 } as const
 
 /**
- * Payload broadcast main → renderer when strict mode hits an unknown
- * destination and needs the user's call. The renderer renders the
- * prompt as a toast with four action buttons; clicking any one
- * resolves the pending verdict via `FIREWALL_IPC.PROMPT_RESOLVE`.
+ * Payload broadcast main → renderer when an unknown destination
+ * needs the user's call. The renderer renders the prompt as a
+ * toast with two buttons (Allow / Deny); the choice resolves the
+ * pending verdict + adds the origin to the matching list (Allow →
+ * whitelist, Deny → blacklist).
  */
 export interface FirewallPromptPayload {
 	/** Stable id used by the renderer to send the resolution back. */
 	promptId: string
-	/** Destination — same triple PermissionService used to make the
-	 * decision. The toast displays `host:port` so the user can tell
+	/** Destination origin — full triple. Toast displays `host:port`
+	 * (with scheme prefix when non-default) so the user can tell
 	 * which call is being prompted. */
-	host: string
-	port: number
-	/** Layer that captured the call. Used by the toast to colour /
-	 * label the prompt ("renderer fetch" vs "main http"). */
+	origin: FirewallOrigin
+	/** Layer that captured the call. */
 	source: RequestRecordSource
-	/** Capture time — ISO timestamp; the toast renders a relative-
-	 * time hint so stale prompts (renderer was hidden, user just
-	 * came back) are obvious. */
+	/** Capture time — ISO timestamp. */
 	timestamp: string
 }
 
 /**
- * Resolution payload sent renderer → main when the user picks one
- * of the toast buttons. `persist: true` adds the host to the
- * persistent allowlist (for `verdict: 'allow'`) or to the
- * in-memory session denylist (for `verdict: 'deny'`). A persistent
- * denylist is follow-up scope — for now the deny side only
- * suppresses repeated prompts for the rest of the session.
+ * Resolution payload sent renderer → main when the user picks one of
+ * the two toast buttons. `Allow` adds the origin to the whitelist
+ * and lets the request through; `Deny` adds it to the blacklist and
+ * fails the request. Both decisions persist to disk.
  */
 export interface FirewallPromptResolution {
 	promptId: string
 	verdict: 'allow' | 'deny'
-	persist: boolean
 }
 
 /**

@@ -1,5 +1,6 @@
 export { firewallService } from './FirewallService'
 export { installMainProcessInterceptor } from './MainProcessInterceptor'
+export { installHardenInterceptor } from './HardenInterceptor'
 export { permissionService } from './PermissionService'
-export type { FirewallMode, Verdict, CheckInput } from './PermissionService'
+export type { Verdict, CheckInput } from './PermissionService'
 export { registerFirewallIpc } from './firewallIpc'

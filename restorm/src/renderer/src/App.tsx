@@ -65,8 +65,8 @@ import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayloa
 import { getResponseHistoryList } from './services/GraphQLIntegration'
 import type { EditorTab, WorkbenchTree, GroupNode, TabGroupNode, ContainerGroupNode } from 'electron-core-ui/renderer'
 import { isContainerNode, isTabGroupNode } from 'electron-core-ui/renderer'
-import { CONSOLE_TAB_ID, type ConsoleTab } from '../../shared/types/editor'
-import { findGroupIdForTab, updateGroupById } from './utils/workbenchHelpers'
+import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, type ConsoleTab, type FirewallTab } from '../../shared/types/editor'
+import { findGroupIdForTab, hasGroupWithId, updateGroupById } from './utils/workbenchHelpers'
 
 /**
  * Match a workbench tab by the underlying item id (request / folder /
@@ -121,6 +121,7 @@ import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
 import { useWorkbenchTabs } from './hooks/useWorkbenchTabs'
 import { useApiUpdateNotifications } from './hooks/useApiUpdateNotifications'
 import { useFirewallPromptToasts } from './hooks/useFirewallPromptToasts'
+import { useFirewallProjectOriginsSync } from './hooks/useFirewallProjectOriginsSync'
 import { useApiUpdateStateMap } from './hooks/useApiUpdateStateMap'
 import { useSidebarState } from './hooks/useSidebarState'
 import {
@@ -268,6 +269,12 @@ const App: React.FC = () => {
   // Root items data (mutable for renaming)
   // Can contain EnvironmentFolders, Folders, or standalone Requests
   const [rootItems, setRootItems] = useState<(EnvironmentFolder | Folder | Request)[]>(initialRootItems)
+
+  // Push the project's auto-derived origins (every request URL,
+  // resolved against available env vars) to the main-process
+  // firewall on every tree change. The PermissionService treats
+  // these as known destinations alongside the user's whitelist.
+  useFirewallProjectOriginsSync(rootItems)
 
   // Sidebar expansion is persisted per-project under
   // `restorm-main-sidebar:<projectUuid>`. The UUID is stamped into the
@@ -419,6 +426,64 @@ const App: React.FC = () => {
       return { orientation: 'horizontal', groups: [wrapped, newGroup] }
     })
   }, [setWorkbenchTree])
+
+  /**
+   * `View → Firewall` handler. Singleton tab (id =
+   * `firewall:singleton`). Unlike Console, no specific placement —
+   * just append to the focused group (or the first available
+   * `TabGroupNode` if no focus). Activate-existing-or-create.
+   */
+  const handleOpenFirewall = useCallback(() => {
+    setWorkbenchTree(prev => {
+      const existingGroupId = findGroupIdForTab(prev.groups, FIREWALL_TAB_ID)
+      if (existingGroupId !== null) {
+        return {
+          ...prev,
+          groups: updateGroupById(prev.groups, existingGroupId, group => ({ ...group, activeTabId: FIREWALL_TAB_ID }))
+        }
+      }
+      const firewallTab: FirewallTab = {
+        id: FIREWALL_TAB_ID,
+        tabType: 'firewall',
+        title: 'Firewall',
+        titleString: 'Firewall'
+      }
+      // Find the focused group (or the first TabGroupNode anywhere
+      // in the tree) and append. Walks containers recursively for
+      // split-view layouts.
+      const findFirstTabGroup = (nodes: GroupNode[]): TabGroupNode | null => {
+        for (const node of nodes) {
+          if (isTabGroupNode(node)) return node
+          if (isContainerNode(node)) {
+            const inner = findFirstTabGroup(node.groups)
+            if (inner !== null) return inner
+          }
+        }
+        return null
+      }
+      const targetId = focusedGroupId !== null && hasGroupWithId(prev.groups, focusedGroupId)
+        ? focusedGroupId
+        : (findFirstTabGroup(prev.groups)?.id ?? null)
+      if (targetId !== null) {
+        return {
+          ...prev,
+          groups: updateGroupById(prev.groups, targetId, group => ({
+            ...group,
+            tabs: [...group.tabs, firewallTab],
+            activeTabId: FIREWALL_TAB_ID
+          }))
+        }
+      }
+      // No groups at all yet (welcome screen path): seed a fresh
+      // group containing only the firewall tab.
+      const newGroup: TabGroupNode = {
+        id: `firewall-group-${String(Date.now())}-${crypto.randomUUID().slice(0, 8)}`,
+        tabs: [firewallTab],
+        activeTabId: FIREWALL_TAB_ID
+      }
+      return { ...prev, groups: [newGroup] }
+    })
+  }, [setWorkbenchTree, focusedGroupId])
 
   // Per-tab dirty state tracking — the legacy checksum store is still
   // wired through `useFileManagement` for backward compat on the
@@ -1408,6 +1473,7 @@ const App: React.FC = () => {
         loadFile: (fileState: { currentFile: { content: unknown } }) => void
         setRootItems: (folders: EnvironmentFolder[]) => void
         findItemIndexPath: (nameChain: string[]) => number[] | null
+        findItemIdByPath: (nameChain: string[]) => string | null
         setEnvFolderTagColor: (folderName: string, tag: string, color: string | null) => boolean
         closeFile: () => Promise<void>
         menuClose: () => Promise<void>
@@ -1486,6 +1552,26 @@ const App: React.FC = () => {
           currentList = next?.items ?? []
         }
         return pathOut
+      },
+      findItemIdByPath: (nameChain: string[]): string | null => {
+        // Same name-chain walk as `findItemIndexPath` but returns the
+        // leaf item's stable uuid. Tests that build a tab id need this
+        // since `buildTabId` switched from index-path-based ids
+        // (`request-idx:N.N.N`) to uuid-based ids (`request-id:<uuid>`).
+        if (nameChain.length === 0) return null
+        let currentList: unknown[] = rootItemsRef.current as unknown[]
+        let leaf: { id?: unknown } | undefined
+        for (const name of nameChain) {
+          const idx = currentList.findIndex((item) => {
+            return typeof (item as { name?: unknown }).name === 'string'
+              && (item as { name: string }).name === name
+          })
+          if (idx === -1) return null
+          leaf = currentList[idx] as { id?: unknown }
+          const next = currentList[idx] as { items?: unknown[] } | undefined
+          currentList = next?.items ?? []
+        }
+        return typeof leaf?.id === 'string' ? leaf.id : null
       }
     }
 
@@ -1740,6 +1826,7 @@ const App: React.FC = () => {
         onOpenRecentFile={(path) => { void handleOpenRecentFile(path) }}
         onSearchResultClick={handleSearchResultClick}
         onOpenConsole={handleOpenConsole}
+        onOpenFirewall={handleOpenFirewall}
       />
 
       {fileName ? (

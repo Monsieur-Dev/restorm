@@ -1332,7 +1332,7 @@ Then('the folder tab\'s {string} tag should be colored yellow', async ({}, tagNa
     .poll(
       async () => {
         const rgb = await currentPage
-          .locator('[data-testid^="tab-env-folder-idx:"][data-testid$="-bookmarks"] .ecui-bookmark-ribbon', { hasText: tagName })
+          .locator('[data-testid^="tab-env-folder-id:"][data-testid$="-bookmarks"] .ecui-bookmark-ribbon', { hasText: tagName })
           .first()
           .evaluate((el) => getComputedStyle(el, '::before').backgroundColor)
           .catch(() => null)
@@ -1350,7 +1350,7 @@ Then('the request tab\'s {string} tag should be colored yellow', async ({}, tagN
     .poll(
       async () => {
         const rgb = await currentPage
-          .locator('[data-testid^="tab-request-idx:"][data-testid$="-bookmarks"] .ecui-bookmark-ribbon', { hasText: tagName })
+          .locator('[data-testid^="tab-request-id:"][data-testid$="-bookmarks"] .ecui-bookmark-ribbon', { hasText: tagName })
           .first()
           .evaluate((el) => getComputedStyle(el, '::before').backgroundColor)
           .catch(() => null)
@@ -1371,29 +1371,29 @@ When(
   'I record the tab ids for folder {string} with subfolder {string} and request {string}',
   async ({}, folderName: string, childFolderName: string, requestName: string) => {
     if (!page) throw new Error('app must be launched')
-    const folderPath = await page.evaluate((name) => {
+    const folderId = await page.evaluate((name) => {
       const helpers = (window as unknown as {
-        __restormTestHelpers?: { findItemIndexPath?: (names: string[]) => number[] | null }
+        __restormTestHelpers?: { findItemIdByPath?: (names: string[]) => string | null }
       }).__restormTestHelpers
-      return helpers?.findItemIndexPath?.([name]) ?? null
+      return helpers?.findItemIdByPath?.([name]) ?? null
     }, folderName)
-    const requestPath = await page.evaluate(
+    const requestId = await page.evaluate(
       ([f, c, r]) => {
         const helpers = (window as unknown as {
-          __restormTestHelpers?: { findItemIndexPath?: (names: string[]) => number[] | null }
+          __restormTestHelpers?: { findItemIdByPath?: (names: string[]) => string | null }
         }).__restormTestHelpers
-        return helpers?.findItemIndexPath?.([f, c, r]) ?? null
+        return helpers?.findItemIdByPath?.([f, c, r]) ?? null
       },
       [folderName, childFolderName, requestName] as const
     )
-    if (!folderPath) throw new Error(`could not resolve index path for folder "${folderName}"`)
-    if (!requestPath) {
+    if (!folderId) throw new Error(`could not resolve uuid for folder "${folderName}"`)
+    if (!requestId) {
       throw new Error(
-        `could not resolve index path for "${folderName}" > "${childFolderName}" > "${requestName}"`
+        `could not resolve uuid for "${folderName}" > "${childFolderName}" > "${requestName}"`
       )
     }
-    recordedFolderTabId = `env-folder-idx:${folderPath.join('.')}`
-    recordedRequestTabId = `request-idx:${requestPath.join('.')}`
+    recordedFolderTabId = `env-folder-id:${folderId}`
+    recordedRequestTabId = `request-id:${requestId}`
   }
 )
 
@@ -1586,7 +1586,7 @@ Then('the environment-folder variables table color picker should be visible', as
  * this scenario.
  */
 function activeFolderBookmarks(currentPage: Page): Locator {
-  return currentPage.locator('[data-testid^="tab-env-folder-idx:"][data-testid$="-bookmarks"]').first()
+  return currentPage.locator('[data-testid^="tab-env-folder-id:"][data-testid$="-bookmarks"]').first()
 }
 
 // ---------------------------------------------------------------------------

@@ -130,6 +130,16 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       if (!group || !isTabGroupNode(group)) return prevTree
 
       const updatedTabs = group.tabs.map((tab) => {
+        const tabType = (tab as { tabType?: string }).tabType
+        // Singleton tabs (Console, Firewall) aren't tied to any
+        // tree item — skip them. Without this guard the `else`
+        // branch below would dereference `.request.id` on a tab
+        // that doesn't carry one and crash with "Cannot read
+        // properties of undefined (reading 'id')" the moment a
+        // sidebar drag-and-drop fires the breadcrumb refresh.
+        if (tabType === 'console' || tabType === 'firewall') {
+          return tab
+        }
         const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
 
         // Get the item ID from the tab

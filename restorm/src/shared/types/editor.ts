@@ -115,6 +115,14 @@ export interface ConsoleTab extends BaseRestormTab {
   tabType: 'console'
 }
 
+/** Tab displaying the firewall admin UI (mode picker + allowlist
+ * editor + audit log). Singleton, identified by `tabId`
+ * `firewall:singleton`. Mounted by `RestormWorkbench`'s
+ * `renderTabContent` branch to a `<FirewallPanel />`. */
+export interface FirewallTab extends BaseRestormTab {
+  tabType: 'firewall'
+}
+
 /** Legacy tab type for backward compatibility */
 export interface LegacyTab extends BaseRestormTab {
   tabType?: undefined
@@ -133,11 +141,16 @@ export type RestormEditorTab =
   | ODataRequestTab
   | AuthenticationRequestTab
   | ConsoleTab
+  | FirewallTab
   | LegacyTab
 
 /** Stable singleton id for the Console workbench tab.
  * `View → Console` and the focus-or-create logic both key off this. */
 export const CONSOLE_TAB_ID = 'console:singleton'
+
+/** Stable singleton id for the Firewall admin workbench tab.
+ * `View → Firewall` and the focus-or-create logic both key off this. */
+export const FIREWALL_TAB_ID = 'firewall:singleton'
 
 /** @deprecated Use RestormEditorTab instead */
 export type restormEditorTab = RestormEditorTab
@@ -190,4 +203,9 @@ export function isAuthenticationRequestTab(tab: RestormEditorTab): tab is Authen
 /** Type guard for ConsoleTab */
 export function isConsoleTab(tab: RestormEditorTab): tab is ConsoleTab {
   return tab.tabType === 'console'
+}
+
+/** Type guard for FirewallTab */
+export function isFirewallTab(tab: RestormEditorTab): tab is FirewallTab {
+  return tab.tabType === 'firewall'
 }

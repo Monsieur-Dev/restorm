@@ -2,24 +2,24 @@ import { useEffect, useRef } from 'react'
 import { toasterService } from 'electron-core-ui/renderer'
 import type { FirewallPromptPayload } from '../../../shared/types/firewall'
 import { FirewallPromptBody } from './FirewallPromptBody'
+import { refreshFirewallControl } from '../components/Firewall'
 
 /**
  * Subscribe to `firewall:prompt-show` and surface each pending
  * permission decision as an indefinite toast in the app-level
- * toaster. The toast body holds four action buttons (Allow once /
- * Allow always / Deny once / Deny always); each click dispatches
- * the resolution back to main via `window.api.firewall.resolvePrompt`
- * and dismisses the toast.
+ * toaster. The toast body holds two action buttons (Allow / Deny);
+ * each click dispatches the resolution back to main via
+ * `window.api.firewall.resolvePrompt` and dismisses the toast.
  *
- * One toast per `host:port` — main dedupes prompts so consecutive
- * subresource loads to the same destination only generate one
- * outstanding prompt at a time. The toast id mirrors the promptId
- * so external code (Settings panel "review pending prompts" later)
- * can target the same record.
+ * One toast per origin (scheme + host + port) — main dedupes
+ * prompts so consecutive subresource loads to the same destination
+ * only generate one outstanding prompt at a time. The toast id
+ * mirrors the promptId so external code can target the same
+ * record.
  */
 interface FirewallApi {
 	onPromptShow: (cb: (payload: FirewallPromptPayload) => void) => () => void
-	resolvePrompt: (promptId: string, verdict: 'allow' | 'deny', persist: boolean) => Promise<void>
+	resolvePrompt: (promptId: string, verdict: 'allow' | 'deny') => Promise<void>
 }
 
 function getFirewallApi(): FirewallApi | null {
@@ -39,8 +39,15 @@ export function useFirewallPromptToasts(): void {
 		const off = firewall.onPromptShow((payload) => {
 			const toastId = `firewall-prompt:${payload.promptId}`
 			openPrompts.current.add(toastId)
-			const resolve = (verdict: 'allow' | 'deny', persist: boolean): void => {
-				void firewall.resolvePrompt(payload.promptId, verdict, persist)
+			const resolve = (verdict: 'allow' | 'deny'): void => {
+				void firewall.resolvePrompt(payload.promptId, verdict).then(() => {
+					// Pull the panel snapshot back into sync — the
+					// main-process `permissionService` just promoted
+					// the origin into whitelist or blacklist; the
+					// `useFirewallControl` store has no other path to
+					// learn about it.
+					void refreshFirewallControl()
+				})
 				toasterService.dismiss('app', toastId)
 				openPrompts.current.delete(toastId)
 			}

@@ -14,8 +14,8 @@ import {
   type CategoryMeta,
   logger
 } from 'electron-core-ui/renderer'
-import type { Folder, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, Request } from '../../../shared/types/collections'
-import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isRequest } from '../../../shared/types/collections'
+import type { Folder, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest, Request } from '../../../shared/types/collections'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isRequest } from '../../../shared/types/collections'
 
 /** Search categories configuration for Restorm */
 const RESTORM_SEARCH_CATEGORIES: Record<string, CategoryMeta> = {
@@ -176,6 +176,92 @@ function httpRequestToSearchDocument(
       path: [...parentPath, request.id]
     },
     metadata: {
+      requestType: 'http',
+      method: request.method,
+      url: request.url,
+      headers: request.headers.map((h) => ({ key: h.key, value: h.value.toString() })),
+      params: request.params.map((p) => ({ key: p.key, value: p.value.toString() })),
+      ...(request.pathParams ? { pathParams: request.pathParams.map((p) => ({ key: p.key, value: p.value.toString() })) } : {}),
+      ...(bodyMetadata ? { body: bodyMetadata } : {}),
+      tags: request.tags,
+      ...(request.notes ? { notes: request.notes } : {}),
+      ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
+    }
+  }
+}
+
+function authenticationRequestToSearchDocument(
+  request: AuthenticationRequest,
+  parentFolderId: string,
+  parentPath: string[] = [],
+  parentNames: string[] = []
+): {
+  id: string
+  title: string
+  description?: string
+  category: string
+  icon: string
+  keywords: string
+  navigation: Record<string, unknown>
+  metadata: Record<string, unknown>
+} {
+  const keywords = [
+    'auth',
+    request.method,
+    request.url,
+    ...request.tags,
+    ...request.headers.map((h) => `${h.key} ${h.value.toString()}`),
+    ...request.params.map((p) => `${p.key} ${p.value.toString()}`),
+    ...(request.pathParams?.map((p) => `${p.key} ${p.value.toString()}`) ?? []),
+    getBodyContent(request.body),
+    request.notes ?? ''
+  ].join(' ')
+
+  // Body metadata mirrors the HTTP shape — auth requests carry the
+  // same body payload (text / form-data / x-www-form-urlencoded /
+  // file) as a regular HTTP request.
+  let bodyMetadata: RestormSearchMetadata['body'] = undefined
+  if (request.body) {
+    switch (request.body.type) {
+      case 'text':
+        bodyMetadata = { type: 'text', content: request.body.content }
+        break
+      case 'file':
+        bodyMetadata = { type: 'file', path: request.body.path }
+        break
+      case 'form-data':
+      case 'x-www-form-urlencoded':
+        bodyMetadata = {
+          type: request.body.type,
+          fields: request.body.fields.map((f) => ({ key: f.key, value: f.value.toString() }))
+        }
+        break
+    }
+  }
+
+  return {
+    id: request.id,
+    title: request.name,
+    ...(request.documentation ? { description: request.documentation } : {}),
+    category: 'request',
+    // `icon: 'auth'` → `mapToBadgeType('AUTH')` → 'AUTH' badge
+    // (matches the sidebar's auth badge styling). The search
+    // tooltip's request branch wraps this in `<Badge type=…/>`.
+    icon: 'auth',
+    keywords,
+    navigation: {
+      type: 'request',
+      folderId: parentFolderId,
+      requestId: request.id,
+      path: [...parentPath, request.id]
+    },
+    metadata: {
+      // The search tooltip's Handlebars template (`request-details.hbs`)
+      // dispatches on `requestType`. There's no `auth` branch — but
+      // an auth request renders identically to an HTTP one (method,
+      // URL, headers, params, body), so we tell the template it's
+      // `http`. The badge stays `AUTH` because that comes from
+      // `icon`, not `requestType`.
       requestType: 'http',
       method: request.method,
       url: request.url,
@@ -488,6 +574,8 @@ function requestToSearchDocument(
     return websocketRequestToSearchDocument(request, parentFolderId, parentPath, parentNames)
   } else if (isODataRequest(request)) {
     return odataRequestToSearchDocument(request, parentFolderId, parentPath, parentNames)
+  } else if (isAuthenticationRequest(request)) {
+    return authenticationRequestToSearchDocument(request, parentFolderId, parentPath, parentNames)
   }
   // Fallback for unknown types
   const unknownRequest = request as { id: string; name: string; tags: string[] }

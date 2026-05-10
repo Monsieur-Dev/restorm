@@ -1,6 +1,10 @@
 import { ipcMain } from 'electron'
 import { permissionService } from './PermissionService'
-import { FIREWALL_IPC, type FirewallMode, type FirewallPromptResolution } from '../../../shared/types/firewall'
+import {
+	FIREWALL_IPC,
+	type FirewallOrigin,
+	type FirewallPromptResolution
+} from '../../../shared/types/firewall'
 
 /**
  * Idempotent guard. `ipcMain.handle` throws if a channel is
@@ -10,33 +14,53 @@ import { FIREWALL_IPC, type FirewallMode, type FirewallPromptResolution } from '
  */
 let installed = false
 
+function asOrigin(value: unknown): FirewallOrigin | null {
+	if (typeof value !== 'object' || value === null) return null
+	const raw = value as { scheme?: unknown; host?: unknown; port?: unknown }
+	if (typeof raw.scheme !== 'string' || typeof raw.host !== 'string' || typeof raw.port !== 'number') return null
+	return { scheme: raw.scheme, host: raw.host, port: Math.trunc(raw.port) }
+}
+
+function asOriginArray(value: unknown): FirewallOrigin[] {
+	if (!Array.isArray(value)) return []
+	const out: FirewallOrigin[] = []
+	for (const v of value) {
+		const o = asOrigin(v)
+		if (o !== null) out.push(o)
+	}
+	return out
+}
+
 export function registerFirewallIpc(): void {
 	if (installed) return
 	installed = true
 
-	ipcMain.handle(FIREWALL_IPC.GET_MODE, () => permissionService.getMode())
+	ipcMain.handle(FIREWALL_IPC.LIST_WHITELIST, () => permissionService.listWhitelist())
+	ipcMain.handle(FIREWALL_IPC.LIST_BLACKLIST, () => permissionService.listBlacklist())
 
-	ipcMain.handle(FIREWALL_IPC.SET_MODE, (_event, mode: unknown) => {
-		if (mode !== 'strict' && mode !== 'log-only' && mode !== 'lockdown') {
-			throw new Error(`Invalid firewall mode: ${String(mode)}`)
-		}
-		permissionService.setMode(mode as FirewallMode)
+	ipcMain.handle(FIREWALL_IPC.ADD_WHITELIST, (_event, origin: unknown) => {
+		const o = asOrigin(origin)
+		if (o === null) throw new Error('Invalid origin payload')
+		permissionService.addToWhitelist(o)
+	})
+	ipcMain.handle(FIREWALL_IPC.REMOVE_WHITELIST, (_event, origin: unknown) => {
+		const o = asOrigin(origin)
+		if (o === null) throw new Error('Invalid origin payload')
+		permissionService.removeFromWhitelist(o)
+	})
+	ipcMain.handle(FIREWALL_IPC.ADD_BLACKLIST, (_event, origin: unknown) => {
+		const o = asOrigin(origin)
+		if (o === null) throw new Error('Invalid origin payload')
+		permissionService.addToBlacklist(o)
+	})
+	ipcMain.handle(FIREWALL_IPC.REMOVE_BLACKLIST, (_event, origin: unknown) => {
+		const o = asOrigin(origin)
+		if (o === null) throw new Error('Invalid origin payload')
+		permissionService.removeFromBlacklist(o)
 	})
 
-	ipcMain.handle(FIREWALL_IPC.LIST_ALLOWLIST, () => permissionService.listAllowlist())
-
-	ipcMain.handle(FIREWALL_IPC.ADD_ALLOWLIST, (_event, pattern: unknown) => {
-		if (typeof pattern !== 'string' || pattern.trim().length === 0) {
-			throw new Error('Allowlist entry must be a non-empty string')
-		}
-		permissionService.addToAllowlist(pattern)
-	})
-
-	ipcMain.handle(FIREWALL_IPC.REMOVE_ALLOWLIST, (_event, pattern: unknown) => {
-		if (typeof pattern !== 'string') {
-			throw new Error('Allowlist entry must be a string')
-		}
-		permissionService.removeFromAllowlist(pattern)
+	ipcMain.handle(FIREWALL_IPC.SET_PROJECT_ORIGINS, (_event, origins: unknown) => {
+		permissionService.setProjectOrigins(asOriginArray(origins))
 	})
 
 	ipcMain.handle(FIREWALL_IPC.PROMPT_RESOLVE, (_event, payload: unknown) => {
@@ -47,7 +71,6 @@ export function registerFirewallIpc(): void {
 		if (r.verdict !== 'allow' && r.verdict !== 'deny') {
 			throw new Error(`verdict must be allow|deny, got ${String(r.verdict)}`)
 		}
-		const persist = typeof r.persist === 'boolean' ? r.persist : false
-		permissionService.resolvePrompt(r.promptId, r.verdict, persist)
+		permissionService.resolvePrompt(r.promptId, r.verdict)
 	})
 }

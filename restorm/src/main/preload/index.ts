@@ -9,7 +9,7 @@ import type { PersistenceFormat } from '../../../../electron-core-ui/src/main/se
 import {
   FIREWALL_IPC,
   FIREWALL_REQUEST_RECORD_CHANNEL,
-  type FirewallMode,
+  type FirewallOrigin,
   type FirewallPromptPayload,
   type RequestRecord
 } from '../../shared/types/firewall'
@@ -40,34 +40,45 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.on(FIREWALL_REQUEST_RECORD_CHANNEL, handler)
       return (): void => { ipcRenderer.off(FIREWALL_REQUEST_RECORD_CHANNEL, handler) }
     },
-    // Control-plane — Settings → Firewall reads + mutates the
-    // PermissionService state through these calls. Persistence is
-    // handled main-side; the renderer never touches the on-disk
+    // Control-plane — the Firewall workbench panel reads + mutates
+    // the PermissionService state through these calls. Persistence
+    // is handled main-side; the renderer never touches the on-disk
     // file directly.
-    getMode: async (): Promise<FirewallMode> => {
-      const result: unknown = await ipcRenderer.invoke(FIREWALL_IPC.GET_MODE)
-      return result as FirewallMode
+    listWhitelist: async (): Promise<FirewallOrigin[]> => {
+      const result: unknown = await ipcRenderer.invoke(FIREWALL_IPC.LIST_WHITELIST)
+      return Array.isArray(result) ? (result as FirewallOrigin[]) : []
     },
-    setMode: async (mode: FirewallMode): Promise<void> => {
-      await ipcRenderer.invoke(FIREWALL_IPC.SET_MODE, mode)
+    addToWhitelist: async (origin: FirewallOrigin): Promise<void> => {
+      await ipcRenderer.invoke(FIREWALL_IPC.ADD_WHITELIST, origin)
     },
-    listAllowlist: async (): Promise<string[]> => {
-      const result: unknown = await ipcRenderer.invoke(FIREWALL_IPC.LIST_ALLOWLIST)
-      return Array.isArray(result) ? (result as string[]) : []
+    removeFromWhitelist: async (origin: FirewallOrigin): Promise<void> => {
+      await ipcRenderer.invoke(FIREWALL_IPC.REMOVE_WHITELIST, origin)
     },
-    addToAllowlist: async (pattern: string): Promise<void> => {
-      await ipcRenderer.invoke(FIREWALL_IPC.ADD_ALLOWLIST, pattern)
+    listBlacklist: async (): Promise<FirewallOrigin[]> => {
+      const result: unknown = await ipcRenderer.invoke(FIREWALL_IPC.LIST_BLACKLIST)
+      return Array.isArray(result) ? (result as FirewallOrigin[]) : []
     },
-    removeFromAllowlist: async (pattern: string): Promise<void> => {
-      await ipcRenderer.invoke(FIREWALL_IPC.REMOVE_ALLOWLIST, pattern)
+    addToBlacklist: async (origin: FirewallOrigin): Promise<void> => {
+      await ipcRenderer.invoke(FIREWALL_IPC.ADD_BLACKLIST, origin)
+    },
+    removeFromBlacklist: async (origin: FirewallOrigin): Promise<void> => {
+      await ipcRenderer.invoke(FIREWALL_IPC.REMOVE_BLACKLIST, origin)
+    },
+    /** Replace the project-derived origins set in one shot. The
+     * renderer recomputes the set on every project tree change
+     * (URL edit, env-var edit, request import, etc.) and pushes
+     * here. Treated as the authoritative project view by the
+     * permission check. */
+    setProjectOrigins: async (origins: FirewallOrigin[]): Promise<void> => {
+      await ipcRenderer.invoke(FIREWALL_IPC.SET_PROJECT_ORIGINS, origins)
     },
     onPromptShow: (cb: (payload: FirewallPromptPayload) => void): (() => void) => {
       const handler = (_event: unknown, payload: FirewallPromptPayload): void => { cb(payload) }
       ipcRenderer.on(FIREWALL_IPC.PROMPT_SHOW, handler)
       return (): void => { ipcRenderer.off(FIREWALL_IPC.PROMPT_SHOW, handler) }
     },
-    resolvePrompt: async (promptId: string, verdict: 'allow' | 'deny', persist: boolean): Promise<void> => {
-      await ipcRenderer.invoke(FIREWALL_IPC.PROMPT_RESOLVE, { promptId, verdict, persist })
+    resolvePrompt: async (promptId: string, verdict: 'allow' | 'deny'): Promise<void> => {
+      await ipcRenderer.invoke(FIREWALL_IPC.PROMPT_RESOLVE, { promptId, verdict })
     }
   }
 })

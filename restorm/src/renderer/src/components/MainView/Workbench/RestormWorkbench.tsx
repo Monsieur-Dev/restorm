@@ -13,9 +13,11 @@ import {
   isWebSocketRequestTab,
   isODataRequestTab,
   isAuthenticationRequestTab,
-  isConsoleTab
+  isConsoleTab,
+  isFirewallTab
 } from '../../../../../shared/types/editor'
 import { ConsolePanel } from '../../Console'
+import { FirewallPanel } from '../../Firewall'
 import {
   HTTPRequestTabView,
   GraphQLRequestTabView,
@@ -354,6 +356,18 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <IconView icon={{ type: 'codicon', value: 'console' }} size={14} />
           <span>Console</span>
+        </span>
+      )
+    }
+
+    // Firewall admin tab — codicon `shield` + "Firewall" label.
+    // Singleton, no dirty indicator (mode + allowlist persist
+    // through main-process IPC, not workbench autosave).
+    if (isFirewallTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <IconView icon={{ type: 'codicon', value: 'shield' }} size={14} />
+          <span>Firewall</span>
         </span>
       )
     }
@@ -788,6 +802,13 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     // ancestor path applies. The component manages its own lifecycle.
     if (isConsoleTab(effectiveTab)) {
       return <ConsolePanel />
+    }
+
+    // Firewall admin tab — singleton, identified by `tabType: 'firewall'`.
+    // Mounts the `<FirewallPanel />` (mode picker + allowlist editor).
+    // No breadcrumbs for the same reason as Console.
+    if (isFirewallTab(effectiveTab)) {
+      return <FirewallPanel />
     }
 
     // Legacy/empty tab fallback (should not happen with typed tabs)

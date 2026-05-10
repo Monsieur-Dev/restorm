@@ -88,17 +88,21 @@ class FirewallService {
 				callback({ cancel: false })
 				return
 			}
-			// Route through PermissionService. The async `check()`
-			// resolves immediately for `localhost` / allowlist hits
-			// / `log-only` mode; resolves to `deny` for `lockdown`
-			// mode; and resolves later (when the user clicks one of
-			// the four toast buttons) for `strict` mode + unknown
-			// destination. Chromium HOLDS the request until the
-			// callback fires — this is what gives us a real block
-			// rather than a "we logged it, then served it" race.
+			// Route through PermissionService. Three resolutions:
+			//   - immediate `allow` (whitelist hit, project-origins
+			//     hit, or restorm infra port);
+			//   - immediate `deny` (blacklist hit);
+			//   - async `allow` / `deny` after the user clicks one
+			//     of the two toast buttons (Allow → adds to
+			//     whitelist + lets through; Deny → adds to
+			//     blacklist + cancels).
+			// Chromium holds the request until the callback fires,
+			// which is what gives us a real block rather than a
+			// "we logged it, then served it" race.
 			const built = record
+			const scheme = parseScheme(details.url)
 			void permissionService
-				.check({ host: built.host, port: built.port, source: built.source })
+				.check({ scheme, host: built.host, port: built.port, source: built.source })
 				.then((verdict) => {
 					built.verdict = verdict
 					this.broadcast(built)
@@ -114,7 +118,7 @@ class FirewallService {
 				})
 		})
 
-		logger.info('FirewallService: webRequest listener installed (observability only)')
+		logger.info('FirewallService: webRequest listener installed')
 	}
 
 	/**
@@ -177,6 +181,14 @@ class FirewallService {
 
 function safeParseUrl(raw: string): URL | null {
 	try { return new URL(raw) } catch { return null }
+}
+
+function parseScheme(rawUrl: string): string {
+	try {
+		return new URL(rawUrl).protocol.replace(/:$/, '').toLowerCase()
+	} catch {
+		return 'http'
+	}
 }
 
 const NETWORK_SCHEMES = new Set<string>(['http:', 'https:', 'ws:', 'wss:'])

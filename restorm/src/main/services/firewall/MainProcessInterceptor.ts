@@ -73,10 +73,10 @@ function patchHttpModule(mod: HttpLikeModule, source: RequestRecordSource): void
 	const patchedRequest = ((...args: Parameters<HttpRequestFn>): ClientRequest => {
 		const record = recordFromHttpArgs(args, source)
 		if (record !== null) {
-			const verdict = permissionService.checkSync({ host: record.host, port: record.port, source: record.source })
+			const verdict = permissionService.checkSync({ scheme: record.protocol, host: record.host, port: record.port, source: record.source })
 			record.verdict = verdict
 			if (verdict === 'deny') {
-				record.errorMessage = `firewall: denied (${permissionService.getMode()})`
+				record.errorMessage = 'firewall: denied (blacklist)'
 				firewallService.emit(record)
 				return makeDenied(record) as unknown as ClientRequest
 			}
@@ -88,10 +88,10 @@ function patchHttpModule(mod: HttpLikeModule, source: RequestRecordSource): void
 	const patchedGet = ((...args: Parameters<HttpGetFn>): ClientRequest => {
 		const record = recordFromHttpArgs(args, source)
 		if (record !== null) {
-			const verdict = permissionService.checkSync({ host: record.host, port: record.port, source: record.source })
+			const verdict = permissionService.checkSync({ scheme: record.protocol, host: record.host, port: record.port, source: record.source })
 			record.verdict = verdict
 			if (verdict === 'deny') {
-				record.errorMessage = `firewall: denied (${permissionService.getMode()})`
+				record.errorMessage = 'firewall: denied (blacklist)'
 				firewallService.emit(record)
 				return makeDenied(record) as unknown as ClientRequest
 			}
@@ -215,10 +215,10 @@ function patchFetch(): void {
 			logger.warn('FirewallService: failed to build fetch record', { error: String(err) })
 		}
 		if (record !== null) {
-			const verdict = permissionService.checkSync({ host: record.host, port: record.port, source: record.source })
+			const verdict = permissionService.checkSync({ scheme: record.protocol, host: record.host, port: record.port, source: record.source })
 			record.verdict = verdict
 			if (verdict === 'deny') {
-				record.errorMessage = `firewall: denied (${permissionService.getMode()})`
+				record.errorMessage = 'firewall: denied (blacklist)'
 				firewallService.emit(record)
 				const err = new Error(`Firewall blocked outbound fetch to ${record.host}:${String(record.port)}`)
 				;(err as Error & { code?: string }).code = 'EFIREWALLDENIED'
