@@ -595,6 +595,13 @@
     "dateTimeFormat.us": "Format US (MM/JJ/AAAA, 12h)",
     "dateTimeFormat.iso": "Format ISO (AAAA-MM-JJ, 24h)"
   },
+  "console": {
+    "title": "Console",
+    "requestFormat": "Format des requêtes",
+    "requestFormatDescription": "Type de shell utilisé par défaut pour afficher les requêtes sortantes dans l'onglet Console. Chaque ligne est une commande copiable ; le toggle de la toolbar Console surcharge ce défaut pour la session courante.",
+    "requestFormat.curl": "curl (style Unix)",
+    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+  },
   "import": {
     "title": "Importer des requêtes",
     "source": {

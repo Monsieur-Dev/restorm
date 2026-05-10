@@ -63,9 +63,15 @@ const platformStrategySchema = z.object({
   AvailableOn: z.array(z.enum(['desktop', 'web']))
 })
 
+const environmentStrategySchema = z.object({
+  Type: z.literal('Environment'),
+  AvailableIn: z.array(z.enum(['dev', 'prod']))
+})
+
 const featureStrategySchema = z.discriminatedUnion('Type', [
   basicStrategySchema,
-  platformStrategySchema
+  platformStrategySchema,
+  environmentStrategySchema
 ])
 
 export const featureConfigSchema = z.object({

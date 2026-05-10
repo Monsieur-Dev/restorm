@@ -595,6 +595,13 @@
     "dateTimeFormat.us": "US format (MM/DD/YYYY, 12h)",
     "dateTimeFormat.iso": "ISO format (YYYY-MM-DD, 24h)"
   },
+  "console": {
+    "title": "Console",
+    "requestFormat": "Request format",
+    "requestFormatDescription": "Default shell flavor used to render outgoing requests in the Console tab. Each row is a copy-pasteable command line; the toggle in the Console toolbar overrides this default for the current tab.",
+    "requestFormat.curl": "curl (Unix-style)",
+    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+  },
   "import": {
     "title": "Import Requests",
     "source": {

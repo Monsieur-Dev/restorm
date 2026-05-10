@@ -1,3 +1,24 @@
+// LOAD-ORDER CRITICAL: install the main-process firewall
+// interceptor (Layer B) BEFORE any other module that might trigger
+// an outgoing HTTP / HTTPS / fetch call. The monkey-patches replace
+// `http.request` / `https.request` / `globalThis.fetch` in-place,
+// so every subsequent `import` / `require` inherits the patched
+// versions. Putting this at the very top means a malicious
+// dependency that phones home from its module-init code is
+// captured too.
+//
+// `installHardenInterceptor` (the deeper net.Socket / dns / dgram
+// patches + the lockdown) is implemented in
+// `./services/firewall/HardenInterceptor.ts` but NOT wired here:
+// undici's path through `net.Socket.prototype.connect` interacts
+// poorly with the wrap (Duplex internals expect `this` to carry a
+// pre-initialised timer symbol that the patch reaches before the
+// Socket constructor finishes). Re-enable once the connect-args
+// shape is fully decoded for every undici signature variant — see
+// the `[harden]` follow-up ticket.
+import { installMainProcessInterceptor } from './services/firewall'
+installMainProcessInterceptor()
+
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { randomBytes } from 'node:crypto'
 import { MainWindow } from './windows/MainWindow'
@@ -15,6 +36,7 @@ import type { PersistenceFormat } from 'electron-core-ui'
 import { dirname, join } from 'path'
 import { existsSync, statSync } from 'fs'
 import { searchIndexService, contextService, responseHistoryService, authenticationCacheService } from './services'
+import { firewallService, permissionService, registerFirewallIpc, installWorkerPatcher } from './services/firewall'
 import { writeMcpDiscoveryFile, cleanupMcpDiscoveryFile } from './services/mcpDiscovery'
 import { registerRestormMcp } from './mcp'
 import { graphQLService } from 'electron-core-ui/main'
@@ -345,6 +367,44 @@ void app.whenReady().then(async () => {
 // FileService subscribes to DocumentEvents internally and tracks per-object checksums
 logger.info('Dirty state managed by FileService checksum system')
 
+// Firewall wiring: Layer A listener + IPC bridge + restorm-internal
+// auto-allow ports. The "infra ports" let restorm's own
+// renderer ↔ main GraphQL bridge, the Vite dev server (in dev),
+// and the MCP server (when launched with `--mcp`) bypass the
+// whitelist gate — only EXACTLY these `localhost:<port>` triples
+// auto-allow; any other localhost port goes through the same
+// whitelist / blacklist / project-origins checks as external
+// hosts.
+void app.whenReady().then(() => {
+  firewallService.registerWebRequestListener()
+  registerFirewallIpc()
+  // Patch worker_threads.Worker + child_process.fork so spawned
+  // contexts inherit a "deny everything outbound" posture. Restorm
+  // doesn't currently use either, so this is a defensive measure
+  // against a future npm dep that does.
+  installWorkerPatcher()
+  // GraphQL bridge port is always known by `whenReady`. Vite
+  // dev port comes from electron-vite's env var (undefined in
+  // prod). MCP port is registered later when `mcpService.start`
+  // resolves (see below).
+  const graphqlEndpoint = graphQLService.getEndpoint()
+  let graphqlPort: number | null = null
+  try { graphqlPort = Number(new URL(graphqlEndpoint).port) || null } catch { /* leave null */ }
+  let viteDevPort: number | null = null
+  const rendererUrl = process.env['ELECTRON_RENDERER_URL']
+  if (typeof rendererUrl === 'string' && rendererUrl !== '') {
+    try { viteDevPort = Number(new URL(rendererUrl).port) || null } catch { /* leave null */ }
+  }
+  permissionService.setInfraPorts({ graphqlPort, viteDevPort })
+})
+
+// Auto-deny every outstanding firewall prompt on shutdown so
+// Layer A's `onBeforeRequest` callbacks don't leave Chromium
+// requests hanging while the app is being torn down.
+app.on('before-quit', () => {
+  permissionService.denyAllPending()
+})
+
 // Initialize Search Index Service (listens to document events from renderer)
 searchIndexService.initialize()
 logger.info('Search Index Service initialized')
@@ -419,6 +479,11 @@ void app.whenReady().then(async () => {
       logger.error('MCP service started but reports no port')
       return
     }
+    // Tell the firewall about the freshly-bound MCP port so
+    // restorm's own MCP traffic to localhost auto-allows. Any
+    // OTHER localhost port still goes through the regular
+    // whitelist / blacklist gates.
+    permissionService.setInfraPorts({ mcpPort: port })
     await writeMcpDiscoveryFile({
       port,
       projectPath: null,

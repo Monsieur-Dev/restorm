@@ -12,8 +12,12 @@ import {
   isSoapRequestTab,
   isWebSocketRequestTab,
   isODataRequestTab,
-  isAuthenticationRequestTab
+  isAuthenticationRequestTab,
+  isConsoleTab,
+  isFirewallTab
 } from '../../../../../shared/types/editor'
+import { ConsolePanel } from '../../Console'
+import { FirewallPanel } from '../../Firewall'
 import {
   HTTPRequestTabView,
   GraphQLRequestTabView,
@@ -85,8 +89,11 @@ export interface RestormWorkbenchProps {
   workbenchId?: string | undefined
   /** Enable automatic save/load of workbench state */
   autosave?: boolean
-  /** Callback to rebuild a tab from its ID (required if autosave is enabled) */
-  onRebuildTab?: RebuildTabCallback
+  /** Callback to rebuild a tab from its ID (required if autosave
+   * is enabled). Pass `undefined` to delay ECUI's autosave restore
+   * until the caller has the data needed to reconstruct tabs
+   * (e.g., wait for `rootItems` to load). */
+  onRebuildTab?: RebuildTabCallback | undefined
   /** Called when state is restored from storage */
   onStateRestored?: (tree: WorkbenchTree | null) => void
   /** Get a reactive Request by ID (for reactivity support) */
@@ -337,6 +344,30 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           <Badge type="AUTH" />
           <span>{restormTab.request.name}</span>
           {renderDirtyIndicator(restormTab)}
+        </span>
+      )
+    }
+
+    // Console tab — codicon `console` + plain "Console" label.
+    // Singleton tab, no dirty indicator (its content is a live log,
+    // not a persistable surface).
+    if (isConsoleTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <IconView icon={{ type: 'codicon', value: 'console' }} size={14} />
+          <span>Console</span>
+        </span>
+      )
+    }
+
+    // Firewall admin tab — codicon `shield` + "Firewall" label.
+    // Singleton, no dirty indicator (mode + allowlist persist
+    // through main-process IPC, not workbench autosave).
+    if (isFirewallTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <IconView icon={{ type: 'codicon', value: 'shield' }} size={14} />
+          <span>Firewall</span>
         </span>
       )
     }
@@ -762,6 +793,22 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           </RestormWorkbenchTab>
         </EnvironmentProvider>
       )
+    }
+
+    // Console tab — singleton, identified by `tabType: 'console'`.
+    // Mounts the standalone `<ConsolePanel />` (xterm.js + firewall
+    // feed subscriber). The breadcrumb chrome is intentionally
+    // skipped: the Console isn't a request / folder, no project-tree
+    // ancestor path applies. The component manages its own lifecycle.
+    if (isConsoleTab(effectiveTab)) {
+      return <ConsolePanel />
+    }
+
+    // Firewall admin tab — singleton, identified by `tabType: 'firewall'`.
+    // Mounts the `<FirewallPanel />` (mode picker + allowlist editor).
+    // No breadcrumbs for the same reason as Console.
+    if (isFirewallTab(effectiveTab)) {
+      return <FirewallPanel />
     }
 
     // Legacy/empty tab fallback (should not happen with typed tabs)

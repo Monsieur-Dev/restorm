@@ -76,6 +76,23 @@ Enables the feature only on specified platforms.
 | `Type` | `"Platform"` | Strategy discriminator |
 | `AvailableOn` | `FeaturePlatform[]` | Allowed platforms: `"desktop"`, `"web"` |
 
+### Environment
+
+Enables the feature only in specified build environments. `dev` covers any unpackaged run (electron-vite dev, `pnpm dev`, the test harness); `prod` covers packaged binaries shipped to users.
+
+```yaml
+- Type: Environment
+  AvailableIn:
+    - dev
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `Type` | `"Environment"` | Strategy discriminator |
+| `AvailableIn` | `FeatureEnvironment[]` | Allowed environments: `"dev"`, `"prod"` |
+
+Use this to ship debug-only surfaces — internal CTAs, test buttons, instrumentation panels — that disappear from packaged builds without code-stripping. The host app passes the current environment to `initFeatureService` (typically `app.isPackaged ? 'prod' : 'dev'`).
+
 ## AND Logic
 
 When a feature has multiple strategies, **all** must return `true`:
@@ -104,7 +121,9 @@ import { initFeatureService, getFeatureService, isFeatureServiceInitialized } fr
 // Initialize singleton (typically done inside setupIPC or manually)
 const service = initFeatureService(
   path.join(__dirname, '../resources/features.yaml'),
-  'desktop'  // FeaturePlatform, defaults to 'desktop'
+  appFeaturesYamlPath,  // optional per-app overrides
+  'desktop',            // FeaturePlatform, defaults to 'desktop'
+  app.isPackaged ? 'prod' : 'dev'  // FeatureEnvironment, defaults to 'prod'
 )
 ```
 
@@ -114,13 +133,15 @@ const service = initFeatureService(
 |--------|---------|-------------|
 | `isEnabled(featureName)` | `boolean` | Evaluate all strategies; `false` if feature not found |
 | `getPlatform()` | `FeaturePlatform` | Current runtime platform (`'desktop'` or `'web'`) |
+| `getEnvironment()` | `FeatureEnvironment` | Current build environment (`'dev'` or `'prod'`) |
 | `listFeatures()` | `string[]` | All registered feature names (for debugging) |
 
 ### Singleton Access
 
 | Function | Description |
 |----------|-------------|
-| `initFeatureService(configPath, platform?)` | Create the singleton; warns if already initialized |
+| `initFeatureService(configPath, platform?)` | Legacy signature — creates the singleton without per-app overrides |
+| `initFeatureService(defaultPath, appPath, platform?, environment?)` | New signature with overrides + environment |
 | `getFeatureService()` | Get the singleton; throws if not initialized |
 | `isFeatureServiceInitialized()` | Check if the singleton exists |
 
@@ -130,8 +151,9 @@ const service = initFeatureService(
 |---------|------|---------|-------------|
 | `feature:is-enabled` | `featureName: string` | `boolean` | Check if a feature is enabled |
 | `feature:get-platform` | -- | `FeaturePlatform` | Get the runtime platform |
+| `feature:get-environment` | -- | `FeatureEnvironment` | Get the build environment |
 
-Both handlers return safe defaults (`false` / `'desktop'`) if the service is not initialized.
+Handlers return safe defaults (`false` / `'desktop'` / `'prod'`) if the service is not initialized.
 
 ## React Hooks and Utilities
 
@@ -235,6 +257,7 @@ const SidebarContainer: React.FC = () => {
 
 ```typescript
 type FeaturePlatform = 'desktop' | 'web'
+type FeatureEnvironment = 'dev' | 'prod'
 
 interface BasicStrategy {
   Type: 'Basic'
@@ -246,7 +269,12 @@ interface PlatformStrategy {
   AvailableOn: FeaturePlatform[]
 }
 
-type FeatureStrategy = BasicStrategy | PlatformStrategy
+interface EnvironmentStrategy {
+  Type: 'Environment'
+  AvailableIn: FeatureEnvironment[]
+}
+
+type FeatureStrategy = BasicStrategy | PlatformStrategy | EnvironmentStrategy
 
 interface FeatureConfig {
   Name: string

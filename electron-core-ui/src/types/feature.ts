@@ -11,9 +11,16 @@
 export type FeaturePlatform = 'desktop' | 'web'
 
 /**
+ * Build environment for environment-based strategy. `dev` covers any
+ * unpackaged / development run (electron-vite dev, `pnpm dev`, the
+ * tests harness); `prod` covers packaged binaries shipped to users.
+ */
+export type FeatureEnvironment = 'dev' | 'prod'
+
+/**
  * Available strategy types
  */
-export type FeatureStrategyType = 'Basic' | 'Platform'
+export type FeatureStrategyType = 'Basic' | 'Platform' | 'Environment'
 
 /**
  * Basic strategy - simple on/off toggle
@@ -32,9 +39,19 @@ export interface PlatformStrategy {
 }
 
 /**
+ * Environment strategy - enabled based on build environment.
+ * `AvailableIn: [dev]` produces a feature that's only on in
+ * unpackaged builds (debug-only UI, internal CTAs, etc).
+ */
+export interface EnvironmentStrategy {
+  Type: 'Environment'
+  AvailableIn: FeatureEnvironment[]
+}
+
+/**
  * Union type for all strategy configurations
  */
-export type FeatureStrategy = BasicStrategy | PlatformStrategy
+export type FeatureStrategy = BasicStrategy | PlatformStrategy | EnvironmentStrategy
 
 /**
  * Feature configuration with multiple strategies
@@ -57,6 +74,7 @@ export interface FeaturesYamlConfig {
  */
 export interface RuntimeContext {
   platform: FeaturePlatform
+  environment: FeatureEnvironment
 }
 
 /**
@@ -65,4 +83,5 @@ export interface RuntimeContext {
 export interface FeatureApi {
   isEnabled: (featureName: string) => Promise<boolean>
   getPlatform: () => Promise<FeaturePlatform>
+  getEnvironment: () => Promise<FeatureEnvironment>
 }

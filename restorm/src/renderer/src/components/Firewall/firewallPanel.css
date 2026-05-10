@@ -1,0 +1,172 @@
+.firewall-panel {
+	height: 100%;
+	min-height: 0;
+	color: var(--editor-foreground);
+	font-family: var(--font-family);
+}
+
+.firewall-panel--loading {
+	padding: 24px;
+	opacity: 0.6;
+	font-style: italic;
+}
+
+.firewall-panel__inner {
+	display: flex;
+	flex-direction: column;
+	min-height: 100%;
+	box-sizing: border-box;
+	padding: 0 0 24px 0;
+}
+
+.firewall-panel__header {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	column-gap: 20px;
+	align-items: start;
+	padding: 24px 20px 16px 20px;
+	border-bottom: 1px solid var(--toolbar-hover-background, rgba(127, 127, 127, 0.12));
+}
+
+.firewall-panel__header-icon {
+	color: var(--editor-foreground);
+	opacity: 0.85;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 96px;
+	height: 96px;
+	border-radius: 8px;
+	background: var(--toolbar-hover-background, rgba(127, 127, 127, 0.08));
+}
+
+.firewall-panel__header-icon .codicon {
+	font-size: 72px !important;
+	line-height: 1;
+}
+
+.firewall-panel__header-text {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-width: 0;
+}
+
+.firewall-panel__header-test {
+	display: flex;
+	align-items: flex-start;
+	margin-top: 4px;
+}
+
+.firewall-panel__title {
+	font-size: 22px;
+	font-weight: 600;
+	margin: 0;
+	letter-spacing: 0.2px;
+}
+
+.firewall-panel__intro {
+	margin: 0;
+	font-size: 12px;
+	opacity: 0.75;
+	line-height: 1.5;
+	max-width: 720px;
+}
+
+.firewall-panel__intro code,
+.firewall-panel__hint code {
+	background: var(--toolbar-hover-background, rgba(127, 127, 127, 0.12));
+	padding: 1px 4px;
+	border-radius: 3px;
+	font-family: var(--monospace-font);
+	font-size: 11px;
+}
+
+.firewall-panel__tabs {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	padding: 8px 0 0 20px;
+}
+
+.firewall-panel__tab-body {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 16px 0;
+}
+
+.firewall-panel__hint {
+	margin: 0;
+	font-size: 12px;
+	opacity: 0.7;
+	line-height: 1.5;
+}
+
+.firewall-panel__group {
+	width: 100%;
+}
+
+/* Make the leading "label-shaped" child of every firewall
+ * ControlGroup stretch to fill the available row width. The
+ * trailing icon-only Button keeps its intrinsic width on the
+ * right (`button-container` from ECUI). Without these flex
+ * hints the InputBox / label collapses to its content width
+ * and the row only takes ~250px.
+ *
+ * `> *:first-child` covers the wrapper div ECUI's `<InputBox>`
+ * sits inside (a `<div class="">` host), and is also the
+ * `firewall-panel__list-label` we render inline in entry rows.
+ * The trailing button gets `flex: 0 0 auto` so the disabled
+ * state doesn't accidentally stretch it. */
+.firewall-panel__group > *:first-child {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+.firewall-panel__group > *:first-child > .inputbox {
+	width: 100%;
+}
+.firewall-panel__group > .button-container {
+	flex: 0 0 auto;
+}
+
+.firewall-panel__list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.firewall-panel__list-row {
+	display: flex;
+}
+
+.firewall-panel__list-label {
+	flex: 1 1 auto;
+	min-width: 0;
+	display: flex;
+	align-items: center;
+	padding: 6px 10px;
+	background: var(--input-background, var(--editor-background, transparent));
+	border: 1px solid var(--input-border, rgba(127, 127, 127, 0.3));
+	border-radius: 3px;
+	overflow: hidden;
+}
+
+.firewall-panel__list-label code {
+	font-family: var(--monospace-font);
+	font-size: 12px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.firewall-panel__empty {
+	font-size: 12px;
+	opacity: 0.6;
+	font-style: italic;
+	padding: 8px 0;
+}

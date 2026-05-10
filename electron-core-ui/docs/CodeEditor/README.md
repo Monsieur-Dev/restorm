@@ -65,3 +65,28 @@ It registers generic steps such as:
 - `When I type in code editor {string} {string}`
 - `Then code editor {string} resolved theme should be {string}`
 
+## Offline / no-CDN guarantee
+
+Importing `CodeEditor` from `electron-core-ui` runs a one-time
+`bootstrapMonaco()` side-effect that:
+
+- Calls `loader.config({ monaco })` so `@monaco-editor/react` uses
+  the locally-bundled `monaco-editor` package instead of fetching
+  Monaco from `cdn.jsdelivr.net` at first mount.
+- Sets `self.MonacoEnvironment.getWorker(_, label)` to instantiate
+  Vite-bundled `?worker` chunks for the `editor` / `json` / `css` /
+  `html` / `typescript` workers, so Monaco never asks the network
+  for its language services either.
+
+This is automatic — consumers don't call `bootstrapMonaco()` directly.
+The bootstrap is idempotent + module-scoped, so multiple `CodeEditor`
+mounts share a single configuration.
+
+If you write a new module that loads Monaco *without* going through
+`CodeEditor` (rare; only relevant for direct `monaco.editor.create`
+calls outside the wrapper), import the bootstrap explicitly:
+
+```ts
+import { bootstrapMonaco } from 'electron-core-ui'
+bootstrapMonaco()
+```

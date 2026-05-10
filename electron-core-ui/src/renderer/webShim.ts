@@ -289,6 +289,13 @@ export function ensureCoreUiWebApiShim(): void {
     },
     getPlatform: (): Promise<FeaturePlatform> => {
       return Promise.resolve('web')
+    },
+    getEnvironment: (): Promise<'dev' | 'prod'> => {
+      // Web shim: report 'prod' so dev-only feature surfaces stay
+      // hidden on the web build. A web-side dev override would need a
+      // different signal (NODE_ENV / Vite import.meta.env) and isn't
+      // wired today.
+      return Promise.resolve('prod')
     }
   }
 

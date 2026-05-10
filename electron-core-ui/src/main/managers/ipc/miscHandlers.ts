@@ -59,6 +59,14 @@ export function registerMiscHandlers(storageService: StorageService): void {
     return getFeatureService().getPlatform()
   })
 
+  ipcMain.handle('feature:get-environment', () => {
+    if (!isFeatureServiceInitialized()) {
+      logger.warn('Feature service not initialized, returning "prod" as default environment')
+      return 'prod'
+    }
+    return getFeatureService().getEnvironment()
+  })
+
   // ========================================================================
   // EventBus IPC handlers
   // ========================================================================

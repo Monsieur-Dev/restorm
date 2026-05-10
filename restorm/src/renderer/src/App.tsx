@@ -63,8 +63,10 @@ const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Recor
 }
 import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload, type RequestHistoryEventPayload } from './services/DocumentEvents'
 import { getResponseHistoryList } from './services/GraphQLIntegration'
-import type { EditorTab, WorkbenchTree, GroupNode } from 'electron-core-ui/renderer'
+import type { EditorTab, WorkbenchTree, GroupNode, TabGroupNode, ContainerGroupNode } from 'electron-core-ui/renderer'
 import { isContainerNode, isTabGroupNode } from 'electron-core-ui/renderer'
+import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, type ConsoleTab, type FirewallTab } from '../../shared/types/editor'
+import { findGroupIdForTab, hasGroupWithId, updateGroupById } from './utils/workbenchHelpers'
 
 /**
  * Match a workbench tab by the underlying item id (request / folder /
@@ -118,6 +120,8 @@ import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
 import { useWorkbenchTabs } from './hooks/useWorkbenchTabs'
 import { useApiUpdateNotifications } from './hooks/useApiUpdateNotifications'
+import { useFirewallPromptToasts } from './hooks/useFirewallPromptToasts'
+import { useFirewallProjectOriginsSync } from './hooks/useFirewallProjectOriginsSync'
 import { useApiUpdateStateMap } from './hooks/useApiUpdateStateMap'
 import { useSidebarState } from './hooks/useSidebarState'
 import {
@@ -157,6 +161,40 @@ const WORKBENCH_ID = 'restorm-main-workbench'
 const initialRootItems: EnvironmentFolder[] = []
 
 const allFolderIds = initialRootItems.flatMap((folder) => collectAllFolderIds(folder))
+
+/**
+ * Resolve the workbench's currently-active tab id. Walks the tree
+ * recursively so split-views (where the root is a `ContainerGroupNode`
+ * wrapping multiple `TabGroupNode`s — happens when the Console tab
+ * sits in a bottom group below an existing horizontal split) are
+ * handled correctly. Falls back to the first `TabGroupNode` with an
+ * `activeTabId` if `focusedGroupId` doesn't match any node — same
+ * behaviour as the old flat-walk path, just container-aware.
+ *
+ * Without recursion `activeRequest` (and the statusbar selectors
+ * that gate on it: auth, env, request-history) would silently
+ * disappear whenever the user opened the Console because the root
+ * groups no longer contained a `TabGroupNode` directly.
+ */
+function resolveActiveTabId(groups: GroupNode[], focusedGroupId: string | null): string | undefined {
+  let focusedActive: string | undefined
+  let firstActive: string | undefined
+  const visit = (nodes: GroupNode[]): void => {
+    for (const node of nodes) {
+      if (isTabGroupNode(node)) {
+        if (typeof node.activeTabId !== 'string') continue
+        firstActive ??= node.activeTabId
+        if (focusedActive === undefined && node.id === focusedGroupId) {
+          focusedActive = node.activeTabId
+        }
+      } else if (isContainerNode(node)) {
+        visit(node.groups)
+      }
+    }
+  }
+  visit(groups)
+  return focusedActive ?? firstActive
+}
 
 const App: React.FC = () => {
   const { t } = useTranslation()
@@ -198,6 +236,13 @@ const App: React.FC = () => {
   // out-of-band notification for users not currently on the folder.
   useApiUpdateNotifications(t)
 
+  // Surface every firewall pending-permission prompt as a toast in
+  // the global app toaster. The four action buttons (Allow once /
+  // Allow always / Deny once / Deny always) dispatch the user's
+  // choice back to main, which fans the verdict out to every
+  // queued caller waiting on this destination.
+  useFirewallPromptToasts()
+
   const handleMenuExit = useCallback(() => {
     void window.api.closeWindow()
   }, [])
@@ -224,6 +269,12 @@ const App: React.FC = () => {
   // Root items data (mutable for renaming)
   // Can contain EnvironmentFolders, Folders, or standalone Requests
   const [rootItems, setRootItems] = useState<(EnvironmentFolder | Folder | Request)[]>(initialRootItems)
+
+  // Push the project's auto-derived origins (every request URL,
+  // resolved against available env vars) to the main-process
+  // firewall on every tree change. The PermissionService treats
+  // these as known destinations alongside the user's whitelist.
+  useFirewallProjectOriginsSync(rootItems)
 
   // Sidebar expansion is persisted per-project under
   // `restorm-main-sidebar:<projectUuid>`. The UUID is stamped into the
@@ -314,6 +365,125 @@ const App: React.FC = () => {
     orientation: 'vertical',
     groups: []
   })
+
+  /**
+   * `View → Console` handler. Two cases:
+   *
+   * - **Tab already exists**: just activate it (set `activeTabId` on
+   *   the group it lives in). Layout doesn't reflow.
+   * - **Tab doesn't exist yet**: create a fresh `TabGroupNode`
+   *   holding a single Console tab and place it in a NEW bottom
+   *   group spanning the FULL workbench width. If the root tree is
+   *   already vertical, append the group to it. If the root is
+   *   horizontal (the user has a side-by-side split), wrap the
+   *   existing root inside a vertical container so the bottom
+   *   group sits below ALL existing groups, not just one of them.
+   *
+   * The Console tab is a singleton (id = `console:singleton`); the
+   * branching above guarantees we never end up with two.
+   */
+  const handleOpenConsole = useCallback(() => {
+    setWorkbenchTree(prev => {
+      const existingGroupId = findGroupIdForTab(prev.groups, CONSOLE_TAB_ID)
+      if (existingGroupId !== null) {
+        return {
+          ...prev,
+          groups: updateGroupById(prev.groups, existingGroupId, group => ({ ...group, activeTabId: CONSOLE_TAB_ID }))
+        }
+      }
+      // `renderTabTitle` in RestormWorkbench owns the visual title
+      // (codicon + label); `title` here is just the JSON-safe
+      // serialisation fallback used by tab-drop / IPC paths.
+      const consoleTab: ConsoleTab = {
+        id: CONSOLE_TAB_ID,
+        tabType: 'console',
+        title: 'Console',
+        titleString: 'Console'
+      }
+      const newGroup: TabGroupNode = {
+        id: `console-group-${String(Date.now())}-${crypto.randomUUID().slice(0, 8)}`,
+        tabs: [consoleTab],
+        activeTabId: CONSOLE_TAB_ID
+      }
+      // Workbench orientation convention (ECUI):
+      //   'vertical'   → flex-direction: row   → groups side-by-side
+      //   'horizontal' → flex-direction: column → groups stacked
+      // The Console must land BELOW everything → we want a horizontal
+      // root with the existing layout above and the console group
+      // below. If the root is already horizontal we just append; if
+      // it's vertical (side-by-side) we wrap the existing tree as a
+      // single child of a new horizontal root so the console sits
+      // under ALL existing groups, not next to one of them.
+      if (prev.orientation === 'horizontal') {
+        return { ...prev, groups: [...prev.groups, newGroup], sizes: undefined }
+      }
+      const wrapped: ContainerGroupNode = {
+        id: `container-wrap-${String(Date.now())}-${crypto.randomUUID().slice(0, 8)}`,
+        orientation: prev.orientation,
+        groups: prev.groups,
+        ...(prev.sizes !== undefined ? { sizes: prev.sizes } : {})
+      }
+      return { orientation: 'horizontal', groups: [wrapped, newGroup] }
+    })
+  }, [setWorkbenchTree])
+
+  /**
+   * `View → Firewall` handler. Singleton tab (id =
+   * `firewall:singleton`). Unlike Console, no specific placement —
+   * just append to the focused group (or the first available
+   * `TabGroupNode` if no focus). Activate-existing-or-create.
+   */
+  const handleOpenFirewall = useCallback(() => {
+    setWorkbenchTree(prev => {
+      const existingGroupId = findGroupIdForTab(prev.groups, FIREWALL_TAB_ID)
+      if (existingGroupId !== null) {
+        return {
+          ...prev,
+          groups: updateGroupById(prev.groups, existingGroupId, group => ({ ...group, activeTabId: FIREWALL_TAB_ID }))
+        }
+      }
+      const firewallTab: FirewallTab = {
+        id: FIREWALL_TAB_ID,
+        tabType: 'firewall',
+        title: 'Firewall',
+        titleString: 'Firewall'
+      }
+      // Find the focused group (or the first TabGroupNode anywhere
+      // in the tree) and append. Walks containers recursively for
+      // split-view layouts.
+      const findFirstTabGroup = (nodes: GroupNode[]): TabGroupNode | null => {
+        for (const node of nodes) {
+          if (isTabGroupNode(node)) return node
+          if (isContainerNode(node)) {
+            const inner = findFirstTabGroup(node.groups)
+            if (inner !== null) return inner
+          }
+        }
+        return null
+      }
+      const targetId = focusedGroupId !== null && hasGroupWithId(prev.groups, focusedGroupId)
+        ? focusedGroupId
+        : (findFirstTabGroup(prev.groups)?.id ?? null)
+      if (targetId !== null) {
+        return {
+          ...prev,
+          groups: updateGroupById(prev.groups, targetId, group => ({
+            ...group,
+            tabs: [...group.tabs, firewallTab],
+            activeTabId: FIREWALL_TAB_ID
+          }))
+        }
+      }
+      // No groups at all yet (welcome screen path): seed a fresh
+      // group containing only the firewall tab.
+      const newGroup: TabGroupNode = {
+        id: `firewall-group-${String(Date.now())}-${crypto.randomUUID().slice(0, 8)}`,
+        tabs: [firewallTab],
+        activeTabId: FIREWALL_TAB_ID
+      }
+      return { ...prev, groups: [newGroup] }
+    })
+  }, [setWorkbenchTree, focusedGroupId])
 
   // Per-tab dirty state tracking — the legacy checksum store is still
   // wired through `useFileManagement` for backward compat on the
@@ -550,14 +720,7 @@ const App: React.FC = () => {
   // prevent the window handler from ever seeing the key. Both paths must
   // therefore run the same "smart save" logic.
   const smartSaveActive = useCallback(async (): Promise<boolean> => {
-    const groups = workbenchTree.groups as { tabs?: unknown; activeTabId?: string; id?: string }[]
-    let activeTabId: string | undefined
-    const focused = groups.find((g) => g.id === focusedGroupId && typeof g.activeTabId === 'string')
-    if (focused) activeTabId = focused.activeTabId
-    if (!activeTabId) {
-      const first = groups.find((g) => typeof g.activeTabId === 'string')
-      activeTabId = first?.activeTabId
-    }
+    const activeTabId = resolveActiveTabId(workbenchTree.groups, focusedGroupId)
     if (!activeTabId) return await handleMenuSaveAll()
     const itemId = resolveTabItemId(activeTabId)
     if (!itemId) return await handleMenuSaveAll()
@@ -570,14 +733,7 @@ const App: React.FC = () => {
   // Request object. Returns null when no tab is active or the active
   // tab isn't a request (folder / env-folder tabs hide the button).
   const activeRequest = useMemo((): { id: string; path: string | null } | null => {
-    const groups = workbenchTree.groups as { activeTabId?: string; id?: string }[]
-    let activeTabId: string | undefined
-    const focused = groups.find((g) => g.id === focusedGroupId && typeof g.activeTabId === 'string')
-    if (focused) activeTabId = focused.activeTabId
-    if (!activeTabId) {
-      const first = groups.find((g) => typeof g.activeTabId === 'string')
-      activeTabId = first?.activeTabId
-    }
+    const activeTabId = resolveActiveTabId(workbenchTree.groups, focusedGroupId)
     if (!activeTabId) return null
     const itemId = resolveTabItemId(activeTabId)
     if (!itemId) return null
@@ -1317,6 +1473,7 @@ const App: React.FC = () => {
         loadFile: (fileState: { currentFile: { content: unknown } }) => void
         setRootItems: (folders: EnvironmentFolder[]) => void
         findItemIndexPath: (nameChain: string[]) => number[] | null
+        findItemIdByPath: (nameChain: string[]) => string | null
         setEnvFolderTagColor: (folderName: string, tag: string, color: string | null) => boolean
         closeFile: () => Promise<void>
         menuClose: () => Promise<void>
@@ -1395,6 +1552,26 @@ const App: React.FC = () => {
           currentList = next?.items ?? []
         }
         return pathOut
+      },
+      findItemIdByPath: (nameChain: string[]): string | null => {
+        // Same name-chain walk as `findItemIndexPath` but returns the
+        // leaf item's stable uuid. Tests that build a tab id need this
+        // since `buildTabId` switched from index-path-based ids
+        // (`request-idx:N.N.N`) to uuid-based ids (`request-id:<uuid>`).
+        if (nameChain.length === 0) return null
+        let currentList: unknown[] = rootItemsRef.current as unknown[]
+        let leaf: { id?: unknown } | undefined
+        for (const name of nameChain) {
+          const idx = currentList.findIndex((item) => {
+            return typeof (item as { name?: unknown }).name === 'string'
+              && (item as { name: string }).name === name
+          })
+          if (idx === -1) return null
+          leaf = currentList[idx] as { id?: unknown }
+          const next = currentList[idx] as { items?: unknown[] } | undefined
+          currentList = next?.items ?? []
+        }
+        return typeof leaf?.id === 'string' ? leaf.id : null
       }
     }
 
@@ -1648,6 +1825,8 @@ const App: React.FC = () => {
         onImport={() => { setShowImportModal(true) }}
         onOpenRecentFile={(path) => { void handleOpenRecentFile(path) }}
         onSearchResultClick={handleSearchResultClick}
+        onOpenConsole={handleOpenConsole}
+        onOpenFirewall={handleOpenFirewall}
       />
 
       {fileName ? (
@@ -1745,7 +1924,7 @@ const App: React.FC = () => {
               onSizesChange={handleSizesChange}
               emptyFallback={<EmptyBench />}
               workbenchId={workbenchId}
-              onRebuildTab={handleRebuildTab}
+              onRebuildTab={rootItems.length > 0 ? handleRebuildTab : undefined}
               onStateRestored={handleStateRestored}
               getRequestById={getRequestByIdCb}
               getFolderById={getFolderByIdCb}

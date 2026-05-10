@@ -5,7 +5,7 @@ import type { ElectronApplication, Locator, Page } from '@playwright/test'
 import { test, expect, SWAGGER_IMPORT_TEMP_DIR, configureNextSaveFileDialogForE2E, configureNextOpenDialogForE2E } from '../../fixtures/swagger-import.fixture'
 
 function activeEnvFolderBookmarks(currentPage: Page): Locator {
-  return currentPage.locator('[data-testid^="tab-env-folder-idx:"][data-testid$="-bookmarks"]').first()
+  return currentPage.locator('[data-testid^="tab-env-folder-id:"][data-testid$="-bookmarks"]').first()
 }
 
 const SAMPLES_DIR = resolve(__dirname, '../../../../unit')

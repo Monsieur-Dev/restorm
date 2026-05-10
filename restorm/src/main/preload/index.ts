@@ -6,6 +6,13 @@ import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import { createCoreUIAPI } from '../../../../electron-core-ui/src/preload/api'
 import { createElectronAPI } from '../../../../electron-core-ui/src/preload/electronAPI'
 import type { PersistenceFormat } from '../../../../electron-core-ui/src/main/services/PersistenceService'
+import {
+  FIREWALL_IPC,
+  FIREWALL_REQUEST_RECORD_CHANNEL,
+  type FirewallOrigin,
+  type FirewallPromptPayload,
+  type RequestRecord
+} from '../../shared/types/firewall'
 
 // Expose core-ui APIs (imported from core-ui preload modules) and extend with restorm project API
 const coreUIAPI = createCoreUIAPI()
@@ -20,6 +27,58 @@ contextBridge.exposeInMainWorld('api', {
     readFile: async (filePath: string): Promise<string> => {
       const result: unknown = await ipcRenderer.invoke('project:read-file', filePath)
       return typeof result === 'string' ? result : ''
+    }
+  },
+  // Firewall + console feed. Layer A (renderer webRequest) + Layer
+  // B (main-process http/https/fetch monkey-patches) both broadcast
+  // `RequestRecord` objects through this channel; the Console
+  // workbench tab subscribes via `useConsoleFeed`. Returns an
+  // unsubscribe fn so consumers can detach on unmount.
+  firewall: {
+    onRecord: (cb: (record: RequestRecord) => void): (() => void) => {
+      const handler = (_event: unknown, record: RequestRecord): void => { cb(record) }
+      ipcRenderer.on(FIREWALL_REQUEST_RECORD_CHANNEL, handler)
+      return (): void => { ipcRenderer.off(FIREWALL_REQUEST_RECORD_CHANNEL, handler) }
+    },
+    // Control-plane — the Firewall workbench panel reads + mutates
+    // the PermissionService state through these calls. Persistence
+    // is handled main-side; the renderer never touches the on-disk
+    // file directly.
+    listWhitelist: async (): Promise<FirewallOrigin[]> => {
+      const result: unknown = await ipcRenderer.invoke(FIREWALL_IPC.LIST_WHITELIST)
+      return Array.isArray(result) ? (result as FirewallOrigin[]) : []
+    },
+    addToWhitelist: async (origin: FirewallOrigin): Promise<void> => {
+      await ipcRenderer.invoke(FIREWALL_IPC.ADD_WHITELIST, origin)
+    },
+    removeFromWhitelist: async (origin: FirewallOrigin): Promise<void> => {
+      await ipcRenderer.invoke(FIREWALL_IPC.REMOVE_WHITELIST, origin)
+    },
+    listBlacklist: async (): Promise<FirewallOrigin[]> => {
+      const result: unknown = await ipcRenderer.invoke(FIREWALL_IPC.LIST_BLACKLIST)
+      return Array.isArray(result) ? (result as FirewallOrigin[]) : []
+    },
+    addToBlacklist: async (origin: FirewallOrigin): Promise<void> => {
+      await ipcRenderer.invoke(FIREWALL_IPC.ADD_BLACKLIST, origin)
+    },
+    removeFromBlacklist: async (origin: FirewallOrigin): Promise<void> => {
+      await ipcRenderer.invoke(FIREWALL_IPC.REMOVE_BLACKLIST, origin)
+    },
+    /** Replace the project-derived origins set in one shot. The
+     * renderer recomputes the set on every project tree change
+     * (URL edit, env-var edit, request import, etc.) and pushes
+     * here. Treated as the authoritative project view by the
+     * permission check. */
+    setProjectOrigins: async (origins: FirewallOrigin[]): Promise<void> => {
+      await ipcRenderer.invoke(FIREWALL_IPC.SET_PROJECT_ORIGINS, origins)
+    },
+    onPromptShow: (cb: (payload: FirewallPromptPayload) => void): (() => void) => {
+      const handler = (_event: unknown, payload: FirewallPromptPayload): void => { cb(payload) }
+      ipcRenderer.on(FIREWALL_IPC.PROMPT_SHOW, handler)
+      return (): void => { ipcRenderer.off(FIREWALL_IPC.PROMPT_SHOW, handler) }
+    },
+    resolvePrompt: async (promptId: string, verdict: 'allow' | 'deny'): Promise<void> => {
+      await ipcRenderer.invoke(FIREWALL_IPC.PROMPT_RESOLVE, { promptId, verdict })
     }
   }
 })

@@ -143,6 +143,7 @@ export function generateCodeSnippets(
     }))
 
   switch (data.requestType) {
+    case 'auth':
     case 'http': {
       const method = data.method ?? 'GET'
       let body: string | null = null

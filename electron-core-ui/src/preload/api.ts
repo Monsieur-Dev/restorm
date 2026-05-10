@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron'
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../types/theme'
-import type { FeaturePlatform } from '../types/feature'
+import type { FeatureEnvironment, FeaturePlatform } from '../types/feature'
 import type { FileServiceState, FileMetadata, SerializationFormat } from '../types/file'
 import type { SettingValue, ResolvedSetting, SettingsGroup } from '../types/settings'
 import type { CoreUiApi } from '../types/api'
@@ -153,6 +153,10 @@ export const createCoreUIAPI = (): CoreUiApi => ({
     getPlatform: async (): Promise<FeaturePlatform> => {
       const result: unknown = await ipcRenderer.invoke('feature:get-platform')
       return result as FeaturePlatform
+    },
+    getEnvironment: async (): Promise<FeatureEnvironment> => {
+      const result: unknown = await ipcRenderer.invoke('feature:get-environment')
+      return result as FeatureEnvironment
     }
   },
 

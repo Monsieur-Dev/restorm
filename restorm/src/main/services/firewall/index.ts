@@ -1,0 +1,7 @@
+export { firewallService } from './FirewallService'
+export { installMainProcessInterceptor } from './MainProcessInterceptor'
+export { installHardenInterceptor } from './HardenInterceptor'
+export { installWorkerPatcher } from './workerPatcher'
+export { permissionService } from './PermissionService'
+export type { Verdict, Classification, CheckInput } from './PermissionService'
+export { registerFirewallIpc } from './firewallIpc'

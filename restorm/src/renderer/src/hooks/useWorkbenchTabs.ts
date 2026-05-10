@@ -52,8 +52,11 @@ import type {
   WebSocketRequestTab,
   ODataRequestTab,
   AuthenticationRequestTab,
+  ConsoleTab,
+  FirewallTab,
   BreadcrumbItem
 } from '../../../shared/types/editor'
+import { CONSOLE_TAB_ID, FIREWALL_TAB_ID } from '../../../shared/types/editor'
 
 export interface UseWorkbenchTabsOptions {
   rootItems: (EnvironmentFolder | Folder | Request)[]
@@ -114,24 +117,68 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     return null
   }, [])
 
-  const buildTabId = useCallback((prefix: 'folder' | 'env-folder' | 'request', id: string): string => {
-    const indexPath = findIndexPathById(rootItems as FolderItem[], id)
-    if (!indexPath) {
-      return `${prefix}-id:${id}`
+  /**
+   * Walk the workbench tree (recursing into ContainerGroupNodes for
+   * split layouts) for the first tab whose underlying tree item id
+   * matches `itemId`. Returns `null` if no tab represents that
+   * item. Used as the second dedup key in `addTabToTree`: lets us
+   * find a stale tab whose `tabId` is now out-of-date because the
+   * user moved the request / folder to a different parent.
+   */
+  const findTabByItemId = useCallback((nodes: GroupNode[], itemId: string): { groupId: string; tabId: string } | null => {
+    for (const node of nodes) {
+      if (isContainerNode(node)) {
+        const inner = findTabByItemId(node.groups, itemId)
+        if (inner !== null) return inner
+        continue
+      }
+      for (const tab of node.tabs) {
+        const t = tab as { folder?: { id?: string }; request?: { id?: string } }
+        const tabItemId = t.folder?.id ?? t.request?.id
+        if (typeof tabItemId === 'string' && tabItemId === itemId) {
+          return { groupId: node.id, tabId: tab.id }
+        }
+      }
     }
-    return `${prefix}-idx:${indexPath.join('.')}`
-  }, [findIndexPathById, rootItems])
+    return null
+  }, [])
+
+  /**
+   * Tab id is keyed off the item's stable uuid, NOT its current
+   * index path. Index-path-based ids (`request-idx:0.1.5`) flip
+   * to point at a DIFFERENT item the moment the user reorders /
+   * moves the tree, because the path stays the same while the
+   * underlying item changes — meaning two open tabs would swap
+   * identities after a sidebar swap. UUID ids stay glued to the
+   * item they were opened for. The legacy `request-idx:N.N.N`
+   * form is still recognised by `parseTabId` for backward-
+   * compat with already-persisted workbench state; new tabs are
+   * always emitted as `request-id:<uuid>`.
+   */
+  const buildTabId = useCallback((prefix: 'folder' | 'env-folder' | 'request', id: string): string => {
+    return `${prefix}-id:${id}`
+  }, [])
 
   // Helper to add a tab to the workbench tree, reusing the focused or
   // first group. When `focus` is false (middle-click "open in
   // background" flow), the tab is added without altering the
   // destination group's `activeTabId`, and an already-open tab
   // becomes a no-op instead of re-activating.
+  //
+  // `itemId` is the underlying tree-item uuid (request.id /
+  // folder.id) that this tab represents. It's used as a SECOND
+  // dedup key — `tabId` alone isn't enough because index-path-
+  // based ids change every time the user drags the item to a
+  // different parent. Without `itemId` matching, dragging a
+  // request from `pet/0.1.5` to `pet/0.2.3` and re-clicking it
+  // would spawn a duplicate tab (the new `tabId` doesn't match
+  // the still-open old `tabId`).
   const addTabToTree = useCallback((
     prev: WorkbenchTree,
     tabId: string,
     newTab: EditorTab,
-    options?: OpenTabOptions
+    options?: OpenTabOptions,
+    itemId?: string
   ): WorkbenchTree => {
     const focus = options?.focus ?? true
     // No groups yet: create the main group with this tab. We always
@@ -152,8 +199,8 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
       }
     }
 
-    // If tab already exists anywhere: re-activate it (focus mode) or
-    // leave the tree untouched (background mode).
+    // Dedup pass A — by tabId. Fast path for the common case
+    // (item hasn't moved since the previous open).
     const existingGroupId = findGroupIdForTab(prev.groups, tabId)
     if (existingGroupId) {
       if (!focus) return prev
@@ -163,6 +210,29 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
           ...group,
           activeTabId: tabId
         }))
+      }
+    }
+
+    // Dedup pass B — by itemId. Fires when the user dragged the
+    // item between parents and the index-path-encoded `tabId`
+    // changed. Walk every tab in every group, compare to the
+    // tab's underlying `request.id` / `folder.id`. On hit:
+    // refresh the tab in place with the new `tabId` + new tab
+    // payload (breadcrumbs, environments, etc.) and focus.
+    if (typeof itemId === 'string' && itemId.length > 0) {
+      const stale = findTabByItemId(prev.groups, itemId)
+      if (stale !== null) {
+        const replacedGroups = updateGroupById(prev.groups, stale.groupId, (group) => {
+          const nextActive = focus
+            ? tabId
+            : (group.activeTabId === stale.tabId ? tabId : (group.activeTabId ?? tabId))
+          return {
+            ...group,
+            tabs: group.tabs.map((t) => (t.id === stale.tabId ? newTab : t)),
+            activeTabId: nextActive
+          }
+        })
+        return { ...prev, groups: replacedGroups }
       }
     }
 
@@ -200,7 +270,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
       ...prev,
       groups: updatedGroups
     }
-  }, [focusedGroupId])
+  }, [focusedGroupId, findTabByItemId])
 
   // Open a folder tab in the workbench
   const openFolderTab = useCallback((folder: Folder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => {
@@ -221,7 +291,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
         breadcrumbs,
         allowFullscreen: true
       }
-      return addTabToTree(prev, tabId, newTab, options)
+      return addTabToTree(prev, tabId, newTab, options, folder.id)
     })
   }, [buildTabId, registerTabDirtyState, setWorkbenchTree, addTabToTree])
 
@@ -249,7 +319,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
         breadcrumbs,
         allowFullscreen: true
       }
-      return addTabToTree(prev, tabId, newTab, options)
+      return addTabToTree(prev, tabId, newTab, options, folder.id)
     })
   }, [buildTabId, registerTabDirtyState, setWorkbenchTree, addTabToTree])
 
@@ -302,7 +372,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
         environments,
         allowFullscreen: true
       }
-      return addTabToTree(prev, tabId, newTab, options)
+      return addTabToTree(prev, tabId, newTab, options, request.id)
     })
   },
     [buildTabId, registerTabDirtyState, setWorkbenchTree, addTabToTree]
@@ -351,6 +421,29 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
 
   // Rebuild tab callback for workbench autosave
   const handleRebuildTab = useCallback((tabId: string): EditorTab | null => {
+    // Console singleton: not tied to any tree item, so it doesn't go
+    // through `parseTabId`. The tab content (xterm + toolbar) is
+    // owned by `RestormWorkbench` based on the `tabType: 'console'`
+    // discriminator — we just rebuild the metadata shell.
+    if (tabId === CONSOLE_TAB_ID) {
+      return {
+        id: CONSOLE_TAB_ID,
+        tabType: 'console',
+        title: 'Console',
+        titleString: 'Console'
+      } as ConsoleTab
+    }
+    // Firewall singleton — same pattern as Console: not tied to
+    // any tree item, content owned by `RestormWorkbench`'s
+    // `tabType: 'firewall'` branch.
+    if (tabId === FIREWALL_TAB_ID) {
+      return {
+        id: FIREWALL_TAB_ID,
+        tabType: 'firewall',
+        title: 'Firewall',
+        titleString: 'Firewall'
+      } as FirewallTab
+    }
     const parsed = parseTabId(tabId)
     if (!parsed) return null
 
