@@ -31,7 +31,7 @@ const mockState = {
   findById: vi.fn<(id: string) => unknown>(),
   getCollections: vi.fn<() => unknown[]>(),
   serializeRequest: vi.fn<(r: unknown) => Record<string, unknown>>(),
-  getContext: vi.fn<(envId: string) => { variables: Record<string, string> } | undefined>(),
+  getContext: vi.fn<(envId: string) => Record<string, string> | undefined>(),
   search: vi.fn<(q: string) => { category: string; items: { id: string; title: string; category: string; description?: string; score: number }[] }[]>()
 }
 
@@ -270,7 +270,9 @@ describe('read tools — get_active_env', () => {
         { id: 'env-B', name: 'prod', variables: [] }
       ]
     })
-    mockState.getContext.mockReturnValue({ variables: { host: 'http://stg' } })
+    // ContextService.getContext returns the resolved variable map
+    // (Record<string, string>) directly — no `variables` wrapper.
+    mockState.getContext.mockReturnValue({ host: 'http://stg' })
     const mcp = new FakeMcpService()
     registerReadTools(mcp as unknown as McpService)
     const { payload } = parseReply(mcp.invoke('get_active_env', { envFolderId: 'ef' })) as { payload: { selectedEnvId: string; selectedEnvName: string; variables: { key: string; resolved: string }[] } }

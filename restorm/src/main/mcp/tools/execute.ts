@@ -115,7 +115,14 @@ function shapeHistoryDetail(detail: unknown): unknown {
   // path/query params, headers, and body. Field availability is
   // protocol-specific (e.g. GraphQL has no `requestParams`); the
   // consumer can ignore missing keys.
+  //
+  // gRPC overloads `requestMethod` on the history shape to mean "the
+  // gRPC method name" — for every other protocol it's the HTTP verb.
+  // We gate the grpc-specific extras on `protocol === 'grpc'` so an
+  // HTTP response doesn't end up with a misleading `grpcMethod: "GET"`.
   const requestMeta = (d['requestMeta'] ?? {}) as Record<string, unknown>
+  const protocol = response['type'] ?? 'http'
+  const isGrpc = protocol === 'grpc'
   const sentRequest = {
     method: response['requestMethod'] ?? requestMeta['method'],
     url: response['requestUrl'],
@@ -123,16 +130,18 @@ function shapeHistoryDetail(detail: unknown): unknown {
     params: response['requestParams'],
     pathParams: response['requestPathParams'],
     body: response['requestBody'],
-    // protocol-specific extras when present
-    soapAction: response['requestSoapAction'],
-    grpcMethod: response['requestMethod'],
-    grpcMessage: response['requestMessage'],
-    grpcMetadata: response['requestMetadata']
+    // protocol-specific extras
+    ...(typeof response['requestSoapAction'] === 'string' ? { soapAction: response['requestSoapAction'] } : {}),
+    ...(isGrpc ? {
+      grpcMethod: response['requestMethod'],
+      grpcMessage: response['requestMessage'],
+      grpcMetadata: response['requestMetadata']
+    } : {})
   }
 
   return {
     requestId: d['requestId'],
-    protocol: response['type'] ?? 'http',
+    protocol,
     success: d['success'] === true,
     status: response['statusCode'] ?? null,
     statusText: response['statusText'],

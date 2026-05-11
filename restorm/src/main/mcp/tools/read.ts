@@ -231,9 +231,12 @@ export function registerReadTools(mcp: McpService): void {
       // renderer-IPC plumbing.
       const selectedId = pickSelectedEnvId(envFolderId, envs.map((e) => e.id)) ?? firstEnv.id
       const selected = envs.find((e) => e.id === selectedId) ?? firstEnv
+      // `getContext` returns `Record<string, string>` (the resolved
+      // variable map) directly — not a wrapper with a `.variables`
+      // property. Iterate over its entries.
       const ctx = contextService.getContext(selected.id)
       const variables = ctx
-        ? Object.entries(ctx.variables).map(([key, value]) => ({
+        ? Object.entries(ctx).map(([key, value]) => ({
           key,
           value: typeof value === 'string' ? value : String(value),
           resolved: typeof value === 'string' ? value : String(value)
