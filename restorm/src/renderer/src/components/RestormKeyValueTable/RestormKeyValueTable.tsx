@@ -531,6 +531,21 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         nextValue = new StringValue(raw)
       }
 
+      // Auto-track the enabled flag against value emptiness so the
+      // user doesn't have to remember to uncheck rows they just
+      // cleared (and doesn't keep a stale checked-but-empty row that
+      // would silently send `?name=` to APIs which reject it). Only
+      // override when the *emptiness* of the value changed on this
+      // edit — when emptiness didn't flip (e.g. the user just
+      // re-toggled the checkbox on an already-empty row to opt in
+      // to an explicit `?filter=`), we respect their choice.
+      const prevEmpty = currentType === undefined || currentType.toString().trim() === ''
+      const nextEmpty = nextValue.toString().trim() === ''
+      let nextEnabled = r.enabled
+      if (prevEmpty !== nextEmpty) {
+        nextEnabled = !nextEmpty
+      }
+
       if (rowId) {
         valueTypeByRowIdRef.current.set(rowId, nextValue)
       }
@@ -540,7 +555,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         key: r.key,
         value: nextValue,
         description: r.description,
-        enabled: r.enabled
+        enabled: nextEnabled
       }
     })
 

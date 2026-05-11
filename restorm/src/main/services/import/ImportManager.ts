@@ -11,6 +11,8 @@
 import * as fs from 'fs/promises'
 import { logger } from 'electron-core-ui/main'
 import type { EnvironmentFolder, FolderItem } from '../../../shared/models'
+import { isRequest, isAnyFolder, isHTTPRequest, isAuthenticationRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from '../../../shared/types/collections'
+import { disableEmptyKeyValues } from '../../../shared/utils/emptyKeyValueHelper'
 
 // ============================================================================
 // Types
@@ -160,6 +162,41 @@ export function detectFormat(content: string, filePath?: string): string | null 
 // Import Functions
 // ============================================================================
 
+/**
+ * Walk a freshly-imported folder tree and flip `enabled: false` on
+ * every KV row whose value resolves to empty (headers, params,
+ * path params, gRPC metadata, SOAP headers). Body fields are left
+ * alone — POSTing `{"bio": ""}` is a legitimate "clear this field"
+ * payload that the user should manage explicitly.
+ */
+function disableEmptyKeyValuesInTree(folder: EnvironmentFolder): void {
+  const visit = (item: FolderItem): void => {
+    if (isRequest(item)) {
+      if (isHTTPRequest(item) || isAuthenticationRequest(item)) {
+        disableEmptyKeyValues(item.headers)
+        disableEmptyKeyValues(item.params)
+        disableEmptyKeyValues(item.pathParams)
+      } else if (isGraphQLRequest(item)) {
+        disableEmptyKeyValues(item.headers)
+      } else if (isGrpcRequest(item)) {
+        disableEmptyKeyValues(item.metadata)
+      } else if (isSoapRequest(item)) {
+        disableEmptyKeyValues(item.headers)
+      } else if (isWebSocketRequest(item)) {
+        disableEmptyKeyValues(item.headers)
+      } else if (isODataRequest(item)) {
+        disableEmptyKeyValues(item.headers)
+        disableEmptyKeyValues(item.params)
+      }
+      return
+    }
+    if (isAnyFolder(item)) {
+      for (const child of item.items) visit(child)
+    }
+  }
+  for (const child of folder.items) visit(child)
+}
+
 /** Import from a given content string with detected or specified format */
 async function importFromContent(
   content: string,
@@ -258,6 +295,15 @@ async function importFromContent(
         }
     }
     
+    // Auto-disable empty rows across the freshly-imported tree. Most
+    // specs (OpenAPI parameters with no `example` / no `default`,
+    // generated headers like `Authorization: ""` waiting for the user
+    // to fill them in) produce KV entries whose value resolves to "".
+    // Sent over the wire as `?name=&header=` they trigger regex-based
+    // 422s on strict APIs. Default is now "create empty rows as
+    // disabled" — the user opts in by re-checking the row.
+    disableEmptyKeyValuesInTree(folder)
+
     // Return the folder itself as a single item, not its children
     return {
       success: true,
