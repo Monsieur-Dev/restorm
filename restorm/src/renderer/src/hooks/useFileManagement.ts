@@ -63,6 +63,7 @@ import { DocumentEvents, type DocumentChangedPayload } from '../services/Documen
 import { searchIndexService } from '../services/SearchIndexService'
 import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
 import { prepareForSerialization, processAfterDeserialization } from '../utils/serialization'
+import { cloneForEventBus } from '../utils/cloneForEventBus'
 import { normalizeFileFormatVersion } from '../../../shared/config/fileFormatVersion'
 import type { Folder, EnvironmentFolder, Request, FolderItem, Environment } from '../../../shared/types/collections'
 import { isEnvironmentFolder, isAnyFolder } from '../../../shared/types/collections'
@@ -881,7 +882,13 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
           const payload: DocumentChangedPayload = {
             id: env.id,
             type: 'environment',
-            document: JSON.parse(JSON.stringify(env)),
+            // `cloneForEventBus` instead of `JSON.parse(JSON.stringify(...))`:
+            // `PasswordValue.toJSON()` strips the plaintext, so without
+            // this every secret loaded from the sidecar `.restorm.env`
+            // would reach main-side ContextService as `""` — handlebars
+            // would then resolve `{{token}}` to an empty string at
+            // execution time even though the on-disk state is correct.
+            document: cloneForEventBus(env),
             parentFolderId,
             parentEnvironmentId
           }
